@@ -1,12 +1,11 @@
 import secrets
-import json, os, asyncio, nest_asyncio
-from IPython.display import Image, display
-from pyppeteer import launch
+import os
+import json
+import asyncio
+from playwright.async_api import async_playwright
 import heapq
 import json
 import re
-
-nest_asyncio.apply()  # allow nested event loops in Jupyter
 
 class ParseNode:
 
@@ -157,7 +156,7 @@ class ParseTree:
 
         self.nodes = []
 
-    def build(self, sentence, end_behavior="converge", debug=False):
+    def build(self, sentence, end_behavior="converge", debug=False): # TODO debug flag needs to be implemented
         """
         Primary method of construction that returns all available nonterminals
         as instances ready to be passed into the long-term hierarchy. The
@@ -293,32 +292,68 @@ class ParseTree:
             instances.append(node.get_as_instance())
 
             for child in node.children:
-                dfs_insts(node)
+                dfs_insts(child)
 
         for child in self.global_root_node.children:
             dfs_insts(child)
 
         return instances
 
-    def visualize(self, out_base="parse_tree", display_in_colab=True):
+    def visualize(self, out_base="parse_tree", render_png=True):
         """
-        Helper method that visualizes subtrees, with nodes represented as tables
-        that relay content and context.
+        Render the parse tree into an HTML file and optionally a PNG screenshot.
+
+        Returns
+        -------
+        (html_path, png_path) if render_png else html_path
         """
         d3_json = json.dumps(self._tree_to_json())
-        html = _build_html(d3_json)
+        html = self._build_html(d3_json)
+
         html_path = f"{out_base}.html"
-        png_path  = f"{out_base}.png"
+        png_path = f"{out_base}.png"
+
         with open(html_path, "w", encoding="utf-8") as f:
             f.write(html)
 
-        # Render to PNG
-        nest_asyncio.apply()
-        asyncio.get_event_loop().run_until_complete(self._html_to_png(html_path, png_path))
+        if render_png:
+            asyncio.run(self._html_to_png(html_path, png_path))
+            return html_path, png_path
+        else:
+            return html_path
 
-        if display_in_colab:
-            display(Image(filename=png_path))
-        return html_path, png_path
+    async def _html_to_png(self, html_path, png_path, scale=2):
+        """
+        Convert an HTML file into a PNG screenshot using Playwright.
+        """
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=True)
+            page = await browser.new_page()
+            await page.goto("file://" + os.path.abspath(html_path))
+
+            # wait until tree is rendered
+            await page.wait_for_selector("#tree svg")
+
+            # compute bounding box of rendered SVG
+            bounding_box = await page.evaluate("""
+                () => {
+                    const svg = document.querySelector('#tree svg');
+                    const bbox = svg.getBBox();
+                    return {
+                        width: Math.ceil(bbox.x + bbox.width + 20),
+                        height: Math.ceil(bbox.y + bbox.height + 20)
+                    };
+                }
+            """)
+
+            await page.set_viewport_size({
+                "width": bounding_box["width"],
+                "height": bounding_box["height"],
+            })
+
+            svg_elem = await page.query_selector("#tree svg")
+            await svg_elem.screenshot(path=png_path, scale="css")  # Playwright auto-scales with DPI
+            await browser.close()
 
     def _safe_lookup(self, idx):
         return self.id_to_value[idx] if (idx is not None and 0 <= idx < len(self.id_to_value)) else "None"
@@ -329,7 +364,7 @@ class ParseTree:
         left  =self._safe_lookup(left_id)
         right = self._safe_lookup(right_id)
 
-        def ctx_list(self, ctx):
+        def ctx_list(ctx):
             if not ctx: return []
             items = sorted(ctx.items(), key=lambda kv: (-kv[1], kv[0]))
             return [{"key": self._safe_lookup(k), "val": float(v)} for k, v in items]
@@ -461,34 +496,3 @@ class ParseTree:
     </body>
     </html>
     """
-
-    async def _html_to_png(html_path, png_path, scale=2):
-        browser = await launch(headless=True, args=["--no-sandbox"])
-        page = await browser.newPage()
-        await page.goto("file://" + os.path.abspath(html_path))
-
-        # wait until tree is rendered
-        await page.waitForSelector("#tree svg")
-
-        # get bounding box of the rendered SVG content
-        bounding_box = await page.evaluate("""
-            () => {
-                const svg = document.querySelector('#tree svg');
-                const bbox = svg.getBBox();
-                return {
-                    width: Math.ceil(bbox.x + bbox.width + 20),
-                    height: Math.ceil(bbox.y + bbox.height + 20)
-                };
-            }
-        """)
-
-        # set viewport to the exact SVG content size
-        await page.setViewport({
-            "width": bounding_box['width'],
-            "height": bounding_box['height'],
-            "deviceScaleFactor": scale
-        })
-
-        svg_elem = await page.querySelector("#tree svg")
-        await svg_elem.screenshot({"path": png_path, "omitBackground": False})
-        await browser.close()
