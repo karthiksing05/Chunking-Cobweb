@@ -496,3 +496,89 @@ class ParseTree:
     </body>
     </html>
     """
+
+    def to_json(self, filepath=None):
+        """
+        Serialize the ParseTree into JSON. Optionally save to `filepath`.
+        """
+        def serialize_node(node, index_map):
+            return {
+                "title": node.title,
+                "content_left": node.content_left,
+                "content_right": node.content_right,
+                "context_before": node.context_before,
+                "context_after": node.context_after,
+                "concept_label": node.concept_label,
+                "global_root": node.global_root,
+                "parent": index_map.get(node.parent),
+                "children": [index_map[ch] for ch in node.children]
+            }
+
+        # build index map for stable references
+        index_map = {node: i for i, node in enumerate([self.global_root_node] + self.nodes)}
+        data = {
+            "sentence": self.sentence,
+            "context_length": self.context_length,
+            "id_to_value": self.id_to_value,
+            "value_to_id": self.value_to_id,
+            "nodes": [serialize_node(node, index_map) for node in [self.global_root_node] + self.nodes]
+        }
+
+        if filepath:
+            # Ensure parent directory exists
+            os.makedirs(os.path.dirname(filepath), exist_ok=True)
+            with open(filepath, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2)
+            return filepath
+        else:
+            return json.dumps(data, indent=2)
+
+    @staticmethod
+    def from_json(data, ltm_hierarchy, filepath=False):
+        """
+        Deserialize a ParseTree from JSON. Requires the same ltm_hierarchy instance.
+        """
+        if filepath:
+            with open(data, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        elif isinstance(data, str):
+            data = json.loads(data)
+
+        tree = ParseTree(
+            ltm_hierarchy,
+            id_to_value=data["id_to_value"],
+            value_to_id=data["value_to_id"],
+            context_length=data["context_length"]
+        )
+        tree.sentence = data["sentence"]
+
+        def restore_dict_keys(d):
+            if d is None:
+                return None
+            return {int(k): v for k, v in d.items()}
+
+        # Recreate nodes
+        node_objs = []
+        for n in data["nodes"]:
+            node = ParseNode()
+            node.title = n["title"]
+            node.content_left = restore_dict_keys(n["content_left"])
+            node.content_right = restore_dict_keys(n["content_right"])
+            node.context_before = restore_dict_keys(n["context_before"])
+            node.context_after = restore_dict_keys(n["context_after"])
+            node.concept_label = n["concept_label"]
+            node.global_root = n["global_root"]
+            node_objs.append(node)
+
+        # Reassign parent/children relationships
+        for idx, n in enumerate(data["nodes"]):
+            node = node_objs[idx]
+            parent_idx = n["parent"]
+            if parent_idx is not None:
+                node.parent = node_objs[parent_idx]
+            node.children = [node_objs[ch] for ch in n["children"]]
+
+        tree.global_root_node = node_objs[0]
+        tree.nodes = node_objs[1:]
+
+        return tree

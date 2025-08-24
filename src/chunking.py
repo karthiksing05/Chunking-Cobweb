@@ -3,8 +3,8 @@ The primary class of the main datastructure, LanguageChunkingParser.
 """
 
 from cobweb.cobweb_discrete import CobwebTree, CobwebNode
-from src.viz import HTMLCobwebDrawer
-from src.parse import ParseTree
+from viz import HTMLCobwebDrawer
+from parse import ParseTree
 import re
 
 
@@ -40,6 +40,9 @@ class LanguageChunkingParser:
         self.id_count += 1
 
         self.context_length = context_length
+
+    def get_long_term_memory(self):
+        return self.ltm_hierarchy
 
     def parse_input(self, sentences, end_behavior="converge", debug=False):
         """
