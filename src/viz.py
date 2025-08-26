@@ -212,17 +212,20 @@ function nodeHTML(d) {{
             await page.screenshot(path=png_file, full_page=True)
             await browser.close()
 
-    def draw_tree(self, root, html_out="cobweb_tree.html", png_out="cobweb_tree.png", render_png=True):
+    def draw_tree(self, root, filepath):
         """
         Draw Cobweb tree from root node and save HTML/PNG.
         """
         d3_json = json.dumps(self._node_to_dict(root))
         html_str = self._build_html(d3_json)
 
-        with open(html_out, "w", encoding="utf-8") as f:
+        os.makedirs(os.path.dirname(filepath + ".html"), exist_ok=True)
+        os.makedirs(os.path.dirname(filepath + ".png"), exist_ok=True)
+
+        with open(filepath + ".html", "w", encoding="utf-8") as f:
             f.write(html_str)
 
-        if render_png and png_out:
-            asyncio.run(self._html_to_png(html_out, png_out))
+        if filepath + ".png":
+            asyncio.run(self._html_to_png(filepath + ".html", filepath + ".png"))
 
-        return html_out, png_out if render_png else html_out
+        return filepath + ".html", filepath + ".png"

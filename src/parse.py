@@ -3,9 +3,23 @@ import os
 import json
 import asyncio
 from playwright.async_api import async_playwright
-import heapq
-import json
 import re
+from cobweb.cobweb_discrete import CobwebTree
+from viz import HTMLCobwebDrawer
+from typing import List
+
+
+"""
+Quick monkeypatch for CobwebNode that allows us to override av_count properly.
+"""
+
+
+"""
+----------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------
+"""
 
 class ParseNode:
 
@@ -138,6 +152,9 @@ class ParseNode:
 
 """
 ----------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------
 """
 
 class ParseTree:
@@ -187,7 +204,8 @@ class ParseTree:
 
         instances = []
 
-        elements = [self.value_to_id[element] for element in re.findall(r"[\w']+|[.,!?;]", sentence)]
+        elements = re.findall(r"[\w']+|[.,!?;]", sentence)
+        elements = [self.value_to_id[element] for element in elements]
 
         for i in range(len(elements) - 1):
 
@@ -228,6 +246,9 @@ class ParseTree:
 
             cat_res = self.ltm_hierarchy.categorize(instance).get_basic_level()
 
+            if debug:
+                print(f"Categorized instance {instance} under basic-level concept with hash {cat_res.concept_hash()}")
+
             inst_dict = instance
             concept_id = self.value_to_id[f"CONCEPT-{cat_res.concept_hash()}"]
 
@@ -252,12 +273,20 @@ class ParseTree:
 
                 merge_inst = ParseNode.create_merge_instance(node_left, node_right)
 
-                candidate_concept = self.ltm_hierarchy.categorize(merge_inst).get_basic_level()
+                candidate_concept = self.ltm_hierarchy.categorize(merge_inst).get_basic_level() # TODO can also change this to get "best_level"
                 candidate_concept_id = self.value_to_id[f"CONCEPT-{candidate_concept.concept_hash()}"]
 
-                # TODO Category Utility may not be the correct score to implement
-                if not best_candidate or candidate_concept.category_utility() > best_candidate[0]:
-                    best_candidate = (candidate_concept.category_utility(), candidate_concept_id, node_left, node_right)
+                candidate_score = 0
+
+                print("Candidate Concept Log Prob Children Instance", candidate_concept.log_prob_children_given_instance(merge_inst))
+                print("Candidate Concept Log Prob Instance", candidate_concept.log_prob_instance(merge_inst))
+                print("Candidate Concept Entropy", candidate_concept.entropy())
+
+                # TODO IMPLEMENT A LOG PROBABILITY SCORE INSTEAD OF A CU SCORE
+                if not best_candidate or candidate_score > best_candidate[0]:
+                    if debug:
+                        print(f"New best candidate found with log-probability {candidate_score} for concept hash {candidate_concept.concept_hash()}")
+                    best_candidate = (candidate_score, candidate_concept_id, node_left, node_right)
 
             if isinstance(end_behavior, (int, float)) and best_candidate[0] < end_behavior:
                 break
@@ -312,6 +341,9 @@ class ParseTree:
 
         html_path = f"{out_base}.html"
         png_path = f"{out_base}.png"
+
+        os.makedirs(os.path.dirname(html_path), exist_ok=True)
+        os.makedirs(os.path.dirname(png_path), exist_ok=True)
 
         with open(html_path, "w", encoding="utf-8") as f:
             f.write(html)
@@ -582,3 +614,229 @@ class ParseTree:
         tree.nodes = node_objs[1:]
 
         return tree
+    
+"""
+----------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------
+"""
+
+class LanguageChunkingParser:
+
+    """
+    This is only for language right now - lots of changes will need to be made
+    to generalize, such as properly representing context.
+
+    Standardizations:
+    *   id-0 => content-left
+    *   id-1 => content-right
+    *   id-2 => context-before
+    *   id-3 => context-after
+    """
+
+    def __init__(self, value_corpus, context_length=3):
+
+        self.ltm_hierarchy = CobwebTree()
+        self.cobweb_drawer = HTMLCobwebDrawer(
+            ["Content-Left", "Content-Right", "Context-Before", "Context-After"],
+            value_corpus
+        )
+
+        self.id_to_value = [x for x in value_corpus]
+        self.value_to_id = dict([(w, i) for i, w in enumerate(value_corpus)])
+        self.id_count = len(value_corpus)
+
+        # adding root node to dictionary! edge case not properly counted
+        hash = self.ltm_hierarchy.root.concept_hash()
+        self.value_to_id[f"CONCEPT-{hash}"] = self.id_count
+        self.id_to_value.append(f"CONCEPT-{hash}")
+        self.id_count += 1
+
+        self.context_length = context_length
+
+    def get_long_term_memory(self):
+        return self.ltm_hierarchy
+
+    def parse_input(self, sentences, end_behavior="converge", debug=False) -> List[ParseTree]:
+        """
+        Primary method for parsing input (a list of sentences) and updating the
+        long-term-memory hierarchy using a parse tree.
+
+        Returns the Parse Tree!
+        """
+
+        parse_trees = []
+
+        for sentence in sentences:
+            parse_tree = ParseTree(self.ltm_hierarchy, self.id_to_value, self.value_to_id)
+            parse_tree.build(sentence, end_behavior, debug)
+
+            parse_trees.append(parse_tree)
+
+        return parse_trees
+
+    def add_parse_tree(self, parse_tree):
+        """
+        Method to add the parse tree to the long-term hierarchy.
+
+        Important note here is that because the parse tree doesn't contain the
+        primitive instances in code (the leaves of the code tree are composite
+        by nature), we can literally just add all nodes of the parse tree as
+        defined by the code.
+
+        Pipeline:
+        *   Save tree structure before adding all new nodes (for each node,
+            what is its parent and what are all its children)
+        *   Add all instances of the parse tree as children via Cobweb's ifit
+        *   Now, we iterate over the new tree and the old tree and keep track of
+            all fundamentally applied actions.
+        *   We initialize an empty list, "rewrite_rules", for updating all
+            instance dictionaries after properly logging all actions.
+        *   We process each Cobweb action in an effort to keep an updated as
+            follows:
+            *   Any "Add" operations don't change the tree's node structure and
+                are not necessary to process.
+            *   Any "Create" operation creates a new node (typically the last
+                action) - these nodes must be added via the pattern
+                "CONCEPT-{node.concept_hash()}" to the self.value_to_id and
+                self.id_to_value dictionaries (also update self.id_count).
+            *   Any "Split" operation deletes a node and promotes all children
+                to become parents - I'm PRETTY SURE there's no vocabulary
+                changes, but we will need to save a rewrite rule binding the old
+                node vocabulary id to it's parent's id, (deleted_id, parent_id).
+            *   Any "Merge" operation groups two children and creates a common
+                parent node for these two nodes. In this case, we should add the
+                new node to the vocabulary similar to the "Create" action.
+        *   Finally, we iterate through the tree and apply all rewrite rules
+            (which I'm pretty sure are only SPLIT rules, so this should be
+            fairly easy).
+
+        Additional Notes:
+        *   We're currently just comparing the old tree to the new tree to
+            safely make all changes, but a future implementation will rewrite
+            the Cobweb class to natively return these actions for our
+            convenience and faster time-complexity.
+        *   In the long term, we should keep track of "stale" concept ids in our
+            vocabulary to replace them over time so our vocabulary doesn't
+            balloon, but again, a later fix.
+        *   Finally, rewrite rules may not currently exist for created nodes but
+            there is a layer of specificity that we can and should replace.
+            Still not sure about the best way to go about that, but leaving it
+            here for future notice.
+            *   In general, the presence of a rewrite rule makes the
+        """
+
+        """
+        Important prior states to save:
+        *   Each node's concept hash
+        *   Each node's children
+        *   Each node's parent
+        """
+
+        # saving old tree structure
+        prior_parents = {}
+        # prior_children = {}
+
+        to_visit = [self.ltm_hierarchy.root]
+
+        while len(to_visit) > 0:
+            curr = to_visit.pop(0)
+
+            if curr.parent:
+                prior_parents[curr.concept_hash()] = curr.parent.concept_hash()
+            else:
+                prior_parents[curr.concept_hash()] = None
+
+            # prior_children[curr.concept_hash()] = None
+            # if curr.children and len(curr.children) > 0:
+            #     for child in children:
+            #         prior_children[curr.concept_hash()] = curr.parent.concept_hash()
+
+        # adding all new instances
+        insts = parse_tree.get_chunk_instances()
+
+        print(insts)
+
+        for inst in insts:
+            print("Adding instance to CobwebTree:", inst)
+            self.ltm_hierarchy.ifit(inst, mode=0)
+
+        # saving new tree structure
+        curr_parents = {}
+
+        to_visit = [self.ltm_hierarchy.root]
+
+        while len(to_visit) > 0:
+            curr = to_visit.pop(0)
+
+            if curr.parent:
+                curr_parents[curr.concept_hash()] = curr.parent.concept_hash()
+            else:
+                curr_parents[curr.concept_hash()] = None
+
+        """
+        Keeping track of all interactions with logic - hopefully with Cobweb
+        supporting a debug mode, this is made better!
+
+        We just need to keep track of all newly created and deleted nodes and
+        adjust them according to our logic above!
+
+        For created nodes:
+        *   If the node is created:
+            *   Add it to the vocabulary!
+        For deleted nodes:
+        *   If the node is deleted:
+            *   Iterate through all nodes and replace the node's id with its
+                parent's id.
+        """
+
+        # created nodes
+        for xhash, parent in curr_parents.items():
+            if not hash in prior_parents:
+                new_vocab = f"CONCEPT-{hash}"
+                self.value_to_id[new_vocab] = self.id_count
+                self.id_to_value.append(new_vocab)
+                self.id_count += 1
+
+        # deleted nodes
+        rewrite_rules = []
+
+        for hash, parent_hash in prior_parents.items():
+            if not hash in curr_parents:
+                rewrite_rules.append((f"CONCEPT-{hash}", f"CONCEPT-{parent_hash}"))
+
+        """
+        Replacing rewrite rules: (TODO)
+
+        Note that at some point, we'll need to program a fix that overrides av_count of the child
+        as well as the recursive path taken to the root. We can probably program some cool BFS from
+        the root that adds the probability of old_key to new_key and then removes old_key, and then
+        traverses down all children, stopping the traversal if old_key doesn't exist.
+        """
+
+        to_visit = [self.ltm_hierarchy.root]
+
+        while len(to_visit) > 0:
+            curr = to_visit.pop(0)
+
+            inst_dict = curr.av_count
+
+            for v in inst_dict.values():
+                for old_key, new_key in rewrite_rules:
+                    if old_key in v:
+                        v[new_key] = v[old_key]
+                        del v[old_key]
+
+            curr.av_count = inst_dict
+
+        return True
+
+    def visualize_ltm(self, out_base="cobweb_tree"):
+        """
+        We had a rudimentary CobwebDrawer before but I'd very much enjoy if we
+        could expand on this and create an HTML-drawing Cobweb method before we
+        continue tests - it would be both easier to explain and certainly easy
+        to verify.
+        """
+        self.cobweb_drawer.draw_tree(self.ltm_hierarchy.root, out_base)

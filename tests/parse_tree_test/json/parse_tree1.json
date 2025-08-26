@@ -1,0 +1,121 @@
+{
+  "sentence": "a dog liked",
+  "context_length": 3,
+  "id_to_value": [
+    "the",
+    "a",
+    "cat",
+    "dog",
+    "man",
+    "woman",
+    "park",
+    "telescope",
+    "big",
+    "small",
+    "red",
+    "quick",
+    "lazy",
+    "saw",
+    "liked",
+    "chased",
+    "found",
+    "admired",
+    "with",
+    "in",
+    "on",
+    "under",
+    "CONCEPT-5360085264"
+  ],
+  "value_to_id": {
+    "the": 0,
+    "a": 1,
+    "cat": 2,
+    "dog": 3,
+    "man": 4,
+    "woman": 5,
+    "park": 6,
+    "telescope": 7,
+    "big": 8,
+    "small": 9,
+    "red": 10,
+    "quick": 11,
+    "lazy": 12,
+    "saw": 13,
+    "liked": 14,
+    "chased": 15,
+    "found": 16,
+    "admired": 17,
+    "with": 18,
+    "in": 19,
+    "on": 20,
+    "under": 21,
+    "CONCEPT-5360085264": 22
+  },
+  "nodes": [
+    {
+      "title": "497c563a",
+      "content_left": null,
+      "content_right": null,
+      "context_before": null,
+      "context_after": null,
+      "concept_label": null,
+      "global_root": true,
+      "parent": null,
+      "children": [
+        3
+      ]
+    },
+    {
+      "title": "3d3e60e2",
+      "content_left": {
+        "1": 1
+      },
+      "content_right": {
+        "3": 1
+      },
+      "context_before": {},
+      "context_after": {
+        "14": 1.0
+      },
+      "concept_label": 22,
+      "global_root": false,
+      "parent": 3,
+      "children": []
+    },
+    {
+      "title": "ee3379cd",
+      "content_left": {
+        "3": 1
+      },
+      "content_right": {
+        "14": 1
+      },
+      "context_before": {
+        "1": 1.0
+      },
+      "context_after": {},
+      "concept_label": 22,
+      "global_root": false,
+      "parent": 3,
+      "children": []
+    },
+    {
+      "title": "83888445",
+      "content_left": {
+        "22": 1
+      },
+      "content_right": {
+        "22": 1
+      },
+      "context_before": {},
+      "context_after": {},
+      "concept_label": 22,
+      "global_root": false,
+      "parent": 0,
+      "children": [
+        1,
+        2
+      ]
+    }
+  ]
+}

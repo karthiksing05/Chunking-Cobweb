@@ -1,5 +1,5 @@
 {
-  "sentence": "the lazy dog chased",
+  "sentence": "the dog liked",
   "context_length": 3,
   "id_to_value": [
     "the",
@@ -24,7 +24,7 @@
     "in",
     "on",
     "under",
-    "CONCEPT-4673809216"
+    "CONCEPT-5360085264"
   ],
   "value_to_id": {
     "the": 0,
@@ -49,11 +49,11 @@
     "in": 19,
     "on": 20,
     "under": 21,
-    "CONCEPT-4673809216": 22
+    "CONCEPT-5360085264": 22
   },
   "nodes": [
     {
-      "title": "4690f1ae",
+      "title": "66f0b3d3",
       "content_left": null,
       "content_right": null,
       "context_before": null,
@@ -62,66 +62,45 @@
       "global_root": true,
       "parent": null,
       "children": [
-        5
+        3
       ]
     },
     {
-      "title": "134c3362",
+      "title": "83b5deb7",
       "content_left": {
         "0": 1
       },
       "content_right": {
-        "12": 1
+        "3": 1
       },
       "context_before": {},
       "context_after": {
-        "3": 1.0,
-        "15": 0.5
+        "14": 1.0
       },
       "concept_label": 22,
       "global_root": false,
-      "parent": 4,
+      "parent": 3,
       "children": []
     },
     {
-      "title": "a0232132",
+      "title": "7465a721",
       "content_left": {
-        "12": 1
+        "3": 1
       },
       "content_right": {
-        "3": 1
+        "14": 1
       },
       "context_before": {
         "0": 1.0
       },
-      "context_after": {
-        "15": 1.0
-      },
-      "concept_label": 22,
-      "global_root": false,
-      "parent": 4,
-      "children": []
-    },
-    {
-      "title": "fbbcd802",
-      "content_left": {
-        "3": 1
-      },
-      "content_right": {
-        "15": 1
-      },
-      "context_before": {
-        "12": 1.0,
-        "0": 0.5
-      },
       "context_after": {},
       "concept_label": 22,
       "global_root": false,
-      "parent": 5,
+      "parent": 3,
       "children": []
     },
     {
-      "title": "cbf88565",
+      "title": "a4183e32",
       "content_left": {
         "22": 1
       },
@@ -129,38 +108,13 @@
         "22": 1
       },
       "context_before": {},
-      "context_after": {
-        "15": 1.0
-      },
-      "concept_label": 22,
-      "global_root": false,
-      "parent": 5,
-      "children": [
-        1,
-        2
-      ]
-    },
-    {
-      "title": "46d5c670",
-      "content_left": {
-        "22": 1
-      },
-      "content_right": {
-        "22": 1
-      },
-      "context_before": {
-        "12": 1.0,
-        "0": 0.5
-      },
-      "context_after": {
-        "15": 1.0
-      },
+      "context_after": {},
       "concept_label": 22,
       "global_root": false,
       "parent": 0,
       "children": [
-        3,
-        4
+        1,
+        2
       ]
     }
   ]
