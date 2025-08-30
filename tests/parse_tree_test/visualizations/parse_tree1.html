@@ -5,6 +5,7 @@
     <title>Parse Tree</title>
     <style>
     body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    #tree-container { display: inline-block; }
     .link { fill: none; stroke: #9aa1a9; stroke-width: 1.5px; }
     .node-box { stroke: #444; fill: #fff; rx: 8; ry: 8; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.15)); }
     .node-fo table { border-collapse: collapse; font-size: 12px; margin: 4px 0; }
@@ -18,10 +19,12 @@
     </style>
     </head>
     <body>
+    <div id="tree-container">
     <div id="tree"></div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script>
-    const data = {"title": "497c563a", "left": "None", "right": "None", "before": [], "after": [], "children": [{"title": "83888445", "left": "CONCEPT-5360085264", "right": "CONCEPT-5360085264", "before": [], "after": [], "children": [{"title": "3d3e60e2", "left": "a", "right": "dog", "before": [], "after": [{"key": "liked", "val": 1.0}], "children": []}, {"title": "ee3379cd", "left": "dog", "right": "liked", "before": [{"key": "a", "val": 1.0}], "after": [], "children": []}]}]};
+    const data = {"title": "9949e12f", "left": "None", "right": "None", "before": [], "after": [], "children": [{"title": "efc5f57b", "left": "CONCEPT-1a6757390a", "right": "CONCEPT-1a6757390a", "before": [], "after": [], "children": [{"title": "515bff72", "left": "CONCEPT-1a6757390a", "right": "CONCEPT-1a6757390a", "before": [], "after": [{"key": "a", "val": 1.0}, {"key": "dog", "val": 0.5}], "children": [{"title": "845ee88a", "left": "a", "right": "park", "before": [], "after": [{"key": "liked", "val": 1.0}, {"key": "a", "val": 0.5}], "children": []}, {"title": "c409abe9", "left": "park", "right": "liked", "before": [{"key": "a", "val": 1.0}], "after": [{"key": "a", "val": 1.0}, {"key": "dog", "val": 0.5}], "children": []}]}, {"title": "a1edad57", "left": "CONCEPT-1a6757390a", "right": "CONCEPT-1a6757390a", "before": [{"key": "park", "val": 1.0}, {"key": "a", "val": 0.5}], "after": [], "children": [{"title": "951ea20c", "left": "liked", "right": "a", "before": [{"key": "park", "val": 1.0}, {"key": "a", "val": 0.5}], "after": [{"key": "dog", "val": 1.0}], "children": []}, {"title": "dbd6427e", "left": "a", "right": "dog", "before": [{"key": "liked", "val": 1.0}, {"key": "park", "val": 0.5}, {"key": "a", "val": 0.3333333333333333}], "after": [], "children": []}]}]}]};
     const nodeW  = 280;
     const nodeH  = 130;
     const hGap   = 80;
@@ -39,8 +42,8 @@
         if (d.y < y0) y0 = d.y;
         if (d.y > y1) y1 = d.y;
     });
-    const width  = x1 - x0 + nodeW + 120;
-    const height = y1 - y0 + nodeH + 120;
+    const width  = x1 - x0 + nodeW + 320;
+    const height = y1 - y0 + nodeH + 320; // THIS IS THE HEIGHT MODIFIER
 
     const svg = d3.select("#tree").append("svg")
     .attr("width", width)

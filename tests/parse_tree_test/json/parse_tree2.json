@@ -1,5 +1,5 @@
 {
-  "sentence": "the dog liked",
+  "sentence": "the quick quick woman chased",
   "context_length": 3,
   "id_to_value": [
     "the",
@@ -24,7 +24,7 @@
     "in",
     "on",
     "under",
-    "CONCEPT-5360085264"
+    "CONCEPT-1a6757390a"
   ],
   "value_to_id": {
     "the": 0,
@@ -49,11 +49,11 @@
     "in": 19,
     "on": 20,
     "under": 21,
-    "CONCEPT-5360085264": 22
+    "CONCEPT-1a6757390a": 22
   },
   "nodes": [
     {
-      "title": "66f0b3d3",
+      "title": "0d44b6d5",
       "content_left": null,
       "content_right": null,
       "context_before": null,
@@ -62,45 +62,129 @@
       "global_root": true,
       "parent": null,
       "children": [
-        3
+        7
       ]
     },
     {
-      "title": "83b5deb7",
+      "title": "ba6adf3d",
       "content_left": {
         "0": 1
       },
       "content_right": {
-        "3": 1
+        "11": 1
       },
       "context_before": {},
       "context_after": {
-        "14": 1.0
+        "11": 1.0,
+        "5": 0.5
       },
       "concept_label": 22,
       "global_root": false,
-      "parent": 3,
+      "parent": 5,
       "children": []
     },
     {
-      "title": "7465a721",
+      "title": "bdf9faa3",
       "content_left": {
-        "3": 1
+        "11": 1
       },
       "content_right": {
-        "14": 1
+        "11": 1
       },
       "context_before": {
         "0": 1.0
       },
-      "context_after": {},
+      "context_after": {
+        "5": 1.0,
+        "15": 0.5
+      },
       "concept_label": 22,
       "global_root": false,
-      "parent": 3,
+      "parent": 5,
       "children": []
     },
     {
-      "title": "a4183e32",
+      "title": "b5b7c127",
+      "content_left": {
+        "11": 1
+      },
+      "content_right": {
+        "5": 1
+      },
+      "context_before": {
+        "11": 1.0,
+        "0": 0.5
+      },
+      "context_after": {
+        "15": 1.0
+      },
+      "concept_label": 22,
+      "global_root": false,
+      "parent": 6,
+      "children": []
+    },
+    {
+      "title": "59ce1aec",
+      "content_left": {
+        "5": 1
+      },
+      "content_right": {
+        "15": 1
+      },
+      "context_before": {
+        "11": 1.5,
+        "0": 0.3333333333333333
+      },
+      "context_after": {},
+      "concept_label": 22,
+      "global_root": false,
+      "parent": 6,
+      "children": []
+    },
+    {
+      "title": "dfbe7514",
+      "content_left": {
+        "22": 1
+      },
+      "content_right": {
+        "22": 1
+      },
+      "context_before": {},
+      "context_after": {
+        "5": 1.0,
+        "15": 0.5
+      },
+      "concept_label": 22,
+      "global_root": false,
+      "parent": 7,
+      "children": [
+        1,
+        2
+      ]
+    },
+    {
+      "title": "d9ea2f1f",
+      "content_left": {
+        "22": 1
+      },
+      "content_right": {
+        "22": 1
+      },
+      "context_before": {
+        "11": 1.0,
+        "0": 0.5
+      },
+      "context_after": {},
+      "concept_label": 22,
+      "global_root": false,
+      "parent": 7,
+      "children": [
+        3,
+        4
+      ]
+    },
+    {
+      "title": "6ff58524",
       "content_left": {
         "22": 1
       },
@@ -113,8 +197,8 @@
       "global_root": false,
       "parent": 0,
       "children": [
-        1,
-        2
+        5,
+        6
       ]
     }
   ]

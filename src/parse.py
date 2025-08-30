@@ -4,14 +4,9 @@ import json
 import asyncio
 from playwright.async_api import async_playwright
 import re
-from cobweb.cobweb_discrete import CobwebTree
+from util.pycobweb import CobwebTree, CobwebNode
 from viz import HTMLCobwebDrawer
 from typing import List
-
-
-"""
-Quick monkeypatch for CobwebNode that allows us to override av_count properly.
-"""
 
 
 """
@@ -276,9 +271,9 @@ class ParseTree:
                 candidate_concept = self.ltm_hierarchy.categorize(merge_inst).get_basic_level() # TODO can also change this to get "best_level"
                 candidate_concept_id = self.value_to_id[f"CONCEPT-{candidate_concept.concept_hash()}"]
 
-                candidate_score = 0
+                candidate_score = candidate_concept.log_prob_instance(merge_inst)
 
-                print("Candidate Concept Log Prob Children Instance", candidate_concept.log_prob_children_given_instance(merge_inst))
+                print("Candidate Concept Log Prob Children Given Instance", candidate_concept.log_prob_children_given_instance(merge_inst))
                 print("Candidate Concept Log Prob Instance", candidate_concept.log_prob_instance(merge_inst))
                 print("Candidate Concept Entropy", candidate_concept.entropy())
 
@@ -331,20 +326,21 @@ class ParseTree:
     def visualize(self, out_base="parse_tree", render_png=True):
         """
         Render the parse tree into an HTML file and optionally a PNG screenshot.
-
-        Returns
-        -------
-        (html_path, png_path) if render_png else html_path
+        The PNG height automatically adjusts to fit the tree, including all nodes.
         """
+
+        # Convert tree to JSON and build HTML
         d3_json = json.dumps(self._tree_to_json())
         html = self._build_html(d3_json)
 
         html_path = f"{out_base}.html"
         png_path = f"{out_base}.png"
 
-        os.makedirs(os.path.dirname(html_path), exist_ok=True)
-        os.makedirs(os.path.dirname(png_path), exist_ok=True)
+        # Ensure output directories exist
+        os.makedirs(os.path.dirname(html_path) or ".", exist_ok=True)
+        os.makedirs(os.path.dirname(png_path) or ".", exist_ok=True)
 
+        # Write HTML file
         with open(html_path, "w", encoding="utf-8") as f:
             f.write(html)
 
@@ -356,35 +352,46 @@ class ParseTree:
 
     async def _html_to_png(self, html_path, png_path, scale=2):
         """
-        Convert an HTML file into a PNG screenshot using Playwright.
+        Convert the HTML tree to a PNG screenshot using Playwright.
+        Automatically adjusts the PNG size to fit the full tree height.
         """
+
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
             page = await browser.new_page()
             await page.goto("file://" + os.path.abspath(html_path))
 
-            # wait until tree is rendered
+            # Wait until the tree SVG exists
             await page.wait_for_selector("#tree svg")
 
-            # compute bounding box of rendered SVG
+            # Wait for layout of dynamic node content to stabilize
+            await page.evaluate("""
+                () => new Promise(resolve => {
+                    requestAnimationFrame(() => requestAnimationFrame(resolve));
+                })
+            """)
+
+            # Measure the wrapper container including all overflow from foreignObjects
             bounding_box = await page.evaluate("""
                 () => {
-                    const svg = document.querySelector('#tree svg');
-                    const bbox = svg.getBBox();
+                    const container = document.querySelector('#tree-container');
                     return {
-                        width: Math.ceil(bbox.x + bbox.width + 20),
-                        height: Math.ceil(bbox.y + bbox.height + 20)
+                        width: Math.ceil(container.scrollWidth) + 20,
+                        height: Math.ceil(container.scrollHeight) + 20
                     };
                 }
             """)
 
+            # Set viewport to actual content size
             await page.set_viewport_size({
                 "width": bounding_box["width"],
-                "height": bounding_box["height"],
+                "height": bounding_box["height"]
             })
 
+            # Take a screenshot of the SVG
             svg_elem = await page.query_selector("#tree svg")
-            await svg_elem.screenshot(path=png_path, scale="css")  # Playwright auto-scales with DPI
+            await svg_elem.screenshot(path=png_path, scale="css")
+
             await browser.close()
 
     def _safe_lookup(self, idx):
@@ -424,6 +431,7 @@ class ParseTree:
     <title>Parse Tree</title>
     <style>
     body {{ margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }}
+    #tree-container {{ display: inline-block; }}
     .link {{ fill: none; stroke: #9aa1a9; stroke-width: 1.5px; }}
     .node-box {{ stroke: #444; fill: #fff; rx: 8; ry: 8; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.15)); }}
     .node-fo table {{ border-collapse: collapse; font-size: 12px; margin: 4px 0; }}
@@ -437,7 +445,9 @@ class ParseTree:
     </style>
     </head>
     <body>
+    <div id="tree-container">
     <div id="tree"></div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script>
     const data = {d3_data_json};
@@ -458,8 +468,8 @@ class ParseTree:
         if (d.y < y0) y0 = d.y;
         if (d.y > y1) y1 = d.y;
     }});
-    const width  = x1 - x0 + nodeW + 120;
-    const height = y1 - y0 + nodeH + 120;
+    const width  = x1 - x0 + nodeW + 320;
+    const height = y1 - y0 + nodeH + 320; // THIS IS THE HEIGHT MODIFIER
 
     const svg = d3.select("#tree").append("svg")
     .attr("width", width)
@@ -528,6 +538,7 @@ class ParseTree:
     </body>
     </html>
     """
+
 
     def to_json(self, filepath=None):
         """
@@ -756,10 +767,16 @@ class LanguageChunkingParser:
         # adding all new instances
         insts = parse_tree.get_chunk_instances()
 
-        print(insts)
+        """
+        ERROR CASE: (IndexError: unordered_map::at: key not found)
+        Adding instance to CobwebTree: {0: {22: 1}, 1: {22: 1}, 2: {}, 3: {}}
+        Adding instance to CobwebTree: {0: {22: 1}, 1: {22: 1}, 2: {}, 3: {4: 1.0, 18: 0.5}}
+        Adding instance to CobwebTree: {0: {22: 1}, 1: {22: 1}, 2: {}, 3: {0: 1.0, 12: 0.5}}
+        """
 
         for inst in insts:
             print("Adding instance to CobwebTree:", inst)
+            # self.cobweb_drawer.draw_tree(self.ltm_hierarchy.root, "tests/gen_learn_test/test_trees/test_parse_tree")
             self.ltm_hierarchy.ifit(inst, mode=0)
 
         # saving new tree structure
@@ -792,9 +809,9 @@ class LanguageChunkingParser:
         """
 
         # created nodes
-        for xhash, parent in curr_parents.items():
-            if not hash in prior_parents:
-                new_vocab = f"CONCEPT-{hash}"
+        for xhash in curr_parents.keys():
+            if not xhash in prior_parents:
+                new_vocab = f"CONCEPT-{xhash}"
                 self.value_to_id[new_vocab] = self.id_count
                 self.id_to_value.append(new_vocab)
                 self.id_count += 1
@@ -802,14 +819,17 @@ class LanguageChunkingParser:
         # deleted nodes
         rewrite_rules = []
 
-        for hash, parent_hash in prior_parents.items():
-            if not hash in curr_parents:
-                rewrite_rules.append((f"CONCEPT-{hash}", f"CONCEPT-{parent_hash}"))
+        for xhash, parent_hash in prior_parents.items():
+            if not xhash in curr_parents:
+                rewrite_rules.append((f"CONCEPT-{xhash}", f"CONCEPT-{parent_hash}"))
+
+        # TODO probably need some logic here for combining rewrite rules recursively??
+        # there might be a way to prove that this will never happen but worth programming just in case
 
         """
-        Replacing rewrite rules: (TODO)
+        Replacing rewrite rules:
 
-        Note that at some point, we'll need to program a fix that overrides av_count of the child
+        TODO: Note that at some point, we'll need to program a fix that overrides av_count of the child
         as well as the recursive path taken to the root. We can probably program some cool BFS from
         the root that adds the probability of old_key to new_key and then removes old_key, and then
         traverses down all children, stopping the traversal if old_key doesn't exist.
@@ -828,6 +848,8 @@ class LanguageChunkingParser:
                         v[new_key] = v[old_key]
                         del v[old_key]
 
+            # curr._av_count = inst_dict
+            print(curr.av_count)
             curr.av_count = inst_dict
 
         return True

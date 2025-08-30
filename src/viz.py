@@ -127,8 +127,8 @@ root.each(d => {{
     if (d.y < y0) y0 = d.y;
     if (d.y > y1) y1 = d.y;
 }});
-const width  = x1 - x0 + nodeW + 200;
-const height = y1 - y0 + nodeH + 200;
+const width  = x1 - x0 + nodeW + 320;
+const height = y1 - y0 + nodeH + 320; // THIS IS THE HEIGHT MODIFIER
 
 const svg = d3.select("#tree").append("svg")
   .attr("width", width)

@@ -1,5 +1,5 @@
 {
-  "sentence": "the woman chased",
+  "sentence": "the quick lazy quick red cat found a woman",
   "context_length": 3,
   "id_to_value": [
     "the",
@@ -24,7 +24,7 @@
     "in",
     "on",
     "under",
-    "CONCEPT-5360085264"
+    "CONCEPT-1a6757390a"
   ],
   "value_to_id": {
     "the": 0,
@@ -49,11 +49,11 @@
     "in": 19,
     "on": 20,
     "under": 21,
-    "CONCEPT-5360085264": 22
+    "CONCEPT-1a6757390a": 22
   },
   "nodes": [
     {
-      "title": "ae3ad010",
+      "title": "c177a01e",
       "content_left": null,
       "content_right": null,
       "context_before": null,
@@ -62,45 +62,308 @@
       "global_root": true,
       "parent": null,
       "children": [
-        3
+        15
       ]
     },
     {
-      "title": "e423f1c4",
+      "title": "a386ac68",
       "content_left": {
         "0": 1
       },
       "content_right": {
-        "5": 1
+        "11": 1
       },
       "context_before": {},
       "context_after": {
-        "15": 1.0
+        "12": 1.0,
+        "11": 0.5
       },
       "concept_label": 22,
       "global_root": false,
-      "parent": 3,
+      "parent": 9,
       "children": []
     },
     {
-      "title": "01fb40d5",
+      "title": "73724c24",
       "content_left": {
-        "5": 1
+        "11": 1
       },
       "content_right": {
-        "15": 1
+        "12": 1
       },
       "context_before": {
         "0": 1.0
       },
-      "context_after": {},
+      "context_after": {
+        "11": 1.0,
+        "10": 0.5
+      },
       "concept_label": 22,
       "global_root": false,
-      "parent": 3,
+      "parent": 9,
       "children": []
     },
     {
-      "title": "d30c8d8d",
+      "title": "53fe32ec",
+      "content_left": {
+        "12": 1
+      },
+      "content_right": {
+        "11": 1
+      },
+      "context_before": {
+        "11": 1.0,
+        "0": 0.5
+      },
+      "context_after": {
+        "10": 1.0,
+        "2": 0.5
+      },
+      "concept_label": 22,
+      "global_root": false,
+      "parent": 10,
+      "children": []
+    },
+    {
+      "title": "d9fc2dc9",
+      "content_left": {
+        "11": 1
+      },
+      "content_right": {
+        "10": 1
+      },
+      "context_before": {
+        "12": 1.0,
+        "11": 0.5,
+        "0": 0.3333333333333333
+      },
+      "context_after": {
+        "2": 1.0,
+        "16": 0.5
+      },
+      "concept_label": 22,
+      "global_root": false,
+      "parent": 10,
+      "children": []
+    },
+    {
+      "title": "2652b588",
+      "content_left": {
+        "10": 1
+      },
+      "content_right": {
+        "2": 1
+      },
+      "context_before": {
+        "11": 1.3333333333333333,
+        "12": 0.5
+      },
+      "context_after": {
+        "16": 1.0,
+        "1": 0.5
+      },
+      "concept_label": 22,
+      "global_root": false,
+      "parent": 11,
+      "children": []
+    },
+    {
+      "title": "966bda7d",
+      "content_left": {
+        "2": 1
+      },
+      "content_right": {
+        "16": 1
+      },
+      "context_before": {
+        "10": 1.0,
+        "11": 0.5,
+        "12": 0.3333333333333333
+      },
+      "context_after": {
+        "1": 1.0,
+        "5": 0.5
+      },
+      "concept_label": 22,
+      "global_root": false,
+      "parent": 11,
+      "children": []
+    },
+    {
+      "title": "b7926d69",
+      "content_left": {
+        "16": 1
+      },
+      "content_right": {
+        "1": 1
+      },
+      "context_before": {
+        "2": 1.0,
+        "10": 0.5,
+        "11": 0.3333333333333333
+      },
+      "context_after": {
+        "5": 1.0
+      },
+      "concept_label": 22,
+      "global_root": false,
+      "parent": 12,
+      "children": []
+    },
+    {
+      "title": "19f6777d",
+      "content_left": {
+        "1": 1
+      },
+      "content_right": {
+        "5": 1
+      },
+      "context_before": {
+        "16": 1.0,
+        "2": 0.5,
+        "10": 0.3333333333333333
+      },
+      "context_after": {},
+      "concept_label": 22,
+      "global_root": false,
+      "parent": 12,
+      "children": []
+    },
+    {
+      "title": "e63de7d5",
+      "content_left": {
+        "22": 1
+      },
+      "content_right": {
+        "22": 1
+      },
+      "context_before": {},
+      "context_after": {
+        "11": 1.0,
+        "10": 0.5
+      },
+      "concept_label": 22,
+      "global_root": false,
+      "parent": 13,
+      "children": [
+        1,
+        2
+      ]
+    },
+    {
+      "title": "cda27ddc",
+      "content_left": {
+        "22": 1
+      },
+      "content_right": {
+        "22": 1
+      },
+      "context_before": {
+        "11": 1.0,
+        "0": 0.5
+      },
+      "context_after": {
+        "2": 1.0,
+        "16": 0.5
+      },
+      "concept_label": 22,
+      "global_root": false,
+      "parent": 13,
+      "children": [
+        3,
+        4
+      ]
+    },
+    {
+      "title": "488fed25",
+      "content_left": {
+        "22": 1
+      },
+      "content_right": {
+        "22": 1
+      },
+      "context_before": {
+        "11": 1.3333333333333333,
+        "12": 0.5
+      },
+      "context_after": {
+        "1": 1.0,
+        "5": 0.5
+      },
+      "concept_label": 22,
+      "global_root": false,
+      "parent": 14,
+      "children": [
+        5,
+        6
+      ]
+    },
+    {
+      "title": "f4876a4f",
+      "content_left": {
+        "22": 1
+      },
+      "content_right": {
+        "22": 1
+      },
+      "context_before": {
+        "2": 1.0,
+        "10": 0.5,
+        "11": 0.3333333333333333
+      },
+      "context_after": {},
+      "concept_label": 22,
+      "global_root": false,
+      "parent": 14,
+      "children": [
+        7,
+        8
+      ]
+    },
+    {
+      "title": "b0b25c84",
+      "content_left": {
+        "22": 1
+      },
+      "content_right": {
+        "22": 1
+      },
+      "context_before": {},
+      "context_after": {
+        "2": 1.0,
+        "16": 0.5
+      },
+      "concept_label": 22,
+      "global_root": false,
+      "parent": 15,
+      "children": [
+        9,
+        10
+      ]
+    },
+    {
+      "title": "5f43cf2a",
+      "content_left": {
+        "22": 1
+      },
+      "content_right": {
+        "22": 1
+      },
+      "context_before": {
+        "11": 1.3333333333333333,
+        "12": 0.5
+      },
+      "context_after": {},
+      "concept_label": 22,
+      "global_root": false,
+      "parent": 15,
+      "children": [
+        11,
+        12
+      ]
+    },
+    {
+      "title": "8bd68c91",
       "content_left": {
         "22": 1
       },
@@ -113,8 +376,8 @@
       "global_root": false,
       "parent": 0,
       "children": [
-        1,
-        2
+        13,
+        14
       ]
     }
   ]

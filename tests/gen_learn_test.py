@@ -1,5 +1,5 @@
 """
-General Learning Test - to briefly confirm the logic of 
+General Learning Test - to confirm the logic of learning is completely functional
 """
 
 from util.cfg import generate, TEST_CORPUS1, TEST_GRAMMAR1
