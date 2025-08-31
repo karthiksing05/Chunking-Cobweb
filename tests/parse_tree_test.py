@@ -16,13 +16,19 @@ pprint(document)
 # Setting up the parser
 parser = LanguageChunkingParser(TEST_CORPUS1)
 
-trees = parser.parse_input(document, debug=True)
+trees = parser.parse_input(document, end_behavior="converge", debug=False)
+# using end behavior of -8 is good for now but TBD because the measure isn't as valid
+# we can also set debug to equal true!
 
 for i, tree in enumerate(trees):
-    print(f"TREE for Sentence {i}: " + document[i])
+    print(f"Generating TREE for Sentence {i}: " + document[i])
     tree.visualize(f"tests/parse_tree_test/visualizations/parse_tree{i}")
     tree.to_json(f"tests/parse_tree_test/json/parse_tree{i}.json")
 
 # Loading parse_tree0.json to verify
 tree = ParseTree.from_json("tests/parse_tree_test/json/parse_tree0.json", ltm_hierarchy=parser.get_long_term_memory(), filepath=True)
 tree.visualize("tests/parse_tree_test/visualizations/parse_tree0_from_json")
+
+print("Confirming that all chunk instances are appropriately scraped:")
+for chunk_inst in tree.get_chunk_instances():
+    print("- ", chunk_inst)

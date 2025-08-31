@@ -48,15 +48,15 @@ class CobwebTree:
             for v in vm.keys():
                 self.attr_vals[a].add(v)
 
-    # ---------------- Learning ----------------
     def ifit(self, instance: AVCount, mode: int = 0) -> Tuple["CobwebNode", Dict[str, float]]:
         """
         Fit a single instance using COBWEB ops.
         mode:
-          0 = full (choose best op)
+          0 = full (choose best op among BEST/NEW/MERGE/SPLIT)
           1 = BEST only
           2 = random decisions among allowed ops
           3 = epsilon-greedy BEST (1% random exploration)
+          4 = BEST and NEW only (explicitly ignore MERGE and SPLIT)
         Returns (node_reached, stats dict — currently unused placeholder).
         """
         self._ensure_attr_vals(instance)
@@ -71,27 +71,40 @@ class CobwebTree:
 
             # Fringe split: leaf but not exact match
             if not current.children:
-                # Create new parent node that copies current
-                new_parent = CobwebNode(tree=self, parent=current.parent)
-                new_parent.update_counts_from_node(current)
-
-                # rewire parent references
                 if current.parent is None:
-                    self.root = new_parent
+                    # Case: current is root → mutate in place, don’t replace object
+                    # Create two children: one for existing contents, one for new instance
+                    old_child = CobwebNode(tree=self, parent=current)
+                    old_child.update_counts_from_node(current)
+
+                    new_child = CobwebNode(tree=self, parent=current)
+                    new_child.increment_counts(instance)
+
+                    current.children = [old_child, new_child]
+                    current.clear_counts()
+                    current.update_counts_from_node(old_child)
+                    current.update_counts_from_node(new_child)
+
+                    current = new_child
+                    break
                 else:
+                    # Case: non-root fringe split → same as before
+                    new_parent = CobwebNode(tree=self, parent=current.parent)
+                    new_parent.update_counts_from_node(current)
+
                     p = current.parent
                     p.children = [new_parent if c is current else c for c in p.children]
 
-                current.parent = new_parent
-                new_parent.children.append(current)
+                    current.parent = new_parent
+                    new_parent.children.append(current)
 
-                # add sibling (new child) for incoming instance
-                sibling = CobwebNode(tree=self, parent=new_parent)
-                sibling.increment_counts(instance)
-                new_parent.increment_counts(instance)  # parent sees instance too
-                new_parent.children.append(sibling)
-                current = sibling
-                break
+                    sibling = CobwebNode(tree=self, parent=new_parent)
+                    sibling.increment_counts(instance)
+                    new_parent.increment_counts(instance)
+                    new_parent.children.append(sibling)
+                    current = sibling
+                    break
+
 
             # Internal node: find two best children
             best1_score, best1, best2 = current.two_best_children(instance)
@@ -108,6 +121,11 @@ class CobwebTree:
                 action = CobwebNode.BEST
                 if best1 is not None and best2 is not None and random.random() < 1e-2:
                     _, action = current.get_best_operation(instance, best1, best2, best1_score)
+            elif mode == 4:
+                # only allow BEST and NEW
+                _, action = current.get_best_operation(instance, best1, best2, best1_score)
+                if action not in (CobwebNode.BEST, CobwebNode.NEW):
+                    action = CobwebNode.BEST
             else:
                 _, action = current.get_best_operation(instance, best1, best2, best1_score)
 
@@ -141,7 +159,6 @@ class CobwebTree:
                 continue
 
             if action == CobwebNode.SPLIT and best1 is not None:
-                # remove best1 and promote its children to current
                 current.children = [c for c in current.children if c is not best1]
                 for ch in best1.children:
                     ch.parent = current
@@ -156,6 +173,7 @@ class CobwebTree:
             current = best1
 
         return current, stats
+
 
     def fit(self, instances: List[AVCount], mode: int, iterations: int = 1, randomizeFirst: bool = True) -> None:
         """
@@ -202,7 +220,7 @@ class CobwebNode:
     # operation codes
     BEST, NEW, MERGE, SPLIT = 0, 1, 2, 3
 
-    def __init__(self, tree: CobwebTree, parent: Optional["CobwebNode"] = None):
+    def __init__(self, tree: CobwebTree, parent: Optional["CobwebNode"] = None, concept_hash: Optional[str] = None):
         self.tree = tree
         self.parent = parent
         self.children: List["CobwebNode"] = []
@@ -214,7 +232,10 @@ class CobwebNode:
         # cache for entropy calculations: for attr -> sum_{val} (n_val + alpha) * log(n_val + alpha)
         self.sum_n_logn: DefaultDict[int, float] = defaultdict(float)
 
-        self._concept_hash = uuid.uuid4().hex[:10]
+        if concept_hash:
+            self._concept_hash = concept_hash
+        else:
+            self._concept_hash = uuid.uuid4().hex[:10]
 
     # ---------------- Count updates ----------------
     def increment_counts(self, instance: AVCount) -> None:
@@ -863,4 +884,14 @@ class CobwebNode:
     # ---------------- Other small helpers ----------------
     def get_weighted_values_list(self, attr: int, allowNone: bool = True) -> List[Tuple[int, float]]:
         return self.get_weighted_values(attr, allowNone)
+
+    def clear_counts(self) -> None:
+        """
+        Reset all statistical counts on this node, but keep identity/hash
+        and structural pointers intact.
+        """
+        self.count = 0.0
+        self.a_count.clear()
+        self.av_count.clear()
+        self.sum_n_logn.clear()
 

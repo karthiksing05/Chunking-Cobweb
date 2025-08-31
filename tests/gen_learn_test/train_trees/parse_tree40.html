@@ -5,6 +5,7 @@
     <title>Parse Tree</title>
     <style>
     body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    #tree-container { display: inline-block; }
     .link { fill: none; stroke: #9aa1a9; stroke-width: 1.5px; }
     .node-box { stroke: #444; fill: #fff; rx: 8; ry: 8; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.15)); }
     .node-fo table { border-collapse: collapse; font-size: 12px; margin: 4px 0; }
@@ -18,10 +19,12 @@
     </style>
     </head>
     <body>
+    <div id="tree-container">
     <div id="tree"></div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script>
-    const data = {"title": "aa3c2f6a", "left": "None", "right": "None", "before": [], "after": [], "children": [{"title": "5e61447f", "left": "CONCEPT-5501397824", "right": "CONCEPT-5501397824", "before": [{"key": "dog", "val": 1.0}, {"key": "the", "val": 0.5}], "after": [{"key": "a", "val": 1.0}, {"key": "red", "val": 0.5}], "children": [{"title": "654012fb", "left": "CONCEPT-5501397824", "right": "CONCEPT-5501397824", "before": [{"key": "dog", "val": 1.0}, {"key": "the", "val": 0.5}], "after": [{"key": "with", "val": 1.0}, {"key": "a", "val": 0.5}], "children": [{"title": "74e27dc2", "left": "CONCEPT-5501397824", "right": "CONCEPT-5501397824", "before": [{"key": "dog", "val": 1.0}, {"key": "the", "val": 0.5}], "after": [{"key": "big", "val": 1.0}, {"key": "woman", "val": 0.5}], "children": [{"title": "37e67799", "left": "liked", "right": "a", "before": [{"key": "dog", "val": 1.0}, {"key": "the", "val": 0.5}], "after": [{"key": "red", "val": 1.0}, {"key": "big", "val": 0.5}], "children": []}, {"title": "ed6d11bc", "left": "a", "right": "red", "before": [{"key": "liked", "val": 1.0}, {"key": "dog", "val": 0.5}, {"key": "the", "val": 0.3333333333333333}], "after": [{"key": "big", "val": 1.0}, {"key": "woman", "val": 0.5}], "children": []}]}, {"title": "9818ed5d", "left": "CONCEPT-5501397824", "right": "CONCEPT-5501397824", "before": [{"key": "a", "val": 1.0}, {"key": "liked", "val": 0.5}, {"key": "dog", "val": 0.3333333333333333}], "after": [{"key": "with", "val": 1.0}, {"key": "a", "val": 0.5}], "children": [{"title": "96d93025", "left": "red", "right": "big", "before": [{"key": "a", "val": 1.0}, {"key": "liked", "val": 0.5}, {"key": "dog", "val": 0.3333333333333333}], "after": [{"key": "woman", "val": 1.0}, {"key": "with", "val": 0.5}], "children": []}, {"title": "8cb2c60a", "left": "big", "right": "woman", "before": [{"key": "red", "val": 1.0}, {"key": "a", "val": 0.5}, {"key": "liked", "val": 0.3333333333333333}], "after": [{"key": "with", "val": 1.0}, {"key": "a", "val": 0.5}], "children": []}]}]}, {"title": "8a3c1ca3", "left": "CONCEPT-5501397824", "right": "CONCEPT-5501397824", "before": [{"key": "big", "val": 1.0}, {"key": "red", "val": 0.5}, {"key": "a", "val": 0.3333333333333333}], "after": [{"key": "a", "val": 1.0}, {"key": "red", "val": 0.5}], "children": [{"title": "606fa17e", "left": "CONCEPT-5501397824", "right": "CONCEPT-5501397824", "before": [{"key": "big", "val": 1.0}, {"key": "red", "val": 0.5}, {"key": "a", "val": 0.3333333333333333}], "after": [{"key": "man", "val": 1.0}], "children": [{"title": "a674d388", "left": "woman", "right": "with", "before": [{"key": "big", "val": 1.0}, {"key": "red", "val": 0.5}, {"key": "a", "val": 0.3333333333333333}], "after": [{"key": "a", "val": 1.0}, {"key": "man", "val": 0.5}], "children": []}, {"title": "d059a9d5", "left": "with", "right": "a", "before": [{"key": "woman", "val": 1.0}, {"key": "big", "val": 0.5}, {"key": "red", "val": 0.3333333333333333}], "after": [{"key": "man", "val": 1.0}], "children": []}]}, {"title": "29c25f0f", "left": "CONCEPT-5501397824", "right": "CONCEPT-5501397824", "before": [{"key": "with", "val": 1.0}, {"key": "woman", "val": 0.5}, {"key": "big", "val": 0.3333333333333333}], "after": [{"key": "a", "val": 1.0}, {"key": "red", "val": 0.5}], "children": [{"title": "a3b8dfa6", "left": "a", "right": "man", "before": [{"key": "with", "val": 1.0}, {"key": "woman", "val": 0.5}, {"key": "big", "val": 0.3333333333333333}], "after": [], "children": []}, {"title": "c53ef5b3", "left": "CONCEPT-5501397824", "right": "CONCEPT-5501397824", "before": [], "after": [{"key": "a", "val": 1.0}, {"key": "red", "val": 0.5}], "children": [{"title": "8c0a93a4", "left": "the", "right": "dog", "before": [], "after": [{"key": "liked", "val": 1.0}, {"key": "a", "val": 0.5}], "children": []}, {"title": "fe61a260", "left": "dog", "right": "liked", "before": [{"key": "the", "val": 1.0}], "after": [{"key": "a", "val": 1.0}, {"key": "red", "val": 0.5}], "children": []}]}]}]}]}]};
+    const data = {"title": "06e4f7e7b8", "left": "None", "right": "None", "before": [], "after": [], "children": [{"title": "1012e089bc", "left": "CONCEPT-6a86272f44", "right": "liked", "before": [], "after": [], "children": [{"title": "6a928b6134", "left": "the", "right": "dog", "before": [], "after": [{"key": "liked", "val": 1.0}], "children": [{"title": "6872e3823b", "left": "the", "right": null, "before": [], "after": [{"key": "dog", "val": 1.0}, {"key": "liked", "val": 0.5}], "children": []}, {"title": "c007f09791", "left": "dog", "right": null, "before": [{"key": "the", "val": 1.0}], "after": [{"key": "liked", "val": 1.0}], "children": []}]}, {"title": "fd7d353c6e", "left": "liked", "right": null, "before": [{"key": "dog", "val": 1.0}, {"key": "the", "val": 0.5}], "after": [], "children": []}]}]};
     const nodeW  = 280;
     const nodeH  = 130;
     const hGap   = 80;
@@ -39,8 +42,8 @@
         if (d.y < y0) y0 = d.y;
         if (d.y > y1) y1 = d.y;
     });
-    const width  = x1 - x0 + nodeW + 120;
-    const height = y1 - y0 + nodeH + 120;
+    const width  = x1 - x0 + nodeW + 320;
+    const height = y1 - y0 + nodeH + 320; // THIS IS THE HEIGHT MODIFIER
 
     const svg = d3.select("#tree").append("svg")
     .attr("width", width)
@@ -89,22 +92,34 @@
     });
 
     function nodeHTML(d) {
-    const ctxTable = (ctx, title) => {
-        if (!ctx || ctx.length === 0) return `<div class="subtable"><i>${title}: empty</i></div>`;
-        const rows = ctx.map(kv => `<tr><td>${kv.key}</td><td>${kv.val.toFixed(2)}</td></tr>`).join("");
-        return `<div class="subtable"><b>${title}</b><table><tbody>${rows}</tbody></table></div>`;
-    };
-    return `
-    <div class="node-fo">
-        <table><tr><th colspan="2">${d.title}</th></tr></table>
-        <table>
-        <tr><td>Content-Left</td><td>${d.left}</td></tr>
-        <tr><td>Content-Right</td><td>${d.right}</td></tr>
-        </table>
-        ${ctxTable(d.before, "Context-Before")}
-        ${ctxTable(d.after,  "Context-After")}
-    </div>`;
+        const ctxTable = (ctx, title) => {
+            if (!ctx || ctx.length === 0) return `<div class="subtable"><i>${title}: empty</i></div>`;
+            const rows = ctx.map(kv => `<tr><td>${kv.key}</td><td>${kv.val.toFixed(2)}</td></tr>`).join("");
+            return `<div class="subtable"><b>${title}</b><table><tbody>${rows}</tbody></table></div>`;
+        };
+
+        let contentRows = "";
+        if (d.right && d.right !== "None") {
+            // Composite node with left and right
+            contentRows = `
+                <tr><td>Content-Left</td><td>${d.left}</td></tr>
+                <tr><td>Content-Right</td><td>${d.right}</td></tr>`;
+        } else {
+            // Primitive node with single content
+            contentRows = `<tr><td>Content</td><td>${d.left}</td></tr>`;
+        }
+
+        return `
+        <div class="node-fo">
+            <table><tr><th colspan="2">${d.title}</th></tr></table>
+            <table>
+            ${contentRows}
+            </table>
+            ${ctxTable(d.before, "Context-Before")}
+            ${ctxTable(d.after,  "Context-After")}
+        </div>`;
     }
+
     </script>
     </body>
     </html>

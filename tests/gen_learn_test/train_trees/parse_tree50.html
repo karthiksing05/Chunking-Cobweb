@@ -5,6 +5,7 @@
     <title>Parse Tree</title>
     <style>
     body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    #tree-container { display: inline-block; }
     .link { fill: none; stroke: #9aa1a9; stroke-width: 1.5px; }
     .node-box { stroke: #444; fill: #fff; rx: 8; ry: 8; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.15)); }
     .node-fo table { border-collapse: collapse; font-size: 12px; margin: 4px 0; }
@@ -18,10 +19,12 @@
     </style>
     </head>
     <body>
+    <div id="tree-container">
     <div id="tree"></div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script>
-    const data = {"title": "c45c387c", "left": "None", "right": "None", "before": [], "after": [], "children": [{"title": "cdda8c3c", "left": "CONCEPT-4808012112", "right": "CONCEPT-4808012112", "before": [], "after": [], "children": [{"title": "c32bde5d", "left": "CONCEPT-4808012112", "right": "CONCEPT-4808012112", "before": [], "after": [{"key": "telescope", "val": 1.0}, {"key": "under", "val": 0.5}], "children": [{"title": "67a6e439", "left": "CONCEPT-4808012112", "right": "CONCEPT-4808012112", "before": [], "after": [{"key": "a", "val": 1.0}, {"key": "lazy", "val": 0.5}], "children": [{"title": "01e9c289", "left": "a", "right": "telescope", "before": [], "after": [{"key": "admired", "val": 1.0}, {"key": "a", "val": 0.5}], "children": []}, {"title": "3f8bc21e", "left": "telescope", "right": "admired", "before": [{"key": "a", "val": 1.0}], "after": [{"key": "a", "val": 1.0}, {"key": "lazy", "val": 0.5}], "children": []}]}, {"title": "259efcfa", "left": "CONCEPT-4808012112", "right": "CONCEPT-4808012112", "before": [{"key": "telescope", "val": 1.0}, {"key": "a", "val": 0.5}], "after": [{"key": "telescope", "val": 1.0}, {"key": "under", "val": 0.5}], "children": [{"title": "97d016f8", "left": "admired", "right": "a", "before": [{"key": "telescope", "val": 1.0}, {"key": "a", "val": 0.5}], "after": [{"key": "lazy", "val": 1.0}, {"key": "telescope", "val": 0.5}], "children": []}, {"title": "9173c020", "left": "a", "right": "lazy", "before": [{"key": "admired", "val": 1.0}, {"key": "telescope", "val": 0.5}, {"key": "a", "val": 0.3333333333333333}], "after": [{"key": "telescope", "val": 1.0}, {"key": "under", "val": 0.5}], "children": []}]}]}, {"title": "6c58ae2b", "left": "CONCEPT-4808012112", "right": "CONCEPT-4808012112", "before": [{"key": "a", "val": 1.0}, {"key": "admired", "val": 0.5}, {"key": "telescope", "val": 0.3333333333333333}], "after": [], "children": [{"title": "9ed75634", "left": "CONCEPT-4808012112", "right": "CONCEPT-4808012112", "before": [{"key": "a", "val": 1.0}, {"key": "admired", "val": 0.5}, {"key": "telescope", "val": 0.3333333333333333}], "after": [{"key": "the", "val": 1.0}, {"key": "park", "val": 0.5}], "children": [{"title": "810e6f80", "left": "lazy", "right": "telescope", "before": [{"key": "a", "val": 1.0}, {"key": "admired", "val": 0.5}, {"key": "telescope", "val": 0.3333333333333333}], "after": [{"key": "under", "val": 1.0}, {"key": "the", "val": 0.5}], "children": []}, {"title": "3853e7e7", "left": "telescope", "right": "under", "before": [{"key": "lazy", "val": 1.0}, {"key": "a", "val": 0.5}, {"key": "admired", "val": 0.3333333333333333}], "after": [{"key": "the", "val": 1.0}, {"key": "park", "val": 0.5}], "children": []}]}, {"title": "aee8db5f", "left": "CONCEPT-4808012112", "right": "CONCEPT-4808012112", "before": [{"key": "telescope", "val": 1.0}, {"key": "lazy", "val": 0.5}, {"key": "a", "val": 0.3333333333333333}], "after": [], "children": [{"title": "4f252ef3", "left": "under", "right": "the", "before": [{"key": "telescope", "val": 1.0}, {"key": "lazy", "val": 0.5}, {"key": "a", "val": 0.3333333333333333}], "after": [{"key": "park", "val": 1.0}], "children": []}, {"title": "963faf84", "left": "the", "right": "park", "before": [{"key": "under", "val": 1.0}, {"key": "telescope", "val": 0.5}, {"key": "lazy", "val": 0.3333333333333333}], "after": [], "children": []}]}]}]}]};
+    const data = {"title": "111e44793b", "left": "None", "right": "None", "before": [], "after": [], "children": [{"title": "785221e00e", "left": "CONCEPT-d2c03f5479", "right": "CONCEPT-55e3143725", "before": [], "after": [], "children": [{"title": "fc1b74e8e6", "left": "CONCEPT-d6761b2566", "right": "found", "before": [], "after": [{"key": "the", "val": 1.0}, {"key": "telescope", "val": 0.5}], "children": [{"title": "dcc8a76b49", "left": "the", "right": "cat", "before": [], "after": [{"key": "found", "val": 1.0}, {"key": "the", "val": 0.5}, {"key": "telescope", "val": 0.3333333333333333}], "children": [{"title": "1b22fca580", "left": "the", "right": null, "before": [], "after": [{"key": "cat", "val": 1.0}, {"key": "found", "val": 0.5}, {"key": "the", "val": 0.3333333333333333}], "children": []}, {"title": "da6ae77e0c", "left": "cat", "right": null, "before": [{"key": "the", "val": 1.0}], "after": [{"key": "found", "val": 1.0}, {"key": "the", "val": 0.5}, {"key": "telescope", "val": 0.3333333333333333}], "children": []}]}, {"title": "7150682a43", "left": "found", "right": null, "before": [{"key": "cat", "val": 1.0}, {"key": "the", "val": 0.5}], "after": [{"key": "the", "val": 1.0}, {"key": "telescope", "val": 0.5}], "children": []}]}, {"title": "4469e99544", "left": "the", "right": "telescope", "before": [{"key": "found", "val": 1.0}, {"key": "cat", "val": 0.5}, {"key": "the", "val": 0.3333333333333333}], "after": [], "children": [{"title": "55ac30263d", "left": "the", "right": null, "before": [{"key": "found", "val": 1.0}, {"key": "cat", "val": 0.5}, {"key": "the", "val": 0.3333333333333333}], "after": [{"key": "telescope", "val": 1.0}], "children": []}, {"title": "15396be7f2", "left": "telescope", "right": null, "before": [{"key": "the", "val": 1.0}, {"key": "found", "val": 0.5}, {"key": "cat", "val": 0.3333333333333333}], "after": [], "children": []}]}]}]};
     const nodeW  = 280;
     const nodeH  = 130;
     const hGap   = 80;
@@ -39,8 +42,8 @@
         if (d.y < y0) y0 = d.y;
         if (d.y > y1) y1 = d.y;
     });
-    const width  = x1 - x0 + nodeW + 120;
-    const height = y1 - y0 + nodeH + 120;
+    const width  = x1 - x0 + nodeW + 320;
+    const height = y1 - y0 + nodeH + 320; // THIS IS THE HEIGHT MODIFIER
 
     const svg = d3.select("#tree").append("svg")
     .attr("width", width)
@@ -89,22 +92,34 @@
     });
 
     function nodeHTML(d) {
-    const ctxTable = (ctx, title) => {
-        if (!ctx || ctx.length === 0) return `<div class="subtable"><i>${title}: empty</i></div>`;
-        const rows = ctx.map(kv => `<tr><td>${kv.key}</td><td>${kv.val.toFixed(2)}</td></tr>`).join("");
-        return `<div class="subtable"><b>${title}</b><table><tbody>${rows}</tbody></table></div>`;
-    };
-    return `
-    <div class="node-fo">
-        <table><tr><th colspan="2">${d.title}</th></tr></table>
-        <table>
-        <tr><td>Content-Left</td><td>${d.left}</td></tr>
-        <tr><td>Content-Right</td><td>${d.right}</td></tr>
-        </table>
-        ${ctxTable(d.before, "Context-Before")}
-        ${ctxTable(d.after,  "Context-After")}
-    </div>`;
+        const ctxTable = (ctx, title) => {
+            if (!ctx || ctx.length === 0) return `<div class="subtable"><i>${title}: empty</i></div>`;
+            const rows = ctx.map(kv => `<tr><td>${kv.key}</td><td>${kv.val.toFixed(2)}</td></tr>`).join("");
+            return `<div class="subtable"><b>${title}</b><table><tbody>${rows}</tbody></table></div>`;
+        };
+
+        let contentRows = "";
+        if (d.right && d.right !== "None") {
+            // Composite node with left and right
+            contentRows = `
+                <tr><td>Content-Left</td><td>${d.left}</td></tr>
+                <tr><td>Content-Right</td><td>${d.right}</td></tr>`;
+        } else {
+            // Primitive node with single content
+            contentRows = `<tr><td>Content</td><td>${d.left}</td></tr>`;
+        }
+
+        return `
+        <div class="node-fo">
+            <table><tr><th colspan="2">${d.title}</th></tr></table>
+            <table>
+            ${contentRows}
+            </table>
+            ${ctxTable(d.before, "Context-Before")}
+            ${ctxTable(d.after,  "Context-After")}
+        </div>`;
     }
+
     </script>
     </body>
     </html>

@@ -1,4 +1,4 @@
-import secrets
+import uuid
 import os
 import json
 import asyncio
@@ -7,6 +7,7 @@ import re
 from util.pycobweb import CobwebTree, CobwebNode
 from viz import HTMLCobwebDrawer
 from typing import List
+from sortedcontainers import SortedList
 
 
 """
@@ -16,16 +17,85 @@ from typing import List
 ----------------------------------------------------------------------------------------------
 """
 
-class ParseNode:
+class PrimitiveParseNode:
+
+    def __init__(self, content, context_before, context_after, word_index):
+
+        self.global_root = False
+        self.word_index = word_index
+
+        self.parent = None
+        self.children = SortedList()
+
+        self.title = uuid.uuid4().hex[:10] # random id
+
+        self.content = content
+        self.context_before = context_before
+        self.context_after = context_after
+
+        self.concept_label = None
+
+    def set_parent(self, node):
+        """
+        Helper method to set the parent of the current node!
+        We're going to adjust both parents and children with this method, to
+        allow for efficient designation.
+
+        This method also deletes the existing parent-child connection, if it
+        already exists (to efficiently manage the root node changes).
+
+        TODO one change to make here may be developing a more finetuned version
+        of this because we only need to remove and reassign the global root node
+        as a parent.
+        """
+
+        try:
+            self.parent.children.remove((self.word_index, self))
+        except AttributeError: # trying to assign parentship for the first time
+            # print("Assigning current node's parent as the global root node for brevity")
+            pass
+        except ValueError: # this should never happen
+            print("Parent does not exist or parent does not include the current node as its child")
+
+        self.parent = node
+        node.children.add((self.word_index, self))
+
+    def get_as_instance(self):
+        """
+        Helper method to get the current parse node as an instance description!
+        """
+
+        return {
+            "content": self.content,
+            "context-before": self.context_before,
+            "context-after": self.context_after
+        }
+
+        # return {
+        #     0: self.content_left,
+        #     1: self.content_right,
+        #     2: self.context_before,
+        #     3: self.context_after
+        # }
+
+"""
+----------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------
+"""
+
+class CompositeParseNode:
 
     def __init__(self):
 
         self.global_root = False
+        self.word_index = None
 
         self.parent = None
-        self.children = []
+        self.children = SortedList()
 
-        self.title = str(secrets.token_hex(4)) # random id
+        self.title = uuid.uuid4().hex[:10] # random id
 
         self.content_left = None
         self.content_right = None
@@ -42,21 +112,21 @@ class ParseNode:
         partial parses with our cutoff.
         """
 
-        node = ParseNode()
+        node = CompositeParseNode()
 
         node.global_root = True
 
         return node
 
     @staticmethod
-    def create_node(instance_dict, closest_concept_id):
+    def create_node(instance_dict, closest_concept_id, word_index):
         """
         One of the method-based constructors to create the correct version
         of our parse nodes at the leaf level - this will create a parse node
         from a directly-parsed instance from the input.
         """
 
-        node = ParseNode()
+        node = CompositeParseNode()
 
         node.content_left = instance_dict[0]
         node.content_right = instance_dict[1]
@@ -65,6 +135,8 @@ class ParseNode:
         node.context_after = instance_dict[3]
 
         node.concept_label = closest_concept_id
+
+        node.word_index = word_index
 
         return node
 
@@ -97,8 +169,15 @@ class ParseNode:
 
         new_inst_dict = {}
 
-        new_inst_dict[0] = {node_left.concept_label: 1}
-        new_inst_dict[1] = {node_right.concept_label: 1}
+        if type(node_left) == PrimitiveParseNode:
+            new_inst_dict[0] = {node_left.content: 1}
+        else:
+            new_inst_dict[0] = {node_left.concept_label: 1}
+
+        if type(node_right) == PrimitiveParseNode:
+            new_inst_dict[1] = {node_right.content: 1}
+        else:
+            new_inst_dict[1] = {node_right.concept_label: 1}
 
         # we need to import the previous node's content and context
         # I have reason to think that the below code will just work LOL
@@ -123,7 +202,7 @@ class ParseNode:
         """
 
         try:
-            self.parent.children.remove(self)
+            self.parent.children.remove((self.word_index, self))
         except AttributeError: # trying to assign parentship for the first time
             # print("Assigning current node's parent as the global root node for brevity")
             pass
@@ -131,7 +210,7 @@ class ParseNode:
             print("Parent does not exist or parent does not include the current node as its child")
 
         self.parent = node
-        node.children.append(self)
+        node.children.add((self.word_index, self))
 
     def get_as_instance(self):
         """
@@ -162,7 +241,7 @@ class ParseTree:
 
         self.context_length = context_length
 
-        self.global_root_node = ParseNode.create_global_root()
+        self.global_root_node = CompositeParseNode.create_global_root()
 
         self.sentence = None
 
@@ -197,57 +276,32 @@ class ParseTree:
 
         self.sentence = sentence
 
-        instances = []
-
         elements = re.findall(r"[\w']+|[.,!?;]", sentence)
         elements = [self.value_to_id[element] for element in elements]
 
-        for i in range(len(elements) - 1):
+        # Creating first layer of primitive nodes
+        for i in range(len(elements)):
 
-            content_left = elements[i]
-            content_right = elements[i + 1]
+            content = elements[i]
 
             context_before_lst = elements[max(0, i - self.context_length):(i)][::-1]
-            context_after_lst = elements[(i + 2):min(len(elements) + 1, i + self.context_length + 1)]
+            context_after_lst = elements[(i + 1):min(len(elements), i + self.context_length + 1)]
 
             # have to compute the dictionaries through a for loop so that we can
             # add multiple weights for multiple instances of the word
 
-            context_before_dict = {}
-            context_after_dict = {}
+            context_before_dict = dict()
+            context_after_dict = dict()
 
-            for i in range(len(context_before_lst)):
-                context_before_dict.setdefault(context_before_lst[i], 0)
-                context_before_dict[context_before_lst[i]] += 1 / (i + 1) # this works because we reversed it above
+            for j in range(len(context_before_lst)):
+                context_before_dict.setdefault(context_before_lst[j], 0)
+                context_before_dict[context_before_lst[j]] += 1 / (j + 1) # this works because we reversed it above
 
-            for i in range(len(context_after_lst)):
-                context_after_dict.setdefault(context_after_lst[i], 0)
-                context_after_dict[context_after_lst[i]] += 1 / (i + 1)
+            for j in range(len(context_after_lst)):
+                context_after_dict.setdefault(context_after_lst[j], 0)
+                context_after_dict[context_after_lst[j]] += 1 / (j + 1)
 
-            instances.append({
-                0: {content_left: 1},
-                1: {content_right: 1},
-                2: context_before_dict,
-                3: context_after_dict,
-            })
-
-        # Creating base layer of composite nodes
-        for instance in instances:
-
-            # categorization is for finding the best concept to use as a label!
-            # this is cool because the label might be useless but the actual
-            # instance description is still functional so when we add to the
-            # tree, the nodes will be relevant
-
-            cat_res = self.ltm_hierarchy.categorize(instance).get_basic_level()
-
-            if debug:
-                print(f"Categorized instance {instance} under basic-level concept with hash {cat_res.concept_hash()}")
-
-            inst_dict = instance
-            concept_id = self.value_to_id[f"CONCEPT-{cat_res.concept_hash()}"]
-
-            node = ParseNode.create_node(inst_dict, concept_id)
+            node = PrimitiveParseNode(content, context_before_dict, context_after_dict, i)
 
             node.set_parent(self.global_root_node)
 
@@ -258,7 +312,9 @@ class ParseTree:
 
             best_candidate = None # stores concepts in the form of (score, label, node_left, node_right)
 
-            parentless = self.global_root_node.children
+            parentless = [x[1] for x in self.global_root_node.children]
+            # print([(x[0], x[1].get_as_instance()) for x in self.global_root_node.children])
+
             # TODO one change we can make here is constantly keeping a candidate list and then not
             # worry about recomputing everything -> leaving this here for now but subject to change!
 
@@ -266,32 +322,49 @@ class ParseTree:
                 node_left = parentless[i]
                 node_right = parentless[i + 1]
 
-                merge_inst = ParseNode.create_merge_instance(node_left, node_right)
+                merge_inst = CompositeParseNode.create_merge_instance(node_left, node_right)
 
                 candidate_concept = self.ltm_hierarchy.categorize(merge_inst).get_basic_level() # TODO can also change this to get "best_level"
                 candidate_concept_id = self.value_to_id[f"CONCEPT-{candidate_concept.concept_hash()}"]
 
                 candidate_score = candidate_concept.log_prob_instance(merge_inst)
 
-                print("Candidate Concept Log Prob Children Given Instance", candidate_concept.log_prob_children_given_instance(merge_inst))
-                print("Candidate Concept Log Prob Instance", candidate_concept.log_prob_instance(merge_inst))
-                print("Candidate Concept Entropy", candidate_concept.entropy())
+                if debug:
+                    print("MERGE INSTANCE EVALUATED: ", merge_inst)
+                    print("Candidate Concept Log Prob Children Given Instance", 
+                          candidate_concept.log_prob_children_given_instance(merge_inst))
+                    print("Candidate Concept Log Prob Instance", 
+                          candidate_concept.log_prob_instance(merge_inst))
+                    print("Candidate Concept Log Prob Instance Missing", 
+                          candidate_concept.log_prob_instance_missing(merge_inst))
+                    print("Candidate Concept Log Prob Class Given Instance", 
+                          candidate_concept.log_prob_class_given_instance(merge_inst))
+                    print()
 
                 # TODO IMPLEMENT A LOG PROBABILITY SCORE INSTEAD OF A CU SCORE
                 if not best_candidate or candidate_score > best_candidate[0]:
                     if debug:
                         print(f"New best candidate found with log-probability {candidate_score} for concept hash {candidate_concept.concept_hash()}")
+                        print()
                     best_candidate = (candidate_score, candidate_concept_id, node_left, node_right)
 
             if isinstance(end_behavior, (int, float)) and best_candidate[0] < end_behavior:
+                if debug:
+                    print("BEST MERGE CANDIDATE was not good enough to be passed, only score of", best_candidate[0])
+                    print("---------" * 7)
                 break
 
-            best_merge_inst = ParseNode.create_merge_instance(best_candidate[2], best_candidate[3])
+            best_merge_inst = CompositeParseNode.create_merge_instance(best_candidate[2], best_candidate[3])
+
+            if debug:
+                print("BEST MERGE CANDIDATE FOUND: ", best_merge_inst)
+                print("with score, ", best_candidate[0])
+                print("---------" * 7)
 
             candidate_concept = self.ltm_hierarchy.categorize(best_merge_inst).get_basic_level()
             candidate_concept_id = self.value_to_id[f"CONCEPT-{candidate_concept.concept_hash()}"]
 
-            add_parse_node = ParseNode.create_node(best_merge_inst, candidate_concept_id)
+            add_parse_node = CompositeParseNode.create_node(best_merge_inst, candidate_concept_id, 0.5 * (best_candidate[2].word_index + best_candidate[3].word_index))
 
             # changing parentship!
             self.nodes.append(add_parse_node)
@@ -299,7 +372,7 @@ class ParseTree:
             best_candidate[2].set_parent(add_parse_node)
             best_candidate[3].set_parent(add_parse_node)
 
-            if end_behavior == "converge" and len(self.global_root_node.children) == 1:
+            if len(self.global_root_node.children) == 1:
                 break
 
         return True
@@ -313,12 +386,15 @@ class ParseTree:
         instances = []
 
         def dfs_insts(node):
+            if type(node) == PrimitiveParseNode:
+                return
+
             instances.append(node.get_as_instance())
 
-            for child in node.children:
+            for _, child in node.children:
                 dfs_insts(child)
 
-        for child in self.global_root_node.children:
+        for _, child in self.global_root_node.children:
             dfs_insts(child)
 
         return instances
@@ -350,7 +426,7 @@ class ParseTree:
         else:
             return html_path
 
-    async def _html_to_png(self, html_path, png_path, scale=2):
+    async def _html_to_png(self, html_path, png_path):
         """
         Convert the HTML tree to a PNG screenshot using Playwright.
         Automatically adjusts the PNG size to fit the full tree height.
@@ -395,32 +471,52 @@ class ParseTree:
             await browser.close()
 
     def _safe_lookup(self, idx):
-        return self.id_to_value[idx] if (idx is not None and 0 <= idx < len(self.id_to_value)) else "None"
+        if (idx is not None and 0 <= idx < len(self.id_to_value)):
+            return self.id_to_value[idx]
+        else:
+            # print("index", idx)
+            return "None"
 
     def _node_to_dict(self, node, children_getter):
-        left_id  = None if not node.content_left  else next(iter(node.content_left.keys()))
-        right_id = None if not node.content_right else next(iter(node.content_right.keys()))
-        left  =self._safe_lookup(left_id)
-        right = self._safe_lookup(right_id)
-
         def ctx_list(ctx):
-            if not ctx: return []
+            if not ctx:
+                return []
             items = sorted(ctx.items(), key=lambda kv: (-kv[1], kv[0]))
             return [{"key": self._safe_lookup(k), "val": float(v)} for k, v in items]
 
-        return {
-            "title": node.title,
-            "left": left,
-            "right": right,
-            "before": ctx_list(node.context_before),
-            "after":  ctx_list(node.context_after),
-            "children": [self._node_to_dict(ch, children_getter) for ch in children_getter(node)]
-        }
+        if isinstance(node, PrimitiveParseNode):
+            return {
+                "title": node.title,
+                "left": self._safe_lookup(node.content),
+                "right": None,
+                "before": ctx_list(node.context_before),
+                "after": ctx_list(node.context_after),
+                "children": [self._node_to_dict(ch[1], children_getter) for ch in children_getter(node)]
+            }
+
+        elif isinstance(node, CompositeParseNode):
+            left_id  = None if not node.content_left  else next(iter(node.content_left.keys()))
+            right_id = None if not node.content_right else next(iter(node.content_right.keys()))
+            left  = self._safe_lookup(left_id)
+            right = self._safe_lookup(right_id)
+
+            return {
+                "title": node.title,
+                "left": left,
+                "right": right,
+                "before": ctx_list(node.context_before),
+                "after":  ctx_list(node.context_after),
+                "children": [self._node_to_dict(ch[1], children_getter) for ch in children_getter(node)]
+            }
+
+        else:
+            raise TypeError(f"Unknown node type {type(node)}")
+
 
     def _tree_to_json(self):
         def children_getter(n):
-            for ch in getattr(n, "children", []):
-                yield (self.nodes[ch] if isinstance(ch, int) else ch)
+            for wi, ch in getattr(n, "children", []):
+                yield (wi, ch)
         return self._node_to_dict(self.global_root_node, children_getter)
 
     def _build_html(self, d3_data_json, node_w=280, node_h=130, h_gap=80, v_gap=150):
@@ -518,22 +614,34 @@ class ParseTree:
     }});
 
     function nodeHTML(d) {{
-    const ctxTable = (ctx, title) => {{
-        if (!ctx || ctx.length === 0) return `<div class="subtable"><i>${{title}}: empty</i></div>`;
-        const rows = ctx.map(kv => `<tr><td>${{kv.key}}</td><td>${{kv.val.toFixed(2)}}</td></tr>`).join("");
-        return `<div class="subtable"><b>${{title}}</b><table><tbody>${{rows}}</tbody></table></div>`;
-    }};
-    return `
-    <div class="node-fo">
-        <table><tr><th colspan="2">${{d.title}}</th></tr></table>
-        <table>
-        <tr><td>Content-Left</td><td>${{d.left}}</td></tr>
-        <tr><td>Content-Right</td><td>${{d.right}}</td></tr>
-        </table>
-        ${{ctxTable(d.before, "Context-Before")}}
-        ${{ctxTable(d.after,  "Context-After")}}
-    </div>`;
+        const ctxTable = (ctx, title) => {{
+            if (!ctx || ctx.length === 0) return `<div class="subtable"><i>${{title}}: empty</i></div>`;
+            const rows = ctx.map(kv => `<tr><td>${{kv.key}}</td><td>${{kv.val.toFixed(2)}}</td></tr>`).join("");
+            return `<div class="subtable"><b>${{title}}</b><table><tbody>${{rows}}</tbody></table></div>`;
+        }};
+
+        let contentRows = "";
+        if (d.right && d.right !== "None") {{
+            // Composite node with left and right
+            contentRows = `
+                <tr><td>Content-Left</td><td>${{d.left}}</td></tr>
+                <tr><td>Content-Right</td><td>${{d.right}}</td></tr>`;
+        }} else {{
+            // Primitive node with single content
+            contentRows = `<tr><td>Content</td><td>${{d.left}}</td></tr>`;
+        }}
+
+        return `
+        <div class="node-fo">
+            <table><tr><th colspan="2">${{d.title}}</th></tr></table>
+            <table>
+            ${{contentRows}}
+            </table>
+            ${{ctxTable(d.before, "Context-Before")}}
+            ${{ctxTable(d.after,  "Context-After")}}
+        </div>`;
     }}
+
     </script>
     </body>
     </html>
@@ -544,32 +652,49 @@ class ParseTree:
         """
         Serialize the ParseTree into JSON. Optionally save to `filepath`.
         """
-        def serialize_node(node, index_map):
-            return {
-                "title": node.title,
-                "content_left": node.content_left,
-                "content_right": node.content_right,
-                "context_before": node.context_before,
-                "context_after": node.context_after,
-                "concept_label": node.concept_label,
-                "global_root": node.global_root,
-                "parent": index_map.get(node.parent),
-                "children": [index_map[ch] for ch in node.children]
-            }
 
-        # build index map for stable references
+        def serialize_node(node, index_map):
+            if isinstance(node, PrimitiveParseNode):
+                return {
+                    "node_type": "primitive",
+                    "title": node.title,
+                    "word_index":node.word_index,
+                    "content": node.content,
+                    "context_before": node.context_before,
+                    "context_after": node.context_after,
+                    "concept_label": node.concept_label,
+                    "global_root": node.global_root,
+                    "parent": index_map.get(node.parent),
+                    "children": [index_map[ch[1]] for ch in node.children],
+                }
+            elif isinstance(node, CompositeParseNode):
+                return {
+                    "node_type": "composite",
+                    "title": node.title,
+                    "word_index":node.word_index,
+                    "content_left": node.content_left,
+                    "content_right": node.content_right,
+                    "context_before": node.context_before,
+                    "context_after": node.context_after,
+                    "concept_label": node.concept_label,
+                    "global_root": node.global_root,
+                    "parent": index_map.get(node.parent),
+                    "children": [index_map[ch[1]] for ch in node.children],
+                }
+            else:
+                raise TypeError(f"Unknown node type {type(node)}")
+
         index_map = {node: i for i, node in enumerate([self.global_root_node] + self.nodes)}
         data = {
             "sentence": self.sentence,
             "context_length": self.context_length,
             "id_to_value": self.id_to_value,
             "value_to_id": self.value_to_id,
-            "nodes": [serialize_node(node, index_map) for node in [self.global_root_node] + self.nodes]
+            "nodes": [serialize_node(node, index_map) for node in [self.global_root_node] + self.nodes],
         }
 
         if filepath:
-            # Ensure parent directory exists
-            os.makedirs(os.path.dirname(filepath), exist_ok=True)
+            os.makedirs(os.path.dirname(filepath) or ".", exist_ok=True)
             with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
             return filepath
@@ -591,7 +716,7 @@ class ParseTree:
             ltm_hierarchy,
             id_to_value=data["id_to_value"],
             value_to_id=data["value_to_id"],
-            context_length=data["context_length"]
+            context_length=data["context_length"],
         )
         tree.sentence = data["sentence"]
 
@@ -600,32 +725,44 @@ class ParseTree:
                 return None
             return {int(k): v for k, v in d.items()}
 
-        # Recreate nodes
         node_objs = []
         for n in data["nodes"]:
-            node = ParseNode()
+            if n["node_type"] == "primitive":
+                node = PrimitiveParseNode(
+                    content=n["content"],
+                    context_before=restore_dict_keys(n["context_before"]),
+                    context_after=restore_dict_keys(n["context_after"]),
+                    word_index=n["word_index"],
+                )
+            elif n["node_type"] == "composite":
+                node = CompositeParseNode()
+                node.content_left = restore_dict_keys(n["content_left"])
+                node.content_right = restore_dict_keys(n["content_right"])
+                node.context_before = restore_dict_keys(n["context_before"])
+                node.context_after = restore_dict_keys(n["context_after"])
+                node.word_index = n["word_index"]
+
+            else:
+                raise ValueError(f"Unknown node_type {n['node_type']}")
+
             node.title = n["title"]
-            node.content_left = restore_dict_keys(n["content_left"])
-            node.content_right = restore_dict_keys(n["content_right"])
-            node.context_before = restore_dict_keys(n["context_before"])
-            node.context_after = restore_dict_keys(n["context_after"])
             node.concept_label = n["concept_label"]
             node.global_root = n["global_root"]
             node_objs.append(node)
 
-        # Reassign parent/children relationships
+        # restore parent/child relations
         for idx, n in enumerate(data["nodes"]):
             node = node_objs[idx]
             parent_idx = n["parent"]
             if parent_idx is not None:
                 node.parent = node_objs[parent_idx]
-            node.children = [node_objs[ch] for ch in n["children"]]
+            node.children = [(node_objs[ch].word_index, node_objs[ch]) for ch in n["children"]]
 
         tree.global_root_node = node_objs[0]
         tree.nodes = node_objs[1:]
 
         return tree
-    
+
 """
 ----------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------
@@ -649,14 +786,16 @@ class LanguageChunkingParser:
     def __init__(self, value_corpus, context_length=3):
 
         self.ltm_hierarchy = CobwebTree()
-        self.cobweb_drawer = HTMLCobwebDrawer(
-            ["Content-Left", "Content-Right", "Context-Before", "Context-After"],
-            value_corpus
-        )
 
         self.id_to_value = [x for x in value_corpus]
         self.value_to_id = dict([(w, i) for i, w in enumerate(value_corpus)])
         self.id_count = len(value_corpus)
+
+        self.cobweb_drawer = HTMLCobwebDrawer(
+            ["Content-Left", "Content-Right", "Context-Before", "Context-After"],
+            id_to_value=self.id_to_value,
+            value_to_id=self.value_to_id
+        )
 
         # adding root node to dictionary! edge case not properly counted
         hash = self.ltm_hierarchy.root.concept_hash()
@@ -680,14 +819,20 @@ class LanguageChunkingParser:
         parse_trees = []
 
         for sentence in sentences:
+            if debug:
+                print(f"BUILDING PARSE TREE FOR SENTENCE {sentence}: " + "-" * 20)
             parse_tree = ParseTree(self.ltm_hierarchy, self.id_to_value, self.value_to_id)
             parse_tree.build(sentence, end_behavior, debug)
 
             parse_trees.append(parse_tree)
 
+            if debug:
+                print("-" * 100)
+                print()
+
         return parse_trees
 
-    def add_parse_tree(self, parse_tree):
+    def add_parse_tree(self, parse_tree, debug=False):
         """
         Method to add the parse tree to the long-term hierarchy.
 
@@ -735,8 +880,10 @@ class LanguageChunkingParser:
             there is a layer of specificity that we can and should replace.
             Still not sure about the best way to go about that, but leaving it
             here for future notice.
-            *   In general, the presence of a rewrite rule makes the
         """
+
+        if debug:
+            print(f"Adding parse tree for sentence, \"{parse_tree.sentence}\"")
 
         """
         Important prior states to save:
@@ -759,10 +906,8 @@ class LanguageChunkingParser:
             else:
                 prior_parents[curr.concept_hash()] = None
 
-            # prior_children[curr.concept_hash()] = None
-            # if curr.children and len(curr.children) > 0:
-            #     for child in children:
-            #         prior_children[curr.concept_hash()] = curr.parent.concept_hash()
+            for child in curr.children:
+                to_visit.append(child)
 
         # adding all new instances
         insts = parse_tree.get_chunk_instances()
@@ -775,9 +920,10 @@ class LanguageChunkingParser:
         """
 
         for inst in insts:
-            print("Adding instance to CobwebTree:", inst)
+            if debug:
+                print("Adding instance to CobwebTree:", inst)
             # self.cobweb_drawer.draw_tree(self.ltm_hierarchy.root, "tests/gen_learn_test/test_trees/test_parse_tree")
-            self.ltm_hierarchy.ifit(inst, mode=0)
+            self.ltm_hierarchy.ifit(inst, mode=4) # TODO can add this with mode=0 once we have replacement programmed
 
         # saving new tree structure
         curr_parents = {}
@@ -791,6 +937,9 @@ class LanguageChunkingParser:
                 curr_parents[curr.concept_hash()] = curr.parent.concept_hash()
             else:
                 curr_parents[curr.concept_hash()] = None
+
+            for child in curr.children:
+                to_visit.append(child)
 
         """
         Keeping track of all interactions with logic - hopefully with Cobweb
@@ -835,22 +984,25 @@ class LanguageChunkingParser:
         traverses down all children, stopping the traversal if old_key doesn't exist.
         """
 
-        to_visit = [self.ltm_hierarchy.root]
+        # to_visit = [self.ltm_hierarchy.root]
 
-        while len(to_visit) > 0:
-            curr = to_visit.pop(0)
+        # while len(to_visit) > 0:
+        #     curr = to_visit.pop(0)
 
-            inst_dict = curr.av_count
+        #     inst_dict = curr.av_count
 
-            for v in inst_dict.values():
-                for old_key, new_key in rewrite_rules:
-                    if old_key in v:
-                        v[new_key] = v[old_key]
-                        del v[old_key]
+        #     for v in inst_dict.values():
+        #         for old_key, new_key in rewrite_rules:
+        #             if old_key in v:
+        #                 v[new_key] = v[old_key]
+        #                 del v[old_key]
 
-            # curr._av_count = inst_dict
-            print(curr.av_count)
-            curr.av_count = inst_dict
+        #     # curr._av_count = inst_dict
+        #     # print(curr.av_count)
+        #     curr.av_count = inst_dict
+
+        if debug:
+            print("-" * 60)
 
         return True
 

@@ -24,7 +24,7 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script>
-    const data = {"title": "7170acf8", "left": "None", "right": "None", "before": [], "after": [], "children": [{"title": "ac3fb2da", "left": "CONCEPT-4999727488", "right": "CONCEPT-4999727488", "before": [{"key": "lazy", "val": 1.0}, {"key": "a", "val": 0.5}], "after": [{"key": "quick", "val": 1.0}, {"key": "man", "val": 0.5}], "children": [{"title": "6f6b2143", "left": "CONCEPT-4999727488", "right": "CONCEPT-4999727488", "before": [{"key": "lazy", "val": 1.0}, {"key": "a", "val": 0.5}], "after": [{"key": "saw", "val": 1.0}], "children": [{"title": "ae408564", "left": "quick", "right": "quick", "before": [{"key": "lazy", "val": 1.0}, {"key": "a", "val": 0.5}], "after": [{"key": "man", "val": 1.0}, {"key": "saw", "val": 0.5}], "children": []}, {"title": "63d45aae", "left": "quick", "right": "man", "before": [{"key": "quick", "val": 1.0}, {"key": "lazy", "val": 0.5}, {"key": "a", "val": 0.3333333333333333}], "after": [{"key": "saw", "val": 1.0}], "children": []}]}, {"title": "f7ea7697", "left": "CONCEPT-4999727488", "right": "CONCEPT-4999727488", "before": [{"key": "quick", "val": 1.5}, {"key": "lazy", "val": 0.3333333333333333}], "after": [{"key": "quick", "val": 1.0}, {"key": "man", "val": 0.5}], "children": [{"title": "a9b106a4", "left": "man", "right": "saw", "before": [{"key": "quick", "val": 1.5}, {"key": "lazy", "val": 0.3333333333333333}], "after": [], "children": []}, {"title": "69f1a7b1", "left": "CONCEPT-4999727488", "right": "CONCEPT-4999727488", "before": [], "after": [{"key": "quick", "val": 1.0}, {"key": "man", "val": 0.5}], "children": [{"title": "f67c238b", "left": "a", "right": "lazy", "before": [], "after": [{"key": "quick", "val": 1.5}], "children": []}, {"title": "8043a19b", "left": "lazy", "right": "quick", "before": [{"key": "a", "val": 1.0}], "after": [{"key": "quick", "val": 1.0}, {"key": "man", "val": 0.5}], "children": []}]}]}]}]};
+    const data = {"title": "bf7dc108bf", "left": "None", "right": "None", "before": [], "after": [], "children": [{"title": "17159f5d6f", "left": "CONCEPT-44959ab71b", "right": "found", "before": [], "after": [], "children": [{"title": "8b065f33f2", "left": "the", "right": "dog", "before": [], "after": [{"key": "found", "val": 1.0}], "children": [{"title": "d3025e847b", "left": "the", "right": null, "before": [], "after": [{"key": "dog", "val": 1.0}, {"key": "found", "val": 0.5}], "children": []}, {"title": "a112d1d262", "left": "dog", "right": null, "before": [{"key": "the", "val": 1.0}], "after": [{"key": "found", "val": 1.0}], "children": []}]}, {"title": "9814667843", "left": "found", "right": null, "before": [{"key": "dog", "val": 1.0}, {"key": "the", "val": 0.5}], "after": [], "children": []}]}]};
     const nodeW  = 280;
     const nodeH  = 130;
     const hGap   = 80;
@@ -92,22 +92,34 @@
     });
 
     function nodeHTML(d) {
-    const ctxTable = (ctx, title) => {
-        if (!ctx || ctx.length === 0) return `<div class="subtable"><i>${title}: empty</i></div>`;
-        const rows = ctx.map(kv => `<tr><td>${kv.key}</td><td>${kv.val.toFixed(2)}</td></tr>`).join("");
-        return `<div class="subtable"><b>${title}</b><table><tbody>${rows}</tbody></table></div>`;
-    };
-    return `
-    <div class="node-fo">
-        <table><tr><th colspan="2">${d.title}</th></tr></table>
-        <table>
-        <tr><td>Content-Left</td><td>${d.left}</td></tr>
-        <tr><td>Content-Right</td><td>${d.right}</td></tr>
-        </table>
-        ${ctxTable(d.before, "Context-Before")}
-        ${ctxTable(d.after,  "Context-After")}
-    </div>`;
+        const ctxTable = (ctx, title) => {
+            if (!ctx || ctx.length === 0) return `<div class="subtable"><i>${title}: empty</i></div>`;
+            const rows = ctx.map(kv => `<tr><td>${kv.key}</td><td>${kv.val.toFixed(2)}</td></tr>`).join("");
+            return `<div class="subtable"><b>${title}</b><table><tbody>${rows}</tbody></table></div>`;
+        };
+
+        let contentRows = "";
+        if (d.right && d.right !== "None") {
+            // Composite node with left and right
+            contentRows = `
+                <tr><td>Content-Left</td><td>${d.left}</td></tr>
+                <tr><td>Content-Right</td><td>${d.right}</td></tr>`;
+        } else {
+            // Primitive node with single content
+            contentRows = `<tr><td>Content</td><td>${d.left}</td></tr>`;
+        }
+
+        return `
+        <div class="node-fo">
+            <table><tr><th colspan="2">${d.title}</th></tr></table>
+            <table>
+            ${contentRows}
+            </table>
+            ${ctxTable(d.before, "Context-Before")}
+            ${ctxTable(d.after,  "Context-After")}
+        </div>`;
     }
+
     </script>
     </body>
     </html>

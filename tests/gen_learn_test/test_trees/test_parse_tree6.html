@@ -1,0 +1,126 @@
+<!doctype html>
+    <html>
+    <head>
+    <meta charset="utf-8"/>
+    <title>Parse Tree</title>
+    <style>
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    #tree-container { display: inline-block; }
+    .link { fill: none; stroke: #9aa1a9; stroke-width: 1.5px; }
+    .node-box { stroke: #444; fill: #fff; rx: 8; ry: 8; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.15)); }
+    .node-fo table { border-collapse: collapse; font-size: 12px; margin: 4px 0; }
+    .node-fo th, .node-fo td { border: 1px solid #888; padding: 2px 6px; }
+    .node-fo th { background: #f3f5f7; font-weight: 600; }
+    .section-title { font-weight: bold; margin-top: 4px; }
+    .section { margin-top: 10px; margin-bottom: 10px; }
+    .subtable b { display: inline-block; margin: 6px 0 2px; }
+    .subtable table { border-collapse: collapse; }
+    .subtable td { border: 1px solid #bbb; padding: 1px 4px; }
+    </style>
+    </head>
+    <body>
+    <div id="tree-container">
+    <div id="tree"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script>
+    const data = {"title": "8f2ac477ed", "left": "None", "right": "None", "before": [], "after": [], "children": [{"title": "ce6ecf9154", "left": "CONCEPT-4be57256fd", "right": "saw", "before": [], "after": [], "children": [{"title": "fbccdbb387", "left": "a", "right": "CONCEPT-42bde70dbd", "before": [], "after": [{"key": "saw", "val": 1.0}], "children": [{"title": "3504d1bd3f", "left": "a", "right": null, "before": [], "after": [{"key": "red", "val": 1.5}, {"key": "telescope", "val": 0.3333333333333333}], "children": []}, {"title": "e6f1c2f45c", "left": "red", "right": "CONCEPT-cc36665184", "before": [{"key": "a", "val": 1.0}], "after": [{"key": "saw", "val": 1.0}], "children": [{"title": "74ec23ad54", "left": "red", "right": null, "before": [{"key": "a", "val": 1.0}], "after": [{"key": "red", "val": 1.0}, {"key": "telescope", "val": 0.5}, {"key": "saw", "val": 0.3333333333333333}], "children": []}, {"title": "59e2d9db27", "left": "red", "right": "telescope", "before": [{"key": "red", "val": 1.0}, {"key": "a", "val": 0.5}], "after": [{"key": "saw", "val": 1.0}], "children": [{"title": "2afeffd89e", "left": "red", "right": null, "before": [{"key": "red", "val": 1.0}, {"key": "a", "val": 0.5}], "after": [{"key": "telescope", "val": 1.0}, {"key": "saw", "val": 0.5}], "children": []}, {"title": "e0a3f700a5", "left": "telescope", "right": null, "before": [{"key": "red", "val": 1.5}, {"key": "a", "val": 0.3333333333333333}], "after": [{"key": "saw", "val": 1.0}], "children": []}]}]}]}, {"title": "e4b3f9aa89", "left": "saw", "right": null, "before": [{"key": "telescope", "val": 1.0}, {"key": "red", "val": 0.8333333333333333}], "after": [], "children": []}]}]};
+    const nodeW  = 280;
+    const nodeH  = 130;
+    const hGap   = 80;
+    const vGap   = 150;
+
+    const root = d3.hierarchy(data);
+    const layout = d3.tree().nodeSize([nodeW + hGap, nodeH + vGap]);
+    layout(root);
+
+    // compute bounds
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    root.each(d => {
+        if (d.x < x0) x0 = d.x;
+        if (d.x > x1) x1 = d.x;
+        if (d.y < y0) y0 = d.y;
+        if (d.y > y1) y1 = d.y;
+    });
+    const width  = x1 - x0 + nodeW + 320;
+    const height = y1 - y0 + nodeH + 320; // THIS IS THE HEIGHT MODIFIER
+
+    const svg = d3.select("#tree").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("viewBox", [x0 - nodeW/2, y0 - nodeH/2, width, height].join(" "));
+
+    const g = svg.append("g");
+
+    // links
+    g.selectAll("path.link")
+    .data(root.links())
+    .join("path")
+    .attr("class", "link")
+    .attr("d", d3.linkVertical().x(d => d.x).y(d => d.y));
+
+    // nodes
+    const node = g.selectAll("g.node")
+    .data(root.descendants())
+    .join("g")
+    .attr("transform", d => `translate(${d.x},${d.y})`);
+
+    // node rect
+    node.append("rect")
+    .attr("class", "node-box")
+    .attr("x", -nodeW/2)
+    .attr("y", 0)
+    .attr("width", nodeW)
+    .attr("height", nodeH);
+
+    // node HTML via foreignObject
+    node.append("foreignObject")
+    .attr("class", "node-fo")
+    .attr("x", -nodeW/2 + 6)
+    .attr("y", 6)
+    .attr("width", nodeW - 12)
+    .attr("height", 1000)
+    .html(d => nodeHTML(d.data));
+
+    // shrink foreignObjects to actual content height
+    node.selectAll("foreignObject").each(function() {
+    const fo = d3.select(this);
+    const div = fo.select("div").node();
+    const h = div.getBoundingClientRect().height + 6;
+    fo.attr("height", h);
+    d3.select(this.parentNode).select("rect").attr("height", h + 12);
+    });
+
+    function nodeHTML(d) {
+        const ctxTable = (ctx, title) => {
+            if (!ctx || ctx.length === 0) return `<div class="subtable"><i>${title}: empty</i></div>`;
+            const rows = ctx.map(kv => `<tr><td>${kv.key}</td><td>${kv.val.toFixed(2)}</td></tr>`).join("");
+            return `<div class="subtable"><b>${title}</b><table><tbody>${rows}</tbody></table></div>`;
+        };
+
+        let contentRows = "";
+        if (d.right && d.right !== "None") {
+            // Composite node with left and right
+            contentRows = `
+                <tr><td>Content-Left</td><td>${d.left}</td></tr>
+                <tr><td>Content-Right</td><td>${d.right}</td></tr>`;
+        } else {
+            // Primitive node with single content
+            contentRows = `<tr><td>Content</td><td>${d.left}</td></tr>`;
+        }
+
+        return `
+        <div class="node-fo">
+            <table><tr><th colspan="2">${d.title}</th></tr></table>
+            <table>
+            ${contentRows}
+            </table>
+            ${ctxTable(d.before, "Context-Before")}
+            ${ctxTable(d.after,  "Context-After")}
+        </div>`;
+    }
+
+    </script>
+    </body>
+    </html>
+    
