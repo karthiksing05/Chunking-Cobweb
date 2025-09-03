@@ -10,6 +10,13 @@ import uuid
 AVCount = Dict[int, Dict[int, float]]   # {attr: {val: count}}
 AttrVals = Dict[int, Set[int]]
 
+last_printed = None  # keep track of the last thing printed
+
+def safe_print(msg):
+    global last_printed
+    if msg != last_printed:
+        print(msg)
+        last_printed = msg
 
 class CobwebTree:
     def __init__(self,
@@ -48,7 +55,9 @@ class CobwebTree:
             for v in vm.keys():
                 self.attr_vals[a].add(v)
 
-    def ifit(self, instance: AVCount, mode: int = 0) -> Tuple["CobwebNode", Dict[str, float]]:
+    # ---------------- Learning ----------------
+        # ---------------- Learning ----------------
+    def ifit(self, instance: AVCount, mode: int = 0) -> Tuple["CobwebNode", Dict[str, float], List[Dict]]:
         """
         Fit a single instance using COBWEB ops.
         mode:
@@ -56,24 +65,41 @@ class CobwebTree:
           1 = BEST only
           2 = random decisions among allowed ops
           3 = epsilon-greedy BEST (1% random exploration)
-          4 = BEST and NEW only (explicitly ignore MERGE and SPLIT)
-        Returns (node_reached, stats dict — currently unused placeholder).
+          4 = BEST and NEW only (ignore MERGE and SPLIT)
+
+        Returns:
+          (node_reached, stats dict, actions list)
+
+        actions list = ordered structural modifications/traversals during this ifit.
+        Each entry is a dict, e.g.:
+          {"action": "NEW", "node": "abc123", "parent": "def456"}
+          {"action": "MERGE", "new_node": "ghi789", "parent": "root000",
+           "children": ["abc123", "xyz999"]}
+          {"action": "SPLIT", "deleted": "abc123", "parent": "root000",
+           "promoted_children": ["child1", "child2"]}
+          {"action": "BEST", "node": "ghi789"}
         """
         self._ensure_attr_vals(instance)
         current = self.root
         stats: Dict[str, float] = {}
+        actions: List[Dict] = []  # <-- new log
 
         while True:
             # Case: leaf and empty or exact match -> absorb and stop
             if not current.children and (current.count == 0 or current.is_exact_match(instance)):
                 current.increment_counts(instance)
+                actions.append({
+                    "action": "NEW",
+                    "node": current.concept_hash(),
+                    "parent": current.parent.concept_hash() if current.parent else None,
+                    "absorbed": True
+                })
                 break
 
             # Fringe split: leaf but not exact match
             if not current.children:
                 if current.parent is None:
-                    # Case: current is root → mutate in place, don’t replace object
-                    # Create two children: one for existing contents, one for new instance
+                    # Special root split
                     old_child = CobwebNode(tree=self, parent=current)
                     old_child.update_counts_from_node(current)
 
@@ -85,10 +111,16 @@ class CobwebTree:
                     current.update_counts_from_node(old_child)
                     current.update_counts_from_node(new_child)
 
+                    actions.append({
+                        "action": "NEW",
+                        "node": new_child.concept_hash(),
+                        "parent": current.concept_hash(),
+                        "extra_nodes_created": [old_child.concept_hash()]
+                    })
                     current = new_child
                     break
                 else:
-                    # Case: non-root fringe split → same as before
+                    # Non-root split
                     new_parent = CobwebNode(tree=self, parent=current.parent)
                     new_parent.update_counts_from_node(current)
 
@@ -102,9 +134,16 @@ class CobwebTree:
                     sibling.increment_counts(instance)
                     new_parent.increment_counts(instance)
                     new_parent.children.append(sibling)
+
+                    actions.append({
+                        "action": "NEW",
+                        "node": sibling.concept_hash(),
+                        "parent": new_parent.concept_hash(),
+                        "extra_nodes_created": [new_parent.concept_hash()]
+                    })
+
                     current = sibling
                     break
-
 
             # Internal node: find two best children
             best1_score, best1, best2 = current.two_best_children(instance)
@@ -122,7 +161,6 @@ class CobwebTree:
                 if best1 is not None and best2 is not None and random.random() < 1e-2:
                     _, action = current.get_best_operation(instance, best1, best2, best1_score)
             elif mode == 4:
-                # only allow BEST and NEW
                 _, action = current.get_best_operation(instance, best1, best2, best1_score)
                 if action not in (CobwebNode.BEST, CobwebNode.NEW):
                     action = CobwebNode.BEST
@@ -132,6 +170,8 @@ class CobwebTree:
             # Execute chosen action
             if action == CobwebNode.BEST and best1 is not None:
                 current.increment_counts(instance)
+                actions.append({"action": "BEST", "node": best1.concept_hash(),
+                                "parent": current.concept_hash()})
                 current = best1
                 continue
 
@@ -140,6 +180,8 @@ class CobwebTree:
                 new_child = CobwebNode(tree=self, parent=current)
                 new_child.increment_counts(instance)
                 current.children.append(new_child)
+                actions.append({"action": "NEW", "node": new_child.concept_hash(),
+                                "parent": current.concept_hash()})
                 current = new_child
                 break
 
@@ -155,6 +197,14 @@ class CobwebTree:
 
                 current.children = [c for c in current.children if c not in (best1, best2)]
                 current.children.append(merged)
+
+                actions.append({
+                    "action": "MERGE",
+                    "new_node": merged.concept_hash(),
+                    "parent": current.concept_hash(),
+                    "children": [best1.concept_hash(), best2.concept_hash()]
+                })
+
                 current = merged
                 continue
 
@@ -164,32 +214,42 @@ class CobwebTree:
                     ch.parent = current
                     ch.tree = self
                     current.children.append(ch)
+
+                actions.append({
+                    "action": "SPLIT",
+                    "deleted": best1.concept_hash(),
+                    "parent": current.concept_hash(),
+                    "promoted_children": [ch.concept_hash() for ch in best1.children]
+                })
                 continue
 
-            # fallback: descend to best (if present), otherwise just stop
+            # fallback
             current.increment_counts(instance)
             if best1 is None:
                 break
+            actions.append({"action": "FALLBACK", "node": best1.concept_hash(),
+                            "parent": current.concept_hash()})
             current = best1
 
-        return current, stats
+        return current, stats, actions
 
 
-    def fit(self, instances: List[AVCount], mode: int, iterations: int = 1, randomizeFirst: bool = True) -> None:
-        """
-        Batch training:
-          - iterations: number of passes over data
-          - randomizeFirst: shuffle instances on first iteration if True
-        """
-        if iterations < 1:
-            iterations = 1
-        for it in range(iterations):
-            if it == 0 and randomizeFirst:
-                random.shuffle(instances)
-            for inst in instances:
-                self.ifit(inst, mode)
-            # shuffle between iterations to reduce ordering bias
-            random.shuffle(instances)
+    # -------------- I have this commented out so we never use it, hasn't been updated with new `ifit` yet ---------------
+    # def fit(self, instances: List[AVCount], mode: int, iterations: int = 1, randomizeFirst: bool = True) -> None:
+    #     """
+    #     Batch training:
+    #       - iterations: number of passes over data
+    #       - randomizeFirst: shuffle instances on first iteration if True
+    #     """
+    #     if iterations < 1:
+    #         iterations = 1
+    #     for it in range(iterations):
+    #         if it == 0 and randomizeFirst:
+    #             random.shuffle(instances)
+    #         for inst in instances:
+    #             self.ifit(inst, mode)
+    #         # shuffle between iterations to reduce ordering bias
+    #         random.shuffle(instances)
 
     # ---------------- Categorization & I/O ----------------
     def categorize(self, instance: AVCount) -> "CobwebNode":

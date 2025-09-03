@@ -14,7 +14,7 @@ for _ in range(num_sentences):
     document.append(sentence)
 
 # Setting up the parser
-parser = LanguageChunkingParser(TEST_CORPUS1)
+parser = LanguageChunkingParser(TEST_CORPUS1, merge_split=True)
 
 train_size = 0.9
 
@@ -26,19 +26,19 @@ for i, doc in enumerate(train_documents):
     parse_trees = parser.parse_input([doc], debug=False)
     parse_tree = parse_trees[0]
 
+    parser.add_parse_tree(parse_tree, debug=True)
+
     if i < 5:
         parser.visualize_ltm(f"tests/gen_learn_test/ltms/cobweb_ltm{i}")
 
     if i % 5 == 0:
-        parse_tree.visualize(f"tests/gen_learn_test/train_trees/parse_tree{i}")
+        parse_tree.visualize(f"tests/gen_learn_test/train_trees/train_parse_tree{i}")
 
         if i < 21:
             parser.visualize_ltm(f"tests/gen_learn_test/ltms/cobweb_ltm{i}")
-    
-    parser.add_parse_tree(parse_tree, debug=True)
 
 # perhaps visualize the last ten parse trees based on new inputs
 for i, test in enumerate(test_documents):
-    parse_tree = parser.parse_input([test], end_behavior="converge", debug=True)[0]
+    parse_tree = parser.parse_input([test], end_behavior="converge", debug=False)[0]
     parse_tree.visualize(f"tests/gen_learn_test/test_trees/test_parse_tree{i}")
     print(f"Created parse tree {i} for sentence, \"{test}\"")

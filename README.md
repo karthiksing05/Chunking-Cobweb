@@ -9,6 +9,7 @@ A couple modifications were made to Cobweb to support some of the edge-case beha
 *   Mode 4 - BEST + NEW
 *   Made AV_Counts editable
 *   Added new fringe split logic to preserve root's concept hash when root is added
+*   Modify Cobweb such that it contains a DEBUG mode and logs all actions (by concept hash)
 
 ## Design Decisions:
 
