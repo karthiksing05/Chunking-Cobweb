@@ -10,6 +10,7 @@ import uuid
 AVCount = Dict[int, Dict[int, float]]   # {attr: {val: count}}
 AttrVals = Dict[int, Set[int]]
 
+ijk = 0
 last_printed = None  # keep track of the last thing printed
 
 def safe_print(msg):
@@ -56,7 +57,6 @@ class CobwebTree:
                 self.attr_vals[a].add(v)
 
     # ---------------- Learning ----------------
-        # ---------------- Learning ----------------
     def ifit(self, instance: AVCount, mode: int = 0) -> Tuple["CobwebNode", Dict[str, float], List[Dict]]:
         """
         Fit a single instance using COBWEB ops.
@@ -79,6 +79,7 @@ class CobwebTree:
            "promoted_children": ["child1", "child2"]}
           {"action": "BEST", "node": "ghi789"}
         """
+        global ijk
         self._ensure_attr_vals(instance)
         current = self.root
         stats: Dict[str, float] = {}
@@ -146,7 +147,7 @@ class CobwebTree:
                     break
 
             # Internal node: find two best children
-            best1_score, best1, best2 = current.two_best_children(instance)
+            best1_score, best1, best2 = current.two_best_children(instance) # TODO Check this!
 
             # choose action according to mode
             if mode == 1:
@@ -165,7 +166,7 @@ class CobwebTree:
                 if action not in (CobwebNode.BEST, CobwebNode.NEW):
                     action = CobwebNode.BEST
             else:
-                _, action = current.get_best_operation(instance, best1, best2, best1_score)
+                _, action = current.get_best_operation(instance, best1, best2, best1_score) # TODO CHECK THIS!
 
             # Execute chosen action
             if action == CobwebNode.BEST and best1 is not None:
@@ -186,6 +187,7 @@ class CobwebTree:
                 break
 
             if action == CobwebNode.MERGE and best1 is not None and best2 is not None:
+
                 current.increment_counts(instance)
                 merged = CobwebNode(tree=self, parent=current)
                 merged.update_counts_from_node(best1)
@@ -458,21 +460,23 @@ class CobwebNode:
         return weights
 
     # ---------------- Log-prob functions ----------------
+    
     def log_prob_instance(self, instance: AVCount) -> float:
         """log P(instance | node) using observed attributes only."""
         logp = 0.0
         alpha = self.tree.alpha
+        
         for attr, vm in instance.items():
-            if attr < 0 or attr not in self.tree.attr_vals:
+            if attr < 0:
                 continue
             num_vals = len(self.tree.attr_vals[attr])
-            denom = self.a_count.get(attr, 0.0) + num_vals * alpha
-            for v, cnt in vm.items():
-                if v not in self.tree.attr_vals[attr]:
-                    numer = alpha
-                else:
-                    numer = self.av_count[attr].get(v, 0.0) + alpha
-                logp += cnt * (math.log(numer + 1e-15) - math.log(denom + 1e-15))
+            attr_count = self.a_count.get(attr, 0.0)
+            denom = attr_count + num_vals * alpha
+            
+            for val, count in vm.items():
+                numer = self.av_count[attr].get(val, 0.0) + alpha
+                logp += count * (math.log(numer) - math.log(denom + 1e-15))
+                
         return logp
 
     def log_prob_instance_missing(self, instance: AVCount) -> float:
@@ -496,18 +500,17 @@ class CobwebNode:
                 # missing attribute: we do not add anything (conservative)
                 pass
         return logp
-
+    
     def log_prob_class_given_instance(self, instance: AVCount, use_root_counts: bool = False) -> float:
-        """
-        log P(node | instance) ∝ log P(instance | node) + log prior(node).
-        If use_root_counts True prior denominator uses root.count; otherwise uses parent.count (if present).
-        """
+        """log P(node | instance) ∝ log P(instance | node) + log prior(node)"""
         ll = self.log_prob_instance(instance)
         prior_num = max(self.count, 0.0)
-        if self.parent is None:
-            prior_den = max(self.tree.root.count, 1e-15)
+        
+        if self.parent is None or use_root_counts:
+            prior_den = max(self.tree.root.count, 0.0)
         else:
-            prior_den = max(self.parent.count if not use_root_counts else self.tree.root.count, 1e-15)
+            prior_den = max(self.parent.count, 0.0)
+            
         prior = math.log((prior_num + 1e-15) / (prior_den + 1e-15))
         return ll + prior
     
@@ -660,40 +663,50 @@ class CobwebNode:
         return obj
 
     def pu_for_insert(self, child: "CobwebNode", instance: AVCount) -> float:
+        # Handle non-normalized attributes case
         if not self.tree.norm_attributes:
             parent_entropy = 0.0
             children_entropy = 0.0
             concept_entropy = 0.0
+            
+            # Calculate parent entropy across all attributes
             for attr in self.tree.attr_vals.keys():
                 parent_entropy += self.entropy_attr_insert(attr, instance)
+            
+            # Calculate children entropy and concept entropy
             for c in self.children:
                 if c is child:
-                    p = (c.count + 1.0) / (self.count + 1.0)
-                    concept_entropy -= p * math.log(p + 1e-15)
+                    p_of_child = (c.count + 1.0) / (self.count + 1.0)
+                    concept_entropy -= p_of_child * math.log(p_of_child + 1e-15)
                     for attr in self.tree.attr_vals.keys():
-                        children_entropy += p * c.entropy_attr_insert(attr, instance)
+                        children_entropy += p_of_child * c.entropy_attr_insert(attr, instance)
                 else:
-                    p = (c.count) / (self.count + 1.0)
-                    concept_entropy -= p * math.log(p + 1e-15)
+                    p_of_child = c.count / (self.count + 1.0)
+                    concept_entropy -= p_of_child * math.log(p_of_child + 1e-15)
                     for attr in self.tree.attr_vals.keys():
-                        children_entropy += p * c.entropy_attr(attr)
+                        children_entropy += p_of_child * c.entropy_attr(attr)
+            
             return self._normalize_obj(parent_entropy, children_entropy, concept_entropy, len(self.children))
 
+        # Handle normalized attributes case
         total = 0.0
         for attr in self.tree.attr_vals.keys():
             children_entropy = 0.0
             concept_entropy = 0.0
+            
             for c in self.children:
                 if c is child:
-                    p = (c.count + 1.0) / (self.count + 1.0)
-                    children_entropy += p * c.entropy_attr_insert(attr, instance)
-                    concept_entropy -= p * math.log(p + 1e-15)
+                    p_of_child = (c.count + 1.0) / (self.count + 1.0)
+                    children_entropy += p_of_child * c.entropy_attr_insert(attr, instance)
+                    concept_entropy -= p_of_child * math.log(p_of_child + 1e-15)
                 else:
-                    p = (c.count) / (self.count + 1.0)
-                    children_entropy += p * c.entropy_attr(attr)
-                    concept_entropy -= p * math.log(p + 1e-15)
+                    p_of_child = c.count / (self.count + 1.0)
+                    children_entropy += p_of_child * c.entropy_attr(attr)
+                    concept_entropy -= p_of_child * math.log(p_of_child + 1e-15)
+            
             parent_entropy = self.entropy_attr_insert(attr, instance)
             total += self._normalize_obj(parent_entropy, children_entropy, concept_entropy, len(self.children))
+        
         return total
 
     def pu_for_new_child(self, instance: AVCount) -> float:
@@ -701,41 +714,52 @@ class CobwebNode:
         tmp.increment_counts(instance)
         p_new = 1.0 / (self.count + 1.0)
 
+        # Handle non-normalized attributes case
         if not self.tree.norm_attributes:
             parent_entropy = 0.0
             children_entropy = 0.0
             concept_entropy = -p_new * math.log(p_new + 1e-15)
+            
             for attr in self.tree.attr_vals.keys():
                 parent_entropy += self.entropy_attr_insert(attr, instance)
                 children_entropy += p_new * tmp.entropy_attr(attr)
+                
             for c in self.children:
                 p = c.count / (self.count + 1.0)
                 concept_entropy -= p * math.log(p + 1e-15)
                 for attr in self.tree.attr_vals.keys():
                     children_entropy += p * c.entropy_attr(attr)
+                    
             return self._normalize_obj(parent_entropy, children_entropy, concept_entropy, len(self.children) + 1)
 
+        # Handle normalized attributes case
         total = 0.0
         for attr in self.tree.attr_vals.keys():
             children_entropy = p_new * tmp.entropy_attr(attr)
             concept_entropy = -p_new * math.log(p_new + 1e-15)
+            
             for c in self.children:
                 p = c.count / (self.count + 1.0)
                 children_entropy += p * c.entropy_attr(attr)
                 concept_entropy -= p * math.log(p + 1e-15)
+                
             parent_entropy = self.entropy_attr_insert(attr, instance)
             total += self._normalize_obj(parent_entropy, children_entropy, concept_entropy, len(self.children) + 1)
+            
         return total
 
     def pu_for_merge(self, best1: "CobwebNode", best2: "CobwebNode", instance: AVCount) -> float:
+        # Handle non-normalized attributes case
         if not self.tree.norm_attributes:
             p_merged = (best1.count + best2.count + 1.0) / (self.count + 1.0)
             parent_entropy = 0.0
             children_entropy = 0.0
             concept_entropy = -p_merged * math.log(p_merged + 1e-15)
+            
             for attr in self.tree.attr_vals.keys():
                 parent_entropy += self.entropy_attr_insert(attr, instance)
                 children_entropy += p_merged * best1.entropy_attr_merge(attr, best2, instance)
+                
             for c in self.children:
                 if c in (best1, best2):
                     continue
@@ -743,32 +767,41 @@ class CobwebNode:
                 concept_entropy -= p * math.log(p + 1e-15)
                 for attr in self.tree.attr_vals.keys():
                     children_entropy += p * c.entropy_attr(attr)
+                    
             return self._normalize_obj(parent_entropy, children_entropy, concept_entropy, max(1, len(self.children) - 1))
 
+        # Handle normalized attributes case
         total = 0.0
         for attr in self.tree.attr_vals.keys():
             children_entropy = 0.0
             concept_entropy = 0.0
+            
             for c in self.children:
                 if c in (best1, best2):
                     continue
                 p = c.count / (self.count + 1.0)
                 children_entropy += p * c.entropy_attr(attr)
                 concept_entropy -= p * math.log(p + 1e-15)
+                
             p = (best1.count + best2.count + 1.0) / (self.count + 1.0)
             children_entropy += p * best1.entropy_attr_merge(attr, best2, instance)
             concept_entropy -= p * math.log(p + 1e-15)
+            
             parent_entropy = self.entropy_attr_insert(attr, instance)
             total += self._normalize_obj(parent_entropy, children_entropy, concept_entropy, max(1, len(self.children) - 1))
+            
         return total
 
     def pu_for_split(self, best: "CobwebNode") -> float:
+        # Handle non-normalized attributes case
         if not self.tree.norm_attributes:
             parent_entropy = 0.0
             children_entropy = 0.0
             concept_entropy = 0.0
+            
             for attr in self.tree.attr_vals.keys():
                 parent_entropy += self.entropy_attr(attr)
+                
             for c in self.children:
                 if c is best:
                     continue
@@ -776,44 +809,98 @@ class CobwebNode:
                 concept_entropy -= p * math.log(p + 1e-15)
                 for attr in self.tree.attr_vals.keys():
                     children_entropy += p * c.entropy_attr(attr)
+                    
             for c in best.children:
                 p = c.count / max(self.count, 1e-15)
                 concept_entropy -= p * math.log(p + 1e-15)
                 for attr in self.tree.attr_vals.keys():
                     children_entropy += p * c.entropy_attr(attr)
-            return self._normalize_obj(parent_entropy, children_entropy, concept_entropy, max(1, len(self.children) - 1 + len(best.children)))
+                    
+            return self._normalize_obj(parent_entropy, children_entropy, concept_entropy, 
+                                    max(1, len(self.children) - 1 + len(best.children)))
 
+        # Handle normalized attributes case
         total = 0.0
         for attr in self.tree.attr_vals.keys():
             children_entropy = 0.0
             concept_entropy = 0.0
+            
             for c in self.children:
                 if c is best:
                     continue
                 p = c.count / max(self.count, 1e-15)
                 children_entropy += p * c.entropy_attr(attr)
                 concept_entropy -= p * math.log(p + 1e-15)
+                
             for c in best.children:
                 p = c.count / max(self.count, 1e-15)
                 children_entropy += p * c.entropy_attr(attr)
                 concept_entropy -= p * math.log(p + 1e-15)
+                
             parent_entropy = self.entropy_attr(attr)
-            total += self._normalize_obj(parent_entropy, children_entropy, concept_entropy, max(1, len(self.children) - 1 + len(best.children)))
+            total += self._normalize_obj(parent_entropy, children_entropy, concept_entropy,
+                                    max(1, len(self.children) - 1 + len(best.children)))
+            
         return total
 
     def partition_utility(self) -> float:
+        """Calculate partition utility (category utility) of this node matching C++ implementation."""
         if not self.children:
             return 0.0
+
+        # BEGIN INDIVIDUAL - handle non-normalized attributes case
+        if not self.tree.norm_attributes:
+            parent_entropy = 0.0
+            children_entropy = 0.0
+            concept_entropy = 0.0
+
+            # Calculate parent entropy across all attributes
+            for attr in self.tree.attr_vals.keys():
+                parent_entropy += self.entropy_attr(attr)
+
+            # Calculate children entropy and concept entropy
+            for child in self.children:
+                p_of_child = child.count / max(self.count, 1e-15)
+                concept_entropy -= p_of_child * math.log(p_of_child + 1e-15)
+
+                for attr in self.tree.attr_vals.keys():
+                    children_entropy += p_of_child * child.entropy_attr(attr)
+
+            obj = (parent_entropy - children_entropy)
+            if self.tree.objective == 1:
+                obj /= (parent_entropy + 1e-15)
+            elif self.tree.objective == 2:
+                obj /= (children_entropy + concept_entropy + 1e-15)
+            
+            if self.tree.children_norm:
+                obj /= len(self.children)
+                
+            return obj
+
+        # Handle normalized attributes case
         entropy = 0.0
         for attr in self.tree.attr_vals.keys():
             children_entropy = 0.0
             concept_entropy = 0.0
-            for c in self.children:
-                p = c.count / max(self.count, 1e-15)
-                children_entropy += p * c.entropy_attr(attr)
-                concept_entropy -= p * math.log(p + 1e-15)
+
+            for child in self.children:
+                p_of_child = child.count / max(self.count, 1e-15)
+                children_entropy += p_of_child * child.entropy_attr(attr)
+                concept_entropy -= p_of_child * math.log(p_of_child + 1e-15)
+
             parent_entropy = self.entropy_attr(attr)
-            entropy += self._normalize_obj(parent_entropy, children_entropy, concept_entropy, max(1, len(self.children)))
+
+            obj = (parent_entropy - children_entropy)
+            if self.tree.objective == 1:
+                obj /= (parent_entropy + 1e-15)
+            elif self.tree.objective == 2:
+                obj /= (children_entropy + concept_entropy + 1e-15)
+
+            if self.tree.children_norm:
+                obj /= len(self.children)
+                
+            entropy += obj
+
         return entropy
 
     def category_utility(self) -> float:
@@ -821,32 +908,69 @@ class CobwebNode:
 
     # ---------------- Decision helpers ----------------
     def two_best_children(self, instance: AVCount) -> Tuple[float, Optional["CobwebNode"], Optional["CobwebNode"]]:
-        best1 = None
-        best2 = None
-        best1_s = -float("inf")
-        best2_s = -float("inf")
-        for c in self.children:
-            s = c.log_prob_class_given_instance(instance, use_root_counts=False)
-            if s > best1_s:
-                best2, best2_s = best1, best1_s
-                best1, best1_s = c, s
-            elif s > best2_s:
-                best2, best2_s = c, s
-        return best1_s, best1, best2
+        """Find the two best children based on scoring method determined by tree objective."""
+        if not self.children:
+            raise ValueError("No children!")
+            
+        if self.tree.objective == 0:
+            # Use relative PU with pu_for_insert scoring
+            scores = []
+            for child in self.children:
+                pu = self.pu_for_insert(child, instance)
+                scores.append((pu, child.count, random.random(), child))
+                
+            # Sort by score (descending), then count, then random tiebreaker
+            scores.sort(reverse=True)
+            best1 = scores[0][3]  # get the node from tuple
+            best1_score = scores[0][0]  # get the score
+            best2 = scores[1][3] if len(scores) > 1 else None
+            
+            return best1_score, best1, best2
+            
+        else:
+            # For other objectives, use log probability scoring
+            best1 = None
+            best2 = None
+            best1_s = -float("inf")
+            best2_s = -float("inf")
+            
+            for c in self.children:
+                score = c.log_prob_class_given_instance(instance, use_root_counts=False)
+                
+                if score > best1_s:
+                    best2 = best1
+                    best2_s = best1_s 
+                    best1 = c
+                    best1_s = score
+                elif score > best2_s:
+                    best2 = c
+                    best2_s = score
+                    
+            return best1_s, best1, best2
 
-    def get_best_operation(self, instance: AVCount, best1: Optional["CobwebNode"], best2: Optional["CobwebNode"], _best1_pu: float) -> Tuple[float, int]:
+    def get_best_operation(self, instance: AVCount, best1: Optional["CobwebNode"], 
+                      best2: Optional["CobwebNode"], best1_score: float) -> Tuple[float, int]:
         candidates: List[Tuple[float, int]] = []
+        
+        # BEST operation
         if best1 is not None:
-            candidates.append((self.pu_for_insert(best1, instance), CobwebNode.BEST))
+            candidates.append((best1_score, CobwebNode.BEST))
+        
+        # NEW operation
         candidates.append((self.pu_for_new_child(instance), CobwebNode.NEW))
-        if best1 is not None and best2 is not None:
+        
+        # MERGE operation 
+        if len(self.children) > 2 and best1 is not None and best2 is not None:
             candidates.append((self.pu_for_merge(best1, best2, instance), CobwebNode.MERGE))
+            
+        # SPLIT operation
         if best1 is not None and best1.children:
             candidates.append((self.pu_for_split(best1), CobwebNode.SPLIT))
+            
         if not candidates:
-            return float("-inf"), CobwebNode.BEST
-        best_score, action = max(candidates, key=lambda t: t[0])
-        return best_score, action
+            return (-float("inf"), CobwebNode.NEW)
+            
+        return max(candidates, key=lambda t: t[0])
 
     # ---------------- Predict mixture helpers ----------------
     def predict_weighted_probs(self, instance: AVCount) -> Dict[int, Dict[int, float]]:

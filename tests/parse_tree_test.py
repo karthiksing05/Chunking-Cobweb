@@ -1,6 +1,6 @@
 from pprint import pprint
 from util.cfg import generate, TEST_CORPUS1, TEST_GRAMMAR1
-from parse import LanguageChunkingParser, ParseTree
+from parse import LanguageChunkingParser, FiniteParseTree
 
 # Creating and printing toy sentences
 num_sentences = 3
@@ -26,7 +26,7 @@ for i, tree in enumerate(trees):
     tree.to_json(f"tests/parse_tree_test/json/parse_tree{i}.json")
 
 # Loading parse_tree0.json to verify
-tree = ParseTree.from_json("tests/parse_tree_test/json/parse_tree0.json", ltm_hierarchy=parser.get_long_term_memory(), filepath=True)
+tree = FiniteParseTree.from_json("tests/parse_tree_test/json/parse_tree0.json", ltm_hierarchy=parser.get_long_term_memory(), filepath=True)
 tree.visualize("tests/parse_tree_test/visualizations/parse_tree0_from_json")
 
 print("Confirming that all chunk instances are appropriately scraped:")

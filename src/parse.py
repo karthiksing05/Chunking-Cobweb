@@ -43,10 +43,6 @@ class PrimitiveParseNode:
 
         This method also deletes the existing parent-child connection, if it
         already exists (to efficiently manage the root node changes).
-
-        TODO one change to make here may be developing a more finetuned version
-        of this because we only need to remove and reassign the global root node
-        as a parent.
         """
 
         try:
@@ -195,10 +191,6 @@ class CompositeParseNode:
 
         This method also deletes the existing parent-child connection, if it
         already exists (to efficiently manage the root node changes).
-
-        TODO one change to make here may be developing a more finetuned version
-        of this because we only need to remove and reassign the global root node
-        as a parent.
         """
 
         try:
@@ -231,7 +223,7 @@ class CompositeParseNode:
 ----------------------------------------------------------------------------------------------
 """
 
-class ParseTree:
+class FiniteParseTree:
 
     def __init__(self, ltm_hierarchy, id_to_value, value_to_id, context_length=3):
         self.ltm_hierarchy = ltm_hierarchy
@@ -243,11 +235,11 @@ class ParseTree:
 
         self.global_root_node = CompositeParseNode.create_global_root()
 
-        self.sentence = None
+        self.window = None
 
         self.nodes = []
 
-    def build(self, sentence, end_behavior="converge", debug=False): # TODO debug flag needs to be implemented
+    def build(self, window, end_behavior="converge", debug=False):
         """
         Primary method of construction that returns all available nonterminals
         as instances ready to be passed into the long-term hierarchy. The
@@ -277,9 +269,9 @@ class ParseTree:
         *   the list of new concept labels that are required
         """
 
-        self.sentence = sentence
+        self.window = window
 
-        elements = re.findall(r"[\w']+|[.,!?;]", sentence)
+        elements = re.findall(r"[\w']+|[.,!?;]", window)
         elements = [self.value_to_id[element] for element in elements]
 
         # Creating first layer of primitive nodes
@@ -327,12 +319,13 @@ class ParseTree:
 
                 merge_inst = CompositeParseNode.create_merge_instance(node_left, node_right)
 
-                candidate_concept = self.ltm_hierarchy.categorize(merge_inst).get_basic_level() # TODO can also change this to get "best_level"
+                candidate_concept = self.ltm_hierarchy.categorize(merge_inst).get_basic_level()
                 candidate_concept_id = self.value_to_id[f"CONCEPT-{candidate_concept.concept_hash()}"]
 
                 candidate_score = candidate_concept.log_prob_instance(merge_inst)
 
                 if debug:
+                    # TODO what scores can / should we be using?
                     print("MERGE INSTANCE EVALUATED: ", merge_inst)
                     # the below thing always returns -inf for some reason!??
                     # print("Candidate Concept Log Prob Children Given Instance", 
@@ -345,7 +338,6 @@ class ParseTree:
                           candidate_concept.log_prob_class_given_instance(merge_inst))
                     print()
 
-                # TODO IMPLEMENT A LOG PROBABILITY SCORE INSTEAD OF A CU SCORE
                 if not best_candidate or candidate_score > best_candidate[0]:
                     if debug:
                         print(f"New best candidate found with log-probability {candidate_score} for concept hash {candidate_concept.concept_hash()}")
@@ -690,7 +682,7 @@ class ParseTree:
 
         index_map = {node: i for i, node in enumerate([self.global_root_node] + self.nodes)}
         data = {
-            "sentence": self.sentence,
+            "window": self.window,
             "context_length": self.context_length,
             "id_to_value": self.id_to_value,
             "value_to_id": self.value_to_id,
@@ -716,13 +708,13 @@ class ParseTree:
         elif isinstance(data, str):
             data = json.loads(data)
 
-        tree = ParseTree(
+        tree = FiniteParseTree(
             ltm_hierarchy,
             id_to_value=data["id_to_value"],
             value_to_id=data["value_to_id"],
             context_length=data["context_length"],
         )
-        tree.sentence = data["sentence"]
+        tree.window = data["window"]
 
         def restore_dict_keys(d):
             if d is None:
@@ -774,6 +766,26 @@ class ParseTree:
 ----------------------------------------------------------------------------------------------
 """
 
+class ContinuousParseTree:
+    """
+    A class extremely similar to the parse tree given above, but one that takes in a stream of
+    data continuously and decides to add to the parse tree until no longer possible by either
+    of the end conditions mentioned above (nothing left to merge or ran out of data). In this
+    implementation, we fix the size of the working memory, and for each merge, we add the 
+
+    Note that we also need to add a function to the LanguageChunkingParser that supports a
+    continuous stream of input (no defined length).
+    """
+    def __init__(self):
+        pass
+
+"""
+----------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------
+"""
+
 class LanguageChunkingParser:
 
     """
@@ -813,21 +825,21 @@ class LanguageChunkingParser:
     def get_long_term_memory(self):
         return self.ltm_hierarchy
 
-    def parse_input(self, sentences, end_behavior="converge", debug=False) -> List[ParseTree]:
+    def parse_input(self, windows, end_behavior="converge", debug=False) -> List[FiniteParseTree]:
         """
-        Primary method for parsing input (a list of sentences) and updating the
-        long-term-memory hierarchy using a parse tree.
+        Primary method for parsing input (a list of sliding windows, for now these are
+        sentences) and updating the long-term-memory hierarchy using a parse tree.
 
         Returns the Parse Tree!
         """
 
         parse_trees = []
 
-        for sentence in sentences:
+        for window in windows:
             if debug:
-                print(f"BUILDING PARSE TREE FOR SENTENCE {sentence}")
-            parse_tree = ParseTree(self.ltm_hierarchy, self.id_to_value, self.value_to_id)
-            parse_tree.build(sentence, end_behavior, debug)
+                print(f"BUILDING PARSE TREE FOR WINDOW {window}")
+            parse_tree = FiniteParseTree(self.ltm_hierarchy, self.id_to_value, self.value_to_id)
+            parse_tree.build(window, end_behavior, debug)
 
             parse_trees.append(parse_tree)
 
@@ -873,234 +885,128 @@ class LanguageChunkingParser:
             (which I'm pretty sure are only SPLIT rules, so this should be
             fairly easy).
 
-        Additional Notes:
-        *   We're currently just comparing the old tree to the new tree to
-            safely make all changes, but a future implementation will rewrite
-            the Cobweb class to natively return these actions for our
-            convenience and faster time-complexity.
-        *   In the long term, we should keep track of "stale" concept ids in our
-            vocabulary to replace them over time so our vocabulary doesn't
-            balloon, but again, a later fix.
-        *   Finally, rewrite rules may not currently exist for created nodes but
-            there is a layer of specificity that we can and should replace.
-            Still not sure about the best way to go about that, but leaving it
-            here for future notice.
+        ---
+        With this new iteration of the method, we have a couple administrative
+        actions we need to complete, but this should greatly reduce the size of
+        the code by a large amount (and the lasting complexity as well).
+
+        After adding to the tree, we'll have a stack-trace of actions. We need
+        to conduct the following two administrative actions:
+        *   All new nodes need to be added to the vocabulary
+        *   All deleted nodes need to be transferred to a rewrite-rules list 
+            and a new method needs to handle all rewrites to the cobweb tree
+            recursively.
+
+        We will implement both of these in here so as not to touch the
+        administrative Cobweb.
+
+        For created nodes:
+        *   If the node is created:
+            *   Add it to the vocabulary!
+        For deleted nodes:
+        *   If the node is deleted:
+            *   Iterate through all nodes and replace the node's id with its
+                parent's id.
+
+        For replacement, we program some cool BFS from the root that adds the
+        probability of old_key to new_key and then removes old_key, and then
+        traverses down all children, stopping the traversal if old_key doesn't
+        exist.
         """
 
         if debug:
-            print(f"Adding parse tree for sentence, \"{parse_tree.sentence}\"")
+            print(f"Adding parse tree for window, \"{parse_tree.window}\"")
 
         # adding all new instances
         insts = parse_tree.get_chunk_instances()
 
-        if not self.merge_split:
-            all_actions = []
-            for inst in insts:
-                if debug:
-                    print("Adding instance to CobwebTree:", inst)
-                # self.cobweb_drawer.draw_tree(self.ltm_hierarchy.root, "tests/gen_learn_test/test_trees/test_parse_tree")
-                _, _, actions = self.ltm_hierarchy.ifit(inst, mode=4)
-                all_actions += actions
+        def print_actions(actions):
+            if not debug:
+                return
+            print()
+            print("PRINTING ALL ACTIONS TAKEN OVER THIS PASS:")
+            for i, act in enumerate(actions, 1):
+                a = act["action"]
+                node = act.get("node")
+                parent = act.get("parent")
+                extras = act.get("extra_nodes_created", [])
+                absorbed = act.get("absorbed", False)
 
-            if debug:
-                print("PRINTING ALL ACTIONS TAKEN OVER THIS PASS:")
-                for i, act in enumerate(actions, 1):
-                    a = act["action"]
-                    node = act.get("node")
-                    parent = act.get("parent")
-                    extras = act.get("extra_nodes_created", [])
-                    absorbed = act.get("absorbed", False)
-
-                    # Format nicely by action type
-                    if a == "NEW":
-                        if absorbed:
-                            print(f"{i:02d}. [NEW/ABSORB] Node {node} absorbed instance "
-                                f"(parent={parent or 'ROOT'})")
-                        elif extras:
-                            print(f"{i:02d}. [NEW] Node {node} (parent={parent}) "
-                                f"(extra created: {', '.join(extras)})")
-                        else:
-                            print(f"{i:02d}. [NEW] Node {node} (parent={parent})")
-
-                    elif a == "BEST":
-                        print(f"{i:02d}. [BEST] Descend into node {node} (parent={parent})")
-
-                    elif a == "MERGE":
-                        kids = ", ".join(act.get("children", []))
-                        print(f"{i:02d}. [MERGE] New node {act['new_node']} under {act['parent']} "
-                            f"merged children [{kids}]")
-
-                    elif a == "SPLIT":
-                        kids = ", ".join(act.get("promoted_children", []))
-                        print(f"{i:02d}. [SPLIT] Deleted {act['deleted']} under {act['parent']}, "
-                            f"promoted [{kids}]")
-
-                    elif a == "FALLBACK":
-                        print(f"{i:02d}. [FALLBACK] Went to {node} (parent={parent})")
-
+                if a == "NEW":
+                    if absorbed:
+                        print(f"{i:02d}. [NEW/ABSORB] Node {node} absorbed instance "
+                            f"(parent={parent or 'ROOT'})")
+                    elif extras:
+                        print(f"{i:02d}. [NEW] Node {node} (parent={parent}) "
+                            f"(extra created: {', '.join(extras)})")
                     else:
-                        print(f"{i:02d}. [UNKNOWN] {act}")
+                        print(f"{i:02d}. [NEW] Node {node} (parent={parent})")
+                elif a == "BEST":
+                    print(f"{i:02d}. [BEST] Descend into node {node} (parent={parent})")
+                elif a == "MERGE":
+                    kids = ", ".join(act.get("children", []))
+                    print(f"{i:02d}. [MERGE] New node {act['new_node']} under {act['parent']} "
+                        f"merged children [{kids}]")
+                elif a == "SPLIT":
+                    kids = ", ".join(act.get("promoted_children", []))
+                    print(f"{i:02d}. [SPLIT] Deleted {act['deleted']} under {act['parent']}, "
+                        f"promoted [{kids}]")
+                elif a == "FALLBACK":
+                    print(f"{i:02d}. [FALLBACK] Went to {node} (parent={parent})")
+                else:
+                    print(f"{i:02d}. [UNKNOWN] {act}")
 
-                print("---")
+            
+            print("---")
 
-            # NEED TO ADD NEW NODES NO MATTER WHAT
-            for action in all_actions:
-                if action["action"] == "NEW":
-                    # ADD CREATED NODES TO VOCABULARY
-                    new_vocab = f"CONCEPT-{action["node"]}"
+        def add_to_vocab(node_list):
+            for n in node_list:
+                new_vocab = f"CONCEPT-{n}"
+                if new_vocab not in self.value_to_id:
                     self.value_to_id[new_vocab] = self.id_count
                     self.id_to_value.append(new_vocab)
                     self.id_count += 1
 
-                    if "extra_nodes_created" in action:
-                        for con_hash in action["extra_nodes_created"]:
-                            new_vocab = f"CONCEPT-{con_hash}"
-                            if new_vocab not in self.value_to_id:
-                                self.value_to_id[new_vocab] = self.id_count
-                                self.id_to_value.append(new_vocab)
-                                self.id_count += 1
-                elif action["action"] == "MERGE":
-                    # ADD CREATED NODES TO VOCABULARY
-                    new_vocab = f"CONCEPT-{action["new_node"]}"
-                    self.value_to_id[new_vocab] = self.id_count
-                    self.id_to_value.append(new_vocab)
-                    self.id_count += 1
+        all_actions = []
+        mode = 0 if self.merge_split else 4
 
-        else:
-            """
-            With this new method, we have a couple administrative actions we need 
-            to complete, but this should greatly reduce the size of the code by a
-            large amount (and the lasting complexity as well).
+        for inst in insts:
+            if debug:
+                print("Adding instance to CobwebTree:", inst)
+            _, _, actions = self.ltm_hierarchy.ifit(inst, mode=mode)
+            all_actions += actions
+            print_actions(actions)
 
-            After adding to the tree, we'll have a stack-trace of actions. We need
-            to conduct the following two administrative actions:
-            *   All new nodes need to be added to the vocabulary
-            *   All deleted nodes need to be transferred to a rewrite-rules list 
-                and a new method needs to handle all rewrites to the cobweb tree
-                recursively.
+        # handle new, merge, and split actions
+        rewrite_rules = []
+        for action in all_actions:
+            if action["action"] == "NEW":
+                add_to_vocab([action["node"]] + action.get("extra_nodes_created", []))
+            elif action["action"] == "MERGE":
+                add_to_vocab([action["new_node"]])
+            elif action["action"] == "SPLIT":
+                rewrite_rules.append((action["deleted"], action["parent"]))
 
-            We will implement both of these in here so as not to touch the
-            administrative Cobweb.
-
-            For created nodes:
-            *   If the node is created:
-                *   Add it to the vocabulary!
-            For deleted nodes:
-            *   If the node is deleted:
-                *   Iterate through all nodes and replace the node's id with its
-                    parent's id.
-
-            TODO: Note that at some point, we'll need to program a fix that overrides
-            av_count of the child as well as the recursive path taken to the root.
-            We can probably program some cool BFS from the root that adds the probability
-            of old_key to new_key and then removes old_key, and then traverses down all
-            children, stopping the traversal if old_key doesn't exist.
-            """
-            all_actions = []
-
-            for inst in insts:
-                if debug:
-                    print("Adding instance to CobwebTree:", inst)
-                # self.cobweb_drawer.draw_tree(self.ltm_hierarchy.root, "tests/gen_learn_test/test_trees/test_parse_tree")
-                _, _, actions = self.ltm_hierarchy.ifit(inst, mode=0)
-                all_actions += actions
-
-                if debug:
-                    print("PRINTING ALL ACTIONS TAKEN OVER THIS PASS:")
-                    for i, act in enumerate(actions, 1):
-                        a = act["action"]
-                        node = act.get("node")
-                        parent = act.get("parent")
-                        extras = act.get("extra_nodes_created", [])
-                        absorbed = act.get("absorbed", False)
-
-                        # Format nicely by action type
-                        if a == "NEW":
-                            if absorbed:
-                                print(f"{i:02d}. [NEW/ABSORB] Node {node} absorbed instance "
-                                    f"(parent={parent or 'ROOT'})")
-                            elif extras:
-                                print(f"{i:02d}. [NEW] Node {node} (parent={parent}) "
-                                    f"(extra created: {', '.join(extras)})")
-                            else:
-                                print(f"{i:02d}. [NEW] Node {node} (parent={parent})")
-
-                        elif a == "BEST":
-                            print(f"{i:02d}. [BEST] Descend into node {node} (parent={parent})")
-
-                        elif a == "MERGE":
-                            kids = ", ".join(act.get("children", []))
-                            print(f"{i:02d}. [MERGE] New node {act['new_node']} under {act['parent']} "
-                                f"merged children [{kids}]")
-
-                        elif a == "SPLIT":
-                            kids = ", ".join(act.get("promoted_children", []))
-                            print(f"{i:02d}. [SPLIT] Deleted {act['deleted']} under {act['parent']}, "
-                                f"promoted [{kids}]")
-
-                        elif a == "FALLBACK":
-                            print(f"{i:02d}. [FALLBACK] Went to {node} (parent={parent})")
-
-                        else:
-                            print(f"{i:02d}. [UNKNOWN] {act}")
-
-                    print("---")
-
-
-            # SEPARATE ACTIONS INTO CREATED AND DELETED
-            rewrite_rules = [] # (old, new)
-
-            for action in all_actions:
-                if action["action"] == "NEW":
-                    # ADD CREATED NODES TO VOCABULARY
-                    new_vocab = f"CONCEPT-{action["node"]}"
-                    self.value_to_id[new_vocab] = self.id_count
-                    self.id_to_value.append(new_vocab)
-                    self.id_count += 1
-
-                    if "extra_nodes_created" in action:
-                        for con_hash in action["extra_nodes_created"]:
-                            new_vocab = f"CONCEPT-{con_hash}"
-                            if new_vocab not in self.value_to_id:
-                                self.value_to_id[new_vocab] = self.id_count
-                                self.id_to_value.append(new_vocab)
-                                self.id_count += 1
-                elif action["action"] == "MERGE":
-                    # ADD CREATED NODES TO VOCABULARY
-                    new_vocab = f"CONCEPT-{action["new_node"]}"
-                    self.value_to_id[new_vocab] = self.id_count
-                    self.id_to_value.append(new_vocab)
-                    self.id_count += 1
-                elif action["action"] == "SPLIT":
-                    # ADD TO REWRITE RULES
-                    rewrite_rules.append((action["deleted"], action["parent"]))
-
-            # BFS/DFS THROUGHOUT TREE AND EDIT AV_COUNTS WHERE APPLICABLE
+        # BFS/DFS throughout tree and edit av_counts where applicable
+        if self.merge_split and rewrite_rules:
             def av_replacement(inst):
                 replaced = False
-
                 for k in inst.keys():
-                    for concept_hash in inst[k].keys():
-                        for rewrite in rewrite_rules:
-                            if f"CONCEPT-{concept_hash}" == rewrite[0]:
-                                inst[k].setdefault(f"CONCEPT-{rewrite[1]}", 0)
-                                inst[k][rewrite[1]] += inst[k][rewrite[0]]
-                                del inst[k][rewrite[0]]
+                    for concept_hash in list(inst[k].keys()):
+                        for old, new in rewrite_rules:
+                            if f"CONCEPT-{concept_hash}" == old:
+                                inst[k].setdefault(f"CONCEPT-{new}", 0)
+                                inst[k][f"CONCEPT-{new}"] += inst[k][old]
+                                del inst[k][old]
                                 replaced = True
-
                 return inst, replaced
 
-
             to_visit = [self.ltm_hierarchy.root]
-
-            while len(to_visit) > 0:
+            while to_visit:
                 curr = to_visit.pop(0)
-                new_av_count, replaced = av_replacement(curr.av_count)
-                curr.av_count = new_av_count
-
+                curr.av_count, replaced = av_replacement(curr.av_count)
                 if replaced:
-                    for child in curr.children:
-                        to_visit.append(child)
+                    to_visit.extend(curr.children)
 
         if debug:
             print("-" * 60)
