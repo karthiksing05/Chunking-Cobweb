@@ -904,7 +904,26 @@ class CobwebNode:
         return entropy
 
     def category_utility(self) -> float:
-        return self.partition_utility()
+        """
+        C++-style Category Utility for this node:
+          CU = P(node) * (root_entropy - node_entropy)
+        where:
+          - P(node) = count(node) / count(root)
+          - root_entropy = sum of root.entropy_attr(attr) over all attributes
+          - node_entropy = sum of this.entropy_attr(attr) over all attributes
+        """
+        if self.tree.root.count <= 0:
+            return 0.0
+
+        p_of_child = (self.count + 1e-15) / (self.tree.root.count + 1e-15)
+
+        root_entropy = 0.0
+        child_entropy = 0.0
+        for attr in self.tree.attr_vals.keys():
+            root_entropy += self.tree.root.entropy_attr(attr)
+            child_entropy += self.entropy_attr(attr)
+
+        return p_of_child * (root_entropy - child_entropy)
 
     # ---------------- Decision helpers ----------------
     def two_best_children(self, instance: AVCount) -> Tuple[float, Optional["CobwebNode"], Optional["CobwebNode"]]:

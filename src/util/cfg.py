@@ -44,6 +44,29 @@ TEST_CORPUS1 = (
     sum(TEST_GRAMMAR1["P"], [])
 )
 
+import random
+
+
+# Define a very simple grammar (no recursion, fewer rules)
+TEST_GRAMMAR2 = {
+    "S": [["NP", "VP"]], # Sentence = Noun Phrase + Verb Phrase
+
+    "NP": [["Det", "N"]], # Noun Phrase = Determiner + Noun
+
+    "VP": [["V", "NP"], ["V"]], # Verb Phrase = Verb (+ optional NP)
+
+    "Det": [["the"], ["a"]],
+    "N": [["dog"], ["cat"], ["man"], ["woman"]],
+    "V": [["runs"], ["sees"], ["likes"], ["chases"]]
+}
+
+
+TEST_CORPUS2 = (
+    sum(TEST_GRAMMAR2["Det"], []) +
+    sum(TEST_GRAMMAR2["N"], []) +
+    sum(TEST_GRAMMAR2["V"], [])
+)
+
 def generate(symbol, grammar):
     """Recursively generate a sentence from the grammar starting with a symbol."""
     if symbol not in grammar:

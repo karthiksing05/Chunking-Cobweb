@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Cobweb Tree</title>
+<style>
+	body { margin: 0; font-family: system-ui, sans-serif; }
+	.link { fill: none; stroke: #9aa1a9; stroke-width: 1.5px; }
+	.node-box { stroke: #444; fill: #fff; rx: 8; ry: 8; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.15)); }
+	.node-fo table { border-collapse: collapse; font-size: 12px; margin: 4px 0; }
+	.node-fo th, .node-fo td { border: 1px solid #888; padding: 2px 6px; }
+	.node-fo th { background: #f3f5f7; font-weight: 600; }
+	.section-title { font-weight: bold; margin-top: 4px; }
+	.section { margin-top: 10px; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<div id="tree"></div>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script>
+const data = {"title": "CONCEPT-c5cd878da2", "attributes": [{"attr": "Content-Left", "rows": [{"val": "cat", "count": 6.0}, {"val": "CONCEPT-1703364086", "count": 1.0}, {"val": "CONCEPT-1a2c084e74", "count": 1.0}, {"val": "CONCEPT-dbb0460b1d", "count": 1.0}]}, {"attr": "Content-Right", "rows": [{"val": "chases", "count": 9.0}]}, {"attr": "Context-Before", "rows": [{"val": "a", "count": 6.0}]}, {"attr": "Context-After", "rows": [{"val": "a", "count": 3.0}, {"val": "man", "count": 1.5}]}], "children": [{"title": "CONCEPT-c2eee28b9c", "attributes": [{"attr": "Content-Left", "rows": [{"val": "CONCEPT-1703364086", "count": 1.0}, {"val": "cat", "count": 1.0}]}, {"attr": "Content-Right", "rows": [{"val": "chases", "count": 2.0}]}, {"attr": "Context-Before", "rows": [{"val": "a", "count": 1.0}]}, {"attr": "Context-After", "rows": [{"val": "a", "count": 1.0}, {"val": "man", "count": 0.5}]}], "children": [{"title": "CONCEPT-56c1a4bb35", "attributes": [{"attr": "Content-Left", "rows": [{"val": "CONCEPT-1703364086", "count": 1.0}]}, {"attr": "Content-Right", "rows": [{"val": "chases", "count": 1.0}]}, {"attr": "Context-Before", "rows": []}, {"attr": "Context-After", "rows": []}], "children": []}, {"title": "CONCEPT-548d229f83", "attributes": [{"attr": "Content-Left", "rows": [{"val": "cat", "count": 1.0}]}, {"attr": "Content-Right", "rows": [{"val": "chases", "count": 1.0}]}, {"attr": "Context-Before", "rows": [{"val": "a", "count": 1.0}]}, {"attr": "Context-After", "rows": [{"val": "a", "count": 1.0}, {"val": "man", "count": 0.5}]}], "children": []}]}, {"title": "CONCEPT-9bfdef167b", "attributes": [{"attr": "Content-Left", "rows": [{"val": "cat", "count": 5.0}, {"val": "CONCEPT-1a2c084e74", "count": 1.0}, {"val": "CONCEPT-dbb0460b1d", "count": 1.0}]}, {"attr": "Content-Right", "rows": [{"val": "chases", "count": 7.0}]}, {"attr": "Context-Before", "rows": [{"val": "a", "count": 5.0}]}, {"attr": "Context-After", "rows": [{"val": "a", "count": 2.0}, {"val": "man", "count": 1.0}]}], "children": [{"title": "CONCEPT-aa655a9c55", "attributes": [{"attr": "Content-Left", "rows": [{"val": "cat", "count": 5.0}, {"val": "CONCEPT-dbb0460b1d", "count": 1.0}]}, {"attr": "Content-Right", "rows": [{"val": "chases", "count": 6.0}]}, {"attr": "Context-Before", "rows": [{"val": "a", "count": 5.0}]}, {"attr": "Context-After", "rows": [{"val": "a", "count": 2.0}, {"val": "man", "count": 1.0}]}], "children": [{"title": "CONCEPT-8614ac0e30", "attributes": [{"attr": "Content-Left", "rows": [{"val": "cat", "count": 4.0}]}, {"attr": "Content-Right", "rows": [{"val": "chases", "count": 4.0}]}, {"attr": "Context-Before", "rows": [{"val": "a", "count": 4.0}]}, {"attr": "Context-After", "rows": [{"val": "a", "count": 1.0}, {"val": "man", "count": 0.5}]}], "children": []}, {"title": "CONCEPT-eb217a0b87", "attributes": [{"attr": "Content-Left", "rows": [{"val": "cat", "count": 1.0}, {"val": "CONCEPT-dbb0460b1d", "count": 1.0}]}, {"attr": "Content-Right", "rows": [{"val": "chases", "count": 2.0}]}, {"attr": "Context-Before", "rows": [{"val": "a", "count": 1.0}]}, {"attr": "Context-After", "rows": [{"val": "a", "count": 1.0}, {"val": "man", "count": 0.5}]}], "children": []}]}, {"title": "CONCEPT-0517d536c4", "attributes": [{"attr": "Content-Left", "rows": [{"val": "CONCEPT-1a2c084e74", "count": 1.0}]}, {"attr": "Content-Right", "rows": [{"val": "chases", "count": 1.0}]}, {"attr": "Context-Before", "rows": []}, {"attr": "Context-After", "rows": []}], "children": []}]}]};
+
+const nodeW  = 320;
+const nodeH  = 140;
+const hGap   = 80;
+const vGap   = 200;
+
+const root = d3.hierarchy(data);
+const layout = d3.tree().nodeSize([nodeW + hGap, nodeH + vGap]);
+layout(root);
+
+// compute bounds
+let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+root.each(d => {
+		if (d.x < x0) x0 = d.x;
+		if (d.x > x1) x1 = d.x;
+		if (d.y < y0) y0 = d.y;
+		if (d.y > y1) y1 = d.y;
+});
+const width  = x1 - x0 + nodeW + 320;
+const height = y1 - y0 + nodeH + 320; // THIS IS THE HEIGHT MODIFIER
+
+const svg = d3.select("#tree").append("svg")
+	.attr("width", width)
+	.attr("height", height)
+	.attr("viewBox", [x0 - nodeW/2 - 50, y0 - nodeH/2 - 50, width, height].join(" "));
+
+const g = svg.append("g");
+
+// links
+g.selectAll("path.link")
+	.data(root.links())
+	.join("path")
+	.attr("class", "link")
+	.attr("d", d3.linkVertical().x(d => d.x).y(d => d.y));
+
+// nodes
+const node = g.selectAll("g.node")
+	.data(root.descendants())
+	.join("g")
+	.attr("transform", d => `translate(${d.x},${d.y})`);
+
+// add bounding rect
+node.append("rect")
+	.attr("class", "node-box")
+	.attr("x", -nodeW/2)
+	.attr("y", 0)
+	.attr("width", nodeW)
+	.attr("height", nodeH);
+
+// add HTML content
+node.append("foreignObject")
+	.attr("class", "node-fo")
+	.attr("x", -nodeW/2 + 6)
+	.attr("y", 6)
+	.attr("width", nodeW - 12)
+	.attr("height", 1000)
+	.html(d => nodeHTML(d.data));
+
+// resize rects to match actual content height
+node.selectAll("foreignObject").each(function(d) {
+	const fo = d3.select(this);
+	const div = fo.select("div").node();
+	const h = div.getBoundingClientRect().height + 12; // padding
+	fo.attr("height", h);
+	d3.select(this.parentNode).select("rect")
+		.attr("height", h + 12); // adjust rect height
+});
+
+function nodeHTML(d) {
+	const attrTables = d.attributes.map(a => {
+		const rows = a.rows.map(r => `<tr><td>${r.val}</td><td>${r.count}</td></tr>`).join("");
+		return `<div class="section"><div class="section-title">${a.attr}</div><table><tbody>${rows}</tbody></table></div>`;
+	}).join("");
+	return `
+	<div class="node-fo">
+		<table><tr><th>${d.title}</th></tr></table>
+		${attrTables}
+	</div>`;
+}
+</script>
+</body>
+</html>

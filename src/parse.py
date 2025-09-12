@@ -766,7 +766,7 @@ class FiniteParseTree:
 ----------------------------------------------------------------------------------------------
 """
 
-class ContinuousParseTree:
+class IncrementalParseTree:
     """
     A class extremely similar to the parse tree given above, but one that takes in a stream of
     data continuously and decides to add to the parse tree until no longer possible by either
@@ -775,9 +775,399 @@ class ContinuousParseTree:
 
     Note that we also need to add a function to the LanguageChunkingParser that supports a
     continuous stream of input (no defined length).
+
+    Important design decision to confirm:
+    *   What is the termination quality of this streaming-based method?
+        *   The termination quality should either be the end of the corpus (which is chill)
+            or the point at which nothing useful can be merged to reveal higher quality, at
+            which point everything from the working memory is dumped and a new set is read in.
+        *   I'm much more a fan of the latter right now, but we can work through both as we
+            proceed. The former will probably result in unstable queries
+    *   When are instances added to the parse tree?
+        *   Should chunk candidates be added as soon as they are wrapped into the continuous
+            parse tree or should they be added at termination point?
+        *   If the criteria we choose for the first decision is termination of a single parse tree
+            once the full corpus has been parsed, that'll lead to increasingly painful and unstable
+            initial trees.
+    *   How do we determine the most optimal candidate?!?
+        *   This is an unsolved question from the FiniteParseTree situation - once we can better
+            attribute the additions through GUI analysis, we can probably iterate better on this.
+
+    Adjustments that need to be made / carried over:
+    *   Need to properly integrate the global root node into most other 
     """
     def __init__(self):
         pass
+
+    def build(self, corpus):
+        pass
+
+    def get_chunk_instances(self):
+        pass
+
+    def visualize(self, out_base="parse_tree", render_png=True):
+        """
+        Render the parse tree into an HTML file and optionally a PNG screenshot.
+        The PNG height automatically adjusts to fit the tree, including all nodes.
+        """
+
+        # Convert tree to JSON and build HTML
+        d3_json = json.dumps(self._tree_to_json())
+        html = self._build_html(d3_json)
+
+        html_path = f"{out_base}.html"
+        png_path = f"{out_base}.png"
+
+        # Ensure output directories exist
+        os.makedirs(os.path.dirname(html_path) or ".", exist_ok=True)
+        os.makedirs(os.path.dirname(png_path) or ".", exist_ok=True)
+
+        # Write HTML file
+        with open(html_path, "w", encoding="utf-8") as f:
+            f.write(html)
+
+        if render_png:
+            asyncio.run(self._html_to_png(html_path, png_path))
+            return html_path, png_path
+        else:
+            return html_path
+
+    async def _html_to_png(self, html_path, png_path):
+        """
+        Convert the HTML tree to a PNG screenshot using Playwright.
+        Automatically adjusts the PNG size to fit the full tree height.
+        """
+
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=True)
+            page = await browser.new_page()
+            await page.goto("file://" + os.path.abspath(html_path))
+
+            # Wait until the tree SVG exists
+            await page.wait_for_selector("#tree svg")
+
+            # Wait for layout of dynamic node content to stabilize
+            await page.evaluate("""
+                () => new Promise(resolve => {
+                    requestAnimationFrame(() => requestAnimationFrame(resolve));
+                })
+            """)
+
+            # Measure the wrapper container including all overflow from foreignObjects
+            bounding_box = await page.evaluate("""
+                () => {
+                    const container = document.querySelector('#tree-container');
+                    return {
+                        width: Math.ceil(container.scrollWidth) + 20,
+                        height: Math.ceil(container.scrollHeight) + 20
+                    };
+                }
+            """)
+
+            # Set viewport to actual content size
+            await page.set_viewport_size({
+                "width": bounding_box["width"],
+                "height": bounding_box["height"]
+            })
+
+            # Take a screenshot of the SVG
+            svg_elem = await page.query_selector("#tree svg")
+            await svg_elem.screenshot(path=png_path, scale="css")
+
+            await browser.close()
+
+    def _safe_lookup(self, idx):
+        if (idx is not None and 0 <= idx < len(self.id_to_value)):
+            return self.id_to_value[idx]
+        else:
+            # print("index", idx)
+            return "None"
+
+    def _node_to_dict(self, node, children_getter):
+        def ctx_list(ctx):
+            if not ctx:
+                return []
+            items = sorted(ctx.items(), key=lambda kv: (-kv[1], kv[0]))
+            return [{"key": self._safe_lookup(k), "val": float(v)} for k, v in items]
+
+        if isinstance(node, PrimitiveParseNode):
+            return {
+                "title": node.title,
+                "left": self._safe_lookup(node.content),
+                "right": None,
+                "before": ctx_list(node.context_before),
+                "after": ctx_list(node.context_after),
+                "children": [self._node_to_dict(ch[1], children_getter) for ch in children_getter(node)]
+            }
+
+        elif isinstance(node, CompositeParseNode):
+            left_id  = None if not node.content_left  else next(iter(node.content_left.keys()))
+            right_id = None if not node.content_right else next(iter(node.content_right.keys()))
+            left  = self._safe_lookup(left_id)
+            right = self._safe_lookup(right_id)
+
+            return {
+                "title": node.title,
+                "left": left,
+                "right": right,
+                "before": ctx_list(node.context_before),
+                "after":  ctx_list(node.context_after),
+                "children": [self._node_to_dict(ch[1], children_getter) for ch in children_getter(node)]
+            }
+
+        else:
+            raise TypeError(f"Unknown node type {type(node)}")
+
+
+    def _tree_to_json(self):
+        def children_getter(n):
+            for wi, ch in getattr(n, "children", []):
+                yield (wi, ch)
+        return self._node_to_dict(self.global_root_node, children_getter)
+
+    def _build_html(self, d3_data_json, node_w=280, node_h=130, h_gap=80, v_gap=150):
+        return f"""<!doctype html>
+    <html>
+    <head>
+    <meta charset="utf-8"/>
+    <title>Parse Tree</title>
+    <style>
+    body {{ margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }}
+    #tree-container {{ display: inline-block; }}
+    .link {{ fill: none; stroke: #9aa1a9; stroke-width: 1.5px; }}
+    .node-box {{ stroke: #444; fill: #fff; rx: 8; ry: 8; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.15)); }}
+    .node-fo table {{ border-collapse: collapse; font-size: 12px; margin: 4px 0; }}
+    .node-fo th, .node-fo td {{ border: 1px solid #888; padding: 2px 6px; }}
+    .node-fo th {{ background: #f3f5f7; font-weight: 600; }}
+    .section-title {{ font-weight: bold; margin-top: 4px; }}
+    .section {{ margin-top: 10px; margin-bottom: 10px; }}
+    .subtable b {{ display: inline-block; margin: 6px 0 2px; }}
+    .subtable table {{ border-collapse: collapse; }}
+    .subtable td {{ border: 1px solid #bbb; padding: 1px 4px; }}
+    </style>
+    </head>
+    <body>
+    <div id="tree-container">
+    <div id="tree"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script>
+    const data = {d3_data_json};
+    const nodeW  = {node_w};
+    const nodeH  = {node_h};
+    const hGap   = {h_gap};
+    const vGap   = {v_gap};
+
+    const root = d3.hierarchy(data);
+    const layout = d3.tree().nodeSize([nodeW + hGap, nodeH + vGap]);
+    layout(root);
+
+    // compute bounds
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    root.each(d => {{
+        if (d.x < x0) x0 = d.x;
+        if (d.x > x1) x1 = d.x;
+        if (d.y < y0) y0 = d.y;
+        if (d.y > y1) y1 = d.y;
+    }});
+    const width  = x1 - x0 + nodeW + 320;
+    const height = y1 - y0 + nodeH + 320; // THIS IS THE HEIGHT MODIFIER
+
+    const svg = d3.select("#tree").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("viewBox", [x0 - nodeW/2, y0 - nodeH/2, width, height].join(" "));
+
+    const g = svg.append("g");
+
+    // links
+    g.selectAll("path.link")
+    .data(root.links())
+    .join("path")
+    .attr("class", "link")
+    .attr("d", d3.linkVertical().x(d => d.x).y(d => d.y));
+
+    // nodes
+    const node = g.selectAll("g.node")
+    .data(root.descendants())
+    .join("g")
+    .attr("transform", d => `translate(${{d.x}},${{d.y}})`);
+
+    // node rect
+    node.append("rect")
+    .attr("class", "node-box")
+    .attr("x", -nodeW/2)
+    .attr("y", 0)
+    .attr("width", nodeW)
+    .attr("height", nodeH);
+
+    // node HTML via foreignObject
+    node.append("foreignObject")
+    .attr("class", "node-fo")
+    .attr("x", -nodeW/2 + 6)
+    .attr("y", 6)
+    .attr("width", nodeW - 12)
+    .attr("height", 1000)
+    .html(d => nodeHTML(d.data));
+
+    // shrink foreignObjects to actual content height
+    node.selectAll("foreignObject").each(function() {{
+    const fo = d3.select(this);
+    const div = fo.select("div").node();
+    const h = div.getBoundingClientRect().height + 6;
+    fo.attr("height", h);
+    d3.select(this.parentNode).select("rect").attr("height", h + 12);
+    }});
+
+    function nodeHTML(d) {{
+        const ctxTable = (ctx, title) => {{
+            if (!ctx || ctx.length === 0) return `<div class="subtable"><i>${{title}}: empty</i></div>`;
+            const rows = ctx.map(kv => `<tr><td>${{kv.key}}</td><td>${{kv.val.toFixed(2)}}</td></tr>`).join("");
+            return `<div class="subtable"><b>${{title}}</b><table><tbody>${{rows}}</tbody></table></div>`;
+        }};
+
+        let contentRows = "";
+        if (d.right && d.right !== "None") {{
+            // Composite node with left and right
+            contentRows = `
+                <tr><td>Content-Left</td><td>${{d.left}}</td></tr>
+                <tr><td>Content-Right</td><td>${{d.right}}</td></tr>`;
+        }} else {{
+            // Primitive node with single content
+            contentRows = `<tr><td>Content</td><td>${{d.left}}</td></tr>`;
+        }}
+
+        return `
+        <div class="node-fo">
+            <table><tr><th colspan="2">${{d.title}}</th></tr></table>
+            <table>
+            ${{contentRows}}
+            </table>
+            ${{ctxTable(d.before, "Context-Before")}}
+            ${{ctxTable(d.after,  "Context-After")}}
+        </div>`;
+    }}
+
+    </script>
+    </body>
+    </html>
+    """
+
+
+    def to_json(self, filepath=None):
+        """
+        Serialize the ParseTree into JSON. Optionally save to `filepath`.
+        """
+
+        def serialize_node(node, index_map):
+            if isinstance(node, PrimitiveParseNode):
+                return {
+                    "node_type": "primitive",
+                    "title": node.title,
+                    "word_index":node.word_index,
+                    "content": node.content,
+                    "context_before": node.context_before,
+                    "context_after": node.context_after,
+                    "concept_label": node.concept_label,
+                    "global_root": node.global_root,
+                    "parent": index_map.get(node.parent),
+                    "children": [index_map[ch[1]] for ch in node.children],
+                }
+            elif isinstance(node, CompositeParseNode):
+                return {
+                    "node_type": "composite",
+                    "title": node.title,
+                    "word_index":node.word_index,
+                    "content_left": node.content_left,
+                    "content_right": node.content_right,
+                    "context_before": node.context_before,
+                    "context_after": node.context_after,
+                    "concept_label": node.concept_label,
+                    "global_root": node.global_root,
+                    "parent": index_map.get(node.parent),
+                    "children": [index_map[ch[1]] for ch in node.children],
+                }
+            else:
+                raise TypeError(f"Unknown node type {type(node)}")
+
+        index_map = {node: i for i, node in enumerate([self.global_root_node] + self.nodes)}
+        data = {
+            "window": self.window,
+            "context_length": self.context_length,
+            "id_to_value": self.id_to_value,
+            "value_to_id": self.value_to_id,
+            "nodes": [serialize_node(node, index_map) for node in [self.global_root_node] + self.nodes],
+        }
+
+        if filepath:
+            os.makedirs(os.path.dirname(filepath) or ".", exist_ok=True)
+            with open(filepath, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2)
+            return filepath
+        else:
+            return json.dumps(data, indent=2)
+
+    @staticmethod
+    def from_json(data, ltm_hierarchy, filepath=False):
+        """
+        Deserialize a ParseTree from JSON. Requires the same ltm_hierarchy instance.
+        """
+        if filepath:
+            with open(data, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        elif isinstance(data, str):
+            data = json.loads(data)
+
+        tree = FiniteParseTree(
+            ltm_hierarchy,
+            id_to_value=data["id_to_value"],
+            value_to_id=data["value_to_id"],
+            context_length=data["context_length"],
+        )
+        tree.window = data["window"]
+
+        def restore_dict_keys(d):
+            if d is None:
+                return None
+            return {int(k): v for k, v in d.items()}
+
+        node_objs = []
+        for n in data["nodes"]:
+            if n["node_type"] == "primitive":
+                node = PrimitiveParseNode(
+                    content=n["content"],
+                    context_before=restore_dict_keys(n["context_before"]),
+                    context_after=restore_dict_keys(n["context_after"]),
+                    word_index=n["word_index"],
+                )
+            elif n["node_type"] == "composite":
+                node = CompositeParseNode()
+                node.content_left = restore_dict_keys(n["content_left"])
+                node.content_right = restore_dict_keys(n["content_right"])
+                node.context_before = restore_dict_keys(n["context_before"])
+                node.context_after = restore_dict_keys(n["context_after"])
+                node.word_index = n["word_index"]
+
+            else:
+                raise ValueError(f"Unknown node_type {n['node_type']}")
+
+            node.title = n["title"]
+            node.concept_label = n["concept_label"]
+            node.global_root = n["global_root"]
+            node_objs.append(node)
+
+        # restore parent/child relations
+        for idx, n in enumerate(data["nodes"]):
+            node = node_objs[idx]
+            parent_idx = n["parent"]
+            if parent_idx is not None:
+                node.parent = node_objs[parent_idx]
+            node.children = [(node_objs[ch].word_index, node_objs[ch]) for ch in n["children"]]
+
+        tree.global_root_node = node_objs[0]
+        tree.nodes = node_objs[1:]
+
+        return tree
 
 """
 ----------------------------------------------------------------------------------------------

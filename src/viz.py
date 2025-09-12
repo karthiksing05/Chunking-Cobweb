@@ -4,6 +4,7 @@ from playwright.async_api import async_playwright
 import asyncio
 import os
 import json
+import statistics
 
 
 class TextCobwebDrawer:
@@ -61,29 +62,51 @@ class HTMLCobwebDrawer:
 	def _safe_lookup(self, id_to_list, idx):
 		return id_to_list[idx] if (idx is not None and 0 <= idx < len(id_to_list)) else "None"
 
-	def _node_to_dict(self, node):
+	def _node_to_dict(self, node, max_depth=None, _depth=0):
 		"""
 		Convert a CobwebNode into a JSON dict for D3 rendering.
+
+		Args:
+			node: CobwebNode
+			max_depth: maximum depth to recurse (int or None).
+					Depth 0 means only the current node,
+					depth=1 includes children, etc.
+			_depth: internal recursion counter.
 		"""
 		title = f"CONCEPT-{node.concept_hash()}"
 
 		attr_tables = []
 		for attr_id, val_counts in sorted(node.av_count.items()):
-				attr_name = self._safe_lookup(self.id_to_attr, attr_id)
-				rows = []
-				for val_id, count in sorted(val_counts.items()):
-						val_name = self._safe_lookup(self.id_to_value, val_id)
-						rows.append({"val": val_name, "count": count})
-				attr_tables.append({
-						"attr": attr_name,
-						"rows": rows
-				})
+			attr_name = self._safe_lookup(self.id_to_attr, attr_id)
+
+			# Sort values by descending count, then take top 7
+			top_vals = sorted(val_counts.items(), key=lambda x: x[1], reverse=True)[:7]
+
+			rows = []
+			for val_id, count in top_vals:
+				val_name = self._safe_lookup(self.id_to_value, val_id)
+				rows.append({"val": val_name, "count": count})
+
+			attr_tables.append({
+				"attr": attr_name,
+				"rows": rows
+			})
+
+		# Stop recursion if max_depth is reached
+		if max_depth is not None and _depth >= max_depth:
+			children = []
+		else:
+			children = [
+				self._node_to_dict(ch, max_depth=max_depth, _depth=_depth + 1)
+				for ch in getattr(node, "children", [])
+			]
 
 		return {
-				"title": title,
-				"attributes": attr_tables,
-				"children": [self._node_to_dict(ch) for ch in getattr(node, "children", [])]
+			"title": title,
+			"attributes": attr_tables,
+			"children": children
 		}
+
 
 	def _build_html(self, d3_data_json, node_w=320, node_h=140, h_gap=80, v_gap=200):
 		# unchanged: your D3 tree HTML builder
@@ -211,11 +234,11 @@ function nodeHTML(d) {{
 				await page.screenshot(path=png_file, full_page=True)
 				await browser.close()
 
-	def draw_tree(self, root, filepath):
+	def draw_tree(self, root, filepath, max_depth=None):
 		"""
 		Draw Cobweb tree from root node and save HTML/PNG.
 		"""
-		d3_json = json.dumps(self._node_to_dict(root))
+		d3_json = json.dumps(self._node_to_dict(root, max_depth=max_depth))
 		html_str = self._build_html(d3_json)
 
 		os.makedirs(os.path.dirname(filepath + ".html"), exist_ok=True)
@@ -228,3 +251,52 @@ function nodeHTML(d) {{
 				asyncio.run(self._html_to_png(filepath + ".html", filepath + ".png"))
 
 		return filepath + ".html", filepath + ".png"
+	
+	def save_basic_level_subtrees(self, root, folder, level=3):
+		"""
+		Helper function to draw all basic-level subtrees!
+
+		Need to save and reload IDs as they occur at the top level!
+		"""
+
+		optimal_depth = level
+
+		leaves = []
+		visited = [(0, root)]
+
+		num_nodes = 0
+
+		while len(visited) > 0:
+			depth, curr = visited.pop()
+			num_nodes += 1
+
+			if len(curr.children) == 0:
+				leaves.append((depth, curr))
+			else:
+				for child in curr.children:
+					visited.append((depth + 1, child))
+
+		# print("average leaf depth:", sum([x[0] for x in leaves]) / len(leaves))
+		# print("median leaf depth:", statistics.median([x[0] for x in leaves]))
+		
+		basic_level_nodes = {}
+
+		for leaf_tup in leaves:
+			leaf_depth, leaf_node = leaf_tup
+			curr_depth = leaf_depth
+			curr_node = leaf_node
+			while curr_depth > optimal_depth:
+				curr_node = curr_node.parent
+				curr_depth -= 1
+
+			if curr_depth == optimal_depth and leaf_depth - curr_depth >= 2: # 2 is an edge case for "big enough" leaves
+				basic_level_nodes[curr_node.concept_hash()] = curr_node
+
+		# print("num nodes:", num_nodes)
+		# print("num leaves:", len(leaves))
+		# print(f"num nodes at depth {level}:", len(basic_level_nodes))
+
+		for key, bl_node in basic_level_nodes.items():
+			self.draw_tree(bl_node, folder + ("/" if folder[-1] != "/" else "") + f"basic_level_{key}", max_depth=3)
+
+		return True
