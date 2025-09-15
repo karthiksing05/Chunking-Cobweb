@@ -26,7 +26,9 @@ for i, doc in enumerate(document):
 
     parser.add_parse_tree(parse_tree, debug=False)
 
+    if i == 50:
+        parser.visualize_ltm("tests/ltm_analysis/ltm")
+
 # calling the basic-level tree draw method!
-# parser.visualize_ltm("tests/ltm_analysis/ltm")
-parser.cobweb_drawer.save_basic_level_subtrees(parser.ltm_hierarchy.root, "tests/ltm_analysis/basic2_subtrees", level=2)
-parser.cobweb_drawer.save_basic_level_subtrees(parser.ltm_hierarchy.root, "tests/ltm_analysis/basic3_subtrees", level=3)
+parser.cobweb_drawer.save_level_subtrees(parser.ltm_hierarchy.root, "tests/ltm_analysis/level_2_subtrees", level=2)
+parser.cobweb_drawer.save_level_subtrees(parser.ltm_hierarchy.root, "tests/ltm_analysis/level_3_subtrees", level=3)

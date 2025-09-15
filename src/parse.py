@@ -252,9 +252,10 @@ class FiniteParseTree:
                 concept that has the highest probability of generating that chunk is
                 added to the parse tree.
 
-        IMPORTANT PARAM: "end_behavior" --> can be "converge" to represent the
-        tree converging on one root or a float to represent the tree continually
-        updating until no candidates proposed have a valuable enough addition.
+        IMPORTANT PARAM: "end_behavior"
+        *   Can be "converge" to represent the tree converging on one root
+        *   A float to represent the tree continually updating until no candidates
+            proposed have a valuable enough addition.
 
         IMPORTANT PARAM: "content_ids" --> can be "longterm" to represent that composite nodes,
         after content, can inherit from localized IDs
@@ -303,6 +304,7 @@ class FiniteParseTree:
             self.nodes.append(node)
 
         # Creating other layers of composite nodes
+        first_iter = 0
         while True:
 
             best_candidate = None # stores concepts in the form of (score, label, node_left, node_right)
@@ -766,6 +768,7 @@ class FiniteParseTree:
 ----------------------------------------------------------------------------------------------
 """
 
+@DeprecationWarning
 class IncrementalParseTree:
     """
     A class extremely similar to the parse tree given above, but one that takes in a stream of

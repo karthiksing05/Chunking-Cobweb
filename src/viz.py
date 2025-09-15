@@ -252,9 +252,9 @@ function nodeHTML(d) {{
 
 		return filepath + ".html", filepath + ".png"
 	
-	def save_basic_level_subtrees(self, root, folder, level=3):
+	def save_level_subtrees(self, root, folder, level=3):
 		"""
-		Helper function to draw all basic-level subtrees!
+		Helper function to draw all subtrees at a certain level!
 
 		Need to save and reload IDs as they occur at the top level!
 		"""
@@ -291,6 +291,47 @@ function nodeHTML(d) {{
 
 			if curr_depth == optimal_depth and leaf_depth - curr_depth >= 2: # 2 is an edge case for "big enough" leaves
 				basic_level_nodes[curr_node.concept_hash()] = curr_node
+
+		# print("num nodes:", num_nodes)
+		# print("num leaves:", len(leaves))
+		# print(f"num nodes at depth {level}:", len(basic_level_nodes))
+
+		for key, bl_node in basic_level_nodes.items():
+			self.draw_tree(bl_node, folder + ("/" if folder[-1] != "/" else "") + f"level_{level}_{key}", max_depth=3)
+
+		return True
+	
+	def save_basic_level_subtrees(self, root, folder):
+		"""
+		Helper function to draw all basic-level subtrees!
+
+		Need to save and reload IDs as they occur at the top level!
+		"""
+
+		leaves = []
+		visited = [(0, root)]
+
+		num_nodes = 0
+
+		while len(visited) > 0:
+			depth, curr = visited.pop()
+			num_nodes += 1
+
+			if len(curr.children) == 0:
+				leaves.append((depth, curr))
+			else:
+				for child in curr.children:
+					visited.append((depth + 1, child))
+
+		# print("average leaf depth:", sum([x[0] for x in leaves]) / len(leaves))
+		# print("median leaf depth:", statistics.median([x[0] for x in leaves]))
+		
+		basic_level_nodes = {}
+
+		for leaf_tup in leaves:
+			_, leaf_node = leaf_tup
+			curr_node = leaf_node.get_basic_level()
+			basic_level_nodes[curr_node.concept_hash()] = curr_node
 
 		# print("num nodes:", num_nodes)
 		# print("num leaves:", len(leaves))
