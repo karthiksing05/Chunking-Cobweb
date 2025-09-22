@@ -18,6 +18,7 @@ def safe_print(msg):
         print(msg)
         last_printed = msg
 
+@DeprecationWarning
 class CobwebTree:
     def __init__(self,
                  alpha: float = 0.01,
