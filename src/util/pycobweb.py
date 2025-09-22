@@ -10,7 +10,6 @@ import uuid
 AVCount = Dict[int, Dict[int, float]]   # {attr: {val: count}}
 AttrVals = Dict[int, Set[int]]
 
-ijk = 0
 last_printed = None  # keep track of the last thing printed
 
 def safe_print(msg):
@@ -79,7 +78,6 @@ class CobwebTree:
            "promoted_children": ["child1", "child2"]}
           {"action": "BEST", "node": "ghi789"}
         """
-        global ijk
         self._ensure_attr_vals(instance)
         current = self.root
         stats: Dict[str, float] = {}
@@ -848,60 +846,45 @@ class CobwebNode:
         if not self.children:
             return 0.0
 
-        # BEGIN INDIVIDUAL - handle non-normalized attributes case
+        # Case A: norm_attributes == False
         if not self.tree.norm_attributes:
             parent_entropy = 0.0
             children_entropy = 0.0
             concept_entropy = 0.0
 
-            # Calculate parent entropy across all attributes
-            for attr in self.tree.attr_vals.keys():
+            # Sum entropy across all attributes
+            for attr in self.tree.attr_vals:
                 parent_entropy += self.entropy_attr(attr)
 
-            # Calculate children entropy and concept entropy
             for child in self.children:
-                p_of_child = child.count / max(self.count, 1e-15)
-                concept_entropy -= p_of_child * math.log(p_of_child + 1e-15)
+                p_child = child.count / self.count
+                concept_entropy -= p_child * math.log(p_child)
+                for attr in self.tree.attr_vals:
+                    children_entropy += p_child * child.entropy_attr(attr)
 
-                for attr in self.tree.attr_vals.keys():
-                    children_entropy += p_of_child * child.entropy_attr(attr)
-
-            obj = (parent_entropy - children_entropy)
-            if self.tree.objective == 1:
-                obj /= (parent_entropy + 1e-15)
-            elif self.tree.objective == 2:
-                obj /= (children_entropy + concept_entropy + 1e-15)
-            
+            obj = self._normalize_obj(parent_entropy, children_entropy, concept_entropy)
             if self.tree.children_norm:
                 obj /= len(self.children)
-                
             return obj
 
-        # Handle normalized attributes case
-        entropy = 0.0
-        for attr in self.tree.attr_vals.keys():
+        # Case B: norm_attributes == True
+        entropy_sum = 0.0
+        for attr in self.tree.attr_vals:
             children_entropy = 0.0
             concept_entropy = 0.0
-
             for child in self.children:
-                p_of_child = child.count / max(self.count, 1e-15)
-                children_entropy += p_of_child * child.entropy_attr(attr)
-                concept_entropy -= p_of_child * math.log(p_of_child + 1e-15)
+                p_child = child.count / self.count
+                children_entropy += p_child * child.entropy_attr(attr)
+                concept_entropy -= p_child * math.log(p_child)
 
             parent_entropy = self.entropy_attr(attr)
-
-            obj = (parent_entropy - children_entropy)
-            if self.tree.objective == 1:
-                obj /= (parent_entropy + 1e-15)
-            elif self.tree.objective == 2:
-                obj /= (children_entropy + concept_entropy + 1e-15)
-
+            obj = self._normalize_obj(parent_entropy, children_entropy, concept_entropy)
             if self.tree.children_norm:
                 obj /= len(self.children)
-                
-            entropy += obj
+            entropy_sum += obj
 
-        return entropy
+        return entropy_sum
+
 
     def category_utility(self) -> float:
         """
@@ -930,42 +913,35 @@ class CobwebNode:
         """Find the two best children based on scoring method determined by tree objective."""
         if not self.children:
             raise ValueError("No children!")
-            
+
         if self.tree.objective == 0:
-            # Use relative PU with pu_for_insert scoring
-            scores = []
+            # Match C++ relative entropy heuristic
+            rel_scores = []
+            for child in self.children:
+                score = (child.count * child.entropy()) - (
+                    (child.count + 1) * child.entropy_insert(instance)
+                )
+                rel_scores.append((score, child.count, random.random(), child))
+
+            rel_scores.sort(key=lambda x: (x[0], x[1], x[2]), reverse=True)
+            best1 = rel_scores[0][3]
+            best1_pu = 0.0  # C++ hardcodes PU=0.0 for objective==0
+            best2 = rel_scores[1][3] if len(rel_scores) > 1 else None
+            return best1_pu, best1, best2
+
+        else:
+            # Same as before for objectives 1,2,...
+            pus = []
             for child in self.children:
                 pu = self.pu_for_insert(child, instance)
-                scores.append((pu, child.count, random.random(), child))
-                
-            # Sort by score (descending), then count, then random tiebreaker
-            scores.sort(reverse=True)
-            best1 = scores[0][3]  # get the node from tuple
-            best1_score = scores[0][0]  # get the score
-            best2 = scores[1][3] if len(scores) > 1 else None
-            
-            return best1_score, best1, best2
-            
-        else:
-            # For other objectives, use log probability scoring
-            best1 = None
-            best2 = None
-            best1_s = -float("inf")
-            best2_s = -float("inf")
-            
-            for c in self.children:
-                score = c.log_prob_class_given_instance(instance, use_root_counts=False)
-                
-                if score > best1_s:
-                    best2 = best1
-                    best2_s = best1_s 
-                    best1 = c
-                    best1_s = score
-                elif score > best2_s:
-                    best2 = c
-                    best2_s = score
-                    
-            return best1_s, best1, best2
+                pus.append((pu, child.count, random.random(), child))
+
+            pus.sort(key=lambda x: (x[0], x[1], x[2]), reverse=True)
+            best1 = pus[0][3]
+            best1_pu = 0.0  # C++ ignores PU magnitude here too
+            best2 = pus[1][3] if len(pus) > 1 else None
+            return best1_pu, best1, best2
+
 
     def get_best_operation(self, instance: AVCount, best1: Optional["CobwebNode"], 
                       best2: Optional["CobwebNode"], best1_score: float) -> Tuple[float, int]:

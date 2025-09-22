@@ -4,7 +4,7 @@ import json
 import asyncio
 from playwright.async_api import async_playwright
 import re
-from util.pycobweb import CobwebTree, CobwebNode
+from cobweb.cobweb_discrete import CobwebTree
 from viz import HTMLCobwebDrawer
 from typing import List
 from sortedcontainers import SortedList

@@ -2,14 +2,33 @@
 
 Work with Dr. Pat Langley and Dr. Chris Maclellan on ISLE Internship to model attributes of the psychological principle of cognitive Chunking through a Cobweb-backed framework.
 
+## Requirements
+
+Instructions on installing the cobweb package are below! Because of the updates that we've made to traditional cobweb (see the section, "Updates to Cobweb")
+
+
 ## Updates to Cobweb:
 
-A couple modifications were made to Cobweb to support some of the edge-case behavior of the chunking framework:
+A couple modifications were made to Cobweb to support some of the edge-case behavior of the chunking framework. Most notably, we leave these changes in ```my_cobweb_discrete.cpp``` - when running this code, copy the contents of that file into the ```cobweb
+
+Full list of changes is below:
 
 *   Mode 4 - BEST + NEW
+    *   Created a new mode, signified by the mode=4 argument within Cobweb, that only evaluates either the BEST or NEW actions in the event that no edge cases are evaluated. In other words, it completely ignores the MERGE and SPLIT actions.
 *   Made AV_Counts editable
+    *   For each node, I want to modify the AV-count variable. Under the current C++ implementation, it's locked as "read-only".
+    *   Pythonically, should be able to access c.av_count for some c = CobwebNode() and assign that to a value easily without affecting other calculations.
 *   Added new fringe split logic to preserve root's concept hash when root is added
-*   Modify Cobweb such that it contains a DEBUG mode and logs all create/delete actions (by concept hash, new and old)
+    *   In the prior implementation of Cobweb, the root node was promoted to the child node and a new root node was created with the addition of the second instance (this is considered the fringe-split case). However, this results in a root-node concept_hash that doesn't make a lot of sense.
+    *   I would like to change this part of the implementation such that the root node's concept hash is preserved during the fringe split case, and a new node is created to store the instance.
+*   Modify Cobweb such that it contains a DEBUG mode (as parameterized by a "debug" argument) and logs all create/delete actions (by concept hash, new and old)
+    *   This is a purely stylistic / debugging change, and I'll provide a code snippet below that details how concepts should be logged and analyzed. This change should primarily happen in the "ifit" method with the logging categorizing changes before and after the enactment. 
+    *   Each entry is a dict, e.g.:
+        *   {"action": "NEW", "node": "abc123", "parent": "def456"}
+        *   {"action": "MERGE", "new_node": "ghi789", "parent": "root000", "children": ["abc123", "xyz999"]}
+        *   {"action": "SPLIT", "deleted": "abc123", "parent": "root000", "promoted_children": ["child1", "child2"]}
+        *   {"action": "BEST", "node": "ghi789"}
+    *   All edge cases caught before the main evaluation should be classified as "NEW" as well!
 
 ## Design Decisions:
 
@@ -29,18 +48,18 @@ One of the most important things to keep track of over the course of this projec
     *   SPLIT and MERGE contribute to long-term inference efficiency (removing of redundant concepts) which is super relevant for beginning and end behavior
 *   The data we choose to read in is subject to change - currently, we're reading language by sentences, but future iterations can do larger-scale windows and slide the window / create parse trees flexibly over time.
     *   We read in the first n primitives and parse them, then we read the next n primitives (keeping the root node of the primitives)
-    *   [COOL STUFF] If we construct partial parse trees, we can continue iteratively adding primitives to our "active working memory" until the threshold for partial parse trees have been met, and then we can dump everything into 
+    *   [COOL STUFF] If we construct partial parse trees, we can continue iteratively adding primitives to our "active working memory" until the threshold for working memory has been met, and then we can dump everything into the memory all at once?
 
 ## Test Planning:
 
-Below is a list of all tests confirming and acknowledging the use of the framework. Use ```pytest -s test.py``` to run!
+Below is a list of all tests confirming and acknowledging the use of the framework. Use ```pytest -s tests/TEST_NAME_HERE.py``` to run (the "-s" flag is for output)
 
-*   ```parse_tree_test.py``` - small test to confirm the correct implementation of parse trees and parse tree composition
-*   ```gen_learn_test.py``` - another small test to also confirm the logic of parse tree addition and processing
-*   TODO NEED TO UPDATE
+*   ```parse_tree_test.py``` - a test to confirm the correct implementation of parse trees and parse tree composition
+*   ```gen_learn_test.py``` - a test to also confirm the logic of parse tree addition and processing
+*   ```ltm_analysis.py``` - a test that analyzes various long-term memories as well as some intermediate subtree levels.
 
 ## Long-term goals
 
 After we effectively demonstrate that this system can cleanly parse language and related associations, we can implement this system in more puzzle frameworks. Word searches, Chess, and Gomoku (which TAIL already implements) are all valuable implementations.
 
-Additionally (and this is more tentative) creating an embeddings prior that overlaps the tree structure can potentially result in more comprehensive embeddings.
+Additionally (and this is more tentative) creating an embeddings prior that overlaps the tree structure can potentially result in more comprehensive embeddings that are inherently based on relation and composition rather than association and 
