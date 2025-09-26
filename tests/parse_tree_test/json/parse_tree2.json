@@ -1,7 +1,8 @@
 {
-  "window": "the red big park found",
+  "window": "the big big small park liked",
   "context_length": 3,
   "id_to_value": [
+    "EMPTYNULL",
     "the",
     "a",
     "cat",
@@ -24,37 +25,38 @@
     "in",
     "on",
     "under",
-    "CONCEPT-5820321200"
+    "CONCEPT-4380982928"
   ],
   "value_to_id": {
-    "the": 0,
-    "a": 1,
-    "cat": 2,
-    "dog": 3,
-    "man": 4,
-    "woman": 5,
-    "park": 6,
-    "telescope": 7,
-    "big": 8,
-    "small": 9,
-    "red": 10,
-    "quick": 11,
-    "lazy": 12,
-    "saw": 13,
-    "liked": 14,
-    "chased": 15,
-    "found": 16,
-    "admired": 17,
-    "with": 18,
-    "in": 19,
-    "on": 20,
-    "under": 21,
-    "CONCEPT-5820321200": 22
+    "EMPTYNULL": 0,
+    "the": 1,
+    "a": 2,
+    "cat": 3,
+    "dog": 4,
+    "man": 5,
+    "woman": 6,
+    "park": 7,
+    "telescope": 8,
+    "big": 9,
+    "small": 10,
+    "red": 11,
+    "quick": 12,
+    "lazy": 13,
+    "saw": 14,
+    "liked": 15,
+    "chased": 16,
+    "found": 17,
+    "admired": 18,
+    "with": 19,
+    "in": 20,
+    "on": 21,
+    "under": 22,
+    "CONCEPT-4380982928": 23
   },
   "nodes": [
     {
       "node_type": "composite",
-      "title": "0ffe1a5c7d",
+      "title": "d98d944ff1",
       "word_index": null,
       "content_left": null,
       "content_right": null,
@@ -64,55 +66,21 @@
       "global_root": true,
       "parent": null,
       "children": [
-        9
+        11
       ]
     },
     {
       "node_type": "primitive",
-      "title": "d4b9d62d04",
+      "title": "45ae66c12c",
       "word_index": 0,
-      "content": 0,
-      "context_before": {},
-      "context_after": {
-        "10": 1.0,
-        "8": 0.5,
-        "6": 0.3333333333333333
-      },
-      "concept_label": null,
-      "global_root": false,
-      "parent": 6,
-      "children": []
-    },
-    {
-      "node_type": "primitive",
-      "title": "646bfcb335",
-      "word_index": 1,
-      "content": 10,
+      "content": 1,
       "context_before": {
-        "0": 1.0
+        "0": 0
       },
       "context_after": {
-        "8": 1.0,
-        "6": 0.5,
-        "16": 0.3333333333333333
-      },
-      "concept_label": null,
-      "global_root": false,
-      "parent": 6,
-      "children": []
-    },
-    {
-      "node_type": "primitive",
-      "title": "f6d93febc5",
-      "word_index": 2,
-      "content": 8,
-      "context_before": {
-        "10": 1.0,
-        "0": 0.5
-      },
-      "context_after": {
-        "6": 1.0,
-        "16": 0.5
+        "0": 0,
+        "9": 1.5,
+        "10": 0.3333333333333333
       },
       "concept_label": null,
       "global_root": false,
@@ -121,16 +89,39 @@
     },
     {
       "node_type": "primitive",
-      "title": "f3aa0185fc",
-      "word_index": 3,
-      "content": 6,
+      "title": "988ac36d43",
+      "word_index": 1,
+      "content": 9,
       "context_before": {
-        "8": 1.0,
-        "10": 0.5,
-        "0": 0.3333333333333333
+        "0": 0,
+        "1": 1.0
       },
       "context_after": {
-        "16": 1.0
+        "0": 0,
+        "9": 1.0,
+        "10": 0.5,
+        "7": 0.3333333333333333
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 7,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "40176ce7b1",
+      "word_index": 2,
+      "content": 9,
+      "context_before": {
+        "0": 0,
+        "9": 1.0,
+        "1": 0.5
+      },
+      "context_after": {
+        "0": 0,
+        "10": 1.0,
+        "7": 0.5,
+        "15": 0.3333333333333333
       },
       "concept_label": null,
       "global_root": false,
@@ -139,39 +130,86 @@
     },
     {
       "node_type": "primitive",
-      "title": "1f90697968",
-      "word_index": 4,
-      "content": 16,
+      "title": "9c22ccd3a7",
+      "word_index": 3,
+      "content": 10,
       "context_before": {
-        "6": 1.0,
-        "8": 0.5,
-        "10": 0.3333333333333333
+        "0": 0,
+        "9": 1.5,
+        "1": 0.3333333333333333
       },
-      "context_after": {},
+      "context_after": {
+        "0": 0,
+        "7": 1.0,
+        "15": 0.5
+      },
       "concept_label": null,
       "global_root": false,
       "parent": 9,
       "children": []
     },
     {
+      "node_type": "primitive",
+      "title": "621cb654a0",
+      "word_index": 4,
+      "content": 7,
+      "context_before": {
+        "0": 0,
+        "10": 1.0,
+        "9": 0.8333333333333333
+      },
+      "context_after": {
+        "0": 0,
+        "15": 1.0
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 10,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "b25e5fcc1a",
+      "word_index": 5,
+      "content": 15,
+      "context_before": {
+        "0": 0,
+        "7": 1.0,
+        "10": 0.5,
+        "9": 0.3333333333333333
+      },
+      "context_after": {
+        "0": 0
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 11,
+      "children": []
+    },
+    {
       "node_type": "composite",
-      "title": "4307af681b",
+      "title": "ecdf179506",
       "word_index": 0.5,
       "content_left": {
-        "0": 1
+        "0": 0,
+        "1": 1
       },
       "content_right": {
-        "10": 1
+        "0": 0,
+        "9": 1
       },
-      "context_before": {},
+      "context_before": {
+        "0": 0
+      },
       "context_after": {
-        "8": 1.0,
-        "6": 0.5,
-        "16": 0.3333333333333333
+        "0": 0,
+        "9": 1.0,
+        "10": 0.5,
+        "7": 0.3333333333333333
       },
-      "concept_label": 22,
+      "concept_label": 23,
       "global_root": false,
-      "parent": 7,
+      "parent": 8,
       "children": [
         1,
         2
@@ -179,67 +217,112 @@
     },
     {
       "node_type": "composite",
-      "title": "078cd8ee6a",
+      "title": "d9d01098c0",
       "word_index": 1.25,
       "content_left": {
-        "22": 1
+        "0": 0,
+        "23": 1
       },
       "content_right": {
-        "8": 1
+        "0": 0,
+        "9": 1
       },
-      "context_before": {},
+      "context_before": {
+        "0": 0
+      },
       "context_after": {
-        "6": 1.0,
-        "16": 0.5
+        "0": 0,
+        "10": 1.0,
+        "7": 0.5,
+        "15": 0.3333333333333333
       },
-      "concept_label": 22,
+      "concept_label": 23,
       "global_root": false,
-      "parent": 8,
+      "parent": 9,
       "children": [
-        6,
+        7,
         3
       ]
     },
     {
       "node_type": "composite",
-      "title": "20cdfe6bd0",
+      "title": "86bde85ae8",
       "word_index": 2.125,
       "content_left": {
-        "22": 1
+        "0": 0,
+        "23": 1
       },
       "content_right": {
-        "6": 1
+        "0": 0,
+        "10": 1
       },
-      "context_before": {},
+      "context_before": {
+        "0": 0
+      },
       "context_after": {
-        "16": 1.0
+        "0": 0,
+        "7": 1.0,
+        "15": 0.5
       },
-      "concept_label": 22,
+      "concept_label": 23,
       "global_root": false,
-      "parent": 9,
+      "parent": 10,
       "children": [
-        7,
+        8,
         4
       ]
     },
     {
       "node_type": "composite",
-      "title": "63c6e01bb5",
+      "title": "b6bf0e7732",
       "word_index": 3.0625,
       "content_left": {
-        "22": 1
+        "0": 0,
+        "23": 1
       },
       "content_right": {
-        "16": 1
+        "0": 0,
+        "7": 1
       },
-      "context_before": {},
-      "context_after": {},
-      "concept_label": 22,
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0,
+        "15": 1.0
+      },
+      "concept_label": 23,
+      "global_root": false,
+      "parent": 11,
+      "children": [
+        9,
+        5
+      ]
+    },
+    {
+      "node_type": "composite",
+      "title": "55e415a958",
+      "word_index": 4.03125,
+      "content_left": {
+        "0": 0,
+        "23": 1
+      },
+      "content_right": {
+        "0": 0,
+        "15": 1
+      },
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0
+      },
+      "concept_label": 23,
       "global_root": false,
       "parent": 0,
       "children": [
-        8,
-        5
+        10,
+        6
       ]
     }
   ]

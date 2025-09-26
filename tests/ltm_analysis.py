@@ -10,7 +10,7 @@ from util.cfg import generate, TEST_CORPUS2, TEST_GRAMMAR2
 from parse import LanguageChunkingParser
 
 # Creating and printing toy sentences
-num_sentences = 200
+num_sentences = 100
 document = []
 
 for _ in range(num_sentences):
@@ -18,10 +18,10 @@ for _ in range(num_sentences):
     document.append(sentence)
 
 # Setting up the parser
-parser = LanguageChunkingParser(TEST_CORPUS2, merge_split=False)
+parser = LanguageChunkingParser(TEST_CORPUS2, merge_split=True)
 
 for i, doc in enumerate(document):
-    parse_trees = parser.parse_input([doc], end_behavior="converge", debug=False)
+    parse_trees = parser.parse_input([doc], end_behavior="converge", debug=True)
     parse_tree = parse_trees[0]
 
     parser.add_parse_tree(parse_tree, debug=False)

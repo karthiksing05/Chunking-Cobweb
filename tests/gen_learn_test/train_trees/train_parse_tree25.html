@@ -24,7 +24,7 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script>
-    const data = {"title": "ec0806158d", "left": "None", "right": "None", "before": [], "after": [], "children": [{"title": "7b81cdfd85", "left": "CONCEPT-11558faf86", "right": "CONCEPT-c1e2635e3b", "before": [], "after": [], "children": [{"title": "b912f8aba5", "left": "a", "right": "lazy", "before": [], "after": [{"key": "man", "val": 1.0}, {"key": "chased", "val": 0.5}], "children": [{"title": "5747ed7a2a", "left": "a", "right": null, "before": [], "after": [{"key": "lazy", "val": 1.0}, {"key": "man", "val": 0.5}, {"key": "chased", "val": 0.3333333333333333}], "children": []}, {"title": "087025a931", "left": "lazy", "right": null, "before": [{"key": "a", "val": 1.0}], "after": [{"key": "man", "val": 1.0}, {"key": "chased", "val": 0.5}], "children": []}]}, {"title": "57c99fbc15", "left": "man", "right": "chased", "before": [{"key": "lazy", "val": 1.0}, {"key": "a", "val": 0.5}], "after": [], "children": [{"title": "3e770ed4b4", "left": "man", "right": null, "before": [{"key": "lazy", "val": 1.0}, {"key": "a", "val": 0.5}], "after": [{"key": "chased", "val": 1.0}], "children": []}, {"title": "9e0215fd48", "left": "chased", "right": null, "before": [{"key": "man", "val": 1.0}, {"key": "lazy", "val": 0.5}, {"key": "a", "val": 0.3333333333333333}], "after": [], "children": []}]}]}]};
+    const data = {"title": "8420766ce6", "left": [], "right": [], "before": [], "after": [], "children": [{"title": "3a7d230cc4", "left": [{"key": "the", "val": 1.0}, {"key": "EMPTYNULL", "val": 0.0}], "right": [{"key": "CONCEPT-5083173088", "val": 1.0}, {"key": "EMPTYNULL", "val": 0.0}], "before": [{"key": "EMPTYNULL", "val": 0.0}], "after": [{"key": "EMPTYNULL", "val": 0.0}], "children": [{"title": "2088651a65", "left": [{"key": "the", "val": 1.0}], "right": [], "before": [{"key": "EMPTYNULL", "val": 0.0}], "after": [{"key": "small", "val": 1.0}, {"key": "red", "val": 0.5}, {"key": "woman", "val": 0.3333333333333333}, {"key": "EMPTYNULL", "val": 0.0}], "children": []}, {"title": "e90f9928b5", "left": [{"key": "small", "val": 1.0}, {"key": "EMPTYNULL", "val": 0.0}], "right": [{"key": "CONCEPT-4544669456", "val": 1.0}, {"key": "EMPTYNULL", "val": 0.0}], "before": [{"key": "the", "val": 1.0}, {"key": "EMPTYNULL", "val": 0.0}], "after": [{"key": "EMPTYNULL", "val": 0.0}], "children": [{"title": "e53033b89b", "left": [{"key": "small", "val": 1.0}], "right": [], "before": [{"key": "the", "val": 1.0}, {"key": "EMPTYNULL", "val": 0.0}], "after": [{"key": "red", "val": 1.0}, {"key": "woman", "val": 0.5}, {"key": "found", "val": 0.3333333333333333}, {"key": "EMPTYNULL", "val": 0.0}], "children": []}, {"title": "136ec45630", "left": [{"key": "red", "val": 1.0}, {"key": "EMPTYNULL", "val": 0.0}], "right": [{"key": "CONCEPT-5083173088", "val": 1.0}, {"key": "EMPTYNULL", "val": 0.0}], "before": [{"key": "small", "val": 1.0}, {"key": "the", "val": 0.5}, {"key": "EMPTYNULL", "val": 0.0}], "after": [{"key": "EMPTYNULL", "val": 0.0}], "children": [{"title": "cfa9fb6a1e", "left": [{"key": "red", "val": 1.0}], "right": [], "before": [{"key": "small", "val": 1.0}, {"key": "the", "val": 0.5}, {"key": "EMPTYNULL", "val": 0.0}], "after": [{"key": "woman", "val": 1.0}, {"key": "found", "val": 0.5}, {"key": "EMPTYNULL", "val": 0.0}], "children": []}, {"title": "cbcad0988e", "left": [{"key": "woman", "val": 1.0}, {"key": "EMPTYNULL", "val": 0.0}], "right": [{"key": "found", "val": 1.0}, {"key": "EMPTYNULL", "val": 0.0}], "before": [{"key": "red", "val": 1.0}, {"key": "small", "val": 0.5}, {"key": "the", "val": 0.3333333333333333}, {"key": "EMPTYNULL", "val": 0.0}], "after": [{"key": "EMPTYNULL", "val": 0.0}], "children": [{"title": "fe0b4edd33", "left": [{"key": "woman", "val": 1.0}], "right": [], "before": [{"key": "red", "val": 1.0}, {"key": "small", "val": 0.5}, {"key": "the", "val": 0.3333333333333333}, {"key": "EMPTYNULL", "val": 0.0}], "after": [{"key": "found", "val": 1.0}, {"key": "EMPTYNULL", "val": 0.0}], "children": []}, {"title": "ddbc88991c", "left": [{"key": "found", "val": 1.0}], "right": [], "before": [{"key": "woman", "val": 1.0}, {"key": "red", "val": 0.5}, {"key": "small", "val": 0.3333333333333333}, {"key": "EMPTYNULL", "val": 0.0}], "after": [{"key": "EMPTYNULL", "val": 0.0}], "children": []}]}]}]}]}]};
     const nodeW  = 280;
     const nodeH  = 130;
     const hGap   = 80;
@@ -98,23 +98,27 @@
             return `<div class="subtable"><b>${title}</b><table><tbody>${rows}</tbody></table></div>`;
         };
 
-        let contentRows = "";
-        if (d.right && d.right !== "None") {
-            // Composite node with left and right
-            contentRows = `
-                <tr><td>Content-Left</td><td>${d.left}</td></tr>
-                <tr><td>Content-Right</td><td>${d.right}</td></tr>`;
+        // content: left and right are now lists of {key, val}
+        let contentHTML = "";
+        const leftHas = Array.isArray(d.left) && d.left.length > 0;
+        const rightHas = Array.isArray(d.right) && d.right.length > 0;
+
+        if (rightHas) {
+            // composite-style node: show both left and right content tables
+            contentHTML = `<div class="section">${ctxTable(d.left, "Content-Left")}${ctxTable(d.right, "Content-Right")}</div>`;
+        } else if (leftHas) {
+            // primitive or single-sided composite: show a single content table
+            // label it "Content" for primitives
+            const label = (d.right && d.right.length > 0) ? "Content-Left" : "Content";
+            contentHTML = `<div class="section">${ctxTable(d.left, label)}</div>`;
         } else {
-            // Primitive node with single content
-            contentRows = `<tr><td>Content</td><td>${d.left}</td></tr>`;
+            contentHTML = `<div class="section"><i>Content: empty</i></div>`;
         }
 
         return `
         <div class="node-fo">
             <table><tr><th colspan="2">${d.title}</th></tr></table>
-            <table>
-            ${contentRows}
-            </table>
+            ${contentHTML}
             ${ctxTable(d.before, "Context-Before")}
             ${ctxTable(d.after,  "Context-After")}
         </div>`;

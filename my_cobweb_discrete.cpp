@@ -666,92 +666,6 @@ public:
             }
             else if (current->children.empty())
             {
-                // OLD CODE!!!!
-                // fringe_split_count += 1;
-                // auto start_fs = std::chrono::high_resolution_clock::now();
-
-                // if (current->parent == nullptr)
-                // {
-                //     // Root-preserving: create a new internal node above root
-                //     CobwebNode *new_node = new CobwebNode();
-                //     new_node->tree = this;
-
-                //     // Set new_node as the root
-                //     new_node->children.push_back(current);
-                //     current->parent = new_node;
-                //     root = new_node;
-
-                //     // Log as NEW (debug)
-                //     if (debug)
-                //     {
-                //         std::ostringstream ss;
-                //         ss << "{\"action\":\"NEW\",\"node\":\"" << new_node->concept_hash() 
-                //         << "\",\"parent\":\"null\"}";
-                //         debug_logs.push_back(ss.str());
-                //     }
-
-                //     // Increment counts for the new node
-                //     auto start_ic_new_node = std::chrono::high_resolution_clock::now();
-                //     new_node->increment_counts(instance);
-                //     auto end_ic_new_node = std::chrono::high_resolution_clock::now();
-                //     std::chrono::duration<double> elapsed_ic_new_node = end_ic_new_node - start_ic_new_node;
-                //     fringe_split_IC_time += elapsed_ic_new_node.count();
-
-                //     // Create a new leaf under new_node for this instance
-                //     CobwebNode *new_leaf = new CobwebNode();
-                //     new_leaf->tree = this;
-                //     new_leaf->parent = new_node;
-
-                //     auto start_leaf_ic = std::chrono::high_resolution_clock::now();
-                //     new_leaf->increment_counts(instance);
-                //     auto end_leaf_ic = std::chrono::high_resolution_clock::now();
-                //     std::chrono::duration<double> elapsed_leaf_ic = end_leaf_ic - start_leaf_ic;
-                //     fringe_split_IC_time += elapsed_leaf_ic.count();
-
-                //     new_node->children.push_back(new_leaf);
-                // }
-                // else
-                // {
-                //     // Original fringe-split behavior for non-root
-                //     CobwebNode *new_node = new CobwebNode(current);
-                //     current->parent = new_node;
-                //     new_node->children.push_back(current);
-
-                //     if (new_node->parent == nullptr)
-                //     {
-                //         root = new_node;
-                //     }
-                //     else
-                //     {
-                //         auto &siblings = new_node->parent->children;
-                //         siblings.erase(std::remove(siblings.begin(), siblings.end(), current), siblings.end());
-                //         siblings.push_back(new_node);
-                //     }
-
-                //     if (debug)
-                //     {
-                //         std::ostringstream ss;
-                //         ss << "{\"action\":\"NEW\",\"node\":\"" << new_node->concept_hash() << "\",\"parent\":\""
-                //         << (new_node->parent ? new_node->parent->concept_hash() : "null") << "\"}";
-                //         debug_logs.push_back(ss.str());
-                //     }
-
-                //     auto start2 = std::chrono::high_resolution_clock::now();
-                //     new_node->increment_counts(instance);
-                //     auto end2 = std::chrono::high_resolution_clock::now();
-                //     fringe_split_IC_time += std::chrono::duration<double>(end2 - start2).count();
-
-                //     current = new CobwebNode();
-                //     current->parent = new_node;
-                //     current->tree = this;
-
-                //     auto start3 = std::chrono::high_resolution_clock::now();
-                //     current->increment_counts(instance);
-                //     auto end3 = std::chrono::high_resolution_clock::now();
-                //     fringe_split_IC_time += std::chrono::duration<double>(end3 - start3).count();
-
-                //     new_node->children.push_back(current);
-                // }
 
                 fringe_split_count += 1;
                 auto start_fs = std::chrono::high_resolution_clock::now();
@@ -759,7 +673,7 @@ public:
                 // Step 1: Preserve the old current node's structure in a new node
                 CobwebNode* old_current_clone = new CobwebNode(*current);
                 old_current_clone->children = current->children;
-                std::cout << "fringe split" << std::endl;
+                // std::cout << "fringe split" << std::endl;
                 for (auto child : old_current_clone->children) {
                     child->parent = old_current_clone;
                 }
@@ -813,49 +727,6 @@ public:
                 auto end_fs = std::chrono::high_resolution_clock::now();
                 fringe_split_time += (end_fs - start_fs).count();
                 break;
-
-                // OLD CODE!!!!
-                // // std::cout << "fringe split" << std::endl;
-                // fringe_split_count += 1;
-
-                // auto start_fs = std::chrono::high_resolution_clock::now();
-                // CobwebNode *new_node = new CobwebNode(current);
-                // current->parent = new_node;
-                // new_node->children.push_back(current);
-
-                // if (new_node->parent == nullptr)
-                // {
-                //     root = new_node;
-                // }
-                // else
-                // {
-                //     new_node->parent->children.erase(remove(new_node->parent->children.begin(),
-                //                                             new_node->parent->children.end(), current),
-                //                                      new_node->parent->children.end());
-                //     new_node->parent->children.push_back(new_node);
-                // }
-
-                // auto start2 = std::chrono::high_resolution_clock::now();
-                // new_node->increment_counts(instance);
-                // auto end2 = std::chrono::high_resolution_clock::now();
-                // std::chrono::duration<double> elapsed2 = end2 - start2;
-                // fringe_split_IC_time += elapsed2.count();
-
-                // current = new CobwebNode();
-                // current->parent = new_node;
-                // current->tree = this;
-
-                // auto start3 = std::chrono::high_resolution_clock::now();
-                // current->increment_counts(instance);
-                // auto end3 = std::chrono::high_resolution_clock::now();
-                // std::chrono::duration<double> elapsed3 = end3 - start3;
-                // fringe_split_IC_time += elapsed3.count();
-
-                // new_node->children.push_back(current);
-                // auto end_fs = std::chrono::high_resolution_clock::now();
-                // std::chrono::duration<double> elapsed_fs = end_fs - start_fs;
-                // fringe_split_time += elapsed_fs.count();
-                // break;
             }
             else
             {
@@ -966,12 +837,6 @@ public:
                 else if (bestAction == NEW)
                 {
                     NEW_count += 1;
-                    if (debug)
-                    {
-                        std::ostringstream ss;
-                        ss << "{\"action\":\"NEW\",\"parent\":\"" << current->concept_hash() << "\"}";
-                        debug_logs.push_back(ss.str());
-                    }
                     auto start_new = std::chrono::high_resolution_clock::now();
 
                     auto start_ic1 = std::chrono::high_resolution_clock::now();
@@ -983,6 +848,14 @@ public:
                     CobwebNode *new_child = new CobwebNode();
                     new_child->parent = current;
                     new_child->tree = this;
+
+                    if (debug)
+                    {
+                        std::ostringstream ss;
+                        ss << "{\"action\":\"NEW\",\"node\":\"" << new_child->concept_hash() << "\",\"parent\":\""
+                             << (current->concept_hash()) << "\"}";
+                        debug_logs.push_back(ss.str());
+                    }
 
                     auto start_ic2 = std::chrono::high_resolution_clock::now();
                     new_child->increment_counts(instance);
@@ -1002,14 +875,7 @@ public:
                 else if (bestAction == MERGE)
                 {
                     MERGE_count += 1;
-                    if (debug)
-                    {
-                        std::ostringstream ss;
-                        ss << "{\"action\":\"MERGE\",\"parent\":\"" << current->concept_hash()
-                           << "\",\"children\":[\"" << (best1 ? best1->concept_hash() : std::string("null")) << "\",\""
-                           << (best2 ? best2->concept_hash() : std::string("null")) << "\"]}";
-                        debug_logs.push_back(ss.str());
-                    }
+                
                     auto start_merge = std::chrono::high_resolution_clock::now();
 
                     auto start_mic1 = std::chrono::high_resolution_clock::now();
@@ -1042,6 +908,16 @@ public:
                     current->children.push_back(new_child);
                     current = new_child;
 
+                    if (debug)
+                    {
+                        std::ostringstream ss;
+                        ss << "{\"action\":\"MERGE\",\"new_node\":\"" << new_child->concept_hash()
+                        << "\",\"parent\":\"" << current->concept_hash()
+                        << "\",\"children\":[\"" << best1->concept_hash()
+                        << "\",\"" << best2->concept_hash() << "\"]}";
+                        debug_logs.push_back(ss.str());
+                    }
+
                     auto end_merge = std::chrono::high_resolution_clock::now();
                     std::chrono::duration<double> elapsed_merge = end_merge - start_merge;
                     MERGE_time += elapsed_merge.count();
@@ -1049,12 +925,6 @@ public:
                 else if (bestAction == SPLIT)
                 {
                     SPLIT_count += 1;
-                    if (debug)
-                    {
-                        std::ostringstream ss;
-                        ss << "{\"action\":\"SPLIT\",\"node\":\"" << (best1 ? best1->concept_hash() : std::string("null")) << "\",\"parent\":\"" << current->concept_hash() << "\"}";
-                        debug_logs.push_back(ss.str());
-                    }
                     auto start_split = std::chrono::high_resolution_clock::now();
                     current->children.erase(remove(current->children.begin(),
                                                    current->children.end(), best1),
@@ -1065,7 +935,25 @@ public:
                         c->tree = this;
                         current->children.push_back(c);
                     }
+
+                    if (debug)
+                    {
+                        std::ostringstream ss;
+                        ss << "{\"action\":\"SPLIT\",\"deleted\":\"" << best1->concept_hash()
+                        << "\",\"parent\":\"" << current->concept_hash()
+                        << "\",\"promoted_children\":[";
+                        for (size_t i = 0; i < best1->children.size(); ++i)
+                        {
+                            ss << "\"" << best1->children[i]->concept_hash() << "\"";
+                            if (i + 1 < best1->children.size())
+                                ss << ",";
+                        }
+                        ss << "]}";
+                        debug_logs.push_back(ss.str());
+                    }
+
                     delete best1;
+
                     auto end_split = std::chrono::high_resolution_clock::now();
                     std::chrono::duration<double> elapsed_split = end_split - start_split;
                     SPLIT_time += elapsed_split.count();

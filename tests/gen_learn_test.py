@@ -26,7 +26,7 @@ for i, doc in enumerate(train_documents):
     parse_trees = parser.parse_input([doc], end_behavior="converge", debug=False)
     parse_tree = parse_trees[0]
 
-    parser.add_parse_tree(parse_tree, debug=True)
+    parser.add_parse_tree(parse_tree, debug=False)
 
     if i < 5:
         parser.visualize_ltm(f"tests/gen_learn_test/ltms/cobweb_ltm{i}")

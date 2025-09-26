@@ -59,6 +59,8 @@ class PrimitiveParseNode:
     def get_as_instance(self):
         """
         Helper method to get the current parse node as an instance description!
+
+        Note that with this method, we don't have to worry about an empty set for the content because it carries forth
         """
 
         return {
@@ -66,13 +68,6 @@ class PrimitiveParseNode:
             "context-before": self.context_before,
             "context-after": self.context_after
         }
-
-        # return {
-        #     0: self.content_left,
-        #     1: self.content_right,
-        #     2: self.context_before,
-        #     3: self.context_after
-        # }
 
 """
 ----------------------------------------------------------------------------------------------
@@ -166,14 +161,14 @@ class CompositeParseNode:
         new_inst_dict = {}
 
         if type(node_left) == PrimitiveParseNode:
-            new_inst_dict[0] = {node_left.content: 1}
+            new_inst_dict[0] = {0: 0, node_left.content: 1}
         else:
-            new_inst_dict[0] = {node_left.concept_label: 1}
+            new_inst_dict[0] = {0: 0, node_left.concept_label: 1}
 
         if type(node_right) == PrimitiveParseNode:
-            new_inst_dict[1] = {node_right.content: 1}
+            new_inst_dict[1] = {0: 0, node_right.content: 1}
         else:
-            new_inst_dict[1] = {node_right.concept_label: 1}
+            new_inst_dict[1] = {0: 0, node_right.concept_label: 1}
 
         # we need to import the previous node's content and context
         # I have reason to think that the below code will just work LOL
@@ -286,8 +281,8 @@ class FiniteParseTree:
             # have to compute the dictionaries through a for loop so that we can
             # add multiple weights for multiple instances of the word
 
-            context_before_dict = dict()
-            context_after_dict = dict()
+            context_before_dict = {0: 0} # initializing with the empty set!
+            context_after_dict = {0: 0}
 
             for j in range(len(context_before_lst)):
                 context_before_dict.setdefault(context_before_lst[j], 0)
@@ -304,7 +299,6 @@ class FiniteParseTree:
             self.nodes.append(node)
 
         # Creating other layers of composite nodes
-        first_iter = 0
         while True:
 
             best_candidate = None # stores concepts in the form of (score, label, node_left, node_right)
@@ -322,6 +316,11 @@ class FiniteParseTree:
                 merge_inst = CompositeParseNode.create_merge_instance(node_left, node_right)
 
                 candidate_concept = self.ltm_hierarchy.categorize(merge_inst).get_basic_level()
+
+                # if self.ltm_hierarchy.categorize(merge_inst).concept_hash() != self.ltm_hierarchy.categorize(merge_inst).get_basic_level():
+                #     print("Basic level was actually a non-leaf for merge-inst")
+                #     print(merge_inst)
+
                 candidate_concept_id = self.value_to_id[f"CONCEPT-{candidate_concept.concept_hash()}"]
 
                 candidate_score = candidate_concept.log_prob_instance(merge_inst)
@@ -337,7 +336,7 @@ class FiniteParseTree:
                     print("Candidate Concept Log Prob Instance Missing", 
                           candidate_concept.log_prob_instance_missing(merge_inst))
                     print("Candidate Concept Log Prob Class Given Instance", 
-                          candidate_concept.log_prob_class_given_instance(merge_inst))
+                          candidate_concept.log_prob_class_given_instance(merge_inst, True))
                     print()
 
                 if not best_candidate or candidate_score > best_candidate[0]:
@@ -476,32 +475,35 @@ class FiniteParseTree:
             return "None"
 
     def _node_to_dict(self, node, children_getter):
+        # new logic for 0:0 claims
         def ctx_list(ctx):
             if not ctx:
                 return []
+            # sort by descending value then key (matching prior behavior)
             items = sorted(ctx.items(), key=lambda kv: (-kv[1], kv[0]))
             return [{"key": self._safe_lookup(k), "val": float(v)} for k, v in items]
 
         if isinstance(node, PrimitiveParseNode):
+            # represent primitive content as a single-entry list to keep a consistent shape
+            left_list = [{"key": self._safe_lookup(node.content), "val": 1.0}]
             return {
                 "title": node.title,
-                "left": self._safe_lookup(node.content),
-                "right": None,
+                "left": left_list,
+                "right": [],  # primitives have no right content
                 "before": ctx_list(node.context_before),
-                "after": ctx_list(node.context_after),
+                "after":  ctx_list(node.context_after),
                 "children": [self._node_to_dict(ch[1], children_getter) for ch in children_getter(node)]
             }
 
         elif isinstance(node, CompositeParseNode):
-            left_id  = None if not node.content_left  else next(iter(node.content_left.keys()))
-            right_id = None if not node.content_right else next(iter(node.content_right.keys()))
-            left  = self._safe_lookup(left_id)
-            right = self._safe_lookup(right_id)
+            # content_left/content_right are dicts -> convert to same list-of-{key,val} shape
+            left_list  = ctx_list(node.content_left)
+            right_list = ctx_list(node.content_right)
 
             return {
                 "title": node.title,
-                "left": left,
-                "right": right,
+                "left": left_list,
+                "right": right_list,
                 "before": ctx_list(node.context_before),
                 "after":  ctx_list(node.context_after),
                 "children": [self._node_to_dict(ch[1], children_getter) for ch in children_getter(node)]
@@ -618,23 +620,27 @@ class FiniteParseTree:
             return `<div class="subtable"><b>${{title}}</b><table><tbody>${{rows}}</tbody></table></div>`;
         }};
 
-        let contentRows = "";
-        if (d.right && d.right !== "None") {{
-            // Composite node with left and right
-            contentRows = `
-                <tr><td>Content-Left</td><td>${{d.left}}</td></tr>
-                <tr><td>Content-Right</td><td>${{d.right}}</td></tr>`;
+        // content: left and right are now lists of {{key, val}}
+        let contentHTML = "";
+        const leftHas = Array.isArray(d.left) && d.left.length > 0;
+        const rightHas = Array.isArray(d.right) && d.right.length > 0;
+
+        if (rightHas) {{
+            // composite-style node: show both left and right content tables
+            contentHTML = `<div class="section">${{ctxTable(d.left, "Content-Left")}}${{ctxTable(d.right, "Content-Right")}}</div>`;
+        }} else if (leftHas) {{
+            // primitive or single-sided composite: show a single content table
+            // label it "Content" for primitives
+            const label = (d.right && d.right.length > 0) ? "Content-Left" : "Content";
+            contentHTML = `<div class="section">${{ctxTable(d.left, label)}}</div>`;
         }} else {{
-            // Primitive node with single content
-            contentRows = `<tr><td>Content</td><td>${{d.left}}</td></tr>`;
+            contentHTML = `<div class="section"><i>Content: empty</i></div>`;
         }}
 
         return `
         <div class="node-fo">
             <table><tr><th colspan="2">${{d.title}}</th></tr></table>
-            <table>
-            ${{contentRows}}
-            </table>
+            ${{contentHTML}}
             ${{ctxTable(d.before, "Context-Before")}}
             ${{ctxTable(d.after,  "Context-After")}}
         </div>`;
@@ -644,7 +650,6 @@ class FiniteParseTree:
     </body>
     </html>
     """
-
 
     def to_json(self, filepath=None):
         """
@@ -1196,21 +1201,23 @@ class LanguageChunkingParser:
 
         self.ltm_hierarchy = CobwebTree()
 
-        self.id_to_value = [x for x in value_corpus]
-        self.value_to_id = dict([(w, i) for i, w in enumerate(value_corpus)])
+        self.id_to_value = ["EMPTYNULL"]
+        for x in value_corpus:
+            self.id_to_value.append(x)
+        self.value_to_id = dict([(w, i) for i, w in enumerate(self.id_to_value)])
         self.id_count = len(value_corpus)
+
+        # adding root node to dictionary! edge case not properly counted
+        hsh = self.ltm_hierarchy.root.concept_hash()
+        self.id_to_value.append(f"CONCEPT-{hsh}")
+        self.id_count += 1
+        self.value_to_id[f"CONCEPT-{hsh}"] = self.id_count
 
         self.cobweb_drawer = HTMLCobwebDrawer(
             ["Content-Left", "Content-Right", "Context-Before", "Context-After"],
             id_to_value=self.id_to_value,
             value_to_id=self.value_to_id
         )
-
-        # adding root node to dictionary! edge case not properly counted
-        hash = self.ltm_hierarchy.root.concept_hash()
-        self.value_to_id[f"CONCEPT-{hash}"] = self.id_count
-        self.id_to_value.append(f"CONCEPT-{hash}")
-        self.id_count += 1
 
         self.context_length = context_length
         self.merge_split = merge_split
@@ -1366,7 +1373,15 @@ class LanguageChunkingParser:
         for inst in insts:
             if debug:
                 print("Adding instance to CobwebTree:", inst)
-            _, _, actions = self.ltm_hierarchy.ifit(inst, mode=mode)
+            _, _, actions = self.ltm_hierarchy.ifit(inst, mode=mode, debug=True) # debug flag for saving logs!
+
+            # print(actions)
+
+            # json loading!!
+            actions = [json.loads(x) for x in actions]
+
+            # print(actions)
+
             all_actions += actions
             print_actions(actions)
 
@@ -1374,7 +1389,7 @@ class LanguageChunkingParser:
         rewrite_rules = []
         for action in all_actions:
             if action["action"] == "NEW":
-                add_to_vocab([action["node"]] + action.get("extra_nodes_created", []))
+                add_to_vocab([action["node"]])
             elif action["action"] == "MERGE":
                 add_to_vocab([action["new_node"]])
             elif action["action"] == "SPLIT":
@@ -1397,7 +1412,8 @@ class LanguageChunkingParser:
             to_visit = [self.ltm_hierarchy.root]
             while to_visit:
                 curr = to_visit.pop(0)
-                curr.av_count, replaced = av_replacement(curr.av_count)
+                new_av_count, replaced = av_replacement(curr.av_count)
+                curr.set_av_count(new_av_count)
                 if replaced:
                     to_visit.extend(curr.children)
 

@@ -24,7 +24,7 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script>
-    const data = {"title": "06f2107e72", "left": "None", "right": "None", "before": [], "after": [], "children": [{"title": "8f26827cd5", "left": "CONCEPT-782c768740", "right": "found", "before": [], "after": [], "children": [{"title": "636b65b4b7", "left": "the", "right": "man", "before": [], "after": [{"key": "found", "val": 1.0}], "children": [{"title": "bcb4c7755e", "left": "the", "right": null, "before": [], "after": [{"key": "man", "val": 1.0}, {"key": "found", "val": 0.5}], "children": []}, {"title": "c76ad886cc", "left": "man", "right": null, "before": [{"key": "the", "val": 1.0}], "after": [{"key": "found", "val": 1.0}], "children": []}]}, {"title": "7b71cc8c19", "left": "found", "right": null, "before": [{"key": "man", "val": 1.0}, {"key": "the", "val": 0.5}], "after": [], "children": []}]}]};
+    const data = {"title": "1b6f16b9af", "left": [], "right": [], "before": [], "after": [], "children": [{"title": "b98deb9104", "left": [{"key": "CONCEPT-5081926144", "val": 1.0}, {"key": "EMPTYNULL", "val": 0.0}], "right": [{"key": "saw", "val": 1.0}, {"key": "EMPTYNULL", "val": 0.0}], "before": [{"key": "EMPTYNULL", "val": 0.0}], "after": [{"key": "EMPTYNULL", "val": 0.0}], "children": [{"title": "2dd8e00fe2", "left": [{"key": "CONCEPT-5081926144", "val": 1.0}, {"key": "EMPTYNULL", "val": 0.0}], "right": [{"key": "cat", "val": 1.0}, {"key": "EMPTYNULL", "val": 0.0}], "before": [{"key": "EMPTYNULL", "val": 0.0}], "after": [{"key": "saw", "val": 1.0}, {"key": "EMPTYNULL", "val": 0.0}], "children": [{"title": "c93cba5ef4", "left": [{"key": "CONCEPT-5081926144", "val": 1.0}, {"key": "EMPTYNULL", "val": 0.0}], "right": [{"key": "big", "val": 1.0}, {"key": "EMPTYNULL", "val": 0.0}], "before": [{"key": "EMPTYNULL", "val": 0.0}], "after": [{"key": "cat", "val": 1.0}, {"key": "saw", "val": 0.5}, {"key": "EMPTYNULL", "val": 0.0}], "children": [{"title": "ab8ff9eac4", "left": [{"key": "a", "val": 1.0}, {"key": "EMPTYNULL", "val": 0.0}], "right": [{"key": "quick", "val": 1.0}, {"key": "EMPTYNULL", "val": 0.0}], "before": [{"key": "EMPTYNULL", "val": 0.0}], "after": [{"key": "big", "val": 1.0}, {"key": "cat", "val": 0.5}, {"key": "saw", "val": 0.3333333333333333}, {"key": "EMPTYNULL", "val": 0.0}], "children": [{"title": "ce84b6978c", "left": [{"key": "a", "val": 1.0}], "right": [], "before": [{"key": "EMPTYNULL", "val": 0.0}], "after": [{"key": "quick", "val": 1.0}, {"key": "big", "val": 0.5}, {"key": "cat", "val": 0.3333333333333333}, {"key": "EMPTYNULL", "val": 0.0}], "children": []}, {"title": "266c197828", "left": [{"key": "quick", "val": 1.0}], "right": [], "before": [{"key": "a", "val": 1.0}, {"key": "EMPTYNULL", "val": 0.0}], "after": [{"key": "big", "val": 1.0}, {"key": "cat", "val": 0.5}, {"key": "saw", "val": 0.3333333333333333}, {"key": "EMPTYNULL", "val": 0.0}], "children": []}]}, {"title": "2c7573394e", "left": [{"key": "big", "val": 1.0}], "right": [], "before": [{"key": "quick", "val": 1.0}, {"key": "a", "val": 0.5}, {"key": "EMPTYNULL", "val": 0.0}], "after": [{"key": "cat", "val": 1.0}, {"key": "saw", "val": 0.5}, {"key": "EMPTYNULL", "val": 0.0}], "children": []}]}, {"title": "e01f30072e", "left": [{"key": "cat", "val": 1.0}], "right": [], "before": [{"key": "big", "val": 1.0}, {"key": "quick", "val": 0.5}, {"key": "a", "val": 0.3333333333333333}, {"key": "EMPTYNULL", "val": 0.0}], "after": [{"key": "saw", "val": 1.0}, {"key": "EMPTYNULL", "val": 0.0}], "children": []}]}, {"title": "5fb63567e5", "left": [{"key": "saw", "val": 1.0}], "right": [], "before": [{"key": "cat", "val": 1.0}, {"key": "big", "val": 0.5}, {"key": "quick", "val": 0.3333333333333333}, {"key": "EMPTYNULL", "val": 0.0}], "after": [{"key": "EMPTYNULL", "val": 0.0}], "children": []}]}]};
     const nodeW  = 280;
     const nodeH  = 130;
     const hGap   = 80;
@@ -98,23 +98,27 @@
             return `<div class="subtable"><b>${title}</b><table><tbody>${rows}</tbody></table></div>`;
         };
 
-        let contentRows = "";
-        if (d.right && d.right !== "None") {
-            // Composite node with left and right
-            contentRows = `
-                <tr><td>Content-Left</td><td>${d.left}</td></tr>
-                <tr><td>Content-Right</td><td>${d.right}</td></tr>`;
+        // content: left and right are now lists of {key, val}
+        let contentHTML = "";
+        const leftHas = Array.isArray(d.left) && d.left.length > 0;
+        const rightHas = Array.isArray(d.right) && d.right.length > 0;
+
+        if (rightHas) {
+            // composite-style node: show both left and right content tables
+            contentHTML = `<div class="section">${ctxTable(d.left, "Content-Left")}${ctxTable(d.right, "Content-Right")}</div>`;
+        } else if (leftHas) {
+            // primitive or single-sided composite: show a single content table
+            // label it "Content" for primitives
+            const label = (d.right && d.right.length > 0) ? "Content-Left" : "Content";
+            contentHTML = `<div class="section">${ctxTable(d.left, label)}</div>`;
         } else {
-            // Primitive node with single content
-            contentRows = `<tr><td>Content</td><td>${d.left}</td></tr>`;
+            contentHTML = `<div class="section"><i>Content: empty</i></div>`;
         }
 
         return `
         <div class="node-fo">
             <table><tr><th colspan="2">${d.title}</th></tr></table>
-            <table>
-            ${contentRows}
-            </table>
+            ${contentHTML}
             ${ctxTable(d.before, "Context-Before")}
             ${ctxTable(d.after,  "Context-After")}
         </div>`;
