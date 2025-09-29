@@ -18,7 +18,7 @@ for _ in range(num_sentences):
     document.append(sentence)
 
 # Setting up the parser
-parser = LanguageChunkingParser(TEST_CORPUS2, merge_split=True)
+parser = LanguageChunkingParser(TEST_CORPUS2, merge_split=False)
 
 for i, doc in enumerate(document):
     parse_trees = parser.parse_input([doc], end_behavior="converge", debug=False)
