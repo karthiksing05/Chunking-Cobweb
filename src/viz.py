@@ -5,7 +5,7 @@ import asyncio
 import os
 import json
 import statistics
-
+import shutil
 
 class TextCobwebDrawer:
 
@@ -259,6 +259,12 @@ function nodeHTML(d) {{
 		Need to save and reload IDs as they occur at the top level!
 		"""
 
+		if os.path.exists(folder):
+			try:
+				shutil.rmtree(folder)
+			except OSError as e:
+				print(f"Error deleting folder '{folder}': {e}")
+
 		optimal_depth = level
 
 		leaves = []
@@ -301,12 +307,18 @@ function nodeHTML(d) {{
 
 		return True
 	
-	def save_basic_level_subtrees(self, root, folder):
+	def save_basic_level_subtrees(self, root, folder, debug=False):
 		"""
 		Helper function to draw all basic-level subtrees!
 
 		Need to save and reload IDs as they occur at the top level!
 		"""
+
+		if os.path.exists(folder):
+			try:
+				shutil.rmtree(folder)
+			except OSError as e:
+				print(f"Error deleting folder '{folder}': {e}")
 
 		leaves = []
 		visited = [(0, root)]
@@ -323,19 +335,22 @@ function nodeHTML(d) {{
 				for child in curr.children:
 					visited.append((depth + 1, child))
 
-		# print("average leaf depth:", sum([x[0] for x in leaves]) / len(leaves))
-		# print("median leaf depth:", statistics.median([x[0] for x in leaves]))
+		if debug:
+			print("average leaf depth:", sum([x[0] for x in leaves]) / len(leaves))
+			print("median leaf depth:", statistics.median([x[0] for x in leaves]))
 		
 		basic_level_nodes = {}
 
 		for leaf_tup in leaves:
 			_, leaf_node = leaf_tup
 			curr_node = leaf_node.get_basic_level()
-			basic_level_nodes[curr_node.concept_hash()] = curr_node
+			if curr_node.concept_hash() != leaf_node.concept_hash():
+				basic_level_nodes[curr_node.concept_hash()] = curr_node
 
-		# print("num nodes:", num_nodes)
-		# print("num leaves:", len(leaves))
-		# print(f"num nodes at depth {level}:", len(basic_level_nodes))
+		if debug:
+			print("num nodes:", num_nodes)
+			print("num leaves:", len(leaves))
+			print(f"num nodes at basic level:", len(basic_level_nodes))
 
 		for key, bl_node in basic_level_nodes.items():
 			self.draw_tree(bl_node, folder + ("/" if folder[-1] != "/" else "") + f"basic_level_{key}", max_depth=3)

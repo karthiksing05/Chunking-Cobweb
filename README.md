@@ -2,14 +2,28 @@
 
 Work with Dr. Pat Langley and Dr. Chris Maclellan on ISLE Internship to model attributes of the psychological principle of cognitive Chunking through a Cobweb-backed framework.
 
-## Requirements
+## Requirements + Setup
 
-Instructions on installing the cobweb package are below! Because of the updates that we've made to traditional cobweb (see the section, "Updates to Cobweb")
+All requirements can be found under requirements.txt, save for cobweb, which must be installed through the Git repository so that we can make necessary changes to it.
 
+Run the following commands:
+```
+# install all necessary prerequisites
+pip install -r requirements.txt
+
+# install and modify cobweb
+git clone https://github.com/Teachable-AI-Lab/cobweb
+cp my_cobweb_discrete.cpp cobweb/src/cobweb_discrete.cpp
+cd cobweb
+pip install .
+cd ..
+```
+
+After running these commands, you should be fully set up with the modified install of Cobweb!
 
 ## Updates to Cobweb:
 
-A couple modifications were made to Cobweb to support some of the edge-case behavior of the chunking framework. Most notably, we leave these changes in ```my_cobweb_discrete.cpp``` - when running this code, copy the contents of that file into the ```cobweb
+A couple modifications were made to Cobweb to support some of the edge-case behavior of the chunking framework. Most notably, we leave these changes in ```my_cobweb_discrete.cpp``` - when running this code, copy the contents of that file into the ```cobweb/src/cobweb_discrete.cpp```.
 
 Full list of changes is below:
 

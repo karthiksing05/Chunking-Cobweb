@@ -8,6 +8,7 @@ from cobweb.cobweb_discrete import CobwebTree
 from viz import HTMLCobwebDrawer
 from typing import List
 from sortedcontainers import SortedList
+import heapq
 
 
 """
@@ -210,6 +211,7 @@ class CompositeParseNode:
             2: self.context_before,
             3: self.context_after
         }
+
 
 """
 ----------------------------------------------------------------------------------------------
@@ -800,9 +802,27 @@ class IncrementalParseTree:
     *   How do we determine the most optimal candidate?!?
         *   This is an unsolved question from the FiniteParseTree situation - once we can better
             attribute the additions through GUI analysis, we can probably iterate better on this.
+        *   We'll go by a best-fit candidate and a 
 
-    Adjustments that need to be made / carried over:
-    *   Need to properly integrate the global root node into most other 
+    Code Analysis:
+    *   We initialize a tree-based structure similar to the previous, but we initialize a "working
+        memory manager" and make the following changes:
+        *   Save all possible changes (potentially create a separate datastructure for this)
+            with the score, the categorized ID, and the two children indexes for which we've 
+            categorized the combination of the pairwise nodes
+        *   The "working memory" represents the topmost level of parentless nodes, which will all be
+            connected to the global root node and their pairwise combinations will be 
+    *   Pseudocode:
+        *   Fill the working memory with the first slew of primitive instances (and related datastructures)
+        *   While the priority queue does not empty:
+            *   Add to working memory until working memory has reached capacity
+            *   Evaluate any new chunk candidates (based on the strictly new instances) and add them to the
+                priority queue
+            *   Select the best candidate according to the priority queue, pop it, and add it to the tree
+                and add it to the long-term memory
+    *   The important thing to consider is that the global root node becomes infinitely more important
+        in this case than in the finite case
+
     """
     def __init__(self):
         pass
