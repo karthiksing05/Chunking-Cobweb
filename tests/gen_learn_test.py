@@ -23,7 +23,7 @@ test_documents = document[int(len(document) * train_size):]
 
 # Iterate through training documents and parse them one at a time, saving every 10th parse tree to file
 for i, doc in enumerate(train_documents):
-    parse_trees = parser.parse_input([doc], end_behavior="converge", debug=False)
+    parse_trees = parser.parse_input([doc], end_behavior="converge", debug=True)
     parse_tree = parse_trees[0]
 
     parser.add_parse_tree(parse_tree, debug=False)

@@ -339,6 +339,8 @@ class FiniteParseTree:
                           candidate_concept.log_prob_instance_missing(merge_inst))
                     print("Candidate Concept Log Prob Class Given Instance", 
                           candidate_concept.log_prob_class_given_instance(merge_inst, True))
+                    print("Candidate Concept Entropy",
+                          candidate_concept.entropy())
                     print()
 
                 if not best_candidate or candidate_score > best_candidate[0]:
