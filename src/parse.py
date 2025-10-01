@@ -4,11 +4,12 @@ import json
 import asyncio
 from playwright.async_api import async_playwright
 import re
-from cobweb.cobweb_discrete import CobwebTree
+from cobweb.cobweb_discrete import CobwebTree, CobwebNode
 from viz import HTMLCobwebDrawer
 from typing import List
 from sortedcontainers import SortedList
-import heapq
+import time
+import math
 
 
 """
@@ -236,6 +237,330 @@ class FiniteParseTree:
 
         self.nodes = []
 
+        self.action_log = []
+        self._undo_stack = []
+
+        self._ensure_editor_state()
+
+    def _ensure_editor_state(self):
+        # call in __init__ of FiniteParseTree:
+        if not hasattr(self, "action_log"):
+            self.action_log = []
+        if not hasattr(self, "_undo_stack"):
+            self._undo_stack = []
+
+    def _score_function(self, candidate_concept: CobwebNode, potential_merge_inst: dict, debug=False):
+        """
+        A wrapper for the score function - so that we can hot-swap between different scoring metrics
+        depending on what we're testing! 
+        """
+
+        if debug:
+            print("MERGE INSTANCE EVALUATED: ", potential_merge_inst)
+            # the below thing always returns -inf for some reason!??
+            # print("Candidate Concept Log Prob Children Given Instance", 
+            #       candidate_concept.log_prob_children_given_instance(merge_inst))
+            print("Candidate Concept Log Prob Instance:", 
+                    candidate_concept.log_prob_instance(potential_merge_inst))
+            print("Candidate Concept Log Prob Instance Missing:", 
+                    candidate_concept.log_prob_instance_missing(potential_merge_inst))
+            print("Candidate Concept Log Prob Class Given Instance:", 
+                    candidate_concept.log_prob_class_given_instance(potential_merge_inst, True))
+            print("Candidate Concept Entropy:",
+                    candidate_concept.entropy())
+            print()
+
+        return candidate_concept.log_prob_instance(potential_merge_inst)
+
+    """
+    -----------------------------------
+    HELPER FUNCTIONS FOR INCREMENTAL BUILDING PROCESS!
+    -----------------------------------
+    """
+
+    def build_primitives(self, window):
+        """
+        A custom function that we add (not given by GPT) to set up the primitive nodes to be combined!
+        """
+        self.window = window
+
+        elements = re.findall(r"[\w']+|[.,!?;]", window)
+        elements = [self.value_to_id[element] for element in elements]
+
+        # Creating first layer of primitive nodes
+        for i in range(len(elements)):
+
+            content = elements[i]
+
+            context_before_lst = elements[max(0, i - self.context_length):(i)][::-1]
+            context_after_lst = elements[(i + 1):min(len(elements), i + self.context_length + 1)]
+
+            # have to compute the dictionaries through a for loop so that we can
+            # add multiple weights for multiple instances of the word
+
+            context_before_dict = {0: 0} # initializing with the empty set!
+            context_after_dict = {0: 0}
+
+            for j in range(len(context_before_lst)):
+                context_before_dict.setdefault(context_before_lst[j], 0)
+                context_before_dict[context_before_lst[j]] += 1 / (j + 1) # this works because we reversed it above
+
+            for j in range(len(context_after_lst)):
+                context_after_dict.setdefault(context_after_lst[j], 0)
+                context_after_dict[context_after_lst[j]] += 1 / (j + 1)
+
+            node = PrimitiveParseNode(content, context_before_dict, context_after_dict, i)
+
+            node.set_parent(self.global_root_node)
+
+            self.nodes.append(node)
+
+
+    def get_parentless_pairs(self):
+        """
+        Return a list of consecutive parentless pairs (as dicts) for the root-level
+        nodes (the nodes that are children of global_root_node), in left-to-right order.
+        Each dict: {"left_word_index": int, "right_word_index": int, "left_label": str, "right_label": str}
+        """
+        pairs = []
+        parentless = [x[1] for x in self.global_root_node.children]
+        for i in range(len(parentless) - 1):
+            left = parentless[i]
+            right = parentless[i + 1]
+            left_label = self._safe_lookup(next(iter(left.content_left.keys())) if getattr(left, "content_left", None) else getattr(left, "content", None))
+            # _safe_lookup handles None; for primitives we use content; for composite we used content_left first-key
+            right_label = self._safe_lookup(next(iter(right.content_left.keys())) if getattr(right, "content_left", None) else getattr(right, "content", None))
+            pairs.append({
+                "left_word_index": left.word_index,
+                "right_word_index": right.word_index,
+                "left_title": left.title,
+                "right_title": right.title,
+                "left_label": left_label,
+                "right_label": right_label
+            })
+        return pairs
+
+    def _find_root_child_by_index(self, word_index):
+        for wi, ch in self.global_root_node.children:
+            if wi == word_index:
+                return ch
+        return None
+
+    def evaluate_pair(self, left_word_index, right_word_index, debug=False):
+        """
+        Evaluate the best candidate for the pair of root-level nodes specified by their word indexes.
+        Returns a serializable dict with:
+        - merge_inst: instance dict produced by create_merge_instance (0..3 keys)
+        - candidate_concept_hash / id
+        - score (float)
+        - debug: numeric debug stats
+        """
+        left_node = self._find_root_child_by_index(left_word_index)
+        right_node = self._find_root_child_by_index(right_word_index)
+        if left_node is None or right_node is None:
+            raise ValueError("Left or right node not found among root's children")
+
+        merge_inst = CompositeParseNode.create_merge_instance(left_node, right_node)
+        candidate_concept = self.ltm_hierarchy.categorize(merge_inst).get_basic_level()
+        candidate_hash = candidate_concept.concept_hash()
+        candidate_id = self.value_to_id.get(f"CONCEPT-{candidate_hash}")
+
+        # collect debug stats (same calls used in your _score_function debug prints)
+        try:
+            log_prob_instance = float(candidate_concept.log_prob_instance(merge_inst))
+            if math.isnan(log_prob_instance):
+                log_prob_instance = 0
+            if math.isinf(log_prob_instance):
+                log_prob_instance = 0
+        except Exception:
+            log_prob_instance = None
+        try:
+            log_prob_instance_missing = float(candidate_concept.log_prob_instance_missing(merge_inst))
+            if math.isnan(log_prob_instance_missing):
+                log_prob_instance_missing = 0
+            if math.isinf(log_prob_instance_missing):
+                log_prob_instance_missing = 0
+        except Exception:
+            log_prob_instance_missing = None
+        try:
+            log_prob_class_given_instance = float(candidate_concept.log_prob_class_given_instance(merge_inst, True))
+            if math.isnan(log_prob_class_given_instance):
+                log_prob_class_given_instance = 0
+            if math.isinf(log_prob_class_given_instance):
+                log_prob_class_given_instance = 0
+        except Exception:
+            log_prob_class_given_instance = None
+        try:
+            entropy = float(candidate_concept.entropy())
+            if math.isnan(entropy):
+                entropy = 0
+            if math.isinf(entropy):
+                entropy = 0
+        except Exception:
+            entropy = None
+
+        score = float(self._score_function(candidate_concept, merge_inst, debug=debug))
+
+        # want to visualize candidate_concept.av_count, need to use draw_dict:
+        candidate_draw_inst = {
+            "title": candidate_hash,
+            "left": self.ctx_list(candidate_concept.av_count[0]),
+            "right": self.ctx_list(candidate_concept.av_count[1]),
+            "before": self.ctx_list(candidate_concept.av_count[2]),
+            "after":  self.ctx_list(candidate_concept.av_count[3]),
+            "children": []
+        }
+
+        return {
+            "merge_inst": merge_inst,  # small dict of instance parts (0/1/2/3)
+            "candidate_concept_hash": candidate_hash,
+            "candidate_concept_id": candidate_id,
+            "candidate_inst": candidate_draw_inst,
+            "score": score,
+            "debug": {
+                "log_prob_instance": log_prob_instance,
+                "log_prob_instance_missing": log_prob_instance_missing,
+                "log_prob_class_given_instance": log_prob_class_given_instance,
+                "entropy": entropy
+            },
+            "left_word_index": left_word_index,
+            "right_word_index": right_word_index,
+            "left_title": left_node.title,
+            "right_title": right_node.title
+        }
+
+    def apply_candidate(self, left_word_index, right_word_index, candidate_concept_hash=None):
+        """
+        Apply the best candidate merge for the pair and modify the tree.
+        If candidate_concept_hash is None, recompute via categorize (same as evaluate_pair).
+        Returns the added node's serialized info (and appends to action_log).
+        Pushes undo information to _undo_stack.
+        """
+        left_node = self._find_root_child_by_index(left_word_index)
+        right_node = self._find_root_child_by_index(right_word_index)
+        if left_node is None or right_node is None:
+            raise ValueError("Left or right node not found among root's children")
+
+        merge_inst = CompositeParseNode.create_merge_instance(left_node, right_node)
+        candidate_concept = self.ltm_hierarchy.categorize(merge_inst).get_basic_level()
+        if candidate_concept_hash is not None and candidate_concept.concept_hash() != candidate_concept_hash:
+            # if user gave an explicit hash, try to find that concept in hierarchy -
+            # but default behavior uses categorize(...) basic level, same as build()
+            pass
+        candidate_id = self.value_to_id.get(f"CONCEPT-{candidate_concept.concept_hash()}")
+
+        # create the composite parse node consistent with build() behavior
+        add_parse_node = CompositeParseNode.create_node(
+            merge_inst,
+            candidate_id,
+            0.5 * (left_node.word_index + right_node.word_index)
+        )
+
+        # Update tree structures (append node and re-parent children)
+        self.nodes.append(add_parse_node)
+        add_parse_node.set_parent(self.global_root_node)
+        left_node.set_parent(add_parse_node)
+        right_node.set_parent(add_parse_node)
+
+        # Prepare undo entry: we will store enough to revert the change simply
+        undo_entry = {
+            "action": "apply_candidate",
+            "added_node_title": add_parse_node.title,
+            "added_node_word_index": add_parse_node.word_index,
+            "left_word_index": left_node.word_index,
+            "right_word_index": right_node.word_index,
+            "timestamp": time.time()
+        }
+        self._undo_stack.append(undo_entry)
+
+        # Append action log entry
+        log_entry = {
+            "timestamp": time.time(),
+            "type": "apply_candidate",
+            "description": f"Applied chunk combining {left_node.title} ({left_node.word_index}) + {right_node.title} ({right_node.word_index}) -> concept CONCEPT-{candidate_concept.concept_hash()}",
+            "payload": {
+                "left": {"title": left_node.title, "word_index": left_node.word_index},
+                "right": {"title": right_node.title, "word_index": right_node.word_index},
+                "new_node": {"title": add_parse_node.title, "word_index": add_parse_node.word_index, "concept_id": candidate_id}
+            }
+        }
+        self.action_log.append(log_entry)
+
+        return {
+            "ok": True,
+            "added_node": {
+                "title": add_parse_node.title,
+                "word_index": add_parse_node.word_index,
+                "concept_id": candidate_id
+            },
+            "action_log_entry": log_entry
+        }
+
+    def undo(self):
+        """
+        Undo the last apply_candidate action. Returns True/False for success.
+        Current implementation only supports undoing the last apply_candidate (stack).
+        """
+        if not self._undo_stack:
+            return {"ok": False, "reason": "Nothing to undo!"}
+
+        entry = self._undo_stack.pop()
+        if entry["action"] != "apply_candidate":
+            return {"ok": False, "reason": "Unsupported undo action!"}
+
+        # find the added node by title and remove it
+        added_title = entry["added_node_title"]
+        added_node = next((n for n in self.nodes if n.title == added_title), None)
+        if added_node is None:
+            return {"ok": False, "reason": "Added node not found!"}
+
+        # re-parent its children back to the global root
+        left_w = entry["left_word_index"]
+        right_w = entry["right_word_index"]
+        left_node = self._find_root_child_by_index(left_w) or next((n for n in self.nodes + [self.global_root_node] if n.word_index == left_w), None)
+        right_node = self._find_root_child_by_index(right_w) or next((n for n in self.nodes + [self.global_root_node] if n.word_index == right_w), None)
+
+        # If left/right_node currently have parent == added_node, reparent to global_root_node
+        try:
+            for wi, ch in list(added_node.children):
+                ch.set_parent(self.global_root_node)
+        except Exception:
+            pass
+
+        # remove added_node from nodes list
+        try:
+            # added_node.set_parent(None) # hopefully a thing
+            self.global_root_node.children.remove((added_node.word_index, added_node))
+            self.nodes.remove(added_node)
+        except ValueError:
+            pass
+
+        # remove matching action_log entry (last matching apply_candidate) if exists
+        for i in range(len(self.action_log)-1, -1, -1):
+            if self.action_log[i]["type"] == "apply_candidate" and self.action_log[i]["payload"]["new_node"]["title"] == added_title:
+                removed = self.action_log.pop(i)
+                break
+
+        return {"ok": True, "undone": added_title}
+
+    def export_json(self, filepath=None):
+        """
+        Export parse tree as JSON; if filepath provided, save there. Also append action_log entry.
+        """
+        res = self.to_json(filepath=filepath)
+        log_entry = {
+            "timestamp": time.time(),
+            "type": "export",
+            "description": f"Exported parse tree to {filepath or 'json-string'}",
+            "payload": {"filepath": filepath}
+        }
+        self.action_log.append(log_entry)
+        return {"ok": True, "export_result": res, "action_log_entry": log_entry}
+    
+    """
+    REGULAR FUNCTIONS CONTINUE BELOW
+    """
+
     def build(self, window, end_behavior="converge", debug=False):
         """
         Primary method of construction that returns all available nonterminals
@@ -325,23 +650,7 @@ class FiniteParseTree:
 
                 candidate_concept_id = self.value_to_id[f"CONCEPT-{candidate_concept.concept_hash()}"]
 
-                candidate_score = candidate_concept.log_prob_instance(merge_inst)
-
-                if debug:
-                    # TODO what scores can / should we be using?
-                    print("MERGE INSTANCE EVALUATED: ", merge_inst)
-                    # the below thing always returns -inf for some reason!??
-                    # print("Candidate Concept Log Prob Children Given Instance", 
-                    #       candidate_concept.log_prob_children_given_instance(merge_inst))
-                    print("Candidate Concept Log Prob Instance", 
-                          candidate_concept.log_prob_instance(merge_inst))
-                    print("Candidate Concept Log Prob Instance Missing", 
-                          candidate_concept.log_prob_instance_missing(merge_inst))
-                    print("Candidate Concept Log Prob Class Given Instance", 
-                          candidate_concept.log_prob_class_given_instance(merge_inst, True))
-                    print("Candidate Concept Entropy",
-                          candidate_concept.entropy())
-                    print()
+                candidate_score = self._score_function(candidate_concept, merge_inst, debug=debug)
 
                 if not best_candidate or candidate_score > best_candidate[0]:
                     if debug:
@@ -407,7 +716,7 @@ class FiniteParseTree:
         """
 
         # Convert tree to JSON and build HTML
-        d3_json = json.dumps(self._tree_to_json())
+        d3_json = json.dumps(self._draw_tree_to_json())
         html = self._build_html(d3_json)
 
         html_path = f"{out_base}.html"
@@ -478,14 +787,22 @@ class FiniteParseTree:
             # print("index", idx)
             return "None"
 
-    def _node_to_dict(self, node, children_getter):
-        # new logic for 0:0 claims
-        def ctx_list(ctx):
-            if not ctx:
-                return []
-            # sort by descending value then key (matching prior behavior)
-            items = sorted(ctx.items(), key=lambda kv: (-kv[1], kv[0]))
-            return [{"key": self._safe_lookup(k), "val": float(v)} for k, v in items]
+    # new logic for 0:0 claims
+    def ctx_list(self, ctx, draw_zeros=False, max_size=7):
+        if not ctx:
+            return []
+        # sort by descending value then key (matching prior behavior)
+        items = sorted(ctx.items(), key=lambda kv: (-kv[1], kv[0]))
+        if len(items) > max_size:
+            items = items[:7]
+        return [{"key": self._safe_lookup(k), "val": float(v)} for k, v in items if (k != 0 or draw_zeros)] # add != 0 so that draw without emptynull
+
+
+    def _draw_node_to_dict(self, node, children_getter, draw_zeros=False):
+
+        """
+        Note: because this is purely for drawing, we should be able to remove the EMPTYNULL here!
+        """
 
         if isinstance(node, PrimitiveParseNode):
             # represent primitive content as a single-entry list to keep a consistent shape
@@ -494,34 +811,34 @@ class FiniteParseTree:
                 "title": node.title,
                 "left": left_list,
                 "right": [],  # primitives have no right content
-                "before": ctx_list(node.context_before),
-                "after":  ctx_list(node.context_after),
-                "children": [self._node_to_dict(ch[1], children_getter) for ch in children_getter(node)]
+                "before": self.ctx_list(node.context_before, draw_zeros),
+                "after":  self.ctx_list(node.context_after, draw_zeros),
+                "children": [self._draw_node_to_dict(ch[1], children_getter) for ch in children_getter(node)]
             }
 
         elif isinstance(node, CompositeParseNode):
             # content_left/content_right are dicts -> convert to same list-of-{key,val} shape
-            left_list  = ctx_list(node.content_left)
-            right_list = ctx_list(node.content_right)
+            left_list  = self.ctx_list(node.content_left, draw_zeros)
+            right_list = self.ctx_list(node.content_right, draw_zeros)
 
             return {
                 "title": node.title,
                 "left": left_list,
                 "right": right_list,
-                "before": ctx_list(node.context_before),
-                "after":  ctx_list(node.context_after),
-                "children": [self._node_to_dict(ch[1], children_getter) for ch in children_getter(node)]
+                "before": self.ctx_list(node.context_before, draw_zeros),
+                "after":  self.ctx_list(node.context_after, draw_zeros),
+                "children": [self._draw_node_to_dict(ch[1], children_getter) for ch in children_getter(node)]
             }
 
         else:
             raise TypeError(f"Unknown node type {type(node)}")
 
 
-    def _tree_to_json(self):
+    def _draw_tree_to_json(self):
         def children_getter(n):
             for wi, ch in getattr(n, "children", []):
                 yield (wi, ch)
-        return self._node_to_dict(self.global_root_node, children_getter)
+        return self._draw_node_to_dict(self.global_root_node, children_getter)
 
     def _build_html(self, d3_data_json, node_w=280, node_h=130, h_gap=80, v_gap=150):
         return f"""<!doctype html>
@@ -654,6 +971,286 @@ class FiniteParseTree:
     </body>
     </html>
     """
+
+    def editor_build_html(self, d3_data_json, node_w=280, node_h=130, h_gap=80, v_gap=150):
+        sentence_str = self.window  # current sentence display
+        return f"""<!doctype html>
+    <html>
+    <head>
+    <meta charset="utf-8"/>
+    <title>Parse Tree Editor</title>
+    <style>
+    body {{ margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }}
+    #editor-container {{ display: flex; flex-direction: row; height: 100vh; }}
+    #tree-panel {{ flex: 3; overflow: auto; border-right: 1px solid #ccc; padding: 12px; }}
+    #sidebar {{ flex: 1; overflow-y: auto; padding: 12px; background: #f9f9f9; }}
+    #header {{ padding: 12px; border-bottom: 1px solid #ccc; }}
+    button {{ margin: 4px; padding: 4px 8px; font-size: 12px; }}
+    #pair-buttons {{ margin-bottom: 12px; }}
+    ul {{ list-style: none; padding-left: 0; font-size: 12px; }}
+    li {{ margin-bottom: 6px; }}
+    .modal {{
+    display: none; position: fixed; z-index: 1000; left:0; top:0; width:100%; height:100%;
+    overflow:auto; background-color: rgba(0,0,0,0.4);
+    }}
+    .modal-content {{
+    background-color: #fff; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 400px; border-radius:8px;
+    }}
+    .close {{ float:right; font-size: 18px; cursor: pointer; }}
+    table {{ border-collapse: collapse; width: 100%; margin-top: 8px; }}
+    th, td {{ border: 1px solid #888; padding: 4px; font-size: 12px; }}
+    th {{ background: #f3f5f7; font-weight: 600; }}
+    </style>
+    </head>
+    <body>
+    <div id="header">
+        <h2>Parse Tree Editor</h2>
+        <h4>Current sentence: {sentence_str}</h4>
+        <button id="undo-btn">Undo Last Chunk</button>
+        <button id="export-btn">Export Tree</button>
+    </div>
+    <div id="editor-container">
+        <div id="tree-panel">
+            <div id="tree"></div>
+        </div>
+        <div id="sidebar">
+            <div id="pair-buttons"><strong>Candidate Pairs:</strong></div>
+            <div><strong>Action Log:</strong><ul id="action-log"></ul></div>
+        </div>
+    </div>
+
+    <!-- Candidate Modal -->
+    <div id="candidate-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Candidate Chunk</h3>
+        <p><strong>Title:</strong> <span id="candidate-title"></span></p>
+        <p><strong>Score:</strong> <span id="candidate-score"></span></p>
+        <table id="candidate-debug"></table>
+        <button id="apply-candidate-btn">Apply Chunk</button>
+    </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script>
+    let treeData = {d3_data_json};
+    let currentLeft=null, currentRight=null;
+
+    // --- D3 tree rendering ---
+    const nodeW  = {node_w};
+    const nodeH  = {node_h};
+    const hGap   = {h_gap};
+    const vGap   = {v_gap};
+
+    function renderTree(data){{
+        d3.select("#tree").selectAll("*").remove();
+        const root = d3.hierarchy(data);
+        const layout = d3.tree().nodeSize([nodeW+hGap, nodeH+vGap]);
+        layout(root);
+
+        let x0=Infinity, x1=-Infinity, y0=Infinity, y1=-Infinity;
+        root.each(d=>{{ x0=Math.min(x0,d.x); x1=Math.max(x1,d.x); y0=Math.min(y0,d.y); y1=Math.max(y1,d.y); }});
+        const width=x1-x0+nodeW+320, height=y1-y0+nodeH+320;
+
+        const svg = d3.select("#tree").append("svg")
+            .attr("width", width).attr("height", height)
+            .attr("viewBox",[x0-nodeW/2, y0-nodeH/2, width, height].join(" "));
+
+        const g = svg.append("g");
+
+        g.selectAll("path.link")
+            .data(root.links())
+            .join("path")
+            .attr("class","link")
+            .attr("fill","none")
+            .attr("stroke","#9aa1a9")
+            .attr("stroke-width",1.5)
+            .attr("d", d3.linkVertical().x(d=>d.x).y(d=>d.y));
+
+        const node = g.selectAll("g.node")
+            .data(root.descendants())
+            .join("g")
+            .attr("transform", d=>`translate(${{d.x}},${{d.y}})`);
+
+        node.append("rect")
+            .attr("class","node-box")
+            .attr("x",-nodeW/2)
+            .attr("y",0)
+            .attr("width",nodeW)
+            .attr("height",nodeH)
+            .attr("stroke","#444")
+            .attr("fill","#fff")
+            .attr("rx",8)
+            .attr("ry",8);
+
+        node.append("foreignObject")
+            .attr("class","node-fo")
+            .attr("x",-nodeW/2+6)
+            .attr("y",6)
+            .attr("width",nodeW-12)
+            .attr("height",1000)
+            .html(d=>nodeHTML(d.data));
+
+        node.selectAll("foreignObject").each(function(){{
+            const fo=d3.select(this);
+            const div=fo.select("div").node();
+            const h=div.getBoundingClientRect().height+6;
+            fo.attr("height",h);
+            d3.select(this.parentNode).select("rect").attr("height",h+12);
+        }});
+    }}
+
+    function nodeHTML(d){{
+        const ctxTable=(ctx,title)=>{{
+            if(!ctx||ctx.length===0) return `<div class="subtable"><i>${{title}}: empty</i></div>`;
+            const rows = ctx.map(kv=>`<tr><td>${{kv.key}}</td><td>${{kv.val.toFixed(2)}}</td></tr>`).join("");
+            return `<div class="subtable"><b>${{title}}</b><table><tbody>${{rows}}</tbody></table></div>`;
+        }};
+        let contentHTML="";
+        const leftHas=Array.isArray(d.left)&&d.left.length>0;
+        const rightHas=Array.isArray(d.right)&&d.right.length>0;
+        if(rightHas) {{
+            contentHTML = `<div class="section">${{ctxTable(d.left,"Content-Left")}}${{ctxTable(d.right,"Content-Right")}}</div>`;
+        }} else if(leftHas) contentHTML=`<div class="section">${{ctxTable(d.left,d.right&&d.right.length>0?"Content-Left":"Content")}}</div>`;
+        else contentHTML=`<div class="section"><i>Content: empty</i></div>`;
+        return `<div class="node-fo">
+            <table><tr><th colspan="2">${{d.title}}</th></tr></table>
+            ${{contentHTML}}
+            ${{ctxTable(d.before,"Context-Before")}}
+            ${{ctxTable(d.after,"Context-After")}}
+        </div>`;
+    }}
+
+    // --- Sidebar action log update ---
+    function updateLog(log){{
+        const ul = document.getElementById("action-log");
+        ul.innerHTML="";
+        log.forEach(e=>{{ ul.innerHTML += `<li>[${{new Date(e.timestamp*1000).toLocaleTimeString()}}] ${{e.description}}</li>`; }});
+    }}
+
+    // --- Pair buttons ---
+    function loadPairs(){{
+        fetch("/api/tree").then(r=>r.json()).then(data=>{{
+            const container = document.getElementById("pair-buttons");
+            container.innerHTML="<strong>Candidate Pairs:</strong>";
+            data.pairs.forEach(p=>{{
+                const btn=document.createElement("button");
+                btn.textContent=`${{p.left_title}} + ${{p.right_title}}`;
+                btn.onclick=()=> evaluatePair(p.left_word_index,p.right_word_index);
+                container.appendChild(btn);
+            }});
+            updateLog(data.action_log);
+            renderTree(data.tree);
+        }});
+    }}
+
+    // --- Evaluate a pair ---
+    function evaluatePair(left,right){{
+        currentLeft=left; currentRight=right;
+        fetch("/api/evaluate", {{
+            method:"POST", headers:{{"Content-Type":"application/json"}},
+            body: JSON.stringify({{left_word_index:left,right_word_index:right,debug:true}})
+        }}).then(r=>r.json()).then(res=>{{
+            if(res.ok) showCandidateModal(res.result);
+            else alert(res.error);
+        }});
+    }}
+
+    // --- Candidate Modal ---
+    const modal = document.getElementById("candidate-modal");
+    const spanClose = modal.querySelector(".close");
+    spanClose.onclick = ()=> modal.style.display="none";
+    window.onclick = e=> {{ if(e.target==modal) modal.style.display="none"; }};
+    function showCandidateModal(result){{
+        const candidate = result.candidate_inst; // candidate node data
+        document.getElementById("candidate-title").textContent = result.candidate_concept_id || result.candidate_concept_hash;
+        document.getElementById("candidate-score").textContent = result.score.toFixed(3);
+
+        const dbg = document.getElementById("candidate-debug");
+        dbg.innerHTML = ""; // clear previous content
+
+        // --- Build node-style table ---
+        function ctxTable(ctx, title) {{
+            if(!ctx || ctx.length===0) return `<div class="subtable"><i>${{title}}: empty</i></div>`;
+            const rows = ctx.map(kv => `<tr><td>${{kv.key}}</td><td>${{kv.val.toFixed(2)}}</td></tr>`).join("");
+            return `<div class="subtable"><b>${{title}}</b><table><tbody>${{rows}}</tbody></table></div>`;
+        }}
+
+        function buildCandidateHTML(d){{
+            let contentHTML="";
+            const leftHas = Array.isArray(d.left) && d.left.length>0;
+            const rightHas = Array.isArray(d.right) && d.right.length>0;
+            if(rightHas){{
+                contentHTML = `<div class="section">${{ctxTable(d.left,"Content-Left")}}${{ctxTable(d.right,"Content-Right")}}</div>`;
+            }} else if(leftHas){{
+                contentHTML = `<div class="section">${{ctxTable(d.left,d.right && d.right.length>0?"Content-Left":"Content")}}</div>`;
+            }} else {{
+                contentHTML = `<div class="section"><i>Content: empty</i></div>`;
+            }}
+            return `
+                <table><tr><th colspan="2">${{d.title}}</th></tr></table>
+                ${{contentHTML}}
+                ${{ctxTable(d.before,"Context-Before")}}
+                ${{ctxTable(d.after,"Context-After")}}
+            `;
+        }}
+
+        // --- Build debug table ---
+        function buildDebugHTML(debugObj){{
+            let html = `<div class="subtable"><b>Debug Stats</b><table><tr><th>Stat</th><th>Value</th></tr>`;
+            for(const [k,v] of Object.entries(debugObj)){{
+                html += `<tr><td>${{k}}</td><td>${{v===null ? "null" : v.toFixed ? v.toFixed(3) : v}}</td></tr>`;
+            }}
+            html += `</table></div>`;
+            return html;
+        }}
+
+        // Render both: candidate table + debug stats
+        dbg.innerHTML = buildCandidateHTML(candidate) + buildDebugHTML(result.debug);
+
+        modal.style.display = "block";
+    }}
+
+    // --- Apply candidate ---
+    document.getElementById("apply-candidate-btn").onclick = ()=>{{
+        if(currentLeft===null||currentRight===null) return;
+        if(!confirm("Confirm applying this chunk?")) return;
+        fetch("/api/apply", {{
+            method:"POST", headers:{{"Content-Type":"application/json"}},
+            body: JSON.stringify({{left_word_index:currentLeft,right_word_index:currentRight}})
+        }}).then(r=>r.json()).then(res=>{{
+            if(res.ok){{ loadPairs(); modal.style.display="none"; }}
+            else alert(res.error);
+        }});
+    }}
+
+    // --- Undo ---
+    document.getElementById("undo-btn").onclick = ()=>{{
+        fetch("/api/undo",{{method:"POST"}}).then(r=>r.json()).then(res=>{{
+            if(res.ok) loadPairs();
+            else alert(res.reason||"Undo failed");
+        }});
+    }}
+
+    // --- Export ---
+    document.getElementById("export-btn").onclick = ()=>{{
+        const fp = prompt("Enter filepath to export (optional):","");
+        fetch("/api/export",{{method:"POST",headers:{{"Content-Type":"application/json"}},body:JSON.stringify({{filepath:fp}})}})
+        .then(r=>r.json()).then(res=>{{
+            if(res.ok){{ alert("Parse tree exported!"); loadPairs(); }}
+            else alert("Export failed");
+        }});
+    }}
+
+    // --- Initial load ---
+    loadPairs();
+
+    </script>
+    </body>
+    </html>
+    """
+
+
 
     def to_json(self, filepath=None):
         """

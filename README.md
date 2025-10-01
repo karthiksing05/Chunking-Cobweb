@@ -1,6 +1,6 @@
 # Chunking Cobweb
 
-Work with Dr. Pat Langley and Dr. Chris Maclellan on ISLE Internship to model attributes of the psychological principle of cognitive Chunking through a Cobweb-backed framework.
+Work with Dr. Pat Langley and Dr. Chris Maclellan on ISLE Internship to model attributes of the psychological principle of cognitive chunking through a Cobweb-backed framework.
 
 ## Requirements + Setup
 
@@ -64,13 +64,19 @@ One of the most important things to keep track of over the course of this projec
     *   We read in the first n primitives and parse them, then we read the next n primitives (keeping the root node of the primitives)
     *   [COOL STUFF] If we construct partial parse trees, we can continue iteratively adding primitives to our "active working memory" until the threshold for working memory has been met, and then we can dump everything into the memory all at once?
 
-## Test Planning:
+## GUI Editor:
+
+Because of the highly conceptual nature of this framework, we've also created a GUI by which we can inspect and analyze both parse trees and our long-term memory.
+
+*   ```gui/parse_tree_editor.py``` - a stylistically consistent editable parse tree generator that can create and export parse trees to a folder of choice.
+
+## Raw Tests:
 
 Below is a list of all tests confirming and acknowledging the use of the framework. Use ```pytest -s tests/TEST_NAME_HERE.py``` to run (the "-s" flag is for output)
 
-*   ```parse_tree_test.py``` - a test to confirm the correct implementation of parse trees and parse tree composition
-*   ```gen_learn_test.py``` - a test to also confirm the logic of parse tree addition and processing
-*   ```ltm_analysis.py``` - a test that analyzes various long-term memories as well as some intermediate subtree levels.
+*   ```tests/parse_tree_test.py``` - a test to confirm the correct implementation of parse trees and parse tree composition
+*   ```tests/gen_learn_test.py``` - a test to also confirm the logic of parse tree addition and processing
+*   ```tests/ltm_analysis.py``` - a test that analyzes various long-term memories as well as some intermediate subtree levels.
 
 ## Long-term goals
 

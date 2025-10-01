@@ -87,6 +87,9 @@ class HTMLCobwebDrawer:
 				val_name = self._safe_lookup(self.id_to_value, val_id)
 				rows.append({"val": val_name, "count": count})
 
+			if len(val_counts.items()) > 7:
+				rows.append({"val": "...", "count": "..."})
+
 			attr_tables.append({
 				"attr": attr_name,
 				"rows": rows

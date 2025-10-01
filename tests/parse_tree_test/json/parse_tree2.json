@@ -1,5 +1,5 @@
 {
-  "window": "the big big small park liked",
+  "window": "a lazy park admired",
   "context_length": 3,
   "id_to_value": [
     "EMPTYNULL",
@@ -25,7 +25,7 @@
     "in",
     "on",
     "under",
-    "CONCEPT-4380982928"
+    "CONCEPT-5342317968"
   ],
   "value_to_id": {
     "EMPTYNULL": 0,
@@ -51,12 +51,12 @@
     "in": 20,
     "on": 21,
     "under": 22,
-    "CONCEPT-4380982928": 23
+    "CONCEPT-5342317968": 23
   },
   "nodes": [
     {
       "node_type": "composite",
-      "title": "d98d944ff1",
+      "title": "4c764a0081",
       "word_index": null,
       "content_left": null,
       "content_right": null,
@@ -66,150 +66,108 @@
       "global_root": true,
       "parent": null,
       "children": [
-        11
+        7
       ]
     },
     {
       "node_type": "primitive",
-      "title": "45ae66c12c",
+      "title": "86b3d5dcbf",
       "word_index": 0,
-      "content": 1,
+      "content": 2,
       "context_before": {
         "0": 0
       },
       "context_after": {
         "0": 0,
-        "9": 1.5,
-        "10": 0.3333333333333333
-      },
-      "concept_label": null,
-      "global_root": false,
-      "parent": 7,
-      "children": []
-    },
-    {
-      "node_type": "primitive",
-      "title": "988ac36d43",
-      "word_index": 1,
-      "content": 9,
-      "context_before": {
-        "0": 0,
-        "1": 1.0
-      },
-      "context_after": {
-        "0": 0,
-        "9": 1.0,
-        "10": 0.5,
-        "7": 0.3333333333333333
-      },
-      "concept_label": null,
-      "global_root": false,
-      "parent": 7,
-      "children": []
-    },
-    {
-      "node_type": "primitive",
-      "title": "40176ce7b1",
-      "word_index": 2,
-      "content": 9,
-      "context_before": {
-        "0": 0,
-        "9": 1.0,
-        "1": 0.5
-      },
-      "context_after": {
-        "0": 0,
-        "10": 1.0,
+        "13": 1.0,
         "7": 0.5,
-        "15": 0.3333333333333333
+        "18": 0.3333333333333333
       },
       "concept_label": null,
       "global_root": false,
-      "parent": 8,
+      "parent": 5,
       "children": []
     },
     {
       "node_type": "primitive",
-      "title": "9c22ccd3a7",
-      "word_index": 3,
-      "content": 10,
+      "title": "4a88069a1e",
+      "word_index": 1,
+      "content": 13,
       "context_before": {
         "0": 0,
-        "9": 1.5,
-        "1": 0.3333333333333333
+        "2": 1.0
       },
       "context_after": {
         "0": 0,
         "7": 1.0,
-        "15": 0.5
+        "18": 0.5
       },
       "concept_label": null,
       "global_root": false,
-      "parent": 9,
+      "parent": 5,
       "children": []
     },
     {
       "node_type": "primitive",
-      "title": "621cb654a0",
-      "word_index": 4,
+      "title": "6288496b19",
+      "word_index": 2,
       "content": 7,
       "context_before": {
         "0": 0,
-        "10": 1.0,
-        "9": 0.8333333333333333
+        "13": 1.0,
+        "2": 0.5
       },
       "context_after": {
         "0": 0,
-        "15": 1.0
+        "18": 1.0
       },
       "concept_label": null,
       "global_root": false,
-      "parent": 10,
+      "parent": 6,
       "children": []
     },
     {
       "node_type": "primitive",
-      "title": "b25e5fcc1a",
-      "word_index": 5,
-      "content": 15,
+      "title": "8808bf0258",
+      "word_index": 3,
+      "content": 18,
       "context_before": {
         "0": 0,
         "7": 1.0,
-        "10": 0.5,
-        "9": 0.3333333333333333
+        "13": 0.5,
+        "2": 0.3333333333333333
       },
       "context_after": {
         "0": 0
       },
       "concept_label": null,
       "global_root": false,
-      "parent": 11,
+      "parent": 7,
       "children": []
     },
     {
       "node_type": "composite",
-      "title": "ecdf179506",
+      "title": "a213a90797",
       "word_index": 0.5,
       "content_left": {
         "0": 0,
-        "1": 1
+        "2": 1
       },
       "content_right": {
         "0": 0,
-        "9": 1
+        "13": 1
       },
       "context_before": {
         "0": 0
       },
       "context_after": {
         "0": 0,
-        "9": 1.0,
-        "10": 0.5,
-        "7": 0.3333333333333333
+        "7": 1.0,
+        "18": 0.5
       },
       "concept_label": 23,
       "global_root": false,
-      "parent": 8,
+      "parent": 6,
       "children": [
         1,
         2
@@ -217,65 +175,8 @@
     },
     {
       "node_type": "composite",
-      "title": "d9d01098c0",
+      "title": "ee5e2e5763",
       "word_index": 1.25,
-      "content_left": {
-        "0": 0,
-        "23": 1
-      },
-      "content_right": {
-        "0": 0,
-        "9": 1
-      },
-      "context_before": {
-        "0": 0
-      },
-      "context_after": {
-        "0": 0,
-        "10": 1.0,
-        "7": 0.5,
-        "15": 0.3333333333333333
-      },
-      "concept_label": 23,
-      "global_root": false,
-      "parent": 9,
-      "children": [
-        7,
-        3
-      ]
-    },
-    {
-      "node_type": "composite",
-      "title": "86bde85ae8",
-      "word_index": 2.125,
-      "content_left": {
-        "0": 0,
-        "23": 1
-      },
-      "content_right": {
-        "0": 0,
-        "10": 1
-      },
-      "context_before": {
-        "0": 0
-      },
-      "context_after": {
-        "0": 0,
-        "7": 1.0,
-        "15": 0.5
-      },
-      "concept_label": 23,
-      "global_root": false,
-      "parent": 10,
-      "children": [
-        8,
-        4
-      ]
-    },
-    {
-      "node_type": "composite",
-      "title": "b6bf0e7732",
-      "word_index": 3.0625,
       "content_left": {
         "0": 0,
         "23": 1
@@ -289,27 +190,27 @@
       },
       "context_after": {
         "0": 0,
-        "15": 1.0
+        "18": 1.0
       },
       "concept_label": 23,
       "global_root": false,
-      "parent": 11,
+      "parent": 7,
       "children": [
-        9,
-        5
+        5,
+        3
       ]
     },
     {
       "node_type": "composite",
-      "title": "55e415a958",
-      "word_index": 4.03125,
+      "title": "06ff3794aa",
+      "word_index": 2.125,
       "content_left": {
         "0": 0,
         "23": 1
       },
       "content_right": {
         "0": 0,
-        "15": 1
+        "18": 1
       },
       "context_before": {
         "0": 0
@@ -321,8 +222,8 @@
       "global_root": false,
       "parent": 0,
       "children": [
-        10,
-        6
+        6,
+        4
       ]
     }
   ]

@@ -23,11 +23,18 @@ Rough Plan
 *   Code plan for Parse Tree Editor
     *   The screen should have a primary window that shows the tree and then a sidebar that shows a log of all actions made
         *   Perhaps also a title that says "Parse Tree Editor" and a subtitle that says "Current sentence: ..." with the dots being filled in by a random sentence
-    *   There's a button for every two consecutive parentless instances: upon selecting a button that marks two consecutive instances, we see:
+    *   There's a button for every two consecutive parentless instances: upon selecting a button that marks two consecutive instances, we see, in a popup window:
         *   The best prospective chunk candidate from the long-term memory
         *   The score for this best candidate (as marked by our scoring function)
-    *   A button to confirm the selection of adding a new chunk candidate (with a popup dialog box for confirmation)
-        *   Upon confirmation, it should populate this in the log as well.
+            *   We should also try to add the different scoring statistics present in the scoring function's debug print as a table!
+        *   Also in the popup window, there should be a button to confirm the selection of adding a new chunk candidate (with a popup dialog box for confirmation)
+            *   Upon confirmation, it should populate this in the log as well.
     *   An undo button that removes the last added chunk candidate and reverts the tree back to the prior state
-        *   Should delete actions from the log as this happens
+        *   Should delete actions from the log as this happens!
     *   A submit button that exports the parse tree as a JSON (with a confirmation box) and then feedback that says the parse tree was exported in the log.
+
+*   Code plan for LTM Inspector
+    *   The screen should have a primary window that is similar to a scrollable and zoomable canvas of the long-term memory
+    *   IDs should be searchable
+    *   Some way to decompose an ID
+    *   Basic level nodes should be highlighted

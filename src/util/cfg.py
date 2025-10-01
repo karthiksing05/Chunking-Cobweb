@@ -44,8 +44,6 @@ TEST_CORPUS1 = (
     sum(TEST_GRAMMAR1["P"], [])
 )
 
-import random
-
 
 # Define a very simple grammar (no recursion, fewer rules)
 TEST_GRAMMAR2 = {

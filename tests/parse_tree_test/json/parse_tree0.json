@@ -1,5 +1,5 @@
 {
-  "window": "the telescope found the big cat with a red man",
+  "window": "a small telescope saw",
   "context_length": 3,
   "id_to_value": [
     "EMPTYNULL",
@@ -25,7 +25,7 @@
     "in",
     "on",
     "under",
-    "CONCEPT-4380982928"
+    "CONCEPT-5342317968"
   ],
   "value_to_id": {
     "EMPTYNULL": 0,
@@ -51,12 +51,12 @@
     "in": 20,
     "on": 21,
     "under": 22,
-    "CONCEPT-4380982928": 23
+    "CONCEPT-5342317968": 23
   },
   "nodes": [
     {
       "node_type": "composite",
-      "title": "390019b0e6",
+      "title": "45105c98c4",
       "word_index": null,
       "content_left": null,
       "content_right": null,
@@ -66,224 +66,120 @@
       "global_root": true,
       "parent": null,
       "children": [
-        19
+        7
       ]
     },
     {
       "node_type": "primitive",
-      "title": "aa3fa3a916",
+      "title": "41845667dc",
       "word_index": 0,
-      "content": 1,
+      "content": 2,
       "context_before": {
         "0": 0
       },
       "context_after": {
         "0": 0,
-        "8": 1.0,
-        "17": 0.5,
-        "1": 0.3333333333333333
+        "10": 1.0,
+        "8": 0.5,
+        "14": 0.3333333333333333
       },
       "concept_label": null,
       "global_root": false,
-      "parent": 11,
+      "parent": 5,
       "children": []
     },
     {
       "node_type": "primitive",
-      "title": "8caf93197f",
+      "title": "3430962039",
       "word_index": 1,
+      "content": 10,
+      "context_before": {
+        "0": 0,
+        "2": 1.0
+      },
+      "context_after": {
+        "0": 0,
+        "8": 1.0,
+        "14": 0.5
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 5,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "16592502f1",
+      "word_index": 2,
       "content": 8,
       "context_before": {
         "0": 0,
-        "1": 1.0
+        "10": 1.0,
+        "2": 0.5
       },
       "context_after": {
         "0": 0,
-        "17": 1.0,
-        "1": 0.5,
-        "9": 0.3333333333333333
+        "14": 1.0
       },
       "concept_label": null,
       "global_root": false,
-      "parent": 11,
+      "parent": 6,
       "children": []
     },
     {
       "node_type": "primitive",
-      "title": "ceeb4b3514",
-      "word_index": 2,
-      "content": 17,
+      "title": "ff2a124d65",
+      "word_index": 3,
+      "content": 14,
       "context_before": {
         "0": 0,
         "8": 1.0,
-        "1": 0.5
-      },
-      "context_after": {
-        "0": 0,
-        "1": 1.0,
-        "9": 0.5,
-        "3": 0.3333333333333333
-      },
-      "concept_label": null,
-      "global_root": false,
-      "parent": 12,
-      "children": []
-    },
-    {
-      "node_type": "primitive",
-      "title": "747a36ff65",
-      "word_index": 3,
-      "content": 1,
-      "context_before": {
-        "0": 0,
-        "17": 1.0,
-        "8": 0.5,
-        "1": 0.3333333333333333
-      },
-      "context_after": {
-        "0": 0,
-        "9": 1.0,
-        "3": 0.5,
-        "19": 0.3333333333333333
-      },
-      "concept_label": null,
-      "global_root": false,
-      "parent": 13,
-      "children": []
-    },
-    {
-      "node_type": "primitive",
-      "title": "f1c7f10104",
-      "word_index": 4,
-      "content": 9,
-      "context_before": {
-        "0": 0,
-        "1": 1.0,
-        "17": 0.5,
-        "8": 0.3333333333333333
-      },
-      "context_after": {
-        "0": 0,
-        "3": 1.0,
-        "19": 0.5,
+        "10": 0.5,
         "2": 0.3333333333333333
-      },
-      "concept_label": null,
-      "global_root": false,
-      "parent": 14,
-      "children": []
-    },
-    {
-      "node_type": "primitive",
-      "title": "04739ac230",
-      "word_index": 5,
-      "content": 3,
-      "context_before": {
-        "0": 0,
-        "9": 1.0,
-        "1": 0.5,
-        "17": 0.3333333333333333
-      },
-      "context_after": {
-        "0": 0,
-        "19": 1.0,
-        "2": 0.5,
-        "11": 0.3333333333333333
-      },
-      "concept_label": null,
-      "global_root": false,
-      "parent": 15,
-      "children": []
-    },
-    {
-      "node_type": "primitive",
-      "title": "3a28ad0a1e",
-      "word_index": 6,
-      "content": 19,
-      "context_before": {
-        "0": 0,
-        "3": 1.0,
-        "9": 0.5,
-        "1": 0.3333333333333333
-      },
-      "context_after": {
-        "0": 0,
-        "2": 1.0,
-        "11": 0.5,
-        "5": 0.3333333333333333
-      },
-      "concept_label": null,
-      "global_root": false,
-      "parent": 16,
-      "children": []
-    },
-    {
-      "node_type": "primitive",
-      "title": "eafea08847",
-      "word_index": 7,
-      "content": 2,
-      "context_before": {
-        "0": 0,
-        "19": 1.0,
-        "3": 0.5,
-        "9": 0.3333333333333333
-      },
-      "context_after": {
-        "0": 0,
-        "11": 1.0,
-        "5": 0.5
-      },
-      "concept_label": null,
-      "global_root": false,
-      "parent": 17,
-      "children": []
-    },
-    {
-      "node_type": "primitive",
-      "title": "3a36c22949",
-      "word_index": 8,
-      "content": 11,
-      "context_before": {
-        "0": 0,
-        "2": 1.0,
-        "19": 0.5,
-        "3": 0.3333333333333333
-      },
-      "context_after": {
-        "0": 0,
-        "5": 1.0
-      },
-      "concept_label": null,
-      "global_root": false,
-      "parent": 18,
-      "children": []
-    },
-    {
-      "node_type": "primitive",
-      "title": "e61f717c84",
-      "word_index": 9,
-      "content": 5,
-      "context_before": {
-        "0": 0,
-        "11": 1.0,
-        "2": 0.5,
-        "19": 0.3333333333333333
       },
       "context_after": {
         "0": 0
       },
       "concept_label": null,
       "global_root": false,
-      "parent": 19,
+      "parent": 7,
       "children": []
     },
     {
       "node_type": "composite",
-      "title": "15ac5debb7",
+      "title": "2e5ce9628d",
       "word_index": 0.5,
       "content_left": {
         "0": 0,
-        "1": 1
+        "2": 1
+      },
+      "content_right": {
+        "0": 0,
+        "10": 1
+      },
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0,
+        "8": 1.0,
+        "14": 0.5
+      },
+      "concept_label": 23,
+      "global_root": false,
+      "parent": 6,
+      "children": [
+        1,
+        2
+      ]
+    },
+    {
+      "node_type": "composite",
+      "title": "baedc70b37",
+      "word_index": 1.25,
+      "content_left": {
+        "0": 0,
+        "23": 1
       },
       "content_right": {
         "0": 0,
@@ -294,50 +190,19 @@
       },
       "context_after": {
         "0": 0,
-        "17": 1.0,
-        "1": 0.5,
-        "9": 0.3333333333333333
+        "14": 1.0
       },
       "concept_label": 23,
       "global_root": false,
-      "parent": 12,
+      "parent": 7,
       "children": [
-        1,
-        2
-      ]
-    },
-    {
-      "node_type": "composite",
-      "title": "df94e565db",
-      "word_index": 1.25,
-      "content_left": {
-        "0": 0,
-        "23": 1
-      },
-      "content_right": {
-        "0": 0,
-        "17": 1
-      },
-      "context_before": {
-        "0": 0
-      },
-      "context_after": {
-        "0": 0,
-        "1": 1.0,
-        "9": 0.5,
-        "3": 0.3333333333333333
-      },
-      "concept_label": 23,
-      "global_root": false,
-      "parent": 13,
-      "children": [
-        11,
+        5,
         3
       ]
     },
     {
       "node_type": "composite",
-      "title": "91fefcdd7a",
+      "title": "1011e5853c",
       "word_index": 2.125,
       "content_left": {
         "0": 0,
@@ -345,178 +210,7 @@
       },
       "content_right": {
         "0": 0,
-        "1": 1
-      },
-      "context_before": {
-        "0": 0
-      },
-      "context_after": {
-        "0": 0,
-        "9": 1.0,
-        "3": 0.5,
-        "19": 0.3333333333333333
-      },
-      "concept_label": 23,
-      "global_root": false,
-      "parent": 14,
-      "children": [
-        12,
-        4
-      ]
-    },
-    {
-      "node_type": "composite",
-      "title": "98e49ecb99",
-      "word_index": 3.0625,
-      "content_left": {
-        "0": 0,
-        "23": 1
-      },
-      "content_right": {
-        "0": 0,
-        "9": 1
-      },
-      "context_before": {
-        "0": 0
-      },
-      "context_after": {
-        "0": 0,
-        "3": 1.0,
-        "19": 0.5,
-        "2": 0.3333333333333333
-      },
-      "concept_label": 23,
-      "global_root": false,
-      "parent": 15,
-      "children": [
-        13,
-        5
-      ]
-    },
-    {
-      "node_type": "composite",
-      "title": "768907f0f9",
-      "word_index": 4.03125,
-      "content_left": {
-        "0": 0,
-        "23": 1
-      },
-      "content_right": {
-        "0": 0,
-        "3": 1
-      },
-      "context_before": {
-        "0": 0
-      },
-      "context_after": {
-        "0": 0,
-        "19": 1.0,
-        "2": 0.5,
-        "11": 0.3333333333333333
-      },
-      "concept_label": 23,
-      "global_root": false,
-      "parent": 16,
-      "children": [
-        14,
-        6
-      ]
-    },
-    {
-      "node_type": "composite",
-      "title": "2802e38ce3",
-      "word_index": 5.015625,
-      "content_left": {
-        "0": 0,
-        "23": 1
-      },
-      "content_right": {
-        "0": 0,
-        "19": 1
-      },
-      "context_before": {
-        "0": 0
-      },
-      "context_after": {
-        "0": 0,
-        "2": 1.0,
-        "11": 0.5,
-        "5": 0.3333333333333333
-      },
-      "concept_label": 23,
-      "global_root": false,
-      "parent": 17,
-      "children": [
-        15,
-        7
-      ]
-    },
-    {
-      "node_type": "composite",
-      "title": "250081ecc3",
-      "word_index": 6.0078125,
-      "content_left": {
-        "0": 0,
-        "23": 1
-      },
-      "content_right": {
-        "0": 0,
-        "2": 1
-      },
-      "context_before": {
-        "0": 0
-      },
-      "context_after": {
-        "0": 0,
-        "11": 1.0,
-        "5": 0.5
-      },
-      "concept_label": 23,
-      "global_root": false,
-      "parent": 18,
-      "children": [
-        16,
-        8
-      ]
-    },
-    {
-      "node_type": "composite",
-      "title": "efb918ffe3",
-      "word_index": 7.00390625,
-      "content_left": {
-        "0": 0,
-        "23": 1
-      },
-      "content_right": {
-        "0": 0,
-        "11": 1
-      },
-      "context_before": {
-        "0": 0
-      },
-      "context_after": {
-        "0": 0,
-        "5": 1.0
-      },
-      "concept_label": 23,
-      "global_root": false,
-      "parent": 19,
-      "children": [
-        17,
-        9
-      ]
-    },
-    {
-      "node_type": "composite",
-      "title": "d4d825defb",
-      "word_index": 8.001953125,
-      "content_left": {
-        "0": 0,
-        "23": 1
-      },
-      "content_right": {
-        "0": 0,
-        "5": 1
+        "14": 1
       },
       "context_before": {
         "0": 0
@@ -528,8 +222,8 @@
       "global_root": false,
       "parent": 0,
       "children": [
-        18,
-        10
+        6,
+        4
       ]
     }
   ]
