@@ -68,7 +68,8 @@ One of the most important things to keep track of over the course of this projec
 
 Because of the highly conceptual nature of this framework, we've also created a GUI by which we can inspect and analyze both parse trees and our long-term memory.
 
-*   ```gui/parse_tree_editor.py``` - a stylistically consistent editable parse tree generator that can create and export parse trees to a folder of choice.
+*   ```gui/parse_tree_editor.py``` - a stylistically consistent editable parse tree generator that can create and export parse trees.
+*   ```gui/ltm_inspector.py``` - an also stylistically consistent long-term-memory (CobwebTree) inspection tool that can peruse and analyze the long-term memory after a given length.
 
 ## Raw Tests:
 

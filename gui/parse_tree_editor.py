@@ -23,6 +23,8 @@ for i, doc in enumerate(document):
     parse_tree = parser.parse_input([doc], end_behavior="converge", debug=False)[0]
     parser.add_parse_tree(parse_tree, debug=False)
 
+parser.visualize_ltm("gui/parse_tree_editor/ltm")
+
 curr_tree = FiniteParseTree(parser.get_long_term_memory(), parser.id_to_value, parser.value_to_id, context_length=2)
 curr_tree.build_primitives(sample_sentence)
 
@@ -76,7 +78,7 @@ def api_export():
         filepath = "parse_tree_test.json"
     if not filepath.lower().endswith(".json"):
         filepath += ".json"
-    res = curr_tree.export_json(f"tests/gui/parse_tree_editor/{filepath}")
+    res = curr_tree.export_json(f"gui/parse_tree_editor/{filepath}")
     return jsonify(res)
 
 # optional static UI endpoint to get a rendered HTML (uses FiniteParseTree._build_html)
