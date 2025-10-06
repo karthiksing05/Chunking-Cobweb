@@ -373,7 +373,7 @@ class FiniteParseTree:
             if math.isinf(log_prob_instance):
                 log_prob_instance = 0
         except Exception:
-            log_prob_instance = None
+            log_prob_instance = 0
         try:
             log_prob_instance_missing = float(candidate_concept.log_prob_instance_missing(merge_inst))
             if math.isnan(log_prob_instance_missing):
@@ -381,7 +381,7 @@ class FiniteParseTree:
             if math.isinf(log_prob_instance_missing):
                 log_prob_instance_missing = 0
         except Exception:
-            log_prob_instance_missing = None
+            log_prob_instance_missing = 0
         try:
             log_prob_class_given_instance = float(candidate_concept.log_prob_class_given_instance(merge_inst, True))
             if math.isnan(log_prob_class_given_instance):
@@ -389,7 +389,7 @@ class FiniteParseTree:
             if math.isinf(log_prob_class_given_instance):
                 log_prob_class_given_instance = 0
         except Exception:
-            log_prob_class_given_instance = None
+            log_prob_class_given_instance = 0
         try:
             entropy = float(candidate_concept.entropy())
             if math.isnan(entropy):
@@ -397,21 +397,33 @@ class FiniteParseTree:
             if math.isinf(entropy):
                 entropy = 0
         except Exception:
-            entropy = None
+            entropy = 0
 
         score = float(self._score_function(candidate_concept, merge_inst, debug=debug))
 
         # want to visualize candidate_concept.av_count, need to use draw_dict:
-        candidate_draw_inst = {
-            "title": candidate_hash,
-            "left": self.ctx_list(candidate_concept.av_count[0]),
-            "right": self.ctx_list(candidate_concept.av_count[1]),
-            "before": self.ctx_list(candidate_concept.av_count[2]),
-            "after":  self.ctx_list(candidate_concept.av_count[3]),
-            "children": []
-        }
+        
 
-        return {
+        if len(candidate_concept.av_count) == 0:
+            candidate_draw_inst = {
+                "title": candidate_hash,
+                "left": [],
+                "right": [],
+                "before": [],
+                "after":  [],
+                "children": []
+            }
+        else:
+            candidate_draw_inst = {
+                "title": candidate_hash,
+                "left": self.ctx_list(candidate_concept.av_count[0]),
+                "right": self.ctx_list(candidate_concept.av_count[1]),
+                "before": self.ctx_list(candidate_concept.av_count[2]),
+                "after":  self.ctx_list(candidate_concept.av_count[3]),
+                "children": []
+            }
+
+        returnData = {
             "merge_inst": merge_inst,  # small dict of instance parts (0/1/2/3)
             "candidate_concept_hash": candidate_hash,
             "candidate_concept_id": candidate_id,
@@ -428,6 +440,10 @@ class FiniteParseTree:
             "left_title": left_node.title,
             "right_title": right_node.title
         }
+                
+        # print(returnData)
+
+        return returnData
 
     def apply_candidate(self, left_word_index, right_word_index, candidate_concept_hash=None):
         """
@@ -1005,7 +1021,7 @@ class FiniteParseTree:
     <body>
     <div id="header">
         <h2>Parse Tree Editor</h2>
-        <h4>Current sentence: {sentence_str}</h4>
+        <h4>Current sentence: <span id="sentence-text">{sentence_str}</span></h4>
         <button id="undo-btn">Undo Last Chunk</button>
         <button id="export-btn">Export Tree</button>
     </div>
@@ -1133,6 +1149,8 @@ class FiniteParseTree:
         fetch("/api/tree").then(r=>r.json()).then(data=>{{
             const container = document.getElementById("pair-buttons");
             container.innerHTML="<strong>Candidate Pairs:</strong>";
+            const s = document.getElementById("sentence-text");
+            if(s && data.sentence) s.textContent = data.sentence;
             data.pairs.forEach(p=>{{
                 const btn=document.createElement("button");
                 btn.textContent=`${{p.left_title}} + ${{p.right_title}}`;
@@ -1235,12 +1253,31 @@ class FiniteParseTree:
     // --- Export ---
     document.getElementById("export-btn").onclick = ()=>{{
         const fp = prompt("Enter filepath to export (optional):","");
-        fetch("/api/export",{{method:"POST",headers:{{"Content-Type":"application/json"}},body:JSON.stringify({{filepath:fp}})}})
-        .then(r=>r.json()).then(res=>{{
-            if(res.ok){{ alert("Parse tree exported!"); loadPairs(); }}
-            else alert("Export failed");
-        }});
-    }}
+        fetch("/api/export",{{
+            method:"POST",
+            headers:{{"Content-Type":"application/json"}},
+            body: JSON.stringify({{filepath:fp}})
+        }})
+        .then(r=>r.json())
+        .then(res=>{{
+            if(res.ok){{
+                alert("Parse tree exported and LTM updated!");
+                if(res.refresh){{
+                    // update sentence text live
+                    const s = document.getElementById("sentence-text");
+                    if(s && res.new_sentence) s.textContent = res.new_sentence;
+                    // slight delay before refreshing to new tree
+                    setTimeout(()=> location.reload(), 800);
+                }} else {{
+                    loadPairs();
+                }}
+            }} else {{
+                alert(res.error || "Export failed");
+            }}
+        }})
+        .catch(err => alert("Network error: " + err));
+    }};
+
 
     // --- Initial load ---
     loadPairs();

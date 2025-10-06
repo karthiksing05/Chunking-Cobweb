@@ -41,8 +41,9 @@ Rough Plan
                 *   Each of these popup boxes with node tables should also contain hyperlinks for any nodes that represent Concept-HASH IDs, so you should be able to recursively open and close pop-up boxes
     *   There should also be a search bar where the concept hashes slowly fill in as you continue typing in an ID. Upon pressing a search button, the stage should automatically teleport to focus on the concept hash you searched.
     *   A button for loading parse trees that, upon clicking, opens a file selection dialog box to pick a .json file for a parse tree (with necessary error correction to see if it's a parse tree json)
-        *   A visualized process for addition to the Cobweb tree that prints all log actions and conveys all actions that are about to be made in a flipbook style (this is optional and potentially will be revised, as it seems like a better change to make to HTMLCobwebDrawer than the )
+        *   A visualized process for addition to the Cobweb tree that prints all log actions and conveys all actions that are about to be made in a flipbook style (this is optional and potentially will be revised, as it seems like a better change to make to HTMLCobwebDrawer than the ltm inspection code)
 
 *   Combining both ideas:
     *   One potential application is that we boot up both of the above files at the same time (I kind of like this LOL)
-        *   For simplicity, let's just boot up both websites at the same time under slightly different urls!
+        *   For simplicity, let's just boot up both websites at the same time under slightly different urls! That way, we can boot up both webpages without a crisis
+        *   I also want to boot up both webpages under the same Flask server to mitigate problems
