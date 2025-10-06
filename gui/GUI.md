@@ -44,6 +44,5 @@ Rough Plan
         *   A visualized process for addition to the Cobweb tree that prints all log actions and conveys all actions that are about to be made in a flipbook style (this is optional and potentially will be revised, as it seems like a better change to make to HTMLCobwebDrawer than the ltm inspection code)
 
 *   Combining both ideas:
-    *   One potential application is that we boot up both of the above files at the same time (I kind of like this LOL)
-        *   For simplicity, let's just boot up both websites at the same time under slightly different urls! That way, we can boot up both webpages without a crisis
-        *   I also want to boot up both webpages under the same Flask server to mitigate problems
+    *   Currently we just have a button to export the LTM when we need it - proving highly successful!
+    *   Going to table the 

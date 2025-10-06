@@ -264,13 +264,17 @@ class FiniteParseTree:
                     candidate_concept.log_prob_instance(potential_merge_inst))
             print("Candidate Concept Log Prob Instance Missing:", 
                     candidate_concept.log_prob_instance_missing(potential_merge_inst))
-            print("Candidate Concept Log Prob Class Given Instance:", 
+            print("Candidate Concept Log Prob Class Given Instance (True):", 
                     candidate_concept.log_prob_class_given_instance(potential_merge_inst, True))
             print("Candidate Concept Entropy:",
                     candidate_concept.entropy())
             print()
 
-        return candidate_concept.log_prob_instance(potential_merge_inst)
+        log_prob_class_given_instance = float(candidate_concept.log_prob_class_given_instance(potential_merge_inst, True))
+        if math.isnan(log_prob_class_given_instance):
+            log_prob_class_given_instance = 0
+
+        return candidate_concept.log_prob_instance_missing(potential_merge_inst)
 
     """
     -----------------------------------
@@ -1024,6 +1028,7 @@ class FiniteParseTree:
         <h4>Current sentence: <span id="sentence-text">{sentence_str}</span></h4>
         <button id="undo-btn">Undo Last Chunk</button>
         <button id="export-btn">Export Tree</button>
+        <button id="export-ltm-btn">Export LTM</button>
     </div>
     <div id="editor-container">
         <div id="tree-panel">
@@ -1273,6 +1278,25 @@ class FiniteParseTree:
                 }}
             }} else {{
                 alert(res.error || "Export failed");
+            }}
+        }})
+        .catch(err => alert("Network error: " + err));
+    }};
+
+    // --- Export LTM ---
+    document.getElementById("export-ltm-btn").onclick = () => {{
+        const fp = prompt("Enter filepath to save LTM JSON (optional):","");
+        fetch("/api/export_ltm", {{
+            method: "POST",
+            headers: {{"Content-Type":"application/json"}},
+            body: JSON.stringify({{filepath: fp}})
+        }})
+        .then(r => r.json())
+        .then(res => {{
+            if(res.ok){{
+                alert("LTM exported!" + (res.filepath ? " Saved to: " + res.filepath : ""));
+            }} else {{
+                alert("Export failed: " + (res.error || "Unknown error"));
             }}
         }})
         .catch(err => alert("Network error: " + err));

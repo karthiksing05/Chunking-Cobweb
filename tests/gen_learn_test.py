@@ -14,7 +14,9 @@ for _ in range(num_sentences):
     document.append(sentence)
 
 # Setting up the parser
-parser = LanguageChunkingParser(TEST_CORPUS1, merge_split=True)
+JSON_FILENAME = ""
+
+parser = LanguageChunkingParser(TEST_CORPUS1, merge_split=True, ltm_json_file=JSON_FILENAME)
 
 train_size = 0.9
 

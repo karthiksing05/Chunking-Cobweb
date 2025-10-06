@@ -3,8 +3,11 @@ from flask import Flask, jsonify, request
 from parse import FiniteParseTree, LanguageChunkingParser
 from util.cfg import generate, TEST_CORPUS2, TEST_GRAMMAR2
 import json
+import uuid
 
 app = Flask(__name__)
+
+LEARNING_ON = True
 
 # --- Initialize parser and LTM ---
 parser = LanguageChunkingParser(TEST_CORPUS2, context_length=2)
@@ -19,8 +22,6 @@ for _ in range(num_load):
 for doc in document:
     parse_tree = parser.parse_input([doc], end_behavior="converge", debug=False)[0]
     parser.add_parse_tree(parse_tree, debug=False)
-
-parser.visualize_ltm("gui/parse_tree_editor/ltm")
 
 # --- Initialize first sentence and tree ---
 sample_sentence = generate("S", TEST_GRAMMAR2)
@@ -90,6 +91,8 @@ def api_export():
     """Export current tree, add to LTM, then reset and refresh."""
     data = request.get_json() or {}
     filepath = data.get("filepath", "parse_tree_test.json")
+    if filepath == "":
+        filepath = "tree_" + str(uuid.uuid4())[:8]
     if not filepath.lower().endswith(".json"):
         filepath += ".json"
 
@@ -98,8 +101,8 @@ def api_export():
     res = curr_tree.export_json(export_path)
 
     # 2. Add to parser’s LTM
-    parser.add_parse_tree(curr_tree, debug=False)
-    parser.visualize_ltm("gui/parse_tree_editor/ltm")
+    if LEARNING_ON:
+        parser.add_parse_tree(curr_tree, debug=False)
 
     # 3. Reset to a new random sentence
     reset_tree()
@@ -111,6 +114,28 @@ def api_export():
         "refresh": True,
         "new_sentence": sample_sentence
     })
+
+@app.route("/api/export_ltm", methods=["POST"])
+def api_export_ltm():
+    """
+    Exports the entire parser long-term memory as JSON.
+    Accepts optional 'filepath' in JSON body to save to disk.
+    """
+    data = request.get_json() or {}
+    filepath = data.get("filepath")
+
+    if filepath == "":
+        filepath = "ltm_" + str(uuid.uuid4())[:8]
+    if not filepath.lower().endswith(".json"):
+        filepath += ".json"
+
+    export_path = f"gui/parse_tree_editor/{filepath}"
+    
+    parser.get_long_term_memory().write_json_stream(export_path)
+    parser.visualize_ltm(export_path.replace(".json", ""))
+    
+    return jsonify({"ok": True, "filepath": export_path})
+
 
 @app.route("/editor", methods=["GET"])
 def editor_page():
