@@ -3087,8 +3087,8 @@ inline double CobwebNode::log_prob_instance_missing(const AV_COUNT_TYPE &instanc
                 // we could treat it as just alpha...
                 if (!this->tree->attr_vals.at(attr).count(val))
                 {
-                    std::cout << "VALUE MISSING TREATING AS ALPHA" << std::endl;
-                    // continue;
+                    // std::cout << "VALUE MISSING TREATING AS ALPHA" << std::endl;
+                    continue;
                 }
 
                 double av_count = alpha;

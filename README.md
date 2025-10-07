@@ -21,6 +21,24 @@ cd ..
 
 After running these commands, you should be fully set up with the modified install of Cobweb!
 
+## GUI Editor:
+
+Because of the highly conceptual nature of this framework, we've also created a GUI by which we can inspect and analyze both parse trees and our long-term memory.
+
+*   ```gui/parse_tree_editor.py``` - a stylistically consistent editable parse tree generator that can create and export parse trees.
+    *   Through this editor, we can show the learning mechanism to be effective through a variety of tests that confirm consistency and stability through fed parse trees.
+*   ```gui/ltm_inspector.py``` - an also stylistically consistent long-term-memory (CobwebTree) inspection tool that can peruse and analyze the long-term memory after a given length.
+    *   TODO this is still in progress! but subject to change    
+
+## Custom Implementation Tests:
+
+Below is a list of all tests confirming and acknowledging the use of the framework. Use ```pytest -s tests/TEST_NAME_HERE.py``` to run (the "-s" flag is for output)
+
+*   ```tests/parse_tree_test.py``` - a test to confirm the correct implementation of parse trees and parse tree composition
+*   ```tests/gen_learn_test.py``` - a test to also confirm the logic of parse tree addition and processing
+*   ```tests/ltm_analysis.py``` - a test that analyzes various long-term memories as well as some intermediate subtree levels.
+*   ```tests/parse_consistency_test.py``` - a test that demonstrates the consistency of parses across various inputs of data, to ensure that parses are regarded as the same.
+
 ## Updates to Cobweb:
 
 A couple modifications were made to Cobweb to support some of the edge-case behavior of the chunking framework. Most notably, we leave these changes in ```my_cobweb_discrete.cpp``` - when running this code, copy the contents of that file into the ```cobweb/src/cobweb_discrete.cpp```.
@@ -53,7 +71,7 @@ One of the most important things to keep track of over the course of this projec
     *   I think this is currently being done by log-probability - the chunk candidate that best matches a concept within the long-term hierarchy is added to the tree (each candidate is categorized to identify the best possible match)
     *   In future instances, we could do this by some kind of collocation score?
 *   How do we select the best chunk candidate label?
-    *   Currently done by basic-level nodes! There are talks of a Pointwise Mutual Information metric coming into play but subject to change.
+    *   Currently done by basic-level nodes, evaluated on the log_prob_instance_missing metric! There are talks of a Pointwise Mutual Information metric coming into play but subject to change.
 *   How do we denote when parse tree construction terminates?
     *   Partial parse tree based on the metric by which we add nodes to the parse tree
     *   Full parse tree every time until one node reached
@@ -63,21 +81,6 @@ One of the most important things to keep track of over the course of this projec
 *   The data we choose to read in is subject to change - currently, we're reading language by sentences, but future iterations can do larger-scale windows and slide the window / create parse trees flexibly over time.
     *   We read in the first n primitives and parse them, then we read the next n primitives (keeping the root node of the primitives)
     *   [COOL STUFF] If we construct partial parse trees, we can continue iteratively adding primitives to our "active working memory" until the threshold for working memory has been met, and then we can dump everything into the memory all at once?
-
-## GUI Editor:
-
-Because of the highly conceptual nature of this framework, we've also created a GUI by which we can inspect and analyze both parse trees and our long-term memory.
-
-*   ```gui/parse_tree_editor.py``` - a stylistically consistent editable parse tree generator that can create and export parse trees.
-*   ```gui/ltm_inspector.py``` - an also stylistically consistent long-term-memory (CobwebTree) inspection tool that can peruse and analyze the long-term memory after a given length.
-
-## Raw Tests:
-
-Below is a list of all tests confirming and acknowledging the use of the framework. Use ```pytest -s tests/TEST_NAME_HERE.py``` to run (the "-s" flag is for output)
-
-*   ```tests/parse_tree_test.py``` - a test to confirm the correct implementation of parse trees and parse tree composition
-*   ```tests/gen_learn_test.py``` - a test to also confirm the logic of parse tree addition and processing
-*   ```tests/ltm_analysis.py``` - a test that analyzes various long-term memories as well as some intermediate subtree levels.
 
 ## Long-term goals
 
