@@ -21,6 +21,7 @@
 #include <chrono>
 #include <cmath>
 #include <variant>
+#include <atomic>
 
 #include "rapidjson/document.h"
 #include "rapidjson/reader.h"
@@ -75,7 +76,7 @@ std::unordered_map<int, std::unordered_map<double, double>> entropy_k_cache;
 
 // do this so that we only store integers in the stack, not strings
 // won't have any impact on the tree
-const std::unordered_map<std::string, int> ATTRIBUTE_MAP = {
+std::unordered_map<std::string, int> ATTRIBUTE_MAP = {
     {"alpha", 1000000},
     {"weight_attr", 10000001},
     {"objective", 10000002},
@@ -86,7 +87,22 @@ const std::unordered_map<std::string, int> ATTRIBUTE_MAP = {
     {"a_count", 100000012},
     {"sum_n_logn", 100000013},
     {"av_count", 100000014},
-    {"children", 100000015}};
+    {"children", 100000015},
+    {"concept_hash", 100000020}};
+
+// Global atomic counter to help guarantee unique concept ids
+static std::atomic<uint64_t> GLOBAL_CONCEPT_COUNTER{0};
+
+static std::string generate_concept_hash()
+{
+    using namespace std::chrono;
+    auto now = high_resolution_clock::now();
+    uint64_t ns = duration_cast<nanoseconds>(now.time_since_epoch()).count();
+    uint64_t id = ++GLOBAL_CONCEPT_COUNTER;
+    std::ostringstream ss;
+    ss << ns << "_" << id;
+    return ss.str();
+}
 
 VALUE_TYPE most_likely_choice(std::vector<std::tuple<VALUE_TYPE, double>> choices)
 {
@@ -118,6 +134,9 @@ public:
     CobwebTree *tree;
     CobwebNode *parent;
     std::vector<CobwebNode *> children;
+
+    // persistent concept identifier (precomputed on creation)
+    std::string concept_id;
 
     COUNT_TYPE count;
     ATTR_COUNT_TYPE a_count;
@@ -360,6 +379,29 @@ public:
             return true;
         }
 
+        bool String(const char *str, rapidjson::SizeType length, bool copy)
+        {
+            if (keyStack.empty())
+                return true;
+
+            int currentKey = keyStack.top();
+            if (currentKey == ATTRIBUTE_MAP.at("concept_hash"))
+            {
+                if (!nodeStack.empty())
+                {
+                    CobwebNode *currentNode = nodeStack.top();
+                    currentNode->concept_id = std::string(str, length);
+                }
+                keyStack.pop();
+            }
+            else
+            {
+                // Strings can also be numeric keys (attribute values), handled in Key when reading keys.
+                // Do not pop the key stack here; other handlers will pop when they process numeric values.
+            }
+            return true;
+        }
+
         bool StartObject()
         {
             if (keyStack.empty())
@@ -393,27 +435,34 @@ public:
 
         bool EndObject(rapidjson::SizeType memberCount)
         {
-            if (keyStack.empty() && nodeStack.empty())
+            if (keyStack.empty())
             {
+                // nothing to do
                 return true;
-            }
-            else if (keyStack.top() == ATTRIBUTE_MAP.at("root"))
-            {
-                nodeStack.pop();
-            }
-            else if (keyStack.top() == ATTRIBUTE_MAP.at("children") && !nodeStack.empty())
-            {
-                nodeStack.pop();
             }
 
-            if (keyStack.top() == ATTRIBUTE_MAP.at("children") && !nodeStack.empty())
+            int currentKey = keyStack.top();
+
+            // If this object was the root object, pop its node and pop the key
+            if (currentKey == ATTRIBUTE_MAP.at("root"))
             {
+                if (!nodeStack.empty())
+                    nodeStack.pop();
+                keyStack.pop();
                 return true;
             }
-            else
+
+            // If we're inside a "children" array, each child object should pop the nodeStack
+            // but KEEP the 'children' key on the keyStack until EndArray() is called.
+            if (currentKey == ATTRIBUTE_MAP.at("children"))
             {
-                keyStack.pop();
+                if (!nodeStack.empty())
+                    nodeStack.pop();
+                return true;
             }
+
+            // Generic object ending under some key: just pop the keyStack
+            keyStack.pop();
             return true;
         }
 
@@ -437,6 +486,9 @@ public:
     void write_json_node(rapidjson::Writer<rapidjson::OStreamWrapper> &writer, CobwebNode *node)
     {
         writer.StartObject();
+        // write persistent concept id
+        writer.Key("concept_hash");
+        writer.String(node->concept_id.c_str());
         writer.Key("count");
         writer.Double(node->count);
 
@@ -666,49 +718,55 @@ public:
             }
             else if (current->children.empty())
             {
+                // Fringe split: we need to turn current into an internal node with
+                // two children: a clone of its previous counts (old_current_clone)
+                // and a new leaf for the incoming instance. We must avoid
+                // accidentally sharing or reusing concept ids or parent pointers.
 
                 fringe_split_count += 1;
                 auto start_fs = std::chrono::high_resolution_clock::now();
 
-                // Step 1: Preserve the old current node's structure in a new node
-                CobwebNode* old_current_clone = new CobwebNode(*current);
+                // Create a shallow clone that will hold the previous counts
+                CobwebNode* old_current_clone = new CobwebNode();
+                old_current_clone->tree = this;
+                old_current_clone->parent = current;
+                // copy aggregated counts from current into the clone
+                old_current_clone->count = current->count;
+                old_current_clone->a_count = current->a_count;
+                old_current_clone->sum_n_logn = current->sum_n_logn;
+                old_current_clone->av_count = current->av_count;
+
+                // Move existing children under the clone and reparent them
                 old_current_clone->children = current->children;
-                // std::cout << "fringe split" << std::endl;
                 for (auto child : old_current_clone->children) {
                     child->parent = old_current_clone;
                 }
 
-                // Step 2: Reset current's children and make current the parent
+                // Clear current's children and attach the clone and a new leaf
                 current->children.clear();
 
-                // Step 3: Create a new node for the incoming instance
                 CobwebNode* new_node = new CobwebNode();
                 new_node->tree = this;
                 new_node->parent = current;
 
-                // Step 4: Attach the old current clone and the new node as children of current
+                // Attach the old clone and the new node as children
                 current->children.push_back(old_current_clone);
-                old_current_clone->parent = current;
-
-                if (debug) {
-                    std::ostringstream ss;
-                    ss << "{\"action\":\"NEW\","
-                    << "\"node\":\"" << old_current_clone->concept_hash() << "\","
-                    << "\"parent\":\"" << (old_current_clone->parent ? old_current_clone->parent->concept_hash() : "null") << "\"}";
-                    debug_logs.push_back(ss.str());
-                }
-
                 current->children.push_back(new_node);
 
                 if (debug) {
                     std::ostringstream ss;
                     ss << "{\"action\":\"NEW\","
-                    << "\"node\":\"" << new_node->concept_hash() << "\","
-                    << "\"parent\":\"" << (new_node->parent ? new_node->parent->concept_hash() : "null") << "\"}";
+                       << "\"node\":\"" << old_current_clone->concept_hash() << "\","
+                       << "\"parent\":\"" << (old_current_clone->parent ? old_current_clone->parent->concept_hash() : "null") << "\"}";
                     debug_logs.push_back(ss.str());
+                    std::ostringstream ss2;
+                    ss2 << "{\"action\":\"NEW\","
+                        << "\"node\":\"" << new_node->concept_hash() << "\","
+                        << "\"parent\":\"" << (new_node->parent ? new_node->parent->concept_hash() : "null") << "\"}";
+                    debug_logs.push_back(ss2.str());
                 }
 
-                // Step 5: Update counts
+                // Update counts for the new leaf and for current (the internal node)
                 auto start2 = std::chrono::high_resolution_clock::now();
                 new_node->increment_counts(instance);
                 auto end2 = std::chrono::high_resolution_clock::now();
@@ -719,7 +777,7 @@ public:
                 auto end3 = std::chrono::high_resolution_clock::now();
                 fringe_split_IC_time += (end3 - start3).count();
 
-                // Step 6: Update root if needed
+                // If current is root, ensure root pointer remains correct
                 if (current->parent == nullptr) {
                     root = current;
                 }
@@ -1250,6 +1308,8 @@ inline CobwebNode::CobwebNode()
     a_count = ATTR_COUNT_TYPE();
     parent = nullptr;
     tree = nullptr;
+    // assign a unique concept id at creation
+    this->concept_id = generate_concept_hash();
 }
 
 inline CobwebNode::CobwebNode(CobwebNode *otherNode)
@@ -1265,8 +1325,12 @@ inline CobwebNode::CobwebNode(CobwebNode *otherNode)
 
     for (auto child : otherNode->children)
     {
-        children.push_back(new CobwebNode(child));
+        CobwebNode *child_clone = new CobwebNode(child);
+        child_clone->parent = this;
+        children.push_back(child_clone);
     }
+    // When cloning an existing node structure, give this new node a fresh id
+    this->concept_id = generate_concept_hash();
 }
 
 inline void CobwebNode::increment_counts(const AV_COUNT_TYPE &instance)
@@ -2321,7 +2385,8 @@ inline bool CobwebNode::is_exact_match(const AV_COUNT_TYPE &instance)
 
 inline size_t CobwebNode::_hash()
 {
-    return std::hash<uintptr_t>()(reinterpret_cast<uintptr_t>(this));
+    // keep backward compatibility: still return a pointer-based hash for size_t
+    return std::hash<std::string>()(this->concept_id);
 }
 
 inline std::string CobwebNode::__str__()
@@ -2331,7 +2396,7 @@ inline std::string CobwebNode::__str__()
 
 inline std::string CobwebNode::concept_hash()
 {
-    return std::to_string(this->_hash());
+    return this->concept_id;
 }
 
 inline std::string CobwebNode::pretty_print(int depth)
@@ -2518,8 +2583,8 @@ inline std::string CobwebNode::sum_n_logn_to_json()
 inline std::string CobwebNode::dump_json()
 {
     std::string output = "{";
-
-    // output += "\"concept_id\": " + std::to_string(this->_hash()) + ",\n";
+    // persist concept id so it can survive dump/load cycles
+    output += "\"concept_hash\": \"" + this->concept_id + "\",\n";
     output += "\"count\": " + doubleToString(this->count) + ",\n";
     output += "\"a_count\": " + this->a_count_to_json() + ",\n";
     output += "\"sum_n_logn\": " + this->sum_n_logn_to_json() + ",\n";
@@ -2546,7 +2611,7 @@ inline std::string CobwebNode::output_json()
 {
     std::string output = "{";
 
-    output += "\"name\": \"Concept" + std::to_string(this->_hash()) + "\",\n";
+    output += "\"name\": \"Concept" + this->concept_id + "\",\n";
     output += "\"size\": " + std::to_string(this->count) + ",\n";
     output += "\"children\": [\n";
     bool first = true;

@@ -18,7 +18,7 @@ forgetting, but we also see the consistency between different parses.
 TODO: extend this step with a stably generated long-term hierarchy.
 """
 
-from util.cfg import generate, TEST_CORPUS2, TEST_GRAMMAR1
+from util.cfg import generate, TEST_GRAMMAR1
 from parse import LanguageChunkingParser, FiniteParseTree
 import time
 
@@ -33,9 +33,9 @@ for _ in range(num_sentences):
 # Setting up the parser
 parser = LanguageChunkingParser.load_state("demo/parse_consistency_test/ltm")
 
-initial_sentence = "a woman sees the woman"
-sub_sentence = "a woman sees"
-new_sentence = "a woman sees the dog"
+initial_sentence = "a woman saw the woman"
+sub_sentence = "a woman saw"
+new_sentence = "a woman saw the dog"
 initial_tree = FiniteParseTree.from_json("demo/parse_consistency_test/initial_parse.json", parser.get_long_term_memory(), filepath=True)
 
 # parser.add_parse_tree(initial_tree, debug=False) # NOTE don't need this because already been added
