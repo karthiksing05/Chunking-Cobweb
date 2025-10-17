@@ -365,7 +365,7 @@ class FiniteParseTree:
             raise ValueError("Left or right node not found among root's children")
 
         merge_inst = CompositeParseNode.create_merge_instance(left_node, right_node)
-        candidate_concept = self.ltm_hierarchy.categorize(merge_inst).get_basic_level()
+        candidate_concept = self.ltm_hierarchy.categorize(merge_inst)
         candidate_hash = candidate_concept.concept_hash()
         candidate_id = self.value_to_id.get(f"CONCEPT-{candidate_hash}")
 
@@ -2039,13 +2039,10 @@ class LanguageChunkingParser:
             
             print("---")
 
-        def add_to_vocab(node_list):
+        def add_node(node_list):
             for n in node_list:
                 new_vocab = f"CONCEPT-{n}"
-                if new_vocab not in self.value_to_id:
-                    self.value_to_id[new_vocab] = self.id_count
-                    self.id_to_value.append(new_vocab)
-                    self.id_count += 1
+                self.add_to_vocab(new_vocab)
 
         all_actions = []
         mode = 0 if self.merge_split else 4
@@ -2069,9 +2066,9 @@ class LanguageChunkingParser:
         rewrite_rules = []
         for action in all_actions:
             if action["action"] == "NEW":
-                add_to_vocab([action["node"]])
+                add_node([action["node"]])
             elif action["action"] == "MERGE":
-                add_to_vocab([action["new_node"]])
+                add_node([action["new_node"]])
             elif action["action"] == "SPLIT":
                 rewrite_rules.append((action["deleted"], action["parent"]))
 
@@ -2101,6 +2098,19 @@ class LanguageChunkingParser:
             print("-" * 60)
 
         return True
+    
+    def add_to_vocab(self, new_vocab):
+        """
+        Helper function to add new word to vocabulary!
+
+        Should return True if the vocab was successfully added, False otherwise.
+        """
+        if new_vocab not in self.value_to_id:
+            self.value_to_id[new_vocab] = self.id_count
+            self.id_to_value.append(new_vocab)
+            self.id_count += 1
+            return True
+        return False
 
     def visualize_ltm(self, out_base="cobweb_tree"):
         """
@@ -2110,3 +2120,103 @@ class LanguageChunkingParser:
         to verify.
         """
         self.cobweb_drawer.draw_tree(self.ltm_hierarchy.root, out_base)
+
+    def save_state(self, dirpath: str):
+        """
+        Save the LanguageChunkingParser state to a directory.
+
+        Writes a `meta.json` for simple attributes (id_to_value, value_to_id,
+        context_length, merge_split, id_count, window if present) and uses
+        the CobwebTree.write_json_stream to write the LTM to `tree.json` in the
+        same directory.
+        """
+        os.makedirs(dirpath, exist_ok=True)
+
+        # meta data
+        meta = {
+            "context_length": self.context_length,
+            "merge_split": self.merge_split,
+            "id_count": getattr(self, "id_count", None),
+            "id_to_value": self.id_to_value,
+            "value_to_id": self.value_to_id,
+        }
+
+        meta_path = os.path.join(dirpath, "meta.json")
+        with open(meta_path, "w", encoding="utf-8") as f:
+            json.dump(meta, f, ensure_ascii=False, indent=2)
+
+        # LTM tree
+        tree_path = os.path.join(dirpath, "tree.json")
+        # CobwebTree provides a write_json_stream(filename) method
+        try:
+            self.ltm_hierarchy.write_json_stream(tree_path)
+        except Exception:
+            # fallback: if write_json_stream not present, try to use to_json
+            try:
+                with open(tree_path, "w", encoding="utf-8") as f:
+                    json.dump(self.ltm_hierarchy.to_json(), f)
+            except Exception as e:
+                raise
+
+        return {"ok": True, "meta": meta_path, "tree": tree_path}
+
+    @staticmethod
+    def load_state(dirpath: str) -> "LanguageChunkingParser":
+        """
+        Static loader that creates and returns a LanguageChunkingParser instance
+        initialized from the given directory (created by `save_state`).
+
+        Usage:
+            parser = LanguageChunkingParser.load_state('/path/to/dir')
+
+        Expects `meta.json` and `tree.json` under `dirpath`.
+        """
+        meta_path = os.path.join(dirpath, "meta.json")
+        tree_path = os.path.join(dirpath, "tree.json")
+
+        if not os.path.exists(meta_path):
+            raise FileNotFoundError(f"meta.json not found in {dirpath}")
+        if not os.path.exists(tree_path):
+            raise FileNotFoundError(f"tree.json not found in {dirpath}")
+
+        with open(meta_path, "r", encoding="utf-8") as f:
+            meta = json.load(f)
+
+        # Create a new parser with an empty value_corpus, then override
+        parser = LanguageChunkingParser([], context_length=meta.get("context_length", 3), merge_split=meta.get("merge_split", True))
+
+        # restore simple attrs (overwrite what constructor set)
+        parser.context_length = meta.get("context_length", parser.context_length)
+        parser.merge_split = meta.get("merge_split", parser.merge_split)
+        parser.id_count = meta.get("id_count", getattr(parser, "id_count", None))
+        parser.id_to_value = meta.get("id_to_value", parser.id_to_value)
+        parser.value_to_id = meta.get("value_to_id", parser.value_to_id)
+
+        # load LTM via CobwebTree.load_json_stream or read_json_stream
+        try:
+            if hasattr(parser.ltm_hierarchy, "load_json_stream"):
+                parser.ltm_hierarchy.load_json_stream(tree_path)
+            elif hasattr(parser.ltm_hierarchy, "read_json_stream"):
+                parser.ltm_hierarchy.read_json_stream(tree_path)
+            else:
+                if hasattr(parser.ltm_hierarchy, "from_json"):
+                    new_tree = parser.ltm_hierarchy.from_json(tree_path)
+                    parser.ltm_hierarchy = new_tree
+                else:
+                    with open(tree_path, "r", encoding="utf-8") as tf:
+                        tree_data = json.load(tf)
+                    if hasattr(parser.ltm_hierarchy, "load_json"):
+                        parser.ltm_hierarchy.load_json(tree_data)
+                    else:
+                        parser.ltm_hierarchy._loaded_json = tree_data
+        except Exception:
+            raise
+
+        # recreate cobweb drawer to reflect loaded vocabulary
+        parser.cobweb_drawer = HTMLCobwebDrawer(
+            ["Content-Left", "Content-Right", "Context-Before", "Context-After"],
+            id_to_value=parser.id_to_value,
+            value_to_id=parser.value_to_id
+        )
+
+        return parser

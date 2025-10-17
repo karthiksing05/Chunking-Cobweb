@@ -1,7 +1,7 @@
-# editor_api.py
+# parse_editor_api.py
 from flask import Flask, jsonify, request
 from parse import FiniteParseTree, LanguageChunkingParser
-from util.cfg import generate, TEST_CORPUS2, TEST_GRAMMAR2
+from util.cfg import generate, TEST_CORPUS1, TEST_GRAMMAR1
 import json
 import uuid
 
@@ -10,13 +10,13 @@ app = Flask(__name__)
 LEARNING_ON = True
 
 # --- Initialize parser and LTM ---
-parser = LanguageChunkingParser(TEST_CORPUS2, context_length=2)
+parser = LanguageChunkingParser(TEST_CORPUS1, context_length=2)
 
 num_load = 0
 document = []
 
 for _ in range(num_load):
-    sentence = generate("S", TEST_GRAMMAR2)
+    sentence = generate("S", TEST_GRAMMAR1)
     document.append(sentence)
 
 for doc in document:
@@ -24,7 +24,8 @@ for doc in document:
     parser.add_parse_tree(parse_tree, debug=False)
 
 # --- Initialize first sentence and tree ---
-sample_sentence = generate("S", TEST_GRAMMAR2)
+sample_sentence = generate("S", TEST_GRAMMAR1)
+# sample_sentence = "a woman saw the woman"
 curr_tree = FiniteParseTree(parser.get_long_term_memory(), parser.id_to_value, parser.value_to_id, context_length=2)
 curr_tree.build_primitives(sample_sentence)
 curr_tree._ensure_editor_state()
@@ -32,7 +33,7 @@ curr_tree._ensure_editor_state()
 def reset_tree():
     """Refresh to a new sentence and rebuild current tree."""
     global curr_tree, sample_sentence
-    sample_sentence = generate("S", TEST_GRAMMAR2)
+    sample_sentence = generate("S", TEST_GRAMMAR1)
     curr_tree = FiniteParseTree(parser.get_long_term_memory(), parser.id_to_value, parser.value_to_id, context_length=2)
     curr_tree.build_primitives(sample_sentence)
     curr_tree._ensure_editor_state()
@@ -91,6 +92,7 @@ def api_export():
     """Export current tree, add to LTM, then reset and refresh."""
     data = request.get_json() or {}
     filepath = data.get("filepath", "parse_tree_test.json")
+
     if filepath == "":
         filepath = "tree_" + str(uuid.uuid4())[:8]
     if not filepath.lower().endswith(".json"):
@@ -122,20 +124,20 @@ def api_export_ltm():
     Accepts optional 'filepath' in JSON body to save to disk.
     """
     data = request.get_json() or {}
-    filepath = data.get("filepath")
+    try:
+        filepath = data.get("filepath")
+    except TypeError:
+        return jsonify({"ok": False})
 
-    if filepath == "":
+    if not filepath or filepath == "":
         filepath = "ltm_" + str(uuid.uuid4())[:8]
-    if not filepath.lower().endswith(".json"):
-        filepath += ".json"
 
     export_path = f"gui/parse_tree_editor/{filepath}"
     
-    parser.get_long_term_memory().write_json_stream(export_path)
-    parser.visualize_ltm(export_path.replace(".json", ""))
+    parser.save_state(export_path)
+    parser.visualize_ltm(export_path)
     
     return jsonify({"ok": True, "filepath": export_path})
-
 
 @app.route("/editor", methods=["GET"])
 def editor_page():

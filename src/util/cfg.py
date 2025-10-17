@@ -58,11 +58,30 @@ TEST_GRAMMAR2 = {
     "V": [["runs"], ["sees"], ["likes"], ["chases"]]
 }
 
+# Define a very simple grammar (no recursion, fewer rules)
+ADDED_GRAMMAR2 = {
+    "S": [["NP", "VP"]], # Sentence = Noun Phrase + Verb Phrase
+
+    "NP": [["Det", "N"]], # Noun Phrase = Determiner + Noun
+
+    "VP": [["V", "NP"], ["V"]], # Verb Phrase = Verb (+ optional NP)
+
+    "Det": [["the"], ["a"], ["an"]],
+    "N": [["dog"], ["cat"], ["man"], ["woman"], ["pencil"], ["typewriter"], ["earring"], ["money"], ["light"], ["lock"]],
+    "V": [["runs"], ["sees"], ["likes"], ["chases"], ["shows"], ["eats"], ["makes"], ["helps"], ["watches"]]
+}
 
 TEST_CORPUS2 = (
     sum(TEST_GRAMMAR2["Det"], []) +
     sum(TEST_GRAMMAR2["N"], []) +
     sum(TEST_GRAMMAR2["V"], [])
+)
+
+ADDED_CORPUS2 = sum(
+    [["an"], # articles
+     ["pencil"], ["typewriter"], ["earring"], ["money"], ["light"], ["lock"], # nouns
+     ["shows"], ["eats"], ["makes"], ["helps"], ["watches"]],
+    [] # verbs
 )
 
 def generate(symbol, grammar):
