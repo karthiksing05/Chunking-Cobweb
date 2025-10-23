@@ -235,6 +235,11 @@ public:
         this->attr_vals = AV_KEY_TYPE();
     }
 
+    // Traverse exactly k steps down the tree following the same greedy
+    // logic as categorize (choose child with highest posterior). If a leaf
+    // is reached before k steps, return that leaf. If k==0, return the root.
+    CobwebNode *partial_categorize(const INSTANCE_TYPE instance, int k);
+
     std::string __str__()
     {
         return this->root->__str__();
@@ -1088,6 +1093,48 @@ public:
     CobwebNode *categorize_helper(const INSTANCE_TYPE &instance)
     {
         return this->_cobweb_categorize(instance);
+    }
+
+    CobwebNode *partial_categorize(const INSTANCE_TYPE instance, int k)
+    {
+        // If k <= 0, return root immediately
+        if (k <= 0)
+            return this->root;
+
+        auto current = this->root;
+
+        int steps = 0;
+
+        while (true)
+        {
+            if (current->children.empty())
+            {
+                // reached a leaf before k steps
+                return current;
+            }
+
+            if (steps >= k)
+            {
+                // already traversed k nodes, return current
+                return current;
+            }
+
+            auto parent = current;
+            current = nullptr;
+            double best_logp;
+
+            for (auto &child : parent->children)
+            {
+                double logp = child->log_prob_class_given_instance_ext(instance, false);
+                if (current == nullptr || logp > best_logp)
+                {
+                    best_logp = logp;
+                    current = child;
+                }
+            }
+
+            steps += 1;
+        }
     }
 
     CobwebNode *categorize(const INSTANCE_TYPE instance)
@@ -3322,6 +3369,7 @@ NB_MODULE(cobweb_discrete, m)
         .def("categorize", &CobwebTree::categorize, nb::arg("instance") = std::vector<AV_COUNT_TYPE>(),
              // nb::arg("get_best_concept") = false,
              nb::rv_policy::reference)
+        .def("partial_categorize", &CobwebTree::partial_categorize, nb::arg("instance") = std::vector<AV_COUNT_TYPE>(), nb::arg("k") = 1, nb::rv_policy::reference)
         .def("predict_probs_mixture", &CobwebTree::predict_probs_mixture)
         .def("predict_probs_mixture_parallel", &CobwebTree::predict_probs_mixture_parallel)
         .def("predict_probs", &CobwebTree::predict_probs_mixture)

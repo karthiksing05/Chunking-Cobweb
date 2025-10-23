@@ -221,6 +221,16 @@ class CompositeParseNode:
 ----------------------------------------------------------------------------------------------
 """
 
+def basic_level_node_def(inst, tree):
+    """
+    Functional solution for basic level nodes to ensure that they're appropriately changed everywhere!
+
+    Currently we're using the leaf directly but this will create a lot of branching and meaningless
+    uses of concept-labels.
+    """
+    return tree.categorize(inst)
+    # return tree.categorize(inst).basic_level()
+
 class FiniteParseTree:
 
     def __init__(self, ltm_hierarchy, id_to_value, value_to_id, context_length=3):
@@ -365,7 +375,7 @@ class FiniteParseTree:
             raise ValueError("Left or right node not found among root's children")
 
         merge_inst = CompositeParseNode.create_merge_instance(left_node, right_node)
-        candidate_concept = self.ltm_hierarchy.categorize(merge_inst)
+        candidate_concept = basic_level_node_def(merge_inst, self.ltm_hierarchy) # TODO REMOVED THIS .get_basic_level()
         candidate_hash = candidate_concept.concept_hash()
         candidate_id = self.value_to_id.get(f"CONCEPT-{candidate_hash}")
 
@@ -462,7 +472,7 @@ class FiniteParseTree:
             raise ValueError("Left or right node not found among root's children")
 
         merge_inst = CompositeParseNode.create_merge_instance(left_node, right_node)
-        candidate_concept = self.ltm_hierarchy.categorize(merge_inst).get_basic_level()
+        candidate_concept = basic_level_node_def(merge_inst, self.ltm_hierarchy)
         if candidate_concept_hash is not None and candidate_concept.concept_hash() != candidate_concept_hash:
             # if user gave an explicit hash, try to find that concept in hierarchy -
             # but default behavior uses categorize(...) basic level, same as build()
@@ -583,6 +593,9 @@ class FiniteParseTree:
 
     def build(self, window, end_behavior="converge", debug=False):
         """
+
+        TODO replace build with a series of all the functions above!
+
         Primary method of construction that returns all available nonterminals
         as instances ready to be passed into the long-term hierarchy. The
         following process takes place:
@@ -662,7 +675,7 @@ class FiniteParseTree:
 
                 merge_inst = CompositeParseNode.create_merge_instance(node_left, node_right)
 
-                candidate_concept = self.ltm_hierarchy.categorize(merge_inst).get_basic_level()
+                candidate_concept = basic_level_node_def(merge_inst, self.ltm_hierarchy)
 
                 # if self.ltm_hierarchy.categorize(merge_inst).concept_hash() != self.ltm_hierarchy.categorize(merge_inst).get_basic_level():
                 #     print("Basic level was actually a non-leaf for merge-inst")
@@ -691,7 +704,7 @@ class FiniteParseTree:
                 print("with score, ", best_candidate[0])
                 print("---------" * 7)
 
-            candidate_concept = self.ltm_hierarchy.categorize(best_merge_inst).get_basic_level()
+            candidate_concept = basic_level_node_def(merge_inst, self.ltm_hierarchy)
             candidate_concept_id = self.value_to_id[f"CONCEPT-{candidate_concept.concept_hash()}"]
 
             add_parse_node = CompositeParseNode.create_node(best_merge_inst, candidate_concept_id, 0.5 * (best_candidate[2].word_index + best_candidate[3].word_index))

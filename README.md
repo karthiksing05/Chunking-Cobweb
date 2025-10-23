@@ -86,6 +86,8 @@ Full list of changes is below:
         *   {"action": "SPLIT", "deleted": "abc123", "parent": "root000", "promoted_children": ["child1", "child2"]}
         *   {"action": "BEST", "node": "ghi789"}
     *   All edge cases caught before the main evaluation should be classified as "NEW" as well!
+*   Update to categorization logic - path-focused
+    *
 
 ## Design Decisions:
 
