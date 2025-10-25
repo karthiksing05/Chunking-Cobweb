@@ -24,6 +24,7 @@ After running these commands, you should be fully set up with the modified insta
 ## Guiding Intuition
 
 [TODO] DO A WRITEUP HERE OF HOW THE FRAMEWORK WORKS!
+[TODO] NEED TO TALK ABOUT SCORING HERE AS WELL!
 *   
 
 ## GUI Editor:
@@ -33,7 +34,7 @@ Because of the highly conceptual nature of this framework, we've also created a 
 *   ```gui/parse_tree_editor.py``` - a stylistically consistent editable parse tree generator that can create and export parse trees.
     *   Through this editor, we can show the learning mechanism to be effective through a variety of tests that confirm consistency and stability through fed parse trees.
 *   ```gui/ltm_inspector.py``` - an also stylistically consistent long-term-memory (CobwebTree) inspection tool that can peruse and analyze the long-term memory after a given length.
-    *   [TODO] this is still in progress! but subject to change
+    *   [TODO] this is still in progress! but subject to change whether we even need this ngl (need a better LTM representation for sure)
 
 ## Important Tests:
 
@@ -55,13 +56,14 @@ Below is a list of tests confirming specific value propositions behind the chunk
     *   [TODO]
 *   [TODO] Need more tests in general!
 
-## Preliminary Tests:
+## Unit Tests:
 
-Below is a list of all tests confirming and acknowledging the effectiveness of the framework. Use ```pytest -s tests/TEST_NAME_HERE.py``` to run (the "-s" flag is for output)
+Below is a list of all tests confirming the syntactic consistency of the framework. Use ```pytest -s tests/TEST_NAME_HERE.py``` to run (the "-s" flag is for output)
 
-*   ```tests/parse_tree_test.py``` - a test to confirm the correct implementation of parse trees and parse tree composition
-*   ```tests/gen_learn_test.py``` - a test to also confirm the logic of parse tree addition and processing
-*   ```tests/ltm_analysis.py``` - a test that analyzes various long-term memories as well as some intermediate subtree levels.
+*   ```unittests/parse_tree_test.py``` - a test to confirm the correct implementation of parse trees and parse tree composition
+*   ```unittests/gen_learn_test.py``` - a test to also confirm the logic of parse tree addition and processing the parse trees into the long-term memory
+*   ```unittests/ltm_analysis.py``` - a test that analyzes various long-term memories as well as some intermediate subtree levels. We hope to see a resulting taxonomy that alternates between AND-like nodes defined mostly by content and OR-like nodes defined mostly by context.
+*   ```unittests/partial_parse_analysis.py``` - a test used to inspect different thresholds at which to cut 
 
 ## Updates to Cobweb:
 
@@ -86,8 +88,14 @@ Full list of changes is below:
         *   {"action": "SPLIT", "deleted": "abc123", "parent": "root000", "promoted_children": ["child1", "child2"]}
         *   {"action": "BEST", "node": "ghi789"}
     *   All edge cases caught before the main evaluation should be classified as "NEW" as well!
-*   Update to categorization logic - path-focused
-    *
+*   Update to categorization logic - path-focused probability matching
+    *   Rather than matching discretely by category, we need to make sure we have some distance-based metric of judging whether two categories are "close" or "far". Thus, we'll be using the paths of each concept label to match how close a given node is to a given other node!
+    *   To do this, we'll be calculating a "flattened" frequency count with the weighted path of the node we categorize. The process is as follows:
+        *   Chunk candidates will be labeled by the leaf node they are categorized under, but the content value they donate to a chunk instance that relationally merges them will be a dictionary of the entire path with frequencies weighted by distance along the path (relative to where in the path you are, similar to how we did PathSum for Cobweb)
+            *   We'll mess around with different path weightings - another valid hypothesis is that the uniform weighting may be successful
+        *   Now we are able to compute content similarities optimally by checking the similarities and overlaps along a path of frequency!
+    *   We're doing this because in the potential case where frequencies (and as such, probabilities) exist for more than one concept-id leaf, we can categorize according to the merged frequencies across the nodes (I'm assuming that the implementation calculates probabilities on the fly based on frequencies for actual comparison - hopefully the comparisons don't change the value)
+    *   The additional hope is that this preserves basic-level definitions by just assuming all overlapping levels contribute to the matching process!
 
 ## Design Decisions:
 

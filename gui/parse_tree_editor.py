@@ -1,22 +1,27 @@
 # parse_editor_api.py
 from flask import Flask, jsonify, request
 from parse import FiniteParseTree, LanguageChunkingParser
-from util.cfg import generate, TEST_CORPUS1, TEST_GRAMMAR1
+from util.cfg import generate, TEST_CORPUS2, TEST_GRAMMAR2
 import json
 import uuid
 
 app = Flask(__name__)
 
 LEARNING_ON = True
+# LOAD_LTM = "gui/parse_tree_editor/ltm_ckpt2"
+LOAD_LTM = ""
 
 # --- Initialize parser and LTM ---
-parser = LanguageChunkingParser(TEST_CORPUS1, context_length=2)
+if LOAD_LTM != "":
+    parser = LanguageChunkingParser.load_state(LOAD_LTM)
+else:
+    parser = LanguageChunkingParser(TEST_CORPUS2, context_length=2)
 
 num_load = 0
 document = []
 
 for _ in range(num_load):
-    sentence = generate("S", TEST_GRAMMAR1)
+    sentence = generate("S", TEST_GRAMMAR2)
     document.append(sentence)
 
 for doc in document:
@@ -24,7 +29,7 @@ for doc in document:
     parser.add_parse_tree(parse_tree, debug=False)
 
 # --- Initialize first sentence and tree ---
-sample_sentence = generate("S", TEST_GRAMMAR1)
+sample_sentence = generate("S", TEST_GRAMMAR2)
 # sample_sentence = "a woman saw the woman"
 curr_tree = FiniteParseTree(parser.get_long_term_memory(), parser.id_to_value, parser.value_to_id, context_length=2)
 curr_tree.build_primitives(sample_sentence)
@@ -33,7 +38,7 @@ curr_tree._ensure_editor_state()
 def reset_tree():
     """Refresh to a new sentence and rebuild current tree."""
     global curr_tree, sample_sentence
-    sample_sentence = generate("S", TEST_GRAMMAR1)
+    sample_sentence = generate("S", TEST_GRAMMAR2)
     curr_tree = FiniteParseTree(parser.get_long_term_memory(), parser.id_to_value, parser.value_to_id, context_length=2)
     curr_tree.build_primitives(sample_sentence)
     curr_tree._ensure_editor_state()

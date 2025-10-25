@@ -35,14 +35,14 @@ Rough Plan
 
 *   Code plan for LTM Inspector (honestly, I think it's probably optimal to make all of these changes to HTMLCobwebDrawer, or even create a new active HTML Cobweb Drawer)
     *   The screen should have a primary window like a "stage" that is similar to a scrollable and zoomable canvas of the long-term memory, with the following features:
-        *   The long-term memory, which is a CobwebTree, should be displayed stylistically similarly to the way that HTMLCobwebDrawer shows the CobwebTree with a couple changes:
-            *   All basic-level nodes should show in a different highlighted outline / shadow to identify that they are basic-level (perhaps purple!)
-            *   Each Concept-HASH ID present in each node table should be able to hyperlink to open up a floating, movable, closeable popup box with that node table present in it
-                *   Each of these popup boxes with node tables should also contain hyperlinks for any nodes that represent Concept-HASH IDs, so you should be able to recursively open and close pop-up boxes
+    *   The long-term memory, which is a CobwebTree, should be displayed stylistically similarly to the way that HTMLCobwebDrawer shows the CobwebTree with a couple changes:
+        *   All basic-level nodes should show in a different highlighted outline / shadow to identify that they are basic-level (perhaps purple!)
+        *   Each Concept-HASH ID present in each node table should be able to hyperlink to open up a floating, movable, closeable popup box with that node table present in it
+            *   Each of these popup boxes with node tables should also contain hyperlinks for any nodes that represent Concept-HASH IDs, so you should be able to recursively open and close pop-up boxes
     *   There should also be a search bar where the concept hashes slowly fill in as you continue typing in an ID. Upon pressing a search button, the stage should automatically teleport to focus on the concept hash you searched.
     *   A button for loading parse trees that, upon clicking, opens a file selection dialog box to pick a .json file for a parse tree (with necessary error correction to see if it's a parse tree json)
         *   A visualized process for addition to the Cobweb tree that prints all log actions and conveys all actions that are about to be made in a flipbook style (this is optional and potentially will be revised, as it seems like a better change to make to HTMLCobwebDrawer than the ltm inspection code)
 
 *   Combining both ideas:
     *   Currently we just have a button to export the LTM when we need it - proving highly successful!
-    *   Going to table the 
+    *   Going to table the LTM inspector 

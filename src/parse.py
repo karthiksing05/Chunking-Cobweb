@@ -96,6 +96,7 @@ class CompositeParseNode:
         self.context_after = None
 
         self.concept_label = None
+        self.categorize_path = None # NEW THING FOR THE PATHS! A list representing the path taken to get to the given concept label!
 
     @staticmethod
     def create_global_root():
@@ -112,7 +113,7 @@ class CompositeParseNode:
         return node
 
     @staticmethod
-    def create_node(instance_dict, closest_concept_id, word_index):
+    def create_node(instance_dict, closest_concept_id, categorize_path, word_index):
         """
         One of the method-based constructors to create the correct version
         of our parse nodes at the leaf level - this will create a parse node
@@ -128,6 +129,7 @@ class CompositeParseNode:
         node.context_after = instance_dict[3]
 
         node.concept_label = closest_concept_id
+        node.categorize_path = categorize_path
 
         node.word_index = word_index
 
@@ -163,18 +165,18 @@ class CompositeParseNode:
         new_inst_dict = {}
 
         if type(node_left) == PrimitiveParseNode:
-            new_inst_dict[0] = {0: 0, node_left.content: 1}
+            new_inst_dict[0] = {node_left.content: 1}
         else:
-            new_inst_dict[0] = {0: 0, node_left.concept_label: 1}
+            new_inst_dict[0] = dict([(key, 1) for key in node_left.categorize_path])
 
         if type(node_right) == PrimitiveParseNode:
-            new_inst_dict[1] = {0: 0, node_right.content: 1}
+            new_inst_dict[1] = {node_right.content: 1}
         else:
-            new_inst_dict[1] = {0: 0, node_right.concept_label: 1}
+            new_inst_dict[1] = dict([(key, 1) for key in node_right.categorize_path])
 
-        # we need to import the previous node's content and context
-        # I have reason to think that the below code will just work LOL
-        # BUT subject to change!
+        new_inst_dict[0][0] = 0
+        new_inst_dict[1][0] = 0
+
         new_inst_dict[2] = node_left.context_before
         new_inst_dict[3] = node_right.context_after
 
@@ -221,15 +223,78 @@ class CompositeParseNode:
 ----------------------------------------------------------------------------------------------
 """
 
-def basic_level_node_def(inst, tree):
+def custom_categorize(inst, tree):
     """
-    Functional solution for basic level nodes to ensure that they're appropriately changed everywhere!
+    A helper function that categorizes down the Cobweb Tree and saves the concept hashes of all
+    nodes to a list ["CONCEPT-{hash}", ...] and returns that list.
 
-    Currently we're using the leaf directly but this will create a lot of branching and meaningless
-    uses of concept-labels.
+    Contains extensive error-catching, but the goal is that we return the whole list of the path
+    traversed when categorizing the node.
     """
-    return tree.categorize(inst)
-    # return tree.categorize(inst).basic_level()
+    path = []
+
+    try:
+        node = tree.root
+    except Exception:
+        try:
+            leaf = tree.categorize(inst)
+            return [f"CONCEPT-{leaf.concept_hash()}"]
+        except Exception:
+            return []
+
+    # Append root concept
+    try:
+        path.append(f"CONCEPT-{node.concept_hash()}")
+        lastNode = node
+    except Exception:
+        # if concept_hash is not available, return empty path
+        return None, []
+
+    while True:
+        try:
+            # log probabilities for each child (in order corresponding to node.children)
+            child_log_probs = node.prob_children_given_instance(inst)
+        except Exception:
+            break
+
+        if not child_log_probs:
+            break
+
+        # find best child index (handle NaN by treating as -inf)
+        best_idx = None
+        best_val = -float("inf")
+        for i, v in enumerate(child_log_probs):
+            try:
+                val = float(v)
+                if math.isnan(val):
+                    val = -float("inf")
+            except Exception:
+                val = -float("inf")
+            if val > best_val:
+                best_val = val
+                best_idx = i
+
+        if best_idx is None or best_val == -float("inf"):
+            break
+
+        # descend to selected child
+        try:
+            # Expect children to be a sequence of CobwebNode objects (as exposed by the C++ binding)
+            node = node.children[best_idx]
+        except Exception:
+            # Some bindings may expose children as list of (attr, node) pairs -- try to handle that
+            try:
+                node = node.children[best_idx][1]
+            except Exception:
+                break
+
+        try:
+            path.append(f"CONCEPT-{node.concept_hash()}")
+            lastNode = node
+        except Exception:
+            break
+
+    return lastNode, path
 
 class FiniteParseTree:
 
@@ -259,32 +324,50 @@ class FiniteParseTree:
         if not hasattr(self, "_undo_stack"):
             self._undo_stack = []
 
-    def _score_function(self, candidate_concept: CobwebNode, potential_merge_inst: dict, debug=False):
+    def _score_function(self, node: CobwebNode, instance: dict, lam=0.1, debug=False):
         """
-        A wrapper for the score function - so that we can hot-swap between different scoring metrics
-        depending on what we're testing! 
+        Compute a symmetric, scaled similarity between two attribute-value dictionaries.
+        Returns a value in (0, 1].
         """
+
+        # 1. Compute raw log-probability (uses node’s built-in method)
+        log_prob = node.log_prob_instance(instance)
+
+        # 2. Compute total weight (sum of all value frequencies)
+        total_weight = sum(
+            cnt for vAttr in instance.values() for cnt in vAttr.values()
+        )
+        if total_weight <= 0:
+            total_weight = 1.0  # avoid division by zero
+
+        # 3. Normalize log-probability
+        avg_log_prob = log_prob / total_weight
+
+        # 4. Compute node complexity (sum of all av_count entries)
+        complexity = sum(
+            cnt for attr_dict in node.av_count.values() for cnt in attr_dict.values()
+        )
+
+        # 5. Compute soft penalty term
+        penalty = lam * math.log(1.0 + complexity)
+
+        # 6. Define cost (lower = better)
+        cost = -avg_log_prob + penalty
+
+        score_data = {
+            'raw_log_prob': log_prob,
+            'avg_log_prob': avg_log_prob,
+            'complexity': complexity,
+            'cost': cost
+        }
 
         if debug:
-            print("MERGE INSTANCE EVALUATED: ", potential_merge_inst)
-            # the below thing always returns -inf for some reason!??
-            # print("Candidate Concept Log Prob Children Given Instance", 
-            #       candidate_concept.log_prob_children_given_instance(merge_inst))
-            print("Candidate Concept Log Prob Instance:", 
-                    candidate_concept.log_prob_instance(potential_merge_inst))
-            print("Candidate Concept Log Prob Instance Missing:", 
-                    candidate_concept.log_prob_instance_missing(potential_merge_inst))
-            print("Candidate Concept Log Prob Class Given Instance (True):", 
-                    candidate_concept.log_prob_class_given_instance(potential_merge_inst, True))
-            print("Candidate Concept Entropy:",
-                    candidate_concept.entropy())
-            print()
+            print("-" * 60)
+            print("Scoring statistics:")
+            print(score_data)
+            print("-" * 60)
 
-        log_prob_class_given_instance = float(candidate_concept.log_prob_class_given_instance(potential_merge_inst, True))
-        if math.isnan(log_prob_class_given_instance):
-            log_prob_class_given_instance = 0
-
-        return candidate_concept.log_prob_instance_missing(potential_merge_inst)
+        return score_data
 
     """
     -----------------------------------
@@ -375,49 +458,22 @@ class FiniteParseTree:
             raise ValueError("Left or right node not found among root's children")
 
         merge_inst = CompositeParseNode.create_merge_instance(left_node, right_node)
-        candidate_concept = basic_level_node_def(merge_inst, self.ltm_hierarchy) # TODO REMOVED THIS .get_basic_level()
+        # compute the categorize_path for this merged instance (list of concept ids)
+
+        candidate_concept, categorize_path = custom_categorize(merge_inst, self.ltm_hierarchy)
+
+        try:
+            categorize_path = [self.value_to_id.get(key) for key in categorize_path]
+        except Exception:
+            categorize_path = []
+
         candidate_hash = candidate_concept.concept_hash()
         candidate_id = self.value_to_id.get(f"CONCEPT-{candidate_hash}")
 
-        # collect debug stats (same calls used in your _score_function debug prints)
-        try:
-            log_prob_instance = float(candidate_concept.log_prob_instance(merge_inst))
-            if math.isnan(log_prob_instance):
-                log_prob_instance = 0
-            if math.isinf(log_prob_instance):
-                log_prob_instance = 0
-        except Exception:
-            log_prob_instance = 0
-        try:
-            log_prob_instance_missing = float(candidate_concept.log_prob_instance_missing(merge_inst))
-            if math.isnan(log_prob_instance_missing):
-                log_prob_instance_missing = 0
-            if math.isinf(log_prob_instance_missing):
-                log_prob_instance_missing = 0
-        except Exception:
-            log_prob_instance_missing = 0
-        try:
-            log_prob_class_given_instance = float(candidate_concept.log_prob_class_given_instance(merge_inst, True))
-            if math.isnan(log_prob_class_given_instance):
-                log_prob_class_given_instance = 0
-            if math.isinf(log_prob_class_given_instance):
-                log_prob_class_given_instance = 0
-        except Exception:
-            log_prob_class_given_instance = 0
-        try:
-            entropy = float(candidate_concept.entropy())
-            if math.isnan(entropy):
-                entropy = 0
-            if math.isinf(entropy):
-                entropy = 0
-        except Exception:
-            entropy = 0
-
-        score = float(self._score_function(candidate_concept, merge_inst, debug=debug))
+        score_data = self._score_function(candidate_concept, merge_inst, debug=debug)
+        score = score_data["cost"]
 
         # want to visualize candidate_concept.av_count, need to use draw_dict:
-        
-
         if len(candidate_concept.av_count) == 0:
             candidate_draw_inst = {
                 "title": candidate_hash,
@@ -437,18 +493,17 @@ class FiniteParseTree:
                 "children": []
             }
 
+        if candidate_id != categorize_path[-1]:
+            print("Error with custom_categorize method!")
+
         returnData = {
             "merge_inst": merge_inst,  # small dict of instance parts (0/1/2/3)
+            "categorize_path": categorize_path,
             "candidate_concept_hash": candidate_hash,
             "candidate_concept_id": candidate_id,
             "candidate_inst": candidate_draw_inst,
             "score": score,
-            "debug": {
-                "log_prob_instance": log_prob_instance,
-                "log_prob_instance_missing": log_prob_instance_missing,
-                "log_prob_class_given_instance": log_prob_class_given_instance,
-                "entropy": entropy
-            },
+            "debug": score_data,
             "left_word_index": left_word_index,
             "right_word_index": right_word_index,
             "left_title": left_node.title,
@@ -472,7 +527,15 @@ class FiniteParseTree:
             raise ValueError("Left or right node not found among root's children")
 
         merge_inst = CompositeParseNode.create_merge_instance(left_node, right_node)
-        candidate_concept = basic_level_node_def(merge_inst, self.ltm_hierarchy)
+
+        candidate_concept, categorize_path = custom_categorize(merge_inst, self.ltm_hierarchy)
+
+        # compute categorize_path for the merged instance and store on node
+        try:
+            categorize_path = [self.value_to_id.get(key) for key in categorize_path]
+        except Exception:
+            categorize_path = []
+
         if candidate_concept_hash is not None and candidate_concept.concept_hash() != candidate_concept_hash:
             # if user gave an explicit hash, try to find that concept in hierarchy -
             # but default behavior uses categorize(...) basic level, same as build()
@@ -483,6 +546,7 @@ class FiniteParseTree:
         add_parse_node = CompositeParseNode.create_node(
             merge_inst,
             candidate_id,
+            categorize_path,
             0.5 * (left_node.word_index + right_node.word_index)
         )
 
@@ -593,9 +657,6 @@ class FiniteParseTree:
 
     def build(self, window, end_behavior="converge", debug=False):
         """
-
-        TODO replace build with a series of all the functions above!
-
         Primary method of construction that returns all available nonterminals
         as instances ready to be passed into the long-term hierarchy. The
         following process takes place:
@@ -627,98 +688,53 @@ class FiniteParseTree:
 
         self.window = window
 
-        elements = re.findall(r"[\w']+|[.,!?;]", window)
-        elements = [self.value_to_id[element] for element in elements]
+        self.build_primitives(window)
 
-        # Creating first layer of primitive nodes
-        for i in range(len(elements)):
-
-            content = elements[i]
-
-            context_before_lst = elements[max(0, i - self.context_length):(i)][::-1]
-            context_after_lst = elements[(i + 1):min(len(elements), i + self.context_length + 1)]
-
-            # have to compute the dictionaries through a for loop so that we can
-            # add multiple weights for multiple instances of the word
-
-            context_before_dict = {0: 0} # initializing with the empty set!
-            context_after_dict = {0: 0}
-
-            for j in range(len(context_before_lst)):
-                context_before_dict.setdefault(context_before_lst[j], 0)
-                context_before_dict[context_before_lst[j]] += 1 / (j + 1) # this works because we reversed it above
-
-            for j in range(len(context_after_lst)):
-                context_after_dict.setdefault(context_after_lst[j], 0)
-                context_after_dict[context_after_lst[j]] += 1 / (j + 1)
-
-            node = PrimitiveParseNode(content, context_before_dict, context_after_dict, i)
-
-            node.set_parent(self.global_root_node)
-
-            self.nodes.append(node)
-
-        # Creating other layers of composite nodes
         while True:
+            parentless_pairs = self.get_parentless_pairs()
+            if not parentless_pairs:
+                break
 
-            best_candidate = None # stores concepts in the form of (score, label, node_left, node_right)
+            best = None  # tuple (score, eval_result)
 
-            parentless = [x[1] for x in self.global_root_node.children]
-            # print([(x[0], x[1].get_as_instance()) for x in self.global_root_node.children])
-
-            # TODO one change we can make here is constantly keeping a candidate list and then not
-            # worry about recomputing everything -> leaving this here for now but subject to change!
-
-            for i in range(len(parentless) - 1):
-                node_left = parentless[i]
-                node_right = parentless[i + 1]
-
-                merge_inst = CompositeParseNode.create_merge_instance(node_left, node_right)
-
-                candidate_concept = basic_level_node_def(merge_inst, self.ltm_hierarchy)
-
-                # if self.ltm_hierarchy.categorize(merge_inst).concept_hash() != self.ltm_hierarchy.categorize(merge_inst).get_basic_level():
-                #     print("Basic level was actually a non-leaf for merge-inst")
-                #     print(merge_inst)
-
-                candidate_concept_id = self.value_to_id[f"CONCEPT-{candidate_concept.concept_hash()}"]
-
-                candidate_score = self._score_function(candidate_concept, merge_inst, debug=debug)
-
-                if not best_candidate or candidate_score > best_candidate[0]:
+            for p in parentless_pairs:
+                try:
+                    res = self.evaluate_pair(p["left_word_index"], p["right_word_index"], debug=debug)
+                except Exception as e:
                     if debug:
-                        print(f"New best candidate found with log-probability {candidate_score} for concept hash {candidate_concept.concept_hash()}")
-                        print()
-                    best_candidate = (candidate_score, candidate_concept_id, node_left, node_right)
+                        print(f"evaluate_pair failed for {p}: {e}")
+                    continue
 
-            if isinstance(end_behavior, (int, float)) and best_candidate[0] < end_behavior:
+                score = res.get("score", float("-inf"))
+                if best is None or score > best[0]:
+                    best = (score, res)
+
+            if best is None:
+                break
+
+            if isinstance(end_behavior, (int, float)):
+                if best[0] < end_behavior:
+                    break
+
+            # Apply the chosen candidate
+            chosen = best[1]
+            left_idx = chosen["left_word_index"]
+            right_idx = chosen["right_word_index"]
+            candidate_hash = chosen.get("candidate_concept_hash")
+
+            try:
+                self.apply_candidate(left_idx, right_idx, candidate_concept_hash=candidate_hash)
+            except Exception as e:
                 if debug:
-                    print("BEST MERGE CANDIDATE was not good enough to be passed, only score of", best_candidate[0])
-                    print("---------" * 7)
+                    print(f"apply_candidate failed for {left_idx},{right_idx}: {e}")
                 break
 
-            best_merge_inst = CompositeParseNode.create_merge_instance(best_candidate[2], best_candidate[3])
-
-            if debug:
-                print("BEST MERGE CANDIDATE FOUND: ", best_merge_inst)
-                print("with score, ", best_candidate[0])
-                print("---------" * 7)
-
-            candidate_concept = basic_level_node_def(merge_inst, self.ltm_hierarchy)
-            candidate_concept_id = self.value_to_id[f"CONCEPT-{candidate_concept.concept_hash()}"]
-
-            add_parse_node = CompositeParseNode.create_node(best_merge_inst, candidate_concept_id, 0.5 * (best_candidate[2].word_index + best_candidate[3].word_index))
-
-            # changing parentship!
-            self.nodes.append(add_parse_node)
-            add_parse_node.set_parent(self.global_root_node)
-            best_candidate[2].set_parent(add_parse_node)
-            best_candidate[3].set_parent(add_parse_node)
-
-            if len(self.global_root_node.children) == 1:
-                break
+            if end_behavior == "converge":
+                if len(self.global_root_node.children) <= 1:
+                    break
 
         return True
+        
 
     def get_chunk_instances(self):
         """
@@ -814,11 +830,19 @@ class FiniteParseTree:
             await browser.close()
 
     def _safe_lookup(self, idx):
-        if (idx is not None and 0 <= idx < len(self.id_to_value)):
-            return self.id_to_value[idx]
-        else:
-            # print("index", idx)
-            return "None"
+        # If idx is already a string (e.g. "CONCEPT-..."), return it directly
+        if isinstance(idx, str):
+            return idx
+
+        # If idx is an integer index into id_to_value, return the mapped value
+        try:
+            if idx is not None and isinstance(idx, int) and 0 <= idx < len(self.id_to_value):
+                return self.id_to_value[idx]
+        except Exception:
+            pass
+
+        # fallback
+        return "None"
 
     # new logic for 0:0 claims
     def ctx_list(self, ctx, draw_zeros=False, max_size=7):
@@ -1352,6 +1376,7 @@ class FiniteParseTree:
                     "word_index":node.word_index,
                     "content_left": node.content_left,
                     "content_right": node.content_right,
+                    "categorize_path": node.categorize_path,
                     "context_before": node.context_before,
                     "context_after": node.context_after,
                     "concept_label": node.concept_label,
@@ -1416,6 +1441,8 @@ class FiniteParseTree:
                 node = CompositeParseNode()
                 node.content_left = restore_dict_keys(n["content_left"])
                 node.content_right = restore_dict_keys(n["content_right"])
+                # restore categorize_path if present (list of concept ids)
+                node.categorize_path = n.get("categorize_path")
                 node.context_before = restore_dict_keys(n["context_before"])
                 node.context_after = restore_dict_keys(n["context_after"])
                 node.word_index = n["word_index"]
@@ -1892,7 +1919,7 @@ class LanguageChunkingParser:
 
     def __init__(self, value_corpus, context_length=3, merge_split=True):
 
-        self.ltm_hierarchy = CobwebTree()
+        self.ltm_hierarchy = CobwebTree(alpha=1)
 
         self.id_to_value = ["EMPTYNULL"]
         for x in value_corpus:
