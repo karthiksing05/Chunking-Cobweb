@@ -253,17 +253,22 @@ def custom_categorize(inst, tree):
     while True:
         try:
             # log probabilities for each child (in order corresponding to node.children)
-            child_log_probs = node.prob_children_given_instance(inst)
-        except Exception:
+            # child_log_probs = node.prob_children_given_instance(inst)
+            child_scores = []
+            for child in node.children:
+                child_scores.append(-child.pu_for_new_child(inst))
+        except Exception as e:
+            pass
+
+        if not child_scores:
             break
 
-        if not child_log_probs:
-            break
+        print(child_scores)
 
         # find best child index (handle NaN by treating as -inf)
         best_idx = None
         best_val = -float("inf")
-        for i, v in enumerate(child_log_probs):
+        for i, v in enumerate(child_scores):
             try:
                 val = float(v)
                 if math.isnan(val):
@@ -293,6 +298,11 @@ def custom_categorize(inst, tree):
             lastNode = node
         except Exception:
             break
+
+    categorizeNode = tree.categorize(inst)
+
+    # if categorizeNode.concept_hash() != lastNode.concept_hash():
+    #     raise RuntimeError(f"tree.categorize returned {categorizeNode.concept_hash()} but custom_categorize returned {lastNode.concept_hash()}")
 
     return lastNode, path
 
@@ -324,7 +334,8 @@ class FiniteParseTree:
         if not hasattr(self, "_undo_stack"):
             self._undo_stack = []
 
-    def _score_function(self, node: CobwebNode, instance: dict, lam=0.1, debug=False):
+    @staticmethod
+    def _score_function(node: CobwebNode, instance: dict, lam=0.1, debug=False):
         """
         Compute a symmetric, scaled similarity between two attribute-value dictionaries.
         Returns a value in (0, 1].
@@ -462,6 +473,10 @@ class FiniteParseTree:
 
         candidate_concept, categorize_path = custom_categorize(merge_inst, self.ltm_hierarchy)
 
+        if debug:
+            print("Categorization Path:")
+            print(categorize_path)
+
         try:
             categorize_path = [self.value_to_id.get(key) for key in categorize_path]
         except Exception:
@@ -470,7 +485,7 @@ class FiniteParseTree:
         candidate_hash = candidate_concept.concept_hash()
         candidate_id = self.value_to_id.get(f"CONCEPT-{candidate_hash}")
 
-        score_data = self._score_function(candidate_concept, merge_inst, debug=debug)
+        score_data = FiniteParseTree._score_function(candidate_concept, merge_inst, debug=debug)
         score = score_data["cost"]
 
         # want to visualize candidate_concept.av_count, need to use draw_dict:
@@ -492,9 +507,6 @@ class FiniteParseTree:
                 "after":  self.ctx_list(candidate_concept.av_count[3]),
                 "children": []
             }
-
-        if candidate_id != categorize_path[-1]:
-            print("Error with custom_categorize method!")
 
         returnData = {
             "merge_inst": merge_inst,  # small dict of instance parts (0/1/2/3)
@@ -706,7 +718,7 @@ class FiniteParseTree:
                     continue
 
                 score = res.get("score", float("-inf"))
-                if best is None or score > best[0]:
+                if best is None or score < best[0]:
                     best = (score, res)
 
             if best is None:

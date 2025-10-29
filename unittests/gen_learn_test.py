@@ -2,19 +2,19 @@
 General Learning Test - to confirm the logic of learning is completely functional!
 """
 
-from util.cfg import generate, TEST_CORPUS1, TEST_GRAMMAR1
+from util.cfg import generate, TEST_CORPUS2, TEST_GRAMMAR2
 from parse import LanguageChunkingParser
 
 # Creating and printing toy sentences
-num_sentences = 100
+num_sentences = 50
 document = []
 
 for _ in range(num_sentences):
-    sentence = generate("S", TEST_GRAMMAR1)
+    sentence = generate("S", TEST_GRAMMAR2)
     document.append(sentence)
 
 # Setting up the parser
-parser = LanguageChunkingParser(TEST_CORPUS1, merge_split=True)
+parser = LanguageChunkingParser(TEST_CORPUS2, merge_split=True)
 
 train_size = 0.9
 
@@ -37,12 +37,14 @@ for i, doc in enumerate(train_documents):
         if i < 21:
             parser.visualize_ltm(f"unittests/gen_learn_test/ltms/cobweb_ltm{i}")
 
+parser.visualize_ltm("unittests/gen_learn_test/final_ltm")
+
 # perhaps visualize the last ten parse trees based on new inputs
 for i, test in enumerate(test_documents):
     parse_tree = parser.parse_input([test], end_behavior="converge", debug=False)[0]
     parse_tree.visualize(f"unittests/gen_learn_test/test_trees/test_parse_tree{i}")
     print(f"Created parse tree {i} for sentence, \"{test}\"")
 
-SAVE_DIR = "unittests/gen_learn_test/end_ltm"
+SAVE_DIR = "unittests/gen_learn_test/final_ltm_data"
 parser.save_state(SAVE_DIR)
 print(f"Saved LTM to \"{SAVE_DIR}\"!")

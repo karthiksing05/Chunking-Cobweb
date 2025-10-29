@@ -31,14 +31,13 @@ for _ in range(num_sentences):
     document.append(sentence)
 
 # Setting up the parser
-parser = LanguageChunkingParser.load_state("demo/parse_consistency_test/ltm")
+parser = LanguageChunkingParser.load_state("unittests/gen_learn_test/final_ltm_data")
 
 initial_sentence = "a woman sees the woman"
 sub_sentence = "a woman sees"
 new_sentence = "a woman sees the dog"
 initial_tree = parser.parse_input([initial_sentence], end_behavior="converge", debug=False)[0]
-
-# parser.add_parse_tree(initial_tree, debug=False)
+parser.add_parse_tree(initial_tree, debug=False)
 initial_tree.visualize("demo/parse_consistency_test/initial_parse")
 
 start = time.time()

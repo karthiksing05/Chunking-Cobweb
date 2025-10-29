@@ -9,13 +9,13 @@ app = Flask(__name__)
 
 LEARNING_ON = True
 # LOAD_LTM = "gui/parse_tree_editor/ltm_ckpt2"
-LOAD_LTM = ""
+LOAD_LTM = "unittests/gen_learn_test/final_ltm_data"
 
 # --- Initialize parser and LTM ---
 if LOAD_LTM != "":
     parser = LanguageChunkingParser.load_state(LOAD_LTM)
 else:
-    parser = LanguageChunkingParser(TEST_CORPUS2, context_length=2)
+    parser = LanguageChunkingParser(TEST_CORPUS2, contsext_length=2)
 
 num_load = 0
 document = []

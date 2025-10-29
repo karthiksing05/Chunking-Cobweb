@@ -235,11 +235,6 @@ public:
         this->attr_vals = AV_KEY_TYPE();
     }
 
-    // Traverse exactly k steps down the tree following the same greedy
-    // logic as categorize (choose child with highest posterior). If a leaf
-    // is reached before k steps, return that leaf. If k==0, return the root.
-    CobwebNode *partial_categorize(const INSTANCE_TYPE instance, int k);
-
     std::string __str__()
     {
         return this->root->__str__();
@@ -3344,6 +3339,8 @@ NB_MODULE(cobweb_discrete, m)
         .def("entropy", &CobwebNode::entropy)
         .def("category_utility", &CobwebNode::category_utility)
         .def("partition_utility", &CobwebNode::partition_utility)
+        .def("pu_for_insert", &CobwebNode::pu_for_insert)
+        .def("pu_for_new_child", &CobwebNode::pu_for_new_child)
         .def("__str__", &CobwebNode::__str__)
         .def("concept_hash", &CobwebNode::concept_hash)
         .def_ro("count", &CobwebNode::count)
