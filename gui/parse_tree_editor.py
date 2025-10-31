@@ -8,14 +8,14 @@ import uuid
 app = Flask(__name__)
 
 LEARNING_ON = True
-# LOAD_LTM = "gui/parse_tree_editor/ltm_ckpt2"
-LOAD_LTM = "unittests/gen_learn_test/final_ltm_data"
+LOAD_LTM = ""
+# LOAD_LTM = "unittests/gen_learn_test/final_ltm_data"
 
 # --- Initialize parser and LTM ---
 if LOAD_LTM != "":
     parser = LanguageChunkingParser.load_state(LOAD_LTM)
 else:
-    parser = LanguageChunkingParser(TEST_CORPUS2, contsext_length=2)
+    parser = LanguageChunkingParser(TEST_CORPUS2, context_length=2)
 
 num_load = 0
 document = []
@@ -30,7 +30,7 @@ for doc in document:
 
 # --- Initialize first sentence and tree ---
 sample_sentence = generate("S", TEST_GRAMMAR2)
-# sample_sentence = "a woman saw the woman"
+# sample_sentence = "a man chases the woman"
 curr_tree = FiniteParseTree(parser.get_long_term_memory(), parser.id_to_value, parser.value_to_id, context_length=2)
 curr_tree.build_primitives(sample_sentence)
 curr_tree._ensure_editor_state()

@@ -8,9 +8,10 @@ from cobweb.cobweb_discrete import CobwebTree, CobwebNode
 from viz import HTMLCobwebDrawer
 from typing import List
 from sortedcontainers import SortedList
+import heapq
 import time
 import math
-
+import random
 
 """
 ----------------------------------------------------------------------------------------------
@@ -223,7 +224,7 @@ class CompositeParseNode:
 ----------------------------------------------------------------------------------------------
 """
 
-def custom_categorize(inst, tree):
+def custom_categorize_dfs(inst, tree):
     """
     A helper function that categorizes down the Cobweb Tree and saves the concept hashes of all
     nodes to a list ["CONCEPT-{hash}", ...] and returns that list.
@@ -256,14 +257,14 @@ def custom_categorize(inst, tree):
             # child_log_probs = node.prob_children_given_instance(inst)
             child_scores = []
             for child in node.children:
-                child_scores.append(-child.pu_for_new_child(inst))
+                child_scores.append(node.pu_for_insert(child, inst) - child.pu_for_new_child(inst))
         except Exception as e:
             pass
 
         if not child_scores:
             break
 
-        print(child_scores)
+        # print(child_scores)
 
         # find best child index (handle NaN by treating as -inf)
         best_idx = None
@@ -299,12 +300,126 @@ def custom_categorize(inst, tree):
         except Exception:
             break
 
-    categorizeNode = tree.categorize(inst)
-
-    # if categorizeNode.concept_hash() != lastNode.concept_hash():
-    #     raise RuntimeError(f"tree.categorize returned {categorizeNode.concept_hash()} but custom_categorize returned {lastNode.concept_hash()}")
+    # categorizeNode = tree.categorize(inst)
 
     return lastNode, path
+
+def custom_categorize_bfs(inst, tree, max_expansions: int = 10000, use_log_probs: bool = True):
+    """
+    Priority-BFS categorization: explore nodes by priority until a leaf is found.
+
+    By default the scorer attempts to use FiniteParseTree._score_function (which
+    produces a 'cost' where smaller is better). If `use_log_probs=True` the BFS
+    will instead score nodes by their average log-probability for `inst` (higher
+    is better), computed from `node.log_prob_instance(inst)` normalized by total
+    instance weight. The heap ordering is handled so both modes pick the "best"
+    candidate first.
+
+    Returns: (leaf_node, path)
+    """
+    try:
+        root = tree.root
+    except Exception:
+        try:
+            leaf = tree.categorize(inst)
+            return leaf, [f"CONCEPT-{leaf.concept_hash()}"]
+        except Exception:
+            return None, []
+
+    def sim_of(node):
+        # If requested, use average log-probability (higher better)
+        if use_log_probs:
+            try:
+                logp = node.log_prob_instance(inst)
+                total_weight = sum(cnt for vAttr in inst.values() for cnt in vAttr.values())
+                if total_weight <= 0:
+                    total_weight = 1.0
+                avg_logp = logp / total_weight
+                return float(avg_logp)
+            except Exception:
+                # fall back to other scorers below
+                pass
+
+        # Prefer FiniteParseTree._score_function if available (returns a dict with 'cost')
+        try:
+            if 'FiniteParseTree' in globals():
+                try:
+                    sd = FiniteParseTree._score_function(node, inst)
+                    if sd is not None and 'cost' in sd:
+                        # convert cost (smaller better) into a similarity-like value
+                        return float(sd.get('cost', 0.0))
+                except Exception:
+                    pass
+
+            # Fallback similarity: normalized overlap between av_count and inst
+            child_av = getattr(node, 'av_count', {}) or {}
+            sim = 0.0
+            for attr, vals in child_av.items():
+                if attr in inst:
+                    for k, v in vals.items():
+                        sim += v * inst[attr].get(k, 0)
+            denom = sum(sum(vals.values()) for vals in child_av.values()) + 1e-9
+            return sim / denom
+        except Exception:
+            return -float('inf')
+
+    def iter_children(n):
+        try:
+            for ch in n.children:
+                if isinstance(ch, (list, tuple)) and len(ch) >= 2:
+                    yield ch[1]
+                else:
+                    yield ch
+        except Exception:
+            return
+
+    heap = []
+    root_score = sim_of(root)
+    root_path = [f"CONCEPT-{root.concept_hash()}"]
+    heapq.heappush(heap, (-root_score + random.random() * 1e-6, root, root_path))
+
+    seen = set()
+    expansions = 0
+    last_node = root
+    last_path = root_path
+
+    while heap and expansions < max_expansions:
+        score, node, path = heapq.heappop(heap)
+        expansions += 1
+
+        try:
+            chash = node.concept_hash()
+        except Exception:
+            chash = None
+        if chash in seen:
+            continue
+        if chash is not None:
+            seen.add(chash)
+
+        try:
+            children_list = list(iter_children(node))
+            has_children = bool(children_list)
+        except Exception:
+            children_list = []
+            has_children = False
+
+        last_node = node
+        last_path = path
+
+        if not has_children:
+            return node, path
+
+        for child in children_list:
+            try:
+                child_hash = child.concept_hash()
+            except Exception:
+                child_hash = None
+            child_sim = sim_of(child)
+            child_path = path + ([f"CONCEPT-{child_hash}"] if child_hash is not None else [])
+            heapq.heappush(heap, (-child_sim + random.random() * 1e-6, child, child_path))
+
+    return last_node, last_path
+
 
 class FiniteParseTree:
 
@@ -362,7 +477,7 @@ class FiniteParseTree:
         # 5. Compute soft penalty term
         penalty = lam * math.log(1.0 + complexity)
 
-        # 6. Define cost (lower = better)
+        # 6. Define cost (higher = better)
         cost = -avg_log_prob + penalty
 
         score_data = {
@@ -471,7 +586,7 @@ class FiniteParseTree:
         merge_inst = CompositeParseNode.create_merge_instance(left_node, right_node)
         # compute the categorize_path for this merged instance (list of concept ids)
 
-        candidate_concept, categorize_path = custom_categorize(merge_inst, self.ltm_hierarchy)
+        candidate_concept, categorize_path = custom_categorize_bfs(merge_inst, self.ltm_hierarchy)
 
         if debug:
             print("Categorization Path:")
@@ -540,7 +655,7 @@ class FiniteParseTree:
 
         merge_inst = CompositeParseNode.create_merge_instance(left_node, right_node)
 
-        candidate_concept, categorize_path = custom_categorize(merge_inst, self.ltm_hierarchy)
+        candidate_concept, categorize_path = custom_categorize_bfs(merge_inst, self.ltm_hierarchy)
 
         # compute categorize_path for the merged instance and store on node
         try:
@@ -718,7 +833,7 @@ class FiniteParseTree:
                     continue
 
                 score = res.get("score", float("-inf"))
-                if best is None or score < best[0]:
+                if best is None or score > best[0]:
                     best = (score, res)
 
             if best is None:

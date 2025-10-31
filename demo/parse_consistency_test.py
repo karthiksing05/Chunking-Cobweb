@@ -31,7 +31,7 @@ for _ in range(num_sentences):
     document.append(sentence)
 
 # Setting up the parser
-parser = LanguageChunkingParser.load_state("unittests/gen_learn_test/final_ltm_data")
+parser = LanguageChunkingParser.load_state("data/grammar2_fullparse/ltm_ad96d10f")
 
 initial_sentence = "a woman sees the woman"
 sub_sentence = "a woman sees"

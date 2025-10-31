@@ -16,7 +16,7 @@ for _ in range(num_sentences):
 # Setting up the parser
 parser = LanguageChunkingParser(TEST_CORPUS2, merge_split=True)
 
-train_size = 0.9
+train_size = 0.8
 
 train_documents = document[:int(len(document) * train_size)]
 test_documents = document[int(len(document) * train_size):]
