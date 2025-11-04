@@ -224,6 +224,99 @@ class CompositeParseNode:
 ----------------------------------------------------------------------------------------------
 """
 
+def match_score(candidate, inst):
+    """
+    A helper function that calculates a score by the matched instances. For simplicity, we'll
+    just do a direct and normalized "match_count" - check all attributes and their corresponding
+    values for matched values in the candidate instance.
+
+    Returns a normalized score denoting the "overlap" between the score and the value.
+    """
+
+    sim = 0.0
+    for attr, vals in candidate.items():
+        if attr in inst:
+            for k, v in vals.items():
+                sim += v * inst[attr].get(k, 0)
+    denom = sum(sum(vals.values()) for vals in candidate.values()) + 1e-9
+    return sim / denom
+
+def custom_categorize_match_score(inst, tree):
+    """
+    A helper function that expands comprehensively based on match score through a heap-based
+    best-first-search. The most likely candidate is the leaf that best matches the passed
+    instance.
+    """
+    try:
+        root = tree.root
+    except Exception:
+        try:
+            leaf = tree.categorize(inst)
+            return leaf, [f"CONCEPT-{leaf.concept_hash()}"]
+        except Exception:
+            return None, []
+
+    def sim_of(node):
+        child_av = getattr(node, 'av_count', {}) or {}
+        return match_score(child_av, inst)
+
+    def iter_children(n):
+        try:
+            for ch in n.children:
+                if isinstance(ch, (list, tuple)) and len(ch) >= 2:
+                    yield ch[1]
+                else:
+                    yield ch
+        except Exception:
+            return
+
+    heap = []
+    root_score = sim_of(root)
+    root_path = [f"CONCEPT-{root.concept_hash()}"]
+    heapq.heappush(heap, (-root_score + random.random() * 1e-6, root, root_path))
+
+    seen = set()
+    expansions = 0
+    last_node = root
+    last_path = root_path
+
+    while heap:
+        score, node, path = heapq.heappop(heap)
+        expansions += 1
+
+        try:
+            chash = node.concept_hash()
+        except Exception:
+            chash = None
+        if chash in seen:
+            continue
+        if chash is not None:
+            seen.add(chash)
+
+        try:
+            children_list = list(iter_children(node))
+            has_children = bool(children_list)
+        except Exception:
+            children_list = []
+            has_children = False
+
+        last_node = node
+        last_path = path
+
+        if not has_children:
+            return node, path
+
+        for child in children_list:
+            try:
+                child_hash = child.concept_hash()
+            except Exception:
+                child_hash = None
+            child_sim = sim_of(child)
+            child_path = path + ([f"CONCEPT-{child_hash}"] if child_hash is not None else [])
+            heapq.heappush(heap, (-child_sim + random.random() * 1e-6, child, child_path))
+
+    return last_node, last_path
+
 def custom_categorize_dfs(inst, tree):
     """
     A helper function that categorizes down the Cobweb Tree and saves the concept hashes of all
@@ -254,10 +347,10 @@ def custom_categorize_dfs(inst, tree):
     while True:
         try:
             # log probabilities for each child (in order corresponding to node.children)
-            # child_log_probs = node.prob_children_given_instance(inst)
-            child_scores = []
-            for child in node.children:
-                child_scores.append(node.pu_for_insert(child, inst) - child.pu_for_new_child(inst))
+            child_scores = node.prob_children_given_instance(inst)
+            # child_scores = []
+            # for child in node.children:
+            #     child_scores.append(node.pu_for_insert(child, inst) - child.pu_for_new_child(inst))
         except Exception as e:
             pass
 
@@ -420,6 +513,8 @@ def custom_categorize_bfs(inst, tree, max_expansions: int = 10000, use_log_probs
 
     return last_node, last_path
 
+def custom_categorize(inst, tree):
+    return custom_categorize_match_score(inst, tree)
 
 class FiniteParseTree:
 
@@ -586,7 +681,7 @@ class FiniteParseTree:
         merge_inst = CompositeParseNode.create_merge_instance(left_node, right_node)
         # compute the categorize_path for this merged instance (list of concept ids)
 
-        candidate_concept, categorize_path = custom_categorize_bfs(merge_inst, self.ltm_hierarchy)
+        candidate_concept, categorize_path = custom_categorize(merge_inst, self.ltm_hierarchy)
 
         if debug:
             print("Categorization Path:")
@@ -655,7 +750,7 @@ class FiniteParseTree:
 
         merge_inst = CompositeParseNode.create_merge_instance(left_node, right_node)
 
-        candidate_concept, categorize_path = custom_categorize_bfs(merge_inst, self.ltm_hierarchy)
+        candidate_concept, categorize_path = custom_categorize(merge_inst, self.ltm_hierarchy)
 
         # compute categorize_path for the merged instance and store on node
         try:
@@ -2273,9 +2368,9 @@ class LanguageChunkingParser:
         Should return True if the vocab was successfully added, False otherwise.
         """
         if new_vocab not in self.value_to_id:
-            self.value_to_id[new_vocab] = self.id_count
             self.id_to_value.append(new_vocab)
             self.id_count += 1
+            self.value_to_id[new_vocab] = self.id_count
             return True
         return False
 

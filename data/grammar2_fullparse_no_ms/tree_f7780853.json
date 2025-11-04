@@ -1,0 +1,163 @@
+{
+  "window": "a man chases",
+  "context_length": 2,
+  "id_to_value": [
+    "EMPTYNULL",
+    "the",
+    "a",
+    "dog",
+    "cat",
+    "man",
+    "woman",
+    "runs",
+    "sees",
+    "likes",
+    "chases",
+    "CONCEPT-3625316460000500_1"
+  ],
+  "value_to_id": {
+    "EMPTYNULL": 0,
+    "the": 1,
+    "a": 2,
+    "dog": 3,
+    "cat": 4,
+    "man": 5,
+    "woman": 6,
+    "runs": 7,
+    "sees": 8,
+    "likes": 9,
+    "chases": 10,
+    "CONCEPT-3625316460000500_1": 11
+  },
+  "nodes": [
+    {
+      "node_type": "composite",
+      "title": "fe20e13033",
+      "word_index": null,
+      "content_left": null,
+      "content_right": null,
+      "categorize_path": null,
+      "context_before": null,
+      "context_after": null,
+      "concept_label": null,
+      "global_root": true,
+      "parent": null,
+      "children": [
+        5
+      ]
+    },
+    {
+      "node_type": "primitive",
+      "title": "47ef8775ee",
+      "word_index": 0,
+      "content": 2,
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0,
+        "5": 1.0,
+        "10": 0.5
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 4,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "3dfedc640e",
+      "word_index": 1,
+      "content": 5,
+      "context_before": {
+        "0": 0,
+        "2": 1.0
+      },
+      "context_after": {
+        "0": 0,
+        "10": 1.0
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 4,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "a72163f7cf",
+      "word_index": 2,
+      "content": 10,
+      "context_before": {
+        "0": 0,
+        "5": 1.0,
+        "2": 0.5
+      },
+      "context_after": {
+        "0": 0
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 5,
+      "children": []
+    },
+    {
+      "node_type": "composite",
+      "title": "4bc677cc8b",
+      "word_index": 0.5,
+      "content_left": {
+        "2": 1,
+        "0": 0
+      },
+      "content_right": {
+        "5": 1,
+        "0": 0
+      },
+      "categorize_path": [
+        11
+      ],
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0,
+        "10": 1.0
+      },
+      "concept_label": 11,
+      "global_root": false,
+      "parent": 5,
+      "children": [
+        1,
+        2
+      ]
+    },
+    {
+      "node_type": "composite",
+      "title": "9210bd71cd",
+      "word_index": 1.25,
+      "content_left": {
+        "11": 1,
+        "0": 0
+      },
+      "content_right": {
+        "10": 1,
+        "0": 0
+      },
+      "categorize_path": [
+        11
+      ],
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0
+      },
+      "concept_label": 11,
+      "global_root": false,
+      "parent": 0,
+      "children": [
+        4,
+        3
+      ]
+    }
+  ]
+}

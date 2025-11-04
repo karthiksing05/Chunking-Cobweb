@@ -1,0 +1,135 @@
+{
+  "window": "a man sees",
+  "context_length": 2,
+  "id_to_value": [
+    "EMPTYNULL",
+    "the",
+    "a",
+    "dog",
+    "cat",
+    "man",
+    "woman",
+    "runs",
+    "sees",
+    "likes",
+    "chases",
+    "CONCEPT-3328406040817291_1"
+  ],
+  "value_to_id": {
+    "EMPTYNULL": 0,
+    "the": 1,
+    "a": 2,
+    "dog": 3,
+    "cat": 4,
+    "man": 5,
+    "woman": 6,
+    "runs": 7,
+    "sees": 8,
+    "likes": 9,
+    "chases": 10,
+    "CONCEPT-3328406040817291_1": 11
+  },
+  "nodes": [
+    {
+      "node_type": "composite",
+      "title": "06fbc84685",
+      "word_index": null,
+      "content_left": null,
+      "content_right": null,
+      "categorize_path": null,
+      "context_before": null,
+      "context_after": null,
+      "concept_label": null,
+      "global_root": true,
+      "parent": null,
+      "children": [
+        4,
+        3
+      ]
+    },
+    {
+      "node_type": "primitive",
+      "title": "5ddf63d8e5",
+      "word_index": 0,
+      "content": 2,
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0,
+        "5": 1.0,
+        "8": 0.5
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 4,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "93b6df9d35",
+      "word_index": 1,
+      "content": 5,
+      "context_before": {
+        "0": 0,
+        "2": 1.0
+      },
+      "context_after": {
+        "0": 0,
+        "8": 1.0
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 4,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "313d4bfb78",
+      "word_index": 2,
+      "content": 8,
+      "context_before": {
+        "0": 0,
+        "5": 1.0,
+        "2": 0.5
+      },
+      "context_after": {
+        "0": 0
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 0,
+      "children": []
+    },
+    {
+      "node_type": "composite",
+      "title": "0e4a95e1c0",
+      "word_index": 0.5,
+      "content_left": {
+        "2": 1,
+        "0": 0
+      },
+      "content_right": {
+        "5": 1,
+        "0": 0
+      },
+      "categorize_path": [
+        11
+      ],
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0,
+        "8": 1.0
+      },
+      "concept_label": 11,
+      "global_root": false,
+      "parent": 0,
+      "children": [
+        1,
+        2
+      ]
+    }
+  ]
+}

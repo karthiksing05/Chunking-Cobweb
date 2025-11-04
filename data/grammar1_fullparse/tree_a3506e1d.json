@@ -1,0 +1,232 @@
+{
+  "window": "a man liked",
+  "context_length": 3,
+  "id_to_value": [
+    "EMPTYNULL",
+    "the",
+    "a",
+    "cat",
+    "dog",
+    "man",
+    "woman",
+    "park",
+    "telescope",
+    "big",
+    "small",
+    "red",
+    "quick",
+    "lazy",
+    "saw",
+    "liked",
+    "chased",
+    "found",
+    "admired",
+    "with",
+    "in",
+    "on",
+    "under",
+    "CONCEPT-3626808680154125_1",
+    "CONCEPT-3626985174878916_2",
+    "CONCEPT-3626985174895125_3",
+    "CONCEPT-3626985174955500_5",
+    "CONCEPT-3626985175001625_7",
+    "CONCEPT-3626985175020625_9",
+    "CONCEPT-3627006943186625_11",
+    "CONCEPT-3627006943280583_13",
+    "CONCEPT-3627006943328833_16",
+    "CONCEPT-3627006943351791_18",
+    "CONCEPT-3627006943357583_19",
+    "CONCEPT-3627006943461958_21",
+    "CONCEPT-3627006943512916_23",
+    "CONCEPT-3627006943534833_25",
+    "CONCEPT-3627039582193916_27",
+    "CONCEPT-3627039582257625_29",
+    "CONCEPT-3627039582297166_32",
+    "CONCEPT-3627039582314916_34",
+    "CONCEPT-3627039582318958_35"
+  ],
+  "value_to_id": {
+    "EMPTYNULL": 0,
+    "the": 1,
+    "a": 2,
+    "cat": 3,
+    "dog": 4,
+    "man": 5,
+    "woman": 6,
+    "park": 7,
+    "telescope": 8,
+    "big": 9,
+    "small": 10,
+    "red": 11,
+    "quick": 12,
+    "lazy": 13,
+    "saw": 14,
+    "liked": 15,
+    "chased": 16,
+    "found": 17,
+    "admired": 18,
+    "with": 19,
+    "in": 20,
+    "on": 21,
+    "under": 22,
+    "CONCEPT-3626808680154125_1": 23,
+    "CONCEPT-3626985174878916_2": 24,
+    "CONCEPT-3626985174895125_3": 25,
+    "CONCEPT-3626985174955500_5": 26,
+    "CONCEPT-3626985175001625_7": 27,
+    "CONCEPT-3626985175020625_9": 28,
+    "CONCEPT-3627006943186625_11": 29,
+    "CONCEPT-3627006943280583_13": 30,
+    "CONCEPT-3627006943328833_16": 31,
+    "CONCEPT-3627006943351791_18": 32,
+    "CONCEPT-3627006943357583_19": 33,
+    "CONCEPT-3627006943461958_21": 34,
+    "CONCEPT-3627006943512916_23": 35,
+    "CONCEPT-3627006943534833_25": 36,
+    "CONCEPT-3627039582193916_27": 37,
+    "CONCEPT-3627039582257625_29": 38,
+    "CONCEPT-3627039582297166_32": 39,
+    "CONCEPT-3627039582314916_34": 40,
+    "CONCEPT-3627039582318958_35": 41
+  },
+  "nodes": [
+    {
+      "node_type": "composite",
+      "title": "42ef97058c",
+      "word_index": null,
+      "content_left": null,
+      "content_right": null,
+      "categorize_path": null,
+      "context_before": null,
+      "context_after": null,
+      "concept_label": null,
+      "global_root": true,
+      "parent": null,
+      "children": [
+        5
+      ]
+    },
+    {
+      "node_type": "primitive",
+      "title": "3ab3da247b",
+      "word_index": 0,
+      "content": 2,
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0,
+        "5": 1.0,
+        "15": 0.5
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 4,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "f042832304",
+      "word_index": 1,
+      "content": 5,
+      "context_before": {
+        "0": 0,
+        "2": 1.0
+      },
+      "context_after": {
+        "0": 0,
+        "15": 1.0
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 4,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "c73feafcf2",
+      "word_index": 2,
+      "content": 15,
+      "context_before": {
+        "0": 0,
+        "5": 1.0,
+        "2": 0.5
+      },
+      "context_after": {
+        "0": 0
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 5,
+      "children": []
+    },
+    {
+      "node_type": "composite",
+      "title": "5bd0128a8c",
+      "word_index": 0.5,
+      "content_left": {
+        "2": 1,
+        "0": 0
+      },
+      "content_right": {
+        "5": 1,
+        "0": 0
+      },
+      "categorize_path": [
+        23,
+        38,
+        39,
+        36,
+        41
+      ],
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0,
+        "15": 1.0
+      },
+      "concept_label": 41,
+      "global_root": false,
+      "parent": 5,
+      "children": [
+        1,
+        2
+      ]
+    },
+    {
+      "node_type": "composite",
+      "title": "b8ba9e9e32",
+      "word_index": 1.25,
+      "content_left": {
+        "23": 1,
+        "38": 1,
+        "39": 1,
+        "36": 1,
+        "41": 1,
+        "0": 0
+      },
+      "content_right": {
+        "15": 1,
+        "0": 0
+      },
+      "categorize_path": [
+        23,
+        37
+      ],
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0
+      },
+      "concept_label": 37,
+      "global_root": false,
+      "parent": 0,
+      "children": [
+        4,
+        3
+      ]
+    }
+  ]
+}

@@ -14,28 +14,26 @@ forgetting, but we also see the consistency between different parses.
 *   However, this seems to fail on larger grammars with not enough properly generated
     concepts / vocabulary
 *   There's a combination of useless fully generated parse trees as well as poorly specified 
-
-TODO: extend this step with a stably generated long-term hierarchy.
 """
 
-from util.cfg import generate, TEST_GRAMMAR2
+from util.cfg import generate, TEST_GRAMMAR1
 from parse import LanguageChunkingParser
 import time
 
 # Creating and printing toy sentences
-num_sentences = 100
+num_sentences = 10000
 document = []
 
 for _ in range(num_sentences):
-    sentence = generate("S", TEST_GRAMMAR2)
+    sentence = generate("S", TEST_GRAMMAR1)
     document.append(sentence)
 
 # Setting up the parser
-parser = LanguageChunkingParser.load_state("data/grammar2_fullparse/ltm_ad96d10f")
+parser = LanguageChunkingParser.load_state("data/grammar1_fullparse/ltm")
 
-initial_sentence = "a woman sees the woman"
-sub_sentence = "a woman sees"
-new_sentence = "a woman sees the dog"
+initial_sentence = "a woman saw the woman"
+sub_sentence = "a woman saw"
+new_sentence = "a woman saw the dog"
 initial_tree = parser.parse_input([initial_sentence], end_behavior="converge", debug=False)[0]
 parser.add_parse_tree(initial_tree, debug=False)
 initial_tree.visualize("demo/parse_consistency_test/initial_parse")

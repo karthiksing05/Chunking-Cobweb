@@ -8,20 +8,22 @@ import uuid
 app = Flask(__name__)
 
 LEARNING_ON = True
+PREBUILD_TREES = False
+CONTEXT_LENGTH = 3
 LOAD_LTM = ""
-# LOAD_LTM = "unittests/gen_learn_test/final_ltm_data"
+# LOAD_LTM = "data/grammar2_fullparse/ltm"
 
 # --- Initialize parser and LTM ---
 if LOAD_LTM != "":
     parser = LanguageChunkingParser.load_state(LOAD_LTM)
 else:
-    parser = LanguageChunkingParser(TEST_CORPUS2, context_length=2)
+    parser = LanguageChunkingParser(TEST_CORPUS2, context_length=CONTEXT_LENGTH, merge_split=True)
 
-num_load = 0
+NUM_LOAD = 0
 document = []
 
-for _ in range(num_load):
-    sentence = generate("S", TEST_GRAMMAR2)
+for _ in range(NUM_LOAD):
+    sentence = generate("S", TEST_CORPUS2)
     document.append(sentence)
 
 for doc in document:
@@ -29,18 +31,24 @@ for doc in document:
     parser.add_parse_tree(parse_tree, debug=False)
 
 # --- Initialize first sentence and tree ---
-sample_sentence = generate("S", TEST_GRAMMAR2)
-# sample_sentence = "a man chases the woman"
-curr_tree = FiniteParseTree(parser.get_long_term_memory(), parser.id_to_value, parser.value_to_id, context_length=2)
-curr_tree.build_primitives(sample_sentence)
+# sample_sentence = generate("S", TEST_GRAMMAR1)
+sample_sentence = "a woman likes a man"
+curr_tree = FiniteParseTree(parser.get_long_term_memory(), parser.id_to_value, parser.value_to_id, context_length=CONTEXT_LENGTH)
+if PREBUILD_TREES:
+    curr_tree.build(sample_sentence)
+else:
+    curr_tree.build_primitives(sample_sentence)
 curr_tree._ensure_editor_state()
 
 def reset_tree():
     """Refresh to a new sentence and rebuild current tree."""
     global curr_tree, sample_sentence
     sample_sentence = generate("S", TEST_GRAMMAR2)
-    curr_tree = FiniteParseTree(parser.get_long_term_memory(), parser.id_to_value, parser.value_to_id, context_length=2)
-    curr_tree.build_primitives(sample_sentence)
+    curr_tree = FiniteParseTree(parser.get_long_term_memory(), parser.id_to_value, parser.value_to_id, context_length=CONTEXT_LENGTH)
+    if PREBUILD_TREES:
+        curr_tree.build(sample_sentence)
+    else:
+        curr_tree.build_primitives(sample_sentence)
     curr_tree._ensure_editor_state()
     print(f"[INFO] New sentence selected: {sample_sentence}")
 

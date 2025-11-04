@@ -1,0 +1,430 @@
+{
+  "window": "a dog runs the dog",
+  "context_length": 2,
+  "id_to_value": [
+    "EMPTYNULL",
+    "the",
+    "a",
+    "dog",
+    "cat",
+    "man",
+    "woman",
+    "runs",
+    "sees",
+    "likes",
+    "chases",
+    "CONCEPT-3328406040817291_1",
+    "CONCEPT-3328433813164875_2",
+    "CONCEPT-3328433813191083_3",
+    "CONCEPT-3328433813269000_5",
+    "CONCEPT-3328442051440000_7",
+    "CONCEPT-3328442051457000_9",
+    "CONCEPT-3328459474982708_12",
+    "CONCEPT-3328459475007583_14",
+    "CONCEPT-3328459475011875_15",
+    "CONCEPT-3328459475110291_17",
+    "CONCEPT-3328459475133250_19",
+    "CONCEPT-3328459475137250_20",
+    "CONCEPT-3328469156559208_23",
+    "CONCEPT-3328469156586916_26",
+    "CONCEPT-3328469156602041_28",
+    "CONCEPT-3328469156605375_29",
+    "CONCEPT-3328475188456875_31",
+    "CONCEPT-3328485762528708_33",
+    "CONCEPT-3328485762562416_36",
+    "CONCEPT-3328485762589041_39",
+    "CONCEPT-3328485762600958_41",
+    "CONCEPT-3328497620687875_44",
+    "CONCEPT-3328497620724708_47",
+    "CONCEPT-3328497620762541_50",
+    "CONCEPT-3328497620781250_52",
+    "CONCEPT-3328497620785291_53",
+    "CONCEPT-3328497620895125_56",
+    "CONCEPT-3328497620929000_59",
+    "CONCEPT-3328497620961333_62",
+    "CONCEPT-3328497620991125_65",
+    "CONCEPT-3328497621019916_67",
+    "CONCEPT-3328497621023375_68",
+    "CONCEPT-3328508307363125_71",
+    "CONCEPT-3328508307395041_74",
+    "CONCEPT-3328508307423458_77",
+    "CONCEPT-3328508307459708_80",
+    "CONCEPT-3328508307489541_83",
+    "CONCEPT-3328508307504125_85",
+    "CONCEPT-3328508307517375_86",
+    "CONCEPT-3328508307615541_89",
+    "CONCEPT-3328508307653375_92",
+    "CONCEPT-3328508307720083_95",
+    "CONCEPT-3328508307737208_97",
+    "CONCEPT-3328517199130000_100",
+    "CONCEPT-3328517199163250_103",
+    "CONCEPT-3328517199179958_105",
+    "CONCEPT-3328517199183416_106",
+    "CONCEPT-3329072219064083_108",
+    "CONCEPT-3329072219156041_110",
+    "CONCEPT-3329072219206875_113",
+    "CONCEPT-3329072219245666_116",
+    "CONCEPT-3329072219281000_119",
+    "CONCEPT-3329072219301791_121",
+    "CONCEPT-3329072219306291_122",
+    "CONCEPT-3329096984719541_124",
+    "CONCEPT-3329096984796875_126",
+    "CONCEPT-3329096984815583_128",
+    "CONCEPT-3329096984857291_130",
+    "CONCEPT-3329096984891916_132",
+    "CONCEPT-3329096984928333_135",
+    "CONCEPT-3329096984973083_138",
+    "CONCEPT-3329096985001333_141",
+    "CONCEPT-3329096985029291_144",
+    "CONCEPT-3329096985058000_147",
+    "CONCEPT-3329096985087875_150",
+    "CONCEPT-3329096985117500_153",
+    "CONCEPT-3329096985144583_156",
+    "CONCEPT-3329096985170583_159",
+    "CONCEPT-3329096985209833_162",
+    "CONCEPT-3329096985238291_165",
+    "CONCEPT-3329096985251000_167",
+    "CONCEPT-3329096985281125_168"
+  ],
+  "value_to_id": {
+    "EMPTYNULL": 0,
+    "the": 1,
+    "a": 2,
+    "dog": 3,
+    "cat": 4,
+    "man": 5,
+    "woman": 6,
+    "runs": 7,
+    "sees": 8,
+    "likes": 9,
+    "chases": 10,
+    "CONCEPT-3328406040817291_1": 11,
+    "CONCEPT-3328433813164875_2": 11,
+    "CONCEPT-3328433813191083_3": 12,
+    "CONCEPT-3328433813269000_5": 13,
+    "CONCEPT-3328442051440000_7": 14,
+    "CONCEPT-3328442051457000_9": 15,
+    "CONCEPT-3328459474982708_12": 16,
+    "CONCEPT-3328459475007583_14": 17,
+    "CONCEPT-3328459475011875_15": 18,
+    "CONCEPT-3328459475110291_17": 19,
+    "CONCEPT-3328459475133250_19": 20,
+    "CONCEPT-3328459475137250_20": 21,
+    "CONCEPT-3328469156559208_23": 22,
+    "CONCEPT-3328469156586916_26": 23,
+    "CONCEPT-3328469156602041_28": 24,
+    "CONCEPT-3328469156605375_29": 25,
+    "CONCEPT-3328475188456875_31": 26,
+    "CONCEPT-3328485762528708_33": 27,
+    "CONCEPT-3328485762562416_36": 28,
+    "CONCEPT-3328485762589041_39": 29,
+    "CONCEPT-3328485762600958_41": 30,
+    "CONCEPT-3328497620687875_44": 31,
+    "CONCEPT-3328497620724708_47": 32,
+    "CONCEPT-3328497620762541_50": 33,
+    "CONCEPT-3328497620781250_52": 34,
+    "CONCEPT-3328497620785291_53": 35,
+    "CONCEPT-3328497620895125_56": 36,
+    "CONCEPT-3328497620929000_59": 37,
+    "CONCEPT-3328497620961333_62": 38,
+    "CONCEPT-3328497620991125_65": 39,
+    "CONCEPT-3328497621019916_67": 40,
+    "CONCEPT-3328497621023375_68": 41,
+    "CONCEPT-3328508307363125_71": 42,
+    "CONCEPT-3328508307395041_74": 43,
+    "CONCEPT-3328508307423458_77": 44,
+    "CONCEPT-3328508307459708_80": 45,
+    "CONCEPT-3328508307489541_83": 46,
+    "CONCEPT-3328508307504125_85": 47,
+    "CONCEPT-3328508307517375_86": 48,
+    "CONCEPT-3328508307615541_89": 49,
+    "CONCEPT-3328508307653375_92": 50,
+    "CONCEPT-3328508307720083_95": 51,
+    "CONCEPT-3328508307737208_97": 52,
+    "CONCEPT-3328517199130000_100": 53,
+    "CONCEPT-3328517199163250_103": 54,
+    "CONCEPT-3328517199179958_105": 55,
+    "CONCEPT-3328517199183416_106": 56,
+    "CONCEPT-3329072219064083_108": 57,
+    "CONCEPT-3329072219156041_110": 58,
+    "CONCEPT-3329072219206875_113": 59,
+    "CONCEPT-3329072219245666_116": 60,
+    "CONCEPT-3329072219281000_119": 61,
+    "CONCEPT-3329072219301791_121": 62,
+    "CONCEPT-3329072219306291_122": 63,
+    "CONCEPT-3329096984719541_124": 64,
+    "CONCEPT-3329096984796875_126": 65,
+    "CONCEPT-3329096984815583_128": 66,
+    "CONCEPT-3329096984857291_130": 67,
+    "CONCEPT-3329096984891916_132": 68,
+    "CONCEPT-3329096984928333_135": 69,
+    "CONCEPT-3329096984973083_138": 70,
+    "CONCEPT-3329096985001333_141": 71,
+    "CONCEPT-3329096985029291_144": 72,
+    "CONCEPT-3329096985058000_147": 73,
+    "CONCEPT-3329096985087875_150": 74,
+    "CONCEPT-3329096985117500_153": 75,
+    "CONCEPT-3329096985144583_156": 76,
+    "CONCEPT-3329096985170583_159": 77,
+    "CONCEPT-3329096985209833_162": 78,
+    "CONCEPT-3329096985238291_165": 79,
+    "CONCEPT-3329096985251000_167": 80,
+    "CONCEPT-3329096985281125_168": 81
+  },
+  "nodes": [
+    {
+      "node_type": "composite",
+      "title": "3d80073d4f",
+      "word_index": null,
+      "content_left": null,
+      "content_right": null,
+      "categorize_path": null,
+      "context_before": null,
+      "context_after": null,
+      "concept_label": null,
+      "global_root": true,
+      "parent": null,
+      "children": [
+        9
+      ]
+    },
+    {
+      "node_type": "primitive",
+      "title": "b36dc4619d",
+      "word_index": 0,
+      "content": 2,
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0,
+        "3": 1.0,
+        "7": 0.5
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 6,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "361471949f",
+      "word_index": 1,
+      "content": 3,
+      "context_before": {
+        "0": 0,
+        "2": 1.0
+      },
+      "context_after": {
+        "0": 0,
+        "7": 1.0,
+        "1": 0.5
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 6,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "fa48b94f03",
+      "word_index": 2,
+      "content": 7,
+      "context_before": {
+        "0": 0,
+        "3": 1.0,
+        "2": 0.5
+      },
+      "context_after": {
+        "0": 0,
+        "1": 1.0,
+        "3": 0.5
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 8,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "aa8b1afb98",
+      "word_index": 3,
+      "content": 1,
+      "context_before": {
+        "0": 0,
+        "7": 1.0,
+        "3": 0.5
+      },
+      "context_after": {
+        "0": 0,
+        "3": 1.0
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 7,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "6ff7c8deb0",
+      "word_index": 4,
+      "content": 3,
+      "context_before": {
+        "0": 0,
+        "1": 1.0,
+        "7": 0.5
+      },
+      "context_after": {
+        "0": 0
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 7,
+      "children": []
+    },
+    {
+      "node_type": "composite",
+      "title": "c602035b89",
+      "word_index": 0.5,
+      "content_left": {
+        "2": 1,
+        "0": 0
+      },
+      "content_right": {
+        "3": 1,
+        "0": 0
+      },
+      "categorize_path": [
+        11,
+        68,
+        67
+      ],
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0,
+        "7": 1.0,
+        "1": 0.5
+      },
+      "concept_label": 67,
+      "global_root": false,
+      "parent": 8,
+      "children": [
+        1,
+        2
+      ]
+    },
+    {
+      "node_type": "composite",
+      "title": "6eb0295591",
+      "word_index": 3.5,
+      "content_left": {
+        "1": 1,
+        "0": 0
+      },
+      "content_right": {
+        "3": 1,
+        "0": 0
+      },
+      "categorize_path": [
+        11,
+        68,
+        69,
+        70,
+        71,
+        72,
+        25
+      ],
+      "context_before": {
+        "0": 0,
+        "7": 1.0,
+        "3": 0.5
+      },
+      "context_after": {
+        "0": 0
+      },
+      "concept_label": 25,
+      "global_root": false,
+      "parent": 9,
+      "children": [
+        4,
+        5
+      ]
+    },
+    {
+      "node_type": "composite",
+      "title": "28a3421c27",
+      "word_index": 1.25,
+      "content_left": {
+        "11": 1,
+        "68": 1,
+        "67": 1,
+        "0": 0
+      },
+      "content_right": {
+        "7": 1,
+        "0": 0
+      },
+      "categorize_path": [
+        11,
+        65,
+        66
+      ],
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0,
+        "1": 1.0,
+        "3": 0.5
+      },
+      "concept_label": 66,
+      "global_root": false,
+      "parent": 9,
+      "children": [
+        6,
+        3
+      ]
+    },
+    {
+      "node_type": "composite",
+      "title": "24bc399ecd",
+      "word_index": 2.375,
+      "content_left": {
+        "11": 1,
+        "65": 1,
+        "66": 1,
+        "0": 0
+      },
+      "content_right": {
+        "11": 1,
+        "68": 1,
+        "69": 1,
+        "70": 1,
+        "71": 1,
+        "72": 1,
+        "25": 1,
+        "0": 0
+      },
+      "categorize_path": [
+        11,
+        65,
+        64
+      ],
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0
+      },
+      "concept_label": 64,
+      "global_root": false,
+      "parent": 0,
+      "children": [
+        8,
+        7
+      ]
+    }
+  ]
+}

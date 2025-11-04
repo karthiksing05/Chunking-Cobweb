@@ -1,0 +1,221 @@
+{
+  "window": "the man sees the dog",
+  "context_length": 2,
+  "id_to_value": [
+    "EMPTYNULL",
+    "the",
+    "a",
+    "dog",
+    "cat",
+    "man",
+    "woman",
+    "runs",
+    "sees",
+    "likes",
+    "chases",
+    "CONCEPT-3328406040817291_1",
+    "CONCEPT-3328433813164875_2",
+    "CONCEPT-3328433813191083_3",
+    "CONCEPT-3328433813269000_5",
+    "CONCEPT-3328442051440000_7",
+    "CONCEPT-3328442051457000_9"
+  ],
+  "value_to_id": {
+    "EMPTYNULL": 0,
+    "the": 1,
+    "a": 2,
+    "dog": 3,
+    "cat": 4,
+    "man": 5,
+    "woman": 6,
+    "runs": 7,
+    "sees": 8,
+    "likes": 9,
+    "chases": 10,
+    "CONCEPT-3328406040817291_1": 11,
+    "CONCEPT-3328433813164875_2": 11,
+    "CONCEPT-3328433813191083_3": 12,
+    "CONCEPT-3328433813269000_5": 13,
+    "CONCEPT-3328442051440000_7": 14,
+    "CONCEPT-3328442051457000_9": 15
+  },
+  "nodes": [
+    {
+      "node_type": "composite",
+      "title": "adc179c3bb",
+      "word_index": null,
+      "content_left": null,
+      "content_right": null,
+      "categorize_path": null,
+      "context_before": null,
+      "context_after": null,
+      "concept_label": null,
+      "global_root": true,
+      "parent": null,
+      "children": [
+        6,
+        3,
+        7
+      ]
+    },
+    {
+      "node_type": "primitive",
+      "title": "228f49dc5d",
+      "word_index": 0,
+      "content": 1,
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0,
+        "5": 1.0,
+        "8": 0.5
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 6,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "fd9a0091fa",
+      "word_index": 1,
+      "content": 5,
+      "context_before": {
+        "0": 0,
+        "1": 1.0
+      },
+      "context_after": {
+        "0": 0,
+        "8": 1.0,
+        "1": 0.5
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 6,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "b25f6871f4",
+      "word_index": 2,
+      "content": 8,
+      "context_before": {
+        "0": 0,
+        "5": 1.0,
+        "1": 0.5
+      },
+      "context_after": {
+        "0": 0,
+        "1": 1.0,
+        "3": 0.5
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 0,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "195d12e905",
+      "word_index": 3,
+      "content": 1,
+      "context_before": {
+        "0": 0,
+        "8": 1.0,
+        "5": 0.5
+      },
+      "context_after": {
+        "0": 0,
+        "3": 1.0
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 7,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "ee7dab2947",
+      "word_index": 4,
+      "content": 3,
+      "context_before": {
+        "0": 0,
+        "1": 1.0,
+        "8": 0.5
+      },
+      "context_after": {
+        "0": 0
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 7,
+      "children": []
+    },
+    {
+      "node_type": "composite",
+      "title": "8352815467",
+      "word_index": 0.5,
+      "content_left": {
+        "1": 1,
+        "0": 0
+      },
+      "content_right": {
+        "5": 1,
+        "0": 0
+      },
+      "categorize_path": [
+        11,
+        14,
+        11
+      ],
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0,
+        "8": 1.0,
+        "1": 0.5
+      },
+      "concept_label": 11,
+      "global_root": false,
+      "parent": 0,
+      "children": [
+        1,
+        2
+      ]
+    },
+    {
+      "node_type": "composite",
+      "title": "49263fa7cf",
+      "word_index": 3.5,
+      "content_left": {
+        "1": 1,
+        "0": 0
+      },
+      "content_right": {
+        "3": 1,
+        "0": 0
+      },
+      "categorize_path": [
+        11,
+        12
+      ],
+      "context_before": {
+        "0": 0,
+        "8": 1.0,
+        "5": 0.5
+      },
+      "context_after": {
+        "0": 0
+      },
+      "concept_label": 12,
+      "global_root": false,
+      "parent": 0,
+      "children": [
+        4,
+        5
+      ]
+    }
+  ]
+}

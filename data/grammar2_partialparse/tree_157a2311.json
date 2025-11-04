@@ -1,0 +1,255 @@
+{
+  "window": "a man likes a man",
+  "context_length": 2,
+  "id_to_value": [
+    "EMPTYNULL",
+    "the",
+    "a",
+    "dog",
+    "cat",
+    "man",
+    "woman",
+    "runs",
+    "sees",
+    "likes",
+    "chases",
+    "CONCEPT-3328406040817291_1",
+    "CONCEPT-3328433813164875_2",
+    "CONCEPT-3328433813191083_3",
+    "CONCEPT-3328433813269000_5",
+    "CONCEPT-3328442051440000_7",
+    "CONCEPT-3328442051457000_9",
+    "CONCEPT-3328459474982708_12",
+    "CONCEPT-3328459475007583_14",
+    "CONCEPT-3328459475011875_15",
+    "CONCEPT-3328459475110291_17",
+    "CONCEPT-3328459475133250_19",
+    "CONCEPT-3328459475137250_20",
+    "CONCEPT-3328469156559208_23",
+    "CONCEPT-3328469156586916_26",
+    "CONCEPT-3328469156602041_28",
+    "CONCEPT-3328469156605375_29",
+    "CONCEPT-3328475188456875_31",
+    "CONCEPT-3328485762528708_33",
+    "CONCEPT-3328485762562416_36",
+    "CONCEPT-3328485762589041_39",
+    "CONCEPT-3328485762600958_41"
+  ],
+  "value_to_id": {
+    "EMPTYNULL": 0,
+    "the": 1,
+    "a": 2,
+    "dog": 3,
+    "cat": 4,
+    "man": 5,
+    "woman": 6,
+    "runs": 7,
+    "sees": 8,
+    "likes": 9,
+    "chases": 10,
+    "CONCEPT-3328406040817291_1": 11,
+    "CONCEPT-3328433813164875_2": 11,
+    "CONCEPT-3328433813191083_3": 12,
+    "CONCEPT-3328433813269000_5": 13,
+    "CONCEPT-3328442051440000_7": 14,
+    "CONCEPT-3328442051457000_9": 15,
+    "CONCEPT-3328459474982708_12": 16,
+    "CONCEPT-3328459475007583_14": 17,
+    "CONCEPT-3328459475011875_15": 18,
+    "CONCEPT-3328459475110291_17": 19,
+    "CONCEPT-3328459475133250_19": 20,
+    "CONCEPT-3328459475137250_20": 21,
+    "CONCEPT-3328469156559208_23": 22,
+    "CONCEPT-3328469156586916_26": 23,
+    "CONCEPT-3328469156602041_28": 24,
+    "CONCEPT-3328469156605375_29": 25,
+    "CONCEPT-3328475188456875_31": 26,
+    "CONCEPT-3328485762528708_33": 27,
+    "CONCEPT-3328485762562416_36": 28,
+    "CONCEPT-3328485762589041_39": 29,
+    "CONCEPT-3328485762600958_41": 30
+  },
+  "nodes": [
+    {
+      "node_type": "composite",
+      "title": "6e04d8455b",
+      "word_index": null,
+      "content_left": null,
+      "content_right": null,
+      "categorize_path": null,
+      "context_before": null,
+      "context_after": null,
+      "concept_label": null,
+      "global_root": true,
+      "parent": null,
+      "children": [
+        6,
+        3,
+        7
+      ]
+    },
+    {
+      "node_type": "primitive",
+      "title": "66804b641a",
+      "word_index": 0,
+      "content": 2,
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0,
+        "5": 1.0,
+        "9": 0.5
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 6,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "512eab1100",
+      "word_index": 1,
+      "content": 5,
+      "context_before": {
+        "0": 0,
+        "2": 1.0
+      },
+      "context_after": {
+        "0": 0,
+        "9": 1.0,
+        "2": 0.5
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 6,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "33c542b439",
+      "word_index": 2,
+      "content": 9,
+      "context_before": {
+        "0": 0,
+        "5": 1.0,
+        "2": 0.5
+      },
+      "context_after": {
+        "0": 0,
+        "2": 1.0,
+        "5": 0.5
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 0,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "5e9811923f",
+      "word_index": 3,
+      "content": 2,
+      "context_before": {
+        "0": 0,
+        "9": 1.0,
+        "5": 0.5
+      },
+      "context_after": {
+        "0": 0,
+        "5": 1.0
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 7,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "bdc56f1234",
+      "word_index": 4,
+      "content": 5,
+      "context_before": {
+        "0": 0,
+        "2": 1.0,
+        "9": 0.5
+      },
+      "context_after": {
+        "0": 0
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 7,
+      "children": []
+    },
+    {
+      "node_type": "composite",
+      "title": "05516bd2cf",
+      "word_index": 0.5,
+      "content_left": {
+        "2": 1,
+        "0": 0
+      },
+      "content_right": {
+        "5": 1,
+        "0": 0
+      },
+      "categorize_path": [
+        11,
+        27,
+        28,
+        26
+      ],
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0,
+        "9": 1.0,
+        "2": 0.5
+      },
+      "concept_label": 26,
+      "global_root": false,
+      "parent": 0,
+      "children": [
+        1,
+        2
+      ]
+    },
+    {
+      "node_type": "composite",
+      "title": "56f32120d9",
+      "word_index": 3.5,
+      "content_left": {
+        "2": 1,
+        "0": 0
+      },
+      "content_right": {
+        "5": 1,
+        "0": 0
+      },
+      "categorize_path": [
+        11,
+        27,
+        16,
+        11,
+        17
+      ],
+      "context_before": {
+        "0": 0,
+        "9": 1.0,
+        "5": 0.5
+      },
+      "context_after": {
+        "0": 0
+      },
+      "concept_label": 17,
+      "global_root": false,
+      "parent": 0,
+      "children": [
+        4,
+        5
+      ]
+    }
+  ]
+}

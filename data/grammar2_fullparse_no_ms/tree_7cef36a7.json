@@ -1,0 +1,148 @@
+{
+  "window": "a woman chases a dog",
+  "context_length": 2,
+  "id_to_value": [
+    "EMPTYNULL",
+    "the",
+    "a",
+    "dog",
+    "cat",
+    "man",
+    "woman",
+    "runs",
+    "sees",
+    "likes",
+    "chases",
+    "CONCEPT-3341056639606541_1"
+  ],
+  "value_to_id": {
+    "EMPTYNULL": 0,
+    "the": 1,
+    "a": 2,
+    "dog": 3,
+    "cat": 4,
+    "man": 5,
+    "woman": 6,
+    "runs": 7,
+    "sees": 8,
+    "likes": 9,
+    "chases": 10,
+    "CONCEPT-3341056639606541_1": 11
+  },
+  "nodes": [
+    {
+      "node_type": "composite",
+      "title": "c1939bff60",
+      "word_index": null,
+      "content_left": null,
+      "content_right": null,
+      "categorize_path": null,
+      "context_before": null,
+      "context_after": null,
+      "concept_label": null,
+      "global_root": true,
+      "parent": null,
+      "children": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "node_type": "primitive",
+      "title": "bc0a4dd76d",
+      "word_index": 0,
+      "content": 2,
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0,
+        "6": 1.0,
+        "10": 0.5
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 0,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "917a756c5d",
+      "word_index": 1,
+      "content": 6,
+      "context_before": {
+        "0": 0,
+        "2": 1.0
+      },
+      "context_after": {
+        "0": 0,
+        "10": 1.0,
+        "2": 0.5
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 0,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "a8a5f809d1",
+      "word_index": 2,
+      "content": 10,
+      "context_before": {
+        "0": 0,
+        "6": 1.0,
+        "2": 0.5
+      },
+      "context_after": {
+        "0": 0,
+        "2": 1.0,
+        "3": 0.5
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 0,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "2490af82dd",
+      "word_index": 3,
+      "content": 2,
+      "context_before": {
+        "0": 0,
+        "10": 1.0,
+        "6": 0.5
+      },
+      "context_after": {
+        "0": 0,
+        "3": 1.0
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 0,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "d4e6a9b548",
+      "word_index": 4,
+      "content": 3,
+      "context_before": {
+        "0": 0,
+        "2": 1.0,
+        "10": 0.5
+      },
+      "context_after": {
+        "0": 0
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 0,
+      "children": []
+    }
+  ]
+}

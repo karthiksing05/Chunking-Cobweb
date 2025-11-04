@@ -1,0 +1,324 @@
+{
+  "window": "the woman sees a woman",
+  "context_length": 2,
+  "id_to_value": [
+    "EMPTYNULL",
+    "the",
+    "a",
+    "dog",
+    "cat",
+    "man",
+    "woman",
+    "runs",
+    "sees",
+    "likes",
+    "chases",
+    "CONCEPT-3625316460000500_1",
+    "CONCEPT-3625340806355166_2",
+    "CONCEPT-3625340806369375_3",
+    "CONCEPT-3625360038839416_5",
+    "CONCEPT-3625360038843625_6",
+    "CONCEPT-3625360039368083_9",
+    "CONCEPT-3625360039371333_10",
+    "CONCEPT-3625360039434625_12",
+    "CONCEPT-3625360039436916_13",
+    "CONCEPT-3625360039487250_16",
+    "CONCEPT-3625360039489541_17",
+    "CONCEPT-3625386622998125_21",
+    "CONCEPT-3625386623002708_22",
+    "CONCEPT-3625386623099458_25",
+    "CONCEPT-3625386623102125_26",
+    "CONCEPT-3625386623186125_29",
+    "CONCEPT-3625386623189083_30",
+    "CONCEPT-3625386623249916_34",
+    "CONCEPT-3625386623252541_35"
+  ],
+  "value_to_id": {
+    "EMPTYNULL": 0,
+    "the": 1,
+    "a": 2,
+    "dog": 3,
+    "cat": 4,
+    "man": 5,
+    "woman": 6,
+    "runs": 7,
+    "sees": 8,
+    "likes": 9,
+    "chases": 10,
+    "CONCEPT-3625316460000500_1": 11,
+    "CONCEPT-3625340806355166_2": 12,
+    "CONCEPT-3625340806369375_3": 13,
+    "CONCEPT-3625360038839416_5": 14,
+    "CONCEPT-3625360038843625_6": 15,
+    "CONCEPT-3625360039368083_9": 16,
+    "CONCEPT-3625360039371333_10": 17,
+    "CONCEPT-3625360039434625_12": 18,
+    "CONCEPT-3625360039436916_13": 19,
+    "CONCEPT-3625360039487250_16": 20,
+    "CONCEPT-3625360039489541_17": 21,
+    "CONCEPT-3625386622998125_21": 22,
+    "CONCEPT-3625386623002708_22": 23,
+    "CONCEPT-3625386623099458_25": 24,
+    "CONCEPT-3625386623102125_26": 25,
+    "CONCEPT-3625386623186125_29": 26,
+    "CONCEPT-3625386623189083_30": 27,
+    "CONCEPT-3625386623249916_34": 28,
+    "CONCEPT-3625386623252541_35": 29
+  },
+  "nodes": [
+    {
+      "node_type": "composite",
+      "title": "ae56d38173",
+      "word_index": null,
+      "content_left": null,
+      "content_right": null,
+      "categorize_path": null,
+      "context_before": null,
+      "context_after": null,
+      "concept_label": null,
+      "global_root": true,
+      "parent": null,
+      "children": [
+        9
+      ]
+    },
+    {
+      "node_type": "primitive",
+      "title": "ad05eb589b",
+      "word_index": 0,
+      "content": 1,
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0,
+        "6": 1.0,
+        "8": 0.5
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 6,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "08b8be7ed7",
+      "word_index": 1,
+      "content": 6,
+      "context_before": {
+        "0": 0,
+        "1": 1.0
+      },
+      "context_after": {
+        "0": 0,
+        "8": 1.0,
+        "2": 0.5
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 6,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "08582a0f90",
+      "word_index": 2,
+      "content": 8,
+      "context_before": {
+        "0": 0,
+        "6": 1.0,
+        "1": 0.5
+      },
+      "context_after": {
+        "0": 0,
+        "2": 1.0,
+        "6": 0.5
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 8,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "d988173f19",
+      "word_index": 3,
+      "content": 2,
+      "context_before": {
+        "0": 0,
+        "8": 1.0,
+        "6": 0.5
+      },
+      "context_after": {
+        "0": 0,
+        "6": 1.0
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 7,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "22ff124d1b",
+      "word_index": 4,
+      "content": 6,
+      "context_before": {
+        "0": 0,
+        "2": 1.0,
+        "8": 0.5
+      },
+      "context_after": {
+        "0": 0
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 7,
+      "children": []
+    },
+    {
+      "node_type": "composite",
+      "title": "3dee97340e",
+      "word_index": 0.5,
+      "content_left": {
+        "1": 1,
+        "0": 0
+      },
+      "content_right": {
+        "6": 1,
+        "0": 0
+      },
+      "categorize_path": [
+        11,
+        13,
+        19,
+        26
+      ],
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0,
+        "8": 1.0,
+        "2": 0.5
+      },
+      "concept_label": 26,
+      "global_root": false,
+      "parent": 8,
+      "children": [
+        1,
+        2
+      ]
+    },
+    {
+      "node_type": "composite",
+      "title": "5f2d2e63ea",
+      "word_index": 3.5,
+      "content_left": {
+        "2": 1,
+        "0": 0
+      },
+      "content_right": {
+        "6": 1,
+        "0": 0
+      },
+      "categorize_path": [
+        11,
+        13,
+        18,
+        21
+      ],
+      "context_before": {
+        "0": 0,
+        "8": 1.0,
+        "6": 0.5
+      },
+      "context_after": {
+        "0": 0
+      },
+      "concept_label": 21,
+      "global_root": false,
+      "parent": 9,
+      "children": [
+        4,
+        5
+      ]
+    },
+    {
+      "node_type": "composite",
+      "title": "3a3d69846e",
+      "word_index": 1.25,
+      "content_left": {
+        "11": 1,
+        "13": 1,
+        "19": 1,
+        "26": 1,
+        "0": 0
+      },
+      "content_right": {
+        "8": 1,
+        "0": 0
+      },
+      "categorize_path": [
+        11,
+        12,
+        15,
+        25
+      ],
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0,
+        "2": 1.0,
+        "6": 0.5
+      },
+      "concept_label": 25,
+      "global_root": false,
+      "parent": 9,
+      "children": [
+        6,
+        3
+      ]
+    },
+    {
+      "node_type": "composite",
+      "title": "af8dfea1a6",
+      "word_index": 2.375,
+      "content_left": {
+        "11": 1,
+        "12": 1,
+        "15": 1,
+        "25": 1,
+        "0": 0
+      },
+      "content_right": {
+        "11": 1,
+        "13": 1,
+        "18": 1,
+        "21": 1,
+        "0": 0
+      },
+      "categorize_path": [
+        11,
+        12,
+        14,
+        17,
+        23
+      ],
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0
+      },
+      "concept_label": 23,
+      "global_root": false,
+      "parent": 0,
+      "children": [
+        8,
+        7
+      ]
+    }
+  ]
+}

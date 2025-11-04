@@ -6,7 +6,7 @@ from util.cfg import generate, TEST_CORPUS2, TEST_GRAMMAR2
 from parse import LanguageChunkingParser
 
 # Creating and printing toy sentences
-num_sentences = 50
+num_sentences = 100
 document = []
 
 for _ in range(num_sentences):
@@ -14,9 +14,9 @@ for _ in range(num_sentences):
     document.append(sentence)
 
 # Setting up the parser
-parser = LanguageChunkingParser(TEST_CORPUS2, merge_split=True)
+parser = LanguageChunkingParser(TEST_CORPUS2, merge_split=False)
 
-train_size = 0.8
+train_size = 0.9
 
 train_documents = document[:int(len(document) * train_size)]
 test_documents = document[int(len(document) * train_size):]
@@ -37,7 +37,7 @@ for i, doc in enumerate(train_documents):
         if i < 21:
             parser.visualize_ltm(f"unittests/gen_learn_test/ltms/cobweb_ltm{i}")
 
-parser.visualize_ltm("unittests/gen_learn_test/final_ltm")
+# parser.visualize_ltm("unittests/gen_learn_test/final_ltm")
 
 # perhaps visualize the last ten parse trees based on new inputs
 for i, test in enumerate(test_documents):

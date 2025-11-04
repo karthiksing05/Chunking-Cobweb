@@ -38,7 +38,7 @@ Because of the highly conceptual nature of this framework, we've also created a 
 
 ## Important Tests:
 
-Below is a list of tests confirming specific value propositions behind the chunking framework. They are designed to test and demon
+Below is a list of tests confirming specific value propositions behind the chunking framework. They are designed to test and demonstrate the capability of "stably defined" long-term memories
 
 *   ```demo/parse_consistency_test.py```
     *   Demonstrates that parses have consistency with subparses within the tree

@@ -1,0 +1,130 @@
+<!doctype html>
+    <html>
+    <head>
+    <meta charset="utf-8"/>
+    <title>Parse Tree</title>
+    <style>
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    #tree-container { display: inline-block; }
+    .link { fill: none; stroke: #9aa1a9; stroke-width: 1.5px; }
+    .node-box { stroke: #444; fill: #fff; rx: 8; ry: 8; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.15)); }
+    .node-fo table { border-collapse: collapse; font-size: 12px; margin: 4px 0; }
+    .node-fo th, .node-fo td { border: 1px solid #888; padding: 2px 6px; }
+    .node-fo th { background: #f3f5f7; font-weight: 600; }
+    .section-title { font-weight: bold; margin-top: 4px; }
+    .section { margin-top: 10px; margin-bottom: 10px; }
+    .subtable b { display: inline-block; margin: 6px 0 2px; }
+    .subtable table { border-collapse: collapse; }
+    .subtable td { border: 1px solid #bbb; padding: 1px 4px; }
+    </style>
+    </head>
+    <body>
+    <div id="tree-container">
+    <div id="tree"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script>
+    const data = {"title": "29061489c7", "left": [], "right": [], "before": [], "after": [], "children": [{"title": "4a6a5d8388", "left": [{"key": "CONCEPT-3683072827304791_1", "val": 1.0}, {"key": "CONCEPT-3683072827736375_3", "val": 1.0}, {"key": "CONCEPT-3683072827781375_8", "val": 1.0}, {"key": "CONCEPT-3683074952826333_16", "val": 1.0}, {"key": "CONCEPT-3683079522180708_227", "val": 1.0}, {"key": "CONCEPT-3683079523301875_269", "val": 1.0}, {"key": "CONCEPT-3683081495812166_430", "val": 1.0}], "right": [{"key": "sees", "val": 1.0}], "before": [], "after": [], "children": [{"title": "c56d080baf", "left": [{"key": "a", "val": 1.0}], "right": [{"key": "cat", "val": 1.0}], "before": [], "after": [{"key": "sees", "val": 1.0}], "children": [{"title": "1ebd215eaa", "left": [{"key": "a", "val": 1.0}], "right": [], "before": [], "after": [{"key": "cat", "val": 1.0}, {"key": "sees", "val": 0.5}], "children": []}, {"title": "e8a1b5f71a", "left": [{"key": "cat", "val": 1.0}], "right": [], "before": [{"key": "a", "val": 1.0}], "after": [{"key": "sees", "val": 1.0}], "children": []}]}, {"title": "75e2c2d98d", "left": [{"key": "sees", "val": 1.0}], "right": [], "before": [{"key": "cat", "val": 1.0}, {"key": "a", "val": 0.5}], "after": [], "children": []}]}]};
+    const nodeW  = 280;
+    const nodeH  = 130;
+    const hGap   = 80;
+    const vGap   = 150;
+
+    const root = d3.hierarchy(data);
+    const layout = d3.tree().nodeSize([nodeW + hGap, nodeH + vGap]);
+    layout(root);
+
+    // compute bounds
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    root.each(d => {
+        if (d.x < x0) x0 = d.x;
+        if (d.x > x1) x1 = d.x;
+        if (d.y < y0) y0 = d.y;
+        if (d.y > y1) y1 = d.y;
+    });
+    const width  = x1 - x0 + nodeW + 320;
+    const height = y1 - y0 + nodeH + 320; // THIS IS THE HEIGHT MODIFIER
+
+    const svg = d3.select("#tree").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("viewBox", [x0 - nodeW/2, y0 - nodeH/2, width, height].join(" "));
+
+    const g = svg.append("g");
+
+    // links
+    g.selectAll("path.link")
+    .data(root.links())
+    .join("path")
+    .attr("class", "link")
+    .attr("d", d3.linkVertical().x(d => d.x).y(d => d.y));
+
+    // nodes
+    const node = g.selectAll("g.node")
+    .data(root.descendants())
+    .join("g")
+    .attr("transform", d => `translate(${d.x},${d.y})`);
+
+    // node rect
+    node.append("rect")
+    .attr("class", "node-box")
+    .attr("x", -nodeW/2)
+    .attr("y", 0)
+    .attr("width", nodeW)
+    .attr("height", nodeH);
+
+    // node HTML via foreignObject
+    node.append("foreignObject")
+    .attr("class", "node-fo")
+    .attr("x", -nodeW/2 + 6)
+    .attr("y", 6)
+    .attr("width", nodeW - 12)
+    .attr("height", 1000)
+    .html(d => nodeHTML(d.data));
+
+    // shrink foreignObjects to actual content height
+    node.selectAll("foreignObject").each(function() {
+    const fo = d3.select(this);
+    const div = fo.select("div").node();
+    const h = div.getBoundingClientRect().height + 6;
+    fo.attr("height", h);
+    d3.select(this.parentNode).select("rect").attr("height", h + 12);
+    });
+
+    function nodeHTML(d) {
+        const ctxTable = (ctx, title) => {
+            if (!ctx || ctx.length === 0) return `<div class="subtable"><i>${title}: empty</i></div>`;
+            const rows = ctx.map(kv => `<tr><td>${kv.key}</td><td>${kv.val.toFixed(2)}</td></tr>`).join("");
+            return `<div class="subtable"><b>${title}</b><table><tbody>${rows}</tbody></table></div>`;
+        };
+
+        // content: left and right are now lists of {key, val}
+        let contentHTML = "";
+        const leftHas = Array.isArray(d.left) && d.left.length > 0;
+        const rightHas = Array.isArray(d.right) && d.right.length > 0;
+
+        if (rightHas) {
+            // composite-style node: show both left and right content tables
+            contentHTML = `<div class="section">${ctxTable(d.left, "Content-Left")}${ctxTable(d.right, "Content-Right")}</div>`;
+        } else if (leftHas) {
+            // primitive or single-sided composite: show a single content table
+            // label it "Content" for primitives
+            const label = (d.right && d.right.length > 0) ? "Content-Left" : "Content";
+            contentHTML = `<div class="section">${ctxTable(d.left, label)}</div>`;
+        } else {
+            contentHTML = `<div class="section"><i>Content: empty</i></div>`;
+        }
+
+        return `
+        <div class="node-fo">
+            <table><tr><th colspan="2">${d.title}</th></tr></table>
+            ${contentHTML}
+            ${ctxTable(d.before, "Context-Before")}
+            ${ctxTable(d.after,  "Context-After")}
+        </div>`;
+    }
+
+    </script>
+    </body>
+    </html>
+    
