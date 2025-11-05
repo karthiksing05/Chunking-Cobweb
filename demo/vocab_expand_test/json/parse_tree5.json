@@ -1,5 +1,5 @@
 {
-  "window": "a money eats",
+  "window": "a dog eats",
   "context_length": 3,
   "id_to_value": [
     "EMPTYNULL",
@@ -294,7 +294,7 @@
   "nodes": [
     {
       "node_type": "composite",
-      "title": "70581d9e98",
+      "title": "fdddb466f0",
       "word_index": null,
       "content_left": null,
       "content_right": null,
@@ -310,7 +310,7 @@
     },
     {
       "node_type": "primitive",
-      "title": "2c8ec4c7b1",
+      "title": "03cf435c7a",
       "word_index": 0,
       "content": 2,
       "context_before": {
@@ -318,7 +318,7 @@
       },
       "context_after": {
         "0": 0,
-        "135": 1.0,
+        "3": 1.0,
         "139": 0.5
       },
       "concept_label": null,
@@ -328,9 +328,9 @@
     },
     {
       "node_type": "primitive",
-      "title": "9cf4a670fe",
+      "title": "7f90afdf8f",
       "word_index": 1,
-      "content": 135,
+      "content": 3,
       "context_before": {
         "0": 0,
         "2": 1.0
@@ -346,12 +346,12 @@
     },
     {
       "node_type": "primitive",
-      "title": "90c025ca47",
+      "title": "8de779144a",
       "word_index": 2,
       "content": 139,
       "context_before": {
         "0": 0,
-        "135": 1.0,
+        "3": 1.0,
         "2": 0.5
       },
       "context_after": {
@@ -364,14 +364,14 @@
     },
     {
       "node_type": "composite",
-      "title": "62832d9da4",
+      "title": "f9746c4991",
       "word_index": 0.5,
       "content_left": {
         "2": 1,
         "0": 0
       },
       "content_right": {
-        "135": 1,
+        "3": 1,
         "0": 0
       },
       "categorize_path": [
@@ -381,16 +381,7 @@
         126,
         111,
         112,
-        113,
-        114,
-        115,
-        116,
-        117,
-        118,
-        119,
-        120,
-        105,
-        121
+        22
       ],
       "context_before": {
         "0": 0
@@ -399,7 +390,7 @@
         "0": 0,
         "139": 1.0
       },
-      "concept_label": 121,
+      "concept_label": 22,
       "global_root": false,
       "parent": 5,
       "children": [
@@ -409,7 +400,7 @@
     },
     {
       "node_type": "composite",
-      "title": "9e533d7dd2",
+      "title": "80b298260b",
       "word_index": 1.25,
       "content_left": {
         "11": 1,
@@ -418,16 +409,7 @@
         "126": 1,
         "111": 1,
         "112": 1,
-        "113": 1,
-        "114": 1,
-        "115": 1,
-        "116": 1,
-        "117": 1,
-        "118": 1,
-        "119": 1,
-        "120": 1,
-        "105": 1,
-        "121": 1,
+        "22": 1,
         "0": 0
       },
       "content_right": {
@@ -438,8 +420,10 @@
         11,
         124,
         125,
-        11,
-        27
+        126,
+        111,
+        112,
+        31
       ],
       "context_before": {
         "0": 0
@@ -447,7 +431,7 @@
       "context_after": {
         "0": 0
       },
-      "concept_label": 27,
+      "concept_label": 31,
       "global_root": false,
       "parent": 0,
       "children": [

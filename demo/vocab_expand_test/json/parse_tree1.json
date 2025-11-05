@@ -1,5 +1,5 @@
 {
-  "window": "an pencil shows",
+  "window": "the woman watches",
   "context_length": 3,
   "id_to_value": [
     "EMPTYNULL",
@@ -294,7 +294,7 @@
   "nodes": [
     {
       "node_type": "composite",
-      "title": "7f312d5219",
+      "title": "975e09c1ea",
       "word_index": null,
       "content_left": null,
       "content_right": null,
@@ -310,16 +310,16 @@
     },
     {
       "node_type": "primitive",
-      "title": "5c8dfb5e9c",
+      "title": "acdd163558",
       "word_index": 0,
-      "content": 131,
+      "content": 1,
       "context_before": {
         "0": 0
       },
       "context_after": {
         "0": 0,
-        "132": 1.0,
-        "138": 0.5
+        "6": 1.0,
+        "142": 0.5
       },
       "concept_label": null,
       "global_root": false,
@@ -328,16 +328,16 @@
     },
     {
       "node_type": "primitive",
-      "title": "e086ec62ef",
+      "title": "39afeb47d8",
       "word_index": 1,
-      "content": 132,
+      "content": 6,
       "context_before": {
         "0": 0,
-        "131": 1.0
+        "1": 1.0
       },
       "context_after": {
         "0": 0,
-        "138": 1.0
+        "142": 1.0
       },
       "concept_label": null,
       "global_root": false,
@@ -346,13 +346,13 @@
     },
     {
       "node_type": "primitive",
-      "title": "960600c511",
+      "title": "9ced56bdb7",
       "word_index": 2,
-      "content": 138,
+      "content": 142,
       "context_before": {
         "0": 0,
-        "132": 1.0,
-        "131": 0.5
+        "6": 1.0,
+        "1": 0.5
       },
       "context_after": {
         "0": 0
@@ -364,29 +364,30 @@
     },
     {
       "node_type": "composite",
-      "title": "b91d89456d",
+      "title": "290db3023b",
       "word_index": 0.5,
       "content_left": {
-        "131": 1,
+        "1": 1,
         "0": 0
       },
       "content_right": {
-        "132": 1,
+        "6": 1,
         "0": 0
       },
       "categorize_path": [
         11,
         124,
-        60
+        125,
+        81
       ],
       "context_before": {
         "0": 0
       },
       "context_after": {
         "0": 0,
-        "138": 1.0
+        "142": 1.0
       },
-      "concept_label": 60,
+      "concept_label": 81,
       "global_root": false,
       "parent": 5,
       "children": [
@@ -396,16 +397,17 @@
     },
     {
       "node_type": "composite",
-      "title": "03e9233f07",
+      "title": "ee89cd3199",
       "word_index": 1.25,
       "content_left": {
         "11": 1,
         "124": 1,
-        "60": 1,
+        "125": 1,
+        "81": 1,
         "0": 0
       },
       "content_right": {
-        "138": 1,
+        "142": 1,
         "0": 0
       },
       "categorize_path": [
@@ -416,8 +418,10 @@
         111,
         112,
         113,
-        20,
-        50
+        114,
+        115,
+        17,
+        40
       ],
       "context_before": {
         "0": 0
@@ -425,7 +429,7 @@
       "context_after": {
         "0": 0
       },
-      "concept_label": 50,
+      "concept_label": 40,
       "global_root": false,
       "parent": 0,
       "children": [

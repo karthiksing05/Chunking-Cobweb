@@ -2,8 +2,7 @@
 Parse Consistency Test AT SCALE - We have a new goal!
 
 Here's the plan:
-*   Build various parse trees
-
+*   Build a shit ton of parse trees and then do the parse consistency test at various intervals!
 """
 
 from util.cfg import generate, TEST_GRAMMAR1

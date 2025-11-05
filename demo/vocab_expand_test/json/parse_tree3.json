@@ -1,5 +1,5 @@
 {
-  "window": "an typewriter shows",
+  "window": "a cat likes an money",
   "context_length": 3,
   "id_to_value": [
     "EMPTYNULL",
@@ -294,7 +294,7 @@
   "nodes": [
     {
       "node_type": "composite",
-      "title": "c34500cb0e",
+      "title": "b849b3c458",
       "word_index": null,
       "content_left": null,
       "content_right": null,
@@ -305,89 +305,149 @@
       "global_root": true,
       "parent": null,
       "children": [
-        5
+        9
       ]
     },
     {
       "node_type": "primitive",
-      "title": "795fdcbd78",
+      "title": "ea9adc0220",
       "word_index": 0,
+      "content": 2,
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0,
+        "4": 1.0,
+        "9": 0.5,
+        "131": 0.3333333333333333
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 6,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "97aa347042",
+      "word_index": 1,
+      "content": 4,
+      "context_before": {
+        "0": 0,
+        "2": 1.0
+      },
+      "context_after": {
+        "0": 0,
+        "9": 1.0,
+        "131": 0.5,
+        "135": 0.3333333333333333
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 6,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "b6bb0c9b59",
+      "word_index": 2,
+      "content": 9,
+      "context_before": {
+        "0": 0,
+        "4": 1.0,
+        "2": 0.5
+      },
+      "context_after": {
+        "0": 0,
+        "131": 1.0,
+        "135": 0.5
+      },
+      "concept_label": null,
+      "global_root": false,
+      "parent": 8,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "bdd31a7a05",
+      "word_index": 3,
       "content": 131,
       "context_before": {
-        "0": 0
+        "0": 0,
+        "9": 1.0,
+        "4": 0.5,
+        "2": 0.3333333333333333
       },
       "context_after": {
         "0": 0,
-        "133": 1.0,
-        "138": 0.5
+        "135": 1.0
       },
       "concept_label": null,
       "global_root": false,
-      "parent": 4,
+      "parent": 7,
       "children": []
     },
     {
       "node_type": "primitive",
-      "title": "6fa8cbafd8",
-      "word_index": 1,
-      "content": 133,
+      "title": "f5cd01541d",
+      "word_index": 4,
+      "content": 135,
       "context_before": {
         "0": 0,
-        "131": 1.0
-      },
-      "context_after": {
-        "0": 0,
-        "138": 1.0
-      },
-      "concept_label": null,
-      "global_root": false,
-      "parent": 4,
-      "children": []
-    },
-    {
-      "node_type": "primitive",
-      "title": "5f216d6178",
-      "word_index": 2,
-      "content": 138,
-      "context_before": {
-        "0": 0,
-        "133": 1.0,
-        "131": 0.5
+        "131": 1.0,
+        "9": 0.5,
+        "4": 0.3333333333333333
       },
       "context_after": {
         "0": 0
       },
       "concept_label": null,
       "global_root": false,
-      "parent": 5,
+      "parent": 7,
       "children": []
     },
     {
       "node_type": "composite",
-      "title": "a8037c8669",
+      "title": "dc48706775",
       "word_index": 0.5,
       "content_left": {
-        "131": 1,
+        "2": 1,
         "0": 0
       },
       "content_right": {
-        "133": 1,
+        "4": 1,
         "0": 0
       },
       "categorize_path": [
         11,
-        79
+        124,
+        125,
+        126,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        105,
+        121
       ],
       "context_before": {
         "0": 0
       },
       "context_after": {
         "0": 0,
-        "138": 1.0
+        "9": 1.0,
+        "131": 0.5,
+        "135": 0.3333333333333333
       },
-      "concept_label": 79,
+      "concept_label": 121,
       "global_root": false,
-      "parent": 5,
+      "parent": 9,
       "children": [
         1,
         2
@@ -395,21 +455,127 @@
     },
     {
       "node_type": "composite",
-      "title": "500abec56c",
-      "word_index": 1.25,
+      "title": "e5b7c718c7",
+      "word_index": 3.5,
       "content_left": {
-        "11": 1,
-        "79": 1,
+        "131": 1,
         "0": 0
       },
       "content_right": {
-        "138": 1,
+        "135": 1,
         "0": 0
       },
       "categorize_path": [
         11,
         124,
-        82
+        125,
+        126,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        30
+      ],
+      "context_before": {
+        "0": 0,
+        "9": 1.0,
+        "4": 0.5,
+        "2": 0.3333333333333333
+      },
+      "context_after": {
+        "0": 0
+      },
+      "concept_label": 30,
+      "global_root": false,
+      "parent": 8,
+      "children": [
+        4,
+        5
+      ]
+    },
+    {
+      "node_type": "composite",
+      "title": "600b332f3f",
+      "word_index": 2.75,
+      "content_left": {
+        "9": 1,
+        "0": 0
+      },
+      "content_right": {
+        "11": 1,
+        "124": 1,
+        "125": 1,
+        "126": 1,
+        "111": 1,
+        "112": 1,
+        "113": 1,
+        "114": 1,
+        "115": 1,
+        "116": 1,
+        "30": 1,
+        "0": 0
+      },
+      "categorize_path": [
+        11,
+        124,
+        125,
+        11,
+        27
+      ],
+      "context_before": {
+        "0": 0,
+        "4": 1.0,
+        "2": 0.5
+      },
+      "context_after": {
+        "0": 0
+      },
+      "concept_label": 27,
+      "global_root": false,
+      "parent": 9,
+      "children": [
+        3,
+        7
+      ]
+    },
+    {
+      "node_type": "composite",
+      "title": "a73e21fa34",
+      "word_index": 1.625,
+      "content_left": {
+        "11": 1,
+        "124": 1,
+        "125": 1,
+        "126": 1,
+        "111": 1,
+        "112": 1,
+        "113": 1,
+        "114": 1,
+        "115": 1,
+        "116": 1,
+        "117": 1,
+        "118": 1,
+        "119": 1,
+        "120": 1,
+        "105": 1,
+        "121": 1,
+        "0": 0
+      },
+      "content_right": {
+        "11": 1,
+        "124": 1,
+        "125": 1,
+        "27": 1,
+        "0": 0
+      },
+      "categorize_path": [
+        11,
+        124,
+        125,
+        11,
+        27
       ],
       "context_before": {
         "0": 0
@@ -417,12 +583,12 @@
       "context_after": {
         "0": 0
       },
-      "concept_label": 82,
+      "concept_label": 27,
       "global_root": false,
       "parent": 0,
       "children": [
-        4,
-        3
+        6,
+        8
       ]
     }
   ]

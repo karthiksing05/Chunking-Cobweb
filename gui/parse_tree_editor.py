@@ -28,7 +28,7 @@ for _ in range(NUM_LOAD):
 
 for doc in document:
     parse_tree = parser.parse_input([doc], end_behavior="converge", debug=False)[0]
-    parser.add_parse_tree(parse_tree, debug=False)
+    parser.add_parse_tree(parse_tree, debug=True)
 
 # --- Initialize first sentence and tree ---
 sample_sentence = generate("S", TEST_GRAMMAR2)

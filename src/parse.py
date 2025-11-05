@@ -436,7 +436,7 @@ def custom_categorize_bfs(inst, tree, max_expansions: int = 10000):
     heap = []
     root_score = sim_of(root)
     root_path = [f"CONCEPT-{root.concept_hash()}"]
-    heapq.heappush(heap, (-root_score + random.random() * 1e-6, root, root_path))
+    heapq.heappush(heap, (-root_score + random.random() * 1e-6, root, root_path, [root_score]))
 
     seen = set()
     expansions = 0
@@ -444,7 +444,7 @@ def custom_categorize_bfs(inst, tree, max_expansions: int = 10000):
     best_path = root_path
 
     while heap and expansions < max_expansions:
-        score, node, path = heapq.heappop(heap)
+        score, node, path, score_path = heapq.heappop(heap)
         expansions += 1
 
         try:
@@ -464,6 +464,7 @@ def custom_categorize_bfs(inst, tree, max_expansions: int = 10000):
             has_children = False
 
         if not has_children:
+            print("Best Score Path: ", score_path)
             return node, path
 
         for child in children_list:
@@ -473,7 +474,8 @@ def custom_categorize_bfs(inst, tree, max_expansions: int = 10000):
                 child_hash = None
             child_sim = sim_of(child)
             child_path = path + ([f"CONCEPT-{child_hash}"] if child_hash is not None else [])
-            heapq.heappush(heap, (-child_sim + random.random() * 1e-6, child, child_path))
+            child_score_path = score_path + ([child_sim] if child_sim else [])
+            heapq.heappush(heap, (-child_sim + random.random() * 1e-6, child, child_path, child_score_path))
 
     return best_node, best_path
 
@@ -509,7 +511,7 @@ class FiniteParseTree:
             self._undo_stack = []
 
     @staticmethod
-    def _score_function(node: CobwebNode, instance: dict, lam=0.0, debug=False):
+    def _score_function(node: CobwebNode, instance: dict, debug=False):
         """
         Compute a symmetric, scaled similarity between two attribute-value dictionaries.
         Returns a value in (0, 1].
@@ -529,20 +531,22 @@ class FiniteParseTree:
         avg_log_prob = log_prob / total_weight
 
         # 4. Compute node complexity (sum of all av_count entries)
-        complexity = sum(
+        node_complexity = sum(
             cnt for attr_dict in node.av_count.values() for cnt in attr_dict.values()
         )
 
-        # 5. Compute soft penalty term
-        penalty = lam * math.log(1.0 + complexity)
+        inst_complexity = sum(
+            cnt for attr_dict in instance.values() for cnt in attr_dict.values()
+        )
 
         # 6. Define cost (higher = better)
-        cost = -avg_log_prob + penalty
+        cost = -avg_log_prob
 
         score_data = {
             'raw_log_prob': log_prob,
             'avg_log_prob': avg_log_prob,
-            'complexity': complexity,
+            'candidate_complexity': node_complexity,
+            'inst_complexity': inst_complexity,
             'cost': cost
         }
 

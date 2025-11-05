@@ -1,5 +1,5 @@
 {
-  "window": "a dog makes",
+  "window": "the lock likes",
   "context_length": 3,
   "id_to_value": [
     "EMPTYNULL",
@@ -294,7 +294,7 @@
   "nodes": [
     {
       "node_type": "composite",
-      "title": "8aaf4df362",
+      "title": "e169758a38",
       "word_index": null,
       "content_left": null,
       "content_right": null,
@@ -310,16 +310,16 @@
     },
     {
       "node_type": "primitive",
-      "title": "d0bf218274",
+      "title": "0d1694d348",
       "word_index": 0,
-      "content": 2,
+      "content": 1,
       "context_before": {
         "0": 0
       },
       "context_after": {
         "0": 0,
-        "3": 1.0,
-        "140": 0.5
+        "137": 1.0,
+        "9": 0.5
       },
       "concept_label": null,
       "global_root": false,
@@ -328,16 +328,16 @@
     },
     {
       "node_type": "primitive",
-      "title": "b6d72c0e26",
+      "title": "9b01f7ff9e",
       "word_index": 1,
-      "content": 3,
+      "content": 137,
       "context_before": {
         "0": 0,
-        "2": 1.0
+        "1": 1.0
       },
       "context_after": {
         "0": 0,
-        "140": 1.0
+        "9": 1.0
       },
       "concept_label": null,
       "global_root": false,
@@ -346,13 +346,13 @@
     },
     {
       "node_type": "primitive",
-      "title": "2ea6f2effc",
+      "title": "fe342acb6a",
       "word_index": 2,
-      "content": 140,
+      "content": 9,
       "context_before": {
         "0": 0,
-        "3": 1.0,
-        "2": 0.5
+        "137": 1.0,
+        "1": 0.5
       },
       "context_after": {
         "0": 0
@@ -364,14 +364,52 @@
     },
     {
       "node_type": "composite",
-      "title": "af1a0057a6",
+      "title": "36b9b184e8",
       "word_index": 0.5,
       "content_left": {
-        "2": 1,
+        "1": 1,
         "0": 0
       },
       "content_right": {
-        "3": 1,
+        "137": 1,
+        "0": 0
+      },
+      "categorize_path": [
+        11,
+        124,
+        125,
+        126,
+        15
+      ],
+      "context_before": {
+        "0": 0
+      },
+      "context_after": {
+        "0": 0,
+        "9": 1.0
+      },
+      "concept_label": 15,
+      "global_root": false,
+      "parent": 5,
+      "children": [
+        1,
+        2
+      ]
+    },
+    {
+      "node_type": "composite",
+      "title": "af6abc5980",
+      "word_index": 1.25,
+      "content_left": {
+        "11": 1,
+        "124": 1,
+        "125": 1,
+        "126": 1,
+        "15": 1,
+        "0": 0
+      },
+      "content_right": {
+        "9": 1,
         "0": 0
       },
       "categorize_path": [
@@ -386,52 +424,9 @@
         115,
         116,
         117,
-        58
-      ],
-      "context_before": {
-        "0": 0
-      },
-      "context_after": {
-        "0": 0,
-        "140": 1.0
-      },
-      "concept_label": 58,
-      "global_root": false,
-      "parent": 5,
-      "children": [
-        1,
-        2
-      ]
-    },
-    {
-      "node_type": "composite",
-      "title": "ba4eae8e34",
-      "word_index": 1.25,
-      "content_left": {
-        "11": 1,
-        "124": 1,
-        "125": 1,
-        "126": 1,
-        "111": 1,
-        "112": 1,
-        "113": 1,
-        "114": 1,
-        "115": 1,
-        "116": 1,
-        "117": 1,
-        "58": 1,
-        "0": 0
-      },
-      "content_right": {
-        "140": 1,
-        "0": 0
-      },
-      "categorize_path": [
-        11,
-        124,
-        125,
-        11,
-        27
+        118,
+        119,
+        96
       ],
       "context_before": {
         "0": 0
@@ -439,7 +434,7 @@
       "context_after": {
         "0": 0
       },
-      "concept_label": 27,
+      "concept_label": 96,
       "global_root": false,
       "parent": 0,
       "children": [
