@@ -1,5 +1,5 @@
 {
-  "window": "a man shows",
+  "window": "the typewriter eats",
   "context_length": 3,
   "id_to_value": [
     "EMPTYNULL",
@@ -294,7 +294,7 @@
   "nodes": [
     {
       "node_type": "composite",
-      "title": "fc86ec050f",
+      "title": "c3f384c7d3",
       "word_index": null,
       "content_left": null,
       "content_right": null,
@@ -310,16 +310,16 @@
     },
     {
       "node_type": "primitive",
-      "title": "0cb4736b0d",
+      "title": "70d5b56b1c",
       "word_index": 0,
-      "content": 2,
+      "content": 1,
       "context_before": {
         "0": 0
       },
       "context_after": {
         "0": 0,
-        "5": 1.0,
-        "138": 0.5
+        "133": 1.0,
+        "139": 0.5
       },
       "concept_label": null,
       "global_root": false,
@@ -328,16 +328,16 @@
     },
     {
       "node_type": "primitive",
-      "title": "cea083b750",
+      "title": "5f6fed0dd4",
       "word_index": 1,
-      "content": 5,
+      "content": 133,
       "context_before": {
         "0": 0,
-        "2": 1.0
+        "1": 1.0
       },
       "context_after": {
         "0": 0,
-        "138": 1.0
+        "139": 1.0
       },
       "concept_label": null,
       "global_root": false,
@@ -346,13 +346,13 @@
     },
     {
       "node_type": "primitive",
-      "title": "495a52a9f0",
+      "title": "b57eb8c529",
       "word_index": 2,
-      "content": 138,
+      "content": 139,
       "context_before": {
         "0": 0,
-        "5": 1.0,
-        "2": 0.5
+        "133": 1.0,
+        "1": 0.5
       },
       "context_after": {
         "0": 0
@@ -364,14 +364,14 @@
     },
     {
       "node_type": "composite",
-      "title": "0fe4d1dbce",
+      "title": "ad7ff6fd4f",
       "word_index": 0.5,
       "content_left": {
-        "2": 1,
+        "1": 1,
         "0": 0
       },
       "content_right": {
-        "5": 1,
+        "133": 1,
         "0": 0
       },
       "categorize_path": [
@@ -379,17 +379,16 @@
         124,
         125,
         126,
-        111,
-        34
+        15
       ],
       "context_before": {
         "0": 0
       },
       "context_after": {
         "0": 0,
-        "138": 1.0
+        "139": 1.0
       },
-      "concept_label": 34,
+      "concept_label": 15,
       "global_root": false,
       "parent": 5,
       "children": [
@@ -399,19 +398,18 @@
     },
     {
       "node_type": "composite",
-      "title": "6093ccc1c5",
+      "title": "a3e68e1082",
       "word_index": 1.25,
       "content_left": {
         "11": 1,
         "124": 1,
         "125": 1,
         "126": 1,
-        "111": 1,
-        "34": 1,
+        "15": 1,
         "0": 0
       },
       "content_right": {
-        "138": 1,
+        "139": 1,
         "0": 0
       },
       "categorize_path": [
@@ -421,7 +419,14 @@
         126,
         111,
         112,
-        52
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        96
       ],
       "context_before": {
         "0": 0
@@ -429,7 +434,7 @@
       "context_after": {
         "0": 0
       },
-      "concept_label": 52,
+      "concept_label": 96,
       "global_root": false,
       "parent": 0,
       "children": [

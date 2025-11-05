@@ -224,29 +224,29 @@ class CompositeParseNode:
 ----------------------------------------------------------------------------------------------
 """
 
-def match_score(candidate, inst):
-    """
-    A helper function that calculates a score by the matched instances. For simplicity, we'll
-    just do a direct and normalized "match_count" - check all attributes and their corresponding
-    values for matched values in the candidate instance.
-
-    Returns a normalized score denoting the "overlap" between the score and the value.
-    """
-
-    sim = 0.0
-    for attr, vals in candidate.items():
-        if attr in inst:
-            for k, v in vals.items():
-                sim += v * inst[attr].get(k, 0)
-    denom = sum(sum(vals.values()) for vals in candidate.values()) + 1e-9
-    return sim / denom
-
 def custom_categorize_match_score(inst, tree):
     """
     A helper function that expands comprehensively based on match score through a heap-based
     best-first-search. The most likely candidate is the leaf that best matches the passed
     instance.
     """
+    def match_score(candidate, inst):
+        """
+        A helper function that calculates a score by the matched instances. For simplicity, we'll
+        just do a direct and normalized "match_count" - check all attributes and their corresponding
+        values for matched values in the candidate instance.
+
+        Returns a normalized score denoting the "overlap" between the score and the value.
+        """
+
+        sim = 0.0
+        for attr, vals in candidate.items():
+            if attr in inst:
+                for k, v in vals.items():
+                    sim += v * inst[attr].get(k, 0)
+        denom = sum(sum(vals.values()) for vals in candidate.values()) + 1e-9
+        return sim / denom
+
     try:
         root = tree.root
     except Exception:
@@ -397,7 +397,7 @@ def custom_categorize_dfs(inst, tree):
 
     return lastNode, path
 
-def custom_categorize_bfs(inst, tree, max_expansions: int = 10000, use_log_probs: bool = True):
+def custom_categorize_bfs(inst, tree, max_expansions: int = 10000):
     """
     Priority-BFS categorization: explore nodes by priority until a leaf is found.
 
@@ -420,41 +420,8 @@ def custom_categorize_bfs(inst, tree, max_expansions: int = 10000, use_log_probs
             return None, []
 
     def sim_of(node):
-        # If requested, use average log-probability (higher better)
-        if use_log_probs:
-            try:
-                logp = node.log_prob_instance(inst)
-                total_weight = sum(cnt for vAttr in inst.values() for cnt in vAttr.values())
-                if total_weight <= 0:
-                    total_weight = 1.0
-                avg_logp = logp / total_weight
-                return float(avg_logp)
-            except Exception:
-                # fall back to other scorers below
-                pass
-
-        # Prefer FiniteParseTree._score_function if available (returns a dict with 'cost')
-        try:
-            if 'FiniteParseTree' in globals():
-                try:
-                    sd = FiniteParseTree._score_function(node, inst)
-                    if sd is not None and 'cost' in sd:
-                        # convert cost (smaller better) into a similarity-like value
-                        return float(sd.get('cost', 0.0))
-                except Exception:
-                    pass
-
-            # Fallback similarity: normalized overlap between av_count and inst
-            child_av = getattr(node, 'av_count', {}) or {}
-            sim = 0.0
-            for attr, vals in child_av.items():
-                if attr in inst:
-                    for k, v in vals.items():
-                        sim += v * inst[attr].get(k, 0)
-            denom = sum(sum(vals.values()) for vals in child_av.values()) + 1e-9
-            return sim / denom
-        except Exception:
-            return -float('inf')
+        sd = FiniteParseTree._score_function(node, inst)
+        return -1 * float(sd.get('cost', 0.0))
 
     def iter_children(n):
         try:
@@ -473,8 +440,8 @@ def custom_categorize_bfs(inst, tree, max_expansions: int = 10000, use_log_probs
 
     seen = set()
     expansions = 0
-    last_node = root
-    last_path = root_path
+    best_node = root
+    best_path = root_path
 
     while heap and expansions < max_expansions:
         score, node, path = heapq.heappop(heap)
@@ -496,9 +463,6 @@ def custom_categorize_bfs(inst, tree, max_expansions: int = 10000, use_log_probs
             children_list = []
             has_children = False
 
-        last_node = node
-        last_path = path
-
         if not has_children:
             return node, path
 
@@ -511,10 +475,10 @@ def custom_categorize_bfs(inst, tree, max_expansions: int = 10000, use_log_probs
             child_path = path + ([f"CONCEPT-{child_hash}"] if child_hash is not None else [])
             heapq.heappush(heap, (-child_sim + random.random() * 1e-6, child, child_path))
 
-    return last_node, last_path
+    return best_node, best_path
 
 def custom_categorize(inst, tree):
-    return custom_categorize_match_score(inst, tree)
+    return custom_categorize_bfs(inst, tree)
 
 class FiniteParseTree:
 
@@ -545,7 +509,7 @@ class FiniteParseTree:
             self._undo_stack = []
 
     @staticmethod
-    def _score_function(node: CobwebNode, instance: dict, lam=0.1, debug=False):
+    def _score_function(node: CobwebNode, instance: dict, lam=0.0, debug=False):
         """
         Compute a symmetric, scaled similarity between two attribute-value dictionaries.
         Returns a value in (0, 1].
@@ -719,7 +683,7 @@ class FiniteParseTree:
             }
 
         returnData = {
-            "merge_inst": merge_inst,  # small dict of instance parts (0/1/2/3)
+            "merge_inst": merge_inst,
             "categorize_path": categorize_path,
             "candidate_concept_hash": candidate_hash,
             "candidate_concept_id": candidate_id,
@@ -1072,13 +1036,16 @@ class FiniteParseTree:
             return []
         # sort by descending value then key (matching prior behavior)
         items = sorted(ctx.items(), key=lambda kv: (-kv[1], kv[0]))
+        # filter out the EMPTYNULL key (0) unless requested, BEFORE truncating to max_size
+        if not draw_zeros:
+            items = [(k, v) for (k, v) in items if k != 0]
+        # respect the max_size parameter (was hard-coded to 7 previously)
         if len(items) > max_size:
-            items = items[:7]
-        return [{"key": self._safe_lookup(k), "val": float(v)} for k, v in items if (k != 0 or draw_zeros)] # add != 0 so that draw without emptynull
-
+            items = items[:max_size]
+        x = [{"key": self._safe_lookup(k), "val": float(v)} for k, v in items]
+        return x
 
     def _draw_node_to_dict(self, node, children_getter, draw_zeros=False):
-
         """
         Note: because this is purely for drawing, we should be able to remove the EMPTYNULL here!
         """

@@ -2,12 +2,14 @@
 
 Work with Dr. Pat Langley and Dr. Chris Maclellan on ISLE Internship to model attributes of the psychological principle of cognitive chunking through a Cobweb-backed framework.
 
+The formal writeup can be found in `FORMALIZATION.md`, under which I describe the design decisions, hypotheses, and evaluations that result in bringing forth this cognitive architecture as a solution to new 
+
 ## Requirements + Setup
 
 All requirements can be found under requirements.txt, save for cobweb, which must be installed through the Git repository so that we can make necessary changes to it.
 
 Run the following commands:
-```
+```sh
 # install all necessary prerequisites
 pip install -r requirements.txt
 
@@ -43,6 +45,8 @@ Below is a list of tests confirming specific value propositions behind the chunk
 *   ```demo/parse_consistency_test.py```
     *   Demonstrates that parses have consistency with subparses within the tree
     *   Showcases the robustness of the framework against catastrophic forgetting over long-term parses
+*   ```demo/parse_consistency_scale_test.py```
+    *   Trying to answer the question: at what point is our long-term memory "stable"?
 *   ```demo/time_complexity_tests```
     *   ```demo/time_complexity_tests/document_scaling_test.py```
         *   [TODO]
@@ -54,6 +58,9 @@ Below is a list of tests confirming specific value propositions behind the chunk
     *   [TODO]
 *   ```demo/grammar_catching_test.py```
     *   [TODO]
+*   ```demo/ltm_analysis.py```
+    *   A test that analyzes various long-term memories as well as some intermediate subtree levels.
+    *   We hope to see a resulting taxonomy that alternates between AND-like nodes defined mostly by content and OR-like nodes defined mostly by context.
 *   [TODO] Need more tests in general!
 
 ## Unit Tests:
@@ -62,7 +69,6 @@ Below is a list of all tests confirming the syntactic consistency of the framewo
 
 *   ```unittests/parse_tree_test.py``` - a test to confirm the correct implementation of parse trees and parse tree composition
 *   ```unittests/gen_learn_test.py``` - a test to also confirm the logic of parse tree addition and processing the parse trees into the long-term memory
-*   ```unittests/ltm_analysis.py``` - a test that analyzes various long-term memories as well as some intermediate subtree levels. We hope to see a resulting taxonomy that alternates between AND-like nodes defined mostly by content and OR-like nodes defined mostly by context.
 *   ```unittests/partial_parse_analysis.py``` - a test used to inspect different thresholds at which to cut 
 
 ## Updates to Cobweb:
@@ -96,26 +102,6 @@ Full list of changes is below:
         *   Now we are able to compute content similarities optimally by checking the similarities and overlaps along a path of frequency!
     *   We're doing this because in the potential case where frequencies (and as such, probabilities) exist for more than one concept-id leaf, we can categorize according to the merged frequencies across the nodes (I'm assuming that the implementation calculates probabilities on the fly based on frequencies for actual comparison - hopefully the comparisons don't change the value)
     *   The additional hope is that this preserves basic-level definitions by just assuming all overlapping levels contribute to the matching process!
-
-## Design Decisions:
-
-One of the most important things to keep track of over the course of this project is the importance of labeling and defining design decisions. These decisions are influenced and ascertained by any choice / assumption made over the course of defining the framework. While current design decisions have been made to support ease of access regarding the programming of the framework, they'll definitely be revisited as we aggregate results and rationale from our tests.
-
-*   The distinction between primitive and composite instances is a pretty unique design decision - additionally, the decision to include more than one concept element and the relations we've fixed (currently sequential, left-right) can be changed as well
-*   How is the most optimal chunk candidate added?
-    *   I think this is currently being done by log-probability - the chunk candidate that best matches a concept within the long-term hierarchy is added to the tree (each candidate is categorized to identify the best possible match)
-    *   In future instances, we could do this by some kind of collocation score?
-*   How do we select the best chunk candidate label?
-    *   Currently done by basic-level nodes, evaluated on the log_prob_instance_missing metric! There are talks of a Pointwise Mutual Information metric coming into play but subject to change.
-*   How do we denote when parse tree construction terminates?
-    *   Partial parse tree based on the metric by which we add nodes to the parse tree
-    *   Full parse tree every time until one node reached
-*   The decision to include the SPLIT / MERGE operations is incredibly interesting
-    *   Prior studies done with Cobweb/4L indicate that SPLIT and MERGE were barely used but that they definitely could be in a longer term
-    *   SPLIT and MERGE contribute to long-term inference efficiency (removing of redundant concepts) which is super relevant for beginning and end behavior
-*   The data we choose to read in is subject to change - currently, we're reading language by sentences, but future iterations can do larger-scale windows and slide the window / create parse trees flexibly over time.
-    *   We read in the first n primitives and parse them, then we read the next n primitives (keeping the root node of the primitives)
-    *   [COOL STUFF] If we construct partial parse trees, we can continue iteratively adding primitives to our "active working memory" until the threshold for working memory has been met, and then we can dump everything into the memory all at once?
 
 ## Long-term Goals
 

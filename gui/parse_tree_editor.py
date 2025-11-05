@@ -10,8 +10,8 @@ app = Flask(__name__)
 LEARNING_ON = True
 PREBUILD_TREES = False
 CONTEXT_LENGTH = 3
-LOAD_LTM = ""
-# LOAD_LTM = "data/grammar2_fullparse/ltm"
+# LOAD_LTM = ""
+LOAD_LTM = "data/grammar2_fullparse/ltm"
 
 # --- Initialize parser and LTM ---
 if LOAD_LTM != "":
@@ -31,8 +31,8 @@ for doc in document:
     parser.add_parse_tree(parse_tree, debug=False)
 
 # --- Initialize first sentence and tree ---
-# sample_sentence = generate("S", TEST_GRAMMAR1)
-sample_sentence = "a woman likes a man"
+sample_sentence = generate("S", TEST_GRAMMAR2)
+# sample_sentence = "the woman sees a woman"
 curr_tree = FiniteParseTree(parser.get_long_term_memory(), parser.id_to_value, parser.value_to_id, context_length=CONTEXT_LENGTH)
 if PREBUILD_TREES:
     curr_tree.build(sample_sentence)
