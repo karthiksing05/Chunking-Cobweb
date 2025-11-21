@@ -2,7 +2,31 @@
 
 Work with Dr. Pat Langley and Dr. Chris Maclellan on ISLE Internship to model attributes of the psychological principle of cognitive chunking through a Cobweb-backed framework.
 
-The formal writeup can be found in `FORMALIZATION.md`, under which I describe the design decisions, hypotheses, and evaluations that result in bringing forth this cognitive architecture as a solution to new 
+The formal writeup can be found in `FORMALIZATION.md`, under which I describe the design decisions, hypotheses, and evaluations that result in bringing forth this cognitive architecture as a solution to new methods of parsing
+
+## EXPERIMENTAL ADDITIONS
+
+We're doing some experimentation! Below is a list of features I hope to add and test as an experiment to ensure consistency and generalization.
+*   We will first test splitting context into several different attributes. This will require a heavy rewriting of a lot of the architecture and modularity to ensure that not only does the logic work, but that it functions as expected.
+    *   Need to formalize what each integer key means for a context length of size N (still two content elements)
+    *   Need to change Primitive and Composite parse nodes and then the finite parse tree such that it takes 
+*   We can also use this branch to test the addition of primitives to the long-term hierarchy and start using word-senses of primitives to build chunks. 
+
+### Implementation of Chunk Finding (*Sequitur?*)
+
+*   The prevalent idea here is that our chunking system can find chunks based on teaching and biases, but we need ways to implant those biases within our algorithm.
+*   We're going to create and generalize a module that requires the amassing of statistics before defining that a chunk "be built"
+    *   This will have to be done by some statistical approach which aggregates statistics over the course of data
+    *   The idea is that data -Y> [chunk finder] -X> [chunk parser] and arrow X can only be validated when [chunk finder ]
+
+### Implementation of splitting of context
+*   **Note**: we're going to put this on hold until we can properly identify the best way to move about this
+*   Instance description:
+    *   Key 0 will still represent content-left and Key 1 will still represent content right
+    *   How do we represent content? It is a variable element and so we're still limited in that aspect
+        *   Maybe we just have empty attributes frfr - let's try this and see what transpires
+        *   The premise is now that our max window size is the same but generally speaking we can fill as little a window as we want depending on what elements are available
+        *   Another option is to just include 
 
 ## Requirements + Setup
 

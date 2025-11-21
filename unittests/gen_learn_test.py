@@ -2,21 +2,22 @@
 General Learning Test - to confirm the logic of learning is completely functional!
 """
 
-from util.cfg import generate, TEST_CORPUS2, TEST_GRAMMAR2
+from util.cfg import generate, TEST_CORPUS1, TEST_GRAMMAR1
 from parse import LanguageChunkingParser
 
 # Creating and printing toy sentences
-num_sentences = 100
+num_sentences = 200
 document = []
 
 for _ in range(num_sentences):
-    sentence = generate("S", TEST_GRAMMAR2)
+    sentence = generate("S", TEST_GRAMMAR1)
     document.append(sentence)
 
 # Setting up the parser
-parser = LanguageChunkingParser(TEST_CORPUS2, merge_split=False)
+# parser = LanguageChunkingParser(TEST_CORPUS1, merge_split=False)
+parser = LanguageChunkingParser.load_state("data/grammar1_fullparse/ltm")
 
-train_size = 0.9
+train_size = 0.95
 
 train_documents = document[:int(len(document) * train_size)]
 test_documents = document[int(len(document) * train_size):]

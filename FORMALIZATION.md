@@ -41,3 +41,6 @@ One of the most important things to keep track of over the course of this projec
 
 ## Hypotheses and results
 
+## Implications
+
+*   PRODUCT QUANTIZATION WITH COBWEB! This is a real thing we can bring forward as a method of either generating or finetuning embeddings
