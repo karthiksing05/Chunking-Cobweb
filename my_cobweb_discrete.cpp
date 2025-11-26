@@ -858,12 +858,13 @@ public:
                     {
                         double best_pu = current->pu_for_insert(best1, instance);
                         double new_pu = current->pu_for_new_child(instance);
+                        std::cout << best_pu << " " << best1_mi << " " << new_pu << std::endl;
                         if (best_pu > new_pu)
                             bestAction = BEST;
                         else if (new_pu > best_pu)
                             bestAction = NEW;
                         else
-                            bestAction = (rand() % 2 == 0) ? BEST : NEW;
+                            bestAction = NEW; // (rand() % 2 == 0) ? BEST : NEW;
                     }
                 }
                 else
@@ -894,6 +895,7 @@ public:
                 }
                 else if (bestAction == NEW)
                 {
+                    std::cout << "NEW" << std::endl;
                     NEW_count += 1;
                     auto start_new = std::chrono::high_resolution_clock::now();
 
@@ -1797,7 +1799,7 @@ inline std::tuple<double, CobwebNode *, CobwebNode *> CobwebNode::two_best_child
 
         sort(relative_pu.rbegin(), relative_pu.rend());
         CobwebNode *best1 = std::get<3>(relative_pu[0]);
-        double best1_pu = 0.0;
+        double best1_pu = pu_for_insert(best1, instance);
         CobwebNode *best2 = relative_pu.size() > 1 ? std::get<3>(relative_pu[1]) : nullptr;
         return std::make_tuple(best1_pu, best1, best2);
     }
@@ -1815,7 +1817,7 @@ inline std::tuple<double, CobwebNode *, CobwebNode *> CobwebNode::two_best_child
         }
         sort(pus.rbegin(), pus.rend());
         CobwebNode *best1 = std::get<3>(pus[0]);
-        double best1_pu = 0.0;
+        double best1_pu = pu_for_insert(best1, instance);
         CobwebNode *best2 = pus.size() > 1 ? std::get<3>(pus[1]) : nullptr;
 
         return std::make_tuple(best1_pu, best1, best2);
