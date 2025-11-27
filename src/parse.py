@@ -22,19 +22,34 @@ import random
 
 class PrimitiveParseNode:
 
-    def __init__(self, content, context_before, context_after, word_index):
+    """
+    This is an updated version of this class designed to accomodate variable context_length
+    more directly and separate each content / context into an attribute for better processing!
+
+    The main list of data, 'elements', is of size 2 * context_length + 1, and the first
+    context_length elements denote context_before while the last context_length elements
+    denote context_after - the middle element denotes the content element.
+
+    'elements' is a list of LISTS - each item in the primary list is a list of all the IDs of each
+    actual word / chunk's path. We will make this a thing in the main script.
+
+    Content will be a single dict-path
+    """
+    def __init__(self, elements, anchor_idx, position_idx, context_length):
 
         self.global_root = False
-        self.word_index = word_index
+        self.context_length = context_length
+        self.position_idx = position_idx
 
         self.parent = None
         self.children = SortedList()
 
         self.title = uuid.uuid4().hex[:10] # random id
 
-        self.content = content
-        self.context_before = context_before
-        self.context_after = context_after
+        self.content = dict([(key, 1) for key in elements[anchor_idx]])
+
+        self.context_before = list(reversed([dict([(key, 1) for key in elements[i]]) for i in range(0, anchor_idx)]))
+        self.context_after = [dict([(key, 1) for key in elements[i]]) for i in range(anchor_idx + 1, len(elements))]
 
         self.concept_label = None
 
@@ -49,7 +64,7 @@ class PrimitiveParseNode:
         """
 
         try:
-            self.parent.children.remove((self.word_index, self))
+            self.parent.children.remove((self.position_idx, self))
         except AttributeError: # trying to assign parentship for the first time
             # print("Assigning current node's parent as the global root node for brevity")
             pass
@@ -57,7 +72,7 @@ class PrimitiveParseNode:
             print("Parent does not exist or parent does not include the current node as its child")
 
         self.parent = node
-        node.children.add((self.word_index, self))
+        node.children.add((self.position_idx, self))
 
     def get_as_instance(self):
         """
@@ -66,11 +81,16 @@ class PrimitiveParseNode:
         Note that with this method, we don't have to worry about an empty set for the content because it carries forth
         """
 
-        return {
-            "content": self.content,
-            "context-before": self.context_before,
-            "context-after": self.context_after
+        inst = {
+            "content": self.content
         }
+
+        for i in range(len(self.context_before)):
+            inst[f"context-before_{i}"] = self.context_before[i]
+        for i in range(len(self.context_after)):
+            inst[f"context-after_{i}"] = self.context_after[i]
+
+        return inst
 
 """
 ----------------------------------------------------------------------------------------------
@@ -81,10 +101,25 @@ class PrimitiveParseNode:
 
 class CompositeParseNode:
 
+    """
+    This class is an updated version of the original class and similar to PrimitiveParseNode,
+    it takes in also two instances and constructs the merged instance. Like with the PrimitiveParseNode,
+    each element is a list of labels corresponding to that word/chunk and its semantic sense.
+
+    Now, there will no longer be just four attributes because of the decision to split up attributes: we
+    will now structure instances according to the following pattern:
+    {
+        0: {content_left_path: 1s for everything},
+        1: {content_right_path: 1s for everything},
+        2 - context_length + 1: {paths for each context_before element: 1s for everything},
+        context_length + 2 - 2 * context_length + 1: {paths for each context_after element: 1s for everything}
+
+    }
+    """
     def __init__(self):
 
         self.global_root = False
-        self.word_index = None
+        self.position_idx = None
 
         self.parent = None
         self.children = SortedList()
@@ -95,6 +130,8 @@ class CompositeParseNode:
         self.content_right = None
         self.context_before = None
         self.context_after = None
+
+        self.context_length = 0
 
         self.concept_label = None
         self.categorize_path = None # NEW THING FOR THE PATHS! A list representing the path taken to get to the given concept label!
@@ -114,30 +151,33 @@ class CompositeParseNode:
         return node
 
     @staticmethod
-    def create_node(instance_dict, closest_concept_id, categorize_path, word_index):
+    def create_node(instance_dict, closest_concept_id, categorize_path, position_idx, context_length):
         """
         One of the method-based constructors to create the correct version
         of our parse nodes at the leaf level - this will create a parse node
-        from a directly-parsed instance from the input.
+        from a directly-parsed instance from the input. This instance is often generated by create_merge_instance
         """
 
         node = CompositeParseNode()
 
+        # just one dict of path
         node.content_left = instance_dict[0]
         node.content_right = instance_dict[1]
 
-        node.context_before = instance_dict[2]
-        node.context_after = instance_dict[3]
+        # list of dicts of paths
+        node.context_before = [instance_dict[i] for i in range(2, (context_length + 1) + 1)]
+        node.context_after = [instance_dict[i] for i in range(context_length + 2, (2 * context_length + 1) + 1)]
 
         node.concept_label = closest_concept_id
         node.categorize_path = categorize_path
 
-        node.word_index = word_index
+        node.position_idx = position_idx
+        node.context_length = context_length
 
         return node
 
     @staticmethod
-    def create_merge_instance(node_left, node_right):
+    def create_merge_instance(node_left, node_right, context_length):
         """
         One of the method-based constructors to create the correct version
         of our parse nodes at the not leaf level - it should properly reference
@@ -166,20 +206,36 @@ class CompositeParseNode:
         new_inst_dict = {}
 
         if type(node_left) == PrimitiveParseNode:
-            new_inst_dict[0] = {node_left.content: 1}
+            new_inst_dict[0] = node_left.content
         else:
             new_inst_dict[0] = dict([(key, 1) for key in node_left.categorize_path])
 
         if type(node_right) == PrimitiveParseNode:
-            new_inst_dict[1] = {node_right.content: 1}
+            new_inst_dict[1] = node_right.content
         else:
             new_inst_dict[1] = dict([(key, 1) for key in node_right.categorize_path])
 
         new_inst_dict[0][0] = 0
         new_inst_dict[1][0] = 0
 
-        new_inst_dict[2] = node_left.context_before
-        new_inst_dict[3] = node_right.context_after
+        # Fill context-before keys (2 .. context_length+1)
+        for i in range(2, context_length + 2):
+            j = i - 2
+            # node_left.context_before is a list of dicts (may be shorter for primitives)
+            if getattr(node_left, "context_before", None) and j < len(node_left.context_before):
+                src = node_left.context_before[j]
+                new_inst_dict[i] = dict([(key, 1) for key in (src or {}).keys()])
+            else:
+                new_inst_dict[i] = {}
+
+        # Fill context-after keys (context_length+2 .. 2*context_length+1)
+        for i in range(context_length + 2, 2 * context_length + 2):
+            j = i - (context_length + 2)
+            if getattr(node_right, "context_after", None) and j < len(node_right.context_after):
+                src = node_right.context_after[j]
+                new_inst_dict[i] = dict([(key, 1) for key in (src or {}).keys()])
+            else:
+                new_inst_dict[i] = {}
 
         return new_inst_dict
 
@@ -194,7 +250,7 @@ class CompositeParseNode:
         """
 
         try:
-            self.parent.children.remove((self.word_index, self))
+            self.parent.children.remove((self.position_idx, self))
         except AttributeError: # trying to assign parentship for the first time
             # print("Assigning current node's parent as the global root node for brevity")
             pass
@@ -202,19 +258,33 @@ class CompositeParseNode:
             print("Parent does not exist or parent does not include the current node as its child")
 
         self.parent = node
-        node.children.add((self.word_index, self))
+        node.children.add((self.position_idx, self))
 
     def get_as_instance(self):
         """
         Helper method to get the current parse node as an instance description!
         """
 
-        return {
+        new_inst = {
             0: self.content_left,
-            1: self.content_right,
-            2: self.context_before,
-            3: self.context_after
+            1: self.content_right
         }
+
+        for i in range(2, (self.context_length + 1) + 1):
+            idx = i - 2
+            if self.context_before and idx < len(self.context_before):
+                new_inst[i] = dict([(key, 1) for key in self.context_before[idx]])
+            else:
+                new_inst[i] = {}
+
+        for i in range(self.context_length + 2, (2 * self.context_length + 1) + 1):
+            idx = i - (self.context_length + 2)
+            if self.context_after and idx < len(self.context_after):
+                new_inst[i] = dict([(key, 1) for key in self.context_after[idx]])
+            else:
+                new_inst[i] = {}
+
+        return new_inst
 
 
 """
@@ -464,7 +534,7 @@ def custom_categorize_bfs(inst, tree, max_expansions: int = 10000):
             has_children = False
 
         if not has_children:
-            print("Best Score Path: ", score_path)
+            # print("Best Score Path: ", score_path)
             return node, path
 
         for child in children_list:
@@ -542,11 +612,42 @@ class FiniteParseTree:
         # 6. Define cost (higher = better)
         cost = -avg_log_prob
 
+        ########
+        # ADDED NOTES: We need to compute the count-statistic we were talking about
+        ########
+
+        curr = node
+        count_sum = 0
+        path_length = 0
+
+        while curr:
+            count_sum += curr.count
+            path_length += 1
+            curr = curr.parent
+
+        # need to normalize somehow, for now we do it by the length of the path and the root statistic
+        # Guard against division-by-zero when the root count is zero or missing.
+        # Normalize first by the path length (avoid zero-length paths) then divide
+        # by the root count if available; otherwise just use the path-normalized value.
+        try:
+            root_obj = getattr(node, 'tree', None)
+            root_count_val = getattr(root_obj.root, 'count', None) if root_obj is not None else None
+        except Exception:
+            root_count_val = None
+
+        path_norm = count_sum / max(path_length, 1)
+        if root_count_val and root_count_val > 0:
+            cnt_avg = path_norm / root_count_val
+        else:
+            # fallback: no root count available (or zero) — use path-normalized count
+            cnt_avg = path_norm
+
         score_data = {
             'raw_log_prob': log_prob,
             'avg_log_prob': avg_log_prob,
             'candidate_complexity': node_complexity,
             'inst_complexity': inst_complexity,
+            'count_normed': cnt_avg,
             'cost': cost
         }
 
@@ -576,26 +677,23 @@ class FiniteParseTree:
         # Creating first layer of primitive nodes
         for i in range(len(elements)):
 
-            content = elements[i]
+            # TODO can optionally add a note here to vocabularize the node with its path information
+            # from a vocab hierarchy but we are just adding to a list rn
 
-            context_before_lst = elements[max(0, i - self.context_length):(i)][::-1]
-            context_after_lst = elements[(i + 1):min(len(elements), i + self.context_length + 1)]
+            start_idx = max(0, i - self.context_length)
+            snapshot = elements[start_idx: min(len(elements), i + self.context_length + 1)]
 
-            # have to compute the dictionaries through a for loop so that we can
-            # add multiple weights for multiple instances of the word
+            listed_elems = [[x] for x in snapshot] # REPLACE HERE FOR VOCAB
 
-            context_before_dict = {0: 0} # initializing with the empty set!
-            context_after_dict = {0: 0}
+            # anchor_idx must be relative to the snapshot window
+            anchor_idx_rel = i - start_idx
 
-            for j in range(len(context_before_lst)):
-                context_before_dict.setdefault(context_before_lst[j], 0)
-                context_before_dict[context_before_lst[j]] += 1 / (j + 1) # this works because we reversed it above
-
-            for j in range(len(context_after_lst)):
-                context_after_dict.setdefault(context_after_lst[j], 0)
-                context_after_dict[context_after_lst[j]] += 1 / (j + 1)
-
-            node = PrimitiveParseNode(content, context_before_dict, context_after_dict, i)
+            node = PrimitiveParseNode(
+                elements=listed_elems,
+                anchor_idx=anchor_idx_rel,
+                position_idx=i,
+                context_length=self.context_length
+            )
 
             node.set_parent(self.global_root_node)
 
@@ -613,12 +711,29 @@ class FiniteParseTree:
         for i in range(len(parentless) - 1):
             left = parentless[i]
             right = parentless[i + 1]
-            left_label = self._safe_lookup(next(iter(left.content_left.keys())) if getattr(left, "content_left", None) else getattr(left, "content", None))
-            # _safe_lookup handles None; for primitives we use content; for composite we used content_left first-key
-            right_label = self._safe_lookup(next(iter(right.content_left.keys())) if getattr(right, "content_left", None) else getattr(right, "content", None))
+            # extract a representative id/key from content dicts for labeling
+            try:
+                if getattr(left, "content_left", None):
+                    left_key = next(iter(left.content_left.keys()))
+                else:
+                    left_key = next(iter(left.content.keys()))
+            except Exception:
+                left_key = None
+
+            try:
+                if getattr(right, "content_left", None):
+                    right_key = next(iter(right.content_left.keys()))
+                else:
+                    right_key = next(iter(right.content.keys()))
+            except Exception:
+                right_key = None
+
+            left_label = self._safe_lookup(left_key)
+            right_label = self._safe_lookup(right_key)
+
             pairs.append({
-                "left_word_index": left.word_index,
-                "right_word_index": right.word_index,
+                "left_word_index": left.position_idx,
+                "right_word_index": right.position_idx,
                 "left_title": left.title,
                 "right_title": right.title,
                 "left_label": left_label,
@@ -626,9 +741,9 @@ class FiniteParseTree:
             })
         return pairs
 
-    def _find_root_child_by_index(self, word_index):
+    def _find_root_child_by_index(self, position_idx):
         for wi, ch in self.global_root_node.children:
-            if wi == word_index:
+            if wi == position_idx:
                 return ch
         return None
 
@@ -646,7 +761,7 @@ class FiniteParseTree:
         if left_node is None or right_node is None:
             raise ValueError("Left or right node not found among root's children")
 
-        merge_inst = CompositeParseNode.create_merge_instance(left_node, right_node)
+        merge_inst = CompositeParseNode.create_merge_instance(left_node, right_node, self.context_length)
         # compute the categorize_path for this merged instance (list of concept ids)
 
         candidate_concept, categorize_path = custom_categorize(merge_inst, self.ltm_hierarchy)
@@ -666,23 +781,40 @@ class FiniteParseTree:
         score_data = FiniteParseTree._score_function(candidate_concept, merge_inst, debug=debug)
         score = score_data["cost"]
 
-        # want to visualize candidate_concept.av_count, need to use draw_dict:
-        if len(candidate_concept.av_count) == 0:
+        # Build a draw-friendly representation of the merge instance so the
+        # candidate modal shows per-index context-before{i} / context-after{i}.
+        try:
+            # merge_inst is expected to be a dict with numeric keys:
+            # 0 -> content_left dict, 1 -> content_right dict,
+            # 2..2+context_length-1 -> context_before dicts,
+            # (2+context_length).. -> context_after dicts
+            left_inst = merge_inst.get(0, {}) or {}
+            right_inst = merge_inst.get(1, {}) or {}
+
+            before_list = []
+            after_list = []
+            for i in range(self.context_length):
+                before_key = 2 + i
+                after_key = 2 + self.context_length + i
+                before_list.append(self.ctx_list(merge_inst.get(before_key, {}) or {}, draw_zeros=False))
+                after_list.append(self.ctx_list(merge_inst.get(after_key, {}) or {}, draw_zeros=False))
+
+            candidate_draw_inst = {
+                "title": candidate_hash,
+                "left": self.ctx_list(left_inst, draw_zeros=False),
+                "right": self.ctx_list(right_inst, draw_zeros=False),
+                "before": before_list,
+                "after": after_list,
+                "children": []
+            }
+        except Exception:
+            # fallback to empty display
             candidate_draw_inst = {
                 "title": candidate_hash,
                 "left": [],
                 "right": [],
                 "before": [],
-                "after":  [],
-                "children": []
-            }
-        else:
-            candidate_draw_inst = {
-                "title": candidate_hash,
-                "left": self.ctx_list(candidate_concept.av_count[0]),
-                "right": self.ctx_list(candidate_concept.av_count[1]),
-                "before": self.ctx_list(candidate_concept.av_count[2]),
-                "after":  self.ctx_list(candidate_concept.av_count[3]),
+                "after": [],
                 "children": []
             }
 
@@ -716,7 +848,7 @@ class FiniteParseTree:
         if left_node is None or right_node is None:
             raise ValueError("Left or right node not found among root's children")
 
-        merge_inst = CompositeParseNode.create_merge_instance(left_node, right_node)
+        merge_inst = CompositeParseNode.create_merge_instance(left_node, right_node, self.context_length)
 
         candidate_concept, categorize_path = custom_categorize(merge_inst, self.ltm_hierarchy)
 
@@ -737,7 +869,8 @@ class FiniteParseTree:
             merge_inst,
             candidate_id,
             categorize_path,
-            0.5 * (left_node.word_index + right_node.word_index)
+            0.5 * (left_node.position_idx + right_node.position_idx),
+            self.context_length
         )
 
         # Update tree structures (append node and re-parent children)
@@ -750,9 +883,9 @@ class FiniteParseTree:
         undo_entry = {
             "action": "apply_candidate",
             "added_node_title": add_parse_node.title,
-            "added_node_word_index": add_parse_node.word_index,
-            "left_word_index": left_node.word_index,
-            "right_word_index": right_node.word_index,
+            "added_node_word_index": add_parse_node.position_idx,
+            "left_word_index": left_node.position_idx,
+            "right_word_index": right_node.position_idx,
             "timestamp": time.time()
         }
         self._undo_stack.append(undo_entry)
@@ -761,11 +894,11 @@ class FiniteParseTree:
         log_entry = {
             "timestamp": time.time(),
             "type": "apply_candidate",
-            "description": f"Applied chunk combining {left_node.title} ({left_node.word_index}) + {right_node.title} ({right_node.word_index}) -> concept CONCEPT-{candidate_concept.concept_hash()}",
+            "description": f"Applied chunk combining {left_node.title} ({left_node.position_idx}) + {right_node.title} ({right_node.position_idx}) -> concept CONCEPT-{candidate_concept.concept_hash()}",
             "payload": {
-                "left": {"title": left_node.title, "word_index": left_node.word_index},
-                "right": {"title": right_node.title, "word_index": right_node.word_index},
-                "new_node": {"title": add_parse_node.title, "word_index": add_parse_node.word_index, "concept_id": candidate_id}
+                "left": {"title": left_node.title, "position_idx": left_node.position_idx},
+                "right": {"title": right_node.title, "position_idx": right_node.position_idx},
+                "new_node": {"title": add_parse_node.title, "position_idx": add_parse_node.position_idx, "concept_id": candidate_id}
             }
         }
         self.action_log.append(log_entry)
@@ -774,7 +907,7 @@ class FiniteParseTree:
             "ok": True,
             "added_node": {
                 "title": add_parse_node.title,
-                "word_index": add_parse_node.word_index,
+                "position_idx": add_parse_node.position_idx,
                 "concept_id": candidate_id
             },
             "action_log_entry": log_entry
@@ -801,8 +934,8 @@ class FiniteParseTree:
         # re-parent its children back to the global root
         left_w = entry["left_word_index"]
         right_w = entry["right_word_index"]
-        left_node = self._find_root_child_by_index(left_w) or next((n for n in self.nodes + [self.global_root_node] if n.word_index == left_w), None)
-        right_node = self._find_root_child_by_index(right_w) or next((n for n in self.nodes + [self.global_root_node] if n.word_index == right_w), None)
+        left_node = self._find_root_child_by_index(left_w) or next((n for n in self.nodes + [self.global_root_node] if n.position_idx == left_w), None)
+        right_node = self._find_root_child_by_index(right_w) or next((n for n in self.nodes + [self.global_root_node] if n.position_idx == right_w), None)
 
         # If left/right_node currently have parent == added_node, reparent to global_root_node
         try:
@@ -814,7 +947,7 @@ class FiniteParseTree:
         # remove added_node from nodes list
         try:
             # added_node.set_parent(None) # hopefully a thing
-            self.global_root_node.children.remove((added_node.word_index, added_node))
+            self.global_root_node.children.remove((added_node.position_idx, added_node))
             self.nodes.remove(added_node)
         except ValueError:
             pass
@@ -1056,27 +1189,39 @@ class FiniteParseTree:
 
         if isinstance(node, PrimitiveParseNode):
             # represent primitive content as a single-entry list to keep a consistent shape
-            left_list = [{"key": self._safe_lookup(node.content), "val": 1.0}]
+            try:
+                content_key = next(iter(node.content.keys()))
+            except Exception:
+                content_key = None
+            left_list = [{"key": self._safe_lookup(content_key), "val": 1.0}]
+            # context_before / context_after are lists of dicts for primitives
+            before_list = [self.ctx_list(d or {}, draw_zeros) for d in (node.context_before or [])]
+            after_list  = [self.ctx_list(d or {}, draw_zeros) for d in (node.context_after or [])]
+
             return {
                 "title": node.title,
                 "left": left_list,
                 "right": [],  # primitives have no right content
-                "before": self.ctx_list(node.context_before, draw_zeros),
-                "after":  self.ctx_list(node.context_after, draw_zeros),
+                "before": before_list,
+                "after":  after_list,
                 "children": [self._draw_node_to_dict(ch[1], children_getter) for ch in children_getter(node)]
             }
 
         elif isinstance(node, CompositeParseNode):
             # content_left/content_right are dicts -> convert to same list-of-{key,val} shape
-            left_list  = self.ctx_list(node.content_left, draw_zeros)
-            right_list = self.ctx_list(node.content_right, draw_zeros)
+            left_list  = self.ctx_list(node.content_left or {}, draw_zeros)
+            right_list = self.ctx_list(node.content_right or {}, draw_zeros)
+
+            # context_before/context_after are lists of dicts for composites - keep per-index lists
+            before_list = [self.ctx_list(d or {}, draw_zeros) for d in (node.context_before or [])]
+            after_list  = [self.ctx_list(d or {}, draw_zeros) for d in (node.context_after or [])]
 
             return {
                 "title": node.title,
                 "left": left_list,
                 "right": right_list,
-                "before": self.ctx_list(node.context_before, draw_zeros),
-                "after":  self.ctx_list(node.context_after, draw_zeros),
+                "before": before_list,
+                "after":  after_list,
                 "children": [self._draw_node_to_dict(ch[1], children_getter) for ch in children_getter(node)]
             }
 
@@ -1190,6 +1335,16 @@ class FiniteParseTree:
             const rows = ctx.map(kv => `<tr><td>${{kv.key}}</td><td>${{kv.val.toFixed(2)}}</td></tr>`).join("");
             return `<div class="subtable"><b>${{title}}</b><table><tbody>${{rows}}</tbody></table></div>`;
         }};
+        const ctxTablesMultiple = (arr, base) => {{
+            if (!arr || arr.length === 0) return `<div class="subtable"><i>${{base}}: empty</i></div>`;
+            // if arr is already a single aggregated ctx-list (array of key/val objects), render one table
+            if (Array.isArray(arr) && arr.length > 0 && arr[0] && typeof arr[0].key !== 'undefined') {{
+                return ctxTable(arr, base);
+            }}
+            let out = "";
+            arr.forEach((ctx, i) => {{ out += ctxTable(ctx, `${{base}}${{i}}`); }});
+            return out;
+        }};
 
         // content: left and right are now lists of {{key, val}}
         let contentHTML = "";
@@ -1212,8 +1367,8 @@ class FiniteParseTree:
         <div class="node-fo">
             <table><tr><th colspan="2">${{d.title}}</th></tr></table>
             ${{contentHTML}}
-            ${{ctxTable(d.before, "Context-Before")}}
-            ${{ctxTable(d.after,  "Context-After")}}
+            ${{ctxTablesMultiple(d.before, "Context-Before")}}
+            ${{ctxTablesMultiple(d.after,  "Context-After")}}
         </div>`;
     }}
 
@@ -1357,6 +1512,15 @@ class FiniteParseTree:
             const rows = ctx.map(kv=>`<tr><td>${{kv.key}}</td><td>${{kv.val.toFixed(2)}}</td></tr>`).join("");
             return `<div class="subtable"><b>${{title}}</b><table><tbody>${{rows}}</tbody></table></div>`;
         }};
+        const ctxTablesMultiple = (arr, base) => {{
+            if (!arr || arr.length === 0) return `<div class="subtable"><i>${{base}}: empty</i></div>`;
+            if (Array.isArray(arr) && arr.length > 0 && arr[0] && typeof arr[0].key !== 'undefined') {{
+                return ctxTable(arr, base);
+            }}
+            let out = "";
+            arr.forEach((ctx, i) => {{ out += ctxTable(ctx, `${{base}}${{i}}`); }});
+            return out;
+        }};
         let contentHTML="";
         const leftHas=Array.isArray(d.left)&&d.left.length>0;
         const rightHas=Array.isArray(d.right)&&d.right.length>0;
@@ -1367,8 +1531,8 @@ class FiniteParseTree:
         return `<div class="node-fo">
             <table><tr><th colspan="2">${{d.title}}</th></tr></table>
             ${{contentHTML}}
-            ${{ctxTable(d.before,"Context-Before")}}
-            ${{ctxTable(d.after,"Context-After")}}
+            ${{ctxTablesMultiple(d.before,"Context-Before")}}
+            ${{ctxTablesMultiple(d.after,"Context-After")}}
         </div>`;
     }}
 
@@ -1440,11 +1604,21 @@ class FiniteParseTree:
             }} else {{
                 contentHTML = `<div class="section"><i>Content: empty</i></div>`;
             }}
+            const ctxTablesMultiple = (arr, base) => {{
+                if (!arr || arr.length === 0) return `<div class="subtable"><i>${{base}}: empty</i></div>`;
+                if (Array.isArray(arr) && arr.length > 0 && arr[0] && typeof arr[0].key !== 'undefined') {{
+                    return ctxTable(arr, base);
+                }}
+                let out = "";
+                arr.forEach((ctx, i) => {{ out += ctxTable(ctx, `${{base}}${{i}}`); }});
+                return out;
+            }};
+
             return `
                 <table><tr><th colspan="2">${{d.title}}</th></tr></table>
                 ${{contentHTML}}
-                ${{ctxTable(d.before,"Context-Before")}}
-                ${{ctxTable(d.after,"Context-After")}}
+                ${{ctxTablesMultiple(d.before,"Context-Before")}}
+                ${{ctxTablesMultiple(d.after,"Context-After")}}
             `;
         }}
 
@@ -1553,7 +1727,7 @@ class FiniteParseTree:
                 return {
                     "node_type": "primitive",
                     "title": node.title,
-                    "word_index":node.word_index,
+                    "position_idx":node.position_idx,
                     "content": node.content,
                     "context_before": node.context_before,
                     "context_after": node.context_after,
@@ -1566,7 +1740,7 @@ class FiniteParseTree:
                 return {
                     "node_type": "composite",
                     "title": node.title,
-                    "word_index":node.word_index,
+                    "position_idx":node.position_idx,
                     "content_left": node.content_left,
                     "content_right": node.content_right,
                     "categorize_path": node.categorize_path,
@@ -1615,46 +1789,82 @@ class FiniteParseTree:
             context_length=data["context_length"],
         )
         tree.window = data["window"]
-
         def restore_dict_keys(d):
             if d is None:
                 return None
-            return {int(k): v for k, v in d.items()}
+            # keys in JSON may be strings; convert back to int keys
+            if isinstance(d, dict):
+                return {int(k): v for k, v in d.items()}
+            return d
 
         node_objs = []
         for n in data["nodes"]:
             if n["node_type"] == "primitive":
+                # rebuild elements: context_before (list of dicts) + content + context_after (list)
+                cb = n.get("context_before") or []
+                ca = n.get("context_after") or []
+                # ensure cb/ca are lists of dicts
+                if isinstance(cb, dict):
+                    # older format may have placed dict; wrap
+                    cb_list = [cb]
+                else:
+                    cb_list = cb
+
+                if isinstance(ca, dict):
+                    ca_list = [ca]
+                else:
+                    ca_list = ca
+
+                content = n.get("content") or {}
+                # construct elements as list of lists (keys)
+                elements = []
+                for d in cb_list:
+                    elements.append(list((restore_dict_keys(d) or {}).keys()))
+                elements.append(list((restore_dict_keys(content) or {}).keys()))
+                for d in ca_list:
+                    elements.append(list((restore_dict_keys(d) or {}).keys()))
+
+                anchor_idx = len(cb_list)
+                position_idx = n.get("position_idx")
+                ctx_len = data.get("context_length", len(cb_list))
+
                 node = PrimitiveParseNode(
-                    content=n["content"],
-                    context_before=restore_dict_keys(n["context_before"]),
-                    context_after=restore_dict_keys(n["context_after"]),
-                    word_index=n["word_index"],
+                    elements=elements,
+                    anchor_idx=anchor_idx,
+                    position_idx=position_idx,
+                    context_length=ctx_len,
                 )
+
             elif n["node_type"] == "composite":
                 node = CompositeParseNode()
-                node.content_left = restore_dict_keys(n["content_left"])
-                node.content_right = restore_dict_keys(n["content_right"])
+                node.content_left = restore_dict_keys(n.get("content_left")) or {}
+                node.content_right = restore_dict_keys(n.get("content_right")) or {}
                 # restore categorize_path if present (list of concept ids)
-                node.categorize_path = n.get("categorize_path")
-                node.context_before = restore_dict_keys(n["context_before"])
-                node.context_after = restore_dict_keys(n["context_after"])
-                node.word_index = n["word_index"]
+                node.categorize_path = n.get("categorize_path") or n.get("categorize_path")
+                # context_before/context_after expected as lists of dicts
+                cb = n.get("context_before") or []
+                ca = n.get("context_after") or []
+                node.context_before = [restore_dict_keys(d) if isinstance(d, dict) else d for d in cb]
+                node.context_after = [restore_dict_keys(d) if isinstance(d, dict) else d for d in ca]
+                node.position_idx = n.get("position_idx")
+                node.context_length = data.get("context_length", node.context_length)
 
             else:
                 raise ValueError(f"Unknown node_type {n['node_type']}")
 
-            node.title = n["title"]
-            node.concept_label = n["concept_label"]
-            node.global_root = n["global_root"]
+            node.title = n.get("title")
+            node.concept_label = n.get("concept_label")
+            node.global_root = n.get("global_root", False)
             node_objs.append(node)
 
         # restore parent/child relations
         for idx, n in enumerate(data["nodes"]):
             node = node_objs[idx]
-            parent_idx = n["parent"]
+            parent_idx = n.get("parent")
             if parent_idx is not None:
                 node.parent = node_objs[parent_idx]
-            node.children = [(node_objs[ch].word_index, node_objs[ch]) for ch in n["children"]]
+            # children stored as indices into nodes list
+            node.children = [(node_objs[ch].position_idx, node_objs[ch]) for ch in n.get("children", [])]
 
         tree.global_root_node = node_objs[0]
         tree.nodes = node_objs[1:]
@@ -1812,12 +2022,31 @@ class IncrementalParseTree:
             return [{"key": self._safe_lookup(k), "val": float(v)} for k, v in items]
 
         if isinstance(node, PrimitiveParseNode):
+            try:
+                content_key = next(iter(node.content.keys()))
+            except Exception:
+                content_key = None
+
+            def _aggregate_list_of_dicts(lst):
+                if not lst:
+                    return {}
+                agg = {}
+                for d in lst:
+                    if not d:
+                        continue
+                    for k, v in d.items():
+                        agg[k] = agg.get(k, 0) + v
+                return agg
+
+            before_agg = _aggregate_list_of_dicts(node.context_before)
+            after_agg = _aggregate_list_of_dicts(node.context_after)
+
             return {
                 "title": node.title,
-                "left": self._safe_lookup(node.content),
+                "left": self._safe_lookup(content_key),
                 "right": None,
-                "before": ctx_list(node.context_before),
-                "after": ctx_list(node.context_after),
+                "before": ctx_list(before_agg),
+                "after": ctx_list(after_agg),
                 "children": [self._node_to_dict(ch[1], children_getter) for ch in children_getter(node)]
             }
 
@@ -1827,12 +2056,26 @@ class IncrementalParseTree:
             left  = self._safe_lookup(left_id)
             right = self._safe_lookup(right_id)
 
+            def _aggregate_list_of_dicts(lst):
+                if not lst:
+                    return {}
+                agg = {}
+                for d in lst:
+                    if not d:
+                        continue
+                    for k, v in d.items():
+                        agg[k] = agg.get(k, 0) + v
+                return agg
+
+            before_agg = _aggregate_list_of_dicts(node.context_before)
+            after_agg = _aggregate_list_of_dicts(node.context_after)
+
             return {
                 "title": node.title,
                 "left": left,
                 "right": right,
-                "before": ctx_list(node.context_before),
-                "after":  ctx_list(node.context_after),
+                "before": ctx_list(before_agg),
+                "after":  ctx_list(after_agg),
                 "children": [self._node_to_dict(ch[1], children_getter) for ch in children_getter(node)]
             }
 
@@ -1975,120 +2218,7 @@ class IncrementalParseTree:
     """
 
 
-    def to_json(self, filepath=None):
-        """
-        Serialize the ParseTree into JSON. Optionally save to `filepath`.
-        """
-
-        def serialize_node(node, index_map):
-            if isinstance(node, PrimitiveParseNode):
-                return {
-                    "node_type": "primitive",
-                    "title": node.title,
-                    "word_index":node.word_index,
-                    "content": node.content,
-                    "context_before": node.context_before,
-                    "context_after": node.context_after,
-                    "concept_label": node.concept_label,
-                    "global_root": node.global_root,
-                    "parent": index_map.get(node.parent),
-                    "children": [index_map[ch[1]] for ch in node.children],
-                }
-            elif isinstance(node, CompositeParseNode):
-                return {
-                    "node_type": "composite",
-                    "title": node.title,
-                    "word_index":node.word_index,
-                    "content_left": node.content_left,
-                    "content_right": node.content_right,
-                    "context_before": node.context_before,
-                    "context_after": node.context_after,
-                    "concept_label": node.concept_label,
-                    "global_root": node.global_root,
-                    "parent": index_map.get(node.parent),
-                    "children": [index_map[ch[1]] for ch in node.children],
-                }
-            else:
-                raise TypeError(f"Unknown node type {type(node)}")
-
-        index_map = {node: i for i, node in enumerate([self.global_root_node] + self.nodes)}
-        data = {
-            "window": self.window,
-            "context_length": self.context_length,
-            "id_to_value": self.id_to_value,
-            "value_to_id": self.value_to_id,
-            "nodes": [serialize_node(node, index_map) for node in [self.global_root_node] + self.nodes],
-        }
-
-        if filepath:
-            os.makedirs(os.path.dirname(filepath) or ".", exist_ok=True)
-            with open(filepath, "w", encoding="utf-8") as f:
-                json.dump(data, f, indent=2)
-            return filepath
-        else:
-            return json.dumps(data, indent=2)
-
-    @staticmethod
-    def from_json(data, ltm_hierarchy, filepath=False):
-        """
-        Deserialize a ParseTree from JSON. Requires the same ltm_hierarchy instance.
-        """
-        if filepath:
-            with open(data, "r", encoding="utf-8") as f:
-                data = json.load(f)
-        elif isinstance(data, str):
-            data = json.loads(data)
-
-        tree = FiniteParseTree(
-            ltm_hierarchy,
-            id_to_value=data["id_to_value"],
-            value_to_id=data["value_to_id"],
-            context_length=data["context_length"],
-        )
-        tree.window = data["window"]
-
-        def restore_dict_keys(d):
-            if d is None:
-                return None
-            return {int(k): v for k, v in d.items()}
-
-        node_objs = []
-        for n in data["nodes"]:
-            if n["node_type"] == "primitive":
-                node = PrimitiveParseNode(
-                    content=n["content"],
-                    context_before=restore_dict_keys(n["context_before"]),
-                    context_after=restore_dict_keys(n["context_after"]),
-                    word_index=n["word_index"],
-                )
-            elif n["node_type"] == "composite":
-                node = CompositeParseNode()
-                node.content_left = restore_dict_keys(n["content_left"])
-                node.content_right = restore_dict_keys(n["content_right"])
-                node.context_before = restore_dict_keys(n["context_before"])
-                node.context_after = restore_dict_keys(n["context_after"])
-                node.word_index = n["word_index"]
-
-            else:
-                raise ValueError(f"Unknown node_type {n['node_type']}")
-
-            node.title = n["title"]
-            node.concept_label = n["concept_label"]
-            node.global_root = n["global_root"]
-            node_objs.append(node)
-
-        # restore parent/child relations
-        for idx, n in enumerate(data["nodes"]):
-            node = node_objs[idx]
-            parent_idx = n["parent"]
-            if parent_idx is not None:
-                node.parent = node_objs[parent_idx]
-            node.children = [(node_objs[ch].word_index, node_objs[ch]) for ch in n["children"]]
-
-        tree.global_root_node = node_objs[0]
-        tree.nodes = node_objs[1:]
-
-        return tree
+    
 
 """
 ----------------------------------------------------------------------------------------------
@@ -2126,13 +2256,19 @@ class LanguageChunkingParser:
         self.id_count += 1
         self.value_to_id[f"CONCEPT-{hsh}"] = self.id_count
 
+        # set context length before creating any drawers
+        self.context_length = context_length
+
+        # dynamic headers: two content cols + N before + N after
+        headers = ["Content-Left", "Content-Right"] + \
+            [f"Context-Before{i}" for i in range(self.context_length)] + \
+            [f"Context-After{i}" for i in range(self.context_length)]
+
         self.cobweb_drawer = HTMLCobwebDrawer(
-            ["Content-Left", "Content-Right", "Context-Before", "Context-After"],
+            headers,
             id_to_value=self.id_to_value,
             value_to_id=self.value_to_id
         )
-
-        self.context_length = context_length
         self.merge_split = merge_split
 
     def get_long_term_memory(self):
@@ -2446,8 +2582,13 @@ class LanguageChunkingParser:
             raise
 
         # recreate cobweb drawer to reflect loaded vocabulary
+        # recreate cobweb drawer with headers sized to reconstructed context_length
+        headers = ["Content-Left", "Content-Right"] + \
+            [f"Context-Before{i}" for i in range(parser.context_length)] + \
+            [f"Context-After{i}" for i in range(parser.context_length)]
+
         parser.cobweb_drawer = HTMLCobwebDrawer(
-            ["Content-Left", "Content-Right", "Context-Before", "Context-After"],
+            headers,
             id_to_value=parser.id_to_value,
             value_to_id=parser.value_to_id
         )

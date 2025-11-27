@@ -18,7 +18,7 @@ import os
 import shutil
 
 # Creating and printing toy sentences
-load_ltm = ""
+load_ltm = "data/grammar2_fullparse/ltm"
 num_sentences = 50
 document = []
 
@@ -30,7 +30,9 @@ for _ in range(num_sentences):
 if load_ltm != "":
     parser = LanguageChunkingParser.load_state(load_ltm)
 else:
-    parser = LanguageChunkingParser(TEST_CORPUS2, merge_split=False)
+    parser = LanguageChunkingParser(TEST_CORPUS2, merge_split=True)
+
+parser.visualize_ltm("demo/ltm_analysis/ltm")
 
 for i, doc in enumerate(document):
     parse_trees = parser.parse_input([doc], end_behavior="converge", debug=False)
@@ -38,36 +40,39 @@ for i, doc in enumerate(document):
 
     parser.add_parse_tree(parse_tree, debug=False)
 
-parser.visualize_ltm("demo/ltm_analysis/ltm")
 parser.save_state("demo/ltm_analysis/ltm_save")
+parser.visualize_ltm("demo/ltm_analysis/ltm")
+
+while not os.path.exists("demo/ltm_analysis/ltm.png"):
+    pass
 
 # calling the basic-level tree draw method!
 parser.cobweb_drawer.save_basic_level_subtrees(parser.ltm_hierarchy.root, "demo/ltm_analysis/basic_level_subtrees", debug=True)
 parser.cobweb_drawer.save_level_subtrees(parser.ltm_hierarchy.root, "demo/ltm_analysis/level_2_subtrees", level=2)
 parser.cobweb_drawer.save_level_subtrees(parser.ltm_hierarchy.root, "demo/ltm_analysis/level_3_subtrees", level=3)
 
-root = parser.ltm_hierarchy.root
-folder = "and_or_node_subtrees"
+# root = parser.ltm_hierarchy.root
+# folder = "and_or_node_subtrees"
 
-if os.path.exists(folder):
-    try:
-        shutil.rmtree(folder)
-    except OSError as e:
-        print(f"Error deleting folder '{folder}': {e}")
+# if os.path.exists(folder):
+#     try:
+#         shutil.rmtree(folder)
+#     except OSError as e:
+#         print(f"Error deleting folder '{folder}': {e}")
 
-visited = [root]
+# visited = [root]
 
-and_nodes = {}
-or_nodes = {}
-num_and_trees = 0
-num_or_trees = 0
+# and_nodes = {}
+# or_nodes = {}
+# num_and_trees = 0
+# num_or_trees = 0
 
-while len(visited) > 0:
-    depth, curr = visited.pop()
-    num_nodes += 1
+# while len(visited) > 0:
+#     depth, curr = visited.pop()
+#     num_nodes += 1
 
-for key, bl_node in and_nodes.items():
-    filename = ""
-    parser.cobweb_drawer.draw_tree(bl_node, folder + ("/" if folder[-1] != "/" else "") + filename, max_depth=3)
+# for key, bl_node in and_nodes.items():
+#     filename = ""
+#     parser.cobweb_drawer.draw_tree(bl_node, folder + ("/" if folder[-1] != "/" else "") + filename, max_depth=3)
 
-print(f"Saved {num_and_trees} AND-trees and {num_or_trees} OR-trees.")
+# print(f"Saved {num_and_trees} AND-trees and {num_or_trees} OR-trees.")

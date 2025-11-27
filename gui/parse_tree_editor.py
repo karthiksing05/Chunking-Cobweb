@@ -9,9 +9,9 @@ app = Flask(__name__)
 
 LEARNING_ON = True
 PREBUILD_TREES = False
-CONTEXT_LENGTH = 3
+CONTEXT_LENGTH = 2
 # LOAD_LTM = ""
-LOAD_LTM = "data/grammar2_fullparse/ltm"
+LOAD_LTM = ""
 
 # --- Initialize parser and LTM ---
 if LOAD_LTM != "":
@@ -23,7 +23,7 @@ NUM_LOAD = 0
 document = []
 
 for _ in range(NUM_LOAD):
-    sentence = generate("S", TEST_CORPUS2)
+    sentence = generate("S", TEST_GRAMMAR2)
     document.append(sentence)
 
 for doc in document:
