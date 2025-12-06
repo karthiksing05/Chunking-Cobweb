@@ -18,8 +18,8 @@ import os
 import shutil
 
 # Creating and printing toy sentences
-load_ltm = "data/grammar2_fullparse/ltm"
-num_sentences = 50
+load_ltm = "data/grammar2_partialparse_ct3/ltm"
+num_sentences = 40
 document = []
 
 for _ in range(num_sentences):

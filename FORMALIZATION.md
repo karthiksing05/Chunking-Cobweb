@@ -2,7 +2,9 @@
 
 ## Intuition
 
-Pat can probably fill this part in better than me, but the idea is almost a "compression" of memory by observing chunks and their compositionality.
+Pat can probably fill this part in better than me, but the idea is almost a "compression" of memory by observing chunks and their compositionality. More frequent chunks should be compressed more often than less frequent chunks!
+
+**NOTE:** CobwebTree(1e-4, True, 0, True, True) is a good parameterization!
 
 ## Processes
 

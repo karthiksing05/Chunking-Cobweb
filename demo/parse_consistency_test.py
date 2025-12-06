@@ -30,7 +30,7 @@ for _ in range(num_sentences):
     document.append(sentence)
 
 # Setting up the parser
-parser = LanguageChunkingParser.load_state("data/grammar2_fullparse/ltm")
+parser = LanguageChunkingParser.load_state("data/grammar2_partialparse_ct3/ltm")
 
 initial_sentence = "a woman sees the woman"
 sub_sentence = "a woman sees"

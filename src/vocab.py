@@ -7,7 +7,7 @@ set of instances:
 - "the dog barks"
 - "an anteater eats"
 
-It can be assumed that the same kind of chunk should operate over both of these things, however
+It can be assumed that the same kind of chunk should operate over all three of these things, however
 these two instances are, on paper, radically different due to their differences in discrete symbols.
 In order to operate over the similarity of discrete symbol, we can build a separate hierarchy purely
 for word-vocabulary to observe semantic meaning in a way that allows it to be a semantic feature for
@@ -20,9 +20,17 @@ It's important that we provide semantic meaning as a scaffold to be able to extr
 TODO do we do this for all chunks or just the words? I think it's fine to do this for words because chunks
 are being stored by their path information but there may come a time where we want to store individual content
 instances
+
+TODO another big question is how we extrapolate meaning from words because they're all interdependent on
+each other. Do we not need to allow the paths to "converge" to some stable state based on them all being
+semantically tagged at the same time? ANSWER LOOK AT SECTION 3.2 OF THE INITIAL COBWEB LANGUAGE PAPER
+*   This may also become relevant within the context of chunking - we want to let our chunks' place in the tree converge
+
+TODO thinking about this in more depth, we probably do want to consider having everything in the same hierarchy
+so that we can use the same root node concept for 
 """
 
-from parse import custom_categorize_bfs
+from cobweb.cobweb_discrete import CobwebTree
 
 class ChunkVocabulary(object):
 
@@ -39,6 +47,8 @@ class ChunkVocabulary(object):
         self.corpus = corpus
         self.context_length = context_length
 
+        self.tree = CobwebTree(1e-4, True, 0, True, True)
+
         self.initialize()
 
     def initialize(self):
@@ -51,7 +61,14 @@ class ChunkVocabulary(object):
         self.value_to_id = dict([(w, i) for i, w in enumerate(self.id_to_value)])
         self.id_count = len(self.corpus)
 
-    def add_instance():
+    def process_window(self, window):
+        """
+        Primary training function for ChunkVocabulary class - takes in a window and
+        aggregates word senses into the vocabulary hierarchy
+        """
+        pass
+
+    def _add_instance(self, inst):
         """
         
         """
@@ -59,6 +76,8 @@ class ChunkVocabulary(object):
 
     def get(self, inst):
         """
-        
+        Primary inference function for ChunkVocabulary class - given an input instance, it
+        marks the best existing instance in the Cobweb class and identifies the path information
+        for such a 
         """
         pass

@@ -85,10 +85,14 @@ class PrimitiveParseNode:
             "content": self.content
         }
 
+        inst["content"][0] = 0
+
         for i in range(len(self.context_before)):
             inst[f"context-before_{i}"] = self.context_before[i]
+            inst[f"context-before_{i}"][0] = 0
         for i in range(len(self.context_after)):
             inst[f"context-after_{i}"] = self.context_after[i]
+            inst[f"context-after_{i}"][0] = 0
 
         return inst
 
@@ -284,6 +288,9 @@ class CompositeParseNode:
             else:
                 new_inst[i] = {}
 
+        for key in new_inst.keys():
+            new_inst[key][0] = 0
+
         return new_inst
 
 
@@ -396,19 +403,21 @@ def custom_categorize_dfs(inst, tree):
     traversed when categorizing the node.
     """
     path = []
+    node_path = []
 
     try:
         node = tree.root
     except Exception:
         try:
             leaf = tree.categorize(inst)
-            return [f"CONCEPT-{leaf.concept_hash()}"]
+            return leaf, [f"CONCEPT-{leaf.concept_hash()}"], [leaf]
         except Exception:
-            return []
+            return None, []
 
     # Append root concept
     try:
         path.append(f"CONCEPT-{node.concept_hash()}")
+        node_path.append(node)
         lastNode = node
     except Exception:
         # if concept_hash is not available, return empty path
@@ -459,14 +468,19 @@ def custom_categorize_dfs(inst, tree):
 
         try:
             path.append(f"CONCEPT-{node.concept_hash()}")
+            node_path.append(node)
             lastNode = node
         except Exception:
             break
 
-    # categorizeNode = tree.categorize(inst)
+    categorizeNode = tree.categorize(inst)
 
-    return lastNode, path
+    if categorizeNode.concept_hash() != lastNode.concept_hash():
+        print("ERR: categorize landed differently than last node")
 
+    return lastNode, path, node_path
+
+@NotImplementedError
 def custom_categorize_bfs(inst, tree, max_expansions: int = 10000):
     """
     Priority-BFS categorization: explore nodes by priority until a leaf is found.
@@ -550,11 +564,11 @@ def custom_categorize_bfs(inst, tree, max_expansions: int = 10000):
     return best_node, best_path
 
 def custom_categorize(inst, tree):
-    return custom_categorize_bfs(inst, tree)
+    return custom_categorize_dfs(inst, tree)
 
 class FiniteParseTree:
 
-    def __init__(self, ltm_hierarchy, id_to_value, value_to_id, context_length=3):
+    def __init__(self, ltm_hierarchy: CobwebTree, id_to_value, value_to_id, context_length=3):
         self.ltm_hierarchy = ltm_hierarchy
 
         self.id_to_value = id_to_value
@@ -581,74 +595,55 @@ class FiniteParseTree:
             self._undo_stack = []
 
     @staticmethod
-    def _score_function(node: CobwebNode, instance: dict, debug=False):
+    def _score_function(path: List[CobwebNode], instance: dict, debug=False):
         """
         Compute a symmetric, scaled similarity between two attribute-value dictionaries.
         Returns a value in (0, 1].
+
+        Notes from Chris and Pat:
+        *   'Smoothing' parameter is what `alpha` is given by: lower smoothing parameters result
+            in higher order functionality
+        *   Plan for recognition is to take the max log-probability of the nodes along the path
+        *   For our convenience, we can normalize this log-probability by the complexity of each
+            node that we sort through
         """
 
-        # 1. Compute raw log-probability (uses node’s built-in method)
-        log_prob = node.log_prob_instance(instance)
+        raw_node_log_probs = []
+        node_log_probs = []
+        best_log_prob = float('inf')
 
-        # 2. Compute total weight (sum of all value frequencies)
-        total_weight = sum(
-            cnt for vAttr in instance.values() for cnt in vAttr.values()
-        )
-        if total_weight <= 0:
-            total_weight = 1.0  # avoid division by zero
+        for node in path:
+            
+            # 1. Compute raw log-probability (uses node’s built-in method)
+            log_prob = node.log_prob_instance(instance)
 
-        # 3. Normalize log-probability
-        avg_log_prob = log_prob / total_weight
+            # 4. Compute node complexity (sum of all av_count entries)
+            node_complexity = sum(
+                cnt for attr_dict in node.av_count.values() for cnt in attr_dict.values()
+            )
 
-        # 4. Compute node complexity (sum of all av_count entries)
-        node_complexity = sum(
-            cnt for attr_dict in node.av_count.values() for cnt in attr_dict.values()
-        )
+            inst_complexity = sum(
+                cnt for attr_dict in instance.values() for cnt in attr_dict.values()
+            )
 
-        inst_complexity = sum(
-            cnt for attr_dict in instance.values() for cnt in attr_dict.values()
-        )
+            # 3. Normalize log-probability
+            if inst_complexity == 0:
+                avg_log_prob = 0
+            else:
+                avg_log_prob = log_prob / inst_complexity
 
-        # 6. Define cost (higher = better)
-        cost = -avg_log_prob
+            if avg_log_prob < best_log_prob:
+                best_log_prob = avg_log_prob
 
-        ########
-        # ADDED NOTES: We need to compute the count-statistic we were talking about
-        ########
-
-        curr = node
-        count_sum = 0
-        path_length = 0
-
-        while curr:
-            count_sum += curr.count
-            path_length += 1
-            curr = curr.parent
-
-        # need to normalize somehow, for now we do it by the length of the path and the root statistic
-        # Guard against division-by-zero when the root count is zero or missing.
-        # Normalize first by the path length (avoid zero-length paths) then divide
-        # by the root count if available; otherwise just use the path-normalized value.
-        try:
-            root_obj = getattr(node, 'tree', None)
-            root_count_val = getattr(root_obj.root, 'count', None) if root_obj is not None else None
-        except Exception:
-            root_count_val = None
-
-        path_norm = count_sum / max(path_length, 1)
-        if root_count_val and root_count_val > 0:
-            cnt_avg = path_norm / root_count_val
-        else:
-            # fallback: no root count available (or zero) — use path-normalized count
-            cnt_avg = path_norm
+            raw_node_log_probs.append(log_prob)
+            node_log_probs.append(avg_log_prob)
 
         score_data = {
-            'raw_log_prob': log_prob,
-            'avg_log_prob': avg_log_prob,
+            'raw_log_probs': str(raw_node_log_probs),
+            'avg_log_probs': str(node_log_probs),
             'candidate_complexity': node_complexity,
             'inst_complexity': inst_complexity,
-            'count_normed': cnt_avg,
-            'cost': cost
+            'cost': best_log_prob
         }
 
         if debug:
@@ -764,7 +759,7 @@ class FiniteParseTree:
         merge_inst = CompositeParseNode.create_merge_instance(left_node, right_node, self.context_length)
         # compute the categorize_path for this merged instance (list of concept ids)
 
-        candidate_concept, categorize_path = custom_categorize(merge_inst, self.ltm_hierarchy)
+        candidate_concept, categorize_path, node_categorize_path = custom_categorize(merge_inst, self.ltm_hierarchy)
 
         if debug:
             print("Categorization Path:")
@@ -778,7 +773,7 @@ class FiniteParseTree:
         candidate_hash = candidate_concept.concept_hash()
         candidate_id = self.value_to_id.get(f"CONCEPT-{candidate_hash}")
 
-        score_data = FiniteParseTree._score_function(candidate_concept, merge_inst, debug=debug)
+        score_data = FiniteParseTree._score_function(node_categorize_path, merge_inst, debug=debug)
         score = score_data["cost"]
 
         # Build a draw-friendly representation of the merge instance so the
@@ -788,16 +783,16 @@ class FiniteParseTree:
             # 0 -> content_left dict, 1 -> content_right dict,
             # 2..2+context_length-1 -> context_before dicts,
             # (2+context_length).. -> context_after dicts
-            left_inst = merge_inst.get(0, {}) or {}
-            right_inst = merge_inst.get(1, {}) or {}
+            left_inst = candidate_concept.av_count.get(0, {}) or {}
+            right_inst = candidate_concept.av_count.get(1, {}) or {}
 
             before_list = []
             after_list = []
             for i in range(self.context_length):
                 before_key = 2 + i
                 after_key = 2 + self.context_length + i
-                before_list.append(self.ctx_list(merge_inst.get(before_key, {}) or {}, draw_zeros=False))
-                after_list.append(self.ctx_list(merge_inst.get(after_key, {}) or {}, draw_zeros=False))
+                before_list.append(self.ctx_list(candidate_concept.av_count.get(before_key, {}) or {}, draw_zeros=False))
+                after_list.append(self.ctx_list(candidate_concept.av_count.get(after_key, {}) or {}, draw_zeros=False))
 
             candidate_draw_inst = {
                 "title": candidate_hash,
@@ -807,8 +802,9 @@ class FiniteParseTree:
                 "after": after_list,
                 "children": []
             }
-        except Exception:
+        except Exception as e:
             # fallback to empty display
+            print(e)
             candidate_draw_inst = {
                 "title": candidate_hash,
                 "left": [],
@@ -831,8 +827,6 @@ class FiniteParseTree:
             "left_title": left_node.title,
             "right_title": right_node.title
         }
-                
-        # print(returnData)
 
         return returnData
 
@@ -850,7 +844,7 @@ class FiniteParseTree:
 
         merge_inst = CompositeParseNode.create_merge_instance(left_node, right_node, self.context_length)
 
-        candidate_concept, categorize_path = custom_categorize(merge_inst, self.ltm_hierarchy)
+        candidate_concept, categorize_path, _ = custom_categorize(merge_inst, self.ltm_hierarchy) # TODO
 
         # compute categorize_path for the merged instance and store on node
         try:
@@ -1029,7 +1023,7 @@ class FiniteParseTree:
                     continue
 
                 score = res.get("score", float("-inf"))
-                if best is None or score > best[0]:
+                if best is None or score < best[0]: # TODO change this depending on whether we are minimizing or maximizing score
                     best = (score, res)
 
             if best is None:
@@ -2242,7 +2236,7 @@ class LanguageChunkingParser:
 
     def __init__(self, value_corpus, context_length=3, merge_split=True):
 
-        self.ltm_hierarchy = CobwebTree(alpha=1)
+        self.ltm_hierarchy = CobwebTree(1e-4, True, 0, True, True)
 
         self.id_to_value = ["EMPTYNULL"]
         for x in value_corpus:

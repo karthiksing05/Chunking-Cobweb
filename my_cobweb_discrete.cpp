@@ -858,7 +858,6 @@ public:
                     {
                         double best_pu = current->pu_for_insert(best1, instance);
                         double new_pu = current->pu_for_new_child(instance);
-                        std::cout << best_pu << " " << best1_mi << " " << new_pu << std::endl;
                         if (best_pu > new_pu)
                             bestAction = BEST;
                         else if (new_pu > best_pu)
@@ -895,7 +894,6 @@ public:
                 }
                 else if (bestAction == NEW)
                 {
-                    std::cout << "NEW" << std::endl;
                     NEW_count += 1;
                     auto start_new = std::chrono::high_resolution_clock::now();
 
@@ -3379,5 +3377,6 @@ NB_MODULE(cobweb_discrete, m)
         // .def("load_json", &CobwebTree::load_json)
         .def("load_json_stream", &CobwebTree::load_json_stream)
         .def("write_json_stream", &CobwebTree::write_json_stream)
-        .def_ro("root", &CobwebTree::root, nb::rv_policy::reference);
+        .def_ro("root", &CobwebTree::root, nb::rv_policy::reference)
+        .def_ro("alpha", &CobwebTree::alpha, nb::rv_policy::reference);
 }

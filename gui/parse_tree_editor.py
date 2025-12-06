@@ -8,10 +8,9 @@ import uuid
 app = Flask(__name__)
 
 LEARNING_ON = True
-PREBUILD_TREES = False
-CONTEXT_LENGTH = 2
-# LOAD_LTM = ""
-LOAD_LTM = ""
+PREBUILD_TREES = True
+CONTEXT_LENGTH = 3
+LOAD_LTM = "data/grammar2_partialparse_ct3/ltm"
 
 # --- Initialize parser and LTM ---
 if LOAD_LTM != "":
@@ -32,7 +31,7 @@ for doc in document:
 
 # --- Initialize first sentence and tree ---
 sample_sentence = generate("S", TEST_GRAMMAR2)
-# sample_sentence = "the woman sees a woman"
+# sample_sentence = "the cat chases the dog"
 curr_tree = FiniteParseTree(parser.get_long_term_memory(), parser.id_to_value, parser.value_to_id, context_length=CONTEXT_LENGTH)
 if PREBUILD_TREES:
     curr_tree.build(sample_sentence)

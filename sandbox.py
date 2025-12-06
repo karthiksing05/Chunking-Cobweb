@@ -65,7 +65,7 @@ def get_chunk_candidates(sentence: str, value_to_id: dict, context_length: int =
     return insts
 
 
-num_sentences = 40
+num_sentences = 50
 document = []
 
 for _ in range(num_sentences):
@@ -74,7 +74,7 @@ for _ in range(num_sentences):
 
 parser = LanguageChunkingParser(TEST_CORPUS2, context_length=CONTEXT_LENGTH)
 
-tree = CobwebTree()
+tree = CobwebTree(1e-4, True, 0, True, True)
 
 for sentence in document:
     instances = get_chunk_candidates(sentence, parser.value_to_id)
@@ -82,5 +82,8 @@ for sentence in document:
     for inst in instances:
         tree.ifit(inst, 0, True)
 
+parser.cobweb_drawer.save_basic_level_subtrees(tree.root, "sandbox")
+
 while not os.path.exists("sandbox/sandbox_ltm.png"):
     parser.cobweb_drawer.draw_tree(tree.root, "sandbox/sandbox_ltm")
+
