@@ -30,5 +30,5 @@ tree = FiniteParseTree.from_json("unittests/parse_tree_test/json/parse_tree0.jso
 tree.visualize("unittests/parse_tree_test/visualizations/parse_tree0_from_json")
 
 print("Confirming that all chunk instances are appropriately scraped:")
-for chunk_inst in tree.get_chunk_instances():
+for chunk_inst in tree.get_parsed_instances():
     print("- ", chunk_inst)

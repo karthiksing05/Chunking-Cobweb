@@ -6,6 +6,8 @@ from util.cfg import generate, TEST_CORPUS2, TEST_GRAMMAR2
 from parse import LanguageChunkingParser
 
 # Creating and printing toy sentences
+CONTEXT_LENGTH = 3
+
 num_sentences = 100
 document = []
 
@@ -14,7 +16,7 @@ for _ in range(num_sentences):
     document.append(sentence)
 
 # Setting up the parser
-parser = LanguageChunkingParser(TEST_CORPUS2, merge_split=False)
+parser = LanguageChunkingParser(TEST_CORPUS2, context_length=CONTEXT_LENGTH, merge_split=True)
 
 train_size = 0.9
 
@@ -23,7 +25,7 @@ test_documents = document[int(len(document) * train_size):]
 
 # Iterate through training documents and parse them one at a time, saving every 10th parse tree to file
 for i, doc in enumerate(train_documents):
-    parse_trees = parser.parse_input([doc], end_behavior="converge", debug=True)
+    parse_trees = parser.parse_input([doc], end_behavior=-5, debug=True)
     parse_tree = parse_trees[0]
 
     parser.add_parse_tree(parse_tree, debug=False)

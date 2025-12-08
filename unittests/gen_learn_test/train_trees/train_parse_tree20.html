@@ -24,7 +24,7 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script>
-    const data = {"title": "75a3634ee5", "left": [], "right": [], "before": [], "after": [], "children": [{"title": "9cd1ff7387", "left": [{"key": "CONCEPT-3758656767009291_1", "val": 1.0}, {"key": "CONCEPT-3758656767347708_2", "val": 1.0}, {"key": "CONCEPT-3758658487331333_5", "val": 1.0}, {"key": "CONCEPT-3758658487380000_10", "val": 1.0}, {"key": "CONCEPT-3758658949264916_25", "val": 1.0}, {"key": "CONCEPT-3758660143108000_63", "val": 1.0}, {"key": "CONCEPT-3758660874975083_77", "val": 1.0}], "right": [{"key": "CONCEPT-3758656767009291_1", "val": 1.0}, {"key": "CONCEPT-3758656767350875_3", "val": 1.0}, {"key": "CONCEPT-3758658487409750_12", "val": 1.0}, {"key": "CONCEPT-3758658487436041_16", "val": 1.0}, {"key": "CONCEPT-3758658949295791_30", "val": 1.0}, {"key": "CONCEPT-3758663974900125_476", "val": 1.0}, {"key": "CONCEPT-3758666001813208_505", "val": 1.0}], "before": [], "after": [], "children": [{"title": "6fa078d444", "left": [{"key": "CONCEPT-3758656767009291_1", "val": 1.0}, {"key": "CONCEPT-3758656767350875_3", "val": 1.0}, {"key": "CONCEPT-3758658487409750_12", "val": 1.0}, {"key": "CONCEPT-3758658487437125_17", "val": 1.0}, {"key": "CONCEPT-3758658949321041_36", "val": 1.0}, {"key": "CONCEPT-3758659499909666_58", "val": 1.0}, {"key": "CONCEPT-3758660143155958_71", "val": 1.0}], "right": [{"key": "chases", "val": 1.0}], "before": [], "after": [{"key": "a", "val": 1.0}, {"key": "dog", "val": 0.5}], "children": [{"title": "0349445fd4", "left": [{"key": "a", "val": 1.0}], "right": [{"key": "woman", "val": 1.0}], "before": [], "after": [{"key": "chases", "val": 1.0}, {"key": "a", "val": 0.5}, {"key": "dog", "val": 0.3333333333333333}], "children": [{"title": "3b307cbc00", "left": [{"key": "a", "val": 1.0}], "right": [], "before": [], "after": [{"key": "woman", "val": 1.0}, {"key": "chases", "val": 0.5}, {"key": "a", "val": 0.3333333333333333}], "children": []}, {"title": "d43ff3b06e", "left": [{"key": "woman", "val": 1.0}], "right": [], "before": [{"key": "a", "val": 1.0}], "after": [{"key": "chases", "val": 1.0}, {"key": "a", "val": 0.5}, {"key": "dog", "val": 0.3333333333333333}], "children": []}]}, {"title": "11ef30e0ca", "left": [{"key": "chases", "val": 1.0}], "right": [], "before": [{"key": "woman", "val": 1.0}, {"key": "a", "val": 0.5}], "after": [{"key": "a", "val": 1.0}, {"key": "dog", "val": 0.5}], "children": []}]}, {"title": "4b18cbb27c", "left": [{"key": "a", "val": 1.0}], "right": [{"key": "dog", "val": 1.0}], "before": [{"key": "chases", "val": 1.0}, {"key": "woman", "val": 0.5}, {"key": "a", "val": 0.3333333333333333}], "after": [], "children": [{"title": "cd0f1f275e", "left": [{"key": "a", "val": 1.0}], "right": [], "before": [{"key": "chases", "val": 1.0}, {"key": "woman", "val": 0.5}, {"key": "a", "val": 0.3333333333333333}], "after": [{"key": "dog", "val": 1.0}], "children": []}, {"title": "0698b5e218", "left": [{"key": "dog", "val": 1.0}], "right": [], "before": [{"key": "a", "val": 1.0}, {"key": "chases", "val": 0.5}, {"key": "woman", "val": 0.3333333333333333}], "after": [], "children": []}]}]}]};
+    const data = {"title": "3856458c6d", "left": [], "right": [], "before": [], "after": [], "children": [{"title": "e60f93dfe6", "left": [{"key": "a", "val": 1.0}], "right": [], "before": [], "after": [[{"key": "man", "val": 1.0}], [{"key": "runs", "val": 1.0}], [{"key": "a", "val": 1.0}]], "children": []}, {"title": "798e418422", "left": [{"key": "man", "val": 1.0}], "right": [], "before": [[{"key": "a", "val": 1.0}]], "after": [[{"key": "runs", "val": 1.0}], [{"key": "a", "val": 1.0}], [{"key": "dog", "val": 1.0}]], "children": []}, {"title": "0396934036", "left": [{"key": "runs", "val": 1.0}], "right": [], "before": [[{"key": "man", "val": 1.0}], [{"key": "a", "val": 1.0}]], "after": [[{"key": "a", "val": 1.0}], [{"key": "dog", "val": 1.0}]], "children": []}, {"title": "0d1d9af271", "left": [{"key": "a", "val": 1.0}], "right": [], "before": [[{"key": "runs", "val": 1.0}], [{"key": "man", "val": 1.0}], [{"key": "a", "val": 1.0}]], "after": [[{"key": "dog", "val": 1.0}]], "children": []}, {"title": "2522dc60a0", "left": [{"key": "dog", "val": 1.0}], "right": [], "before": [[{"key": "a", "val": 1.0}], [{"key": "runs", "val": 1.0}], [{"key": "man", "val": 1.0}]], "after": [], "children": []}]};
     const nodeW  = 280;
     const nodeH  = 130;
     const hGap   = 80;
@@ -97,6 +97,16 @@
             const rows = ctx.map(kv => `<tr><td>${kv.key}</td><td>${kv.val.toFixed(2)}</td></tr>`).join("");
             return `<div class="subtable"><b>${title}</b><table><tbody>${rows}</tbody></table></div>`;
         };
+        const ctxTablesMultiple = (arr, base) => {
+            if (!arr || arr.length === 0) return `<div class="subtable"><i>${base}: empty</i></div>`;
+            // if arr is already a single aggregated ctx-list (array of key/val objects), render one table
+            if (Array.isArray(arr) && arr.length > 0 && arr[0] && typeof arr[0].key !== 'undefined') {
+                return ctxTable(arr, base);
+            }
+            let out = "";
+            arr.forEach((ctx, i) => { out += ctxTable(ctx, `${base}${i}`); });
+            return out;
+        };
 
         // content: left and right are now lists of {key, val}
         let contentHTML = "";
@@ -119,8 +129,8 @@
         <div class="node-fo">
             <table><tr><th colspan="2">${d.title}</th></tr></table>
             ${contentHTML}
-            ${ctxTable(d.before, "Context-Before")}
-            ${ctxTable(d.after,  "Context-After")}
+            ${ctxTablesMultiple(d.before, "Context-Before")}
+            ${ctxTablesMultiple(d.after,  "Context-After")}
         </div>`;
     }
 

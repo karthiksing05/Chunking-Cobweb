@@ -24,7 +24,7 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script>
-    const data = {"title": "b59b4ccbdb", "left": [], "right": [], "before": [], "after": [], "children": [{"title": "f80d87d9a8", "left": [{"key": "CONCEPT-3758656767009291_1", "val": 1.0}, {"key": "CONCEPT-3758656767350875_3", "val": 1.0}, {"key": "CONCEPT-3758658487411125_13", "val": 1.0}], "right": [{"key": "chases", "val": 1.0}], "before": [], "after": [], "children": [{"title": "c8c84cef80", "left": [{"key": "a", "val": 1.0}], "right": [{"key": "cat", "val": 1.0}], "before": [], "after": [{"key": "chases", "val": 1.0}], "children": [{"title": "b7cf108f15", "left": [{"key": "a", "val": 1.0}], "right": [], "before": [], "after": [{"key": "cat", "val": 1.0}, {"key": "chases", "val": 0.5}], "children": []}, {"title": "783f82bcb8", "left": [{"key": "cat", "val": 1.0}], "right": [], "before": [{"key": "a", "val": 1.0}], "after": [{"key": "chases", "val": 1.0}], "children": []}]}, {"title": "3c5e63b2f5", "left": [{"key": "chases", "val": 1.0}], "right": [], "before": [{"key": "cat", "val": 1.0}, {"key": "a", "val": 0.5}], "after": [], "children": []}]}]};
+    const data = {"title": "36b8ea6fe3", "left": [], "right": [], "before": [], "after": [], "children": [{"title": "655c381560", "left": [{"key": "the", "val": 1.0}], "right": [], "before": [], "after": [[{"key": "woman", "val": 1.0}], [{"key": "sees", "val": 1.0}], [{"key": "the", "val": 1.0}]], "children": []}, {"title": "4ac08cf107", "left": [{"key": "woman", "val": 1.0}], "right": [], "before": [[{"key": "the", "val": 1.0}]], "after": [[{"key": "sees", "val": 1.0}], [{"key": "the", "val": 1.0}], [{"key": "man", "val": 1.0}]], "children": []}, {"title": "d9617a6cc8", "left": [{"key": "sees", "val": 1.0}], "right": [], "before": [[{"key": "woman", "val": 1.0}], [{"key": "the", "val": 1.0}]], "after": [[{"key": "the", "val": 1.0}], [{"key": "man", "val": 1.0}]], "children": []}, {"title": "08e0f050d2", "left": [{"key": "the", "val": 1.0}], "right": [], "before": [[{"key": "sees", "val": 1.0}], [{"key": "woman", "val": 1.0}], [{"key": "the", "val": 1.0}]], "after": [[{"key": "man", "val": 1.0}]], "children": []}, {"title": "c7183949b7", "left": [{"key": "man", "val": 1.0}], "right": [], "before": [[{"key": "the", "val": 1.0}], [{"key": "sees", "val": 1.0}], [{"key": "woman", "val": 1.0}]], "after": [], "children": []}]};
     const nodeW  = 280;
     const nodeH  = 130;
     const hGap   = 80;
@@ -97,6 +97,16 @@
             const rows = ctx.map(kv => `<tr><td>${kv.key}</td><td>${kv.val.toFixed(2)}</td></tr>`).join("");
             return `<div class="subtable"><b>${title}</b><table><tbody>${rows}</tbody></table></div>`;
         };
+        const ctxTablesMultiple = (arr, base) => {
+            if (!arr || arr.length === 0) return `<div class="subtable"><i>${base}: empty</i></div>`;
+            // if arr is already a single aggregated ctx-list (array of key/val objects), render one table
+            if (Array.isArray(arr) && arr.length > 0 && arr[0] && typeof arr[0].key !== 'undefined') {
+                return ctxTable(arr, base);
+            }
+            let out = "";
+            arr.forEach((ctx, i) => { out += ctxTable(ctx, `${base}${i}`); });
+            return out;
+        };
 
         // content: left and right are now lists of {key, val}
         let contentHTML = "";
@@ -119,8 +129,8 @@
         <div class="node-fo">
             <table><tr><th colspan="2">${d.title}</th></tr></table>
             ${contentHTML}
-            ${ctxTable(d.before, "Context-Before")}
-            ${ctxTable(d.after,  "Context-After")}
+            ${ctxTablesMultiple(d.before, "Context-Before")}
+            ${ctxTablesMultiple(d.after,  "Context-After")}
         </div>`;
     }
 

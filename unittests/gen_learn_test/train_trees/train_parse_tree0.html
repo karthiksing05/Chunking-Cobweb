@@ -24,7 +24,7 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script>
-    const data = {"title": "b9b5f140a6", "left": [], "right": [], "before": [], "after": [], "children": [{"title": "cd646cf834", "left": [{"key": "CONCEPT-3758656767009291_1", "val": 1.0}], "right": [{"key": "likes", "val": 1.0}], "before": [], "after": [], "children": [{"title": "140260ed10", "left": [{"key": "a", "val": 1.0}], "right": [{"key": "dog", "val": 1.0}], "before": [], "after": [{"key": "likes", "val": 1.0}], "children": [{"title": "071a740f4c", "left": [{"key": "a", "val": 1.0}], "right": [], "before": [], "after": [{"key": "dog", "val": 1.0}, {"key": "likes", "val": 0.5}], "children": []}, {"title": "1cfdd9e3d0", "left": [{"key": "dog", "val": 1.0}], "right": [], "before": [{"key": "a", "val": 1.0}], "after": [{"key": "likes", "val": 1.0}], "children": []}]}, {"title": "4eb8c7cf80", "left": [{"key": "likes", "val": 1.0}], "right": [], "before": [{"key": "dog", "val": 1.0}, {"key": "a", "val": 0.5}], "after": [], "children": []}]}]};
+    const data = {"title": "d025b5b559", "left": [], "right": [], "before": [], "after": [], "children": [{"title": "3959742604", "left": [{"key": "a", "val": 1.0}], "right": [], "before": [], "after": [[{"key": "man", "val": 1.0}], [{"key": "runs", "val": 1.0}]], "children": []}, {"title": "6ad0af0c43", "left": [{"key": "man", "val": 1.0}], "right": [], "before": [[{"key": "a", "val": 1.0}]], "after": [[{"key": "runs", "val": 1.0}]], "children": []}, {"title": "7468b3b796", "left": [{"key": "runs", "val": 1.0}], "right": [], "before": [[{"key": "man", "val": 1.0}], [{"key": "a", "val": 1.0}]], "after": [], "children": []}]};
     const nodeW  = 280;
     const nodeH  = 130;
     const hGap   = 80;
@@ -97,6 +97,16 @@
             const rows = ctx.map(kv => `<tr><td>${kv.key}</td><td>${kv.val.toFixed(2)}</td></tr>`).join("");
             return `<div class="subtable"><b>${title}</b><table><tbody>${rows}</tbody></table></div>`;
         };
+        const ctxTablesMultiple = (arr, base) => {
+            if (!arr || arr.length === 0) return `<div class="subtable"><i>${base}: empty</i></div>`;
+            // if arr is already a single aggregated ctx-list (array of key/val objects), render one table
+            if (Array.isArray(arr) && arr.length > 0 && arr[0] && typeof arr[0].key !== 'undefined') {
+                return ctxTable(arr, base);
+            }
+            let out = "";
+            arr.forEach((ctx, i) => { out += ctxTable(ctx, `${base}${i}`); });
+            return out;
+        };
 
         // content: left and right are now lists of {key, val}
         let contentHTML = "";
@@ -119,8 +129,8 @@
         <div class="node-fo">
             <table><tr><th colspan="2">${d.title}</th></tr></table>
             ${contentHTML}
-            ${ctxTable(d.before, "Context-Before")}
-            ${ctxTable(d.after,  "Context-After")}
+            ${ctxTablesMultiple(d.before, "Context-Before")}
+            ${ctxTablesMultiple(d.after,  "Context-After")}
         </div>`;
     }
 

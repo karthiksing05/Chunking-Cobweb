@@ -4,7 +4,7 @@
 
 Pat can probably fill this part in better than me, but the idea is almost a "compression" of memory by observing chunks and their compositionality. More frequent chunks should be compressed more often than less frequent chunks!
 
-**NOTE:** CobwebTree(1e-4, True, 0, True, True) is a good parameterization!
+**NOTE:** CobwebTree(1e-2, True, 0, True, True) is a good parameterization!
 
 ## Processes
 
@@ -48,28 +48,23 @@ From discussions with Pat on 11/21/2025, we have made some very important distin
 
 At our core, we're trying to only add chunks once we've aggregated enough frequency on them. It goes back to our original question on the necessity of chunks to begin with - chunks are, among other things, a way of compressing information in a valuable way. It follows intuitively that you would want to compress information such that the most frequently seen pattern are compressed often.
 
-Note that this implementation can be done with one hierarchy where nodes are tagged according to their real-ness - we really need to figure out three main questions:
+We really need to figure out three main questions:
 *   When a chunk goes from being virtual to being real
-    *   We need to organize some form of frequency cutoff based on Cobweb with respect to the amount of instances
-    *   This change needs to be performed by a path aggregation of SOME SORT
-    *   Although this feels like a CLASSIC basic-level definition application, we can get around this by finding the mean value of the sums of the counts of the nodes along the path that we categorize to in the virtual hierarchy (**I think we're onto something here!**)
+    *   If a chunk is recognized in the virtual hierarchy, we can say that it's real?
 *   Which chunk is the best real chunk, of the real chunks categorized (note that this is only relevant if our prospective chunk definitions are overlapping)
     *   This can be done quite simply according to our current metric, which scores the given chunk with respect to what it's seen
     *   I'm not actually sure what the "best" chunk is and am hoping we avoid this altogether, but we know that a chunk is a good fit if we've seen it before
     *   This does raise a bit of a larger concern - perhaps we need to score based on the pathsum
 *   We need to define whether chunks are real or virtual to begin with
-    *   The threshold for when a virtual chunk becomes real is probably a good step here - we can find out whether that's good enough to establish value
+    *   We can do this through a recognition in the real hierarchy - assume that all chunks which are not seen in the real hierarchy are virtual
 *   We need to figure out the best way to term the idea of "recognition" - we can use this to define a lot of the above works
-    *   A normalized log-probability will do the trick quite well I feel (according to some preliminary conversations with Pat) but we really need to lock in on that
+    *   From discussions with Chris + Pat - the score function now is the maxed log-likelihood along all of the nodes along the path
 
-We're also going to program the change where we separate context into individual attributes in addition to content for positional encoding and further separation for clarity. This should separate our chunks cleanly.
-
-**NEW and TESTABLE generalization:**
-*   Can we just add every possible candidate to our long-term memory? This would consist of all valid parses plus all top-level candidates
-*   We're probably going to need to adjust the scoring mechanic on some level to include a frequency-based aggregation by the path sum, and we'll also need a separate score to confirm that our categorization is in fact good
-    *   Our separate score already exists in the form of an averaged log-probability
-    *   Let's start by adding all of the potential candidate chunks at the root level to a long-term hierarchy and then figuring out what heuristics we can derive from there
-    *   We basically just start programming this heuristic and then hopefully we can extend it to long-term data
+#### **TESTABLE GENERALIZATION SUCCESS!!**
+*   Rather than creating two separate hierarchies, we create a single hierarchy and not only add all chunks to that hierarchy, but all unparsed "virtual" candidate chunks as well - we then let our recognition metric derive from there
+*   I'm lowk a big fan of this as it gets around the multiple hierarchy approach and requires MINIMAL code changes to our existing framework.
+*   One thing that we need to do which is relatively important is find what thresholds work as well as a formula (theoretical or empirical) for thresholding but this looks GREAT
+*   In retrospect, this actually makes perfect sense, because we are storing the probability of a given chunk existing using Cobweb as the hierarchy, and by adding all unparsed instances, we are letting probabilities for each of them and their generalizations accumulate over time. 
 
 ## Design Decisions
 

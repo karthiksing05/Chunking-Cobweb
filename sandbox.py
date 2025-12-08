@@ -3,12 +3,18 @@ Sandbox!
 
 Currently working on testing what happens when we just add the first granularity of candidate chunks
 to Cobweb and see how the hierarchy emerges.
+
+So far, a safe score that we're seeing is -5 for this setting right here. Everything is
+equally valuable earlier (obviously)!
+
+What we can do is store costs prior to our chunking to acknowledge our chunks
 """
 
 from util.cfg import generate, TEST_CORPUS2, TEST_GRAMMAR2
-from parse import LanguageChunkingParser
+from parse import LanguageChunkingParser, FiniteParseTree, custom_categorize
 from cobweb.cobweb_discrete import CobwebTree
 import os
+from pprint import pprint
 
 if os.path.exists("sandbox/sandbox_ltm.png"):
     os.remove("sandbox/sandbox_ltm.png")
@@ -65,7 +71,7 @@ def get_chunk_candidates(sentence: str, value_to_id: dict, context_length: int =
     return insts
 
 
-num_sentences = 50
+num_sentences = 20
 document = []
 
 for _ in range(num_sentences):
@@ -74,7 +80,7 @@ for _ in range(num_sentences):
 
 parser = LanguageChunkingParser(TEST_CORPUS2, context_length=CONTEXT_LENGTH)
 
-tree = CobwebTree(1e-4, True, 0, True, True)
+tree = CobwebTree(1e-2, True, 0, True, True)
 
 for sentence in document:
     instances = get_chunk_candidates(sentence, parser.value_to_id)
@@ -84,6 +90,28 @@ for sentence in document:
 
 parser.cobweb_drawer.save_basic_level_subtrees(tree.root, "sandbox")
 
+print("All sentences:")
+pprint(document)
+
 while not os.path.exists("sandbox/sandbox_ltm.png"):
     parser.cobweb_drawer.draw_tree(tree.root, "sandbox/sandbox_ltm")
 
+test_sentence = input("enter input sentence: ")
+candidates = get_chunk_candidates(test_sentence, parser.value_to_id)
+
+print("Test Sentence:", test_sentence)
+
+costs = []
+counts = []
+
+for i, candidate in enumerate(candidates):
+    print(f"Candidate {i}:")
+    node, categorize_ids, node_categorize_path = custom_categorize(candidate, tree)
+    print("Stats:")
+    score_stats = FiniteParseTree._score_function(node_categorize_path, candidate)
+    pprint(score_stats)
+    costs.append(score_stats["cost"])
+    counts.append(score_stats["best_count"])
+
+print(costs)
+print(counts)

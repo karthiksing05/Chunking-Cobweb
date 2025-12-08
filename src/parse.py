@@ -230,7 +230,7 @@ class CompositeParseNode:
                 src = node_left.context_before[j]
                 new_inst_dict[i] = dict([(key, 1) for key in (src or {}).keys()])
             else:
-                new_inst_dict[i] = {}
+                new_inst_dict[i] = {0: 0}
 
         # Fill context-after keys (context_length+2 .. 2*context_length+1)
         for i in range(context_length + 2, 2 * context_length + 2):
@@ -239,7 +239,7 @@ class CompositeParseNode:
                 src = node_right.context_after[j]
                 new_inst_dict[i] = dict([(key, 1) for key in (src or {}).keys()])
             else:
-                new_inst_dict[i] = {}
+                new_inst_dict[i] = {0: 0}
 
         return new_inst_dict
 
@@ -604,18 +604,26 @@ class FiniteParseTree:
         *   'Smoothing' parameter is what `alpha` is given by: lower smoothing parameters result
             in higher order functionality
         *   Plan for recognition is to take the max log-probability of the nodes along the path
-        *   For our convenience, we can normalize this log-probability by the complexity of each
-            node that we sort through
+        *   We're going to use the regular log-probability right now and then potentially normalize
+            later
+        *   Should we acknowledge the counts in this score?
+
+        Trends noticed so far:
+        *   If we've seen the exact instance before, we see the node probability go to zero
+        *   Perhaps the methodology is to save log-probabilities with the 
         """
 
         raw_node_log_probs = []
         node_log_probs = []
-        best_log_prob = float('inf')
+        path_counts = []
+        best_log_prob = float('-inf')
+        best_log_prob_idx = 0
+        best_avg_log_prob = float('-inf')
 
-        for node in path:
+        for i, node in enumerate(path):
             
             # 1. Compute raw log-probability (uses node’s built-in method)
-            log_prob = node.log_prob_instance(instance)
+            log_prob = node.log_prob_class_given_instance(instance, True)
 
             # 4. Compute node complexity (sum of all av_count entries)
             node_complexity = sum(
@@ -626,24 +634,38 @@ class FiniteParseTree:
                 cnt for attr_dict in instance.values() for cnt in attr_dict.values()
             )
 
+            path_counts.append(node.count)
+
             # 3. Normalize log-probability
-            if inst_complexity == 0:
+            if node_complexity == 0:
                 avg_log_prob = 0
             else:
-                avg_log_prob = log_prob / inst_complexity
+                 # TODO this is broken but it's perhaps fine because we're running raw log probs instead??
+                avg_log_prob = log_prob / node_complexity
 
-            if avg_log_prob < best_log_prob:
-                best_log_prob = avg_log_prob
+            if log_prob > best_log_prob:
+                best_log_prob = log_prob
+                best_log_prob_idx = i
+
+            if avg_log_prob > best_avg_log_prob:
+                best_avg_log_prob = avg_log_prob
 
             raw_node_log_probs.append(log_prob)
             node_log_probs.append(avg_log_prob)
 
+
+        normed_count = sum(path_counts) / len(path_counts)
+
+        # print([node.concept_hash() for node in path])
+
         score_data = {
             'raw_log_probs': str(raw_node_log_probs),
             'avg_log_probs': str(node_log_probs),
-            'candidate_complexity': node_complexity,
+            'candidate_counts': str(path_counts),
+            'best_count': path_counts[best_log_prob_idx],
             'inst_complexity': inst_complexity,
-            'cost': best_log_prob
+            'cost': best_log_prob if best_log_prob != 0 else -1e9,
+            'best_avg_log_prob': best_avg_log_prob
         }
 
         if debug:
@@ -990,9 +1012,6 @@ class FiniteParseTree:
         *   A float to represent the tree continually updating until no candidates
             proposed have a valuable enough addition.
 
-        IMPORTANT PARAM: "content_ids" --> can be "longterm" to represent that composite nodes,
-        after content, can inherit from localized IDs
-
         Process for creating a non-terminal parse node:
         *   initialize the parse node based on an instance dictionary
         *   assign it its respective concept label
@@ -1023,10 +1042,11 @@ class FiniteParseTree:
                     continue
 
                 score = res.get("score", float("-inf"))
-                if best is None or score < best[0]: # TODO change this depending on whether we are minimizing or maximizing score
+                if best is None or score > best[0]: # TODO change this depending on whether we are minimizing or maximizing score
                     best = (score, res)
 
             if best is None:
+                print("BEST IS NONE??")
                 break
 
             if isinstance(end_behavior, (int, float)):
@@ -1053,10 +1073,10 @@ class FiniteParseTree:
         return True
         
 
-    def get_chunk_instances(self):
+    def get_parsed_instances(self):
         """
         Primary method that returns all available nonterminals as instances
-        ready to be passed into the long-term hierarchy
+        ready to be passed into the long-term hierarchy!
         """
 
         instances = []
@@ -1074,6 +1094,39 @@ class FiniteParseTree:
             dfs_insts(child)
 
         return instances
+    
+    def get_unparsed_instances(self):
+        """
+        This is a helper function to return the top-level of unparsed instances.
+        """
+
+        instances = []
+
+        parentless_pairs = self.get_parentless_pairs()
+
+        for pair in parentless_pairs:
+
+            left_word_index = pair["left_word_index"]
+            right_word_index = pair["right_word_index"]
+
+            left_node = self._find_root_child_by_index(left_word_index)
+            right_node = self._find_root_child_by_index(right_word_index)
+
+            merge_inst = CompositeParseNode.create_merge_instance(left_node, right_node, self.context_length)
+
+            instances.append(merge_inst)
+
+        return instances
+
+    def get_all_instances(self) -> list:
+        """
+        The primary method we now use to add to our long-term hierarchy!
+
+        In addition to returning a list of all parsed instances within the FiniteParseTree, this
+        function returns the top-level of unparsed instances to be added 
+        """
+
+        return self.get_parsed_instances() + self.get_unparsed_instances()
 
     def visualize(self, out_base="parse_tree", render_png=True):
         """
@@ -1927,7 +1980,7 @@ class IncrementalParseTree:
     def build(self, corpus):
         pass
 
-    def get_chunk_instances(self):
+    def get_all_instances(self):
         pass
 
     def visualize(self, out_base="parse_tree", render_png=True):
@@ -2236,7 +2289,7 @@ class LanguageChunkingParser:
 
     def __init__(self, value_corpus, context_length=3, merge_split=True):
 
-        self.ltm_hierarchy = CobwebTree(1e-4, True, 0, True, True)
+        self.ltm_hierarchy = CobwebTree(1e-2, True, 0, True, True)
 
         self.id_to_value = ["EMPTYNULL"]
         for x in value_corpus:
@@ -2361,7 +2414,7 @@ class LanguageChunkingParser:
             print(f"Adding parse tree for window, \"{parse_tree.window}\"")
 
         # adding all new instances
-        insts = parse_tree.get_chunk_instances()
+        insts = parse_tree.get_all_instances()
 
         def print_actions(actions):
             if not debug:

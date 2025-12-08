@@ -24,7 +24,7 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script>
-    const data = {"title": "fa383c7f3f", "left": [], "right": [], "before": [], "after": [], "children": [{"title": "4d1e8918f9", "left": [{"key": "CONCEPT-3758656767009291_1", "val": 1.0}, {"key": "CONCEPT-3758656767350875_3", "val": 1.0}, {"key": "CONCEPT-3758658487409750_12", "val": 1.0}, {"key": "CONCEPT-3758658487437125_17", "val": 1.0}, {"key": "CONCEPT-3758658949321041_36", "val": 1.0}, {"key": "CONCEPT-3758659499909666_58", "val": 1.0}, {"key": "CONCEPT-3758660143155958_71", "val": 1.0}], "right": [{"key": "dog", "val": 1.0}], "before": [], "after": [], "children": [{"title": "71359f50eb", "left": [{"key": "CONCEPT-3758656767009291_1", "val": 1.0}, {"key": "CONCEPT-3758656767350875_3", "val": 1.0}, {"key": "CONCEPT-3758658487409750_12", "val": 1.0}, {"key": "CONCEPT-3758658487437125_17", "val": 1.0}, {"key": "CONCEPT-3758658949321041_36", "val": 1.0}, {"key": "CONCEPT-3758659499909666_58", "val": 1.0}, {"key": "CONCEPT-3758660143155958_71", "val": 1.0}], "right": [{"key": "a", "val": 1.0}], "before": [], "after": [{"key": "dog", "val": 1.0}], "children": [{"title": "b6ce3389a8", "left": [{"key": "CONCEPT-3758656767009291_1", "val": 1.0}, {"key": "CONCEPT-3758656767350875_3", "val": 1.0}, {"key": "CONCEPT-3758658487409750_12", "val": 1.0}, {"key": "CONCEPT-3758658487436041_16", "val": 1.0}, {"key": "CONCEPT-3758658949295791_30", "val": 1.0}, {"key": "CONCEPT-3758663974900125_476", "val": 1.0}, {"key": "CONCEPT-3758666001813208_505", "val": 1.0}], "right": [{"key": "likes", "val": 1.0}], "before": [], "after": [{"key": "a", "val": 1.0}, {"key": "dog", "val": 0.5}], "children": [{"title": "354389a427", "left": [{"key": "a", "val": 1.0}], "right": [{"key": "dog", "val": 1.0}], "before": [], "after": [{"key": "likes", "val": 1.0}, {"key": "a", "val": 0.5}, {"key": "dog", "val": 0.3333333333333333}], "children": [{"title": "36154e94c2", "left": [{"key": "a", "val": 1.0}], "right": [], "before": [], "after": [{"key": "dog", "val": 1.0}, {"key": "likes", "val": 0.5}, {"key": "a", "val": 0.3333333333333333}], "children": []}, {"title": "2d023d26c8", "left": [{"key": "dog", "val": 1.0}], "right": [], "before": [{"key": "a", "val": 1.0}], "after": [{"key": "likes", "val": 1.0}, {"key": "a", "val": 0.5}, {"key": "dog", "val": 0.3333333333333333}], "children": []}]}, {"title": "3f3eb9a977", "left": [{"key": "likes", "val": 1.0}], "right": [], "before": [{"key": "dog", "val": 1.0}, {"key": "a", "val": 0.5}], "after": [{"key": "a", "val": 1.0}, {"key": "dog", "val": 0.5}], "children": []}]}, {"title": "a0dc8c34a1", "left": [{"key": "a", "val": 1.0}], "right": [], "before": [{"key": "likes", "val": 1.0}, {"key": "dog", "val": 0.5}, {"key": "a", "val": 0.3333333333333333}], "after": [{"key": "dog", "val": 1.0}], "children": []}]}, {"title": "4e8a6f1cea", "left": [{"key": "dog", "val": 1.0}], "right": [], "before": [{"key": "a", "val": 1.0}, {"key": "likes", "val": 0.5}, {"key": "dog", "val": 0.3333333333333333}], "after": [], "children": []}]}]};
+    const data = {"title": "5c096dd5ca", "left": [], "right": [], "before": [], "after": [], "children": [{"title": "a1a8459565", "left": [{"key": "a", "val": 1.0}], "right": [], "before": [], "after": [[{"key": "dog", "val": 1.0}], [{"key": "likes", "val": 1.0}]], "children": []}, {"title": "b726d54fda", "left": [{"key": "dog", "val": 1.0}], "right": [], "before": [[{"key": "a", "val": 1.0}]], "after": [[{"key": "likes", "val": 1.0}]], "children": []}, {"title": "56f073bbdc", "left": [{"key": "likes", "val": 1.0}], "right": [], "before": [[{"key": "dog", "val": 1.0}], [{"key": "a", "val": 1.0}]], "after": [], "children": []}]};
     const nodeW  = 280;
     const nodeH  = 130;
     const hGap   = 80;
@@ -97,6 +97,16 @@
             const rows = ctx.map(kv => `<tr><td>${kv.key}</td><td>${kv.val.toFixed(2)}</td></tr>`).join("");
             return `<div class="subtable"><b>${title}</b><table><tbody>${rows}</tbody></table></div>`;
         };
+        const ctxTablesMultiple = (arr, base) => {
+            if (!arr || arr.length === 0) return `<div class="subtable"><i>${base}: empty</i></div>`;
+            // if arr is already a single aggregated ctx-list (array of key/val objects), render one table
+            if (Array.isArray(arr) && arr.length > 0 && arr[0] && typeof arr[0].key !== 'undefined') {
+                return ctxTable(arr, base);
+            }
+            let out = "";
+            arr.forEach((ctx, i) => { out += ctxTable(ctx, `${base}${i}`); });
+            return out;
+        };
 
         // content: left and right are now lists of {key, val}
         let contentHTML = "";
@@ -119,8 +129,8 @@
         <div class="node-fo">
             <table><tr><th colspan="2">${d.title}</th></tr></table>
             ${contentHTML}
-            ${ctxTable(d.before, "Context-Before")}
-            ${ctxTable(d.after,  "Context-After")}
+            ${ctxTablesMultiple(d.before, "Context-Before")}
+            ${ctxTablesMultiple(d.after,  "Context-After")}
         </div>`;
     }
 
