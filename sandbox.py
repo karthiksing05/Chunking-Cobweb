@@ -19,7 +19,7 @@ from pprint import pprint
 if os.path.exists("sandbox/sandbox_ltm.png"):
     os.remove("sandbox/sandbox_ltm.png")
 
-CONTEXT_LENGTH = 2
+CONTEXT_LENGTH = 3
 
 # function to scrape instances from sentence (not using the parse tree stuff for this)
 # that'll eventually be rewritten!
@@ -70,8 +70,7 @@ def get_chunk_candidates(sentence: str, value_to_id: dict, context_length: int =
 
     return insts
 
-
-num_sentences = 20
+num_sentences = 1
 document = []
 
 for _ in range(num_sentences):
@@ -80,7 +79,7 @@ for _ in range(num_sentences):
 
 parser = LanguageChunkingParser(TEST_CORPUS2, context_length=CONTEXT_LENGTH)
 
-tree = CobwebTree(1e-2, True, 0, True, True)
+tree = CobwebTree(10, False, 0, True, False)
 
 for sentence in document:
     instances = get_chunk_candidates(sentence, parser.value_to_id)
@@ -103,6 +102,8 @@ print("Test Sentence:", test_sentence)
 
 costs = []
 counts = []
+root_costs = []
+best_log_prob_idxs = []
 
 for i, candidate in enumerate(candidates):
     print(f"Candidate {i}:")
@@ -111,7 +112,11 @@ for i, candidate in enumerate(candidates):
     score_stats = FiniteParseTree._score_function(node_categorize_path, candidate)
     pprint(score_stats)
     costs.append(score_stats["cost"])
-    counts.append(score_stats["best_count"])
+    counts.append(score_stats["normed_count"])
+    root_costs.append(score_stats["root_cost"])
+    best_log_prob_idxs.append(score_stats["best_log_prob_idx"])
 
 print(costs)
 print(counts)
+print(root_costs)
+print(best_log_prob_idxs)

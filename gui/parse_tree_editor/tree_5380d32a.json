@@ -1,0 +1,173 @@
+{
+  "window": "a man sees",
+  "context_length": 3,
+  "id_to_value": [
+    "EMPTYNULL",
+    "the",
+    "a",
+    "dog",
+    "cat",
+    "man",
+    "woman",
+    "runs",
+    "sees",
+    "likes",
+    "chases",
+    "CONCEPT-3031356348337416_1",
+    "CONCEPT-3031366443947291_2",
+    "CONCEPT-3031366443967750_3",
+    "CONCEPT-3031366444108291_5",
+    "CONCEPT-3031366444113791_6",
+    "CONCEPT-3031366444175583_8",
+    "CONCEPT-3031366444179625_9",
+    "CONCEPT-3031378443872708_12",
+    "CONCEPT-3031378443878625_13",
+    "CONCEPT-3031378443975125_16",
+    "CONCEPT-3031378443979041_17",
+    "CONCEPT-3031378444092750_20",
+    "CONCEPT-3031378444097458_21",
+    "CONCEPT-3031378444265875_25",
+    "CONCEPT-3031378444271291_26",
+    "CONCEPT-3031386231588916_30",
+    "CONCEPT-3031386231621541_31",
+    "CONCEPT-3031386231784625_34",
+    "CONCEPT-3031386231790125_35",
+    "CONCEPT-3031386231889791_39",
+    "CONCEPT-3031386231894416_40",
+    "CONCEPT-3031386231998250_44",
+    "CONCEPT-3031386232026166_46",
+    "CONCEPT-3031386232030416_47",
+    "CONCEPT-3031392316895375_51",
+    "CONCEPT-3031392316902291_52",
+    "CONCEPT-3031392317054125_56",
+    "CONCEPT-3031392317059708_57"
+  ],
+  "value_to_id": {
+    "EMPTYNULL": 0,
+    "the": 1,
+    "a": 2,
+    "dog": 3,
+    "cat": 4,
+    "man": 5,
+    "woman": 6,
+    "runs": 7,
+    "sees": 8,
+    "likes": 9,
+    "chases": 10,
+    "CONCEPT-3031356348337416_1": 11,
+    "CONCEPT-3031366443947291_2": 12,
+    "CONCEPT-3031366443967750_3": 13,
+    "CONCEPT-3031366444108291_5": 14,
+    "CONCEPT-3031366444113791_6": 15,
+    "CONCEPT-3031366444175583_8": 16,
+    "CONCEPT-3031366444179625_9": 17,
+    "CONCEPT-3031378443872708_12": 18,
+    "CONCEPT-3031378443878625_13": 19,
+    "CONCEPT-3031378443975125_16": 20,
+    "CONCEPT-3031378443979041_17": 21,
+    "CONCEPT-3031378444092750_20": 22,
+    "CONCEPT-3031378444097458_21": 23,
+    "CONCEPT-3031378444265875_25": 24,
+    "CONCEPT-3031378444271291_26": 25,
+    "CONCEPT-3031386231588916_30": 26,
+    "CONCEPT-3031386231621541_31": 27,
+    "CONCEPT-3031386231784625_34": 28,
+    "CONCEPT-3031386231790125_35": 29,
+    "CONCEPT-3031386231889791_39": 30,
+    "CONCEPT-3031386231894416_40": 31,
+    "CONCEPT-3031386231998250_44": 32,
+    "CONCEPT-3031386232026166_46": 33,
+    "CONCEPT-3031386232030416_47": 34,
+    "CONCEPT-3031392316895375_51": 35,
+    "CONCEPT-3031392316902291_52": 36,
+    "CONCEPT-3031392317054125_56": 37,
+    "CONCEPT-3031392317059708_57": 38
+  },
+  "nodes": [
+    {
+      "node_type": "composite",
+      "title": "09e1685863",
+      "position_idx": null,
+      "content_left": null,
+      "content_right": null,
+      "categorize_path": null,
+      "context_before": null,
+      "context_after": null,
+      "concept_label": null,
+      "global_root": true,
+      "parent": null,
+      "children": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "node_type": "primitive",
+      "title": "c058f34ffd",
+      "position_idx": 0,
+      "content": {
+        "2": 1.0,
+        "0": 0
+      },
+      "context_before": [],
+      "context_after": [
+        {
+          "5": 1
+        },
+        {
+          "8": 1
+        }
+      ],
+      "concept_label": null,
+      "global_root": false,
+      "parent": 0,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "effab9c43b",
+      "position_idx": 1,
+      "content": {
+        "5": 1.0,
+        "0": 0
+      },
+      "context_before": [
+        {
+          "2": 1
+        }
+      ],
+      "context_after": [
+        {
+          "8": 1
+        }
+      ],
+      "concept_label": null,
+      "global_root": false,
+      "parent": 0,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "5894323e4d",
+      "position_idx": 2,
+      "content": {
+        "8": 1.0,
+        "0": 0
+      },
+      "context_before": [
+        {
+          "5": 1
+        },
+        {
+          "2": 1
+        }
+      ],
+      "context_after": [],
+      "concept_label": null,
+      "global_root": false,
+      "parent": 0,
+      "children": []
+    }
+  ]
+}

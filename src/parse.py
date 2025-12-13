@@ -46,7 +46,7 @@ class PrimitiveParseNode:
 
         self.title = uuid.uuid4().hex[:10] # random id
 
-        self.content = dict([(key, 1) for key in elements[anchor_idx]])
+        self.content = dict([(key, 1 / len(elements[anchor_idx])) for key in elements[anchor_idx]])
 
         self.context_before = list(reversed([dict([(key, 1) for key in elements[i]]) for i in range(0, anchor_idx)]))
         self.context_after = [dict([(key, 1) for key in elements[i]]) for i in range(anchor_idx + 1, len(elements))]
@@ -212,12 +212,12 @@ class CompositeParseNode:
         if type(node_left) == PrimitiveParseNode:
             new_inst_dict[0] = node_left.content
         else:
-            new_inst_dict[0] = dict([(key, 1) for key in node_left.categorize_path])
+            new_inst_dict[0] = dict([(key, 1 / len(node_left.categorize_path)) for key in node_left.categorize_path])
 
         if type(node_right) == PrimitiveParseNode:
             new_inst_dict[1] = node_right.content
         else:
-            new_inst_dict[1] = dict([(key, 1) for key in node_right.categorize_path])
+            new_inst_dict[1] = dict([(key, 1 / len(node_right.categorize_path)) for key in node_right.categorize_path])
 
         new_inst_dict[0][0] = 0
         new_inst_dict[1][0] = 0
@@ -228,7 +228,7 @@ class CompositeParseNode:
             # node_left.context_before is a list of dicts (may be shorter for primitives)
             if getattr(node_left, "context_before", None) and j < len(node_left.context_before):
                 src = node_left.context_before[j]
-                new_inst_dict[i] = dict([(key, 1) for key in (src or {}).keys()])
+                new_inst_dict[i] = dict([(key, 1 / len((src or {}).keys())) for key in (src or {}).keys()])
             else:
                 new_inst_dict[i] = {0: 0}
 
@@ -237,7 +237,7 @@ class CompositeParseNode:
             j = i - (context_length + 2)
             if getattr(node_right, "context_after", None) and j < len(node_right.context_after):
                 src = node_right.context_after[j]
-                new_inst_dict[i] = dict([(key, 1) for key in (src or {}).keys()])
+                new_inst_dict[i] = dict([(key, 1 / len((src or {}).keys())) for key in (src or {}).keys()])
             else:
                 new_inst_dict[i] = {0: 0}
 
@@ -277,14 +277,14 @@ class CompositeParseNode:
         for i in range(2, (self.context_length + 1) + 1):
             idx = i - 2
             if self.context_before and idx < len(self.context_before):
-                new_inst[i] = dict([(key, 1) for key in self.context_before[idx]])
+                new_inst[i] = dict([(key, 1 / len(self.context_before[idx])) for key in self.context_before[idx]])
             else:
                 new_inst[i] = {}
 
         for i in range(self.context_length + 2, (2 * self.context_length + 1) + 1):
             idx = i - (self.context_length + 2)
             if self.context_after and idx < len(self.context_after):
-                new_inst[i] = dict([(key, 1) for key in self.context_after[idx]])
+                new_inst[i] = dict([(key, 1 / len(self.context_after[idx])) for key in self.context_after[idx]])
             else:
                 new_inst[i] = {}
 
@@ -623,7 +623,11 @@ class FiniteParseTree:
         for i, node in enumerate(path):
             
             # 1. Compute raw log-probability (uses node’s built-in method)
+            # log_prob = node.log_prob_class_given_instance(instance, True)
             log_prob = node.log_prob_class_given_instance(instance, True)
+
+            if math.isnan(log_prob) or log_prob == 0:
+                log_prob = -1e8
 
             # 4. Compute node complexity (sum of all av_count entries)
             node_complexity = sum(
@@ -641,7 +645,7 @@ class FiniteParseTree:
                 avg_log_prob = 0
             else:
                  # TODO this is broken but it's perhaps fine because we're running raw log probs instead??
-                avg_log_prob = log_prob / node_complexity
+                avg_log_prob = log_prob / (node_complexity - 1)
 
             if log_prob > best_log_prob:
                 best_log_prob = log_prob
@@ -657,14 +661,16 @@ class FiniteParseTree:
         normed_count = sum(path_counts) / len(path_counts)
 
         # print([node.concept_hash() for node in path])
-
+        
         score_data = {
             'raw_log_probs': str(raw_node_log_probs),
             'avg_log_probs': str(node_log_probs),
             'candidate_counts': str(path_counts),
-            'best_count': path_counts[best_log_prob_idx],
+            'normed_count': normed_count,
+            'best_log_prob_idx': best_log_prob_idx,
             'inst_complexity': inst_complexity,
-            'cost': best_log_prob if best_log_prob != 0 else -1e9,
+            'cost': best_log_prob, #/ (path_counts[best_log_prob_idx] - 1),
+            'root_cost': raw_node_log_probs[0],
             'best_avg_log_prob': best_avg_log_prob
         }
 
@@ -2289,7 +2295,7 @@ class LanguageChunkingParser:
 
     def __init__(self, value_corpus, context_length=3, merge_split=True):
 
-        self.ltm_hierarchy = CobwebTree(1e-2, True, 0, True, True)
+        self.ltm_hierarchy = CobwebTree(10, False, 0, True, False)
 
         self.id_to_value = ["EMPTYNULL"]
         for x in value_corpus:

@@ -8,9 +8,9 @@ import uuid
 app = Flask(__name__)
 
 LEARNING_ON = True
-PREBUILD_TREES = True
+PREBUILD_TREES = False
 CONTEXT_LENGTH = 3
-LOAD_LTM = "data/grammar2_partialparse_ct3/ltm"
+LOAD_LTM = ""
 
 # --- Initialize parser and LTM ---
 if LOAD_LTM != "":
