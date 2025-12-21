@@ -1,0 +1,191 @@
+{
+  "window": "the woman likes a cat",
+  "context_length": 3,
+  "id_to_value": [
+    "EMPTYNULL",
+    "the",
+    "a",
+    "dog",
+    "cat",
+    "man",
+    "woman",
+    "runs",
+    "sees",
+    "likes",
+    "chases",
+    "CONCEPT-3445297828921875_1"
+  ],
+  "value_to_id": {
+    "EMPTYNULL": 0,
+    "the": 1,
+    "a": 2,
+    "dog": 3,
+    "cat": 4,
+    "man": 5,
+    "woman": 6,
+    "runs": 7,
+    "sees": 8,
+    "likes": 9,
+    "chases": 10,
+    "CONCEPT-3445297828921875_1": 11
+  },
+  "nodes": [
+    {
+      "node_type": "composite",
+      "title": "8f5b9c5da3",
+      "position_idx": null,
+      "content_left": null,
+      "content_right": null,
+      "categorize_path": null,
+      "context_before": null,
+      "context_after": null,
+      "concept_label": null,
+      "global_root": true,
+      "parent": null,
+      "children": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "node_type": "primitive",
+      "title": "3339109265",
+      "position_idx": 0,
+      "content": {
+        "1": 1.0,
+        "0": 0
+      },
+      "context_before": [],
+      "context_after": [
+        {
+          "6": 1
+        },
+        {
+          "9": 1
+        },
+        {
+          "2": 1
+        }
+      ],
+      "concept_label": null,
+      "global_root": false,
+      "parent": 0,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "b2da002b97",
+      "position_idx": 1,
+      "content": {
+        "6": 1.0,
+        "0": 0
+      },
+      "context_before": [
+        {
+          "1": 1
+        }
+      ],
+      "context_after": [
+        {
+          "9": 1
+        },
+        {
+          "2": 1
+        },
+        {
+          "4": 1
+        }
+      ],
+      "concept_label": null,
+      "global_root": false,
+      "parent": 0,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "ea7cc9d9bf",
+      "position_idx": 2,
+      "content": {
+        "9": 1.0,
+        "0": 0
+      },
+      "context_before": [
+        {
+          "6": 1
+        },
+        {
+          "1": 1
+        }
+      ],
+      "context_after": [
+        {
+          "2": 1
+        },
+        {
+          "4": 1
+        }
+      ],
+      "concept_label": null,
+      "global_root": false,
+      "parent": 0,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "f40d1b026b",
+      "position_idx": 3,
+      "content": {
+        "2": 1.0,
+        "0": 0
+      },
+      "context_before": [
+        {
+          "9": 1
+        },
+        {
+          "6": 1
+        },
+        {
+          "1": 1
+        }
+      ],
+      "context_after": [
+        {
+          "4": 1
+        }
+      ],
+      "concept_label": null,
+      "global_root": false,
+      "parent": 0,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "73792fbf62",
+      "position_idx": 4,
+      "content": {
+        "4": 1.0,
+        "0": 0
+      },
+      "context_before": [
+        {
+          "2": 1
+        },
+        {
+          "9": 1
+        },
+        {
+          "6": 1
+        }
+      ],
+      "context_after": [],
+      "concept_label": null,
+      "global_root": false,
+      "parent": 0,
+      "children": []
+    }
+  ]
+}

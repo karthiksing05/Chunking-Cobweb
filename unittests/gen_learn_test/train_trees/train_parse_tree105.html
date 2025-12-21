@@ -1,0 +1,140 @@
+<!doctype html>
+    <html>
+    <head>
+    <meta charset="utf-8"/>
+    <title>Parse Tree</title>
+    <style>
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    #tree-container { display: inline-block; }
+    .link { fill: none; stroke: #9aa1a9; stroke-width: 1.5px; }
+    .node-box { stroke: #444; fill: #fff; rx: 8; ry: 8; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.15)); }
+    .node-fo table { border-collapse: collapse; font-size: 12px; margin: 4px 0; }
+    .node-fo th, .node-fo td { border: 1px solid #888; padding: 2px 6px; }
+    .node-fo th { background: #f3f5f7; font-weight: 600; }
+    .section-title { font-weight: bold; margin-top: 4px; }
+    .section { margin-top: 10px; margin-bottom: 10px; }
+    .subtable b { display: inline-block; margin: 6px 0 2px; }
+    .subtable table { border-collapse: collapse; }
+    .subtable td { border: 1px solid #bbb; padding: 1px 4px; }
+    </style>
+    </head>
+    <body>
+    <div id="tree-container">
+    <div id="tree"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script>
+    const data = {"title": "dc06f49be9", "left": [], "right": [], "before": [], "after": [], "children": [{"title": "38e07b7c88", "left": [{"key": "CONCEPT-3444995209489666_1", "val": 0.023809523809523808}, {"key": "CONCEPT-3444995209785708_3", "val": 0.023809523809523808}, {"key": "CONCEPT-3444996885104916_17", "val": 0.023809523809523808}, {"key": "CONCEPT-3444997320131583_25", "val": 0.023809523809523808}, {"key": "CONCEPT-3445000277912333_91", "val": 0.023809523809523808}, {"key": "CONCEPT-3445001644147458_279", "val": 0.023809523809523808}, {"key": "CONCEPT-3445006316285916_804", "val": 0.023809523809523808}], "right": [{"key": "sees", "val": 1.0}], "before": [[], [], []], "after": [[], [], []], "children": [{"title": "cd8ca8744f", "left": [{"key": "a", "val": 1.0}], "right": [{"key": "man", "val": 1.0}], "before": [[], [], []], "after": [[{"key": "sees", "val": 1.0}], [], []], "children": [{"title": "9762d1de9b", "left": [{"key": "a", "val": 1.0}], "right": [], "before": [], "after": [[{"key": "man", "val": 1.0}], [{"key": "sees", "val": 1.0}]], "children": []}, {"title": "6b2d01d08d", "left": [{"key": "man", "val": 1.0}], "right": [], "before": [[{"key": "a", "val": 1.0}]], "after": [[{"key": "sees", "val": 1.0}]], "children": []}]}, {"title": "dee68b7a07", "left": [{"key": "sees", "val": 1.0}], "right": [], "before": [[{"key": "man", "val": 1.0}], [{"key": "a", "val": 1.0}]], "after": [], "children": []}]}]};
+    const nodeW  = 280;
+    const nodeH  = 130;
+    const hGap   = 80;
+    const vGap   = 150;
+
+    const root = d3.hierarchy(data);
+    const layout = d3.tree().nodeSize([nodeW + hGap, nodeH + vGap]);
+    layout(root);
+
+    // compute bounds
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    root.each(d => {
+        if (d.x < x0) x0 = d.x;
+        if (d.x > x1) x1 = d.x;
+        if (d.y < y0) y0 = d.y;
+        if (d.y > y1) y1 = d.y;
+    });
+    const width  = x1 - x0 + nodeW + 320;
+    const height = y1 - y0 + nodeH + 320; // THIS IS THE HEIGHT MODIFIER
+
+    const svg = d3.select("#tree").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("viewBox", [x0 - nodeW/2, y0 - nodeH/2, width, height].join(" "));
+
+    const g = svg.append("g");
+
+    // links
+    g.selectAll("path.link")
+    .data(root.links())
+    .join("path")
+    .attr("class", "link")
+    .attr("d", d3.linkVertical().x(d => d.x).y(d => d.y));
+
+    // nodes
+    const node = g.selectAll("g.node")
+    .data(root.descendants())
+    .join("g")
+    .attr("transform", d => `translate(${d.x},${d.y})`);
+
+    // node rect
+    node.append("rect")
+    .attr("class", "node-box")
+    .attr("x", -nodeW/2)
+    .attr("y", 0)
+    .attr("width", nodeW)
+    .attr("height", nodeH);
+
+    // node HTML via foreignObject
+    node.append("foreignObject")
+    .attr("class", "node-fo")
+    .attr("x", -nodeW/2 + 6)
+    .attr("y", 6)
+    .attr("width", nodeW - 12)
+    .attr("height", 1000)
+    .html(d => nodeHTML(d.data));
+
+    // shrink foreignObjects to actual content height
+    node.selectAll("foreignObject").each(function() {
+    const fo = d3.select(this);
+    const div = fo.select("div").node();
+    const h = div.getBoundingClientRect().height + 6;
+    fo.attr("height", h);
+    d3.select(this.parentNode).select("rect").attr("height", h + 12);
+    });
+
+    function nodeHTML(d) {
+        const ctxTable = (ctx, title) => {
+            if (!ctx || ctx.length === 0) return `<div class="subtable"><i>${title}: empty</i></div>`;
+            const rows = ctx.map(kv => `<tr><td>${kv.key}</td><td>${kv.val.toFixed(2)}</td></tr>`).join("");
+            return `<div class="subtable"><b>${title}</b><table><tbody>${rows}</tbody></table></div>`;
+        };
+        const ctxTablesMultiple = (arr, base) => {
+            if (!arr || arr.length === 0) return `<div class="subtable"><i>${base}: empty</i></div>`;
+            // if arr is already a single aggregated ctx-list (array of key/val objects), render one table
+            if (Array.isArray(arr) && arr.length > 0 && arr[0] && typeof arr[0].key !== 'undefined') {
+                return ctxTable(arr, base);
+            }
+            let out = "";
+            arr.forEach((ctx, i) => { out += ctxTable(ctx, `${base}${i}`); });
+            return out;
+        };
+
+        // content: left and right are now lists of {key, val}
+        let contentHTML = "";
+        const leftHas = Array.isArray(d.left) && d.left.length > 0;
+        const rightHas = Array.isArray(d.right) && d.right.length > 0;
+
+        if (rightHas) {
+            // composite-style node: show both left and right content tables
+            contentHTML = `<div class="section">${ctxTable(d.left, "Content-Left")}${ctxTable(d.right, "Content-Right")}</div>`;
+        } else if (leftHas) {
+            // primitive or single-sided composite: show a single content table
+            // label it "Content" for primitives
+            const label = (d.right && d.right.length > 0) ? "Content-Left" : "Content";
+            contentHTML = `<div class="section">${ctxTable(d.left, label)}</div>`;
+        } else {
+            contentHTML = `<div class="section"><i>Content: empty</i></div>`;
+        }
+
+        return `
+        <div class="node-fo">
+            <table><tr><th colspan="2">${d.title}</th></tr></table>
+            ${contentHTML}
+            ${ctxTablesMultiple(d.before, "Context-Before")}
+            ${ctxTablesMultiple(d.after,  "Context-After")}
+        </div>`;
+    }
+
+    </script>
+    </body>
+    </html>
+    

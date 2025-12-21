@@ -24,7 +24,7 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script>
-    const data = {"title": "975e09c1ea", "left": [], "right": [], "before": [], "after": [], "children": [{"title": "ee89cd3199", "left": [{"key": "CONCEPT-3279574995762291_1", "val": 1.0}, {"key": "CONCEPT-3280029523962708_160", "val": 1.0}, {"key": "CONCEPT-3280260304414458_278", "val": 1.0}, {"key": "CONCEPT-3280260304477333_280", "val": 1.0}], "right": [{"key": "watches", "val": 1.0}], "before": [], "after": [], "children": [{"title": "290db3023b", "left": [{"key": "the", "val": 1.0}], "right": [{"key": "woman", "val": 1.0}], "before": [], "after": [{"key": "watches", "val": 1.0}], "children": [{"title": "acdd163558", "left": [{"key": "the", "val": 1.0}], "right": [], "before": [], "after": [{"key": "woman", "val": 1.0}, {"key": "watches", "val": 0.5}], "children": []}, {"title": "39afeb47d8", "left": [{"key": "woman", "val": 1.0}], "right": [], "before": [{"key": "the", "val": 1.0}], "after": [{"key": "watches", "val": 1.0}], "children": []}]}, {"title": "9ced56bdb7", "left": [{"key": "watches", "val": 1.0}], "right": [], "before": [{"key": "woman", "val": 1.0}, {"key": "the", "val": 0.5}], "after": [], "children": []}]}]};
+    const data = {"title": "88ead14017", "left": [], "right": [], "before": [], "after": [], "children": [{"title": "b890fc6092", "left": [{"key": "CONCEPT-3444995209489666_1", "val": 0.2}, {"key": "CONCEPT-3444995209785708_3", "val": 0.2}, {"key": "CONCEPT-3445000279898000_158", "val": 0.2}, {"key": "CONCEPT-3445007840903708_1397", "val": 0.2}, {"key": "CONCEPT-3445017804760708_8167", "val": 0.2}], "right": [{"key": "CONCEPT-3444995209489666_1", "val": 0.014925373134328358}, {"key": "CONCEPT-3444995209785708_3", "val": 0.014925373134328358}, {"key": "CONCEPT-3444996885104916_17", "val": 0.014925373134328358}, {"key": "CONCEPT-3444997320131583_25", "val": 0.014925373134328358}, {"key": "CONCEPT-3445000277912333_91", "val": 0.014925373134328358}, {"key": "CONCEPT-3445001643393208_243", "val": 0.014925373134328358}, {"key": "CONCEPT-3445001644147458_279", "val": 0.014925373134328358}], "before": [[], [], []], "after": [[], [], []], "children": [{"title": "8d6790f70d", "left": [{"key": "CONCEPT-3444995209489666_1", "val": 0.041666666666666664}, {"key": "CONCEPT-3444995209782625_2", "val": 0.041666666666666664}, {"key": "CONCEPT-3444996885073000_12", "val": 0.041666666666666664}, {"key": "CONCEPT-3444997320197458_35", "val": 0.041666666666666664}, {"key": "CONCEPT-3444998428691125_51", "val": 0.041666666666666664}, {"key": "CONCEPT-3445005808247000_719", "val": 0.041666666666666664}, {"key": "CONCEPT-3445006318502625_908", "val": 0.041666666666666664}], "right": [{"key": "eats", "val": 1.0}], "before": [[], [], []], "after": [[{"key": "a", "val": 1.0}], [{"key": "earring", "val": 1.0}], []], "children": [{"title": "669fcc4529", "left": [{"key": "a", "val": 1.0}], "right": [{"key": "cat", "val": 1.0}], "before": [[], [], []], "after": [[{"key": "eats", "val": 1.0}], [{"key": "a", "val": 1.0}], [{"key": "earring", "val": 1.0}]], "children": [{"title": "66c7e21a48", "left": [{"key": "a", "val": 1.0}], "right": [], "before": [], "after": [[{"key": "cat", "val": 1.0}], [{"key": "eats", "val": 1.0}], [{"key": "a", "val": 1.0}]], "children": []}, {"title": "cc744ca7fd", "left": [{"key": "cat", "val": 1.0}], "right": [], "before": [[{"key": "a", "val": 1.0}]], "after": [[{"key": "eats", "val": 1.0}], [{"key": "a", "val": 1.0}], [{"key": "earring", "val": 1.0}]], "children": []}]}, {"title": "a2d148fa1a", "left": [{"key": "eats", "val": 1.0}], "right": [], "before": [[{"key": "cat", "val": 1.0}], [{"key": "a", "val": 1.0}]], "after": [[{"key": "a", "val": 1.0}], [{"key": "earring", "val": 1.0}]], "children": []}]}, {"title": "19819b80e9", "left": [{"key": "a", "val": 1.0}], "right": [{"key": "earring", "val": 1.0}], "before": [[{"key": "eats", "val": 1.0}], [{"key": "cat", "val": 1.0}], [{"key": "a", "val": 1.0}]], "after": [[], [], []], "children": [{"title": "65a95fb9f8", "left": [{"key": "a", "val": 1.0}], "right": [], "before": [[{"key": "eats", "val": 1.0}], [{"key": "cat", "val": 1.0}], [{"key": "a", "val": 1.0}]], "after": [[{"key": "earring", "val": 1.0}]], "children": []}, {"title": "a878044a2f", "left": [{"key": "earring", "val": 1.0}], "right": [], "before": [[{"key": "a", "val": 1.0}], [{"key": "eats", "val": 1.0}], [{"key": "cat", "val": 1.0}]], "after": [], "children": []}]}]}]};
     const nodeW  = 280;
     const nodeH  = 130;
     const hGap   = 80;
@@ -97,6 +97,16 @@
             const rows = ctx.map(kv => `<tr><td>${kv.key}</td><td>${kv.val.toFixed(2)}</td></tr>`).join("");
             return `<div class="subtable"><b>${title}</b><table><tbody>${rows}</tbody></table></div>`;
         };
+        const ctxTablesMultiple = (arr, base) => {
+            if (!arr || arr.length === 0) return `<div class="subtable"><i>${base}: empty</i></div>`;
+            // if arr is already a single aggregated ctx-list (array of key/val objects), render one table
+            if (Array.isArray(arr) && arr.length > 0 && arr[0] && typeof arr[0].key !== 'undefined') {
+                return ctxTable(arr, base);
+            }
+            let out = "";
+            arr.forEach((ctx, i) => { out += ctxTable(ctx, `${base}${i}`); });
+            return out;
+        };
 
         // content: left and right are now lists of {key, val}
         let contentHTML = "";
@@ -119,8 +129,8 @@
         <div class="node-fo">
             <table><tr><th colspan="2">${d.title}</th></tr></table>
             ${contentHTML}
-            ${ctxTable(d.before, "Context-Before")}
-            ${ctxTable(d.after,  "Context-After")}
+            ${ctxTablesMultiple(d.before, "Context-Before")}
+            ${ctxTablesMultiple(d.after,  "Context-After")}
         </div>`;
     }
 

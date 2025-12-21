@@ -23,7 +23,7 @@ We can evaluate this based on the grammar2 vocabularies constructed in the data 
 from util.cfg import generate, TEST_CORPUS2, TEST_GRAMMAR2, ADDED_CORPUS2, ADDED_GRAMMAR2
 from parse import LanguageChunkingParser
 
-parser = LanguageChunkingParser.load_state("data/grammar2_fullparse/ltm")
+parser = LanguageChunkingParser.load_state("unittests/gen_learn_test/final_ltm_data")
 
 num_new_sents = 10
 new_document = []

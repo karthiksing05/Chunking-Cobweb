@@ -11,7 +11,7 @@ shutil.rmtree("unittests/gen_learn_test")
 # Creating and printing toy sentences
 CONTEXT_LENGTH = 3
 
-num_sentences = 40
+num_sentences = 200
 document = []
 
 for _ in range(num_sentences):
@@ -21,14 +21,14 @@ for _ in range(num_sentences):
 # Setting up the parser
 parser = LanguageChunkingParser(TEST_CORPUS2, context_length=CONTEXT_LENGTH, merge_split=True)
 
-train_size = 0.75
+train_size = 0.95
 
 train_documents = document[:int(len(document) * train_size)]
 test_documents = document[int(len(document) * train_size):]
 
 # Iterate through training documents and parse them one at a time, saving every 10th parse tree to file
 for i, doc in enumerate(train_documents):
-    threshold = (0 if i < 10 else -30 * (i + 1) / len(train_documents))
+    threshold = (0 if i < 90 else -15) # should never trigger atp
     print("Threshold:", threshold)
     parse_trees = parser.parse_input([doc], end_behavior=threshold, debug=True)
     parse_tree = parse_trees[0]
@@ -43,8 +43,6 @@ for i, doc in enumerate(train_documents):
 
         if i < 21:
             parser.visualize_ltm(f"unittests/gen_learn_test/ltms/cobweb_ltm{i}")
-    
-    input()
 
 # parser.visualize_ltm("unittests/gen_learn_test/final_ltm")
 

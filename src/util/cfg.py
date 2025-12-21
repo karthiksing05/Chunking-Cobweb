@@ -60,7 +60,7 @@ TEST_GRAMMAR2 = {
 
 # Define a very simple grammar (no recursion, fewer rules)
 ADDED_GRAMMAR2 = {
-    "S": [["NP", "VP"]], # Sentence = Noun Phrase + Verb Phrase
+    "S": [["NP", "VP"], ["S", "Conj", "S"]], # Sentence can also coordinate two sentences
 
     "NP": [["Det", "N"]], # Noun Phrase = Determiner + Noun
 
@@ -68,7 +68,8 @@ ADDED_GRAMMAR2 = {
 
     "Det": [["the"], ["a"], ["an"]],
     "N": [["dog"], ["cat"], ["man"], ["woman"], ["pencil"], ["typewriter"], ["earring"], ["money"], ["light"], ["lock"]],
-    "V": [["runs"], ["sees"], ["likes"], ["chases"], ["shows"], ["eats"], ["makes"], ["helps"], ["watches"]]
+    "V": [["runs"], ["sees"], ["likes"], ["chases"], ["shows"], ["eats"], ["makes"], ["helps"], ["watches"]],
+    "Conj": [["and"], ["or"]]
 }
 
 TEST_CORPUS2 = (
@@ -80,8 +81,45 @@ TEST_CORPUS2 = (
 ADDED_CORPUS2 = sum(
     [["an"], # articles
      ["pencil"], ["typewriter"], ["earring"], ["money"], ["light"], ["lock"], # nouns
-     ["shows"], ["eats"], ["makes"], ["helps"], ["watches"]],
-    [] # verbs
+     ["shows"], ["eats"], ["makes"], ["helps"], ["watches"], # verbs
+     ["and"], ["or"]], # conjunctions
+    []
+)
+
+# Grammar with relative clauses and stacked adjectival phrases
+TEST_GRAMMAR3 = {
+    "S": [["NP", "VP"]],
+
+    "NP": [
+        ["Det", "N"],
+        ["Det", "AdjP", "N"],
+        ["Det", "N", "RelClause"],
+        ["Det", "AdjP", "N", "RelClause"]
+    ],
+
+    "VP": [["V", "NP"], ["V"], ["V", "PP"]],
+
+    "AdjP": [["Adj"], ["Adj", "AdjP"]],
+
+    "RelClause": [["RelPro", "VP"]],
+
+    "PP": [["P", "NP"]],
+
+    "Det": [["the"], ["a"], ["this"], ["that"]],
+    "N": [["book"], ["boy"], ["girl"], ["teacher"], ["robot"], ["apple"]],
+    "Adj": [["tall"], ["curious"], ["blue"], ["ancient"], ["friendly"]],
+    "RelPro": [["who"], ["that"], ["which"]],
+    "V": [["saw"], ["liked"], ["chased"], ["carried"], ["read"], ["admired"]],
+    "P": [["with"], ["without"], ["near"]]
+}
+
+TEST_CORPUS3 = (
+    sum(TEST_GRAMMAR3["Det"], []) +
+    sum(TEST_GRAMMAR3["N"], []) +
+    sum(TEST_GRAMMAR3["Adj"], []) +
+    sum(TEST_GRAMMAR3["RelPro"], []) +
+    sum(TEST_GRAMMAR3["V"], []) +
+    sum(TEST_GRAMMAR3["P"], [])
 )
 
 def generate(symbol, grammar):

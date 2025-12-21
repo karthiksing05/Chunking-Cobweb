@@ -613,10 +613,13 @@ class FiniteParseTree:
         *   Perhaps the methodology is to save log-probabilities with the 
         """
 
+        # print(path[-1].concept_hash()) # utility print to make sure that different categorizations are appropriate
+
         raw_node_log_probs = []
-        node_log_probs = []
+        avg_log_probs = []
         path_counts = []
         best_log_prob = float('-inf')
+        worst_log_prob = 0
         best_log_prob_idx = 0
         best_avg_log_prob = float('-inf')
 
@@ -642,34 +645,51 @@ class FiniteParseTree:
 
             # 3. Normalize log-probability
             if node_complexity == 0:
-                avg_log_prob = 0
+                avg_log_prob = -1e8
             else:
                  # TODO this is broken but it's perhaps fine because we're running raw log probs instead??
-                avg_log_prob = log_prob / (node_complexity - 1)
+                avg_log_prob = log_prob / inst_complexity
 
             if log_prob > best_log_prob:
                 best_log_prob = log_prob
                 best_log_prob_idx = i
 
+            if log_prob < worst_log_prob:
+                worst_log_prob = log_prob
+
             if avg_log_prob > best_avg_log_prob:
                 best_avg_log_prob = avg_log_prob
 
             raw_node_log_probs.append(log_prob)
-            node_log_probs.append(avg_log_prob)
+            avg_log_probs.append(avg_log_prob)
 
-
-        normed_count = sum(path_counts) / len(path_counts)
+        # normed_count = sum(path_counts) / len(path_counts)
 
         # print([node.concept_hash() for node in path])
+
+        cost = 0
+        scale_coef = 1
+        scale_factor = 0.33
+        for lp in raw_node_log_probs:
+            cost += lp * scale_coef
+            scale_coef *= scale_factor
+
+        normed_count = 0
+        scale_coef = 1
+        scale_factor = 0.5
+        for i in range(1, len(path_counts)):
+            normed_count += path_counts[i] * scale_coef
+            scale_coef *= scale_factor
         
         score_data = {
-            'raw_log_probs': str(raw_node_log_probs),
-            'avg_log_probs': str(node_log_probs),
+            'raw_node_log_probs': str(raw_node_log_probs),
             'candidate_counts': str(path_counts),
             'normed_count': normed_count,
             'best_log_prob_idx': best_log_prob_idx,
             'inst_complexity': inst_complexity,
-            'cost': best_log_prob, #/ (path_counts[best_log_prob_idx] - 1),
+            'cost': cost, #/ (path_counts[best_log_prob_idx] - 1),
+            'best_log_prob': best_log_prob,
+            'worst_log_prob': worst_log_prob,
             'root_cost': raw_node_log_probs[0],
             'best_avg_log_prob': best_avg_log_prob
         }
@@ -2295,7 +2315,7 @@ class LanguageChunkingParser:
 
     def __init__(self, value_corpus, context_length=3, merge_split=True):
 
-        self.ltm_hierarchy = CobwebTree(10, False, 0, True, False)
+        self.ltm_hierarchy = CobwebTree(0.1, False, 0, True, False)
 
         self.id_to_value = ["EMPTYNULL"]
         for x in value_corpus:

@@ -47,7 +47,7 @@ class ChunkVocabulary(object):
         self.corpus = corpus
         self.context_length = context_length
 
-        self.tree = CobwebTree(1e-4, True, 0, True, True)
+        self.tree = CobwebTree(0.1, False, 0, True, False)
 
         self.initialize()
 
