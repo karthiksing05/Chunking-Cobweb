@@ -10,7 +10,7 @@ app = Flask(__name__)
 LEARNING_ON = True
 PREBUILD_TREES = False
 CONTEXT_LENGTH = 3
-LOAD_LTM = ""
+LOAD_LTM = "unittests/gen_learn_test/final_ltm_data"
 
 # --- Initialize parser and LTM ---
 if LOAD_LTM != "":

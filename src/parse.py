@@ -78,7 +78,8 @@ class PrimitiveParseNode:
         """
         Helper method to get the current parse node as an instance description!
 
-        Note that with this method, we don't have to worry about an empty set for the content because it carries forth
+        Note that with this method, we don't have to worry about an empty set for the content because
+        it carries forth.
         """
 
         inst = {
@@ -622,6 +623,7 @@ class FiniteParseTree:
         worst_log_prob = 0
         best_log_prob_idx = 0
         best_avg_log_prob = float('-inf')
+        entropies = []
 
         for i, node in enumerate(path):
             
@@ -663,6 +665,8 @@ class FiniteParseTree:
             raw_node_log_probs.append(log_prob)
             avg_log_probs.append(avg_log_prob)
 
+            entropies.append(node.entropy())
+
         # normed_count = sum(path_counts) / len(path_counts)
 
         # print([node.concept_hash() for node in path])
@@ -684,6 +688,7 @@ class FiniteParseTree:
         score_data = {
             'raw_node_log_probs': str(raw_node_log_probs),
             'candidate_counts': str(path_counts),
+            'entropies': str(entropies),
             'normed_count': normed_count,
             'best_log_prob_idx': best_log_prob_idx,
             'inst_complexity': inst_complexity,

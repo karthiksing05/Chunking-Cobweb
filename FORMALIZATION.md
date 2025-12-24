@@ -105,8 +105,14 @@ We really need to figure out three main questions:
         *   Do we use path-annotated context or just regular context? I think because of the way we've been handling composite chunks we should just do regular context and give content elements the path information
 *   Chunk utility solution:
     *   We are normalizing the average log-probability of the whole path, but with an "information-style" weighting. Each log-probability gets halved as you move down the path so it's log-probability at the root with some extra steps.
-    *   My hope is that once instances start being of reasonably
-    *   I completely disagree with Chris - I think that path information will yield very important semantic relevance and it's similar to how we as people store information. At any given point, we need to be able to recall that a robin is both a bird and an animal so that we can make efficient decisions based on how it appears within the sentence
+    *   My hope is that we can threshold by some measure of uncertainty that is particular to the path that we categorize down itself
+    *   There may be something interesting we can do with entropy in order to properly yield a "stability" focused calculation - higher instances should have more entropy and lower instances should have less entropy
+        *   It's essentially variance so I'm not sure if it by itself can measure something, but perhaps a count-scaled entropy could be valuable
+    *   I completely disagree with Chris - I think that path information will yield very important semantic relevance and it's similar to how we as people store information. At any given point, we need to be able to recall that a robin is both a bird and an animal so that we can make efficient decisions based on how it appears within the sentence\
+
+#### *Implementation Plan*
+*   Program primitives first!!
+*   Normalizing the score needs a lot of work - we need a binary metric of recognition
 
 ## Design Decisions
 

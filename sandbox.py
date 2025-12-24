@@ -136,7 +136,7 @@ tree = CobwebTree(0.1, False, 0, True, False)
 
 for sentence in document:
 
-    instances = get_composite_chunk_candidates(sentence, parser.value_to_id)
+    instances = get_primitive_chunk_candidates(sentence, parser.value_to_id)
 
     for inst in instances:
         tree.ifit(inst, 0, True)
@@ -146,33 +146,33 @@ parser.cobweb_drawer.save_basic_level_subtrees(tree.root, "sandbox")
 print("All sentences:")
 pprint(document)
 
-# while not os.path.exists("sandbox/sandbox_ltm.png"):
-#     parser.cobweb_drawer.draw_tree(tree.root, "sandbox/sandbox_ltm")
+while not os.path.exists("sandbox/sandbox_ltm.png"):
+    parser.cobweb_drawer.draw_tree(tree.root, "sandbox/sandbox_ltm")
 
-test_sentence = input("enter input sentence: ")
-candidates = get_composite_chunk_candidates(test_sentence, parser.value_to_id)
+# test_sentence = input("enter input sentence: ")
+# candidates = get_composite_chunk_candidates(test_sentence, parser.value_to_id)
 
-print("Test Sentence:", test_sentence)
+# print("Test Sentence:", test_sentence)
 
-costs = []
-counts = []
-root_costs = []
-best_log_prob_idxs = []
-best_avg_log_probs = []
-log_prob_avgs = []
+# costs = []
+# counts = []
+# root_costs = []
+# best_log_prob_idxs = []
+# best_avg_log_probs = []
+# log_prob_avgs = []
 
-for i, candidate in enumerate(candidates):
-    print(f"Candidate {i}:")
-    node, categorize_ids, node_categorize_path = custom_categorize(candidate, tree)
-    print("Stats:")
-    score_stats = FiniteParseTree._score_function(node_categorize_path, candidate)
-    pprint(score_stats)
-    costs.append(score_stats["cost"])
-    counts.append(score_stats["normed_count"])
-    root_costs.append(score_stats["root_cost"])
-    best_log_prob_idxs.append(score_stats["best_log_prob_idx"])
-    best_avg_log_probs.append(score_stats["best_avg_log_prob"])
+# for i, candidate in enumerate(candidates):
+#     print(f"Candidate {i}:")
+#     node, categorize_ids, node_categorize_path = custom_categorize(candidate, tree)
+#     print("Stats:")
+#     score_stats = FiniteParseTree._score_function(node_categorize_path, candidate)
+#     pprint(score_stats)
+#     costs.append(score_stats["cost"])
+#     counts.append(score_stats["normed_count"])
+#     root_costs.append(score_stats["root_cost"])
+#     best_log_prob_idxs.append(score_stats["best_log_prob_idx"])
+#     best_avg_log_probs.append(score_stats["best_avg_log_prob"])
 
-print(costs)
-print(root_costs)
-print(counts)
+# print(costs)
+# print(root_costs)
+# print(counts)
