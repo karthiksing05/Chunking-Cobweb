@@ -10,7 +10,7 @@ equally valuable earlier (obviously)!
 What we can do is store costs prior to our chunking to acknowledge our chunks
 """
 
-from util.cfg import generate, TEST_CORPUS2, TEST_GRAMMAR2
+from util.cfg import generate, TEST_CORPUS1, TEST_GRAMMAR1
 from parse import LanguageChunkingParser, FiniteParseTree, custom_categorize
 from cobweb.cobweb_discrete import CobwebTree
 import os
@@ -66,6 +66,8 @@ def get_composite_chunk_candidates(sentence: str, value_to_id: dict, context_len
                 d = {0: 0}
             inst[2 + context_length + k] = d
 
+        inst[2 + 2 * context_length] = {0: 0}
+
         insts.append(inst)
 
     return insts
@@ -90,8 +92,8 @@ def get_primitive_chunk_candidates(sentence: str, value_to_id: dict, context_len
     for i in range(len(words)):
 
         inst = {
-            0: {0: 0},
-            1: {0: 0}
+            0: {0: 1},
+            1: {0: 1}
         }
 
         # build per-index context-before (0 = immediate left of `content_left`)
@@ -118,28 +120,36 @@ def get_primitive_chunk_candidates(sentence: str, value_to_id: dict, context_len
 
     return insts
 
-num_sentences = 20
+num_sentences = 30
 document = []
 
-num_primitive_docs = 0.5
-
 for _ in range(num_sentences):
-    sentence = generate("S", TEST_GRAMMAR2)
+    sentence = generate("S", TEST_GRAMMAR1)
     document.append(sentence)
 
-primitive_doc = None
+primitives_factor = 0.66
 
-parser = LanguageChunkingParser(TEST_CORPUS2, context_length=CONTEXT_LENGTH)
+primitive_doc = document[:int(len(document) * primitives_factor)]
+composite_doc = document[int(len(document) * primitives_factor):]
+
+parser = LanguageChunkingParser(TEST_CORPUS1, context_length=CONTEXT_LENGTH)
 
 # tree = CobwebTree(10, False, 0, True, False)
 tree = CobwebTree(0.1, False, 0, True, False)
 
-for sentence in document:
+for sentence in primitive_doc:
 
     instances = get_primitive_chunk_candidates(sentence, parser.value_to_id)
 
     for inst in instances:
         tree.ifit(inst, 0, True)
+
+# for sentence in composite_doc:
+
+#     instances = get_composite_chunk_candidates(sentence, parser.value_to_id)
+
+#     for inst in instances:
+#         tree.ifit(inst, 0, True)
 
 parser.cobweb_drawer.save_basic_level_subtrees(tree.root, "sandbox")
 

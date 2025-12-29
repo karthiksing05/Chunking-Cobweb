@@ -356,6 +356,6 @@ function nodeHTML(d) {{
 			print(f"num nodes at basic level:", len(basic_level_nodes))
 
 		for key, bl_node in basic_level_nodes.items():
-			self.draw_tree(bl_node, folder + ("/" if folder[-1] != "/" else "") + f"basic_level_{key}", max_depth=3)
+			self.draw_tree(bl_node, folder + ("/" if folder[-1] != "/" else "") + f"basic_level_{key}", max_depth=4)
 
 		return True

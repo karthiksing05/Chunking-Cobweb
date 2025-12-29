@@ -4,6 +4,34 @@ Boilerplate code for creating toy grammars with which to test our chunking algor
 
 import random
 
+# Define a simple context-free grammar using recursive structures (NO TERMINALS YET)
+POS_GRAMMAR1 = {
+    "S": [["NP", "VP"]],  # Sentence = Noun Phrase + Verb Phrase
+
+    "NP": [
+        ["Det", "AdjP", "N"],  # Noun Phrase = Determiner + Adjective Phrase + Noun
+        ["Det", "N"]
+    ],
+
+    "AdjP": [
+        ["Adj", "AdjP"],  # Adjective Phrase can recurse: Adj + AdjP
+        ["Adj"],
+        []  # Empty string to allow termination of recursion
+    ],
+
+    "VP": [
+        ["V", "NP"],  # Verb Phrase = Verb + Noun Phrase
+        ["V", "NP", "PP"],  # Verb Phrase with prepositional phrase
+        ["V"]  # Simple verb
+    ],
+
+    "PP": [
+        ["P", "NP"]  # Prepositional Phrase = Preposition + Noun Phrase
+    ]
+}
+
+POS_CORPUS1 = ["Det", "N", "Adj", "V", "P"]
+
 # Define a simple context-free grammar using recursive structures
 TEST_GRAMMAR1 = {
     "S": [["NP", "VP"]],  # Sentence = Noun Phrase + Verb Phrase

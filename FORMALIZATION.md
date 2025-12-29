@@ -1,5 +1,9 @@
 # Formalizations of the Chunking Framework
 
+## NEW GROUNDBREAKING PLAN:
+
+*   
+
 ## Intuition
 
 Pat can probably fill this part in better than me, but the idea is almost a "compression" of memory by observing chunks and their compositionality. More frequent chunks should be compressed more often than less frequent chunks!
@@ -103,6 +107,7 @@ We really need to figure out three main questions:
     *   I think we should sort primitives until we have some sort of convergence there (recognition of primitives, as they are chunks too!) - let them go through the same process of recognition and chunk-building!!!
         *   Once we recognize chunks, we can move to the next layers of chunking and we can simply just extend the philosophy for primitive instances
         *   Do we use path-annotated context or just regular context? I think because of the way we've been handling composite chunks we should just do regular context and give content elements the path information
+    *   Should we let the primitive hierarchy converge before we build composites? I think **this makes a lot of sense** as you absolutely need your terminating rules before you're able to create rules over generalizations (i.e. we need N -> "dog" before we get )
 *   Chunk utility solution:
     *   We are normalizing the average log-probability of the whole path, but with an "information-style" weighting. Each log-probability gets halved as you move down the path so it's log-probability at the root with some extra steps.
     *   My hope is that we can threshold by some measure of uncertainty that is particular to the path that we categorize down itself
@@ -112,7 +117,14 @@ We really need to figure out three main questions:
 
 #### *Implementation Plan*
 *   Program primitives first!!
-*   Normalizing the score needs a lot of work - we need a binary metric of recognition
+    *   The label is its path so the label gets passed up but the primitive instance will always be made of unique words
+    *   Because we're letting the hierarchy of primitives converge before we build hierarchies, there shouldn't need to be a lot of data donated to just the 
+    *   Here's the specific implementation:
+        *   We can set a flag variable within our LanguageChunkingParser called vocabulary_stable that continues to hierarchize the primitives until they no longer need to be hierarchized (this way, we can manually decide when to start building)
+        *   Let's let our primitive hierarchy converge and then add composites to the hierarchy for clarity
+        *   Hmmm...do we even need content for this? Perhaps we assign individual chunks content and partitions of chunks context (**This isn't relevant now but it may be if this primitive stuff doesn't work**)
+*   Normalizing the score needs a lot of work - we NEED a binary metric of recognition which works across layers so we can guarantee that a given 
+*   At some point we should implement restructuring because I feel as though it will resolve the premise of things being incorrectly sorted
 
 ## Design Decisions
 

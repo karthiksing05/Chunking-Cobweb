@@ -2,7 +2,7 @@
 General Learning Test - to confirm the logic of learning is completely functional!
 """
 
-from util.cfg import generate, TEST_CORPUS2, TEST_GRAMMAR2
+from util.cfg import generate, POS_GRAMMAR1, POS_CORPUS1
 from parse import LanguageChunkingParser
 import shutil
 
@@ -15,11 +15,11 @@ num_sentences = 200
 document = []
 
 for _ in range(num_sentences):
-    sentence = generate("S", TEST_GRAMMAR2)
+    sentence = generate("S", POS_GRAMMAR1)
     document.append(sentence)
 
 # Setting up the parser
-parser = LanguageChunkingParser(TEST_CORPUS2, context_length=CONTEXT_LENGTH, merge_split=True)
+parser = LanguageChunkingParser(POS_CORPUS1, context_length=CONTEXT_LENGTH, merge_split=True)
 
 train_size = 0.95
 
