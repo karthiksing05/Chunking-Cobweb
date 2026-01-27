@@ -4,7 +4,7 @@ import json
 import asyncio
 from playwright.async_api import async_playwright
 import re
-from cobweb.cobweb_discrete import CobwebTree, CobwebNode
+from cobweb.cobweb_discrete import CobwebDiscreteTree, CobwebDiscreteNode
 from viz import HTMLCobwebDrawer
 from typing import List
 from sortedcontainers import SortedList
@@ -612,7 +612,7 @@ def custom_categorize(inst, tree):
 
 class FiniteParseTree:
 
-    def __init__(self, ltm_hierarchy: CobwebTree, id_to_value, value_to_id, context_length=3):
+    def __init__(self, ltm_hierarchy: CobwebDiscreteTree, id_to_value, value_to_id, context_length=3):
         self.ltm_hierarchy = ltm_hierarchy
 
         self.id_to_value = id_to_value
@@ -639,7 +639,7 @@ class FiniteParseTree:
             self._undo_stack = []
 
     @staticmethod
-    def _score_function(path: List[CobwebNode], instance: dict, debug=False):
+    def _score_function(path: List[CobwebDiscreteNode], instance: dict, debug=False):
         """
         Compute a symmetric, scaled similarity between two attribute-value dictionaries.
         Returns a value in (0, 1].
@@ -2475,7 +2475,7 @@ class LanguageChunkingParser:
 
     def __init__(self, value_corpus, context_length=3, merge_split=True):
 
-        self.ltm_hierarchy = CobwebTree(1 / 20, False, 0, True, False)
+        self.ltm_hierarchy = CobwebDiscreteTree(1 / len(value_corpus))
 
         self.id_to_value = ["EMPTYNULL"]
         for x in value_corpus:

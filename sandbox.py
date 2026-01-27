@@ -1,21 +1,13 @@
 """
 Sandbox!
 
-Currently working on testing what happens when we just add the first granularity of candidate chunks
-to Cobweb and see how the hierarchy emerges.
-
-So far, a safe score that we're seeing is -5 for this setting right here. Everything is
-equally valuable earlier (obviously)!
-
-What we can do is store costs prior to our chunking to acknowledge our chunks
-
-Instance representations - pad EMPTYNULL with 1s for composite singular-content attribute and for
-primitive content-left and content-right attributes
+Currently working on better understanding representations - need normalized attributes across all dimensions
+so that we can calculate scores that make sense
 """
 
 from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1, POS_GRAMMAR1, POS_CORPUS1
 from parse import LanguageChunkingParser, FiniteParseTree, custom_categorize
-from cobweb.cobweb_discrete import CobwebTree
+from cobweb.cobweb_discrete import CobwebDiscreteTree
 import os
 from pprint import pprint
 
@@ -49,8 +41,8 @@ def get_composite_chunk_candidates(sentence: str, value_to_id: dict, context_len
         content_right = words[i + 1]
 
         inst = {
-            0: {content_left: 1, 0: 0},
-            1: {content_right: 1, 0: 0}
+            0: {content_left: 0.5, 0: 0},
+            1: {content_right: 0.5, 0: 0}
         }
 
         if bow:
@@ -60,7 +52,7 @@ def get_composite_chunk_candidates(sentence: str, value_to_id: dict, context_len
             for k in range(context_length):
                 idx_before = i - 1 - k
                 if idx_before >= 0:
-                    d[words[idx_before]] = 1.0 / (k + 1)
+                    d[words[idx_before]] = 1.0 / (2 ** (k + 1))
                 inst[2 + k] = {0: 0}
 
             inst[2] = d
@@ -70,14 +62,10 @@ def get_composite_chunk_candidates(sentence: str, value_to_id: dict, context_len
             for k in range(context_length):
                 idx_after = i + 2 + k
                 if idx_after < len(words):
-                    d[words[idx_after]] = 1.0 / (k + 1)
+                    d[words[idx_after]] = 1.0 / (2 ** (k + 1))
                 inst[2 + context_length + k] = {0: 0}
 
             inst[2 + context_length] = d
-
-            inst[2 + 2 * context_length] = {0: 1}
-
-            insts.append(inst)
             
         else:
 
@@ -85,7 +73,7 @@ def get_composite_chunk_candidates(sentence: str, value_to_id: dict, context_len
             for k in range(context_length):
                 idx_before = i - 1 - k
                 if idx_before >= 0:
-                    d = {words[idx_before]: 1.0, 0: 0}
+                    d = {words[idx_before]: 1.0 / (2 ** (k + 1)), 0: 0}
                 else:
                     d = {0: 0}
                 inst[2 + k] = d
@@ -94,14 +82,14 @@ def get_composite_chunk_candidates(sentence: str, value_to_id: dict, context_len
             for k in range(context_length):
                 idx_after = i + 2 + k
                 if idx_after < len(words):
-                    d = {words[idx_after]: 1.0, 0: 0}
+                    d = {words[idx_after]: 1.0 / (2 ** (k + 1)), 0: 0}
                 else:
                     d = {0: 0}
                 inst[2 + context_length + k] = d
 
-            inst[2 + 2 * context_length] = {0: 1}
+        inst[2 + 2 * context_length] = {0: 0}
 
-            insts.append(inst)
+        insts.append(inst)
 
     return insts
 
@@ -127,8 +115,8 @@ def get_primitive_chunk_candidates(sentence: str, value_to_id: dict, context_len
     for i in range(len(words)):
 
         inst = {
-            0: {0: 1},
-            1: {0: 1}
+            0: {0: 0},
+            1: {0: 0}
         }
 
         if bow:
@@ -139,7 +127,6 @@ def get_primitive_chunk_candidates(sentence: str, value_to_id: dict, context_len
                 idx_before = i - 1 - k
                 if idx_before >= 0:
                     d[words[idx_before]] = 1.0 / (k + 1)
-                inst[2 + k] = {0: 0}
 
             inst[2] = d
 
@@ -149,13 +136,8 @@ def get_primitive_chunk_candidates(sentence: str, value_to_id: dict, context_len
                 idx_after = i + 2 + k
                 if idx_after < len(words):
                     d[words[idx_after]] = 1.0 / (k + 1)
-                inst[2 + context_length + k] = {0: 0}
 
             inst[2 + context_length] = d
-
-            inst[2 + 2 * context_length] = {words[i]: 1.0, 0: 0}
-
-            insts.append(inst)
             
         else:
 
@@ -163,8 +145,9 @@ def get_primitive_chunk_candidates(sentence: str, value_to_id: dict, context_len
             for k in range(context_length):
                 idx_before = i - 1 - k
                 if idx_before >= 0:
-                    d = {words[idx_before]: 1.0, 0: 0}
+                    d = {words[idx_before]: 1.0 / (2 ** (k + 1)), 0: 0}
                 else:
+                    # d = {0: 1.0 / (2 ** (k + 1))}
                     d = {0: 0}
                 inst[2 + k] = d
 
@@ -172,26 +155,27 @@ def get_primitive_chunk_candidates(sentence: str, value_to_id: dict, context_len
             for k in range(context_length):
                 idx_after = i + 1 + k
                 if idx_after < len(words):
-                    d = {words[idx_after]: 1.0, 0: 0}
+                    d = {words[idx_after]: 1.0 / (2 ** (k + 1)), 0: 0}
                 else:
+                    # d = {0: 1.0 / (2 ** (k + 1))}
                     d = {0: 0}
                 inst[2 + context_length + k] = d
 
-            inst[2 + 2 * context_length] = {words[i]: 1.0, 0: 0}
+        inst[2 + 2 * context_length] = {words[i]: 1.0, 0: 0}
 
-            insts.append(inst)
+        insts.append(inst)
 
     return insts
 
 
-num_sentences = 2000
+num_sentences = 200
 document = []
 
 for _ in range(num_sentences):
     sentence = generate("S", TEST_GRAMMAR1)
     document.append(sentence)
 
-primitives_factor = 0.66
+primitives_factor = 0.75
 
 primitive_doc = document[:int(len(document) * primitives_factor)]
 composite_doc = document[int(len(document) * primitives_factor):]
@@ -199,21 +183,38 @@ composite_doc = document[int(len(document) * primitives_factor):]
 parser = LanguageChunkingParser(TEST_CORPUS1, context_length=CONTEXT_LENGTH)
 
 # tree = CobwebTree(10, False, 0, True, False)
-tree = CobwebTree(0.0005, False, 0, True, False)
+tree = CobwebDiscreteTree(1 / len(TEST_CORPUS1))
 
 for sentence in primitive_doc:
 
-    instances = get_primitive_chunk_candidates(sentence, parser.value_to_id, bow=True)
+    instances = get_primitive_chunk_candidates(sentence, parser.value_to_id, bow=False)
 
     for inst in instances:
-        tree.ifit(inst, 0, True)
+        # check total sum of the instance
+        total_value_sum = 0
+        for d in inst.values():
+            total_value_sum += sum(d.values())
+
+        print(total_value_sum)
+
+    for inst in instances:
+        tree.ifit(inst)
 
 for sentence in composite_doc:
 
     instances = get_composite_chunk_candidates(sentence, parser.value_to_id, bow=True)
 
     for inst in instances:
-        tree.ifit(inst, 0, True)
+        # check total sum of the instance
+        total_value_sum = 0
+        for d in inst.values():
+            total_value_sum += sum(d.values())
+
+        print(total_value_sum)
+
+
+    for inst in instances:
+        tree.ifit(inst)
 
 parser.cobweb_drawer.save_basic_level_subtrees(tree.root, "sandbox", debug=True)
 

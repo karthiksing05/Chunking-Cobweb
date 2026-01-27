@@ -367,11 +367,14 @@ function nodeHTML(d) {{
 
 		for leaf_tup in leaves:
 			_, leaf_node = leaf_tup
-			curr_node = leaf_node.get_basic_level()
+			curr_node = leaf_node.get_basic(1000, 1000)
 			if curr_node.concept_hash() != leaf_node.concept_hash():
 				basic_level_nodes[curr_node.concept_hash()] = curr_node
 				basic_level_count[curr_node.concept_hash()] = basic_level_count.setdefault(curr_node.concept_hash(), 1)
 				basic_level_count[curr_node.concept_hash()] += 1
+			else:
+				# print(f"BASIC LEVEL NODE IS LEAF NODE FOR CONCEPT HASH {leaf_node.concept_hash()}")
+				pass
 
 		basic_level_count = dict(sorted(basic_level_count.items()))
 
