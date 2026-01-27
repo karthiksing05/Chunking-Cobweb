@@ -111,8 +111,7 @@ class HTMLCobwebDrawer:
 		}
 
 
-	def _build_html(self, d3_data_json, node_w=320, node_h=140, h_gap=80, v_gap=200):
-		# unchanged: your D3 tree HTML builder
+	def _build_html(self, d3_data_json, node_w=380, node_h=140, h_gap=20, v_gap=140):
 		return f"""<!doctype html>
 <html>
 <head>
@@ -141,41 +140,29 @@ const hGap   = {h_gap};
 const vGap   = {v_gap};
 
 const root = d3.hierarchy(data);
-const layout = d3.tree().nodeSize([nodeW + hGap, nodeH + vGap]);
+const layout = d3.tree()
+	.nodeSize([nodeW + hGap, nodeH + vGap])
+	.separation((a, b) => (a.parent === b.parent ? 1.0 : 1.4));
 layout(root);
 
-// compute bounds
-let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
-root.each(d => {{
-		if (d.x < x0) x0 = d.x;
-		if (d.x > x1) x1 = d.x;
-		if (d.y < y0) y0 = d.y;
-		if (d.y > y1) y1 = d.y;
-}});
-const width  = x1 - x0 + nodeW + 320;
-const height = y1 - y0 + nodeH + 320; // THIS IS THE HEIGHT MODIFIER
-
 const svg = d3.select("#tree").append("svg")
-	.attr("width", width)
-	.attr("height", height)
-	.attr("viewBox", [x0 - nodeW/2 - 50, y0 - nodeH/2 - 50, width, height].join(" "));
+	.attr("width", 1)
+	.attr("height", 1);
 
 const g = svg.append("g");
 
-// links
-g.selectAll("path.link")
+const linkGen = d3.linkVertical().x(d => d.x).y(d => d.y);
+const link = g.selectAll("path.link")
 	.data(root.links())
 	.join("path")
 	.attr("class", "link")
-	.attr("d", d3.linkVertical().x(d => d.x).y(d => d.y));
+	.attr("d", linkGen);
 
-// nodes
 const node = g.selectAll("g.node")
 	.data(root.descendants())
 	.join("g")
 	.attr("transform", d => `translate(${{d.x}},${{d.y}})`);
 
-// add bounding rect
 node.append("rect")
 	.attr("class", "node-box")
 	.attr("x", -nodeW/2)
@@ -183,7 +170,6 @@ node.append("rect")
 	.attr("width", nodeW)
 	.attr("height", nodeH);
 
-// add HTML content
 node.append("foreignObject")
 	.attr("class", "node-fo")
 	.attr("x", -nodeW/2 + 6)
@@ -192,15 +178,49 @@ node.append("foreignObject")
 	.attr("height", 1000)
 	.html(d => nodeHTML(d.data));
 
-// resize rects to match actual content height
 node.selectAll("foreignObject").each(function(d) {{
 	const fo = d3.select(this);
 	const div = fo.select("div").node();
-	const h = div.getBoundingClientRect().height + 12; // padding
+	const h = div.getBoundingClientRect().height + 12;
+	d._nodeHeight = h;
 	fo.attr("height", h);
-	d3.select(this.parentNode).select("rect")
-		.attr("height", h + 12); // adjust rect height
+	d3.select(this.parentNode).select("rect").attr("height", h + 12);
 }});
+
+const depthMaxHeight = new Map();
+root.each(d => {{
+	const h = d._nodeHeight || nodeH;
+	const existing = depthMaxHeight.get(d.depth) || 0;
+	if (h > existing) {{ depthMaxHeight.set(d.depth, h); }}
+}});
+
+const depthOffsets = [];
+const maxDepth = Math.max(...Array.from(depthMaxHeight.keys()));
+for (let i = 0; i <= maxDepth; i++) {{
+	const prev = i === 0 ? 0 : depthOffsets[i - 1] + depthMaxHeight.get(i - 1) + vGap;
+	depthOffsets.push(prev);
+}}
+
+root.each(d => {{ d.y = depthOffsets[d.depth]; }});
+
+node.attr("transform", d => `translate(${{d.x}},${{d.y}})`);
+link.attr("d", linkGen);
+
+let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+root.each(d => {{
+	const halfW = nodeW / 2;
+	const h = d._nodeHeight || nodeH;
+	if (d.x - halfW - 30 < x0) x0 = d.x - halfW - 30;
+	if (d.x + halfW + 30 > x1) x1 = d.x + halfW + 30;
+	if (d.y - 30 < y0) y0 = d.y - 30;
+	if (d.y + h + 30 > y1) y1 = d.y + h + 30;
+}});
+const width  = x1 - x0;
+const height = y1 - y0;
+
+svg.attr("width", width)
+	.attr("height", height)
+	.attr("viewBox", [x0, y0, width, height].join(" "));
 
 function nodeHTML(d) {{
 	const attrTables = d.attributes.map(a => {{
@@ -343,17 +363,29 @@ function nodeHTML(d) {{
 			print("median leaf depth:", statistics.median([x[0] for x in leaves]))
 		
 		basic_level_nodes = {}
+		basic_level_count = {}
 
 		for leaf_tup in leaves:
 			_, leaf_node = leaf_tup
 			curr_node = leaf_node.get_basic_level()
 			if curr_node.concept_hash() != leaf_node.concept_hash():
 				basic_level_nodes[curr_node.concept_hash()] = curr_node
+				basic_level_count[curr_node.concept_hash()] = basic_level_count.setdefault(curr_node.concept_hash(), 1)
+				basic_level_count[curr_node.concept_hash()] += 1
+
+		basic_level_count = dict(sorted(basic_level_count.items()))
 
 		if debug:
 			print("num nodes:", num_nodes)
 			print("num leaves:", len(leaves))
 			print(f"num nodes at basic level:", len(basic_level_nodes))
+
+			for key, cnt in basic_level_count.items():
+				print(f"Node {key} is basic-level for {cnt} nodes, has: !")
+				print(f"- Entropy of {basic_level_nodes[key].entropy()}")
+				print(f"- Category Utility of {basic_level_nodes[key].category_utility()}")
+				print(f"- Partition Utility of {basic_level_nodes[key].partition_utility()}")
+
 
 		for key, bl_node in basic_level_nodes.items():
 			self.draw_tree(bl_node, folder + ("/" if folder[-1] != "/" else "") + f"basic_level_{key}", max_depth=4)

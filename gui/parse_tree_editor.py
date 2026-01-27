@@ -1,7 +1,7 @@
 # parse_editor_api.py
 from flask import Flask, jsonify, request
 from parse import FiniteParseTree, LanguageChunkingParser
-from util.cfg import generate, TEST_CORPUS2, TEST_GRAMMAR2
+from util.cfg import generate, TEST_CORPUS1, TEST_GRAMMAR1
 import json
 import uuid
 
@@ -10,19 +10,19 @@ app = Flask(__name__)
 LEARNING_ON = True
 PREBUILD_TREES = False
 CONTEXT_LENGTH = 3
-LOAD_LTM = "unittests/gen_learn_test/final_ltm_data"
+LOAD_LTM = "unittests/primitive_only_test/final_ltm_data" # "unittests/gen_learn_test/final_ltm_data"
 
 # --- Initialize parser and LTM ---
 if LOAD_LTM != "":
     parser = LanguageChunkingParser.load_state(LOAD_LTM)
 else:
-    parser = LanguageChunkingParser(TEST_CORPUS2, context_length=CONTEXT_LENGTH, merge_split=True)
+    parser = LanguageChunkingParser(TEST_CORPUS1, context_length=CONTEXT_LENGTH, merge_split=True)
 
 NUM_LOAD = 0
 document = []
 
 for _ in range(NUM_LOAD):
-    sentence = generate("S", TEST_GRAMMAR2)
+    sentence = generate("S", TEST_GRAMMAR1)
     document.append(sentence)
 
 for doc in document:
@@ -30,24 +30,24 @@ for doc in document:
     parser.add_parse_tree(parse_tree, debug=True)
 
 # --- Initialize first sentence and tree ---
-sample_sentence = generate("S", TEST_GRAMMAR2)
+sample_sentence = generate("S", TEST_GRAMMAR1)
 # sample_sentence = "the cat chases the dog"
 curr_tree = FiniteParseTree(parser.get_long_term_memory(), parser.id_to_value, parser.value_to_id, context_length=CONTEXT_LENGTH)
 if PREBUILD_TREES:
     curr_tree.build(sample_sentence)
 else:
-    curr_tree.build_primitives(sample_sentence)
+    curr_tree.build_primitives(sample_sentence, threshold=-1e9)
 curr_tree._ensure_editor_state()
 
 def reset_tree():
     """Refresh to a new sentence and rebuild current tree."""
     global curr_tree, sample_sentence
-    sample_sentence = generate("S", TEST_GRAMMAR2)
+    sample_sentence = generate("S", TEST_GRAMMAR1)
     curr_tree = FiniteParseTree(parser.get_long_term_memory(), parser.id_to_value, parser.value_to_id, context_length=CONTEXT_LENGTH)
     if PREBUILD_TREES:
         curr_tree.build(sample_sentence)
     else:
-        curr_tree.build_primitives(sample_sentence)
+        curr_tree.build_primitives(sample_sentence, threshold=-1e9)
     curr_tree._ensure_editor_state()
     print(f"[INFO] New sentence selected: {sample_sentence}")
 
@@ -59,7 +59,8 @@ def api_get_tree():
         "tree": d3_json,
         "pairs": pairs,
         "action_log": curr_tree.action_log,
-        "sentence": sample_sentence
+        "sentence": sample_sentence,
+        "primitive_scores": curr_tree.get_primitive_score_data()
     })
 
 @app.route("/api/evaluate", methods=["POST"])

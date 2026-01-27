@@ -33,7 +33,15 @@ class PrimitiveParseNode:
     'elements' is a list of LISTS - each item in the primary list is a list of all the IDs of each
     actual word / chunk's path. We will make this a thing in the main script.
 
-    Content will be a single dict-path
+    Content is a dict which represents the path of 'elements'!
+
+    - 0: NONE, placeholder element
+    - 1: NONE, placeholder element
+    - 2...2+context_length-1: per-index context-before dicts (0 = immediate left)
+    - 2+context_length...2+2*context_length-1: per-index context-after dicts (0 = immediate right)
+    - 2+2*context_length-1: singular content 
+
+    Adding a new implementation note!!
     """
     def __init__(self, elements, anchor_idx, position_idx, context_length):
 
@@ -46,10 +54,16 @@ class PrimitiveParseNode:
 
         self.title = uuid.uuid4().hex[:10] # random id
 
-        self.content = dict([(key, 1 / len(elements[anchor_idx])) for key in elements[anchor_idx]])
+        self.content = dict([(key, 1) for key in elements[anchor_idx]])
+        # self.content = dict([(key, 1 / len(elements[anchor_idx])) for key in elements[anchor_idx]])
 
         self.context_before = list(reversed([dict([(key, 1) for key in elements[i]]) for i in range(0, anchor_idx)]))
         self.context_after = [dict([(key, 1) for key in elements[i]]) for i in range(anchor_idx + 1, len(elements))]
+
+        # NEW STUFF INVOLVING PRIMITIVES BEING VALID!!!
+        self.categorize_path = None
+        self.stable = False
+        self.score_data = {}
 
         self.concept_label = None
 
@@ -80,20 +94,34 @@ class PrimitiveParseNode:
 
         Note that with this method, we don't have to worry about an empty set for the content because
         it carries forth.
+
+        TODO check this for addition of primitive content attribute, make sure we're good here!
         """
 
         inst = {
-            "content": self.content
+            0: {0: 1},
+            1: {0: 1},
         }
 
-        inst["content"][0] = 0
+        for i in range(2, (self.context_length + 1) + 1):
+            idx = i - 2
+            if self.context_before and idx < len(self.context_before):
+                inst[i] = dict([(key, 1) for key in self.context_before[idx]])
+                # new_inst[i] = dict([(key, 1 / len(self.context_before[idx])) for key in self.context_before[idx]])
+            else:
+                inst[i] = {}
+            inst[i][0] = 0
 
-        for i in range(len(self.context_before)):
-            inst[f"context-before_{i}"] = self.context_before[i]
-            inst[f"context-before_{i}"][0] = 0
-        for i in range(len(self.context_after)):
-            inst[f"context-after_{i}"] = self.context_after[i]
-            inst[f"context-after_{i}"][0] = 0
+        for i in range(self.context_length + 2, (2 * self.context_length + 1) + 1):
+            idx = i - (self.context_length + 2)
+            if self.context_after and idx < len(self.context_after):
+                inst[i] = dict([(key, 1) for key in self.context_after[idx]])
+                # new_inst[i] = dict([(key, 1 / len(self.context_after[idx])) for key in self.context_after[idx]])
+            else:
+                inst[i] = {}
+            inst[i][0] = 0
+            
+        inst[2 + 2 * self.context_length] = self.content
 
         return inst
 
@@ -116,9 +144,9 @@ class CompositeParseNode:
     {
         0: {content_left_path: 1s for everything},
         1: {content_right_path: 1s for everything},
-        2 - context_length + 1: {paths for each context_before element: 1s for everything},
-        context_length + 2 - 2 * context_length + 1: {paths for each context_after element: 1s for everything}
-
+        2 through context_length + 1: {paths for each context_before element: 1s for everything},
+        context_length + 2 through 2 + 2 * context_length: {paths for each context_after element: 1s for everything}
+        2 + 2 * context_length - 1: singular content (set to emptynull for composite nodes)
     }
     """
     def __init__(self):
@@ -210,15 +238,17 @@ class CompositeParseNode:
 
         new_inst_dict = {}
 
-        if type(node_left) == PrimitiveParseNode:
-            new_inst_dict[0] = node_left.content
-        else:
-            new_inst_dict[0] = dict([(key, 1 / len(node_left.categorize_path)) for key in node_left.categorize_path])
+        # if type(node_left) == PrimitiveParseNode:
+        #     new_inst_dict[0] = node_left.content
+        # else:
+        new_inst_dict[0] = dict([(key, 1) for key in node_left.categorize_path])
+        # new_inst_dict[0] = dict([(key, 1 / len(node_left.categorize_path)) for key in node_left.categorize_path])
 
-        if type(node_right) == PrimitiveParseNode:
-            new_inst_dict[1] = node_right.content
-        else:
-            new_inst_dict[1] = dict([(key, 1 / len(node_right.categorize_path)) for key in node_right.categorize_path])
+        # if type(node_right) == PrimitiveParseNode:
+        #     new_inst_dict[1] = node_right.content
+        # else:
+        new_inst_dict[1] = dict([(key, 1) for key in node_right.categorize_path])
+        # new_inst_dict[1] = dict([(key, 1 / len(node_right.categorize_path)) for key in node_right.categorize_path])
 
         new_inst_dict[0][0] = 0
         new_inst_dict[1][0] = 0
@@ -229,7 +259,8 @@ class CompositeParseNode:
             # node_left.context_before is a list of dicts (may be shorter for primitives)
             if getattr(node_left, "context_before", None) and j < len(node_left.context_before):
                 src = node_left.context_before[j]
-                new_inst_dict[i] = dict([(key, 1 / len((src or {}).keys())) for key in (src or {}).keys()])
+                new_inst_dict[i] = dict([(key, 1) for key in (src or {}).keys()])
+                # new_inst_dict[i] = dict([(key, 1 / len((src or {}).keys())) for key in (src or {}).keys()])
             else:
                 new_inst_dict[i] = {0: 0}
 
@@ -238,7 +269,8 @@ class CompositeParseNode:
             j = i - (context_length + 2)
             if getattr(node_right, "context_after", None) and j < len(node_right.context_after):
                 src = node_right.context_after[j]
-                new_inst_dict[i] = dict([(key, 1 / len((src or {}).keys())) for key in (src or {}).keys()])
+                new_inst_dict[i] = dict([(key, 1) for key in (src or {}).keys()])
+                # new_inst_dict[i] = dict([(key, 1 / len((src or {}).keys())) for key in (src or {}).keys()])
             else:
                 new_inst_dict[i] = {0: 0}
 
@@ -268,6 +300,8 @@ class CompositeParseNode:
     def get_as_instance(self):
         """
         Helper method to get the current parse node as an instance description!
+
+        TODO check this for addition of primitive content attribute, make sure we're good here!
         """
 
         new_inst = {
@@ -275,22 +309,30 @@ class CompositeParseNode:
             1: self.content_right
         }
 
+        new_inst[0][0] = 0
+        new_inst[1][0] = 0
+
         for i in range(2, (self.context_length + 1) + 1):
             idx = i - 2
             if self.context_before and idx < len(self.context_before):
-                new_inst[i] = dict([(key, 1 / len(self.context_before[idx])) for key in self.context_before[idx]])
+                new_inst[i] = dict([(key, 1) for key in self.context_before[idx]])
+                # new_inst[i] = dict([(key, 1 / len(self.context_before[idx])) for key in self.context_before[idx]])
             else:
                 new_inst[i] = {}
+            new_inst[i][0] = 0
+            
 
         for i in range(self.context_length + 2, (2 * self.context_length + 1) + 1):
             idx = i - (self.context_length + 2)
             if self.context_after and idx < len(self.context_after):
-                new_inst[i] = dict([(key, 1 / len(self.context_after[idx])) for key in self.context_after[idx]])
+                new_inst[i] = dict([(key, 1) for key in self.context_after[idx]])
+                # new_inst[i] = dict([(key, 1 / len(self.context_after[idx])) for key in self.context_after[idx]])
             else:
                 new_inst[i] = {}
+            new_inst[i][0] = 0
 
-        for key in new_inst.keys():
-            new_inst[key][0] = 0
+        # new line that adds a marker for composite instance
+        new_inst[2 + 2 * self.context_length] = {0: 1}
 
         return new_inst
 
@@ -427,17 +469,15 @@ def custom_categorize_dfs(inst, tree):
     while True:
         try:
             # log probabilities for each child (in order corresponding to node.children)
-            child_scores = node.prob_children_given_instance(inst)
+            child_scores = node.log_prob_children_given_instance(inst)
             # child_scores = []
             # for child in node.children:
-            #     child_scores.append(node.pu_for_insert(child, inst) - child.pu_for_new_child(inst))
+            #     child_scores.append(child.log_prob_class_given_instance(inst, True))
         except Exception as e:
             pass
 
         if not child_scores:
             break
-
-        # print(child_scores)
 
         # find best child index (handle NaN by treating as -inf)
         best_idx = None
@@ -454,6 +494,8 @@ def custom_categorize_dfs(inst, tree):
                 best_idx = i
 
         if best_idx is None or best_val == -float("inf"):
+            print(child_scores)
+            print("BEST CHILD COULD NOT BE RANKED")
             break
 
         # descend to selected child
@@ -477,7 +519,8 @@ def custom_categorize_dfs(inst, tree):
     categorizeNode = tree.categorize(inst)
 
     if categorizeNode.concept_hash() != lastNode.concept_hash():
-        print("ERR: categorize landed differently than last node")
+        print(f"ERR: categorize landed differently than last node: our node, {lastNode.concept_hash()} vs. tree method node {lastNode.concept_hash()}")
+        print(f"PATH OF the following: {path}")
 
     return lastNode, path, node_path
 
@@ -629,7 +672,8 @@ class FiniteParseTree:
             
             # 1. Compute raw log-probability (uses node’s built-in method)
             # log_prob = node.log_prob_class_given_instance(instance, True)
-            log_prob = node.log_prob_class_given_instance(instance, True)
+            # log_prob = node.log_prob_class_given_instance(instance, True)
+            log_prob = node.log_prob_instance(instance)
 
             if math.isnan(log_prob) or log_prob == 0:
                 log_prob = -1e8
@@ -674,16 +718,22 @@ class FiniteParseTree:
         cost = 0
         scale_coef = 1
         scale_factor = 0.33
-        for lp in raw_node_log_probs:
+        for lp in reversed(raw_node_log_probs): # TODO REVERSED THIS COUNT ATTR
             cost += lp * scale_coef
             scale_coef *= scale_factor
 
         normed_count = 0
         scale_coef = 1
-        scale_factor = 0.5
+        scale_factor = 0.33
         for i in range(1, len(path_counts)):
             normed_count += path_counts[i] * scale_coef
             scale_coef *= scale_factor
+
+        # TRYING BASIC-LEVEL STUFF TODO need to see if this works
+        basic_level_on_path = path[-1].get_basic_level()
+        basic_level_count = basic_level_on_path.count
+        bl_log_prob = basic_level_on_path.log_prob_instance_missing(instance)
+        # bl_pu = basic_level_on_path.parent.pu_for_insert(basic_level_on_path, instance)
         
         score_data = {
             'raw_node_log_probs': str(raw_node_log_probs),
@@ -692,7 +742,10 @@ class FiniteParseTree:
             'normed_count': normed_count,
             'best_log_prob_idx': best_log_prob_idx,
             'inst_complexity': inst_complexity,
-            'cost': cost, #/ (path_counts[best_log_prob_idx] - 1),
+            'cost': bl_log_prob, #/ (path_counts[best_log_prob_idx] - 1),
+            'basic_level_log_prob': bl_log_prob,
+            'basic_level_node_hash': basic_level_on_path.concept_hash(),
+            'basic_level_count': basic_level_count,
             'best_log_prob': best_log_prob,
             'worst_log_prob': worst_log_prob,
             'root_cost': raw_node_log_probs[0],
@@ -713,7 +766,7 @@ class FiniteParseTree:
     -----------------------------------
     """
 
-    def build_primitives(self, window):
+    def build_primitives(self, window, threshold=-7):
         """
         A custom function that we add (not given by GPT) to set up the primitive nodes to be combined!
         """
@@ -731,7 +784,7 @@ class FiniteParseTree:
             start_idx = max(0, i - self.context_length)
             snapshot = elements[start_idx: min(len(elements), i + self.context_length + 1)]
 
-            listed_elems = [[x] for x in snapshot] # REPLACE HERE FOR VOCAB
+            listed_elems = [[x] for x in snapshot] # TODO REPLACE HERE FOR VOCAB
 
             # anchor_idx must be relative to the snapshot window
             anchor_idx_rel = i - start_idx
@@ -745,8 +798,29 @@ class FiniteParseTree:
 
             node.set_parent(self.global_root_node)
 
-            self.nodes.append(node)
+            # WERE JUST GOING TO BUILD AND ADD THE CATEGORIZE PATHS HERE!! THESE ARE THE UNARY LABELS FOR OUR RULES
+            primitive_inst = node.get_as_instance()
 
+            _, categorize_path, node_categorize_path = custom_categorize(primitive_inst, self.ltm_hierarchy)
+
+            try:
+                categorize_path = [self.value_to_id.get(key) for key in categorize_path]
+            except Exception:
+                categorize_path = []
+
+            # TODO may need to add the word itself to the end of the categorization path
+            # categorize_path.append(elements[anchor_idx_rel])
+
+            node.categorize_path = categorize_path
+
+            node.score_data = FiniteParseTree._score_function(node_categorize_path, primitive_inst)
+
+            if threshold == "converge":
+                node.stable = True
+            else:
+                node.stable = node.score_data["cost"] > threshold
+
+            self.nodes.append(node)
 
     def get_parentless_pairs(self):
         """
@@ -789,9 +863,31 @@ class FiniteParseTree:
             })
         return pairs
 
+    def get_primitive_score_data(self):
+        primitives = []
+
+        def walk(node):
+            if isinstance(node, PrimitiveParseNode):
+                primitives.append(node)
+            for _, ch in getattr(node, "children", []):
+                walk(ch)
+
+        walk(self.global_root_node)
+
+        primitives.sort(key=lambda n: (n.position_idx if n.position_idx is not None else float("inf"), n.title))
+
+        out = []
+        for node in primitives:
+            out.append({
+                "title": node.title,
+                "position_idx": node.position_idx,
+                "score_data": node.score_data or {}
+            })
+        return out
+
     def _find_root_child_by_index(self, position_idx):
         for wi, ch in self.global_root_node.children:
-            if wi == position_idx:
+            if wi == position_idx and (type(ch) == CompositeParseNode or getattr(ch, "stable", False)):
                 return ch
         return None
 
@@ -839,6 +935,10 @@ class FiniteParseTree:
             left_inst = candidate_concept.av_count.get(0, {}) or {}
             right_inst = candidate_concept.av_count.get(1, {}) or {}
 
+            # fallback content if no left/right: some LTM nodes may store content at the "content" slot
+            content_idx = 2 + 2 * self.context_length
+            content_inst = candidate_concept.av_count.get(content_idx, {}) or merge_inst.get(content_idx, {}) or {}
+
             before_list = []
             after_list = []
             for i in range(self.context_length):
@@ -851,6 +951,7 @@ class FiniteParseTree:
                 "title": candidate_hash,
                 "left": self.ctx_list(left_inst, draw_zeros=False),
                 "right": self.ctx_list(right_inst, draw_zeros=False),
+                "content_single": self.ctx_list(content_inst, draw_zeros=False),
                 "before": before_list,
                 "after": after_list,
                 "children": []
@@ -1055,7 +1156,7 @@ class FiniteParseTree:
 
         self.window = window
 
-        self.build_primitives(window)
+        self.build_primitives(window, threshold=end_behavior)
 
         while True:
             parentless_pairs = self.get_parentless_pairs()
@@ -1068,8 +1169,7 @@ class FiniteParseTree:
                 try:
                     res = self.evaluate_pair(p["left_word_index"], p["right_word_index"], debug=debug)
                 except Exception as e:
-                    if debug:
-                        print(f"evaluate_pair failed for {p}: {e}")
+                    print(f"evaluate_pair failed for {p}: {e}")
                     continue
 
                 score = res.get("score", float("-inf"))
@@ -1108,13 +1208,17 @@ class FiniteParseTree:
         """
         Primary method that returns all available nonterminals as instances
         ready to be passed into the long-term hierarchy!
+
+        Note that in this method, all primitives are already built, regardless of whether
+        they are stable or not, so we can just add them through this method!
         """
 
         instances = []
 
         def dfs_insts(node):
-            if type(node) == PrimitiveParseNode:
-                return
+            # NOTE we no longer need this!!!
+            # if type(node) == PrimitiveParseNode:
+            #     return
 
             instances.append(node.get_as_instance())
 
@@ -1129,6 +1233,9 @@ class FiniteParseTree:
     def get_unparsed_instances(self):
         """
         This is a helper function to return the top-level of unparsed instances.
+
+        NOTE: technically we should like wait to do this somehow until we get solid
+        unary rules for the primitives I think??? But not really sure how to do this further
         """
 
         instances = []
@@ -1143,9 +1250,14 @@ class FiniteParseTree:
             left_node = self._find_root_child_by_index(left_word_index)
             right_node = self._find_root_child_by_index(right_word_index)
 
-            merge_inst = CompositeParseNode.create_merge_instance(left_node, right_node, self.context_length)
+            if left_node and right_node: # checks for stability of the primitives
 
-            instances.append(merge_inst)
+                merge_inst = CompositeParseNode.create_merge_instance(left_node, right_node, self.context_length)
+
+                instances.append(merge_inst)
+
+        # NOTE we don't need to find all primitives here because they will automatically be
+        # found with the `get_parsed_instances` method!
 
         return instances
 
@@ -1467,6 +1579,9 @@ class FiniteParseTree:
     #editor-container {{ display: flex; flex-direction: row; height: 100vh; }}
     #tree-panel {{ flex: 3; overflow: auto; border-right: 1px solid #ccc; padding: 12px; }}
     #sidebar {{ flex: 1; overflow-y: auto; padding: 12px; background: #f9f9f9; }}
+    #primitive-scores {{ margin-top: 12px; }}
+    #primitive-score-buttons button {{ width: 100%; text-align: left; margin: 4px 0; padding: 4px 8px; font-size: 12px; }}
+    #primitive-score-view {{ margin-top: 8px; font-size: 12px; }}
     #header {{ padding: 12px; border-bottom: 1px solid #ccc; }}
     button {{ margin: 4px; padding: 4px 8px; font-size: 12px; }}
     #pair-buttons {{ margin-bottom: 12px; }}
@@ -1499,6 +1614,11 @@ class FiniteParseTree:
         </div>
         <div id="sidebar">
             <div id="pair-buttons"><strong>Candidate Pairs:</strong></div>
+            <div id="primitive-scores">
+                <strong>Primitive Scores:</strong>
+                <div id="primitive-score-buttons"></div>
+                <div id="primitive-score-view"><i>Select a primitive to view its score data.</i></div>
+            </div>
             <div><strong>Action Log:</strong><ul id="action-log"></ul></div>
         </div>
     </div>
@@ -1621,6 +1741,35 @@ class FiniteParseTree:
         log.forEach(e=>{{ ul.innerHTML += `<li>[${{new Date(e.timestamp*1000).toLocaleTimeString()}}] ${{e.description}}</li>`; }});
     }}
 
+    function formatScoreValue(val){{
+        if(val===null || typeof val==="undefined") return "null";
+        if(typeof val==="number") return Number.isFinite(val) ? val.toFixed(3) : String(val);
+        return val;
+    }}
+
+    function buildScoreTable(score){{
+        if(!score || Object.keys(score).length===0) return "<i>No score data</i>";
+        let rows="";
+        for(const [k,v] of Object.entries(score)){{
+            rows += `<tr><td>${{k}}</td><td>${{formatScoreValue(v)}}</td></tr>`;
+        }}
+        return `<table><tr><th>Metric</th><th>Value</th></tr>${{rows}}</table>`;
+    }}
+
+    function renderPrimitiveScores(primitives){{
+        const btnContainer = document.getElementById("primitive-score-buttons");
+        const view = document.getElementById("primitive-score-view");
+        if(!btnContainer || !view) return;
+        btnContainer.innerHTML="";
+        view.innerHTML="<i>Select a primitive to view its score data.</i>";
+        primitives.forEach(p=>{{
+            const btn=document.createElement("button");
+            btn.textContent=p.title;
+            btn.onclick=()=>{{ view.innerHTML = buildScoreTable(p.score_data); }};
+            btnContainer.appendChild(btn);
+        }});
+    }}
+
     // --- Pair buttons ---
     function loadPairs(){{
         fetch("/api/tree").then(r=>r.json()).then(data=>{{
@@ -1628,6 +1777,7 @@ class FiniteParseTree:
             container.innerHTML="<strong>Candidate Pairs:</strong>";
             const s = document.getElementById("sentence-text");
             if(s && data.sentence) s.textContent = data.sentence;
+            renderPrimitiveScores(data.primitive_scores || []);
             data.pairs.forEach(p=>{{
                 const btn=document.createElement("button");
                 btn.textContent=`${{p.left_title}} + ${{p.right_title}}`;
@@ -1675,10 +1825,13 @@ class FiniteParseTree:
             let contentHTML="";
             const leftHas = Array.isArray(d.left) && d.left.length>0;
             const rightHas = Array.isArray(d.right) && d.right.length>0;
+            const singleHas = Array.isArray(d.content_single) && d.content_single.length>0;
             if(rightHas){{
                 contentHTML = `<div class="section">${{ctxTable(d.left,"Content-Left")}}${{ctxTable(d.right,"Content-Right")}}</div>`;
             }} else if(leftHas){{
                 contentHTML = `<div class="section">${{ctxTable(d.left,d.right && d.right.length>0?"Content-Left":"Content")}}</div>`;
+            }} else if(singleHas){{
+                contentHTML = `<div class="section">${{ctxTable(d.content_single,"Content")}}</div>`;
             }} else {{
                 contentHTML = `<div class="section"><i>Content: empty</i></div>`;
             }}
@@ -2312,15 +2465,17 @@ class LanguageChunkingParser:
     to generalize, such as properly representing context.
 
     Standardizations:
-    *   id-0 => content-left
-    *   id-1 => content-right
-    *   id-2 => context-before
-    *   id-3 => context-after
+    {
+        0: {content_left_path: 1s for everything},
+        1: {content_right_path: 1s for everything},
+        2 - context_length + 1: {paths for each context_before element: 1s for everything},
+        context_length + 2 - 2 * context_length + 1: {paths for each context_after element: 1s for everything}
+    }
     """
 
     def __init__(self, value_corpus, context_length=3, merge_split=True):
 
-        self.ltm_hierarchy = CobwebTree(0.1, False, 0, True, False)
+        self.ltm_hierarchy = CobwebTree(1 / 20, False, 0, True, False)
 
         self.id_to_value = ["EMPTYNULL"]
         for x in value_corpus:
@@ -2340,7 +2495,8 @@ class LanguageChunkingParser:
         # dynamic headers: two content cols + N before + N after
         headers = ["Content-Left", "Content-Right"] + \
             [f"Context-Before{i}" for i in range(self.context_length)] + \
-            [f"Context-After{i}" for i in range(self.context_length)]
+            [f"Context-After{i}" for i in range(self.context_length)] + \
+            ["Primitive-Content"]
 
         self.cobweb_drawer = HTMLCobwebDrawer(
             headers,
@@ -2559,14 +2715,14 @@ class LanguageChunkingParser:
             return True
         return False
 
-    def visualize_ltm(self, out_base="cobweb_tree"):
+    def visualize_ltm(self, out_base="cobweb_tree", max_depth=1e9):
         """
         We had a rudimentary CobwebDrawer before but I'd very much enjoy if we
         could expand on this and create an HTML-drawing Cobweb method before we
         continue tests - it would be both easier to explain and certainly easy
         to verify.
         """
-        self.cobweb_drawer.draw_tree(self.ltm_hierarchy.root, out_base)
+        self.cobweb_drawer.draw_tree(self.ltm_hierarchy.root, out_base, max_depth=max_depth)
 
     def save_state(self, dirpath: str):
         """

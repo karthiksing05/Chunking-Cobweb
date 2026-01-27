@@ -1,14 +1,8 @@
 # Formalizations of the Chunking Framework
 
-## NEW GROUNDBREAKING PLAN:
-
-*   
-
 ## Intuition
 
 Pat can probably fill this part in better than me, but the idea is almost a "compression" of memory by observing chunks and their compositionality. More frequent chunks should be compressed more often than less frequent chunks!
-
-**NOTE:** CobwebTree(0.1, False, 0, True, False) is a good parameterization!
 
 ## Processes
 
@@ -107,26 +101,62 @@ We really need to figure out three main questions:
     *   I think we should sort primitives until we have some sort of convergence there (recognition of primitives, as they are chunks too!) - let them go through the same process of recognition and chunk-building!!!
         *   Once we recognize chunks, we can move to the next layers of chunking and we can simply just extend the philosophy for primitive instances
         *   Do we use path-annotated context or just regular context? I think because of the way we've been handling composite chunks we should just do regular context and give content elements the path information
-    *   Should we let the primitive hierarchy converge before we build composites? I think **this makes a lot of sense** as you absolutely need your terminating rules before you're able to create rules over generalizations (i.e. we need N -> "dog" before we get )
+    *   Should we let the primitive hierarchy converge before we build composites? I think **this makes a lot of sense** as you absolutely need your terminating rules before you're able to create rules over generalizations (i.e. we need N -> "dog" before we get "ADJP -> ADJP + N" because how do we know what N is?)
 *   Chunk utility solution:
     *   We are normalizing the average log-probability of the whole path, but with an "information-style" weighting. Each log-probability gets halved as you move down the path so it's log-probability at the root with some extra steps.
     *   My hope is that we can threshold by some measure of uncertainty that is particular to the path that we categorize down itself
     *   There may be something interesting we can do with entropy in order to properly yield a "stability" focused calculation - higher instances should have more entropy and lower instances should have less entropy
         *   It's essentially variance so I'm not sure if it by itself can measure something, but perhaps a count-scaled entropy could be valuable
-    *   I completely disagree with Chris - I think that path information will yield very important semantic relevance and it's similar to how we as people store information. At any given point, we need to be able to recall that a robin is both a bird and an animal so that we can make efficient decisions based on how it appears within the sentence\
+    *   I completely disagree with Chris - I think that path information will yield very important semantic relevance and it's similar to how we as people store information. At any given point, we need to be able to recall that a robin is both a bird and an animal so that we can make efficient decisions based on how it appears within the sentence
+        *   Show BOW results to confirm this!!
 
 #### *Implementation Plan*
-*   Program primitives first!!
-    *   The label is its path so the label gets passed up but the primitive instance will always be made of unique words
-    *   Because we're letting the hierarchy of primitives converge before we build hierarchies, there shouldn't need to be a lot of data donated to just the 
-    *   Here's the specific implementation:
-        *   We can set a flag variable within our LanguageChunkingParser called vocabulary_stable that continues to hierarchize the primitives until they no longer need to be hierarchized (this way, we can manually decide when to start building)
-        *   Let's let our primitive hierarchy converge and then add composites to the hierarchy for clarity
-        *   Hmmm...do we even need content for this? Perhaps we assign individual chunks content and partitions of chunks context (**This isn't relevant now but it may be if this primitive stuff doesn't work**)
-*   Normalizing the score needs a lot of work - we NEED a binary metric of recognition which works across layers so we can guarantee that a given 
-*   At some point we should implement restructuring because I feel as though it will resolve the premise of things being incorrectly sorted
+*   So, we've kind of been all over the place, but I'm pretty sure that the following approach will result in some new and promising results!
+*   I INITIALLY THOUGHT THE FOLLOWING (BUT ITS NOT TRUE): Preliminary tests work well with the POS grammar - we HAVE to use word classes and word unary labels to self-select otherwise we can't possibly inherit meaning
+    *   BUT THIS IS NOT TRUE YAYAY - DATA SCALE FIXES THIS AND THIS IS SUPPORTED BY GRIDS PAPER MEASUREMENTS
+    *   Once we uplift the root node to 
+*   We REALLY need to resolve a basic-level node definition OR a heuristic that allows for us to determine when things are good enough, but adding primitives is a sound start.
+
+We'll implement the following things:
+*   Not sure what the best alpha is yet but we'll leave it as 0.5 - unlike Chris's instructions - because 1 has some nodes with large branching factor
+*   Craft primitive instance representations with EMPTYNULL = 1 for content-left and content-right (and composite instances with EMPTYNULL = 1 for the content-only element) 
+*   We should program this without dividing the counts by the path length - just do ones and perhaps even a limited path traversal
+    *   We could like move down the path while the log probability decreases
+*   Fundamentally the input loop is the same - we build chunks based on recognition until we can no longer do so, and then we add top-level candidate chunks
+    *   Hopefully this does work? We may need to recategorize elements with their path information after we find them for fitting?
+
+TODOS FOR THE FORMULA:
+*   Nodes with the largest basic-level count should influence the way we pick them - THIS IS THE HEURISTIC FOR SURE THIS IS 100% THE HEURISTIC
+
+Some things we're not doing right now but we definitely need to do at some point:
+*   Need some sort of stabilization loop! But for now we will just program based on existing framework and building off stable chunks
+*   Need to program chunk finding and deciding off of multiple levels of chunking and not just the word-level for context
+
+### **New Plan for Primitives: Two data-structures?**
+
+*   Here's the deal - we need to make one of the following two decisions:
+    *   Either we categorize words with their path information back into the same hierarchy
+    *   OR, we maintain a hierarchy for compositional rules and a hierarchy for unary rules
+*   In the event that we only make the latter decision, I make the following claims:
+    *   Chunks must be created by the hierarchy of compositional rules but labeled by the hierarchy of unary rules!! I enjoy this and think it's a valuable 
+    *   Oh bruh what if we put both types of rules in the same hierarchy - this is literally just re-sorting the path into the same hierarchy as itself this is soooo troll
+*   I think splitting into two datastructures to handle unary rules and compositional rules respectively makes a lot of sense
 
 ## Design Decisions
+
+### Second wave of decisions (PRIMITIVES)
+
+We have three primary design decisions to alter with this new branch. We'll discuss them below and allow them to influence our discussion of primitives and then our final 
+*   Unary and compositional rules: should they be organized within the same hierarchy or different hierarchies?
+    *   We can always do them in the same hierarchy as long as we find an instance representation that works for both of them
+*   Stabilizing the label not just in terms of one categorization, but a converging categorization that updates with the categorizations of surrounding context
+    *   Path information for the instance itself is probably a solid idea? We can do stabilizations based off that
+*   Including higher level chunk information for both content and context
+    *   How do higher-level structures get assigned? We need to create attribute mappings that make sense
+*   RECOGNITION VS CONFIDENCE!!! Rather than recognizing the most probable prospective chunks (or perhaps in addition to this former topic), what if we evaluate chunk candidates based on whether we are confident in the stability of our compositional ingredients and add them if so?
+    *   New kind of formulation which may already be defined by Cobweb
+
+### First wave of decisions
 
 One of the most important things to keep track of over the course of this project is the importance of labeling and defining design decisions. These decisions are influenced and ascertained by any choice / assumption made over the course of defining the framework. While current design decisions have been made to support ease of access regarding the programming of the framework, they'll definitely be revisited as we aggregate results and rationale from our tests.
 
