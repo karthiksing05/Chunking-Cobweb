@@ -75,7 +75,8 @@ def get_composite_chunk_candidates(sentence: str, value_to_id: dict, context_len
                 if idx_before >= 0:
                     d = {words[idx_before]: 1.0 / (2 ** (k + 1)), 0: 0}
                 else:
-                    d = {0: 0}
+                    d = {0: 1.0 / (2 ** (k + 1))}
+                    # d = {0: 0}
                 inst[2 + k] = d
 
             # build per-index context-after (0 = immediate right of `content_right`)
@@ -84,7 +85,8 @@ def get_composite_chunk_candidates(sentence: str, value_to_id: dict, context_len
                 if idx_after < len(words):
                     d = {words[idx_after]: 1.0 / (2 ** (k + 1)), 0: 0}
                 else:
-                    d = {0: 0}
+                    d = {0: 1.0 / (2 ** (k + 1))}
+                    # d = {0: 0}
                 inst[2 + context_length + k] = d
 
         inst[2 + 2 * context_length] = {0: 0}
@@ -147,8 +149,8 @@ def get_primitive_chunk_candidates(sentence: str, value_to_id: dict, context_len
                 if idx_before >= 0:
                     d = {words[idx_before]: 1.0 / (2 ** (k + 1)), 0: 0}
                 else:
-                    # d = {0: 1.0 / (2 ** (k + 1))}
-                    d = {0: 0}
+                    d = {0: 1.0 / (2 ** (k + 1))}
+                    # d = {0: 0}
                 inst[2 + k] = d
 
             # build per-index context-after (0 = immediate right of `content_right`)
@@ -157,8 +159,8 @@ def get_primitive_chunk_candidates(sentence: str, value_to_id: dict, context_len
                 if idx_after < len(words):
                     d = {words[idx_after]: 1.0 / (2 ** (k + 1)), 0: 0}
                 else:
-                    # d = {0: 1.0 / (2 ** (k + 1))}
-                    d = {0: 0}
+                    d = {0: 1.0 / (2 ** (k + 1))}
+                    # d = {0: 0}
                 inst[2 + context_length + k] = d
 
         inst[2 + 2 * context_length] = {words[i]: 1.0, 0: 0}
@@ -192,7 +194,8 @@ for sentence in primitive_doc:
     for inst in instances:
         # check total sum of the instance
         total_value_sum = 0
-        for d in inst.values():
+        for k, d in inst.items():
+            # print(f"{k}: {sum(d.values())}")
             total_value_sum += sum(d.values())
 
         print(total_value_sum)
@@ -202,12 +205,13 @@ for sentence in primitive_doc:
 
 for sentence in composite_doc:
 
-    instances = get_composite_chunk_candidates(sentence, parser.value_to_id, bow=True)
+    instances = get_composite_chunk_candidates(sentence, parser.value_to_id, bow=False)
 
     for inst in instances:
         # check total sum of the instance
         total_value_sum = 0
-        for d in inst.values():
+        for k, d in inst.items():
+            # print(f"{k}: {sum(d.values())}")
             total_value_sum += sum(d.values())
 
         print(total_value_sum)
