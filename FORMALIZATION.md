@@ -144,7 +144,12 @@ Some things we're not doing right now but we definitely need to do at some point
 
 ### **New Plan for Representation**
 
-*   Yet another new plan LOL - but this one seems to have a lot of strong implications
+*   Yet another new plan LOL - but this one seems to have a lot of strong implications!!
+    *   We've adjusted the attribute sizes such that the content and context attributes have very similar "pull" within a given instance
+    *   We've also adjusted the path weighting such that each successive node gets 1/2 the weight of prior nodes
+        *   This will probably need revision - nodes in the middle are weighted well but nodes at extensions are weighted poorly
+        *   However, most of the hierarchy is in the top four nodes so maybe we weight the path information some other way??? We may need to go back to implementing the path information according to average of the path
+    *   Hopefully, this "normalizes" the log-prob such that we can compare chunk scores
 
 ## Design Decisions
 

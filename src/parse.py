@@ -54,8 +54,8 @@ class PrimitiveParseNode:
 
         self.title = uuid.uuid4().hex[:10] # random id
 
-        self.content = dict([(key, 1) for key in elements[anchor_idx]])
-        # self.content = dict([(key, 1 / len(elements[anchor_idx])) for key in elements[anchor_idx]])
+        # self.content = dict([(key, 1) for key in elements[anchor_idx]])
+        self.content = dict([(key, 1 / len(elements[anchor_idx])) for key in elements[anchor_idx]])
 
         self.context_before = list(reversed([dict([(key, 1) for key in elements[i]]) for i in range(0, anchor_idx)]))
         self.context_after = [dict([(key, 1) for key in elements[i]]) for i in range(anchor_idx + 1, len(elements))]
@@ -99,14 +99,14 @@ class PrimitiveParseNode:
         """
 
         inst = {
-            0: {0: 1},
-            1: {0: 1},
+            0: {0: 0},
+            1: {0: 0},
         }
 
         for i in range(2, (self.context_length + 1) + 1):
             idx = i - 2
             if self.context_before and idx < len(self.context_before):
-                inst[i] = dict([(key, 1) for key in self.context_before[idx]])
+                inst[i] = dict([(key, 1.0 / (2 ** (idx + 1))) for key in self.context_before[idx]])
                 # new_inst[i] = dict([(key, 1 / len(self.context_before[idx])) for key in self.context_before[idx]])
             else:
                 inst[i] = {}
@@ -115,7 +115,7 @@ class PrimitiveParseNode:
         for i in range(self.context_length + 2, (2 * self.context_length + 1) + 1):
             idx = i - (self.context_length + 2)
             if self.context_after and idx < len(self.context_after):
-                inst[i] = dict([(key, 1) for key in self.context_after[idx]])
+                inst[i] = dict([(key, 1.0 / (2 ** (idx + 1))) for key in self.context_after[idx]])
                 # new_inst[i] = dict([(key, 1 / len(self.context_after[idx])) for key in self.context_after[idx]])
             else:
                 inst[i] = {}
@@ -239,16 +239,16 @@ class CompositeParseNode:
         new_inst_dict = {}
 
         # if type(node_left) == PrimitiveParseNode:
-        #     new_inst_dict[0] = node_left.content
+            # new_inst_dict[0] = node_left.content
         # else:
-        new_inst_dict[0] = dict([(key, 1) for key in node_left.categorize_path])
-        # new_inst_dict[0] = dict([(key, 1 / len(node_left.categorize_path)) for key in node_left.categorize_path])
+        # new_inst_dict[0] = dict([(key, 0.5) for key in node_left.categorize_path])
+        new_inst_dict[0] = dict([(key, 0.5 / len(node_left.categorize_path)) for key in node_left.categorize_path]) # TODO changed this to reflect 0.5
 
         # if type(node_right) == PrimitiveParseNode:
         #     new_inst_dict[1] = node_right.content
         # else:
-        new_inst_dict[1] = dict([(key, 1) for key in node_right.categorize_path])
-        # new_inst_dict[1] = dict([(key, 1 / len(node_right.categorize_path)) for key in node_right.categorize_path])
+        # new_inst_dict[1] = dict([(key, 0.5) for key in node_right.categorize_path])
+        new_inst_dict[1] = dict([(key, 0.5 / len(node_right.categorize_path)) for key in node_right.categorize_path]) # TODO changed this to reflect 0.5
 
         new_inst_dict[0][0] = 0
         new_inst_dict[1][0] = 0
@@ -259,20 +259,24 @@ class CompositeParseNode:
             # node_left.context_before is a list of dicts (may be shorter for primitives)
             if getattr(node_left, "context_before", None) and j < len(node_left.context_before):
                 src = node_left.context_before[j]
-                new_inst_dict[i] = dict([(key, 1) for key in (src or {}).keys()])
+                new_inst_dict[i] = dict([(key, 1.0 / (2 ** (j + 1))) for key in (src or {}).keys()])
                 # new_inst_dict[i] = dict([(key, 1 / len((src or {}).keys())) for key in (src or {}).keys()])
+                new_inst_dict[i][0] = 0
             else:
-                new_inst_dict[i] = {0: 0}
+                new_inst_dict[i] = {0: 1.0 / (2 ** (j + 1))}
 
         # Fill context-after keys (context_length+2 .. 2*context_length+1)
         for i in range(context_length + 2, 2 * context_length + 2):
             j = i - (context_length + 2)
             if getattr(node_right, "context_after", None) and j < len(node_right.context_after):
                 src = node_right.context_after[j]
-                new_inst_dict[i] = dict([(key, 1) for key in (src or {}).keys()])
+                new_inst_dict[i] = dict([(key, 1.0 / (2 ** (j + 1))) for key in (src or {}).keys()])
                 # new_inst_dict[i] = dict([(key, 1 / len((src or {}).keys())) for key in (src or {}).keys()])
+                new_inst_dict[i][0] = 0
             else:
-                new_inst_dict[i] = {0: 0}
+                new_inst_dict[i] = {0: 1.0 / (2 ** (j + 1))}
+        
+        new_inst_dict[2 * context_length + 2] = {0: 0}
 
         return new_inst_dict
 
@@ -315,24 +319,23 @@ class CompositeParseNode:
         for i in range(2, (self.context_length + 1) + 1):
             idx = i - 2
             if self.context_before and idx < len(self.context_before):
-                new_inst[i] = dict([(key, 1) for key in self.context_before[idx]])
+                new_inst[i] = dict([(key, 1.0 / (2 ** (idx + 1))) for key in self.context_before[idx]])
                 # new_inst[i] = dict([(key, 1 / len(self.context_before[idx])) for key in self.context_before[idx]])
+                new_inst[i][0] = 0
             else:
-                new_inst[i] = {}
-            new_inst[i][0] = 0
-            
+                new_inst[i] = {0: 1.0 / (2 ** (idx + 1))}
 
         for i in range(self.context_length + 2, (2 * self.context_length + 1) + 1):
             idx = i - (self.context_length + 2)
             if self.context_after and idx < len(self.context_after):
-                new_inst[i] = dict([(key, 1) for key in self.context_after[idx]])
+                new_inst[i] = dict([(key, 1.0 / (2 ** (idx + 1))) for key in self.context_after[idx]])
                 # new_inst[i] = dict([(key, 1 / len(self.context_after[idx])) for key in self.context_after[idx]])
+                new_inst[i][0] = 0
             else:
-                new_inst[i] = {}
-            new_inst[i][0] = 0
+                new_inst[i] = {0: 1.0 / (2 ** (idx + 1))}
 
-        # new line that adds a marker for composite instance
-        new_inst[2 + 2 * self.context_length] = {0: 1}
+        # TODO WE DONT NEED A MARKER ANYMORE!!!
+        new_inst[2 + 2 * self.context_length] = {0: 0}
 
         return new_inst
 
@@ -730,9 +733,9 @@ class FiniteParseTree:
             scale_coef *= scale_factor
 
         # TRYING BASIC-LEVEL STUFF TODO need to see if this works
-        basic_level_on_path = path[-1].get_basic_level()
-        basic_level_count = basic_level_on_path.count
-        bl_log_prob = basic_level_on_path.log_prob_instance_missing(instance)
+        best_level_on_path = path[-1].get_best(path[-1].av_count)
+        best_level_count = best_level_on_path.count
+        bl_log_prob = best_level_on_path.log_prob_instance(instance)
         # bl_pu = basic_level_on_path.parent.pu_for_insert(basic_level_on_path, instance)
         
         score_data = {
@@ -743,9 +746,9 @@ class FiniteParseTree:
             'best_log_prob_idx': best_log_prob_idx,
             'inst_complexity': inst_complexity,
             'cost': bl_log_prob, #/ (path_counts[best_log_prob_idx] - 1),
-            'basic_level_log_prob': bl_log_prob,
-            'basic_level_node_hash': basic_level_on_path.concept_hash(),
-            'basic_level_count': basic_level_count,
+            'best_level_log_prob': bl_log_prob,
+            'best_level_node_hash': best_level_on_path.concept_hash(),
+            'best_level_count': best_level_count,
             'best_log_prob': best_log_prob,
             'worst_log_prob': worst_log_prob,
             'root_cost': raw_node_log_probs[0],
@@ -2653,9 +2656,9 @@ class LanguageChunkingParser:
         for inst in insts:
             if debug:
                 print("Adding instance to CobwebTree:", inst)
-            _, _, actions = self.ltm_hierarchy.ifit(inst, mode=mode, debug=True) # debug flag for saving logs!
 
-            # print(actions)
+            # print(inst)
+            _, actions = self.ltm_hierarchy.ifit(inst, debug=True) # debug flag for saving logs! # TODO NEED TO FILL IN FOR MERGED AND SPLITTED NODES
 
             # json loading!!
             actions = [json.loads(x) for x in actions]
@@ -2759,7 +2762,7 @@ class LanguageChunkingParser:
                 with open(tree_path, "w", encoding="utf-8") as f:
                     json.dump(self.ltm_hierarchy.to_json(), f)
             except Exception as e:
-                raise
+                self.ltm_hierarchy.dump_json(tree_path)
 
         return {"ok": True, "meta": meta_path, "tree": tree_path}
 

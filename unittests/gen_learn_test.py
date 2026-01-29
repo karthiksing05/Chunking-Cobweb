@@ -2,11 +2,13 @@
 General Learning Test - to confirm the logic of learning is completely functional!
 """
 
-from util.cfg import generate, POS_GRAMMAR1, POS_CORPUS1
+from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1
 from parse import LanguageChunkingParser
 import shutil
+import os
 
-shutil.rmtree("unittests/gen_learn_test")
+if os.path.exists("unittests/gen_learn_test"):
+    shutil.rmtree("unittests/gen_learn_test")
 
 # Creating and printing toy sentences
 CONTEXT_LENGTH = 3
@@ -15,11 +17,11 @@ num_sentences = 200
 document = []
 
 for _ in range(num_sentences):
-    sentence = generate("S", POS_GRAMMAR1)
+    sentence = generate("S", TEST_GRAMMAR1)
     document.append(sentence)
 
 # Setting up the parser
-parser = LanguageChunkingParser(POS_CORPUS1, context_length=CONTEXT_LENGTH, merge_split=True)
+parser = LanguageChunkingParser(TEST_CORPUS1, context_length=CONTEXT_LENGTH, merge_split=True)
 
 train_size = 0.95
 
@@ -36,15 +38,15 @@ for i, doc in enumerate(train_documents):
     parser.add_parse_tree(parse_tree, debug=False)
 
     if i < 5:
-        parser.visualize_ltm(f"unittests/gen_learn_test/ltms/cobweb_ltm{i}")
+        parser.visualize_ltm(f"unittests/gen_learn_test/ltms/cobweb_ltm{i}", max_depth=4)
 
     if i % 5 == 0:
         parse_tree.visualize(f"unittests/gen_learn_test/train_trees/train_parse_tree{i}")
 
         if i < 21:
-            parser.visualize_ltm(f"unittests/gen_learn_test/ltms/cobweb_ltm{i}")
+            parser.visualize_ltm(f"unittests/gen_learn_test/ltms/cobweb_ltm{i}", max_depth=4)
 
-# parser.visualize_ltm("unittests/gen_learn_test/final_ltm")
+parser.visualize_ltm("unittests/gen_learn_test/final_ltm", max_depth=4)
 
 # perhaps visualize the last ten parse trees based on new inputs
 for i, test in enumerate(test_documents):

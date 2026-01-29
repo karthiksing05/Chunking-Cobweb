@@ -30,7 +30,8 @@ def get_composite_chunk_candidates(sentence: str, value_to_id: dict, context_len
 
     Missing context slots are represented as `{0: 0}` to keep compatibility with existing code.
 
-    'bow' represents a parameter of how the context should be associated - positionally OR with 
+    'bow' represents a parameter of how the context should be associated - positionally OR with
+    Bag-Of-Word contexts
     """
 
     words = [value_to_id[w] for w in sentence.split(" ")]
@@ -108,7 +109,8 @@ def get_primitive_chunk_candidates(sentence: str, value_to_id: dict, context_len
 
     Missing context slots are represented as `{0: 0}` to keep compatibility with existing code.
 
-    'bow' is a keyword that signifies the type of 
+    'bow' represents a parameter of how the context should be associated - positionally OR with
+    Bag-Of-Word contexts
     """
 
     words = [value_to_id[w] for w in sentence.split(" ")]

@@ -359,8 +359,11 @@ function nodeHTML(d) {{
 					visited.append((depth + 1, child))
 
 		if debug:
-			print("average leaf depth:", sum([x[0] for x in leaves]) / len(leaves))
 			print("median leaf depth:", statistics.median([x[0] for x in leaves]))
+			print("mean leaf depth:", statistics.mean([x[0] for x in leaves]))
+			print("mode leaf depth:", statistics.mode([x[0] for x in leaves]), f"with count of {[x[0] for x in leaves].count(statistics.mode([x[0] for x in leaves]))} leaves")
+			print("min leaf depth:", min([x[0] for x in leaves]))
+			print("max leaf depth:", max([x[0] for x in leaves]))
 		
 		basic_level_nodes = {}
 		basic_level_count = {}
