@@ -6,7 +6,7 @@ so that we can calculate scores that make sense
 """
 
 from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1, POS_GRAMMAR1, POS_CORPUS1
-from parse import LanguageChunkingParser, FiniteParseTree, custom_categorize
+from parse import LanguageChunkingParser
 from cobweb.cobweb_discrete import CobwebDiscreteTree
 import os
 from pprint import pprint

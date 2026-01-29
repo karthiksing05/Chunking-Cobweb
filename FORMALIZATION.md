@@ -17,7 +17,7 @@ We will also outline the following criteria for the adding to long-term memory:
 
 In order to generate parse trees in the style of prior parse trees, we need to create a scoring metric that matches chunks that have been seen before based on content, context, or both. The most likely chunk will always be added first.
 
-### New addition: Virtual and Real Chunks!
+### **New addition: Virtual and Real Chunks!**
 
 From discussions with Pat on 11/21/2025, we have made some very important distinctions! I'm going to list the rationale first and then the specific implementation for our rationale.
 
@@ -141,6 +141,10 @@ Some things we're not doing right now but we definitely need to do at some point
     *   Chunks must be created by the hierarchy of compositional rules but labeled by the hierarchy of unary rules!! I enjoy this and think it's a valuable 
     *   Oh bruh what if we put both types of rules in the same hierarchy - this is literally just re-sorting the path into the same hierarchy as itself this is soooo troll
 *   I think splitting into two datastructures to handle unary rules and compositional rules respectively makes a lot of sense
+
+### **New Plan for Representation**
+
+*   Yet another new plan LOL - but this one seems to have a lot of strong implications
 
 ## Design Decisions
 
