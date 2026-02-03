@@ -10,6 +10,7 @@ app = Flask(__name__)
 LEARNING_ON = True
 PREBUILD_TREES = False
 CONTEXT_LENGTH = 3
+PRIMITIVE_THRESHOLD = "converge"
 LOAD_LTM = "unittests/primitive_only_test/final_ltm_data" # "unittests/gen_learn_test/final_ltm_data"
 
 # --- Initialize parser and LTM ---
@@ -36,7 +37,7 @@ curr_tree = FiniteParseTree(parser.get_long_term_memory(), parser.id_to_value, p
 if PREBUILD_TREES:
     curr_tree.build(sample_sentence)
 else:
-    curr_tree.build_primitives(sample_sentence, threshold=-1e9)
+    curr_tree.build_primitives(sample_sentence, threshold=PRIMITIVE_THRESHOLD)
 curr_tree._ensure_editor_state()
 
 def reset_tree():
@@ -47,7 +48,7 @@ def reset_tree():
     if PREBUILD_TREES:
         curr_tree.build(sample_sentence)
     else:
-        curr_tree.build_primitives(sample_sentence, threshold=-1e9)
+        curr_tree.build_primitives(sample_sentence, threshold=PRIMITIVE_THRESHOLD)
     curr_tree._ensure_editor_state()
     print(f"[INFO] New sentence selected: {sample_sentence}")
 
@@ -69,11 +70,11 @@ def api_evaluate():
     left = data.get("left_word_index")
     right = data.get("right_word_index")
     debug = data.get("debug", False)
-    try:
-        result = curr_tree.evaluate_pair(left, right, debug=debug)
-        return jsonify({"ok": True, "result": result})
-    except Exception as e:
-        return jsonify({"ok": False, "error": str(e)}), 400
+    # try:
+    result = curr_tree.evaluate_pair(left, right, debug=debug)
+    return jsonify({"ok": True, "result": result})
+    # except Exception as e:
+    #     return jsonify({"ok": False, "error": str(e)}), 400
 
 @app.route("/api/apply", methods=["POST"])
 def api_apply():
@@ -148,7 +149,7 @@ def api_export_ltm():
     export_path = f"gui/parse_tree_editor/{filepath}"
     
     parser.save_state(export_path)
-    parser.visualize_ltm(export_path)
+    parser.visualize_ltm(export_path, max_depth=4) # TODO change this!
     
     return jsonify({"ok": True, "filepath": export_path})
 

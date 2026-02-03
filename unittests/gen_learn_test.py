@@ -30,7 +30,7 @@ test_documents = document[int(len(document) * train_size):]
 
 # Iterate through training documents and parse them one at a time, saving every 10th parse tree to file
 for i, doc in enumerate(train_documents):
-    threshold = (0 if i < 90 else -15) # should never trigger atp
+    threshold = (0 if i < 150 else -20) # should never trigger atp
     print("Threshold:", threshold)
     parse_trees = parser.parse_input([doc], end_behavior=threshold, debug=True)
     parse_tree = parse_trees[0]

@@ -84,8 +84,8 @@ Full list of changes is below:
     *   For each node, I want to modify the AV-count variable. Under the current C++ implementation, it's locked as "read-only".
     *   I created a method, set_av_count, which overwrites a CobwebNode c's c.av_count attribute with a passed-in Python dictionary.
     *   This method has the potential to break the tree completely, but it is applied recursively from leaf-to-root for any given node path, so probabilities are not destroyed in any given path.
-*   Made Concept_IDs editable
-    *   Similar to AV_Counts, having access to the concept hash of a given node will help us with memory storage and then 
+*   Made Concept_IDs editable and persist between saving / loading
+    *   Similar to AV_Counts, having access to the concept hash of a given node will help us with memory storage and also, we need to make sure that they persist 
 *   Modify Cobweb such that it contains a DEBUG mode (as parameterized by a "debug" argument) and logs all create/delete actions (by concept hash, new and old)
     *   This is a purely stylistic / debugging change, and I'll provide a code snippet below that details how concepts should be logged and analyzed. This change should primarily happen in the "ifit" method with the logging categorizing changes before and after the enactment. 
     *   Each entry is a dict, e.g.:
@@ -94,6 +94,7 @@ Full list of changes is below:
         *   {"action": "SPLIT", "deleted": "abc123", "parent": "root000", "promoted_children": ["child1", "child2"]}
         *   {"action": "BEST", "node": "ghi789"}
     *   All edge cases caught before the main evaluation should be classified as "NEW" as well!
+    *   As it turns out, the reason for this change is because MERGE, SPLIT, and NEW need to be kept track of in order to appropriately expand our vocabulary!
 *   Update to categorization logic - path-focused probability matching
     *   Rather than matching discretely by category, we need to make sure we have some distance-based metric of judging whether two categories are "close" or "far". Thus, we'll be using the paths of each concept label to match how close a given node is to a given other node!
     *   To do this, we'll be calculating a "flattened" frequency count with the weighted path of the node we categorize. The process is as follows:

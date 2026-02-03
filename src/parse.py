@@ -108,18 +108,18 @@ class PrimitiveParseNode:
             if self.context_before and idx < len(self.context_before):
                 inst[i] = dict([(key, 1.0 / (2 ** (idx + 1))) for key in self.context_before[idx]])
                 # new_inst[i] = dict([(key, 1 / len(self.context_before[idx])) for key in self.context_before[idx]])
+                inst[i][0] = 0
             else:
-                inst[i] = {}
-            inst[i][0] = 0
-
+                inst[i] = {0: 1.0 / (2 ** (idx + 1))}
+    
         for i in range(self.context_length + 2, (2 * self.context_length + 1) + 1):
             idx = i - (self.context_length + 2)
             if self.context_after and idx < len(self.context_after):
                 inst[i] = dict([(key, 1.0 / (2 ** (idx + 1))) for key in self.context_after[idx]])
                 # new_inst[i] = dict([(key, 1 / len(self.context_after[idx])) for key in self.context_after[idx]])
+                inst[i][0] = 0
             else:
-                inst[i] = {}
-            inst[i][0] = 0
+                inst[i] = {0: 1.0 / (2 ** (idx + 1))}
             
         inst[2 + 2 * self.context_length] = self.content
 
@@ -472,12 +472,14 @@ def custom_categorize_dfs(inst, tree):
     while True:
         try:
             # log probabilities for each child (in order corresponding to node.children)
+            # print(inst)
             child_scores = node.log_prob_children_given_instance(inst)
             # child_scores = []
             # for child in node.children:
             #     child_scores.append(child.log_prob_class_given_instance(inst, True))
         except Exception as e:
-            pass
+            print(e)
+            exit()
 
         if not child_scores:
             break
@@ -669,13 +671,11 @@ class FiniteParseTree:
         worst_log_prob = 0
         best_log_prob_idx = 0
         best_avg_log_prob = float('-inf')
-        entropies = []
 
         for i, node in enumerate(path):
             
             # 1. Compute raw log-probability (uses node’s built-in method)
-            # log_prob = node.log_prob_class_given_instance(instance, True)
-            # log_prob = node.log_prob_class_given_instance(instance, True)
+            # log_prob = node.log_prob_class_given_instance(instance)
             log_prob = node.log_prob_instance(instance)
 
             if math.isnan(log_prob) or log_prob == 0:
@@ -712,8 +712,6 @@ class FiniteParseTree:
             raw_node_log_probs.append(log_prob)
             avg_log_probs.append(avg_log_prob)
 
-            entropies.append(node.entropy())
-
         # normed_count = sum(path_counts) / len(path_counts)
 
         # print([node.concept_hash() for node in path])
@@ -732,23 +730,17 @@ class FiniteParseTree:
             normed_count += path_counts[i] * scale_coef
             scale_coef *= scale_factor
 
-        # TRYING BASIC-LEVEL STUFF TODO need to see if this works
-        best_level_on_path = path[-1].get_best(path[-1].av_count)
-        best_level_count = best_level_on_path.count
-        bl_log_prob = best_level_on_path.log_prob_instance(instance)
-        # bl_pu = basic_level_on_path.parent.pu_for_insert(basic_level_on_path, instance)
+        tree_log_prob = path[-1].tree.log_prob(instance, 200, False)
         
         score_data = {
             'raw_node_log_probs': str(raw_node_log_probs),
             'candidate_counts': str(path_counts),
-            'entropies': str(entropies),
+            'normed_log_prob': cost,
             'normed_count': normed_count,
             'best_log_prob_idx': best_log_prob_idx,
             'inst_complexity': inst_complexity,
-            'cost': bl_log_prob, #/ (path_counts[best_log_prob_idx] - 1),
-            'best_level_log_prob': bl_log_prob,
-            'best_level_node_hash': best_level_on_path.concept_hash(),
-            'best_level_count': best_level_count,
+            'cost': best_log_prob, #/ (path_counts[best_log_prob_idx] - 1),
+            'tree_log_prob': tree_log_prob,
             'best_log_prob': best_log_prob,
             'worst_log_prob': worst_log_prob,
             'root_cost': raw_node_log_probs[0],
@@ -910,6 +902,8 @@ class FiniteParseTree:
 
         merge_inst = CompositeParseNode.create_merge_instance(left_node, right_node, self.context_length)
         # compute the categorize_path for this merged instance (list of concept ids)
+
+        print(merge_inst)
 
         candidate_concept, categorize_path, node_categorize_path = custom_categorize(merge_inst, self.ltm_hierarchy)
 
@@ -2478,7 +2472,7 @@ class LanguageChunkingParser:
 
     def __init__(self, value_corpus, context_length=3, merge_split=True):
 
-        self.ltm_hierarchy = CobwebDiscreteTree(1 / len(value_corpus))
+        self.ltm_hierarchy = CobwebDiscreteTree(0.05) # TODO TUNE ALPHA
 
         self.id_to_value = ["EMPTYNULL"]
         for x in value_corpus:
@@ -2799,24 +2793,7 @@ class LanguageChunkingParser:
         parser.value_to_id = meta.get("value_to_id", parser.value_to_id)
 
         # load LTM via CobwebTree.load_json_stream or read_json_stream
-        try:
-            if hasattr(parser.ltm_hierarchy, "load_json_stream"):
-                parser.ltm_hierarchy.load_json_stream(tree_path)
-            elif hasattr(parser.ltm_hierarchy, "read_json_stream"):
-                parser.ltm_hierarchy.read_json_stream(tree_path)
-            else:
-                if hasattr(parser.ltm_hierarchy, "from_json"):
-                    new_tree = parser.ltm_hierarchy.from_json(tree_path)
-                    parser.ltm_hierarchy = new_tree
-                else:
-                    with open(tree_path, "r", encoding="utf-8") as tf:
-                        tree_data = json.load(tf)
-                    if hasattr(parser.ltm_hierarchy, "load_json"):
-                        parser.ltm_hierarchy.load_json(tree_data)
-                    else:
-                        parser.ltm_hierarchy._loaded_json = tree_data
-        except Exception:
-            raise
+        parser.ltm_hierarchy.load_json(tree_path)
 
         # recreate cobweb drawer to reflect loaded vocabulary
         # recreate cobweb drawer with headers sized to reconstructed context_length

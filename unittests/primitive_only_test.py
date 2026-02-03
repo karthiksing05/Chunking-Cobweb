@@ -16,7 +16,7 @@ if os.path.isdir("unittests/primitive_only_test"):
 # Creating and printing toy sentences
 CONTEXT_LENGTH = 3
 
-num_sentences = 60
+num_sentences = 200
 document = []
 
 for _ in range(num_sentences):
