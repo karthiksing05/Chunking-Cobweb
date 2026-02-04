@@ -5,7 +5,7 @@ Currently working on better understanding representations - need normalized attr
 so that we can calculate scores that make sense
 """
 
-from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1, POS_GRAMMAR1, POS_CORPUS1
+from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1, POS_GRAMMAR1, POS_CORPUS1, TEST_EPOCH_GRAMMAR_EPOCH_1, TEST_EPOCH_GRAMMAR_EPOCH_2, TEST_EPOCH_CORPUS
 from parse import LanguageChunkingParser
 from cobweb.cobweb_discrete import CobwebDiscreteTree
 import os
@@ -198,15 +198,15 @@ num_sentences = 300
 document = []
 
 for _ in range(num_sentences):
-    sentence = generate("S", TEST_GRAMMAR1)
+    sentence = generate("S", TEST_EPOCH_GRAMMAR_EPOCH_1)
     document.append(sentence)
 
-primitives_factor = 0.95
+primitives_factor = 0.5
 
 primitive_doc = document[:int(len(document) * primitives_factor)]
 composite_doc = document[int(len(document) * primitives_factor):]
 
-parser = LanguageChunkingParser(TEST_CORPUS1, context_length=CONTEXT_LENGTH)
+parser = LanguageChunkingParser(TEST_EPOCH_CORPUS, context_length=CONTEXT_LENGTH)
 
 # tree = CobwebTree(10, False, 0, True, False)
 tree = CobwebDiscreteTree(alpha=1e-4, weight_attr=True)

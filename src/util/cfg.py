@@ -150,6 +150,68 @@ TEST_CORPUS3 = (
     sum(TEST_GRAMMAR3["P"], [])
 )
 
+
+# Define a simple context-free grammar using recursive structures
+TEST_EPOCH_GRAMMAR_EPOCH_1 = {
+    "S": [["NP"]],  # Sentence = Noun Phrase + Verb Phrase
+
+    "NP": [
+        ["Det", "AdjP", "N"],  # Noun Phrase = Determiner + Adjective Phrase + Noun
+        ["Det", "N"]
+    ],
+
+    "AdjP": [
+        ["Adj", "AdjP"],  # Adjective Phrase can recurse: Adj + AdjP
+        ["Adj"],
+        []  # Empty string to allow termination of recursion
+    ],
+
+    "Det": [["the"], ["a"]],
+    "N": [["cat"], ["dog"], ["man"], ["woman"], ["park"], ["telescope"]],
+    "Adj": [["big"], ["small"], ["red"], ["quick"], ["lazy"]]
+}
+
+# Define a simple context-free grammar using recursive structures
+TEST_EPOCH_GRAMMAR_EPOCH_2 = {
+    "S": [["NP", "VP"]],  # Sentence = Noun Phrase + Verb Phrase
+
+    "NP": [
+        ["Det", "AdjP", "N"],  # Noun Phrase = Determiner + Adjective Phrase + Noun
+        ["Det", "N"]
+    ],
+
+    "AdjP": [
+        ["Adj", "AdjP"],  # Adjective Phrase can recurse: Adj + AdjP
+        ["Adj"],
+        []  # Empty string to allow termination of recursion
+    ],
+
+    "VP": [
+        ["V", "NP"],  # Verb Phrase = Verb + Noun Phrase
+        ["V", "NP", "PP"],  # Verb Phrase with prepositional phrase
+        ["V"]  # Simple verb
+    ],
+
+    "PP": [
+        ["P", "NP"]  # Prepositional Phrase = Preposition + Noun Phrase
+    ],
+
+    "Det": [["the"], ["a"]],
+    "N": [["cat"], ["dog"], ["man"], ["woman"], ["park"], ["telescope"]],
+    "Adj": [["big"], ["small"], ["red"], ["quick"], ["lazy"]],
+    "V": [["saw"], ["liked"], ["chased"], ["found"], ["admired"]],
+    "P": [["with"], ["in"], ["on"], ["under"]]
+}
+
+TEST_EPOCH_CORPUS = (
+    sum(TEST_GRAMMAR1["Det"], []) +
+    sum(TEST_GRAMMAR1["N"], []) +
+    sum(TEST_GRAMMAR1["Adj"], []) +
+    sum(TEST_GRAMMAR1["V"], []) +
+    sum(TEST_GRAMMAR1["P"], [])
+)
+
+
 def generate(symbol, grammar):
     """Recursively generate a sentence from the grammar starting with a symbol."""
     if symbol not in grammar:
