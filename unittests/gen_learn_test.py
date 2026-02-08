@@ -25,12 +25,15 @@ parser = LanguageChunkingParser(TEST_CORPUS1, context_length=CONTEXT_LENGTH, mer
 
 train_size = 0.95
 
+PRIMITIVES_FIRST = 100
+THRESHOLD = -2.1
+
 train_documents = document[:int(len(document) * train_size)]
 test_documents = document[int(len(document) * train_size):]
 
 # Iterate through training documents and parse them one at a time, saving every 10th parse tree to file
 for i, doc in enumerate(train_documents):
-    threshold = (0 if i < 150 else -20) # should never trigger atp
+    threshold = (0 if i < PRIMITIVES_FIRST else THRESHOLD) # should never trigger atp
     print("Threshold:", threshold)
     parse_trees = parser.parse_input([doc], end_behavior=threshold, debug=True)
     parse_tree = parse_trees[0]

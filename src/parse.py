@@ -55,7 +55,7 @@ class PrimitiveParseNode:
         self.title = uuid.uuid4().hex[:10] # random id
 
         # self.content = dict([(key, 1) for key in elements[anchor_idx]])
-        self.content = dict([(key, 1 / len(elements[anchor_idx])) for key in elements[anchor_idx]])
+        self.content = dict([(key, 1 / 2 ** (i + 1)) for i, key in enumerate(elements[anchor_idx])])
 
         self.context_before = list(reversed([dict([(key, 1) for key in elements[i]]) for i in range(0, anchor_idx)]))
         self.context_after = [dict([(key, 1) for key in elements[i]]) for i in range(anchor_idx + 1, len(elements))]
@@ -242,13 +242,13 @@ class CompositeParseNode:
             # new_inst_dict[0] = node_left.content
         # else:
         # new_inst_dict[0] = dict([(key, 0.5) for key in node_left.categorize_path])
-        new_inst_dict[0] = dict([(key, 0.5 / len(node_left.categorize_path)) for key in node_left.categorize_path]) # TODO changed this to reflect 0.5
+        new_inst_dict[0] = dict([(key, 0.5 / 2 ** (i + 1)) for i, key in enumerate(node_left.categorize_path)]) # TODO changed this to reflect 0.5
 
         # if type(node_right) == PrimitiveParseNode:
         #     new_inst_dict[1] = node_right.content
         # else:
         # new_inst_dict[1] = dict([(key, 0.5) for key in node_right.categorize_path])
-        new_inst_dict[1] = dict([(key, 0.5 / len(node_right.categorize_path)) for key in node_right.categorize_path]) # TODO changed this to reflect 0.5
+        new_inst_dict[1] = dict([(key, 0.5 / 2 ** (i + 1)) for i, key in enumerate(node_right.categorize_path)]) # TODO changed this to reflect 0.5
 
         new_inst_dict[0][0] = 0
         new_inst_dict[1][0] = 0
@@ -739,7 +739,7 @@ class FiniteParseTree:
             'normed_count': normed_count,
             'best_log_prob_idx': best_log_prob_idx,
             'inst_complexity': inst_complexity,
-            'cost': best_log_prob, #/ (path_counts[best_log_prob_idx] - 1),
+            'cost': best_avg_log_prob, #/ (path_counts[best_log_prob_idx] - 1),
             'tree_log_prob': tree_log_prob,
             'best_log_prob': best_log_prob,
             'worst_log_prob': worst_log_prob,
@@ -903,7 +903,7 @@ class FiniteParseTree:
         merge_inst = CompositeParseNode.create_merge_instance(left_node, right_node, self.context_length)
         # compute the categorize_path for this merged instance (list of concept ids)
 
-        print(merge_inst)
+        # print(merge_inst)
 
         candidate_concept, categorize_path, node_categorize_path = custom_categorize(merge_inst, self.ltm_hierarchy)
 
