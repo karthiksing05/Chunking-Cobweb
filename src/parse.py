@@ -12,6 +12,7 @@ import heapq
 import time
 import math
 import random
+from pprint import pprint
 
 """
 ----------------------------------------------------------------------------------------------
@@ -730,7 +731,7 @@ class FiniteParseTree:
             normed_count += path_counts[i] * scale_coef
             scale_coef *= scale_factor
 
-        tree_log_prob = path[-1].tree.log_prob(instance, 200, False)
+        tree_log_prob = path[-1].tree.log_prob(instance, 250, False)
         
         score_data = {
             'raw_node_log_probs': str(raw_node_log_probs),
@@ -739,7 +740,7 @@ class FiniteParseTree:
             'normed_count': normed_count,
             'best_log_prob_idx': best_log_prob_idx,
             'inst_complexity': inst_complexity,
-            'cost': best_avg_log_prob, #/ (path_counts[best_log_prob_idx] - 1),
+            'cost': tree_log_prob, #/ (path_counts[best_log_prob_idx] - 1),
             'tree_log_prob': tree_log_prob,
             'best_log_prob': best_log_prob,
             'worst_log_prob': worst_log_prob,
@@ -1003,10 +1004,6 @@ class FiniteParseTree:
         except Exception:
             categorize_path = []
 
-        if candidate_concept_hash is not None and candidate_concept.concept_hash() != candidate_concept_hash:
-            # if user gave an explicit hash, try to find that concept in hierarchy -
-            # but default behavior uses categorize(...) basic level, same as build()
-            pass
         candidate_id = self.value_to_id.get(f"CONCEPT-{candidate_concept.concept_hash()}")
 
         # create the composite parse node consistent with build() behavior
@@ -1273,6 +1270,9 @@ class FiniteParseTree:
         Render the parse tree into an HTML file and optionally a PNG screenshot.
         The PNG height automatically adjusts to fit the tree, including all nodes.
         """
+
+        # print("PARSE TREE ROOT NODE")
+        # print(self.global_root_node.children[0][1].get_as_instance())
 
         # Convert tree to JSON and build HTML
         d3_json = json.dumps(self._draw_tree_to_json())
@@ -2472,7 +2472,7 @@ class LanguageChunkingParser:
 
     def __init__(self, value_corpus, context_length=3, merge_split=True):
 
-        self.ltm_hierarchy = CobwebDiscreteTree(0.05) # TODO TUNE ALPHA
+        self.ltm_hierarchy = CobwebDiscreteTree(1e-4) # TODO TUNE ALPHA
 
         self.id_to_value = ["EMPTYNULL"]
         for x in value_corpus:
@@ -2720,6 +2720,195 @@ class LanguageChunkingParser:
         to verify.
         """
         self.cobweb_drawer.draw_tree(self.ltm_hierarchy.root, out_base, max_depth=max_depth)
+
+    def generate_sentence(self, prompt="", debug=False) -> List:
+        """
+        Creating a method for generating sentences using our current Cobweb framework!
+
+        For the prompt, we build as much a parse tree as we can, and if the parse tree's been
+        built to one node, we extend by one node and predict the right content. We can recursively
+        do this until we run out of good predictivity for the right content!
+
+        If no prompt is given, it'll sample a highly complex node and then expand it and then create
+        a parse node until it can no longer do so!
+        *   Let's kind of cheat here and find a node with no left and no right context - we'll assume
+            that node represents 
+        """
+
+        def sample_node(instance: dict):
+            """
+            Helper function that, given an instance (partial or completed) finds the best leaf node
+            to represent that instance! We're going to fill in one of the attributes first, and then
+            the other attribute using probability generation!
+
+            TODO this is some weird stuff right now because we don't have good access to basic-level
+            nodes - my hope is that eventually we find the basic-level node and can just sample from that!
+
+            FIND a way to measure the probability mass of composite node vs. 
+            """
+
+            def probabilistic_subset(d, k=20):
+                keys = list(d.keys())
+                weights = list(d.values())
+                # random.choices returns a k-sized list of elements chosen from the population
+                # with replacement, according to relative weights.
+                selected_keys = random.choices(keys, weights=weights, k=k)
+                return dict([(k, d[k]) for k in selected_keys])
+
+            prediction = self.ltm_hierarchy.predict(instance, random.randint(100, 500), False)
+
+            instance[0] = probabilistic_subset(prediction[0], k=20)
+            instance[1] = probabilistic_subset(prediction[1], k=20)
+            # instance[0] = {0: 0}
+            # instance[1] = {0: 0}
+            instance[(2 * self.context_length + 1) + 1] = {0: 0}
+
+            # print(sum(probabilistic_subset(prediction[0]).values()))
+            # print(sum(probabilistic_subset(prediction[1]).values()))
+            # print(sum(probabilistic_subset(prediction[(2 * self.context_length + 1) + 1]).values()))
+
+            candidate_concept, categorize_path, node_categorize_path = custom_categorize(instance, self.ltm_hierarchy)
+
+            # print(candidate_concept.concept_hash())
+            # pprint(instance)
+            # pprint(candidate_concept.av_count)
+
+            return candidate_concept, categorize_path, node_categorize_path
+
+        if prompt:
+
+            prompt_parse = FiniteParseTree(self.ltm_hierarchy, self.id_to_value, self.value_to_id, self.context_length)
+            prompt_parse.build(
+                window=prompt,
+                end_behavior="converge"
+            )
+
+            # create a new root, and expand right content downward
+
+            return ["PROMPT NOT WORKING YET", None]
+
+        else:
+
+            global_root = CompositeParseNode.create_global_root()
+
+            # sample a high-level node (by absence of context!!!)
+            complex_instance = {}
+
+            for i in range(2, (self.context_length + 1) + 1):
+                idx = i - 2
+                # complex_instance[i] = {0: 1.0 / (2 ** (idx + 1))}
+                complex_instance[i] = {0: 0}
+
+            for i in range(self.context_length + 2, (2 * self.context_length + 1) + 1):
+                idx = i - (self.context_length + 2)
+                # complex_instance[i] = {0: 1.0 / (2 ** (idx + 1))}
+                complex_instance[i] = {0: 0}
+
+            sampled_complex_node, complex_path, _ = sample_node(complex_instance)
+
+            try:
+                categorize_path = [self.value_to_id.get(key) for key in categorize_path]
+            except Exception:
+                categorize_path = []
+
+            candidate_id = self.value_to_id.get(f"CONCEPT-{sampled_complex_node.concept_hash()}")
+
+            initial_composite_node = CompositeParseNode.create_node(
+                sampled_complex_node.av_count,
+                candidate_id,
+                complex_path,
+                0.0,
+                self.context_length
+            )
+
+            global_root.children.add((initial_composite_node.position_idx, initial_composite_node))
+            initial_composite_node.set_parent(global_root)
+
+            # expand recursively - do this by finding the basic-level node and sampling content elements
+            # we'll use best-level node here to make this easy
+
+            def expand_node(node: CompositeParseNode, complexity: int) -> List:
+                """
+                Method to expand any node into two nodes (composite or primitive)
+
+                To decide composite vs. primitives, we should check probabilities!
+                
+                We also have to create the nodes here! And label them with their index appropriately!
+                Let the complexity dictate the power of 2 past which we increment and decrement
+                (b-tree style!)
+                Let the increment/decrement be ± 1 / 2 ^ (complexity - 1)
+
+                Unfortunately this is going to be a content-only generation - for context-reliant,
+                we're going to do a prompting strategy that mimics autoregressive models where:
+                *   Prior words influence the current-generated word (fulfilling context-left)
+                *   We expand one higher-level node up and then we generate more
+
+                Process is as follows!
+                *   We traverse to the leaf node of left and right content, sample using that leaf's
+                basic level node (or our mock-solution purely in terms of context right now)
+                *   We then create new nodes based on the instance from which the resultant sample is taken
+                """
+
+                def traverse(path):
+
+                    curr_node = self.ltm_hierarchy.root
+
+                    for item in sorted(path.items(), key=lambda x: x[0], reverse=True):
+
+                        concept_hash = self.id_to_value[item[0]]
+
+                        if not curr_node.children:
+                            return curr_node
+
+                        for child in curr_node.children:
+                            if child.concept_hash() == concept_hash:
+                                curr_node = child
+                                break
+
+                    return curr_node
+                
+                print(node.content_left)
+                print(node.content_right)
+
+                left_leaf = traverse(node.content_left)
+                right_leaf = traverse(node.content_right)
+
+                print(left_leaf.concept_hash())
+                print(right_leaf.concept_hash())
+                
+                return None, None
+
+            frontier = [(0, initial_composite_node)] # at some point, we need a heuristic that explains the best node to pop
+            # maybe the heuristic is position? bias noising earlier nodes out before later nodes to provide context
+
+            while len(frontier) > 0:
+
+                complexity, node_to_expand = heapq.heappop(frontier)
+
+                # expand the node into two nodes
+                left_child, right_child = expand_node(node_to_expand, complexity)
+
+                # NEED HEURISTICS HERE!
+                if type(left_child) == CompositeParseNode:
+                    heapq.heappush((complexity + 1, left_child))
+
+                if type(right_child) == CompositeParseNode:
+                    heapq.heappush((complexity + 1, left_child))
+
+            # flatten the sentence at the end, save results to a real parse tree
+
+            window = None # Flattened result
+
+            final_parse = FiniteParseTree(self.ltm_hierarchy, self.id_to_value, self.value_to_id, self.context_length)
+
+            final_parse.window = window
+            final_parse.global_root_node = global_root
+            final_parse.nodes = [] # collect all nodes in the parse tree
+
+        ### IF WE DO both, we can generate the starter sentence from nothing and then do the recursive parsing until stop (so like similar to our prompt)
+
+        return [window, final_parse]
+
 
     def save_state(self, dirpath: str):
         """

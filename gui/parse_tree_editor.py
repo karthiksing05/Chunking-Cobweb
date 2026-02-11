@@ -11,7 +11,8 @@ LEARNING_ON = True
 PREBUILD_TREES = False
 CONTEXT_LENGTH = 3
 PRIMITIVE_THRESHOLD = "converge"
-LOAD_LTM = "unittests/primitive_only_test/final_ltm_data" # "unittests/gen_learn_test/final_ltm_data"
+# LOAD_LTM = "unittests/primitive_only_test/final_ltm_data"
+LOAD_LTM = "unittests/gen_learn_test/final_ltm_data"
 
 # --- Initialize parser and LTM ---
 if LOAD_LTM != "":
