@@ -36,7 +36,6 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
         *   Most likely, this is a counts-focused heuristic, and will probably get better as we split into two hierarchies
     *   There were initial notes of whether the chunk "fit" here, but we don't need to worry about that as much - the idea is that recognition promotes goodness of fit anyways, so a separate mechanism isn't necessary
 
-
 *   Learning: [*Given a sentence, our goal is to determine (unsupervised) a successful (partial or complete) parse for that sentence.*]
     *   **OPTIONAL:** We add primitive elements (as evidenced by )
         *   Messed up by either including or not including this, need to implement it as a yes/no setting in the 
@@ -78,12 +77,12 @@ Primitive Nodes:
     *   parent
     *   context_instance (created upon inception of the node)
     *   label - the path information for the context instance of this node, weighted appropriately, for creating higher-level nodes
-    *   complexity - 1 for all Primitive Nodes
+    *   complexity = 1 for all Primitive Nodes
+    *   index - index of the current content (for calculating and visualization)
 *   Methods
     *   [STATIC] create_node(context_instance, label)
     *   get_context_instance -> returns a context-focused instance of the data
         *   This stores content and complexity = 0 in hidden attributes!
-    
 
 Composite Nodes:
 *   Variables
@@ -93,6 +92,7 @@ Composite Nodes:
     *   content_instance (created upon inception of the node)
     *   label - the path information for the context instance of this node, weighted appropriately, for creating higher-level nodes
     *   complexity - max(children.complexity) + 1 (or can also do sum(children.complexity))
+    *   index - index of the current content (for calculating and visualization)
 *   Methods
     *   [STATIC] create_global_root
     *   [STATIC] create_instances(left_node, right_node)
@@ -111,8 +111,8 @@ Finite Parse Tree:
         *   each primitive will have an "index" which we can use to reference it and these indexes will be called from 
     *   generate_candidate_chunk(index1, index2)
     *   add_candidate_chunk(index1, index2) -> gives you new index
-    *   Visualize methods for visualizing the chunk
-        *   I would like for nodes to be represented by circles, and clicking on them expands both the content-instance and the context-instance
+    *   Visualize methods for visualizing the parse tree
+        *   I would like for nodes to be represented by circles, and clicking on them expands both the content-instance and the context-instance at the same time
     *   to_json(filename) and from_json(filename) methods
 
 Rolling Parse Tree: TBD
@@ -122,18 +122,22 @@ Long Term Memory:
     *   context_hierarchy = CobwebDiscreteTree
     *   content_hierarchy = CobwebDiscreteTree
     *   corpus
+    *   id-to-value
+    *   value-to-id
 *   Methods
     *   Helper methods:
         *   instance to id-instance
         *   id-instance to instance
-    *   get_content_instance_statistics
+    *   get_content_instance_statistics()
         *   A bit like the current FiniteParseTree.score_function - gives all the statistics we'll need to do thresholding and score calculation
-    *   get_context_instance_statistics
+    *   get_context_instance_statistics()
         *   Same as above, but for the context hierarchy
+    *   update_vocabulary(actions)
+        *   Given the actions from a Cobweb ifit, make changes to vocabulary and the Cobweb hierarchy accordingly
 
 Webster: (Primary Class - we're going to do all logic and parsing in here, and every other class is simply going to be a data-class that stores necessary information and helper methods)
 *   Variables
-    *   Corpus, attribute size, 
+    *   Corpus, context size, threshold
     *   An instance of the Long Term Memory
 *   Methods
     *   parse_sentence(sentence, threshold=None, new_vocab=True, learning=False)
@@ -143,10 +147,12 @@ Webster: (Primary Class - we're going to do all logic and parsing in here, and e
         *   new_vocab determines if new vocab is in the sentence
         *   if learning == true, we add the sentence at the end
             *   We should already have the top level of candidate chunks
+        *   This method will manage all of the logic
     *   evaluate_chunk(content_instance, context_instance) - a method that, given the content and context instances for a candidate chunk, returns the necessary scores for that thing
-        *   This should just call methods from the long-term hierarchy
+        *   This should just call methods from the long-term hierarchy and do calculations / thresholding for heuristics
     *   generate_sentence(masked_sentence)
-        *   masked_sentence is of the form 
+        *   masked_sentence is of the form "word1 word2 [mask] word3..." and predicts an expansion for each masked token available
+        *   Masked tokens are not part of the vocabulary, but instead an indicator to do sampling from basic-level nodes
 
 ## Things to take note of
 
@@ -182,7 +188,8 @@ Webster: (Primary Class - we're going to do all logic and parsing in here, and e
     *   If we create an LLM that's capable of parsing higher-level symbols into lower-level symbols, it's probably going to generate much more consistently
     *   The idea is that we're building an LLM with an adaptive vocabulary and latent space!! (**SEE BELOW POINTS, THIS ONE GOES CRAZY FRFR**)
         *   ADAPTIVE VOCABULARY LEARNED THROUGH THE POINCARE EMBEDDINGS SYSTEM - we still build a discrete cobweb but classify things continuously and then build an extension to an LLM that learns similarities!!
-        *   If this system ever succeeds at a single-hierarhcy 
+        *   If this system ever succeeds at a single-hierarchy implementation, we can totally do this
+        *   Generally, the context hierarchy can probably be used to handle this as well 
 
 *   An important note comes into play when discussing this is whether semantic information will be appropriately translated, and I think that diffusion models will fare better than our purely discrete counterpart in using the latent space to leverage both semantic and syntactic correlation (contextually related)
 

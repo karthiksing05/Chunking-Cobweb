@@ -53,11 +53,28 @@ class TextCobwebDrawer:
 		print_dfs(root)
 
 class HTMLCobwebDrawer:
-	def __init__(self, attributes, id_to_value, value_to_id):
+	def __init__(self, attributes, id_to_value, value_to_id, attr_value_fn=None):
+		"""
+		Parameters
+		----------
+		attributes : list[str]
+			Human-readable header names for each attribute index.
+		id_to_value : list[str]
+			Default value-name lookup (index → display string).
+		value_to_id : dict[str, int]
+			Reverse mapping of id_to_value.
+		attr_value_fn : dict[int, callable] | None
+			Optional per-attribute value-name overrides.  Keys are attribute
+			indices (matching the attribute order in *attributes*); values are
+			callables ``fn(val_id) -> str`` that return the display string for
+			a given value id.  Attributes not present in this dict fall back to
+			the global ``id_to_value`` list.
+		"""
 		self.id_to_attr = attributes
 		self.attr_to_id = {w: i for i, w in enumerate(attributes)}
 		self.id_to_value = id_to_value
 		self.value_to_id = value_to_id
+		self.attr_value_fn = attr_value_fn or {}
 
 	def _safe_lookup(self, id_to_list, idx):
 		return id_to_list[idx] if (idx is not None and 0 <= idx < len(id_to_list)) else "None"
@@ -84,7 +101,11 @@ class HTMLCobwebDrawer:
 
 			rows = []
 			for val_id, count in top_vals:
-				val_name = self._safe_lookup(self.id_to_value, val_id)
+				# Use per-attribute value function if provided, else global lookup
+				if attr_id in self.attr_value_fn:
+					val_name = self.attr_value_fn[attr_id](val_id)
+				else:
+					val_name = self._safe_lookup(self.id_to_value, val_id)
 				rows.append({"val": val_name, "count": count})
 
 			if len(val_counts.items()) > 7:
