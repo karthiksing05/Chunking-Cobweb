@@ -1,0 +1,124 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Parse Tree (Multi-Hierarchy)</title>
+<style>
+body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+#tree-container { display: inline-block; }
+.link { fill: none; stroke: #9aa1a9; stroke-width: 1.5px; }
+.node-box { stroke: #444; fill: #fff; rx: 8; ry: 8; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.15)); }
+.node-fo table { border-collapse: collapse; font-size: 12px; margin: 4px 0; }
+.node-fo th, .node-fo td { border: 1px solid #888; padding: 2px 6px; }
+.node-fo th { background: #f3f5f7; font-weight: 600; }
+.section-title { font-weight: bold; margin-top: 6px; font-size: 11px; color: #555; }
+.subtable b { display: inline-block; margin: 6px 0 2px; }
+.subtable table { border-collapse: collapse; }
+.subtable td { border: 1px solid #bbb; padding: 1px 4px; }
+</style>
+</head>
+<body>
+<div id="tree-container"><div id="tree"></div></div>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script>
+const data = {"title": "ROOT", "left": [], "right": [], "before": [], "after": [], "ctx_attrs": [], "children": [{"title": "c83a6bbb66", "left": [{"key": "CONCEPT-2743366747359416_1886", "val": 1.0}], "right": [{"key": "CONCEPT-2743368402132625_3001", "val": 1.0}], "before": [[], [], [], [], []], "after": [[], [], [], [], []], "ctx_attrs": [[], [], [], [], [], [], [], [], [], [], [{"key": "COMPLEXITY", "val": 4.0}], [{"key": "CONCEPT-2743372093592833_5617", "val": 1.0}]], "children": [{"title": "0b22e91df1", "left": [{"key": "CONCEPT-2743370490440208_4165", "val": 1.0}], "right": [{"key": "CONCEPT-2743368401990750_2993", "val": 1.0}], "before": [[], [], [], [], []], "after": [[{"key": "the", "val": 0.5}], [], [], [], []], "ctx_attrs": [[], [], [], [], [], [{"key": "the", "val": 0.5}], [], [], [], [], [{"key": "COMPLEXITY", "val": 3.0}], [{"key": "CONCEPT-2743372054793375_5306", "val": 1.0}]], "children": [{"title": "c8cd8c3f8f", "left": [{"key": "CONCEPT-2743368401288125_2963", "val": 1.0}], "right": [{"key": "CONCEPT-2743368401728416_2987", "val": 1.0}], "before": [[], [], [], [], []], "after": [[{"key": "found", "val": 0.5}], [{"key": "the", "val": 0.25}], [], [], []], "ctx_attrs": [[], [], [], [], [], [{"key": "found", "val": 0.5}], [{"key": "the", "val": 0.25}], [], [], [], [{"key": "COMPLEXITY", "val": 2.0}], [{"key": "CONCEPT-2743369809278666_3988", "val": 1.0}]], "children": [{"title": "8b7f4ec24e", "left": [{"key": "a", "val": 1.0}], "right": [], "before": [[], [], [], [], []], "after": [[{"key": "woman", "val": 1.0}], [{"key": "found", "val": 1.0}], [{"key": "the", "val": 1.0}], [], []], "ctx_attrs": [[], [], [], [], [], [{"key": "woman", "val": 0.5}], [{"key": "found", "val": 0.25}], [{"key": "the", "val": 0.125}], [], [], [{"key": "COMPLEXITY", "val": 1.0}], [{"key": "a", "val": 1.0}]], "children": []}, {"title": "df86964656", "left": [{"key": "woman", "val": 1.0}], "right": [], "before": [[{"key": "a", "val": 1.0}], [], [], [], []], "after": [[{"key": "found", "val": 1.0}], [{"key": "the", "val": 1.0}], [], [], []], "ctx_attrs": [[{"key": "a", "val": 0.5}], [], [], [], [], [{"key": "found", "val": 0.5}], [{"key": "the", "val": 0.25}], [], [], [], [{"key": "COMPLEXITY", "val": 1.0}], [{"key": "woman", "val": 1.0}]], "children": []}]}, {"title": "0f793da8ea", "left": [{"key": "found", "val": 1.0}], "right": [], "before": [[{"key": "woman", "val": 1.0}], [{"key": "a", "val": 1.0}], [], [], []], "after": [[{"key": "the", "val": 1.0}], [], [], [], []], "ctx_attrs": [[{"key": "woman", "val": 0.5}], [{"key": "a", "val": 0.25}], [], [], [], [{"key": "the", "val": 0.5}], [], [], [], [], [{"key": "COMPLEXITY", "val": 1.0}], [{"key": "found", "val": 1.0}]], "children": []}]}, {"title": "95b23c3a3e", "left": [{"key": "the", "val": 1.0}], "right": [], "before": [[{"key": "found", "val": 1.0}], [{"key": "woman", "val": 1.0}], [{"key": "a", "val": 1.0}], [], []], "after": [[], [], [], [], []], "ctx_attrs": [[{"key": "found", "val": 0.5}], [{"key": "woman", "val": 0.25}], [{"key": "a", "val": 0.125}], [], [], [], [], [], [], [], [{"key": "COMPLEXITY", "val": 1.0}], [{"key": "the", "val": 1.0}]], "children": []}]}]};
+const ctxHeaders = ["CtxBefore0", "CtxBefore1", "CtxBefore2", "CtxBefore3", "CtxBefore4", "CtxAfter0", "CtxAfter1", "CtxAfter2", "CtxAfter3", "CtxAfter4", "Complexity"];
+const nodeW=280, nodeH=130, hGap=80, vGap=150;
+
+const root = d3.hierarchy(data);
+const layout = d3.tree()
+  .nodeSize([nodeW+hGap, nodeH+vGap])
+  .separation((a,b) => a.parent===b.parent ? 1.0 : 1.4);
+layout(root);
+
+const svg = d3.select("#tree").append("svg").attr("width",1).attr("height",1);
+const g = svg.append("g");
+
+const linkGen = d3.linkVertical().x(d=>d.x).y(d=>d.y);
+const link = g.selectAll("path.link").data(root.links()).join("path")
+  .attr("class","link").attr("d",linkGen);
+
+const node = g.selectAll("g.node").data(root.descendants()).join("g")
+  .attr("transform", d=>`translate(${d.x},${d.y})`);
+
+node.append("rect").attr("class","node-box")
+  .attr("x",-nodeW/2).attr("y",0).attr("width",nodeW).attr("height",nodeH);
+
+node.append("foreignObject").attr("class","node-fo")
+  .attr("x",-nodeW/2+6).attr("y",6).attr("width",nodeW-12).attr("height",1000)
+  .html(d => nodeHTML(d.data));
+
+// measure actual content heights
+node.selectAll("foreignObject").each(function(d){
+  const fo=d3.select(this), div=fo.select("div").node();
+  const h=div.getBoundingClientRect().height+12;
+  d._nodeHeight = h;
+  fo.attr("height",h);
+  d3.select(this.parentNode).select("rect").attr("height",h+12);
+});
+
+// compute per-depth max height and reposition rows
+const depthMaxHeight = new Map();
+root.each(d => {
+  const h = d._nodeHeight || nodeH;
+  const existing = depthMaxHeight.get(d.depth) || 0;
+  if (h > existing) depthMaxHeight.set(d.depth, h);
+});
+const maxDepth = Math.max(...Array.from(depthMaxHeight.keys()));
+const depthOffsets = [];
+for (let i = 0; i <= maxDepth; i++) {
+  const prev = i === 0 ? 0 : depthOffsets[i-1] + (depthMaxHeight.get(i-1)||nodeH) + vGap;
+  depthOffsets.push(prev);
+}
+root.each(d => { d.y = depthOffsets[d.depth]; });
+node.attr("transform", d => `translate(${d.x},${d.y})`);
+link.attr("d", linkGen);
+
+// fit viewBox
+let x0=Infinity, x1=-Infinity, y0=Infinity, y1=-Infinity;
+root.each(d => {
+  const halfW = nodeW/2, h = d._nodeHeight || nodeH;
+  if (d.x-halfW-30 < x0) x0 = d.x-halfW-30;
+  if (d.x+halfW+30 > x1) x1 = d.x+halfW+30;
+  if (d.y-30 < y0) y0 = d.y-30;
+  if (d.y+h+30 > y1) y1 = d.y+h+30;
+});
+const width=x1-x0, height=y1-y0;
+svg.attr("width",width).attr("height",height)
+  .attr("viewBox",[x0,y0,width,height].join(" "));
+
+function nodeHTML(d){
+  const ctxTable=(ctx,title)=>{
+    if(!ctx||ctx.length===0) return `<div class="subtable"><i>${title}: empty</i></div>`;
+    const rows=ctx.map(kv=>`<tr><td>${kv.key}</td><td>${kv.val.toFixed(2)}</td></tr>`).join("");
+    return `<div class="subtable"><b>${title}</b><table><tbody>${rows}</tbody></table></div>`;
+  };
+  const ctxMulti=(arr,base)=>{
+    if(!arr||arr.length===0) return `<div class="subtable"><i>${base}: empty</i></div>`;
+    if(Array.isArray(arr)&&arr.length>0&&arr[0]&&typeof arr[0].key!=='undefined') return ctxTable(arr,base);
+    let out=""; arr.forEach((c,i)=>{ out+=ctxTable(c,`${base}${i}`); }); return out;
+  };
+  // content instance
+  let contentHTML="";
+  const lH=Array.isArray(d.left)&&d.left.length>0, rH=Array.isArray(d.right)&&d.right.length>0;
+  if(rH) contentHTML=`<div class="section-title">Content Instance</div>${ctxTable(d.left,"Left")}${ctxTable(d.right,"Right")}`;
+  else if(lH) contentHTML=`<div class="section-title">Content Instance</div>${ctxTable(d.left,"Word")}`;
+  else contentHTML=``;
+  // context instance
+  let contextHTML="";
+  if(d.ctx_attrs && d.ctx_attrs.length>0){
+    contextHTML=`<div class="section-title">Context Instance</div>`;
+    d.ctx_attrs.forEach((attr,i)=>{
+      const hdr = i < ctxHeaders.length ? ctxHeaders[i] : `Attr${i}`;
+      contextHTML += ctxTable(attr, hdr);
+    });
+  }
+  return `<div class="node-fo">
+    <table><tr><th colspan="2">${d.title}</th></tr></table>
+    ${contentHTML}
+    ${contextHTML}
+  </div>`;
+}
+</script>
+</body>
+</html>
