@@ -2,15 +2,31 @@
 
 Whereas before we hypothesized needing multiple hierarchies for multiple levels of granularity or to separate primitives and composites, we now rely on multiple hierarchies to properly separate *content* and *context*.
 
-## Prior problems
+## Current problems
 
-*   There's not really a problem, it's just that context gets treated weirdly and I think that separating into two hierarchies will make analysis a little cleaner and strengthen our chunk creation
-*   It's also going to be a LOT easier to program a heuristic that makes sense and is adaptable
-*   We've also evaluated that tracking stability and complexity of instances is incredibly important, and I think that the two hierarchy-partition will encode metadata appropriately
+*   This may solve the below two problems, but first and foremost, we have a path-weighting problems
+    *   Path-information does not seem like a successful final representation, unless we learn node distributions!!
+    *   The first here may be some sort of joint-distribution structure which stores count-based probabilities for pairwise node labels to better calculate
+    *   Fundamentally, the idea is that we're able to threshold the creation of chunks using the counts and probabilities from this hierarchy, but we want to store generalizations of these chunks (so a system that stores a joint probability distribution between two paths and is also able to evaluate whether a given pair of paths' generalization has been seen frequently enough to necessitate forming that as a chunk!)
+    *   For generation, I would like to store references (as hidden attributes, marked by negative numbers) to a content-ref which stores the content instance's path and when we ask to expand a given context instance, we should find the left path and the right path, and find the generalizations of those paths and sample from those generalizations (prototypes) to expand the node, similar to basic-level definition in the old code, but some other situation
+    *   I like using a hierarchy because we're able to get a steady level of generalizability at any given time
+    *   NOTE: trying to split the hierarchy across attributes!!!
 
-*   *Bonus but fun!* - splitting into two hierarchies will almost guaranteed make the diffusion model analogy a lot easier.
+*   The following two are issues that are also faced but might be resolved by 
+    *   Scoring problems
+        
 
-## Current solution
+    *   Basic level problems
+
+*   For generation, we face the following problems:
+    *   How to choose where to start from???
+        *   We should be able to denote the "complexity" of a given instance in some way, and select a highly complex node to start from
+        *   We should also program both an autoregressive and diffusive way of generation
+            *   The autoregressive way starts with a word, creates a high-level token, then expands downwards, then creates another high-level token, etc etc.
+            *   
+        *   
+
+## Methodology 1.0
 
 *   TWO COBWEB HIERARCHIES!! This will basically solve everything and provide so many new levels of analysis! I'll detail the process below
 
@@ -164,6 +180,8 @@ Webster: (Primary Class - we're going to do all logic and parsing in here, and e
 
 *   It might be true that building chunks requires both an understanding of context and content - HOWEVER, if we define every content item purely by its context (which I think is super reasonable) every chunk combination is naturally a context-driven creation!
 
+*   Still a problem with generation because our pre-fit labels are not robust - this needs fixing before we commit to only using pre-fit labels. I have post-fit labels as a fix to this, but we'll need to address
+
 ## **Bonus:** Parallels to Diffusion Models, BPE + Tokenization
 
 **TL;DR - we can use diffusion models and the diffusion process specifically to discover partonomies!**
@@ -190,7 +208,16 @@ Webster: (Primary Class - we're going to do all logic and parsing in here, and e
         *   ADAPTIVE VOCABULARY LEARNED THROUGH THE POINCARE EMBEDDINGS SYSTEM - we still build a discrete cobweb but classify things continuously and then build an extension to an LLM that learns similarities!!
         *   If this system ever succeeds at a single-hierarchy implementation, we can totally do this
         *   Generally, the context hierarchy can probably be used to handle this as well 
+    *   Another valuable extension here could be if we do a masked representation and then 
 
 *   An important note comes into play when discussing this is whether semantic information will be appropriately translated, and I think that diffusion models will fare better than our purely discrete counterpart in using the latent space to leverage both semantic and syntactic correlation (contextually related)
 
 *   Another note here is that while our current process resembles diffusion LMs, the continuous parse tree is more analogous to autoregressive models!!
+
+## Rationale for this theory
+
+*   There's not really a problem, it's just that context gets treated weirdly and I think that separating into two hierarchies will make analysis a little cleaner and strengthen our chunk creation
+*   It's also going to be a LOT easier to program a heuristic that makes sense and is adaptable
+*   We've also evaluated that tracking stability and complexity of instances is incredibly important, and I think that the two hierarchy-partition will encode metadata appropriately
+
+*   *Bonus but fun!* - splitting into two hierarchies will almost guaranteed make the diffusion model analogy a lot easier.

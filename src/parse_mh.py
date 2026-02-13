@@ -8,20 +8,31 @@ to be worked).
 See implementation details in MULTIHIERARCHY.md!
 
 Key difference from parse.py (single-hierarchy):
-    - TWO Cobweb hierarchies: one for content (left+right path), one for context (surrounding
-      context windows + complexity).  In the old code a single LTM stored a flat instance
-      {0: left, 1: right, 2..N: ctx_before, N+1..2N: ctx_after, 2N+1: primitive_content}.
-      Here those are split:
-          content_instance = {0: left_path, 1: right_path}
-          context_instance = {0..context_length-1: ctx_before, context_length..2*ctx_len-1: ctx_after,
-                              2*ctx_len: complexity}
-    - Primitive labels come from categorizing in the *context* hierarchy.
-    - Composite labels come from categorizing in the *context* hierarchy (full path,
-      weighted leaf→root via 1/2^i).
-    - Only frozen/accepted chunks are added to BOTH hierarchies; unfrozen candidates
-      go only to the content hierarchy.
-    - Scoring is recognition-based (tree-wide log-probability), matching parse.py's
-      current approach.
+    - TWO Cobweb hierarchies: one for content, one for context.
+    - Content instances use **multi-attribute path encoding** with
+      `content_path_depth` (default 3) depth levels per side:
+          content_instance = {
+              0: {left_depth0: 1},  # most specific (word or concept leaf)
+              1: {left_depth1: 1},  # context-hierarchy parent concept
+              2: {left_depth2: 1},  # grandparent concept
+              3: {right_depth0: 1},
+              4: {right_depth1: 1},
+              5: {right_depth2: 1},
+          }
+      Each attribute has exactly one value with count 1 so that
+      log_prob_instance produces clean, comparable scores.
+      Words sharing a context-hierarchy ancestor get identical values
+      at that depth level, enabling category-level generalization.
+    - Context instances carry sliding-window context + complexity:
+          context_instance = {0..ctx_len-1: ctx_before,
+                              ctx_len..2*ctx_len-1: ctx_after,
+                              2*ctx_len: complexity,
+                              2*ctx_len+1: content-ref}
+    - Primitive labels: {word_id: 1}.
+    - Composite labels: {context_leaf_concept_id: 1}.
+    - Only frozen/accepted chunks are added to BOTH hierarchies; unfrozen
+      candidates go only to the content hierarchy.
+    - Scoring is recognition-based (tree-wide log-probability).
 """
 import uuid
 import os
@@ -44,10 +55,20 @@ from pprint import pprint
 # Categorization helpers (ported from parse.py, hierarchy-agnostic)
 # ---------------------------------------------------------------------------
 
-def _categorize_dfs(inst: dict, tree: CobwebDiscreteTree):
+def _categorize_dfs(inst: dict, tree: CobwebDiscreteTree,
+                    stochastic: bool = False):
     """
-    DFS categorization down a CobwebDiscreteTree, returning (leaf_node, path_strings, node_path).
-    path_strings is ["CONCEPT-<hash>", ...] from root to leaf.
+    DFS categorization down a CobwebDiscreteTree, returning
+    ``(leaf_node, path_strings, node_path)``.
+    ``path_strings`` is ``["CONCEPT-<hash>", ...]`` from root to leaf.
+
+    Parameters
+    ----------
+    stochastic : bool
+        If True, sample from the child probability distribution at each
+        level instead of always picking the best child.  This introduces
+        variety during generation so that identical inputs can produce
+        different outputs.
     """
     path: List[str] = []
     node_path: List[CobwebDiscreteNode] = []
@@ -77,27 +98,44 @@ def _categorize_dfs(inst: dict, tree: CobwebDiscreteTree):
         if not child_scores:
             break
 
-        best_idx = None
-        best_val = -float("inf")
-        for i, v in enumerate(child_scores):
+        # Convert log-probs to usable floats
+        scores = []
+        for v in child_scores:
             try:
                 val = float(v)
                 if math.isnan(val):
                     val = -float("inf")
             except Exception:
                 val = -float("inf")
-            if val > best_val:
-                best_val = val
-                best_idx = i
+            scores.append(val)
 
-        if best_idx is None or best_val == -float("inf"):
+        if all(s == -float("inf") for s in scores):
             break
 
+        if stochastic:
+            # Convert log-probs to probabilities via softmax and sample
+            max_s = max(scores)
+            weights = [math.exp(s - max_s) if s != -float("inf") else 0.0
+                       for s in scores]
+            total = sum(weights)
+            if total <= 0:
+                break
+            chosen_idx = random.choices(range(len(weights)), weights=weights, k=1)[0]
+        else:
+            chosen_idx = None
+            best_val = -float("inf")
+            for i, val in enumerate(scores):
+                if val > best_val:
+                    best_val = val
+                    chosen_idx = i
+            if chosen_idx is None:
+                break
+
         try:
-            node = node.children[best_idx]
+            node = node.children[chosen_idx]
         except Exception:
             try:
-                node = node.children[best_idx][1]
+                node = node.children[chosen_idx][1]
             except Exception:
                 break
 
@@ -181,6 +219,60 @@ def _score_along_path(
 
 
 # ---------------------------------------------------------------------------
+# Shared helpers for multi-depth label_path construction
+# ---------------------------------------------------------------------------
+
+def _build_label_path_from_ctx(path_strs: list, value_to_id: dict,
+                               content_path_depth: int,
+                               leaf_override: int = None) -> list:
+    """
+    Build a multi-depth label_path from a context-hierarchy categorization
+    path.
+
+    Parameters
+    ----------
+    path_strs : list[str]
+        The categorization path from root to leaf (e.g. ["CONCEPT-aaa",
+        "CONCEPT-bbb", "CONCEPT-ccc"]).
+    value_to_id : dict
+        Vocabulary mapping (str → int).
+    content_path_depth : int
+        How many depth levels to include.
+    leaf_override : int or None
+        If given, forces the depth-0 entry to this value (used for
+        primitives where depth-0 is the word_id, not a concept).
+
+    Returns
+    -------
+    list[int] of length *content_path_depth*.
+        [depth_0, depth_1, depth_2, ...] from most-specific (leaf) to
+        most-general (towards root).  Padded with 0 (EMPTYNULL) if the
+        path is shorter than *content_path_depth*.
+    """
+    # Reversed path is leaf-first (most specific → most general).
+    rev = list(reversed(path_strs))
+    cpd = content_path_depth
+
+    if leaf_override is not None:
+        # Primitive: depth-0 is word_id, remaining slots from context path
+        lp = [leaf_override]
+        for s in rev[:cpd - 1]:
+            v = value_to_id.get(s)
+            lp.append(v if v is not None else 0)
+    else:
+        # Composite: depth-0 is context leaf concept, etc.
+        lp = []
+        for s in rev[:cpd]:
+            v = value_to_id.get(s)
+            lp.append(v if v is not None else 0)
+
+    # Pad to exactly content_path_depth
+    while len(lp) < cpd:
+        lp.append(0)
+    return lp[:cpd]
+
+
+# ---------------------------------------------------------------------------
 # PrimitiveParseNode
 # ---------------------------------------------------------------------------
 
@@ -188,13 +280,13 @@ class PrimitiveParseNode(object):
     """
     Represents a single word/token in the parse tree.
 
-    In the multi-hierarchy theory every node carries two facets:
+    Every node carries two facets:
         context_instance  – what the context hierarchy sees
-                            (sliding-window context + complexity attribute)
-        label             – the full categorization path through the context
-                            hierarchy, weighted leaf→root via 1/2^i.  This is
-                            what higher-level nodes use as "content" when
-                            building composite chunks.
+                            (sliding-window context + complexity)
+        label             – discrete identity {word_id: 1} for primitives
+        label_path        – multi-depth list [word_id, parent_concept, grandparent, ...]
+                            used to build content instances with multi-attribute
+                            path encoding for category-level generalization.
 
     Attributes
     ----------
@@ -202,10 +294,11 @@ class PrimitiveParseNode(object):
     children : SortedList          always empty for primitives
     position_idx : int             word position in the sentence
     title : str                    unique random id
-    context_instance : dict        the instance dict for the context hierarchy
-    label : dict                   weighted path dict {concept_id: weight}
+    context_instance : dict        instance dict for the context hierarchy
+    label : dict                   {word_id: 1}
+    label_path : list              [word_id, ctx_parent_vid, ctx_grandparent_vid, ...]
     complexity : int               always 1 for primitives
-    word_id : int                  the vocabulary id of the raw token
+    word_id : int                  vocabulary id of the raw token
     score_data : dict              scoring statistics from the context hierarchy
     stable : bool                  whether this primitive passed the threshold
     """
@@ -218,7 +311,8 @@ class PrimitiveParseNode(object):
         self.position_idx: int = position_idx
 
         self.context_instance: dict = context_instance
-        self.label: dict = label  # weighted categorize path {concept_vocab_id: 1/2^i}
+        self.label: dict = label  # discrete identity: {word_id: 1} for primitives
+        self.label_path: list = []  # multi-depth path for content hierarchy
         self.word_id: int = word_id
 
         self.complexity: int = 1
@@ -252,7 +346,7 @@ class PrimitiveParseNode(object):
 
     # ------------------------------------------------------------------
     def get_label(self) -> dict:
-        """Return the weighted path dict used as 'content' in higher-level nodes."""
+        """Return the discrete identity dict {word_id: 1} for primitives."""
         return dict(self.label)
 
 
@@ -265,7 +359,7 @@ class CompositeParseNode(object):
     Represents a merged chunk (two children) in the parse tree.
 
     Carries two distinct instance facets:
-        content_instance  – {0: left_label, 1: right_label} for the content hierarchy
+        content_instance  – multi-depth path-encoded attrs for the content hierarchy
         context_instance  – sliding-window context + complexity, for the context hierarchy
 
     The node's *label* is the weighted categorize path through the context hierarchy
@@ -283,14 +377,15 @@ class CompositeParseNode(object):
         self.title: str = uuid.uuid4().hex[:10]
 
         # content facet
-        self.content_instance: Optional[dict] = None  # {0: left_label, 1: right_label}
+        self.content_instance: Optional[dict] = None  # {0..cpd-1: left depths, cpd..2*cpd-1: right depths}
 
         # context facet
         self.context_instance: Optional[dict] = None
         self.context_before: Optional[List[dict]] = None
         self.context_after: Optional[List[dict]] = None
 
-        self.label: Optional[dict] = None  # weighted path from context hierarchy
+        self.label: Optional[dict] = None  # {concept_leaf_id: 1}
+        self.label_path: list = []  # [concept_leaf, parent, grandparent, ...]
         self.categorize_path: Optional[List] = None  # raw path strings
 
         self.context_length: int = 0
@@ -309,36 +404,64 @@ class CompositeParseNode(object):
 
     # ------------------------------------------------------------------
     @staticmethod
-    def create_content_instance(left_node, right_node) -> dict:
+    def create_content_instance(left_node, right_node, content_path_depth: int = 1) -> dict:
         """
-        Build the content-hierarchy instance from two children.
-        Content is strictly {0: left_label, 1: right_label} – no context.
-        Labels are the weighted categorize paths of each child.
-        """
-        left_label = left_node.get_label()
-        right_label = right_node.get_label()
+        Build the content-hierarchy instance from two children using
+        multi-attribute path encoding.
 
-        content_inst = {
-            0: dict(left_label),
-            1: dict(right_label),
-        }
-        # Ensure EMPTYNULL placeholder
-        content_inst[0].setdefault(0, 0)
-        content_inst[1].setdefault(0, 0)
-        return content_inst
+        Layout (2 * content_path_depth attributes):
+          Attrs  0 .. cpd-1   : left side  (depth 0 = most specific identity,
+                                             depth 1 = context-hierarchy parent, …)
+          Attrs cpd .. 2*cpd-1: right side  (same depth ordering)
+
+        Each attribute has exactly one value with count 1, keeping
+        log_prob_instance clean and comparable.
+
+        Generalizability: words/chunks sharing a context-hierarchy ancestor
+        will produce identical values at their shared depth level, giving the
+        content hierarchy a category-level signal.
+        """
+        left_path = getattr(left_node, 'label_path', None)
+        right_path = getattr(right_node, 'label_path', None)
+
+        # Fallback for nodes without label_path (backward compat)
+        if not left_path:
+            lbl = left_node.get_label()
+            left_path = [next(iter(lbl.keys()), 0)]
+        if not right_path:
+            lbl = right_node.get_label()
+            right_path = [next(iter(lbl.keys()), 0)]
+
+        cpd = content_path_depth
+        inst = {}
+        for i in range(cpd):
+            val_l = left_path[i] if i < len(left_path) else 0
+            inst[i] = {val_l: 1}
+
+            val_r = right_path[i] if i < len(right_path) else 0
+            inst[cpd + i] = {val_r: 1}
+
+        return inst
 
     # ------------------------------------------------------------------
     @staticmethod
     def create_context_instance(left_node, right_node, context_length: int,
-                                content_ref_id: int = None) -> dict:
+                                content_ref_id: int = None,
+                                complexity_vid: int = 0) -> dict:
         """
         Build the context-hierarchy instance from two children.
         Attributes:
             0 .. context_length-1       : context_before (from left_node)
             context_length .. 2*ctx-1   : context_after  (from right_node)
-            2*context_length            : complexity (max child complexity + 1)
+            2*context_length            : complexity – stored as
+                                          {complexity_vid: actual_complexity_int}
             2*context_length + 1        : content-ref (content hierarchy leaf
                                           concept vocab id, for generation)
+
+        Parameters
+        ----------
+        complexity_vid : int
+            Vocab ID for the "COMPLEXITY" sentinel.
         """
         ctx_inst: dict = {}
 
@@ -361,11 +484,11 @@ class CompositeParseNode(object):
             else:
                 ctx_inst[attr_key] = {0: 1.0 / (2 ** (j + 1))}
 
-        # complexity attribute
+        # complexity attribute – single COMPLEXITY sentinel, count = actual complexity
         left_c = getattr(left_node, "complexity", 1)
         right_c = getattr(right_node, "complexity", 1)
         complexity = max(left_c, right_c) + 1
-        ctx_inst[2 * context_length] = {complexity: 1}
+        ctx_inst[2 * context_length] = {complexity_vid: complexity}
 
         # content-ref attribute: for composites this is the content
         # hierarchy leaf concept id; for primitives it's the word_id
@@ -504,8 +627,8 @@ class FiniteParseTree(object):
     def build_primitives(self, window: str, threshold=-7):
         """
         Tokenize *window* and create PrimitiveParseNode objects.
-        Each primitive is categorized in the **context hierarchy** to obtain
-        its label (weighted path).
+        Each primitive is categorized in the context hierarchy to obtain
+        its label ({word_id: 1}) and label_path (multi-depth ancestor list).
         """
         self.window = window
 
@@ -535,8 +658,9 @@ class FiniteParseTree(object):
                 else:
                     ctx_inst[attr_key] = {0: 1.0 / (2 ** (j + 1))}
 
-            # complexity = 1 for primitives
-            ctx_inst[2 * self.context_length] = {1: 1}
+            # complexity = 1 for primitives – single COMPLEXITY value, count = 1
+            _cplx_vid = self.value_to_id.get("COMPLEXITY", 0)
+            ctx_inst[2 * self.context_length] = {_cplx_vid: 1}
 
             # word identity attribute – enables generation to recover
             # the actual word from a context hierarchy leaf
@@ -545,17 +669,17 @@ class FiniteParseTree(object):
             # categorize in context hierarchy to get label path
             leaf_node, path_strs, node_path = _categorize_dfs(ctx_inst, self.ltm.context_hierarchy)
 
-            # convert path strings to vocab ids and build weighted label
-            label: dict = {}
-            path_ids: list = []
-            for idx_p, pstr in enumerate(path_strs):
-                vid = self.value_to_id.get(pstr)
-                if vid is not None:
-                    label[vid] = 1.0 / (2 ** (idx_p + 1))
-                    path_ids.append(vid)
-            label[0] = 0  # EMPTYNULL placeholder
+            # Discrete single-identity label: primitive's identity is its word_id
+            label = {wid: 1}
+
+            # Build label_path via helper
+            label_path = _build_label_path_from_ctx(
+                path_strs, self.value_to_id,
+                self.ltm.content_path_depth, leaf_override=wid
+            )
 
             node = PrimitiveParseNode.create_node(ctx_inst, label, position_idx=i, word_id=wid)
+            node.label_path = label_path
 
             # build context_before / context_after lists of dicts for visualization
             cb = []
@@ -632,7 +756,7 @@ class FiniteParseTree(object):
         if left_node is None or right_node is None:
             raise ValueError("Left or right node not found among root's children")
 
-        content_inst = CompositeParseNode.create_content_instance(left_node, right_node)
+        content_inst = CompositeParseNode.create_content_instance(left_node, right_node, self.ltm.content_path_depth)
 
         # categorize in content hierarchy first to get the leaf reference
         cnt_leaf, cnt_path, cnt_node_path = _categorize_dfs(content_inst, self.ltm.content_hierarchy)
@@ -643,17 +767,29 @@ class FiniteParseTree(object):
         self.ltm.add_to_vocab(cnt_ref_str)
         cnt_ref_id = self.value_to_id.get(cnt_ref_str, 0)
 
+        _cplx_vid = self.value_to_id.get("COMPLEXITY", 0)
         context_inst = CompositeParseNode.create_context_instance(
             left_node, right_node, self.context_length,
             content_ref_id=cnt_ref_id,
+            complexity_vid=_cplx_vid,
         )
 
         # categorize in context hierarchy (for identity / label)
         ctx_leaf, ctx_path, ctx_node_path = _categorize_dfs(context_inst, self.ltm.context_hierarchy)
 
-        # score from content hierarchy (recognition)
-        score_data = _score_along_path(cnt_node_path, content_inst, self.ltm.content_hierarchy, debug=debug)
-        score = score_data.get("cost", -1e8)
+        # Score using content hierarchy tree-wide log-probability.
+        # Multi-attribute path encoding gives each attribute exactly one
+        # value with count 1, so log_prob produces clean, comparable scores.
+        score = self.ltm.content_hierarchy.log_prob(content_inst, 250, False)
+        if score == 0:
+            score = -1e9
+        score_data = {
+            "cost": score,
+            "tree_log_prob": score,
+        }
+        if debug:
+            print(f"Content score for pair: {score:.4f}")
+            print(f"  content_inst: {content_inst}")
 
         # build label (weighted path from context hierarchy)
         ctx_path_ids = []
@@ -693,7 +829,7 @@ class FiniteParseTree(object):
         if left_node is None or right_node is None:
             raise ValueError("Left or right node not found among root's children")
 
-        content_inst = CompositeParseNode.create_content_instance(left_node, right_node)
+        content_inst = CompositeParseNode.create_content_instance(left_node, right_node, self.ltm.content_path_depth)
 
         # categorize in content hierarchy first to get the leaf reference
         cnt_leaf, cnt_path, _ = _categorize_dfs(content_inst, self.ltm.content_hierarchy)
@@ -702,30 +838,33 @@ class FiniteParseTree(object):
         self.ltm.add_to_vocab(cnt_ref_str)
         cnt_ref_id = self.value_to_id.get(cnt_ref_str, 0)
 
+        _cplx_vid = self.value_to_id.get("COMPLEXITY", 0)
         context_inst = CompositeParseNode.create_context_instance(
             left_node, right_node, self.context_length,
             content_ref_id=cnt_ref_id,
+            complexity_vid=_cplx_vid,
         )
 
         # categorize in context hierarchy
         ctx_leaf, ctx_path, _ = _categorize_dfs(context_inst, self.ltm.context_hierarchy)
-
-        # build label (weighted path)
-        label: dict = {}
-        path_ids: list = []
-        for idx_p, pstr in enumerate(ctx_path):
-            vid = self.value_to_id.get(pstr)
-            if vid is not None:
-                label[vid] = 1.0 / (2 ** (idx_p + 1))
-                path_ids.append(vid)
-        label[0] = 0
 
         left_c = getattr(left_node, "complexity", 1)
         right_c = getattr(right_node, "complexity", 1)
         complexity = max(left_c, right_c) + 1
 
         ctx_hash = ctx_leaf.concept_hash() if ctx_leaf else "unknown"
-        concept_label = self.value_to_id.get(f"CONCEPT-{ctx_hash}")
+        concept_label_str = f"CONCEPT-{ctx_hash}"
+        self.ltm.add_to_vocab(concept_label_str)
+        concept_label = self.value_to_id.get(concept_label_str)
+
+        # Discrete single-identity label
+        label = {concept_label: 1} if concept_label is not None else {0: 1}
+        path_ids = list(label.keys())
+
+        # Multi-depth label_path via helper
+        _label_path = _build_label_path_from_ctx(
+            ctx_path, self.value_to_id, self.ltm.content_path_depth
+        )
 
         new_node = CompositeParseNode.create_node(
             content_instance=content_inst,
@@ -737,6 +876,7 @@ class FiniteParseTree(object):
             complexity=complexity,
             concept_label=concept_label,
         )
+        new_node.label_path = _label_path
         new_node.frozen = frozen
 
         self.nodes.append(new_node)
@@ -908,7 +1048,7 @@ class FiniteParseTree(object):
             left = self._find_root_child_by_index(p["left_word_index"])
             right = self._find_root_child_by_index(p["right_word_index"])
             if left and right:
-                ci = CompositeParseNode.create_content_instance(left, right)
+                ci = CompositeParseNode.create_content_instance(left, right, self.ltm.content_path_depth)
                 content_insts.append(ci)
 
         return content_insts, context_insts
@@ -956,8 +1096,9 @@ class FiniteParseTree(object):
                     "ctx_attrs": [],
                     "children": [self._draw_node_to_dict(ch[1], draw_zeros) for ch in node.children],
                 }
+            _cpd = self.ltm.content_path_depth if self.ltm else 1
             left_list = self.ctx_list(node.content_instance.get(0, {}) if node.content_instance else {}, draw_zeros)
-            right_list = self.ctx_list(node.content_instance.get(1, {}) if node.content_instance else {}, draw_zeros)
+            right_list = self.ctx_list(node.content_instance.get(_cpd, {}) if node.content_instance else {}, draw_zeros)
             before_list = [self.ctx_list(d or {}, draw_zeros) for d in (node.context_before or [])]
             after_list = [self.ctx_list(d or {}, draw_zeros) for d in (node.context_after or [])]
             # context instance attributes for composites
@@ -1576,7 +1717,7 @@ class LongTermMemory(object):
     Holds TWO Cobweb hierarchies (content + context) plus corpus/vocabulary
     management.
 
-    Content hierarchy  – instances are {0: left_label, 1: right_label}.
+    Content hierarchy  – instances are {0..cpd-1: left_path_depths, cpd..2*cpd-1: right_path_depths}.
     Context hierarchy   – instances are {0..ctx_len-1: ctx_before,
                           ctx_len..2*ctx_len-1: ctx_after,
                           2*ctx_len: complexity,
@@ -1584,7 +1725,7 @@ class LongTermMemory(object):
                                        content leaf concept_id for composites)}.
     """
 
-    def __init__(self, value_corpus: list, context_length: int = 3, alpha: float = 1e-4):
+    def __init__(self, value_corpus: list, context_length: int = 3, content_path_depth: int = 3, alpha: float = 1e-4):
         self.content_hierarchy = CobwebDiscreteTree(alpha)
         self.context_hierarchy = CobwebDiscreteTree(alpha)
 
@@ -1592,17 +1733,24 @@ class LongTermMemory(object):
         self.id_to_value: List[str] = ["EMPTYNULL"]
         for x in value_corpus:
             self.id_to_value.append(x)
+        # Reserve a special vocab entry for the COMPLEXITY sentinel value
+        self.id_to_value.append("COMPLEXITY")
         self.value_to_id: Dict[str, int] = {w: i for i, w in enumerate(self.id_to_value)}
         self.id_count: int = len(self.id_to_value) - 1
 
         self.context_length = context_length
+        self.content_path_depth = content_path_depth
 
         # register root concepts of both hierarchies
         self._register_concept(self.content_hierarchy.root)
         self._register_concept(self.context_hierarchy.root)
 
         # drawer for content hierarchy visualization
-        content_headers = ["Content-Left", "Content-Right"]
+        # Multi-attribute path encoding: one attr per depth level per side
+        content_headers = (
+            [f"Left-Depth{i}" for i in range(content_path_depth)]
+            + [f"Right-Depth{i}" for i in range(content_path_depth)]
+        )
         self.content_drawer = HTMLCobwebDrawer(
             content_headers,
             id_to_value=self.id_to_value,
@@ -1616,11 +1764,21 @@ class LongTermMemory(object):
             + ["Complexity"]
             + ["Content-Ref"]
         )
-        # Complexity attribute should display raw integer values,
-        # not vocab lookups.
-        complexity_attr_idx = 2 * context_length
+        # Complexity: now uses a single COMPLEXITY sentinel as the value key,
+        # with the count being the actual complexity number.  The default
+        # id_to_value lookup will display "COMPLEXITY" which is correct.
+        # Content-Ref: add a display function that truncates CONCEPT hashes.
+        content_ref_attr_idx = 2 * context_length + 1
+        def _content_ref_display(val_id):
+            if val_id is not None and 0 <= val_id < len(self.id_to_value):
+                name = self.id_to_value[val_id]
+            else:
+                name = f"?{val_id}"
+            if isinstance(name, str) and name.startswith("CONCEPT-"):
+                return "C-" + name[8:20] + "…"
+            return name
         context_attr_value_fn = {
-            complexity_attr_idx: lambda val_id: str(val_id),
+            content_ref_attr_idx: _content_ref_display,
         }
         self.context_drawer = HTMLCobwebDrawer(
             context_headers,
@@ -1663,8 +1821,8 @@ class LongTermMemory(object):
 
     def _ifit_and_update_vocab(self, instance: dict, tree: CobwebDiscreteTree, debug=False) -> list:
         """
-        Call ifit on a hierarchy, process the resulting actions (vocab updates + splits).
-        Returns the list of raw actions.
+        Call ifit on a hierarchy, process the resulting actions (vocab updates
+        + splits).  Returns the list of raw actions.
         """
         _, actions = tree.ifit(instance, debug=True)
         actions = [json.loads(x) for x in actions]
@@ -1678,54 +1836,173 @@ class LongTermMemory(object):
             elif act["action"] == "SPLIT":
                 rewrite_rules.append((act["deleted"], act["parent"]))
 
-        # apply rewrite rules via BFS
-        if rewrite_rules:
-            self._apply_rewrite_rules(tree, rewrite_rules)
-
-        return actions
+        return actions, rewrite_rules
 
     def _apply_rewrite_rules(self, tree: CobwebDiscreteTree, rewrite_rules: list):
-        """BFS through tree and replace split-deleted concept hashes in av_counts."""
+        """
+        BFS through *tree* and replace split-deleted concept vocab IDs in
+        av_counts.
+
+        *rewrite_rules* is a list of ``(deleted_hash, parent_hash)`` where each
+        hash is the raw concept hash string from a SPLIT action.  We convert
+        these to integer vocab IDs and walk the tree, replacing every occurrence
+        of the deleted ID with the parent ID in every node's av_count.
+        """
+        # Convert hash-based rules to vocab-ID-based rules.
+        vid_rules: list = []
+        for deleted_hash, parent_hash in rewrite_rules:
+            old_vid = self.value_to_id.get(f"CONCEPT-{deleted_hash}")
+            new_vid = self.value_to_id.get(f"CONCEPT-{parent_hash}")
+            if old_vid is not None and new_vid is not None:
+                vid_rules.append((old_vid, new_vid))
+
+        if not vid_rules:
+            return
+
         def av_replacement(av):
             replaced = False
-            for k in av.keys():
-                for concept_hash in list(av[k].keys()):
-                    for old, new in rewrite_rules:
-                        if f"CONCEPT-{concept_hash}" == old:
-                            av[k].setdefault(f"CONCEPT-{new}", 0)
-                            av[k][f"CONCEPT-{new}"] += av[k][old]
-                            del av[k][old]
-                            replaced = True
+            for attr in av.keys():
+                for old_vid, new_vid in vid_rules:
+                    if old_vid in av[attr]:
+                        av[attr][new_vid] = av[attr].get(new_vid, 0) + av[attr][old_vid]
+                        del av[attr][old_vid]
+                        replaced = True
             return av, replaced
 
         to_visit = [tree.root]
         while to_visit:
             curr = to_visit.pop(0)
             new_av, replaced = av_replacement(curr.av_count)
-            curr.set_av_count(new_av)
             if replaced:
+                curr.set_av_count(new_av)
                 to_visit.extend(curr.children)
 
     def add_parse_tree(self, parse_tree: 'FiniteParseTree', debug=False):
         """
         Learn from a completed parse tree.
 
-        Per multi-hierarchy theory:
-          - ALL content instances (parsed + unparsed candidates) → content hierarchy
-          - Only context instances from parsed/frozen nodes → context hierarchy
+        Order of operations (per multi-hierarchy theory):
+          1. Fit **context instances** to the context hierarchy first.
+             Collect any SPLIT rewrite rules produced by ifit.
+          1b. **Cross-hierarchy propagation**: if the context hierarchy
+              underwent splits, the deleted concept vocab IDs may already
+              be stored as values inside the content hierarchy's av_count
+              (from prior training sentences).  Walk the content hierarchy
+              and replace those stale IDs with their parent replacements
+              so that old and new instances remain comparable.
+          2. Re-categorize every node's context instance through the
+             now-updated context hierarchy to obtain fresh labels and
+             label_path values.
+          3. Rebuild **content instances** using the refreshed labels
+             (both parsed composites and unparsed candidate pairs).
+          4. Fit those updated content instances to the content hierarchy.
+             Apply any resulting content-hierarchy splits to the context
+             hierarchy (for content-ref attribute consistency).
         """
-        content_insts, context_insts = parse_tree.get_all_instances()
+        # -- Step 0: collect raw instances --------------------------------
+        _, context_insts_parsed = parse_tree.get_parsed_instances()
 
         if debug:
             print(f"Adding parse tree for window: \"{parse_tree.window}\"")
-            print(f"  content instances: {len(content_insts)}")
-            print(f"  context instances: {len(context_insts)}")
+            print(f"  context instances to fit: {len(context_insts_parsed)}")
 
+        # -- Step 1: fit context instances first --------------------------
+        ctx_split_rules: list = []
+        for xi in context_insts_parsed:
+            _, rewrites = self._ifit_and_update_vocab(xi, self.context_hierarchy, debug=debug)
+            ctx_split_rules.extend(rewrites)
+
+        # -- Step 1b: propagate context-hierarchy splits to content hierarchy
+        if ctx_split_rules:
+            if debug:
+                print(f"  propagating {len(ctx_split_rules)} context-hierarchy split(s) to content hierarchy")
+            self._apply_rewrite_rules(self.content_hierarchy, ctx_split_rules)
+
+        # -- Step 2: re-categorize every node and refresh labels ----------
+        def _refresh_labels(node):
+            """Bottom-up DFS: refresh children first, then this node."""
+            for _, ch in getattr(node, "children", []):
+                _refresh_labels(ch)
+
+            if isinstance(node, PrimitiveParseNode):
+                node.label = {node.word_id: 1}
+                # Refresh label_path from updated context hierarchy
+                _p_ctx = node.get_context_instance()
+                _p_leaf, _p_path, _ = _categorize_dfs(_p_ctx, self.context_hierarchy)
+                node.label_path = _build_label_path_from_ctx(
+                    _p_path, self.value_to_id,
+                    self.content_path_depth, leaf_override=node.word_id
+                )
+                if debug:
+                    print(f"  refreshed primitive label pos={node.position_idx}")
+
+            elif isinstance(node, CompositeParseNode) and not node.is_global_root:
+                # Re-categorize in updated context hierarchy to get fresh concept_label
+                ctx_inst = node.get_context_instance()
+                leaf, path_strs, _ = _categorize_dfs(ctx_inst, self.context_hierarchy)
+                ctx_hash = leaf.concept_hash() if leaf else "unknown"
+                concept_label_str = f"CONCEPT-{ctx_hash}"
+                self.add_to_vocab(concept_label_str)
+                new_concept_label = self.value_to_id.get(concept_label_str)
+                node.concept_label = new_concept_label
+                node.label = {new_concept_label: 1} if new_concept_label is not None else {0: 1}
+
+                # Refresh label_path from updated context hierarchy
+                node.label_path = _build_label_path_from_ctx(
+                    path_strs, self.value_to_id, self.content_path_depth
+                )
+
+                # Rebuild content_instance from children's refreshed labels
+                children_sorted = list(node.children)
+                if len(children_sorted) == 2:
+                    left_child = children_sorted[0][1]
+                    right_child = children_sorted[1][1]
+                    node.content_instance = CompositeParseNode.create_content_instance(
+                        left_child, right_child, self.content_path_depth
+                    )
+                if debug:
+                    print(f"  refreshed composite label pos={node.position_idx}")
+
+        for _, ch in parse_tree.global_root_node.children:
+            _refresh_labels(ch)
+
+        # -- Step 3: collect content instances with refreshed labels -------
+        content_insts: list = []
+        # parsed composites
+        def _collect_content(node):
+            if isinstance(node, CompositeParseNode) and not node.is_global_root:
+                content_insts.append(node.get_content_instance())
+            for _, ch in getattr(node, "children", []):
+                _collect_content(ch)
+
+        for _, ch in parse_tree.global_root_node.children:
+            _collect_content(ch)
+
+        # unparsed candidate pairs (also use refreshed labels)
+        pairs = parse_tree.get_parentless_pairs()
+        for p in pairs:
+            left = parse_tree._find_root_child_by_index(p["left_word_index"])
+            right = parse_tree._find_root_child_by_index(p["right_word_index"])
+            if left and right:
+                content_insts.append(
+                    CompositeParseNode.create_content_instance(left, right, self.content_path_depth)
+                )
+
+        if debug:
+            print(f"  content instances to fit: {len(content_insts)}")
+
+        # -- Step 4: fit content instances --------------------------------
+        cnt_split_rules: list = []
         for ci in content_insts:
-            self._ifit_and_update_vocab(ci, self.content_hierarchy, debug=debug)
+            _, rewrites = self._ifit_and_update_vocab(ci, self.content_hierarchy, debug=debug)
+            cnt_split_rules.extend(rewrites)
 
-        for xi in context_insts:
-            self._ifit_and_update_vocab(xi, self.context_hierarchy, debug=debug)
+        # Propagate content-hierarchy splits to context hierarchy
+        # (content-ref attribute stores content hierarchy concept IDs)
+        if cnt_split_rules:
+            if debug:
+                print(f"  propagating {len(cnt_split_rules)} content-hierarchy split(s) to context hierarchy")
+            self._apply_rewrite_rules(self.context_hierarchy, cnt_split_rules)
 
         return True
 
@@ -1754,6 +2031,7 @@ class LongTermMemory(object):
 
         meta = {
             "context_length": self.context_length,
+            "content_path_depth": self.content_path_depth,
             "id_count": self.id_count,
             "id_to_value": self.id_to_value,
             "value_to_id": self.value_to_id,
@@ -1787,7 +2065,10 @@ class LongTermMemory(object):
         with open(meta_path, "r", encoding="utf-8") as f:
             meta = json.load(f)
 
-        ltm = LongTermMemory([], context_length=meta.get("context_length", 3))
+        ltm = LongTermMemory(
+            [], context_length=meta.get("context_length", 3),
+            content_path_depth=meta.get("content_path_depth", 3)
+        )
         ltm.id_to_value = meta.get("id_to_value", ltm.id_to_value)
         ltm.value_to_id = meta.get("value_to_id", ltm.value_to_id)
         ltm.id_count = meta.get("id_count", ltm.id_count)
@@ -1802,7 +2083,10 @@ class LongTermMemory(object):
             ltm.context_hierarchy.load_json(context_path)
 
         # rebuild drawers
-        content_headers = ["Content-Left", "Content-Right"]
+        content_headers = (
+            [f"Left-Depth{i}" for i in range(ltm.content_path_depth)]
+            + [f"Right-Depth{i}" for i in range(ltm.content_path_depth)]
+        )
         ltm.content_drawer = HTMLCobwebDrawer(
             content_headers,
             id_to_value=ltm.id_to_value,
@@ -1814,9 +2098,17 @@ class LongTermMemory(object):
             + ["Complexity"]
             + ["Content-Ref"]
         )
-        complexity_attr_idx = 2 * ltm.context_length
+        content_ref_attr_idx = 2 * ltm.context_length + 1
+        def _content_ref_display(val_id):
+            if val_id is not None and 0 <= val_id < len(ltm.id_to_value):
+                name = ltm.id_to_value[val_id]
+            else:
+                name = f"?{val_id}"
+            if isinstance(name, str) and name.startswith("CONCEPT-"):
+                return "C-" + name[8:20] + "…"
+            return name
         context_attr_value_fn = {
-            complexity_attr_idx: lambda val_id: str(val_id),
+            content_ref_attr_idx: _content_ref_display,
         }
         ltm.context_drawer = HTMLCobwebDrawer(
             context_headers,
@@ -1841,9 +2133,25 @@ class WEBSTER(object):
     Named per MULTIHIERARCHY.md's specification.
     """
 
-    def __init__(self, value_corpus: list, context_length: int = 3, alpha: float = 1e-4, threshold=-7):
-        self.ltm = LongTermMemory(value_corpus, context_length=context_length, alpha=alpha)
+    def __init__(self, value_corpus: list, context_length: int = 3, content_length: int = 3, alpha: float = 1e-4, threshold=-5.0):
+        """
+        Parameters
+        ----------
+        value_corpus : list
+            Initial vocabulary (list of word strings).
+        context_length : int
+            Number of context-window slots on each side (before/after).
+        content_length : int
+            Number of depth-level attributes per side in content instances.
+            Total content attributes = 2 * content_length (left depths + right depths).
+        alpha : float
+            Cobweb smoothing parameter.
+        threshold : float
+            Default score threshold for accepting chunk merges.
+        """
+        self.ltm = LongTermMemory(value_corpus, context_length=context_length, content_path_depth=content_length, alpha=alpha)
         self.context_length = context_length
+        self.content_length = content_length
         self.threshold = threshold
 
     # ---- accessors ------------------------------------------------------
@@ -2016,55 +2324,61 @@ class WEBSTER(object):
             )[0]
 
         def _traverse_to_leaf(label_dict: dict) -> Optional[CobwebDiscreteNode]:
-            """Follow a weighted label path through the content hierarchy to a leaf."""
+            """Follow a weighted label path through the content hierarchy.
+
+            Uses top-down child-matching: at each node, pick the child whose
+            CONCEPT hash appears in *label_dict* with the highest count.
+            This handles accumulated labels (mixed paths) correctly because
+            at each branching point it follows the most likely path.
+            """
             curr = self.ltm.content_hierarchy.root
-            for item_key, _ in sorted(label_dict.items(), key=lambda x: -x[1]):
-                concept_str = _safe_lookup(item_key)
-                if concept_str is None or concept_str == "EMPTYNULL":
-                    continue
-                if not curr.children:
-                    return curr
-                found = False
+            while curr.children:
+                best_child = None
+                best_weight = -1
                 for child in curr.children:
                     try:
-                        if f"CONCEPT-{child.concept_hash()}" == concept_str:
-                            curr = child
-                            found = True
-                            break
+                        child_hash_str = f"CONCEPT-{child.concept_hash()}"
+                        child_vid = self.ltm.value_to_id.get(child_hash_str)
+                        if child_vid is not None and child_vid in label_dict:
+                            w = label_dict[child_vid]
+                            if w > best_weight:
+                                best_weight = w
+                                best_child = child
                     except Exception:
                         continue
-                if not found:
-                    return curr
+                if best_child is None:
+                    break
+                curr = best_child
             return curr
 
         def _traverse_context_leaf(label_dict: dict) -> Optional[CobwebDiscreteNode]:
             """Follow a weighted label path through the **context** hierarchy.
 
-            Labels stored in the content hierarchy are weighted paths of
-            CONCEPT-… IDs that originate from the context hierarchy.  This
-            function traverses the context hierarchy matching those concept
-            hashes and returns the deepest reachable node.
+            Uses top-down child-matching: at each node, pick the child whose
+            CONCEPT hash appears in *label_dict* with the highest count.
+            This correctly handles accumulated labels from the content
+            hierarchy because at each branching point it follows the most
+            likely branch rather than trying to match concepts in arbitrary
+            weight order.
             """
             curr = self.ltm.context_hierarchy.root
-            for item_key, _ in sorted(label_dict.items(), key=lambda x: -x[1]):
-                concept_str = _safe_lookup(item_key)
-                if concept_str is None or concept_str == "EMPTYNULL":
-                    continue
-                if not isinstance(concept_str, str) or not concept_str.startswith("CONCEPT-"):
-                    continue
-                if not curr.children:
-                    return curr
-                found = False
+            while curr.children:
+                best_child = None
+                best_weight = -1
                 for child in curr.children:
                     try:
-                        if f"CONCEPT-{child.concept_hash()}" == concept_str:
-                            curr = child
-                            found = True
-                            break
+                        child_hash_str = f"CONCEPT-{child.concept_hash()}"
+                        child_vid = self.ltm.value_to_id.get(child_hash_str)
+                        if child_vid is not None and child_vid in label_dict:
+                            w = label_dict[child_vid]
+                            if w > best_weight:
+                                best_weight = w
+                                best_child = child
                     except Exception:
                         continue
-                if not found:
-                    return curr
+                if best_child is None:
+                    break
+                curr = best_child
             return curr
 
         def _word_from_context_leaf(ctx_node: CobwebDiscreteNode) -> int:
@@ -2121,133 +2435,288 @@ class WEBSTER(object):
             return None
 
         def _make_empty_ctx(complexity_val: int = 1) -> dict:
-            """Build an empty context instance with a given complexity value."""
+            """Build an empty context instance with a given complexity value.
+
+            Uses fractional EMPTYNULL weights ``{0: 1/(2^(j+1))}`` matching
+            the training format in ``create_context_instance``."""
+            _cplx_vid = self.ltm.value_to_id.get("COMPLEXITY", 0)
             ctx = {}
             for j in range(self.context_length):
-                ctx[j] = {0: 0}
-                ctx[self.context_length + j] = {0: 0}
-            ctx[2 * self.context_length] = {complexity_val: 1}
+                ctx[j] = {0: 1.0 / (2 ** (j + 1))}
+                ctx[self.context_length + j] = {0: 1.0 / (2 ** (j + 1))}
+            ctx[2 * self.context_length] = {_cplx_vid: complexity_val}
             return ctx
 
         def _sample_content_node(hint: dict = None):
             """
             Sample a leaf from the content hierarchy.
 
-            If *hint* is given it should be a partial content instance
-            ``{0: …, 1: …}``; missing attrs are predicted.  Returns
+            If *hint* is given it should be a partial content instance;
+            missing primary attrs (depth-0) are predicted.  Returns
             ``(leaf_node, path_strs, node_path)``.
             """
+            _cpd = self.ltm.content_path_depth
             partial = dict(hint) if hint else {}
             prediction = self.ltm.content_hierarchy.predict(partial, random.randint(100, 500), False)
+            # Ensure left depth-0 (attr 0) and right depth-0 (attr cpd) are filled
             if 0 not in partial or not partial[0]:
                 partial[0] = _probabilistic_subset(prediction.get(0, {}), k=20)
-            if 1 not in partial or not partial[1]:
-                partial[1] = _probabilistic_subset(prediction.get(1, {}), k=20)
+            if _cpd not in partial or not partial[_cpd]:
+                partial[_cpd] = _probabilistic_subset(prediction.get(_cpd, {}), k=20)
             partial[0][0] = 0
-            partial[1][0] = 0
-            return _categorize_dfs(partial, self.ltm.content_hierarchy)
+            partial[_cpd][0] = 0
+            return _categorize_dfs(partial, self.ltm.content_hierarchy,
+                                   stochastic=True)
 
-        def _predict_complexity(ctx_inst: dict) -> int:
+        def _predict_complexity(ctx_inst: dict, use_max: bool = False) -> int:
             """
             Use the context hierarchy to predict the most likely complexity
             for a given context instance.  Returns the integer complexity.
-            """
-            complexity_attr = 2 * self.context_length
-            prediction = self.ltm.context_hierarchy.predict(ctx_inst, random.randint(100, 500), False)
-            complexity_dist = prediction.get(complexity_attr, {})
-            if not complexity_dist:
-                return 1
-            # pick the complexity value with highest weight
-            best_c = max(complexity_dist, key=complexity_dist.get)
-            return max(int(best_c), 1)
 
-        def _build_label_from_path(path_strs: list) -> dict:
-            """Convert a categorize path into a weighted label dict."""
-            label: dict = {}
-            for idx_p, pstr in enumerate(path_strs):
-                vid = self.value_to_id.get(pstr)
+            Complexity is stored as {COMPLEXITY_VID: actual_complexity_int}.
+
+            Parameters
+            ----------
+            ctx_inst : dict
+                Context instance to categorize.
+            use_max : bool
+                If True, return the **maximum** observed complexity at the
+                matched leaf instead of the average.  This is appropriate
+                for from-scratch generation where we want sentence-level
+                (high-complexity) seeds.
+            """
+            _cplx_vid = self.ltm.value_to_id.get("COMPLEXITY", 0)
+            complexity_attr = 2 * self.context_length
+            ref_attr = 2 * self.context_length + 1
+
+            leaf, _, _ = _categorize_dfs(ctx_inst, self.ltm.context_hierarchy)
+            if leaf is None:
+                return 1
+
+            cplx_sum = leaf.av_count.get(complexity_attr, {}).get(_cplx_vid, 0)
+            # Count instances via content-ref attribute (each instance adds one
+            # content-ref with count 1).
+            n_instances = sum(leaf.av_count.get(ref_attr, {}).values())
+            if n_instances <= 0:
+                return 1
+
+            if use_max:
+                # Return the maximum complexity observed at the root level.
+                # cplx_sum / count_of_unit_complexity_instances gives the
+                # weighted average, but for sentence seeds we want the max.
+                # The max is bounded by cplx_sum (all complexity concentrated
+                # in one instance) but realistically we use a high percentile.
+                avg = cplx_sum / n_instances
+                # Use 2x average as a proxy for max (true max is hard to recover
+                # from aggregated counts); floor at 3 for meaningful expansion.
+                return max(int(round(avg * 2)), 3)
+            return max(int(round(cplx_sum / n_instances)), 1)
+
+        def _build_label_from_path(path_strs: list):
+            """Build a discrete single-identity label AND multi-depth label_path
+            from a context categorization path.
+
+            Returns (label_dict, label_path_list).
+            Uses the leaf concept (last in path) as the sole identity with count 1.
+            If the path is empty, falls back to {0: 1} (EMPTYNULL).
+            """
+            _cpd = self.ltm.content_path_depth
+            if path_strs:
+                leaf_str = path_strs[-1]
+                vid = self.value_to_id.get(leaf_str)
                 if vid is not None:
-                    label[vid] = 1.0 / (2 ** (idx_p + 1))
-            label[0] = 0
-            return label
+                    label = {vid: 1}
+                    lp = _build_label_path_from_ctx(
+                        path_strs, self.value_to_id, _cpd
+                    )
+                    return label, lp
+            return {0: 1}, [0] * _cpd
 
         # ---- expand a single composite into two children -------------------
+
+        def _derive_child_ctx(parent_ctx: dict, side: str,
+                              child_complexity: int) -> dict:
+            """
+            Derive a child's context instance from the parent's context.
+
+            The **left** child inherits the parent's *before* context (the
+            words to the left of the parent are also to the left of the
+            left child).  The **right** child inherits the parent's *after*
+            context.  The other side (inner boundary) is unknown during
+            generation, so it is filled with EMPTYNULL using the same
+            fractional weighting scheme as training
+            (``{0: 1.0 / (2 ** (j+1))}``).
+
+            Parameters
+            ----------
+            parent_ctx : dict
+                The parent node's context instance.
+            side : str
+                ``'left'`` or ``'right'``.
+            child_complexity : int
+                Complexity value for the child.
+            """
+            _cplx_vid = self.ltm.value_to_id.get("COMPLEXITY", 0)
+            ctx: dict = {}
+            cl = self.context_length
+
+            if side == 'left':
+                # Left child inherits parent's before-context
+                for j in range(cl):
+                    fallback = {0: 1.0 / (2 ** (j + 1))}
+                    ctx[j] = dict(parent_ctx.get(j, fallback))
+                # After-context is unknown (inner boundary) — use
+                # fractional EMPTYNULL weights matching training format
+                for j in range(cl):
+                    ctx[cl + j] = {0: 1.0 / (2 ** (j + 1))}
+            else:
+                # Before-context is unknown (inner boundary)
+                for j in range(cl):
+                    ctx[j] = {0: 1.0 / (2 ** (j + 1))}
+                # Right child inherits parent's after-context
+                for j in range(cl):
+                    fallback = {0: 1.0 / (2 ** (j + 1))}
+                    ctx[cl + j] = dict(parent_ctx.get(cl + j, fallback))
+
+            ctx[2 * cl] = {_cplx_vid: child_complexity}
+            return ctx
 
         def _expand_node(node: CompositeParseNode) -> Tuple[Any, Any]:
             """
             Expand a composite parse node into two children.
 
-            For each child (left, right):
-                1. Traverse the *context* hierarchy using the side label from
-                   the parent's content_instance to reach a context leaf.
-                2. Read the content-ref attribute (``2*ctx_len+1``) from that
-                   leaf.
+            Children inherit the parent's surrounding-word context:
+            the left child gets the parent's before-context, the right
+            child gets the parent's after-context.
 
-                   - If the ref is a word  → create a ``PrimitiveParseNode``.
-                   - If the ref is a ``CONCEPT-<hash>`` → find the matching
-                     content hierarchy node, use its ``av_count`` for
-                     sub-content, and create a ``CompositeParseNode`` for
-                     further expansion.
+            **Critically**, the left child is resolved first and its
+            word identity (if primitive) is injected into the right
+            child's before-context (attribute 0).  This breaks the
+            all-EMPTYNULL echo-chamber that otherwise makes every
+            primitive see identical context.
 
-                3. Fall back to content hierarchy traversal + complexity
-                   prediction when the content-ref is unavailable.
+            All internal ``_categorize_dfs`` calls use ``stochastic=True``
+            so that repeated generation from the same context can produce
+            different outputs.
+
+            Per MULTIHIERARCHY.md:
+                1. Categorize the node's content_instance in the **content
+                   hierarchy** to reach a coherent leaf where (left, right)
+                   pairs co-occurred during training.
+                2. Sample a left label from that leaf, then re-categorize
+                   ``{0: left}`` to predict a conditionally coherent right
+                   label.
+                3. Resolve left child first (context hierarchy → content-ref
+                   → primitive or composite).  Then resolve right child with
+                   the left child's word injected into its before-context.
+                4. Child complexity = max(parent.complexity - 1, 1).
             """
             if not node.content_instance:
                 return None, None
 
-            left_label = node.content_instance.get(0, {})
-            right_label = node.content_instance.get(1, {})
             content_ref_attr = 2 * self.context_length + 1
+            child_complexity = max(node.complexity - 1, 1)
+            parent_ctx = node.context_instance or {}
 
-            results = []
-            for side_idx, side_label in enumerate([left_label, right_label]):
-                # 1. Traverse context hierarchy to get a context leaf
-                ctx_leaf = _traverse_context_leaf(side_label)
+            # ---- Step 1: Categorize content → coherent leaf ---------------
+            content_leaf, _, _ = _categorize_dfs(
+                node.content_instance, self.ltm.content_hierarchy,
+                stochastic=True,
+            )
+            if content_leaf is None:
+                content_leaf = self.ltm.content_hierarchy.root
+            leaf_av = content_leaf.av_count or {}
 
-                # 2. Read content-ref from context leaf
-                content_ref_id = _content_ref_from_leaf(ctx_leaf) if ctx_leaf else 0
-                ref_name = _safe_lookup(content_ref_id) if content_ref_id else None
+            # ---- Step 2: Conditional left/right for coherence -------------
+            _cpd = self.ltm.content_path_depth
+            left_label = _probabilistic_subset(
+                dict(leaf_av.get(0, node.content_instance.get(0, {}))), k=20
+            )
+            left_label[0] = 0
+
+            cond_leaf, _, _ = _categorize_dfs(
+                {0: left_label}, self.ltm.content_hierarchy,
+                stochastic=True,
+            )
+            cond_av = (cond_leaf.av_count if cond_leaf else leaf_av) or leaf_av
+            right_label = _probabilistic_subset(
+                dict(cond_av.get(
+                    _cpd, leaf_av.get(_cpd, node.content_instance.get(_cpd, {}))
+                )), k=20
+            )
+            right_label[0] = 0
+
+            # ---- Helper: resolve one side into a parse node ---------------
+            def _resolve_side(side: str, side_label: dict,
+                              child_ctx: dict) -> Tuple[Any, int]:
+                """Resolve a single side into a parse node.
+
+                Returns ``(child_node, resolved_word_id)`` where
+                *resolved_word_id* is the vocab id of the chosen word
+                (non-zero only when the child is a primitive).
+                """
+                # Categorize in context hierarchy (stochastic for variety)
+                ctx_leaf_node, ctx_path, _ = _categorize_dfs(
+                    child_ctx, self.ltm.context_hierarchy,
+                    stochastic=True,
+                )
+
+                # Read content-ref from context leaf
+                content_ref_id = (_content_ref_from_leaf(ctx_leaf_node)
+                                  if ctx_leaf_node else 0)
+                ref_name = (_safe_lookup(content_ref_id)
+                            if content_ref_id else None)
 
                 if debug:
+                    side_idx = 0 if side == 'left' else 1
                     print(f"  Side {side_idx}: ctx_leaf_hash="
-                          f"{ctx_leaf.concept_hash() if ctx_leaf else 'None'}, "
+                          f"{ctx_leaf_node.concept_hash() if ctx_leaf_node else 'None'}, "
                           f"content_ref={ref_name} (id={content_ref_id})")
 
-                # --- PRIMITIVE: content-ref is a word ---
-                if content_ref_id and _is_word_token(content_ref_id):
+                # --- PRIMITIVE: content-ref is a word AND complexity ≤ 1 ---
+                if (content_ref_id and _is_word_token(content_ref_id)
+                        and child_complexity <= 1):
                     word_id = content_ref_id
-                    child_ctx = _make_empty_ctx(1)
                     child_ctx[content_ref_attr] = {word_id: 1}
-                    _, ctx_path, _ = _categorize_dfs(child_ctx, self.ltm.context_hierarchy)
-                    child_label = _build_label_from_path(ctx_path)
+                    child_label = {word_id: 1}
                     child_node = PrimitiveParseNode.create_node(
                         context_instance=child_ctx,
                         label=child_label,
                         position_idx=node.position_idx,
                         word_id=word_id,
                     )
-                    results.append(child_node)
-                    continue
+                    child_node.label_path = [word_id] + [0] * (_cpd - 1)
+                    return child_node, word_id
 
                 # --- COMPOSITE: content-ref is a CONCEPT-<hash> ---
-                if ref_name and isinstance(ref_name, str) and ref_name.startswith("CONCEPT-"):
+                if (ref_name and isinstance(ref_name, str)
+                        and ref_name.startswith("CONCEPT-")
+                        and child_complexity > 1):
                     target_hash = ref_name[len("CONCEPT-"):]
                     content_node = _find_content_node_by_hash(target_hash)
                     if content_node:
-                        cnt_av = content_node.av_count or {}
-                        child_content = {
-                            0: _probabilistic_subset(dict(cnt_av.get(0, {0: 1})), k=15),
-                            1: _probabilistic_subset(dict(cnt_av.get(1, {0: 1})), k=15),
-                        }
-                        child_content[0][0] = 0
-                        child_content[1][0] = 0
-                        parent_ctx = (dict(node.context_instance)
-                                      if node.context_instance
-                                      else _make_empty_ctx(node.complexity))
-                        child_complexity = max(_predict_complexity(parent_ctx) - 1, 2)
-                        child_ctx = _make_empty_ctx(child_complexity)
-                        _, ctx_path, _ = _categorize_dfs(child_ctx, self.ltm.context_hierarchy)
-                        child_label = _build_label_from_path(ctx_path)
+                        sub_inst = {}
+                        for _i in range(2 * _cpd):
+                            sub_inst[_i] = dict(
+                                content_node.av_count.get(_i, {0: 1}))
+                        sub_leaf, _, _ = _categorize_dfs(
+                            sub_inst, self.ltm.content_hierarchy,
+                            stochastic=True,
+                        )
+                        sub_av = (sub_leaf.av_count
+                                  if sub_leaf
+                                  else content_node.av_count) or {}
+                        child_content = {}
+                        for _i in range(2 * _cpd):
+                            child_content[_i] = _probabilistic_subset(
+                                dict(sub_av.get(_i, {0: 1})), k=15)
+                            child_content[_i][0] = 0
+                        _, ctx_path_c, _ = _categorize_dfs(
+                            child_ctx, self.ltm.context_hierarchy,
+                            stochastic=True,
+                        )
+                        child_label, child_label_path = \
+                            _build_label_from_path(ctx_path_c)
                         child_node = CompositeParseNode.create_node(
                             content_instance=child_content,
                             context_instance=child_ctx,
@@ -2257,39 +2726,22 @@ class WEBSTER(object):
                             context_length=self.context_length,
                             complexity=child_complexity,
                         )
-                        results.append(child_node)
-                        continue
+                        child_node.label_path = child_label_path
+                        return child_node, 0
 
-                # --- FALLBACK: content hierarchy traversal + complexity ---
-                leaf = _traverse_to_leaf(side_label)
-                if leaf is None:
-                    results.append(None)
-                    continue
-
-                leaf_av = leaf.av_count or {}
-                left_dist = dict(leaf_av.get(0, {0: 1}))
-                right_dist = dict(leaf_av.get(1, {0: 1}))
-
-                parent_ctx = (dict(node.context_instance)
-                              if node.context_instance
-                              else _make_empty_ctx(node.complexity))
-                child_complexity = max(_predict_complexity(parent_ctx) - 1, 1)
-
-                if debug:
-                    leaf_hash = leaf.concept_hash() if leaf else "None"
-                    print(f"  Fallback side {side_idx}: leaf={leaf_hash}, "
-                          f"child_complexity={child_complexity}")
-
+                # --- FALLBACK ---
                 if child_complexity > 1:
-                    child_content = {
-                        0: _probabilistic_subset(left_dist, k=15),
-                        1: _probabilistic_subset(right_dist, k=15),
-                    }
-                    child_content[0][0] = 0
-                    child_content[1][0] = 0
-                    child_ctx = _make_empty_ctx(child_complexity)
-                    _, ctx_path, _ = _categorize_dfs(child_ctx, self.ltm.context_hierarchy)
-                    child_label = _build_label_from_path(ctx_path)
+                    child_content = {}
+                    for _i in range(2 * _cpd):
+                        child_content[_i] = _probabilistic_subset(
+                            dict(leaf_av.get(_i, {0: 1})), k=15)
+                        child_content[_i][0] = 0
+                    _, ctx_path_f, _ = _categorize_dfs(
+                        child_ctx, self.ltm.context_hierarchy,
+                        stochastic=True,
+                    )
+                    child_label, child_label_path = \
+                        _build_label_from_path(ctx_path_f)
                     child_node = CompositeParseNode.create_node(
                         content_instance=child_content,
                         context_instance=child_ctx,
@@ -2299,28 +2751,47 @@ class WEBSTER(object):
                         context_length=self.context_length,
                         complexity=child_complexity,
                     )
-                    results.append(child_node)
-                else:
-                    # last resort: predict word from global context hierarchy
-                    fallback_ctx = _make_empty_ctx(1)
-                    prediction = self.ltm.context_hierarchy.predict(
-                        fallback_ctx, random.randint(100, 500), False
-                    )
-                    word_dist = prediction.get(content_ref_attr, {})
-                    word_id = _best_word_from_distribution(word_dist)
-                    child_ctx = _make_empty_ctx(1)
-                    child_ctx[content_ref_attr] = {word_id: 1}
-                    _, ctx_path, _ = _categorize_dfs(child_ctx, self.ltm.context_hierarchy)
-                    child_label = _build_label_from_path(ctx_path)
-                    child_node = PrimitiveParseNode.create_node(
-                        context_instance=child_ctx,
-                        label=child_label,
-                        position_idx=node.position_idx,
-                        word_id=word_id,
-                    )
-                    results.append(child_node)
+                    child_node.label_path = child_label_path
+                    return child_node, 0
 
-            return results[0], results[1]
+                # child_complexity == 1 → force primitive word prediction
+                prediction = self.ltm.context_hierarchy.predict(
+                    child_ctx, random.randint(100, 500), False
+                )
+                word_dist = prediction.get(content_ref_attr, {})
+                word_id = _best_word_from_distribution(word_dist)
+                child_ctx[content_ref_attr] = {word_id: 1}
+                child_label = {word_id: 1}
+                child_node = PrimitiveParseNode.create_node(
+                    context_instance=child_ctx,
+                    label=child_label,
+                    position_idx=node.position_idx,
+                    word_id=word_id,
+                )
+                child_node.label_path = [word_id] + [0] * (_cpd - 1)
+                return child_node, word_id
+
+            # ---- Step 3: Resolve LEFT first, then RIGHT ------------------
+
+            # 3a. Left child inherits parent's before-context
+            left_ctx = _derive_child_ctx(parent_ctx, 'left', child_complexity)
+            left_child, left_word_id = _resolve_side(
+                'left', left_label, left_ctx
+            )
+
+            # 3b. Right child inherits parent's after-context, PLUS the
+            #     left child's resolved word injected into before-context
+            #     attribute 0 (the nearest-before position).
+            right_ctx = _derive_child_ctx(parent_ctx, 'right', child_complexity)
+            if left_word_id and left_word_id != 0:
+                # Inject left word as the nearest before-context word
+                right_ctx[0] = {left_word_id: 1.0 / (2 ** 1)}
+                right_ctx[0][0] = 0
+            right_child, _ = _resolve_side(
+                'right', right_label, right_ctx
+            )
+
+            return left_child, right_child
 
         # ---- flatten primitives to word list -------------------------------
 
@@ -2354,69 +2825,191 @@ class WEBSTER(object):
                 print(f"Mask positions: {mask_positions}")
 
             # Resolve known tokens to vocab ids
-            word_ids = []
+            known_word_ids: List[Optional[int]] = []
             for tok in tokens:
                 if tok == "[mask]":
-                    word_ids.append(None)  # placeholder
+                    known_word_ids.append(None)
                 else:
                     vid = self.value_to_id.get(tok, 0)
-                    word_ids.append(vid)
+                    known_word_ids.append(vid)
 
-            # Fill each [mask] using context hierarchy predictions
-            for mi in mask_positions:
-                ctx_inst = {}
+            content_ref_attr = 2 * self.context_length + 1
 
-                # context_before: words to the left of the mask
+            # ---- helper: build context instance seeded with surrounding text ----
+            def _build_seeded_ctx(position: int, resolved_ids: list,
+                                  complexity_val: int) -> dict:
+                """Build a context instance using the known (and already-resolved)
+                tokens around *position* as context_before / context_after."""
+                ctx: dict = {}
                 for j in range(self.context_length):
-                    src_idx = mi - (j + 1)
-                    if 0 <= src_idx < len(word_ids) and word_ids[src_idx] is not None and word_ids[src_idx] != 0:
-                        ctx_inst[j] = {word_ids[src_idx]: 1.0 / (2 ** (j + 1))}
-                        ctx_inst[j][0] = 0
+                    src = position - (j + 1)
+                    if 0 <= src < len(resolved_ids) and resolved_ids[src] is not None and resolved_ids[src] != 0:
+                        ctx[j] = {resolved_ids[src]: 1.0 / (2 ** (j + 1))}
+                        ctx[j][0] = 0
                     else:
-                        ctx_inst[j] = {0: 1.0 / (2 ** (j + 1))}
-
-                # context_after: words to the right of the mask
+                        ctx[j] = {0: 1.0 / (2 ** (j + 1))}
                 for j in range(self.context_length):
-                    src_idx = mi + (j + 1)
+                    src = position + (j + 1)
                     attr_key = self.context_length + j
-                    if 0 <= src_idx < len(word_ids) and word_ids[src_idx] is not None and word_ids[src_idx] != 0:
-                        ctx_inst[attr_key] = {word_ids[src_idx]: 1.0 / (2 ** (j + 1))}
-                        ctx_inst[attr_key][0] = 0
+                    if 0 <= src < len(resolved_ids) and resolved_ids[src] is not None and resolved_ids[src] != 0:
+                        ctx[attr_key] = {resolved_ids[src]: 1.0 / (2 ** (j + 1))}
+                        ctx[attr_key][0] = 0
                     else:
-                        ctx_inst[attr_key] = {0: 1.0 / (2 ** (j + 1))}
+                        ctx[attr_key] = {0: 1.0 / (2 ** (j + 1))}
+                _cplx_vid = self.ltm.value_to_id.get("COMPLEXITY", 0)
+                ctx[2 * self.context_length] = {_cplx_vid: complexity_val}
+                return ctx
 
-                # complexity = 1 (we want a primitive word)
-                ctx_inst[2 * self.context_length] = {1: 1}
+            # ---- expand each [mask] into a subtree ----
+            # Each mask is expanded compositionally: use surrounding context
+            # to predict complexity and content, then recursively expand just
+            # like from-scratch generation but with real context.
+            mask_expansions: Dict[int, List[str]] = {}  # mask_pos → list of words
 
-                # predict from context hierarchy – specifically the
-                # word-identity attribute (2*ctx_len+1) which stores
-                # actual word IDs in primitive context instances
-                prediction = self.ltm.context_hierarchy.predict(ctx_inst, random.randint(100, 500), False)
-
-                word_attr = 2 * self.context_length + 1
-                word_dist = prediction.get(word_attr, {})
-                combined = {vid: w for vid, w in word_dist.items() if _is_word_token(vid)}
-
-                if combined:
-                    chosen_id = random.choices(
-                        list(combined.keys()),
-                        weights=[max(v, 1e-12) for v in combined.values()],
-                        k=1,
-                    )[0]
-                else:
-                    chosen_id = 0
-
-                word_ids[mi] = chosen_id
+            for mi in mask_positions:
+                # Use surrounding context to predict initial complexity
+                seed_ctx = _build_seeded_ctx(mi, known_word_ids, 1)
+                initial_complexity = _predict_complexity(seed_ctx)
+                initial_complexity = max(initial_complexity, 2)
 
                 if debug:
-                    print(f"  [mask] at {mi}: chose '{_safe_lookup(chosen_id)}' (id={chosen_id})")
+                    print(f"\n  [mask] at pos {mi}: predicted complexity={initial_complexity}")
 
-            # rebuild token list
-            result_tokens = []
+                # Sample content from the content hierarchy,
+                # seeded with context-derived predictions
+                seed_ctx_full = _build_seeded_ctx(mi, known_word_ids, initial_complexity)
+                prediction = self.ltm.context_hierarchy.predict(
+                    seed_ctx_full, random.randint(100, 500), False
+                )
+                # Use the predicted content-ref to try to seed content sampling
+                ref_dist = prediction.get(content_ref_attr, {})
+                ref_candidates = {vid: w for vid, w in ref_dist.items()
+                                  if vid != 0 and _safe_lookup(vid) not in (None, "EMPTYNULL")}
+
+                sampled_content = None
+                if ref_candidates:
+                    chosen_ref = random.choices(
+                        list(ref_candidates.keys()),
+                        weights=[max(v, 1e-12) for v in ref_candidates.values()],
+                        k=1,
+                    )[0]
+                    ref_name = _safe_lookup(chosen_ref)
+                    if ref_name and isinstance(ref_name, str) and ref_name.startswith("CONCEPT-"):
+                        target_hash = ref_name[len("CONCEPT-"):]
+                        content_node = _find_content_node_by_hash(target_hash)
+                        if content_node:
+                            cnt_av = content_node.av_count or {}
+                            _cpd_m = self.ltm.content_path_depth
+                            # Conditional right prediction for coherence
+                            _m_left = _probabilistic_subset(
+                                dict(cnt_av.get(0, {0: 1})), k=20)
+                            _m_left[0] = 0
+                            _m_cond, _, _ = _categorize_dfs(
+                                {0: _m_left}, self.ltm.content_hierarchy,
+                                stochastic=True)
+                            _m_cond_av = (_m_cond.av_count
+                                          if _m_cond else cnt_av) or cnt_av
+                            _m_right = _probabilistic_subset(
+                                dict(_m_cond_av.get(
+                                    _cpd_m, cnt_av.get(_cpd_m, {0: 1}))), k=20)
+                            _m_right[0] = 0
+                            sampled_content = {0: _m_left, _cpd_m: _m_right}
+                            # Fill higher depth attributes from content node
+                            for _di in range(1, _cpd_m):
+                                sampled_content[_di] = _probabilistic_subset(
+                                    dict(cnt_av.get(_di, {0: 1})), k=15)
+                                sampled_content[_di][0] = 0
+                                sampled_content[_cpd_m + _di] = _probabilistic_subset(
+                                    dict(cnt_av.get(_cpd_m + _di, {0: 1})), k=15)
+                                sampled_content[_cpd_m + _di][0] = 0
+
+                # Fallback: sample from content hierarchy directly
+                if sampled_content is None:
+                    sampled_leaf, sampled_path, _ = _sample_content_node()
+                    sampled_av = sampled_leaf.av_count if sampled_leaf else {}
+                    _cpd_fb = self.ltm.content_path_depth
+                    # Conditional right prediction for coherence
+                    _fb_left = _probabilistic_subset(
+                        dict(sampled_av.get(0, {0: 1})), k=20)
+                    _fb_left[0] = 0
+                    _fb_cond, _, _ = _categorize_dfs(
+                        {0: _fb_left}, self.ltm.content_hierarchy,
+                        stochastic=True)
+                    _fb_cond_av = (_fb_cond.av_count
+                                   if _fb_cond else sampled_av) or sampled_av
+                    _fb_right = _probabilistic_subset(
+                        dict(_fb_cond_av.get(
+                            _cpd_fb, sampled_av.get(_cpd_fb, {0: 1}))), k=20)
+                    _fb_right[0] = 0
+                    sampled_content = {0: _fb_left, _cpd_fb: _fb_right}
+                    for _di in range(1, _cpd_fb):
+                        sampled_content[_di] = _probabilistic_subset(
+                            dict(sampled_av.get(_di, {0: 1})), k=15)
+                        sampled_content[_di][0] = 0
+                        sampled_content[_cpd_fb + _di] = _probabilistic_subset(
+                            dict(sampled_av.get(_cpd_fb + _di, {0: 1})), k=15)
+                        sampled_content[_cpd_fb + _di][0] = 0
+
+                # Build the seed composite node with actual context
+                seed_label, seed_label_path = _build_label_from_path([])
+                seed_node = CompositeParseNode.create_node(
+                    content_instance=sampled_content,
+                    context_instance=seed_ctx_full,
+                    label=seed_label,
+                    categorize_path=[],
+                    position_idx=float(mi),
+                    context_length=self.context_length,
+                    complexity=initial_complexity,
+                )
+                seed_node.label_path = seed_label_path
+
+                # Priority-queue expansion (same as from-scratch)
+                frontier = [(-initial_complexity, id(seed_node), seed_node)]
+                all_mask_nodes = [seed_node]
+                max_mask_expansions = 50
+                expansions = 0
+
+                while frontier and expansions < max_mask_expansions:
+                    neg_c, _, node_to_expand = heapq.heappop(frontier)
+                    if not isinstance(node_to_expand, CompositeParseNode):
+                        continue
+
+                    if debug:
+                        print(f"    expand {expansions}: pos={node_to_expand.position_idx}, "
+                              f"cplx={node_to_expand.complexity}")
+
+                    left_child, right_child = _expand_node(node_to_expand)
+
+                    if left_child is not None:
+                        left_child.position_idx = node_to_expand.position_idx - 0.5 / (2 ** expansions)
+                        left_child.set_parent(node_to_expand)
+                        all_mask_nodes.append(left_child)
+                        if isinstance(left_child, CompositeParseNode):
+                            heapq.heappush(frontier, (-left_child.complexity, id(left_child), left_child))
+
+                    if right_child is not None:
+                        right_child.position_idx = node_to_expand.position_idx + 0.5 / (2 ** expansions)
+                        right_child.set_parent(node_to_expand)
+                        all_mask_nodes.append(right_child)
+                        if isinstance(right_child, CompositeParseNode):
+                            heapq.heappush(frontier, (-right_child.complexity, id(right_child), right_child))
+
+                    expansions += 1
+
+                # Flatten the expanded subtree to words
+                mask_words = _flatten_to_words(seed_node)
+                mask_expansions[mi] = mask_words
+
+                if debug:
+                    print(f"    → expanded [mask] at {mi} to: {mask_words}")
+
+            # Rebuild the full token list, splicing in expanded words
+            result_tokens: List[str] = []
             for i, tok in enumerate(tokens):
-                if tok == "[mask]":
-                    w = _safe_lookup(word_ids[i])
-                    result_tokens.append(w if w and w != "EMPTYNULL" else "?")
+                if tok == "[mask]" and i in mask_expansions:
+                    result_tokens.extend(mask_expansions[i])
+                elif tok == "[mask]":
+                    result_tokens.append("?")
                 else:
                     result_tokens.append(tok)
 
@@ -2440,25 +3033,46 @@ class WEBSTER(object):
                 print(f"Sampled initial content leaf: {leaf_hash}")
                 print(f"  Path: {sampled_path}")
 
-            label = _build_label_from_path(sampled_path)
+            label, label_path = _build_label_from_path(sampled_path)
 
-            # Use context hierarchy to predict appropriate starting complexity
-            seed_ctx = _make_empty_ctx(1)  # start with minimal complexity hint
-            initial_complexity = _predict_complexity(seed_ctx)
-            # ensure we start with at least complexity 2 so expansion happens
-            initial_complexity = max(initial_complexity, 2)
+            # Use context hierarchy to predict high starting complexity
+            # (from-scratch generation → we want sentence-level seeds)
+            seed_ctx = _make_empty_ctx(1)
+            initial_complexity = _predict_complexity(seed_ctx, use_max=True)
+            # ensure we start with at least complexity 3 for meaningful expansion
+            initial_complexity = max(initial_complexity, 3)
 
             if debug:
                 print(f"  Initial complexity: {initial_complexity}")
 
             # Build seed content from sampled leaf's av_count
+            # Use conditional right prediction for coherent pairing:
+            #   1. Sample left from the leaf.
+            #   2. Categorize {0: left} to find the right that co-occurs.
+            _cpd_gen = self.ltm.content_path_depth
             sampled_av = sampled_leaf.av_count if sampled_leaf else {}
-            sampled_content = {
-                0: _probabilistic_subset(dict(sampled_av.get(0, {0: 1})), k=20),
-                1: _probabilistic_subset(dict(sampled_av.get(1, {0: 1})), k=20),
-            }
-            sampled_content[0][0] = 0
-            sampled_content[1][0] = 0
+            sampled_left = _probabilistic_subset(
+                dict(sampled_av.get(0, {0: 1})), k=20
+            )
+            sampled_left[0] = 0
+            cond_leaf_seed, _, _ = _categorize_dfs(
+                {0: sampled_left}, self.ltm.content_hierarchy,
+                stochastic=True,
+            )
+            cond_av_seed = (cond_leaf_seed.av_count
+                            if cond_leaf_seed else sampled_av) or sampled_av
+            sampled_right = _probabilistic_subset(
+                dict(cond_av_seed.get(_cpd_gen, sampled_av.get(_cpd_gen, {0: 1}))), k=20
+            )
+            sampled_right[0] = 0
+            sampled_content = {0: sampled_left, _cpd_gen: sampled_right}
+            for _di in range(1, _cpd_gen):
+                sampled_content[_di] = _probabilistic_subset(
+                    dict(sampled_av.get(_di, {0: 1})), k=15)
+                sampled_content[_di][0] = 0
+                sampled_content[_cpd_gen + _di] = _probabilistic_subset(
+                    dict(sampled_av.get(_cpd_gen + _di, {0: 1})), k=15)
+                sampled_content[_cpd_gen + _di][0] = 0
 
             ctx_inst = _make_empty_ctx(initial_complexity)
 
@@ -2471,6 +3085,7 @@ class WEBSTER(object):
                 context_length=self.context_length,
                 complexity=initial_complexity,
             )
+            initial_node.label_path = label_path
             initial_node.set_parent(global_root)
 
             # 2. Expand recursively via a priority queue (highest complexity first)
@@ -2539,6 +3154,7 @@ class WEBSTER(object):
         os.makedirs(dirpath, exist_ok=True)
         meta = {
             "context_length": self.context_length,
+            "content_length": self.content_length,
             "threshold": self.threshold,
         }
         meta_path = os.path.join(dirpath, "webster_meta.json")
@@ -2565,5 +3181,6 @@ class WEBSTER(object):
         w = WEBSTER.__new__(WEBSTER)
         w.ltm = ltm
         w.context_length = meta.get("context_length", 3)
+        w.content_length = meta.get("content_length", 3)
         w.threshold = meta.get("threshold", -7)
         return w

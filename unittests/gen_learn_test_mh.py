@@ -17,6 +17,7 @@ if os.path.exists(OUT_DIR):
 
 # Creating and printing toy sentences
 CONTEXT_LENGTH = 3
+CONTENT_LENGTH = 10
 
 num_sentences = 100
 document = []
@@ -25,13 +26,20 @@ for _ in range(num_sentences):
     sentence = generate("S", TEST_GRAMMAR1)
     document.append(sentence)
 
+THRESHOLD = -5.0
+
 # Setting up the multi-hierarchy parser (WEBSTER)
-webster = WEBSTER(TEST_CORPUS1, context_length=CONTEXT_LENGTH, threshold=-5.5)
+webster = WEBSTER(
+    TEST_CORPUS1,
+    context_length=CONTEXT_LENGTH,
+    content_length=CONTENT_LENGTH,
+    threshold=THRESHOLD,
+    alpha=1e-4
+)
 
 train_size = 0.90
 
 PRIMITIVES_FIRST = 0
-THRESHOLD = -5.5
 
 train_documents = document[:int(len(document) * train_size)]
 test_documents = document[int(len(document) * train_size):]
@@ -93,14 +101,19 @@ for i, fake_sentence in enumerate(fake_sentences):
 
 # Generating complete sentences from scratch
 print("\n--- FROM-SCRATCH GENERATION ---")
-for i in range(10):
-    sentence, parse = webster.generate_sentence(debug=True)
-    print(f"Generated sentence [{i}]: \"{sentence}\"")
-    if parse and hasattr(parse, 'visualize'):
-        parse.visualize(f"{OUT_DIR}/generated_trees/generated_parse_tree{i}")
+gen_results_path = f"{OUT_DIR}/generated_sentences.txt"
+os.makedirs(os.path.dirname(gen_results_path), exist_ok=True)
+with open(gen_results_path, "w") as gen_f:
+    for i in range(10):
+        sentence, parse = webster.generate_sentence(debug=True)
+        print(f"Generated sentence [{i}]: \"{sentence}\"")
+        gen_f.write(f"[{i}] {sentence}\n")
+        if parse and hasattr(parse, 'visualize'):
+            parse.visualize(f"{OUT_DIR}/generated_trees/generated_parse_tree{i}")
+print(f"Saved generated sentences to \"{gen_results_path}\"")
 
-# Masked completion
-print("\n--- MASKED COMPLETION ---")
+# Masked completion (random single-token mask)
+print("\n--- MASKED COMPLETION (single token) ---")
 for i in range(min(5, len(test_documents))):
     tokens = test_documents[i].split()
     if len(tokens) > 2:
@@ -110,6 +123,29 @@ for i in range(min(5, len(test_documents))):
     print(f"  Masked input: \"{masked}\"")
     completed, parse = webster.generate_sentence(masked_sentence=masked, debug=True)
     print(f"  Completed:    \"{completed}\"\n")
+
+# Masked prediction: keep first half, replace second half with a single [mask]
+print("\n--- MASKED PREDICTION (expand second half) ---")
+mask_pred_path = f"{OUT_DIR}/masked_prediction_results.txt"
+os.makedirs(os.path.dirname(mask_pred_path), exist_ok=True)
+with open(mask_pred_path, "w") as mask_f:
+    for i in range(min(10, len(test_documents))):
+        tokens = test_documents[i].split()
+        if len(tokens) < 2:
+            continue
+        split_point = len(tokens) // 2
+        prefix = tokens[:split_point]
+        masked = ' '.join(prefix + ['[mask]'])
+        print(f"  Original:  \"{test_documents[i]}\"")
+        print(f"  Masked:    \"{masked}\"")
+        mask_f.write(f"[{i}] original: {test_documents[i]}\n")
+        mask_f.write(f"    masked:   {masked}\n")
+        completed, parse = webster.generate_sentence(masked_sentence=masked, debug=True)
+        print(f"  Completed: \"{completed}\"\n")
+        mask_f.write(f"    completed: {completed}\n\n")
+        if parse and hasattr(parse, 'visualize'):
+            parse.visualize(f"{OUT_DIR}/masked_pred_trees/masked_pred_tree{i}")
+print(f"Saved masked prediction results to \"{mask_pred_path}\"")
 
 SAVE_DIR = f"{OUT_DIR}/final_ltm_data"
 webster.save_state(SAVE_DIR)
