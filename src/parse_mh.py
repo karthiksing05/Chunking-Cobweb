@@ -223,11 +223,15 @@ def _score_along_path(
 # ---------------------------------------------------------------------------
 
 def _build_label_path_from_ctx(path_strs: list, value_to_id: dict,
-                               content_path_depth: int,
-                               leaf_override: int = None) -> list:
+                               content_path_depth: int) -> list:
     """
     Build a multi-depth label_path from a context-hierarchy categorization
     path.
+
+    Every entry is a context-hierarchy concept vocab ID — **never** a raw
+    word ID.  Words are stored separately in the context hierarchy's
+    content-ref attribute (``2*ctx_len + 1``); the content hierarchy
+    organises purely by structural concept paths.
 
     Parameters
     ----------
@@ -238,9 +242,6 @@ def _build_label_path_from_ctx(path_strs: list, value_to_id: dict,
         Vocabulary mapping (str → int).
     content_path_depth : int
         How many depth levels to include.
-    leaf_override : int or None
-        If given, forces the depth-0 entry to this value (used for
-        primitives where depth-0 is the word_id, not a concept).
 
     Returns
     -------
@@ -253,18 +254,10 @@ def _build_label_path_from_ctx(path_strs: list, value_to_id: dict,
     rev = list(reversed(path_strs))
     cpd = content_path_depth
 
-    if leaf_override is not None:
-        # Primitive: depth-0 is word_id, remaining slots from context path
-        lp = [leaf_override]
-        for s in rev[:cpd - 1]:
-            v = value_to_id.get(s)
-            lp.append(v if v is not None else 0)
-    else:
-        # Composite: depth-0 is context leaf concept, etc.
-        lp = []
-        for s in rev[:cpd]:
-            v = value_to_id.get(s)
-            lp.append(v if v is not None else 0)
+    lp = []
+    for s in rev[:cpd]:
+        v = value_to_id.get(s)
+        lp.append(v if v is not None else 0)
 
     # Pad to exactly content_path_depth
     while len(lp) < cpd:
@@ -318,6 +311,9 @@ class PrimitiveParseNode(object):
         self.complexity: int = 1
         self.score_data: dict = {}
         self.stable: bool = False
+
+    def __lt__(self, other):
+        return id(self) < id(other)
 
     # ------------------------------------------------------------------
     @staticmethod
@@ -393,6 +389,9 @@ class CompositeParseNode(object):
 
         self.concept_label = None  # vocab id of the concept
         self.frozen: bool = False  # whether this chunk has been "accepted"
+
+    def __lt__(self, other):
+        return id(self) < id(other)
 
     # ------------------------------------------------------------------
     @staticmethod
@@ -610,7 +609,13 @@ class FiniteParseTree(object):
             return []
         items = sorted(ctx.items(), key=lambda kv: (-kv[1], kv[0]))
         if not draw_zeros:
-            items = [(k, v) for k, v in items if k != 0]
+            non_zero = [(k, v) for k, v in items if k != 0]
+            if non_zero:
+                items = non_zero
+            else:
+                # All entries are EMPTYNULL (key 0) — show it explicitly
+                # so the fractional weight is visible.
+                items = [(k, v) for k, v in items]
         if len(items) > max_size:
             items = items[:max_size]
         return [{"key": self._safe_lookup(k), "val": float(v)} for k, v in items]
@@ -675,7 +680,7 @@ class FiniteParseTree(object):
             # Build label_path via helper
             label_path = _build_label_path_from_ctx(
                 path_strs, self.value_to_id,
-                self.ltm.content_path_depth, leaf_override=wid
+                self.ltm.content_path_depth
             )
 
             node = PrimitiveParseNode.create_node(ctx_inst, label, position_idx=i, word_id=wid)
@@ -1097,8 +1102,13 @@ class FiniteParseTree(object):
                     "children": [self._draw_node_to_dict(ch[1], draw_zeros) for ch in node.children],
                 }
             _cpd = self.ltm.content_path_depth if self.ltm else 1
-            left_list = self.ctx_list(node.content_instance.get(0, {}) if node.content_instance else {}, draw_zeros)
-            right_list = self.ctx_list(node.content_instance.get(_cpd, {}) if node.content_instance else {}, draw_zeros)
+            left_list = []
+            right_list = []
+            if node.content_instance:
+                for i in range(_cpd):
+                    left_list.append(self.ctx_list(node.content_instance.get(i, {}), draw_zeros))
+                for i in range(_cpd):
+                    right_list.append(self.ctx_list(node.content_instance.get(_cpd + i, {}), draw_zeros))
             before_list = [self.ctx_list(d or {}, draw_zeros) for d in (node.context_before or [])]
             after_list = [self.ctx_list(d or {}, draw_zeros) for d in (node.context_after or [])]
             # context instance attributes for composites
@@ -1165,6 +1175,7 @@ class FiniteParseTree(object):
             [f"CtxBefore{i}" for i in range(self.context_length)]
             + [f"CtxAfter{i}" for i in range(self.context_length)]
             + ["Complexity"]
+            + ["ContentRef"]
         )
         return f"""<!doctype html>
 <html>
@@ -1269,7 +1280,7 @@ function nodeHTML(d){{
   // content instance
   let contentHTML="";
   const lH=Array.isArray(d.left)&&d.left.length>0, rH=Array.isArray(d.right)&&d.right.length>0;
-  if(rH) contentHTML=`<div class="section-title">Content Instance</div>${{ctxTable(d.left,"Left")}}${{ctxTable(d.right,"Right")}}`;
+  if(rH) contentHTML=`<div class="section-title">Content Instance</div>${{ctxMulti(d.left,"Left")}}${{ctxMulti(d.right,"Right")}}`;
   else if(lH) contentHTML=`<div class="section-title">Content Instance</div>${{ctxTable(d.left,"Word")}}`;
   else contentHTML=``;
   // context instance
@@ -1332,6 +1343,7 @@ function nodeHTML(d){{
             [f"CtxBefore{i}" for i in range(self.context_length)]
             + [f"CtxAfter{i}" for i in range(self.context_length)]
             + ["Complexity"]
+            + ["ContentRef"]
         )
         return f"""<!doctype html>
 <html>
@@ -1450,10 +1462,15 @@ function nodeHTML(d){{
         const rows=ctx.map(kv=>`<tr><td>${{kv.key}}</td><td>${{kv.val.toFixed(2)}}</td></tr>`).join("");
         return `<div class="subtable"><b>${{title}}</b><table><tbody>${{rows}}</tbody></table></div>`;
     }};
+    const ctxMulti=(arr,base)=>{{
+        if(!arr||arr.length===0) return `<div class="subtable"><i>${{base}}: empty</i></div>`;
+        if(Array.isArray(arr)&&arr.length>0&&arr[0]&&typeof arr[0].key!=='undefined') return ctxTable(arr,base);
+        let out=""; arr.forEach((c,i)=>{{ out+=ctxTable(c,`${{base}}${{i}}`); }}); return out;
+    }};
     // content instance
     let contentHTML="";
     const lH=Array.isArray(d.left)&&d.left.length>0,rH=Array.isArray(d.right)&&d.right.length>0;
-    if(rH) contentHTML=`<div class="section-title">Content Instance</div>${{ctxTable(d.left,"Left")}}${{ctxTable(d.right,"Right")}}`;
+    if(rH) contentHTML=`<div class="section-title">Content Instance</div>${{ctxMulti(d.left,"Left")}}${{ctxMulti(d.right,"Right")}}`;
     else if(lH) contentHTML=`<div class="section-title">Content Instance</div>${{ctxTable(d.left,"Word")}}`;
     else contentHTML=``;
     // context instance
@@ -1699,16 +1716,6 @@ loadPairs();
 
 
 # ---------------------------------------------------------------------------
-# RollingParseTree (placeholder for streaming)
-# ---------------------------------------------------------------------------
-
-@DeprecationWarning
-class RollingParseTree(object):
-    """Placeholder for future streaming / rolling-window parse tree."""
-    pass
-
-
-# ---------------------------------------------------------------------------
 # LongTermMemory
 # ---------------------------------------------------------------------------
 
@@ -1740,6 +1747,17 @@ class LongTermMemory(object):
 
         self.context_length = context_length
         self.content_path_depth = content_path_depth
+
+        # Generation-time mapping: context-node-id → list of (sentence_id, content_instance).
+        # Populated during add_parse_tree Step 5 so that generation can
+        # look up the EXACT content instance for any composite, bypassing
+        # potential content-hierarchy merging issues.
+        # Stored as lists of (sent_id, ci_dict) to handle cases where
+        # multiple composites from different sentences share an ifit leaf.
+        # During generation, the sentence_id ensures consistency: all
+        # sub-composites are resolved from the SAME sentence's entries.
+        self.gen_content_map: Dict[str, list] = {}
+        self._gen_sentence_counter: int = 0
 
         # register root concepts of both hierarchies
         self._register_concept(self.content_hierarchy.root)
@@ -1819,12 +1837,12 @@ class LongTermMemory(object):
 
     # ---- learning (ifit + vocab management) -----------------------------
 
-    def _ifit_and_update_vocab(self, instance: dict, tree: CobwebDiscreteTree, debug=False) -> list:
+    def _ifit_and_update_vocab(self, instance: dict, tree: CobwebDiscreteTree, debug=False):
         """
         Call ifit on a hierarchy, process the resulting actions (vocab updates
-        + splits).  Returns the list of raw actions.
+        + splits).  Returns ``(leaf_node, rewrite_rules)``.
         """
-        _, actions = tree.ifit(instance, debug=True)
+        leaf, actions = tree.ifit(instance, debug=True)
         actions = [json.loads(x) for x in actions]
 
         rewrite_rules = []
@@ -1836,7 +1854,7 @@ class LongTermMemory(object):
             elif act["action"] == "SPLIT":
                 rewrite_rules.append((act["deleted"], act["parent"]))
 
-        return actions, rewrite_rules
+        return leaf, rewrite_rules
 
     def _apply_rewrite_rules(self, tree: CobwebDiscreteTree, rewrite_rules: list):
         """
@@ -1899,20 +1917,43 @@ class LongTermMemory(object):
              Apply any resulting content-hierarchy splits to the context
              hierarchy (for content-ref attribute consistency).
         """
-        # -- Step 0: collect raw instances --------------------------------
-        _, context_insts_parsed = parse_tree.get_parsed_instances()
+        # -- Step 0: collect nodes with their context instances -----------
+        #    We iterate over nodes (not a flat list) so we can track which
+        #    ifit leaf each composite gets — essential for gen_content_map.
+        node_ctx_pairs: list = []   # [(node_or_None, ctx_instance), ...]
+
+        def _collect_nodes_with_ctx(node):
+            if isinstance(node, PrimitiveParseNode):
+                node_ctx_pairs.append((node, node.get_context_instance()))
+            elif isinstance(node, CompositeParseNode) and not node.is_global_root:
+                node_ctx_pairs.append((node, node.get_context_instance()))
+            for _, ch in getattr(node, "children", []):
+                _collect_nodes_with_ctx(ch)
+
+        for _, ch in parse_tree.global_root_node.children:
+            _collect_nodes_with_ctx(ch)
 
         if debug:
             print(f"Adding parse tree for window: \"{parse_tree.window}\"")
-            print(f"  context instances to fit: {len(context_insts_parsed)}")
+            print(f"  context instances to fit: {len(node_ctx_pairs)}")
 
         # -- Step 1: fit context instances first --------------------------
+        #    For each composite, save the ifit leaf's node ID so that
+        #    Step 5 can build gen_content_map with the EXACT leaf that
+        #    Cobweb placed this instance into (not a stale categorize result).
         ctx_split_rules: list = []
-        for xi in context_insts_parsed:
-            _, rewrites = self._ifit_and_update_vocab(xi, self.context_hierarchy, debug=debug)
+        for source_node, xi in node_ctx_pairs:
+            leaf, rewrites = self._ifit_and_update_vocab(xi, self.context_hierarchy, debug=debug)
             ctx_split_rules.extend(rewrites)
+            # Save ifit leaf nid on composite nodes for gen_content_map
+            if isinstance(source_node, CompositeParseNode) and not source_node.is_global_root:
+                if leaf is not None:
+                    leaf_hash = str(leaf.concept_hash()) if hasattr(leaf, 'concept_hash') else str(leaf)
+                    source_node._ifit_ctx_leaf_nid = leaf_hash.rsplit('_', 1)[-1]
+                else:
+                    source_node._ifit_ctx_leaf_nid = None
 
-        # -- Step 1b: propagate context-hierarchy splits to content hierarchy
+        # -- Step 1b: propagate context-hierarchy splits
         if ctx_split_rules:
             if debug:
                 print(f"  propagating {len(ctx_split_rules)} context-hierarchy split(s) to content hierarchy")
@@ -1931,7 +1972,7 @@ class LongTermMemory(object):
                 _p_leaf, _p_path, _ = _categorize_dfs(_p_ctx, self.context_hierarchy)
                 node.label_path = _build_label_path_from_ctx(
                     _p_path, self.value_to_id,
-                    self.content_path_depth, leaf_override=node.word_id
+                    self.content_path_depth
                 )
                 if debug:
                     print(f"  refreshed primitive label pos={node.position_idx}")
@@ -1946,6 +1987,14 @@ class LongTermMemory(object):
                 new_concept_label = self.value_to_id.get(concept_label_str)
                 node.concept_label = new_concept_label
                 node.label = {new_concept_label: 1} if new_concept_label is not None else {0: 1}
+
+                # Save BOTH categorize nid (matches path_vids in content instances)
+                # and ifit nid (guaranteed placement).  gen_content_map is keyed
+                # by categorize nid (for path_vid alignment).  The ifit nid is
+                # saved as fallback.
+                node._cat_ctx_leaf_nid = str(ctx_hash).rsplit('_', 1)[-1] if leaf else None
+                # the returned leaf; categorize may return a different leaf if
+                # the tree restructured.
 
                 # Refresh label_path from updated context hierarchy
                 node.label_path = _build_label_path_from_ctx(
@@ -1967,11 +2016,14 @@ class LongTermMemory(object):
             _refresh_labels(ch)
 
         # -- Step 3: collect content instances with refreshed labels -------
-        content_insts: list = []
-        # parsed composites
+        # We track (composite_node, content_instance) pairs so that
+        # Step 5 can link each ifit result back to the composite.
+        composite_ci_pairs: list = []   # [(CompositeParseNode, dict), ...]
+        orphan_cis: list = []           # unparsed candidate pairs
+
         def _collect_content(node):
             if isinstance(node, CompositeParseNode) and not node.is_global_root:
-                content_insts.append(node.get_content_instance())
+                composite_ci_pairs.append((node, node.get_content_instance()))
             for _, ch in getattr(node, "children", []):
                 _collect_content(ch)
 
@@ -1984,17 +2036,36 @@ class LongTermMemory(object):
             left = parse_tree._find_root_child_by_index(p["left_word_index"])
             right = parse_tree._find_root_child_by_index(p["right_word_index"])
             if left and right:
-                content_insts.append(
+                orphan_cis.append(
                     CompositeParseNode.create_content_instance(left, right, self.content_path_depth)
                 )
 
         if debug:
-            print(f"  content instances to fit: {len(content_insts)}")
+            print(f"  content instances to fit: {len(composite_ci_pairs) + len(orphan_cis)}")
 
         # -- Step 4: fit content instances --------------------------------
+        #    Track ifit leaf for each composite so Step 5 can link them.
         cnt_split_rules: list = []
-        for ci in content_insts:
-            _, rewrites = self._ifit_and_update_vocab(ci, self.content_hierarchy, debug=debug)
+        composite_cnt_leaves = {}  # id(composite_node) → content_hierarchy_leaf
+
+        for comp_node, ci in composite_ci_pairs:
+            leaf, action_strs = self.content_hierarchy.ifit(ci, debug=True)
+            actions = [json.loads(x) for x in action_strs]
+            rewrite_rules = []
+            for act in actions:
+                if act["action"] == "NEW":
+                    self.add_to_vocab(f"CONCEPT-{act['node']}")
+                elif act["action"] == "MERGE":
+                    self.add_to_vocab(f"CONCEPT-{act['new_node']}")
+                elif act["action"] == "SPLIT":
+                    rewrite_rules.append((act["deleted"], act["parent"]))
+            cnt_split_rules.extend(rewrite_rules)
+            if leaf is not None:
+                composite_cnt_leaves[id(comp_node)] = leaf
+
+        # Fit orphan content instances (no composite node to link back to)
+        for ci in orphan_cis:
+            _leaf, rewrites = self._ifit_and_update_vocab(ci, self.content_hierarchy, debug=debug)
             cnt_split_rules.extend(rewrites)
 
         # Propagate content-hierarchy splits to context hierarchy
@@ -2004,17 +2075,64 @@ class LongTermMemory(object):
                 print(f"  propagating {len(cnt_split_rules)} content-hierarchy split(s) to context hierarchy")
             self._apply_rewrite_rules(self.context_hierarchy, cnt_split_rules)
 
+        # -- Step 5: build gen_content_map with direct child references -----
+        #
+        # For each composite, store its content_instance AND direct
+        # references to its left/right children (either word_id for
+        # primitives or child ifit_nid for composites).  This forms a
+        # self-contained expansion tree that doesn't rely on path_vid →
+        # context-node lookups (which break when the hierarchy restructures).
+        #
+        # Each entry: (sent_id, content_instance, left_ref, right_ref,
+        #              complexity, source_ifit_nid)
+        # where left/right_ref = ('word', word_id) | ('comp', ifit_nid)
+        # source_ifit_nid identifies the node that created this entry,
+        # distinguishing primary entries (key == source_ifit_nid) from
+        # aliases (key == cat_nid != source_ifit_nid).
+        _ref_attr_idx = 2 * self.context_length + 1
+        sent_id = self._gen_sentence_counter
+        self._gen_sentence_counter += 1
+
+        for comp_node, _ in composite_ci_pairs:
+            ifit_nid = getattr(comp_node, '_ifit_ctx_leaf_nid', None)
+            cat_nid = getattr(comp_node, '_cat_ctx_leaf_nid', None)
+            if not ifit_nid and not cat_nid:
+                continue
+
+            # Determine left/right child references
+            children_sorted = list(comp_node.children)
+            left_ref, right_ref = None, None
+            if len(children_sorted) >= 2:
+                left_child = children_sorted[0][1]
+                right_child = children_sorted[1][1]
+                if isinstance(left_child, PrimitiveParseNode):
+                    left_ref = ('word', left_child.word_id)
+                elif isinstance(left_child, CompositeParseNode):
+                    left_ref = ('comp', getattr(left_child, '_ifit_ctx_leaf_nid', None))
+                if isinstance(right_child, PrimitiveParseNode):
+                    right_ref = ('word', right_child.word_id)
+                elif isinstance(right_child, CompositeParseNode):
+                    right_ref = ('comp', getattr(right_child, '_ifit_ctx_leaf_nid', None))
+
+            source_nid = ifit_nid or cat_nid
+            entry = (sent_id, dict(comp_node.content_instance),
+                     left_ref, right_ref, comp_node.complexity, source_nid)
+
+            # Store under BOTH ifit nid and categorize nid for maximum reachability
+            nids_to_store = set()
+            if ifit_nid:
+                nids_to_store.add(ifit_nid)
+            if cat_nid:
+                nids_to_store.add(cat_nid)
+            for nid in nids_to_store:
+                if nid not in self.gen_content_map:
+                    self.gen_content_map[nid] = []
+                self.gen_content_map[nid].append(entry)
+
+            if debug:
+                print(f"  mapped nids={nids_to_store} sent={sent_id} L={left_ref} R={right_ref}")
+
         return True
-
-    # ---- update vocabulary after external changes -----------------------
-
-    def update_vocabulary(self, actions: list):
-        """Process a list of Cobweb actions to update vocabulary accordingly."""
-        for act in actions:
-            if act.get("action") in ("NEW", "MERGE"):
-                node_hash = act.get("node") or act.get("new_node")
-                if node_hash:
-                    self.add_to_vocab(f"CONCEPT-{node_hash}")
 
     # ---- visualization --------------------------------------------------
 
@@ -2035,7 +2153,20 @@ class LongTermMemory(object):
             "id_count": self.id_count,
             "id_to_value": self.id_to_value,
             "value_to_id": self.value_to_id,
+            "gen_sentence_counter": self._gen_sentence_counter,
         }
+
+        # gen_content_map — convert tuple keys/values to JSON-safe lists
+        gcm_path = os.path.join(dirpath, "gen_content_map.json")
+        gcm_serializable = {}
+        for nid, entries in self.gen_content_map.items():
+            gcm_serializable[nid] = [
+                [e[0], e[1], list(e[2]) if e[2] else None,
+                 list(e[3]) if e[3] else None, e[4], e[5]]
+                for e in entries
+            ]
+        with open(gcm_path, "w", encoding="utf-8") as f:
+            json.dump(gcm_serializable, f, ensure_ascii=False)
         meta_path = os.path.join(dirpath, "meta.json")
         with open(meta_path, "w", encoding="utf-8") as f:
             json.dump(meta, f, ensure_ascii=False, indent=2)
@@ -2072,6 +2203,20 @@ class LongTermMemory(object):
         ltm.id_to_value = meta.get("id_to_value", ltm.id_to_value)
         ltm.value_to_id = meta.get("value_to_id", ltm.value_to_id)
         ltm.id_count = meta.get("id_count", ltm.id_count)
+        ltm._gen_sentence_counter = meta.get("gen_sentence_counter", 0)
+
+        # load gen_content_map
+        gcm_path = os.path.join(dirpath, "gen_content_map.json")
+        if os.path.exists(gcm_path):
+            with open(gcm_path, "r", encoding="utf-8") as f:
+                gcm_raw = json.load(f)
+            ltm.gen_content_map = {}
+            for nid, entries in gcm_raw.items():
+                ltm.gen_content_map[nid] = [
+                    (e[0], e[1], tuple(e[2]) if e[2] else None,
+                     tuple(e[3]) if e[3] else None, e[4], e[5])
+                    for e in entries
+                ]
 
         # load hierarchies
         content_path = os.path.join(dirpath, "content_tree.json")
@@ -2263,883 +2408,815 @@ class WEBSTER(object):
         """
         Generate or complete a sentence.
 
-        **Masked completion** (``"the [mask] dog [mask] the park"``):
-            1. Tokenize, build primitives for known words (with context).
-            2. For each ``[mask]``, use the surrounding context to predict
-               the most likely word from the context hierarchy.
+        **Core algorithm** (recursive, applied at every level):
+            1. Categorize a context instance in the context hierarchy → ctx_leaf.
+            2. Read ctx_leaf's content-ref.
+               - Word → done (primitive).
+               - CONCEPT-<hash> → find that node in the content hierarchy.
+            3. Call ``content_node.get_basic(1000, 1000)`` → basic-level node.
+               **ASSERT** result is NOT the content hierarchy root.
+            4. Sample a leaf from the basic-level node (weighted by count).
+            5. The sampled leaf's av_count encodes left/right path info
+               (vocab IDs of context-hierarchy concept hashes at each depth).
+               Build a CompositeParseNode whose content_instance carries
+               that path info.
+            6. For each side of each composite in a priority queue:
+               - Extract path_vids from content_instance.
+               - Look up the deepest matching context-hierarchy node.
+               - Read THAT node's content-ref.
+               - Word → PrimitiveParseNode.
+               - CONCEPT → find in content hierarchy → get_basic() →
+                 sample leaf → CompositeParseNode (repeat).
 
-        **From-scratch generation** (empty string):
-            1. Sample a high-level content node (no context → high complexity).
-            2. Recursively expand composites via the content hierarchy until
-               every leaf is a primitive (complexity 1).
-            3. At each expansion step, the content hierarchy's leaf node
-               determines the left and right children's content; the context
-               hierarchy determines whether complexity is > 1 (composite) or
-               == 1 (primitive / freeze).
+        **From-scratch**: ``get_basic()`` on a leaf with no sibling
+        competition returns the leaf itself, so we deterministically
+        reproduce a training sentence.
 
         Returns ``[generated_text, FiniteParseTree]``.
         """
 
-        # ---- shared helpers ------------------------------------------------
+        _cpd = self.ltm.content_path_depth
+        _cl  = self.context_length
+        _cplx_vid  = self.ltm.value_to_id.get("COMPLEXITY", 0)
+        _ref_attr  = 2 * _cl + 1          # content-ref attribute index
+        _cplx_attr = 2 * _cl              # complexity attribute index
 
-        def _probabilistic_subset(d: dict, k: int = 20) -> dict:
-            """Sample *k* keys from *d* weighted by value."""
-            if not d:
-                return {}
-            keys = list(d.keys())
-            weights = [max(v, 1e-12) for v in d.values()]
-            selected = random.choices(keys, weights=weights, k=k)
-            return {sk: d[sk] for sk in selected}
+        # ── tiny helpers ──────────────────────────────────────────────────
 
-        def _safe_lookup(idx):
-            if isinstance(idx, str):
-                return idx
+        def _name(vid):
+            """Vocab-ID → string (or pass-through if already a string)."""
+            if isinstance(vid, str):
+                return vid
             try:
-                if idx is not None and 0 <= idx < len(self.id_to_value):
-                    return self.id_to_value[idx]
+                if vid is not None and 0 <= vid < len(self.id_to_value):
+                    return self.id_to_value[vid]
             except Exception:
                 pass
             return None
 
-        def _is_word_token(vid: int) -> bool:
-            """True when *vid* is a genuine word (not EMPTYNULL, not CONCEPT-…)."""
-            if vid is None or vid == 0:
+        def _is_word(vid) -> bool:
+            """True when *vid* names a real word (not EMPTYNULL / CONCEPT)."""
+            if not vid:
                 return False
-            name = _safe_lookup(vid)
-            if name is None or name == "EMPTYNULL":
+            n = _name(vid)
+            if n is None or n == "EMPTYNULL":
                 return False
-            if isinstance(name, str) and name.startswith("CONCEPT-"):
-                return False
-            return True
+            return not (isinstance(n, str) and n.startswith("CONCEPT-"))
 
-        def _best_word_from_distribution(dist: dict) -> int:
-            """Weighted random pick of the best word id from a value distribution."""
-            candidates = {vid: w for vid, w in dist.items() if _is_word_token(vid)}
-            if not candidates:
-                return 0
-            return random.choices(
-                list(candidates.keys()),
-                weights=[max(v, 1e-12) for v in candidates.values()],
-                k=1,
-            )[0]
+        # ── hash → node indices (built once) ─────────────────────────────
 
-        def _traverse_to_leaf(label_dict: dict) -> Optional[CobwebDiscreteNode]:
-            """Follow a weighted label path through the content hierarchy.
+        def _index(root):
+            out = {}
+            def walk(n):
+                out[str(n.concept_hash())] = n
+                for c in n.children:
+                    walk(c)
+            walk(root)
+            return out
 
-            Uses top-down child-matching: at each node, pick the child whose
-            CONCEPT hash appears in *label_dict* with the highest count.
-            This handles accumulated labels (mixed paths) correctly because
-            at each branching point it follows the most likely path.
-            """
-            curr = self.ltm.content_hierarchy.root
-            while curr.children:
-                best_child = None
-                best_weight = -1
-                for child in curr.children:
-                    try:
-                        child_hash_str = f"CONCEPT-{child.concept_hash()}"
-                        child_vid = self.ltm.value_to_id.get(child_hash_str)
-                        if child_vid is not None and child_vid in label_dict:
-                            w = label_dict[child_vid]
-                            if w > best_weight:
-                                best_weight = w
-                                best_child = child
-                    except Exception:
-                        continue
-                if best_child is None:
-                    break
-                curr = best_child
-            return curr
+        ctx_idx = _index(self.ltm.context_hierarchy.root)
+        cnt_idx = _index(self.ltm.content_hierarchy.root)
 
-        def _traverse_context_leaf(label_dict: dict) -> Optional[CobwebDiscreteNode]:
-            """Follow a weighted label path through the **context** hierarchy.
+        # node-ID → node index for fallback when full concept hashes are stale
+        # (concept hash = "{av_hash}_{node_id}"; node_id is stable across ifits)
+        ctx_nid = {}
+        for h, nd in ctx_idx.items():
+            nid = h.rsplit('_', 1)[-1]
+            ctx_nid[nid] = nd
+        cnt_nid = {}
+        for h, nd in cnt_idx.items():
+            nid = h.rsplit('_', 1)[-1]
+            cnt_nid[nid] = nd
 
-            Uses top-down child-matching: at each node, pick the child whose
-            CONCEPT hash appears in *label_dict* with the highest count.
-            This correctly handles accumulated labels from the content
-            hierarchy because at each branching point it follows the most
-            likely branch rather than trying to match concepts in arbitrary
-            weight order.
-            """
-            curr = self.ltm.context_hierarchy.root
-            while curr.children:
-                best_child = None
-                best_weight = -1
-                for child in curr.children:
-                    try:
-                        child_hash_str = f"CONCEPT-{child.concept_hash()}"
-                        child_vid = self.ltm.value_to_id.get(child_hash_str)
-                        if child_vid is not None and child_vid in label_dict:
-                            w = label_dict[child_vid]
-                            if w > best_weight:
-                                best_weight = w
-                                best_child = child
-                    except Exception:
-                        continue
-                if best_child is None:
-                    break
-                curr = best_child
-            return curr
+        # gen_content_map: context-node-id → exact content instance
+        _gen_map = self.ltm.gen_content_map
 
-        def _word_from_context_leaf(ctx_node: CobwebDiscreteNode) -> int:
-            """Extract the most likely word_id from a context hierarchy node
-            by reading its word-identity attribute (2*ctx_len+1)."""
-            word_attr = 2 * self.context_length + 1
-            av = ctx_node.av_count if ctx_node else {}
-            word_dist = av.get(word_attr, {})
-            candidates = {vid: w for vid, w in word_dist.items() if _is_word_token(vid)}
-            if not candidates:
-                return 0
-            return random.choices(
-                list(candidates.keys()),
-                weights=[max(v, 1e-12) for v in candidates.values()],
-                k=1,
-            )[0]
+        # ── path → context-hierarchy node ────────────────────────────────
 
-        def _content_ref_from_leaf(ctx_node: CobwebDiscreteNode) -> int:
-            """Extract the most likely content-ref vocab id from a context
-            hierarchy node's content-ref attribute (2*ctx_len+1).
-            Returns a word vocab id for primitives or a CONCEPT-… vocab id
-            for composites, or 0 if nothing useful is found."""
-            ref_attr = 2 * self.context_length + 1
-            av = ctx_node.av_count if ctx_node else {}
-            ref_dist = av.get(ref_attr, {})
-            candidates = {}
-            for vid, w in ref_dist.items():
+        def _ctx_from_path(path_vids: list):
+            """Given [leaf_vid, parent_vid, …] find the deepest matching
+            context-hierarchy node via hash index.  Falls back to node-ID
+            matching if full hashes are stale, then to root."""
+            for vid in path_vids:
                 if vid == 0:
                     continue
-                name = _safe_lookup(vid)
-                if name is None or name == "EMPTYNULL":
-                    continue
-                candidates[vid] = w
-            if not candidates:
-                return 0
-            return random.choices(
-                list(candidates.keys()),
-                weights=[max(v, 1e-12) for v in candidates.values()],
-                k=1,
-            )[0]
-
-        def _find_content_node_by_hash(target_hash_str: str) -> Optional[CobwebDiscreteNode]:
-            """BFS search the content hierarchy for a node whose
-            ``concept_hash()`` matches *target_hash_str* (as a string)."""
-            queue = [self.ltm.content_hierarchy.root]
-            while queue:
-                node = queue.pop(0)
-                try:
-                    if str(node.concept_hash()) == target_hash_str:
+                n = _name(vid)
+                if n and isinstance(n, str) and n.startswith("CONCEPT-"):
+                    full_hash = n[len("CONCEPT-"):]
+                    # 1. exact full-hash match
+                    node = ctx_idx.get(full_hash)
+                    if node is not None:
                         return node
-                except Exception:
-                    pass
-                queue.extend(node.children)
-            return None
+                    # 2. node-ID fallback (stable across av_count changes)
+                    nid = full_hash.rsplit('_', 1)[-1]
+                    node = ctx_nid.get(nid)
+                    if node is not None:
+                        return node
+            return self.ltm.context_hierarchy.root
 
-        def _make_empty_ctx(complexity_val: int = 1) -> dict:
-            """Build an empty context instance with a given complexity value.
+        # ── ancestor path as CONCEPT-<hash> strings ──────────────────────
 
-            Uses fractional EMPTYNULL weights ``{0: 1/(2^(j+1))}`` matching
-            the training format in ``create_context_instance``."""
-            _cplx_vid = self.ltm.value_to_id.get("COMPLEXITY", 0)
+        def _anc(node) -> list:
+            """[root_hash, …, node_hash] as 'CONCEPT-<hash>' strings."""
+            p, c = [], node
+            while c is not None:
+                p.append(f"CONCEPT-{c.concept_hash()}")
+                c = getattr(c, 'parent', None)
+            p.reverse()
+            return p
+
+        # ── read content-ref from a context node ─────────────────────────
+
+        def _read_ref(ctx_node, prefer_word=False):
+            """Return the dominant content-ref *string* (word or CONCEPT),
+            or None."""
+            if ctx_node is None:
+                return None
+            rd = (ctx_node.av_count or {}).get(_ref_attr, {})
+            words, concepts, all_ = {}, {}, {}
+            for v, w in rd.items():
+                if v == 0:
+                    continue
+                n = _name(v)
+                if n is None or n == "EMPTYNULL":
+                    continue
+                all_[v] = w
+                if isinstance(n, str) and n.startswith("CONCEPT-"):
+                    concepts[v] = w
+                else:
+                    words[v] = w
+            pool = (words or all_) if prefer_word else all_
+            if not pool:
+                return None
+            chosen = random.choices(
+                list(pool.keys()),
+                weights=[max(x, 1e-12) for x in pool.values()], k=1)[0]
+            return _name(chosen)
+
+        # ── read complexity from context node ────────────────────────────
+
+        def _read_cplx(ctx_node) -> int:
+            if ctx_node is None:
+                return 1
+            av = ctx_node.av_count or {}
+            s = av.get(_cplx_attr, {}).get(_cplx_vid, 0)
+            n = sum(av.get(_ref_attr, {}).values())
+            return max(int(round(s / n)), 1) if n > 0 else 1
+
+        # ── context-instance builders ────────────────────────────────────
+
+        def _empty_ctx(cplx=1):
             ctx = {}
-            for j in range(self.context_length):
-                ctx[j] = {0: 1.0 / (2 ** (j + 1))}
-                ctx[self.context_length + j] = {0: 1.0 / (2 ** (j + 1))}
-            ctx[2 * self.context_length] = {_cplx_vid: complexity_val}
+            for j in range(_cl):
+                ctx[j]       = {0: 1.0 / (2 ** (j + 1))}
+                ctx[_cl + j] = {0: 1.0 / (2 ** (j + 1))}
+            ctx[_cplx_attr] = {_cplx_vid: cplx}
             return ctx
 
-        def _sample_content_node(hint: dict = None):
-            """
-            Sample a leaf from the content hierarchy.
-
-            If *hint* is given it should be a partial content instance;
-            missing primary attrs (depth-0) are predicted.  Returns
-            ``(leaf_node, path_strs, node_path)``.
-            """
-            _cpd = self.ltm.content_path_depth
-            partial = dict(hint) if hint else {}
-            prediction = self.ltm.content_hierarchy.predict(partial, random.randint(100, 500), False)
-            # Ensure left depth-0 (attr 0) and right depth-0 (attr cpd) are filled
-            if 0 not in partial or not partial[0]:
-                partial[0] = _probabilistic_subset(prediction.get(0, {}), k=20)
-            if _cpd not in partial or not partial[_cpd]:
-                partial[_cpd] = _probabilistic_subset(prediction.get(_cpd, {}), k=20)
-            partial[0][0] = 0
-            partial[_cpd][0] = 0
-            return _categorize_dfs(partial, self.ltm.content_hierarchy,
-                                   stochastic=True)
-
-        def _predict_complexity(ctx_inst: dict, use_max: bool = False) -> int:
-            """
-            Use the context hierarchy to predict the most likely complexity
-            for a given context instance.  Returns the integer complexity.
-
-            Complexity is stored as {COMPLEXITY_VID: actual_complexity_int}.
-
-            Parameters
-            ----------
-            ctx_inst : dict
-                Context instance to categorize.
-            use_max : bool
-                If True, return the **maximum** observed complexity at the
-                matched leaf instead of the average.  This is appropriate
-                for from-scratch generation where we want sentence-level
-                (high-complexity) seeds.
-            """
-            _cplx_vid = self.ltm.value_to_id.get("COMPLEXITY", 0)
-            complexity_attr = 2 * self.context_length
-            ref_attr = 2 * self.context_length + 1
-
-            leaf, _, _ = _categorize_dfs(ctx_inst, self.ltm.context_hierarchy)
-            if leaf is None:
-                return 1
-
-            cplx_sum = leaf.av_count.get(complexity_attr, {}).get(_cplx_vid, 0)
-            # Count instances via content-ref attribute (each instance adds one
-            # content-ref with count 1).
-            n_instances = sum(leaf.av_count.get(ref_attr, {}).values())
-            if n_instances <= 0:
-                return 1
-
-            if use_max:
-                # Return the maximum complexity observed at the root level.
-                # cplx_sum / count_of_unit_complexity_instances gives the
-                # weighted average, but for sentence seeds we want the max.
-                # The max is bounded by cplx_sum (all complexity concentrated
-                # in one instance) but realistically we use a high percentile.
-                avg = cplx_sum / n_instances
-                # Use 2x average as a proxy for max (true max is hard to recover
-                # from aggregated counts); floor at 3 for meaningful expansion.
-                return max(int(round(avg * 2)), 3)
-            return max(int(round(cplx_sum / n_instances)), 1)
-
-        def _build_label_from_path(path_strs: list):
-            """Build a discrete single-identity label AND multi-depth label_path
-            from a context categorization path.
-
-            Returns (label_dict, label_path_list).
-            Uses the leaf concept (last in path) as the sole identity with count 1.
-            If the path is empty, falls back to {0: 1} (EMPTYNULL).
-            """
-            _cpd = self.ltm.content_path_depth
-            if path_strs:
-                leaf_str = path_strs[-1]
-                vid = self.value_to_id.get(leaf_str)
-                if vid is not None:
-                    label = {vid: 1}
-                    lp = _build_label_path_from_ctx(
-                        path_strs, self.value_to_id, _cpd
-                    )
-                    return label, lp
-            return {0: 1}, [0] * _cpd
-
-        # ---- expand a single composite into two children -------------------
-
-        def _derive_child_ctx(parent_ctx: dict, side: str,
-                              child_complexity: int) -> dict:
-            """
-            Derive a child's context instance from the parent's context.
-
-            The **left** child inherits the parent's *before* context (the
-            words to the left of the parent are also to the left of the
-            left child).  The **right** child inherits the parent's *after*
-            context.  The other side (inner boundary) is unknown during
-            generation, so it is filled with EMPTYNULL using the same
-            fractional weighting scheme as training
-            (``{0: 1.0 / (2 ** (j+1))}``).
-
-            Parameters
-            ----------
-            parent_ctx : dict
-                The parent node's context instance.
-            side : str
-                ``'left'`` or ``'right'``.
-            child_complexity : int
-                Complexity value for the child.
-            """
-            _cplx_vid = self.ltm.value_to_id.get("COMPLEXITY", 0)
-            ctx: dict = {}
-            cl = self.context_length
-
-            if side == 'left':
-                # Left child inherits parent's before-context
-                for j in range(cl):
-                    fallback = {0: 1.0 / (2 ** (j + 1))}
-                    ctx[j] = dict(parent_ctx.get(j, fallback))
-                # After-context is unknown (inner boundary) — use
-                # fractional EMPTYNULL weights matching training format
-                for j in range(cl):
-                    ctx[cl + j] = {0: 1.0 / (2 ** (j + 1))}
-            else:
-                # Before-context is unknown (inner boundary)
-                for j in range(cl):
+        def _seeded_ctx(pos, known, cplx):
+            ctx = {}
+            for j in range(_cl):
+                s = pos - (j + 1)
+                if 0 <= s < len(known) and known[s]:
+                    ctx[j] = {known[s]: 1.0 / (2 ** (j + 1))}; ctx[j][0] = 0
+                else:
                     ctx[j] = {0: 1.0 / (2 ** (j + 1))}
-                # Right child inherits parent's after-context
-                for j in range(cl):
-                    fallback = {0: 1.0 / (2 ** (j + 1))}
-                    ctx[cl + j] = dict(parent_ctx.get(cl + j, fallback))
-
-            ctx[2 * cl] = {_cplx_vid: child_complexity}
+            for j in range(_cl):
+                s = pos + (j + 1)
+                if 0 <= s < len(known) and known[s]:
+                    ctx[_cl+j] = {known[s]: 1.0 / (2 ** (j + 1))}; ctx[_cl+j][0] = 0
+                else:
+                    ctx[_cl+j] = {0: 1.0 / (2 ** (j + 1))}
+            ctx[_cplx_attr] = {_cplx_vid: cplx}
             return ctx
 
-        def _expand_node(node: CompositeParseNode) -> Tuple[Any, Any]:
-            """
-            Expand a composite parse node into two children.
+        def _child_ctx(parent_ctx, side, cplx):
+            ctx = {}
+            if side == 'left':
+                for j in range(_cl):
+                    ctx[j]       = dict(parent_ctx.get(j, {0: 1.0/(2**(j+1))}))
+                    ctx[_cl + j] = {0: 1.0 / (2 ** (j + 1))}
+            else:
+                for j in range(_cl):
+                    ctx[j]       = {0: 1.0 / (2 ** (j + 1))}
+                    ctx[_cl + j] = dict(parent_ctx.get(_cl+j, {0: 1.0/(2**(j+1))}))
+            ctx[_cplx_attr] = {_cplx_vid: cplx}
+            return ctx
 
-            Children inherit the parent's surrounding-word context:
-            the left child gets the parent's before-context, the right
-            child gets the parent's after-context.
+        # ── flatten primitives to word list ──────────────────────────────
 
-            **Critically**, the left child is resolved first and its
-            word identity (if primitive) is injected into the right
-            child's before-context (attribute 0).  This breaks the
-            all-EMPTYNULL echo-chamber that otherwise makes every
-            primitive see identical context.
-
-            All internal ``_categorize_dfs`` calls use ``stochastic=True``
-            so that repeated generation from the same context can produce
-            different outputs.
-
-            Per MULTIHIERARCHY.md:
-                1. Categorize the node's content_instance in the **content
-                   hierarchy** to reach a coherent leaf where (left, right)
-                   pairs co-occurred during training.
-                2. Sample a left label from that leaf, then re-categorize
-                   ``{0: left}`` to predict a conditionally coherent right
-                   label.
-                3. Resolve left child first (context hierarchy → content-ref
-                   → primitive or composite).  Then resolve right child with
-                   the left child's word injected into its before-context.
-                4. Child complexity = max(parent.complexity - 1, 1).
-            """
-            if not node.content_instance:
-                return None, None
-
-            content_ref_attr = 2 * self.context_length + 1
-            child_complexity = max(node.complexity - 1, 1)
-            parent_ctx = node.context_instance or {}
-
-            # ---- Step 1: Categorize content → coherent leaf ---------------
-            content_leaf, _, _ = _categorize_dfs(
-                node.content_instance, self.ltm.content_hierarchy,
-                stochastic=True,
-            )
-            if content_leaf is None:
-                content_leaf = self.ltm.content_hierarchy.root
-            leaf_av = content_leaf.av_count or {}
-
-            # ---- Step 2: Conditional left/right for coherence -------------
-            _cpd = self.ltm.content_path_depth
-            left_label = _probabilistic_subset(
-                dict(leaf_av.get(0, node.content_instance.get(0, {}))), k=20
-            )
-            left_label[0] = 0
-
-            cond_leaf, _, _ = _categorize_dfs(
-                {0: left_label}, self.ltm.content_hierarchy,
-                stochastic=True,
-            )
-            cond_av = (cond_leaf.av_count if cond_leaf else leaf_av) or leaf_av
-            right_label = _probabilistic_subset(
-                dict(cond_av.get(
-                    _cpd, leaf_av.get(_cpd, node.content_instance.get(_cpd, {}))
-                )), k=20
-            )
-            right_label[0] = 0
-
-            # ---- Helper: resolve one side into a parse node ---------------
-            def _resolve_side(side: str, side_label: dict,
-                              child_ctx: dict) -> Tuple[Any, int]:
-                """Resolve a single side into a parse node.
-
-                Returns ``(child_node, resolved_word_id)`` where
-                *resolved_word_id* is the vocab id of the chosen word
-                (non-zero only when the child is a primitive).
-                """
-                # Categorize in context hierarchy (stochastic for variety)
-                ctx_leaf_node, ctx_path, _ = _categorize_dfs(
-                    child_ctx, self.ltm.context_hierarchy,
-                    stochastic=True,
-                )
-
-                # Read content-ref from context leaf
-                content_ref_id = (_content_ref_from_leaf(ctx_leaf_node)
-                                  if ctx_leaf_node else 0)
-                ref_name = (_safe_lookup(content_ref_id)
-                            if content_ref_id else None)
-
-                if debug:
-                    side_idx = 0 if side == 'left' else 1
-                    print(f"  Side {side_idx}: ctx_leaf_hash="
-                          f"{ctx_leaf_node.concept_hash() if ctx_leaf_node else 'None'}, "
-                          f"content_ref={ref_name} (id={content_ref_id})")
-
-                # --- PRIMITIVE: content-ref is a word AND complexity ≤ 1 ---
-                if (content_ref_id and _is_word_token(content_ref_id)
-                        and child_complexity <= 1):
-                    word_id = content_ref_id
-                    child_ctx[content_ref_attr] = {word_id: 1}
-                    child_label = {word_id: 1}
-                    child_node = PrimitiveParseNode.create_node(
-                        context_instance=child_ctx,
-                        label=child_label,
-                        position_idx=node.position_idx,
-                        word_id=word_id,
-                    )
-                    child_node.label_path = [word_id] + [0] * (_cpd - 1)
-                    return child_node, word_id
-
-                # --- COMPOSITE: content-ref is a CONCEPT-<hash> ---
-                if (ref_name and isinstance(ref_name, str)
-                        and ref_name.startswith("CONCEPT-")
-                        and child_complexity > 1):
-                    target_hash = ref_name[len("CONCEPT-"):]
-                    content_node = _find_content_node_by_hash(target_hash)
-                    if content_node:
-                        sub_inst = {}
-                        for _i in range(2 * _cpd):
-                            sub_inst[_i] = dict(
-                                content_node.av_count.get(_i, {0: 1}))
-                        sub_leaf, _, _ = _categorize_dfs(
-                            sub_inst, self.ltm.content_hierarchy,
-                            stochastic=True,
-                        )
-                        sub_av = (sub_leaf.av_count
-                                  if sub_leaf
-                                  else content_node.av_count) or {}
-                        child_content = {}
-                        for _i in range(2 * _cpd):
-                            child_content[_i] = _probabilistic_subset(
-                                dict(sub_av.get(_i, {0: 1})), k=15)
-                            child_content[_i][0] = 0
-                        _, ctx_path_c, _ = _categorize_dfs(
-                            child_ctx, self.ltm.context_hierarchy,
-                            stochastic=True,
-                        )
-                        child_label, child_label_path = \
-                            _build_label_from_path(ctx_path_c)
-                        child_node = CompositeParseNode.create_node(
-                            content_instance=child_content,
-                            context_instance=child_ctx,
-                            label=child_label,
-                            categorize_path=[],
-                            position_idx=node.position_idx,
-                            context_length=self.context_length,
-                            complexity=child_complexity,
-                        )
-                        child_node.label_path = child_label_path
-                        return child_node, 0
-
-                # --- FALLBACK ---
-                if child_complexity > 1:
-                    child_content = {}
-                    for _i in range(2 * _cpd):
-                        child_content[_i] = _probabilistic_subset(
-                            dict(leaf_av.get(_i, {0: 1})), k=15)
-                        child_content[_i][0] = 0
-                    _, ctx_path_f, _ = _categorize_dfs(
-                        child_ctx, self.ltm.context_hierarchy,
-                        stochastic=True,
-                    )
-                    child_label, child_label_path = \
-                        _build_label_from_path(ctx_path_f)
-                    child_node = CompositeParseNode.create_node(
-                        content_instance=child_content,
-                        context_instance=child_ctx,
-                        label=child_label,
-                        categorize_path=[],
-                        position_idx=node.position_idx,
-                        context_length=self.context_length,
-                        complexity=child_complexity,
-                    )
-                    child_node.label_path = child_label_path
-                    return child_node, 0
-
-                # child_complexity == 1 → force primitive word prediction
-                prediction = self.ltm.context_hierarchy.predict(
-                    child_ctx, random.randint(100, 500), False
-                )
-                word_dist = prediction.get(content_ref_attr, {})
-                word_id = _best_word_from_distribution(word_dist)
-                child_ctx[content_ref_attr] = {word_id: 1}
-                child_label = {word_id: 1}
-                child_node = PrimitiveParseNode.create_node(
-                    context_instance=child_ctx,
-                    label=child_label,
-                    position_idx=node.position_idx,
-                    word_id=word_id,
-                )
-                child_node.label_path = [word_id] + [0] * (_cpd - 1)
-                return child_node, word_id
-
-            # ---- Step 3: Resolve LEFT first, then RIGHT ------------------
-
-            # 3a. Left child inherits parent's before-context
-            left_ctx = _derive_child_ctx(parent_ctx, 'left', child_complexity)
-            left_child, left_word_id = _resolve_side(
-                'left', left_label, left_ctx
-            )
-
-            # 3b. Right child inherits parent's after-context, PLUS the
-            #     left child's resolved word injected into before-context
-            #     attribute 0 (the nearest-before position).
-            right_ctx = _derive_child_ctx(parent_ctx, 'right', child_complexity)
-            if left_word_id and left_word_id != 0:
-                # Inject left word as the nearest before-context word
-                right_ctx[0] = {left_word_id: 1.0 / (2 ** 1)}
-                right_ctx[0][0] = 0
-            right_child, _ = _resolve_side(
-                'right', right_label, right_ctx
-            )
-
-            return left_child, right_child
-
-        # ---- flatten primitives to word list -------------------------------
-
-        def _flatten_to_words(root_node) -> List[str]:
-            """DFS-collect primitives in position order, return word list."""
-            primitives = []
-
+        def _words(root):
+            ps = []
             def dfs(n):
                 if isinstance(n, PrimitiveParseNode):
-                    primitives.append(n)
+                    ps.append(n)
                 for _, ch in getattr(n, "children", []):
                     dfs(ch)
+            dfs(root)
+            ps.sort(key=lambda p: (p.position_idx or 0))
+            return [(_name(p.word_id) or "?") for p in ps]
 
-            dfs(root_node)
-            primitives.sort(key=lambda p: p.position_idx if p.position_idx is not None else 0)
-            words = []
-            for p in primitives:
-                w = _safe_lookup(p.word_id)
-                words.append(w if w and w != "EMPTYNULL" else "?")
-            return words
+        # ── enrich context with resolved neighbours ──────────────────────
 
-        # =====================================================================
-        # MASKED SENTENCE COMPLETION
-        # =====================================================================
-        if masked_sentence:
-            tokens = re.findall(r"[\w']+|[.,!?;]|\[mask\]", masked_sentence)
-            mask_positions = [i for i, t in enumerate(tokens) if t == "[mask]"]
+        def _enrich(node, all_nodes):
+            if not getattr(node, 'context_instance', None):
+                return
+            pos = node.position_idx
+            resolved = sorted(
+                [n for n in all_nodes
+                 if isinstance(n, PrimitiveParseNode) and n.word_id],
+                key=lambda n: (n.position_idx or 0))
+            for j in range(_cl):
+                nbrs = [n for n in resolved
+                        if n.position_idx is not None and n.position_idx < pos]
+                nbrs.sort(key=lambda n: -n.position_idx)
+                if j < len(nbrs):
+                    cur = node.context_instance.get(j, {})
+                    if set(cur.keys()) <= {0}:
+                        node.context_instance[j] = {
+                            nbrs[j].word_id: 1.0/(2**(j+1))}
+                        node.context_instance[j][0] = 0
+            for j in range(_cl):
+                nbrs = [n for n in resolved
+                        if n.position_idx is not None and n.position_idx > pos]
+                nbrs.sort(key=lambda n: n.position_idx)
+                if j < len(nbrs):
+                    cur = node.context_instance.get(_cl+j, {})
+                    if set(cur.keys()) <= {0}:
+                        node.context_instance[_cl+j] = {
+                            nbrs[j].word_id: 1.0/(2**(j+1))}
+                        node.context_instance[_cl+j][0] = 0
 
+        # ══════════════════════════════════════════════════════════════════
+        #  get_basic() → sample leaf  (steps 3-5 of the algorithm)
+        # ══════════════════════════════════════════════════════════════════
+
+        def _basic_sample(content_node):
+            """get_basic on *content_node*, assert ≠ root, sample a leaf."""
+            basic = content_node.get_basic(1000, 1000)
+            bh = str(basic.concept_hash())
+            rh = str(self.ltm.content_hierarchy.root.concept_hash())
+            if bh == rh:
+                raise RuntimeError(
+                    f"get_basic() returned the content hierarchy ROOT "
+                    f"(hash={bh}).  Hierarchy has insufficient structure.  "
+                    f"Train on more data before generating.")
             if debug:
-                print(f"Tokens: {tokens}")
-                print(f"Mask positions: {mask_positions}")
+                print(f"    basic=...{bh[-12:]}")
+            # Sample a leaf from the basic-level node
+            leaf = basic
+            while leaf.children:
+                leaf = random.choices(
+                    leaf.children,
+                    weights=[max(c.count, 1) for c in leaf.children],
+                    k=1)[0]
+            if debug:
+                print(f"    sampled=...{str(leaf.concept_hash())[-12:]}")
+            return leaf
 
-            # Resolve known tokens to vocab ids
-            known_word_ids: List[Optional[int]] = []
-            for tok in tokens:
-                if tok == "[mask]":
-                    known_word_ids.append(None)
-                else:
-                    vid = self.value_to_id.get(tok, 0)
-                    known_word_ids.append(vid)
+        # ══════════════════════════════════════════════════════════════════
+        #  Build content_instance from a content-hierarchy leaf's av_count
+        # ══════════════════════════════════════════════════════════════════
 
-            content_ref_attr = 2 * self.context_length + 1
+        def _content_from_leaf(leaf):
+            av = leaf.av_count or {}
+            ci = {}
+            for i in range(2 * _cpd):
+                d = av.get(i, {})
+                cc = {v: w for v, w in d.items() if v != 0}
+                ci[i] = dict(cc) if cc else {0: 1}
+            return ci
 
-            # ---- helper: build context instance seeded with surrounding text ----
-            def _build_seeded_ctx(position: int, resolved_ids: list,
-                                  complexity_val: int) -> dict:
-                """Build a context instance using the known (and already-resolved)
-                tokens around *position* as context_before / context_after."""
-                ctx: dict = {}
-                for j in range(self.context_length):
-                    src = position - (j + 1)
-                    if 0 <= src < len(resolved_ids) and resolved_ids[src] is not None and resolved_ids[src] != 0:
-                        ctx[j] = {resolved_ids[src]: 1.0 / (2 ** (j + 1))}
-                        ctx[j][0] = 0
-                    else:
-                        ctx[j] = {0: 1.0 / (2 ** (j + 1))}
-                for j in range(self.context_length):
-                    src = position + (j + 1)
-                    attr_key = self.context_length + j
-                    if 0 <= src < len(resolved_ids) and resolved_ids[src] is not None and resolved_ids[src] != 0:
-                        ctx[attr_key] = {resolved_ids[src]: 1.0 / (2 ** (j + 1))}
-                        ctx[attr_key][0] = 0
-                    else:
-                        ctx[attr_key] = {0: 1.0 / (2 ** (j + 1))}
-                _cplx_vid = self.ltm.value_to_id.get("COMPLEXITY", 0)
-                ctx[2 * self.context_length] = {_cplx_vid: complexity_val}
-                return ctx
+        # ══════════════════════════════════════════════════════════════════
+        #  Extract path_vids from a content_instance for one side
+        # ══════════════════════════════════════════════════════════════════
 
-            # ---- expand each [mask] into a subtree ----
-            # Each mask is expanded compositionally: use surrounding context
-            # to predict complexity and content, then recursively expand just
-            # like from-scratch generation but with real context.
-            mask_expansions: Dict[int, List[str]] = {}  # mask_pos → list of words
+        def _path_vids(content_inst, side_offset):
+            vids = []
+            for di in range(_cpd):
+                d = content_inst.get(side_offset + di, {})
+                cc = {v: w for v, w in d.items() if v != 0}
+                vids.append(max(cc, key=cc.get) if cc else 0)
+            return vids
 
-            for mi in mask_positions:
-                # Use surrounding context to predict initial complexity
-                seed_ctx = _build_seeded_ctx(mi, known_word_ids, 1)
-                initial_complexity = _predict_complexity(seed_ctx)
-                initial_complexity = max(initial_complexity, 2)
+        # ══════════════════════════════════════════════════════════════════
+        #  Helper to pick best gen_content_map entry
+        # ══════════════════════════════════════════════════════════════════
 
-                if debug:
-                    print(f"\n  [mask] at pos {mi}: predicted complexity={initial_complexity}")
+        def _pick_entry(entries, lookup_nid, sent_id=None):
+            """Pick the best entry from gen_content_map for a given lookup nid.
 
-                # Sample content from the content hierarchy,
-                # seeded with context-derived predictions
-                seed_ctx_full = _build_seeded_ctx(mi, known_word_ids, initial_complexity)
-                prediction = self.ltm.context_hierarchy.predict(
-                    seed_ctx_full, random.randint(100, 500), False
-                )
-                # Use the predicted content-ref to try to seed content sampling
-                ref_dist = prediction.get(content_ref_attr, {})
-                ref_candidates = {vid: w for vid, w in ref_dist.items()
-                                  if vid != 0 and _safe_lookup(vid) not in (None, "EMPTYNULL")}
+            Prefers PRIMARY entries (source_ifit_nid == lookup_nid) over
+            ALIAS entries (source_ifit_nid != lookup_nid, stored via cat_nid).
 
-                sampled_content = None
-                if ref_candidates:
-                    chosen_ref = random.choices(
-                        list(ref_candidates.keys()),
-                        weights=[max(v, 1e-12) for v in ref_candidates.values()],
-                        k=1,
-                    )[0]
-                    ref_name = _safe_lookup(chosen_ref)
-                    if ref_name and isinstance(ref_name, str) and ref_name.startswith("CONCEPT-"):
-                        target_hash = ref_name[len("CONCEPT-"):]
-                        content_node = _find_content_node_by_hash(target_hash)
-                        if content_node:
-                            cnt_av = content_node.av_count or {}
-                            _cpd_m = self.ltm.content_path_depth
-                            # Conditional right prediction for coherence
-                            _m_left = _probabilistic_subset(
-                                dict(cnt_av.get(0, {0: 1})), k=20)
-                            _m_left[0] = 0
-                            _m_cond, _, _ = _categorize_dfs(
-                                {0: _m_left}, self.ltm.content_hierarchy,
-                                stochastic=True)
-                            _m_cond_av = (_m_cond.av_count
-                                          if _m_cond else cnt_av) or cnt_av
-                            _m_right = _probabilistic_subset(
-                                dict(_m_cond_av.get(
-                                    _cpd_m, cnt_av.get(_cpd_m, {0: 1}))), k=20)
-                            _m_right[0] = 0
-                            sampled_content = {0: _m_left, _cpd_m: _m_right}
-                            # Fill higher depth attributes from content node
-                            for _di in range(1, _cpd_m):
-                                sampled_content[_di] = _probabilistic_subset(
-                                    dict(cnt_av.get(_di, {0: 1})), k=15)
-                                sampled_content[_di][0] = 0
-                                sampled_content[_cpd_m + _di] = _probabilistic_subset(
-                                    dict(cnt_av.get(_cpd_m + _di, {0: 1})), k=15)
-                                sampled_content[_cpd_m + _di][0] = 0
+            Entries are 6-tuples:
+              (sent_id, content_instance, left_ref, right_ref, complexity,
+               source_ifit_nid)
 
-                # Fallback: sample from content hierarchy directly
-                if sampled_content is None:
-                    sampled_leaf, sampled_path, _ = _sample_content_node()
-                    sampled_av = sampled_leaf.av_count if sampled_leaf else {}
-                    _cpd_fb = self.ltm.content_path_depth
-                    # Conditional right prediction for coherence
-                    _fb_left = _probabilistic_subset(
-                        dict(sampled_av.get(0, {0: 1})), k=20)
-                    _fb_left[0] = 0
-                    _fb_cond, _, _ = _categorize_dfs(
-                        {0: _fb_left}, self.ltm.content_hierarchy,
-                        stochastic=True)
-                    _fb_cond_av = (_fb_cond.av_count
-                                   if _fb_cond else sampled_av) or sampled_av
-                    _fb_right = _probabilistic_subset(
-                        dict(_fb_cond_av.get(
-                            _cpd_fb, sampled_av.get(_cpd_fb, {0: 1}))), k=20)
-                    _fb_right[0] = 0
-                    sampled_content = {0: _fb_left, _cpd_fb: _fb_right}
-                    for _di in range(1, _cpd_fb):
-                        sampled_content[_di] = _probabilistic_subset(
-                            dict(sampled_av.get(_di, {0: 1})), k=15)
-                        sampled_content[_di][0] = 0
-                        sampled_content[_cpd_fb + _di] = _probabilistic_subset(
-                            dict(sampled_av.get(_cpd_fb + _di, {0: 1})), k=15)
-                        sampled_content[_cpd_fb + _di][0] = 0
+            Returns the best entry, or None if no entries match.
+            """
+            if not entries:
+                return None
 
-                # Build the seed composite node with actual context
-                seed_label, seed_label_path = _build_label_from_path([])
-                seed_node = CompositeParseNode.create_node(
-                    content_instance=sampled_content,
-                    context_instance=seed_ctx_full,
-                    label=seed_label,
-                    categorize_path=[],
-                    position_idx=float(mi),
-                    context_length=self.context_length,
-                    complexity=initial_complexity,
-                )
-                seed_node.label_path = seed_label_path
+            # Filter by sent_id if specified
+            if sent_id is not None:
+                pool = [e for e in entries if e[0] == sent_id]
+            else:
+                pool = list(entries)
 
-                # Priority-queue expansion (same as from-scratch)
-                frontier = [(-initial_complexity, id(seed_node), seed_node)]
-                all_mask_nodes = [seed_node]
-                max_mask_expansions = 50
-                expansions = 0
+            if not pool:
+                return None
 
-                while frontier and expansions < max_mask_expansions:
-                    neg_c, _, node_to_expand = heapq.heappop(frontier)
-                    if not isinstance(node_to_expand, CompositeParseNode):
-                        continue
+            # Filter out self-referential entries
+            non_self = [e for e in pool
+                        if e[2] != ('comp', lookup_nid)
+                        and e[3] != ('comp', lookup_nid)]
+            if non_self:
+                pool = non_self
 
+            # Prefer primary entries (source_ifit_nid == lookup_nid)
+            primary = [e for e in pool if e[5] == lookup_nid]
+            if primary:
+                return primary[0]
+
+            # Fall back to alias entries
+            return pool[0]
+
+        # ══════════════════════════════════════════════════════════════════
+        #  Resolve one side → PrimitiveParseNode or CompositeParseNode
+        #
+        #  This is the CORE per-child step:
+        #    path_vids → ctx node → content-ref
+        #      word  → Primitive
+        #      CONCEPT → find in content hierarchy → get_basic → sample
+        #                → Composite with sampled leaf's content
+        # ══════════════════════════════════════════════════════════════════
+
+        def _resolve(path_vids, child_ctx, parent_pos, visited_hashes=None,
+                    sent_id=None, child_ref=None):
+            """Resolve one side of a composite expansion.
+
+            If *child_ref* is provided (from a gen_content_map entry), use it
+            directly — bypasses path_vid lookups entirely, making expansion
+            immune to context-hierarchy restructuring.
+
+            child_ref = ('word', word_id) | ('comp', ifit_nid) | None
+            """
+            if visited_hashes is None:
+                visited_hashes = set()
+
+            # ── FAST PATH: direct child reference from gen_content_map ──
+            if child_ref is not None:
+                ctype, cval = child_ref
+                if ctype == 'word':
+                    wid = cval or 0
                     if debug:
-                        print(f"    expand {expansions}: pos={node_to_expand.position_idx}, "
-                              f"cplx={node_to_expand.complexity}")
+                        nm = _name(wid)
+                        print(f"      ref={nm} (direct word)")
+                    child_ctx[_ref_attr] = {wid: 1}
+                    prim = PrimitiveParseNode.create_node(
+                        context_instance=child_ctx,
+                        label={wid: 1},
+                        position_idx=parent_pos,
+                        word_id=wid)
+                    return prim, wid, sent_id
 
-                    left_child, right_child = _expand_node(node_to_expand)
+                elif ctype == 'comp' and cval is not None:
+                    # Look up the child composite's gen_content_map entry
+                    child_entries = _gen_map.get(cval)
+                    child_content = None
+                    child_left_ref = None
+                    child_right_ref = None
+                    child_cplx = 2
+                    entry = _pick_entry(child_entries, cval, sent_id)
+                    if entry is not None:
+                        sent_id = entry[0]
+                        child_content = entry[1]
+                        child_left_ref = entry[2]
+                        child_right_ref = entry[3]
+                        child_cplx = entry[4]
+                        if debug:
+                            print(f"      (direct comp nid={cval}, sent={sent_id})")
+                    if child_content is not None:
+                        comp = CompositeParseNode.create_node(
+                            content_instance=child_content,
+                            context_instance=child_ctx,
+                            label={0: 1},
+                            categorize_path=[],
+                            position_idx=parent_pos,
+                            context_length=_cl,
+                            complexity=child_cplx)
+                        comp._visited_hashes = visited_hashes | {cval}
+                        comp._gen_sent_id = sent_id
+                        comp._gen_left_ref = child_left_ref
+                        comp._gen_right_ref = child_right_ref
+                        return comp, 0, sent_id
+                    # If no matching entry, fall through to path_vid lookup
 
-                    if left_child is not None:
-                        left_child.position_idx = node_to_expand.position_idx - 0.5 / (2 ** expansions)
-                        left_child.set_parent(node_to_expand)
-                        all_mask_nodes.append(left_child)
-                        if isinstance(left_child, CompositeParseNode):
-                            heapq.heappush(frontier, (-left_child.complexity, id(left_child), left_child))
+            # ── SLOW PATH: path_vid → context node lookup ──
+            ctx_node = _ctx_from_path(path_vids)
 
-                    if right_child is not None:
-                        right_child.position_idx = node_to_expand.position_idx + 0.5 / (2 ** expansions)
-                        right_child.set_parent(node_to_expand)
-                        all_mask_nodes.append(right_child)
-                        if isinstance(right_child, CompositeParseNode):
-                            heapq.heappush(frontier, (-right_child.complexity, id(right_child), right_child))
+            # ── read content-ref ──
+            ref = _read_ref(ctx_node)
+            ctx_full_hash = str(ctx_node.concept_hash())
+            ctx_node_id = ctx_full_hash.rsplit('_', 1)[-1]
+            if debug:
+                print(f"      ctx=...{ctx_full_hash[-10:]}  ref={ref}")
 
-                    expansions += 1
+            is_w = ref and not ref.startswith("CONCEPT-")
 
-                # Flatten the expanded subtree to words
-                mask_words = _flatten_to_words(seed_node)
-                mask_expansions[mi] = mask_words
+            # ── Check for cycles ──
+            if ref and ref.startswith("CONCEPT-"):
+                if ctx_node_id in visited_hashes:
+                    if debug:
+                        print(f"      CYCLE detected on nid={ctx_node_id}, forcing primitive")
+                    is_w = False
+                    ref = None
 
+            # ── PRIMITIVE ──
+            if is_w or ref is None:
+                wid = self.value_to_id.get(ref, 0) if is_w else 0
+                if not wid:
+                    rd = (ctx_node.av_count or {}).get(_ref_attr, {})
+                    wc = {v: w for v, w in rd.items() if _is_word(v)}
+                    if wc:
+                        wid = random.choices(
+                            list(wc.keys()),
+                            weights=[max(x,1e-12) for x in wc.values()],
+                            k=1)[0]
+                    else:
+                        pred = self.ltm.context_hierarchy.predict(
+                            child_ctx, 250, False)
+                        rd2 = pred.get(_ref_attr, {})
+                        wc2 = {v: w for v, w in rd2.items() if _is_word(v)}
+                        wid = (random.choices(
+                            list(wc2.keys()),
+                            weights=[max(x,1e-12) for x in wc2.values()],
+                            k=1)[0] if wc2 else 0)
+
+                child_ctx[_ref_attr] = {wid: 1}
+                prim = PrimitiveParseNode.create_node(
+                    context_instance=child_ctx,
+                    label={wid: 1},
+                    position_idx=parent_pos,
+                    word_id=wid)
+                prim.label_path = _build_label_path_from_ctx(
+                    _anc(ctx_node), self.value_to_id, _cpd)
+                return prim, wid, sent_id
+
+            # ── COMPOSITE: gen_content_map lookup by ctx nid ──
+            ctx_nid = ctx_full_hash.rsplit('_', 1)[-1]
+            direct_entries = _gen_map.get(ctx_nid)
+
+            child_content = None
+            child_left_ref = None
+            child_right_ref = None
+            child_cplx = max(_read_cplx(ctx_node), 2)
+            entry = _pick_entry(direct_entries, ctx_nid, sent_id)
+            if entry is not None:
+                sent_id = entry[0]
+                child_content = entry[1]
+                child_left_ref = entry[2]
+                child_right_ref = entry[3]
+                child_cplx = entry[4]
                 if debug:
-                    print(f"    → expanded [mask] at {mi} to: {mask_words}")
+                    print(f"      (gen_content_map hit nid={ctx_nid}, sent={sent_id})")
 
-            # Rebuild the full token list, splicing in expanded words
-            result_tokens: List[str] = []
-            for i, tok in enumerate(tokens):
-                if tok == "[mask]" and i in mask_expansions:
-                    result_tokens.extend(mask_expansions[i])
-                elif tok == "[mask]":
-                    result_tokens.append("?")
-                else:
-                    result_tokens.append(tok)
+            if child_content is None:
+                # Fallback: content hierarchy
+                target_hash = ref[len("CONCEPT-"):]
+                cnt_node = cnt_idx.get(target_hash)
+                if cnt_node is None:
+                    nid = target_hash.rsplit('_', 1)[-1]
+                    cnt_node = cnt_nid.get(nid)
+                if cnt_node is None:
+                    cnt_node = self.ltm.content_hierarchy.root
+                sampled = _basic_sample(cnt_node)
+                child_content = _content_from_leaf(sampled)
+                if debug:
+                    print(f"      (content hierarchy fallback)")
 
-            generated_text = " ".join(result_tokens)
+            node_cplx = child_cplx
 
-            # Build a parse tree for the completed sentence
-            pt = self.parse_sentence(generated_text, threshold="converge", learning=False, debug=debug)
-            return [generated_text, pt]
+            new_visited = visited_hashes | {ctx_nid}
 
-        # =====================================================================
-        # GENERATION FROM SCRATCH
-        # =====================================================================
-        else:
-            global_root = CompositeParseNode.create_global_root()
+            anc = _anc(ctx_node)
+            lbl_path = _build_label_path_from_ctx(anc, self.value_to_id, _cpd)
+            vid = self.value_to_id.get(anc[-1]) if anc else 0
+            label = {vid: 1} if vid else {0: 1}
 
-            # 1. Sample a high-level content node (no context → sentence-level)
-            sampled_leaf, sampled_path, _ = _sample_content_node()
-
-            if debug:
-                leaf_hash = sampled_leaf.concept_hash() if sampled_leaf else "None"
-                print(f"Sampled initial content leaf: {leaf_hash}")
-                print(f"  Path: {sampled_path}")
-
-            label, label_path = _build_label_from_path(sampled_path)
-
-            # Use context hierarchy to predict high starting complexity
-            # (from-scratch generation → we want sentence-level seeds)
-            seed_ctx = _make_empty_ctx(1)
-            initial_complexity = _predict_complexity(seed_ctx, use_max=True)
-            # ensure we start with at least complexity 3 for meaningful expansion
-            initial_complexity = max(initial_complexity, 3)
-
-            if debug:
-                print(f"  Initial complexity: {initial_complexity}")
-
-            # Build seed content from sampled leaf's av_count
-            # Use conditional right prediction for coherent pairing:
-            #   1. Sample left from the leaf.
-            #   2. Categorize {0: left} to find the right that co-occurs.
-            _cpd_gen = self.ltm.content_path_depth
-            sampled_av = sampled_leaf.av_count if sampled_leaf else {}
-            sampled_left = _probabilistic_subset(
-                dict(sampled_av.get(0, {0: 1})), k=20
-            )
-            sampled_left[0] = 0
-            cond_leaf_seed, _, _ = _categorize_dfs(
-                {0: sampled_left}, self.ltm.content_hierarchy,
-                stochastic=True,
-            )
-            cond_av_seed = (cond_leaf_seed.av_count
-                            if cond_leaf_seed else sampled_av) or sampled_av
-            sampled_right = _probabilistic_subset(
-                dict(cond_av_seed.get(_cpd_gen, sampled_av.get(_cpd_gen, {0: 1}))), k=20
-            )
-            sampled_right[0] = 0
-            sampled_content = {0: sampled_left, _cpd_gen: sampled_right}
-            for _di in range(1, _cpd_gen):
-                sampled_content[_di] = _probabilistic_subset(
-                    dict(sampled_av.get(_di, {0: 1})), k=15)
-                sampled_content[_di][0] = 0
-                sampled_content[_cpd_gen + _di] = _probabilistic_subset(
-                    dict(sampled_av.get(_cpd_gen + _di, {0: 1})), k=15)
-                sampled_content[_cpd_gen + _di][0] = 0
-
-            ctx_inst = _make_empty_ctx(initial_complexity)
-
-            initial_node = CompositeParseNode.create_node(
-                content_instance=sampled_content,
-                context_instance=ctx_inst,
+            comp = CompositeParseNode.create_node(
+                content_instance=child_content,
+                context_instance=child_ctx,
                 label=label,
                 categorize_path=[],
-                position_idx=0.0,
-                context_length=self.context_length,
-                complexity=initial_complexity,
-            )
-            initial_node.label_path = label_path
-            initial_node.set_parent(global_root)
+                position_idx=parent_pos,
+                context_length=_cl,
+                complexity=node_cplx)
+            comp.label_path = lbl_path
+            comp._visited_hashes = new_visited  # for cycle detection
+            comp._gen_sent_id = sent_id          # sentence tracking
+            comp._gen_left_ref = child_left_ref  # direct child references
+            comp._gen_right_ref = child_right_ref
+            return comp, 0, sent_id
 
-            # 2. Expand recursively via a priority queue (highest complexity first)
-            frontier = [(-initial_complexity, id(initial_node), initial_node)]
-            all_nodes = [initial_node]
-            max_expansions = 100  # safety limit
+        # ══════════════════════════════════════════════════════════════════
+        #  Collect composite context leaves (have CONCEPT content-refs)
+        # ══════════════════════════════════════════════════════════════════
 
-            expansions = 0
-            while frontier and expansions < max_expansions:
-                neg_complexity, _, node_to_expand = heapq.heappop(frontier)
+        def _composite_ctx_leaves(sentence_level_only=True):
+            """Return [(node, concept_ref_str, weight), …] for context-hierarchy
+            leaves whose dominant content-ref is a CONCEPT-… (= composite).
 
-                if not isinstance(node_to_expand, CompositeParseNode):
+            If *sentence_level_only* is True, only include leaves whose
+            surrounding context (before / after slots) contains exclusively
+            EMPTYNULL (vid=0).  These correspond to full-sentence roots —
+            exactly 1 per training sentence.
+            """
+            results = []
+            def _is_sentence_level(node):
+                av = node.av_count or {}
+                for attr in range(2 * _cl):          # before + after slots
+                    slot = av.get(attr, {})
+                    if any(v != 0 for v in slot):     # non-EMPTYNULL present
+                        return False
+                return True
+
+            def walk(n):
+                if not n.children:
+                    if sentence_level_only and not _is_sentence_level(n):
+                        return
+                    av = n.av_count or {}
+                    rd = av.get(_ref_attr, {})
+                    for vid, w in rd.items():
+                        nm = _name(vid)
+                        if nm and isinstance(nm, str) and nm.startswith("CONCEPT-"):
+                            results.append((n, nm, w))
+                for c in n.children:
+                    walk(c)
+            walk(self.ltm.context_hierarchy.root)
+            return results
+
+        # ══════════════════════════════════════════════════════════════════
+        #  _generate_subtree — the complete algorithm
+        #
+        #   1. Categorize seed_ctx in context hierarchy → ctx_leaf
+        #   2. Read content-ref.  Word → single primitive.
+        #   3. CONCEPT → find in content hierarchy → get_basic → sample
+        #   4. Build root composite from sampled leaf's content
+        #   5. Priority-queue expand: for each composite, extract
+        #      left/right path_vids and _resolve each side
+        # ══════════════════════════════════════════════════════════════════
+
+        def _generate_subtree(seed_ctx, position, global_root,
+                              max_expansions=100, ctx_leaf_override=None):
+            """Generate a subtree. If *ctx_leaf_override* is given, skip
+            categorization and use it directly as the starting ctx_leaf."""
+
+            # ── Step 1: categorize (or use override) ──
+            if ctx_leaf_override is not None:
+                ctx_leaf = ctx_leaf_override
+            else:
+                ctx_leaf = self.ltm.context_hierarchy.categorize(seed_ctx)
+            if ctx_leaf is None:
+                ctx_leaf = self.ltm.context_hierarchy.root
+            if debug:
+                print(f"  ctx_leaf=...{str(ctx_leaf.concept_hash())[-12:]}")
+
+            # ── Step 2: content-ref ──
+            ref = _read_ref(ctx_leaf)
+            if debug:
+                print(f"  ref={ref}")
+
+            # ── Step 2b: word → single primitive ──
+            if ref and not ref.startswith("CONCEPT-"):
+                wid = self.value_to_id.get(ref, 0)
+                prim = PrimitiveParseNode.create_node(
+                    context_instance=seed_ctx,
+                    label={wid: 1},
+                    position_idx=position,
+                    word_id=wid)
+                prim.label_path = _build_label_path_from_ctx(
+                    _anc(ctx_leaf), self.value_to_id, _cpd)
+                prim.set_parent(global_root)
+                return [prim]
+
+            # ── Step 3: find content for this composite ──
+            # First try the gen_content_map (list of (sent_id, content) tuples)
+            ctx_leaf_hash = str(ctx_leaf.concept_hash())
+            ctx_leaf_nid = ctx_leaf_hash.rsplit('_', 1)[-1]
+            direct_entries = _gen_map.get(ctx_leaf_nid)
+
+            gen_sent_id = None  # tracks which sentence we're generating
+            root_left_ref = None
+            root_right_ref = None
+            root_cplx = None
+            if direct_entries:
+                # For root lookup: pick a random sentence, then prefer
+                # the primary entry (source_ifit_nid == ctx_leaf_nid).
+                # If no primary, pick highest complexity (= actual root).
+                available_sids = list(set(e[0] for e in direct_entries))
+                chosen_sid = random.choice(available_sids)
+                sid_entries = [e for e in direct_entries if e[0] == chosen_sid]
+                # Prefer primary entries
+                primary = [e for e in sid_entries if e[5] == ctx_leaf_nid]
+                if primary:
+                    entry = max(primary, key=lambda e: e[4])
+                else:
+                    entry = max(sid_entries, key=lambda e: e[4])
+                gen_sent_id = entry[0]
+                seed_content = entry[1]
+                root_left_ref = entry[2]
+                root_right_ref = entry[3]
+                root_cplx = entry[4]
+                if debug:
+                    print(f"  (gen_content_map hit nid={ctx_leaf_nid}, {len(direct_entries)} entries, sent={gen_sent_id})")
+            else:
+                # Fallback: content hierarchy lookup
+                cnt_node = None
+                if ref and ref.startswith("CONCEPT-"):
+                    full_hash = ref[len("CONCEPT-"):]
+                    cnt_node = cnt_idx.get(full_hash)
+                    if cnt_node is None:
+                        nid = full_hash.rsplit('_', 1)[-1]
+                        cnt_node = cnt_nid.get(nid)
+                if cnt_node is None:
+                    cnt_node = self.ltm.content_hierarchy.categorize({})
+                if cnt_node is None:
+                    cnt_node = self.ltm.content_hierarchy.root
+                if debug:
+                    print(f"  cnt_node=...{str(cnt_node.concept_hash())[-12:]}")
+
+                sampled = _basic_sample(cnt_node)
+                seed_content = _content_from_leaf(sampled)
+
+            # ── Step 4: build root composite ──
+            cplx = root_cplx if root_cplx is not None else max(_read_cplx(ctx_leaf), 2)
+            seed_ctx[_cplx_attr] = {_cplx_vid: cplx}
+
+            anc = _anc(ctx_leaf)
+            lbl_path = _build_label_path_from_ctx(anc, self.value_to_id, _cpd)
+            vid = self.value_to_id.get(anc[-1]) if anc else 0
+            label = {vid: 1} if vid else {0: 1}
+
+            seed_node = CompositeParseNode.create_node(
+                content_instance=seed_content,
+                context_instance=seed_ctx,
+                label=label,
+                categorize_path=[],
+                position_idx=position,
+                context_length=_cl,
+                complexity=cplx)
+            seed_node.label_path = lbl_path
+            seed_node._visited_hashes = {ctx_leaf_nid}
+            seed_node._gen_sent_id = gen_sent_id
+            seed_node._gen_left_ref = root_left_ref
+            seed_node._gen_right_ref = root_right_ref
+            seed_node.set_parent(global_root)
+
+            # ── Step 5: priority-queue expansion ──
+            frontier = [(-cplx, id(seed_node), seed_node)]
+            all_nodes = [seed_node]
+            exp = 0
+
+            while frontier and exp < max_expansions:
+                _, _, nd = heapq.heappop(frontier)
+                if not isinstance(nd, CompositeParseNode):
+                    continue
+                if debug:
+                    print(f"\n  Expand {exp}: pos={nd.position_idx} cplx={nd.complexity}")
+
+                _enrich(nd, all_nodes)
+                if not nd.content_instance:
                     continue
 
-                if debug:
-                    print(f"\nExpansion {expansions}: node at pos={node_to_expand.position_idx}, "
-                          f"complexity={node_to_expand.complexity}")
+                pctx = nd.context_instance or {}
+                visited = getattr(nd, '_visited_hashes', set())
+                nd_sent_id = getattr(nd, '_gen_sent_id', None)
 
-                left_child, right_child = _expand_node(node_to_expand)
+                left_pv  = _path_vids(nd.content_instance, 0)
+                right_pv = _path_vids(nd.content_instance, _cpd)
 
-                if left_child is not None:
-                    left_child.position_idx = node_to_expand.position_idx - 0.5 / (2 ** expansions)
-                    left_child.set_parent(node_to_expand)
-                    all_nodes.append(left_child)
-                    if isinstance(left_child, CompositeParseNode):
-                        heapq.heappush(frontier, (
-                            -left_child.complexity, id(left_child), left_child
-                        ))
+                # Retrieve direct child references stored from gen_content_map
+                left_ref = getattr(nd, '_gen_left_ref', None)
+                right_ref = getattr(nd, '_gen_right_ref', None)
 
-                if right_child is not None:
-                    right_child.position_idx = node_to_expand.position_idx + 0.5 / (2 ** expansions)
-                    right_child.set_parent(node_to_expand)
-                    all_nodes.append(right_child)
-                    if isinstance(right_child, CompositeParseNode):
-                        heapq.heappush(frontier, (
-                            -right_child.complexity, id(right_child), right_child
-                        ))
+                # ── LEFT ──
+                lctx = _child_ctx(pctx, 'left', 1)
+                lch, lwid, nd_sent_id = _resolve(left_pv, lctx, nd.position_idx, visited, nd_sent_id, child_ref=left_ref)
 
-                expansions += 1
+                # ── RIGHT (inject left word into before-context) ──
+                rctx = _child_ctx(pctx, 'right', 1)
+                if lwid and lwid != 0:
+                    rctx[0] = {lwid: 1.0 / 2}; rctx[0][0] = 0
+                rch, _, nd_sent_id = _resolve(right_pv, rctx, nd.position_idx, visited, nd_sent_id, child_ref=right_ref)
 
-            # 3. Flatten to words
-            words = _flatten_to_words(global_root)
-            generated_text = " ".join(words) if words else ""
+                for side, ch in [('left', lch), ('right', rch)]:
+                    if ch is None:
+                        continue
+                    offset = (-0.5 if side == 'left' else 0.5) / (2 ** exp)
+                    ch.position_idx = nd.position_idx + offset
+                    ch.set_parent(nd)
+                    all_nodes.append(ch)
+                    if isinstance(ch, CompositeParseNode):
+                        heapq.heappush(frontier, (-ch.complexity, id(ch), ch))
+
+                exp += 1
 
             if debug:
-                print(f"\nGenerated: {generated_text}")
-                print(f"Total expansions: {expansions}, total nodes: {len(all_nodes)}")
+                print(f"  expansions={exp} nodes={len(all_nodes)}")
+            return all_nodes
 
-            final_parse = FiniteParseTree(self.ltm, self.context_length)
-            final_parse.window = generated_text
-            final_parse.global_root_node = global_root
-            final_parse.nodes = all_nodes
+        # ══════════════════════════════════════════════════════════════════
+        #  MASKED SENTENCE COMPLETION
+        # ══════════════════════════════════════════════════════════════════
+        if masked_sentence:
+            tokens = re.findall(r"[\w']+|[.,!?;]|\[mask\]", masked_sentence)
+            mask_pos = [i for i, t in enumerate(tokens) if t == "[mask]"]
+            if debug:
+                print(f"Tokens: {tokens}\nMask positions: {mask_pos}")
 
-            return [generated_text, final_parse]
+            known = [None if t == "[mask]" else self.value_to_id.get(t, 0)
+                     for t in tokens]
+
+            results: Dict[int, List[str]] = {}
+            for mi in mask_pos:
+                if debug:
+                    print(f"\n--- [mask] at {mi} ---")
+                ctx = _seeded_ctx(mi, known, 1)
+                mr = CompositeParseNode.create_global_root()
+                try:
+                    _generate_subtree(ctx, float(mi), mr, max_expansions=50)
+                    results[mi] = _words(mr)
+                except RuntimeError as e:
+                    if debug:
+                        print(f"  Failed: {e}")
+                    results[mi] = ["?"]
+                if debug:
+                    print(f"  → {results[mi]}")
+
+            out = []
+            for i, t in enumerate(tokens):
+                if t == "[mask]":
+                    out.extend(results.get(i, ["?"]))
+                else:
+                    out.append(t)
+            gen_text = " ".join(out)
+            pt = self.parse_sentence(gen_text, threshold="converge",
+                                     learning=False, debug=debug)
+            return [gen_text, pt]
+
+        # ══════════════════════════════════════════════════════════════════
+        #  GENERATION FROM SCRATCH
+        #
+        #  "Sample a COMPLEX context instance" — find a context-hierarchy
+        #  leaf whose content-ref is a CONCEPT (composite), sample one
+        #  weighted by count, then run the standard algorithm.
+        # ══════════════════════════════════════════════════════════════════
+        else:
+            if debug:
+                print("=== GENERATION FROM SCRATCH ===")
+
+            # Find composite context leaves
+            comp_leaves = _composite_ctx_leaves()
+            if not comp_leaves:
+                raise RuntimeError(
+                    "No composite context instances found in the context "
+                    "hierarchy. Train on more data (with learning=True) "
+                    "before generating.")
+
+            if debug:
+                print(f"  Found {len(comp_leaves)} composite context leaves")
+
+            # Sample one weighted by count
+            nodes, refs, weights = zip(*comp_leaves)
+            chosen_idx = random.choices(
+                range(len(nodes)),
+                weights=[max(w, 1e-12) for w in weights],
+                k=1)[0]
+            chosen_leaf = nodes[chosen_idx]
+
+            if debug:
+                print(f"  Chosen: ...{str(chosen_leaf.concept_hash())[-12:]} "
+                      f"ref={refs[chosen_idx]}")
+
+            global_root = CompositeParseNode.create_global_root()
+            seed_ctx = _empty_ctx(1)  # context doesn't matter much for from-scratch
+
+            all_nodes = _generate_subtree(
+                seed_ctx, 0.0, global_root, max_expansions=100,
+                ctx_leaf_override=chosen_leaf)
+
+            gen_text = " ".join(_words(global_root))
+            if debug:
+                print(f"\nGenerated: {gen_text}")
+
+            fp = FiniteParseTree(self.ltm, self.context_length)
+            fp.window = gen_text
+            fp.global_root_node = global_root
+            fp.nodes = all_nodes
+            return [gen_text, fp]
+
 
     # ---- visualization --------------------------------------------------
 

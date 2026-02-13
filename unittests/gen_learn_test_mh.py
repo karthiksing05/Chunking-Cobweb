@@ -16,7 +16,7 @@ if os.path.exists(OUT_DIR):
     shutil.rmtree(OUT_DIR)
 
 # Creating and printing toy sentences
-CONTEXT_LENGTH = 3
+CONTEXT_LENGTH = 5
 CONTENT_LENGTH = 10
 
 num_sentences = 100

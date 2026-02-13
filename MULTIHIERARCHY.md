@@ -62,6 +62,7 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
         *   We add this chunk
     *   At the end, all candidate chunks are added to the content-hierarchy. All frozen chunks are added to both the content and context hierarchies.
         *   The reason for this shift is that only the content-hierarchy is in charge of aggregating frequencies
+    *   We also replace the content hierarchy paths with actual context hierarchy paths (updated for the specific node) and then replace content-refs wherever applicable as well!!
 
 *   Performance: [*Given a partially filled in text, our goal is to generate the full parse and generate the sentence as an extension.*]
     *   Our input is of the form "word1 word2 [mask] word3 word4 [mask] word5 [mask]..." and corresponds to a level of granularity we've seen before (sentences, paragraphs, etc)
@@ -78,6 +79,10 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
     *   **IMPORTANT NOTE** - we need to find some method of multi-level context that explains all the contextual levels of the parse tree, so that this data can be leveraged properly
         *   Perhaps the answer here is that we encode the level of appropriate context at that level
         *   Perhaps another answer here is that we don't need context for generation? Unless it's offered as the prompt
+
+    *   The process of generation should be as follows: sample a complex context instance, find the leaf which corresponds to its content-ref of the context instance, find the basic level node of that leaf, sample a new leaf from that node, expand its two content elements as new nodes by using PATH INFORMATION to traverse the CONTEXT HIERARCHY, and repeat this process until words terminate as sentences!!!
+    *   For generation with masked language, we do the same generation process above for each masked token (but we use surrounding context to find the initial context-hierarchy node as well)
+
 
 ## Implementation 
 
@@ -213,6 +218,8 @@ Webster: (Primary Class - we're going to do all logic and parsing in here, and e
 *   An important note comes into play when discussing this is whether semantic information will be appropriately translated, and I think that diffusion models will fare better than our purely discrete counterpart in using the latent space to leverage both semantic and syntactic correlation (contextually related)
 
 *   Another note here is that while our current process resembles diffusion LMs, the continuous parse tree is more analogous to autoregressive models!!
+
+MOVING THIS TO ITS OWN REPOSITORY SO THAT WE CAN START WORKING ON IT!!!
 
 ## Rationale for this theory
 
