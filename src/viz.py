@@ -53,7 +53,8 @@ class TextCobwebDrawer:
 		print_dfs(root)
 
 class HTMLCobwebDrawer:
-	def __init__(self, attributes, id_to_value, value_to_id, attr_value_fn=None):
+	def __init__(self, attributes, id_to_value, value_to_id,
+				 attr_value_fn=None, attr_name_overrides=None):
 		"""
 		Parameters
 		----------
@@ -69,12 +70,18 @@ class HTMLCobwebDrawer:
 			callables ``fn(val_id) -> str`` that return the display string for
 			a given value id.  Attributes not present in this dict fall back to
 			the global ``id_to_value`` list.
+		attr_name_overrides : dict[int, str] | None
+			Optional mapping from attribute index to display name.  Useful for
+			hidden (negative-index) attributes that are not in the positional
+			*attributes* list but should still show a meaningful header in the
+			visualisation.
 		"""
 		self.id_to_attr = attributes
 		self.attr_to_id = {w: i for i, w in enumerate(attributes)}
 		self.id_to_value = id_to_value
 		self.value_to_id = value_to_id
 		self.attr_value_fn = attr_value_fn or {}
+		self.attr_name_overrides = attr_name_overrides or {}
 
 	def _safe_lookup(self, id_to_list, idx):
 		return id_to_list[idx] if (idx is not None and 0 <= idx < len(id_to_list)) else "None"
@@ -83,38 +90,35 @@ class HTMLCobwebDrawer:
 		"""
 		Convert a CobwebNode into a JSON dict for D3 rendering.
 
-		Args:
-			node: CobwebNode
-			max_depth: maximum depth to recurse (int or None).
-					Depth 0 means only the current node,
-					depth=1 includes children, etc.
-			_depth: internal recursion counter.
+		Each node produces a flat list of ``{attr, val, count}`` rows
+		(one row per value per attribute) for a single three-column table.
 		"""
 		title = f"CONCEPT-{node.concept_hash()}"
 
-		attr_tables = []
+		rows = []
 		for attr_id, val_counts in sorted(node.av_count.items()):
-			attr_name = self._safe_lookup(self.id_to_attr, attr_id)
+			attr_name = self.attr_name_overrides.get(
+				attr_id, self._safe_lookup(self.id_to_attr, attr_id)
+			)
 
 			# Sort values by descending count, then take top 7
 			top_vals = sorted(val_counts.items(), key=lambda x: x[1], reverse=True)[:7]
 
-			rows = []
+			first = True
 			for val_id, count in top_vals:
-				# Use per-attribute value function if provided, else global lookup
 				if attr_id in self.attr_value_fn:
 					val_name = self.attr_value_fn[attr_id](val_id)
 				else:
 					val_name = self._safe_lookup(self.id_to_value, val_id)
-				rows.append({"val": val_name, "count": count})
+				rows.append({
+					"attr": attr_name if first else "",
+					"val": val_name,
+					"count": count,
+				})
+				first = False
 
-			if len(val_counts.items()) > 7:
-				rows.append({"val": "...", "count": "..."})
-
-			attr_tables.append({
-				"attr": attr_name,
-				"rows": rows
-			})
+			if len(val_counts) > 7:
+				rows.append({"attr": "", "val": "...", "count": "..."})
 
 		# Stop recursion if max_depth is reached
 		if max_depth is not None and _depth >= max_depth:
@@ -127,7 +131,7 @@ class HTMLCobwebDrawer:
 
 		return {
 			"title": title,
-			"attributes": attr_tables,
+			"rows": rows,
 			"children": children
 		}
 
@@ -244,14 +248,16 @@ svg.attr("width", width)
 	.attr("viewBox", [x0, y0, width, height].join(" "));
 
 function nodeHTML(d) {{
-	const attrTables = d.attributes.map(a => {{
-		const rows = a.rows.map(r => `<tr><td>${{r.val}}</td><td>${{r.count}}</td></tr>`).join("");
-		return `<div class="section"><div class="section-title">${{a.attr}}</div><table><tbody>${{rows}}</tbody></table></div>`;
-	}}).join("");
+	let tableRows = d.rows.map(r =>
+		`<tr><td>${{r.attr}}</td><td>${{r.val}}</td><td>${{r.count}}</td></tr>`
+	).join("");
 	return `
 	<div class="node-fo">
-		<table><tr><th>${{d.title}}</th></tr></table>
-		${{attrTables}}
+		<table>
+			<tr><th colspan="3">${{d.title}}</th></tr>
+			<tr><th>Attr</th><th>Value</th><th>Count</th></tr>
+			${{tableRows}}
+		</table>
 	</div>`;
 }}
 </script>

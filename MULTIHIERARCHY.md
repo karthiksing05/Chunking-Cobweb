@@ -82,6 +82,7 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
 
     *   The process of generation should be as follows: sample a complex context instance, find the leaf which corresponds to its content-ref of the context instance, find the basic level node of that leaf, sample a new leaf from that node, expand its two content elements as new nodes by using PATH INFORMATION to traverse the CONTEXT HIERARCHY, and repeat this process until words terminate as sentences!!!
     *   For generation with masked language, we do the same generation process above for each masked token (but we use surrounding context to find the initial context-hierarchy node as well)
+        *   One small clarification to this - what we should do is we should build a new composite node next to the child node
 
 
 ## Implementation 

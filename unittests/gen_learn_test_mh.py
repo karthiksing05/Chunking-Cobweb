@@ -26,7 +26,7 @@ for _ in range(num_sentences):
     sentence = generate("S", TEST_GRAMMAR1)
     document.append(sentence)
 
-THRESHOLD = -5.0
+THRESHOLD = -30
 
 # Setting up the multi-hierarchy parser (WEBSTER)
 webster = WEBSTER(
@@ -67,7 +67,6 @@ for i, doc in enumerate(train_documents):
         if i < 21:
             webster.visualize_ltm(f"{OUT_DIR}/ltms/ltm{i}", max_depth=4)
 
-webster.visualize_ltm(f"{OUT_DIR}/final_ltm", max_depth=4)
 
 # Visualize the test parse trees
 for i, test in enumerate(test_documents):
@@ -147,6 +146,7 @@ with open(mask_pred_path, "w") as mask_f:
             parse.visualize(f"{OUT_DIR}/masked_pred_trees/masked_pred_tree{i}")
 print(f"Saved masked prediction results to \"{mask_pred_path}\"")
 
+webster.visualize_ltm(f"{OUT_DIR}/final_ltm", max_depth=3)
 SAVE_DIR = f"{OUT_DIR}/final_ltm_data"
 webster.save_state(SAVE_DIR)
 print(f"Saved Final LTM to \"{SAVE_DIR}\"!")

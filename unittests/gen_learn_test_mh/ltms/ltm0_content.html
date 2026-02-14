@@ -18,7 +18,7 @@
 <div id="tree"></div>
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script>
-const data = {"title": "CONCEPT-2834164569110250_1", "attributes": [], "children": []};
+const data = {"title": "CONCEPT-2913502141562666_1", "rows": [], "children": []};
 
 const nodeW  = 380;
 const nodeH  = 140;
@@ -109,14 +109,16 @@ svg.attr("width", width)
 	.attr("viewBox", [x0, y0, width, height].join(" "));
 
 function nodeHTML(d) {
-	const attrTables = d.attributes.map(a => {
-		const rows = a.rows.map(r => `<tr><td>${r.val}</td><td>${r.count}</td></tr>`).join("");
-		return `<div class="section"><div class="section-title">${a.attr}</div><table><tbody>${rows}</tbody></table></div>`;
-	}).join("");
+	let tableRows = d.rows.map(r =>
+		`<tr><td>${r.attr}</td><td>${r.val}</td><td>${r.count}</td></tr>`
+	).join("");
 	return `
 	<div class="node-fo">
-		<table><tr><th>${d.title}</th></tr></table>
-		${attrTables}
+		<table>
+			<tr><th colspan="3">${d.title}</th></tr>
+			<tr><th>Attr</th><th>Value</th><th>Count</th></tr>
+			${tableRows}
+		</table>
 	</div>`;
 }
 </script>
