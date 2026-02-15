@@ -1,0 +1,50 @@
+[0] original: a park liked a man
+    masked:   a park [mask] a man
+    replaced: "liked" at pos 2
+    completed: a park under a man
+
+[1] original: the park found the red woman
+    masked:   the park found [mask] red woman
+    replaced: "the" at pos 3
+    completed: the park found a red woman
+
+[2] original: the telescope liked
+    masked:   the [mask] liked
+    replaced: "telescope" at pos 1
+    completed: the dog liked
+
+[3] original: the telescope chased
+    masked:   the [mask] chased
+    replaced: "telescope" at pos 1
+    completed: the park chased
+
+[4] original: a red cat chased
+    masked:   a red [mask] chased
+    replaced: "cat" at pos 2
+    completed: a red park chased
+
+[5] original: a woman admired a park in the park
+    masked:   a woman admired a [mask] in the park
+    replaced: "park" at pos 4
+    completed: a woman admired a man in the park
+
+[6] original: the woman liked a woman
+    masked:   the woman [mask] a woman
+    replaced: "liked" at pos 2
+    completed: the woman found a woman
+
+[7] original: a park chased a park
+    masked:   a park [mask] a park
+    replaced: "chased" at pos 2
+    completed: a park under a park
+
+[8] original: the dog saw the woman under the park
+    masked:   the dog saw the [mask] under the park
+    replaced: "woman" at pos 4
+    completed: the dog saw the woman under the park
+
+[9] original: a cat chased
+    masked:   a [mask] chased
+    replaced: "cat" at pos 1
+    completed: a cat chased
+

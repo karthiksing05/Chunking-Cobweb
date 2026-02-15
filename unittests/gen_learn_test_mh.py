@@ -123,6 +123,60 @@ for i in range(min(5, len(test_documents))):
     completed, parse = webster.generate_sentence(masked_sentence=masked, debug=True)
     print(f"  Completed:    \"{completed}\"\n")
 
+# Mid-sentence masked completion: [mask] in the MIDDLE with context on BOTH sides
+print("\n--- MID-SENTENCE MASKED COMPLETION ---")
+mid_mask_path = f"{OUT_DIR}/mid_mask_results.txt"
+os.makedirs(os.path.dirname(mid_mask_path), exist_ok=True)
+with open(mid_mask_path, "w") as mid_f:
+    for i in range(min(10, len(test_documents))):
+        tokens = test_documents[i].split()
+        if len(tokens) < 3:
+            continue
+        # Place [mask] roughly in the middle so both sides have context
+        mid = len(tokens) // 2
+        original_token = tokens[mid]
+        masked_tokens = tokens[:mid] + ['[mask]'] + tokens[mid + 1:]
+        masked = ' '.join(masked_tokens)
+        print(f"  Original:  \"{test_documents[i]}\"")
+        print(f"  Masked:    \"{masked}\"  (replaced \"{original_token}\" at pos {mid})")
+        mid_f.write(f"[{i}] original: {test_documents[i]}\n")
+        mid_f.write(f"    masked:   {masked}\n")
+        mid_f.write(f"    replaced: \"{original_token}\" at pos {mid}\n")
+        completed, parse = webster.generate_sentence(masked_sentence=masked, debug=True)
+        print(f"  Completed: \"{completed}\"\n")
+        mid_f.write(f"    completed: {completed}\n\n")
+        if parse and hasattr(parse, 'visualize'):
+            parse.visualize(f"{OUT_DIR}/mid_mask_trees/mid_mask_tree{i}")
+print(f"Saved mid-sentence mask results to \"{mid_mask_path}\"")
+
+# Multi-token mid-sentence mask: replace a contiguous span in the middle
+print("\n--- MULTI-TOKEN MID-SENTENCE MASK ---")
+multi_mid_path = f"{OUT_DIR}/multi_mid_mask_results.txt"
+os.makedirs(os.path.dirname(multi_mid_path), exist_ok=True)
+with open(multi_mid_path, "w") as multi_f:
+    for i in range(min(10, len(test_documents))):
+        tokens = test_documents[i].split()
+        if len(tokens) < 5:
+            continue
+        # Replace 2-4 contiguous tokens in the middle with a single [mask]
+        max_remove = min(4, len(tokens) - 2)  # leave at least 1 token on each side
+        num_remove = random.randint(2, max(2, max_remove))
+        mid = max(1, (len(tokens) - num_remove) // 2)  # ensure at least 1 left token
+        removed = tokens[mid:mid + num_remove]
+        masked_tokens = tokens[:mid] + ['[mask]'] + tokens[mid + num_remove:]
+        masked = ' '.join(masked_tokens)
+        print(f"  Original:  \"{test_documents[i]}\"")
+        print(f"  Masked:    \"{masked}\"  (removed {num_remove} tokens: \"{' '.join(removed)}\" at pos {mid}-{mid+num_remove-1})")
+        multi_f.write(f"[{i}] original: {test_documents[i]}\n")
+        multi_f.write(f"    masked:   {masked}\n")
+        multi_f.write(f"    removed: \"{' '.join(removed)}\" ({num_remove} tokens) at pos {mid}-{mid+num_remove-1}\n")
+        completed, parse = webster.generate_sentence(masked_sentence=masked, debug=True)
+        print(f"  Completed: \"{completed}\"\n")
+        multi_f.write(f"    completed: {completed}\n\n")
+        if parse and hasattr(parse, 'visualize'):
+            parse.visualize(f"{OUT_DIR}/multi_mid_trees/multi_mid_tree{i}")
+print(f"Saved multi-token mid mask results to \"{multi_mid_path}\"")
+
 # Masked prediction: keep first half, replace second half with a single [mask]
 print("\n--- MASKED PREDICTION (expand second half) ---")
 mask_pred_path = f"{OUT_DIR}/masked_prediction_results.txt"

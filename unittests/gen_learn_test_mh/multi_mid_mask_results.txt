@@ -1,0 +1,30 @@
+[0] original: a park liked a man
+    masked:   a [mask] a man
+    removed: "park liked" (2 tokens) at pos 1-2
+    completed: a park under a man
+
+[1] original: the park found the red woman
+    masked:   the park [mask] red woman
+    removed: "found the" (2 tokens) at pos 2-3
+    completed: the park liked the red woman
+
+[5] original: a woman admired a park in the park
+    masked:   a woman [mask] in the park
+    removed: "admired a park" (3 tokens) at pos 2-4
+    completed: a woman telescope in the park
+
+[6] original: the woman liked a woman
+    masked:   the [mask] woman
+    removed: "woman liked a" (3 tokens) at pos 1-3
+    completed: the quick woman
+
+[7] original: a park chased a park
+    masked:   a [mask] a park
+    removed: "park chased" (2 tokens) at pos 1-2
+    completed: a park under a park
+
+[8] original: the dog saw the woman under the park
+    masked:   the dog saw [mask] under the park
+    removed: "the woman" (2 tokens) at pos 3-4
+    completed: the dog saw a man under the park
+

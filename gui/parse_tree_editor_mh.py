@@ -9,16 +9,22 @@ app = Flask(__name__)
 
 LEARNING_ON = True
 PREBUILD_TREES = False
-CONTEXT_LENGTH = 3
-PRIMITIVE_THRESHOLD = -5.5
-# LOAD_LTM = ""
-LOAD_LTM = "unittests/gen_learn_test_mh/final_ltm_data"
+CONTEXT_LENGTH = 5
+CONTENT_LENGTH = 10
+PRIMITIVE_THRESHOLD = "converge"
+LOAD_LTM = ""
+# LOAD_LTM = "unittests/gen_learn_test_mh/final_ltm_data"
 
 # --- Initialize WEBSTER (multi-hierarchy parser) ---
 if LOAD_LTM != "":
     webster = WEBSTER.load_state(LOAD_LTM)
 else:
-    webster = WEBSTER(TEST_CORPUS1, context_length=CONTEXT_LENGTH, threshold=PRIMITIVE_THRESHOLD)
+    webster = WEBSTER(
+        TEST_CORPUS1,
+        context_length=CONTEXT_LENGTH,
+        content_length=CONTENT_LENGTH,
+        threshold=PRIMITIVE_THRESHOLD
+    )
 
 NUM_LOAD = 0
 document = []
