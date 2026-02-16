@@ -4,6 +4,8 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
 
 ## Current problems
 
+*   Our current two main problems rely on both the nature of 
+
 *   This may solve the below two problems, but first and foremost, we have a path-weighting problems
     *   Path-information does not seem like a successful final representation, unless we learn node distributions!!
     *   The first here may be some sort of joint-distribution structure which stores count-based probabilities for pairwise node labels to better calculate
@@ -12,19 +14,11 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
     *   I like using a hierarchy because we're able to get a steady level of generalizability at any given time
     *   NOTE: trying to split the hierarchy across attributes!!!
 
-*   The following two are issues that are also faced but might be resolved by 
-    *   Scoring problems
-        
-
-    *   Basic level problems
-
 *   For generation, we face the following problems:
     *   How to choose where to start from???
         *   We should be able to denote the "complexity" of a given instance in some way, and select a highly complex node to start from
         *   We should also program both an autoregressive and diffusive way of generation
             *   The autoregressive way starts with a word, creates a high-level token, then expands downwards, then creates another high-level token, etc etc.
-            *   
-        *   
 
 ## Methodology 1.0
 

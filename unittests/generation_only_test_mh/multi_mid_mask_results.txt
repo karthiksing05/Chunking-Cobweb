@@ -1,0 +1,40 @@
+[0] original: a small big telescope saw
+    masked:   a [mask] saw
+    removed: "small big telescope" (3 tokens) at pos 1-3
+    completed: a man saw
+
+[1] original: the small lazy cat liked
+    masked:   the [mask] cat liked
+    removed: "small lazy" (2 tokens) at pos 1-2
+    completed: the the cat liked
+
+[2] original: a man liked a man
+    masked:   a [mask] man
+    removed: "man liked a" (3 tokens) at pos 1-3
+    completed: a small man
+
+[3] original: a big big man admired the telescope with the park
+    masked:   a big big [mask] telescope with the park
+    removed: "man admired the" (3 tokens) at pos 3-5
+    completed: a big big quick telescope with the park
+
+[4] original: the telescope saw a small quick quick telescope
+    masked:   the telescope [mask] quick telescope
+    removed: "saw a small quick" (4 tokens) at pos 2-5
+    completed: the telescope liked quick telescope
+
+[5] original: a small telescope saw the quick red telescope on the red red cat
+    masked:   a small telescope saw the [mask] telescope on the red red cat
+    removed: "quick red" (2 tokens) at pos 5-6
+    completed: a small telescope saw the quick telescope on the red red cat
+
+[6] original: the telescope found the man in a park
+    masked:   the telescope found [mask] in a park
+    removed: "the man" (2 tokens) at pos 3-4
+    completed: the telescope found the lazy red woman in a park
+
+[9] original: a park admired the park on a small woman
+    masked:   a park [mask] a small woman
+    removed: "admired the park on" (4 tokens) at pos 2-5
+    completed: a park liked a small woman
+

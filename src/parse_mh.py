@@ -2487,7 +2487,8 @@ class WEBSTER(object):
 
         def _basic_sample(cnt_node):
             """get_basic → sample a leaf from the basic-level subtree."""
-            # basic = cnt_node.get_basic(10000, 100000) # TODO REVISE THIS!!!
+            # basic = cnt_node.get_basic(100, 100000) # TODO REVISE THIS!!! n_nodes, n_samples
+            # basic = cnt_node.get_best(cnt_node.av_count)
             basic = cnt_node
             cnt_root_h = str(self.ltm.content_hierarchy.root.concept_hash())
             if str(basic.concept_hash()) == cnt_root_h:
