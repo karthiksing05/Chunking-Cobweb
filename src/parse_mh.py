@@ -12,9 +12,9 @@ Key difference from parse.py (single-hierarchy):
     - Content instances use **multi-attribute path encoding** with
       `content_path_depth` (default 3) depth levels per side:
           content_instance = {
-              0: {left_depth0: 1},  # most specific (word or concept leaf)
-              1: {left_depth1: 1},  # context-hierarchy parent concept
-              2: {left_depth2: 1},  # grandparent concept
+              0: {left_depth0: 1},  # ROOT / most general (context root concept)
+              1: {left_depth1: 1},  # deeper toward leaf (more specific)
+              2: {left_depth2: 1},  # most specific (leaf-level concept)
               3: {right_depth0: 1},
               4: {right_depth1: 1},
               5: {right_depth2: 1},
@@ -246,16 +246,15 @@ def _build_label_path_from_ctx(path_strs: list, value_to_id: dict,
     Returns
     -------
     list[int] of length *content_path_depth*.
-        [depth_0, depth_1, depth_2, ...] from most-specific (leaf) to
-        most-general (towards root).  Padded with 0 (EMPTYNULL) if the
+        [depth_0, depth_1, depth_2, ...] from most-general (root) to
+        most-specific (towards leaf).  Padded with 0 (EMPTYNULL) if the
         path is shorter than *content_path_depth*.
     """
-    # Reversed path is leaf-first (most specific → most general).
-    rev = list(reversed(path_strs))
+    # Root-first: depth-0 = root (most general), deeper = more specific.
     cpd = content_path_depth
 
     lp = []
-    for s in rev[:cpd]:
+    for s in path_strs[:cpd]:
         v = value_to_id.get(s)
         lp.append(v if v is not None else 0)
 
@@ -409,13 +408,13 @@ class CompositeParseNode(object):
         multi-attribute path encoding.
 
         Layout (2 * content_path_depth attributes):
-          Attrs  0 .. cpd-1   : left side  (depth 0 = most specific identity,
-                                             depth 1 = context-hierarchy parent, …)
+          Attrs  0 .. cpd-1   : left side  (depth 0 = ROOT / most general,
+                                             deeper = more specific toward leaf)
           Attrs cpd .. 2*cpd-1: right side  (same depth ordering)
 
-        For primitives, depth-0 is the word_id.
-        For composites, depth-0 is a CONCEPT-<hash> vocab ID
-        referencing the context hierarchy.
+        For primitives, the deepest non-zero depth holds the most specific
+        CONCEPT-<hash> (leaf-level context concept).
+        For composites, same structure — all CONCEPT refs, no raw words.
 
         Each attribute has exactly one value with count 1, keeping
         log_prob_instance clean and comparable.
@@ -684,7 +683,7 @@ class FiniteParseTree(object):
             # Discrete single-identity label: primitive's identity is its word_id
             label = {wid: 1}
 
-            # Build label_path: [CONCEPT-leaf, CONCEPT-parent, ...]
+            # Build label_path: root-first [CONCEPT-root, ..., CONCEPT-leaf]
             # All entries are context-hierarchy concept refs — NO raw words.
             # The word itself is stored in the context hierarchy's -1 attr.
             label_path = _build_label_path_from_ctx(
@@ -1940,21 +1939,25 @@ class LongTermMemory(object):
 
             if isinstance(node, PrimitiveParseNode):
                 node.label = {node.word_id: 1}
-                # Primitive label_path: [CONCEPT-leaf, CONCEPT-parent, ...]
-                # Same structure as composites — all CONCEPT refs, no raw words.
+                # Primitive label_path: root-first CONCEPT path.
+                # depth-0 = root (most general), deeper = more specific.
                 # The word itself lives in the context hierarchy's -1 attr.
-                lp = []
+                lp_rev = []
                 p = ctx_leaf
-                while p is not None and len(lp) < self.content_path_depth:
+                while p is not None:
                     concept_str = f"CONCEPT-{p.concept_hash()}"
                     self.add_to_vocab(concept_str)
                     v = self.value_to_id.get(concept_str)
                     if v is not None:
-                        lp.append(v)
+                        lp_rev.append(v)
                     p = getattr(p, 'parent', None)
+                # lp_rev is leaf→root; reverse to root→leaf (root-first).
+                lp = list(reversed(lp_rev))
+                # Keep root end, truncate deepest if too long.
+                lp = lp[:self.content_path_depth]
                 while len(lp) < self.content_path_depth:
                     lp.append(0)
-                node.label_path = lp[:self.content_path_depth]
+                node.label_path = lp
 
             elif isinstance(node, CompositeParseNode) and not node.is_global_root:
                 ctx_hash = ctx_leaf.concept_hash()
@@ -1964,19 +1967,24 @@ class LongTermMemory(object):
                 node.concept_label = new_concept_label
                 node.label = {new_concept_label: 1} if new_concept_label else {0: 1}
 
-                # Composite label_path: [CONCEPT-leaf, CONCEPT-parent, ...]
-                lp = []
+                # Composite label_path: root-first CONCEPT path.
+                # depth-0 = root (most general), deeper = more specific.
+                lp_rev = []
                 p = ctx_leaf
-                while p is not None and len(lp) < self.content_path_depth:
+                while p is not None:
                     concept_str = f"CONCEPT-{p.concept_hash()}"
                     self.add_to_vocab(concept_str)
                     v = self.value_to_id.get(concept_str)
                     if v is not None:
-                        lp.append(v)
+                        lp_rev.append(v)
                     p = getattr(p, 'parent', None)
+                # lp_rev is leaf→root; reverse to root→leaf (root-first).
+                lp = list(reversed(lp_rev))
+                # Keep root end, truncate deepest if too long.
+                lp = lp[:self.content_path_depth]
                 while len(lp) < self.content_path_depth:
                     lp.append(0)
-                node.label_path = lp[:self.content_path_depth]
+                node.label_path = lp
 
                 # Rebuild content_instance from children's refreshed labels
                 children_sorted = list(node.children)
@@ -2332,7 +2340,8 @@ class WEBSTER(object):
           2. Read its content-ref (-1) → find that content-hierarchy leaf.
           3. get_basic() on that content leaf → sample a new leaf from the
              basic-level subtree.
-          4. Read the sampled content leaf's left/right path attrs (depth-0).
+          4. Read the sampled content leaf's left/right path attrs (deepest
+             non-empty depth, i.e. most specific concept).
              These are references to CONTEXT hierarchy nodes (for composites)
              or words (for primitives).
           5. For each path_vid:
@@ -2487,9 +2496,10 @@ class WEBSTER(object):
 
         def _basic_sample(cnt_node):
             """get_basic → sample a leaf from the basic-level subtree."""
-            # basic = cnt_node.get_basic(100, 100000) # TODO REVISE THIS!!! n_nodes, n_samples
+            basic = cnt_node.get_basic(1000, 1000) # TODO REVISE THIS!!! n_nodes, n_samples
             # basic = cnt_node.get_best(cnt_node.av_count)
-            basic = cnt_node
+            # basic = cnt_node.tree.categorize(cnt_node.av_count).get_best(cnt_node.av_count)
+            # basic = cnt_node
             cnt_root_h = str(self.ltm.content_hierarchy.root.concept_hash())
             if str(basic.concept_hash()) == cnt_root_h:
                 raise ValueError("BASIC LEVEL = ROOT????")
@@ -2511,6 +2521,20 @@ class WEBSTER(object):
                 list(pool.keys()),
                 weights=[max(x, 1e-12) for x in pool.values()],
                 k=1)[0]
+
+        def _deepest_attr(cnt_leaf, side_offset):
+            """Find the deepest (most specific) non-empty attr index for a side.
+
+            With root-first ordering, depth-0 = root, depth-(cpd-1) = most
+            specific.  We scan from deepest to shallowest and return the
+            first attr index that has a non-zero value.
+            """
+            for d in range(_cpd - 1, -1, -1):
+                attr = side_offset + d
+                rd = (cnt_leaf.av_count or {}).get(attr, {})
+                if any(v != 0 and c > 0 for v, c in rd.items()):
+                    return attr
+            return side_offset  # fallback to depth-0
 
         # ── context instance builders ────────────────────────────────────
 
@@ -2609,8 +2633,11 @@ class WEBSTER(object):
             sampled_leaf = _basic_sample(cnt_node)
 
             # Read left/right path_vids from sampled content leaf
-            left_pv  = _sample_path(sampled_leaf, 0)       # depth-0 of left
-            right_pv = _sample_path(sampled_leaf, _cpd)     # depth-0 of right
+            # Root-first ordering: deepest non-empty attr = most specific
+            left_attr  = _deepest_attr(sampled_leaf, 0)
+            right_attr = _deepest_attr(sampled_leaf, _cpd)
+            left_pv  = _sample_path(sampled_leaf, left_attr)
+            right_pv = _sample_path(sampled_leaf, right_attr)
 
             left_name  = _name(left_pv)
             right_name = _name(right_pv)

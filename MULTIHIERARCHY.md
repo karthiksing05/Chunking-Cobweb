@@ -4,7 +4,14 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
 
 ## Current problems
 
-*   Our current two main problems rely on both the nature of 
+*   Our current two main problems rely on the qualities of the content hierarchy:
+    *   What is the basic-level node in a content-hierarchy?
+    *   What is the score that determines whether a new chunk should be added?
+
+    *   General discussion:
+        *   We might have to create a datastructure that stores a joint-path-probability distribution
+            *   Score can be ascertained by a probability of some sort
+            *   Basic-level node determined by some aggregation and averaging criteria!
 
 *   This may solve the below two problems, but first and foremost, we have a path-weighting problems
     *   Path-information does not seem like a successful final representation, unless we learn node distributions!!

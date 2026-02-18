@@ -1,50 +1,50 @@
-[0] original: a park liked a man
-    masked:   a park [mask] a man
-    replaced: "liked" at pos 2
-    completed: a park under a man
+[0] original: a big lazy man found a cat
+    masked:   a big lazy [mask] found a cat
+    replaced: "man" at pos 3
+    completed: a big lazy park found a cat
 
-[1] original: the park found the red woman
-    masked:   the park found [mask] red woman
-    replaced: "the" at pos 3
-    completed: the park found a red woman
-
-[2] original: the telescope liked
-    masked:   the [mask] liked
-    replaced: "telescope" at pos 1
-    completed: the dog liked
-
-[3] original: the telescope chased
+[1] original: the man chased
     masked:   the [mask] chased
-    replaced: "telescope" at pos 1
-    completed: the park chased
+    replaced: "man" at pos 1
+    completed: the dog chased
 
-[4] original: a red cat chased
-    masked:   a red [mask] chased
-    replaced: "cat" at pos 2
-    completed: a red park chased
+[2] original: a red red telescope saw
+    masked:   a red [mask] telescope saw
+    replaced: "red" at pos 2
+    completed: a red red telescope saw
 
-[5] original: a woman admired a park in the park
-    masked:   a woman admired a [mask] in the park
-    replaced: "park" at pos 4
-    completed: a woman admired a man in the park
-
-[6] original: the woman liked a woman
-    masked:   the woman [mask] a woman
-    replaced: "liked" at pos 2
-    completed: the woman found a woman
-
-[7] original: a park chased a park
-    masked:   a park [mask] a park
+[3] original: a cat chased a park
+    masked:   a cat [mask] a park
     replaced: "chased" at pos 2
-    completed: a park under a park
+    completed: a cat on a park
 
-[8] original: the dog saw the woman under the park
-    masked:   the dog saw the [mask] under the park
-    replaced: "woman" at pos 4
-    completed: the dog saw the woman under the park
+[4] original: a cat saw the woman
+    masked:   a cat [mask] the woman
+    replaced: "saw" at pos 2
+    completed: a cat chased the woman
 
-[9] original: a cat chased
-    masked:   a [mask] chased
+[5] original: the telescope found the big big man with the man
+    masked:   the telescope found the big [mask] man with the man
+    replaced: "big" at pos 5
+    completed: the telescope found the big cat man with the man
+
+[6] original: a cat liked
+    masked:   a [mask] liked
     replaced: "cat" at pos 1
-    completed: a cat chased
+    completed: a park liked
+
+[7] original: the quick man chased
+    masked:   the quick [mask] chased
+    replaced: "man" at pos 2
+    completed: the quick cat chased
+
+[8] original: the quick park liked a dog
+    masked:   the quick park [mask] a dog
+    replaced: "liked" at pos 3
+    completed: the quick park saw a dog
+
+[9] original: a red red woman liked
+    masked:   a red [mask] woman liked
+    replaced: "red" at pos 2
+    completed: a red red woman liked
 

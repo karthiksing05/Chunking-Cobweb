@@ -12,7 +12,7 @@ PREBUILD_TREES = False
 CONTEXT_LENGTH = 5
 CONTENT_LENGTH = 10
 PRIMITIVE_THRESHOLD = "converge"
-LOAD_LTM = ""
+LOAD_LTM = "data/test_grammar/ltm_ffab16ae"
 # LOAD_LTM = "unittests/gen_learn_test_mh/final_ltm_data"
 
 # --- Initialize WEBSTER (multi-hierarchy parser) ---

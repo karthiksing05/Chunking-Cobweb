@@ -1,30 +1,35 @@
-[0] original: a park liked a man
-    masked:   a [mask] a man
-    removed: "park liked" (2 tokens) at pos 1-2
-    completed: a park under a man
+[0] original: a big lazy man found a cat
+    masked:   a big [mask] a cat
+    removed: "lazy man found" (3 tokens) at pos 2-4
+    completed: a big chased a cat
 
-[1] original: the park found the red woman
-    masked:   the park [mask] red woman
-    removed: "found the" (2 tokens) at pos 2-3
-    completed: the park liked the red woman
+[2] original: a red red telescope saw
+    masked:   a [mask] telescope saw
+    removed: "red red" (2 tokens) at pos 1-2
+    completed: a quick telescope saw
 
-[5] original: a woman admired a park in the park
-    masked:   a woman [mask] in the park
-    removed: "admired a park" (3 tokens) at pos 2-4
-    completed: a woman telescope in the park
-
-[6] original: the woman liked a woman
-    masked:   the [mask] woman
-    removed: "woman liked a" (3 tokens) at pos 1-3
-    completed: the quick woman
-
-[7] original: a park chased a park
+[3] original: a cat chased a park
     masked:   a [mask] a park
-    removed: "park chased" (2 tokens) at pos 1-2
-    completed: a park under a park
+    removed: "cat chased" (2 tokens) at pos 1-2
+    completed: a big cat on a park
 
-[8] original: the dog saw the woman under the park
-    masked:   the dog saw [mask] under the park
-    removed: "the woman" (2 tokens) at pos 3-4
-    completed: the dog saw a man under the park
+[4] original: a cat saw the woman
+    masked:   a [mask] woman
+    removed: "cat saw the" (3 tokens) at pos 1-3
+    completed: a red woman
+
+[5] original: the telescope found the big big man with the man
+    masked:   the telescope found the [mask] man with the man
+    removed: "big big" (2 tokens) at pos 4-5
+    completed: the telescope found the lazy man with the man
+
+[8] original: the quick park liked a dog
+    masked:   the [mask] a dog
+    removed: "quick park liked" (3 tokens) at pos 1-3
+    completed: the telescope saw a dog
+
+[9] original: a red red woman liked
+    masked:   a [mask] woman liked
+    removed: "red red" (2 tokens) at pos 1-2
+    completed: a red woman liked
 

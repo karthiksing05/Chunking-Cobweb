@@ -15,7 +15,7 @@ import random
 from parse_mh import WEBSTER
 from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1
 
-LOAD_LTM_DIR = "data/test_grammar/ltm_e7bd9512"
+LOAD_LTM_DIR = "data/test_grammar2/ltm_194c09e0"
 OUT_DIR = "unittests/generation_only_test_mh"
 
 
