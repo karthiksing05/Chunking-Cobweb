@@ -434,10 +434,10 @@ class CompositeParseNode(object):
         inst = {}
         for i in range(cpd):
             val_l = left_path[i] if i < len(left_path) else 0
-            inst[i] = {val_l: 1}
+            inst[i] = {val_l: 1} if val_l != 0 else {0: 0}
 
             val_r = right_path[i] if i < len(right_path) else 0
-            inst[cpd + i] = {val_r: 1}
+            inst[cpd + i] = {val_r: 1} if val_r != 0 else {0: 0}
 
         return inst
 

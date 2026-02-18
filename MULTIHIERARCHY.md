@@ -5,6 +5,7 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
 ## Current problems
 
 *   Our current two main problems rely on the qualities of the content hierarchy:
+    *   How do we represent a chunk, with respect to other chunks?
     *   What is the basic-level node in a content-hierarchy?
     *   What is the score that determines whether a new chunk should be added?
 
