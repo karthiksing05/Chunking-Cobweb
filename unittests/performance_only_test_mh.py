@@ -15,7 +15,7 @@ import random
 from parse_mh import WEBSTER
 from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1
 
-LOAD_LTM_DIR = "data/test_grammar2/ltm_194c09e0"
+LOAD_LTM_DIR = "data/supervised_train1/ltm_90fff18e"
 OUT_DIR = "unittests/performance_only_test_mh"
 
 
@@ -31,6 +31,60 @@ os.makedirs(OUT_DIR, exist_ok=True)
 webster = WEBSTER.load_state(LOAD_LTM_DIR)
 
 THRESHOLD = -30
+
+NUM_SENTENCES = 10
+
+test_parses = []
+
+for _ in range(NUM_SENTENCES):
+    sentence = generate("S", TEST_GRAMMAR1)
+    test_parses.append(sentence)
+
+# --- PARSING EVALUATION: generated sentences ---------------------------------
+print("\n--- PARSING EVALUATION: Generated Sentences ---")
+gen_eval_dir = os.path.join(OUT_DIR, "eval_generated")
+os.makedirs(gen_eval_dir, exist_ok=True)
+for i, sent in enumerate(test_parses):
+    try:
+        parse_tree = webster.parse_sentence(
+            sent,
+            threshold=THRESHOLD,
+            new_vocab=True,
+            learning=False,
+            debug=False,
+        )
+        print(f"  [{i}] Parsed generated sentence: \"{sent}\"")
+        if parse_tree and hasattr(parse_tree, "visualize"):
+            parse_tree.visualize(os.path.join(gen_eval_dir, f"gen_parsed_{i}"))
+    except Exception as e:
+        print(f"  [{i}] FAILED to parse generated sentence: {e}")
+
+# --- PARSING EVALUATION: fake sentences --------------------------------------
+print("\n--- PARSING EVALUATION: Fake Sentences ---")
+fake_eval_dir = os.path.join(OUT_DIR, "eval_fake")
+os.makedirs(fake_eval_dir, exist_ok=True)
+
+# Create fake sentences by random sampling vocabulary words
+fake_sentences = [
+    " ".join([random.choice(TEST_CORPUS1) for _ in range(random.randint(3, 8))])
+    for _ in range(10)
+]
+fake_sentences.append("the dog the dog")
+
+for i, fake_sentence in enumerate(fake_sentences):
+    try:
+        parse_tree = webster.parse_sentence(
+            fake_sentence,
+            threshold=THRESHOLD,
+            new_vocab=True,
+            learning=False,
+            debug=False,
+        )
+        print(f"  [{i}] Parsed fake sentence: \"{fake_sentence}\"")
+        if parse_tree and hasattr(parse_tree, "visualize"):
+            parse_tree.visualize(os.path.join(fake_eval_dir, f"fake_parsed_{i}"))
+    except Exception as e:
+        print(f"  [{i}] FAILED to parse fake sentence: {e}")
 
 # FROM-SCRATCH GENERATION
 print("\n--- FROM-SCRATCH GENERATION ---")
@@ -143,54 +197,5 @@ with open(mask_pred_path, "w", encoding="utf-8") as mask_f:
             os.makedirs(os.path.join(OUT_DIR, "masked_pred_trees"), exist_ok=True)
             parse.visualize(os.path.join(OUT_DIR, "masked_pred_trees", f"masked_pred_tree{i}"))
 print(f"Saved masked prediction results to \"{mask_pred_path}\"")
-
-# --- PARSING EVALUATION: generated sentences ---------------------------------
-print("\n--- PARSING EVALUATION: Generated Sentences ---")
-gen_eval_dir = os.path.join(OUT_DIR, "eval_generated")
-os.makedirs(gen_eval_dir, exist_ok=True)
-for i, sent in enumerate(generated[:30]):
-    try:
-        parse_tree = webster.parse_sentence(
-            sent,
-            threshold=THRESHOLD,
-            new_vocab=True,
-            learning=False,
-            debug=False,
-        )
-        print(f"  [{i}] Parsed generated sentence: \"{sent}\"")
-        if parse_tree and hasattr(parse_tree, "visualize"):
-            parse_tree.visualize(os.path.join(gen_eval_dir, f"gen_parsed_{i}"))
-    except Exception as e:
-        print(f"  [{i}] FAILED to parse generated sentence: {e}")
-
-# --- PARSING EVALUATION: fake sentences --------------------------------------
-print("\n--- PARSING EVALUATION: Fake Sentences ---")
-fake_eval_dir = os.path.join(OUT_DIR, "eval_fake")
-os.makedirs(fake_eval_dir, exist_ok=True)
-
-# Create fake sentences by random sampling vocabulary words
-fake_sentences = [
-    " ".join([random.choice(TEST_CORPUS1) for _ in range(random.randint(3, 8))])
-    for _ in range(10)
-]
-fake_sentences.append("the dog the dog")
-
-for i, fake_sentence in enumerate(fake_sentences):
-    try:
-        parse_tree = webster.parse_sentence(
-            fake_sentence,
-            threshold=THRESHOLD,
-            new_vocab=True,
-            learning=False,
-            debug=False,
-        )
-        print(f"  [{i}] Parsed fake sentence: \"{fake_sentence}\"")
-        if parse_tree and hasattr(parse_tree, "visualize"):
-            parse_tree.visualize(os.path.join(fake_eval_dir, f"fake_parsed_{i}"))
-    except Exception as e:
-        print(f"  [{i}] FAILED to parse fake sentence: {e}")
-
-# Visualize LTM
-webster.visualize_ltm(os.path.join(OUT_DIR, "final_ltm"), max_depth=3)
 
 print(f"Performance-only outputs written to '{OUT_DIR}'")

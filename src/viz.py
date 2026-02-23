@@ -90,12 +90,18 @@ class HTMLCobwebDrawer:
 		"""
 		Convert a CobwebNode into a JSON dict for D3 rendering.
 
-		Each node produces a flat list of ``{attr, val, count}`` rows
-		(one row per value per attribute) for a single three-column table.
+		Rows are split into ``left_rows`` (Left* / Context-Before*),
+		``right_rows`` (Right* / Context-After*), and ``other_rows``
+		(Complexity, ContentRef, anything unrecognised) for side-by-side
+		display.  The flat ``rows`` key is also kept for fallback.
 		"""
 		title = f"CONCEPT-{node.concept_hash()}"
 
 		rows = []
+		left_rows = []
+		right_rows = []
+		other_rows = []
+
 		for attr_id, val_counts in sorted(node.av_count.items()):
 			attr_name = self.attr_name_overrides.get(
 				attr_id, self._safe_lookup(self.id_to_attr, attr_id)
@@ -104,21 +110,34 @@ class HTMLCobwebDrawer:
 			# Sort values by descending count, then take top 7
 			top_vals = sorted(val_counts.items(), key=lambda x: x[1], reverse=True)[:7]
 
+			attr_rows = []
 			first = True
 			for val_id, count in top_vals:
 				if attr_id in self.attr_value_fn:
 					val_name = self.attr_value_fn[attr_id](val_id)
 				else:
 					val_name = self._safe_lookup(self.id_to_value, val_id)
-				rows.append({
+				row = {
 					"attr": attr_name if first else "",
 					"val": val_name,
 					"count": count,
-				})
+				}
+				attr_rows.append(row)
+				rows.append(row)
 				first = False
 
 			if len(val_counts) > 7:
-				rows.append({"attr": "", "val": "...", "count": "..."})
+				ellipsis = {"attr": "", "val": "...", "count": "..."}
+				attr_rows.append(ellipsis)
+				rows.append(ellipsis)
+
+			# Route into left / right / other based on attribute name prefix
+			if attr_name.startswith("Left") or attr_name.startswith("Context-Before") or attr_name == "CtxBefore":
+				left_rows.extend(attr_rows)
+			elif attr_name.startswith("Right") or attr_name.startswith("Context-After") or attr_name == "CtxAfter":
+				right_rows.extend(attr_rows)
+			else:
+				other_rows.extend(attr_rows)
 
 		# Stop recursion if max_depth is reached
 		if max_depth is not None and _depth >= max_depth:
@@ -132,11 +151,14 @@ class HTMLCobwebDrawer:
 		return {
 			"title": title,
 			"rows": rows,
+			"left_rows": left_rows,
+			"right_rows": right_rows,
+			"other_rows": other_rows,
 			"children": children
 		}
 
 
-	def _build_html(self, d3_data_json, node_w=380, node_h=140, h_gap=20, v_gap=140):
+	def _build_html(self, d3_data_json, node_w=700, node_h=140, h_gap=20, v_gap=140):
 		return f"""<!doctype html>
 <html>
 <head>
@@ -149,8 +171,10 @@ class HTMLCobwebDrawer:
 	.node-fo table {{ border-collapse: collapse; font-size: 12px; margin: 4px 0; }}
 	.node-fo th, .node-fo td {{ border: 1px solid #888; padding: 2px 6px; }}
 	.node-fo th {{ background: #f3f5f7; font-weight: 600; }}
-	.section-title {{ font-weight: bold; margin-top: 4px; }}
-	.section {{ margin-top: 10px; margin-bottom: 10px; }}
+	.section-header {{ font-weight: 700; font-size: 13px; color: #333; margin: 8px 0 4px 0; border-bottom: 1px solid #ccc; padding-bottom: 2px; }}
+	.side-by-side {{ display: flex; gap: 8px; align-items: flex-start; }}
+	.side-by-side > div {{ flex: 1; min-width: 0; }}
+	.sub-title {{ font-weight: 600; font-size: 11px; color: #555; margin-bottom: 2px; }}
 </style>
 </head>
 <body>
@@ -247,17 +271,52 @@ svg.attr("width", width)
 	.attr("height", height)
 	.attr("viewBox", [x0, y0, width, height].join(" "));
 
-function nodeHTML(d) {{
-	let tableRows = d.rows.map(r =>
+function subtable(title, rows) {{
+	if (!rows || rows.length === 0) return "";
+	const body = rows.map(r =>
 		`<tr><td>${{r.attr}}</td><td>${{r.val}}</td><td>${{r.count}}</td></tr>`
 	).join("");
-	return `
-	<div class="node-fo">
+	return `<div class="sub-title">${{title}}</div>
 		<table>
-			<tr><th colspan="3">${{d.title}}</th></tr>
 			<tr><th>Attr</th><th>Value</th><th>Count</th></tr>
-			${{tableRows}}
-		</table>
+			${{body}}
+		</table>`;
+}}
+
+function nodeHTML(d) {{
+	const hasLeft  = d.left_rows  && d.left_rows.length  > 0;
+	const hasRight = d.right_rows && d.right_rows.length > 0;
+	const hasOther = d.other_rows && d.other_rows.length > 0;
+	const hasSplit = hasLeft || hasRight;
+
+	let mainHTML = "";
+	if (hasSplit) {{
+		// Determine section header label based on which sides are present
+		const leftLabel  = hasLeft  ? (d.left_rows[0].attr.startsWith("Context")  ? "Before" : "Left")  : "Left";
+		const rightLabel = hasRight ? (d.right_rows[0].attr.startsWith("Context") ? "After"  : "Right") : "Right";
+		mainHTML = `<div class="section-header">Attributes</div>
+			<div class="side-by-side">
+				<div>${{subtable(leftLabel,  d.left_rows)}}</div>
+				<div>${{subtable(rightLabel, d.right_rows)}}</div>
+			</div>`;
+	}} else {{
+		// Fallback: render all rows in one table
+		const body = d.rows.map(r =>
+			`<tr><td>${{r.attr}}</td><td>${{r.val}}</td><td>${{r.count}}</td></tr>`
+		).join("");
+		mainHTML = `<div class="section-header">Attributes</div>
+			<table>
+				<tr><th>Attr</th><th>Value</th><th>Count</th></tr>
+				${{body}}
+			</table>`;
+	}}
+	const otherHTML = hasOther
+		? `<div class="section-header">Other</div>${{subtable("", d.other_rows)}}`
+		: "";
+	return `<div class="node-fo">
+		<table><tr><th colspan="3">${{d.title}}</th></tr></table>
+		${{mainHTML}}
+		${{otherHTML}}
 	</div>`;
 }}
 </script>
@@ -424,3 +483,133 @@ function nodeHTML(d) {{
 			self.draw_tree(bl_node, folder + ("/" if folder[-1] != "/" else "") + f"basic_level_{key}", max_depth=4)
 
 		return True
+
+
+class CategorizePathVisualizer:
+	"""
+	Builds compact, deterministic tree JSON and standalone HTML for
+	visualizing the path a ``categorize`` call takes through a Cobweb tree.
+
+	Nodes are rendered as small dots; the categorize path is highlighted
+	with red edges and red dot fills.  All other edges and nodes are gray.
+	Children are always sorted by concept_hash() so the layout stays
+	visually consistent across multiple evaluate calls on the same tree.
+	"""
+
+	@staticmethod
+	def tree_to_compact_json(root) -> dict:
+		"""
+		Recursively convert a CobwebDiscreteNode tree to a compact
+		``{id, children}`` dict for D3 rendering.
+
+		Children are sorted by concept_hash for layout consistency.
+		"""
+		def walk(node):
+			h = node.concept_hash()
+			children = sorted(
+				getattr(node, "children", []),
+				key=lambda c: c.concept_hash()
+			)
+			return {
+				"id": h,
+				"children": [walk(c) for c in children],
+			}
+		return walk(root)
+
+	@staticmethod
+	def build_standalone_html(root, path_hashes: list, width: int = 900, height: int = 600) -> str:
+		"""
+		Build a full standalone HTML page that shows the tree with the
+		categorize path highlighted in red.  Supports pan + zoom via D3.
+
+		Parameters
+		----------
+		root : CobwebDiscreteNode
+			Root of the hierarchy.
+		path_hashes : list[str]
+			Concept hashes (WITHOUT the ``"CONCEPT-"`` prefix) ordered
+			from root to the categorized leaf.
+		width, height : int
+			Initial SVG viewport size in pixels.
+		"""
+		tree_json = json.dumps(CategorizePathVisualizer.tree_to_compact_json(root))
+		path_json = json.dumps(path_hashes)
+
+		return f"""<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Categorize Path Visualization</title>
+<style>
+	body {{ margin: 0; overflow: hidden; background: #fafafa; font-family: system-ui, sans-serif; }}
+	#tooltip {{ position: fixed; top: 8px; left: 8px; font-size: 11px; background: rgba(0,0,0,0.6);
+	            color: #fff; padding: 4px 8px; border-radius: 4px; pointer-events: none; display: none; }}
+</style>
+</head>
+<body>
+<div id="tooltip"></div>
+<svg id="viz" style="width:100vw;height:100vh;"></svg>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script>
+(function() {{
+  const treeData  = {tree_json};
+  const pathArr   = {path_json};
+  const pathEdges = new Set();
+  const pathNodes = new Set(pathArr);
+  for (let i = 0; i < pathArr.length - 1; i++) {{
+    pathEdges.add(pathArr[i] + ">>>" + pathArr[i + 1]);
+  }}
+
+  const svg = d3.select("#viz");
+  const w   = window.innerWidth, h = window.innerHeight;
+  svg.attr("width", w).attr("height", h);
+
+  const g = svg.append("g");
+
+  const root   = d3.hierarchy(treeData);
+  const layout = d3.tree().size([w - 80, h - 80]);
+  layout(root);
+  root.each(d => {{ d.x += 40; d.y += 40; }});
+
+  // pan + zoom
+  svg.call(d3.zoom().scaleExtent([0.02, 20])
+    .on("zoom", e => g.attr("transform", e.transform)));
+
+  // edges
+  g.selectAll("line.edge")
+    .data(root.links())
+    .join("line")
+    .attr("class", "edge")
+    .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+    .attr("x2", d => d.target.x).attr("y2", d => d.target.y)
+    .attr("stroke", d => {{
+      return pathEdges.has(d.source.data.id + ">>>" + d.target.data.id) ? "#e53e3e" : "#cbd5e0";
+    }})
+    .attr("stroke-width", d => {{
+      return pathEdges.has(d.source.data.id + ">>>" + d.target.data.id) ? 2.5 : 1;
+    }});
+
+  // nodes
+  const tip = document.getElementById("tooltip");
+  g.selectAll("circle.node")
+    .data(root.descendants())
+    .join("circle")
+    .attr("class", "node")
+    .attr("cx", d => d.x).attr("cy", d => d.y)
+    .attr("r", 4)
+    .attr("fill", d => pathNodes.has(d.data.id) ? "#e53e3e" : "#718096")
+    .attr("stroke", "none")
+    .on("mouseover", (event, d) => {{
+      tip.style.display = "block";
+      tip.textContent = d.data.id;
+    }})
+    .on("mousemove", event => {{
+      tip.style.left = (event.clientX + 12) + "px";
+      tip.style.top  = (event.clientY - 4)  + "px";
+    }})
+    .on("mouseout", () => {{ tip.style.display = "none"; }});
+}})();
+</script>
+</body>
+</html>
+"""

@@ -9,10 +9,7 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
     *   What is the basic-level node in a content-hierarchy?
     *   What is the score that determines whether a new chunk should be added?
 
-    *   General discussion:
-        *   We might have to create a datastructure that stores a joint-path-probability distribution
-            *   Score can be ascertained by a probability of some sort
-            *   Basic-level node determined by some aggregation and averaging criteria!
+    *   INITIALLY WAS THINKING ABOUT A NEW STRUCTURE BUT I'M SO TROLL - Cobweb is best here, we just need to master the basic-level assumption. Focus on content-hierarchy and inspecting for accuracy!
 
 *   This may solve the below two problems, but first and foremost, we have a path-weighting problems
     *   Path-information does not seem like a successful final representation, unless we learn node distributions!!
@@ -27,6 +24,11 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
         *   We should be able to denote the "complexity" of a given instance in some way, and select a highly complex node to start from
         *   We should also program both an autoregressive and diffusive way of generation
             *   The autoregressive way starts with a word, creates a high-level token, then expands downwards, then creates another high-level token, etc etc.
+
+## Methodology 1.1
+
+*   Short Revision: what if categorization through a greedy, discretely chosen path is not enough to guarantee coherence in the long-term?? 
+    *   Just see what we can extrapolate from multi-node contexts!!
 
 ## Methodology 1.0
 

@@ -1,0 +1,244 @@
+{
+  "window": "the telescope liked",
+  "context_length": 3,
+  "nodes": [
+    {
+      "node_type": "composite",
+      "title": "2d5b729491",
+      "position_idx": null,
+      "is_global_root": true,
+      "content_instance": null,
+      "context_instance": null,
+      "label": null,
+      "categorize_path": null,
+      "context_before": null,
+      "context_after": null,
+      "context_length": 0,
+      "complexity": 0,
+      "concept_label": null,
+      "frozen": false,
+      "parent": null,
+      "children": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "node_type": "primitive",
+      "title": "428411764b",
+      "position_idx": 0,
+      "word_id": 1,
+      "context_instance": {
+        "0": {
+          "0": 0
+        },
+        "1": {
+          "0": 0
+        },
+        "2": {
+          "0": 0
+        },
+        "3": {
+          "8": 0.5,
+          "0": 0
+        },
+        "4": {
+          "15": 0.25,
+          "0": 0
+        },
+        "5": {
+          "0": 0
+        },
+        "6": {
+          "23": 1
+        },
+        "-1": {
+          "1": 1
+        }
+      },
+      "label": {
+        "1": 1
+      },
+      "complexity": 1,
+      "stable": true,
+      "score_data": {
+        "raw_node_log_probs": "[-2.3005132217971447, -3.413976607378621, -2.597357921572437, -2.383084657879538, -1.570914008396948]",
+        "candidate_counts": "[45.0, 24.0, 5.875, 4.875, 2.875]",
+        "normed_log_prob": -2.7901545699008685,
+        "best_log_prob_idx": 4,
+        "cost": -2.330459575316512,
+        "tree_log_prob": -2.330459575316512,
+        "best_log_prob": -1.570914008396948
+      },
+      "context_before": [
+        {
+          "0": 0
+        },
+        {
+          "0": 0
+        },
+        {
+          "0": 0
+        }
+      ],
+      "context_after": [
+        {
+          "8": 1
+        },
+        {
+          "15": 1
+        },
+        {
+          "0": 0
+        }
+      ],
+      "parent": 0,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "d200f39be5",
+      "position_idx": 1,
+      "word_id": 8,
+      "context_instance": {
+        "0": {
+          "1": 0.5,
+          "0": 0
+        },
+        "1": {
+          "0": 0
+        },
+        "2": {
+          "0": 0
+        },
+        "3": {
+          "15": 0.5,
+          "0": 0
+        },
+        "4": {
+          "0": 0
+        },
+        "5": {
+          "0": 0
+        },
+        "6": {
+          "23": 1
+        },
+        "-1": {
+          "8": 1
+        }
+      },
+      "label": {
+        "8": 1
+      },
+      "complexity": 1,
+      "stable": true,
+      "score_data": {
+        "raw_node_log_probs": "[-2.637864525540781, -1.9377794147592646, -1.433360334246982, -3.668105527636041, -3.466779677099961, -1.4531146876880066]",
+        "candidate_counts": "[45.0, 21.0, 7.0, 3.0, 4.375, 2.875]",
+        "normed_log_prob": -3.0814232629244795,
+        "best_log_prob_idx": 2,
+        "cost": -2.2928450064209462,
+        "tree_log_prob": -2.2928450064209462,
+        "best_log_prob": -1.433360334246982
+      },
+      "context_before": [
+        {
+          "1": 1
+        },
+        {
+          "0": 0
+        },
+        {
+          "0": 0
+        }
+      ],
+      "context_after": [
+        {
+          "15": 1
+        },
+        {
+          "0": 0
+        },
+        {
+          "0": 0
+        }
+      ],
+      "parent": 0,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "ae3a0f400c",
+      "position_idx": 2,
+      "word_id": 15,
+      "context_instance": {
+        "0": {
+          "8": 0.5,
+          "0": 0
+        },
+        "1": {
+          "1": 0.25,
+          "0": 0
+        },
+        "2": {
+          "0": 0
+        },
+        "3": {
+          "0": 0
+        },
+        "4": {
+          "0": 0
+        },
+        "5": {
+          "0": 0
+        },
+        "6": {
+          "23": 1
+        },
+        "-1": {
+          "15": 1
+        }
+      },
+      "label": {
+        "15": 1
+      },
+      "complexity": 1,
+      "stable": true,
+      "score_data": {
+        "raw_node_log_probs": "[-2.300555544432, -1.972254346406984, -1.03613522515427, -0.01433310013222433]",
+        "candidate_counts": "[45.0, 24.0, 7.5, 3.5]",
+        "normed_log_prob": -0.6537112873571067,
+        "best_log_prob_idx": 3,
+        "cost": -1.7244562488233006,
+        "tree_log_prob": -1.7244562488233006,
+        "best_log_prob": -0.01433310013222433
+      },
+      "context_before": [
+        {
+          "8": 1
+        },
+        {
+          "1": 1
+        },
+        {
+          "0": 0
+        }
+      ],
+      "context_after": [
+        {
+          "0": 0
+        },
+        {
+          "0": 0
+        },
+        {
+          "0": 0
+        }
+      ],
+      "parent": 0,
+      "children": []
+    }
+  ]
+}

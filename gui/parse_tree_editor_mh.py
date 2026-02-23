@@ -9,21 +9,28 @@ app = Flask(__name__)
 
 LEARNING_ON = True
 PREBUILD_TREES = False
-CONTEXT_LENGTH = 5
+CONTEXT_LENGTH = 3
 CONTENT_LENGTH = 10
 PRIMITIVE_THRESHOLD = "converge"
-LOAD_LTM = "data/test_grammar/ltm_ffab16ae"
-# LOAD_LTM = "unittests/gen_learn_test_mh/final_ltm_data"
+CATEGORIZATION_MODE = "bfs"  # "dfs", "bfs", or "bfs_pmi"
+# LOAD_LTM = ""
+LOAD_LTM = "unittests/primitives_only_test_mh/final_ltm_data"
 
 # --- Initialize WEBSTER (multi-hierarchy parser) ---
 if LOAD_LTM != "":
     webster = WEBSTER.load_state(LOAD_LTM)
+    # Override categorization_mode from config if loaded from state
+    webster.categorization_mode = CATEGORIZATION_MODE
+    webster.ltm.categorization_mode = CATEGORIZATION_MODE
 else:
     webster = WEBSTER(
         TEST_CORPUS1,
         context_length=CONTEXT_LENGTH,
         content_length=CONTENT_LENGTH,
-        threshold=PRIMITIVE_THRESHOLD
+        threshold=PRIMITIVE_THRESHOLD,
+        content_alpha=5e-4,
+        context_alpha=5e-4,
+        categorization_mode=CATEGORIZATION_MODE,
     )
 
 NUM_LOAD = 0
@@ -61,23 +68,32 @@ def reset_tree():
 def api_get_tree():
     d3_json = curr_tree._draw_tree_to_json()
     pairs = curr_tree.get_parentless_pairs()
+    from viz import CategorizePathVisualizer
+    cpv = CategorizePathVisualizer()
+    context_tree = cpv.tree_to_compact_json(webster.ltm.context_hierarchy.root)
     return jsonify({
         "tree": d3_json,
         "pairs": pairs,
         "action_log": curr_tree.action_log,
         "sentence": sample_sentence,
-        "primitive_scores": curr_tree.get_primitive_score_data()
+        "primitive_scores": curr_tree.get_primitive_score_data(),
+        "context_tree": context_tree
     })
 
 
 @app.route("/api/evaluate", methods=["POST"])
 def api_evaluate():
+    from viz import CategorizePathVisualizer
     data = request.get_json()
     left = data.get("left_word_index")
     right = data.get("right_word_index")
     debug = data.get("debug", False)
     result = curr_tree.evaluate_pair(left, right, debug=debug)
-    return jsonify({"ok": True, "result": result})
+    cpv = CategorizePathVisualizer()
+    content_tree = cpv.tree_to_compact_json(webster.ltm.content_hierarchy.root)
+    context_tree = cpv.tree_to_compact_json(webster.ltm.context_hierarchy.root)
+    return jsonify({"ok": True, "result": result,
+                    "content_tree": content_tree, "context_tree": context_tree})
 
 
 @app.route("/api/apply", methods=["POST"])

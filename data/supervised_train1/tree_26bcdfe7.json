@@ -1,0 +1,244 @@
+{
+  "window": "the cat admired",
+  "context_length": 3,
+  "nodes": [
+    {
+      "node_type": "composite",
+      "title": "0380a43e4a",
+      "position_idx": null,
+      "is_global_root": true,
+      "content_instance": null,
+      "context_instance": null,
+      "label": null,
+      "categorize_path": null,
+      "context_before": null,
+      "context_after": null,
+      "context_length": 0,
+      "complexity": 0,
+      "concept_label": null,
+      "frozen": false,
+      "parent": null,
+      "children": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "node_type": "primitive",
+      "title": "4f0fb9e22c",
+      "position_idx": 0,
+      "word_id": 1,
+      "context_instance": {
+        "0": {
+          "0": 0
+        },
+        "1": {
+          "0": 0
+        },
+        "2": {
+          "0": 0
+        },
+        "3": {
+          "3": 0.5,
+          "0": 0
+        },
+        "4": {
+          "18": 0.25,
+          "0": 0
+        },
+        "5": {
+          "0": 0
+        },
+        "6": {
+          "23": 1
+        },
+        "-1": {
+          "1": 1
+        }
+      },
+      "label": {
+        "1": 1
+      },
+      "complexity": 1,
+      "stable": true,
+      "score_data": {
+        "raw_node_log_probs": "[-2.2573235881759617, -3.1593886248318683, -2.815609568018676, -2.4277690766870292, -1.9159606959640159, -0.7831416095512933]",
+        "candidate_counts": "[86.0, 38.0, 17.0, 6.0, 4.375, 3.375]",
+        "normed_log_prob": -1.8272792304651593,
+        "best_log_prob_idx": 5,
+        "cost": -2.280048838549369,
+        "tree_log_prob": -2.280048838549369,
+        "best_log_prob": -0.7831416095512933
+      },
+      "context_before": [
+        {
+          "0": 0
+        },
+        {
+          "0": 0
+        },
+        {
+          "0": 0
+        }
+      ],
+      "context_after": [
+        {
+          "3": 1
+        },
+        {
+          "18": 1
+        },
+        {
+          "0": 0
+        }
+      ],
+      "parent": 0,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "8a88d46098",
+      "position_idx": 1,
+      "word_id": 3,
+      "context_instance": {
+        "0": {
+          "1": 0.5,
+          "0": 0
+        },
+        "1": {
+          "0": 0
+        },
+        "2": {
+          "0": 0
+        },
+        "3": {
+          "18": 0.5,
+          "0": 0
+        },
+        "4": {
+          "0": 0
+        },
+        "5": {
+          "0": 0
+        },
+        "6": {
+          "23": 1
+        },
+        "-1": {
+          "3": 1
+        }
+      },
+      "label": {
+        "3": 1
+      },
+      "complexity": 1,
+      "stable": true,
+      "score_data": {
+        "raw_node_log_probs": "[-2.922413444948301, -2.222940578121866, -1.9666925128113701, -0.7882806645082665, -0.015601028956581447, -0.020761992423429132]",
+        "candidate_counts": "[86.0, 38.0, 17.0, 6.0, 4.375, 3.375]",
+        "normed_log_prob": -0.22023042417807565,
+        "best_log_prob_idx": 4,
+        "cost": -1.3115168993754778,
+        "tree_log_prob": -1.3115168993754778,
+        "best_log_prob": -0.015601028956581447
+      },
+      "context_before": [
+        {
+          "1": 1
+        },
+        {
+          "0": 0
+        },
+        {
+          "0": 0
+        }
+      ],
+      "context_after": [
+        {
+          "18": 1
+        },
+        {
+          "0": 0
+        },
+        {
+          "0": 0
+        }
+      ],
+      "parent": 0,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "4ffa86af90",
+      "position_idx": 2,
+      "word_id": 18,
+      "context_instance": {
+        "0": {
+          "3": 0.5,
+          "0": 0
+        },
+        "1": {
+          "1": 0.25,
+          "0": 0
+        },
+        "2": {
+          "0": 0
+        },
+        "3": {
+          "0": 0
+        },
+        "4": {
+          "0": 0
+        },
+        "5": {
+          "0": 0
+        },
+        "6": {
+          "23": 1
+        },
+        "-1": {
+          "18": 1
+        }
+      },
+      "label": {
+        "18": 1
+      },
+      "complexity": 1,
+      "stable": true,
+      "score_data": {
+        "raw_node_log_probs": "[-1.8848091023743412, -1.555254775270864, -0.867973317158395, -0.6243840324680461, -0.020166981833759923]",
+        "candidate_counts": "[86.0, 48.0, 14.5, 6.0, 3.625]",
+        "normed_log_prob": -0.3989795446006422,
+        "best_log_prob_idx": 4,
+        "cost": -1.9216129853053208,
+        "tree_log_prob": -1.9216129853053208,
+        "best_log_prob": -0.020166981833759923
+      },
+      "context_before": [
+        {
+          "3": 1
+        },
+        {
+          "1": 1
+        },
+        {
+          "0": 0
+        }
+      ],
+      "context_after": [
+        {
+          "0": 0
+        },
+        {
+          "0": 0
+        },
+        {
+          "0": 0
+        }
+      ],
+      "parent": 0,
+      "children": []
+    }
+  ]
+}

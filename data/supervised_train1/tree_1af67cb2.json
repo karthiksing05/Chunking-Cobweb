@@ -1,0 +1,244 @@
+{
+  "window": "a dog admired",
+  "context_length": 3,
+  "nodes": [
+    {
+      "node_type": "composite",
+      "title": "fefdaaeecd",
+      "position_idx": null,
+      "is_global_root": true,
+      "content_instance": null,
+      "context_instance": null,
+      "label": null,
+      "categorize_path": null,
+      "context_before": null,
+      "context_after": null,
+      "context_length": 0,
+      "complexity": 0,
+      "concept_label": null,
+      "frozen": false,
+      "parent": null,
+      "children": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "node_type": "primitive",
+      "title": "c20f2e10b0",
+      "position_idx": 0,
+      "word_id": 2,
+      "context_instance": {
+        "0": {
+          "0": 0
+        },
+        "1": {
+          "0": 0
+        },
+        "2": {
+          "0": 0
+        },
+        "3": {
+          "4": 0.5,
+          "0": 0
+        },
+        "4": {
+          "18": 0.25,
+          "0": 0
+        },
+        "5": {
+          "0": 0
+        },
+        "6": {
+          "23": 1
+        },
+        "-1": {
+          "2": 1
+        }
+      },
+      "label": {
+        "2": 1
+      },
+      "complexity": 1,
+      "stable": true,
+      "score_data": {
+        "raw_node_log_probs": "[-2.283194966889226, -2.1051393040139477, -1.528049594944875, -1.0207832312064369, -0.49295024566086254, -0.17863729626238675, -0.281609887950517, -0.02161383507193071]",
+        "candidate_counts": "[392.0, 209.0, 69.875, 27.75, 10.75, 6.75, 7.5, 2.75]",
+        "normed_log_prob": -0.17349139960884558,
+        "best_log_prob_idx": 7,
+        "cost": -1.0614186511737143,
+        "tree_log_prob": -1.0614186511737143,
+        "best_log_prob": -0.02161383507193071
+      },
+      "context_before": [
+        {
+          "0": 0
+        },
+        {
+          "0": 0
+        },
+        {
+          "0": 0
+        }
+      ],
+      "context_after": [
+        {
+          "4": 1
+        },
+        {
+          "18": 1
+        },
+        {
+          "0": 0
+        }
+      ],
+      "parent": 0,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "e5bd8eff8f",
+      "position_idx": 1,
+      "word_id": 4,
+      "context_instance": {
+        "0": {
+          "2": 0.5,
+          "0": 0
+        },
+        "1": {
+          "0": 0
+        },
+        "2": {
+          "0": 0
+        },
+        "3": {
+          "18": 0.5,
+          "0": 0
+        },
+        "4": {
+          "0": 0
+        },
+        "5": {
+          "0": 0
+        },
+        "6": {
+          "23": 1
+        },
+        "-1": {
+          "4": 1
+        }
+      },
+      "label": {
+        "4": 1
+      },
+      "complexity": 1,
+      "stable": true,
+      "score_data": {
+        "raw_node_log_probs": "[-2.358698028067926, -1.5681574299380248, -1.246137688986242, -1.1070829996649718, -0.3483634312493582, -0.08020091832386766, -0.010934503100285767, -0.021739987656836046]",
+        "candidate_counts": "[392.0, 183.0, 88.0, 34.0, 14.625, 9.375, 4.0, 3.375]",
+        "normed_log_prob": -0.06763779437892946,
+        "best_log_prob_idx": 6,
+        "cost": -1.1027066107950778,
+        "tree_log_prob": -1.1027066107950778,
+        "best_log_prob": -0.010934503100285767
+      },
+      "context_before": [
+        {
+          "2": 1
+        },
+        {
+          "0": 0
+        },
+        {
+          "0": 0
+        }
+      ],
+      "context_after": [
+        {
+          "18": 1
+        },
+        {
+          "0": 0
+        },
+        {
+          "0": 0
+        }
+      ],
+      "parent": 0,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "b30e3fe025",
+      "position_idx": 2,
+      "word_id": 18,
+      "context_instance": {
+        "0": {
+          "4": 0.5,
+          "0": 0
+        },
+        "1": {
+          "2": 0.25,
+          "0": 0
+        },
+        "2": {
+          "0": 0
+        },
+        "3": {
+          "0": 0
+        },
+        "4": {
+          "0": 0
+        },
+        "5": {
+          "0": 0
+        },
+        "6": {
+          "23": 1
+        },
+        "-1": {
+          "18": 1
+        }
+      },
+      "label": {
+        "18": 1
+      },
+      "complexity": 1,
+      "stable": true,
+      "score_data": {
+        "raw_node_log_probs": "[-2.1570748187753312, -1.7967936168824932, -1.1717984476197256, -0.7101339086784965, -0.049219442174891825, -0.010902248464351895, -0.02161383507193071]",
+        "candidate_counts": "[392.0, 209.0, 60.5, 25.0, 8.625, 4.625, 3.625]",
+        "normed_log_prob": -0.07980587593103161,
+        "best_log_prob_idx": 5,
+        "cost": -1.0817893178424232,
+        "tree_log_prob": -1.0817893178424232,
+        "best_log_prob": -0.010902248464351895
+      },
+      "context_before": [
+        {
+          "4": 1
+        },
+        {
+          "2": 1
+        },
+        {
+          "0": 0
+        }
+      ],
+      "context_after": [
+        {
+          "0": 0
+        },
+        {
+          "0": 0
+        },
+        {
+          "0": 0
+        }
+      ],
+      "parent": 0,
+      "children": []
+    }
+  ]
+}

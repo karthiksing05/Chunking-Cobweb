@@ -11,15 +11,18 @@ body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial
 .node-fo table { border-collapse: collapse; font-size: 12px; margin: 4px 0; }
 .node-fo th, .node-fo td { border: 1px solid #888; padding: 2px 6px; }
 .node-fo th { background: #f3f5f7; font-weight: 600; }
-.section-title { font-weight: bold; margin-top: 6px; font-size: 11px; color: #555; }
+.section-header { font-weight: 700; font-size: 13px; color: #333; margin: 8px 0 4px 0; border-bottom: 1px solid #ccc; padding-bottom: 2px; }
+.side-by-side { display: flex; gap: 8px; align-items: flex-start; }
+.side-by-side > div { flex: 1; min-width: 0; }
+.sub-title { font-weight: 600; font-size: 11px; color: #555; margin-bottom: 2px; }
 </style>
 </head>
 <body>
 <div id="tree-container"><div id="tree"></div></div>
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script>
-const data = {"title": "ROOT", "content_rows": [], "context_rows": [], "children": [{"title": "a310bb9932", "content_rows": [{"attr": "Left0", "val": "CONCEPT-3254346231104625_3", "count": "1.00"}, {"attr": "Left1", "val": "CONCEPT-3254346231228708_10", "count": "1.00"}, {"attr": "Left2", "val": "CONCEPT-3254357366337208_174", "count": "1.00"}, {"attr": "Left3", "val": "CONCEPT-3254403119214625_2672", "count": "1.00"}, {"attr": "Left4", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Left5", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Left6", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Left7", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Left8", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Left9", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Right0", "val": "CONCEPT-3254346231104625_3", "count": "1.00"}, {"attr": "Right1", "val": "CONCEPT-3254346231285541_14", "count": "1.00"}, {"attr": "Right2", "val": "CONCEPT-3254361664101291_327", "count": "1.00"}, {"attr": "Right3", "val": "CONCEPT-3254367419922833_906", "count": "1.00"}, {"attr": "Right4", "val": "CONCEPT-3254403119587625_2690", "count": "1.00"}, {"attr": "Right5", "val": "CONCEPT-3254403119593583_2691", "count": "1.00"}, {"attr": "Right6", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Right7", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Right8", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Right9", "val": "EMPTYNULL", "count": "0.00"}], "context_rows": [{"attr": "CtxBefore0", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore3", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore4", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter0", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter3", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter4", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Complexity", "val": "COMPLEXITY", "count": "3.00"}], "children": [{"title": "ad3d7f7ff9", "content_rows": [{"attr": "Left0", "val": "CONCEPT-3254346231104625_3", "count": "1.00"}, {"attr": "Left1", "val": "CONCEPT-3254346231228708_10", "count": "1.00"}, {"attr": "Left2", "val": "CONCEPT-3254351437918958_22", "count": "1.00"}, {"attr": "Left3", "val": "CONCEPT-3254367458959916_950", "count": "1.00"}, {"attr": "Left4", "val": "CONCEPT-3254377137119250_1660", "count": "1.00"}, {"attr": "Left5", "val": "CONCEPT-3254403119353458_2678", "count": "1.00"}, {"attr": "Left6", "val": "CONCEPT-3254403119360041_2679", "count": "1.00"}, {"attr": "Left7", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Left8", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Left9", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Right0", "val": "CONCEPT-3254346231104625_3", "count": "1.00"}, {"attr": "Right1", "val": "CONCEPT-3254346231228708_10", "count": "1.00"}, {"attr": "Right2", "val": "CONCEPT-3254403090992833_2473", "count": "1.00"}, {"attr": "Right3", "val": "CONCEPT-3254352927645458_39", "count": "1.00"}, {"attr": "Right4", "val": "CONCEPT-3254377078701750_1272", "count": "1.00"}, {"attr": "Right5", "val": "CONCEPT-3254403119482875_2685", "count": "1.00"}, {"attr": "Right6", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Right7", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Right8", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Right9", "val": "EMPTYNULL", "count": "0.00"}], "context_rows": [{"attr": "CtxBefore0", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore3", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore4", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter0", "val": "dog", "count": "0.50"}, {"attr": "CtxAfter1", "val": "found", "count": "0.25"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter3", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter4", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Complexity", "val": "COMPLEXITY", "count": "2.00"}], "children": [{"title": "f886198d20", "content_rows": [{"attr": "Word", "val": "the", "count": "1.00"}], "context_rows": [{"attr": "CtxBefore0", "val": "EMPTYNULL", "count": "0.50"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.25"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.12"}, {"attr": "CtxBefore3", "val": "EMPTYNULL", "count": "0.06"}, {"attr": "CtxBefore4", "val": "EMPTYNULL", "count": "0.03"}, {"attr": "CtxAfter0", "val": "small", "count": "0.50"}, {"attr": "CtxAfter1", "val": "dog", "count": "0.25"}, {"attr": "CtxAfter2", "val": "found", "count": "0.12"}, {"attr": "CtxAfter3", "val": "EMPTYNULL", "count": "0.06"}, {"attr": "CtxAfter4", "val": "EMPTYNULL", "count": "0.03"}, {"attr": "Complexity", "val": "COMPLEXITY", "count": "1.00"}, {"attr": "ContentRef", "val": "the", "count": "1.00"}], "children": []}, {"title": "da438e945e", "content_rows": [{"attr": "Word", "val": "small", "count": "1.00"}], "context_rows": [{"attr": "CtxBefore0", "val": "the", "count": "0.50"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.25"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.12"}, {"attr": "CtxBefore3", "val": "EMPTYNULL", "count": "0.06"}, {"attr": "CtxBefore4", "val": "EMPTYNULL", "count": "0.03"}, {"attr": "CtxAfter0", "val": "dog", "count": "0.50"}, {"attr": "CtxAfter1", "val": "found", "count": "0.25"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.12"}, {"attr": "CtxAfter3", "val": "EMPTYNULL", "count": "0.06"}, {"attr": "CtxAfter4", "val": "EMPTYNULL", "count": "0.03"}, {"attr": "Complexity", "val": "COMPLEXITY", "count": "1.00"}, {"attr": "ContentRef", "val": "small", "count": "1.00"}], "children": []}]}, {"title": "fe488e6ceb", "content_rows": [{"attr": "Left0", "val": "CONCEPT-3254346231104625_3", "count": "1.00"}, {"attr": "Left1", "val": "CONCEPT-3254346231228708_10", "count": "1.00"}, {"attr": "Left2", "val": "CONCEPT-3254403090992833_2473", "count": "1.00"}, {"attr": "Left3", "val": "CONCEPT-3254352927645458_39", "count": "1.00"}, {"attr": "Left4", "val": "CONCEPT-3254367395083875_591", "count": "1.00"}, {"attr": "Left5", "val": "CONCEPT-3254403119733333_2697", "count": "1.00"}, {"attr": "Left6", "val": "CONCEPT-3254403119739041_2698", "count": "1.00"}, {"attr": "Left7", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Left8", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Left9", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Right0", "val": "CONCEPT-3254346231104625_3", "count": "1.00"}, {"attr": "Right1", "val": "CONCEPT-3254346231285541_14", "count": "1.00"}, {"attr": "Right2", "val": "CONCEPT-3254361664101291_327", "count": "1.00"}, {"attr": "Right3", "val": "CONCEPT-3254367419922833_906", "count": "1.00"}, {"attr": "Right4", "val": "CONCEPT-3254403119848291_2703", "count": "1.00"}, {"attr": "Right5", "val": "CONCEPT-3254403119853500_2704", "count": "1.00"}, {"attr": "Right6", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Right7", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Right8", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Right9", "val": "EMPTYNULL", "count": "0.00"}], "context_rows": [{"attr": "CtxBefore0", "val": "small", "count": "0.50"}, {"attr": "CtxBefore1", "val": "the", "count": "0.25"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore3", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore4", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter0", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter3", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter4", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Complexity", "val": "COMPLEXITY", "count": "2.00"}], "children": [{"title": "1a522b2195", "content_rows": [{"attr": "Word", "val": "dog", "count": "1.00"}], "context_rows": [{"attr": "CtxBefore0", "val": "small", "count": "0.50"}, {"attr": "CtxBefore1", "val": "the", "count": "0.25"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.12"}, {"attr": "CtxBefore3", "val": "EMPTYNULL", "count": "0.06"}, {"attr": "CtxBefore4", "val": "EMPTYNULL", "count": "0.03"}, {"attr": "CtxAfter0", "val": "found", "count": "0.50"}, {"attr": "CtxAfter1", "val": "EMPTYNULL", "count": "0.25"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.12"}, {"attr": "CtxAfter3", "val": "EMPTYNULL", "count": "0.06"}, {"attr": "CtxAfter4", "val": "EMPTYNULL", "count": "0.03"}, {"attr": "Complexity", "val": "COMPLEXITY", "count": "1.00"}, {"attr": "ContentRef", "val": "dog", "count": "1.00"}], "children": []}, {"title": "f012c4cc1a", "content_rows": [{"attr": "Word", "val": "found", "count": "1.00"}], "context_rows": [{"attr": "CtxBefore0", "val": "dog", "count": "0.50"}, {"attr": "CtxBefore1", "val": "small", "count": "0.25"}, {"attr": "CtxBefore2", "val": "the", "count": "0.12"}, {"attr": "CtxBefore3", "val": "EMPTYNULL", "count": "0.06"}, {"attr": "CtxBefore4", "val": "EMPTYNULL", "count": "0.03"}, {"attr": "CtxAfter0", "val": "EMPTYNULL", "count": "0.50"}, {"attr": "CtxAfter1", "val": "EMPTYNULL", "count": "0.25"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.12"}, {"attr": "CtxAfter3", "val": "EMPTYNULL", "count": "0.06"}, {"attr": "CtxAfter4", "val": "EMPTYNULL", "count": "0.03"}, {"attr": "Complexity", "val": "COMPLEXITY", "count": "1.00"}, {"attr": "ContentRef", "val": "found", "count": "1.00"}], "children": []}]}]}]};
-const nodeW=280, nodeH=130, hGap=80, vGap=150;
+const data = {"title": "ROOT", "content_rows": [], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [], "context_after_rows": [], "context_other_rows": [], "children": [{"title": "de6b02738c", "content_rows": [{"attr": "Word", "val": "the", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.00"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "red", "count": "0.50"}, {"attr": "CtxAfter1", "val": "park", "count": "0.25"}, {"attr": "CtxAfter2", "val": "liked", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "COMPLEXITY", "count": "1.00"}, {"attr": "ContentRef", "val": "the", "count": "1.00"}], "children": []}, {"title": "47801bf01e", "content_rows": [{"attr": "Word", "val": "red", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "the", "count": "0.50"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.00"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "park", "count": "0.50"}, {"attr": "CtxAfter1", "val": "liked", "count": "0.25"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.00"}], "context_other_rows": [{"attr": "Complexity", "val": "COMPLEXITY", "count": "1.00"}, {"attr": "ContentRef", "val": "red", "count": "1.00"}], "children": []}, {"title": "f12695d5fd", "content_rows": [{"attr": "Word", "val": "park", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "red", "count": "0.50"}, {"attr": "CtxBefore1", "val": "the", "count": "0.25"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.00"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "liked", "count": "0.50"}, {"attr": "CtxAfter1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.00"}], "context_other_rows": [{"attr": "Complexity", "val": "COMPLEXITY", "count": "1.00"}, {"attr": "ContentRef", "val": "park", "count": "1.00"}], "children": []}, {"title": "039f25dbf4", "content_rows": [{"attr": "Word", "val": "liked", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "park", "count": "0.50"}, {"attr": "CtxBefore1", "val": "red", "count": "0.25"}, {"attr": "CtxBefore2", "val": "the", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.00"}], "context_other_rows": [{"attr": "Complexity", "val": "COMPLEXITY", "count": "1.00"}, {"attr": "ContentRef", "val": "liked", "count": "1.00"}], "children": []}]};
+const nodeW=600, nodeH=130, hGap=80, vGap=150;
 
 const root = d3.hierarchy(data);
 const layout = d3.tree()
@@ -88,7 +91,7 @@ function threeColTable(title, rows) {
   const body = rows.map(r =>
     `<tr><td>${r.attr}</td><td>${r.val}</td><td>${r.count}</td></tr>`
   ).join("");
-  return `<div class="section-title">${title}</div>
+  return `<div class="sub-title">${title}</div>
     <table>
       <tr><th>Attr</th><th>Value</th><th>Count</th></tr>
       ${body}
@@ -96,10 +99,48 @@ function threeColTable(title, rows) {
 }
 
 function nodeHTML(d){
+  // --- Content section ---
+  let contentHTML = "";
+  const hasLeft = d.content_left_rows && d.content_left_rows.length > 0;
+  const hasRight = d.content_right_rows && d.content_right_rows.length > 0;
+  const hasSingle = d.content_rows && d.content_rows.length > 0;
+
+  if (hasLeft || hasRight) {
+    // Composite node: left and right side by side
+    contentHTML = `<div class="section-header">Content</div>
+      <div class="side-by-side">
+        <div>${threeColTable("Left", d.content_left_rows)}</div>
+        <div>${threeColTable("Right", d.content_right_rows)}</div>
+      </div>`;
+  } else if (hasSingle) {
+    // Primitive node: single content table
+    contentHTML = `<div class="section-header">Content</div>${threeColTable("", d.content_rows)}`;
+  }
+
+  // --- Context section ---
+  let contextHTML = "";
+  const hasBefore = d.context_before_rows && d.context_before_rows.length > 0;
+  const hasAfter = d.context_after_rows && d.context_after_rows.length > 0;
+  const hasOther = d.context_other_rows && d.context_other_rows.length > 0;
+
+  if (hasBefore || hasAfter || hasOther) {
+    let ctxInner = "";
+    if (hasBefore || hasAfter) {
+      ctxInner += `<div class="side-by-side">
+        <div>${threeColTable("Before", d.context_before_rows)}</div>
+        <div>${threeColTable("After", d.context_after_rows)}</div>
+      </div>`;
+    }
+    if (hasOther) {
+      ctxInner += threeColTable("Other", d.context_other_rows);
+    }
+    contextHTML = `<div class="section-header">Context</div>${ctxInner}`;
+  }
+
   return `<div class="node-fo">
     <table><tr><th colspan="3">${d.title}</th></tr></table>
-    ${threeColTable("Content Instance", d.content_rows)}
-    ${threeColTable("Context Instance", d.context_rows)}
+    ${contentHTML}
+    ${contextHTML}
   </div>`;
 }
 </script>

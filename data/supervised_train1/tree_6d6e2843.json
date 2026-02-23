@@ -1,0 +1,244 @@
+{
+  "window": "a cat saw",
+  "context_length": 3,
+  "nodes": [
+    {
+      "node_type": "composite",
+      "title": "8daf8a2980",
+      "position_idx": null,
+      "is_global_root": true,
+      "content_instance": null,
+      "context_instance": null,
+      "label": null,
+      "categorize_path": null,
+      "context_before": null,
+      "context_after": null,
+      "context_length": 0,
+      "complexity": 0,
+      "concept_label": null,
+      "frozen": false,
+      "parent": null,
+      "children": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "node_type": "primitive",
+      "title": "a8893a3aaf",
+      "position_idx": 0,
+      "word_id": 2,
+      "context_instance": {
+        "0": {
+          "0": 0
+        },
+        "1": {
+          "0": 0
+        },
+        "2": {
+          "0": 0
+        },
+        "3": {
+          "3": 0.5,
+          "0": 0
+        },
+        "4": {
+          "14": 0.25,
+          "0": 0
+        },
+        "5": {
+          "0": 0
+        },
+        "6": {
+          "23": 1
+        },
+        "-1": {
+          "2": 1
+        }
+      },
+      "label": {
+        "2": 1
+      },
+      "complexity": 1,
+      "stable": true,
+      "score_data": {
+        "raw_node_log_probs": "[-1.9423659572744314, -1.547087545579941, -1.6167665946155232, -0.7826850097115001, -0.02161383507193071]",
+        "candidate_counts": "[200.0, 91.0, 44.0, 10.0, 3.75]",
+        "normed_log_prob": -0.5345983813400311,
+        "best_log_prob_idx": 4,
+        "cost": -1.7145506277762002,
+        "tree_log_prob": -1.7145506277762002,
+        "best_log_prob": -0.02161383507193071
+      },
+      "context_before": [
+        {
+          "0": 0
+        },
+        {
+          "0": 0
+        },
+        {
+          "0": 0
+        }
+      ],
+      "context_after": [
+        {
+          "3": 1
+        },
+        {
+          "14": 1
+        },
+        {
+          "0": 0
+        }
+      ],
+      "parent": 0,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "d37c0d2520",
+      "position_idx": 1,
+      "word_id": 3,
+      "context_instance": {
+        "0": {
+          "2": 0.5,
+          "0": 0
+        },
+        "1": {
+          "0": 0
+        },
+        "2": {
+          "0": 0
+        },
+        "3": {
+          "14": 0.5,
+          "0": 0
+        },
+        "4": {
+          "0": 0
+        },
+        "5": {
+          "0": 0
+        },
+        "6": {
+          "23": 1
+        },
+        "-1": {
+          "3": 1
+        }
+      },
+      "label": {
+        "3": 1
+      },
+      "complexity": 1,
+      "stable": true,
+      "score_data": {
+        "raw_node_log_probs": "[-2.498387009838167, -1.6749987881791182, -0.9961960098243104, -0.15019323822489158, -0.021739987656836046]",
+        "candidate_counts": "[200.0, 91.0, 31.0, 5.875, 3.0]",
+        "normed_log_prob": -0.2696128294026536,
+        "best_log_prob_idx": 4,
+        "cost": -0.9308623451986461,
+        "tree_log_prob": -0.9308623451986461,
+        "best_log_prob": -0.021739987656836046
+      },
+      "context_before": [
+        {
+          "2": 1
+        },
+        {
+          "0": 0
+        },
+        {
+          "0": 0
+        }
+      ],
+      "context_after": [
+        {
+          "14": 1
+        },
+        {
+          "0": 0
+        },
+        {
+          "0": 0
+        }
+      ],
+      "parent": 0,
+      "children": []
+    },
+    {
+      "node_type": "primitive",
+      "title": "6e9c873715",
+      "position_idx": 2,
+      "word_id": 14,
+      "context_instance": {
+        "0": {
+          "3": 0.5,
+          "0": 0
+        },
+        "1": {
+          "2": 0.25,
+          "0": 0
+        },
+        "2": {
+          "0": 0
+        },
+        "3": {
+          "0": 0
+        },
+        "4": {
+          "0": 0
+        },
+        "5": {
+          "0": 0
+        },
+        "6": {
+          "23": 1
+        },
+        "-1": {
+          "14": 1
+        }
+      },
+      "label": {
+        "14": 1
+      },
+      "complexity": 1,
+      "stable": true,
+      "score_data": {
+        "raw_node_log_probs": "[-1.8683961116405432, -1.5154600793255546, -0.9147575088678703, -0.5458688476953022, -0.20993896075352012, -0.02161383507193071]",
+        "candidate_counts": "[200.0, 109.0, 30.5, 12.0, 4.875, 3.5]",
+        "normed_log_prob": -0.20849665116900631,
+        "best_log_prob_idx": 5,
+        "cost": -1.5738831110091343,
+        "tree_log_prob": -1.5738831110091343,
+        "best_log_prob": -0.02161383507193071
+      },
+      "context_before": [
+        {
+          "3": 1
+        },
+        {
+          "2": 1
+        },
+        {
+          "0": 0
+        }
+      ],
+      "context_after": [
+        {
+          "0": 0
+        },
+        {
+          "0": 0
+        },
+        {
+          "0": 0
+        }
+      ],
+      "parent": 0,
+      "children": []
+    }
+  ]
+}

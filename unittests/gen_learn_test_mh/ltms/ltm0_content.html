@@ -10,17 +10,19 @@
 	.node-fo table { border-collapse: collapse; font-size: 12px; margin: 4px 0; }
 	.node-fo th, .node-fo td { border: 1px solid #888; padding: 2px 6px; }
 	.node-fo th { background: #f3f5f7; font-weight: 600; }
-	.section-title { font-weight: bold; margin-top: 4px; }
-	.section { margin-top: 10px; margin-bottom: 10px; }
+	.section-header { font-weight: 700; font-size: 13px; color: #333; margin: 8px 0 4px 0; border-bottom: 1px solid #ccc; padding-bottom: 2px; }
+	.side-by-side { display: flex; gap: 8px; align-items: flex-start; }
+	.side-by-side > div { flex: 1; min-width: 0; }
+	.sub-title { font-weight: 600; font-size: 11px; color: #555; margin-bottom: 2px; }
 </style>
 </head>
 <body>
 <div id="tree"></div>
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script>
-const data = {"title": "CONCEPT-3254346230568416_1", "rows": [], "children": []};
+const data = {"title": "CONCEPT-3467210648852875_1", "rows": [], "left_rows": [], "right_rows": [], "other_rows": [], "children": []};
 
-const nodeW  = 380;
+const nodeW  = 700;
 const nodeH  = 140;
 const hGap   = 20;
 const vGap   = 140;
@@ -108,17 +110,52 @@ svg.attr("width", width)
 	.attr("height", height)
 	.attr("viewBox", [x0, y0, width, height].join(" "));
 
-function nodeHTML(d) {
-	let tableRows = d.rows.map(r =>
+function subtable(title, rows) {
+	if (!rows || rows.length === 0) return "";
+	const body = rows.map(r =>
 		`<tr><td>${r.attr}</td><td>${r.val}</td><td>${r.count}</td></tr>`
 	).join("");
-	return `
-	<div class="node-fo">
+	return `<div class="sub-title">${title}</div>
 		<table>
-			<tr><th colspan="3">${d.title}</th></tr>
 			<tr><th>Attr</th><th>Value</th><th>Count</th></tr>
-			${tableRows}
-		</table>
+			${body}
+		</table>`;
+}
+
+function nodeHTML(d) {
+	const hasLeft  = d.left_rows  && d.left_rows.length  > 0;
+	const hasRight = d.right_rows && d.right_rows.length > 0;
+	const hasOther = d.other_rows && d.other_rows.length > 0;
+	const hasSplit = hasLeft || hasRight;
+
+	let mainHTML = "";
+	if (hasSplit) {
+		// Determine section header label based on which sides are present
+		const leftLabel  = hasLeft  ? (d.left_rows[0].attr.startsWith("Context")  ? "Before" : "Left")  : "Left";
+		const rightLabel = hasRight ? (d.right_rows[0].attr.startsWith("Context") ? "After"  : "Right") : "Right";
+		mainHTML = `<div class="section-header">Attributes</div>
+			<div class="side-by-side">
+				<div>${subtable(leftLabel,  d.left_rows)}</div>
+				<div>${subtable(rightLabel, d.right_rows)}</div>
+			</div>`;
+	} else {
+		// Fallback: render all rows in one table
+		const body = d.rows.map(r =>
+			`<tr><td>${r.attr}</td><td>${r.val}</td><td>${r.count}</td></tr>`
+		).join("");
+		mainHTML = `<div class="section-header">Attributes</div>
+			<table>
+				<tr><th>Attr</th><th>Value</th><th>Count</th></tr>
+				${body}
+			</table>`;
+	}
+	const otherHTML = hasOther
+		? `<div class="section-header">Other</div>${subtable("", d.other_rows)}`
+		: "";
+	return `<div class="node-fo">
+		<table><tr><th colspan="3">${d.title}</th></tr></table>
+		${mainHTML}
+		${otherHTML}
 	</div>`;
 }
 </script>

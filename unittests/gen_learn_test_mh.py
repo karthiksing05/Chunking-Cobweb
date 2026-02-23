@@ -14,19 +14,19 @@ OUT_DIR = "unittests/gen_learn_test_mh"
 
 if os.path.exists(OUT_DIR):
     shutil.rmtree(OUT_DIR)
-
+    
 # Creating and printing toy sentences
-CONTEXT_LENGTH = 5
+CONTEXT_LENGTH = 3
 CONTENT_LENGTH = 10
 
-num_sentences = 100
+num_sentences = 300
 document = []
 
 for _ in range(num_sentences):
     sentence = generate("S", TEST_GRAMMAR1)
     document.append(sentence)
 
-THRESHOLD = -30
+THRESHOLD = -20
 
 # Setting up the multi-hierarchy parser (WEBSTER)
 webster = WEBSTER(
@@ -34,12 +34,13 @@ webster = WEBSTER(
     context_length=CONTEXT_LENGTH,
     content_length=CONTENT_LENGTH,
     threshold=THRESHOLD,
-    alpha=1e-4
+    content_alpha=5e-4,
+    context_alpha=5e-4
 )
 
-train_size = 0.90
+train_size = 0.96
 
-PRIMITIVES_FIRST = 0
+PRIMITIVES_FIRST = 30
 
 train_documents = document[:int(len(document) * train_size)]
 test_documents = document[int(len(document) * train_size):]
@@ -65,7 +66,13 @@ for i, doc in enumerate(train_documents):
         parse_tree.visualize(f"{OUT_DIR}/train_trees/train_parse_tree{i}")
 
         if i < 21:
-            webster.visualize_ltm(f"{OUT_DIR}/ltms/ltm{i}", max_depth=4)
+            webster.visualize_ltm(f"{OUT_DIR}/ltms/ltm{i}", max_depth=3)
+
+
+webster.visualize_ltm(f"{OUT_DIR}/final_ltm", max_depth=3)
+SAVE_DIR = f"{OUT_DIR}/final_ltm_data"
+webster.save_state(SAVE_DIR)
+print(f"Saved Final LTM to \"{SAVE_DIR}\"!")
 
 
 # Visualize the test parse trees
@@ -199,8 +206,3 @@ with open(mask_pred_path, "w") as mask_f:
         if parse and hasattr(parse, 'visualize'):
             parse.visualize(f"{OUT_DIR}/masked_pred_trees/masked_pred_tree{i}")
 print(f"Saved masked prediction results to \"{mask_pred_path}\"")
-
-webster.visualize_ltm(f"{OUT_DIR}/final_ltm", max_depth=3)
-SAVE_DIR = f"{OUT_DIR}/final_ltm_data"
-webster.save_state(SAVE_DIR)
-print(f"Saved Final LTM to \"{SAVE_DIR}\"!")
