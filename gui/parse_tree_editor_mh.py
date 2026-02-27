@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 LEARNING_ON = True
 PREBUILD_TREES = False
-CONTEXT_LENGTH = 3
+CONTEXT_LENGTH = 8
 CONTENT_LENGTH = 10
 PRIMITIVE_THRESHOLD = "converge"
 CATEGORIZATION_MODE = "bfs"  # "dfs", "bfs", or "bfs_pmi"

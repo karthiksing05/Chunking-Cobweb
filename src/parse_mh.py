@@ -52,6 +52,30 @@ from pprint import pprint
 
 
 # ---------------------------------------------------------------------------
+# Weighting helper
+# ---------------------------------------------------------------------------
+
+def _context_weight(j: int, mode: str = "binary") -> float:
+    """Return the weight for context slot at distance *j* (0-indexed).
+
+    Parameters
+    ----------
+    j : int
+        0-indexed distance from the target word (0 = immediate neighbour).
+    mode : str
+        ``'binary'``   – 1 / 2^(j+1)   (default, original behaviour)
+        ``'harmonic'`` – 1 / (j+1)
+        ``'constant'`` – 1
+    """
+    if mode == "harmonic":
+        return 1.0 / (j + 1)
+    elif mode == "constant":
+        return 1.0
+    else:  # 'binary' (default / fallback)
+        return 1.0 / (2 ** (j + 1))
+
+
+# ---------------------------------------------------------------------------
 # Categorization helpers (ported from parse.py, hierarchy-agnostic)
 # ---------------------------------------------------------------------------
 
@@ -436,6 +460,41 @@ def _score_along_path(
     return score_data
 
 
+def _basic_level_node_info(node, id_to_value, max_vals=7):
+    """Build a JSON-serialisable dict describing a basic-level CobwebDiscreteNode."""
+    if node is None:
+        return None
+
+    def _lookup(idx):
+        """Resolve a vocab index to its string via *id_to_value* (a list)."""
+        try:
+            return str(id_to_value[idx])
+        except (IndexError, TypeError):
+            return str(idx)
+
+    info = {
+        "concept_hash": node.concept_hash(),
+        "count": int(node.count),
+        "depth": int(node.depth()),
+        "attrs": [],
+    }
+    for attr_id, val_dict in sorted(node.av_count.items()):
+        if attr_id < 0:
+            if attr_id == -1:
+                attr_name = "Content-Ref"
+            elif attr_id == -2:
+                attr_name = "Complexity"
+            else:
+                attr_name = f"Hidden({attr_id})"
+        else:
+            attr_name = _lookup(attr_id)
+        sorted_vals = sorted(val_dict.items(), key=lambda kv: -kv[1])[:max_vals]
+        vals = [{"key": _lookup(vid), "count": round(float(cnt), 4)}
+                for vid, cnt in sorted_vals]
+        info["attrs"].append({"attr": str(attr_name), "vals": vals})
+    return info
+
+
 # ---------------------------------------------------------------------------
 # Shared helpers for multi-depth label_path construction
 # ---------------------------------------------------------------------------
@@ -716,7 +775,9 @@ class CompositeParseNode(object):
     def create_context_instance(left_node, right_node, context_length: int,
                                 content_ref_id: int = None,
                                 complexity_vid: int = 0,
-                                bow: bool = False) -> dict:
+                                bow: bool = False,
+                                weighting: str = 'binary',
+                                empty_weighting: bool = False) -> dict:
         """
         Build the context-hierarchy instance from two children.
         Attributes:
@@ -749,12 +810,12 @@ class CompositeParseNode(object):
 
         if bow:
             # BOW: collapse all before slots into key 0, all after into key 1.
-            # Values are distance-weighted (1/(j+1)) and summed per word.
+            # Values are distance-weighted and summed per word.
             # EMPTYNULL (0) slots are omitted entirely.
             before_bag: dict = {}
             for j in range(context_length):
                 if j < len(left_ctx_before) and left_ctx_before[j]:
-                    weight = 1.0 / (j + 1)
+                    weight = _context_weight(j, weighting)
                     for k in left_ctx_before[j]:
                         if k != 0:  # skip EMPTYNULL
                             before_bag[k] = before_bag.get(k, 0) + weight
@@ -764,7 +825,7 @@ class CompositeParseNode(object):
             after_bag: dict = {}
             for j in range(context_length):
                 if j < len(right_ctx_after) and right_ctx_after[j]:
-                    weight = 1.0 / (j + 1)
+                    weight = _context_weight(j, weighting)
                     for k in right_ctx_after[j]:
                         if k != 0:  # skip EMPTYNULL
                             after_bag[k] = after_bag.get(k, 0) + weight
@@ -773,21 +834,22 @@ class CompositeParseNode(object):
 
             ctx_inst[-2] = {complexity_vid: complexity}  # COMPLEXITY hidden at -2
         else:
+            _empty_val = 1 if empty_weighting else 0
             # Slot-per-position: one attribute per context window position.
             for j in range(context_length):
                 if j < len(left_ctx_before) and left_ctx_before[j]:
-                    ctx_inst[j] = {k: 1.0 / (j + 1) for k in left_ctx_before[j]}
+                    ctx_inst[j] = {k: _context_weight(j, weighting) for k in left_ctx_before[j]}
                     ctx_inst[j][0] = 0
                 else:
-                    ctx_inst[j] = {0: 0}
+                    ctx_inst[j] = {0: _empty_val}
 
             for j in range(context_length):
                 attr_key = context_length + j
                 if j < len(right_ctx_after) and right_ctx_after[j]:
-                    ctx_inst[attr_key] = {k: 1.0 / (j + 1) for k in right_ctx_after[j]}
+                    ctx_inst[attr_key] = {k: _context_weight(j, weighting) for k in right_ctx_after[j]}
                     ctx_inst[attr_key][0] = 0
                 else:
-                    ctx_inst[attr_key] = {0: 0}
+                    ctx_inst[attr_key] = {0: _empty_val}
 
             ctx_inst[-2] = {complexity_vid: complexity}
 
@@ -826,10 +888,10 @@ class CompositeParseNode(object):
         # derive before/after lists from context_instance for visualization
         node.context_before = []
         for j in range(context_length):
-            node.context_before.append(context_instance.get(j, {0: 0}))
+            node.context_before.append(dict(context_instance.get(j, {0: 0})))
         node.context_after = []
         for j in range(context_length):
-            node.context_after.append(context_instance.get(context_length + j, {0: 0}))
+            node.context_after.append(dict(context_instance.get(context_length + j, {0: 0})))
 
         return node
 
@@ -943,6 +1005,9 @@ class FiniteParseTree(object):
         word_ids = [self.value_to_id[e] for e in elements]
 
         _bow = getattr(self.ltm, 'bow', False)
+        _weighting = getattr(self.ltm, 'weighting', 'binary')
+        _empty_wt = getattr(self.ltm, 'empty_weighting', False)
+        _empty_val = 1 if _empty_wt else 0
         for i, wid in enumerate(word_ids):
             # build sliding-window context instance for context hierarchy
             ctx_inst: dict = {}
@@ -950,13 +1015,13 @@ class FiniteParseTree(object):
 
             if _bow:
                 # BOW: key 0 = before bag, key 1 = after bag, key 2 = complexity.
-                # Distance-weighted (1/(j+1)), summed if repeated; EMPTYNULL omitted.
+                # Distance-weighted, summed if repeated; EMPTYNULL omitted.
                 before_bag: dict = {}
                 for j in range(self.context_length):
                     src_idx = i - (j + 1)
                     if 0 <= src_idx < len(word_ids):
                         w = word_ids[src_idx]
-                        before_bag[w] = before_bag.get(w, 0) + 1.0 / (j + 1)
+                        before_bag[w] = before_bag.get(w, 0) + _context_weight(j, _weighting)
                 if before_bag:
                     ctx_inst[0] = before_bag
 
@@ -965,7 +1030,7 @@ class FiniteParseTree(object):
                     src_idx = i + (j + 1)
                     if 0 <= src_idx < len(word_ids):
                         w = word_ids[src_idx]
-                        after_bag[w] = after_bag.get(w, 0) + 1.0 / (j + 1)
+                        after_bag[w] = after_bag.get(w, 0) + _context_weight(j, _weighting)
                 if after_bag:
                     ctx_inst[1] = after_bag
 
@@ -975,20 +1040,20 @@ class FiniteParseTree(object):
                 for j in range(self.context_length):
                     src_idx = i - (j + 1)
                     if 0 <= src_idx < len(word_ids):
-                        ctx_inst[j] = {word_ids[src_idx]: 1.0 / (j + 1)}
+                        ctx_inst[j] = {word_ids[src_idx]: _context_weight(j, _weighting)}
                         ctx_inst[j][0] = 0
                     else:
-                        ctx_inst[j] = {0: 0}
+                        ctx_inst[j] = {0: _empty_val}
 
                 # context_after
                 for j in range(self.context_length):
                     src_idx = i + (j + 1)
                     attr_key = self.context_length + j
                     if 0 <= src_idx < len(word_ids):
-                        ctx_inst[attr_key] = {word_ids[src_idx]: 1.0 / (j + 1)}
+                        ctx_inst[attr_key] = {word_ids[src_idx]: _context_weight(j, _weighting)}
                         ctx_inst[attr_key][0] = 0
                     else:
-                        ctx_inst[attr_key] = {0: 0}
+                        ctx_inst[attr_key] = {0: _empty_val}
 
                 # complexity = 1 for primitives – single COMPLEXITY value, count = 1
                 ctx_inst[-2] = {_cplx_vid: 1}
@@ -1033,7 +1098,7 @@ class FiniteParseTree(object):
                 if 0 <= src_idx < len(word_ids):
                     cb.append({word_ids[src_idx]: 1})
                 else:
-                    cb.append({0: 0})
+                    cb.append({0: _empty_val})
             node.context_before = cb
 
             ca = []
@@ -1042,11 +1107,16 @@ class FiniteParseTree(object):
                 if 0 <= src_idx < len(word_ids):
                     ca.append({word_ids[src_idx]: 1})
                 else:
-                    ca.append({0: 0})
+                    ca.append({0: _empty_val})
             node.context_after = ca
 
             # score
             score_data = _score_along_path(node_path, ctx_inst, self.ltm.context_hierarchy)
+            # basic-level node info for context hierarchy
+            _bl_idx = score_data.get("best_log_prob_idx", 0)
+            if node_path and 0 <= _bl_idx < len(node_path):
+                score_data["context_basic_level_node"] = _basic_level_node_info(
+                    node_path[_bl_idx], self.id_to_value)
             node.score_data = score_data
 
             if threshold == "converge":
@@ -1111,6 +1181,8 @@ class FiniteParseTree(object):
             content_ref_id=None,  # no -1 during categorization
             complexity_vid=_cplx_vid,
             bow=getattr(self.ltm, 'bow', False),
+            weighting=getattr(self.ltm, 'weighting', 'binary'),
+            empty_weighting=getattr(self.ltm, 'empty_weighting', False),
         )
 
         # categorize in context hierarchy (for identity / label)
@@ -1135,6 +1207,19 @@ class FiniteParseTree(object):
         }
         content_score_data = _score_along_path(cnt_node_path, content_inst, self.ltm.content_hierarchy)
         context_score_data = _score_along_path(ctx_node_path, context_inst, self.ltm.context_hierarchy)
+
+        # Basic-level node info for both hierarchies
+        _cnt_bl_idx = content_score_data.get("best_log_prob_idx", 0)
+        _ctx_bl_idx = context_score_data.get("best_log_prob_idx", 0)
+        content_basic_level = None
+        context_basic_level = None
+        if cnt_node_path and 0 <= _cnt_bl_idx < len(cnt_node_path):
+            content_basic_level = _basic_level_node_info(
+                cnt_node_path[_cnt_bl_idx], self.id_to_value)
+        if ctx_node_path and 0 <= _ctx_bl_idx < len(ctx_node_path):
+            context_basic_level = _basic_level_node_info(
+                ctx_node_path[_ctx_bl_idx], self.id_to_value)
+
         if debug:
             print(f"Content score for pair: {score:.4f}")
             print(f"  content_inst: {content_inst}")
@@ -1175,6 +1260,8 @@ class FiniteParseTree(object):
             "context_path_hashes": context_path_hashes,
             "content_score_data": content_score_data,
             "context_score_data": context_score_data,
+            "content_basic_level_node": content_basic_level,
+            "context_basic_level_node": context_basic_level,
             "categorization_mode": _cat_mode,
         }
 
@@ -1203,6 +1290,8 @@ class FiniteParseTree(object):
             content_ref_id=None,  # no -1 during categorization
             complexity_vid=_cplx_vid,
             bow=getattr(self.ltm, 'bow', False),
+            weighting=getattr(self.ltm, 'weighting', 'binary'),
+            empty_weighting=getattr(self.ltm, 'empty_weighting', False),
         )
 
         # categorize in context hierarchy
@@ -1908,7 +1997,7 @@ function renderPathViz(tab) {{
     const entry = _pathVizData[tab];
     const scoreEl = document.getElementById('path-tab-score');
     if (!entry || !entry.tree) {{ if(scoreEl) scoreEl.innerHTML=''; return; }}
-    if (scoreEl) scoreEl.innerHTML = buildScoreTable(entry.scoreData || {{}});
+    if (scoreEl) scoreEl.innerHTML = buildScoreTable(entry.scoreData || {{}}) + buildBasicLevelHTML(entry.basicLevelNode, "Basic-Level Node");
     const treeD  = entry.tree;
     const pathArr = entry.path || [];
     const pathNodes = new Set(pathArr);
@@ -1932,7 +2021,16 @@ function renderPathViz(tab) {{
     const root = d3.hierarchy(treeD);
     const layout = d3.tree().size([W - 80, H - 60]);
     layout(root);
-    root.each(d => {{ d.x += 40; d.y += 30; }});
+    // Custom Y: full spacing for first 7 layers, compressed beyond
+    const FULL_LAYERS = 7;
+    let maxDepth = 0;
+    root.each(d => {{ if (d.depth > maxDepth) maxDepth = d.depth; }});
+    function depthY(depth) {{
+        const fullGap = 50, compressGap = 12;
+        if (depth <= FULL_LAYERS) return depth * fullGap;
+        return FULL_LAYERS * fullGap + (depth - FULL_LAYERS) * compressGap;
+    }}
+    root.each(d => {{ d.x += 40; d.y = depthY(d.depth) + 30; }});
     svgSel.call(d3.zoom().scaleExtent([0.02, 20])
         .on("zoom", e => d3.select("#path-viz-svg .pviz-root").attr("transform", e.transform)));
     g.selectAll("line.pviz-e")
@@ -2060,8 +2158,28 @@ function formatScoreValue(val){{
 function buildScoreTable(score){{
     if(!score||Object.keys(score).length===0) return "<i>No score data</i>";
     let rows="";
-    for(const [k,v] of Object.entries(score)){{rows+=`<tr><td>${{k}}</td><td>${{formatScoreValue(v)}}</td></tr>`;}}
+    for(const [k,v] of Object.entries(score)){{if(typeof v==="object"&&v!==null) continue;rows+=`<tr><td>${{k}}</td><td>${{formatScoreValue(v)}}</td></tr>`;}}
     return `<table><tr><th>Metric</th><th>Value</th></tr>${{rows}}</table>`;
+}}
+function buildBasicLevelHTML(info, title){{
+    if(!info) return "";
+    title = title || "Basic-Level Node";
+    let html = `<div class="section-header">${{title}}</div>`;
+    html += `<table><tr><th>Property</th><th>Value</th></tr>`;
+    html += `<tr><td>Concept Hash</td><td>${{info.concept_hash}}</td></tr>`;
+    html += `<tr><td>Count</td><td>${{info.count}}</td></tr>`;
+    html += `<tr><td>Depth</td><td>${{info.depth}}</td></tr>`;
+    html += `</table>`;
+    if(info.attrs && info.attrs.length>0){{
+        html += `<div style="margin-top:6px;">`;
+        for(const a of info.attrs){{
+            const valRows = a.vals.map(v=>`<tr><td>${{v.key}}</td><td>${{v.count}}</td></tr>`).join("");
+            html += `<div style="margin:4px 0;"><strong style="font-size:11px;">${{a.attr}}:</strong>`;
+            html += `<table style="margin-top:2px;"><tr><th>Value</th><th>Count</th></tr>${{valRows}}</table></div>`;
+        }}
+        html += `</div>`;
+    }}
+    return html;
 }}
 function renderPrimitivePath(pathHashes){{
     const sub=document.getElementById("primitive-path-viz-sub");
@@ -2091,7 +2209,11 @@ function renderPrimitivePath(pathHashes){{
     const root=d3.hierarchy(_primitiveContextTree);
     const layout=d3.tree().size([W-80,H-60]);
     layout(root);
-    root.each(d=>{{d.x+=40;d.y+=30;}});
+    // Custom Y: full spacing for first 7 layers, compressed beyond
+    const PP_FULL=7;
+    let ppMaxD=0;root.each(d=>{{if(d.depth>ppMaxD)ppMaxD=d.depth;}});
+    function ppDepthY(depth){{const fg=40,cg=10;if(depth<=PP_FULL)return depth*fg;return PP_FULL*fg+(depth-PP_FULL)*cg;}}
+    root.each(d=>{{d.x+=40;d.y=ppDepthY(d.depth)+30;}});
     svgSel.call(d3.zoom().scaleExtent([0.02,20])
         .on("zoom",e=>d3.select("#primitive-path-svg .ppviz-root").attr("transform",e.transform)));
     g.selectAll("line.ppviz-e")
@@ -2119,7 +2241,7 @@ function renderPrimitiveScores(primitives){{
     primitives.forEach(p=>{{
         const btn=document.createElement("button");btn.textContent=p.title;
         btn.onclick=()=>{{
-            if(view)view.innerHTML=buildScoreTable(p.score_data);
+            if(view)view.innerHTML=buildScoreTable(p.score_data)+buildBasicLevelHTML(p.score_data&&p.score_data.context_basic_level_node,"Context Basic-Level Node");
             if(container)container.style.display="";
             renderPrimitivePath(p.context_path_hashes||[]);
         }};
@@ -2162,8 +2284,8 @@ function showCandidateModal(result, contentTree, contextTree){{
     document.getElementById("candidate-score").textContent=result.score.toFixed(3) + modeLabel;
     // store path data for both hierarchies
     _pathVizData = {{
-        content: {{ tree: contentTree, path: result.content_path_hashes || [], scoreData: result.content_score_data || {{}} }},
-        context: {{ tree: contextTree, path: result.context_path_hashes || [], scoreData: result.context_score_data || {{}} }},
+        content: {{ tree: contentTree, path: result.content_path_hashes || [], scoreData: result.content_score_data || {{}}, basicLevelNode: result.content_basic_level_node || null }},
+        context: {{ tree: contextTree, path: result.context_path_hashes || [], scoreData: result.context_score_data || {{}}, basicLevelNode: result.context_basic_level_node || null }},
     }};
     // reset tab to content
     _currentPathTab = 'content';
@@ -2354,7 +2476,7 @@ class LongTermMemory(object):
 
     def __init__(self, value_corpus: list, context_length: int = 3, content_path_depth: int = 3, alpha: float = 1e-4,
                  content_alpha: float = None, context_alpha: float = None, bow: bool = False,
-                 categorization_mode: str = 'dfs'):
+                 categorization_mode: str = 'dfs', weighting: str = 'binary', empty_weighting: bool = False):
         _content_alpha = content_alpha if content_alpha is not None else alpha
         _context_alpha = context_alpha if context_alpha is not None else alpha
         self.content_alpha = _content_alpha
@@ -2375,6 +2497,8 @@ class LongTermMemory(object):
         self.content_path_depth = content_path_depth
         self.bow = bow
         self.categorization_mode = categorization_mode
+        self.weighting = weighting  # 'binary', 'harmonic', or 'constant'
+        self.empty_weighting = empty_weighting  # True: EMPTYNULL uses count 1
 
         # register root concepts of both hierarchies
         self._register_concept(self.content_hierarchy.root)
@@ -2699,19 +2823,8 @@ class LongTermMemory(object):
             else:
                 continue
 
-            # Update the context leaf's av_count to include -1
-            current_av = dict(ctx_leaf.av_count) if ctx_leaf.av_count else {}
-            # Deep copy each attribute's value dict
-            new_av = {}
-            for k, v in current_av.items():
-                new_av[k] = dict(v)
-            # Add or update -1 attribute
-            if -1 not in new_av:
-                new_av[-1] = {}
-            ref_counts = dict(new_av[-1])
-            ref_counts[ref_vid] = ref_counts.get(ref_vid, 0) + 1
-            new_av[-1] = ref_counts
-            ctx_leaf.set_av_count(new_av)
+            # Propagate content-ref to the context leaf AND all its ancestors
+            ctx_leaf.increment_attr_value(-1, ref_vid, 1)
 
         if debug:
             print(f"  content-refs written to context hierarchy leaves")
@@ -2738,6 +2851,8 @@ class LongTermMemory(object):
             "context_alpha": self.context_alpha,
             "bow": self.bow,
             "categorization_mode": getattr(self, 'categorization_mode', 'dfs'),
+            "weighting": getattr(self, 'weighting', 'binary'),
+            "empty_weighting": getattr(self, 'empty_weighting', False),
             "id_count": self.id_count,
             "id_to_value": self.id_to_value,
             "value_to_id": self.value_to_id,
@@ -2779,6 +2894,8 @@ class LongTermMemory(object):
             context_alpha=meta.get("context_alpha", 1e-4),
             bow=meta.get("bow", False),
             categorization_mode=meta.get("categorization_mode", "dfs"),
+            weighting=meta.get("weighting", "binary"),
+            empty_weighting=meta.get("empty_weighting", False),
         )
         ltm.id_to_value = meta.get("id_to_value", ltm.id_to_value)
         ltm.value_to_id = meta.get("value_to_id", ltm.value_to_id)
@@ -2848,7 +2965,7 @@ class WEBSTER(object):
 
     def __init__(self, value_corpus: list, context_length: int = 3, content_length: int = 3, alpha: float = 1e-4,
                  content_alpha: float = None, context_alpha: float = None, threshold=-5.0, bow: bool = False,
-                 categorization_mode: str = 'dfs'):
+                 categorization_mode: str = 'dfs', weighting: str = 'binary', empty_weighting: bool = False):
         """
         Parameters
         ----------
@@ -2883,6 +3000,15 @@ class WEBSTER(object):
             PMI-weighted priority, terminates at first leaf).  BFS modes
             build multi-valued label_paths containing weighted concept
             distributions at each depth level.
+        weighting : str
+            Context distance-weighting scheme:
+            ``'binary'``   – 1 / 2^(j+1)   (default, original behaviour)
+            ``'harmonic'`` – 1 / (j+1)
+            ``'constant'`` – 1  (no distance decay)
+        empty_weighting : bool
+            If True, EMPTYNULL context slots use count 1 instead of 0.
+            This makes boundary positions contribute to entropy the same
+            way real words do, rather than being invisible.
         """
         self.ltm = LongTermMemory(
             value_corpus, context_length=context_length,
@@ -2890,12 +3016,16 @@ class WEBSTER(object):
             content_alpha=content_alpha, context_alpha=context_alpha,
             bow=bow,
             categorization_mode=categorization_mode,
+            weighting=weighting,
+            empty_weighting=empty_weighting,
         )
         self.context_length = context_length
         self.content_length = content_length
         self.threshold = threshold
         self.bow = bow
         self.categorization_mode = categorization_mode
+        self.weighting = weighting
+        self.empty_weighting = empty_weighting
 
     # ---- accessors ------------------------------------------------------
 
@@ -3222,11 +3352,15 @@ class WEBSTER(object):
 
         # ── context instance builders ────────────────────────────────────
 
+        _wt_mode = getattr(self.ltm, 'weighting', 'binary')
+        _ew = getattr(self.ltm, 'empty_weighting', False)
+        _ev = lambda j: _context_weight(j, _wt_mode) if _ew else 0
+
         def _empty_ctx(cplx=1):
             ctx = {}
             for j in range(_cl):
-                ctx[j]       = {0: 1.0 / (j + 1)}
-                ctx[_cl + j] = {0: 1.0 / (j + 1)}
+                ctx[j]       = {0: _ev(j)}
+                ctx[_cl + j] = {0: _ev(j)}
             ctx[_cplx_attr] = {_cplx_vid: cplx}
             return ctx
 
@@ -3235,15 +3369,15 @@ class WEBSTER(object):
             for j in range(_cl):
                 s = pos - (j + 1)
                 if 0 <= s < len(known) and known[s]:
-                    ctx[j] = {known[s]: 1.0 / (j + 1)}; ctx[j][0] = 0
+                    ctx[j] = {known[s]: _context_weight(j, _wt_mode)}; ctx[j][0] = 0
                 else:
-                    ctx[j] = {0: 1.0 / (j + 1)}
+                    ctx[j] = {0: _ev(j)}
             for j in range(_cl):
                 s = pos + (j + 1)
                 if 0 <= s < len(known) and known[s]:
-                    ctx[_cl+j] = {known[s]: 1.0 / (j + 1)}; ctx[_cl+j][0] = 0
+                    ctx[_cl+j] = {known[s]: _context_weight(j, _wt_mode)}; ctx[_cl+j][0] = 0
                 else:
-                    ctx[_cl+j] = {0: 1.0 / (j + 1)}
+                    ctx[_cl+j] = {0: _ev(j)}
             ctx[_cplx_attr] = {_cplx_vid: cplx}
             return ctx
 
@@ -3665,6 +3799,8 @@ class WEBSTER(object):
             "threshold": self.threshold,
             "bow": self.bow,
             "categorization_mode": getattr(self, 'categorization_mode', 'dfs'),
+            "weighting": getattr(self, 'weighting', 'binary'),
+            "empty_weighting": getattr(self, 'empty_weighting', False),
         }
         meta_path = os.path.join(dirpath, "webster_meta.json")
         with open(meta_path, "w", encoding="utf-8") as f:
@@ -3694,5 +3830,9 @@ class WEBSTER(object):
         w.threshold = meta.get("threshold", -7)
         w.bow = meta.get("bow", False)
         w.categorization_mode = meta.get("categorization_mode", "dfs")
+        w.weighting = meta.get("weighting", "binary")
+        w.empty_weighting = meta.get("empty_weighting", False)
         w.ltm.categorization_mode = w.categorization_mode
+        w.ltm.weighting = w.weighting
+        w.ltm.empty_weighting = w.empty_weighting
         return w

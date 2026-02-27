@@ -569,7 +569,17 @@ class CategorizePathVisualizer:
   const root   = d3.hierarchy(treeData);
   const layout = d3.tree().size([w - 80, h - 80]);
   layout(root);
-  root.each(d => {{ d.x += 40; d.y += 40; }});
+  // Custom Y: full spacing for first 7 layers, compressed beyond
+  const FULL_LAYERS = 7;
+  let maxDepth = 0;
+  root.each(d => {{ if (d.depth > maxDepth) maxDepth = d.depth; }});
+  function depthY(depth) {{
+      const fullGap = (h - 80) / Math.min(maxDepth, FULL_LAYERS);
+      const compressGap = fullGap * 0.25;
+      if (depth <= FULL_LAYERS) return depth * fullGap;
+      return FULL_LAYERS * fullGap + (depth - FULL_LAYERS) * compressGap;
+  }}
+  root.each(d => {{ d.x += 40; d.y = depthY(d.depth) + 40; }});
 
   // pan + zoom
   svg.call(d3.zoom().scaleExtent([0.02, 20])

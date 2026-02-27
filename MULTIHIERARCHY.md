@@ -25,6 +25,19 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
         *   We should also program both an autoregressive and diffusive way of generation
             *   The autoregressive way starts with a word, creates a high-level token, then expands downwards, then creates another high-level token, etc etc.
 
+## Methodology 2.0
+
+*   Because hierarchy quality is TERRIBLE there are two things to do:
+    *   Either we choose to represent with something that's NOT path information (i.e. basic-level values + counts)
+    *   OR we fix the hierarchy quality
+
+*   The core of our problems is hierarchy quality - here is a number of empirical findings I'm discovering below
+    *   Harmonic weighting is not great - information-style bitwise weighting functions a lot better!!
+    *   There are branches of similar contents that never get categorized together in the context hierarchy unfortunately, and this largely relates to the representation problem
+
+*   What may fix hierarchy quality is representing nodes with higher-level context (this will also make generation more intuitive!)
+    *   Still facing some issues where the word-senses are being represented in two separate places of the hierarchy
+
 ## Methodology 1.1
 
 *   Short Revision: what if categorization through a greedy, discretely chosen path is not enough to guarantee coherence in the long-term?? 
