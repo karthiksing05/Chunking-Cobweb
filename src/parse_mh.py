@@ -2953,6 +2953,127 @@ class LongTermMemory(object):
 
 
 # ---------------------------------------------------------------------------
+# ObservationBuffer  (incremental context bootstrapping)
+# ---------------------------------------------------------------------------
+
+class ObservationBuffer:
+    """Accumulates per-word-type context observations and flushes to the
+    context hierarchy after every *flush_every* observations of a given word.
+
+    Use via :pymeth:`WEBSTER.create_observation_buffer`::
+
+        buf = webster.create_observation_buffer(flush_every=5, debug=True)
+        for sentence in corpus:
+            buf.observe_sentence(sentence)
+        buf.flush_all()
+
+    Parameters
+    ----------
+    webster : WEBSTER
+        The parser whose context hierarchy we are bootstrapping.
+    flush_every : int
+        Number of token observations per word type before flushing that
+        word's accumulated instance into the hierarchy via ``ifit``.
+    debug : bool
+        Print a message each time a word is flushed.
+    """
+
+    def __init__(self, webster, flush_every: int = 5, debug: bool = False):
+        self.webster = webster
+        self.ltm = webster.ltm
+        self.flush_every = flush_every
+        self.debug = debug
+        self.context_length = webster.context_length
+        self._weighting = getattr(self.ltm, 'weighting', 'binary')
+        self._cplx_vid = self.ltm.value_to_id.get("COMPLEXITY", 0)
+
+        # Per-word-type accumulators
+        self._before: Dict[int, Dict[int, float]] = {}
+        self._after: Dict[int, Dict[int, float]] = {}
+        self._obs_count: Dict[int, int] = {}
+        self._total_flushes: int = 0
+
+    # -- public API -------------------------------------------------------
+
+    def observe_sentence(self, sentence: str):
+        """Process a single sentence: tokenize, ensure vocab, accumulate
+        context for every token, and flush words that hit the threshold."""
+        elements = re.findall(r"[\w']+|[.,!?;]", sentence)
+
+        # ensure all tokens are in vocab
+        for tok in elements:
+            if tok not in self.ltm.value_to_id:
+                self.ltm.add_to_vocab(tok)
+
+        word_ids = [self.ltm.value_to_id[e] for e in elements]
+
+        for i, wid in enumerate(word_ids):
+            # initialise if first time seeing this word
+            if wid not in self._obs_count:
+                self._before[wid] = {}
+                self._after[wid] = {}
+                self._obs_count[wid] = 0
+
+            # accumulate before context
+            for j in range(self.context_length):
+                src_idx = i - (j + 1)
+                if 0 <= src_idx < len(word_ids):
+                    ctx_wid = word_ids[src_idx]
+                    weight = _context_weight(j, self._weighting)
+                    self._before[wid][ctx_wid] = (
+                        self._before[wid].get(ctx_wid, 0) + weight
+                    )
+
+            # accumulate after context
+            for j in range(self.context_length):
+                src_idx = i + (j + 1)
+                if 0 <= src_idx < len(word_ids):
+                    ctx_wid = word_ids[src_idx]
+                    weight = _context_weight(j, self._weighting)
+                    self._after[wid][ctx_wid] = (
+                        self._after[wid].get(ctx_wid, 0) + weight
+                    )
+
+            self._obs_count[wid] += 1
+
+            # flush if threshold reached
+            if self._obs_count[wid] >= self.flush_every:
+                self._flush(wid)
+
+    def flush_all(self):
+        """Flush every word that has any buffered observations, regardless
+        of whether it has reached the threshold."""
+        for wid in list(self._obs_count.keys()):
+            if self._obs_count[wid] > 0:
+                self._flush(wid)
+
+    # -- internals --------------------------------------------------------
+
+    def _flush(self, wid: int):
+        """Build a BOW instance from the buffered context for *wid*,
+        ifit it into the context hierarchy, and reset the buffer."""
+        inst: dict = {}
+        if self._before[wid]:
+            inst[0] = dict(self._before[wid])
+        if self._after[wid]:
+            inst[1] = dict(self._after[wid])
+        inst[-2] = {self._cplx_vid: 1}
+        inst[-1] = {wid: 1}
+
+        self.ltm._ifit_and_update_vocab(inst, self.ltm.context_hierarchy)
+        self._total_flushes += 1
+
+        if self.debug:
+            name = self.ltm.id_to_value[wid] if 0 <= wid < len(self.ltm.id_to_value) else f"?{wid}"
+            print(f"  [buffer] flushed '{name}' after {self._obs_count[wid]} observations")
+
+        # reset buffer for this word
+        self._before[wid] = {}
+        self._after[wid] = {}
+        self._obs_count[wid] = 0
+
+
+# ---------------------------------------------------------------------------
 # WEBSTER  (primary orchestrator)
 # ---------------------------------------------------------------------------
 
@@ -3233,6 +3354,23 @@ class WEBSTER(object):
             instances[wid] = inst
 
         return instances
+
+    def create_observation_buffer(self, flush_every: int = 5, debug: bool = False) -> 'ObservationBuffer':
+        """Create an :class:`ObservationBuffer` bound to this WEBSTER.
+
+        The buffer accumulates per-word-type context observations
+        incrementally and flushes (``ifit``) to the context hierarchy
+        every *flush_every* observations of a given word type.
+
+        Parameters
+        ----------
+        flush_every : int
+            Number of token observations per word type before the
+            accumulated instance is flushed into the hierarchy.
+        debug : bool
+            Print a message each time a word is flushed.
+        """
+        return ObservationBuffer(self, flush_every=flush_every, debug=debug)
 
     # ---- chunk evaluation (called by external tools / GUI) --------------
 

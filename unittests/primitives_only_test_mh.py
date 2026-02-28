@@ -39,10 +39,10 @@ webster = WEBSTER(
     content_length=CONTENT_LENGTH,
     threshold=THRESHOLD,
     content_alpha=1e-4,
-    context_alpha=1e-4,
+    context_alpha=1e-6,
     bow=False,
     empty_weighting=True,
-    weighting="constant",
+    weighting="binary",
     categorization_mode='bfs_pmi' # can be dfs, bfs, or bfs_pmi
 )
 
