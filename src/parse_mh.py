@@ -23,11 +23,17 @@ Key difference from parse.py (single-hierarchy):
       log_prob_instance produces clean, comparable scores.
       Words sharing a context-hierarchy ancestor get identical values
       at that depth level, enabling category-level generalization.
-    - Context instances carry sliding-window context + complexity:
-          context_instance = {0..ctx_len-1: ctx_before,
-                              ctx_len..2*ctx_len-1: ctx_after,
-                              2*ctx_len: complexity,
-                              2*ctx_len+1: content-ref}
+    - Context instances carry sliding-window context + complexity + content-ref:
+          context_instance = {0..ctx_len-1: ctx_before,       (slot mode)
+                              ctx_len..2*ctx_len-1: ctx_after, (slot mode)
+                              -2: complexity (hidden),
+                              2*ctx_len: content-ref}          (always, both modes)
+          In BOW mode:      {0: before_bag, 1: after_bag,
+                             -2: complexity (hidden), 2*ctx_len: content-ref}
+      Content-ref is always at index 2*context_length (visible/positive) so
+      Cobweb includes it in entropy calculations.  In BOW mode the indices
+      2..2*ctx_len-1 are simply absent; the stable index avoids any
+      mode-dependent collision.
     - Primitive labels: {word_id: 1}.
     - Composite labels: {context_leaf_concept_id: 1}.
     - Only frozen/accepted chunks are added to BOTH hierarchies; unfrozen
@@ -435,9 +441,9 @@ def _score_along_path(
     coef = 1.0
     for lp in reversed(raw_log_probs):
         cost += lp * coef
-        coef *= 0.33
+        coef *= 0.75
 
-    tree_log_prob = tree.log_prob(instance, 250, False)
+    tree_log_prob = tree.log_prob(instance, 1000, False)
     if tree_log_prob == 0:
         tree_log_prob = -1e9
 
@@ -446,7 +452,7 @@ def _score_along_path(
         "candidate_counts": str(path_counts),
         "normed_log_prob": cost,
         "best_log_prob_idx": best_lp_idx,
-        "cost": tree_log_prob,
+        "cost": cost,
         "tree_log_prob": tree_log_prob,
         "best_log_prob": best_lp,
     }
@@ -855,9 +861,11 @@ class CompositeParseNode(object):
 
         # content-ref attribute: for composites this is the content
         # hierarchy leaf concept id; for primitives it's the word_id
-        # (set separately in build_primitives)
+        # (set separately in build_primitives).
+        # Visible (positive index) so Cobweb includes it in entropy calculations.
         if content_ref_id is not None:
-            ctx_inst[-1] = {content_ref_id: 1}
+            _content_ref_attr = 2 * context_length
+            ctx_inst[_content_ref_attr] = {content_ref_id: 1}
 
         return ctx_inst
 
@@ -1062,8 +1070,9 @@ class FiniteParseTree(object):
 
             # word identity attribute – enables generation to recover
             # the actual word from a context hierarchy leaf.
-            # Hidden (negative index) so it doesn't influence categorization.
-            ctx_inst[-1] = {wid: 1}
+            # Visible (positive index) so it influences Cobweb categorization.
+            _content_ref_attr = 2 * self.context_length
+            ctx_inst[_content_ref_attr] = {wid: 1}
 
             # categorize in context hierarchy to get label path
             _cat_mode = getattr(self.ltm, 'categorization_mode', 'dfs')
@@ -1565,7 +1574,8 @@ class FiniteParseTree(object):
             if node.context_instance:
                 cl = self.context_length
                 _bow = getattr(self.ltm, 'bow', False)
-                for attr_key in sorted(k for k in node.context_instance if k >= 0):
+                _cref = 2 * cl
+                for attr_key in sorted(k for k in node.context_instance if k >= 0 and k != _cref):
                     if _bow:
                         if attr_key == 0:
                             context_before_rows.extend(_rows_from_ctx(node.context_instance[attr_key], "CtxBefore"))
@@ -1584,8 +1594,9 @@ class FiniteParseTree(object):
                             context_other_rows.extend(_rows_from_ctx(node.context_instance[attr_key], f"Attr{attr_key}"))
                 if -2 in node.context_instance:
                     context_other_rows.extend(_rows_from_ctx(node.context_instance[-2], "Complexity"))
-                if -1 in node.context_instance:
-                    context_other_rows.extend(_rows_from_ctx(node.context_instance[-1], "ContentRef"))
+                _cref = 2 * cl
+                if _cref in node.context_instance:
+                    context_other_rows.extend(_rows_from_ctx(node.context_instance[_cref], "ContentRef"))
 
             return {
                 "title": node.title,
@@ -1629,7 +1640,8 @@ class FiniteParseTree(object):
             if node.context_instance:
                 cl = self.context_length
                 _bow = getattr(self.ltm, 'bow', False)
-                for attr_key in sorted(k for k in node.context_instance if k >= 0):
+                _cref = 2 * cl
+                for attr_key in sorted(k for k in node.context_instance if k >= 0 and k != _cref):
                     if _bow:
                         if attr_key == 0:
                             context_before_rows.extend(_rows_from_ctx(node.context_instance[attr_key], "CtxBefore"))
@@ -1648,8 +1660,9 @@ class FiniteParseTree(object):
                             context_other_rows.extend(_rows_from_ctx(node.context_instance[attr_key], f"Attr{attr_key}"))
                 if -2 in node.context_instance:
                     context_other_rows.extend(_rows_from_ctx(node.context_instance[-2], "Complexity"))
-                if -1 in node.context_instance:
-                    context_other_rows.extend(_rows_from_ctx(node.context_instance[-1], "ContentRef"))
+                _cref2 = 2 * cl
+                if _cref2 in node.context_instance:
+                    context_other_rows.extend(_rows_from_ctx(node.context_instance[_cref2], "ContentRef"))
 
             return {
                 "title": node.title,
@@ -2521,13 +2534,14 @@ class LongTermMemory(object):
 
         # drawer for context hierarchy visualization
         if bow:
-            context_headers = ["CtxBefore", "CtxAfter"]
+            context_headers = ["CtxBefore", "CtxAfter", "Content-Ref"]
         else:
             context_headers = (
                 [f"Context-Before{i}" for i in range(context_length)]
                 + [f"Context-After{i}" for i in range(context_length)]
+                + ["Content-Ref"]
             )
-        content_ref_attr_idx = -1
+        content_ref_attr_idx = 2 * context_length
         def _content_ref_display(val_id):
             if val_id is not None and 0 <= val_id < len(self.id_to_value):
                 name = self.id_to_value[val_id]
@@ -2536,16 +2550,25 @@ class LongTermMemory(object):
             if isinstance(name, str) and name.startswith("CONCEPT-"):
                 return "C-" + name[8:20] + "…"
             return name
-        context_attr_value_fn = {
-            content_ref_attr_idx: _content_ref_display,
-        }
         self.context_drawer = HTMLCobwebDrawer(
             context_headers,
             id_to_value=self.id_to_value,
             value_to_id=self.value_to_id,
-            attr_value_fn=context_attr_value_fn,
+            attr_value_fn={content_ref_attr_idx: _content_ref_display},
             attr_name_overrides={content_ref_attr_idx: "Content-Ref", -2: "Complexity"},
         )
+
+    # ---- property helpers -----------------------------------------------
+
+    @property
+    def content_ref_attr(self) -> int:
+        """Attribute index for the content-ref in context instances.
+        Always ``2 * context_length`` regardless of BOW mode.
+        In slot mode this is the first index after all positional slots.
+        In BOW mode (attrs 0 and 1 used) attrs 2..2*ctx-1 are absent,
+        so content-ref lands at the same stable index in both modes.
+        """
+        return 2 * self.context_length
 
     # ---- vocabulary helpers ---------------------------------------------
 
@@ -2676,14 +2699,24 @@ class LongTermMemory(object):
             print(f"Adding parse tree for window: \"{parse_tree.window}\"")
             print(f"  nodes collected: {len(all_nodes)}")
 
-        # -- Step 1: fit context instances WITHOUT -1 ---------------------
+        # -- Step 1: fit context instances ------------------------------------
+        # Primitives: include content-ref (wid at _cref_attr) IN the ifit call so
+        # that (a) same-word instances cluster together and (b) attr_vals[_cref_attr]
+        # is registered – preventing entropy_attr_insert from crashing on subsequent
+        # sentences when it finds _cref_attr in av_count but not in attr_vals.
+        # Composites: content-ref is not in their instance (created with
+        # content_ref_id=None), so the pop is a harmless no-op, but we keep it
+        # for clarity.
         ctx_leaf_map: dict = {}   # id(node) → context-hierarchy leaf
 
+        _cref_attr = self.content_ref_attr
         for node in all_nodes:
             ctx_inst = node.get_context_instance()
-            # Remove content-ref (-1) before fitting; re-added in step 4.
-            # Complexity (-2) is kept so it appears in av_count for visualisation.
-            ctx_inst.pop(-1, None)
+            # Only strip content-ref for composites; primitives keep it so the
+            # word-identity attribute participates in Cobweb clustering and is
+            # registered in tree.attr_vals before any step-4 increment_attr_value.
+            if isinstance(node, CompositeParseNode):
+                ctx_inst.pop(_cref_attr, None)
             leaf, rewrites = self._ifit_and_update_vocab(
                 ctx_inst, self.context_hierarchy, debug=debug)
             ctx_leaf_map[id(node)] = leaf
@@ -2699,9 +2732,11 @@ class LongTermMemory(object):
         _use_bfs = _cat_mode in ('bfs', 'bfs_pmi')
 
         def _bfs_label_path(node):
-            """Build label_path using BFS categorization for this node."""
+            """Build label_path using BFS categorization for this node.
+            Content-ref is stripped so the label path reflects distributional
+            position only, not word identity."""
             ctx_inst = node.get_context_instance()
-            ctx_inst.pop(-1, None)
+            ctx_inst.pop(_cref_attr, None)  # exclude content-ref from label path
             _, _, _, depth_dists = _categorize(
                 ctx_inst, self.context_hierarchy, mode=_cat_mode)
             if depth_dists is not None:
@@ -2804,17 +2839,19 @@ class LongTermMemory(object):
 
         # -- Step 4: write content-refs back to context hierarchy ---------
         # For each node, update its context leaf's av_count to include
-        # -1 = content-ref. Use set_av_count() to write directly.
+        # content_ref_attr = content-ref. Use increment_attr_value() to write directly.
+        # Primitives: content-ref was already written into the tree via ifit in step 1,
+        # so we skip them here to avoid double-counting.
         for node in all_nodes:
+            if isinstance(node, PrimitiveParseNode):
+                continue  # already in tree via step-1 ifit
+
             ctx_leaf = ctx_leaf_map.get(id(node))
             if ctx_leaf is None:
                 continue
 
-            # Determine the content-ref value
-            if isinstance(node, PrimitiveParseNode):
-                # Primitive: content-ref = word_id
-                ref_vid = node.word_id
-            elif isinstance(node, CompositeParseNode) and not node.is_global_root:
+            # Determine the content-ref value (composites only)
+            if isinstance(node, CompositeParseNode) and not node.is_global_root:
                 cnt_leaf = content_leaf_map.get(id(node))
                 if cnt_leaf is None:
                     continue
@@ -2827,7 +2864,7 @@ class LongTermMemory(object):
                 continue
 
             # Propagate content-ref to the context leaf AND all its ancestors
-            ctx_leaf.increment_attr_value(-1, ref_vid, 1)
+            ctx_leaf.increment_attr_value(_cref_attr, ref_vid, 1)
 
         if debug:
             print(f"  content-refs written to context hierarchy leaves")
@@ -2924,13 +2961,14 @@ class LongTermMemory(object):
             value_to_id=ltm.value_to_id,
         )
         if ltm.bow:
-            context_headers = ["CtxBefore", "CtxAfter"]
+            context_headers = ["CtxBefore", "CtxAfter", "Content-Ref"]
         else:
             context_headers = (
                 [f"Context-Before{i}" for i in range(ltm.context_length)]
                 + [f"Context-After{i}" for i in range(ltm.context_length)]
+                + ["Content-Ref"]
             )
-        content_ref_attr_idx = -1
+        content_ref_attr_idx = 2 * ltm.context_length
         def _content_ref_display(val_id):
             if val_id is not None and 0 <= val_id < len(ltm.id_to_value):
                 name = ltm.id_to_value[val_id]
@@ -2939,138 +2977,14 @@ class LongTermMemory(object):
             if isinstance(name, str) and name.startswith("CONCEPT-"):
                 return "C-" + name[8:20] + "…"
             return name
-        context_attr_value_fn = {
-            content_ref_attr_idx: _content_ref_display,
-        }
         ltm.context_drawer = HTMLCobwebDrawer(
             context_headers,
             id_to_value=ltm.id_to_value,
             value_to_id=ltm.value_to_id,
-            attr_value_fn=context_attr_value_fn,
+            attr_value_fn={content_ref_attr_idx: _content_ref_display},
             attr_name_overrides={content_ref_attr_idx: "Content-Ref", -2: "Complexity"},
         )
         return ltm
-
-
-# ---------------------------------------------------------------------------
-# ObservationBuffer  (incremental context bootstrapping)
-# ---------------------------------------------------------------------------
-
-class ObservationBuffer:
-    """Accumulates per-word-type context observations and flushes to the
-    context hierarchy after every *flush_every* observations of a given word.
-
-    Use via :pymeth:`WEBSTER.create_observation_buffer`::
-
-        buf = webster.create_observation_buffer(flush_every=5, debug=True)
-        for sentence in corpus:
-            buf.observe_sentence(sentence)
-        buf.flush_all()
-
-    Parameters
-    ----------
-    webster : WEBSTER
-        The parser whose context hierarchy we are bootstrapping.
-    flush_every : int
-        Number of token observations per word type before flushing that
-        word's accumulated instance into the hierarchy via ``ifit``.
-    debug : bool
-        Print a message each time a word is flushed.
-    """
-
-    def __init__(self, webster, flush_every: int = 5, debug: bool = False):
-        self.webster = webster
-        self.ltm = webster.ltm
-        self.flush_every = flush_every
-        self.debug = debug
-        self.context_length = webster.context_length
-        self._weighting = getattr(self.ltm, 'weighting', 'binary')
-        self._cplx_vid = self.ltm.value_to_id.get("COMPLEXITY", 0)
-
-        # Per-word-type accumulators
-        self._before: Dict[int, Dict[int, float]] = {}
-        self._after: Dict[int, Dict[int, float]] = {}
-        self._obs_count: Dict[int, int] = {}
-        self._total_flushes: int = 0
-
-    # -- public API -------------------------------------------------------
-
-    def observe_sentence(self, sentence: str):
-        """Process a single sentence: tokenize, ensure vocab, accumulate
-        context for every token, and flush words that hit the threshold."""
-        elements = re.findall(r"[\w']+|[.,!?;]", sentence)
-
-        # ensure all tokens are in vocab
-        for tok in elements:
-            if tok not in self.ltm.value_to_id:
-                self.ltm.add_to_vocab(tok)
-
-        word_ids = [self.ltm.value_to_id[e] for e in elements]
-
-        for i, wid in enumerate(word_ids):
-            # initialise if first time seeing this word
-            if wid not in self._obs_count:
-                self._before[wid] = {}
-                self._after[wid] = {}
-                self._obs_count[wid] = 0
-
-            # accumulate before context
-            for j in range(self.context_length):
-                src_idx = i - (j + 1)
-                if 0 <= src_idx < len(word_ids):
-                    ctx_wid = word_ids[src_idx]
-                    weight = _context_weight(j, self._weighting)
-                    self._before[wid][ctx_wid] = (
-                        self._before[wid].get(ctx_wid, 0) + weight
-                    )
-
-            # accumulate after context
-            for j in range(self.context_length):
-                src_idx = i + (j + 1)
-                if 0 <= src_idx < len(word_ids):
-                    ctx_wid = word_ids[src_idx]
-                    weight = _context_weight(j, self._weighting)
-                    self._after[wid][ctx_wid] = (
-                        self._after[wid].get(ctx_wid, 0) + weight
-                    )
-
-            self._obs_count[wid] += 1
-
-            # flush if threshold reached
-            if self._obs_count[wid] >= self.flush_every:
-                self._flush(wid)
-
-    def flush_all(self):
-        """Flush every word that has any buffered observations, regardless
-        of whether it has reached the threshold."""
-        for wid in list(self._obs_count.keys()):
-            if self._obs_count[wid] > 0:
-                self._flush(wid)
-
-    # -- internals --------------------------------------------------------
-
-    def _flush(self, wid: int):
-        """Build a BOW instance from the buffered context for *wid*,
-        ifit it into the context hierarchy, and reset the buffer."""
-        inst: dict = {}
-        if self._before[wid]:
-            inst[0] = dict(self._before[wid])
-        if self._after[wid]:
-            inst[1] = dict(self._after[wid])
-        inst[-2] = {self._cplx_vid: 1}
-        inst[-1] = {wid: 1}
-
-        self.ltm._ifit_and_update_vocab(inst, self.ltm.context_hierarchy)
-        self._total_flushes += 1
-
-        if self.debug:
-            name = self.ltm.id_to_value[wid] if 0 <= wid < len(self.ltm.id_to_value) else f"?{wid}"
-            print(f"  [buffer] flushed '{name}' after {self._obs_count[wid]} observations")
-
-        # reset buffer for this word
-        self._before[wid] = {}
-        self._after[wid] = {}
-        self._obs_count[wid] = 0
 
 
 # ---------------------------------------------------------------------------
@@ -3237,141 +3151,6 @@ class WEBSTER(object):
                 print("-" * 100)
         return trees
 
-    # ---- context hierarchy bootstrapping --------------------------------
-
-    def bootstrap_context_hierarchy(
-        self,
-        sentences: List[str],
-        debug: bool = False,
-    ) -> None:
-        """Pre-train the context hierarchy using accumulated distributions.
-
-        Scans *sentences*, accumulates per-word-type co-occurrence
-        distributions (one bag-of-words instance per word TYPE, not per
-        token), and trains the context hierarchy on these.  This gives
-        immediate distributional clustering — words appearing in similar
-        contexts (same POS) will share accumulated value overlap and
-        cluster together.
-
-        Parameters
-        ----------
-        sentences : list[str]
-            Training corpus (list of sentence strings).
-        debug : bool
-            Print progress information.
-        """
-        # -- ensure all sentence words are in vocab -----------------------
-        for sent in sentences:
-            for tok in re.findall(r"[\w']+|[.,!?;]", sent):
-                if tok not in self.ltm.value_to_id:
-                    self.ltm.add_to_vocab(tok)
-
-        # -- accumulate per-word-type context distributions ---------------
-        accumulated = self._accumulate_word_contexts(sentences)
-        if debug:
-            print(f"[bootstrap] Accumulated contexts for {len(accumulated)} word types")
-
-        # -- build instances and train ------------------------------------
-        instances = self._build_bootstrap_instances(accumulated)
-
-        # clear and re-train context hierarchy
-        self.ltm.context_hierarchy = CobwebDiscreteTree(self.ltm.context_alpha)
-        self.ltm._register_concept(self.ltm.context_hierarchy.root)
-
-        for wid, inst in instances.items():
-            self.ltm._ifit_and_update_vocab(inst, self.ltm.context_hierarchy)
-
-        if debug:
-            n_leaves = sum(1 for _ in self._iter_leaves(self.ltm.context_hierarchy.root))
-            print(f"[bootstrap] Trained {len(instances)} word types -> {n_leaves} leaves")
-
-    # -- bootstrap helpers ------------------------------------------------
-
-    @staticmethod
-    def _iter_leaves(node):
-        """Yield all leaf nodes under *node*."""
-        if not node.children:
-            yield node
-        else:
-            for child in node.children:
-                yield from WEBSTER._iter_leaves(child)
-
-    def _accumulate_word_contexts(self, sentences: List[str]) -> dict:
-        """Scan sentences, accumulate per-word-type context distributions.
-
-        Returns ``{word_id: {"before": {ctx_wid: total_weight}, "after": {...}}}``.
-        """
-        accumulated: Dict[int, Dict[str, Dict[int, float]]] = {}
-        _weighting = getattr(self.ltm, 'weighting', 'binary')
-
-        for sentence in sentences:
-            elements = re.findall(r"[\w']+|[.,!?;]", sentence)
-            word_ids = [self.ltm.value_to_id[e] for e in elements]
-
-            for i, wid in enumerate(word_ids):
-                if wid not in accumulated:
-                    accumulated[wid] = {"before": {}, "after": {}}
-
-                for j in range(self.context_length):
-                    src_idx = i - (j + 1)
-                    if 0 <= src_idx < len(word_ids):
-                        ctx_wid = word_ids[src_idx]
-                        weight = _context_weight(j, _weighting)
-                        accumulated[wid]["before"][ctx_wid] = (
-                            accumulated[wid]["before"].get(ctx_wid, 0) + weight
-                        )
-
-                for j in range(self.context_length):
-                    src_idx = i + (j + 1)
-                    if 0 <= src_idx < len(word_ids):
-                        ctx_wid = word_ids[src_idx]
-                        weight = _context_weight(j, _weighting)
-                        accumulated[wid]["after"][ctx_wid] = (
-                            accumulated[wid]["after"].get(ctx_wid, 0) + weight
-                        )
-
-        return accumulated
-
-    def _build_bootstrap_instances(self, accumulated: dict) -> dict:
-        """Build BOW context instances from accumulated distributions.
-
-        Returns ``{word_id: instance_dict}``.  Always uses BOW format
-        (attr 0 = before bag, attr 1 = after bag) regardless of the
-        ``bow`` setting, since accumulated distributions are inherently
-        bag-like.
-        """
-        _cplx_vid = self.ltm.value_to_id.get("COMPLEXITY", 0)
-        instances: Dict[int, dict] = {}
-
-        for wid, ctx in accumulated.items():
-            inst: dict = {}
-            if ctx["before"]:
-                inst[0] = dict(ctx["before"])
-            if ctx["after"]:
-                inst[1] = dict(ctx["after"])
-            inst[-2] = {_cplx_vid: 1}   # complexity = 1 (primitive)
-            inst[-1] = {wid: 1}         # content-ref = word identity (hidden)
-            instances[wid] = inst
-
-        return instances
-
-    def create_observation_buffer(self, flush_every: int = 5, debug: bool = False) -> 'ObservationBuffer':
-        """Create an :class:`ObservationBuffer` bound to this WEBSTER.
-
-        The buffer accumulates per-word-type context observations
-        incrementally and flushes (``ifit``) to the context hierarchy
-        every *flush_every* observations of a given word type.
-
-        Parameters
-        ----------
-        flush_every : int
-            Number of token observations per word type before the
-            accumulated instance is flushed into the hierarchy.
-        debug : bool
-            Print a message each time a word is flushed.
-        """
-        return ObservationBuffer(self, flush_every=flush_every, debug=debug)
-
     # ---- chunk evaluation (called by external tools / GUI) --------------
 
     def evaluate_chunk(self, content_instance: dict, context_instance: dict, debug=False) -> dict:
@@ -3429,7 +3208,7 @@ class WEBSTER(object):
         _cpd = self.ltm.content_path_depth
         _cl  = self.context_length
         _cplx_vid  = self.ltm.value_to_id.get("COMPLEXITY", 0)
-        _ref_attr  = -1                   # content-ref (hidden)
+        _ref_attr  = 2 * self.context_length  # content-ref (visible, always 2*ctx_len)
         _cplx_attr = -2                   # complexity (hidden, negative key)
 
         # ── helpers ───────────────────────────────────────────────────────

@@ -12,11 +12,13 @@ import random
 
 OUT_DIR = "unittests/gen_learn_test_mh"
 
+VIZ_INTERMEDIATES = False
+
 if os.path.exists(OUT_DIR):
     shutil.rmtree(OUT_DIR)
     
 # Creating and printing toy sentences
-CONTEXT_LENGTH = 3
+CONTEXT_LENGTH = 5
 CONTENT_LENGTH = 10
 
 num_sentences = 300
@@ -26,7 +28,7 @@ for _ in range(num_sentences):
     sentence = generate("S", TEST_GRAMMAR1)
     document.append(sentence)
 
-THRESHOLD = -20
+THRESHOLD = -25
 
 # Setting up the multi-hierarchy parser (WEBSTER)
 webster = WEBSTER(
@@ -34,8 +36,12 @@ webster = WEBSTER(
     context_length=CONTEXT_LENGTH,
     content_length=CONTENT_LENGTH,
     threshold=THRESHOLD,
-    content_alpha=5e-4,
-    context_alpha=5e-4
+    content_alpha=1e-6,
+    context_alpha=1e-4,
+    bow=False,
+    empty_weighting=True,
+    weighting="binary",
+    categorization_mode='dfs' # can be dfs, bfs, or bfs_pmi
 )
 
 train_size = 0.96
@@ -59,13 +65,13 @@ for i, doc in enumerate(train_documents):
         debug=True,
     )
 
-    if i < 5:
+    if i < 5 and VIZ_INTERMEDIATES:
         webster.visualize_ltm(f"{OUT_DIR}/ltms/ltm{i}", max_depth=4)
 
-    if i % 5 == 0:
+    if i % 5 == 0 and VIZ_INTERMEDIATES:
         parse_tree.visualize(f"{OUT_DIR}/train_trees/train_parse_tree{i}")
 
-        if i < 21:
+        if i < 21 and VIZ_INTERMEDIATES:
             webster.visualize_ltm(f"{OUT_DIR}/ltms/ltm{i}", max_depth=3)
 
 

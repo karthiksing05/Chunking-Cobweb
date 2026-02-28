@@ -9,10 +9,10 @@ app = Flask(__name__)
 
 LEARNING_ON = True
 PREBUILD_TREES = False
-CONTEXT_LENGTH = 8
+CONTEXT_LENGTH = 5
 CONTENT_LENGTH = 10
 PRIMITIVE_THRESHOLD = "converge"
-CATEGORIZATION_MODE = "bfs"  # "dfs", "bfs", or "bfs_pmi"
+CATEGORIZATION_MODE = "dfs"  # "dfs", "bfs", or "bfs_pmi"
 # LOAD_LTM = ""
 LOAD_LTM = "unittests/primitives_only_test_mh/final_ltm_data"
 

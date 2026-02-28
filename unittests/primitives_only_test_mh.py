@@ -20,7 +20,7 @@ if os.path.exists(OUT_DIR):
     shutil.rmtree(OUT_DIR)
     
 # Creating and printing toy sentences
-CONTEXT_LENGTH = 1
+CONTEXT_LENGTH = 5
 CONTENT_LENGTH = 10
 
 num_sentences = 100
@@ -39,11 +39,11 @@ webster = WEBSTER(
     content_length=CONTENT_LENGTH,
     threshold=THRESHOLD,
     content_alpha=1e-4,
-    context_alpha=1e-6,
+    context_alpha=1e-4,
     bow=False,
-    empty_weighting=True,
+    empty_weighting=False,
     weighting="binary",
-    categorization_mode='bfs_pmi' # can be dfs, bfs, or bfs_pmi
+    categorization_mode='dfs' # can be dfs, bfs, or bfs_pmi
 )
 
 # Iterate through training documents and parse them one at a time
@@ -74,7 +74,7 @@ webster.visualize_ltm(f"{OUT_DIR}/final_ltm", max_depth=3)
 # # print("Redistributing content hierarchy...")
 # # webster.ltm.content_hierarchy.redistribute(10000)
 # print("Redistributing context hierarchy...")
-# webster.ltm.context_hierarchy.redistribute(25000)
+# webster.ltm.context_hierarchy.redistribute(10000)
 # print("Redistribution complete!")
 
 # REDIST_SAVE_DIR = f"{OUT_DIR}/final_ltm_data_redistributed"

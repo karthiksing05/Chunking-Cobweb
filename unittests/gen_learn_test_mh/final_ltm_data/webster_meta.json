@@ -1,5 +1,9 @@
 {
-  "context_length": 3,
+  "context_length": 5,
   "content_length": 10,
-  "threshold": -20
+  "threshold": -25,
+  "bow": false,
+  "categorization_mode": "dfs",
+  "weighting": "binary",
+  "empty_weighting": true
 }

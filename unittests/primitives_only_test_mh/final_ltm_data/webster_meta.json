@@ -1,9 +1,9 @@
 {
-  "context_length": 1,
+  "context_length": 5,
   "content_length": 10,
   "threshold": 0,
   "bow": false,
-  "categorization_mode": "bfs_pmi",
-  "weighting": "constant",
-  "empty_weighting": true
+  "categorization_mode": "dfs",
+  "weighting": "binary",
+  "empty_weighting": false
 }

@@ -54,7 +54,7 @@ class TextCobwebDrawer:
 
 class HTMLCobwebDrawer:
 	def __init__(self, attributes, id_to_value, value_to_id,
-				 attr_value_fn=None, attr_name_overrides=None):
+				 attr_value_fn=None, attr_name_overrides=None, skip_attrs=None):
 		"""
 		Parameters
 		----------
@@ -75,6 +75,9 @@ class HTMLCobwebDrawer:
 			hidden (negative-index) attributes that are not in the positional
 			*attributes* list but should still show a meaningful header in the
 			visualisation.
+		skip_attrs : set[int] | None
+			Optional set of attribute indices to suppress entirely from the
+			rendered output.
 		"""
 		self.id_to_attr = attributes
 		self.attr_to_id = {w: i for i, w in enumerate(attributes)}
@@ -82,6 +85,7 @@ class HTMLCobwebDrawer:
 		self.value_to_id = value_to_id
 		self.attr_value_fn = attr_value_fn or {}
 		self.attr_name_overrides = attr_name_overrides or {}
+		self.skip_attrs = skip_attrs or set()
 
 	def _safe_lookup(self, id_to_list, idx):
 		return id_to_list[idx] if (idx is not None and 0 <= idx < len(id_to_list)) else "None"
@@ -103,6 +107,8 @@ class HTMLCobwebDrawer:
 		other_rows = []
 
 		for attr_id, val_counts in sorted(node.av_count.items()):
+			if attr_id in self.skip_attrs:
+				continue
 			attr_name = self.attr_name_overrides.get(
 				attr_id, self._safe_lookup(self.id_to_attr, attr_id)
 			)
