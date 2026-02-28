@@ -2,22 +2,7 @@
 
 Whereas before we hypothesized needing multiple hierarchies for multiple levels of granularity or to separate primitives and composites, we now rely on multiple hierarchies to properly separate *content* and *context*.
 
-## Current problems
-
-*   Our current two main problems rely on the qualities of the content hierarchy:
-    *   How do we represent a chunk, with respect to other chunks?
-    *   What is the basic-level node in a content-hierarchy?
-    *   What is the score that determines whether a new chunk should be added?
-
-    *   INITIALLY WAS THINKING ABOUT A NEW STRUCTURE BUT I'M SO TROLL - Cobweb is best here, we just need to master the basic-level assumption. Focus on content-hierarchy and inspecting for accuracy!
-
-*   This may solve the below two problems, but first and foremost, we have a path-weighting problems
-    *   Path-information does not seem like a successful final representation, unless we learn node distributions!!
-    *   The first here may be some sort of joint-distribution structure which stores count-based probabilities for pairwise node labels to better calculate
-    *   Fundamentally, the idea is that we're able to threshold the creation of chunks using the counts and probabilities from this hierarchy, but we want to store generalizations of these chunks (so a system that stores a joint probability distribution between two paths and is also able to evaluate whether a given pair of paths' generalization has been seen frequently enough to necessitate forming that as a chunk!)
-    *   For generation, I would like to store references (as hidden attributes, marked by negative numbers) to a content-ref which stores the content instance's path and when we ask to expand a given context instance, we should find the left path and the right path, and find the generalizations of those paths and sample from those generalizations (prototypes) to expand the node, similar to basic-level definition in the old code, but some other situation
-    *   I like using a hierarchy because we're able to get a steady level of generalizability at any given time
-    *   NOTE: trying to split the hierarchy across attributes!!!
+## Current problems:
 
 *   For generation, we face the following problems:
     *   How to choose where to start from???
@@ -27,16 +12,32 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
 
 ## Methodology 2.0
 
+### Gathering distributional context
+
+*   THERE ARE SO MANY WAYS TO DO THIS - and honestly, I think a distributional buffer for Cobweb is a generally valuable solution and should be discussed
+    *   Instances are made up of an average of observations - this makes sense relative to how humans track instances as well
+    *   We store distributional data relative to multiple things that we know are the same - ?!?!? We should have a preliminary short-term Cobweb hierarchy that feeds into a longer-term Cobweb hierarchy
+
+### Refitting based on concepts
+
+*   This is pretty self-explanatory - we need to represent nodes in our parse tree in terms of context relative to what it represents
+*   An important note here is that order matters now! We should build concepts in terms of other concepts and reflect 
+
+### General brainstorm:
 *   Because hierarchy quality is TERRIBLE there are two things to do:
     *   Either we choose to represent with something that's NOT path information (i.e. basic-level values + counts)
     *   OR we fix the hierarchy quality
-
 *   The core of our problems is hierarchy quality - here is a number of empirical findings I'm discovering below
     *   Harmonic weighting is not great - information-style bitwise weighting functions a lot better!!
     *   There are branches of similar contents that never get categorized together in the context hierarchy unfortunately, and this largely relates to the representation problem
-
-*   What may fix hierarchy quality is representing nodes with higher-level context (this will also make generation more intuitive!)
-    *   Still facing some issues where the word-senses are being represented in two separate places of the hierarchy
+    *   PERHAPS THE ANSWER IS SOME FORM OF MINI-BATCH + HEURISTIC KEEPA TRACKA OFA
+        *   YYAYAYAYAYAY THIS IS THE SOLUTION AND RECOGNITION IS THE SOLUTION
+*   NEW FINDINGS BELOW!!!
+    *   Accidentally performed a GRIDS-like methodology where we ALSO refit with concepts as context
+    *   There are two new and important findings here:
+        *   One is the distributional context setting, which is incredibly crucial
+        *   Another is the self-referential concept structure which is SUPER important (similar to what was found by the leaf and path variants in Chris's work with Peter)
+    *   We may need a separate buffer datastructure with distributions!!! So, we do not store a word in our taxonomy until it accumulates some counts in the context!!!
 
 ## Methodology 1.1
 

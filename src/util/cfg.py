@@ -212,6 +212,140 @@ TEST_EPOCH_CORPUS = (
 )
 
 
+# ── Large grammar with rich syntax and broad vocabulary ─────────────────
+TEST_GRAMMAR_LARGE = {
+    # Top-level sentence types
+    "S": [
+        ["NP", "VP"],
+        ["S", "Conj", "S"],          # coordination
+        ["AdvP", "NP", "VP"],         # fronted adverb
+    ],
+
+    # Noun phrases
+    "NP": [
+        ["Det", "N"],
+        ["Det", "AdjP", "N"],
+        ["Det", "N", "PP"],
+        ["Det", "AdjP", "N", "PP"],
+        ["Det", "N", "RelClause"],
+        ["Det", "AdjP", "N", "RelClause"],
+        ["ProperN"],                  # bare proper noun
+        ["Pron"],                     # pronoun
+    ],
+
+    # Adjective phrases (recursive stacking)
+    "AdjP": [
+        ["Adj"],
+        ["Adj", "AdjP"],
+        ["AdvDeg", "Adj"],            # degree adverb + adjective ("very big")
+    ],
+
+    # Adverb phrase (sentence-level)
+    "AdvP": [
+        ["Adv"],
+        ["AdvDeg", "Adv"],            # "very quickly"
+    ],
+
+    # Verb phrases
+    "VP": [
+        ["Vi"],                       # intransitive
+        ["Vi", "AdvP"],               # intransitive + adverb
+        ["Vt", "NP"],                 # transitive
+        ["Vt", "NP", "AdvP"],         # transitive + adverb
+        ["Vt", "NP", "PP"],           # transitive + PP
+        ["Vt", "NP", "PP", "PP"],     # double PP attachment
+        ["Vdt", "NP", "NP"],          # ditransitive ("gave the dog a bone")
+        ["Vc", "AdjP"],              # copula ("is tall")
+        ["Vc", "NP"],                # copula + NP ("is a teacher")
+        ["Vt", "Comp"],              # sentential complement ("thinks that ...")
+    ],
+
+    # Prepositional phrases
+    "PP": [
+        ["P", "NP"],
+    ],
+
+    # Relative clauses
+    "RelClause": [
+        ["RelPro", "VP"],             # "who runs"
+        ["RelPro", "NP", "Vt"],       # "that the dog chased"  (object-gap)
+    ],
+
+    # Complement clause
+    "Comp": [
+        ["CompC", "NP", "VP"],        # "that the cat ran"
+    ],
+
+    # ── Terminals ────────────────────────────────────────────────────────
+
+    "Det": [["the"], ["a"], ["an"], ["this"], ["that"], ["every"],
+            ["some"], ["each"], ["no"], ["my"], ["her"], ["his"]],
+
+    "N": [["cat"], ["dog"], ["man"], ["woman"], ["child"], ["teacher"],
+          ["student"], ["robot"], ["doctor"], ["artist"], ["book"], ["apple"],
+          ["table"], ["car"], ["house"], ["tree"], ["river"], ["mountain"],
+          ["city"], ["garden"], ["bridge"], ["letter"], ["window"], ["door"],
+          ["phone"], ["camera"], ["ticket"], ["lamp"], ["clock"], ["key"]],
+
+    "ProperN": [["Alice"], ["Bob"], ["Charlie"], ["Diana"], ["Eve"],
+                ["Frank"], ["Grace"], ["Henry"]],
+
+    "Pron": [["he"], ["she"], ["it"], ["they"], ["someone"], ["everyone"]],
+
+    "Adj": [["big"], ["small"], ["red"], ["blue"], ["green"], ["old"],
+            ["young"], ["tall"], ["short"], ["bright"], ["dark"], ["quiet"],
+            ["loud"], ["fast"], ["slow"], ["heavy"], ["light"], ["clean"],
+            ["dirty"], ["sharp"], ["soft"], ["warm"], ["cold"], ["ancient"],
+            ["curious"], ["friendly"], ["angry"], ["brave"], ["gentle"], ["wise"]],
+
+    "AdvDeg": [["very"], ["quite"], ["extremely"], ["rather"], ["somewhat"]],
+
+    "Adv": [["quickly"], ["slowly"], ["carefully"], ["eagerly"], ["quietly"],
+            ["loudly"], ["gently"], ["suddenly"], ["often"], ["never"],
+            ["always"], ["sometimes"], ["rarely"], ["happily"], ["sadly"]],
+
+    "Vi": [["ran"], ["slept"], ["arrived"], ["laughed"], ["cried"],
+           ["waited"], ["vanished"], ["appeared"], ["fell"], ["jumped"]],
+
+    "Vt": [["saw"], ["liked"], ["chased"], ["found"], ["admired"],
+           ["carried"], ["read"], ["built"], ["opened"], ["watched"],
+           ["painted"], ["loved"], ["heard"], ["followed"], ["caught"]],
+
+    "Vdt": [["gave"], ["showed"], ["sent"], ["offered"], ["handed"],
+            ["told"]],
+
+    "Vc": [["is"], ["was"], ["seems"], ["became"], ["remains"]],
+
+    "P": [["with"], ["in"], ["on"], ["under"], ["near"], ["behind"],
+          ["beside"], ["above"], ["below"], ["across"], ["through"],
+          ["around"], ["between"], ["among"], ["without"]],
+
+    "RelPro": [["who"], ["that"], ["which"]],
+
+    "CompC": [["that"]],
+
+    "Conj": [["and"], ["but"], ["or"], ["yet"]],
+}
+
+TEST_CORPUS_LARGE = (
+    sum(TEST_GRAMMAR_LARGE["Det"], []) +
+    sum(TEST_GRAMMAR_LARGE["N"], []) +
+    sum(TEST_GRAMMAR_LARGE["ProperN"], []) +
+    sum(TEST_GRAMMAR_LARGE["Pron"], []) +
+    sum(TEST_GRAMMAR_LARGE["Adj"], []) +
+    sum(TEST_GRAMMAR_LARGE["AdvDeg"], []) +
+    sum(TEST_GRAMMAR_LARGE["Adv"], []) +
+    sum(TEST_GRAMMAR_LARGE["Vi"], []) +
+    sum(TEST_GRAMMAR_LARGE["Vt"], []) +
+    sum(TEST_GRAMMAR_LARGE["Vdt"], []) +
+    sum(TEST_GRAMMAR_LARGE["Vc"], []) +
+    sum(TEST_GRAMMAR_LARGE["P"], []) +
+    sum(TEST_GRAMMAR_LARGE["RelPro"], []) +
+    sum(TEST_GRAMMAR_LARGE["CompC"], []) +
+    sum(TEST_GRAMMAR_LARGE["Conj"], [])
+)
+
+
 def generate(symbol, grammar):
     """Recursively generate a sentence from the grammar starting with a symbol."""
     if symbol not in grammar:

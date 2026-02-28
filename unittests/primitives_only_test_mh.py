@@ -4,9 +4,11 @@ is completely functional using the two-hierarchy (content + context) framework
 defined in parse_mh.py / MULTIHIERARCHY.md.
 
 ONLY TESTS PRIMITIVES - currently used for sandboxing
+
+This is the best settings right now but still failing in disambiguation so distributional context coming in clutch!!
 """
 
-from util.cfg import generate, TEST_GRAMMAR2, TEST_CORPUS2
+from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1
 from parse_mh import WEBSTER
 import shutil
 import os
@@ -25,19 +27,19 @@ num_sentences = 100
 document = []
 
 for _ in range(num_sentences):
-    sentence = generate("S", TEST_GRAMMAR2)
+    sentence = generate("S", TEST_GRAMMAR1)
     document.append(sentence)
 
 THRESHOLD = 0
 
 # Setting up the multi-hierarchy parser (WEBSTER)
 webster = WEBSTER(
-    TEST_CORPUS2,
+    TEST_CORPUS1,
     context_length=CONTEXT_LENGTH,
     content_length=CONTENT_LENGTH,
     threshold=THRESHOLD,
     content_alpha=1e-4,
-    context_alpha=1e-1,
+    context_alpha=1e-4,
     bow=False,
     empty_weighting=True,
     weighting="constant",

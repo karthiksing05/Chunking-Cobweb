@@ -1040,7 +1040,8 @@ class FiniteParseTree(object):
                 for j in range(self.context_length):
                     src_idx = i - (j + 1)
                     if 0 <= src_idx < len(word_ids):
-                        ctx_inst[j] = {word_ids[src_idx]: _context_weight(j, _weighting)}
+                        cw = word_ids[src_idx]
+                        ctx_inst[j] = {cw: _context_weight(j, _weighting)}
                         ctx_inst[j][0] = 0
                     else:
                         ctx_inst[j] = {0: _empty_val}
@@ -1050,7 +1051,8 @@ class FiniteParseTree(object):
                     src_idx = i + (j + 1)
                     attr_key = self.context_length + j
                     if 0 <= src_idx < len(word_ids):
-                        ctx_inst[attr_key] = {word_ids[src_idx]: _context_weight(j, _weighting)}
+                        cw = word_ids[src_idx]
+                        ctx_inst[attr_key] = {cw: _context_weight(j, _weighting)}
                         ctx_inst[attr_key][0] = 0
                     else:
                         ctx_inst[attr_key] = {0: _empty_val}
@@ -1092,6 +1094,7 @@ class FiniteParseTree(object):
             node.label_path = label_path
 
             # build context_before / context_after lists of dicts for visualization
+            # (also used by create_context_instance for composites)
             cb = []
             for j in range(self.context_length):
                 src_idx = i - (j + 1)
@@ -3112,6 +3115,124 @@ class WEBSTER(object):
             if debug:
                 print("-" * 100)
         return trees
+
+    # ---- context hierarchy bootstrapping --------------------------------
+
+    def bootstrap_context_hierarchy(
+        self,
+        sentences: List[str],
+        debug: bool = False,
+    ) -> None:
+        """Pre-train the context hierarchy using accumulated distributions.
+
+        Scans *sentences*, accumulates per-word-type co-occurrence
+        distributions (one bag-of-words instance per word TYPE, not per
+        token), and trains the context hierarchy on these.  This gives
+        immediate distributional clustering — words appearing in similar
+        contexts (same POS) will share accumulated value overlap and
+        cluster together.
+
+        Parameters
+        ----------
+        sentences : list[str]
+            Training corpus (list of sentence strings).
+        debug : bool
+            Print progress information.
+        """
+        # -- ensure all sentence words are in vocab -----------------------
+        for sent in sentences:
+            for tok in re.findall(r"[\w']+|[.,!?;]", sent):
+                if tok not in self.ltm.value_to_id:
+                    self.ltm.add_to_vocab(tok)
+
+        # -- accumulate per-word-type context distributions ---------------
+        accumulated = self._accumulate_word_contexts(sentences)
+        if debug:
+            print(f"[bootstrap] Accumulated contexts for {len(accumulated)} word types")
+
+        # -- build instances and train ------------------------------------
+        instances = self._build_bootstrap_instances(accumulated)
+
+        # clear and re-train context hierarchy
+        self.ltm.context_hierarchy = CobwebDiscreteTree(self.ltm.context_alpha)
+        self.ltm._register_concept(self.ltm.context_hierarchy.root)
+
+        for wid, inst in instances.items():
+            self.ltm._ifit_and_update_vocab(inst, self.ltm.context_hierarchy)
+
+        if debug:
+            n_leaves = sum(1 for _ in self._iter_leaves(self.ltm.context_hierarchy.root))
+            print(f"[bootstrap] Trained {len(instances)} word types -> {n_leaves} leaves")
+
+    # -- bootstrap helpers ------------------------------------------------
+
+    @staticmethod
+    def _iter_leaves(node):
+        """Yield all leaf nodes under *node*."""
+        if not node.children:
+            yield node
+        else:
+            for child in node.children:
+                yield from WEBSTER._iter_leaves(child)
+
+    def _accumulate_word_contexts(self, sentences: List[str]) -> dict:
+        """Scan sentences, accumulate per-word-type context distributions.
+
+        Returns ``{word_id: {"before": {ctx_wid: total_weight}, "after": {...}}}``.
+        """
+        accumulated: Dict[int, Dict[str, Dict[int, float]]] = {}
+        _weighting = getattr(self.ltm, 'weighting', 'binary')
+
+        for sentence in sentences:
+            elements = re.findall(r"[\w']+|[.,!?;]", sentence)
+            word_ids = [self.ltm.value_to_id[e] for e in elements]
+
+            for i, wid in enumerate(word_ids):
+                if wid not in accumulated:
+                    accumulated[wid] = {"before": {}, "after": {}}
+
+                for j in range(self.context_length):
+                    src_idx = i - (j + 1)
+                    if 0 <= src_idx < len(word_ids):
+                        ctx_wid = word_ids[src_idx]
+                        weight = _context_weight(j, _weighting)
+                        accumulated[wid]["before"][ctx_wid] = (
+                            accumulated[wid]["before"].get(ctx_wid, 0) + weight
+                        )
+
+                for j in range(self.context_length):
+                    src_idx = i + (j + 1)
+                    if 0 <= src_idx < len(word_ids):
+                        ctx_wid = word_ids[src_idx]
+                        weight = _context_weight(j, _weighting)
+                        accumulated[wid]["after"][ctx_wid] = (
+                            accumulated[wid]["after"].get(ctx_wid, 0) + weight
+                        )
+
+        return accumulated
+
+    def _build_bootstrap_instances(self, accumulated: dict) -> dict:
+        """Build BOW context instances from accumulated distributions.
+
+        Returns ``{word_id: instance_dict}``.  Always uses BOW format
+        (attr 0 = before bag, attr 1 = after bag) regardless of the
+        ``bow`` setting, since accumulated distributions are inherently
+        bag-like.
+        """
+        _cplx_vid = self.ltm.value_to_id.get("COMPLEXITY", 0)
+        instances: Dict[int, dict] = {}
+
+        for wid, ctx in accumulated.items():
+            inst: dict = {}
+            if ctx["before"]:
+                inst[0] = dict(ctx["before"])
+            if ctx["after"]:
+                inst[1] = dict(ctx["after"])
+            inst[-2] = {_cplx_vid: 1}   # complexity = 1 (primitive)
+            inst[-1] = {wid: 1}         # content-ref = word identity (hidden)
+            instances[wid] = inst
+
+        return instances
 
     # ---- chunk evaluation (called by external tools / GUI) --------------
 
