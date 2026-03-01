@@ -10,7 +10,7 @@ app = Flask(__name__)
 LEARNING_ON = True
 PREBUILD_TREES = False
 CONTEXT_LENGTH = 5
-CONTENT_LENGTH = 10
+CONTENT_LENGTH = 4
 PRIMITIVE_THRESHOLD = "converge"
 CATEGORIZATION_MODE = "dfs"  # "dfs", "bfs", or "bfs_pmi"
 # LOAD_LTM = ""
@@ -27,10 +27,14 @@ else:
         TEST_CORPUS1,
         context_length=CONTEXT_LENGTH,
         content_length=CONTENT_LENGTH,
-        threshold=PRIMITIVE_THRESHOLD,
-        content_alpha=5e-4,
-        context_alpha=5e-4,
-        categorization_mode=CATEGORIZATION_MODE,
+        threshold="converge",
+        content_alpha=1e-6,
+        context_alpha=1e-4,
+        bow=False,
+        chunk_context=False,
+        empty_weighting=True,
+        weighting="binary",
+        categorization_mode='dfs' # can be dfs, bfs, or bfs_pmi
     )
 
 NUM_LOAD = 0

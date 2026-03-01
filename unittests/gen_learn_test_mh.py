@@ -28,7 +28,7 @@ for _ in range(num_sentences):
     sentence = generate("S", TEST_GRAMMAR1)
     document.append(sentence)
 
-THRESHOLD = -25
+THRESHOLD = -7
 
 # Setting up the multi-hierarchy parser (WEBSTER)
 webster = WEBSTER(
@@ -39,14 +39,17 @@ webster = WEBSTER(
     content_alpha=1e-6,
     context_alpha=1e-4,
     bow=False,
+    chunk_context=False,
     empty_weighting=True,
     weighting="binary",
-    categorization_mode='dfs' # can be dfs, bfs, or bfs_pmi
+    categorization_mode='dfs', # can be dfs, bfs, or bfs_pmi
+    min_chunk_count=5,
+    freq_weight=1.0
 )
 
 train_size = 0.96
 
-PRIMITIVES_FIRST = 30
+PRIMITIVES_FIRST = 50
 
 train_documents = document[:int(len(document) * train_size)]
 test_documents = document[int(len(document) * train_size):]
@@ -75,11 +78,10 @@ for i, doc in enumerate(train_documents):
             webster.visualize_ltm(f"{OUT_DIR}/ltms/ltm{i}", max_depth=3)
 
 
-webster.visualize_ltm(f"{OUT_DIR}/final_ltm", max_depth=3)
 SAVE_DIR = f"{OUT_DIR}/final_ltm_data"
 webster.save_state(SAVE_DIR)
 print(f"Saved Final LTM to \"{SAVE_DIR}\"!")
-
+webster.visualize_ltm(f"{OUT_DIR}/final_ltm", max_depth=3)
 
 # Visualize the test parse trees
 for i, test in enumerate(test_documents):

@@ -12,6 +12,10 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
 
 ## Methodology 2.0
 
+Distributional context has solved some problems but we still need a threshold??!?
+
+Long story short, there are Cobweb problems - or at the very least, I can't seem to figure out what the right scoring functions or instance representations are. Our methodology is sound, but there seems to be a lot of problems
+
 ### Gathering distributional context
 
 *   THERE ARE SO MANY WAYS TO DO THIS - and honestly, I think a distributional buffer for Cobweb is a generally valuable solution and should be discussed

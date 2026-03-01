@@ -138,9 +138,9 @@ class HTMLCobwebDrawer:
 				rows.append(ellipsis)
 
 			# Route into left / right / other based on attribute name prefix
-			if attr_name.startswith("Left") or attr_name.startswith("Context-Before") or attr_name == "CtxBefore":
+			if attr_name.startswith("Left") or attr_name.startswith("Context-Before") or attr_name.startswith("CtxBefore"):
 				left_rows.extend(attr_rows)
-			elif attr_name.startswith("Right") or attr_name.startswith("Context-After") or attr_name == "CtxAfter":
+			elif attr_name.startswith("Right") or attr_name.startswith("Context-After") or attr_name.startswith("CtxAfter"):
 				right_rows.extend(attr_rows)
 			else:
 				other_rows.extend(attr_rows)

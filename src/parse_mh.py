@@ -443,17 +443,19 @@ def _score_along_path(
         cost += lp * coef
         coef *= 0.75
 
-    tree_log_prob = tree.log_prob(instance, 1000, False)
-    if tree_log_prob == 0:
-        tree_log_prob = -1e9
+    tree_log_prob = tree.log_prob(instance, 100, False)
+    # if tree_log_prob == 0:
+    #     tree_log_prob = -1e9
 
     score_data = {
         "raw_node_log_probs": str(raw_log_probs),
         "candidate_counts": str(path_counts),
         "normed_log_prob": cost,
         "best_log_prob_idx": best_lp_idx,
-        "cost": cost,
+        "cost": tree_log_prob,
         "tree_log_prob": tree_log_prob,
+        "root_log_prob": raw_log_probs[0],
+        "leaf_log_prob": raw_log_probs[-1],
         "best_log_prob": best_lp,
     }
 
@@ -589,6 +591,178 @@ def _build_label_path_from_bfs(depth_dists: list, value_to_id: dict,
             lp.append({0: 0})
 
     return lp[:cpd]
+
+
+# ---------------------------------------------------------------------------
+# Chunk-context instance builder
+# ---------------------------------------------------------------------------
+
+def _build_chunk_context_instance(
+    node,
+    top_level_nodes: list,
+    context_length: int,
+    content_path_depth: int,
+    bow: bool,
+    weighting: str,
+    empty_weighting: bool,
+    complexity_vid: int,
+    content_ref_id=None,
+) -> dict:
+    """
+    Build a context-hierarchy instance in **chunk-context mode**.
+
+    Instead of using raw word IDs at each context slot, uses the
+    *label_path* (content-hierarchy concept path) of the nearest
+    non-overlapping top-level parse chunks.
+
+    "Non-overlapping" means only top-level global-root children are
+    used as context units; interior nodes of a chunk are never
+    referenced separately, so each context slot represents one chunk
+    (primitive or composite) rather than one word.
+
+    Attribute layout — slot mode (``bow=False``):
+        Each of the *context_length* before-slots expands to
+        *content_path_depth* (cpd) sub-attributes:
+          Before slot j (j=0 nearest left), depth d → attr  j*cpd + d
+          After  slot j (j=0 nearest right), depth d → attr  ctx_len*cpd + j*cpd + d
+          Complexity                                  → attr  -2  (hidden)
+          Content-ref                                 → attr  2*ctx_len*cpd
+
+    Attribute layout — BOW mode (``bow=True``):
+        Before depth d → attr  d          (0..cpd-1)
+        After  depth d → attr  cpd + d    (cpd..2*cpd-1)
+        Complexity     → attr  -2  (hidden)
+        Content-ref    → attr  2*ctx_len*cpd  (unified with slot mode)
+
+    Parameters
+    ----------
+    node : PrimitiveParseNode | CompositeParseNode
+        The node whose context instance we are building.
+    top_level_nodes : list of (position_idx, node)
+        The sorted global-root children at the time of learning.
+    context_length, content_path_depth, bow, weighting, empty_weighting :
+        Same semantics as in the rest of the system.
+    complexity_vid : int
+        Vocab ID for the "COMPLEXITY" sentinel.
+    content_ref_id : int | None
+        Word/concept ID to write at the content-ref attribute, if any.
+    """
+    cpd = content_path_depth
+    ctx_inst: dict = {}
+    _empty_val = 1 if empty_weighting else 0
+
+    # ---- locate the node's top-level ancestor in the final tree ---------
+    def _contains(ancestor, target):
+        if ancestor is target:
+            return True
+        for _, ch in getattr(ancestor, "children", []):
+            if _contains(ch, target):
+                return True
+        return False
+
+    anc_idx = -1
+    for idx, (_, tl_node) in enumerate(top_level_nodes):
+        if _contains(tl_node, node):
+            anc_idx = idx
+            break
+
+    def _neighbor(offset):
+        """Return the top-level node *offset* positions from ancestor."""
+        idx = anc_idx + offset
+        if 0 <= idx < len(top_level_nodes):
+            return top_level_nodes[idx][1]
+        return None
+
+    def _get_label_path(ctx_node):
+        """Return a cpd-length list of concept IDs from label_path."""
+        if ctx_node is None:
+            return [0] * cpd
+        lp = getattr(ctx_node, "label_path", None) or []
+        result = []
+        for d in range(cpd):
+            if d < len(lp):
+                val = lp[d]
+                # BFS produces dicts; DFS produces plain ints
+                if isinstance(val, dict):
+                    best = max(val.items(), key=lambda kv: kv[1], default=(0, 0))
+                    result.append(best[0] or 0)
+                else:
+                    result.append(val if val else 0)
+            else:
+                result.append(0)
+        return result
+
+    # ---- complexity (hidden, unchanged from normal mode) ----------------
+    complexity = getattr(node, "complexity", 1)
+    ctx_inst[-2] = {complexity_vid: complexity}
+
+    # ---- context slots --------------------------------------------------
+    cref_attr = 2 * context_length * cpd  # unified for both BOW and slot
+
+    if bow:
+        # BOW: aggregate over context_length non-overlapping left/right
+        # chunks into per-depth bags, distance-weighted.
+        before_bags: list = [{} for _ in range(cpd)]
+        for j in range(context_length):
+            ctx_node = _neighbor(-(j + 1))
+            if ctx_node is None:
+                continue
+            lp = _get_label_path(ctx_node)
+            wt = _context_weight(j, weighting)
+            for d in range(cpd):
+                v = lp[d]
+                if v != 0:
+                    before_bags[d][v] = before_bags[d].get(v, 0) + wt
+        for d in range(cpd):
+            if before_bags[d]:
+                ctx_inst[d] = before_bags[d]
+
+        after_bags: list = [{} for _ in range(cpd)]
+        for j in range(context_length):
+            ctx_node = _neighbor(j + 1)
+            if ctx_node is None:
+                continue
+            lp = _get_label_path(ctx_node)
+            wt = _context_weight(j, weighting)
+            for d in range(cpd):
+                v = lp[d]
+                if v != 0:
+                    after_bags[d][v] = after_bags[d].get(v, 0) + wt
+        for d in range(cpd):
+            if after_bags[d]:
+                ctx_inst[cpd + d] = after_bags[d]
+    else:
+        # Slot mode: context_length slots × cpd depth-levels each.
+        wt = _context_weight  # shorthand
+        for j in range(context_length):
+            ctx_node = _neighbor(-(j + 1))
+            lp = _get_label_path(ctx_node)
+            slot_wt = wt(j, weighting)
+            for d in range(cpd):
+                attr_key = j * cpd + d
+                v = lp[d]
+                if v != 0:
+                    ctx_inst[attr_key] = {v: slot_wt, 0: 0}
+                else:
+                    ctx_inst[attr_key] = {0: _empty_val}
+
+        for j in range(context_length):
+            ctx_node = _neighbor(j + 1)
+            lp = _get_label_path(ctx_node)
+            slot_wt = wt(j, weighting)
+            for d in range(cpd):
+                attr_key = context_length * cpd + j * cpd + d
+                v = lp[d]
+                if v != 0:
+                    ctx_inst[attr_key] = {v: slot_wt, 0: 0}
+                else:
+                    ctx_inst[attr_key] = {0: _empty_val}
+
+    # ---- content-ref (optional) -----------------------------------------
+    if content_ref_id is not None:
+        ctx_inst[cref_attr] = {content_ref_id: 1}
+
+    return ctx_inst
 
 
 # ---------------------------------------------------------------------------
@@ -1124,11 +1298,6 @@ class FiniteParseTree(object):
 
             # score
             score_data = _score_along_path(node_path, ctx_inst, self.ltm.context_hierarchy)
-            # basic-level node info for context hierarchy
-            _bl_idx = score_data.get("best_log_prob_idx", 0)
-            if node_path and 0 <= _bl_idx < len(node_path):
-                score_data["context_basic_level_node"] = _basic_level_node_info(
-                    node_path[_bl_idx], self.id_to_value)
             node.score_data = score_data
 
             if threshold == "converge":
@@ -1207,34 +1376,28 @@ class FiniteParseTree(object):
         cnt_leaf, cnt_path, cnt_node_path, cnt_depth_dists = _categorize(
             content_inst, self.ltm.content_hierarchy, mode=_cat_mode)
 
-        # Score using content hierarchy tree-wide log-probability.
-        # Multi-attribute path encoding gives each attribute exactly one
-        # value with count 1, so log_prob produces clean, comparable scores.
-        score = self.ltm.content_hierarchy.log_prob(content_inst, 250, False)
-        if score == 0:
-            score = -1e9
-        score_data = {
-            "cost": score,
-            "tree_log_prob": score,
-        }
         content_score_data = _score_along_path(cnt_node_path, content_inst, self.ltm.content_hierarchy)
         context_score_data = _score_along_path(ctx_node_path, context_inst, self.ltm.context_hierarchy)
 
-        # Basic-level node info for both hierarchies
-        _cnt_bl_idx = content_score_data.get("best_log_prob_idx", 0)
-        _ctx_bl_idx = context_score_data.get("best_log_prob_idx", 0)
-        content_basic_level = None
-        context_basic_level = None
-        if cnt_node_path and 0 <= _cnt_bl_idx < len(cnt_node_path):
-            content_basic_level = _basic_level_node_info(
-                cnt_node_path[_cnt_bl_idx], self.id_to_value)
-        if ctx_node_path and 0 <= _ctx_bl_idx < len(ctx_node_path):
-            context_basic_level = _basic_level_node_info(
-                ctx_node_path[_ctx_bl_idx], self.id_to_value)
+        # IMPORTANT STUFF HERE!!!
+        score = context_score_data["cost"] # + content_score_data["cost"] 
+
+        # Score each child's own context instance individually so the UI
+        # can display per-chunk context scores alongside the merged score.
+        _cref_attr = self.ltm.content_ref_attr
+        def _score_child_ctx(child):
+            ctx = child.get_context_instance()
+            ctx.pop(_cref_attr, None)  # strip content-ref, matches add_parse_tree
+            if not ctx:
+                return {}
+            _, _, _path, _ = _categorize(ctx, self.ltm.context_hierarchy, mode=_cat_mode)
+            return _score_along_path(_path, ctx, self.ltm.context_hierarchy)
+
+        left_ctx_score_data  = _score_child_ctx(left_node)
+        right_ctx_score_data = _score_child_ctx(right_node)
 
         if debug:
-            print(f"Content score for pair: {score:.4f}")
-            print(f"  content_inst: {content_inst}")
+            print(f"Score for pair: {score:.4f}")
 
         # build label (weighted path from context hierarchy)
         ctx_path_ids = []
@@ -1262,7 +1425,6 @@ class FiniteParseTree(object):
             "candidate_concept_hash": ctx_hash,
             "candidate_concept_id": ctx_concept_id,
             "score": score,
-            "debug": score_data,
             "left_word_index": left_word_index,
             "right_word_index": right_word_index,
             "left_title": left_node.title,
@@ -1272,8 +1434,9 @@ class FiniteParseTree(object):
             "context_path_hashes": context_path_hashes,
             "content_score_data": content_score_data,
             "context_score_data": context_score_data,
-            "content_basic_level_node": content_basic_level,
-            "context_basic_level_node": context_basic_level,
+            # Per-child context scores (visualized in the evaluate-pair modal)
+            "left_context_score_data": left_ctx_score_data,
+            "right_context_score_data": right_ctx_score_data,
             "categorization_mode": _cat_mode,
         }
 
@@ -2013,7 +2176,30 @@ function renderPathViz(tab) {{
     const entry = _pathVizData[tab];
     const scoreEl = document.getElementById('path-tab-score');
     if (!entry || !entry.tree) {{ if(scoreEl) scoreEl.innerHTML=''; return; }}
-    if (scoreEl) scoreEl.innerHTML = buildScoreTable(entry.scoreData || {{}}) + buildBasicLevelHTML(entry.basicLevelNode, "Basic-Level Node");
+
+    // Merged-pair score
+    let scoreHTML = buildScoreTable(entry.scoreData || {{}});
+
+    // Per-chunk context scores (context tab only)
+    if (tab === 'context') {{
+        const hasLeft  = entry.leftScoreData  && Object.keys(entry.leftScoreData).length  > 0;
+        const hasRight = entry.rightScoreData && Object.keys(entry.rightScoreData).length > 0;
+        if (hasLeft || hasRight) {{
+            scoreHTML += `<div class="section-header" style="margin-top:10px;">Per-Chunk Context Scores</div>
+<div class="side-by-side">
+  <div>
+    <div class="sub-title">${{entry.leftTitle || "Left"}}</div>
+    ${{buildScoreTable(entry.leftScoreData || {{}})}}
+  </div>
+  <div>
+    <div class="sub-title">${{entry.rightTitle || "Right"}}</div>
+    ${{buildScoreTable(entry.rightScoreData || {{}})}}
+  </div>
+</div>`;
+        }}
+    }}
+
+    if (scoreEl) scoreEl.innerHTML = scoreHTML;
     const treeD  = entry.tree;
     const pathArr = entry.path || [];
     const pathNodes = new Set(pathArr);
@@ -2177,26 +2363,6 @@ function buildScoreTable(score){{
     for(const [k,v] of Object.entries(score)){{if(typeof v==="object"&&v!==null) continue;rows+=`<tr><td>${{k}}</td><td>${{formatScoreValue(v)}}</td></tr>`;}}
     return `<table><tr><th>Metric</th><th>Value</th></tr>${{rows}}</table>`;
 }}
-function buildBasicLevelHTML(info, title){{
-    if(!info) return "";
-    title = title || "Basic-Level Node";
-    let html = `<div class="section-header">${{title}}</div>`;
-    html += `<table><tr><th>Property</th><th>Value</th></tr>`;
-    html += `<tr><td>Concept Hash</td><td>${{info.concept_hash}}</td></tr>`;
-    html += `<tr><td>Count</td><td>${{info.count}}</td></tr>`;
-    html += `<tr><td>Depth</td><td>${{info.depth}}</td></tr>`;
-    html += `</table>`;
-    if(info.attrs && info.attrs.length>0){{
-        html += `<div style="margin-top:6px;">`;
-        for(const a of info.attrs){{
-            const valRows = a.vals.map(v=>`<tr><td>${{v.key}}</td><td>${{v.count}}</td></tr>`).join("");
-            html += `<div style="margin:4px 0;"><strong style="font-size:11px;">${{a.attr}}:</strong>`;
-            html += `<table style="margin-top:2px;"><tr><th>Value</th><th>Count</th></tr>${{valRows}}</table></div>`;
-        }}
-        html += `</div>`;
-    }}
-    return html;
-}}
 function renderPrimitivePath(pathHashes){{
     const sub=document.getElementById("primitive-path-viz-sub");
     if(!_primitiveContextTree||!pathHashes||pathHashes.length===0){{if(sub)sub.style.display="none";return;}}
@@ -2257,7 +2423,7 @@ function renderPrimitiveScores(primitives){{
     primitives.forEach(p=>{{
         const btn=document.createElement("button");btn.textContent=p.title;
         btn.onclick=()=>{{
-            if(view)view.innerHTML=buildScoreTable(p.score_data)+buildBasicLevelHTML(p.score_data&&p.score_data.context_basic_level_node,"Context Basic-Level Node");
+            if(view)view.innerHTML=buildScoreTable(p.score_data||{{}});
             if(container)container.style.display="";
             renderPrimitivePath(p.context_path_hashes||[]);
         }};
@@ -2300,8 +2466,16 @@ function showCandidateModal(result, contentTree, contextTree){{
     document.getElementById("candidate-score").textContent=result.score.toFixed(3) + modeLabel;
     // store path data for both hierarchies
     _pathVizData = {{
-        content: {{ tree: contentTree, path: result.content_path_hashes || [], scoreData: result.content_score_data || {{}}, basicLevelNode: result.content_basic_level_node || null }},
-        context: {{ tree: contextTree, path: result.context_path_hashes || [], scoreData: result.context_score_data || {{}}, basicLevelNode: result.context_basic_level_node || null }},
+        content: {{ tree: contentTree, path: result.content_path_hashes || [], scoreData: result.content_score_data || {{}} }},
+        context: {{
+            tree: contextTree,
+            path: result.context_path_hashes || [],
+            scoreData: result.context_score_data || {{}},
+            leftTitle: result.left_title || "Left",
+            rightTitle: result.right_title || "Right",
+            leftScoreData: result.left_context_score_data || {{}},
+            rightScoreData: result.right_context_score_data || {{}},
+        }},
     }};
     // reset tab to content
     _currentPathTab = 'content';
@@ -2492,7 +2666,8 @@ class LongTermMemory(object):
 
     def __init__(self, value_corpus: list, context_length: int = 3, content_path_depth: int = 3, alpha: float = 1e-4,
                  content_alpha: float = None, context_alpha: float = None, bow: bool = False,
-                 categorization_mode: str = 'dfs', weighting: str = 'binary', empty_weighting: bool = False):
+                 categorization_mode: str = 'dfs', weighting: str = 'binary', empty_weighting: bool = False,
+                 chunk_context: bool = False):
         _content_alpha = content_alpha if content_alpha is not None else alpha
         _context_alpha = context_alpha if context_alpha is not None else alpha
         self.content_alpha = _content_alpha
@@ -2515,6 +2690,7 @@ class LongTermMemory(object):
         self.categorization_mode = categorization_mode
         self.weighting = weighting  # 'binary', 'harmonic', or 'constant'
         self.empty_weighting = empty_weighting  # True: EMPTYNULL uses count 1
+        self.chunk_context = chunk_context  # True: use chunk label_paths as context
 
         # register root concepts of both hierarchies
         self._register_concept(self.content_hierarchy.root)
@@ -2533,15 +2709,26 @@ class LongTermMemory(object):
         )
 
         # drawer for context hierarchy visualization
-        if bow:
-            context_headers = ["CtxBefore", "CtxAfter", "Content-Ref"]
+        _cpd = content_path_depth
+        content_ref_attr_idx = 2 * context_length * _cpd if chunk_context else 2 * context_length
+        if chunk_context:
+            if bow:
+                context_headers = (
+                    [f"CtxBefore-D{d}" for d in range(_cpd)]
+                    + [f"CtxAfter-D{d}" for d in range(_cpd)]
+                )
+            else:
+                context_headers = (
+                    [f"Context-Before{j}-D{d}" for j in range(context_length) for d in range(_cpd)]
+                    + [f"Context-After{j}-D{d}" for j in range(context_length) for d in range(_cpd)]
+                )
+        elif bow:
+            context_headers = ["CtxBefore", "CtxAfter"]
         else:
             context_headers = (
                 [f"Context-Before{i}" for i in range(context_length)]
                 + [f"Context-After{i}" for i in range(context_length)]
-                + ["Content-Ref"]
             )
-        content_ref_attr_idx = 2 * context_length
         def _content_ref_display(val_id):
             if val_id is not None and 0 <= val_id < len(self.id_to_value):
                 name = self.id_to_value[val_id]
@@ -2563,11 +2750,20 @@ class LongTermMemory(object):
     @property
     def content_ref_attr(self) -> int:
         """Attribute index for the content-ref in context instances.
-        Always ``2 * context_length`` regardless of BOW mode.
-        In slot mode this is the first index after all positional slots.
-        In BOW mode (attrs 0 and 1 used) attrs 2..2*ctx-1 are absent,
-        so content-ref lands at the same stable index in both modes.
+
+        Normal mode (``chunk_context=False``):
+            Always ``2 * context_length`` regardless of BOW mode.
+            In slot mode this is the first index after all positional slots.
+            In BOW mode attrs 0 and 1 are used; 2..2*ctx-1 are absent.
+
+        Chunk-context mode (``chunk_context=True``):
+            ``2 * context_length * content_path_depth`` (unified for both
+            BOW and slot modes).  Each context slot expands to
+            ``content_path_depth`` depth-level attributes, so content-ref
+            is placed after all of them.
         """
+        if self.chunk_context:
+            return 2 * self.context_length * self.content_path_depth
         return 2 * self.context_length
 
     # ---- vocabulary helpers ---------------------------------------------
@@ -2707,16 +2903,42 @@ class LongTermMemory(object):
         # Composites: content-ref is not in their instance (created with
         # content_ref_id=None), so the pop is a harmless no-op, but we keep it
         # for clarity.
+        #
+        # chunk_context mode: instead of stored word-ID slots, rebuild each
+        # context instance using label_paths of the nearest non-overlapping
+        # top-level parse chunks (final global-root children).
         ctx_leaf_map: dict = {}   # id(node) → context-hierarchy leaf
 
         _cref_attr = self.content_ref_attr
+        _chunk_ctx = getattr(self, 'chunk_context', False)
+        _cplx_vid = self.value_to_id.get("COMPLEXITY", 0)
+
+        if _chunk_ctx:
+            # Pre-compute sorted top-level nodes once for the whole tree.
+            top_level_nodes = sorted(
+                [(n.position_idx, n) for _, n in parse_tree.global_root_node.children],
+                key=lambda x: x[0],
+            )
+
         for node in all_nodes:
-            ctx_inst = node.get_context_instance()
-            # Only strip content-ref for composites; primitives keep it so the
-            # word-identity attribute participates in Cobweb clustering and is
-            # registered in tree.attr_vals before any step-4 increment_attr_value.
-            if isinstance(node, CompositeParseNode):
-                ctx_inst.pop(_cref_attr, None)
+            if _chunk_ctx:
+                # Build fresh instance using top-level chunk label_paths.
+                # content_ref for primitives = word_id (so generation still works);
+                # for composites it will be written in step 4.
+                _cref_id = node.word_id if isinstance(node, PrimitiveParseNode) else None
+                ctx_inst = _build_chunk_context_instance(
+                    node, top_level_nodes,
+                    self.context_length, self.content_path_depth,
+                    self.bow, self.weighting, self.empty_weighting,
+                    _cplx_vid, content_ref_id=_cref_id,
+                )
+            else:
+                ctx_inst = node.get_context_instance()
+                # Only strip content-ref for composites; primitives keep it so the
+                # word-identity attribute participates in Cobweb clustering and is
+                # registered in tree.attr_vals before any step-4 increment_attr_value.
+                if isinstance(node, CompositeParseNode):
+                    ctx_inst.pop(_cref_attr, None)
             leaf, rewrites = self._ifit_and_update_vocab(
                 ctx_inst, self.context_hierarchy, debug=debug)
             ctx_leaf_map[id(node)] = leaf
@@ -2893,6 +3115,7 @@ class LongTermMemory(object):
             "categorization_mode": getattr(self, 'categorization_mode', 'dfs'),
             "weighting": getattr(self, 'weighting', 'binary'),
             "empty_weighting": getattr(self, 'empty_weighting', False),
+            "chunk_context": getattr(self, 'chunk_context', False),
             "id_count": self.id_count,
             "id_to_value": self.id_to_value,
             "value_to_id": self.value_to_id,
@@ -2936,6 +3159,7 @@ class LongTermMemory(object):
             categorization_mode=meta.get("categorization_mode", "dfs"),
             weighting=meta.get("weighting", "binary"),
             empty_weighting=meta.get("empty_weighting", False),
+            chunk_context=meta.get("chunk_context", False),
         )
         ltm.id_to_value = meta.get("id_to_value", ltm.id_to_value)
         ltm.value_to_id = meta.get("value_to_id", ltm.value_to_id)
@@ -2950,40 +3174,14 @@ class LongTermMemory(object):
         if os.path.exists(context_path):
             ltm.context_hierarchy.load_json(context_path)
 
-        # rebuild drawers
-        content_headers = (
-            [f"Left-Depth{i}" for i in range(ltm.content_path_depth)]
-            + [f"Right-Depth{i}" for i in range(ltm.content_path_depth)]
-        )
-        ltm.content_drawer = HTMLCobwebDrawer(
-            content_headers,
-            id_to_value=ltm.id_to_value,
-            value_to_id=ltm.value_to_id,
-        )
-        if ltm.bow:
-            context_headers = ["CtxBefore", "CtxAfter", "Content-Ref"]
-        else:
-            context_headers = (
-                [f"Context-Before{i}" for i in range(ltm.context_length)]
-                + [f"Context-After{i}" for i in range(ltm.context_length)]
-                + ["Content-Ref"]
-            )
-        content_ref_attr_idx = 2 * ltm.context_length
-        def _content_ref_display(val_id):
-            if val_id is not None and 0 <= val_id < len(ltm.id_to_value):
-                name = ltm.id_to_value[val_id]
-            else:
-                name = f"?{val_id}"
-            if isinstance(name, str) and name.startswith("CONCEPT-"):
-                return "C-" + name[8:20] + "…"
-            return name
-        ltm.context_drawer = HTMLCobwebDrawer(
-            context_headers,
-            id_to_value=ltm.id_to_value,
-            value_to_id=ltm.value_to_id,
-            attr_value_fn={content_ref_attr_idx: _content_ref_display},
-            attr_name_overrides={content_ref_attr_idx: "Content-Ref", -2: "Complexity"},
-        )
+        # rebuild drawers — delegate to a re-init of the drawer only;
+        # LongTermMemory.__init__ already ran the right logic via the
+        # constructor call above, so the drawers are already correct.
+        # We only need to refresh stale id_to_value / value_to_id refs.
+        ltm.content_drawer.id_to_value = ltm.id_to_value
+        ltm.content_drawer.value_to_id = ltm.value_to_id
+        ltm.context_drawer.id_to_value = ltm.id_to_value
+        ltm.context_drawer.value_to_id = ltm.value_to_id
         return ltm
 
 
@@ -3003,7 +3201,8 @@ class WEBSTER(object):
 
     def __init__(self, value_corpus: list, context_length: int = 3, content_length: int = 3, alpha: float = 1e-4,
                  content_alpha: float = None, context_alpha: float = None, threshold=-5.0, bow: bool = False,
-                 categorization_mode: str = 'dfs', weighting: str = 'binary', empty_weighting: bool = False):
+                 categorization_mode: str = 'dfs', weighting: str = 'binary', empty_weighting: bool = False,
+                 chunk_context: bool = False):
         """
         Parameters
         ----------
@@ -3047,6 +3246,14 @@ class WEBSTER(object):
             If True, EMPTYNULL context slots use count 1 instead of 0.
             This makes boundary positions contribute to entropy the same
             way real words do, rather than being invisible.
+        chunk_context : bool
+            If True, context instances use the content-hierarchy *label_path*
+            of neighbouring chunks rather than raw word IDs.  Each context
+            slot expands to *content_length* depth-level sub-attributes
+            (one per depth in the content path). Only the highest available
+            non-overlapping parse layer is used — each top-level chunk
+            occupies exactly one context slot regardless of how many words
+            it spans.  Default ``False``.
         """
         self.ltm = LongTermMemory(
             value_corpus, context_length=context_length,
@@ -3056,6 +3263,7 @@ class WEBSTER(object):
             categorization_mode=categorization_mode,
             weighting=weighting,
             empty_weighting=empty_weighting,
+            chunk_context=chunk_context,
         )
         self.context_length = context_length
         self.content_length = content_length
@@ -3064,6 +3272,7 @@ class WEBSTER(object):
         self.categorization_mode = categorization_mode
         self.weighting = weighting
         self.empty_weighting = empty_weighting
+        self.chunk_context = chunk_context
 
     # ---- accessors ------------------------------------------------------
 
@@ -3208,7 +3417,7 @@ class WEBSTER(object):
         _cpd = self.ltm.content_path_depth
         _cl  = self.context_length
         _cplx_vid  = self.ltm.value_to_id.get("COMPLEXITY", 0)
-        _ref_attr  = 2 * self.context_length  # content-ref (visible, always 2*ctx_len)
+        _ref_attr  = self.ltm.content_ref_attr  # content-ref (layout depends on chunk_context mode)
         _cplx_attr = -2                   # complexity (hidden, negative key)
 
         # ── helpers ───────────────────────────────────────────────────────
