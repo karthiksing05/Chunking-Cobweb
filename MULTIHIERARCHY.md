@@ -6,32 +6,28 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
 
 A whole host of new problems! I'm refactoring and appending problems below so that we can discuss them properly
 
-### Revising our scoring with both Content and Context
+### FROM DISCUSSIONS WITH CHRIS!
+*   Unseen things are being seen with the log probabilities in bad ways!!! (***)
+*   Not a bug but log prob is contingent on how the tree is built, and also not enough to guarantee frequency - we need some basic level adaptation + counts
+*   Basic level seems pretty strong in our test_logprob_paths script! So maybe the problem is truly shuffling the data!!
+    *   We can say that if the basic level evaluates to being the root node, that we haven't formed a basic level yet!! As per test_logprob_paths!!
+
+### Revising our scoring (with both Content and Context?)
 
 From Methodology 1.0 and with some new stuff, our scoring should have the following characteristics:
 *   *Recognition* - whether an instance of data is recognized by our memory. 
     *   Recognition should be over a gradient - we should be able to say that something is recognized more or less than something else
     *   Recognition should be over generalizations - an unseen exemplar with a high-frequency prototype should be evaluated as recognized stronger than an exemplar we've seen twice
-    *   Potential formula: log p(x | c_basic) + log(count_basic / count_root) (of course, hinges on the basic-level node evaluating to true AND the quality of the hierarchy being strong)
+    *   A stronger way to do this is first filtering by basic level counts and then evaluating to see which is the most seen, and then filtering further by log probs
+        *   **We should take all chunks whose basic level count is above threshold, and then find the best one by evaluating log-prob!!**
 *   *Stability* - whether a chunk is built of two chunks that have been recognized prior over various occasions
-    *   Not sure how to implement this yet, immediately my head goes to a separate threshold (higher-level) - almost like tiers! So tier 1 allows the chunk to be built, and tier 2 allows the chunk to contribtue to higher-level chunks
+    *   Not sure how to implement this yet, immediately my head goes to a separate threshold (higher-level) - almost like tiers! So tier 1 allows the chunk to be built, and tier 2 allows the chunk to contribtue to higher-level chunks (or recognition of candidate chunks vs. recognition of )
 
 Things we don't need:
 *   *Fit* - I thought we needed this, but we mix context-information into the "recognition" categorize
 *   *Reusability* - I thought we needed this, but again, recognition guarantees that by the time we create a chunk, we've seen it enough times to evaluate that we'll *probably* reuse it in the future
 
-Generally, the two scores that we've cooked up are probably more than enough, but neither of them use the context. Still, it might be ok because context is stored in our content instances
-
-### A different data-structure??
-
-Cobweb is SO GOOD for this purpose because it does literally all the things we need it to do - but hypothetically speaking, what is a list of the things we need to do? If, for instance, we don't end up using Cobweb...
-
-Our data-structure must do the following:
-*   Must be incremental on some level - or, at the very least, should be online
-*   Must take in a discrete instance of some sort (I really like attribute-value representations)
-*   Must yield a score of "recognition" which takes into account both frequency and accuracy
-    *   As mentioned by the scoring data above, recognition should fulfill all those criteria (though the actual mechanism might be different)
-*   Must contain a basic level of some form (which adapts as the data store expands) (or at the very least, some generalization)
+Generally, the two scores that we've cooked up are probably more than enough, but neither of them use the context. Still, it might be ok because context is stored inherently in the makeup of our content instances
 
 ### Order effects
 
@@ -56,6 +52,17 @@ Grammars may have something to do with this - honestly, I don't really care whet
 
 *   This is pretty self-explanatory - we need to represent nodes in our parse tree in terms of context relative to what it represents
 *   An important note here is that order matters if we do this!! We should build concepts in terms of other concepts and reflect 
+
+### A different data-structure??
+
+Cobweb is SO GOOD for this purpose because it does literally all the things we need it to do - but hypothetically speaking, what is a list of the things we need to do? If, for instance, we don't end up using Cobweb...
+
+Our data-structure must do the following:
+*   Must be incremental on some level - or, at the very least, should be online
+*   Must take in a discrete instance of some sort (I really like attribute-value representations)
+*   Must yield a score of "recognition" which takes into account both frequency and accuracy
+    *   As mentioned by the scoring data above, recognition should fulfill all those criteria (though the actual mechanism might be different)
+*   Must contain a basic level of some form (which adapts as the data store expands) (or at the very least, some generalization)
 
 ## Methodology 1.1
 

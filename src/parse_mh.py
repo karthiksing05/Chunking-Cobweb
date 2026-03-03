@@ -2827,7 +2827,7 @@ class LongTermMemory(object):
                 curr.set_av_count(new_av)
                 to_visit.extend(curr.children)
 
-    def add_parse_tree(self, parse_tree: 'FiniteParseTree', debug=False):
+    def add_parse_tree(self, parse_tree: 'FiniteParseTree', debug: bool = False, shuffle: bool = True):
         """
         Learn from a completed parse tree.
 
@@ -2887,7 +2887,12 @@ class LongTermMemory(object):
                 key=lambda x: x[0],
             )
 
-        for node in all_nodes:
+        # Optionally shuffle instances before fitting to hierarchies
+        ctx_nodes = list(all_nodes)
+        if shuffle:
+            random.shuffle(ctx_nodes)
+
+        for node in ctx_nodes:
             if _chunk_ctx:
                 # Build fresh instance using top-level chunk label_paths.
                 # content_ref for primitives = word_id (so generation still works);
@@ -2999,19 +3004,24 @@ class LongTermMemory(object):
         # -- Step 3: fit content instances --------------------------------
         content_leaf_map: dict = {}   # id(comp_node) → content-hierarchy leaf
 
-        for node in all_nodes:
-            if isinstance(node, CompositeParseNode) and not node.is_global_root:
-                ci = node.get_content_instance()
-                if ci:
-                    leaf, rewrites = self._ifit_and_update_vocab(
-                        ci, self.content_hierarchy, debug=debug)
-                    content_leaf_map[id(node)] = leaf
-                    # Propagate content splits to context hierarchy
-                    if rewrites:
-                        self._apply_rewrite_rules(self.context_hierarchy, rewrites)
+        # Prepare composite nodes for content fitting; optionally shuffle
+        content_nodes = [n for n in all_nodes if isinstance(n, CompositeParseNode) and not n.is_global_root]
+        if shuffle:
+            random.shuffle(content_nodes)
+        for node in content_nodes:
+            ci = node.get_content_instance()
+            if ci:
+                leaf, rewrites = self._ifit_and_update_vocab(
+                    ci, self.content_hierarchy, debug=debug)
+                content_leaf_map[id(node)] = leaf
+                # Propagate content splits to context hierarchy
+                if rewrites:
+                    self._apply_rewrite_rules(self.context_hierarchy, rewrites)
 
         # Also fit orphan candidate pairs (parentless adjacent pairs)
         pairs = parse_tree.get_parentless_pairs()
+        if shuffle:
+            random.shuffle(pairs)
         for p in pairs:
             left = parse_tree._find_root_child_by_index(p["left_word_index"])
             right = parse_tree._find_root_child_by_index(p["right_word_index"])
@@ -3297,7 +3307,7 @@ class WEBSTER(object):
         parse_tree.build(sentence, end_behavior=threshold, debug=debug)
 
         if learning:
-            self.ltm.add_parse_tree(parse_tree, debug=debug)
+            self.ltm.add_parse_tree(parse_tree, shuffle=True, debug=debug)
 
         return parse_tree
 

@@ -144,7 +144,7 @@ def api_export():
 
     # 2. Add to LTM (both content + context hierarchies)
     if LEARNING_ON:
-        webster.ltm.add_parse_tree(curr_tree, debug=False)
+        webster.ltm.add_parse_tree(curr_tree, shuffle=True, debug=False)
 
     # 3. Reset to a new random sentence
     reset_tree()

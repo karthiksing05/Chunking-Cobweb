@@ -114,6 +114,7 @@ def print_scores(label, tree, instance):
     path = path_to_leaf(tree, instance)
 
     tree_lp    = tree.log_prob(instance, 100, False)
+    tree_class_lp  = tree.log_prob_class_given_instance(instance, 100, False)
     root_lp    = path[0].log_prob_instance(instance)
     leaf_lp    = path[-1].log_prob_instance(instance)
 
@@ -126,6 +127,7 @@ def print_scores(label, tree, instance):
     print(f"  Query: {label}")
     print(f"{'='*60}")
     print(f"  tree  log-prob : {tree_lp:.6f}")
+    print(f"  class log-prob : {tree_class_lp:.6f}")
     print(f"  root  log-prob : {root_lp:.6f}  (count={path[0].count})")
     print(f"  leaf  log-prob : {leaf_lp:.6f}  (count={path[-1].count})")
     print(f"  basic log-prob : {basic_lp:.6f}  (depth={basic_depth}, count={basic_node.count})")
@@ -150,6 +152,9 @@ def test_word_logprobs():
     # (the, cat) seen during training → should score highest
     print_scores('Det+Noun  →  "the cat"  (FREQUENT, NP-internal bigram)',
                  tree, inst(THE, CAT))
+    
+    print_scores('Det+Noun  →  "the mouse"  (FREQUENT, NP-internal bigram)',
+                 tree, inst(A, MOUSE))
 
     # ── Rare bigram: Noun+Verb (NP→VP boundary crossing) ────────────────
     # (cat, runs) seen only twice → should score much lower

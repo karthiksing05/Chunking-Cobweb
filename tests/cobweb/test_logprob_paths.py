@@ -38,8 +38,12 @@ Expected insight over test 1:
 
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 
 from cobweb.cobweb_discrete import CobwebDiscreteTree
+from viz import HTMLCobwebDrawer
+
+import random
 
 
 # ── simulated concept IDs (POS hierarchy) ────────────────────────────────────
@@ -68,6 +72,29 @@ HORSE = 2031   # UNSEEN during training (same depth-0/1/2 as animate nouns)
 COW   = 2032   # UNSEEN during training
 RUNS  = 2211
 SEES  = 2212
+
+
+# ── human-readable names for every concept ID used in this test ─────────────
+VALUE_NAMES = {
+    FUNC_WORD:    "FUNC_WORD",
+    CONTENT_WORD: "CONTENT_WORD",
+    ARTICLE:      "ARTICLE",
+    NOUN:         "NOUN",
+    VERB:         "VERB",
+    DEF_ART:      "DEF_ART",
+    INDEF_ART:    "INDEF_ART",
+    THE:          "the",
+    A:            "a",
+    CAT:          "cat",
+    DOG:          "dog",
+    BIRD:         "bird",
+    FISH:         "fish",
+    MOUSE:        "mouse",
+    HORSE:        "horse (unseen)",
+    COW:          "cow (unseen)",
+    RUNS:         "runs",
+    SEES:         "sees",
+}
 
 
 def inst(l0, l1, l2, r0, r1, r2):
@@ -108,7 +135,13 @@ DET_NOUN_BIGRAMS = [
 # Boundary-crossing bigrams: Noun + Verb (2 instances, low cohesion)
 NOUN_VERB_BIGRAMS = [
     inst(*noun_anim(CAT), *verb(RUNS)),
-    inst(*noun_anim(DOG), *verb(RUNS)),
+    inst(*noun_anim(DOG), *verb(SEES)),
+    # inst(*noun_anim(DOG), *verb(RUNS)),
+    # inst(*noun_anim(CAT), *verb(SEES)),
+    # inst(*noun_anim(BIRD), *verb(RUNS)),
+    # inst(*noun_anim(FISH), *verb(SEES)),
+    # inst(*noun_anim(FISH), *verb(RUNS)),
+    # inst(*noun_anim(BIRD), *verb(SEES)),
 ]
 
 TRAINING = DET_NOUN_BIGRAMS + NOUN_VERB_BIGRAMS
@@ -135,22 +168,43 @@ def path_to_leaf(tree, instance):
 def print_scores(label, tree, instance):
     path = path_to_leaf(tree, instance)
 
+    left_only_instance = {
+        0: instance[0],
+        1: instance[1],
+        2: instance[2]
+    }
+
+    right_only_instance = {
+        3: instance[3],
+        4: instance[4],
+        5: instance[5]
+    }
+
+    tree_left_lp = tree.log_prob(left_only_instance, 100, False)
+    tree_right_lp = tree.log_prob(right_only_instance, 100, False)
+
     tree_lp    = tree.log_prob(instance, 100, False)
+    tree_class_lp    = tree.log_prob_class_given_instance(instance, 100, False)
     root_lp    = path[0].log_prob_instance(instance)
     leaf_lp    = path[-1].log_prob_instance(instance)
 
     # basic-level via get_basic (expected-PMI walk from leaf toward root)
     basic_node = path[-1].get_basic(1000, 100)
     basic_lp   = basic_node.log_prob_instance(instance)
+    basic_class_lp   = basic_node.log_prob_class_given_instance(instance)
     basic_depth = basic_node.depth()
 
     print(f"\n{'='*60}")
     print(f"  Query: {label}")
     print(f"{'='*60}")
-    print(f"  tree  log-prob : {tree_lp:.6f}")
-    print(f"  root  log-prob : {root_lp:.6f}  (count={path[0].count})")
-    print(f"  leaf  log-prob : {leaf_lp:.6f}  (count={path[-1].count})")
-    print(f"  basic log-prob : {basic_lp:.6f}  (depth={basic_depth}, count={basic_node.count})")
+    print(f"         tree log-prob : {tree_lp:.6f}")
+    print(f"   tree class log-prob : {tree_class_lp:.6f}")
+    print(f"    tree left log-prob : {tree_left_lp:.6f}")
+    print(f"   tree right log-prob : {tree_right_lp:.6f}")
+    print(f"         root log-prob : {root_lp:.6f}  (count={path[0].count})")
+    print(f"         leaf log-prob : {leaf_lp:.6f}  (count={path[-1].count})")
+    print(f"        basic log-prob : {basic_lp:.6f}  (depth={basic_depth}, count={basic_node.count})")
+    print(f"  basic-class log-prob : {basic_class_lp:.6f}")
 
     print(f"\n  Full path ({len(path)} nodes):")
     for i, n in enumerate(path):
@@ -162,8 +216,22 @@ def print_scores(label, tree, instance):
 # ── main test ─────────────────────────────────────────────────────────────────
 def test_path_logprobs():
     tree = CobwebDiscreteTree(alpha=1e-3, weight_attr=False)
+
+    # random.shuffle(TRAINING)
     for item in TRAINING:
         tree.ifit(item)
+
+    tree.redistribute(2000)
+
+    # print()
+    # print("Training Data")
+
+    # from pprint import pprint
+
+    # pprint(TRAINING)
+
+    # print(inst(*article_def(), *noun_anim(CAT)))
+    # print(inst(*noun_anim(CAT), *verb(RUNS)))
 
     print(f"\nTree has {count_concepts(tree.root)} concepts, "
           f"root.count={tree.root.count}")
@@ -206,6 +274,36 @@ def test_path_logprobs():
         tree,
         inst(*article_indef(), *noun_anim(HORSE)),
     )
+
+    # ── HTML tree visualization ───────────────────────────────────────────
+    _val_fn = lambda vid: VALUE_NAMES.get(vid, str(vid))
+    drawer = HTMLCobwebDrawer(
+        attributes=[
+            "Left-D0", "Left-D1", "Left-D2",
+            "Right-D0", "Right-D1", "Right-D2",
+        ],
+        id_to_value=[],
+        value_to_id={},
+        attr_value_fn={i: _val_fn for i in range(6)},
+    )
+    output_path = os.path.join(
+        os.path.dirname(__file__), "output", "logprob_paths_tree"
+    )
+    try:
+        html_file, png_file = drawer.draw_tree(tree.root, output_path)
+        print(f"\nTree visualization saved to: {html_file}")
+    except Exception as exc:
+        # PNG generation via Playwright may fail if Chromium is not installed;
+        # the HTML file is still useful on its own.
+        html_file = output_path + ".html"
+        import json
+        d3_json = json.dumps(drawer._node_to_dict(tree.root))
+        html_str = drawer._build_html(d3_json)
+        os.makedirs(os.path.dirname(html_file), exist_ok=True)
+        with open(html_file, "w", encoding="utf-8") as f:
+            f.write(html_str)
+        print(f"\nTree visualization (HTML only) saved to: {html_file}")
+        print(f"  (PNG skipped: {exc})")
 
 
 if __name__ == "__main__":
