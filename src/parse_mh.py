@@ -447,12 +447,14 @@ def _score_along_path(
     # if tree_log_prob == 0:
     #     tree_log_prob = -1e9
 
+    basic_level_log_prob = node_path[-1].get_basic(100, 100).log_prob_instance(instance)
+
     score_data = {
         "raw_node_log_probs": str(raw_log_probs),
         "candidate_counts": str(path_counts),
         "normed_log_prob": cost,
         "best_log_prob_idx": best_lp_idx,
-        "cost": tree_log_prob,
+        "cost": basic_level_log_prob,
         "tree_log_prob": tree_log_prob,
         "root_log_prob": raw_log_probs[0],
         "leaf_log_prob": raw_log_probs[-1],
@@ -466,41 +468,6 @@ def _score_along_path(
         print("-" * 60)
 
     return score_data
-
-
-def _basic_level_node_info(node, id_to_value, max_vals=7):
-    """Build a JSON-serialisable dict describing a basic-level CobwebDiscreteNode."""
-    if node is None:
-        return None
-
-    def _lookup(idx):
-        """Resolve a vocab index to its string via *id_to_value* (a list)."""
-        try:
-            return str(id_to_value[idx])
-        except (IndexError, TypeError):
-            return str(idx)
-
-    info = {
-        "concept_hash": node.concept_hash(),
-        "count": int(node.count),
-        "depth": int(node.depth()),
-        "attrs": [],
-    }
-    for attr_id, val_dict in sorted(node.av_count.items()):
-        if attr_id < 0:
-            if attr_id == -1:
-                attr_name = "Content-Ref"
-            elif attr_id == -2:
-                attr_name = "Complexity"
-            else:
-                attr_name = f"Hidden({attr_id})"
-        else:
-            attr_name = _lookup(attr_id)
-        sorted_vals = sorted(val_dict.items(), key=lambda kv: -kv[1])[:max_vals]
-        vals = [{"key": _lookup(vid), "count": round(float(cnt), 4)}
-                for vid, cnt in sorted_vals]
-        info["attrs"].append({"attr": str(attr_name), "vals": vals})
-    return info
 
 
 # ---------------------------------------------------------------------------
@@ -1380,7 +1347,7 @@ class FiniteParseTree(object):
         context_score_data = _score_along_path(ctx_node_path, context_inst, self.ltm.context_hierarchy)
 
         # IMPORTANT STUFF HERE!!!
-        score = context_score_data["cost"] # + content_score_data["cost"] 
+        score = content_score_data["cost"]
 
         # Score each child's own context instance individually so the UI
         # can display per-chunk context scores alongside the merged score.

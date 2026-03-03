@@ -2,19 +2,49 @@
 
 Whereas before we hypothesized needing multiple hierarchies for multiple levels of granularity or to separate primitives and composites, we now rely on multiple hierarchies to properly separate *content* and *context*.
 
-## Current problems:
-
-*   For generation, we face the following problems:
-    *   How to choose where to start from???
-        *   We should be able to denote the "complexity" of a given instance in some way, and select a highly complex node to start from
-        *   We should also program both an autoregressive and diffusive way of generation
-            *   The autoregressive way starts with a word, creates a high-level token, then expands downwards, then creates another high-level token, etc etc.
-
 ## Methodology 2.0
 
-Distributional context has solved some problems but we still need a threshold??!?
+A whole host of new problems! I'm refactoring and appending problems below so that we can discuss them properly
 
-Long story short, there are Cobweb problems - or at the very least, I can't seem to figure out what the right scoring functions or instance representations are. Our methodology is sound, but there seems to be a lot of problems
+### Revising our scoring with both Content and Context
+
+From Methodology 1.0 and with some new stuff, our scoring should have the following characteristics:
+*   *Recognition* - whether an instance of data is recognized by our memory. 
+    *   Recognition should be over a gradient - we should be able to say that something is recognized more or less than something else
+    *   Recognition should be over generalizations - an unseen exemplar with a high-frequency prototype should be evaluated as recognized stronger than an exemplar we've seen twice
+    *   Potential formula: log p(x | c_basic) + log(count_basic / count_root) (of course, hinges on the basic-level node evaluating to true AND the quality of the hierarchy being strong)
+*   *Stability* - whether a chunk is built of two chunks that have been recognized prior over various occasions
+    *   Not sure how to implement this yet, immediately my head goes to a separate threshold (higher-level) - almost like tiers! So tier 1 allows the chunk to be built, and tier 2 allows the chunk to contribtue to higher-level chunks
+
+Things we don't need:
+*   *Fit* - I thought we needed this, but we mix context-information into the "recognition" categorize
+*   *Reusability* - I thought we needed this, but again, recognition guarantees that by the time we create a chunk, we've seen it enough times to evaluate that we'll *probably* reuse it in the future
+
+Generally, the two scores that we've cooked up are probably more than enough, but neither of them use the context. Still, it might be ok because context is stored in our content instances
+
+### A different data-structure??
+
+Cobweb is SO GOOD for this purpose because it does literally all the things we need it to do - but hypothetically speaking, what is a list of the things we need to do? If, for instance, we don't end up using Cobweb...
+
+Our data-structure must do the following:
+*   Must be incremental on some level - or, at the very least, should be online
+*   Must take in a discrete instance of some sort (I really like attribute-value representations)
+*   Must yield a score of "recognition" which takes into account both frequency and accuracy
+    *   As mentioned by the scoring data above, recognition should fulfill all those criteria (though the actual mechanism might be different)
+*   Must contain a basic level of some form (which adapts as the data store expands) (or at the very least, some generalization)
+
+### Order effects
+
+Building the wrong chunks first probably has problems - we should find some way to learn the best order in which chunks should be built
+
+This could also be a nod to the need for inside-outside parsing - we might need to monitor the capacity to build new chunks with each chunk we create (in the evaluation process)
+*   This doesn't exactly feel intuitive to me because it makes sense that we build chunks via a frequency-rule, and assuming we keep that frequency rule, we shouldn't ever need to evaluate a chunk's prospect UNLESS we start to think about optimality as more than just frequency (this would warrant inside-outside parsing)
+
+### Removing Primitives?
+
+One thing I've been thinking about thoroughly is putting primitives into a separate hierarchy, so that their representations don't affect the creation of chunks - however, there would once again arise a problem with nouns being paired with their relative clause more often than they were paired with the adjective
+
+Grammars may have something to do with this - honestly, I don't really care whether we find chunks to be strong or weak as long as we build chunks consistently (recognition score is key here though)
 
 ### Gathering distributional context
 
@@ -25,28 +55,14 @@ Long story short, there are Cobweb problems - or at the very least, I can't seem
 ### Refitting based on concepts
 
 *   This is pretty self-explanatory - we need to represent nodes in our parse tree in terms of context relative to what it represents
-*   An important note here is that order matters now! We should build concepts in terms of other concepts and reflect 
-
-### General brainstorm:
-*   Because hierarchy quality is TERRIBLE there are two things to do:
-    *   Either we choose to represent with something that's NOT path information (i.e. basic-level values + counts)
-    *   OR we fix the hierarchy quality
-*   The core of our problems is hierarchy quality - here is a number of empirical findings I'm discovering below
-    *   Harmonic weighting is not great - information-style bitwise weighting functions a lot better!!
-    *   There are branches of similar contents that never get categorized together in the context hierarchy unfortunately, and this largely relates to the representation problem
-    *   PERHAPS THE ANSWER IS SOME FORM OF MINI-BATCH + HEURISTIC KEEPA TRACKA OFA
-        *   YYAYAYAYAYAY THIS IS THE SOLUTION AND RECOGNITION IS THE SOLUTION
-*   NEW FINDINGS BELOW!!!
-    *   Accidentally performed a GRIDS-like methodology where we ALSO refit with concepts as context
-    *   There are two new and important findings here:
-        *   One is the distributional context setting, which is incredibly crucial
-        *   Another is the self-referential concept structure which is SUPER important (similar to what was found by the leaf and path variants in Chris's work with Peter)
-    *   We may need a separate buffer datastructure with distributions!!! So, we do not store a word in our taxonomy until it accumulates some counts in the context!!!
+*   An important note here is that order matters if we do this!! We should build concepts in terms of other concepts and reflect 
 
 ## Methodology 1.1
 
 *   Short Revision: what if categorization through a greedy, discretely chosen path is not enough to guarantee coherence in the long-term?? 
     *   Just see what we can extrapolate from multi-node contexts!!
+
+Also added a ton of features like empty weighting, different weighting of surrounding nodes, etc
 
 ## Methodology 1.0
 
@@ -68,7 +84,6 @@ Long story short, there are Cobweb problems - or at the very least, I can't seem
         *   This should do with the complexity data that we annotate each chunk instance with
     *   *Recognition* - whether an instance of data is recognized by our memory
         *   From the cobweb-psych experiments, log-likelihood with respect to the whole tree (multinode expansion) yields success here!
-        *   Only thing is I'm not sure whether 
     *   *Reusability* - whether we are building a chunk that we have the capability to reuse in the future
         *   This is important because we shouldn't build a ton of one-off chunks
         *   Most likely, this is a counts-focused heuristic, and will probably get better as we split into two hierarchies
@@ -209,7 +224,7 @@ Webster: (Primary Class - we're going to do all logic and parsing in here, and e
 
 *   Still a problem with generation because our pre-fit labels are not robust - this needs fixing before we commit to only using pre-fit labels. I have post-fit labels as a fix to this, but we'll need to address
 
-## **Bonus:** Parallels to Diffusion Models, BPE + Tokenization
+# **Bonus:** Parallels to Diffusion Models, BPE + Tokenization
 
 **TL;DR - we can use diffusion models and the diffusion process specifically to discover partonomies!**
 

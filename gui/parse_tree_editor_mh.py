@@ -28,13 +28,13 @@ else:
         context_length=CONTEXT_LENGTH,
         content_length=CONTENT_LENGTH,
         threshold="converge",
-        content_alpha=1e-6,
+        content_alpha=1e-4,
         context_alpha=1e-4,
         bow=False,
         chunk_context=False,
-        empty_weighting=True,
+        empty_weighting=False,
         weighting="binary",
-        categorization_mode='dfs' # can be dfs, bfs, or bfs_pmi
+        categorization_mode='dfs', # can be dfs, bfs, or bfs_pmi
     )
 
 NUM_LOAD = 0

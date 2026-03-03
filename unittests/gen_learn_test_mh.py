@@ -4,7 +4,7 @@ is completely functional using the two-hierarchy (content + context) framework
 defined in parse_mh.py / MULTIHIERARCHY.md.
 """
 
-from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1
+from util.cfg import generate, TEST_GRAMMAR2, TEST_CORPUS2
 from parse_mh import WEBSTER
 import shutil
 import os
@@ -18,38 +18,36 @@ if os.path.exists(OUT_DIR):
     shutil.rmtree(OUT_DIR)
     
 # Creating and printing toy sentences
-CONTEXT_LENGTH = 5
+CONTEXT_LENGTH = 4
 CONTENT_LENGTH = 10
 
 num_sentences = 300
 document = []
 
 for _ in range(num_sentences):
-    sentence = generate("S", TEST_GRAMMAR1)
+    sentence = generate("S", TEST_GRAMMAR2)
     document.append(sentence)
 
-THRESHOLD = -7
+THRESHOLD = "converge"
 
 # Setting up the multi-hierarchy parser (WEBSTER)
 webster = WEBSTER(
-    TEST_CORPUS1,
+    TEST_CORPUS2,
     context_length=CONTEXT_LENGTH,
     content_length=CONTENT_LENGTH,
     threshold=THRESHOLD,
-    content_alpha=1e-6,
+    content_alpha=1e-4,
     context_alpha=1e-4,
     bow=False,
     chunk_context=False,
-    empty_weighting=True,
+    empty_weighting=False,
     weighting="binary",
     categorization_mode='dfs', # can be dfs, bfs, or bfs_pmi
-    min_chunk_count=5,
-    freq_weight=1.0
 )
 
 train_size = 0.96
 
-PRIMITIVES_FIRST = 50
+PRIMITIVES_FIRST = 30
 
 train_documents = document[:int(len(document) * train_size)]
 test_documents = document[int(len(document) * train_size):]
@@ -81,7 +79,6 @@ for i, doc in enumerate(train_documents):
 SAVE_DIR = f"{OUT_DIR}/final_ltm_data"
 webster.save_state(SAVE_DIR)
 print(f"Saved Final LTM to \"{SAVE_DIR}\"!")
-webster.visualize_ltm(f"{OUT_DIR}/final_ltm", max_depth=3)
 
 # Visualize the test parse trees
 for i, test in enumerate(test_documents):
@@ -97,7 +94,7 @@ for i, test in enumerate(test_documents):
 
 # Creating fake sentences, through completely random choice, to see if they parse!
 fake_sentences = [
-    " ".join([random.choice(TEST_CORPUS1) for _ in range(random.randint(3, 8))])
+    " ".join([random.choice(TEST_CORPUS2) for _ in range(random.randint(3, 8))])
     for _ in range(10)
 ]
 fake_sentences.append("the dog the dog")
@@ -112,6 +109,8 @@ for i, fake_sentence in enumerate(fake_sentences):
     )
     parse_tree.visualize(f"{OUT_DIR}/fake_trees/fake_parse_tree{i}")
     print(f"Created fake parse tree for fake sentence, \"{fake_sentence}\"")
+
+webster.visualize_ltm(f"{OUT_DIR}/final_ltm", max_depth=3)
 
 # Generating complete sentences from scratch
 print("\n--- FROM-SCRATCH GENERATION ---")

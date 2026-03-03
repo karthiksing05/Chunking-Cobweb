@@ -1,0 +1,25 @@
+[2] original: a man chases a cat
+    masked:   a [mask] cat
+    removed: "man chases a" (3 tokens) at pos 1-3
+    completed: a man likes the cat
+
+[5] original: a woman runs a woman
+    masked:   a [mask] woman
+    removed: "woman runs a" (3 tokens) at pos 1-3
+    completed: a man woman
+
+[6] original: a cat sees a man
+    masked:   a [mask] a man
+    removed: "cat sees" (2 tokens) at pos 1-2
+    completed: a woman sees a man
+
+[7] original: a dog sees a woman
+    masked:   a [mask] woman
+    removed: "dog sees a" (3 tokens) at pos 1-3
+    completed: a man woman
+
+[8] original: the dog likes a man
+    masked:   the [mask] man
+    removed: "dog likes a" (3 tokens) at pos 1-3
+    completed: the man chases the man
+
