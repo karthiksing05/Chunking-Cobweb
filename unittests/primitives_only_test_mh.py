@@ -8,7 +8,7 @@ ONLY TESTS PRIMITIVES - currently used for sandboxing
 This is the best settings right now but still failing in disambiguation so distributional context coming in clutch!!
 """
 
-from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1
+from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1, TEST_GRAMMAR2, TEST_CORPUS2, POS_GRAMMAR1, POS_CORPUS1
 from parse_mh import WEBSTER
 import shutil
 import os
@@ -20,8 +20,8 @@ if os.path.exists(OUT_DIR):
     shutil.rmtree(OUT_DIR)
     
 # Creating and printing toy sentences
-CONTEXT_LENGTH = 5
-CONTENT_LENGTH = 10
+CONTEXT_LENGTH = 3
+CONTENT_LENGTH = 4
 
 num_sentences = 100
 document = []
@@ -30,7 +30,7 @@ for _ in range(num_sentences):
     sentence = generate("S", TEST_GRAMMAR1)
     document.append(sentence)
 
-THRESHOLD = 0
+THRESHOLD = 5
 
 # Setting up the multi-hierarchy parser (WEBSTER)
 webster = WEBSTER(
@@ -38,12 +38,13 @@ webster = WEBSTER(
     context_length=CONTEXT_LENGTH,
     content_length=CONTENT_LENGTH,
     threshold=THRESHOLD,
-    content_alpha=1e-4,
-    context_alpha=1e-4,
+    content_alpha=1e-1,
+    context_alpha=1,
     bow=False,
+    chunk_context=False,
     empty_weighting=False,
     weighting="binary",
-    categorization_mode='dfs' # can be dfs, bfs, or bfs_pmi
+    categorization_mode='dfs', # can be dfs, bfs, or bfs_pmi
 )
 
 # Iterate through training documents and parse them one at a time
@@ -68,6 +69,16 @@ SAVE_DIR = f"{OUT_DIR}/final_ltm_data"
 webster.save_state(SAVE_DIR)
 print(f"Saved Final LTM to \"{SAVE_DIR}\"!")
 webster.visualize_ltm(f"{OUT_DIR}/final_ltm", max_depth=3)
+
+# --- Basic-level nodes ---
+basic_nodes = webster.get_basic_level_nodes()
+print("\n=== Basic-Level Nodes ===")
+print("Content hierarchy:")
+for h, node, freq in sorted(basic_nodes["content"], key=lambda x: x[2], reverse=True):
+    print(f"  - {h}  count={node.count}  depth={node.depth()}  leaf_freq={freq}")
+print("Context hierarchy:")
+for h, node, freq in sorted(basic_nodes["context"], key=lambda x: x[2], reverse=True):
+    print(f"  - {h}  count={node.count}  depth={node.depth()}  leaf_freq={freq}")
 
 # --- Redistribution ---
 # print("\n=== Redistributing (10000 samples) ===")

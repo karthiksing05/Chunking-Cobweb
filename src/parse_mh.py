@@ -406,59 +406,49 @@ def _score_along_path(
     """
     Compute recognition statistics along a categorization path.
     Mirrors FiniteParseTree._score_function from parse.py.
-    Returns a dict of score metrics; the primary one is 'cost' (tree-wide log-prob).
+    Returns a dict of score metrics!
+
+    FROM NOTES WITH CHRIS - basic level **count** is the cost/score used for
+    thresholding.  A count of -1 means the basic-level node collapsed back to
+    the root (not enough evidence to form a real category), which should always
+    fail the threshold.  A positive count N means the basic-level node has been
+    reinforced N times; pass once N > threshold.
     """
     raw_log_probs = []
-    avg_log_probs = []
     path_counts = []
-    best_lp = -float("inf")
-    best_lp_idx = 0
 
-    for i, node in enumerate(node_path):
+    for node in node_path:
         lp = node.log_prob_instance(instance)
-        if math.isnan(lp) or lp == 0:
-            lp = -1e8
-
-        node_complexity = sum(
-            cnt for attr_dict in node.av_count.values() for cnt in attr_dict.values()
-        )
-        inst_complexity = sum(
-            cnt for attr_dict in instance.values() for cnt in attr_dict.values()
-        )
+        raw_log_probs.append(lp)
         path_counts.append(node.count)
 
-        avg_lp = lp / inst_complexity if inst_complexity else -1e8
+    tree_log_prob = tree.log_prob(instance, 200, False)
+    tree_class_log_prob = tree.log_prob_class_given_instance(instance, 200, False)
 
-        if lp > best_lp:
-            best_lp = lp
-            best_lp_idx = i
-
-        raw_log_probs.append(lp)
-        avg_log_probs.append(avg_lp)
-
-    # weighted cost (leaf-biased)
-    cost = 0.0
-    coef = 1.0
-    for lp in reversed(raw_log_probs):
-        cost += lp * coef
-        coef *= 0.75
-
-    tree_log_prob = tree.log_prob(instance, 100, False)
-    # if tree_log_prob == 0:
-    #     tree_log_prob = -1e9
-
-    basic_level_log_prob = node_path[-1].get_basic(100, 100).log_prob_instance(instance)
+    basic_level_node = node_path[-1].get_basic(200, 100, debug=True)
+    basic_level_log_prob = basic_level_node.log_prob_instance(instance)
+    basic_level_class_log_prob = basic_level_node.log_prob_class_given_instance(instance)
+    # if basic level node is root node immediately rule this out, we don't have enough evidence!!
+    basic_level_count = basic_level_node.count if basic_level_node.concept_hash() != node_path[0].concept_hash() else -1
 
     score_data = {
+        # raw data
         "raw_node_log_probs": str(raw_log_probs),
         "candidate_counts": str(path_counts),
-        "normed_log_prob": cost,
-        "best_log_prob_idx": best_lp_idx,
-        "cost": basic_level_log_prob,
+
+        # basic level stuff
+        "basic_level_count": basic_level_count,
+        "basic_level_log_prob": basic_level_log_prob,
+        "basic_level_class_log_prob": basic_level_class_log_prob,
+        "cost": basic_level_count,
+
+        # tree stuff
         "tree_log_prob": tree_log_prob,
+        "tree_class_log_prob": tree_class_log_prob,
+
+        # additional info
         "root_log_prob": raw_log_probs[0],
         "leaf_log_prob": raw_log_probs[-1],
-        "best_log_prob": best_lp,
     }
 
     if debug:
@@ -1142,7 +1132,7 @@ class FiniteParseTree(object):
 
     # ---- primitive layer ------------------------------------------------
 
-    def build_primitives(self, window: str, threshold=-7):
+    def build_primitives(self, window: str, threshold=0):
         """
         Tokenize *window* and create PrimitiveParseNode objects.
         Each primitive is categorized in the context hierarchy to obtain
@@ -1270,7 +1260,10 @@ class FiniteParseTree(object):
             if threshold == "converge":
                 node.stable = True
             else:
-                node.stable = score_data.get("cost", -1e8) > threshold
+                # cost is basic_level_count: -1 (root=no evidence) or a
+                # positive integer. Fallback -1 mirrors the "no evidence"
+                # sentinel so that an absent key never spuriously passes.
+                node.stable = score_data.get("cost", -1) > threshold
 
             node.set_parent(self.global_root_node)
             self.nodes.append(node)
@@ -1314,7 +1307,7 @@ class FiniteParseTree(object):
         Builds *both* content and context instances, categorizes each in its
         respective hierarchy, and returns scoring data.
 
-        Order matches add_parse_tree: context-first WITHOUT -1, then content.
+        THIS IS WHERE THE MAGIC HAPPENS!!
         """
         left_node = self._find_root_child_by_index(left_word_index)
         right_node = self._find_root_child_by_index(right_word_index)
@@ -2663,6 +2656,12 @@ class LongTermMemory(object):
         self._register_concept(self.content_hierarchy.root)
         self._register_concept(self.context_hierarchy.root)
 
+        # Track context-hierarchy concept depths for stale-path detection.
+        # Updated after every context-fitting pass in add_parse_tree so that
+        # any Cobweb MERGE / SPLIT / fringe-split that shifts a concept to a
+        # different depth level can be propagated into the content hierarchy.
+        self._ctx_concept_depths: dict = {}  # {concept_hash_str: depth_int}
+
         # drawer for content hierarchy visualization
         # Multi-attribute path encoding: one attr per depth level per side
         content_headers = (
@@ -2788,6 +2787,108 @@ class LongTermMemory(object):
 
         return leaf, rewrite_rules
 
+    # ---- context depth tracking & content-hierarchy depth-shift rewrites ---
+
+    def _get_context_hierarchy_depths(self) -> dict:
+        """
+        BFS through the context hierarchy and return a snapshot
+        ``{concept_hash_str: depth_int}`` for every live node.
+        Depth 0 is the root.
+        """
+        result: dict = {}
+        root = getattr(self.context_hierarchy, 'root', None)
+        if root is None:
+            return result
+        queue = [(root, 0)]
+        while queue:
+            node, d = queue.pop(0)
+            h = node.concept_hash()
+            result[h] = d
+            for child in node.children:
+                queue.append((child, d + 1))
+        return result
+
+    def _apply_context_depth_shifts(self, pre_depths: dict) -> None:
+        """
+        Compare *pre_depths* (snapshot taken before a round of context-hierarchy
+        ifit calls) with the hierarchy's current depths.  For every context
+        concept whose depth changed, rewrite its attribute position in every
+        node of the **content** hierarchy so that depth-indexed attributes
+        (Left-Depth0 … cpd-1, Right-Depth0 … cpd-1) remain accurate.
+
+        This handles all Cobweb restructuring operations:
+          * MERGE – two children become grandchildren (+1 depth each)
+          * SPLIT – grandchildren become children (−1 depth each)
+          * Fringe-split – the original leaf gains a new intermediate parent
+            (+1 depth)
+
+        Parameters
+        ----------
+        pre_depths : dict
+            ``{concept_hash_str: old_depth}`` snapshot captured *before* the
+            round of context ifit calls whose effects we want to propagate.
+        """
+        post_depths = self._get_context_hierarchy_depths()
+        # update the stored snapshot for the next sentence
+        self._ctx_concept_depths = post_depths
+
+        cpd = self.content_path_depth
+
+        # Build (vid, old_left_attr, new_left_attr) shift rules.
+        # We only care about depths 0…cpd-1 since those are the only
+        # attribute positions used by the content hierarchy.
+        shift_rules: list = []
+        for h, old_d in pre_depths.items():
+            new_d = post_depths.get(h)
+            if new_d is None or new_d == old_d:
+                continue
+            # Both depths must fall within the encoded range to matter.
+            if not (0 <= old_d < cpd or 0 <= new_d < cpd):
+                continue
+            concept_str = f"CONCEPT-{h}"
+            vid = self.value_to_id.get(concept_str)
+            if vid is None or vid == 0:
+                continue
+            shift_rules.append((vid, old_d, new_d))
+
+        if not shift_rules or self.content_hierarchy.root is None:
+            return
+
+        def _shift_av(av: dict) -> tuple:
+            """Apply shift_rules to one node's av_count dict in-place."""
+            changed = False
+            for vid, old_d, new_d in shift_rules:
+                # --- left side: attr old_d → new_d ----------------------
+                if 0 <= old_d < cpd and old_d in av and vid in av[old_d]:
+                    cnt = av[old_d].pop(vid)
+                    if not av[old_d]:
+                        av.pop(old_d)
+                    target = new_d if 0 <= new_d < cpd else old_d  # clamp
+                    av.setdefault(target, {})
+                    av[target][vid] = av[target].get(vid, 0) + cnt
+                    changed = True
+                # --- right side: attr (cpd + old_d) → (cpd + new_d) ----
+                r_old = cpd + old_d
+                r_new = cpd + new_d
+                if 0 <= old_d < cpd and r_old in av and vid in av[r_old]:
+                    cnt = av[r_old].pop(vid)
+                    if not av[r_old]:
+                        av.pop(r_old)
+                    r_target = (cpd + new_d) if 0 <= new_d < cpd else r_old  # clamp
+                    av.setdefault(r_target, {})
+                    av[r_target][vid] = av[r_target].get(vid, 0) + cnt
+                    changed = True
+            return av, changed
+
+        # BFS over the content hierarchy and patch every node.
+        to_visit = [self.content_hierarchy.root]
+        while to_visit:
+            curr = to_visit.pop(0)
+            new_av, changed = _shift_av(dict(curr.av_count))
+            if changed:
+                curr.set_av_count(new_av)
+            to_visit.extend(curr.children)
+
     def _apply_rewrite_rules(self, tree: CobwebDiscreteTree, rewrite_rules: list):
         """
         BFS through *tree* and replace split-deleted concept vocab IDs in
@@ -2892,6 +2993,12 @@ class LongTermMemory(object):
         if shuffle:
             random.shuffle(ctx_nodes)
 
+        # Snapshot context-hierarchy depths BEFORE this round of ifit calls so
+        # that any Cobweb restructuring (MERGE / SPLIT / fringe-split) that
+        # shifts an existing concept to a different depth can be detected and
+        # propagated into the content hierarchy afterwards.
+        _pre_ctx_depths = self._get_context_hierarchy_depths()
+
         for node in ctx_nodes:
             if _chunk_ctx:
                 # Build fresh instance using top-level chunk label_paths.
@@ -2917,6 +3024,12 @@ class LongTermMemory(object):
             # Propagate context splits to content hierarchy
             if rewrites:
                 self._apply_rewrite_rules(self.content_hierarchy, rewrites)
+
+        # Detect and propagate depth changes caused by any Cobweb MERGE, SPLIT,
+        # or fringe-split that occurred during the context fitting pass above.
+        # This keeps every depth-indexed content-hierarchy attribute consistent
+        # with the current context-hierarchy structure.
+        self._apply_context_depth_shifts(_pre_ctx_depths)
 
         if debug:
             print(f"  context instances fitted: {len(all_nodes)}")
@@ -3078,6 +3191,42 @@ class LongTermMemory(object):
     def visualize_context_hierarchy(self, out_base="context_hierarchy", max_depth=1e9):
         self.context_drawer.draw_tree(self.context_hierarchy.root, out_base, max_depth=max_depth)
 
+    # ---- basic-level node retrieval -------------------------------------
+
+    def get_basic_level_nodes(self, n_samples: int = 200, max_nodes: int = 100) -> dict:
+        """
+        Walk every leaf node in both hierarchies, call .get_basic() on each,
+        and return a deduplicated list of (hash, node, freq) tuples where
+        freq is the number of leaf nodes that claimed that node as their
+        basic-level node.
+
+        Returns
+        -------
+        {"content": [(hash, node, freq), ...], "context": [(hash, node, freq), ...]}
+        """
+        def _collect(root):
+            seen = {}   # hash -> node
+            freq = {}   # hash -> int count
+            stack = [root]
+            while stack:
+                curr = stack.pop()
+                if not curr.children:
+                    basic = curr.get_basic(n_samples, max_nodes, debug=True)
+                    h = basic.concept_hash()
+                    if h not in seen:
+                        seen[h] = basic
+                        freq[h] = 0
+                    freq[h] += 1
+                else:
+                    for child in curr.children:
+                        stack.append(child)
+            return [(h, seen[h], freq[h]) for h in seen]
+
+        return {
+            "content": _collect(self.content_hierarchy.root),
+            "context": _collect(self.context_hierarchy.root),
+        }
+
     # ---- save / load ----------------------------------------------------
 
     def save_state(self, dirpath: str) -> dict:
@@ -3177,7 +3326,7 @@ class WEBSTER(object):
     """
 
     def __init__(self, value_corpus: list, context_length: int = 3, content_length: int = 3, alpha: float = 1e-4,
-                 content_alpha: float = None, context_alpha: float = None, threshold=-5.0, bow: bool = False,
+                 content_alpha: float = None, context_alpha: float = None, threshold=5, bow: bool = False,
                  categorization_mode: str = 'dfs', weighting: str = 'binary', empty_weighting: bool = False,
                  chunk_context: bool = False):
         """
@@ -3199,8 +3348,17 @@ class WEBSTER(object):
         context_alpha : float | None
             Smoothing parameter for the context hierarchy. Falls back to
             *alpha* when ``None``.
-        threshold : float
-            Default score threshold for accepting chunk merges.
+        threshold : int | float
+            Minimum **basic-level count** required to accept a chunk merge
+            (or to mark a primitive as stable).  The score used is
+            ``basic_level_count``: ``-1`` when the basic-level node is the
+            tree root (not enough evidence), otherwise the positive integer
+            count of observations at that node.  A threshold of ``5`` means
+            a concept must have been reinforced at least 5 times before it
+            can trigger merging.  ``0`` accepts any node that has been seen
+            at least once.  Use ``"converge"`` to suppress thresholding
+            entirely (all primitives stable, all composites merged until one
+            remains).  Default ``5``.
         bow : bool
             If True, context instances use a bag-of-words representation:
             key 0 = before-context bag, key 1 = after-context bag (both
@@ -3263,6 +3421,10 @@ class WEBSTER(object):
 
     def get_long_term_memory(self) -> LongTermMemory:
         return self.ltm
+
+    def get_basic_level_nodes(self, n_samples: int = 200, max_nodes: int = 100) -> dict:
+        """Delegate to LongTermMemory.get_basic_level_nodes."""
+        return self.ltm.get_basic_level_nodes(n_samples=n_samples, max_nodes=max_nodes)
 
     # ---- primary parsing ------------------------------------------------
 
@@ -3336,23 +3498,6 @@ class WEBSTER(object):
             if debug:
                 print("-" * 100)
         return trees
-
-    # ---- chunk evaluation (called by external tools / GUI) --------------
-
-    def evaluate_chunk(self, content_instance: dict, context_instance: dict, debug=False) -> dict:
-        """
-        Given content and context instances for a candidate chunk, return
-        recognition scores from both hierarchies.
-        """
-        content_stats = self.ltm.get_content_instance_statistics(content_instance, debug=debug)
-        context_stats = self.ltm.get_context_instance_statistics(context_instance, debug=debug)
-
-        return {
-            "content_score": content_stats.get("cost", -1e8),
-            "context_score": context_stats.get("cost", -1e8),
-            "content_stats": content_stats,
-            "context_stats": context_stats,
-        }
 
     # ---- generation -----------------------------------------------------
 
@@ -3534,7 +3679,7 @@ class WEBSTER(object):
 
         def _basic_sample(cnt_node):
             """get_basic → sample a leaf from the basic-level subtree."""
-            basic = cnt_node.get_basic(100, 1000) # TODO REVISE THIS!!! n_nodes, n_samples
+            basic = cnt_node.get_basic(100, 1000, debug=True) # TODO REVISE THIS!!! n_nodes, n_samples
             # basic = cnt_node.get_best(cnt_node.av_count)
             # basic = cnt_node.tree.categorize(cnt_node.av_count).get_best(cnt_node.av_count)
             # basic = cnt_node

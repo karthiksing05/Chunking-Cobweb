@@ -18,17 +18,17 @@ if os.path.exists(OUT_DIR):
     shutil.rmtree(OUT_DIR)
     
 # Creating and printing toy sentences
-CONTEXT_LENGTH = 4
-CONTENT_LENGTH = 10
+CONTEXT_LENGTH = 3
+CONTENT_LENGTH = 4
 
-num_sentences = 300
+num_sentences = 100
 document = []
 
 for _ in range(num_sentences):
     sentence = generate("S", TEST_GRAMMAR2)
     document.append(sentence)
 
-THRESHOLD = "converge"
+THRESHOLD = 5
 
 # Setting up the multi-hierarchy parser (WEBSTER)
 webster = WEBSTER(
@@ -36,18 +36,18 @@ webster = WEBSTER(
     context_length=CONTEXT_LENGTH,
     content_length=CONTENT_LENGTH,
     threshold=THRESHOLD,
-    content_alpha=1e-4,
-    context_alpha=1e-4,
+    content_alpha=1e-3,
+    context_alpha=7.5e-1,
     bow=False,
     chunk_context=False,
-    empty_weighting=False,
+    empty_weighting=True,
     weighting="binary",
     categorization_mode='dfs', # can be dfs, bfs, or bfs_pmi
 )
 
-train_size = 0.96
+train_size = 0.9
 
-PRIMITIVES_FIRST = 30
+PRIMITIVES_FIRST = 15
 
 train_documents = document[:int(len(document) * train_size)]
 test_documents = document[int(len(document) * train_size):]

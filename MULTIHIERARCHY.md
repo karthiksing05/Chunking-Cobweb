@@ -2,9 +2,13 @@
 
 Whereas before we hypothesized needing multiple hierarchies for multiple levels of granularity or to separate primitives and composites, we now rely on multiple hierarchies to properly separate *content* and *context*.
 
+## Methodology 3.0!!
+
+The home stretch! Going to add some notes regarding next steps here, but literally the thing holding us back right now is the quality of the context-hierarchyk
+
 ## Methodology 2.0
 
-A whole host of new problems! I'm refactoring and appending problems below so that we can discuss them properly
+A whole host of new problems! I'm refactoring and appending problems below so that we can discuss them properly, but very very promising stuff!!
 
 ### FROM DISCUSSIONS WITH CHRIS!
 *   Unseen things are being seen with the log probabilities in bad ways!!! (***)
@@ -21,7 +25,7 @@ From Methodology 1.0 and with some new stuff, our scoring should have the follow
     *   A stronger way to do this is first filtering by basic level counts and then evaluating to see which is the most seen, and then filtering further by log probs
         *   **We should take all chunks whose basic level count is above threshold, and then find the best one by evaluating log-prob!!**
 *   *Stability* - whether a chunk is built of two chunks that have been recognized prior over various occasions
-    *   Not sure how to implement this yet, immediately my head goes to a separate threshold (higher-level) - almost like tiers! So tier 1 allows the chunk to be built, and tier 2 allows the chunk to contribtue to higher-level chunks (or recognition of candidate chunks vs. recognition of )
+    *   Not sure how to implement this yet, immediately my head goes to a separate threshold (higher-level) - almost like tiers! So tier 1 allows the chunk to be built, and tier 2 allows the chunk to contribtue to higher-level chunks (or recognition of candidate chunks vs. recognition of chunk stability)
 
 Things we don't need:
 *   *Fit* - I thought we needed this, but we mix context-information into the "recognition" categorize
@@ -35,12 +39,6 @@ Building the wrong chunks first probably has problems - we should find some way 
 
 This could also be a nod to the need for inside-outside parsing - we might need to monitor the capacity to build new chunks with each chunk we create (in the evaluation process)
 *   This doesn't exactly feel intuitive to me because it makes sense that we build chunks via a frequency-rule, and assuming we keep that frequency rule, we shouldn't ever need to evaluate a chunk's prospect UNLESS we start to think about optimality as more than just frequency (this would warrant inside-outside parsing)
-
-### Removing Primitives?
-
-One thing I've been thinking about thoroughly is putting primitives into a separate hierarchy, so that their representations don't affect the creation of chunks - however, there would once again arise a problem with nouns being paired with their relative clause more often than they were paired with the adjective
-
-Grammars may have something to do with this - honestly, I don't really care whether we find chunks to be strong or weak as long as we build chunks consistently (recognition score is key here though)
 
 ### Gathering distributional context
 
@@ -63,6 +61,12 @@ Our data-structure must do the following:
 *   Must yield a score of "recognition" which takes into account both frequency and accuracy
     *   As mentioned by the scoring data above, recognition should fulfill all those criteria (though the actual mechanism might be different)
 *   Must contain a basic level of some form (which adapts as the data store expands) (or at the very least, some generalization)
+
+### Removing Primitives?
+
+One thing I've been thinking about thoroughly is putting primitives into a separate hierarchy, so that their representations don't affect the creation of chunks - however, there would once again arise a problem with nouns being paired with their relative clause more often than they were paired with the adjective
+
+Grammars may have something to do with this - honestly, I don't really care whether we find chunks to be strong or weak as long as we build chunks consistently (recognition score is key here though)
 
 ## Methodology 1.1
 
