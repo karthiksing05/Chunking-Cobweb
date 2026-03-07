@@ -44,6 +44,7 @@ import uuid
 import os
 import json
 import asyncio
+from dataclasses import dataclass, field
 from playwright.async_api import async_playwright
 import re
 from cobweb.cobweb_discrete import CobwebDiscreteTree, CobwebDiscreteNode
@@ -402,6 +403,7 @@ def _score_along_path(
     instance: dict,
     tree: CobwebDiscreteTree,
     debug: bool = False,
+    eval_alpha: float = None,
 ) -> dict:
     """
     Compute recognition statistics along a categorization path.
@@ -425,7 +427,8 @@ def _score_along_path(
     tree_log_prob = tree.log_prob(instance, 200, False)
     tree_class_log_prob = tree.log_prob_class_given_instance(instance, 200, False)
 
-    basic_level_node = node_path[-1].get_basic(200, 100, debug=True)
+    _bl_eval_alpha = eval_alpha if eval_alpha is not None else -1.0
+    basic_level_node = node_path[-1].get_basic(200, 100, debug=True, eval_alpha=_bl_eval_alpha)
     basic_level_log_prob = basic_level_node.log_prob_instance(instance)
     basic_level_class_log_prob = basic_level_node.log_prob_class_given_instance(instance)
     # if basic level node is root node immediately rule this out, we don't have enough evidence!!
@@ -1132,7 +1135,7 @@ class FiniteParseTree(object):
 
     # ---- primitive layer ------------------------------------------------
 
-    def build_primitives(self, window: str, threshold=0):
+    def build_primitives(self, window: str, threshold=0, debug: bool = False):
         """
         Tokenize *window* and create PrimitiveParseNode objects.
         Each primitive is categorized in the context hierarchy to obtain
@@ -1254,7 +1257,8 @@ class FiniteParseTree(object):
             node.context_after = ca
 
             # score
-            score_data = _score_along_path(node_path, ctx_inst, self.ltm.context_hierarchy)
+            score_data = _score_along_path(node_path, ctx_inst, self.ltm.context_hierarchy,
+                                            eval_alpha=getattr(self.ltm, 'context_bl_alpha', None))
             node.score_data = score_data
 
             if threshold == "converge":
@@ -1336,8 +1340,10 @@ class FiniteParseTree(object):
         cnt_leaf, cnt_path, cnt_node_path, cnt_depth_dists = _categorize(
             content_inst, self.ltm.content_hierarchy, mode=_cat_mode)
 
-        content_score_data = _score_along_path(cnt_node_path, content_inst, self.ltm.content_hierarchy)
-        context_score_data = _score_along_path(ctx_node_path, context_inst, self.ltm.context_hierarchy)
+        content_score_data = _score_along_path(cnt_node_path, content_inst, self.ltm.content_hierarchy,
+                                               eval_alpha=getattr(self.ltm, 'content_bl_alpha', None))
+        context_score_data = _score_along_path(ctx_node_path, context_inst, self.ltm.context_hierarchy,
+                                               eval_alpha=getattr(self.ltm, 'context_bl_alpha', None))
 
         # IMPORTANT STUFF HERE!!!
         score = content_score_data["cost"]
@@ -1351,7 +1357,8 @@ class FiniteParseTree(object):
             if not ctx:
                 return {}
             _, _, _path, _ = _categorize(ctx, self.ltm.context_hierarchy, mode=_cat_mode)
-            return _score_along_path(_path, ctx, self.ltm.context_hierarchy)
+            return _score_along_path(_path, ctx, self.ltm.context_hierarchy,
+                                     eval_alpha=getattr(self.ltm, 'context_bl_alpha', None))
 
         left_ctx_score_data  = _score_child_ctx(left_node)
         right_ctx_score_data = _score_child_ctx(right_node)
@@ -1564,7 +1571,7 @@ class FiniteParseTree(object):
         Fully automatic parse: build primitives then greedily merge best pairs.
         """
         self.window = window
-        self.build_primitives(window, threshold=end_behavior)
+        self.build_primitives(window, threshold=end_behavior, debug=debug)
 
         while True:
             pairs = self.get_parentless_pairs()
@@ -2625,15 +2632,21 @@ class LongTermMemory(object):
     """
 
     def __init__(self, value_corpus: list, context_length: int = 3, content_path_depth: int = 3, alpha: float = 1e-4,
-                 content_alpha: float = None, context_alpha: float = None, bow: bool = False,
+                 content_alpha: float = None, context_alpha: float = None,
+                 content_bl_alpha: float = None, context_bl_alpha: float = None,
+                 bow: bool = False,
                  categorization_mode: str = 'dfs', weighting: str = 'binary', empty_weighting: bool = False,
-                 chunk_context: bool = False):
+                 chunk_context: bool = False,
+                 depth_max_content: int = 1000, depth_max_context: int = 1000,
+                 branch_max_content: int = 1000, branch_max_context: int = 1000):
         _content_alpha = content_alpha if content_alpha is not None else alpha
         _context_alpha = context_alpha if context_alpha is not None else alpha
         self.content_alpha = _content_alpha
         self.context_alpha = _context_alpha
-        self.content_hierarchy = CobwebDiscreteTree(_content_alpha)
-        self.context_hierarchy = CobwebDiscreteTree(_context_alpha)
+        self.content_bl_alpha = content_bl_alpha
+        self.context_bl_alpha = context_bl_alpha
+        self.content_hierarchy = CobwebDiscreteTree(_content_alpha, depth_max=depth_max_content, branch_max=branch_max_content)
+        self.context_hierarchy = CobwebDiscreteTree(_context_alpha, depth_max=depth_max_context, branch_max=branch_max_context)
 
         # vocabulary: index 0 is always EMPTYNULL
         self.id_to_value: List[str] = ["EMPTYNULL"]
@@ -2755,7 +2768,8 @@ class LongTermMemory(object):
         _cat_mode = getattr(self, 'categorization_mode', 'dfs')
         leaf, path, node_path, _ = _categorize(
             content_inst, self.content_hierarchy, mode=_cat_mode)
-        return _score_along_path(node_path, content_inst, self.content_hierarchy, debug=debug)
+        return _score_along_path(node_path, content_inst, self.content_hierarchy, debug=debug,
+                                 eval_alpha=self.content_bl_alpha)
 
     def get_context_instance_statistics(self, context_inst: dict, debug=False) -> dict:
         """
@@ -2764,7 +2778,8 @@ class LongTermMemory(object):
         _cat_mode = getattr(self, 'categorization_mode', 'dfs')
         leaf, path, node_path, _ = _categorize(
             context_inst, self.context_hierarchy, mode=_cat_mode)
-        return _score_along_path(node_path, context_inst, self.context_hierarchy, debug=debug)
+        return _score_along_path(node_path, context_inst, self.context_hierarchy, debug=debug,
+                                 eval_alpha=self.context_bl_alpha)
 
     # ---- learning (ifit + vocab management) -----------------------------
 
@@ -2928,9 +2943,25 @@ class LongTermMemory(object):
                 curr.set_av_count(new_av)
                 to_visit.extend(curr.children)
 
-    def add_parse_tree(self, parse_tree: 'FiniteParseTree', debug: bool = False, shuffle: bool = True):
+    def add_parse_tree(self, parse_tree: 'FiniteParseTree', debug: bool = False, shuffle: bool = True,
+                         obs_buffer: 'ObservationBuffer' = None):
         """
         Learn from a completed parse tree.
+
+        Parameters
+        ----------
+        obs_buffer : ObservationBuffer | None
+            When provided, context-hierarchy learning for this sentence is
+            delegated to the buffer.  Each node's context instance is passed
+            to ``obs_buffer.observe()`` instead of being fitted directly via
+            ``ifit``.  The buffer decides when to call ``ifit`` (every
+            ``flush_every`` observations per word/concept type).  The
+            ``ctx_leaf_map`` is still populated via read-only categorization
+            so that label computation and content-hierarchy fitting proceed
+            normally.  Call ``obs_buffer.flush_all()`` at the end of the
+            training corpus to flush remaining buffered types.
+            When ``None`` (default), the original per-token ifit behaviour
+            is used.
 
         Order of operations (context-first per MULTIHIERARCHY.md):
           1. **Fit context instances** (WITHOUT -1 content-ref).
@@ -3018,12 +3049,27 @@ class LongTermMemory(object):
                 # registered in tree.attr_vals before any step-4 increment_attr_value.
                 if isinstance(node, CompositeParseNode):
                     ctx_inst.pop(_cref_attr, None)
-            leaf, rewrites = self._ifit_and_update_vocab(
-                ctx_inst, self.context_hierarchy, debug=debug)
-            ctx_leaf_map[id(node)] = leaf
-            # Propagate context splits to content hierarchy
-            if rewrites:
-                self._apply_rewrite_rules(self.content_hierarchy, rewrites)
+            if obs_buffer is not None:
+                # ObservationBuffer mode: accumulate observation for this word/concept
+                # type; the buffer calls ifit internally after flush_every observations.
+                if isinstance(node, PrimitiveParseNode):
+                    type_id = node.word_id
+                else:
+                    type_id = node.concept_label if node.concept_label is not None else 0
+                obs_buffer.observe(type_id, ctx_inst)
+                # Populate ctx_leaf_map via read-only categorization so that
+                # label computation (Step 2) and content fitting (Step 3) work
+                # as normal even before this word type has been flushed.
+                _cat_mode_local = getattr(self, 'categorization_mode', 'dfs')
+                leaf, _, _, _ = _categorize(ctx_inst, self.context_hierarchy, mode=_cat_mode_local)
+                ctx_leaf_map[id(node)] = leaf
+            else:
+                leaf, rewrites = self._ifit_and_update_vocab(
+                    ctx_inst, self.context_hierarchy, debug=debug)
+                ctx_leaf_map[id(node)] = leaf
+                # Propagate context splits to content hierarchy
+                if rewrites:
+                    self._apply_rewrite_rules(self.content_hierarchy, rewrites)
 
         # Detect and propagate depth changes caused by any Cobweb MERGE, SPLIT,
         # or fringe-split that occurred during the context fitting pass above.
@@ -3032,7 +3078,8 @@ class LongTermMemory(object):
         self._apply_context_depth_shifts(_pre_ctx_depths)
 
         if debug:
-            print(f"  context instances fitted: {len(all_nodes)}")
+            mode_label = "buffered" if obs_buffer is not None else "fitted"
+            print(f"  context instances {mode_label}: {len(all_nodes)}")
 
         # -- Step 2: compute labels from fresh context hierarchy ----------
         _cat_mode = getattr(self, 'categorization_mode', 'dfs')
@@ -3204,14 +3251,16 @@ class LongTermMemory(object):
         -------
         {"content": [(hash, node, freq), ...], "context": [(hash, node, freq), ...]}
         """
-        def _collect(root):
+        def _collect(root, bl_alpha=None):
             seen = {}   # hash -> node
             freq = {}   # hash -> int count
             stack = [root]
             while stack:
                 curr = stack.pop()
                 if not curr.children:
-                    basic = curr.get_basic(n_samples, max_nodes, debug=True)
+                    _bl_eval_alpha = bl_alpha if bl_alpha is not None else -1.0
+                    basic = curr.get_basic(n_samples, max_nodes, debug=False,
+                                          eval_alpha=_bl_eval_alpha)
                     h = basic.concept_hash()
                     if h not in seen:
                         seen[h] = basic
@@ -3223,8 +3272,10 @@ class LongTermMemory(object):
             return [(h, seen[h], freq[h]) for h in seen]
 
         return {
-            "content": _collect(self.content_hierarchy.root),
-            "context": _collect(self.context_hierarchy.root),
+            "content": _collect(self.content_hierarchy.root,
+                                bl_alpha=getattr(self, 'content_bl_alpha', None)),
+            "context": _collect(self.context_hierarchy.root,
+                                bl_alpha=getattr(self, 'context_bl_alpha', None)),
         }
 
     # ---- save / load ----------------------------------------------------
@@ -3312,6 +3363,133 @@ class LongTermMemory(object):
 
 
 # ---------------------------------------------------------------------------
+# ObservationBuffer  (context-hierarchy batch-learning helper)
+# ---------------------------------------------------------------------------
+
+@dataclass
+class ObservationBuffer:
+    """Accumulates distributional context observations per word/concept type
+    and periodically flushes them into the context hierarchy as Cobweb
+    instances.
+
+    Motivation
+    ----------
+    Adding one context instance per token per sentence is sparse and noisy.
+    Instead, this class batches observations for each word type and only
+    calls ``ifit`` after the word has been observed ``flush_every`` times.
+    Each flushed instance is the accumulated union of context words seen
+    across those observations, giving Cobweb a richer, more stable
+    distributional signal.
+
+    Representation
+    --------------
+    * **Attribute** = *neighbor word ID* (not slot position).  Two words that
+      share any context word therefore share an attribute, giving guaranteed
+      feature overlap for same-POS words regardless of where those context
+      words appear.
+    * **Value** = ``1`` (presence / boolean True).  The value space stays
+      binary so that the only variation across instances is *which* context
+      words are present.
+
+    Usage
+    -----
+    Created via ``WEBSTER.create_observation_buffer(flush_every, debug)``.
+    Observations are added automatically during ``parse_sentence(...,
+    learning=True)`` when the buffer is active.  Call ``flush_all()`` at
+    the end of training to flush any remaining word types that have not yet
+    reached ``flush_every``.
+    """
+
+    ltm: 'LongTermMemory'
+    flush_every: int = 5
+    debug: bool = False
+
+    # Internal accumulation state — one dict per word/concept type.
+    # _buffers[type_id] = {neighbor_word_id: 1, ...}  (union of context words)
+    # _counts[type_id]  = number of observations accumulated so far
+    _buffers: Dict[int, Dict[int, int]] = field(default_factory=dict)
+    _counts: Dict[int, int] = field(default_factory=dict)
+
+    # ------------------------------------------------------------------
+    def _extract_presence(self, ctx_inst: dict) -> Dict[int, int]:
+        """Convert a slot-keyed context instance to a presence-keyed dict.
+
+        Slot-keyed (normal mode):  ``{slot_idx: word_id, ...}``
+        BOW mode:                  ``{0: {wid: count, ...}, 1: {wid: count, ...}}``
+
+        Skips the complexity attribute (key ``-2``) and the content-ref
+        attribute (``ltm.content_ref_attr``).
+
+        Returns ``{neighbor_word_id: 1, ...}``.
+        """
+        skip = {-2, self.ltm.content_ref_attr}
+        presence: Dict[int, int] = {}
+        for attr, val in ctx_inst.items():
+            if attr in skip:
+                continue
+            if isinstance(val, dict):
+                # BOW representation — val is {word_id: weight}
+                for wid in val:
+                    if wid and wid != 0:
+                        presence[wid] = 1
+            elif isinstance(val, int) and val and val != 0:
+                presence[val] = 1
+        return presence
+
+    # ------------------------------------------------------------------
+    def observe(self, type_id: int, ctx_inst: dict) -> None:
+        """Record one context observation for *type_id* (word or concept ID).
+
+        Parameters
+        ----------
+        type_id : int
+            Vocabulary ID of the target word/concept type whose context is
+            being accumulated.
+        ctx_inst : dict
+            The raw context instance for this occurrence (slot-keyed or
+            BOW-keyed dict as produced by ``get_context_instance()``).
+        """
+        presence = self._extract_presence(ctx_inst)
+        buf = self._buffers.setdefault(type_id, {})
+        for neighbor_id in presence:
+            buf[neighbor_id] = 1  # union — presence is binary
+
+        self._counts[type_id] = self._counts.get(type_id, 0) + 1
+        if self._counts[type_id] >= self.flush_every:
+            self._flush_type(type_id)
+
+    # ------------------------------------------------------------------
+    def _flush_type(self, type_id: int) -> None:
+        """Flush the accumulated buffer for *type_id* into the context hierarchy."""
+        buf = self._buffers.pop(type_id, None)
+        self._counts[type_id] = 0
+        if not buf:
+            return
+        if self.debug:
+            name = self.ltm.id_to_value[type_id] if 0 <= type_id < len(self.ltm.id_to_value) else str(type_id)
+            print(f"[ObservationBuffer] flushing '{name}' with {len(buf)} neighbour attrs")
+        _, rewrites = self.ltm._ifit_and_update_vocab(buf, self.ltm.context_hierarchy, debug=self.debug)
+        # Propagate any context-hierarchy splits into the content hierarchy so
+        # that references to deleted concepts are redirected to their parents.
+        if rewrites:
+            self.ltm._apply_rewrite_rules(self.ltm.content_hierarchy, rewrites)
+
+    # ------------------------------------------------------------------
+    def flush_all(self) -> None:
+        """Flush all remaining word/concept types regardless of count.
+
+        Call this at the end of the training corpus to ensure every
+        word type that has not yet reached ``flush_every`` still
+        contributes its accumulated context to the hierarchy.
+        """
+        if self.debug:
+            pending = [t for t, c in self._counts.items() if c > 0]
+            print(f"[ObservationBuffer] flush_all(): {len(pending)} type(s) remaining")
+        for type_id in list(self._buffers.keys()):
+            self._flush_type(type_id)
+
+
+# ---------------------------------------------------------------------------
 # WEBSTER  (primary orchestrator)
 # ---------------------------------------------------------------------------
 
@@ -3326,9 +3504,14 @@ class WEBSTER(object):
     """
 
     def __init__(self, value_corpus: list, context_length: int = 3, content_length: int = 3, alpha: float = 1e-4,
-                 content_alpha: float = None, context_alpha: float = None, threshold=5, bow: bool = False,
+                 content_alpha: float = None, context_alpha: float = None,
+                 content_bl_alpha: float = None, context_bl_alpha: float = None,
+                 threshold=5, bow: bool = False,
                  categorization_mode: str = 'dfs', weighting: str = 'binary', empty_weighting: bool = False,
-                 chunk_context: bool = False):
+                 chunk_context: bool = False,
+                 use_observation_buffer: bool = False, obs_buffer_flush_every: int = 5,
+                 depth_max_content: int = 1000, depth_max_context: int = 1000,
+                 branch_max_content: int = 1000, branch_max_context: int = 1000):
         """
         Parameters
         ----------
@@ -3348,6 +3531,13 @@ class WEBSTER(object):
         context_alpha : float | None
             Smoothing parameter for the context hierarchy. Falls back to
             *alpha* when ``None``.
+        content_bl_alpha : float | None
+            Smoothing (eval_alpha) used **only during EPMI evaluation** in
+            ``get_basic`` calls on the content hierarchy.  Decouples the
+            basic-level detector's sharpness from the tree's structural
+            alpha.  Falls back to the tree's own alpha when ``None``.
+        context_bl_alpha : float | None
+            Same as *content_bl_alpha* but for the context hierarchy.
         threshold : int | float
             Minimum **basic-level count** required to accept a chunk merge
             (or to mark a primitive as stable).  The score used is
@@ -3389,16 +3579,46 @@ class WEBSTER(object):
             non-overlapping parse layer is used — each top-level chunk
             occupies exactly one context slot regardless of how many words
             it spans.  Default ``False``.
+        use_observation_buffer : bool
+            If True, context-hierarchy learning is delegated to an
+            :class:`ObservationBuffer` that batches observations per word
+            type and only calls ``ifit`` after ``obs_buffer_flush_every``
+            occurrences of each type have been seen.  This produces richer,
+            more stable distributional signals by accumulating co-occurrence
+            evidence before it enters Cobweb.  The buffer persists across
+            all ``parse_sentence`` calls and must be explicitly flushed at
+            end of training via :meth:`flush_observation_buffer`.
+            Default ``False``.
+        obs_buffer_flush_every : int
+            Number of token observations per word/concept type required
+            before the accumulated context is flushed into the context
+            hierarchy via ``ifit``.  Only meaningful when
+            ``use_observation_buffer=True``.  Default ``5``.
+        depth_max_content : int
+            Maximum depth the content Cobweb tree is allowed to grow.
+            Default ``1000`` (effectively unlimited).
+        depth_max_context : int
+            Maximum depth the context Cobweb tree is allowed to grow.
+            Default ``1000`` (effectively unlimited).
+        branch_max_content : int
+            Maximum number of children per node in the content Cobweb tree.
+            Default ``1000`` (effectively unlimited).
+        branch_max_context : int
+            Maximum number of children per node in the context Cobweb tree.
+            Default ``1000`` (effectively unlimited).
         """
         self.ltm = LongTermMemory(
             value_corpus, context_length=context_length,
             content_path_depth=content_length, alpha=alpha,
             content_alpha=content_alpha, context_alpha=context_alpha,
+            content_bl_alpha=content_bl_alpha, context_bl_alpha=context_bl_alpha,
             bow=bow,
             categorization_mode=categorization_mode,
             weighting=weighting,
             empty_weighting=empty_weighting,
             chunk_context=chunk_context,
+            depth_max_content=depth_max_content, depth_max_context=depth_max_context,
+            branch_max_content=branch_max_content, branch_max_context=branch_max_context,
         )
         self.context_length = context_length
         self.content_length = content_length
@@ -3408,6 +3628,16 @@ class WEBSTER(object):
         self.weighting = weighting
         self.empty_weighting = empty_weighting
         self.chunk_context = chunk_context
+        self.content_bl_alpha = content_bl_alpha
+        self.context_bl_alpha = context_bl_alpha
+        self.use_observation_buffer = use_observation_buffer
+        self.obs_buffer_flush_every = obs_buffer_flush_every
+        # Lazily-created ObservationBuffer; call create_observation_buffer() or
+        # set use_observation_buffer=True to activate automatically.
+        self._obs_buffer: Optional[ObservationBuffer] = (
+            ObservationBuffer(ltm=self.ltm, flush_every=obs_buffer_flush_every)
+            if use_observation_buffer else None
+        )
 
     # ---- accessors ------------------------------------------------------
 
@@ -3425,6 +3655,59 @@ class WEBSTER(object):
     def get_basic_level_nodes(self, n_samples: int = 200, max_nodes: int = 100) -> dict:
         """Delegate to LongTermMemory.get_basic_level_nodes."""
         return self.ltm.get_basic_level_nodes(n_samples=n_samples, max_nodes=max_nodes)
+
+    # ---- ObservationBuffer factory & management -------------------------
+
+    def create_observation_buffer(
+        self,
+        flush_every: int = 5,
+        debug: bool = False,
+    ) -> 'ObservationBuffer':
+        """Create (or replace) the bound :class:`ObservationBuffer` for this
+        instance and return it.
+
+        After calling this method, every subsequent ``parse_sentence(...,
+        learning=True)`` call will route context-hierarchy observations
+        through the buffer rather than fitting them one-by-one.
+
+        Parameters
+        ----------
+        flush_every : int
+            Number of token observations per word/concept type that must
+            accumulate before the merged context instance is submitted to
+            Cobweb via ``ifit``.  Higher values give richer, more stable
+            distributional signals at the cost of delaying integration.
+            Default ``5``.
+        debug : bool
+            When True, the buffer prints a line each time it flushes a type.
+
+        Returns
+        -------
+        ObservationBuffer
+            The newly created buffer (also stored as ``self._obs_buffer``).
+        """
+        self._obs_buffer = ObservationBuffer(
+            ltm=self.ltm,
+            flush_every=flush_every,
+            debug=debug,
+        )
+        self.use_observation_buffer = True
+        self.obs_buffer_flush_every = flush_every
+        return self._obs_buffer
+
+    def flush_observation_buffer(self) -> None:
+        """Flush all remaining buffered observations into the context hierarchy.
+
+        Call this at the end of the training corpus when
+        ``use_observation_buffer=True`` (or after
+        :meth:`create_observation_buffer`) to ensure every word/concept type
+        whose accumulated count has not yet reached ``obs_buffer_flush_every``
+        still contributes its observed context to the hierarchy.
+
+        No-op when no observation buffer is active.
+        """
+        if self._obs_buffer is not None:
+            self._obs_buffer.flush_all()
 
     # ---- primary parsing ------------------------------------------------
 
@@ -3469,7 +3752,10 @@ class WEBSTER(object):
         parse_tree.build(sentence, end_behavior=threshold, debug=debug)
 
         if learning:
-            self.ltm.add_parse_tree(parse_tree, shuffle=True, debug=debug)
+            self.ltm.add_parse_tree(
+                parse_tree, shuffle=True, debug=debug,
+                obs_buffer=self._obs_buffer,
+            )
 
         return parse_tree
 
@@ -3679,7 +3965,8 @@ class WEBSTER(object):
 
         def _basic_sample(cnt_node):
             """get_basic → sample a leaf from the basic-level subtree."""
-            basic = cnt_node.get_basic(100, 1000, debug=True) # TODO REVISE THIS!!! n_nodes, n_samples
+            _bl_eval_alpha = self.content_bl_alpha if self.content_bl_alpha is not None else -1.0
+            basic = cnt_node.get_basic(100, 1000, debug=True, eval_alpha=_bl_eval_alpha) # TODO REVISE THIS!!! n_nodes, n_samples
             # basic = cnt_node.get_best(cnt_node.av_count)
             # basic = cnt_node.tree.categorize(cnt_node.av_count).get_best(cnt_node.av_count)
             # basic = cnt_node

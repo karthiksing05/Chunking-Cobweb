@@ -4,7 +4,28 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
 
 ## Methodology 3.0!!
 
-The home stretch! Going to add some notes regarding next steps here, but literally the thing holding us back right now is the quality of the context-hierarchyk
+The home stretch! Going to add some notes regarding next steps here, but literally the thing holding us back right now is the quality of the context-hierarchy. Long-story short, we need to improve performance of the two hierarchies and then we're set!
+
+WE DID IT!!! Kind of - still definitely need to mess around with truncating hierarchies and ALPHA TUNING IS BIGGEST PROBLEMMMM
+
+Important general realizations below:
+*   An important note here is that the basic level should only determine a passage - after that, we use LOG PROB OF THE TREE IN CONTENT HIERARCHY TO GENERATE BEST MATCHES
+*   Having sufficiently low alpha helps hierarchy quality immensely, but reduces the basic level threshold. What we really need to do is figure out the right settings for alpha and get_basic such that we derive a sufficient basic level while having a hierarchy that makes sense!!
+    *   Need to design a test that shows poor alphas at high values and whatever (lowkey idk but we need to figure this out!!!)
+    *   One thing I've added is a primitive threshold for the context hierarchy - maybe we can extend this to the two-part 
+    *   *Trying a basic level alpha that is different from the tree alpha!!! So far, so good!!!*
+*   Redistribution does a really solid job of making the hierarchies better - which is extremely interesting
+    *   Redistribute simply just can't be updated because it's terrible for paths - this would be significantly better if labels were just represented by basic-level av-counts but unfortunately this is not the case!
+
+
+Some new notes for generation:
+*   We should do some probability-based structure inference for what doesn't exist, and then be able to fill in that structure through probability - 
+*   We need to find a fix for if we truncate the hierarchy where we still store a joint distribution at the leaves!!
+
+Still may need the following things to improve the hierarchy - currently, reducing alpha sufficiently gets that done but it has harmful effects on the basic level node!
+*   Observation buffer is HUGE - need to include variance of response here so that we know which to add?
+*   Truncating hierarchy could be optimal - I like this just generally in terms of keeping the basic-level strongly concentrated at the root as an option
+*   Adjusting alphas + representations is pretty optimal
 
 ## Methodology 2.0
 

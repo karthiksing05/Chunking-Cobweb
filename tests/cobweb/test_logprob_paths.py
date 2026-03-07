@@ -189,10 +189,17 @@ def print_scores(label, tree, instance):
     leaf_lp    = path[-1].log_prob_instance(instance)
 
     # basic-level via get_basic (expected-PMI walk from leaf toward root)
-    basic_node = path[-1].get_basic(1000, 100)
+    # eval_alpha=1e-1 decouples EPMI smoothing from the tree's structural alpha (1e-3)
+    basic_node = path[-1].get_basic(1000, 100, True, eval_alpha=1)
     basic_lp   = basic_node.log_prob_instance(instance)
     basic_class_lp   = basic_node.log_prob_class_given_instance(instance)
     basic_depth = basic_node.depth()
+
+    # best node via get_best (peak log_prob_instance along root→leaf path)
+    best_node  = path[-1].get_best(instance)
+    best_lp    = best_node.log_prob_instance(instance)
+    best_class_lp = best_node.log_prob_class_given_instance(instance)
+    best_depth = best_node.depth()
 
     print(f"\n{'='*60}")
     print(f"  Query: {label}")
@@ -205,17 +212,24 @@ def print_scores(label, tree, instance):
     print(f"         leaf log-prob : {leaf_lp:.6f}  (count={path[-1].count})")
     print(f"        basic log-prob : {basic_lp:.6f}  (depth={basic_depth}, count={basic_node.count})")
     print(f"  basic-class log-prob : {basic_class_lp:.6f}")
+    print(f"         best log-prob : {best_lp:.6f}  (depth={best_depth}, count={best_node.count})")
+    print(f"   best-class log-prob : {best_class_lp:.6f}")
 
     print(f"\n  Full path ({len(path)} nodes):")
     for i, n in enumerate(path):
         lp = n.log_prob_instance(instance)
-        marker = " ← basic-level" if n is basic_node else ""
+        markers = []
+        if n is basic_node:
+            markers.append("basic-level")
+        if n is best_node:
+            markers.append("best")
+        marker = (" ← " + ", ".join(markers)) if markers else ""
         print(f"    [{i}] depth={i}  count={n.count:5.0f}  lp={lp:.6f}{marker}")
 
 
 # ── main test ─────────────────────────────────────────────────────────────────
 def test_path_logprobs():
-    tree = CobwebDiscreteTree(alpha=5e-1, weight_attr=False)
+    tree = CobwebDiscreteTree(alpha=1e-3, weight_attr=True)
 
     random.shuffle(TRAINING)
     for item in TRAINING:

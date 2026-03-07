@@ -12,7 +12,7 @@ import random
 
 OUT_DIR = "unittests/gen_learn_test_mh"
 
-VIZ_INTERMEDIATES = False
+VIZ_INTERMEDIATES = True
 
 if os.path.exists(OUT_DIR):
     shutil.rmtree(OUT_DIR)
@@ -21,15 +21,16 @@ if os.path.exists(OUT_DIR):
 CONTEXT_LENGTH = 3
 CONTENT_LENGTH = 4
 
-num_sentences = 100
+num_sentences = 200
 document = []
 
 for _ in range(num_sentences):
     sentence = generate("S", TEST_GRAMMAR2)
     document.append(sentence)
 
-THRESHOLD = 5
+THRESHOLD = 10
 
+# Setting up the multi-hierarchy parser (WEBSTER)
 # Setting up the multi-hierarchy parser (WEBSTER)
 webster = WEBSTER(
     TEST_CORPUS2,
@@ -37,30 +38,36 @@ webster = WEBSTER(
     content_length=CONTENT_LENGTH,
     threshold=THRESHOLD,
     content_alpha=1e-3,
-    context_alpha=7.5e-1,
+    context_alpha=1e-3,
+    content_bl_alpha=1e-1,
+    context_bl_alpha=1e-1,
     bow=False,
     chunk_context=False,
-    empty_weighting=True,
+    empty_weighting=False,
     weighting="binary",
     categorization_mode='dfs', # can be dfs, bfs, or bfs_pmi
+    depth_max_content=1000,
+    depth_max_context=1000,
+    branch_max_content=1000,
+    branch_max_context=1000,
 )
 
-train_size = 0.9
 
-PRIMITIVES_FIRST = 15
+train_size = 0.95
+
+PRIMITIVES_FIRST = 40
 
 train_documents = document[:int(len(document) * train_size)]
 test_documents = document[int(len(document) * train_size):]
 
 # Iterate through training documents and parse them one at a time
 for i, doc in enumerate(train_documents):
-    threshold = (0 if i < PRIMITIVES_FIRST else THRESHOLD)  # should never trigger atp
-    print("Threshold:", threshold)
+    p_threshold = (0 if i < PRIMITIVES_FIRST else THRESHOLD)
 
     # parse_sentence with learning=True adds to both hierarchies automatically
     parse_tree = webster.parse_sentence(
         doc,
-        threshold=threshold,
+        threshold=THRESHOLD,
         new_vocab=True,
         learning=True,
         debug=True,

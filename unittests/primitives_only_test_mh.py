@@ -20,7 +20,7 @@ if os.path.exists(OUT_DIR):
     shutil.rmtree(OUT_DIR)
     
 # Creating and printing toy sentences
-CONTEXT_LENGTH = 3
+CONTEXT_LENGTH = 5
 CONTENT_LENGTH = 4
 
 num_sentences = 100
@@ -30,7 +30,8 @@ for _ in range(num_sentences):
     sentence = generate("S", TEST_GRAMMAR1)
     document.append(sentence)
 
-THRESHOLD = 5
+THRESHOLD = 10
+PRIMITIVE_THRESHOLD = -6
 
 # Setting up the multi-hierarchy parser (WEBSTER)
 webster = WEBSTER(
@@ -38,13 +39,19 @@ webster = WEBSTER(
     context_length=CONTEXT_LENGTH,
     content_length=CONTENT_LENGTH,
     threshold=THRESHOLD,
-    content_alpha=1e-1,
-    context_alpha=1,
+    content_alpha=1e-3,
+    context_alpha=1e-3,
+    content_bl_alpha=5e-1,
+    context_bl_alpha=5e-1,
     bow=False,
     chunk_context=False,
     empty_weighting=False,
     weighting="binary",
     categorization_mode='dfs', # can be dfs, bfs, or bfs_pmi
+    depth_max_content=1000,
+    depth_max_context=1000,
+    branch_max_content=1000,
+    branch_max_context=1000,
 )
 
 # Iterate through training documents and parse them one at a time
@@ -81,14 +88,24 @@ for h, node, freq in sorted(basic_nodes["context"], key=lambda x: x[2], reverse=
     print(f"  - {h}  count={node.count}  depth={node.depth()}  leaf_freq={freq}")
 
 # --- Redistribution ---
-# print("\n=== Redistributing (10000 samples) ===")
-# # print("Redistributing content hierarchy...")
-# # webster.ltm.content_hierarchy.redistribute(10000)
-# print("Redistributing context hierarchy...")
-# webster.ltm.context_hierarchy.redistribute(10000)
-# print("Redistribution complete!")
+print("\n=== Redistributing (1500 samples) ===")
+# print("Redistributing content hierarchy...")
+# webster.ltm.content_hierarchy.redistribute(10000)
+print("Redistributing context hierarchy...")
+webster.ltm.context_hierarchy.redistribute(1500)
+print("Redistribution complete!")
 
-# REDIST_SAVE_DIR = f"{OUT_DIR}/final_ltm_data_redistributed"
-# webster.save_state(REDIST_SAVE_DIR)
-# print(f"Saved Redistributed LTM to \"{REDIST_SAVE_DIR}\"!")
-# webster.visualize_ltm(f"{OUT_DIR}/final_ltm_redistributed", max_depth=3)
+REDIST_SAVE_DIR = f"{OUT_DIR}/final_ltm_data_redistributed"
+webster.save_state(REDIST_SAVE_DIR)
+print(f"Saved Redistributed LTM to \"{REDIST_SAVE_DIR}\"!")
+webster.visualize_ltm(f"{OUT_DIR}/final_ltm_redistributed", max_depth=3)
+
+# --- Basic-level nodes ---
+basic_nodes = webster.get_basic_level_nodes()
+print("\n=== REDISTRIBUTED Basic-Level Nodes ===")
+print("Content hierarchy:")
+for h, node, freq in sorted(basic_nodes["content"], key=lambda x: x[2], reverse=True):
+    print(f"  - {h}  count={node.count}  depth={node.depth()}  leaf_freq={freq}")
+print("Context hierarchy:")
+for h, node, freq in sorted(basic_nodes["context"], key=lambda x: x[2], reverse=True):
+    print(f"  - {h}  count={node.count}  depth={node.depth()}  leaf_freq={freq}")

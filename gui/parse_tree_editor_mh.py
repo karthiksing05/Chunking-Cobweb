@@ -13,8 +13,8 @@ CONTEXT_LENGTH = 5
 CONTENT_LENGTH = 4
 PRIMITIVE_THRESHOLD = "converge"
 CATEGORIZATION_MODE = "dfs"  # "dfs", "bfs", or "bfs_pmi"
-# LOAD_LTM = ""
-LOAD_LTM = "unittests/primitives_only_test_mh/final_ltm_data"
+LOAD_LTM = ""
+# LOAD_LTM = "unittests/primitives_only_test_mh/final_ltm_data"
 
 # --- Initialize WEBSTER (multi-hierarchy parser) ---
 if LOAD_LTM != "":
@@ -23,18 +23,23 @@ if LOAD_LTM != "":
     webster.categorization_mode = CATEGORIZATION_MODE
     webster.ltm.categorization_mode = CATEGORIZATION_MODE
 else:
+    # Setting up the multi-hierarchy parser (WEBSTER)
     webster = WEBSTER(
         TEST_CORPUS1,
         context_length=CONTEXT_LENGTH,
         content_length=CONTENT_LENGTH,
         threshold="converge",
-        content_alpha=1e-4,
-        context_alpha=1e-4,
+        content_alpha=5e-2,
+        context_alpha=1e-3,
         bow=False,
         chunk_context=False,
         empty_weighting=False,
         weighting="binary",
         categorization_mode='dfs', # can be dfs, bfs, or bfs_pmi
+        depth_max_content=10,
+        depth_max_context=10,
+        branch_max_content=4,
+        branch_max_context=4,
     )
 
 NUM_LOAD = 0
