@@ -23,30 +23,29 @@ if os.path.exists(OUT_DIR):
 CONTEXT_LENGTH = 5
 CONTENT_LENGTH = 4
 
-num_sentences = 100
+num_sentences = 40
 document = []
 
 for _ in range(num_sentences):
-    sentence = generate("S", TEST_GRAMMAR1)
+    sentence = generate("S", TEST_GRAMMAR2)
     document.append(sentence)
 
-THRESHOLD = 10
-PRIMITIVE_THRESHOLD = -6
+THRESHOLD = 30
 
 # Setting up the multi-hierarchy parser (WEBSTER)
 webster = WEBSTER(
-    TEST_CORPUS1,
+    TEST_CORPUS2,
     context_length=CONTEXT_LENGTH,
     content_length=CONTENT_LENGTH,
     threshold=THRESHOLD,
-    content_alpha=1e-3,
-    context_alpha=1e-3,
-    content_bl_alpha=5e-1,
-    context_bl_alpha=5e-1,
+    content_alpha=1e-1,
+    context_alpha=1e-1,
+    content_bl_alpha=1,
+    context_bl_alpha=1,
     bow=False,
     chunk_context=False,
     empty_weighting=False,
-    weighting="binary",
+    weighting="harmonic",
     categorization_mode='dfs', # can be dfs, bfs, or bfs_pmi
     depth_max_content=1000,
     depth_max_context=1000,

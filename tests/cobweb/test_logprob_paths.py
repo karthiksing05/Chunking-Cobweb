@@ -229,7 +229,7 @@ def print_scores(label, tree, instance):
 
 # ── main test ─────────────────────────────────────────────────────────────────
 def test_path_logprobs():
-    tree = CobwebDiscreteTree(alpha=1e-3, weight_attr=True)
+    tree = CobwebDiscreteTree(alpha=1e-3, weight_attr=False)
 
     random.shuffle(TRAINING)
     for item in TRAINING:

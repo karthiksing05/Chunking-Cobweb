@@ -18,33 +18,32 @@ if os.path.exists(OUT_DIR):
     shutil.rmtree(OUT_DIR)
     
 # Creating and printing toy sentences
-CONTEXT_LENGTH = 3
-CONTENT_LENGTH = 4
+CONTEXT_LENGTH = 5
+CONTENT_LENGTH = 10
 
-num_sentences = 200
+num_sentences = 100
 document = []
 
 for _ in range(num_sentences):
     sentence = generate("S", TEST_GRAMMAR2)
     document.append(sentence)
 
-THRESHOLD = 10
+THRESHOLD = 5
 
-# Setting up the multi-hierarchy parser (WEBSTER)
 # Setting up the multi-hierarchy parser (WEBSTER)
 webster = WEBSTER(
     TEST_CORPUS2,
     context_length=CONTEXT_LENGTH,
     content_length=CONTENT_LENGTH,
     threshold=THRESHOLD,
-    content_alpha=1e-3,
-    context_alpha=1e-3,
-    content_bl_alpha=1e-1,
-    context_bl_alpha=1e-1,
+    content_alpha=1e-1,
+    context_alpha=1e-1,
+    content_bl_alpha=1,
+    context_bl_alpha=1,
     bow=False,
     chunk_context=False,
     empty_weighting=False,
-    weighting="binary",
+    weighting="harmonic",
     categorization_mode='dfs', # can be dfs, bfs, or bfs_pmi
     depth_max_content=1000,
     depth_max_context=1000,
@@ -52,8 +51,7 @@ webster = WEBSTER(
     branch_max_context=1000,
 )
 
-
-train_size = 0.95
+train_size = 0.9
 
 PRIMITIVES_FIRST = 40
 
@@ -62,12 +60,12 @@ test_documents = document[int(len(document) * train_size):]
 
 # Iterate through training documents and parse them one at a time
 for i, doc in enumerate(train_documents):
-    p_threshold = (0 if i < PRIMITIVES_FIRST else THRESHOLD)
+    p_threshold = (1e9 if i < PRIMITIVES_FIRST else THRESHOLD)
 
     # parse_sentence with learning=True adds to both hierarchies automatically
     parse_tree = webster.parse_sentence(
         doc,
-        threshold=THRESHOLD,
+        threshold=p_threshold,
         new_vocab=True,
         learning=True,
         debug=True,
@@ -82,6 +80,8 @@ for i, doc in enumerate(train_documents):
         if i < 21 and VIZ_INTERMEDIATES:
             webster.visualize_ltm(f"{OUT_DIR}/ltms/ltm{i}", max_depth=3)
 
+    # input()
+
 
 SAVE_DIR = f"{OUT_DIR}/final_ltm_data"
 webster.save_state(SAVE_DIR)
@@ -94,7 +94,7 @@ for i, test in enumerate(test_documents):
         threshold=THRESHOLD,
         new_vocab=True,
         learning=False,
-        debug=False,
+        debug=True,
     )
     parse_tree.visualize(f"{OUT_DIR}/test_trees/test_parse_tree{i}")
     print(f"Created parse tree {i} for sentence, \"{test}\"")
@@ -112,7 +112,7 @@ for i, fake_sentence in enumerate(fake_sentences):
         threshold=THRESHOLD,
         new_vocab=True,
         learning=False,
-        debug=False,
+        debug=True,
     )
     parse_tree.visualize(f"{OUT_DIR}/fake_trees/fake_parse_tree{i}")
     print(f"Created fake parse tree for fake sentence, \"{fake_sentence}\"")

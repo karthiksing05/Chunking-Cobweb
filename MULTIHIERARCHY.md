@@ -6,7 +6,30 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
 
 The home stretch! Going to add some notes regarding next steps here, but literally the thing holding us back right now is the quality of the context-hierarchy. Long-story short, we need to improve performance of the two hierarchies and then we're set!
 
-WE DID IT!!! Kind of - still definitely need to mess around with truncating hierarchies and ALPHA TUNING IS BIGGEST PROBLEMMMM
+WE DID IT!!! Kind of - still definitely need to mess around with truncating hierarchies and ALPHA TUNING IS BIGGEST PROBLEMMMM (tentative rule in 1 / vocab and then 1 for basic level calls)
+
+What works for test_grammar_2: 
+```py
+webster = WEBSTER(
+    TEST_CORPUS2,
+    context_length=CONTEXT_LENGTH,
+    content_length=CONTENT_LENGTH,
+    threshold=THRESHOLD,
+    content_alpha=1e-3,
+    context_alpha=1e-2,
+    content_bl_alpha=1,
+    context_bl_alpha=1,
+    bow=False,
+    chunk_context=False,
+    empty_weighting=False,
+    weighting="harmonic",
+    categorization_mode='dfs', # can be dfs, bfs, or bfs_pmi
+    depth_max_content=1000,
+    depth_max_context=1000,
+    branch_max_content=1000,
+    branch_max_context=1000,
+)
+```
 
 Important general realizations below:
 *   An important note here is that the basic level should only determine a passage - after that, we use LOG PROB OF THE TREE IN CONTENT HIERARCHY TO GENERATE BEST MATCHES
@@ -17,10 +40,15 @@ Important general realizations below:
 *   Redistribution does a really solid job of making the hierarchies better - which is extremely interesting
     *   Redistribute simply just can't be updated because it's terrible for paths - this would be significantly better if labels were just represented by basic-level av-counts but unfortunately this is not the case!
 
-
 Some new notes for generation:
-*   We should do some probability-based structure inference for what doesn't exist, and then be able to fill in that structure through probability - 
+*   We should do some probability-based structure inference for what doesn't exist, and then be able to fill in that structure through probability
+    *   Evaluate 
 *   We need to find a fix for if we truncate the hierarchy where we still store a joint distribution at the leaves!!
+
+**NEW GENERATION LOOP**
+*   Given a node, we should predict the most likely structure next to it (either left or right) and then from structure one at a time
+*   Then, from the top-down, we should pick candidates that we've seen that validate the structure we've chosen
+*   To me, generation can only happen after we decide how to represent higher-level context for true diversity
 
 Still may need the following things to improve the hierarchy - currently, reducing alpha sufficiently gets that done but it has harmful effects on the basic level node!
 *   Observation buffer is HUGE - need to include variance of response here so that we know which to add?
