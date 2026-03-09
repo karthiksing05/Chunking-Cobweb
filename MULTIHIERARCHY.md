@@ -7,12 +7,20 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
 Lots more work to do - I'm going to spend some time devising a TODO list of stuff that needs to happen, in this order, for us to complete the framework, and then we're basically just going to iterate through this todo list.
 0.  Need to integrate chunk context into the model!!!
 *   This was initially a later thing we needed to do but I think leading with this as a new design decision is quite important
+
 1.  Need to find settings for the Cobweb Hierarchies that produce consistent path information of value
 *   Need to achieve this for both the content and context hierarchies
 *   We might be able to mess around with something where we can use the basic-level node information, normalized such that each attribute has a value of 1 
 *   This might necessitate the observational buffer!! But we also might want to add content hierarchy information
+
 2.  Need to find basic level alpha that yields consistently what we want
 *   We're looking for the lowest level that differentiates a node from its siblings while maintaining the structural rigidity that we're looking for - this is going to take some searching
+
+3.  Need to test supervised parsing!!
+
+4.  Need to test unsupervised parsing!!
+
+5.  Need to test generation in all forms (according to new stuff from Methodology 3.0)
 
 ## Methodology 3.0!!
 
