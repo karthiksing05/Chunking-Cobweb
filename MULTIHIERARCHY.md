@@ -2,34 +2,23 @@
 
 Whereas before we hypothesized needing multiple hierarchies for multiple levels of granularity or to separate primitives and composites, we now rely on multiple hierarchies to properly separate *content* and *context*.
 
+## Methodology 3.1
+
+Lots more work to do - I'm going to spend some time devising a TODO list of stuff that needs to happen, in this order, for us to complete the framework, and then we're basically just going to iterate through this todo list.
+0.  Need to integrate chunk context into the model!!!
+*   This was initially a later thing we needed to do but I think leading with this as a new design decision is quite important
+1.  Need to find settings for the Cobweb Hierarchies that produce consistent path information of value
+*   Need to achieve this for both the content and context hierarchies
+*   We might be able to mess around with something where we can use the basic-level node information, normalized such that each attribute has a value of 1 
+*   This might necessitate the observational buffer!! But we also might want to add content hierarchy information
+2.  Need to find basic level alpha that yields consistently what we want
+*   We're looking for the lowest level that differentiates a node from its siblings while maintaining the structural rigidity that we're looking for - this is going to take some searching
+
 ## Methodology 3.0!!
 
 The home stretch! Going to add some notes regarding next steps here, but literally the thing holding us back right now is the quality of the context-hierarchy. Long-story short, we need to improve performance of the two hierarchies and then we're set!
 
 WE DID IT!!! Kind of - still definitely need to mess around with truncating hierarchies and ALPHA TUNING IS BIGGEST PROBLEMMMM (tentative rule in 1 / vocab and then 1 for basic level calls)
-
-What works for test_grammar_2: 
-```py
-webster = WEBSTER(
-    TEST_CORPUS2,
-    context_length=CONTEXT_LENGTH,
-    content_length=CONTENT_LENGTH,
-    threshold=THRESHOLD,
-    content_alpha=1e-3,
-    context_alpha=1e-2,
-    content_bl_alpha=1,
-    context_bl_alpha=1,
-    bow=False,
-    chunk_context=False,
-    empty_weighting=False,
-    weighting="harmonic",
-    categorization_mode='dfs', # can be dfs, bfs, or bfs_pmi
-    depth_max_content=1000,
-    depth_max_context=1000,
-    branch_max_content=1000,
-    branch_max_context=1000,
-)
-```
 
 Important general realizations below:
 *   An important note here is that the basic level should only determine a passage - after that, we use LOG PROB OF THE TREE IN CONTENT HIERARCHY TO GENERATE BEST MATCHES

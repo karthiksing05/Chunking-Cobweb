@@ -27,16 +27,15 @@ Key difference from parse.py (single-hierarchy):
           context_instance = {0..ctx_len-1: ctx_before,       (slot mode)
                               ctx_len..2*ctx_len-1: ctx_after, (slot mode)
                               -2: complexity (hidden, stored as {C{X}_vid: 1}),
-                              2*ctx_len: content-ref}          (always, both modes)
+                              -1: content-ref (hidden, always both modes)}
           In BOW mode:      {0: before_bag, 1: after_bag,
                              -2: complexity (hidden, stored as {C{X}_vid: 1}),
-                             2*ctx_len: content-ref}
+                             -1: content-ref (hidden)}
           Complexity uses per-level vocab identifiers C1, C2, C3 … so the key
           itself encodes the complexity value (count is always 1).
-      Content-ref is always at index 2*context_length (visible/positive) so
-      Cobweb includes it in entropy calculations.  In BOW mode the indices
-      2..2*ctx_len-1 are simply absent; the stable index avoids any
-      mode-dependent collision.
+      Content-ref is always at index -1 (hidden/negative) so Cobweb excludes it
+      from entropy calculations.  It is stored in av_count for retrieval and
+      visualization but does not influence categorization.
     - Primitive labels: {word_id: 1}.
     - Composite labels: {context_leaf_concept_id: 1}.
     - Only frozen/accepted chunks are added to BOTH hierarchies; unfrozen
@@ -609,13 +608,13 @@ def _build_chunk_context_instance(
           Before slot j (j=0 nearest left), depth d → attr  j*cpd + d
           After  slot j (j=0 nearest right), depth d → attr  ctx_len*cpd + j*cpd + d
           Complexity                                  → attr  -2  (hidden)
-          Content-ref                                 → attr  2*ctx_len*cpd
+          Content-ref                                 → attr  -1  (hidden)
 
     Attribute layout — BOW mode (``bow=True``):
         Before depth d → attr  d          (0..cpd-1)
         After  depth d → attr  cpd + d    (cpd..2*cpd-1)
         Complexity     → attr  -2  (hidden)
-        Content-ref    → attr  2*ctx_len*cpd  (unified with slot mode)
+        Content-ref    → attr  -1  (hidden, unified with slot mode)
 
     Parameters
     ----------
@@ -681,7 +680,7 @@ def _build_chunk_context_instance(
     ctx_inst[-2] = {_get_or_register_cplx_vid(complexity, cplx_vocab_pair[0], cplx_vocab_pair[1]): 1}
 
     # ---- context slots --------------------------------------------------
-    cref_attr = 2 * context_length * cpd  # unified for both BOW and slot
+    cref_attr = -1  # hidden, unified for both BOW and slot (and both modes)
 
     if bow:
         # BOW: aggregate over context_length non-overlapping left/right
@@ -1021,9 +1020,9 @@ class CompositeParseNode(object):
         # content-ref attribute: for composites this is the content
         # hierarchy leaf concept id; for primitives it's the word_id
         # (set separately in build_primitives).
-        # Visible (positive index) so Cobweb includes it in entropy calculations.
+        # Hidden (negative index -1) so Cobweb excludes it from entropy.
         if content_ref_id is not None:
-            _content_ref_attr = 2 * context_length
+            _content_ref_attr = -1
             ctx_inst[_content_ref_attr] = {content_ref_id: 1}
 
         return ctx_inst
@@ -1228,8 +1227,8 @@ class FiniteParseTree(object):
 
             # word identity attribute – enables generation to recover
             # the actual word from a context hierarchy leaf.
-            # Visible (positive index) so it influences Cobweb categorization.
-            _content_ref_attr = 2 * self.context_length
+            # Hidden (negative index -1) so Cobweb excludes it from entropy.
+            _content_ref_attr = -1
             ctx_inst[_content_ref_attr] = {wid: 1}
 
             # categorize in context hierarchy to get label path
@@ -2699,8 +2698,8 @@ class LongTermMemory(object):
         self.context_alpha = _context_alpha
         self.content_bl_alpha = content_bl_alpha
         self.context_bl_alpha = context_bl_alpha
-        self.content_hierarchy = CobwebDiscreteTree(_content_alpha, depth_max=depth_max_content, branch_max=branch_max_content)
-        self.context_hierarchy = CobwebDiscreteTree(_context_alpha, depth_max=depth_max_context, branch_max=branch_max_context)
+        self.content_hierarchy = CobwebDiscreteTree(_content_alpha, weight_attr=False, depth_max=depth_max_content, branch_max=branch_max_content)
+        self.context_hierarchy = CobwebDiscreteTree(_context_alpha, weight_attr=False, depth_max=depth_max_context, branch_max=branch_max_context)
 
         # vocabulary: index 0 is always EMPTYNULL
         self.id_to_value: List[str] = ["EMPTYNULL"]
@@ -2742,7 +2741,7 @@ class LongTermMemory(object):
 
         # drawer for context hierarchy visualization
         _cpd = content_path_depth
-        content_ref_attr_idx = 2 * context_length * _cpd if chunk_context else 2 * context_length
+        content_ref_attr_idx = -1  # always hidden at -1 regardless of mode
         if chunk_context:
             if bow:
                 context_headers = (
@@ -2783,20 +2782,13 @@ class LongTermMemory(object):
     def content_ref_attr(self) -> int:
         """Attribute index for the content-ref in context instances.
 
-        Normal mode (``chunk_context=False``):
-            Always ``2 * context_length`` regardless of BOW mode.
-            In slot mode this is the first index after all positional slots.
-            In BOW mode attrs 0 and 1 are used; 2..2*ctx-1 are absent.
-
-        Chunk-context mode (``chunk_context=True``):
-            ``2 * context_length * content_path_depth`` (unified for both
-            BOW and slot modes).  Each context slot expands to
-            ``content_path_depth`` depth-level attributes, so content-ref
-            is placed after all of them.
+        Always ``-1`` (hidden) in all modes.  Negative-index attributes are
+        stored in Cobweb's ``av_count`` but are excluded from entropy
+        calculations by the C++ engine (``attr >= 0`` guard).  The content-ref
+        is therefore visible in the visualizer via ``attr_name_overrides`` but
+        does not influence categorisation.
         """
-        if self.chunk_context:
-            return 2 * self.context_length * self.content_path_depth
-        return 2 * self.context_length
+        return -1
 
     # ---- vocabulary helpers ---------------------------------------------
 
