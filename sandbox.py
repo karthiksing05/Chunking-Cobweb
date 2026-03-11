@@ -1,60 +1,260 @@
-#!/usr/bin/env python3
-"""Sandbox: load a saved WEBSTER state, redistribute the content hierarchy,
-and parse a random sentence.
-
-Usage: python sandbox.py
 """
-import os
-import sys
-import random
+Sandbox!
 
-# Ensure local `src` is importable
-HERE = os.path.dirname(__file__)
-SRC = os.path.join(HERE, "src")
-if SRC not in sys.path:
-    sys.path.insert(0, SRC)
+Currently working on better understanding representations - need normalized attributes across all dimensions
+so that we can calculate scores that make sense
+"""
 
+from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1, POS_GRAMMAR1, POS_CORPUS1
 from parse_mh import WEBSTER
-from util.cfg import generate, TEST_GRAMMAR2
+from cobweb.cobweb_discrete import CobwebDiscreteTree
+import os
+from pprint import pprint
+
+if os.path.exists("sandbox/sandbox_ltm.png"):
+    os.remove("sandbox/sandbox_ltm.png")
+
+CONTEXT_LENGTH = 4
+
+# function to scrape instances from sentence (not using the parse tree stuff for this)
+# that'll eventually be rewritten!
+def get_composite_chunk_candidates(sentence: str, value_to_id: dict, context_length: int = CONTEXT_LENGTH, bow=False):
+    """
+    Produce merge-candidate instances for all adjacent word pairs in `sentence`.
+
+    Instances follow the numeric-key format used by `PrimitiveParseNode`/`CompositeParseNode`:
+      - 0: content-left dict
+      - 1: content-right dict
+      - 2..2+context_length-1: per-index context-before dicts (0 = immediate left)
+      - 2+context_length..2+2*context_length-1: per-index context-after dicts (0 = immediate right)
+
+    Missing context slots are represented as `{0: 0}` to keep compatibility with existing code.
+
+    'bow' represents a parameter of how the context should be associated - positionally OR with 
+    """
+
+    words = [value_to_id[w] for w in sentence.split(" ")]
+    insts = []
+
+    for i in range(len(words) - 1):
+        content_left = words[i]
+        content_right = words[i + 1]
+
+        inst = {
+            0: {content_left: 0.5, 0: 0},
+            1: {content_right: 0.5, 0: 0}
+        }
+
+        if bow:
+
+            # build per-index context-before (0 = immediate left of `content_left`)
+            d = {0: 0}
+            for k in range(context_length):
+                idx_before = i - 1 - k
+                if idx_before >= 0:
+                    d[words[idx_before]] = 1.0 / (2 ** (k + 1))
+                inst[2 + k] = {0: 0}
+
+            inst[2] = d
+
+            # build per-index context-after (0 = immediate right of `content_right`)
+            d = {0: 0}
+            for k in range(context_length):
+                idx_after = i + 2 + k
+                if idx_after < len(words):
+                    d[words[idx_after]] = 1.0 / (2 ** (k + 1))
+                inst[2 + context_length + k] = {0: 0}
+
+            inst[2 + context_length] = d
+            
+        else:
+
+            # build per-index context-before (0 = immediate left of `content_left`)
+            for k in range(context_length):
+                idx_before = i - 1 - k
+                if idx_before >= 0:
+                    d = {words[idx_before]: 1.0 / (2 ** (k + 1)), 0: 0}
+                else:
+                    d = {0: 1.0 / (2 ** (k + 1))}
+                    # d = {0: 0}
+                inst[2 + k] = d
+
+            # build per-index context-after (0 = immediate right of `content_right`)
+            for k in range(context_length):
+                idx_after = i + 2 + k
+                if idx_after < len(words):
+                    d = {words[idx_after]: 1.0 / (2 ** (k + 1)), 0: 0}
+                else:
+                    d = {0: 1.0 / (2 ** (k + 1))}
+                    # d = {0: 0}
+                inst[2 + context_length + k] = d
+
+        inst[2 + 2 * context_length] = {0: 0}
+
+        insts.append(inst)
+
+    return insts
+
+def get_primitive_chunk_candidates(sentence: str, value_to_id: dict, context_length: int = CONTEXT_LENGTH, bow=False):
+    """
+    Produce merge-candidate instances for words in `sentence`.
+
+    Instances follow the numeric-key format used by `PrimitiveParseNode`/`CompositeParseNode`:
+      - 0: NONE
+      - 1: NONE
+      - 2..2+context_length-1: per-index context-before dicts (0 = immediate left)
+      - 2+context_length..2+2*context_length-1: per-index context-after dicts (0 = immediate right)
+      - 2+2*context_length-1: singular content 
+
+    Missing context slots are represented as `{0: 0}` to keep compatibility with existing code.
+
+    'bow' is a keyword that signifies the type of 
+    """
+
+    words = [value_to_id[w] for w in sentence.split(" ")]
+    insts = []
+
+    for i in range(len(words)):
+
+        inst = {
+            0: {0: 0},
+            1: {0: 0}
+        }
+
+        if bow:
+
+            # build per-index context-before (0 = immediate left of `content_left`)
+            d = {0: 0}
+            for k in range(context_length):
+                idx_before = i - 1 - k
+                if idx_before >= 0:
+                    d[words[idx_before]] = 1.0 / (k + 1)
+
+            inst[2] = d
+
+            # build per-index context-after (0 = immediate right of `content_right`)
+            d = {0: 0}
+            for k in range(context_length):
+                idx_after = i + 2 + k
+                if idx_after < len(words):
+                    d[words[idx_after]] = 1.0 / (k + 1)
+
+            inst[2 + context_length] = d
+            
+        else:
+
+            # build per-index context-before (0 = immediate left of `content_left`)
+            for k in range(context_length):
+                idx_before = i - 1 - k
+                if idx_before >= 0:
+                    d = {words[idx_before]: 1.0 / (2 ** (k + 1)), 0: 0}
+                else:
+                    d = {0: 1.0 / (2 ** (k + 1))}
+                    # d = {0: 0}
+                inst[2 + k] = d
+
+            # build per-index context-after (0 = immediate right of `content_right`)
+            for k in range(context_length):
+                idx_after = i + 1 + k
+                if idx_after < len(words):
+                    d = {words[idx_after]: 1.0 / (2 ** (k + 1)), 0: 0}
+                else:
+                    d = {0: 1.0 / (2 ** (k + 1))}
+                    # d = {0: 0}
+                inst[2 + context_length + k] = d
+
+        inst[2 + 2 * context_length] = {words[i]: 1.0, 0: 0}
+
+        insts.append(inst)
+
+    return insts
 
 
-def main():
-    save_dir = "unittests/gen_learn_test_mh/final_ltm_data"
-    if not os.path.exists(save_dir):
-        print(f"Saved WEBSTER state not found at '{save_dir}'. Run the gen_learn_test_mh to create it.")
-        return
+num_sentences = 200
+document = []
 
-    print(f"Loading WEBSTER from: {save_dir}")
-    w = WEBSTER.load_state(save_dir)
-    print("Loaded WEBSTER; LTM vocab size:", len(w.ltm.id_to_value))
+for _ in range(num_sentences):
+    sentence = generate("S", TEST_GRAMMAR1)
+    document.append(sentence)
 
-    # Generate a proper sentence from the test grammar and parse it before/after redistribution
-    sent = generate("S", TEST_GRAMMAR2)
-    print("Parsing sentence BEFORE redistribute:", sent)
-    try:
-        tree_before = w.parse_sentence(sent, threshold=None, new_vocab=False, learning=False, debug=True)
-        if hasattr(tree_before, 'visualize'):
-            tree_before.visualize("sandbox_parse_tree_before", render_png=False)
-            print("Wrote sandbox_parse_tree_before.html")
-    except Exception as e:
-        print("Parsing before redistribute failed:", e)
+primitives_factor = 0.75
 
-    # Call redistribute on the content hierarchy (may raise if not implemented)
-    try:
-        print("Calling redistribute(2000) on content_hierarchy...")
-        w.ltm.content_hierarchy.redistribute(2000)
-        print("Redistribute completed.")
-    except Exception as e:
-        print("redistribute failed:", e)
+primitive_doc = document[:int(len(document) * primitives_factor)]
+composite_doc = document[int(len(document) * primitives_factor):]
 
-    print("Parsing sentence AFTER redistribute:", sent)
-    try:
-        tree_after = w.parse_sentence(sent, threshold=None, new_vocab=False, learning=False, debug=True)
-        if hasattr(tree_after, 'visualize'):
-            tree_after.visualize("sandbox_parse_tree_after", render_png=False)
-            print("Wrote sandbox_parse_tree_after.html")
-    except Exception as e:
-        print("Parsing after redistribute failed:", e)
+parser = WEBSTER(TEST_CORPUS1, context_length=CONTEXT_LENGTH)
+
+# tree = CobwebTree(10, False, 0, True, False)
+tree = CobwebDiscreteTree(1 / len(TEST_CORPUS1))
+
+for sentence in primitive_doc:
+
+    instances = get_primitive_chunk_candidates(sentence, parser.value_to_id, bow=False)
+
+    for inst in instances:
+        # check total sum of the instance
+        total_value_sum = 0
+        for k, d in inst.items():
+            # print(f"{k}: {sum(d.values())}")
+            total_value_sum += sum(d.values())
+
+        print(total_value_sum)
+
+    for inst in instances:
+        tree.ifit(inst)
+
+for sentence in composite_doc:
+
+    instances = get_composite_chunk_candidates(sentence, parser.value_to_id, bow=False)
+
+    for inst in instances:
+        # check total sum of the instance
+        total_value_sum = 0
+        for k, d in inst.items():
+            # print(f"{k}: {sum(d.values())}")
+            total_value_sum += sum(d.values())
+
+        print(total_value_sum)
 
 
-main()
+    for inst in instances:
+        tree.ifit(inst)
+
+# parser.cobweb_drawer.save_basic_level_subtrees(tree.root, "sandbox", debug=True)
+
+# print("All sentences:")
+# pprint(document)
+
+MAX_DEPTH = 4
+
+while not os.path.exists(f"sandbox/sandbox_ltm_{MAX_DEPTH}.png"):
+    # parser.cobweb_drawer.draw_tree(tree.root, "sandbox/sandbox_ltm")
+    parser.ltm.context_drawer.draw_tree(tree.root, f"sandbox/sandbox_ltm_{MAX_DEPTH}", max_depth=MAX_DEPTH)
+
+# test_sentence = input("enter input sentence: ")
+# candidates = get_composite_chunk_candidates(test_sentence, parser.value_to_id)
+
+# print("Test Sentence:", test_sentence)
+
+# costs = []
+# counts = []
+# root_costs = []
+# best_log_prob_idxs = []
+# best_avg_log_probs = []
+# log_prob_avgs = []
+
+# for i, candidate in enumerate(candidates):
+#     print(f"Candidate {i}:")
+#     node, categorize_ids, node_categorize_path = custom_categorize(candidate, tree)
+#     print("Stats:")
+#     score_stats = FiniteParseTree._score_function(node_categorize_path, candidate)
+#     pprint(score_stats)
+#     costs.append(score_stats["cost"])
+#     counts.append(score_stats["normed_count"])
+#     root_costs.append(score_stats["root_cost"])
+#     best_log_prob_idxs.append(score_stats["best_log_prob_idx"])
+#     best_avg_log_probs.append(score_stats["best_avg_log_prob"])
+
+# print(costs)
+# print(root_costs)
+# print(counts)

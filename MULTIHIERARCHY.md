@@ -5,22 +5,30 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
 ## Methodology 3.1
 
 Lots more work to do - I'm going to spend some time devising a TODO list of stuff that needs to happen, in this order, for us to complete the framework, and then we're basically just going to iterate through this todo list.
-0.  Need to integrate chunk context into the model!!!
-*   This was initially a later thing we needed to do but I think leading with this as a new design decision is quite important
 
 1.  Need to find settings for the Cobweb Hierarchies that produce consistent path information of value
 *   Need to achieve this for both the content and context hierarchies
+*   Need to maybe do adaptive alpha!!!
 *   We might be able to mess around with something where we can use the basic-level node information, normalized such that each attribute has a value of 1 
-*   This might necessitate the observational buffer!! But we also might want to add content hierarchy information
+*   This might necessitate the observational buffer!!
+*   We may also want to add the content hierarchy information (more than just the leaf node, perhaps a path or something) to the context nodes as well
 
 2.  Need to find basic level alpha that yields consistently what we want
 *   We're looking for the lowest level that differentiates a node from its siblings while maintaining the structural rigidity that we're looking for - this is going to take some searching
 
-3.  Need to test supervised parsing!!
+3.  Need to integrate chunk context into the model!!!
+*   This was initially a later thing we needed to do but I think leading with this as a new design decision is quite important
+*   We also need to formalize the method by which we calculate chunk context (learn from the Matasakis Paper!!)
+*   BUILD A COBWEB DIFFUSION MODEL!! Need to see how higher-level generalizations occur
+*   We are definitely adding the content back LOL - but there might be some nuance to this!
+    *   This is a problem because there's no way for us to directly compare content of a primitive node to content of a composite node
 
-4.  Need to test unsupervised parsing!!
+4.  Need to test supervised parsing!!
+*   Go into the parse tree editor, create custom parse trees and then work on an analysis for them
 
-5.  Need to test generation in all forms (according to new stuff from Methodology 3.0)
+5.  Need to test unsupervised parsing!!
+
+6.  Need to test generation in all forms (according to new stuff from Methodology 3.0)
 
 ## Methodology 3.0!!
 

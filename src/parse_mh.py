@@ -27,15 +27,15 @@ Key difference from parse.py (single-hierarchy):
           context_instance = {0..ctx_len-1: ctx_before,       (slot mode)
                               ctx_len..2*ctx_len-1: ctx_after, (slot mode)
                               -2: complexity (hidden, stored as {C{X}_vid: 1}),
-                              -1: content-ref (hidden, always both modes)}
+                              2*ctx_len: content-ref (visible)}
           In BOW mode:      {0: before_bag, 1: after_bag,
                              -2: complexity (hidden, stored as {C{X}_vid: 1}),
-                             -1: content-ref (hidden)}
+                             2: content-ref (visible)}
           Complexity uses per-level vocab identifiers C1, C2, C3 … so the key
           itself encodes the complexity value (count is always 1).
-      Content-ref is always at index -1 (hidden/negative) so Cobweb excludes it
-      from entropy calculations.  It is stored in av_count for retrieval and
-      visualization but does not influence categorization.
+      Content-ref is at the first positive index after all context attributes
+      (2*ctx_len in slot mode, 2 in BOW mode) so Cobweb includes it in entropy
+      calculations.
     - Primitive labels: {word_id: 1}.
     - Composite labels: {context_leaf_concept_id: 1}.
     - Only frozen/accepted chunks are added to BOTH hierarchies; unfrozen
@@ -608,13 +608,13 @@ def _build_chunk_context_instance(
           Before slot j (j=0 nearest left), depth d → attr  j*cpd + d
           After  slot j (j=0 nearest right), depth d → attr  ctx_len*cpd + j*cpd + d
           Complexity                                  → attr  -2  (hidden)
-          Content-ref                                 → attr  -1  (hidden)
+          Content-ref                                 → attr  2*ctx_len*cpd
 
     Attribute layout — BOW mode (``bow=True``):
         Before depth d → attr  d          (0..cpd-1)
         After  depth d → attr  cpd + d    (cpd..2*cpd-1)
         Complexity     → attr  -2  (hidden)
-        Content-ref    → attr  -1  (hidden, unified with slot mode)
+        Content-ref    → attr  2*cpd
 
     Parameters
     ----------
@@ -680,7 +680,7 @@ def _build_chunk_context_instance(
     ctx_inst[-2] = {_get_or_register_cplx_vid(complexity, cplx_vocab_pair[0], cplx_vocab_pair[1]): 1}
 
     # ---- context slots --------------------------------------------------
-    cref_attr = -1  # hidden, unified for both BOW and slot (and both modes)
+    cref_attr = 2 * content_path_depth if bow else 2 * content_path_depth * context_length
 
     if bow:
         # BOW: aggregate over context_length non-overlapping left/right
@@ -946,12 +946,14 @@ class CompositeParseNode(object):
         Attributes:
             0 .. context_length-1       : context_before (from left_node)
             context_length .. 2*ctx-1   : context_after  (from right_node)
-            2*context_length            : complexity – stored as
+            -2                          : complexity – stored as
                                           {C{X}_vid: 1} where X encodes the level
-            -1                          : content-ref (content hierarchy leaf
+                                          (hidden, negative index)
+            2*context_length            : content-ref (content hierarchy leaf
                                           concept vocab id, for generation)
-                                          Hidden (negative index) so it does
-                                          not influence Cobweb categorization.
+                                          Visible (positive index) so it
+                                          participates in Cobweb categorization.
+                                          In BOW mode the index is 2 instead.
 
         Child expansion information is stored in the **content** hierarchy
         via path attributes (label_path of left/right children).  No
@@ -1020,9 +1022,9 @@ class CompositeParseNode(object):
         # content-ref attribute: for composites this is the content
         # hierarchy leaf concept id; for primitives it's the word_id
         # (set separately in build_primitives).
-        # Hidden (negative index -1) so Cobweb excludes it from entropy.
+        # Visible (positive index) so Cobweb includes it in entropy.
         if content_ref_id is not None:
-            _content_ref_attr = -1
+            _content_ref_attr = 2 if bow else 2 * context_length
             ctx_inst[_content_ref_attr] = {content_ref_id: 1}
 
         return ctx_inst
@@ -1173,7 +1175,7 @@ class FiniteParseTree(object):
         _bow = getattr(self.ltm, 'bow', False)
         _weighting = getattr(self.ltm, 'weighting', 'binary')
         _empty_wt = getattr(self.ltm, 'empty_weighting', False)
-        _empty_val = 1 if _empty_wt else 0
+        _empty_val = lambda j: _context_weight(j, _weighting) if _empty_wt else 0
         for i, wid in enumerate(word_ids):
             # build sliding-window context instance for context hierarchy
             ctx_inst: dict = {}
@@ -1209,7 +1211,7 @@ class FiniteParseTree(object):
                         ctx_inst[j] = {cw: _context_weight(j, _weighting)}
                         ctx_inst[j][0] = 0
                     else:
-                        ctx_inst[j] = {0: _empty_val}
+                        ctx_inst[j] = {0: _empty_val(j)}
 
                 # context_after
                 for j in range(self.context_length):
@@ -1220,15 +1222,15 @@ class FiniteParseTree(object):
                         ctx_inst[attr_key] = {cw: _context_weight(j, _weighting)}
                         ctx_inst[attr_key][0] = 0
                     else:
-                        ctx_inst[attr_key] = {0: _empty_val}
+                        ctx_inst[attr_key] = {0: _empty_val(j)}
 
                 # complexity = 1 for primitives – C1 identifier, count = 1
                 ctx_inst[-2] = {_get_or_register_cplx_vid(1, self.id_to_value, self.value_to_id): 1}
 
             # word identity attribute – enables generation to recover
             # the actual word from a context hierarchy leaf.
-            # Hidden (negative index -1) so Cobweb excludes it from entropy.
-            _content_ref_attr = -1
+            # Visible (positive index) so Cobweb includes it in entropy.
+            _content_ref_attr = self.ltm.content_ref_attr
             ctx_inst[_content_ref_attr] = {wid: 1}
 
             # categorize in context hierarchy to get label path
@@ -1267,7 +1269,7 @@ class FiniteParseTree(object):
                 if 0 <= src_idx < len(word_ids):
                     cb.append({word_ids[src_idx]: 1})
                 else:
-                    cb.append({0: _empty_val})
+                    cb.append({0: _empty_val(j)})
             node.context_before = cb
 
             ca = []
@@ -1276,7 +1278,7 @@ class FiniteParseTree(object):
                 if 0 <= src_idx < len(word_ids):
                     ca.append({word_ids[src_idx]: 1})
                 else:
-                    ca.append({0: _empty_val})
+                    ca.append({0: _empty_val(j)})
             node.context_after = ca
 
             # score
@@ -2674,12 +2676,12 @@ class LongTermMemory(object):
     Content hierarchy  – instances are {0..cpd-1: left_path_depths, cpd..2*cpd-1: right_path_depths}.
     Context hierarchy (non-BOW) – instances are {0..ctx_len-1: ctx_before,
                           ctx_len..2*ctx_len-1: ctx_after,
-                          2*ctx_len: complexity,
-                          -1: content-ref (word_id for primitives,
+                          -2: complexity (hidden),
+                          2*ctx_len: content-ref (word_id for primitives,
                                        content leaf concept_id for composites)}.
 
     Context hierarchy (BOW) – instances are {0: before_bag, 1: after_bag,
-                          2: complexity, -1: content-ref}.
+                          -2: complexity (hidden), 2: content-ref}.
                           Words in bag attributes are distance-weighted
                           (1/2^(j+1)) and summed if repeated.
     """
@@ -2741,7 +2743,6 @@ class LongTermMemory(object):
 
         # drawer for context hierarchy visualization
         _cpd = content_path_depth
-        content_ref_attr_idx = -1  # always hidden at -1 regardless of mode
         if chunk_context:
             if bow:
                 context_headers = (
@@ -2760,6 +2761,8 @@ class LongTermMemory(object):
                 [f"Context-Before{i}" for i in range(context_length)]
                 + [f"Context-After{i}" for i in range(context_length)]
             )
+        content_ref_attr_idx = len(context_headers)
+        context_headers = context_headers + ["Content-Ref"]
         def _content_ref_display(val_id):
             if val_id is not None and 0 <= val_id < len(self.id_to_value):
                 name = self.id_to_value[val_id]
@@ -2782,13 +2785,15 @@ class LongTermMemory(object):
     def content_ref_attr(self) -> int:
         """Attribute index for the content-ref in context instances.
 
-        Always ``-1`` (hidden) in all modes.  Negative-index attributes are
-        stored in Cobweb's ``av_count`` but are excluded from entropy
-        calculations by the C++ engine (``attr >= 0`` guard).  The content-ref
-        is therefore visible in the visualizer via ``attr_name_overrides`` but
-        does not influence categorisation.
+        The first positive index after all context attributes:
+            Normal slot mode:         2 * context_length
+            BOW mode:                 2
+            chunk_context + slot:     2 * context_length * content_path_depth
+            chunk_context + BOW:      2 * content_path_depth
+        Content-ref participates in Cobweb entropy calculations.
         """
-        return -1
+        cpd = self.content_path_depth if self.chunk_context else 1
+        return 2 * cpd if self.bow else 2 * cpd * self.context_length
 
     # ---- vocabulary helpers ---------------------------------------------
 
@@ -2849,7 +2854,26 @@ class LongTermMemory(object):
 
         return leaf, rewrite_rules
 
-    # ---- context depth tracking & content-hierarchy depth-shift rewrites ---
+    # ---- depth tracking helpers -----------------------------------------
+
+    def _get_content_hierarchy_depths(self) -> dict:
+        """
+        BFS through the content hierarchy and return a snapshot
+        ``{concept_hash_str: depth_int}`` for every live node.
+        Depth 0 is the root.
+        """
+        result: dict = {}
+        root = getattr(self.content_hierarchy, 'root', None)
+        if root is None:
+            return result
+        queue = [(root, 0)]
+        while queue:
+            node, d = queue.pop(0)
+            h = node.concept_hash()
+            result[h] = d
+            for child in node.children:
+                queue.append((child, d + 1))
+        return result
 
     def _get_context_hierarchy_depths(self) -> dict:
         """
@@ -2870,6 +2894,197 @@ class LongTermMemory(object):
                 queue.append((child, d + 1))
         return result
 
+    # ---- content → context: split-delete & depth-shift rewrites -----------
+
+    def _apply_split_deletes_to_context(self, rewrite_rules: list):
+        """
+        Handle content-hierarchy SPLIT events by **deleting** the stale concept
+        vocab IDs from the content-ref attribute of the *context* hierarchy
+        av_counts.  Replacing with the parent would put the parent's vid at
+        the wrong weight position; the depth-shift step
+        (``_apply_content_depth_shifts_to_context``) handles the promoted
+        children correctly.
+
+        Parameters
+        ----------
+        rewrite_rules : list of (deleted_hash, parent_hash)
+            As returned by ``_ifit_and_update_vocab`` for SPLIT actions in the
+            content hierarchy.
+        """
+        del_vids: list = []
+        for deleted_hash, _parent_hash in rewrite_rules:
+            old_vid = self.value_to_id.get(f"CONCEPT-{deleted_hash}")
+            if old_vid is not None:
+                del_vids.append(old_vid)
+
+        if not del_vids or self.context_hierarchy.root is None:
+            return
+
+        _cref_attr = self.content_ref_attr
+
+        def _del_from_cref(av):
+            cref = av.get(_cref_attr)
+            if cref is None:
+                return av, False
+            changed = False
+            cref = dict(cref)
+            for old_vid in del_vids:
+                if old_vid in cref:
+                    del cref[old_vid]
+                    changed = True
+            if not changed:
+                return av, False
+            av = dict(av)
+            if cref:
+                av[_cref_attr] = cref
+            else:
+                del av[_cref_attr]
+            return av, True
+
+        to_visit = [self.context_hierarchy.root]
+        while to_visit:
+            curr = to_visit.pop(0)
+            new_av, changed = _del_from_cref(dict(curr.av_count))
+            if changed:
+                curr.set_av_count(new_av)
+            to_visit.extend(curr.children)
+
+    def _apply_content_depth_shifts_to_context(self, pre_depths: dict) -> None:
+        """
+        Symmetric partner of ``_apply_context_depth_shifts`` — operates on the
+        **context** hierarchy instead of the content hierarchy.
+
+        When the content hierarchy restructures (MERGE / SPLIT / fringe-split),
+        the content-ref attribute ``_cref_attr`` in context-hierarchy nodes
+        stores a weighted bag ``{content_concept_vid: weight}`` where weight
+        encodes distance from the content leaf (leaf = w(0), parent = w(1), …).
+        This method keeps those weights consistent:
+
+          * MERGE – A, B merge under new C; A and B shift one level deeper
+            (weight decreases by one decay step); C is inserted at their old weight.
+          * SPLIT – deleted concept's entries were already removed by
+            ``_apply_split_deletes_to_context``; only the promoted children
+            (which moved shallower) need their weights adjusted here.
+          * Fringe-split – the original leaf stays at the same absolute depth
+            (only a new copy is inserted below it), so no weight change is needed.
+
+        Weight decay / growth by one step:
+          binary   : w_new = w_old * 0.5  (deeper) / * 2.0 (shallower)
+          harmonic : w_new = w_old / (1 + delta * w_old)
+          constant : no change
+        """
+        post_depths = self._get_content_hierarchy_depths()
+
+        # Shift rules: (vid, old_d, new_d)
+        shift_rules: list = []
+        for h, old_d in pre_depths.items():
+            new_d = post_depths.get(h)
+            if new_d is None or new_d == old_d:
+                continue
+            concept_str = f"CONCEPT-{h}"
+            vid = self.value_to_id.get(concept_str)
+            if vid is None or vid == 0:
+                continue
+            shift_rules.append((vid, old_d, new_d))
+
+        if not shift_rules or self.context_hierarchy.root is None:
+            return
+
+        # Fill rules for MERGE/fringe: (shifted_vid, delta, parent_vid)
+        # When concept V moves deeper by delta, its parent P (new merged node)
+        # should be inserted at V's old weight.
+        fill_rules: list = []
+        deeper_shifts = [(vid, old_d, new_d) for vid, old_d, new_d in shift_rules if new_d > old_d]
+        if deeper_shifts:
+            h_to_node: dict = {}
+            stack = [self.content_hierarchy.root]
+            while stack:
+                curr = stack.pop()
+                h_to_node[curr.concept_hash()] = curr
+                stack.extend(curr.children)
+
+            for vid, old_d, new_d in deeper_shifts:
+                concept_str = (
+                    self.id_to_value[vid]
+                    if 0 <= vid < len(self.id_to_value)
+                    else None
+                )
+                if not concept_str or not concept_str.startswith("CONCEPT-"):
+                    continue
+                h = concept_str[8:]
+                node = h_to_node.get(h)
+                if node is not None and node.parent is not None:
+                    parent_str = f"CONCEPT-{node.parent.concept_hash()}"
+                    parent_vid = self.value_to_id.get(parent_str)
+                    if parent_vid is not None and parent_vid != 0:
+                        fill_rules.append((vid, new_d - old_d, parent_vid))
+
+        _cref_attr = self.content_ref_attr
+        _weighting = self.weighting
+
+        def _rescale(weight: float, delta: int) -> float:
+            """Apply delta depth-increase steps to a content-ref weight."""
+            if delta == 0 or weight <= 0:
+                return weight
+            if _weighting == 'harmonic':
+                return weight / (1.0 + delta * weight)
+            elif _weighting == 'constant':
+                return weight
+            else:  # binary
+                return weight * (0.5 ** delta)
+
+        def _rescale_reverse(weight: float, delta: int) -> float:
+            """Reverse delta depth-increase steps (recover old weight)."""
+            if delta == 0 or weight <= 0:
+                return weight
+            if _weighting == 'harmonic':
+                denom = 1.0 - delta * weight
+                return weight / denom if abs(denom) > 1e-12 else weight
+            elif _weighting == 'constant':
+                return weight
+            else:  # binary
+                return weight * (2.0 ** delta)
+
+        def _shift_cref(av: dict) -> tuple:
+            cref = av.get(_cref_attr)
+            if cref is None:
+                return av, False
+            cref = dict(cref)
+            changed = False
+
+            # Shift weights for all concepts that changed depth.
+            for vid, old_d, new_d in shift_rules:
+                if vid not in cref:
+                    continue
+                delta = new_d - old_d
+                cref[vid] = _rescale(cref[vid], delta)
+                changed = True
+
+            # Fill: add parent at the weight the shifted concept vacated.
+            for vid, delta, parent_vid in fill_rules:
+                if vid not in cref:
+                    continue
+                # cref[vid] is already the NEW (shifted) weight; reverse to get old.
+                old_w = _rescale_reverse(cref[vid], delta)
+                cref[parent_vid] = cref.get(parent_vid, 0.0) + old_w
+                changed = True
+
+            if not changed:
+                return av, False
+            av = dict(av)
+            av[_cref_attr] = cref
+            return av, True
+
+        to_visit = [self.context_hierarchy.root]
+        while to_visit:
+            curr = to_visit.pop(0)
+            new_av, changed = _shift_cref(dict(curr.av_count))
+            if changed:
+                curr.set_av_count(new_av)
+            to_visit.extend(curr.children)
+
+    # ---- context → content: split-delete & depth-shift rewrites -----------
+
     def _apply_context_depth_shifts(self, pre_depths: dict) -> None:
         """
         Compare *pre_depths* (snapshot taken before a round of context-hierarchy
@@ -2879,10 +3094,14 @@ class LongTermMemory(object):
         (Left-Depth0 … cpd-1, Right-Depth0 … cpd-1) remain accurate.
 
         This handles all Cobweb restructuring operations:
-          * MERGE – two children become grandchildren (+1 depth each)
-          * SPLIT – grandchildren become children (−1 depth each)
+          * MERGE – two children become grandchildren (+1 depth each);
+            the new merged parent concept is inserted at the vacated slot.
+          * SPLIT – grandchildren become children (−1 depth each);
+            the deleted node's entries were already removed by
+            ``_apply_split_deletes_to_content`` so only the depth
+            re-positioning of the promoted children is needed here.
           * Fringe-split – the original leaf gains a new intermediate parent
-            (+1 depth)
+            (+1 depth); the new fringe parent fills the vacated slot.
 
         Parameters
         ----------
@@ -2896,7 +3115,7 @@ class LongTermMemory(object):
 
         cpd = self.content_path_depth
 
-        # Build (vid, old_left_attr, new_left_attr) shift rules.
+        # Build (vid, old_d, new_d) shift rules.
         # We only care about depths 0…cpd-1 since those are the only
         # attribute positions used by the content hierarchy.
         shift_rules: list = []
@@ -2916,8 +3135,44 @@ class LongTermMemory(object):
         if not shift_rules or self.content_hierarchy.root is None:
             return
 
+        # Build fill_rules for concepts that shifted DEEPER (MERGE / fringe-split).
+        # When concept V moves from old_d to new_d > old_d, its former slot
+        # old_d is now occupied by V's new parent P in the context hierarchy.
+        # We must reflect this: for every content-hierarchy av_count entry that
+        # had V at attr old_d (now shifted to attr new_d), also add P at attr old_d.
+        fill_rules: list = []  # (shifted_vid, old_d, new_d, parent_vid)
+        deeper_shifts = [
+            (vid, old_d, new_d)
+            for vid, old_d, new_d in shift_rules
+            if new_d > old_d and 0 <= old_d < cpd
+        ]
+        if deeper_shifts:
+            # Build hash → node map for the current context hierarchy.
+            h_to_node: dict = {}
+            ctx_stack = [self.context_hierarchy.root]
+            while ctx_stack:
+                curr = ctx_stack.pop()
+                h_to_node[curr.concept_hash()] = curr
+                ctx_stack.extend(curr.children)
+
+            for vid, old_d, new_d in deeper_shifts:
+                concept_str = (
+                    self.id_to_value[vid]
+                    if 0 <= vid < len(self.id_to_value)
+                    else None
+                )
+                if not concept_str or not concept_str.startswith("CONCEPT-"):
+                    continue
+                h = concept_str[8:]  # strip "CONCEPT-"
+                node = h_to_node.get(h)
+                if node is not None and node.parent is not None:
+                    parent_str = f"CONCEPT-{node.parent.concept_hash()}"
+                    parent_vid = self.value_to_id.get(parent_str)
+                    if parent_vid is not None and parent_vid != 0:
+                        fill_rules.append((vid, old_d, new_d, parent_vid))
+
         def _shift_av(av: dict) -> tuple:
-            """Apply shift_rules to one node's av_count dict in-place."""
+            """Apply shift_rules (and fill_rules) to one node's av_count dict."""
             changed = False
             for vid, old_d, new_d in shift_rules:
                 # --- left side: attr old_d → new_d ----------------------
@@ -2940,6 +3195,29 @@ class LongTermMemory(object):
                     av.setdefault(r_target, {})
                     av[r_target][vid] = av[r_target].get(vid, 0) + cnt
                     changed = True
+
+            # Fill vacated depth slots with the merged/fringe parent concept.
+            # After the shift moves V from old_d to new_d, V now sits at
+            # attr new_d.  We read V's count there and credit parent P at
+            # attr old_d so the generalization hierarchy is preserved.
+            for vid, old_d, new_d, parent_vid in fill_rules:
+                # Left side
+                if 0 <= new_d < cpd and new_d in av and vid in av[new_d]:
+                    cnt = av[new_d][vid]
+                    if cnt > 0 and 0 <= old_d < cpd:
+                        av.setdefault(old_d, {})
+                        av[old_d][parent_vid] = av[old_d].get(parent_vid, 0) + cnt
+                        changed = True
+                # Right side
+                r_new = cpd + new_d
+                r_old = cpd + old_d
+                if 0 <= new_d < cpd and r_new in av and vid in av[r_new]:
+                    cnt = av[r_new][vid]
+                    if cnt > 0 and 0 <= old_d < cpd:
+                        av.setdefault(r_old, {})
+                        av[r_old][parent_vid] = av[r_old].get(parent_vid, 0) + cnt
+                        changed = True
+
             return av, changed
 
         # BFS over the content hierarchy and patch every node.
@@ -2947,6 +3225,54 @@ class LongTermMemory(object):
         while to_visit:
             curr = to_visit.pop(0)
             new_av, changed = _shift_av(dict(curr.av_count))
+            if changed:
+                curr.set_av_count(new_av)
+            to_visit.extend(curr.children)
+
+    def _apply_split_deletes_to_content(self, rewrite_rules: list):
+        """
+        Handle context-hierarchy SPLIT events by **deleting** the stale concept
+        vocab IDs from the *content* hierarchy av_counts — without replacing
+        them with the parent concept.
+
+        The depth-shift propagation step (``_apply_context_depth_shifts``) moves
+        the split node's promoted children to the correct depth attribute, so
+        replacing with the parent would place the parent's vid at the wrong
+        depth-attribute position and corrupt those statistics.
+
+        Parameters
+        ----------
+        rewrite_rules : list of (deleted_hash, parent_hash)
+            As returned by ``_ifit_and_update_vocab`` for SPLIT actions in the
+            context hierarchy.  Only the *deleted_hash* is used here.
+        """
+        del_vids: list = []
+        for deleted_hash, _parent_hash in rewrite_rules:
+            old_vid = self.value_to_id.get(f"CONCEPT-{deleted_hash}")
+            if old_vid is not None:
+                del_vids.append(old_vid)
+
+        if not del_vids or self.content_hierarchy.root is None:
+            return
+
+        def av_delete(av):
+            changed = False
+            for attr in list(av.keys()):
+                for old_vid in del_vids:
+                    if attr not in av:
+                        break  # attribute was deleted by a previous vid in this loop
+                    if old_vid in av[attr]:
+                        del av[attr][old_vid]
+                        changed = True
+                        if not av[attr]:
+                            del av[attr]
+                            break  # attribute now empty and removed; skip remaining vids
+            return av, changed
+
+        to_visit = [self.content_hierarchy.root]
+        while to_visit:
+            curr = to_visit.pop(0)
+            new_av, changed = av_delete(dict(curr.av_count))
             if changed:
                 curr.set_av_count(new_av)
             to_visit.extend(curr.children)
@@ -3082,9 +3408,12 @@ class LongTermMemory(object):
             leaf, rewrites = self._ifit_and_update_vocab(
                 ctx_inst, self.context_hierarchy, debug=debug)
             ctx_leaf_map[id(node)] = leaf
-            # Propagate context splits to content hierarchy
+            # Propagate context splits to content hierarchy.
+            # Use delete-only (not replace) so that the parent's vid is not
+            # written at the wrong depth-attribute slot; the depth-shift step
+            # below will move the promoted children to the correct position.
             if rewrites:
-                self._apply_rewrite_rules(self.content_hierarchy, rewrites)
+                self._apply_split_deletes_to_content(rewrites)
 
         # Detect and propagate depth changes caused by any Cobweb MERGE, SPLIT,
         # or fringe-split that occurred during the context fitting pass above.
@@ -3178,6 +3507,12 @@ class LongTermMemory(object):
         # -- Step 3: fit content instances --------------------------------
         content_leaf_map: dict = {}   # id(comp_node) → content-hierarchy leaf
 
+        # Snapshot content-hierarchy depths BEFORE fitting so that any Cobweb
+        # restructuring (MERGE / SPLIT / fringe-split) that shifts a content
+        # concept can be detected and propagated into the context hierarchy's
+        # content-ref weights afterwards.
+        _pre_cnt_depths = self._get_content_hierarchy_depths()
+
         # Prepare composite nodes for content fitting; optionally shuffle
         content_nodes = [n for n in all_nodes if isinstance(n, CompositeParseNode) and not n.is_global_root]
         if shuffle:
@@ -3188,9 +3523,11 @@ class LongTermMemory(object):
                 leaf, rewrites = self._ifit_and_update_vocab(
                     ci, self.content_hierarchy, debug=debug)
                 content_leaf_map[id(node)] = leaf
-                # Propagate content splits to context hierarchy
+                # Propagate content splits to context hierarchy.
+                # Delete-only (not replace) so no parent vid lands at the wrong
+                # weight; the depth-shift step below handles promoted children.
                 if rewrites:
-                    self._apply_rewrite_rules(self.context_hierarchy, rewrites)
+                    self._apply_split_deletes_to_context(rewrites)
 
         # Also fit orphan candidate pairs (parentless adjacent pairs)
         pairs = parse_tree.get_parentless_pairs()
@@ -3205,7 +3542,12 @@ class LongTermMemory(object):
                 _leaf, rewrites = self._ifit_and_update_vocab(
                     ci, self.content_hierarchy, debug=debug)
                 if rewrites:
-                    self._apply_rewrite_rules(self.context_hierarchy, rewrites)
+                    self._apply_split_deletes_to_context(rewrites)
+
+        # Detect and propagate content depth changes into context hierarchy
+        # content-ref weights (mirrors _apply_context_depth_shifts for the
+        # content→context direction).
+        self._apply_content_depth_shifts_to_context(_pre_cnt_depths)
 
         if debug:
             print(f"  content instances fitted: {len(content_leaf_map)}")
@@ -3228,16 +3570,33 @@ class LongTermMemory(object):
                 cnt_leaf = content_leaf_map.get(id(node))
                 if cnt_leaf is None:
                     continue
-                cnt_ref_str = f"CONCEPT-{cnt_leaf.concept_hash()}"
-                self.add_to_vocab(cnt_ref_str)
-                ref_vid = self.value_to_id.get(cnt_ref_str, 0)
-                if ref_vid == 0:
+                # Build a weighted path from the content-hierarchy leaf to the
+                # root.  Each ancestor at distance d from the leaf receives
+                # weight _context_weight(d, weighting) so that the most specific
+                # (leaf-level) concept dominates, mirroring the context-window
+                # weighting scheme.
+                path_entries: list = []
+                p = cnt_leaf
+                d = 0
+                while p is not None:
+                    concept_str = f"CONCEPT-{p.concept_hash()}"
+                    self.add_to_vocab(concept_str)
+                    vid = self.value_to_id.get(concept_str, 0)
+                    if vid != 0:
+                        path_entries.append((vid, _context_weight(d, self.weighting)))
+                    p = getattr(p, 'parent', None)
+                    d += 1
+                if not path_entries:
                     continue
+                # Store the weighted path on the node's context_instance for
+                # later retrieval (e.g., _build_chunk_context_instance).
+                node.context_instance[_cref_attr] = {vid: w for vid, w in path_entries}
             else:
                 continue
 
-            # Propagate content-ref to the context leaf AND all its ancestors
-            ctx_leaf.increment_attr_value(_cref_attr, ref_vid, 1)
+            # Propagate weighted content-ref path to the context leaf
+            for vid, weight in path_entries:
+                ctx_leaf.increment_attr_value(_cref_attr, vid, weight)
 
         if debug:
             print(f"  content-refs written to context hierarchy leaves")
@@ -3575,7 +3934,7 @@ class WEBSTER(object):
 
         if learning:
             self.ltm.add_parse_tree(
-                parse_tree, shuffle=False, debug=debug,
+                parse_tree, shuffle=True, debug=debug,
             )
 
         return parse_tree

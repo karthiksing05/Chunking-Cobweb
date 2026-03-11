@@ -4,7 +4,7 @@ is completely functional using the two-hierarchy (content + context) framework
 defined in parse_mh.py / MULTIHIERARCHY.md.
 """
 
-from util.cfg import generate, TEST_GRAMMAR2, TEST_CORPUS2
+from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1, TEST_GRAMMAR2, TEST_CORPUS2
 from parse_mh import WEBSTER
 import shutil
 import os
@@ -25,21 +25,21 @@ num_sentences = 100
 document = []
 
 for _ in range(num_sentences):
-    sentence = generate("S", TEST_GRAMMAR2)
+    sentence = generate("S", TEST_GRAMMAR1)
     document.append(sentence)
 
 THRESHOLD = 5
 
 # Setting up the multi-hierarchy parser (WEBSTER)
 webster = WEBSTER(
-    TEST_CORPUS2,
+    TEST_CORPUS1,
     context_length=CONTEXT_LENGTH,
     content_length=CONTENT_LENGTH,
     threshold=THRESHOLD,
-    content_alpha=1e-1,
-    context_alpha=1e-1,
+    content_alpha=1e-3,
+    context_alpha=1e-8,
     content_bl_alpha=1,
-    context_bl_alpha=1,
+    context_bl_alpha=1e-1,
     bow=False,
     chunk_context=False,
     empty_weighting=False,
@@ -101,7 +101,7 @@ for i, test in enumerate(test_documents):
 
 # Creating fake sentences, through completely random choice, to see if they parse!
 fake_sentences = [
-    " ".join([random.choice(TEST_CORPUS2) for _ in range(random.randint(3, 8))])
+    " ".join([random.choice(TEST_CORPUS1) for _ in range(random.randint(3, 8))])
     for _ in range(10)
 ]
 fake_sentences.append("the dog the dog")
