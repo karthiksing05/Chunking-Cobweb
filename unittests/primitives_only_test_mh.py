@@ -20,7 +20,7 @@ if os.path.exists(OUT_DIR):
     shutil.rmtree(OUT_DIR)
     
 # Creating and printing toy sentences
-CONTEXT_LENGTH = 6
+CONTEXT_LENGTH = 3
 CONTENT_LENGTH = 4
 
 num_sentences = 40
@@ -39,9 +39,9 @@ webster = WEBSTER(
     content_length=CONTENT_LENGTH,
     threshold=THRESHOLD,
     content_alpha=1e-3,
-    context_alpha=1e-8,
+    context_alpha=1 / len(TEST_CORPUS1),
     content_bl_alpha=1,
-    context_bl_alpha=1e-1,
+    context_bl_alpha=1,
     bow=False,
     chunk_context=False,
     empty_weighting=True,

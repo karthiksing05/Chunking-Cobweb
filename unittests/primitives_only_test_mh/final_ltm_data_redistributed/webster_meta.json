@@ -1,10 +1,10 @@
 {
-  "context_length": 6,
+  "context_length": 3,
   "content_length": 4,
   "threshold": 1000000000.0,
   "primitive_threshold": null,
   "content_bl_alpha": 1,
-  "context_bl_alpha": 0.1,
+  "context_bl_alpha": 1,
   "bow": false,
   "categorization_mode": "dfs",
   "weighting": "binary",

@@ -3934,7 +3934,7 @@ class WEBSTER(object):
 
         if learning:
             self.ltm.add_parse_tree(
-                parse_tree, shuffle=True, debug=debug,
+                parse_tree, shuffle=False, debug=debug,
             )
 
         return parse_tree

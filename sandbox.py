@@ -14,7 +14,7 @@ from pprint import pprint
 if os.path.exists("sandbox/sandbox_ltm.png"):
     os.remove("sandbox/sandbox_ltm.png")
 
-CONTEXT_LENGTH = 4
+CONTEXT_LENGTH = 3
 
 # function to scrape instances from sentence (not using the parse tree stuff for this)
 # that'll eventually be rewritten!
@@ -170,22 +170,22 @@ def get_primitive_chunk_candidates(sentence: str, value_to_id: dict, context_len
     return insts
 
 
-num_sentences = 200
+num_sentences = 40
 document = []
 
 for _ in range(num_sentences):
     sentence = generate("S", TEST_GRAMMAR1)
     document.append(sentence)
 
-primitives_factor = 0.75
+primitives_factor = 1.0
 
 primitive_doc = document[:int(len(document) * primitives_factor)]
 composite_doc = document[int(len(document) * primitives_factor):]
 
+# WEBSTER is used only for vocabulary mapping and the drawer
 parser = WEBSTER(TEST_CORPUS1, context_length=CONTEXT_LENGTH)
 
-# tree = CobwebTree(10, False, 0, True, False)
-tree = CobwebDiscreteTree(1 / len(TEST_CORPUS1))
+tree = CobwebDiscreteTree(1 / len(TEST_CORPUS1), weight_attr=False)
 
 for sentence in primitive_doc:
 
@@ -203,33 +203,32 @@ for sentence in primitive_doc:
     for inst in instances:
         tree.ifit(inst)
 
-for sentence in composite_doc:
+# for sentence in composite_doc:
 
-    instances = get_composite_chunk_candidates(sentence, parser.value_to_id, bow=False)
+#     instances = get_composite_chunk_candidates(sentence, parser.value_to_id, bow=False)
 
-    for inst in instances:
-        # check total sum of the instance
-        total_value_sum = 0
-        for k, d in inst.items():
-            # print(f"{k}: {sum(d.values())}")
-            total_value_sum += sum(d.values())
+#     for inst in instances:
+#         # check total sum of the instance
+#         total_value_sum = 0
+#         for k, d in inst.items():
+#             # print(f"{k}: {sum(d.values())}")
+#             total_value_sum += sum(d.values())
 
-        print(total_value_sum)
+#         print(total_value_sum)
 
+#     for inst in instances:
+#         tree.ifit(inst)
 
-    for inst in instances:
-        tree.ifit(inst)
-
-# parser.cobweb_drawer.save_basic_level_subtrees(tree.root, "sandbox", debug=True)
+# parser.ltm.context_drawer.save_basic_level_subtrees(tree.root, "sandbox", debug=True, save_png=False)
 
 # print("All sentences:")
 # pprint(document)
 
-MAX_DEPTH = 4
+MAX_DEPTH = 3
 
-while not os.path.exists(f"sandbox/sandbox_ltm_{MAX_DEPTH}.png"):
-    # parser.cobweb_drawer.draw_tree(tree.root, "sandbox/sandbox_ltm")
-    parser.ltm.context_drawer.draw_tree(tree.root, f"sandbox/sandbox_ltm_{MAX_DEPTH}", max_depth=MAX_DEPTH)
+# while not os.path.exists(f"sandbox/sandbox_ltm_{MAX_DEPTH}.png"):
+    # parser.ltm.context_drawer.draw_tree(tree.root, "sandbox/sandbox_ltm")
+parser.ltm.context_drawer.draw_tree(tree.root, f"sandbox/sandbox_ltm_{MAX_DEPTH}", max_depth=MAX_DEPTH)
 
 # test_sentence = input("enter input sentence: ")
 # candidates = get_composite_chunk_candidates(test_sentence, parser.value_to_id)
