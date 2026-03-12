@@ -6,29 +6,19 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
 
 Lots more work to do - I'm going to spend some time devising a TODO list of stuff that needs to happen, in this order, for us to complete the framework, and then we're basically just going to iterate through this todo list.
 
-1.  Need to find settings for the Cobweb Hierarchies that produce consistent path information of value
-*   Need to achieve this for both the content and context hierarchies
-*   Need to maybe do adaptive alpha!!!
-*   We might be able to mess around with something where we can use the basic-level node information, normalized such that each attribute has a value of 1 
-*   This might necessitate the observational buffer!!
-*   We may also want to add the content hierarchy information (more than just the leaf node, perhaps a path or something) to the context nodes as well
+We did stuff! Long term, shuffling makes things weird, alphas customized for the basic level work, and more data was needed for success!!
+*   Initial results from cramming for CoCo reveals some, but not all consistency!!
+*   The framework is better than I thought - just need to find strong hierarchy quality for generation!
 
-2.  Need to find basic level alpha that yields consistently what we want
-*   We're looking for the lowest level that differentiates a node from its siblings while maintaining the structural rigidity that we're looking for - this is going to take some searching
+IMPORTANT THING: We need a simplicity bias - or maybe just better levels of generalization and better hierarchy quality LOL, not sure which yet.
 
-3.  Need to integrate chunk context into the model!!!
-*   This was initially a later thing we needed to do but I think leading with this as a new design decision is quite important
-*   We also need to formalize the method by which we calculate chunk context (learn from the Matasakis Paper!!)
-*   BUILD A COBWEB DIFFUSION MODEL!! Need to see how higher-level generalizations occur
-*   We are definitely adding the content back LOL - but there might be some nuance to this!
-    *   This is a problem because there's no way for us to directly compare content of a primitive node to content of a composite node
-
-4.  Need to test supervised parsing!!
-*   Go into the parse tree editor, create custom parse trees and then work on an analysis for them
-
-5.  Need to test unsupervised parsing!!
-
-6.  Need to test generation in all forms (according to new stuff from Methodology 3.0)
+Potential things to try:
+*   Redistribution!!!! GET THIS WORKING, THIS HAS TO BE IT FOR SURE
+    *   Do Pat's thing - as we traverse down the path, we look at leaves of every given node and evaluate them as misplaced
+    *   Remove MERGING AND SPLITTING AND IF THIS IS TRUE, DO IT!!!
+*   Threshold by both log-prob and counts if needed
+*   Program sufficient generation scheme!!
+*   IF WORST COMES TO WORST - we're DEFINITELY going to have to store models of various depths in various hierarchies and call them all the same hierarchy (make complexity a visible attribute first, and then try this???)
 
 ## Methodology 3.0!!
 
@@ -53,7 +43,9 @@ Some new notes for generation:
 **NEW GENERATION LOOP**
 *   Given a node, we should predict the most likely structure next to it (either left or right) and then from structure one at a time
 *   Then, from the top-down, we should pick candidates that we've seen that validate the structure we've chosen
-*   To me, generation can only happen after we decide how to represent higher-level context for true diversity
+
+Here's some pseudocode for generation:
+
 
 Still may need the following things to improve the hierarchy - currently, reducing alpha sufficiently gets that done but it has harmful effects on the basic level node!
 *   Observation buffer is HUGE - need to include variance of response here so that we know which to add?

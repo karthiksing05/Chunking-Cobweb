@@ -21,7 +21,7 @@ if os.path.exists(OUT_DIR):
     
 # Creating and printing toy sentences
 CONTEXT_LENGTH = 3
-CONTENT_LENGTH = 4
+CONTENT_LENGTH = 5
 
 num_sentences = 40
 document = []
@@ -39,7 +39,7 @@ webster = WEBSTER(
     content_length=CONTENT_LENGTH,
     threshold=THRESHOLD,
     content_alpha=1e-3,
-    context_alpha=1 / len(TEST_CORPUS1),
+    context_alpha=1e-4,
     content_bl_alpha=1,
     context_bl_alpha=1,
     bow=False,
@@ -87,11 +87,11 @@ for h, node, freq in sorted(basic_nodes["context"], key=lambda x: x[2], reverse=
     print(f"  - {h}  count={node.count}  depth={node.depth()}  leaf_freq={freq}")
 
 # --- Redistribution ---
-print("\n=== Redistributing (1500 samples) ===")
+print("\n=== Redistributing ===")
 # print("Redistributing content hierarchy...")
 # webster.ltm.content_hierarchy.redistribute(10000)
 print("Redistributing context hierarchy...")
-webster.ltm.context_hierarchy.redistribute(1500)
+webster.ltm.context_hierarchy.redistribute(5000)
 print("Redistribution complete!")
 
 REDIST_SAVE_DIR = f"{OUT_DIR}/final_ltm_data_redistributed"

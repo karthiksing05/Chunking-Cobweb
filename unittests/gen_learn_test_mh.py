@@ -21,14 +21,14 @@ if os.path.exists(OUT_DIR):
 CONTEXT_LENGTH = 3
 CONTENT_LENGTH = 10
 
-num_sentences = 300
+num_sentences = 175
 document = []
 
 for _ in range(num_sentences):
     sentence = generate("S", TEST_GRAMMAR1)
     document.append(sentence)
 
-THRESHOLD = 5
+THRESHOLD = 30
 
 # Setting up the multi-hierarchy parser (WEBSTER)
 webster = WEBSTER(
@@ -36,7 +36,7 @@ webster = WEBSTER(
     context_length=CONTEXT_LENGTH,
     content_length=CONTENT_LENGTH,
     threshold=THRESHOLD,
-    content_alpha=1e-3,
+    content_alpha=1e-5,
     context_alpha=1e-3,
     content_bl_alpha=1,
     context_bl_alpha=1,
@@ -53,7 +53,7 @@ webster = WEBSTER(
 
 train_size = 0.9
 
-PRIMITIVES_FIRST = 40
+PRIMITIVES_FIRST = 100
 
 train_documents = document[:int(len(document) * train_size)]
 test_documents = document[int(len(document) * train_size):]
@@ -77,8 +77,7 @@ for i, doc in enumerate(train_documents):
     if i % 5 == 0 and VIZ_INTERMEDIATES:
         parse_tree.visualize(f"{OUT_DIR}/train_trees/train_parse_tree{i}")
 
-        if i < 21 and VIZ_INTERMEDIATES:
-            webster.visualize_ltm(f"{OUT_DIR}/ltms/ltm{i}", max_depth=3)
+        webster.visualize_ltm(f"{OUT_DIR}/ltms/ltm{i}", max_depth=3)
 
     # input()
 

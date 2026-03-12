@@ -1,0 +1,148 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Parse Tree (Multi-Hierarchy)</title>
+<style>
+body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+#tree-container { display: inline-block; }
+.link { fill: none; stroke: #9aa1a9; stroke-width: 1.5px; }
+.node-box { stroke: #444; fill: #fff; rx: 8; ry: 8; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.15)); }
+.node-fo table { border-collapse: collapse; font-size: 12px; margin: 4px 0; }
+.node-fo th, .node-fo td { border: 1px solid #888; padding: 2px 6px; }
+.node-fo th { background: #f3f5f7; font-weight: 600; }
+.section-header { font-weight: 700; font-size: 13px; color: #333; margin: 8px 0 4px 0; border-bottom: 1px solid #ccc; padding-bottom: 2px; }
+.side-by-side { display: flex; gap: 8px; align-items: flex-start; }
+.side-by-side > div { flex: 1; min-width: 0; }
+.sub-title { font-weight: 600; font-size: 11px; color: #555; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+<div id="tree-container"><div id="tree"></div></div>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script>
+const data = {"title": "ROOT", "content_rows": [], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [], "context_after_rows": [], "context_other_rows": [], "children": [{"title": "4be8ef56cb", "content_rows": [], "content_left_rows": [{"attr": "Left0", "val": "CONCEPT-687345735926708_3", "count": "1.00"}, {"attr": "Left1", "val": "CONCEPT-687914091599541_7329", "count": "1.00"}, {"attr": "Left2", "val": "CONCEPT-687914079920208_7253", "count": "1.00"}, {"attr": "Left3", "val": "CONCEPT-687877145790708_7146", "count": "1.00"}, {"attr": "Left4", "val": "CONCEPT-687914077289416_7219", "count": "1.00"}, {"attr": "Left5", "val": "CONCEPT-687914077328833_7222", "count": "1.00"}, {"attr": "Left6", "val": "CONCEPT-687380956878000_732", "count": "1.00"}, {"attr": "Left7", "val": "CONCEPT-687425311726208_1811", "count": "1.00"}, {"attr": "Left8", "val": "CONCEPT-687914077435125_7230", "count": "1.00"}, {"attr": "Left9", "val": "CONCEPT-687914077467125_7233", "count": "1.00"}], "content_right_rows": [{"attr": "Right0", "val": "CONCEPT-687345735926708_3", "count": "1.00"}, {"attr": "Right1", "val": "CONCEPT-687864634206500_6885", "count": "1.00"}, {"attr": "Right2", "val": "CONCEPT-687914085848375_7283", "count": "1.00"}, {"attr": "Right3", "val": "CONCEPT-687370339923291_415", "count": "1.00"}, {"attr": "Right4", "val": "CONCEPT-687358855909416_139", "count": "1.00"}, {"attr": "Right5", "val": "CONCEPT-687477071203708_2987", "count": "1.00"}, {"attr": "Right6", "val": "CONCEPT-687914085925375_7288", "count": "1.00"}, {"attr": "Right7", "val": "CONCEPT-687914085929958_7289", "count": "1.00"}, {"attr": "Right8", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Right9", "val": "EMPTYNULL", "count": "0.00"}], "context_before_rows": [{"attr": "CtxBefore0", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.00"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "found", "count": "0.50"}, {"attr": "CtxAfter1", "val": "a", "count": "0.25"}, {"attr": "CtxAfter2", "val": "dog", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C4", "count": "1.00"}, {"attr": "ContentRef", "val": "CONCEPT-687914135934125_7366", "count": "0.50"}, {"attr": "", "val": "CONCEPT-687914135927333_7365", "count": "0.25"}, {"attr": "", "val": "CONCEPT-687914135897541_7363", "count": "0.12"}, {"attr": "", "val": "CONCEPT-687914135834500_7360", "count": "0.06"}, {"attr": "", "val": "CONCEPT-687600674006541_5120", "count": "0.03"}, {"attr": "", "val": "CONCEPT-687914135747416_7357", "count": "0.02"}, {"attr": "", "val": "CONCEPT-687864694484416_7027", "count": "0.01"}], "children": [{"title": "49db762f5f", "content_rows": [], "content_left_rows": [{"attr": "Left0", "val": "CONCEPT-687345735926708_3", "count": "1.00"}, {"attr": "Left1", "val": "CONCEPT-687914091599541_7329", "count": "1.00"}, {"attr": "Left2", "val": "CONCEPT-687914079920208_7253", "count": "1.00"}, {"attr": "Left3", "val": "CONCEPT-687914079698291_7241", "count": "1.00"}, {"attr": "Left4", "val": "CONCEPT-687914084428791_7276", "count": "1.00"}, {"attr": "Left5", "val": "CONCEPT-687366292712208_330", "count": "1.00"}, {"attr": "Left6", "val": "CONCEPT-687388647288250_917", "count": "1.00"}, {"attr": "Left7", "val": "CONCEPT-687407558519250_1353", "count": "1.00"}, {"attr": "Left8", "val": "CONCEPT-687735392544708_6261", "count": "1.00"}, {"attr": "Left9", "val": "CONCEPT-687874046313625_7068", "count": "1.00"}], "content_right_rows": [{"attr": "Right0", "val": "CONCEPT-687345735926708_3", "count": "1.00"}, {"attr": "Right1", "val": "CONCEPT-687914091599541_7329", "count": "1.00"}, {"attr": "Right2", "val": "CONCEPT-687914079920208_7253", "count": "1.00"}, {"attr": "Right3", "val": "CONCEPT-687914079698291_7241", "count": "1.00"}, {"attr": "Right4", "val": "CONCEPT-687914084428791_7276", "count": "1.00"}, {"attr": "Right5", "val": "CONCEPT-687914084450833_7278", "count": "1.00"}, {"attr": "Right6", "val": "CONCEPT-687914084455291_7279", "count": "1.00"}, {"attr": "Right7", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Right8", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Right9", "val": "EMPTYNULL", "count": "0.00"}], "context_before_rows": [{"attr": "CtxBefore0", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.00"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "woman", "count": "0.50"}, {"attr": "CtxAfter1", "val": "found", "count": "0.25"}, {"attr": "CtxAfter2", "val": "a", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C3", "count": "1.00"}, {"attr": "ContentRef", "val": "CONCEPT-687914138388500_7373", "count": "0.50"}, {"attr": "", "val": "CONCEPT-687914138381750_7372", "count": "0.25"}, {"attr": "", "val": "CONCEPT-687699792243833_6041", "count": "0.12"}, {"attr": "", "val": "CONCEPT-687864694484416_7027", "count": "0.06"}, {"attr": "", "val": "CONCEPT-687556041326500_4677", "count": "0.03"}], "children": [{"title": "f6a5353d91", "content_rows": [], "content_left_rows": [{"attr": "Left0", "val": "CONCEPT-687345735926708_3", "count": "1.00"}, {"attr": "Left1", "val": "CONCEPT-687914091599541_7329", "count": "1.00"}, {"attr": "Left2", "val": "CONCEPT-687914079920208_7253", "count": "1.00"}, {"attr": "Left3", "val": "CONCEPT-687914079698291_7241", "count": "1.00"}, {"attr": "Left4", "val": "CONCEPT-687914084428791_7276", "count": "1.00"}, {"attr": "Left5", "val": "CONCEPT-687366292712208_330", "count": "1.00"}, {"attr": "Left6", "val": "CONCEPT-687463702337125_2682", "count": "1.00"}, {"attr": "Left7", "val": "CONCEPT-687410675409166_1454", "count": "1.00"}, {"attr": "Left8", "val": "CONCEPT-687428201202250_1899", "count": "1.00"}, {"attr": "Left9", "val": "CONCEPT-687914080015083_7260", "count": "1.00"}], "content_right_rows": [{"attr": "Right0", "val": "CONCEPT-687345735926708_3", "count": "1.00"}, {"attr": "Right1", "val": "CONCEPT-687914091599541_7329", "count": "1.00"}, {"attr": "Right2", "val": "CONCEPT-687914079920208_7253", "count": "1.00"}, {"attr": "Right3", "val": "CONCEPT-687914079698291_7241", "count": "1.00"}, {"attr": "Right4", "val": "CONCEPT-687914084428791_7276", "count": "1.00"}, {"attr": "Right5", "val": "CONCEPT-687366292712208_330", "count": "1.00"}, {"attr": "Right6", "val": "CONCEPT-687388647288250_917", "count": "1.00"}, {"attr": "Right7", "val": "CONCEPT-687547338643208_4459", "count": "1.00"}, {"attr": "Right8", "val": "CONCEPT-687548884710083_4527", "count": "1.00"}, {"attr": "Right9", "val": "CONCEPT-687914082004208_7270", "count": "1.00"}], "context_before_rows": [{"attr": "CtxBefore0", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.00"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "lazy", "count": "0.50"}, {"attr": "CtxAfter1", "val": "woman", "count": "0.25"}, {"attr": "CtxAfter2", "val": "found", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C2", "count": "1.00"}, {"attr": "ContentRef", "val": "CONCEPT-687914138528791_7379", "count": "0.50"}, {"attr": "", "val": "CONCEPT-687914138381750_7372", "count": "0.25"}, {"attr": "", "val": "CONCEPT-687699792243833_6041", "count": "0.12"}, {"attr": "", "val": "CONCEPT-687864694484416_7027", "count": "0.06"}, {"attr": "", "val": "CONCEPT-687556041326500_4677", "count": "0.03"}], "children": [{"title": "d087bc7b37", "content_rows": [{"attr": "Word", "val": "the", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "EMPTYNULL", "count": "0.50"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.25"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "lazy", "count": "0.50"}, {"attr": "CtxAfter1", "val": "lazy", "count": "0.25"}, {"attr": "CtxAfter2", "val": "woman", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "the", "count": "1.00"}], "children": []}, {"title": "276d006190", "content_rows": [{"attr": "Word", "val": "lazy", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "the", "count": "0.50"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.25"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "lazy", "count": "0.50"}, {"attr": "CtxAfter1", "val": "woman", "count": "0.25"}, {"attr": "CtxAfter2", "val": "found", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "lazy", "count": "1.00"}], "children": []}]}, {"title": "125d064859", "content_rows": [{"attr": "Word", "val": "lazy", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "lazy", "count": "0.50"}, {"attr": "CtxBefore1", "val": "the", "count": "0.25"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "woman", "count": "0.50"}, {"attr": "CtxAfter1", "val": "found", "count": "0.25"}, {"attr": "CtxAfter2", "val": "a", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "lazy", "count": "1.00"}], "children": []}]}, {"title": "fec0947ff5", "content_rows": [{"attr": "Word", "val": "woman", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "lazy", "count": "0.50"}, {"attr": "CtxBefore1", "val": "lazy", "count": "0.25"}, {"attr": "CtxBefore2", "val": "the", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "found", "count": "0.50"}, {"attr": "CtxAfter1", "val": "a", "count": "0.25"}, {"attr": "CtxAfter2", "val": "dog", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "woman", "count": "1.00"}], "children": []}]}, {"title": "3143df4538", "content_rows": [], "content_left_rows": [{"attr": "Left0", "val": "CONCEPT-687345735926708_3", "count": "1.00"}, {"attr": "Left1", "val": "CONCEPT-687914091599541_7329", "count": "1.00"}, {"attr": "Left2", "val": "CONCEPT-687914088579458_7307", "count": "1.00"}, {"attr": "Left3", "val": "CONCEPT-687914087228708_7295", "count": "1.00"}, {"attr": "Left4", "val": "CONCEPT-687362557146125_206", "count": "1.00"}, {"attr": "Left5", "val": "CONCEPT-687386089978500_873", "count": "1.00"}, {"attr": "Left6", "val": "CONCEPT-687468097014791_2841", "count": "1.00"}, {"attr": "Left7", "val": "CONCEPT-687652086501666_5598", "count": "1.00"}, {"attr": "Left8", "val": "CONCEPT-687914088670666_7314", "count": "1.00"}, {"attr": "Left9", "val": "CONCEPT-687914088674791_7315", "count": "1.00"}], "content_right_rows": [{"attr": "Right0", "val": "CONCEPT-687345735926708_3", "count": "1.00"}, {"attr": "Right1", "val": "CONCEPT-687864634206500_6885", "count": "1.00"}, {"attr": "Right2", "val": "CONCEPT-687864651621208_7018", "count": "1.00"}, {"attr": "Right3", "val": "CONCEPT-687914094538666_7346", "count": "1.00"}, {"attr": "Right4", "val": "CONCEPT-687454682529166_2526", "count": "1.00"}, {"attr": "Right5", "val": "CONCEPT-687459370774416_2671", "count": "1.00"}, {"attr": "Right6", "val": "CONCEPT-687425312230708_1847", "count": "1.00"}, {"attr": "Right7", "val": "CONCEPT-687440208058291_2162", "count": "1.00"}, {"attr": "Right8", "val": "CONCEPT-687459370813208_2675", "count": "1.00"}, {"attr": "Right9", "val": "CONCEPT-687914094625416_7353", "count": "1.00"}], "context_before_rows": [{"attr": "CtxBefore0", "val": "woman", "count": "0.50"}, {"attr": "CtxBefore1", "val": "lazy", "count": "0.25"}, {"attr": "CtxBefore2", "val": "lazy", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.00"}], "context_other_rows": [{"attr": "Complexity", "val": "C3", "count": "1.00"}, {"attr": "ContentRef", "val": "CONCEPT-687914138852541_7390", "count": "0.50"}, {"attr": "", "val": "CONCEPT-687914138844791_7389", "count": "0.25"}, {"attr": "", "val": "CONCEPT-687914138810833_7387", "count": "0.12"}, {"attr": "", "val": "CONCEPT-687846075583458_6879", "count": "0.06"}, {"attr": "", "val": "CONCEPT-687877186896583_7191", "count": "0.03"}, {"attr": "", "val": "CONCEPT-687699792243833_6041", "count": "0.02"}, {"attr": "", "val": "CONCEPT-687864694484416_7027", "count": "0.01"}], "children": [{"title": "52af3d3e77", "content_rows": [], "content_left_rows": [{"attr": "Left0", "val": "CONCEPT-687345735926708_3", "count": "1.00"}, {"attr": "Left1", "val": "CONCEPT-687914091599541_7329", "count": "1.00"}, {"attr": "Left2", "val": "CONCEPT-687440207599291_2141", "count": "1.00"}, {"attr": "Left3", "val": "CONCEPT-687914090670125_7321", "count": "1.00"}, {"attr": "Left4", "val": "CONCEPT-687410675716125_1476", "count": "1.00"}, {"attr": "Left5", "val": "CONCEPT-687420153594250_1739", "count": "1.00"}, {"attr": "Left6", "val": "CONCEPT-687590015248583_5000", "count": "1.00"}, {"attr": "Left7", "val": "CONCEPT-687914090747541_7326", "count": "1.00"}, {"attr": "Left8", "val": "CONCEPT-687914090752416_7327", "count": "1.00"}, {"attr": "Left9", "val": "EMPTYNULL", "count": "0.00"}], "content_right_rows": [{"attr": "Right0", "val": "CONCEPT-687345735926708_3", "count": "1.00"}, {"attr": "Right1", "val": "CONCEPT-687914091599541_7329", "count": "1.00"}, {"attr": "Right2", "val": "CONCEPT-687914088579458_7307", "count": "1.00"}, {"attr": "Right3", "val": "CONCEPT-687914091712333_7334", "count": "1.00"}, {"attr": "Right4", "val": "CONCEPT-687914091764541_7337", "count": "1.00"}, {"attr": "Right5", "val": "CONCEPT-687379656943375_715", "count": "1.00"}, {"attr": "Right6", "val": "CONCEPT-687454682458250_2520", "count": "1.00"}, {"attr": "Right7", "val": "CONCEPT-687914091837958_7342", "count": "1.00"}, {"attr": "Right8", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "Right9", "val": "EMPTYNULL", "count": "0.00"}], "context_before_rows": [{"attr": "CtxBefore0", "val": "woman", "count": "0.50"}, {"attr": "CtxBefore1", "val": "lazy", "count": "0.25"}, {"attr": "CtxBefore2", "val": "lazy", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "dog", "count": "0.50"}, {"attr": "CtxAfter1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.00"}], "context_other_rows": [{"attr": "Complexity", "val": "C2", "count": "1.00"}, {"attr": "ContentRef", "val": "CONCEPT-687914141293041_7396", "count": "0.50"}, {"attr": "", "val": "CONCEPT-687914138381750_7372", "count": "0.25"}, {"attr": "", "val": "CONCEPT-687699792243833_6041", "count": "0.12"}, {"attr": "", "val": "CONCEPT-687864694484416_7027", "count": "0.06"}, {"attr": "", "val": "CONCEPT-687556041326500_4677", "count": "0.03"}], "children": [{"title": "7b2e0ec6e7", "content_rows": [{"attr": "Word", "val": "found", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "woman", "count": "0.50"}, {"attr": "CtxBefore1", "val": "lazy", "count": "0.25"}, {"attr": "CtxBefore2", "val": "lazy", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "a", "count": "0.50"}, {"attr": "CtxAfter1", "val": "dog", "count": "0.25"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "found", "count": "1.00"}], "children": []}, {"title": "642054593c", "content_rows": [{"attr": "Word", "val": "a", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "found", "count": "0.50"}, {"attr": "CtxBefore1", "val": "woman", "count": "0.25"}, {"attr": "CtxBefore2", "val": "lazy", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "dog", "count": "0.50"}, {"attr": "CtxAfter1", "val": "EMPTYNULL", "count": "0.25"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "a", "count": "1.00"}], "children": []}]}, {"title": "7022547123", "content_rows": [{"attr": "Word", "val": "dog", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "a", "count": "0.50"}, {"attr": "CtxBefore1", "val": "found", "count": "0.25"}, {"attr": "CtxBefore2", "val": "woman", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "EMPTYNULL", "count": "0.50"}, {"attr": "CtxAfter1", "val": "EMPTYNULL", "count": "0.25"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "dog", "count": "1.00"}], "children": []}]}]};
+const nodeW=600, nodeH=130, hGap=80, vGap=150;
+
+const root = d3.hierarchy(data);
+const layout = d3.tree()
+  .nodeSize([nodeW+hGap, nodeH+vGap])
+  .separation((a,b) => a.parent===b.parent ? 1.0 : 1.4);
+layout(root);
+
+const svg = d3.select("#tree").append("svg").attr("width",1).attr("height",1);
+const g = svg.append("g");
+
+const linkGen = d3.linkVertical().x(d=>d.x).y(d=>d.y);
+const link = g.selectAll("path.link").data(root.links()).join("path")
+  .attr("class","link").attr("d",linkGen);
+
+const node = g.selectAll("g.node").data(root.descendants()).join("g")
+  .attr("transform", d=>`translate(${d.x},${d.y})`);
+
+node.append("rect").attr("class","node-box")
+  .attr("x",-nodeW/2).attr("y",0).attr("width",nodeW).attr("height",nodeH);
+
+node.append("foreignObject").attr("class","node-fo")
+  .attr("x",-nodeW/2+6).attr("y",6).attr("width",nodeW-12).attr("height",1000)
+  .html(d => nodeHTML(d.data));
+
+// measure actual content heights
+node.selectAll("foreignObject").each(function(d){
+  const fo=d3.select(this), div=fo.select("div").node();
+  const h=div.getBoundingClientRect().height+12;
+  d._nodeHeight = h;
+  fo.attr("height",h);
+  d3.select(this.parentNode).select("rect").attr("height",h+12);
+});
+
+// compute per-depth max height and reposition rows
+const depthMaxHeight = new Map();
+root.each(d => {
+  const h = d._nodeHeight || nodeH;
+  const existing = depthMaxHeight.get(d.depth) || 0;
+  if (h > existing) depthMaxHeight.set(d.depth, h);
+});
+const maxDepth = Math.max(...Array.from(depthMaxHeight.keys()));
+const depthOffsets = [];
+for (let i = 0; i <= maxDepth; i++) {
+  const prev = i === 0 ? 0 : depthOffsets[i-1] + (depthMaxHeight.get(i-1)||nodeH) + vGap;
+  depthOffsets.push(prev);
+}
+root.each(d => { d.y = depthOffsets[d.depth]; });
+node.attr("transform", d => `translate(${d.x},${d.y})`);
+link.attr("d", linkGen);
+
+// fit viewBox
+let x0=Infinity, x1=-Infinity, y0=Infinity, y1=-Infinity;
+root.each(d => {
+  const halfW = nodeW/2, h = d._nodeHeight || nodeH;
+  if (d.x-halfW-30 < x0) x0 = d.x-halfW-30;
+  if (d.x+halfW+30 > x1) x1 = d.x+halfW+30;
+  if (d.y-30 < y0) y0 = d.y-30;
+  if (d.y+h+30 > y1) y1 = d.y+h+30;
+});
+const width=x1-x0, height=y1-y0;
+svg.attr("width",width).attr("height",height)
+  .attr("viewBox",[x0,y0,width,height].join(" "));
+
+function threeColTable(title, rows) {
+  if (!rows || rows.length === 0) return "";
+  const body = rows.map(r =>
+    `<tr><td>${r.attr}</td><td>${r.val}</td><td>${r.count}</td></tr>`
+  ).join("");
+  return `<div class="sub-title">${title}</div>
+    <table>
+      <tr><th>Attr</th><th>Value</th><th>Count</th></tr>
+      ${body}
+    </table>`;
+}
+
+function nodeHTML(d){
+  // --- Content section ---
+  let contentHTML = "";
+  const hasLeft = d.content_left_rows && d.content_left_rows.length > 0;
+  const hasRight = d.content_right_rows && d.content_right_rows.length > 0;
+  const hasSingle = d.content_rows && d.content_rows.length > 0;
+
+  if (hasLeft || hasRight) {
+    // Composite node: left and right side by side
+    contentHTML = `<div class="section-header">Content</div>
+      <div class="side-by-side">
+        <div>${threeColTable("Left", d.content_left_rows)}</div>
+        <div>${threeColTable("Right", d.content_right_rows)}</div>
+      </div>`;
+  } else if (hasSingle) {
+    // Primitive node: single content table
+    contentHTML = `<div class="section-header">Content</div>${threeColTable("", d.content_rows)}`;
+  }
+
+  // --- Context section ---
+  let contextHTML = "";
+  const hasBefore = d.context_before_rows && d.context_before_rows.length > 0;
+  const hasAfter = d.context_after_rows && d.context_after_rows.length > 0;
+  const hasOther = d.context_other_rows && d.context_other_rows.length > 0;
+
+  if (hasBefore || hasAfter || hasOther) {
+    let ctxInner = "";
+    if (hasBefore || hasAfter) {
+      ctxInner += `<div class="side-by-side">
+        <div>${threeColTable("Before", d.context_before_rows)}</div>
+        <div>${threeColTable("After", d.context_after_rows)}</div>
+      </div>`;
+    }
+    if (hasOther) {
+      ctxInner += threeColTable("Other", d.context_other_rows);
+    }
+    contextHTML = `<div class="section-header">Context</div>${ctxInner}`;
+  }
+
+  return `<div class="node-fo">
+    <table><tr><th colspan="3">${d.title}</th></tr></table>
+    ${contentHTML}
+    ${contextHTML}
+  </div>`;
+}
+</script>
+</body>
+</html>

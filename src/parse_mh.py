@@ -1409,7 +1409,7 @@ class FiniteParseTree(object):
             content_path_hashes = [p[8:] if p.startswith("CONCEPT-") else p for p in cnt_path]
             context_path_hashes = [p[8:] if p.startswith("CONCEPT-") else p for p in ctx_path]
 
-        return {
+        res = {
             "content_inst": content_inst,
             "context_inst": context_inst,
             "categorize_path": ctx_path_ids,
@@ -1430,6 +1430,21 @@ class FiniteParseTree(object):
             "right_context_score_data": right_ctx_score_data,
             "categorization_mode": _cat_mode,
         }
+
+        if debug:
+            _lc = res.get("left_context_score_data", {})
+            _rc = res.get("right_context_score_data", {})
+            _cnt = res.get("content_score_data", {})
+            _ctx = res.get("context_score_data", {})
+            print(
+                f"  pair ({res['left_word_index']}, {res['right_word_index']}):\n"
+                f"    left  ctx  | bl_count={_lc.get('basic_level_count', 'N/A')!s:>6}  tree_lp={_lc.get('tree_log_prob', float('nan')):.4f}\n"
+                f"    right ctx  | bl_count={_rc.get('basic_level_count', 'N/A')!s:>6}  tree_lp={_rc.get('tree_log_prob', float('nan')):.4f}\n"
+                f"    cand  ctx  | bl_count={_ctx.get('basic_level_count', 'N/A')!s:>6}  tree_lp={_ctx.get('tree_log_prob', float('nan')):.4f}\n"
+                f"    cand  cnt  | bl_count={_cnt.get('basic_level_count', 'N/A')!s:>6}  cnt_tree_lp={_cnt.get('tree_log_prob', float('nan')):.4f} cxt_tree_lp={_ctx.get('tree_log_prob', float('nan')):.4f}"
+            )
+
+        return res
 
     # ---- application ----------------------------------------------------
 
@@ -1625,26 +1640,15 @@ class FiniteParseTree(object):
                     continue
 
                 basic_level_count = res.get("score", -float("inf"))  # == content_score_data["cost"]
-                tree_log_prob = res.get("content_score_data", {}).get("tree_log_prob", -float("inf"))
-
-                if debug:
-                    _lc = res.get("left_context_score_data", {})
-                    _rc = res.get("right_context_score_data", {})
-                    _cnt = res.get("content_score_data", {})
-                    _ctx = res.get("context_score_data", {})
-                    print(
-                        f"  pair ({p['left_word_index']}, {p['right_word_index']}):\n"
-                        f"    left  ctx  | bl_count={_lc.get('basic_level_count', 'N/A')!s:>6}  tree_lp={_lc.get('tree_log_prob', float('nan')):.4f}\n"
-                        f"    right ctx  | bl_count={_rc.get('basic_level_count', 'N/A')!s:>6}  tree_lp={_rc.get('tree_log_prob', float('nan')):.4f}\n"
-                        f"    cand  ctx  | bl_count={_ctx.get('basic_level_count', 'N/A')!s:>6}  tree_lp={_ctx.get('tree_log_prob', float('nan')):.4f}\n"
-                        f"    cand  cnt  | bl_count={basic_level_count!s:>6}  tree_lp={tree_log_prob:.4f}  [GATE: {'PASS' if basic_level_count > count_threshold else 'FAIL'}]"
-                    )
+                ctx_tree_log_prob = res.get("context_score_data", {}).get("tree_class_log_prob", -float("inf"))
+                cnt_tree_log_prob = res.get("content_score_data", {}).get("tree_log_prob", -float("inf"))
+                sum_tree_lps = cnt_tree_log_prob + ctx_tree_log_prob
 
                 # Stage 1: threshold gate
                 if basic_level_count <= count_threshold:
                     continue
 
-                candidates.append((tree_log_prob, res)) # SECONDARY SCORE
+                candidates.append((sum_tree_lps, res)) # SECONDARY SCORE
 
             if not candidates:
                 break

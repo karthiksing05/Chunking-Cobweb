@@ -1,0 +1,50 @@
+[0] original: the cat saw
+    masked:   the [mask] saw
+    replaced: "cat" at pos 1
+    completed: the cat saw
+
+[1] original: a small lazy telescope saw the big woman
+    masked:   a small lazy telescope [mask] the big woman
+    replaced: "saw" at pos 4
+    completed: a small lazy telescope park park park the the big woman
+
+[2] original: a man chased the telescope
+    masked:   a man [mask] the telescope
+    replaced: "chased" at pos 2
+    completed: a man found the telescope
+
+[3] original: the dog found a small dog under the lazy big red telescope
+    masked:   the dog found a small dog [mask] the lazy big red telescope
+    replaced: "under" at pos 6
+    completed: the dog found a small dog found the lazy big red telescope
+
+[4] original: the park admired a park
+    masked:   the park [mask] a park
+    replaced: "admired" at pos 2
+    completed: the park liked a park
+
+[5] original: a man admired the man
+    masked:   a man [mask] the man
+    replaced: "admired" at pos 2
+    completed: a man liked the man
+
+[6] original: a woman liked a red telescope under the cat
+    masked:   a woman liked a [mask] telescope under the cat
+    replaced: "red" at pos 4
+    completed: a woman liked a big telescope under the cat
+
+[7] original: the dog liked a big telescope
+    masked:   the dog liked [mask] big telescope
+    replaced: "a" at pos 3
+    completed: the dog liked the big telescope
+
+[8] original: a telescope admired a woman in a cat
+    masked:   a telescope admired a [mask] in a cat
+    replaced: "woman" at pos 4
+    completed: a telescope admired a man in a cat
+
+[9] original: a telescope chased
+    masked:   a [mask] chased
+    replaced: "telescope" at pos 1
+    completed: a woman chased
+

@@ -1,259 +1,33 @@
-"""
-Sandbox!
-
-Currently working on better understanding representations - need normalized attributes across all dimensions
-so that we can calculate scores that make sense
-"""
-
-from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1, POS_GRAMMAR1, POS_CORPUS1
-from parse_mh import WEBSTER
-from cobweb.cobweb_discrete import CobwebDiscreteTree
+import sys
 import os
-from pprint import pprint
 
-if os.path.exists("sandbox/sandbox_ltm.png"):
-    os.remove("sandbox/sandbox_ltm.png")
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
-CONTEXT_LENGTH = 3
+from parse_mh import LongTermMemory
+from viz import CategorizePathVisualizer
 
-# function to scrape instances from sentence (not using the parse tree stuff for this)
-# that'll eventually be rewritten!
-def get_composite_chunk_candidates(sentence: str, value_to_id: dict, context_length: int = CONTEXT_LENGTH, bow=False):
-    """
-    Produce merge-candidate instances for all adjacent word pairs in `sentence`.
+# --- Set the LTM directory to visualize ---
+LTM_FILENAME = "unittests/gen_learn_test_mh/final_ltm_data/ltm"
 
-    Instances follow the numeric-key format used by `PrimitiveParseNode`/`CompositeParseNode`:
-      - 0: content-left dict
-      - 1: content-right dict
-      - 2..2+context_length-1: per-index context-before dicts (0 = immediate left)
-      - 2+context_length..2+2*context_length-1: per-index context-after dicts (0 = immediate right)
+# --- Load LTM ---
+ltm = LongTermMemory.load_state(LTM_FILENAME)
 
-    Missing context slots are represented as `{0: 0}` to keep compatibility with existing code.
+# --- Visualize content hierarchy (no red paths) ---
+content_html = CategorizePathVisualizer.build_standalone_html(
+    ltm.content_hierarchy.root,
+    path_hashes=[],
+)
+content_out = "sandbox_content_hierarchy.html"
+with open(content_out, "w", encoding="utf-8") as f:
+    f.write(content_html)
+print(f"Content hierarchy saved to: {content_out}")
 
-    'bow' represents a parameter of how the context should be associated - positionally OR with 
-    """
-
-    words = [value_to_id[w] for w in sentence.split(" ")]
-    insts = []
-
-    for i in range(len(words) - 1):
-        content_left = words[i]
-        content_right = words[i + 1]
-
-        inst = {
-            0: {content_left: 0.5, 0: 0},
-            1: {content_right: 0.5, 0: 0}
-        }
-
-        if bow:
-
-            # build per-index context-before (0 = immediate left of `content_left`)
-            d = {0: 0}
-            for k in range(context_length):
-                idx_before = i - 1 - k
-                if idx_before >= 0:
-                    d[words[idx_before]] = 1.0 / (2 ** (k + 1))
-                inst[2 + k] = {0: 0}
-
-            inst[2] = d
-
-            # build per-index context-after (0 = immediate right of `content_right`)
-            d = {0: 0}
-            for k in range(context_length):
-                idx_after = i + 2 + k
-                if idx_after < len(words):
-                    d[words[idx_after]] = 1.0 / (2 ** (k + 1))
-                inst[2 + context_length + k] = {0: 0}
-
-            inst[2 + context_length] = d
-            
-        else:
-
-            # build per-index context-before (0 = immediate left of `content_left`)
-            for k in range(context_length):
-                idx_before = i - 1 - k
-                if idx_before >= 0:
-                    d = {words[idx_before]: 1.0 / (2 ** (k + 1)), 0: 0}
-                else:
-                    d = {0: 1.0 / (2 ** (k + 1))}
-                    # d = {0: 0}
-                inst[2 + k] = d
-
-            # build per-index context-after (0 = immediate right of `content_right`)
-            for k in range(context_length):
-                idx_after = i + 2 + k
-                if idx_after < len(words):
-                    d = {words[idx_after]: 1.0 / (2 ** (k + 1)), 0: 0}
-                else:
-                    d = {0: 1.0 / (2 ** (k + 1))}
-                    # d = {0: 0}
-                inst[2 + context_length + k] = d
-
-        inst[2 + 2 * context_length] = {0: 0}
-
-        insts.append(inst)
-
-    return insts
-
-def get_primitive_chunk_candidates(sentence: str, value_to_id: dict, context_length: int = CONTEXT_LENGTH, bow=False):
-    """
-    Produce merge-candidate instances for words in `sentence`.
-
-    Instances follow the numeric-key format used by `PrimitiveParseNode`/`CompositeParseNode`:
-      - 0: NONE
-      - 1: NONE
-      - 2..2+context_length-1: per-index context-before dicts (0 = immediate left)
-      - 2+context_length..2+2*context_length-1: per-index context-after dicts (0 = immediate right)
-      - 2+2*context_length-1: singular content 
-
-    Missing context slots are represented as `{0: 0}` to keep compatibility with existing code.
-
-    'bow' is a keyword that signifies the type of 
-    """
-
-    words = [value_to_id[w] for w in sentence.split(" ")]
-    insts = []
-
-    for i in range(len(words)):
-
-        inst = {
-            0: {0: 0},
-            1: {0: 0}
-        }
-
-        if bow:
-
-            # build per-index context-before (0 = immediate left of `content_left`)
-            d = {0: 0}
-            for k in range(context_length):
-                idx_before = i - 1 - k
-                if idx_before >= 0:
-                    d[words[idx_before]] = 1.0 / (k + 1)
-
-            inst[2] = d
-
-            # build per-index context-after (0 = immediate right of `content_right`)
-            d = {0: 0}
-            for k in range(context_length):
-                idx_after = i + 2 + k
-                if idx_after < len(words):
-                    d[words[idx_after]] = 1.0 / (k + 1)
-
-            inst[2 + context_length] = d
-            
-        else:
-
-            # build per-index context-before (0 = immediate left of `content_left`)
-            for k in range(context_length):
-                idx_before = i - 1 - k
-                if idx_before >= 0:
-                    d = {words[idx_before]: 1.0 / (2 ** (k + 1)), 0: 0}
-                else:
-                    d = {0: 1.0 / (2 ** (k + 1))}
-                    # d = {0: 0}
-                inst[2 + k] = d
-
-            # build per-index context-after (0 = immediate right of `content_right`)
-            for k in range(context_length):
-                idx_after = i + 1 + k
-                if idx_after < len(words):
-                    d = {words[idx_after]: 1.0 / (2 ** (k + 1)), 0: 0}
-                else:
-                    d = {0: 1.0 / (2 ** (k + 1))}
-                    # d = {0: 0}
-                inst[2 + context_length + k] = d
-
-        inst[2 + 2 * context_length] = {words[i]: 1.0, 0: 0}
-
-        insts.append(inst)
-
-    return insts
-
-
-num_sentences = 40
-document = []
-
-for _ in range(num_sentences):
-    sentence = generate("S", TEST_GRAMMAR1)
-    document.append(sentence)
-
-primitives_factor = 1.0
-
-primitive_doc = document[:int(len(document) * primitives_factor)]
-composite_doc = document[int(len(document) * primitives_factor):]
-
-# WEBSTER is used only for vocabulary mapping and the drawer
-parser = WEBSTER(TEST_CORPUS1, context_length=CONTEXT_LENGTH)
-
-tree = CobwebDiscreteTree(1 / len(TEST_CORPUS1), weight_attr=False)
-
-for sentence in primitive_doc:
-
-    instances = get_primitive_chunk_candidates(sentence, parser.value_to_id, bow=False)
-
-    for inst in instances:
-        # check total sum of the instance
-        total_value_sum = 0
-        for k, d in inst.items():
-            # print(f"{k}: {sum(d.values())}")
-            total_value_sum += sum(d.values())
-
-        print(total_value_sum)
-
-    for inst in instances:
-        tree.ifit(inst)
-
-# for sentence in composite_doc:
-
-#     instances = get_composite_chunk_candidates(sentence, parser.value_to_id, bow=False)
-
-#     for inst in instances:
-#         # check total sum of the instance
-#         total_value_sum = 0
-#         for k, d in inst.items():
-#             # print(f"{k}: {sum(d.values())}")
-#             total_value_sum += sum(d.values())
-
-#         print(total_value_sum)
-
-#     for inst in instances:
-#         tree.ifit(inst)
-
-# parser.ltm.context_drawer.save_basic_level_subtrees(tree.root, "sandbox", debug=True, save_png=False)
-
-# print("All sentences:")
-# pprint(document)
-
-MAX_DEPTH = 3
-
-# while not os.path.exists(f"sandbox/sandbox_ltm_{MAX_DEPTH}.png"):
-    # parser.ltm.context_drawer.draw_tree(tree.root, "sandbox/sandbox_ltm")
-parser.ltm.context_drawer.draw_tree(tree.root, f"sandbox/sandbox_ltm_{MAX_DEPTH}", max_depth=MAX_DEPTH)
-
-# test_sentence = input("enter input sentence: ")
-# candidates = get_composite_chunk_candidates(test_sentence, parser.value_to_id)
-
-# print("Test Sentence:", test_sentence)
-
-# costs = []
-# counts = []
-# root_costs = []
-# best_log_prob_idxs = []
-# best_avg_log_probs = []
-# log_prob_avgs = []
-
-# for i, candidate in enumerate(candidates):
-#     print(f"Candidate {i}:")
-#     node, categorize_ids, node_categorize_path = custom_categorize(candidate, tree)
-#     print("Stats:")
-#     score_stats = FiniteParseTree._score_function(node_categorize_path, candidate)
-#     pprint(score_stats)
-#     costs.append(score_stats["cost"])
-#     counts.append(score_stats["normed_count"])
-#     root_costs.append(score_stats["root_cost"])
-#     best_log_prob_idxs.append(score_stats["best_log_prob_idx"])
-#     best_avg_log_probs.append(score_stats["best_avg_log_prob"])
-
-# print(costs)
-# print(root_costs)
-# print(counts)
+# --- Visualize context hierarchy (no red paths) ---
+context_html = CategorizePathVisualizer.build_standalone_html(
+    ltm.context_hierarchy.root,
+    path_hashes=[],
+)
+context_out = "sandbox_context_hierarchy.html"
+with open(context_out, "w", encoding="utf-8") as f:
+    f.write(context_html)
+print(f"Context hierarchy saved to: {context_out}")

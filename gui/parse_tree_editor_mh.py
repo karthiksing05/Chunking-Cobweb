@@ -1,7 +1,7 @@
 # parse_tree_editor_mh.py  –  Flask GUI for the multi-hierarchy framework
 from flask import Flask, jsonify, request
 from parse_mh import FiniteParseTree, WEBSTER, LongTermMemory
-from util.cfg import generate, TEST_CORPUS2, TEST_GRAMMAR2
+from util.cfg import generate, TEST_CORPUS1, TEST_GRAMMAR1, TEST_CORPUS2, TEST_GRAMMAR2
 import json
 import uuid
 
@@ -10,11 +10,14 @@ app = Flask(__name__)
 LEARNING_ON = True
 PREBUILD_TREES = False
 CONTEXT_LENGTH = 3
-CONTENT_LENGTH = 5
-THRESHOLD = "converge"
-CATEGORIZATION_MODE = "bfs_pmi"  # "dfs", "bfs", or "bfs_pmi"
-# LOAD_LTM = ""
-LOAD_LTM = "unittests/primitives_only_test_mh/final_ltm_data_redistributed"
+CONTENT_LENGTH = 10
+THRESHOLD = -2
+CATEGORIZATION_MODE = "dfs"  # "dfs", "bfs", or "bfs_pmi"
+LOAD_LTM = ""
+LOAD_LTM = "unittests/gen_learn_test_mh/final_ltm_data"
+
+corpus = TEST_CORPUS1
+grammar = TEST_GRAMMAR1
 
 # --- Initialize WEBSTER (multi-hierarchy parser) ---
 if LOAD_LTM != "":
@@ -22,21 +25,22 @@ if LOAD_LTM != "":
     # Override categorization_mode from config if loaded from state
     webster.categorization_mode = CATEGORIZATION_MODE
     webster.ltm.categorization_mode = CATEGORIZATION_MODE
+    webster.content_bl_alpha = 1e-2
 else:
     # Setting up the multi-hierarchy parser (WEBSTER)
     webster = WEBSTER(
-        TEST_CORPUS2,
+        corpus,
         context_length=CONTEXT_LENGTH,
         content_length=CONTENT_LENGTH,
         threshold=THRESHOLD,
-        content_alpha=1e-4,
-        context_alpha=1e-2,
+        content_alpha=1e-3,
+        context_alpha=1e-3,
         content_bl_alpha=1,
         context_bl_alpha=1,
         bow=False,
         chunk_context=False,
-        empty_weighting=False,
-        weighting="harmonic",
+        empty_weighting=True,
+        weighting="binary",
         categorization_mode='dfs', # can be dfs, bfs, or bfs_pmi
         depth_max_content=1000,
         depth_max_context=1000,
@@ -48,14 +52,14 @@ NUM_LOAD = 0
 document = []
 
 for _ in range(NUM_LOAD):
-    sentence = generate("S", TEST_GRAMMAR2)
+    sentence = generate("S", grammar)
     document.append(sentence)
 
 for doc in document:
     webster.parse_sentence(doc, threshold=THRESHOLD, new_vocab=True, learning=True, debug=False)
 
 # --- Initialize first sentence and tree ---
-sample_sentence = generate("S", TEST_GRAMMAR2)
+sample_sentence = generate("S", grammar)
 curr_tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
 if PREBUILD_TREES:
     curr_tree.build(sample_sentence)
@@ -66,7 +70,7 @@ else:
 def reset_tree():
     """Refresh to a new sentence and rebuild current tree."""
     global curr_tree, sample_sentence
-    sample_sentence = generate("S", TEST_GRAMMAR2)
+    sample_sentence = generate("S", grammar)
     curr_tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
     if PREBUILD_TREES:
         curr_tree.build(sample_sentence)
@@ -98,7 +102,7 @@ def api_evaluate():
     data = request.get_json()
     left = data.get("left_word_index")
     right = data.get("right_word_index")
-    debug = data.get("debug", False)
+    debug = data.get("debug", True)
     result = curr_tree.evaluate_pair(left, right, debug=debug)
     cpv = CategorizePathVisualizer()
     content_tree = cpv.tree_to_compact_json(webster.ltm.content_hierarchy.root)

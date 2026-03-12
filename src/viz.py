@@ -547,7 +547,7 @@ class CategorizePathVisualizer:
 <meta charset="utf-8"/>
 <title>Categorize Path Visualization</title>
 <style>
-	body {{ margin: 0; overflow: hidden; background: #fafafa; font-family: system-ui, sans-serif; }}
+	body {{ margin: 0; overflow: hidden; background: #fff; font-family: system-ui, sans-serif; }}
 	#tooltip {{ position: fixed; top: 8px; left: 8px; font-size: 11px; background: rgba(0,0,0,0.6);
 	            color: #fff; padding: 4px 8px; border-radius: 4px; pointer-events: none; display: none; }}
 </style>
