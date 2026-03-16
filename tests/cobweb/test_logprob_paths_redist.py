@@ -1,39 +1,8 @@
 """
-Test 2: Log-probability probe using concept-path IDs – bigram framing.
-
-In the real framework, content instances encode *both* tokens of a bigram as
-their label_path through the context hierarchy — 3 depth levels per side:
-
-    {0: {left_d0: 1}, 1: {left_d1: 1}, 2: {left_d2: 1},
-     3: {right_d0: 1}, 4: {right_d1: 1}, 5: {right_d2: 1}}
-
-This test simulates that encoding with a POS hierarchy that distinguishes
-function words (articles/determiners) from content words (nouns/verbs):
-
-    ROOT
-    ├── FUNC_WORD (100)
-    │   └── ARTICLE (110)
-    │       ├── DEF_ART (111)        ← "the"
-    │       └── INDEF_ART (112)      ← "a"
-    └── CONTENT_WORD (200)
-        ├── NOUN (210)
-        │   ├── ANIM_NOUN (211)      ← cat, dog, bird
-        │   └── INANIM_NOUN (212)    ← fish, mouse
-        └── VERB (220)
-            ├── RUNS (221)
-            └── SEES (222)
-
-Training bigrams mimic surface bigrams from S → NP VP, NP → Det N:
-  - 10  Det+Noun  bigrams  (NP-internal, e.g. "the cat", "a dog")
-  - 2   Noun+Verb bigrams  (NP→VP boundary crossing, e.g. "cat runs")
-
-Expected insight over test 1:
-  • A Det+unseen_noun bigram (e.g. "the horse") should score *much closer*
-    to the trained Det+Noun cluster than a Noun+Verb boundary bigram,
-    because depth-0 (FUNC_WORD) and depth-1 (ARTICLE) match even when
-    the leaf (horse) is novel.
-  • Unseen Noun+Verb (horse, runs) should still score lower than any
-    Det+Noun variant because the category mismatch persists at depth-0.
+Test 2 (redistribute variant): Same as test_logprob_paths.py but the tree is
+built with redistribute=True so that MERGE and SPLIT are disabled during ifit
+and misplaced children are redistributed at each node before descending.
+redist_debug=True is passed to ifit so redistributions are printed to stdout.
 """
 
 import sys, os
@@ -137,18 +106,12 @@ DET_NOUN_BIGRAMS = [
 NOUN_VERB_BIGRAMS = [
     inst(*noun_anim(CAT), *verb(RUNS)),
     inst(*noun_anim(DOG), *verb(SEES)),
-    # inst(*noun_anim(DOG), *verb(RUNS)),
-    # inst(*noun_anim(CAT), *verb(SEES)),
-    # inst(*noun_anim(BIRD), *verb(RUNS)),
-    # inst(*noun_anim(FISH), *verb(SEES)),
-    # inst(*noun_anim(FISH), *verb(RUNS)),
-    # inst(*noun_anim(BIRD), *verb(SEES)),
 ]
 
 TRAINING = DET_NOUN_BIGRAMS + NOUN_VERB_BIGRAMS
 
 
-# ── helpers (same as test 1) ──────────────────────────────────────────────────
+# ── helpers ───────────────────────────────────────────────────────────────────
 def count_concepts(node):
     """Recursively count all nodes in the tree."""
     return 1 + sum(count_concepts(c) for c in node.children)
@@ -229,25 +192,13 @@ def print_scores(label, tree, instance):
 
 
 # ── main test ─────────────────────────────────────────────────────────────────
-def test_path_logprobs(shuffle=False):
-    tree = CobwebDiscreteTree(alpha=1e-3, weight_attr=False)
+def test_path_logprobs_redist(shuffle=False):
+    tree = CobwebDiscreteTree(alpha=1e-3, weight_attr=False, redistribute=True)
 
     if shuffle:
         random.shuffle(TRAINING)
     for item in TRAINING:
-        tree.ifit(item)
-
-    # tree.redistribute(2000)
-
-    # print()
-    # print("Training Data")
-
-    # from pprint import pprint
-
-    # pprint(TRAINING)
-
-    # print(inst(*article_def(), *noun_anim(CAT)))
-    # print(inst(*noun_anim(CAT), *verb(RUNS)))
+        tree.ifit(item, redist_debug=True)
 
     print(f"\nTree has {count_concepts(tree.root)} concepts, "
           f"root.count={tree.root.count}")
@@ -303,14 +254,12 @@ def test_path_logprobs(shuffle=False):
         attr_value_fn={i: _val_fn for i in range(6)},
     )
     output_path = os.path.join(
-        os.path.dirname(__file__), "output", "logprob_paths_tree"
+        os.path.dirname(__file__), "output", "logprob_paths_redist_tree"
     )
     try:
         html_file, png_file = drawer.draw_tree(tree.root, output_path)
         print(f"\nTree visualization saved to: {html_file}")
     except Exception as exc:
-        # PNG generation via Playwright may fail if Chromium is not installed;
-        # the HTML file is still useful on its own.
         html_file = output_path + ".html"
         import json
         d3_json = json.dumps(drawer._node_to_dict(tree.root))
@@ -327,4 +276,4 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--shuffle", action="store_true",
                         help="Shuffle training data before fitting")
     args = parser.parse_args()
-    test_path_logprobs(shuffle=args.shuffle)
+    test_path_logprobs_redist(shuffle=args.shuffle)

@@ -1,93 +1,10 @@
 """
-Test: Log-probability probe using concept-path IDs – larger bigram framing.
+Test: Log-probability probe (large, redistribute variant).
 
-Instances encode *both* tokens of a bigram as a 4-level path through a richer
-POS/semantic hierarchy — 4 depth levels per side (8 attributes total):
-
-    {0: {l_d0: 1}, 1: {l_d1: 1}, 2: {l_d2: 1}, 3: {l_d3: 1},
-     4: {r_d0: 1}, 5: {r_d1: 1}, 6: {r_d2: 1}, 7: {r_d3: 1}}
-
-Simulated POS/semantic hierarchy (depth-4, root implied):
-
-    ROOT
-    ├── FUNC_WORD (100)
-    │   ├── ARTICLE (110)
-    │   │   ├── DEF_ART (111)
-    │   │   │   └── THE (1011)
-    │   │   └── INDEF_ART (112)
-    │   │       ├── A (1012)
-    │   │       └── AN (1013)
-    │   └── PREP (120)
-    │       ├── SPATIAL_PREP (121)
-    │       │   ├── IN (1021)
-    │       │   ├── ON (1022)
-    │       │   └── UNDER (1023)
-    │       └── TEMPORAL_PREP (122)
-    │           ├── BEFORE (1031)
-    │           └── AFTER (1032)
-    └── CONTENT_WORD (200)
-        ├── NOUN (210)
-        │   ├── ANIM_NOUN (211)
-        │   │   ├── CAT (2011)
-        │   │   ├── DOG (2012)
-        │   │   ├── BIRD (2013)
-        │   │   └── WOLF (2014)      ← UNSEEN
-        │   ├── INANIM_NOUN (212)
-        │   │   ├── FISH (2021)
-        │   │   ├── STONE (2022)
-        │   │   ├── BOOK (2023)
-        │   │   └── COIN (2024)      ← UNSEEN
-        │   └── PLACE_NOUN (213)
-        │       ├── PARK (2031)
-        │       ├── RIVER (2032)
-        │       ├── FOREST (2033)
-        │       └── CAVE (2034)      ← UNSEEN
-        ├── VERB (220)
-        │   ├── MOTION_VERB (221)
-        │   │   ├── RUNS (2211)
-        │   │   ├── SWIMS (2212)
-        │   │   ├── FLIES (2213)
-        │   │   └── LEAPS (2214)     ← UNSEEN
-        │   ├── PERCEPTION_VERB (222)
-        │   │   ├── SEES (2221)
-        │   │   ├── HEARS (2222)
-        │   │   └── SMELLS (2223)    ← UNSEEN
-        │   └── STATIVE_VERB (223)
-        │       ├── LIKES (2231)
-        │       ├── KNOWS (2232)
-        │       └── FEARS (2233)     ← UNSEEN
-        └── ADJ (230)
-            ├── SIZE_ADJ (231)
-            │   ├── BIG (2311)
-            │   ├── SMALL (2312)
-            │   └── TINY (2313)      ← UNSEEN
-            └── COLOR_ADJ (232)
-                ├── RED (2321)
-                ├── BLUE (2322)
-                ├── GREEN (2323)
-                └── BLACK (2324)     ← UNSEEN
-
-Training corpus covers:
-  - NP-internal bigrams:  Det + AnimNoun  (×10, high frequency)
-  - NP-internal bigrams:  Det + InanimNoun (×8)
-  - NP-internal bigrams:  Det + PlaceNoun  (×6)
-  - Adj+Noun bigrams:     SizeAdj/ColorAdj + Noun  (×12)
-  - VP bigrams:           AnimNoun + MotionVerb     (×8)
-  - VP bigrams:           AnimNoun + PerceptionVerb (×6)
-  - VP bigrams:           AnimNoun + StatVerb       (×4)
-  - PP-internal bigrams:  SpatialPrep + PlaceNoun   (×6)
-  - PP-internal bigrams:  TemporalPrep + Verb       (×4)
-  - Boundary crossings:   Noun + SpatialPrep        (×4)
-  - Noisy/rare:           InanimNoun + MotionVerb   (×2)
-
-Expected probe insights:
-  • Det + unseen animate noun should outscore any boundary pattern
-    because d0/d1/d2 (FUNC_WORD, ARTICLE, DEF_ART / INDEF_ART) all match.
-  • SizeAdj + unseen noun should score closer to trained Adj+Noun bigrams
-    than to VP bigrams.
-  • An unseen MotionVerb after an AnimNoun should still score well because
-    d0 (CONTENT_WORD) and d1 (VERB) and d2 (MOTION_VERB) all match.
-  • Temporally odd combos (PrepTemporal + AnimNoun) should score low.
+Same corpus and probes as test_logprob_paths_large.py but the tree is built
+with redistribute=True so that MERGE and SPLIT are disabled during ifit and
+misplaced children are redistributed at each node before descending.
+redist_debug=True is passed to ifit so redistributions are printed to stdout.
 """
 
 import sys, os
@@ -98,6 +15,7 @@ from cobweb.cobweb_discrete import CobwebDiscreteTree
 from viz import HTMLCobwebDrawer
 
 import random
+import argparse
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -109,23 +27,23 @@ FUNC_WORD    = 100
 CONTENT_WORD = 200
 
 # ── depth 1 ──────────────────────────────────────────────────────────────────
-ARTICLE      = 110   # subset of FUNC_WORD
-PREP         = 120   # subset of FUNC_WORD
+ARTICLE      = 110
+PREP         = 120
 
-NOUN         = 210   # subset of CONTENT_WORD
-VERB         = 220   # subset of CONTENT_WORD
-ADJ          = 230   # subset of CONTENT_WORD
+NOUN         = 210
+VERB         = 220
+ADJ          = 230
 
 # ── depth 2 ──────────────────────────────────────────────────────────────────
-DEF_ART      = 111   # definite article
-INDEF_ART    = 112   # indefinite article
+DEF_ART      = 111
+INDEF_ART    = 112
 
 SPATIAL_PREP   = 121
 TEMPORAL_PREP  = 122
 
-ANIM_NOUN    = 211   # animate nouns
-INANIM_NOUN  = 212   # inanimate nouns
-PLACE_NOUN   = 213   # place nouns
+ANIM_NOUN    = 211
+INANIM_NOUN  = 212
+PLACE_NOUN   = 213
 
 MOTION_VERB      = 221
 PERCEPTION_VERB  = 222
@@ -135,72 +53,53 @@ SIZE_ADJ   = 231
 COLOR_ADJ  = 232
 
 # ── depth 3 (leaf token IDs) ─────────────────────────────────────────────────
-#   Articles
 THE   = 1011
 A     = 1012
 AN    = 1013
 
-#   Spatial prepositions
 IN    = 1021
 ON    = 1022
 UNDER = 1023
 
-#   Temporal prepositions
 BEFORE = 1031
 AFTER  = 1032
 
-#   Animate nouns  (SEEN)
 CAT   = 2011
 DOG   = 2012
 BIRD  = 2013
-#   Animate nouns  (UNSEEN)
-WOLF  = 2014
+WOLF  = 2014   # UNSEEN
 
-#   Inanimate nouns  (SEEN)
 FISH  = 2021
 STONE = 2022
 BOOK  = 2023
-#   Inanimate nouns  (UNSEEN)
-COIN  = 2024
+COIN  = 2024   # UNSEEN
 
-#   Place nouns  (SEEN)
 PARK   = 2031
 RIVER  = 2032
 FOREST = 2033
-#   Place nouns  (UNSEEN)
-CAVE   = 2034
+CAVE   = 2034  # UNSEEN
 
-#   Motion verbs  (SEEN)
 RUNS   = 2211
 SWIMS  = 2212
 FLIES  = 2213
-#   Motion verbs  (UNSEEN)
-LEAPS  = 2214
+LEAPS  = 2214  # UNSEEN
 
-#   Perception verbs  (SEEN)
 SEES   = 2221
 HEARS  = 2222
-#   Perception verbs  (UNSEEN)
-SMELLS = 2223
+SMELLS = 2223  # UNSEEN
 
-#   Stative verbs  (SEEN)
 LIKES  = 2231
 KNOWS  = 2232
-#   Stative verbs  (UNSEEN)
-FEARS  = 2233
+FEARS  = 2233  # UNSEEN
 
-#   Size adjectives  (SEEN)
 BIG   = 2311
 SMALL = 2312
-#   Size adjectives  (UNSEEN)
-TINY  = 2313
+TINY  = 2313   # UNSEEN
 
-#   Color adjectives  (SEEN)
 RED   = 2321
 BLUE  = 2322
 GREEN = 2323
-#   Color adjectives  (UNSEEN)
-BLACK = 2324
+BLACK = 2324   # UNSEEN
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -272,14 +171,14 @@ VALUE_NAMES = {
 def inst(l0, l1, l2, l3, r0, r1, r2, r3):
     """4-depth-per-side content instance (8 attributes total)."""
     return {
-        0: {l0: 1.0},  # left  depth 0
-        1: {l1: 1.0},  # left  depth 1
-        2: {l2: 1.0},  # left  depth 2
-        3: {l3: 1.0},  # left  depth 3  (leaf token ID)
-        4: {r0: 1.0},  # right depth 0
-        5: {r1: 1.0},  # right depth 1
-        6: {r2: 1.0},  # right depth 2
-        7: {r3: 1.0},  # right depth 3  (leaf token ID)
+        0: {l0: 1.0},
+        1: {l1: 1.0},
+        2: {l2: 1.0},
+        3: {l3: 1.0},
+        4: {r0: 1.0},
+        5: {r1: 1.0},
+        6: {r2: 1.0},
+        7: {r3: 1.0},
     }
 
 
@@ -310,12 +209,11 @@ def p_color(leaf):   return (CONTENT_WORD, ADJ, COLOR_ADJ, leaf)
 # Training corpus
 # ═══════════════════════════════════════════════════════════════════════════
 
-# ── NP-internal: Det + AnimNoun  (×10 – high frequency) ─────────────────────
 DET_ANIM_BIGRAMS = [
     inst(*p_the(),  *p_anim(CAT)),
     inst(*p_the(),  *p_anim(DOG)),
     inst(*p_the(),  *p_anim(BIRD)),
-    inst(*p_the(),  *p_anim(CAT)),   # repeat to boost "the cat"
+    inst(*p_the(),  *p_anim(CAT)),
     inst(*p_the(),  *p_anim(DOG)),
     inst(*p_a(),    *p_anim(CAT)),
     inst(*p_a(),    *p_anim(DOG)),
@@ -324,7 +222,6 @@ DET_ANIM_BIGRAMS = [
     inst(*p_an(),   *p_anim(BIRD)),
 ]
 
-# ── NP-internal: Det + InanimNoun  (×8) ──────────────────────────────────────
 DET_INANIM_BIGRAMS = [
     inst(*p_the(),  *p_inanim(FISH)),
     inst(*p_the(),  *p_inanim(STONE)),
@@ -336,7 +233,6 @@ DET_INANIM_BIGRAMS = [
     inst(*p_an(),   *p_inanim(STONE)),
 ]
 
-# ── NP-internal: Det + PlaceNoun  (×6) ───────────────────────────────────────
 DET_PLACE_BIGRAMS = [
     inst(*p_the(),  *p_place(PARK)),
     inst(*p_the(),  *p_place(RIVER)),
@@ -346,27 +242,21 @@ DET_PLACE_BIGRAMS = [
     inst(*p_a(),    *p_place(FOREST)),
 ]
 
-# ── NP-internal: Adj + Noun  (×12) ───────────────────────────────────────────
 ADJ_NOUN_BIGRAMS = [
-    # size + animate
     inst(*p_size(BIG),    *p_anim(CAT)),
     inst(*p_size(BIG),    *p_anim(DOG)),
     inst(*p_size(SMALL),  *p_anim(BIRD)),
     inst(*p_size(SMALL),  *p_anim(CAT)),
-    # size + inanimate
     inst(*p_size(BIG),    *p_inanim(STONE)),
     inst(*p_size(SMALL),  *p_inanim(FISH)),
-    # color + animate
     inst(*p_color(RED),   *p_anim(BIRD)),
-    inst(*p_color(BLUE),  *p_anim(FISH)),   # fish used as animate loosely
+    inst(*p_color(BLUE),  *p_anim(FISH)),
     inst(*p_color(GREEN), *p_anim(BIRD)),
-    # color + inanimate
     inst(*p_color(RED),   *p_inanim(STONE)),
     inst(*p_color(BLUE),  *p_inanim(BOOK)),
     inst(*p_color(GREEN), *p_inanim(FISH)),
 ]
 
-# ── VP: AnimNoun + MotionVerb  (×8) ──────────────────────────────────────────
 ANIM_MOTION_BIGRAMS = [
     inst(*p_anim(CAT),   *p_motion(RUNS)),
     inst(*p_anim(DOG),   *p_motion(RUNS)),
@@ -374,11 +264,10 @@ ANIM_MOTION_BIGRAMS = [
     inst(*p_anim(FISH),  *p_motion(SWIMS)),
     inst(*p_anim(CAT),   *p_motion(SWIMS)),
     inst(*p_anim(DOG),   *p_motion(FLIES)),
-    inst(*p_anim(CAT),   *p_motion(RUNS)),   # repeat
-    inst(*p_anim(BIRD),  *p_motion(FLIES)),  # repeat
+    inst(*p_anim(CAT),   *p_motion(RUNS)),
+    inst(*p_anim(BIRD),  *p_motion(FLIES)),
 ]
 
-# ── VP: AnimNoun + PerceptionVerb  (×6) ──────────────────────────────────────
 ANIM_PERCEP_BIGRAMS = [
     inst(*p_anim(CAT),   *p_percep(SEES)),
     inst(*p_anim(DOG),   *p_percep(SEES)),
@@ -388,7 +277,6 @@ ANIM_PERCEP_BIGRAMS = [
     inst(*p_anim(BIRD),  *p_percep(SEES)),
 ]
 
-# ── VP: AnimNoun + StativeVerb  (×4) ─────────────────────────────────────────
 ANIM_STATIV_BIGRAMS = [
     inst(*p_anim(CAT),  *p_stativ(LIKES)),
     inst(*p_anim(DOG),  *p_stativ(KNOWS)),
@@ -396,7 +284,6 @@ ANIM_STATIV_BIGRAMS = [
     inst(*p_anim(BIRD), *p_stativ(LIKES)),
 ]
 
-# ── PP-internal: SpatialPrep + PlaceNoun  (×6) ───────────────────────────────
 SPATPREP_PLACE_BIGRAMS = [
     inst(*p_in(),    *p_place(PARK)),
     inst(*p_in(),    *p_place(RIVER)),
@@ -406,7 +293,6 @@ SPATPREP_PLACE_BIGRAMS = [
     inst(*p_under(),  *p_place(PARK)),
 ]
 
-# ── PP-internal: TemporalPrep + Verb  (×4) ───────────────────────────────────
 TEMPPREP_VERB_BIGRAMS = [
     inst(*p_before(), *p_motion(RUNS)),
     inst(*p_before(), *p_motion(FLIES)),
@@ -414,7 +300,6 @@ TEMPPREP_VERB_BIGRAMS = [
     inst(*p_after(),  *p_stativ(LIKES)),
 ]
 
-# ── Boundary crossing: AnimNoun + SpatialPrep  (×4, rare) ────────────────────
 ANIM_PREP_BOUNDARY = [
     inst(*p_anim(CAT),  *p_in()),
     inst(*p_anim(DOG),  *p_on()),
@@ -422,13 +307,11 @@ ANIM_PREP_BOUNDARY = [
     inst(*p_anim(CAT),  *p_under()),
 ]
 
-# ── Noisy / rare: InanimNoun + MotionVerb  (×2) ──────────────────────────────
 INANIM_MOTION_NOISE = [
-    inst(*p_inanim(STONE), *p_motion(RUNS)),   # weird but seen once
-    inst(*p_inanim(BOOK),  *p_motion(FLIES)),  # metaphorical
+    inst(*p_inanim(STONE), *p_motion(RUNS)),
+    inst(*p_inanim(BOOK),  *p_motion(FLIES)),
 ]
 
-# ── Full training set ─────────────────────────────────────────────────────────
 TRAINING = (
     DET_ANIM_BIGRAMS
     + DET_INANIM_BIGRAMS
@@ -513,13 +396,13 @@ def print_scores(label, tree, instance):
 # ═══════════════════════════════════════════════════════════════════════════
 # Main test
 # ═══════════════════════════════════════════════════════════════════════════
-def test_path_logprobs_large(shuffle=False):
-    tree = CobwebDiscreteTree(alpha=1e-3, weight_attr=False)
+def test_path_logprobs_large_redist(shuffle=False):
+    tree = CobwebDiscreteTree(alpha=1e-3, weight_attr=False, redistribute=True)
 
     if shuffle:
         random.shuffle(TRAINING)
     for item in TRAINING:
-        tree.ifit(item)
+        tree.ifit(item, redist_debug=True)
 
     print(f"\nTree has {count_concepts(tree.root)} concepts, "
           f"root.count={tree.root.count}, training size={len(TRAINING)}")
@@ -687,8 +570,7 @@ def test_path_logprobs_large(shuffle=False):
         inst(*p_under(), *p_place(CAVE)),
     )
 
-    # ── [I] Category-mismatch probes  ────────────────────────────────────────
-    # These should score LOWER than their correct-pattern counterparts.
+    # ── [I] Category-mismatch probes ─────────────────────────────────────────
     print("\n" + "─"*66)
     print("  [I] Category-mismatch probes (should score poorly)")
     print("─"*66)
@@ -731,7 +613,7 @@ def test_path_logprobs_large(shuffle=False):
         attr_value_fn={i: _val_fn for i in range(8)},
     )
     output_path = os.path.join(
-        os.path.dirname(__file__), "output", "logprob_paths_large_tree"
+        os.path.dirname(__file__), "output", "logprob_paths_large_redist_tree"
     )
     try:
         html_file, png_file = drawer.draw_tree(tree.root, output_path)
@@ -753,4 +635,4 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--shuffle", action="store_true",
                         help="Shuffle training data before fitting")
     args = parser.parse_args()
-    test_path_logprobs_large(shuffle=args.shuffle)
+    test_path_logprobs_large_redist(shuffle=args.shuffle)

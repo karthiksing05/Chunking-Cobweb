@@ -2,6 +2,20 @@
 
 Whereas before we hypothesized needing multiple hierarchies for multiple levels of granularity or to separate primitives and composites, we now rely on multiple hierarchies to properly separate *content* and *context*.
 
+## Methodology 4.0
+
+I think Pat's right - we need to store pointers and use path information in real time for maximal simplicity, if we're implementing the redistribute method we should store leaves and move from there.
+
+TODO LIST FOR NEXT METHODOLOGY (WITH REDISTRIBUTE):
+*   Adjust Cobweb to store IDs that have pointers to Cobweb nodes and then modify the log-prob functions to recompute path information in real time (this is either a cobweb library approach or a )
+    *   As a result of this, we can remove all of the instance merging and removing, and recompute everything in real time which should be really nice
+*   CHUNK CONTEXT HOWWWWW
+    *   Need to program a test that uses the leaves and then finds similarities in a similar way to the above thing - I think chunk context will be significantly easier if we overhaul with the new thing that we're trying to do!!
+
+Adjustments for Cobweb:
+*   Let's build the new ID-mapping natively into this - then, based on whether the given ID links to a string or a CobwebNode, we can treat it separately
+    *   Assume that a string and a CobwebNode have no similarity
+
 ## Methodology 3.1
 
 Lots more work to do - I'm going to spend some time devising a TODO list of stuff that needs to happen, in this order, for us to complete the framework, and then we're basically just going to iterate through this todo list.
@@ -9,8 +23,11 @@ Lots more work to do - I'm going to spend some time devising a TODO list of stuf
 We did stuff! Long term, shuffling makes things weird, alphas customized for the basic level work, and more data was needed for success!!
 *   Initial results from cramming for CoCo reveals some, but not all consistency!!
 *   The framework is better than I thought - just need to find strong hierarchy quality for generation!
+    *   We see some proper disambiguation, hierarchical structure, the primary problem is that path representation is weak as a result of the poor hierarchy quality!!
+    *   This is also important in generation - basic level nodes need to appropriately sample the level of diversity that they represent for the ability to do strong generation diversity
 
-IMPORTANT THING: We need a simplicity bias - or maybe just better levels of generalization and better hierarchy quality LOL, not sure which yet.
+*   IMPORTANT THING: We need a simplicity bias - or maybe just better levels of generalization and better hierarchy quality LOL, not sure which yet.
+    *   The primary reason I say this is that we need some bias that convinces the model to build a chunk that it recognizes before trying to create a new chunk (so perhaps basic level categories are either too broad or too narrow right now)
 
 Potential things to try:
 *   Redistribution!!!! GET THIS WORKING, THIS HAS TO BE IT FOR SURE
@@ -19,6 +36,7 @@ Potential things to try:
 *   Threshold by both log-prob and counts if needed
 *   Program sufficient generation scheme!!
 *   IF WORST COMES TO WORST - we're DEFINITELY going to have to store models of various depths in various hierarchies and call them all the same hierarchy (make complexity a visible attribute first, and then try this???)
+    *   Create a Cobweb hierarchy neural model where we have LAYERS of Cobweb hierarchies
 
 ## Methodology 3.0!!
 
