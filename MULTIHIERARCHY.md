@@ -5,16 +5,24 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
 ## Methodology 4.0
 
 I think Pat's right - we need to store pointers and use path information in real time for maximal simplicity, if we're implementing the redistribute method we should store leaves and move from there.
+*   HUGE implications here - there's a commentary here about how computing a latent in real-time for comparison is a necessity for a true incremental learning system! 
 
 TODO LIST FOR NEXT METHODOLOGY (WITH REDISTRIBUTE):
 *   Adjust Cobweb to store IDs that have pointers to Cobweb nodes and then modify the log-prob functions to recompute path information in real time (this is either a cobweb library approach or a )
     *   As a result of this, we can remove all of the instance merging and removing, and recompute everything in real time which should be really nice
 *   CHUNK CONTEXT HOWWWWW
+    *   Program short chunk context test to see if POS retains its part of speech with iterative context! (Basically, build a diffusion model with Cobweb) - Use Matasakis Implementation for inspiration!!
+        *   This will be an extremely important initial test for testing whether chunk context will even work, but hopefully the shift in path information will make things make sense
     *   Need to program a test that uses the leaves and then finds similarities in a similar way to the above thing - I think chunk context will be significantly easier if we overhaul with the new thing that we're trying to do!!
 
-Adjustments for Cobweb:
-*   Let's build the new ID-mapping natively into this - then, based on whether the given ID links to a string or a CobwebNode, we can treat it separately
+Code changes to make:
+*   To Cobweb:
+    *   Let's build the new ID-mapping natively into this - then, based on whether the given ID links to a string or a CobwebNode, we can treat it separately
     *   Assume that a string and a CobwebNode have no similarity
+*   To Webster:
+    *   
+*   Miscellaneous:
+    *   Make sure that at the end, we can do a "hover" mechanic within the GUI where hovering over a given Concept-ID or Chunk-ID
 
 ## Methodology 3.1
 
