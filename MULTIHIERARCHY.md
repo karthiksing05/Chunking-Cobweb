@@ -7,22 +7,37 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
 I think Pat's right - we need to store pointers and use path information in real time for maximal simplicity, if we're implementing the redistribute method we should store leaves and move from there.
 *   HUGE implications here - there's a commentary here about how computing a latent in real-time for comparison is a necessity for a true incremental learning system! 
 
-TODO LIST FOR NEXT METHODOLOGY (WITH REDISTRIBUTE):
-*   Adjust Cobweb to store IDs that have pointers to Cobweb nodes and then modify the log-prob functions to recompute path information in real time (this is either a cobweb library approach or a )
-    *   As a result of this, we can remove all of the instance merging and removing, and recompute everything in real time which should be really nice
-*   CHUNK CONTEXT HOWWWWW
-    *   Program short chunk context test to see if POS retains its part of speech with iterative context! (Basically, build a diffusion model with Cobweb) - Use Matasakis Implementation for inspiration!!
-        *   This will be an extremely important initial test for testing whether chunk context will even work, but hopefully the shift in path information will make things make sense
-    *   Need to program a test that uses the leaves and then finds similarities in a similar way to the above thing - I think chunk context will be significantly easier if we overhaul with the new thing that we're trying to do!!
+TODO LIST For Leaf Pointer and real-time Path Information calculation:
+*   Let's first do the path information thing and then we can iterate on the redistribution idea!!
+*   We'll move the ID-mapping (value_to_id and id_to_value) present in parse_mh.py to the Cobweb C++ layer - this way, we can store the leaves as actual pointers when creating them in the vocabulary 
+*   Attributes are strings, values are either strings or CobwebNodes! CobwebNodes taken from the reference hierarchy, which is also a parameter we provide to the constructor!!
+    *   Need to do a way of comparison for the CobwebNodes between each other in a "soft" way (Lowest Common Ancestor!!!)
+    *   All actual storage should be of ints for attributes, ints for values, and ints for counts, but we have a lookup table to check if attributes are cobweb-nodes OR strings. 
+    *   If they are regular strings, we can do standard comparison as Cobweb library does right now, otherwise we use LCA of the paths of the two nodes as a similarity proxy.
+*   The Path Information change should be a change primarily made in the Cobweb library, with stuff on the WEBSTER side being mostly a change to the instances and logistics
 
 Code changes to make:
 *   To Cobweb:
     *   Let's build the new ID-mapping natively into this - then, based on whether the given ID links to a string or a CobwebNode, we can treat it separately
-    *   Assume that a string and a CobwebNode have no similarity
+    *   Assume that a string and a CobwebNode have no similarity, and the similarity between two strings is either 1 or 0 but the similarity between two CobwebNode instances is some fraction depending on the LCA between the two nodes
 *   To Webster:
-    *   
+    *   We can just remove code related to the ID-mapping and stuff
+    *   Now, content-left and content-right in the content instance only store a single leaf pointer ID and paths are recomputed in real time
+    *   The content-ref in the context instance should also only store 
+    *   REMOVE CHUNK CONTEXT FOR NOW!! We'll add it back later!!
 *   Miscellaneous:
     *   Make sure that at the end, we can do a "hover" mechanic within the GUI where hovering over a given Concept-ID or Chunk-ID
+    *   Generally, adjust the HTMLCobwebDrawer such that we get correct visualizations
+    *   [IMPORTANT]: Let's create a test that loads a hierarchy kind of like the hierarchy from tests/cobweb/test_logprob_paths.py and then creates another hierarchy, using word-pairs from a typical sentence. The left and right element should be found 
+
+TODO LIST for Redistribution:
+*   For redistribution, the following is necessary:
+    *   Maintain redistribution as a batch operation, but also include it as a 
+
+TODO LIST FOR NEXT METHODOLOGY WITH CHUNK CONTEXT:
+*   Program short chunk context test to see if POS retains its part of speech with iterative context! (Basically, build a diffusion model with Cobweb) - Use Matasakis Implementation for inspiration!!
+    *   This will be an extremely important initial test for testing whether chunk context will even work, but hopefully the shift in path information will make things make sense
+*   Need to program a test that uses the leaves and then finds similarities in a similar way to the above thing - I think chunk context will be significantly easier if we overhaul with the new thing that we're trying to do!!
 
 ## Methodology 3.1
 

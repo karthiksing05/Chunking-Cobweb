@@ -10,7 +10,6 @@ app = Flask(__name__)
 LEARNING_ON = True
 PREBUILD_TREES = False
 CONTEXT_LENGTH = 3
-CONTENT_LENGTH = 10
 THRESHOLD = -2
 CATEGORIZATION_MODE = "dfs"  # "dfs", "bfs", or "bfs_pmi"
 LOAD_LTM = ""
@@ -31,14 +30,12 @@ else:
     webster = WEBSTER(
         corpus,
         context_length=CONTEXT_LENGTH,
-        content_length=CONTENT_LENGTH,
         threshold=THRESHOLD,
         content_alpha=1e-3,
         context_alpha=1e-3,
         content_bl_alpha=1,
         context_bl_alpha=1,
         bow=False,
-        chunk_context=False,
         empty_weighting=True,
         weighting="binary",
         categorization_mode='dfs', # can be dfs, bfs, or bfs_pmi

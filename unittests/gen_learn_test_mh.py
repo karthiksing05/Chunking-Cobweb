@@ -19,7 +19,6 @@ if os.path.exists(OUT_DIR):
     
 # Creating and printing toy sentences
 CONTEXT_LENGTH = 3
-CONTENT_LENGTH = 10
 
 num_sentences = 175
 document = []
@@ -34,14 +33,12 @@ THRESHOLD = 30
 webster = WEBSTER(
     TEST_CORPUS1,
     context_length=CONTEXT_LENGTH,
-    content_length=CONTENT_LENGTH,
     threshold=THRESHOLD,
-    content_alpha=1e-5,
+    content_alpha=1e-3,
     context_alpha=1e-3,
-    content_bl_alpha=1,
-    context_bl_alpha=1,
+    content_bl_alpha=1e-1,
+    context_bl_alpha=1e-1,
     bow=False,
-    chunk_context=False,
     empty_weighting=True,
     weighting="binary",
     categorization_mode='dfs', # can be dfs, bfs, or bfs_pmi
@@ -54,6 +51,7 @@ webster = WEBSTER(
 train_size = 0.9
 
 PRIMITIVES_FIRST = 100
+REDISTRIBUTE_TREES = False
 
 train_documents = document[:int(len(document) * train_size)]
 test_documents = document[int(len(document) * train_size):]
@@ -76,8 +74,14 @@ for i, doc in enumerate(train_documents):
 
     if i % 5 == 0 and VIZ_INTERMEDIATES:
         parse_tree.visualize(f"{OUT_DIR}/train_trees/train_parse_tree{i}")
-
         webster.visualize_ltm(f"{OUT_DIR}/ltms/ltm{i}", max_depth=3)
+
+    if i % 10 == 0 and REDISTRIBUTE_TREES:
+        print("REDISTRIBUTING CONTENT HIERARCHY:")
+        webster.ltm.content_hierarchy.redistribute(1000)
+
+        print("REDISTRIBUTING CONTENT HIERARCHY:")
+        webster.ltm.content_hierarchy.redistribute(1000)
 
     # input()
 
