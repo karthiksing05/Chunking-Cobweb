@@ -1,0 +1,13 @@
+{
+  "context_length": 3,
+  "threshold": 30,
+  "primitive_threshold": null,
+  "content_bl_alpha": 0.1,
+  "context_bl_alpha": 1,
+  "bow": false,
+  "categorization_mode": "dfs",
+  "weighting": "binary",
+  "empty_weighting": true,
+  "use_observation_buffer": false,
+  "obs_buffer_flush_every": 5
+}

@@ -1363,7 +1363,7 @@ class FiniteParseTree(object):
                 basic_level_count = res.get("score", -float("inf"))  # == content_score_data["cost"]
                 ctx_tree_log_prob = res.get("context_score_data", {}).get("tree_class_log_prob", -float("inf"))
                 cnt_tree_log_prob = res.get("content_score_data", {}).get("tree_log_prob", -float("inf"))
-                sum_tree_lps = cnt_tree_log_prob + ctx_tree_log_prob
+                sum_tree_lps = cnt_tree_log_prob # + ctx_tree_log_prob
 
                 # Stage 1: threshold gate
                 if basic_level_count <= count_threshold:

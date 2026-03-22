@@ -1,0 +1,163 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Cobweb Tree</title>
+<style>
+	body { margin: 0; font-family: system-ui, sans-serif; }
+	.link { fill: none; stroke: #9aa1a9; stroke-width: 1.5px; }
+	.node-box { stroke: #444; fill: #fff; rx: 8; ry: 8; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.15)); }
+	.node-fo table { border-collapse: collapse; font-size: 12px; margin: 4px 0; }
+	.node-fo th, .node-fo td { border: 1px solid #888; padding: 2px 6px; }
+	.node-fo th { background: #f3f5f7; font-weight: 600; }
+	.section-header { font-weight: 700; font-size: 13px; color: #333; margin: 8px 0 4px 0; border-bottom: 1px solid #ccc; padding-bottom: 2px; }
+	.side-by-side { display: flex; gap: 8px; align-items: flex-start; }
+	.side-by-side > div { flex: 1; min-width: 0; }
+	.sub-title { font-weight: 600; font-size: 11px; color: #555; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+<div id="tree"></div>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script>
+const data = {"title": "CONCEPT-1552488964707375_5004", "rows": [{"attr": "Left", "val": "CONCEPT-1552502869034500_5511", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869684125_5557", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502870183958_5593", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869181666_5521", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552323559214416_1116", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050420500_5286", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050209000_5269", "count": 1.0}, {"attr": "", "val": "...", "count": "..."}, {"attr": "Right", "val": "CONCEPT-1552502869294500_5529", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502870289541_5601", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869791583_5565", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869551875_5548", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869414500_5539", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499813268208_5435", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499812239708_5356", "count": 1.0}, {"attr": "", "val": "...", "count": "..."}], "left_rows": [{"attr": "Left", "val": "CONCEPT-1552502869034500_5511", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869684125_5557", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502870183958_5593", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869181666_5521", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552323559214416_1116", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050420500_5286", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050209000_5269", "count": 1.0}, {"attr": "", "val": "...", "count": "..."}], "right_rows": [{"attr": "Right", "val": "CONCEPT-1552502869294500_5529", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502870289541_5601", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869791583_5565", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869551875_5548", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869414500_5539", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499813268208_5435", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499812239708_5356", "count": 1.0}, {"attr": "", "val": "...", "count": "..."}], "other_rows": [], "children": [{"title": "CONCEPT-1552488964753458_5007", "rows": [{"attr": "Left", "val": "CONCEPT-1552502870183958_5593", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502868667625_5484", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869181666_5521", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049320333_5203", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499812504125_5376", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552323559214416_1116", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050209000_5269", "count": 1.0}, {"attr": "", "val": "...", "count": "..."}, {"attr": "Right", "val": "CONCEPT-1552502870289541_5601", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869933166_5575", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499813152291_5426", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049886708_5244", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869414500_5539", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049100500_5188", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493651452041_5018", "count": 1.0}, {"attr": "", "val": "...", "count": "..."}], "left_rows": [{"attr": "Left", "val": "CONCEPT-1552502870183958_5593", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502868667625_5484", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869181666_5521", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049320333_5203", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499812504125_5376", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552323559214416_1116", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050209000_5269", "count": 1.0}, {"attr": "", "val": "...", "count": "..."}], "right_rows": [{"attr": "Right", "val": "CONCEPT-1552502870289541_5601", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869933166_5575", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499813152291_5426", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049886708_5244", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869414500_5539", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049100500_5188", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493651452041_5018", "count": 1.0}, {"attr": "", "val": "...", "count": "..."}], "other_rows": [], "children": [{"title": "CONCEPT-1552493653376500_5083", "rows": [{"attr": "Left", "val": "CONCEPT-1552502868667625_5484", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499812504125_5376", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049320333_5203", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493652376083_5080", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050118833_5263", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963930458_5003", "count": 1.0}, {"attr": "Right", "val": "CONCEPT-1552498049886708_5244", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049751416_5235", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499813152291_5426", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493651452041_5018", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869933166_5575", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488962880958_4924", "count": 1.0}], "left_rows": [{"attr": "Left", "val": "CONCEPT-1552502868667625_5484", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499812504125_5376", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049320333_5203", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493652376083_5080", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050118833_5263", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963930458_5003", "count": 1.0}], "right_rows": [{"attr": "Right", "val": "CONCEPT-1552498049886708_5244", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049751416_5235", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499813152291_5426", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493651452041_5018", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869933166_5575", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488962880958_4924", "count": 1.0}], "other_rows": [], "children": [{"title": "CONCEPT-1552498051839208_5315", "rows": [{"attr": "Left", "val": "CONCEPT-1552498049320333_5203", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493652376083_5080", "count": 1.0}, {"attr": "Right", "val": "CONCEPT-1552498049751416_5235", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493651452041_5018", "count": 1.0}], "left_rows": [{"attr": "Left", "val": "CONCEPT-1552498049320333_5203", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493652376083_5080", "count": 1.0}], "right_rows": [{"attr": "Right", "val": "CONCEPT-1552498049751416_5235", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493651452041_5018", "count": 1.0}], "other_rows": [], "children": []}, {"title": "CONCEPT-1552498051944166_5320", "rows": [{"attr": "Left", "val": "CONCEPT-1552502868667625_5484", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499812504125_5376", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050118833_5263", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963930458_5003", "count": 1.0}, {"attr": "Right", "val": "CONCEPT-1552499813152291_5426", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049886708_5244", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869933166_5575", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488962880958_4924", "count": 1.0}], "left_rows": [{"attr": "Left", "val": "CONCEPT-1552502868667625_5484", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499812504125_5376", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050118833_5263", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963930458_5003", "count": 1.0}], "right_rows": [{"attr": "Right", "val": "CONCEPT-1552499813152291_5426", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049886708_5244", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869933166_5575", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488962880958_4924", "count": 1.0}], "other_rows": [], "children": []}]}, {"title": "CONCEPT-1552493653522416_5091", "rows": [{"attr": "Left", "val": "CONCEPT-1552502869181666_5521", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050209000_5269", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552323559214416_1116", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493652023041_5052", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552494890198333_5110", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502870183958_5593", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963056375_4936", "count": 1.0}, {"attr": "Right", "val": "CONCEPT-1552502870289541_5601", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493651661916_5030", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049100500_5188", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499812622500_5385", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869414500_5539", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552494890039541_5100", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963363041_4957", "count": 1.0}], "left_rows": [{"attr": "Left", "val": "CONCEPT-1552502869181666_5521", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050209000_5269", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552323559214416_1116", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493652023041_5052", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552494890198333_5110", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502870183958_5593", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963056375_4936", "count": 1.0}], "right_rows": [{"attr": "Right", "val": "CONCEPT-1552502870289541_5601", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493651661916_5030", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049100500_5188", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499812622500_5385", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869414500_5539", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552494890039541_5100", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963363041_4957", "count": 1.0}], "other_rows": [], "children": [{"title": "CONCEPT-1552494892124375_5165", "rows": [{"attr": "Left", "val": "CONCEPT-1552323559214416_1116", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552494890198333_5110", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869181666_5521", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493652023041_5052", "count": 1.0}, {"attr": "Right", "val": "CONCEPT-1552502869414500_5539", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499812622500_5385", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552494890039541_5100", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493651661916_5030", "count": 1.0}], "left_rows": [{"attr": "Left", "val": "CONCEPT-1552323559214416_1116", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552494890198333_5110", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869181666_5521", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493652023041_5052", "count": 1.0}], "right_rows": [{"attr": "Right", "val": "CONCEPT-1552502869414500_5539", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499812622500_5385", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552494890039541_5100", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493651661916_5030", "count": 1.0}], "other_rows": [], "children": []}, {"title": "CONCEPT-1552498052321875_5340", "rows": [{"attr": "Left", "val": "CONCEPT-1552502870183958_5593", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050209000_5269", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963056375_4936", "count": 1.0}, {"attr": "Right", "val": "CONCEPT-1552502870289541_5601", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049100500_5188", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963363041_4957", "count": 1.0}], "left_rows": [{"attr": "Left", "val": "CONCEPT-1552502870183958_5593", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050209000_5269", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963056375_4936", "count": 1.0}], "right_rows": [{"attr": "Right", "val": "CONCEPT-1552502870289541_5601", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049100500_5188", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963363041_4957", "count": 1.0}], "other_rows": [], "children": []}]}]}, {"title": "CONCEPT-1552488964794583_5010", "rows": [{"attr": "Left", "val": "CONCEPT-1552502869034500_5511", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869684125_5557", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502868543791_5475", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498048962708_5179", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049998375_5253", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502870067791_5585", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493651855625_5041", "count": 1.0}, {"attr": "", "val": "...", "count": "..."}, {"attr": "Right", "val": "CONCEPT-1552502869791583_5565", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869551875_5548", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499812239708_5356", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869294500_5529", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499813268208_5435", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050732166_5311", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050317708_5278", "count": 1.0}, {"attr": "", "val": "...", "count": "..."}], "left_rows": [{"attr": "Left", "val": "CONCEPT-1552502869034500_5511", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869684125_5557", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502868543791_5475", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498048962708_5179", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049998375_5253", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502870067791_5585", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493651855625_5041", "count": 1.0}, {"attr": "", "val": "...", "count": "..."}], "right_rows": [{"attr": "Right", "val": "CONCEPT-1552502869791583_5565", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869551875_5548", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499812239708_5356", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869294500_5529", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499813268208_5435", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050732166_5311", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050317708_5278", "count": 1.0}, {"attr": "", "val": "...", "count": "..."}], "other_rows": [], "children": [{"title": "CONCEPT-1552493653450416_5087", "rows": [{"attr": "Left", "val": "CONCEPT-1552502869684125_5557", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050420500_5286", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552494890434875_5129", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502870067791_5585", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963695750_4984", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049590791_5224", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499812379541_5366", "count": 1.0}, {"attr": "", "val": "...", "count": "..."}, {"attr": "Right", "val": "CONCEPT-1552502869551875_5548", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499813268208_5435", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050732166_5311", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050536708_5296", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493652158125_5061", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552494890702458_5149", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869294500_5529", "count": 1.0}, {"attr": "", "val": "...", "count": "..."}], "left_rows": [{"attr": "Left", "val": "CONCEPT-1552502869684125_5557", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050420500_5286", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552494890434875_5129", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502870067791_5585", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963695750_4984", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049590791_5224", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499812379541_5366", "count": 1.0}, {"attr": "", "val": "...", "count": "..."}], "right_rows": [{"attr": "Right", "val": "CONCEPT-1552502869551875_5548", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499813268208_5435", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050732166_5311", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050536708_5296", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493652158125_5061", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552494890702458_5149", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869294500_5529", "count": 1.0}, {"attr": "", "val": "...", "count": "..."}], "other_rows": [], "children": [{"title": "CONCEPT-1552494892233083_5170", "rows": [{"attr": "Left", "val": "CONCEPT-1552502870067791_5585", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499812379541_5366", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552494890434875_5129", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493651855625_5041", "count": 1.0}, {"attr": "Right", "val": "CONCEPT-1552502869551875_5548", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499813268208_5435", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552494890702458_5149", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493652158125_5061", "count": 1.0}], "left_rows": [{"attr": "Left", "val": "CONCEPT-1552502870067791_5585", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499812379541_5366", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552494890434875_5129", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493651855625_5041", "count": 1.0}], "right_rows": [{"attr": "Right", "val": "CONCEPT-1552502869551875_5548", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499813268208_5435", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552494890702458_5149", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552493652158125_5061", "count": 1.0}], "other_rows": [], "children": []}, {"title": "CONCEPT-1552498052137083_5330", "rows": [{"attr": "Left", "val": "CONCEPT-1552502869684125_5557", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050420500_5286", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049590791_5224", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963695750_4984", "count": 1.0}, {"attr": "Right", "val": "CONCEPT-1552498050732166_5311", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869294500_5529", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050536708_5296", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963596166_4976", "count": 1.0}], "left_rows": [{"attr": "Left", "val": "CONCEPT-1552502869684125_5557", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050420500_5286", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049590791_5224", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963695750_4984", "count": 1.0}], "right_rows": [{"attr": "Right", "val": "CONCEPT-1552498050732166_5311", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869294500_5529", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050536708_5296", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963596166_4976", "count": 1.0}], "other_rows": [], "children": []}]}, {"title": "CONCEPT-1552494892005250_5160", "rows": [{"attr": "Left", "val": "CONCEPT-1552502869034500_5511", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498048962708_5179", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502868543791_5475", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552494890533208_5138", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963812208_4993", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499812861750_5404", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049998375_5253", "count": 1.0}, {"attr": "Right", "val": "CONCEPT-1552499812239708_5356", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502868392750_5467", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869791583_5565", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050625166_5303", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552494890821500_5157", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050317708_5278", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963196833_4946", "count": 1.0}], "left_rows": [{"attr": "Left", "val": "CONCEPT-1552502869034500_5511", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498048962708_5179", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502868543791_5475", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552494890533208_5138", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963812208_4993", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499812861750_5404", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049998375_5253", "count": 1.0}], "right_rows": [{"attr": "Right", "val": "CONCEPT-1552499812239708_5356", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502868392750_5467", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869791583_5565", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050625166_5303", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552494890821500_5157", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050317708_5278", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963196833_4946", "count": 1.0}], "other_rows": [], "children": [{"title": "CONCEPT-1552498052043500_5325", "rows": [{"attr": "Left", "val": "CONCEPT-1552502868543791_5475", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049998375_5253", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552494890533208_5138", "count": 1.0}, {"attr": "Right", "val": "CONCEPT-1552502869791583_5565", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050625166_5303", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552494890821500_5157", "count": 1.0}], "left_rows": [{"attr": "Left", "val": "CONCEPT-1552502868543791_5475", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498049998375_5253", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552494890533208_5138", "count": 1.0}], "right_rows": [{"attr": "Right", "val": "CONCEPT-1552502869791583_5565", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050625166_5303", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552494890821500_5157", "count": 1.0}], "other_rows": [], "children": []}, {"title": "CONCEPT-1552498052227958_5335", "rows": [{"attr": "Left", "val": "CONCEPT-1552498048962708_5179", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869034500_5511", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499812861750_5404", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963812208_4993", "count": 1.0}, {"attr": "Right", "val": "CONCEPT-1552499812239708_5356", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502868392750_5467", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050317708_5278", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963196833_4946", "count": 1.0}], "left_rows": [{"attr": "Left", "val": "CONCEPT-1552498048962708_5179", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502869034500_5511", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552499812861750_5404", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963812208_4993", "count": 1.0}], "right_rows": [{"attr": "Right", "val": "CONCEPT-1552499812239708_5356", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552502868392750_5467", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552498050317708_5278", "count": 1.0}, {"attr": "", "val": "CONCEPT-1552488963196833_4946", "count": 1.0}], "other_rows": [], "children": []}]}]}]};
+
+const nodeW  = 700;
+const nodeH  = 140;
+const hGap   = 20;
+const vGap   = 140;
+
+const root = d3.hierarchy(data);
+const layout = d3.tree()
+	.nodeSize([nodeW + hGap, nodeH + vGap])
+	.separation((a, b) => (a.parent === b.parent ? 1.0 : 1.4));
+layout(root);
+
+const svg = d3.select("#tree").append("svg")
+	.attr("width", 1)
+	.attr("height", 1);
+
+const g = svg.append("g");
+
+const linkGen = d3.linkVertical().x(d => d.x).y(d => d.y);
+const link = g.selectAll("path.link")
+	.data(root.links())
+	.join("path")
+	.attr("class", "link")
+	.attr("d", linkGen);
+
+const node = g.selectAll("g.node")
+	.data(root.descendants())
+	.join("g")
+	.attr("transform", d => `translate(${d.x},${d.y})`);
+
+node.append("rect")
+	.attr("class", "node-box")
+	.attr("x", -nodeW/2)
+	.attr("y", 0)
+	.attr("width", nodeW)
+	.attr("height", nodeH);
+
+node.append("foreignObject")
+	.attr("class", "node-fo")
+	.attr("x", -nodeW/2 + 6)
+	.attr("y", 6)
+	.attr("width", nodeW - 12)
+	.attr("height", 1000)
+	.html(d => nodeHTML(d.data));
+
+node.selectAll("foreignObject").each(function(d) {
+	const fo = d3.select(this);
+	const div = fo.select("div").node();
+	const h = div.getBoundingClientRect().height + 12;
+	d._nodeHeight = h;
+	fo.attr("height", h);
+	d3.select(this.parentNode).select("rect").attr("height", h + 12);
+});
+
+const depthMaxHeight = new Map();
+root.each(d => {
+	const h = d._nodeHeight || nodeH;
+	const existing = depthMaxHeight.get(d.depth) || 0;
+	if (h > existing) { depthMaxHeight.set(d.depth, h); }
+});
+
+const depthOffsets = [];
+const maxDepth = Math.max(...Array.from(depthMaxHeight.keys()));
+for (let i = 0; i <= maxDepth; i++) {
+	const prev = i === 0 ? 0 : depthOffsets[i - 1] + depthMaxHeight.get(i - 1) + vGap;
+	depthOffsets.push(prev);
+}
+
+root.each(d => { d.y = depthOffsets[d.depth]; });
+
+node.attr("transform", d => `translate(${d.x},${d.y})`);
+link.attr("d", linkGen);
+
+let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+root.each(d => {
+	const halfW = nodeW / 2;
+	const h = d._nodeHeight || nodeH;
+	if (d.x - halfW - 30 < x0) x0 = d.x - halfW - 30;
+	if (d.x + halfW + 30 > x1) x1 = d.x + halfW + 30;
+	if (d.y - 30 < y0) y0 = d.y - 30;
+	if (d.y + h + 30 > y1) y1 = d.y + h + 30;
+});
+const width  = x1 - x0;
+const height = y1 - y0;
+
+svg.attr("width", width)
+	.attr("height", height)
+	.attr("viewBox", [x0, y0, width, height].join(" "));
+
+function subtable(title, rows) {
+	if (!rows || rows.length === 0) return "";
+	const body = rows.map(r =>
+		`<tr><td>${r.attr}</td><td>${r.val}</td><td>${r.count}</td></tr>`
+	).join("");
+	return `<div class="sub-title">${title}</div>
+		<table>
+			<tr><th>Attr</th><th>Value</th><th>Count</th></tr>
+			${body}
+		</table>`;
+}
+
+function nodeHTML(d) {
+	const hasLeft  = d.left_rows  && d.left_rows.length  > 0;
+	const hasRight = d.right_rows && d.right_rows.length > 0;
+	const hasOther = d.other_rows && d.other_rows.length > 0;
+	const hasSplit = hasLeft || hasRight;
+
+	let mainHTML = "";
+	if (hasSplit) {
+		// Determine section header label based on which sides are present
+		const leftLabel  = hasLeft  ? (d.left_rows[0].attr.startsWith("Context")  ? "Before" : "Left")  : "Left";
+		const rightLabel = hasRight ? (d.right_rows[0].attr.startsWith("Context") ? "After"  : "Right") : "Right";
+		mainHTML = `<div class="section-header">Attributes</div>
+			<div class="side-by-side">
+				<div>${subtable(leftLabel,  d.left_rows)}</div>
+				<div>${subtable(rightLabel, d.right_rows)}</div>
+			</div>`;
+	} else {
+		// Fallback: render all rows in one table
+		const body = d.rows.map(r =>
+			`<tr><td>${r.attr}</td><td>${r.val}</td><td>${r.count}</td></tr>`
+		).join("");
+		mainHTML = `<div class="section-header">Attributes</div>
+			<table>
+				<tr><th>Attr</th><th>Value</th><th>Count</th></tr>
+				${body}
+			</table>`;
+	}
+	const otherHTML = hasOther
+		? `<div class="section-header">Other</div>${subtable("", d.other_rows)}`
+		: "";
+	return `<div class="node-fo">
+		<table><tr><th colspan="3">${d.title}</th></tr></table>
+		${mainHTML}
+		${otherHTML}
+	</div>`;
+}
+</script>
+</body>
+</html>
