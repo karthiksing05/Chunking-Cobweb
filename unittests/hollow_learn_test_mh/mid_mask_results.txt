@@ -1,0 +1,50 @@
+[0] original: a park found the lazy dog under a red quick man
+    masked:   a park found the lazy [mask] under a red quick man
+    replaced: "dog" at pos 5
+    completed: a park found the lazy telescope under a red quick man
+
+[1] original: a lazy cat liked a cat
+    masked:   a lazy cat [mask] a cat
+    replaced: "liked" at pos 3
+    completed: a lazy cat under a cat
+
+[2] original: the woman liked
+    masked:   the [mask] liked
+    replaced: "woman" at pos 1
+    completed: the telescope liked
+
+[3] original: the lazy park chased the woman in a dog
+    masked:   the lazy park chased [mask] woman in a dog
+    replaced: "the" at pos 4
+    completed: the lazy park chased the woman in a dog
+
+[4] original: a big woman liked the telescope on a cat
+    masked:   a big woman liked [mask] telescope on a cat
+    replaced: "the" at pos 4
+    completed: a big woman liked a telescope on a cat
+
+[5] original: the telescope found the park with the dog
+    masked:   the telescope found the [mask] with the dog
+    replaced: "park" at pos 4
+    completed: the telescope found the man with the dog
+
+[6] original: a man admired a cat on the man
+    masked:   a man admired a [mask] on the man
+    replaced: "cat" at pos 4
+    completed: a man admired a cat on the man
+
+[7] original: the small red park saw
+    masked:   the small [mask] park saw
+    replaced: "red" at pos 2
+    completed: the small red park saw
+
+[8] original: the man admired a man under the lazy dog
+    masked:   the man admired a [mask] under the lazy dog
+    replaced: "man" at pos 4
+    completed: the man admired a dog under the lazy dog
+
+[9] original: the park liked the small park under the big dog
+    masked:   the park liked the small [mask] under the big dog
+    replaced: "park" at pos 5
+    completed: the park liked the small woman under the big dog
+

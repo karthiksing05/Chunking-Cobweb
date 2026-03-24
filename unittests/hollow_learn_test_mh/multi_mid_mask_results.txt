@@ -1,0 +1,45 @@
+[0] original: a park found the lazy dog under a red quick man
+    masked:   a park found the [mask] a red quick man
+    removed: "lazy dog under" (3 tokens) at pos 4-6
+    completed: a park found the lazy a red quick man
+
+[1] original: a lazy cat liked a cat
+    masked:   a [mask] cat
+    removed: "lazy cat liked a" (4 tokens) at pos 1-4
+    completed: a lazy cat
+
+[3] original: the lazy park chased the woman in a dog
+    masked:   the lazy [mask] in a dog
+    removed: "park chased the woman" (4 tokens) at pos 2-5
+    completed: the lazy woman in a dog
+
+[4] original: a big woman liked the telescope on a cat
+    masked:   a big woman [mask] on a cat
+    removed: "liked the telescope" (3 tokens) at pos 3-5
+    completed: a big woman big the dog on a cat
+
+[5] original: the telescope found the park with the dog
+    masked:   the telescope [mask] the dog
+    removed: "found the park with" (4 tokens) at pos 2-5
+    completed: the telescope found the dog
+
+[6] original: a man admired a cat on the man
+    masked:   a man admired [mask] on the man
+    removed: "a cat" (2 tokens) at pos 3-4
+    completed: a man admired a dog on the man
+
+[7] original: the small red park saw
+    masked:   the [mask] park saw
+    removed: "small red" (2 tokens) at pos 1-2
+    completed: the quick park saw
+
+[8] original: the man admired a man under the lazy dog
+    masked:   the man admired [mask] under the lazy dog
+    removed: "a man" (2 tokens) at pos 3-4
+    completed: the man admired the park under the lazy dog
+
+[9] original: the park liked the small park under the big dog
+    masked:   the park liked [mask] under the big dog
+    removed: "the small park" (3 tokens) at pos 3-5
+    completed: the park liked quick quick the man big telescope under the big dog
+

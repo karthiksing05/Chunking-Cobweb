@@ -1,0 +1,28 @@
+[0] original: a small big telescope saw
+    masked:   a small [mask] telescope saw
+    replaced: "big" at pos 2
+    completed: a small quick telescope saw
+
+[1] original: the small lazy cat liked
+    masked:   the small [mask] cat liked
+    replaced: "lazy" at pos 2
+    completed: the small quick cat liked
+
+[2] original: a man liked a man
+    masked:   a man [mask] a man
+    replaced: "liked" at pos 2
+    completed: a man admired a man
+
+[3] original: a big big man admired the telescope with the park
+    masked:   a big big man admired [mask] telescope with the park
+    replaced: "the" at pos 5
+    completed: a big big man admired a telescope with the park
+
+[4] original: the telescope saw a small quick quick telescope
+    masked:   the telescope saw a [mask] quick quick telescope
+    replaced: "small" at pos 4
+    completed: the telescope saw a small quick quick telescope
+
+[5] original: a small telescope saw the quick red telescope on the red red cat
+    masked:   a small telescope saw the quick [mask] telescope on the red red cat
+    replaced: "red" at pos 6
