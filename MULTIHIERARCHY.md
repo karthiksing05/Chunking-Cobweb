@@ -7,19 +7,19 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
 Quality-of-life changes:
 *   BASIC LEVEL SAMPLING IS SLOWWWW - let's parallelize this through either matrix ops or multithreading!!
 
-Two main issues:
+**Two main issues:**
 *   Need to CRAFT BETTER HIERARCHY!!!
     *   Chris's analogy is quite right - we see that there are nodes that behave the same yet are found in various different places across the hierarchy
 *   Need to add chunk context whenever we're ready to do that (perhaps this will create a better hierarchy?)
 
-Better Hierarchy Brainstorm:
+**Better Hierarchy Brainstorm:**
 *   Spreading activation theory for restructuring?? The idea is that BFSes are DFSes if the tree is perfectly normal, and so we want to restructure the tree such that BFSes produce DFSes in the long run
     *   Some kind of mass-based merge?
     *   Really, we should be restructuring basic-level nodes!
 
-Chunk Context Brainstorm:
+**Chunk Context Brainstorm:**
 *   Here, the order of chunks matters - we're going to start with this "greedy" sort of chunk creation but eventually we'll transition to a 
-*   There's an important point here - even in the context hierarchy, do we represent nodes by their surrounding or by their composition?
+*   There's an important point here - even in the context hierarchy under the 'content-ref' attribute, do we represent nodes by their surrounding or by their composition? Composition makes chunk matching easy but 
 
 ## Methodology 4.0
 

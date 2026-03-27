@@ -76,6 +76,7 @@ webster = WEBSTER(
     context_bl_alpha=1,
     bow=False,
     empty_weighting=True,
+    chunk_context=False,
     weighting="binary",
     categorization_mode="dfs",
     depth_max_content=1000,
@@ -134,6 +135,7 @@ for i, hollow in enumerate(hollow_corpus):
 SAVE_DIR = f"{OUT_DIR}/final_ltm_data"
 webster.save_state(SAVE_DIR)
 print(f"\nSaved Final LTM to \"{SAVE_DIR}\"!")
+webster.visualize_ltm(f"{OUT_DIR}/final_ltm", max_depth=3)
 
 # ── Test: auto-parse held-out sentences ────────────────────────────────────
 print("\n=== AUTO-PARSE TEST SENTENCES ===")
@@ -167,8 +169,6 @@ for i, fake in enumerate(fake_sentences):
     )
     parse_tree.visualize(f"{OUT_DIR}/fake_trees/fake_parse_tree{i}")
     print(f"  Fake tree {i}: \"{fake}\"")
-
-webster.visualize_ltm(f"{OUT_DIR}/final_ltm", max_depth=3)
 
 # ── Generation: from-scratch ──────────────────────────────────────────────
 print("\n=== FROM-SCRATCH GENERATION ===")

@@ -671,7 +671,9 @@ class CompositeParseNode(object):
                                 cplx_vocab_pair: tuple = (None, None),
                                 bow: bool = False,
                                 weighting: str = 'binary',
-                                empty_weighting: bool = False) -> dict:
+                                empty_weighting: bool = False,
+                                chunk_context_before: list = None,
+                                chunk_context_after: list = None) -> dict:
         """
         Build the context-hierarchy instance from two children.
         Attributes:
@@ -695,6 +697,13 @@ class CompositeParseNode(object):
         cplx_vocab_pair : tuple of (id_to_value, value_to_id)
             Vocabulary lists used to look up or register ``C{X}`` complexity
             identifiers on demand.
+        chunk_context_before : list | None
+            When provided, overrides ``left_node.context_before`` with a list
+            of ``{label_path: 1}`` dicts built from neighboring top-level
+            nodes (chunk context mode).
+        chunk_context_after : list | None
+            Same as *chunk_context_before* but overrides
+            ``right_node.context_after``.
         """
         ctx_inst: dict = {}
 
@@ -702,8 +711,8 @@ class CompositeParseNode(object):
         right_c = getattr(right_node, "complexity", 1)
         complexity = max(left_c, right_c) + 1
 
-        left_ctx_before = getattr(left_node, "context_before", None) or []
-        right_ctx_after = getattr(right_node, "context_after", None) or []
+        left_ctx_before = chunk_context_before if chunk_context_before is not None else (getattr(left_node, "context_before", None) or [])
+        right_ctx_after = chunk_context_after if chunk_context_after is not None else (getattr(right_node, "context_after", None) or [])
 
         if bow:
             # BOW: collapse all before slots into key 0, all after into key 1.
@@ -907,6 +916,7 @@ class FiniteParseTree(object):
         _weighting = getattr(self.ltm, 'weighting', 'binary')
         _empty_wt = getattr(self.ltm, 'empty_weighting', False)
         _empty_val = lambda j: _context_weight(j, _weighting) if _empty_wt else 0
+        _ctx_leaves = []  # saved for chunk_context pass 2
         for i, wid in enumerate(word_ids):
             # build sliding-window context instance for context hierarchy
             ctx_inst: dict = {}
@@ -968,6 +978,7 @@ class FiniteParseTree(object):
             _cat_mode = getattr(self.ltm, 'categorization_mode', 'dfs')
             leaf_node, path_strs, node_path, depth_dists = _categorize(
                 ctx_inst, self.ltm.context_hierarchy, mode=_cat_mode)
+            _ctx_leaves.append(leaf_node)
 
             # Discrete single-identity label: primitive's identity is its word_id
             label = {wid: 1}
@@ -1022,6 +1033,85 @@ class FiniteParseTree(object):
             node.set_parent(self.global_root_node)
             self.nodes.append(node)
 
+        # -- chunk_context pass 2: rebuild context instances using label_paths --
+        if getattr(self.ltm, 'chunk_context', False):
+            primitive_nodes = [x[1] for x in self.global_root_node.children]
+            for idx, node in enumerate(primitive_nodes):
+                # context_before from left neighbors' label_paths
+                cb = []
+                for j in range(self.context_length):
+                    src = idx - (j + 1)
+                    if 0 <= src:
+                        lp = getattr(primitive_nodes[src], 'label_path', 0)
+                        cb.append({lp: 1} if lp else {})
+                    else:
+                        cb.append({})
+                node.context_before = cb
+
+                # context_after from right neighbors' label_paths
+                ca = []
+                for j in range(self.context_length):
+                    src = idx + (j + 1)
+                    if src < len(primitive_nodes):
+                        lp = getattr(primitive_nodes[src], 'label_path', 0)
+                        ca.append({lp: 1} if lp else {})
+                    else:
+                        ca.append({})
+                node.context_after = ca
+
+                # Rebuild context_instance from chunk context
+                ctx_inst = {}
+                if _bow:
+                    before_bag = {}
+                    for j in range(self.context_length):
+                        if j < len(cb) and cb[j]:
+                            weight = _context_weight(j, _weighting)
+                            for k in cb[j]:
+                                if k != 0:
+                                    before_bag[k] = before_bag.get(k, 0) + weight
+                    if before_bag:
+                        ctx_inst[0] = before_bag
+
+                    after_bag = {}
+                    for j in range(self.context_length):
+                        if j < len(ca) and ca[j]:
+                            weight = _context_weight(j, _weighting)
+                            for k in ca[j]:
+                                if k != 0:
+                                    after_bag[k] = after_bag.get(k, 0) + weight
+                    if after_bag:
+                        ctx_inst[1] = after_bag
+
+                    ctx_inst[-2] = {_get_or_register_cplx_vid(1, self.id_to_value, self.value_to_id): 1}
+                else:
+                    _empty_v = 1 if _empty_wt else 0
+                    for j in range(self.context_length):
+                        if j < len(cb) and cb[j]:
+                            ctx_inst[j] = {k: _context_weight(j, _weighting) for k in cb[j]}
+                            ctx_inst[j][0] = 0
+                        else:
+                            ctx_inst[j] = {0: _empty_v}
+                    for j in range(self.context_length):
+                        attr_key = self.context_length + j
+                        if j < len(ca) and ca[j]:
+                            ctx_inst[attr_key] = {k: _context_weight(j, _weighting) for k in ca[j]}
+                            ctx_inst[attr_key][0] = 0
+                        else:
+                            ctx_inst[attr_key] = {0: _empty_v}
+                    ctx_inst[-2] = {_get_or_register_cplx_vid(1, self.id_to_value, self.value_to_id): 1}
+
+                # content-ref = label_path (context hierarchy leaf pointer)
+                _cref_attr = self.ltm.content_ref_attr
+                ctx_inst[_cref_attr] = {node.label_path: 1} if node.label_path else {node.word_id: 1}
+
+                node.context_instance = ctx_inst
+
+                # Register label_path on context hierarchy for self-ref LCA
+                if node.label_path and idx < len(_ctx_leaves):
+                    self.ltm.context_hierarchy.register_ref_val(
+                        node.label_path, _ctx_leaves[idx]
+                    )
+
     # ---- pair enumeration -----------------------------------------------
 
     def get_parentless_pairs(self) -> List[dict]:
@@ -1070,6 +1160,33 @@ class FiniteParseTree(object):
 
         # Step 1: Build and categorize context WITHOUT -1 content-ref
         # (matching add_parse_tree behavior)
+
+        # When chunk_context is enabled, build context from top-level
+        # nodes' label_paths instead of children's sliding-window context.
+        _chunk_cb = None
+        _chunk_ca = None
+        if getattr(self.ltm, 'chunk_context', False):
+            parentless = [x[1] for x in self.global_root_node.children]
+            left_pos = next((i for i, n in enumerate(parentless) if n is left_node), None)
+            right_pos = next((i for i, n in enumerate(parentless) if n is right_node), None)
+            if left_pos is not None and right_pos is not None:
+                _chunk_cb = []
+                for j in range(self.context_length):
+                    src = left_pos - (j + 1)
+                    if 0 <= src:
+                        lp = getattr(parentless[src], 'label_path', 0)
+                        _chunk_cb.append({lp: 1} if lp else {})
+                    else:
+                        _chunk_cb.append({})
+                _chunk_ca = []
+                for j in range(self.context_length):
+                    src = right_pos + (j + 1)
+                    if src < len(parentless):
+                        lp = getattr(parentless[src], 'label_path', 0)
+                        _chunk_ca.append({lp: 1} if lp else {})
+                    else:
+                        _chunk_ca.append({})
+
         context_inst = CompositeParseNode.create_context_instance(
             left_node, right_node, self.context_length,
             content_ref_id=None,  # no -1 during categorization
@@ -1077,6 +1194,8 @@ class FiniteParseTree(object):
             bow=getattr(self.ltm, 'bow', False),
             weighting=getattr(self.ltm, 'weighting', 'binary'),
             empty_weighting=getattr(self.ltm, 'empty_weighting', False),
+            chunk_context_before=_chunk_cb,
+            chunk_context_after=_chunk_ca,
         )
 
         # categorize in context hierarchy (for identity / label)
@@ -1190,6 +1309,33 @@ class FiniteParseTree(object):
 
         # Step 1: Build and categorize context WITHOUT -1
         # (matching add_parse_tree step 1)
+
+        # When chunk_context is enabled, build context from top-level
+        # nodes' label_paths.
+        _chunk_cb = None
+        _chunk_ca = None
+        if getattr(self.ltm, 'chunk_context', False):
+            parentless = [x[1] for x in self.global_root_node.children]
+            left_pos = next((i for i, n in enumerate(parentless) if n is left_node), None)
+            right_pos = next((i for i, n in enumerate(parentless) if n is right_node), None)
+            if left_pos is not None and right_pos is not None:
+                _chunk_cb = []
+                for j in range(self.context_length):
+                    src = left_pos - (j + 1)
+                    if 0 <= src:
+                        lp = getattr(parentless[src], 'label_path', 0)
+                        _chunk_cb.append({lp: 1} if lp else {})
+                    else:
+                        _chunk_cb.append({})
+                _chunk_ca = []
+                for j in range(self.context_length):
+                    src = right_pos + (j + 1)
+                    if src < len(parentless):
+                        lp = getattr(parentless[src], 'label_path', 0)
+                        _chunk_ca.append({lp: 1} if lp else {})
+                    else:
+                        _chunk_ca.append({})
+
         context_inst = CompositeParseNode.create_context_instance(
             left_node, right_node, self.context_length,
             content_ref_id=None,  # no -1 during categorization
@@ -1197,6 +1343,8 @@ class FiniteParseTree(object):
             bow=getattr(self.ltm, 'bow', False),
             weighting=getattr(self.ltm, 'weighting', 'binary'),
             empty_weighting=getattr(self.ltm, 'empty_weighting', False),
+            chunk_context_before=_chunk_cb,
+            chunk_context_after=_chunk_ca,
         )
 
         # categorize in context hierarchy
@@ -1227,6 +1375,9 @@ class FiniteParseTree(object):
         # Register for LCA similarity in content hierarchy
         if _label_path:
             self.ltm.content_hierarchy.register_ref_val(_label_path, ctx_leaf)
+            # Also register on context hierarchy when chunk_context (self-ref)
+            if getattr(self.ltm, 'chunk_context', False):
+                self.ltm.context_hierarchy.register_ref_val(_label_path, ctx_leaf)
 
         new_node = CompositeParseNode.create_node(
             content_instance=content_inst,
@@ -2412,6 +2563,7 @@ class LongTermMemory(object):
                  content_bl_alpha: float = None, context_bl_alpha: float = None,
                  bow: bool = False,
                  categorization_mode: str = 'dfs', weighting: str = 'binary', empty_weighting: bool = False,
+                 chunk_context: bool = False,
                  depth_max_content: int = 1000, depth_max_context: int = 1000,
                  branch_max_content: int = 1000, branch_max_context: int = 1000):
         _content_alpha = content_alpha if content_alpha is not None else alpha
@@ -2420,6 +2572,7 @@ class LongTermMemory(object):
         self.context_alpha = _context_alpha
         self.content_bl_alpha = content_bl_alpha
         self.context_bl_alpha = context_bl_alpha
+        self.chunk_context = chunk_context
 
         # Create context hierarchy first (it serves as ref_tree for content)
         self.context_hierarchy = CobwebDiscreteTree(_context_alpha, weight_attr=False, depth_max=depth_max_context, branch_max=branch_max_context)
@@ -2428,6 +2581,20 @@ class LongTermMemory(object):
         # Mark content attrs 0 (left) and 1 (right) as ref attrs for soft matching
         self.content_hierarchy.set_ref_attr(0)
         self.content_hierarchy.set_ref_attr(1)
+
+        # When chunk_context is enabled, context hierarchy uses itself as
+        # ref_tree so that label_path values get LCA similarity.
+        if chunk_context:
+            self.context_hierarchy.set_ref_tree(self.context_hierarchy)
+            if bow:
+                self.context_hierarchy.set_ref_attr(0)  # before_bag
+                self.context_hierarchy.set_ref_attr(1)  # after_bag
+            else:
+                for j in range(2 * context_length):
+                    self.context_hierarchy.set_ref_attr(j)
+            # content-ref attr also uses label_paths
+            _cref = 2 if bow else 2 * context_length
+            self.context_hierarchy.set_ref_attr(_cref)
 
         # vocabulary: index 0 is always EMPTYNULL
         self.id_to_value: List[str] = ["EMPTYNULL"]
@@ -2631,6 +2798,11 @@ class LongTermMemory(object):
         ctx_leaf_map: dict = {}   # id(node) → context-hierarchy leaf
         _cref_attr = self.content_ref_attr
 
+        # When chunk_context is enabled the context hierarchy is its own
+        # ref_tree; invalidate its ref cache before fitting new instances.
+        if self.chunk_context:
+            self.context_hierarchy.invalidate_ref_cache()
+
         # Optionally shuffle instances before fitting to hierarchies
         ctx_nodes = list(all_nodes)
         if shuffle:
@@ -2670,6 +2842,8 @@ class LongTermMemory(object):
                 # Register the label_path VID → context leaf for LCA similarity
                 if node.label_path:
                     self.content_hierarchy.register_ref_val(node.label_path, ctx_leaf)
+                    if self.chunk_context:
+                        self.context_hierarchy.register_ref_val(node.label_path, ctx_leaf)
 
             elif isinstance(node, CompositeParseNode) and not node.is_global_root:
                 ctx_hash = ctx_leaf.concept_hash()
@@ -2683,6 +2857,8 @@ class LongTermMemory(object):
                 # Register the label_path VID → context leaf for LCA similarity
                 if node.label_path:
                     self.content_hierarchy.register_ref_val(node.label_path, ctx_leaf)
+                    if self.chunk_context:
+                        self.context_hierarchy.register_ref_val(node.label_path, ctx_leaf)
 
                 # Rebuild content_instance from children's refreshed labels
                 children_sorted = list(node.children)
@@ -2739,7 +2915,7 @@ class LongTermMemory(object):
         # -- Step 4: write content-refs back to context hierarchy ---------
         # For each composite node, write a single content-leaf pointer into its
         # context-hierarchy leaf.  Primitives already have their content-ref
-        # (word_id) written via ifit in step 1.
+        # (word_id or label_path) written via ifit in step 1.
         for node in all_nodes:
             if isinstance(node, PrimitiveParseNode):
                 continue  # already in tree via step-1 ifit
@@ -2749,15 +2925,21 @@ class LongTermMemory(object):
                 continue
 
             if isinstance(node, CompositeParseNode) and not node.is_global_root:
-                cnt_leaf = content_leaf_map.get(id(node))
-                if cnt_leaf is None:
-                    continue
-                # Single pointer: register a CONCEPT-<hash> value and write it
-                concept_str = f"CONCEPT-{cnt_leaf.concept_hash()}"
-                self.add_to_vocab(concept_str)
-                vid = self.value_to_id.get(concept_str, 0)
-                if vid == 0:
-                    continue
+                if self.chunk_context:
+                    # chunk_context: content-ref = context hierarchy leaf pointer
+                    vid = node.label_path
+                    if not vid:
+                        continue
+                else:
+                    cnt_leaf = content_leaf_map.get(id(node))
+                    if cnt_leaf is None:
+                        continue
+                    # Single pointer: register a CONCEPT-<hash> value and write it
+                    concept_str = f"CONCEPT-{cnt_leaf.concept_hash()}"
+                    self.add_to_vocab(concept_str)
+                    vid = self.value_to_id.get(concept_str, 0)
+                    if vid == 0:
+                        continue
                 node.context_instance[_cref_attr] = {vid: 1}
                 ctx_leaf.increment_attr_value(_cref_attr, vid, 1)
             else:
@@ -2927,6 +3109,7 @@ class WEBSTER(object):
                  content_bl_alpha: float = None, context_bl_alpha: float = None,
                  threshold=5, bow: bool = False,
                  categorization_mode: str = 'dfs', weighting: str = 'binary', empty_weighting: bool = False,
+                 chunk_context: bool = False,
                  depth_max_content: int = 1000, depth_max_context: int = 1000,
                  branch_max_content: int = 1000, branch_max_context: int = 1000):
         """
@@ -2982,6 +3165,7 @@ class WEBSTER(object):
             categorization_mode=categorization_mode,
             weighting=weighting,
             empty_weighting=empty_weighting,
+            chunk_context=chunk_context,
             depth_max_content=depth_max_content, depth_max_context=depth_max_context,
             branch_max_content=branch_max_content, branch_max_context=branch_max_context,
         )
@@ -2991,6 +3175,7 @@ class WEBSTER(object):
         self.categorization_mode = categorization_mode
         self.weighting = weighting
         self.empty_weighting = empty_weighting
+        self.chunk_context = chunk_context
         self.content_bl_alpha = content_bl_alpha
         self.context_bl_alpha = context_bl_alpha
 
