@@ -1,50 +1,50 @@
-[0] original: the man liked
-    masked:   the [mask] liked
-    replaced: "man" at pos 1
-    completed: the dog liked
+[0] original: the dog liked a man
+    masked:   the dog [mask] a man
+    replaced: "liked" at pos 2
+    completed: the dog found a man
 
-[1] original: a park liked the small lazy lazy cat in a park
-    masked:   a park liked the small [mask] lazy cat in a park
-    replaced: "lazy" at pos 5
-    completed: a park liked the small big lazy cat in a park
+[1] original: a dog chased the cat
+    masked:   a dog [mask] the cat
+    replaced: "chased" at pos 2
+    completed: a dog chased the cat
 
-[2] original: a small park liked
-    masked:   a small [mask] liked
-    replaced: "park" at pos 2
-    completed: a small telescope liked
+[2] original: a quick telescope admired the quick small telescope
+    masked:   a quick telescope admired [mask] quick small telescope
+    replaced: "the" at pos 4
+    completed: a quick telescope admired the quick small telescope
 
-[3] original: the red telescope found the cat
-    masked:   the red telescope [mask] the cat
-    replaced: "found" at pos 3
-    completed: the red telescope in the cat
+[3] original: a quick cat found a cat under the woman
+    masked:   a quick cat found [mask] cat under the woman
+    replaced: "a" at pos 4
+    completed: a quick cat found a cat under the woman
 
-[4] original: the lazy man liked the red woman
-    masked:   the lazy man [mask] the red woman
-    replaced: "liked" at pos 3
-    completed: the lazy man found the red woman
+[4] original: the big man saw a red cat on a quick lazy cat
+    masked:   the big man saw a red [mask] on a quick lazy cat
+    replaced: "cat" at pos 6
+    completed: the big man saw a red cat on a quick lazy cat
 
-[5] original: the park saw the park
-    masked:   the park [mask] the park
+[5] original: a red telescope saw
+    masked:   a red [mask] saw
+    replaced: "telescope" at pos 2
+    completed: a red cat saw
+
+[6] original: the dog chased a park
+    masked:   the dog [mask] a park
+    replaced: "chased" at pos 2
+    completed: the dog found a park
+
+[7] original: the red big dog found the red cat
+    masked:   the red big dog [mask] the red cat
+    replaced: "found" at pos 4
+    completed: the red big dog chased the red cat
+
+[8] original: a lazy telescope saw
+    masked:   a lazy [mask] saw
+    replaced: "telescope" at pos 2
+    completed: a lazy park saw
+
+[9] original: the telescope saw a man
+    masked:   the telescope [mask] a man
     replaced: "saw" at pos 2
-    completed: the park saw the park
-
-[6] original: a cat saw
-    masked:   a [mask] saw
-    replaced: "cat" at pos 1
-    completed: a park saw
-
-[7] original: the big big park saw
-    masked:   the big [mask] park saw
-    replaced: "big" at pos 2
-    completed: the big small park saw
-
-[8] original: a woman chased the lazy telescope
-    masked:   a woman chased [mask] lazy telescope
-    replaced: "the" at pos 3
-    completed: a woman chased the lazy telescope
-
-[9] original: a red dog chased
-    masked:   a red [mask] chased
-    replaced: "dog" at pos 2
-    completed: a red dog chased
+    completed: the telescope chased a man
 

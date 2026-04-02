@@ -14,12 +14,13 @@ Quality-of-life changes:
 
 **Better Hierarchy Brainstorm:**
 *   Spreading activation theory for restructuring?? The idea is that BFSes are DFSes if the tree is perfectly normal, and so we want to restructure the tree such that BFSes produce DFSes in the long run
-    *   Some kind of mass-based merge?
-    *   Really, we should be restructuring basic-level nodes!
+    *   Some kind of mass-based merge? Realistically, the best way to approach this is to say that 
 
 **Chunk Context Brainstorm:**
-*   Here, the order of chunks matters - we're going to start with this "greedy" sort of chunk creation but eventually we'll transition to a 
-*   There's an important point here - even in the context hierarchy under the 'content-ref' attribute, do we represent nodes by their surrounding or by their composition? Composition makes chunk matching easy but 
+*   Here, the order of chunks matters!! The best bet for us is probably a Matasakis-akin implementation, which focuses on iterative addition to a given script!!
+*   There's an important point here - even in the context hierarchy under the 'content-ref' attribute, do we represent nodes by their surrounding or by their composition?
+*   We really need to formalize the observational buffer thing here - there might be a way we can layer multiple hierarchies to keep track of different options
+    *   In the incremental learning paradigm, all data is considered "out-of-distribution" until it is seen repeatedly - we really need to emphasize a datastructure that holds importance and reinforces importance (OR find a way to frame Cobweb in this aspect)
 
 ## Methodology 4.0
 

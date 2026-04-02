@@ -77,6 +77,7 @@ webster = WEBSTER(
     bow=False,
     empty_weighting=True,
     chunk_context=False,
+    # context_n_iterations=5,
     weighting="binary",
     categorization_mode="dfs",
     depth_max_content=1000,

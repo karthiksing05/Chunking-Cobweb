@@ -1,0 +1,11 @@
+Category,Avg CntLP,Avg CtxLP,Avg CntBC,Avg CtxBC,#Chunks,#Context
+Grammatical Baseline,-7.4939,-4.0639,22.8182,247.8395,11,81
+Word-Order Swap,-4.9477,-5.8816,24.0000,219.8387,14,93
+Reversed,-6.1414,-8.1003,26.7500,229.5733,12,75
+Category Violation,-4.7598,-5.3076,28.2000,250.3433,10,67
+Missing Constituent,-4.7752,-4.3661,28.3077,237.8088,13,68
+Duplicated Constituent,-4.5395,-4.4317,32.4333,231.2241,30,116
+Extra Insertion,-4.4618,-4.6576,25.1379,253.4190,29,105
+Random Sequences,-4.6607,-7.1880,33.3333,248.5556,15,72
+Structural Violations,-4.6528,-4.9541,32.8421,309.7910,19,67
+Out-of-Vocabulary,-4.3648,-4.7048,33.5600,290.6184,25,76
