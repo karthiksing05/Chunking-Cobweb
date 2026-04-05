@@ -6,6 +6,7 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
 
 Quality-of-life changes:
 *   BASIC LEVEL SAMPLING IS SLOWWWW - let's parallelize this through either matrix ops or multithreading!!
+    *   FOUND A GREAT PROXY - putting it under ENTROPY_BASIC_LEVEL.md
 
 **Two main issues:**
 *   Need to CRAFT BETTER HIERARCHY!!!
