@@ -80,10 +80,10 @@ webster = WEBSTER(
     # context_n_iterations=5,
     weighting="binary",
     categorization_mode="dfs",
-    depth_max_content=1000,
-    depth_max_context=1000,
-    branch_max_content=1000,
-    branch_max_context=1000,
+    depth_max_content=10,
+    depth_max_context=10,
+    branch_max_content=10,
+    branch_max_context=10,
 )
 
 # ── Phase 1: primitives-only on random sentences ──────────────────────────
