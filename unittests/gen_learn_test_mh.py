@@ -32,6 +32,7 @@ THRESHOLD = 30
 # Setting up the multi-hierarchy parser (WEBSTER)
 webster = WEBSTER(
     TEST_CORPUS1,
+    mode_basic_level=True,
     context_length=CONTEXT_LENGTH,
     threshold=THRESHOLD,
     content_alpha=1e-3,
@@ -39,16 +40,17 @@ webster = WEBSTER(
     content_bl_alpha=1e-1,
     context_bl_alpha=1,
     bow=False,
+    empty_weighting=True,
     chunk_context=False,
     # context_n_iterations=5,
-    empty_weighting=True,
     weighting="binary",
-    categorization_mode='dfs', # can be dfs, bfs, or bfs_pmi
-    depth_max_content=1000,
-    depth_max_context=1000,
-    branch_max_content=1000,
-    branch_max_context=1000,
+    categorization_mode="dfs",
+    depth_max_content=10,
+    depth_max_context=10,
+    branch_max_content=10,
+    branch_max_context=10,
 )
+
 
 train_size = 0.9
 

@@ -401,6 +401,7 @@ def _score_along_path(
     debug: bool = False,
     eval_alpha: float = None,
     _basic_cache: dict = None,
+    mode_basic_level: bool = False,
 ) -> dict:
     """
     Compute recognition statistics along a categorization path.
@@ -429,11 +430,14 @@ def _score_along_path(
 
     _bl_eval_alpha = eval_alpha if eval_alpha is not None else -1.0
     leaf_hash = node_path[-1].concept_hash()
-    _basic_key = (id(tree), leaf_hash, _bl_eval_alpha) if _basic_cache is not None else None
+    _basic_key = (id(tree), leaf_hash, _bl_eval_alpha, mode_basic_level) if _basic_cache is not None else None
     if _basic_cache is not None and _basic_key in _basic_cache:
         basic_level_node = _basic_cache[_basic_key]
     else:
-        basic_level_node = node_path[-1].get_basic(200, 100, debug=True, eval_alpha=_bl_eval_alpha)
+        if mode_basic_level:
+            basic_level_node = node_path[-1].get_basic_mode_pmi(debug=True, eval_alpha=_bl_eval_alpha)
+        else:
+            basic_level_node = node_path[-1].get_basic(200, 100, debug=True, eval_alpha=_bl_eval_alpha)
         if _basic_cache is not None:
             _basic_cache[_basic_key] = basic_level_node
     basic_level_log_prob = basic_level_node.log_prob_instance(instance)
@@ -1035,7 +1039,8 @@ class FiniteParseTree(object):
 
             # score
             score_data = _score_along_path(node_path, ctx_inst, self.ltm.context_hierarchy,
-                                            eval_alpha=getattr(self.ltm, 'context_bl_alpha', None))
+                                            eval_alpha=getattr(self.ltm, 'context_bl_alpha', None),
+                                            mode_basic_level=getattr(self.ltm, 'mode_basic_level', False))
             node.score_data = score_data
 
             if threshold == "converge":
@@ -1267,10 +1272,12 @@ class FiniteParseTree(object):
 
         content_score_data = _score_along_path(cnt_node_path, content_inst, self.ltm.content_hierarchy,
                                                eval_alpha=getattr(self.ltm, 'content_bl_alpha', None),
-                                               _basic_cache=_basic_cache)
+                                               _basic_cache=_basic_cache,
+                                               mode_basic_level=getattr(self.ltm, 'mode_basic_level', False))
         context_score_data = _score_along_path(ctx_node_path, context_inst, self.ltm.context_hierarchy,
                                                eval_alpha=getattr(self.ltm, 'context_bl_alpha', None),
-                                               _basic_cache=_basic_cache)
+                                               _basic_cache=_basic_cache,
+                                               mode_basic_level=getattr(self.ltm, 'mode_basic_level', False))
 
         # IMPORTANT STUFF HERE!!!
         score = content_score_data["cost"]
@@ -1290,7 +1297,8 @@ class FiniteParseTree(object):
                 _, _, _path, _ = _categorize(ctx, self.ltm.context_hierarchy, mode=_cat_mode)
                 result = _score_along_path(_path, ctx, self.ltm.context_hierarchy,
                                            eval_alpha=getattr(self.ltm, 'context_bl_alpha', None),
-                                           _basic_cache=_basic_cache)
+                                           _basic_cache=_basic_cache,
+                                           mode_basic_level=getattr(self.ltm, 'mode_basic_level', False))
             if _child_ctx_cache is not None:
                 _child_ctx_cache[child_id] = result
             return result
@@ -2696,7 +2704,8 @@ class LongTermMemory(object):
                  categorization_mode: str = 'dfs', weighting: str = 'binary', empty_weighting: bool = False,
                  chunk_context: bool = False, context_n_iterations: int = 0,
                  depth_max_content: int = 1000, depth_max_context: int = 1000,
-                 branch_max_content: int = 1000, branch_max_context: int = 1000):
+                 branch_max_content: int = 1000, branch_max_context: int = 1000,
+                 mode_basic_level: bool = False):
         _content_alpha = content_alpha if content_alpha is not None else alpha
         _context_alpha = context_alpha if context_alpha is not None else alpha
         self.content_alpha = _content_alpha
@@ -2741,6 +2750,7 @@ class LongTermMemory(object):
         self.categorization_mode = categorization_mode
         self.weighting = weighting  # 'binary', 'harmonic', or 'constant'
         self.empty_weighting = empty_weighting  # True: EMPTYNULL uses count 1
+        self.mode_basic_level = mode_basic_level
 
         # register root concepts of both hierarchies
         self._register_concept(self.content_hierarchy.root)
@@ -2819,7 +2829,8 @@ class LongTermMemory(object):
         leaf, path, node_path, _ = _categorize(
             content_inst, self.content_hierarchy, mode=_cat_mode)
         return _score_along_path(node_path, content_inst, self.content_hierarchy, debug=debug,
-                                 eval_alpha=self.content_bl_alpha)
+                                 eval_alpha=self.content_bl_alpha,
+                                 mode_basic_level=getattr(self, 'mode_basic_level', False))
 
     def get_context_instance_statistics(self, context_inst: dict, debug=False) -> dict:
         """
@@ -2829,7 +2840,8 @@ class LongTermMemory(object):
         leaf, path, node_path, _ = _categorize(
             context_inst, self.context_hierarchy, mode=_cat_mode)
         return _score_along_path(node_path, context_inst, self.context_hierarchy, debug=debug,
-                                 eval_alpha=self.context_bl_alpha)
+                                 eval_alpha=self.context_bl_alpha,
+                                 mode_basic_level=getattr(self, 'mode_basic_level', False))
 
     # ---- learning (ifit + vocab management) -----------------------------
 
@@ -3111,8 +3123,11 @@ class LongTermMemory(object):
                 curr = stack.pop()
                 if not curr.children:
                     _bl_eval_alpha = bl_alpha if bl_alpha is not None else -1.0
-                    basic = curr.get_basic(n_samples, max_nodes, debug=False,
-                                          eval_alpha=_bl_eval_alpha)
+                    if getattr(self, 'mode_basic_level', False):
+                        basic = curr.get_basic_mode_pmi(eval_alpha=_bl_eval_alpha)
+                    else:
+                        basic = curr.get_basic(n_samples, max_nodes, debug=False,
+                                              eval_alpha=_bl_eval_alpha)
                     h = basic.concept_hash()
                     if h not in seen:
                         seen[h] = basic
@@ -3243,7 +3258,8 @@ class WEBSTER(object):
                  categorization_mode: str = 'dfs', weighting: str = 'binary', empty_weighting: bool = False,
                  chunk_context: bool = False, context_n_iterations: int = 0,
                  depth_max_content: int = 1000, depth_max_context: int = 1000,
-                 branch_max_content: int = 1000, branch_max_context: int = 1000):
+                 branch_max_content: int = 1000, branch_max_context: int = 1000,
+                 mode_basic_level: bool = False):
         """
         Parameters
         ----------
@@ -3295,6 +3311,10 @@ class WEBSTER(object):
             Maximum children per node in content tree. Default ``1000``.
         branch_max_context : int
             Maximum children per node in context tree. Default ``1000``.
+        mode_basic_level : bool
+            If True, use ``get_basic_mode_pmi()`` (MAP-instance PMI proxy) instead
+            of the Monte Carlo ``get_basic()`` for basic-level selection. Fast
+            analytical approximation; no sampling required. Default ``False``.
         """
         self.ltm = LongTermMemory(
             value_corpus, context_length=context_length,
@@ -3308,6 +3328,7 @@ class WEBSTER(object):
             chunk_context=chunk_context, context_n_iterations=context_n_iterations,
             depth_max_content=depth_max_content, depth_max_context=depth_max_context,
             branch_max_content=branch_max_content, branch_max_context=branch_max_context,
+            mode_basic_level=mode_basic_level,
         )
         self.context_length = context_length
         self.threshold = threshold
@@ -3319,6 +3340,7 @@ class WEBSTER(object):
         self.context_n_iterations = context_n_iterations
         self.content_bl_alpha = content_bl_alpha
         self.context_bl_alpha = context_bl_alpha
+        self.mode_basic_level = mode_basic_level
 
     # ---- accessors ------------------------------------------------------
 
@@ -3609,9 +3631,12 @@ class WEBSTER(object):
         # ── sample from content hierarchy via basic-level ────────────────
 
         def _basic_sample(cnt_node):
-            """get_basic → sample a leaf from the basic-level subtree."""
+            """get_basic / get_basic_mode_pmi → sample a leaf from the basic-level subtree."""
             _bl_eval_alpha = self.content_bl_alpha if self.content_bl_alpha is not None else -1.0
-            basic = cnt_node.get_basic(100, 1000, debug=True, eval_alpha=_bl_eval_alpha) # TODO REVISE THIS!!! n_nodes, n_samples
+            if getattr(self, 'mode_basic_level', False):
+                basic = cnt_node.get_basic_mode_pmi(debug=True, eval_alpha=_bl_eval_alpha)
+            else:
+                basic = cnt_node.get_basic(100, 1000, debug=True, eval_alpha=_bl_eval_alpha) # TODO REVISE THIS!!! n_nodes, n_samples
             # basic = cnt_node.get_best(cnt_node.av_count)
             # basic = cnt_node.tree.categorize(cnt_node.av_count).get_best(cnt_node.av_count)
             # basic = cnt_node

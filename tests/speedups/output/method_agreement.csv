@@ -1,0 +1,11 @@
+tree,method,n_leaves,hash_agree,hash_agree_pct,depth_agree,depth_agree_pct,ms_per_leaf,speedup
+content,sampled,446,446,100.0,446,100.0,385.4218,1.0
+content,entropy,446,399,89.46,399,89.46,0.003,127674.8
+content,root_kl,446,399,89.46,399,89.46,0.0289,13349.8
+content,inst_pmi,446,399,89.46,399,89.46,0.0464,8303.0
+content,mode_pmi,446,399,89.46,399,89.46,0.0459,8394.7
+context,sampled,1542,1542,100.0,1542,100.0,318.9782,1.0
+context,entropy,1542,816,52.92,816,52.92,0.0018,173168.8
+context,root_kl,1542,1041,67.51,1041,67.51,0.024,13298.7
+context,inst_pmi,1542,1263,81.91,1263,81.91,0.0087,36596.3
+context,mode_pmi,1542,1407,91.25,1407,91.25,0.0041,78615.0
