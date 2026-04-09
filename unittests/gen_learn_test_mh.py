@@ -20,7 +20,7 @@ if os.path.exists(OUT_DIR):
 # Creating and printing toy sentences
 CONTEXT_LENGTH = 3
 
-num_sentences = 175
+num_sentences = 300
 document = []
 
 for _ in range(num_sentences):
@@ -32,7 +32,7 @@ THRESHOLD = 30
 # Setting up the multi-hierarchy parser (WEBSTER)
 webster = WEBSTER(
     TEST_CORPUS1,
-    mode_basic_level=True,
+    instance_basic_level=True,
     context_length=CONTEXT_LENGTH,
     threshold=THRESHOLD,
     content_alpha=1e-3,

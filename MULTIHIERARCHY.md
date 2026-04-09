@@ -6,11 +6,12 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
 
 Quality-of-life changes:
 *   BASIC LEVEL SAMPLING IS SLOWWWW - let's parallelize this through either matrix ops or multithreading!!
-    *   FOUND A GREAT PROXY - putting it under ENTROPY_BASIC_LEVEL.md
+    *   FOUND A GREAT PROXY - putting it under MODE_AS_BASIC_LEVEL.md
 
 **Two main issues:**
 *   Need to CRAFT BETTER HIERARCHY!!!
     *   Chris's analogy is quite right - we see that there are nodes that behave the same yet are found in various different places across the hierarchy
+    *   Better hierarchy, better analysis of what these final representations look like, and better basic level!!!
 *   Need to add chunk context whenever we're ready to do that (perhaps this will create a better hierarchy?)
 
 **Better Hierarchy Brainstorm:**

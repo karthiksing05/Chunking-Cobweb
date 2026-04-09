@@ -106,11 +106,8 @@ def _method_fns(leaf):
     inst = {a: {max(v, key=v.get): 1.0} for a, v in leaf.av_count.items()} if leaf.av_count else {}
     return {
         "sampled":  lambda l=leaf: l.get_basic(200, MAX_NODES),
-        "entropy":  lambda l=leaf: l.get_basic_entropy(),
-        "root_kl":  lambda l=leaf: l.get_basic_root_kl(),
         "inst_pmi": lambda l=leaf: l.get_basic_instance_pmi(
                         {a: {max(v, key=v.get): 1.0} for a, v in l.av_count.items()} if l.av_count else {}),
-        "mode_pmi": lambda l=leaf: l.get_basic_mode_pmi(),
     }
 
 
@@ -125,7 +122,7 @@ def test_method_agreement(webster, capsys):
     """
     ltm   = webster.ltm
     trees = {"content": ltm.content_hierarchy, "context": ltm.context_hierarchy}
-    METHODS = ["entropy", "root_kl", "inst_pmi", "mode_pmi"]
+    METHODS = ["inst_pmi"]
     csv_rows = []
 
     for tree_name, tree in trees.items():
@@ -143,20 +140,10 @@ def test_method_agreement(webster, capsys):
 
         rows = {}
         for method in METHODS:
-            if method == "entropy":
-                t0 = time.perf_counter()
-                results = [leaf.get_basic_entropy() for leaf in leaves]
-            elif method == "root_kl":
-                t0 = time.perf_counter()
-                results = [leaf.get_basic_root_kl() for leaf in leaves]
-            elif method == "inst_pmi":
-                t0 = time.perf_counter()
-                results = [leaf.get_basic_instance_pmi(
-                    {a: {max(v, key=v.get): 1.0} for a, v in leaf.av_count.items()} if leaf.av_count else {}
-                ) for leaf in leaves]
-            elif method == "mode_pmi":
-                t0 = time.perf_counter()
-                results = [leaf.get_basic_mode_pmi() for leaf in leaves]
+            t0 = time.perf_counter()
+            results = [leaf.get_basic_instance_pmi(
+                {a: {max(v, key=v.get): 1.0} for a, v in leaf.av_count.items()} if leaf.av_count else {}
+            ) for leaf in leaves]
             t_method = time.perf_counter() - t0
             h_agree  = sum(r.concept_hash() == s for r, s in zip(results, s_hashes))
             d_agree  = sum(r.depth()        == s for r, s in zip(results, s_depths))
@@ -201,17 +188,11 @@ def test_method_agreement(webster, capsys):
 
 def _fast_results(method: str, leaves: list) -> list:
     """Compute fast-method results for a list of leaves (no sampling)."""
-    if method == "entropy":
-        return [leaf.get_basic_entropy() for leaf in leaves]
-    elif method == "root_kl":
-        return [leaf.get_basic_root_kl() for leaf in leaves]
-    elif method == "inst_pmi":
+    if method == "inst_pmi":
         return [leaf.get_basic_instance_pmi(
             {a: {max(v, key=v.get): 1.0} for a, v in leaf.av_count.items()}
             if leaf.av_count else {}
         ) for leaf in leaves]
-    elif method == "mode_pmi":
-        return [leaf.get_basic_mode_pmi() for leaf in leaves]
     raise ValueError(f"Unknown method: {method}")
 
 
@@ -227,7 +208,7 @@ def test_alpha_ablation(webster, capsys):
     """
     ltm        = webster.ltm
     trees      = {"content": ltm.content_hierarchy, "context": ltm.context_hierarchy}
-    FAST_METHS = ["entropy", "root_kl", "inst_pmi", "mode_pmi"]
+    FAST_METHS = ["inst_pmi"]
     sample_cap = 200
 
     # Pre-compute fast results (alpha-independent) for all methods × trees
@@ -404,17 +385,11 @@ def test_disagreement_cases(webster, capsys):
         disagree_cases = []
         for leaf in leaves:
             s_node   = leaf.get_basic(200, MAX_NODES)
-            e_node   = leaf.get_basic_entropy()
-            kl_node  = leaf.get_basic_root_kl()
             ip_inst  = {a: {max(v, key=v.get): 1.0} for a, v in leaf.av_count.items()} if leaf.av_count else {}
             ip_node  = leaf.get_basic_instance_pmi(ip_inst)
-            mp_node  = leaf.get_basic_mode_pmi()
             picks    = {
                 "sampled":  s_node,
-                "entropy":  e_node,
-                "root_kl":  kl_node,
                 "inst_pmi": ip_node,
-                "mode_pmi": mp_node,
             }
             s_hash = s_node.concept_hash()
             if any(n.concept_hash() != s_hash for k, n in picks.items() if k != "sampled"):
@@ -434,14 +409,12 @@ def test_disagreement_cases(webster, capsys):
             with capsys.disabled():
                 print(f"\n  Case {case_idx + 1}: leaf={leaf.concept_hash()[:10]}")
                 col_fmt = f"  {'Depth':>5}  {'Hash':>10}  {'count':>7}  "
-                col_fmt += f"{'-H(c)':>12}  {'KL-root':>12}  {'iPMI':>12}  {'EPMI(n=50)':>12}  picks"
+                col_fmt += f"{'iPMI':>12}  {'EPMI(n=50)':>12}  picks"
                 print(col_fmt)
-                print(f"  {'─'*5}  {'─'*10}  {'─'*7}  {'─'*12}  {'─'*12}  {'─'*12}  {'─'*12}  ─────")
+                print(f"  {'─'*5}  {'─'*10}  {'─'*7}  {'─'*12}  {'─'*12}  ─────")
 
             for node in path:
                 h      = node.concept_hash()
-                neg_h  = -node.entropy()
-                kl_sc  = -(node.entropy()) - node.cross_entropy_with_root()
                 inst   = {a: {max(v, key=v.get): 1.0} for a, v in leaf.av_count.items()} if leaf.av_count else {}
                 root   = node
                 while root.parent is not None:
@@ -456,12 +429,11 @@ def test_disagreement_cases(webster, capsys):
                                  "leaf_hash": leaf.concept_hash()[:10],
                                  "depth": node.depth(), "node_hash": h[:10],
                                  "count": node.count,
-                                 "neg_h": round(neg_h, 6), "kl_root": round(kl_sc, 6),
                                  "inst_pmi": round(ip_sc, 6), "epmi_n50": round(epmi, 6),
                                  "picks": "|".join(p_tags)})
                 with capsys.disabled():
                     print(f"  {node.depth():>5}  {h[:10]:>10}  {node.count:>7}  "
-                          f"{neg_h:>12.4f}  {kl_sc:>12.4f}  {ip_sc:>12.4f}  {epmi:>12.4f}  "
+                          f"{ip_sc:>12.4f}  {epmi:>12.4f}  "
                           f"{'  '.join(p_tags)}")
 
             with capsys.disabled():
@@ -472,7 +444,7 @@ def test_disagreement_cases(webster, capsys):
 
     _csv_write(os.path.join(OUTPUT_DIR, "disagreement_cases.csv"),
                ["tree", "case", "leaf_hash", "depth", "node_hash", "count",
-                "neg_h", "kl_root", "inst_pmi", "epmi_n50", "picks"],
+                "inst_pmi", "epmi_n50", "picks"],
                csv_rows)
 
 
@@ -494,10 +466,7 @@ def test_timing_comparison(webster, capsys):
     timings = {}
     for name, fn in [
         ("sampled",  lambda: leaf.get_basic(200, MAX_NODES)),
-        ("entropy",  lambda: leaf.get_basic_entropy()),
-        ("root_kl",  lambda: leaf.get_basic_root_kl()),
         ("inst_pmi", lambda: leaf.get_basic_instance_pmi(inst)),
-        ("mode_pmi", lambda: leaf.get_basic_mode_pmi()),
     ]:
         t0 = time.perf_counter()
         for _ in range(BENCH_REPS):
@@ -547,7 +516,7 @@ def test_plot_comparison(webster, capsys):
 
     ltm    = webster.ltm
     trees  = {"content": ltm.content_hierarchy, "context": ltm.context_hierarchy}
-    METHODS = ["entropy", "root_kl", "inst_pmi", "mode_pmi"]
+    METHODS = ["inst_pmi"]
 
     # Collect data
     all_data = {}
@@ -561,16 +530,9 @@ def test_plot_comparison(webster, capsys):
         method_depths = {}
         method_hash_agree = {}
         for method in METHODS:
-            if method == "entropy":
-                results = [leaf.get_basic_entropy() for leaf in leaves]
-            elif method == "root_kl":
-                results = [leaf.get_basic_root_kl() for leaf in leaves]
-            elif method == "inst_pmi":
-                results = [leaf.get_basic_instance_pmi(
-                    {a: {max(v, key=v.get): 1.0} for a, v in leaf.av_count.items()} if leaf.av_count else {}
-                ) for leaf in leaves]
-            elif method == "mode_pmi":
-                results = [leaf.get_basic_mode_pmi() for leaf in leaves]
+            results = [leaf.get_basic_instance_pmi(
+                {a: {max(v, key=v.get): 1.0} for a, v in leaf.av_count.items()} if leaf.av_count else {}
+            ) for leaf in leaves]
             method_depths[method]     = [r.depth() for r in results]
             method_hash_agree[method] = sum(r.concept_hash() == s
                                             for r, s in zip(results, s_hashes)) / len(leaves) * 100
@@ -696,24 +658,17 @@ def test_plot_score_curves(webster, capsys):
 
     ltm    = webster.ltm
     trees  = {"content": ltm.content_hierarchy, "context": ltm.context_hierarchy}
-    METHODS = ["entropy", "root_kl", "inst_pmi", "mode_pmi"]
+    METHODS = ["inst_pmi"]
     tree_names = list(trees.keys())
 
     def _proxy_scores(method, path_root_first, leaf):
         """Proxy score for each node in path (root first)."""
         root = path_root_first[0]
-        if method == "entropy":
-            return [-n.entropy() for n in path_root_first]
-        elif method == "root_kl":
-            return [-(n.entropy()) - n.cross_entropy_with_root()
-                    for n in path_root_first]
-        elif method in ("inst_pmi", "mode_pmi"):
-            inst = ({a: {max(v, key=v.get): 1.0} for a, v in leaf.av_count.items()}
-                    if leaf.av_count else {})
-            lp_root = root.log_prob_instance(inst) if inst else 0.0
-            return [n.log_prob_instance(inst) - lp_root
-                    for n in path_root_first]
-        raise ValueError(method)
+        inst = ({a: {max(v, key=v.get): 1.0} for a, v in leaf.av_count.items()}
+                if leaf.av_count else {})
+        lp_root = root.log_prob_instance(inst) if inst else 0.0
+        return [n.log_prob_instance(inst) - lp_root
+                for n in path_root_first]
 
     def _znorm(arr):
         a = np.array(arr, dtype=float)

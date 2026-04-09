@@ -68,7 +68,7 @@ if not hollow_corpus:
 # ── Initialise WEBSTER ────────────────────────────────────────────────────
 webster = WEBSTER(
     corpus,
-    mode_basic_level=True,
+    instance_basic_level=True,
     context_length=CONTEXT_LENGTH,
     threshold=THRESHOLD,
     content_alpha=1e-3,

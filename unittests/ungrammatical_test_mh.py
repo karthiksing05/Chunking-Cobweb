@@ -17,7 +17,7 @@ import math
 from parse_mh import WEBSTER, PrimitiveParseNode, CompositeParseNode
 from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1
 
-LOAD_LTM_DIR = "unittests/gen_learn_test_mh/final_ltm_data"
+LOAD_LTM_DIR = "unittests/hollow_learn_test_mh/final_ltm_data"
 OUT_DIR = "unittests/ungrammatical_test_mh"
 
 if not os.path.exists(LOAD_LTM_DIR):
