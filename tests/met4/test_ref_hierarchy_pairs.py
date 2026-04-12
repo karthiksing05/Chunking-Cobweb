@@ -304,7 +304,8 @@ def test_ref_hierarchy_pairs():
         attr_name_overrides={-1: "WordPair"},
     )
 
-    out_base = os.path.join(os.path.dirname(__file__), "output")
+    out_base = os.path.join(os.path.dirname(__file__), "output", "test_ref_hierarchy_pairs")
+    os.makedirs(out_base, exist_ok=True)
     pairs_to_viz = [
         ("POS",     pos_drawer,     pos_tree,     os.path.join(out_base, "ref_hierarchy_pairs_pos")),
         ("content", content_drawer, content_tree, os.path.join(out_base, "ref_hierarchy_pairs_content")),

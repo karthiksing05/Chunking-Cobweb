@@ -497,7 +497,7 @@ def test_context_hierarchy():
     )
 
     output_path = os.path.join(
-        os.path.dirname(__file__), "output", "context_hierarchy_tree"
+        os.path.dirname(__file__), "output", "test_context_hierarchy", "context_hierarchy_tree"
     )
     try:
         html_file, png_file = drawer.draw_tree(tree.root, output_path, max_depth=3)

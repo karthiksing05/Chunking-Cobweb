@@ -613,7 +613,7 @@ def test_path_logprobs_large_redist(shuffle=False):
         attr_value_fn={i: _val_fn for i in range(8)},
     )
     output_path = os.path.join(
-        os.path.dirname(__file__), "output", "logprob_paths_large_redist_tree"
+        os.path.dirname(__file__), "output", "test_logprob_paths_large_redist", "logprob_paths_large_redist_tree"
     )
     try:
         html_file, png_file = drawer.draw_tree(tree.root, output_path)

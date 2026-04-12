@@ -33,7 +33,7 @@ MAX_CASE_STUDIES = 5
 QUICK_EPMI_N     = 50
 MAX_NODES        = 100
 BENCH_REPS       = 20
-OUTPUT_DIR       = os.path.join(os.path.dirname(__file__), "output")
+OUTPUT_DIR       = os.path.join(os.path.dirname(__file__), "output", "test_basic_level_fix")
 
 
 # ---------------------------------------------------------------------------
@@ -511,7 +511,7 @@ def test_plot_comparison(webster, capsys):
     import matplotlib.pyplot as plt
     import numpy as np
 
-    output_dir = os.path.join(os.path.dirname(__file__), "output")
+    output_dir = os.path.join(os.path.dirname(__file__), "output", "test_basic_level_fix")
     os.makedirs(output_dir, exist_ok=True)
 
     ltm    = webster.ltm

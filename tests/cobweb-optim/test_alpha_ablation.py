@@ -40,7 +40,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 from cobweb.cobweb_discrete import CobwebDiscreteTree, CobwebDiscreteNode
 from viz import HTMLCobwebDrawer
 
-OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "output")
+OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "output", "test_alpha_ablation")
 
 ALPHAS = [1e-5, 1e-4, 1e-3, 1e-2, 5e-2, 1e-1, 5e-1, 1.0, 10.0, 100.0]
 
