@@ -1,11 +1,8 @@
 """
 tests/speedups/test_basic_level_fix.py
 
-Benchmarks 4 fast methods vs sampled get_basic(200, 100):
-  entropy   - argmin H(c)                            O(height)
-  root_kl   - argmax KL(P_c || P_root)               O(height × |V_c|)
+Benchmarks 1 fast method vs sampled get_basic(200, 100):
   inst_pmi  - argmax logP_c(x) - logP_root(x)        O(height × |x|)
-  mode_pmi  - inst_pmi on MAP instance of leaf        O(height × |x|)
 
 Tests
 ─────
@@ -141,9 +138,12 @@ def test_method_agreement(webster, capsys):
         rows = {}
         for method in METHODS:
             t0 = time.perf_counter()
-            results = [leaf.get_basic_instance_pmi(
-                {a: {max(v, key=v.get): 1.0} for a, v in leaf.av_count.items()} if leaf.av_count else {}
-            ) for leaf in leaves]
+            if method == "inst_pmi":
+                results = [leaf.get_basic_instance_pmi(
+                    {a: {max(v, key=v.get): 1.0} for a, v in leaf.av_count.items()} if leaf.av_count else {}
+                ) for leaf in leaves]
+            else:
+                raise ValueError(method)
             t_method = time.perf_counter() - t0
             h_agree  = sum(r.concept_hash() == s for r, s in zip(results, s_hashes))
             d_agree  = sum(r.depth()        == s for r, s in zip(results, s_depths))
@@ -297,7 +297,7 @@ def test_plot_alpha_ablation(webster, capsys):
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    FAST_METHS  = ["entropy", "root_kl", "inst_pmi", "mode_pmi"]
+    FAST_METHS  = ["inst_pmi"]
     METRICS     = [("hash_agree_pct",  "Hash agreement (%)"),
                    ("depth_agree_pct", "Depth agreement (%)")]
     TREE_COLORS = {"content": "#1f77b4", "context": "#ff7f0e"}
@@ -491,7 +491,7 @@ def test_timing_comparison(webster, capsys):
                  "speedup": round(t_sampled / t, 1) if t > 0 else float("inf")}
                 for name, t in timings.items()])
 
-    for name in ["entropy", "root_kl", "inst_pmi", "mode_pmi"]:
+    for name in ["inst_pmi"]:
         assert timings[name] <= t_sampled * 5, f"{name} not fast enough vs sampled"
 
 
@@ -530,9 +530,12 @@ def test_plot_comparison(webster, capsys):
         method_depths = {}
         method_hash_agree = {}
         for method in METHODS:
-            results = [leaf.get_basic_instance_pmi(
-                {a: {max(v, key=v.get): 1.0} for a, v in leaf.av_count.items()} if leaf.av_count else {}
-            ) for leaf in leaves]
+            if method == "inst_pmi":
+                results = [leaf.get_basic_instance_pmi(
+                    {a: {max(v, key=v.get): 1.0} for a, v in leaf.av_count.items()} if leaf.av_count else {}
+                ) for leaf in leaves]
+            else:
+                raise ValueError(method)
             method_depths[method]     = [r.depth() for r in results]
             method_hash_agree[method] = sum(r.concept_hash() == s
                                             for r, s in zip(results, s_hashes)) / len(leaves) * 100
@@ -641,8 +644,8 @@ def test_plot_score_curves(webster, capsys):
     same axes regardless of absolute scale.  The key visual question is:
     'Do the two curves peak at the same ancestor?'
 
-    Layout: 2 rows (content, context) × 4 cols (entropy, root_kl, inst_pmi,
-            mode_pmi).  Each panel overlays up to N_CURVE_LEAVES leaf paths.
+    Layout: 2 rows (content, context) × 1 col (inst_pmi).
+    Each panel overlays up to N_CURVE_LEAVES leaf paths.
     x-axis: ancestor depth (0 = root, max = leaf depth).
     Vertical dashed lines: blue = sampled argmax, red = proxy argmax.
 

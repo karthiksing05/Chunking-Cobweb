@@ -399,7 +399,7 @@ def test_score_curves_per_alpha(capsys):
                 path = list(reversed(_walk_path_to_root(leaf)))  # root-first
                 depths = [n.depth() for n in path]
 
-                # Mode instance
+                # Instance for inst-PMI (actual mode of this leaf)
                 inst = ({a: {max(v, key=v.get): 1.0}
                          for a, v in leaf.av_count.items()} if leaf.av_count else {})
                 root = path[0]
@@ -413,16 +413,16 @@ def test_score_curves_per_alpha(capsys):
                 epmi_scores = [n.expected_pmi(EPMI_N, MAX_NODES, alpha)
                                for n in path]
 
-                # Plot raw scores (not z-normed, so we see absolute shape)
+                # Plot raw scores
                 ax.plot(depths, epmi_scores, color="steelblue", lw=1.5,
                         marker="o", markersize=3, label="EPMI (sampled)")
-                ax.plot(depths, inst_scores, color="tomato", lw=1.5,
+                ax.plot(depths, inst_scores, color="orange", lw=1.5,
                         marker="s", markersize=3, linestyle="--", label="inst-PMI")
 
                 epmi_best = depths[int(np.argmax(epmi_scores))]
                 inst_best = depths[int(np.argmax(inst_scores))]
                 ax.axvline(epmi_best, color="steelblue", alpha=0.4, lw=1, ls=":")
-                ax.axvline(inst_best, color="tomato",    alpha=0.4, lw=1, ls=":")
+                ax.axvline(inst_best, color="orange",    alpha=0.4, lw=1, ls=":")
 
                 ax.set_xlabel("depth")
                 if col == 0:
@@ -539,25 +539,31 @@ def test_alpha_sweep_agreement(capsys):
         with capsys.disabled():
             print(f"{'═' * 90}")
 
-        # ── Per-hierarchy plot: mean depth vs alpha ──────────────────────
-        fig, ax = plt.subplots(figsize=(8, 4.5))
-        for m_name, pts in sweep_data.items():
-            xs = [p[0] for p in pts]
-            ys = [p[1] for p in pts]
-            ax.plot(xs, ys, marker="o", markersize=5, lw=1.8,
-                    color=METHOD_COLORS[m_name], label=m_name)
+        # ── Per-hierarchy plot: grouped bar chart ─────────────────────────
+        fig, ax = plt.subplots(figsize=(max(8, len(ALPHAS) * 1.2), 4.5))
+        method_names = list(METHODS.keys())
+        n_methods = len(method_names)
+        x = np.arange(len(ALPHAS))
+        bar_width = 0.8 / n_methods
+
+        for i, m_name in enumerate(method_names):
+            ys = [p[1] for p in sweep_data[m_name]]
+            ax.bar(x + i * bar_width, ys, bar_width,
+                   color=METHOD_COLORS[m_name], label=m_name)
 
         # Mark the expected basic-level depth
         ax.axhline(expected_depth, color="gray", ls="--", lw=1, alpha=0.6,
                    label=f"expected depth={expected_depth}")
 
-        ax.set_xscale("log")
-        ax.set_xlabel("eval_alpha (log scale)")
+        ax.set_xticks(x + bar_width * (n_methods - 1) / 2)
+        ax.set_xticklabels([f"{a:.0e}" for a in ALPHAS], fontsize=7, rotation=45,
+                           ha="right")
+        ax.set_xlabel("eval_alpha")
         ax.set_ylabel("Mean basic-level depth")
         ax.set_title(f"{hier_name}: {desc}\nMean basic-level depth vs eval_alpha",
                      fontsize=10)
         ax.legend(fontsize=8)
-        ax.grid(True, alpha=0.3)
+        ax.grid(True, alpha=0.3, axis="y")
         fig.tight_layout()
         fig.savefig(os.path.join(OUTPUT_DIR, f"alpha_sweep_{hier_name}.png"),
                     dpi=130)
@@ -618,25 +624,33 @@ def test_alpha_sweep_grid(capsys):
 
         max_leaf_depth = max(l.depth() for l in leaves)
 
-        for m_name, m_fn in METHODS.items():
+        method_names = list(METHODS.keys())
+        n_methods = len(method_names)
+        x = np.arange(len(ALPHAS))
+        bar_width = 0.8 / n_methods
+
+        for i, m_name in enumerate(method_names):
             mean_depths = []
+            m_fn = METHODS[m_name]
             for alpha in ALPHAS:
                 results = [m_fn(leaf, alpha) for leaf in leaves]
                 mean_d = sum(r.depth() for r in results) / len(results)
                 mean_depths.append(mean_d)
-            ax.plot(ALPHAS, mean_depths, marker="o", markersize=4, lw=1.6,
-                    color=METHOD_COLORS[m_name], label=m_name)
+            ax.bar(x + i * bar_width, mean_depths, bar_width,
+                   color=METHOD_COLORS[m_name], label=m_name)
 
         ax.axhline(expected_depth, color="gray", ls="--", lw=1, alpha=0.6)
         ax.axhline(0, color="lightgray", ls=":", lw=0.5)
         ax.axhline(max_leaf_depth, color="lightgray", ls=":", lw=0.5)
 
-        ax.set_xscale("log")
+        ax.set_xticks(x + bar_width * (n_methods - 1) / 2)
+        ax.set_xticklabels([f"{a:.0e}" for a in ALPHAS], fontsize=6,
+                           rotation=45, ha="right")
         ax.set_xlabel("eval_alpha")
         ax.set_ylabel("Mean basic-level depth")
         ax.set_title(f"{hier_name}\n{desc}", fontsize=9)
         ax.set_ylim(-0.3, max_leaf_depth + 0.5)
-        ax.grid(True, alpha=0.2)
+        ax.grid(True, alpha=0.2, axis="y")
         if idx == 0:
             ax.legend(fontsize=7, loc="best")
 

@@ -12,6 +12,7 @@ Quality-of-life changes:
 *   Need to CRAFT BETTER HIERARCHY!!!
     *   Chris's analogy is quite right - we see that there are nodes that behave the same yet are found in various different places across the hierarchy
     *   Better hierarchy, better analysis of what these final representations look like, and better basic level!!!
+    *   My worry is that
 *   Need to add chunk context whenever we're ready to do that (perhaps this will create a better hierarchy?)
 
 **Better Hierarchy Brainstorm:**

@@ -1,5 +1,7 @@
 tree,method,n_leaves,hash_agree,hash_agree_pct,depth_agree,depth_agree_pct,ms_per_leaf,speedup
-content,sampled,430,430,100.0,430,100.0,394.1891,1.0
-content,inst_pmi,430,376,87.44,376,87.44,0.0459,8591.6
-context,sampled,1607,1607,100.0,1607,100.0,329.4731,1.0
-context,inst_pmi,1607,1345,83.7,1345,83.7,0.0097,33834.3
+content,sampled,369,369,100.0,369,100.0,442.1041,1.0
+content,inst_pmi,369,334,90.51,334,90.51,0.0538,8223.2
+content,mode_pmi,369,334,90.51,334,90.51,0.052,8509.5
+context,sampled,2098,2098,100.0,2098,100.0,337.0265,1.0
+context,inst_pmi,2098,1813,86.42,1813,86.42,0.0087,38677.0
+context,mode_pmi,2098,1813,86.42,1813,86.42,0.0045,74216.1

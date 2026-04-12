@@ -35,7 +35,7 @@ VIZ_INTERMEDIATES = True
 
 CONTEXT_LENGTH = 3
 THRESHOLD = 30
-PRIMITIVES_FIRST = 100  # first N trees train with infinite threshold (primitives only)
+PRIMITIVES_FIRST = 200  # first N trees train with infinite threshold (primitives only)
 
 corpus = TEST_CORPUS1
 grammar = TEST_GRAMMAR1
