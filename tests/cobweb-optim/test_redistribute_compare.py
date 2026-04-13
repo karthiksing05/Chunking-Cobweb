@@ -1,23 +1,25 @@
 """
 Test: compare standard redistribute (misplaced-PU) vs BFS activation-based
-redistribute_bfs on the same synthetic POS hierarchy.
+redistribute_bfs on the same synthetic POS hierarchy AND on a real context
+hierarchy loaded from hollow_learn_test_mh.
 
-Three trees are built from identical training data:
-  1. baseline     – no redistribution
-  2. redist_pu    – standard redistribute(n)
-  3. redist_bfs   – BFS activation-based redistribute_bfs(...)
+Synthetic test (test_redistribute_compare):
+  Three trees built from identical training data — baseline, redist_pu,
+  redist_bfs.
 
-For each tree the same battery of query instances is evaluated and printed
-so that structural differences can be inspected.
+Hollow context test (test_redistribute_hollow_context):
+  Loads the saved context hierarchy from hollow_learn_test_mh, clones it
+  three times, and compares baseline / redistribute / redistribute_bfs.
 """
 
-import sys, os, copy, json, random, argparse
+import sys, os, copy, json, random, argparse, tempfile
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 
 from cobweb.cobweb_discrete import CobwebDiscreteTree
 from viz import HTMLCobwebDrawer
+from parse_mh import WEBSTER, LongTermMemory
 
 
 # ── simulated concept IDs (POS hierarchy) ────────────────────────────────────
@@ -235,9 +237,173 @@ def test_redistribute_compare(shuffle=False):
     save_tree_html(redist_bfs, os.path.join(output_dir, "redist_compare_bfs"),        "REDIST-BFS")
 
 
+# ── hollow context hierarchy test ─────────────────────────────────────────────
+
+HOLLOW_LTM_DIR = os.path.join(
+    os.path.dirname(__file__), "..", "..",
+    "unittests", "hollow_learn_test_mh", "final_ltm_data")
+
+
+def _clone_tree(tree: CobwebDiscreteTree, alpha=1e-3) -> CobwebDiscreteTree:
+    """Deep-copy a tree via JSON round-trip."""
+    tmp = tempfile.NamedTemporaryFile(suffix=".json", delete=False)
+    tmp.close()
+    try:
+        tree.dump_json(tmp.name)
+        clone = CobwebDiscreteTree(alpha=alpha, weight_attr=False)
+        clone.load_json(tmp.name)
+        return clone
+    finally:
+        os.unlink(tmp.name)
+
+
+def _print_tree_stats(tag, tree):
+    nc = count_concepts(tree.root)
+    rc = tree.root.count
+    nch = len(tree.root.children)
+    print(f"  [{tag}] {nc} concepts, root.count={rc}, root.children={nch}")
+
+
+def _print_probe_scores(tag, tree, instance, probe_label):
+    """Print log-prob scores for a single probe on one tree variant."""
+    path = path_to_leaf(tree, instance)
+    tree_lp = tree.log_prob(instance, 100, False)
+    root_lp = path[0].log_prob_instance(instance)
+    leaf_lp = path[-1].log_prob_instance(instance)
+
+    basic_node = path[-1].get_basic(1000, 100, False, eval_alpha=1)
+    basic_lp = basic_node.log_prob_instance(instance)
+    best_node = path[-1].get_best(instance)
+    best_lp = best_node.log_prob_instance(instance)
+
+    print(f"    [{tag}] tree_lp={tree_lp:+.4f}  root={root_lp:+.4f}  "
+          f"leaf={leaf_lp:+.4f}(d={path[-1].depth()})  "
+          f"basic={basic_lp:+.4f}(d={basic_node.depth()})  "
+          f"best={best_lp:+.4f}(d={best_node.depth()})  "
+          f"path_len={len(path)}")
+
+
+def _save_context_html(tree, output_path, tag, ltm):
+    """Save an HTML viz using the LTM's context_drawer."""
+    drawer = ltm.context_drawer
+    try:
+        html_file, _ = drawer.draw_tree(tree.root, output_path, max_depth=5)
+        print(f"\n  [{tag}] context tree saved to: {html_file}")
+    except Exception as exc:
+        html_file = output_path + ".html"
+        d3_json = json.dumps(drawer._node_to_dict(tree.root, max_depth=5))
+        html_str = drawer._build_html(d3_json)
+        os.makedirs(os.path.dirname(html_file), exist_ok=True)
+        with open(html_file, "w", encoding="utf-8") as f:
+            f.write(html_str)
+        print(f"\n  [{tag}] context tree (HTML only) saved to: {html_file}")
+        print(f"    (PNG skipped: {exc})")
+
+
+def test_redistribute_hollow_context():
+    """
+    Load the context hierarchy from hollow_learn_test_mh's saved state,
+    clone it three ways, and compare baseline / redistribute / redistribute_bfs.
+    """
+    ltm_dir = os.path.join(HOLLOW_LTM_DIR, "ltm")
+    ctx_json = os.path.join(ltm_dir, "context_tree.json")
+    meta_json = os.path.join(ltm_dir, "meta.json")
+
+    if not os.path.exists(ctx_json):
+        print(f"[SKIP] Context tree not found at {ctx_json}.")
+        print("       Run hollow_learn_test_mh.py first to generate it.")
+        return
+
+    # Load LTM (for drawer / vocab)
+    ltm = LongTermMemory.load_state(ltm_dir)
+
+    # ── 1. Load context hierarchy ──────────────────────────────────────
+    baseline = ltm.context_hierarchy
+    print("\n" + "═" * 70)
+    print("  HOLLOW CONTEXT HIERARCHY — redistribute comparison")
+    print("═" * 70)
+    _print_tree_stats("BASELINE", baseline)
+
+    # ── 2. Clone for each method ───────────────────────────────────────
+    ctx_alpha = ltm.context_alpha
+    redist_pu  = _clone_tree(baseline, alpha=ctx_alpha)
+    redist_bfs = _clone_tree(baseline, alpha=ctx_alpha)
+
+    # ── 3. Standard redistribute ───────────────────────────────────────
+    print("\n  Running standard redistribute(500) ...")
+    redist_pu.redistribute(500)
+    _print_tree_stats("REDIST-PU", redist_pu)
+
+    # ── 4. BFS activation-based redistribute ───────────────────────────
+    n_probes = 500
+    max_nodes = 100
+    sim_threshold = 0.5
+    max_merges = 50
+    print(f"\n  Running redistribute_bfs("
+          f"n_probes={n_probes}, max_nodes={max_nodes}, "
+          f"sim_threshold={sim_threshold}, max_merges={max_merges}) ...")
+    n_merges = redist_bfs.redistribute_bfs(
+        n_probes=n_probes, max_nodes=max_nodes,
+        sim_threshold=sim_threshold, max_merges=max_merges)
+    print(f"    → {n_merges} merge(s) performed")
+    _print_tree_stats("REDIST-BFS", redist_bfs)
+
+    # ── 5. Sample probe instances from leaves and compare ──────────────
+    print("\n" + "─" * 70)
+    print("  Probe comparison (sampled leaves from baseline)")
+    print("─" * 70)
+    random.seed(42)
+    n_probes_test = 10
+    probes = []
+    for _ in range(n_probes_test):
+        leaf = baseline.sample_leaf()
+        if leaf is not None:
+            probes.append(leaf.av_count)
+
+    trees = [
+        ("BASELINE",   baseline),
+        ("REDIST-PU",  redist_pu),
+        ("REDIST-BFS", redist_bfs),
+    ]
+
+    # Aggregate scores for summary
+    agg = {tag: {"tree_lp": 0.0} for tag, _ in trees}
+
+    for i, probe_inst in enumerate(probes):
+        print(f"\n  Probe {i}:")
+        for tag, tree in trees:
+            _print_probe_scores(tag, tree, probe_inst, f"probe_{i}")
+            agg[tag]["tree_lp"] += tree.log_prob(probe_inst, 100, False)
+
+    # ── 6. Summary ─────────────────────────────────────────────────────
+    print("\n" + "─" * 70)
+    print(f"  Aggregate tree log-prob over {len(probes)} probes:")
+    print("─" * 70)
+    for tag, _ in trees:
+        avg_lp = agg[tag]["tree_lp"] / max(len(probes), 1)
+        print(f"    [{tag}] total={agg[tag]['tree_lp']:+.4f}  "
+              f"avg={avg_lp:+.4f}")
+
+    # ── 7. Visualizations ──────────────────────────────────────────────
+    output_dir = os.path.join(os.path.dirname(__file__), "output",
+                              "test_redistribute_compare")
+    os.makedirs(output_dir, exist_ok=True)
+    _save_context_html(baseline,   os.path.join(output_dir, "hollow_ctx_baseline"),   "BASELINE",   ltm)
+    _save_context_html(redist_pu,  os.path.join(output_dir, "hollow_ctx_pu"),         "REDIST-PU",  ltm)
+    _save_context_html(redist_bfs, os.path.join(output_dir, "hollow_ctx_bfs"),        "REDIST-BFS", ltm)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--shuffle", action="store_true",
-                        help="Shuffle training data before fitting")
+                        help="Shuffle training data before fitting (synthetic test)")
+    parser.add_argument("--hollow-only", action="store_true",
+                        help="Run only the hollow context hierarchy test")
+    parser.add_argument("--synthetic-only", action="store_true",
+                        help="Run only the synthetic POS test")
     args = parser.parse_args()
-    test_redistribute_compare(shuffle=args.shuffle)
+
+    if not args.hollow_only:
+        test_redistribute_compare(shuffle=args.shuffle)
+    if not args.synthetic_only:
+        test_redistribute_hollow_context()
