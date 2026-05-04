@@ -49,6 +49,8 @@ webster = WEBSTER(
     depth_max_context=10,
     branch_max_content=10,
     branch_max_context=10,
+    context_attr_weights={0: 10.0},   # attr 6 = content-ref when context_length=3
+    content_attr_weights={0: 1.0, 1: 1.0},  # boost left & right child attrs
 )
 
 

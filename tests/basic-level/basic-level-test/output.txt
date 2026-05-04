@@ -1,0 +1,83 @@
+
+
+===== RUN 1: context_alpha=0.0001 ========================================================================================================================================================================================================
+
+=== Basic-Level Nodes for a=0.0001 ===
+Context hierarchy (top 10 most frequent basic level nodes):
+  - 1526521746894625_205  count=70.0  depth=3  leaf_freq=35
+  - 1526521751315583_721  count=68.0  depth=3  leaf_freq=33
+  - 1526521745689458_54  count=160.0  depth=2  leaf_freq=22
+  - 1526521745608041_42  count=157.0  depth=2  leaf_freq=19
+  - 1526521745748333_63  count=183.0  depth=2  leaf_freq=15
+  - 1526521745715291_58  count=164.0  depth=2  leaf_freq=14
+  - 1526521745502250_27  count=135.0  depth=2  leaf_freq=14
+  - 1526521746314458_130  count=62.0  depth=3  leaf_freq=13
+  - 1526521745663166_50  count=201.0  depth=2  leaf_freq=12
+  - 1526521745635416_46  count=160.0  depth=2  leaf_freq=12
+
+=== Basic-Level Nodes for a=0.001 ===
+Context hierarchy (top 10 most frequent basic level nodes):
+  - 1526521745689458_54  count=160.0  depth=2  leaf_freq=25
+  - 1526521745502250_27  count=135.0  depth=2  leaf_freq=21
+  - 1526521745608041_42  count=157.0  depth=2  leaf_freq=18
+  - 1526521746894625_205  count=70.0  depth=3  leaf_freq=18
+  - 1526521745635416_46  count=160.0  depth=2  leaf_freq=18
+  - 1526521751315583_721  count=68.0  depth=3  leaf_freq=17
+  - 1526521745748333_63  count=183.0  depth=2  leaf_freq=17
+  - 1526521745715291_58  count=164.0  depth=2  leaf_freq=9
+  - 1526521745581500_38  count=157.0  depth=2  leaf_freq=9
+  - 1526521746819208_195  count=72.0  depth=3  leaf_freq=9
+
+=== Basic-Level Nodes for a=0.01 ===
+Context hierarchy (top 10 most frequent basic level nodes):
+  - 1526521745689458_54  count=160.0  depth=2  leaf_freq=83
+  - 1526521745748333_63  count=183.0  depth=2  leaf_freq=76
+  - 1526521745502250_27  count=135.0  depth=2  leaf_freq=76
+  - 1526521745581500_38  count=157.0  depth=2  leaf_freq=74
+  - 1526521745635416_46  count=160.0  depth=2  leaf_freq=66
+  - 1526521745608041_42  count=157.0  depth=2  leaf_freq=64
+  - 1526521745715291_58  count=164.0  depth=2  leaf_freq=54
+  - 1526521746819208_195  count=72.0  depth=3  leaf_freq=21
+  - 1526521745530458_31  count=138.0  depth=2  leaf_freq=15
+  - 1526521746894625_205  count=70.0  depth=3  leaf_freq=12
+
+=== Basic-Level Nodes for a=0.1 ===
+Context hierarchy (top 10 most frequent basic level nodes):
+  - 1526521745663166_50  count=201.0  depth=2  leaf_freq=200
+  - 1526521745748333_63  count=183.0  depth=2  leaf_freq=179
+  - 1526521745715291_58  count=164.0  depth=2  leaf_freq=164
+  - 1526521745689458_54  count=160.0  depth=2  leaf_freq=160
+  - 1526521745635416_46  count=160.0  depth=2  leaf_freq=159
+  - 1526521745608041_42  count=157.0  depth=2  leaf_freq=157
+  - 1526521745581500_38  count=157.0  depth=2  leaf_freq=146
+  - 1526521745530458_31  count=138.0  depth=2  leaf_freq=138
+  - 1526521745502250_27  count=135.0  depth=2  leaf_freq=134
+  - 1526521747156916_240  count=41.0  depth=3  leaf_freq=4
+
+=== Basic-Level Nodes for a=1 ===
+Context hierarchy (top 10 most frequent basic level nodes):
+  - 1526521745663166_50  count=201.0  depth=2  leaf_freq=201
+  - 1526521745715291_58  count=164.0  depth=2  leaf_freq=163
+  - 1526521745635416_46  count=160.0  depth=2  leaf_freq=160
+  - 1526521745608041_42  count=157.0  depth=2  leaf_freq=157
+  - 1526521745689458_54  count=160.0  depth=2  leaf_freq=149
+  - 1526521745581500_38  count=157.0  depth=2  leaf_freq=141
+  - 1526521745530458_31  count=138.0  depth=2  leaf_freq=137
+  - 1526521745502250_27  count=135.0  depth=2  leaf_freq=135
+  - 1526521745748333_63  count=183.0  depth=2  leaf_freq=83
+  - 1526521746932833_210  count=46.0  depth=3  leaf_freq=46
+
+=== Basic-Level Nodes for a=10 ===
+Context hierarchy (top 10 most frequent basic level nodes):
+  - 1526521745319250_3  count=1455.0  depth=0  leaf_freq=940
+  - 1526521745400791_13  count=504.0  depth=1  leaf_freq=315
+  - 1526521746629791_170  count=74.0  depth=3  leaf_freq=73
+  - 1526523093684708_1653  count=56.0  depth=4  leaf_freq=56
+  - 1526521746969083_215  count=87.0  depth=3  leaf_freq=31
+  - 1526521745748333_63  count=183.0  depth=2  leaf_freq=29
+  - 1526521745380041_10  count=496.0  depth=1  leaf_freq=9
+  - 1526521745430708_17  count=455.0  depth=1  leaf_freq=1
+  - 1526521745663166_50  count=201.0  depth=2  leaf_freq=1
+
+
+===== RUN 2: context_alpha=1 ========================================================================================================================================================================================================

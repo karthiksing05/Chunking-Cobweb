@@ -283,15 +283,17 @@ def _print_probe_scores(tag, tree, instance, probe_label):
           f"path_len={len(path)}")
 
 
-def _save_context_html(tree, output_path, tag, ltm):
-    """Save an HTML viz using the LTM's context_drawer."""
+def _save_context_html(tree, output_path, tag, ltm, max_depth=3):
+    """Save an HTML + PNG viz using the LTM's context_drawer, truncated at max_depth."""
     drawer = ltm.context_drawer
     try:
-        html_file, _ = drawer.draw_tree(tree.root, output_path, max_depth=5)
+        html_file, png_file = drawer.draw_tree(tree.root, output_path, max_depth=max_depth)
         print(f"\n  [{tag}] context tree saved to: {html_file}")
+        if png_file and os.path.exists(png_file):
+            print(f"  [{tag}] PNG saved to: {png_file}")
     except Exception as exc:
         html_file = output_path + ".html"
-        d3_json = json.dumps(drawer._node_to_dict(tree.root, max_depth=5))
+        d3_json = json.dumps(drawer._node_to_dict(tree.root, max_depth=max_depth))
         html_str = drawer._build_html(d3_json)
         os.makedirs(os.path.dirname(html_file), exist_ok=True)
         with open(html_file, "w", encoding="utf-8") as f:

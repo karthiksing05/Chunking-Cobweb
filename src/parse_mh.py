@@ -2705,7 +2705,8 @@ class LongTermMemory(object):
                  chunk_context: bool = False, context_n_iterations: int = 0,
                  depth_max_content: int = 1000, depth_max_context: int = 1000,
                  branch_max_content: int = 1000, branch_max_context: int = 1000,
-                 instance_basic_level: bool = False):
+                 instance_basic_level: bool = False,
+                 content_attr_weights: dict = None, context_attr_weights: dict = None):
         _content_alpha = content_alpha if content_alpha is not None else alpha
         _context_alpha = context_alpha if context_alpha is not None else alpha
         self.content_alpha = _content_alpha
@@ -2716,9 +2717,9 @@ class LongTermMemory(object):
         self.context_n_iterations = context_n_iterations
 
         # Create context hierarchy first (it serves as ref_tree for content)
-        self.context_hierarchy = CobwebDiscreteTree(_context_alpha, weight_attr=False, depth_max=depth_max_context, branch_max=branch_max_context)
+        self.context_hierarchy = CobwebDiscreteTree(_context_alpha, weight_attr=False, depth_max=depth_max_context, branch_max=branch_max_context, attr_weights=context_attr_weights or {})
         # Content hierarchy uses context hierarchy as ref_tree for LCA similarity
-        self.content_hierarchy = CobwebDiscreteTree(_content_alpha, weight_attr=False, depth_max=depth_max_content, branch_max=branch_max_content, ref_tree=self.context_hierarchy)
+        self.content_hierarchy = CobwebDiscreteTree(_content_alpha, weight_attr=False, depth_max=depth_max_content, branch_max=branch_max_content, ref_tree=self.context_hierarchy, attr_weights=content_attr_weights or {})
         # Mark content attrs 0 (left) and 1 (right) as ref attrs for soft matching
         self.content_hierarchy.set_ref_attr(0)
         self.content_hierarchy.set_ref_attr(1)
@@ -3260,7 +3261,8 @@ class WEBSTER(object):
                  chunk_context: bool = False, context_n_iterations: int = 0,
                  depth_max_content: int = 1000, depth_max_context: int = 1000,
                  branch_max_content: int = 1000, branch_max_context: int = 1000,
-                 instance_basic_level: bool = False):
+                 instance_basic_level: bool = False,
+                 content_attr_weights: dict = None, context_attr_weights: dict = None):
         """
         Parameters
         ----------
@@ -3330,6 +3332,8 @@ class WEBSTER(object):
             depth_max_content=depth_max_content, depth_max_context=depth_max_context,
             branch_max_content=branch_max_content, branch_max_context=branch_max_context,
             instance_basic_level=instance_basic_level,
+            content_attr_weights=content_attr_weights,
+            context_attr_weights=context_attr_weights,
         )
         self.context_length = context_length
         self.threshold = threshold

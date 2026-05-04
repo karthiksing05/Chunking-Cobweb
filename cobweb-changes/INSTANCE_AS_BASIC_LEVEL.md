@@ -10,6 +10,9 @@ $$
 
 Evaluated by Monte Carlo sampling.  Cost: $O(\text{height} \times N)$.
 
+From code:
+
+$$E_{x|c} [pmi(x;c)] = H(p_{x|c}, p_x) - H(p_{x|c}).$$
 ---
 
 ## Instance-PMI (`get_basic_instance_pmi`)
