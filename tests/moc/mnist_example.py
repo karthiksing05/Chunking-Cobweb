@@ -54,8 +54,11 @@ X_test, y_test = to_numpy(testset,   2_000)
 
 # ── PCA ───────────────────────────────────────────────────────────────────────
 
-DZ    = 128   # representation dimensionality
-TOP_K =  16   # fixed top-k per-instance sparsification
+DZ      = 128    # representation dimensionality
+TOP_K   =  16    # fixed top-k per-instance sparsification
+AUXK    =  16    # AuxK: dead-neuron top-k for aux reconstruction loss
+AUXK_W  = 1/32   # weight on AuxK loss term
+L1_LAM  = 3e-4   # L1 penalty coefficient for L1-SAE
 
 pca = PCA(n_components=DZ)
 Z_pca      = pca.fit_transform(X)
@@ -105,6 +108,152 @@ with torch.no_grad():
     Z_ae      = ae.encoder(torch.tensor(X,      dtype=torch.float32)).numpy()
     Z_ae_test = ae.encoder(torch.tensor(X_test, dtype=torch.float32)).numpy()
 
+# ── Sparse Autoencoders ───────────────────────────────────────────────────────
+
+class L1SAE(nn.Module):
+    """SAE with ReLU encoder and L1 sparsity penalty."""
+    def __init__(self, dz=DZ, input_dim=784):
+        super().__init__()
+        self.dz = dz
+        self.encoder = nn.Sequential(nn.Linear(input_dim, dz), nn.ReLU())
+        self.decoder = nn.Linear(dz, input_dim)
+
+    def encode(self, x):
+        return self.encoder(x)
+
+    def forward(self, x):
+        h = self.encode(x)
+        return h, self.decoder(h)
+
+
+class TopKSAE(nn.Module):
+    """SAE whose encoder keeps only the top-k activations per sample.
+    Supports AuxK: an auxiliary loss that routes dead-neuron activations
+    through the decoder toward the residual error, reviving dead neurons.
+    """
+    def __init__(self, dz=DZ, input_dim=784, k=TOP_K):
+        super().__init__()
+        self.dz = dz
+        self.k  = k
+        self._enc = nn.Linear(input_dim, dz)
+        self.decoder = nn.Linear(dz, input_dim)
+        # fire-count buffer for dead-neuron tracking (not a parameter)
+        self.register_buffer("fire_counts", torch.zeros(dz))
+
+    def encode(self, x):
+        pre = F.relu(self._enc(x))
+        topk_vals, topk_idx = torch.topk(pre, self.k, dim=1)
+        h = torch.zeros_like(pre)
+        h.scatter_(1, topk_idx, topk_vals)
+        return h
+
+    def encode_pre(self, x):
+        """Return pre-sparsification ReLU activations."""
+        return F.relu(self._enc(x))
+
+    def forward(self, x):
+        h = self.encode(x)
+        return h, self.decoder(h)
+
+
+def train_l1sae(model, X_train, lam=L1_LAM, epochs=20, batch_size=256):
+    opt = torch.optim.Adam(model.parameters(), lr=1e-3)
+    loader = torch.utils.data.DataLoader(
+        torch.utils.data.TensorDataset(torch.tensor(X_train, dtype=torch.float32)),
+        batch_size=batch_size, shuffle=True,
+    )
+    model.train()
+    for ep in range(epochs):
+        total_rec, total_l1 = 0.0, 0.0
+        for (batch,) in loader:
+            opt.zero_grad()
+            h, x_hat = model(batch)
+            rec = F.mse_loss(x_hat, batch)
+            l1  = lam * h.abs().mean()
+            (rec + l1).backward()
+            opt.step()
+            total_rec += rec.item()
+            total_l1  += l1.item()
+        n = len(loader)
+        print(f"  epoch {ep+1:02d}/{epochs}  rec={total_rec/n:.4f}  l1={total_l1/n:.5f}")
+    model.eval()
+    return model
+
+
+def train_topksae(model, X_train, auxk=AUXK, auxk_w=AUXK_W, epochs=20, batch_size=256):
+    """Train TopKSAE with AuxK loss to revive dead neurons.
+
+    AuxK: after normal TopK forward, compute residual = x - x_hat (no grad).
+    Among the neurons that have fired fewer times than a threshold (dead), take
+    the top-AUXK by their pre-activation magnitude, reconstruct the residual
+    from those, and add a weighted MSE loss.  This pushes dead neurons toward
+    useful directions without corrupting the primary TopK representation.
+    """
+    opt = torch.optim.Adam(model.parameters(), lr=1e-3)
+    loader = torch.utils.data.DataLoader(
+        torch.utils.data.TensorDataset(torch.tensor(X_train, dtype=torch.float32)),
+        batch_size=batch_size, shuffle=True,
+    )
+    model.train()
+    dead_threshold = len(X_train) // batch_size  # ~1 epoch of batches
+    for ep in range(epochs):
+        total_rec, total_aux = 0.0, 0.0
+        model.fire_counts.zero_()
+        for (batch,) in loader:
+            opt.zero_grad()
+            # ── primary TopK forward ──
+            pre = model.encode_pre(batch)                # (B, dz)
+            topk_vals, topk_idx = torch.topk(pre, model.k, dim=1)
+            h = torch.zeros_like(pre)
+            h.scatter_(1, topk_idx, topk_vals)
+            x_hat = model.decoder(h)
+            rec = F.mse_loss(x_hat, batch)
+
+            # update fire counts
+            with torch.no_grad():
+                model.fire_counts += (h > 0).float().sum(dim=0)
+
+            # ── AuxK loss on dead neurons ──
+            dead_mask = model.fire_counts < dead_threshold  # (dz,) bool
+            n_dead = dead_mask.sum().item()
+            if n_dead > 0 and auxk > 0:
+                k_aux = min(auxk, n_dead)
+                # activations of dead neurons only, others zeroed
+                pre_dead = pre * dead_mask.float()          # (B, dz)
+                auxk_vals, auxk_idx = torch.topk(pre_dead, k_aux, dim=1)
+                h_aux = torch.zeros_like(pre)
+                h_aux.scatter_(1, auxk_idx, auxk_vals)
+                residual = (batch - x_hat).detach()         # target for aux
+                x_aux = model.decoder(h_aux)
+                aux = auxk_w * F.mse_loss(x_aux, residual + x_hat.detach())
+            else:
+                aux = torch.tensor(0.0)
+
+            (rec + aux).backward()
+            opt.step()
+            total_rec += rec.item()
+            total_aux += aux.item()
+        n = len(loader)
+        n_dead_final = (model.fire_counts < dead_threshold).sum().item()
+        print(f"  epoch {ep+1:02d}/{epochs}  rec={total_rec/n:.4f}  aux={total_aux/n:.5f}  dead={n_dead_final}/{model.dz}")
+    model.eval()
+    return model
+
+
+print("Training L1-SAE …")
+l1sae = train_l1sae(L1SAE(dz=DZ), X, epochs=20)
+
+print("Training TopK-SAE …")
+topksae = train_topksae(TopKSAE(dz=DZ, k=TOP_K), X, epochs=20)
+
+with torch.no_grad():
+    _Xt  = torch.tensor(X,      dtype=torch.float32)
+    _Xtt = torch.tensor(X_test, dtype=torch.float32)
+    Z_l1sae        = l1sae.encode(_Xt).numpy()
+    Z_l1sae_test   = l1sae.encode(_Xtt).numpy()
+    Z_topksae      = topksae.encode(_Xt).numpy()
+    Z_topksae_test = topksae.encode(_Xtt).numpy()
+
 # ── Save data arrays ──────────────────────────────────────────────────────────
 
 np.save(os.path.join(ARR_DIR, "X_train.npy"),      X)
@@ -116,6 +265,12 @@ np.save(os.path.join(ARR_DIR, "Z_pca_test.npy"),   Z_pca_test)
 np.save(os.path.join(ARR_DIR, "Z_ae_train.npy"),   Z_ae)
 np.save(os.path.join(ARR_DIR, "Z_ae_test.npy"),    Z_ae_test)
 torch.save(ae.state_dict(), os.path.join(ARR_DIR, "ae_weights.pt"))
+np.save(os.path.join(ARR_DIR, "Z_l1sae_train.npy"),   Z_l1sae)
+np.save(os.path.join(ARR_DIR, "Z_l1sae_test.npy"),    Z_l1sae_test)
+np.save(os.path.join(ARR_DIR, "Z_topksae_train.npy"), Z_topksae)
+np.save(os.path.join(ARR_DIR, "Z_topksae_test.npy"),  Z_topksae_test)
+torch.save(l1sae.state_dict(),   os.path.join(ARR_DIR, "l1sae_weights.pt"))
+torch.save(topksae.state_dict(), os.path.join(ARR_DIR, "topksae_weights.pt"))
 print("Data arrays saved.")
 
 # ── Cobweb: raw-input setup ───────────────────────────────────────────────────
@@ -420,55 +575,95 @@ def linear_probe_per_class(Z_tr, y_tr, Z_te, y_te):
 def knn_accuracy_vs_k(Z_tr, y_tr, Z_te, y_te, ks=KNN_KS):
     return [KNeighborsClassifier(n_neighbors=k).fit(Z_tr, y_tr).score(Z_te, y_te) for k in ks]
 
+def _repr_stats(Z):
+    """(avg_l0, dead_pct): mean non-zero features per sample; % of features always zero."""
+    nz = (Z != 0)
+    return nz.sum(axis=1).mean(), (~nz.any(axis=0)).mean() * 100
+
 print("\nEvaluating …")
-pca_lin_overall,     pca_lin_per     = linear_probe_per_class(Z_pca,      y, Z_pca_test,      y_test)
-ae_lin_overall,      ae_lin_per      = linear_probe_per_class(Z_ae,       y, Z_ae_test,       y_test)
+pca_lin_overall,      pca_lin_per      = linear_probe_per_class(Z_pca,      y, Z_pca_test,      y_test)
+ae_lin_overall,       ae_lin_per       = linear_probe_per_class(Z_ae,       y, Z_ae_test,       y_test)
+l1sae_lin_overall,    l1sae_lin_per    = linear_probe_per_class(Z_l1sae,    y, Z_l1sae_test,    y_test)
+topksae_lin_overall,  topksae_lin_per  = linear_probe_per_class(Z_topksae,  y, Z_topksae_test,  y_test)
 cob_bfs_lin_overall,  cob_bfs_lin_per  = linear_probe_per_class(Z_cob_bfs,  y, Z_cob_bfs_test,  y_test)
 cob_dep_lin_overall,  cob_dep_lin_per  = linear_probe_per_class(Z_cob_dep,  y, Z_cob_dep_test,  y_test)
 cob_topk_lin_overall, cob_topk_lin_per = linear_probe_per_class(Z_cob_topk, y, Z_cob_topk_test, y_test)
 
 pca_knn_accs      = knn_accuracy_vs_k(Z_pca,      y, Z_pca_test,      y_test)
 ae_knn_accs       = knn_accuracy_vs_k(Z_ae,       y, Z_ae_test,       y_test)
+l1sae_knn_accs    = knn_accuracy_vs_k(Z_l1sae,    y, Z_l1sae_test,    y_test)
+topksae_knn_accs  = knn_accuracy_vs_k(Z_topksae,  y, Z_topksae_test,  y_test)
 cob_bfs_knn_accs  = knn_accuracy_vs_k(Z_cob_bfs,  y, Z_cob_bfs_test,  y_test)
 cob_dep_knn_accs  = knn_accuracy_vs_k(Z_cob_dep,  y, Z_cob_dep_test,  y_test)
 cob_topk_knn_accs = knn_accuracy_vs_k(Z_cob_topk, y, Z_cob_topk_test, y_test)
 
-for name, overall in [(f"PCA ({DZ}d)",                                                      pca_lin_overall),
-                      (f"AE  ({DZ}d)",                                                      ae_lin_overall),
-                      (f"Cobweb-BFS  ({DZ}d)",                                             cob_bfs_lin_overall),
-                      (f"Cobweb-Depth (depth={best_depth},dim={n_depth})",                         cob_dep_lin_overall),
-                      (f"Cobweb-TopK (depth={topk_depth},dim={n_topk_pool},k={TOP_K})",     cob_topk_lin_overall)]:
-    print(f"  {name:<50} linear probe: {overall*100:.1f}%")
+print(f"\n  {'Method':<54} {'Lin.Probe':>10} {'KNN@5':>7} {'Avg L0':>8} {'Dead%':>7}")
+print(f"  {'-'*90}")
+_knn5_idx = KNN_KS.index(5)
+_summary_rows = []
+for name, overall, Z_tr, knn_accs in [
+    (f"PCA ({DZ}d)",                                              pca_lin_overall,      Z_pca,      pca_knn_accs),
+    (f"AE  ({DZ}d)",                                              ae_lin_overall,       Z_ae,       ae_knn_accs),
+    (f"L1-SAE ({DZ}d, λ={L1_LAM})",                              l1sae_lin_overall,    Z_l1sae,    l1sae_knn_accs),
+    (f"TopK-SAE ({DZ}d, k={TOP_K})",                              topksae_lin_overall,  Z_topksae,  topksae_knn_accs),
+    (f"Cobweb-BFS ({DZ}d)",                                       cob_bfs_lin_overall,  Z_cob_bfs,  cob_bfs_knn_accs),
+    (f"Cobweb-Depth (depth={best_depth},dim={n_depth})",          cob_dep_lin_overall,  Z_cob_dep,  cob_dep_knn_accs),
+    (f"Cobweb-TopK (depth={topk_depth},dim={n_topk_pool},k={TOP_K})", cob_topk_lin_overall, Z_cob_topk, cob_topk_knn_accs),
+]:
+    avg_l0, dead_pct = _repr_stats(Z_tr)
+    knn5 = knn_accs[_knn5_idx] * 100
+    print(f"  {name:<54} {overall*100:>9.1f}% {knn5:>6.1f}% {avg_l0:>8.1f} {dead_pct:>6.1f}%")
+    _summary_rows.append({
+        "method":        name,
+        "lin_probe_pct": round(overall * 100, 2),
+        "knn5_pct":      round(knn5, 2),
+        "avg_l0":        round(float(avg_l0), 2),
+        "dead_pct":      round(float(dead_pct), 2),
+    })
+
+import csv
+_csv_path = os.path.join(OUT_DIR, "summary.csv")
+with open(_csv_path, "w", newline="") as _f:
+    _w = csv.DictWriter(_f, fieldnames=["method", "lin_probe_pct", "knn5_pct", "avg_l0", "dead_pct"])
+    _w.writeheader()
+    _w.writerows(_summary_rows)
+print(f"  Summary saved → {_csv_path}")
 
 # ── Visualisation ─────────────────────────────────────────────────────────────
 
 from matplotlib.patches import Patch
 
 METHODS = [
-    (Z_pca,      Z_pca_test,      pca_lin_per,      pca_knn_accs,      f"PCA ({DZ}d)",                                               "o-", "#4878d0"),
-    (Z_ae,       Z_ae_test,       ae_lin_per,       ae_knn_accs,       f"AE  ({DZ}d)",                                               "s-", "#ee854a"),
-    (Z_cob_bfs,  Z_cob_bfs_test,  cob_bfs_lin_per,  cob_bfs_knn_accs,  f"Cobweb-BFS ({DZ}d)",                                       "^-", "#6acc65"),
-    (Z_cob_dep,  Z_cob_dep_test,  cob_dep_lin_per,  cob_dep_knn_accs,  f"Cobweb-Depth (depth={best_depth},dim={n_depth})",                  "D-", "#d65f5f"),
+    (Z_pca,      Z_pca_test,      pca_lin_per,     pca_knn_accs,     f"PCA ({DZ}d)",                                                    "o-", "#4878d0"),
+    (Z_ae,       Z_ae_test,       ae_lin_per,      ae_knn_accs,      f"AE  ({DZ}d)",                                                    "s-", "#ee854a"),
+    (Z_l1sae,    Z_l1sae_test,    l1sae_lin_per,   l1sae_knn_accs,   f"L1-SAE ({DZ}d, λ={L1_LAM})",                                    "v-", "#ff7f0e"),
+    (Z_topksae,  Z_topksae_test,  topksae_lin_per, topksae_knn_accs, f"TopK-SAE ({DZ}d, k={TOP_K})",                                   "H-", "#bcbd22"),
+    (Z_cob_bfs,  Z_cob_bfs_test,  cob_bfs_lin_per, cob_bfs_knn_accs, f"Cobweb-BFS ({DZ}d)",                                            "^-", "#6acc65"),
+    (Z_cob_dep,  Z_cob_dep_test,  cob_dep_lin_per, cob_dep_knn_accs, f"Cobweb-Depth (depth={best_depth},dim={n_depth})",               "D-", "#d65f5f"),
     (Z_cob_topk, Z_cob_topk_test, cob_topk_lin_per, cob_topk_knn_accs, f"Cobweb-TopK (depth={topk_depth},dim={n_topk_pool},k={TOP_K})", "P-", "#956cb4"),
 ]
 
 # 1a. UMAP scatter plots
 print("Computing UMAP projections for scatter plots …")
 _umap = UMAP(n_components=2, random_state=42)
-Z_pca2  = _umap.fit_transform(Z_pca)
-Z_ae2   = _umap.fit_transform(Z_ae)
-Z_bfs2  = _umap.fit_transform(Z_cob_bfs)
-Z_dep2  = _umap.fit_transform(Z_cob_dep)
-Z_topk2 = _umap.fit_transform(Z_cob_topk)
+Z_pca2     = _umap.fit_transform(Z_pca)
+Z_ae2      = _umap.fit_transform(Z_ae)
+Z_l1sae2   = _umap.fit_transform(Z_l1sae)
+Z_topksae2 = _umap.fit_transform(Z_topksae)
+Z_bfs2     = _umap.fit_transform(Z_cob_bfs)
+Z_dep2     = _umap.fit_transform(Z_cob_dep)
+Z_topk2    = _umap.fit_transform(Z_cob_topk)
 
 scatter_data_umap = [
-    (Z_pca2,  "PCA → UMAP 2D"),
-    (Z_ae2,   "AE → UMAP 2D"),
-    (Z_bfs2,  "Cobweb-BFS → UMAP 2D"),
-    (Z_dep2,  "Cobweb-Depth → UMAP 2D"),
-    (Z_topk2, "Cobweb-TopK → UMAP 2D"),
+    (Z_pca2,     "PCA → UMAP 2D"),
+    (Z_ae2,      "AE → UMAP 2D"),
+    (Z_l1sae2,   "L1-SAE → UMAP 2D"),
+    (Z_topksae2, "TopK-SAE → UMAP 2D"),
+    (Z_bfs2,     "Cobweb-BFS → UMAP 2D"),
+    (Z_dep2,     "Cobweb-Depth → UMAP 2D"),
+    (Z_topk2,    "Cobweb-TopK → UMAP 2D"),
 ]
-fig, axes = plt.subplots(1, 5, figsize=(26, 5))
+fig, axes = plt.subplots(1, 7, figsize=(36, 5))
 fig.suptitle("UMAP Projections", fontsize=12, y=1.01)
 for ax, (Z, title) in zip(axes, scatter_data_umap):
     for c in CLASSES:
@@ -488,20 +683,24 @@ plt.close()
 # 1b. t-SNE scatter plots
 print("Computing t-SNE projections for scatter plots …")
 _tsne = TSNE(n_components=2, random_state=42, n_jobs=-1)
-Z_pca2t  = _tsne.fit_transform(Z_pca)
-Z_ae2t   = _tsne.fit_transform(Z_ae)
-Z_bfs2t  = _tsne.fit_transform(Z_cob_bfs)
-Z_dep2t  = _tsne.fit_transform(Z_cob_dep)
-Z_topk2t = _tsne.fit_transform(Z_cob_topk)
+Z_pca2t     = _tsne.fit_transform(Z_pca)
+Z_ae2t      = _tsne.fit_transform(Z_ae)
+Z_l1sae2t   = _tsne.fit_transform(Z_l1sae)
+Z_topksae2t = _tsne.fit_transform(Z_topksae)
+Z_bfs2t     = _tsne.fit_transform(Z_cob_bfs)
+Z_dep2t     = _tsne.fit_transform(Z_cob_dep)
+Z_topk2t    = _tsne.fit_transform(Z_cob_topk)
 
 scatter_data_tsne = [
-    (Z_pca2t,  "PCA → t-SNE 2D"),
-    (Z_ae2t,   "AE → t-SNE 2D"),
-    (Z_bfs2t,  "Cobweb-BFS → t-SNE 2D"),
-    (Z_dep2t,  "Cobweb-Depth → t-SNE 2D"),
-    (Z_topk2t, "Cobweb-TopK → t-SNE 2D"),
+    (Z_pca2t,     "PCA → t-SNE 2D"),
+    (Z_ae2t,      "AE → t-SNE 2D"),
+    (Z_l1sae2t,   "L1-SAE → t-SNE 2D"),
+    (Z_topksae2t, "TopK-SAE → t-SNE 2D"),
+    (Z_bfs2t,     "Cobweb-BFS → t-SNE 2D"),
+    (Z_dep2t,     "Cobweb-Depth → t-SNE 2D"),
+    (Z_topk2t,    "Cobweb-TopK → t-SNE 2D"),
 ]
-fig, axes = plt.subplots(1, 5, figsize=(26, 5))
+fig, axes = plt.subplots(1, 7, figsize=(36, 5))
 fig.suptitle("t-SNE Projections", fontsize=12, y=1.01)
 for ax, (Z, title) in zip(axes, scatter_data_tsne):
     for c in CLASSES:
@@ -548,22 +747,28 @@ plt.tight_layout()
 plt.savefig(os.path.join(OUT_DIR, "knn_vs_k.png"), dpi=120)
 plt.close()
 
-# 4. Reconstruction gallery (10 samples, PCA and AE only)
+# 4. Reconstruction gallery (10 samples: Original, PCA, AE, L1-SAE, TopK-SAE)
 with torch.no_grad():
-    X_rec = ae.decoder(torch.tensor(Z_ae[:10], dtype=torch.float32)).numpy()
+    _t10 = torch.tensor(X[:10], dtype=torch.float32)
+    X_rec_ae     = ae.decoder(torch.tensor(Z_ae[:10],     dtype=torch.float32)).numpy()
+    X_rec_l1sae  = l1sae.decoder(l1sae.encode(_t10)).numpy()
+    X_rec_topksae = topksae.decoder(topksae.encode(_t10)).numpy()
 X_rec_pca = pca.inverse_transform(Z_pca[:10])
 
-fig, axes = plt.subplots(3, 10, figsize=(15, 5))
-fig.suptitle("Original vs PCA vs AE reconstructions (first 10 samples)")
-for i in range(10):
-    axes[0, i].imshow(X[i].reshape(28, 28), cmap="gray")
-    axes[1, i].imshow(X_rec_pca[i].reshape(28, 28), cmap="gray")
-    axes[2, i].imshow(X_rec[i].reshape(28, 28), cmap="gray")
-    for row in range(3):
-        axes[row, i].axis("off")
-axes[0, 0].set_title("Original", fontsize=8)
-axes[1, 0].set_title("PCA rec",  fontsize=8)
-axes[2, 0].set_title("AE rec",   fontsize=8)
+_rec_rows = [
+    (X[:10],          "Original"),
+    (X_rec_pca,       "PCA rec"),
+    (X_rec_ae,        "AE rec"),
+    (X_rec_l1sae,     "L1-SAE rec"),
+    (X_rec_topksae,   "TopK-SAE rec"),
+]
+fig, axes = plt.subplots(len(_rec_rows), 10, figsize=(15, len(_rec_rows) * 1.7))
+fig.suptitle("Reconstruction gallery (first 10 samples)")
+for row_idx, (imgs, label) in enumerate(_rec_rows):
+    for i in range(10):
+        axes[row_idx, i].imshow(imgs[i].reshape(28, 28), cmap="gray")
+        axes[row_idx, i].axis("off")
+    axes[row_idx, 0].set_title(label, fontsize=8)
 plt.tight_layout()
 plt.savefig(os.path.join(OUT_DIR, "reconstructions.png"), dpi=120)
 plt.close()

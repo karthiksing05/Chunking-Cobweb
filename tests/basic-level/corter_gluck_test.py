@@ -204,7 +204,7 @@ def test_corter_gluck_basic_level():
     instances = build_instances()
 
     passed_any = False
-    for alpha in [1e-4, 1e-3, 1e-2]:
+    for alpha in [1e-4, 1e-3, 1e-2, 1e-1, 1.0]:
         tree = CobwebDiscreteTree(alpha=alpha, weight_attr=True)
         tree.fit(instances, iterations=15, randomizeFirst=True)
         results = evaluate_basic_level(tree, instances)
