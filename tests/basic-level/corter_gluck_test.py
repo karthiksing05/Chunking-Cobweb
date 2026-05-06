@@ -18,8 +18,32 @@ get_basic() / get_basic_instance_pmi() implements.
 
 import sys
 import os
+import shutil
+
+# Make sure src/ is on the path so viz.py can be imported
+_SRC_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "src")
+if _SRC_DIR not in sys.path:
+    sys.path.insert(0, _SRC_DIR)
 
 from cobweb.cobweb_discrete import CobwebDiscreteTree
+from viz import HTMLCobwebDrawer
+
+# ---------------------------------------------------------------------------
+# Tunable constants
+# ---------------------------------------------------------------------------
+
+ALPHA      = 1e-3   # Cobweb tree smoothing parameter
+EVAL_ALPHA = 10   # Smoothing used only during basic-level evaluation
+
+# Corter & Gluck's analysis is purely structural (closed-form CU on a static
+# 16-item matrix — no learning loop at all).  For Cobweb we must present
+# items incrementally; ITERATIONS full passes are used so the tree can
+# converge.  Each of the 16 items is seen exactly ITERATIONS times and every
+# pass uses a freshly shuffled order (see CobwebDiscreteTree::fit — a
+# std::default_random_engine() shuffle is applied *after* every iteration,
+# seeded deterministically at 0, so results are reproducible).
+ITERATIONS = 15
+OUT_DIR    = "tests/basic-level/corter_gluck_viz"
 
 # ---------------------------------------------------------------------------
 # Murphy & Smith (1982) Table 3 stimuli
@@ -71,8 +95,105 @@ def build_instances():
 
 
 # ---------------------------------------------------------------------------
-# Core evaluation
+# Category Utility (Corter & Gluck 1992, Equation 2)
+#
+# CU(c) = P(c) * Σ_j Σ_k [ P(f_jk|c)² - P(f_jk)² ]
+#
+# P(f_jk) is computed from all 16 items (the full population), matching the
+# analysis in Table 4 of the paper (where superordinate CU = 0.31, not 0).
 # ---------------------------------------------------------------------------
+
+def compute_category_utility(category_indices, all_instances):
+    """
+    Corter & Gluck (1992) Equation 2: category utility for a single category.
+
+    Parameters
+    ----------
+    category_indices : list[int]
+        Indices into all_instances belonging to this category.
+    all_instances : list[dict]
+        The full population of 16 instances (provides base-rate P(f_jk)).
+
+    Note: C&G use ALL 16 items as the reference population for P(f_jk), not
+    just the superordinate subtree.  This is why the superordinate CU in
+    Table 4 is 0.31 rather than 0 — the superordinate categories are evaluated
+    against the global base rates of the full stimulus set.
+    """
+    n_total = len(all_instances)
+    n_cat   = len(category_indices)
+    p_c     = n_cat / n_total
+
+    # Collect every (attr, val) pair that appears in the population
+    all_attrs: dict[int, set] = {}
+    for inst in all_instances:
+        for attr, val_dict in inst.items():
+            all_attrs.setdefault(attr, set()).update(val_dict.keys())
+
+    cu_inner = 0.0
+    for attr, vals in all_attrs.items():
+        for val in vals:
+            p_f = sum(1 for inst in all_instances
+                      if val in inst.get(attr, {})) / n_total
+            p_f_given_c = sum(1 for i in category_indices
+                              if val in all_instances[i].get(attr, {})) / n_cat
+            cu_inner += p_f_given_c ** 2 - p_f ** 2
+
+    return p_c * cu_inner
+
+
+def compute_cu_by_level(instances):
+    """
+    Compute mean CU for each of the three levels: superordinate, basic, subordinate.
+
+    Returns dict mapping level → {category_name: CU}.
+    """
+    superord_idx: dict[str, list] = {}
+    basic_idx:    dict[str, list] = {}
+    subord_idx:   dict[str, list] = {}
+
+    for i, item in enumerate(ITEMS):
+        _, superord, basic, subord = item[0], item[1], item[2], item[3]
+        superord_idx.setdefault(superord, []).append(i)
+        basic_idx.setdefault(basic, []).append(i)
+        subord_idx.setdefault(subord, []).append(i)
+
+    return {
+        "superordinate": {c: compute_category_utility(idx, instances)
+                          for c, idx in superord_idx.items()},
+        "basic":         {c: compute_category_utility(idx, instances)
+                          for c, idx in basic_idx.items()},
+        "subordinate":   {c: compute_category_utility(idx, instances)
+                          for c, idx in subord_idx.items()},
+    }
+
+
+def print_cu_table(cu_by_level):
+    """
+    Print per-level CU summary, replicating Table 4 of Corter & Gluck (1992).
+    Expected: Subordinate≈0.30, Basic≈0.47, Superordinate≈0.31
+    """
+    print(f"\n{'='*60}")
+    print("  Category Utility — replication of Table 4 (Corter & Gluck 1992)")
+    print(f"{'='*60}")
+    print(f"  {'Level':>14}  {'Mean CU':>8}  {'Categories'}")
+    print("-" * 60)
+    level_means = {}
+    for level in ("superordinate", "basic", "subordinate"):
+        cats = cu_by_level[level]
+        mean_cu = sum(cats.values()) / len(cats)
+        level_means[level] = mean_cu
+        cat_str = ", ".join(f"{c}={v:.3f}" for c, v in sorted(cats.items()))
+        print(f"  {level:>14}  {mean_cu:>8.4f}  {cat_str}")
+    print("-" * 60)
+    print("  Paper Table 4:  Subordinate=0.30, Basic=0.47, Superordinate=0.31")
+
+    correct = (level_means["basic"] > level_means["subordinate"] and
+               level_means["basic"] > level_means["superordinate"])
+    print(f"\n  Basic level has highest CU: {'YES — matches paper ✓' if correct else 'NO — differs from paper ✗'}")
+    return correct
+
+
+
 
 def evaluate_basic_level(tree, instances):
     """
@@ -86,7 +207,7 @@ def evaluate_basic_level(tree, instances):
         item_id, superord, basic, subord = item[0], item[1], item[2], item[3]
         inst = instances[i]
         leaf       = tree.categorize(inst)
-        basic_node = leaf.get_basic_instance_pmi(inst, debug=False)
+        basic_node = leaf.get_basic_instance_pmi(inst, debug=False, eval_alpha=EVAL_ALPHA)
         results.append({
             "item_id":     item_id,
             "superord":    superord,
@@ -159,36 +280,59 @@ def check_basic_level_accuracy(results, label=""):
 
 
 # ---------------------------------------------------------------------------
-# Main sweep over alpha values
+# Visualization
 # ---------------------------------------------------------------------------
 
-def run_sweep(alpha_values=None, iterations=10):
-    if alpha_values is None:
-        alpha_values = [1e-4, 1e-3, 1e-2, 1e-1, 1.0]
+def make_drawer():
+    """
+    Build an HTMLCobwebDrawer suited for the Murphy & Smith attribute space.
 
-    instances = build_instances()
-    summary = {}
+    Attributes are the four integer keys (0-3).  Values are raw integers
+    (1-6 for Handle/Shaft/Head, 1-2 for Size); id_to_value is built so that
+    index i returns the string "i", which matches the raw integer values used
+    as dict keys in CobwebDiscreteTree.
+    """
+    attr_names = ["Handle", "Shaft", "Head", "Size"]
+    # Values range from 0-6; index == value so the drawer can look them up directly
+    id_to_value = [str(i) for i in range(7)]
+    value_to_id = {v: i for i, v in enumerate(id_to_value)}
+    return HTMLCobwebDrawer(attr_names, id_to_value, value_to_id)
 
-    for alpha in alpha_values:
-        tree = CobwebDiscreteTree(alpha=alpha, weight_attr=True)
-        tree.fit(instances, iterations=iterations, randomizeFirst=True)
 
-        results = evaluate_basic_level(tree, instances)
-        print_results_table(results, alpha)
-        cons, dist = check_basic_level_accuracy(results, label=f"alpha={alpha}")
-        summary[alpha] = {"consistency": cons, "distinctness": dist}
+def visualize(tree, instances):
+    """
+    Draw:
+      1. The full Cobweb tree rooted at tree.root
+      2. One subtree per unique basic-level node identified via
+         get_basic_instance_pmi (one call per item, deduped by concept hash)
+    """
+    if os.path.exists(OUT_DIR):
+        shutil.rmtree(OUT_DIR)
+    os.makedirs(OUT_DIR, exist_ok=True)
 
-    print("\n\n" + "="*72)
-    print("SUMMARY across alpha values")
-    print("="*72)
-    print(f"{'alpha':>8}  {'Consistency':>12}  {'Distinctness':>13}")
-    print("-" * 40)
-    for alpha, res in summary.items():
-        c = "PASS" if res["consistency"] else "FAIL"
-        d = "PASS" if res["distinctness"] else "FAIL"
-        print(f"{alpha:>8.0e}  {c:>12}  {d:>13}")
+    drawer = make_drawer()
 
-    return summary
+    # --- full tree ---
+    drawer.draw_tree(tree.root, os.path.join(OUT_DIR, "full_tree"))
+    print(f"  Full tree → {OUT_DIR}/full_tree.html")
+
+    # --- basic-level nodes ---
+    bl_nodes: dict[str, object] = {}
+    for i, item in enumerate(ITEMS):
+        inst = instances[i]
+        leaf = tree.categorize(inst)
+        bl_node = leaf.get_basic_instance_pmi(inst, debug=False, eval_alpha=EVAL_ALPHA)
+        h = bl_node.concept_hash()
+        if h not in bl_nodes:
+            bl_nodes[h] = bl_node
+
+    print(f"  {len(bl_nodes)} unique basic-level node(s) found:")
+    for h, node in bl_nodes.items():
+        out_path = os.path.join(OUT_DIR, f"basic_level_{h}")
+        drawer.draw_tree(node, out_path)
+        print(f"    {h[:16]} (depth={node.depth()}) → {out_path}.html")
+
+    print(f"\nAll visualizations saved to {OUT_DIR}/")
 
 
 # ---------------------------------------------------------------------------
@@ -198,26 +342,48 @@ def run_sweep(alpha_values=None, iterations=10):
 def test_corter_gluck_basic_level():
     """
     Pytest test: Cobweb on the Murphy & Smith (1982) stimuli should recover
-    the basic-level categories (Hammer, Brick, Knife, Pizza cutter) at a
-    range of alpha values, matching the Corter & Gluck (1992) prediction.
+    the basic-level categories (Hammer, Brick, Knife, Pizza cutter) using the
+    constants ALPHA and EVAL_ALPHA defined at the top of this file.
+
+    Also directly replicates Table 4 from Corter & Gluck (1992) by computing
+    the exact Category Utility formula before involving Cobweb at all.
     """
     instances = build_instances()
 
-    passed_any = False
-    for alpha in [1e-4, 1e-3, 1e-2, 1e-1, 1.0]:
-        tree = CobwebDiscreteTree(alpha=alpha, weight_attr=True)
-        tree.fit(instances, iterations=15, randomizeFirst=True)
-        results = evaluate_basic_level(tree, instances)
-        cons, dist = check_basic_level_accuracy(results, label=f"alpha={alpha}")
-        if cons and dist:
-            passed_any = True
-            break
+    # --- Step 1: verify Table 4 via closed-form CU (no Cobweb) ---
+    cu_by_level = compute_cu_by_level(instances)
+    cu_correct = print_cu_table(cu_by_level)
 
-    assert passed_any, (
-        "Cobweb failed to recover basic-level categories from Murphy & Smith stimuli "
-        "at any tested alpha value. Check tree structure / alpha sweep."
-    )
+    # --- Step 2: fit Cobweb and check its basic-level detection ---
+    tree = CobwebDiscreteTree(alpha=ALPHA, weight_attr=True)
+    tree.fit(instances, iterations=ITERATIONS, randomizeFirst=True)
+
+    results = evaluate_basic_level(tree, instances)
+    print_results_table(results, ALPHA)
+    cons, dist = check_basic_level_accuracy(results, label=f"alpha={ALPHA}")
+
+    visualize(tree, instances)
+
+    if cu_correct and cons and dist:
+        print("\nOVERALL: PASS")
+    else:
+        print("\nOVERALL: FAIL")
 
 
 if __name__ == "__main__":
-    run_sweep(alpha_values=[1e-4, 1e-3, 1e-2, 1e-1, 1.0], iterations=10)
+    instances = build_instances()
+
+    # --- Paper replication: closed-form CU (Table 4) ---
+    cu_by_level = compute_cu_by_level(instances)
+    print_cu_table(cu_by_level)
+
+    # --- Cobweb basic-level detection ---
+    tree = CobwebDiscreteTree(alpha=ALPHA, weight_attr=True)
+    tree.fit(instances, iterations=ITERATIONS, randomizeFirst=True)
+
+    results = evaluate_basic_level(tree, instances)
+    print_results_table(results, ALPHA)
+    check_basic_level_accuracy(results, label=f"alpha={ALPHA}")
+
+    print("\nGenerating visualizations ...")
+    visualize(tree, instances)

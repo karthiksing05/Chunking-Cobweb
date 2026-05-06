@@ -54,7 +54,7 @@ X_test, y_test = to_numpy(testset,   2_000)
 
 # ── PCA ───────────────────────────────────────────────────────────────────────
 
-DZ      = 128    # representation dimensionality
+DZ      = 256    # representation dimensionality
 TOP_K   =  16    # fixed top-k per-instance sparsification
 AUXK    =  16    # AuxK: dead-neuron top-k for aux reconstruction loss
 AUXK_W  = 1/32   # weight on AuxK loss term
@@ -389,12 +389,19 @@ print("Encoding Top-K pool (test) …")
 Z_topk_pool_test = _scaler_topk.transform(encode_logpost(X_cob_test, topk_pool_nodes))
 Z_cob_topk_test  = topk_sparsify(Z_topk_pool_test, TOP_K)
 
-np.save(os.path.join(ARR_DIR, "Z_cob_bfs_train.npy"),  Z_cob_bfs)
-np.save(os.path.join(ARR_DIR, "Z_cob_bfs_test.npy"),   Z_cob_bfs_test)
-np.save(os.path.join(ARR_DIR, "Z_cob_dep_train.npy"),  Z_cob_dep)
-np.save(os.path.join(ARR_DIR, "Z_cob_dep_test.npy"),   Z_cob_dep_test)
-np.save(os.path.join(ARR_DIR, "Z_cob_topk_train.npy"), Z_cob_topk)
-np.save(os.path.join(ARR_DIR, "Z_cob_topk_test.npy"),  Z_cob_topk_test)
+# Depth-TopK (BFS-TopK): take the DZ BFS nodes and sparsify per-instance to TOP_K
+Z_cob_bfs_topk      = topk_sparsify(Z_cob_bfs,      TOP_K)
+Z_cob_bfs_topk_test = topk_sparsify(Z_cob_bfs_test, TOP_K)
+print(f"  Applied per-instance top-{TOP_K} sparsification to BFS nodes (Depth-TopK, dim={DZ})")
+
+np.save(os.path.join(ARR_DIR, "Z_cob_bfs_train.npy"),      Z_cob_bfs)
+np.save(os.path.join(ARR_DIR, "Z_cob_bfs_test.npy"),       Z_cob_bfs_test)
+np.save(os.path.join(ARR_DIR, "Z_cob_dep_train.npy"),      Z_cob_dep)
+np.save(os.path.join(ARR_DIR, "Z_cob_dep_test.npy"),       Z_cob_dep_test)
+np.save(os.path.join(ARR_DIR, "Z_cob_topk_train.npy"),     Z_cob_topk)
+np.save(os.path.join(ARR_DIR, "Z_cob_topk_test.npy"),      Z_cob_topk_test)
+np.save(os.path.join(ARR_DIR, "Z_cob_bfstopk_train.npy"),  Z_cob_bfs_topk)
+np.save(os.path.join(ARR_DIR, "Z_cob_bfstopk_test.npy"),   Z_cob_bfs_topk_test)
 print("Cobweb data saved.")
 
 # ── Cobweb: tree visualisation (top 4 depths, label distributions) ────────────
@@ -587,7 +594,8 @@ l1sae_lin_overall,    l1sae_lin_per    = linear_probe_per_class(Z_l1sae,    y, Z
 topksae_lin_overall,  topksae_lin_per  = linear_probe_per_class(Z_topksae,  y, Z_topksae_test,  y_test)
 cob_bfs_lin_overall,  cob_bfs_lin_per  = linear_probe_per_class(Z_cob_bfs,  y, Z_cob_bfs_test,  y_test)
 cob_dep_lin_overall,  cob_dep_lin_per  = linear_probe_per_class(Z_cob_dep,  y, Z_cob_dep_test,  y_test)
-cob_topk_lin_overall, cob_topk_lin_per = linear_probe_per_class(Z_cob_topk, y, Z_cob_topk_test, y_test)
+cob_topk_lin_overall,     cob_topk_lin_per     = linear_probe_per_class(Z_cob_topk,     y, Z_cob_topk_test,     y_test)
+cob_bfs_topk_lin_overall, cob_bfs_topk_lin_per = linear_probe_per_class(Z_cob_bfs_topk, y, Z_cob_bfs_topk_test, y_test)
 
 pca_knn_accs      = knn_accuracy_vs_k(Z_pca,      y, Z_pca_test,      y_test)
 ae_knn_accs       = knn_accuracy_vs_k(Z_ae,       y, Z_ae_test,       y_test)
@@ -595,7 +603,8 @@ l1sae_knn_accs    = knn_accuracy_vs_k(Z_l1sae,    y, Z_l1sae_test,    y_test)
 topksae_knn_accs  = knn_accuracy_vs_k(Z_topksae,  y, Z_topksae_test,  y_test)
 cob_bfs_knn_accs  = knn_accuracy_vs_k(Z_cob_bfs,  y, Z_cob_bfs_test,  y_test)
 cob_dep_knn_accs  = knn_accuracy_vs_k(Z_cob_dep,  y, Z_cob_dep_test,  y_test)
-cob_topk_knn_accs = knn_accuracy_vs_k(Z_cob_topk, y, Z_cob_topk_test, y_test)
+cob_topk_knn_accs     = knn_accuracy_vs_k(Z_cob_topk,     y, Z_cob_topk_test,     y_test)
+cob_bfs_topk_knn_accs = knn_accuracy_vs_k(Z_cob_bfs_topk, y, Z_cob_bfs_topk_test, y_test)
 
 print(f"\n  {'Method':<54} {'Lin.Probe':>10} {'KNN@5':>7} {'Avg L0':>8} {'Dead%':>7}")
 print(f"  {'-'*90}")
@@ -608,7 +617,8 @@ for name, overall, Z_tr, knn_accs in [
     (f"TopK-SAE ({DZ}d, k={TOP_K})",                              topksae_lin_overall,  Z_topksae,  topksae_knn_accs),
     (f"Cobweb-BFS ({DZ}d)",                                       cob_bfs_lin_overall,  Z_cob_bfs,  cob_bfs_knn_accs),
     (f"Cobweb-Depth (depth={best_depth},dim={n_depth})",          cob_dep_lin_overall,  Z_cob_dep,  cob_dep_knn_accs),
-    (f"Cobweb-TopK (depth={topk_depth},dim={n_topk_pool},k={TOP_K})", cob_topk_lin_overall, Z_cob_topk, cob_topk_knn_accs),
+    (f"Cobweb-TopK (depth={topk_depth},dim={n_topk_pool},k={TOP_K})", cob_topk_lin_overall,     Z_cob_topk,     cob_topk_knn_accs),
+    (f"Cobweb-Depth-TopK ({DZ}d, k={TOP_K})",                         cob_bfs_topk_lin_overall, Z_cob_bfs_topk, cob_bfs_topk_knn_accs),
 ]:
     avg_l0, dead_pct = _repr_stats(Z_tr)
     knn5 = knn_accs[_knn5_idx] * 100
@@ -640,7 +650,8 @@ METHODS = [
     (Z_topksae,  Z_topksae_test,  topksae_lin_per, topksae_knn_accs, f"TopK-SAE ({DZ}d, k={TOP_K})",                                   "H-", "#bcbd22"),
     (Z_cob_bfs,  Z_cob_bfs_test,  cob_bfs_lin_per, cob_bfs_knn_accs, f"Cobweb-BFS ({DZ}d)",                                            "^-", "#6acc65"),
     (Z_cob_dep,  Z_cob_dep_test,  cob_dep_lin_per, cob_dep_knn_accs, f"Cobweb-Depth (depth={best_depth},dim={n_depth})",               "D-", "#d65f5f"),
-    (Z_cob_topk, Z_cob_topk_test, cob_topk_lin_per, cob_topk_knn_accs, f"Cobweb-TopK (depth={topk_depth},dim={n_topk_pool},k={TOP_K})", "P-", "#956cb4"),
+    (Z_cob_topk,     Z_cob_topk_test,     cob_topk_lin_per,     cob_topk_knn_accs,     f"Cobweb-TopK (depth={topk_depth},dim={n_topk_pool},k={TOP_K})", "P-", "#956cb4"),
+    (Z_cob_bfs_topk, Z_cob_bfs_topk_test, cob_bfs_topk_lin_per, cob_bfs_topk_knn_accs, f"Cobweb-Depth-TopK ({DZ}d, k={TOP_K})",                         "X-", "#17becf"),
 ]
 
 # 1a. UMAP scatter plots
@@ -652,7 +663,8 @@ Z_l1sae2   = _umap.fit_transform(Z_l1sae)
 Z_topksae2 = _umap.fit_transform(Z_topksae)
 Z_bfs2     = _umap.fit_transform(Z_cob_bfs)
 Z_dep2     = _umap.fit_transform(Z_cob_dep)
-Z_topk2    = _umap.fit_transform(Z_cob_topk)
+Z_topk2      = _umap.fit_transform(Z_cob_topk)
+Z_bfstopk2   = _umap.fit_transform(Z_cob_bfs_topk)
 
 scatter_data_umap = [
     (Z_pca2,     "PCA → UMAP 2D"),
@@ -662,8 +674,9 @@ scatter_data_umap = [
     (Z_bfs2,     "Cobweb-BFS → UMAP 2D"),
     (Z_dep2,     "Cobweb-Depth → UMAP 2D"),
     (Z_topk2,    "Cobweb-TopK → UMAP 2D"),
+    (Z_bfstopk2, "Cobweb-Depth-TopK → UMAP 2D"),
 ]
-fig, axes = plt.subplots(1, 7, figsize=(36, 5))
+fig, axes = plt.subplots(1, 8, figsize=(42, 5))
 fig.suptitle("UMAP Projections", fontsize=12, y=1.01)
 for ax, (Z, title) in zip(axes, scatter_data_umap):
     for c in CLASSES:
@@ -689,7 +702,8 @@ Z_l1sae2t   = _tsne.fit_transform(Z_l1sae)
 Z_topksae2t = _tsne.fit_transform(Z_topksae)
 Z_bfs2t     = _tsne.fit_transform(Z_cob_bfs)
 Z_dep2t     = _tsne.fit_transform(Z_cob_dep)
-Z_topk2t    = _tsne.fit_transform(Z_cob_topk)
+Z_topk2t      = _tsne.fit_transform(Z_cob_topk)
+Z_bfstopk2t   = _tsne.fit_transform(Z_cob_bfs_topk)
 
 scatter_data_tsne = [
     (Z_pca2t,     "PCA → t-SNE 2D"),
@@ -699,8 +713,9 @@ scatter_data_tsne = [
     (Z_bfs2t,     "Cobweb-BFS → t-SNE 2D"),
     (Z_dep2t,     "Cobweb-Depth → t-SNE 2D"),
     (Z_topk2t,    "Cobweb-TopK → t-SNE 2D"),
+    (Z_bfstopk2t, "Cobweb-Depth-TopK → t-SNE 2D"),
 ]
-fig, axes = plt.subplots(1, 7, figsize=(36, 5))
+fig, axes = plt.subplots(1, 8, figsize=(42, 5))
 fig.suptitle("t-SNE Projections", fontsize=12, y=1.01)
 for ax, (Z, title) in zip(axes, scatter_data_tsne):
     for c in CLASSES:
