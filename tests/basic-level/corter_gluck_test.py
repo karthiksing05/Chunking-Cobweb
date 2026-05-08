@@ -207,7 +207,8 @@ def evaluate_basic_level(tree, instances):
         item_id, superord, basic, subord = item[0], item[1], item[2], item[3]
         inst = instances[i]
         leaf       = tree.categorize(inst)
-        basic_node = leaf.get_basic_instance_pmi(inst, debug=False, eval_alpha=EVAL_ALPHA)
+        # basic_node = leaf.get_basic_instance_pmi(inst, debug=False, eval_alpha=EVAL_ALPHA)
+        basic_node = leaf.get_basic(1000, 1000, debug=False, eval_alpha=EVAL_ALPHA, uniform_leaf=True)
         results.append({
             "item_id":     item_id,
             "superord":    superord,
@@ -321,7 +322,8 @@ def visualize(tree, instances):
     for i, item in enumerate(ITEMS):
         inst = instances[i]
         leaf = tree.categorize(inst)
-        bl_node = leaf.get_basic_instance_pmi(inst, debug=False, eval_alpha=EVAL_ALPHA)
+        # bl_node = leaf.get_basic_instance_pmi(inst, debug=False, eval_alpha=EVAL_ALPHA)
+        bl_node = leaf.get_basic(1000, 1000, debug=False, eval_alpha=EVAL_ALPHA, uniform_leaf=True)
         h = bl_node.concept_hash()
         if h not in bl_nodes:
             bl_nodes[h] = bl_node

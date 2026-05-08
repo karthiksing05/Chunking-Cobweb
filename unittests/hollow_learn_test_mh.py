@@ -81,12 +81,12 @@ webster = WEBSTER(
     # context_n_iterations=5,
     weighting="binary",
     categorization_mode="dfs",
-    depth_max_content=10,
-    depth_max_context=10,
-    branch_max_content=10,
-    branch_max_context=10,
-    context_attr_weights={6: 2.0},   # attr 6 = content-ref when context_length=3
-    content_attr_weights={0: 1.0, 1: 1.0},  # boost left & right child attrs
+    depth_max_content=1000,
+    depth_max_context=1000,
+    branch_max_content=1000,
+    branch_max_context=1000,
+    # context_attr_weights={6: 2.0},   # attr 6 = content-ref when context_length=3
+    # content_attr_weights={0: 1.0, 1: 1.0},  # boost left & right child attrs
 )
 
 # ── Phase 1: primitives-only on random sentences ──────────────────────────

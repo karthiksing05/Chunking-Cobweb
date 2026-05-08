@@ -2,13 +2,23 @@
 
 Whereas before we hypothesized needing multiple hierarchies for multiple levels of granularity or to separate primitives and composites, we now rely on multiple hierarchies to properly separate *content* and *context*.
 
+## Methodology 5.1
+
+Did a ton of experiments, here's what we need!
+
+**Representations**
+*   Sparse list of concepts that is built based on stable state!! This is something that can be implemented
+    *   Can even take a sparse list and then pick the top-one from that!!
+
 ## Methodology 5
 
 TL;DR is that Cobweb is NOT WHAT WE THOUGHT IT WAS!! Specifically, it doesn't split on what we think it splits on, and so we need to rethink A LOT OF THINGS because of this. Also, the parsing process needs to be revised based on this new understanding and also an inside-outside style mechanism. I'll be documenting both of these under *Representations* and *Parsing*.
 
+**Convolutional Cobweb:**
+*   Very very interesting paper I have not looked at!!! We might be able to take inspiration from this for our mixture-of-concepts idea
+
 **General Cobweb Changes:**
-*   Basic level function needs to be updated! Weird tradeoff with alpha + stuff, need a better way to approximate the P(x) distribution
-*   Generally, we also need to update the way that P(x) is collected for basic-level calculations!!
+*   Basic level not working RIP
 
 **Representations:**
 *   First, what does Cobweb split by? By understanding exactly what the splitting criteria is we can craft better representations
@@ -19,11 +29,11 @@ TL;DR is that Cobweb is NOT WHAT WE THOUGHT IT WAS!! Specifically, it doesn't sp
     *   Splits do not contain as much information as the activations of the best concepts for a given instances, which may not always be in the path of the top exploration
     *   In lieu of this, we employ a "Mixture-Of-Concepts" idea where the log-probs of concepts are taken as "activations" of the Cobweb tree with respect to a specific 
 *   This would need some form of continuous integration AND a way to be incrementally sustainable
-    *   Perhaps instead of memorizing something as "50% dog concept, 30% car concept, etc" you could literally combine the features of the resultant concepts 
+    *   Perhaps instead of memorizing something as "50% dog concept, 30% car concept, etc" you could literally combine the features of the resultant concepts!!
+*   MIXTURE OF CONCEPTS YIELDS SPARSE RESULTS!!
 
 **Parsing:**
 *   The primary option for parsing that Chris and I discussed was creating a parse lattice from the bottom up (inside) and then freezing the most probable sequence in a top-down manner (outside) - generally, I'm of the opinion that the idea of our representation will change our method of reconstructions
-*   We could also do a straight-up form of 
 
 ## Methodology 4.1
 
