@@ -75,6 +75,23 @@ V          = len(vocab)
 print(f"  Vocab size: {V}  |  Total tokens: {len(all_tokens)}")
 print(f"  Vocab: {vocab}")
 
+# Build word → POS mapping from grammar terminal rules
+_TERMINAL_POS = ["Det", "N", "Adj", "RelPro", "V", "P"]
+word2pos = {}
+for _pos_tag in _TERMINAL_POS:
+    if _pos_tag in TEST_GRAMMAR3:
+        for _prod in TEST_GRAMMAR3[_pos_tag]:
+            if len(_prod) == 1 and _prod[0] not in word2pos:
+                word2pos[_prod[0]] = _pos_tag
+for _w in vocab:
+    if _w not in word2pos:
+        word2pos[_w] = "Unk"
+pos_tags = sorted(set(word2pos.values()))
+pos2id   = {p: i for i, p in enumerate(pos_tags)}
+id2pos   = {i: p for p, i in pos2id.items()}
+print(f"  POS tags ({len(pos_tags)}): {pos_tags}")
+print(f"  word→POS: { {w: word2pos[w] for w in vocab} }")
+
 # ── Build context instances ───────────────────────────────────────────────────
 # INSTANCE_TYPE = {int attr_id: {int val_id: float}} where
 #   attr_id = position offset index  (0 → offset -2, 1 → -1, 2 → +1, 3 → +2)
@@ -101,7 +118,7 @@ labels_all    = []
 for sent in sentences:
     for pos, word in enumerate(sent):
         instances_raw.append(make_context_instance(sent, pos))
-        labels_all.append(word2id[word])
+        labels_all.append(pos2id[word2pos[word]])
 
 labels_all = np.array(labels_all, dtype=np.int32)
 print(f"  Total instances (tokens): {len(instances_raw)}")
@@ -223,6 +240,16 @@ def topk_sparsify(Z, k):
     return out
 
 
+def topk_binarize(Z, k):
+    """Set the k largest values per row to 1.0, rest to 0.0."""
+    out = np.zeros_like(Z)
+    k   = min(k, Z.shape[1])
+    top_idx = np.argpartition(Z, -k, axis=1)[:, -k:]
+    rows    = np.arange(Z.shape[0])[:, None]
+    out[rows, top_idx] = 1.0
+    return out
+
+
 print(f"  Top-K pool size: {n_topk_pool} nodes at depth {topk_depth}")
 print("Encoding Top-K pool (train) …")
 _scaler_topk    = StandardScaler()
@@ -235,6 +262,13 @@ Z_cob_topk_test  = topk_sparsify(Z_topk_pool_test, TOP_K)
 Z_cob_bfs_topk      = topk_sparsify(Z_cob_bfs,      TOP_K)
 Z_cob_bfs_topk_test = topk_sparsify(Z_cob_bfs_test, TOP_K)
 print(f"  Applied per-instance top-{TOP_K} sparsification")
+
+# TopK-Binary / Depth-TopK-Binary: same selection but active nodes fixed to 1.0
+Z_cob_topk_bin          = topk_binarize(Z_topk_pool,      TOP_K)
+Z_cob_topk_bin_test     = topk_binarize(Z_topk_pool_test, TOP_K)
+Z_cob_bfs_topk_bin      = topk_binarize(Z_cob_bfs,        TOP_K)
+Z_cob_bfs_topk_bin_test = topk_binarize(Z_cob_bfs_test,   TOP_K)
+print(f"  Applied per-instance top-{TOP_K} binarisation (TopK-Bin, Depth-TopK-Bin)")
 
 # ── Path-information encoding ─────────────────────────────────────────────────
 def collect_path_tree_nodes(root, max_depth):
@@ -302,6 +336,10 @@ np.save(os.path.join(ARR_DIR, "Z_cob_topk_train.npy"),     Z_cob_topk)
 np.save(os.path.join(ARR_DIR, "Z_cob_topk_test.npy"),      Z_cob_topk_test)
 np.save(os.path.join(ARR_DIR, "Z_cob_bfstopk_train.npy"),  Z_cob_bfs_topk)
 np.save(os.path.join(ARR_DIR, "Z_cob_bfstopk_test.npy"),   Z_cob_bfs_topk_test)
+np.save(os.path.join(ARR_DIR, "Z_cob_topkbin_train.npy"),  Z_cob_topk_bin)
+np.save(os.path.join(ARR_DIR, "Z_cob_topkbin_test.npy"),   Z_cob_topk_bin_test)
+np.save(os.path.join(ARR_DIR, "Z_cob_bfstopkbin_train.npy"), Z_cob_bfs_topk_bin)
+np.save(os.path.join(ARR_DIR, "Z_cob_bfstopkbin_test.npy"),  Z_cob_bfs_topk_bin_test)
 np.save(os.path.join(ARR_DIR, "Z_cob_path_train.npy"),     Z_cob_path)
 np.save(os.path.join(ARR_DIR, "Z_cob_path_test.npy"),      Z_cob_path_test)
 print("Arrays saved.")
@@ -311,7 +349,7 @@ CLASSES   = sorted(set(y.tolist()))
 N_CLASSES = len(CLASSES)
 CMAP      = plt.get_cmap("tab20") if N_CLASSES > 10 else plt.get_cmap("tab10")
 word_colors = [CMAP(i / max(N_CLASSES - 1, 1)) for i in range(N_CLASSES)]
-class_to_ci = {c: i for i, c in enumerate(CLASSES)}   # word_id → color index
+class_to_ci = {c: i for i, c in enumerate(CLASSES)}   # pos_id → color index
 
 
 def compute_node_label_counts_disc(root, instances_tr, y_tr, max_depth=3):
@@ -372,7 +410,7 @@ def plot_tree_word_labels(root, label_counts_map, out_path=None, max_depth=3):
     ax.set_ylim(-0.7, max_depth * y_gap + 0.7)
     ax.invert_yaxis()
     ax.axis("off")
-    ax.set_title(f"Cobweb Discrete Tree — Word Distributions (depths 0–{max_depth})", fontsize=11)
+    ax.set_title(f"Cobweb Discrete Tree — POS Distributions (depths 0–{max_depth})", fontsize=11)
 
     def draw_edges(node, depth):
         if depth >= max_depth or not node.children:
@@ -418,10 +456,10 @@ def plot_tree_word_labels(root, label_counts_map, out_path=None, max_depth=3):
 
     legend_handles = [
         plt.Rectangle((0, 0), 1, 1, color=word_colors[class_to_ci[c]],
-                       label=id2word[c])
+                       label=id2pos[c])
         for c in CLASSES
     ]
-    ax.legend(handles=legend_handles, title="word", loc="lower right",
+    ax.legend(handles=legend_handles, title="POS", loc="lower right",
               ncol=max(1, N_CLASSES // 4), fontsize=6, title_fontsize=7)
     plt.tight_layout()
     if out_path:
@@ -468,14 +506,18 @@ def softmax_entropy(Z):
 print("\nEvaluating …")
 cob_bfs_lin_overall,      cob_bfs_lin_per      = linear_probe_per_class(Z_cob_bfs,      y, Z_cob_bfs_test,      y_test)
 cob_dep_lin_overall,      cob_dep_lin_per      = linear_probe_per_class(Z_cob_dep,      y, Z_cob_dep_test,      y_test)
-cob_topk_lin_overall,     cob_topk_lin_per     = linear_probe_per_class(Z_cob_topk,     y, Z_cob_topk_test,     y_test)
-cob_bfs_topk_lin_overall, cob_bfs_topk_lin_per = linear_probe_per_class(Z_cob_bfs_topk, y, Z_cob_bfs_topk_test, y_test)
+cob_topk_lin_overall,         cob_topk_lin_per         = linear_probe_per_class(Z_cob_topk,         y, Z_cob_topk_test,         y_test)
+cob_bfs_topk_lin_overall,     cob_bfs_topk_lin_per     = linear_probe_per_class(Z_cob_bfs_topk,     y, Z_cob_bfs_topk_test,     y_test)
+cob_topk_bin_lin_overall,     cob_topk_bin_lin_per     = linear_probe_per_class(Z_cob_topk_bin,     y, Z_cob_topk_bin_test,     y_test)
+cob_bfs_topk_bin_lin_overall, cob_bfs_topk_bin_lin_per = linear_probe_per_class(Z_cob_bfs_topk_bin, y, Z_cob_bfs_topk_bin_test, y_test)
 cob_path_lin_overall,     cob_path_lin_per     = linear_probe_per_class(Z_cob_path,     y, Z_cob_path_test,     y_test)
 
 cob_bfs_knn_accs      = knn_accuracy_vs_k(Z_cob_bfs,      y, Z_cob_bfs_test,      y_test)
 cob_dep_knn_accs      = knn_accuracy_vs_k(Z_cob_dep,      y, Z_cob_dep_test,      y_test)
-cob_topk_knn_accs     = knn_accuracy_vs_k(Z_cob_topk,     y, Z_cob_topk_test,     y_test)
-cob_bfs_topk_knn_accs = knn_accuracy_vs_k(Z_cob_bfs_topk, y, Z_cob_bfs_topk_test, y_test)
+cob_topk_knn_accs         = knn_accuracy_vs_k(Z_cob_topk,         y, Z_cob_topk_test,         y_test)
+cob_bfs_topk_knn_accs     = knn_accuracy_vs_k(Z_cob_bfs_topk,     y, Z_cob_bfs_topk_test,     y_test)
+cob_topk_bin_knn_accs     = knn_accuracy_vs_k(Z_cob_topk_bin,     y, Z_cob_topk_bin_test,     y_test)
+cob_bfs_topk_bin_knn_accs = knn_accuracy_vs_k(Z_cob_bfs_topk_bin, y, Z_cob_bfs_topk_bin_test, y_test)
 cob_path_knn_accs     = knn_accuracy_vs_k(Z_cob_path,     y, Z_cob_path_test,     y_test)
 
 print(f"\n  {'Method':<60} {'Lin.Probe':>10} {'KNN@5':>7} {'Avg L0':>8} {'Dead%':>7}")
@@ -485,9 +527,11 @@ _summary_rows = []
 for name, overall, Z_tr, knn_accs in [
     (f"Cobweb-BFS ({len(bfs_nodes)}d)",                                  cob_bfs_lin_overall,      Z_cob_bfs,      cob_bfs_knn_accs),
     (f"Cobweb-Depth (depth={best_depth},dim={n_depth})",                 cob_dep_lin_overall,      Z_cob_dep,      cob_dep_knn_accs),
-    (f"Cobweb-TopK (depth={topk_depth},dim={n_topk_pool},k={TOP_K})",    cob_topk_lin_overall,     Z_cob_topk,     cob_topk_knn_accs),
-    (f"Cobweb-Depth-TopK ({len(bfs_nodes)}d, k={TOP_K})",               cob_bfs_topk_lin_overall, Z_cob_bfs_topk, cob_bfs_topk_knn_accs),
-    (f"Cobweb-Path (d={PATH_DEPTH},n={N_PATHS},dim={n_path_dim})",       cob_path_lin_overall,     Z_cob_path,     cob_path_knn_accs),
+    (f"Cobweb-TopK (depth={topk_depth},dim={n_topk_pool},k={TOP_K})",     cob_topk_lin_overall,         Z_cob_topk,         cob_topk_knn_accs),
+    (f"Cobweb-Depth-TopK ({len(bfs_nodes)}d, k={TOP_K})",                cob_bfs_topk_lin_overall,     Z_cob_bfs_topk,     cob_bfs_topk_knn_accs),
+    (f"Cobweb-TopK-Bin (depth={topk_depth},dim={n_topk_pool},k={TOP_K})", cob_topk_bin_lin_overall,     Z_cob_topk_bin,     cob_topk_bin_knn_accs),
+    (f"Cobweb-Depth-TopK-Bin ({len(bfs_nodes)}d, k={TOP_K})",             cob_bfs_topk_bin_lin_overall, Z_cob_bfs_topk_bin, cob_bfs_topk_bin_knn_accs),
+    (f"Cobweb-Path (d={PATH_DEPTH},n={N_PATHS},dim={n_path_dim})",        cob_path_lin_overall,         Z_cob_path,         cob_path_knn_accs),
 ]:
     avg_l0, dead_pct = _repr_stats(Z_tr)
     avg_ent = softmax_entropy(Z_tr).mean()
@@ -516,12 +560,16 @@ METHODS = [
      f"Cobweb-BFS ({len(bfs_nodes)}d)",                               "^-", "#6acc65"),
     (Z_cob_dep,      Z_cob_dep_test,      cob_dep_lin_per,      cob_dep_knn_accs,
      f"Cobweb-Depth (depth={best_depth},dim={n_depth})",              "D-", "#d65f5f"),
-    (Z_cob_topk,     Z_cob_topk_test,     cob_topk_lin_per,     cob_topk_knn_accs,
-     f"Cobweb-TopK (depth={topk_depth},dim={n_topk_pool},k={TOP_K})", "P-", "#956cb4"),
-    (Z_cob_bfs_topk, Z_cob_bfs_topk_test, cob_bfs_topk_lin_per, cob_bfs_topk_knn_accs,
-     f"Cobweb-Depth-TopK ({len(bfs_nodes)}d, k={TOP_K})",            "X-", "#17becf"),
-    (Z_cob_path,     Z_cob_path_test,     cob_path_lin_per,     cob_path_knn_accs,
-     f"Cobweb-Path (d={PATH_DEPTH},n={N_PATHS},dim={n_path_dim})",   "p-", "#8c564b"),
+    (Z_cob_topk,         Z_cob_topk_test,         cob_topk_lin_per,         cob_topk_knn_accs,
+     f"Cobweb-TopK (depth={topk_depth},dim={n_topk_pool},k={TOP_K})",     "P-", "#956cb4"),
+    (Z_cob_bfs_topk,     Z_cob_bfs_topk_test,     cob_bfs_topk_lin_per,     cob_bfs_topk_knn_accs,
+     f"Cobweb-Depth-TopK ({len(bfs_nodes)}d, k={TOP_K})",                "X-", "#17becf"),
+    (Z_cob_topk_bin,     Z_cob_topk_bin_test,     cob_topk_bin_lin_per,     cob_topk_bin_knn_accs,
+     f"Cobweb-TopK-Bin (depth={topk_depth},dim={n_topk_pool},k={TOP_K})", "8-", "#c39bd3"),
+    (Z_cob_bfs_topk_bin, Z_cob_bfs_topk_bin_test, cob_bfs_topk_bin_lin_per, cob_bfs_topk_bin_knn_accs,
+     f"Cobweb-Depth-TopK-Bin ({len(bfs_nodes)}d, k={TOP_K})",            ">-", "#76d7c4"),
+    (Z_cob_path,         Z_cob_path_test,         cob_path_lin_per,         cob_path_knn_accs,
+     f"Cobweb-Path (d={PATH_DEPTH},n={N_PATHS},dim={n_path_dim})",        "p-", "#8c564b"),
 ]
 n_meth = len(METHODS)
 
@@ -529,7 +577,7 @@ n_meth = len(METHODS)
 _leg_handles = [
     plt.Line2D([0], [0], marker='o', color='w',
                markerfacecolor=CMAP(i / max(N_CLASSES - 1, 1)),
-               markersize=6, label=id2word[CLASSES[i]])
+               markersize=6, label=id2pos[CLASSES[i]])
     for i in range(N_CLASSES)
 ]
 
@@ -549,7 +597,7 @@ for ax, Z2, (_, _, _, _, lbl, _, _) in zip(axes, projs_umap, METHODS):
     ax.set_xlabel("Dim 1", fontsize=7)
     ax.set_ylabel("Dim 2", fontsize=7)
     ax.tick_params(labelsize=6)
-fig.legend(handles=_leg_handles, title="word", loc="center right",
+fig.legend(handles=_leg_handles, title="POS", loc="center right",
            bbox_to_anchor=(1.0, 0.5), ncol=2, fontsize=6, title_fontsize=7,
            frameon=True)
 plt.tight_layout(rect=[0, 0, 0.91, 1])
@@ -573,7 +621,7 @@ for ax, Z2, (_, _, _, _, lbl, _, _) in zip(axes, projs_tsne, METHODS):
     ax.set_xlabel("Dim 1", fontsize=7)
     ax.set_ylabel("Dim 2", fontsize=7)
     ax.tick_params(labelsize=6)
-fig.legend(handles=_leg_handles, title="word", loc="center right",
+fig.legend(handles=_leg_handles, title="POS", loc="center right",
            bbox_to_anchor=(1.0, 0.5), ncol=2, fontsize=6, title_fontsize=7,
            frameon=True)
 plt.tight_layout(rect=[0, 0, 0.91, 1])
@@ -589,9 +637,9 @@ fig, ax = plt.subplots(figsize=(max(16, N_CLASSES * 1.0), 5))
 for (_, _, per, _, lbl, _, color), offset in zip(METHODS, offsets):
     ax.bar(x_bar + offset, per * 100, w_bar, label=lbl, color=color, alpha=0.85)
 ax.set_xticks(x_bar)
-ax.set_xticklabels([id2word[c] for c in CLASSES], rotation=45, ha="right", fontsize=9)
+ax.set_xticklabels([id2pos[c] for c in CLASSES], rotation=45, ha="right", fontsize=9)
 ax.set_ylabel("Test Accuracy %")
-ax.set_title("Linear Probe — Per-word Test Accuracy  (Grammar / TEST_GRAMMAR3)")
+ax.set_title("Linear Probe — Per-POS Test Accuracy  (Grammar / TEST_GRAMMAR3)")
 ax.set_ylim(0, 115)
 ax.legend(fontsize=7)
 plt.tight_layout()

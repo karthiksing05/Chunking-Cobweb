@@ -380,6 +380,15 @@ def topk_sparsify(Z, k):
     out[rows, top_idx] = Z[rows, top_idx]
     return out
 
+def topk_binarize(Z, k):
+    """Set the k largest values per row to 1.0, rest to 0.0."""
+    out = np.zeros_like(Z)
+    k   = min(k, Z.shape[1])
+    top_idx = np.argpartition(Z, -k, axis=1)[:, -k:]
+    rows    = np.arange(Z.shape[0])[:, None]
+    out[rows, top_idx] = 1.0
+    return out
+
 n_topk_pool = len(topk_pool_nodes)
 print(f"  Top-K pool size: {n_topk_pool} nodes at depth {topk_depth}")
 print("Encoding Top-K pool (train) …")
@@ -396,14 +405,25 @@ Z_cob_bfs_topk      = topk_sparsify(Z_cob_bfs,      TOP_K)
 Z_cob_bfs_topk_test = topk_sparsify(Z_cob_bfs_test, TOP_K)
 print(f"  Applied per-instance top-{TOP_K} sparsification to BFS nodes (Depth-TopK, dim={DZ})")
 
+# TopK-Binary / Depth-TopK-Binary: same selection but active nodes fixed to 1.0
+Z_cob_topk_bin          = topk_binarize(Z_topk_pool,      TOP_K)
+Z_cob_topk_bin_test     = topk_binarize(Z_topk_pool_test, TOP_K)
+Z_cob_bfs_topk_bin      = topk_binarize(Z_cob_bfs,        TOP_K)
+Z_cob_bfs_topk_bin_test = topk_binarize(Z_cob_bfs_test,   TOP_K)
+print(f"  Applied per-instance top-{TOP_K} binarisation (TopK-Binary, Depth-TopK-Binary)")
+
 np.save(os.path.join(ARR_DIR, "Z_cob_bfs_train.npy"),      Z_cob_bfs)
 np.save(os.path.join(ARR_DIR, "Z_cob_bfs_test.npy"),       Z_cob_bfs_test)
 np.save(os.path.join(ARR_DIR, "Z_cob_dep_train.npy"),      Z_cob_dep)
 np.save(os.path.join(ARR_DIR, "Z_cob_dep_test.npy"),       Z_cob_dep_test)
 np.save(os.path.join(ARR_DIR, "Z_cob_topk_train.npy"),     Z_cob_topk)
 np.save(os.path.join(ARR_DIR, "Z_cob_topk_test.npy"),      Z_cob_topk_test)
-np.save(os.path.join(ARR_DIR, "Z_cob_bfstopk_train.npy"),  Z_cob_bfs_topk)
-np.save(os.path.join(ARR_DIR, "Z_cob_bfstopk_test.npy"),   Z_cob_bfs_topk_test)
+np.save(os.path.join(ARR_DIR, "Z_cob_bfstopk_train.npy"),     Z_cob_bfs_topk)
+np.save(os.path.join(ARR_DIR, "Z_cob_bfstopk_test.npy"),      Z_cob_bfs_topk_test)
+np.save(os.path.join(ARR_DIR, "Z_cob_topkbin_train.npy"),     Z_cob_topk_bin)
+np.save(os.path.join(ARR_DIR, "Z_cob_topkbin_test.npy"),      Z_cob_topk_bin_test)
+np.save(os.path.join(ARR_DIR, "Z_cob_bfstopkbin_train.npy"),  Z_cob_bfs_topk_bin)
+np.save(os.path.join(ARR_DIR, "Z_cob_bfstopkbin_test.npy"),   Z_cob_bfs_topk_bin_test)
 print("Cobweb data saved.")
 
 # ── Cobweb: path-information encoding ────────────────────────────────────────
@@ -677,9 +697,11 @@ l1sae_lin_overall,    l1sae_lin_per    = linear_probe_per_class(Z_l1sae,    y, Z
 topksae_lin_overall,  topksae_lin_per  = linear_probe_per_class(Z_topksae,  y, Z_topksae_test,  y_test)
 cob_bfs_lin_overall,  cob_bfs_lin_per  = linear_probe_per_class(Z_cob_bfs,  y, Z_cob_bfs_test,  y_test)
 cob_dep_lin_overall,  cob_dep_lin_per  = linear_probe_per_class(Z_cob_dep,  y, Z_cob_dep_test,  y_test)
-cob_topk_lin_overall,     cob_topk_lin_per     = linear_probe_per_class(Z_cob_topk,     y, Z_cob_topk_test,     y_test)
-cob_bfs_topk_lin_overall, cob_bfs_topk_lin_per = linear_probe_per_class(Z_cob_bfs_topk, y, Z_cob_bfs_topk_test, y_test)
-cob_path_lin_overall,     cob_path_lin_per      = linear_probe_per_class(Z_cob_path,     y, Z_cob_path_test,     y_test)
+cob_topk_lin_overall,         cob_topk_lin_per         = linear_probe_per_class(Z_cob_topk,         y, Z_cob_topk_test,         y_test)
+cob_bfs_topk_lin_overall,     cob_bfs_topk_lin_per     = linear_probe_per_class(Z_cob_bfs_topk,     y, Z_cob_bfs_topk_test,     y_test)
+cob_topk_bin_lin_overall,     cob_topk_bin_lin_per     = linear_probe_per_class(Z_cob_topk_bin,     y, Z_cob_topk_bin_test,     y_test)
+cob_bfs_topk_bin_lin_overall, cob_bfs_topk_bin_lin_per = linear_probe_per_class(Z_cob_bfs_topk_bin, y, Z_cob_bfs_topk_bin_test, y_test)
+cob_path_lin_overall,         cob_path_lin_per          = linear_probe_per_class(Z_cob_path,         y, Z_cob_path_test,         y_test)
 
 pca_knn_accs      = knn_accuracy_vs_k(Z_pca,      y, Z_pca_test,      y_test)
 ae_knn_accs       = knn_accuracy_vs_k(Z_ae,       y, Z_ae_test,       y_test)
@@ -687,9 +709,11 @@ l1sae_knn_accs    = knn_accuracy_vs_k(Z_l1sae,    y, Z_l1sae_test,    y_test)
 topksae_knn_accs  = knn_accuracy_vs_k(Z_topksae,  y, Z_topksae_test,  y_test)
 cob_bfs_knn_accs  = knn_accuracy_vs_k(Z_cob_bfs,  y, Z_cob_bfs_test,  y_test)
 cob_dep_knn_accs  = knn_accuracy_vs_k(Z_cob_dep,  y, Z_cob_dep_test,  y_test)
-cob_topk_knn_accs     = knn_accuracy_vs_k(Z_cob_topk,     y, Z_cob_topk_test,     y_test)
-cob_bfs_topk_knn_accs = knn_accuracy_vs_k(Z_cob_bfs_topk, y, Z_cob_bfs_topk_test, y_test)
-cob_path_knn_accs     = knn_accuracy_vs_k(Z_cob_path,     y, Z_cob_path_test,     y_test)
+cob_topk_knn_accs         = knn_accuracy_vs_k(Z_cob_topk,         y, Z_cob_topk_test,         y_test)
+cob_bfs_topk_knn_accs     = knn_accuracy_vs_k(Z_cob_bfs_topk,     y, Z_cob_bfs_topk_test,     y_test)
+cob_topk_bin_knn_accs     = knn_accuracy_vs_k(Z_cob_topk_bin,     y, Z_cob_topk_bin_test,     y_test)
+cob_bfs_topk_bin_knn_accs = knn_accuracy_vs_k(Z_cob_bfs_topk_bin, y, Z_cob_bfs_topk_bin_test, y_test)
+cob_path_knn_accs         = knn_accuracy_vs_k(Z_cob_path,         y, Z_cob_path_test,         y_test)
 
 print(f"\n  {'Method':<54} {'Lin.Probe':>10} {'KNN@5':>7} {'Avg L0':>8} {'Dead%':>7}")
 print(f"  {'-'*90}")
@@ -702,9 +726,11 @@ for name, overall, Z_tr, knn_accs in [
     (f"TopK-SAE ({DZ}d, k={TOP_K})",                              topksae_lin_overall,  Z_topksae,  topksae_knn_accs),
     (f"Cobweb-BFS ({DZ}d)",                                       cob_bfs_lin_overall,  Z_cob_bfs,  cob_bfs_knn_accs),
     (f"Cobweb-Depth (depth={best_depth},dim={n_depth})",          cob_dep_lin_overall,  Z_cob_dep,  cob_dep_knn_accs),
-    (f"Cobweb-TopK (depth={topk_depth},dim={n_topk_pool},k={TOP_K})", cob_topk_lin_overall,     Z_cob_topk,     cob_topk_knn_accs),
-    (f"Cobweb-Depth-TopK ({DZ}d, k={TOP_K})",                         cob_bfs_topk_lin_overall, Z_cob_bfs_topk, cob_bfs_topk_knn_accs),
-    (f"Cobweb-Path (depth={PATH_DEPTH}, n={N_PATHS}, dim={n_path_dim})", cob_path_lin_overall,     Z_cob_path,     cob_path_knn_accs),
+    (f"Cobweb-TopK (depth={topk_depth},dim={n_topk_pool},k={TOP_K})",     cob_topk_lin_overall,         Z_cob_topk,         cob_topk_knn_accs),
+    (f"Cobweb-Depth-TopK ({DZ}d, k={TOP_K})",                             cob_bfs_topk_lin_overall,     Z_cob_bfs_topk,     cob_bfs_topk_knn_accs),
+    (f"Cobweb-TopK-Bin (depth={topk_depth},dim={n_topk_pool},k={TOP_K})", cob_topk_bin_lin_overall,     Z_cob_topk_bin,     cob_topk_bin_knn_accs),
+    (f"Cobweb-Depth-TopK-Bin ({DZ}d, k={TOP_K})",                         cob_bfs_topk_bin_lin_overall, Z_cob_bfs_topk_bin, cob_bfs_topk_bin_knn_accs),
+    (f"Cobweb-Path (depth={PATH_DEPTH}, n={N_PATHS}, dim={n_path_dim})",  cob_path_lin_overall,         Z_cob_path,         cob_path_knn_accs),
 ]:
     avg_l0, dead_pct = _repr_stats(Z_tr)
     avg_ent = softmax_entropy(Z_tr).mean()
@@ -738,9 +764,11 @@ METHODS = [
     (Z_topksae,  Z_topksae_test,  topksae_lin_per, topksae_knn_accs, f"TopK-SAE ({DZ}d, k={TOP_K})",                                   "H-", "#bcbd22"),
     (Z_cob_bfs,  Z_cob_bfs_test,  cob_bfs_lin_per, cob_bfs_knn_accs, f"Cobweb-BFS ({DZ}d)",                                            "^-", "#6acc65"),
     (Z_cob_dep,  Z_cob_dep_test,  cob_dep_lin_per, cob_dep_knn_accs, f"Cobweb-Depth (depth={best_depth},dim={n_depth})",               "D-", "#d65f5f"),
-    (Z_cob_topk,     Z_cob_topk_test,     cob_topk_lin_per,     cob_topk_knn_accs,     f"Cobweb-TopK (depth={topk_depth},dim={n_topk_pool},k={TOP_K})", "P-", "#956cb4"),
-    (Z_cob_bfs_topk, Z_cob_bfs_topk_test, cob_bfs_topk_lin_per, cob_bfs_topk_knn_accs, f"Cobweb-Depth-TopK ({DZ}d, k={TOP_K})",                         "X-", "#17becf"),
-    (Z_cob_path,     Z_cob_path_test,      cob_path_lin_per,     cob_path_knn_accs,     f"Cobweb-Path (d={PATH_DEPTH},n={N_PATHS},dim={n_path_dim})",     "p-", "#8c564b"),
+    (Z_cob_topk,         Z_cob_topk_test,         cob_topk_lin_per,         cob_topk_knn_accs,         f"Cobweb-TopK (depth={topk_depth},dim={n_topk_pool},k={TOP_K})",     "P-", "#956cb4"),
+    (Z_cob_bfs_topk,     Z_cob_bfs_topk_test,     cob_bfs_topk_lin_per,     cob_bfs_topk_knn_accs,     f"Cobweb-Depth-TopK ({DZ}d, k={TOP_K})",                             "X-", "#17becf"),
+    (Z_cob_topk_bin,     Z_cob_topk_bin_test,     cob_topk_bin_lin_per,     cob_topk_bin_knn_accs,     f"Cobweb-TopK-Bin (depth={topk_depth},dim={n_topk_pool},k={TOP_K})", "8-", "#c39bd3"),
+    (Z_cob_bfs_topk_bin, Z_cob_bfs_topk_bin_test, cob_bfs_topk_bin_lin_per, cob_bfs_topk_bin_knn_accs, f"Cobweb-Depth-TopK-Bin ({DZ}d, k={TOP_K})",                         ">-", "#76d7c4"),
+    (Z_cob_path,         Z_cob_path_test,          cob_path_lin_per,         cob_path_knn_accs,         f"Cobweb-Path (d={PATH_DEPTH},n={N_PATHS},dim={n_path_dim})",         "p-", "#8c564b"),
 ]
 
 # 1a. UMAP scatter plots
@@ -754,20 +782,24 @@ Z_bfs2     = _umap.fit_transform(Z_cob_bfs)
 Z_dep2     = _umap.fit_transform(Z_cob_dep)
 Z_topk2      = _umap.fit_transform(Z_cob_topk)
 Z_bfstopk2   = _umap.fit_transform(Z_cob_bfs_topk)
-Z_path2      = _umap.fit_transform(Z_cob_path)
+Z_path2        = _umap.fit_transform(Z_cob_path)
+Z_topkbin2     = _umap.fit_transform(Z_cob_topk_bin)
+Z_bfstopkbin2  = _umap.fit_transform(Z_cob_bfs_topk_bin)
 
 scatter_data_umap = [
-    (Z_pca2,     "PCA → UMAP 2D"),
-    (Z_ae2,      "AE → UMAP 2D"),
-    (Z_l1sae2,   "L1-SAE → UMAP 2D"),
-    (Z_topksae2, "TopK-SAE → UMAP 2D"),
-    (Z_bfs2,     "Cobweb-BFS → UMAP 2D"),
-    (Z_dep2,     "Cobweb-Depth → UMAP 2D"),
-    (Z_topk2,    "Cobweb-TopK → UMAP 2D"),
-    (Z_bfstopk2, "Cobweb-Depth-TopK → UMAP 2D"),
-    (Z_path2,    f"Cobweb-Path (d={PATH_DEPTH},n={N_PATHS}) → UMAP 2D"),
+    (Z_pca2,        "PCA → UMAP 2D"),
+    (Z_ae2,         "AE → UMAP 2D"),
+    (Z_l1sae2,      "L1-SAE → UMAP 2D"),
+    (Z_topksae2,    "TopK-SAE → UMAP 2D"),
+    (Z_bfs2,        "Cobweb-BFS → UMAP 2D"),
+    (Z_dep2,        "Cobweb-Depth → UMAP 2D"),
+    (Z_topk2,       "Cobweb-TopK → UMAP 2D"),
+    (Z_bfstopk2,    "Cobweb-Depth-TopK → UMAP 2D"),
+    (Z_topkbin2,    "Cobweb-TopK-Bin → UMAP 2D"),
+    (Z_bfstopkbin2, "Cobweb-Depth-TopK-Bin → UMAP 2D"),
+    (Z_path2,       f"Cobweb-Path (d={PATH_DEPTH},n={N_PATHS}) → UMAP 2D"),
 ]
-fig, axes = plt.subplots(1, 9, figsize=(47, 5))
+fig, axes = plt.subplots(1, 11, figsize=(57, 5))
 fig.suptitle("UMAP Projections", fontsize=12, y=1.01)
 for ax, (Z, title) in zip(axes, scatter_data_umap):
     for c in CLASSES:
@@ -795,20 +827,24 @@ Z_bfs2t     = _tsne.fit_transform(Z_cob_bfs)
 Z_dep2t     = _tsne.fit_transform(Z_cob_dep)
 Z_topk2t      = _tsne.fit_transform(Z_cob_topk)
 Z_bfstopk2t   = _tsne.fit_transform(Z_cob_bfs_topk)
-Z_path2t      = _tsne.fit_transform(Z_cob_path)
+Z_path2t        = _tsne.fit_transform(Z_cob_path)
+Z_topkbin2t     = _tsne.fit_transform(Z_cob_topk_bin)
+Z_bfstopkbin2t  = _tsne.fit_transform(Z_cob_bfs_topk_bin)
 
 scatter_data_tsne = [
-    (Z_pca2t,     "PCA → t-SNE 2D"),
-    (Z_ae2t,      "AE → t-SNE 2D"),
-    (Z_l1sae2t,   "L1-SAE → t-SNE 2D"),
-    (Z_topksae2t, "TopK-SAE → t-SNE 2D"),
-    (Z_bfs2t,     "Cobweb-BFS → t-SNE 2D"),
-    (Z_dep2t,     "Cobweb-Depth → t-SNE 2D"),
-    (Z_topk2t,    "Cobweb-TopK → t-SNE 2D"),
-    (Z_bfstopk2t, "Cobweb-Depth-TopK → t-SNE 2D"),
-    (Z_path2t,    f"Cobweb-Path (d={PATH_DEPTH},n={N_PATHS}) → t-SNE 2D"),
+    (Z_pca2t,        "PCA → t-SNE 2D"),
+    (Z_ae2t,         "AE → t-SNE 2D"),
+    (Z_l1sae2t,      "L1-SAE → t-SNE 2D"),
+    (Z_topksae2t,    "TopK-SAE → t-SNE 2D"),
+    (Z_bfs2t,        "Cobweb-BFS → t-SNE 2D"),
+    (Z_dep2t,        "Cobweb-Depth → t-SNE 2D"),
+    (Z_topk2t,       "Cobweb-TopK → t-SNE 2D"),
+    (Z_bfstopk2t,    "Cobweb-Depth-TopK → t-SNE 2D"),
+    (Z_topkbin2t,    "Cobweb-TopK-Bin → t-SNE 2D"),
+    (Z_bfstopkbin2t, "Cobweb-Depth-TopK-Bin → t-SNE 2D"),
+    (Z_path2t,       f"Cobweb-Path (d={PATH_DEPTH},n={N_PATHS}) → t-SNE 2D"),
 ]
-fig, axes = plt.subplots(1, 9, figsize=(47, 5))
+fig, axes = plt.subplots(1, 11, figsize=(57, 5))
 fig.suptitle("t-SNE Projections", fontsize=12, y=1.01)
 for ax, (Z, title) in zip(axes, scatter_data_tsne):
     for c in CLASSES:
