@@ -77,21 +77,58 @@ for run_idx, ctx_alpha in enumerate([1e-4, 1], start=1):
     print(f"Saved Final LTM to \"{SAVE_DIR}\"!")
     webster.visualize_ltm(f"{OUT_DIR}/final_ltm_alpha-{ctx_alpha}", max_depth=3)
 
-    # --- Basic-level nodes ---
+    # --- Basic-level nodes (get_basic_pc, P(c)-weighted EPMI vs root) ---
+    # No eval_alpha sweep — the P(c) prefix replaces eval_alpha as the
+    # leaf-bias control. Single pass with default smoothing (tree->alpha).
+    def _collect_pc(root, n_samples=200, uniform_leaf=False):
+        """Walk leaves, call get_basic_pc on each, dedupe by hash."""
+        seen, freq = {}, {}
+        stack = [root]
+        while stack:
+            curr = stack.pop()
+            if not curr.children:
+                bl = curr.get_basic_pc(n_samples, debug=False, uniform_leaf=uniform_leaf)
+                h = bl.concept_hash()
+                if h not in seen:
+                    seen[h] = bl
+                    freq[h] = 0
+                freq[h] += 1
+            else:
+                for child in curr.children:
+                    stack.append(child)
+        return [(h, seen[h], freq[h]) for h in seen]
+
+    ltm = webster.get_long_term_memory()
+    for uniform_leaf in (False, True):
+        label = "uniform_leaf=True" if uniform_leaf else "uniform_leaf=False"
+        ctx_pc = _collect_pc(ltm.context_hierarchy.root, uniform_leaf=uniform_leaf)
+
+        print(f"\n=== Basic-Level Nodes (get_basic_pc, {label}) ===")
+        print("Context hierarchy (top 10 most frequent basic level nodes):")
+        for h, node, frq in sorted(ctx_pc, key=lambda x: x[2], reverse=True)[:10]:
+            print(f"  - {h}  count={node.count}  depth={node.depth()}  leaf_freq={frq}")
+
+        with open(OUT_TEXT, "a") as out:
+            out.write(f"\n=== Basic-Level Nodes (get_basic_pc, {label}) ===\n")
+            out.write("Context hierarchy (top 10 most frequent basic level nodes):\n")
+            for h, node, frq in sorted(ctx_pc, key=lambda x: x[2], reverse=True)[:10]:
+                out.write(f"  - {h}  count={node.count}  depth={node.depth()}  leaf_freq={frq}\n")
+
+    # --- Basic-level nodes (get_basic, swept across eval_alpha) ---
     basic_level_alphas = [1e-4, 1e-3, 1e-2, 1e-1, 1, 10]
     for ctx_bl_alpha in basic_level_alphas:
         webster.get_long_term_memory().context_bl_alpha = ctx_bl_alpha
         basic_nodes = webster.get_basic_level_nodes()
 
         # Print to console as before
-        print(f"\n=== Basic-Level Nodes for a={ctx_bl_alpha} ===")
+        print(f"\n=== Basic-Level Nodes (get_basic) for a={ctx_bl_alpha} ===")
         print("Context hierarchy (top 10 most frequent basic level nodes):")
         for h, node, freq in sorted(basic_nodes["context"], key=lambda x: x[2], reverse=True)[:10]:
             print(f"  - {h}  count={node.count}  depth={node.depth()}  leaf_freq={freq}")
 
         # Also append the basic-level nodes info to the output file ONLY
         with open(OUT_TEXT, "a") as out:
-            out.write(f"\n=== Basic-Level Nodes for a={ctx_bl_alpha} ===\n")
+            out.write(f"\n=== Basic-Level Nodes (get_basic) for a={ctx_bl_alpha} ===\n")
             out.write("Context hierarchy (top 10 most frequent basic level nodes):\n")
             for h, node, freq in sorted(basic_nodes["context"], key=lambda x: x[2], reverse=True)[:10]:
                 out.write(f"  - {h}  count={node.count}  depth={node.depth()}  leaf_freq={freq}\n")

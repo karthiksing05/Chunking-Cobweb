@@ -181,7 +181,17 @@ print("Extracting BFS nodes …")
 bfs_nodes = bfs_first_n_nodes(cobweb_tree.root, DZ)
 if not bfs_nodes:
     bfs_nodes = [cobweb_tree.root]   # degenerate tree
-print(f"  {len(bfs_nodes)} BFS nodes collected")
+print(f"  {len(bfs_nodes)} BFS nodes collected (target DZ={DZ})")
+
+bfs_nodes_32 = bfs_first_n_nodes(cobweb_tree.root, 32)
+if not bfs_nodes_32:
+    bfs_nodes_32 = [cobweb_tree.root]
+print(f"  {len(bfs_nodes_32)} BFS-32 nodes collected (target DZ=32)")
+
+bfs_nodes_8 = bfs_first_n_nodes(cobweb_tree.root, 8)
+if not bfs_nodes_8:
+    bfs_nodes_8 = [cobweb_tree.root]
+print(f"  {len(bfs_nodes_8)} BFS-8 nodes collected (target DZ=8)")
 
 print("Extracting depth nodes …")
 by_depth_nodes = collect_by_depth_nodes(cobweb_tree.root)
@@ -222,6 +232,18 @@ _scaler_bfs    = StandardScaler()
 Z_cob_bfs      = _scaler_bfs.fit_transform(encode_logpost(instances_train, bfs_nodes))
 print("Encoding test set (BFS) …")
 Z_cob_bfs_test = _scaler_bfs.transform(encode_logpost(instances_test, bfs_nodes))
+
+print("Encoding train set (BFS-32) …")
+_scaler_bfs32    = StandardScaler()
+Z_cob_bfs32      = _scaler_bfs32.fit_transform(encode_logpost(instances_train, bfs_nodes_32))
+print("Encoding test set (BFS-32) …")
+Z_cob_bfs32_test = _scaler_bfs32.transform(encode_logpost(instances_test, bfs_nodes_32))
+
+print("Encoding train set (BFS-8) …")
+_scaler_bfs8    = StandardScaler()
+Z_cob_bfs8      = _scaler_bfs8.fit_transform(encode_logpost(instances_train, bfs_nodes_8))
+print("Encoding test set (BFS-8) …")
+Z_cob_bfs8_test = _scaler_bfs8.transform(encode_logpost(instances_test, bfs_nodes_8))
 
 print("Encoding train set (Depth) …")
 _scaler_dep    = StandardScaler()
@@ -330,6 +352,10 @@ Z_cob_path_test = path_sparsify(Z_path_raw_test, Z_path_sc_test, path_node_to_id
 # Save arrays
 np.save(os.path.join(ARR_DIR, "Z_cob_bfs_train.npy"),      Z_cob_bfs)
 np.save(os.path.join(ARR_DIR, "Z_cob_bfs_test.npy"),       Z_cob_bfs_test)
+np.save(os.path.join(ARR_DIR, "Z_cob_bfs32_train.npy"),    Z_cob_bfs32)
+np.save(os.path.join(ARR_DIR, "Z_cob_bfs32_test.npy"),     Z_cob_bfs32_test)
+np.save(os.path.join(ARR_DIR, "Z_cob_bfs8_train.npy"),     Z_cob_bfs8)
+np.save(os.path.join(ARR_DIR, "Z_cob_bfs8_test.npy"),      Z_cob_bfs8_test)
 np.save(os.path.join(ARR_DIR, "Z_cob_dep_train.npy"),      Z_cob_dep)
 np.save(os.path.join(ARR_DIR, "Z_cob_dep_test.npy"),       Z_cob_dep_test)
 np.save(os.path.join(ARR_DIR, "Z_cob_topk_train.npy"),     Z_cob_topk)
@@ -505,6 +531,8 @@ def softmax_entropy(Z):
 
 print("\nEvaluating …")
 cob_bfs_lin_overall,      cob_bfs_lin_per      = linear_probe_per_class(Z_cob_bfs,      y, Z_cob_bfs_test,      y_test)
+cob_bfs32_lin_overall,    cob_bfs32_lin_per    = linear_probe_per_class(Z_cob_bfs32,    y, Z_cob_bfs32_test,    y_test)
+cob_bfs8_lin_overall,     cob_bfs8_lin_per     = linear_probe_per_class(Z_cob_bfs8,     y, Z_cob_bfs8_test,     y_test)
 cob_dep_lin_overall,      cob_dep_lin_per      = linear_probe_per_class(Z_cob_dep,      y, Z_cob_dep_test,      y_test)
 cob_topk_lin_overall,         cob_topk_lin_per         = linear_probe_per_class(Z_cob_topk,         y, Z_cob_topk_test,         y_test)
 cob_bfs_topk_lin_overall,     cob_bfs_topk_lin_per     = linear_probe_per_class(Z_cob_bfs_topk,     y, Z_cob_bfs_topk_test,     y_test)
@@ -513,6 +541,8 @@ cob_bfs_topk_bin_lin_overall, cob_bfs_topk_bin_lin_per = linear_probe_per_class(
 cob_path_lin_overall,     cob_path_lin_per     = linear_probe_per_class(Z_cob_path,     y, Z_cob_path_test,     y_test)
 
 cob_bfs_knn_accs      = knn_accuracy_vs_k(Z_cob_bfs,      y, Z_cob_bfs_test,      y_test)
+cob_bfs32_knn_accs    = knn_accuracy_vs_k(Z_cob_bfs32,    y, Z_cob_bfs32_test,    y_test)
+cob_bfs8_knn_accs     = knn_accuracy_vs_k(Z_cob_bfs8,     y, Z_cob_bfs8_test,     y_test)
 cob_dep_knn_accs      = knn_accuracy_vs_k(Z_cob_dep,      y, Z_cob_dep_test,      y_test)
 cob_topk_knn_accs         = knn_accuracy_vs_k(Z_cob_topk,         y, Z_cob_topk_test,         y_test)
 cob_bfs_topk_knn_accs     = knn_accuracy_vs_k(Z_cob_bfs_topk,     y, Z_cob_bfs_topk_test,     y_test)
@@ -526,6 +556,8 @@ _knn5_idx     = KNN_KS.index(5)
 _summary_rows = []
 for name, overall, Z_tr, knn_accs in [
     (f"Cobweb-BFS ({len(bfs_nodes)}d)",                                  cob_bfs_lin_overall,      Z_cob_bfs,      cob_bfs_knn_accs),
+    (f"Cobweb-BFS-32 ({len(bfs_nodes_32)}d)",                            cob_bfs32_lin_overall,    Z_cob_bfs32,    cob_bfs32_knn_accs),
+    (f"Cobweb-BFS-8 ({len(bfs_nodes_8)}d)",                              cob_bfs8_lin_overall,     Z_cob_bfs8,     cob_bfs8_knn_accs),
     (f"Cobweb-Depth (depth={best_depth},dim={n_depth})",                 cob_dep_lin_overall,      Z_cob_dep,      cob_dep_knn_accs),
     (f"Cobweb-TopK (depth={topk_depth},dim={n_topk_pool},k={TOP_K})",     cob_topk_lin_overall,         Z_cob_topk,         cob_topk_knn_accs),
     (f"Cobweb-Depth-TopK ({len(bfs_nodes)}d, k={TOP_K})",                cob_bfs_topk_lin_overall,     Z_cob_bfs_topk,     cob_bfs_topk_knn_accs),
@@ -558,6 +590,10 @@ print(f"  Summary saved → {_csv_path}")
 METHODS = [
     (Z_cob_bfs,      Z_cob_bfs_test,      cob_bfs_lin_per,      cob_bfs_knn_accs,
      f"Cobweb-BFS ({len(bfs_nodes)}d)",                               "^-", "#6acc65"),
+    (Z_cob_bfs32,    Z_cob_bfs32_test,    cob_bfs32_lin_per,    cob_bfs32_knn_accs,
+     f"Cobweb-BFS-32 ({len(bfs_nodes_32)}d)",                         "v-", "#2a7d3a"),
+    (Z_cob_bfs8,     Z_cob_bfs8_test,     cob_bfs8_lin_per,     cob_bfs8_knn_accs,
+     f"Cobweb-BFS-8 ({len(bfs_nodes_8)}d)",                           "s-", "#a8e3a0"),
     (Z_cob_dep,      Z_cob_dep_test,      cob_dep_lin_per,      cob_dep_knn_accs,
      f"Cobweb-Depth (depth={best_depth},dim={n_depth})",              "D-", "#d65f5f"),
     (Z_cob_topk,         Z_cob_topk_test,         cob_topk_lin_per,         cob_topk_knn_accs,

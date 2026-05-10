@@ -25,13 +25,25 @@ also performed here for completeness.
 import sys
 import os
 import shutil
+import importlib.util
 
 # Make sure src/ is on the path so viz.py can be imported
 _SRC_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "src")
 if _SRC_DIR not in sys.path:
     sys.path.insert(0, _SRC_DIR)
 
-from cobweb.frozen_discrete import FrozenCobwebDiscreteTree
+# Load frozen_discrete.py directly from cobweb-private/src/cobweb/.
+# The installed cobweb package only ships the .so extensions; the Python
+# helpers (frozen_discrete.py, viz.py wrappers, …) live in source only.
+_FD_PATH = os.path.join(
+    os.path.dirname(__file__), "..", "..",
+    "cobweb-private", "src", "cobweb", "frozen_discrete.py",
+)
+_fd_spec = importlib.util.spec_from_file_location("_frozen_discrete_local", _FD_PATH)
+_fd_mod  = importlib.util.module_from_spec(_fd_spec)
+_fd_spec.loader.exec_module(_fd_mod)
+FrozenCobwebDiscreteTree = _fd_mod.FrozenCobwebDiscreteTree
+
 from viz import HTMLCobwebDrawer
 
 # ---------------------------------------------------------------------------
@@ -226,10 +238,14 @@ def print_cu_table(cu_by_level):
 # Cobweb-based basic-level evaluation
 # ---------------------------------------------------------------------------
 
-def evaluate_basic_level(tree, instances, uniform_leaf=False):
+def evaluate_basic_level(tree, instances, uniform_leaf=False, method="get_basic"):
     """
     For every item, categorize it to its leaf and ask that leaf for its
-    basic-level ancestor via ``get_basic``.
+    basic-level ancestor via the chosen method.
+
+    ``method`` is one of:
+      - "get_basic"     : original EPMI vs full-tree mixture (uses EVAL_ALPHA)
+      - "get_basic_pc"  : P(c)-weighted EPMI vs root (no eval_alpha)
 
     Returns a list of per-item result dicts.
     """
@@ -238,9 +254,18 @@ def evaluate_basic_level(tree, instances, uniform_leaf=False):
         item_id, superord, basic, subord = item[0], item[1], item[2], item[3]
         inst       = instances[i]
         leaf       = tree.categorize(inst)
-        basic_node = leaf.get_basic(
-            1000, 1000, debug=False, eval_alpha=EVAL_ALPHA, uniform_leaf=uniform_leaf
-        )
+        if method == "get_basic":
+            basic_node = leaf.get_basic(
+                1000, 1000, debug=False,
+                eval_alpha=EVAL_ALPHA, uniform_leaf=uniform_leaf,
+            )
+        elif method == "get_basic_pc":
+            basic_node = leaf.get_basic_pc(
+                1000, debug=False, uniform_leaf=uniform_leaf,
+            )
+        else:
+            msg = f"unknown basic-level method: {method!r}"
+            raise ValueError(msg)
         results.append({
             "item_id":     item_id,
             "superord":    superord,
@@ -252,6 +277,120 @@ def evaluate_basic_level(tree, instances, uniform_leaf=False):
             "is_root":     basic_node.parent is None,
         })
     return results
+
+
+# ---------------------------------------------------------------------------
+# Side-by-side comparison: get_basic vs get_basic_pc
+# ---------------------------------------------------------------------------
+
+# Depth → human-readable level label, given the ideal C&G hierarchy:
+#   0 = Root,  1 = Superord,  2 = Basic (target),  3 = Subord,  4+ = Leaf
+DEPTH_LABEL = {0: "Root", 1: "Superord", 2: "Basic", 3: "Subord"}
+
+
+def _level_label(depth):
+    return DEPTH_LABEL.get(depth, "Leaf")
+
+
+def _hash_to_label(node_hash, hash_to_basic_cat, hash_to_depth):
+    """Map a basic-level node hash to a human-readable label.
+
+    If the hash is the canonical BL node for one of the four target basic
+    categories (Hammer/Brick/Knife/Pizza cutter), return that category name.
+    Otherwise return the level-tier label (Root/Superord/Subord/Leaf).
+    """
+    if node_hash in hash_to_basic_cat:
+        return hash_to_basic_cat[node_hash]
+    return _level_label(hash_to_depth.get(node_hash, -1))
+
+
+def _build_canonical_bl_map(results):
+    """For each target basic category, find the BL-node hash that the
+    *majority* of its items mapped to. Used purely for labeling — not for
+    correctness checking."""
+    by_cat: dict[str, dict[str, int]] = {}
+    for r in results:
+        by_cat.setdefault(r["basic"], {})
+        by_cat[r["basic"]][r["basic_hash"]] = (
+            by_cat[r["basic"]].get(r["basic_hash"], 0) + 1
+        )
+    canonical: dict[str, str] = {}
+    for cat, counts in by_cat.items():
+        winner = max(counts.items(), key=lambda kv: kv[1])[0]
+        canonical[winner] = cat
+    return canonical
+
+
+def print_comparison_table(results_old, results_pc, label="", out_file=None):
+    """Print side-by-side table of the basic-level node each method picked
+    for every item.
+
+    Columns:
+      Item | Expected basic | get_basic node (depth, label) | get_basic_pc node (depth, label) | Match?
+
+    If ``out_file`` is provided (a writeable file object), the same table is
+    appended there in addition to being printed to stdout.
+    """
+    tag = f"  [{label}]" if label else ""
+
+    def _emit(line):
+        print(line)
+        if out_file is not None:
+            out_file.write(line + "\n")
+
+    _emit(f"\n{'='*92}")
+    _emit(f"  Comparison: get_basic  vs  get_basic_pc{tag}")
+    _emit(f"{'='*92}")
+
+    canon_old = _build_canonical_bl_map(results_old)
+    canon_pc  = _build_canonical_bl_map(results_pc)
+    depth_map = {}
+    for r in results_old + results_pc:
+        depth_map[r["basic_hash"]] = r["basic_depth"]
+
+    header = (
+        f"{'Item':>4}  {'Expected':>13}  "
+        f"{'get_basic (d, label)':>28}  "
+        f"{'get_basic_pc (d, label)':>28}  "
+        f"{'Match?':>8}"
+    )
+    _emit(header)
+    _emit("-" * 92)
+
+    n_old_correct = 0
+    n_pc_correct  = 0
+    n_agree       = 0
+
+    for r_old, r_pc in zip(results_old, results_pc, strict=True):
+        assert r_old["item_id"] == r_pc["item_id"]
+        item_id  = r_old["item_id"]
+        expected = r_old["basic"]
+
+        old_label = _hash_to_label(r_old["basic_hash"], canon_old, depth_map)
+        pc_label  = _hash_to_label(r_pc["basic_hash"],  canon_pc,  depth_map)
+
+        old_correct = (old_label == expected)
+        pc_correct  = (pc_label  == expected)
+        agree       = (r_old["basic_hash"] == r_pc["basic_hash"])
+
+        n_old_correct += int(old_correct)
+        n_pc_correct  += int(pc_correct)
+        n_agree       += int(agree)
+
+        old_cell = f"{r_old['basic_depth']}, {old_label}"
+        pc_cell  = f"{r_pc['basic_depth']}, {pc_label}"
+        match_cell = "same" if agree else "DIFF"
+
+        _emit(
+            f"{item_id:>4}  {expected:>13}  "
+            f"{old_cell:>28}  {pc_cell:>28}  {match_cell:>8}"
+        )
+
+    _emit("-" * 92)
+    n = len(results_old)
+    _emit(f"  get_basic    target hits: {n_old_correct}/{n}")
+    _emit(f"  get_basic_pc target hits: {n_pc_correct}/{n}")
+    _emit(f"  Methods agree on:         {n_agree}/{n} items")
 
 
 def print_results_table(results, label=""):
@@ -383,22 +522,77 @@ def test_corter_gluck_stable_basic_level():
 
     # Evaluate with default sampling (weighted-choice on node distribution)
     print("\n--- get_basic (uniform_leaf=False, default) ---")
-    results_default = evaluate_basic_level(tree, instances, uniform_leaf=False)
-    print_results_table(results_default, label="uniform_leaf=False")
-    cons_d, dist_d = check_basic_level_accuracy(results_default, label="uniform_leaf=False")
+    results_default = evaluate_basic_level(
+        tree, instances, uniform_leaf=False, method="get_basic"
+    )
+    print_results_table(results_default, label="get_basic, uniform_leaf=False")
+    cons_d, dist_d = check_basic_level_accuracy(
+        results_default, label="get_basic, uniform_leaf=False"
+    )
 
     # Evaluate with uniform-leaf sampling
     print("\n--- get_basic (uniform_leaf=True) ---")
-    results_uniform = evaluate_basic_level(tree, instances, uniform_leaf=True)
-    print_results_table(results_uniform, label="uniform_leaf=True")
-    cons_u, dist_u = check_basic_level_accuracy(results_uniform, label="uniform_leaf=True")
+    results_uniform = evaluate_basic_level(
+        tree, instances, uniform_leaf=True, method="get_basic"
+    )
+    print_results_table(results_uniform, label="get_basic, uniform_leaf=True")
+    cons_u, dist_u = check_basic_level_accuracy(
+        results_uniform, label="get_basic, uniform_leaf=True"
+    )
+
+    # Evaluate get_basic_pc (no eval_alpha — P(c) damping replaces it)
+    print("\n--- get_basic_pc (uniform_leaf=False) ---")
+    results_pc = evaluate_basic_level(
+        tree, instances, uniform_leaf=False, method="get_basic_pc"
+    )
+    print_results_table(results_pc, label="get_basic_pc, uniform_leaf=False")
+    cons_pc, dist_pc = check_basic_level_accuracy(
+        results_pc, label="get_basic_pc, uniform_leaf=False"
+    )
+
+    print("\n--- get_basic_pc (uniform_leaf=True) ---")
+    results_pc_u = evaluate_basic_level(
+        tree, instances, uniform_leaf=True, method="get_basic_pc"
+    )
+    print_results_table(results_pc_u, label="get_basic_pc, uniform_leaf=True")
+    cons_pcu, dist_pcu = check_basic_level_accuracy(
+        results_pc_u, label="get_basic_pc, uniform_leaf=True"
+    )
+
+    # Side-by-side comparison tables (also persisted to disk)
+    os.makedirs(OUT_DIR, exist_ok=True)
+    cmp_path = os.path.join(OUT_DIR, "basic_level_comparison.txt")
+    with open(cmp_path, "w") as cmp_f:
+        cmp_f.write(
+            "Comparison of basic-level node selection: get_basic vs get_basic_pc\n"
+            f"  ALPHA={ALPHA}, EVAL_ALPHA={EVAL_ALPHA}, n_samples=1000\n"
+        )
+        print_comparison_table(
+            results_default, results_pc,
+            label="uniform_leaf=False", out_file=cmp_f,
+        )
+        print_comparison_table(
+            results_uniform, results_pc_u,
+            label="uniform_leaf=True",  out_file=cmp_f,
+        )
+    print(f"\nComparison table saved → {cmp_path}")
 
     # --- Step 3: visualize ---
     print("\nGenerating visualizations …")
     visualize(tree, instances, OUT_DIR)
 
+    # Pytest pass/fail is gated only on the original get_basic method.
+    # get_basic_pc is reported for comparison but not required to pass —
+    # treat its consistency/distinctness results as informational.
     passed = cu_correct and cons_d and dist_d and cons_u and dist_u
-    print(f"\nOVERALL: {'PASS' if passed else 'FAIL'}")
+    pc_summary = (
+        f"get_basic_pc (uniform=False): consistency={'P' if cons_pc else 'F'} "
+        f"distinctness={'P' if dist_pc else 'F'} | "
+        f"get_basic_pc (uniform=True):  consistency={'P' if cons_pcu else 'F'} "
+        f"distinctness={'P' if dist_pcu else 'F'}"
+    )
+    print(f"\n  [info] {pc_summary}")
+    print(f"\nOVERALL: {'PASS' if passed else 'FAIL'} (gated on get_basic only)")
 
 
 if __name__ == "__main__":
@@ -411,9 +605,23 @@ if __name__ == "__main__":
     tree      = FrozenCobwebDiscreteTree(hierarchy, alpha=ALPHA, weight_attr=True)
     print("  Tree built.")
 
-    results = evaluate_basic_level(tree, instances)
-    print_results_table(results)
-    check_basic_level_accuracy(results)
+    results_old = evaluate_basic_level(tree, instances, method="get_basic")
+    print_results_table(results_old, label="get_basic")
+    check_basic_level_accuracy(results_old, label="get_basic")
+
+    results_pc = evaluate_basic_level(tree, instances, method="get_basic_pc")
+    print_results_table(results_pc, label="get_basic_pc")
+    check_basic_level_accuracy(results_pc, label="get_basic_pc")
+
+    os.makedirs(OUT_DIR, exist_ok=True)
+    cmp_path = os.path.join(OUT_DIR, "basic_level_comparison.txt")
+    with open(cmp_path, "w") as cmp_f:
+        cmp_f.write(
+            "Comparison of basic-level node selection: get_basic vs get_basic_pc\n"
+            f"  ALPHA={ALPHA}, EVAL_ALPHA={EVAL_ALPHA}, n_samples=1000\n"
+        )
+        print_comparison_table(results_old, results_pc, out_file=cmp_f)
+    print(f"\nComparison table saved → {cmp_path}")
 
     print("\nGenerating visualizations …")
     visualize(tree, instances, OUT_DIR)

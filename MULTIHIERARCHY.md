@@ -2,14 +2,19 @@
 
 Whereas before we hypothesized needing multiple hierarchies for multiple levels of granularity or to separate primitives and composites, we now rely on multiple hierarchies to properly separate *content* and *context*.
 
+## Methodology 5.2
+
+Need to change the parsing process! Can't implement this until representations are fixed and our greedy method works kind of though - low-level parsing can (and probably should) be done greedily!
+
 ## Methodology 5.1
 
-Did a ton of experiments, here's what we need below!!
+Did a ton of experiments, going to make a list of all changes we need to make below - there'll be all kinds of stuff but as long as we draft everything properly we'll be in a good place!
 
-**Representations**
-*   Sparse list of concepts that is built based on stable state!! This is something that can be implemented pretty easily as long as we efficiently implement in conjunction with our 
-    *   Can even take a sparse list and then pick the top-one from that!!
-*   How does scoring and parsing change as a result of this new representation?
+**What worked:**
+*   As evidenced by `grammar_chunking_example.py`, a bag of sparse concepts taken from some fixed depth worked like a CHARM!! We did in fact take it from a fixed and randomly chosen depth and then we chose our concepts based on 
+
+**What we're changing:**
+*   Mixture-of-concepts method!! Instead of our current representation (which is lowkey terrible) we're going to employ a sparse bag-of-concepts style 
 
 ## Methodology 5
 
@@ -17,9 +22,21 @@ TL;DR is that Cobweb is NOT WHAT WE THOUGHT IT WAS!! Specifically, it doesn't sp
 
 **Convolutional Cobweb:**
 *   Very very interesting paper I have not looked at!!! We might be able to take inspiration from this for our mixture-of-concepts idea!! Or vice versa LOL
+*   WHY IS CONVOLUTIONAL COBWEB SO SILLY?? I mean, maybe not, but hopefully everyone's set of chunks will be aligned once we explain stuff in terms of that!!
+    *   Maybe try a convolutional-cobweb-like setup with WEBSTER to note similarities and differences between the two ideas!
+    *   Convolutional Cobweb uses leaves to identify but maintains the top level of tree for representations to pass from the convolutional (chunking) hierarchy into the classification (context) hierarchy
+    *   My verdict is that if we make this chunking framework work, we can also make the convolutional framework work, as the convolution framework inherently assumes both that everything is part of a chunk and that the parse tree is more like a "parse pyramid"
 
 **General Cobweb Changes:**
 *   Basic level not working RIP - need to figure out whether it can work in a static hierarchy!!
+*   Current basic level definition favors leaves - how can we fix this?
+    *   To me, basic level is like the highest level over which you can do prediction on a sample space you govern
+    *   BUT it has to be proportional to the counts of the nodes otherwise the node that can predict what’s below it the best is always going to be a leaf node (I think)
+*   Potential solutions:
+    *   We need some way to weight the COUNTS of the node that is the basic level node by the accuracy of its description maybe?
+    *   Or we change up the basic level to be a simplicity-style objective - if it is truly in terms of "recall"
+        *   WE COULD DO THE SHALLOWEST SOMETHING - instead of counts, we use depth as our proxy!!
+        *   If we do this then we can collect a basic-level frontier for sure!!
 
 **Representations:**
 *   First, what does Cobweb split by? By understanding exactly what the splitting criteria is we can craft better representations
