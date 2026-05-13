@@ -1,0 +1,255 @@
+Alpha-agnostic basic_level_score and get_basic_frontier on the
+Corter & Gluck hierarchies (Murphy & Smith + Begriffshierarchien
++ Fruit + Music + Furniture).
+
+==============================================================================
+  Dataset: Murphy&Smith
+==============================================================================
+
+Per-node basic_level_score (α-agnostic):
+  [Subordinate 2]
+    MS_Pizza2-2              depth=4 count=  1 score=+2.87500
+    MS_Pizza2-1              depth=4 count=  1 score=+2.87500
+    MS_Pizza1-2              depth=4 count=  1 score=+2.87500
+    MS_Pizza1-1              depth=4 count=  1 score=+2.87500
+    MS_Knife2-2              depth=4 count=  1 score=+2.87500
+    MS_Knife2-1              depth=4 count=  1 score=+2.87500
+    MS_Knife1-2              depth=4 count=  1 score=+2.87500
+    MS_Knife1-1              depth=4 count=  1 score=+2.87500
+    MS_Brick2-2              depth=4 count=  1 score=+2.87500
+    MS_Brick2-1              depth=4 count=  1 score=+2.87500
+    MS_Brick1-2              depth=4 count=  1 score=+2.87500
+    MS_Brick1-1              depth=4 count=  1 score=+2.87500
+    MS_Hammer2-2             depth=4 count=  1 score=+2.87500
+    MS_Hammer2-1             depth=4 count=  1 score=+2.87500
+    MS_Hammer1-2             depth=4 count=  1 score=+2.87500
+    MS_Hammer1-1             depth=4 count=  1 score=+2.87500
+  [Subordinate 1]
+    MS_Pizza2                depth=3 count=  2 score=+4.80833
+    MS_Pizza1                depth=3 count=  2 score=+4.80833
+    MS_Knife2                depth=3 count=  2 score=+4.80833
+    MS_Knife1                depth=3 count=  2 score=+4.80833
+    MS_Brick2                depth=3 count=  2 score=+4.80833
+    MS_Brick1                depth=3 count=  2 score=+4.80833
+    MS_Hammer2               depth=3 count=  2 score=+4.80833
+    MS_Hammer1               depth=3 count=  2 score=+4.80833
+  [Basic]
+    MS_PizzaCutter           depth=2 count=  4 score=+7.67500
+    MS_Knife                 depth=2 count=  4 score=+7.67500
+    MS_Brick                 depth=2 count=  4 score=+7.67500
+    MS_Hammer                depth=2 count=  4 score=+7.67500
+  [Superordinate 1]
+    MS_Cutter                depth=1 count=  8 score=+5.40833
+    MS_Pounder               depth=1 count=  8 score=+5.40833
+  [Superordinate 2]
+    MS_Root                  depth=0 count= 16 score=+0.87500
+
+Frontier (4 nodes):
+  MS_PizzaCutter           depth=2 count=  4 score=+7.67500
+  MS_Knife                 depth=2 count=  4 score=+7.67500
+  MS_Brick                 depth=2 count=  4 score=+7.67500
+  MS_Hammer                depth=2 count=  4 score=+7.67500
+
+Expected basic level: ['MS_Brick', 'MS_Hammer', 'MS_Knife', 'MS_PizzaCutter']
+  Frontier match: YES ✓
+
+One-BL-per-path check (16 leaves):
+  1 frontier nodes on path : 16
+
+==============================================================================
+  Dataset: Hierarchy I
+==============================================================================
+
+Per-node basic_level_score (α-agnostic):
+  [Subordinate 2]
+    B1_bur                   depth=3 count=  1 score=+2.00000
+    B1_pux                   depth=3 count=  1 score=+2.00000
+    B1_duw                   depth=3 count=  1 score=+2.00000
+    B1_nub                   depth=3 count=  1 score=+2.00000
+    B1_zut                   depth=3 count=  1 score=+2.00000
+    B1_tuz                   depth=3 count=  1 score=+2.00000
+    B1_fuk                   depth=3 count=  1 score=+2.00000
+    B1_lun                   depth=3 count=  1 score=+2.00000
+  [Subordinate 1]
+    B1_saf                   depth=2 count=  2 score=+3.00000
+    B1_gam                   depth=2 count=  2 score=+3.00000
+    B1_jad                   depth=2 count=  2 score=+3.00000
+    B1_kas                   depth=2 count=  2 score=+3.00000
+  [Basic]
+    B1_mip                   depth=1 count=  4 score=+3.00000
+    B1_ril                   depth=1 count=  4 score=+3.00000
+  [Superordinate 1]
+    B1_Root                  depth=0 count=  8 score=+0.00000
+
+Frontier (2 nodes):
+  B1_mip                   depth=1 count=  4 score=+3.00000
+  B1_ril                   depth=1 count=  4 score=+3.00000
+
+Expected basic level: ['B1_mip', 'B1_ril']
+  Frontier match: YES ✓
+
+One-BL-per-path check (8 leaves):
+  1 frontier nodes on path : 8
+
+==============================================================================
+  Dataset: Hierarchy II
+==============================================================================
+
+Per-node basic_level_score (α-agnostic):
+  [Subordinate 1]
+    B2_zut                   depth=3 count=  1 score=+2.00000
+    B2_tuz                   depth=3 count=  1 score=+2.00000
+    B2_duw                   depth=3 count=  1 score=+2.00000
+    B2_nub                   depth=3 count=  1 score=+2.00000
+    B2_bur                   depth=3 count=  1 score=+2.00000
+    B2_pux                   depth=3 count=  1 score=+2.00000
+    B2_fuk                   depth=3 count=  1 score=+2.00000
+    B2_lun                   depth=3 count=  1 score=+2.00000
+  [Basic]
+    B2_saf                   depth=2 count=  2 score=+3.00000
+    B2_gam                   depth=2 count=  2 score=+3.00000
+    B2_jad                   depth=2 count=  2 score=+3.00000
+    B2_kas                   depth=2 count=  2 score=+3.00000
+  [Superordinate 1]
+    B2_mip                   depth=1 count=  4 score=+1.00000
+    B2_ril                   depth=1 count=  4 score=+1.00000
+  [Superordinate 2]
+    B2_Root                  depth=0 count=  8 score=+0.00000
+
+Frontier (4 nodes):
+  B2_saf                   depth=2 count=  2 score=+3.00000
+  B2_gam                   depth=2 count=  2 score=+3.00000
+  B2_jad                   depth=2 count=  2 score=+3.00000
+  B2_kas                   depth=2 count=  2 score=+3.00000
+
+Expected basic level: ['B2_gam', 'B2_jad', 'B2_kas', 'B2_saf']
+  Frontier match: YES ✓
+
+One-BL-per-path check (8 leaves):
+  1 frontier nodes on path : 8
+
+==============================================================================
+  Dataset: Hierarchy III
+==============================================================================
+
+Per-node basic_level_score (α-agnostic):
+  [Basic]
+    B3_bur                   depth=3 count=  1 score=+2.00000
+    B3_fuk                   depth=3 count=  1 score=+2.00000
+    B3_nub                   depth=3 count=  1 score=+2.00000
+    B3_tuz                   depth=3 count=  1 score=+2.00000
+    B3_duw                   depth=3 count=  1 score=+2.00000
+    B3_zut                   depth=3 count=  1 score=+2.00000
+    B3_pux                   depth=3 count=  1 score=+2.00000
+    B3_lun                   depth=3 count=  1 score=+2.00000
+  [Superordinate 1]
+    B3_saf                   depth=2 count=  2 score=+1.00000
+    B3_gam                   depth=2 count=  2 score=+1.00000
+    B3_jad                   depth=2 count=  2 score=+1.00000
+    B3_kas                   depth=2 count=  2 score=+1.00000
+  [Superordinate 2]
+    B3_mip                   depth=1 count=  4 score=+0.00000
+    B3_ril                   depth=1 count=  4 score=+0.00000
+  [Superordinate 3]
+    B3_Root                  depth=0 count=  8 score=+0.00000
+
+Frontier (1 nodes):
+  B3_Root                  depth=0 count=  8 score=+0.00000
+
+Expected basic level: ['B3_bur', 'B3_duw', 'B3_fuk', 'B3_lun', 'B3_nub', 'B3_pux', 'B3_tuz', 'B3_zut']
+  Frontier match: NO ✗
+  Missing from frontier: ['B3_bur', 'B3_duw', 'B3_fuk', 'B3_lun', 'B3_nub', 'B3_pux', 'B3_tuz', 'B3_zut']
+  Extra in frontier: ['B3_Root']
+
+One-BL-per-path check (8 leaves):
+  1 frontier nodes on path : 8
+
+==============================================================================
+  Dataset: Musical Instrument
+==============================================================================
+
+Per-node basic_level_score (α-agnostic):
+  [Subordinate 1]
+    MI_kettle_drum           depth=2 count=  1 score=+8.66667
+    MI_kettle_drum           depth=2 count=  1 score=+8.66667
+    MI_grand_piano           depth=2 count=  1 score=+10.00000
+    MI_upright_piano         depth=2 count=  1 score=+8.66667
+    MI_classical_guitar      depth=2 count=  1 score=+7.66667
+    MI_classical_guitar      depth=2 count=  1 score=+7.66667
+  [Basic]
+    MI_drum                  depth=1 count=  2 score=+18.66667
+    MI_piano                 depth=1 count=  2 score=+17.33333
+    MI_guitar                depth=1 count=  2 score=+17.66667
+  [Superordinate 1]
+    MI_instrument            depth=0 count=  6 score=+7.22222
+
+Frontier (3 nodes):
+  MI_drum                  depth=1 count=  2 score=+18.66667
+  MI_piano                 depth=1 count=  2 score=+17.33333
+  MI_guitar                depth=1 count=  2 score=+17.66667
+
+Expected basic level: ['MI_drum', 'MI_guitar', 'MI_piano']
+  Frontier match: YES ✓
+
+One-BL-per-path check (6 leaves):
+  1 frontier nodes on path : 6
+
+==============================================================================
+  Dataset: Furniture
+==============================================================================
+
+Per-node basic_level_score (α-agnostic):
+  [Subordinate 1]
+    FU_living_room_chair     depth=2 count=  1 score=+11.50000
+    FU_kitchen_chair         depth=2 count=  1 score=+9.50000
+    FU_floor_lamp            depth=2 count=  1 score=+10.50000
+    FU_floor_lamp            depth=2 count=  1 score=+10.50000
+    FU_dining_room_table     depth=2 count=  1 score=+8.83333
+    FU_kitchen_table         depth=2 count=  1 score=+9.50000
+  [Basic]
+    FU_chair                 depth=1 count=  2 score=+19.50000
+    FU_lamp                  depth=1 count=  2 score=+22.50000
+    FU_table                 depth=1 count=  2 score=+19.16667
+  [Superordinate 1]
+    FU_furniture             depth=0 count=  6 score=+9.72222
+
+Frontier (3 nodes):
+  FU_chair                 depth=1 count=  2 score=+19.50000
+  FU_lamp                  depth=1 count=  2 score=+22.50000
+  FU_table                 depth=1 count=  2 score=+19.16667
+
+Expected basic level: ['FU_chair', 'FU_lamp', 'FU_table']
+  Frontier match: YES ✓
+
+One-BL-per-path check (6 leaves):
+  1 frontier nodes on path : 6
+
+==============================================================================
+  Dataset: Fruit
+==============================================================================
+
+Per-node basic_level_score (α-agnostic):
+  [Subordinate 1]
+    FR_green                 depth=2 count=  1 score=+8.50000
+    FR_concord               depth=2 count=  1 score=+7.83333
+    FR_cling                 depth=2 count=  1 score=+7.50000
+    FR_freestone             depth=2 count=  1 score=+7.50000
+    FR_macintosh             depth=2 count=  1 score=+6.50000
+    FR_delicious             depth=2 count=  1 score=+9.16667
+  [Basic]
+    FR_grapes                depth=1 count=  2 score=+15.66667
+    FR_peach                 depth=1 count=  2 score=+16.00000
+    FR_apple                 depth=1 count=  2 score=+14.33333
+  [Superordinate 1]
+    FR_fruit                 depth=0 count=  6 score=+13.33333
+
+Frontier (3 nodes):
+  FR_grapes                depth=1 count=  2 score=+15.66667
+  FR_peach                 depth=1 count=  2 score=+16.00000
+  FR_apple                 depth=1 count=  2 score=+14.33333
+
+Expected basic level: ['FR_apple', 'FR_grapes', 'FR_peach']
+  Frontier match: YES ✓
+
+One-BL-per-path check (6 leaves):
+  1 frontier nodes on path : 6

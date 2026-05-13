@@ -2,9 +2,13 @@
 
 Whereas before we hypothesized needing multiple hierarchies for multiple levels of granularity or to separate primitives and composites, we now rely on multiple hierarchies to properly separate *content* and *context*.
 
-## Methodology 5.2
+## ACS-26 Deliverables
 
-Need to change the parsing process! Can't implement this until representations are fixed and our greedy method works kind of though - low-level parsing can (and probably should) be done greedily!
+What do we need for ACS!!!
+*   Representations of Chunks on LOCKDOWN
+*   Parsing process verified and tested
+*   Reconstruction on original alternatives
+*   
 
 ## Methodology 5.1
 
@@ -17,12 +21,11 @@ Did a ton of experiments, going to make a list of all changes we need to make be
 
 **What we're changing:**
 *   Mixture-of-concepts method!! Instead of our current representation (which is lowkey terrible) we're going to employ a sparse bag-of-concepts style method
-*   Convolutional Cobweb is NOT as good as our variant 
+*   Convolutional Cobweb's CU-variant (Cobweb/3) is NOT as good as our variant (Cobweb/4 and derivatives, information-theoretic variant) so we'll stick to the original variant for now!
 
 **How do we make it work?**
 *   How do we make bag-of-concepts an incremental variant?
-    *   We can do what we did with the original variant and procedurally replace and recalculate dead nodes !!
-*   Does expectation-maximization ever work here? Rather than training both content and context at the same time, should we train context and content in alternation??
+    *   We can do what we did with the original variant and procedurally replace and recalculate dead nodes incrementally!!
 
 ## Methodology 5
 

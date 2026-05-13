@@ -9,5 +9,8 @@
   "weighting": "binary",
   "empty_weighting": true,
   "use_observation_buffer": false,
-  "obs_buffer_flush_every": 5
+  "obs_buffer_flush_every": 5,
+  "content_encoding": "boc",
+  "boc_k": 5,
+  "boc_pool": 128
 }
