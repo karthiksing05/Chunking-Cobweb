@@ -73,7 +73,7 @@ N_SENTENCES = 1000
 WINDOW      = 3       # context half-window  (offsets ±1, ±2, ±3, exclude self)
 DZ_CONTEXT  = 128     # context tree BFS / depth target
 DZ_CONTENT  = 128     # content tree BFS-feature target for downstream eval
-TOP_K       = 10      # per-instance TopK sparsification on context tree
+TOP_K       = 5      # per-instance TopK sparsification on context tree
 TOPK_DEPTH  = 4       # fixed depth in context tree to pull the TopK pool from
                       # (clamped to deepest available if tree is shallower)
 PATH_DEPTH  = 6       # truncation depth for path-based baselines

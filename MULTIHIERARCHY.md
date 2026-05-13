@@ -11,10 +11,18 @@ Need to change the parsing process! Can't implement this until representations a
 Did a ton of experiments, going to make a list of all changes we need to make below - there'll be all kinds of stuff but as long as we draft everything properly we'll be in a good place!
 
 **What worked:**
-*   As evidenced by `grammar_chunking_example.py`, a bag of sparse concepts taken from some fixed depth worked like a CHARM!! We did in fact take it from a fixed and randomly chosen depth and then we chose our concepts based on 
+*   As evidenced by `grammar_chunking_example.py`, a bag of sparse concepts taken from some fixed depth worked like a CHARM!! We did in fact take it from a fixed and randomly chosen depth and then we chose our concepts based on high log probs
+*   Basic level has been found to a much better accuracy!!
+    *   Even though we've found the basic level, we're not in a place where we can efficiently use it because of the quality of the tree! We NEED our mixture of concepts idea to allow for representations that create nice clusters
 
 **What we're changing:**
-*   Mixture-of-concepts method!! Instead of our current representation (which is lowkey terrible) we're going to employ a sparse bag-of-concepts style 
+*   Mixture-of-concepts method!! Instead of our current representation (which is lowkey terrible) we're going to employ a sparse bag-of-concepts style method
+*   Convolutional Cobweb is NOT as good as our variant 
+
+**How do we make it work?**
+*   How do we make bag-of-concepts an incremental variant?
+    *   We can do what we did with the original variant and procedurally replace and recalculate dead nodes !!
+*   Does expectation-maximization ever work here? Rather than training both content and context at the same time, should we train context and content in alternation??
 
 ## Methodology 5
 
@@ -26,6 +34,8 @@ TL;DR is that Cobweb is NOT WHAT WE THOUGHT IT WAS!! Specifically, it doesn't sp
     *   Maybe try a convolutional-cobweb-like setup with WEBSTER to note similarities and differences between the two ideas!
     *   Convolutional Cobweb uses leaves to identify but maintains the top level of tree for representations to pass from the convolutional (chunking) hierarchy into the classification (context) hierarchy
     *   My verdict is that if we make this chunking framework work, we can also make the convolutional framework work, as the convolution framework inherently assumes both that everything is part of a chunk and that the parse tree is more like a "parse pyramid"
+*   THIS JUST IN - Convolutional Cobweb is apparently goated? However, it's ONLY THE OLD VERSION, hinting at some deeper problems
+    *   We're going to program some examples to verify whether this difference is massive enough to be valuable!!
 
 **General Cobweb Changes:**
 *   Basic level not working RIP - need to figure out whether it can work in a static hierarchy!!
@@ -37,6 +47,8 @@ TL;DR is that Cobweb is NOT WHAT WE THOUGHT IT WAS!! Specifically, it doesn't sp
     *   Or we change up the basic level to be a simplicity-style objective - if it is truly in terms of "recall"
         *   WE COULD DO THE SHALLOWEST SOMETHING - instead of counts, we use depth as our proxy!!
         *   If we do this then we can collect a basic-level frontier for sure!!
+
+*   IDEA ONE OF BASIC LEVEL WITH P(C) SEEMS TO WORK QUITE WELL!!
 
 **Representations:**
 *   First, what does Cobweb split by? By understanding exactly what the splitting criteria is we can craft better representations
