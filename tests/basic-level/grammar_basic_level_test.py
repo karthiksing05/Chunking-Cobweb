@@ -1,45 +1,35 @@
 """
-Grammar basic-level test — α-agnostic frontier vs original get_basic.
-=====================================================================
+Grammar basic-level test — leaf.get_basic(use_root=True, eval_alpha=10).
+========================================================================
 
-Builds a Cobweb-Discrete context tree on a TEST_GRAMMAR3 corpus, then
-identifies basic-level nodes via two methods and compares:
+Builds a Cobweb-Discrete context tree on a TEST_GRAMMAR3 corpus, then for
+each test token walks its greedy-descent leaf up to root using the new
+``CobwebDiscreteNode::get_basic(use_root=True)`` — empirical PMI against
+the root marginal (closed form when ``n_samples=0``; same formula as
+``tests/basic-level/corter_gluck_hierarchies_cobweb.py`` and the Python
+``corter_gluck_hierarchies.py`` reference).
 
-  1. NEW  : ``tree.get_basic_frontier()`` — single DFS over the closed-form,
-            α-agnostic, sampling-free score (CobwebDiscreteNode.basic_level_score).
-  2. OLD  : ``leaf.get_basic(n_samples, max_nodes, eval_alpha=…)`` — Monte
-            Carlo expected PMI against the full-tree mixture marginal.
+For every test token we record which BL node it lands at, then collect:
+  - the unique BL nodes,
+  - per-BL POS distributions, top center words, and top context words,
+  - mean empirical-PMI by depth across the whole tree.
 
-For every test token we record:
-  - which frontier node covers it (NEW)
-  - which basic-level node the leaf walks up to under the old method
-  - per-token agreement
-
-Plus a side-by-side visual: the tree with red borders on frontier nodes,
-and a second figure with green borders on the (deduplicated) BL nodes
-returned by the old method.
-
-Outputs (in ``tests/basic-level/grammar_basic_level_output/``):
-  - basic_level_subtrees_frontier.png : POS hist + center words + context
-    table, one row per frontier subtree.
-  - basic_level_subtrees_get_basic.png : same view, one row per BL node
-    selected by the old method.
-  - cobweb_tree_labels_frontier.png  : tree, red borders on frontier nodes.
-  - cobweb_tree_labels_get_basic.png : tree, green borders on old-method
-    BL nodes.
-  - method_comparison.txt : counts of unique BL nodes per method, per-leaf
-    agreement, and a short summary.
-  - per_subtree_membership_frontier.csv : depth, count, dominant POS, POS
-    distribution.
-
-Run directly: ``python tests/basic-level/grammar_basic_level_test.py``.
+Outputs (in tests/basic-level/grammar_basic_level_output/):
+  - basic_level_subtrees.png       : POS hist + center words + context
+                                     table, one row per BL node.
+  - cobweb_tree_labels.png         : tree with red borders on BL nodes.
+  - per_subtree_membership.csv     : depth, count, dominant POS, POS
+                                     distribution.
+  - method_summary.txt             : per-BL summary text.
+  - score_by_depth.png             : mean expected_pmi(use_root=True,
+                                     eval_alpha=EVAL_ALPHA) by depth,
+                                     vertical marks where BL nodes live.
 """
 
 import os
 import sys
 import csv
 import random
-from collections import Counter
 
 import numpy as np
 import matplotlib
@@ -65,9 +55,7 @@ os.makedirs(OUT_DIR, exist_ok=True)
 N_SENTENCES = 1000
 WINDOW      = 3
 ALPHA       = 1e-3
-EVAL_ALPHA  = 10.0     # smoothing used inside the *old* get_basic
-N_SAMPLES   = 200       # Monte Carlo samples for the old get_basic
-MAX_NODES   = 100       # priority-queue budget for old get_basic's marginal
+EVAL_ALPHA  = 10.0     # high-α smoothing inside the new get_basic
 SEED        = 42
 TREE_DEPTH_FOR_LABEL_FIG = 3
 TOP_WORDS_PER_OFFSET     = 3
@@ -168,110 +156,53 @@ def greedy_descend(root, instance):
 
 
 # ---------------------------------------------------------------------------
-# NEW: alpha-agnostic frontier via tree.get_basic_frontier()
+# Basic level per leaf via the new get_basic(use_root=True). Closed form:
+# n_samples=0 evaluates expected_pmi over every leaf under each candidate
+# ancestor — exact empirical PMI against the root marginal.
 # ---------------------------------------------------------------------------
 
-print("\nComputing α-agnostic frontier via tree.get_basic_frontier() …")
-frontier_nodes  = tree.get_basic_frontier()
-frontier_id_set = {id(n) for n in frontier_nodes}
-print(f"  Frontier size: {len(frontier_nodes)} nodes")
-
-
-def assign_to_frontier(leaf):
-    """Walk leaf → root; return the first ancestor (or self) in the
-    frontier set.  By the antichain property exactly one ancestor qualifies."""
-    node = leaf
-    while node is not None:
-        if id(node) in frontier_id_set:
-            return node
-        node = node.parent
-    return None
-
-
-# ---------------------------------------------------------------------------
-# OLD: Monte Carlo get_basic per leaf
-# ---------------------------------------------------------------------------
-
-print(f"Running OLD get_basic (n_samples={N_SAMPLES}, eval_alpha={EVAL_ALPHA}) per leaf …")
-# Cache per-leaf to avoid redoing the Monte Carlo walk for repeated leaves.
-_old_cache = {}
-
-def get_basic_old(leaf):
+print(f"\nRunning get_basic(use_root=True, eval_alpha={EVAL_ALPHA}) per leaf …")
+_cache = {}
+def get_basic_node(leaf):
     key = id(leaf)
-    if key in _old_cache:
-        return _old_cache[key]
-    bl = leaf.get_basic(N_SAMPLES, MAX_NODES, debug=False, eval_alpha=EVAL_ALPHA)
-    _old_cache[key] = bl
+    if key in _cache:
+        return _cache[key]
+    bl = leaf.get_basic(0, 0, debug=False, eval_alpha=EVAL_ALPHA, use_root=True)
+    _cache[key] = bl
     return bl
 
 
 # ---------------------------------------------------------------------------
-# Map test tokens via both methods
+# Map test tokens to BL nodes
 # ---------------------------------------------------------------------------
 
-print("\nMapping test tokens via both methods …")
+print("Mapping test tokens to basic-level nodes …")
 
-new_members = {}   # id(frontier_node) -> {node, depth, indices, center_words, pos_labels}
-old_members = {}
-agreements  = 0    # # test tokens where new and old map to the same node
+bl_members = {}   # id(bl_node) -> {node, depth, indices, center_words, pos_labels}
 
 for i, inst in enumerate(instances_test):
     leaf = greedy_descend(tree.root, inst)
+    bl   = get_basic_node(leaf)
+    if bl is None:
+        continue
+    nid = id(bl)
+    if nid not in bl_members:
+        bl_members[nid] = {
+            "node":         bl,
+            "depth":        bl.depth(),
+            "indices":      [],
+            "center_words": [],
+            "pos_labels":   [],
+        }
+    bl_members[nid]["indices"].append(i)
+    bl_members[nid]["center_words"].append(int(center_test[i]))
+    bl_members[nid]["pos_labels"].append(int(y_test[i]))
 
-    bl_new = assign_to_frontier(leaf)
-    bl_old = get_basic_old(leaf)
-    same   = (bl_new is not None) and (id(bl_new) == id(bl_old))
-    agreements += int(same)
-
-    for bl, store in [(bl_new, new_members), (bl_old, old_members)]:
-        if bl is None:
-            continue
-        nid = id(bl)
-        if nid not in store:
-            store[nid] = {
-                "node":         bl,
-                "depth":        bl.depth(),
-                "indices":      [],
-                "center_words": [],
-                "pos_labels":   [],
-            }
-        store[nid]["indices"].append(i)
-        store[nid]["center_words"].append(int(center_test[i]))
-        store[nid]["pos_labels"].append(int(y_test[i]))
-
-print(f"  NEW: {len(new_members)} unique BL nodes covering {len(instances_test)} tokens")
-print(f"  OLD: {len(old_members)} unique BL nodes covering {len(instances_test)} tokens")
-print(f"  Tokens where NEW and OLD agree exactly: "
-      f"{agreements}/{len(instances_test)} ({100*agreements/len(instances_test):.1f}%)")
-
-# One-BL-per-path check for NEW
-counts = Counter()
-def all_leaves(root):
-    leaves, stack = [], [root]
-    while stack:
-        n = stack.pop()
-        if not n.children:
-            leaves.append(n)
-        else:
-            stack.extend(n.children)
-    return leaves
-for leaf in all_leaves(tree.root):
-    node = leaf
-    c = 0
-    while node is not None:
-        if id(node) in frontier_id_set:
-            c += 1
-        node = node.parent
-    counts[c] += 1
-n_leaves_tree = sum(counts.values())
-print("\nOne-BL-per-path check (NEW, over all tree leaves):")
-for k in sorted(counts.keys()):
-    flag = "" if k == 1 else "  ← violation"
-    print(f"  {k} frontier nodes on path: {counts[k]} ({100*counts[k]/n_leaves_tree:.1f}%){flag}")
+print(f"  {len(bl_members)} unique BL nodes covering {len(instances_test)} tokens")
 
 
 # ---------------------------------------------------------------------------
-# Per-subtree visualisation (shared helper)
+# Per-subtree visualisation
 # ---------------------------------------------------------------------------
 
 CMAP = plt.get_cmap("tab20") if N_POS > 10 else plt.get_cmap("tab10")
@@ -377,16 +308,10 @@ def plot_subtrees(members, title, out_path):
 
 
 plot_subtrees(
-    new_members,
-    title=(f"NEW frontier — tree.get_basic_frontier()  "
-           f"(N_test={len(instances_test)}, n_subtrees={len(new_members)})"),
-    out_path=os.path.join(OUT_DIR, "basic_level_subtrees_frontier.png"),
-)
-plot_subtrees(
-    old_members,
-    title=(f"OLD get_basic (Monte Carlo, eval_alpha={EVAL_ALPHA})  "
-           f"(N_test={len(instances_test)}, n_subtrees={len(old_members)})"),
-    out_path=os.path.join(OUT_DIR, "basic_level_subtrees_get_basic.png"),
+    bl_members,
+    title=(f"Basic-level subtrees — get_basic(use_root=True, eval_alpha={EVAL_ALPHA})  "
+           f"(N_test={len(instances_test)}, n_subtrees={len(bl_members)})"),
+    out_path=os.path.join(OUT_DIR, "basic_level_subtrees.png"),
 )
 
 
@@ -394,12 +319,12 @@ plot_subtrees(
 # CSV
 # ---------------------------------------------------------------------------
 
-csv_path = os.path.join(OUT_DIR, "per_subtree_membership_frontier.csv")
+csv_path = os.path.join(OUT_DIR, "per_subtree_membership.csv")
 with open(csv_path, "w", newline="") as f:
     w = csv.writer(f)
     w.writerow(["subtree_idx", "depth", "node_count", "test_members",
                 "dominant_pos", "pos_distribution"])
-    for i, m in enumerate(sorted(new_members.values(),
+    for i, m in enumerate(sorted(bl_members.values(),
                                   key=lambda m: len(m["indices"]),
                                   reverse=True)):
         labels = np.array(m["pos_labels"])
@@ -520,32 +445,22 @@ def plot_tree_pos_labels(root, label_counts_map, out_path,
 
 plot_tree_pos_labels(
     tree.root, label_counts_map,
-    out_path=os.path.join(OUT_DIR, "cobweb_tree_labels_frontier.png"),
+    out_path=os.path.join(OUT_DIR, "cobweb_tree_labels.png"),
     max_depth=TREE_DEPTH_FOR_LABEL_FIG,
-    highlight_ids=set(new_members.keys()),
+    highlight_ids=set(bl_members.keys()),
     highlight_color="red",
-    title=("Cobweb Discrete Context Tree — POS Distributions  "
-           "(red = α-agnostic frontier nodes)"),
-)
-plot_tree_pos_labels(
-    tree.root, label_counts_map,
-    out_path=os.path.join(OUT_DIR, "cobweb_tree_labels_get_basic.png"),
-    max_depth=TREE_DEPTH_FOR_LABEL_FIG,
-    highlight_ids=set(old_members.keys()),
-    highlight_color="green",
     title=(f"Cobweb Discrete Context Tree — POS Distributions  "
-           f"(green = old get_basic, eval_alpha={EVAL_ALPHA})"),
+           f"(red = basic-level nodes, eval_alpha={EVAL_ALPHA})"),
 )
-print(f"  Tree figures saved.")
+print(f"  Tree figure saved.")
 
 
 # ---------------------------------------------------------------------------
-# Mean basic-level score by depth
-# Mirrors corter_gluck_hierarchies.py's plot, but x-axis is depth (int)
-# instead of named categorical levels.
+# Mean expected_pmi by depth — the new α-dependent score evaluated at
+# EVAL_ALPHA via the closed-form path (n_samples=0).
 # ---------------------------------------------------------------------------
 
-print("Computing basic_level_score for every node in the tree …")
+print(f"Computing expected_pmi(use_root=True, eval_alpha={EVAL_ALPHA}) for every node …")
 all_nodes_full = []
 stack = [tree.root]
 while stack:
@@ -558,13 +473,14 @@ print(f"  {len(all_nodes_full)} nodes, {n_leaves_for_score} leaves")
 depth_to_scores = {}
 for n in all_nodes_full:
     d = n.depth()
-    depth_to_scores.setdefault(d, []).append(n.basic_level_score(n_leaves_for_score))
+    score = n.expected_pmi(0, 0, eval_alpha=EVAL_ALPHA,
+                           uniform_leaf=False, use_root=True)
+    depth_to_scores.setdefault(d, []).append(score)
 
-# Mark which depths contain frontier nodes
-depth_to_n_frontier = {}
-for n in frontier_nodes:
-    d = n.depth()
-    depth_to_n_frontier[d] = depth_to_n_frontier.get(d, 0) + 1
+depth_to_n_bl = {}
+for m in bl_members.values():
+    d = m["depth"]
+    depth_to_n_bl[d] = depth_to_n_bl.get(d, 0) + 1
 
 depths_sorted = sorted(depth_to_scores.keys())
 means = [np.mean(depth_to_scores[d]) for d in depths_sorted]
@@ -575,26 +491,25 @@ fig, ax = plt.subplots(figsize=(9, 5))
 ax.fill_between(depths_sorted, mins, maxs, alpha=0.15, color="#1f77b4",
                 label="min–max range")
 ax.plot(depths_sorted, means, marker="o", linewidth=2, color="#1f77b4",
-        label="mean basic_level_score", zorder=3)
+        label="mean expected_pmi", zorder=3)
 
-# Annotate each point with mean value
 for d, m in zip(depths_sorted, means):
     ax.annotate(f"{m:.3f}", (d, m),
                 textcoords="offset points", xytext=(0, 8),
                 fontsize=8, ha="center", color="#1f77b4")
 
-# Mark depths where frontier nodes live
-for d, n in depth_to_n_frontier.items():
+for d, n in depth_to_n_bl.items():
     ax.axvline(d, color="red", alpha=0.25, linestyle="--", linewidth=1.2,
                zorder=1)
-    ax.text(d, ax.get_ylim()[1], f"frontier × {n}",
+    ax.text(d, ax.get_ylim()[1], f"BL × {n}",
             color="red", fontsize=7, ha="center", va="bottom",
             rotation=0)
 
 ax.set_xlabel("Tree depth (root = 0)", fontsize=11)
-ax.set_ylabel("Mean basic_level_score (α-agnostic)", fontsize=11)
-ax.set_title("Mean α-agnostic basic-level score by depth  "
-             "(red dashed = depth contains a frontier node)", fontsize=11)
+ax.set_ylabel(f"Mean expected_pmi (use_root=True, eval_alpha={EVAL_ALPHA})",
+              fontsize=11)
+ax.set_title("Mean empirical PMI against root by depth  "
+             "(red dashed = depth contains a BL node)", fontsize=11)
 ax.axhline(0, color="black", linewidth=0.8, linestyle=":", alpha=0.4)
 ax.set_xticks(depths_sorted)
 ax.grid(axis="y", alpha=0.25)
@@ -607,24 +522,23 @@ print(f"  Score-by-depth plot saved → {depth_plot_path}")
 
 
 # ---------------------------------------------------------------------------
-# Method comparison summary
+# Summary
 # ---------------------------------------------------------------------------
 
-cmp_path = os.path.join(OUT_DIR, "method_comparison.txt")
-with open(cmp_path, "w") as f:
+summary_path = os.path.join(OUT_DIR, "method_summary.txt")
+with open(summary_path, "w") as f:
     f.write("=" * 60 + "\n")
-    f.write(" Frontier (NEW) vs get_basic (OLD) comparison\n")
+    f.write(" Basic-level summary — get_basic(use_root=True)\n")
     f.write("=" * 60 + "\n\n")
-    f.write(f"Settings:\n")
+    f.write("Settings:\n")
     f.write(f"  N_SENTENCES = {N_SENTENCES}\n")
     f.write(f"  ALPHA       = {ALPHA}\n")
-    f.write(f"  EVAL_ALPHA  = {EVAL_ALPHA}   (only used by old get_basic)\n")
-    f.write(f"  N_SAMPLES   = {N_SAMPLES}    (only used by old get_basic)\n")
+    f.write(f"  EVAL_ALPHA  = {EVAL_ALPHA}\n")
     f.write(f"  Train tokens: {len(instances_train)}\n")
     f.write(f"  Test  tokens: {len(instances_test)}\n\n")
 
-    f.write(f"NEW: {len(new_members)} unique frontier nodes\n")
-    for i, m in enumerate(sorted(new_members.values(),
+    f.write(f"{len(bl_members)} unique basic-level nodes:\n")
+    for i, m in enumerate(sorted(bl_members.values(),
                                   key=lambda m: len(m["indices"]),
                                   reverse=True)):
         labels = np.array(m["pos_labels"])
@@ -632,23 +546,6 @@ with open(cmp_path, "w") as f:
         dom = id2pos[int(cls_counts.argmax())]
         f.write(f"  [{i:>2}] depth={m['depth']:>2}  count={int(m['node'].count):>5}  "
                 f"members={len(m['indices']):>4}  dom={dom}\n")
-
-    f.write(f"\nOLD: {len(old_members)} unique BL nodes\n")
-    for i, m in enumerate(sorted(old_members.values(),
-                                  key=lambda m: len(m["indices"]),
-                                  reverse=True)):
-        labels = np.array(m["pos_labels"])
-        cls_counts = np.bincount(labels, minlength=N_POS)
-        dom = id2pos[int(cls_counts.argmax())]
-        f.write(f"  [{i:>2}] depth={m['depth']:>2}  count={int(m['node'].count):>5}  "
-                f"members={len(m['indices']):>4}  dom={dom}\n")
-
-    f.write(f"\nPer-token agreement: {agreements}/{len(instances_test)} "
-            f"({100*agreements/len(instances_test):.1f}%)\n")
-    f.write(f"\nOne-BL-per-path (NEW frontier, all tree leaves):\n")
-    for k in sorted(counts.keys()):
-        f.write(f"  {k} frontier nodes on path: {counts[k]} "
-                f"({100*counts[k]/n_leaves_tree:.1f}%)\n")
-print(f"  Comparison saved → {cmp_path}")
+print(f"  Summary saved → {summary_path}")
 
 print("\nDone.")

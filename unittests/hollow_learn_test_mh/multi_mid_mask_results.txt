@@ -1,25 +1,40 @@
-[1] original: the dog admired the park
-    masked:   the [mask] park
-    removed: "dog admired the" (3 tokens) at pos 1-3
-    completed: the quick park
+[0] original: the woman saw the lazy quick park
+    masked:   the woman [mask] lazy quick park
+    removed: "saw the" (2 tokens) at pos 2-3
+    completed: the woman small lazy quick park
 
-[2] original: a dog found the park with a small quick big telescope
-    masked:   a dog found the [mask] a small quick big telescope
-    removed: "park with" (2 tokens) at pos 4-5
-    completed: a dog found the cat a small quick big telescope
+[1] original: the woman found a park on the dog
+    masked:   the woman found [mask] on the dog
+    removed: "a park" (2 tokens) at pos 3-4
+    completed: the woman found a cat on the dog
 
-[3] original: the red woman found a telescope in a cat
-    masked:   the red [mask] in a cat
-    removed: "woman found a telescope" (4 tokens) at pos 2-5
-    completed: the red telescope in a cat
+[2] original: the park liked a dog in the telescope
+    masked:   the park [mask] the telescope
+    removed: "liked a dog in" (4 tokens) at pos 2-5
+    completed: the park chased the telescope
 
-[4] original: the telescope liked the small cat on the dog
-    masked:   the telescope liked [mask] cat on the dog
-    removed: "the small" (2 tokens) at pos 3-4
-    completed: the telescope liked the cat on the dog
+[3] original: the man liked a small dog
+    masked:   the [mask] small dog
+    removed: "man liked a" (3 tokens) at pos 1-3
+    completed: the big small dog
 
-[5] original: a lazy lazy man chased
-    masked:   a [mask] chased
-    removed: "lazy lazy man" (3 tokens) at pos 1-3
-    completed: a cat chased
+[4] original: the lazy woman liked a woman
+    masked:   the [mask] woman
+    removed: "lazy woman liked a" (4 tokens) at pos 1-4
+    completed: the red woman
+
+[5] original: the park saw the small quick telescope
+    masked:   the [mask] quick telescope
+    removed: "park saw the small" (4 tokens) at pos 1-4
+    completed: the lazy quick telescope
+
+[7] original: the dog saw the lazy small woman
+    masked:   the dog [mask] lazy small woman
+    removed: "saw the" (2 tokens) at pos 2-3
+    completed: the dog liked lazy small woman
+
+[9] original: a park saw the telescope on a big cat
+    masked:   a park saw [mask] a big cat
+    removed: "the telescope on" (3 tokens) at pos 3-5
+    completed: a park saw in a big cat
 

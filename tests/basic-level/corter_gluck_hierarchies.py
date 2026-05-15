@@ -494,8 +494,8 @@ datasets = {
         'K':            ms_K,
         'node_members': ms_node_members,
         'levels':       ms_levels,
-        'leaf_level':   'Subordinate 2',
-        # 'leaf_level':   'Root',
+        # Root marginal: leaf_level set to the level that holds MS_Root.
+        'leaf_level':   'Superordinate 2',
         'color':        '#1f77b4',
     },
     'Hierarchy I': {
@@ -504,8 +504,8 @@ datasets = {
         'K':            bg_K,
         'node_members': bg1_node_members,
         'levels':       bg1_levels,
-        # 'leaf_level':   'Root',
-        'leaf_level':   'Subordinate 2',
+        # Root marginal: leaf_level set to the level that holds B1_Root.
+        'leaf_level':   'Superordinate 1',
         'color':        '#2ca02c',
     },
     'Hierarchy II': {
@@ -514,8 +514,8 @@ datasets = {
         'K':            bg_K,
         'node_members': bg2_node_members,
         'levels':       bg2_levels,
-        # 'leaf_level':   'Root',
-        'leaf_level':   'Subordinate 1',
+        # Root marginal: leaf_level set to the level that holds B2_Root.
+        'leaf_level':   'Superordinate 2',
         'color':        '#ff7f0e',
     },
     'Hierarchy III': {
@@ -524,8 +524,8 @@ datasets = {
         'K':            bg_K,
         'node_members': bg3_node_members,
         'levels':       bg3_levels,
-        'leaf_level':   'Basic',
-        # 'leaf_level':   'Root',
+        # Root marginal: leaf_level set to the level that holds B3_Root.
+        'leaf_level':   'Superordinate 3',
         'color':        '#d62728',
     },
     'Musical Instrument': {
@@ -534,7 +534,8 @@ datasets = {
         'K':            music_K,
         'node_members': music_node_members,
         'levels':       music_levels,
-        'leaf_level':   'Subordinate 1',
+        # Root marginal: leaf_level set to the level that holds MI_instrument.
+        'leaf_level':   'Superordinate 1',
         'color':        '#9467bf',
     },
     'Furniture': {
@@ -543,7 +544,8 @@ datasets = {
         'K':            furn_K,
         'node_members': furn_node_members,
         'levels':       furn_levels,
-        'leaf_level':   'Subordinate 1',
+        # Root marginal: leaf_level set to the level that holds FU_furniture.
+        'leaf_level':   'Superordinate 1',
         'color':        '#8c564b',
     },
     'Fruit': {
@@ -552,7 +554,8 @@ datasets = {
         'K':            fruit_K,
         'node_members': fruit_node_members,
         'levels':       fruit_levels,
-        'leaf_level':   'Subordinate 1',
+        # Root marginal: leaf_level set to the level that holds FR_fruit.
+        'leaf_level':   'Superordinate 1',
         'color':        '#e377c2',
     },
 }

@@ -32,7 +32,6 @@ THRESHOLD = 30
 # Setting up the multi-hierarchy parser (WEBSTER)
 webster = WEBSTER(
     TEST_CORPUS1,
-    instance_basic_level=True,
     context_length=CONTEXT_LENGTH,
     threshold=THRESHOLD,
     content_alpha=1e-3,

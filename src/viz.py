@@ -422,11 +422,14 @@ function nodeHTML(d) {{
 
 		return True
 	
-	def save_basic_level_subtrees(self, root, folder, debug=False):
+	def save_basic_level_subtrees(self, root, folder, debug=False, eval_alpha=-1.0):
 		"""
 		Helper function to draw all basic-level subtrees!
 
 		Need to save and reload IDs as they occur at the top level!
+
+		eval_alpha is forwarded to ``get_basic(use_root=True, eval_alpha=…)``
+		— pass the hierarchy's BL alpha (e.g. ``content_bl_alpha``) here.
 		"""
 
 		if os.path.exists(folder):
@@ -462,7 +465,7 @@ function nodeHTML(d) {{
 
 		for leaf_tup in leaves:
 			_, leaf_node = leaf_tup
-			curr_node = leaf_node.get_basic(1000, 1000)
+			curr_node = leaf_node.get_basic(1000, 1000, eval_alpha=eval_alpha, use_root=True)
 			if curr_node.concept_hash() != leaf_node.concept_hash():
 				basic_level_nodes[curr_node.concept_hash()] = curr_node
 				basic_level_count[curr_node.concept_hash()] = basic_level_count.setdefault(curr_node.concept_hash(), 1)

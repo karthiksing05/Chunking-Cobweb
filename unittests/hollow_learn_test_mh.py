@@ -68,17 +68,15 @@ if not hollow_corpus:
 # ── Initialise WEBSTER ────────────────────────────────────────────────────
 webster = WEBSTER(
     corpus,
-    instance_basic_level=True,
     context_length=CONTEXT_LENGTH,
     threshold=THRESHOLD,
     content_alpha=1e-3,
     context_alpha=1e-3,
-    content_bl_alpha=1e-1,
+    content_bl_alpha=1,
     context_bl_alpha=1,
     bow=False,
     empty_weighting=True,
     chunk_context=False,
-    # context_n_iterations=5,
     weighting="binary",
     categorization_mode="dfs",
     depth_max_content=1000,

@@ -8,7 +8,7 @@ What do we need for ACS!!!
 *   Representations of Chunks on LOCKDOWN
 *   Parsing process verified and tested
 *   Reconstruction on original alternatives
-*   
+*   Comparison to alternatives
 
 ## Methodology 5.1
 
@@ -16,16 +16,18 @@ Did a ton of experiments, going to make a list of all changes we need to make be
 
 **What worked:**
 *   As evidenced by `grammar_chunking_example.py`, a bag of sparse concepts taken from some fixed depth worked like a CHARM!! We did in fact take it from a fixed and randomly chosen depth and then we chose our concepts based on high log probs
-*   Basic level has been found to a much better accuracy!!
-    *   Even though we've found the basic level, we're not in a place where we can efficiently use it because of the quality of the tree! We NEED our mixture of concepts idea to allow for representations that create nice clusters
+*   Basic level has been found to a much better accuracy!! As a result of the frontier method which is REALLY good!!!
+    *   We can and should totally try a dynamic remapping where each node gets remapped as it is learned and predicted (so as we go through the category route, we remap all nodes in-the-moment)
+*   Convolutional Cobweb's CU-variant (Cobweb/3) is NOT as good as our variant (Cobweb/4 and derivatives, information-theoretic variant) so we'll stick to the original variant for now!
 
 **What we're changing:**
-*   Mixture-of-concepts method!! Instead of our current representation (which is lowkey terrible) we're going to employ a sparse bag-of-concepts style method
-*   Convolutional Cobweb's CU-variant (Cobweb/3) is NOT as good as our variant (Cobweb/4 and derivatives, information-theoretic variant) so we'll stick to the original variant for now!
+*   Biggest thing is we need to make bag-of-concepts work with dynamic remapping AND include a threshold 
 
 **How do we make it work?**
 *   How do we make bag-of-concepts an incremental variant?
-    *   We can do what we did with the original variant and procedurally replace and recalculate dead nodes incrementally!!
+    *   We can do what we did with the original variant and procedurally replace and recalculate dead nodes incrementally, and this makes the most sense to me, but I'm not sure how this'll affect the formulas
+*   Should we make basic-level concepts work??
+    *   There is potential but I'm not too sure - at the very least, we need to make sure basic-level is understood for the sake of log-probs and recognition threshold!!
 
 ## Methodology 5
 
