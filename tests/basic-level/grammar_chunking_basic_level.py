@@ -1,34 +1,33 @@
 """
-Grammar Chunking basic-level example — TopK-Disc-Cnt1 representation.
-=====================================================================
+Grammar Chunking basic-level — two content-tree variants side by side.
+======================================================================
 
-Mirrors ``tests/moc/grammar_chunking_example.py`` for the corpus,
-context tree, and TopK-Disc-Cnt1 pair encoding, then layers on the new
-basic-level pipeline used in ``tests/basic-level/grammar_basic_level_test.py``:
+Builds one shared context tree on TEST_GRAMMAR3 tokens, then trains
+*two* content trees and runs the new ``get_basic(use_root=True,
+eval_alpha=EVAL_ALPHA)`` pipeline on each so the resulting basic-level
+nodes can be compared head-to-head.
 
-  1. Build a Cobweb-Discrete *context* tree on TEST_GRAMMAR3 tokens.
-  2. For each adjacent bigram (w_i, w_{i+1}), pull top-K context-tree
-     node ids at depth ``TOPK_DEPTH`` per side → TopK-Disc-Cnt1 instance
-     ``{0:{top-K-L:1.0}, 1:{top-K-R:1.0}}``.
-  3. Train a Cobweb-Discrete *content* tree on those instances.
-  4. For every test pair, greedy-descend to a content leaf and call
-     ``leaf.get_basic(use_root=True, eval_alpha=EVAL_ALPHA)`` — the new
-     empirical-PMI-against-root basic level.
+Variants:
+  A) ``TopK-Disc-Cnt1`` (bag-of-context-concepts)
+       For each bigram, attrs 0/1 hold the top-K context-tree pool-node
+       ids at depth TOPK_DEPTH per side. Plain ``CobwebDiscreteTree``,
+       no ref_tree.
 
-Outputs (in tests/moc/grammar_chunking_basic_level_output/):
-  - basic_level_subtrees.png       : per-BL row showing
-                                     (L_POS, R_POS) joint heat-map +
-                                     top center bigrams + top per-side
-                                     context-attr signatures.
-  - content_tree_labels.png        : content tree with stacked L/R POS
-                                     bars at every node; red borders
-                                     mark BL nodes.
-  - per_subtree_membership.csv     : depth, count, dominant pair POS,
-                                     joint POS distribution.
-  - method_summary.txt             : per-BL summary text.
-  - score_by_depth.png             : mean expected_pmi(use_root=True,
-                                     eval_alpha=EVAL_ALPHA) by depth in
-                                     the content tree.
+  B) ``WEBSTER`` (leaf-pointer + ref_tree, matches src/parse_mh.py:651)
+       For each bigram, attrs 0/1 hold a single leaf pointer per side —
+       an integer vocab id identifying the context-tree leaf the
+       left/right context instance categorises into. The content tree
+       sets ``ref_tree=context_tree``, declares attrs 0 and 1 as
+       ``ref_attrs``, and registers every context-leaf id via
+       ``register_ref_val``. ``log_prob_instance`` on this content tree
+       then aggregates counts by LCA similarity in the context tree,
+       which is what WEBSTER's content hierarchy actually uses.
+
+Outputs (under tests/basic-level/grammar_chunking_basic_level_output/):
+  - topk_disc_cnt1/...  ↘ five files per variant:
+  - webster/...           basic_level_subtrees.png, content_tree_labels.png,
+                          per_subtree_membership.csv, method_summary.txt,
+                          score_by_depth.png
 """
 
 import os
@@ -52,7 +51,7 @@ from cobweb.cobweb_discrete import CobwebDiscreteTree
 OUT_DIR = os.path.join(_HERE, "grammar_chunking_basic_level_output")
 os.makedirs(OUT_DIR, exist_ok=True)
 
-# ── Constants (same shape as grammar_chunking_example.py) ────────────────────
+# ── Constants ────────────────────────────────────────────────────────────────
 N_SENTENCES   = 1000
 WINDOW        = 3
 TOP_K         = 5
@@ -120,7 +119,6 @@ def make_context_instance(sent, pos):
     return inst
 
 
-# Sentence split — no leakage between train/test pairs
 rng         = np.random.default_rng(SEED)
 sent_perm   = rng.permutation(len(sentences))
 split_s     = int(0.8 * len(sentences))
@@ -153,7 +151,7 @@ test_L,  test_R,  y_test,  test_wL,  test_wR  = build_pair_set(test_sents)
 print(f"  Pairs:  train={len(train_L)}  test={len(test_L)}")
 
 
-# ── Context tree ─────────────────────────────────────────────────────────────
+# ── Shared Context tree ──────────────────────────────────────────────────────
 print(f"\nBuilding Context tree (CobwebDiscreteTree, alpha={ALPHA_CONTEXT}) …")
 context_tree = CobwebDiscreteTree(alpha=ALPHA_CONTEXT, weight_attr=True)
 for i, inst in enumerate(context_train_tokens):
@@ -183,7 +181,17 @@ if topk_depth != TOPK_DEPTH:
 print(f"  TopK pool: depth {topk_depth} ({len(topk_pool_nodes)} nodes)  k={TOP_K}")
 
 
-# ── TopK-Disc-Cnt1 encoding ──────────────────────────────────────────────────
+def greedy_descend(root, instance):
+    node = root
+    while node.children:
+        node = max(node.children, key=lambda c: c.log_prob_instance(instance))
+    return node
+
+
+# ============================================================================
+# Variant A — TopK-Disc-Cnt1 (bag of context concepts per side)
+# ============================================================================
+
 def encode_logpost_disc(instances, nodes):
     out = np.empty((len(instances), len(nodes)), dtype=np.float64)
     for j, node in enumerate(nodes):
@@ -197,7 +205,7 @@ def topk_indices(Z_raw, k):
     return np.argpartition(Z_raw, -k, axis=1)[:, -k:]
 
 
-print("Encoding TopK pool log-probs …")
+print("\n[A] Encoding TopK pool log-probs …")
 _pool_train_L = encode_logpost_disc(train_L, topk_pool_nodes)
 _pool_train_R = encode_logpost_disc(train_R, topk_pool_nodes)
 _pool_test_L  = encode_logpost_disc(test_L,  topk_pool_nodes)
@@ -214,85 +222,97 @@ def topkdisc_cnt1_inst(idx_L, idx_R):
             1: {int(j): 1.0 for j in idx_R}}
 
 
-pair_train = [topkdisc_cnt1_inst(iL, iR)
-              for iL, iR in zip(topk_idx_train_L, topk_idx_train_R)]
-pair_test  = [topkdisc_cnt1_inst(iL, iR)
-              for iL, iR in zip(topk_idx_test_L,  topk_idx_test_R)]
-print(f"  TopK-Disc-Cnt1 instances built: train={len(pair_train)}  test={len(pair_test)}")
+pair_train_topk = [topkdisc_cnt1_inst(iL, iR)
+                   for iL, iR in zip(topk_idx_train_L, topk_idx_train_R)]
+pair_test_topk  = [topkdisc_cnt1_inst(iL, iR)
+                   for iL, iR in zip(topk_idx_test_L,  topk_idx_test_R)]
+print(f"  TopK-Disc-Cnt1 instances: train={len(pair_train_topk)}  test={len(pair_test_topk)}")
 
-
-# ── Content tree ─────────────────────────────────────────────────────────────
-print(f"\nBuilding Content tree (CobwebDiscreteTree, alpha={ALPHA_CONTENT}) …")
-content_tree = CobwebDiscreteTree(alpha=ALPHA_CONTENT, weight_attr=True)
-for i, inst in enumerate(pair_train):
-    content_tree.ifit(inst)
+print(f"[A] Building TopK content tree (CobwebDiscreteTree, alpha={ALPHA_CONTENT}) …")
+content_tree_topk = CobwebDiscreteTree(alpha=ALPHA_CONTENT, weight_attr=True)
+for i, inst in enumerate(pair_train_topk):
+    content_tree_topk.ifit(inst)
     if (i + 1) % 2000 == 0:
-        print(f"  {i + 1}/{len(pair_train)} inserted")
-print("  Content tree built.")
+        print(f"  {i + 1}/{len(pair_train_topk)} inserted")
+print("[A] Content tree built.")
 
 
-def greedy_descend(root, instance):
-    node = root
-    while node.children:
-        node = max(node.children, key=lambda c: c.log_prob_instance(instance))
-    return node
+# ============================================================================
+# Variant B — WEBSTER leaf-pointer + ref_tree (mirrors parse_mh.py 2710–2716)
+# ============================================================================
+
+print("\n[B] Walking context tree leaves and assigning label-path ids …")
+ctx_leaves = []
+stack = [context_tree.root]
+while stack:
+    n = stack.pop()
+    if not n.children:
+        ctx_leaves.append(n)
+    else:
+        stack.extend(n.children)
+hash_to_leaf_id = {}
+id_to_leaf      = {}
+for leaf in ctx_leaves:
+    h = leaf.concept_hash()
+    if h not in hash_to_leaf_id:
+        lid = len(hash_to_leaf_id) + 1   # reserve 0 as "missing"
+        hash_to_leaf_id[h] = lid
+        id_to_leaf[lid]    = leaf
+print(f"  Context leaves: {len(ctx_leaves)} ({len(hash_to_leaf_id)} unique by concept_hash)")
 
 
-# ── Basic level via leaf.get_basic(use_root=True) ────────────────────────────
-print(f"\nRunning get_basic(use_root=True, eval_alpha={EVAL_ALPHA}) per leaf …")
-_cache = {}
-def get_basic_node(leaf):
-    key = id(leaf)
-    if key in _cache:
-        return _cache[key]
-    bl = leaf.get_basic(0, 0, debug=False, eval_alpha=EVAL_ALPHA, use_root=True)
-    _cache[key] = bl
-    return bl
+def webster_inst(inst_L, inst_R):
+    leaf_L = greedy_descend(context_tree.root, inst_L)
+    leaf_R = greedy_descend(context_tree.root, inst_R)
+    l_id = hash_to_leaf_id[leaf_L.concept_hash()]
+    r_id = hash_to_leaf_id[leaf_R.concept_hash()]
+    return {0: {l_id: 1.0}, 1: {r_id: 1.0}}
 
 
-print("Mapping test pairs to basic-level nodes …")
-bl_members = {}
-for i, inst in enumerate(pair_test):
-    leaf = greedy_descend(content_tree.root, inst)
-    bl   = get_basic_node(leaf)
-    if bl is None:
-        continue
-    nid = id(bl)
-    if nid not in bl_members:
-        bl_members[nid] = {
-            "node":     bl,
-            "depth":    bl.depth(),
-            "indices":  [],
-            "wL":       [],
-            "wR":       [],
-            "labels":   [],
-        }
-    bl_members[nid]["indices"].append(i)
-    bl_members[nid]["wL"].append(int(test_wL[i]))
-    bl_members[nid]["wR"].append(int(test_wR[i]))
-    bl_members[nid]["labels"].append(int(y_test[i]))
+print("[B] Building WEBSTER content instances (single leaf-pointer per side) …")
+pair_train_webster = [webster_inst(L, R) for L, R in zip(train_L, train_R)]
+pair_test_webster  = [webster_inst(L, R) for L, R in zip(test_L,  test_R)]
 
-print(f"  {len(bl_members)} unique BL nodes covering {len(pair_test)} test pairs")
+print(f"[B] Building WEBSTER content tree "
+      f"(ref_tree=context_tree, ref_attrs=[0,1], alpha={ALPHA_CONTENT}) …")
+content_tree_webster = CobwebDiscreteTree(
+    alpha=ALPHA_CONTENT,
+    weight_attr=False,            # matches WEBSTER (parse_mh.py:2713)
+    ref_tree=context_tree,
+)
+content_tree_webster.set_ref_attr(0)
+content_tree_webster.set_ref_attr(1)
+# Register every leaf id ↔ context-tree node before fitting so LCA-similarity
+# soft matching is available from the first ifit.
+for lid, leaf in id_to_leaf.items():
+    content_tree_webster.register_ref_val(lid, leaf)
+for i, inst in enumerate(pair_train_webster):
+    content_tree_webster.ifit(inst)
+    if (i + 1) % 2000 == 0:
+        print(f"  {i + 1}/{len(pair_train_webster)} inserted")
+print("[B] WEBSTER content tree built.")
 
 
-# ── Per-subtree visualisation ────────────────────────────────────────────────
+# ============================================================================
+# BL pipeline + viz (shared between the two variants)
+# ============================================================================
+
 CMAP_POS    = plt.get_cmap("tab10") if N_POS <= 10 else plt.get_cmap("tab20")
 pos_colors  = [CMAP_POS(i / max(N_POS - 1, 1)) for i in range(N_POS)]
 
 
 def top_context_attrs(node, k=TOP_CTX_NODES):
-    """Top-k pool-node ids stored at this content node, per side (attr 0 = L, 1 = R)."""
     out = {0: [], 1: []}
     for attr in (0, 1):
         if attr not in node.av_count:
             continue
         items = sorted(node.av_count[attr].items(), key=lambda kv: -kv[1])[:k]
         total = sum(node.av_count[attr].values()) or 1
-        out[attr] = [(int(pool_id), c / total) for pool_id, c in items]
+        out[attr] = [(int(val_id), c / total) for val_id, c in items]
     return out
 
 
-def plot_subtrees(members, title, out_path):
+def plot_subtrees(members, title, out_path, attr_label_fn):
     sorted_bls = sorted(members.values(),
                         key=lambda m: len(m["indices"]), reverse=True)
     n_rows = len(sorted_bls)
@@ -314,7 +334,6 @@ def plot_subtrees(members, title, out_path):
         n_mem   = len(m["indices"])
         depth   = m["depth"]
 
-        # Joint (L_POS, R_POS) heatmap
         joint = np.zeros((N_POS, N_POS), dtype=np.int32)
         for lbl in labels:
             lp, rp = split_pair_label(int(lbl))
@@ -324,8 +343,8 @@ def plot_subtrees(members, title, out_path):
         dom_pair = f"{id2pos[dom_l]}-{id2pos[dom_r]}"
 
         ax0 = axes[row, 0]
-        im = ax0.imshow(joint / max(joint.sum(), 1), cmap="Blues",
-                        vmin=0, vmax=1, aspect="equal")
+        ax0.imshow(joint / max(joint.sum(), 1), cmap="Blues",
+                   vmin=0, vmax=1, aspect="equal")
         ax0.set_xticks(range(N_POS))
         ax0.set_yticks(range(N_POS))
         ax0.set_xticklabels([id2pos[i] for i in range(N_POS)],
@@ -339,7 +358,6 @@ def plot_subtrees(members, title, out_path):
         if row == 0:
             ax0.set_title("(L,R) POS joint", fontsize=8)
 
-        # Top center bigrams
         ax1 = axes[row, 1]
         bigram_counts = Counter(zip(wL_arr.tolist(), wR_arr.tolist()))
         top_big = bigram_counts.most_common(TOP_CENTER_BIGRAMS)
@@ -356,7 +374,6 @@ def plot_subtrees(members, title, out_path):
         if row == 0:
             ax1.set_title("top center bigrams", fontsize=8)
 
-        # Top context-tree node ids stored at this content node, per side
         ax2 = axes[row, 2]
         ax2.axis("off")
         ctx_top = top_context_attrs(node, k=TOP_CTX_NODES)
@@ -364,55 +381,20 @@ def plot_subtrees(members, title, out_path):
             cx = (ci + 0.5) / 2.0
             ax2.text(cx, 0.95, side, ha="center", va="top",
                      fontsize=7, fontweight="bold", transform=ax2.transAxes)
-            for li, (pool_id, frac) in enumerate(ctx_top[ci]):
+            for li, (val_id, frac) in enumerate(ctx_top[ci]):
                 cy = 0.85 - li * 0.16
-                ax2.text(cx, cy, f"ctx#{pool_id} ({frac:.2f})",
+                ax2.text(cx, cy, f"{attr_label_fn(val_id)} ({frac:.2f})",
                          ha="center", va="top", fontsize=6,
                          color="black", transform=ax2.transAxes)
         if row == 0:
-            ax2.set_title(f"top context pool-node ids (k={TOP_CTX_NODES})",
+            ax2.set_title(f"top per-side attr values (k={TOP_CTX_NODES})",
                           fontsize=8)
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     plt.savefig(out_path, dpi=140, bbox_inches="tight")
     plt.close()
-    print(f"  Subtree visualisation saved → {out_path}")
 
 
-plot_subtrees(
-    bl_members,
-    title=(f"Basic-level subtrees — TopK-Disc-Cnt1 content tree, "
-           f"get_basic(use_root=True, eval_alpha={EVAL_ALPHA})  "
-           f"(N_test={len(pair_test)}, n_subtrees={len(bl_members)})"),
-    out_path=os.path.join(OUT_DIR, "basic_level_subtrees.png"),
-)
-
-
-# ── CSV ──────────────────────────────────────────────────────────────────────
-csv_path = os.path.join(OUT_DIR, "per_subtree_membership.csv")
-with open(csv_path, "w", newline="") as f:
-    w = csv.writer(f)
-    w.writerow(["subtree_idx", "depth", "node_count", "test_members",
-                "dominant_pair", "top_pair_dist"])
-    for i, m in enumerate(sorted(bl_members.values(),
-                                  key=lambda m: len(m["indices"]),
-                                  reverse=True)):
-        labels = np.array(m["labels"])
-        joint  = np.bincount(labels, minlength=N_POS * N_POS)
-        top5 = np.argsort(-joint)[:5]
-        dl, dr = split_pair_label(int(top5[0]))
-        dist_str = "/".join(
-            f"{id2pos[split_pair_label(int(p))[0]]}-"
-            f"{id2pos[split_pair_label(int(p))[1]]}:{int(joint[p])}"
-            for p in top5 if joint[p] > 0
-        )
-        w.writerow([i, m["depth"], int(m["node"].count),
-                    len(m["indices"]),
-                    f"{id2pos[dl]}-{id2pos[dr]}", dist_str])
-print(f"  CSV summary saved → {csv_path}")
-
-
-# ── Content-tree with stacked L/R POS bars + BL highlights ───────────────────
 def make_layout(root, max_depth):
     all_nodes   = [root]
     children_of = {0: []}
@@ -456,24 +438,6 @@ def compute_pair_label_counts_idx(all_nodes, children_of,
             cL[idx][l_pos] += 1
             cR[idx][r_pos] += 1
     return cL, cR
-
-
-# Map id(bl_node) -> layout idx (needed for tree-plot highlights).
-print("Computing content-tree layout + per-node label counts …")
-layout_nodes, layout_children, layout_depth = make_layout(
-    content_tree.root, max_depth=TREE_DEPTH_FOR_LABEL_FIG,
-)
-cL_map, cR_map = compute_pair_label_counts_idx(
-    layout_nodes, layout_children, pair_train, y_train,
-    max_depth=TREE_DEPTH_FOR_LABEL_FIG,
-)
-
-# BL nodes that happen to live within the rendered depth band
-bl_node_hashes = {m["node"].concept_hash() for m in bl_members.values()}
-highlight_idx = set()
-for idx, n in enumerate(layout_nodes):
-    if n.concept_hash() in bl_node_hashes:
-        highlight_idx.add(idx)
 
 
 def plot_pair_tree_idx(children_of, depth_of, counts_L, counts_R,
@@ -571,104 +535,200 @@ def plot_pair_tree_idx(children_of, depth_of, counts_L, counts_R,
     plt.close()
 
 
-tree_fig_path = os.path.join(OUT_DIR, "content_tree_labels.png")
-plot_pair_tree_idx(
-    layout_children, layout_depth, cL_map, cR_map,
-    title=(f"Content tree (TopK-Disc-Cnt1) — Pair POS distributions  "
-           f"(red border = basic-level node, eval_alpha={EVAL_ALPHA})"),
-    out_path=tree_fig_path,
-    max_depth=TREE_DEPTH_FOR_LABEL_FIG,
-    highlight_idx=highlight_idx,
+def run_bl_pipeline(content_tree, pair_train, pair_test,
+                     y_test_arr, test_wL_arr, test_wR_arr,
+                     out_subdir, variant_label, attr_label_fn):
+    os.makedirs(out_subdir, exist_ok=True)
+    print(f"\n=== Running BL pipeline for variant: {variant_label} ===")
+
+    # Per-leaf get_basic with use_root=True
+    _cache = {}
+    def get_bl(leaf):
+        key = id(leaf)
+        if key in _cache:
+            return _cache[key]
+        bl = leaf.get_basic(0, 0, debug=False,
+                            eval_alpha=EVAL_ALPHA, use_root=True)
+        _cache[key] = bl
+        return bl
+
+    bl_members = {}
+    for i, inst in enumerate(pair_test):
+        leaf = greedy_descend(content_tree.root, inst)
+        bl   = get_bl(leaf)
+        if bl is None:
+            continue
+        nid = id(bl)
+        if nid not in bl_members:
+            bl_members[nid] = {
+                "node":     bl, "depth": bl.depth(),
+                "indices":  [], "wL": [], "wR": [], "labels": [],
+            }
+        bl_members[nid]["indices"].append(i)
+        bl_members[nid]["wL"].append(int(test_wL_arr[i]))
+        bl_members[nid]["wR"].append(int(test_wR_arr[i]))
+        bl_members[nid]["labels"].append(int(y_test_arr[i]))
+
+    print(f"  {len(bl_members)} unique BL nodes covering {len(pair_test)} test pairs")
+
+    # 1) per-BL subtree view
+    plot_subtrees(
+        bl_members,
+        title=(f"{variant_label} — Basic-level subtrees, "
+               f"get_basic(use_root=True, eval_alpha={EVAL_ALPHA})  "
+               f"(N_test={len(pair_test)}, n_subtrees={len(bl_members)})"),
+        out_path=os.path.join(out_subdir, "basic_level_subtrees.png"),
+        attr_label_fn=attr_label_fn,
+    )
+    print(f"  Subtrees → {os.path.join(out_subdir, 'basic_level_subtrees.png')}")
+
+    # 2) CSV
+    csv_path = os.path.join(out_subdir, "per_subtree_membership.csv")
+    with open(csv_path, "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["subtree_idx", "depth", "node_count", "test_members",
+                    "dominant_pair", "top_pair_dist"])
+        for i, m in enumerate(sorted(bl_members.values(),
+                                      key=lambda m: len(m["indices"]),
+                                      reverse=True)):
+            labels = np.array(m["labels"])
+            joint  = np.bincount(labels, minlength=N_POS * N_POS)
+            top5 = np.argsort(-joint)[:5]
+            dl, dr = split_pair_label(int(top5[0]))
+            dist_str = "/".join(
+                f"{id2pos[split_pair_label(int(p))[0]]}-"
+                f"{id2pos[split_pair_label(int(p))[1]]}:{int(joint[p])}"
+                for p in top5 if joint[p] > 0
+            )
+            w.writerow([i, m["depth"], int(m["node"].count),
+                        len(m["indices"]),
+                        f"{id2pos[dl]}-{id2pos[dr]}", dist_str])
+    print(f"  CSV → {csv_path}")
+
+    # 3) content tree visualisation
+    layout_nodes, layout_children, layout_depth = make_layout(
+        content_tree.root, max_depth=TREE_DEPTH_FOR_LABEL_FIG,
+    )
+    cL_map, cR_map = compute_pair_label_counts_idx(
+        layout_nodes, layout_children, pair_train, y_train,
+        max_depth=TREE_DEPTH_FOR_LABEL_FIG,
+    )
+    bl_node_hashes = {m["node"].concept_hash() for m in bl_members.values()}
+    highlight_idx = {idx for idx, n in enumerate(layout_nodes)
+                     if n.concept_hash() in bl_node_hashes}
+    tree_fig_path = os.path.join(out_subdir, "content_tree_labels.png")
+    plot_pair_tree_idx(
+        layout_children, layout_depth, cL_map, cR_map,
+        title=(f"{variant_label} content tree — Pair POS distributions  "
+               f"(red border = BL, eval_alpha={EVAL_ALPHA})"),
+        out_path=tree_fig_path,
+        max_depth=TREE_DEPTH_FOR_LABEL_FIG,
+        highlight_idx=highlight_idx,
+    )
+    print(f"  Tree fig → {tree_fig_path}")
+
+    # 4) score by depth
+    all_nodes_full = []
+    stack = [content_tree.root]
+    while stack:
+        n = stack.pop()
+        all_nodes_full.append(n)
+        stack.extend(n.children)
+    depth_to_scores = {}
+    for n in all_nodes_full:
+        d = n.depth()
+        score = n.expected_pmi(0, 0, eval_alpha=EVAL_ALPHA,
+                               uniform_leaf=False, use_root=True)
+        depth_to_scores.setdefault(d, []).append(score)
+    depth_to_n_bl = {}
+    for m in bl_members.values():
+        d = m["depth"]
+        depth_to_n_bl[d] = depth_to_n_bl.get(d, 0) + 1
+
+    depths_sorted = sorted(depth_to_scores.keys())
+    means = [np.mean(depth_to_scores[d]) for d in depths_sorted]
+    mins  = [np.min(depth_to_scores[d])  for d in depths_sorted]
+    maxs  = [np.max(depth_to_scores[d])  for d in depths_sorted]
+
+    fig, ax = plt.subplots(figsize=(9, 5))
+    ax.fill_between(depths_sorted, mins, maxs, alpha=0.15, color="#1f77b4",
+                    label="min–max range")
+    ax.plot(depths_sorted, means, marker="o", linewidth=2, color="#1f77b4",
+            label="mean expected_pmi", zorder=3)
+    for d, m in zip(depths_sorted, means):
+        ax.annotate(f"{m:.3f}", (d, m),
+                    textcoords="offset points", xytext=(0, 8),
+                    fontsize=8, ha="center", color="#1f77b4")
+    for d, n in depth_to_n_bl.items():
+        ax.axvline(d, color="red", alpha=0.25, linestyle="--", linewidth=1.2,
+                   zorder=1)
+        ax.text(d, ax.get_ylim()[1], f"BL × {n}",
+                color="red", fontsize=7, ha="center", va="bottom")
+    ax.set_xlabel("Tree depth (root = 0)", fontsize=11)
+    ax.set_ylabel(f"Mean expected_pmi (use_root=True, eval_alpha={EVAL_ALPHA})",
+                  fontsize=11)
+    ax.set_title(f"{variant_label} — mean empirical PMI vs root by depth  "
+                 "(red dashed = depth contains a BL)", fontsize=11)
+    ax.axhline(0, color="black", linewidth=0.8, linestyle=":", alpha=0.4)
+    ax.set_xticks(depths_sorted)
+    ax.grid(axis="y", alpha=0.25)
+    ax.legend(loc="best", fontsize=9)
+    plt.tight_layout()
+    depth_plot_path = os.path.join(out_subdir, "score_by_depth.png")
+    plt.savefig(depth_plot_path, dpi=150, bbox_inches="tight")
+    plt.close()
+    print(f"  Score-by-depth → {depth_plot_path}")
+
+    # 5) summary
+    summary_path = os.path.join(out_subdir, "method_summary.txt")
+    with open(summary_path, "w") as f:
+        f.write("=" * 64 + "\n")
+        f.write(f" {variant_label}\n")
+        f.write(f" Method: leaf.get_basic(use_root=True, eval_alpha={EVAL_ALPHA})\n")
+        f.write("=" * 64 + "\n\n")
+        f.write(f"Train pairs: {len(pair_train)}\n")
+        f.write(f"Test  pairs: {len(pair_test)}\n")
+        f.write(f"Content tree nodes: {len(all_nodes_full)}\n\n")
+        f.write(f"{len(bl_members)} unique basic-level nodes:\n")
+        for i, m in enumerate(sorted(bl_members.values(),
+                                      key=lambda m: len(m["indices"]),
+                                      reverse=True)):
+            labels = np.array(m["labels"])
+            joint  = np.bincount(labels, minlength=N_POS * N_POS)
+            top1   = int(joint.argmax())
+            dl, dr = split_pair_label(top1)
+            f.write(f"  [{i:>2}] depth={m['depth']:>2}  "
+                    f"count={int(m['node'].count):>6}  "
+                    f"members={len(m['indices']):>4}  "
+                    f"dom={id2pos[dl]}-{id2pos[dr]}\n")
+    print(f"  Summary → {summary_path}")
+
+    return bl_members, len(all_nodes_full)
+
+
+# ── Run both variants ────────────────────────────────────────────────────────
+
+bl_topk, n_nodes_topk = run_bl_pipeline(
+    content_tree_topk,  pair_train_topk,  pair_test_topk,
+    y_test, test_wL, test_wR,
+    out_subdir=os.path.join(OUT_DIR, "topk_disc_cnt1"),
+    variant_label="TopK-Disc-Cnt1",
+    attr_label_fn=lambda v: f"ctx#{v}",
 )
-print(f"  Content tree figure saved → {tree_fig_path}")
+
+bl_webster, n_nodes_webster = run_bl_pipeline(
+    content_tree_webster, pair_train_webster, pair_test_webster,
+    y_test, test_wL, test_wR,
+    out_subdir=os.path.join(OUT_DIR, "webster"),
+    variant_label="WEBSTER (leaf-pointer + ref_tree)",
+    attr_label_fn=lambda v: f"leaf#{v}",
+)
 
 
-# ── Mean expected_pmi by depth (content tree) ────────────────────────────────
-print(f"Computing expected_pmi(use_root=True, eval_alpha={EVAL_ALPHA}) for every content node …")
-all_nodes_full = []
-stack = [content_tree.root]
-while stack:
-    n = stack.pop()
-    all_nodes_full.append(n)
-    stack.extend(n.children)
-print(f"  {len(all_nodes_full)} nodes total")
-
-depth_to_scores = {}
-for n in all_nodes_full:
-    d = n.depth()
-    score = n.expected_pmi(0, 0, eval_alpha=EVAL_ALPHA,
-                           uniform_leaf=False, use_root=True)
-    depth_to_scores.setdefault(d, []).append(score)
-
-depth_to_n_bl = {}
-for m in bl_members.values():
-    d = m["depth"]
-    depth_to_n_bl[d] = depth_to_n_bl.get(d, 0) + 1
-
-depths_sorted = sorted(depth_to_scores.keys())
-means = [np.mean(depth_to_scores[d]) for d in depths_sorted]
-mins  = [np.min(depth_to_scores[d])  for d in depths_sorted]
-maxs  = [np.max(depth_to_scores[d])  for d in depths_sorted]
-
-fig, ax = plt.subplots(figsize=(9, 5))
-ax.fill_between(depths_sorted, mins, maxs, alpha=0.15, color="#1f77b4",
-                label="min–max range")
-ax.plot(depths_sorted, means, marker="o", linewidth=2, color="#1f77b4",
-        label="mean expected_pmi", zorder=3)
-for d, m in zip(depths_sorted, means):
-    ax.annotate(f"{m:.3f}", (d, m),
-                textcoords="offset points", xytext=(0, 8),
-                fontsize=8, ha="center", color="#1f77b4")
-for d, n in depth_to_n_bl.items():
-    ax.axvline(d, color="red", alpha=0.25, linestyle="--", linewidth=1.2,
-               zorder=1)
-    ax.text(d, ax.get_ylim()[1], f"BL × {n}",
-            color="red", fontsize=7, ha="center", va="bottom")
-ax.set_xlabel("Tree depth (root = 0)", fontsize=11)
-ax.set_ylabel(f"Mean expected_pmi (use_root=True, eval_alpha={EVAL_ALPHA})",
-              fontsize=11)
-ax.set_title("Content tree — mean empirical PMI against root by depth  "
-             "(red dashed = depth contains a BL node)", fontsize=11)
-ax.axhline(0, color="black", linewidth=0.8, linestyle=":", alpha=0.4)
-ax.set_xticks(depths_sorted)
-ax.grid(axis="y", alpha=0.25)
-ax.legend(loc="best", fontsize=9)
-plt.tight_layout()
-depth_plot_path = os.path.join(OUT_DIR, "score_by_depth.png")
-plt.savefig(depth_plot_path, dpi=150, bbox_inches="tight")
-plt.close()
-print(f"  Score-by-depth plot saved → {depth_plot_path}")
-
-
-# ── Summary ──────────────────────────────────────────────────────────────────
-summary_path = os.path.join(OUT_DIR, "method_summary.txt")
-with open(summary_path, "w") as f:
-    f.write("=" * 64 + "\n")
-    f.write(" Grammar chunking basic-level summary — TopK-Disc-Cnt1\n")
-    f.write(" Method: leaf.get_basic(use_root=True, eval_alpha={:.1f})\n".format(EVAL_ALPHA))
-    f.write("=" * 64 + "\n\n")
-    f.write(f"Settings:\n")
-    f.write(f"  N_SENTENCES = {N_SENTENCES}\n")
-    f.write(f"  WINDOW      = {WINDOW}\n")
-    f.write(f"  TOP_K       = {TOP_K}\n")
-    f.write(f"  TOPK_DEPTH  = {topk_depth} (clamped from {TOPK_DEPTH})\n")
-    f.write(f"  ALPHA_CONTEXT = {ALPHA_CONTEXT}\n")
-    f.write(f"  ALPHA_CONTENT = {ALPHA_CONTENT}\n")
-    f.write(f"  EVAL_ALPHA  = {EVAL_ALPHA}\n")
-    f.write(f"  Train pairs: {len(pair_train)}\n")
-    f.write(f"  Test  pairs: {len(pair_test)}\n")
-    f.write(f"  Content tree nodes: {len(all_nodes_full)}\n\n")
-
-    f.write(f"{len(bl_members)} unique basic-level nodes:\n")
-    for i, m in enumerate(sorted(bl_members.values(),
-                                  key=lambda m: len(m["indices"]),
-                                  reverse=True)):
-        labels = np.array(m["labels"])
-        joint  = np.bincount(labels, minlength=N_POS * N_POS)
-        top1   = int(joint.argmax())
-        dl, dr = split_pair_label(top1)
-        f.write(f"  [{i:>2}] depth={m['depth']:>2}  count={int(m['node'].count):>6}  "
-                f"members={len(m['indices']):>4}  dom={id2pos[dl]}-{id2pos[dr]}\n")
-print(f"  Summary saved → {summary_path}")
-
-print(f"\nDone. All outputs in {OUT_DIR}")
+# ── Cross-variant comparison line ────────────────────────────────────────────
+print("\n" + "=" * 64)
+print(" Cross-variant comparison")
+print("=" * 64)
+print(f"  TopK-Disc-Cnt1 : {len(bl_topk):>3} BLs  /  {n_nodes_topk:>6} tree nodes")
+print(f"  WEBSTER        : {len(bl_webster):>3} BLs  /  {n_nodes_webster:>6} tree nodes")
+print(f"\nOutputs in {OUT_DIR}/{{topk_disc_cnt1, webster}}/")

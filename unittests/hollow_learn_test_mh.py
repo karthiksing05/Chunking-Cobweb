@@ -70,7 +70,7 @@ webster = WEBSTER(
     corpus,
     context_length=CONTEXT_LENGTH,
     threshold=THRESHOLD,
-    content_alpha=1e-3,
+    content_alpha=1e-4,
     context_alpha=1e-3,
     content_bl_alpha=1,
     context_bl_alpha=1,

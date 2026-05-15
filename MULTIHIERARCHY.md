@@ -21,7 +21,7 @@ Did a ton of experiments, going to make a list of all changes we need to make be
 *   Convolutional Cobweb's CU-variant (Cobweb/3) is NOT as good as our variant (Cobweb/4 and derivatives, information-theoretic variant) so we'll stick to the original variant for now!
 
 **What we're changing:**
-*   Biggest thing is we need to make bag-of-concepts work with dynamic remapping AND include a threshold 
+*   Biggest thing is we need to make bag-of-concepts work with dynamic remapping AND include a threshold that takes multiple nodes into account frfr
 
 **How do we make it work?**
 *   How do we make bag-of-concepts an incremental variant?

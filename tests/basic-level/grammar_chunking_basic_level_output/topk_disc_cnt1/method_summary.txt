@@ -1,0 +1,31 @@
+================================================================
+ TopK-Disc-Cnt1
+ Method: leaf.get_basic(use_root=True, eval_alpha=10.0)
+================================================================
+
+Train pairs: 8605
+Test  pairs: 2292
+Content tree nodes: 14841
+
+21 unique basic-level nodes:
+  [ 0] depth= 3  count=   665  members= 183  dom=Adj-Adj
+  [ 1] depth= 3  count=   620  members= 176  dom=N-RelPro
+  [ 2] depth= 2  count=  1054  members= 174  dom=Adj-N
+  [ 3] depth= 3  count=   623  members= 170  dom=RelPro-V
+  [ 4] depth= 2  count=  1005  members= 154  dom=Det-N
+  [ 5] depth= 3  count=   575  members= 152  dom=V-P
+  [ 6] depth= 3  count=   531  members= 118  dom=Adj-Adj
+  [ 7] depth= 3  count=   487  members= 117  dom=Det-N
+  [ 8] depth= 4  count=   428  members= 116  dom=V-Det
+  [ 9] depth= 4  count=   395  members= 111  dom=P-Det
+  [10] depth= 3  count=   779  members= 110  dom=RelPro-V
+  [11] depth= 3  count=  1284  members= 104  dom=Det-Adj
+  [12] depth= 4  count=   357  members=  87  dom=RelPro-V
+  [13] depth= 3  count=   329  members=  86  dom=Adj-N
+  [14] depth= 3  count=   662  members=  80  dom=V-Det
+  [15] depth= 5  count=   291  members=  80  dom=P-Det
+  [16] depth= 4  count=   314  members=  77  dom=N-RelPro
+  [17] depth= 2  count=  1059  members=  64  dom=N-V
+  [18] depth= 4  count=   501  members=  56  dom=Det-Adj
+  [19] depth= 2  count=   821  members=  52  dom=N-V
+  [20] depth= 3  count=   422  members=  25  dom=Adj-N
