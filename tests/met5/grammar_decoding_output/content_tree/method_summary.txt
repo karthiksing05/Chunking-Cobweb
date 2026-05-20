@@ -1,0 +1,26 @@
+CONTENT tree — get_basic(use_root=True, eval_alpha=10.0)
+========================================================
+
+  Chunks: 439
+  Unique BL nodes: 5
+
+Class distribution:
+     NP:  170
+      S:   88
+     VP:   82
+   AdjP:   74
+     PP:   25
+
+Per-class clustering purity:
+     NP: 169/170 (99.4%)
+   AdjP: 49/74 (66.2%)
+     PP: 18/25 (72.0%)
+     VP: 59/82 (72.0%)
+      S: 50/88 (56.8%)
+
+BL nodes (sorted by membership):
+  [ 0] depth= 2  count=  165  members= 211  dom=NP
+  [ 1] depth= 1  count=  107  members= 114  dom=VP
+  [ 2] depth= 2  count=   40  members=  68  dom=S
+  [ 3] depth= 1  count=  237  members=  37  dom=AdjP
+  [ 4] depth= 1  count=   81  members=   9  dom=VP

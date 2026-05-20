@@ -6,35 +6,33 @@ Settings:
   N_SENTENCES = 1000
   ALPHA       = 0.001
   EVAL_ALPHA  = 10.0
-  Train tokens: 9517
-  Test  tokens: 2380
+  Train tokens: 9635
+  Test  tokens: 2409
 
-28 unique basic-level nodes:
-  [ 0] depth= 2  count=  829  members= 198  dom=Adj
-  [ 1] depth= 2  count=  631  members= 173  dom=N
-  [ 2] depth= 2  count=  929  members= 168  dom=RelPro
-  [ 3] depth= 3  count=  551  members= 152  dom=Adj
-  [ 4] depth= 3  count= 1250  members= 146  dom=V
-  [ 5] depth= 4  count=  511  members= 131  dom=P
-  [ 6] depth= 3  count=  376  members= 130  dom=V
-  [ 7] depth= 3  count=  494  members= 130  dom=N
-  [ 8] depth= 4  count=  348  members= 115  dom=V
-  [ 9] depth= 3  count=  340  members=  97  dom=Adj
-  [10] depth= 4  count=  282  members=  95  dom=RelPro
-  [11] depth= 4  count=  237  members=  91  dom=Det
-  [12] depth= 4  count=  389  members=  89  dom=Det
-  [13] depth= 3  count=  695  members=  77  dom=Det
-  [14] depth= 4  count=  245  members=  70  dom=N
-  [15] depth= 4  count=  215  members=  69  dom=P
-  [16] depth= 3  count=  534  members=  66  dom=Adj
-  [17] depth= 2  count=  882  members=  57  dom=V
-  [18] depth= 3  count=  206  members=  54  dom=Det
-  [19] depth= 2  count= 1257  members=  45  dom=N
-  [20] depth= 4  count=  174  members=  45  dom=P
-  [21] depth= 4  count=  203  members=  44  dom=P
-  [22] depth= 3  count=  524  members=  30  dom=N
-  [23] depth= 3  count=  753  members=  30  dom=Det
-  [24] depth= 5  count=  123  members=  27  dom=Det
-  [25] depth= 4  count=  275  members=  23  dom=Det
-  [26] depth= 3  count=  482  members=  20  dom=Det
-  [27] depth= 2  count= 1794  members=   8  dom=Adj
+26 unique basic-level nodes:
+  [ 0] depth= 2  count= 1119  members= 188  dom=N
+  [ 1] depth= 4  count=  637  members= 172  dom=Det
+  [ 2] depth= 3  count=  585  members= 167  dom=N
+  [ 3] depth= 2  count=  441  members= 159  dom=V
+  [ 4] depth= 3  count= 1070  members= 154  dom=Adj
+  [ 5] depth= 4  count=  460  members= 152  dom=P
+  [ 6] depth= 3  count=  385  members= 142  dom=V
+  [ 7] depth= 3  count=  666  members= 136  dom=RelPro
+  [ 8] depth= 2  count= 1417  members= 123  dom=N
+  [ 9] depth= 4  count=  424  members= 114  dom=Adj
+  [10] depth= 3  count=  415  members= 113  dom=Adj
+  [11] depth= 2  count=  757  members= 112  dom=V
+  [12] depth= 2  count=  963  members= 111  dom=Adj
+  [13] depth= 3  count=  963  members=  73  dom=Det
+  [14] depth= 3  count= 1120  members=  68  dom=Det
+  [15] depth= 4  count=  213  members=  63  dom=V
+  [16] depth= 5  count=  253  members=  60  dom=Det
+  [17] depth= 4  count=  279  members=  60  dom=Adj
+  [18] depth= 4  count=  247  members=  58  dom=Det
+  [19] depth= 3  count=  722  members=  57  dom=Det
+  [20] depth= 5  count=  236  members=  46  dom=V
+  [21] depth= 4  count=  148  members=  33  dom=N
+  [22] depth= 3  count=  445  members=  23  dom=Adj
+  [23] depth= 1  count= 3145  members=  14  dom=Adj
+  [24] depth= 3  count=  363  members=   9  dom=N
+  [25] depth= 4  count=  315  members=   2  dom=V

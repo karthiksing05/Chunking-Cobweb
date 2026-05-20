@@ -1,0 +1,13 @@
+tree,class,n_gold,n_correct,precision,recall,f1
+context,Det,53,40,0.9524,0.7547,0.8421
+context,N,53,41,0.9318,0.7736,0.8454
+context,Adj,32,27,0.5192,0.8438,0.6429
+context,V,23,13,0.6500,0.5652,0.6047
+context,P,10,3,0.2308,0.3000,0.2609
+content,AdjP,32,32,1.0000,1.0000,1.0000
+content,NP,53,53,1.0000,1.0000,1.0000
+content,PP,10,9,0.8182,0.9000,0.8571
+content,S,22,17,0.8500,0.7727,0.8095
+content,VP,30,28,0.9032,0.9333,0.9180
+context,OVERALL,171,124,,0.7251,
+content,OVERALL,147,139,,0.9456,

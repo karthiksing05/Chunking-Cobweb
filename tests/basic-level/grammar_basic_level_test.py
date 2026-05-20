@@ -33,8 +33,13 @@ import random
 
 import numpy as np
 import matplotlib
-matplotlib.use("Agg")
+# Leave the default backend in place so the interactive α-slider can
+# pop up (cf. ``corter_gluck_hierarchies.py``). To run the test
+# headless (CI / no display) set ``MPLBACKEND=Agg`` in the environment
+# before invocation — ``plt.savefig`` keeps working on any backend.
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+from matplotlib.widgets import Slider
 
 # Make src/ importable
 _HERE     = os.path.dirname(os.path.abspath(__file__))
@@ -547,5 +552,82 @@ with open(summary_path, "w") as f:
         f.write(f"  [{i:>2}] depth={m['depth']:>2}  count={int(m['node'].count):>5}  "
                 f"members={len(m['indices']):>4}  dom={dom}\n")
 print(f"  Summary saved → {summary_path}")
+
+
+# ---------------------------------------------------------------------------
+# Interactive α-slider for score_by_depth (mirrors corter_gluck_hierarchies.py)
+# ---------------------------------------------------------------------------
+# The static ``score_by_depth.png`` is computed at EVAL_ALPHA. This slider
+# lets you sweep ``log_10(eval_alpha)`` and watch the depth curve update
+# live — the same exploratory affordance as
+# ``tests/basic-level/corter_gluck_hierarchies.py``. The BL vertical
+# markers stay anchored at the initial EVAL_ALPHA (changing the slider
+# would also shift basic-level membership; we keep the BL set frozen
+# so the slider only shows how the *depth-score curve itself* moves
+# with α).
+
+print("\nOpening interactive α-slider for score_by_depth …")
+
+fig_sl = plt.figure(figsize=(10, 6.5))
+gs = gridspec.GridSpec(2, 1, height_ratios=[15, 1], hspace=0.32)
+ax_plot   = fig_sl.add_subplot(gs[0])
+ax_slider = fig_sl.add_subplot(gs[1])
+
+slider = Slider(
+    ax=ax_slider,
+    label="log₁₀(eval_alpha)",
+    valmin=-3, valmax=5,
+    valinit=float(np.log10(EVAL_ALPHA)),
+    valstep=0.05,
+)
+
+
+def _redraw(eval_a):
+    ax_plot.clear()
+    # Recompute expected_pmi per node at the new α.
+    d2s: dict = {}
+    for n in all_nodes_full:
+        d = n.depth()
+        score = n.expected_pmi(0, 0, eval_alpha=eval_a,
+                               uniform_leaf=False, use_root=True)
+        d2s.setdefault(d, []).append(score)
+    depths_sorted = sorted(d2s.keys())
+    means = [float(np.mean(d2s[d])) for d in depths_sorted]
+    mins  = [float(np.min(d2s[d]))  for d in depths_sorted]
+    maxs  = [float(np.max(d2s[d]))  for d in depths_sorted]
+
+    ax_plot.fill_between(depths_sorted, mins, maxs, alpha=0.15,
+                          color="#1f77b4", label="min–max range")
+    ax_plot.plot(depths_sorted, means, marker="o", linewidth=2,
+                  color="#1f77b4", label="mean expected_pmi", zorder=3)
+    for d, m in zip(depths_sorted, means):
+        ax_plot.annotate(f"{m:.3f}", (d, m),
+                          textcoords="offset points", xytext=(0, 8),
+                          fontsize=8, ha="center", color="#1f77b4")
+    # BL markers from the original EVAL_ALPHA run (frozen).
+    for d, n in depth_to_n_bl.items():
+        ax_plot.axvline(d, color="red", alpha=0.25, linestyle="--",
+                         linewidth=1.2, zorder=1)
+        ax_plot.text(d, ax_plot.get_ylim()[1], f"BL × {n}",
+                      color="red", fontsize=7, ha="center", va="bottom")
+
+    ax_plot.set_xlabel("Tree depth (root = 0)", fontsize=11)
+    ax_plot.set_ylabel(f"Mean expected_pmi  (eval_alpha = {eval_a:.4g})",
+                        fontsize=11)
+    ax_plot.set_title(
+        f"Interactive α sweep — score_by_depth   "
+        f"(BL markers frozen at initial α = {EVAL_ALPHA})",
+        fontsize=11)
+    ax_plot.axhline(0, color="black", linewidth=0.8, linestyle=":",
+                     alpha=0.4)
+    ax_plot.set_xticks(depths_sorted)
+    ax_plot.grid(axis="y", alpha=0.25)
+    ax_plot.legend(loc="best", fontsize=9)
+    fig_sl.canvas.draw_idle()
+
+
+slider.on_changed(lambda _val: _redraw(10 ** slider.val))
+_redraw(10 ** slider.valinit)
+plt.show()
 
 print("\nDone.")

@@ -2,7 +2,21 @@
 
 Whereas before we hypothesized needing multiple hierarchies for multiple levels of granularity or to separate primitives and composites, we now rely on multiple hierarchies to properly separate *content* and *context*.
 
+## Methodology 5.2
+
+I can start to see some artifacts of the parsing process making their way through where if we have an incorrect parse at the beginning
+*   I'd like to introduce the idea of a maximum-value parse where we look ahead X number of steps and see what the most parsable thing is! Once we find that, we parse it up! (it's like creating multiple chunks at once)
+    *   Can do multiple partial parses
+
+As mentioned below, generation is a problem! We need the idea of chunk context to properly scaffold the breaking down of chunks and we also need to identify a good decoding idea
+
 ## ACS-26 Deliverables
+
+ACS Contributions List:
+*   Representation in a conceptual nature (content/context)
+*   Parsing + Supervised Learning
+*   Generation
+*   Evaluation against CFG and CSG
 
 What do we need for ACS!!!
 *   Representations of Chunks on LOCKDOWN
@@ -10,9 +24,18 @@ What do we need for ACS!!!
 *   Reconstruction on original alternatives
 *   Comparison to alternatives
 
-## Methodology 5.1
+The TL;DR is that our process can basically be revered as a way of creating symbolic representations and leveraging those representations to create structure with a couple simple rules! But the key idea is 
+
+## Methodology 5.1 (ACS PAPER HERE)
 
 Did a ton of experiments, going to make a list of all changes we need to make below - there'll be all kinds of stuff but as long as we draft everything properly we'll be in a good place!
+
+**Final List of things we need to test:**
+*   Representation (Autoencoder) test - Given content / context instance, can we generate it and compress it? (and also verify that similar instances are encoded similarly)
+*   Threshold / Recognition - given the right representations, can we accurately compare structures to see what structures we’ve seen before
+*   Parsing - does the parsing process appropriately use the threshold / prior memory to create structures that line up with what we’ve seen?
+*   Generation - can we unpack the parsing process in reverse? That is, can we generate relative to what we've seen before?
+    *   Very relevant note is that if we use the idea that Pat said where we "distill" the rules out of the two hierarchies, this process becomes very very easy (and honestly I'd recommend it, it's just that we'd lose contextual information)
 
 **What worked:**
 *   As evidenced by `grammar_chunking_example.py`, a bag of sparse concepts taken from some fixed depth worked like a CHARM!! We did in fact take it from a fixed and randomly chosen depth and then we chose our concepts based on high log probs
@@ -21,13 +44,17 @@ Did a ton of experiments, going to make a list of all changes we need to make be
 *   Convolutional Cobweb's CU-variant (Cobweb/3) is NOT as good as our variant (Cobweb/4 and derivatives, information-theoretic variant) so we'll stick to the original variant for now!
 
 **What we're changing:**
-*   Biggest thing is we need to make bag-of-concepts work with dynamic remapping AND include a threshold that takes multiple nodes into account frfr
+*   Biggest thing is we need to make bag-of-concepts work with dynamic remapping AND include a threshold that takes multiple nodes into account frfr!!!
+    *   Initial idea is that we store five leaves instead of five nodes (through a tree-log-prob-like BFS) and then we do dynamic remapping with a cache in real time - currently have it to a certain depth but can also try basic-level node!!
+    *   We find the five leaves from the five nodes when we store a concept for the first time so the nodes are still preserved but the leaves make things easy
+*   As a result of this, there are crises with generation - because the reference is not to one node anymore, we can't unpack in a direct sense, so we have to employ a best-match across ALL ancestors to select the correct node!
 
 **How do we make it work?**
 *   How do we make bag-of-concepts an incremental variant?
     *   We can do what we did with the original variant and procedurally replace and recalculate dead nodes incrementally, and this makes the most sense to me, but I'm not sure how this'll affect the formulas
 *   Should we make basic-level concepts work??
     *   There is potential but I'm not too sure - at the very least, we need to make sure basic-level is understood for the sake of log-probs and recognition threshold!!
+    *   There might be multiple basic-level nodes in a path BUT the lowest basic level node is considered the basic level node for that path - in this way, we can update the frontier procedurally!
 
 ## Methodology 5
 

@@ -346,10 +346,59 @@ TEST_CORPUS_LARGE = (
 )
 
 
-def generate(symbol, grammar):
-    """Recursively generate a sentence from the grammar starting with a symbol."""
+def generate(symbol, grammar, _adjp_depth: int = 0):
+    """Recursively generate a sentence from the grammar starting with a symbol.
+
+    AdjP recursion uses a multiplicatively-decaying continuation
+    probability: ``P(continue) = (1/3)**depth`` where ``depth`` is
+    the number of AdjP recursions already taken. So:
+      depth 0 → p=1     (always go to a 2nd adjective)
+      depth 1 → p=1/3
+      depth 2 → p=1/9
+      depth 3 → p=1/27
+      ...
+
+    Geometric decay rather than a hard cap — 5+ adjective AdjPs are
+    possible but rare (~3.7% chance of 5+ adj when AdjP is invoked,
+    ~1.2% for 6+).
+
+    The empty AdjP terminating branch (``[]``) is also skipped when
+    non-empty options exist, so every AdjP invocation produces at
+    least one adjective.
+    """
     if symbol not in grammar:
         return symbol  # Terminal symbol
+
+    # Depth-aware override for AdjP: split productions into recursive
+    # (those that re-invoke AdjP) and terminating, then pick a recursive
+    # production with the depth-decayed probability.
+    if symbol == "AdjP":
+        productions = grammar[symbol]
+        recursive   = [p for p in productions if "AdjP" in p]
+        terminating = [p for p in productions if "AdjP" not in p]
+        # Prefer non-empty terminating productions so AdjP always
+        # yields at least one adjective when it's invoked.
+        non_empty_term = [p for p in terminating if p]
+        if non_empty_term:
+            terminating = non_empty_term
+
+        p_continue = (1.0 / 3.0) ** _adjp_depth
+        if recursive and (not terminating or random.random() < p_continue):
+            production = random.choice(recursive)
+            next_depth = _adjp_depth + 1
+        elif terminating:
+            production = random.choice(terminating)
+            next_depth = _adjp_depth
+        else:
+            production = random.choice(productions)
+            next_depth = _adjp_depth
+        result = []
+        for sym in production:
+            if sym == "AdjP":
+                result.append(generate(sym, grammar, next_depth))
+            else:
+                result.append(generate(sym, grammar))
+        return " ".join(filter(None, result))
 
     production = random.choice(grammar[symbol])  # Choose one production rule
     result = []

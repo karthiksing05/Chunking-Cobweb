@@ -1,0 +1,68 @@
+================================================================
+ BFSBag-BLRemap (K=5, target=basic-level)
+ Method: leaf.get_basic(use_root=True, eval_alpha=10.0)
+================================================================
+
+Train pairs: 8605
+Test  pairs: 2292
+Content tree nodes: 12609
+
+58 unique basic-level nodes:
+  [ 0] depth= 2  count=   986  members= 115  dom=V-Det
+  [ 1] depth= 4  count=   343  members=  85  dom=RelPro-V
+  [ 2] depth= 4  count=   201  members=  77  dom=Det-Adj
+  [ 3] depth= 3  count=   453  members=  77  dom=Det-Adj
+  [ 4] depth= 5  count=   281  members=  74  dom=N-RelPro
+  [ 5] depth= 3  count=   846  members=  73  dom=N-V
+  [ 6] depth= 4  count=   544  members=  73  dom=N-RelPro
+  [ 7] depth= 2  count=  1004  members=  72  dom=Adj-N
+  [ 8] depth= 5  count=   246  members=  72  dom=Det-N
+  [ 9] depth= 4  count=   293  members=  68  dom=Adj-Adj
+  [10] depth= 3  count=   532  members=  66  dom=Det-N
+  [11] depth= 4  count=   225  members=  62  dom=P-Det
+  [12] depth= 4  count=   242  members=  61  dom=Adj-Adj
+  [13] depth= 4  count=   583  members=  60  dom=RelPro-V
+  [14] depth= 4  count=   343  members=  58  dom=Adj-N
+  [15] depth= 4  count=   291  members=  56  dom=Det-N
+  [16] depth= 4  count=   210  members=  54  dom=V-Det
+  [17] depth= 5  count=   198  members=  54  dom=RelPro-V
+  [18] depth= 3  count=   319  members=  52  dom=V-Det
+  [19] depth= 3  count=   502  members=  48  dom=Det-Adj
+  [20] depth= 4  count=   176  members=  48  dom=Adj-Adj
+  [21] depth= 3  count=   301  members=  47  dom=V-P
+  [22] depth= 4  count=   216  members=  44  dom=RelPro-V
+  [23] depth= 4  count=   646  members=  43  dom=N-RelPro
+  [24] depth= 4  count=   129  members=  42  dom=P-Det
+  [25] depth= 4  count=   141  members=  42  dom=Det-Adj
+  [26] depth= 4  count=   152  members=  41  dom=V-P
+  [27] depth= 5  count=   158  members=  40  dom=RelPro-V
+  [28] depth= 3  count=   371  members=  40  dom=Det-N
+  [29] depth= 3  count=   744  members=  40  dom=V-P
+  [30] depth= 5  count=   130  members=  34  dom=Det-N
+  [31] depth= 5  count=   240  members=  32  dom=N-RelPro
+  [32] depth= 4  count=   136  members=  30  dom=V-P
+  [33] depth= 3  count=   316  members=  28  dom=Det-N
+  [34] depth= 5  count=   113  members=  28  dom=RelPro-V
+  [35] depth= 3  count=   226  members=  27  dom=Det-N
+  [36] depth= 4  count=    83  members=  27  dom=P-Det
+  [37] depth= 6  count=   176  members=  25  dom=N-RelPro
+  [38] depth= 5  count=   182  members=  25  dom=Adj-N
+  [39] depth= 4  count=   112  members=  24  dom=Det-N
+  [40] depth= 6  count=   111  members=  24  dom=N-RelPro
+  [41] depth= 4  count=    85  members=  24  dom=Adj-Adj
+  [42] depth= 3  count=  1186  members=  22  dom=N-V
+  [43] depth= 6  count=   102  members=  20  dom=Adj-N
+  [44] depth= 3  count=   154  members=  19  dom=Det-Adj
+  [45] depth= 6  count=    80  members=  17  dom=N-RelPro
+  [46] depth= 3  count=   226  members=  17  dom=Det-Adj
+  [47] depth= 5  count=   271  members=  15  dom=N-RelPro
+  [48] depth= 2  count=   543  members=  15  dom=Det-Adj
+  [49] depth= 3  count=   232  members=  12  dom=Adj-Adj
+  [50] depth= 6  count=    36  members=   7  dom=RelPro-V
+  [51] depth= 5  count=    24  members=   7  dom=V-Det
+  [52] depth= 8  count=    43  members=   7  dom=N-RelPro
+  [53] depth= 7  count=    45  members=   6  dom=N-V
+  [54] depth= 4  count=    67  members=   6  dom=Det-Adj
+  [55] depth= 6  count=    73  members=   5  dom=N-V
+  [56] depth= 7  count=    76  members=   4  dom=N-Det
+  [57] depth= 9  count=     4  members=   1  dom=Det-N

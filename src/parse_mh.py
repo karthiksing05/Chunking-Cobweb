@@ -9,15 +9,25 @@ See implementation details in MULTIHIERARCHY.md!
 
 Key difference from parse.py (single-hierarchy):
     - TWO Cobweb hierarchies: one for content, one for context.
-    - Content instances use **leaf pointer encoding** with just 2 attributes
-      (Methodology 4.0):
+    - Content instances use the **TopK-Pool encoding** with 2 attributes:
           content_instance = {
-              0: {left_label_path: 1},   # context-hierarchy leaf concept for left child
-              1: {right_label_path: 1},  # context-hierarchy leaf concept for right child
+              0: {pool_id_a: 1.0, pool_id_b: 1.0, ...},  # left K-set
+              1: {pool_id_c: 1.0, pool_id_d: 1.0, ...},  # right K-set
           }
-      Soft similarity between values is computed via LCA depth in the context
-      hierarchy (the ref_tree), so that nodes sharing a deep common ancestor
-      are treated as more similar than unrelated nodes.
+      For each side, every node at depth ``content_pool_depth`` in the
+      context hierarchy is scored against the child's
+      ``get_context_instance()`` via ``log_prob_instance``.  For each
+      of the top ``content_top_k`` pool nodes, the encoder picks the
+      **best leaf** under it (highest-count descendant) and stores
+      *that leaf's* id with count 1.  The ``value_remap_dict`` payload
+      pushed via ``set_value_remap`` then re-canonicalises each stored
+      leaf id to its current depth-d ancestor at evaluation time, so
+      Cobweb's entropy math groups leaves by pool ancestor — the same
+      aggregation ``TopK-Disc-Cnt1`` produced at storage time, but
+      recomputable as the tree restructures.  Leaves are far more
+      stable than pool nodes, so old data stays meaningful.  See
+      ``LongTermMemory.content_encoder`` (a ``TopKPoolEncoder`` from
+      ``cobweb-private/src/cobweb/leaf_remap.py``).
     - Context instances carry sliding-window context + complexity + content-ref:
           context_instance = {0..ctx_len-1: ctx_before,       (slot mode)
                               ctx_len..2*ctx_len-1: ctx_after, (slot mode)
@@ -44,6 +54,20 @@ import asyncio
 from playwright.async_api import async_playwright
 import re
 from cobweb.cobweb_discrete import CobwebDiscreteTree, CobwebDiscreteNode
+# leaf_remap.py is a recent Python-only addition that lives in *this* repo's
+# cobweb-private/, but the pip-installed cobweb's editable __path__ points
+# at a different copy that doesn't ship it. Append the local cobweb dir to
+# the cobweb package's __path__ so `from cobweb.leaf_remap` resolves
+# regardless of which cobweb wheel is installed.
+import cobweb as _cobweb_pkg
+import os as _os_for_cobweb
+_LOCAL_COBWEB = _os_for_cobweb.path.abspath(_os_for_cobweb.path.join(
+    _os_for_cobweb.path.dirname(__file__), "..", "cobweb-private", "src", "cobweb"))
+if (_os_for_cobweb.path.isdir(_LOCAL_COBWEB)
+        and _LOCAL_COBWEB not in _cobweb_pkg.__path__):
+    _cobweb_pkg.__path__.append(_LOCAL_COBWEB)
+del _cobweb_pkg, _os_for_cobweb, _LOCAL_COBWEB
+from cobweb.leaf_remap import TopKPoolEncoder
 from viz import HTMLCobwebDrawer
 from typing import List, Tuple, Optional, Dict, Any
 from sortedcontainers import SortedList
@@ -648,31 +672,29 @@ class CompositeParseNode(object):
 
     # ------------------------------------------------------------------
     @staticmethod
-    def create_content_instance(left_node, right_node) -> dict:
+    def create_content_instance(left_node, right_node, ltm) -> dict:
         """
         Build the content-hierarchy instance from two children using
-        single leaf pointers (Methodology 4.0).
+        the TopK-Pool representation
+        (``LongTermMemory.content_encoder``).
 
         Layout (2 attributes):
-          Attr 0 : left leaf pointer  {left_label_path: 1}
-          Attr 1 : right leaf pointer {right_label_path: 1}
+          Attr 0 : set of ``ltm.content_top_k`` int ids — the top-scoring
+                   depth-``ltm.content_pool_depth`` context-tree nodes under
+                   the LEFT child's ``context_instance`` (count=1 each).
+          Attr 1 : same for the RIGHT child.
 
-        label_path is a single int (context concept vocab ID).
+        Each id is a stable int minted from the corresponding context
+        node's ``concept_hash``; the encoder maintains a
+        ``set_value_remap`` payload that re-canonicalises ids when the
+        underlying pool node moves out of the depth band (merge above
+        or split). See ``cobweb-private/src/cobweb/leaf_remap.py``.
         """
-        left_lp = getattr(left_node, 'label_path', 0)
-        right_lp = getattr(right_node, 'label_path', 0)
-
-        # Fallback for nodes without label_path set
-        if not left_lp:
-            lbl = left_node.get_label()
-            left_lp = next(iter(lbl.keys()), 0)
-        if not right_lp:
-            lbl = right_node.get_label()
-            right_lp = next(iter(lbl.keys()), 0)
-
+        left_ctx  = left_node.get_context_instance()
+        right_ctx = right_node.get_context_instance()
         return {
-            0: {left_lp: 1} if left_lp != 0 else {0: 0},
-            1: {right_lp: 1} if right_lp != 0 else {0: 0},
+            0: ltm._bag_for_context_inst(left_ctx),
+            1: ltm._bag_for_context_inst(right_ctx),
         }
 
     # ------------------------------------------------------------------
@@ -700,8 +722,9 @@ class CompositeParseNode(object):
                                           In BOW mode the index is 2 instead.
 
         Child expansion information is stored in the **content** hierarchy
-        via path attributes (label_path of left/right children).  No
-        child-ref hidden attributes are needed in the context instance.
+        via the BFSBag-Remap bag-of-K-depth-d-ancestor-ids encoding (see
+        CompositeParseNode.create_content_instance).  No child-ref hidden
+        attributes are needed in the context instance.
 
         Parameters
         ----------
@@ -996,14 +1019,10 @@ class FiniteParseTree(object):
 
             # Single leaf pointer: the context leaf concept this node categorized into
             label_path = _build_label_from_ctx_leaf(leaf_node, self.value_to_id)
-            # Register for LCA similarity in content hierarchy
-            if label_path:
-                self.ltm.content_hierarchy.register_ref_val(label_path, leaf_node)
-                # Also register on context hierarchy in pass 1 so that the
-                # iterative chunk_context loop can resolve these VIDs via LCA
-                # from the very first iteration.
-                if getattr(self.ltm, 'chunk_context', False):
-                    self.ltm.context_hierarchy.register_ref_val(label_path, leaf_node)
+            # Content hierarchy is bag-of-concepts now (no ref_tree) — only
+            # register on context hierarchy if chunk_context wants self-LCA.
+            if label_path and getattr(self.ltm, 'chunk_context', False):
+                self.ltm.context_hierarchy.register_ref_val(label_path, leaf_node)
 
             node = PrimitiveParseNode.create_node(ctx_inst, label, position_idx=i, word_id=wid)
             # For BFS modes, include ALL explored node hashes for viz
@@ -1157,10 +1176,10 @@ class FiniteParseTree(object):
                 if _max_iters > 0 and _iteration >= _max_iters:
                     break
 
-            # Register final label_paths on context hierarchy for self-ref LCA
+            # Register final label_paths on context hierarchy for self-ref
+            # LCA. Content hierarchy no longer uses ref_tree.
             for idx, node in enumerate(primitive_nodes):
                 if node.label_path and idx < len(_ctx_leaves):
-                    self.ltm.content_hierarchy.register_ref_val(node.label_path, _ctx_leaves[idx])
                     self.ltm.context_hierarchy.register_ref_val(
                         node.label_path, _ctx_leaves[idx]
                     )
@@ -1261,7 +1280,7 @@ class FiniteParseTree(object):
             context_inst, self.ltm.context_hierarchy, mode=_cat_mode)
 
         # Step 2: Build and categorize content (for scoring)
-        content_inst = CompositeParseNode.create_content_instance(left_node, right_node)
+        content_inst = CompositeParseNode.create_content_instance(left_node, right_node, self.ltm)
         cnt_leaf, cnt_path, cnt_node_path, cnt_depth_dists = _categorize(
             content_inst, self.ltm.content_hierarchy, mode=_cat_mode)
 
@@ -1422,7 +1441,7 @@ class FiniteParseTree(object):
         # Step 2: Build content instance
         # (matching add_parse_tree step 3, but we don't categorize here —
         # add_parse_tree will rebuild content instances from refreshed labels)
-        content_inst = CompositeParseNode.create_content_instance(left_node, right_node)
+        content_inst = CompositeParseNode.create_content_instance(left_node, right_node, self.ltm)
 
         left_c = getattr(left_node, "complexity", 1)
         right_c = getattr(right_node, "complexity", 1)
@@ -1437,14 +1456,11 @@ class FiniteParseTree(object):
         label = {concept_label: 1} if concept_label is not None else {0: 1}
         path_ids = list(label.keys())
 
-        # Single leaf pointer
+        # Single leaf pointer (kept for chunk_context VID propagation and
+        # for visualisation — the content hierarchy itself no longer uses it).
         _label_path = _build_label_from_ctx_leaf(ctx_leaf, self.value_to_id)
-        # Register for LCA similarity in content hierarchy
-        if _label_path:
-            self.ltm.content_hierarchy.register_ref_val(_label_path, ctx_leaf)
-            # Also register on context hierarchy when chunk_context (self-ref)
-            if getattr(self.ltm, 'chunk_context', False):
-                self.ltm.context_hierarchy.register_ref_val(_label_path, ctx_leaf)
+        if _label_path and getattr(self.ltm, 'chunk_context', False):
+            self.ltm.context_hierarchy.register_ref_val(_label_path, ctx_leaf)
 
         new_node = CompositeParseNode.create_node(
             content_instance=content_inst,
@@ -1678,7 +1694,7 @@ class FiniteParseTree(object):
             left = self._find_root_child_by_index(p["left_word_index"])
             right = self._find_root_child_by_index(p["right_word_index"])
             if left and right:
-                ci = CompositeParseNode.create_content_instance(left, right)
+                ci = CompositeParseNode.create_content_instance(left, right, self.ltm)
                 content_insts.append(ci)
 
         return content_insts, context_insts
@@ -2697,7 +2713,13 @@ class LongTermMemory(object):
                  chunk_context: bool = False, context_n_iterations: int = 0,
                  depth_max_content: int = 1000, depth_max_context: int = 1000,
                  branch_max_content: int = 1000, branch_max_context: int = 1000,
-                 content_attr_weights: dict = None, context_attr_weights: dict = None):
+                 content_attr_weights: dict = None, context_attr_weights: dict = None,
+                 content_pool_depth: int = 4,
+                 content_top_k: int = 5,
+                 content_pool_use_basic_level: bool = False,
+                 content_pool_bl_eval_alpha: float = 10.0,
+                 context_weight_attr: bool = False,
+                 content_weight_attr: bool = False):
         _content_alpha = content_alpha if content_alpha is not None else alpha
         _context_alpha = context_alpha if context_alpha is not None else alpha
         self.content_alpha = _content_alpha
@@ -2707,13 +2729,44 @@ class LongTermMemory(object):
         self.chunk_context = chunk_context
         self.context_n_iterations = context_n_iterations
 
-        # Create context hierarchy first (it serves as ref_tree for content)
-        self.context_hierarchy = CobwebDiscreteTree(_context_alpha, weight_attr=False, depth_max=depth_max_context, branch_max=branch_max_context, attr_weights=context_attr_weights or {})
-        # Content hierarchy uses context hierarchy as ref_tree for LCA similarity
-        self.content_hierarchy = CobwebDiscreteTree(_content_alpha, weight_attr=False, depth_max=depth_max_content, branch_max=branch_max_content, ref_tree=self.context_hierarchy, attr_weights=content_attr_weights or {})
-        # Mark content attrs 0 (left) and 1 (right) as ref attrs for soft matching
-        self.content_hierarchy.set_ref_attr(0)
-        self.content_hierarchy.set_ref_attr(1)
+        # TopK-Pool settings for content instances. Attrs 0/1 carry a
+        # set of ``content_top_k`` context-tree node ids — see
+        # CompositeParseNode.create_content_instance. When
+        # ``content_pool_use_basic_level`` is True, the pool isn't a
+        # fixed depth: instead the encoder uses each leaf's basic-
+        # level ancestor (per-leaf ``get_basic(use_root=True,
+        # eval_alpha=content_pool_bl_eval_alpha)``) so different
+        # branches of the context tree can anchor at different
+        # depths automatically.
+        self.content_pool_depth         = int(content_pool_depth)
+        self.content_top_k              = int(content_top_k)
+        self.content_pool_use_basic_level = bool(content_pool_use_basic_level)
+        self.content_pool_bl_eval_alpha   = float(content_pool_bl_eval_alpha)
+
+        # Create context hierarchy first. ``weight_attr`` controls how
+        # Cobweb's entropy treats missing attributes; the grammar_*
+        # reference tests use True, WEBSTER defaults to False for
+        # backwards compatibility.
+        self.context_hierarchy = CobwebDiscreteTree(_context_alpha, weight_attr=context_weight_attr, depth_max=depth_max_context, branch_max=branch_max_context, attr_weights=context_attr_weights or {})
+        # Content hierarchy is a plain CobwebDiscreteTree.  No ref_tree.
+        # Stored attribute values are stable ints from the encoder's
+        # value_vocab; a ``{int_id → canonical_int_id}`` map is pushed
+        # via ``set_value_remap`` whenever a pool node leaves its depth
+        # band so old av_count entries stay meaningful.
+        self.content_hierarchy = CobwebDiscreteTree(_content_alpha, weight_attr=content_weight_attr, depth_max=depth_max_content, branch_max=branch_max_content, attr_weights=content_attr_weights or {})
+
+        # TopK-Pool encoder. Maintains a cached list of depth-``d``
+        # context-tree nodes; on every query, scores each pool node via
+        # ``log_prob_instance`` and returns the top-K as a set with
+        # count=1 per entry (faithful to ``TopK-Disc-Cnt1``). Survives
+        # context-tree restructuring via the value_remap_dict pattern.
+        self.content_encoder = TopKPoolEncoder(
+            context_tree    = self.context_hierarchy,
+            depth           = self.content_pool_depth,
+            k               = self.content_top_k,
+            use_basic_level = self.content_pool_use_basic_level,
+            bl_eval_alpha   = self.content_pool_bl_eval_alpha,
+        )
 
         # When chunk_context is enabled, context hierarchy uses itself as
         # ref_tree so that label_path values get LCA similarity.
@@ -2746,13 +2799,36 @@ class LongTermMemory(object):
         self._register_concept(self.content_hierarchy.root)
         self._register_concept(self.context_hierarchy.root)
 
-        # drawer for content hierarchy visualization
-        # Single leaf pointer per side (Methodology 4.0)
+        # drawer for content hierarchy visualization. Attrs 0/1 store
+        # actual context-tree leaf ids (BFSBag-LeafStore-Remap), so the
+        # default id_to_value lookup would mis-resolve them to vocab
+        # words. Override with a function that resolves the id back to
+        # its registered leaf concept_hash. Where a remap binding is
+        # available we also show the depth-d ancestor it canonicalises
+        # to, so the rendered tree communicates *both* the stored leaf
+        # and the evaluation-time aggregation target.
         content_headers = ["Left", "Right"]
+        def _content_leaf_display(val_id):
+            if val_id is None:
+                return "?None"
+            try:
+                vid = int(val_id)
+            except (TypeError, ValueError):
+                return f"?{val_id}"
+            if vid == 0:
+                return "EMPTY"
+            leaf_hash = self.content_encoder.value_vocab_inv.get(vid)
+            anc_id    = self.content_encoder.value_remap_dict.get(vid)
+            anc_hash  = (self.content_encoder.value_vocab_inv.get(anc_id)
+                         if anc_id is not None else None)
+            leaf_part = (leaf_hash[:10] + "…") if leaf_hash and len(leaf_hash) > 10 else (leaf_hash or f"L-{vid}")
+            anc_part  = (anc_hash[:10] + "…") if anc_hash and len(anc_hash) > 10 else (anc_hash or "?")
+            return f"{leaf_part}→{anc_part}"
         self.content_drawer = HTMLCobwebDrawer(
             content_headers,
             id_to_value=self.id_to_value,
             value_to_id=self.value_to_id,
+            attr_value_fn={0: _content_leaf_display, 1: _content_leaf_display},
         )
 
         # drawer for context hierarchy visualization
@@ -2780,6 +2856,30 @@ class LongTermMemory(object):
             attr_value_fn={content_ref_attr_idx: _content_ref_display},
             attr_name_overrides={content_ref_attr_idx: "Content-Ref", -2: "Complexity"},
         )
+
+    # ---- content bag-of-concepts helpers --------------------------------
+    #
+    # The content hierarchy uses the **TopK-Pool** representation: attrs
+    # 0/1 store a set of K stable ints, one per top-scoring depth-d node
+    # in the context tree. Identifiers come from the encoder's
+    # ``value_vocab`` (concept_hash → int) so they survive context-tree
+    # restructuring; if a pool node later leaves depth d (because of a
+    # merge above or a split removing it), the encoder pushes a
+    # ``{old_id → new_canonical_id}`` entry through
+    # ``content_hierarchy.set_value_remap`` so old ``av_count`` entries
+    # stay aligned with the current depth-d slice.
+
+    def _bag_for_context_inst(self, ctx_inst: dict) -> dict:
+        """
+        Score every depth-``content_pool_depth`` context-tree node
+        against ``ctx_inst`` (with pool-list caching) and return the
+        ``{int_id: 1.0}`` bag of the top-``content_top_k`` ids. Pushes
+        the up-to-date ``set_value_remap`` payload to
+        ``content_hierarchy`` before returning so downstream Cobweb
+        evaluation canonicalises correctly. Empty/None instance →
+        ``{0: 0}``.
+        """
+        return self.content_encoder.bag_for(ctx_inst, self.content_hierarchy)
 
     # ---- property helpers -----------------------------------------------
 
@@ -2950,9 +3050,13 @@ class LongTermMemory(object):
             leaf, rewrites = self._ifit_and_update_vocab(
                 ctx_inst, self.context_hierarchy, debug=debug)
             ctx_leaf_map[id(node)] = leaf
-            # Propagate context splits to content hierarchy using simple rewrite
-            if rewrites:
-                self._apply_rewrite_rules(self.content_hierarchy, rewrites)
+            # NOTE: do NOT propagate context-hierarchy splits to content_hierarchy
+            # via _apply_rewrite_rules.  Content tree attrs 0/1 store *pool ids*
+            # from the encoder's separate namespace (TopKPoolEncoder.value_vocab),
+            # NOT LTM CONCEPT vids.  The encoder's structure_generation-validated
+            # cache + set_value_remap mechanism handles context-tree changes
+            # correctly.  A blind av_count rewrite here would mis-rewrite pool
+            # ids that happen to coincide numerically with LTM CONCEPT vids.
 
         if debug:
             print(f"  context instances fitted: {len(all_nodes)}")
@@ -2971,11 +3075,10 @@ class LongTermMemory(object):
             if isinstance(node, PrimitiveParseNode):
                 node.label = {node.word_id: 1}
                 node.label_path = _build_label_from_ctx_leaf(ctx_leaf, self.value_to_id)
-                # Register the label_path VID → context leaf for LCA similarity
-                if node.label_path:
-                    self.content_hierarchy.register_ref_val(node.label_path, ctx_leaf)
-                    if self.chunk_context:
-                        self.context_hierarchy.register_ref_val(node.label_path, ctx_leaf)
+                # Content hierarchy uses bag-of-concepts (no ref_tree). Only
+                # context hierarchy still uses label_path for chunk_context.
+                if node.label_path and self.chunk_context:
+                    self.context_hierarchy.register_ref_val(node.label_path, ctx_leaf)
 
             elif isinstance(node, CompositeParseNode) and not node.is_global_root:
                 ctx_hash = ctx_leaf.concept_hash()
@@ -2986,11 +3089,8 @@ class LongTermMemory(object):
                 node.label = {new_concept_label: 1} if new_concept_label else {0: 1}
 
                 node.label_path = _build_label_from_ctx_leaf(ctx_leaf, self.value_to_id)
-                # Register the label_path VID → context leaf for LCA similarity
-                if node.label_path:
-                    self.content_hierarchy.register_ref_val(node.label_path, ctx_leaf)
-                    if self.chunk_context:
-                        self.context_hierarchy.register_ref_val(node.label_path, ctx_leaf)
+                if node.label_path and self.chunk_context:
+                    self.context_hierarchy.register_ref_val(node.label_path, ctx_leaf)
 
                 # Rebuild content_instance from children's refreshed labels
                 children_sorted = list(node.children)
@@ -2998,7 +3098,7 @@ class LongTermMemory(object):
                     left_child = children_sorted[0][1]
                     right_child = children_sorted[1][1]
                     node.content_instance = CompositeParseNode.create_content_instance(
-                        left_child, right_child
+                        left_child, right_child, self
                     )
 
         for _, ch in parse_tree.global_root_node.children:
@@ -3008,9 +3108,12 @@ class LongTermMemory(object):
             print(f"  labels refreshed from context hierarchy")
 
         # -- Step 3: fit content instances --------------------------------
-        # Invalidate cached ref_tree max_depth since context hierarchy may
-        # have changed structure during step 1.
-        self.content_hierarchy.invalidate_ref_cache()
+        # Content hierarchy has no ref_tree.  ``content_encoder`` (a
+        # ``TopKPoolEncoder``) self-invalidates lazily via
+        # ``context_hierarchy.structure_generation``: any content_instance
+        # rebuilt after this point sees the new depth-d pool and the
+        # encoder pushes a fresh ``set_value_remap`` if any prior pool
+        # node has been moved out of the depth band.
         content_leaf_map: dict = {}   # id(comp_node) → content-hierarchy leaf
 
         # Prepare composite nodes for content fitting; optionally shuffle
@@ -3035,7 +3138,7 @@ class LongTermMemory(object):
             right = parse_tree._find_root_child_by_index(p["right_word_index"])
             if left and right:
                 ci = CompositeParseNode.create_content_instance(
-                    left, right)
+                    left, right, self)
                 _leaf, rewrites = self._ifit_and_update_vocab(
                     ci, self.content_hierarchy, debug=debug)
                 if rewrites:
@@ -3152,6 +3255,15 @@ class LongTermMemory(object):
             "id_count": self.id_count,
             "id_to_value": self.id_to_value,
             "value_to_id": self.value_to_id,
+            # TopK-Pool encoder state
+            "content_pool_depth": self.content_pool_depth,
+            "content_top_k": self.content_top_k,
+            "content_pool_use_basic_level": self.content_pool_use_basic_level,
+            "content_pool_bl_eval_alpha":   self.content_pool_bl_eval_alpha,
+            "content_value_vocab": self.content_encoder.value_vocab,
+            "content_value_remap_dict": {
+                str(k): int(v) for k, v in self.content_encoder.value_remap_dict.items()
+            },
         }
 
         meta_path = os.path.join(dirpath, "meta.json")
@@ -3197,10 +3309,35 @@ class LongTermMemory(object):
             depth_max_context=meta.get("depth_max_context", 1000),
             branch_max_content=meta.get("branch_max_content", 1000),
             branch_max_context=meta.get("branch_max_context", 1000),
+            content_pool_depth=meta.get("content_pool_depth",
+                                        meta.get("content_remap_depth", 4)),
+            content_top_k=meta.get("content_top_k",
+                                    meta.get("content_bfs_k", 5)),
+            content_pool_use_basic_level=meta.get(
+                "content_pool_use_basic_level", False),
+            content_pool_bl_eval_alpha=meta.get(
+                "content_pool_bl_eval_alpha", 10.0),
         )
         ltm.id_to_value = meta.get("id_to_value", ltm.id_to_value)
         ltm.value_to_id = meta.get("value_to_id", ltm.value_to_id)
         ltm.id_count = meta.get("id_count", ltm.id_count)
+        # Restore the encoder's persistent vocab + leaf→ancestor remap
+        # so reloaded content trees keep their stored leaf ids meaningful.
+        saved_vocab = meta.get("content_value_vocab", {})
+        ltm.content_encoder.value_vocab = {
+            str(k): int(v) for k, v in saved_vocab.items()
+        }
+        ltm.content_encoder.value_vocab_inv = {
+            int(v): str(k) for k, v in saved_vocab.items()
+        }
+        saved_remap = meta.get("content_value_remap_dict", {})
+        ltm.content_encoder.value_remap_dict = {
+            int(k): int(v) for k, v in saved_remap.items()
+        }
+        if ltm.content_encoder.value_remap_dict:
+            ltm.content_hierarchy.set_value_remap(
+                ltm.content_encoder.value_remap_dict
+            )
 
         # load hierarchies
         content_path = os.path.join(dirpath, "content_tree.json")
@@ -3244,12 +3381,28 @@ class WEBSTER(object):
                  chunk_context: bool = False, context_n_iterations: int = 0,
                  depth_max_content: int = 1000, depth_max_context: int = 1000,
                  branch_max_content: int = 1000, branch_max_context: int = 1000,
-                 content_attr_weights: dict = None, context_attr_weights: dict = None):
+                 content_attr_weights: dict = None, context_attr_weights: dict = None,
+                 content_pool_depth: int = 4,
+                 content_top_k: int = 5,
+                 content_pool_use_basic_level: bool = False,
+                 content_pool_bl_eval_alpha: float = 10.0,
+                 context_weight_attr: bool = False,
+                 content_weight_attr: bool = False):
         """
         Parameters
         ----------
         value_corpus : list
             Initial vocabulary (list of word strings).
+        content_pool_use_basic_level : bool
+            When True, the TopK-Pool encoder treats each leaf's
+            **basic-level ancestor** (per-leaf
+            ``get_basic(use_root=True, eval_alpha=…)``) as that leaf's
+            canonical instead of a fixed depth. Different leaves can
+            anchor at different depths — useful when no single pool
+            depth fits the whole context tree's coarseness.
+        content_pool_bl_eval_alpha : float
+            ``eval_alpha`` forwarded to ``get_basic`` when
+            ``content_pool_use_basic_level`` is True. Default ``10.0``.
         context_length : int
             Number of context-window slots on each side (before/after).
         alpha : float
@@ -3311,6 +3464,12 @@ class WEBSTER(object):
             branch_max_content=branch_max_content, branch_max_context=branch_max_context,
             content_attr_weights=content_attr_weights,
             context_attr_weights=context_attr_weights,
+            content_pool_depth=content_pool_depth,
+            content_top_k=content_top_k,
+            content_pool_use_basic_level=content_pool_use_basic_level,
+            content_pool_bl_eval_alpha=content_pool_bl_eval_alpha,
+            context_weight_attr=context_weight_attr,
+            content_weight_attr=content_weight_attr,
         )
         self.context_length = context_length
         self.threshold = threshold
@@ -3429,7 +3588,9 @@ class WEBSTER(object):
                 return found
         return None
 
-    def generate_sentence(self, masked_sentence: str = "", debug: bool = False) -> List:
+    def generate_sentence(self, masked_sentence: str = "",
+                          start_content_leaf=None,
+                          debug: bool = False) -> List:
         """
         Generate or complete a sentence.
 
@@ -3449,12 +3610,33 @@ class WEBSTER(object):
                (content-ref) → go to step 2 (RECURSE)
           6. Repeat until all leaves are words (sentence complete).
 
+        Args:
+            masked_sentence: optional "the [mask] dog" template — masked
+                regions get filled by the masked-completion path.
+            start_content_leaf: optional **specific** content-tree node
+                to unpack from. When provided, this short-circuits steps
+                1-3 of the from-scratch algorithm — we skip sentence-root
+                sampling AND ``_basic_sample`` (no get_basic, no leaf
+                resampling). The given leaf is treated as if it WERE
+                the basic-level result: we read its left/right bags
+                directly and recurse normally. Use this for
+                "deterministically regenerate the chunk stored at this
+                specific leaf" — the precision-recovery probe in the
+                hollow diagnostic.
+            debug: verbose tracing.
+
         Returns ``[generated_text, FiniteParseTree]``.
         """
 
         _cl  = self.context_length
         _ref_attr  = self.ltm.content_ref_attr  # content-ref attribute index
         _cplx_attr = -2                   # complexity (hidden, negative key)
+
+        # Make sure the encoder's leaf→canonical remap is in sync with
+        # the current context tree before sampling. _sample_path reads
+        # value_remap_dict directly, so a stale remap would route
+        # canonical aggregation to wrong pool ancestors.
+        self.ltm.content_encoder.sync_remap(self.ltm.content_hierarchy)
 
         # ── helpers ───────────────────────────────────────────────────────
 
@@ -3629,16 +3811,32 @@ class WEBSTER(object):
                     k=1)[0]
             return leaf
 
-        def _sample_path(cnt_leaf, attr_idx):
-            """Sample a single path vid from content leaf at attr_idx (0=left, 1=right)."""
+        def _read_canonical_bag(cnt_leaf, attr_idx):
+            """Read the canonical-aggregated bag from a content leaf's attr.
+
+            With the leaf-store TopKPoolEncoder, ``av_count[attr_idx]``
+            stores **stable leaf ids**, but Cobweb's entropy aggregates
+            them by their depth-d canonical via the encoder's
+            ``value_remap_dict``. We mirror that aggregation here so
+            the bag returned matches the entropy-time view of this
+            side: ``{canonical_id: total_count}`` summed across all
+            stored leaves that canonicalise to each ancestor.
+
+            Returns the full bag (or empty dict if no data) — generation
+            uses **all** canonicals jointly via ``_resolve_bag``, not
+            a sampled one. See ``_resolve_bag`` for the matching step.
+            """
             rd = (cnt_leaf.av_count or {}).get(attr_idx, {})
-            pool = {v: w for v, w in rd.items() if v != 0}
-            if not pool:
-                return 0
-            return random.choices(
-                list(pool.keys()),
-                weights=[max(x, 1e-12) for x in pool.values()],
-                k=1)[0]
+            if not rd:
+                return {}
+            enc = self.ltm.content_encoder
+            bag: dict = {}
+            for v, w in rd.items():
+                if v == 0:
+                    continue
+                canonical = enc.value_remap_dict.get(v, v)
+                bag[canonical] = bag.get(canonical, 0.0) + w
+            return bag
 
         # ── context instance builders ────────────────────────────────────
 
@@ -3697,7 +3895,8 @@ class WEBSTER(object):
         #       - CONCEPT-hash → find CONTEXT node → read ITS -1 → recurse
         # ══════════════════════════════════════════════════════════════════
 
-        def _expand(content_ref_str, position, depth=0, max_depth=40):
+        def _expand(content_ref_str, position, depth=0, max_depth=40,
+                    target_complexity=None):
             """Expand a content-ref string into a parse subtree.
 
             Args:
@@ -3705,6 +3904,12 @@ class WEBSTER(object):
                     referencing a content-hierarchy node.
                 position: The position index for this node.
                 depth: Current recursion depth.
+                target_complexity: Expected complexity at this depth.
+                    Passed to ``_resolve_bag`` to anchor the synthetic
+                    instance at the right structural level. Decrements
+                    by 1 at each recursion (binary tree: child = parent
+                    - 1, clamped to ≥ 1). If None, ``_resolve_bag``
+                    falls back to a depth heuristic.
 
             Returns:
                 (node, [all_nodes]) where node is the root of the subtree.
@@ -3740,15 +3945,16 @@ class WEBSTER(object):
             # get_basic → sample a leaf
             sampled_leaf = _basic_sample(cnt_node)
 
-            # Read left (attr 0) and right (attr 1) from sampled content leaf
-            left_pv  = _sample_path(sampled_leaf, 0)
-            right_pv = _sample_path(sampled_leaf, 1)
-
-            left_name  = _name(left_pv)
-            right_name = _name(right_pv)
+            # Read the canonical-aggregated bag for left (attr 0) and
+            # right (attr 1). The bag is the full set of top-K pool
+            # ancestors stored for each side — generation uses *all*
+            # of them jointly via _resolve_bag, not a sampled one.
+            left_bag  = _read_canonical_bag(sampled_leaf, 0)
+            right_bag = _read_canonical_bag(sampled_leaf, 1)
 
             if debug:
-                print(f"  {'  '*depth}expand: L={left_name}  R={right_name}")
+                print(f"  {'  '*depth}expand: |L_bag|={len(left_bag)}  "
+                      f"|R_bag|={len(right_bag)}")
 
             # Create composite node for this level
             comp = CompositeParseNode()
@@ -3757,68 +3963,192 @@ class WEBSTER(object):
             comp.context_length = _cl
             all_nodes = [comp]
 
-            # ── Resolve LEFT child ──
-            left_child_ref = _resolve_path_vid(left_pv, depth + 1)
+            # Children's expected complexity: parent's - 1 (binary tree
+            # rule: complexity = max(children.complexity) + 1).
+            # Clamp at 1 (primitive level). If target_complexity is
+            # None (legacy caller), pass None along.
+            child_cplx = (max(1, target_complexity - 1)
+                          if target_complexity is not None else None)
+
+            # ── Resolve LEFT child via joint bag matching ──
+            left_child_ref = _resolve_bag(left_bag, depth + 1,
+                                          target_complexity=child_cplx)
             left_node, left_sub = _expand(
                 left_child_ref, position - 0.25 / (2 ** depth),
-                depth=depth + 1)
+                depth=depth + 1, target_complexity=child_cplx)
             left_node.set_parent(comp)
             all_nodes.extend(left_sub)
 
-            # ── Resolve RIGHT child ──
-            right_child_ref = _resolve_path_vid(right_pv, depth + 1)
+            # ── Resolve RIGHT child via joint bag matching ──
+            right_child_ref = _resolve_bag(right_bag, depth + 1,
+                                           target_complexity=child_cplx)
             right_node, right_sub = _expand(
                 right_child_ref, position + 0.25 / (2 ** depth),
-                depth=depth + 1)
+                depth=depth + 1, target_complexity=child_cplx)
             right_node.set_parent(comp)
             all_nodes.extend(right_sub)
 
             return comp, all_nodes
 
-        def _resolve_path_vid(path_vid, depth):
-            """Resolve a path_vid to a content-ref string.
+        def _resolve_bag(bag, depth, target_complexity=None):
+            """Resolve a canonical bag → content-ref string via
+            **frontier-categorize**.
 
-            path_vid is from a content leaf's attribute. It's either:
-              - A word vocab ID → return the word string (terminal)
-              - A CONCEPT-<hash> → this references a CONTEXT node.
-                Read that context node's -1 (content-ref) and return it.
+            The bag is ``{canonical_id: count, ...}`` — K context-tree
+            ancestors the encoder selected for this side at training
+            time. Old "pick one canonical, descend, read its
+            content-ref" loses K-1 worth of evidence; instead we
+            treat the K canonicals as a *frontier* and let every one
+            of them weigh in on the content-ref choice:
+
+              1. Resolve bag → live (node, weight) pairs.
+              2. Enumerate the **union** of content-ref values
+                 appearing in any canonical's ``av_count[content_ref]``
+                 — these are the candidate content-refs.
+              3. For each candidate ``c`` (a vocab id pointing at a
+                 word OR ``CONCEPT-{hash}``) compute the
+                 bag-weighted log-prob:
+
+                     score(c) = (1/Σ_F w_F) · Σ_F w_F · log p(content_ref = c | F)
+
+                 where ``log p(content_ref = c | F)`` is
+                 ``F.log_prob_instance({content_ref: {c: 1}})`` —
+                 isolating just the content-ref attribute's
+                 contribution under canonical F.
+              4. Pick ``argmax_c score(c)`` as the resolved
+                 content-ref. If it's a word → caller terminates
+                 recursion; if it's ``CONCEPT-{hash}`` → caller
+                 recurses into that content-tree node.
+
+            ``target_complexity`` is honoured as a **soft tie-break**
+            only: when two candidates score within a small margin,
+            the one whose typical complexity at the canonicals is
+            closer to ``target_complexity`` wins. The structural
+            decision (primitive vs composite) is still driven by what
+            the bag *says* — we never zero out the "terminate" option.
+
+            Empirically (see tests/met5/grammar_decoding_test.py) the
+            naive un-weighted ``mean log p`` over the whole depth-k
+            slice collapses to predicting the most frequent word every
+            time. Bag-count weighting is the natural posterior weight
+            in WEBSTER's case because the encoder already selected
+            the K canonicals that matched this side's context at
+            training time; their counts are the evidence.
             """
-            ref_name = _name(path_vid) if path_vid else None
-
-            if not ref_name or ref_name == "EMPTYNULL" or path_vid == 0:
+            if not bag:
                 raise RuntimeError(
-                    f"Invalid path_vid={path_vid} at depth={depth}. "
+                    f"Empty canonical bag at depth={depth}. "
                     f"Incomplete training data.")
 
-            # Word → return directly
-            if not (isinstance(ref_name, str) and ref_name.startswith("CONCEPT-")):
-                return ref_name
+            enc = self.ltm.content_encoder
+            _ref_attr = self.ltm.content_ref_attr
 
-            # CONCEPT → find context node → read its content-ref
-            ctx_node = _find_ctx(ref_name)
-            if ctx_node is None:
+            # Step 1: live canonical nodes with their bag weights.
+            canonical_pairs: list = []
+            dropped = 0
+            for can_id, weight in bag.items():
+                if can_id == 0 or weight <= 0:
+                    continue
+                can_hash = enc.value_vocab_inv.get(can_id)
+                if can_hash is None:
+                    dropped += 1
+                    continue
+                node = _find_ctx(f"CONCEPT-{can_hash}")
+                if node is None:
+                    dropped += 1
+                    continue
+                canonical_pairs.append((node, float(weight), can_hash))
+
+            if not canonical_pairs:
+                enc.sync_remap(self.ltm.content_hierarchy)
+                for can_id, weight in bag.items():
+                    if can_id == 0 or weight <= 0:
+                        continue
+                    can_id2 = enc.value_remap_dict.get(can_id, can_id)
+                    can_hash = enc.value_vocab_inv.get(can_id2)
+                    if can_hash is None:
+                        continue
+                    node = _find_ctx(f"CONCEPT-{can_hash}")
+                    if node is not None:
+                        canonical_pairs.append((node, float(weight), can_hash))
+                if not canonical_pairs:
+                    raise RuntimeError(
+                        f"Cannot resolve any canonical in bag "
+                        f"({len(bag)} entries) at depth={depth}: all "
+                        f"ancestors orphaned.")
+
+            # Step 2: enumerate candidate content-refs from the
+            # union of frontier av_count[content_ref] across the bag.
+            # This naturally restricts the search to refs the frontier
+            # has ever seen (no global vocab sweep).
+            candidate_vids: set = set()
+            for node, _, _ in canonical_pairs:
+                for vid in (node.av_count.get(_ref_attr, {}) or {}).keys():
+                    if vid != 0:
+                        candidate_vids.add(int(vid))
+            if not candidate_vids:
                 raise RuntimeError(
-                    f"Context node not found for path {ref_name[:50]}. "
-                    f"Split propagation bug or stale vocabulary.")
+                    f"No candidate content-refs across {len(canonical_pairs)} "
+                    f"canonicals at depth={depth}. Train with "
+                    f"threshold='converge'.")
 
-            # If this context node has children (was split after training),
-            # go to a leaf for more specific content-ref
-            if ctx_node.children:
-                cat_leaf = self.ltm.context_hierarchy.categorize(
-                    _empty_ctx(depth))
-                if cat_leaf and not cat_leaf.children:
-                    ctx_node = cat_leaf
+            # Step 3: frontier-categorize each candidate. Build a
+            # *single-attribute* instance (content-ref only) so
+            # log_prob_instance returns purely the content-ref's
+            # contribution under each canonical — no double-counting
+            # of surrounding context (the bag selection already used
+            # surrounding context).
+            total_w = sum(w for _, w, _ in canonical_pairs) or 1.0
+            best_vid, best_score = None, float("-inf")
+            second_score = float("-inf")
+            scores_by_vid: dict = {}   # for tie-break diagnostics
+            for vid in candidate_vids:
+                inst = {_ref_attr: {vid: 1}}
+                score = 0.0
+                for node, weight, _ in canonical_pairs:
+                    score += weight * node.log_prob_instance(inst)
+                score /= total_w
+                scores_by_vid[vid] = score
+                if score > best_score:
+                    second_score = best_score
+                    best_score, best_vid = score, vid
+                elif score > second_score:
+                    second_score = score
 
-            content_ref, is_word = _read_content_ref(ctx_node)
-            if content_ref is None:
+            if best_vid is None:
                 raise RuntimeError(
-                    f"No content-ref on context node "
-                    f"...{str(ctx_node.concept_hash())[-12:]}. "
-                    f"Train with threshold='converge'.")
+                    f"Frontier-categorize produced no winner at depth={depth}.")
+
+            content_ref = (self.ltm.id_to_value[best_vid]
+                            if 0 <= best_vid < len(self.ltm.id_to_value)
+                            else None)
+            if content_ref is None or content_ref == "EMPTYNULL":
+                # Pathological: best vid maps to nothing. Fall back to
+                # the next-best vid that does map.
+                for vid, _sc in sorted(scores_by_vid.items(),
+                                        key=lambda kv: -kv[1]):
+                    if 0 <= vid < len(self.ltm.id_to_value):
+                        cand = self.ltm.id_to_value[vid]
+                        if cand and cand != "EMPTYNULL":
+                            content_ref = cand
+                            best_vid = vid
+                            break
+                if content_ref is None:
+                    raise RuntimeError(
+                        f"No usable content-ref in frontier at depth={depth}.")
+
+            is_word = not (isinstance(content_ref, str)
+                            and content_ref.startswith("CONCEPT-"))
 
             if debug:
                 kind = "word" if is_word else "concept"
-                print(f"  {'  '*depth}ctx→content-ref: {content_ref[:40]} ({kind})")
+                top = max(canonical_pairs, key=lambda p: p[1])
+                margin = best_score - second_score
+                print(f"  {'  '*depth}bag({len(canonical_pairs)} live, "
+                      f"top={top[2][:14]}@{top[1]:.1f}, drop={dropped}, "
+                      f"candidates={len(candidate_vids)}, "
+                      f"margin={margin:.3f})"
+                      f"→content-ref:{content_ref[:40]} ({kind})")
 
             return content_ref
 
@@ -3848,6 +4178,75 @@ class WEBSTER(object):
                     walk(c)
             walk(self.ltm.context_hierarchy.root)
             return results
+
+        # ══════════════════════════════════════════════════════════════════
+        #  UNPACK-FROM-LEAF (deterministic chunk recovery)
+        #
+        #  When the caller hands us a specific content-tree leaf, we
+        #  skip BOTH sentence-root sampling AND ``_basic_sample`` — the
+        #  leaf IS the result of basic-level sampling. We read its
+        #  left/right canonical bags directly, resolve each via
+        #  ``_resolve_bag``, and recurse via ``_expand`` for children.
+        #
+        #  This is the precision-recovery primitive: given that a
+        #  training chunk was supposed to land at a particular leaf,
+        #  does unpacking that leaf re-emit the original tokens?
+        # ══════════════════════════════════════════════════════════════════
+        if start_content_leaf is not None:
+            if debug:
+                lh = str(start_content_leaf.concept_hash())[-12:]
+                print(f"=== UNPACK FROM LEAF ...{lh} ===")
+
+            # Determine a target complexity from the leaf's complexity
+            # attribute (if present) so _resolve_bag's tie-break can
+            # honour structural depth.
+            leaf_cplx = _read_cplx(start_content_leaf)
+
+            left_bag  = _read_canonical_bag(start_content_leaf, 0)
+            right_bag = _read_canonical_bag(start_content_leaf, 1)
+
+            if not left_bag and not right_bag:
+                raise RuntimeError(
+                    f"start_content_leaf has empty left+right bags — "
+                    f"not a composite-storing leaf.")
+
+            global_root = CompositeParseNode.create_global_root()
+            comp = CompositeParseNode()
+            comp.position_idx = 0.5
+            comp.complexity = leaf_cplx
+            comp.context_length = _cl
+            all_nodes = [comp]
+
+            child_cplx = max(1, leaf_cplx - 1) if leaf_cplx else None
+
+            if left_bag:
+                left_ref = _resolve_bag(left_bag, 1,
+                                        target_complexity=child_cplx)
+                left_node, left_sub = _expand(
+                    left_ref, 0.25, depth=1,
+                    target_complexity=child_cplx)
+                left_node.set_parent(comp)
+                all_nodes.extend(left_sub)
+
+            if right_bag:
+                right_ref = _resolve_bag(right_bag, 1,
+                                         target_complexity=child_cplx)
+                right_node, right_sub = _expand(
+                    right_ref, 0.75, depth=1,
+                    target_complexity=child_cplx)
+                right_node.set_parent(comp)
+                all_nodes.extend(right_sub)
+
+            comp.set_parent(global_root)
+            gen_text = " ".join(_words(global_root))
+            if debug:
+                print(f"\nUnpacked: {gen_text}")
+
+            fp = FiniteParseTree(self.ltm, self.context_length)
+            fp.window = gen_text
+            fp.global_root_node = global_root
+            fp.nodes = all_nodes
+            return [gen_text, fp]
 
         # ══════════════════════════════════════════════════════════════════
         #  MASKED SENTENCE COMPLETION
@@ -4021,9 +4420,25 @@ class WEBSTER(object):
                     "No sentence-root context leaves found. "
                     "Train on more data before generating.")
 
-            # Prefer high-complexity roots (full sentences)
+            # Filter out trivially-short roots: a "sentence" should be
+            # at least a few composites deep. Complexity 1 is a single
+            # word; complexity 2 is a two-word chunk. Keep only roots
+            # with complexity ≥ 3 so generation produces sentence-
+            # shaped output rather than fragments. If filtering wipes
+            # out everything, fall back to whatever we have.
+            min_root_cplx = 3
+            filtered = [(n, c) for n, c in sent_roots if c >= min_root_cplx]
+            if filtered:
+                sent_roots = filtered
+
+            # Weight by complexity^2 (favor more complex / longer
+            # sentences) *and* by node.count (favor patterns we've
+            # actually seen often). Without the count factor, a
+            # one-off complexity-10 root dominates a well-supported
+            # complexity-5 root.
             nodes, complexities = zip(*sent_roots)
-            weights = [c ** 2 for c in complexities]
+            weights = [(c ** 2) * max(getattr(n, 'count', 1.0), 1.0)
+                       for n, c in zip(nodes, complexities)]
 
             chosen_idx = random.choices(
                 range(len(nodes)),
@@ -4035,7 +4450,9 @@ class WEBSTER(object):
             if debug:
                 print(f"  Sampled context leaf: "
                       f"...{str(chosen_ctx.concept_hash())[-12:]} "
-                      f"complexity={chosen_cplx}")
+                      f"complexity={chosen_cplx} "
+                      f"(filtered {len(sent_roots)} of "
+                      f"{len(_sentence_root_ctx_leaves())} roots)")
 
             # Read content-ref from the chosen context leaf
             content_ref, is_word = _read_content_ref(chosen_ctx)
@@ -4048,10 +4465,14 @@ class WEBSTER(object):
                 kind = "word" if is_word else "concept"
                 print(f"  content-ref: {content_ref[:40]} ({kind})")
 
-            # Expand: unpack the content-ref recursively
+            # Expand: unpack the content-ref recursively, threading the
+            # chosen sentence-root complexity so each level enforces
+            # the right target complexity in its bag-resolve step.
             global_root = CompositeParseNode.create_global_root()
             try:
-                root_node, all_nodes = _expand(content_ref, 0.5, depth=0)
+                root_node, all_nodes = _expand(
+                    content_ref, 0.5, depth=0,
+                    target_complexity=chosen_cplx)
                 root_node.set_parent(global_root)
             except RuntimeError as e:
                 if debug:

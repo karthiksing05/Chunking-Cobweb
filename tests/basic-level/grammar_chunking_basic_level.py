@@ -1,33 +1,59 @@
 """
-Grammar Chunking basic-level — two content-tree variants side by side.
-======================================================================
+Grammar Chunking basic-level — five content-tree variants side by side.
+=======================================================================
 
 Builds one shared context tree on TEST_GRAMMAR3 tokens, then trains
-*two* content trees and runs the new ``get_basic(use_root=True,
+*four* content trees and runs the new ``get_basic(use_root=True,
 eval_alpha=EVAL_ALPHA)`` pipeline on each so the resulting basic-level
 nodes can be compared head-to-head.
 
 Variants:
-  A) ``TopK-Disc-Cnt1`` (bag-of-context-concepts)
-       For each bigram, attrs 0/1 hold the top-K context-tree pool-node
-       ids at depth TOPK_DEPTH per side. Plain ``CobwebDiscreteTree``,
-       no ref_tree.
+  A) ``TopK-Disc-Cnt1`` (bag-of-context-concepts at fixed depth)
+       Attrs 0/1 = top-K context-tree pool-node ids at depth TOPK_DEPTH
+       per side. Plain ``CobwebDiscreteTree``. NOT incremental: the pool
+       is a fixed-depth slice; ifit-driven structural change at depth ≤
+       TOPK_DEPTH invalidates the pool numbering.
 
-  B) ``WEBSTER`` (leaf-pointer + ref_tree, matches src/parse_mh.py:651)
-       For each bigram, attrs 0/1 hold a single leaf pointer per side —
-       an integer vocab id identifying the context-tree leaf the
-       left/right context instance categorises into. The content tree
-       sets ``ref_tree=context_tree``, declares attrs 0 and 1 as
-       ``ref_attrs``, and registers every context-leaf id via
-       ``register_ref_val``. ``log_prob_instance`` on this content tree
-       then aggregates counts by LCA similarity in the context tree,
-       which is what WEBSTER's content hierarchy actually uses.
+  B) ``WEBSTER`` (single leaf-pointer + ref_tree, matches src/parse_mh.py:651)
+       Attrs 0/1 = single integer leaf id per side. Content tree wires
+       ``ref_tree=context_tree`` + ``set_ref_attr(0/1)`` so
+       ``log_prob_instance`` does LCA-similarity soft matching.
+       Incremental: ``register_ref_val`` re-points ids when leaves split.
+
+  C) ``TopK-Pool-Cache`` (incremental analog of TopK-Disc-Cnt1)
+       Attrs 0/1 = set of TOP_K stable int ids — the top-scoring depth-
+       ``POOL_DEPTH`` context-tree nodes under each side, scored
+       directly via ``log_prob_instance``. Same emission semantics as
+       variant A, but identifiers are minted from each pool node's
+       ``concept_hash`` so they survive context-tree restructuring.
+       When a pool node moves out of the depth band (merged above or
+       split) the encoder pushes a ``{old_id → current_canonical_id}``
+       entry through ``content_tree.set_value_remap`` so old
+       ``av_count`` entries keep accumulating against the right
+       canonical value. Encoded by ``TopKPoolEncoder``
+       (``cobweb-private/src/cobweb/leaf_remap.py``).
+
+  D) ``BFSBag-RefTree`` (BFS K-leaves directly as ref-attr values)
+       Attrs 0/1 = bag of K leaf-pointer ids found by BFS, fed into a
+       content tree with ``ref_tree=context_tree`` + ``set_ref_attr(0/1)``.
+       Soft-matching via LCA similarity. Like WEBSTER but K-wide instead
+       of single-pointer. Incremental: same as WEBSTER plus the
+       BFS-vs-greedy difference.
+
+  E) ``BFSBag-BLRemap`` (BFS K-leaves → remap to each leaf's basic-level)
+       Same BFS step as C and D, but each leaf is hard-remapped to *its
+       own* basic-level node via
+       ``leaf.get_basic(use_root=True, eval_alpha=EVAL_ALPHA)`` cached by
+       ``BasicLevelCache`` (generation-validated). Plain
+       ``CobwebDiscreteTree`` (no ref_tree). Useful when the natural
+       coarse category isn't a fixed depth but varies across the tree.
 
 Outputs (under tests/basic-level/grammar_chunking_basic_level_output/):
-  - topk_disc_cnt1/...  ↘ five files per variant:
-  - webster/...           basic_level_subtrees.png, content_tree_labels.png,
-                          per_subtree_membership.csv, method_summary.txt,
-                          score_by_depth.png
+  - topk_disc_cnt1/...    ↘ five files per variant:
+  - webster/...             basic_level_subtrees.png, content_tree_labels.png,
+  - topk_pool_cache/...     per_subtree_membership.csv, method_summary.txt,
+  - bfsbag_reftree/...      score_by_depth.png
+  - bfsbag_blremap/...
 """
 
 import os
@@ -38,8 +64,13 @@ from collections import Counter
 
 import numpy as np
 import matplotlib
-matplotlib.use("Agg")
+# Leave the default backend in place so the interactive α-slider can
+# pop up (cf. ``corter_gluck_hierarchies.py``). To run the test
+# headless (CI / no display) set ``MPLBACKEND=Agg`` in the environment
+# before invocation — ``plt.savefig`` keeps working on any backend.
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+from matplotlib.widgets import Slider
 
 _HERE    = os.path.dirname(os.path.abspath(__file__))
 _SRC_DIR = os.path.join(_HERE, "..", "..", "src")
@@ -47,6 +78,9 @@ if _SRC_DIR not in sys.path:
     sys.path.insert(0, _SRC_DIR)
 from util.cfg import TEST_GRAMMAR3, generate
 from cobweb.cobweb_discrete import CobwebDiscreteTree
+from cobweb.leaf_remap import (
+    TopKPoolEncoder, BasicLevelCache, bfsbag_blremap_instance,
+)
 
 OUT_DIR = os.path.join(_HERE, "grammar_chunking_basic_level_output")
 os.makedirs(OUT_DIR, exist_ok=True)
@@ -54,8 +88,11 @@ os.makedirs(OUT_DIR, exist_ok=True)
 # ── Constants ────────────────────────────────────────────────────────────────
 N_SENTENCES   = 1000
 WINDOW        = 3
-TOP_K         = 5
-TOPK_DEPTH    = 4
+TOP_K         = 5            # bag width for variant A
+TOPK_DEPTH    = 4            # fixed pool depth for variant A
+BFS_K         = 5            # bag width for variant D (BFSBag-RefTree) + E
+BFS_MAX_NODES = 128          # BFS expansion budget (variants D, E)
+POOL_DEPTH    = 4            # pool depth for variant C (TopK-Pool-Cache)
 ALPHA_CONTEXT = 1e-3
 ALPHA_CONTENT = 1e-3
 EVAL_ALPHA    = 10.0     # for get_basic / expected_pmi (use_root=True)
@@ -294,7 +331,155 @@ print("[B] WEBSTER content tree built.")
 
 
 # ============================================================================
-# BL pipeline + viz (shared between the two variants)
+# Variant C — TopK-Pool-Cache:
+#   Same emission as TopK-Disc-Cnt1 (set of K depth-d node ids scored
+#   directly via log_prob_instance) but with **stable** concept_hash-
+#   derived ids. ``TopKPoolEncoder`` caches the pool list by
+#   ``context_tree.structure_generation`` and pushes a
+#   ``{old_id → current_canonical_id}`` entry through
+#   ``set_value_remap`` whenever a pool node moves out of its depth
+#   band (merge above, split above, or split-at-depth removing the
+#   node). This is the incremental counterpart of variant A.
+# ============================================================================
+
+print(f"\n[C] Setting up TopKPoolEncoder (POOL_DEPTH={POOL_DEPTH}, K={TOP_K}) …")
+encoder_C = TopKPoolEncoder(
+    context_tree=context_tree,
+    depth=POOL_DEPTH,
+    k=TOP_K,
+)
+print(f"  Pool size: {encoder_C.pool_size} depth-{POOL_DEPTH} nodes")
+
+print(f"[C] Building TopK-Pool-Cache content tree "
+      f"(plain CobwebDiscreteTree, alpha={ALPHA_CONTENT}) …")
+content_tree_pool = CobwebDiscreteTree(alpha=ALPHA_CONTENT, weight_attr=True)
+
+
+def topk_pool_inst(inst_L, inst_R):
+    # Defer set_value_remap push during the encoding loop; sync once
+    # after both train and test bags are built.
+    return {0: encoder_C.bag_for(inst_L, None),
+            1: encoder_C.bag_for(inst_R, None)}
+
+
+print("[C] Building TopK-Pool-Cache content instances …")
+pair_train_pool = [topk_pool_inst(L, R) for L, R in zip(train_L, train_R)]
+pair_test_pool  = [topk_pool_inst(L, R) for L, R in zip(test_L,  test_R)]
+encoder_C.sync_remap(content_tree_pool)
+print(f"  Encoder value_vocab: {len(encoder_C.value_vocab)} pool ids; "
+      f"remap_dict entries (non-identity): {len(encoder_C.value_remap_dict)}")
+print(f"  Last refresh stats: {encoder_C.last_refresh_stats}  "
+      f"(moved=pool nodes pushed/pulled to a different depth; "
+      f"rescued=deleted nodes recovered via best-leaf-under-parent; "
+      f"orphaned=cascading deletions left identity-mapped)")
+
+for i, inst in enumerate(pair_train_pool):
+    content_tree_pool.ifit(inst)
+    if (i + 1) % 2000 == 0:
+        print(f"  {i + 1}/{len(pair_train_pool)} inserted")
+print(f"[C] TopK-Pool-Cache content tree built. "
+      f"use_value_remap={content_tree_pool.use_value_remap}")
+
+
+# ============================================================================
+# Variant D — BFSBag-RefTree: BFS K leaves used directly as ref-attr values.
+# ============================================================================
+
+# Per-variant value vocab: leaf concept_hash → int id, plus the actual
+# context-tree leaf node so we can register_ref_val before any ifit.
+leaf_hash_to_id_D: dict = {}
+leaf_id_to_node_D: dict = {}
+
+def _leaf_id_D(h: str, leaf_node) -> int:
+    lid = leaf_hash_to_id_D.get(h)
+    if lid is None:
+        lid = len(leaf_hash_to_id_D) + 1
+        leaf_hash_to_id_D[h] = lid
+        leaf_id_to_node_D[lid] = leaf_node
+    return lid
+
+
+def bfsbag_reftree_inst(inst_L, inst_R):
+    bag = {0: {}, 1: {}}
+    for side_idx, side_inst in ((0, inst_L), (1, inst_R)):
+        for leaf, _score in context_tree.bfs_top_k_leaves(
+                side_inst, BFS_K, BFS_MAX_NODES):
+            lid = _leaf_id_D(leaf.concept_hash(), leaf)
+            bag[side_idx][lid] = bag[side_idx].get(lid, 0.0) + 1.0
+    return bag
+
+
+print("\n[D] Building BFSBag-RefTree content instances …")
+pair_train_reftree = [bfsbag_reftree_inst(L, R) for L, R in zip(train_L, train_R)]
+pair_test_reftree  = [bfsbag_reftree_inst(L, R) for L, R in zip(test_L,  test_R)]
+print(f"  Distinct leaves seen via BFS: {len(leaf_hash_to_id_D)}")
+
+print(f"[D] Building BFSBag-RefTree content tree "
+      f"(ref_tree=context_tree, ref_attrs=[0,1], alpha={ALPHA_CONTENT}) …")
+content_tree_reftree = CobwebDiscreteTree(
+    alpha=ALPHA_CONTENT,
+    weight_attr=False,
+    ref_tree=context_tree,
+)
+content_tree_reftree.set_ref_attr(0)
+content_tree_reftree.set_ref_attr(1)
+for lid, leaf in leaf_id_to_node_D.items():
+    content_tree_reftree.register_ref_val(lid, leaf)
+for i, inst in enumerate(pair_train_reftree):
+    content_tree_reftree.ifit(inst)
+    if (i + 1) % 2000 == 0:
+        print(f"  {i + 1}/{len(pair_train_reftree)} inserted")
+print("[D] BFSBag-RefTree content tree built.")
+
+
+# ============================================================================
+# Variant E — BFSBag-BLRemap: BFS K leaves → remap each to its basic-level
+# node (via leaf.get_basic(use_root=True, eval_alpha=EVAL_ALPHA), cached).
+# Bag of basic-level concept_hashes (multiset). No ref_tree.
+# ============================================================================
+
+print(f"\n[E] Setting up BasicLevelCache (eval_alpha={EVAL_ALPHA}) …")
+bl_cache_E = BasicLevelCache(context_tree, eval_alpha=EVAL_ALPHA)
+
+# Per-variant value vocab: basic-level concept_hash → int id (≥1).
+bl_hash_to_id_E: dict = {}
+def _bl_id(h: str) -> int:
+    lid = bl_hash_to_id_E.get(h)
+    if lid is None:
+        lid = len(bl_hash_to_id_E) + 1
+        bl_hash_to_id_E[h] = lid
+    return lid
+
+
+def bfsbag_blremap_inst(inst_L, inst_R):
+    bag_L_h = bfsbag_blremap_instance(context_tree, inst_L,
+                                      BFS_K, BFS_MAX_NODES, bl_cache_E)
+    bag_R_h = bfsbag_blremap_instance(context_tree, inst_R,
+                                      BFS_K, BFS_MAX_NODES, bl_cache_E)
+    return {0: {_bl_id(h): float(c) for h, c in bag_L_h.items()},
+            1: {_bl_id(h): float(c) for h, c in bag_R_h.items()}}
+
+
+print("[E] Building BFSBag-BLRemap content instances "
+      "(this calls leaf.get_basic on every encountered leaf — slowest setup) …")
+pair_train_blremap = [bfsbag_blremap_inst(L, R) for L, R in zip(train_L, train_R)]
+pair_test_blremap  = [bfsbag_blremap_inst(L, R) for L, R in zip(test_L,  test_R)]
+print(f"  Basic-level target vocab: {len(bl_hash_to_id_E)} distinct BL nodes")
+print(f"  BL cache size: {len(bl_cache_E)}  "
+      f"(gen={context_tree.structure_generation})")
+
+print(f"[E] Building BFSBag-BLRemap content tree "
+      f"(plain CobwebDiscreteTree, alpha={ALPHA_CONTENT}) …")
+content_tree_blremap = CobwebDiscreteTree(alpha=ALPHA_CONTENT, weight_attr=True)
+for i, inst in enumerate(pair_train_blremap):
+    content_tree_blremap.ifit(inst)
+    if (i + 1) % 2000 == 0:
+        print(f"  {i + 1}/{len(pair_train_blremap)} inserted")
+print("[E] BFSBag-BLRemap content tree built.")
+
+
+# ============================================================================
+# BL pipeline + viz (shared between the five variants)
 # ============================================================================
 
 CMAP_POS    = plt.get_cmap("tab10") if N_POS <= 10 else plt.get_cmap("tab20")
@@ -703,12 +888,15 @@ def run_bl_pipeline(content_tree, pair_train, pair_test,
                     f"dom={id2pos[dl]}-{id2pos[dr]}\n")
     print(f"  Summary → {summary_path}")
 
-    return bl_members, len(all_nodes_full)
+    # Return ``all_nodes_full`` itself (not just its length) so the
+    # cross-variant interactive α-slider at the bottom of the script
+    # can re-call ``expected_pmi`` per node at the slider's current α.
+    return bl_members, all_nodes_full
 
 
 # ── Run both variants ────────────────────────────────────────────────────────
 
-bl_topk, n_nodes_topk = run_bl_pipeline(
+bl_topk, nodes_topk = run_bl_pipeline(
     content_tree_topk,  pair_train_topk,  pair_test_topk,
     y_test, test_wL, test_wR,
     out_subdir=os.path.join(OUT_DIR, "topk_disc_cnt1"),
@@ -716,7 +904,7 @@ bl_topk, n_nodes_topk = run_bl_pipeline(
     attr_label_fn=lambda v: f"ctx#{v}",
 )
 
-bl_webster, n_nodes_webster = run_bl_pipeline(
+bl_webster, nodes_webster = run_bl_pipeline(
     content_tree_webster, pair_train_webster, pair_test_webster,
     y_test, test_wL, test_wR,
     out_subdir=os.path.join(OUT_DIR, "webster"),
@@ -724,11 +912,114 @@ bl_webster, n_nodes_webster = run_bl_pipeline(
     attr_label_fn=lambda v: f"leaf#{v}",
 )
 
+bl_pool, nodes_pool = run_bl_pipeline(
+    content_tree_pool, pair_train_pool, pair_test_pool,
+    y_test, test_wL, test_wR,
+    out_subdir=os.path.join(OUT_DIR, "topk_pool_cache"),
+    variant_label=f"TopK-Pool-Cache (K={TOP_K}, depth={POOL_DEPTH})",
+    attr_label_fn=lambda v: f"pool#{v}",
+)
+
+bl_reftree, nodes_reftree = run_bl_pipeline(
+    content_tree_reftree, pair_train_reftree, pair_test_reftree,
+    y_test, test_wL, test_wR,
+    out_subdir=os.path.join(OUT_DIR, "bfsbag_reftree"),
+    variant_label=f"BFSBag-RefTree (K={BFS_K}, ref_tree=context)",
+    attr_label_fn=lambda v: f"leaf#{v}",
+)
+
+bl_blremap, nodes_blremap = run_bl_pipeline(
+    content_tree_blremap, pair_train_blremap, pair_test_blremap,
+    y_test, test_wL, test_wR,
+    out_subdir=os.path.join(OUT_DIR, "bfsbag_blremap"),
+    variant_label=f"BFSBag-BLRemap (K={BFS_K}, target=basic-level)",
+    attr_label_fn=lambda v: f"bl#{v}",
+)
+
 
 # ── Cross-variant comparison line ────────────────────────────────────────────
 print("\n" + "=" * 64)
 print(" Cross-variant comparison")
 print("=" * 64)
-print(f"  TopK-Disc-Cnt1 : {len(bl_topk):>3} BLs  /  {n_nodes_topk:>6} tree nodes")
-print(f"  WEBSTER        : {len(bl_webster):>3} BLs  /  {n_nodes_webster:>6} tree nodes")
-print(f"\nOutputs in {OUT_DIR}/{{topk_disc_cnt1, webster}}/")
+print(f"  TopK-Disc-Cnt1   : {len(bl_topk):>4} BLs  /  {len(nodes_topk):>6} tree nodes")
+print(f"  WEBSTER          : {len(bl_webster):>4} BLs  /  {len(nodes_webster):>6} tree nodes")
+print(f"  TopK-Pool-Cache  : {len(bl_pool):>4} BLs  /  {len(nodes_pool):>6} tree nodes")
+print(f"  BFSBag-RefTree   : {len(bl_reftree):>4} BLs  /  {len(nodes_reftree):>6} tree nodes")
+print(f"  BFSBag-BLRemap   : {len(bl_blremap):>4} BLs  /  {len(nodes_blremap):>6} tree nodes")
+print(f"\nOutputs in {OUT_DIR}/"
+      "{topk_disc_cnt1, webster, topk_pool_cache, bfsbag_reftree, bfsbag_blremap}/")
+
+
+# ── Cross-variant interactive α-slider ──────────────────────────────────────
+# Mirrors corter_gluck_hierarchies.py: overlay every variant's
+# score-by-depth curve on the same axes and sweep
+# ``log_10(eval_alpha)`` to watch all five curves move together.
+# The per-variant static ``score_by_depth.png`` saved inside each
+# variant's subfolder uses the fixed ``EVAL_ALPHA``; this slider is
+# the exploratory companion.
+#
+# BL vertical markers are intentionally **not** drawn here because each
+# variant has its own BL set at different depths — five overlaid
+# vertical-line clouds would render the panel unreadable. The slider
+# is about comparing the depth-score *curves* across variants.
+
+print("\nOpening interactive α-slider (cross-variant overlay)…")
+
+_variant_specs = [
+    ("TopK-Disc-Cnt1",                                 nodes_topk,    "#1f77b4"),
+    ("WEBSTER (leaf-pointer + ref_tree)",              nodes_webster, "#ff7f0e"),
+    (f"TopK-Pool-Cache (K={TOP_K}, depth={POOL_DEPTH})",
+                                                       nodes_pool,    "#2ca02c"),
+    (f"BFSBag-RefTree (K={BFS_K})",                    nodes_reftree, "#d62728"),
+    (f"BFSBag-BLRemap (K={BFS_K})",                    nodes_blremap, "#9467bd"),
+]
+
+fig_sl = plt.figure(figsize=(12, 7))
+gs = gridspec.GridSpec(2, 1, height_ratios=[15, 1], hspace=0.32)
+ax_plot   = fig_sl.add_subplot(gs[0])
+ax_slider = fig_sl.add_subplot(gs[1])
+
+slider = Slider(
+    ax=ax_slider,
+    label="log₁₀(eval_alpha)",
+    valmin=-3, valmax=5,
+    valinit=float(np.log10(EVAL_ALPHA)),
+    valstep=0.05,
+)
+
+
+def _redraw_variants(eval_a):
+    ax_plot.clear()
+    for label, nodes, color in _variant_specs:
+        d2s: dict = {}
+        for n in nodes:
+            d = n.depth()
+            score = n.expected_pmi(0, 0, eval_alpha=eval_a,
+                                   uniform_leaf=False, use_root=True)
+            d2s.setdefault(d, []).append(score)
+        if not d2s:
+            continue
+        depths_sorted = sorted(d2s.keys())
+        means = [float(np.mean(d2s[d])) for d in depths_sorted]
+        ax_plot.plot(depths_sorted, means, marker="o", linewidth=2,
+                      color=color, label=label, zorder=3)
+        for d, m in zip(depths_sorted, means):
+            ax_plot.annotate(f"{m:.2f}", (d, m),
+                              textcoords="offset points", xytext=(0, 6),
+                              fontsize=6, ha="center", color=color)
+    ax_plot.set_xlabel("Tree depth (root = 0)", fontsize=11)
+    ax_plot.set_ylabel(f"Mean expected_pmi  (eval_alpha = {eval_a:.4g})",
+                        fontsize=11)
+    ax_plot.set_title(
+        "Interactive α sweep — score_by_depth across variants",
+        fontsize=12)
+    ax_plot.axhline(0, color="black", linewidth=0.8, linestyle=":",
+                     alpha=0.4)
+    ax_plot.grid(axis="y", alpha=0.25)
+    ax_plot.legend(loc="best", fontsize=8)
+    fig_sl.canvas.draw_idle()
+
+
+slider.on_changed(lambda _val: _redraw_variants(10 ** slider.val))
+_redraw_variants(10 ** slider.valinit)
+plt.show()

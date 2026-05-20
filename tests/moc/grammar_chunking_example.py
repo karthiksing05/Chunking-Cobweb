@@ -33,6 +33,27 @@ Variants (each builds its own content tree):
     TopK-Disc-LogProb   — TopK selected node ids → bag
                           counts = exp(log_prob - max)         → CobwebDiscreteTree
 
+  Incremental BFS-bag (priority-queue BFS via bfs_top_k_leaves):
+    TopK-Pool-Cache     — incremental analog of TopK-Disc-Cnt1. Every
+                          context-tree node at depth d is scored
+                          directly via log_prob_instance and the top-K
+                          are emitted as a set with count=1 per id.
+                          Ids are stable concept_hash-derived ints; if
+                          a pool node leaves depth d (merge above /
+                          split-at-depth / split-above) the encoder
+                          pushes a {old_id → current_canonical_id}
+                          entry through set_value_remap so old
+                          av_count entries keep accumulating against
+                          the right canonical value. Encoded by
+                          TopKPoolEncoder.
+    BFSBag-BLRemap      — bfs_top_k_leaves(K, max_nodes) → each leaf is
+                          hard-remapped to *its own* basic-level node via
+                          leaf.get_basic(use_root=True,
+                          eval_alpha=BL_EVAL_ALPHA), cached by
+                          BasicLevelCache. Plain CobwebDiscreteTree (no
+                          ref_tree). Captures variable-coarseness
+                          categorisation when no single REMAP_DEPTH fits.
+
 Evaluation mirrors grammar_example.py: extract BFS-DZ_CONTENT nodes from
 each content tree, compute per-node log_prob for each pair, then linear
 probe + KNN against the (left_POS, right_POS) flattened class label.
@@ -43,6 +64,7 @@ import sys
 import csv
 import math
 import random
+import time
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
@@ -61,6 +83,9 @@ if _SRC_DIR not in sys.path:
 from util.cfg import TEST_GRAMMAR3, generate
 from cobweb.cobweb_discrete   import CobwebDiscreteTree
 from cobweb.cobweb_continuous import CobwebContinuousTree
+from cobweb.leaf_remap        import (
+    TopKPoolEncoder, BasicLevelCache, bfsbag_blremap_instance,
+)
 
 OUT_DIR  = os.path.join(_HERE, "grammar_chunking_output")
 ARR_DIR  = os.path.join(OUT_DIR, "arrays")
@@ -73,10 +98,14 @@ N_SENTENCES = 1000
 WINDOW      = 3       # context half-window  (offsets ±1, ±2, ±3, exclude self)
 DZ_CONTEXT  = 128     # context tree BFS / depth target
 DZ_CONTENT  = 128     # content tree BFS-feature target for downstream eval
-TOP_K       = 5      # per-instance TopK sparsification on context tree
+TOP_K       = 7      # per-instance TopK sparsification on context tree
 TOPK_DEPTH  = 4       # fixed depth in context tree to pull the TopK pool from
                       # (clamped to deepest available if tree is shallower)
 PATH_DEPTH  = 6       # truncation depth for path-based baselines
+BFS_K         = 7     # bag width for BFSBag-* variants
+BFS_MAX_NODES = 128   # BFS expansion budget for BFSBag-* (matches DZ_CONTEXT)
+REMAP_DEPTH   = 4     # ancestor depth for the BFSBag-Remap remap step
+BL_EVAL_ALPHA = 10.0  # eval_alpha for BFSBag-BLRemap's get_basic(use_root=True)
 SEED        = 42
 random.seed(SEED)
 np.random.seed(SEED)
@@ -90,6 +119,8 @@ ALPHA_BFS_CONT            = 1e-3
 ALPHA_TOPK_CONT           = 1e-3
 ALPHA_TOPK_DISC_CNT1      = 1e-3
 ALPHA_TOPK_DISC_LOGPROB   = 1e-3
+ALPHA_BFSBAG_REMAP        = 1e-3
+ALPHA_BFSBAG_BLREMAP      = 1e-3
 
 # ── Generate corpus ───────────────────────────────────────────────────────────
 print(f"Generating {N_SENTENCES} sentences from TEST_GRAMMAR3 …")
@@ -464,6 +495,71 @@ topk_disc_logprob_train = _disc_list_from_topk(topk_idx_train_L, topk_idx_train_
                                                _pool_train_L, _pool_train_R, "logprob")
 topk_disc_logprob_test  = _disc_list_from_topk(topk_idx_test_L,  topk_idx_test_R,
                                                _pool_test_L,  _pool_test_R,  "logprob")
+
+
+# ── BFSBag-* encodings (BFS K leaves per side from the context tree) ──────────
+# Uses CobwebDiscreteTree.bfs_top_k_leaves(inst, k, max_nodes) — a
+# priority-queue BFS that returns up to K leaves under the query, bounded by
+# max_nodes pops (same style as tree.log_prob).
+#
+print("\nBuilding BFSBag-* encodings (K=%d, max_nodes=%d) …" % (BFS_K, BFS_MAX_NODES))
+
+# Variant: TopK-Pool-Cache (incremental analog of TopK-Disc-Cnt1)
+# Cached pool of depth-d context-tree nodes; for each query, score every
+# pool node via log_prob_instance and emit a set of the top-K stable
+# concept-hash ids. The encoder maintains a {pool_id → canonical_id}
+# remap in lockstep that survives merges / splits / deletions in the
+# context tree (see TopKPoolEncoder for details).
+_pool_encoder_moc       = TopKPoolEncoder(
+    context_tree=context_tree, depth=REMAP_DEPTH, k=BFS_K,
+)
+_pool_content_tree_moc  = CobwebDiscreteTree(
+    alpha=ALPHA_BFSBAG_REMAP, weight_attr=True,
+)
+print(f"  TopK-Pool-Cache : pool size = {_pool_encoder_moc.pool_size} "
+      f"depth-{REMAP_DEPTH} nodes, K={BFS_K}")
+
+def _topk_pool_inst(inst_L, inst_R):
+    # Defer the set_value_remap push (content_tree=None) — we sync once
+    # after both train and test bags are built.
+    return {0: _pool_encoder_moc.bag_for(inst_L, None),
+            1: _pool_encoder_moc.bag_for(inst_R, None)}
+
+bfsbag_remap_train = [_topk_pool_inst(L, R) for L, R in zip(train_L, train_R)]
+bfsbag_remap_test  = [_topk_pool_inst(L, R) for L, R in zip(test_L,  test_R)]
+_pool_encoder_moc.sync_remap(_pool_content_tree_moc)
+print(f"  TopK-Pool-Cache : value_vocab={len(_pool_encoder_moc.value_vocab)} pool ids, "
+      f"remap_dict={len(_pool_encoder_moc.value_remap_dict)} (non-identity), "
+      f"use_value_remap={_pool_content_tree_moc.use_value_remap}")
+print(f"  TopK-Pool-Cache last refresh stats: {_pool_encoder_moc.last_refresh_stats}  "
+      f"(moved/rescued/orphaned)")
+
+# Variant: BFSBag-BLRemap (remap each BFS-leaf to its basic-level ancestor)
+_bl_cache_moc        = BasicLevelCache(context_tree, eval_alpha=BL_EVAL_ALPHA)
+_blremap_hash_to_id  : dict = {}
+def _blremap_id_moc(h: str) -> int:
+    lid = _blremap_hash_to_id.get(h)
+    if lid is None:
+        lid = len(_blremap_hash_to_id) + 1
+        _blremap_hash_to_id[h] = lid
+    return lid
+
+def _bfsbag_blremap_inst(inst_L, inst_R):
+    bag_L = bfsbag_blremap_instance(context_tree, inst_L,
+                                    BFS_K, BFS_MAX_NODES, _bl_cache_moc)
+    bag_R = bfsbag_blremap_instance(context_tree, inst_R,
+                                    BFS_K, BFS_MAX_NODES, _bl_cache_moc)
+    return {0: {_blremap_id_moc(h): float(c) for h, c in bag_L.items()},
+            1: {_blremap_id_moc(h): float(c) for h, c in bag_R.items()}}
+
+print("  Building BFSBag-BLRemap instances "
+      "(calls leaf.get_basic for every new BFS-leaf — slowest setup) …")
+_t = time.time()
+bfsbag_blremap_train = [_bfsbag_blremap_inst(L, R) for L, R in zip(train_L, train_R)]
+bfsbag_blremap_test  = [_bfsbag_blremap_inst(L, R) for L, R in zip(test_L,  test_R)]
+print(f"  BFSBag-BLRemap : bl_vocab={len(_blremap_hash_to_id)} "
+      f"bl_cache_size={len(_bl_cache_moc)}  built in {time.time() - _t:.1f}s")
+
 print("  Per-variant pair instances built.")
 
 
@@ -512,6 +608,25 @@ tree_topk_disc_logprob = train_disc_content("TopK-Disc-LogProb",
                                             ALPHA_TOPK_DISC_LOGPROB,
                                             topk_disc_logprob_train)
 
+# TopK-Pool-Cache: pre-created above as ``_pool_content_tree_moc`` so the
+# encoder's set_value_remap pushes land on the actual tree object.
+# Train in place — same fit loop as the other disc variants.
+tree_bfsbag_remap = _pool_content_tree_moc
+print(f"\n[TopK-Pool-Cache] Training pre-created CobwebDiscreteTree "
+      f"(alpha={ALPHA_BFSBAG_REMAP}, n_train={len(bfsbag_remap_train)}) …")
+for _i, _inst in enumerate(bfsbag_remap_train):
+    tree_bfsbag_remap.ifit(_inst)
+    if (_i + 1) % 2000 == 0:
+        print(f"  {_i + 1}/{len(bfsbag_remap_train)} inserted")
+print(f"[TopK-Pool-Cache] Tree built. use_value_remap="
+      f"{tree_bfsbag_remap.use_value_remap}")
+
+# BFSBag-BLRemap: plain CobwebDiscreteTree (no ref_tree).  Attribute values
+# are integer ids for *basic-level* targets (one per leaf, found via
+# leaf.get_basic(use_root=True, eval_alpha=BL_EVAL_ALPHA)).
+tree_bfsbag_blremap = train_disc_content("BFSBag-BLRemap",
+                                         ALPHA_BFSBAG_BLREMAP, bfsbag_blremap_train)
+
 
 # ── Extract BFS-DZ_CONTENT features per content tree ──────────────────────────
 _empty_lbl = np.zeros(0, dtype=np.float32)
@@ -542,20 +657,36 @@ print("\nEncoding pair → content-tree BFS features …")
 
 
 def _encode_disc_variant(name, tree, train_insts, test_insts):
+    t0 = time.time()
     nodes = bfs_or_root(tree, DZ_CONTENT)
-    print(f"  [{name}] BFS-{DZ_CONTENT}: {len(nodes)} nodes")
+    print(f"  [{name}] BFS-{DZ_CONTENT}: {len(nodes)} nodes", flush=True)
+    print(f"  [{name}]   encoding train ({len(train_insts)} pairs) …", flush=True)
+    t1 = time.time()
     Z_tr_raw = encode_disc(train_insts, nodes)
+    print(f"  [{name}]   train encoded in {time.time() - t1:.1f}s", flush=True)
+    print(f"  [{name}]   encoding test  ({len(test_insts)} pairs) …", flush=True)
+    t1 = time.time()
     Z_te_raw = encode_disc(test_insts,  nodes)
+    print(f"  [{name}]   test  encoded in {time.time() - t1:.1f}s", flush=True)
     sc = StandardScaler().fit(Z_tr_raw)
+    print(f"  [{name}]   total {time.time() - t0:.1f}s", flush=True)
     return sc.transform(Z_tr_raw), sc.transform(Z_te_raw), nodes
 
 
 def _encode_cont_variant(name, tree, train_vecs, test_vecs):
+    t0 = time.time()
     nodes = bfs_or_root(tree, DZ_CONTENT)
-    print(f"  [{name}] BFS-{DZ_CONTENT}: {len(nodes)} nodes")
+    print(f"  [{name}] BFS-{DZ_CONTENT}: {len(nodes)} nodes", flush=True)
+    print(f"  [{name}]   encoding train ({train_vecs.shape[0]} pairs) …", flush=True)
+    t1 = time.time()
     Z_tr_raw = encode_cont(train_vecs, nodes)
+    print(f"  [{name}]   train encoded in {time.time() - t1:.1f}s", flush=True)
+    print(f"  [{name}]   encoding test  ({test_vecs.shape[0]} pairs) …", flush=True)
+    t1 = time.time()
     Z_te_raw = encode_cont(test_vecs,  nodes)
+    print(f"  [{name}]   test  encoded in {time.time() - t1:.1f}s", flush=True)
     sc = StandardScaler().fit(Z_tr_raw)
+    print(f"  [{name}]   total {time.time() - t0:.1f}s", flush=True)
     return sc.transform(Z_tr_raw), sc.transform(Z_te_raw), nodes
 
 
@@ -574,6 +705,10 @@ Z_tkdc_tr,    Z_tkdc_te,    nodes_tkdc    = _encode_disc_variant(
 Z_tkdlp_tr,   Z_tkdlp_te,   nodes_tkdlp   = _encode_disc_variant(
     "TopK-Disc-LogProb",tree_topk_disc_logprob,topk_disc_logprob_train,
     topk_disc_logprob_test)
+Z_bbrm_tr,    Z_bbrm_te,    nodes_bbrm    = _encode_disc_variant(
+    "TopK-Pool-Cache",  tree_bfsbag_remap,    bfsbag_remap_train,    bfsbag_remap_test)
+Z_bbbl_tr,    Z_bbbl_te,    nodes_bbbl    = _encode_disc_variant(
+    "BFSBag-BLRemap",   tree_bfsbag_blremap,  bfsbag_blremap_train,  bfsbag_blremap_test)
 
 # Save all feature arrays ------------------------------------------------------
 for name, Ztr, Zte in [
@@ -584,6 +719,8 @@ for name, Ztr, Zte in [
     ("tkc",     Z_tkc_tr,     Z_tkc_te),
     ("tkdc",    Z_tkdc_tr,    Z_tkdc_te),
     ("tkdlp",   Z_tkdlp_tr,   Z_tkdlp_te),
+    ("bbrm",    Z_bbrm_tr,    Z_bbrm_te),
+    ("bbbl",    Z_bbbl_tr,    Z_bbbl_te),
 ]:
     np.save(os.path.join(ARR_DIR, f"Z_{name}_train.npy"), Ztr)
     np.save(os.path.join(ARR_DIR, f"Z_{name}_test.npy"),  Zte)
@@ -645,6 +782,11 @@ for short, lbl, Ztr, Zte in [
                                                                 Z_tkdc_tr,   Z_tkdc_te),
     ("tkdlp",   f"TopK-Disc-LogProb (disc, k={TOP_K}, depth={topk_depth})",
                                                                 Z_tkdlp_tr,  Z_tkdlp_te),
+    ("bbrm",    f"TopK-Pool-Cache (disc, K={BFS_K}, depth={REMAP_DEPTH}, "
+                f"stable_concept_hash ids)",                    Z_bbrm_tr,   Z_bbrm_te),
+    ("bbbl",    f"BFSBag-BLRemap (disc, K={BFS_K}, max_nodes={BFS_MAX_NODES}, "
+                f"target=basic-level, bl_eval_α={BL_EVAL_ALPHA})",
+                                                                Z_bbbl_tr,   Z_bbbl_te),
 ]:
     print(f"  evaluating {lbl} …")
     lin_overall, lin_per = linear_probe_per_class(Ztr, y_train, Zte, y_test)
@@ -852,6 +994,8 @@ for short, tree, train_data, descend_fn in [
     ("topk_cont",         tree_topk_cont,        topk_cont_train,        descend_layout_cont),
     ("topk_disc_cnt1",    tree_topk_disc_cnt1,   topk_disc_cnt1_train,   descend_layout_disc),
     ("topk_disc_logprob", tree_topk_disc_logprob,topk_disc_logprob_train,descend_layout_disc),
+    ("topk_pool_cache",   tree_bfsbag_remap,     bfsbag_remap_train,     descend_layout_disc),
+    ("bfsbag_blremap",    tree_bfsbag_blremap,   bfsbag_blremap_train,   descend_layout_disc),
 ]:
     all_nodes, children_of, depth_of = make_layout(tree.root, max_depth=3)
     cL, cR = compute_pair_label_counts_idx(all_nodes, children_of,
@@ -880,6 +1024,10 @@ METHODS = [
      results["tkdc"]["label"],   "X-", "#17becf"),
     (Z_tkdlp_tr,   Z_tkdlp_te,   results["tkdlp"]["lin_per"],   results["tkdlp"]["knn_accs"],
      results["tkdlp"]["label"],  "p-", "#8c564b"),
+    (Z_bbrm_tr,    Z_bbrm_te,    results["bbrm"]["lin_per"],    results["bbrm"]["knn_accs"],
+     results["bbrm"]["label"],   "*-", "#e377c2"),
+    (Z_bbbl_tr,    Z_bbbl_te,    results["bbbl"]["lin_per"],    results["bbbl"]["knn_accs"],
+     results["bbbl"]["label"],   "1-", "#bcbd22"),
 ]
 n_meth = len(METHODS)
 

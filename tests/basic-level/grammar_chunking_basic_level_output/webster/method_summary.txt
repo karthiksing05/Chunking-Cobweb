@@ -5,94 +5,97 @@
 
 Train pairs: 8605
 Test  pairs: 2292
-Content tree nodes: 16823
+Content tree nodes: 16785
 
-88 unique basic-level nodes:
-  [ 0] depth= 3  count=   624  members= 322  dom=RelPro-V
-  [ 1] depth=104  count=     2  members= 287  dom=N-RelPro
-  [ 2] depth= 2  count=   631  members= 209  dom=Adj-Adj
-  [ 3] depth= 3  count=   701  members= 207  dom=Det-Adj
-  [ 4] depth= 4  count=   465  members= 206  dom=Det-N
-  [ 5] depth= 2  count=   536  members= 189  dom=Adj-Adj
-  [ 6] depth= 3  count=   596  members=  89  dom=V-Det
-  [ 7] depth=94  count=     2  members=  85  dom=V-Det
-  [ 8] depth=103  count=     1  members=  71  dom=N-RelPro
-  [ 9] depth=71  count=     1  members=  63  dom=V-P
-  [10] depth= 3  count=  1000  members=  60  dom=Adj-N
-  [11] depth= 3  count=   710  members=  51  dom=N-RelPro
-  [12] depth=106  count=     1  members=  44  dom=RelPro-V
-  [13] depth= 4  count=   259  members=  31  dom=Det-N
-  [14] depth=92  count=     1  members=  30  dom=V-P
-  [15] depth=69  count=     3  members=  29  dom=V-P
-  [16] depth=53  count=     1  members=  23  dom=P-Det
-  [17] depth=140  count=     1  members=  23  dom=Det-N
-  [18] depth=14  count=     1  members=  22  dom=V-P
-  [19] depth=83  count=    13  members=  17  dom=P-Det
-  [20] depth=83  count=     1  members=  16  dom=V-P
+91 unique basic-level nodes:
+  [ 0] depth= 3  count=   624  members= 316  dom=RelPro-V
+  [ 1] depth=105  count=     1  members= 315  dom=N-RelPro
+  [ 2] depth= 2  count=   631  members= 210  dom=Adj-Adj
+  [ 3] depth= 3  count=   701  members= 209  dom=Det-Adj
+  [ 4] depth= 2  count=   536  members= 191  dom=Adj-Adj
+  [ 5] depth=88  count=     3  members= 132  dom=Det-N
+  [ 6] depth= 3  count=   710  members= 103  dom=N-RelPro
+  [ 7] depth=93  count=     1  members=  83  dom=V-Det
+  [ 8] depth= 3  count=   596  members=  81  dom=V-Det
+  [ 9] depth=69  count=     1  members=  63  dom=V-P
+  [10] depth= 3  count=  1005  members=  63  dom=Adj-N
+  [11] depth= 4  count=   464  members=  49  dom=Adj-N
+  [12] depth=105  count=     1  members=  44  dom=RelPro-V
+  [13] depth=91  count=     1  members=  26  dom=V-P
+  [14] depth=67  count=     3  members=  24  dom=V-P
+  [15] depth=52  count=     1  members=  23  dom=P-Det
+  [16] depth=14  count=     1  members=  22  dom=V-P
+  [17] depth=89  count=     1  members=  21  dom=Det-N
+  [18] depth= 4  count=   259  members=  21  dom=V-V
+  [19] depth=140  count=     1  members=  21  dom=Det-N
+  [20] depth=82  count=    13  members=  17  dom=P-Det
   [21] depth= 3  count=   869  members=  15  dom=N-V
-  [22] depth= 3  count=   532  members=  13  dom=N-V
-  [23] depth=20  count=     1  members=  13  dom=P-Det
-  [24] depth= 2  count=   962  members=  12  dom=P-Det
-  [25] depth= 2  count=  1034  members=  11  dom=V-Det
-  [26] depth= 3  count=   486  members=  10  dom=Det-Adj
-  [27] depth=94  count=     1  members=   9  dom=P-Det
-  [28] depth=53  count=     1  members=   7  dom=P-Det
-  [29] depth=75  count=     1  members=   7  dom=Det-Adj
-  [30] depth= 3  count=   942  members=   7  dom=Det-Adj
-  [31] depth=66  count=     1  members=   6  dom=P-Det
-  [32] depth=111  count=     1  members=   6  dom=RelPro-V
-  [33] depth=88  count=     1  members=   6  dom=V-P
-  [34] depth=165  count=     1  members=   6  dom=N-RelPro
-  [35] depth=19  count=     1  members=   5  dom=Det-Adj
-  [36] depth=58  count=     1  members=   5  dom=Det-N
-  [37] depth=15  count=     1  members=   4  dom=Adj-N
-  [38] depth= 5  count=     1  members=   4  dom=Det-N
-  [39] depth=80  count=     1  members=   4  dom=Adj-N
-  [40] depth=25  count=     1  members=   4  dom=V-Det
-  [41] depth=54  count=     1  members=   3  dom=V-Det
-  [42] depth=148  count=     1  members=   3  dom=Det-N
-  [43] depth= 4  count=   496  members=   3  dom=Det-N
-  [44] depth=134  count=     1  members=   3  dom=Det-N
-  [45] depth=174  count=     1  members=   2  dom=V-Det
-  [46] depth= 4  count=     1  members=   2  dom=Det-Adj
-  [47] depth= 5  count=     1  members=   2  dom=V-V
-  [48] depth=56  count=     1  members=   2  dom=V-V
-  [49] depth= 5  count=     1  members=   2  dom=Adj-N
-  [50] depth=50  count=     1  members=   2  dom=V-Det
-  [51] depth=87  count=     1  members=   2  dom=V-Det
-  [52] depth=16  count=     1  members=   2  dom=Det-V
-  [53] depth=94  count=     1  members=   2  dom=N-RelPro
-  [54] depth=118  count=     1  members=   1  dom=N-V
-  [55] depth=16  count=     1  members=   1  dom=V-P
-  [56] depth=136  count=     1  members=   1  dom=P-Det
-  [57] depth= 5  count=     1  members=   1  dom=V-V
-  [58] depth=16  count=     1  members=   1  dom=Adj-N
-  [59] depth=80  count=     1  members=   1  dom=Det-N
-  [60] depth=80  count=     1  members=   1  dom=Det-Adj
-  [61] depth=117  count=     1  members=   1  dom=RelPro-V
-  [62] depth=89  count=     1  members=   1  dom=Adj-Adj
-  [63] depth=25  count=     1  members=   1  dom=N-RelPro
-  [64] depth=27  count=     1  members=   1  dom=V-P
-  [65] depth=165  count=     1  members=   1  dom=Adj-Adj
-  [66] depth= 5  count=     1  members=   1  dom=Det-V
-  [67] depth=70  count=     1  members=   1  dom=V-P
-  [68] depth=79  count=     1  members=   1  dom=V-V
-  [69] depth=102  count=     1  members=   1  dom=RelPro-V
-  [70] depth=98  count=     1  members=   1  dom=N-RelPro
-  [71] depth=170  count=     1  members=   1  dom=V-Det
-  [72] depth=88  count=     1  members=   1  dom=Det-N
-  [73] depth=67  count=     1  members=   1  dom=V-Det
-  [74] depth=47  count=     1  members=   1  dom=RelPro-V
-  [75] depth= 4  count=   464  members=   1  dom=Adj-N
-  [76] depth=17  count=     4  members=   1  dom=N-V
-  [77] depth= 5  count=     1  members=   1  dom=V-P
-  [78] depth= 6  count=     1  members=   1  dom=V-Det
-  [79] depth=79  count=     1  members=   1  dom=N-V
-  [80] depth=86  count=     1  members=   1  dom=Adj-Adj
-  [81] depth=164  count=     1  members=   1  dom=V-Det
-  [82] depth=63  count=     9  members=   1  dom=V-P
-  [83] depth= 9  count=     1  members=   1  dom=Adj-N
-  [84] depth=82  count=     1  members=   1  dom=Adj-N
-  [85] depth=86  count=     1  members=   1  dom=V-V
-  [86] depth=108  count=     6  members=   1  dom=V-V
-  [87] depth=33  count=     1  members=   1  dom=Adj-Adj
+  [22] depth=83  count=     1  members=  15  dom=V-P
+  [23] depth= 3  count=   532  members=  14  dom=N-V
+  [24] depth=88  count=     1  members=  13  dom=V-P
+  [25] depth=21  count=     1  members=  13  dom=P-Det
+  [26] depth= 2  count=  1034  members=  12  dom=V-Det
+  [27] depth= 2  count=   962  members=  12  dom=P-Det
+  [28] depth=99  count=     1  members=  10  dom=Det-Adj
+  [29] depth= 3  count=   486  members=   9  dom=Det-Adj
+  [30] depth=18  count=    12  members=   8  dom=Det-N
+  [31] depth=21  count=     1  members=   8  dom=Det-N
+  [32] depth=22  count=     1  members=   7  dom=P-Det
+  [33] depth=76  count=     1  members=   7  dom=Det-Adj
+  [34] depth= 3  count=   937  members=   7  dom=Det-Adj
+  [35] depth= 4  count=   496  members=   7  dom=Det-N
+  [36] depth=64  count=     1  members=   6  dom=P-Det
+  [37] depth=110  count=     1  members=   6  dom=RelPro-V
+  [38] depth=19  count=     1  members=   5  dom=Det-Adj
+  [39] depth=163  count=     1  members=   5  dom=N-RelPro
+  [40] depth=12  count=     1  members=   4  dom=Adj-N
+  [41] depth=79  count=     1  members=   4  dom=Adj-N
+  [42] depth=25  count=     1  members=   4  dom=V-Det
+  [43] depth=53  count=     1  members=   3  dom=V-Det
+  [44] depth=53  count=     1  members=   3  dom=N-Det
+  [45] depth=146  count=     1  members=   3  dom=Det-N
+  [46] depth=134  count=     1  members=   3  dom=Det-N
+  [47] depth=174  count=     1  members=   2  dom=V-Det
+  [48] depth=83  count=     1  members=   2  dom=Det-N
+  [49] depth=83  count=     1  members=   2  dom=Adj-Adj
+  [50] depth= 4  count=     1  members=   2  dom=Det-Adj
+  [51] depth= 5  count=     1  members=   2  dom=V-V
+  [52] depth=166  count=     1  members=   2  dom=Adj-Adj
+  [53] depth= 7  count=     1  members=   2  dom=Adj-N
+  [54] depth=50  count=     1  members=   2  dom=V-Det
+  [55] depth=86  count=     1  members=   2  dom=V-Det
+  [56] depth=16  count=     1  members=   2  dom=Det-V
+  [57] depth=94  count=     1  members=   2  dom=N-RelPro
+  [58] depth=117  count=     1  members=   1  dom=N-V
+  [59] depth=50  count=     1  members=   1  dom=Det-Adj
+  [60] depth=53  count=     3  members=   1  dom=N-V
+  [61] depth=160  count=     1  members=   1  dom=V-P
+  [62] depth=10  count=     1  members=   1  dom=V-P
+  [63] depth=136  count=     1  members=   1  dom=P-Det
+  [64] depth=16  count=     1  members=   1  dom=Adj-N
+  [65] depth=80  count=     1  members=   1  dom=Det-N
+  [66] depth=38  count=     1  members=   1  dom=Det-Adj
+  [67] depth=115  count=     1  members=   1  dom=RelPro-V
+  [68] depth=88  count=     1  members=   1  dom=Adj-Adj
+  [69] depth=25  count=     1  members=   1  dom=V-P
+  [70] depth=68  count=     1  members=   1  dom=V-P
+  [71] depth=79  count=     1  members=   1  dom=V-V
+  [72] depth=101  count=     1  members=   1  dom=RelPro-V
+  [73] depth=72  count=     1  members=   1  dom=V-P
+  [74] depth=98  count=     1  members=   1  dom=N-RelPro
+  [75] depth=170  count=     1  members=   1  dom=V-Det
+  [76] depth=116  count=     1  members=   1  dom=Det-V
+  [77] depth=86  count=     1  members=   1  dom=Det-N
+  [78] depth=65  count=     1  members=   1  dom=V-Det
+  [79] depth=44  count=     1  members=   1  dom=RelPro-V
+  [80] depth= 4  count=   463  members=   1  dom=Adj-N
+  [81] depth= 5  count=     1  members=   1  dom=V-P
+  [82] depth= 6  count=     1  members=   1  dom=V-Det
+  [83] depth=83  count=     1  members=   1  dom=Adj-Adj
+  [84] depth=164  count=     1  members=   1  dom=V-Det
+  [85] depth=66  count=     4  members=   1  dom=V-P
+  [86] depth=10  count=     1  members=   1  dom=Adj-N
+  [87] depth=83  count=     1  members=   1  dom=Adj-N
+  [88] depth=85  count=     1  members=   1  dom=V-V
+  [89] depth=107  count=     6  members=   1  dom=V-V
+  [90] depth=66  count=     1  members=   1  dom=Adj-Adj
