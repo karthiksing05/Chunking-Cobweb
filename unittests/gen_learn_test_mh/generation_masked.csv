@@ -1,0 +1,24 @@
+idx,sentence,mask_pos,gold,gold_pos,filled,filled_pos,completed,exact,pos_ok
+0,"the telescope found",1,telescope,N,cat,N,"the cat found",0,1
+1,"a cat chased",1,cat,N,telescope,N,"a telescope chased",0,1
+2,"the dog admired the big man with a dog",4,big,Adj,park,N,"the dog admired the park man with a dog",0,0
+3,"the park chased the telescope under the quick red woman",5,under,P,admired,V,"the park chased the telescope admired the quick red woman",0,0
+4,"a cat saw",1,cat,N,woman,N,"a woman saw",0,1
+5,"the man admired the woman under a dog",4,woman,N,dog,N,"the man admired the dog under a dog",0,1
+6,"a dog liked",1,dog,N,dog,N,"a dog liked",1,1
+7,"the telescope saw a telescope",2,saw,V,with,P,"the telescope with a telescope",0,0
+8,"a woman admired",1,woman,N,telescope,N,"a telescope admired",0,1
+9,"the telescope admired a park",2,admired,V,liked,V,"the telescope liked a park",0,1
+10,"a dog chased the man",2,chased,V,chased,V,"a dog chased the man",1,1
+11,"the small dog liked",2,dog,N,the,Det,"the small the telescope liked",0,0
+12,"a cat saw the red telescope in a big woman",5,telescope,N,dog,N,"a cat saw the red dog in a big woman",0,1
+13,"the quick lazy lazy telescope chased",3,lazy,Adj,lazy,Adj,"the quick lazy lazy telescope chased",1,1
+14,"the big telescope chased the lazy dog under the big telescope",5,lazy,Adj,man,N,"the big telescope chased the man dog under the big telescope",0,0
+15,"the cat admired a park under a cat",4,park,N,cat,N,"the cat admired a cat under a cat",0,1
+16,"a red small small woman saw",3,small,Adj,big,Adj,"a red small big woman saw",0,1
+17,"the cat chased",1,cat,N,man,N,"the man chased",0,1
+18,"a park admired a telescope with the telescope",4,telescope,N,cat,N,"a park admired a cat with the telescope",0,1
+19,"the dog chased a cat in the lazy small woman",5,in,P,found,V,"the dog chased a cat found the lazy small woman",0,0
+20,"the park found",1,park,N,cat,N,"the cat found",0,1
+21,"a woman liked a big cat under a woman",4,big,Adj,park,N,"a woman liked a park cat under a woman",0,0
+22,"a telescope found a dog under a cat",4,dog,N,cat,N,"a telescope found a cat under a cat",0,1

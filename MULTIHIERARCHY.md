@@ -2,7 +2,7 @@
 
 Whereas before we hypothesized needing multiple hierarchies for multiple levels of granularity or to separate primitives and composites, we now rely on multiple hierarchies to properly separate *content* and *context*.
 
-## Methodology 5.2
+## Methodology 6
 
 I can start to see some artifacts of the parsing process making their way through where if we have an incorrect parse at the beginning
 *   I'd like to introduce the idea of a maximum-value parse where we look ahead X number of steps and see what the most parsable thing is! Once we find that, we parse it up! (it's like creating multiple chunks at once)
@@ -24,18 +24,38 @@ What do we need for ACS!!!
 *   Reconstruction on original alternatives
 *   Comparison to alternatives
 
-The TL;DR is that our process can basically be revered as a way of creating symbolic representations and leveraging those representations to create structure with a couple simple rules! But the key idea is 
+The TL;DR is that our process can basically be revered as a way of creating symbolic representations and leveraging those representations to create structure with a couple simple rules!
 
-## Methodology 5.1 (ACS PAPER HERE)
+## Methodology 5.2 (ACS PAPER HERE)
 
 Did a ton of experiments, going to make a list of all changes we need to make below - there'll be all kinds of stuff but as long as we draft everything properly we'll be in a good place!
 
 **Final List of things we need to test:**
 *   Representation (Autoencoder) test - Given content / context instance, can we generate it and compress it? (and also verify that similar instances are encoded similarly)
+    *   As evidenced by `grammar_decoding_test.py`, the best representation is by far the bag-of-concepts, which leverages the X highest-activating concepts at a depth of Y and uses similarity between bags to determine similarity of the underlying instances (maintaining a form of generalization)
 *   Threshold / Recognition - given the right representations, can we accurately compare structures to see what structures we’ve seen before
+    *   As evidenced by `grammar_threshold_test.py`, best heuristic involves ranking by ctx_root_lp and taking the best with cnt_root_lp - this looks pretty reasonable but we'll need to check that it works best, one greedy decision throws the whole thing into disarray
 *   Parsing - does the parsing process appropriately use the threshold / prior memory to create structures that line up with what we’ve seen?
+    *   
 *   Generation - can we unpack the parsing process in reverse? That is, can we generate relative to what we've seen before?
-    *   Very relevant note is that if we use the idea that Pat said where we "distill" the rules out of the two hierarchies, this process becomes very very easy (and honestly I'd recommend it, it's just that we'd lose contextual information)
+
+**Grammar Distillation**
+If the nodes in our Cobweb tree eventually become pure, one thing we can try is simply distilling the CFG from the trees and using a threshold on a hand-collected set of nodes to generate, parse, etc!!
+*   AND SO FAR, THINGS ARE LOOKING PURE!!! The primary problem is that we only know this property is true from basic-level nodes but I think that distilling is a great step forward - let's try to program it!!
+
+Here's the method:
+*   After training our hierarchy, we get the frontier of basic level nodes
+*   Then, we go into the following loop:
+    *   Create representations for any new chunks (or primitives, if applicable)
+    *   Decide which is the best chunk to form PURELY by iterating over all basic-level nodes (can optionally categorize DFS down to a basic-level node)
+    *   Use that basic-level node's score to rank that chunk relative to all other chunks and freeze the best one
+*   For generation, we can just invert this process (or better yet, create tags and such)
+    *   Generation will be significantly easier than parsing as we don't have to worry about classification
+
+Some other cool things:
+*   We can probably construct the generalized parse if we want to show a cool thing!
+
+## Methodology 5.1
 
 **What worked:**
 *   As evidenced by `grammar_chunking_example.py`, a bag of sparse concepts taken from some fixed depth worked like a CHARM!! We did in fact take it from a fixed and randomly chosen depth and then we chose our concepts based on high log probs

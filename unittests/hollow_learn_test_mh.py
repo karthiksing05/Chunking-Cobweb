@@ -1,50 +1,109 @@
 """
 Hollow Learning Test (Multi-Hierarchy) — trains WEBSTER from a corpus of
 human-annotated "hollow" parse trees (merge recipes), then evaluates
-learning + generation quality.
+the UNSUPERVISED "climbing-ancestor" parse strategy:
 
-Hollow JSON format:
-  { "sentence": "the dog chased the cat",
-    "merges": [{"left": 0, "right": 1}, ...] }
+    Stage 1 (gate): For each candidate pair, descend the content tree
+        to its leaf, then walk UP until finding the most-specific
+        ancestor whose count > THRESHOLD. If the walk reaches root,
+        the bag isn't well-supported anywhere — reject.
 
-Workflow:
-  1. Load hollow JSONs from HOLLOW_CORPUS_DIR
-  2. For each hollow tree, build primitives and replay merges via WEBSTER
-  3. Learn from each completed tree
-  4. Evaluate on held-out test sentences (auto-parsed)
-  5. Run generation tests (from-scratch, masked, multi-mask, prefix)
+    Stage 2 (rank): Argmax of the climbed ancestor's
+        log_prob_instance(bag) — how well the candidate fits the
+        well-supported cluster it would commit to.
+
+    Stage 3 (stop): When no candidate passes the gate, the parse
+        terminates ("create chunks until we can no longer do so").
+
+This matches the user's mental model: representations + threshold over
+them + ample-count gate + chunk-until-done. Fully unsupervised.
+
+The supervised chunk-class probe in
+`tests/met5/grammar_decoding_test.py` Phase 3a hits 99% — that
+confirms the cobweb-tree representations ARE separable by chunk class.
+The climbing-ancestor mechanism is the unsupervised counterpart: it
+finds the well-supported cluster (any depth, not necessarily basic-
+level) without needing class labels.
+
+  (1)  Ground-truth PARSE accuracy on held-out hollow sentences.
+       Bracket P/R/F1 between WEBSTER's auto-parse and the gold
+       brackets. Order-independent (bracket SET).
+
+  (1b) STEP-PICK accuracy. At each gold-merge step, run the climbing-
+       ancestor gate + ranker and ask: is the top pick a gold
+       candidate? Threshold-test reference for Phase 4b (no climbing
+       gate): ~93% step-pick.
+
+  (2) GRAMMAR (chunk-class) accuracy via a Cobweb-Discrete probe.
+      Same protocol as tests/met5/grammar_decoding_test.py Phase 3a:
+      train a probe on chunk content_instance bags from the train fold,
+      predict chunk classes on the held-out test fold, report per-class
+      precision/recall/F1.  This is the "strong decoding style" — it
+      treats each bag as a discrete attribute → value-set instance and
+      lets Cobweb cluster classes from the representations alone.
+
+  (3) GENERATION accuracy under that same decoding style.
+      Generation already flows through FiniteParseTree._resolve_bag's
+      frontier-categorize routine (see src/parse_mh.py:_resolve_bag),
+      which scores every candidate content-ref by bag-weighted log-prob
+      across the K canonical context nodes — same posterior-weighted
+      decoding the probe in (2) certifies as discriminative.  We then
+      score each generation by:
+        - From-scratch: grammaticality against TEST_GRAMMAR1 (CYK).
+        - Single-mask completion: exact-token recovery vs the gold
+          held-out token.
 """
 
-import sys, os
+import sys, os, shutil, json, random, glob, re
+from collections import Counter, defaultdict
 
 _src = os.path.join(os.path.dirname(__file__), "..", "src")
 if _src not in sys.path:
     sys.path.insert(0, os.path.abspath(_src))
 
-from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1, TEST_GRAMMAR2, TEST_CORPUS2
-from parse_mh import WEBSTER, FiniteParseTree
-import shutil
-import json
-import random
-import glob
+import numpy as np
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1
+from parse_mh import WEBSTER, FiniteParseTree, PrimitiveParseNode
+from cobweb.cobweb_discrete import CobwebDiscreteTree, set_random_seed as cobweb_set_seed
 
 # ── Configuration ──────────────────────────────────────────────────────────
-OUT_DIR = "unittests/hollow_learn_test_mh"
-HOLLOW_CORPUS_DIR = "data/test_hollow_grammar_1"  # where hollow JSONs live
-VIZ_INTERMEDIATES = True
+OUT_DIR           = "unittests/hollow_learn_test_mh"
+HOLLOW_CORPUS_DIR = "data/test_hollow_grammar_1"
+VIZ_INTERMEDIATES = True    # per-step intermediate parse / LTM viz
 
-CONTEXT_LENGTH = 3
-THRESHOLD = 30
-PRIMITIVES_FIRST = 200  # first N trees train with infinite threshold (primitives only)
+CONTEXT_LENGTH    = 3
+THRESHOLD         = 30
+PRIMITIVES_FIRST  = 200
+SEED              = 13
+PROBE_ALPHA       = 1e-3
 
-corpus = TEST_CORPUS1
+random.seed(SEED)
+np.random.seed(SEED)
+cobweb_set_seed(SEED)   # seed the C++ cobweb RNG for reproducibility
+
+corpus  = TEST_CORPUS1
 grammar = TEST_GRAMMAR1
+
+# Word → POS for chunk classification.
+POS_LIST = ["Det", "N", "Adj", "V", "P"]
+WORD_TO_POS = {}
+for pos in POS_LIST:
+    for prod in grammar[pos]:
+        for w in prod:
+            WORD_TO_POS[w] = pos
+CHUNK_LABELS = ["NP", "AdjP", "PP", "VP", "S"]
+ALL_LABELS   = POS_LIST + CHUNK_LABELS + ["OTHER"]
 
 # ── Setup ──────────────────────────────────────────────────────────────────
 if os.path.exists(OUT_DIR):
     shutil.rmtree(OUT_DIR)
+os.makedirs(OUT_DIR, exist_ok=True)
 
-# ── Load hollow corpus ────────────────────────────────────────────────────
+# ── Load hollow corpus ─────────────────────────────────────────────────────
 hollow_paths = sorted(glob.glob(os.path.join(HOLLOW_CORPUS_DIR, "*.json")))
 hollow_corpus: list[dict] = []
 for p in hollow_paths:
@@ -56,24 +115,32 @@ for p in hollow_paths:
             continue
     if "sentence" in data and "merges" in data:
         hollow_corpus.append(data)
-    else:
-        print(f"[WARN] Skipping non-hollow JSON (missing sentence/merges): {p}")
 
 print(f"Loaded {len(hollow_corpus)} hollow parse trees from {HOLLOW_CORPUS_DIR}")
-
 if not hollow_corpus:
-    print("[ERROR] No hollow parse trees found. Create some with the hollow editor first.")
+    print("[ERROR] No hollow parse trees found.")
     sys.exit(1)
 
-# ── Initialise WEBSTER ────────────────────────────────────────────────────
+# 80/20 sentence-level split (matches grammar_threshold_test / grammar_decoding_test).
+random.shuffle(hollow_corpus)
+_split = int(0.8 * len(hollow_corpus))
+train_hollow = hollow_corpus[:_split]
+test_hollow  = hollow_corpus[_split:]
+print(f"  Split: train={len(train_hollow)}  test={len(test_hollow)}")
+
+# ── Initialise WEBSTER (identical hyperparameters to grammar_threshold_test) ──
 webster = WEBSTER(
     corpus,
     context_length=CONTEXT_LENGTH,
     threshold=THRESHOLD,
+    # alpha=1e-4 chosen via tests/met5/grammar_param_sweep_test.py — tied
+    # for top F1 with 1e-6 but better EM (65.2% vs 60.9%) and step-pick
+    # (98.3% vs 96.6%). bl_alpha=10 is a hard floor: 1.0 breaks EPMI from
+    # the leaf side, 100 collapses it.
     content_alpha=1e-4,
-    context_alpha=1e-3,
+    context_alpha=1e-4,
     content_bl_alpha=10,
-    context_bl_alpha=1,
+    context_bl_alpha=10,
     bow=False,
     empty_weighting=True,
     chunk_context=False,
@@ -84,725 +151,746 @@ webster = WEBSTER(
     branch_max_content=1000,
     branch_max_context=1000,
     content_top_k=7,
-    content_pool_depth=4
-    # context_attr_weights={6: 2.0},   # attr 6 = content-ref when context_length=3
-    # content_attr_weights={0: 1.0, 1: 1.0},  # boost left & right child attrs
+    content_pool_depth=4,
 )
 
-# ── Phase 1: primitives-only on random sentences ──────────────────────────
+# ── Phase 1: primitives-only on random sentences ───────────────────────────
 print(f"\n=== PHASE 1: PRIMITIVES ONLY ({PRIMITIVES_FIRST} random sentences) ===")
 for i in range(PRIMITIVES_FIRST):
     sentence = generate("S", grammar)
     parse_tree = webster.parse_sentence(
-        sentence,
-        threshold=1e9,
-        new_vocab=True,
-        learning=True,
-        debug=False,
-    )
-
-    if i % 5 == 0 and VIZ_INTERMEDIATES:
+        sentence, threshold=1e9, new_vocab=True,
+        learning=True, debug=False)
+    if VIZ_INTERMEDIATES and i % 25 == 0:
         parse_tree.visualize(f"{OUT_DIR}/train_trees/primitives_tree{i}")
         webster.visualize_ltm(f"{OUT_DIR}/ltms/primitives_ltm{i}", max_depth=3)
+    if (i + 1) % 50 == 0:
+        print(f"  [{i+1}/{PRIMITIVES_FIRST}]")
 
-    print(f"  [{i+1}/{PRIMITIVES_FIRST}] Primitives: \"{sentence}\"")
-
-# ── Phase 2: replay hollow trees with merges ──────────────────────────────
-print(f"\n=== PHASE 2: HOLLOW CORPUS TRAINING (size = {len(hollow_corpus)}) ===")
-for i, hollow in enumerate(hollow_corpus):
+# ── Phase 2: replay TRAIN hollow trees with merges ─────────────────────────
+print(f"\n=== PHASE 2: HOLLOW CORPUS TRAINING (train fold, size = {len(train_hollow)}) ===")
+trained_trees = []   # keep for unsupervised transition-map mining below
+for i, hollow in enumerate(train_hollow):
     sentence = hollow["sentence"]
-    merges = hollow["merges"]
+    merges   = hollow["merges"]
 
-    # Build primitives for this sentence
     tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
     tree.build_primitives(sentence, threshold=THRESHOLD)
-
-    # Replay the human-annotated merge sequence
     for m in merges:
         try:
             tree.apply_candidate(m["left"], m["right"])
         except Exception as e:
-            print(f"  [WARN] Merge ({m['left']}, {m['right']}) failed on sentence "
-                  f"\"{sentence}\": {e}")
-
-    # Learn from the completed tree
+            print(f"  [WARN] Merge ({m['left']}, {m['right']}) failed on "
+                  f"sentence \"{sentence}\": {e}")
     webster.ltm.add_parse_tree(tree, shuffle=True, debug=False)
+    trained_trees.append(tree)
 
-    if i % 5 == 0 and VIZ_INTERMEDIATES:
+    if VIZ_INTERMEDIATES and i % 10 == 0:
         tree.visualize(f"{OUT_DIR}/train_trees/train_parse_tree{i}")
         webster.visualize_ltm(f"{OUT_DIR}/ltms/ltm{i}", max_depth=3)
 
-    print(f"  [{i+1}/{len(hollow_corpus)}] Trained on: \"{sentence}\"  "
-          f"({len(merges)} merges)")
+    if (i + 1) % 25 == 0:
+        print(f"  [{i+1}/{len(train_hollow)}]")
 
-# ── Save state ─────────────────────────────────────────────────────────────
+# Learn unsupervised structural transitions on the content tree:
+# for each composite chunk in training, record which content-tree
+# leaves its CHILDREN landed at. This builds a self-supervised
+# leaf→child-leaves map used by generate_sentence to keep
+# unpacking class-coherent (e.g. left child of S → NP-class leaf,
+# right child → VP-class leaf — except instead of labels, it uses
+# the leaves themselves as identifiers). No POS dictionary, no gold
+# class labels — pure unsupervised structural pattern.
+webster.learn_leaf_transitions(trained_trees)
+print(f"\nLearned {len(webster.content_leaf_transitions)} "
+      f"content-tree leaf transitions (unsupervised)")
+
+# ── Save state + visualize final LTM ───────────────────────────────────────
 SAVE_DIR = f"{OUT_DIR}/final_ltm_data"
 webster.save_state(SAVE_DIR)
-print(f"\nSaved Final LTM to \"{SAVE_DIR}\"!")
+print(f"\nSaved Final LTM to \"{SAVE_DIR}\"")
 webster.visualize_ltm(f"{OUT_DIR}/final_ltm", max_depth=3)
 
-# ============================================================================
-# DIAGNOSTIC PHASE — does supervised training actually stick?
-# ============================================================================
-# The supervised regime (apply_candidate bypassing the threshold gate)
-# guarantees each annotated chunk is added to the LTM. But re-parsing
-# with the SAME threshold-gated greedy chunker may pick different
-# merges than the human did, because the threshold gate is computed
-# at recognition time using basic_level_count and tree_log_prob —
-# both of which depend on aggregate training statistics, not on
-# whether THIS specific chunk was annotated.
-#
-# This diagnostic section measures:
-#   A. Re-parse fidelity per sentence (recall of gold spans).
-#   B. Threshold sweep — at which threshold does recall plateau?
-#   C. Chunk memorization — for each gold chunk, where does its
-#      content_instance land in the content tree, and what's that
-#      leaf's training-count?
-#   D. Over/under-generalization breakdown.
-#   E. Generation precision — for each of K sampled training chunks,
-#      can we regenerate the exact tokens from the corresponding
-#      content-tree leaf?
-# ============================================================================
-print("\n=== DIAGNOSTIC: supervised memorization + re-parse fidelity ===")
+# =============================================================================
+# Shared helpers (lifted from grammar_decoding_test.py / grammar_threshold_test.py)
+# =============================================================================
+def _chunk_span(node):
+    out = []
+    def w(n):
+        if isinstance(n, PrimitiveParseNode):
+            out.append(int(n.position_idx)); return
+        for _, c in getattr(n, "children", []):
+            w(c)
+    w(node)
+    if not out: return None, None
+    return min(out), max(out)
 
-import csv, numpy as np
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-from parse_mh import PrimitiveParseNode, CompositeParseNode
-
-DIAG_DIR = f"{OUT_DIR}/diagnostic"
-os.makedirs(DIAG_DIR, exist_ok=True)
-
-# ──────────────────────────────────────────────────────────────────────
-# Helpers
-# ──────────────────────────────────────────────────────────────────────
-def _extract_spans(parse_tree):
-    """{(start, end)} for every non-root composite. Inclusive."""
-    spans: set = set()
-    def walk(node):
-        if isinstance(node, PrimitiveParseNode):
-            pos = int(node.position_idx)
-            return (pos, pos)
-        starts, ends = [], []
-        for _, c in sorted(getattr(node, "children", []),
-                            key=lambda x: x[0] if x[0] is not None else 0):
-            s, e = walk(c)
-            if s is not None:
-                starts.append(s); ends.append(e)
-        if not starts:
-            return (None, None)
-        rng = (min(starts), max(ends))
-        if not getattr(node, "is_global_root", False):
-            spans.add(rng)
-        return rng
-    walk(parse_tree.global_root_node)
-    return spans
-
-def _gold_spans_from_merges(merges, sentence):
-    """Replay the hollow merge sequence symbolically → set of inclusive spans."""
-    tokens = sentence.split()
-    n = len(tokens)
-    centers = [float(i) for i in range(n)]
-    spans   = [(i, i) for i in range(n)]
-    out: set = set()
-    for m in merges:
-        l_c, r_c = m.get("left"), m.get("right")
-        if l_c is None or r_c is None:
-            return None
-        try:
-            li = centers.index(l_c); ri = centers.index(r_c)
-        except ValueError:
-            return None
-        if abs(li - ri) != 1:
-            return None
-        a, b = (li, ri) if li < ri else (ri, li)
-        new_span = (spans[a][0], spans[b][1])
-        out.add(new_span)
-        centers[a:b+1] = [(centers[a] + centers[b]) / 2.0]
-        spans[a:b+1]   = [new_span]
+def _chunk_yield(node):
+    out = []
+    def w(n):
+        if isinstance(n, PrimitiveParseNode):
+            wid = getattr(n, "word_id", None)
+            if wid is None or wid < 0 or wid >= len(webster.ltm.id_to_value):
+                return
+            pos = WORD_TO_POS.get(webster.ltm.id_to_value[wid])
+            if pos: out.append(pos)
+            return
+        for _, c in sorted(getattr(n, "children", []),
+                           key=lambda x: x[0] if x[0] is not None else 0):
+            w(c)
+    w(node)
     return out
 
 def _walk_composites(node):
-    if isinstance(node, PrimitiveParseNode):
-        return
+    if isinstance(node, PrimitiveParseNode): return
     if not getattr(node, "is_global_root", False):
         yield node
     for _, c in getattr(node, "children", []):
         yield from _walk_composites(c)
 
-def _greedy_descend(root, instance):
-    n = root
-    while n.children:
-        n = max(n.children, key=lambda c: c.log_prob_instance(instance))
-    return n
+def classify_chunk(node, sentence_len):
+    """Head-based chunk classification; S only for the root chunk."""
+    pos_seq = _chunk_yield(node)
+    if not pos_seq:                                     return None
+    if len(pos_seq) == 1:                               return pos_seq[0]
+    s, e = _chunk_span(node)
+    if s == 0 and e == sentence_len - 1:                return "S"
+    if "V" in pos_seq:                                  return "VP"
+    if pos_seq[0] == "P":                               return "PP"
+    if all(p == "Adj" for p in pos_seq):                return "AdjP"
+    if pos_seq[0] == "Adj" and "N" in pos_seq:          return "AdjP"
+    if "N" in pos_seq or pos_seq[0] == "Det":           return "NP"
+    return "OTHER"
 
-# ──────────────────────────────────────────────────────────────────────
-# A. Re-parse fidelity (at the trained THRESHOLD)
-# ──────────────────────────────────────────────────────────────────────
-print(f"\n  --- A. Re-parse fidelity (threshold={THRESHOLD}) ---")
-fidelity_rows = []
-agg_gold = agg_pred = agg_match = 0
-for h in hollow_corpus:
-    sentence = h["sentence"]
-    gold = _gold_spans_from_merges(h["merges"], sentence)
-    if gold is None or not gold:
-        continue
-    try:
-        pt = webster.parse_sentence(sentence, threshold=THRESHOLD,
-                                     new_vocab=False, learning=False, debug=False)
-    except Exception:
-        continue
-    pred = _extract_spans(pt)
-    match = pred & gold
-    agg_gold += len(gold); agg_pred += len(pred); agg_match += len(match)
-    fidelity_rows.append({
-        "sentence": sentence, "n_words": len(sentence.split()),
-        "n_gold": len(gold), "n_pred": len(pred),
-        "n_match": len(match),
-        "recall": len(match) / max(1, len(gold)),
-        "precision": len(match) / max(1, len(pred)),
-        "missed_spans": sorted(gold - pred),
-        "extra_spans":  sorted(pred - gold),
-    })
+def _clean_bag(bag):
+    """Drop EMPTYNULL (vid 0) sentinels from each attr's value-set."""
+    out = {}
+    for a, vm in (bag or {}).items():
+        cleaned = {v: c for v, c in (vm or {}).items() if v != 0}
+        if cleaned: out[a] = cleaned
+    return out
 
-agg_p = agg_match / max(1, agg_pred)
-agg_r = agg_match / max(1, agg_gold)
-agg_f1 = 2 * agg_p * agg_r / max(1e-12, agg_p + agg_r)
-print(f"    Aggregate over {len(fidelity_rows)} sentences:")
-print(f"      precision = {100*agg_p:5.1f}%   recall = {100*agg_r:5.1f}%   F1 = {100*agg_f1:5.1f}%")
-print(f"      total_gold = {agg_gold}   total_pred = {agg_pred}   match = {agg_match}")
+# =============================================================================
+# (1) GROUND-TRUTH PARSE ACCURACY
+# =============================================================================
+# For each held-out hollow sentence:
+#   • gold brackets  = the set of {(left_word_idx, right_word_idx)} spans
+#                      induced by replaying the human merge sequence.
+#   • pred brackets  = the same set induced by WEBSTER's auto-parse via
+#                      parse_sentence(threshold=THRESHOLD) — i.e. the
+#                      4-stage build() from src/parse_mh.py.
+# Report micro-averaged precision / recall / F1 across the held-out fold.
+print("\n=== (1) GROUND-TRUTH PARSE ACCURACY ===")
 
-# Recall histogram
-recalls = [r["recall"] for r in fidelity_rows]
-bins = np.linspace(0, 1, 11)
-hist, _ = np.histogram(recalls, bins=bins)
-print(f"    Per-sentence recall histogram:")
-for i, c in enumerate(hist):
-    bar = "#" * min(50, int(c))
-    print(f"      [{bins[i]:.1f}, {bins[i+1]:.1f}): {c:>4} {bar}")
-
-with open(f"{DIAG_DIR}/A_per_sentence.csv", "w") as f:
-    w = csv.writer(f)
-    w.writerow(["sentence", "n_words", "n_gold", "n_pred", "n_match",
-                "precision", "recall", "missed_spans", "extra_spans"])
-    for r in fidelity_rows:
-        w.writerow([r["sentence"], r["n_words"], r["n_gold"], r["n_pred"],
-                    r["n_match"], f"{r['precision']:.3f}", f"{r['recall']:.3f}",
-                    "|".join(f"{s},{e}" for s, e in r["missed_spans"]),
-                    "|".join(f"{s},{e}" for s, e in r["extra_spans"])])
-
-# ──────────────────────────────────────────────────────────────────────
-# B. Threshold sweep
-# ──────────────────────────────────────────────────────────────────────
-print(f"\n  --- B. Threshold sweep ---")
-sweep_thresholds = [-2, 0, 1, 3, 5, 10, 20, 30, 50, 100, 200]
-sweep_rows = []
-for t in sweep_thresholds:
-    tg = tp = tm = 0
-    for h in hollow_corpus:
-        sentence = h["sentence"]
-        gold = _gold_spans_from_merges(h["merges"], sentence)
-        if gold is None or not gold:
-            continue
-        try:
-            pt = webster.parse_sentence(sentence, threshold=t,
-                                         new_vocab=False, learning=False, debug=False)
-        except Exception:
-            continue
-        pred = _extract_spans(pt)
-        tg += len(gold); tp += len(pred); tm += len(pred & gold)
-    p = tm / max(1, tp); r = tm / max(1, tg)
-    f1 = 2 * p * r / max(1e-12, p + r)
-    sweep_rows.append({"threshold": t, "precision": p, "recall": r, "f1": f1,
-                       "total_pred": tp, "total_gold": tg, "match": tm})
-    print(f"    threshold={t:>5}  P={100*p:5.1f}%  R={100*r:5.1f}%  F1={100*f1:5.1f}%  "
-          f"(pred={tp}, match={tm}, gold={tg})")
-
-with open(f"{DIAG_DIR}/B_threshold_sweep.csv", "w") as f:
-    w = csv.writer(f)
-    w.writerow(["threshold", "precision", "recall", "f1",
-                "total_pred", "total_gold", "match"])
-    for row in sweep_rows:
-        w.writerow([row["threshold"], f"{row['precision']:.4f}",
-                    f"{row['recall']:.4f}", f"{row['f1']:.4f}",
-                    row["total_pred"], row["total_gold"], row["match"]])
-
-# Plot threshold sweep
-plt.figure(figsize=(8, 4))
-xs = [r["threshold"] for r in sweep_rows]
-plt.plot(xs, [r["precision"] for r in sweep_rows], "o-", label="Precision")
-plt.plot(xs, [r["recall"]    for r in sweep_rows], "o-", label="Recall")
-plt.plot(xs, [r["f1"]        for r in sweep_rows], "o-", label="F1")
-plt.axvline(THRESHOLD, color="red", linestyle="--", alpha=0.4,
-            label=f"trained threshold ({THRESHOLD})")
-plt.xlabel("Re-parse threshold"); plt.ylabel("Score")
-plt.title("Re-parse fidelity vs threshold (on hollow training set)")
-plt.legend(); plt.grid(alpha=0.3); plt.tight_layout()
-plt.savefig(f"{DIAG_DIR}/B_threshold_sweep.png", dpi=140)
-plt.close()
-
-# ──────────────────────────────────────────────────────────────────────
-# C. Chunk memorization — leaf-count distribution
-# ──────────────────────────────────────────────────────────────────────
-print(f"\n  --- C. Chunk memorization (content-tree leaf counts) ---")
-chunk_leaf_rows = []
-for h in hollow_corpus:
-    sentence = h["sentence"]
-    tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
-    tree.build_primitives(sentence, threshold=THRESHOLD)
-    fail = 0
-    for m in h["merges"]:
-        try:
-            tree.apply_candidate(m["left"], m["right"])
-        except Exception:
-            fail += 1
-    if fail:
-        continue
+def _bracket_set(tree):
+    """Return set of (start, end) word-index spans for every composite chunk."""
+    brackets = set()
     for comp in _walk_composites(tree.global_root_node):
-        ci = comp.get_content_instance()
-        if not ci:
-            continue
-        leaf = _greedy_descend(webster.ltm.content_hierarchy.root, ci)
-        cplx = getattr(comp, "complexity", None)
-        chunk_leaf_rows.append({
-            "complexity": cplx,
-            "leaf_count": int(getattr(leaf, "count", 0)),
-            "leaf_depth": int(leaf.depth()),
-        })
+        s, e = _chunk_span(comp)
+        if s is not None and e is not None and s != e:
+            brackets.add((s, e))
+    return brackets
 
-if chunk_leaf_rows:
-    leaf_counts = [r["leaf_count"] for r in chunk_leaf_rows]
-    print(f"    Inspected {len(chunk_leaf_rows)} training chunks")
-    print(f"    Leaf count: min={min(leaf_counts)}  "
-          f"median={int(np.median(leaf_counts))}  "
-          f"max={max(leaf_counts)}  mean={np.mean(leaf_counts):.1f}")
-    buckets = [(0, 2), (2, 5), (5, 10), (10, 30), (30, 100), (100, int(1e9))]
-    print(f"    Distribution:")
-    for lo, hi in buckets:
-        c = sum(1 for x in leaf_counts if lo <= x < hi)
-        pct = 100 * c / max(1, len(leaf_counts))
-        bar = "#" * min(50, int(pct))
-        print(f"      [{lo:>4}, {hi if hi < 1e9 else '∞':>4}): {c:>4} ({pct:5.1f}%) {bar}")
+parse_rows = []
+total_tp = total_fp = total_fn = 0
+exact_match_count = 0
 
-    with open(f"{DIAG_DIR}/C_chunk_memorization.csv", "w") as f:
-        w = csv.writer(f)
-        w.writerow(["complexity", "leaf_count", "leaf_depth"])
-        for r in chunk_leaf_rows:
-            w.writerow([r["complexity"], r["leaf_count"], r["leaf_depth"]])
-
-    plt.figure(figsize=(8, 4))
-    plt.hist(leaf_counts, bins=30, color="#1f77b4", edgecolor="white")
-    plt.axvline(THRESHOLD, color="red", linestyle="--",
-                label=f"trained threshold ({THRESHOLD})")
-    plt.xlabel("Content-tree leaf count where chunk lands")
-    plt.ylabel("# training chunks")
-    plt.title("Chunk memorization: training chunks vs landing-leaf count")
-    plt.legend(); plt.tight_layout()
-    plt.savefig(f"{DIAG_DIR}/C_chunk_memorization.png", dpi=140)
-    plt.close()
-
-# ──────────────────────────────────────────────────────────────────────
-# D. Over/under-generalization
-# ──────────────────────────────────────────────────────────────────────
-print(f"\n  --- D. Over/under-generalization (threshold={THRESHOLD}) ---")
-over = agg_pred - agg_match
-under = agg_gold - agg_match
-print(f"    Predicted spans  : {agg_pred}")
-print(f"    Gold spans       : {agg_gold}")
-print(f"    Matched          : {agg_match}")
-over_pct  = 100 * over  / max(1, agg_pred)
-under_pct = 100 * under / max(1, agg_gold)
-print(f"    Overgeneralized  : {over:>4} "
-      f"({over_pct:.1f}% of pred — chunks the parser invented)")
-print(f"    Undergeneralized : {under:>4} "
-      f"({under_pct:.1f}% of gold — chunks the supervisor gave that parser missed)")
-
-# Per-length breakdown
-print(f"    By chunk length:")
-len_buckets: dict = {}
-for r in fidelity_rows:
-    sentence_tokens = r["sentence"].split()
-    for s, e in r["missed_spans"]:
-        length = e - s + 1
-        len_buckets.setdefault(length, {"missed": 0, "extra": 0})
-        len_buckets[length]["missed"] += 1
-    for s, e in r["extra_spans"]:
-        length = e - s + 1
-        len_buckets.setdefault(length, {"missed": 0, "extra": 0})
-        len_buckets[length]["extra"] += 1
-print(f"      {'span_len':>10s} {'missed (under)':>16s} {'extra (over)':>15s}")
-for length in sorted(len_buckets.keys()):
-    b = len_buckets[length]
-    print(f"      {length:>10d} {b['missed']:>16d} {b['extra']:>15d}")
-
-with open(f"{DIAG_DIR}/D_generalization.txt", "w") as f:
-    f.write(f"Re-parse threshold:        {THRESHOLD}\n")
-    f.write(f"Total predicted spans:     {agg_pred}\n")
-    f.write(f"Total gold spans:          {agg_gold}\n")
-    f.write(f"Matched (TP):              {agg_match}\n")
-    f.write(f"Overgeneralized  (FP):     {over} ({over_pct:.1f}% of pred)\n")
-    f.write(f"Undergeneralized (FN):     {under} ({under_pct:.1f}% of gold)\n\n")
-    f.write("By chunk length:\n")
-    f.write(f"  {'span_len':>10s} {'missed (under)':>16s} {'extra (over)':>15s}\n")
-    for length in sorted(len_buckets.keys()):
-        b = len_buckets[length]
-        f.write(f"  {length:>10d} {b['missed']:>16d} {b['extra']:>15d}\n")
-
-# ──────────────────────────────────────────────────────────────────────
-# E. Generation precision — can we regenerate a learned chunk?
-# ──────────────────────────────────────────────────────────────────────
-print(f"\n  --- E. Generation precision (chunk → tokens) ---")
-# For each of K sampled training chunks, find the composite's content-tree
-# leaf, then use webster.generate_sentence on a sentence template that
-# anchors the composite at its original position and asks the model to
-# regenerate it. We measure exact-token match.
-GEN_K = 30
-sampled_chunks = []
-for h in hollow_corpus:
-    gold = _gold_spans_from_merges(h["merges"], h["sentence"])
-    if gold is None: continue
-    tokens = h["sentence"].split()
-    for s, e in gold:
-        if e > s and not (s == 0 and e == len(tokens) - 1):
-            sampled_chunks.append((h["sentence"], tokens, s, e))
-random.shuffle(sampled_chunks)
-sampled_chunks = sampled_chunks[:GEN_K]
-
-gen_results = []
-for sentence, tokens, s, e in sampled_chunks:
-    gold_chunk = tokens[s:e+1]
-    masked = " ".join(tokens[:s] + ["[mask]"] + tokens[e+1:])
-    try:
-        completed, _ = webster.generate_sentence(
-            masked_sentence=masked, debug=False)
-    except Exception:
-        completed = ""
-    comp_toks = completed.split() if completed else []
-    # Extract inserted span (handles empty-suffix correctly).
-    prefix = tokens[:s]; suffix = tokens[e+1:]
-    inserted = []
-    if len(comp_toks) >= len(prefix):
-        ptr = len(prefix)
-        if not suffix:
-            inserted = comp_toks[ptr:]
-        else:
-            for j in range(ptr, len(comp_toks) - len(suffix) + 1):
-                if comp_toks[j:j+len(suffix)] == suffix:
-                    inserted = comp_toks[ptr:j]; break
-            else:
-                inserted = comp_toks[ptr:]
-    exact = (inserted == gold_chunk)
-    length_match = (len(inserted) == len(gold_chunk))
-    first_match  = bool(inserted) and inserted[0] == gold_chunk[0]
-    gen_results.append({
-        "sentence": sentence, "span": (s, e),
-        "gold": gold_chunk, "inserted": inserted,
-        "exact": exact, "length_match": length_match,
-        "first_match": first_match,
-    })
-
-if gen_results:
-    n = len(gen_results)
-    n_exact = sum(1 for r in gen_results if r["exact"])
-    n_len   = sum(1 for r in gen_results if r["length_match"])
-    n_first = sum(1 for r in gen_results if r["first_match"])
-    print(f"    Sampled {n} training chunks. Regenerated via mask-completion.")
-    print(f"      exact-token match : {n_exact}/{n} ({100*n_exact/n:.1f}%)")
-    print(f"      length match      : {n_len}/{n}   ({100*n_len/n:.1f}%)")
-    print(f"      first-token match : {n_first}/{n} ({100*n_first/n:.1f}%)")
-
-    with open(f"{DIAG_DIR}/E_generation_precision.csv", "w") as f:
-        w = csv.writer(f)
-        w.writerow(["sentence", "span_start", "span_end", "gold", "inserted",
-                    "exact", "length_match", "first_match"])
-        for r in gen_results:
-            w.writerow([r["sentence"], r["span"][0], r["span"][1],
-                        " ".join(r["gold"]), " ".join(r["inserted"]),
-                        r["exact"], r["length_match"], r["first_match"]])
-
-# ──────────────────────────────────────────────────────────────────────
-# F. Unpack-from-leaf precision — bypass _basic_sample
-# ──────────────────────────────────────────────────────────────────────
-# Section E went through masked-completion (context-hierarchy
-# categorize → ref → _basic_sample → bag → resolve). Section F
-# pins the content-tree leaf the chunk landed at (via greedy
-# descent on the chunk's content-instance) and calls the new
-# ``start_content_leaf=`` generation mode. No _basic_sample, no
-# leaf resampling — we read THAT leaf's left/right bags directly.
-# If the chunk is truly memorised, this should regenerate the
-# exact tokens; if even THIS fails the bags themselves are too
-# diffuse for deterministic recall.
-print(f"\n  --- F. Unpack-from-leaf precision (deterministic recall) ---")
-
-f_results = []
-for h in hollow_corpus:
-    sentence = h["sentence"]
-    tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
-    tree.build_primitives(sentence, threshold=THRESHOLD)
-    fail = 0
-    for m in h["merges"]:
-        try:
-            tree.apply_candidate(m["left"], m["right"])
-        except Exception:
-            fail += 1
-    if fail:
+for hollow in test_hollow:
+    sentence = hollow["sentence"]
+    sent_len = len(re.findall(r"[\w']+|[.,!?;]", sentence))
+    if sent_len < 2:
         continue
-    tokens = sentence.split()
-    # Build a position → span map for the chunks in this sentence
-    def _span_of(node):
-        starts, ends = [], []
-        def w(n):
-            if isinstance(n, PrimitiveParseNode):
-                pos = int(n.position_idx)
-                starts.append(pos); ends.append(pos)
-                return
-            for _, c in getattr(n, "children", []):
-                w(c)
-        w(node)
-        return (min(starts), max(ends)) if starts else (None, None)
 
-    for comp in _walk_composites(tree.global_root_node):
-        ci = comp.get_content_instance()
-        if not ci:
-            continue
-        leaf = _greedy_descend(webster.ltm.content_hierarchy.root, ci)
-        s, e = _span_of(comp)
-        if s is None:
-            continue
-        gold_chunk = tokens[s:e+1]
-        try:
-            unpacked, _ = webster.generate_sentence(
-                start_content_leaf=leaf, debug=False)
-        except Exception as ex:
-            unpacked = f"<failed: {ex}>"
-        gen_tokens = unpacked.split() if unpacked and not unpacked.startswith("<failed") else []
-        exact = (gen_tokens == gold_chunk)
-        length_match = (len(gen_tokens) == len(gold_chunk))
-        first_match = bool(gen_tokens) and gen_tokens[0] == gold_chunk[0]
-        f_results.append({
-            "sentence": sentence,
-            "span": (s, e),
-            "gold": gold_chunk,
-            "unpacked": gen_tokens,
-            "leaf_count": int(getattr(leaf, "count", 0)),
-            "exact": exact,
-            "length_match": length_match,
-            "first_match": first_match,
-        })
+    # gold brackets via replaying merges
+    gold_tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+    gold_tree.build_primitives(sentence, threshold="converge")
+    for m in hollow["merges"]:
+        try: gold_tree.apply_candidate(m["left"], m["right"])
+        except Exception: pass
+    gold = _bracket_set(gold_tree)
 
-if f_results:
-    n = len(f_results)
-    n_exact = sum(1 for r in f_results if r["exact"])
-    n_len   = sum(1 for r in f_results if r["length_match"])
-    n_first = sum(1 for r in f_results if r["first_match"])
-    print(f"    Probed {n} chunks via start_content_leaf.")
-    print(f"      exact-token match : {n_exact}/{n} ({100*n_exact/n:.1f}%)")
-    print(f"      length match      : {n_len}/{n}   ({100*n_len/n:.1f}%)")
-    print(f"      first-token match : {n_first}/{n} ({100*n_first/n:.1f}%)")
-    # Stratify by leaf count — leaves with more training count should
-    # have tighter bags and recover more often.
-    print(f"    Stratified by leaf count:")
-    print(f"      {'leaf_count_range':>18s} {'n':>5s} {'exact':>8s}")
-    for lo, hi in [(1, 2), (2, 5), (5, 20), (20, 100), (100, int(1e9))]:
-        sub = [r for r in f_results if lo <= r["leaf_count"] < hi]
-        if not sub:
-            continue
-        nx = sum(1 for r in sub if r["exact"])
-        hi_str = "∞" if hi >= 1e9 else str(hi)
-        print(f"      [{lo:>4}, {hi_str:>4}): {len(sub):>5d} {100*nx/len(sub):>7.1f}%")
+    # predicted brackets via WEBSTER auto-parse. The new build() uses
+    # the climbing-ancestor count gate on the content tree: only
+    # candidates whose categorization leaf has an ancestor with
+    # count > THRESHOLD are admitted. THRESHOLD here flows into both
+    # primitive stability AND the climbing gate.
+    pred_tree = webster.parse_sentence(
+        sentence, threshold=THRESHOLD, new_vocab=False,
+        learning=False, debug=False)
+    pred = _bracket_set(pred_tree)
 
-    with open(f"{DIAG_DIR}/F_unpack_from_leaf.csv", "w") as f:
-        w = csv.writer(f)
-        w.writerow(["sentence", "span_start", "span_end", "gold",
-                    "unpacked", "leaf_count",
-                    "exact", "length_match", "first_match"])
-        for r in f_results:
-            w.writerow([r["sentence"], r["span"][0], r["span"][1],
-                        " ".join(r["gold"]), " ".join(r["unpacked"]),
-                        r["leaf_count"],
-                        r["exact"], r["length_match"], r["first_match"]])
+    tp = len(gold & pred); fp = len(pred - gold); fn = len(gold - pred)
+    total_tp += tp; total_fp += fp; total_fn += fn
+    if gold == pred and len(gold) > 0:
+        exact_match_count += 1
+    parse_rows.append({"sentence": sentence, "gold": sorted(gold),
+                       "pred": sorted(pred), "tp": tp, "fp": fp, "fn": fn})
 
-print(f"\nDiagnostic outputs in {DIAG_DIR}/:")
-print("  A_per_sentence.csv         — per-sentence re-parse stats")
-print("  B_threshold_sweep.csv/.png — threshold vs P/R/F1")
-print("  C_chunk_memorization.csv/.png — leaf-count distribution")
-print("  D_generalization.txt       — over/under stats")
-print("  E_generation_precision.csv — chunk regeneration (masked-completion)")
-print("  F_unpack_from_leaf.csv     — chunk regeneration (start_content_leaf)")
+    # Per-sentence parse-tree viz: gold (replayed merges) + pred (auto-parse).
+    idx = len(parse_rows) - 1
+    gold_tree.visualize(f"{OUT_DIR}/test_trees/test_gold_tree{idx}")
+    pred_tree.visualize(f"{OUT_DIR}/test_trees/test_pred_tree{idx}")
 
-# ── Test: auto-parse held-out sentences ────────────────────────────────────
-print("\n=== AUTO-PARSE TEST SENTENCES ===")
-num_test = 20
-test_documents = [generate("S", grammar) for _ in range(num_test)]
-
-for i, test in enumerate(test_documents):
-    parse_tree = webster.parse_sentence(
-        test,
-        threshold=THRESHOLD,
-        new_vocab=True,
-        learning=False,
-        debug=True,
-    )
-    parse_tree.visualize(f"{OUT_DIR}/test_trees/test_parse_tree{i}")
-    print(f"  Test tree {i}: \"{test}\"")
-
-# ── Test: random / fake sentences ──────────────────────────────────────────
-print("\n=== FAKE SENTENCE PARSING ===")
+# Bonus: parse + visualize random fake-word strings to expose the
+# negative-input rejection behavior of the sum_class_lp gate.
+print("\n  Parsing 10 fake (random-word) sentences for inspection...")
 fake_sentences = [
     " ".join([random.choice(corpus) for _ in range(random.randint(3, 8))])
     for _ in range(10)
 ]
 for i, fake in enumerate(fake_sentences):
-    parse_tree = webster.parse_sentence(
-        fake,
-        threshold=THRESHOLD,
-        new_vocab=True,
-        learning=False,
-        debug=True,
-    )
-    parse_tree.visualize(f"{OUT_DIR}/fake_trees/fake_parse_tree{i}")
-    print(f"  Fake tree {i}: \"{fake}\"")
+    fake_tree = webster.parse_sentence(
+        fake, threshold=THRESHOLD, new_vocab=False,
+        learning=False, debug=False)
+    fake_tree.visualize(f"{OUT_DIR}/fake_trees/fake_parse_tree{i}")
+    n_chunks = sum(1 for _ in _walk_composites(fake_tree.global_root_node))
+    print(f"    [{i+1:>2}] \"{fake}\"   chunks formed: {n_chunks}")
 
-# ============================================================================
-# Generation tests — restored under the new frontier-categorize regime.
-# WEBSTER's ``_resolve_bag`` (see src/parse_mh.py) now scores every
-# candidate content-ref against the bag of K canonical context-tree
-# nodes by *bag-weighted* mean log-prob and picks ``argmax``, instead
-# of stochastically descending one canonical's subtree. Generation
-# below uses the same path through ``webster.generate_sentence``.
-# ============================================================================
+precision = total_tp / max(total_tp + total_fp, 1)
+recall    = total_tp / max(total_tp + total_fn, 1)
+f1        = 2 * precision * recall / max(precision + recall, 1e-12)
+exact_pct = exact_match_count / max(len(parse_rows), 1)
 
-# ── Generation: from-scratch ────────────────────────────────────────────────
-print("\n=== FROM-SCRATCH GENERATION ===")
-gen_path = f"{OUT_DIR}/generated_sentences.txt"
-os.makedirs(os.path.dirname(gen_path), exist_ok=True)
-with open(gen_path, "w") as gf:
-    for i in range(10):
+print(f"  Test sentences: {len(parse_rows)}")
+print(f"  Gold brackets: {total_tp + total_fn}   Pred brackets: {total_tp + total_fp}")
+print(f"  Bracket Precision : {100*precision:5.1f}%   "
+      f"Recall: {100*recall:5.1f}%   F1: {100*f1:5.1f}%")
+print(f"  Exact-match parses (gold == pred): "
+      f"{exact_match_count}/{len(parse_rows)} ({100*exact_pct:.1f}%)")
+
+with open(f"{OUT_DIR}/parse_accuracy.csv", "w") as f:
+    f.write("sentence,gold_brackets,pred_brackets,tp,fp,fn\n")
+    for r in parse_rows:
+        f.write(f"\"{r['sentence']}\",\"{r['gold']}\",\"{r['pred']}\","
+                f"{r['tp']},{r['fp']},{r['fn']}\n")
+
+# =============================================================================
+# (1b) STEP-PICK ACCURACY (climbing-ancestor protocol)
+# =============================================================================
+# At each step of the gold replay on each held-out hollow sentence,
+# evaluate every parentless pair and apply build()'s exact strategy:
+#   Stage 1 (gate): climbing-ancestor count > THRESHOLD (content tree)
+#   Stage 2 (rank): argmax ancestor.log_prob_instance(bag)
+# Then ask: does the top-ranked pair's resulting span lie in the gold
+# bracket set?
+print("\n=== (1b) STEP-PICK ACCURACY (climbing-ancestor) ===")
+
+n_step_correct = n_step_total = n_step_no_cand = 0
+step_rows = []
+for hollow in test_hollow:
+    sentence = hollow["sentence"]
+    # 1. Gold bracket set (replay merges on a fresh tree).
+    gold_tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+    gold_tree.build_primitives(sentence, threshold="converge")
+    for m in hollow["merges"]:
+        try: gold_tree.apply_candidate(m["left"], m["right"])
+        except Exception: pass
+    gold = _bracket_set(gold_tree)
+    if not gold:
+        continue
+
+    # 2. Step-by-step replay alongside gold merges.
+    step_tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+    step_tree.build_primitives(sentence, threshold="converge")
+
+    for step_idx, m in enumerate(hollow["merges"]):
+        pairs = step_tree.get_parentless_pairs()
+        if not pairs:
+            break
+
+        # Evaluate every parentless pair. Mirror build()'s strategy:
+        # climbing-ancestor count gate × argmax cnt_root_lp.
+        admitted = []   # [(score, span), ...]
+        for p in pairs:
+            try:
+                res = step_tree.evaluate_pair(
+                    p["left_word_index"], p["right_word_index"],
+                    climb_count_threshold=THRESHOLD)
+            except Exception:
+                continue
+            csd = res.get("content_score_data", {})
+            if csd.get("climb_hit_root", True):
+                continue   # gate rejects
+            left_node  = step_tree._find_root_child_by_index(p["left_word_index"])
+            right_node = step_tree._find_root_child_by_index(p["right_word_index"])
+            if left_node is None or right_node is None:
+                continue
+            ls, _  = _chunk_span(left_node)
+            _, re_ = _chunk_span(right_node)
+            admitted.append((csd.get("root_log_prob", -float("inf")),
+                             (int(ls), int(re_))))
+
+        n_step_total += 1
+        if not admitted:
+            n_step_no_cand += 1
+            top_span = None
+            is_gold = False
+        else:
+            admitted.sort(key=lambda x: x[0], reverse=True)
+            top_span = admitted[0][1]
+            is_gold = top_span in gold
+            if is_gold:
+                n_step_correct += 1
+
+        step_rows.append({
+            "sentence": sentence, "step": step_idx,
+            "n_pairs": len(pairs), "n_admitted": len(admitted),
+            "top_span": top_span, "is_gold": int(is_gold),
+        })
+
+        # Advance state by applying the gold merge.
         try:
-            sentence, parse = webster.generate_sentence(debug=False)
-        except Exception as e:
-            sentence, parse = f"<generation failed: {e}>", None
-        print(f"  Generated [{i}]: \"{sentence}\"")
-        gf.write(f"[{i}] {sentence}\n")
-        if parse is not None and hasattr(parse, "visualize"):
-            parse.visualize(f"{OUT_DIR}/generated_trees/generated_parse_tree{i}")
-print(f"Saved generated sentences to \"{gen_path}\"")
+            step_tree.apply_candidate(m["left"], m["right"])
+        except Exception:
+            break
 
-# ── Generation: single-token mask ───────────────────────────────────────────
-print("\n=== MASKED COMPLETION (single token) ===")
-single_mask_path = f"{OUT_DIR}/single_mask_results.txt"
-os.makedirs(os.path.dirname(single_mask_path), exist_ok=True)
-with open(single_mask_path, "w") as smf:
-    for i in range(min(10, len(test_documents))):
-        tokens = test_documents[i].split()
-        if len(tokens) < 2:
-            continue
-        mask_idx = random.randint(1, len(tokens) - 1)
-        original_token = tokens[mask_idx]
-        masked_tokens = list(tokens); masked_tokens[mask_idx] = "[mask]"
-        masked = " ".join(masked_tokens)
-        try:
-            completed, parse = webster.generate_sentence(
-                masked_sentence=masked, debug=False)
-        except Exception as e:
-            completed, parse = f"<failed: {e}>", None
-        print(f"  Original:  \"{test_documents[i]}\"")
-        print(f"  Masked:    \"{masked}\"  (replaced \"{original_token}\" @ pos {mask_idx})")
-        print(f"  Completed: \"{completed}\"\n")
-        smf.write(f"[{i}] original: {test_documents[i]}\n")
-        smf.write(f"    masked:   {masked}\n")
-        smf.write(f"    replaced: \"{original_token}\" at pos {mask_idx}\n")
-        smf.write(f"    completed: {completed}\n\n")
-        if parse is not None and hasattr(parse, "visualize"):
-            parse.visualize(f"{OUT_DIR}/single_mask_trees/single_mask_tree{i}")
-print(f"Saved single-mask results to \"{single_mask_path}\"")
+step_acc = n_step_correct / max(n_step_total, 1)
+print(f"  Steps evaluated:    {n_step_total}")
+print(f"  Steps with NO admissible candidate "
+      f"(climbing gate rejected all): {n_step_no_cand}  "
+      f"({100*n_step_no_cand/max(n_step_total,1):.1f}%)")
+print(f"  Step-pick accuracy: "
+      f"{n_step_correct}/{n_step_total} ({100*step_acc:.1f}%)")
+print(f"  (THRESHOLD = {THRESHOLD} = climbing-ancestor count threshold)")
 
-# ── Generation: mid-sentence single mask ────────────────────────────────────
-print("\n=== MID-SENTENCE MASKED COMPLETION ===")
-mid_mask_path = f"{OUT_DIR}/mid_mask_results.txt"
-os.makedirs(os.path.dirname(mid_mask_path), exist_ok=True)
-with open(mid_mask_path, "w") as mf:
-    for i in range(min(10, len(test_documents))):
-        tokens = test_documents[i].split()
-        if len(tokens) < 3:
-            continue
-        mid = len(tokens) // 2
-        original_token = tokens[mid]
-        masked_tokens = tokens[:mid] + ["[mask]"] + tokens[mid + 1:]
-        masked = " ".join(masked_tokens)
-        try:
-            completed, parse = webster.generate_sentence(
-                masked_sentence=masked, debug=False)
-        except Exception as e:
-            completed, parse = f"<failed: {e}>", None
-        print(f"  Original:  \"{test_documents[i]}\"")
-        print(f"  Masked:    \"{masked}\"  (replaced \"{original_token}\" @ pos {mid})")
-        print(f"  Completed: \"{completed}\"\n")
-        mf.write(f"[{i}] original: {test_documents[i]}\n")
-        mf.write(f"    masked:   {masked}\n")
-        mf.write(f"    replaced: \"{original_token}\" at pos {mid}\n")
-        mf.write(f"    completed: {completed}\n\n")
-        if parse is not None and hasattr(parse, "visualize"):
-            parse.visualize(f"{OUT_DIR}/mid_mask_trees/mid_mask_tree{i}")
-print(f"Saved mid-sentence mask results to \"{mid_mask_path}\"")
+with open(f"{OUT_DIR}/step_pick_accuracy.csv", "w") as f:
+    f.write("sentence,step,n_pairs,n_admitted,top_span,is_gold\n")
+    for r in step_rows:
+        f.write(f"\"{r['sentence']}\",{r['step']},{r['n_pairs']},"
+                f"{r['n_admitted']},\"{r['top_span']}\",{r['is_gold']}\n")
 
-# ── Generation: multi-token mid-sentence mask ───────────────────────────────
-print("\n=== MULTI-TOKEN MID-SENTENCE MASK ===")
-multi_mid_path = f"{OUT_DIR}/multi_mid_mask_results.txt"
-os.makedirs(os.path.dirname(multi_mid_path), exist_ok=True)
-with open(multi_mid_path, "w") as mmf:
-    for i in range(min(10, len(test_documents))):
-        tokens = test_documents[i].split()
-        if len(tokens) < 5:
-            continue
-        max_remove = min(4, len(tokens) - 2)
-        num_remove = random.randint(2, max(2, max_remove))
-        mid = max(1, (len(tokens) - num_remove) // 2)
-        removed = tokens[mid:mid + num_remove]
-        masked_tokens = tokens[:mid] + ["[mask]"] + tokens[mid + num_remove:]
-        masked = " ".join(masked_tokens)
-        try:
-            completed, parse = webster.generate_sentence(
-                masked_sentence=masked, debug=False)
-        except Exception as e:
-            completed, parse = f"<failed: {e}>", None
-        print(f"  Original:  \"{test_documents[i]}\"")
-        print(f"  Masked:    \"{masked}\"  (removed {num_remove} tokens: "
-              f"\"{' '.join(removed)}\" at pos {mid}-{mid+num_remove-1})")
-        print(f"  Completed: \"{completed}\"\n")
-        mmf.write(f"[{i}] original: {test_documents[i]}\n")
-        mmf.write(f"    masked:   {masked}\n")
-        mmf.write(f"    removed: \"{' '.join(removed)}\" ({num_remove} tokens) "
-                  f"at pos {mid}-{mid+num_remove-1}\n")
-        mmf.write(f"    completed: {completed}\n\n")
-        if parse is not None and hasattr(parse, "visualize"):
-            parse.visualize(f"{OUT_DIR}/multi_mid_trees/multi_mid_tree{i}")
-print(f"Saved multi-token mid mask results to \"{multi_mid_path}\"")
+# =============================================================================
+# (2) GRAMMAR (CHUNK-CLASS) ACCURACY via Cobweb-Discrete probe
+# =============================================================================
+# Train a CobwebDiscreteTree probe on (content_instance bag → gold chunk class)
+# pairs from the TRAIN fold; predict + evaluate on the TEST fold.
+# This is the same "strong decoding style" used in
+# tests/met5/grammar_decoding_test.py Phase 3a.
+print("\n=== (2) GRAMMAR / CHUNK-CLASS ACCURACY (Cobweb-Discrete probe) ===")
 
-# ── Generation: prefix prediction (expand second half) ──────────────────────
-print("\n=== MASKED PREDICTION (expand second half) ===")
-mask_pred_path = f"{OUT_DIR}/masked_prediction_results.txt"
-os.makedirs(os.path.dirname(mask_pred_path), exist_ok=True)
-with open(mask_pred_path, "w") as mpf:
-    for i in range(min(10, len(test_documents))):
-        tokens = test_documents[i].split()
-        if len(tokens) < 2:
-            continue
-        split_point = len(tokens) // 2
-        prefix = tokens[:split_point]
-        masked = " ".join(prefix + ["[mask]"])
+_CLASS_ATTR = -1000   # special attr slot for the gold-label
+
+def _train_probe(train_bags, train_labels):
+    label_ids = {lbl: i + 1 for i, lbl in enumerate(sorted(set(train_labels)))}
+    id_labels = {i: lbl for lbl, i in label_ids.items()}
+    probe = CobwebDiscreteTree(alpha=PROBE_ALPHA, weight_attr=True)
+    for bag, lbl in zip(train_bags, train_labels):
+        inst = _clean_bag(bag)
+        inst[_CLASS_ATTR] = {label_ids[lbl]: 1}
+        probe.ifit(inst)
+    return probe, label_ids, id_labels
+
+def _predict_probe(probe, bag, id_labels):
+    inst = _clean_bag(bag)
+    n = probe.root
+    while n.children:
+        n = max(n.children, key=lambda c: c.log_prob_instance(inst))
+    while n is not None:
+        dist = (n.av_count or {}).get(_CLASS_ATTR, {})
+        winning = [(v, c) for v, c in (dist or {}).items() if v != 0]
+        if winning:
+            return id_labels.get(max(winning, key=lambda kv: kv[1])[0])
+        n = getattr(n, "parent", None)
+    return None
+
+# Build train + test bags from chunk content_instances.
+def _collect_chunk_bags(hollow_set):
+    bags, ys = [], []
+    for hollow in hollow_set:
+        sentence = hollow["sentence"]; sent_toks = sentence.split()
+        n_words  = len(sent_toks)
+        tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+        tree.build_primitives(sentence, threshold="converge")
+        for m in hollow["merges"]:
+            try: tree.apply_candidate(m["left"], m["right"])
+            except Exception: pass
+        for comp in _walk_composites(tree.global_root_node):
+            ci = comp.get_content_instance()
+            if not ci: continue
+            gold = classify_chunk(comp, n_words)
+            if gold is None: continue
+            bags.append(ci); ys.append(gold)
+    return bags, ys
+
+train_bags, train_y = _collect_chunk_bags(train_hollow)
+test_bags,  test_y  = _collect_chunk_bags(test_hollow)
+print(f"  Train chunks: {len(train_bags)}    Test chunks: {len(test_bags)}")
+
+chunk_probe, _, chunk_id_labels = _train_probe(train_bags, train_y)
+preds = [_predict_probe(chunk_probe, b, chunk_id_labels) or "UNKNOWN"
+         for b in test_bags]
+
+chunk_correct = sum(1 for p, g in zip(preds, test_y) if p == g)
+chunk_acc = chunk_correct / max(len(test_y), 1)
+print(f"  Overall chunk-class accuracy: "
+      f"{chunk_correct}/{len(test_y)} ({100*chunk_acc:.1f}%)")
+
+# Per-class precision/recall/F1
+gold_by = Counter(test_y); pred_by = Counter(preds)
+tp_by   = Counter(g for p, g in zip(preds, test_y) if p == g)
+print(f"  {'class':<6} {'n':>5} {'TP':>4} {'P':>7} {'R':>7} {'F1':>7}")
+prf_rows = []
+for cls in sorted(set(train_y) | set(test_y)):
+    n  = gold_by.get(cls, 0)
+    tp = tp_by.get(cls, 0)
+    pp = pred_by.get(cls, 0)
+    prec = tp / pp if pp else 0.0
+    rec  = tp / n  if n  else 0.0
+    f1c  = 2 * prec * rec / (prec + rec) if (prec + rec) else 0.0
+    if n == 0 and pp == 0: continue
+    prf_rows.append((cls, n, tp, prec, rec, f1c))
+    print(f"  {cls:<6} {n:>5} {tp:>4} {100*prec:>6.1f}% "
+          f"{100*rec:>6.1f}% {100*f1c:>6.1f}%")
+
+with open(f"{OUT_DIR}/chunk_class_accuracy.csv", "w") as f:
+    f.write("class,n_gold,tp,precision,recall,f1\n")
+    for cls, n, tp, p, r, f1c in prf_rows:
+        f.write(f"{cls},{n},{tp},{p:.4f},{r:.4f},{f1c:.4f}\n")
+    f.write(f"OVERALL,{len(test_y)},{chunk_correct},,{chunk_acc:.4f},\n")
+
+# =============================================================================
+# (3) GENERATION ACCURACY (under the strong decoding style)
+# =============================================================================
+# 3a. FROM-SCRATCH: generate sentences and score grammaticality with a
+#     CYK recognizer over TEST_GRAMMAR1.  Generation already routes
+#     through FiniteParseTree._resolve_bag's bag-weighted frontier-
+#     categorize (same posterior-weighted decoding the probe in (2)
+#     validates).
+# 3b. MASKED COMPLETION: hide one token in each held-out sentence, run
+#     generation, score (i) exact-token recovery and (ii) POS-class
+#     recovery of the filled-in token.
+print("\n=== (3) GENERATION ACCURACY ===")
+
+# ── CYK-style recognizer over TEST_GRAMMAR1 ──
+# Handles binary, ternary, unary productions on a chart[i][j] of
+# derived nonterminals. Each span is filled by:
+#   - splitting at every k between binary RHS pairs
+#   - splitting at every (k2, k) pair between ternary RHS triples
+#   - applying unary closure until fixed point
+def _grammar_recognize(tokens, start="S"):
+    n = len(tokens)
+    if n == 0: return False
+    term_lhs = defaultdict(set)
+    for lhs, prods in grammar.items():
+        for prod in prods:
+            if len(prod) == 1 and (prod[0] in WORD_TO_POS or prod[0] not in grammar):
+                term_lhs[prod[0]].add(lhs)
+
+    chart = [[set() for _ in range(n + 1)] for _ in range(n + 1)]
+
+    def _unary_closure(s):
+        changed = True
+        while changed:
+            changed = False
+            for lhs, prods in grammar.items():
+                for prod in prods:
+                    if len(prod) == 1 and prod[0] in s and lhs not in s:
+                        s.add(lhs); changed = True
+
+    for i, tok in enumerate(tokens):
+        chart[i][i + 1] = set(term_lhs.get(tok, set()))
+        _unary_closure(chart[i][i + 1])
+
+    for span in range(2, n + 1):
+        for i in range(n - span + 1):
+            j = i + span
+            # Binary productions: try every split point.
+            for k in range(i + 1, j):
+                left, right = chart[i][k], chart[k][j]
+                if not left or not right: continue
+                for lhs, prods in grammar.items():
+                    for prod in prods:
+                        if (len(prod) == 2
+                                and prod[0] in left and prod[1] in right):
+                            chart[i][j].add(lhs)
+            # Ternary productions: try every (k2, k) split. Doesn't
+            # require chart[i][k] to be non-empty (intentional — the
+            # 3-way split bypasses chart[i][k] entirely).
+            if span >= 3:
+                for k2 in range(i + 1, j - 1):
+                    for k in range(k2 + 1, j):
+                        a_set = chart[i][k2]
+                        b_set = chart[k2][k]
+                        c_set = chart[k][j]
+                        if not a_set or not b_set or not c_set: continue
+                        for lhs, prods in grammar.items():
+                            for prod in prods:
+                                if (len(prod) == 3
+                                        and prod[0] in a_set
+                                        and prod[1] in b_set
+                                        and prod[2] in c_set):
+                                    chart[i][j].add(lhs)
+            _unary_closure(chart[i][j])
+    return start in chart[0][n]
+
+# ── 3a. From-scratch generation ──
+print("\n  --- (3a) From-scratch generation ---")
+N_GEN = 50
+n_gen_ok = n_lex_ok = n_total = 0
+generations = []
+for i in range(N_GEN):
+    try:
+        gen_text, gen_parse = webster.generate_sentence(debug=False)
+    except Exception as e:
+        gen_text, gen_parse = f"<failed: {e}>", None
+    n_total += 1
+    toks = gen_text.split()
+    lex_ok = all(t in WORD_TO_POS for t in toks) if toks else False
+    gram_ok = lex_ok and _grammar_recognize(toks)
+    if lex_ok:  n_lex_ok  += 1
+    if gram_ok: n_gen_ok  += 1
+    generations.append({"text": gen_text, "lex_ok": lex_ok, "gram_ok": gram_ok})
+    flag = "✓" if gram_ok else ("L" if lex_ok else "x")
+    print(f"    [{i+1:>3}] {flag} \"{gen_text}\"")
+    if gen_parse is not None and i < 20:
         try:
-            completed, parse = webster.generate_sentence(
-                masked_sentence=masked, debug=False)
-        except Exception as e:
-            completed, parse = f"<failed: {e}>", None
-        print(f"  Original:  \"{test_documents[i]}\"")
-        print(f"  Masked:    \"{masked}\"")
-        print(f"  Completed: \"{completed}\"\n")
-        mpf.write(f"[{i}] original: {test_documents[i]}\n")
-        mpf.write(f"    masked:   {masked}\n")
-        mpf.write(f"    completed: {completed}\n\n")
-        if parse is not None and hasattr(parse, "visualize"):
-            parse.visualize(f"{OUT_DIR}/masked_pred_trees/masked_pred_tree{i}")
-print(f"Saved masked prediction results to \"{mask_pred_path}\"")
+            gen_parse.visualize(f"{OUT_DIR}/generated_trees/generated_parse_tree{i}")
+        except Exception:
+            pass
+
+print(f"  In-lexicon : {n_lex_ok}/{n_total} ({100*n_lex_ok/max(n_total,1):.1f}%)")
+print(f"  Grammatical: {n_gen_ok}/{n_total} ({100*n_gen_ok/max(n_total,1):.1f}%)")
+
+with open(f"{OUT_DIR}/generation_from_scratch.csv", "w") as f:
+    f.write("idx,in_lexicon,grammatical,text\n")
+    for i, g in enumerate(generations):
+        f.write(f"{i},{int(g['lex_ok'])},{int(g['gram_ok'])},\"{g['text']}\"\n")
+
+# ── 3b. Single-token masked completion (POS + exact recovery) ──
+print("\n  --- (3b) Single-token masked completion ---")
+mask_rows = []
+exact_hits = pos_hits = mask_total = 0
+test_sents = [h["sentence"] for h in test_hollow if len(h["sentence"].split()) >= 3]
+
+for i, sent in enumerate(test_sents[:30]):
+    toks = sent.split()
+    mid  = len(toks) // 2
+    gold_tok = toks[mid]
+    gold_pos = WORD_TO_POS.get(gold_tok, "OTHER")
+    masked = " ".join(toks[:mid] + ["[mask]"] + toks[mid + 1:])
+    try:
+        completed, comp_parse = webster.generate_sentence(
+            masked_sentence=masked, debug=False)
+    except Exception as e:
+        completed, comp_parse = f"<failed: {e}>", None
+    if comp_parse is not None and i < 20:
+        try:
+            comp_parse.visualize(f"{OUT_DIR}/mask_trees/mask_tree{i}")
+        except Exception:
+            pass
+    comp_toks = completed.split()
+    # Pull out what filled the mask: take the token at position `mid`
+    # (or "?" if completion is shorter).
+    filled = comp_toks[mid] if mid < len(comp_toks) else "?"
+    filled_pos = WORD_TO_POS.get(filled, "OTHER")
+
+    exact = (filled == gold_tok)
+    pos_ok = (filled_pos == gold_pos)
+    if exact:  exact_hits += 1
+    if pos_ok: pos_hits   += 1
+    mask_total += 1
+
+    mark = "=" if exact else ("~" if pos_ok else "x")
+    print(f"    [{i+1:>3}] {mark} gold=\"{gold_tok}\" ({gold_pos}) "
+          f"→ filled=\"{filled}\" ({filled_pos})   completed=\"{completed}\"")
+    mask_rows.append({
+        "sentence": sent, "mask_pos": mid,
+        "gold": gold_tok, "gold_pos": gold_pos,
+        "filled": filled, "filled_pos": filled_pos,
+        "completed": completed,
+        "exact": int(exact), "pos_ok": int(pos_ok),
+    })
+
+print(f"  Exact-token recovery: {exact_hits}/{mask_total} "
+      f"({100*exact_hits/max(mask_total,1):.1f}%)")
+print(f"  POS-class recovery  : {pos_hits}/{mask_total} "
+      f"({100*pos_hits/max(mask_total,1):.1f}%)")
+print(f"  (chance: lexicon={100/len(WORD_TO_POS):.1f}%, "
+      f"POS={100/len(POS_LIST):.0f}%)")
+
+with open(f"{OUT_DIR}/generation_masked.csv", "w") as f:
+    f.write("idx,sentence,mask_pos,gold,gold_pos,filled,filled_pos,"
+            "completed,exact,pos_ok\n")
+    for i, r in enumerate(mask_rows):
+        f.write(f"{i},\"{r['sentence']}\",{r['mask_pos']},{r['gold']},"
+                f"{r['gold_pos']},{r['filled']},{r['filled_pos']},"
+                f"\"{r['completed']}\",{r['exact']},{r['pos_ok']}\n")
+
+# =============================================================================
+# Summary
+# =============================================================================
+print("\n" + "=" * 70)
+print("SUMMARY — flying colors check")
+print("=" * 70)
+print(f"  (1)  Parse bracket P/R/F1     : "
+      f"{100*precision:.1f}% / {100*recall:.1f}% / {100*f1:.1f}%")
+print(f"       Exact-match parses        : {100*exact_pct:.1f}%")
+print(f"  (1b) Step-pick (climbing-ancestor): {100*step_acc:.1f}%  "
+      f"(of {n_step_total} steps; {n_step_no_cand} gated out)")
+print(f"  (2)  Chunk-class accuracy     : {100*chunk_acc:.1f}%")
+print(f"  (3a) From-scratch grammatical : {100*n_gen_ok/max(n_total,1):.1f}%")
+print(f"  (3a) From-scratch in-lexicon  : {100*n_lex_ok/max(n_total,1):.1f}%")
+print(f"  (3b) Mask exact recovery      : "
+      f"{100*exact_hits/max(mask_total,1):.1f}%")
+print(f"  (3b) Mask POS recovery        : "
+      f"{100*pos_hits/max(mask_total,1):.1f}%")
+print()
+print(f"Artefacts in {OUT_DIR}/:")
+print(f"  parse_accuracy.csv, chunk_class_accuracy.csv,")
+print(f"  generation_from_scratch.csv, generation_masked.csv,")
+print(f"  final_ltm_data/ (saved WEBSTER state)")
+print(f"  performance_summary.png (overview graphic)")
+
+# =============================================================================
+# SUMMARY GRAPHIC — performance across all evaluated tasks
+# =============================================================================
+# A four-panel figure:
+#   • Panel A: bracket-level P / R / F1 + exact-match (Phase 1).
+#   • Panel B: per-chunk-class P / R / F1 (Phase 2), with overall accuracy
+#               called out in the title.
+#   • Panel C: from-scratch generation rates (in-lexicon, grammatical).
+#   • Panel D: masked-completion recovery (exact-token, POS-class) with
+#               chance baselines.
+fig = plt.figure(figsize=(18, 10))
+fig.suptitle(
+    "WEBSTER — Hollow Learning Test Performance Summary  "
+    f"(SEED={SEED}, train={len(train_hollow)}, test={len(test_hollow)})  "
+    f"[strategy: climbing-ancestor count gate (THRESHOLD={THRESHOLD}) × "
+    "argmax cnt_root_lp]",
+    fontsize=12, fontweight="bold")
+
+# Panel A — Parse bracket P/R/F1 + exact-match.
+axA = fig.add_subplot(2, 3, 1)
+parse_metrics = ["Precision", "Recall", "F1", "Exact-match"]
+parse_values  = [precision, recall, f1, exact_pct]
+parse_colors  = ["#1f77b4", "#2ca02c", "#d62728", "#9467bd"]
+bars = axA.bar(parse_metrics, parse_values,
+               color=parse_colors, edgecolor="black", linewidth=0.5)
+for b, v in zip(bars, parse_values):
+    axA.text(b.get_x() + b.get_width()/2, v + 0.02,
+             f"{100*v:.1f}%", ha="center", fontsize=10, fontweight="bold")
+axA.set_ylim(0, 1.15)
+axA.set_ylabel("Score")
+axA.set_title(
+    f"(A) End-to-end Parse Accuracy  (n={len(parse_rows)})", fontsize=11)
+axA.grid(axis="y", alpha=0.3)
+
+# Panel B — Step-pick accuracy: climbing-ancestor gate.
+axB = fig.add_subplot(2, 3, 2)
+step_chance = (1 / max(np.mean([r["n_pairs"] for r in step_rows]) or 1, 1)
+               if step_rows else 0)
+gate_pass_rate = ((n_step_total - n_step_no_cand) / max(n_step_total, 1)
+                  if n_step_total else 0)
+sp_labels = ["Step-pick\n(of admitted)",
+             "Gate pass-rate\n(climb cleared)",
+             "chance"]
+sp_values = [step_acc, gate_pass_rate, step_chance]
+sp_colors = ["#d62728", "#2ca02c", "lightgray"]
+sp_bars = axB.bar(sp_labels, sp_values,
+                  color=sp_colors, edgecolor="black", linewidth=0.5)
+for b, v in zip(sp_bars, sp_values):
+    axB.text(b.get_x() + b.get_width()/2, v + 0.02,
+             f"{100*v:.1f}%", ha="center", fontsize=10, fontweight="bold")
+axB.set_ylim(0, 1.15)
+axB.set_ylabel("Accuracy")
+axB.set_title(
+    f"(B) Step-pick — Climbing-Ancestor  (n={n_step_total} steps)",
+    fontsize=11)
+axB.tick_params(axis="x", labelsize=8)
+axB.grid(axis="y", alpha=0.3)
+
+# Panel C — Per-chunk-class P / R / F1 grouped bars.
+axC = fig.add_subplot(2, 3, 3)
+if prf_rows:
+    cls_names = [r[0] for r in prf_rows]
+    P  = [r[3] for r in prf_rows]
+    R  = [r[4] for r in prf_rows]
+    F1 = [r[5] for r in prf_rows]
+    n_g = [r[1] for r in prf_rows]
+    x = np.arange(len(cls_names)); w = 0.27
+    axC.bar(x - w, P,  w, label="Precision", color="#1f77b4")
+    axC.bar(x,     R,  w, label="Recall",    color="#2ca02c")
+    axC.bar(x + w, F1, w, label="F1",        color="#d62728")
+    for i in range(len(cls_names)):
+        axC.text(x[i] - w, P[i]  + 0.02, f"{100*P[i]:.0f}",  ha="center", fontsize=7)
+        axC.text(x[i],     R[i]  + 0.02, f"{100*R[i]:.0f}",  ha="center", fontsize=7)
+        axC.text(x[i] + w, F1[i] + 0.02, f"{100*F1[i]:.0f}", ha="center", fontsize=7)
+    axC.set_xticks(x)
+    axC.set_xticklabels([f"{c}\n(n={n})" for c, n in zip(cls_names, n_g)],
+                       fontsize=9)
+    axC.set_ylim(0, 1.15); axC.set_ylabel("Score")
+    axC.set_title(
+        f"(C) Chunk-Class Probe   overall {100*chunk_acc:.1f}%   (n={len(test_y)})",
+        fontsize=11)
+    axC.legend(loc="lower right", fontsize=8)
+    axC.grid(axis="y", alpha=0.3)
+
+# Panel D — From-scratch generation rates.
+axD = fig.add_subplot(2, 3, 4)
+gen_metrics = ["In-lexicon", "Grammatical"]
+gen_values  = [n_lex_ok / max(n_total, 1),
+               n_gen_ok / max(n_total, 1)]
+gen_colors  = ["#17becf", "#bcbd22"]
+bars = axD.bar(gen_metrics, gen_values,
+               color=gen_colors, edgecolor="black", linewidth=0.5)
+for b, v in zip(bars, gen_values):
+    axD.text(b.get_x() + b.get_width()/2, v + 0.02,
+             f"{100*v:.1f}%", ha="center", fontsize=10, fontweight="bold")
+axD.set_ylim(0, 1.15); axD.set_ylabel("Rate")
+axD.set_title(
+    f"(D) From-scratch Generation  (n={n_total})", fontsize=11)
+axD.grid(axis="y", alpha=0.3)
+
+# Panel E — Mask completion: exact + POS recovery, with chance baselines.
+axE = fig.add_subplot(2, 3, 5)
+mask_metrics = ["Exact-token", "POS-class"]
+mask_values  = [exact_hits / max(mask_total, 1),
+                pos_hits   / max(mask_total, 1)]
+mask_chance  = [1 / max(len(WORD_TO_POS), 1),
+                1 / max(len(POS_LIST), 1)]
+mask_colors  = ["#ff7f0e", "#e377c2"]
+x = np.arange(len(mask_metrics)); w = 0.35
+bars = axE.bar(x - w/2, mask_values, w, color=mask_colors,
+               edgecolor="black", linewidth=0.5, label="WEBSTER")
+chance_bars = axE.bar(x + w/2, mask_chance, w,
+                      color="lightgray", edgecolor="black",
+                      linewidth=0.5, label="chance")
+for b, v in zip(bars, mask_values):
+    axE.text(b.get_x() + b.get_width()/2, v + 0.02,
+             f"{100*v:.1f}%", ha="center", fontsize=9, fontweight="bold")
+for b, v in zip(chance_bars, mask_chance):
+    axE.text(b.get_x() + b.get_width()/2, v + 0.02,
+             f"{100*v:.1f}%", ha="center", fontsize=8, color="#444")
+axE.set_xticks(x); axE.set_xticklabels(mask_metrics)
+axE.set_ylim(0, 1.15); axE.set_ylabel("Recovery rate")
+axE.set_title(
+    f"(E) Single-token Masked Completion  (n={mask_total})", fontsize=11)
+axE.legend(loc="upper right", fontsize=9)
+axE.grid(axis="y", alpha=0.3)
+
+# Panel F — Headline numbers / overall scorecard.
+axF = fig.add_subplot(2, 3, 6)
+axF.axis("off")
+scorecard = [
+    ("Parse F1",                  f"{100*f1:.1f}%"),
+    ("Exact-match parses",        f"{100*exact_pct:.1f}%"),
+    ("Step-pick (climbing)",      f"{100*step_acc:.1f}%"),
+    ("Gate pass-rate",            f"{100*gate_pass_rate:.1f}%"),
+    ("Chunk-class accuracy",      f"{100*chunk_acc:.1f}%"),
+    ("Mask POS recovery",         f"{100*pos_hits/max(mask_total,1):.1f}%"),
+]
+axF.set_title("(F) Scorecard", fontsize=11)
+y_top = 0.95
+for i, (label, val) in enumerate(scorecard):
+    y = y_top - i * 0.14
+    axF.text(0.05, y, label, fontsize=12, va="center",
+             transform=axF.transAxes)
+    axF.text(0.95, y, val, fontsize=14, va="center", ha="right",
+             fontweight="bold", color="#1f77b4",
+             transform=axF.transAxes)
+    axF.plot([0.04, 0.96], [y - 0.07, y - 0.07],
+             color="#ddd", linewidth=0.6, transform=axF.transAxes)
+
+plt.tight_layout(rect=[0, 0, 1, 0.95])
+plt.savefig(f"{OUT_DIR}/performance_summary.png", dpi=140, bbox_inches="tight")
+plt.close()
+print(f"  Summary graphic → {OUT_DIR}/performance_summary.png")

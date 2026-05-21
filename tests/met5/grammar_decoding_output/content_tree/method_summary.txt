@@ -12,15 +12,15 @@ Class distribution:
      PP:   25
 
 Per-class clustering purity:
-     NP: 169/170 (99.4%)
-   AdjP: 49/74 (66.2%)
+     NP: 170/170 (100.0%)
+   AdjP: 68/74 (91.9%)
      PP: 18/25 (72.0%)
-     VP: 59/82 (72.0%)
-      S: 50/88 (56.8%)
+     VP: 75/82 (91.5%)
+      S: 55/88 (62.5%)
 
 BL nodes (sorted by membership):
-  [ 0] depth= 2  count=  165  members= 211  dom=NP
-  [ 1] depth= 1  count=  107  members= 114  dom=VP
-  [ 2] depth= 2  count=   40  members=  68  dom=S
-  [ 3] depth= 1  count=  237  members=  37  dom=AdjP
-  [ 4] depth= 1  count=   81  members=   9  dom=VP
+  [ 0] depth= 2  count=  166  members= 178  dom=NP
+  [ 1] depth= 1  count=  108  members= 117  dom=VP
+  [ 2] depth= 2  count=   40  members=  70  dom=S
+  [ 3] depth= 1  count=  238  members=  62  dom=AdjP
+  [ 4] depth= 1  count=   81  members=  12  dom=VP

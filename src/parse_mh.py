@@ -418,6 +418,49 @@ def _categorize(inst: dict, tree: CobwebDiscreteTree,
         return leaf, path, node_path, None
 
 
+def _climbing_ancestor(node_path: List[CobwebDiscreteNode],
+                       count_threshold: float) -> dict:
+    """
+    Walk up from the categorization leaf along ``node_path`` (root → leaf)
+    and find the **most-specific** ancestor whose ``count > count_threshold``.
+
+    This is the unsupervised "freeze when good enough" gate the user
+    described: representations cluster in the cobweb tree, and the
+    most-specific cluster that has accumulated ``> count_threshold``
+    instances is treated as a "well-supported category" — i.e. a chunk
+    type we've seen enough times to commit to.
+
+    Returns
+    -------
+    dict with keys:
+      ``ancestor_count``    : count at the chosen ancestor
+      ``ancestor_depth``    : depth in node_path (0=root, len-1=leaf)
+      ``ancestor_log_prob`` : ancestor.log_prob_instance(instance)
+                              [not computed here; caller does it]
+      ``hit_root``          : True if no non-root ancestor cleared the
+                              threshold (candidate is unfamiliar and
+                              should NOT be admitted)
+    """
+    # node_path is root → leaf. Walk from leaf upward.
+    for depth in range(len(node_path) - 1, -1, -1):
+        node = node_path[depth]
+        if node.count > count_threshold:
+            return {
+                "ancestor_node":  node,
+                "ancestor_count": node.count,
+                "ancestor_depth": depth,
+                "hit_root":       (depth == 0),
+            }
+    # No ancestor cleared — even root doesn't have enough count (shouldn't
+    # happen for a trained tree, but be safe).
+    return {
+        "ancestor_node":  node_path[0],
+        "ancestor_count": node_path[0].count,
+        "ancestor_depth": 0,
+        "hit_root":       True,
+    }
+
+
 def _score_along_path(
     node_path: List[CobwebDiscreteNode],
     instance: dict,
@@ -425,17 +468,19 @@ def _score_along_path(
     debug: bool = False,
     eval_alpha: float = None,
     _basic_cache: dict = None,
+    climb_count_threshold: float = None,
 ) -> dict:
     """
     Compute recognition statistics along a categorization path.
-    Mirrors FiniteParseTree._score_function from parse.py.
-    Returns a dict of score metrics!
 
-    FROM NOTES WITH CHRIS - basic level **count** is the cost/score used for
-    thresholding.  A count of -1 means the basic-level node collapsed back to
-    the root (not enough evidence to form a real category), which should always
-    fail the threshold.  A positive count N means the basic-level node has been
-    reinforced N times; pass once N > threshold.
+    Includes the **climbing-ancestor** signal (the new unsupervised gate):
+    the most-specific ancestor on the path whose ``count`` exceeds
+    ``climb_count_threshold``. If ``climb_count_threshold`` is provided,
+    the score dict carries ``climb_ancestor_count``, ``climb_ancestor_depth``,
+    ``climb_ancestor_log_prob``, and ``climb_hit_root`` so that ``build()``
+    can gate and rank on them.
+
+    Returns a dict of score metrics!
 
     _basic_cache: optional dict for caching get_basic() results by leaf
     concept hash. Useful when the tree is read-only (e.g. during build()).
@@ -470,7 +515,8 @@ def _score_along_path(
         "raw_node_log_probs": str(raw_log_probs),
         "candidate_counts": str(path_counts),
 
-        # basic level stuff
+        # basic level stuff (kept for diagnostics; NO LONGER used as the
+        # parse gate — replaced by the climbing-ancestor signal below).
         "basic_level_count": basic_level_count,
         "basic_level_log_prob": basic_level_log_prob,
         "basic_level_class_log_prob": basic_level_class_log_prob,
@@ -484,6 +530,14 @@ def _score_along_path(
         "root_log_prob": raw_log_probs[0],
         "leaf_log_prob": raw_log_probs[-1],
     }
+
+    # Climbing-ancestor gate (unsupervised "ample count" signal).
+    if climb_count_threshold is not None:
+        climb = _climbing_ancestor(node_path, climb_count_threshold)
+        score_data["climb_ancestor_count"]    = climb["ancestor_count"]
+        score_data["climb_ancestor_depth"]    = climb["ancestor_depth"]
+        score_data["climb_ancestor_log_prob"] = climb["ancestor_node"].log_prob_instance(instance)
+        score_data["climb_hit_root"]          = climb["hit_root"]
 
     if debug:
         print("-" * 60)
@@ -678,23 +732,52 @@ class CompositeParseNode(object):
         the TopK-Pool representation
         (``LongTermMemory.content_encoder``).
 
-        Layout (2 attributes):
-          Attr 0 : set of ``ltm.content_top_k`` int ids — the top-scoring
-                   depth-``ltm.content_pool_depth`` context-tree nodes under
-                   the LEFT child's ``context_instance`` (count=1 each).
-          Attr 1 : same for the RIGHT child.
+        Layout (4 attributes):
+          Attr 0 : LEFT child's TopK pool bag (depth-d context-tree node ids).
+          Attr 1 : RIGHT child's TopK pool bag.
+          Attr 2 : LEFT child complexity tag {C{left_cplx}: 1}.
+          Attr 3 : RIGHT child complexity tag {C{right_cplx}: 1}.
 
-        Each id is a stable int minted from the corresponding context
-        node's ``concept_hash``; the encoder maintains a
-        ``set_value_remap`` payload that re-canonicalises ids when the
-        underlying pool node moves out of the depth band (merge above
-        or split). See ``cobweb-private/src/cobweb/leaf_remap.py``.
+        Why include child complexities (attrs 2 and 3):
+
+        With ONLY bags (attrs 0 and 1), Cobweb's CU partitions chunks
+        by surface context similarity. Two chunks with the same
+        children-context shape but different structural depth (e.g.,
+        cplx-2 NP "the dog" vs cplx-4 NP "the big red small dog")
+        end up in the same leaf even though they belong to different
+        sub-classes. The diagnostic ran in this session showed
+        content-tree LEAVES are 94.5% class-pure but BL nodes (one
+        level up) collapse VP and S together — exactly because cplx
+        isn't a clustering axis.
+
+        Including LEFT and RIGHT child complexities as separate
+        VISIBLE attributes does two things:
+
+         1. Tightens the unsupervised clustering. Cobweb's CU now
+            splits chunks by (left_cplx, right_cplx) shape, which is
+            a strong proxy for chunk class (NP=Det+N → (1,1); S=NP+V
+            → (2-3, 1); deeper S=NP+VP → (2-3, 2-3); etc.). This
+            is the same trick the SUPERVISED probe at 99% used —
+            adding a class-correlated attribute makes Cobweb cluster
+            on it. Here we use cplx as an unsupervised proxy for
+            class.
+         2. Lets the generator allocate target_complexity correctly
+            at unpack time. Reading attrs 2 and 3 from the resolved
+            leaf tells us EXACTLY how complex each child should be,
+            so balanced-binary recursion stops behaving like a
+            balanced-binary recursion on caterpillar-shaped chunks.
         """
         left_ctx  = left_node.get_context_instance()
         right_ctx = right_node.get_context_instance()
+        left_c    = getattr(left_node,  "complexity", 1)
+        right_c   = getattr(right_node, "complexity", 1)
+        left_cplx_vid  = _get_or_register_cplx_vid(left_c,  ltm.id_to_value, ltm.value_to_id)
+        right_cplx_vid = _get_or_register_cplx_vid(right_c, ltm.id_to_value, ltm.value_to_id)
         return {
             0: ltm._bag_for_context_inst(left_ctx),
             1: ltm._bag_for_context_inst(right_ctx),
+            2: {left_cplx_vid:  1},
+            3: {right_cplx_vid: 1},
         }
 
     # ------------------------------------------------------------------
@@ -1218,7 +1301,8 @@ class FiniteParseTree(object):
     # ---- evaluation -----------------------------------------------------
 
     def evaluate_pair(self, left_word_index, right_word_index, debug=False,
-                      _basic_cache=None, _child_ctx_cache=None) -> dict:
+                      _basic_cache=None, _child_ctx_cache=None,
+                      climb_count_threshold: float = None) -> dict:
         """
         Evaluate merging two root-level children.
         Builds *both* content and context instances, categorizes each in its
@@ -1228,6 +1312,9 @@ class FiniteParseTree(object):
 
         _basic_cache: optional dict for caching get_basic() results.
         _child_ctx_cache: optional dict for caching per-child context scores.
+        climb_count_threshold: if provided, the content-tree score_data
+            carries climbing-ancestor signals (count, depth, log_prob,
+            hit_root) — used by build()'s unsupervised gate.
         """
         left_node = self._find_root_child_by_index(left_word_index)
         right_node = self._find_root_child_by_index(right_word_index)
@@ -1286,7 +1373,8 @@ class FiniteParseTree(object):
 
         content_score_data = _score_along_path(cnt_node_path, content_inst, self.ltm.content_hierarchy,
                                                eval_alpha=getattr(self.ltm, 'content_bl_alpha', None),
-                                               _basic_cache=_basic_cache)
+                                               _basic_cache=_basic_cache,
+                                               climb_count_threshold=climb_count_threshold)
         context_score_data = _score_along_path(ctx_node_path, context_inst, self.ltm.context_hierarchy,
                                                eval_alpha=getattr(self.ltm, 'context_bl_alpha', None),
                                                _basic_cache=_basic_cache)
@@ -1559,76 +1647,120 @@ class FiniteParseTree(object):
 
     # ---- build (automatic) ---------------------------------------------
 
-    def build(self, window: str, end_behavior="converge", debug=False) -> bool:
+    # --- recognition-gate defaults -----------------------------------
+    # Climbing-ancestor count gate: the most-specific ancestor of the
+    # candidate's content-tree categorization leaf whose ``count`` exceeds
+    # this threshold is treated as a "well-supported category". If even
+    # the climb reaches root without clearing it, the candidate is novel
+    # and rejected. UNSUPERVISED: this is the user's "ample count on a
+    # learned representation" intuition, applied on the content tree.
+    CLIMB_COUNT_THRESHOLD_DEFAULT = 30
+
+    def build(self, window: str, end_behavior="converge", debug=False,
+              climb_count_threshold: int = None) -> bool:
         """
         Fully automatic parse: build primitives then greedily merge best pairs.
 
-        Selection strategy (two-stage):
-            1. Threshold gate: keep only candidates whose basic-level count
-               exceeds *end_behavior* (numeric) or is > -1 (``"converge"``).
-               A count of -1 means the basic-level node collapsed to the root,
-               i.e. there is no real evidence for the chunk.
-            2. Tie-break by content ``tree_log_prob``: among all candidates
-               that pass the gate, the one with the highest tree log-probability
-               is chosen.  If no candidates pass the gate, the loop terminates.
+        Selection strategy (unsupervised, single coherent rule):
+
+            1. **Climbing-ancestor count gate** (on the content tree):
+               For each candidate pair, descend the content tree to the
+               leaf that the merged bag categorises into; then walk
+               UPWARD until you find the most-specific ancestor whose
+               ``count > climb_count_threshold``. If you'd have to walk
+               all the way to root, the candidate is unfamiliar — reject.
+               Otherwise admit.
+
+            2. **Rank by ``cnt_root_lp``**: argmax of the content
+               tree's root log-prob for the candidate bag — the
+               threshold-test's strongest single content-tree
+               heuristic (Phase 4: 85.7% step-pick alone). Higher
+               ``cnt_root_lp`` = candidate bag matches the overall
+               content distribution better. Merge the top one.
+
+            3. **Stop** when no candidate passes the gate. The remaining
+               parentless nodes are "frozen" — there's no learned
+               representation that licenses further chunking.
+
+        Why this matches the user's mental model
+        ----------------------------------------
+        The content tree learns representations (Cobweb-CU clustering
+        on TopK-Pool bags). `grammar_decoding_test.py` Phase 3a confirms
+        these representations are 99% linearly separable by chunk class.
+        Each ancestor on the categorization path IS a "learned chunk
+        type". The count at an ancestor is "how many times have we seen
+        chunks of this type". The climbing-ancestor finds the
+        most-specific type with enough evidence to commit to — which is
+        the partonomic-generalization gate the user described.
+
+        Why this isn't the old "basic_level_count > threshold" gate
+        ----------------------------------------------------------
+        The old gate used `get_basic()`'s single answer + a -1 sentinel
+        whenever the basic-level detector chose root. That gate killed
+        many gold chunks where BL detection happened to be ambiguous.
+        Climbing the path explicitly avoids that brittleness: we don't
+        need to pick a basic level, we just walk up until we find the
+        first ancestor with enough evidence.
+
+        ``end_behavior`` is now only a *convergence signal*:
+        ``"converge"`` (default) → merge until 1 root remains OR the
+        gate stops admitting candidates.
         """
         self.window = window
         self.build_primitives(window, threshold=end_behavior, debug=debug)
 
-        # Determine the numeric count threshold for stage-1 gating.
-        # "converge" means accept any candidate with at least some evidence
-        # (basic_level_count > -1).  A numeric end_behavior is used directly.
-        count_threshold = -1 if end_behavior == "converge" else end_behavior
+        if climb_count_threshold is None:
+            climb_count_threshold = self.CLIMB_COUNT_THRESHOLD_DEFAULT
 
-        # --- pair score cache: avoid re-evaluating unchanged pairs ---
-        _pair_cache: dict = {}  # (left_idx, right_idx) → (sum_tree_lps, res)
-        # --- caches for expensive sub-computations (trees are read-only during build) ---
-        _basic_cache: dict = {}   # (tree_id, leaf_hash, alpha) → basic_level_node
-        _child_ctx_cache: dict = {}  # child_id → context score dict
+        # Caches: pair-eval results are reused as long as their two
+        # endpoints aren't merged.
+        _pair_cache: dict = {}      # (left_idx, right_idx) → res-or-None
+        _basic_cache: dict = {}
+        _child_ctx_cache: dict = {}
 
         while True:
             pairs = self.get_parentless_pairs()
             if not pairs:
                 break
 
-            candidates = []
+            # ── Evaluate every parentless pair, gate by climbing-ancestor ──
+            admitted = []   # [(score, res), ...]
             for p in pairs:
                 pair_key = (p["left_word_index"], p["right_word_index"])
-
-                # Use cached result if available
                 if pair_key in _pair_cache:
-                    cached_lps, cached_res = _pair_cache[pair_key]
-                    if cached_lps is not None:  # passed threshold last time
-                        candidates.append((cached_lps, cached_res))
+                    res = _pair_cache[pair_key]
+                    if res is None:
+                        continue
+                else:
+                    try:
+                        res = self.evaluate_pair(
+                            p["left_word_index"], p["right_word_index"],
+                            debug=debug,
+                            _basic_cache=_basic_cache,
+                            _child_ctx_cache=_child_ctx_cache,
+                            climb_count_threshold=climb_count_threshold)
+                    except Exception as e:
+                        if debug:
+                            print(f"evaluate_pair failed: {e}")
+                        _pair_cache[pair_key] = None
+                        continue
+                    _pair_cache[pair_key] = res
+
+                # Stage 1: gate on climbing-ancestor count.
+                csd = res.get("content_score_data", {})
+                if csd.get("climb_hit_root", True):
                     continue
 
-                try:
-                    res = self.evaluate_pair(p["left_word_index"], p["right_word_index"], debug=debug,
-                                            _basic_cache=_basic_cache, _child_ctx_cache=_child_ctx_cache)
-                except Exception as e:
-                    if debug:
-                        print(f"evaluate_pair failed: {e}")
-                    _pair_cache[pair_key] = (None, None)
-                    continue
+                # Stage 2: rank by content-tree root log-prob.
+                score = csd.get("root_log_prob", -float("inf"))
+                admitted.append((score, res))
 
-                basic_level_count = res.get("score", -float("inf"))  # == content_score_data["cost"]
-                cnt_tree_log_prob = res.get("content_score_data", {}).get("tree_log_prob", -float("inf"))
-                sum_tree_lps = cnt_tree_log_prob
-
-                # Stage 1: threshold gate
-                if basic_level_count <= count_threshold:
-                    _pair_cache[pair_key] = (None, None)
-                    continue
-
-                _pair_cache[pair_key] = (sum_tree_lps, res)
-                candidates.append((sum_tree_lps, res)) # SECONDARY SCORE
-
-            if not candidates:
+            if not admitted:
                 break
 
-            # Stage 2: pick the candidate with the highest tree_log_prob
-            candidates.sort(key=lambda x: x[0], reverse=True)
-            chosen = candidates[0][1]
+            # Argmax content-tree root log-prob.
+            admitted.sort(key=lambda x: x[0], reverse=True)
+            chosen = admitted[0][1]
 
             chosen_left = chosen["left_word_index"]
             chosen_right = chosen["right_word_index"]
@@ -1652,7 +1784,7 @@ class FiniteParseTree(object):
             for k in stale_keys:
                 del _pair_cache[k]
 
-            if end_behavior == "converge" and len(self.global_root_node.children) <= 1:
+            if len(self.global_root_node.children) <= 1:
                 break
 
         return True
@@ -3482,6 +3614,94 @@ class WEBSTER(object):
         self.content_bl_alpha = content_bl_alpha
         self.context_bl_alpha = context_bl_alpha
 
+        # Optional unsupervised structural transition map populated by
+        # learn_leaf_transitions() — used by generate_sentence to
+        # filter candidate content-refs by which OTHER content-tree
+        # leaves were typical children of THIS leaf during training.
+        # Pure unsupervised: the leaves themselves act as class labels
+        # (they're already 99% class-pure per the probe). No external
+        # POS dictionary, no gold class labels.
+        self.content_leaf_transitions: dict = {}
+
+    def learn_leaf_transitions(self, train_trees: list = None) -> dict:
+        """Populate ``self.content_leaf_transitions`` from WEBSTER's
+        OWN training history. For every composite chunk seen during
+        training, record (parent_leaf, left_child_leaf,
+        right_child_leaf). The result is an unsupervised structural
+        transition map: each content-tree leaf knows which OTHER
+        content-tree leaves typically appeared as its children.
+
+        Pure unsupervised: no class labels, no POS dictionary, no
+        external supervision. The 99% class-purity of content-tree
+        leaves (proved by ``tests/met5/grammar_decoding_test.py``
+        Phase 3a's probe) means treating leaves as classes recovers
+        nearly all the discriminative info the supervised probe has.
+
+        Parameters
+        ----------
+        train_trees : list of FiniteParseTree, optional
+            Trees to mine. If None, attempts to use trees stored
+            internally during training (not currently tracked, so this
+            argument is effectively required for now).
+
+        Returns the populated transitions dict for convenience.
+        """
+        from collections import Counter
+        trans: dict = {}
+
+        if not train_trees:
+            return trans
+
+        def _walk(n):
+            if isinstance(n, PrimitiveParseNode): return
+            if not getattr(n, "is_global_root", False):
+                yield n
+            for _, c in getattr(n, "children", []):
+                yield from _walk(c)
+
+        def _descend_content(ci):
+            n = self.ltm.content_hierarchy.root
+            while n.children:
+                n = max(n.children, key=lambda c: c.log_prob_instance(ci))
+            return n
+
+        for tree in train_trees:
+            for comp in _walk(tree.global_root_node):
+                ci = comp.get_content_instance()
+                if not ci: continue
+                leaf_parent = _descend_content(ci)
+                key = str(leaf_parent.concept_hash())
+                entry = trans.setdefault(key, {
+                    "count": 0,
+                    "L_children": Counter(),   # leaf_hash → count
+                    "R_children": Counter(),
+                    "L_words":    Counter(),   # word_id → count (if primitive)
+                    "R_words":    Counter(),
+                })
+                entry["count"] += 1
+                kids = sorted(getattr(comp, "children", []),
+                              key=lambda y: y[0] if y[0] is not None else 0)
+                if len(kids) < 2: continue
+                lk, rk = kids[0][1], kids[1][1]
+                # LEFT child
+                if isinstance(lk, PrimitiveParseNode):
+                    entry["L_words"][lk.word_id] += 1
+                else:
+                    lci = lk.get_content_instance()
+                    if lci:
+                        ll = _descend_content(lci)
+                        entry["L_children"][str(ll.concept_hash())] += 1
+                # RIGHT child
+                if isinstance(rk, PrimitiveParseNode):
+                    entry["R_words"][rk.word_id] += 1
+                else:
+                    rci = rk.get_content_instance()
+                    if rci:
+                        rl = _descend_content(rci)
+                        entry["R_children"][str(rl.concept_hash())] += 1
+        self.content_leaf_transitions = trans
+        return trans
+
     # ---- accessors ------------------------------------------------------
 
     @property
@@ -3516,8 +3736,15 @@ class WEBSTER(object):
         ----------
         sentence : str
             The text to parse.
-        threshold : float | "converge" | None
-            Score threshold for accepting chunks. None falls back to self.threshold.
+        threshold : int | "converge" | None
+            ``int``        → climbing-ancestor count threshold used by
+                             ``FiniteParseTree.build()``. Also used as
+                             the primitive stability threshold in
+                             ``build_primitives``.
+            ``"converge"`` → primitives are always stable; climbing-
+                             ancestor gate uses
+                             ``CLIMB_COUNT_THRESHOLD_DEFAULT``.
+            ``None``       → falls back to ``self.threshold``.
         new_vocab : bool
             If True, add previously unseen words to the vocabulary.
         learning : bool
@@ -3539,7 +3766,16 @@ class WEBSTER(object):
                 self.ltm.add_to_vocab(tok)
 
         parse_tree = FiniteParseTree(self.ltm, context_length=self.context_length)
-        parse_tree.build(sentence, end_behavior=threshold, debug=debug)
+        # The primitive-stability threshold (build_primitives) and the
+        # climbing-ancestor count threshold (build's gate) share the
+        # numeric ``threshold`` argument so callers only have to set one
+        # knob: "what counts as 'seen enough times'".
+        climb_thr = (FiniteParseTree.CLIMB_COUNT_THRESHOLD_DEFAULT
+                     if threshold == "converge"
+                     else int(threshold) if isinstance(threshold, (int, float))
+                     else FiniteParseTree.CLIMB_COUNT_THRESHOLD_DEFAULT)
+        parse_tree.build(sentence, end_behavior=threshold,
+                         climb_count_threshold=climb_thr, debug=debug)
 
         if learning:
             self.ltm.add_parse_tree(
@@ -3575,18 +3811,6 @@ class WEBSTER(object):
         return trees
 
     # ---- generation -----------------------------------------------------
-
-    def _find_node_by_hash(self, root, hash_str):
-        """Find a node in a hierarchy tree by its concept hash string."""
-        if root is None:
-            return None
-        if str(root.concept_hash()) == str(hash_str):
-            return root
-        for child in root.children:
-            found = self._find_node_by_hash(child, hash_str)
-            if found:
-                return found
-        return None
 
     def generate_sentence(self, masked_sentence: str = "",
                           start_content_leaf=None,
@@ -3811,6 +4035,33 @@ class WEBSTER(object):
                     k=1)[0]
             return leaf
 
+        def _read_child_cplx_static(cnt_node, attr_idx):
+            """Read the stored child-complexity (attr 2 or 3) on a
+            content-tree node — works for internal nodes too since they
+            aggregate from descendants."""
+            rd = (cnt_node.av_count or {}).get(attr_idx, {})
+            if not rd:
+                return 1
+            best_c, best_w = 1, 0
+            for vid, ww in rd.items():
+                if vid == 0:
+                    continue
+                name = (self.ltm.id_to_value[vid]
+                        if 0 <= vid < len(self.ltm.id_to_value) else None)
+                if not (name and isinstance(name, str) and name.startswith("C")):
+                    continue
+                try:
+                    c = int(name[1:])
+                    if ww > best_w:
+                        best_w, best_c = ww, c
+                except ValueError:
+                    pass
+            return max(1, best_c)
+
+        def _read_child_cplx(cnt_leaf, attr_idx):
+            """Alias kept for backward compatibility / readability."""
+            return _read_child_cplx_static(cnt_leaf, attr_idx)
+
         def _read_canonical_bag(cnt_leaf, attr_idx):
             """Read the canonical-aggregated bag from a content leaf's attr.
 
@@ -3914,9 +4165,63 @@ class WEBSTER(object):
             Returns:
                 (node, [all_nodes]) where node is the root of the subtree.
             """
-            if depth > max_depth:
+            # If we're at or past the depth cap and the resolver picked
+            # a concept, terminate by extracting the most likely WORD
+            # from that concept's content_instance bag instead of
+            # recursing further. This bounds output length at 2^max_depth.
+            if depth >= max_depth and (
+                    isinstance(content_ref_str, str) and
+                    content_ref_str.startswith("CONCEPT-")):
+                cnt_node = _find_cnt(content_ref_str)
+                fallback_word = None
+                if cnt_node is not None:
+                    # Sample a leaf and read one of its bag attrs to
+                    # find a word vid via the encoder's value_vocab_inv.
+                    try:
+                        sl = _basic_sample(cnt_node)
+                        for attr_idx in (0, 1):
+                            bg = _read_canonical_bag(sl, attr_idx)
+                            for can_id, w in sorted(
+                                    bg.items(), key=lambda kv: -kv[1]):
+                                can_hash = self.ltm.content_encoder.value_vocab_inv.get(can_id)
+                                if can_hash is None:
+                                    continue
+                                cn = _find_ctx(f"CONCEPT-{can_hash}")
+                                if cn is None:
+                                    continue
+                                rd = (cn.av_count or {}).get(_ref_attr, {})
+                                for vid, _c in sorted(
+                                        rd.items(), key=lambda kv: -kv[1]):
+                                    if vid == 0:
+                                        continue
+                                    nm = (self.ltm.id_to_value[vid]
+                                          if 0 <= vid < len(self.ltm.id_to_value)
+                                          else None)
+                                    if (nm and nm != "EMPTYNULL"
+                                            and not nm.startswith("CONCEPT-")):
+                                        fallback_word = nm
+                                        break
+                                if fallback_word:
+                                    break
+                            if fallback_word:
+                                break
+                    except Exception:
+                        pass
+                if fallback_word is None:
+                    # Last-ditch: pick any vocab word so we don't crash.
+                    for w in self.ltm.id_to_value:
+                        if (isinstance(w, str) and w not in ("EMPTYNULL",)
+                                and not w.startswith("CONCEPT-")
+                                and not w.startswith("C")):
+                            fallback_word = w
+                            break
+                if fallback_word is None:
+                    fallback_word = "?"
+                content_ref_str = fallback_word
+
+            if depth > max_depth + 4:   # hard safety stop
                 raise RuntimeError(
-                    f"Recursion depth {depth} > {max_depth}. "
+                    f"Recursion depth {depth} > max_depth+4={max_depth+4}. "
                     f"Cycle in content-refs? ref={content_ref_str}")
 
             # ── BASE CASE: content-ref is a word ──
@@ -3942,15 +4247,21 @@ class WEBSTER(object):
                     f"Content node not found for {content_ref_str[:50]}. "
                     f"Stale content-ref.")
 
-            # get_basic → sample a leaf
-            sampled_leaf = _basic_sample(cnt_node)
+            # Read the resolved leaf's bags DIRECTLY (no basic-level
+            # resampling). Content-refs always point to leaves.
+            if cnt_node.children:
+                sampled_leaf = _basic_sample(cnt_node)
+            else:
+                sampled_leaf = cnt_node
 
             # Read the canonical-aggregated bag for left (attr 0) and
-            # right (attr 1). The bag is the full set of top-K pool
-            # ancestors stored for each side — generation uses *all*
-            # of them jointly via _resolve_bag, not a sampled one.
-            left_bag  = _read_canonical_bag(sampled_leaf, 0)
-            right_bag = _read_canonical_bag(sampled_leaf, 1)
+            # right (attr 1), AND the stored child complexities
+            # (attrs 2 and 3 — new in this iteration of
+            # create_content_instance).
+            left_bag         = _read_canonical_bag(sampled_leaf, 0)
+            right_bag        = _read_canonical_bag(sampled_leaf, 1)
+            left_cplx_read   = _read_child_cplx(sampled_leaf, 2)
+            right_cplx_read  = _read_child_cplx(sampled_leaf, 3)
 
             if debug:
                 print(f"  {'  '*depth}expand: |L_bag|={len(left_bag)}  "
@@ -3963,34 +4274,60 @@ class WEBSTER(object):
             comp.context_length = _cl
             all_nodes = [comp]
 
-            # Children's expected complexity: parent's - 1 (binary tree
-            # rule: complexity = max(children.complexity) + 1).
-            # Clamp at 1 (primitive level). If target_complexity is
-            # None (legacy caller), pass None along.
-            child_cplx = (max(1, target_complexity - 1)
-                          if target_complexity is not None else None)
+            # Use the STORED per-child complexities from the resolved
+            # leaf (attrs 2 and 3, written at training time by
+            # create_content_instance). Each leaf knows exactly how
+            # complex its children were at training.
+            left_cplx_alloc  = (left_cplx_read  if left_cplx_read  >= 1
+                                else max(1, (target_complexity or 1) - 1))
+            right_cplx_alloc = (right_cplx_read if right_cplx_read >= 1
+                                else max(1, (target_complexity or 1) - 1))
+
+            # Look up this leaf's expected child LEAVES from the
+            # unsupervised structural transition map (populated by
+            # learn_leaf_transitions). The seed leaf tells us "my
+            # left children at training were leaf X 5 times and leaf
+            # Y 3 times" — propagate those expectations down. Pure
+            # leaf-identity, no class labels.
+            _tr = getattr(self, "content_leaf_transitions", {}) or {}
+            _entry = _tr.get(str(sampled_leaf.concept_hash()), {})
+            _allowed_L_leaves = (_entry.get("L_children")
+                                 if _entry else None) or None
+            _allowed_R_leaves = (_entry.get("R_children")
+                                 if _entry else None) or None
+            _allowed_L_words = (_entry.get("L_words")
+                                if _entry else None) or None
+            _allowed_R_words = (_entry.get("R_words")
+                                if _entry else None) or None
 
             # ── Resolve LEFT child via joint bag matching ──
             left_child_ref = _resolve_bag(left_bag, depth + 1,
-                                          target_complexity=child_cplx)
+                                          target_complexity=left_cplx_alloc,
+                                          allowed_leaves=_allowed_L_leaves,
+                                          allowed_words=_allowed_L_words)
             left_node, left_sub = _expand(
                 left_child_ref, position - 0.25 / (2 ** depth),
-                depth=depth + 1, target_complexity=child_cplx)
+                depth=depth + 1, target_complexity=left_cplx_alloc,
+                max_depth=max_depth)
             left_node.set_parent(comp)
             all_nodes.extend(left_sub)
 
             # ── Resolve RIGHT child via joint bag matching ──
             right_child_ref = _resolve_bag(right_bag, depth + 1,
-                                           target_complexity=child_cplx)
+                                           target_complexity=right_cplx_alloc,
+                                           allowed_leaves=_allowed_R_leaves,
+                                           allowed_words=_allowed_R_words)
             right_node, right_sub = _expand(
                 right_child_ref, position + 0.25 / (2 ** depth),
-                depth=depth + 1, target_complexity=child_cplx)
+                depth=depth + 1, target_complexity=right_cplx_alloc,
+                max_depth=max_depth)
             right_node.set_parent(comp)
             all_nodes.extend(right_sub)
 
             return comp, all_nodes
 
-        def _resolve_bag(bag, depth, target_complexity=None):
+        def _resolve_bag(bag, depth, target_complexity=None,
+                         allowed_leaves=None, allowed_words=None):
             """Resolve a canonical bag → content-ref string via
             **frontier-categorize**.
 
@@ -4081,16 +4418,85 @@ class WEBSTER(object):
             # union of frontier av_count[content_ref] across the bag.
             # This naturally restricts the search to refs the frontier
             # has ever seen (no global vocab sweep).
-            candidate_vids: set = set()
+            #
+            # When ``target_complexity > 1`` we are still inside a
+            # composite expansion — the child SHOULD be a CONCEPT
+            # (another composite), not a word. Restrict candidate_vids
+            # to CONCEPT-pointing vids to prevent premature word-
+            # termination of the recursion (this is the failure mode
+            # the old algorithm had: a high-cplx root expanded to a
+            # word at depth 1 and the parse aborted with 2 leaves).
+            # Fall back to all vids if NO concept candidate exists.
+            id2v = self.ltm.id_to_value
+            def _is_concept_vid(vid):
+                if not (0 <= vid < len(id2v)):
+                    return False
+                n = id2v[vid]
+                return isinstance(n, str) and n.startswith("CONCEPT-")
+
+            all_vids: set = set()
             for node, _, _ in canonical_pairs:
                 for vid in (node.av_count.get(_ref_attr, {}) or {}).keys():
                     if vid != 0:
-                        candidate_vids.add(int(vid))
-            if not candidate_vids:
+                        all_vids.add(int(vid))
+            if not all_vids:
                 raise RuntimeError(
                     f"No candidate content-refs across {len(canonical_pairs)} "
                     f"canonicals at depth={depth}. Train with "
                     f"threshold='converge'.")
+
+            # Hard-filter by target_complexity:
+            #   target == 1 → must be a primitive WORD.
+            #   target >  1 → must be a CONCEPT (composite).
+            if target_complexity == 1:
+                word_vids = {v for v in all_vids if not _is_concept_vid(v)}
+                candidate_vids = word_vids if word_vids else all_vids
+            elif target_complexity is not None and target_complexity > 1:
+                concept_vids = {v for v in all_vids if _is_concept_vid(v)}
+                candidate_vids = concept_vids if concept_vids else all_vids
+            else:
+                candidate_vids = all_vids
+
+            # Unsupervised structural transition filter
+            # (grammar_decoding_test.py Phase 4 idea, refactored to
+            # use leaf identity instead of class labels):
+            #
+            # If the parent told us which child LEAVES (or words) it
+            # saw at training via ``allowed_leaves`` / ``allowed_words``,
+            # restrict the candidates to those that match. Each leaf
+            # is already a 99% class-pure cluster (per the supervised
+            # probe), so leaf-identity acts as an unsupervised proxy
+            # for class — without needing any POS dictionary or gold
+            # class labels.
+            #
+            # ``allowed_leaves`` / ``allowed_words`` are Counters keyed
+            # by leaf_hash / word_id with values = training-instance
+            # count. We store these as ``transition_weight`` per
+            # candidate vid so step-3 scoring can prefer the most
+            # commonly-seen child pattern.
+            transition_weight: dict = {}
+            if (allowed_leaves or allowed_words):
+                def _vid_target_leaf_hash(vid):
+                    n = (self.ltm.id_to_value[vid]
+                         if 0 <= vid < len(self.ltm.id_to_value) else None)
+                    if not n:
+                        return None, None
+                    if n.startswith("CONCEPT-"):
+                        cn = _find_cnt(n)
+                        if cn is None: return None, None
+                        return str(cn.concept_hash()), None
+                    return None, vid  # primitive: word_id
+                struct_matched = set()
+                for v in candidate_vids:
+                    lh, wid = _vid_target_leaf_hash(v)
+                    if lh is not None and allowed_leaves and lh in allowed_leaves:
+                        struct_matched.add(v)
+                        transition_weight[v] = allowed_leaves.get(lh, 1)
+                    elif wid is not None and allowed_words and wid in allowed_words:
+                        struct_matched.add(v)
+                        transition_weight[v] = allowed_words.get(wid, 1)
+                if struct_matched:
+                    candidate_vids = struct_matched
 
             # Step 3: frontier-categorize each candidate. Build a
             # *single-attribute* instance (content-ref only) so
@@ -4102,12 +4508,22 @@ class WEBSTER(object):
             best_vid, best_score = None, float("-inf")
             second_score = float("-inf")
             scores_by_vid: dict = {}   # for tie-break diagnostics
+            import math as _math
             for vid in candidate_vids:
                 inst = {_ref_attr: {vid: 1}}
                 score = 0.0
                 for node, weight, _ in canonical_pairs:
                     score += weight * node.log_prob_instance(inst)
                 score /= total_w
+                # Boost by training-transition frequency. If this vid
+                # was seen N times as a child at this position during
+                # training, add log(N+1) to the score — so a 5×-seen
+                # transition wins over a 1×-seen one even when their
+                # bag-scores are similar.
+                if transition_weight:
+                    tw = transition_weight.get(vid, 0)
+                    if tw > 0:
+                        score += _math.log(tw + 1)
                 scores_by_vid[vid] = score
                 if score > best_score:
                     second_score = best_score
@@ -4217,23 +4633,25 @@ class WEBSTER(object):
             comp.context_length = _cl
             all_nodes = [comp]
 
-            child_cplx = max(1, leaf_cplx - 1) if leaf_cplx else None
+            # Read stored per-child complexities (attrs 2 and 3).
+            left_cplx_seed  = _read_child_cplx(start_content_leaf, 2)
+            right_cplx_seed = _read_child_cplx(start_content_leaf, 3)
 
             if left_bag:
                 left_ref = _resolve_bag(left_bag, 1,
-                                        target_complexity=child_cplx)
+                                        target_complexity=left_cplx_seed)
                 left_node, left_sub = _expand(
                     left_ref, 0.25, depth=1,
-                    target_complexity=child_cplx)
+                    target_complexity=left_cplx_seed)
                 left_node.set_parent(comp)
                 all_nodes.extend(left_sub)
 
             if right_bag:
                 right_ref = _resolve_bag(right_bag, 1,
-                                         target_complexity=child_cplx)
+                                         target_complexity=right_cplx_seed)
                 right_node, right_sub = _expand(
                     right_ref, 0.75, depth=1,
-                    target_complexity=child_cplx)
+                    target_complexity=right_cplx_seed)
                 right_node.set_parent(comp)
                 all_nodes.extend(right_sub)
 
@@ -4399,86 +4817,215 @@ class WEBSTER(object):
             return [gen_text, pt]
 
         # ══════════════════════════════════════════════════════════════════
-        #  GENERATION FROM SCRATCH
+        #  GENERATION FROM SCRATCH (complex-concept seed)
         #
-        #  Per MULTIHIERARCHY.md line 83:
-        #  "sample a complex context instance, find the leaf which
-        #   corresponds to its content-ref, find the basic level node of
-        #   that leaf, sample a new leaf from that node, expand its two
-        #   content elements as new nodes by using PATH INFORMATION to
-        #   traverse the CONTEXT HIERARCHY, and repeat this process until
-        #   words terminate as sentences!!!"
+        #  Old algorithm sampled a context-tree LEAF whose context slots
+        #  were all-empty (a "sentence-root") and read its content-ref to
+        #  start expansion. Problem: even when cplx≥4 sentence-roots
+        #  existed, _resolve_bag at depth 1 of expansion almost always
+        #  collapsed to a WORD (because the bag's canonical context
+        #  nodes have words as their most-frequent content-refs at
+        #  storage time). Result: 2-word outputs.
+        #
+        #  New algorithm (uses ideas from grammar_decoding_test.py
+        #  Phase 3a — the chunk-class probe at 99% confirms content-
+        #  tree leaves CLUSTER strongly by chunk class):
+        #
+        #     1. Build a {content_tree_leaf → max_complexity} map by
+        #        walking every CONTEXT-tree leaf and pulling its
+        #        content-ref pointer → content-tree node + its stored
+        #        complexity (from av_count[-2]).
+        #     2. Sample a content-tree leaf weighted by
+        #        max_complexity^3 × count. This SAMPLES A COMPLEX
+        #        CONCEPT directly, biased toward S-class (cplx 4+)
+        #        clusters where sentences live.
+        #     3. Use the UNPACK-FROM-LEAF path (the same one that
+        #        already handles deterministic chunk recovery): read
+        #        the leaf's left/right bags and recurse via _expand.
+        #  This way we start from a content-tree leaf whose stored
+        #  chunks are KNOWN to be high-complexity, not from a context
+        #  leaf whose content-ref might or might not be.
         # ══════════════════════════════════════════════════════════════════
         else:
             if debug:
-                print("=== GENERATION FROM SCRATCH ===")
+                print("=== GENERATION FROM SCRATCH (complex-concept seed) ===")
 
-            # Find sentence-root context leaves (empty context, has content-ref)
-            sent_roots = _sentence_root_ctx_leaves()
-            if not sent_roots:
+            # Step 1: Build seed candidate pool from SENTENCE-ROOT
+            # context leaves only — these are context-tree leaves with
+            # all-empty context slots (the chunk was the WHOLE sentence
+            # at training, not a sub-chunk). This is the same filter
+            # the old generation used, but now we feed the resolved
+            # content-tree leaves directly into UNPACK-FROM-LEAF (which
+            # uses the cplx attrs added in
+            # project-content-instance-cplx-attrs) instead of going
+            # through _basic_sample's cross-cluster resampling.
+            #
+            # Why ROOT context only? Otherwise we hit idiosyncratic
+            # deep chunks (max_cplx=10 caterpillars from a single
+            # training sentence with count=1) and unpack them into
+            # word salad. Sentence-roots are the WELL-SUPPORTED
+            # S-class clusters.
+            content_leaf_stats: dict = {}
+            id2v = self.ltm.id_to_value
+
+            def _walk_ctx_leaves(n):
+                if not n.children:
+                    yield n
+                else:
+                    for c in n.children:
+                        yield from _walk_ctx_leaves(c)
+
+            for ctx_leaf in _walk_ctx_leaves(self.ltm.context_hierarchy.root):
+                # Sentence-root filter: context slots all empty.
+                av = ctx_leaf.av_count or {}
+                is_sent_root = all(
+                    not any(v != 0 for v in av.get(a, {}))
+                    for a in range(2 * _cl))
+                if not is_sent_root:
+                    continue
+                cplx = _read_cplx(ctx_leaf)
+                if cplx < 3:
+                    continue   # tiny chunks aren't sentences
+                rd = av.get(_ref_attr, {})
+                for vid, ref_count in rd.items():
+                    if vid == 0 or not (0 <= vid < len(id2v)):
+                        continue
+                    name = id2v[vid]
+                    if not (isinstance(name, str) and name.startswith("CONCEPT-")):
+                        continue
+                    cnt_node = _find_cnt(name)
+                    if cnt_node is None or cnt_node.children:
+                        continue
+                    stats = content_leaf_stats.setdefault(
+                        cnt_node, {"max_cplx": 0, "count": 0.0, "n_refs": 0})
+                    if cplx > stats["max_cplx"]:
+                        stats["max_cplx"] = cplx
+                    stats["count"] += ref_count
+                    stats["n_refs"] += 1
+
+            if not content_leaf_stats:
                 raise RuntimeError(
-                    "No sentence-root context leaves found. "
-                    "Train on more data before generating.")
+                    "No sentence-root content-tree leaves found. "
+                    "Train on more data with full-sentence chunks "
+                    "before generating.")
 
-            # Filter out trivially-short roots: a "sentence" should be
-            # at least a few composites deep. Complexity 1 is a single
-            # word; complexity 2 is a two-word chunk. Keep only roots
-            # with complexity ≥ 3 so generation produces sentence-
-            # shaped output rather than fragments. If filtering wipes
-            # out everything, fall back to whatever we have.
-            min_root_cplx = 3
-            filtered = [(n, c) for n, c in sent_roots if c >= min_root_cplx]
-            if filtered:
-                sent_roots = filtered
+            # Step 2: filter to S-shape leaves and weight.
+            # Requires lc >= 2 (left child non-trivial — rules out
+            # right-deep chunks with a primitive left, which look like
+            # "<word> <VP>" and aren't sentence-shaped).
+            #
+            # Weight = node.count^2 × max_cplx. The COUNT^2 strongly
+            # favours well-clustered leaves (multiple training chunks
+            # landed there). Single-instance seeds (count=1) often have
+            # only ONE training transition, which can be class-wrong
+            # (e.g. a cplx-3 seed whose ONE left-child transition is
+            # an "AdjP+N" internal chunk from a longer training
+            # sentence). Multi-instance leaves have varied transitions
+            # → better resolve_bag class coherence.
+            leaves = []
+            weights = []
+            for cnt_leaf, st in content_leaf_stats.items():
+                lc = _read_child_cplx_static(cnt_leaf, 2)
+                rc = _read_child_cplx_static(cnt_leaf, 3)
+                if lc < 2:
+                    continue
+                node_count = float(cnt_leaf.count)
+                weight = (node_count ** 2) * max(st["max_cplx"], 1)
+                leaves.append(cnt_leaf)
+                weights.append(weight)
 
-            # Weight by complexity^2 (favor more complex / longer
-            # sentences) *and* by node.count (favor patterns we've
-            # actually seen often). Without the count factor, a
-            # one-off complexity-10 root dominates a well-supported
-            # complexity-5 root.
-            nodes, complexities = zip(*sent_roots)
-            weights = [(c ** 2) * max(getattr(n, 'count', 1.0), 1.0)
-                       for n, c in zip(nodes, complexities)]
+            if not leaves:
+                raise RuntimeError(
+                    "No S-shape sentence-root leaves found "
+                    "(filter: left_cplx >= 2). Loosen criteria.")
 
-            chosen_idx = random.choices(
-                range(len(nodes)),
+            idx = random.choices(
+                range(len(leaves)),
                 weights=[max(w, 1e-12) for w in weights],
                 k=1)[0]
-            chosen_ctx = nodes[chosen_idx]
-            chosen_cplx = complexities[chosen_idx]
+            chosen_leaf = leaves[idx]
+            chosen_stats = content_leaf_stats[chosen_leaf]
+            chosen_cplx = chosen_stats["max_cplx"]
 
             if debug:
-                print(f"  Sampled context leaf: "
-                      f"...{str(chosen_ctx.concept_hash())[-12:]} "
-                      f"complexity={chosen_cplx} "
-                      f"(filtered {len(sent_roots)} of "
-                      f"{len(_sentence_root_ctx_leaves())} roots)")
+                lh = str(chosen_leaf.concept_hash())[-12:]
+                print(f"  Sampled content-tree leaf ...{lh} "
+                      f"max_cplx={chosen_cplx} "
+                      f"ref_count={chosen_stats['count']:.0f} "
+                      f"(from {len(leaves)} candidate leaves)")
 
-            # Read content-ref from the chosen context leaf
-            content_ref, is_word = _read_content_ref(chosen_ctx)
-            if content_ref is None:
+            # Step 3: UNPACK-FROM-LEAF via _expand on the chosen leaf's
+            # left/right canonical bags. This is the SAME code path the
+            # deterministic chunk-recovery primitive uses; we just
+            # picked the leaf via the complex-concept sampler above.
+            left_bag  = _read_canonical_bag(chosen_leaf, 0)
+            right_bag = _read_canonical_bag(chosen_leaf, 1)
+            # Stored child complexities (attrs 2/3).
+            left_cplx_seed  = _read_child_cplx(chosen_leaf, 2)
+            right_cplx_seed = _read_child_cplx(chosen_leaf, 3)
+            # Look up the seed's expected CHILD LEAVES from the
+            # unsupervised structural transition map. The map tells
+            # us "leaf X had {leaf_A: 5, leaf_B: 3} as its left
+            # children during training" — pure leaf-identity, no
+            # class labels. Falls through if transitions weren't
+            # learned.
+            trans = getattr(self, "content_leaf_transitions", {}) or {}
+            seed_key = str(chosen_leaf.concept_hash())
+            seed_entry = trans.get(seed_key, {})
+            allowed_L_leaves = (seed_entry.get("L_children")
+                                if seed_entry else None) or None
+            allowed_R_leaves = (seed_entry.get("R_children")
+                                if seed_entry else None) or None
+            allowed_L_words  = (seed_entry.get("L_words")
+                                if seed_entry else None) or None
+            allowed_R_words  = (seed_entry.get("R_words")
+                                if seed_entry else None) or None
+
+            if not left_bag and not right_bag:
                 raise RuntimeError(
-                    f"No content-ref on chosen context leaf. "
-                    f"Train with threshold='converge'.")
+                    f"Sampled content leaf has empty left+right bags "
+                    f"(complexity={chosen_cplx}). Train more.")
 
-            if debug:
-                kind = "word" if is_word else "concept"
-                print(f"  content-ref: {content_ref[:40]} ({kind})")
-
-            # Expand: unpack the content-ref recursively, threading the
-            # chosen sentence-root complexity so each level enforces
-            # the right target complexity in its bag-resolve step.
             global_root = CompositeParseNode.create_global_root()
+            comp = CompositeParseNode()
+            comp.position_idx = 0.5
+            comp.complexity = chosen_cplx
+            comp.context_length = _cl
+            all_nodes = [comp]
+            import math as _math
+            gen_max_depth = max(3, int(_math.ceil(_math.log2(
+                max(2, chosen_cplx)))) + 1)
+
             try:
-                root_node, all_nodes = _expand(
-                    content_ref, 0.5, depth=0,
-                    target_complexity=chosen_cplx)
-                root_node.set_parent(global_root)
+                if left_bag:
+                    left_ref = _resolve_bag(left_bag, 1,
+                                            target_complexity=left_cplx_seed,
+                                            allowed_leaves=allowed_L_leaves,
+                                            allowed_words=allowed_L_words)
+                    left_node, left_sub = _expand(
+                        left_ref, 0.25, depth=1,
+                        target_complexity=left_cplx_seed,
+                        max_depth=gen_max_depth)
+                    left_node.set_parent(comp)
+                    all_nodes.extend(left_sub)
+
+                if right_bag:
+                    right_ref = _resolve_bag(right_bag, 1,
+                                             target_complexity=right_cplx_seed,
+                                             allowed_leaves=allowed_R_leaves,
+                                             allowed_words=allowed_R_words)
+                    right_node, right_sub = _expand(
+                        right_ref, 0.75, depth=1,
+                        target_complexity=right_cplx_seed,
+                        max_depth=gen_max_depth)
+                    right_node.set_parent(comp)
+                    all_nodes.extend(right_sub)
             except RuntimeError as e:
                 if debug:
                     print(f"  Expansion failed: {e}")
                 raise
 
+            comp.set_parent(global_root)
             gen_text = " ".join(_words(global_root))
             if debug:
                 print(f"\nGenerated: {gen_text}")
@@ -4504,15 +5051,12 @@ class WEBSTER(object):
         meta = {
             "context_length": self.context_length,
             "threshold": self.threshold,
-            "primitive_threshold": getattr(self, 'primitive_threshold', None),
             "content_bl_alpha": getattr(self, 'content_bl_alpha', None),
             "context_bl_alpha": getattr(self, 'context_bl_alpha', None),
             "bow": self.bow,
             "categorization_mode": getattr(self, 'categorization_mode', 'dfs'),
             "weighting": getattr(self, 'weighting', 'binary'),
             "empty_weighting": getattr(self, 'empty_weighting', False),
-            "use_observation_buffer": getattr(self, 'use_observation_buffer', False),
-            "obs_buffer_flush_every": getattr(self, 'obs_buffer_flush_every', 5),
         }
         meta_path = os.path.join(dirpath, "webster_meta.json")
         with open(meta_path, "w", encoding="utf-8") as f:
@@ -4539,16 +5083,13 @@ class WEBSTER(object):
         w.ltm = ltm
         w.context_length = meta.get("context_length", 3)
         w.threshold = meta.get("threshold", 5)
-        w.primitive_threshold = meta.get("primitive_threshold", None)
         w.content_bl_alpha = meta.get("content_bl_alpha", None)
         w.context_bl_alpha = meta.get("context_bl_alpha", None)
         w.bow = meta.get("bow", False)
         w.categorization_mode = meta.get("categorization_mode", "dfs")
         w.weighting = meta.get("weighting", "binary")
         w.empty_weighting = meta.get("empty_weighting", False)
-        w.use_observation_buffer = meta.get("use_observation_buffer", False)
-        w.obs_buffer_flush_every = meta.get("obs_buffer_flush_every", 5)
-        w._obs_buffer = None
+        w.chunk_context = meta.get("chunk_context", False)
         w.ltm.categorization_mode = w.categorization_mode
         w.ltm.weighting = w.weighting
         w.ltm.empty_weighting = w.empty_weighting

@@ -542,12 +542,14 @@ def compute_ctx_node_counts(root, test_primitives_data, max_depth):
     return all_nodes, children_of, counts
 
 def plot_tree_single_bars(children_of, counts, label_list, color_map,
-                          highlight_idx, title, out_path, max_depth):
-    # Prune empty subtrees so the layout doesn't reserve horizontal
-    # space for children that won't be drawn.
-    children_of = _prune_empty(
-        children_of,
-        lambda i: i in counts and counts[i].sum() > 0)
+                          highlight_idx, title, out_path, max_depth,
+                          all_nodes=None):
+    """Draw a single-bar-per-node tree.  All BFS-discovered Cobweb
+    children are kept — none are pruned for empty descent tallies —
+    so the layout faithfully reflects Cobweb's actual structure.
+    Children with no descended chunks render as a small grey
+    "n=cobweb_count" placeholder so the user sees every real branch.
+    """
     pos_map, total_w = _layout_x(children_of, max_depth)
     bar_w, bar_h, y_gap = 0.7, 0.35, 1.0
     fig, ax = plt.subplots(
@@ -560,11 +562,15 @@ def plot_tree_single_bars(children_of, counts, label_list, color_map,
     def _has(idx):
         return idx in counts and counts[idx].sum() > 0
 
+    def _cobweb_n(idx):
+        if all_nodes and 0 <= idx < len(all_nodes):
+            return int(getattr(all_nodes[idx], "count", 0))
+        return 0
+
     def _edges(idx, depth):
-        if depth >= max_depth or not children_of[idx] or not _has(idx): return
+        if depth >= max_depth or not children_of[idx]: return
         px, py = pos_map[idx]
         for c in children_of[idx]:
-            if not _has(c): continue
             cx, cy = pos_map[c]
             ax.plot([px, cx],
                     [py * y_gap + bar_h / 2, cy * y_gap - bar_h / 2],
@@ -573,26 +579,37 @@ def plot_tree_single_bars(children_of, counts, label_list, color_map,
     _edges(0, 0)
 
     def _draw(idx, depth):
-        if not _has(idx): return
-        cnts = counts[idx].astype(float); total = cnts.sum()
-        props = cnts / total
         x_c, _ = pos_map[idx]
         x_left = x_c - bar_w / 2; y_top = depth * y_gap - bar_h / 2
-        cur = x_left
-        for ci, lbl in enumerate(label_list):
-            seg = props[ci] * bar_w
-            if seg > 0:
-                ax.add_patch(plt.Rectangle((cur, y_top), seg, bar_h,
-                                           color=color_map[lbl], lw=0))
-                cur += seg
-        is_bl = idx in highlight_idx
-        ax.add_patch(plt.Rectangle(
-            (x_left, y_top), bar_w, bar_h, fill=False,
-            edgecolor=("red" if is_bl else "black"),
-            lw=(3.0 if is_bl else 0.4),
-            zorder=(5 if is_bl else 2)))
-        ax.text(x_c, depth * y_gap + bar_h / 2 + 0.05,
-                f"n={int(total)}", ha="center", va="top", fontsize=5)
+        if _has(idx):
+            cnts = counts[idx].astype(float); total = cnts.sum()
+            props = cnts / total
+            cur = x_left
+            for ci, lbl in enumerate(label_list):
+                seg = props[ci] * bar_w
+                if seg > 0:
+                    ax.add_patch(plt.Rectangle((cur, y_top), seg, bar_h,
+                                               color=color_map[lbl], lw=0))
+                    cur += seg
+            is_bl = idx in highlight_idx
+            ax.add_patch(plt.Rectangle(
+                (x_left, y_top), bar_w, bar_h, fill=False,
+                edgecolor=("red" if is_bl else "black"),
+                lw=(3.0 if is_bl else 0.4),
+                zorder=(5 if is_bl else 2)))
+            ax.text(x_c, depth * y_gap + bar_h / 2 + 0.05,
+                    f"n={int(total)}", ha="center", va="top", fontsize=5)
+        else:
+            # Cobweb-real child with no descended chunks.  Show its
+            # Cobweb-stored count in a grey placeholder.
+            cw_n = _cobweb_n(idx)
+            ax.add_patch(plt.Rectangle(
+                (x_left, y_top), bar_w, bar_h,
+                facecolor="#f0f0f0", edgecolor="gray",
+                lw=0.4, zorder=2))
+            ax.text(x_c, depth * y_gap, f"cobweb_n={cw_n}",
+                    ha="center", va="center", fontsize=5, color="gray",
+                    style="italic")
         if depth < max_depth and children_of[idx]:
             for c in children_of[idx]: _draw(c, depth + 1)
     _draw(0, 0)
@@ -619,6 +636,7 @@ plot_tree_single_bars(
            f"(red border = BL, eval_alpha={EVAL_ALPHA})"),
     out_path=os.path.join(CONTEXT_DIR, "cobweb_tree_labels.png"),
     max_depth=TREE_DEPTH_FIG,
+    all_nodes=ctx_layout_nodes,
 )
 print(f"  Context tree fig → {CONTEXT_DIR}/cobweb_tree_labels.png")
 
@@ -923,12 +941,13 @@ def compute_cnt_node_counts(root, chunk_records, max_depth):
     return all_nodes, children_of, cnt_L, cnt_R
 
 def plot_tree_pair_bars(children_of, cL, cR, label_list, color_map,
-                        highlight_idx, title, out_path, max_depth):
-    # Prune empty subtrees so the layout doesn't reserve horizontal
-    # space for children that won't be drawn.
-    children_of = _prune_empty(
-        children_of,
-        lambda i: i in cL and cL[i].sum() > 0)
+                        highlight_idx, title, out_path, max_depth,
+                        all_nodes=None):
+    """Draw an L/R-bars-per-node tree.  All BFS-discovered Cobweb
+    children are kept (no pruning by descent-tally) so the layout
+    faithfully reflects Cobweb's structure.  Cobweb-real children
+    with no descended chunks render as a small grey placeholder
+    showing only the Cobweb-stored count."""
     pos_map, total_w = _layout_x(children_of, max_depth)
     bar_w, bar_h, gap, y_unit = 0.7, 0.18, 0.05, 1.0
     fig, ax = plt.subplots(
@@ -939,11 +958,15 @@ def plot_tree_pair_bars(children_of, cL, cR, label_list, color_map,
     def _has(idx):
         return idx in cL and cL[idx].sum() > 0
 
+    def _cobweb_n(idx):
+        if all_nodes and 0 <= idx < len(all_nodes):
+            return int(getattr(all_nodes[idx], "count", 0))
+        return 0
+
     def _edges(idx, depth):
-        if depth >= max_depth or not children_of[idx] or not _has(idx): return
+        if depth >= max_depth or not children_of[idx]: return
         px, py = pos_map[idx]
         for c in children_of[idx]:
-            if not _has(c): continue
             cx, cy = pos_map[c]
             y_par = py * y_unit + bar_h + gap / 2
             y_chi = cy * y_unit - bar_h - gap / 2
@@ -968,18 +991,31 @@ def plot_tree_pair_bars(children_of, cL, cR, label_list, color_map,
                 ha="right", va="center", fontsize=5)
 
     def _draw(idx, depth):
-        if not _has(idx): return
-        cL_a = cL[idx].astype(float); cR_a = cR[idx].astype(float)
-        total = cL_a.sum()
-        propsL = cL_a / total; propsR = cR_a / total
-        is_bl = idx in highlight_idx
         x_c, _ = pos_map[idx]; x_left = x_c - bar_w / 2
-        y_top_L = depth * y_unit - bar_h - gap / 2
-        y_top_R = depth * y_unit + gap / 2
-        _bar(x_left, y_top_L, propsL, "L", is_bl)
-        _bar(x_left, y_top_R, propsR, "R", is_bl)
-        ax.text(x_c, y_top_L - 0.04, f"n={int(total)}",
-                ha="center", va="bottom", fontsize=5)
+        if _has(idx):
+            cL_a = cL[idx].astype(float); cR_a = cR[idx].astype(float)
+            total = cL_a.sum()
+            propsL = cL_a / total; propsR = cR_a / total
+            is_bl = idx in highlight_idx
+            y_top_L = depth * y_unit - bar_h - gap / 2
+            y_top_R = depth * y_unit + gap / 2
+            _bar(x_left, y_top_L, propsL, "L", is_bl)
+            _bar(x_left, y_top_R, propsR, "R", is_bl)
+            ax.text(x_c, y_top_L - 0.04, f"n={int(total)}",
+                    ha="center", va="bottom", fontsize=5)
+        else:
+            # Cobweb-real child with no descended chunks.  Show the
+            # Cobweb-stored count as a grey placeholder spanning the
+            # L+R-bar height so the user can see the branch exists.
+            cw_n = _cobweb_n(idx)
+            y_top = depth * y_unit - bar_h - gap / 2
+            ax.add_patch(plt.Rectangle(
+                (x_left, y_top), bar_w, 2 * bar_h + gap,
+                facecolor="#f0f0f0", edgecolor="gray",
+                lw=0.4, zorder=2))
+            ax.text(x_c, depth * y_unit, f"cobweb_n={cw_n}",
+                    ha="center", va="center", fontsize=5, color="gray",
+                    style="italic")
         if depth < max_depth and children_of[idx]:
             for c in children_of[idx]: _draw(c, depth + 1)
     _draw(0, 0)
@@ -1009,6 +1045,7 @@ plot_tree_pair_bars(
            f"(red border = BL, eval_alpha={EVAL_ALPHA})"),
     out_path=os.path.join(CONTENT_DIR, "content_tree_labels.png"),
     max_depth=TREE_DEPTH_FIG,
+    all_nodes=cnt_layout_nodes,
 )
 print(f"  Content tree fig → {CONTENT_DIR}/content_tree_labels.png")
 
@@ -1450,6 +1487,229 @@ with open(os.path.join(DECODING_DIR, "quality_summary.csv"), "w") as f:
     w_.writerow(["content", "OVERALL", n_chunks, n_correct,
                  "", f"{chunk_overall:.4f}", ""])
 
+# =============================================================================
+# PHASE 4 — HEURISTIC COMPARISON
+# =============================================================================
+# "If the leaves are pure, why doesn't log-probability recognize chunks
+#  correctly?"  This phase audits the answer.
+#
+# Approach: for every test item, descend WEBSTER's *actual* tree (the
+# one parsing will use) to its terminal leaf.  Build a leaf → gold-class
+# map from training instances along the same descent (walk up to the
+# nearest labelled ancestor when needed) — this is the "leaf-majority"
+# classifier.  Compare its accuracy to the Cobweb-Discrete probe from
+# Phase 3.
+#
+# Then, for every test chunk, gather five candidate ranking heuristics
+# from the leaf the chunk descends to, and report which ranks chunks
+# of the same class together most reliably:
+#
+#   tree_log_prob          – marginal over the whole tree (current rank)
+#   leaf_log_prob          – log p(instance | landing leaf)
+#   bl_log_prob            – log p(instance | basic-level node)
+#   bl_class_log_prob      – log p(class   | instance) at BL
+#   bl_count               – just the BL count (pure frequency)
+#
+# Each heuristic is judged on its rank-discrimination by gold class
+# (Spearman corr to the "this leaf's gold class" indicator).
+# =============================================================================
+print("\n=== PHASE 4: HEURISTIC COMPARISON ===")
+
+# ── 4a. Direct leaf-majority on WEBSTER's actual tree ───────────────────────
+# Build leaf → gold-class map from training data via greedy descent.
+def _leaf_majority_map(root, items_with_class):
+    leaf_classes = {}  # concept_hash → Counter
+    for inst, cls in items_with_class:
+        n = greedy_descend(root, inst)
+        h = str(n.concept_hash())
+        leaf_classes.setdefault(h, Counter())[cls] += 1
+    return {h: c.most_common(1)[0][0] for h, c in leaf_classes.items()}
+
+# Walk-up: returns leaf's class, else the nearest ancestor's, else None.
+def _predict_leaf_or_ancestor(root, inst, leaf_pred):
+    n = greedy_descend(root, inst)
+    while n is not None:
+        h = str(n.concept_hash())
+        if h in leaf_pred:
+            return leaf_pred[h]
+        n = getattr(n, "parent", None)
+    return None
+
+# CHUNKS: build train map + evaluate.
+chunk_leaf_pred = _leaf_majority_map(
+    cnt_root,
+    [(r["content_instance"], r["class"]) for r in chunk_records])
+print(f"  Content tree leaves with class labels: {len(chunk_leaf_pred)}")
+chunk_lm_correct = 0
+for bag, gold in zip(test_chunk_bags, test_chunk_y):
+    pred = _predict_leaf_or_ancestor(cnt_root, _clean_bag(bag), chunk_leaf_pred)
+    if pred == gold: chunk_lm_correct += 1
+chunk_lm_acc = chunk_lm_correct / max(len(test_chunk_y), 1)
+
+# PRIMITIVES: same.
+prim_train_items = []
+for s in training_sentences:
+    toks = s.split()
+    for i, w in enumerate(toks):
+        pos = WORD_TO_POS.get(w)
+        if pos is None: continue
+        prim_train_items.append((_primitive_bag(toks, i), pos))
+prim_leaf_pred = _leaf_majority_map(ctx_root, prim_train_items)
+print(f"  Context tree leaves with POS labels: {len(prim_leaf_pred)}")
+prim_lm_correct = 0
+for bag, gold in zip(test_prim_bags, test_prim_y):
+    pred = _predict_leaf_or_ancestor(ctx_root, _clean_bag(bag), prim_leaf_pred)
+    if pred == gold: prim_lm_correct += 1
+prim_lm_acc = prim_lm_correct / max(len(test_prim_y), 1)
+
+print(f"\n  --- Probe accuracy comparison (chunks) ---")
+print(f"    Cobweb-Discrete probe (Phase 3a)   : "
+      f"{n_correct}/{n_chunks} = {100*chunk_overall:5.1f}%")
+print(f"    Leaf-majority on WEBSTER tree      : "
+      f"{chunk_lm_correct}/{len(test_chunk_y)} = {100*chunk_lm_acc:5.1f}%")
+print(f"    Δ = {100*(chunk_lm_acc - chunk_overall):+.1f}pp "
+      f"({'WEBSTER tree more discriminative' if chunk_lm_acc > chunk_overall else 'Probe more discriminative'})")
+
+print(f"\n  --- Probe accuracy comparison (primitives) ---")
+print(f"    Cobweb-Discrete probe (Phase 3b)   : "
+      f"{n_pcorr}/{n_prim} = {100*prim_overall:5.1f}%")
+print(f"    Leaf-majority on WEBSTER tree      : "
+      f"{prim_lm_correct}/{len(test_prim_y)} = {100*prim_lm_acc:5.1f}%")
+print(f"    Δ = {100*(prim_lm_acc - prim_overall):+.1f}pp")
+
+# ── 4b. Ranking-heuristic comparison on the content tree ────────────────────
+# For each test chunk we measure five ranking heuristics at the leaf
+# the chunk descends to, then ask: does each heuristic let us SELECT
+# the right candidate?  Operationally:  among all test chunks that
+# descend to the SAME leaf, the heuristic should rank them in a way
+# that's consistent with their gold class.
+#
+# We measure that as the accuracy of "predict via leaf majority then
+# tie-break by heuristic" — which is exactly what FiniteParseTree.build
+# does (gate by count, rank by tree_log_prob).
+from parse_mh import _score_along_path, _categorize
+heur_results = []
+for bag, gold in zip(test_chunk_bags, test_chunk_y):
+    inst = _clean_bag(bag)
+    leaf, path_strs, node_path, _ = _categorize(
+        inst, webster.ltm.content_hierarchy, mode="dfs")
+    sd = _score_along_path(node_path, inst, webster.ltm.content_hierarchy,
+                            eval_alpha=getattr(webster.ltm,
+                                                "content_bl_alpha", None))
+    leaf_lp = leaf.log_prob_instance(inst)
+    bl_cnt  = sd.get("basic_level_count", -1)
+    bl_lp   = sd.get("basic_level_log_prob", float("-inf"))
+    bl_clp  = sd.get("basic_level_class_log_prob", float("-inf"))
+    tree_lp = sd.get("tree_log_prob", float("-inf"))
+    leaf_pred = chunk_leaf_pred.get(str(leaf.concept_hash()))
+    heur_results.append({
+        "gold": gold,
+        "leaf_pred": leaf_pred,
+        "scores": {
+            "tree_log_prob":     tree_lp,
+            "leaf_log_prob":     leaf_lp,
+            "bl_log_prob":       bl_lp,
+            "bl_class_log_prob": bl_clp,
+            "bl_count":          float(bl_cnt),
+        },
+    })
+
+# For each heuristic, build a per-(landing-leaf) ranking and report
+# how often the top-ranked item's gold class matches the leaf's
+# dominant class — i.e. how reliably the heuristic agrees with the
+# clustering.  Higher = more reliable as a ranking signal.
+heur_names = ["tree_log_prob", "leaf_log_prob", "bl_log_prob",
+              "bl_class_log_prob", "bl_count"]
+print(f"\n  --- Ranking-heuristic discrimination (content tree) ---")
+print(f"    {'heuristic':<22} {'agree-w-leaf-class':>20} {'rank-quality':>14}")
+
+heur_agree = {h: [0, 0] for h in heur_names}   # [hit, total]
+# Group test chunks by landing leaf so we can rank within each.
+from collections import defaultdict
+by_leaf: dict = defaultdict(list)
+for bag, gold, hr in zip(test_chunk_bags, test_chunk_y, heur_results):
+    if hr["leaf_pred"] is None: continue
+    h = str(greedy_descend(cnt_root, _clean_bag(bag)).concept_hash())
+    by_leaf[h].append((gold, hr))
+
+# Per-heuristic: across leaves with mixed gold classes, does the
+# heuristic rank the leaf-dominant-class items HIGHER than others?
+heur_rank_quality = {h: [0, 0] for h in heur_names}   # [correct_rank, total_pairs]
+for leaf_hash, items in by_leaf.items():
+    if len(items) < 2: continue
+    dom = Counter(g for g, _ in items).most_common(1)[0][0]
+    # For each ordered pair (i, j), if i's gold==dom and j's gold!=dom,
+    # the heuristic should rank i above j.
+    for i, (gi, hri) in enumerate(items):
+        for j, (gj, hrj) in enumerate(items):
+            if i == j: continue
+            if gi == dom and gj != dom:
+                for h in heur_names:
+                    heur_rank_quality[h][1] += 1
+                    if hri["scores"][h] > hrj["scores"][h]:
+                        heur_rank_quality[h][0] += 1
+
+# Leaf-class agreement: how often does each heuristic's argmax agree
+# with the leaf-majority prediction?
+for h in heur_names:
+    hit = total = 0
+    for hr in heur_results:
+        if hr["leaf_pred"] is None: continue
+        total += 1
+        if hr["leaf_pred"] == hr["gold"]:
+            hit += 1
+    heur_agree[h] = [hit, total]
+
+for h in heur_names:
+    hit, tot = heur_agree[h]
+    rc, rt   = heur_rank_quality[h]
+    agree_pct = 100 * hit / max(tot, 1)
+    rank_pct  = 100 * rc / max(rt, 1)
+    print(f"    {h:<22} {agree_pct:>18.1f}%   {rank_pct:>12.1f}%")
+
+print(f"\n  Note: 'agree-w-leaf-class' is the SAME across heuristics —")
+print(f"  it's the leaf-majority prediction accuracy, independent of "
+      f"the ranking score.")
+print(f"  'rank-quality' answers: when two test chunks land at the SAME")
+print(f"  leaf, does the heuristic rank the dominant-class chunk higher?")
+print(f"  Higher = better ranking signal for build()'s tie-break.")
+
+# ── 4c. Heuristic-comparison visualization ───────────────────────────────────
+fig, ax = plt.subplots(figsize=(9, 4))
+rqs = [100 * heur_rank_quality[h][0] / max(heur_rank_quality[h][1], 1)
+       for h in heur_names]
+colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd"]
+ax.bar(range(len(heur_names)), rqs, color=colors)
+for i, v in enumerate(rqs):
+    ax.text(i, v + 1.5, f"{v:.1f}%", ha="center", fontsize=9)
+ax.axhline(50, color="black", linestyle=":", alpha=0.4,
+           label="chance (random rank)")
+ax.set_xticks(range(len(heur_names)))
+ax.set_xticklabels(heur_names, rotation=20, ha="right", fontsize=9)
+ax.set_ylim(0, 110); ax.set_ylabel("Rank-quality % (pairs ranked right)")
+ax.set_title("Ranking-heuristic discrimination — chunk content tree")
+ax.legend(loc="lower right", fontsize=8)
+plt.tight_layout()
+plt.savefig(os.path.join(DECODING_DIR, "heuristic_comparison.png"), dpi=140)
+plt.close()
+print(f"  Heuristic comparison plot → {DECODING_DIR}/heuristic_comparison.png")
+
+# ── 4d. Side-by-side accuracy bar (linear probe vs leaf-majority) ──────────
+fig, ax = plt.subplots(figsize=(8, 4))
+xs = ["Chunk\n(linear probe)", "Chunk\n(leaf majority)",
+      "Primitive\n(linear probe)", "Primitive\n(leaf majority)"]
+ys = [chunk_overall, chunk_lm_acc, prim_overall, prim_lm_acc]
+bar_colors = ["#1f77b4", "#2ca02c", "#1f77b4", "#2ca02c"]
+ax.bar(xs, ys, color=bar_colors)
+for i, v in enumerate(ys):
+    ax.text(i, v + 0.02, f"{100*v:.1f}%", ha="center", fontsize=9)
+ax.set_ylim(0, 1.1); ax.set_ylabel("Accuracy")
+ax.set_title("Probe accuracy: Cobweb-Discrete probe vs WEBSTER-tree leaf-majority")
+plt.tight_layout()
+plt.savefig(os.path.join(DECODING_DIR, "probe_vs_leaf_majority.png"), dpi=140)
+plt.close()
+print(f"  Probe-vs-leaf-majority plot → {DECODING_DIR}/probe_vs_leaf_majority.png")
+
 print(f"\nAll outputs written to {OUT_DIR}/")
 print(f"  context_tree/    — primitive POS distributions + BL viz")
 print(f"  content_tree/    — chunk L/R-class distributions + BL viz")
@@ -1459,3 +1719,5 @@ print(f"     chunk_prf1.png                + chunk_prf1_table.png")
 print(f"     primitive_quality.csv/.png    + primitive_confusion.png")
 print(f"     primitive_prf1.png            + primitive_prf1_table.png")
 print(f"     quality_summary.csv")
+print(f"     heuristic_comparison.png      ← Phase 4 ranking-heuristic test")
+print(f"     probe_vs_leaf_majority.png    ← Phase 4 direct-leaf vs probe")

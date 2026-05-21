@@ -1,0 +1,79 @@
+WEBSTER Threshold + Parsing-Heuristic Analysis
+=======================================================
+
+Trained WEBSTER on 89 hollow trees.
+Probed on 23 held-out hollow trees.
+Logged 614 candidate pair evaluations across 147 merge steps.
+Heuristic set: NO basic-level — only tree_log_prob, tree_class_log_prob, root_log_prob, leaf_log_prob and their derived combinations.
+
+ROC AUC (gold vs non-gold candidate pair):
+             sum_leaf_lp: AUC=0.8540  AP=0.8203
+             cnt_root_lp: AUC=0.8163  AP=0.7728
+             cnt_leaf_lp: AUC=0.8103  AP=0.7596
+             sum_tree_lp: AUC=0.8020  AP=0.7277
+            sum_class_lp: AUC=0.7883  AP=0.7102
+     cnt_leaf_above_root: AUC=0.7843  AP=0.7152
+             cnt_tree_lp: AUC=0.7702  AP=0.6939
+             min_tree_lp: AUC=0.7702  AP=0.6939
+       cnt_tree_class_lp: AUC=0.7669  AP=0.6828
+            min_class_lp: AUC=0.7669  AP=0.6828
+             ctx_leaf_lp: AUC=0.7642  AP=0.6873
+             ctx_tree_lp: AUC=0.7606  AP=0.6641
+             max_tree_lp: AUC=0.7606  AP=0.6641
+     ctx_leaf_above_root: AUC=0.7582  AP=0.6335
+             ctx_root_lp: AUC=0.7167  AP=0.6302
+       ctx_tree_class_lp: AUC=0.6968  AP=0.5993
+            max_class_lp: AUC=0.6968  AP=0.5993
+     ctx_tree_above_root: AUC=0.6306  AP=0.4704
+     sum_tree_above_root: AUC=0.6196  AP=0.4664
+     cnt_tree_above_root: AUC=0.6008  AP=0.4515
+
+Step-pick accuracy (argmax-heuristic == gold):
+             sum_leaf_lp:  135/147  (91.8%)
+             cnt_leaf_lp:  131/147  (89.1%)
+             cnt_root_lp:  126/147  (85.7%)
+     cnt_leaf_above_root:  122/147  (83.0%)
+             sum_tree_lp:  121/147  (82.3%)
+            sum_class_lp:  117/147  (79.6%)
+       cnt_tree_class_lp:  115/147  (78.2%)
+            min_class_lp:  115/147  (78.2%)
+             cnt_tree_lp:  113/147  (76.9%)
+             min_tree_lp:  113/147  (76.9%)
+     ctx_leaf_above_root:  109/147  (74.1%)
+             ctx_tree_lp:  102/147  (69.4%)
+             max_tree_lp:  102/147  (69.4%)
+             ctx_leaf_lp:   97/147  (66.0%)
+       ctx_tree_class_lp:   85/147  (57.8%)
+            max_class_lp:   85/147  (57.8%)
+             ctx_root_lp:   80/147  (54.4%)
+     ctx_tree_above_root:   79/147  (53.7%)
+     cnt_tree_above_root:   72/147  (49.0%)
+     sum_tree_above_root:   72/147  (49.0%)
+
+Best single-heuristic gate τ (Phase 4 quantile sweep):
+             sum_leaf_lp: q=0.0  overall=91.8%
+             cnt_leaf_lp: q=0.0  overall=89.1%
+             cnt_root_lp: q=0.0  overall=85.7%
+     cnt_leaf_above_root: q=0.0  overall=83.0%
+             sum_tree_lp: q=0.0  overall=82.3%
+            sum_class_lp: q=0.0  overall=79.6%
+       cnt_tree_class_lp: q=0.0  overall=78.2%
+            min_class_lp: q=0.0  overall=78.2%
+             cnt_tree_lp: q=0.0  overall=76.9%
+             min_tree_lp: q=0.0  overall=76.9%
+     ctx_leaf_above_root: q=0.0  overall=74.1%
+             ctx_tree_lp: q=0.0  overall=69.4%
+             max_tree_lp: q=0.0  overall=69.4%
+             ctx_leaf_lp: q=0.0  overall=66.0%
+       ctx_tree_class_lp: q=0.0  overall=57.8%
+            max_class_lp: q=0.0  overall=57.8%
+             ctx_root_lp: q=0.0  overall=54.4%
+     ctx_tree_above_root: q=0.0  overall=53.7%
+     sum_tree_above_root: q=0.0  overall=49.0%
+     cnt_tree_above_root: q=0.0  overall=48.3%
+
+Best heuristic by AUC:           sum_leaf_lp (AUC=0.8540)
+Best heuristic by step acc:      sum_leaf_lp (91.8%)
+Best single-heuristic gate:      sum_leaf_lp @ q=0.0 (91.8%)
+Best weighted-combo formula:     0.8*z(sum_leaf_lp) + 0.2*z(ctx_tree_above_root)
+  step acc = 59.2%  AUC = 0.8648

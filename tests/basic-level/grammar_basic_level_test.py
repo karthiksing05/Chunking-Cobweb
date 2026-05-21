@@ -167,9 +167,12 @@ def greedy_descend(root, instance):
 # ---------------------------------------------------------------------------
 
 print(f"\nRunning get_basic(use_root=True, eval_alpha={EVAL_ALPHA}) per leaf …")
+# concept_hash() is the C++-stable identifier — id() is unsafe because
+# pybind11 may hand out a fresh Python wrapper for the same underlying
+# C++ node on every access, which breaks dict-lookups across calls.
 _cache = {}
 def get_basic_node(leaf):
-    key = id(leaf)
+    key = str(leaf.concept_hash())
     if key in _cache:
         return _cache[key]
     bl = leaf.get_basic(0, 0, debug=False, eval_alpha=EVAL_ALPHA, use_root=True)
@@ -183,14 +186,14 @@ def get_basic_node(leaf):
 
 print("Mapping test tokens to basic-level nodes …")
 
-bl_members = {}   # id(bl_node) -> {node, depth, indices, center_words, pos_labels}
+bl_members = {}   # concept_hash(bl_node) -> {node, depth, indices, center_words, pos_labels}
 
 for i, inst in enumerate(instances_test):
     leaf = greedy_descend(tree.root, inst)
     bl   = get_basic_node(leaf)
     if bl is None:
         continue
-    nid = id(bl)
+    nid = str(bl.concept_hash())
     if nid not in bl_members:
         bl_members[nid] = {
             "node":         bl,
@@ -348,7 +351,7 @@ print(f"  CSV summary saved → {csv_path}")
 def compute_node_label_counts_disc(root, instances_tr, y_tr, max_depth=3):
     counts, node_obj = {}, {}
     def _ensure(node):
-        nid = id(node)
+        nid = str(node.concept_hash())
         if nid not in counts:
             counts[nid] = np.zeros(N_POS, dtype=np.int32)
             node_obj[nid] = node
@@ -356,7 +359,7 @@ def compute_node_label_counts_disc(root, instances_tr, y_tr, max_depth=3):
         node = root
         for depth in range(max_depth + 1):
             _ensure(node)
-            counts[id(node)][int(label)] += 1
+            counts[str(node.concept_hash())][int(label)] += 1
             if not node.children or depth == max_depth:
                 break
             node = max(node.children, key=lambda c: c.log_prob_instance(inst))
@@ -380,7 +383,7 @@ def plot_tree_pos_labels(root, label_counts_map, out_path,
     def assign_pos(node, depth, x_left):
         span = leaf_span(node, depth, max_depth)
         x_centre = x_left + span / 2.0
-        pos[id(node)] = (x_centre, depth)
+        pos[str(node.concept_hash())] = (x_centre, depth)
         if depth < max_depth and node.children:
             cursor = x_left
             for child in node.children:
@@ -401,16 +404,16 @@ def plot_tree_pos_labels(root, label_counts_map, out_path,
 
     def draw_edges(node, depth):
         if depth >= max_depth or not node.children: return
-        px, py = pos[id(node)]
+        px, py = pos[str(node.concept_hash())]
         for child in node.children:
-            cx, cy = pos[id(child)]
+            cx, cy = pos[str(child.concept_hash())]
             ax.plot([px, cx], [py * y_gap + bar_h / 2, cy * y_gap - bar_h / 2],
                     color="gray", lw=0.8, zorder=0)
             draw_edges(child, depth + 1)
     draw_edges(root, 0)
 
     def draw_node(node, depth):
-        nid = id(node)
+        nid = str(node.concept_hash())
         if nid not in label_counts_map: return
         cnts = label_counts_map[nid].astype(float)
         total = cnts.sum()

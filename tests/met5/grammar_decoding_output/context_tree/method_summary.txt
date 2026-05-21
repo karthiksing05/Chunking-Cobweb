@@ -1,30 +1,22 @@
 CONTEXT tree — get_basic(use_root=True, eval_alpha=10.0)
 ========================================================
 
-  Test primitives: 1177
-  Unique BL nodes: 24
+  Test primitives: 1173
+  Unique BL nodes: 16
 
-  [ 0] depth= 3  count=  198  members= 153  dom=Det
-  [ 1] depth= 3  count=  240  members= 148  dom=Det
-  [ 2] depth= 3  count=  266  members= 137  dom=V
-  [ 3] depth= 1  count= 1762  members= 116  dom=Adj
-  [ 4] depth= 3  count=  131  members= 102  dom=N
-  [ 5] depth= 4  count=  122  members=  88  dom=Adj
-  [ 6] depth= 4  count=  103  members=  82  dom=Adj
-  [ 7] depth= 2  count=  607  members=  75  dom=N
-  [ 8] depth= 3  count=  201  members=  74  dom=Adj
-  [ 9] depth= 2  count=  531  members=  59  dom=N
-  [10] depth= 1  count=  718  members=  47  dom=V
-  [11] depth= 2  count=  166  members=  47  dom=N
-  [12] depth= 4  count=   14  members=  19  dom=N
-  [13] depth= 2  count=  386  members=  15  dom=V
-  [14] depth= 5  count=    5  members=   4  dom=N
-  [15] depth= 5  count=   25  members=   2  dom=Adj
-  [16] depth= 8  count=    2  members=   2  dom=Adj
-  [17] depth= 8  count=    1  members=   1  dom=Adj
-  [18] depth= 6  count=    8  members=   1  dom=Adj
-  [19] depth= 6  count=    2  members=   1  dom=N
-  [20] depth= 8  count=    1  members=   1  dom=Adj
-  [21] depth=10  count=    1  members=   1  dom=Adj
-  [22] depth= 4  count=   35  members=   1  dom=N
-  [23] depth= 4  count=    9  members=   1  dom=N
+  [ 0] depth= 3  count=  131  members= 479  dom=Adj
+  [ 1] depth= 3  count=  198  members= 273  dom=Det
+  [ 2] depth= 1  count=  721  members= 120  dom=Adj
+  [ 3] depth= 4  count=  122  members= 100  dom=Adj
+  [ 4] depth= 3  count=  240  members=  59  dom=Det
+  [ 5] depth= 2  count=  607  members=  34  dom=N
+  [ 6] depth= 1  count= 1762  members=  24  dom=Adj
+  [ 7] depth= 4  count=  103  members=  19  dom=Adj
+  [ 8] depth= 2  count=  386  members=  19  dom=Adj
+  [ 9] depth= 3  count=  266  members=  18  dom=V
+  [10] depth= 3  count=  201  members=  16  dom=Adj
+  [11] depth= 2  count=  166  members=   6  dom=N
+  [12] depth= 2  count=  531  members=   3  dom=N
+  [13] depth= 9  count=    2  members=   1  dom=Adj
+  [14] depth= 4  count=   14  members=   1  dom=N
+  [15] depth= 5  count=   25  members=   1  dom=Adj
