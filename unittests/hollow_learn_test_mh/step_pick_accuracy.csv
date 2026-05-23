@@ -1,0 +1,120 @@
+sentence,step,n_pairs,n_admitted,top_span,is_gold
+"the telescope found",0,2,2,"(0, 1)",1
+"the telescope found",1,1,1,"(0, 2)",1
+"a cat chased",0,2,2,"(0, 1)",1
+"a cat chased",1,1,1,"(0, 2)",1
+"the dog admired the big man with a dog",0,8,8,"(0, 1)",1
+"the dog admired the big man with a dog",1,7,7,"(7, 8)",1
+"the dog admired the big man with a dog",2,6,6,"(7, 8)",1
+"the dog admired the big man with a dog",3,5,5,"(7, 8)",1
+"the dog admired the big man with a dog",4,4,4,"(7, 8)",1
+"the dog admired the big man with a dog",5,3,3,"(7, 8)",1
+"the dog admired the big man with a dog",6,2,2,"(6, 8)",1
+"the park chased the telescope under the quick red woman",0,9,9,"(0, 1)",1
+"the park chased the telescope under the quick red woman",1,8,8,"(0, 2)",1
+"the park chased the telescope under the quick red woman",2,7,7,"(8, 9)",1
+"the park chased the telescope under the quick red woman",3,6,6,"(0, 4)",1
+"the park chased the telescope under the quick red woman",4,5,5,"(8, 9)",1
+"the park chased the telescope under the quick red woman",5,4,4,"(7, 9)",1
+"the park chased the telescope under the quick red woman",6,3,3,"(6, 9)",1
+"the park chased the telescope under the quick red woman",7,2,2,"(5, 9)",1
+"the park chased the telescope under the quick red woman",8,1,1,"(0, 9)",1
+"a cat saw",0,2,2,"(0, 1)",1
+"a cat saw",1,1,1,"(0, 2)",1
+"the man admired the woman under a dog",0,7,7,"(6, 7)",1
+"the man admired the woman under a dog",1,6,6,"(6, 7)",1
+"the man admired the woman under a dog",2,5,5,"(6, 7)",1
+"the man admired the woman under a dog",3,4,4,"(3, 4)",1
+"the man admired the woman under a dog",4,3,3,"(3, 4)",1
+"the man admired the woman under a dog",5,2,2,"(0, 4)",1
+"the man admired the woman under a dog",6,1,1,"(0, 7)",1
+"a dog liked",0,2,2,"(0, 1)",1
+"a dog liked",1,1,1,"(0, 2)",1
+"the telescope saw a telescope",0,4,4,"(0, 1)",1
+"the telescope saw a telescope",1,3,3,"(3, 4)",1
+"the telescope saw a telescope",2,2,2,"(3, 4)",1
+"the telescope saw a telescope",3,1,1,"(0, 4)",1
+"a woman admired",0,2,2,"(0, 1)",1
+"a woman admired",1,1,1,"(0, 2)",1
+"the telescope admired a park",0,4,4,"(0, 1)",1
+"the telescope admired a park",1,3,3,"(0, 2)",1
+"the telescope admired a park",2,2,2,"(3, 4)",1
+"the telescope admired a park",3,1,1,"(0, 4)",1
+"a dog chased the man",0,4,4,"(3, 4)",1
+"a dog chased the man",1,3,3,"(3, 4)",1
+"a dog chased the man",2,2,2,"(3, 4)",1
+"a dog chased the man",3,1,1,"(0, 4)",1
+"the small dog liked",0,3,3,"(1, 2)",1
+"the small dog liked",1,2,2,"(0, 2)",1
+"the small dog liked",2,1,1,"(0, 3)",1
+"a cat saw the red telescope in a big woman",0,9,9,"(0, 1)",1
+"a cat saw the red telescope in a big woman",1,8,8,"(0, 2)",1
+"a cat saw the red telescope in a big woman",2,7,7,"(4, 5)",1
+"a cat saw the red telescope in a big woman",3,6,6,"(8, 9)",1
+"a cat saw the red telescope in a big woman",4,5,5,"(8, 9)",1
+"a cat saw the red telescope in a big woman",5,4,4,"(8, 9)",1
+"a cat saw the red telescope in a big woman",6,3,3,"(7, 9)",1
+"a cat saw the red telescope in a big woman",7,2,2,"(6, 9)",1
+"a cat saw the red telescope in a big woman",8,1,1,"(0, 9)",1
+"the quick lazy lazy telescope chased",0,5,5,"(3, 4)",1
+"the quick lazy lazy telescope chased",1,4,4,"(2, 4)",1
+"the quick lazy lazy telescope chased",2,3,3,"(1, 4)",1
+"the quick lazy lazy telescope chased",3,2,2,"(0, 4)",1
+"the quick lazy lazy telescope chased",4,1,1,"(0, 5)",1
+"the big telescope chased the lazy dog under the big telescope",0,10,10,"(1, 2)",1
+"the big telescope chased the lazy dog under the big telescope",1,9,9,"(0, 2)",1
+"the big telescope chased the lazy dog under the big telescope",2,8,8,"(9, 10)",1
+"the big telescope chased the lazy dog under the big telescope",3,7,7,"(9, 10)",1
+"the big telescope chased the lazy dog under the big telescope",4,6,6,"(9, 10)",1
+"the big telescope chased the lazy dog under the big telescope",5,5,5,"(9, 10)",1
+"the big telescope chased the lazy dog under the big telescope",6,4,4,"(9, 10)",1
+"the big telescope chased the lazy dog under the big telescope",7,3,3,"(8, 10)",1
+"the big telescope chased the lazy dog under the big telescope",8,2,2,"(7, 10)",1
+"the big telescope chased the lazy dog under the big telescope",9,1,1,"(0, 10)",1
+"the cat admired a park under a cat",0,7,7,"(0, 1)",1
+"the cat admired a park under a cat",1,6,6,"(6, 7)",1
+"the cat admired a park under a cat",2,5,5,"(6, 7)",1
+"the cat admired a park under a cat",3,4,4,"(6, 7)",1
+"the cat admired a park under a cat",4,3,3,"(6, 7)",1
+"the cat admired a park under a cat",5,2,2,"(5, 7)",1
+"the cat admired a park under a cat",6,1,1,"(0, 7)",1
+"a red small small woman saw",0,5,5,"(3, 4)",1
+"a red small small woman saw",1,4,4,"(3, 5)",0
+"a red small small woman saw",2,3,3,"(1, 4)",1
+"a red small small woman saw",3,2,2,"(0, 4)",1
+"a red small small woman saw",4,1,1,"(0, 5)",1
+"the cat chased",0,2,2,"(0, 1)",1
+"the cat chased",1,1,1,"(0, 2)",1
+"a park admired a telescope with the telescope",0,7,7,"(0, 1)",1
+"a park admired a telescope with the telescope",1,6,6,"(0, 2)",1
+"a park admired a telescope with the telescope",2,5,5,"(6, 7)",1
+"a park admired a telescope with the telescope",3,4,4,"(6, 7)",1
+"a park admired a telescope with the telescope",4,3,3,"(6, 7)",1
+"a park admired a telescope with the telescope",5,2,2,"(5, 7)",1
+"a park admired a telescope with the telescope",6,1,1,"(0, 7)",1
+"the dog chased a cat in the lazy small woman",0,9,9,"(0, 1)",1
+"the dog chased a cat in the lazy small woman",1,8,8,"(0, 2)",1
+"the dog chased a cat in the lazy small woman",2,7,7,"(8, 9)",1
+"the dog chased a cat in the lazy small woman",3,6,6,"(8, 9)",1
+"the dog chased a cat in the lazy small woman",4,5,5,"(8, 9)",1
+"the dog chased a cat in the lazy small woman",5,4,4,"(7, 9)",1
+"the dog chased a cat in the lazy small woman",6,3,3,"(6, 9)",1
+"the dog chased a cat in the lazy small woman",7,2,2,"(5, 9)",1
+"the dog chased a cat in the lazy small woman",8,1,1,"(0, 9)",1
+"the park found",0,2,2,"(0, 1)",1
+"the park found",1,1,1,"(0, 2)",1
+"a woman liked a big cat under a woman",0,8,8,"(0, 1)",1
+"a woman liked a big cat under a woman",1,7,7,"(0, 2)",1
+"a woman liked a big cat under a woman",2,6,6,"(4, 5)",1
+"a woman liked a big cat under a woman",3,5,5,"(7, 8)",1
+"a woman liked a big cat under a woman",4,4,4,"(0, 5)",1
+"a woman liked a big cat under a woman",5,3,3,"(7, 8)",1
+"a woman liked a big cat under a woman",6,2,2,"(6, 8)",1
+"a woman liked a big cat under a woman",7,1,1,"(0, 8)",1
+"a telescope found a dog under a cat",0,7,7,"(3, 4)",1
+"a telescope found a dog under a cat",1,6,6,"(3, 4)",1
+"a telescope found a dog under a cat",2,5,5,"(3, 4)",1
+"a telescope found a dog under a cat",3,4,4,"(6, 7)",1
+"a telescope found a dog under a cat",4,3,3,"(6, 7)",1
+"a telescope found a dog under a cat",5,2,2,"(5, 7)",1
+"a telescope found a dog under a cat",6,1,1,"(0, 7)",1

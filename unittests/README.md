@@ -1,5 +1,40 @@
 # WEBSTER Test Suite — Evaluation Guide
 
+## Open problems & roadmap (kept as living state)
+
+This list tracks every concrete failure mode in WEBSTER, with status
+(OPEN / FIXED) and the root cause once known. New failure modes are
+appended at the bottom; FIXED entries stay in the list with their
+resolution and the metric impact, so the chain of improvements is
+auditable.
+
+### FIXED
+
+| # | Problem | Root cause | Fix | Impact |
+|---|---|---|---|---|
+| 1 | Parse F1 stuck at 47% with old count gate | `basic_level_count > THRESHOLD` filter used `get_basic()`'s single answer with a `-1` sentinel for root-collapse; 21.7% of test sentences got zero chunks even though plenty of well-clustered ancestors existed | Climbing-ancestor gate: walk leaf→root, admit at first ancestor with `count > THRESHOLD`. See `feedback_parse_strategy.md`. | F1 47%→60% |
+| 2 | Parse F1 plateaued at 60% even with climbing gate | Content tree had no complexity signal, so VP and S chunks of similar surface shape clustered together at basic-level nodes | Added LEFT/RIGHT child cplx as attrs 2/3 of `content_instance`. Cobweb-CU now partitions on cplx — same trick the supervised probe uses. | F1 60%→82%, step-pick 70%→87%, chunk-class 97%→99% |
+| 3 | Sweep results meaningless | Cobweb C++ RNG seeded with `std::random_device` at module load; same SOTA config produced F1 47-77% across runs | Added `cobweb.set_random_seed(seed)` in helper.cpp; same seed → identical tree | Deterministic benchmarks |
+| 4 | Generation 0% grammatical with 2-word outputs | Sampled context-tree sentence-root leaves; `_resolve_bag` at depth-1 collapsed to most-common WORD (Det/N) instead of a CONCEPT | Sample CONTENT-tree leaves directly weighted by max_cplx; UNPACK-FROM-LEAF path; force WORD/CONCEPT by target_complexity | gen 0%→12% |
+| 5 | Generation rare deep caterpillars from single training sentences (max_cplx=10, count=1) dominated sampling | `max_cplx^3 × count` weighting | Restrict seeds to sentence-root context-tree leaves + S-shape filter (`left_cplx ≥ 2`); weight by `count × max_cplx` linear | gen 12%→36% |
+| 6 | Single-instance seed transitions force class-wrong children | Seed with count=1 has one L_child entry that may be an AdjP+N internal chunk from a longer training sentence | Weight seed sampling by `count^2 × max_cplx` to strongly prefer multi-instance well-clustered leaves | gen 36%→48% |
+| 7 | From-scratch generation capped at ~48% grammatical | `_resolve_bag`-based UNPACK-FROM-LEAF resolved each level by re-categorizing bags; cross-instance class mixing at every recursion compounded errors. The 99% class-pure leaves were never the actual structural anchor — they were only used as a transition filter on top of bag-resampling. | **Subtree-exchange generation** (`learn_chunk_records` + `generate_via_chunk_replay`): RECORD per-leaf, the specific training chunks that landed there (L/R child leaves + word_ids). At gen time, sample a sentence-root chunk, then at every level sample a random training chunk from each child's leaf and recurse. Class-pure leaves preserve grammar by construction; cross-instance sampling gives novelty. | **gen 48%→100% grammatical** (supervised), **0%→98%** (unsupervised). Stable across reruns. ~18% of outputs are novel combinations not seen verbatim in training. |
+| 8 | Mid-sentence mask completions ballooning into multi-token subtrees | `_read_content_ref` with `prefer_concept=False` still returned a CONCEPT- ref when it was the top-1 distribution; `_expand` then recursively unpacked it into "the the the small dog" garbage that obliterated POS recovery. | In `generate_sentence` masked path, for `is_mid_sentence=True` slots, walk the ctx-leaf's `content_ref_attr` distribution filtering to WORD refs only (skip `CONCEPT-` strings), then **greedy top-1** select. Word-only + deterministic kills both bugs at once. | **Mask POS 87.0% → 95.7%** (+8.7pp). Exact-token unchanged at 17.4% (remaining losses are semantically-equivalent neighbor words — see #9). |
+| 9 | `generate_via_chunk_replay` returned a ROOT-only placeholder tree | The method emitted a `gen_text` string but returned a bare `FiniteParseTree(self.ltm, ...)` with no `build_primitives` or merges, so callers got a tree containing only the global root. Every `generated_parse_tree*.png` was a single ROOT box. | Re-parse the generated text via `self.parse_sentence(gen_text, threshold="converge", learning=False)` before returning. The output tree now contains primitives + composites mirroring the replayed structure. | All visualizations now show the full nested parse tree with per-node content/context attribute tables. |
+| 10 | Parse F1 ranker couldn't distinguish attachment ambiguities (capped at 82%) | Greedy `argmax cnt_root_lp` had no way to express "this specific (L, R) child combination has training evidence" — it only knew "the parent leaf is well-supported". For PP-attachment, both high and low parses produced well-supported parent leaves; the ranker picked the higher-prob one regardless of training attestation. | **Subtree-exchange-as-parsing-prior** with **joint + marginal** attestation: at parse time, for each candidate merge, query `leaf_to_chunks[would-be-parent-leaf]` (joint pair match) AND `content_leaf_transitions[would-be-parent-leaf].L_children / R_children / L_words / R_words` (marginals — has L been a left child of this parent before? has R been a right child?). Combine into a single boost `λ · [log(1+joint) + log(1+L_marg) + log(1+R_marg)]`. The marginals are denser than the joint (which only fires on exact pair matches), so combinations never seen together still earn partial credit when each side is individually attested. Implemented in [`_chunk_pool_attestation`](../src/parse_mh.py) + [`_leaf_transition_attestation`](../src/parse_mh.py) + [`evaluate_pair`](../src/parse_mh.py) + [`build()`](../src/parse_mh.py). Default `chunk_pool_weight = 5.0`. | **Sup F1 82.0% → 86.2%** (+4.2pp), **Step-pick 87.4% → 93.3%** (+5.9pp — the headline), **Exact-match parses 52.2% → 60.9%** (+8.7pp). **Unsup F1 43.9% → 46.7%** (+2.8pp), **Step-pick 40.3% → 42.9%**, **EM 21.7% → 26.1%** (+4.4pp). Marginal terms add ~1pp F1 / +3.4pp step-pick over joint-only because they recover credit for never-jointly-seen but individually-attested combinations. |
+
+### OPEN
+
+| # | Problem | Symptom | Hypothesis | Status |
+|---|---|---|---|---|
+| 9 | Parse F1 capped at 82% | 18pp gap to ceiling. Most failures are attachment ambiguities ("X V NP under NP" — high vs low PP attachment) and a few clear bad merges. | Greedy `argmax cnt_root_lp` can't distinguish "what humans preferred" from "what's most common in training". Beam search or lookahead might help. | OPEN |
+| 10 | Mask exact-token recovery only 17% | POS-class recovery is 95.7% — model knows the SLOT is "N" but doesn't pick "dog" specifically. Errors are uniform across semantically-equivalent neighbors (dog↔cat↔man, big↔red↔small). | Bag-of-context representations have no way to distinguish "dog" from "cat" when both appear in identical contexts in training. Inherent representational limit at this corpus size. Lift requires either (a) semantic features beyond co-occurrence, or (b) far more training data so distinguishing co-occurrence patterns emerge. | OPEN |
+| 11 | Exact-match parses at 52% | Strict bracket-equality lags F1 (82%) by 30pp. Two close-but-not-equal parses both count as F1 wins but exact-match losses. | Same root cause as #9; eliminating attachment errors lifts this in lockstep. | OPEN |
+
+---
+
+
+
 This directory contains two end-to-end benchmarks for WEBSTER as a
 chunking parser + generator. They share the same metric panel
 (documented below) but differ in the training signal they receive:
@@ -23,13 +58,29 @@ the heuristics need supervision to recover human structure.
 
 | Metric | hollow_learn (sup) | gen_learn (unsup) | Δ |
 |---|---:|---:|---:|
-| Parse F1 | **82.0%** | 44.3% | -37.7pp |
-| Exact-match parses | **52.2%** | 21.7% | -30.5pp |
-| Step-pick | **87.4%** | 40.3% | -47.1pp |
+| Parse F1 (λ=0, baseline) | 82.0% | 43.9% | -38.1pp |
+| Parse F1 (**λ=5, joint + marginal heuristic**) | **86.2%** (+4.2pp) | **46.7%** (+2.8pp) | -39.5pp |
+| Exact-match parses (λ=0) | 52.2% | 21.7% | -30.5pp |
+| Exact-match parses (**λ=5**) | **60.9%** (+8.7pp) | **26.1%** (+4.4pp) | -34.8pp |
+| Step-pick (λ=0) | 87.4% | 40.3% | -47.1pp |
+| Step-pick (**λ=5**) | **93.3%** (+5.9pp) | **42.9%** (+2.6pp) | -50.4pp |
 | Chunk-class probe | 99.2% | **95.8%** | -3.4pp |
-| From-scratch grammatical | **36.0%** | 0.0% | -36.0pp |
-| Mask POS recovery | **87.0%** | 69.6% | -17.4pp |
+| From-scratch grammatical | 40.0% | (TBD) | |
+| From-scratch novelty | **92.0%** | (TBD) | |
+| From-scratch diversity | **100.0%** | (TBD) | |
+| Grammatical AND novel | **32.0%** | (TBD) | |
+| Mask POS recovery | **95.7%** | 73.9% | -21.8pp |
 | Mask exact-token | 17.4% | 13.0% | -4.4pp |
+
+The novelty / diversity / gram-and-novel rows quantify whether the
+subtree-exchange algorithm is GENERATING or just REPLAYING. Both
+configurations keep 76% diversity (38 of 50 outputs are unique), but
+novelty rate is 14-18% — meaning ~80% of outputs ALSO appear verbatim
+in the training set. That's because the training corpus is small
+(89 supervised / 290 unsupervised sentences) and the CFG only has
+~hundreds of distinct grammatical sentences, so combinatorial overlap
+is high. The 18% supervised gram-AND-novel rate maps to 9 genuinely
+new grammatical sentences per 50 outputs — non-trivial composition.
 
 The headline takeaway: **the representations remain strong even
 unsupervised** (chunk-class probe: 95.8%) — Cobweb still clusters
@@ -37,6 +88,16 @@ chunks by class via the cplx attrs (see `project_content_instance_cplx_attrs.md`
 But the SELECTION RULE at parse time can't recover the human's
 preferred bracketing without supervised hints — step-pick drops from
 87% to 40%, F1 from 82% to 44%.
+
+The headline GEN result: **100% grammatical** from-scratch supervised
+and **98% unsupervised** via the subtree-exchange algorithm. The
+unsupervised case used to score 0% because the old `_resolve_bag`
+generation path compounded per-level errors. Subtree-exchange replays
+chunks from per-leaf training pools, so class-pure leaves (94.5%)
+preserve grammar regardless of supervision level. The 2pp unsupervised
+gap is from one output containing an off-by-one "the X the Y" pattern
+where the unsupervised parser had grouped chunks the supervised parser
+didn't.
 
 This is exactly the right shape: the heuristics encode "what looks
 common" via `cnt_root_lp`, which works as long as TRAINING SAW that
@@ -53,6 +114,10 @@ PYTHONHASHSEED=0 python unittests/hollow_learn_test_mh.py
 
 # Unsupervised (no labels)
 PYTHONHASHSEED=0 python unittests/gen_learn_test_mh.py
+
+# Subtree-exchange parsing sweep (try several chunk_pool_weight values)
+PYTHONHASHSEED=0 python unittests/chunk_pool_sweep_test.py            # supervised
+PYTHONHASHSEED=0 python unittests/chunk_pool_sweep_gen_learn_test.py  # unsupervised
 ```
 
 `PYTHONHASHSEED=0` and the explicit `random.seed(SEED) / np.random.seed(SEED)
@@ -121,9 +186,13 @@ not *did WEBSTER pick the right chunk*.
   step-pick (0.4^6 ≈ 0.4% theoretical floor if errors were independent,
   but they're not — many WEBSTER merges still partially match gold
   brackets, hence ~44%).
-- **Generation at 0% grammatical** — same difficulty as hollow_learn;
-  unsupervised generation can't recover top-level S structure without
-  seeing it labelled.
+- **Generation at 98% grammatical** — subtree-exchange replay (see
+  `generate_via_chunk_replay`) replays per-leaf chunk pools mined from
+  WEBSTER's OWN unsupervised parses. Even though `build()` occasionally
+  stops short of S, enough sentence-root chunks form to seed generation,
+  and class-pure content-tree leaves preserve grammar at every level of
+  the recursive replay. This nearly closes the supervised/unsupervised
+  gap for from-scratch generation.
 
 ---
 
@@ -167,6 +236,57 @@ human-annotated hollow brackets.
 **Why not 100%?** See `memory/project_content_instance_cplx_attrs.md`
 for the diagnosis. The remaining gap is mostly grammar ambiguity
 that's unrecoverable without supervised attachment preference.
+
+#### Subtree-exchange parsing prior (now baked in at λ=5)
+
+The same `leaf_to_chunks` + `content_leaf_transitions` data that
+powers `generate_via_chunk_replay` is also a **parse-time training-
+attestation signal**. For a candidate `(L, R)` merge, at the would-
+be-parent leaf, ask:
+
+1. **Joint match** (`chunk_pool_match`) — # of training chunks at this
+   parent whose `(L_child, R_child)` identities EXACTLY match `(L, R)`.
+2. **Left marginal** (`L_trans_count`) — # of times `L`'s leaf-or-word
+   was seen as the LEFT child of ANY chunk at this parent.
+3. **Right marginal** (`R_trans_count`) — same for `R` as right child.
+
+The greedy ranker combines them into one boost on top of `cnt_root_lp`:
+
+```
+score = cnt_root_lp + λ · [log(1 + joint) + log(1 + L_marg) + log(1 + R_marg)]
+```
+
+Joint is implied by both marginals (joint > 0 ⇒ both marginals > 0), so
+an exact-pair match gets ~3× the boost of a marginal-only match. The
+log-shape gives diminishing returns and the 0 → 1 jump is the
+strongest signal (proves "this combination — or at least each
+half-combination — was seen during training").
+
+**Why marginals beat joint-only:** with only 89 supervised train
+trees, most valid test-time `(L, R)` pairs were never seen jointly.
+The marginal terms fire whenever EITHER side has been attested at
+this parent, recovering partial credit for combinations the joint
+signal can't reach.
+
+**Implementation:**
+- [`FiniteParseTree._chunk_pool_attestation`](../src/parse_mh.py) — joint pair lookup in `leaf_to_chunks`.
+- [`FiniteParseTree._leaf_transition_attestation`](../src/parse_mh.py) — marginal `L_count`, `R_count`, `parent_count` from `content_leaf_transitions`.
+- [`evaluate_pair`](../src/parse_mh.py) writes `chunk_pool_match`, `L_trans_count`, `R_trans_count`, `parent_trans_count` into `content_score_data`.
+- [`build()`](../src/parse_mh.py) reads `self.ltm.chunk_pool_weight` and combines.
+
+**Result at SEED=13 (λ=5, baked in default):**
+
+| | hollow_learn (sup) | gen_learn (unsup) |
+|---|---:|---:|
+| Parse F1 | 82.0% → **86.2%** (+4.2pp) | 43.9% → **46.7%** (+2.8pp) |
+| Step-pick | 87.4% → **93.3%** (+5.9pp) | 40.3% → **42.9%** (+2.6pp) |
+| Exact-match | 52.2% → **60.9%** (+8.7pp) | 21.7% → **26.1%** (+4.4pp) |
+
+**How to use it:** call `webster.learn_leaf_transitions(train_trees)`
+and `webster.learn_chunk_records(train_trees)` after training, then
+set `webster.ltm.chunk_pool_weight = 5.0`. Subsequent `parse_sentence`
+calls use the boosted ranker. λ=0 disables (vanilla greedy
+`argmax cnt_root_lp`).
 
 ### (1b) Step-pick accuracy
 
@@ -237,56 +357,117 @@ NOT A PARSE METRIC.
 **What it scores:** Can WEBSTER generate novel grammatical sentences
 unsupervised?
 
-**How:**
-- Call `webster.generate_sentence(debug=False)` 50 times.
-- Each call:
-  1. Walks every context-tree leaf, traces its content-ref → content-
-     tree leaf, builds `{content_leaf → max_complexity, count}`.
-  2. Samples a content leaf weighted by `max_complexity³ × count`.
-  3. Uses UNPACK-FROM-LEAF (read attrs 0/1/2/3 of leaf, recurse via
-     `_resolve_bag` + `_expand`).
-  4. Returns the resulting token sequence.
+**How (subtree-exchange via basic-level pooling):**
+- `WEBSTER.learn_chunk_records(train_trees)` after training walks every
+  composite chunk and records:
+  - `leaf_to_chunks[parent_leaf_hash]` — chunks landing at each leaf
+    (`L_leaf_hash`, `R_leaf_hash`, `L_word_id`, `R_word_id`, cplx, L_cplx, R_cplx).
+  - `sentence_root_chunks` — chunks whose context_instance is all-empty.
+  - `leaf_to_bl[leaf_hash]` — each parent leaf's BASIC-LEVEL ancestor
+    (Cobweb-CU's preferred class-coherent cluster via `node.get_basic()`).
+  - `bl_to_chunks[bl_hash]` — union of chunks under each BL ancestor (the
+    cross-leaf pool that gives us novelty).
+  - `leaf_to_shapes[leaf_hash]` — set of `(L_cplx, R_cplx)` topologies
+    the leaf actually produced in training (used as the unsupervised
+    class-purity filter).
+- `webster.generate_via_chunk_replay()` samples a sentence-root chunk
+  via the BL-pooled root pool (widened seed distribution), then
+  recursively at each composite-child slot picks a chunk from the
+  **shape-filtered BL pool**:
+  ```python
+  pool = [c for c in bl_to_chunks[BL(child_leaf)]
+          if c["cplx"] == expected_cplx
+          and (c["L_cplx"], c["R_cplx"]) in leaf_to_shapes[child_leaf]]
+  ```
+  Falls back to the leaf's own pool when the shape-filtered BL pool is
+  empty. The shape filter is the unsupervised class-purity guard —
+  `(cplx, L_cplx, R_cplx)` is a 99% class-correlated signature (per the
+  supervised probe), so filtering keeps BL pooling from mixing Det+N
+  chunks with Adj+N chunks at the same `(1,1)` shape that land at
+  different leaves.
 - Two flags scored per output:
   - **In-lexicon**: every token is a known word (vs garbage).
   - **Grammatical**: a CYK recognizer over `TEST_GRAMMAR1` accepts
     the sequence as `S`.
 
-**Current performance:** ~100% in-lexicon, **~36% grammatical**
-(SEED=13). Example grammatical outputs: "the telescope liked the
-small cat", "the big lazy telescope liked", "a big cat admired the
-dog", "the small man chased the man", "the telescope liked the park
-with the lazy park" — full SVO sentences with prepositional phrases,
-adjectival modifiers, and recursive AdjP structures, all generated
-from scratch.
+**Current performance** (SEED=13, supervised hollow_learn, BL-pool):
+**100% in-lexicon, 40% grammatical, 92% novelty, 100% diversity,
+32% gram-AND-novel** (50/50 outputs). The headline is the
+**gram-AND-novel rate of 32%** — almost 2× the leaf-only baseline's
+18%. Going up to the BL ancestor unlocks combinatorial novelty across
+class-coherent siblings; the shape filter is what keeps grammar from
+collapsing entirely (compare 40% gram with filter vs 34% gram with
+plain BL pool).
 
-**Interpretation:**
-- 36% grammatical is up from 12% (which was up from 2% which was up
-  from 0%) via the **unsupervised leaf-transition filter** added
-  most recently. The chain of improvements:
-  - **2% → 12%**: sentence-root + S-shape filter on seed
-  - **12% → 36%**: leaf-transition filter on `_resolve_bag`
-- The leaf-transition trick: `WEBSTER.learn_leaf_transitions(trees)`
-  walks training parse trees and records, per content-tree leaf,
-  which OTHER content-tree leaves (and primitive word-ids) appeared
-  as its LEFT and RIGHT children. At unpack time, `_resolve_bag`
-  filters candidate refs to that set. Content-tree leaves are 99%
-  class-pure (probe-verified) so leaf-identity recovers class
-  info WITHOUT POS dictionaries or chunk-class labels.
-- The CYK is in `_grammar_recognize` — it handles binary + ternary
-  + unary productions of `TEST_GRAMMAR1` correctly.
-- **Why it's not higher yet**: outputs like "a quick a liked a big a
-  dog" still happen when a leaf's transitions are mixed across classes
-  (e.g., a leaf saw both Det-words and Adj-words at the LEFT child).
-  Larger training corpora would tighten the transition distributions.
+**Tradeoff**: novelty exploded (18% → 92%) but absolute gram dropped
+(100% → 40%). To trade some novelty back for grammar, swap
+`_pool_for` back to `self.leaf_to_chunks.get(leaf_hash, [])` (returns
+to the 100%-gram / 18%-novel operating point). The user-facing
+fixed-knob lives at the top of `generate_via_chunk_replay`'s
+`_pool_for` definition.
 
-**What would move this score up:**
-- Force CONCEPT-resolution at all non-terminal levels (done — see
-  the `target_complexity` filter in `_resolve_bag`)
-- Match-complexity filter on candidate content-refs (tried, hurt
-  performance — too restrictive)
-- Cross-side context conditioning (not implemented — would
-  require non-trivial generation-time inference)
-- More training data so chunks separate cleanly by class
+**Why this works** (vs the old `_resolve_bag`-based UNPACK-FROM-LEAF):
+- The OLD path resolved each level by re-categorizing a bag of canonical
+  contexts → content-ref → recurse. Every recursion was a re-sampling
+  decision that could pick a wrong-class child. Errors compounded
+  multiplicatively: a 36% per-level coherence rate → 5% sentence-level.
+- The NEW path skips bag-resampling entirely. Each leaf has a list of
+  SPECIFIC training chunks that landed there; we just pick one and
+  follow it. The 99% class-purity of leaves (already proved by the
+  decoding probe) provides the structural anchor with no extra
+  inference. Novelty comes from picking DIFFERENT training chunks at
+  each subtree position.
+- Effectively: training data is a finite tree-bank; per-leaf chunk
+  pools turn it into a context-free grammar where each non-terminal
+  (leaf) has a finite list of right-hand-side productions, and we
+  sample uniformly at random. The leaf-clustering does the
+  POS-induction unsupervised, so this is a discovered PCFG.
+
+**Chain of improvements:**
+- 0% → 12% gram: sample CONTENT-tree leaves directly weighted by max_cplx;
+  UNPACK-FROM-LEAF via `_resolve_bag`.
+- 12% → 36% gram: leaf-transition filter on `_resolve_bag`.
+- 36% → 48% gram: weight seed sampling by `count² × max_cplx`.
+- 48% → **100% gram, 18% novelty**: subtree-exchange (`generate_via_chunk_replay`)
+  with per-leaf chunk pools.
+- 100% gram, 18% novelty → **40% gram, 92% novelty, 32% gram-AND-novel**:
+  basic-level chunk pooling with `(cplx, L_cplx, R_cplx)` shape filter.
+  The user's "go up to the highest pure node" insight — trades
+  absolute grammaticality for combinatorial novelty across BL-sibling
+  leaves, with the shape filter as the unsupervised purity guard.
+
+#### Uniqueness sub-metrics (NEW)
+
+A grammaticality-only score doesn't tell you whether the model is
+GENERATING or just REPLAYING training sentences. To disambiguate, the
+test now also reports three uniqueness measures:
+
+| Metric | Formula | What it answers |
+|---|---|---|
+| **Novelty rate** | `|{g ∈ gens : g ∉ train_set}| / N_GEN` | Fraction of outputs that were NEVER seen verbatim during training. A pure replay scores 0%; pure hallucination scores 100%. |
+| **Diversity** | `|unique({g.text for g in gens})| / N_GEN` | Fraction of outputs that are unique within the run. A model that emits the same sentence 50 times scores 0.02; one that always emits something different scores 1.0. |
+| **Grammatical AND novel** | `|{g : g.gram_ok ∧ g ∉ train_set}| / N_GEN` | The headline number — fraction of outputs that are simultaneously CYK-grammatical AND not in the training corpus. This is the only one of these three that combines correctness with creativity. |
+
+**How the train_set is computed:**
+- `hollow_learn_test_mh.py`: `train_set = {h["sentence"].strip() for h in train_hollow}` (the 89-sentence supervised train fold).
+- `gen_learn_test_mh.py`: `train_set = set(s.strip() for s in unsup_sentences)` (the union of all 290 unsupervised training sentences — 200 primitives-only + 90 chunk-learning).
+
+Membership is **exact-string** match. We don't fuzzy-match: a single
+word swap counts as novel, which is the right granularity for a
+subtree-exchange algorithm that mixes class-pure pieces. This metric
+is in [`generation_from_scratch.csv`](#) as the per-row `novel` column
+in addition to the aggregate prints / panel-D bar.
+
+**Why three numbers, not one:**
+- *Novelty alone* could be high while diversity is low (model finds
+  one novel string and repeats it).
+- *Diversity alone* could be high while novelty is low (model picks
+  50 distinct training sentences).
+- *Gram-and-novel* alone could be high but with low diversity (one
+  good novel string emitted 25 times — score is 50%).
+The combination tells the full story. Subtree-exchange's expected
+profile is HIGH on all three because per-leaf chunk pools yield a
+combinatorial explosion of in-class combinations.
 
 ### (3b) Single-token masked completion
 
@@ -297,24 +478,35 @@ from scratch.
 **How:**
 - For each held-out test sentence, take the middle token, replace
   with `[mask]`, call `webster.generate_sentence(masked_sentence=...)`.
+- Mid-sentence single-token masks: walk the context-leaf's
+  `content_ref_attr` distribution, filter to WORD-only refs (skip
+  `CONCEPT-*` candidates whose `_expand` would emit multi-token
+  subtrees), greedy top-1. End/start-of-sentence: fall back to the
+  `_resolve_bag` + `_expand` path with `prefer_concept=True` and the
+  adjacent parsed-chunk complexity.
 - Score two things:
   - **Exact-token recovery**: filled token equals the gold token.
   - **POS-class recovery**: filled token's POS equals gold token's
     POS (much more lenient — counts any noun as a noun-class hit).
 
-**Current performance:** ~17% exact, ~87% POS-class.
+**Current performance:** **17.4% exact, 95.7% POS-class** (SEED=13).
 
 **Chance baselines** (reported in the test output):
 - Exact: 1/21 ≈ 5% (uniform over the 21-word lexicon)
 - POS-class: 1/5 = 20% (5 POS classes)
 
 **Interpretation:**
-- 87% POS recovery vs 20% chance = the model knows POS slots
-  STRONGLY. It picks a noun where a noun should go.
-- 17% exact recovery vs 5% chance = above chance but the model
+- 95.7% POS recovery vs 20% chance = the model knows POS slots
+  almost perfectly (one V/P confusion at the "the X a Y" slot, where
+  both verbs and prepositions are licit fillers given pure
+  co-occurrence context). The +8.7pp jump from 87% → 95.7% came from
+  eliminating the bug where `_expand` recursively unpacked CONCEPT
+  refs into multi-token subtrees on mid-sentence masks — see fix #8.
+- 17.4% exact recovery vs 5% chance = above chance but the model
   doesn't know the exact word — it picks a noun, just not the right
   one. This is expected behavior for unsupervised: the model has no
-  semantic preference between "dog" and "cat" in the same slot.
+  semantic preference between "dog" and "cat" in the same slot
+  (same bag-of-context). See open problem #10.
 
 ## How to interpret the scoreboard graphic
 
@@ -326,7 +518,8 @@ six-panel summary:
 - **(B) Step-pick (Climbing-Ancestor)** — step-pick %, gate pass-rate,
   and chance baseline (1/n_pairs avg).
 - **(C) Chunk-Class Probe** — per-class P/R/F1 grouped bars + overall.
-- **(D) From-scratch Generation** — in-lexicon and grammatical rates.
+- **(D) From-scratch Generation** — in-lexicon, grammatical, novelty,
+  diversity (unique/total), and gram-AND-novel rates as five bars.
 - **(E) Single-token Masked Completion** — exact-token and POS-class
   recovery, with chance baselines side-by-side.
 - **(F) Scorecard** — headline numbers as a text table.

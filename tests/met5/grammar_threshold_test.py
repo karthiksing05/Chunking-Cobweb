@@ -97,6 +97,7 @@ import sys
 import csv
 import glob
 import json
+import math
 import random
 import shutil
 from collections import Counter, defaultdict
@@ -195,6 +196,36 @@ BASE_HEURS = [
     "max_tree_lp",
     "min_class_lp",
     "max_class_lp",
+    # Cobweb ifit early-stop signal: NEW vs INSERT PU. Higher = chunk
+    # fits an established cluster better than a hypothetical new child
+    # (gold-aligned by hypothesis). Computed at the categorization
+    # leaf's parent AND at the basic-level ancestor of the leaf, on
+    # both content and context trees.
+    "cnt_leaf_insert_minus_new",
+    "cnt_bl_insert_minus_new",
+    "ctx_leaf_insert_minus_new",
+    "ctx_bl_insert_minus_new",
+    "sum_leaf_insert_minus_new",
+    "sum_bl_insert_minus_new",
+    # Similarity / recognition family — "match to a well-supported
+    # cluster". See _extract_heuristics for the definitions.
+    "cnt_bl_lp",
+    "cnt_bl_above_root",
+    "cnt_bl_lp_count_weighted",
+    "cnt_climb_lp",
+    "cnt_climb_above_root",
+    "cnt_recognition",
+    "ctx_bl_lp",
+    "ctx_bl_above_root",
+    "ctx_bl_lp_count_weighted",
+    "ctx_climb_lp",
+    "ctx_climb_above_root",
+    "ctx_recognition",
+    "sum_bl_lp",
+    "sum_bl_above_root",
+    "sum_climb_lp",
+    "sum_climb_above_root",
+    "sum_recognition",
 ]
 HEURISTICS = BASE_HEURS   # alias kept so the rest of the script reads same
 HEUR_COLORS = plt.cm.tab20(np.linspace(0, 1, len(HEURISTICS)))
@@ -207,8 +238,8 @@ webster = WEBSTER(
     TEST_CORPUS1,
     context_length=CONTEXT_LENGTH,
     threshold=THRESHOLD,
-    content_alpha=1e-6,
-    context_alpha=1e-6,
+    content_alpha=1e-4,
+    context_alpha=1e-4,
     content_bl_alpha=10,
     context_bl_alpha=10,
     bow=False,
@@ -1029,6 +1060,79 @@ def _extract_heuristics(res):
     row["max_tree_lp"]   = max(row["cnt_tree_lp"],       row["ctx_tree_lp"])
     row["min_class_lp"]  = min(row["cnt_tree_class_lp"], row["ctx_tree_class_lp"])
     row["max_class_lp"]  = max(row["cnt_tree_class_lp"], row["ctx_tree_class_lp"])
+    # ── Cobweb ifit early-stop signal (NEW vs INSERT PU) ─────────────
+    # At the leaf's PARENT and at the BASIC-LEVEL ancestor, ask:
+    # would Cobweb's ifit prefer to insert this instance into an
+    # existing child (INSERT_PU) or create a new child (NEW_PU)?
+    # The convention here is ``insert_minus_new`` so HIGHER = candidate
+    # fits an established cluster better than a hypothetical new one
+    # (gold-aligned). NEGATIVE = "novel" instance, Cobweb would split
+    # off a new node = likely bad chunk.
+    row["cnt_leaf_insert_minus_new"] = float(cnt.get("leaf_insert_minus_new", 0.0))
+    row["cnt_bl_insert_minus_new"]   = float(cnt.get("bl_insert_minus_new",   0.0))
+    row["ctx_leaf_insert_minus_new"] = float(ctx.get("leaf_insert_minus_new", 0.0))
+    row["ctx_bl_insert_minus_new"]   = float(ctx.get("bl_insert_minus_new",   0.0))
+    row["sum_leaf_insert_minus_new"] = (row["cnt_leaf_insert_minus_new"]
+                                        + row["ctx_leaf_insert_minus_new"])
+    row["sum_bl_insert_minus_new"]   = (row["cnt_bl_insert_minus_new"]
+                                        + row["ctx_bl_insert_minus_new"])
+    # Raw INSERT_PU and NEW_PU for diagnostic plots.
+    row["cnt_leaf_insert_pu"] = float(cnt.get("leaf_insert_pu", 0.0))
+    row["cnt_leaf_new_pu"]    = float(cnt.get("leaf_new_pu",    0.0))
+    row["cnt_bl_insert_pu"]   = float(cnt.get("bl_insert_pu",   0.0))
+    row["cnt_bl_new_pu"]      = float(cnt.get("bl_new_pu",      0.0))
+    row["ctx_leaf_insert_pu"] = float(ctx.get("leaf_insert_pu", 0.0))
+    row["ctx_leaf_new_pu"]    = float(ctx.get("leaf_new_pu",    0.0))
+    row["ctx_bl_insert_pu"]   = float(ctx.get("bl_insert_pu",   0.0))
+    row["ctx_bl_new_pu"]      = float(ctx.get("bl_new_pu",      0.0))
+    # ── Similarity heuristics (research loop) ────────────────────────
+    # "Recognition as similarity with a well-supported cluster" — pull
+    # log_prob_instance at the basic-level ancestor and at the
+    # climbing-ancestor (first ancestor whose count exceeds the
+    # threshold). Pair each with its count, and derive:
+    #   bl_lp                 — raw similarity at BL
+    #   bl_above_root         — BL similarity above root prior (PMI-like)
+    #   bl_lp_count_weighted  — BL similarity weighted by log(count)
+    #                           ("similarity × support")
+    #   climb_lp              — raw similarity at climbing-ancestor
+    #   climb_above_root      — climb similarity above root prior
+    #   recognition           — climb_above_root × log(1+count): the
+    #                           full "I recognize this well-supported
+    #                           cluster" score the user described.
+    # All gated naturally — if climb_hit_root, climb_above_root → 0
+    # because climb_ancestor == root.
+    for prefix, sd in (("cnt", cnt), ("ctx", ctx)):
+        bl_lp     = float(sd.get("basic_level_log_prob", -1e9))
+        bl_count  = float(sd.get("basic_level_count",     0.0))
+        # bl_count == -1 means basic-level collapsed to root (no signal).
+        bl_valid  = bl_count > 0
+        root_lp   = float(sd.get("root_log_prob",        -1e9))
+        climb_lp  = float(sd.get("climb_ancestor_log_prob", -1e9))
+        climb_ct  = float(sd.get("climb_ancestor_count",    0.0))
+        hit_root  = bool(sd.get("climb_hit_root", True))
+
+        row[f"{prefix}_bl_lp"]                = bl_lp if bl_valid else -1e9
+        row[f"{prefix}_bl_above_root"]        = (bl_lp - root_lp) if bl_valid else 0.0
+        row[f"{prefix}_bl_lp_count_weighted"] = ((bl_lp - root_lp)
+                                                 * math.log1p(max(bl_count, 0.0))
+                                                 if bl_valid else 0.0)
+        row[f"{prefix}_bl_count"]             = bl_count
+        row[f"{prefix}_climb_lp"]             = climb_lp if not hit_root else -1e9
+        row[f"{prefix}_climb_above_root"]     = (climb_lp - root_lp) if not hit_root else 0.0
+        row[f"{prefix}_climb_count"]          = climb_ct
+        # Headline "recognition" score: how much above-prior at the
+        # climbing-ancestor × log(1+ancestor count). High = candidate
+        # is a strong match to a well-supported cluster. Naturally 0
+        # when climb_hit_root (no support found anywhere).
+        row[f"{prefix}_recognition"]          = ((climb_lp - root_lp)
+                                                 * math.log1p(max(climb_ct, 0.0))
+                                                 if not hit_root else 0.0)
+    # Sum-across-trees compositions for the headline signals.
+    row["sum_bl_lp"]              = row["cnt_bl_lp"] + row["ctx_bl_lp"]
+    row["sum_bl_above_root"]      = row["cnt_bl_above_root"] + row["ctx_bl_above_root"]
+    row["sum_climb_lp"]           = row["cnt_climb_lp"] + row["ctx_climb_lp"]
+    row["sum_climb_above_root"]   = row["cnt_climb_above_root"] + row["ctx_climb_above_root"]
+    row["sum_recognition"]        = row["cnt_recognition"] + row["ctx_recognition"]
     return row
 
 # ── Gold-bracket reconstruction ─────────────────────────────────────────────
@@ -1096,7 +1200,11 @@ for hollow in test_hollow:
             merged_span = (spans[a][0], spans[b][1])
             is_gold = merged_span in gold_brackets
             try:
-                res = tree.evaluate_pair(li, ri, debug=False)
+                # Pass climb_count_threshold so content/context score
+                # dicts carry climb_ancestor_* fields for the similarity
+                # heuristics (see _extract_heuristics).
+                res = tree.evaluate_pair(li, ri, debug=False,
+                                         climb_count_threshold=THRESHOLD)
             except Exception:
                 continue
             heurs = _extract_heuristics(res)

@@ -154,15 +154,39 @@ for i in range(PRIMITIVES_FIRST):
 # chunks here (no gold merges). The climbing-ancestor gate + cnt_root_lp
 # ranker have to discover chunking on their own.
 print(f"\n=== PHASE 2: UNSUPERVISED CHUNK LEARNING ({N_UNSUP_TRAIN} sentences) ===")
+trained_trees = []   # keep so subtree-exchange generation can mine them
 for i in range(N_UNSUP_TRAIN):
     sentence = unsup_sentences[PRIMITIVES_FIRST + i]
     parse_tree = webster.parse_sentence(
         sentence, threshold=THRESHOLD, new_vocab=True,
         learning=True, debug=False)
+    trained_trees.append(parse_tree)
     if VIZ_INTERMEDIATES and i % 10 == 0:
         parse_tree.visualize(f"{OUT_DIR}/train_trees/unsup_tree{i}")
     if (i + 1) % 25 == 0:
         print(f"  [{i+1}/{N_UNSUP_TRAIN}]")
+
+# Mine the unsupervised parse trees for chunk-replay data. Even when
+# build() doesn't always fire at the sentence-root level (the gate may
+# stop short of S), per-leaf chunk pools are still populated by every
+# composite WEBSTER did form during training — so generation can replay
+# subtrees out of whatever was learned.
+webster.learn_leaf_transitions(trained_trees)
+webster.learn_chunk_records(trained_trees)
+print(f"\nLearned {len(webster.content_leaf_transitions)} "
+      f"content-tree leaf transitions (unsupervised)")
+print(f"Recorded {sum(len(v) for v in webster.leaf_to_chunks.values())} "
+      f"chunk records across {len(webster.leaf_to_chunks)} leaves; "
+      f"{len(webster.sentence_root_chunks)} sentence-root chunks "
+      f"available as gen seeds")
+
+# Turn ON the subtree-exchange parsing heuristic — same knob as
+# hollow_learn. Mined from WEBSTER's OWN parses (no gold merges) so
+# the boost reinforces self-consistent training patterns rather than
+# pulling toward human-preferred ones.
+webster.ltm.chunk_pool_weight = 5.0
+print(f"Subtree-exchange parsing heuristic ON: "
+      f"chunk_pool_weight = {webster.ltm.chunk_pool_weight}")
 
 # ── Save state ─────────────────────────────────────────────────────────────
 SAVE_DIR = f"{OUT_DIR}/final_ltm_data"
@@ -329,8 +353,22 @@ for hollow in test_hollow:
                 continue
             ls, _  = _chunk_span(left_node)
             _, re_ = _chunk_span(right_node)
-            admitted.append((csd.get("root_log_prob", -float("inf")),
-                             (int(ls), int(re_))))
+            # Mirror build()'s ranker:
+            #   cnt_root_lp + 0.3·sum_leaf_lp + λ·attestation-boost
+            _sc = csd.get("root_log_prob", -float("inf"))
+            _ctx_sd = res.get("context_score_data", {})
+            _cnt_leaf_lp = csd.get("leaf_log_prob", None)
+            _ctx_leaf_lp = _ctx_sd.get("leaf_log_prob", None)
+            if _cnt_leaf_lp is not None and _ctx_leaf_lp is not None:
+                _sc = _sc + 0.3 * (float(_cnt_leaf_lp) + float(_ctx_leaf_lp))
+            _w = getattr(webster.ltm, "chunk_pool_weight", 0.0) or 0.0
+            if _w > 0:
+                import math as _m
+                _sc = _sc + _w * (
+                    _m.log(1.0 + csd.get("chunk_pool_match", 0))
+                    + _m.log(1.0 + csd.get("L_trans_count", 0))
+                    + _m.log(1.0 + csd.get("R_trans_count", 0)))
+            admitted.append((_sc, (int(ls), int(re_))))
 
         n_step_total += 1
         if not admitted:
@@ -510,9 +548,17 @@ print("\n  --- (3a) From-scratch generation ---")
 N_GEN = 50
 n_gen_ok = n_lex_ok = n_total = 0
 generations = []
+# Subtree-exchange generation needs at least one sentence-root chunk to seed.
+# Unsupervised training may not produce any (the climbing gate can stop before
+# the top-level S), so fall back to the old _resolve_bag path if it's empty.
+_use_replay = bool(getattr(webster, "sentence_root_chunks", None))
+print(f"    [gen mode: {'subtree-replay' if _use_replay else 'resolve_bag fallback'}]")
 for i in range(N_GEN):
     try:
-        gen_text, gen_parse = webster.generate_sentence(debug=False)
+        if _use_replay:
+            gen_text, gen_parse = webster.generate_via_chunk_replay()
+        else:
+            gen_text, gen_parse = webster.generate_sentence(debug=False)
     except Exception as e:
         gen_text, gen_parse = f"<failed: {e}>", None
     n_total += 1
@@ -533,10 +579,32 @@ for i in range(N_GEN):
 print(f"  In-lexicon : {n_lex_ok}/{n_total} ({100*n_lex_ok/max(n_total,1):.1f}%)")
 print(f"  Grammatical: {n_gen_ok}/{n_total} ({100*n_gen_ok/max(n_total,1):.1f}%)")
 
+# ── Uniqueness / novelty metrics (see unittests/README.md (3a) section) ──
+# train_set = the unsupervised training sentences (Phase 2 only — the
+# 90 sentences WEBSTER actually formed chunks on; the 200 primitives-
+# only sentences don't contribute chunks, but we union them in too so
+# novelty isn't inflated by primitive-only repeats).
+train_set = set(s.strip() for s in unsup_sentences)
+unique_texts = {g["text"].strip() for g in generations}
+novel_count = sum(1 for g in generations if g["text"].strip() not in train_set)
+gram_novel_count = sum(1 for g in generations
+                       if g["gram_ok"] and g["text"].strip() not in train_set)
+novelty_rate = novel_count / max(n_total, 1)
+diversity    = len(unique_texts) / max(n_total, 1)
+gram_novel_rate = gram_novel_count / max(n_total, 1)
+print(f"  Novelty (not in train): {novel_count}/{n_total} "
+      f"({100*novelty_rate:.1f}%)")
+print(f"  Diversity (unique/total): {len(unique_texts)}/{n_total} "
+      f"({100*diversity:.1f}%)")
+print(f"  Grammatical AND novel: {gram_novel_count}/{n_total} "
+      f"({100*gram_novel_rate:.1f}%)")
+
 with open(f"{OUT_DIR}/generation_from_scratch.csv", "w") as f:
-    f.write("idx,in_lexicon,grammatical,text\n")
+    f.write("idx,in_lexicon,grammatical,novel,text\n")
     for i, g in enumerate(generations):
-        f.write(f"{i},{int(g['lex_ok'])},{int(g['gram_ok'])},\"{g['text']}\"\n")
+        is_novel = int(g["text"].strip() not in train_set)
+        f.write(f"{i},{int(g['lex_ok'])},{int(g['gram_ok'])},"
+                f"{is_novel},\"{g['text']}\"\n")
 
 # ── 3b. Single-token masked completion ──
 print("\n  --- (3b) Single-token masked completion ---")
@@ -610,6 +678,9 @@ print(f"  (1b) Step-pick (climbing-ancestor): {100*step_acc:.1f}%  "
 print(f"  (2)  Chunk-class accuracy     : {100*chunk_acc:.1f}%")
 print(f"  (3a) From-scratch grammatical : {100*n_gen_ok/max(n_total,1):.1f}%")
 print(f"  (3a) From-scratch in-lexicon  : {100*n_lex_ok/max(n_total,1):.1f}%")
+print(f"  (3a) From-scratch novelty     : {100*novelty_rate:.1f}%  "
+      f"(unique outputs: {100*diversity:.1f}%)")
+print(f"  (3a) Grammatical AND novel    : {100*gram_novel_rate:.1f}%")
 print(f"  (3b) Mask exact recovery      : "
       f"{100*exact_hits/max(mask_total,1):.1f}%")
 print(f"  (3b) Mask POS recovery        : "
@@ -696,19 +767,23 @@ if prf_rows:
     axC.legend(loc="lower right", fontsize=8)
     axC.grid(axis="y", alpha=0.3)
 
-# Panel D — From-scratch generation.
+# Panel D — From-scratch generation (incl. uniqueness/novelty).
 axD = fig.add_subplot(2, 3, 4)
-gen_metrics = ["In-lexicon", "Grammatical"]
+gen_metrics = ["In-lexicon", "Grammatical", "Novel", "Unique", "Gram & Novel"]
 gen_values  = [n_lex_ok / max(n_total, 1),
-               n_gen_ok / max(n_total, 1)]
-gen_colors  = ["#17becf", "#bcbd22"]
+               n_gen_ok / max(n_total, 1),
+               novelty_rate,
+               diversity,
+               gram_novel_rate]
+gen_colors  = ["#17becf", "#bcbd22", "#9467bd", "#8c564b", "#2ca02c"]
 bars = axD.bar(gen_metrics, gen_values,
                color=gen_colors, edgecolor="black", linewidth=0.5)
 for b, v in zip(bars, gen_values):
     axD.text(b.get_x() + b.get_width()/2, v + 0.02,
-             f"{100*v:.1f}%", ha="center", fontsize=10, fontweight="bold")
+             f"{100*v:.1f}%", ha="center", fontsize=9, fontweight="bold")
 axD.set_ylim(0, 1.15); axD.set_ylabel("Rate")
 axD.set_title(f"(D) From-scratch Generation  (n={n_total})", fontsize=11)
+axD.tick_params(axis="x", labelsize=8, rotation=15)
 axD.grid(axis="y", alpha=0.3)
 
 # Panel E — Mask completion.
@@ -742,10 +817,11 @@ axF = fig.add_subplot(2, 3, 6)
 axF.axis("off")
 scorecard = [
     ("Parse F1",                  f"{100*f1:.1f}%"),
-    ("Exact-match parses",        f"{100*exact_pct:.1f}%"),
     ("Step-pick (climbing)",      f"{100*step_acc:.1f}%"),
-    ("Gate pass-rate",            f"{100*gate_pass_rate:.1f}%"),
     ("Chunk-class accuracy",      f"{100*chunk_acc:.1f}%"),
+    ("Gen grammatical",           f"{100*n_gen_ok/max(n_total,1):.1f}%"),
+    ("Gen novelty",               f"{100*novelty_rate:.1f}%"),
+    ("Gen gram&novel",            f"{100*gram_novel_rate:.1f}%"),
     ("Mask POS recovery",         f"{100*pos_hits/max(mask_total,1):.1f}%"),
 ]
 axF.set_title("(F) Scorecard", fontsize=11)

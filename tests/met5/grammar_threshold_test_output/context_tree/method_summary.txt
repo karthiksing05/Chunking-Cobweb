@@ -1,35 +1,37 @@
 CONTEXT tree — get_basic(use_root=True, eval_alpha=10.0)
 ========================================================
 
-  Test primitives: 1167
-  Unique BL nodes: 29
+  Test primitives: 1177
+  Unique BL nodes: 31
 
-  [ 0] depth= 3  count=  211  members= 178  dom=Adj
-  [ 1] depth= 3  count=  230  members= 162  dom=Det
-  [ 2] depth= 3  count=  766  members= 152  dom=Adj
-  [ 3] depth= 3  count=  179  members=  94  dom=V
-  [ 4] depth= 2  count=  298  members=  87  dom=N
-  [ 5] depth= 2  count=  926  members=  78  dom=Adj
-  [ 6] depth= 2  count=  410  members=  68  dom=V
-  [ 7] depth= 3  count=  176  members=  65  dom=N
-  [ 8] depth= 5  count=  202  members=  56  dom=Det
-  [ 9] depth= 1  count=  640  members=  50  dom=V
-  [10] depth= 4  count=  132  members=  40  dom=N
-  [11] depth= 7  count=   30  members=  34  dom=Adj
-  [12] depth= 6  count=  107  members=  24  dom=N
-  [13] depth= 2  count=  589  members=  15  dom=N
-  [14] depth= 6  count=   53  members=  15  dom=Adj
-  [15] depth= 5  count=   10  members=  11  dom=N
-  [16] depth= 6  count=   11  members=   8  dom=Det
-  [17] depth= 5  count=   12  members=   6  dom=N
-  [18] depth= 6  count=    9  members=   5  dom=Det
-  [19] depth= 4  count=   30  members=   5  dom=N
-  [20] depth= 5  count=  199  members=   4  dom=N
-  [21] depth= 8  count=    1  members=   3  dom=Adj
-  [22] depth= 6  count=    5  members=   1  dom=Adj
-  [23] depth= 7  count=    3  members=   1  dom=N
-  [24] depth=12  count=    1  members=   1  dom=N
-  [25] depth=10  count=    1  members=   1  dom=N
-  [26] depth=10  count=    2  members=   1  dom=Adj
-  [27] depth= 6  count=    3  members=   1  dom=N
-  [28] depth= 7  count=    2  members=   1  dom=N
+  [ 0] depth= 2  count=  313  members= 194  dom=Det
+  [ 1] depth= 2  count=  227  members= 154  dom=Adj
+  [ 2] depth= 2  count=  750  members= 122  dom=Adj
+  [ 3] depth= 1  count=  495  members= 103  dom=V
+  [ 4] depth= 2  count=  217  members=  93  dom=V
+  [ 5] depth= 2  count=  246  members=  82  dom=N
+  [ 6] depth= 3  count=  624  members=  71  dom=Adj
+  [ 7] depth= 5  count=  100  members=  69  dom=N
+  [ 8] depth= 4  count=  211  members=  67  dom=Det
+  [ 9] depth= 2  count=  250  members=  56  dom=N
+  [10] depth= 3  count=  130  members=  45  dom=N
+  [11] depth= 5  count=   94  members=  36  dom=Det
+  [12] depth= 4  count=  178  members=  29  dom=N
+  [13] depth= 4  count=   20  members=  20  dom=N
+  [14] depth= 4  count=   12  members=  10  dom=N
+  [15] depth= 7  count=   11  members=   7  dom=Adj
+  [16] depth= 6  count=    2  members=   3  dom=Det
+  [17] depth= 7  count=    1  members=   2  dom=Adj
+  [18] depth= 6  count=    2  members=   2  dom=N
+  [19] depth= 5  count=    6  members=   1  dom=N
+  [20] depth= 5  count=    6  members=   1  dom=N
+  [21] depth= 5  count=    5  members=   1  dom=N
+  [22] depth= 6  count=    1  members=   1  dom=N
+  [23] depth= 5  count=    3  members=   1  dom=N
+  [24] depth= 6  count=    2  members=   1  dom=Det
+  [25] depth= 5  count=    4  members=   1  dom=Det
+  [26] depth= 6  count=    3  members=   1  dom=Adj
+  [27] depth= 7  count=    1  members=   1  dom=N
+  [28] depth= 8  count=    1  members=   1  dom=N
+  [29] depth= 6  count=    3  members=   1  dom=Adj
+  [30] depth= 7  count=    1  members=   1  dom=N

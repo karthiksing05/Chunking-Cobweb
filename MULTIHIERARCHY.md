@@ -30,18 +30,21 @@ The TL;DR is that our process can basically be revered as a way of creating symb
 
 Did a ton of experiments, going to make a list of all changes we need to make below - there'll be all kinds of stuff but as long as we draft everything properly we'll be in a good place!
 
+**Stuff is not working now??**
+
+
 **Final List of things we need to test:**
 *   Representation (Autoencoder) test - Given content / context instance, can we generate it and compress it? (and also verify that similar instances are encoded similarly)
     *   As evidenced by `grammar_decoding_test.py`, the best representation is by far the bag-of-concepts, which leverages the X highest-activating concepts at a depth of Y and uses similarity between bags to determine similarity of the underlying instances (maintaining a form of generalization)
 *   Threshold / Recognition - given the right representations, can we accurately compare structures to see what structures we’ve seen before
     *   As evidenced by `grammar_threshold_test.py`, best heuristic involves ranking by ctx_root_lp and taking the best with cnt_root_lp - this looks pretty reasonable but we'll need to check that it works best, one greedy decision throws the whole thing into disarray
 *   Parsing - does the parsing process appropriately use the threshold / prior memory to create structures that line up with what we’ve seen?
-    *   
 *   Generation - can we unpack the parsing process in reverse? That is, can we generate relative to what we've seen before?
 
 **Grammar Distillation**
 If the nodes in our Cobweb tree eventually become pure, one thing we can try is simply distilling the CFG from the trees and using a threshold on a hand-collected set of nodes to generate, parse, etc!!
-*   AND SO FAR, THINGS ARE LOOKING PURE!!! The primary problem is that we only know this property is true from basic-level nodes but I think that distilling is a great step forward - let's try to program it!!
+*   The primary problem is that we only know this property is true from supervision but I think that distilling is a great step forward - let's try to program it!!
+*   Initially thought that things looked pretty pure but now I'm not so sure...
 
 Here's the method:
 *   After training our hierarchy, we get the frontier of basic level nodes

@@ -7,73 +7,142 @@ Logged 614 candidate pair evaluations across 147 merge steps.
 Heuristic set: NO basic-level — only tree_log_prob, tree_class_log_prob, root_log_prob, leaf_log_prob and their derived combinations.
 
 ROC AUC (gold vs non-gold candidate pair):
-             sum_leaf_lp: AUC=0.8540  AP=0.8203
-             cnt_root_lp: AUC=0.8163  AP=0.7728
-             cnt_leaf_lp: AUC=0.8103  AP=0.7596
-             sum_tree_lp: AUC=0.8020  AP=0.7277
-            sum_class_lp: AUC=0.7883  AP=0.7102
-     cnt_leaf_above_root: AUC=0.7843  AP=0.7152
-             cnt_tree_lp: AUC=0.7702  AP=0.6939
-             min_tree_lp: AUC=0.7702  AP=0.6939
-       cnt_tree_class_lp: AUC=0.7669  AP=0.6828
-            min_class_lp: AUC=0.7669  AP=0.6828
-             ctx_leaf_lp: AUC=0.7642  AP=0.6873
-             ctx_tree_lp: AUC=0.7606  AP=0.6641
-             max_tree_lp: AUC=0.7606  AP=0.6641
-     ctx_leaf_above_root: AUC=0.7582  AP=0.6335
-             ctx_root_lp: AUC=0.7167  AP=0.6302
-       ctx_tree_class_lp: AUC=0.6968  AP=0.5993
-            max_class_lp: AUC=0.6968  AP=0.5993
-     ctx_tree_above_root: AUC=0.6306  AP=0.4704
-     sum_tree_above_root: AUC=0.6196  AP=0.4664
-     cnt_tree_above_root: AUC=0.6008  AP=0.4515
+             sum_leaf_lp: AUC=0.9066  AP=0.8822
+             cnt_leaf_lp: AUC=0.8930  AP=0.8699
+  cnt_leaf_insert_minus_new: AUC=0.8921  AP=0.8417
+             sum_tree_lp: AUC=0.8891  AP=0.8685
+            sum_class_lp: AUC=0.8852  AP=0.8686
+     cnt_leaf_above_root: AUC=0.8561  AP=0.8347
+            sum_climb_lp: AUC=0.8504  AP=0.8133
+             cnt_tree_lp: AUC=0.8436  AP=0.8353
+             min_tree_lp: AUC=0.8436  AP=0.8353
+             cnt_root_lp: AUC=0.8433  AP=0.8474
+       cnt_tree_class_lp: AUC=0.8354  AP=0.8249
+            min_class_lp: AUC=0.8354  AP=0.8249
+             ctx_tree_lp: AUC=0.8040  AP=0.6946
+             max_tree_lp: AUC=0.8040  AP=0.6946
+       ctx_tree_class_lp: AUC=0.7967  AP=0.6885
+            max_class_lp: AUC=0.7967  AP=0.6885
+               ctx_bl_lp: AUC=0.7847  AP=0.6928
+            cnt_climb_lp: AUC=0.7760  AP=0.7400
+             ctx_leaf_lp: AUC=0.7756  AP=0.6758
+            ctx_climb_lp: AUC=0.7665  AP=0.6474
+     ctx_tree_above_root: AUC=0.7528  AP=0.5734
+     ctx_leaf_above_root: AUC=0.7521  AP=0.6216
+     sum_tree_above_root: AUC=0.7410  AP=0.7048
+             ctx_root_lp: AUC=0.7166  AP=0.6300
+               sum_bl_lp: AUC=0.7122  AP=0.6141
+  sum_leaf_insert_minus_new: AUC=0.7122  AP=0.5908
+       ctx_bl_above_root: AUC=0.7031  AP=0.5519
+     cnt_tree_above_root: AUC=0.7022  AP=0.6701
+         ctx_recognition: AUC=0.6885  AP=0.5252
+  ctx_bl_lp_count_weighted: AUC=0.6865  AP=0.5062
+    sum_climb_above_root: AUC=0.6781  AP=0.5975
+    ctx_climb_above_root: AUC=0.6762  AP=0.4982
+  ctx_leaf_insert_minus_new: AUC=0.6629  AP=0.5461
+               cnt_bl_lp: AUC=0.6455  AP=0.5137
+         sum_recognition: AUC=0.6163  AP=0.4743
+    cnt_climb_above_root: AUC=0.5853  AP=0.5163
+  ctx_bl_insert_minus_new: AUC=0.5517  AP=0.4115
+  cnt_bl_insert_minus_new: AUC=0.5494  AP=0.4077
+  sum_bl_insert_minus_new: AUC=0.5434  AP=0.4044
+         cnt_recognition: AUC=0.5141  AP=0.4001
+  cnt_bl_lp_count_weighted: AUC=0.4933  AP=0.3915
+       sum_bl_above_root: AUC=0.4905  AP=0.4335
+       cnt_bl_above_root: AUC=0.4699  AP=0.4053
 
 Step-pick accuracy (argmax-heuristic == gold):
+       cnt_tree_class_lp:  136/147  (92.5%)
+             cnt_root_lp:  136/147  (92.5%)
+            sum_class_lp:  136/147  (92.5%)
+            min_class_lp:  136/147  (92.5%)
+             cnt_tree_lp:  135/147  (91.8%)
+             sum_tree_lp:  135/147  (91.8%)
              sum_leaf_lp:  135/147  (91.8%)
-             cnt_leaf_lp:  131/147  (89.1%)
-             cnt_root_lp:  126/147  (85.7%)
-     cnt_leaf_above_root:  122/147  (83.0%)
-             sum_tree_lp:  121/147  (82.3%)
-            sum_class_lp:  117/147  (79.6%)
-       cnt_tree_class_lp:  115/147  (78.2%)
-            min_class_lp:  115/147  (78.2%)
-             cnt_tree_lp:  113/147  (76.9%)
-             min_tree_lp:  113/147  (76.9%)
-     ctx_leaf_above_root:  109/147  (74.1%)
-             ctx_tree_lp:  102/147  (69.4%)
-             max_tree_lp:  102/147  (69.4%)
-             ctx_leaf_lp:   97/147  (66.0%)
-       ctx_tree_class_lp:   85/147  (57.8%)
-            max_class_lp:   85/147  (57.8%)
+             min_tree_lp:  135/147  (91.8%)
+             cnt_leaf_lp:  133/147  (90.5%)
+            cnt_climb_lp:  129/147  (87.8%)
+     cnt_leaf_above_root:  128/147  (87.1%)
+            sum_climb_lp:  128/147  (87.1%)
+  cnt_leaf_insert_minus_new:  126/147  (85.7%)
+     sum_tree_above_root:  120/147  (81.6%)
+     cnt_tree_above_root:  117/147  (79.6%)
+       ctx_tree_class_lp:  109/147  (74.1%)
+            max_class_lp:  109/147  (74.1%)
+             ctx_tree_lp:  103/147  (70.1%)
+             max_tree_lp:  103/147  (70.1%)
+     ctx_tree_above_root:  102/147  (69.4%)
+     ctx_leaf_above_root:   98/147  (66.7%)
+       ctx_bl_above_root:   97/147  (66.0%)
+               ctx_bl_lp:   96/147  (65.3%)
+         ctx_recognition:   96/147  (65.3%)
+  sum_leaf_insert_minus_new:   95/147  (64.6%)
+    sum_climb_above_root:   93/147  (63.3%)
+  ctx_leaf_insert_minus_new:   92/147  (62.6%)
+  ctx_bl_lp_count_weighted:   90/147  (61.2%)
+    ctx_climb_above_root:   89/147  (60.5%)
+               sum_bl_lp:   89/147  (60.5%)
+             ctx_leaf_lp:   88/147  (59.9%)
+            ctx_climb_lp:   84/147  (57.1%)
              ctx_root_lp:   80/147  (54.4%)
-     ctx_tree_above_root:   79/147  (53.7%)
-     cnt_tree_above_root:   72/147  (49.0%)
-     sum_tree_above_root:   72/147  (49.0%)
+               cnt_bl_lp:   77/147  (52.4%)
+    cnt_climb_above_root:   77/147  (52.4%)
+  sum_bl_insert_minus_new:   76/147  (51.7%)
+         sum_recognition:   72/147  (49.0%)
+  ctx_bl_insert_minus_new:   70/147  (47.6%)
+       sum_bl_above_root:   56/147  (38.1%)
+       cnt_bl_above_root:   49/147  (33.3%)
+  cnt_bl_lp_count_weighted:   47/147  (32.0%)
+         cnt_recognition:   44/147  (29.9%)
+  cnt_bl_insert_minus_new:   38/147  (25.9%)
 
 Best single-heuristic gate τ (Phase 4 quantile sweep):
-             sum_leaf_lp: q=0.0  overall=91.8%
-             cnt_leaf_lp: q=0.0  overall=89.1%
-             cnt_root_lp: q=0.0  overall=85.7%
-     cnt_leaf_above_root: q=0.0  overall=83.0%
-             sum_tree_lp: q=0.0  overall=82.3%
-            sum_class_lp: q=0.0  overall=79.6%
-       cnt_tree_class_lp: q=0.0  overall=78.2%
-            min_class_lp: q=0.0  overall=78.2%
-             cnt_tree_lp: q=0.0  overall=76.9%
-             min_tree_lp: q=0.0  overall=76.9%
-     ctx_leaf_above_root: q=0.0  overall=74.1%
-             ctx_tree_lp: q=0.0  overall=69.4%
-             max_tree_lp: q=0.0  overall=69.4%
-             ctx_leaf_lp: q=0.0  overall=66.0%
-       ctx_tree_class_lp: q=0.0  overall=57.8%
-            max_class_lp: q=0.0  overall=57.8%
+       cnt_tree_class_lp: q=0.0  overall=92.5%
+             cnt_root_lp: q=0.0  overall=92.5%
+            sum_class_lp: q=0.0  overall=92.5%
+            min_class_lp: q=0.0  overall=92.5%
+             cnt_tree_lp: q=0.0  overall=91.8%
+             sum_tree_lp: q=0.0  overall=91.8%
+             min_tree_lp: q=0.0  overall=91.8%
+             sum_leaf_lp: q=0.0  overall=91.2%
+             cnt_leaf_lp: q=0.0  overall=89.8%
+            cnt_climb_lp: q=0.0  overall=87.8%
+     cnt_leaf_above_root: q=0.0  overall=87.1%
+            sum_climb_lp: q=0.0  overall=87.1%
+  cnt_leaf_insert_minus_new: q=0.0  overall=85.7%
+     sum_tree_above_root: q=0.0  overall=81.6%
+     cnt_tree_above_root: q=0.0  overall=79.6%
+       ctx_tree_class_lp: q=0.0  overall=74.1%
+            max_class_lp: q=0.0  overall=74.1%
+             ctx_tree_lp: q=0.0  overall=70.1%
+             max_tree_lp: q=0.0  overall=70.1%
+     ctx_tree_above_root: q=0.0  overall=69.4%
+     ctx_leaf_above_root: q=0.0  overall=66.7%
+       ctx_bl_above_root: q=0.0  overall=66.0%
+               ctx_bl_lp: q=0.0  overall=65.3%
+         ctx_recognition: q=0.0  overall=65.3%
+  sum_leaf_insert_minus_new: q=0.0  overall=64.6%
+    sum_climb_above_root: q=0.0  overall=63.3%
+  ctx_leaf_insert_minus_new: q=0.0  overall=62.6%
+  ctx_bl_lp_count_weighted: q=0.0  overall=61.2%
+    ctx_climb_above_root: q=0.0  overall=60.5%
+               sum_bl_lp: q=0.0  overall=60.5%
+             ctx_leaf_lp: q=0.0  overall=59.9%
+            ctx_climb_lp: q=0.0  overall=57.1%
              ctx_root_lp: q=0.0  overall=54.4%
-     ctx_tree_above_root: q=0.0  overall=53.7%
-     sum_tree_above_root: q=0.0  overall=49.0%
-     cnt_tree_above_root: q=0.0  overall=48.3%
+               cnt_bl_lp: q=0.0  overall=52.4%
+    cnt_climb_above_root: q=0.0  overall=52.4%
+  sum_bl_insert_minus_new: q=0.0  overall=51.7%
+         sum_recognition: q=0.0  overall=49.0%
+  ctx_bl_insert_minus_new: q=0.0  overall=47.6%
+       sum_bl_above_root: q=0.0  overall=38.1%
+       cnt_bl_above_root: q=0.0  overall=33.3%
+  cnt_bl_lp_count_weighted: q=0.0  overall=32.0%
+         cnt_recognition: q=0.0  overall=29.9%
+  cnt_bl_insert_minus_new: q=0.0  overall=25.9%
 
-Best heuristic by AUC:           sum_leaf_lp (AUC=0.8540)
-Best heuristic by step acc:      sum_leaf_lp (91.8%)
-Best single-heuristic gate:      sum_leaf_lp @ q=0.0 (91.8%)
-Best weighted-combo formula:     0.8*z(sum_leaf_lp) + 0.2*z(ctx_tree_above_root)
-  step acc = 59.2%  AUC = 0.8648
+Best heuristic by AUC:           sum_leaf_lp (AUC=0.9066)
+Best heuristic by step acc:      cnt_tree_class_lp (92.5%)
+Best single-heuristic gate:      cnt_tree_class_lp @ q=0.0 (92.5%)
+Best weighted-combo formula:     0.2*z(cnt_root_lp) + 0.8*z(cnt_leaf_insert_minus_new)
+  step acc = 71.4%  AUC = 0.9210
