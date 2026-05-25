@@ -1,0 +1,145 @@
+sentence,step,n_pairs,n_admitted,top_span,is_gold
+"the man sees",0,2,2,"(0, 1)",1
+"the man sees",1,1,1,"(0, 2)",1
+"the cat chases",0,2,2,"(0, 1)",1
+"the cat chases",1,1,1,"(0, 2)",1
+"the man likes",0,2,2,"(0, 1)",1
+"the man likes",1,1,1,"(0, 2)",1
+"a woman chases the woman",0,4,4,"(3, 4)",1
+"a woman chases the woman",1,3,3,"(3, 4)",1
+"a woman chases the woman",2,2,2,"(0, 2)",1
+"a woman chases the woman",3,1,1,"(0, 4)",1
+"a cat likes the man",0,4,4,"(3, 4)",1
+"a cat likes the man",1,3,3,"(3, 4)",1
+"a cat likes the man",2,2,2,"(0, 2)",1
+"a cat likes the man",3,1,1,"(0, 4)",1
+"a cat chases a man",0,4,4,"(3, 4)",1
+"a cat chases a man",1,3,3,"(3, 4)",1
+"a cat chases a man",2,2,2,"(0, 2)",1
+"a cat chases a man",3,1,1,"(0, 4)",1
+"a man likes a man",0,4,4,"(3, 4)",1
+"a man likes a man",1,3,3,"(3, 4)",1
+"a man likes a man",2,2,2,"(0, 2)",1
+"a man likes a man",3,1,1,"(0, 4)",1
+"the dog chases a woman",0,4,4,"(3, 4)",1
+"the dog chases a woman",1,3,3,"(3, 4)",1
+"the dog chases a woman",2,2,2,"(0, 2)",1
+"the dog chases a woman",3,1,1,"(0, 4)",1
+"a woman runs a man",0,4,4,"(3, 4)",1
+"a woman runs a man",1,3,3,"(3, 4)",1
+"a woman runs a man",2,2,2,"(0, 2)",1
+"a woman runs a man",3,1,1,"(0, 4)",1
+"a man runs a cat",0,4,4,"(3, 4)",1
+"a man runs a cat",1,3,3,"(3, 4)",1
+"a man runs a cat",2,2,2,"(0, 2)",1
+"a man runs a cat",3,1,1,"(0, 4)",1
+"a woman sees the man",0,4,4,"(3, 4)",1
+"a woman sees the man",1,3,3,"(3, 4)",1
+"a woman sees the man",2,2,2,"(0, 2)",1
+"a woman sees the man",3,1,1,"(0, 4)",1
+"a cat runs a woman",0,4,4,"(3, 4)",1
+"a cat runs a woman",1,3,3,"(3, 4)",1
+"a cat runs a woman",2,2,2,"(0, 2)",1
+"a cat runs a woman",3,1,1,"(0, 4)",1
+"the man sees the woman",0,4,4,"(3, 4)",1
+"the man sees the woman",1,3,3,"(3, 4)",1
+"the man sees the woman",2,2,2,"(0, 2)",1
+"the man sees the woman",3,1,1,"(0, 4)",1
+"the dog likes the dog",0,4,4,"(3, 4)",1
+"the dog likes the dog",1,3,3,"(3, 4)",1
+"the dog likes the dog",2,2,2,"(0, 2)",1
+"the dog likes the dog",3,1,1,"(0, 4)",1
+"a man chases a woman",0,4,4,"(3, 4)",1
+"a man chases a woman",1,3,3,"(3, 4)",1
+"a man chases a woman",2,2,2,"(0, 2)",1
+"a man chases a woman",3,1,1,"(0, 4)",1
+"a cat runs",0,2,2,"(0, 1)",1
+"a cat runs",1,1,1,"(0, 2)",1
+"the man runs the man",0,4,4,"(3, 4)",1
+"the man runs the man",1,3,3,"(3, 4)",1
+"the man runs the man",2,2,2,"(2, 4)",0
+"the man runs the man",3,1,1,"(0, 4)",1
+"the man runs",0,2,2,"(0, 1)",1
+"the man runs",1,1,1,"(0, 2)",1
+"the man runs a woman",0,4,4,"(3, 4)",1
+"the man runs a woman",1,3,3,"(3, 4)",1
+"the man runs a woman",2,2,2,"(2, 4)",0
+"the man runs a woman",3,1,1,"(0, 4)",1
+"a man likes the dog",0,4,4,"(3, 4)",1
+"a man likes the dog",1,3,3,"(3, 4)",1
+"a man likes the dog",2,2,2,"(0, 2)",1
+"a man likes the dog",3,1,1,"(0, 4)",1
+"the woman likes",0,2,2,"(0, 1)",1
+"the woman likes",1,1,1,"(0, 2)",1
+"a dog chases a cat",0,4,4,"(3, 4)",1
+"a dog chases a cat",1,3,3,"(3, 4)",1
+"a dog chases a cat",2,2,2,"(0, 2)",1
+"a dog chases a cat",3,1,1,"(0, 4)",1
+"the woman sees a cat",0,4,4,"(0, 1)",1
+"the woman sees a cat",1,3,3,"(3, 4)",1
+"the woman sees a cat",2,2,2,"(0, 2)",1
+"the woman sees a cat",3,1,1,"(0, 4)",1
+"a woman chases the man",0,4,4,"(3, 4)",1
+"a woman chases the man",1,3,3,"(3, 4)",1
+"a woman chases the man",2,2,2,"(0, 2)",1
+"a woman chases the man",3,1,1,"(0, 4)",1
+"a dog sees the man",0,4,4,"(0, 1)",1
+"a dog sees the man",1,3,3,"(3, 4)",1
+"a dog sees the man",2,2,2,"(0, 2)",1
+"a dog sees the man",3,1,1,"(0, 4)",1
+"a dog likes the dog",0,4,4,"(3, 4)",1
+"a dog likes the dog",1,3,3,"(3, 4)",1
+"a dog likes the dog",2,2,2,"(0, 2)",1
+"a dog likes the dog",3,1,1,"(0, 4)",1
+"a dog runs a cat",0,4,4,"(0, 1)",1
+"a dog runs a cat",1,3,3,"(3, 4)",1
+"a dog runs a cat",2,2,2,"(0, 2)",1
+"a dog runs a cat",3,1,1,"(0, 4)",1
+"a cat chases",0,2,2,"(0, 1)",1
+"a cat chases",1,1,1,"(0, 2)",1
+"the woman likes a dog",0,4,4,"(3, 4)",1
+"the woman likes a dog",1,3,3,"(3, 4)",1
+"the woman likes a dog",2,2,2,"(0, 2)",1
+"the woman likes a dog",3,1,1,"(0, 4)",1
+"the dog sees a man",0,4,4,"(3, 4)",1
+"the dog sees a man",1,3,3,"(3, 4)",1
+"the dog sees a man",2,2,2,"(0, 2)",1
+"the dog sees a man",3,1,1,"(0, 4)",1
+"the man likes a dog",0,4,4,"(3, 4)",1
+"the man likes a dog",1,3,3,"(3, 4)",1
+"the man likes a dog",2,2,2,"(0, 2)",1
+"the man likes a dog",3,1,1,"(0, 4)",1
+"the cat likes the woman",0,4,4,"(3, 4)",1
+"the cat likes the woman",1,3,3,"(3, 4)",1
+"the cat likes the woman",2,2,2,"(0, 2)",1
+"the cat likes the woman",3,1,1,"(0, 4)",1
+"a man likes a woman",0,4,4,"(3, 4)",1
+"a man likes a woman",1,3,3,"(3, 4)",1
+"a man likes a woman",2,2,2,"(0, 2)",1
+"a man likes a woman",3,1,1,"(0, 4)",1
+"a dog runs the woman",0,4,4,"(3, 4)",1
+"a dog runs the woman",1,3,3,"(3, 4)",1
+"a dog runs the woman",2,2,2,"(0, 2)",1
+"a dog runs the woman",3,1,1,"(0, 4)",1
+"a dog sees the woman",0,4,4,"(3, 4)",1
+"a dog sees the woman",1,3,3,"(3, 4)",1
+"a dog sees the woman",2,2,2,"(0, 2)",1
+"a dog sees the woman",3,1,1,"(0, 4)",1
+"the man runs a man",0,4,4,"(3, 4)",1
+"the man runs a man",1,3,3,"(3, 4)",1
+"the man runs a man",2,2,2,"(2, 4)",0
+"the man runs a man",3,1,1,"(0, 4)",1
+"a dog runs the dog",0,4,4,"(3, 4)",1
+"a dog runs the dog",1,3,3,"(3, 4)",1
+"a dog runs the dog",2,2,2,"(0, 2)",1
+"a dog runs the dog",3,1,1,"(0, 4)",1
+"a woman chases",0,2,2,"(0, 1)",1
+"a woman chases",1,1,1,"(0, 2)",1
+"the cat likes the cat",0,4,4,"(3, 4)",1
+"the cat likes the cat",1,3,3,"(3, 4)",1
+"the cat likes the cat",2,2,2,"(0, 2)",1
+"the cat likes the cat",3,1,1,"(0, 4)",1
+"a woman sees the woman",0,4,4,"(3, 4)",1
+"a woman sees the woman",1,3,3,"(3, 4)",1
+"a woman sees the woman",2,2,2,"(0, 2)",1
+"a woman sees the woman",3,1,1,"(0, 4)",1
