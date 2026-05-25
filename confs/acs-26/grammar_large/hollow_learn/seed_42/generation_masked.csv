@@ -1,0 +1,31 @@
+idx,sentence,mask_pos,gold,gold_pos,filled,filled_pos,completed,exact,pos_ok
+0,"this book read this book",2,read,V,without,P,"this book without this book",0,0
+1,"this tall tall teacher liked that apple without this book",5,that,RelPro,the,Det,"this tall tall teacher liked the apple without this book",0,0
+2,"this teacher read with the blue friendly boy",4,the,Det,a,Det,"this teacher read with a blue friendly boy",0,1
+3,"the friendly blue book read near this curious blue robot",5,near,P,with,P,"the friendly blue book read with this curious blue robot",0,1
+4,"that friendly tall book liked near this boy",4,liked,V,carried,V,"that friendly tall book carried near this boy",0,1
+5,"that teacher saw a boy that saw this boy",4,boy,N,teacher,N,"that teacher saw a teacher that saw this boy",0,1
+6,"that apple saw near this curious tall boy",4,this,Det,that,RelPro,"that apple saw near that curious tall boy",0,0
+7,"this ancient curious friendly robot saw the teacher",4,robot,N,book,N,"this ancient curious friendly book saw the teacher",0,1
+8,"a ancient curious girl carried without a curious friendly robot",5,without,P,without,P,"a ancient curious girl carried without a curious friendly robot",1,1
+9,"a boy saw with a apple",3,with,P,without,P,"a boy saw without a apple",0,1
+10,"that girl chased that book",2,chased,V,read,V,"that girl read that book",0,1
+11,"the ancient ancient girl admired a book",3,girl,N,girl,N,"the ancient ancient girl admired a book",1,1
+12,"this ancient ancient friendly robot admired this book",4,robot,N,apple,N,"this ancient ancient friendly apple admired this book",0,1
+13,"a girl liked without that apple",3,without,P,near,P,"a girl liked near that apple",0,1
+14,"the boy chased with a tall friendly robot",4,a,Det,a,Det,"the boy chased with a tall friendly robot",1,1
+15,"a book liked this robot",2,liked,V,without,P,"a book without this robot",0,0
+16,"that blue blue teacher saw with this friendly tall girl",5,with,P,with,P,"that blue blue teacher saw with this friendly tall girl",1,1
+17,"that blue tall apple carried without that girl",4,carried,V,saw,V,"that blue tall apple saw without that girl",0,1
+18,"the ancient curious ancient book chased a curious tall boy",5,chased,V,with,P,"the ancient curious ancient book with a curious tall boy",0,0
+19,"this friendly curious girl carried this boy",3,girl,N,teacher,N,"this friendly curious teacher carried this boy",0,1
+20,"this ancient ancient teacher saw the ancient tall friendly robot",5,the,Det,a,Det,"this ancient ancient teacher saw a ancient tall friendly robot",0,1
+21,"this tall curious girl chased the teacher",3,girl,N,girl,N,"this tall curious girl chased the teacher",1,1
+22,"the ancient blue robot read that blue blue friendly book",5,that,RelPro,this,Det,"the ancient blue robot read this blue blue friendly book",0,0
+23,"that boy read a book who carried the girl",4,book,N,robot,N,"that boy read a robot who carried the girl",0,1
+24,"a robot liked that girl",2,liked,V,saw,V,"a robot saw that girl",0,1
+25,"a teacher admired without that ancient curious friendly teacher",4,that,RelPro,this,Det,"a teacher admired without this ancient curious friendly teacher",0,0
+26,"that ancient curious curious book chased a book",4,book,N,teacher,N,"that ancient curious curious teacher chased a book",0,1
+27,"the teacher liked this apple",2,liked,V,liked,V,"the teacher liked this apple",1,1
+28,"that robot liked near a ancient curious boy",4,a,Det,the,Det,"that robot liked near the ancient curious boy",0,1
+29,"the teacher admired this book",2,admired,V,liked,V,"the teacher liked this book",0,1

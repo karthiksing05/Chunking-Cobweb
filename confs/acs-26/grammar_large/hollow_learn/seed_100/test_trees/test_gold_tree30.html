@@ -1,0 +1,163 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Parse Tree (Multi-Hierarchy)</title>
+<style>
+body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+#tree-container { display: inline-block; }
+.link { fill: none; stroke: #9aa1a9; stroke-width: 1.5px; }
+.node-box { stroke: #444; fill: #fff; rx: 8; ry: 8; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.15)); }
+.node-fo table { border-collapse: collapse; font-size: 12px; margin: 4px 0; }
+.node-fo th, .node-fo td { border: 1px solid #888; padding: 2px 6px; }
+.node-fo th { background: #f3f5f7; font-weight: 600; }
+.section-header { font-weight: 700; font-size: 13px; color: #333; margin: 8px 0 4px 0; border-bottom: 1px solid #ccc; padding-bottom: 2px; }
+.side-by-side { display: flex; gap: 8px; align-items: flex-start; }
+.side-by-side > div { flex: 1; min-width: 0; }
+.sub-title { font-weight: 600; font-size: 11px; color: #555; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+<div id="tree-container"><div id="tree"></div></div>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script>
+const data = {"title": "ROOT", "content_rows": [], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [], "context_after_rows": [], "context_other_rows": [], "score_rows": [], "children": [{"title": "bb6e3f7584", "content_rows": [], "content_left_rows": [{"attr": "Left", "val": "leaf-3236856412", "count": "1.00"}, {"attr": "", "val": "leaf-3236852125", "count": "1.00"}, {"attr": "", "val": "leaf-3236852127", "count": "1.00"}, {"attr": "", "val": "leaf-3236908937", "count": "1.00"}, {"attr": "", "val": "leaf-3236967955", "count": "1.00"}, {"attr": "", "val": "leaf-3236968147", "count": "1.00"}, {"attr": "", "val": "leaf-3236968236", "count": "1.00"}], "content_right_rows": [{"attr": "Right", "val": "leaf-3236860973", "count": "1.00"}, {"attr": "", "val": "leaf-3236839127", "count": "1.00"}, {"attr": "", "val": "leaf-3236860591", "count": "1.00"}, {"attr": "", "val": "leaf-3236882003", "count": "1.00"}, {"attr": "", "val": "leaf-3236941708", "count": "1.00"}, {"attr": "", "val": "leaf-3236996888", "count": "1.00"}, {"attr": "", "val": "leaf-3236992264", "count": "1.00"}], "context_before_rows": [{"attr": "CtxBefore0", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.00"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.00"}], "context_other_rows": [{"attr": "Complexity", "val": "C6", "count": "1.00"}], "score_rows": [], "children": [{"title": "81c94a6f04", "content_rows": [], "content_left_rows": [{"attr": "Left", "val": "leaf-3236860592", "count": "1.00"}, {"attr": "", "val": "leaf-3236851699", "count": "1.00"}, {"attr": "", "val": "leaf-3236852006", "count": "1.00"}, {"attr": "", "val": "leaf-3236936049", "count": "1.00"}, {"attr": "", "val": "leaf-3236835034", "count": "1.00"}, {"attr": "", "val": "leaf-3236941361", "count": "1.00"}, {"attr": "", "val": "leaf-3236941467", "count": "1.00"}], "content_right_rows": [{"attr": "Right", "val": "leaf-3236852127", "count": "1.00"}, {"attr": "", "val": "leaf-3236860843", "count": "1.00"}, {"attr": "", "val": "leaf-3236839372", "count": "1.00"}, {"attr": "", "val": "leaf-3236941467", "count": "1.00"}, {"attr": "", "val": "leaf-3236951934", "count": "1.00"}, {"attr": "", "val": "leaf-3236968147", "count": "1.00"}, {"attr": "", "val": "leaf-3236992264", "count": "1.00"}], "context_before_rows": [{"attr": "CtxBefore0", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.00"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "near", "count": "0.50"}, {"attr": "CtxAfter1", "val": "this", "count": "0.25"}, {"attr": "CtxAfter2", "val": "curious", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C5", "count": "1.00"}], "score_rows": [], "children": [{"title": "56c2e30247", "content_rows": [], "content_left_rows": [{"attr": "Left", "val": "leaf-3236835682", "count": "1.00"}, {"attr": "", "val": "leaf-3236839127", "count": "1.00"}, {"attr": "", "val": "leaf-3236908937", "count": "1.00"}, {"attr": "", "val": "leaf-3236890637", "count": "1.00"}, {"attr": "", "val": "leaf-3236968236", "count": "1.00"}, {"attr": "", "val": "leaf-3236992351", "count": "1.00"}, {"attr": "", "val": "leaf-3237011084", "count": "1.00"}], "content_right_rows": [{"attr": "Right", "val": "leaf-3236860592", "count": "1.00"}, {"attr": "", "val": "leaf-3236908937", "count": "1.00"}, {"attr": "", "val": "leaf-3236936049", "count": "1.00"}, {"attr": "", "val": "leaf-3236941467", "count": "1.00"}, {"attr": "", "val": "leaf-3236968236", "count": "1.00"}, {"attr": "", "val": "leaf-3236973122", "count": "1.00"}, {"attr": "", "val": "leaf-3237011084", "count": "1.00"}], "context_before_rows": [{"attr": "CtxBefore0", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.00"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "read", "count": "0.50"}, {"attr": "CtxAfter1", "val": "near", "count": "0.25"}, {"attr": "CtxAfter2", "val": "this", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C4", "count": "1.00"}], "score_rows": [], "children": [{"title": "abb11c5f61", "content_rows": [{"attr": "Word", "val": "the", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "EMPTYNULL", "count": "0.50"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.25"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "friendly", "count": "0.50"}, {"attr": "CtxAfter1", "val": "blue", "count": "0.25"}, {"attr": "CtxAfter2", "val": "book", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "the", "count": "1.00"}], "score_rows": [], "children": []}, {"title": "9e88f48545", "content_rows": [], "content_left_rows": [{"attr": "Left", "val": "leaf-3236856772", "count": "1.00"}, {"attr": "", "val": "leaf-3236908554", "count": "1.00"}, {"attr": "", "val": "leaf-3236890637", "count": "1.00"}, {"attr": "", "val": "leaf-3236895603", "count": "1.00"}, {"attr": "", "val": "leaf-3236968236", "count": "1.00"}, {"attr": "", "val": "leaf-3236903988", "count": "1.00"}, {"attr": "", "val": "leaf-3237011084", "count": "1.00"}], "content_right_rows": [{"attr": "Right", "val": "leaf-3236856412", "count": "1.00"}, {"attr": "", "val": "leaf-3236864678", "count": "1.00"}, {"attr": "", "val": "leaf-3236908937", "count": "1.00"}, {"attr": "", "val": "leaf-3236835034", "count": "1.00"}, {"attr": "", "val": "leaf-3236864587", "count": "1.00"}, {"attr": "", "val": "leaf-3236973122", "count": "1.00"}, {"attr": "", "val": "leaf-3236992264", "count": "1.00"}], "context_before_rows": [{"attr": "CtxBefore0", "val": "the", "count": "0.50"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.00"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "read", "count": "0.50"}, {"attr": "CtxAfter1", "val": "near", "count": "0.25"}, {"attr": "CtxAfter2", "val": "this", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C3", "count": "1.00"}], "score_rows": [], "children": [{"title": "ca2a030857", "content_rows": [], "content_left_rows": [{"attr": "Left", "val": "leaf-3236856772", "count": "1.00"}, {"attr": "", "val": "leaf-3236848078", "count": "1.00"}, {"attr": "", "val": "leaf-3236864756", "count": "1.00"}, {"attr": "", "val": "leaf-3236908554", "count": "1.00"}, {"attr": "", "val": "leaf-3236922782", "count": "1.00"}, {"attr": "", "val": "leaf-3236951934", "count": "1.00"}, {"attr": "", "val": "leaf-3236992351", "count": "1.00"}], "content_right_rows": [{"attr": "Right", "val": "leaf-3236856772", "count": "1.00"}, {"attr": "", "val": "leaf-3236861206", "count": "1.00"}, {"attr": "", "val": "leaf-3236856344", "count": "1.00"}, {"attr": "", "val": "leaf-3236861208", "count": "1.00"}, {"attr": "", "val": "leaf-3236908554", "count": "1.00"}, {"attr": "", "val": "leaf-3236992351", "count": "1.00"}, {"attr": "", "val": "leaf-3237011084", "count": "1.00"}], "context_before_rows": [{"attr": "CtxBefore0", "val": "the", "count": "0.50"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.00"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "book", "count": "0.50"}, {"attr": "CtxAfter1", "val": "read", "count": "0.25"}, {"attr": "CtxAfter2", "val": "near", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C2", "count": "1.00"}], "score_rows": [], "children": [{"title": "a3ed4615c8", "content_rows": [{"attr": "Word", "val": "friendly", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "the", "count": "0.50"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.25"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "blue", "count": "0.50"}, {"attr": "CtxAfter1", "val": "book", "count": "0.25"}, {"attr": "CtxAfter2", "val": "read", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "friendly", "count": "1.00"}], "score_rows": [], "children": []}, {"title": "22ed6f505e", "content_rows": [{"attr": "Word", "val": "blue", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "friendly", "count": "0.50"}, {"attr": "CtxBefore1", "val": "the", "count": "0.25"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "book", "count": "0.50"}, {"attr": "CtxAfter1", "val": "read", "count": "0.25"}, {"attr": "CtxAfter2", "val": "near", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "blue", "count": "1.00"}], "score_rows": [], "children": []}]}, {"title": "210d1909d5", "content_rows": [{"attr": "Word", "val": "book", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "blue", "count": "0.50"}, {"attr": "CtxBefore1", "val": "friendly", "count": "0.25"}, {"attr": "CtxBefore2", "val": "the", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "read", "count": "0.50"}, {"attr": "CtxAfter1", "val": "near", "count": "0.25"}, {"attr": "CtxAfter2", "val": "this", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "book", "count": "1.00"}], "score_rows": [], "children": []}]}]}, {"title": "2dd9a41746", "content_rows": [{"attr": "Word", "val": "read", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "book", "count": "0.50"}, {"attr": "CtxBefore1", "val": "blue", "count": "0.25"}, {"attr": "CtxBefore2", "val": "friendly", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "near", "count": "0.50"}, {"attr": "CtxAfter1", "val": "this", "count": "0.25"}, {"attr": "CtxAfter2", "val": "curious", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "read", "count": "1.00"}], "score_rows": [], "children": []}]}, {"title": "e46bc345d1", "content_rows": [], "content_left_rows": [{"attr": "Left", "val": "leaf-3236860973", "count": "1.00"}, {"attr": "", "val": "leaf-3236860547", "count": "1.00"}, {"attr": "", "val": "leaf-3236908937", "count": "1.00"}, {"attr": "", "val": "leaf-3236951934", "count": "1.00"}, {"attr": "", "val": "leaf-3236968331", "count": "1.00"}, {"attr": "", "val": "leaf-3236977863", "count": "1.00"}, {"attr": "", "val": "leaf-3236987273", "count": "1.00"}], "content_right_rows": [{"attr": "Right", "val": "leaf-3236839127", "count": "1.00"}, {"attr": "", "val": "leaf-3236895603", "count": "1.00"}, {"attr": "", "val": "leaf-3236962845", "count": "1.00"}, {"attr": "", "val": "leaf-3236903988", "count": "1.00"}, {"attr": "", "val": "leaf-3236987601", "count": "1.00"}, {"attr": "", "val": "leaf-3236996498", "count": "1.00"}, {"attr": "", "val": "leaf-3236987031", "count": "1.00"}], "context_before_rows": [{"attr": "CtxBefore0", "val": "read", "count": "0.50"}, {"attr": "CtxBefore1", "val": "book", "count": "0.25"}, {"attr": "CtxBefore2", "val": "blue", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.00"}], "context_other_rows": [{"attr": "Complexity", "val": "C5", "count": "1.00"}], "score_rows": [], "children": [{"title": "6d75a24d6e", "content_rows": [{"attr": "Word", "val": "near", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "read", "count": "0.50"}, {"attr": "CtxBefore1", "val": "book", "count": "0.25"}, {"attr": "CtxBefore2", "val": "blue", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "this", "count": "0.50"}, {"attr": "CtxAfter1", "val": "curious", "count": "0.25"}, {"attr": "CtxAfter2", "val": "blue", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "near", "count": "1.00"}], "score_rows": [], "children": []}, {"title": "948a335c46", "content_rows": [], "content_left_rows": [{"attr": "Left", "val": "leaf-3236839127", "count": "1.00"}, {"attr": "", "val": "leaf-3236860973", "count": "1.00"}, {"attr": "", "val": "leaf-3236908937", "count": "1.00"}, {"attr": "", "val": "leaf-3236951934", "count": "1.00"}, {"attr": "", "val": "leaf-3236968331", "count": "1.00"}, {"attr": "", "val": "leaf-3236973122", "count": "1.00"}, {"attr": "", "val": "leaf-3236992264", "count": "1.00"}], "content_right_rows": [{"attr": "Right", "val": "leaf-3236860593", "count": "1.00"}, {"attr": "", "val": "leaf-3236848078", "count": "1.00"}, {"attr": "", "val": "leaf-3236852125", "count": "1.00"}, {"attr": "", "val": "leaf-3236835695", "count": "1.00"}, {"attr": "", "val": "leaf-3236860229", "count": "1.00"}, {"attr": "", "val": "leaf-3236856210", "count": "1.00"}, {"attr": "", "val": "leaf-3236987031", "count": "1.00"}], "context_before_rows": [{"attr": "CtxBefore0", "val": "near", "count": "0.50"}, {"attr": "CtxBefore1", "val": "read", "count": "0.25"}, {"attr": "CtxBefore2", "val": "book", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.00"}], "context_other_rows": [{"attr": "Complexity", "val": "C4", "count": "1.00"}], "score_rows": [], "children": [{"title": "04159d8af3", "content_rows": [{"attr": "Word", "val": "this", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "near", "count": "0.50"}, {"attr": "CtxBefore1", "val": "read", "count": "0.25"}, {"attr": "CtxBefore2", "val": "book", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "curious", "count": "0.50"}, {"attr": "CtxAfter1", "val": "blue", "count": "0.25"}, {"attr": "CtxAfter2", "val": "robot", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "this", "count": "1.00"}], "score_rows": [], "children": []}, {"title": "c658a98de3", "content_rows": [], "content_left_rows": [{"attr": "Left", "val": "leaf-3236835695", "count": "1.00"}, {"attr": "", "val": "leaf-3236856210", "count": "1.00"}, {"attr": "", "val": "leaf-3236908554", "count": "1.00"}, {"attr": "", "val": "leaf-3236962845", "count": "1.00"}, {"attr": "", "val": "leaf-3236987031", "count": "1.00"}, {"attr": "", "val": "leaf-3237010995", "count": "1.00"}, {"attr": "", "val": "leaf-3237011159", "count": "1.00"}], "content_right_rows": [{"attr": "Right", "val": "leaf-3236843712", "count": "1.00"}, {"attr": "", "val": "leaf-3236882003", "count": "1.00"}, {"attr": "", "val": "leaf-3236899924", "count": "1.00"}, {"attr": "", "val": "leaf-3236908554", "count": "1.00"}, {"attr": "", "val": "leaf-3236908718", "count": "1.00"}, {"attr": "", "val": "leaf-3236992101", "count": "1.00"}, {"attr": "", "val": "leaf-3236996888", "count": "1.00"}], "context_before_rows": [{"attr": "CtxBefore0", "val": "this", "count": "0.50"}, {"attr": "CtxBefore1", "val": "near", "count": "0.25"}, {"attr": "CtxBefore2", "val": "read", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.00"}], "context_other_rows": [{"attr": "Complexity", "val": "C3", "count": "1.00"}], "score_rows": [], "children": [{"title": "563dfc55af", "content_rows": [], "content_left_rows": [{"attr": "Left", "val": "leaf-3236860835", "count": "1.00"}, {"attr": "", "val": "leaf-3236848078", "count": "1.00"}, {"attr": "", "val": "leaf-3236860975", "count": "1.00"}, {"attr": "", "val": "leaf-3236856831", "count": "1.00"}, {"attr": "", "val": "leaf-3236908554", "count": "1.00"}, {"attr": "", "val": "leaf-3236973122", "count": "1.00"}, {"attr": "", "val": "leaf-3236992351", "count": "1.00"}], "content_right_rows": [{"attr": "Right", "val": "leaf-3236861206", "count": "1.00"}, {"attr": "", "val": "leaf-3236860976", "count": "1.00"}, {"attr": "", "val": "leaf-3236843712", "count": "1.00"}, {"attr": "", "val": "leaf-3236908554", "count": "1.00"}, {"attr": "", "val": "leaf-3236973122", "count": "1.00"}, {"attr": "", "val": "leaf-3236992351", "count": "1.00"}, {"attr": "", "val": "leaf-3237010995", "count": "1.00"}], "context_before_rows": [{"attr": "CtxBefore0", "val": "this", "count": "0.50"}, {"attr": "CtxBefore1", "val": "near", "count": "0.25"}, {"attr": "CtxBefore2", "val": "read", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "robot", "count": "0.50"}, {"attr": "CtxAfter1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.00"}], "context_other_rows": [{"attr": "Complexity", "val": "C2", "count": "1.00"}], "score_rows": [], "children": [{"title": "b1779e01e8", "content_rows": [{"attr": "Word", "val": "curious", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "this", "count": "0.50"}, {"attr": "CtxBefore1", "val": "near", "count": "0.25"}, {"attr": "CtxBefore2", "val": "read", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "blue", "count": "0.50"}, {"attr": "CtxAfter1", "val": "robot", "count": "0.25"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "curious", "count": "1.00"}], "score_rows": [], "children": []}, {"title": "c75144c83b", "content_rows": [{"attr": "Word", "val": "blue", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "curious", "count": "0.50"}, {"attr": "CtxBefore1", "val": "this", "count": "0.25"}, {"attr": "CtxBefore2", "val": "near", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "robot", "count": "0.50"}, {"attr": "CtxAfter1", "val": "EMPTYNULL", "count": "0.25"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "blue", "count": "1.00"}], "score_rows": [], "children": []}]}, {"title": "df7c5c8168", "content_rows": [{"attr": "Word", "val": "robot", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "blue", "count": "0.50"}, {"attr": "CtxBefore1", "val": "curious", "count": "0.25"}, {"attr": "CtxBefore2", "val": "this", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "EMPTYNULL", "count": "0.50"}, {"attr": "CtxAfter1", "val": "EMPTYNULL", "count": "0.25"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "robot", "count": "1.00"}], "score_rows": [], "children": []}]}]}]}]}]};
+const nodeW=600, nodeH=130, hGap=80, vGap=150;
+
+const root = d3.hierarchy(data);
+const layout = d3.tree()
+  .nodeSize([nodeW+hGap, nodeH+vGap])
+  .separation((a,b) => a.parent===b.parent ? 1.0 : 1.4);
+layout(root);
+
+const svg = d3.select("#tree").append("svg").attr("width",1).attr("height",1);
+const g = svg.append("g");
+
+const linkGen = d3.linkVertical().x(d=>d.x).y(d=>d.y);
+const link = g.selectAll("path.link").data(root.links()).join("path")
+  .attr("class","link").attr("d",linkGen);
+
+const node = g.selectAll("g.node").data(root.descendants()).join("g")
+  .attr("transform", d=>`translate(${d.x},${d.y})`);
+
+node.append("rect").attr("class","node-box")
+  .attr("x",-nodeW/2).attr("y",0).attr("width",nodeW).attr("height",nodeH);
+
+node.append("foreignObject").attr("class","node-fo")
+  .attr("x",-nodeW/2+6).attr("y",6).attr("width",nodeW-12).attr("height",1000)
+  .html(d => nodeHTML(d.data));
+
+// measure actual content heights
+node.selectAll("foreignObject").each(function(d){
+  const fo=d3.select(this), div=fo.select("div").node();
+  const h=div.getBoundingClientRect().height+12;
+  d._nodeHeight = h;
+  fo.attr("height",h);
+  d3.select(this.parentNode).select("rect").attr("height",h+12);
+});
+
+// compute per-depth max height and reposition rows
+const depthMaxHeight = new Map();
+root.each(d => {
+  const h = d._nodeHeight || nodeH;
+  const existing = depthMaxHeight.get(d.depth) || 0;
+  if (h > existing) depthMaxHeight.set(d.depth, h);
+});
+const maxDepth = Math.max(...Array.from(depthMaxHeight.keys()));
+const depthOffsets = [];
+for (let i = 0; i <= maxDepth; i++) {
+  const prev = i === 0 ? 0 : depthOffsets[i-1] + (depthMaxHeight.get(i-1)||nodeH) + vGap;
+  depthOffsets.push(prev);
+}
+root.each(d => { d.y = depthOffsets[d.depth]; });
+node.attr("transform", d => `translate(${d.x},${d.y})`);
+link.attr("d", linkGen);
+
+// fit viewBox
+let x0=Infinity, x1=-Infinity, y0=Infinity, y1=-Infinity;
+root.each(d => {
+  const halfW = nodeW/2, h = d._nodeHeight || nodeH;
+  if (d.x-halfW-30 < x0) x0 = d.x-halfW-30;
+  if (d.x+halfW+30 > x1) x1 = d.x+halfW+30;
+  if (d.y-30 < y0) y0 = d.y-30;
+  if (d.y+h+30 > y1) y1 = d.y+h+30;
+});
+const width=x1-x0, height=y1-y0;
+svg.attr("width",width).attr("height",height)
+  .attr("viewBox",[x0,y0,width,height].join(" "));
+
+function threeColTable(title, rows) {
+  if (!rows || rows.length === 0) return "";
+  const body = rows.map(r =>
+    `<tr><td>${r.attr}</td><td>${r.val}</td><td>${r.count}</td></tr>`
+  ).join("");
+  return `<div class="sub-title">${title}</div>
+    <table>
+      <tr><th>Attr</th><th>Value</th><th>Count</th></tr>
+      ${body}
+    </table>`;
+}
+
+function nodeHTML(d){
+  // --- Content section ---
+  let contentHTML = "";
+  const hasLeft = d.content_left_rows && d.content_left_rows.length > 0;
+  const hasRight = d.content_right_rows && d.content_right_rows.length > 0;
+  const hasSingle = d.content_rows && d.content_rows.length > 0;
+
+  if (hasLeft || hasRight) {
+    // Composite node: left and right side by side
+    contentHTML = `<div class="section-header">Content</div>
+      <div class="side-by-side">
+        <div>${threeColTable("Left", d.content_left_rows)}</div>
+        <div>${threeColTable("Right", d.content_right_rows)}</div>
+      </div>`;
+  } else if (hasSingle) {
+    // Primitive node: single content table
+    contentHTML = `<div class="section-header">Content</div>${threeColTable("", d.content_rows)}`;
+  }
+
+  // --- Context section ---
+  let contextHTML = "";
+  const hasBefore = d.context_before_rows && d.context_before_rows.length > 0;
+  const hasAfter = d.context_after_rows && d.context_after_rows.length > 0;
+  const hasOther = d.context_other_rows && d.context_other_rows.length > 0;
+
+  if (hasBefore || hasAfter || hasOther) {
+    let ctxInner = "";
+    if (hasBefore || hasAfter) {
+      ctxInner += `<div class="side-by-side">
+        <div>${threeColTable("Before", d.context_before_rows)}</div>
+        <div>${threeColTable("After", d.context_after_rows)}</div>
+      </div>`;
+    }
+    if (hasOther) {
+      ctxInner += threeColTable("Other", d.context_other_rows);
+    }
+    contextHTML = `<div class="section-header">Context</div>${ctxInner}`;
+  }
+
+  // --- Score section ---
+  let scoreHTML = "";
+  const hasScores = d.score_rows && d.score_rows.length > 0;
+  if (hasScores) {
+    const scoreBody = d.score_rows.map(r =>
+      `<tr><td>${r.attr}</td><td style="font-weight:600">${r.val}</td><td>${r.count}</td></tr>`
+    ).join("");
+    scoreHTML = `<div class="section-header" style="color:#2b6cb0;">Scores</div>
+      <table>
+        <tr><th>Metric</th><th>Value</th><th></th></tr>
+        ${scoreBody}
+      </table>`;
+  }
+
+  return `<div class="node-fo">
+    <table><tr><th colspan="3">${d.title}</th></tr></table>
+    ${contentHTML}
+    ${contextHTML}
+    ${scoreHTML}
+  </div>`;
+}
+</script>
+</body>
+</html>

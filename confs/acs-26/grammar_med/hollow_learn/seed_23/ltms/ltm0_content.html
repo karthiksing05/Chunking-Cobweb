@@ -1,0 +1,163 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Cobweb Tree</title>
+<style>
+	body { margin: 0; font-family: system-ui, sans-serif; }
+	.link { fill: none; stroke: #9aa1a9; stroke-width: 1.5px; }
+	.node-box { stroke: #444; fill: #fff; rx: 8; ry: 8; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.15)); }
+	.node-fo table { border-collapse: collapse; font-size: 12px; margin: 4px 0; }
+	.node-fo th, .node-fo td { border: 1px solid #888; padding: 2px 6px; }
+	.node-fo th { background: #f3f5f7; font-weight: 600; }
+	.section-header { font-weight: 700; font-size: 13px; color: #333; margin: 8px 0 4px 0; border-bottom: 1px solid #ccc; padding-bottom: 2px; }
+	.side-by-side { display: flex; gap: 8px; align-items: flex-start; }
+	.side-by-side > div { flex: 1; min-width: 0; }
+	.sub-title { font-weight: 600; font-size: 11px; color: #555; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+<div id="tree"></div>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script>
+const data = {"title": "CONCEPT-3235242206023500_125822", "rows": [{"attr": "Left", "val": "3235223256\u2026\u21923235223247\u2026", "count": 1.0}, {"attr": "", "val": "3235242022\u2026\u21923235230890\u2026", "count": 1.0}, {"attr": "", "val": "3235236121\u2026\u21923235223271\u2026", "count": 1.0}, {"attr": "", "val": "3235228405\u2026\u21923235228404\u2026", "count": 1.0}, {"attr": "", "val": "3235223307\u2026\u21923235223307\u2026", "count": 1.0}, {"attr": "", "val": "3235242155\u2026\u21923235223292\u2026", "count": 1.0}, {"attr": "", "val": "3235242023\u2026\u21923235238817\u2026", "count": 1.0}, {"attr": "", "val": "...", "count": "..."}, {"attr": "Right", "val": "3235223256\u2026\u21923235223240\u2026", "count": 2.0}, {"attr": "", "val": "3235238846\u2026\u21923235225667\u2026", "count": 2.0}, {"attr": "", "val": "3235242167\u2026\u21923235225608\u2026", "count": 1.0}, {"attr": "", "val": "3235233558\u2026\u21923235225726\u2026", "count": 1.0}, {"attr": "", "val": "3235242154\u2026\u21923235223299\u2026", "count": 1.0}, {"attr": "", "val": "3235242195\u2026\u21923235228292\u2026", "count": 1.0}, {"attr": "", "val": "3235242168\u2026\u21923235225645\u2026", "count": 1.0}, {"attr": "", "val": "...", "count": "..."}, {"attr": "None", "val": "C1", "count": 2.0}, {"attr": "", "val": "C2", "count": 1.0}, {"attr": "", "val": "C3", "count": 1.0}, {"attr": "None", "val": "C1", "count": 3.0}, {"attr": "", "val": "C2", "count": 1.0}], "left_rows": [{"attr": "Left", "val": "3235223256\u2026\u21923235223247\u2026", "count": 1.0}, {"attr": "", "val": "3235242022\u2026\u21923235230890\u2026", "count": 1.0}, {"attr": "", "val": "3235236121\u2026\u21923235223271\u2026", "count": 1.0}, {"attr": "", "val": "3235228405\u2026\u21923235228404\u2026", "count": 1.0}, {"attr": "", "val": "3235223307\u2026\u21923235223307\u2026", "count": 1.0}, {"attr": "", "val": "3235242155\u2026\u21923235223292\u2026", "count": 1.0}, {"attr": "", "val": "3235242023\u2026\u21923235238817\u2026", "count": 1.0}, {"attr": "", "val": "...", "count": "..."}], "right_rows": [{"attr": "Right", "val": "3235223256\u2026\u21923235223240\u2026", "count": 2.0}, {"attr": "", "val": "3235238846\u2026\u21923235225667\u2026", "count": 2.0}, {"attr": "", "val": "3235242167\u2026\u21923235225608\u2026", "count": 1.0}, {"attr": "", "val": "3235233558\u2026\u21923235225726\u2026", "count": 1.0}, {"attr": "", "val": "3235242154\u2026\u21923235223299\u2026", "count": 1.0}, {"attr": "", "val": "3235242195\u2026\u21923235228292\u2026", "count": 1.0}, {"attr": "", "val": "3235242168\u2026\u21923235225645\u2026", "count": 1.0}, {"attr": "", "val": "...", "count": "..."}], "other_rows": [{"attr": "None", "val": "C1", "count": 2.0}, {"attr": "", "val": "C2", "count": 1.0}, {"attr": "", "val": "C3", "count": 1.0}, {"attr": "None", "val": "C1", "count": 3.0}, {"attr": "", "val": "C2", "count": 1.0}], "children": [{"title": "CONCEPT-3235221730009708_113465", "rows": [{"attr": "Left", "val": "3235242039\u2026\u21923235238909\u2026", "count": 1.0}, {"attr": "", "val": "3235241989\u2026\u21923235230865\u2026", "count": 1.0}, {"attr": "", "val": "3235242194\u2026\u21923235233611\u2026", "count": 1.0}, {"attr": "", "val": "3235242134\u2026\u21923235223307\u2026", "count": 1.0}, {"attr": "", "val": "3235233655\u2026\u21923235228247\u2026", "count": 1.0}, {"attr": "", "val": "3235225666\u2026\u21923235223271\u2026", "count": 1.0}, {"attr": "", "val": "3235233639\u2026\u21923235228239\u2026", "count": 1.0}, {"attr": "Right", "val": "3235242155\u2026\u21923235223292\u2026", "count": 1.0}, {"attr": "", "val": "3235236236\u2026\u21923235225705\u2026", "count": 1.0}, {"attr": "", "val": "3235242168\u2026\u21923235228445\u2026", "count": 1.0}, {"attr": "", "val": "3235236184\u2026\u21923235223267\u2026", "count": 1.0}, {"attr": "", "val": "3235242023\u2026\u21923235238817\u2026", "count": 1.0}, {"attr": "", "val": "3235238771\u2026\u21923235228374\u2026", "count": 1.0}, {"attr": "", "val": "3235242168\u2026\u21923235225645\u2026", "count": 1.0}, {"attr": "None", "val": "C3", "count": 1.0}, {"attr": "None", "val": "C2", "count": 1.0}], "left_rows": [{"attr": "Left", "val": "3235242039\u2026\u21923235238909\u2026", "count": 1.0}, {"attr": "", "val": "3235241989\u2026\u21923235230865\u2026", "count": 1.0}, {"attr": "", "val": "3235242194\u2026\u21923235233611\u2026", "count": 1.0}, {"attr": "", "val": "3235242134\u2026\u21923235223307\u2026", "count": 1.0}, {"attr": "", "val": "3235233655\u2026\u21923235228247\u2026", "count": 1.0}, {"attr": "", "val": "3235225666\u2026\u21923235223271\u2026", "count": 1.0}, {"attr": "", "val": "3235233639\u2026\u21923235228239\u2026", "count": 1.0}], "right_rows": [{"attr": "Right", "val": "3235242155\u2026\u21923235223292\u2026", "count": 1.0}, {"attr": "", "val": "3235236236\u2026\u21923235225705\u2026", "count": 1.0}, {"attr": "", "val": "3235242168\u2026\u21923235228445\u2026", "count": 1.0}, {"attr": "", "val": "3235236184\u2026\u21923235223267\u2026", "count": 1.0}, {"attr": "", "val": "3235242023\u2026\u21923235238817\u2026", "count": 1.0}, {"attr": "", "val": "3235238771\u2026\u21923235228374\u2026", "count": 1.0}, {"attr": "", "val": "3235242168\u2026\u21923235225645\u2026", "count": 1.0}], "other_rows": [{"attr": "None", "val": "C3", "count": 1.0}, {"attr": "None", "val": "C2", "count": 1.0}], "children": []}, {"title": "CONCEPT-3235242206027250_125823", "rows": [{"attr": "Left", "val": "3235242168\u2026\u21923235225645\u2026", "count": 1.0}, {"attr": "", "val": "3235242167\u2026\u21923235225608\u2026", "count": 1.0}, {"attr": "", "val": "3235242154\u2026\u21923235223299\u2026", "count": 1.0}, {"attr": "", "val": "3235233585\u2026\u21923235228258\u2026", "count": 1.0}, {"attr": "", "val": "3235233558\u2026\u21923235225726\u2026", "count": 1.0}, {"attr": "", "val": "3235223256\u2026\u21923235223240\u2026", "count": 1.0}, {"attr": "", "val": "3235242124\u2026\u21923235228393\u2026", "count": 1.0}, {"attr": "Right", "val": "3235242039\u2026\u21923235238909\u2026", "count": 1.0}, {"attr": "", "val": "3235242134\u2026\u21923235223307\u2026", "count": 1.0}, {"attr": "", "val": "3235242194\u2026\u21923235233611\u2026", "count": 1.0}, {"attr": "", "val": "3235233655\u2026\u21923235228247\u2026", "count": 1.0}, {"attr": "", "val": "3235236258\u2026\u21923235223283\u2026", "count": 1.0}, {"attr": "", "val": "3235242052\u2026\u21923235223275\u2026", "count": 1.0}, {"attr": "", "val": "3235223311\u2026\u21923235223263\u2026", "count": 1.0}, {"attr": "None", "val": "C2", "count": 1.0}, {"attr": "None", "val": "C1", "count": 1.0}], "left_rows": [{"attr": "Left", "val": "3235242168\u2026\u21923235225645\u2026", "count": 1.0}, {"attr": "", "val": "3235242167\u2026\u21923235225608\u2026", "count": 1.0}, {"attr": "", "val": "3235242154\u2026\u21923235223299\u2026", "count": 1.0}, {"attr": "", "val": "3235233585\u2026\u21923235228258\u2026", "count": 1.0}, {"attr": "", "val": "3235233558\u2026\u21923235225726\u2026", "count": 1.0}, {"attr": "", "val": "3235223256\u2026\u21923235223240\u2026", "count": 1.0}, {"attr": "", "val": "3235242124\u2026\u21923235228393\u2026", "count": 1.0}], "right_rows": [{"attr": "Right", "val": "3235242039\u2026\u21923235238909\u2026", "count": 1.0}, {"attr": "", "val": "3235242134\u2026\u21923235223307\u2026", "count": 1.0}, {"attr": "", "val": "3235242194\u2026\u21923235233611\u2026", "count": 1.0}, {"attr": "", "val": "3235233655\u2026\u21923235228247\u2026", "count": 1.0}, {"attr": "", "val": "3235236258\u2026\u21923235223283\u2026", "count": 1.0}, {"attr": "", "val": "3235242052\u2026\u21923235223275\u2026", "count": 1.0}, {"attr": "", "val": "3235223311\u2026\u21923235223263\u2026", "count": 1.0}], "other_rows": [{"attr": "None", "val": "C2", "count": 1.0}, {"attr": "None", "val": "C1", "count": 1.0}], "children": []}, {"title": "CONCEPT-3235242206193000_125827", "rows": [{"attr": "Left", "val": "3235242022\u2026\u21923235230890\u2026", "count": 1.0}, {"attr": "", "val": "3235236121\u2026\u21923235223271\u2026", "count": 1.0}, {"attr": "", "val": "3235228405\u2026\u21923235228404\u2026", "count": 1.0}, {"attr": "", "val": "3235223307\u2026\u21923235223307\u2026", "count": 1.0}, {"attr": "", "val": "3235242039\u2026\u21923235228382\u2026", "count": 1.0}, {"attr": "", "val": "3235242168\u2026\u21923235228445\u2026", "count": 1.0}, {"attr": "", "val": "3235236184\u2026\u21923235223267\u2026", "count": 1.0}, {"attr": "", "val": "...", "count": "..."}, {"attr": "Right", "val": "3235223256\u2026\u21923235223240\u2026", "count": 2.0}, {"attr": "", "val": "3235238846\u2026\u21923235225667\u2026", "count": 2.0}, {"attr": "", "val": "3235242167\u2026\u21923235225608\u2026", "count": 1.0}, {"attr": "", "val": "3235233558\u2026\u21923235225726\u2026", "count": 1.0}, {"attr": "", "val": "3235233585\u2026\u21923235228258\u2026", "count": 1.0}, {"attr": "", "val": "3235236132\u2026\u21923235225608\u2026", "count": 1.0}, {"attr": "", "val": "3235242195\u2026\u21923235228292\u2026", "count": 1.0}, {"attr": "", "val": "...", "count": "..."}, {"attr": "None", "val": "C1", "count": 2.0}, {"attr": "None", "val": "C1", "count": 2.0}], "left_rows": [{"attr": "Left", "val": "3235242022\u2026\u21923235230890\u2026", "count": 1.0}, {"attr": "", "val": "3235236121\u2026\u21923235223271\u2026", "count": 1.0}, {"attr": "", "val": "3235228405\u2026\u21923235228404\u2026", "count": 1.0}, {"attr": "", "val": "3235223307\u2026\u21923235223307\u2026", "count": 1.0}, {"attr": "", "val": "3235242039\u2026\u21923235228382\u2026", "count": 1.0}, {"attr": "", "val": "3235242168\u2026\u21923235228445\u2026", "count": 1.0}, {"attr": "", "val": "3235236184\u2026\u21923235223267\u2026", "count": 1.0}, {"attr": "", "val": "...", "count": "..."}], "right_rows": [{"attr": "Right", "val": "3235223256\u2026\u21923235223240\u2026", "count": 2.0}, {"attr": "", "val": "3235238846\u2026\u21923235225667\u2026", "count": 2.0}, {"attr": "", "val": "3235242167\u2026\u21923235225608\u2026", "count": 1.0}, {"attr": "", "val": "3235233558\u2026\u21923235225726\u2026", "count": 1.0}, {"attr": "", "val": "3235233585\u2026\u21923235228258\u2026", "count": 1.0}, {"attr": "", "val": "3235236132\u2026\u21923235225608\u2026", "count": 1.0}, {"attr": "", "val": "3235242195\u2026\u21923235228292\u2026", "count": 1.0}, {"attr": "", "val": "...", "count": "..."}], "other_rows": [{"attr": "None", "val": "C1", "count": 2.0}, {"attr": "None", "val": "C1", "count": 2.0}], "children": [{"title": "CONCEPT-3235242206087875_125825", "rows": [{"attr": "Left", "val": "3235242155\u2026\u21923235223292\u2026", "count": 1.0}, {"attr": "", "val": "3235242023\u2026\u21923235238817\u2026", "count": 1.0}, {"attr": "", "val": "3235242047\u2026\u21923235242195\u2026", "count": 1.0}, {"attr": "", "val": "3235236184\u2026\u21923235223267\u2026", "count": 1.0}, {"attr": "", "val": "3235242195\u2026\u21923235225695\u2026", "count": 1.0}, {"attr": "", "val": "3235242168\u2026\u21923235228445\u2026", "count": 1.0}, {"attr": "", "val": "3235242039\u2026\u21923235228382\u2026", "count": 1.0}, {"attr": "Right", "val": "3235223307\u2026\u21923235223307\u2026", "count": 1.0}, {"attr": "", "val": "3235242003\u2026\u21923235230881\u2026", "count": 1.0}, {"attr": "", "val": "3235242124\u2026\u21923235228393\u2026", "count": 1.0}, {"attr": "", "val": "3235238846\u2026\u21923235225667\u2026", "count": 1.0}, {"attr": "", "val": "3235236132\u2026\u21923235225608\u2026", "count": 1.0}, {"attr": "", "val": "3235233585\u2026\u21923235228258\u2026", "count": 1.0}, {"attr": "", "val": "3235223256\u2026\u21923235223240\u2026", "count": 1.0}, {"attr": "None", "val": "C1", "count": 1.0}, {"attr": "None", "val": "C1", "count": 1.0}], "left_rows": [{"attr": "Left", "val": "3235242155\u2026\u21923235223292\u2026", "count": 1.0}, {"attr": "", "val": "3235242023\u2026\u21923235238817\u2026", "count": 1.0}, {"attr": "", "val": "3235242047\u2026\u21923235242195\u2026", "count": 1.0}, {"attr": "", "val": "3235236184\u2026\u21923235223267\u2026", "count": 1.0}, {"attr": "", "val": "3235242195\u2026\u21923235225695\u2026", "count": 1.0}, {"attr": "", "val": "3235242168\u2026\u21923235228445\u2026", "count": 1.0}, {"attr": "", "val": "3235242039\u2026\u21923235228382\u2026", "count": 1.0}], "right_rows": [{"attr": "Right", "val": "3235223307\u2026\u21923235223307\u2026", "count": 1.0}, {"attr": "", "val": "3235242003\u2026\u21923235230881\u2026", "count": 1.0}, {"attr": "", "val": "3235242124\u2026\u21923235228393\u2026", "count": 1.0}, {"attr": "", "val": "3235238846\u2026\u21923235225667\u2026", "count": 1.0}, {"attr": "", "val": "3235236132\u2026\u21923235225608\u2026", "count": 1.0}, {"attr": "", "val": "3235233585\u2026\u21923235228258\u2026", "count": 1.0}, {"attr": "", "val": "3235223256\u2026\u21923235223240\u2026", "count": 1.0}], "other_rows": [{"attr": "None", "val": "C1", "count": 1.0}, {"attr": "None", "val": "C1", "count": 1.0}], "children": []}, {"title": "CONCEPT-3235242206195916_125828", "rows": [{"attr": "Left", "val": "3235223256\u2026\u21923235223247\u2026", "count": 1.0}, {"attr": "", "val": "3235242022\u2026\u21923235230890\u2026", "count": 1.0}, {"attr": "", "val": "3235236121\u2026\u21923235223271\u2026", "count": 1.0}, {"attr": "", "val": "3235228405\u2026\u21923235228404\u2026", "count": 1.0}, {"attr": "", "val": "3235223307\u2026\u21923235223307\u2026", "count": 1.0}, {"attr": "", "val": "3235223242\u2026\u21923235225685\u2026", "count": 1.0}, {"attr": "", "val": "3235242183\u2026\u21923235230901\u2026", "count": 1.0}, {"attr": "Right", "val": "3235242167\u2026\u21923235225608\u2026", "count": 1.0}, {"attr": "", "val": "3235223256\u2026\u21923235223240\u2026", "count": 1.0}, {"attr": "", "val": "3235233558\u2026\u21923235225726\u2026", "count": 1.0}, {"attr": "", "val": "3235242154\u2026\u21923235223299\u2026", "count": 1.0}, {"attr": "", "val": "3235242195\u2026\u21923235228292\u2026", "count": 1.0}, {"attr": "", "val": "3235242168\u2026\u21923235225645\u2026", "count": 1.0}, {"attr": "", "val": "3235238846\u2026\u21923235225667\u2026", "count": 1.0}, {"attr": "None", "val": "C1", "count": 1.0}, {"attr": "None", "val": "C1", "count": 1.0}], "left_rows": [{"attr": "Left", "val": "3235223256\u2026\u21923235223247\u2026", "count": 1.0}, {"attr": "", "val": "3235242022\u2026\u21923235230890\u2026", "count": 1.0}, {"attr": "", "val": "3235236121\u2026\u21923235223271\u2026", "count": 1.0}, {"attr": "", "val": "3235228405\u2026\u21923235228404\u2026", "count": 1.0}, {"attr": "", "val": "3235223307\u2026\u21923235223307\u2026", "count": 1.0}, {"attr": "", "val": "3235223242\u2026\u21923235225685\u2026", "count": 1.0}, {"attr": "", "val": "3235242183\u2026\u21923235230901\u2026", "count": 1.0}], "right_rows": [{"attr": "Right", "val": "3235242167\u2026\u21923235225608\u2026", "count": 1.0}, {"attr": "", "val": "3235223256\u2026\u21923235223240\u2026", "count": 1.0}, {"attr": "", "val": "3235233558\u2026\u21923235225726\u2026", "count": 1.0}, {"attr": "", "val": "3235242154\u2026\u21923235223299\u2026", "count": 1.0}, {"attr": "", "val": "3235242195\u2026\u21923235228292\u2026", "count": 1.0}, {"attr": "", "val": "3235242168\u2026\u21923235225645\u2026", "count": 1.0}, {"attr": "", "val": "3235238846\u2026\u21923235225667\u2026", "count": 1.0}], "other_rows": [{"attr": "None", "val": "C1", "count": 1.0}, {"attr": "None", "val": "C1", "count": 1.0}], "children": []}]}]};
+
+const nodeW  = 700;
+const nodeH  = 140;
+const hGap   = 20;
+const vGap   = 140;
+
+const root = d3.hierarchy(data);
+const layout = d3.tree()
+	.nodeSize([nodeW + hGap, nodeH + vGap])
+	.separation((a, b) => (a.parent === b.parent ? 1.0 : 1.4));
+layout(root);
+
+const svg = d3.select("#tree").append("svg")
+	.attr("width", 1)
+	.attr("height", 1);
+
+const g = svg.append("g");
+
+const linkGen = d3.linkVertical().x(d => d.x).y(d => d.y);
+const link = g.selectAll("path.link")
+	.data(root.links())
+	.join("path")
+	.attr("class", "link")
+	.attr("d", linkGen);
+
+const node = g.selectAll("g.node")
+	.data(root.descendants())
+	.join("g")
+	.attr("transform", d => `translate(${d.x},${d.y})`);
+
+node.append("rect")
+	.attr("class", "node-box")
+	.attr("x", -nodeW/2)
+	.attr("y", 0)
+	.attr("width", nodeW)
+	.attr("height", nodeH);
+
+node.append("foreignObject")
+	.attr("class", "node-fo")
+	.attr("x", -nodeW/2 + 6)
+	.attr("y", 6)
+	.attr("width", nodeW - 12)
+	.attr("height", 1000)
+	.html(d => nodeHTML(d.data));
+
+node.selectAll("foreignObject").each(function(d) {
+	const fo = d3.select(this);
+	const div = fo.select("div").node();
+	const h = div.getBoundingClientRect().height + 12;
+	d._nodeHeight = h;
+	fo.attr("height", h);
+	d3.select(this.parentNode).select("rect").attr("height", h + 12);
+});
+
+const depthMaxHeight = new Map();
+root.each(d => {
+	const h = d._nodeHeight || nodeH;
+	const existing = depthMaxHeight.get(d.depth) || 0;
+	if (h > existing) { depthMaxHeight.set(d.depth, h); }
+});
+
+const depthOffsets = [];
+const maxDepth = Math.max(...Array.from(depthMaxHeight.keys()));
+for (let i = 0; i <= maxDepth; i++) {
+	const prev = i === 0 ? 0 : depthOffsets[i - 1] + depthMaxHeight.get(i - 1) + vGap;
+	depthOffsets.push(prev);
+}
+
+root.each(d => { d.y = depthOffsets[d.depth]; });
+
+node.attr("transform", d => `translate(${d.x},${d.y})`);
+link.attr("d", linkGen);
+
+let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+root.each(d => {
+	const halfW = nodeW / 2;
+	const h = d._nodeHeight || nodeH;
+	if (d.x - halfW - 30 < x0) x0 = d.x - halfW - 30;
+	if (d.x + halfW + 30 > x1) x1 = d.x + halfW + 30;
+	if (d.y - 30 < y0) y0 = d.y - 30;
+	if (d.y + h + 30 > y1) y1 = d.y + h + 30;
+});
+const width  = x1 - x0;
+const height = y1 - y0;
+
+svg.attr("width", width)
+	.attr("height", height)
+	.attr("viewBox", [x0, y0, width, height].join(" "));
+
+function subtable(title, rows) {
+	if (!rows || rows.length === 0) return "";
+	const body = rows.map(r =>
+		`<tr><td>${r.attr}</td><td>${r.val}</td><td>${r.count}</td></tr>`
+	).join("");
+	return `<div class="sub-title">${title}</div>
+		<table>
+			<tr><th>Attr</th><th>Value</th><th>Count</th></tr>
+			${body}
+		</table>`;
+}
+
+function nodeHTML(d) {
+	const hasLeft  = d.left_rows  && d.left_rows.length  > 0;
+	const hasRight = d.right_rows && d.right_rows.length > 0;
+	const hasOther = d.other_rows && d.other_rows.length > 0;
+	const hasSplit = hasLeft || hasRight;
+
+	let mainHTML = "";
+	if (hasSplit) {
+		// Determine section header label based on which sides are present
+		const leftLabel  = hasLeft  ? (d.left_rows[0].attr.startsWith("Context")  ? "Before" : "Left")  : "Left";
+		const rightLabel = hasRight ? (d.right_rows[0].attr.startsWith("Context") ? "After"  : "Right") : "Right";
+		mainHTML = `<div class="section-header">Attributes</div>
+			<div class="side-by-side">
+				<div>${subtable(leftLabel,  d.left_rows)}</div>
+				<div>${subtable(rightLabel, d.right_rows)}</div>
+			</div>`;
+	} else {
+		// Fallback: render all rows in one table
+		const body = d.rows.map(r =>
+			`<tr><td>${r.attr}</td><td>${r.val}</td><td>${r.count}</td></tr>`
+		).join("");
+		mainHTML = `<div class="section-header">Attributes</div>
+			<table>
+				<tr><th>Attr</th><th>Value</th><th>Count</th></tr>
+				${body}
+			</table>`;
+	}
+	const otherHTML = hasOther
+		? `<div class="section-header">Other</div>${subtable("", d.other_rows)}`
+		: "";
+	return `<div class="node-fo">
+		<table><tr><th colspan="3">${d.title}</th></tr></table>
+		${mainHTML}
+		${otherHTML}
+	</div>`;
+}
+</script>
+</body>
+</html>

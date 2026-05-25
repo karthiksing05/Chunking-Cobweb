@@ -1,0 +1,31 @@
+idx,sentence,mask_pos,gold,gold_pos,filled,filled_pos,completed,exact,pos_ok
+0,"the red small dog chased the park",3,dog,N,woman,N,"the red small woman chased the park",0,1
+1,"a woman liked",1,woman,N,park,N,"a park liked",0,1
+2,"the red small park admired a dog",3,park,N,man,N,"the red small man admired a dog",0,1
+3,"the park liked the big small cat",3,the,Det,a,Det,"the park liked a big small cat",0,1
+4,"a quick quick park chased the dog",3,park,N,woman,N,"a quick quick woman chased the dog",0,1
+5,"the telescope chased",1,telescope,N,cat,N,"the cat chased",0,1
+6,"a red quick big telescope found a big big man",5,found,V,admired,V,"a red quick big telescope admired a big big man",0,1
+7,"a telescope admired a quick lazy telescope with the woman",5,lazy,Adj,small,Adj,"a telescope admired a quick small telescope with the woman",0,1
+8,"the woman liked a big lazy quick big woman",4,big,Adj,quick,Adj,"the woman liked a quick lazy quick big woman",0,1
+9,"a small red small dog liked the park",4,dog,N,woman,N,"a small red small woman liked the park",0,1
+10,"a lazy red park admired",2,red,Adj,lazy,Adj,"a lazy lazy park admired",0,1
+11,"the dog saw a man in the man",4,man,N,small,Adj,"the dog saw a small in the man",0,0
+12,"a woman admired",1,woman,N,telescope,N,"a telescope admired",0,1
+13,"the small red cat saw the park",3,cat,N,telescope,N,"the small red telescope saw the park",0,1
+14,"a cat saw a quick red woman",3,a,Det,the,Det,"a cat saw the quick red woman",0,1
+15,"the man liked",1,man,N,cat,N,"the cat liked",0,1
+16,"a lazy small cat admired",2,small,Adj,quick,Adj,"a lazy quick cat admired",0,1
+17,"a telescope found",1,telescope,N,dog,N,"a dog found",0,1
+18,"a man chased the lazy big man",3,the,Det,a,Det,"a man chased a lazy big man",0,1
+19,"the lazy quick cat chased the dog on the dog",5,the,Det,the,Det,"the lazy quick cat chased the dog on the dog",1,1
+20,"the red red small telescope chased",3,small,Adj,quick,Adj,"the red red quick telescope chased",0,1
+21,"the big red dog admired a park under the man",5,a,Det,a,Det,"the big red dog admired a park under the man",1,1
+22,"the big quick park saw the quick quick quick cat",5,the,Det,a,Det,"the big quick park saw a quick quick quick cat",0,1
+23,"a red lazy man found",2,lazy,Adj,small,Adj,"a red small man found",0,1
+24,"the big quick big quick quick woman liked",4,quick,Adj,lazy,Adj,"the big quick big lazy quick woman liked",0,1
+25,"the lazy lazy woman found",2,lazy,Adj,lazy,Adj,"the lazy lazy woman found",1,1
+26,"a big big man found",2,big,Adj,red,Adj,"a big red man found",0,1
+27,"the park chased a woman",2,chased,V,chased,V,"the park chased a woman",1,1
+28,"a small lazy man chased",2,lazy,Adj,lazy,Adj,"a small lazy man chased",1,1
+29,"the park chased a lazy small dog in a dog",5,small,Adj,big,Adj,"the park chased a lazy big dog in a dog",0,1

@@ -6,9 +6,11 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
 
 I can start to see some artifacts of the parsing process making their way through where if we have an incorrect parse at the beginning
 *   I'd like to introduce the idea of a maximum-value parse where we look ahead X number of steps and see what the most parsable thing is! Once we find that, we parse it up! (it's like creating multiple chunks at once)
-    *   Can do multiple partial parses
+    *   Can do multiple partial parses until we get our final parse and freeze the maximum-value parse from the top-down once we get a greedy solution!
 
 As mentioned below, generation is a problem! We need the idea of chunk context to properly scaffold the breaking down of chunks and we also need to identify a good decoding idea
+*   The big problem with generation is that basic-level nodes are mixed and so often-times when we resample from that frontier, we get the wrong part of speech
+    *   This might be resolved with a stronger representation but the basic-level definition also needs fixing (tuning alpha is NOT the method)
 
 ## ACS-26 Deliverables
 
