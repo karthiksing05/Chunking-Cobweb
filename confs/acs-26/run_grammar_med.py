@@ -46,6 +46,7 @@ hl_agg = run_multi_seed_hollow_learn(
     grammar=TEST_GRAMMAR_MED,
     corpus=TEST_CORPUS_MED,
     seeds=SEEDS,
+    viz_dir=OUT_BASE,
 )
 
 print(f"\n=== ACS-26 / TEST_GRAMMAR_MED — 5-seed learning curves ===")

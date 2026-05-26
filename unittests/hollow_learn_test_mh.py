@@ -917,6 +917,16 @@ def run_hollow_learn(
           f"{sum(1 for r in cand_heur_log if r['is_gold'])} gold, "
           f"{sum(1 for r in cand_heur_log if not r['is_gold'])} non-gold")
 
+    # Persist the raw candidate heuristic log so multi-seed pipelines
+    # can pool across seeds and rebuild an aggregate histogram.
+    _cand_csv = f"{OUT_DIR}/cand_heur_log.csv"
+    with open(_cand_csv, "w") as _f:
+        _f.write("is_gold," + ",".join(_hist_heurs) + "\n")
+        for _r in cand_heur_log:
+            _f.write(f"{int(bool(_r['is_gold']))},"
+                     + ",".join(f"{_r[h]}" for h in _hist_heurs) + "\n")
+    print(f"  Per-candidate heuristic log → {_cand_csv}")
+
     n_h = len(_hist_heurs)
     n_cols = 4
     n_rows = (n_h + n_cols - 1) // n_cols
