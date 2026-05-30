@@ -4,7 +4,9 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
 
 ## Methodology 6
 
-I can start to see some artifacts of the parsing process making their way through where if we have an incorrect parse at the beginning
+I can start to see some artifacts of the parsing process making their way through where if we have an incorrect parse at the beginning, it balloons up!
+*   The basic-level is kind of cooked right now - alpha tuning and then also prior_var tuning cooks everything!
+*   Log-probability scores are HECKA weird! I have no idea how to get a score that efficiently evaluates whether a concept belongs to an instance!
 *   I'd like to introduce the idea of a maximum-value parse where we look ahead X number of steps and see what the most parsable thing is! Once we find that, we parse it up! (it's like creating multiple chunks at once)
     *   Can do multiple partial parses until we get our final parse and freeze the maximum-value parse from the top-down once we get a greedy solution!
 
@@ -30,10 +32,10 @@ The TL;DR is that our process can basically be revered as a way of creating symb
 
 ## Methodology 5.2 (ACS PAPER HERE)
 
+Quick addition is primitive threshold!
+*   Parameterizing for this gave us BETTER results than the prior idea, which was a list of primitive-only!!
+
 Did a ton of experiments, going to make a list of all changes we need to make below - there'll be all kinds of stuff but as long as we draft everything properly we'll be in a good place!
-
-**Stuff is not working now??**
-
 
 **Final List of things we need to test:**
 *   Representation (Autoencoder) test - Given content / context instance, can we generate it and compress it? (and also verify that similar instances are encoded similarly)

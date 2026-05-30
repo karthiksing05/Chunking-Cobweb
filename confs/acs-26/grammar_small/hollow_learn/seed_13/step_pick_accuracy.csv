@@ -1,26 +1,26 @@
 sentence,step,n_pairs,n_admitted,top_span,is_gold
 "the woman chases the dog",0,4,4,"(0, 1)",1
-"the woman chases the dog",1,3,3,"(3, 4)",1
+"the woman chases the dog",1,3,3,"(0, 2)",1
 "the woman chases the dog",2,2,2,"(0, 2)",1
 "the woman chases the dog",3,1,1,"(0, 4)",1
 "a dog sees",0,2,2,"(0, 1)",1
 "a dog sees",1,1,1,"(0, 2)",1
-"a dog sees the dog",0,4,4,"(0, 1)",1
+"a dog sees the dog",0,4,4,"(3, 4)",1
 "a dog sees the dog",1,3,3,"(3, 4)",1
 "a dog sees the dog",2,2,2,"(0, 2)",1
 "a dog sees the dog",3,1,1,"(0, 4)",1
 "the cat chases",0,2,2,"(0, 1)",1
 "the cat chases",1,1,1,"(0, 2)",1
 "the woman runs the man",0,4,4,"(3, 4)",1
-"the woman runs the man",1,3,3,"(3, 4)",1
+"the woman runs the man",1,3,3,"(0, 2)",1
 "the woman runs the man",2,2,2,"(0, 2)",1
 "the woman runs the man",3,1,1,"(0, 4)",1
-"the man likes a man",0,4,4,"(0, 1)",1
-"the man likes a man",1,3,3,"(0, 2)",1
+"the man likes a man",0,4,4,"(3, 4)",1
+"the man likes a man",1,3,3,"(3, 4)",1
 "the man likes a man",2,2,2,"(0, 2)",1
 "the man likes a man",3,1,1,"(0, 4)",1
 "the cat chases the dog",0,4,4,"(0, 1)",1
-"the cat chases the dog",1,3,3,"(3, 4)",1
+"the cat chases the dog",1,3,3,"(0, 2)",1
 "the cat chases the dog",2,2,2,"(0, 2)",1
 "the cat chases the dog",3,1,1,"(0, 4)",1
 "the man likes a dog",0,4,4,"(3, 4)",1
@@ -29,14 +29,14 @@ sentence,step,n_pairs,n_admitted,top_span,is_gold
 "the man likes a dog",3,1,1,"(0, 4)",1
 "the dog chases",0,2,2,"(0, 1)",1
 "the dog chases",1,1,1,"(0, 2)",1
-"a woman likes a dog",0,4,4,"(0, 1)",1
-"a woman likes a dog",1,3,3,"(3, 4)",1
+"a woman likes a dog",0,4,4,"(3, 4)",1
+"a woman likes a dog",1,3,3,"(0, 2)",1
 "a woman likes a dog",2,2,2,"(0, 2)",1
 "a woman likes a dog",3,1,1,"(0, 4)",1
 "a woman likes",0,2,2,"(0, 1)",1
 "a woman likes",1,1,1,"(0, 2)",1
 "the woman likes the dog",0,4,4,"(3, 4)",1
-"the woman likes the dog",1,3,3,"(3, 4)",1
+"the woman likes the dog",1,3,3,"(0, 2)",1
 "the woman likes the dog",2,2,2,"(0, 2)",1
 "the woman likes the dog",3,1,1,"(0, 4)",1
 "a dog chases",0,2,2,"(0, 1)",1
@@ -44,30 +44,30 @@ sentence,step,n_pairs,n_admitted,top_span,is_gold
 "a woman chases",0,2,2,"(0, 1)",1
 "a woman chases",1,1,1,"(0, 2)",1
 "a man chases the man",0,4,4,"(3, 4)",1
-"a man chases the man",1,3,3,"(3, 4)",1
+"a man chases the man",1,3,3,"(0, 2)",1
 "a man chases the man",2,2,2,"(0, 2)",1
 "a man chases the man",3,1,1,"(0, 4)",1
 "a dog sees a man",0,4,4,"(3, 4)",1
 "a dog sees a man",1,3,3,"(3, 4)",1
 "a dog sees a man",2,2,2,"(0, 2)",1
 "a dog sees a man",3,1,1,"(0, 4)",1
-"a dog sees the man",0,4,4,"(3, 4)",1
-"a dog sees the man",1,3,3,"(3, 4)",1
+"a dog sees the man",0,4,4,"(0, 1)",1
+"a dog sees the man",1,3,3,"(0, 2)",1
 "a dog sees the man",2,2,2,"(0, 2)",1
 "a dog sees the man",3,1,1,"(0, 4)",1
 "the dog runs the man",0,4,4,"(3, 4)",1
 "the dog runs the man",1,3,3,"(3, 4)",1
 "the dog runs the man",2,2,2,"(0, 2)",1
 "the dog runs the man",3,1,1,"(0, 4)",1
-"the dog sees the man",0,4,4,"(3, 4)",1
-"the dog sees the man",1,3,3,"(3, 4)",1
+"the dog sees the man",0,4,4,"(0, 1)",1
+"the dog sees the man",1,3,3,"(0, 2)",1
 "the dog sees the man",2,2,2,"(0, 2)",1
 "the dog sees the man",3,1,1,"(0, 4)",1
-"the woman likes a man",0,4,4,"(0, 1)",1
-"the woman likes a man",1,3,3,"(3, 4)",1
+"the woman likes a man",0,4,4,"(3, 4)",1
+"the woman likes a man",1,3,3,"(0, 2)",1
 "the woman likes a man",2,2,2,"(0, 2)",1
 "the woman likes a man",3,1,1,"(0, 4)",1
-"the man sees the woman",0,4,4,"(0, 1)",1
+"the man sees the woman",0,4,4,"(3, 4)",1
 "the man sees the woman",1,3,3,"(0, 2)",1
 "the man sees the woman",2,2,2,"(0, 2)",1
 "the man sees the woman",3,1,1,"(0, 4)",1
@@ -75,16 +75,16 @@ sentence,step,n_pairs,n_admitted,top_span,is_gold
 "the cat chases the cat",1,3,3,"(3, 4)",1
 "the cat chases the cat",2,2,2,"(0, 2)",1
 "the cat chases the cat",3,1,1,"(0, 4)",1
-"a cat sees a dog",0,4,4,"(0, 1)",1
+"a cat sees a dog",0,4,4,"(3, 4)",1
 "a cat sees a dog",1,3,3,"(3, 4)",1
 "a cat sees a dog",2,2,2,"(0, 2)",1
 "a cat sees a dog",3,1,1,"(0, 4)",1
-"the man runs a dog",0,4,4,"(0, 1)",1
+"the man runs a dog",0,4,4,"(3, 4)",1
 "the man runs a dog",1,3,3,"(3, 4)",1
 "the man runs a dog",2,2,2,"(0, 2)",1
 "the man runs a dog",3,1,1,"(0, 4)",1
-"a dog likes the cat",0,4,4,"(3, 4)",1
-"a dog likes the cat",1,3,3,"(3, 4)",1
+"a dog likes the cat",0,4,4,"(0, 1)",1
+"a dog likes the cat",1,3,3,"(0, 2)",1
 "a dog likes the cat",2,2,2,"(0, 2)",1
 "a dog likes the cat",3,1,1,"(0, 4)",1
 "a dog runs the man",0,4,4,"(3, 4)",1
@@ -99,13 +99,13 @@ sentence,step,n_pairs,n_admitted,top_span,is_gold
 "the cat chases a woman",1,3,3,"(3, 4)",1
 "the cat chases a woman",2,2,2,"(0, 2)",1
 "the cat chases a woman",3,1,1,"(0, 4)",1
-"the cat chases the woman",0,4,4,"(0, 1)",1
+"the cat chases the woman",0,4,4,"(3, 4)",1
 "the cat chases the woman",1,3,3,"(3, 4)",1
 "the cat chases the woman",2,2,2,"(0, 2)",1
 "the cat chases the woman",3,1,1,"(0, 4)",1
 "a woman runs",0,2,2,"(0, 1)",1
 "a woman runs",1,1,1,"(0, 2)",1
-"a dog likes a man",0,4,4,"(0, 1)",1
+"a dog likes a man",0,4,4,"(3, 4)",1
 "a dog likes a man",1,3,3,"(0, 2)",1
 "a dog likes a man",2,2,2,"(0, 2)",1
 "a dog likes a man",3,1,1,"(0, 4)",1
@@ -113,7 +113,7 @@ sentence,step,n_pairs,n_admitted,top_span,is_gold
 "the woman runs the dog",1,3,3,"(3, 4)",1
 "the woman runs the dog",2,2,2,"(0, 2)",1
 "the woman runs the dog",3,1,1,"(0, 4)",1
-"a dog chases the woman",0,4,4,"(3, 4)",1
+"a dog chases the woman",0,4,4,"(0, 1)",1
 "a dog chases the woman",1,3,3,"(3, 4)",1
 "a dog chases the woman",2,2,2,"(0, 2)",1
 "a dog chases the woman",3,1,1,"(0, 4)",1
@@ -135,7 +135,7 @@ sentence,step,n_pairs,n_admitted,top_span,is_gold
 "the cat likes the cat",1,3,3,"(3, 4)",1
 "the cat likes the cat",2,2,2,"(0, 2)",1
 "the cat likes the cat",3,1,1,"(0, 4)",1
-"a dog likes a woman",0,4,4,"(3, 4)",1
-"a dog likes a woman",1,3,3,"(3, 4)",1
+"a dog likes a woman",0,4,4,"(0, 1)",1
+"a dog likes a woman",1,3,3,"(0, 2)",1
 "a dog likes a woman",2,2,2,"(0, 2)",1
 "a dog likes a woman",3,1,1,"(0, 4)",1

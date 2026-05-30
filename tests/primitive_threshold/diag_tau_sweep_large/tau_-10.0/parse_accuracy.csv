@@ -1,0 +1,81 @@
+sentence,gold_brackets,pred_brackets,tp,fp,fn
+"this tall friendly robot liked the robot","[(0, 3), (0, 4), (0, 6), (1, 2), (1, 3), (5, 6)]","[(0, 3), (1, 2), (1, 3), (5, 6)]",4,0,2
+"the boy liked near this girl","[(0, 1), (0, 2), (0, 5), (3, 5), (4, 5)]","[(0, 1), (4, 5)]",2,0,3
+"the apple read near that curious blue friendly robot","[(0, 1), (0, 2), (0, 8), (3, 8), (4, 8), (5, 7), (5, 8), (6, 7)]","[(0, 1), (4, 8), (5, 7), (5, 8), (6, 7)]",5,0,3
+"the teacher chased this girl with the apple","[(0, 1), (0, 2), (0, 4), (0, 7), (3, 4), (5, 7), (6, 7)]","[(0, 1), (3, 4), (6, 7)]",3,0,4
+"a tall curious friendly teacher saw this teacher","[(0, 4), (0, 5), (0, 7), (1, 3), (1, 4), (2, 3), (6, 7)]","[(0, 4), (1, 2), (1, 3), (1, 4), (6, 7)]",4,1,3
+"this robot which saw near a boy carried a girl","[(0, 6), (0, 7), (0, 9), (1, 6), (2, 6), (3, 6), (4, 6), (5, 6), (8, 9)]","[(0, 1), (5, 6), (8, 9)]",2,1,7
+"the ancient friendly book liked this curious blue friendly teacher","[(0, 3), (0, 4), (0, 9), (1, 2), (1, 3), (5, 9), (6, 8), (6, 9), (7, 8)]","[(0, 3), (1, 2), (1, 3), (5, 9), (6, 8), (6, 9), (7, 8)]",7,0,2
+"a apple saw the friendly curious book","[(0, 1), (0, 2), (0, 6), (3, 6), (4, 5), (4, 6)]","[(0, 1), (3, 5), (3, 6), (4, 5)]",3,1,3
+"that blue blue teacher saw with this friendly tall girl","[(0, 3), (0, 4), (0, 9), (1, 2), (1, 3), (5, 9), (6, 9), (7, 8), (7, 9)]","[(0, 3), (1, 2), (1, 3), (6, 9), (7, 8), (7, 9)]",6,0,3
+"a curious tall girl admired near this blue tall apple","[(0, 3), (0, 4), (0, 9), (1, 2), (1, 3), (5, 9), (6, 9), (7, 8), (7, 9)]","[(0, 3), (1, 2), (1, 3), (6, 9), (7, 8), (7, 9)]",6,0,3
+"this robot carried the apple without that apple","[(0, 1), (0, 2), (0, 4), (0, 7), (3, 4), (5, 7), (6, 7)]","[(0, 1), (3, 4), (6, 7)]",3,0,4
+"this ancient tall book saw the apple","[(0, 3), (0, 4), (0, 6), (1, 2), (1, 3), (5, 6)]","[(0, 3), (1, 2), (1, 3), (5, 6)]",4,0,2
+"this tall friendly robot admired this apple","[(0, 3), (0, 4), (0, 6), (1, 2), (1, 3), (5, 6)]","[(0, 3), (1, 2), (1, 3), (5, 6)]",4,0,2
+"the teacher liked without a boy","[(0, 1), (0, 2), (0, 5), (3, 5), (4, 5)]","[(0, 1), (4, 5)]",2,0,3
+"that ancient curious curious book chased a book","[(0, 4), (0, 5), (0, 7), (1, 3), (1, 4), (2, 3), (6, 7)]","[(0, 3), (0, 4), (1, 3), (2, 3), (6, 7)]",4,1,3
+"that boy liked with a tall friendly girl","[(0, 1), (0, 2), (0, 7), (3, 7), (4, 7), (5, 6), (5, 7)]","[(0, 1), (4, 7), (5, 6), (5, 7)]",4,0,3
+"that teacher liked near this teacher","[(0, 1), (0, 2), (0, 5), (3, 5), (4, 5)]","[(0, 1), (4, 5)]",2,0,3
+"the curious blue robot admired this friendly ancient teacher","[(0, 3), (0, 4), (0, 8), (1, 2), (1, 3), (5, 8), (6, 7), (6, 8)]","[(0, 3), (1, 2), (1, 3), (5, 8), (6, 7), (6, 8)]",6,0,2
+"the blue friendly boy admired near that teacher","[(0, 3), (0, 4), (0, 7), (1, 2), (1, 3), (5, 7), (6, 7)]","[(0, 3), (1, 2), (1, 3), (6, 7)]",4,0,3
+"a teacher saw that friendly friendly teacher","[(0, 1), (0, 2), (0, 6), (3, 6), (4, 5), (4, 6)]","[(0, 1), (3, 5), (3, 6), (4, 5)]",3,1,3
+"the ancient ancient robot chased that teacher without a apple","[(0, 3), (0, 4), (0, 6), (0, 9), (1, 2), (1, 3), (5, 6), (7, 9), (8, 9)]","[(0, 3), (1, 2), (1, 3), (5, 6), (8, 9)]",5,0,4
+"a curious tall robot liked a friendly blue apple","[(0, 3), (0, 4), (0, 8), (1, 2), (1, 3), (5, 8), (6, 7), (6, 8)]","[(0, 3), (1, 2), (1, 3), (5, 8), (6, 7), (6, 8)]",6,0,2
+"the boy liked this teacher without that friendly blue robot","[(0, 1), (0, 2), (0, 4), (0, 9), (3, 4), (5, 9), (6, 9), (7, 8), (7, 9)]","[(0, 1), (3, 4), (6, 9), (7, 8), (7, 9)]",5,0,4
+"a teacher admired without that ancient curious friendly teacher","[(0, 1), (0, 2), (0, 8), (3, 8), (4, 8), (5, 7), (5, 8), (6, 7)]","[(0, 1), (4, 7), (4, 8), (5, 7), (6, 7)]",4,1,4
+"that boy read the apple","[(0, 1), (0, 2), (0, 4), (3, 4)]","[(0, 1), (0, 4), (2, 4), (3, 4)]",3,1,1
+"that teacher liked this friendly blue girl","[(0, 1), (0, 2), (0, 6), (3, 6), (4, 5), (4, 6)]","[(0, 1), (3, 6), (4, 5), (4, 6)]",4,0,2
+"the blue friendly apple saw this book","[(0, 3), (0, 4), (0, 6), (1, 2), (1, 3), (5, 6)]","[(0, 3), (1, 2), (1, 3), (5, 6)]",4,0,2
+"this boy chased with a apple that admired the girl","[(0, 1), (0, 2), (0, 9), (3, 9), (4, 9), (5, 9), (6, 9), (7, 9), (8, 9)]","[(0, 1), (4, 5), (4, 6), (4, 9), (7, 9), (8, 9)]",4,2,5
+"the boy saw a ancient blue teacher with this girl","[(0, 1), (0, 2), (0, 6), (0, 9), (3, 6), (4, 5), (4, 6), (7, 9), (8, 9)]","[(0, 1), (3, 6), (4, 5), (4, 6), (8, 9)]",5,0,4
+"this girl which chased near a book carried a book","[(0, 6), (0, 7), (0, 9), (1, 6), (2, 6), (3, 6), (4, 6), (5, 6), (8, 9)]","[(0, 1), (5, 6), (8, 9)]",2,1,7
+"that apple saw near this curious tall boy","[(0, 1), (0, 2), (0, 7), (3, 7), (4, 7), (5, 6), (5, 7)]","[(0, 1), (4, 6), (4, 7), (5, 6)]",3,1,4
+"this friendly curious apple admired without that book","[(0, 3), (0, 4), (0, 7), (1, 2), (1, 3), (5, 7), (6, 7)]","[(0, 3), (1, 2), (1, 3), (6, 7)]",4,0,3
+"this friendly friendly curious friendly teacher chased this book","[(0, 5), (0, 6), (0, 8), (1, 4), (1, 5), (2, 4), (3, 4), (7, 8)]","[(0, 4), (0, 5), (1, 2), (1, 3), (1, 4), (7, 8)]",3,3,5
+"a ancient curious teacher chased with the tall blue apple","[(0, 3), (0, 4), (0, 9), (1, 2), (1, 3), (5, 9), (6, 9), (7, 8), (7, 9)]","[(0, 2), (0, 3), (1, 2), (6, 7), (6, 8), (6, 9)]",3,3,6
+"this curious tall girl chased this tall tall boy","[(0, 3), (0, 4), (0, 8), (1, 2), (1, 3), (5, 8), (6, 7), (6, 8)]","[(0, 1), (0, 2), (0, 3), (5, 8), (6, 7), (6, 8)]",4,2,4
+"this tall ancient robot liked that book","[(0, 3), (0, 4), (0, 6), (1, 2), (1, 3), (5, 6)]","[(0, 3), (1, 2), (1, 3), (5, 6)]",4,0,2
+"the apple read near the ancient tall ancient apple","[(0, 1), (0, 2), (0, 8), (3, 8), (4, 8), (5, 7), (5, 8), (6, 7)]","[(0, 1), (4, 8), (5, 6), (5, 7), (5, 8)]",4,1,4
+"the book saw with that boy","[(0, 1), (0, 2), (0, 5), (3, 5), (4, 5)]","[(0, 1), (4, 5)]",2,0,3
+"that robot read the girl","[(0, 1), (0, 2), (0, 4), (3, 4)]","[(0, 1), (0, 2), (0, 4), (3, 4)]",4,0,0
+"that friendly tall book liked near this boy","[(0, 3), (0, 4), (0, 7), (1, 2), (1, 3), (5, 7), (6, 7)]","[(0, 3), (1, 2), (1, 3), (6, 7)]",4,0,3
+"that robot who read near the book chased this boy","[(0, 6), (0, 7), (0, 9), (1, 6), (2, 6), (3, 6), (4, 6), (5, 6), (8, 9)]","[(0, 1), (5, 6), (8, 9)]",2,1,7
+"that curious blue girl admired the girl","[(0, 3), (0, 4), (0, 6), (1, 2), (1, 3), (5, 6)]","[(0, 3), (1, 2), (1, 3), (5, 6)]",4,0,2
+"this ancient curious girl saw with that tall curious book","[(0, 3), (0, 4), (0, 9), (1, 2), (1, 3), (5, 9), (6, 9), (7, 8), (7, 9)]","[(0, 3), (1, 2), (1, 3), (6, 9), (7, 8), (7, 9)]",6,0,3
+"that robot chased that teacher","[(0, 1), (0, 2), (0, 4), (3, 4)]","[(0, 1), (0, 4), (2, 4), (3, 4)]",3,1,1
+"a robot admired with this teacher","[(0, 1), (0, 2), (0, 5), (3, 5), (4, 5)]","[(0, 1), (4, 5)]",2,0,3
+"this blue ancient blue girl liked that apple","[(0, 4), (0, 5), (0, 7), (1, 3), (1, 4), (2, 3), (6, 7)]","[(0, 4), (1, 2), (1, 3), (1, 4), (6, 7)]",4,1,3
+"that teacher carried that tall friendly apple","[(0, 1), (0, 2), (0, 6), (3, 6), (4, 5), (4, 6)]","[(0, 1), (3, 6), (4, 5), (4, 6)]",4,0,2
+"this blue ancient robot liked without the robot","[(0, 3), (0, 4), (0, 7), (1, 2), (1, 3), (5, 7), (6, 7)]","[(0, 3), (1, 2), (1, 3), (6, 7)]",4,0,3
+"that tall blue teacher carried with that robot","[(0, 3), (0, 4), (0, 7), (1, 2), (1, 3), (5, 7), (6, 7)]","[(0, 3), (1, 2), (1, 3), (6, 7)]",4,0,3
+"the curious curious teacher carried this book","[(0, 3), (0, 4), (0, 6), (1, 2), (1, 3), (5, 6)]","[(0, 3), (1, 2), (1, 3), (5, 6)]",4,0,2
+"this blue tall book chased that apple","[(0, 3), (0, 4), (0, 6), (1, 2), (1, 3), (5, 6)]","[(0, 3), (1, 2), (1, 3), (5, 6)]",4,0,2
+"that ancient blue book liked with this blue tall teacher","[(0, 3), (0, 4), (0, 9), (1, 2), (1, 3), (5, 9), (6, 9), (7, 8), (7, 9)]","[(0, 3), (1, 2), (1, 3), (6, 9), (7, 8), (7, 9)]",6,0,3
+"a ancient ancient teacher read this girl","[(0, 3), (0, 4), (0, 6), (1, 2), (1, 3), (5, 6)]","[(0, 3), (1, 2), (1, 3), (5, 6)]",4,0,2
+"that girl chased without the blue tall boy","[(0, 1), (0, 2), (0, 7), (3, 7), (4, 7), (5, 6), (5, 7)]","[(0, 1), (4, 7), (5, 6), (5, 7)]",4,0,3
+"that apple chased a robot who read this robot","[(0, 1), (0, 2), (0, 8), (3, 8), (4, 8), (5, 8), (6, 8), (7, 8)]","[(0, 1), (7, 8)]",2,0,6
+"the girl saw that book without that book","[(0, 1), (0, 2), (0, 4), (0, 7), (3, 4), (5, 7), (6, 7)]","[(0, 1), (3, 4), (6, 7)]",3,0,4
+"this blue ancient apple chased a apple","[(0, 3), (0, 4), (0, 6), (1, 2), (1, 3), (5, 6)]","[(0, 3), (1, 2), (1, 3), (5, 6)]",4,0,2
+"a blue blue teacher carried without the robot","[(0, 3), (0, 4), (0, 7), (1, 2), (1, 3), (5, 7), (6, 7)]","[(0, 3), (1, 2), (1, 3), (6, 7)]",4,0,3
+"that robot admired without a robot","[(0, 1), (0, 2), (0, 5), (3, 5), (4, 5)]","[(0, 1), (4, 5)]",2,0,3
+"a friendly curious teacher carried near that tall friendly girl","[(0, 3), (0, 4), (0, 9), (1, 2), (1, 3), (5, 9), (6, 9), (7, 8), (7, 9)]","[(0, 3), (1, 2), (1, 3), (6, 9), (7, 8), (7, 9)]",6,0,3
+"this boy liked without a book","[(0, 1), (0, 2), (0, 5), (3, 5), (4, 5)]","[(0, 1), (4, 5)]",2,0,3
+"this ancient ancient teacher saw the ancient tall friendly robot","[(0, 3), (0, 4), (0, 9), (1, 2), (1, 3), (5, 9), (6, 8), (6, 9), (7, 8)]","[(0, 3), (1, 2), (1, 3), (5, 7), (5, 9), (6, 7), (8, 9)]",4,3,5
+"that friendly tall teacher chased without a girl","[(0, 3), (0, 4), (0, 7), (1, 2), (1, 3), (5, 7), (6, 7)]","[(0, 3), (1, 2), (1, 3), (6, 7)]",4,0,3
+"that teacher admired with the apple which saw a boy","[(0, 1), (0, 2), (0, 9), (3, 9), (4, 9), (5, 9), (6, 9), (7, 9), (8, 9)]","[(0, 1), (8, 9)]",2,0,7
+"a teacher carried a robot","[(0, 1), (0, 2), (0, 4), (3, 4)]","[(0, 1), (0, 4), (2, 4), (3, 4)]",3,1,1
+"that blue ancient teacher carried a book","[(0, 3), (0, 4), (0, 6), (1, 2), (1, 3), (5, 6)]","[(0, 3), (1, 2), (1, 3), (5, 6)]",4,0,2
+"that blue ancient book admired a robot with the boy","[(0, 3), (0, 4), (0, 6), (0, 9), (1, 2), (1, 3), (5, 6), (7, 9), (8, 9)]","[(0, 3), (1, 2), (1, 3), (5, 6), (8, 9)]",5,0,4
+"a ancient curious apple liked with a friendly ancient girl","[(0, 3), (0, 4), (0, 9), (1, 2), (1, 3), (5, 9), (6, 9), (7, 8), (7, 9)]","[(0, 3), (1, 2), (1, 3), (6, 9), (7, 8), (7, 9)]",6,0,3
+"that teacher admired without that ancient ancient girl","[(0, 1), (0, 2), (0, 7), (3, 7), (4, 7), (5, 6), (5, 7)]","[(0, 1), (4, 7), (5, 6), (5, 7)]",4,0,3
+"this apple chased a robot","[(0, 1), (0, 2), (0, 4), (3, 4)]","[(0, 1), (0, 4), (2, 4), (3, 4)]",3,1,1
+"the tall curious tall book saw that girl","[(0, 4), (0, 5), (0, 7), (1, 3), (1, 4), (2, 3), (6, 7)]","[(0, 4), (1, 2), (1, 3), (1, 4), (6, 7)]",4,1,3
+"this tall friendly apple chased without this girl","[(0, 3), (0, 4), (0, 7), (1, 2), (1, 3), (5, 7), (6, 7)]","[(0, 3), (1, 2), (1, 3), (6, 7)]",4,0,3
+"a robot which liked that boy liked with the apple","[(0, 5), (0, 6), (0, 9), (1, 5), (2, 5), (3, 5), (4, 5), (7, 9), (8, 9)]","[(0, 1), (4, 5), (8, 9)]",2,1,7
+"this blue tall boy saw that robot without a teacher","[(0, 3), (0, 4), (0, 6), (0, 9), (1, 2), (1, 3), (5, 6), (7, 9), (8, 9)]","[(0, 3), (1, 2), (1, 3), (5, 6), (8, 9)]",5,0,4
+"a blue friendly ancient robot chased this apple","[(0, 4), (0, 5), (0, 7), (1, 3), (1, 4), (2, 3), (6, 7)]","[(0, 4), (1, 2), (1, 3), (1, 4), (6, 7)]",4,1,3
+"the robot admired that teacher","[(0, 1), (0, 2), (0, 4), (3, 4)]","[(0, 1), (0, 4), (2, 4), (3, 4)]",3,1,1
+"a book chased with this girl","[(0, 1), (0, 2), (0, 5), (3, 5), (4, 5)]","[(0, 1), (4, 5)]",2,0,3
+"the robot admired this friendly tall friendly book","[(0, 1), (0, 2), (0, 7), (3, 7), (4, 6), (4, 7), (5, 6)]","[(0, 1), (3, 6), (3, 7), (4, 6), (5, 6)]",4,1,3
+"the ancient ancient girl admired a book","[(0, 3), (0, 4), (0, 6), (1, 2), (1, 3), (5, 6)]","[(0, 3), (1, 2), (1, 3), (5, 6)]",4,0,2
+"that girl read without that book","[(0, 1), (0, 2), (0, 5), (3, 5), (4, 5)]","[(0, 1), (0, 2), (0, 5), (3, 5), (4, 5)]",5,0,0

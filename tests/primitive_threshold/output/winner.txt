@@ -1,0 +1,26 @@
+heuristic = root_log_prob
+threshold = -7.555708557219482
+auc       = 0.6266
+f1        = 0.3427
+coverage  = 0.3441
+
+Full ranking (by AUC, then F1):
+  root_log_prob                   AUC=0.627  F1=0.343  τ=-7.555708557219482
+  basic_level_class_log_prob      AUC=0.597  F1=0.344  τ=-6.532018213442834
+  basic_level_log_prob            AUC=0.569  F1=0.332  τ=-4.446455800651497
+  basic_level_count               AUC=0.538  F1=0.316  τ=156.75510204081633
+  path_depth                      AUC=0.509  F1=0.287  τ=7.0
+  leaf_count                      AUC=0.474  F1=0.226  τ=1.0
+  bl_depth                        AUC=0.432  F1=0.291  τ=1.0
+  max_path_count                  AUC=0.428  F1=0.000  τ=1014.0
+  tree_class_log_prob             AUC=0.394  F1=0.289  τ=-7.851582708570578
+  tree_log_prob                   AUC=0.322  F1=0.289  τ=-1.535519033525869
+  leaf_log_prob                   AUC=0.289  F1=0.287  τ=-14.00824216286007
+  lp_gain                         AUC=0.217  F1=0.289  τ=-7.007266239118968
+
+Winner thresholds for common admission rates:
+  cov≈0.50  τ=-8.133
+  cov≈0.70  τ=-8.591
+  cov≈0.80  τ=-8.910
+  cov≈0.90  τ=-9.495
+  cov≈0.95  τ=-9.803

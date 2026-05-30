@@ -49,32 +49,43 @@ SEEDS = [13, 17, 23, 42, 100]
 # ───────────────────────────── CSV helpers ────────────────────────────
 
 def load_learning_curve_csv(csv_path):
-    """Read a learning_curves.csv into parallel arrays:
-    (xs, F1, EM, gen_gram, gen_novel)."""
-    xs, F1, EM, gen_gram, gen_novel = [], [], [], [], []
+    """Read a learning_curves.csv into parallel arrays. Returns a tuple
+    ``(xs, F1, P, R, EM, gen_gram, gen_novel, gen_gram_novel,
+        p_parse_legal, prim_active)``.
+    Older CSVs without the new columns get graceful fallbacks
+    (P=R=F1, p_parse_legal=0, prim_active=1)."""
+    xs = []; F1 = []; P = []; R = []; EM = []
+    gen_gram = []; gen_novel = []; gen_gram_novel = []
+    p_parse_legal = []; prim_active = []
     with open(csv_path) as f:
         for row in csv.DictReader(f):
             xs.append(int(row["n_trained"]))
-            F1.append(float(row["parse_F1"]))
+            f1 = float(row["parse_F1"])
+            F1.append(f1)
+            P.append(float(row.get("parse_P", f1)))
+            R.append(float(row.get("parse_R", f1)))
             EM.append(float(row["parse_EM"]))
             gen_gram.append(float(row["gen_gram"]))
-            gen_novel.append(float(row["gen_novel"]))
-    return xs, F1, EM, gen_gram, gen_novel
+            gn = float(row["gen_novel"])
+            gen_novel.append(gn)
+            gen_gram_novel.append(float(row.get("gen_gram_novel", gn)))
+            p_parse_legal.append(float(row.get("p_parse_legal", 0.0)))
+            prim_active.append(float(row.get("prim_active_frac", 1.0)))
+    return (xs, F1, P, R, EM,
+            gen_gram, gen_novel, gen_gram_novel,
+            p_parse_legal, prim_active)
 
 
 def aggregate_seeds(seed_curves):
-    """Given a list of (xs, F1, EM, gen_gram, gen_novel) tuples (one
-    per seed, all with the same ``xs`` axis), return a dict of
-    ``{"xs": x_array, "F1": (mean, std), "EM": (mean, std),
-        "gen_gram": (mean, std), "gen_novel": (mean, std)}``.
-
-    Trims to the shortest curve so means are always well-defined
-    even if some seeds have one fewer eval point.
-    """
+    """Given a list of tuples from ``load_learning_curve_csv``, return
+    a dict of (mean, std) per metric. Trims to the shortest curve."""
     xs = seed_curves[0][0]
     n = min(len(sc[1]) for sc in seed_curves)
     out = {"xs": xs[:n]}
-    for i, name in enumerate(["F1", "EM", "gen_gram", "gen_novel"], start=1):
+    names = ["F1", "P", "R", "EM",
+             "gen_gram", "gen_novel", "gen_gram_novel",
+             "p_parse_legal", "prim_active"]
+    for i, name in enumerate(names, start=1):
         arr = np.array([sc[i][:n] for sc in seed_curves])
         out[name] = (arr.mean(axis=0), arr.std(axis=0))
     return out
@@ -82,12 +93,17 @@ def aggregate_seeds(seed_curves):
 
 def write_aggregated_csv(path, agg):
     """Write aggregated learning-curve mean/std to a CSV."""
+    cols = ["F1", "P", "R", "EM",
+            "gen_gram", "gen_novel", "gen_gram_novel",
+            "p_parse_legal", "prim_active"]
     with open(path, "w") as f:
-        f.write("n_trained,F1_mean,F1_std,EM_mean,EM_std,"
-                "gen_gram_mean,gen_gram_std,gen_novel_mean,gen_novel_std\n")
+        header = ["n_trained"]
+        for k in cols:
+            header += [f"{k}_mean", f"{k}_std"]
+        f.write(",".join(header) + "\n")
         for i, x in enumerate(agg["xs"]):
             row = [str(x)]
-            for k in ["F1", "EM", "gen_gram", "gen_novel"]:
+            for k in cols:
                 m, s = agg[k]
                 row += [f"{m[i]:.4f}", f"{s[i]:.4f}"]
             f.write(",".join(row) + "\n")
@@ -97,7 +113,10 @@ def write_aggregated_csv(path, agg):
 
 def run_multi_seed_learning_curves(corpus_dir, out_base, grammar, corpus,
                                     seeds=SEEDS, eval_every=10,
-                                    n_gen_per_eval=30):
+                                    n_gen_per_eval=50,
+                                    primitives_first=None,
+                                    maturity_gate: tuple = None,
+                                    gate_mode:    str   = "skip"):
     """Orchestrate: run ``run_learning_curves`` once per seed into
     ``out_base/seed_{N}/``, then aggregate and write the unified
     ``out_base/aggregated.csv``. Returns the aggregated dict."""
@@ -117,6 +136,9 @@ def run_multi_seed_learning_curves(corpus_dir, out_base, grammar, corpus,
             seed=sd,
             eval_every=eval_every,
             n_gen_per_eval=n_gen_per_eval,
+            primitives_first=primitives_first,
+            maturity_gate=maturity_gate,
+            gate_mode=gate_mode,
         )
         seed_curves.append(load_learning_curve_csv(
             os.path.join(seed_dir, "learning_curves.csv")))
@@ -129,53 +151,81 @@ def run_multi_seed_learning_curves(corpus_dir, out_base, grammar, corpus,
 
 
 def plot_learning_curves_with_band(out_path, agg, title, n_seeds=None):
-    """Single-variant 3-panel chart: parse acc, gen gram, gen novelty —
-    with mean line + ±1 std shaded band for each metric."""
-    fig, axes = plt.subplots(1, 3, figsize=(18, 5))
-    panel_specs = [
-        ("Parse accuracy (held-out test)",
-            [("F1", "Parse F1", "#1f77b4"),
-             ("EM", "Exact-match", "#9467bd")],
-            "% on held-out test"),
-        ("Generation grammaticality",
-            [("gen_gram", "Grammatical", "#bcbd22")],
-            "% of outputs"),
-        ("Generation novelty (not in train)",
-            [("gen_novel", "Novel", "#d62728")],
-            "% of outputs"),
-    ]
+    """Single-variant 4-panel chart with ±1σ bands across seeds:
+        A: Parse Precision + Recall + Exact-match  (P/R split, not F1)
+        B: Generation Grammaticality + In-lexicon
+        C: Generation Novelty (grammatical-only)
+        D: Gate activation (% sentences with mature primitives)
+    Also writes a separate ``grids_curves.png`` next to ``out_path`` with
+    the GRIDS-style omission / co-mission plots."""
     xs = agg["xs"]
-    for ax, (sub_title, keys, ylabel) in zip(axes, panel_specs):
+    suffix = f"  (mean ± std across {n_seeds} seeds)" if n_seeds else ""
+
+    fig, axes = plt.subplots(1, 4, figsize=(24, 5))
+    panel_specs = [
+        ("Parse accuracy — precision / recall (split)",
+            [("P",  "Precision",   "#1f77b4"),
+             ("R",  "Recall",      "#2ca02c"),
+             ("EM", "Exact-match", "#9467bd")]),
+        ("Generation grammaticality",
+            [("gen_gram", "Grammatical", "#bcbd22")]),
+        ("Generation novelty (grammatical-only)",
+            [("gen_gram_novel", "Grammatical & Novel", "#d62728")]),
+        ("Gate activation",
+            [("prim_active", "% train sents w/ mature primitives", "#7f7f7f")]),
+    ]
+    for ax, (sub_title, keys) in zip(axes, panel_specs):
         for k, lbl, c in keys:
             mean, std = agg[k]
-            mean_pct = 100 * mean
-            std_pct  = 100 * std
-            ax.plot(xs, mean_pct, "o-", color=c, linewidth=2, label=lbl)
-            ax.fill_between(xs, mean_pct - std_pct, mean_pct + std_pct,
+            ax.plot(xs, 100*mean, "o-", color=c, linewidth=2, label=lbl)
+            ax.fill_between(xs, 100*(mean - std), 100*(mean + std),
                             color=c, alpha=0.2)
-        ax.set_xlabel("# training sentences")
-        ax.set_ylabel(ylabel)
-        ax.set_title(sub_title)
-        ax.set_ylim(0, 105)
-        ax.grid(alpha=0.3)
-        ax.legend(loc="lower right", fontsize=9)
-    suffix = f"  (mean ± std across {n_seeds} seeds)" if n_seeds else ""
+        ax.set_xlabel("# training sentences"); ax.set_ylabel("%")
+        ax.set_title(sub_title); ax.set_ylim(0, 105)
+        ax.grid(alpha=0.3); ax.legend(loc="lower right", fontsize=9)
     fig.suptitle(title + suffix, fontsize=13, fontweight="bold")
     plt.tight_layout(rect=[0, 0, 1, 0.94])
     plt.savefig(out_path, dpi=140, bbox_inches="tight")
     plt.close()
     print(f"  Chart → {out_path}")
 
+    # GRIDS-style omission/co-mission alongside the main chart.
+    grids_path = os.path.join(os.path.dirname(out_path), "grids_curves.png")
+    fig, axes = plt.subplots(1, 2, figsize=(13, 5))
+    pp_m, pp_s = agg["p_parse_legal"]
+    axes[0].plot(xs, pp_m, "o-", color="#1f77b4", linewidth=2)
+    axes[0].fill_between(xs, pp_m - pp_s, pp_m + pp_s, color="#1f77b4", alpha=0.2)
+    axes[0].set_xlabel("# training sentences")
+    axes[0].set_ylabel("Probability of parsing a legal sentence")
+    axes[0].set_title("(a) Parsing — errors of omission")
+    axes[0].set_ylim(0, 1.05); axes[0].grid(alpha=0.3)
+    gg_m, gg_s = agg["gen_gram"]
+    axes[1].plot(xs, gg_m, "o-", color="#2ca02c", linewidth=2)
+    axes[1].fill_between(xs, gg_m - gg_s, gg_m + gg_s, color="#2ca02c", alpha=0.2)
+    axes[1].set_xlabel("# training sentences")
+    axes[1].set_ylabel("Probability of generating a legal sentence")
+    axes[1].set_title("(b) Generation — errors of co-mission")
+    axes[1].set_ylim(0, 1.05); axes[1].grid(alpha=0.3)
+    fig.suptitle(f"GRIDS-style omission / co-mission — {title}{suffix}",
+                  fontsize=13, fontweight="bold")
+    plt.tight_layout(rect=[0, 0, 1, 0.94])
+    plt.savefig(grids_path, dpi=140, bbox_inches="tight")
+    plt.close()
+    print(f"  GRIDS → {grids_path}")
+
 
 def plot_overlay_with_bands(out_path, agg_by_variant, colors, labels,
                               suptitle, n_seeds=None):
-    """Three-panel overlay: parse F1 / gen gram / gen novelty, one
-    line per variant. Each variant gets a mean line + ±1 std band."""
-    fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+    """Multi-variant overlay (4-panel): parse Precision, parse Recall,
+    gen grammaticality, gen novelty (grammatical). One line per variant
+    with ±1σ band. Also writes a GRIDS-style overlay next to ``out_path``."""
+    fig, axes = plt.subplots(1, 4, figsize=(24, 5))
     panel_specs = [
-        ("Parse F1 (held-out test)",     "F1",        "% bracket F1"),
-        ("Generation grammaticality",    "gen_gram",  "% of outputs"),
-        ("Generation novelty (not in train)", "gen_novel", "% of outputs"),
+        ("Parse Precision (held-out test)",                "P",              "% bracket precision"),
+        ("Parse Recall (held-out test)",                   "R",              "% bracket recall"),
+        ("Generation grammaticality",                      "gen_gram",       "% of outputs"),
+        ("Generation novelty (grammatical-only, not in train)",
+                                                           "gen_gram_novel", "% of outputs"),
     ]
     for ax, (title, key, ylabel) in zip(axes, panel_specs):
         for v, agg in agg_by_variant.items():
@@ -200,6 +250,35 @@ def plot_overlay_with_bands(out_path, agg_by_variant, colors, labels,
     plt.savefig(out_path, dpi=140, bbox_inches="tight")
     plt.close()
     print(f"  Overlay → {out_path}")
+
+    # GRIDS-style overlay: P(parse legal) + P(generate legal), variants overlaid
+    grids_path = os.path.join(os.path.dirname(out_path), "grids_overlay.png")
+    fig, axes = plt.subplots(1, 2, figsize=(13, 5))
+    for v, agg in agg_by_variant.items():
+        xs = agg["xs"]
+        c = colors.get(v, "#666666"); lbl = labels.get(v, v)
+        pp_m, pp_s = agg["p_parse_legal"]
+        axes[0].plot(xs, pp_m, "o-", color=c, linewidth=2, label=lbl)
+        axes[0].fill_between(xs, pp_m - pp_s, pp_m + pp_s, color=c, alpha=0.18)
+        gg_m, gg_s = agg["gen_gram"]
+        axes[1].plot(xs, gg_m, "o-", color=c, linewidth=2, label=lbl)
+        axes[1].fill_between(xs, gg_m - gg_s, gg_m + gg_s, color=c, alpha=0.18)
+    axes[0].set_xlabel("# training sentences")
+    axes[0].set_ylabel("Probability of parsing a legal sentence")
+    axes[0].set_title("(a) Parsing — errors of omission")
+    axes[0].set_ylim(0, 1.05); axes[0].grid(alpha=0.3)
+    axes[0].legend(loc="lower right", fontsize=9)
+    axes[1].set_xlabel("# training sentences")
+    axes[1].set_ylabel("Probability of generating a legal sentence")
+    axes[1].set_title("(b) Generation — errors of co-mission")
+    axes[1].set_ylim(0, 1.05); axes[1].grid(alpha=0.3)
+    axes[1].legend(loc="lower right", fontsize=9)
+    fig.suptitle("GRIDS-style omission / co-mission overlay" + suffix,
+                  fontsize=13, fontweight="bold")
+    plt.tight_layout(rect=[0, 0, 1, 0.94])
+    plt.savefig(grids_path, dpi=140, bbox_inches="tight")
+    plt.close()
+    print(f"  GRIDS overlay → {grids_path}")
 
 
 # ─────────────────────── Multi-seed hollow_learn ──────────────────────
@@ -234,7 +313,10 @@ def compute_hollow_metrics(test_dir):
 
 def run_multi_seed_hollow_learn(corpus_dir, out_base, grammar, corpus,
                                   seeds=SEEDS, primitives_first=200,
-                                  viz_dir=None):
+                                  viz_dir=None,
+                                  maturity_gate: tuple = None,
+                                  gate_mode: str = "skip",
+                                  viz_intermediates: bool = False):
     """Orchestrate: run ``run_hollow_learn`` once per seed into
     ``out_base/seed_{N}/``, then aggregate F1/EM/step-pick into
     ``out_base/hollow_learn_summary.csv`` and a printable table.
@@ -263,6 +345,9 @@ def run_multi_seed_hollow_learn(corpus_dir, out_base, grammar, corpus,
             corpus=corpus,
             seed=sd,
             primitives_first=primitives_first,
+            maturity_gate=maturity_gate,
+            gate_mode=gate_mode,
+            viz_intermediates=viz_intermediates,
         )
         f1, em, sp = compute_hollow_metrics(seed_dir)
         per_seed.append({"seed": sd, "F1": f1, "EM": em, "step_pick": sp})

@@ -78,6 +78,9 @@ def run_hollow_learn(
     corpus:     list = TEST_CORPUS1,
     seed:       int  = 13,
     primitives_first: int = 200,
+    maturity_gate: tuple = None,
+    gate_mode:    str   = "skip",
+    viz_intermediates: bool = True,
 ):
     """Run the full hollow_learn pipeline against ``corpus_dir`` /
     ``grammar`` / ``corpus``, writing outputs to ``out_dir``.
@@ -88,7 +91,7 @@ def run_hollow_learn(
     # ── Configuration ──────────────────────────────────────────────────────────
     OUT_DIR = out_dir
     HOLLOW_CORPUS_DIR = corpus_dir
-    VIZ_INTERMEDIATES = True    # per-step intermediate parse / LTM viz
+    VIZ_INTERMEDIATES = viz_intermediates    # per-step intermediate parse / LTM viz
 
     CONTEXT_LENGTH    = 3
     THRESHOLD         = 30
@@ -210,17 +213,22 @@ def run_hollow_learn(
     )
 
     # ── Phase 1: primitives-only on random sentences ───────────────────────────
-    print(f"\n=== PHASE 1: PRIMITIVES ONLY ({PRIMITIVES_FIRST} random sentences) ===")
-    for i in range(PRIMITIVES_FIRST):
-        sentence = generate("S", grammar)
-        parse_tree = webster.parse_sentence(
-            sentence, threshold=1e9, new_vocab=True,
-            learning=True, debug=False)
-        if VIZ_INTERMEDIATES and i % 25 == 0:
-            parse_tree.visualize(f"{OUT_DIR}/train_trees/primitives_tree{i}")
-            webster.visualize_ltm(f"{OUT_DIR}/ltms/primitives_ltm{i}", max_depth=3)
-        if (i + 1) % 50 == 0:
-            print(f"  [{i+1}/{PRIMITIVES_FIRST}]")
+    if PRIMITIVES_FIRST > 0:
+        print(f"\n=== PHASE 1: PRIMITIVES ONLY ({PRIMITIVES_FIRST} random sentences) ===")
+        for i in range(PRIMITIVES_FIRST):
+            sentence = generate("S", grammar)
+            parse_tree = webster.parse_sentence(
+                sentence, threshold=1e9, new_vocab=True,
+                learning=True, debug=False)
+            if VIZ_INTERMEDIATES and i % 25 == 0:
+                parse_tree.visualize(f"{OUT_DIR}/train_trees/primitives_tree{i}")
+                webster.visualize_ltm(f"{OUT_DIR}/ltms/primitives_ltm{i}", max_depth=3)
+            if (i + 1) % 50 == 0:
+                print(f"  [{i+1}/{PRIMITIVES_FIRST}]")
+    else:
+        gate_desc = (f"maturity_gate={maturity_gate} mode={gate_mode}"
+                     if maturity_gate else "no gate (all primitives stable)")
+        print(f"\n=== PHASE 1: SKIPPED (primitives_first=0; {gate_desc}) ===")
 
     # ── Phase 2: replay TRAIN hollow trees with merges ─────────────────────────
     print(f"\n=== PHASE 2: HOLLOW CORPUS TRAINING (train fold, size = {len(train_hollow)}) ===")
@@ -230,13 +238,23 @@ def run_hollow_learn(
         merges   = hollow["merges"]
 
         tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
-        tree.build_primitives(sentence, threshold=THRESHOLD)
-        for m in merges:
-            try:
-                tree.apply_candidate(m["left"], m["right"])
-            except Exception as e:
-                print(f"  [WARN] Merge ({m['left']}, {m['right']}) failed on "
-                      f"sentence \"{sentence}\": {e}")
+        tree.build_primitives(sentence, threshold=THRESHOLD,
+                              maturity_gate=maturity_gate, gate_mode=gate_mode)
+        # all_or_none: if any primitive immature, skip gold merges entirely
+        # (the context tree still grows via add_parse_tree below).
+        if (maturity_gate is not None and gate_mode == "all_or_none"
+                and not tree.all_primitives_stable()):
+            pass  # no merges this sentence
+        else:
+            for m in merges:
+                try:
+                    tree.apply_candidate(m["left"], m["right"])
+                except Exception as e:
+                    # In skip mode, missing primitives (immature) cause
+                    # apply_candidate to fail — that's by design.
+                    if maturity_gate is None:
+                        print(f"  [WARN] Merge ({m['left']}, {m['right']}) failed on "
+                              f"sentence \"{sentence}\": {e}")
         webster.ltm.add_parse_tree(tree, shuffle=True, debug=False)
         trained_trees.append(tree)
 
@@ -280,7 +298,8 @@ def run_hollow_learn(
     SAVE_DIR = f"{OUT_DIR}/final_ltm_data"
     webster.save_state(SAVE_DIR)
     print(f"\nSaved Final LTM to \"{SAVE_DIR}\"")
-    webster.visualize_ltm(f"{OUT_DIR}/final_ltm", max_depth=3)
+    if VIZ_INTERMEDIATES:
+        webster.visualize_ltm(f"{OUT_DIR}/final_ltm", max_depth=3)
 
     # =============================================================================
     # Shared helpers (lifted from grammar_decoding_test.py / grammar_threshold_test.py)
@@ -387,7 +406,8 @@ def run_hollow_learn(
         # primitive stability AND the climbing gate.
         pred_tree = webster.parse_sentence(
             sentence, threshold=THRESHOLD, new_vocab=False,
-            learning=False, debug=False)
+            learning=False, debug=False,
+            maturity_gate=maturity_gate, gate_mode=gate_mode)
         pred = _bracket_set(pred_tree)
 
         tp = len(gold & pred); fp = len(pred - gold); fn = len(gold - pred)
@@ -399,8 +419,9 @@ def run_hollow_learn(
 
         # Per-sentence parse-tree viz: gold (replayed merges) + pred (auto-parse).
         idx = len(parse_rows) - 1
-        gold_tree.visualize(f"{OUT_DIR}/test_trees/test_gold_tree{idx}")
-        pred_tree.visualize(f"{OUT_DIR}/test_trees/test_pred_tree{idx}")
+        if VIZ_INTERMEDIATES:
+            gold_tree.visualize(f"{OUT_DIR}/test_trees/test_gold_tree{idx}")
+            pred_tree.visualize(f"{OUT_DIR}/test_trees/test_pred_tree{idx}")
 
     # Bonus: parse + visualize random fake-word strings to expose the
     # negative-input rejection behavior of the sum_class_lp gate.
@@ -412,8 +433,10 @@ def run_hollow_learn(
     for i, fake in enumerate(fake_sentences):
         fake_tree = webster.parse_sentence(
             fake, threshold=THRESHOLD, new_vocab=False,
-            learning=False, debug=False)
-        fake_tree.visualize(f"{OUT_DIR}/fake_trees/fake_parse_tree{i}")
+            learning=False, debug=False,
+            maturity_gate=maturity_gate, gate_mode=gate_mode)
+        if VIZ_INTERMEDIATES:
+            fake_tree.visualize(f"{OUT_DIR}/fake_trees/fake_parse_tree{i}")
         n_chunks = sum(1 for _ in _walk_composites(fake_tree.global_root_node))
         print(f"    [{i+1:>2}] \"{fake}\"   chunks formed: {n_chunks}")
 

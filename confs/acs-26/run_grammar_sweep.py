@@ -122,6 +122,10 @@ def main():
             corpus=corpora[v],
             seeds=SEEDS,
             eval_every=10,
+            # Production primitive-maturity gate (see tests/primitive_threshold).
+            primitives_first=0,
+            maturity_gate=("root_log_prob", -12.0),
+            gate_mode="skip",
         )
 
     print(f"\n=== Building overlay comparison chart (mean ± std) ===")

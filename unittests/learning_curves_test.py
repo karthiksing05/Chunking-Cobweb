@@ -47,7 +47,7 @@ CONTEXT_LENGTH   = 3
 THRESHOLD        = 30
 PRIMITIVES_FIRST = 200
 EVAL_EVERY       = 10
-N_GEN_PER_EVAL   = 30   # smaller than hollow_learn's 50 for speed
+N_GEN_PER_EVAL   = 50   # generation samples per eval point (also used for GRIDS omission eval)
 
 
 # ---------- helpers reused from hollow_learn (re-declared here to avoid
@@ -142,6 +142,9 @@ def run_learning_curves(
     seed:       int  = 13,
     eval_every: int  = EVAL_EVERY,
     n_gen_per_eval: int = N_GEN_PER_EVAL,
+    primitives_first: int = None,    # None → uses module-level PRIMITIVES_FIRST
+    maturity_gate: tuple = None,
+    gate_mode:    str   = "skip",
 ):
     """Train incrementally; eval every ``eval_every`` training sentences."""
     if os.path.exists(out_dir):
@@ -182,11 +185,17 @@ def run_learning_curves(
         content_top_k=7, content_pool_depth=4,
     )
 
-    print(f"\nPHASE 1: PRIMITIVES ({PRIMITIVES_FIRST} random sentences)")
-    for i in range(PRIMITIVES_FIRST):
-        s = generate("S", grammar)
-        webster.parse_sentence(s, threshold=1e9, new_vocab=True,
-                               learning=True, debug=False)
+    pf = PRIMITIVES_FIRST if primitives_first is None else primitives_first
+    if pf > 0:
+        print(f"\nPHASE 1: PRIMITIVES ({pf} random sentences)")
+        for i in range(pf):
+            s = generate("S", grammar)
+            webster.parse_sentence(s, threshold=1e9, new_vocab=True,
+                                   learning=True, debug=False)
+    else:
+        gate_desc = (f"gate={maturity_gate} mode={gate_mode}"
+                     if maturity_gate else "no gate")
+        print(f"\nPHASE 1: SKIPPED (primitives_first=0; {gate_desc})")
 
     recog, WORD_TO_POS = _build_cyk_recognizer(grammar)
 
@@ -207,7 +216,9 @@ def run_learning_curves(
         for sent, g in gold.items():
             pt = webster.parse_sentence(sent, threshold=THRESHOLD,
                                         new_vocab=False, learning=False,
-                                        debug=False)
+                                        debug=False,
+                                        maturity_gate=maturity_gate,
+                                        gate_mode=gate_mode)
             pred = _bracket_set(pt)
             tp += len(g & pred); fp += len(pred - g); fn += len(g - pred)
             if g == pred and len(g) > 0: em += 1
@@ -217,9 +228,9 @@ def run_learning_curves(
         return P, R, F, em / max(n, 1)
 
     def _eval_gen(n_samples=n_gen_per_eval):
-        gen_ok = lex_ok = novel = total = 0
+        gen_ok = lex_ok = novel = gram_novel = total = 0
         if not getattr(webster, "sentence_root_chunks", None):
-            return 0.0, 0.0, 0.0, 0
+            return 0.0, 0.0, 0.0, 0.0, 0
         for _ in range(n_samples):
             try:
                 text, _ = webster.generate_via_chunk_replay()
@@ -234,97 +245,187 @@ def run_learning_curves(
             if l_ok:  lex_ok += 1
             if g_ok:  gen_ok += 1
             if n_ok:  novel  += 1
+            if g_ok and n_ok: gram_novel += 1
         return (gen_ok / max(total, 1),
                 novel  / max(total, 1),
                 lex_ok / max(total, 1),
+                gram_novel / max(total, 1),
                 total)
+
+    def _eval_omission(n_samples=n_gen_per_eval):
+        """GRIDS-style 'probability of parsing a legal sentence':
+        generate ``n_samples`` sentences from the GOLD grammar and
+        check what fraction the LEARNER can fully chunk (single root
+        chunk spanning the entire sentence). Returns (p_parse_legal,
+        total_evaluated). Errors of omission = 1 - p_parse_legal."""
+        success = total = 0
+        for _ in range(n_samples):
+            try:
+                sent = generate("S", grammar)
+            except Exception:
+                continue
+            toks = sent.strip().split()
+            n_words = len(toks)
+            if n_words < 2:  # single-token sentences are trivially "parsed"
+                continue
+            try:
+                pt = webster.parse_sentence(
+                    sent, threshold=THRESHOLD, new_vocab=False,
+                    learning=False, debug=False,
+                    maturity_gate=maturity_gate, gate_mode=gate_mode)
+            except Exception:
+                continue
+            total += 1
+            children = list(pt.global_root_node.children)
+            if len(children) == 1:
+                root = children[0][1]
+                if isinstance(root, PrimitiveParseNode):
+                    continue   # single primitive ≠ complete parse of 2+ words
+                a, b = _chunk_span(root)
+                if a == 0 and b == n_words - 1:
+                    success += 1
+        return success / max(total, 1), total
 
     # ── Phase 2: incremental train + eval ──
     print(f"\nPHASE 2: INCREMENTAL TRAINING ({len(train_h)} sentences, "
           f"eval every {eval_every})")
     trained_trees = []
     rows = []   # learning curve: list of dicts
-    # Initial eval at n_trained=0 (no chunks yet, gen unavailable).
+    # Per-training-sentence gate-firing tracker.
+    n_sents_with_chunks = 0
+
     P0, R0, F0, em0 = _eval_parse()
     rows.append({"n_trained": 0,
                  "parse_F1": F0, "parse_P": P0, "parse_R": R0, "parse_EM": em0,
                  "gen_gram": 0.0, "gen_novel": 0.0, "gen_lex": 0.0,
-                 "gen_n": 0})
+                 "gen_gram_novel": 0.0,
+                 "p_parse_legal": 0.0,   # GRIDS omission inverse
+                 "gen_n": 0, "prim_active_frac": 0.0})
     print(f"  n=  0  F1={100*F0:5.1f}%  EM={100*em0:5.1f}%  gen=n/a")
 
     for i, hollow in enumerate(train_h):
         sent  = hollow["sentence"]
         merges= hollow["merges"]
         tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
-        tree.build_primitives(sent, threshold=THRESHOLD)
-        for m in merges:
-            try: tree.apply_candidate(m["left"], m["right"])
-            except Exception: pass
+        tree.build_primitives(sent, threshold=THRESHOLD,
+                              maturity_gate=maturity_gate, gate_mode=gate_mode)
+        if maturity_gate is None:
+            sentence_active = True
+        elif gate_mode == "all_or_none":
+            sentence_active = tree.all_primitives_stable()
+        else:
+            sentence_active = any(getattr(n, "stable", False) for n in tree.nodes)
+        if sentence_active:
+            n_sents_with_chunks += 1
+
+        if (maturity_gate is not None and gate_mode == "all_or_none"
+                and not tree.all_primitives_stable()):
+            pass  # no merges; context tree still grows via add_parse_tree
+        else:
+            for m in merges:
+                try: tree.apply_candidate(m["left"], m["right"])
+                except Exception: pass
         webster.ltm.add_parse_tree(tree, shuffle=True, debug=False)
         trained_trees.append(tree)
 
         if (i + 1) % eval_every == 0 or (i + 1) == len(train_h):
-            # Re-mine leaf transitions + chunk records on current trees.
             webster.learn_leaf_transitions(trained_trees)
             webster.learn_chunk_records(trained_trees)
             webster.ltm.chunk_pool_weight = 5.0
             P, R, F, em = _eval_parse()
-            g_gram, g_novel, g_lex, g_n = _eval_gen()
+            g_gram, g_novel, g_lex, g_gram_novel, g_n = _eval_gen()
+            p_parse_legal, _n_om = _eval_omission()
+            prim_active_frac = n_sents_with_chunks / (i + 1)
             rows.append({
                 "n_trained": i + 1,
                 "parse_F1": F, "parse_P": P, "parse_R": R, "parse_EM": em,
                 "gen_gram": g_gram, "gen_novel": g_novel, "gen_lex": g_lex,
+                "gen_gram_novel": g_gram_novel,
+                "p_parse_legal": p_parse_legal,
                 "gen_n": g_n,
+                "prim_active_frac": prim_active_frac,
             })
-            print(f"  n={i+1:>3}  F1={100*F:5.1f}%  EM={100*em:5.1f}%  "
+            print(f"  n={i+1:>3}  P={100*P:5.1f}%  R={100*R:5.1f}%  EM={100*em:5.1f}%  "
                   f"gen_gram={100*g_gram:5.1f}%  "
-                  f"gen_novel={100*g_novel:5.1f}%  (n={g_n})")
+                  f"P(parse_legal)={100*p_parse_legal:5.1f}%  "
+                  f"prim_active={100*prim_active_frac:5.1f}%")
 
     # ── Persist CSV + chart ──
     csv_path = f"{out_dir}/learning_curves.csv"
     with open(csv_path, "w") as f:
         f.write("n_trained,parse_F1,parse_P,parse_R,parse_EM,"
-                "gen_gram,gen_novel,gen_lex,gen_n\n")
+                "gen_gram,gen_novel,gen_lex,gen_gram_novel,"
+                "p_parse_legal,gen_n,prim_active_frac\n")
         for r in rows:
             f.write(f"{r['n_trained']},{r['parse_F1']:.4f},"
                     f"{r['parse_P']:.4f},{r['parse_R']:.4f},"
                     f"{r['parse_EM']:.4f},{r['gen_gram']:.4f},"
                     f"{r['gen_novel']:.4f},{r['gen_lex']:.4f},"
-                    f"{r['gen_n']}\n")
+                    f"{r.get('gen_gram_novel', 0.0):.4f},"
+                    f"{r.get('p_parse_legal', 0.0):.4f},"
+                    f"{r['gen_n']},{r.get('prim_active_frac', 1.0):.4f}\n")
     print(f"\nCurves CSV  → {csv_path}")
 
     xs = [r["n_trained"] for r in rows]
-    fig, axes = plt.subplots(1, 3, figsize=(18, 5))
-    # Parse panel
-    axes[0].plot(xs, [100*r["parse_F1"] for r in rows], "o-", color="#1f77b4", label="Parse F1")
-    axes[0].plot(xs, [100*r["parse_EM"] for r in rows], "s-", color="#9467bd", label="Exact-match")
-    axes[0].set_xlabel("# training sentences")
-    axes[0].set_ylabel("% on held-out test")
-    axes[0].set_title("Parse accuracy")
-    axes[0].set_ylim(0, 105)
-    axes[0].grid(alpha=0.3); axes[0].legend()
-    # Gen-gram panel
+
+    # ── learning_curves.png — 4-panel (parse P/R split + gen + novelty) ──
+    fig, axes = plt.subplots(1, 4, figsize=(24, 5))
+    axes[0].plot(xs, [100*r["parse_P"]  for r in rows], "o-", color="#1f77b4", label="Precision")
+    axes[0].plot(xs, [100*r["parse_R"]  for r in rows], "s-", color="#2ca02c", label="Recall")
+    axes[0].plot(xs, [100*r["parse_EM"] for r in rows], "d-", color="#9467bd", label="Exact-match")
+    axes[0].plot(xs, [100*r.get("prim_active_frac", 1.0) for r in rows],
+                  "^--", color="#7f7f7f", alpha=0.7, label="gate active")
+    axes[0].set_xlabel("# training sentences"); axes[0].set_ylabel("%")
+    axes[0].set_title("Parse accuracy — precision / recall (split)")
+    axes[0].set_ylim(0, 105); axes[0].grid(alpha=0.3); axes[0].legend(loc="lower right", fontsize=9)
+
     axes[1].plot(xs, [100*r["gen_gram"] for r in rows], "o-", color="#bcbd22", label="Grammatical")
     axes[1].plot(xs, [100*r["gen_lex"]  for r in rows], "s-", color="#17becf", label="In-lexicon")
-    axes[1].set_xlabel("# training sentences")
-    axes[1].set_ylabel("% of generated outputs")
+    axes[1].set_xlabel("# training sentences"); axes[1].set_ylabel("%")
     axes[1].set_title("Generation grammaticality")
-    axes[1].set_ylim(0, 105)
-    axes[1].grid(alpha=0.3); axes[1].legend()
-    # Gen-novelty panel
-    axes[2].plot(xs, [100*r["gen_novel"] for r in rows], "o-", color="#d62728", label="Novel")
-    axes[2].set_xlabel("# training sentences")
-    axes[2].set_ylabel("% of generated outputs")
-    axes[2].set_title("Generation novelty (not in train)")
-    axes[2].set_ylim(0, 105)
-    axes[2].grid(alpha=0.3); axes[2].legend()
+    axes[1].set_ylim(0, 105); axes[1].grid(alpha=0.3); axes[1].legend(loc="lower right", fontsize=9)
+
+    axes[2].plot(xs, [100*r.get("gen_gram_novel", 0.0) for r in rows],
+                  "o-", color="#d62728", label="Grammatical & novel")
+    axes[2].set_xlabel("# training sentences"); axes[2].set_ylabel("% of generated outputs")
+    axes[2].set_title("Generation novelty (grammatical-only)")
+    axes[2].set_ylim(0, 105); axes[2].grid(alpha=0.3); axes[2].legend()
+
+    axes[3].plot(xs, [100*r.get("prim_active_frac", 1.0) for r in rows],
+                  "^-", color="#7f7f7f", label="% train sents w/ mature primitives")
+    axes[3].set_xlabel("# training sentences"); axes[3].set_ylabel("%")
+    axes[3].set_title("Gate activation")
+    axes[3].set_ylim(0, 105); axes[3].grid(alpha=0.3); axes[3].legend(loc="lower right", fontsize=9)
+
     fig.suptitle(
-        f"Learning curves — {corpus_dir.split('/')[-1]} (eval every {eval_every})",
+        f"Learning curves — {corpus_dir.split('/')[-1]} (eval every {eval_every}, n_gen={n_gen_per_eval})",
         fontsize=13, fontweight="bold")
     plt.tight_layout(rect=[0, 0, 1, 0.94])
     plt.savefig(f"{out_dir}/learning_curves.png", dpi=140, bbox_inches="tight")
     plt.close()
     print(f"Curves PNG  → {out_dir}/learning_curves.png")
+
+    # ── grids_curves.png — GRIDS-style (Langley & Stromsten 2000 Fig 1) ──
+    fig, axes = plt.subplots(1, 2, figsize=(13, 5))
+    axes[0].plot(xs, [r.get("p_parse_legal", 0.0) for r in rows],
+                  "o-", color="#1f77b4", linewidth=2)
+    axes[0].set_xlabel("# training sentences")
+    axes[0].set_ylabel("Probability of parsing a legal sentence")
+    axes[0].set_title("(a) Parsing — errors of omission")
+    axes[0].set_ylim(0, 1.05); axes[0].grid(alpha=0.3)
+    axes[1].plot(xs, [r["gen_gram"] for r in rows],
+                  "o-", color="#2ca02c", linewidth=2)
+    axes[1].set_xlabel("# training sentences")
+    axes[1].set_ylabel("Probability of generating a legal sentence")
+    axes[1].set_title("(b) Generation — errors of co-mission")
+    axes[1].set_ylim(0, 1.05); axes[1].grid(alpha=0.3)
+    fig.suptitle(
+        f"GRIDS-style omission / co-mission curves — {corpus_dir.split('/')[-1]}",
+        fontsize=13, fontweight="bold")
+    plt.tight_layout(rect=[0, 0, 1, 0.94])
+    plt.savefig(f"{out_dir}/grids_curves.png", dpi=140, bbox_inches="tight")
+    plt.close()
+    print(f"GRIDS PNG   → {out_dir}/grids_curves.png")
 
 
 if __name__ == "__main__":

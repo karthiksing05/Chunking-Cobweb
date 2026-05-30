@@ -1018,11 +1018,31 @@ class FiniteParseTree(object):
 
     # ---- primitive layer ------------------------------------------------
 
-    def build_primitives(self, window: str, threshold=0, debug: bool = False):
+    def build_primitives(self, window: str, threshold=0, debug: bool = False,
+                          maturity_gate: tuple = None,
+                          gate_mode: str = "skip"):
         """
         Tokenize *window* and create PrimitiveParseNode objects.
         Each primitive is categorized in the context hierarchy to obtain
         its label ({word_id: 1}) and label_path (multi-depth ancestor list).
+
+        ``maturity_gate``: optional ``(heuristic_name, threshold)`` tuple.
+            When provided, each primitive's ``stable`` flag is set by
+            ``score_data[heuristic_name] > threshold`` instead of the
+            legacy ``cost > threshold`` integer-count gate. Default
+            from ``tests/primitive_threshold``:
+            ``("root_log_prob", -8.5)`` — context-tree root log-prob,
+            gating at ≈70% admission.
+
+        ``gate_mode``: how immature primitives propagate:
+            "skip"        — only the immature primitives themselves are
+                            marked unstable; mature primitives can still
+                            participate in chunk merges (default).
+            "all_or_none" — if ANY primitive is immature, mark ALL as
+                            unstable for this sentence. The parser will
+                            form no chunks but the context tree still
+                            absorbs the primitive instances on the
+                            subsequent ``add_parse_tree`` call.
         """
         self.window = window
 
@@ -1140,7 +1160,13 @@ class FiniteParseTree(object):
                                             eval_alpha=getattr(self.ltm, 'context_bl_alpha', None))
             node.score_data = score_data
 
-            if threshold == "converge":
+            if maturity_gate is not None:
+                # Heuristic-based gate (met6 research). Higher score
+                # = more mature representation; admit if above threshold.
+                h_name, h_thr = maturity_gate
+                h_val = score_data.get(h_name, float("-inf"))
+                node.stable = (h_val is not None and h_val > h_thr)
+            elif threshold == "converge":
                 node.stable = True
             else:
                 # cost is basic_level_count: -1 (root=no evidence) or a
@@ -1266,6 +1292,21 @@ class FiniteParseTree(object):
                     self.ltm.context_hierarchy.register_ref_val(
                         node.label_path, _ctx_leaves[idx]
                     )
+
+        # all_or_none gate: cascade. If maturity_gate produced even one
+        # immature primitive AND gate_mode requests it, mark every
+        # primitive on this sentence unstable. The parser then forms
+        # no composites, but the context tree still absorbs the
+        # primitives' contexts on the subsequent add_parse_tree() call.
+        if maturity_gate is not None and gate_mode == "all_or_none":
+            if any(not getattr(n, "stable", False) for n in self.nodes):
+                for n in self.nodes:
+                    n.stable = False
+
+    def all_primitives_stable(self) -> bool:
+        """True if every primitive in this tree passed the maturity gate.
+        Used by training loops to decide whether to attempt gold merges."""
+        return all(getattr(n, "stable", False) for n in self.nodes) and len(self.nodes) > 0
 
     # ---- pair enumeration -----------------------------------------------
 
@@ -1868,7 +1909,9 @@ class FiniteParseTree(object):
     CLIMB_COUNT_THRESHOLD_DEFAULT = 30
 
     def build(self, window: str, end_behavior="converge", debug=False,
-              climb_count_threshold: int = None) -> bool:
+              climb_count_threshold: int = None,
+              maturity_gate: tuple = None,
+              gate_mode: str = "skip") -> bool:
         """
         Fully automatic parse: build primitives then greedily merge best pairs.
 
@@ -1918,7 +1961,8 @@ class FiniteParseTree(object):
         gate stops admitting candidates.
         """
         self.window = window
-        self.build_primitives(window, threshold=end_behavior, debug=debug)
+        self.build_primitives(window, threshold=end_behavior, debug=debug,
+                              maturity_gate=maturity_gate, gate_mode=gate_mode)
 
         if climb_count_threshold is None:
             climb_count_threshold = self.CLIMB_COUNT_THRESHOLD_DEFAULT
@@ -4248,6 +4292,8 @@ class WEBSTER(object):
         new_vocab: bool = True,
         learning: bool = False,
         debug: bool = False,
+        maturity_gate: tuple = None,
+        gate_mode: str = "skip",
     ) -> FiniteParseTree:
         """
         Create a parse tree for *sentence*.
@@ -4295,7 +4341,8 @@ class WEBSTER(object):
                      else int(threshold) if isinstance(threshold, (int, float))
                      else FiniteParseTree.CLIMB_COUNT_THRESHOLD_DEFAULT)
         parse_tree.build(sentence, end_behavior=threshold,
-                         climb_count_threshold=climb_thr, debug=debug)
+                         climb_count_threshold=climb_thr, debug=debug,
+                         maturity_gate=maturity_gate, gate_mode=gate_mode)
 
         if learning:
             self.ltm.add_parse_tree(

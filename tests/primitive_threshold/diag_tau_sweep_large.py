@@ -1,0 +1,65 @@
+"""
+τ sweep on grammar_LARGE (1 seed each). Same as diag_tau_sweep but
+on the larger grammar. Goal: find τ that gives F1 ≥ 85% (baseline).
+"""
+import os, sys, csv
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_ROOT = os.path.abspath(os.path.join(_HERE, "..", ".."))
+sys.path.insert(0, _ROOT)
+sys.path.insert(0, os.path.join(_ROOT, "src"))
+
+from util.cfg import TEST_GRAMMAR_LARGE, TEST_CORPUS_LARGE
+from unittests.hollow_learn_test_mh import run_hollow_learn
+
+CORPUS_DIR = os.path.join(_ROOT, "data", "cfg_grammar_large")
+OUT_BASE   = os.path.join(_HERE, "diag_tau_sweep_large")
+SEED       = 13
+
+TAUS = [-10.0, -12.0, -15.0, -20.0, -50.0]
+
+
+def metrics(out_dir):
+    pa = os.path.join(out_dir, "parse_accuracy.csv")
+    sp = os.path.join(out_dir, "step_pick_accuracy.csv")
+    tp = fp = fn = em = n = 0
+    with open(pa) as f:
+        r = csv.reader(f); next(r)
+        for row in r:
+            t, p_, e = int(row[-3]), int(row[-2]), int(row[-1])
+            tp += t; fp += p_; fn += e
+            if p_==0 and e==0 and t>0: em += 1
+            n += 1
+    P = tp/max(tp+fp,1); R = tp/max(tp+fn,1)
+    F = 2*P*R/max(P+R, 1e-9)
+    EM = em/max(n, 1)
+    sp_ok = sp_n = 0
+    with open(sp) as f:
+        for row in csv.DictReader(f):
+            if row.get("is_gold") == "1": sp_ok += 1
+            sp_n += 1
+    return F, EM, sp_ok/max(sp_n, 1)
+
+
+results = []
+for tau in TAUS:
+    name = f"tau_{tau}"
+    out_dir = os.path.join(OUT_BASE, name)
+    print(f"\n{'='*70}\n=== {name}  τ={tau}\n{'='*70}")
+    run_hollow_learn(
+        corpus_dir=CORPUS_DIR, out_dir=out_dir,
+        grammar=TEST_GRAMMAR_LARGE, corpus=TEST_CORPUS_LARGE,
+        seed=SEED, viz_intermediates=False,
+        primitives_first=0,
+        maturity_gate=("root_log_prob", tau),
+        gate_mode="skip",
+    )
+    f1, em, sp = metrics(out_dir)
+    results.append((tau, f1, em, sp))
+
+print(f"\n\n{'='*70}\n=== τ SWEEP RESULTS (seed=13 on grammar_LARGE, PF=0) ===\n{'='*70}")
+print(f"  Baseline (PF=200):  F1=85.8%  EM=55.0%  SP=95.8%")
+print(f"{'τ':>10s} {'F1':>10s} {'EM':>10s} {'StepPick':>10s}")
+for tau, f, e, s in results:
+    flag = "  ← beats baseline" if f >= 0.858 else ""
+    print(f"{tau:>10.1f}  {100*f:>8.1f}%  {100*e:>8.1f}%  {100*s:>8.1f}%{flag}")
+print()

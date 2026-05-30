@@ -1,535 +1,543 @@
 sentence,step,n_pairs,n_admitted,top_span,is_gold
-"this book read this book",0,4,4,"(0, 1)",1
-"this book read this book",1,3,3,"(3, 4)",1
-"this book read this book",2,2,2,"(0, 2)",1
-"this book read this book",3,1,1,"(0, 4)",1
-"this tall tall teacher liked that apple without this book",0,9,9,"(1, 2)",1
-"this tall tall teacher liked that apple without this book",1,8,8,"(5, 6)",1
-"this tall tall teacher liked that apple without this book",2,7,7,"(0, 3)",1
-"this tall tall teacher liked that apple without this book",3,6,6,"(5, 6)",1
-"this tall tall teacher liked that apple without this book",4,5,5,"(0, 4)",1
-"this tall tall teacher liked that apple without this book",5,4,4,"(0, 4)",1
-"this tall tall teacher liked that apple without this book",6,3,3,"(0, 4)",1
-"this tall tall teacher liked that apple without this book",7,2,2,"(5, 9)",0
-"this tall tall teacher liked that apple without this book",8,1,1,"(0, 9)",1
-"this teacher read with the blue friendly boy",0,7,7,"(0, 1)",1
-"this teacher read with the blue friendly boy",1,6,6,"(0, 2)",1
-"this teacher read with the blue friendly boy",2,5,5,"(5, 7)",1
-"this teacher read with the blue friendly boy",3,4,4,"(4, 7)",1
-"this teacher read with the blue friendly boy",4,3,3,"(3, 7)",1
-"this teacher read with the blue friendly boy",5,2,2,"(0, 2)",1
-"this teacher read with the blue friendly boy",6,1,1,"(0, 7)",1
-"the friendly blue book read near this curious blue robot",0,9,9,"(1, 2)",1
-"the friendly blue book read near this curious blue robot",1,8,8,"(1, 3)",1
-"the friendly blue book read near this curious blue robot",2,7,7,"(7, 8)",1
-"the friendly blue book read near this curious blue robot",3,6,6,"(0, 4)",1
-"the friendly blue book read near this curious blue robot",4,5,5,"(0, 4)",1
-"the friendly blue book read near this curious blue robot",5,4,4,"(6, 9)",1
-"the friendly blue book read near this curious blue robot",6,3,3,"(0, 4)",1
-"the friendly blue book read near this curious blue robot",7,2,2,"(0, 4)",1
-"the friendly blue book read near this curious blue robot",8,1,1,"(0, 9)",1
-"that friendly tall book liked near this boy",0,7,7,"(1, 2)",1
-"that friendly tall book liked near this boy",1,6,6,"(1, 3)",1
-"that friendly tall book liked near this boy",2,5,5,"(0, 3)",1
-"that friendly tall book liked near this boy",3,4,4,"(0, 4)",1
-"that friendly tall book liked near this boy",4,3,3,"(5, 7)",1
-"that friendly tall book liked near this boy",5,2,2,"(0, 4)",1
-"that friendly tall book liked near this boy",6,1,1,"(0, 7)",1
-"that teacher saw a boy that saw this boy",0,8,8,"(0, 1)",1
-"that teacher saw a boy that saw this boy",1,7,7,"(7, 8)",1
-"that teacher saw a boy that saw this boy",2,6,6,"(5, 6)",0
-"that teacher saw a boy that saw this boy",3,5,5,"(3, 4)",0
-"that teacher saw a boy that saw this boy",4,4,4,"(4, 8)",1
-"that teacher saw a boy that saw this boy",5,3,3,"(3, 8)",1
-"that teacher saw a boy that saw this boy",6,2,2,"(0, 2)",1
-"that teacher saw a boy that saw this boy",7,1,1,"(0, 8)",1
-"that apple saw near this curious tall boy",0,7,7,"(5, 6)",1
-"that apple saw near this curious tall boy",1,6,6,"(5, 6)",1
-"that apple saw near this curious tall boy",2,5,5,"(5, 7)",1
-"that apple saw near this curious tall boy",3,4,4,"(4, 7)",1
-"that apple saw near this curious tall boy",4,3,3,"(3, 7)",1
-"that apple saw near this curious tall boy",5,2,2,"(0, 2)",1
-"that apple saw near this curious tall boy",6,1,1,"(0, 7)",1
-"this ancient curious friendly robot saw the teacher",0,7,7,"(2, 3)",1
-"this ancient curious friendly robot saw the teacher",1,6,6,"(1, 3)",1
-"this ancient curious friendly robot saw the teacher",2,5,5,"(0, 3)",0
-"this ancient curious friendly robot saw the teacher",3,4,4,"(6, 7)",1
-"this ancient curious friendly robot saw the teacher",4,3,3,"(6, 7)",1
-"this ancient curious friendly robot saw the teacher",5,2,2,"(5, 7)",0
-"this ancient curious friendly robot saw the teacher",6,1,1,"(0, 7)",1
-"a ancient curious girl carried without a curious friendly robot",0,9,9,"(1, 2)",1
-"a ancient curious girl carried without a curious friendly robot",1,8,8,"(7, 8)",1
-"a ancient curious girl carried without a curious friendly robot",2,7,7,"(0, 3)",1
-"a ancient curious girl carried without a curious friendly robot",3,6,6,"(0, 4)",1
-"a ancient curious girl carried without a curious friendly robot",4,5,5,"(0, 4)",1
-"a ancient curious girl carried without a curious friendly robot",5,4,4,"(0, 4)",1
-"a ancient curious girl carried without a curious friendly robot",6,3,3,"(0, 4)",1
-"a ancient curious girl carried without a curious friendly robot",7,2,2,"(0, 4)",1
-"a ancient curious girl carried without a curious friendly robot",8,1,1,"(0, 9)",1
-"a boy saw with a apple",0,5,5,"(0, 1)",1
-"a boy saw with a apple",1,4,4,"(4, 5)",1
-"a boy saw with a apple",2,3,3,"(3, 5)",1
-"a boy saw with a apple",3,2,2,"(0, 2)",1
-"a boy saw with a apple",4,1,1,"(0, 5)",1
-"that girl chased that book",0,4,4,"(0, 1)",1
-"that girl chased that book",1,3,3,"(3, 4)",1
-"that girl chased that book",2,2,2,"(0, 2)",1
-"that girl chased that book",3,1,1,"(0, 4)",1
-"the ancient ancient girl admired a book",0,6,6,"(1, 2)",1
-"the ancient ancient girl admired a book",1,5,5,"(1, 3)",1
-"the ancient ancient girl admired a book",2,4,4,"(0, 3)",1
-"the ancient ancient girl admired a book",3,3,3,"(5, 6)",1
-"the ancient ancient girl admired a book",4,2,2,"(0, 4)",1
-"the ancient ancient girl admired a book",5,1,1,"(0, 6)",1
-"this ancient ancient friendly robot admired this book",0,7,7,"(2, 3)",1
-"this ancient ancient friendly robot admired this book",1,6,6,"(1, 3)",1
-"this ancient ancient friendly robot admired this book",2,5,5,"(0, 3)",0
-"this ancient ancient friendly robot admired this book",3,4,4,"(0, 4)",1
-"this ancient ancient friendly robot admired this book",4,3,3,"(6, 7)",1
-"this ancient ancient friendly robot admired this book",5,2,2,"(5, 7)",0
-"this ancient ancient friendly robot admired this book",6,1,1,"(0, 7)",1
-"a girl liked without that apple",0,5,5,"(0, 1)",1
-"a girl liked without that apple",1,4,4,"(0, 2)",1
-"a girl liked without that apple",2,3,3,"(0, 2)",1
-"a girl liked without that apple",3,2,2,"(0, 2)",1
-"a girl liked without that apple",4,1,1,"(0, 5)",1
-"the boy chased with a tall friendly robot",0,7,7,"(0, 1)",1
-"the boy chased with a tall friendly robot",1,6,6,"(0, 2)",1
-"the boy chased with a tall friendly robot",2,5,5,"(0, 2)",1
-"the boy chased with a tall friendly robot",3,4,4,"(0, 2)",1
-"the boy chased with a tall friendly robot",4,3,3,"(0, 2)",1
-"the boy chased with a tall friendly robot",5,2,2,"(0, 2)",1
-"the boy chased with a tall friendly robot",6,1,1,"(0, 7)",1
-"a book liked this robot",0,4,4,"(0, 1)",1
-"a book liked this robot",1,3,3,"(0, 2)",1
-"a book liked this robot",2,2,2,"(0, 2)",1
-"a book liked this robot",3,1,1,"(0, 4)",1
-"that blue blue teacher saw with this friendly tall girl",0,9,9,"(1, 2)",1
-"that blue blue teacher saw with this friendly tall girl",1,8,8,"(7, 8)",1
-"that blue blue teacher saw with this friendly tall girl",2,7,7,"(7, 8)",1
-"that blue blue teacher saw with this friendly tall girl",3,6,6,"(7, 8)",1
-"that blue blue teacher saw with this friendly tall girl",4,5,5,"(5, 6)",0
-"that blue blue teacher saw with this friendly tall girl",5,4,4,"(6, 9)",1
-"that blue blue teacher saw with this friendly tall girl",6,3,3,"(5, 9)",1
-"that blue blue teacher saw with this friendly tall girl",7,2,2,"(0, 4)",1
-"that blue blue teacher saw with this friendly tall girl",8,1,1,"(0, 9)",1
-"that blue tall apple carried without that girl",0,7,7,"(1, 2)",1
-"that blue tall apple carried without that girl",1,6,6,"(1, 3)",1
-"that blue tall apple carried without that girl",2,5,5,"(6, 7)",1
-"that blue tall apple carried without that girl",3,4,4,"(6, 7)",1
-"that blue tall apple carried without that girl",4,3,3,"(0, 4)",1
-"that blue tall apple carried without that girl",5,2,2,"(0, 4)",1
-"that blue tall apple carried without that girl",6,1,1,"(0, 7)",1
-"the ancient curious ancient book chased a curious tall boy",0,9,9,"(2, 3)",1
-"the ancient curious ancient book chased a curious tall boy",1,8,8,"(7, 8)",1
-"the ancient curious ancient book chased a curious tall boy",2,7,7,"(7, 8)",1
-"the ancient curious ancient book chased a curious tall boy",3,6,6,"(0, 4)",1
-"the ancient curious ancient book chased a curious tall boy",4,5,5,"(7, 8)",1
-"the ancient curious ancient book chased a curious tall boy",5,4,4,"(7, 9)",1
-"the ancient curious ancient book chased a curious tall boy",6,3,3,"(0, 5)",1
-"the ancient curious ancient book chased a curious tall boy",7,2,2,"(0, 5)",1
-"the ancient curious ancient book chased a curious tall boy",8,1,1,"(0, 9)",1
-"this friendly curious girl carried this boy",0,6,6,"(1, 2)",1
-"this friendly curious girl carried this boy",1,5,5,"(5, 6)",1
-"this friendly curious girl carried this boy",2,4,4,"(5, 6)",1
-"this friendly curious girl carried this boy",3,3,3,"(5, 6)",1
-"this friendly curious girl carried this boy",4,2,2,"(0, 4)",1
-"this friendly curious girl carried this boy",5,1,1,"(0, 6)",1
-"this ancient ancient teacher saw the ancient tall friendly robot",0,9,9,"(1, 2)",1
-"this ancient ancient teacher saw the ancient tall friendly robot",1,8,8,"(1, 3)",1
-"this ancient ancient teacher saw the ancient tall friendly robot",2,7,7,"(7, 8)",1
-"this ancient ancient teacher saw the ancient tall friendly robot",3,6,6,"(7, 8)",1
-"this ancient ancient teacher saw the ancient tall friendly robot",4,5,5,"(6, 8)",1
-"this ancient ancient teacher saw the ancient tall friendly robot",5,4,4,"(6, 9)",1
-"this ancient ancient teacher saw the ancient tall friendly robot",6,3,3,"(5, 9)",1
-"this ancient ancient teacher saw the ancient tall friendly robot",7,2,2,"(4, 9)",0
-"this ancient ancient teacher saw the ancient tall friendly robot",8,1,1,"(0, 9)",1
-"this tall curious girl chased the teacher",0,6,6,"(1, 2)",1
-"this tall curious girl chased the teacher",1,5,5,"(5, 6)",1
-"this tall curious girl chased the teacher",2,4,4,"(0, 3)",1
-"this tall curious girl chased the teacher",3,3,3,"(0, 4)",1
-"this tall curious girl chased the teacher",4,2,2,"(0, 4)",1
-"this tall curious girl chased the teacher",5,1,1,"(0, 6)",1
-"the ancient blue robot read that blue blue friendly book",0,9,9,"(1, 2)",1
-"the ancient blue robot read that blue blue friendly book",1,8,8,"(1, 3)",1
-"the ancient blue robot read that blue blue friendly book",2,7,7,"(7, 8)",1
-"the ancient blue robot read that blue blue friendly book",3,6,6,"(7, 8)",1
-"the ancient blue robot read that blue blue friendly book",4,5,5,"(0, 4)",1
-"the ancient blue robot read that blue blue friendly book",5,4,4,"(0, 4)",1
-"the ancient blue robot read that blue blue friendly book",6,3,3,"(0, 4)",1
-"the ancient blue robot read that blue blue friendly book",7,2,2,"(0, 4)",1
-"the ancient blue robot read that blue blue friendly book",8,1,1,"(0, 9)",1
-"that boy read a book who carried the girl",0,8,8,"(0, 1)",1
-"that boy read a book who carried the girl",1,7,7,"(7, 8)",1
-"that boy read a book who carried the girl",2,6,6,"(5, 6)",0
-"that boy read a book who carried the girl",3,5,5,"(5, 8)",1
-"that boy read a book who carried the girl",4,4,4,"(0, 2)",1
-"that boy read a book who carried the girl",5,3,3,"(0, 2)",1
-"that boy read a book who carried the girl",6,2,2,"(0, 2)",1
-"that boy read a book who carried the girl",7,1,1,"(0, 8)",1
-"a robot liked that girl",0,4,4,"(0, 1)",1
-"a robot liked that girl",1,3,3,"(3, 4)",1
-"a robot liked that girl",2,2,2,"(0, 2)",1
-"a robot liked that girl",3,1,1,"(0, 4)",1
-"a teacher admired without that ancient curious friendly teacher",0,8,8,"(0, 1)",1
-"a teacher admired without that ancient curious friendly teacher",1,7,7,"(0, 2)",1
-"a teacher admired without that ancient curious friendly teacher",2,6,6,"(0, 2)",1
-"a teacher admired without that ancient curious friendly teacher",3,5,5,"(0, 2)",1
-"a teacher admired without that ancient curious friendly teacher",4,4,4,"(0, 2)",1
-"a teacher admired without that ancient curious friendly teacher",5,3,3,"(0, 2)",1
-"a teacher admired without that ancient curious friendly teacher",6,2,2,"(0, 2)",1
-"a teacher admired without that ancient curious friendly teacher",7,1,1,"(0, 8)",1
-"that ancient curious curious book chased a book",0,7,7,"(6, 7)",1
-"that ancient curious curious book chased a book",1,6,6,"(6, 7)",1
-"that ancient curious curious book chased a book",2,5,5,"(6, 7)",1
-"that ancient curious curious book chased a book",3,4,4,"(6, 7)",1
-"that ancient curious curious book chased a book",4,3,3,"(6, 7)",1
-"that ancient curious curious book chased a book",5,2,2,"(0, 5)",1
-"that ancient curious curious book chased a book",6,1,1,"(0, 7)",1
-"the teacher liked this apple",0,4,4,"(0, 1)",1
-"the teacher liked this apple",1,3,3,"(0, 2)",1
-"the teacher liked this apple",2,2,2,"(0, 2)",1
-"the teacher liked this apple",3,1,1,"(0, 4)",1
-"that robot liked near a ancient curious boy",0,7,7,"(5, 6)",1
-"that robot liked near a ancient curious boy",1,6,6,"(5, 6)",1
-"that robot liked near a ancient curious boy",2,5,5,"(5, 7)",1
-"that robot liked near a ancient curious boy",3,4,4,"(4, 7)",1
-"that robot liked near a ancient curious boy",4,3,3,"(3, 7)",1
-"that robot liked near a ancient curious boy",5,2,2,"(0, 2)",1
-"that robot liked near a ancient curious boy",6,1,1,"(0, 7)",1
-"the teacher admired this book",0,4,4,"(0, 1)",1
-"the teacher admired this book",1,3,3,"(0, 2)",1
-"the teacher admired this book",2,2,2,"(0, 2)",1
-"the teacher admired this book",3,1,1,"(0, 4)",1
-"a boy chased near this apple",0,5,5,"(0, 1)",1
-"a boy chased near this apple",1,4,4,"(4, 5)",1
-"a boy chased near this apple",2,3,3,"(0, 2)",1
-"a boy chased near this apple",3,2,2,"(0, 2)",1
-"a boy chased near this apple",4,1,1,"(0, 5)",1
-"this boy carried the girl",0,4,4,"(0, 1)",1
-"this boy carried the girl",1,3,3,"(3, 4)",1
-"this boy carried the girl",2,2,2,"(0, 2)",1
-"this boy carried the girl",3,1,1,"(0, 4)",1
-"a curious ancient apple read the robot",0,6,6,"(1, 2)",1
-"a curious ancient apple read the robot",1,5,5,"(1, 3)",1
-"a curious ancient apple read the robot",2,4,4,"(0, 3)",1
-"a curious ancient apple read the robot",3,3,3,"(5, 6)",1
-"a curious ancient apple read the robot",4,2,2,"(0, 4)",1
-"a curious ancient apple read the robot",5,1,1,"(0, 6)",1
-"this teacher saw near that friendly tall girl",0,7,7,"(0, 1)",1
-"this teacher saw near that friendly tall girl",1,6,6,"(0, 2)",1
-"this teacher saw near that friendly tall girl",2,5,5,"(5, 7)",1
-"this teacher saw near that friendly tall girl",3,4,4,"(0, 2)",1
-"this teacher saw near that friendly tall girl",4,3,3,"(0, 2)",1
-"this teacher saw near that friendly tall girl",5,2,2,"(0, 2)",1
-"this teacher saw near that friendly tall girl",6,1,1,"(0, 7)",1
-"that friendly tall teacher chased without a girl",0,7,7,"(1, 2)",1
-"that friendly tall teacher chased without a girl",1,6,6,"(1, 3)",1
-"that friendly tall teacher chased without a girl",2,5,5,"(0, 3)",1
-"that friendly tall teacher chased without a girl",3,4,4,"(6, 7)",1
-"that friendly tall teacher chased without a girl",4,3,3,"(5, 7)",1
-"that friendly tall teacher chased without a girl",5,2,2,"(0, 4)",1
-"that friendly tall teacher chased without a girl",6,1,1,"(0, 7)",1
-"that teacher chased a robot with the apple",0,7,7,"(0, 1)",1
-"that teacher chased a robot with the apple",1,6,6,"(0, 2)",1
-"that teacher chased a robot with the apple",2,5,5,"(0, 2)",1
-"that teacher chased a robot with the apple",3,4,4,"(0, 2)",1
-"that teacher chased a robot with the apple",4,3,3,"(0, 2)",1
-"that teacher chased a robot with the apple",5,2,2,"(3, 7)",0
-"that teacher chased a robot with the apple",6,1,1,"(0, 7)",1
-"this apple carried a boy",0,4,4,"(0, 1)",1
-"this apple carried a boy",1,3,3,"(3, 4)",1
-"this apple carried a boy",2,2,2,"(0, 2)",1
-"this apple carried a boy",3,1,1,"(0, 4)",1
-"a apple read the robot",0,4,4,"(0, 1)",1
-"a apple read the robot",1,3,3,"(3, 4)",1
-"a apple read the robot",2,2,2,"(0, 2)",1
-"a apple read the robot",3,1,1,"(0, 4)",1
-"a friendly friendly girl saw a robot",0,6,6,"(5, 6)",1
-"a friendly friendly girl saw a robot",1,5,5,"(5, 6)",1
-"a friendly friendly girl saw a robot",2,4,4,"(5, 6)",1
-"a friendly friendly girl saw a robot",3,3,3,"(5, 6)",1
-"a friendly friendly girl saw a robot",4,2,2,"(4, 6)",0
-"a friendly friendly girl saw a robot",5,1,1,"(0, 6)",1
-"the boy admired with that boy",0,5,5,"(0, 1)",1
-"the boy admired with that boy",1,4,4,"(4, 5)",1
-"the boy admired with that boy",2,3,3,"(0, 2)",1
-"the boy admired with that boy",3,2,2,"(0, 2)",1
-"the boy admired with that boy",4,1,1,"(0, 5)",1
-"that curious tall robot carried this friendly tall apple",0,8,8,"(1, 2)",1
-"that curious tall robot carried this friendly tall apple",1,7,7,"(1, 3)",1
-"that curious tall robot carried this friendly tall apple",2,6,6,"(0, 3)",1
-"that curious tall robot carried this friendly tall apple",3,5,5,"(6, 7)",1
-"that curious tall robot carried this friendly tall apple",4,4,4,"(6, 8)",1
-"that curious tall robot carried this friendly tall apple",5,3,3,"(5, 8)",1
-"that curious tall robot carried this friendly tall apple",6,2,2,"(4, 8)",0
-"that curious tall robot carried this friendly tall apple",7,1,1,"(0, 8)",1
-"the robot saw a robot",0,4,4,"(0, 1)",1
-"the robot saw a robot",1,3,3,"(3, 4)",1
-"the robot saw a robot",2,2,2,"(0, 2)",1
-"the robot saw a robot",3,1,1,"(0, 4)",1
-"that tall tall girl admired near that curious tall apple",0,9,9,"(1, 2)",1
-"that tall tall girl admired near that curious tall apple",1,8,8,"(1, 3)",1
-"that tall tall girl admired near that curious tall apple",2,7,7,"(0, 3)",1
-"that tall tall girl admired near that curious tall apple",3,6,6,"(0, 4)",1
-"that tall tall girl admired near that curious tall apple",4,5,5,"(0, 4)",1
-"that tall tall girl admired near that curious tall apple",5,4,4,"(0, 4)",1
-"that tall tall girl admired near that curious tall apple",6,3,3,"(0, 4)",1
-"that tall tall girl admired near that curious tall apple",7,2,2,"(0, 4)",1
-"that tall tall girl admired near that curious tall apple",8,1,1,"(0, 9)",1
-"that tall curious robot liked a boy",0,6,6,"(5, 6)",1
-"that tall curious robot liked a boy",1,5,5,"(5, 6)",1
-"that tall curious robot liked a boy",2,4,4,"(5, 6)",1
-"that tall curious robot liked a boy",3,3,3,"(5, 6)",1
-"that tall curious robot liked a boy",4,2,2,"(0, 4)",1
-"that tall curious robot liked a boy",5,1,1,"(0, 6)",1
-"a ancient curious blue apple saw the boy",0,7,7,"(2, 3)",1
-"a ancient curious blue apple saw the boy",1,6,6,"(1, 3)",1
-"a ancient curious blue apple saw the boy",2,5,5,"(6, 7)",1
-"a ancient curious blue apple saw the boy",3,4,4,"(6, 7)",1
-"a ancient curious blue apple saw the boy",4,3,3,"(6, 7)",1
-"a ancient curious blue apple saw the boy",5,2,2,"(5, 7)",0
-"a ancient curious blue apple saw the boy",6,1,1,"(0, 7)",1
-"a apple carried with this ancient friendly apple",0,7,7,"(0, 1)",1
-"a apple carried with this ancient friendly apple",1,6,6,"(5, 6)",1
-"a apple carried with this ancient friendly apple",2,5,5,"(5, 7)",1
-"a apple carried with this ancient friendly apple",3,4,4,"(3, 4)",0
-"a apple carried with this ancient friendly apple",4,3,3,"(3, 7)",1
-"a apple carried with this ancient friendly apple",5,2,2,"(0, 2)",1
-"a apple carried with this ancient friendly apple",6,1,1,"(0, 7)",1
-"that curious friendly apple liked with a girl",0,7,7,"(1, 2)",1
-"that curious friendly apple liked with a girl",1,6,6,"(1, 3)",1
-"that curious friendly apple liked with a girl",2,5,5,"(0, 3)",1
-"that curious friendly apple liked with a girl",3,4,4,"(6, 7)",1
-"that curious friendly apple liked with a girl",4,3,3,"(0, 4)",1
-"that curious friendly apple liked with a girl",5,2,2,"(0, 4)",1
-"that curious friendly apple liked with a girl",6,1,1,"(0, 7)",1
-"this girl which chased near a book carried a book",0,9,9,"(8, 9)",1
-"this girl which chased near a book carried a book",1,8,8,"(8, 9)",1
-"this girl which chased near a book carried a book",2,7,7,"(8, 9)",1
-"this girl which chased near a book carried a book",3,6,6,"(8, 9)",1
-"this girl which chased near a book carried a book",4,5,5,"(8, 9)",1
-"this girl which chased near a book carried a book",5,4,4,"(8, 9)",1
-"this girl which chased near a book carried a book",6,3,3,"(8, 9)",1
-"this girl which chased near a book carried a book",7,2,2,"(0, 7)",1
-"this girl which chased near a book carried a book",8,1,1,"(0, 9)",1
-"a book saw with that curious blue robot",0,7,7,"(0, 1)",1
-"a book saw with that curious blue robot",1,6,6,"(5, 6)",1
-"a book saw with that curious blue robot",2,5,5,"(0, 2)",1
-"a book saw with that curious blue robot",3,4,4,"(0, 2)",1
-"a book saw with that curious blue robot",4,3,3,"(3, 7)",1
-"a book saw with that curious blue robot",5,2,2,"(0, 2)",1
-"a book saw with that curious blue robot",6,1,1,"(0, 7)",1
-"the book admired without this curious blue friendly apple",0,8,8,"(0, 1)",1
-"the book admired without this curious blue friendly apple",1,7,7,"(0, 2)",1
-"the book admired without this curious blue friendly apple",2,6,6,"(0, 2)",1
-"the book admired without this curious blue friendly apple",3,5,5,"(0, 2)",1
-"the book admired without this curious blue friendly apple",4,4,4,"(0, 2)",1
-"the book admired without this curious blue friendly apple",5,3,3,"(3, 8)",1
-"the book admired without this curious blue friendly apple",6,2,2,"(0, 2)",1
-"the book admired without this curious blue friendly apple",7,1,1,"(0, 8)",1
-"that blue ancient apple carried without a blue friendly robot",0,9,9,"(1, 2)",1
-"that blue ancient apple carried without a blue friendly robot",1,8,8,"(1, 3)",1
-"that blue ancient apple carried without a blue friendly robot",2,7,7,"(7, 8)",1
-"that blue ancient apple carried without a blue friendly robot",3,6,6,"(7, 8)",1
-"that blue ancient apple carried without a blue friendly robot",4,5,5,"(7, 9)",1
-"that blue ancient apple carried without a blue friendly robot",5,4,4,"(6, 9)",1
-"that blue ancient apple carried without a blue friendly robot",6,3,3,"(5, 9)",1
-"that blue ancient apple carried without a blue friendly robot",7,2,2,"(0, 4)",1
-"that blue ancient apple carried without a blue friendly robot",8,1,1,"(0, 9)",1
-"this book carried that apple",0,4,4,"(0, 1)",1
-"this book carried that apple",1,3,3,"(0, 2)",1
-"this book carried that apple",2,2,2,"(0, 2)",1
-"this book carried that apple",3,1,1,"(0, 4)",1
-"this tall ancient blue friendly boy chased this boy",0,8,8,"(7, 8)",1
-"this tall ancient blue friendly boy chased this boy",1,7,7,"(7, 8)",1
-"this tall ancient blue friendly boy chased this boy",2,6,6,"(7, 8)",1
-"this tall ancient blue friendly boy chased this boy",3,5,5,"(7, 8)",1
-"this tall ancient blue friendly boy chased this boy",4,4,4,"(7, 8)",1
-"this tall ancient blue friendly boy chased this boy",5,3,3,"(7, 8)",1
-"this tall ancient blue friendly boy chased this boy",6,2,2,"(0, 6)",1
-"this tall ancient blue friendly boy chased this boy",7,1,1,"(0, 8)",1
-"the curious blue robot admired this friendly ancient teacher",0,8,8,"(1, 2)",1
-"the curious blue robot admired this friendly ancient teacher",1,7,7,"(1, 3)",1
-"the curious blue robot admired this friendly ancient teacher",2,6,6,"(6, 7)",1
-"the curious blue robot admired this friendly ancient teacher",3,5,5,"(6, 7)",1
-"the curious blue robot admired this friendly ancient teacher",4,4,4,"(0, 4)",1
-"the curious blue robot admired this friendly ancient teacher",5,3,3,"(0, 4)",1
-"the curious blue robot admired this friendly ancient teacher",6,2,2,"(0, 4)",1
-"the curious blue robot admired this friendly ancient teacher",7,1,1,"(0, 8)",1
-"this blue friendly apple saw that friendly blue teacher",0,8,8,"(1, 2)",1
-"this blue friendly apple saw that friendly blue teacher",1,7,7,"(6, 7)",1
-"this blue friendly apple saw that friendly blue teacher",2,6,6,"(6, 7)",1
-"this blue friendly apple saw that friendly blue teacher",3,5,5,"(6, 7)",1
-"this blue friendly apple saw that friendly blue teacher",4,4,4,"(6, 8)",1
-"this blue friendly apple saw that friendly blue teacher",5,3,3,"(5, 8)",1
-"this blue friendly apple saw that friendly blue teacher",6,2,2,"(4, 8)",0
-"this blue friendly apple saw that friendly blue teacher",7,1,1,"(0, 8)",1
-"a girl carried that book",0,4,4,"(0, 1)",1
-"a girl carried that book",1,3,3,"(3, 4)",1
-"a girl carried that book",2,2,2,"(2, 4)",0
-"a girl carried that book",3,1,1,"(0, 4)",1
-"a girl chased the robot",0,4,4,"(0, 1)",1
-"a girl chased the robot",1,3,3,"(3, 4)",1
-"a girl chased the robot",2,2,2,"(0, 2)",1
-"a girl chased the robot",3,1,1,"(0, 4)",1
-"the curious friendly boy carried a friendly curious boy",0,8,8,"(1, 2)",1
-"the curious friendly boy carried a friendly curious boy",1,7,7,"(1, 3)",1
-"the curious friendly boy carried a friendly curious boy",2,6,6,"(6, 7)",1
-"the curious friendly boy carried a friendly curious boy",3,5,5,"(6, 7)",1
-"the curious friendly boy carried a friendly curious boy",4,4,4,"(6, 8)",1
-"the curious friendly boy carried a friendly curious boy",5,3,3,"(5, 8)",1
-"the curious friendly boy carried a friendly curious boy",6,2,2,"(0, 4)",1
-"the curious friendly boy carried a friendly curious boy",7,1,1,"(0, 8)",1
-"that book read a curious friendly teacher",0,6,6,"(0, 1)",1
-"that book read a curious friendly teacher",1,5,5,"(4, 5)",1
-"that book read a curious friendly teacher",2,4,4,"(4, 6)",1
-"that book read a curious friendly teacher",3,3,3,"(3, 6)",1
-"that book read a curious friendly teacher",4,2,2,"(0, 2)",1
-"that book read a curious friendly teacher",5,1,1,"(0, 6)",1
-"this blue ancient blue girl liked that apple",0,7,7,"(2, 3)",1
-"this blue ancient blue girl liked that apple",1,6,6,"(1, 3)",1
-"this blue ancient blue girl liked that apple",2,5,5,"(0, 3)",0
-"this blue ancient blue girl liked that apple",3,4,4,"(0, 4)",1
-"this blue ancient blue girl liked that apple",4,3,3,"(0, 5)",1
-"this blue ancient blue girl liked that apple",5,2,2,"(0, 5)",1
-"this blue ancient blue girl liked that apple",6,1,1,"(0, 7)",1
-"this curious curious blue book read the book",0,7,7,"(2, 3)",1
-"this curious curious blue book read the book",1,6,6,"(6, 7)",1
-"this curious curious blue book read the book",2,5,5,"(6, 7)",1
-"this curious curious blue book read the book",3,4,4,"(0, 4)",1
-"this curious curious blue book read the book",4,3,3,"(6, 7)",1
-"this curious curious blue book read the book",5,2,2,"(0, 5)",1
-"this curious curious blue book read the book",6,1,1,"(0, 7)",1
-"that book liked without a tall ancient boy",0,7,7,"(0, 1)",1
-"that book liked without a tall ancient boy",1,6,6,"(0, 2)",1
-"that book liked without a tall ancient boy",2,5,5,"(0, 2)",1
-"that book liked without a tall ancient boy",3,4,4,"(4, 7)",1
-"that book liked without a tall ancient boy",4,3,3,"(0, 2)",1
-"that book liked without a tall ancient boy",5,2,2,"(0, 2)",1
-"that book liked without a tall ancient boy",6,1,1,"(0, 7)",1
-"this boy liked without a book",0,5,5,"(0, 1)",1
-"this boy liked without a book",1,4,4,"(4, 5)",1
-"this boy liked without a book",2,3,3,"(3, 5)",1
-"this boy liked without a book",3,2,2,"(0, 2)",1
-"this boy liked without a book",4,1,1,"(0, 5)",1
-"the tall friendly apple chased this curious tall book",0,8,8,"(1, 2)",1
-"the tall friendly apple chased this curious tall book",1,7,7,"(6, 7)",1
-"the tall friendly apple chased this curious tall book",2,6,6,"(0, 3)",1
-"the tall friendly apple chased this curious tall book",3,5,5,"(6, 7)",1
-"the tall friendly apple chased this curious tall book",4,4,4,"(0, 4)",1
-"the tall friendly apple chased this curious tall book",5,3,3,"(5, 8)",1
-"the tall friendly apple chased this curious tall book",6,2,2,"(0, 4)",1
-"the tall friendly apple chased this curious tall book",7,1,1,"(0, 8)",1
-"the book admired that boy without that curious friendly teacher",0,9,9,"(0, 1)",1
-"the book admired that boy without that curious friendly teacher",1,8,8,"(7, 8)",1
-"the book admired that boy without that curious friendly teacher",2,7,7,"(7, 8)",1
-"the book admired that boy without that curious friendly teacher",3,6,6,"(0, 2)",1
-"the book admired that boy without that curious friendly teacher",4,5,5,"(0, 2)",1
-"the book admired that boy without that curious friendly teacher",5,4,4,"(0, 2)",1
-"the book admired that boy without that curious friendly teacher",6,3,3,"(0, 2)",1
-"the book admired that boy without that curious friendly teacher",7,2,2,"(0, 4)",1
-"the book admired that boy without that curious friendly teacher",8,1,1,"(0, 9)",1
-"this blue friendly teacher carried the blue ancient tall boy",0,9,9,"(1, 2)",1
-"this blue friendly teacher carried the blue ancient tall boy",1,8,8,"(1, 3)",1
-"this blue friendly teacher carried the blue ancient tall boy",2,7,7,"(0, 3)",1
-"this blue friendly teacher carried the blue ancient tall boy",3,6,6,"(7, 8)",1
-"this blue friendly teacher carried the blue ancient tall boy",4,5,5,"(6, 8)",1
-"this blue friendly teacher carried the blue ancient tall boy",5,4,4,"(6, 9)",1
-"this blue friendly teacher carried the blue ancient tall boy",6,3,3,"(5, 9)",1
-"this blue friendly teacher carried the blue ancient tall boy",7,2,2,"(0, 4)",1
-"this blue friendly teacher carried the blue ancient tall boy",8,1,1,"(0, 9)",1
-"a book admired without a friendly blue boy",0,7,7,"(0, 1)",1
-"a book admired without a friendly blue boy",1,6,6,"(5, 6)",1
-"a book admired without a friendly blue boy",2,5,5,"(0, 2)",1
-"a book admired without a friendly blue boy",3,4,4,"(0, 2)",1
-"a book admired without a friendly blue boy",4,3,3,"(0, 2)",1
-"a book admired without a friendly blue boy",5,2,2,"(0, 2)",1
-"a book admired without a friendly blue boy",6,1,1,"(0, 7)",1
-"that teacher carried near a tall curious curious apple",0,8,8,"(0, 1)",1
-"that teacher carried near a tall curious curious apple",1,7,7,"(0, 2)",1
-"that teacher carried near a tall curious curious apple",2,6,6,"(5, 7)",1
-"that teacher carried near a tall curious curious apple",3,5,5,"(0, 2)",1
-"that teacher carried near a tall curious curious apple",4,4,4,"(0, 2)",1
-"that teacher carried near a tall curious curious apple",5,3,3,"(0, 2)",1
-"that teacher carried near a tall curious curious apple",6,2,2,"(0, 2)",1
-"that teacher carried near a tall curious curious apple",7,1,1,"(0, 8)",1
-"a blue blue teacher carried without the robot",0,7,7,"(1, 2)",1
-"a blue blue teacher carried without the robot",1,6,6,"(1, 3)",1
-"a blue blue teacher carried without the robot",2,5,5,"(0, 3)",1
-"a blue blue teacher carried without the robot",3,4,4,"(0, 4)",1
-"a blue blue teacher carried without the robot",4,3,3,"(0, 4)",1
-"a blue blue teacher carried without the robot",5,2,2,"(0, 4)",1
-"a blue blue teacher carried without the robot",6,1,1,"(0, 7)",1
-"the robot chased without that friendly curious book",0,7,7,"(0, 1)",1
-"the robot chased without that friendly curious book",1,6,6,"(5, 6)",1
-"the robot chased without that friendly curious book",2,5,5,"(5, 7)",1
-"the robot chased without that friendly curious book",3,4,4,"(0, 2)",1
-"the robot chased without that friendly curious book",4,3,3,"(0, 2)",1
-"the robot chased without that friendly curious book",5,2,2,"(0, 2)",1
-"the robot chased without that friendly curious book",6,1,1,"(0, 7)",1
-"a apple admired the robot",0,4,4,"(0, 1)",1
-"a apple admired the robot",1,3,3,"(3, 4)",1
-"a apple admired the robot",2,2,2,"(0, 2)",1
-"a apple admired the robot",3,1,1,"(0, 4)",1
-"the teacher liked without a boy",0,5,5,"(0, 1)",1
-"the teacher liked without a boy",1,4,4,"(4, 5)",1
-"the teacher liked without a boy",2,3,3,"(3, 5)",1
-"the teacher liked without a boy",3,2,2,"(0, 2)",1
-"the teacher liked without a boy",4,1,1,"(0, 5)",1
-"that tall blue teacher carried with that robot",0,7,7,"(1, 2)",1
-"that tall blue teacher carried with that robot",1,6,6,"(1, 3)",1
-"that tall blue teacher carried with that robot",2,5,5,"(0, 3)",1
-"that tall blue teacher carried with that robot",3,4,4,"(6, 7)",1
-"that tall blue teacher carried with that robot",4,3,3,"(0, 4)",1
-"that tall blue teacher carried with that robot",5,2,2,"(0, 4)",1
-"that tall blue teacher carried with that robot",6,1,1,"(0, 7)",1
-"that robot chased that boy that liked without that boy",0,9,9,"(0, 1)",1
-"that robot chased that boy that liked without that boy",1,8,8,"(8, 9)",1
-"that robot chased that boy that liked without that boy",2,7,7,"(7, 9)",1
-"that robot chased that boy that liked without that boy",3,6,6,"(6, 9)",1
-"that robot chased that boy that liked without that boy",4,5,5,"(5, 9)",1
-"that robot chased that boy that liked without that boy",5,4,4,"(4, 9)",1
-"that robot chased that boy that liked without that boy",6,3,3,"(0, 2)",1
-"that robot chased that boy that liked without that boy",7,2,2,"(0, 2)",1
-"that robot chased that boy that liked without that boy",8,1,1,"(0, 9)",1
-"this curious blue tall apple liked without that robot",0,8,8,"(2, 3)",1
-"this curious blue tall apple liked without that robot",1,7,7,"(1, 3)",1
-"this curious blue tall apple liked without that robot",2,6,6,"(0, 3)",0
-"this curious blue tall apple liked without that robot",3,5,5,"(0, 4)",1
-"this curious blue tall apple liked without that robot",4,4,4,"(7, 8)",1
-"this curious blue tall apple liked without that robot",5,3,3,"(6, 8)",1
-"this curious blue tall apple liked without that robot",6,2,2,"(0, 5)",1
-"this curious blue tall apple liked without that robot",7,1,1,"(0, 8)",1
-"this book chased this apple",0,4,4,"(0, 1)",1
-"this book chased this apple",1,3,3,"(0, 2)",1
-"this book chased this apple",2,2,2,"(0, 2)",1
-"this book chased this apple",3,1,1,"(0, 4)",1
-"that robot read the girl",0,4,4,"(0, 1)",1
-"that robot read the girl",1,3,3,"(3, 4)",1
-"that robot read the girl",2,2,2,"(0, 2)",1
-"that robot read the girl",3,1,1,"(0, 4)",1
-"that friendly friendly curious girl read near a book",0,8,8,"(2, 3)",1
-"that friendly friendly curious girl read near a book",1,7,7,"(1, 3)",1
-"that friendly friendly curious girl read near a book",2,6,6,"(7, 8)",1
-"that friendly friendly curious girl read near a book",3,5,5,"(7, 8)",1
-"that friendly friendly curious girl read near a book",4,4,4,"(7, 8)",1
-"that friendly friendly curious girl read near a book",5,3,3,"(0, 5)",1
-"that friendly friendly curious girl read near a book",6,2,2,"(0, 5)",1
-"that friendly friendly curious girl read near a book",7,1,1,"(0, 8)",1
-"a curious tall boy saw that friendly friendly boy",0,8,8,"(6, 7)",1
-"a curious tall boy saw that friendly friendly boy",1,7,7,"(6, 7)",1
-"a curious tall boy saw that friendly friendly boy",2,6,6,"(6, 7)",1
-"a curious tall boy saw that friendly friendly boy",3,5,5,"(6, 7)",1
-"a curious tall boy saw that friendly friendly boy",4,4,4,"(6, 8)",1
-"a curious tall boy saw that friendly friendly boy",5,3,3,"(5, 8)",1
-"a curious tall boy saw that friendly friendly boy",6,2,2,"(4, 8)",0
-"a curious tall boy saw that friendly friendly boy",7,1,1,"(0, 8)",1
-"that girl saw near this blue friendly tall boy",0,8,8,"(0, 1)",1
-"that girl saw near this blue friendly tall boy",1,7,7,"(3, 4)",0
-"that girl saw near this blue friendly tall boy",2,6,6,"(5, 7)",1
-"that girl saw near this blue friendly tall boy",3,5,5,"(3, 4)",0
-"that girl saw near this blue friendly tall boy",4,4,4,"(4, 8)",1
-"that girl saw near this blue friendly tall boy",5,3,3,"(3, 8)",1
-"that girl saw near this blue friendly tall boy",6,2,2,"(0, 2)",1
-"that girl saw near this blue friendly tall boy",7,1,1,"(0, 8)",1
+"this blue blue apple liked a blue curious ancient robot",0,9,9,"(1, 2)",1
+"this blue blue apple liked a blue curious ancient robot",1,8,8,"(6, 7)",0
+"this blue blue apple liked a blue curious ancient robot",2,7,7,"(6, 7)",0
+"this blue blue apple liked a blue curious ancient robot",3,6,6,"(6, 7)",0
+"this blue blue apple liked a blue curious ancient robot",4,5,5,"(6, 8)",1
+"this blue blue apple liked a blue curious ancient robot",5,4,4,"(6, 9)",1
+"this blue blue apple liked a blue curious ancient robot",6,3,3,"(5, 9)",1
+"this blue blue apple liked a blue curious ancient robot",7,2,2,"(0, 4)",1
+"this blue blue apple liked a blue curious ancient robot",8,1,1,"(0, 9)",1
+"this teacher carried that apple near the girl",0,7,7,"(6, 7)",1
+"this teacher carried that apple near the girl",1,6,6,"(6, 7)",1
+"this teacher carried that apple near the girl",2,5,5,"(6, 7)",1
+"this teacher carried that apple near the girl",3,4,4,"(5, 7)",1
+"this teacher carried that apple near the girl",4,3,3,"(0, 2)",1
+"this teacher carried that apple near the girl",5,2,2,"(0, 4)",1
+"this teacher carried that apple near the girl",6,1,1,"(0, 7)",1
+"a boy liked with that book",0,5,5,"(4, 5)",1
+"a boy liked with that book",1,4,4,"(0, 2)",1
+"a boy liked with that book",2,3,3,"(0, 2)",1
+"a boy liked with that book",3,2,2,"(0, 2)",1
+"a boy liked with that book",4,1,1,"(0, 5)",1
+"the ancient curious robot liked this teacher",0,6,6,"(5, 6)",1
+"the ancient curious robot liked this teacher",1,5,5,"(5, 6)",1
+"the ancient curious robot liked this teacher",2,4,4,"(5, 6)",1
+"the ancient curious robot liked this teacher",3,3,3,"(5, 6)",1
+"the ancient curious robot liked this teacher",4,2,2,"(0, 4)",1
+"the ancient curious robot liked this teacher",5,1,1,"(0, 6)",1
+"the robot admired that tall tall blue book",0,7,7,"(0, 1)",1
+"the robot admired that tall tall blue book",1,6,6,"(0, 2)",1
+"the robot admired that tall tall blue book",2,5,5,"(4, 6)",1
+"the robot admired that tall tall blue book",3,4,4,"(3, 6)",0
+"the robot admired that tall tall blue book",4,3,3,"(0, 2)",1
+"the robot admired that tall tall blue book",5,2,2,"(0, 2)",1
+"the robot admired that tall tall blue book",6,1,1,"(0, 7)",1
+"a teacher admired the book with a tall blue book",0,9,9,"(7, 8)",1
+"a teacher admired the book with a tall blue book",1,8,8,"(7, 8)",1
+"a teacher admired the book with a tall blue book",2,7,7,"(7, 8)",1
+"a teacher admired the book with a tall blue book",3,6,6,"(7, 9)",1
+"a teacher admired the book with a tall blue book",4,5,5,"(6, 9)",1
+"a teacher admired the book with a tall blue book",5,4,4,"(5, 9)",1
+"a teacher admired the book with a tall blue book",6,3,3,"(0, 2)",1
+"a teacher admired the book with a tall blue book",7,2,2,"(0, 4)",1
+"a teacher admired the book with a tall blue book",8,1,1,"(0, 9)",1
+"this teacher liked this robot",0,4,4,"(3, 4)",1
+"this teacher liked this robot",1,3,3,"(3, 4)",1
+"this teacher liked this robot",2,2,2,"(0, 2)",1
+"this teacher liked this robot",3,1,1,"(0, 4)",1
+"that blue friendly teacher carried the friendly blue robot",0,8,8,"(6, 7)",1
+"that blue friendly teacher carried the friendly blue robot",1,7,7,"(1, 3)",1
+"that blue friendly teacher carried the friendly blue robot",2,6,6,"(6, 7)",1
+"that blue friendly teacher carried the friendly blue robot",3,5,5,"(6, 7)",1
+"that blue friendly teacher carried the friendly blue robot",4,4,4,"(6, 8)",1
+"that blue friendly teacher carried the friendly blue robot",5,3,3,"(5, 8)",1
+"that blue friendly teacher carried the friendly blue robot",6,2,2,"(0, 4)",1
+"that blue friendly teacher carried the friendly blue robot",7,1,1,"(0, 8)",1
+"a girl saw a curious friendly teacher near the girl",0,9,9,"(8, 9)",1
+"a girl saw a curious friendly teacher near the girl",1,8,8,"(8, 9)",1
+"a girl saw a curious friendly teacher near the girl",2,7,7,"(8, 9)",1
+"a girl saw a curious friendly teacher near the girl",3,6,6,"(8, 9)",1
+"a girl saw a curious friendly teacher near the girl",4,5,5,"(8, 9)",1
+"a girl saw a curious friendly teacher near the girl",5,4,4,"(0, 2)",1
+"a girl saw a curious friendly teacher near the girl",6,3,3,"(0, 2)",1
+"a girl saw a curious friendly teacher near the girl",7,2,2,"(0, 6)",1
+"a girl saw a curious friendly teacher near the girl",8,1,1,"(0, 9)",1
+"the apple read the teacher",0,4,4,"(3, 4)",1
+"the apple read the teacher",1,3,3,"(0, 2)",1
+"the apple read the teacher",2,2,2,"(0, 2)",1
+"the apple read the teacher",3,1,1,"(0, 4)",1
+"this book chased with that boy",0,5,5,"(4, 5)",1
+"this book chased with that boy",1,4,4,"(4, 5)",1
+"this book chased with that boy",2,3,3,"(3, 5)",1
+"this book chased with that boy",3,2,2,"(2, 5)",0
+"this book chased with that boy",4,1,1,"(0, 5)",1
+"a apple read this boy",0,4,4,"(0, 1)",1
+"a apple read this boy",1,3,3,"(3, 4)",1
+"a apple read this boy",2,2,2,"(0, 2)",1
+"a apple read this boy",3,1,1,"(0, 4)",1
+"a curious ancient book liked near a teacher",0,7,7,"(6, 7)",1
+"a curious ancient book liked near a teacher",1,6,6,"(6, 7)",1
+"a curious ancient book liked near a teacher",2,5,5,"(6, 7)",1
+"a curious ancient book liked near a teacher",3,4,4,"(6, 7)",1
+"a curious ancient book liked near a teacher",4,3,3,"(0, 4)",1
+"a curious ancient book liked near a teacher",5,2,2,"(0, 4)",1
+"a curious ancient book liked near a teacher",6,1,1,"(0, 7)",1
+"a apple read that girl",0,4,4,"(0, 1)",1
+"a apple read that girl",1,3,3,"(3, 4)",1
+"a apple read that girl",2,2,2,"(0, 2)",1
+"a apple read that girl",3,1,1,"(0, 4)",1
+"that apple saw that boy",0,4,4,"(3, 4)",1
+"that apple saw that boy",1,3,3,"(3, 4)",1
+"that apple saw that boy",2,2,2,"(0, 2)",1
+"that apple saw that boy",3,1,1,"(0, 4)",1
+"this tall tall girl read with that blue ancient girl",0,9,9,"(7, 8)",1
+"this tall tall girl read with that blue ancient girl",1,8,8,"(7, 8)",1
+"this tall tall girl read with that blue ancient girl",2,7,7,"(7, 8)",1
+"this tall tall girl read with that blue ancient girl",3,6,6,"(0, 4)",1
+"this tall tall girl read with that blue ancient girl",4,5,5,"(0, 4)",1
+"this tall tall girl read with that blue ancient girl",5,4,4,"(0, 4)",1
+"this tall tall girl read with that blue ancient girl",6,3,3,"(5, 9)",1
+"this tall tall girl read with that blue ancient girl",7,2,2,"(0, 4)",1
+"this tall tall girl read with that blue ancient girl",8,1,1,"(0, 9)",1
+"this friendly blue friendly girl chased without the girl",0,8,8,"(7, 8)",1
+"this friendly blue friendly girl chased without the girl",1,7,7,"(7, 8)",1
+"this friendly blue friendly girl chased without the girl",2,6,6,"(7, 8)",1
+"this friendly blue friendly girl chased without the girl",3,5,5,"(7, 8)",1
+"this friendly blue friendly girl chased without the girl",4,4,4,"(7, 8)",1
+"this friendly blue friendly girl chased without the girl",5,3,3,"(6, 8)",1
+"this friendly blue friendly girl chased without the girl",6,2,2,"(5, 8)",0
+"this friendly blue friendly girl chased without the girl",7,1,1,"(0, 8)",1
+"this tall tall robot carried near the blue ancient robot",0,9,9,"(7, 8)",1
+"this tall tall robot carried near the blue ancient robot",1,8,8,"(1, 3)",1
+"this tall tall robot carried near the blue ancient robot",2,7,7,"(0, 3)",1
+"this tall tall robot carried near the blue ancient robot",3,6,6,"(7, 8)",1
+"this tall tall robot carried near the blue ancient robot",4,5,5,"(7, 9)",1
+"this tall tall robot carried near the blue ancient robot",5,4,4,"(6, 9)",1
+"this tall tall robot carried near the blue ancient robot",6,3,3,"(5, 9)",1
+"this tall tall robot carried near the blue ancient robot",7,2,2,"(0, 4)",1
+"this tall tall robot carried near the blue ancient robot",8,1,1,"(0, 9)",1
+"a curious blue robot read near a teacher",0,7,7,"(6, 7)",1
+"a curious blue robot read near a teacher",1,6,6,"(6, 7)",1
+"a curious blue robot read near a teacher",2,5,5,"(6, 7)",1
+"a curious blue robot read near a teacher",3,4,4,"(6, 7)",1
+"a curious blue robot read near a teacher",4,3,3,"(0, 4)",1
+"a curious blue robot read near a teacher",5,2,2,"(0, 4)",1
+"a curious blue robot read near a teacher",6,1,1,"(0, 7)",1
+"the robot liked near a girl",0,5,5,"(4, 5)",1
+"the robot liked near a girl",1,4,4,"(4, 5)",1
+"the robot liked near a girl",2,3,3,"(0, 2)",1
+"the robot liked near a girl",3,2,2,"(0, 2)",1
+"the robot liked near a girl",4,1,1,"(0, 5)",1
+"the robot read the robot",0,4,4,"(3, 4)",1
+"the robot read the robot",1,3,3,"(3, 4)",1
+"the robot read the robot",2,2,2,"(0, 2)",1
+"the robot read the robot",3,1,1,"(0, 4)",1
+"this girl chased near this blue friendly teacher",0,7,7,"(0, 1)",1
+"this girl chased near this blue friendly teacher",1,6,6,"(0, 2)",1
+"this girl chased near this blue friendly teacher",2,5,5,"(5, 7)",1
+"this girl chased near this blue friendly teacher",3,4,4,"(4, 7)",1
+"this girl chased near this blue friendly teacher",4,3,3,"(3, 7)",1
+"this girl chased near this blue friendly teacher",5,2,2,"(2, 7)",0
+"this girl chased near this blue friendly teacher",6,1,1,"(0, 7)",1
+"that teacher carried a boy",0,4,4,"(3, 4)",1
+"that teacher carried a boy",1,3,3,"(3, 4)",1
+"that teacher carried a boy",2,2,2,"(0, 2)",1
+"that teacher carried a boy",3,1,1,"(0, 4)",1
+"a book admired near the curious ancient friendly curious book",0,9,9,"(8, 9)",0
+"a book admired near the curious ancient friendly curious book",1,8,8,"(8, 9)",0
+"a book admired near the curious ancient friendly curious book",2,7,7,"(6, 8)",1
+"a book admired near the curious ancient friendly curious book",3,6,6,"(5, 8)",1
+"a book admired near the curious ancient friendly curious book",4,5,5,"(5, 9)",1
+"a book admired near the curious ancient friendly curious book",5,4,4,"(0, 2)",1
+"a book admired near the curious ancient friendly curious book",6,3,3,"(0, 2)",1
+"a book admired near the curious ancient friendly curious book",7,2,2,"(0, 2)",1
+"a book admired near the curious ancient friendly curious book",8,1,1,"(0, 9)",1
+"that ancient tall book carried a boy",0,6,6,"(5, 6)",1
+"that ancient tall book carried a boy",1,5,5,"(5, 6)",1
+"that ancient tall book carried a boy",2,4,4,"(5, 6)",1
+"that ancient tall book carried a boy",3,3,3,"(5, 6)",1
+"that ancient tall book carried a boy",4,2,2,"(0, 4)",1
+"that ancient tall book carried a boy",5,1,1,"(0, 6)",1
+"that friendly ancient book read the curious friendly boy",0,8,8,"(6, 7)",1
+"that friendly ancient book read the curious friendly boy",1,7,7,"(6, 7)",1
+"that friendly ancient book read the curious friendly boy",2,6,6,"(6, 7)",1
+"that friendly ancient book read the curious friendly boy",3,5,5,"(6, 7)",1
+"that friendly ancient book read the curious friendly boy",4,4,4,"(0, 4)",1
+"that friendly ancient book read the curious friendly boy",5,3,3,"(5, 8)",1
+"that friendly ancient book read the curious friendly boy",6,2,2,"(0, 4)",1
+"that friendly ancient book read the curious friendly boy",7,1,1,"(0, 8)",1
+"the teacher liked the blue curious teacher",0,6,6,"(0, 1)",1
+"the teacher liked the blue curious teacher",1,5,5,"(0, 2)",1
+"the teacher liked the blue curious teacher",2,4,4,"(4, 6)",1
+"the teacher liked the blue curious teacher",3,3,3,"(0, 2)",1
+"the teacher liked the blue curious teacher",4,2,2,"(0, 2)",1
+"the teacher liked the blue curious teacher",5,1,1,"(0, 6)",1
+"that book carried the apple without this book",0,7,7,"(0, 1)",1
+"that book carried the apple without this book",1,6,6,"(6, 7)",1
+"that book carried the apple without this book",2,5,5,"(6, 7)",1
+"that book carried the apple without this book",3,4,4,"(0, 2)",1
+"that book carried the apple without this book",4,3,3,"(0, 2)",1
+"that book carried the apple without this book",5,2,2,"(3, 7)",0
+"that book carried the apple without this book",6,1,1,"(0, 7)",1
+"the friendly friendly girl read a friendly ancient boy",0,8,8,"(1, 2)",1
+"the friendly friendly girl read a friendly ancient boy",1,7,7,"(1, 3)",1
+"the friendly friendly girl read a friendly ancient boy",2,6,6,"(0, 3)",1
+"the friendly friendly girl read a friendly ancient boy",3,5,5,"(0, 4)",1
+"the friendly friendly girl read a friendly ancient boy",4,4,4,"(0, 4)",1
+"the friendly friendly girl read a friendly ancient boy",5,3,3,"(5, 8)",1
+"the friendly friendly girl read a friendly ancient boy",6,2,2,"(0, 4)",1
+"the friendly friendly girl read a friendly ancient boy",7,1,1,"(0, 8)",1
+"this friendly curious boy admired near the robot",0,7,7,"(6, 7)",1
+"this friendly curious boy admired near the robot",1,6,6,"(6, 7)",1
+"this friendly curious boy admired near the robot",2,5,5,"(6, 7)",1
+"this friendly curious boy admired near the robot",3,4,4,"(6, 7)",1
+"this friendly curious boy admired near the robot",4,3,3,"(0, 4)",1
+"this friendly curious boy admired near the robot",5,2,2,"(0, 4)",1
+"this friendly curious boy admired near the robot",6,1,1,"(0, 7)",1
+"that book admired that girl with a girl",0,7,7,"(0, 1)",1
+"that book admired that girl with a girl",1,6,6,"(6, 7)",1
+"that book admired that girl with a girl",2,5,5,"(6, 7)",1
+"that book admired that girl with a girl",3,4,4,"(0, 2)",1
+"that book admired that girl with a girl",4,3,3,"(0, 2)",1
+"that book admired that girl with a girl",5,2,2,"(0, 4)",1
+"that book admired that girl with a girl",6,1,1,"(0, 7)",1
+"that apple admired near this apple",0,5,5,"(4, 5)",1
+"that apple admired near this apple",1,4,4,"(4, 5)",1
+"that apple admired near this apple",2,3,3,"(3, 5)",1
+"that apple admired near this apple",3,2,2,"(2, 5)",0
+"that apple admired near this apple",4,1,1,"(0, 5)",1
+"the robot read that friendly friendly curious tall book",0,8,8,"(0, 1)",1
+"the robot read that friendly friendly curious tall book",1,7,7,"(0, 2)",1
+"the robot read that friendly friendly curious tall book",2,6,6,"(0, 2)",1
+"the robot read that friendly friendly curious tall book",3,5,5,"(0, 2)",1
+"the robot read that friendly friendly curious tall book",4,4,4,"(0, 2)",1
+"the robot read that friendly friendly curious tall book",5,3,3,"(0, 2)",1
+"the robot read that friendly friendly curious tall book",6,2,2,"(0, 2)",1
+"the robot read that friendly friendly curious tall book",7,1,1,"(0, 8)",1
+"a teacher admired a friendly friendly robot",0,6,6,"(0, 1)",1
+"a teacher admired a friendly friendly robot",1,5,5,"(0, 2)",1
+"a teacher admired a friendly friendly robot",2,4,4,"(0, 2)",1
+"a teacher admired a friendly friendly robot",3,3,3,"(0, 2)",1
+"a teacher admired a friendly friendly robot",4,2,2,"(0, 2)",1
+"a teacher admired a friendly friendly robot",5,1,1,"(0, 6)",1
+"that tall tall tall boy admired near this apple",0,8,8,"(7, 8)",1
+"that tall tall tall boy admired near this apple",1,7,7,"(7, 8)",1
+"that tall tall tall boy admired near this apple",2,6,6,"(7, 8)",1
+"that tall tall tall boy admired near this apple",3,5,5,"(7, 8)",1
+"that tall tall tall boy admired near this apple",4,4,4,"(7, 8)",1
+"that tall tall tall boy admired near this apple",5,3,3,"(0, 5)",1
+"that tall tall tall boy admired near this apple",6,2,2,"(0, 5)",1
+"that tall tall tall boy admired near this apple",7,1,1,"(0, 8)",1
+"the teacher liked with that blue curious boy",0,7,7,"(0, 1)",1
+"the teacher liked with that blue curious boy",1,6,6,"(0, 2)",1
+"the teacher liked with that blue curious boy",2,5,5,"(0, 2)",1
+"the teacher liked with that blue curious boy",3,4,4,"(0, 2)",1
+"the teacher liked with that blue curious boy",4,3,3,"(0, 2)",1
+"the teacher liked with that blue curious boy",5,2,2,"(0, 2)",1
+"the teacher liked with that blue curious boy",6,1,1,"(0, 7)",1
+"the girl read that girl with a apple",0,7,7,"(6, 7)",1
+"the girl read that girl with a apple",1,6,6,"(6, 7)",1
+"the girl read that girl with a apple",2,5,5,"(6, 7)",1
+"the girl read that girl with a apple",3,4,4,"(0, 2)",1
+"the girl read that girl with a apple",4,3,3,"(0, 2)",1
+"the girl read that girl with a apple",5,2,2,"(0, 4)",1
+"the girl read that girl with a apple",6,1,1,"(0, 7)",1
+"a friendly blue apple admired this boy",0,6,6,"(5, 6)",1
+"a friendly blue apple admired this boy",1,5,5,"(5, 6)",1
+"a friendly blue apple admired this boy",2,4,4,"(5, 6)",1
+"a friendly blue apple admired this boy",3,3,3,"(5, 6)",1
+"a friendly blue apple admired this boy",4,2,2,"(0, 4)",1
+"a friendly blue apple admired this boy",5,1,1,"(0, 6)",1
+"the apple read the blue friendly boy",0,6,6,"(5, 6)",0
+"the apple read the blue friendly boy",1,5,5,"(0, 2)",1
+"the apple read the blue friendly boy",2,4,4,"(0, 2)",1
+"the apple read the blue friendly boy",3,3,3,"(0, 2)",1
+"the apple read the blue friendly boy",4,2,2,"(0, 2)",1
+"the apple read the blue friendly boy",5,1,1,"(0, 6)",1
+"this girl read this friendly curious girl with this boy",0,9,9,"(8, 9)",1
+"this girl read this friendly curious girl with this boy",1,8,8,"(8, 9)",1
+"this girl read this friendly curious girl with this boy",2,7,7,"(8, 9)",1
+"this girl read this friendly curious girl with this boy",3,6,6,"(8, 9)",1
+"this girl read this friendly curious girl with this boy",4,5,5,"(8, 9)",1
+"this girl read this friendly curious girl with this boy",5,4,4,"(0, 2)",1
+"this girl read this friendly curious girl with this boy",6,3,3,"(0, 2)",1
+"this girl read this friendly curious girl with this boy",7,2,2,"(0, 6)",1
+"this girl read this friendly curious girl with this boy",8,1,1,"(0, 9)",1
+"that boy read a blue curious book without a girl",0,9,9,"(8, 9)",1
+"that boy read a blue curious book without a girl",1,8,8,"(0, 2)",1
+"that boy read a blue curious book without a girl",2,7,7,"(0, 2)",1
+"that boy read a blue curious book without a girl",3,6,6,"(0, 2)",1
+"that boy read a blue curious book without a girl",4,5,5,"(0, 2)",1
+"that boy read a blue curious book without a girl",5,4,4,"(0, 2)",1
+"that boy read a blue curious book without a girl",6,3,3,"(0, 2)",1
+"that boy read a blue curious book without a girl",7,2,2,"(0, 6)",1
+"that boy read a blue curious book without a girl",8,1,1,"(0, 9)",1
+"this curious blue teacher liked that book near a teacher",0,9,9,"(8, 9)",1
+"this curious blue teacher liked that book near a teacher",1,8,8,"(8, 9)",1
+"this curious blue teacher liked that book near a teacher",2,7,7,"(8, 9)",1
+"this curious blue teacher liked that book near a teacher",3,6,6,"(8, 9)",1
+"this curious blue teacher liked that book near a teacher",4,5,5,"(8, 9)",1
+"this curious blue teacher liked that book near a teacher",5,4,4,"(7, 9)",1
+"this curious blue teacher liked that book near a teacher",6,3,3,"(0, 4)",1
+"this curious blue teacher liked that book near a teacher",7,2,2,"(0, 6)",1
+"this curious blue teacher liked that book near a teacher",8,1,1,"(0, 9)",1
+"that ancient tall teacher carried near that curious ancient teacher",0,9,9,"(7, 8)",1
+"that ancient tall teacher carried near that curious ancient teacher",1,8,8,"(7, 8)",1
+"that ancient tall teacher carried near that curious ancient teacher",2,7,7,"(0, 3)",1
+"that ancient tall teacher carried near that curious ancient teacher",3,6,6,"(7, 8)",1
+"that ancient tall teacher carried near that curious ancient teacher",4,5,5,"(7, 9)",1
+"that ancient tall teacher carried near that curious ancient teacher",5,4,4,"(6, 9)",1
+"that ancient tall teacher carried near that curious ancient teacher",6,3,3,"(0, 4)",1
+"that ancient tall teacher carried near that curious ancient teacher",7,2,2,"(0, 4)",1
+"that ancient tall teacher carried near that curious ancient teacher",8,1,1,"(0, 9)",1
+"that tall tall apple saw the book",0,6,6,"(5, 6)",1
+"that tall tall apple saw the book",1,5,5,"(5, 6)",1
+"that tall tall apple saw the book",2,4,4,"(5, 6)",1
+"that tall tall apple saw the book",3,3,3,"(5, 6)",1
+"that tall tall apple saw the book",4,2,2,"(0, 4)",1
+"that tall tall apple saw the book",5,1,1,"(0, 6)",1
+"that tall blue boy read a book",0,6,6,"(5, 6)",1
+"that tall blue boy read a book",1,5,5,"(5, 6)",1
+"that tall blue boy read a book",2,4,4,"(0, 3)",1
+"that tall blue boy read a book",3,3,3,"(0, 4)",1
+"that tall blue boy read a book",4,2,2,"(0, 4)",1
+"that tall blue boy read a book",5,1,1,"(0, 6)",1
+"a boy liked without that curious friendly robot",0,7,7,"(0, 1)",1
+"a boy liked without that curious friendly robot",1,6,6,"(0, 2)",1
+"a boy liked without that curious friendly robot",2,5,5,"(5, 7)",1
+"a boy liked without that curious friendly robot",3,4,4,"(4, 7)",1
+"a boy liked without that curious friendly robot",4,3,3,"(0, 2)",1
+"a boy liked without that curious friendly robot",5,2,2,"(0, 2)",1
+"a boy liked without that curious friendly robot",6,1,1,"(0, 7)",1
+"this boy chased near a apple",0,5,5,"(4, 5)",1
+"this boy chased near a apple",1,4,4,"(4, 5)",1
+"this boy chased near a apple",2,3,3,"(0, 2)",1
+"this boy chased near a apple",3,2,2,"(2, 5)",0
+"this boy chased near a apple",4,1,1,"(0, 5)",1
+"this curious curious girl liked near a boy",0,7,7,"(6, 7)",1
+"this curious curious girl liked near a boy",1,6,6,"(6, 7)",1
+"this curious curious girl liked near a boy",2,5,5,"(6, 7)",1
+"this curious curious girl liked near a boy",3,4,4,"(6, 7)",1
+"this curious curious girl liked near a boy",4,3,3,"(0, 4)",1
+"this curious curious girl liked near a boy",5,2,2,"(0, 4)",1
+"this curious curious girl liked near a boy",6,1,1,"(0, 7)",1
+"a teacher carried this teacher without a girl",0,7,7,"(6, 7)",1
+"a teacher carried this teacher without a girl",1,6,6,"(6, 7)",1
+"a teacher carried this teacher without a girl",2,5,5,"(6, 7)",1
+"a teacher carried this teacher without a girl",3,4,4,"(5, 7)",1
+"a teacher carried this teacher without a girl",4,3,3,"(0, 2)",1
+"a teacher carried this teacher without a girl",5,2,2,"(0, 4)",1
+"a teacher carried this teacher without a girl",6,1,1,"(0, 7)",1
+"this book read that book without the boy",0,7,7,"(0, 1)",1
+"this book read that book without the boy",1,6,6,"(6, 7)",1
+"this book read that book without the boy",2,5,5,"(6, 7)",1
+"this book read that book without the boy",3,4,4,"(0, 2)",1
+"this book read that book without the boy",4,3,3,"(0, 2)",1
+"this book read that book without the boy",5,2,2,"(0, 4)",1
+"this book read that book without the boy",6,1,1,"(0, 7)",1
+"this robot chased this teacher near this apple",0,7,7,"(0, 1)",1
+"this robot chased this teacher near this apple",1,6,6,"(6, 7)",1
+"this robot chased this teacher near this apple",2,5,5,"(6, 7)",1
+"this robot chased this teacher near this apple",3,4,4,"(0, 2)",1
+"this robot chased this teacher near this apple",4,3,3,"(0, 2)",1
+"this robot chased this teacher near this apple",5,2,2,"(0, 4)",1
+"this robot chased this teacher near this apple",6,1,1,"(0, 7)",1
+"the blue blue ancient apple liked without a robot",0,8,8,"(7, 8)",1
+"the blue blue ancient apple liked without a robot",1,7,7,"(7, 8)",1
+"the blue blue ancient apple liked without a robot",2,6,6,"(7, 8)",1
+"the blue blue ancient apple liked without a robot",3,5,5,"(7, 8)",1
+"the blue blue ancient apple liked without a robot",4,4,4,"(7, 8)",1
+"the blue blue ancient apple liked without a robot",5,3,3,"(0, 5)",1
+"the blue blue ancient apple liked without a robot",6,2,2,"(0, 5)",1
+"the blue blue ancient apple liked without a robot",7,1,1,"(0, 8)",1
+"a book saw near this apple",0,5,5,"(4, 5)",1
+"a book saw near this apple",1,4,4,"(4, 5)",1
+"a book saw near this apple",2,3,3,"(0, 2)",1
+"a book saw near this apple",3,2,2,"(0, 2)",1
+"a book saw near this apple",4,1,1,"(0, 5)",1
+"a tall friendly friendly teacher carried near the robot",0,8,8,"(7, 8)",1
+"a tall friendly friendly teacher carried near the robot",1,7,7,"(7, 8)",1
+"a tall friendly friendly teacher carried near the robot",2,6,6,"(7, 8)",1
+"a tall friendly friendly teacher carried near the robot",3,5,5,"(7, 8)",1
+"a tall friendly friendly teacher carried near the robot",4,4,4,"(7, 8)",1
+"a tall friendly friendly teacher carried near the robot",5,3,3,"(6, 8)",1
+"a tall friendly friendly teacher carried near the robot",6,2,2,"(5, 8)",0
+"a tall friendly friendly teacher carried near the robot",7,1,1,"(0, 8)",1
+"the boy liked this teacher",0,4,4,"(3, 4)",1
+"the boy liked this teacher",1,3,3,"(3, 4)",1
+"the boy liked this teacher",2,2,2,"(0, 2)",1
+"the boy liked this teacher",3,1,1,"(0, 4)",1
+"this book saw near this girl",0,5,5,"(4, 5)",1
+"this book saw near this girl",1,4,4,"(4, 5)",1
+"this book saw near this girl",2,3,3,"(0, 2)",1
+"this book saw near this girl",3,2,2,"(0, 2)",1
+"this book saw near this girl",4,1,1,"(0, 5)",1
+"that tall curious apple carried this curious blue tall boy",0,9,9,"(1, 2)",1
+"that tall curious apple carried this curious blue tall boy",1,8,8,"(1, 3)",1
+"that tall curious apple carried this curious blue tall boy",2,7,7,"(0, 3)",1
+"that tall curious apple carried this curious blue tall boy",3,6,6,"(7, 8)",1
+"that tall curious apple carried this curious blue tall boy",4,5,5,"(0, 4)",1
+"that tall curious apple carried this curious blue tall boy",5,4,4,"(6, 9)",1
+"that tall curious apple carried this curious blue tall boy",6,3,3,"(5, 9)",1
+"that tall curious apple carried this curious blue tall boy",7,2,2,"(0, 4)",1
+"that tall curious apple carried this curious blue tall boy",8,1,1,"(0, 9)",1
+"the robot admired near this apple",0,5,5,"(4, 5)",1
+"the robot admired near this apple",1,4,4,"(4, 5)",1
+"the robot admired near this apple",2,3,3,"(3, 5)",1
+"the robot admired near this apple",3,2,2,"(0, 2)",1
+"the robot admired near this apple",4,1,1,"(0, 5)",1
+"a teacher carried a robot without this teacher",0,7,7,"(6, 7)",1
+"a teacher carried a robot without this teacher",1,6,6,"(6, 7)",1
+"a teacher carried a robot without this teacher",2,5,5,"(6, 7)",1
+"a teacher carried a robot without this teacher",3,4,4,"(5, 7)",1
+"a teacher carried a robot without this teacher",4,3,3,"(0, 2)",1
+"a teacher carried a robot without this teacher",5,2,2,"(0, 4)",1
+"a teacher carried a robot without this teacher",6,1,1,"(0, 7)",1
+"the book carried with that friendly tall tall teacher",0,8,8,"(0, 1)",1
+"the book carried with that friendly tall tall teacher",1,7,7,"(0, 2)",1
+"the book carried with that friendly tall tall teacher",2,6,6,"(5, 7)",1
+"the book carried with that friendly tall tall teacher",3,5,5,"(5, 8)",1
+"the book carried with that friendly tall tall teacher",4,4,4,"(4, 8)",1
+"the book carried with that friendly tall tall teacher",5,3,3,"(3, 8)",1
+"the book carried with that friendly tall tall teacher",6,2,2,"(0, 2)",1
+"the book carried with that friendly tall tall teacher",7,1,1,"(0, 8)",1
+"this ancient friendly boy read near that boy",0,7,7,"(6, 7)",1
+"this ancient friendly boy read near that boy",1,6,6,"(6, 7)",1
+"this ancient friendly boy read near that boy",2,5,5,"(6, 7)",1
+"this ancient friendly boy read near that boy",3,4,4,"(6, 7)",1
+"this ancient friendly boy read near that boy",4,3,3,"(0, 4)",1
+"this ancient friendly boy read near that boy",5,2,2,"(0, 4)",1
+"this ancient friendly boy read near that boy",6,1,1,"(0, 7)",1
+"that curious curious boy chased that book",0,6,6,"(5, 6)",1
+"that curious curious boy chased that book",1,5,5,"(5, 6)",1
+"that curious curious boy chased that book",2,4,4,"(5, 6)",1
+"that curious curious boy chased that book",3,3,3,"(5, 6)",1
+"that curious curious boy chased that book",4,2,2,"(0, 4)",1
+"that curious curious boy chased that book",5,1,1,"(0, 6)",1
+"a boy saw this book",0,4,4,"(3, 4)",1
+"a boy saw this book",1,3,3,"(3, 4)",1
+"a boy saw this book",2,2,2,"(0, 2)",1
+"a boy saw this book",3,1,1,"(0, 4)",1
+"that book liked this curious ancient ancient book",0,7,7,"(0, 1)",1
+"that book liked this curious ancient ancient book",1,6,6,"(0, 2)",1
+"that book liked this curious ancient ancient book",2,5,5,"(0, 2)",1
+"that book liked this curious ancient ancient book",3,4,4,"(0, 2)",1
+"that book liked this curious ancient ancient book",4,3,3,"(0, 2)",1
+"that book liked this curious ancient ancient book",5,2,2,"(0, 2)",1
+"that book liked this curious ancient ancient book",6,1,1,"(0, 7)",1
+"that apple chased a blue tall girl",0,6,6,"(4, 5)",1
+"that apple chased a blue tall girl",1,5,5,"(4, 5)",1
+"that apple chased a blue tall girl",2,4,4,"(4, 6)",1
+"that apple chased a blue tall girl",3,3,3,"(3, 6)",1
+"that apple chased a blue tall girl",4,2,2,"(0, 2)",1
+"that apple chased a blue tall girl",5,1,1,"(0, 6)",1
+"this blue blue girl liked without that girl",0,7,7,"(6, 7)",1
+"this blue blue girl liked without that girl",1,6,6,"(6, 7)",1
+"this blue blue girl liked without that girl",2,5,5,"(6, 7)",1
+"this blue blue girl liked without that girl",3,4,4,"(6, 7)",1
+"this blue blue girl liked without that girl",4,3,3,"(0, 4)",1
+"this blue blue girl liked without that girl",5,2,2,"(0, 4)",1
+"this blue blue girl liked without that girl",6,1,1,"(0, 7)",1
+"a robot liked a friendly blue book",0,6,6,"(0, 1)",1
+"a robot liked a friendly blue book",1,5,5,"(0, 2)",1
+"a robot liked a friendly blue book",2,4,4,"(4, 6)",1
+"a robot liked a friendly blue book",3,3,3,"(0, 2)",1
+"a robot liked a friendly blue book",4,2,2,"(0, 2)",1
+"a robot liked a friendly blue book",5,1,1,"(0, 6)",1
+"this girl read this boy",0,4,4,"(3, 4)",1
+"this girl read this boy",1,3,3,"(3, 4)",1
+"this girl read this boy",2,2,2,"(0, 2)",1
+"this girl read this boy",3,1,1,"(0, 4)",1
+"a ancient friendly girl read with this tall curious book",0,9,9,"(7, 8)",1
+"a ancient friendly girl read with this tall curious book",1,8,8,"(7, 8)",1
+"a ancient friendly girl read with this tall curious book",2,7,7,"(7, 8)",1
+"a ancient friendly girl read with this tall curious book",3,6,6,"(7, 8)",1
+"a ancient friendly girl read with this tall curious book",4,5,5,"(7, 9)",1
+"a ancient friendly girl read with this tall curious book",5,4,4,"(0, 4)",1
+"a ancient friendly girl read with this tall curious book",6,3,3,"(0, 4)",1
+"a ancient friendly girl read with this tall curious book",7,2,2,"(0, 4)",1
+"a ancient friendly girl read with this tall curious book",8,1,1,"(0, 9)",1
+"this girl carried that curious friendly girl near that boy",0,9,9,"(8, 9)",1
+"this girl carried that curious friendly girl near that boy",1,8,8,"(8, 9)",1
+"this girl carried that curious friendly girl near that boy",2,7,7,"(8, 9)",1
+"this girl carried that curious friendly girl near that boy",3,6,6,"(8, 9)",1
+"this girl carried that curious friendly girl near that boy",4,5,5,"(8, 9)",1
+"this girl carried that curious friendly girl near that boy",5,4,4,"(7, 9)",1
+"this girl carried that curious friendly girl near that boy",6,3,3,"(0, 2)",1
+"this girl carried that curious friendly girl near that boy",7,2,2,"(3, 9)",0
+"this girl carried that curious friendly girl near that boy",8,1,1,"(0, 9)",1
+"a tall friendly apple read that teacher",0,6,6,"(5, 6)",1
+"a tall friendly apple read that teacher",1,5,5,"(5, 6)",1
+"a tall friendly apple read that teacher",2,4,4,"(5, 6)",1
+"a tall friendly apple read that teacher",3,3,3,"(5, 6)",1
+"a tall friendly apple read that teacher",4,2,2,"(0, 4)",1
+"a tall friendly apple read that teacher",5,1,1,"(0, 6)",1
+"that friendly ancient book read a ancient blue boy",0,8,8,"(6, 7)",1
+"that friendly ancient book read a ancient blue boy",1,7,7,"(6, 7)",1
+"that friendly ancient book read a ancient blue boy",2,6,6,"(6, 7)",1
+"that friendly ancient book read a ancient blue boy",3,5,5,"(6, 7)",1
+"that friendly ancient book read a ancient blue boy",4,4,4,"(0, 4)",1
+"that friendly ancient book read a ancient blue boy",5,3,3,"(5, 8)",1
+"that friendly ancient book read a ancient blue boy",6,2,2,"(0, 4)",1
+"that friendly ancient book read a ancient blue boy",7,1,1,"(0, 8)",1
+"this friendly curious book chased near the friendly blue boy",0,9,9,"(8, 9)",0
+"this friendly curious book chased near the friendly blue boy",1,8,8,"(8, 9)",0
+"this friendly curious book chased near the friendly blue boy",2,7,7,"(8, 9)",0
+"this friendly curious book chased near the friendly blue boy",3,6,6,"(8, 9)",0
+"this friendly curious book chased near the friendly blue boy",4,5,5,"(7, 9)",1
+"this friendly curious book chased near the friendly blue boy",5,4,4,"(0, 4)",1
+"this friendly curious book chased near the friendly blue boy",6,3,3,"(0, 4)",1
+"this friendly curious book chased near the friendly blue boy",7,2,2,"(0, 4)",1
+"this friendly curious book chased near the friendly blue boy",8,1,1,"(0, 9)",1
+"that apple chased near a curious ancient apple",0,7,7,"(0, 1)",1
+"that apple chased near a curious ancient apple",1,6,6,"(5, 6)",1
+"that apple chased near a curious ancient apple",2,5,5,"(5, 7)",1
+"that apple chased near a curious ancient apple",3,4,4,"(4, 7)",1
+"that apple chased near a curious ancient apple",4,3,3,"(3, 7)",1
+"that apple chased near a curious ancient apple",5,2,2,"(2, 7)",0
+"that apple chased near a curious ancient apple",6,1,1,"(0, 7)",1
+"the boy chased with a apple",0,5,5,"(4, 5)",1
+"the boy chased with a apple",1,4,4,"(4, 5)",1
+"the boy chased with a apple",2,3,3,"(0, 2)",1
+"the boy chased with a apple",3,2,2,"(0, 2)",1
+"the boy chased with a apple",4,1,1,"(0, 5)",1
+"this curious curious boy admired the ancient curious curious book",0,9,9,"(8, 9)",0
+"this curious curious boy admired the ancient curious curious book",1,8,8,"(8, 9)",0
+"this curious curious boy admired the ancient curious curious book",2,7,7,"(0, 3)",1
+"this curious curious boy admired the ancient curious curious book",3,6,6,"(8, 9)",0
+"this curious curious boy admired the ancient curious curious book",4,5,5,"(0, 4)",1
+"this curious curious boy admired the ancient curious curious book",5,4,4,"(6, 9)",1
+"this curious curious boy admired the ancient curious curious book",6,3,3,"(5, 9)",1
+"this curious curious boy admired the ancient curious curious book",7,2,2,"(0, 4)",1
+"this curious curious boy admired the ancient curious curious book",8,1,1,"(0, 9)",1
+"that ancient ancient friendly apple chased this book",0,7,7,"(6, 7)",1
+"that ancient ancient friendly apple chased this book",1,6,6,"(6, 7)",1
+"that ancient ancient friendly apple chased this book",2,5,5,"(6, 7)",1
+"that ancient ancient friendly apple chased this book",3,4,4,"(1, 5)",0
+"that ancient ancient friendly apple chased this book",4,3,3,"(6, 7)",1
+"that ancient ancient friendly apple chased this book",5,2,2,"(0, 5)",1
+"that ancient ancient friendly apple chased this book",6,1,1,"(0, 7)",1
+"that apple liked this blue curious curious friendly robot",0,8,8,"(0, 1)",1
+"that apple liked this blue curious curious friendly robot",1,7,7,"(6, 7)",1
+"that apple liked this blue curious curious friendly robot",2,6,6,"(6, 8)",0
+"that apple liked this blue curious curious friendly robot",3,5,5,"(0, 2)",1
+"that apple liked this blue curious curious friendly robot",4,4,4,"(0, 2)",1
+"that apple liked this blue curious curious friendly robot",5,3,3,"(0, 2)",1
+"that apple liked this blue curious curious friendly robot",6,2,2,"(0, 2)",1
+"that apple liked this blue curious curious friendly robot",7,1,1,"(0, 8)",1
+"that curious ancient ancient robot carried near this apple",0,8,8,"(7, 8)",1
+"that curious ancient ancient robot carried near this apple",1,7,7,"(7, 8)",1
+"that curious ancient ancient robot carried near this apple",2,6,6,"(7, 8)",1
+"that curious ancient ancient robot carried near this apple",3,5,5,"(7, 8)",1
+"that curious ancient ancient robot carried near this apple",4,4,4,"(7, 8)",1
+"that curious ancient ancient robot carried near this apple",5,3,3,"(6, 8)",1
+"that curious ancient ancient robot carried near this apple",6,2,2,"(5, 8)",0
+"that curious ancient ancient robot carried near this apple",7,1,1,"(0, 8)",1
+"that teacher admired near a blue friendly girl",0,7,7,"(5, 6)",1
+"that teacher admired near a blue friendly girl",1,6,6,"(5, 6)",1
+"that teacher admired near a blue friendly girl",2,5,5,"(0, 2)",1
+"that teacher admired near a blue friendly girl",3,4,4,"(4, 7)",1
+"that teacher admired near a blue friendly girl",4,3,3,"(0, 2)",1
+"that teacher admired near a blue friendly girl",5,2,2,"(0, 2)",1
+"that teacher admired near a blue friendly girl",6,1,1,"(0, 7)",1

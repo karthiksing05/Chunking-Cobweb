@@ -36,7 +36,12 @@ OUT_BASE   = os.path.join(_HERE, "grammar_large")
 HL_DIR     = os.path.join(OUT_BASE, "hollow_learn")
 LC_DIR     = os.path.join(OUT_BASE, "learning_curves")
 
+# Primitive-maturity gate (see tests/primitive_threshold).
+MATURITY_GATE = ("root_log_prob", -12.0)
+GATE_MODE     = "skip"
+
 print(f"=== ACS-26 / TEST_GRAMMAR_LARGE — 5-seed hollow_learn ===")
+print(f"    primitives_first=0, maturity_gate={MATURITY_GATE}, mode={GATE_MODE}")
 hl_agg = run_multi_seed_hollow_learn(
     corpus_dir=CORPUS_DIR,
     out_base=HL_DIR,
@@ -44,6 +49,9 @@ hl_agg = run_multi_seed_hollow_learn(
     corpus=TEST_CORPUS_LARGE,
     seeds=SEEDS,
     viz_dir=OUT_BASE,
+    primitives_first=0,
+    maturity_gate=MATURITY_GATE,
+    gate_mode=GATE_MODE,
 )
 
 print(f"\n=== ACS-26 / TEST_GRAMMAR_LARGE — 5-seed learning curves ===")
@@ -53,6 +61,9 @@ lc_agg = run_multi_seed_learning_curves(
     grammar=TEST_GRAMMAR_LARGE,
     corpus=TEST_CORPUS_LARGE,
     seeds=SEEDS,
+    primitives_first=0,
+    maturity_gate=MATURITY_GATE,
+    gate_mode=GATE_MODE,
 )
 plot_learning_curves_with_band(
     out_path=os.path.join(LC_DIR, "learning_curves.png"),

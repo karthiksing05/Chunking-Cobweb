@@ -1,31 +1,31 @@
 idx,sentence,mask_pos,gold,gold_pos,filled,filled_pos,completed,exact,pos_ok
 0,"the woman runs the woman",2,runs,V,likes,V,"the woman likes the woman",0,1
-1,"the cat chases the dog",2,chases,V,likes,V,"the cat likes the dog",0,1
+1,"the cat chases the dog",2,chases,V,sees,V,"the cat sees the dog",0,1
 2,"a cat sees the cat",2,sees,V,runs,V,"a cat runs the cat",0,1
 3,"the cat sees a cat",2,sees,V,likes,V,"the cat likes a cat",0,1
-4,"a dog sees a man",2,sees,V,chases,V,"a dog chases a man",0,1
+4,"a dog sees a man",2,sees,V,likes,V,"a dog likes a man",0,1
 5,"a cat likes a woman",2,likes,V,sees,V,"a cat sees a woman",0,1
-6,"a man runs",1,man,N,man,N,"a man runs",1,1
-7,"the cat runs the cat",2,runs,V,sees,V,"the cat sees the cat",0,1
-8,"the cat runs",1,cat,N,dog,N,"the dog runs",0,1
+6,"a man runs",1,man,N,cat,N,"a cat runs",0,1
+7,"the cat runs the cat",2,runs,V,chases,V,"the cat chases the cat",0,1
+8,"the cat runs",1,cat,N,man,N,"the man runs",0,1
 9,"a cat likes a man",2,likes,V,runs,V,"a cat runs a man",0,1
-10,"the dog likes the dog",2,likes,V,likes,V,"the dog likes the dog",1,1
+10,"the dog likes the dog",2,likes,V,chases,V,"the dog chases the dog",0,1
 11,"a man likes a man",2,likes,V,likes,V,"a man likes a man",1,1
-12,"the dog runs a cat",2,runs,V,chases,V,"the dog chases a cat",0,1
-13,"a woman chases a man",2,chases,V,runs,V,"a woman runs a man",0,1
-14,"a woman runs a cat",2,runs,V,sees,V,"a woman sees a cat",0,1
-15,"a man sees a cat",2,sees,V,sees,V,"a man sees a cat",1,1
+12,"the dog runs a cat",2,runs,V,likes,V,"the dog likes a cat",0,1
+13,"a woman chases a man",2,chases,V,likes,V,"a woman likes a man",0,1
+14,"a woman runs a cat",2,runs,V,likes,V,"a woman likes a cat",0,1
+15,"a man sees a cat",2,sees,V,likes,V,"a man likes a cat",0,1
 16,"the cat chases a woman",2,chases,V,likes,V,"the cat likes a woman",0,1
-17,"a dog runs",1,dog,N,man,N,"a man runs",0,1
-18,"the cat sees the woman",2,sees,V,sees,V,"the cat sees the woman",1,1
-19,"the woman runs a man",2,runs,V,runs,V,"the woman runs a man",1,1
-20,"a man runs a cat",2,runs,V,sees,V,"a man sees a cat",0,1
-21,"a man sees the dog",2,sees,V,runs,V,"a man runs the dog",0,1
-22,"the dog sees a dog",2,sees,V,runs,V,"the dog runs a dog",0,1
+17,"a dog runs",1,dog,N,cat,N,"a cat runs",0,1
+18,"the cat sees the woman",2,sees,V,runs,V,"the cat runs the woman",0,1
+19,"the woman runs a man",2,runs,V,likes,V,"the woman likes a man",0,1
+20,"a man runs a cat",2,runs,V,likes,V,"a man likes a cat",0,1
+21,"a man sees the dog",2,sees,V,likes,V,"a man likes the dog",0,1
+22,"the dog sees a dog",2,sees,V,likes,V,"the dog likes a dog",0,1
 23,"the cat sees a dog",2,sees,V,likes,V,"the cat likes a dog",0,1
-24,"a dog chases",1,dog,N,cat,N,"a cat chases",0,1
-25,"the man runs a woman",2,runs,V,likes,V,"the man likes a woman",0,1
+24,"a dog chases",1,dog,N,woman,N,"a woman chases",0,1
+25,"the man runs a woman",2,runs,V,chases,V,"the man chases a woman",0,1
 26,"the dog likes",1,dog,N,man,N,"the man likes",0,1
 27,"the dog likes the man",2,likes,V,chases,V,"the dog chases the man",0,1
-28,"a dog likes the cat",2,likes,V,likes,V,"a dog likes the cat",1,1
-29,"the woman runs",1,woman,N,dog,N,"the dog runs",0,1
+28,"a dog likes the cat",2,likes,V,sees,V,"a dog sees the cat",0,1
+29,"the woman runs",1,woman,N,man,N,"the man runs",0,1

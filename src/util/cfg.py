@@ -173,13 +173,28 @@ ADDED_CORPUS2 = sum(
     []
 )
 
-# Grammar with relative clauses and stacked adjectival phrases
+# Grammar with relative clauses and stacked adjectival phrases.
+# NP is biased toward terminal expansions (3× weight on non-recursive
+# productions) so RelClause recursion behaves like AdjP recursion in
+# TEST_GRAMMAR1: a tail-heavy distribution that almost always
+# terminates. Without this bias the uniform 50/50 choice between
+# "no RelClause" and "with RelClause" leads to runaway expansion via
+# RelClause → RelPro VP → V NP → ... → RelClause again, producing
+# 20+ word sentences during _eval_omission that crippled grammar_large
+# runtime in the May 28 chain.
 TEST_GRAMMAR3 = {
     "S": [["NP", "VP"]],
 
     "NP": [
-        ["Det", "N"],
-        ["Det", "AdjP", "N"],
+        # Terminal expansions — duplicated 6× so they dominate. The
+        # 3× / 6× / 8× sweep showed 6× is the smallest weight that
+        # tames the long tail (p90 ≤ 15 words) without eliminating
+        # RelClauses entirely.
+        ["Det", "N"], ["Det", "N"], ["Det", "N"],
+        ["Det", "N"], ["Det", "N"], ["Det", "N"],
+        ["Det", "AdjP", "N"], ["Det", "AdjP", "N"], ["Det", "AdjP", "N"],
+        ["Det", "AdjP", "N"], ["Det", "AdjP", "N"], ["Det", "AdjP", "N"],
+        # Recursive expansions — single weight; ~14% per NP.
         ["Det", "N", "RelClause"],
         ["Det", "AdjP", "N", "RelClause"]
     ],

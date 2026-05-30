@@ -1,5 +1,5 @@
 sentence,step,n_pairs,n_admitted,top_span,is_gold
-"the red small dog chased the park",0,6,6,"(5, 6)",1
+"the red small dog chased the park",0,6,6,"(1, 2)",1
 "the red small dog chased the park",1,5,5,"(5, 6)",1
 "the red small dog chased the park",2,4,4,"(5, 6)",1
 "the red small dog chased the park",3,3,3,"(5, 6)",1
@@ -7,37 +7,37 @@ sentence,step,n_pairs,n_admitted,top_span,is_gold
 "the red small dog chased the park",5,1,1,"(0, 6)",1
 "a woman liked",0,2,2,"(0, 1)",1
 "a woman liked",1,1,1,"(0, 2)",1
-"the red small park admired a dog",0,6,6,"(5, 6)",1
+"the red small park admired a dog",0,6,6,"(1, 2)",1
 "the red small park admired a dog",1,5,5,"(5, 6)",1
 "the red small park admired a dog",2,4,4,"(5, 6)",1
 "the red small park admired a dog",3,3,3,"(5, 6)",1
 "the red small park admired a dog",4,2,2,"(0, 4)",1
 "the red small park admired a dog",5,1,1,"(0, 6)",1
-"the park liked the big small cat",0,6,6,"(0, 1)",1
-"the park liked the big small cat",1,5,5,"(0, 2)",1
-"the park liked the big small cat",2,4,4,"(0, 2)",1
-"the park liked the big small cat",3,3,3,"(3, 6)",1
+"the park liked the big small cat",0,6,6,"(4, 5)",1
+"the park liked the big small cat",1,5,5,"(4, 5)",1
+"the park liked the big small cat",2,4,4,"(4, 6)",1
+"the park liked the big small cat",3,3,3,"(0, 2)",1
 "the park liked the big small cat",4,2,2,"(0, 2)",1
 "the park liked the big small cat",5,1,1,"(0, 6)",1
 "a quick quick park chased the dog",0,6,6,"(1, 2)",1
 "a quick quick park chased the dog",1,5,5,"(5, 6)",1
 "a quick quick park chased the dog",2,4,4,"(5, 6)",1
-"a quick quick park chased the dog",3,3,3,"(5, 6)",1
+"a quick quick park chased the dog",3,3,3,"(0, 4)",1
 "a quick quick park chased the dog",4,2,2,"(0, 4)",1
 "a quick quick park chased the dog",5,1,1,"(0, 6)",1
 "the telescope chased",0,2,2,"(0, 1)",1
 "the telescope chased",1,1,1,"(0, 2)",1
 "a red quick big telescope found a big big man",0,9,9,"(1, 2)",0
-"a red quick big telescope found a big big man",1,8,8,"(1, 3)",1
+"a red quick big telescope found a big big man",1,8,8,"(7, 8)",1
 "a red quick big telescope found a big big man",2,7,7,"(1, 4)",1
-"a red quick big telescope found a big big man",3,6,6,"(0, 4)",1
-"a red quick big telescope found a big big man",4,5,5,"(0, 5)",1
-"a red quick big telescope found a big big man",5,4,4,"(0, 5)",1
-"a red quick big telescope found a big big man",6,3,3,"(0, 5)",1
+"a red quick big telescope found a big big man",3,6,6,"(7, 8)",1
+"a red quick big telescope found a big big man",4,5,5,"(7, 8)",1
+"a red quick big telescope found a big big man",5,4,4,"(7, 9)",1
+"a red quick big telescope found a big big man",6,3,3,"(6, 9)",1
 "a red quick big telescope found a big big man",7,2,2,"(0, 5)",1
 "a red quick big telescope found a big big man",8,1,1,"(0, 9)",1
-"a telescope admired a quick lazy telescope with the woman",0,9,9,"(8, 9)",1
-"a telescope admired a quick lazy telescope with the woman",1,8,8,"(8, 9)",1
+"a telescope admired a quick lazy telescope with the woman",0,9,9,"(4, 5)",1
+"a telescope admired a quick lazy telescope with the woman",1,8,8,"(4, 5)",1
 "a telescope admired a quick lazy telescope with the woman",2,7,7,"(8, 9)",1
 "a telescope admired a quick lazy telescope with the woman",3,6,6,"(8, 9)",1
 "a telescope admired a quick lazy telescope with the woman",4,5,5,"(8, 9)",1
@@ -45,7 +45,7 @@ sentence,step,n_pairs,n_admitted,top_span,is_gold
 "a telescope admired a quick lazy telescope with the woman",6,3,3,"(0, 2)",1
 "a telescope admired a quick lazy telescope with the woman",7,2,2,"(0, 6)",1
 "a telescope admired a quick lazy telescope with the woman",8,1,1,"(0, 9)",1
-"the woman liked a big lazy quick big woman",0,8,8,"(1, 2)",0
+"the woman liked a big lazy quick big woman",0,8,8,"(5, 6)",0
 "the woman liked a big lazy quick big woman",1,7,7,"(0, 2)",1
 "the woman liked a big lazy quick big woman",2,6,6,"(0, 2)",1
 "the woman liked a big lazy quick big woman",3,5,5,"(0, 2)",1
@@ -79,27 +79,27 @@ sentence,step,n_pairs,n_admitted,top_span,is_gold
 "the small red cat saw the park",3,3,3,"(5, 6)",1
 "the small red cat saw the park",4,2,2,"(0, 4)",1
 "the small red cat saw the park",5,1,1,"(0, 6)",1
-"a cat saw a quick red woman",0,6,6,"(0, 1)",1
-"a cat saw a quick red woman",1,5,5,"(0, 2)",1
+"a cat saw a quick red woman",0,6,6,"(4, 5)",1
+"a cat saw a quick red woman",1,5,5,"(4, 5)",1
 "a cat saw a quick red woman",2,4,4,"(4, 6)",1
-"a cat saw a quick red woman",3,3,3,"(0, 2)",1
+"a cat saw a quick red woman",3,3,3,"(3, 6)",1
 "a cat saw a quick red woman",4,2,2,"(0, 2)",1
 "a cat saw a quick red woman",5,1,1,"(0, 6)",1
 "the man liked",0,2,2,"(0, 1)",1
 "the man liked",1,1,1,"(0, 2)",1
-"a lazy small cat admired",0,4,4,"(0, 1)",0
+"a lazy small cat admired",0,4,4,"(1, 2)",1
 "a lazy small cat admired",1,3,3,"(1, 3)",1
 "a lazy small cat admired",2,2,2,"(0, 3)",1
 "a lazy small cat admired",3,1,1,"(0, 4)",1
 "a telescope found",0,2,2,"(0, 1)",1
 "a telescope found",1,1,1,"(0, 2)",1
-"a man chased the lazy big man",0,6,6,"(0, 1)",1
-"a man chased the lazy big man",1,5,5,"(0, 2)",1
+"a man chased the lazy big man",0,6,6,"(4, 5)",1
+"a man chased the lazy big man",1,5,5,"(4, 5)",1
 "a man chased the lazy big man",2,4,4,"(0, 2)",1
-"a man chased the lazy big man",3,3,3,"(3, 6)",1
+"a man chased the lazy big man",3,3,3,"(0, 2)",1
 "a man chased the lazy big man",4,2,2,"(0, 2)",1
 "a man chased the lazy big man",5,1,1,"(0, 6)",1
-"the lazy quick cat chased the dog on the dog",0,9,9,"(1, 2)",1
+"the lazy quick cat chased the dog on the dog",0,9,9,"(8, 9)",1
 "the lazy quick cat chased the dog on the dog",1,8,8,"(8, 9)",1
 "the lazy quick cat chased the dog on the dog",2,7,7,"(8, 9)",1
 "the lazy quick cat chased the dog on the dog",3,6,6,"(8, 9)",1
@@ -111,10 +111,10 @@ sentence,step,n_pairs,n_admitted,top_span,is_gold
 "the red red small telescope chased",0,5,5,"(2, 3)",1
 "the red red small telescope chased",1,4,4,"(1, 3)",1
 "the red red small telescope chased",2,3,3,"(1, 4)",1
-"the red red small telescope chased",3,2,2,"(1, 5)",0
+"the red red small telescope chased",3,2,2,"(0, 4)",1
 "the red red small telescope chased",4,1,1,"(0, 5)",1
-"the big red dog admired a park under the man",0,9,9,"(8, 9)",1
-"the big red dog admired a park under the man",1,8,8,"(8, 9)",1
+"the big red dog admired a park under the man",0,9,9,"(1, 2)",1
+"the big red dog admired a park under the man",1,8,8,"(1, 3)",1
 "the big red dog admired a park under the man",2,7,7,"(8, 9)",1
 "the big red dog admired a park under the man",3,6,6,"(0, 4)",1
 "the big red dog admired a park under the man",4,5,5,"(0, 4)",1
@@ -122,48 +122,48 @@ sentence,step,n_pairs,n_admitted,top_span,is_gold
 "the big red dog admired a park under the man",6,3,3,"(0, 4)",1
 "the big red dog admired a park under the man",7,2,2,"(0, 6)",1
 "the big red dog admired a park under the man",8,1,1,"(0, 9)",1
-"the big quick park saw the quick quick quick cat",0,9,9,"(1, 2)",1
-"the big quick park saw the quick quick quick cat",1,8,8,"(1, 3)",1
-"the big quick park saw the quick quick quick cat",2,7,7,"(0, 3)",1
-"the big quick park saw the quick quick quick cat",3,6,6,"(0, 4)",1
-"the big quick park saw the quick quick quick cat",4,5,5,"(0, 4)",1
-"the big quick park saw the quick quick quick cat",5,4,4,"(0, 4)",1
-"the big quick park saw the quick quick quick cat",6,3,3,"(0, 4)",1
+"the big quick park saw the quick quick quick cat",0,9,9,"(7, 8)",1
+"the big quick park saw the quick quick quick cat",1,8,8,"(7, 8)",1
+"the big quick park saw the quick quick quick cat",2,7,7,"(7, 8)",1
+"the big quick park saw the quick quick quick cat",3,6,6,"(7, 8)",1
+"the big quick park saw the quick quick quick cat",4,5,5,"(6, 8)",1
+"the big quick park saw the quick quick quick cat",5,4,4,"(5, 8)",0
+"the big quick park saw the quick quick quick cat",6,3,3,"(5, 9)",1
 "the big quick park saw the quick quick quick cat",7,2,2,"(0, 4)",1
 "the big quick park saw the quick quick quick cat",8,1,1,"(0, 9)",1
 "a red lazy man found",0,4,4,"(1, 2)",1
 "a red lazy man found",1,3,3,"(1, 3)",1
 "a red lazy man found",2,2,2,"(0, 3)",1
 "a red lazy man found",3,1,1,"(0, 4)",1
-"the big quick big quick quick woman liked",0,7,7,"(1, 2)",0
+"the big quick big quick quick woman liked",0,7,7,"(4, 5)",1
 "the big quick big quick quick woman liked",1,6,6,"(1, 2)",0
-"the big quick big quick quick woman liked",2,5,5,"(1, 2)",0
-"the big quick big quick quick woman liked",3,4,4,"(1, 5)",1
+"the big quick big quick quick woman liked",2,5,5,"(2, 5)",1
+"the big quick big quick quick woman liked",3,4,4,"(6, 7)",0
 "the big quick big quick quick woman liked",4,3,3,"(1, 6)",1
 "the big quick big quick quick woman liked",5,2,2,"(1, 7)",0
 "the big quick big quick quick woman liked",6,1,1,"(0, 7)",1
 "the lazy lazy woman found",0,4,4,"(1, 2)",1
 "the lazy lazy woman found",1,3,3,"(1, 3)",1
-"the lazy lazy woman found",2,2,2,"(1, 4)",0
+"the lazy lazy woman found",2,2,2,"(0, 3)",1
 "the lazy lazy woman found",3,1,1,"(0, 4)",1
-"a big big man found",0,4,4,"(3, 4)",0
+"a big big man found",0,4,4,"(1, 2)",1
 "a big big man found",1,3,3,"(1, 3)",1
 "a big big man found",2,2,2,"(0, 3)",1
 "a big big man found",3,1,1,"(0, 4)",1
 "the park chased a woman",0,4,4,"(3, 4)",1
 "the park chased a woman",1,3,3,"(3, 4)",1
-"the park chased a woman",2,2,2,"(2, 4)",0
+"the park chased a woman",2,2,2,"(0, 2)",1
 "the park chased a woman",3,1,1,"(0, 4)",1
 "a small lazy man chased",0,4,4,"(1, 2)",1
 "a small lazy man chased",1,3,3,"(1, 3)",1
 "a small lazy man chased",2,2,2,"(0, 3)",1
 "a small lazy man chased",3,1,1,"(0, 4)",1
-"the park chased a lazy small dog in a dog",0,9,9,"(8, 9)",1
-"the park chased a lazy small dog in a dog",1,8,8,"(8, 9)",1
+"the park chased a lazy small dog in a dog",0,9,9,"(4, 5)",1
+"the park chased a lazy small dog in a dog",1,8,8,"(4, 5)",1
 "the park chased a lazy small dog in a dog",2,7,7,"(8, 9)",1
 "the park chased a lazy small dog in a dog",3,6,6,"(8, 9)",1
 "the park chased a lazy small dog in a dog",4,5,5,"(8, 9)",1
-"the park chased a lazy small dog in a dog",5,4,4,"(7, 9)",1
+"the park chased a lazy small dog in a dog",5,4,4,"(0, 2)",1
 "the park chased a lazy small dog in a dog",6,3,3,"(0, 2)",1
 "the park chased a lazy small dog in a dog",7,2,2,"(0, 6)",1
 "the park chased a lazy small dog in a dog",8,1,1,"(0, 9)",1
@@ -180,14 +180,14 @@ sentence,step,n_pairs,n_admitted,top_span,is_gold
 "the lazy big cat chased",3,1,1,"(0, 4)",1
 "the red small quick small park saw",0,6,6,"(1, 2)",0
 "the red small quick small park saw",1,5,5,"(1, 2)",0
-"the red small quick small park saw",2,4,4,"(0, 1)",0
+"the red small quick small park saw",2,4,4,"(1, 4)",1
 "the red small quick small park saw",3,3,3,"(1, 5)",1
 "the red small quick small park saw",4,2,2,"(1, 6)",0
 "the red small quick small park saw",5,1,1,"(0, 6)",1
-"the big big telescope found the telescope",0,6,6,"(5, 6)",1
-"the big big telescope found the telescope",1,5,5,"(5, 6)",1
-"the big big telescope found the telescope",2,4,4,"(5, 6)",1
-"the big big telescope found the telescope",3,3,3,"(5, 6)",1
+"the big big telescope found the telescope",0,6,6,"(1, 2)",1
+"the big big telescope found the telescope",1,5,5,"(1, 3)",1
+"the big big telescope found the telescope",2,4,4,"(0, 3)",1
+"the big big telescope found the telescope",3,3,3,"(0, 4)",1
 "the big big telescope found the telescope",4,2,2,"(0, 4)",1
 "the big big telescope found the telescope",5,1,1,"(0, 6)",1
 "a park found the dog",0,4,4,"(3, 4)",1
@@ -198,32 +198,32 @@ sentence,step,n_pairs,n_admitted,top_span,is_gold
 "a red red man found",1,3,3,"(1, 3)",1
 "a red red man found",2,2,2,"(0, 3)",1
 "a red red man found",3,1,1,"(0, 4)",1
-"the park chased the red small park",0,6,6,"(0, 1)",1
-"the park chased the red small park",1,5,5,"(0, 2)",1
+"the park chased the red small park",0,6,6,"(4, 5)",1
+"the park chased the red small park",1,5,5,"(4, 5)",1
 "the park chased the red small park",2,4,4,"(0, 2)",1
 "the park chased the red small park",3,3,3,"(0, 2)",1
 "the park chased the red small park",4,2,2,"(0, 2)",1
 "the park chased the red small park",5,1,1,"(0, 6)",1
-"the woman liked a lazy lazy telescope",0,6,6,"(1, 2)",0
+"the woman liked a lazy lazy telescope",0,6,6,"(4, 5)",1
 "the woman liked a lazy lazy telescope",1,5,5,"(0, 2)",1
 "the woman liked a lazy lazy telescope",2,4,4,"(0, 2)",1
 "the woman liked a lazy lazy telescope",3,3,3,"(0, 2)",1
 "the woman liked a lazy lazy telescope",4,2,2,"(0, 2)",1
 "the woman liked a lazy lazy telescope",5,1,1,"(0, 6)",1
-"a quick red dog liked the small red telescope",0,8,8,"(6, 7)",1
-"a quick red dog liked the small red telescope",1,7,7,"(6, 7)",1
-"a quick red dog liked the small red telescope",2,6,6,"(6, 7)",1
-"a quick red dog liked the small red telescope",3,5,5,"(6, 7)",1
+"a quick red dog liked the small red telescope",0,8,8,"(1, 2)",1
+"a quick red dog liked the small red telescope",1,7,7,"(1, 3)",1
+"a quick red dog liked the small red telescope",2,6,6,"(0, 3)",1
+"a quick red dog liked the small red telescope",3,5,5,"(0, 4)",1
 "a quick red dog liked the small red telescope",4,4,4,"(0, 4)",1
 "a quick red dog liked the small red telescope",5,3,3,"(0, 4)",1
 "a quick red dog liked the small red telescope",6,2,2,"(0, 4)",1
 "a quick red dog liked the small red telescope",7,1,1,"(0, 8)",1
-"the small lazy park found a telescope with the park",0,9,9,"(8, 9)",1
+"the small lazy park found a telescope with the park",0,9,9,"(1, 2)",1
 "the small lazy park found a telescope with the park",1,8,8,"(8, 9)",1
 "the small lazy park found a telescope with the park",2,7,7,"(8, 9)",1
 "the small lazy park found a telescope with the park",3,6,6,"(8, 9)",1
 "the small lazy park found a telescope with the park",4,5,5,"(8, 9)",1
-"the small lazy park found a telescope with the park",5,4,4,"(7, 9)",1
+"the small lazy park found a telescope with the park",5,4,4,"(0, 4)",1
 "the small lazy park found a telescope with the park",6,3,3,"(0, 4)",1
 "the small lazy park found a telescope with the park",7,2,2,"(0, 6)",1
 "the small lazy park found a telescope with the park",8,1,1,"(0, 9)",1

@@ -1,0 +1,163 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Parse Tree (Multi-Hierarchy)</title>
+<style>
+body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+#tree-container { display: inline-block; }
+.link { fill: none; stroke: #9aa1a9; stroke-width: 1.5px; }
+.node-box { stroke: #444; fill: #fff; rx: 8; ry: 8; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.15)); }
+.node-fo table { border-collapse: collapse; font-size: 12px; margin: 4px 0; }
+.node-fo th, .node-fo td { border: 1px solid #888; padding: 2px 6px; }
+.node-fo th { background: #f3f5f7; font-weight: 600; }
+.section-header { font-weight: 700; font-size: 13px; color: #333; margin: 8px 0 4px 0; border-bottom: 1px solid #ccc; padding-bottom: 2px; }
+.side-by-side { display: flex; gap: 8px; align-items: flex-start; }
+.side-by-side > div { flex: 1; min-width: 0; }
+.sub-title { font-weight: 600; font-size: 11px; color: #555; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+<div id="tree-container"><div id="tree"></div></div>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script>
+const data = {"title": "ROOT", "content_rows": [], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [], "context_after_rows": [], "context_other_rows": [], "score_rows": [], "children": [{"title": "0e2f654e6b", "content_rows": [], "content_left_rows": [{"attr": "Left", "val": "leaf-3533457408", "count": "1.00"}, {"attr": "", "val": "leaf-3533457695", "count": "1.00"}, {"attr": "", "val": "leaf-3533459787", "count": "1.00"}, {"attr": "", "val": "leaf-3533466963", "count": "1.00"}, {"attr": "", "val": "leaf-3533468881", "count": "1.00"}, {"attr": "", "val": "leaf-3533469723", "count": "1.00"}, {"attr": "", "val": "leaf-3533467305", "count": "1.00"}], "content_right_rows": [{"attr": "Right", "val": "leaf-3533461502", "count": "1.00"}, {"attr": "", "val": "leaf-3533461973", "count": "1.00"}, {"attr": "", "val": "leaf-3533464123", "count": "1.00"}, {"attr": "", "val": "leaf-3533463834", "count": "1.00"}, {"attr": "", "val": "leaf-3533468359", "count": "1.00"}, {"attr": "", "val": "leaf-3533469851", "count": "1.00"}, {"attr": "", "val": "leaf-3533470228", "count": "1.00"}], "context_before_rows": [{"attr": "CtxBefore0", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.00"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.00"}], "context_other_rows": [{"attr": "Complexity", "val": "C6", "count": "1.00"}], "score_rows": [], "children": [{"title": "47e2e177a5", "content_rows": [], "content_left_rows": [{"attr": "Left", "val": "leaf-3533457408", "count": "1.00"}, {"attr": "", "val": "leaf-3533457695", "count": "1.00"}, {"attr": "", "val": "leaf-3533466400", "count": "1.00"}, {"attr": "", "val": "leaf-3533466792", "count": "1.00"}, {"attr": "", "val": "leaf-3533466908", "count": "1.00"}, {"attr": "", "val": "leaf-3533469670", "count": "1.00"}, {"attr": "", "val": "leaf-3533469723", "count": "1.00"}], "content_right_rows": [{"attr": "Right", "val": "leaf-3533457408", "count": "1.00"}, {"attr": "", "val": "leaf-3533459280", "count": "1.00"}, {"attr": "", "val": "leaf-3533466792", "count": "1.00"}, {"attr": "", "val": "leaf-3533466963", "count": "1.00"}, {"attr": "", "val": "leaf-3533468881", "count": "1.00"}, {"attr": "", "val": "leaf-3533466197", "count": "1.00"}, {"attr": "", "val": "leaf-3533467305", "count": "1.00"}], "context_before_rows": [{"attr": "CtxBefore0", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.00"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "with", "count": "0.50"}, {"attr": "CtxAfter1", "val": "this", "count": "0.25"}, {"attr": "CtxAfter2", "val": "friendly", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C5", "count": "1.00"}], "score_rows": [], "children": [{"title": "a6d36a91ab", "content_rows": [], "content_left_rows": [{"attr": "Left", "val": "leaf-3533457695", "count": "1.00"}, {"attr": "", "val": "leaf-3533461502", "count": "1.00"}, {"attr": "", "val": "leaf-3533459787", "count": "1.00"}, {"attr": "", "val": "leaf-3533463834", "count": "1.00"}, {"attr": "", "val": "leaf-3533468202", "count": "1.00"}, {"attr": "", "val": "leaf-3533468149", "count": "1.00"}, {"attr": "", "val": "leaf-3533465825", "count": "1.00"}], "content_right_rows": [{"attr": "Right", "val": "leaf-3533457408", "count": "1.00"}, {"attr": "", "val": "leaf-3533457695", "count": "1.00"}, {"attr": "", "val": "leaf-3533466400", "count": "1.00"}, {"attr": "", "val": "leaf-3533466792", "count": "1.00"}, {"attr": "", "val": "leaf-3533469670", "count": "1.00"}, {"attr": "", "val": "leaf-3533469723", "count": "1.00"}, {"attr": "", "val": "leaf-3533470228", "count": "1.00"}], "context_before_rows": [{"attr": "CtxBefore0", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.00"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "saw", "count": "0.50"}, {"attr": "CtxAfter1", "val": "with", "count": "0.25"}, {"attr": "CtxAfter2", "val": "this", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C4", "count": "1.00"}], "score_rows": [], "children": [{"title": "1cb2d36098", "content_rows": [{"attr": "Word", "val": "that", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "EMPTYNULL", "count": "0.50"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.25"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "blue", "count": "0.50"}, {"attr": "CtxAfter1", "val": "blue", "count": "0.25"}, {"attr": "CtxAfter2", "val": "teacher", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "that", "count": "1.00"}], "score_rows": [], "children": []}, {"title": "34f7d35666", "content_rows": [], "content_left_rows": [{"attr": "Left", "val": "leaf-3533457408", "count": "1.00"}, {"attr": "", "val": "leaf-3533457695", "count": "1.00"}, {"attr": "", "val": "leaf-3533466792", "count": "1.00"}, {"attr": "", "val": "leaf-3533459787", "count": "1.00"}, {"attr": "", "val": "leaf-3533468149", "count": "1.00"}, {"attr": "", "val": "leaf-3533466197", "count": "1.00"}, {"attr": "", "val": "leaf-3533465825", "count": "1.00"}], "content_right_rows": [{"attr": "Right", "val": "leaf-3533457408", "count": "1.00"}, {"attr": "", "val": "leaf-3533461705", "count": "1.00"}, {"attr": "", "val": "leaf-3533466400", "count": "1.00"}, {"attr": "", "val": "leaf-3533466792", "count": "1.00"}, {"attr": "", "val": "leaf-3533466963", "count": "1.00"}, {"attr": "", "val": "leaf-3533466197", "count": "1.00"}, {"attr": "", "val": "leaf-3533470228", "count": "1.00"}], "context_before_rows": [{"attr": "CtxBefore0", "val": "that", "count": "0.50"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.00"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "saw", "count": "0.50"}, {"attr": "CtxAfter1", "val": "with", "count": "0.25"}, {"attr": "CtxAfter2", "val": "this", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C3", "count": "1.00"}], "score_rows": [], "children": [{"title": "cc10073707", "content_rows": [], "content_left_rows": [{"attr": "Left", "val": "leaf-3533457695", "count": "1.00"}, {"attr": "", "val": "leaf-3533462464", "count": "1.00"}, {"attr": "", "val": "leaf-3533466792", "count": "1.00"}, {"attr": "", "val": "leaf-3533459787", "count": "1.00"}, {"attr": "", "val": "leaf-3533468202", "count": "1.00"}, {"attr": "", "val": "leaf-3533465825", "count": "1.00"}, {"attr": "", "val": "leaf-3533470228", "count": "1.00"}], "content_right_rows": [{"attr": "Right", "val": "leaf-3533462464", "count": "1.00"}, {"attr": "", "val": "leaf-3533463873", "count": "1.00"}, {"attr": "", "val": "leaf-3533466792", "count": "1.00"}, {"attr": "", "val": "leaf-3533466908", "count": "1.00"}, {"attr": "", "val": "leaf-3533466197", "count": "1.00"}, {"attr": "", "val": "leaf-3533465825", "count": "1.00"}, {"attr": "", "val": "leaf-3533469960", "count": "1.00"}], "context_before_rows": [{"attr": "CtxBefore0", "val": "that", "count": "0.50"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.00"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "teacher", "count": "0.50"}, {"attr": "CtxAfter1", "val": "saw", "count": "0.25"}, {"attr": "CtxAfter2", "val": "with", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C2", "count": "1.00"}], "score_rows": [], "children": [{"title": "08df944f1b", "content_rows": [{"attr": "Word", "val": "blue", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "that", "count": "0.50"}, {"attr": "CtxBefore1", "val": "EMPTYNULL", "count": "0.25"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "blue", "count": "0.50"}, {"attr": "CtxAfter1", "val": "teacher", "count": "0.25"}, {"attr": "CtxAfter2", "val": "saw", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "blue", "count": "1.00"}], "score_rows": [], "children": []}, {"title": "3f1a4aa065", "content_rows": [{"attr": "Word", "val": "blue", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "blue", "count": "0.50"}, {"attr": "CtxBefore1", "val": "that", "count": "0.25"}, {"attr": "CtxBefore2", "val": "EMPTYNULL", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "teacher", "count": "0.50"}, {"attr": "CtxAfter1", "val": "saw", "count": "0.25"}, {"attr": "CtxAfter2", "val": "with", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "blue", "count": "1.00"}], "score_rows": [], "children": []}]}, {"title": "6b5f1c7a4e", "content_rows": [{"attr": "Word", "val": "teacher", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "blue", "count": "0.50"}, {"attr": "CtxBefore1", "val": "blue", "count": "0.25"}, {"attr": "CtxBefore2", "val": "that", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "saw", "count": "0.50"}, {"attr": "CtxAfter1", "val": "with", "count": "0.25"}, {"attr": "CtxAfter2", "val": "this", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "teacher", "count": "1.00"}], "score_rows": [], "children": []}]}]}, {"title": "8816913d85", "content_rows": [{"attr": "Word", "val": "saw", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "teacher", "count": "0.50"}, {"attr": "CtxBefore1", "val": "blue", "count": "0.25"}, {"attr": "CtxBefore2", "val": "blue", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "with", "count": "0.50"}, {"attr": "CtxAfter1", "val": "this", "count": "0.25"}, {"attr": "CtxAfter2", "val": "friendly", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "saw", "count": "1.00"}], "score_rows": [], "children": []}]}, {"title": "fc61b2693a", "content_rows": [], "content_left_rows": [{"attr": "Left", "val": "leaf-3533462464", "count": "1.00"}, {"attr": "", "val": "leaf-3533464123", "count": "1.00"}, {"attr": "", "val": "leaf-3533464160", "count": "1.00"}, {"attr": "", "val": "leaf-3533466963", "count": "1.00"}, {"attr": "", "val": "leaf-3533463834", "count": "1.00"}, {"attr": "", "val": "leaf-3533468359", "count": "1.00"}, {"attr": "", "val": "leaf-3533470228", "count": "1.00"}], "content_right_rows": [{"attr": "Right", "val": "leaf-3533462417", "count": "1.00"}, {"attr": "", "val": "leaf-3533463917", "count": "1.00"}, {"attr": "", "val": "leaf-3533466652", "count": "1.00"}, {"attr": "", "val": "leaf-3533467030", "count": "1.00"}, {"attr": "", "val": "leaf-3533464327", "count": "1.00"}, {"attr": "", "val": "leaf-3533469851", "count": "1.00"}, {"attr": "", "val": "leaf-3533470228", "count": "1.00"}], "context_before_rows": [{"attr": "CtxBefore0", "val": "saw", "count": "0.50"}, {"attr": "CtxBefore1", "val": "teacher", "count": "0.25"}, {"attr": "CtxBefore2", "val": "blue", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.00"}], "context_other_rows": [{"attr": "Complexity", "val": "C5", "count": "1.00"}], "score_rows": [], "children": [{"title": "ece4f01741", "content_rows": [{"attr": "Word", "val": "with", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "saw", "count": "0.50"}, {"attr": "CtxBefore1", "val": "teacher", "count": "0.25"}, {"attr": "CtxBefore2", "val": "blue", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "this", "count": "0.50"}, {"attr": "CtxAfter1", "val": "friendly", "count": "0.25"}, {"attr": "CtxAfter2", "val": "tall", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "with", "count": "1.00"}], "score_rows": [], "children": []}, {"title": "03c2fd26c5", "content_rows": [], "content_left_rows": [{"attr": "Left", "val": "leaf-3533461502", "count": "1.00"}, {"attr": "", "val": "leaf-3533460053", "count": "1.00"}, {"attr": "", "val": "leaf-3533462417", "count": "1.00"}, {"attr": "", "val": "leaf-3533466792", "count": "1.00"}, {"attr": "", "val": "leaf-3533464327", "count": "1.00"}, {"attr": "", "val": "leaf-3533463834", "count": "1.00"}, {"attr": "", "val": "leaf-3533470228", "count": "1.00"}], "content_right_rows": [{"attr": "Right", "val": "leaf-3533461705", "count": "1.00"}, {"attr": "", "val": "leaf-3533461833", "count": "1.00"}, {"attr": "", "val": "leaf-3533462464", "count": "1.00"}, {"attr": "", "val": "leaf-3533462417", "count": "1.00"}, {"attr": "", "val": "leaf-3533463917", "count": "1.00"}, {"attr": "", "val": "leaf-3533466197", "count": "1.00"}, {"attr": "", "val": "leaf-3533470228", "count": "1.00"}], "context_before_rows": [{"attr": "CtxBefore0", "val": "with", "count": "0.50"}, {"attr": "CtxBefore1", "val": "saw", "count": "0.25"}, {"attr": "CtxBefore2", "val": "teacher", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.00"}], "context_other_rows": [{"attr": "Complexity", "val": "C4", "count": "1.00"}], "score_rows": [], "children": [{"title": "6cc8e2cedd", "content_rows": [{"attr": "Word", "val": "this", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "with", "count": "0.50"}, {"attr": "CtxBefore1", "val": "saw", "count": "0.25"}, {"attr": "CtxBefore2", "val": "teacher", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "friendly", "count": "0.50"}, {"attr": "CtxAfter1", "val": "tall", "count": "0.25"}, {"attr": "CtxAfter2", "val": "girl", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "this", "count": "1.00"}], "score_rows": [], "children": []}, {"title": "d0881869ec", "content_rows": [], "content_left_rows": [{"attr": "Left", "val": "leaf-3533457408", "count": "1.00"}, {"attr": "", "val": "leaf-3533461705", "count": "1.00"}, {"attr": "", "val": "leaf-3533461833", "count": "1.00"}, {"attr": "", "val": "leaf-3533462464", "count": "1.00"}, {"attr": "", "val": "leaf-3533462417", "count": "1.00"}, {"attr": "", "val": "leaf-3533463873", "count": "1.00"}, {"attr": "", "val": "leaf-3533463917", "count": "1.00"}], "content_right_rows": [{"attr": "Right", "val": "leaf-3533457408", "count": "1.00"}, {"attr": "", "val": "leaf-3533461705", "count": "1.00"}, {"attr": "", "val": "leaf-3533461833", "count": "1.00"}, {"attr": "", "val": "leaf-3533461973", "count": "1.00"}, {"attr": "", "val": "leaf-3533462417", "count": "1.00"}, {"attr": "", "val": "leaf-3533463917", "count": "1.00"}, {"attr": "", "val": "leaf-3533466792", "count": "1.00"}], "context_before_rows": [{"attr": "CtxBefore0", "val": "this", "count": "0.50"}, {"attr": "CtxBefore1", "val": "with", "count": "0.25"}, {"attr": "CtxBefore2", "val": "saw", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.00"}], "context_other_rows": [{"attr": "Complexity", "val": "C3", "count": "1.00"}], "score_rows": [], "children": [{"title": "ed65718caa", "content_rows": [], "content_left_rows": [{"attr": "Left", "val": "leaf-3533461833", "count": "1.00"}, {"attr": "", "val": "leaf-3533462464", "count": "1.00"}, {"attr": "", "val": "leaf-3533462417", "count": "1.00"}, {"attr": "", "val": "leaf-3533466792", "count": "1.00"}, {"attr": "", "val": "leaf-3533459787", "count": "1.00"}, {"attr": "", "val": "leaf-3533468202", "count": "1.00"}, {"attr": "", "val": "leaf-3533470228", "count": "1.00"}], "content_right_rows": [{"attr": "Right", "val": "leaf-3533461705", "count": "1.00"}, {"attr": "", "val": "leaf-3533462464", "count": "1.00"}, {"attr": "", "val": "leaf-3533463873", "count": "1.00"}, {"attr": "", "val": "leaf-3533466792", "count": "1.00"}, {"attr": "", "val": "leaf-3533466908", "count": "1.00"}, {"attr": "", "val": "leaf-3533464327", "count": "1.00"}, {"attr": "", "val": "leaf-3533469960", "count": "1.00"}], "context_before_rows": [{"attr": "CtxBefore0", "val": "this", "count": "0.50"}, {"attr": "CtxBefore1", "val": "with", "count": "0.25"}, {"attr": "CtxBefore2", "val": "saw", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "girl", "count": "0.50"}, {"attr": "CtxAfter1", "val": "EMPTYNULL", "count": "0.00"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.00"}], "context_other_rows": [{"attr": "Complexity", "val": "C2", "count": "1.00"}], "score_rows": [], "children": [{"title": "26229e62bf", "content_rows": [{"attr": "Word", "val": "friendly", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "this", "count": "0.50"}, {"attr": "CtxBefore1", "val": "with", "count": "0.25"}, {"attr": "CtxBefore2", "val": "saw", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "tall", "count": "0.50"}, {"attr": "CtxAfter1", "val": "girl", "count": "0.25"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "friendly", "count": "1.00"}], "score_rows": [], "children": []}, {"title": "030ab499a0", "content_rows": [{"attr": "Word", "val": "tall", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "friendly", "count": "0.50"}, {"attr": "CtxBefore1", "val": "this", "count": "0.25"}, {"attr": "CtxBefore2", "val": "with", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "girl", "count": "0.50"}, {"attr": "CtxAfter1", "val": "EMPTYNULL", "count": "0.25"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "tall", "count": "1.00"}], "score_rows": [], "children": []}]}, {"title": "c2331ff053", "content_rows": [{"attr": "Word", "val": "girl", "count": "1.00"}], "content_left_rows": [], "content_right_rows": [], "context_before_rows": [{"attr": "CtxBefore0", "val": "tall", "count": "0.50"}, {"attr": "CtxBefore1", "val": "friendly", "count": "0.25"}, {"attr": "CtxBefore2", "val": "this", "count": "0.12"}], "context_after_rows": [{"attr": "CtxAfter0", "val": "EMPTYNULL", "count": "0.50"}, {"attr": "CtxAfter1", "val": "EMPTYNULL", "count": "0.25"}, {"attr": "CtxAfter2", "val": "EMPTYNULL", "count": "0.12"}], "context_other_rows": [{"attr": "Complexity", "val": "C1", "count": "1.00"}, {"attr": "ContentRef", "val": "girl", "count": "1.00"}], "score_rows": [], "children": []}]}]}]}]}]};
+const nodeW=600, nodeH=130, hGap=80, vGap=150;
+
+const root = d3.hierarchy(data);
+const layout = d3.tree()
+  .nodeSize([nodeW+hGap, nodeH+vGap])
+  .separation((a,b) => a.parent===b.parent ? 1.0 : 1.4);
+layout(root);
+
+const svg = d3.select("#tree").append("svg").attr("width",1).attr("height",1);
+const g = svg.append("g");
+
+const linkGen = d3.linkVertical().x(d=>d.x).y(d=>d.y);
+const link = g.selectAll("path.link").data(root.links()).join("path")
+  .attr("class","link").attr("d",linkGen);
+
+const node = g.selectAll("g.node").data(root.descendants()).join("g")
+  .attr("transform", d=>`translate(${d.x},${d.y})`);
+
+node.append("rect").attr("class","node-box")
+  .attr("x",-nodeW/2).attr("y",0).attr("width",nodeW).attr("height",nodeH);
+
+node.append("foreignObject").attr("class","node-fo")
+  .attr("x",-nodeW/2+6).attr("y",6).attr("width",nodeW-12).attr("height",1000)
+  .html(d => nodeHTML(d.data));
+
+// measure actual content heights
+node.selectAll("foreignObject").each(function(d){
+  const fo=d3.select(this), div=fo.select("div").node();
+  const h=div.getBoundingClientRect().height+12;
+  d._nodeHeight = h;
+  fo.attr("height",h);
+  d3.select(this.parentNode).select("rect").attr("height",h+12);
+});
+
+// compute per-depth max height and reposition rows
+const depthMaxHeight = new Map();
+root.each(d => {
+  const h = d._nodeHeight || nodeH;
+  const existing = depthMaxHeight.get(d.depth) || 0;
+  if (h > existing) depthMaxHeight.set(d.depth, h);
+});
+const maxDepth = Math.max(...Array.from(depthMaxHeight.keys()));
+const depthOffsets = [];
+for (let i = 0; i <= maxDepth; i++) {
+  const prev = i === 0 ? 0 : depthOffsets[i-1] + (depthMaxHeight.get(i-1)||nodeH) + vGap;
+  depthOffsets.push(prev);
+}
+root.each(d => { d.y = depthOffsets[d.depth]; });
+node.attr("transform", d => `translate(${d.x},${d.y})`);
+link.attr("d", linkGen);
+
+// fit viewBox
+let x0=Infinity, x1=-Infinity, y0=Infinity, y1=-Infinity;
+root.each(d => {
+  const halfW = nodeW/2, h = d._nodeHeight || nodeH;
+  if (d.x-halfW-30 < x0) x0 = d.x-halfW-30;
+  if (d.x+halfW+30 > x1) x1 = d.x+halfW+30;
+  if (d.y-30 < y0) y0 = d.y-30;
+  if (d.y+h+30 > y1) y1 = d.y+h+30;
+});
+const width=x1-x0, height=y1-y0;
+svg.attr("width",width).attr("height",height)
+  .attr("viewBox",[x0,y0,width,height].join(" "));
+
+function threeColTable(title, rows) {
+  if (!rows || rows.length === 0) return "";
+  const body = rows.map(r =>
+    `<tr><td>${r.attr}</td><td>${r.val}</td><td>${r.count}</td></tr>`
+  ).join("");
+  return `<div class="sub-title">${title}</div>
+    <table>
+      <tr><th>Attr</th><th>Value</th><th>Count</th></tr>
+      ${body}
+    </table>`;
+}
+
+function nodeHTML(d){
+  // --- Content section ---
+  let contentHTML = "";
+  const hasLeft = d.content_left_rows && d.content_left_rows.length > 0;
+  const hasRight = d.content_right_rows && d.content_right_rows.length > 0;
+  const hasSingle = d.content_rows && d.content_rows.length > 0;
+
+  if (hasLeft || hasRight) {
+    // Composite node: left and right side by side
+    contentHTML = `<div class="section-header">Content</div>
+      <div class="side-by-side">
+        <div>${threeColTable("Left", d.content_left_rows)}</div>
+        <div>${threeColTable("Right", d.content_right_rows)}</div>
+      </div>`;
+  } else if (hasSingle) {
+    // Primitive node: single content table
+    contentHTML = `<div class="section-header">Content</div>${threeColTable("", d.content_rows)}`;
+  }
+
+  // --- Context section ---
+  let contextHTML = "";
+  const hasBefore = d.context_before_rows && d.context_before_rows.length > 0;
+  const hasAfter = d.context_after_rows && d.context_after_rows.length > 0;
+  const hasOther = d.context_other_rows && d.context_other_rows.length > 0;
+
+  if (hasBefore || hasAfter || hasOther) {
+    let ctxInner = "";
+    if (hasBefore || hasAfter) {
+      ctxInner += `<div class="side-by-side">
+        <div>${threeColTable("Before", d.context_before_rows)}</div>
+        <div>${threeColTable("After", d.context_after_rows)}</div>
+      </div>`;
+    }
+    if (hasOther) {
+      ctxInner += threeColTable("Other", d.context_other_rows);
+    }
+    contextHTML = `<div class="section-header">Context</div>${ctxInner}`;
+  }
+
+  // --- Score section ---
+  let scoreHTML = "";
+  const hasScores = d.score_rows && d.score_rows.length > 0;
+  if (hasScores) {
+    const scoreBody = d.score_rows.map(r =>
+      `<tr><td>${r.attr}</td><td style="font-weight:600">${r.val}</td><td>${r.count}</td></tr>`
+    ).join("");
+    scoreHTML = `<div class="section-header" style="color:#2b6cb0;">Scores</div>
+      <table>
+        <tr><th>Metric</th><th>Value</th><th></th></tr>
+        ${scoreBody}
+      </table>`;
+  }
+
+  return `<div class="node-fo">
+    <table><tr><th colspan="3">${d.title}</th></tr></table>
+    ${contentHTML}
+    ${contextHTML}
+    ${scoreHTML}
+  </div>`;
+}
+</script>
+</body>
+</html>
