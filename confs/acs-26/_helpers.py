@@ -46,6 +46,59 @@ from unittests.learning_curves_test import run_learning_curves
 SEEDS = [13, 17, 23, 42, 100]
 
 
+# ───────────────────────────── Plot palette ──────────────────────────
+# All plotters in this module reference the BLUE_* constants. Two
+# palettes are defined below; the ``ACTIVE_PALETTE_NAME`` switch at
+# the bottom rebinds the BLUE_* names to whichever palette is active
+# so plotters don't need to know about it. To re-theme the whole
+# acs-26 figure set, just flip the switch and re-run regenerate_viz.
+
+# Palette A — monochromatic blue (one hue, six shades).
+# Shades from a perceptually-uniform blue ramp; ``BLUE_LIGHTEST`` is
+# light enough to use as a fill / overlay without losing legibility
+# against white grid lines.
+_BLUE_DARKEST  = "#08306b"   # navy — primary lead metric
+_BLUE_DARK     = "#2171b5"   # standard blue — secondary metric
+_BLUE_MID      = "#4292c6"   # medium — tertiary metric
+_BLUE_LIGHT    = "#6baed6"   # light — quaternary / overlay
+_BLUE_LIGHTER  = "#9ecae1"   # very light — error / chance
+_BLUE_LIGHTEST = "#deebf7"   # near-white — background fills
+_BLUE_TRIAD    = [_BLUE_LIGHTER, _BLUE_DARK, _BLUE_DARKEST]
+
+# Palette B — Red / Orange / Green (three distinct hues + light fills).
+# Maps slots so panel metrics get DISTINGUISHABLE HUES (not just
+# shades): primary metric = red, secondary = orange, tertiary = green.
+# Sweep variants get a traffic-light triad (green=low/simple,
+# orange=mid, red=high/complex).
+_RED_DARK     = "#c0392b"   # primary lead metric
+_ORANGE_DARK  = "#e67e22"   # secondary
+_GREEN_DARK   = "#27ae60"   # tertiary
+_RED_LIGHT    = "#f5b7b1"   # primary fill / error / chance
+_ORANGE_LIGHT = "#fad7a0"   # secondary fill
+_GREEN_LIGHT  = "#a9dfbf"   # tertiary fill
+_RYG_TRIAD    = [_GREEN_DARK, _ORANGE_DARK, _RED_DARK]   # low → high
+
+# ↓ flip to "blue" to revert ↓
+ACTIVE_PALETTE_NAME = "ryg"
+
+if ACTIVE_PALETTE_NAME == "blue":
+    BLUE_DARKEST, BLUE_DARK, BLUE_MID    = _BLUE_DARKEST, _BLUE_DARK, _BLUE_MID
+    BLUE_LIGHT, BLUE_LIGHTER, BLUE_LIGHTEST = _BLUE_LIGHT, _BLUE_LIGHTER, _BLUE_LIGHTEST
+    PALETTE_TRIAD = _BLUE_TRIAD
+elif ACTIVE_PALETTE_NAME == "ryg":
+    # Slot mapping for RYG: lead=RED, support=ORANGE, third=GREEN.
+    # The "LIGHT/LIGHTER/LIGHTEST" slots become the light tints of
+    # red/orange/green so per-panel hierarchy still works visually.
+    BLUE_DARKEST, BLUE_DARK, BLUE_MID    = _RED_DARK, _ORANGE_DARK, _GREEN_DARK
+    BLUE_LIGHT, BLUE_LIGHTER, BLUE_LIGHTEST = _RED_LIGHT, _ORANGE_LIGHT, _GREEN_LIGHT
+    PALETTE_TRIAD = _RYG_TRIAD
+else:
+    raise ValueError(f"Unknown ACTIVE_PALETTE_NAME={ACTIVE_PALETTE_NAME!r}")
+
+PALETTE_BLUE = [BLUE_DARKEST, BLUE_DARK, BLUE_MID, BLUE_LIGHT,
+                BLUE_LIGHTER, BLUE_LIGHTEST]
+
+
 # ───────────────────────────── CSV helpers ────────────────────────────
 
 def load_learning_curve_csv(csv_path):
@@ -164,15 +217,15 @@ def plot_learning_curves_with_band(out_path, agg, title, n_seeds=None):
     fig, axes = plt.subplots(1, 4, figsize=(24, 5))
     panel_specs = [
         ("Parse accuracy — precision / recall (split)",
-            [("P",  "Precision",   "#1f77b4"),
-             ("R",  "Recall",      "#2ca02c"),
-             ("EM", "Exact-match", "#9467bd")]),
+            [("P",  "Precision",   BLUE_DARKEST),
+             ("R",  "Recall",      BLUE_DARK),
+             ("EM", "Exact-match", BLUE_MID)]),
         ("Generation grammaticality",
-            [("gen_gram", "Grammatical", "#bcbd22")]),
+            [("gen_gram", "Grammatical", BLUE_DARK)]),
         ("Generation novelty (grammatical-only)",
-            [("gen_gram_novel", "Grammatical & Novel", "#d62728")]),
+            [("gen_gram_novel", "Grammatical & Novel", BLUE_DARK)]),
         ("Gate activation",
-            [("prim_active", "% train sents w/ mature primitives", "#7f7f7f")]),
+            [("prim_active", "% train sents w/ mature primitives", BLUE_DARK)]),
     ]
     for ax, (sub_title, keys) in zip(axes, panel_specs):
         for k, lbl, c in keys:
@@ -193,15 +246,15 @@ def plot_learning_curves_with_band(out_path, agg, title, n_seeds=None):
     grids_path = os.path.join(os.path.dirname(out_path), "grids_curves.png")
     fig, axes = plt.subplots(1, 2, figsize=(13, 5))
     pp_m, pp_s = agg["p_parse_legal"]
-    axes[0].plot(xs, pp_m, "o-", color="#1f77b4", linewidth=2)
-    axes[0].fill_between(xs, pp_m - pp_s, pp_m + pp_s, color="#1f77b4", alpha=0.2)
+    axes[0].plot(xs, pp_m, "o-", color=BLUE_DARKEST, linewidth=2)
+    axes[0].fill_between(xs, pp_m - pp_s, pp_m + pp_s, color=BLUE_DARKEST, alpha=0.2)
     axes[0].set_xlabel("# training sentences")
     axes[0].set_ylabel("Probability of parsing a legal sentence")
     axes[0].set_title("(a) Parsing — errors of omission")
     axes[0].set_ylim(0, 1.05); axes[0].grid(alpha=0.3)
     gg_m, gg_s = agg["gen_gram"]
-    axes[1].plot(xs, gg_m, "o-", color="#2ca02c", linewidth=2)
-    axes[1].fill_between(xs, gg_m - gg_s, gg_m + gg_s, color="#2ca02c", alpha=0.2)
+    axes[1].plot(xs, gg_m, "o-", color=BLUE_DARK, linewidth=2)
+    axes[1].fill_between(xs, gg_m - gg_s, gg_m + gg_s, color=BLUE_DARK, alpha=0.2)
     axes[1].set_xlabel("# training sentences")
     axes[1].set_ylabel("Probability of generating a legal sentence")
     axes[1].set_title("(b) Generation — errors of co-mission")
@@ -438,9 +491,9 @@ def _plot_pooled_histograms(gold, nong, out_path, n_seeds):
         if lo == hi:
             lo -= 0.5; hi += 0.5
         bins = np.linspace(lo, hi, 30)
-        ax.hist(n, bins=bins, alpha=0.5, color="#d62728",
+        ax.hist(n, bins=bins, alpha=0.5, color=BLUE_LIGHTER,
                 label=f"non-gold (n={len(n)})")
-        ax.hist(g, bins=bins, alpha=0.7, color="#2ca02c",
+        ax.hist(g, bins=bins, alpha=0.7, color=BLUE_DARKEST,
                 label=f"gold (n={len(g)})")
         if len(g) > 1 and len(n) > 1:
             pooled_std = float(np.sqrt(
@@ -592,10 +645,10 @@ def _plot_aggregate_summary(per_seed_metrics, out_path, n_seeds, title_suffix=""
 
     # Panel A — Parse P/R/F1/EM.
     axA = fig.add_subplot(2, 3, 1)
-    pa_keys = [("precision", "Precision", "#1f77b4"),
-               ("recall",    "Recall",    "#2ca02c"),
-               ("F1",        "F1",        "#d62728"),
-               ("EM",        "Exact-match", "#9467bd")]
+    pa_keys = [("precision", "Precision", BLUE_DARKEST),
+               ("recall",    "Recall",    BLUE_DARK),
+               ("F1",        "F1",        BLUE_MID),
+               ("EM",        "Exact-match", BLUE_LIGHT)]
     means = [ms(k)[0] for k, _, _ in pa_keys]
     stds  = [ms(k)[1] for k, _, _ in pa_keys]
     _grouped_bar(axA, [l for _, l, _ in pa_keys], means, stds,
@@ -606,9 +659,9 @@ def _plot_aggregate_summary(per_seed_metrics, out_path, n_seeds, title_suffix=""
 
     # Panel B — Step-pick + gate pass rate + chance.
     axB = fig.add_subplot(2, 3, 2)
-    sp_keys = [("step_pick", "Step-pick\n(of admitted)", "#d62728"),
-               ("gate_pass", "Gate pass-rate\n(climb cleared)", "#2ca02c"),
-               ("step_chance", "chance",                  "lightgray")]
+    sp_keys = [("step_pick", "Step-pick\n(of admitted)", BLUE_DARKEST),
+               ("gate_pass", "Gate pass-rate\n(climb cleared)", BLUE_DARK),
+               ("step_chance", "chance",                  BLUE_LIGHTER)]
     means = [ms(k)[0] for k, _, _ in sp_keys]
     stds  = [ms(k)[1] for k, _, _ in sp_keys]
     _grouped_bar(axB, [l for _, l, _ in sp_keys], means, stds,
@@ -639,11 +692,11 @@ def _plot_aggregate_summary(per_seed_metrics, out_path, n_seeds, title_suffix=""
             Fm.append(arr[:, 2].mean()); Fs.append(arr[:, 2].std())
             n_mean.append(int(arr[:, 3].mean()))
         axC.bar(x - w, Pm, w, yerr=Ps, capsize=3, ecolor="#333",
-                label="Precision", color="#1f77b4")
+                label="Precision", color=BLUE_DARKEST)
         axC.bar(x,     Rm, w, yerr=Rs, capsize=3, ecolor="#333",
-                label="Recall",    color="#2ca02c")
+                label="Recall",    color=BLUE_DARK)
         axC.bar(x + w, Fm, w, yerr=Fs, capsize=3, ecolor="#333",
-                label="F1",        color="#d62728")
+                label="F1",        color=BLUE_MID)
         axC.set_xticks(x)
         axC.set_xticklabels([f"{c}\n(n̄={n})" for c, n in zip(ordering, n_mean)],
                             fontsize=9)
@@ -657,11 +710,11 @@ def _plot_aggregate_summary(per_seed_metrics, out_path, n_seeds, title_suffix=""
 
     # Panel D — From-scratch generation rates.
     axD = fig.add_subplot(2, 3, 4)
-    gen_keys = [("in_lex",     "In-lexicon",   "#17becf"),
-                ("gram",       "Grammatical",  "#bcbd22"),
-                ("novel",      "Novel",        "#9467bd"),
-                ("unique",     "Unique",       "#8c564b"),
-                ("gram_novel", "Gram & Novel", "#2ca02c")]
+    gen_keys = [("in_lex",     "In-lexicon",   BLUE_DARKEST),
+                ("gram",       "Grammatical",  BLUE_DARK),
+                ("novel",      "Novel",        BLUE_MID),
+                ("unique",     "Unique",       BLUE_LIGHT),
+                ("gram_novel", "Gram & Novel", BLUE_LIGHTER)]
     means = [ms(k)[0] for k, _, _ in gen_keys]
     stds  = [ms(k)[1] for k, _, _ in gen_keys]
     _grouped_bar(axD, [l for _, l, _ in gen_keys], means, stds,
@@ -673,8 +726,8 @@ def _plot_aggregate_summary(per_seed_metrics, out_path, n_seeds, title_suffix=""
 
     # Panel E — Mask completion exact / POS.
     axE = fig.add_subplot(2, 3, 5)
-    mk_keys = [("mask_exact", "Exact-token", "#ff7f0e"),
-               ("mask_pos",   "POS-class",   "#e377c2")]
+    mk_keys = [("mask_exact", "Exact-token", BLUE_DARKEST),
+               ("mask_pos",   "POS-class",   BLUE_DARK)]
     means = [ms(k)[0] for k, _, _ in mk_keys]
     stds  = [ms(k)[1] for k, _, _ in mk_keys]
     _grouped_bar(axE, [l for _, l, _ in mk_keys], means, stds,
@@ -704,7 +757,7 @@ def _plot_aggregate_summary(per_seed_metrics, out_path, n_seeds, title_suffix=""
                  transform=axF.transAxes)
         axF.text(0.95, y, f"{100*m:.1f} ± {100*s:.1f}%",
                  fontsize=13, va="center", ha="right",
-                 fontweight="bold", color="#1f77b4",
+                 fontweight="bold", color=BLUE_DARKEST,
                  transform=axF.transAxes)
         axF.plot([0.04, 0.96], [y - 0.065, y - 0.065],
                  color="#ddd", linewidth=0.6, transform=axF.transAxes)
