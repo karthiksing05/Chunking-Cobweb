@@ -117,3 +117,41 @@ grammar, which is perfectly deterministic once frozen.
 The grammar does **not** match the source CFG (we never measure that, per
 the project goal). It is its own consistent, simple, recursive,
 generative system induced from raw sentences.
+
+## Simplicity bias — condensing the symbol inventory (`simplicity_bias.py`)
+
+Follow-up question: is there a **simplicity bias** that motivates *fewer*
+chunk categories while keeping each one **meaningful**? Measured with a
+two-part MDL code (`DL_grammar = n_prod·3·log2(n_symbols)` +
+`DL_data = n_internal·log2(n_prod)`; lower = simpler grammar that still
+explains the data) plus a **category-purity** metric (fraction of a
+category's uses that take its single most-common expansion = how well a
+category predicts its own structure). The lever swept is the content-tree
+clustering prior **`content_alpha`** (higher → coarser Cobweb clusters →
+fewer basic-level categories), retrained per value at τ=5.
+
+| content_alpha | #cats | reuse | singleton | purity | #prod | coverage | self_embed | gen_gram | **MDL** |
+|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 1e-4 (default) | 16 | 26.8 | 0.12 | 0.17 | 177 | 1.00 | 0.20 | 0.82 | 6014 |
+| 1e-3 | 10 | 42.9 | 0.30 | 0.10 | 199 | 1.00 | 0.20 | 0.72 | 6291 |
+| 1e-2 | 15 | 28.6 | 0.07 | 0.15 | 195 | 1.00 | 0.13 | 0.90 | 6337 |
+| **0.1** | **5** | **85.8** | **0.00** | **0.26** | **104** | 1.00 | 0.23 | 0.62 | **4380** |
+| 1.0 | 12 | 35.8 | 0.33 | 0.14 | 220 | 1.00 | 0.20 | 0.43 | 6726 |
+
+**Yes — `content_alpha ≈ 0.1` is the simplicity bias, and MDL picks it
+out.** It condenses the inventory **16 → 5 categories** (3×) and
+productions 177 → 104, drives **singletons to 0** (every surviving
+category is reused — none is pure description-length overhead, mean reuse
+85.8), and *raises* purity 0.17 → 0.26 (categories become more
+structurally predictive), all while keeping **coverage = 1.0** and
+recursion (self_embed 0.23). MDL bottoms out here (4380 vs 6014 default).
+
+The tradeoff is **generation grammaticality** (0.82 → 0.62): five
+categories generalize aggressively — excellent for a compact, meaningful
+parsing inventory, looser when *sampling* fresh sentences. `content_alpha`
+is thus a tunable simplicity ↔ generative-fidelity dial; the MDL-optimal
+α=0.1 favours the simplest meaningful grammar. (`α=1.0` overshoots:
+clusters fragment again — 12 cats, 33% singletons, MDL 6726.)
+
+Run: `PYTHONHASHSEED=0 python tests/met6/simplicity_bias.py`
+(→ `tests/met6/simplicity_bias/{simplicity_bias.csv, .png}`).
