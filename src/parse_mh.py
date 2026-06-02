@@ -50,6 +50,7 @@ Key difference from parse.py (single-hierarchy):
 import uuid
 import os
 import json
+import ast
 import asyncio
 from playwright.async_api import async_playwright
 import re
@@ -441,10 +442,26 @@ def _climbing_ancestor(node_path: List[CobwebDiscreteNode],
                               threshold (candidate is unfamiliar and
                               should NOT be admitted)
     """
+    # Threshold semantics (overload):
+    #   count_threshold >= 1  → ABSOLUTE count gate (node.count > τ).
+    #   0 < count_threshold < 1 → RELATIVE-support gate: node holds a
+    #       fraction (node.count / root_count) > ρ of all instances. This
+    #       keeps the gate's *selectivity* constant as the tree grows,
+    #       instead of an absolute count that becomes trivially-cleared
+    #       once enough candidates have been absorbed. Genuine recurring
+    #       chunk types occupy a stable fraction of the content tree, so a
+    #       relative gate stabilises which chunks are committed → the parse
+    #       shape converges across epochs.
+    root_count = node_path[0].count if node_path else 1.0
+    relative = (0.0 < count_threshold < 1.0)
+
+    def _support(node):
+        return (node.count / root_count) if (relative and root_count > 0) else node.count
+
     # node_path is root → leaf. Walk from leaf upward.
     for depth in range(len(node_path) - 1, -1, -1):
         node = node_path[depth]
-        if node.count > count_threshold:
+        if _support(node) > count_threshold:
             return {
                 "ancestor_node":  node,
                 "ancestor_count": node.count,
@@ -502,7 +519,7 @@ def _score_along_path(
     if _basic_cache is not None and _basic_key in _basic_cache:
         basic_level_node = _basic_cache[_basic_key]
     else:
-        basic_level_node = node_path[-1].get_basic(200, 100, debug=True, eval_alpha=_bl_eval_alpha, use_root=True)
+        basic_level_node = node_path[-1].get_basic(200, 100, debug=False, eval_alpha=_bl_eval_alpha, use_root=True)
         if _basic_cache is not None:
             _basic_cache[_basic_key] = basic_level_node
     basic_level_log_prob = basic_level_node.log_prob_instance(instance)
@@ -1908,6 +1925,23 @@ class FiniteParseTree(object):
     # learned representation" intuition, applied on the content tree.
     CLIMB_COUNT_THRESHOLD_DEFAULT = 30
 
+    # --- merge policy (experimental hook for met6 unsupervised loop) ------
+    # ``None`` → legacy behaviour: gate on the climbing-ancestor
+    # (``climb_hit_root``) and rank admitted candidates by the drifting
+    # log-prob score (``cnt_root_lp`` + leaf tie-break).
+    #
+    # A dict selects a frequency-driven, DETERMINISTIC merge policy instead
+    # (BPE/GRIDS-style): the climbing-ancestor gate is permissive by design
+    # (it climbs until it finds support), so it never pins parse shape — the
+    # ranker does, and a log-prob ranker drifts as counts grow → the parse
+    # never converges across epochs. Frequency is monotone and its relative
+    # order stabilises, so ranking/gating on chunk-type frequency yields a
+    # stable, simple, recursive grammar.
+    #   {"rank": "freq_basic"|"freq_leaf",   # what to maximise
+    #    "gate": "freq_basic"|"climb",       # what to reject on
+    #    "freq_min": float}                  # min chunk-class count to merge
+    MERGE_POLICY = None
+
     def build(self, window: str, end_behavior="converge", debug=False,
               climb_count_threshold: int = None,
               maturity_gate: tuple = None,
@@ -2001,9 +2035,34 @@ class FiniteParseTree(object):
                         continue
                     _pair_cache[pair_key] = res
 
-                # Stage 1: gate on climbing-ancestor count.
+                # Stage 1: gate.
                 csd = res.get("content_score_data", {})
-                if csd.get("climb_hit_root", True):
+                _policy = self.MERGE_POLICY
+                if _policy and _policy.get("gate") == "freq_basic":
+                    # Frequency gate: the candidate's chunk CLASS (content
+                    # basic-level concept) must have been seen > freq_min
+                    # times. basic_level_count == -1 means the basic level
+                    # collapsed to root (no evidence) → reject.
+                    _bc = csd.get("basic_level_count", -1)
+                    if _bc is None or _bc <= _policy.get("freq_min", 1):
+                        continue
+                else:
+                    if csd.get("climb_hit_root", True):
+                        continue
+
+                # Stage 2 (frequency policy): rank by chunk-type frequency,
+                # deterministic. Most-frequent recognizable chunk merges
+                # first; ties broken by left index for full determinism.
+                if _policy and str(_policy.get("rank", "")).startswith("freq"):
+                    if _policy["rank"] == "freq_leaf":
+                        try:
+                            _freq = ast.literal_eval(
+                                csd.get("candidate_counts", "[]"))[-1]
+                        except Exception:
+                            _freq = 0.0
+                    else:  # freq_basic
+                        _freq = csd.get("basic_level_count", -1)
+                    admitted.append((float(_freq), res))
                     continue
 
                 # Stage 2: rank by ROOT-fit + LEAF-similarity tie-breaker.
@@ -2053,7 +2112,9 @@ class FiniteParseTree(object):
             if not admitted:
                 break
 
-            admitted.sort(key=lambda x: x[0], reverse=True)
+            # Deterministic: highest score, ties broken by leftmost pair.
+            admitted.sort(key=lambda x: (x[0], -x[1]["left_word_index"]),
+                          reverse=True)
             chosen = admitted[0][1]
 
             chosen_left = chosen["left_word_index"]
@@ -4294,6 +4355,7 @@ class WEBSTER(object):
         debug: bool = False,
         maturity_gate: tuple = None,
         gate_mode: str = "skip",
+        climb_count_threshold: float = None,
     ) -> FiniteParseTree:
         """
         Create a parse tree for *sentence*.
@@ -4311,6 +4373,13 @@ class WEBSTER(object):
                              ancestor gate uses
                              ``CLIMB_COUNT_THRESHOLD_DEFAULT``.
             ``None``       → falls back to ``self.threshold``.
+        climb_count_threshold : float | None
+            Composite climbing-ancestor count gate. When provided, this
+            OVERRIDES the value derived from ``threshold``, decoupling the
+            composite gate from the primitive-stability knob. This is what
+            the unsupervised threshold sweep varies: ``threshold`` (and the
+            ``maturity_gate``) stay fixed while only the composite gate moves.
+            ``None`` → derive from ``threshold`` as before (backwards-compat).
         new_vocab : bool
             If True, add previously unseen words to the vocabulary.
         learning : bool
@@ -4336,10 +4405,15 @@ class WEBSTER(object):
         # climbing-ancestor count threshold (build's gate) share the
         # numeric ``threshold`` argument so callers only have to set one
         # knob: "what counts as 'seen enough times'".
-        climb_thr = (FiniteParseTree.CLIMB_COUNT_THRESHOLD_DEFAULT
-                     if threshold == "converge"
-                     else int(threshold) if isinstance(threshold, (int, float))
-                     else FiniteParseTree.CLIMB_COUNT_THRESHOLD_DEFAULT)
+        if climb_count_threshold is not None:
+            # Explicit override: decouple the composite gate from the
+            # primitive-stability ``threshold`` knob (used by the sweep).
+            climb_thr = climb_count_threshold
+        else:
+            climb_thr = (FiniteParseTree.CLIMB_COUNT_THRESHOLD_DEFAULT
+                         if threshold == "converge"
+                         else int(threshold) if isinstance(threshold, (int, float))
+                         else FiniteParseTree.CLIMB_COUNT_THRESHOLD_DEFAULT)
         parse_tree.build(sentence, end_behavior=threshold,
                          climb_count_threshold=climb_thr, debug=debug,
                          maturity_gate=maturity_gate, gate_mode=gate_mode)

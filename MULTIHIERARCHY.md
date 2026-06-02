@@ -2,13 +2,30 @@
 
 Whereas before we hypothesized needing multiple hierarchies for multiple levels of granularity or to separate primitives and composites, we now rely on multiple hierarchies to properly separate *content* and *context*.
 
+## Methodology 6.1
+
+Start forays into other forms of chunking, with different discrete relations!!
+*   This may need a different way to assign content and context (and also USE content and context!!)
+    *   Perhaps we entangle with the idea of weighting attributes for each hierarchy so the information is not lost completely but it's also not used to build the hierarchy
+
+Immediate domain ideas:
+*   Context-sensitive grammar - where context needs to be attributed to define how elements are grouped or split up
+    *   This may warrant the need for a different kind of generalized framework!
+*   Chess - more discrete relations and no distinct notion of content / context
+*   Go - also a ton of discrete relations and no real notion of content / context, could be simpler than Chess though
+
 ## Methodology 6
+
+MAIN GOALS:
+*   Unsupervised (and supervised) learning threshold!! What is this, how does it work
+*   Basic-level nodes + generation process need to be properly fleshed out!
 
 I can start to see some artifacts of the parsing process making their way through where if we have an incorrect parse at the beginning, it balloons up!
 *   The basic-level is kind of cooked right now - alpha tuning and then also prior_var tuning cooks everything!
 *   Log-probability scores are HECKA weird! I have no idea how to get a score that efficiently evaluates whether a concept belongs to an instance!
 *   I'd like to introduce the idea of a maximum-value parse where we look ahead X number of steps and see what the most parsable thing is! Once we find that, we parse it up! (it's like creating multiple chunks at once)
     *   Can do multiple partial parses until we get our final parse and freeze the maximum-value parse from the top-down once we get a greedy solution!
+*   WE ALSO NEED TO FIND THE OPTIMAL UNSUPERVISED THRESHOLDING ISSUE!!
 
 As mentioned below, generation is a problem! We need the idea of chunk context to properly scaffold the breaking down of chunks and we also need to identify a good decoding idea
 *   The big problem with generation is that basic-level nodes are mixed and so often-times when we resample from that frontier, we get the wrong part of speech
