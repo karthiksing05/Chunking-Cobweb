@@ -75,16 +75,9 @@ test uses.
 | **Simplicity** | `n_categories` (distinct content basic-level classes), `n_phrasal_prods` (parentCat → leftCat rightCat, both children chunks). `τ` is the simplicity knob — higher τ → fewer categories. |
 | **Generation** | `gen_gram` (CYK legality oracle), `gen_novel`, `roundtrip` (generate → re-parse → one root = closed under its own generation) |
 
-## Run
-
-```bash
-PYTHONHASHSEED=0 python tests/met6/unsupervised_grammar_formation.py   # main sweep over τ
-PYTHONHASHSEED=0 python tests/met6/diag_convergence.py                 # abs vs relative gate
-PYTHONHASHSEED=0 python tests/met6/diag_freq_policy.py                 # frequency-merge policy
-PYTHONHASHSEED=0 python tests/met6/diag_grammar_size.py                # categories / productions
-```
-
-Outputs: `tests/met6/unsup_grammar/{unsup_grammar.csv, unsup_grammar.png}`.
+_(The sweeps/diagnostics below were exploratory and have been consolidated
+into the single standalone `gen_learn_test.py` — see "Run" at the bottom.
+The original scripts remain in git history.)_
 
 ## Results (MED, 70 train sentences, 4 epochs → freeze, seed=13)
 
@@ -153,8 +146,7 @@ is thus a tunable simplicity ↔ generative-fidelity dial; the MDL-optimal
 α=0.1 favours the simplest meaningful grammar. (`α=1.0` overshoots:
 clusters fragment again — 12 cats, 33% singletons, MDL 6726.)
 
-Run: `PYTHONHASHSEED=0 python tests/met6/simplicity_bias.py`
-(→ `tests/met6/simplicity_bias/{simplicity_bias.csv, .png}`).
+_(simplicity-bias sweep — consolidated into git history.)_
 
 ## Matching the supervised version (`diag_supervised_gap.py`, `research_loop_match_supervised.py`, `gen_learn_test.py`)
 
@@ -209,3 +201,44 @@ PYTHONHASHSEED=0 python tests/met6/gen_learn_test.py MED
 ```
 
 Outputs: `tests/met6/gen_learn/<grammar>/{results.md, trees/*.png}`.
+
+> The exploratory scripts (`diag_*`, `simplicity_bias`, `research_loop_*`,
+> `unsupervised_grammar_formation`) were consolidated — `gen_learn_test.py`
+> is now standalone and the only met6 test. The earlier scripts remain in
+> git history.
+
+### Nonterminal analysis — what categories does the unsupervised grammar form, and how consistent are they?
+
+`gen_learn_test.py` reports the discovered **nonterminals** = the content
+basic-level categories the parser commits chunks into, with three
+consistency measures. On **MED** (τ=2, 150 train, 6 epochs):
+
+- **17 nonterminals** discovered.
+- **Assignment consistency 86%** (bottom-up): a given surface POS-span is
+  assigned to the *same* nonterminal 86% of the time — the grammar
+  structures input **reliably/deterministically**.
+- **Representation consistency 49%** / **expansion consistency 55%**
+  (top-down): a nonterminal corresponds to one POS-span / one production
+  only ~half the time — categories are **generalizations** that cover
+  several surface realizations.
+
+| nonterminal | uses | dominant POS-span | repr% | #spans | reading |
+|---|--:|---|--:|--:|---|
+| NT-a | 263 | `Det N` | 48% | 10 | **NP** (also Det Adj N, Adj N, …) |
+| NT-b | 195 | `Det Adj` | **78%** | 8 | **NP-with-AdjP** (cleanest category) |
+| NT-c | 174 | `Det N V` | 43% | 5 | **clause/S core** (NP + V) |
+| NT-d | 30 | `N V` | 47% | 5 | bare clause |
+| … | | longer spans | 10–25% | many | **sentence-level rollups** (vary by definition) |
+
+**Reading.** The grammar is **internally consistent** — bottom-up it maps
+the same structure to the same category 86% of the time — and it forms a
+**compact, interpretable inventory** (a dominant NP `Det N`, a clean
+NP+AdjP category at 78%, verbal/clausal categories, and whole-sentence
+rollups). The moderate top-down purity is *expected*: a single "NP"
+category legitimately covers `Det N`, `Det Adj N`, `Adj N`, … so it spans
+many POS-patterns. The contrast — **86% assignment consistency vs 46%
+parse-F1-vs-gold** — is the crux: the unsupervised parser categorizes
+consistently, it just binarizes differently from the gold convention, so
+bracket-F1 penalizes it even though its grammar is coherent. Categories
+are polysemous (one NP for many realizations), not incoherent. Long-span
+"S" rollups have low purity simply because full sentences vary.
