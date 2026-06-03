@@ -36,6 +36,11 @@ import os, sys, re, random
 from collections import Counter, defaultdict
 import numpy as np
 
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.abspath(os.path.join(_HERE, "..", ".."))
 sys.path.insert(0, _ROOT); sys.path.insert(0, os.path.join(_ROOT, "src"))
@@ -286,6 +291,100 @@ def analyze_nonterminals(web, sents, tau, w2p):
     }
 
 
+# ───────────────────────── summary graphics ───────────────────────────
+
+def make_analysis_summary(out_dir, gname, tau, sup, uns, A):
+    """Large 4-panel summary: head-to-head metrics, corpus consistency,
+    top-nonterminal usage, per-nonterminal consistency."""
+    fig, axes = plt.subplots(2, 2, figsize=(22, 13))
+    BLUE, GREY = "#2171b5", "#9e9e9e"
+
+    # (a) head-to-head metrics
+    ax = axes[0, 0]
+    keys = ["F1", "EM", "gen_gram", "gen_novel"]
+    labels = ["parse F1", "exact-match", "gen gram", "gen novel"]
+    x = np.arange(len(keys)); w = 0.38
+    ax.bar(x - w/2, [100*sup[k] for k in keys], w, label="supervised", color=GREY)
+    ax.bar(x + w/2, [100*uns[k] for k in keys], w, label="unsupervised", color=BLUE)
+    for i, k in enumerate(keys):
+        ax.text(i - w/2, 100*sup[k] + 1, f"{100*sup[k]:.0f}", ha="center", fontsize=9)
+        ax.text(i + w/2, 100*uns[k] + 1, f"{100*uns[k]:.0f}", ha="center", fontsize=9)
+    ax.set_xticks(x); ax.set_xticklabels(labels); ax.set_ylim(0, 108)
+    ax.set_ylabel("%"); ax.set_title("(a) Head-to-head: supervised vs unsupervised")
+    ax.legend(loc="upper right"); ax.grid(alpha=0.3, axis="y")
+
+    # (b) corpus-level nonterminal consistency
+    ax = axes[0, 1]
+    cons = [("assignment\n(surface→NT)", A["assignment_consistency"], "#2ca02c"),
+            ("representation\n(NT→one span)", A["mean_repr_consistency"], "#e6820f"),
+            ("expansion\n(NT→one rule)", A["mean_expand_consistency"], "#d62728")]
+    ax.bar([c[0] for c in cons], [100*c[1] for c in cons], color=[c[2] for c in cons])
+    for i, c in enumerate(cons):
+        ax.text(i, 100*c[1] + 1, f"{100*c[1]:.0f}%", ha="center", fontsize=11, fontweight="bold")
+    ax.set_ylim(0, 108); ax.set_ylabel("%")
+    ax.set_title(f"(b) Nonterminal consistency — {A['n_nonterminals']} NTs discovered")
+    ax.grid(alpha=0.3, axis="y")
+
+    # (c) top-nonterminal usage, labeled by dominant POS-span
+    ax = axes[1, 0]
+    rows = A["rows"][:14][::-1]
+    ax.barh(range(len(rows)), [r["count"] for r in rows], color="#4292c6")
+    ax.set_yticks(range(len(rows)))
+    ax.set_yticklabels([(r["dom_span"][:26] or "∅") for r in rows], fontsize=8)
+    ax.set_xlabel("chunk instances"); ax.set_title("(c) Top nonterminals — usage (label = dominant POS-span)")
+    ax.grid(alpha=0.3, axis="x")
+
+    # (d) per-nonterminal representation vs expansion consistency
+    ax = axes[1, 1]
+    rows2 = A["rows"][:14][::-1]
+    idx = np.arange(len(rows2))
+    ax.barh(idx - 0.2, [100*r["repr_cons"] for r in rows2], 0.4, label="representation", color="#e6820f")
+    ax.barh(idx + 0.2, [100*r["expand_cons"] for r in rows2], 0.4, label="expansion", color="#d62728")
+    ax.set_yticks(idx); ax.set_yticklabels([(r["dom_span"][:22] or "∅") for r in rows2], fontsize=7)
+    ax.set_xlim(0, 105); ax.set_xlabel("%"); ax.legend(loc="lower right")
+    ax.set_title("(d) Per-nonterminal consistency")
+
+    fig.suptitle(f"met6 gen_learn_test — {gname} (τ={tau}): unsupervised grammar vs supervised reference + nonterminal analysis",
+                 fontsize=15, fontweight="bold")
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    p = os.path.join(out_dir, "summary.png")
+    plt.savefig(p, dpi=120, bbox_inches="tight"); plt.close()
+    return p
+
+
+def make_trees_montage(out_dir, tree_dir, tree_notes, gen_samples, gname):
+    """Montage of rendered parse trees: test sentences (unsup | gold) and
+    generated sentences."""
+    n_test = len(tree_notes); n_gen = len(gen_samples)
+    nrows = n_test + (1 if n_gen else 0)
+    ncols = max(2, n_gen)
+    fig = plt.figure(figsize=(7 * ncols, 8 * nrows))
+    gs = fig.add_gridspec(nrows, ncols, hspace=0.12, wspace=0.05)
+
+    def show(ax, png, title):
+        ax.axis("off")
+        path = os.path.join(tree_dir, png)
+        try:
+            ax.imshow(mpimg.imread(path))
+        except Exception:
+            ax.text(0.5, 0.5, "(render unavailable)", ha="center", va="center")
+        ax.set_title(title, fontsize=9)
+
+    for i, (s, u_png, g_png) in enumerate(tree_notes):
+        show(fig.add_subplot(gs[i, 0]), u_png, f"UNSUP: {s}")
+        show(fig.add_subplot(gs[i, 1]), g_png, f"GOLD: {s}")
+    if n_gen:
+        for j, (text, gram, novel, png) in enumerate(gen_samples):
+            tags = [t for t, ok in [("gram", gram), ("novel", novel)] if ok]
+            show(fig.add_subplot(gs[n_test, j]), png, f"GEN: {text}  [{','.join(tags) or 'in-train'}]")
+
+    fig.suptitle(f"met6 gen_learn_test — {gname}: parse trees (test unsup vs gold; generated)",
+                 fontsize=15, fontweight="bold")
+    p = os.path.join(out_dir, "trees_montage.png")
+    plt.savefig(p, dpi=90, bbox_inches="tight"); plt.close()
+    return p
+
+
 def main():
     gname = (sys.argv[1] if len(sys.argv) > 1 else "MED").upper()
     cfg = SETTINGS[gname]
@@ -390,7 +489,15 @@ def main():
         f.write("\n## Test parse trees (unsupervised vs gold)\n\n")
         for s, u_png, g_png in tree_notes:
             f.write(f"- `{s}`  →  unsup `trees/{u_png}`  vs  gold `trees/{g_png}`\n")
-    print(f"\nreport → {md}\ntrees  → {tree_dir}")
+
+    # ── summary graphics ──
+    print("\nbuilding summary graphics…", flush=True)
+    sp = make_analysis_summary(out_dir, gname, tau, sup, uns, A)
+    mp = make_trees_montage(out_dir, tree_dir, tree_notes, gen_samples, gname)
+    with open(md, "a") as f:
+        f.write(f"\n## Summary graphics\n\n- `summary.png` — head-to-head + nonterminal analysis\n")
+        f.write(f"- `trees_montage.png` — all parse trees in one figure\n")
+    print(f"report  → {md}\ntrees   → {tree_dir}\nsummary → {sp}\nmontage → {mp}")
 
 
 if __name__ == "__main__":
