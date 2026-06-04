@@ -497,6 +497,195 @@ np.save(os.path.join(ARR_DIR, "Z_cob_path_train.npy"), Z_cob_path)
 np.save(os.path.join(ARR_DIR, "Z_cob_path_test.npy"),  Z_cob_path_test)
 print("Path-info data saved.")
 
+# ── Cobweb: Product-of-Experts compositional encoding ─────────────────────────
+# After Wang, Gupta, Zhu & MacLellan, "Test-Time Compositional Generalization in
+# Diffusion Models via Concept Discovery" (2026).  That work repurposes a
+# pretrained diffusion model's time-indexed score field as a *hierarchy of
+# density modes*: local modes of the noisy marginals p_t(x_t) act as reusable
+# concept prototypes whose abstraction level is set by the noise level t.  Given a
+# query it (i) discovers candidate prototypes by mode-ascent, summarised as local
+# Gaussians q_j(x)=N(x; m_j, Σ_j); (ii) greedily selects a few with a submodular
+# coverage objective; (iii) composes their Gaussians into a Product-of-Experts.
+#
+# Cobweb already *is* that hierarchy of Gaussian density modes — no mode-ascent or
+# Tweedie pullback required.  Every node n is a diagonal-Gaussian expert
+#     q_n(x) = N(x; m_n, Σ_n),  m_n = n.mean,  σ²_{n,r} = n.sum_sq_r/n.count + prior_var
+# — exactly the model Cobweb itself scores with (verified to match node.log_prob).
+# Shallow nodes are coarse concept prototypes, deep nodes fine ones: the direct
+# analog of diffusion modes coarsening as the noise level rises.
+#
+# Encoding a query x  (paper Eqs. 8-10):
+#     ℓ_{n,r}(x) = log N(x_r; m_{n,r}, σ²_{n,r})           per-dim expert log-lik
+#     F(S)       = Σ_r max_{n∈S} ℓ_{n,r}(x)                submodular coverage (Eq. 8)
+#     grow S: best singleton, then max marginal gain ∆_n   until |S| = K  (Eq. 9)
+#     w_n(r)     = softmax_{n∈S}( ℓ_{n,r}(x) / τ )          per-dim PoE weights (Eq. 10)
+#
+# CODING — each selected prototype's *marginal gain*.  We seed the greedy
+# coverage with the tree root (the most general "mode" — the trivial concept that
+# covers everything), so S_0 = {root}.  The value stored for the prototype chosen
+# at each step is its marginal gain over the current explanation,
+#     ∆_n = F(S_{i-1} ∪ {n}) − F(S_{i-1}) = Σ_r max( ℓ_{n,r} − cur_max_r , 0 ) ≥ 0,
+# which is exactly the quantity the greedy step maximises (Eq. 9).  Seeding with
+# the root gives every prototype a principled, all-positive, instance-comparable
+# gain (no arbitrary floor).  The code is sparse over the prototype pool: entry n =
+# ∆_n for n∈S, 0 otherwise.  Unlike Cobweb-TopK (independent top-k log-probs, which
+# keeps redundant parent/child nodes on one path), the submodular objective forces
+# the K prototypes to cover *complementary* dimensions — a genuine compositional
+# part decomposition.  The PoE mean μ_T (Eq. 7) is also reconstructed (gallery), and
+# the per-instance selected concepts are rendered in poe_concepts.png.
+
+POE_DEPTHS    = (1, 2, 3, 4, 5, 6)   # tree levels donating concept prototypes
+POE_MIN_COUNT = 20                    # min support for a trustworthy Gaussian expert
+POE_CAP       = DZ                    # prototype-pool size (matches the other methods)
+POE_K         = TOP_K                 # number of prototypes composed per instance
+POE_TAU       = 1.0                   # PoE softmax temperature (Eq. 10)
+PRIOR_VAR     = 0.05854983152         # CobwebContinuousTree default prior_var
+
+print("Building Cobweb-PoE prototype pool …")
+_poe_candidates = []
+for d in POE_DEPTHS:
+    for node in by_depth_nodes.get(d, []):
+        if node.count >= POE_MIN_COUNT:
+            _poe_candidates.append((d, node))
+# keep the best-supported POE_CAP prototypes across the pooled depths
+_poe_candidates.sort(key=lambda dn: dn[1].count, reverse=True)
+_poe_candidates = _poe_candidates[:POE_CAP]
+poe_depths = [d for d, _ in _poe_candidates]
+poe_nodes  = [n for _, n in _poe_candidates]
+n_poe      = len(poe_nodes)
+_poe_depth_hist = {d: poe_depths.count(d) for d in sorted(set(poe_depths))}
+print(f"  {n_poe} prototypes; per-depth counts {_poe_depth_hist}")
+
+# Diagonal-Gaussian parameters for every prototype (P, d)
+proto_mean = np.stack([np.asarray(n.mean,   dtype=np.float32) for n in poe_nodes])
+proto_var  = (np.stack([np.asarray(n.sum_sq, dtype=np.float32) / np.float32(n.count)
+                        for n in poe_nodes]) + np.float32(PRIOR_VAR))
+proto_logc = (-0.5 * np.log(2.0 * np.pi * proto_var)).astype(np.float32)   # per-dim log-norm const
+proto_iv   = (0.5 / proto_var).astype(np.float32)                          # ½·precision
+POE_K_EFF  = int(min(POE_K, n_poe))
+
+# Root node = the most general "mode": the empty-set baseline S_0 = {root} that
+# seeds the greedy coverage, so every prototype gets an all-positive marginal gain.
+_root_mean = np.asarray(cobweb_tree.root.mean,   dtype=np.float32)
+_root_var  = (np.asarray(cobweb_tree.root.sum_sq, dtype=np.float32)
+              / np.float32(cobweb_tree.root.count) + np.float32(PRIOR_VAR))
+root_logc  = (-0.5 * np.log(2.0 * np.pi * _root_var)).astype(np.float32)
+root_iv    = (0.5 / _root_var).astype(np.float32)
+
+
+def encode_poe(instances, k=POE_K_EFF, tau=POE_TAU, return_mu=False, batch=256):
+    """Greedy submodular prototype selection + Product-of-Experts composition.
+
+    Coding = each selected prototype's *marginal gain* ∆_n (Eq. 9), the coverage it
+    adds over the current explanation, with the greedy coverage seeded by the tree
+    root (S_0 = {root}) so all gains are ≥ 0 and comparable across instances.
+
+    Returns (code, mu_out, sel, gain):
+      code  (n, n_poe)  sparse — entry = ∆_n for the K selected prototypes, else 0
+      mu_out(n, d)      PoE mean μ_T (Eq. 7) if return_mu else None
+      sel   (n, k)      pool indices of the selected prototypes, in selection order
+      gain  (n, k)      their marginal gains ∆_n, aligned with sel
+    """
+    Xf = instances.astype(np.float32, copy=False)
+    n, d = Xf.shape
+    code     = np.zeros((n, n_poe), dtype=np.float64)
+    sel_all  = np.empty((n, k), dtype=np.int64)
+    gain_all = np.empty((n, k), dtype=np.float64)
+    mu_out   = np.zeros((n, d), dtype=np.float32) if return_mu else None
+    for s in range(0, n, batch):
+        xb = Xf[s:s + batch]                                          # (B, d)
+        B  = xb.shape[0]
+        # per-dim expert log-likelihood  L[b, j, r] = logc[j,r] - ½·iv[j,r]·(x-m)²
+        diff = xb[:, None, :] - proto_mean[None, :, :]                # (B, P, d)
+        L = proto_logc[None, :, :] - proto_iv[None, :, :] * diff * diff
+        # seed coverage with the root expert (S_0 = {root}): ℓ_root per dimension
+        rdiff   = xb - _root_mean[None, :]
+        cur_max = (root_logc[None, :] - root_iv[None, :] * rdiff * rdiff).copy()  # (B, d)
+        chosen  = np.zeros((B, n_poe), dtype=bool)
+        sel     = np.empty((B, k), dtype=np.int64)
+        gains   = np.empty((B, k), dtype=np.float64)
+        br      = np.arange(B)
+        # ── greedy: at each step add the prototype with the largest marginal gain ──
+        for step in range(k):
+            gain = np.maximum(L - cur_max[:, None, :], 0.0).sum(axis=2)   # (B, P) ∆_n ≥ 0
+            gain[chosen] = -np.inf
+            j = gain.argmax(axis=1)
+            sel[:, step]   = j
+            gains[:, step] = gain[br, j]                              # store the marginal gain
+            chosen[br, j]  = True
+            cur_max = np.maximum(cur_max, L[br, j, :])                # extend coverage
+        # write marginal gains into the sparse code
+        code[np.repeat(br, k) + s, sel.reshape(-1)] = gains.reshape(-1)
+        sel_all[s:s + B]  = sel
+        gain_all[s:s + B] = gains
+        if return_mu:
+            # ── per-dim PoE weights over the selected set: softmax(ℓ/τ) (Eq. 10) ──
+            Lsel = L[br[:, None], sel, :]                             # (B, k, d)
+            w = Lsel / tau
+            w -= w.max(axis=1, keepdims=True)
+            np.exp(w, out=w)
+            w /= w.sum(axis=1, keepdims=True)
+            iv_sel, mean_sel = proto_iv[sel], proto_mean[sel]         # (B, k, d) each
+            num = (w * iv_sel * mean_sel).sum(axis=1)                 # PoE: Σ w·Σ⁻¹·m
+            den = (w * iv_sel).sum(axis=1)                            # PoE: Σ w·Σ⁻¹
+            mu_out[s:s + B] = num / den
+    return code, mu_out, sel_all, gain_all
+
+
+print(f"Encoding Cobweb-PoE train (K={POE_K_EFF}, τ={POE_TAU}, coding=marginal-gain) …")
+Z_cob_poe, Z_cob_poe_mu, poe_sel, poe_gain = encode_poe(X_cob, return_mu=True)
+print("Encoding Cobweb-PoE test …")
+Z_cob_poe_test, _, _, _ = encode_poe(X_cob_test)
+
+np.save(os.path.join(ARR_DIR, "Z_cob_poe_train.npy"), Z_cob_poe)
+np.save(os.path.join(ARR_DIR, "Z_cob_poe_test.npy"),  Z_cob_poe_test)
+print("Cobweb-PoE data saved.")
+
+# ── Cobweb-PoE: visualise the selected concepts (not the full code) ────────────
+# For one example per digit, render the K' top concept prototypes that compose it
+# (each as its Gaussian mean-image m_n, the literal "concept"), ordered by marginal
+# gain, alongside the original and the PoE reconstruction μ_T.  Titles show each
+# concept's tree depth (abstraction level) and its marginal gain ∆_n.
+
+POE_VIZ_CONCEPTS = 6                                   # top concepts shown per instance
+_poe_depths_arr  = np.asarray(poe_depths)
+print("Rendering Cobweb-PoE selected-concept gallery …")
+_viz_idx = [int(np.where(y == c)[0][0]) for c in range(10)]   # first sample of each digit
+_n_cols  = 2 + POE_VIZ_CONCEPTS
+fig, axes = plt.subplots(len(_viz_idx), _n_cols,
+                         figsize=(_n_cols * 1.5, len(_viz_idx) * 1.6))
+fig.suptitle(
+    "Cobweb-PoE — concepts composing each digit "
+    f"(top {POE_VIZ_CONCEPTS} of K={POE_K_EFF} by marginal gain)\n"
+    "col 1 = input · col 2 = PoE μ_T · cols 3+ = selected concept prototypes (mean-image)",
+    fontsize=10,
+)
+for row, si in enumerate(_viz_idx):
+    # order this instance's selected concepts by marginal gain (descending)
+    order = np.argsort(-poe_gain[si])
+    axes[row, 0].imshow(X[si].reshape(28, 28), cmap="gray")
+    axes[row, 0].set_ylabel(f"digit {y[si]}", fontsize=8)
+    axes[row, 0].set_xticks([]); axes[row, 0].set_yticks([])
+    if row == 0:
+        axes[row, 0].set_title("input", fontsize=8)
+    axes[row, 1].imshow(Z_cob_poe_mu[si].reshape(28, 28), cmap="gray")
+    axes[row, 1].axis("off")
+    if row == 0:
+        axes[row, 1].set_title("PoE μ_T", fontsize=8)
+    for c in range(POE_VIZ_CONCEPTS):
+        ax = axes[row, 2 + c]
+        ax.axis("off")
+        if c < len(order):
+            pj    = int(poe_sel[si, order[c]])
+            gj    = poe_gain[si, order[c]]
+            depth = int(_poe_depths_arr[pj])
+            ax.imshow(proto_mean[pj].reshape(28, 28), cmap="magma")
+            ax.set_title(f"d{depth}·Δ{gj:.0f}", fontsize=7)
+plt.tight_layout(rect=[0, 0, 1, 0.96])
+plt.savefig(os.path.join(OUT_DIR, "poe_concepts.png"), dpi=130, bbox_inches="tight")
+plt.close()
+print(f"  Selected-concept gallery saved → {os.path.join(OUT_DIR, 'poe_concepts.png')}")
+
 # ── Cobweb: tree visualisation (top 4 depths, label distributions) ────────────
 
 def compute_node_label_counts(root, X_instances, y_labels, max_depth=3):
@@ -702,6 +891,7 @@ cob_bfs_topk_lin_overall,     cob_bfs_topk_lin_per     = linear_probe_per_class(
 cob_topk_bin_lin_overall,     cob_topk_bin_lin_per     = linear_probe_per_class(Z_cob_topk_bin,     y, Z_cob_topk_bin_test,     y_test)
 cob_bfs_topk_bin_lin_overall, cob_bfs_topk_bin_lin_per = linear_probe_per_class(Z_cob_bfs_topk_bin, y, Z_cob_bfs_topk_bin_test, y_test)
 cob_path_lin_overall,         cob_path_lin_per          = linear_probe_per_class(Z_cob_path,         y, Z_cob_path_test,         y_test)
+cob_poe_lin_overall,          cob_poe_lin_per           = linear_probe_per_class(Z_cob_poe,          y, Z_cob_poe_test,          y_test)
 
 pca_knn_accs      = knn_accuracy_vs_k(Z_pca,      y, Z_pca_test,      y_test)
 ae_knn_accs       = knn_accuracy_vs_k(Z_ae,       y, Z_ae_test,       y_test)
@@ -714,6 +904,7 @@ cob_bfs_topk_knn_accs     = knn_accuracy_vs_k(Z_cob_bfs_topk,     y, Z_cob_bfs_t
 cob_topk_bin_knn_accs     = knn_accuracy_vs_k(Z_cob_topk_bin,     y, Z_cob_topk_bin_test,     y_test)
 cob_bfs_topk_bin_knn_accs = knn_accuracy_vs_k(Z_cob_bfs_topk_bin, y, Z_cob_bfs_topk_bin_test, y_test)
 cob_path_knn_accs         = knn_accuracy_vs_k(Z_cob_path,         y, Z_cob_path_test,         y_test)
+cob_poe_knn_accs          = knn_accuracy_vs_k(Z_cob_poe,          y, Z_cob_poe_test,          y_test)
 
 print(f"\n  {'Method':<54} {'Lin.Probe':>10} {'KNN@5':>7} {'Avg L0':>8} {'Dead%':>7}")
 print(f"  {'-'*90}")
@@ -731,6 +922,7 @@ for name, overall, Z_tr, knn_accs in [
     (f"Cobweb-TopK-Bin (depth={topk_depth},dim={n_topk_pool},k={TOP_K})", cob_topk_bin_lin_overall,     Z_cob_topk_bin,     cob_topk_bin_knn_accs),
     (f"Cobweb-Depth-TopK-Bin ({DZ}d, k={TOP_K})",                         cob_bfs_topk_bin_lin_overall, Z_cob_bfs_topk_bin, cob_bfs_topk_bin_knn_accs),
     (f"Cobweb-Path (depth={PATH_DEPTH}, n={N_PATHS}, dim={n_path_dim})",  cob_path_lin_overall,         Z_cob_path,         cob_path_knn_accs),
+    (f"Cobweb-PoE (dim={n_poe}, K={POE_K_EFF}, marginal-gain)",           cob_poe_lin_overall,          Z_cob_poe,          cob_poe_knn_accs),
 ]:
     avg_l0, dead_pct = _repr_stats(Z_tr)
     avg_ent = softmax_entropy(Z_tr).mean()
@@ -769,6 +961,7 @@ METHODS = [
     (Z_cob_topk_bin,     Z_cob_topk_bin_test,     cob_topk_bin_lin_per,     cob_topk_bin_knn_accs,     f"Cobweb-TopK-Bin (depth={topk_depth},dim={n_topk_pool},k={TOP_K})", "8-", "#c39bd3"),
     (Z_cob_bfs_topk_bin, Z_cob_bfs_topk_bin_test, cob_bfs_topk_bin_lin_per, cob_bfs_topk_bin_knn_accs, f"Cobweb-Depth-TopK-Bin ({DZ}d, k={TOP_K})",                         ">-", "#76d7c4"),
     (Z_cob_path,         Z_cob_path_test,          cob_path_lin_per,         cob_path_knn_accs,         f"Cobweb-Path (d={PATH_DEPTH},n={N_PATHS},dim={n_path_dim})",         "p-", "#8c564b"),
+    (Z_cob_poe,          Z_cob_poe_test,           cob_poe_lin_per,          cob_poe_knn_accs,          f"Cobweb-PoE (dim={n_poe},K={POE_K_EFF},Δgain)",                     "*-", "#e377c2"),
 ]
 
 # 1a. UMAP scatter plots
@@ -785,6 +978,7 @@ Z_bfstopk2   = _umap.fit_transform(Z_cob_bfs_topk)
 Z_path2        = _umap.fit_transform(Z_cob_path)
 Z_topkbin2     = _umap.fit_transform(Z_cob_topk_bin)
 Z_bfstopkbin2  = _umap.fit_transform(Z_cob_bfs_topk_bin)
+Z_poe2         = _umap.fit_transform(Z_cob_poe)
 
 scatter_data_umap = [
     (Z_pca2,        "PCA → UMAP 2D"),
@@ -798,8 +992,9 @@ scatter_data_umap = [
     (Z_topkbin2,    "Cobweb-TopK-Bin → UMAP 2D"),
     (Z_bfstopkbin2, "Cobweb-Depth-TopK-Bin → UMAP 2D"),
     (Z_path2,       f"Cobweb-Path (d={PATH_DEPTH},n={N_PATHS}) → UMAP 2D"),
+    (Z_poe2,        f"Cobweb-PoE (K={POE_K_EFF}) → UMAP 2D"),
 ]
-fig, axes = plt.subplots(1, 11, figsize=(57, 5))
+fig, axes = plt.subplots(1, len(scatter_data_umap), figsize=(len(scatter_data_umap) * 5.2, 5))
 fig.suptitle("UMAP Projections", fontsize=12, y=1.01)
 for ax, (Z, title) in zip(axes, scatter_data_umap):
     for c in CLASSES:
@@ -830,6 +1025,7 @@ Z_bfstopk2t   = _tsne.fit_transform(Z_cob_bfs_topk)
 Z_path2t        = _tsne.fit_transform(Z_cob_path)
 Z_topkbin2t     = _tsne.fit_transform(Z_cob_topk_bin)
 Z_bfstopkbin2t  = _tsne.fit_transform(Z_cob_bfs_topk_bin)
+Z_poe2t         = _tsne.fit_transform(Z_cob_poe)
 
 scatter_data_tsne = [
     (Z_pca2t,        "PCA → t-SNE 2D"),
@@ -843,8 +1039,9 @@ scatter_data_tsne = [
     (Z_topkbin2t,    "Cobweb-TopK-Bin → t-SNE 2D"),
     (Z_bfstopkbin2t, "Cobweb-Depth-TopK-Bin → t-SNE 2D"),
     (Z_path2t,       f"Cobweb-Path (d={PATH_DEPTH},n={N_PATHS}) → t-SNE 2D"),
+    (Z_poe2t,        f"Cobweb-PoE (K={POE_K_EFF}) → t-SNE 2D"),
 ]
-fig, axes = plt.subplots(1, 11, figsize=(57, 5))
+fig, axes = plt.subplots(1, len(scatter_data_tsne), figsize=(len(scatter_data_tsne) * 5.2, 5))
 fig.suptitle("t-SNE Projections", fontsize=12, y=1.01)
 for ax, (Z, title) in zip(axes, scatter_data_tsne):
     for c in CLASSES:
@@ -905,6 +1102,7 @@ _rec_rows = [
     (X_rec_ae,        "AE rec"),
     (X_rec_l1sae,     "L1-SAE rec"),
     (X_rec_topksae,   "TopK-SAE rec"),
+    (Z_cob_poe_mu[:10], "Cobweb-PoE μ_T"),
 ]
 fig, axes = plt.subplots(len(_rec_rows), 10, figsize=(15, len(_rec_rows) * 1.7))
 fig.suptitle("Reconstruction gallery (first 10 samples)")
