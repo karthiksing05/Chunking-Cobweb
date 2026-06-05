@@ -1,7 +1,7 @@
 """
 Shared multi-seed orchestration for ACS-26 confs.
 
-Every conf in this folder uses the same pattern: train+eval the WEBSTER
+Every conf in this folder uses the same pattern: train+eval the TRELLIS
 pipeline on a corpus with multiple seeds, then aggregate the
 per-seed CSVs into mean ± 1 std (for learning curves) or
 mean ± std summary statistics (for final headline metrics).
@@ -639,7 +639,7 @@ def _plot_aggregate_summary(per_seed_metrics, out_path, n_seeds, title_suffix=""
 
     fig = plt.figure(figsize=(18, 10))
     fig.suptitle(
-        "WEBSTER — Hollow Learning Test Performance Summary  "
+        "TRELLIS — Hollow Learning Test Performance Summary  "
         f"(mean ± std across {n_seeds} seeds){title_suffix}",
         fontsize=12, fontweight="bold")
 

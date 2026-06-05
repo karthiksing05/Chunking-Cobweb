@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 
 from cobweb.cobweb_discrete import CobwebDiscreteTree
 from viz import HTMLCobwebDrawer
-from parse_mh import WEBSTER, LongTermMemory
+from parse_mh import TRELLIS, LongTermMemory
 
 
 # ── simulated concept IDs (POS hierarchy) ────────────────────────────────────

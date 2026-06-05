@@ -1,7 +1,7 @@
-WEBSTER Threshold + Parsing-Heuristic Analysis
+TRELLIS Threshold + Parsing-Heuristic Analysis
 =======================================================
 
-Trained WEBSTER on 89 hollow trees.
+Trained TRELLIS on 89 hollow trees.
 Probed on 23 held-out hollow trees.
 Logged 614 candidate pair evaluations across 147 merge steps.
 Heuristic set: NO basic-level — only tree_log_prob, tree_class_log_prob, root_log_prob, leaf_log_prob and their derived combinations.

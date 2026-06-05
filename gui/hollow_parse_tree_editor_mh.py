@@ -1,6 +1,6 @@
 # hollow_parse_tree_editor_mh.py  –  Flask GUI for manual parse tree annotation
 #
-# Purely structural: no WEBSTER, no LTM, no Cobweb hierarchies.
+# Purely structural: no TRELLIS, no LTM, no Cobweb hierarchies.
 # The user picks which adjacent nodes to merge and in what order.
 # The only output is a "hollow JSON" recording the sentence and merge order.
 #
@@ -8,7 +8,7 @@
 #   { "sentence": "the dog chased the cat",
 #     "merges": [{"left": 0, "right": 1}, {"left": 0.5, "right": 2}, ...] }
 #
-# These can later be replayed by the unittest to train WEBSTER.
+# These can later be replayed by the unittest to train TRELLIS.
 
 import sys, os
 

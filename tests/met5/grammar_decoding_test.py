@@ -1,8 +1,8 @@
 """
-WEBSTER Bag-Packing / Bag-Unpacking decoding test
+TRELLIS Bag-Packing / Bag-Unpacking decoding test
 =================================================
 
-Trains WEBSTER on the hollow corpus (mirroring ``unittests/hollow_learn_test_mh.py``
+Trains TRELLIS on the hollow corpus (mirroring ``unittests/hollow_learn_test_mh.py``
 exactly so both scripts share the same model), then evaluates both
 hierarchies with the same visual idiom as ``tests/basic-level/
 grammar_basic_level_test.py`` and ``grammar_chunking_basic_level.py``.
@@ -48,7 +48,7 @@ Phase 3. BAG-PACKING / UNPACKING decoding (generalization).
     B) Chunk recovery — for every held-out phrasal span (NP / VP /
        AdjP / PP from a freshly generated sentence's gold derivation
        tree) we mask the span and call
-       ``webster.generate_sentence(masked_sentence=…)``.  Scores
+       ``trellis.generate_sentence(masked_sentence=…)``.  Scores
        exact-token, length, first-token-POS, full POS-sequence match.
 
 Outputs (``tests/met5/grammar_decoding_output/``)
@@ -94,7 +94,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1
-from parse_mh import (WEBSTER, FiniteParseTree, PrimitiveParseNode,
+from parse_mh import (TRELLIS, FiniteParseTree, PrimitiveParseNode,
                       _get_or_register_cplx_vid, _context_weight)
 from cobweb.cobweb_discrete import CobwebDiscreteTree
 
@@ -130,9 +130,9 @@ for pos in POS_LIST:
             WORD_TO_POS[w] = pos
 print(f"Vocabulary: {len(WORD_TO_POS)} words across {len(POS_LIST)} POS classes")
 
-# ── PHASE 0: TRAIN WEBSTER (mirror hollow_learn_test_mh.py) ──────────────────
-print("\n=== PHASE 0: Train WEBSTER (mirroring hollow_learn_test_mh.py) ===")
-webster = WEBSTER(
+# ── PHASE 0: TRAIN TRELLIS (mirror hollow_learn_test_mh.py) ──────────────────
+print("\n=== PHASE 0: Train TRELLIS (mirroring hollow_learn_test_mh.py) ===")
+trellis = TRELLIS(
     TEST_CORPUS1,
     context_length=CONTEXT_LENGTH,
     threshold=THRESHOLD,
@@ -158,7 +158,7 @@ training_sentences = []   # remember for primitive recovery
 for i in range(PRIMITIVES_FIRST):
     s = generate("S", TEST_GRAMMAR1)
     training_sentences.append(s)
-    webster.parse_sentence(s, threshold=1e9, new_vocab=True,
+    trellis.parse_sentence(s, threshold=1e9, new_vocab=True,
                            learning=True, debug=False)
     if (i + 1) % 50 == 0:
         print(f"    [{i+1}/{PRIMITIVES_FIRST}]")
@@ -173,7 +173,7 @@ for p in sorted(glob.glob(os.path.join(HOLLOW_CORPUS_DIR, "*.json"))):
         hollow_corpus_all.append(data)
 print(f"    Loaded {len(hollow_corpus_all)} hollow trees")
 
-# 80/20 split at the sentence level. Train chunks feed WEBSTER and
+# 80/20 split at the sentence level. Train chunks feed TRELLIS and
 # Phase 1/2 inspection; test chunks are held out for Phase 3's
 # representation-quality probe.
 random.shuffle(hollow_corpus_all)
@@ -183,12 +183,12 @@ hollow_test    = hollow_corpus_all[_split_idx:]   # held-out (probed)
 print(f"    Split: train={len(hollow_corpus)}  test={len(hollow_test)}")
 
 for i, hollow in enumerate(hollow_corpus):
-    tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+    tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
     tree.build_primitives(hollow["sentence"], threshold=THRESHOLD)
     for m in hollow["merges"]:
         try: tree.apply_candidate(m["left"], m["right"])
         except Exception: pass
-    webster.ltm.add_parse_tree(tree, shuffle=True, debug=False)
+    trellis.ltm.add_parse_tree(tree, shuffle=True, debug=False)
     if (i + 1) % 25 == 0:
         print(f"    [{i+1}/{len(hollow_corpus)}]")
 
@@ -198,9 +198,9 @@ def _chunk_yield(node):
     def w(n):
         if isinstance(n, PrimitiveParseNode):
             wid = getattr(n, "word_id", None)
-            if wid is None or wid < 0 or wid >= len(webster.ltm.id_to_value):
+            if wid is None or wid < 0 or wid >= len(trellis.ltm.id_to_value):
                 return
-            pos = WORD_TO_POS.get(webster.ltm.id_to_value[wid])
+            pos = WORD_TO_POS.get(trellis.ltm.id_to_value[wid])
             if pos: out.append(pos)
             return
         for _, c in sorted(getattr(n, "children", []),
@@ -225,8 +225,8 @@ def _chunk_tokens(node):
     def w(n):
         if isinstance(n, PrimitiveParseNode):
             wid = getattr(n, "word_id", None)
-            if wid is not None and 0 <= wid < len(webster.ltm.id_to_value):
-                out.append((int(n.position_idx), webster.ltm.id_to_value[wid]))
+            if wid is not None and 0 <= wid < len(trellis.ltm.id_to_value):
+                out.append((int(n.position_idx), trellis.ltm.id_to_value[wid]))
             return
         for _, c in getattr(n, "children", []):
             w(c)
@@ -294,13 +294,13 @@ pos_colors  = [LABEL_COLOR[p] for p in PRIM_LABELS]
 # =============================================================================
 # PHASE 1 — CONTEXT TREE INSPECTION
 # =============================================================================
-# Every primitive token has a context_instance stored in WEBSTER. Greedy
+# Every primitive token has a context_instance stored in TRELLIS. Greedy
 # descend → leaf → get_basic. Per-BL POS histograms, top center & context
 # words. Tree-with-POS-bars (red borders on BL nodes). Score by depth.
 # =============================================================================
 print("\n=== PHASE 1: CONTEXT TREE INSPECTION ===")
 
-ctx_root = webster.ltm.context_hierarchy.root
+ctx_root = trellis.ltm.context_hierarchy.root
 ctx_offsets = list(range(CONTEXT_LENGTH))  # before slots
 ctx_after_offsets = list(range(CONTEXT_LENGTH, 2 * CONTEXT_LENGTH))
 ctx_attr_offsets = {j: -(j+1) for j in ctx_offsets}      # 0→-1, 1→-2, 2→-3
@@ -311,7 +311,7 @@ def offset_for_attr(attr_id):
 
 def _build_ctx_instance(toks, i):
     """Mirror parse_mh.build_primitives' context instance build."""
-    ltm = webster.ltm
+    ltm = trellis.ltm
     cl  = ltm.context_length
     wt_mode = getattr(ltm, "weighting", "binary")
     emp_wt  = getattr(ltm, "empty_weighting", False)
@@ -361,7 +361,7 @@ for sent_toks, i, w, pos in test_primitives:
             "pos_labels": [], "center_words": [],
         }
     ctx_bl_members[h]["pos_labels"].append(prim2id[pos])
-    ctx_bl_members[h]["center_words"].append(webster.ltm.value_to_id[w])
+    ctx_bl_members[h]["center_words"].append(trellis.ltm.value_to_id[w])
 print(f"  {len(ctx_bl_members)} unique BL nodes in context tree")
 
 # ── Per-BL viz (POS hist + top center + top context per offset) ─────────────
@@ -376,8 +376,8 @@ def _top_context_words(node, k=TOP_WORDS_PER_OFFSET):
         if not items: continue
         total = sum(c for _, c in items) or 1
         offset = offset_for_attr(attr_id)
-        out[offset] = [(webster.ltm.id_to_value[v]
-                          if 0 <= v < len(webster.ltm.id_to_value) else f"<{v}>",
+        out[offset] = [(trellis.ltm.id_to_value[v]
+                          if 0 <= v < len(trellis.ltm.id_to_value) else f"<{v}>",
                         c / total)
                        for v, c in items]
     return out
@@ -421,7 +421,7 @@ def plot_bl_subtrees_primitive(members, title, out_path):
         for c in centers: cw_counts[int(c)] = cw_counts.get(int(c), 0) + 1
         top_cw = sorted(cw_counts.items(), key=lambda kv: -kv[1])[:TOP_CENTER_WORDS]
         if top_cw:
-            words = [webster.ltm.id_to_value[w] for w, _ in top_cw]
+            words = [trellis.ltm.id_to_value[w] for w, _ in top_cw]
             counts_ = [c for _, c in top_cw]
             colors_ = [LABEL_COLOR.get(WORD_TO_POS.get(w_str, "OTHER"), "#999")
                        for w_str in words]
@@ -718,7 +718,7 @@ with open(os.path.join(CONTEXT_DIR, "method_summary.txt"), "w") as f:
 # =============================================================================
 print("\n=== PHASE 2: CONTENT TREE INSPECTION ===")
 
-cnt_root = webster.ltm.content_hierarchy.root
+cnt_root = trellis.ltm.content_hierarchy.root
 N_LABEL  = len(ALL_LABELS)
 label2id = {lbl: i for i, lbl in enumerate(ALL_LABELS)}
 
@@ -728,7 +728,7 @@ chunk_records: list = []
 for hollow in hollow_corpus:
     sentence = hollow["sentence"]; sent_toks = sentence.split()
     n_words = len(sent_toks)
-    tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+    tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
     tree.build_primitives(sentence, threshold="converge")
     for m in hollow["merges"]:
         try: tree.apply_candidate(m["left"], m["right"])
@@ -1082,7 +1082,7 @@ with open(os.path.join(CONTENT_DIR, "method_summary.txt"), "w") as f:
 # =============================================================================
 # PHASE 3 — REPRESENTATION QUALITY (Cobweb-discrete probe on bags)
 # =============================================================================
-# Treat the bag WEBSTER builds for each item as its learned encoding
+# Treat the bag TRELLIS builds for each item as its learned encoding
 # and ask: how DISCERNABLE are these bags by class?
 #
 # Probe protocol — Cobweb-Discrete classifier, exactly the format the
@@ -1093,7 +1093,7 @@ with open(os.path.join(CONTENT_DIR, "method_summary.txt"), "w") as f:
 # categorize the test bag *without* the class attribute and read the
 # landing leaf's class-attr distribution — the majority class there
 # is the prediction.  This keeps each attribute discrete (value-set
-# per attribute) the way Cobweb is built for, and matches how WEBSTER
+# per attribute) the way Cobweb is built for, and matches how TRELLIS
 # encodes its content / context hierarchies elsewhere.
 #
 # Bag definitions:
@@ -1163,7 +1163,7 @@ test_chunk_bags = []; test_chunk_y = []; test_chunk_meta = []
 for hollow in hollow_test:
     sentence = hollow["sentence"]; sent_toks = sentence.split()
     n_words  = len(sent_toks)
-    tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+    tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
     tree.build_primitives(sentence, threshold="converge")
     for m in hollow["merges"]:
         try: tree.apply_candidate(m["left"], m["right"])
@@ -1292,7 +1292,7 @@ with open(os.path.join(DECODING_DIR, "chunk_quality.csv"), "w") as f:
 # attribute (= the gold word's vocab id) stripped, so the probe can't
 # trivially memorise the answer from the input.
 print(f"\n  Collecting primitive bags from train + test sentences...")
-content_ref_attr = webster.ltm.content_ref_attr
+content_ref_attr = trellis.ltm.content_ref_attr
 
 def _primitive_bag(toks, i):
     inst = _build_ctx_instance(toks, i)
@@ -1493,7 +1493,7 @@ with open(os.path.join(DECODING_DIR, "quality_summary.csv"), "w") as f:
 # "If the leaves are pure, why doesn't log-probability recognize chunks
 #  correctly?"  This phase audits the answer.
 #
-# Approach: for every test item, descend WEBSTER's *actual* tree (the
+# Approach: for every test item, descend TRELLIS's *actual* tree (the
 # one parsing will use) to its terminal leaf.  Build a leaf → gold-class
 # map from training instances along the same descent (walk up to the
 # nearest labelled ancestor when needed) — this is the "leaf-majority"
@@ -1515,7 +1515,7 @@ with open(os.path.join(DECODING_DIR, "quality_summary.csv"), "w") as f:
 # =============================================================================
 print("\n=== PHASE 4: HEURISTIC COMPARISON ===")
 
-# ── 4a. Direct leaf-majority on WEBSTER's actual tree ───────────────────────
+# ── 4a. Direct leaf-majority on TRELLIS's actual tree ───────────────────────
 # Build leaf → gold-class map from training data via greedy descent.
 def _leaf_majority_map(root, items_with_class):
     leaf_classes = {}  # concept_hash → Counter
@@ -1565,15 +1565,15 @@ prim_lm_acc = prim_lm_correct / max(len(test_prim_y), 1)
 print(f"\n  --- Probe accuracy comparison (chunks) ---")
 print(f"    Cobweb-Discrete probe (Phase 3a)   : "
       f"{n_correct}/{n_chunks} = {100*chunk_overall:5.1f}%")
-print(f"    Leaf-majority on WEBSTER tree      : "
+print(f"    Leaf-majority on TRELLIS tree      : "
       f"{chunk_lm_correct}/{len(test_chunk_y)} = {100*chunk_lm_acc:5.1f}%")
 print(f"    Δ = {100*(chunk_lm_acc - chunk_overall):+.1f}pp "
-      f"({'WEBSTER tree more discriminative' if chunk_lm_acc > chunk_overall else 'Probe more discriminative'})")
+      f"({'TRELLIS tree more discriminative' if chunk_lm_acc > chunk_overall else 'Probe more discriminative'})")
 
 print(f"\n  --- Probe accuracy comparison (primitives) ---")
 print(f"    Cobweb-Discrete probe (Phase 3b)   : "
       f"{n_pcorr}/{n_prim} = {100*prim_overall:5.1f}%")
-print(f"    Leaf-majority on WEBSTER tree      : "
+print(f"    Leaf-majority on TRELLIS tree      : "
       f"{prim_lm_correct}/{len(test_prim_y)} = {100*prim_lm_acc:5.1f}%")
 print(f"    Δ = {100*(prim_lm_acc - prim_overall):+.1f}pp")
 
@@ -1592,9 +1592,9 @@ heur_results = []
 for bag, gold in zip(test_chunk_bags, test_chunk_y):
     inst = _clean_bag(bag)
     leaf, path_strs, node_path, _ = _categorize(
-        inst, webster.ltm.content_hierarchy, mode="dfs")
-    sd = _score_along_path(node_path, inst, webster.ltm.content_hierarchy,
-                            eval_alpha=getattr(webster.ltm,
+        inst, trellis.ltm.content_hierarchy, mode="dfs")
+    sd = _score_along_path(node_path, inst, trellis.ltm.content_hierarchy,
+                            eval_alpha=getattr(trellis.ltm,
                                                 "content_bl_alpha", None))
     leaf_lp = leaf.log_prob_instance(inst)
     bl_cnt  = sd.get("basic_level_count", -1)
@@ -1704,7 +1704,7 @@ ax.bar(xs, ys, color=bar_colors)
 for i, v in enumerate(ys):
     ax.text(i, v + 0.02, f"{100*v:.1f}%", ha="center", fontsize=9)
 ax.set_ylim(0, 1.1); ax.set_ylabel("Accuracy")
-ax.set_title("Probe accuracy: Cobweb-Discrete probe vs WEBSTER-tree leaf-majority")
+ax.set_title("Probe accuracy: Cobweb-Discrete probe vs TRELLIS-tree leaf-majority")
 plt.tight_layout()
 plt.savefig(os.path.join(DECODING_DIR, "probe_vs_leaf_majority.png"), dpi=140)
 plt.close()

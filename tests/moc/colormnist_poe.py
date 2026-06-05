@@ -98,7 +98,7 @@ def make_split(n_ood=40, tries=500):
 SEEN_SLOTS, OOD_SLOTS = make_split()
 print(f"Split: {len(SEEN_SLOTS)} seen / {len(OOD_SLOTS)} OOD")
 
-N_PER_SEEN, N_QUERY, N_GEN = 80, 25, 25     # per-class generated/faithful and generalization sizes
+N_PER_SEEN, N_QUERY, N_GEN = 80, 20, 20     # per-class generated/faithful and generalization sizes
 _cur = {d: 0 for d in range(10)}
 def take(d, k): i = _by_digit[d][_cur[d]:_cur[d] + k]; _cur[d] += k; return i
 
@@ -203,16 +203,18 @@ def poe_compose(x, k=POE_K, tau=0.0, n_cand=SEARCH_NCAND, max_pop=SEARCH_MAXPOP,
     """(1) discover candidate concepts top-down; (2) submodular-pick K (or use_all);
     (3) compose by per-dim PoE weights w_n(r)=softmax(ℓ_{n,r}/τ).  tau→0 (default) =
     per-pixel ownership: each pixel from the single selected concept that best explains
-    the query there.  Returns (mu_T, selected node objects, per-pixel owner index)."""
+    the query there.  Returns (mu_T, selected node objects, per-pixel weights w (K,d) —
+    one-hot at τ→0; w.mean(1) is each concept's share of the composition)."""
     C, M, L, IV = search_candidates(x, n_cand, max_pop)
     chosen = list(range(len(C))) if use_all else submodular_select(L, k)
     nodes = [C[j] for j in chosen]; Ms = M[chosen]; Ls = L[chosen]; IVs = IV[chosen]
     if tau <= 0:                                                        # τ→0: hard per-pixel ownership
         own = Ls.argmax(0)                                             # which selected concept owns each pixel
-        return Ms[own, np.arange(D)].astype(np.float32), nodes, own
+        w = np.zeros_like(Ls); w[own, np.arange(D)] = 1.0              # one-hot ownership map
+        return Ms[own, np.arange(D)].astype(np.float32), nodes, w
     w = np.exp((Ls - Ls.max(0, keepdims=True)) / tau); w /= w.sum(0, keepdims=True)
     mu = (w * IVs * Ms).sum(0) / (w * IVs).sum(0)
-    return mu.astype(np.float32), nodes, None
+    return mu.astype(np.float32), nodes, w
 
 def teacher_topk(x, k):
     """Nearest-seen-prototype baseline (paper §4.2): rank the depth-1-6 pool by
@@ -223,12 +225,13 @@ def teacher_topk(x, k):
     w = np.exp(sing[sel] - sing[sel].max()); w /= w.sum(); iv = proto_iv[sel]
     return ((w[:, None] * iv * proto_mean[sel]).sum(0) / (w[:, None] * iv).sum(0)).astype(np.float32)
 
-METHODS = {
-    "PoE (top-down, τ→0)": lambda x: poe_compose(x, tau=0.0)[0],     # ← THE method (top-down select + per-pixel PoE)
-    "PoE soft (τ=1)":      lambda x: poe_compose(x, tau=1.0)[0],     # averaging baseline (shows the τ→0 win)
-    "Top-1 retrieval":     lambda x: teacher_topk(x, 1),            # nearest-seen-prototype baseline
-    "Query-only":          lambda x: np.clip(x + 0.15 * RNG.standard_normal(D).astype(np.float32), 0, 1),  # N(x_q, σ²I) sample (paper §4.2)
-}
+# Temperature (T) sweep of the per-dim PoE composition.  Selection (top-down discovery
+# + submodular pick) is IDENTICAL across all T; only the composition changes:
+#   T = 0  → per-pixel ownership (hard limit, the method);  larger T → softer averaging.
+TAU_SWEEP = [0.0, 0.25, 0.5, 1.0, 2.0]
+METHODS = {f"T = {t:g}": (lambda x, t=t: poe_compose(x, tau=t)[0]) for t in TAU_SWEEP}
+METHODS["Top-1 retrieval"] = lambda x: teacher_topk(x, 1)                                    # nearest-seen-prototype baseline
+METHODS["Query-only"]      = lambda x: np.clip(x + 0.15 * RNG.standard_normal(D).astype(np.float32), 0, 1)  # N(x_q, σ²I) sample (paper §4.2)
 
 # ══ METRICS — exactly as in Wang et al. §4.2 ══════════════════════════════════
 # For each OOD class we score the generated images against two reference sets —
@@ -344,6 +347,24 @@ fig.suptitle("ColorMNIST OOD — Wang et al. metrics by method (mean ± SE over 
 plt.tight_layout(rect=[0, 0, 1, 0.96]); plt.savefig(os.path.join(OUT_DIR, "metrics.png"), dpi=130, bbox_inches="tight"); plt.close()
 print(f"  metrics chart → {os.path.join(OUT_DIR, 'metrics.png')}")
 
+# ── Temperature (T) sweep — metrics vs composition temperature ────────────────
+_sw = [f"T = {t:g}" for t in TAU_SWEEP]
+fig, (axL, axR) = plt.subplots(1, 2, figsize=(11, 4.2))
+for key, lab, c in [("f1F", "F1 Faithful", "#4878d0"), ("f1G", "F1 General", "#ee854a"), ("joint", "joint/100", "#6acc65")]:
+    sc = 100.0 if key == "joint" else 1.0
+    ys = [RES[n][key][0] / sc for n in _sw]; es = [RES[n][key][1] / sc for n in _sw]
+    axL.errorbar(TAU_SWEEP, ys, yerr=es, marker="o", capsize=2, label=lab, color=c)
+axL.set_xlabel("T (PoE composition temperature)"); axL.set_ylabel("score ↑"); axL.set_title("F1 / joint vs T")
+axL.legend(fontsize=8); axL.grid(alpha=0.3)
+for key, lab, c in [("fidF", "FID Faithful", "#4878d0"), ("fidG", "FID General", "#ee854a")]:
+    ys = [RES[n][key][0] for n in _sw]; es = [RES[n][key][1] for n in _sw]
+    axR.errorbar(TAU_SWEEP, ys, yerr=es, marker="o", capsize=2, label=lab, color=c)
+axR.set_xlabel("T (PoE composition temperature)"); axR.set_ylabel("FID ↓"); axR.set_title("FID vs T")
+axR.legend(fontsize=8); axR.grid(alpha=0.3)
+fig.suptitle("ColorMNIST OOD — PoE temperature sweep  (T=0 = per-pixel ownership → larger T = softer averaging)", fontsize=11)
+plt.tight_layout(rect=[0, 0, 1, 0.95]); plt.savefig(os.path.join(OUT_DIR, "tau_sweep.png"), dpi=130, bbox_inches="tight"); plt.close()
+print(f"  τ-sweep chart → {os.path.join(OUT_DIR, 'tau_sweep.png')}")
+
 # ── Figures ───────────────────────────────────────────────────────────────────
 def show(ax, vec, title=None, ylabel=None):
     ax.imshow(np.clip(vec.reshape(IMG, IMG, 3), 0, 1)); ax.set_xticks([]); ax.set_yticks([])
@@ -363,26 +384,38 @@ for r, (d, f, b) in enumerate(show_slots):
 plt.tight_layout(rect=[0, 0, 1, 0.97]); plt.savefig(os.path.join(OUT_DIR, "methods.png"), dpi=130, bbox_inches="tight"); plt.close()
 print(f"  methods figure → {os.path.join(OUT_DIR, 'methods.png')}")
 
-# (2) concept decomposition: query · μ_T · the top selected concepts by pixels owned
+# (2) concept decomposition, PER METHOD (per T): query · μ_T · the concepts that
+#     compose it, ordered by each concept's share (pixels owned at T=0; mean weight at T>0).
 SHOW_CONCEPTS = min(POE_K, 8)
-fig, axes = plt.subplots(N_SHOW, 2 + SHOW_CONCEPTS, figsize=((2 + SHOW_CONCEPTS) * 1.5, N_SHOW * 1.55))
-fig.suptitle(f"Per-pixel PoE decomposition — query · μ_T · top {SHOW_CONCEPTS} of K={POE_K} selected "
-             f"concepts (d=tree depth, %=pixels it owns)", fontsize=10)
-for r, (d, f, b) in enumerate(show_slots):
-    x = ood_queries[(d, f, b)][0]; mu, nodes, owner = poe_compose(x, tau=0.0)   # owner = per-pixel idx into nodes
-    show(axes[r, 0], x, "query" if r == 0 else None, f"{d}/{f}/{b}")
-    show(axes[r, 1], mu, "μ_T" if r == 0 else None)
-    order = sorted(range(len(nodes)), key=lambda i: -(owner == i).sum())        # most-owning concept first
-    for c in range(SHOW_CONCEPTS):
-        ax = axes[r, 2 + c]; ax.axis("off")
-        if c < len(order):
-            i = order[c]; nd = nodes[i]; frac = 100 * (owner == i).mean()
-            show(ax, np.asarray(nd.mean, np.float32), f"d{_node_depth(nd)}·{frac:.0f}%")
-plt.tight_layout(rect=[0, 0, 1, 0.96]); plt.savefig(os.path.join(OUT_DIR, "concepts.png"), dpi=130, bbox_inches="tight"); plt.close()
-print(f"  concepts figure → {os.path.join(OUT_DIR, 'concepts.png')}")
+def render_concepts(tau, out_path, title):
+    fig, axes = plt.subplots(N_SHOW, 2 + SHOW_CONCEPTS, figsize=((2 + SHOW_CONCEPTS) * 1.5, N_SHOW * 1.55))
+    fig.suptitle(title, fontsize=10)
+    for r, (d, f, b) in enumerate(show_slots):
+        x = ood_queries[(d, f, b)][0]; mu, nodes, w = poe_compose(x, tau=tau)
+        contrib = w.mean(1)                                            # each concept's share of the composition
+        show(axes[r, 0], x, "query" if r == 0 else None, f"{d}/{f}/{b}")
+        show(axes[r, 1], mu, "μ_T" if r == 0 else None)
+        order = np.argsort(-contrib)
+        for c in range(SHOW_CONCEPTS):
+            ax = axes[r, 2 + c]; ax.axis("off")
+            if c < len(order):
+                i = int(order[c]); nd = nodes[i]
+                show(ax, np.asarray(nd.mean, np.float32), f"d{_node_depth(nd)}·{100*contrib[i]:.0f}%")
+    plt.tight_layout(rect=[0, 0, 1, 0.96]); plt.savefig(out_path, dpi=130, bbox_inches="tight"); plt.close()
 
-# (3) concept hierarchy: mean image at each node, top-down (depth 3)
-HIER_DEPTH, HIER_TOP = 3, 6; _cmap = plt.get_cmap("tab10")
+render_concepts(0.0, os.path.join(OUT_DIR, "concepts.png"),
+                f"Per-pixel PoE decomposition (T=0) — query · μ_T · top {SHOW_CONCEPTS} of K={POE_K} concepts "
+                f"(d=tree depth, %=pixels owned)")
+print(f"  concepts figure → {os.path.join(OUT_DIR, 'concepts.png')}")
+CONC_DIR = os.path.join(OUT_DIR, "concepts"); os.makedirs(CONC_DIR, exist_ok=True)
+for t in TAU_SWEEP:                                                    # concepts for each composition idea (T)
+    render_concepts(t, os.path.join(CONC_DIR, f"concepts_T{t:g}.png"),
+                    f"PoE concept decomposition at T={t:g} — query · μ_T · top {SHOW_CONCEPTS} concepts "
+                    f"(% = concept share: pixels owned at T=0, mean weight at T>0)")
+print(f"  per-T concept figures → {CONC_DIR}/")
+
+# (3) concept hierarchy: mean image at each node, top-down — plus level-3 subtrees
+HIER_TOP = 6; _cmap = plt.get_cmap("tab10")
 def greedy_counts(root, Xs, ys, maxd):
     counts = {}
     for xx, lab in zip(Xs, ys):
@@ -392,36 +425,58 @@ def greedy_counts(root, Xs, ys, maxd):
             if not n.children or dd == maxd: break
             n = max(n.children, key=lambda c: c.log_prob(xx, _empty))
     return counts
-NODE_COUNTS = greedy_counts(tree.root, X_train, dig_tr, HIER_DEPTH)
-def disp_ch(n, d): return sorted(n.children, key=lambda c: c.count, reverse=True)[:HIER_TOP] if d < HIER_DEPTH else []
-def span(n, d):
-    ch = disp_ch(n, d); return 1 if not ch else sum(span(c, d + 1) for c in ch)
-pos = {}
-def assign(n, d, xl):
-    sp = span(n, d); pos[id(n)] = (xl + sp / 2.0, d); cur = xl
-    for c in disp_ch(n, d): assign(c, d + 1, cur); cur += span(c, d + 1)
-    return sp
-tw = assign(tree.root, 0, 0.0)
-fig, ax = plt.subplots(figsize=(max(12, tw * 1.5), (HIER_DEPTH + 1) * 2.6))
-ax.set_xlim(-0.6, tw + 0.6); ax.set_ylim(-0.8, HIER_DEPTH + 0.8); ax.invert_yaxis(); ax.axis("off")
-ax.set_title(f"Cobweb concept hierarchy — mean image per node (top-down, depth {HIER_DEPTH}, top {HIER_TOP} children)", fontsize=13)
-def draw_e(n, d):
-    x0, _ = pos[id(n)]
-    for c in disp_ch(n, d):
-        xc, dc = pos[id(c)]; ax.plot([x0, xc], [d + 0.34, dc - 0.34], color="gray", lw=0.8, zorder=0); draw_e(c, d + 1)
-draw_e(tree.root, 0)
-def draw_n(n, d):
-    x0, _ = pos[id(n)]; img = np.clip(np.asarray(n.mean, np.float32).reshape(IMG, IMG, 3), 0, 1)
-    cnt = NODE_COUNTS.get(id(n))
-    if cnt is not None and cnt.sum() > 0:
-        dom = int(cnt.argmax()); color = _cmap(dom); lab = f"n={int(n.count)}\ndigit {dom}·{100*cnt[dom]/cnt.sum():.0f}%"
-    else: color, lab = "black", f"n={int(n.count)}"
-    ax.add_artist(AnnotationBbox(OffsetImage(img, zoom=1.7), (x0, d), frameon=True, bboxprops=dict(edgecolor=color, lw=2.5)))
-    ax.text(x0, d + 0.40, lab, ha="center", va="top", fontsize=5)
-    for c in disp_ch(n, d): draw_n(c, d + 1)
-draw_n(tree.root, 0)
-ax.legend(handles=[plt.Rectangle((0, 0), 1, 1, color=_cmap(i), label=str(i)) for i in range(10)],
-          title="dominant digit", loc="lower center", ncol=10, fontsize=8, title_fontsize=9, bbox_to_anchor=(0.5, -0.04))
-plt.tight_layout(); plt.savefig(os.path.join(OUT_DIR, "hierarchy.png"), dpi=140, bbox_inches="tight"); plt.close()
+NODE_COUNTS = greedy_counts(tree.root, X_train, dig_tr, 6)              # to depth 6 (covers subtrees)
+
+def render_hierarchy(root_node, out_path, title, max_depth=3, top_children=HIER_TOP):
+    """Render root_node + max_depth levels of its top-count children as a mean-image tree.
+    Returns the nodes at the deepest displayed level."""
+    def dch(n, d): return sorted(n.children, key=lambda c: c.count, reverse=True)[:top_children] if d < max_depth else []
+    def span(n, d):
+        ch = dch(n, d); return 1 if not ch else sum(span(c, d + 1) for c in ch)
+    pos = {}; deepest = []
+    def assign(n, d, xl):
+        sp = span(n, d); pos[id(n)] = (xl + sp / 2.0, d)
+        if d == max_depth: deepest.append(n)
+        cur = xl
+        for c in dch(n, d): assign(c, d + 1, cur); cur += span(c, d + 1)
+        return sp
+    tw = assign(root_node, 0, 0.0)
+    fig, ax = plt.subplots(figsize=(max(12, tw * 1.5), (max_depth + 1) * 2.6))
+    ax.set_xlim(-0.6, tw + 0.6); ax.set_ylim(-0.8, max_depth + 0.8); ax.invert_yaxis(); ax.axis("off")
+    ax.set_title(title, fontsize=12)
+    def de(n, d):
+        x0, _ = pos[id(n)]
+        for c in dch(n, d):
+            xc, dc = pos[id(c)]
+            ax.plot([x0, xc], [d + 0.34, dc - 0.34], color="gray", lw=0.8, zorder=0); de(c, d + 1)
+    de(root_node, 0)
+    def dn(n, d):
+        x0, _ = pos[id(n)]; img = np.clip(np.asarray(n.mean, np.float32).reshape(IMG, IMG, 3), 0, 1)
+        cnt = NODE_COUNTS.get(id(n))
+        if cnt is not None and cnt.sum() > 0:
+            dom = int(cnt.argmax()); color = _cmap(dom); lab = f"n={int(n.count)}\ndigit {dom}·{100*cnt[dom]/cnt.sum():.0f}%"
+        else:
+            color, lab = "black", f"n={int(n.count)}"
+        ax.add_artist(AnnotationBbox(OffsetImage(img, zoom=1.7), (x0, d), frameon=True, bboxprops=dict(edgecolor=color, lw=2.5)))
+        ax.text(x0, d + 0.40, lab, ha="center", va="top", fontsize=5)
+        for c in dch(n, d): dn(c, d + 1)
+    dn(root_node, 0)
+    ax.legend(handles=[plt.Rectangle((0, 0), 1, 1, color=_cmap(i), label=str(i)) for i in range(10)],
+              title="dominant digit", loc="lower center", ncol=10, fontsize=8, title_fontsize=9, bbox_to_anchor=(0.5, -0.04))
+    plt.tight_layout(); plt.savefig(out_path, dpi=140, bbox_inches="tight"); plt.close()
+    return deepest
+
+level3 = render_hierarchy(tree.root, os.path.join(OUT_DIR, "hierarchy.png"),
+                          "Cobweb concept hierarchy — mean image per node (top-down, depth 3, top 6 children)", 3)
 print(f"  hierarchy figure → {os.path.join(OUT_DIR, 'hierarchy.png')}")
+# level-3 subtrees: 3 levels deep, rooted at each leaf of the depth-3 hierarchy
+SUB_DIR = os.path.join(OUT_DIR, "subtrees"); os.makedirs(SUB_DIR, exist_ok=True)
+_nsub = 0
+for i, node in enumerate(level3):
+    if not node.children: continue
+    cnt = NODE_COUNTS.get(id(node)); dom = int(cnt.argmax()) if cnt is not None and cnt.sum() > 0 else -1
+    render_hierarchy(node, os.path.join(SUB_DIR, f"subtree_{i:02d}_digit{dom}.png"),
+                     f"Level-3 subtree (3 levels deep) — root n={int(node.count)}, dominant digit {dom}", 3)
+    _nsub += 1
+print(f"  {_nsub} level-3 subtrees → {SUB_DIR}/")
 print("Done.")

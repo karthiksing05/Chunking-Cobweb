@@ -48,7 +48,7 @@ sys.path.insert(0, _ROOT); sys.path.insert(0, os.path.join(_ROOT, "src"))
 from cobweb.cobweb_discrete import set_random_seed as cobweb_set_seed
 from util.cfg import (TEST_GRAMMAR_SMALL, TEST_CORPUS_SMALL,
                       TEST_GRAMMAR_MED, TEST_CORPUS_MED, generate_with_merges)
-from parse_mh import (WEBSTER, FiniteParseTree, CompositeParseNode,
+from parse_mh import (TRELLIS, FiniteParseTree, CompositeParseNode,
                       PrimitiveParseNode, _categorize)
 from unittests.learning_curves_test import _build_cyk_recognizer, _bracket_set
 
@@ -71,8 +71,8 @@ N_GEN_EVAL   = 60
 
 # ───────────────────────── train / eval helpers ───────────────────────
 
-def make_webster(corpus):
-    return WEBSTER(
+def make_trellis(corpus):
+    return TRELLIS(
         corpus, context_length=CONTEXT_LENGTH, threshold=30,
         content_alpha=CONTENT_ALPHA, context_alpha=1e-4,
         content_bl_alpha=CONTENT_BL_ALPHA, context_bl_alpha=10,
@@ -97,8 +97,8 @@ def gen_corpus(grammar, n, seed, flatten):
     return out
 
 
-def gold_brackets(webster, h):
-    gt = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+def gold_brackets(trellis, h):
+    gt = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
     gt.build_primitives(h["sentence"], threshold="converge")
     for m in h["merges"]:
         try: gt.apply_candidate(m["left"], m["right"])
@@ -108,7 +108,7 @@ def gold_brackets(webster, h):
 
 def train_supervised(corpus, train):
     random.seed(SEED); np.random.seed(SEED); cobweb_set_seed(SEED)
-    web = make_webster(corpus)
+    web = make_trellis(corpus)
     for h in train:
         for tok in re.findall(r"[\w']+|[.,!?;]", h["sentence"]):
             web.ltm.add_to_vocab(tok)
@@ -125,7 +125,7 @@ def train_supervised(corpus, train):
 
 def train_unsupervised(corpus, train, tau, epochs):
     random.seed(SEED); np.random.seed(SEED); cobweb_set_seed(SEED)
-    web = make_webster(corpus)
+    web = make_trellis(corpus)
     trees = []
     for ep in range(epochs):
         trees = []
@@ -399,7 +399,7 @@ def main():
     train, test = data[:cfg["n_train"]], data[cfg["n_train"]:cfg["n_train"] + 40]
     train_set = {h["sentence"].strip() for h in train}
 
-    scratch = make_webster(corpus)
+    scratch = make_trellis(corpus)
     for h in data:
         for tok in re.findall(r"[\w']+|[.,!?;]", h["sentence"]):
             scratch.ltm.add_to_vocab(tok)

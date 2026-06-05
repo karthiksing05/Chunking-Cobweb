@@ -1,6 +1,6 @@
-# TopKPoolEncoder — incremental TopK-Disc-Cnt1 for WEBSTER
+# TopKPoolEncoder — incremental TopK-Disc-Cnt1 for TRELLIS
 
-This document describes the content-hierarchy encoder that WEBSTER uses
+This document describes the content-hierarchy encoder that TRELLIS uses
 today, and explains in detail how it monitors stale references and
 keeps old data relevant as the context tree restructures under
 incremental learning.
@@ -66,7 +66,7 @@ context-tree leaf's `concept_hash`. The encoder maintains
 canonical lookup re-routes the leaf id to its pool ancestor during
 evaluation.
 
-## WEBSTER wiring (where the encoder lives)
+## TRELLIS wiring (where the encoder lives)
 
 [`src/parse_mh.py`](../src/parse_mh.py) routes everything content-side
 through the encoder. Concretely:
@@ -350,11 +350,11 @@ fallbacks for older meta keys (`content_remap_depth`, `content_bfs_k`).
 
 ```python
 import sys; sys.path.insert(0, 'src')
-from parse_mh import WEBSTER
+from parse_mh import TRELLIS
 from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1
 import random; random.seed(0)
 
-w = WEBSTER(TEST_CORPUS1, context_length=2, threshold=2,
+w = TRELLIS(TEST_CORPUS1, context_length=2, threshold=2,
             content_alpha=1e-3, context_alpha=1e-3,
             content_bl_alpha=10, context_bl_alpha=1,
             bow=False, empty_weighting=True, chunk_context=False,

@@ -109,7 +109,7 @@ confs/acs-26/grammar_med/
 ├── generation_masked.csv
 ├── step_pick_histograms.png       # gold vs non-gold heuristic distributions
 ├── performance_summary.png        # six-panel summary
-├── final_ltm_data/                # saved WEBSTER state
+├── final_ltm_data/                # saved TRELLIS state
 ├── train_trees/   test_trees/   fake_trees/   generated_trees/   mask_trees/
 └── learning_curves/
     ├── learning_curves.csv

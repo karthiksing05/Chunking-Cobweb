@@ -8,7 +8,7 @@ Content instances encode **2 leaf-pointer attributes** (`{0: left_leaf_vid, 1: r
 
 ### Reference Tree & Ref Attrs
 
-A `CobwebDiscreteTree` can hold a pointer to another tree (`ref_tree`) whose hierarchy defines value similarity. Attributes marked as **ref attrs** use soft LCA matching instead of exact matching. In WEBSTER: content hierarchy's `ref_tree` = context hierarchy; attrs `0` (left) and `1` (right) are ref attrs.
+A `CobwebDiscreteTree` can hold a pointer to another tree (`ref_tree`) whose hierarchy defines value similarity. Attributes marked as **ref attrs** use soft LCA matching instead of exact matching. In TRELLIS: content hierarchy's `ref_tree` = context hierarchy; attrs `0` (left) and `1` (right) are ref attrs.
 
 ### LCA Similarity
 
@@ -102,7 +102,7 @@ Constructor: `ref_tree=nullptr`. Exposed all new methods/properties listed above
 - **`PrimitiveParseNode` / `CompositeParseNode`**: `label_path` changed from `list` to `int`; `create_content_instance` returns `{0: {left.label_path: 1}, 1: {right.label_path: 1}}`
 - **`LongTermMemory`**: removed `content_path_depth`, `chunk_context`; context tree passed as `ref_tree` to content tree; `set_ref_attr(0)`, `set_ref_attr(1)` called
 - **`add_parse_tree`**: step 2 calls `register_ref_val`; step 3 calls `invalidate_ref_cache()`; depth-shift propagation replaced by `_apply_rewrite_rules`
-- **`WEBSTER`**: removed `content_length`, `chunk_context` params; generation simplified to read attrs 0/1 directly
+- **`TRELLIS`**: removed `content_length`, `chunk_context` params; generation simplified to read attrs 0/1 directly
 
 ---
 

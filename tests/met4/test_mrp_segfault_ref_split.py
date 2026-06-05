@@ -57,7 +57,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 
 from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1
-from parse_mh import WEBSTER
+from parse_mh import TRELLIS
 
 
 def test_no_segfault_after_context_split():
@@ -79,7 +79,7 @@ def test_no_segfault_after_context_split():
     """
     sentences = [generate("S", TEST_GRAMMAR1) for _ in range(157)]
 
-    webster = WEBSTER(
+    trellis = TRELLIS(
         TEST_CORPUS1,
         context_length=3,
         threshold=30,
@@ -100,7 +100,7 @@ def test_no_segfault_after_context_split():
     PRIMITIVES_FIRST = 100
     for i, sentence in enumerate(sentences):
         p_threshold = 1e9 if i < PRIMITIVES_FIRST else 30
-        webster.parse_sentence(
+        trellis.parse_sentence(
             sentence,
             threshold=p_threshold,
             new_vocab=True,

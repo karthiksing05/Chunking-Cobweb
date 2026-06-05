@@ -14,7 +14,7 @@ Variants:
        is a fixed-depth slice; ifit-driven structural change at depth ≤
        TOPK_DEPTH invalidates the pool numbering.
 
-  B) ``WEBSTER`` (single leaf-pointer + ref_tree, matches src/parse_mh.py:651)
+  B) ``TRELLIS`` (single leaf-pointer + ref_tree, matches src/parse_mh.py:651)
        Attrs 0/1 = single integer leaf id per side. Content tree wires
        ``ref_tree=context_tree`` + ``set_ref_attr(0/1)`` so
        ``log_prob_instance`` does LCA-similarity soft matching.
@@ -36,8 +36,8 @@ Variants:
   D) ``BFSBag-RefTree`` (BFS K-leaves directly as ref-attr values)
        Attrs 0/1 = bag of K leaf-pointer ids found by BFS, fed into a
        content tree with ``ref_tree=context_tree`` + ``set_ref_attr(0/1)``.
-       Soft-matching via LCA similarity. Like WEBSTER but K-wide instead
-       of single-pointer. Incremental: same as WEBSTER plus the
+       Soft-matching via LCA similarity. Like TRELLIS but K-wide instead
+       of single-pointer. Incremental: same as TRELLIS plus the
        BFS-vs-greedy difference.
 
   E) ``BFSBag-BLRemap`` (BFS K-leaves → remap to each leaf's basic-level)
@@ -50,7 +50,7 @@ Variants:
 
 Outputs (under tests/basic-level/grammar_chunking_basic_level_output/):
   - topk_disc_cnt1/...    ↘ five files per variant:
-  - webster/...             basic_level_subtrees.png, content_tree_labels.png,
+  - trellis/...             basic_level_subtrees.png, content_tree_labels.png,
   - topk_pool_cache/...     per_subtree_membership.csv, method_summary.txt,
   - bfsbag_reftree/...      score_by_depth.png
   - bfsbag_blremap/...
@@ -275,7 +275,7 @@ print("[A] Content tree built.")
 
 
 # ============================================================================
-# Variant B — WEBSTER leaf-pointer + ref_tree (mirrors parse_mh.py 2710–2716)
+# Variant B — TRELLIS leaf-pointer + ref_tree (mirrors parse_mh.py 2710–2716)
 # ============================================================================
 
 print("\n[B] Walking context tree leaves and assigning label-path ids …")
@@ -298,7 +298,7 @@ for leaf in ctx_leaves:
 print(f"  Context leaves: {len(ctx_leaves)} ({len(hash_to_leaf_id)} unique by concept_hash)")
 
 
-def webster_inst(inst_L, inst_R):
+def trellis_inst(inst_L, inst_R):
     leaf_L = greedy_descend(context_tree.root, inst_L)
     leaf_R = greedy_descend(context_tree.root, inst_R)
     l_id = hash_to_leaf_id[leaf_L.concept_hash()]
@@ -306,28 +306,28 @@ def webster_inst(inst_L, inst_R):
     return {0: {l_id: 1.0}, 1: {r_id: 1.0}}
 
 
-print("[B] Building WEBSTER content instances (single leaf-pointer per side) …")
-pair_train_webster = [webster_inst(L, R) for L, R in zip(train_L, train_R)]
-pair_test_webster  = [webster_inst(L, R) for L, R in zip(test_L,  test_R)]
+print("[B] Building TRELLIS content instances (single leaf-pointer per side) …")
+pair_train_trellis = [trellis_inst(L, R) for L, R in zip(train_L, train_R)]
+pair_test_trellis  = [trellis_inst(L, R) for L, R in zip(test_L,  test_R)]
 
-print(f"[B] Building WEBSTER content tree "
+print(f"[B] Building TRELLIS content tree "
       f"(ref_tree=context_tree, ref_attrs=[0,1], alpha={ALPHA_CONTENT}) …")
-content_tree_webster = CobwebDiscreteTree(
+content_tree_trellis = CobwebDiscreteTree(
     alpha=ALPHA_CONTENT,
-    weight_attr=False,            # matches WEBSTER (parse_mh.py:2713)
+    weight_attr=False,            # matches TRELLIS (parse_mh.py:2713)
     ref_tree=context_tree,
 )
-content_tree_webster.set_ref_attr(0)
-content_tree_webster.set_ref_attr(1)
+content_tree_trellis.set_ref_attr(0)
+content_tree_trellis.set_ref_attr(1)
 # Register every leaf id ↔ context-tree node before fitting so LCA-similarity
 # soft matching is available from the first ifit.
 for lid, leaf in id_to_leaf.items():
-    content_tree_webster.register_ref_val(lid, leaf)
-for i, inst in enumerate(pair_train_webster):
-    content_tree_webster.ifit(inst)
+    content_tree_trellis.register_ref_val(lid, leaf)
+for i, inst in enumerate(pair_train_trellis):
+    content_tree_trellis.ifit(inst)
     if (i + 1) % 2000 == 0:
-        print(f"  {i + 1}/{len(pair_train_webster)} inserted")
-print("[B] WEBSTER content tree built.")
+        print(f"  {i + 1}/{len(pair_train_trellis)} inserted")
+print("[B] TRELLIS content tree built.")
 
 
 # ============================================================================
@@ -904,11 +904,11 @@ bl_topk, nodes_topk = run_bl_pipeline(
     attr_label_fn=lambda v: f"ctx#{v}",
 )
 
-bl_webster, nodes_webster = run_bl_pipeline(
-    content_tree_webster, pair_train_webster, pair_test_webster,
+bl_trellis, nodes_trellis = run_bl_pipeline(
+    content_tree_trellis, pair_train_trellis, pair_test_trellis,
     y_test, test_wL, test_wR,
-    out_subdir=os.path.join(OUT_DIR, "webster"),
-    variant_label="WEBSTER (leaf-pointer + ref_tree)",
+    out_subdir=os.path.join(OUT_DIR, "trellis"),
+    variant_label="TRELLIS (leaf-pointer + ref_tree)",
     attr_label_fn=lambda v: f"leaf#{v}",
 )
 
@@ -942,12 +942,12 @@ print("\n" + "=" * 64)
 print(" Cross-variant comparison")
 print("=" * 64)
 print(f"  TopK-Disc-Cnt1   : {len(bl_topk):>4} BLs  /  {len(nodes_topk):>6} tree nodes")
-print(f"  WEBSTER          : {len(bl_webster):>4} BLs  /  {len(nodes_webster):>6} tree nodes")
+print(f"  TRELLIS          : {len(bl_trellis):>4} BLs  /  {len(nodes_trellis):>6} tree nodes")
 print(f"  TopK-Pool-Cache  : {len(bl_pool):>4} BLs  /  {len(nodes_pool):>6} tree nodes")
 print(f"  BFSBag-RefTree   : {len(bl_reftree):>4} BLs  /  {len(nodes_reftree):>6} tree nodes")
 print(f"  BFSBag-BLRemap   : {len(bl_blremap):>4} BLs  /  {len(nodes_blremap):>6} tree nodes")
 print(f"\nOutputs in {OUT_DIR}/"
-      "{topk_disc_cnt1, webster, topk_pool_cache, bfsbag_reftree, bfsbag_blremap}/")
+      "{topk_disc_cnt1, trellis, topk_pool_cache, bfsbag_reftree, bfsbag_blremap}/")
 
 
 # ── Cross-variant interactive α-slider ──────────────────────────────────────
@@ -967,7 +967,7 @@ print("\nOpening interactive α-slider (cross-variant overlay)…")
 
 _variant_specs = [
     ("TopK-Disc-Cnt1",                                 nodes_topk,    "#1f77b4"),
-    ("WEBSTER (leaf-pointer + ref_tree)",              nodes_webster, "#ff7f0e"),
+    ("TRELLIS (leaf-pointer + ref_tree)",              nodes_trellis, "#ff7f0e"),
     (f"TopK-Pool-Cache (K={TOP_K}, depth={POOL_DEPTH})",
                                                        nodes_pool,    "#2ca02c"),
     (f"BFSBag-RefTree (K={BFS_K})",                    nodes_reftree, "#d62728"),

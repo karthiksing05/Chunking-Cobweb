@@ -1,13 +1,13 @@
 """
-WEBSTER Threshold + Parsing-Heuristic Analysis (met5)
+TRELLIS Threshold + Parsing-Heuristic Analysis (met5)
 =====================================================
 
-Train WEBSTER on the hollow corpus (mirroring
+Train TRELLIS on the hollow corpus (mirroring
 ``unittests/hollow_learn_test_mh.py``), then ask: which heuristic in
 ``evaluate_pair`` most reliably distinguishes the **gold** next-merge
 from the rest of the parentless pairs at every parse step?
 
-WEBSTER's ``FiniteParseTree.build`` currently uses a two-stage rule:
+TRELLIS's ``FiniteParseTree.build`` currently uses a two-stage rule:
 
   Stage 1 (gate) : ``basic_level_count > count_threshold``
   Stage 2 (rank) : argmax content ``tree_log_prob``
@@ -31,7 +31,7 @@ Heuristics logged per candidate pair (from ``evaluate_pair``)
 
 Phases
 ------
-0. Train WEBSTER + 80/20 split of the hollow corpus.
+0. Train TRELLIS + 80/20 split of the hollow corpus.
 1. HEURISTIC LOGGING. For each TEST hollow sentence, replay the gold
    merge sequence; at each step evaluate ALL parentless pairs and
    record their full heuristic vector + a STRUCTURE-based gold flag.
@@ -115,7 +115,7 @@ from sklearn.metrics import (roc_curve, auc,
                               precision_recall_curve, average_precision_score)
 
 from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1
-from parse_mh import (WEBSTER, FiniteParseTree, PrimitiveParseNode,
+from parse_mh import (TRELLIS, FiniteParseTree, PrimitiveParseNode,
                       CompositeParseNode,
                       _get_or_register_cplx_vid, _context_weight)
 
@@ -231,10 +231,10 @@ HEURISTICS = BASE_HEURS   # alias kept so the rest of the script reads same
 HEUR_COLORS = plt.cm.tab20(np.linspace(0, 1, len(HEURISTICS)))
 
 # =============================================================================
-# PHASE 0 — TRAIN WEBSTER  (mirror unittests/hollow_learn_test_mh.py)
+# PHASE 0 — TRAIN TRELLIS  (mirror unittests/hollow_learn_test_mh.py)
 # =============================================================================
-print("=== PHASE 0: Train WEBSTER ===")
-webster = WEBSTER(
+print("=== PHASE 0: Train TRELLIS ===")
+trellis = TRELLIS(
     TEST_CORPUS1,
     context_length=CONTEXT_LENGTH,
     threshold=THRESHOLD,
@@ -258,7 +258,7 @@ webster = WEBSTER(
 print(f"  Phase 0a: {PRIMITIVES_FIRST} primitive-only sentences")
 for i in range(PRIMITIVES_FIRST):
     s = generate("S", TEST_GRAMMAR1)
-    webster.parse_sentence(s, threshold=1e9, new_vocab=True,
+    trellis.parse_sentence(s, threshold=1e9, new_vocab=True,
                            learning=True, debug=False)
     if (i + 1) % 50 == 0:
         print(f"    [{i+1}/{PRIMITIVES_FIRST}]")
@@ -273,7 +273,7 @@ for p in sorted(glob.glob(os.path.join(HOLLOW_CORPUS_DIR, "*.json"))):
         hollow_corpus.append(data)
 print(f"    Loaded {len(hollow_corpus)} hollow trees")
 
-# 80/20 split (train trees go into WEBSTER; test trees feed the heuristic probe).
+# 80/20 split (train trees go into TRELLIS; test trees feed the heuristic probe).
 random.shuffle(hollow_corpus)
 _split = int(0.8 * len(hollow_corpus))
 train_hollow = hollow_corpus[:_split]
@@ -281,12 +281,12 @@ test_hollow  = hollow_corpus[_split:]
 print(f"    Split: train={len(train_hollow)}  test={len(test_hollow)}")
 
 for i, hollow in enumerate(train_hollow):
-    tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+    tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
     tree.build_primitives(hollow["sentence"], threshold=THRESHOLD)
     for m in hollow["merges"]:
         try: tree.apply_candidate(m["left"], m["right"])
         except Exception: pass
-    webster.ltm.add_parse_tree(tree, shuffle=True, debug=False)
+    trellis.ltm.add_parse_tree(tree, shuffle=True, debug=False)
     if (i + 1) % 25 == 0: print(f"    [{i+1}/{len(train_hollow)}]")
 
 # =============================================================================
@@ -304,9 +304,9 @@ def _chunk_yield(node):
     def w(n):
         if isinstance(n, PrimitiveParseNode):
             wid = getattr(n, "word_id", None)
-            if wid is None or wid < 0 or wid >= len(webster.ltm.id_to_value):
+            if wid is None or wid < 0 or wid >= len(trellis.ltm.id_to_value):
                 return
-            pos = WORD_TO_POS.get(webster.ltm.id_to_value[wid])
+            pos = WORD_TO_POS.get(trellis.ltm.id_to_value[wid])
             if pos: out.append(pos)
             return
         for _, c in sorted(getattr(n, "children", []),
@@ -331,8 +331,8 @@ def _chunk_tokens(node):
     def w(n):
         if isinstance(n, PrimitiveParseNode):
             wid = getattr(n, "word_id", None)
-            if wid is not None and 0 <= wid < len(webster.ltm.id_to_value):
-                out.append((int(n.position_idx), webster.ltm.id_to_value[wid]))
+            if wid is not None and 0 <= wid < len(trellis.ltm.id_to_value):
+                out.append((int(n.position_idx), trellis.ltm.id_to_value[wid]))
             return
         for _, c in getattr(n, "children", []):
             w(c)
@@ -376,7 +376,7 @@ def get_basic_cached(leaf, cache):
     return bl
 
 # ── CONTEXT-tree inspection ──────────────────────────────────────────────────
-ctx_root = webster.ltm.context_hierarchy.root
+ctx_root = trellis.ltm.context_hierarchy.root
 ctx_attr_offsets = {j: -(j+1) for j in range(CONTEXT_LENGTH)}
 ctx_attr_offsets.update({CONTEXT_LENGTH + j: (j+1) for j in range(CONTEXT_LENGTH)})
 
@@ -384,7 +384,7 @@ def offset_for_attr(attr_id):
     return ctx_attr_offsets.get(attr_id, attr_id)
 
 def _build_ctx_instance(toks, i):
-    ltm = webster.ltm
+    ltm = trellis.ltm
     cl  = ltm.context_length
     wt_mode = getattr(ltm, "weighting", "binary")
     emp_wt  = getattr(ltm, "empty_weighting", False)
@@ -430,7 +430,7 @@ for sent_toks, i, w, pos in test_primitives:
         ctx_bl_members[h] = {"node": bl, "depth": bl.depth(),
                               "pos_labels": [], "center_words": []}
     ctx_bl_members[h]["pos_labels"].append(prim2id[pos])
-    ctx_bl_members[h]["center_words"].append(webster.ltm.value_to_id[w])
+    ctx_bl_members[h]["center_words"].append(trellis.ltm.value_to_id[w])
 print(f"  {len(ctx_bl_members)} unique BL nodes in context tree")
 
 def _top_context_words(node, k=TOP_WORDS_PER_OFFSET):
@@ -444,8 +444,8 @@ def _top_context_words(node, k=TOP_WORDS_PER_OFFSET):
         if not items: continue
         total = sum(c for _, c in items) or 1
         offset = offset_for_attr(attr_id)
-        out[offset] = [(webster.ltm.id_to_value[v]
-                         if 0 <= v < len(webster.ltm.id_to_value) else f"<{v}>",
+        out[offset] = [(trellis.ltm.id_to_value[v]
+                         if 0 <= v < len(trellis.ltm.id_to_value) else f"<{v}>",
                         c / total)
                        for v, c in items]
     return out
@@ -484,7 +484,7 @@ def plot_bl_subtrees_primitive(members, title, out_path):
         for c in centers: cw_counts[int(c)] = cw_counts.get(int(c), 0) + 1
         top_cw = sorted(cw_counts.items(), key=lambda kv: -kv[1])[:TOP_CENTER_WORDS]
         if top_cw:
-            words = [webster.ltm.id_to_value[w] for w, _ in top_cw]
+            words = [trellis.ltm.id_to_value[w] for w, _ in top_cw]
             counts_ = [c for _, c in top_cw]
             colors_ = [LABEL_COLOR.get(WORD_TO_POS.get(w_str, "OTHER"), "#999")
                        for w_str in words]
@@ -727,14 +727,14 @@ with open(os.path.join(CONTEXT_DIR, "method_summary.txt"), "w") as f:
                 f"members={len(m['pos_labels']):>4}  dom={dom}\n")
 
 # ── CONTENT-tree inspection ──────────────────────────────────────────────────
-cnt_root = webster.ltm.content_hierarchy.root
+cnt_root = trellis.ltm.content_hierarchy.root
 cnt_bl_cache: dict = {}
 cnt_bl_members: dict = {}
 chunk_records: list = []
 for hollow in train_hollow:
     sentence = hollow["sentence"]; sent_toks = sentence.split()
     n_words = len(sent_toks)
-    tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+    tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
     tree.build_primitives(sentence, threshold="converge")
     for m in hollow["merges"]:
         try: tree.apply_candidate(m["left"], m["right"])
@@ -1021,7 +1021,7 @@ with open(os.path.join(CONTENT_DIR, "method_summary.txt"), "w") as f:
 # PHASE 1 — HEURISTIC LOGGING (structure-based gold flag)
 # =============================================================================
 # For each test hollow sentence, walk the gold merge sequence.  At
-# every step, evaluate EVERY parentless pair (the candidates WEBSTER
+# every step, evaluate EVERY parentless pair (the candidates TRELLIS
 # would actually score during automatic parsing) and store its full
 # heuristic vector with an ``is_gold`` flag.
 print("\n=== PHASE 1: HEURISTIC LOGGING ===")
@@ -1174,7 +1174,7 @@ for hollow in test_hollow:
     sent_steps: list = []
     test_sentence_records[sentence] = sent_steps
 
-    tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+    tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
     tree.build_primitives(sentence, threshold="converge")
 
     # Parallel state alongside `tree`: at each step, ``centers[k]`` is
@@ -1982,7 +1982,7 @@ NEG_LEN_LO     = 4
 NEG_LEN_HI     = 8
 
 # Sweep grid spans the realistic range of basic_level_count values
-# WEBSTER's count-gate sees: 0 (everything passes) up to 500+
+# TRELLIS's count-gate sees: 0 (everything passes) up to 500+
 # (essentially nothing passes).  Picked to cover the typical hollow-
 # corpus count distribution.
 NEG_THRESHOLDS = [-1, 0, 5, 10, 20, 30, 50, 75, 100, 150, 200, 300, 500]
@@ -2020,7 +2020,7 @@ def _parse_and_count(sentences, thr):
     out_chunks, out_n_words = [], []
     for s in sentences:
         try:
-            pt = webster.parse_sentence(s, threshold=thr,
+            pt = trellis.parse_sentence(s, threshold=thr,
                                          new_vocab=False, learning=False,
                                          debug=False)
             out_chunks.append(_chunks_formed(pt))
@@ -2146,7 +2146,7 @@ print(f"  negative_test_best_thr.csv      — per-sentence detail at best thr")
 # PHASE 7 — HEURISTIC ANALYSIS FOR NEGATIVE-INPUT REJECTION
 # =============================================================================
 # Phase 6 sweeps a SINGLE gate (basic_level_count) and shows it has at
-# best ~2× selectivity.  But there are 20 heuristics WEBSTER computes
+# best ~2× selectivity.  But there are 20 heuristics TRELLIS computes
 # per candidate — maybe one of them separates random-sentence
 # candidates from grammatical-sentence candidates more cleanly.
 #
@@ -2169,7 +2169,7 @@ print(f"\n=== PHASE 7: HEURISTIC ANALYSIS FOR NEGATIVE-INPUT REJECTION ===")
 def _bigram_heurs(sentence):
     """Evaluate every adjacent primitive-bigram in ``sentence`` and
     return its full heuristic vector."""
-    tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+    tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
     tree.build_primitives(sentence, threshold="converge")
     out = []
     for p in tree.get_parentless_pairs():
@@ -2211,7 +2211,7 @@ def _add_bl(rows, side):
 p7_random_full  = []
 p7_grammar_full = []
 def _bigram_heurs_full(sentence):
-    tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+    tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
     tree.build_primitives(sentence, threshold="converge")
     rows = []
     for p in tree.get_parentless_pairs():
@@ -2440,9 +2440,9 @@ print(f"  parse_trees/*.png             — annotated parse trees "
 print(f"  context_tree/ + content_tree/ — hierarchy inspection visuals")
 
 with open(os.path.join(OUT_DIR, "summary.txt"), "w") as f:
-    f.write("WEBSTER Threshold + Parsing-Heuristic Analysis\n")
+    f.write("TRELLIS Threshold + Parsing-Heuristic Analysis\n")
     f.write("=" * 55 + "\n\n")
-    f.write(f"Trained WEBSTER on {len(train_hollow)} hollow trees.\n")
+    f.write(f"Trained TRELLIS on {len(train_hollow)} hollow trees.\n")
     f.write(f"Probed on {len(test_hollow)} held-out hollow trees.\n")
     f.write(f"Logged {len(candidate_log)} candidate pair evaluations "
             f"across {len(step_picks)} merge steps.\n")

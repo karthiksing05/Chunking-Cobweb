@@ -95,7 +95,7 @@ def make_grammar_variant(lex_sizes):
 
     ``lex_sizes`` is a dict like ``{"Det": 2, "N": 6, "Adj": 5, "V": 5, "P": 4}``
     specifying how many terminal options each POS class has. Returns
-    ``(grammar, corpus)`` ready to feed to the WEBSTER pipeline.
+    ``(grammar, corpus)`` ready to feed to the TRELLIS pipeline.
 
     The non-terminal productions (S, NP, VP, PP, AdjP) are kept
     identical to ``TEST_GRAMMAR1`` so structural complexity stays

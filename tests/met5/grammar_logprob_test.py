@@ -2,7 +2,7 @@
 Grammar Log-Probability Test (met5)
 ====================================
 
-Sanity-checks that ``log_prob_instance`` on the trained WEBSTER cobweb
+Sanity-checks that ``log_prob_instance`` on the trained TRELLIS cobweb
 trees behaves the way the grammar-distillation hypothesis assumes —
 i.e. it actually discriminates chunk classes.
 
@@ -41,7 +41,7 @@ discriminative enough to support unsupervised grammar distillation.
 
 Phases & outputs
 ----------------
-0. Train WEBSTER (mirrors grammar_threshold_test / hollow_learn_test).
+0. Train TRELLIS (mirrors grammar_threshold_test / hollow_learn_test).
 1. Collect test chunks + gold head-based chunk class.
 2. **Heatmap** (rows=chunks sorted by gold class, cols=frontier NTs,
    cell=log-prob): block structure expected. Two heatmaps, one for
@@ -86,7 +86,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
 from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1
-from parse_mh import (WEBSTER, FiniteParseTree, PrimitiveParseNode,
+from parse_mh import (TRELLIS, FiniteParseTree, PrimitiveParseNode,
                       CompositeParseNode)
 from cobweb.cobweb_discrete import set_random_seed as cobweb_set_seed
 
@@ -122,10 +122,10 @@ LABEL_COLOR = {
 }
 
 # =============================================================================
-# PHASE 0 — Train WEBSTER
+# PHASE 0 — Train TRELLIS
 # =============================================================================
-print("=== PHASE 0: Train WEBSTER ===")
-webster = WEBSTER(
+print("=== PHASE 0: Train TRELLIS ===")
+trellis = TRELLIS(
     TEST_CORPUS1,
     context_length=CONTEXT_LENGTH,
     threshold=THRESHOLD,
@@ -149,7 +149,7 @@ webster = WEBSTER(
 print(f"  Phase 0a: {PRIMITIVES_FIRST} primitive-only sentences")
 for i in range(PRIMITIVES_FIRST):
     s = generate("S", TEST_GRAMMAR1)
-    webster.parse_sentence(s, threshold=1e9, new_vocab=True,
+    trellis.parse_sentence(s, threshold=1e9, new_vocab=True,
                            learning=True, debug=False)
     if (i + 1) % 50 == 0: print(f"    [{i+1}/{PRIMITIVES_FIRST}]")
 
@@ -168,14 +168,14 @@ test_hollow  = hollow_corpus[_split:]
 print(f"  Loaded {len(hollow_corpus)} hollow trees · "
       f"train={len(train_hollow)}  test={len(test_hollow)}")
 for i, hollow in enumerate(train_hollow):
-    tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+    tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
     tree.build_primitives(hollow["sentence"], threshold=THRESHOLD)
     for m in hollow["merges"]:
         try: tree.apply_candidate(m["left"], m["right"])
         except Exception: pass
-    webster.ltm.add_parse_tree(tree, shuffle=True, debug=False)
+    trellis.ltm.add_parse_tree(tree, shuffle=True, debug=False)
 
-cnt_root = webster.ltm.content_hierarchy.root
+cnt_root = trellis.ltm.content_hierarchy.root
 
 
 # =============================================================================
@@ -205,9 +205,9 @@ def _chunk_yield(node):
     def w(n):
         if isinstance(n, PrimitiveParseNode):
             wid = getattr(n, "word_id", None)
-            if wid is None or wid < 0 or wid >= len(webster.ltm.id_to_value):
+            if wid is None or wid < 0 or wid >= len(trellis.ltm.id_to_value):
                 return
-            pos = WORD_TO_POS.get(webster.ltm.id_to_value[wid])
+            pos = WORD_TO_POS.get(trellis.ltm.id_to_value[wid])
             if pos: out.append(pos)
             return
         for _, c in sorted(getattr(n, "children", []),
@@ -281,7 +281,7 @@ print("\n=== PHASE 1: Collect labeled test chunks ===")
 chunks = []   # [{bag, gold_class, tokens, sentence}]
 for hollow in test_hollow:
     sent = hollow["sentence"]; sent_len = len(sent.split())
-    tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+    tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
     tree.build_primitives(sent, threshold="converge")
     for m in hollow["merges"]:
         try: tree.apply_candidate(m["left"], m["right"])

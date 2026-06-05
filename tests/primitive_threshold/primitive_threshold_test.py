@@ -43,7 +43,7 @@ Heuristics evaluated (all from ``_score_along_path``)
 Pipeline
 --------
 0. Load hollow corpus + grammar POS map.
-1. Train WEBSTER incrementally on the train fold, NO primitives-only
+1. Train TRELLIS incrementally on the train fold, NO primitives-only
    warm-up; for each sentence, build primitives, log each primitive's
    score_data + true POS, then apply gold merges and update LTM.
 2. Compute ground-truth maturity from cluster majority POS.
@@ -81,7 +81,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from util.cfg import TEST_GRAMMAR_MED, TEST_CORPUS_MED
-from parse_mh import WEBSTER, FiniteParseTree, PrimitiveParseNode
+from parse_mh import TRELLIS, FiniteParseTree, PrimitiveParseNode
 from cobweb.cobweb_discrete import set_random_seed as cobweb_set_seed
 
 # ───────────────────────────── Configuration ─────────────────────────
@@ -138,8 +138,8 @@ split = int(0.8 * len(hollow))
 train, test = hollow[:split], hollow[split:]
 print(f"Hollow corpus: {len(hollow)}  train={len(train)}  test={len(test)}")
 
-# Initialise WEBSTER — same hyperparams as hollow_learn_test_mh
-webster = WEBSTER(
+# Initialise TRELLIS — same hyperparams as hollow_learn_test_mh
+trellis = TRELLIS(
     TEST_CORPUS_MED,
     context_length=CONTEXT_LEN,
     threshold=30,
@@ -167,17 +167,17 @@ webster = WEBSTER(
 # This is the apples-to-apples setup: heuristics and ground-truth
 # (cluster purity) both come from the same fixed tree, so there's no
 # temporal bias from a growing tree.
-print(f"\n=== PHASE 1a: train WEBSTER on train fold (no logging yet) ===")
+print(f"\n=== PHASE 1a: train TRELLIS on train fold (no logging yet) ===")
 for sent_idx, h in enumerate(train):
     sentence = h["sentence"]
-    tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LEN)
+    tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LEN)
     tree.build_primitives(sentence, threshold=0)
     for m in h["merges"]:
         try:
             tree.apply_candidate(m["left"], m["right"])
         except Exception:
             pass
-    webster.ltm.add_parse_tree(tree, shuffle=True, debug=False)
+    trellis.ltm.add_parse_tree(tree, shuffle=True, debug=False)
     if (sent_idx + 1) % 20 == 0:
         print(f"  trained [{sent_idx+1}/{len(train)}]")
 
@@ -233,7 +233,7 @@ for sent_idx, h in enumerate(train):
     # Re-categorize against the FULLY-TRAINED tree. Each primitive's
     # score_data now reflects the converged LTM state, not whatever
     # snapshot existed when this sentence was first trained on.
-    tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LEN)
+    tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LEN)
     tree.build_primitives(sentence, threshold=0)
 
     for pos_idx, prim in enumerate(tree.nodes):

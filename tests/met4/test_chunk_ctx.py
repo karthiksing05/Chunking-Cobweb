@@ -3,11 +3,11 @@ import os
 import faulthandler
 faulthandler.enable()
 sys.path.insert(0, 'src')
-from parse_mh import WEBSTER
+from parse_mh import TRELLIS
 
 vocab = ['the', 'cat', 'sat', 'on', 'a', 'mat', 'dog', 'ran', 'in', 'park']
 
-w2 = WEBSTER(vocab, context_length=2, alpha=0.01, threshold=0.0, chunk_context=True)
+w2 = TRELLIS(vocab, context_length=2, alpha=0.01, threshold=0.0, chunk_context=True)
 print('ready', flush=True)
 
 sentences = [

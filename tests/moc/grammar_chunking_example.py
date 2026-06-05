@@ -5,7 +5,7 @@ Inherits the corpus and context-encoding setup from grammar_example.py.
 For each adjacent bigram (w_i, w_{i+1}) in TEST_GRAMMAR3 sentences we
 encode w_i (Left) and w_{i+1} (Right) via a shared context tree
 (CobwebDiscreteTree).  That left/right encoding is then fed into a
-per-variant content tree, mirroring WEBSTER's content-vs-context
+per-variant content tree, mirroring TRELLIS's content-vs-context
 hierarchy idea (see src/parse_mh.py around line 2700).
 
 Variants (each builds its own content tree):

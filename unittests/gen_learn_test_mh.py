@@ -4,7 +4,7 @@ unittests/hollow_learn_test_mh.py.
 
 Where hollow_learn_test trains on HUMAN-ANNOTATED hollow merges
 (supervised structural signal), this test trains *only* on raw
-sentences. WEBSTER's own ``parse_sentence(learning=True)`` decides
+sentences. TRELLIS's own ``parse_sentence(learning=True)`` decides
 the chunks via build()'s climbing-ancestor gate + cnt_root_lp ranker
 and learns from its OWN parses.
 
@@ -44,7 +44,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1
-from parse_mh import WEBSTER, FiniteParseTree, PrimitiveParseNode
+from parse_mh import TRELLIS, FiniteParseTree, PrimitiveParseNode
 from cobweb.cobweb_discrete import CobwebDiscreteTree, set_random_seed as cobweb_set_seed
 
 # ── Configuration ──────────────────────────────────────────────────────────
@@ -110,13 +110,13 @@ unsup_sentences = [generate("S", grammar) for _ in range(PRIMITIVES_FIRST + N_UN
 print(f"  Unsupervised training sentences: {len(unsup_sentences)} "
       f"(first {PRIMITIVES_FIRST} primitives-only, rest with build())")
 
-# Reset seed before WEBSTER construction so the training run is reproducible.
+# Reset seed before TRELLIS construction so the training run is reproducible.
 random.seed(SEED)
 np.random.seed(SEED)
 cobweb_set_seed(SEED)
 
-# ── Initialise WEBSTER (same hyperparams as hollow_learn_test) ────────────
-webster = WEBSTER(
+# ── Initialise TRELLIS (same hyperparams as hollow_learn_test) ────────────
+trellis = TRELLIS(
     corpus,
     context_length=CONTEXT_LENGTH,
     threshold=THRESHOLD,
@@ -141,7 +141,7 @@ webster = WEBSTER(
 print(f"\n=== PHASE 1: PRIMITIVES ONLY ({PRIMITIVES_FIRST} random sentences) ===")
 for i in range(PRIMITIVES_FIRST):
     sentence = unsup_sentences[i]
-    parse_tree = webster.parse_sentence(
+    parse_tree = trellis.parse_sentence(
         sentence, threshold=1e9, new_vocab=True,
         learning=True, debug=False)
     if VIZ_INTERMEDIATES and i % 50 == 0:
@@ -157,7 +157,7 @@ print(f"\n=== PHASE 2: UNSUPERVISED CHUNK LEARNING ({N_UNSUP_TRAIN} sentences) =
 trained_trees = []   # keep so subtree-exchange generation can mine them
 for i in range(N_UNSUP_TRAIN):
     sentence = unsup_sentences[PRIMITIVES_FIRST + i]
-    parse_tree = webster.parse_sentence(
+    parse_tree = trellis.parse_sentence(
         sentence, threshold=THRESHOLD, new_vocab=True,
         learning=True, debug=False)
     trained_trees.append(parse_tree)
@@ -169,30 +169,30 @@ for i in range(N_UNSUP_TRAIN):
 # Mine the unsupervised parse trees for chunk-replay data. Even when
 # build() doesn't always fire at the sentence-root level (the gate may
 # stop short of S), per-leaf chunk pools are still populated by every
-# composite WEBSTER did form during training — so generation can replay
+# composite TRELLIS did form during training — so generation can replay
 # subtrees out of whatever was learned.
-webster.learn_leaf_transitions(trained_trees)
-webster.learn_chunk_records(trained_trees)
-print(f"\nLearned {len(webster.content_leaf_transitions)} "
+trellis.learn_leaf_transitions(trained_trees)
+trellis.learn_chunk_records(trained_trees)
+print(f"\nLearned {len(trellis.content_leaf_transitions)} "
       f"content-tree leaf transitions (unsupervised)")
-print(f"Recorded {sum(len(v) for v in webster.leaf_to_chunks.values())} "
-      f"chunk records across {len(webster.leaf_to_chunks)} leaves; "
-      f"{len(webster.sentence_root_chunks)} sentence-root chunks "
+print(f"Recorded {sum(len(v) for v in trellis.leaf_to_chunks.values())} "
+      f"chunk records across {len(trellis.leaf_to_chunks)} leaves; "
+      f"{len(trellis.sentence_root_chunks)} sentence-root chunks "
       f"available as gen seeds")
 
 # Turn ON the subtree-exchange parsing heuristic — same knob as
-# hollow_learn. Mined from WEBSTER's OWN parses (no gold merges) so
+# hollow_learn. Mined from TRELLIS's OWN parses (no gold merges) so
 # the boost reinforces self-consistent training patterns rather than
 # pulling toward human-preferred ones.
-webster.ltm.chunk_pool_weight = 5.0
+trellis.ltm.chunk_pool_weight = 5.0
 print(f"Subtree-exchange parsing heuristic ON: "
-      f"chunk_pool_weight = {webster.ltm.chunk_pool_weight}")
+      f"chunk_pool_weight = {trellis.ltm.chunk_pool_weight}")
 
 # ── Save state ─────────────────────────────────────────────────────────────
 SAVE_DIR = f"{OUT_DIR}/final_ltm_data"
-webster.save_state(SAVE_DIR)
+trellis.save_state(SAVE_DIR)
 print(f"\nSaved Final LTM to \"{SAVE_DIR}\"")
-webster.visualize_ltm(f"{OUT_DIR}/final_ltm", max_depth=3)
+trellis.visualize_ltm(f"{OUT_DIR}/final_ltm", max_depth=3)
 
 # =============================================================================
 # Shared helpers
@@ -212,9 +212,9 @@ def _chunk_yield(node):
     def w(n):
         if isinstance(n, PrimitiveParseNode):
             wid = getattr(n, "word_id", None)
-            if wid is None or wid < 0 or wid >= len(webster.ltm.id_to_value):
+            if wid is None or wid < 0 or wid >= len(trellis.ltm.id_to_value):
                 return
-            pos = WORD_TO_POS.get(webster.ltm.id_to_value[wid])
+            pos = WORD_TO_POS.get(trellis.ltm.id_to_value[wid])
             if pos: out.append(pos)
             return
         for _, c in sorted(getattr(n, "children", []),
@@ -273,14 +273,14 @@ for hollow in test_hollow:
     if sent_len < 2:
         continue
 
-    gold_tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+    gold_tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
     gold_tree.build_primitives(sentence, threshold="converge")
     for m in hollow["merges"]:
         try: gold_tree.apply_candidate(m["left"], m["right"])
         except Exception: pass
     gold = _bracket_set(gold_tree)
 
-    pred_tree = webster.parse_sentence(
+    pred_tree = trellis.parse_sentence(
         sentence, threshold=THRESHOLD, new_vocab=False,
         learning=False, debug=False)
     pred = _bracket_set(pred_tree)
@@ -319,7 +319,7 @@ n_step_correct = n_step_total = n_step_no_cand = 0
 step_rows = []
 for hollow in test_hollow:
     sentence = hollow["sentence"]
-    gold_tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+    gold_tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
     gold_tree.build_primitives(sentence, threshold="converge")
     for m in hollow["merges"]:
         try: gold_tree.apply_candidate(m["left"], m["right"])
@@ -328,7 +328,7 @@ for hollow in test_hollow:
     if not gold:
         continue
 
-    step_tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+    step_tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
     step_tree.build_primitives(sentence, threshold="converge")
 
     for step_idx, m in enumerate(hollow["merges"]):
@@ -361,7 +361,7 @@ for hollow in test_hollow:
             _ctx_leaf_lp = _ctx_sd.get("leaf_log_prob", None)
             if _cnt_leaf_lp is not None and _ctx_leaf_lp is not None:
                 _sc = _sc + 0.3 * (float(_cnt_leaf_lp) + float(_ctx_leaf_lp))
-            _w = getattr(webster.ltm, "chunk_pool_weight", 0.0) or 0.0
+            _w = getattr(trellis.ltm, "chunk_pool_weight", 0.0) or 0.0
             if _w > 0:
                 import math as _m
                 _sc = _sc + _w * (
@@ -439,15 +439,15 @@ def _predict_probe(probe, bag, id_labels):
 
 def _collect_chunk_bags(hollow_set):
     """Collect (bag, class) pairs from hollow gold parses. Used by the
-    probe whether WEBSTER was trained supervised (hollow) or
+    probe whether TRELLIS was trained supervised (hollow) or
     unsupervised (random). Gold class comes from the hollow merges, not
-    from WEBSTER's internal state — so the probe always sees ground
+    from TRELLIS's internal state — so the probe always sees ground
     truth labels."""
     bags, ys = [], []
     for hollow in hollow_set:
         sentence = hollow["sentence"]; sent_toks = sentence.split()
         n_words  = len(sent_toks)
-        tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+        tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
         tree.build_primitives(sentence, threshold="converge")
         for m in hollow["merges"]:
             try: tree.apply_candidate(m["left"], m["right"])
@@ -551,14 +551,14 @@ generations = []
 # Subtree-exchange generation needs at least one sentence-root chunk to seed.
 # Unsupervised training may not produce any (the climbing gate can stop before
 # the top-level S), so fall back to the old _resolve_bag path if it's empty.
-_use_replay = bool(getattr(webster, "sentence_root_chunks", None))
+_use_replay = bool(getattr(trellis, "sentence_root_chunks", None))
 print(f"    [gen mode: {'subtree-replay' if _use_replay else 'resolve_bag fallback'}]")
 for i in range(N_GEN):
     try:
         if _use_replay:
-            gen_text, gen_parse = webster.generate_via_chunk_replay()
+            gen_text, gen_parse = trellis.generate_via_chunk_replay()
         else:
-            gen_text, gen_parse = webster.generate_sentence(debug=False)
+            gen_text, gen_parse = trellis.generate_sentence(debug=False)
     except Exception as e:
         gen_text, gen_parse = f"<failed: {e}>", None
     n_total += 1
@@ -581,7 +581,7 @@ print(f"  Grammatical: {n_gen_ok}/{n_total} ({100*n_gen_ok/max(n_total,1):.1f}%)
 
 # ── Uniqueness / novelty metrics (see unittests/README.md (3a) section) ──
 # train_set = the unsupervised training sentences (Phase 2 only — the
-# 90 sentences WEBSTER actually formed chunks on; the 200 primitives-
+# 90 sentences TRELLIS actually formed chunks on; the 200 primitives-
 # only sentences don't contribute chunks, but we union them in too so
 # novelty isn't inflated by primitive-only repeats).
 train_set = set(s.strip() for s in unsup_sentences)
@@ -619,7 +619,7 @@ for i, sent in enumerate(test_sents[:30]):
     gold_pos = WORD_TO_POS.get(gold_tok, "OTHER")
     masked = " ".join(toks[:mid] + ["[mask]"] + toks[mid + 1:])
     try:
-        completed, comp_parse = webster.generate_sentence(
+        completed, comp_parse = trellis.generate_sentence(
             masked_sentence=masked, debug=False)
     except Exception as e:
         completed, comp_parse = f"<failed: {e}>", None
@@ -690,7 +690,7 @@ print(f"Artefacts in {OUT_DIR}/:")
 print(f"  parse_accuracy.csv, chunk_class_accuracy.csv,")
 print(f"  step_pick_accuracy.csv,")
 print(f"  generation_from_scratch.csv, generation_masked.csv,")
-print(f"  final_ltm_data/ (saved WEBSTER state)")
+print(f"  final_ltm_data/ (saved TRELLIS state)")
 print(f"  performance_summary.png (overview graphic)")
 
 # =============================================================================
@@ -698,7 +698,7 @@ print(f"  performance_summary.png (overview graphic)")
 # =============================================================================
 fig = plt.figure(figsize=(18, 10))
 fig.suptitle(
-    f"WEBSTER — gen_learn (UNSUPERVISED) Performance Summary  "
+    f"TRELLIS — gen_learn (UNSUPERVISED) Performance Summary  "
     f"(SEED={SEED}, unsup_train={N_UNSUP_TRAIN}, "
     f"eval_test={len(test_hollow)})  "
     f"[strategy: climbing-ancestor count gate (THRESHOLD={THRESHOLD}) × "
@@ -796,7 +796,7 @@ mask_chance  = [1 / max(len(WORD_TO_POS), 1),
 mask_colors  = ["#ff7f0e", "#e377c2"]
 x = np.arange(len(mask_metrics)); w = 0.35
 bars = axE.bar(x - w/2, mask_values, w, color=mask_colors,
-               edgecolor="black", linewidth=0.5, label="WEBSTER")
+               edgecolor="black", linewidth=0.5, label="TRELLIS")
 chance_bars = axE.bar(x + w/2, mask_chance, w,
                       color="lightgray", edgecolor="black",
                       linewidth=0.5, label="chance")

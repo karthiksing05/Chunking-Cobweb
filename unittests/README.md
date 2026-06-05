@@ -1,8 +1,8 @@
-# WEBSTER Test Suite — Evaluation Guide
+# TRELLIS Test Suite — Evaluation Guide
 
 ## Open problems & roadmap (kept as living state)
 
-This list tracks every concrete failure mode in WEBSTER, with status
+This list tracks every concrete failure mode in TRELLIS, with status
 (OPEN / FIXED) and the root cause once known. New failure modes are
 appended at the bottom; FIXED entries stay in the list with their
 resolution and the metric impact, so the chain of improvements is
@@ -35,17 +35,17 @@ auditable.
 
 
 
-This directory contains two end-to-end benchmarks for WEBSTER as a
+This directory contains two end-to-end benchmarks for TRELLIS as a
 chunking parser + generator. They share the same metric panel
 (documented below) but differ in the training signal they receive:
 
 - [`hollow_learn_test_mh.py`](hollow_learn_test_mh.py) — **SUPERVISED**.
   Trains on human-annotated hollow merges (`data/test_hollow_grammar_1/`).
-  WEBSTER replays each gold merge via `tree.apply_candidate(...)` and
+  TRELLIS replays each gold merge via `tree.apply_candidate(...)` and
   learns the structures humans chose.
 - [`gen_learn_test_mh.py`](gen_learn_test_mh.py) — **UNSUPERVISED**.
   Trains on random CFG-generated sentences via
-  `parse_sentence(threshold=THRESHOLD, learning=True)`. WEBSTER's
+  `parse_sentence(threshold=THRESHOLD, learning=True)`. TRELLIS's
   `build()` decides the chunks on its own (climbing-ancestor gate +
   argmax `cnt_root_lp`) and learns from its OWN parses.
 
@@ -102,7 +102,7 @@ didn't.
 This is exactly the right shape: the heuristics encode "what looks
 common" via `cnt_root_lp`, which works as long as TRAINING SAW that
 "common" pattern. In hollow_learn, training saw gold merges so common
-≈ gold. In gen_learn, training saw whatever WEBSTER's own greedy
+≈ gold. In gen_learn, training saw whatever TRELLIS's own greedy
 parses produced (some right, some wrong) — so common drifts away from
 the human gold.
 
@@ -134,7 +134,7 @@ Both directories contain the same set of artefacts:
 - `generation_from_scratch.csv` — 50 from-scratch generations + flags
 - `generation_masked.csv` — 30 single-mask completions
 - `performance_summary.png` — six-panel scoreboard
-- `final_ltm_data/` — saved WEBSTER state
+- `final_ltm_data/` — saved TRELLIS state
 
 ---
 
@@ -146,7 +146,7 @@ Same train/test split as `tests/met5/grammar_threshold_test.py` and
 `tests/met5/grammar_decoding_test.py`:
 
 - 89 train sentences (80%) from the hollow corpus — replayed via gold
-  merges (`tree.apply_candidate(...)`). WEBSTER learns the structures
+  merges (`tree.apply_candidate(...)`). TRELLIS learns the structures
   the human annotator chose.
 - 23 test sentences (20%) — same fold used for evaluation in both tests.
 - `SEED=13`, `PRIMITIVES_FIRST=200`, `THRESHOLD=30`,
@@ -168,27 +168,27 @@ Same train/test split as `tests/met5/grammar_threshold_test.py` and
 The chunk-class probe (metric 2) trains on the HOLLOW train fold even
 in this test — the probe needs labels and the only label source is the
 hollow annotations. This isolates "representation quality" from
-"WEBSTER's selection rule": the probe asks *is the bag class-separable*,
-not *did WEBSTER pick the right chunk*.
+"TRELLIS's selection rule": the probe asks *is the bag class-separable*,
+not *did TRELLIS pick the right chunk*.
 
 ### What the unsupervised numbers tell you
 
-- **Chunk-class probe at 95.8%** — WEBSTER's unsupervised content
+- **Chunk-class probe at 95.8%** — TRELLIS's unsupervised content
   tree clusters chunks by class almost as well as the supervised one.
   The cplx attrs added to `content_instance` (see
   `memory/project_content_instance_cplx_attrs.md`) give Cobweb-CU a
   class-correlated axis that survives unsupervised training.
 - **Step-pick at 40%** — without seeing human-preferred merges in
-  training, `cnt_root_lp` ranks WEBSTER's-own-preferred chunks above
+  training, `cnt_root_lp` ranks TRELLIS's-own-preferred chunks above
   human-preferred chunks at ~60% of steps. The gap to hollow_learn's
   87% reflects exactly how much the training trajectory matters.
 - **Parse F1 at 44%** — end-to-end is a multi-step compounding of
   step-pick (0.4^6 ≈ 0.4% theoretical floor if errors were independent,
-  but they're not — many WEBSTER merges still partially match gold
+  but they're not — many TRELLIS merges still partially match gold
   brackets, hence ~44%).
 - **Generation at 98% grammatical** — subtree-exchange replay (see
   `generate_via_chunk_replay`) replays per-leaf chunk pools mined from
-  WEBSTER's OWN unsupervised parses. Even though `build()` occasionally
+  TRELLIS's OWN unsupervised parses. Even though `build()` occasionally
   stops short of S, enough sentence-root chunks form to seed generation,
   and class-pure content-tree leaves preserve grammar at every level of
   the recursive replay. This nearly closes the supervised/unsupervised
@@ -205,20 +205,20 @@ substitutes for each other.
 
 ### (1) Parse bracket Precision / Recall / F1
 
-**What it scores:** WEBSTER's end-to-end auto-parse against the
+**What it scores:** TRELLIS's end-to-end auto-parse against the
 human-annotated hollow brackets.
 
 **How:**
 - For each test sentence, build the gold bracket set by replaying the
   hollow merges via `tree.apply_candidate(...)` and reading every
   composite's `_chunk_span()` as `(start, end)`.
-- WEBSTER's `parse_sentence(threshold=30)` runs `build()` which uses
+- TRELLIS's `parse_sentence(threshold=30)` runs `build()` which uses
   climbing-ancestor count gate + `argmax cnt_root_lp`.
 - Score the predicted bracket set against gold:
   - Precision = `|gold ∩ pred| / |pred|`
   - Recall = `|gold ∩ pred| / |gold|`
   - F1 = harmonic mean
-- **Order-independent**: bracket SETS are compared. WEBSTER's merge
+- **Order-independent**: bracket SETS are compared. TRELLIS's merge
   order doesn't need to match the human's — only the resulting
   structure does.
 
@@ -226,9 +226,9 @@ human-annotated hollow brackets.
 
 **What pulls it down:**
 - **Attachment ambiguities** (~10pp): "the dog admired the big man
-  with a dog" — gold attaches "with a dog" to NP; WEBSTER attaches to
+  with a dog" — gold attaches "with a dog" to NP; TRELLIS attaches to
   VP. Both are legitimate parses.
-- **Bad merges** (~8pp): "the man admired the woman" — WEBSTER picks
+- **Bad merges** (~8pp): "the man admired the woman" — TRELLIS picks
   `(man admired)` before `(the man)` because `cnt_root_lp` doesn't
   perfectly distinguish gold-vs-other when both look "common" in
   bag space.
@@ -282,15 +282,15 @@ signal can't reach.
 | Step-pick | 87.4% → **93.3%** (+5.9pp) | 40.3% → **42.9%** (+2.6pp) |
 | Exact-match | 52.2% → **60.9%** (+8.7pp) | 21.7% → **26.1%** (+4.4pp) |
 
-**How to use it:** call `webster.learn_leaf_transitions(train_trees)`
-and `webster.learn_chunk_records(train_trees)` after training, then
-set `webster.ltm.chunk_pool_weight = 5.0`. Subsequent `parse_sentence`
+**How to use it:** call `trellis.learn_leaf_transitions(train_trees)`
+and `trellis.learn_chunk_records(train_trees)` after training, then
+set `trellis.ltm.chunk_pool_weight = 5.0`. Subsequent `parse_sentence`
 calls use the boosted ranker. λ=0 disables (vanilla greedy
 `argmax cnt_root_lp`).
 
 ### (1b) Step-pick accuracy
 
-**What it scores:** Per-decision quality of WEBSTER's selection rule
+**What it scores:** Per-decision quality of TRELLIS's selection rule
 on the gold trajectory.
 
 **How:**
@@ -299,7 +299,7 @@ on the gold trajectory.
   - Build primitives and replay gold merges step-by-step.
   - At each step, evaluate EVERY parentless pair via
     `evaluate_pair(climb_count_threshold=THRESHOLD)`.
-  - Apply WEBSTER's selection rule (climbing-ancestor gate + argmax
+  - Apply TRELLIS's selection rule (climbing-ancestor gate + argmax
     `cnt_root_lp`).
   - Mark the step CORRECT if the top-ranked pair's resulting span is
     in the gold bracket set.
@@ -310,7 +310,7 @@ on the gold trajectory.
 **Interpretation:**
 - This is per-decision accuracy on a CORRECT trajectory. End-to-end
   F1 (82%) is lower because errors compound.
-- 100% would mean WEBSTER's selection rule is perfect on this LTM;
+- 100% would mean TRELLIS's selection rule is perfect on this LTM;
   the only remaining gap to F1=100% would be trajectory commitment
   (which gold step to take first when many are valid).
 
@@ -327,7 +327,7 @@ sentence with 7 gold brackets and 6 matches counts here as 0/1, not
 
 ### (2) Chunk-class accuracy (Cobweb-Discrete probe)
 
-**What it scores:** Whether the representations WEBSTER builds are
+**What it scores:** Whether the representations TRELLIS builds are
 linearly class-separable. THIS IS A REPRESENTATION QUALITY METRIC,
 NOT A PARSE METRIC.
 
@@ -354,11 +354,11 @@ NOT A PARSE METRIC.
 
 ### (3a) From-scratch generation
 
-**What it scores:** Can WEBSTER generate novel grammatical sentences
+**What it scores:** Can TRELLIS generate novel grammatical sentences
 unsupervised?
 
 **How (subtree-exchange via basic-level pooling):**
-- `WEBSTER.learn_chunk_records(train_trees)` after training walks every
+- `TRELLIS.learn_chunk_records(train_trees)` after training walks every
   composite chunk and records:
   - `leaf_to_chunks[parent_leaf_hash]` — chunks landing at each leaf
     (`L_leaf_hash`, `R_leaf_hash`, `L_word_id`, `R_word_id`, cplx, L_cplx, R_cplx).
@@ -370,7 +370,7 @@ unsupervised?
   - `leaf_to_shapes[leaf_hash]` — set of `(L_cplx, R_cplx)` topologies
     the leaf actually produced in training (used as the unsupervised
     class-purity filter).
-- `webster.generate_via_chunk_replay()` samples a sentence-root chunk
+- `trellis.generate_via_chunk_replay()` samples a sentence-root chunk
   via the BL-pooled root pool (widened seed distribution), then
   recursively at each composite-child slot picks a chunk from the
   **shape-filtered BL pool**:
@@ -472,12 +472,12 @@ combinatorial explosion of in-class combinations.
 ### (3b) Single-token masked completion
 
 **What it scores:** Given a sentence with one token replaced by
-`[mask]`, can WEBSTER fill in (i) the exact gold token and
+`[mask]`, can TRELLIS fill in (i) the exact gold token and
 (ii) at least the correct POS class?
 
 **How:**
 - For each held-out test sentence, take the middle token, replace
-  with `[mask]`, call `webster.generate_sentence(masked_sentence=...)`.
+  with `[mask]`, call `trellis.generate_sentence(masked_sentence=...)`.
 - Mid-sentence single-token masks: walk the context-leaf's
   `content_ref_attr` distribution, filter to WORD-only refs (skip
   `CONCEPT-*` candidates whose `_expand` would emit multi-token
@@ -562,7 +562,7 @@ score:
 | Step-pick drops to ~25% | Climbing gate rejecting everything | Check that THRESHOLD ≤ `node.count` for typical chunks |
 | Generation drops to 0% but lex-ok 100% | CYK can't parse output; outputs are still in-lexicon | Check CYK handles all production arities; verify outputs look right |
 | Mask exact / POS stuck at chance | `_resolve_bag` not finding any candidates | Check `content_ref_attr` is populated at context-tree leaves |
-| Tests vary 20pp+ run-to-run | Cobweb RNG not seeded | Confirm `cobweb_set_seed(SEED)` is called before WEBSTER init |
+| Tests vary 20pp+ run-to-run | Cobweb RNG not seeded | Confirm `cobweb_set_seed(SEED)` is called before TRELLIS init |
 
 ## See also
 

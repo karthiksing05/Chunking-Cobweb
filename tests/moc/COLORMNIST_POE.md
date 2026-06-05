@@ -63,19 +63,31 @@ using the paper's metrics:
 Reported as mean ± SE over the 40 OOD classes.  (Small-N FID caveats per the paper's
 Appendix E apply; we generate one composed image per query.)
 
-Baselines compared (paper §4.2): **Top-k** nearest-trained-class retrieval and
-**Query-only** (`N(x_q, σ²I)` sampled — the noisy memorisation reference).
+We evaluate a **temperature (T) sweep** of the composition — `T ∈ {0, 0.25, 0.5, 1, 2}`
+(selection is identical across T; only the per-dim PoE weighting changes) — so the effect
+of the hard limit is visible directly: **T = 0** is per-pixel ownership (the method),
+**T = 1** is the soft average, larger T is blurrier.  Baselines (paper §4.2): **Top-1**
+nearest-trained-class retrieval and **Query-only** (`N(x_q, σ²I)` sampled — the noisy
+memorisation reference).
 
 ## Outputs (`tests/moc/colormnist_output/`)
 - `summary.csv` — every metric (FID, CLIP, Precision, Recall, F1 for both reference sets,
-  plus an attribute-classifier joint accuracy) for each method.
+  plus an attribute-classifier joint accuracy) for each T and baseline.
 - **`metrics.png`** — the metrics as a **grouped bar chart**: one panel per metric
   (FID↓, CLIP↑, Precision↑, Recall↑, F1↑), bars per method with **Faithfulness vs
-  Generalization** side by side and **±SE** error bars — a visual of the table above.
+  Generalization** side by side and **±SE** error bars.
+- **`tau_sweep.png`** — the **temperature sweep**: F1 / joint and FID vs T, showing
+  accuracy peaking at T = 0 (per-pixel ownership) and degrading as T softens to averaging.
 - `methods.png` — each method's reconstruction of held-out queries.
-- `concepts.png` — the per-pixel PoE decomposition (query · μ_T · the selected concepts,
-  labelled by the % of pixels each owns).
-- `hierarchy.png` — the Cobweb concept hierarchy, mean image at each node, top-down.
+- `concepts.png` — the per-pixel PoE decomposition at T=0 (query · μ_T · the selected
+  concepts, labelled by the % of pixels each owns).
+- **`concepts/concepts_T{t}.png`** — the same decomposition **for each composition idea
+  in the sweep** (every T): the selection is shared, so the concept *set* is constant, but
+  each panel shows how that T blends them (% = pixels owned at T=0, mean weight at T>0).
+- `hierarchy.png` — the Cobweb concept hierarchy, mean image at each node, top-down (depth 3).
+- **`subtrees/subtree_*.png`** — for each leaf of the depth-3 hierarchy (a level-3 node),
+  its **subtree expanded 3 more levels** (mean image per node), so the structure below the
+  main view is visible.
 
 ## Key finding
 The composition is faithful to the paper (selection Eqs. 8-9, composition Eq. 10); the

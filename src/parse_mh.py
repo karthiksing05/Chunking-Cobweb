@@ -1361,7 +1361,7 @@ class FiniteParseTree(object):
     def _chunk_pool_attestation(self, left_node, right_node):
         """Parse-time analogue of generation's subtree-exchange replay.
 
-        At training time, ``WEBSTER.learn_chunk_records`` records, for
+        At training time, ``TRELLIS.learn_chunk_records`` records, for
         every composite chunk, a tuple
             (parent_leaf_hash, L_child_identity, R_child_identity)
         where child identity is either a content-tree leaf hash (for
@@ -1439,7 +1439,7 @@ class FiniteParseTree(object):
         joint signal is too sparse to lift many decisions.
 
         This helper uses ``content_leaf_transitions`` (built by
-        ``WEBSTER.learn_leaf_transitions``), which stores, *per parent
+        ``TRELLIS.learn_leaf_transitions``), which stores, *per parent
         leaf*, marginal Counters of:
           - ``L_children`` / ``R_children`` — composite child leaf hashes
           - ``L_words``   / ``R_words``    — primitive child word_ids
@@ -3275,7 +3275,7 @@ class LongTermMemory(object):
 
         # Create context hierarchy first. ``weight_attr`` controls how
         # Cobweb's entropy treats missing attributes; the grammar_*
-        # reference tests use True, WEBSTER defaults to False for
+        # reference tests use True, TRELLIS defaults to False for
         # backwards compatibility.
         self.context_hierarchy = CobwebDiscreteTree(_context_alpha, weight_attr=context_weight_attr, depth_max=depth_max_context, branch_max=branch_max_context, attr_weights=context_attr_weights or {})
         # Content hierarchy is a plain CobwebDiscreteTree.  No ref_tree.
@@ -3890,14 +3890,14 @@ class LongTermMemory(object):
 
 
 # ---------------------------------------------------------------------------
-# WEBSTER  (primary orchestrator)
+# TRELLIS  (primary orchestrator)
 # ---------------------------------------------------------------------------
 
-class WEBSTER(object):
+class TRELLIS(object):
     """
     Primary class that orchestrates all parsing and learning logic.
     All other classes (PrimitiveParseNode, CompositeParseNode, FiniteParseTree,
-    LongTermMemory) serve as data classes with helper methods; WEBSTER handles
+    LongTermMemory) serve as data classes with helper methods; TRELLIS handles
     the overall flow.
 
     Named per MULTIHIERARCHY.md's specification.
@@ -4245,7 +4245,7 @@ class WEBSTER(object):
         return [gen_text, fp]
 
     def learn_leaf_transitions(self, train_trees: list = None) -> dict:
-        """Populate ``self.content_leaf_transitions`` from WEBSTER's
+        """Populate ``self.content_leaf_transitions`` from TRELLIS's
         OWN training history. For every composite chunk seen during
         training, record (parent_leaf, left_child_leaf,
         right_child_leaf). The result is an unsupervised structural
@@ -4458,7 +4458,7 @@ class WEBSTER(object):
         sentence-class seeds (sentence-root context leaves' content-
         refs, with S-shape filter). Used by _is_self_parseable's
         ``require_seed_leaf`` argument to enforce that generated
-        outputs re-parse to WHAT WEBSTER recognizes as a sentence.
+        outputs re-parse to WHAT TRELLIS recognizes as a sentence.
         """
         _cl = self.context_length
         _ref_attr = self.ltm.content_ref_attr
@@ -4540,7 +4540,7 @@ class WEBSTER(object):
         (0, n-1). If ``require_seed_leaf`` is supplied (a set of
         content-tree leaf hashes), additionally require the top
         chunk's categorization to land at one of those leaves —
-        i.e. the generation is structurally what WEBSTER would
+        i.e. the generation is structurally what TRELLIS would
         recognize as a sentence-root chunk.
         """
         toks = re.findall(r"[\w']+|[.,!?;]", text)
@@ -4604,7 +4604,7 @@ class WEBSTER(object):
                 and start_content_leaf is None):
             # Build the seed-leaf hash set ONCE for the strong check:
             # require the re-parsed output to land at a sentence-root
-            # leaf in our seed pool (i.e. WEBSTER would recognize the
+            # leaf in our seed pool (i.e. TRELLIS would recognize the
             # output as a sentence-class chunk it has seen before).
             seed_leaf_hashes = self._collect_seed_leaf_hashes()
 
@@ -5192,7 +5192,7 @@ class WEBSTER(object):
             naive un-weighted ``mean log p`` over the whole depth-k
             slice collapses to predicting the most frequent word every
             time. Bag-count weighting is the natural posterior weight
-            in WEBSTER's case because the encoder already selected
+            in TRELLIS's case because the encoder already selected
             the K canonicals that matched this side's context at
             training time; their counts are the evidence.
             """
@@ -5933,20 +5933,20 @@ class WEBSTER(object):
             "weighting": getattr(self, 'weighting', 'binary'),
             "empty_weighting": getattr(self, 'empty_weighting', False),
         }
-        meta_path = os.path.join(dirpath, "webster_meta.json")
+        meta_path = os.path.join(dirpath, "trellis_meta.json")
         with open(meta_path, "w", encoding="utf-8") as f:
             json.dump(meta, f, indent=2)
 
         ltm_dir = os.path.join(dirpath, "ltm")
         ltm_result = self.ltm.save_state(ltm_dir)
 
-        return {"ok": True, "webster_meta": meta_path, "ltm": ltm_result}
+        return {"ok": True, "trellis_meta": meta_path, "ltm": ltm_result}
 
     @staticmethod
-    def load_state(dirpath: str) -> 'WEBSTER':
-        meta_path = os.path.join(dirpath, "webster_meta.json")
+    def load_state(dirpath: str) -> 'TRELLIS':
+        meta_path = os.path.join(dirpath, "trellis_meta.json")
         if not os.path.exists(meta_path):
-            raise FileNotFoundError(f"webster_meta.json not found in {dirpath}")
+            raise FileNotFoundError(f"trellis_meta.json not found in {dirpath}")
 
         with open(meta_path, "r", encoding="utf-8") as f:
             meta = json.load(f)
@@ -5954,7 +5954,7 @@ class WEBSTER(object):
         ltm_dir = os.path.join(dirpath, "ltm")
         ltm = LongTermMemory.load_state(ltm_dir)
 
-        w = WEBSTER.__new__(WEBSTER)
+        w = TRELLIS.__new__(TRELLIS)
         w.ltm = ltm
         w.context_length = meta.get("context_length", 3)
         w.threshold = meta.get("threshold", 5)

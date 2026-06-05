@@ -1,6 +1,6 @@
 # parse_tree_editor_mh.py  –  Flask GUI for the multi-hierarchy framework
 from flask import Flask, jsonify, request
-from parse_mh import FiniteParseTree, WEBSTER, LongTermMemory
+from parse_mh import FiniteParseTree, TRELLIS, LongTermMemory
 from util.cfg import generate, TEST_CORPUS1, TEST_GRAMMAR1, TEST_CORPUS2, TEST_GRAMMAR2
 import json
 import uuid
@@ -18,16 +18,16 @@ LOAD_LTM = "unittests/gen_learn_test_mh/final_ltm_data"
 corpus = TEST_CORPUS1
 grammar = TEST_GRAMMAR1
 
-# --- Initialize WEBSTER (multi-hierarchy parser) ---
+# --- Initialize TRELLIS (multi-hierarchy parser) ---
 if LOAD_LTM != "":
-    webster = WEBSTER.load_state(LOAD_LTM)
+    trellis = TRELLIS.load_state(LOAD_LTM)
     # Override categorization_mode from config if loaded from state
-    webster.categorization_mode = CATEGORIZATION_MODE
-    webster.ltm.categorization_mode = CATEGORIZATION_MODE
-    webster.content_bl_alpha = 1e-2
+    trellis.categorization_mode = CATEGORIZATION_MODE
+    trellis.ltm.categorization_mode = CATEGORIZATION_MODE
+    trellis.content_bl_alpha = 1e-2
 else:
-    # Setting up the multi-hierarchy parser (WEBSTER)
-    webster = WEBSTER(
+    # Setting up the multi-hierarchy parser (TRELLIS)
+    trellis = TRELLIS(
         corpus,
         context_length=CONTEXT_LENGTH,
         threshold=THRESHOLD,
@@ -53,11 +53,11 @@ for _ in range(NUM_LOAD):
     document.append(sentence)
 
 for doc in document:
-    webster.parse_sentence(doc, threshold=THRESHOLD, new_vocab=True, learning=True, debug=False)
+    trellis.parse_sentence(doc, threshold=THRESHOLD, new_vocab=True, learning=True, debug=False)
 
 # --- Initialize first sentence and tree ---
 sample_sentence = generate("S", grammar)
-curr_tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+curr_tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
 if PREBUILD_TREES:
     curr_tree.build(sample_sentence)
 else:
@@ -68,7 +68,7 @@ def reset_tree():
     """Refresh to a new sentence and rebuild current tree."""
     global curr_tree, sample_sentence
     sample_sentence = generate("S", grammar)
-    curr_tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+    curr_tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
     if PREBUILD_TREES:
         curr_tree.build(sample_sentence)
     else:
@@ -82,7 +82,7 @@ def api_get_tree():
     pairs = curr_tree.get_parentless_pairs()
     from viz import CategorizePathVisualizer
     cpv = CategorizePathVisualizer()
-    context_tree = cpv.tree_to_compact_json(webster.ltm.context_hierarchy.root)
+    context_tree = cpv.tree_to_compact_json(trellis.ltm.context_hierarchy.root)
     return jsonify({
         "tree": d3_json,
         "pairs": pairs,
@@ -102,8 +102,8 @@ def api_evaluate():
     debug = data.get("debug", True)
     result = curr_tree.evaluate_pair(left, right, debug=debug)
     cpv = CategorizePathVisualizer()
-    content_tree = cpv.tree_to_compact_json(webster.ltm.content_hierarchy.root)
-    context_tree = cpv.tree_to_compact_json(webster.ltm.context_hierarchy.root)
+    content_tree = cpv.tree_to_compact_json(trellis.ltm.content_hierarchy.root)
+    context_tree = cpv.tree_to_compact_json(trellis.ltm.context_hierarchy.root)
     return jsonify({"ok": True, "result": result,
                     "content_tree": content_tree, "context_tree": context_tree})
 
@@ -152,7 +152,7 @@ def api_export():
 
     # 2. Add to LTM (both content + context hierarchies)
     if LEARNING_ON:
-        webster.ltm.add_parse_tree(curr_tree, shuffle=True, debug=False)
+        trellis.ltm.add_parse_tree(curr_tree, shuffle=True, debug=False)
 
     # 3. Reset to a new random sentence
     reset_tree()
@@ -183,8 +183,8 @@ def api_export_ltm():
 
     export_path = f"gui/parse_tree_editor_mh/{filepath}"
 
-    webster.save_state(export_path)
-    webster.visualize_ltm(export_path, max_depth=4)
+    trellis.save_state(export_path)
+    trellis.visualize_ltm(export_path, max_depth=4)
 
     return jsonify({"ok": True, "filepath": export_path})
 

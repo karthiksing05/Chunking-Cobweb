@@ -1,5 +1,5 @@
 """
-WEBSTER / Cobweb parameter sweep
+TRELLIS / Cobweb parameter sweep
 ================================
 
 Sweep the cobweb hyperparameters that most plausibly affect parse quality
@@ -47,7 +47,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1
-from parse_mh import WEBSTER, FiniteParseTree, PrimitiveParseNode
+from parse_mh import TRELLIS, FiniteParseTree, PrimitiveParseNode
 from cobweb.cobweb_discrete import set_random_seed as cobweb_set_seed
 
 # ── Configuration ─────────────────────────────────────────────────────────────
@@ -167,14 +167,14 @@ print(f"  Primitive sentences: {len(PRIMITIVE_SENTS)}")
 
 # ── Eval functions ──────────────────────────────────────────────────────────
 def _train(cfg):
-    """Train a fresh WEBSTER with the given config; return webster."""
+    """Train a fresh TRELLIS with the given config; return trellis."""
     # Reset ALL three rngs (Python, NumPy, cobweb C++) to the same seed
     # so the only difference between sweep rows is the config itself.
     random.seed(SEED + 999)
     np.random.seed(SEED + 999)
     cobweb_set_seed(SEED + 999)
 
-    webster = WEBSTER(
+    trellis = TRELLIS(
         TEST_CORPUS1,
         context_length=CONTEXT_LENGTH,
         threshold=cfg["threshold"],
@@ -198,19 +198,19 @@ def _train(cfg):
     )
     # Phase 1: primitives-only.
     for s in PRIMITIVE_SENTS:
-        webster.parse_sentence(s, threshold=1e9, new_vocab=True,
+        trellis.parse_sentence(s, threshold=1e9, new_vocab=True,
                                learning=True, debug=False)
     # Phase 2: hollow replay.
     for hollow in TRAIN_HOLLOW:
-        tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+        tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
         tree.build_primitives(hollow["sentence"], threshold=cfg["threshold"])
         for m in hollow["merges"]:
             try: tree.apply_candidate(m["left"], m["right"])
             except Exception: pass
-        webster.ltm.add_parse_tree(tree, shuffle=True, debug=False)
-    return webster
+        trellis.ltm.add_parse_tree(tree, shuffle=True, debug=False)
+    return trellis
 
-def _evaluate(webster, cfg):
+def _evaluate(trellis, cfg):
     """Compute F1, exact-match, step-pick on TEST_HOLLOW."""
     total_tp = total_fp = total_fn = 0
     exact = 0
@@ -224,7 +224,7 @@ def _evaluate(webster, cfg):
             continue
 
         # Gold brackets.
-        gold_tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+        gold_tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
         gold_tree.build_primitives(sentence, threshold="converge")
         for m in hollow["merges"]:
             try: gold_tree.apply_candidate(m["left"], m["right"])
@@ -232,7 +232,7 @@ def _evaluate(webster, cfg):
         gold = _bracket_set(gold_tree)
 
         # End-to-end parse (uses build()).
-        pred_tree = webster.parse_sentence(
+        pred_tree = trellis.parse_sentence(
             sentence, threshold=cfg["threshold"],
             new_vocab=False, learning=False, debug=False)
         pred = _bracket_set(pred_tree)
@@ -247,7 +247,7 @@ def _evaluate(webster, cfg):
         # Step-pick on gold trajectory.
         if not gold:
             continue
-        step_tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+        step_tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
         step_tree.build_primitives(sentence, threshold="converge")
         for step_idx, m in enumerate(hollow["merges"]):
             pairs = step_tree.get_parentless_pairs()
@@ -307,8 +307,8 @@ for sweep_name, configs in SWEEPS.items():
         cfg = _make_cfg(overrides)
         print(f"  [{label}]   cfg={overrides}")
         try:
-            webster = _train(cfg)
-            metrics = _evaluate(webster, cfg)
+            trellis = _train(cfg)
+            metrics = _evaluate(trellis, cfg)
             row = {
                 "sweep": sweep_name, "label": label, **overrides, **metrics,
             }
@@ -340,7 +340,7 @@ sweeps_with_data = list(SWEEPS.keys())
 n = len(sweeps_with_data)
 fig, axes = plt.subplots(2, 3, figsize=(18, 10))
 axes = axes.flatten()
-fig.suptitle("WEBSTER / Cobweb parameter sweep — hollow-learn test", fontsize=14)
+fig.suptitle("TRELLIS / Cobweb parameter sweep — hollow-learn test", fontsize=14)
 
 for i, sname in enumerate(sweeps_with_data):
     ax = axes[i]

@@ -2,7 +2,7 @@
 Grammar Distillation Test (met5) — fixed_d3 vanilla vs redistributed
 ====================================================================
 
-After WEBSTER training, the FIXED_D3 frontier with categorize-mode
+After TRELLIS training, the FIXED_D3 frontier with categorize-mode
 scoring is the winner among all the distillation strategies we tried
 (F1 ≈ 83%, step-pick ≈ 90% — beats the climbing-ancestor baseline).
 This test isolates that strategy and compares two variants:
@@ -93,7 +93,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
 from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1
-from parse_mh import (WEBSTER, FiniteParseTree, PrimitiveParseNode,
+from parse_mh import (TRELLIS, FiniteParseTree, PrimitiveParseNode,
                       CompositeParseNode)
 from cobweb.cobweb_discrete import set_random_seed as cobweb_set_seed
 
@@ -154,9 +154,9 @@ TREE_DEPTH_FIG = 4
 
 
 # =============================================================================
-# PHASE 0 — Train WEBSTER
+# PHASE 0 — Train TRELLIS
 # =============================================================================
-log("=== PHASE 0: Train WEBSTER ===")
+log("=== PHASE 0: Train TRELLIS ===")
 # Cobweb's internal debug prints (PMI lines, redistribute progress)
 # stream to stdout (fd 1) and bury our logs. Silence stdout at the
 # file-descriptor level for the rest of the run; our progress goes
@@ -164,7 +164,7 @@ log("=== PHASE 0: Train WEBSTER ===")
 _silencer = silence_stdout_fd()
 _silencer.__enter__()
 
-webster = WEBSTER(
+trellis = TRELLIS(
     TEST_CORPUS1,
     context_length=CONTEXT_LENGTH,
     threshold=THRESHOLD,
@@ -188,7 +188,7 @@ webster = WEBSTER(
 log(f"  Phase 0a: {PRIMITIVES_FIRST} primitive-only sentences")
 for i in range(PRIMITIVES_FIRST):
     s = generate("S", TEST_GRAMMAR1)
-    webster.parse_sentence(s, threshold=1e9, new_vocab=True,
+    trellis.parse_sentence(s, threshold=1e9, new_vocab=True,
                            learning=True, debug=False)
     if (i + 1) % 50 == 0: log(f"    [{i+1}/{PRIMITIVES_FIRST}]")
 
@@ -207,12 +207,12 @@ train_hollow = hollow_corpus[:_split]
 test_hollow  = hollow_corpus[_split:]
 log(f"    Split: train={len(train_hollow)}  test={len(test_hollow)}")
 for i, hollow in enumerate(train_hollow):
-    tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+    tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
     tree.build_primitives(hollow["sentence"], threshold=THRESHOLD)
     for m in hollow["merges"]:
         try: tree.apply_candidate(m["left"], m["right"])
         except Exception: pass
-    webster.ltm.add_parse_tree(tree, shuffle=True, debug=False)
+    trellis.ltm.add_parse_tree(tree, shuffle=True, debug=False)
     if (i + 1) % 25 == 0: log(f"    [{i+1}/{len(train_hollow)}]")
 
 # Distillation corpus used in Phase 5 etc. — fresh auto-parsed sentences.
@@ -248,9 +248,9 @@ def _chunk_yield(node):
     def w(n):
         if isinstance(n, PrimitiveParseNode):
             wid = getattr(n, "word_id", None)
-            if wid is None or wid < 0 or wid >= len(webster.ltm.id_to_value):
+            if wid is None or wid < 0 or wid >= len(trellis.ltm.id_to_value):
                 return
-            pos = WORD_TO_POS.get(webster.ltm.id_to_value[wid])
+            pos = WORD_TO_POS.get(trellis.ltm.id_to_value[wid])
             if pos: out.append(pos)
             return
         for _, c in sorted(getattr(n, "children", []),
@@ -264,8 +264,8 @@ def _chunk_tokens(node):
     def w(n):
         if isinstance(n, PrimitiveParseNode):
             wid = getattr(n, "word_id", None)
-            if wid is not None and 0 <= wid < len(webster.ltm.id_to_value):
-                out.append((int(n.position_idx), webster.ltm.id_to_value[wid]))
+            if wid is not None and 0 <= wid < len(trellis.ltm.id_to_value):
+                out.append((int(n.position_idx), trellis.ltm.id_to_value[wid]))
             return
         for _, c in getattr(n, "children", []):
             w(c)
@@ -323,7 +323,7 @@ def collect_node_chunk_class_counts(root, sentences):
     counts = defaultdict(Counter)
     for sent in sentences:
         try:
-            parse = webster.parse_sentence(
+            parse = trellis.parse_sentence(
                 sent, threshold=THRESHOLD, new_vocab=False,
                 learning=False, debug=False)
         except Exception:
@@ -431,7 +431,7 @@ def parse_with_frontier(sentence, f_cnt, f_ctx, cnt_root, ctx_root,
                          record_labels=False):
     f_cnt_hashes = {str(n.concept_hash()) for n in f_cnt}
     f_ctx_hashes = {str(n.concept_hash()) for n in f_ctx}
-    tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+    tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
     tree.build_primitives(sentence, threshold="converge")
 
     while True:
@@ -477,14 +477,14 @@ def step_pick(test_hollow, f_cnt, f_ctx, cnt_root, ctx_root):
     n_correct = n_total = 0
     for hollow in test_hollow:
         sentence = hollow["sentence"]
-        gold_tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+        gold_tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
         gold_tree.build_primitives(sentence, threshold="converge")
         for m in hollow["merges"]:
             try: gold_tree.apply_candidate(m["left"], m["right"])
             except Exception: pass
         gold = bracket_set(gold_tree)
         if not gold: continue
-        step_tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+        step_tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
         step_tree.build_primitives(sentence, threshold="converge")
         for m in hollow["merges"]:
             pairs = step_tree.get_parentless_pairs()
@@ -586,7 +586,7 @@ def generate_from_frontier(frontier_content, return_leaf=False):
                             k=1)[0]
     leaf = _representative_leaf(chosen)
     try:
-        text, parse = webster.generate_sentence(
+        text, parse = trellis.generate_sentence(
             start_content_leaf=leaf, debug=False)
     except Exception as e:
         text, parse = f"<gen failed: {e}>", None
@@ -651,7 +651,7 @@ def _build_primitive_instances(sentences, n_max=400):
 
 def _build_ctx_inst_for_word(toks, i):
     from parse_mh import _context_weight, _get_or_register_cplx_vid
-    ltm = webster.ltm
+    ltm = trellis.ltm
     cl  = ltm.context_length
     wt_mode = getattr(ltm, "weighting", "binary")
     emp_wt  = getattr(ltm, "empty_weighting", False)
@@ -682,24 +682,24 @@ def _collect_ctx_descents(prim_instances, sentences):
       * Primitives:  context_instance built from sliding-window context,
                      labelled by gold POS (Det, N, Adj, V, P).
       * Composites:  context_instance carried on the composite (set by
-                     apply_candidate during WEBSTER's auto-parse),
+                     apply_candidate during TRELLIS's auto-parse),
                      labelled by gold head-based chunk class (NP, AdjP,
                      PP, VP, S). The content-ref attribute is stripped
                      so we descend the pure-context signal (matching
                      how add_parse_tree fit the composite during
                      training)."""
-    cref_attr = webster.ltm.content_ref_attr
+    cref_attr = trellis.ltm.content_ref_attr
     pairs = []
     # Primitives — use POS as the label.
     for sent_toks, i, w, pos in prim_instances:
         inst = _build_ctx_inst_for_word(sent_toks, i)
         pairs.append((inst, _label2id[pos]))
-    # Composites — descend through every chunk that WEBSTER's parser
+    # Composites — descend through every chunk that TRELLIS's parser
     # produces on the same distillation corpus. Labels come from
     # head-based chunk classification.
     for sent in sentences:
         try:
-            parse = webster.parse_sentence(
+            parse = trellis.parse_sentence(
                 sent, threshold=THRESHOLD, new_vocab=False,
                 learning=False, debug=False)
         except Exception:
@@ -740,7 +740,7 @@ def compute_cnt_node_counts(root, sentences, max_depth):
     cnt_L = {}; cnt_R = {}
     for sent in sentences:
         try:
-            parse = webster.parse_sentence(
+            parse = trellis.parse_sentence(
                 sent, threshold=THRESHOLD, new_vocab=False,
                 learning=False, debug=False)
         except Exception:
@@ -899,7 +899,7 @@ def label_frontier_unsupervised(frontier_nodes, sentences):
     gold_per_nt   = defaultdict(Counter)
     for sent in sentences:
         try:
-            parse = webster.parse_sentence(
+            parse = trellis.parse_sentence(
                 sent, threshold=THRESHOLD, new_vocab=False,
                 learning=False, debug=False)
         except Exception:
@@ -923,8 +923,8 @@ def extract_rules_unsupervised(frontier_nodes, frontier_labels, sentences):
     def label_node(n):
         if isinstance(n, PrimitiveParseNode):
             wid = getattr(n, "word_id", None)
-            if wid is not None and 0 <= wid < len(webster.ltm.id_to_value):
-                return f"'{webster.ltm.id_to_value[wid]}'"
+            if wid is not None and 0 <= wid < len(trellis.ltm.id_to_value):
+                return f"'{trellis.ltm.id_to_value[wid]}'"
             return "?"
         ci = n.get_content_instance()
         if not ci: return "?"
@@ -933,7 +933,7 @@ def extract_rules_unsupervised(frontier_nodes, frontier_labels, sentences):
         return frontier_labels.get(str(best.concept_hash()), "?")
     for sent in sentences:
         try:
-            parse = webster.parse_sentence(
+            parse = trellis.parse_sentence(
                 sent, threshold=THRESHOLD, new_vocab=False,
                 learning=False, debug=False)
         except Exception:
@@ -1387,8 +1387,8 @@ def plot_parse_derivation(parse_tree, frontier_labels, frontier_nodes,
     def label_fn(n):
         if isinstance(n, PrimitiveParseNode):
             wid = getattr(n, "word_id", None)
-            if wid is not None and 0 <= wid < len(webster.ltm.id_to_value):
-                return f'"{webster.ltm.id_to_value[wid]}"'
+            if wid is not None and 0 <= wid < len(trellis.ltm.id_to_value):
+                return f'"{trellis.ltm.id_to_value[wid]}"'
             return "?"
         if getattr(n, "is_global_root", False): return "ROOT"
         nt = _nt_for(n)
@@ -1434,8 +1434,8 @@ def plot_generation_derivation(parse_tree, frontier_labels, frontier_nodes,
     def label_fn(n):
         if isinstance(n, PrimitiveParseNode):
             wid = getattr(n, "word_id", None)
-            if wid is not None and 0 <= wid < len(webster.ltm.id_to_value):
-                return f'"{webster.ltm.id_to_value[wid]}"'
+            if wid is not None and 0 <= wid < len(trellis.ltm.id_to_value):
+                return f'"{trellis.ltm.id_to_value[wid]}"'
             return "?"
         nt = _nt_for(n)
         if nt is None: return "?"
@@ -1487,7 +1487,7 @@ def run_variant(variant_name, out_dir, cnt_root, ctx_root,
     tp = fp = fn = exact = total = 0
     for hollow in test_hollow:
         sentence = hollow["sentence"]
-        gold_tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+        gold_tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
         gold_tree.build_primitives(sentence, threshold="converge")
         for m in hollow["merges"]:
             try: gold_tree.apply_candidate(m["left"], m["right"])
@@ -1660,13 +1660,13 @@ def run_variant(variant_name, out_dir, cnt_root, ctx_root,
 log("\n" + "=" * 70)
 log("PHASE 1 — VANILLA fixed_d3")
 log("=" * 70)
-log(f"  Content tree: {sum(1 for _ in _walk(webster.ltm.content_hierarchy.root))} nodes")
-log(f"  Context tree: {sum(1 for _ in _walk(webster.ltm.context_hierarchy.root))} nodes")
+log(f"  Content tree: {sum(1 for _ in _walk(trellis.ltm.content_hierarchy.root))} nodes")
+log(f"  Context tree: {sum(1 for _ in _walk(trellis.ltm.context_hierarchy.root))} nodes")
 
 vanilla_results = run_variant(
     "fixed_d3 vanilla", VANILLA_DIR,
-    webster.ltm.content_hierarchy.root,
-    webster.ltm.context_hierarchy.root,
+    trellis.ltm.content_hierarchy.root,
+    trellis.ltm.context_hierarchy.root,
     frontier_kind="fixed_d3")
 
 
@@ -1677,7 +1677,7 @@ log("\n" + "=" * 70)
 log(f"PHASE 2 — REDISTRIBUTE (n={REDIST_N} per tree)")
 log("=" * 70)
 log(f"  Calling tree.redistribute({REDIST_N}) on CONTENT tree…")
-webster.ltm.content_hierarchy.redistribute(REDIST_N)
+trellis.ltm.content_hierarchy.redistribute(REDIST_N)
 # Skip redistributing the CONTEXT tree: the TopK-Pool encoder caches
 # the context tree's depth-d node list as stable int ids, and moving
 # context-tree nodes invalidates those ids in ways the encoder's
@@ -1687,9 +1687,9 @@ webster.ltm.content_hierarchy.redistribute(REDIST_N)
 # alone is the safe-and-meaningful variant — it re-clusters the chunk
 # representations without touching the substrate the encoder relies on.
 log(f"  Content tree (post-redist): "
-      f"{sum(1 for _ in _walk(webster.ltm.content_hierarchy.root))} nodes")
+      f"{sum(1 for _ in _walk(trellis.ltm.content_hierarchy.root))} nodes")
 log(f"  Context tree (untouched):  "
-      f"{sum(1 for _ in _walk(webster.ltm.context_hierarchy.root))} nodes")
+      f"{sum(1 for _ in _walk(trellis.ltm.context_hierarchy.root))} nodes")
 
 
 # =============================================================================
@@ -1700,8 +1700,8 @@ log("PHASE 3 — REDISTRIBUTED fixed_d3")
 log("=" * 70)
 redist_results = run_variant(
     "fixed_d3 redist", REDIST_DIR,
-    webster.ltm.content_hierarchy.root,
-    webster.ltm.context_hierarchy.root,
+    trellis.ltm.content_hierarchy.root,
+    trellis.ltm.context_hierarchy.root,
     frontier_kind="fixed_d3")
 
 
@@ -1723,15 +1723,15 @@ log("=" * 70)
 log("  Tallying chunk-class distributions at every node visited "
     "during auto-parses…")
 _cnt_class_counts = collect_node_chunk_class_counts(
-    webster.ltm.content_hierarchy.root, distill_sentences)
+    trellis.ltm.content_hierarchy.root, distill_sentences)
 _ctx_class_counts = collect_node_chunk_class_counts(
-    webster.ltm.context_hierarchy.root, distill_sentences)
-bfs_cnt = bfs_pure_frontier(webster.ltm.content_hierarchy.root,
+    trellis.ltm.context_hierarchy.root, distill_sentences)
+bfs_cnt = bfs_pure_frontier(trellis.ltm.content_hierarchy.root,
                              _cnt_class_counts,
                              purity_threshold=PURITY_THRESHOLD,
                              max_depth=PURITY_MAX_DEPTH,
                              min_count=PURITY_MIN_COUNT)
-bfs_ctx = bfs_pure_frontier(webster.ltm.context_hierarchy.root,
+bfs_ctx = bfs_pure_frontier(trellis.ltm.context_hierarchy.root,
                              _ctx_class_counts,
                              purity_threshold=PURITY_THRESHOLD,
                              max_depth=PURITY_MAX_DEPTH,
@@ -1743,8 +1743,8 @@ log(f"  BFS-pure context frontier: {len(bfs_ctx)} NTs  "
 
 bfs_pure_results = run_variant(
     "bfs_pure redist", BFS_PURE_DIR,
-    webster.ltm.content_hierarchy.root,
-    webster.ltm.context_hierarchy.root,
+    trellis.ltm.content_hierarchy.root,
+    trellis.ltm.context_hierarchy.root,
     f_cnt=bfs_cnt, f_ctx=bfs_ctx,
     frontier_kind=f"bfs_pure (≥{PURITY_THRESHOLD}, ≤{PURITY_MAX_DEPTH})")
 

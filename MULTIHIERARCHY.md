@@ -11,8 +11,7 @@ Start forays into other forms of chunking, with different discrete relations!!
 Immediate domain ideas:
 *   Context-sensitive grammar - where context needs to be attributed to define how elements are grouped or split up
     *   This may warrant the need for a different kind of generalized framework!
-*   Chess - more discrete relations and no distinct notion of content / context
-*   Go - also a ton of discrete relations and no real notion of content / context, could be simpler than Chess though
+*   Chess - more discrete relations and no distinct notion of content / context!!! Can do spatial awareness by demonstrating!!
 
 ## Methodology 6
 
@@ -107,7 +106,7 @@ TL;DR is that Cobweb is NOT WHAT WE THOUGHT IT WAS!! Specifically, it doesn't sp
 **Convolutional Cobweb:**
 *   Very very interesting paper I have not looked at!!! We might be able to take inspiration from this for our mixture-of-concepts idea!! Or vice versa LOL
 *   WHY IS CONVOLUTIONAL COBWEB SO SILLY?? I mean, maybe not, but hopefully everyone's set of chunks will be aligned once we explain stuff in terms of that!!
-    *   Maybe try a convolutional-cobweb-like setup with WEBSTER to note similarities and differences between the two ideas!
+    *   Maybe try a convolutional-cobweb-like setup with TRELLIS to note similarities and differences between the two ideas!
     *   Convolutional Cobweb uses leaves to identify but maintains the top level of tree for representations to pass from the convolutional (chunking) hierarchy into the classification (context) hierarchy
     *   My verdict is that if we make this chunking framework work, we can also make the convolutional framework work, as the convolution framework inherently assumes both that everything is part of a chunk and that the parse tree is more like a "parse pyramid"
 *   THIS JUST IN - Convolutional Cobweb is apparently goated? However, it's ONLY THE OLD VERSION, hinting at some deeper problems
@@ -177,13 +176,13 @@ TODO LIST For Leaf Pointer and real-time Path Information calculation:
     *   Need to do a way of comparison for the CobwebNodes between each other in a "soft" way (Lowest Common Ancestor!!!)
     *   All actual storage should be of ints for attributes, ints for values, and ints for counts, but we have a lookup table to check if attributes are cobweb-nodes OR strings. 
     *   If they are regular strings, we can do standard comparison as Cobweb library does right now, otherwise we use LCA of the paths of the two nodes as a similarity proxy.
-*   The Path Information change should be a change primarily made in the Cobweb library, with stuff on the WEBSTER side being mostly a change to the instances and logistics
+*   The Path Information change should be a change primarily made in the Cobweb library, with stuff on the TRELLIS side being mostly a change to the instances and logistics
 
 Code changes to make:
 *   To Cobweb:
     *   Let's build the new ID-mapping natively into this - then, based on whether the given ID links to a string or a CobwebNode, we can treat it separately
     *   Assume that a string and a CobwebNode have no similarity, and the similarity between two strings is either 1 or 0 but the similarity between two CobwebNode instances is some fraction depending on the LCA between the two nodes
-*   To Webster:
+*   To Trellis:
     *   We can just remove code related to the ID-mapping and stuff
     *   Now, content-left and content-right in the content instance only store a single leaf pointer ID and paths are recomputed in real time
     *   The content-ref in the context instance should also only store 
@@ -454,7 +453,7 @@ Long Term Memory:
     *   update_vocabulary(actions)
         *   Given the actions from a Cobweb ifit, make changes to vocabulary and the Cobweb hierarchy accordingly
 
-Webster: (Primary Class - we're going to do all logic and parsing in here, and every other class is simply going to be a data-class that stores necessary information and helper methods)
+Trellis: (Primary Class - we're going to do all logic and parsing in here, and every other class is simply going to be a data-class that stores necessary information and helper methods)
 *   Variables
     *   Corpus, context size, threshold
     *   An instance of the Long Term Memory

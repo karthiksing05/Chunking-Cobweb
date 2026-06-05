@@ -1,7 +1,7 @@
 """
 Test 3: Context-hierarchy probe – distributional primitives from a toy grammar.
 
-The *context hierarchy* in webster learns distributional representations of words
+The *context hierarchy* in trellis learns distributional representations of words
 by training on their sliding-window neighbourhood: what words surround each
 token in a sentence.
 

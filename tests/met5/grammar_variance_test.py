@@ -17,7 +17,7 @@ if _SRC not in sys.path:
 import numpy as np
 
 from util.cfg import generate, TEST_GRAMMAR1, TEST_CORPUS1
-from parse_mh import WEBSTER, FiniteParseTree, PrimitiveParseNode
+from parse_mh import TRELLIS, FiniteParseTree, PrimitiveParseNode
 from cobweb.cobweb_discrete import set_random_seed as cobweb_set_seed
 
 HOLLOW_CORPUS_DIR = "data/test_hollow_grammar_1"
@@ -74,7 +74,7 @@ def _run_once(seed_offset):
     random.seed(SEED + seed_offset); np.random.seed(SEED + seed_offset)
     cobweb_set_seed(SEED + seed_offset)   # ← seed cobweb's C++ RNG too
     cfg = SOTA
-    webster = WEBSTER(
+    trellis = TRELLIS(
         TEST_CORPUS1, context_length=CONTEXT_LENGTH,
         threshold=cfg["threshold"],
         content_alpha=cfg["content_alpha"], context_alpha=cfg["context_alpha"],
@@ -85,26 +85,26 @@ def _run_once(seed_offset):
         content_weight_attr=cfg["weight_attr"], context_weight_attr=cfg["weight_attr"],
     )
     for s in PRIM_SENTS:
-        webster.parse_sentence(s, threshold=1e9, new_vocab=True, learning=True, debug=False)
+        trellis.parse_sentence(s, threshold=1e9, new_vocab=True, learning=True, debug=False)
     for hollow in TRAIN:
-        tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+        tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
         tree.build_primitives(hollow["sentence"], threshold=cfg["threshold"])
         for m in hollow["merges"]:
             try: tree.apply_candidate(m["left"], m["right"])
             except: pass
-        webster.ltm.add_parse_tree(tree, shuffle=True, debug=False)
+        trellis.ltm.add_parse_tree(tree, shuffle=True, debug=False)
 
     total_tp = total_fp = total_fn = 0; exact = n_sents = 0
     for hollow in TEST:
         sentence = hollow["sentence"]
         if len(re.findall(r"[\w']+|[.,!?;]", sentence)) < 2: continue
-        gold_tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+        gold_tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
         gold_tree.build_primitives(sentence, threshold="converge")
         for m in hollow["merges"]:
             try: gold_tree.apply_candidate(m["left"], m["right"])
             except: pass
         gold = _bracket_set(gold_tree)
-        pred_tree = webster.parse_sentence(
+        pred_tree = trellis.parse_sentence(
             sentence, threshold=cfg["threshold"], new_vocab=False, learning=False, debug=False)
         pred = _bracket_set(pred_tree)
         total_tp += len(gold & pred); total_fp += len(pred - gold); total_fn += len(gold - pred)

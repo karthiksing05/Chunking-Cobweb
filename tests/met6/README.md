@@ -152,7 +152,7 @@ _(simplicity-bias sweep — consolidated into git history.)_
 
 Are the unsupervised settings as good as the **supervised** version (acs-26
 `hollow_learn`, which trains on gold merges)? Head-to-head on the SAME
-corpus + WEBSTER config (150 train, 6 epochs), comparing parse F1/EM vs
+corpus + TRELLIS config (150 train, 6 epochs), comparing parse F1/EM vs
 gold and generation grammaticality (CYK legality oracle):
 
 | grammar | mode | τ | parse F1 | EM | gen-gram | gen-novel |

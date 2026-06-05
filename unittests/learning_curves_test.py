@@ -1,5 +1,5 @@
 """
-Learning-curve test for WEBSTER. Trains incrementally on the supplied
+Learning-curve test for TRELLIS. Trains incrementally on the supplied
 hollow corpus, snapshotting evaluation metrics every ``EVAL_EVERY``
 training sentences:
 
@@ -38,7 +38,7 @@ import matplotlib.pyplot as plt
 from util.cfg import (generate, generate_with_merges,
                       TEST_GRAMMAR1, TEST_CORPUS1,
                       TEST_GRAMMAR3, TEST_CORPUS3)
-from parse_mh import WEBSTER, FiniteParseTree, PrimitiveParseNode
+from parse_mh import TRELLIS, FiniteParseTree, PrimitiveParseNode
 from cobweb.cobweb_discrete import set_random_seed as cobweb_set_seed
 
 
@@ -174,7 +174,7 @@ def run_learning_curves(
     # Set of training sentences for novelty checking.
     train_sentences = {h["sentence"].strip() for h in train_h}
 
-    webster = WEBSTER(
+    trellis = TRELLIS(
         corpus, context_length=CONTEXT_LENGTH, threshold=THRESHOLD,
         content_alpha=1e-4, context_alpha=1e-4,
         content_bl_alpha=10, context_bl_alpha=10,
@@ -190,7 +190,7 @@ def run_learning_curves(
         print(f"\nPHASE 1: PRIMITIVES ({pf} random sentences)")
         for i in range(pf):
             s = generate("S", grammar)
-            webster.parse_sentence(s, threshold=1e9, new_vocab=True,
+            trellis.parse_sentence(s, threshold=1e9, new_vocab=True,
                                    learning=True, debug=False)
     else:
         gate_desc = (f"gate={maturity_gate} mode={gate_mode}"
@@ -204,7 +204,7 @@ def run_learning_curves(
     for h in test_h:
         sent = h["sentence"]
         if len(re.findall(r"[\w']+|[.,!?;]", sent)) < 2: continue
-        gt = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+        gt = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
         gt.build_primitives(sent, threshold="converge")
         for m in h["merges"]:
             try: gt.apply_candidate(m["left"], m["right"])
@@ -214,7 +214,7 @@ def run_learning_curves(
     def _eval_parse():
         tp = fp = fn = em = n = 0
         for sent, g in gold.items():
-            pt = webster.parse_sentence(sent, threshold=THRESHOLD,
+            pt = trellis.parse_sentence(sent, threshold=THRESHOLD,
                                         new_vocab=False, learning=False,
                                         debug=False,
                                         maturity_gate=maturity_gate,
@@ -229,11 +229,11 @@ def run_learning_curves(
 
     def _eval_gen(n_samples=n_gen_per_eval):
         gen_ok = lex_ok = novel = gram_novel = total = 0
-        if not getattr(webster, "sentence_root_chunks", None):
+        if not getattr(trellis, "sentence_root_chunks", None):
             return 0.0, 0.0, 0.0, 0.0, 0
         for _ in range(n_samples):
             try:
-                text, _ = webster.generate_via_chunk_replay()
+                text, _ = trellis.generate_via_chunk_replay()
             except Exception:
                 continue
             toks = text.split()
@@ -269,7 +269,7 @@ def run_learning_curves(
             if n_words < 2:  # single-token sentences are trivially "parsed"
                 continue
             try:
-                pt = webster.parse_sentence(
+                pt = trellis.parse_sentence(
                     sent, threshold=THRESHOLD, new_vocab=False,
                     learning=False, debug=False,
                     maturity_gate=maturity_gate, gate_mode=gate_mode)
@@ -306,7 +306,7 @@ def run_learning_curves(
     for i, hollow in enumerate(train_h):
         sent  = hollow["sentence"]
         merges= hollow["merges"]
-        tree = FiniteParseTree(webster.ltm, context_length=CONTEXT_LENGTH)
+        tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
         tree.build_primitives(sent, threshold=THRESHOLD,
                               maturity_gate=maturity_gate, gate_mode=gate_mode)
         if maturity_gate is None:
@@ -325,13 +325,13 @@ def run_learning_curves(
             for m in merges:
                 try: tree.apply_candidate(m["left"], m["right"])
                 except Exception: pass
-        webster.ltm.add_parse_tree(tree, shuffle=True, debug=False)
+        trellis.ltm.add_parse_tree(tree, shuffle=True, debug=False)
         trained_trees.append(tree)
 
         if (i + 1) % eval_every == 0 or (i + 1) == len(train_h):
-            webster.learn_leaf_transitions(trained_trees)
-            webster.learn_chunk_records(trained_trees)
-            webster.ltm.chunk_pool_weight = 5.0
+            trellis.learn_leaf_transitions(trained_trees)
+            trellis.learn_chunk_records(trained_trees)
+            trellis.ltm.chunk_pool_weight = 5.0
             P, R, F, em = _eval_parse()
             g_gram, g_novel, g_lex, g_gram_novel, g_n = _eval_gen()
             p_parse_legal, _n_om = _eval_omission()
