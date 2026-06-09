@@ -1,96 +1,80 @@
 # ColorMNIST-PoE — Compositional Generalization with Cobweb
 
-Cobweb adaptation of **Wang, Gupta, Zhu & MacLellan, "Test-Time Compositional
-Generalization in Diffusion Models via Concept Discovery" (2026)**.  The paper
-repurposes a pretrained diffusion model as a hierarchy of density modes: for an
-out-of-distribution query it *discovers* reusable concept prototypes, *selects*
-relevant ones with a submodular coverage objective, and *composes* their local
-Gaussians into a **Product-of-Experts (PoE)**.
-
-Cobweb already **is** such a hierarchy of Gaussian density modes — every node `n`
-is a diagonal-Gaussian expert `q_n(x)=N(m_n, Σ_n)` with `m_n = node.mean`,
-`σ²_{n,r} = sum_sq_r/count + prior_var` (verified to match `node.log_prob`).  So we
-run the paper's discover → select → compose pipeline **directly on the Cobweb tree,
-in raw pixel space, with no diffusion model and no autoencoder**.
+Cobweb version of **Wang, Gupta, Zhu & MacLellan, "Test-Time Compositional Generalization in
+Diffusion Models via Concept Discovery" (2026)**. The paper turns a pretrained DDPM into a
+hierarchy of Gaussian "concept" modes, picks a few that cover an out-of-distribution query, and
+multiplies them into a **Product-of-Experts (PoE)**. ColorMNIST in the paper is a 32×32
+**pixel-space** DDPM (no autoencoder), so we run the same pipeline on **raw pixels** with Cobweb
+standing in for the diffusion model.
 
 Implementation: `tests/moc/colormnist_poe.py`.
 
-## Benchmark (paper §4.1)
-32×32 RGB ColorMNIST with three primitive factors — digit (10) × foreground colour
-(4) × background colour (4) = **160 slots**, of which **120 are SEEN** by Cobweb and
-**40 held out as OOD**.  The split is a genuine *compositional* OOD split (asserted in
-code): every held-out slot is a novel combination whose digit, fg-colour and bg-colour
-each appear in training, just never together; no slot, combination, or grayscale
-exemplar leaks between train and OOD.
+## The method in three steps
 
-## The method — two steps
+**1. Concepts = Cobweb nodes.** Each node is a diagonal Gaussian `N(m_n, σ²_n)` over pixels
+(`m_n = node.mean`, `σ²_{n,r} = sum_sq_r/count + prior_var`). Shallow nodes are broad concepts
+(a background colour), deep nodes are specific ones (a digit shape) — the paper's coarse-to-fine
+mode hierarchy, for free.
 
-The per-pixel expert log-likelihood is `ℓ_{n,r}(x) = log N(x_r; m_{n,r}, σ²_{n,r})`.
-
-### (1) Select the concepts to compose — top-down, heuristic, **no fixed depth**
-- **Discover** candidates by a **best-first DESCENT** of the tree (the analog of the
-  paper's discovery of density modes at multiple abstraction scales).  Priority is the
-  node posterior `φ(n) = Σ_r ℓ_{n,r}(x) + log P(n)`; a node's children are expanded
-  **only while a child raises `φ`**, so each branch stops at its own `φ`-peak — the
-  natural granularity, decided per-branch by the heuristic rather than a depth cap.
-  (`search_candidates`.)
-- **Pick K** by greedy submodular coverage `F(S) = Σ_r max_{n∈S} ℓ_{n,r}(x)`
-  (paper Eqs. 8-9): best singleton, then maximum marginal gain, until `|S| = K`.
-  (`submodular_select`.)
-
-### (2) Compose them — per-dim Product-of-Experts at the **hard limit τ→0** (paper Eq. 10)
-The paper weights each concept per pixel `w_n(r) = softmax_{n∈S}(ℓ_{n,r}(x)/τ)`.  We
-take **τ→0**, which is *per-pixel ownership*:
+**2. Select concepts by a best-first candidate pool** (`select_concepts`). This is the paper's
+greedy argmax (Eq. 9) over a candidate pool — gathered from the Cobweb tree instead of by
+mode-ascent. The pool's score is the paper's *coverage gain*:
 
 ```
-μ_T[r] = m_{ argmax_{n∈S} ℓ_{n,r}(x) , r }
+Δ(n) = Σ_r max( ℓ_{n,r}(x_q) − cur_r , 0 ),   cur_r = best per-pixel log-lik so far
 ```
 
-i.e. **every pixel is copied from the single selected concept that best explains the
-query at that pixel** (`poe_compose`).  This is the crux: soft averaging (τ=1) blends
-every concept on every pixel → blurry, wrong; the hard limit routes background pixels
-to the background-colour concept and the stroke to the digit-shape+colour concept → a
-sharp, correct held-out (digit, fg, bg).
+For each concept we **best-first expand** the tree by `Δ` (priority queue: pop the max-`Δ` node,
+push its children) up to a pool of **~3% of the tree's nodes**, then take the global `Δ`-maximizer
+in that pool. We fold the pick into `cur_r` and **re-run the pool for the next concept** — now `Δ`
+rewards only the pixels still unexplained, so the search reaches a *different* branch (the digit
+after the background). This re-routing across branches is the Cobweb analog of the paper's modes
+recovered from different noise levels.
 
-## Metrics — exactly as in the paper (§4.2)
-Generated images are scored against two reference sets per OOD class — **Faithfulness**
-(the query images) and **Generalization** (other held-out images of the same class) —
-using the paper's metrics:
-- **FID** (Fréchet Inception Distance, Inception-V3 pool features),
-- **CLIP** image–image cosine similarity (CLIP ViT-B/32),
-- **Precision / Recall** via the k-NN density estimator (k=3) in Inception feature space,
-- **F1** = harmonic mean of precision and recall.
-Reported as mean ± SE over the 40 OOD classes.  (Small-N FID caveats per the paper's
-Appendix E apply; we generate one composed image per query.)
+> Two cheaper variants we tried and rejected: descending by Cobweb's own posterior routing
+> (`log_prob_class_given_instance`) sends every concept to the same nearest cluster — one branch,
+> blurry, joint ≈ 22%; a single greedy coverage-gain *descent* (one root→leaf path per concept)
+> recovers cross-branch diversity (joint ≈ 42%) but misses better off-path concepts. The
+> best-first **pool** finds them — the better concepts are spread across branches, so the
+> per-concept argmax has to look at a real candidate set. Pool size trades quality for cost
+> (joint ≈ 42% at 1%, ≈ 43% at 3%, ≈ 46% at 10% of the tree); we use **3%** as the balance.
 
-We evaluate a **temperature (T) sweep** of the composition — `T ∈ {0, 0.25, 0.5, 1, 2}`
-(selection is identical across T; only the per-dim PoE weighting changes) — so the effect
-of the hard limit is visible directly: **T = 0** is per-pixel ownership (the method),
-**T = 1** is the soft average, larger T is blurrier.  Baselines (paper §4.2): **Top-1**
-nearest-trained-class retrieval and **Query-only** (`N(x_q, σ²I)` sampled — the noisy
-memorisation reference).
+**How many concepts — the leftover-image cutoff.** After each pick we compose `μ_T` and measure
+how much of the query it explains, `R² = 1 − ‖x_q − μ_T‖² / ‖x_q − x̄_q‖²`, stopping once
+`R² ≥ 0.99` (capped at `K_MAX = 6`). Easy queries reach 99% with a couple of concepts; hard ones
+recruit more. This keys the cutoff off *how much image is left to explain* — earlier cutoffs based
+on the coverage gain itself (a Δ-peak, a coverage knee) stopped too early because the gain is
+dominated by the background.
+
+**3. Compose with a per-pixel product of Gaussians** (paper Eqs. 7 & 10), temperature **τ = 0.1**:
+
+```
+w_n(r) = softmax_{n∈S}( ℓ_{n,r}(x_q) / τ )
+μ_T[r] = ( Σ_n w_n(r)·m_{n,r}/σ²_{n,r} ) / ( Σ_n w_n(r)/σ²_{n,r} )
+```
+
+Low τ means each pixel comes mostly from its single best-fitting concept (background pixels from
+the background concept, the stroke from the digit concept). We have no diffusion sampler, so the
+generated image is this PoE mean `μ_T`.
+
+## Baselines & metrics (paper §4.2)
+
+We evaluate the leftover-image cutoff at two thresholds — **PoE 99% / 90%** — plus a fixed
+**PoE K=3** ablation (the paper's choice), against **Top-1 / Top-3** nearest seen-class retrieval
+baselines. Per OOD class, generations are scored against two reference sets —
+**Faithfulness** (the query images) and **Generalization** (other held-out images of the class) —
+with **FID**, **CLIP** cosine, k-NN (k=3) **Precision/Recall/F1**, plus an attribute-classifier
+**joint accuracy**. Reported as mean ± SE over the 40 OOD classes.
 
 ## Outputs (`tests/moc/colormnist_output/`)
-- `summary.csv` — every metric (FID, CLIP, Precision, Recall, F1 for both reference sets,
-  plus an attribute-classifier joint accuracy) for each T and baseline.
-- **`metrics.png`** — the metrics as a **grouped bar chart**: one panel per metric
-  (FID↓, CLIP↑, Precision↑, Recall↑, F1↑), bars per method with **Faithfulness vs
-  Generalization** side by side and **±SE** error bars.
-- **`tau_sweep.png`** — the **temperature sweep**: F1 / joint and FID vs T, showing
-  accuracy peaking at T = 0 (per-pixel ownership) and degrading as T softens to averaging.
-- `methods.png` — each method's reconstruction of held-out queries.
-- `concepts.png` — the per-pixel PoE decomposition at T=0 (query · μ_T · the selected
-  concepts, labelled by the % of pixels each owns).
-- **`concepts/concepts_T{t}.png`** — the same decomposition **for each composition idea
-  in the sweep** (every T): the selection is shared, so the concept *set* is constant, but
-  each panel shows how that T blends them (% = pixels owned at T=0, mean weight at T>0).
-- `hierarchy.png` — the Cobweb concept hierarchy, mean image at each node, top-down (depth 3).
-- **`subtrees/subtree_*.png`** — for each leaf of the depth-3 hierarchy (a level-3 node),
-  its **subtree expanded 3 more levels** (mean image per node), so the structure below the
-  main view is visible.
 
-## Key finding
-The composition is faithful to the paper (selection Eqs. 8-9, composition Eq. 10); the
-decisive ingredient for Cobweb on raw pixels is the **hard temperature limit τ→0** of
-the per-dim PoE weighting — it roughly doubles compositional accuracy over the soft
-average by giving each pixel to its single best-fitting concept.
+- `summary.csv`, `metrics.png` — all metrics per method (Faithfulness vs Generalization).
+- `methods.png` — each method's reconstruction of held-out queries.
+- `concepts/concepts_{99,90,k3}.png` — per variant: query · μ_T · the selected concepts in
+  recovery order, labelled by tree depth and coverage-gain share ΣΔ.
+- `heatmaps/heatmaps_{99,90,k3}.png` — per variant: each concept's per-pixel donation `w_n(r)`.
+- `concept_depths.png` — selected-concept depth histogram (99% cutoff).
+- `nodes_explored.png` — **bar chart of mean nodes visited per query, by variant**.
+- `hierarchy.png`, `subtrees/` — the Cobweb concept hierarchy as mean images.
+
+The run prints per-query stats (at the 99% cutoff): average **K**, concept **depth**, and **nodes visited**.

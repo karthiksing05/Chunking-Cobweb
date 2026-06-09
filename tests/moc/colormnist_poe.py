@@ -1,49 +1,36 @@
 """
 ColorMNIST — Test-Time Compositional Generalization with Cobweb (Product-of-Experts)
 ====================================================================================
-Cobweb adaptation of Wang, Gupta, Zhu & MacLellan, "Test-Time Compositional
-Generalization in Diffusion Models via Concept Discovery" (2026).
+Cobweb version of Wang, Gupta, Zhu & MacLellan, "Test-Time Compositional Generalization
+in Diffusion Models via Concept Discovery" (2026).  The paper turns a pretrained DDPM
+into a hierarchy of Gaussian "concept" modes, picks a few that cover an OOD query, and
+multiplies them into a Product-of-Experts.  ColorMNIST in the paper is a 32x32 pixel
+DDPM (no autoencoder), so we do the same thing on RAW PIXELS with Cobweb as the hierarchy.
 
-The paper repurposes a pretrained diffusion model as a hierarchy of density modes:
-for an out-of-distribution query it discovers reusable concept prototypes, greedily
-selects relevant ones with a submodular coverage objective, and composes their local
-Gaussians into a Product-of-Experts (PoE).  Cobweb *is* such a hierarchy of Gaussian
-density modes — every node n is a diagonal-Gaussian expert  q_n(x)=N(m_n, Σ_n) with
-m_n=node.mean, σ²_{n,r}=sum_sq_r/count + prior_var (verified to match node.log_prob) —
-so we run the paper's discovery + composition directly on the Cobweb tree, in raw
-pixel space, with no diffusion model.
+Three steps:
 
-THE METHOD — two steps.  Concepts = Cobweb nodes (each a diagonal-Gaussian expert).
-The per-pixel expert log-likelihood is  ℓ_{n,r}(x) = log N(x_r; m_{n,r}, σ²_{n,r}).
+  1. CONCEPTS = Cobweb nodes.  Each node n is a diagonal Gaussian N(m_n, σ²_n) with
+     m_n = node.mean and σ²_{n,r} = sum_sq_r/count + prior_var.  Shallow nodes are broad
+     concepts (backgrounds), deep nodes are specific ones (a digit shape) — the paper's
+     coarse-to-fine mode hierarchy, for free.
 
-  (1) HOW WE SELECT THE CONCEPTS TO COMPOSE — TOP-DOWN discovery, then submodular pick
-        (a) DISCOVER candidates by descending the tree best-first (paper's modes-of-the-
-            marginal at multiple scales): priority = node posterior φ(n)=Σ_r ℓ_{n,r}(x)+log P(n);
-            expand a node only while a child raises φ, so each branch stops at its natural
-            granularity.  No static pool — candidates are gathered per query.  [search_candidates]
-        (b) PICK K by greedy submodular coverage F(S)=Σ_r max_{n∈S} ℓ_{n,r}(x) (paper Eqs. 8-9):
-            best singleton, then max marginal gain, until |S|=K(=6).            [submodular_select]
-        → the few concepts that, together, best explain the query (e.g. a background-colour
-          concept + a digit-shape+colour concept).
+  2. SELECT concepts with the paper's greedy argmax (Eq. 9) over a candidate POOL gathered from
+     the tree.  For each concept, best-first expand the tree by the coverage gain (Eqs. 8-9)
+     Δ(n) = Σ_r max(ℓ_{n,r}(x_q) − cur_r, 0) to a pool of ~3% of the nodes, then take the
+     global Δ-maximizer.  Folding the pick into cur RE-ROUTES the next concept's pool toward the
+     pixels still unexplained — so the background and the digit are found on different branches
+     (the Cobweb analog of the paper's modes from different noise levels).  HOW MANY concepts:
+     fixed K, or the leftover-image cutoff — stop once μ_T explains ≥99% of the query.
 
-  (2) HOW WE COMPOSE THEM — per-dim Product-of-Experts at the HARD limit (paper Eq. 10, τ→0)
-        the paper weights each concept per pixel  w_n(r) = softmax_{n∈S}(ℓ_{n,r}(x)/τ);
-        we take τ→0, which is per-pixel ownership:
-            μ_T[r] = m_{ argmax_{n∈S} ℓ_{n,r}(x) , r }
-        i.e. every pixel is copied from the SINGLE selected concept that best explains the
-        query at that pixel.                                   [code: poe_compose]
+  3. COMPOSE with the paper's product of Gaussians (Eqs. 7 & 10) at temperature τ=0.1:
+         w_n(r) = softmax_{n∈S}( ℓ_{n,r}(x_q)/τ )            (per-pixel concept weights)
+         μ_T[r] = (Σ_n w_n(r)·m_{n,r}/σ²_{n,r}) / (Σ_n w_n(r)/σ²_{n,r})
+     Low τ → each pixel comes mostly from its single best concept.  We have no diffusion
+     sampler, so the generated image is this PoE mean μ_T.
 
-The hard limit is the crux: soft averaging (τ=1) blends every concept on every pixel
-→ blurry, wrong (joint ≈ 27%); hard per-pixel ownership routes background pixels to the
-background-colour concept and the stroke to the digit-shape+colour concept → a sharp,
-correct held-out (digit, fg, bg) (joint ≈ 48%).
-
-Benchmark (paper §4.1): 32×32 RGB, 10 digits × 4 fg-colours × 4 bg-colours = 160
-slots, 120 SEEN by Cobweb / 40 held out as OOD (verified compositional split).
-Metrics (no diffusion sampler → adapted): attribute classifiers (digit/fg/bg) on the
-composed image → per-factor + JOINT accuracy ["did we produce the held-out combo?"],
-plus a generalization distance to other held-out class images (guards against the
-degenerate "just reconstruct the query" solution — which K=6 abstraction prevents).
+Benchmark (paper §4.1): 32x32 RGB, 10 digits × 4 fg × 4 bg = 160 slots, 120 seen / 40
+held-out OOD.  Baselines: Top-1 / Top-3 nearest seen-class retrieval.  Metrics: FID, CLIP,
+k-NN P/R/F1 vs Faithfulness (queries) and Generalization sets.
 """
 
 import os, csv
@@ -52,6 +39,7 @@ import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import torch, torchvision, torchvision.transforms as transforms
+import torch.nn.functional as F
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import LinearSVC
 
@@ -63,7 +51,13 @@ OUT_DIR  = os.path.join(HERE, "colormnist_output"); os.makedirs(OUT_DIR, exist_o
 DATA_DIR = os.path.join(HERE, "mnist_output", "data")            # reuse downloaded MNIST
 PRIOR_VAR = 0.05854983152                                        # CobwebContinuousTree default
 
-# ── Palettes (paper §4.1) ─────────────────────────────────────────────────────
+# ── Hyperparameters ───────────────────────────────────────────────────────────
+TAU      = 0.1     # per-coordinate softmax temperature (Eq. 10); low → sharp per-pixel ownership
+K_MAX    = 6       # safety cap on concepts per query
+EXPLAIN_FRAC = 0.99 # cutoff: keep adding concepts until the composed μ_T explains this fraction of
+                    # the query's content (R² vs the query mean) — i.e. until little leftover remains
+
+# ── Palettes (paper §4.1, Table 3) ────────────────────────────────────────────
 FG_COLORS = {"yellow":(0.93,0.90,0.20), "green":(0.30,0.80,0.35), "cyan":(0.30,0.82,0.88), "pink":(0.95,0.52,0.78)}
 BG_COLORS = {"deepred":(0.42,0.06,0.06), "navy":(0.05,0.10,0.38), "purple":(0.26,0.05,0.36), "brown":(0.30,0.19,0.06)}
 FG_NAMES, BG_NAMES = list(FG_COLORS), list(BG_COLORS)
@@ -98,15 +92,15 @@ def make_split(n_ood=40, tries=500):
 SEEN_SLOTS, OOD_SLOTS = make_split()
 print(f"Split: {len(SEEN_SLOTS)} seen / {len(OOD_SLOTS)} OOD")
 
-N_PER_SEEN, N_QUERY, N_GEN = 80, 20, 20     # per-class generated/faithful and generalization sizes
+N_PER_SEEN, N_QUERY, N_GEN = 80, 16, 16     # per-class generated/faithful and generalization sizes
 _cur = {d: 0 for d in range(10)}
 def take(d, k): i = _by_digit[d][_cur[d]:_cur[d] + k]; _cur[d] += k; return i
 
-X_train, dig_tr, fg_tr, bg_tr, _tr_gi = [], [], [], [], []
+X_train, dig_tr, fg_tr, bg_tr, slot_tr, _tr_gi = [], [], [], [], [], []
 for (d, f, b) in SEEN_SLOTS:
     for gi in take(d, N_PER_SEEN):
         X_train.append(render(GRAY[gi], f, b)); _tr_gi.append(int(gi))
-        dig_tr.append(d); fg_tr.append(FG_NAMES.index(f)); bg_tr.append(BG_NAMES.index(b))
+        dig_tr.append(d); fg_tr.append(FG_NAMES.index(f)); bg_tr.append(BG_NAMES.index(b)); slot_tr.append((d, f, b))
 X_train = np.asarray(X_train, np.float32); dig_tr = np.asarray(dig_tr); fg_tr = np.asarray(fg_tr); bg_tr = np.asarray(bg_tr)
 ood_queries, ood_genset, _ood_gi = {}, {}, []
 for (d, f, b) in OOD_SLOTS:
@@ -122,7 +116,7 @@ assert set(zip(dig_tr.tolist(), [FG_NAMES[i] for i in fg_tr], [BG_NAMES[i] for i
 assert set(_tr_gi).isdisjoint(set(_ood_gi))
 print("  ✓ verified: 120/40 disjoint, no combination or exemplar leakage")
 
-# ── Build the Cobweb tree on raw pixels ───────────────────────────────────────
+# ── Build the Cobweb tree on raw pixels (= the paper's density-mode hierarchy) ──
 print("Building Cobweb tree …")
 tree = CobwebContinuousTree(size=D, covar_from=1, num_labels=0); _empty = np.zeros(0, np.float32)
 for c, i in enumerate(RNG.permutation(len(X_train))):
@@ -137,108 +131,121 @@ def by_depth(root):
         for ch in n.children: q.append((ch, d + 1))
     return bd
 BD = by_depth(tree.root); print("  nodes/depth:", {d: len(v) for d, v in sorted(BD.items())})
+TREE_NODES = sum(len(v) for v in BD.values())
+BFS_BUDGET = int(0.03 * TREE_NODES)   # best-first candidate-pool size per concept (3% of tree)
+print(f"  tree nodes: {TREE_NODES}  (BFS pool budget = {BFS_BUDGET})")
 
-# ── Concept prototypes = Cobweb nodes (depths 1-6, well-supported) ────────────
-POE_DEPTHS, MIN_COUNT, POOL_CAP, POE_K = (1, 2, 3, 4, 5, 6), 15, 400, 12
-_cand = sorted([(d, n) for d in POE_DEPTHS for n in BD.get(d, []) if n.count >= MIN_COUNT],
-               key=lambda dn: dn[1].count, reverse=True)[:POOL_CAP]
-poe_nodes  = [n for _, n in _cand]; poe_depths = np.asarray([d for d, _ in _cand]); P = len(poe_nodes)
-proto_mean = np.stack([np.asarray(n.mean,   np.float32) for n in poe_nodes])
-proto_var  = np.stack([np.asarray(n.sum_sq, np.float32) / np.float32(n.count) for n in poe_nodes]) + np.float32(PRIOR_VAR)
-proto_logc = (-0.5 * np.log(2.0 * np.pi * proto_var)).astype(np.float32)
-proto_iv   = (0.5 / proto_var).astype(np.float32)
-print(f"  {P} concept prototypes")
-
-import heapq
-SEARCH_NCAND, SEARCH_MAXPOP = 250, 1500   # wide enough for best-first to reach cross-colour concepts
-_logN = np.log(float(tree.root.count))
 def _node_depth(n):
     d = 0; p = n.parent
     while p is not None: d += 1; p = p.parent
     return d
+
+# ── A Cobweb node as a clean-space diagonal-Gaussian concept ───────────────────
 def node_feats(node, x):
-    """A node as a diagonal-Gaussian expert: (mean, per-dim ℓ, ½·precision, posterior φ)."""
+    """(mean m_n, per-dim variance σ²_{n,r}, per-dim log-lik ℓ_{n,r}(x))."""
     m = np.asarray(node.mean, np.float32)
     v = np.asarray(node.sum_sq, np.float32) / np.float32(node.count) + np.float32(PRIOR_VAR)
     ll = -0.5 * np.log(2.0 * np.pi * v) - 0.5 * (x - m) ** 2 / v
-    return m, ll, (0.5 / v).astype(np.float32), float(ll.sum()) + np.log(float(node.count)) - _logN
+    return m, v, ll
 
-# ══ (1) SELECT — discover candidate concepts TOP-DOWN, then submodular-pick K ════
-def search_candidates(x, n_cand=SEARCH_NCAND, max_pop=SEARCH_MAXPOP, min_count=MIN_COUNT):
-    """Best-first DESCENT of the Cobweb tree — the analog of the paper's discovery of
-    density modes at multiple abstraction scales.  Priority = node posterior
-    φ(n)=Σ_r ℓ_{n,r}(x)+log P(n); a node's children are expanded only while a child
-    raises φ, so each branch stops at its natural granularity (φ-peak).  Collect the
-    well-supported nodes visited as the per-query candidate concepts (no static pool)."""
+def marginal_gain(ll, cur):
+    """Submodular coverage gain Δ = Σ_r max(ℓ_{n,r} − cur_r, 0) — credit only where this
+    concept beats the running coverage cur (paper Eqs. 8-9).  cur=None → Δ = Σ_r ℓ (singleton)."""
+    return float(ll.sum()) if cur is None else float(np.maximum(ll - cur, 0.0).sum())
+
+def absorb(cur, ll):
+    """Fold a picked concept into the running coverage: cur_r ← max(cur_r, ℓ_{n,r})."""
+    return ll.copy() if cur is None else np.maximum(cur, ll)
+
+def _poe_mu(M, V, L, tau):
+    """The PoE mean μ_T (Eqs. 7,10) for stacked concept feats (k,D)."""
+    if M.shape[0] == 1: return M[0]
+    w = np.exp((L - L.max(0, keepdims=True)) / tau); w /= w.sum(0, keepdims=True)
+    prec = (w / V).sum(0)
+    return (w * M / V).sum(0) / np.maximum(prec, 1e-12)
+
+# ══ (1) SELECT concepts by a best-first candidate pool (Wang et al. §3.2 on the tree) ══
+def select_concepts(x, record=None, fixed_k=None, explain_frac=EXPLAIN_FRAC, max_nodes=BFS_BUDGET, tau=TAU):
+    """For each concept (Wang's Eq. 9 argmax over a candidate pool): best-first expand the tree by
+    coverage gain  Δ(n) = Σ_r max(ℓ_{n,r}(x_q) − cur_r, 0) (Eqs. 8-9) — pop the max-Δ node, push
+    its children — up to a pool of `max_nodes` (~3% of the tree), then take the global Δ-maximizer
+    in that pool.  Folding the pick into cur RE-ROUTES the next concept's pool toward the pixels
+    still unexplained, so the background and the digit are found on different branches.
+    HOW MANY: `fixed_k`, else the leftover-image cutoff — stop once the composed μ_T explains
+    ≥ `explain_frac` of the query (R² vs its mean).  `record`: appends nodes visited."""
+    import heapq
     cache = {}
-    def f(n):
+    def feats(n):
         e = cache.get(id(n))
         if e is None: e = node_feats(n, x); cache[id(n)] = e
         return e
-    pq = [(-f(tree.root)[3], 0, tree.root)]; tie = 1; C = []; pop = 0
-    while pq and pop < max_pop and len(C) < n_cand:
-        _, _, node = heapq.heappop(pq); pop += 1
-        if node is not tree.root and node.count >= min_count: C.append(node)
-        kids = node.children
-        if kids and max(f(c)[3] for c in kids) > f(node)[3]:        # descend while φ still rises
-            for c in kids: heapq.heappush(pq, (-f(c)[3], tie, c)); tie += 1
-    if not C: C = [max(tree.root.children, key=lambda c: f(c)[3])]
-    M = np.stack([f(n)[0] for n in C]); L = np.stack([f(n)[1] for n in C]); IV = np.stack([f(n)[2] for n in C])
-    return C, M, L, IV
+    cur = None
+    def gain(n): return marginal_gain(feats(n)[2], cur)           # Δ given current coverage (residual)
+    chosen, gains, picked, Ms, Vs, Ls, explored = [], [], set(), [], [], [], 0
+    sstot = float(((x - x.mean()) ** 2).sum()) + 1e-12
+    for _ in range(fixed_k or K_MAX):
+        pq = [(-gain(tree.root), 0, tree.root)]; tie = 1           # best-first pool, max-Δ first
+        best_n, best_g, pop = None, 0.0, 0
+        while pq and pop < max_nodes:
+            _, _, n = heapq.heappop(pq); pop += 1
+            if n is not tree.root and id(n) not in picked:
+                g = gain(n)
+                if g > best_g: best_n, best_g = n, g
+            for c in n.children:
+                heapq.heappush(pq, (-gain(c), tie, c)); tie += 1
+        explored += pop
+        if best_n is None or best_g <= 1e-6: break                # leftover already covered
+        picked.add(id(best_n)); m, v, l = feats(best_n)
+        chosen.append(best_n); gains.append(best_g); Ms.append(m); Vs.append(v); Ls.append(l)
+        cur = absorb(cur, l)                                      # subtract it → re-route next pool
+        if fixed_k is None:                                       # leftover-image cutoff
+            mu = _poe_mu(np.stack(Ms), np.stack(Vs), np.stack(Ls), tau)
+            if 1.0 - float(((x - mu) ** 2).sum()) / sstot >= explain_frac: break
+    if record is not None: record.append(explored)
+    return [(p, *feats(p), g) for p, g in zip(chosen, gains)]      # (node, mean, var, ll, Δ-gain)
 
-def submodular_select(L, k):
-    """Greedy submodular coverage F(S)=Σ_r max_{n∈S} ℓ_{n,r} (paper Eqs. 8-9):
-    best singleton, then max marginal gain.  Returns indices into the candidate set."""
-    sing = L.sum(1); j0 = int(sing.argmax()); chosen, picked, cur = [j0], {j0}, L[j0].copy()
-    for _ in range(min(k, L.shape[0]) - 1):
-        g = np.maximum(L - cur[None, :], 0.0).sum(1)
-        for j in picked: g[j] = -np.inf
-        j = int(g.argmax())
-        if g[j] <= 0: break
-        chosen.append(j); picked.add(j); cur = np.maximum(cur, L[j])
-    return chosen
+# ══ (2) COMPOSE — per-pixel product of Gaussians (paper Eqs. 7, 10) ══
+def poe_compose(x, selector, tau=TAU):
+    """Select concepts, then compose them as the paper's PoE.  Returns (μ_T, nodes in recovery
+    order, per-pixel weights w, per-concept coverage gain Δ from selection)."""
+    sel = selector(x)
+    if not sel:
+        return x.copy(), [], np.zeros((0, D), np.float32), np.zeros(0, np.float32)
+    nodes = [s[0] for s in sel]; gains = np.asarray([s[4] for s in sel], np.float32)
+    M = np.stack([s[1] for s in sel]); V = np.stack([s[2] for s in sel]); L = np.stack([s[3] for s in sel])
+    if len(sel) == 1:
+        return M[0].astype(np.float32), nodes, np.ones((1, D), np.float32), gains
+    w = np.exp((L - L.max(0, keepdims=True)) / tau); w /= w.sum(0, keepdims=True)   # Eq. 10
+    return _poe_mu(M, V, L, tau).astype(np.float32), nodes, w, gains                # Eq. 7
 
-# ══ (2) COMPOSE — per-dim Product-of-Experts at the hard limit τ→0 (paper Eq. 10) ══
-def poe_compose(x, k=POE_K, tau=0.0, n_cand=SEARCH_NCAND, max_pop=SEARCH_MAXPOP, use_all=False):
-    """(1) discover candidate concepts top-down; (2) submodular-pick K (or use_all);
-    (3) compose by per-dim PoE weights w_n(r)=softmax(ℓ_{n,r}/τ).  tau→0 (default) =
-    per-pixel ownership: each pixel from the single selected concept that best explains
-    the query there.  Returns (mu_T, selected node objects, per-pixel weights w (K,d) —
-    one-hot at τ→0; w.mean(1) is each concept's share of the composition)."""
-    C, M, L, IV = search_candidates(x, n_cand, max_pop)
-    chosen = list(range(len(C))) if use_all else submodular_select(L, k)
-    nodes = [C[j] for j in chosen]; Ms = M[chosen]; Ls = L[chosen]; IVs = IV[chosen]
-    if tau <= 0:                                                        # τ→0: hard per-pixel ownership
-        own = Ls.argmax(0)                                             # which selected concept owns each pixel
-        w = np.zeros_like(Ls); w[own, np.arange(D)] = 1.0              # one-hot ownership map
-        return Ms[own, np.arange(D)].astype(np.float32), nodes, w
-    w = np.exp((Ls - Ls.max(0, keepdims=True)) / tau); w /= w.sum(0, keepdims=True)
-    mu = (w * IVs * Ms).sum(0) / (w * IVs).sum(0)
-    return mu.astype(np.float32), nodes, w
+# ── Baselines: nearest seen-class retrieval (paper §4.2 Top-k) ─────────────────
+# C = the 120 seen slots, each a diagonal Gaussian.  Top-1 = nearest class mean;
+# Top-3 = the per-pixel PoE of the 3 nearest classes.
+_slot_idx = {s: [i for i, ss in enumerate(slot_tr) if ss == s] for s in SEEN_SLOTS}
+CLASS_MEAN = np.stack([X_train[_slot_idx[s]].mean(0) for s in SEEN_SLOTS]).astype(np.float32)
+CLASS_VAR  = np.stack([X_train[_slot_idx[s]].var(0)  for s in SEEN_SLOTS]).astype(np.float32) + np.float32(PRIOR_VAR)
+_CLOGC = (-0.5 * np.log(2.0 * np.pi * CLASS_VAR)).astype(np.float32)
 
 def teacher_topk(x, k):
-    """Nearest-seen-prototype baseline (paper §4.2): rank the depth-1-6 pool by
-    singleton log-lik.  (The retrieval baseline scans a flat pool; our method navigates.)"""
-    sing = (proto_logc - proto_iv * (x[None, :] - proto_mean) ** 2).sum(1)
-    sel = np.argsort(-sing)[:k]
-    if k == 1: return proto_mean[sel[0]].copy()
-    w = np.exp(sing[sel] - sing[sel].max()); w /= w.sum(); iv = proto_iv[sel]
-    return ((w[:, None] * iv * proto_mean[sel]).sum(0) / (w[:, None] * iv).sum(0)).astype(np.float32)
+    L = _CLOGC - 0.5 * (x[None, :] - CLASS_MEAN) ** 2 / CLASS_VAR          # (120, D) per-dim ℓ
+    sel = np.argsort(-L.sum(1))[:k]
+    if k == 1: return CLASS_MEAN[sel[0]].copy()
+    Ls, M, V = L[sel], CLASS_MEAN[sel], CLASS_VAR[sel]
+    w = np.exp((Ls - Ls.max(0, keepdims=True)) / TAU); w /= w.sum(0, keepdims=True)
+    prec = (w / V).sum(0)
+    return ((w * M / V).sum(0) / np.maximum(prec, 1e-12)).astype(np.float32)
 
-# Temperature (T) sweep of the per-dim PoE composition.  Selection (top-down discovery
-# + submodular pick) is IDENTICAL across all T; only the composition changes:
-#   T = 0  → per-pixel ownership (hard limit, the method);  larger T → softer averaging.
-TAU_SWEEP = [0.0, 0.25, 0.5, 1.0, 2.0]
-METHODS = {f"T = {t:g}": (lambda x, t=t: poe_compose(x, tau=t)[0]) for t in TAU_SWEEP}
-METHODS["Top-1 retrieval"] = lambda x: teacher_topk(x, 1)                                    # nearest-seen-prototype baseline
-METHODS["Query-only"]      = lambda x: np.clip(x + 0.15 * RNG.standard_normal(D).astype(np.float32), 0, 1)  # N(x_q, σ²I) sample (paper §4.2)
+_ef = lambda f: (lambda y: select_concepts(y, explain_frac=f))  # leftover-image cutoff at fraction f
+_k3 = lambda y: select_concepts(y, fixed_k=3)                   # paper's fixed K=3
+METHODS = {
+    "PoE 99%":  lambda x: poe_compose(x, _ef(0.99))[0],         # leftover cutoff, explain ≥ 99%
+    "PoE 90%":  lambda x: poe_compose(x, _ef(0.90))[0],         # leftover cutoff, explain ≥ 90%
+    "PoE K=3":  lambda x: poe_compose(x, _k3)[0],              # fixed K=3 (paper's choice)
+    "Top-1":    lambda x: teacher_topk(x, 1),
+    "Top-3":    lambda x: teacher_topk(x, 3),
+}
 
 # ══ METRICS — exactly as in Wang et al. §4.2 ══════════════════════════════════
-# For each OOD class we score the generated images against two reference sets —
-# FAITHFULNESS (the query images) and GENERALIZATION (other held-out images of the
-# class) — with FID, CLIP image-image cosine, and k-NN (k=3) Precision/Recall/F1 in
-# Inception-V3 feature space.  Reported as mean ± SE over the 40 OOD classes.
-import torch.nn.functional as F
 from scipy.spatial.distance import cdist
 from torchvision.models import inception_v3, Inception_V3_Weights
 
@@ -270,17 +277,16 @@ except Exception as e:
     print("  CLIP unavailable:", e); HAVE_CLIP = False
 
 def fid(fr, fg):
-    """Exact 2048-d Fréchet Inception Distance via a low-rank (n×n) eigendecomposition
-    (avoids the 2048² matrix sqrt; valid for small per-class N)."""
+    """Exact 2048-d Fréchet Inception Distance via a low-rank (n×n) eigendecomposition."""
     mu1, mu2 = fr.mean(0), fg.mean(0); n, m = len(fr), len(fg)
     Mr, Mg = fr - mu1, fg - mu2
     trC1, trC2 = (Mr ** 2).sum() / (n - 1), (Mg ** 2).sum() / (m - 1)
-    K = Mr @ Mg.T                                            # (n, m)
-    ev = np.linalg.eigvalsh(K @ K.T) / ((n - 1) * (m - 1))   # nonzero eigenvalues of C1·C2
+    K = Mr @ Mg.T
+    ev = np.linalg.eigvalsh(K @ K.T) / ((n - 1) * (m - 1))
     tr_sqrt = np.sqrt(np.clip(ev, 0, None)).sum()
     return float(((mu1 - mu2) ** 2).sum() + trC1 + trC2 - 2 * tr_sqrt)
 def prec_recall(real, gen, k=3):                             # Kynkäänniemi k-NN P/R
-    def kth(Z): D = cdist(Z, Z); D.sort(1); return D[:, min(k, len(Z) - 1)]
+    def kth(Z): Dm = cdist(Z, Z); Dm.sort(1); return Dm[:, min(k, len(Z) - 1)]
     rr, rg = kth(real), kth(gen)
     P = float((cdist(gen, real) <= rr[None, :]).any(1).mean())
     R = float((cdist(real, gen) <= rg[None, :]).any(1).mean())
@@ -315,24 +321,63 @@ def evaluate(fn):
 RES = {m: evaluate(fn) for m, fn in METHODS.items()}
 def cell(mv): return f"{mv[0]:.1f}±{mv[1]:.1f}"
 print(f"\n  Paper metrics — mean±SE over {len(OOD_SLOTS)} OOD classes.   [F=Faithfulness, G=Generalization]")
-print(f"  {'Method':<20}{'FID-F↓':>11}{'FID-G↓':>11}{'CLIP-F↑':>10}{'CLIP-G↑':>10}{'F1-F↑':>9}{'F1-G↑':>9}{'joint↑':>8}")
-print("  " + "-" * 88)
+print(f"  {'Method':<16}{'FID-F↓':>11}{'FID-G↓':>11}{'CLIP-F↑':>10}{'CLIP-G↑':>10}{'F1-F↑':>9}{'F1-G↑':>9}{'joint↑':>8}")
+print("  " + "-" * 84)
 for m, R in RES.items():
     clF = cell(R['clF']) if HAVE_CLIP else "  n/a"; clG = cell(R['clG']) if HAVE_CLIP else "  n/a"
-    print(f"  {m:<20}{cell(R['fidF']):>11}{cell(R['fidG']):>11}{clF:>10}{clG:>10}"
+    print(f"  {m:<16}{cell(R['fidF']):>11}{cell(R['fidG']):>11}{clF:>10}{clG:>10}"
           f"{cell(R['f1F']):>9}{cell(R['f1G']):>9}{R['joint'][0]:>7.1f}%")
 with open(os.path.join(OUT_DIR, "summary.csv"), "w", newline="") as fcsv:
     cols = ["method","fidF","fidG","clF","clG","pF","rF","f1F","pG","rG","f1G","joint"]
-    w = csv.writer(fcsv); w.writerow([c + ("_mean") for c in cols])
+    w = csv.writer(fcsv); w.writerow([c + "_mean" for c in cols])
     for m, R in RES.items(): w.writerow([m] + [round(R[c][0], 3) if c in R else "" for c in cols[1:]])
 print(f"  summary → {os.path.join(OUT_DIR, 'summary.csv')}")
 
+# ── Per-variant search stats over all OOD queries: K, depth, nodes visited ──
+print("\n  Best-first pool selection — per-query stats by variant:")
+_VARIANTS = [("99%", dict(explain_frac=0.99), "#4878d0"), ("90%", dict(explain_frac=0.90), "#6acc65"),
+             ("K=3", dict(fixed_k=3), "#956cb4")]
+_K = {n: [] for n, _, _ in _VARIANTS}; _EXP = {n: [] for n, _, _ in _VARIANTS}; _DEPTH = {n: [] for n, _, _ in _VARIANTS}
+for s in OOD_SLOTS:
+    for x in ood_queries[s]:
+        for name, kw, _ in _VARIANTS:
+            nodes = [t[0] for t in select_concepts(x, record=_EXP[name], **kw)]
+            _K[name].append(len(nodes)); _DEPTH[name].extend(_node_depth(n) for n in nodes)
+_nq = len(_K["99%"])
+for name, _, _ in _VARIANTS:
+    print(f"    {name:<4} K mean {np.mean(_K[name]):.2f}  depth mean {np.mean(_DEPTH[name]):.2f}  "
+          f"nodes mean {np.mean(_EXP[name]):.0f} (min {min(_EXP[name])}, max {max(_EXP[name])})")
+
+# depth histogram (default 99% cutoff), highest → lowest depth
+_d99 = _DEPTH["99%"]; _dmin, _dmax = int(min(_d99)), int(max(_d99)); _bins = np.arange(_dmin, _dmax + 2) - 0.5
+fig, ax = plt.subplots(figsize=(9, 4.4))
+ax.hist(_d99, bins=_bins, color="#4878d0", alpha=0.85)
+ax.axvline(np.mean(_d99), color="k", ls="--", lw=1, label=f"mean {np.mean(_d99):.1f}")
+ax.set_xticks(range(_dmin, _dmax + 1)); ax.invert_xaxis()
+ax.set_xlabel("Cobweb tree depth of selected concept  (deeper/leaf ← → shallower/root)")
+ax.set_ylabel(f"count over {_nq} OOD queries × selected concepts")
+ax.set_title("Depth of selected concepts (99% cutoff, all 40×16 OOD queries)")
+ax.legend(); ax.grid(axis="y", alpha=0.3)
+plt.tight_layout(); plt.savefig(os.path.join(OUT_DIR, "concept_depths.png"), dpi=130, bbox_inches="tight"); plt.close()
+print(f"    depth histogram → {os.path.join(OUT_DIR, 'concept_depths.png')}")
+
+# nodes-visited bar chart: mean nodes per query, by variant
+_names = [n for n, _, _ in _VARIANTS]; _cols = [c for _, _, c in _VARIANTS]
+_means = [np.mean(_EXP[n]) for n in _names]
+fig, ax = plt.subplots(figsize=(7, 4.4))
+bars = ax.bar(_names, _means, color=_cols)
+for b, m in zip(bars, _means): ax.text(b.get_x() + b.get_width()/2, m, f"{m:.0f}", ha="center", va="bottom", fontsize=9)
+ax.set_ylabel(f"mean tree nodes visited per query (over {_nq} OOD queries)")
+ax.set_xlabel("variant")
+ax.set_title("Search effort — average nodes visited per query, by variant")
+ax.grid(axis="y", alpha=0.3)
+plt.tight_layout(); plt.savefig(os.path.join(OUT_DIR, "nodes_explored.png"), dpi=130, bbox_inches="tight"); plt.close()
+print(f"    nodes-visited histogram (all variants) → {os.path.join(OUT_DIR, 'nodes_explored.png')}")
+
 # ── Metrics bar chart — paper metrics by method, Faithfulness vs Generalization ─
-# One panel per metric (FID↓, CLIP↑, Precision↑, Recall↑, F1↑); grouped bars per
-# method with SE error bars; FID is on its own axis (≫1), the rest are in [0,1].
 _panels = [("FID ↓", "fidF", "fidG"), ("CLIP ↑", "clF", "clG"), ("Precision ↑", "pF", "pG"),
            ("Recall ↑", "rF", "rG"), ("F1 ↑", "f1F", "f1G")]
-_panels = [p for p in _panels if p[1] in RES[next(iter(RES))]]      # drop CLIP if unavailable
+_panels = [p for p in _panels if p[1] in RES[next(iter(RES))]]
 _mlabels = list(RES); _x = np.arange(len(_mlabels)); _w = 0.38
 fig, axes = plt.subplots(1, len(_panels), figsize=(len(_panels) * 3.0, 4.2))
 for ax, (title, kf, kg) in zip(axes, _panels):
@@ -343,27 +388,9 @@ for ax, (title, kf, kg) in zip(axes, _panels):
     ax.set_title(title, fontsize=10); ax.set_xticks(_x)
     ax.set_xticklabels([m.replace(" ", "\n", 1) for m in _mlabels], rotation=30, ha="right", fontsize=6)
     ax.grid(axis="y", alpha=0.3); ax.legend(fontsize=6)
-fig.suptitle("ColorMNIST OOD — Wang et al. metrics by method (mean ± SE over 40 OOD classes)", fontsize=11)
+fig.suptitle("ColorMNIST OOD — metrics by method (mean ± SE over 40 OOD classes)", fontsize=11)
 plt.tight_layout(rect=[0, 0, 1, 0.96]); plt.savefig(os.path.join(OUT_DIR, "metrics.png"), dpi=130, bbox_inches="tight"); plt.close()
 print(f"  metrics chart → {os.path.join(OUT_DIR, 'metrics.png')}")
-
-# ── Temperature (T) sweep — metrics vs composition temperature ────────────────
-_sw = [f"T = {t:g}" for t in TAU_SWEEP]
-fig, (axL, axR) = plt.subplots(1, 2, figsize=(11, 4.2))
-for key, lab, c in [("f1F", "F1 Faithful", "#4878d0"), ("f1G", "F1 General", "#ee854a"), ("joint", "joint/100", "#6acc65")]:
-    sc = 100.0 if key == "joint" else 1.0
-    ys = [RES[n][key][0] / sc for n in _sw]; es = [RES[n][key][1] / sc for n in _sw]
-    axL.errorbar(TAU_SWEEP, ys, yerr=es, marker="o", capsize=2, label=lab, color=c)
-axL.set_xlabel("T (PoE composition temperature)"); axL.set_ylabel("score ↑"); axL.set_title("F1 / joint vs T")
-axL.legend(fontsize=8); axL.grid(alpha=0.3)
-for key, lab, c in [("fidF", "FID Faithful", "#4878d0"), ("fidG", "FID General", "#ee854a")]:
-    ys = [RES[n][key][0] for n in _sw]; es = [RES[n][key][1] for n in _sw]
-    axR.errorbar(TAU_SWEEP, ys, yerr=es, marker="o", capsize=2, label=lab, color=c)
-axR.set_xlabel("T (PoE composition temperature)"); axR.set_ylabel("FID ↓"); axR.set_title("FID vs T")
-axR.legend(fontsize=8); axR.grid(alpha=0.3)
-fig.suptitle("ColorMNIST OOD — PoE temperature sweep  (T=0 = per-pixel ownership → larger T = softer averaging)", fontsize=11)
-plt.tight_layout(rect=[0, 0, 1, 0.95]); plt.savefig(os.path.join(OUT_DIR, "tau_sweep.png"), dpi=130, bbox_inches="tight"); plt.close()
-print(f"  τ-sweep chart → {os.path.join(OUT_DIR, 'tau_sweep.png')}")
 
 # ── Figures ───────────────────────────────────────────────────────────────────
 def show(ax, vec, title=None, ylabel=None):
@@ -384,35 +411,69 @@ for r, (d, f, b) in enumerate(show_slots):
 plt.tight_layout(rect=[0, 0, 1, 0.97]); plt.savefig(os.path.join(OUT_DIR, "methods.png"), dpi=130, bbox_inches="tight"); plt.close()
 print(f"  methods figure → {os.path.join(OUT_DIR, 'methods.png')}")
 
-# (2) concept decomposition, PER METHOD (per T): query · μ_T · the concepts that
-#     compose it, ordered by each concept's share (pixels owned at T=0; mean weight at T>0).
-SHOW_CONCEPTS = min(POE_K, 8)
-def render_concepts(tau, out_path, title):
-    fig, axes = plt.subplots(N_SHOW, 2 + SHOW_CONCEPTS, figsize=((2 + SHOW_CONCEPTS) * 1.5, N_SHOW * 1.55))
+# (2) concept decomposition: query · μ_T · the concepts that compose it, in RECOVERY ORDER
+#     (concept 1 = first picked).  %=each concept's share of the total coverage gain Σ Δ —
+#     the contribution to the marginal that the selection heuristic actually used.  Columns
+#     are sized to the most concepts any shown query uses (no wasted whitespace).
+def _share(gains):
+    g = np.asarray(gains, np.float32); s = g.sum()
+    return g / s if len(g) and s > 0 else np.zeros(len(g), np.float32)
+
+def _gather(selector):
+    rows = []
+    for (d, f, b) in show_slots:
+        x = ood_queries[(d, f, b)][0]; mu, nodes, w, gains = poe_compose(x, selector)
+        rows.append((x, d, f, b, mu, nodes, w, gains))
+    ncol = max((len(r[5]) for r in rows), default=1)
+    return rows, ncol
+
+def render_concepts(selector, out_path, title):
+    rows, ncol = _gather(selector)
+    fig, axes = plt.subplots(N_SHOW, 2 + ncol, figsize=((2 + ncol) * 1.6, N_SHOW * 1.55), squeeze=False)
     fig.suptitle(title, fontsize=10)
-    for r, (d, f, b) in enumerate(show_slots):
-        x = ood_queries[(d, f, b)][0]; mu, nodes, w = poe_compose(x, tau=tau)
-        contrib = w.mean(1)                                            # each concept's share of the composition
+    for r, (x, d, f, b, mu, nodes, w, gains) in enumerate(rows):
+        contrib = _share(gains)
         show(axes[r, 0], x, "query" if r == 0 else None, f"{d}/{f}/{b}")
         show(axes[r, 1], mu, "μ_T" if r == 0 else None)
-        order = np.argsort(-contrib)
-        for c in range(SHOW_CONCEPTS):
+        for c in range(ncol):
             ax = axes[r, 2 + c]; ax.axis("off")
-            if c < len(order):
-                i = int(order[c]); nd = nodes[i]
-                show(ax, np.asarray(nd.mean, np.float32), f"d{_node_depth(nd)}·{100*contrib[i]:.0f}%")
+            if c < len(nodes):
+                nd = nodes[c]
+                show(ax, np.asarray(nd.mean, np.float32), f"d{_node_depth(nd)}·{100*contrib[c]:.0f}%")
     plt.tight_layout(rect=[0, 0, 1, 0.96]); plt.savefig(out_path, dpi=130, bbox_inches="tight"); plt.close()
 
-render_concepts(0.0, os.path.join(OUT_DIR, "concepts.png"),
-                f"Per-pixel PoE decomposition (T=0) — query · μ_T · top {SHOW_CONCEPTS} of K={POE_K} concepts "
-                f"(d=tree depth, %=pixels owned)")
-print(f"  concepts figure → {os.path.join(OUT_DIR, 'concepts.png')}")
-CONC_DIR = os.path.join(OUT_DIR, "concepts"); os.makedirs(CONC_DIR, exist_ok=True)
-for t in TAU_SWEEP:                                                    # concepts for each composition idea (T)
-    render_concepts(t, os.path.join(CONC_DIR, f"concepts_T{t:g}.png"),
-                    f"PoE concept decomposition at T={t:g} — query · μ_T · top {SHOW_CONCEPTS} concepts "
-                    f"(% = concept share: pixels owned at T=0, mean weight at T>0)")
-print(f"  per-T concept figures → {CONC_DIR}/")
+# (2b) donation heatmaps: per concept, the per-coordinate composition weight w_n(r) it donates
+#      (reshaped to 32×32, averaged over channels); %label = share of coverage gain ΣΔ.
+def render_heatmaps(selector, out_path, title):
+    rows, ncol = _gather(selector)
+    fig, axes = plt.subplots(N_SHOW, 2 + ncol, figsize=((2 + ncol) * 1.6, N_SHOW * 1.55), squeeze=False)
+    fig.suptitle(title, fontsize=10); im = None
+    for r, (x, d, f, b, mu, nodes, w, gains) in enumerate(rows):
+        contrib = _share(gains)
+        show(axes[r, 0], x, "query" if r == 0 else None, f"{d}/{f}/{b}")
+        show(axes[r, 1], mu, "μ_T" if r == 0 else None)
+        for c in range(ncol):
+            ax = axes[r, 2 + c]; ax.set_xticks([]); ax.set_yticks([])
+            if c < len(nodes):
+                heat = w[c].reshape(IMG, IMG, 3).mean(2)
+                im = ax.imshow(heat, cmap="magma", vmin=0.0, vmax=1.0)
+                ax.set_xlabel(f"d{_node_depth(nodes[c])}·{100*contrib[c]:.0f}%", fontsize=6)
+                if r == 0: ax.set_title(f"concept {c+1}", fontsize=8)
+            else:
+                ax.axis("off")
+    if im is not None: fig.colorbar(im, ax=axes, fraction=0.012, pad=0.01, label="per-coord weight w_n(r)")
+    plt.savefig(out_path, dpi=130, bbox_inches="tight"); plt.close()
+
+# concepts + heatmaps per PoE variant, saved to subdirectories
+CDIR = os.path.join(OUT_DIR, "concepts"); HDIR = os.path.join(OUT_DIR, "heatmaps")
+os.makedirs(CDIR, exist_ok=True); os.makedirs(HDIR, exist_ok=True)
+for _suf, _sel, _lab in [("99", _ef(0.99), "explain ≥ 99%"), ("90", _ef(0.90), "explain ≥ 90%"),
+                          ("k3", _k3, "fixed K=3")]:
+    render_concepts(_sel, os.path.join(CDIR, f"concepts_{_suf}.png"),
+                    f"PoE decomposition ({_lab}) — query · μ_T · concepts in recovery order (d=tree depth, %=share of coverage gain ΣΔ)")
+    render_heatmaps(_sel, os.path.join(HDIR, f"heatmaps_{_suf}.png"),
+                    f"Concept donation heatmaps ({_lab}) — query · μ_T · per-coord weight w_n(r) (Eq. 10, τ={TAU}); %=share of coverage gain ΣΔ")
+print(f"  concepts → {CDIR}/  ·  heatmaps → {HDIR}/  (variants: 99, 90, k3)")
 
 # (3) concept hierarchy: mean image at each node, top-down — plus level-3 subtrees
 HIER_TOP = 6; _cmap = plt.get_cmap("tab10")
@@ -425,11 +486,9 @@ def greedy_counts(root, Xs, ys, maxd):
             if not n.children or dd == maxd: break
             n = max(n.children, key=lambda c: c.log_prob(xx, _empty))
     return counts
-NODE_COUNTS = greedy_counts(tree.root, X_train, dig_tr, 6)              # to depth 6 (covers subtrees)
+NODE_COUNTS = greedy_counts(tree.root, X_train, dig_tr, 6)
 
 def render_hierarchy(root_node, out_path, title, max_depth=3, top_children=HIER_TOP):
-    """Render root_node + max_depth levels of its top-count children as a mean-image tree.
-    Returns the nodes at the deepest displayed level."""
     def dch(n, d): return sorted(n.children, key=lambda c: c.count, reverse=True)[:top_children] if d < max_depth else []
     def span(n, d):
         ch = dch(n, d); return 1 if not ch else sum(span(c, d + 1) for c in ch)
@@ -469,7 +528,6 @@ def render_hierarchy(root_node, out_path, title, max_depth=3, top_children=HIER_
 level3 = render_hierarchy(tree.root, os.path.join(OUT_DIR, "hierarchy.png"),
                           "Cobweb concept hierarchy — mean image per node (top-down, depth 3, top 6 children)", 3)
 print(f"  hierarchy figure → {os.path.join(OUT_DIR, 'hierarchy.png')}")
-# level-3 subtrees: 3 levels deep, rooted at each leaf of the depth-3 hierarchy
 SUB_DIR = os.path.join(OUT_DIR, "subtrees"); os.makedirs(SUB_DIR, exist_ok=True)
 _nsub = 0
 for i, node in enumerate(level3):

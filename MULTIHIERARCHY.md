@@ -11,7 +11,7 @@ Start forays into other forms of chunking, with different discrete relations!!
 Immediate domain ideas:
 *   Context-sensitive grammar - where context needs to be attributed to define how elements are grouped or split up
     *   This may warrant the need for a different kind of generalized framework!
-*   Chess - more discrete relations and no distinct notion of content / context!!! Can do spatial awareness by demonstrating!!
+*   Chess - more discrete relations and no distinct notion of content / context!!! Can do spatial awareness by demonstrating this application!
 
 ## Methodology 6
 
