@@ -49,7 +49,7 @@ from cobweb.cu_cobweb_continuous import CUCobwebContinuousTree
 # ── Paths ─────────────────────────────────────────────────────────────────────
 HERE     = os.path.dirname(os.path.abspath(__file__))
 OUT_DIR  = os.path.join(HERE, "mnist_output")
-DATA_DIR = os.path.join(OUT_DIR, "data")
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data"); os.makedirs(DATA_DIR, exist_ok=True)  # shared root-level data/
 ARR_DIR  = os.path.join(OUT_DIR, "arrays")
 for _d in (OUT_DIR, DATA_DIR, ARR_DIR):
     os.makedirs(_d, exist_ok=True)

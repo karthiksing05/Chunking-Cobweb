@@ -7,7 +7,7 @@ multiplies them into a **Product-of-Experts (PoE)**. ColorMNIST in the paper is 
 **pixel-space** DDPM (no autoencoder), so we run the same pipeline on **raw pixels** with Cobweb
 standing in for the diffusion model.
 
-Implementation: `tests/moc/colormnist_poe.py`.
+Implementation: `tests/poe/colormnist_poe.py`.
 
 ## The method in three steps
 
@@ -66,7 +66,7 @@ baselines. Per OOD class, generations are scored against two reference sets —
 with **FID**, **CLIP** cosine, k-NN (k=3) **Precision/Recall/F1**, plus an attribute-classifier
 **joint accuracy**. Reported as mean ± SE over the 40 OOD classes.
 
-## Outputs (`tests/moc/colormnist_output/`)
+## Outputs (`tests/poe/colormnist_output/`)
 
 - `summary.csv`, `metrics.png` — all metrics per method (Faithfulness vs Generalization).
 - `methods.png` — each method's reconstruction of held-out queries.
@@ -80,7 +80,7 @@ with **FID**, **CLIP** cosine, k-NN (k=3) **Precision/Recall/F1**, plus an attri
 
 The run prints per-query stats (at the 99% cutoff): average **K**, concept **depth**, and **nodes visited**.
 
-## Primitive discovery — pixels the PoE donates together (`poe_primitives.py`)
+## Primitive discovery — pixels the PoE donates together
 
 A follow-on analysis that asks: across all compositions, which **groups of pixels behave as reusable
 parts**? We run the **PoE 90%** selection over all 640 OOD queries and record, for every selected
@@ -98,7 +98,7 @@ primitive at the coarsest split, with the digit refining into concentric **strok
 (interior → stroke band → outline) as the tree deepens — purely from co-donation statistics, never
 told where the digit is.
 
-Outputs (`tests/moc/colormnist_output/primitives/`):
+Outputs (`tests/poe/colormnist_output/primitives/`):
 - `pixel_correlation_regions.png` — pixels colored by Cobweb region at depths 1/2/3 (2 → 4 → 8 regions).
 - `pixel_correlation_matrix.png` — the cross-correlation `R`, pixels reordered by region (shows the
   background/digit blocks).

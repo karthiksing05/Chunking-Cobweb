@@ -5,6 +5,11 @@ __pycache__
 
 .claude
 
+data/celeba
+data/cifar-10-batches-py
+data/FashionMNIST
+data/MNIST
+
 tests/moc/mnist_output/
 tests/moc/cifar_output/
 tests/moc/celeba_output/
@@ -19,6 +24,10 @@ tests/cu_cobweb/mnist_output
 tests/cu_cobweb/grammar_output
 tests/cu_cobweb/grammar_chunking_output
 
+tests/poe/colormnist_output
+tests/poe/fashionmnist_output
+tests/poe/mnist_output
+
 postulates.tex
 
 # acs-26 / tests/ debug log dumps — PMI / categorization spam from
@@ -27,3 +36,5 @@ postulates.tex
 tests/**/*.log
 tests/**/diag_*.log
 confs/**/*.log
+# dataset tarballs (too large for git)
+data/*.tar.gz

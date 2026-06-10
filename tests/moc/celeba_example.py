@@ -42,7 +42,7 @@ from cobweb.cobweb_continuous import CobwebContinuousTree
 
 HERE     = os.path.dirname(os.path.abspath(__file__))
 OUT_DIR  = os.path.join(HERE, "celeba_output")
-DATA_DIR = os.path.join(OUT_DIR, "data")
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data"); os.makedirs(DATA_DIR, exist_ok=True)  # shared root-level data/
 ARR_DIR  = os.path.join(OUT_DIR, "arrays")
 os.makedirs(OUT_DIR,  exist_ok=True)
 os.makedirs(DATA_DIR, exist_ok=True)

@@ -1,10 +1,10 @@
 """
-ColorMNIST — Test-Time Compositional Generalization with Cobweb (Product-of-Experts)
+FashionMNIST — Test-Time Compositional Generalization with Cobweb (Product-of-Experts)
 ====================================================================================
 Cobweb version of Wang, Gupta, Zhu & MacLellan, "Test-Time Compositional Generalization
 in Diffusion Models via Concept Discovery" (2026).  The paper turns a pretrained DDPM
 into a hierarchy of Gaussian "concept" modes, picks a few that cover an OOD query, and
-multiplies them into a Product-of-Experts.  ColorMNIST in the paper is a 32x32 pixel
+multiplies them into a Product-of-Experts.  FashionMNIST in the paper is a 32x32 pixel
 DDPM (no autoencoder), so we do the same thing on RAW PIXELS with Cobweb as the hierarchy.
 
 Three steps:
@@ -47,8 +47,8 @@ from cobweb.cobweb_continuous import CobwebContinuousTree
 
 RNG = np.random.default_rng(0)
 HERE     = os.path.dirname(os.path.abspath(__file__))
-OUT_DIR  = os.path.join(HERE, "colormnist_output"); os.makedirs(OUT_DIR, exist_ok=True)
-DATA_DIR = os.path.join(HERE, "mnist_output", "data")            # reuse downloaded MNIST
+OUT_DIR  = os.path.join(HERE, "fashionmnist_output"); os.makedirs(OUT_DIR, exist_ok=True)
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data"); os.makedirs(DATA_DIR, exist_ok=True)  # shared root-level data/
 PRIOR_VAR = 0.05854983152                                        # CobwebContinuousTree default
 
 # ── Hyperparameters ───────────────────────────────────────────────────────────
@@ -63,9 +63,9 @@ BG_COLORS = {"deepred":(0.42,0.06,0.06), "navy":(0.05,0.10,0.38), "purple":(0.26
 FG_NAMES, BG_NAMES = list(FG_COLORS), list(BG_COLORS)
 IMG = 32; D = IMG * IMG * 3
 
-# ── Render ColorMNIST ─────────────────────────────────────────────────────────
+# ── Render FashionMNIST ─────────────────────────────────────────────────────────
 transform = transforms.ToTensor()
-trainset = torchvision.datasets.MNIST(root=DATA_DIR, train=True, download=True, transform=transform)
+trainset = torchvision.datasets.FashionMNIST(root=DATA_DIR, train=True, download=True, transform=transform)
 _imgs, _lbls = next(iter(torch.utils.data.DataLoader(trainset, batch_size=20000, shuffle=False)))
 GRAY, GLAB = _imgs.squeeze(1).numpy(), _lbls.numpy()
 _by_digit = {d: np.where(GLAB == d)[0] for d in range(10)}
@@ -408,7 +408,7 @@ for ax, (title, kf, kg) in zip(axes, _panels):
     ax.set_title(title, fontsize=10); ax.set_xticks(_x)
     ax.set_xticklabels([m.replace(" ", "\n", 1) for m in _mlabels], rotation=30, ha="right", fontsize=6)
     ax.grid(axis="y", alpha=0.3); ax.legend(fontsize=6)
-fig.suptitle("ColorMNIST OOD — metrics by method (mean ± SE over 40 OOD classes)", fontsize=11)
+fig.suptitle("FashionMNIST OOD — metrics by method (mean ± SE over 40 OOD classes)", fontsize=11)
 plt.tight_layout(rect=[0, 0, 1, 0.96]); plt.savefig(os.path.join(OUT_DIR, "metrics.png"), dpi=130, bbox_inches="tight"); plt.close()
 print(f"  metrics chart → {os.path.join(OUT_DIR, 'metrics.png')}")
 
@@ -422,7 +422,7 @@ N_SHOW = min(10, len(OOD_SLOTS)); show_slots = [OOD_SLOTS[i] for i in np.linspac
 # (1) method comparison
 cols = list(METHODS)
 fig, axes = plt.subplots(N_SHOW, 1 + len(cols), figsize=((1+len(cols)) * 1.6, N_SHOW * 1.6))
-fig.suptitle("ColorMNIST OOD composition — held-out (digit, fg, bg) query reconstructed by each method", fontsize=11)
+fig.suptitle("FashionMNIST OOD composition — held-out (digit, fg, bg) query reconstructed by each method", fontsize=11)
 for r, (d, f, b) in enumerate(show_slots):
     x = ood_queries[(d, f, b)][0]
     show(axes[r, 0], x, "query" if r == 0 else None, f"{d}/{f}/{b}")
@@ -557,4 +557,137 @@ for i, node in enumerate(level3):
                      f"Level-3 subtree (3 levels deep) — root n={int(node.count)}, dominant digit {dom}", 3)
     _nsub += 1
 print(f"  {_nsub} level-3 subtrees → {SUB_DIR}/")
+
+# ════════════════════════════════════════════════════════════════════════════════
+# PRIMITIVE DISCOVERY — pixels the PoE donates together (90% variant).  Gather every
+# composed concept's donation heatmap, correlate pixels by donation profile, and group
+# them with Cobweb to reveal reusable spatial primitives.
+# ════════════════════════════════════════════════════════════════════════════════
+PRIM = os.path.join(OUT_DIR, "primitives"); os.makedirs(PRIM, exist_ok=True)
+NP = IMG * IMG   # 1024 spatial pixels
+
+print("Gathering PoE donation heatmaps over all OOD queries (90% cutoff) …")
+sel90 = lambda y: select_concepts(y, explain_frac=0.90)
+MAPS = []                                                    # one (NP,) heatmap per composed concept
+for s in OOD_SLOTS:
+    for x in ood_queries[s]:
+        mu, nodes, w, gains = poe_compose(x, sel90)
+        for k in range(len(w)):
+            MAPS.append(w[k].reshape(IMG, IMG, 3).mean(2).reshape(NP))   # channel-avg donation heatmap
+MAPS = np.ascontiguousarray(MAPS, np.float32)
+print(f"  {len(MAPS)} donation heatmaps")
+
+_mag = plt.get_cmap("magma")
+SUB = os.path.join(PRIM, "subtrees"); os.makedirs(SUB, exist_ok=True)
+
+# ── Pixel cross-correlation → regions ──────────────────────────────────────────
+# Correlate every pixel's donation profile (its value across all heatmaps) with every
+# other pixel, then group pixels into regions with Cobweb.  Each region = a set of pixels
+# that the PoE tends to donate together — a spatial "primitive".
+print("Pixel cross-correlation regions …")
+def _nodes_at_depth(root, depth):
+    cur = [root]
+    for _ in range(depth):
+        nxt = [c for n in cur for c in n.children]
+        if not nxt: break
+        cur = nxt
+    return cur
+def cobweb_pixel_regions(R, depth):
+    t = CobwebContinuousTree(size=R.shape[1], covar_from=1, num_labels=0)
+    for i in RNG.permutation(len(R)): t.ifit(np.ascontiguousarray(R[i]), _empty)
+    nodes = _nodes_at_depth(t.root, depth)
+    if len(nodes) < 2: nodes = list(t.root.children)
+    if len(nodes) < 2: return np.zeros(len(R), int), 1
+    lab = np.array([int(np.argmax([nd.log_prob(np.ascontiguousarray(r), _empty) for nd in nodes])) for r in R])
+    uniq = sorted(set(lab.tolist())); remap = {u: i for i, u in enumerate(uniq)}
+    return np.array([remap[l] for l in lab]), len(uniq)
+
+R = np.corrcoef(MAPS.T.astype(np.float64))                   # (NP,NP) pixel cross-correlation
+R = np.nan_to_num(R, nan=0.0).astype(np.float32)             # constant pixels → 0 correlation
+from matplotlib.colors import ListedColormap
+_others = [plt.get_cmap("tab20")(i) for i in range(20) if i not in (0, 1)] + list(plt.get_cmap("tab20b").colors)
+_PAL = ListedColormap([(0.23, 0.43, 0.69)] + _others)        # index 0 = background blue, rest distinct
+def _bg_first(lab):                                          # relabel so the corner (background) cluster = 0
+    bg = lab[0]; remap = {bg: 0}; nxt = 1
+    for l in sorted(set(lab.tolist())):
+        if l != bg: remap[l] = nxt; nxt += 1
+    return np.array([remap[l] for l in lab])
+fig, axes = plt.subplots(1, 4, figsize=(14, 3.6))
+order = None
+for ax, depth in [(axes[0], 1), (axes[1], 2), (axes[2], 3), (axes[3], 4)]:
+    lab, nc = cobweb_pixel_regions(R, depth); lab = _bg_first(lab)
+    if depth == 2: order = np.argsort(lab)                   # reorder corr matrix by depth-2 regions (next panel)
+    ax.imshow(lab.reshape(IMG, IMG), cmap=_PAL, vmin=0, vmax=len(_PAL.colors) - 1)
+    ax.set_xticks([]); ax.set_yticks([])
+    ax.set_title(f"Cobweb depth-{depth}\n{nc} regions", fontsize=10)
+fig.suptitle("PoE pixel primitives (90%) — pixels grouped by donation cross-correlation (a region = pixels donated together)", fontsize=10)
+plt.tight_layout(rect=[0, 0, 1, 0.93]); plt.savefig(os.path.join(PRIM, "pixel_correlation_regions.png"), dpi=130, bbox_inches="tight"); plt.close()
+print(f"  pixel-correlation regions → {os.path.join(PRIM, 'pixel_correlation_regions.png')}")
+
+# the cross-correlation matrix itself, reordered by region for visible block structure
+fig, ax = plt.subplots(figsize=(5, 4.6))
+im = ax.imshow(R[np.ix_(order, order)], cmap="coolwarm", vmin=-1, vmax=1)
+ax.set_xticks([]); ax.set_yticks([]); ax.set_title("Pixel donation cross-correlation\n(pixels ordered by region)", fontsize=10)
+fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04, label="correlation")
+plt.tight_layout(); plt.savefig(os.path.join(PRIM, "pixel_correlation_matrix.png"), dpi=130, bbox_inches="tight"); plt.close()
+print(f"  cross-correlation matrix → {os.path.join(PRIM, 'pixel_correlation_matrix.png')}")
+
+# ── hierarchy of the cross-correlation: each node = the region of pixels routed to it ──
+print("Building Cobweb hierarchy over pixel cross-correlation …")
+rtree = CobwebContinuousTree(size=NP, covar_from=1, num_labels=0)
+for i in RNG.permutation(NP): rtree.ifit(np.ascontiguousarray(R[i]), _empty)
+
+def render_region_hierarchy(root, out_path, title, max_depth=4, top_children=6, root_idxs=None):
+    _disp = {}
+    def dch(n, d):
+        if d >= max_depth: return []
+        if id(n) not in _disp: _disp[id(n)] = sorted(n.children, key=lambda c: c.count, reverse=True)[:top_children]
+        return _disp[id(n)]
+    member = {}; deepest = []                                # id(node) -> list of pixel indices routed to it
+    def assign_members(n, d, idxs):
+        member[id(n)] = idxs; ch = dch(n, d)
+        if not ch or not idxs: return
+        lp = np.array([[c.log_prob(np.ascontiguousarray(R[p]), _empty) for c in ch] for p in idxs])
+        best = lp.argmax(1)
+        for ci, c in enumerate(ch): assign_members(c, d + 1, [idxs[j] for j in range(len(idxs)) if best[j] == ci])
+    assign_members(root, 0, list(range(NP)) if root_idxs is None else list(root_idxs))
+    def span(n, d):
+        ch = dch(n, d); return 1 if not ch else sum(span(c, d + 1) for c in ch)
+    pos = {}
+    def assign(n, d, xl):
+        sp = span(n, d); pos[id(n)] = (xl + sp / 2.0, d); cur = xl
+        if d == max_depth: deepest.append((n, member.get(id(n), [])))
+        for c in dch(n, d): assign(c, d + 1, cur); cur += span(c, d + 1)
+        return sp
+    tw = assign(root, 0, 0.0)
+    fig, ax = plt.subplots(figsize=(max(12, tw * 1.6), (max_depth + 1) * 2.6))
+    ax.set_xlim(-0.6, tw + 0.6); ax.set_ylim(-0.8, max_depth + 0.8); ax.invert_yaxis(); ax.axis("off"); ax.set_title(title, fontsize=12)
+    def de(n, d):
+        x0, _ = pos[id(n)]
+        for c in dch(n, d):
+            xc, dc = pos[id(c)]; ax.plot([x0, xc], [d + 0.34, dc - 0.34], color="gray", lw=0.8, zorder=0); de(c, d + 1)
+    de(root, 0)
+    def dn(n, d):
+        x0, _ = pos[id(n)]; mask = np.zeros(NP, np.float32); mask[member.get(id(n), [])] = 1.0
+        img = _mag(mask.reshape(IMG, IMG))[..., :3]
+        ax.add_artist(AnnotationBbox(OffsetImage(img, zoom=1.8), (x0, d), frameon=True, bboxprops=dict(edgecolor="black", lw=1.2)))
+        ax.text(x0, d + 0.42, f"{len(member.get(id(n), []))}px", ha="center", va="top", fontsize=6)
+        for c in dch(n, d): dn(c, d + 1)
+    dn(root, 0)
+    plt.tight_layout(); plt.savefig(out_path, dpi=140, bbox_inches="tight"); plt.close()
+    return deepest
+
+level = render_region_hierarchy(rtree.root, os.path.join(PRIM, "correlation_hierarchy.png"),
+                        "PoE pixel-correlation hierarchy (90%) — each node = the region of pixels routed to it "
+                        "(bright = pixels in the region), top 5 levels", max_depth=4)
+print(f"  correlation hierarchy → {os.path.join(PRIM, 'correlation_hierarchy.png')}")
+
+# subtrees: 3 levels deep rooted at each leaf region of the correlation hierarchy
+_nsub = 0
+for i, (node, idxs) in enumerate(sorted(level, key=lambda t: -len(t[1]))):
+    if not node.children or not idxs: continue
+    render_region_hierarchy(node, os.path.join(SUB, f"subtree_{i:02d}.png"),
+                            f"Pixel-correlation subtree (3 levels) — root region {len(idxs)}px", max_depth=3, root_idxs=idxs)
+    _nsub += 1
+print(f"  {_nsub} primitive subtrees → {SUB}/")
 print("Done.")

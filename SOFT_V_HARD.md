@@ -44,3 +44,9 @@ My eventual hope is that by implementing a scheme of hard AND soft composition w
 *   Discover the set of relations + primitives within our input data as a result of soft composition
     *   The set of primitives and relations can (hopefully) both be inspected by noticing commonalities in existing compositions, and new primitives may be able to be hypothesized by seeing how breaking down an OOD example with an inferred set of relations!
 *   Similar to a "neuro-symbolic pairing", identify a reasonable mapping from soft composition to hard composition (or justify that one is a subset of the other)
+
+## Compositional Autoencoder??
+
+Is there validity to designing an autoencoder that works off the basis of developing concepts given an input and then generating output using PoE?
+*   Instead of backprop, the idea is to somehow train the concept map to minimize the number of concepts needed to generate the output (in the hopes that it results in eventual disjoint ideas)
+*   More on this in the 
