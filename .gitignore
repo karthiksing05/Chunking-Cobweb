@@ -2,6 +2,9 @@ cobweb-private
 concept_formation
 src/archive
 __pycache__
+
+.claude
+
 tests/moc/mnist_output/
 tests/moc/cifar_output/
 tests/moc/celeba_output/
@@ -9,13 +12,13 @@ tests/moc/grammar_output/
 tests/moc/grammar_decoding_output/
 tests/moc/grammar_chunking_output/
 tests/moc/colormnist_output/
-tests/moc/colormnist_ae_output/
+tests/moc/hsv_mnist_output/
 
 tests/basic-level/mnist_basic_level_output/data
 tests/cu_cobweb/mnist_output
 tests/cu_cobweb/grammar_output
 tests/cu_cobweb/grammar_chunking_output
-.claude
+
 postulates.tex
 
 # acs-26 / tests/ debug log dumps — PMI / categorization spam from

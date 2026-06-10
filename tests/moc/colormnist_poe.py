@@ -338,15 +338,18 @@ print("\n  Best-first pool selection — per-query stats by variant:")
 _VARIANTS = [("99%", dict(explain_frac=0.99), "#4878d0"), ("90%", dict(explain_frac=0.90), "#6acc65"),
              ("K=3", dict(fixed_k=3), "#956cb4")]
 _K = {n: [] for n, _, _ in _VARIANTS}; _EXP = {n: [] for n, _, _ in _VARIANTS}; _DEPTH = {n: [] for n, _, _ in _VARIANTS}
+_LEAF = {n: [] for n, _, _ in _VARIANTS}                          # per selected concept: 1 if leaf (no children)
 for s in OOD_SLOTS:
     for x in ood_queries[s]:
         for name, kw, _ in _VARIANTS:
             nodes = [t[0] for t in select_concepts(x, record=_EXP[name], **kw)]
             _K[name].append(len(nodes)); _DEPTH[name].extend(_node_depth(n) for n in nodes)
+            _LEAF[name].extend(0 if n.children else 1 for n in nodes)
 _nq = len(_K["99%"])
 for name, _, _ in _VARIANTS:
+    leaf_frac = 100 * np.mean(_LEAF[name]) if _LEAF[name] else 0.0
     print(f"    {name:<4} K mean {np.mean(_K[name]):.2f}  depth mean {np.mean(_DEPTH[name]):.2f}  "
-          f"nodes mean {np.mean(_EXP[name]):.0f} (min {min(_EXP[name])}, max {max(_EXP[name])})")
+          f"nodes mean {np.mean(_EXP[name]):.0f}  leaves {leaf_frac:.0f}% / internal {100-leaf_frac:.0f}%")
 
 # depth histogram (default 99% cutoff), highest → lowest depth
 _d99 = _DEPTH["99%"]; _dmin, _dmax = int(min(_d99)), int(max(_d99)); _bins = np.arange(_dmin, _dmax + 2) - 0.5
@@ -360,6 +363,23 @@ ax.set_title("Depth of selected concepts (99% cutoff, all 40×16 OOD queries)")
 ax.legend(); ax.grid(axis="y", alpha=0.3)
 plt.tight_layout(); plt.savefig(os.path.join(OUT_DIR, "concept_depths.png"), dpi=130, bbox_inches="tight"); plt.close()
 print(f"    depth histogram → {os.path.join(OUT_DIR, 'concept_depths.png')}")
+
+# concept-type bar chart: mean # of selected concepts that are internal (have children) vs leaves
+_names = [n for n, _, _ in _VARIANTS]; _x = np.arange(len(_names))
+_internal = [np.sum([1 - v for v in _LEAF[n]]) / _nq for n in _names]   # mean count per query
+_leaves   = [np.sum(_LEAF[n]) / _nq for n in _names]
+fig, ax = plt.subplots(figsize=(7, 4.4))
+b1 = ax.bar(_x, _internal, 0.6, color="#4878d0", label="internal (has children)")
+b2 = ax.bar(_x, _leaves, 0.6, bottom=_internal, color="#ee854a", label="leaf (no children)")
+for i in range(len(_names)):
+    if _internal[i] > 0.05: ax.text(_x[i], _internal[i]/2, f"{_internal[i]:.1f}", ha="center", va="center", fontsize=9, color="white")
+    if _leaves[i]   > 0.05: ax.text(_x[i], _internal[i] + _leaves[i]/2, f"{_leaves[i]:.1f}", ha="center", va="center", fontsize=9, color="white")
+ax.set_xticks(_x); ax.set_xticklabels(_names); ax.set_xlabel("variant")
+ax.set_ylabel(f"mean # selected concepts per query (over {_nq} OOD queries)")
+ax.set_title("Selected concepts — internal nodes vs leaves, by variant")
+ax.legend(); ax.grid(axis="y", alpha=0.3)
+plt.tight_layout(); plt.savefig(os.path.join(OUT_DIR, "concept_types.png"), dpi=130, bbox_inches="tight"); plt.close()
+print(f"    concept-type bar chart → {os.path.join(OUT_DIR, 'concept_types.png')}")
 
 # nodes-visited bar chart: mean nodes per query, by variant
 _names = [n for n, _, _ in _VARIANTS]; _cols = [c for _, _, c in _VARIANTS]

@@ -74,7 +74,34 @@ with **FID**, **CLIP** cosine, k-NN (k=3) **Precision/Recall/F1**, plus an attri
   recovery order, labelled by tree depth and coverage-gain share ΣΔ.
 - `heatmaps/heatmaps_{99,90,k3}.png` — per variant: each concept's per-pixel donation `w_n(r)`.
 - `concept_depths.png` — selected-concept depth histogram (99% cutoff).
-- `nodes_explored.png` — **bar chart of mean nodes visited per query, by variant**.
+- `concept_types.png` — mean # of selected concepts that are internal (have children) vs leaves, per variant.
+- `nodes_explored.png` — bar chart of mean nodes visited per query, by variant.
 - `hierarchy.png`, `subtrees/` — the Cobweb concept hierarchy as mean images.
 
 The run prints per-query stats (at the 99% cutoff): average **K**, concept **depth**, and **nodes visited**.
+
+## Primitive discovery — pixels the PoE donates together (`poe_primitives.py`)
+
+A follow-on analysis that asks: across all compositions, which **groups of pixels behave as reusable
+parts**? We run the **PoE 90%** selection over all 640 OOD queries and record, for every selected
+concept, its per-pixel donation heatmap `w_n(r)` (channel-averaged to 32×32). This gives ~1,700
+donation maps — one per composed concept.
+
+**Pixel cross-correlation.** Treat each *pixel* as a variable and its donation value across all
+those maps as its samples, and compute the pixel×pixel **Pearson cross-correlation** `R`. Two
+pixels correlate highly when the composition tends to hand them to the *same* concept. We then
+**group the pixels with Cobweb** (fit a `CobwebContinuousTree` on the rows of `R`; clusters = nodes
+at a given tree depth) — an unsupervised number of regions, no `k` to set.
+
+What emerges is the method's spatial vocabulary: a **background-field** primitive and a **digit**
+primitive at the coarsest split, with the digit refining into concentric **stroke shells**
+(interior → stroke band → outline) as the tree deepens — purely from co-donation statistics, never
+told where the digit is.
+
+Outputs (`tests/moc/colormnist_output/primitives/`):
+- `pixel_correlation_regions.png` — pixels colored by Cobweb region at depths 1/2/3 (2 → 4 → 8 regions).
+- `pixel_correlation_matrix.png` — the cross-correlation `R`, pixels reordered by region (shows the
+  background/digit blocks).
+- `correlation_hierarchy.png` — the Cobweb hierarchy of `R`, top 5 levels, each node drawn as the
+  **spatial region of pixels routed to it** (bright = in-region; label = region size in pixels).
+- `subtrees/subtree_*.png` — each leaf region of that hierarchy expanded 3 levels deeper.
