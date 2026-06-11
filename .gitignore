@@ -2,6 +2,11 @@ cobweb-private
 concept_formation
 src/archive
 __pycache__
+.pytest_cache/
+**/.pytest_cache/
+
+.vscode/
+**/.vscode/
 
 .claude
 
