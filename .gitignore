@@ -33,8 +33,6 @@ tests/poe/colormnist_output
 tests/poe/fashionmnist_output
 tests/poe/mnist_output
 
-postulates.tex
-
 # acs-26 / tests/ debug log dumps — PMI / categorization spam from
 # cobweb that grows into 100s of MB per run; not version-control content.
 **/run.log
@@ -43,3 +41,28 @@ tests/**/diag_*.log
 confs/**/*.log
 # dataset tarballs (too large for git)
 data/*.tar.gz
+
+# LaTeX build artifacts.
+# .latexmkrc in confs/acs-26/paper/ routes all aux files into ./temporary/,
+# but in case any stray files land elsewhere (or the user builds via
+# bare pdflatex), ignore the standard cruft anywhere in the tree.
+**/temporary/
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lot
+*.out
+*.synctex.gz
+*.toc
+*.nav
+*.snm
+*.vrb
+*.run.xml
+*.bcf
+# Stray intermediate PDFs (the final paper PDF is fine, but watch for
+# auto-generated standalone PDFs we don't track).
+confs/acs-26/paper/temporary/*

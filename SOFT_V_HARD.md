@@ -21,7 +21,11 @@ The cool thing with a diffusion model is that you can “sample” an infinite a
 
 Immediate results:
 *   90% version is super cool - shows what exactly is missing at each interval and tries to represent within-dist queries through 1 concept
-*   Blends of colors happen very frequently because the first concept is trying to explain as much of the image as possible - so you end up with a blend of colors to result in the foreground! You can imagine that if we utilize 
+*   Blends of colors happen very frequently because the first concept is trying to explain as much of the image as possible - so you end up with a blend of colors to result in the foreground!
+    *   You can imagine that if we utilize a different heuristic for selection of images, we'll get a more appropriate system of chunking, and to be honest, that seems like the best thing to find!
+*   **IMPORTANT NOTE HERE:** the closest image to a given query is not always the best image for stealing from!!! Our heuristic may need improvement!!
+    *   How can we create images that properly exemplify the components?
+
 
 ## Extension: Distilling primitives + discrete relations from SOFT composition!
 
@@ -49,4 +53,4 @@ My eventual hope is that by implementing a scheme of hard AND soft composition w
 
 Is there validity to designing an autoencoder that works off the basis of developing concepts given an input and then generating output using PoE?
 *   Instead of backprop, the idea is to somehow train the concept map to minimize the number of concepts needed to generate the output (in the hopes that it results in eventual disjoint ideas)
-*   More on this in the 
+*   More on this in the next steps but the goal is to immediately rip a compositional autoencoder!!

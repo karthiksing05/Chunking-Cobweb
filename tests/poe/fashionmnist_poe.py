@@ -218,6 +218,34 @@ def poe_compose(x, selector, tau=TAU):
     w = np.exp((L - L.max(0, keepdims=True)) / tau); w /= w.sum(0, keepdims=True)   # Eq. 10
     return _poe_mu(M, V, L, tau).astype(np.float32), nodes, w, gains                # Eq. 7
 
+# ══ (2′) SAMPLE — Cobweb-native generative prior (scheme A: descendant-leaf resampling) ══
+# The paper draws clean varied samples by routing q_T's score through a diffusion model whose
+# reverse process re-projects onto the image manifold.  We have no diffusion model — but Cobweb
+# IS a hierarchical generative prior: its leaves are tight Gaussians on clusters of real training
+# instances, so a leaf sample is clean and on-manifold.  We keep the coverage-selected concept
+# frontier (which reaches the OOD combination), then replace each selected node's mean with a
+# SAMPLED descendant leaf and recompose.  Each selected node owns a region via w_n(r); its leaves
+# vary within that region (a different exemplar of the same fg/bg/garment) while their content
+# elsewhere is masked out — so variety is clean and the OOD combo is assembled region-by-region
+# from real patches on different branches.  (Image analog of grammar subtree-exchange replay.)
+def _sample_leaf(node, rng):
+    """Count-weighted walk down node's subtree to a leaf (Cobweb's own generative process)."""
+    n = node
+    while n.children:
+        ch = list(n.children); cnt = np.array([float(c.count) for c in ch], np.float64)
+        n = ch[int(rng.choice(len(ch), p=cnt / cnt.sum()))]
+    return n
+
+def poe_sample(x, selector, tau=TAU, rng=RNG):
+    """Like poe_compose, but each selected concept donates a SAMPLED descendant leaf instead of its
+    mean — a clean, on-manifold draw from the composed distribution.  Returns (sample, leaves)."""
+    sel = selector(x)
+    if not sel: return x.copy(), []
+    leaves = [_sample_leaf(s[0], rng) for s in sel]
+    feats = [node_feats(l, x) for l in leaves]                  # (mean, var, per-dim ℓ) of each leaf
+    M = np.stack([f[0] for f in feats]); V = np.stack([f[1] for f in feats]); L = np.stack([f[2] for f in feats])
+    return _poe_mu(M, V, L, tau).astype(np.float32), leaves     # _poe_mu handles the k=1 case
+
 # ── Baselines: nearest seen-class retrieval (paper §4.2 Top-k) ─────────────────
 # C = the 120 seen slots, each a diagonal Gaussian.  Top-1 = nearest class mean;
 # Top-3 = the per-pixel PoE of the 3 nearest classes.
@@ -238,11 +266,12 @@ def teacher_topk(x, k):
 _ef = lambda f: (lambda y: select_concepts(y, explain_frac=f))  # leftover-image cutoff at fraction f
 _k3 = lambda y: select_concepts(y, fixed_k=3)                   # paper's fixed K=3
 METHODS = {
-    "PoE 99%":  lambda x: poe_compose(x, _ef(0.99))[0],         # leftover cutoff, explain ≥ 99%
-    "PoE 90%":  lambda x: poe_compose(x, _ef(0.90))[0],         # leftover cutoff, explain ≥ 90%
-    "PoE K=3":  lambda x: poe_compose(x, _k3)[0],              # fixed K=3 (paper's choice)
-    "Top-1":    lambda x: teacher_topk(x, 1),
-    "Top-3":    lambda x: teacher_topk(x, 3),
+    "PoE 99%":   lambda x: poe_compose(x, _ef(0.99))[0],        # leftover cutoff, explain ≥ 99% (mean μ_T)
+    "PoE 90%":   lambda x: poe_compose(x, _ef(0.90))[0],        # leftover cutoff, explain ≥ 90%
+    "PoE K=3":   lambda x: poe_compose(x, _k3)[0],             # fixed K=3 (paper's choice)
+    "PoE-S 99%": lambda x: poe_sample(x, _ef(0.99))[0],        # scheme A: one clean leaf-resampled draw
+    "Top-1":     lambda x: teacher_topk(x, 1),
+    "Top-3":     lambda x: teacher_topk(x, 3),
 }
 
 # ══ METRICS — exactly as in Wang et al. §4.2 ══════════════════════════════════
@@ -430,6 +459,21 @@ for r, (d, f, b) in enumerate(show_slots):
         show(axes[r, 1 + c], METHODS[m](x), m if r == 0 else None)
 plt.tight_layout(rect=[0, 0, 1, 0.97]); plt.savefig(os.path.join(OUT_DIR, "methods.png"), dpi=130, bbox_inches="tight"); plt.close()
 print(f"  methods figure → {os.path.join(OUT_DIR, 'methods.png')}")
+
+# (1b) Cobweb-prior SAMPLING (scheme A): query · μ_T · N clean leaf-resampled draws of the SAME
+#      OOD combination.  μ_T is the deterministic PoE mean; each sample swaps in a different
+#      descendant leaf per concept, so variety = exemplar/style while the combo stays fixed.
+N_SAMP = 6
+fig, axes = plt.subplots(N_SHOW, 2 + N_SAMP, figsize=((2 + N_SAMP) * 1.6, N_SHOW * 1.55), squeeze=False)
+fig.suptitle(f"FashionMNIST OOD — Cobweb-prior samples (scheme A): query · μ_T · {N_SAMP} clean leaf-resampled draws", fontsize=11)
+for r, (d, f, b) in enumerate(show_slots):
+    x = ood_queries[(d, f, b)][0]
+    show(axes[r, 0], x, "query" if r == 0 else None, f"{d}/{f}/{b}")
+    show(axes[r, 1], poe_compose(x, _ef(0.99))[0], "μ_T (mean)" if r == 0 else None)
+    for c in range(N_SAMP):
+        show(axes[r, 2 + c], poe_sample(x, _ef(0.99))[0], f"sample {c+1}" if r == 0 else None)
+plt.tight_layout(rect=[0, 0, 1, 0.97]); plt.savefig(os.path.join(OUT_DIR, "samples.png"), dpi=130, bbox_inches="tight"); plt.close()
+print(f"  samples figure → {os.path.join(OUT_DIR, 'samples.png')}")
 
 # (2) concept decomposition: query · μ_T · the concepts that compose it, in RECOVERY ORDER
 #     (concept 1 = first picked).  %=each concept's share of the total coverage gain Σ Δ —

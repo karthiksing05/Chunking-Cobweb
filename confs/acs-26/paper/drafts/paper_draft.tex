@@ -1,0 +1,117 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage{cogsys}
+%\usepackage{cogsysapa} % deprecated!
+% \usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage{times}
+\usepackage[pdftex]{graphicx} % use this when importing PDF files
+
+% natbib required to produce author-year citations;
+% apacite is not properly supported and may lead to errors
+\usepackage{natbib}
+\setlength{\bibsep}{0.75ex}
+
+
+\newcounter{rpostulate}
+\newcounter{opostulate}
+\newcounter{ppostulate}
+\newcounter{lpostulate}
+
+\newenvironment{rpost}{%
+  \stepcounter{rpostulate}%
+  \par\noindent
+  \hangindent=2.5em\hangafter=1%   % wraps postulate text to after "R1."
+  \textbf{R\therpostulate.}~\ignorespaces
+  \setlength{\parindent}{0pt}%     % follow-up paragraphs align with "R"
+  \setlength{\parskip}{4pt}%
+}{%
+  \par\medskip
+}
+
+\newenvironment{opost}{%
+  \stepcounter{opostulate}%
+  \par\noindent
+  \hangindent=2.5em\hangafter=1%   % wraps postulate text to after "O1."
+  \textbf{O\theopostulate.}~\ignorespaces
+  \setlength{\parindent}{0pt}%     % follow-up paragraphs align with "O"
+  \setlength{\parskip}{4pt}%
+}{%
+  \par\medskip
+}
+
+\newenvironment{ppost}{%
+  \stepcounter{ppostulate}%
+  \par\noindent
+  \hangindent=2.5em\hangafter=1%
+  \textbf{P\theppostulate.}~\ignorespaces
+  \setlength{\parindent}{0pt}%
+  \setlength{\parskip}{4pt}%
+}{%
+  \par\medskip
+}
+
+\newenvironment{lpost}{%
+  \stepcounter{lpostulate}%
+  \par\noindent
+  \hangindent=2.5em\hangafter=1%
+  \textbf{L\thelpostulate.}~\ignorespaces
+  \setlength{\parindent}{0pt}%
+  \setlength{\parskip}{4pt}%
+}{%
+  \par\medskip
+}
+
+ % First page headings for accepted submissions.
+\cogsysheading{X}{20XX}{1-6}{X/20XX}{X/20XX}
+ % First page headings for poster submissions.
+%\cogsysposterheading{First}{2012}{1-18}
+
+\ShortHeadings{\title}
+              {K.\ Singaravadivelan and P.\ Langley}
+
+\begin{document} 
+
+\title{\textsc{Trellis}: blah blah blah}
+ 
+\author{Karthik Singaravadivelan}{ksingara3@gatech.edu}
+\author{Pat Langley}{something goes here}
+\address{Institute for the Study of Learning and Expertise, 
+         2164 Staunton Court, Palo Alto, CA 94306 USA}
+\vskip 0.2in
+ 
+\begin{abstract}
+Highkey important for chunks frfr
+\end{abstract}
+
+\section{Introduction} 
+
+\section{Background and Motivation}
+
+\section{A Unified Theory of Chunking}
+
+\section{The \textsc{Trellis} Chunking System}
+
+\section{Evaluation of \textsc{Trellis}}
+
+\section{Related Work}
+
+\section{Conclusion and Future Work}
+ 
+\begin{acknowledgements} 
+\noindent
+Shoutout to Zekun, Chris, friends at Teachable AI Lab etc etc etc
+\end{acknowledgements} 
+
+\vspace{-0.25in}
+
+{\parindent -10pt\leftskip 10pt\noindent
+\bibliographystyle{cogsysapa}
+\bibliography{main}
+
+}
+
+% Leave a blank line before the closing brace to ensure the final 
+% reference has the proper indentation. 
+
+\end{document} 
+

@@ -1,0 +1,309 @@
+\documentclass{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx} % Required for inserting images
+
+\newcounter{rpostulate}
+\newcounter{opostulate}
+\newcounter{ppostulate}
+\newcounter{lpostulate}
+
+\newenvironment{rpost}{%
+  \stepcounter{rpostulate}%
+  \par\noindent
+  \hangindent=2.5em\hangafter=1%   % wraps postulate text to after "R1."
+  \textbf{R\therpostulate.}~\ignorespaces
+  \setlength{\parindent}{0pt}%     % follow-up paragraphs align with "R"
+  \setlength{\parskip}{4pt}%
+}{%
+  \par\medskip
+}
+
+\newenvironment{opost}{%
+  \stepcounter{opostulate}%
+  \par\noindent
+  \hangindent=2.5em\hangafter=1%   % wraps postulate text to after "O1."
+  \textbf{O\theopostulate.}~\ignorespaces
+  \setlength{\parindent}{0pt}%     % follow-up paragraphs align with "O"
+  \setlength{\parskip}{4pt}%
+}{%
+  \par\medskip
+}
+
+\newenvironment{ppost}{%
+  \stepcounter{ppostulate}%
+  \par\noindent
+  \hangindent=2.5em\hangafter=1%
+  \textbf{P\theppostulate.}~\ignorespaces
+  \setlength{\parindent}{0pt}%
+  \setlength{\parskip}{4pt}%
+}{%
+  \par\medskip
+}
+
+\newenvironment{lpost}{%
+  \stepcounter{lpostulate}%
+  \par\noindent
+  \hangindent=2.5em\hangafter=1%
+  \textbf{L\thelpostulate.}~\ignorespaces
+  \setlength{\parindent}{0pt}%
+  \setlength{\parskip}{4pt}%
+}{%
+  \par\medskip
+}
+
+\title{Chunking Cobweb Postulates}
+\author{Karthik Singaravadivelan}
+\date{Advances in Cognitive Systems 2026}
+
+\begin{document}
+
+\maketitle
+
+\section{A review of Cobweb}
+
+Cobweb is an incremental concept-formation system that organizes attribute--value instances into a probabilistic taxonomic hierarchy. We review it here because our theory of chunking, presented in Section~2, presupposes the existence of taxonomic hierarchies of just this kind, and because the system we describe in Section~3 employs Cobweb specifically as its taxonomic substrate. The postulates below state Cobweb's commitments about the forms knowledge takes, the arrangement of concepts in long-term memory, the process by which the system handles a new instance, and the way the hierarchy is updated as instances are incorporated.
+
+\subsection{Representation Postulates}
+
+We begin by specifying the forms in which knowledge is stored. The following postulates fix these forms.
+
+\begin{rpost}
+Knowledge takes two forms: instances and concepts.
+\end{rpost}
+
+\begin{rpost}
+An instance is a set of attribute--value pairs describing a single observation.
+\end{rpost}
+
+\begin{rpost}
+A concept is a probabilistic summary of a set of instances, expressed as counts over attribute--value pairs.
+\end{rpost}
+
+\begin{rpost}
+Cobweb treats the attribute--value pairs within an instance as conditionally independent given a concept, so that each attribute's count distribution at a concept can be considered in isolation.
+\end{rpost}
+
+\begin{rpost}
+Each attribute's value distribution at a concept is smoothed by a uniform prior, so that unobserved values still receive a non-zero base-rate probability.
+\end{rpost}
+
+\subsection{Organization Postulates}
+
+Having stated the forms knowledge takes, we now describe the way concepts are arranged in long-term memory.
+
+\begin{opost}
+Concepts are organized in a taxonomic hierarchy rooted at a single concept that summarizes all observed instances.
+\end{opost}
+
+\begin{opost}
+Each non-terminal node in the taxonomy has two or more children that partition the instances it summarizes.
+\end{opost}
+
+\begin{opost}
+Instances reside as terminal nodes of the taxonomic hierarchy.
+\end{opost}
+
+\subsection{Performance Postulates}
+
+With these representational and organizational commitments in place, we can describe how Cobweb uses its hierarchy to process a new instance.
+
+\begin{ppost}
+An instance is processed by sorting it down the hierarchy from the root toward a terminal node.
+\end{ppost}
+
+\begin{ppost}
+At each non-terminal node, the instance is routed to the child concept that best fits it under a sorting criterion.
+\end{ppost}
+
+\begin{ppost}
+Predictions about unobserved attributes of an instance are read from the concept to which that instance is sorted.
+\end{ppost}
+
+\subsection{Learning Postulates}
+
+Finally, we describe the mechanism by which Cobweb updates its hierarchy as new instances are incorporated.
+
+\begin{lpost}
+Learning is incremental, piecemeal, and unsupervised, and it is interleaved with performance.
+\end{lpost}
+
+\begin{lpost}
+At each non-terminal concept along the sorting path, one of four restructuring actions occurs: add the instance to an existing child, create a new child for the instance, merge two children, or split a child.
+\end{lpost}
+
+\begin{lpost}
+The action selected at each step is the one that best improves the evaluation criterion at that node.
+\end{lpost}
+
+\begin{lpost}
+Once sorting terminates, the incorporated instance is installed as a new leaf concept along the path it traversed.
+\end{lpost}
+
+\section{A theory of chunking}
+
+\setcounter{rpostulate}{0}
+\setcounter{opostulate}{0}
+\setcounter{ppostulate}{0}
+\setcounter{lpostulate}{0}
+
+We now turn to our theory of chunking. The theory builds on a longstanding observation that mental structures exhibit both a categorical character, in which they generalize over instances, and a compositional character, in which they decompose into parts. We take taxonomic hierarchies of the kind reviewed in the previous section as a primitive substrate for the categorical aspect, and we add postulates that govern how the compositional aspect is built up over that substrate. The theory's central claim is that a chunking system requires two such hierarchies, operating in concert, to support both aspects together: one that organizes elements by what they are composed of, and another that organizes them by what surrounds them. Together these hierarchies support the parsing of an experience into chunks, the generation of an experience from chunks, and the incremental absorption of parsed elaborations back into memory.
+
+\subsection{Representation Postulates}
+
+Our theory begins with a position on the forms in which knowledge is stored. As in Cobweb (Section~1, R1--R3), knowledge takes the form of instances and concepts; the postulates below extend that representational vocabulary to distinguish primitive from composite elements and to introduce the content--context structure that every element carries.
+
+At the heart of the theory is the notion of an \emph{element}: a unit of structure in the data that may be either a primitive, with no internal composition, or a composite, built from other elements. The theory makes two claims about how an element is represented. First, every element is characterized by what it is made of --- the parts that compose it, when it is composite, or nothing at all, when it is primitive --- which we call its \emph{content}. Second, every element is characterized by what surrounds it --- the discrete relations it bears to its neighbors in an experience --- which we call its \emph{context}. These two characterizations are kept strictly distinct from one another, since each plays a different role in the organization, performance, and learning commitments that follow: the content of an element determines how it participates in chunks, while the context of an element determines where it appears in experiences.
+
+\begin{rpost}
+Every element has a content description, which names the parts that compose it.
+\end{rpost}
+
+\begin{rpost}
+Every element has a context description, which names the discrete relations it bears to surrounding elements.
+\end{rpost}
+
+\begin{rpost}
+Every element is either a primitive or a composite.
+\end{rpost}
+
+\begin{rpost}
+A chunk is a composite concept whose instances are themselves built from other primitive or composite elements.
+\end{rpost}
+
+\subsection{Organization Postulates}
+
+Our representational commitments imply a particular organization of long-term memory, in which the partonomic structure of chunks is supported by a pair of taxonomic hierarchies that play complementary roles.
+
+\begin{opost}
+Primitives and composites are jointly organized in a partonomic hierarchy.
+\end{opost}
+
+\begin{opost}
+An experience is a collection of instances and the relationships between them, represented as a set of primitive elements together with a set of discrete relations among those elements.
+\end{opost}
+
+\begin{opost}
+The system maintains long-term memory in the form of two distinct taxonomic hierarchies --- a \emph{content hierarchy} organizing the content descriptions of R1, and a \emph{context hierarchy} organizing the context descriptions of R2.
+\end{opost}
+
+\subsection{Performance Postulates}
+
+With the representational and organizational commitments fixed, we can describe the two processes by which the system uses its memory: parsing, which incrementally builds chunks from a given experience, and generation, which incrementally unpacks chunks back into the elements that compose them.
+
+\subsubsection{Parsing}
+
+\begin{ppost}
+Parsing is an incremental process of elaborations on an input experience.
+\end{ppost}
+
+\begin{ppost}
+A single elaboration generates a set of candidate chunks consistent with the current partial parse.
+\end{ppost}
+
+\begin{ppost}
+Each candidate chunk is scored against the content and context hierarchies and gated by a recognition threshold.
+\end{ppost}
+
+\begin{ppost}
+The best-scoring candidate that passes the recognition threshold is committed to the partonomic parse tree as a new composite element.
+\end{ppost}
+
+\begin{ppost}
+Parsing terminates when no remaining candidate passes the recognition threshold.
+\end{ppost}
+
+\subsubsection{Generation}
+
+\begin{ppost}
+Generation is an incremental process of expansions on a composite seed.
+\end{ppost}
+
+\begin{ppost}
+A single expansion produces a candidate leaf consistent with the basic-level concept above the seed's content reference.
+\end{ppost}
+
+\begin{ppost}
+The candidate leaf is sampled from the content hierarchy and conditioned on the context hierarchy.
+\end{ppost}
+
+\begin{ppost}
+The sampled leaf is committed to the partonomic generation tree as the seed's expansion, and its content children (if any) become new seeds.
+\end{ppost}
+
+\begin{ppost}
+Generation terminates when every expanded element is a primitive.
+\end{ppost}
+
+\subsection{Learning Postulates}
+
+Finally, we describe the mechanism by which the elaborations produced during parsing are absorbed into the two taxonomic hierarchies.
+
+\begin{lpost}
+Learning consists of incorporating the elaborations produced by parsing into the two taxonomic hierarchies.
+\end{lpost}
+
+\begin{lpost}
+Each composite committed during parsing is added to both hierarchies --- its content instance to the content hierarchy and its context instance to the context hierarchy --- while primitives, which carry no content instance, are added to the context hierarchy alone.
+\end{lpost}
+
+\begin{lpost}
+Each addition follows the standard sorting-with-learning procedure of the taxonomic hierarchy that receives it.
+\end{lpost}
+
+\section{The Chunking System}
+
+We have implemented a system, WEBSTER, that instantiates the theory of chunking presented in the previous section, built atop the Cobweb framework of Section~1. Theories are abstract and require additional assumptions to make them operational. In this section we describe WEBSTER's representation, the organization of its long-term memory, its parsing and generation processes, and the way it absorbs the results back into memory. We refer to the earlier postulates wherever a choice can be traced to a theoretical commitment.
+
+\subsection{Representation}
+
+The WEBSTER architecture realizes the representational commitments of Section~2. To make those postulates concrete, the system adopts a specific encoding for primitives, composites, and the chunks that result from parsing them. The notation resembles attribute--value representations used elsewhere in the concept-formation literature, but elements are constructed and consumed in a distinct way.
+
+Every element in WEBSTER carries two attribute--value descriptions: a \emph{content instance} and a \emph{context instance}. The content instance names the parts that compose the element; the context instance names the neighbors that surround it. The two are kept separate, and each is routed to its own hierarchy in long-term memory.
+
+Primitives are atomic and have nothing to enumerate, so they carry only a context instance. Composites carry both, as required by R3 and R4.
+
+A composite's content instance contains two attributes naming its left and right children. These attributes store identifiers that point into the context hierarchy, where each child has already been classified. A composite therefore always describes its parts in the same vocabulary as the rest of the system's elements.
+
+\subsection{Organization}
+
+WEBSTER organizes long-term memory into two Cobweb taxonomies, as required by O3. Both inherit the commitments reviewed in Section~1, but they play complementary roles.
+
+The content hierarchy classifies the content instances of composites and captures the regularities that govern how chunks are built. Because a composite's content instance refers to its children by identifiers drawn from the context hierarchy, similarity in the content hierarchy is grounded in similarity of parts in the context hierarchy.
+
+The context hierarchy classifies the context instances of every element the system has encountered, treating each as a singleton defined by its surroundings. Every element has a context instance, so every element appears here; only composites also appear in the content hierarchy, which follows from R3.
+
+Alongside these two long-term structures sits a transient working structure: the partonomic parse tree for the current experience. The parse tree is a scratchpad on which WEBSTER accumulates its committed elaborations. Each of its nodes references the content concept and the context concept that classify it, allowing both hierarchies to score the parse as it grows and to absorb its nodes as they are committed.
+
+\subsection{Performance}
+
+WEBSTER realizes the performance commitments of postulates P1 through P10 as two complementary processes: parsing, which incrementally builds chunks from a given experience, and generation, which incrementally unpacks chunks back into primitives. The two are described in turn below.
+
+\subsubsection{Parsing}
+
+WEBSTER parses an input experience through a single performance loop, the procedural realization of P1 through P5. The loop consumes primitives and elaborates them into composites. At the start of a parse, the partonomic parse tree is initialized with the primitives of the input; these form the parse frontier from which the first elaboration begins, and the system operates on the frontier from this point on.
+
+Each elaboration forms a candidate chunk for every adjacent pair of elements on the current frontier. A candidate is a hypothesized composite whose left and right children would be the paired elements. WEBSTER evaluates each candidate by routing its content instance through the content hierarchy and its context instance through the context hierarchy, yielding a content-recognition score and a context-recognition score that together express how well the candidate matches the chunks the system has consolidated.
+
+A recognition threshold then separates candidates the system can confidently call familiar from candidates that look like accidents of the current input. Candidates that fail are discarded; the highest-scoring survivor is committed as a new composite. Its two children are removed from the frontier, the composite takes their place, and the next elaboration begins from the updated frontier against an updated long-term memory whose new state is described in Section~3.4.
+
+The loop repeats until no candidate passes the threshold. Parsing then terminates, and the remaining parse tree is the system's final account of the input: its frontier captures the chunks the system identified, and its internal structure captures the order in which they were assembled.
+
+\subsubsection{Generation}
+
+Generation inverts the parsing loop, as fixed by P6 through P10: where parsing elaborates upward from primitives to composites, generation expands downward from a composite seed back to primitives.
+
+A generation step begins with a context-instance seed describing the element to be expanded. WEBSTER locates the leaf in the content hierarchy referenced by that seed, identifies the basic-level concept above it, and samples a fresh leaf from that concept --- a representative of the same class as the anchor, but not necessarily the anchor itself. If the sampled leaf is a primitive, the step returns it. Otherwise, its content instance names two children, each a reference into the context hierarchy; WEBSTER takes these as new seeds and recursively generates from each, producing the left and right subtrees of the composite being expanded.
+
+The basic-level concept plays two roles. It fixes the level of abstraction from which the leaf is drawn, and it guarantees that the leaf comes from a class the system has actually consolidated rather than an idiosyncratic exemplar. Because the content children of each sampled leaf are already references into the context hierarchy, every expansion produces valid seeds for the next recursive call, and the procedure proceeds until every branch terminates at a primitive.
+
+\subsection{Learning}
+
+Learning in WEBSTER is the absorption of parse-committed elaborations into the two long-term hierarchies. There is no separate training regime: every commit during the performance loop is followed immediately by an update to memory, so parsing and learning interleave one step at a time. This realizes L1.
+
+When a composite is committed, WEBSTER sorts its content instance into the content hierarchy and its context instance into the context hierarchy, each via the standard Cobweb procedure of Section~1 (L2, L4). The two sorts run independently and in parallel. Primitives encountered during a parse are sorted into the context hierarchy alone, in accordance with L2, since they carry no content instance.
+
+Restricting primitives to the context hierarchy keeps the content hierarchy compositional by construction: every leaf there is a composite whose children are valid references into the context hierarchy. This invariant is what makes the generation procedure of Section~3.3.2 well-defined --- sampling any content leaf yields two valid seeds rather than a malformed reference.
+
+Because both hierarchies are updated immediately, candidates produced later in the same parse are scored against a memory that already reflects the chunks committed earlier. Performance and learning are tightly coupled: a composite committed near the start of an experience can shape the system's recognition of candidates near its end, and over repeated experiences the two hierarchies converge toward a shared organization of the chunks the system has come to recognize.
+
+\end{document}
