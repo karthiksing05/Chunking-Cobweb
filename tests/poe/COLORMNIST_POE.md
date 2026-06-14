@@ -93,6 +93,18 @@ pixels correlate highly when the composition tends to hand them to the *same* co
 **group the pixels with Cobweb** (fit a `CobwebContinuousTree` on the rows of `R`; clusters = nodes
 at a given tree depth) — an unsupervised number of regions, no `k` to set.
 
+**Why these correlations are effectively 0/1.** The donation value is the per-coordinate composition
+weight `w_n(r) = softmax_{n∈S}( ℓ_{n,r}(x_q) / τ )` (Eq. 10) — the share of pixel `r` that concept `n`
+contributes to `μ_T`. At the working temperature **τ = 0.1** this softmax is *near one-hot*: each pixel
+is handed almost entirely to a **single** concept, so every donation map `w_n` is ≈ 0/1 (a pixel is
+"owned" by the concept or not). Correlating these near-binary maps therefore yields a cross-correlation
+`R` that is itself effectively binary — two pixels read as correlated when they are **co-owned by the
+same concept** across compositions, and uncorrelated otherwise. The Cobweb regions are thus a hard
+partition of the canvas into co-donated pixel groups; pushing `τ → 0` sharpens ownership toward exact
+0/1, while a larger `τ` blends concepts per pixel and softens the correlations. (We deliberately keep
+this binary, donation-based signal as the primitive vocabulary rather than the raw pixel-intensity
+correlation, which mixes the dataset's colour/shape covariance into the regions.)
+
 What emerges is the method's spatial vocabulary: a **background-field** primitive and a **digit**
 primitive at the coarsest split, with the digit refining into concentric **stroke shells**
 (interior → stroke band → outline) as the tree deepens — purely from co-donation statistics, never
