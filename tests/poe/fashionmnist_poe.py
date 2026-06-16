@@ -610,18 +610,20 @@ print(f"  {_nsub} level-3 subtrees → {SUB_DIR}/")
 PRIM = os.path.join(OUT_DIR, "primitives"); os.makedirs(PRIM, exist_ok=True)
 NP = IMG * IMG   # 1024 spatial pixels
 
-print("Gathering PoE donation heatmaps over all OOD queries (90% cutoff) …")
+SOFT_TAU = 0.1                                               # donation temperature for the correlation (= composition TAU)
+                                                            # analysis (vs composition TAU=0.1); higher = softer
+print(f"Gathering SOFT donation weights over all OOD queries (90% cutoff, τ={SOFT_TAU:g}) …")
 sel90 = lambda y: select_concepts(y, explain_frac=0.90)
 MAPS = []                                                    # one (NP,) heatmap per composed concept
 for s in OOD_SLOTS:
     for x in ood_queries[s]:
-        mu, nodes, w, gains = poe_compose(x, sel90)
+        mu, nodes, w, gains = poe_compose(x, sel90, tau=SOFT_TAU)
         for k in range(len(w)):
             MAPS.append(w[k].reshape(IMG, IMG, 3).mean(2).reshape(NP))   # channel-avg donation heatmap
 MAPS = np.ascontiguousarray(MAPS, np.float32)
 print(f"  {len(MAPS)} donation heatmaps")
 
-_mag = plt.get_cmap("magma")
+_mag = plt.get_cmap("magma"); _cw = plt.get_cmap("coolwarm")
 SUB = os.path.join(PRIM, "subtrees"); os.makedirs(SUB, exist_ok=True)
 
 # ── Pixel cross-correlation → regions ──────────────────────────────────────────
@@ -648,6 +650,7 @@ def cobweb_pixel_regions(R, depth):
 
 R = np.corrcoef(MAPS.T.astype(np.float64))                   # (NP,NP) pixel cross-correlation
 R = np.nan_to_num(R, nan=0.0).astype(np.float32)             # constant pixels → 0 correlation
+np.save(os.path.join(PRIM, "R.npy"), R)                      # (diagnostic) save R for the basic-level analysis
 from matplotlib.colors import ListedColormap
 _others = [plt.get_cmap("tab20")(i) for i in range(20) if i not in (0, 1)] + list(plt.get_cmap("tab20b").colors)
 _PAL = ListedColormap([(0.23, 0.43, 0.69)] + _others)        # index 0 = background blue, rest distinct
@@ -681,7 +684,32 @@ print("Building Cobweb hierarchy over pixel cross-correlation …")
 rtree = CobwebContinuousTree(size=NP, covar_from=1, num_labels=0)
 for i in RNG.permutation(NP): rtree.ifit(np.ascontiguousarray(R[i]), _empty)
 
-def render_region_hierarchy(root, out_path, title, max_depth=4, top_children=6, root_idxs=None):
+# ── Basic-level primitives: each Cobweb basic-level node = one region ──────────
+# For every pixel, route its correlation vector R[p] to a leaf, then walk up to the
+# BASIC-LEVEL node — the max expected-PMI ancestor on the leaf→root path
+# (node.get_basic, evaluated with prior_var=BL_PV, alpha=BL_ALPHA).  Pixels sharing a
+# basic-level node form one region; that same node set is outlined in red on the
+# correlation hierarchy below.  (Nodes keyed content-wise by (count, mean) since
+# Cobweb hands back fresh wrappers per access.)
+BL_PV, BL_ALPHA = 1e6, 1e4
+def _fp(n): return (int(n.count), hash(np.asarray(n.mean, np.float32).tobytes()))
+print(f"Basic-level regions (get_basic, prior_var={BL_PV:g}, alpha={BL_ALPHA:g}) …")
+_bl_seen, _bl_order, bl_lab = {}, [], np.empty(NP, int)
+for p in range(NP):
+    _b = rtree.get_leaf(np.ascontiguousarray(R[p]), _empty).get_basic(False, BL_PV, BL_ALPHA, False)
+    f = _fp(_b)
+    if f not in _bl_seen: _bl_seen[f] = len(_bl_order); _bl_order.append(f)
+    bl_lab[p] = _bl_seen[f]
+BASIC_FPS = set(_bl_order)
+print(f"  {len(_bl_order)} basic-level regions over {NP} pixels")
+fig, ax = plt.subplots(figsize=(4.4, 4.6))
+ax.imshow(_bg_first(bl_lab).reshape(IMG, IMG), cmap=_PAL, vmin=0, vmax=len(_PAL.colors) - 1)
+ax.set_xticks([]); ax.set_yticks([])
+ax.set_title(f"Basic-level regions — {len(_bl_order)} regions\n(get_basic: prior_var={BL_PV:g}, α={BL_ALPHA:g})", fontsize=10)
+plt.tight_layout(); plt.savefig(os.path.join(PRIM, "basic_level_regions.png"), dpi=130, bbox_inches="tight"); plt.close()
+print(f"  basic-level regions → {os.path.join(PRIM, 'basic_level_regions.png')}")
+
+def render_region_hierarchy(root, out_path, title, max_depth=4, top_children=6, root_idxs=None, basic_fps=None):
     _disp = {}
     def dch(n, d):
         if d >= max_depth: return []
@@ -712,9 +740,12 @@ def render_region_hierarchy(root, out_path, title, max_depth=4, top_children=6, 
             xc, dc = pos[id(c)]; ax.plot([x0, xc], [d + 0.34, dc - 0.34], color="gray", lw=0.8, zorder=0); de(c, d + 1)
     de(root, 0)
     def dn(n, d):
-        x0, _ = pos[id(n)]; mask = np.zeros(NP, np.float32); mask[member.get(id(n), [])] = 1.0
-        img = _mag(mask.reshape(IMG, IMG))[..., :3]
-        ax.add_artist(AnnotationBbox(OffsetImage(img, zoom=1.8), (x0, d), frameon=True, bboxprops=dict(edgecolor="black", lw=1.2)))
+        x0, _ = pos[id(n)]; idxs = member.get(id(n), [])
+        prof = R[idxs].mean(0) if len(idxs) else np.zeros(NP, np.float32)   # node's TRUE mean correlation profile
+        img = _cw(np.clip((prof.reshape(IMG, IMG) + 1) / 2, 0, 1))[..., :3]   # continuous, true value
+        _bl = basic_fps is not None and _fp(n) in basic_fps          # basic-level node?
+        _ec, _lw = ("red", 3.0) if _bl else ("black", 1.2)
+        ax.add_artist(AnnotationBbox(OffsetImage(img, zoom=1.8), (x0, d), frameon=True, bboxprops=dict(edgecolor=_ec, lw=_lw)))
         ax.text(x0, d + 0.42, f"{len(member.get(id(n), []))}px", ha="center", va="top", fontsize=6)
         for c in dch(n, d): dn(c, d + 1)
     dn(root, 0)
@@ -723,7 +754,7 @@ def render_region_hierarchy(root, out_path, title, max_depth=4, top_children=6, 
 
 level = render_region_hierarchy(rtree.root, os.path.join(PRIM, "correlation_hierarchy.png"),
                         "PoE pixel-correlation hierarchy (90%) — each node = the region of pixels routed to it "
-                        "(bright = pixels in the region), top 5 levels", max_depth=4)
+                        "(colour = node mean correlation profile, coolwarm true value; red outline = basic-level node), top 5 levels", max_depth=4, basic_fps=BASIC_FPS)
 print(f"  correlation hierarchy → {os.path.join(PRIM, 'correlation_hierarchy.png')}")
 
 # subtrees: 3 levels deep rooted at each leaf region of the correlation hierarchy
@@ -731,7 +762,7 @@ _nsub = 0
 for i, (node, idxs) in enumerate(sorted(level, key=lambda t: -len(t[1]))):
     if not node.children or not idxs: continue
     render_region_hierarchy(node, os.path.join(SUB, f"subtree_{i:02d}.png"),
-                            f"Pixel-correlation subtree (3 levels) — root region {len(idxs)}px", max_depth=3, root_idxs=idxs)
+                            f"Pixel-correlation subtree (3 levels) — root region {len(idxs)}px", max_depth=3, root_idxs=idxs, basic_fps=BASIC_FPS)
     _nsub += 1
 print(f"  {_nsub} primitive subtrees → {SUB}/")
 print("Done.")
