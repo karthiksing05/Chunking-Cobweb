@@ -34,15 +34,15 @@ from util.cfg import (generate_with_merges,
 CONFIGS = [
     # SMALL: minimal grammar (S→NP VP; VP=V (NP); 4 N, 4 V, 2 Det),
     # tighter length cap because the surface forms are short.
-    ("data/cfg_grammar_small", TEST_GRAMMAR_SMALL, 13, 200,  8, ("VP",)),
-    ("data/cfg_grammar_med",   TEST_GRAMMAR_MED,   13, 200, 10, ("VP",)),
+    ("data/cfg_grammar_small", TEST_GRAMMAR_SMALL, 13, 300,  8, ()),
+    ("data/cfg_grammar_med",   TEST_GRAMMAR_MED,   13, 300, 10, ()),
     # LARGE gets 2x the training data and a tighter length cap.
     # Rationale: TEST_GRAMMAR_LARGE adds RelClauses and a 3-way VP
     # expansion (V NP | V NP PP | V PP), roughly doubling the number
     # of distinct chunk patterns vs MED. The parser needs proportionally
     # more examples per chunk type to converge. Tighter length (10) also
     # kills the deep RelClause-in-RelClause cases that dominate the long tail.
-    ("data/cfg_grammar_large", TEST_GRAMMAR_LARGE, 23, 400, 10, ("VP",)),
+    ("data/cfg_grammar_large", TEST_GRAMMAR_LARGE, 23, 400, 10, ()),
 ]
 
 

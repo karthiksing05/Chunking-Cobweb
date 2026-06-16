@@ -44,9 +44,9 @@ from _helpers import (run_multi_seed_learning_curves,
 
 # Each variant: (grammar, corpus, flatten_at_parent, max_words).
 VARIANTS = {
-    "small": (TEST_GRAMMAR_SMALL, TEST_CORPUS_SMALL, ("VP",), 8),
-    "med":   (TEST_GRAMMAR_MED,   TEST_CORPUS_MED,   ("VP",), 10),
-    "large": (TEST_GRAMMAR_LARGE, TEST_CORPUS_LARGE, ("VP",), 10),
+    "small": (TEST_GRAMMAR_SMALL, TEST_CORPUS_SMALL, (), 8),
+    "med":   (TEST_GRAMMAR_MED,   TEST_CORPUS_MED,   (), 10),
+    "large": (TEST_GRAMMAR_LARGE, TEST_CORPUS_LARGE, (), 10),
 }
 
 N_SENTENCES = 200

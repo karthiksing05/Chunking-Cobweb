@@ -32,29 +32,33 @@ POS_GRAMMAR1 = {
 
 POS_CORPUS1 = ["Det", "N", "Adj", "V", "P"]
 
-# Define a simple context-free grammar using recursive structures
+# MED grammar (TEST_GRAMMAR1). Every nonterminal expansion has
+# exactly two right-hand-side elements, so derivation trees are
+# strictly binary -- no post-hoc binarisation is required. PP
+# attaches via the recursive S -> S PP production; AdjP is
+# right-recursive and bottoms out at Adj+N.
 TEST_GRAMMAR1 = {
-    "S": [["NP", "VP"]],  # Sentence = Noun Phrase + Verb Phrase
+    "S": [
+        ["NP", "VP"],
+        ["S", "PP"],
+    ],
 
     "NP": [
-        ["Det", "AdjP", "N"],  # Noun Phrase = Determiner + Adjective Phrase + Noun
-        ["Det", "N"]
+        ["Det", "N"],
+        ["Det", "AdjP"],
     ],
 
     "AdjP": [
-        ["Adj", "AdjP"],  # Adjective Phrase can recurse: Adj + AdjP
-        ["Adj"],
-        []  # Empty string to allow termination of recursion
+        ["Adj", "AdjP"],
+        ["Adj", "N"],
     ],
 
     "VP": [
-        ["V", "NP"],  # Verb Phrase = Verb + Noun Phrase
-        ["V", "NP", "PP"],  # Verb Phrase with prepositional phrase
-        ["V"]  # Simple verb
+        ["V", "NP"],
     ],
 
     "PP": [
-        ["P", "NP"]  # Prepositional Phrase = Preposition + Noun Phrase
+        ["P", "NP"],
     ],
 
     "Det": [["the"], ["a"]],
@@ -132,17 +136,17 @@ LEXICON_VARIANTS = {
 }
 
 
-# Define a very simple grammar (no recursion, fewer rules)
+# SMALL grammar (TEST_GRAMMAR2). Every nonterminal expansion has
+# exactly two right-hand-side elements (strictly binary). The unary
+# intransitive ``VP -> V`` production has been removed so every
+# verb is treated as transitive.
 TEST_GRAMMAR2 = {
-    "S": [["NP", "VP"]], # Sentence = Noun Phrase + Verb Phrase
-
-    "NP": [["Det", "N"]], # Noun Phrase = Determiner + Noun
-
-    "VP": [["V", "NP"], ["V"]], # Verb Phrase = Verb (+ optional NP)
-
+    "S":   [["NP", "VP"]],
+    "NP":  [["Det", "N"]],
+    "VP":  [["V", "NP"]],
     "Det": [["the"], ["a"]],
-    "N": [["dog"], ["cat"], ["man"], ["woman"]],
-    "V": [["runs"], ["sees"], ["likes"], ["chases"]]
+    "N":   [["dog"], ["cat"], ["man"], ["woman"]],
+    "V":   [["runs"], ["sees"], ["likes"], ["chases"]],
 }
 
 # Define a very simple grammar (no recursion, fewer rules)
@@ -182,50 +186,47 @@ ADDED_CORPUS2 = sum(
 # RelClause → RelPro VP → V NP → ... → RelClause again, producing
 # 20+ word sentences during _eval_omission that crippled grammar_large
 # runtime in the May 28 chain.
+# LARGE grammar (TEST_GRAMMAR3). Every nonterminal expansion has
+# exactly two right-hand-side elements (strictly binary). NPs gain
+# RelClause modification recursively via NP -> NP RelClause; PPs
+# adjoin at the S level via S -> S PP (same convention as MED).
+# The NP expansions are weighted to keep the terminal expansions
+# dominant -- without the bias, RelClause + AdjP recursion together
+# blow up the tail of sentence length.
 TEST_GRAMMAR3 = {
-    "S": [["NP", "VP"]],
-
-    "NP": [
-        # Terminal expansions — duplicated 6× so they dominate. The
-        # 3× / 6× / 8× sweep showed 6× is the smallest weight that
-        # tames the long tail (p90 ≤ 15 words) without eliminating
-        # RelClauses entirely.
-        ["Det", "N"], ["Det", "N"], ["Det", "N"],
-        ["Det", "N"], ["Det", "N"], ["Det", "N"],
-        ["Det", "AdjP", "N"], ["Det", "AdjP", "N"], ["Det", "AdjP", "N"],
-        ["Det", "AdjP", "N"], ["Det", "AdjP", "N"], ["Det", "AdjP", "N"],
-        # Recursive expansions — single weight; ~14% per NP.
-        ["Det", "N", "RelClause"],
-        ["Det", "AdjP", "N", "RelClause"]
+    "S": [
+        ["NP", "VP"],
+        ["S", "PP"],
     ],
 
-    # VP productions: ALL TRANSITIVE. The verbs in this grammar
-    # (saw / liked / chased / carried / read / admired) are
-    # semantically transitive in English, so allowing intransitive
-    # ``VP → V`` produced weird sentences like ``the apple liked``
-    # or RelClauses like ``which chased`` standalone. Removing the
-    # intransitive variant and adding ``V NP PP`` (matching
-    # TEST_GRAMMAR1) gives semantically-sensible sentences and a
-    # richer 3-way VP shape distribution.
+    "NP": [
+        # Terminal expansions -- duplicated 6x so they dominate.
+        ["Det", "N"], ["Det", "N"], ["Det", "N"],
+        ["Det", "N"], ["Det", "N"], ["Det", "N"],
+        ["Det", "AdjP"], ["Det", "AdjP"], ["Det", "AdjP"],
+        ["Det", "AdjP"], ["Det", "AdjP"], ["Det", "AdjP"],
+        # Recursive expansion -- single weight; ~7% per NP.
+        ["NP", "RelClause"],
+    ],
+
+    # VP productions: strictly binary. Transitive (V NP) plus
+    # intransitive-with-PP (V PP). The ternary V NP PP shape has
+    # been removed; PPs now attach at the S level via S -> S PP.
     "VP": [
         ["V", "NP"],
-        ["V", "NP", "PP"],
         ["V", "PP"],
     ],
 
-    "AdjP": [["Adj"], ["Adj", "AdjP"]],
+    "AdjP": [
+        ["Adj", "AdjP"],
+        ["Adj", "N"],
+    ],
 
     "RelClause": [["RelPro", "VP"]],
 
     "PP": [["P", "NP"]],
 
     "Det": [["the"], ["a"], ["this"], ["that"]],
-    # Use animate Ns (boy, girl, teacher) more naturally as RelClause
-    # heads — they can plausibly be subjects of verbs like ``saw``,
-    # ``liked``. Inanimate Ns (book, robot, apple) appear too but
-    # produce less semantically-plausible RelClauses (e.g. ``the apple
-    # which saw the boy``). Both still grammatical and valuable for
-    # the parser; only the surface meaning is anthropomorphic.
     "N": [["book"], ["boy"], ["girl"], ["teacher"], ["robot"], ["apple"]],
     "Adj": [["tall"], ["curious"], ["blue"], ["ancient"], ["friendly"]],
     "RelPro": [["who"], ["that"], ["which"]],
@@ -458,7 +459,7 @@ TEST_CORPUS_HUGE = (
 )
 
 
-def generate_with_merges(symbol, grammar, flatten_at_parent=("VP",)):
+def generate_with_merges(symbol, grammar, flatten_at_parent=()):
     """Generate a sentence AND the hollow-style merge sequence,
     matching the hand-annotated convention in
     ``data/test_hollow_grammar_1/``.

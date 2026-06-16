@@ -59,7 +59,7 @@ def make_dataset(variant: str, out_dir: str, seed: int = DATASET_SEED):
     while n_written < N_SENTENCES and attempts < max_attempts:
         attempts += 1
         text, merges = generate_with_merges(
-            "S", grammar, flatten_at_parent=("VP",))
+            "S", grammar, flatten_at_parent=())
         text = text.strip()
         if not text or text in seen:
             continue
