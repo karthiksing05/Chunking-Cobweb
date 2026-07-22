@@ -10,6 +10,7 @@ __pycache__
 
 .claude
 
+data/
 data/celeba
 data/cifar-10-batches-py
 data/FashionMNIST
@@ -32,6 +33,7 @@ tests/cu_cobweb/grammar_chunking_output
 tests/poe/colormnist_output
 tests/poe/fashionmnist_output
 tests/poe/mnist_output
+tests/poe/multimnist_output
 
 # acs-26 / tests/ debug log dumps — PMI / categorization spam from
 # cobweb that grows into 100s of MB per run; not version-control content.

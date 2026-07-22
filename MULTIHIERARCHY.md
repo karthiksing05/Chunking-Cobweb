@@ -4,6 +4,8 @@ Whereas before we hypothesized needing multiple hierarchies for multiple levels 
 
 ## Methodology 6.1
 
+UNSUPERVISED CHUNKING IS FIRST PRIORITY!!!
+
 Start forays into other forms of chunking, with different discrete relations!!
 *   This may need a different way to assign content and context (and also USE content and context!!)
     *   Perhaps we entangle with the idea of weighting attributes for each hierarchy so the information is not lost completely but it's also not used to build the hierarchy

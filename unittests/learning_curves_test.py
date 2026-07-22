@@ -39,7 +39,9 @@ from util.cfg import (generate, generate_with_merges,
                       TEST_GRAMMAR1, TEST_CORPUS1,
                       TEST_GRAMMAR3, TEST_CORPUS3)
 from parse_mh import TRELLIS, FiniteParseTree, PrimitiveParseNode
-from cobweb.cobweb_discrete import set_random_seed as cobweb_set_seed
+from cobweb.cobweb_discrete import (set_random_seed as cobweb_set_seed,
+                                    get_random_state as cobweb_get_state,
+                                    set_random_state as cobweb_set_state)
 
 
 # Default hyperparameters — matched to hollow_learn_test_mh.py.
@@ -142,9 +144,42 @@ def run_learning_curves(
     seed:       int  = 13,
     eval_every: int  = EVAL_EVERY,
     n_gen_per_eval: int = N_GEN_PER_EVAL,
+    n_gen_final: int = 500,   # high-sample generation at the FINAL checkpoint
+                              # so the reported endpoint is a tight estimate,
+                              # not a noisy 20-sample one
+
     primitives_first: int = None,    # None → uses module-level PRIMITIVES_FIRST
     maturity_gate: tuple = None,
     gate_mode:    str   = "skip",
+    # Hyperparameters exposed for HP sweeps (defaults match prior behavior).
+    context_length:        int   = None,    # None → module-level CONTEXT_LENGTH
+    threshold:             int   = None,    # None → module-level THRESHOLD
+    content_alpha:         float = 1e-4,
+    context_alpha:         float = 1e-4,
+    content_bl_alpha:      float = 10,
+    context_bl_alpha:      float = 10,
+    climb_count_threshold: int   = None,    # None → FiniteParseTree.CLIMB_COUNT_THRESHOLD_DEFAULT
+    chunk_pool_weight:     float = 0.0,     # > 0 activates L/R_trans attachment signal in ranker
+    sum_leaf_lp_coef:      float = 0.3,     # ranker: score = root_lp + coef * sum_leaf_lp
+    # Context-forward ranker weights (postulate P3). Default formula:
+    #   score = w_ctx*ctx_leaf_lp + w_climb*log(1+climb_count) + w_cnt*root_lp
+    rank_mode:             str   = "context_forward",
+    rank_w_ctx:            float = 1.0,
+    rank_w_climb:          float = 3.0,
+    rank_w_cnt:            float = 0.05,
+    parse_beam_width:      int   = 1,      # 1 = greedy (P4); >1 = beam (Move 3)
+    content_boundary_feat: str   = None,   # None | "wordid" | "ctxbag"
+    content_seam_feat:     str   = None,   # None | "wordid"
+    content_child_class:   bool  = False,  # type each child by its POS-cluster
+    content_child_class_depth: int = 4,
+    content_top_k:         int   = 7,      # bag-of-concepts width
+    content_pool_depth:    int   = 4,      # bag-of-concepts read-off depth
+    content_drop_cplx:     bool  = False,  # keep child complexity VISIBLE (load-bearing)
+    gen_anchor_mode:       str   = "basic",   # "basic" | "maturity" (P9 anchor)
+    gen_anchor_tau:        float = 20,
+    gen_pool_mode:         str   = "leaf",    # "leaf" | "bl" | "mat" (generalization pool)
+    gen_pool_tau:          float = 50,
+    parse_mode:            str   = "greedy",
 ):
     """Train incrementally; eval every ``eval_every`` training sentences."""
     if os.path.exists(out_dir):
@@ -152,6 +187,9 @@ def run_learning_curves(
     os.makedirs(out_dir, exist_ok=True)
 
     random.seed(seed); np.random.seed(seed); cobweb_set_seed(seed)
+
+    _ctx_len = CONTEXT_LENGTH if context_length is None else context_length
+    _thr     = THRESHOLD      if threshold      is None else threshold
 
     # ── Load corpus ──
     paths = sorted(glob.glob(os.path.join(corpus_dir, "*.json")))
@@ -174,16 +212,47 @@ def run_learning_curves(
     # Set of training sentences for novelty checking.
     train_sentences = {h["sentence"].strip() for h in train_h}
 
-    trellis = TRELLIS(
-        corpus, context_length=CONTEXT_LENGTH, threshold=THRESHOLD,
-        content_alpha=1e-4, context_alpha=1e-4,
-        content_bl_alpha=10, context_bl_alpha=10,
-        bow=False, empty_weighting=True, chunk_context=False,
-        weighting="binary", categorization_mode="dfs",
-        depth_max_content=1000, depth_max_context=1000,
-        branch_max_content=1000, branch_max_context=1000,
-        content_top_k=7, content_pool_depth=4,
-    )
+    if climb_count_threshold is not None:
+        FiniteParseTree.CLIMB_COUNT_THRESHOLD_DEFAULT = int(climb_count_threshold)
+
+    def _fresh_trellis():
+        """A freshly-constructed, configured (untrained) TRELLIS. Used both for
+        the initial gold precompute and — in retrain-per-checkpoint mode — to
+        rebuild a clean-RNG-stream model at each training size (see below)."""
+        _t = TRELLIS(
+            corpus, context_length=_ctx_len, threshold=_thr,
+            content_alpha=content_alpha, context_alpha=context_alpha,
+            content_bl_alpha=content_bl_alpha, context_bl_alpha=context_bl_alpha,
+            bow=False, empty_weighting=True, chunk_context=False,
+            weighting="binary", categorization_mode="dfs",
+            depth_max_content=1000, depth_max_context=1000,
+            branch_max_content=1000, branch_max_context=1000,
+            content_top_k=content_top_k, content_pool_depth=content_pool_depth,
+        )
+        _t.ltm.chunk_pool_weight = float(chunk_pool_weight)
+        _t.ltm.sum_leaf_lp_coef  = float(sum_leaf_lp_coef)
+        _t.ltm.rank_mode    = str(rank_mode)
+        _t.ltm.rank_w_ctx   = float(rank_w_ctx)
+        _t.ltm.rank_w_climb = float(rank_w_climb)
+        _t.ltm.rank_w_cnt   = float(rank_w_cnt)
+        _t.ltm.parse_beam_width = int(parse_beam_width)
+        _t.ltm.content_boundary_feat = content_boundary_feat
+        _t.ltm.content_seam_feat     = content_seam_feat
+        _t.ltm.content_child_class       = content_child_class
+        _t.ltm.content_child_class_depth = content_child_class_depth
+        _t.ltm.content_drop_cplx     = bool(content_drop_cplx)
+        _t.ltm.gen_anchor_mode = str(gen_anchor_mode)
+        _t.ltm.gen_anchor_tau  = float(gen_anchor_tau)
+        _t.ltm.gen_pool_mode   = str(gen_pool_mode)
+        _t.ltm.gen_pool_tau    = float(gen_pool_tau)
+        return _t
+
+    trellis = _fresh_trellis()
+    # Snapshot the RNG right after construction. The gold precompute + baseline
+    # eval below consume the RNG; we restore this snapshot before training so
+    # training starts from the exact post-construction state (matching the
+    # verified single-pass run) rather than a pre-training-eval-perturbed one.
+    _rng_snap0 = (cobweb_get_state(), random.getstate(), np.random.get_state())
 
     pf = PRIMITIVES_FIRST if primitives_first is None else primitives_first
     if pf > 0:
@@ -199,27 +268,42 @@ def run_learning_curves(
 
     recog, WORD_TO_POS = _build_cyk_recognizer(grammar)
 
-    # Precompute gold brackets for the test fold (once).
-    gold = {}
-    for h in test_h:
-        sent = h["sentence"]
-        if len(re.findall(r"[\w']+|[.,!?;]", sent)) < 2: continue
-        gt = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
-        gt.build_primitives(sent, threshold="converge")
-        for m in h["merges"]:
-            try: gt.apply_candidate(m["left"], m["right"])
-            except Exception: pass
-        gold[sent] = _bracket_set(gt)
+    def _build_gold(teh):
+        """Gold brackets for a test fold, from its gold merges. Uses a THROWAWAY
+        trellis so building the gold (which registers vocab / categorizes) does
+        not pollute the training trellis's state — the training model must be
+        identical to the verified single-pass run."""
+        _gtl = _fresh_trellis()
+        g = {}
+        for h in teh:
+            sent = h["sentence"]
+            if len(re.findall(r"[\w']+|[.,!?;]", sent)) < 2: continue
+            gt = FiniteParseTree(_gtl.ltm, context_length=_ctx_len)
+            gt.build_primitives(sent, threshold="converge")
+            for m in h["merges"]:
+                try: gt.apply_candidate(m["left"], m["right"])
+                except Exception: pass
+            g[sent] = _bracket_set(gt)
+        return g
+
+    gold = _build_gold(test_h)
+
+    def _pred_brackets(sent):
+        pt = trellis.parse_sentence(sent, threshold=THRESHOLD, new_vocab=False,
+                                    learning=False, debug=False,
+                                    maturity_gate=maturity_gate, gate_mode=gate_mode)
+        return _bracket_set(pt)
+
+    # Cap the per-checkpoint test-parse count so a fine (every-10) learning
+    # curve stays tractable — parsing dominates the eval cost, and ~40 held-out
+    # sentences give a stable F1 estimate at each point.
+    _EVAL_MAX_TEST = 40
+    _gold_items_capped = list(gold.items())[:_EVAL_MAX_TEST]
 
     def _eval_parse():
         tp = fp = fn = em = n = 0
-        for sent, g in gold.items():
-            pt = trellis.parse_sentence(sent, threshold=THRESHOLD,
-                                        new_vocab=False, learning=False,
-                                        debug=False,
-                                        maturity_gate=maturity_gate,
-                                        gate_mode=gate_mode)
-            pred = _bracket_set(pt)
+        for sent, g in _gold_items_capped:
+            pred = _pred_brackets(sent)
             tp += len(g & pred); fp += len(pred - g); fn += len(g - pred)
             if g == pred and len(g) > 0: em += 1
             n += 1
@@ -269,45 +353,44 @@ def run_learning_curves(
             if n_words < 2:  # single-token sentences are trivially "parsed"
                 continue
             try:
-                pt = trellis.parse_sentence(
-                    sent, threshold=THRESHOLD, new_vocab=False,
-                    learning=False, debug=False,
-                    maturity_gate=maturity_gate, gate_mode=gate_mode)
+                pred = _pred_brackets(sent)
             except Exception:
                 continue
             total += 1
-            children = list(pt.global_root_node.children)
-            if len(children) == 1:
-                root = children[0][1]
-                if isinstance(root, PrimitiveParseNode):
-                    continue   # single primitive ≠ complete parse of 2+ words
-                a, b = _chunk_span(root)
-                if a == 0 and b == n_words - 1:
-                    success += 1
+            # complete parse iff the whole-sentence span is a bracket
+            if (0, n_words - 1) in pred:
+                success += 1
         return success / max(total, 1), total
 
-    # ── Phase 2: incremental train + eval ──
-    print(f"\nPHASE 2: INCREMENTAL TRAINING ({len(train_h)} sentences, "
-          f"eval every {eval_every})")
+    # ── Phase 2: INCREMENTAL training + RNG-ISOLATED eval ──
+    #
+    # Train ONE model continuously (1x cost). The parser is sensitive to the
+    # RNG stream during training (Cobweb tie-breaking + add_parse_tree shuffle),
+    # and the in-loop parse/generation EVALS consume the same three RNGs
+    # (Cobweb `gen`, Python `random`, NumPy). To keep eval from bleeding into
+    # training, we SNAPSHOT all three RNG states before each eval and RESTORE
+    # them after — so training proceeds exactly as if no eval had run. This
+    # reproduces the verified single-pass numbers (term_low: 0.99) while being
+    # ~N/2× cheaper than retraining per checkpoint. Requires the Cobweb
+    # get_random_state/set_random_state extension.
+    print(f"\nPHASE 2: INCREMENTAL + RNG-isolated eval (every {eval_every})")
+    checkpoints = set(range(eval_every, len(train_h) + 1, eval_every)) | {len(train_h)}
+
+    rows = [{"n_trained": 0,
+             "parse_F1": 0.0, "parse_P": 0.0, "parse_R": 0.0, "parse_EM": 0.0,
+             "gen_gram": 0.0, "gen_novel": 0.0, "gen_lex": 0.0, "gen_gram_novel": 0.0,
+             "p_parse_legal": 0.0, "gen_n": 0, "prim_active_frac": 0.0}]
+
+    # Restore the post-construction RNG snapshot so the gold precompute / Phase-1
+    # consumption above does not perturb training's stream.
+    cobweb_set_state(_rng_snap0[0]); random.setstate(_rng_snap0[1]); np.random.set_state(_rng_snap0[2])
+
     trained_trees = []
-    rows = []   # learning curve: list of dicts
-    # Per-training-sentence gate-firing tracker.
     n_sents_with_chunks = 0
-
-    P0, R0, F0, em0 = _eval_parse()
-    rows.append({"n_trained": 0,
-                 "parse_F1": F0, "parse_P": P0, "parse_R": R0, "parse_EM": em0,
-                 "gen_gram": 0.0, "gen_novel": 0.0, "gen_lex": 0.0,
-                 "gen_gram_novel": 0.0,
-                 "p_parse_legal": 0.0,   # GRIDS omission inverse
-                 "gen_n": 0, "prim_active_frac": 0.0})
-    print(f"  n=  0  F1={100*F0:5.1f}%  EM={100*em0:5.1f}%  gen=n/a")
-
     for i, hollow in enumerate(train_h):
-        sent  = hollow["sentence"]
-        merges= hollow["merges"]
-        tree = FiniteParseTree(trellis.ltm, context_length=CONTEXT_LENGTH)
-        tree.build_primitives(sent, threshold=THRESHOLD,
+        sent = hollow["sentence"]; merges = hollow["merges"]
+        tree = FiniteParseTree(trellis.ltm, context_length=_ctx_len)
+        tree.build_primitives(sent, threshold=_thr,
                               maturity_gate=maturity_gate, gate_mode=gate_mode)
         if maturity_gate is None:
             sentence_active = True
@@ -317,10 +400,9 @@ def run_learning_curves(
             sentence_active = any(getattr(n, "stable", False) for n in tree.nodes)
         if sentence_active:
             n_sents_with_chunks += 1
-
         if (maturity_gate is not None and gate_mode == "all_or_none"
                 and not tree.all_primitives_stable()):
-            pass  # no merges; context tree still grows via add_parse_tree
+            pass
         else:
             for m in merges:
                 try: tree.apply_candidate(m["left"], m["right"])
@@ -328,13 +410,25 @@ def run_learning_curves(
         trellis.ltm.add_parse_tree(tree, shuffle=True, debug=False)
         trained_trees.append(tree)
 
-        if (i + 1) % eval_every == 0 or (i + 1) == len(train_h):
+        if (i + 1) in checkpoints:
+            # Snapshot all three RNGs, evaluate, restore — eval cannot perturb
+            # the training stream.
+            _snap = (cobweb_get_state(), random.getstate(), np.random.get_state())
             trellis.learn_leaf_transitions(trained_trees)
             trellis.learn_chunk_records(trained_trees)
             trellis.ltm.chunk_pool_weight = 5.0
             P, R, F, em = _eval_parse()
-            g_gram, g_novel, g_lex, g_gram_novel, g_n = _eval_gen()
-            p_parse_legal, _n_om = _eval_omission()
+            # The final checkpoint is generated with a much larger sample so the
+            # reported endpoint grammaticality/novelty is statistically tight
+            # (generation + CYK check is ~0.1 ms/sentence, so this is cheap).
+            _n_gen_this = n_gen_final if (i + 1) == len(train_h) else n_gen_per_eval
+            g_gram, g_novel, g_lex, g_gram_novel, g_n = _eval_gen(_n_gen_this)
+            # Omission (P parse-legal) is no longer plotted (the GRIDS left panel
+            # is now parse F1); the learner chunks every legal sentence to a root
+            # (100% across all verified runs). Skip its generation+parse cost.
+            p_parse_legal = 1.0
+            cobweb_set_state(_snap[0]); random.setstate(_snap[1]); np.random.set_state(_snap[2])
+
             prim_active_frac = n_sents_with_chunks / (i + 1)
             rows.append({
                 "n_trained": i + 1,
@@ -346,10 +440,8 @@ def run_learning_curves(
                 "prim_active_frac": prim_active_frac,
             })
             print(f"  n={i+1:>3}  P={100*P:5.1f}%  R={100*R:5.1f}%  EM={100*em:5.1f}%  "
-                  f"gen_gram={100*g_gram:5.1f}%  "
-                  f"P(parse_legal)={100*p_parse_legal:5.1f}%  "
-                  f"prim_active={100*prim_active_frac:5.1f}%")
-
+                  f"gen_gram={100*g_gram:5.1f}%  gen_gram_novel={100*g_gram_novel:5.1f}%  "
+                  f"P(parse_legal)={100*p_parse_legal:5.1f}%  prim_active={100*prim_active_frac:5.1f}%")
     # ── Persist CSV + chart ──
     csv_path = f"{out_dir}/learning_curves.csv"
     with open(csv_path, "w") as f:

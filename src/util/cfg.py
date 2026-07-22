@@ -32,34 +32,31 @@ POS_GRAMMAR1 = {
 
 POS_CORPUS1 = ["Det", "N", "Adj", "V", "P"]
 
-# MED grammar (TEST_GRAMMAR1). Every nonterminal expansion has
-# exactly two right-hand-side elements, so derivation trees are
-# strictly binary -- no post-hoc binarisation is required. PP
-# attaches via the recursive S -> S PP production; AdjP is
-# right-recursive and bottoms out at Adj+N.
+# MED grammar (TEST_GRAMMAR1) — strictly BINARY: every syntactic
+# non-terminal expansion has exactly two right-hand-side children.
+# Lexical preterminals (Det, N, Adj, V, P) keep their unary
+# ``POS → word`` rewrites since they are the lexicon. The grammar
+# avoids unary syntactic productions like ``AdjP → N`` or
+# ``AdjP → Adj`` (which would produce singleton wrappers in the
+# parse trees) by giving NP a no-modifier shortcut ``Det N`` and
+# folding adjective recursion into AdjP directly. AdjP is removed
+# entirely; AdjP handles adjective chaining.
 TEST_GRAMMAR1 = {
-    "S": [
-        ["NP", "VP"],
-        ["S", "PP"],
-    ],
+    "S":     [["NP", "VP"]],
 
-    "NP": [
-        ["Det", "N"],
-        ["Det", "AdjP"],
-    ],
+    # No-modifier NP goes straight to Det+N; modified NP uses AdjP.
+    "NP":    [["Det", "N"], ["Det", "N"], ["Det", "N"],
+              ["Det", "AdjP"], ["Det", "AdjP"]],
 
-    "AdjP": [
-        ["Adj", "AdjP"],
-        ["Adj", "N"],
-    ],
+    # AdjP always introduces at least one adjective.
+    "AdjP":  [["Adj", "N"], ["Adj", "N"], ["Adj", "AdjP"]],
 
-    "VP": [
-        ["V", "NP"],
-    ],
+    # No intransitive ``VP → V`` (would be unary); transitive only.
+    "VP":    [["V", "NP"], ["V", "VPobj"]],
 
-    "PP": [
-        ["P", "NP"],
-    ],
+    "VPobj": [["NP", "PP"]],
+
+    "PP":    [["P", "NP"]],
 
     "Det": [["the"], ["a"]],
     "N": [["cat"], ["dog"], ["man"], ["woman"], ["park"], ["telescope"]],
@@ -77,7 +74,7 @@ TEST_CORPUS1 = (
 )
 
 
-# ── Terminal-sweep helper ─────────────────────────────────────────────
+# ── Terminal-experiment helper ─────────────────────────────────────────────
 # Extended terminal pools for the lexicon-size variation experiment.
 # Each pool overlaps with TEST_GRAMMAR1's terminals at the head so the
 # "med" variant matches the canonical grammar exactly.
@@ -99,19 +96,20 @@ def make_grammar_variant(lex_sizes):
 
     ``lex_sizes`` is a dict like ``{"Det": 2, "N": 6, "Adj": 5, "V": 5, "P": 4}``
     specifying how many terminal options each POS class has. Returns
-    ``(grammar, corpus)`` ready to feed to the TRELLIS pipeline.
+    ``(grammar, corpus)`` ready to feed to the WEBSTER pipeline.
 
-    The non-terminal productions (S, NP, VP, PP, AdjP) are kept
-    identical to ``TEST_GRAMMAR1`` so structural complexity stays
-    constant; only the lexicon size varies. This isolates the effect
-    of lexical diversity on parser learning.
+    The non-terminal productions (S, NP, AdjP, VP, VPobj, PP) are
+    kept identical to ``TEST_GRAMMAR1`` so structural complexity
+    stays constant; only the lexicon size varies. This isolates the
+    effect of lexical diversity on parser learning.
     """
     grammar = {
-        "S":   list(TEST_GRAMMAR1["S"]),
-        "NP":  list(TEST_GRAMMAR1["NP"]),
-        "AdjP": list(TEST_GRAMMAR1["AdjP"]),
-        "VP":  list(TEST_GRAMMAR1["VP"]),
-        "PP":  list(TEST_GRAMMAR1["PP"]),
+        "S":     list(TEST_GRAMMAR1["S"]),
+        "NP":    list(TEST_GRAMMAR1["NP"]),
+        "AdjP":  list(TEST_GRAMMAR1["AdjP"]),
+        "VP":    list(TEST_GRAMMAR1["VP"]),
+        "VPobj": list(TEST_GRAMMAR1["VPobj"]),
+        "PP":    list(TEST_GRAMMAR1["PP"]),
     }
     corpus = []
     for cls, n in lex_sizes.items():
@@ -124,7 +122,7 @@ def make_grammar_variant(lex_sizes):
     return grammar, corpus
 
 
-# Default variant catalogue for the terminal-sweep experiment.
+# Default variant catalogue for the terminal-experiment.
 # - ``low``  : 11 terminals — every POS class has just 2-3 words.
 # - ``med``  : 22 terminals — matches TEST_GRAMMAR1 exactly.
 # - ``high`` : 39 terminals — pool is doubled for maximum lexical
@@ -136,17 +134,23 @@ LEXICON_VARIANTS = {
 }
 
 
-# SMALL grammar (TEST_GRAMMAR2). Every nonterminal expansion has
-# exactly two right-hand-side elements (strictly binary). The unary
-# intransitive ``VP -> V`` production has been removed so every
-# verb is treated as transitive.
+# SMALL grammar (TEST_GRAMMAR2) — the minimal core of MED.
+# Every production and every terminal here is a strict subset of
+# TEST_GRAMMAR1 (MED): S/NP/VP take only MED's no-modifier alternatives,
+# and the lexicon is exactly MED's Det/N/V pools (no Adj/P). This makes the
+# three-grammar experiment a clean nested progression SMALL ⊂ MED ⊂ LARGE,
+# so added complexity is purely additive. Sharing MED's full Det/N/V lexicon
+# also gives SMALL a 2·6·5·2·6 = 720-sentence space, enough to train past
+# 320 sentences (a 4-noun/4-verb lexicon saturated at 256). Strictly binary:
+# only the transitive ``V NP`` VP is allowed, so VP is never a unary wrapper.
 TEST_GRAMMAR2 = {
-    "S":   [["NP", "VP"]],
-    "NP":  [["Det", "N"]],
-    "VP":  [["V", "NP"]],
+    "S": [["NP", "VP"]],
+    "NP": [["Det", "N"]],
+    "VP": [["V", "NP"]],
+
     "Det": [["the"], ["a"]],
-    "N":   [["dog"], ["cat"], ["man"], ["woman"]],
-    "V":   [["runs"], ["sees"], ["likes"], ["chases"]],
+    "N": [["cat"], ["dog"], ["man"], ["woman"], ["park"], ["telescope"]],
+    "V": [["saw"], ["liked"], ["chased"], ["found"], ["admired"]],
 }
 
 # Define a very simple grammar (no recursion, fewer rules)
@@ -177,61 +181,62 @@ ADDED_CORPUS2 = sum(
     []
 )
 
-# Grammar with relative clauses and stacked adjectival phrases.
-# NP is biased toward terminal expansions (3× weight on non-recursive
-# productions) so RelClause recursion behaves like AdjP recursion in
-# TEST_GRAMMAR1: a tail-heavy distribution that almost always
-# terminates. Without this bias the uniform 50/50 choice between
-# "no RelClause" and "with RelClause" leads to runaway expansion via
-# RelClause → RelPro VP → V NP → ... → RelClause again, producing
-# 20+ word sentences during _eval_omission that crippled grammar_large
-# runtime in the May 28 chain.
-# LARGE grammar (TEST_GRAMMAR3). Every nonterminal expansion has
-# exactly two right-hand-side elements (strictly binary). NPs gain
-# RelClause modification recursively via NP -> NP RelClause; PPs
-# adjoin at the S level via S -> S PP (same convention as MED).
-# The NP expansions are weighted to keep the terminal expansions
-# dominant -- without the bias, RelClause + AdjP recursion together
-# blow up the tail of sentence length.
+# LARGE grammar (TEST_GRAMMAR3) — MED plus relative clauses.
+# Every MED production is retained verbatim and every MED terminal is
+# kept, so LARGE is a strict SUPERSET of MED (which is itself a strict
+# superset of SMALL): the experiment is a clean nested progression
+# SMALL ⊂ MED ⊂ LARGE. LARGE adds relative clauses on top of MED:
+# a relative-clause NP shape (Det Nbar), the Nbar and RelClause
+# nonterminals, and the RelPro POS class, together with a handful of
+# extra Det/N/Adj/V/P terminals appended to MED's pools. Strictly
+# unary/binary throughout (no ternary/n-ary); all VPs remain transitive.
 TEST_GRAMMAR3 = {
-    "S": [
-        ["NP", "VP"],
-        ["S", "PP"],
-    ],
+    "S":     [["NP", "VP"]],
 
-    "NP": [
-        # Terminal expansions -- duplicated 6x so they dominate.
-        ["Det", "N"], ["Det", "N"], ["Det", "N"],
-        ["Det", "N"], ["Det", "N"], ["Det", "N"],
-        ["Det", "AdjP"], ["Det", "AdjP"], ["Det", "AdjP"],
-        ["Det", "AdjP"], ["Det", "AdjP"], ["Det", "AdjP"],
-        # Recursive expansion -- single weight; ~7% per NP.
-        ["NP", "RelClause"],
-    ],
+    # MED's two NP shapes (Det N, Det AdjP) plus the relative-clause
+    # shape (Det Nbar). Weighting (6/2/1) keeps RelClause sentences a
+    # meaningful minority (~20%) of the corpus — enough to require the
+    # parser to handle embedded clauses, but not so frequent that they
+    # dominate and prevent convergence on the simpler NP shapes first.
+    "NP":    [["Det", "N"], ["Det", "N"], ["Det", "N"],
+              ["Det", "N"], ["Det", "N"], ["Det", "N"],
+              ["Det", "AdjP"], ["Det", "AdjP"],
+              ["Det", "Nbar"]],
 
-    # VP productions: strictly binary. Transitive (V NP) plus
-    # intransitive-with-PP (V PP). The ternary V NP PP shape has
-    # been removed; PPs now attach at the S level via S -> S PP.
-    "VP": [
+    # AdjP — identical to MED. Adjective phrase only; always carries at
+    # least one adjective; recursion via Adj+AdjP.
+    "AdjP":  [["Adj", "N"], ["Adj", "N"], ["Adj", "AdjP"]],
+
+    # Nbar (new in LARGE) — a noun-bar: a noun head (or adjective-
+    # modified noun head) with a relative clause attached, in X-bar
+    # terminology an N expanded by a complement clause.
+    "Nbar":  [["N", "RelClause"], ["N", "RelClause"],
+              ["AdjP", "RelClause"]],
+
+    # VP is identical to MED (V NP, V VPobj).
+    "VP":    [
         ["V", "NP"],
-        ["V", "PP"],
+        ["V", "VPobj"],
     ],
 
-    "AdjP": [
-        ["Adj", "AdjP"],
-        ["Adj", "N"],
-    ],
+    "VPobj": [["NP", "PP"]],
 
-    "RelClause": [["RelPro", "VP"]],
+    "RelClause": [["RelPro", "VP"]],   # new in LARGE
 
-    "PP": [["P", "NP"]],
+    "PP":    [["P", "NP"]],
 
+    # Terminals: MED's pools with extras appended. Every MED terminal is
+    # retained so LARGE ⊇ MED lexically. The added animate nouns (boy,
+    # girl, teacher) read naturally as RelClause subjects.
     "Det": [["the"], ["a"], ["this"], ["that"]],
-    "N": [["book"], ["boy"], ["girl"], ["teacher"], ["robot"], ["apple"]],
-    "Adj": [["tall"], ["curious"], ["blue"], ["ancient"], ["friendly"]],
-    "RelPro": [["who"], ["that"], ["which"]],
-    "V": [["saw"], ["liked"], ["chased"], ["carried"], ["read"], ["admired"]],
-    "P": [["with"], ["without"], ["near"]]
+    "N": [["cat"], ["dog"], ["man"], ["woman"], ["park"], ["telescope"],
+          ["boy"], ["girl"], ["teacher"]],
+    "Adj": [["big"], ["small"], ["red"], ["quick"], ["lazy"],
+            ["tall"], ["curious"]],
+    "RelPro": [["who"], ["that"], ["which"]],   # new POS class in LARGE
+    "V": [["saw"], ["liked"], ["chased"], ["found"], ["admired"],
+          ["carried"], ["read"]],
+    "P": [["with"], ["in"], ["on"], ["under"], ["near"]],
 }
 
 TEST_CORPUS3 = (
@@ -244,15 +249,17 @@ TEST_CORPUS3 = (
 )
 
 
-# ── Canonical structural-complexity progression ────────────────────────
-# SMALL  : minimal CFG — flat S, NP=Det N, VP=V (NP)
-#          (TEST_GRAMMAR2). 4 nouns, 4 verbs, 2 dets, no AdjP/PP.
-# MED    : +AdjP recursion, +PP, +ditransitive VP→V NP PP
-#          (TEST_GRAMMAR1). The hand-annotated hollow corpus targets
-#          this grammar, so it's the apples-to-apples baseline.
-# LARGE  : +RelClause modifier on NP, +RelPro POS class
-#          (TEST_GRAMMAR3). Same lexicon size as MED but with embedded
-#          sentence-like structures inside NPs.
+# ── Canonical structural-complexity progression (strictly nested) ──────
+# SMALL ⊂ MED ⊂ LARGE: each grammar's productions AND terminals are a
+# subset of the next, so added complexity is purely additive.
+# SMALL  : minimal core — S→NP VP, NP→Det N, VP→V NP (TEST_GRAMMAR2).
+#          MED's full 2 Det / 6 N / 5 V lexicon; no Adj/P, no AdjP/PP.
+# MED    : SMALL +AdjP recursion, +PP, +ditransitive VP→V VPobj, and
+#          the modified NP shape Det AdjP (TEST_GRAMMAR1). The hand-
+#          annotated hollow corpus targets this grammar.
+# LARGE  : MED +RelClause on NP (Det Nbar), +Nbar/RelClause non-
+#          terminals, +RelPro POS class, with extra Det/N/Adj/V/P
+#          terminals appended to MED's pools (TEST_GRAMMAR3).
 #
 # The old numeric names (TEST_GRAMMAR1/2/3) remain as aliases so all
 # existing scripts and tests continue to work without modification.
@@ -459,7 +466,7 @@ TEST_CORPUS_HUGE = (
 )
 
 
-def generate_with_merges(symbol, grammar, flatten_at_parent=()):
+def generate_with_merges(symbol, grammar, flatten_at_parent=("VP",)):
     """Generate a sentence AND the hollow-style merge sequence,
     matching the hand-annotated convention in
     ``data/test_hollow_grammar_1/``.

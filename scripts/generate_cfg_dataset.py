@@ -24,25 +24,26 @@ from util.cfg import (generate_with_merges,
 
 # (out_dir, grammar, seed, n_target, max_words, flatten_at_parent).
 #
-# Per-grammar binarization choices:
-#   SMALL / MED — flatten ``VP`` at parent level. This matches the
-#     hand-annotated ``data/test_hollow_grammar_1`` convention: the
-#     hollow corpus has e.g. ``(0,2) "a park admired"`` brackets — V
-#     glued INCREMENTALLY into the running S-chunk, no VP constituent.
-#   LARGE — same flatten convention; RelClause is the only extra
-#     structure on top of MED.
+# Per-grammar flatten choices:
+#   SMALL — flatten ``VP`` only. The grammar has no VPobj nonterminal.
+#   MED / LARGE — flatten ``VP`` and ``VPobj``. Both nonterminals get
+#     bubbled up to the running S-chunk so that V / NP / PP merge
+#     incrementally (matching the hand-annotated hollow corpus
+#     convention: ``(0,2) "a park admired"`` brackets — V glued into
+#     the running S, no VP constituent). RelClause in LARGE is NOT
+#     flattened: it is a real constituent that the parser should
+#     learn as a chunk type.
 CONFIGS = [
-    # SMALL: minimal grammar (S→NP VP; VP=V (NP); 4 N, 4 V, 2 Det),
+    # SMALL: minimal grammar (S→NP VP; VP=V NP | V; 4 N, 4 V, 2 Det),
     # tighter length cap because the surface forms are short.
-    ("data/cfg_grammar_small", TEST_GRAMMAR_SMALL, 13, 300,  8, ()),
-    ("data/cfg_grammar_med",   TEST_GRAMMAR_MED,   13, 300, 10, ()),
+    ("data/cfg_grammar_small", TEST_GRAMMAR_SMALL, 13, 300,  8, ("VP",)),
+    ("data/cfg_grammar_med",   TEST_GRAMMAR_MED,   13, 300, 10, ("VP", "VPobj")),
     # LARGE gets 2x the training data and a tighter length cap.
-    # Rationale: TEST_GRAMMAR_LARGE adds RelClauses and a 3-way VP
-    # expansion (V NP | V NP PP | V PP), roughly doubling the number
-    # of distinct chunk patterns vs MED. The parser needs proportionally
-    # more examples per chunk type to converge. Tighter length (10) also
-    # kills the deep RelClause-in-RelClause cases that dominate the long tail.
-    ("data/cfg_grammar_large", TEST_GRAMMAR_LARGE, 23, 400, 10, ()),
+    # Rationale: TEST_GRAMMAR_LARGE adds RelClauses on top of MED's
+    # productions. The parser needs proportionally more examples per
+    # chunk type to converge. Tighter length (10) also kills the deep
+    # RelClause-in-RelClause cases that dominate the long tail.
+    ("data/cfg_grammar_large", TEST_GRAMMAR_LARGE, 23, 400, 10, ("VP", "VPobj")),
 ]
 
 

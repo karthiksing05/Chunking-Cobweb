@@ -10,7 +10,7 @@ Walks every experiment directory under ``confs/acs-26/`` and regenerates:
       learning_curves/        →  aggregated.csv  +  learning_curves.png
                                  +  grids_curves.png  (mean ± 1σ bands)
 
-  * **Sweep tests** (grammar_sweep / terminal_sweep / terminal_sweep_long):
+  * **Experiment tests** (grammar_experiment / terminal_experiment / terminal_experiment_long):
       <variant>/seed_*/  →  per-seed learning_curves.png + grids_curves.png
       <variant>/         →  aggregated.csv + learning_curves.png + grids_curves.png
       <top-level>/       →  comparison.png  +  grids_overlay.png
@@ -19,14 +19,14 @@ Walks every experiment directory under ``confs/acs-26/`` and regenerates:
 The point: **no model training happens**. All data is read from per-seed
 CSVs (and per-seed cand_heur_log files for the hollow_learn histograms),
 so this is fast and safe to run repeatedly. Tweak the plot code in
-``_helpers.py`` (or inline in this file) to apply new paper-style
+``experiment_harness.py`` (or inline in this file) to apply new paper-style
 themes — colour palette, panel layout, axis ranges, etc. — without
 re-running the heavy training pipeline.
 
 Usage:
     python confs/acs-26/regenerate_viz.py                 # all experiments
     python confs/acs-26/regenerate_viz.py grammar_large   # one experiment
-    python confs/acs-26/regenerate_viz.py grammar_small grammar_sweep
+    python confs/acs-26/regenerate_viz.py grammar_small grammar_experiment
 """
 import os, sys, glob, csv
 
@@ -39,14 +39,14 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from _helpers import (
+from experiment_harness import (
     SEEDS,
     load_learning_curve_csv, aggregate_seeds, write_aggregated_csv,
     plot_learning_curves_with_band, plot_overlay_with_bands,
     build_aggregate_hollow_visuals,
     # Monochromatic blue palette — shared across this script and
-    # the aggregate plotters in _helpers.py. Re-theme by editing
-    # the palette block in _helpers.py.
+    # the aggregate plotters in experiment_harness.py. Re-theme by editing
+    # the palette block in experiment_harness.py.
     BLUE_DARKEST, BLUE_DARK, BLUE_MID, BLUE_LIGHT,
     BLUE_LIGHTER, BLUE_LIGHTEST, PALETTE_TRIAD,
 )
@@ -56,21 +56,21 @@ from _helpers import (
 # Grammar tests: hollow_learn aggregate + learning_curves aggregate.
 GRAMMAR_TESTS = ["grammar_small", "grammar_med", "grammar_large"]
 
-# Sweep tests: per-variant learning_curves aggregate + multi-variant overlay.
+# Experiment tests: per-variant learning_curves aggregate + multi-variant overlay.
 # Variant colors use the monochromatic blue triad (PALETTE_TRIAD)
 # so "increasing complexity / lexicon size" reads as "deeper blue".
 _TRIAD3 = {0: PALETTE_TRIAD[0], 1: PALETTE_TRIAD[1], 2: PALETTE_TRIAD[2]}
 
-SWEEP_TESTS = {
-    "grammar_sweep": {
+EXPERIMENT_TESTS = {
+    "grammar_experiment": {
         "variants": ["small", "med", "large"],
         "colors":   {"small": _TRIAD3[0], "med": _TRIAD3[1], "large": _TRIAD3[2]},
         "labels":   {"small": "small (S→NP VP; VP=V (NP))",
                      "med":   "med (+AdjP, PP, V NP PP)",
                      "large": "large (+RelClause)"},
-        "title":    "TEST_GRAMMAR sweep — learning curves vs grammar complexity",
+        "title":    "TEST_GRAMMAR experiment — learning curves vs grammar complexity",
     },
-    "terminal_sweep": {
+    "terminal_experiment": {
         "variants": ["low", "med", "high"],
         "colors":   {"low": _TRIAD3[0], "med": _TRIAD3[1], "high": _TRIAD3[2]},
         "labels":   {"low":  "low  (11 terminals)",
@@ -78,7 +78,7 @@ SWEEP_TESTS = {
                      "high": "high (39 terminals)"},
         "title":    "TEST_GRAMMAR_MED — learning curves vs lexicon size (N=200)",
     },
-    "terminal_sweep_long": {
+    "terminal_experiment_long": {
         "variants": ["low", "med", "high"],
         "colors":   {"low": _TRIAD3[0], "med": _TRIAD3[1], "high": _TRIAD3[2]},
         "labels":   {"low":  "low  (11 terminals)",
@@ -219,9 +219,9 @@ def regen_grammar_test(name):
         print(f"  (no learning_curves dir)")
 
 
-def regen_sweep(name, spec):
+def regen_experiment(name, spec):
     """Regen per-variant aggregates + overlay (comparison.png +
-    grids_overlay.png) for a sweep test."""
+    grids_overlay.png) for a experiment test."""
     print(f"\n=== {name} ===")
     base = os.path.join(_HERE, name)
     if not os.path.isdir(base):
@@ -257,16 +257,16 @@ def regen_sweep(name, spec):
 def main():
     targets = sys.argv[1:]
     if not targets:
-        targets = list(GRAMMAR_TESTS) + list(SWEEP_TESTS)
+        targets = list(GRAMMAR_TESTS) + list(EXPERIMENT_TESTS)
 
     for t in targets:
         if t in GRAMMAR_TESTS:
             regen_grammar_test(t)
-        elif t in SWEEP_TESTS:
-            regen_sweep(t, SWEEP_TESTS[t])
+        elif t in EXPERIMENT_TESTS:
+            regen_experiment(t, EXPERIMENT_TESTS[t])
         else:
             print(f"[WARN] unknown experiment: {t}")
-            print(f"       valid: {' '.join(list(GRAMMAR_TESTS) + list(SWEEP_TESTS))}")
+            print(f"       valid: {' '.join(list(GRAMMAR_TESTS) + list(EXPERIMENT_TESTS))}")
 
     print("\n=== done ===")
 

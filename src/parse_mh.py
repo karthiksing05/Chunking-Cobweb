@@ -590,18 +590,62 @@ def _get_or_register_cplx_vid(complexity: int, id_to_value: list, value_to_id: d
 # label_path helper (single leaf pointer)
 # ---------------------------------------------------------------------------
 
-def _build_label_from_ctx_leaf(ctx_leaf, value_to_id: dict) -> int:
-    """
-    Return the single context-hierarchy leaf concept vocab ID.
+def _cut_ancestor(ctx_leaf, cut=None, tau=None):
+    """Walk from a context leaf UP to the identifier level named by ``cut``.
 
-    Under Methodology 4.0 the multi-depth label_path is replaced by a
-    single leaf pointer — the most-specific concept that a node was
-    categorized into.
+    An element is named by a *concept*, and Cobweb theory has a privileged
+    answer for which one: not the idiosyncratic leaf, but a well-supported
+    ancestor. This picks that ancestor so the identifier generalises across
+    surface forms (the sparse-lexicon fix — same-POS neighbours collapse to
+    one id instead of fragmenting per word).
+
+      "leaf" / None : the leaf itself (most specific; legacy behaviour).
+      "basic"       : the basic-level (max-EPMI / max-KL-from-root) ancestor —
+                      the Cobweb-native notion of the natural naming level.
+      "maturity"    : deepest ancestor whose instance count >= tau — names an
+                      element by the most specific concept with enough
+                      evidence; shares its threshold with the climbing gate.
+    """
+    if ctx_leaf is None:
+        return None
+    if not cut or cut == "leaf":
+        return ctx_leaf
+    if cut == "basic":
+        try:
+            return ctx_leaf.get_basic(200, 100, debug=False,
+                                      eval_alpha=-1.0, use_root=True)
+        except Exception:
+            return ctx_leaf
+    if cut == "maturity":
+        n = ctx_leaf
+        thr = tau or 0
+        while getattr(n, "parent", None) is not None and float(n.count) < thr:
+            n = n.parent
+        return n
+    return ctx_leaf
+
+
+def _build_label_from_ctx_leaf(ctx_leaf, value_to_id: dict,
+                               cut=None, tau=None, add_to_vocab=None) -> int:
+    """
+    Return the context-hierarchy concept vocab ID that NAMES ``ctx_leaf``.
+
+    Under Methodology 4.0 the multi-depth label_path is replaced by a single
+    concept pointer. ``cut`` chooses WHICH concept: the leaf (default), or a
+    well-supported ancestor (see ``_cut_ancestor``) so the identifier
+    generalises across surface forms. Registers the concept string on demand
+    when ``add_to_vocab`` is supplied (coarser ancestors may not be in the
+    vocab yet).
     """
     if ctx_leaf is None:
         return 0
-    concept_str = f"CONCEPT-{ctx_leaf.concept_hash()}"
-    return value_to_id.get(concept_str, 0)
+    node = _cut_ancestor(ctx_leaf, cut, tau)
+    concept_str = f"CONCEPT-{node.concept_hash()}"
+    vid = value_to_id.get(concept_str, 0)
+    if vid == 0 and add_to_vocab is not None:
+        add_to_vocab(concept_str)
+        vid = value_to_id.get(concept_str, 0)
+    return vid
 
 
 
@@ -741,6 +785,82 @@ class CompositeParseNode(object):
         node.is_global_root = True
         return node
 
+    @staticmethod
+    def _edge_primitive(node, first=True):
+        """Leftmost (first=True) or rightmost primitive leaf under ``node`` —
+        the edge word of the constituent. Returns a PrimitiveParseNode."""
+        cur = node
+        guard = 0
+        while not isinstance(cur, PrimitiveParseNode):
+            kids = getattr(cur, "children", None)
+            if not kids:
+                return cur if isinstance(cur, PrimitiveParseNode) else None
+            ordered = sorted(kids, key=lambda y: y[0] if y[0] is not None else 0)
+            cur = ordered[0][1] if first else ordered[-1][1]
+            guard += 1
+            if guard > 64:
+                break
+        return cur if isinstance(cur, PrimitiveParseNode) else None
+
+    @staticmethod
+    def _edge_primitives(node, first=True, n=1):
+        """Up to ``n`` edge primitives from the left (first=True) or right
+        end of ``node``, in inward order (closest to the edge first)."""
+        out = []
+        def collect(cur, depth=0):
+            if len(out) >= n or depth > 128:
+                return
+            if isinstance(cur, PrimitiveParseNode):
+                out.append(cur); return
+            kids = getattr(cur, "children", None)
+            if not kids:
+                return
+            ordered = sorted(kids, key=lambda y: y[0] if y[0] is not None else 0)
+            seq = ordered if first else list(reversed(ordered))
+            for _, c in seq:
+                collect(c, depth + 1)
+                if len(out) >= n:
+                    return
+        collect(node)
+        return out
+
+    @staticmethod
+    def _ctx_class_str(ltm, cx, depth):
+        """POS-class symbol for a context instance: the context-hierarchy
+        cluster at a FIXED shallow depth. A depth-4 cut consolidates same-POS
+        terminals into ~1 pure cluster (word-level homog 0.95 / completeness
+        0.81 on term_high) where the leaf/basic level fragments each POS across
+        ~7 clusters (completeness 0.43) — see confs/acs-26/_diag_prim_pos.
+        This abstracts over the sparse terminal lexicon so rare/unseen words
+        inherit their POS-class rather than a dead raw word_id."""
+        if not cx:
+            return None
+        cref = ltm.content_ref_attr
+        cx = dict(cx); cx.pop(cref, None)
+        node = ltm.context_hierarchy.root
+        d = 0
+        while node.children and d < depth:
+            node = max(node.children, key=lambda c: c.log_prob_instance(cx))
+            d += 1
+        return f"CCLASS-{node.concept_hash()}"
+
+    @staticmethod
+    def _ctx_class_bag(ltm, node_prim, depth):
+        """{vid: 1} bag holding the POS-class symbol of a primitive's context,
+        or None. Registers the symbol in the vocab on demand."""
+        if node_prim is None:
+            return None
+        try:
+            cx = node_prim.get_context_instance()
+        except Exception:
+            return None
+        s = CompositeParseNode._ctx_class_str(ltm, cx, depth)
+        if s is None:
+            return None
+        ltm.add_to_vocab(s)
+        vid = ltm.value_to_id.get(s)
+        return {vid: 1} if vid is not None else None
+
     # ------------------------------------------------------------------
     @staticmethod
     def create_content_instance(left_node, right_node, ltm) -> dict:
@@ -790,12 +910,113 @@ class CompositeParseNode(object):
         right_c   = getattr(right_node, "complexity", 1)
         left_cplx_vid  = _get_or_register_cplx_vid(left_c,  ltm.id_to_value, ltm.value_to_id)
         right_cplx_vid = _get_or_register_cplx_vid(right_c, ltm.id_to_value, ltm.value_to_id)
-        return {
-            0: ltm._bag_for_context_inst(left_ctx),
-            1: ltm._bag_for_context_inst(right_ctx),
-            2: {left_cplx_vid:  1},
-            3: {right_cplx_vid: 1},
-        }
+        inst = {}
+        # Child complexity tags (attrs 2/3) — a STRUCTURAL disambiguator (NP=Det+N
+        # vs S=NP+VP can share a (cat_L,cat_R) shape but differ in depth). Gated
+        # so a pure two-axis representation (context+content only, no engineered
+        # hints) can drop it when the child categories already separate classes.
+        if not getattr(ltm, 'content_drop_cplx', False):
+            inst[2] = {left_cplx_vid:  1}
+            inst[3] = {right_cplx_vid: 1}
+        # Fuzzy TopK context-pool bags for each child (attrs 0/1). Gated so a
+        # PURE-CATEGORICAL content representation ("a chunk is just the two
+        # CATEGORIES that combined") can drop them and rely solely on the sharp
+        # child-class categories (attrs 22/23). See content_drop_pool.
+        if not getattr(ltm, 'content_drop_pool', False):
+            inst[0] = ltm._bag_for_context_inst(left_ctx)
+            inst[1] = ltm._bag_for_context_inst(right_ctx)
+
+        # ── Constituent-boundary feature (postulate R1: content names the
+        # parts). A constituent's grammatical TYPE is largely fixed by its
+        # edge words — a PP opens with a preposition, a relative clause with
+        # a relative pronoun, an NP with a determiner. Encoding the first and
+        # last primitive of the whole chunk gives Cobweb a near-deterministic
+        # class axis that the fuzzy child pool-bags (attrs 0/1) blur away for
+        # DEEP chunks (where the informative edge word is nested below the
+        # immediate child). Off by default; ltm.content_boundary_feat selects
+        # "wordid" (raw lexical edge, sharpest) or "ctxbag" (edge word's
+        # context class, generalizes POS-like).
+        mode = getattr(ltm, 'content_boundary_feat', None)
+        if mode:
+            depth = int(getattr(ltm, 'content_edge_depth', 1) or 1)
+            lps = CompositeParseNode._edge_primitives(left_node,  first=True,  n=depth)
+            rps = CompositeParseNode._edge_primitives(right_node, first=False, n=depth)
+            # attrs 4.. = first-d words of the chunk (left edge, inward);
+            # attrs (4+depth).. = last-d words (right edge, inward).
+            for i in range(depth):
+                a_l = 4 + i
+                a_r = 4 + depth + i
+                lp = lps[i] if i < len(lps) else None
+                rp = rps[i] if i < len(rps) else None
+                if mode == "wordid":
+                    if lp is not None: inst[a_l] = {int(lp.word_id): 1}
+                    if rp is not None: inst[a_r] = {int(rp.word_id): 1}
+                elif mode == "ctxbag":
+                    if lp is not None: inst[a_l] = ltm._bag_for_context_inst(lp.get_context_instance())
+                    if rp is not None: inst[a_r] = ltm._bag_for_context_inst(rp.get_context_instance())
+                elif mode == "posclass":
+                    # sharp POS-class of the edge word (depth-cut context
+                    # cluster) — generalizes across the sparse terminal lexicon
+                    # where raw word_id is dead for rare/unseen words.
+                    cd = int(getattr(ltm, 'content_posclass_depth', 4))
+                    bl = CompositeParseNode._ctx_class_bag(ltm, lp, cd)
+                    br = CompositeParseNode._ctx_class_bag(ltm, rp, cd)
+                    if bl is not None: inst[a_l] = bl
+                    if br is not None: inst[a_r] = br
+
+        # ── Seam feature: the two primitives that become adjacent at the
+        # merge junction (rightmost of left child, leftmost of right child).
+        # This is the local evidence for whether the two constituents legally
+        # combine here (e.g. a noun immediately followed by a preposition is a
+        # different join than a noun followed by a verb). Off by default.
+        seam_mode = getattr(ltm, 'content_seam_feat', None)
+        if seam_mode:
+            sl = CompositeParseNode._edge_primitive(left_node,  first=False)
+            sr = CompositeParseNode._edge_primitive(right_node, first=True)
+            # fixed high indices so they never collide with the variable-depth
+            # boundary attrs (4 .. 4+2*edge_depth-1).
+            if seam_mode == "wordid":
+                if sl is not None: inst[20] = {int(sl.word_id): 1}
+                if sr is not None: inst[21] = {int(sr.word_id): 1}
+            elif seam_mode == "posclass":
+                cd = int(getattr(ltm, 'content_posclass_depth', 4))
+                bl = CompositeParseNode._ctx_class_bag(ltm, sl, cd)
+                br = CompositeParseNode._ctx_class_bag(ltm, sr, cd)
+                if bl is not None: inst[20] = bl
+                if br is not None: inst[21] = br
+
+        # ── Child-CLASS feature (stronger, robust phrase-type separation).
+        # A phrase's type is fixed by WHICH CLASSES its two children are
+        # (Det+N -> NP; Adj+N -> AdjP; V+NP -> VP; P+NP -> PP), not by the
+        # fuzzy TopK pool-bags (attrs 0/1) which blur these on unlucky seeds.
+        # We add each child's context-hierarchy CLUSTER at a fixed shallow
+        # depth (a POS/phrase-level concept) as a sharp discrete content
+        # attribute, so Cobweb clusters chunks by their (L_class, R_class)
+        # production — the near-deterministic phrase-type axis. Off by default;
+        # ltm.content_child_class enables it, ltm.content_child_class_depth
+        # sets the ancestor depth (default 4).
+        if getattr(ltm, 'content_child_class', False):
+            cd = int(getattr(ltm, 'content_child_class_depth', 4))
+            cref = ltm.content_ref_attr
+            for aidx, child in ((22, left_node), (23, right_node)):
+                try:
+                    cx = child.get_context_instance()
+                except Exception:
+                    cx = None
+                if not cx:
+                    continue
+                cx = dict(cx); cx.pop(cref, None)
+                node = ltm.context_hierarchy.root
+                d = 0
+                while node.children and d < cd:
+                    node = max(node.children, key=lambda c: c.log_prob_instance(cx))
+                    d += 1
+                cls_str = f"CCLASS-{node.concept_hash()}"
+                ltm.add_to_vocab(cls_str)
+                vid = ltm.value_to_id.get(cls_str)
+                if vid is not None:
+                    inst[aidx] = {vid: 1}
+        return inst
 
     # ------------------------------------------------------------------
     @staticmethod
@@ -1124,9 +1345,25 @@ class FiniteParseTree(object):
 
             # word identity attribute – enables generation to recover
             # the actual word from a context hierarchy leaf.
-            # Visible (positive index) so Cobweb includes it in entropy.
+            # By default VISIBLE (positive index) so Cobweb clusters on it —
+            # but that fragments each POS across many word-specific clusters
+            # (primitives never consolidate into one per-POS generalization;
+            # see _diag_prim_pos.py). With ltm.prim_word_hidden the word_id is
+            # stored at a HIDDEN (negative) index: Cobweb still TRACKS it (so
+            # generation can recover the word) but does NOT split on it, so
+            # primitives cluster by CONTEXT alone → same-POS words consolidate.
             _content_ref_attr = self.ltm.content_ref_attr
-            ctx_inst[_content_ref_attr] = {wid: 1}
+            if getattr(self.ltm, 'prim_word_hidden', False):
+                # Use a SHARED CONSTANT content-ref for all primitives so
+                # Cobweb cannot split them by word identity — they cluster by
+                # CONTEXT (POS) alone, letting same-POS words consolidate into
+                # one generalization. The word stays recoverable from the
+                # node's word_id / label; generation uses chunk records, not
+                # the context-leaf content-ref, so this is safe.
+                self.ltm.add_to_vocab("__PRIMWORD__")
+                ctx_inst[_content_ref_attr] = {self.ltm.value_to_id["__PRIMWORD__"]: 1}
+            else:
+                ctx_inst[_content_ref_attr] = {wid: 1}
 
             # categorize in context hierarchy to get label path
             _cat_mode = getattr(self.ltm, 'categorization_mode', 'dfs')
@@ -1137,8 +1374,13 @@ class FiniteParseTree(object):
             # Discrete single-identity label: primitive's identity is its word_id
             label = {wid: 1}
 
-            # Single leaf pointer: the context leaf concept this node categorized into
-            label_path = _build_label_from_ctx_leaf(leaf_node, self.value_to_id)
+            # Single concept pointer, named at the configured cut (leaf / basic /
+            # maturity) so identifiers generalise across surface forms.
+            label_path = _build_label_from_ctx_leaf(
+                leaf_node, self.value_to_id,
+                cut=getattr(self.ltm, 'context_label_cut', None),
+                tau=getattr(self.ltm, 'context_label_tau', None),
+                add_to_vocab=self.ltm.add_to_vocab)
             # Content hierarchy is bag-of-concepts now (no ref_tree) — only
             # register on context hierarchy if chunk_context wants self-LCA.
             if label_path and getattr(self.ltm, 'chunk_context', False):
@@ -1173,13 +1415,27 @@ class FiniteParseTree(object):
             node.context_after = ca
 
             # score
+            # Pass climb_count_threshold so score_data carries the
+            # climbing-ancestor signals on the context hierarchy
+            # (climb_ancestor_count/_depth/_log_prob, climb_hit_root).
+            # These let the maturity gate require the primitive's
+            # categorization to have *reached* a well-supported non-root
+            # ancestor — a fundamentally sharper check than root_log_prob
+            # (which only asks whether the surrounding context is plausible
+            # under the global marginal, regardless of whether the primitive
+            # has actually been placed into a discriminating cluster).
             score_data = _score_along_path(node_path, ctx_inst, self.ltm.context_hierarchy,
-                                            eval_alpha=getattr(self.ltm, 'context_bl_alpha', None))
+                                            eval_alpha=getattr(self.ltm, 'context_bl_alpha', None),
+                                            climb_count_threshold=self.CLIMB_COUNT_THRESHOLD_DEFAULT)
             node.score_data = score_data
 
             if maturity_gate is not None:
-                # Heuristic-based gate (met6 research). Higher score
-                # = more mature representation; admit if above threshold.
+                # Heuristic-based gate. Higher score = more mature
+                # representation; admit if above threshold. Recommended
+                # heuristic: ``("climb_ancestor_depth", 1)`` — primitive
+                # must have descended past the depth-1 catch-all bin into
+                # a depth-2+ cluster, which the context tree builds as
+                # POS-pure (or near-pure) territory across all corpora.
                 h_name, h_thr = maturity_gate
                 h_val = score_data.get(h_name, float("-inf"))
                 node.stable = (h_val is not None and h_val > h_thr)
@@ -1281,7 +1537,11 @@ class FiniteParseTree(object):
                     leaf_node, path_strs, node_path, depth_dists = _categorize(
                         ctx_inst, self.ltm.context_hierarchy, mode=_cat_mode)
                     _ctx_leaves[idx] = leaf_node
-                    new_label_path = _build_label_from_ctx_leaf(leaf_node, self.value_to_id)
+                    new_label_path = _build_label_from_ctx_leaf(
+                        leaf_node, self.value_to_id,
+                        cut=getattr(self.ltm, 'context_label_cut', None),
+                        tau=getattr(self.ltm, 'context_label_tau', None),
+                        add_to_vocab=self.ltm.add_to_vocab)
 
                     if new_label_path != node.label_path:
                         _any_changed = True
@@ -1815,7 +2075,11 @@ class FiniteParseTree(object):
 
         # Single leaf pointer (kept for chunk_context VID propagation and
         # for visualisation — the content hierarchy itself no longer uses it).
-        _label_path = _build_label_from_ctx_leaf(ctx_leaf, self.value_to_id)
+        _label_path = _build_label_from_ctx_leaf(
+            ctx_leaf, self.value_to_id,
+            cut=getattr(self.ltm, 'context_label_cut', None),
+            tau=getattr(self.ltm, 'context_label_tau', None),
+            add_to_vocab=self.ltm.add_to_vocab)
         if _label_path and getattr(self.ltm, 'chunk_context', False):
             self.ltm.context_hierarchy.register_ref_val(_label_path, ctx_leaf)
 
@@ -1918,11 +2182,10 @@ class FiniteParseTree(object):
 
     # --- recognition-gate defaults -----------------------------------
     # Climbing-ancestor count gate: the most-specific ancestor of the
-    # candidate's content-tree categorization leaf whose ``count`` exceeds
-    # this threshold is treated as a "well-supported category". If even
+    # candidate's categorization leaf whose ``count`` exceeds this
+    # threshold is treated as a "well-supported category". If even
     # the climb reaches root without clearing it, the candidate is novel
-    # and rejected. UNSUPERVISED: this is the user's "ample count on a
-    # learned representation" intuition, applied on the content tree.
+    # and rejected.
     CLIMB_COUNT_THRESHOLD_DEFAULT = 30
 
     # --- merge policy (experimental hook for met6 unsupervised loop) ------
@@ -2001,6 +2264,15 @@ class FiniteParseTree(object):
         if climb_count_threshold is None:
             climb_count_threshold = self.CLIMB_COUNT_THRESHOLD_DEFAULT
 
+        # Optional beam over elaboration sequences (Move 3). Greedy commit
+        # (beam_width == 1) is the postulate-literal path (P4: commit the
+        # single best candidate per step); a beam relaxes that to keep the
+        # best COMPLETE elaboration sequence, reducing error-compounding.
+        beam_width = int(getattr(self.ltm, 'parse_beam_width', 1) or 1)
+        if beam_width > 1:
+            return self._build_beam(window, beam_width, climb_count_threshold,
+                                    maturity_gate, gate_mode, end_behavior, debug)
+
         # Caches: pair-eval results are reused as long as their two
         # endpoints aren't merged.
         _pair_cache: dict = {}      # (left_idx, right_idx) → res-or-None
@@ -2045,6 +2317,18 @@ class FiniteParseTree(object):
                     # collapsed to root (no evidence) → reject.
                     _bc = csd.get("basic_level_count", -1)
                     if _bc is None or _bc <= _policy.get("freq_min", 1):
+                        continue
+                elif maturity_gate is not None:
+                    # Same gate semantics used for primitive admission.
+                    # The candidate's content-tree score_data carries
+                    # the same heuristic fields (climb_*, cost,
+                    # basic_level_*, leaf_log_prob, root_log_prob); we
+                    # admit iff the named heuristic is strictly above
+                    # the threshold. Composites and primitives share a
+                    # single notion of "mature candidate".
+                    _h_name, _h_thr = maturity_gate
+                    _h_val = csd.get(_h_name)
+                    if _h_val is None or _h_val <= _h_thr:
                         continue
                 else:
                     if csd.get("climb_hit_root", True):
@@ -2092,12 +2376,83 @@ class FiniteParseTree(object):
                 # cnt_root_lp dominant for the cases where it was
                 # already correct, while sum_leaf_lp tips the balance
                 # exactly on the previously-failing attachment ties.
-                score = csd.get("root_log_prob", -float("inf"))
                 _xsd = res.get("context_score_data", {}) if isinstance(res, dict) else {}
+
+                # ── Context-forward ranker (default; postulate P3) ──────────
+                # The theory says a candidate is "scored against the content
+                # AND context hierarchies" — content determines HOW an element
+                # composes, context determines WHERE it appears. The
+                # diagnostic (_diag_signal.py) confirmed that for attachment
+                # disambiguation the *context* hierarchy carries the signal:
+                # at greedy wrong-picks the gold merge had a strictly higher
+                # context-leaf fit 96%/69% of the time, and a better-supported
+                # climbing ancestor 61%/77% of the time, while the content-
+                # leaf fit was ANTI-discriminative (it rewarded stale generic
+                # Det+N chunks the greedy parser kept re-merging). So we rank
+                # primarily on where the merge SITS (context-leaf log-prob)
+                # and how well-supported its chunk TYPE is (climb-ancestor
+                # count), with global content-likeness (root log-prob) as a
+                # small tie-break. Weights are per-variant tunable via
+                # ltm.rank_w_ctx / rank_w_climb / rank_w_cnt.
+                rank_mode = getattr(self.ltm, 'rank_mode', 'context_forward')
+                if rank_mode == 'root_lp':
+                    # Paper-faithful recognition score (§4.2): the root
+                    # log-probability under EACH hierarchy, summed. No leaf
+                    # terms, no learned weights — the plain generative score
+                    # the elaboration loop is specified to use.
+                    w = float(getattr(self.ltm, 'root_lp_ctx_w', 1.0))
+                    _c = csd.get("root_log_prob", 0.0)
+                    _x = _xsd.get("root_log_prob", 0.0)
+                    _c = float(_c) if _c is not None else 0.0
+                    _x = float(_x) if _x is not None else 0.0
+                    admitted.append((_c + w * _x, res))
+                    continue
+                if rank_mode == 'class_lp':
+                    # Discriminative / EPMI-style heuristic: rank by
+                    # log P(class | instance) summed over both hierarchies.
+                    # This normalizes out the instance marginal (unlike raw
+                    # log-prob, which a dense cluster inflates), so a merge is
+                    # ranked by how CONFIDENTLY it belongs to a recognized
+                    # class. Non-constituents ("found the") don't confidently
+                    # belong anywhere and score low. (~98% gold-trajectory
+                    # step-pick vs ~83% for cnt_root_lp; see _diag_pmi.py.)
+                    w_ctx_cl = float(getattr(self.ltm, 'class_lp_ctx_w', 1.0))
+                    _c = csd.get("tree_class_log_prob", 0.0)
+                    _x = _xsd.get("tree_class_log_prob", 0.0)
+                    _c = float(_c) if _c is not None else 0.0
+                    _x = float(_x) if _x is not None else 0.0
+                    admitted.append((_c + w_ctx_cl * _x, res))
+                    continue
+                if rank_mode == 'learned':
+                    # Supervised step-pick ranker: linear combination of
+                    # hierarchy-derived recognition scores, weights trained
+                    # on gold-trajectory merge decisions (see _calib_learned).
+                    admitted.append((self._learned_score(res), res))
+                    continue
+                if rank_mode == 'context_forward':
+                    w_ctx   = float(getattr(self.ltm, 'rank_w_ctx',   1.0))
+                    w_climb = float(getattr(self.ltm, 'rank_w_climb', 3.0))
+                    w_cnt   = float(getattr(self.ltm, 'rank_w_cnt',   0.05))
+                    _ctx_leaf_lp = _xsd.get("leaf_log_prob", 0.0)
+                    _ctx_leaf_lp = float(_ctx_leaf_lp) if _ctx_leaf_lp is not None else 0.0
+                    _climb_cnt   = csd.get("climb_ancestor_count", 0) or 0
+                    _root_lp     = csd.get("root_log_prob", 0.0)
+                    _root_lp     = float(_root_lp) if _root_lp is not None else 0.0
+                    score = (
+                        w_ctx   * _ctx_leaf_lp
+                        + w_climb * math.log(1.0 + float(_climb_cnt))
+                        + w_cnt   * _root_lp
+                    )
+                    admitted.append((score, res))
+                    continue
+
+                # ── Legacy ranker (root_lp + 0.3·sum_leaf_lp + cp boost) ────
+                score = csd.get("root_log_prob", -float("inf"))
                 _cnt_leaf_lp = csd.get("leaf_log_prob", None)
                 _ctx_leaf_lp = _xsd.get("leaf_log_prob", None) if _xsd else None
+                _leaf_coef   = float(getattr(self.ltm, 'sum_leaf_lp_coef', 0.3))
                 if _cnt_leaf_lp is not None and _ctx_leaf_lp is not None:
-                    score = score + 0.3 * (float(_cnt_leaf_lp) + float(_ctx_leaf_lp))
+                    score = score + _leaf_coef * (float(_cnt_leaf_lp) + float(_ctx_leaf_lp))
                 cp_weight = getattr(self.ltm, 'chunk_pool_weight', 0.0)
                 if cp_weight and cp_weight > 0:
                     cp_match = csd.get("chunk_pool_match", 0)
@@ -2112,9 +2467,12 @@ class FiniteParseTree(object):
             if not admitted:
                 break
 
-            # Deterministic: highest score, ties broken by leftmost pair.
-            admitted.sort(key=lambda x: (x[0], -x[1]["left_word_index"]),
-                          reverse=True)
+            # Sort admitted candidates by score (descending). Python's sort
+            # is stable, so ties resolve in original candidate-list order,
+            # which is the right-to-left iteration of the candidate
+            # generator -- aligning with right-branching merges (AdjP -> Adj
+            # AdjP) that dominate the synthetic grammars.
+            admitted.sort(key=lambda x: x[0], reverse=True)
             chosen = admitted[0][1]
 
             chosen_left = chosen["left_word_index"]
@@ -2142,6 +2500,170 @@ class FiniteParseTree(object):
             if len(self.global_root_node.children) <= 1:
                 break
 
+        return True
+
+    # ---- ranker helpers (shared by greedy + beam) ----------------------
+
+    def _passes_gate(self, res: dict, maturity_gate) -> bool:
+        """Admission gate — identical semantics to build()'s Stage-1."""
+        csd = res.get("content_score_data", {}) if isinstance(res, dict) else {}
+        if maturity_gate is not None:
+            name, thr = maturity_gate
+            val = csd.get(name)
+            return val is not None and val > thr
+        return not csd.get("climb_hit_root", True)
+
+    # Feature names for the supervised step-pick ranker (rank_mode="learned").
+    # Every feature is a hierarchy-derived recognition score already computed
+    # by evaluate_pair; the learned weights just combine them. Training uses
+    # ONLY gold parse trees (the gold merge at each step is the positive
+    # label), so this stays inside the supervised paradigm — TRELLIS never
+    # trains the ranker on its own parses.
+    LEARNED_FEATURES = [
+        "c_root_log_prob", "c_leaf_log_prob", "c_basic_level_log_prob",
+        "c_basic_level_count", "c_tree_log_prob", "c_tree_class_log_prob",
+        "c_climb_ancestor_count", "c_climb_ancestor_log_prob",
+        "c_leaf_insert_minus_new", "c_bl_insert_minus_new",
+        "c_chunk_pool_match", "c_L_trans_count", "c_R_trans_count",
+        "x_root_log_prob", "x_leaf_log_prob", "x_basic_level_log_prob",
+        "x_basic_level_count", "x_tree_log_prob", "x_tree_class_log_prob",
+        "x_climb_ancestor_count", "x_climb_ancestor_log_prob",
+        "x_leaf_insert_minus_new", "x_bl_insert_minus_new",
+    ]
+
+    @staticmethod
+    def _feature_vector(res: dict) -> list:
+        """Flat feature vector (order = LEARNED_FEATURES) for a candidate
+        ``res``. Non-finite / missing values are clamped so the linear score
+        stays well-defined."""
+        csd = res.get("content_score_data", {}) if isinstance(res, dict) else {}
+        xsd = res.get("context_score_data", {}) if isinstance(res, dict) else {}
+        def g(d, k):
+            v = d.get(k)
+            try:
+                v = float(v)
+            except (TypeError, ValueError):
+                return 0.0
+            if v != v or v in (float("inf"), -float("inf")):
+                return 0.0
+            return v
+        out = []
+        for name in FiniteParseTree.LEARNED_FEATURES:
+            src = csd if name[0] == "c" else xsd
+            out.append(g(src, name[2:]))
+        return out
+
+    def _learned_score(self, res: dict) -> float:
+        """Linear step-pick score: w·features + b. Weights live on
+        ``ltm.learned_rank_w`` (list, order = LEARNED_FEATURES) with optional
+        ``ltm.learned_rank_b`` bias and ``ltm.learned_rank_mean`` /
+        ``ltm.learned_rank_std`` standardization vectors."""
+        w = getattr(self.ltm, 'learned_rank_w', None)
+        if not w:
+            return 0.0
+        feats = self._feature_vector(res)
+        mean = getattr(self.ltm, 'learned_rank_mean', None)
+        std  = getattr(self.ltm, 'learned_rank_std', None)
+        if mean is not None and std is not None:
+            feats = [(f - m) / s if s else 0.0
+                     for f, m, s in zip(feats, mean, std)]
+        b = float(getattr(self.ltm, 'learned_rank_b', 0.0))
+        return b + sum(wi * fi for wi, fi in zip(w, feats))
+
+    def _rank_score(self, res: dict) -> float:
+        """Context-forward ranker score for a candidate ``res`` — the same
+        formula used inline in build()'s Stage-2, factored out so the beam
+        scores candidates identically to greedy."""
+        if getattr(self.ltm, 'rank_mode', None) == 'learned':
+            return self._learned_score(res)
+        csd = res.get("content_score_data", {}) if isinstance(res, dict) else {}
+        xsd = res.get("context_score_data", {}) if isinstance(res, dict) else {}
+        w_ctx   = float(getattr(self.ltm, 'rank_w_ctx',   1.0))
+        w_climb = float(getattr(self.ltm, 'rank_w_climb', 3.0))
+        w_cnt   = float(getattr(self.ltm, 'rank_w_cnt',   0.05))
+        ctx_leaf_lp = xsd.get("leaf_log_prob", 0.0)
+        ctx_leaf_lp = float(ctx_leaf_lp) if ctx_leaf_lp is not None else 0.0
+        climb_cnt   = csd.get("climb_ancestor_count", 0) or 0
+        root_lp     = csd.get("root_log_prob", 0.0)
+        root_lp     = float(root_lp) if root_lp is not None else 0.0
+        return (w_ctx * ctx_leaf_lp
+                + w_climb * math.log(1.0 + float(climb_cnt))
+                + w_cnt * root_lp)
+
+    def _build_beam(self, window, beam_width, climb_thr,
+                    maturity_gate, gate_mode, end_behavior, debug=False):
+        """Beam search over elaboration sequences. Each state is a list of
+        applied (left_idx, right_idx) merges; states are re-materialized on
+        fresh trees so scoring is identical to greedy. We keep the top
+        ``beam_width`` partial parses by cumulative score, and return the
+        best COMPLETE parse (reduced to a single root) when one exists —
+        which removes greedy's error-compounding without changing what a
+        single merge is scored by. Falls back to the best partial parse
+        when no full reduction is admitted (mirrors P5 early-termination)."""
+        if climb_thr is None:
+            climb_thr = self.CLIMB_COUNT_THRESHOLD_DEFAULT
+
+        def _fresh(merges):
+            t = FiniteParseTree(self.ltm, context_length=self.context_length)
+            t.window = window
+            t.build_primitives(window, threshold=end_behavior, debug=False,
+                               maturity_gate=maturity_gate, gate_mode=gate_mode)
+            for (l, r) in merges:
+                t.apply_candidate(l, r)
+            return t
+
+        def _admitted(t):
+            out = []
+            for p in t.get_parentless_pairs():
+                try:
+                    res = t.evaluate_pair(
+                        p["left_word_index"], p["right_word_index"],
+                        climb_count_threshold=climb_thr)
+                except Exception:
+                    continue
+                if not self._passes_gate(res, maturity_gate):
+                    continue
+                out.append((self._rank_score(res),
+                            p["left_word_index"], p["right_word_index"]))
+            out.sort(key=lambda x: x[0], reverse=True)
+            return out
+
+        n_prim = len(self.global_root_node.children)
+        beam = [(0.0, [])]        # (cumulative_score, merges)
+        full = []                 # states reduced to a single root
+        stuck = []                # states with no admitted candidate left
+        for _ in range(n_prim + 2):
+            if not beam:
+                break
+            nxt = []
+            for cum, merges in beam:
+                try:
+                    t = _fresh(merges)
+                except Exception:
+                    continue
+                if len(t.global_root_node.children) <= 1:
+                    full.append((cum, merges)); continue
+                cands = _admitted(t)
+                if not cands:
+                    stuck.append((cum, merges)); continue
+                for (sc, l, r) in cands[:beam_width]:
+                    nxt.append((cum + sc, merges + [(l, r)]))
+            if not nxt:
+                break
+            nxt.sort(key=lambda x: x[0], reverse=True)
+            beam = nxt[:beam_width]
+
+        # Prefer a complete parse (all n-1 merges → comparable scores);
+        # else the best partial parse we reached.
+        pool = full if full else (stuck + beam)
+        if not pool:
+            return True
+        best = max(pool, key=lambda x: x[0])
+        for (l, r) in best[1]:
+            try:
+                self.apply_candidate(l, r)
+            except Exception:
+                break
         return True
 
     # ---- instance collection -------------------------------------------
@@ -3248,6 +3770,7 @@ class LongTermMemory(object):
                  content_top_k: int = 5,
                  content_pool_use_basic_level: bool = False,
                  content_pool_bl_eval_alpha: float = 10.0,
+                 content_bag_weight_mode: str = "binary",
                  context_weight_attr: bool = False,
                  content_weight_attr: bool = False):
         _content_alpha = content_alpha if content_alpha is not None else alpha
@@ -3296,6 +3819,7 @@ class LongTermMemory(object):
             k               = self.content_top_k,
             use_basic_level = self.content_pool_use_basic_level,
             bl_eval_alpha   = self.content_pool_bl_eval_alpha,
+            weight_mode     = content_bag_weight_mode,
         )
 
         # When chunk_context is enabled, context hierarchy uses itself as
@@ -3604,7 +4128,11 @@ class LongTermMemory(object):
 
             if isinstance(node, PrimitiveParseNode):
                 node.label = {node.word_id: 1}
-                node.label_path = _build_label_from_ctx_leaf(ctx_leaf, self.value_to_id)
+                node.label_path = _build_label_from_ctx_leaf(
+                    ctx_leaf, self.value_to_id,
+                    cut=getattr(self, 'context_label_cut', None),
+                    tau=getattr(self, 'context_label_tau', None),
+                    add_to_vocab=self.add_to_vocab)
                 # Content hierarchy uses bag-of-concepts (no ref_tree). Only
                 # context hierarchy still uses label_path for chunk_context.
                 if node.label_path and self.chunk_context:
@@ -3618,7 +4146,11 @@ class LongTermMemory(object):
                 node.concept_label = new_concept_label
                 node.label = {new_concept_label: 1} if new_concept_label else {0: 1}
 
-                node.label_path = _build_label_from_ctx_leaf(ctx_leaf, self.value_to_id)
+                node.label_path = _build_label_from_ctx_leaf(
+                    ctx_leaf, self.value_to_id,
+                    cut=getattr(self, 'context_label_cut', None),
+                    tau=getattr(self, 'context_label_tau', None),
+                    add_to_vocab=self.add_to_vocab)
                 if node.label_path and self.chunk_context:
                     self.context_hierarchy.register_ref_val(node.label_path, ctx_leaf)
 
@@ -3916,6 +4448,7 @@ class TRELLIS(object):
                  content_top_k: int = 5,
                  content_pool_use_basic_level: bool = False,
                  content_pool_bl_eval_alpha: float = 10.0,
+                 content_bag_weight_mode: str = "binary",
                  context_weight_attr: bool = False,
                  content_weight_attr: bool = False):
         """
@@ -3998,6 +4531,7 @@ class TRELLIS(object):
             content_top_k=content_top_k,
             content_pool_use_basic_level=content_pool_use_basic_level,
             content_pool_bl_eval_alpha=content_pool_bl_eval_alpha,
+            content_bag_weight_mode=content_bag_weight_mode,
             context_weight_attr=context_weight_attr,
             content_weight_attr=content_weight_attr,
         )
@@ -4063,6 +4597,27 @@ class TRELLIS(object):
                 n = max(n.children, key=lambda c: c.log_prob_instance(ci))
             return n
 
+        _cref_attr = self.ltm.content_ref_attr
+
+        def _ctx_leaf_hash(node):
+            """Context-hierarchy leaf class of a parse node — the answer to
+            'where does this element appear' (postulate P8's conditioning
+            signal). Content-ref is stripped before descent to match the
+            categorization convention used in add_parse_tree / evaluate_pair.
+            Returns None for primitives (no composite context class)."""
+            try:
+                ci = node.get_context_instance()
+            except Exception:
+                return None
+            if not ci:
+                return None
+            ci = dict(ci)
+            ci.pop(_cref_attr, None)
+            n = self.ltm.context_hierarchy.root
+            while n.children:
+                n = max(n.children, key=lambda c: c.log_prob_instance(ci))
+            return str(n.concept_hash())
+
         def _is_root_chunk(comp):
             # Sentence-root iff its context_instance has all-empty
             # context slots (no surrounding words).
@@ -4090,6 +4645,14 @@ class TRELLIS(object):
                     "cplx":   getattr(comp, "complexity", 1),
                     "L_cplx": getattr(lk, "complexity", 1),
                     "R_cplx": getattr(rk, "complexity", 1),
+                    # Context classes (postulate P8 conditioning): this
+                    # composite's own context leaf, and the context leaf
+                    # each child had in training. At generation time a child
+                    # slot is filled only from chunks whose OWN context leaf
+                    # matches the expected child context leaf recorded here.
+                    "ctx_leaf":   _ctx_leaf_hash(comp),
+                    "L_ctx_leaf": _ctx_leaf_hash(lk),
+                    "R_ctx_leaf": _ctx_leaf_hash(rk),
                 }
                 if isinstance(lk, PrimitiveParseNode):
                     rec["L_word_id"] = lk.word_id
@@ -4150,6 +4713,27 @@ class TRELLIS(object):
             self.leaf_to_bl[leaf_hash] = bl_hash
             self.bl_to_chunks.setdefault(bl_hash, []).extend(chunks)
 
+        # MATURITY pooling: pool chunks across all leaves under each leaf's
+        # deepest ancestor with count >= tau. This is a PURER intermediary
+        # generalization than the max-EPMI basic level (which over-merges
+        # types), so the ctx-filter recovers grammaticality while the pool is
+        # still wide enough for real novelty. tau tunes the novelty/grammar
+        # tradeoff. See gen_pool_mode="mat".
+        _mat_tau = float(getattr(self.ltm, 'gen_pool_tau', 20))
+        self.leaf_to_mat: dict = {}
+        self.mat_to_chunks: dict = {}
+        for leaf_hash, chunks in self.leaf_to_chunks.items():
+            node = hash_to_node.get(leaf_hash)
+            if node is None:
+                continue
+            anc = node
+            while (getattr(anc, "parent", None) is not None
+                   and float(anc.count) < _mat_tau):
+                anc = anc.parent
+            mh = str(anc.concept_hash())
+            self.leaf_to_mat[leaf_hash] = mh
+            self.mat_to_chunks.setdefault(mh, []).extend(chunks)
+
         # BL-pooled sentence-root chunks: when generation picks a seed,
         # we can also sample from the seed's BL ancestor's pool to start
         # from a richer "what kind of sentence is this" distribution.
@@ -4198,29 +4782,70 @@ class TRELLIS(object):
                 "learn_chunk_records(train_trees) first.")
 
         emitted_words: list = []
+        # Postulate P8: the child leaf is sampled from the content hierarchy
+        # AND conditioned on the context hierarchy. We realize the
+        # conditioning by restricting the subtree-exchange pool for a slot to
+        # chunks whose OWN context class matches the context class the parent
+        # expected for that child (``L_ctx_leaf`` / ``R_ctx_leaf``). This
+        # keeps a grammatically-impure content leaf from emitting a wrong-type
+        # constituent (the source of commission errors). Falls back to the
+        # full content-leaf pool when no context-matching chunk exists, so
+        # novel combinations are still reachable.
+        _ctx_cond = getattr(self.ltm, 'gen_context_conditioned', True)
+
+        # gen_pool_mode selects the GENERALIZATION level the child chunk is
+        # sampled from. "leaf" (default) samples only chunks that landed at the
+        # child's own content leaf — near-memorization (leaves are ~singletons).
+        # "bl" pools chunks across ALL leaves under the child's basic-level
+        # ancestor — a genuine intermediary GENERALIZATION, so recombinations no
+        # single leaf could produce become reachable (real novelty). In BOTH
+        # cases the ctx_leaf filter (P10 conditioning) keeps only chunks whose
+        # own type matches the slot, so a wider/impure pool stays grammatical.
+        _pool_mode = getattr(self.ltm, 'gen_pool_mode', 'leaf')
+        _leaf_to_bl = getattr(self, 'leaf_to_bl', {}) or {}
+        _bl_to_chunks = getattr(self, 'bl_to_chunks', {}) or {}
+        _leaf_to_mat = getattr(self, 'leaf_to_mat', {}) or {}
+        _mat_to_chunks = getattr(self, 'mat_to_chunks', {}) or {}
+
+        def _pick(leaf_hash, want_ctx):
+            pool = None
+            if _pool_mode == 'bl':
+                bl = _leaf_to_bl.get(leaf_hash)
+                if bl is not None:
+                    pool = _bl_to_chunks.get(bl)
+            elif _pool_mode == 'mat':
+                mh = _leaf_to_mat.get(leaf_hash)
+                if mh is not None:
+                    pool = _mat_to_chunks.get(mh)
+            if not pool:
+                pool = self.leaf_to_chunks.get(leaf_hash, [])
+            if not pool:
+                return None
+            if _ctx_cond and want_ctx is not None:
+                filt = [c for c in pool if c.get("ctx_leaf") == want_ctx]
+                if filt:
+                    pool = filt
+            return random.choice(pool)
 
         def _emit_chunk(chunk_rec, depth=0, max_depth=8):
-            """Whole-chunk replay at the leaf level (the 100%-gram /
-            18%-novel operating point). For each composite-child slot,
-            sample a random training chunk from ``leaf_to_chunks[child_leaf]``
-            and recurse."""
+            """Whole-chunk replay at the leaf level. For each composite-child
+            slot, sample a context-compatible training chunk from
+            ``leaf_to_chunks[child_leaf]`` (see P8 note above) and recurse."""
             if depth > max_depth:
                 return
             # LEFT
             if chunk_rec["L_word_id"] is not None:
                 emitted_words.append(chunk_rec["L_word_id"])
             elif chunk_rec["L_leaf_hash"] is not None:
-                pool = self.leaf_to_chunks.get(chunk_rec["L_leaf_hash"], [])
-                if pool:
-                    nxt = random.choice(pool)
+                nxt = _pick(chunk_rec["L_leaf_hash"], chunk_rec.get("L_ctx_leaf"))
+                if nxt is not None:
                     _emit_chunk(nxt, depth + 1, max_depth)
             # RIGHT
             if chunk_rec["R_word_id"] is not None:
                 emitted_words.append(chunk_rec["R_word_id"])
             elif chunk_rec["R_leaf_hash"] is not None:
-                pool = self.leaf_to_chunks.get(chunk_rec["R_leaf_hash"], [])
-                if pool:
-                    nxt = random.choice(pool)
+                nxt = _pick(chunk_rec["R_leaf_hash"], chunk_rec.get("R_ctx_leaf"))
+                if nxt is not None:
                     _emit_chunk(nxt, depth + 1, max_depth)
 
         seed = random.choice(self.sentence_root_chunks)
@@ -4842,16 +5467,36 @@ class TRELLIS(object):
         # ── sample from content hierarchy via basic-level ────────────────
 
         def _basic_sample(cnt_node):
-            """get_basic → sample a leaf from the basic-level subtree."""
-            _bl_eval_alpha = self.content_bl_alpha if self.content_bl_alpha is not None else -1.0
-            basic = cnt_node.get_basic(100, 1000, debug=True, eval_alpha=_bl_eval_alpha, use_root=True)
-            # basic = cnt_node.get_best(cnt_node.av_count)
-            # basic = cnt_node.tree.categorize(cnt_node.av_count).get_best(cnt_node.av_count)
-            # basic = cnt_node
-            cnt_root_h = str(self.ltm.content_hierarchy.root.concept_hash())
-            if str(basic.concept_hash()) == cnt_root_h:
-                raise ValueError("BASIC LEVEL = ROOT????")
-            leaf = basic
+            """Walk up to a well-supported abstraction level (P9), then sample a
+            fresh leaf from that subtree — the substitution step of generation.
+
+            ``gen_anchor_mode``:
+              "basic"    — max-EPMI ancestor (get_basic). NOTE: measured to be
+                           substitution-IMPURE here (homog ~0.62): it overshoots
+                           to a node mixing distinct productions (PP/NP/VP), so
+                           the resampled leaf can be the wrong constituent type.
+                           See confs/acs-26/_diag_subst_purity.py.
+              "maturity" — deepest ancestor with count >= tau. Keeps the anchor a
+                           PURE substitution class (homog ~0.90 at tau=20) while
+                           still consolidating several leaves per production, so
+                           the fresh leaf is a same-type novel substitute. This
+                           is the same count-maturity notion of "well-supported"
+                           that fixed parsing, and a cleaner read of P9 than EPMI.
+            """
+            mode = getattr(self.ltm, 'gen_anchor_mode', 'basic')
+            if mode == "maturity":
+                tau = float(getattr(self.ltm, 'gen_anchor_tau', 20))
+                anchor = cnt_node
+                while (getattr(anchor, "parent", None) is not None
+                       and float(anchor.count) < tau):
+                    anchor = anchor.parent
+            else:
+                _bl_eval_alpha = self.content_bl_alpha if self.content_bl_alpha is not None else -1.0
+                anchor = cnt_node.get_basic(100, 1000, debug=False, eval_alpha=_bl_eval_alpha, use_root=True)
+                cnt_root_h = str(self.ltm.content_hierarchy.root.concept_hash())
+                if str(anchor.concept_hash()) == cnt_root_h:
+                    raise ValueError("BASIC LEVEL = ROOT????")
+            leaf = anchor
             while leaf.children:
                 leaf = random.choices(
                     leaf.children,
