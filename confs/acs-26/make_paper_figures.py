@@ -1340,17 +1340,23 @@ def make_parse_infographic_figure(path: str) -> None:
                       fill=CAND_FILL, edge=CAND_EDGE)
 
     # =================================================================
-    # Panel 2: sort the picked candidate through both hierarchies and
-    # show that its joint score clears the recognition threshold.
+    # Panel 2: sort the picked candidate through both hierarchies, then
+    # show the two things Section 4.3.1 says happen at commit time --
+    # (a) the climbing-ancestor GATE: walk the sort path upward until an
+    #     ancestor's instance count exceeds tau_parse (admits the
+    #     candidate), and
+    # (b) the RANK: sum the class-posterior scores from the two
+    #     hierarchies (highest wins across the frontier).
     # Layout (top -> bottom):
     #   1. Two mini Cobweb-style hierarchies (Content + Context).
-    #   2. Worked-example score with a green check-marked threshold box.
+    #   2. Gate box (green, count-based).
+    #   3. Rank box (blue, score-based).
     # =================================================================
     p2 = _panel_box(ax, x=4.95, y=PANEL_Y, w=4.95, h=PANEL_H, number=2,
-                    title="Score through both hierarchies")
+                    title="Gate + rank through both hierarchies")
     cx0, cy0, cw, ch = p2
-    HIER_SCALE = 0.45
-    HIER_CY    = cy0 + 2.10
+    HIER_SCALE = 0.40
+    HIER_CY    = cy0 + 2.30
     cont_nodes = _mini_hierarchy(ax,
                                  cx=cx0 + cw * 0.27,
                                  cy=HIER_CY,
@@ -1367,35 +1373,52 @@ def make_parse_infographic_figure(path: str) -> None:
                                  highlight_path=[
                                      "root", "R", "R_L"],
                                  scale=HIER_SCALE)
-    SCORE_COLOR    = "#2f8a3e"
-    SCORE_FILL     = "#e8f7ed"
-    score_cx = cx0 + cw / 2
-    score_cy = cy0 + 0.95
-    score_w  = cw - 0.35
-    score_h  = 0.85
+
+    # ----- Gate box: instance-count threshold on the sort path -----
+    # Both boxes sit ABOVE the primitive row in panels 1/3 (whose leaf_y
+    # is cy0 + 0.55, height 0.40 -- top at cy0 + 0.75) to avoid the
+    # visual collision that occurs when boxes slide into that row.
+    GATE_COLOR = "#2f8a3e"
+    GATE_FILL  = "#e8f7ed"
+    box_w = cw - 0.35
+    box_h = 0.45
+    gate_cx = cx0 + cw / 2
+    gate_cy = cy0 + 1.30
     ax.add_patch(FancyBboxPatch(
-        (score_cx - score_w / 2, score_cy - score_h / 2),
-        score_w, score_h,
+        (gate_cx - box_w / 2, gate_cy - box_h / 2),
+        box_w, box_h,
         boxstyle="round,pad=0.02,rounding_size=0.06",
-        linewidth=1.4, edgecolor=SCORE_COLOR,
-        facecolor=SCORE_FILL, zorder=3))
-    ax.text(score_cx, score_cy + 0.22,
-            r"score $=\ \log P_{\mathrm{cnt}}(c) + \log P_{\mathrm{ctx}}(c)"
-            r"\ =\ -5.5$",
-            ha="center", va="center", fontsize=11.0,
-            color="#1a1a1a", family="serif", zorder=4)
-    ax.text(score_cx, score_cy - 0.18,
-            r"$-5.5\ \geq\ \tau\ =\ -12.0$    "
-            r"$\checkmark$ commit",
-            ha="center", va="center", fontsize=12.0,
-            color=SCORE_COLOR, fontweight="bold",
+        linewidth=1.4, edgecolor=GATE_COLOR,
+        facecolor=GATE_FILL, zorder=3))
+    ax.text(gate_cx, gate_cy,
+            r"admit: path-count $=\ 47\ >\ "
+            r"\tau_{\mathrm{parse}}\ =\ 30$   $\checkmark$",
+            ha="center", va="center", fontsize=10.5,
+            color=GATE_COLOR, fontweight="bold",
             family="serif", zorder=4)
-    # Two arrows from the (basic-level / leaf) results in each
-    # hierarchy down into the score box.
+
+    # ----- Rank box: sum of class-posterior scores from both trees ----
+    RANK_COLOR = "#2b6cb0"
+    RANK_FILL  = "#eaf2fb"
+    rank_cx = cx0 + cw / 2
+    rank_cy = cy0 + 0.65
+    ax.add_patch(FancyBboxPatch(
+        (rank_cx - box_w / 2, rank_cy - box_h / 2),
+        box_w, box_h,
+        boxstyle="round,pad=0.02,rounding_size=0.06",
+        linewidth=1.4, edgecolor=RANK_COLOR,
+        facecolor=RANK_FILL, zorder=3))
+    ax.text(rank_cx, rank_cy,
+            r"rank: $s_c + s_x\ =\ -5.3$   (best-scoring wins)",
+            ha="center", va="center", fontsize=10.5,
+            color=RANK_COLOR, fontweight="bold",
+            family="serif", zorder=4)
+
+    # Arrows from the sort-path leaves down into the gate box.
     for src_node, sign in ((cont_nodes["L_L_R"], -1),
                            (ctx_nodes["R_L"],   +1)):
         ax.annotate("",
-                    xy=(score_cx + sign * 0.4, score_cy + score_h / 2),
+                    xy=(gate_cx + sign * 0.4, gate_cy + box_h / 2),
                     xytext=(src_node[0], src_node[1] - 0.18 * HIER_SCALE),
                     arrowprops=dict(arrowstyle="->", color="#6e6e6e",
                                     lw=1.0))
@@ -1549,7 +1572,7 @@ def make_generation_infographic_figure(path: str) -> None:
     cont_nodes = _mini_hierarchy(
         ax,
         cx=cx0 + cw / 2,
-        cy=cy0 + 1.35,
+        cy=cy0 + 1.05,
         title="",
         scale=SCALE,
         show_title=False,
@@ -1584,7 +1607,7 @@ def make_generation_infographic_figure(path: str) -> None:
     ctx_nodes = _mini_hierarchy(
         ax,
         cx=cx0 + cw / 2,
-        cy=cy0 + 1.35,
+        cy=cy0 + 1.05,
         title="",
         scale=SCALE,
         show_title=False,

@@ -36,8 +36,16 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from unittests.hollow_learn_test_mh import run_hollow_learn
-from unittests.learning_curves_test import run_learning_curves
+# NOTE: unittests/ was deleted from the main repo after the paper shipped;
+# the canonical copies of run_hollow_learn / run_learning_curves live in
+# trellis_v1/. This module only exposes the plotting helpers used by
+# render_paper_pdfs.py, so the imports are guarded.
+try:
+    from unittests.hollow_learn_test_mh import run_hollow_learn  # noqa: F401
+    from unittests.learning_curves_test import run_learning_curves  # noqa: F401
+except ImportError:
+    run_hollow_learn = None
+    run_learning_curves = None
 
 
 # Canonical seed list for variance estimation in ACS-26.
@@ -384,16 +392,16 @@ def plot_overlay_with_bands(out_path, agg_by_variant, colors, labels,
         gg_m, gg_s = np.asarray(agg["gen_gram"][0]), np.asarray(agg["gen_gram"][1])
         axes[1].plot(xs_p, gg_m[m], "o-", color=c, linewidth=2, markersize=4, label=lbl)
         axes[1].fill_between(xs_p, (gg_m - gg_s)[m], (gg_m + gg_s)[m], color=c, alpha=0.18)
-    _lab_fs = 15 if compact else 16
-    _tick_fs = 13 if compact else 14
     _leg_fs = 12 if compact else 13
+    _lab_fs = _leg_fs - 1          # axis labels a touch smaller than the legend
+    _tick_fs = 13 if compact else 14
     axes[0].set_xlabel("# training sentences", fontsize=_lab_fs)
-    axes[0].set_ylabel("Parse accuracy", fontsize=_lab_fs)
+    axes[0].set_ylabel(r"$1 - $ errors of omission", fontsize=_lab_fs)
     axes[0].set_ylim(0, 1.05); axes[0].grid(alpha=0.3)
     axes[0].tick_params(axis="both", labelsize=_tick_fs)
     axes[0].legend(loc="lower right", fontsize=_leg_fs)
     axes[1].set_xlabel("# training sentences", fontsize=_lab_fs)
-    axes[1].set_ylabel("Generation grammaticality", fontsize=_lab_fs)
+    axes[1].set_ylabel(r"$1 - $ errors of commission", fontsize=_lab_fs)
     axes[1].set_ylim(0, 1.05); axes[1].grid(alpha=0.3)
     axes[1].tick_params(axis="both", labelsize=_tick_fs)
     # Legend appears once on the left panel only (see axes[0].legend above)

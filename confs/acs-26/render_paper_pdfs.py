@@ -222,8 +222,8 @@ def _render_experiment(name: str, experiment_dir: str, variants: list[str],
 def render_experiment_grids() -> None:
     _section("experiment grids (grids_grammar_experiment, grids_terminal_experiment)")
 
-    grammar_experiment_dir  = os.path.join(_HERE, "grammar_experiment")
-    terminal_experiment_dir = os.path.join(_HERE, "terminal_experiment")
+    grammar_experiment_dir  = os.path.join(_HERE, "grammar_experiment_20seed")
+    terminal_experiment_dir = os.path.join(_HERE, "terminal_experiment_20seed")
 
     _render_experiment(
         name="grammar_experiment",

@@ -231,6 +231,17 @@ address = {Sydney, Australia},
 publisher = {Morgan Kaufmann}
 }
 
+@incollection{labyrinth-thompson-langley,
+author = {Thompson, K. and Langley, P.},
+year = {1991},
+title = {Concept formation in structured domains},
+editor = {Fisher, D. H. and Pazzani, M. J. and Langley, P.},
+booktitle = {Concept Formation: Knowledge and Experience in Unsupervised Learning},
+pages = {127-161},
+address = {San Mateo, CA},
+publisher = {Morgan Kaufmann}
+}
+
 @inproceedings{trestle-maclellan,
 author = {MacLellan, C. J. and Harpstead, E. and Aleven, V. and Koedinger, K. R.},
 year = {2016},
@@ -240,30 +251,18 @@ volume = {4},
 pages = {131-150}
 }
 
-@inproceedings{cobweb-4l-maclellan,
-author = {MacLellan, C. J. and Matsakis, N. and Langley, P.},
-year = {2022},
-title = {Efficient induction of language models via probabilistic concept formation},
-booktitle = {Advances in Cognitive Systems},
-volume = {10},
-pages = {1-16}
-}
-
 @inproceedings{convolutional-cobweb,
-author = {Lian, X. and MacLellan, C. J.},
-year = {2024},
-title = {Convolutional {Cobweb}: A new approach to image classification through concept formation},
-booktitle = {Advances in Cognitive Systems},
-volume = {11},
-pages = {221-238}
+author = {MacLellan, C. J. and Thakur, H.},
+year = {2021},
+title = {Convolutional {Cobweb}: A model of incremental learning from 2{D} images},
+booktitle = {Proceedings of the Ninth Annual Conference on Advances in Cognitive Systems}
 }
 
 @inproceedings{matsakis-cobweb,
-author = {Matsakis, N. and MacLellan, C. J. and Langley, P.},
-year = {2023},
-title = {Incremental induction of phrase-structure grammars through probabilistic concept formation},
-booktitle = {Proceedings of the Eleventh Annual Conference on Advances in Cognitive Systems},
-address = {Atlanta, GA}
+author = {MacLellan, C. J. and Matsakis, P. and Langley, P.},
+year = {2022},
+title = {Efficient Induction of Language Models via Probabilistic Concept Formation},
+booktitle = {Proceedings of the Tenth Annual Conference on Advances in Cognitive Systems}
 }
 
 % -- Grammar induction --------------------------------------------------
@@ -285,6 +284,16 @@ booktitle = {Proceedings of the Eleventh European Conference on Machine Learning
 pages = {220-228},
 address = {Barcelona, Spain},
 publisher = {Springer}
+}
+
+@inproceedings{muggleton-buntine-predinvention,
+author = {Muggleton, S. and Buntine, W.},
+year = {1988},
+title = {Machine invention of first-order predicates by inverting resolution},
+booktitle = {Proceedings of the Fifth International Conference on Machine Learning},
+pages = {339-352},
+address = {Ann Arbor, MI},
+publisher = {Morgan Kaufmann}
 }
 
 @article{diffusion-grammar,
@@ -410,13 +419,12 @@ pages = {eaaw4325}
   pages   = {12--32}
 }
 
-@incollection{murphy-medin,
+@article{murphy-medin,
   author    = {Murphy, Gregory L. and Medin, Douglas L.},
   title     = {The Role of Theories in Conceptual Coherence},
-  booktitle = {Psychological Review},
+  journal   = {Psychological Review},
   year      = {1985},
   volume    = {92},
-  number    = {3},
   pages     = {289--316}
 }
 
@@ -438,4 +446,35 @@ pages = {eaaw4325}
   volume  = {6},
   number  = {3},
   pages   = {623--641}
+}
+
+@misc{gupta2025hierarchicalsemanticretrievalcobweb,
+      title={Hierarchical Semantic Retrieval with Cobweb}, 
+      author={Anant Gupta and Karthik Singaravadivelan and Zekun Wang},
+      year={2025},
+      eprint={2510.02539},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2510.02539}, 
+}
+
+@inproceedings{singaravadivelan-etal-2026-cobwebtm,
+    title = "{C}obweb{TM}: Probabilistic Concept Formation for Lifelong and Hierarchical Topic Modeling",
+    author = "Singaravadivelan, Karthik  and
+      Gupta, Anant  and
+      Wang, Zekun  and
+      MacLellan, Christopher J.",
+    editor = "Liakata, Maria  and
+      Moreira, Viviane P.  and
+      Zhang, Jiajun  and
+      Jurgens, David",
+    booktitle = "Findings of the {A}ssociation for {C}omputational {L}inguistics: {ACL} 2026",
+    month = jul,
+    year = "2026",
+    address = "San Diego, CA",
+    publisher = "Association for Computational Linguistics",
+    doi = "10.18653/v1/2026.findings-acl.1753",
+    pages = "35140--35155",
+    ISBN = "979-8-89176-395-1",
+    abstract = "Topic modeling seeks to uncover latent semantic structure in text corpora with minimal supervision. Neural approaches achieve strong performance but require extensive tuning and struggle with lifelong learning due to catastrophic forgetting and fixed capacity, while classical probabilistic models lack flexibility and adaptability to streaming data. We introduce CobwebTM, a low-parameter lifelong hierarchical topic model based on incremental probabilistic concept formation. By adapting the Cobweb algorithm to continuous document embeddings, CobwebTM constructs semantic hierarchies online, enabling unsupervised topic discovery, dynamic topic creation, and hierarchical organization without predefining the number of topics. Across diverse datasets, CobwebTM achieves strong topic coherence, stable topics over time, and high-quality hierarchies, demonstrating that incremental symbolic concept formation combined with pretrained representations is an efficient approach to topic modeling."
 }
