@@ -68,3 +68,5 @@ data/*.tar.gz
 # Stray intermediate PDFs (the final paper PDF is fine, but watch for
 # auto-generated standalone PDFs we don't track).
 confs/acs-26/paper/temporary/*
+
+tests/attention_output
