@@ -1947,3 +1947,125 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# =====================================================================
+# Architecture overview: how TRELLIS's modules act on an experience.
+# Requested by a reviewer who wanted one figure that names every piece
+# of vocabulary and shows the flow from input experience to output.
+# =====================================================================
+
+MEM_FILL = "#eef4fb"
+MEM_EDGE = "#3a5e8a"
+
+
+def _plain_box(ax, x, y, w, h, *, title, lines, fill="#ffffff",
+               edge="#444", title_color="#1a1a1a", fs_title=10.0,
+               fs_body=8.6):
+    """Rounded box with a bold title and a stack of body lines."""
+    ax.add_patch(FancyBboxPatch(
+        (x, y), w, h,
+        boxstyle="round,pad=0.005,rounding_size=0.06",
+        linewidth=1.2, edgecolor=edge, facecolor=fill))
+    ax.text(x + w / 2, y + h - 0.30, title,
+            ha="center", va="center", fontsize=fs_title,
+            fontweight="bold", color=title_color, family="serif")
+    for i, ln in enumerate(lines):
+        ax.text(x + w / 2, y + h - 0.72 - i * 0.40, ln,
+                ha="center", va="center", fontsize=fs_body,
+                color="#1a1a1a", family="serif")
+
+
+def make_architecture_figure(path: str) -> None:
+    fig, ax = plt.subplots(figsize=(7.5, 2.55))
+    ax.set_xlim(0, 15)
+    ax.set_ylim(0, 5.1)
+    ax.set_axis_off()
+
+    PY, PH = 1.35, 3.55          # panel band
+    IY, IH = 2.10, 2.05          # input/output band
+
+    # ---- input experience -------------------------------------------
+    _plain_box(ax, 0.05, IY, 2.05, IH,
+               title="Experience",
+               lines=["elements +", "relations", "(primitives)"],
+               fill="#fdecea", edge=PRIM_EDGE)
+
+    # ---- 1. parsing --------------------------------------------------
+    p1 = _panel_box(ax, x=2.45, y=PY, w=3.35, h=PH,
+                    number=1, title="Parsing")
+    cx, cy, cw, ch = p1
+    for i, ln in enumerate([
+            "form candidate composites",
+            "over adjacent elements",
+            "admit those clearing the",
+            "recognition threshold",
+            "commit best to the",
+            "partonomic tree"]):
+        ax.text(cx + cw / 2, cy + ch - 0.30 - i * 0.44, ln,
+                ha="center", va="center", fontsize=8.4,
+                color="#1a1a1a", family="serif",
+                style="italic" if i in (3, 5) else "normal")
+
+    # ---- 2. long-term memory ----------------------------------------
+    _plain_box(ax, 6.15, PY, 3.15, PH,
+               title="Long-term memory",
+               lines=[], fill=MEM_FILL, edge=MEM_EDGE, fs_title=9.2)
+    for j, (nm, sub) in enumerate([
+            ("content taxonomy", "how chunks compose"),
+            ("context taxonomy", "how elements distribute")]):
+        by = PY + PH - 1.05 - j * 1.30
+        ax.add_patch(FancyBboxPatch(
+            (6.15 + 0.22, by - 0.52), 3.15 - 0.44, 0.98,
+            boxstyle="round,pad=0.005,rounding_size=0.05",
+            linewidth=1.1, edgecolor=MEM_EDGE, facecolor="#ffffff"))
+        ax.text(6.15 + 3.15 / 2, by + 0.14, nm,
+                ha="center", va="center", fontsize=8.4,
+                fontweight="bold", color=MEM_EDGE, family="serif")
+        ax.text(6.15 + 3.15 / 2, by - 0.24, sub,
+                ha="center", va="center", fontsize=7.2,
+                color="#444", family="serif", style="italic")
+
+    # ---- 3. generation -----------------------------------------------
+    p3 = _panel_box(ax, x=9.63, y=PY, w=3.30, h=PH,
+                    number=2, title="Generation")
+    cx, cy, cw, ch = p3
+    for i, ln in enumerate([
+            "expand an element using",
+            "its basic-level concept",
+            "recall a decomposition,",
+            "condition it on context",
+            "stop when all parts",
+            "are primitive"]):
+        ax.text(cx + cw / 2, cy + ch - 0.30 - i * 0.44, ln,
+                ha="center", va="center", fontsize=8.4,
+                color="#1a1a1a", family="serif",
+                style="italic" if i in (1,) else "normal")
+
+    # ---- output experience -------------------------------------------
+    _plain_box(ax, 13.22, IY, 1.73, IH,
+               title="Experience",
+               lines=["a new", "well-formed", "configuration"],
+               fill="#eaf6ee", edge="#1f7d4e", fs_title=9.2, fs_body=8.0)
+
+    # ---- flow arrows --------------------------------------------------
+    for x1, x2 in [(2.12, 2.42), (5.83, 6.12), (9.32, 9.60), (12.95, 13.19)]:
+        _panel_arrow(ax, x1, PY + PH / 2, x2)
+
+    # ---- learning feedback -------------------------------------------
+    ly = 0.72
+    ax.annotate("", xy=(7.62, PY - 0.04), xytext=(7.62, ly),
+                arrowprops=dict(arrowstyle="-|>", color="#b45309",
+                                lw=1.6, mutation_scale=16))
+    ax.add_line(Line2D([4.12, 7.62], [ly, ly], color="#b45309", lw=1.6))
+    ax.add_line(Line2D([4.12, 4.12], [ly, PY - 0.04],
+                       color="#b45309", lw=1.6))
+    ax.text(5.87, ly - 0.36,
+            "Learning: sort each committed element into both taxonomies",
+            ha="center", va="center", fontsize=8.2,
+            color="#b45309", family="serif", fontweight="bold")
+
+    fig.tight_layout(pad=0.15)
+    fig.savefig(path, dpi=200, bbox_inches="tight")
+    plt.close(fig)
+    print(f"wrote {path}")
