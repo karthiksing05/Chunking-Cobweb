@@ -20,7 +20,7 @@ Outputs land in ``confs/acs-26/paper/graphics/`` next to the PNGs:
     hierarchies.{png,pdf}                instances.{png,pdf}
     parse_infographic.{png,pdf}          generation_infographic.{png,pdf}
     sample_parses_{small,med,large}.{png,pdf}
-    hierarchy_bars_{content,context}.{png,pdf}
+    hierarchy_bars_{content,context,legend}.{png,pdf}
     grids_grammar_experiment.{png,pdf}        grids_terminal_experiment.{png,pdf}
 
 Usage::
@@ -135,6 +135,9 @@ def render_trellis_figures() -> None:
 #    ~5–10 min training internally).
 # ----------------------------------------------------------------------
 def render_hierarchy_bars() -> None:
+    """NOTE: this re-trains a TRELLIS and overwrites the committed
+    hierarchy-bar figures with a different tree -- see the warning at the
+    top of ``make_hierarchy_bars.py``."""
     _section("hierarchy bars (re-trains a TRELLIS from cfg_grammar_med)")
     try:
         import make_hierarchy_bars as mhb

@@ -10,6 +10,19 @@ content and the context hierarchies. Outputs:
 
   confs/acs-26/paper/graphics/hierarchy_bars_context.png
   confs/acs-26/paper/graphics/hierarchy_bars_content.png
+  confs/acs-26/paper/graphics/hierarchy_bars_legend.png
+
+The two trees are drawn without legends; the paper stacks them with the
+single shared legend in between, rendered separately at print size so it
+does not inherit the 3-4x downscaling the wide trees need.
+
+WARNING: running this replaces the committed figures, and the trees will
+NOT match. ``cobweb_set_seed`` is imported in a try/except below and the
+cobweb build currently on the path does not export it, so training falls
+back to an unseeded RNG and every run yields a different context tree.
+The committed content/context figures are one particular render, kept
+because the paper's caption was written against it. Rebuild the patched
+``cobweb-private`` before trusting a regeneration.
 
 Run::
 
@@ -245,9 +258,41 @@ def _prune_empty(children_of, has_data_fn):
 
 
 # The trees are rendered at ~18-30 inches wide and then scaled to a
-# fraction of \textwidth in the paper, which shrinks the legend by roughly
-# 4x. LEGEND_FONTSIZE is therefore in figure points, not page points.
+# fraction of \textwidth in the paper, which shrinks anything drawn inside
+# them by roughly 4x. The paper therefore carries ONE legend for both
+# trees, rendered on its own at the size it is printed at
+# (make_legend_figure below), and the trees themselves are drawn without
+# one. LEGEND_FONTSIZE only applies when a legend is drawn into a tree.
 LEGEND_FONTSIZE = 26
+
+# Standalone legend: rendered at its final print size so it can be included
+# at 1:1 and land at exactly LEGEND_PT on the page.
+LEGEND_LABELS = [l for l in ALL_LABELS if l != "OTHER"]
+LEGEND_TITLE = "syntactic class (red border = basic level)"
+LEGEND_PT = 8.0
+
+
+def make_legend_figure(out_path, labels=None, color_map=None,
+                       title=LEGEND_TITLE, fontsize=LEGEND_PT):
+    """Render the shared class legend on its own, with no tree attached.
+
+    Both taxonomies use one palette, so the paper shows a single legend
+    between the two panels. Drawing it separately keeps it at print size
+    instead of inheriting the 3-4x downscaling the wide trees need."""
+    labels = LEGEND_LABELS if labels is None else labels
+    color_map = LABEL_COLOR if color_map is None else color_map
+    handles = [plt.Rectangle((0, 0), 1, 1, color=color_map[l], label=l)
+               for l in labels]
+    fig = plt.figure(figsize=(6.0, 0.6))
+    fig.legend(handles=handles, title=title,
+               loc="center", ncol=len(handles),
+               fontsize=fontsize, title_fontsize=fontsize,
+               handlelength=1.1, handleheight=0.9,
+               columnspacing=1.0, handletextpad=0.4,
+               borderpad=0.5, frameon=True)
+    plt.savefig(out_path, dpi=180, bbox_inches="tight",
+                facecolor="white"); plt.close(fig)
+    print(f"wrote {out_path}")
 
 
 def _draw_external_legend(fig, label_list, color_map, used, legend_title,
@@ -638,13 +683,9 @@ def main():
     print(f"  context BL nodes in view: {len(ctx_bl_idx)}/{len(ctx_bl_hashes)}")
     print(f"  content BL nodes in view: {len(cnt_bl_idx)}/{len(cnt_bl_hashes)}")
 
-    # The two trees share one palette, so the paper shows a single legend.
-    # It goes on the content figure, which sits above the context figure and
-    # is scaled down less, and it covers every class either tree uses.
-    shared_used = np.zeros(len(ALL_LABELS), dtype=np.int64)
-    for c in ctx_counts.values(): shared_used += c
-    for c in cnt_L.values(): shared_used += c
-    for c in cnt_R.values(): shared_used += c
+    # Both trees are drawn without a legend; the paper places one shared
+    # legend between the two panels (see make_legend_figure).
+    make_legend_figure(os.path.join(OUT_DIR, "hierarchy_bars_legend.png"))
 
     plot_tree_single_bars(
         ctx_children, ctx_counts, ALL_LABELS, LABEL_COLOR,
@@ -661,8 +702,6 @@ def main():
         out_path=os.path.join(OUT_DIR, "hierarchy_bars_content.png"),
         max_depth=MAX_DEPTH,
         highlight_idx=cnt_bl_idx,
-        legend_used=shared_used,
-        legend_title="syntactic class (red border = basic level)",
     )
 
 
