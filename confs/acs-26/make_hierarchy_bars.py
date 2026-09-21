@@ -244,21 +244,34 @@ def _prune_empty(children_of, has_data_fn):
     return new
 
 
-def _draw_external_legend(fig, label_list, color_map, used, legend_title):
+# The trees are rendered at ~18-30 inches wide and then scaled to a
+# fraction of \textwidth in the paper, which shrinks the legend by roughly
+# 4x. LEGEND_FONTSIZE is therefore in figure points, not page points.
+LEGEND_FONTSIZE = 26
+
+
+def _draw_external_legend(fig, label_list, color_map, used, legend_title,
+                          fontsize=LEGEND_FONTSIZE):
     """Horizontal legend strip below the plot, OUTSIDE the axes so it
     never overlaps a bottom-row node."""
     legend_h = [plt.Rectangle((0, 0), 1, 1, color=color_map[lbl], label=lbl)
                 for i, lbl in enumerate(label_list) if used[i] > 0]
+    # Anchor the legend's TOP just below the figure so that enlarging it
+    # pushes it further down rather than up over the bottom row of nodes;
+    # bbox_inches="tight" grows the saved canvas to include it.
     fig.legend(handles=legend_h, title=legend_title,
-               loc="lower center", bbox_to_anchor=(0.5, -0.06),
+               loc="upper center", bbox_to_anchor=(0.5, 0.07),
                ncol=len(legend_h),
-               fontsize=10, title_fontsize=10,
+               fontsize=fontsize, title_fontsize=fontsize,
+               handlelength=1.2, handleheight=1.0,
+               columnspacing=1.2, handletextpad=0.5,
                frameon=True)
 
 
 def plot_tree_single_bars(children_of, counts, label_list, color_map,
                           title, out_path, max_depth,
-                          highlight_idx=None):
+                          highlight_idx=None, legend_used=None,
+                          legend_title=None):
     highlight_idx = set() if highlight_idx is None else highlight_idx
     children_of = _prune_empty(
         children_of, lambda i: i in counts and counts[i].sum() > 0)
@@ -306,10 +319,9 @@ def plot_tree_single_bars(children_of, counts, label_list, color_map,
         if depth < max_depth and children_of[idx]:
             for c in children_of[idx]: _draw(c, depth + 1)
     _draw(0, 0)
-    used = np.zeros(len(label_list), dtype=np.int64)
-    for c in counts.values(): used += c
-    _draw_external_legend(fig, label_list, color_map, used,
-                          legend_title="class (red border = basic level)")
+    if legend_used is not None:
+        _draw_external_legend(fig, label_list, color_map, legend_used,
+                              legend_title=legend_title)
     plt.tight_layout()
     plt.savefig(out_path, dpi=180, bbox_inches="tight",
                 facecolor="white"); plt.close()
@@ -318,7 +330,8 @@ def plot_tree_single_bars(children_of, counts, label_list, color_map,
 
 def plot_tree_pair_bars(children_of, cL, cR, label_list, color_map,
                         title, out_path, max_depth,
-                        highlight_idx=None):
+                        highlight_idx=None, legend_used=None,
+                        legend_title=None):
     highlight_idx = set() if highlight_idx is None else highlight_idx
     children_of = _prune_empty(
         children_of, lambda i: i in cL and cL[i].sum() > 0)
@@ -373,12 +386,9 @@ def plot_tree_pair_bars(children_of, cL, cR, label_list, color_map,
         if depth < max_depth and children_of[idx]:
             for c in children_of[idx]: _draw(c, depth + 1)
     _draw(0, 0)
-    used = np.zeros(len(label_list), dtype=np.int64)
-    for c in cL.values(): used += c
-    for c in cR.values(): used += c
-    _draw_external_legend(fig, label_list, color_map, used,
-                          legend_title="class (top=L, bottom=R; "
-                                       "red border = basic level)")
+    if legend_used is not None:
+        _draw_external_legend(fig, label_list, color_map, legend_used,
+                              legend_title=legend_title)
     plt.tight_layout()
     plt.savefig(out_path, dpi=180, bbox_inches="tight",
                 facecolor="white"); plt.close()
@@ -628,6 +638,14 @@ def main():
     print(f"  context BL nodes in view: {len(ctx_bl_idx)}/{len(ctx_bl_hashes)}")
     print(f"  content BL nodes in view: {len(cnt_bl_idx)}/{len(cnt_bl_hashes)}")
 
+    # The two trees share one palette, so the paper shows a single legend.
+    # It goes on the content figure, which sits above the context figure and
+    # is scaled down less, and it covers every class either tree uses.
+    shared_used = np.zeros(len(ALL_LABELS), dtype=np.int64)
+    for c in ctx_counts.values(): shared_used += c
+    for c in cnt_L.values(): shared_used += c
+    for c in cnt_R.values(): shared_used += c
+
     plot_tree_single_bars(
         ctx_children, ctx_counts, ALL_LABELS, LABEL_COLOR,
         title="Context hierarchy --- POS + chunk-class distributions "
@@ -643,6 +661,8 @@ def main():
         out_path=os.path.join(OUT_DIR, "hierarchy_bars_content.png"),
         max_depth=MAX_DEPTH,
         highlight_idx=cnt_bl_idx,
+        legend_used=shared_used,
+        legend_title="syntactic class (red border = basic level)",
     )
 
 
