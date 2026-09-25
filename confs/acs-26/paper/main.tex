@@ -14,6 +14,27 @@
 % apacite is not properly supported and may lead to errors
 \usepackage{natbib}
 \setlength{\bibsep}{0.0ex}
+
+% APA practice: "&" joins author names inside parentheses, "and" joins them in
+% running text. natbib takes both from the same \bibitem field, which
+% cogsysapa.bst writes with \&, so \citep is already right and the textual
+% forms just need \& to read as "and". The bibliography itself is untouched.
+\makeatletter
+% natbib builds \citet with \DeclareRobustCommand, so the real body lives in
+% the control sequence "citet " -- grab that one, not the \protect wrapper,
+% or the redefinition below recurses.
+\expandafter\let\expandafter\CC@citet\csname citet \endcsname
+\expandafter\let\expandafter\CC@citeauthor\csname citeauthor \endcsname
+\def\CC@and{\def\&{and}}
+\DeclareRobustCommand\citet{\@ifstar{\CC@t@star}{\CC@t@nostar}}
+\def\CC@t@nostar{\@ifnextchar[{\CC@t@a}{\CC@t@z}}
+\def\CC@t@z#1{{\CC@and\CC@citet{#1}}}
+\def\CC@t@a[#1]{\@ifnextchar[{\CC@t@two[#1]}{\CC@t@one[#1]}}
+\def\CC@t@one[#1]#2{{\CC@and\CC@citet[#1]{#2}}}
+\def\CC@t@two[#1][#2]#3{{\CC@and\CC@citet[#1][#2]{#3}}}
+\def\CC@t@star#1{{\CC@and\CC@citet*{#1}}}
+\DeclareRobustCommand\citeauthor[1]{{\CC@and\CC@citeauthor{#1}}}
+\makeatother
 % Keep large floats at the top of a text page rather than banishing
 % them to a nearly empty float page.
 \renewcommand{\floatpagefraction}{0.88}
