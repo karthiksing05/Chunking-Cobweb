@@ -14,27 +14,6 @@
 % apacite is not properly supported and may lead to errors
 \usepackage{natbib}
 \setlength{\bibsep}{0.0ex}
-
-% APA practice: "&" joins author names inside parentheses, "and" joins them in
-% running text. natbib takes both from the same \bibitem field, which
-% cogsysapa.bst writes with \&, so \citep is already right and the textual
-% forms just need \& to read as "and". The bibliography itself is untouched.
-\makeatletter
-% natbib builds \citet with \DeclareRobustCommand, so the real body lives in
-% the control sequence "citet " -- grab that one, not the \protect wrapper,
-% or the redefinition below recurses.
-\expandafter\let\expandafter\CC@citet\csname citet \endcsname
-\expandafter\let\expandafter\CC@citeauthor\csname citeauthor \endcsname
-\def\CC@and{\def\&{and}}
-\DeclareRobustCommand\citet{\@ifstar{\CC@t@star}{\CC@t@nostar}}
-\def\CC@t@nostar{\@ifnextchar[{\CC@t@a}{\CC@t@z}}
-\def\CC@t@z#1{{\CC@and\CC@citet{#1}}}
-\def\CC@t@a[#1]{\@ifnextchar[{\CC@t@two[#1]}{\CC@t@one[#1]}}
-\def\CC@t@one[#1]#2{{\CC@and\CC@citet[#1]{#2}}}
-\def\CC@t@two[#1][#2]#3{{\CC@and\CC@citet[#1][#2]{#3}}}
-\def\CC@t@star#1{{\CC@and\CC@citet*{#1}}}
-\DeclareRobustCommand\citeauthor[1]{{\CC@and\CC@citeauthor{#1}}}
-\makeatother
 % Keep large floats at the top of a text page rather than banishing
 % them to a nearly empty float page.
 \renewcommand{\floatpagefraction}{0.88}
@@ -104,7 +83,7 @@
 \def\note#1{\vskip 0.15in\texitem{$\bullet$} #1 \vskip 0.15in}
 
  % First page headings for accepted submissions.                                
-\cogsysheading{X}{2026}{1-19}{8/2026}{X/2026}
+\cogsysheading{X}{2026}{1--20}{8/2026}{10/2026}
  % First page headings for poster submissions.                                  
 %\cogsysposterheading{First}{2012}{1-18}                                        
 
@@ -113,13 +92,13 @@
 
 \begin{document}
 
-\title{A Unified Account of Concepts and Chunks: \\                             
-       Extending Cobweb from Categorization to Composition}
+\title{A Unified Account of Concepts and Chunks}
 
 \author{Karthik Singaravadivelan}{ksingara3@gatech.edu}
 \author{Pat Langley}{patrick.w.langley@gmail.com}
-\address{Institute for the Study of Learning and Expertise,
-         2164 Staunton Court, Palo Alto, CA 94306 USA}
+\address{Georgia Institute of Technology, Atlanta, GA 30332 USA \\
+         Institute for the Study of Learning and Expertise,
+         Palo Alto, CA 94306 USA}
 
 \begin{abstract}
 Cognitive psychology has studied how people encode, use, and learn
@@ -127,7 +106,7 @@ concepts that describe categories, and how they represent, recognize,
 and acquire chunks for familiar patterns of elements. The literatures
 on these two topics are nearly disjoint, which poses a challenge for
 unified theories of cognition. In this paper, we review Cobweb, a
-computational account of categorization and concept formation, and
+computational account of categorization and concept formation, then 
 propose an extended theory that incorporates chunks and their
 acquisition. The theory makes no commitments about
 modality, applying to any experience that decomposes into elements
@@ -135,12 +114,12 @@ and relations among them. We also present \trellis/, an
 implementation of this theory, and illustrate its application to
 learning context-free grammars, which we adopt as a testbed because
 they involve both concept-like and chunk-like elements. In addition,
-we report experimental
-results on three synthetic grammars that demonstrate the system's
-ability to represent syntactic knowledge, use it to parse and
-generate sentences, and learn compositional structures from sample
-parses. We conclude by discussing related work on concepts and
-chunks, along with directions for future research in the area.
+we report experimental results on learning for three synthetic grammars 
+that demonstrate the system's ability to represent syntactic knowledge, 
+use it to parse and generate sentences, and learn compositional 
+structures from sample parses. We conclude by discussing related 
+work on concepts and chunks, along with directions for future 
+research on the problem. 
 \end{abstract} 
 
 \section{Introduction}
@@ -151,8 +130,8 @@ such theories involve postulates about the mental structures stored in
 memory, the performance processes that operate over them, and the
 learning mechanisms that acquire them.
 Different paradigms take differing positions on these issues, but all
-share a concern with generality, seeking broad coverage from few
-assumptions.
+share a concern with generality, seeking broad coverage from a small 
+set of assumptions.
 
 In this paper, we propose a unified computational account of two
 facets of cognition that researchers have long treated as distinct and
@@ -171,14 +150,14 @@ disconnected. One of these revolves around {\it concepts\/}, which
 The representation, use, and learning of concepts has been a major
 topic in cognitive psychology \citep{rips-smith-medin} and artificial
 intelligence \citep{langley-machine-learning} since the 1960s. A second
-and less popular area, which still receives substantial attention,
+area, less popular but one that still receives substantial attention,
 concerns {\it chunks}, which Langley defines as:
 
 \vskip 0.05in
 
 \bull
-  {\it A chunk is a cognitive structure that denotes a collection of            
-       entities, possibly typed, that form a specified configuration            
+  {\it A chunk is a cognitive structure that denotes a collection of 
+       entities, possibly typed, that form a specified configuration 
        or relational pattern\/}.
 
 \vskip 0.05in
@@ -186,63 +165,74 @@ concerns {\it chunks}, which Langley defines as:
 Treatments of chunk encoding, recognition, and acquisition have mainly
 appeared in the psychological literature
 \citep{miller-magical-seven,fountain-doyle-chunking}, but there has
-been some AI work \citep{campbell-berliner-chunks}. Topics like concept generalization and similarity have been
-recurring themes in work on concepts, whereas research on chunks has
-emphasized the composition of higher-level structures from constituents.
+been some AI work \citep{campbell-berliner-chunks}. Topics like concept generalization and similarity have been recurring themes in work on 
+concepts, whereas research on chunks has emphasized the composition 
+of higher-level structures from their constituents.
 
-These two notions meet in the broader question of what it takes for a
-system to be {\it compositional\/}. We adopt a definition in the same
-spirit as the two above:
-
-\vskip 0.05in
-
-\bull
-  {\it A system is compositional if it constructs representations from
-       parts and the relations that arrange them, and it is
-       compositionally proficient if it generalizes those relations
-       to construct representations it has never encountered\/}.
-
-\vskip 0.05in
-\noindent
-The second clause does the real work. Storing a configuration is not
-enough, since a system that reuses only arrangements it has seen stays
-tied to its experience. Proficiency requires treating the parts as
-members of categories, so a familiar arrangement applies to unfamiliar
-fillers. This is why the two literatures need each other: composition
-supplies the parts and their relations, categorization the generality
-that lets an arrangement transfer.
+% These two notions meet in the broader question of what it takes for a
+% system to be {\it compositional\/}. We adopt a definition in the same
+% spirit as the two above:
+% 
+% \vskip 0.05in
+% 
+% \bull
+%   {\it A system is compositional if it constructs representations from
+%        parts and the relations that arrange them, and it is
+%        compositionally proficient if it generalizes those relations
+%        to construct representations it has never encountered\/}.
+% 
+% \vskip 0.05in
+% \noindent
+% Storing a configuration is not
+% enough, since a system that reuses only arrangements it has seen stays
+% tied to its experience. Proficiency requires treating the parts as
+% members of categories, so a familiar arrangement applies to unfamiliar
+% fillers. This is why the two literatures need each other: composition
+% supplies the parts and their relations, categorization the generality
+% that lets an arrangement transfer.
 
 Concepts and chunks have much in common, but work on the former has
 emphasized generalization, whereas studies of the latter have focused
-on composition. In the remaining pages, we present a unified theory
+on composition. Both capabilities are necessary for robust cognition, 
+but neither alone is sufficient, which suggests that most existing 
+theories are incomplete. A system that supports generalization 
+without composition is limited to encoding knowledge at a single level, 
+whereas one that acquires configurations without generalizing them 
+cannot use them in novel situations. Both capacities are needed.  
+Composable chunks supply parts and relations among them, whereas 
+generalized concepts extend their coverage. 
+
+In the remaining pages, we present a unified theory
 that addresses both aspects of cognition. Our approach builds on Cobweb
 \citep{fisher-cobweb}, a computational account of concept representation,
 organization, retrieval, and formation. We start by reviewing Cobweb's
 main assumptions, which our framework retains, and then introduce
 postulates that support chunk-related phenomena. After this, we
 describe \trellis/, an implementation of the theory, and report
-experimental results on grammar induction, which requires both
-generalization and composition. In closing, we examine related ideas
+experimental results on grammar induction. We focus on this task  
+because syntax acquisition involves both generalization and composition, 
+but the theory should apply equally well to vision, problem solving, 
+and other cognitive functions. In closing, we examine related ideas
 and note avenues for future research.
 
-We should be clear at the outset about the role grammar plays here. The
-postulates below assume only that an experience arrives as a set of
-elements with local relations among them, a description that fits a
-board position, a visual scene, or a motor sequence as readily as a
-sentence. We adopt sentences as our testbed because they exercise
-categorization and composition in equal measure and because gold parses
-give an unambiguous target. Nothing in the theory requires that the
-elements be words or the relation be {\it before\/}, a claim we revisit
-in Section~8.
+% We should be clear at the outset about the role grammar plays here. The
+% postulates below assume only that an experience arrives as a set of
+% elements with local relations among them, a description that fits a
+% board position, a visual scene, or a motor sequence as readily as a
+% sentence. We adopt sentences as our testbed because they exercise
+% categorization and composition in equal measure and because gold parses
+% give an unambiguous target. Nothing in the theory requires that the
+% elements be words or the relation be {\it before\/}, a claim we revisit
+% in Section~8.
 
-% We adopt grammar induction as the empirical domain because it                 
-% exercises the two abilities together, and because gold parse                  
-% trees provide an unambiguous target.                                          
+% We adopt grammar induction as the empirical domain because it 
+% exercises the two abilities together, and because gold parse  
+% trees provide an unambiguous target.                 
 
-% The idea was formalized in CHREST \citep{chrest-gobet-lane}, a                
-% descendant of EPAM \citep{epam-richman}, and runs through much                
-% of the grammar induction literature \citep{wolff-grammar,                     
-% grids-langley-stromsten}.                                                     
+% The idea was formalized in CHREST \citep{chrest-gobet-lane}, a 
+% descendant of EPAM \citep{epam-richman}, and runs through much 
+% of the grammar induction literature \citep{wolff-grammar, 
+% grids-langley-stromsten}. 
 
 \section{The Cobweb Framework}
 
@@ -252,9 +242,11 @@ Bayesian classifiers, and nearest-neighbor methods. The system
 received considerable attention within the maturing machine learning
 community and made contact with important psychological findings
 like basic-level and typicality effects. Excitement about the approach
-led to multiple extensions, many of them documented in
-\citet{fisher-concept-formation-vol}. In this section, we review the framework's main theoretical
-tenets, which it shares with its descendants.
+led to multiple extensions, many of them documented in Fisher, Pazzani, 
+and Langley (\citeyear{fisher-concept-formation-vol}). In this 
+section, we review the framework's main theoretical tenets, which 
+it shares with its descendants, including the new system we report 
+later. 
 
 \subsection{Representation in Cobweb}
 
@@ -334,9 +326,10 @@ instances it summarizes.
 
 \vskip 0.02in
 \noindent
-This organization resembles that produced by hierarchical clustering,
-except that each nonterminal node (cluster) has a concept description
-rather than a set of instances, which are stored at terminal nodes.
+This organization resembles that produced by hierarchical clustering 
+systems, except that each nonterminal node (cluster) in the taxonomy 
+has a concept description rather than a set of instances, which are 
+stored at terminal nodes.
 
 The taxonomy is also similar to a decision tree, except that
 it stores `tests' on nodes rather than links. Also, the tests
@@ -364,7 +357,7 @@ in long-term memory, which has implications for performance.
 
 Claims about representation and organization are not enough for a
 complete theory. Cobweb also posits performance mechanisms that
-use its concept, and their arrangement in long-term memory, to
+use its concepts, and their arrangement in long-term memory, to
 produce behavior. We can summarize the framework's assumptions on
 this front as:
 
@@ -422,13 +415,13 @@ unknown attributes.
 \noindent
 Again, this scheme resembles that in decision trees, but rather than
 predicting a class label, Cobweb infers values for all missing
-attributes, an ability \citet{fisher-cobweb} called {\it flexible
-prediction\/}.
+attributes, an ability that \citet{fisher-cobweb} called {\it 
+flexible prediction\/}.
 
 \subsection{Learning in Cobweb}
 
 Finally, the theory makes statements about how conceptual knowledge
-is acquired through learning. These postulates include:
+is acquired through learning. These additional postulates include:
 
 % Learning in Cobweb is not a separate offline stage but an update rule 
 % attached to the same sorting descent that supports recognition. 
@@ -447,10 +440,10 @@ Learning is unsupervised in that instances do not come with class labels.
 \vskip 0.02in
 \noindent
 That is, sorting each new instance changes both the content of
-existing concepts and their organization in long-term memory. And the
-learner must invent its own categories rather than obtain them from an
-outside source.\footnote{Training
-cases can include a special `class' attribute, but this is treated
+existing concepts and their organization in long-term memory. 
+Moreover, the learner must invent its own categories rather 
+than obtain them from an outside source.\footnote{Training 
+cases can include a `class' attribute, but this is treated
 no differently from others.}
 
 Furthermore, the Cobweb theory posits two varieties of incremental
@@ -470,7 +463,7 @@ This mechanism simply alter counts that reflect the prior probability
 of a concept given its parent and the probability of each attribute
 value given that concept, much as in naive Bayesian classifiers.
 These changes are determined entirely by the instance's content
-and which path it traverses.
+and the path it traverses.
 
 \vskip 0.05in
 
@@ -482,26 +475,27 @@ a child, or merging two children.
 
 \vskip 0.02in
 \noindent
-The first option does revise taxonomic structure; the probabilities
-for the child are simply updated. The second alternative creates
+The first option does not revise taxonomic structure; it simply 
+updates probabilities for the child. The second alternative creates
 a new child based on the instance. The latter two actions lead to
 local restructuring before sorting continues. The same evaluation
 criterion used in routing determines which of these steps to take.
 Because Cobweb learns incrementally, the order in which it encounters
 instances can influence the structure of the acquired taxonomy.
-Merging and splitting nodes can mitigate these order effects,
-resulting in hierarchies with better organizations.
-
-% and lacks sufficient statistics, 
+Merging and splitting can mitigate these order effects, resulting 
+in hierarchies with better organizations.
 
 The framework also invokes a deterministic restructuring action
 when an instance reaches a terminal node N. In these cases, the
 learning process creates two new terminal nodes, one based on the
 stored instance and the other based on the new case. The existing
 node N becomes their parents, with its probabilities updated based 
-on values in the recent instance. Together, these
-operations support the incremental and unsupervised acquisition
-of a taxonomy of probabilistic concepts.
+on values in the recent instance. Together, these operations 
+support the incremental and unsupervised acquisition of a taxonomy 
+of probabilistic concepts, which are key characteristics of human 
+category learning. 
+
+% and lacks sufficient statistics, 
 
 \section{A Unified Theory of Chunking and Categorization}
 
@@ -552,8 +546,8 @@ composite\/} structure.
 
 \vskip 0.02in
 \noindent
-Primitive elements are the basic building blocks of memory, much like
-instances and concepts in Cobweb. A composite, in contrast, is an
+Primitive elements are the basic building blocks of memory, similar 
+to instances and concepts in Cobweb. A composite, in contrast, is an
 element built from primitives or lower-level composites, which its
 content description specifies. Composites correspond to {\it chunks\/}.
 
@@ -613,7 +607,7 @@ For primitive elements, this hierarchy corresponds to that in Cobweb,
 which clusters instances that have similar attribute values. However,
 for composite elements, it groups cases that have similar sets
 of constituents. For example, the chunks {\sl black dog} and {\sl 
-black cat} share the element {sl black}. 
+black cat} share the element {\sl black}. 
 
 \vskip 0.05in
 
@@ -630,7 +624,7 @@ contexts. For instance, it might group the words {\sl dog} and
 The same applies to composite structures, like different
 types of noun phrases, which occur both before and after verbs.
 These two taxonomies are intertwined in that nodes in one point
-to nodes in the other. However, keeping them separate recognizes
+to nodes in the other. However, keeping them separate acknowledges 
 that one can organize memory either in terms of content (i.e.,
 the constituents of chunks) or in terms of context (i.e, the
 situations in which chunks occur).
@@ -691,7 +685,7 @@ recognized chunk.
 
 \vskip 0.02in
 \noindent
-This introduces a notion absent from Cobweb, a {\it recognition
+This requires a notion absent from Cobweb, a {\it recognition
 threshold\/} that a candidate must exceed at some node in the taxonomy
 before counting as familiar enough to proceed. Among the candidates
 that pass, the best-scoring chunk joins the growing parse tree.
@@ -729,8 +723,8 @@ This is the inverse of parsing. Rather than combining elements into
 larger structures, it starts from a single composite and rewrites it
 into constituents, then rewrites those in turn until only primitives
 remain. For language, expanding a {\sl sentence} into a {\sl noun
-phrase} and {\sl verb phrase}, and so on, yields a grammatical
-sequence of words.
+phrase} and {\sl verb phrase}, decomposing them, and so forth, 
+yields a grammatical sequence of words.
 
 \vskip 0.05in
 
@@ -743,10 +737,10 @@ and conditions them on the context taxonomy.
 \noindent
 This assumes a counterpart to the recognition threshold, which
 determines whether a candidate is familiar enough to use in parsing.
-Here we need a threshold that determines whether to use a content
-concept to recall an expansion~\citep{gupta2025hierarchicalsemanticretrievalcobweb}. If this is too low, then generation
+Here we need a {\it recall\/} threshold that determines whether 
+to use a content concept for an  expansion~\citep{gupta2025hierarchicalsemanticretrievalcobweb}. If this is too low, then generation
 will draw on very specific nodes supported by only a few cases; if
-too hight, it will favor general nodes that will mix constituents
+too high, it will favor general nodes that mix constituents
 which do not belong together. Recall samples from the most specific
 chunks that exceed the threshold to generate candidate expansions,
 then uses the context hierarchy to rank them.
@@ -762,14 +756,14 @@ Generation terminates when every expanded element is a primitive.
 
 \vskip 0.02in
 \noindent
-The two taxonomies play complementary roles throughout. The content
+The two taxonomies play complementary roles. The content
 hierarchy specifies candidate chunk expansions, whereas the context
 hierarchy specifies how well they fit their surroundings. For
 grammatical expertise, the first is analogous to individual rewrite
 rules, such as {\sl VP => Verb NP}, and the second to knowledge about
 which rule to choose. Because generation recombines familiar parts in
 new ways, it can produce experiences the system has never seen yet
-consistent with what it has learned, which for language means
+are consistent with what it has learned, which for language means
 grammatical sentences beyond the training corpus. 
 
 % \begin{ppost}
@@ -825,23 +819,23 @@ grammatical sentences beyond the training corpus.
 % allows, and conditioning the sampled leaf on context (P7) keeps the 
 % output distributionally consistent with what the system has already 
 % seen.                                                                    
-
 \subsection{New Learning Postulates}
 
 Learning in the extended theory does not require new postulates about
-mechanisms, as they remain unchanged from Cobweb, but it does make
-claims about the inputs to those processes. These include:
+mechanisms, as they remain unchanged from the Cobweb framework. 
+However, it does make claims about the inputs to these already 
+established processes. They include:
 
 \vskip 0.05in
 
 \bull
-Learning incorporates content and context instances into the content
-and context hierarchies, respectively.
+Learning incorporates content and context instances extracted from 
+elements into the content and context taxonomies, respectively.
 
 \bull
 Learning incorporates instances for composite elements into both
-taxonomies, but those for primitive elements only into the context
-taxonomy.
+taxonomies, but incorporates instances for primitive elements only 
+into the context taxonomy.
 
 \vskip 0.05in
 \noindent
@@ -850,7 +844,20 @@ commitments: (a) the distinction between content and context
 instances, and (b) interleaving learning with performance. There is no
 separate mechanism for creating chunks, since parsing already produces
 candidates, and learning simply treats them as data for updating the
-taxonomies.
+taxonomies. 
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{graphics/architecture}
+\vspace{-0.40in}
+\caption{Modules of \trellis/ and the flow of an experience through
+  them. Parsing composes primitive elements into a partonomic tree,
+  consulting the content and context taxonomies that make up long-term
+  memory, while generation inverts the process. Section~3 defines 
+  the terms set in italics.} 
+\label{fig:architecture}
+\vskip 0.15in
+\end{figure}
 
 This does not reflect a limitation of Cobweb's account of learning.
 If anything, it provides evidence for substantial generality. Cobweb
@@ -870,27 +877,16 @@ invokes Cobweb as a subroutine. In this section, we describe how
 examples from language processing. We delay covering details like
 formulas for the recognition score until Appendix~B.
 
-Figure~\ref{fig:architecture} summarizes how the pieces fit together and
-fixes the vocabulary we use below. An experience enters as primitive
-elements and the relations among them. Parsing composes these into
-higher-level elements, admitting only candidates that clear a
-recognition threshold and committing the best to a partonomic tree.
+Figure~\ref{fig:architecture} summarizes how the pieces fit together 
+and clarifies our terminology. An experience enters as a set of 
+primitive elements and relations among them. Parsing composes these 
+into higher-level elements, admitting only candidates that clear 
+a recognition threshold and committing the best to a partonomic tree.
 Long-term memory holds two taxonomies, over content and over context
 descriptions, which supply the scores that parsing consults. Generation
 runs the same machinery in reverse. Learning is not a separate stage:
 every committed element is sorted into both taxonomies, so the memory
-that scores later experiences is the one earlier experiences built.
-
-\begin{figure}[!htbp]
-\centering
-\includegraphics[width=\textwidth]{graphics/architecture}
-\caption{Modules of \trellis/ and the flow of an experience through
-  them. Parsing composes primitive elements into a partonomic tree,
-  consulting the content and context taxonomies that make up long-term
-  memory; generation inverts the process. Terms set in italics are
-  defined in Section~3.}
-\label{fig:architecture}
-\end{figure}
+that scores later experiences is the one built from earlier experiences.
 
 \subsection{Representation in \trellis/}
 
@@ -904,24 +900,26 @@ with two attributes: an identifier that points to the context
 taxonomy (referring to the child itself) and a complexity tag
 (a small integer denoting its nesting depth). Both reside in the
 context hierarchy's identifier space rather than the surface
-vocabulary, so the content hierarchy never sees a surface word.
+vocabulary, so the content hierarchy never sees a primitive word.
 Every value encountered during a content sort was created by a
 context sort of the corresponding child. The complexity tag lets
 the content taxonomy identify composites whose children have
 similar contexts but differ in structural depth, such as
 {\sc np}$=${\sc det}$+${\sc n} vs.\ {\sc s}$=${\sc np}$+${\sc vp}.
 
-\begin{figure}[!htbp]
+\begin{figure}[t]
 \centering
-\includegraphics[width=0.88\textwidth]{graphics/instances}
+\includegraphics[width=\textwidth]{graphics/instances}
+\vskip -0.10in
 \caption{One primitive (``cat'', green) and one composite (``saw a
   dog'', amber) from a parse of ``the cat saw a dog''. Each box header
-  is the long-term memory identifier the instance was sorted to. The
-  composite's content field
+  is the long-term memory identifier to which the instance was sorted. 
+  The composite's content field
   points into the context hierarchy, keeping the two descriptions
   in complementary formats. Window width, distance weighting, and
   content-bag width are run-time values (Appendix~B).}
 \label{fig:instances}
+\vskip 0.10in
 \end{figure}
 
 \subsection{Organization in \trellis/}
@@ -931,7 +929,7 @@ two Cobweb taxonomies. The content hierarchy stores the content
 descriptions of composites and the context hierarchy stores the
 contexts in which they occur. They are linked in that a composite's
 content refers to identifiers in the context hierarchy, so every
-description it encounters comes from an earlier context sort.
+description it encounters comes from an earlier context classification. 
 Neither trades conceptual facets for compositional ones, since both
 structures carry each. Composites with structurally similar children
 appear near each other in the content tree, reflecting a shared role
@@ -951,23 +949,28 @@ hierarchy and the cross-hierarchy references that link them.
 % hierarchy while conditioning each child on the context class the 
 % structure expects at that slot.                                            
 
-\begin{figure}[!htbp]
+\begin{figure}[t]
 \centering
-\includegraphics[width=0.75\textwidth, trim=0 0 15 15, clip]{graphics/hierarchies}
+\includegraphics[width=\textwidth, trim=0 0 15 15, clip]{graphics/hierarchies}
+\vskip -0.07in
 \caption{Leaf-level subtrees of the content (left) and context (right)
   hierarchies. Arrows show the cross-hierarchy link: a content leaf's
   child fields name the context concepts that describe its children.}
 \label{fig:hierarchies}
+\vskip 0.15in
 \end{figure}
 
 \subsection{Parsing and Generation in \trellis/}
 
 The \trellis/ system includes two modules that expand on the
-theory's performance postulates. A parsing mechanism constructs
-parses from the bottom up by iteratively creating chunks that
-elaborate on the input experience. In addition, a generation
-mechanism constructs output experiences from the top down by
-iteratively decomposing chunks until reaching primitives.
+theory's performance postulates. 
+As Figure~\ref{fig:generation-infographic}~(a) depicts, a parsing 
+mechanism constructs parses from the bottom up by iteratively 
+creating chunks that elaborate on the input experience. 
+In addition, the generation mechanism shown in 
+Figure~\ref{fig:generation-infographic}~(b) constructs output 
+experiences from the top down by iteratively decomposing chunks 
+until its reaches primitive elements.
 
 Parsing carries out greedy search through the space of possible
 parses. The module starts with a frontier of primitive elements,
@@ -993,13 +996,15 @@ candidate's constituents with the composite element on the frontier.
 Parsing terminates if the module recognizes none of the candidate 
 chunks, in which case it halts with a partial parse.
 
-\begin{figure}[!htbp]
+\begin{figure}[t]
 \centering
+{\small (a) One parsing step}\\[0.10in]
 \includegraphics[width=0.95\textwidth]{graphics/parse_infographic}\\[0.04in]
-{\small (a) one parsing step}\\[0.10in]
+{\small (b) One generation step}\\[0.10in]
 \includegraphics[width=0.95\textwidth]{graphics/generation_infographic}\\[0.04in]
-{\small (b) one generation step}
-\caption{The two performance modules. (a) Parsing (1) forms candidate
+\vskip -0.05in
+\caption{{\sc Trellis}' two performance modules. (a) Parsing (1) 
+  forms candidate
   chunks over adjacent frontier elements; (2) sorts each through both
   taxonomies, admitting it iff some nonroot ancestor on the sort path
   has count above $\tau_{parse}$, ranking the admitted candidates by
@@ -1008,32 +1013,33 @@ chunks, in which case it halts with a partial parse.
   a fresh content leaf from a well-supported neighborhood above it; (3)
   resolves each of the sampled leaf's two child references against the
   class the parent expects; (4) expands the seed with these results.
-  Numeric values in (a2) are illustrative.}
+  The numeric values in a2 are for illustration only.}
 \label{fig:parse-infographic}
 \label{fig:generation-infographic}
+\vskip 0.2in
 \end{figure}
 
 Generation proceeds in the opposite direction to produce a
-grammatical sentence. This process begins from a seed node that
+grammatical structure. This process begins from a seed node that
 is an unexpanded composite with an identifier in the content
 hierarchy. The module samples from a {\it recombination pool\/}
 associated with the seed, decomposing the result into two children.
 To create the pool, \trellis/ walks up from the seed's leaf until
-it reaches an ancestor whose count exceeds $\tau$, a parameter
-similar to the recognition threshold. At this point, it considers
-the constituent pairs stored at this node, each of which has an
-associated probability. Thus, the system draws from a set of
-decompositions it has seen often enough to treat as acceptable,
+it reaches an ancestor whose count exceeds the recall threshold 
+$\tau$, analogous to the recognition threshold. At this point, 
+it considers the constituent pairs stored at this node, each of 
+which has an associated probability. Thus, the system draws from a 
+set of decompositions it has seen often enough to treat as acceptable, 
 from which it then samples, rather than ones with little empirical
 support. The sampling process can produce new combinations that
 no single training experience has contained.
 
 After selecting a decomposition, \trellis/ uses the context hierarchy
-to filter candidates. If a candidate's parent does not expect one of
-them, then the system eliminates it from competition to ensure it
+to filter alternatives. If a candidate's parent does not expect one 
+of them, then the system eliminates it from competition to ensure it
 cannot emit an incorrect constituent. If the filter eliminates all
 candidates, say because the context concept has not yet acquired any
-compatible chunks, the system falls back to a wider, less-filtered
+compatible chunks, then the system falls back to a wider, less-filtered
 pool that incurs a small risk for errors of commission in return
 for broader coverage. Generation halts when every leaf of the parse
 tree is a primitive structure.
@@ -1043,21 +1049,22 @@ tree is a primitive structure.
 
 Learning in \trellis/ does not require any new mechanisms beyond those
 in Cobweb, but it operates over what we have called `experiences',
-which are collections of related elements. The system is provided
+which are collections of related elements. We provide system 
 not only with training experiences, but also with desired parse trees
-for them. For example, the sentence {\sl the big dog chased the black           
+for them. For example, the sentence {\sl the big dog chased the black 
 cat} would come with a parse into phrases at various levels. This
 constitutes a form of supervised learning, although nonterminal nodes
-in the parse trees are not themselves labeled.
+in the parse trees are not themselves labeled with terms like {\sl NP} 
+and {\sl VP}. 
 
 As with parsing, \trellis/ learns iteratively from the bottom up.
 This involves selecting an element on the frontier (initially the
 set of primitive structures) and sorting it through taxonomies.
 The system only sends primitive elements through the context
 hierarchy, as they have no internal structure. Composite elements
-go through both taxonomies, which incorporates them by their content
-and context descriptions. \trellis/ sorts composite
-elements only after their constituents have been processed.
+are sent through both taxonomies, which incorporates them by their 
+content and context descriptions. \trellis/ classifies composite
+elements only after it has already processed their constituents.
 
 % *** Is the statement below really accurate? It can't be right. 
 
@@ -1070,7 +1077,7 @@ turns to the next, continuing until it exhausts the training data.
 Thus, learning occurs both incrementally within each experience and
 across a succession of experiences. \trellis/ has no separate routine
 for creating chunks: every composite structure becomes a new node in
-the hierarchies, and that node is what later parsing uses as the
+the taxonomies, and that node is what later parsing uses as the 
 category label when the system meets a structurally similar chunk. 
 
 \section{Evaluation of \trellis/}
@@ -1080,7 +1087,9 @@ theory, but whether it operates as intended is another question. To
 answer it, we designed experiments on grammar acquisition that examined
 its ability to represent, organize, use, and learn linked content and
 context taxonomies. We describe the experimental design and test
-domains below, then present the results.
+domains below, then present the results. As noted earlier, we focused 
+on syntax because it requires both chunks and categories, but we 
+anticipate our findings will carry over to other settings. 
 
 % The evaluation asks whether \trellis/ does what the postulates 
 % promise: recognize gold-standard chunks in inputs it has not seen and 
@@ -1105,11 +1114,11 @@ For our initial studies, we devised synthetic context-free grammars
 to generate training data, rather than a corpus of natural sentences
 like the Penn Treebank. To compute the two metrics, we used the target
 grammar to generate training sentences and associated parse trees,
-then let \trellis/ to learn concepts and chunks from these experiences.
+then let \trellis/ learn concepts and chunks from these experiences.
 To measure errors of omission, we used the target grammar to generate
 novel sentences, then used \trellis/' parsing module to attempt
 parsing them. Similarly, to measure errors of commission, we called
-the generation module to produce sentences with the learned taxonomies,
+the generation module to produce sentences from the learned taxonomies,
 then used the target grammar to attempt parsing them.
 Because the system can acquire incomplete grammars, especially early
 in training, we did not use an all-or-none measure of success.
@@ -1124,13 +1133,13 @@ For each test sentence, we took the fraction of substructures matched
 between the target and learned sentences.
 
 The main purpose of our experiments was to reveal whether \trellis/
-induces accurate grammatical knowledge, or whether it forms overly
+induces accurate grammatical knowledge or whether it forms overly
 specific or overly general structures. We were also interested in
 the rate of improvement as measured by learning curves. In addition,
-we also wanted to know how behavior scaled in response to two types
+we also wanted to know how behavior scales in response to two types
 of grammatical complexity. One involved the number of nonterminal
 categories, such as {\sl NP} and {\sl VP}, in the target grammar.
-Raising this count increases the number of chunk types the content
+Raising this count increases the number of chunk types that the content
 hierarchy must encode and acquire. The other concerned the words per
 part-of-speech class. Increasing this number requires the context
 hierarchy to generalize across more surface forms.
@@ -1147,21 +1156,21 @@ hierarchy to generalize across more surface forms.
 % the fraction of samples the grammar accepts. 
 
 In one experiment, we varied the number of nonterminal symbols, using
-three grammars with 3, 6, and 8 nonterminals, which we will refer
-to as small, medium, and large, while holding number of words per
-class constant. In a second study, we varied the words per
-part of speech class from 11 (low) to 22 (medium) to high (39), while
-holding the number of nonterminals at 6. Appendix~A presents the
-rewrite rules and lexical items for each grammar, most of which
+three grammars with three, six, and eight nonterminals, which we will 
+refer to as small, medium, and large, while holding number of words 
+per class constant. In a second study, we varied the number of words 
+per part of speech class from 11 (low) to 22 (medium) to high (39), 
+while holding the number of nonterminals at six. Appendix~A presents 
+the rewrite rules and lexical items for each grammar, most of which
 involve recursion, while Appendix~B provides the system parameters,
 which we did not vary. Each experimental condition used 400
 sentence-parse pairs generated from the target grammar. To measure
 errors of omission, we used five-fold cross validation, holding out
-a different subset of 40 pairs for each fold for testing and the
-remaining 320 pairs for training. To measure errors of commission, we
-used the same five learned taxonomies to generate 40 sentence-parse
-pairs. Thus, we averaged each dependent variable over five runs based
-on different training data.
+a different subset of 80 pairs for each fold in testing and the
+remaining 320 pairs in training. To measure errors of commission, we
+used the same five learned taxonomies to generate 80 sentence-parse
+pairs. Finally, we averaged each dependent variable over five runs based
+on the different training sets.
 
 % three strictly nested grammars of progressively richer constituent 
 % structure ({\sc small} $\subset$ {\sc med} $\subset$ {\sc large}). 
@@ -1191,7 +1200,8 @@ the commission rate on the right against the number of training
 sentences. Each graph shows three learning curves, one per grammatical
 complexity level. The most important result is that \trellis/ acquires
 grammatical expertise well, with both errors of omission and commission
-dropping to low percentages even for the most complex grammar.
+dropping to low percentages even for the most complex grammar, despite 
+the inclusion of recursive rewrite rules in the targets. 
 Learning is also rapid, with both errors dropping to 20 percent almost
 immediately and then improving gradually with more training sentences.
 Increasing the number of nonterminals slows learning, as the system
@@ -1211,18 +1221,20 @@ reasonable concepts for each nonterminal in the target grammar.
 % back to a wider, less filtered pool that can occasionally admit a  
 % wrong-type constituent. 
 
-\begin{figure}[!htbp]
+\begin{figure}[t]
 \centering
-\includegraphics[width=0.81\textwidth]{graphics/grids_grammar_experiment}\\[0.03in]
-{\small (a) varying grammar complexity}\\[0.08in]
-\includegraphics[width=0.81\textwidth]{graphics/grids_terminal_experiment}\\[0.03in]
-{\small (b) varying lexicon size on the {\sc med} grammar}
+{\small (a) Varying grammar complexity}\\[0.10in]
+\includegraphics[width=0.95\textwidth]{graphics/grids_grammar_experiment}\\[0.04in]
+{\small (b) Varying lexicon size for the {\sc med} grammar}\\[0.10in]
+\includegraphics[width=0.95\textwidth]{graphics/grids_terminal_experiment}\\[0.04in]
+\vskip -0.10in
 \caption{$1 - {\rm omission\ rate}$ (parse, left of each pair) and
   $1 - {\rm commission\ rate}$ (generation, right of each pair), across
   (a) the three grammars and (b) the three lexicon sizes (five data
   sets, $\pm1\sigma$ band).}
 \label{fig:comparison-grammar}
 \label{fig:comparison-terminal}
+\vskip 0.1in
 \end{figure}
 
 % {\bf Scaling Across Vocabulary Size}\label{sec:terminal-experiment}           
@@ -1235,8 +1247,9 @@ omission and commission for all complexity levels. Increasing
 the number of words per part of speech class slows the rate of
 learning, but improvement is rapid in all conditions and the
 reduction with more complex grammars is modest. Inspection of
-the context hierarchy showed the system grouped nouns with nouns,
-verbs with verbs, and so forth, as desired.
+the context hierarchy, which encodes word and phrasal classes, 
+showed the system grouped nouns with nouns, verbs with verbs, 
+and so forth, as desired.
 
 % The two-hierarchy organization absorbs per-terminal sparsity by 
 % construction: the context hierarchy groups distributional equivalents 
@@ -1262,11 +1275,11 @@ scales reasonably in response to both forms of grammatical complexity.
 Examination of the content hierarchy showed concepts that mapped well
 onto nonterminals in the target grammar and inspection of the context
 hierarchy showed categories for target word classes like determiners,
-adjectives, nouns, verbs, and prepositions.
+adjectives, nouns, verbs, and prepositions. 
 
 Overall, these results indicate that \trellis/' extension of Cobweb
 to support linked content and context hierarchies support the rapid
-acquisition of both chunks and concepts, both of which are important
+acquisition of chunks and concepts, both of which are important
 in grammar induction. We considered briefly the idea of a lesion study
 that compared \trellis/' behavior to that of Cobweb, but rejected it
 because the earlier system only handles individual items and not
@@ -1274,73 +1287,93 @@ collections of related items like words in sentences. The experiments
 demonstrate clearly that the new system's ability to represent, use,
 and learn both concepts and chunks give it this ability. Certainly
 many other systems can acquire grammatical knowledge, but few of
-them offer a unified account of chunks and concepts.
+them offer such a unified theoretical account of chunks and concepts.
 
 The aggregate scores say that \trellis/ parses and generates well, but
 not what it has learned. Figure~\ref{fig:hierbars} opens the two
-taxonomies after training on the \textsc{med} grammar, coloring each node
-by the syntactic classes of the elements beneath it; the labels are ours
-for reading the structure, not the system's. Two patterns stand out.
-Nodes are close to pure well above the leaves, so a node stands for a
-class of elements rather than the items that created it. And the two
+taxonomies after training on the \textsc{med} grammar, coloring each 
+node by the syntactic classes of the elements beneath it; the labels 
+are ours for interpreting the structure, not used by the system. 
+Two patterns stand out. First, 
+nodes are close to pure well above the leaves, so a node stands for a
+class of elements rather than the items that created it. Second, the two
 taxonomies carve memory along different dimensions: content separates
 chunks by the classes of their parts, splitting determiner-noun pairs
 from verb-phrase structures, whereas context groups elements appearing
 in similar surroundings, placing nouns beside adjective phrases that
 fill the same slots. This division of labor is what lets a chunk learned
-over one set of words apply to another.
+over one set of words apply to another. 
 
-\begin{figure}[!htbp]
+\begin{figure}[t]
 \centering
-\includegraphics[width=0.82\textwidth]{graphics/hierarchy_bars_content}\\[0.03in]
-\includegraphics[width=0.82\textwidth]{graphics/hierarchy_bars_legend}\\[0.03in]
-\includegraphics[width=0.88\textwidth]{graphics/hierarchy_bars_context}
+\includegraphics[width=0.95\textwidth]{graphics/hierarchy_bars_content}\\[0.03in]
+\includegraphics[width=0.95\textwidth]{graphics/hierarchy_bars_legend}\\[0.03in]
+\includegraphics[width=0.95\textwidth]{graphics/hierarchy_bars_context}
 \caption{Content (top) and context (bottom) taxonomies after training
   on the \textsc{med} grammar. Each node shows the distribution of
   syntactic classes among the elements sorted through it, with $n$ the
-  number of such elements; for content nodes the upper and lower bars
-  give the left and right constituent. Red borders mark basic-level
-  nodes, and both panels share the legend. The labels are for our
-  inspection only and play no role in learning. Nodes become nearly pure well above the leaves, which is
-  the generalization that lets one chunk cover many fillers.}
+  number of such elements. For content nodes the upper and lower bars
+  give the left and right constituent, respectively. Red borders mark basic-level nodes, and the legend applies to both panels. The labels 
+  are only for inspection purposes and play no role in learning. Nodes 
+  become nearly pure well above the leaves, which is the generalization 
+  that lets one chunk cover many fillers.}
 \label{fig:hierbars}
+\vskip 0.10in
 \end{figure}
 
 \section{Related Research on Concepts and Chunks}
 
 Our unified theory offers a promising account of how concepts and
-chunks are two sides of the same coin, and the \trellis/ results
-suggest its viability. Yet other frameworks have addressed the problem
+chunks are two sides of the same coin and the \trellis/ results
+suggest its viability, yet other frameworks have addressed the problem
 and merit discussion. The closest are other variants of Cobweb,
 starting with \textsc{Labyrinth} \citep{labyrinth-thompson-langley}, which
 encoded, used, and learned both primitive and composite concepts, the
 latter similar to chunks. However, it lacked a contextual taxonomy and
-suffered substantial order effects. Another
-descendant, Trestle \citep{trestle-maclellan}, operated over instances organized
+suffered substantial order effects. Another descendant, Trestle 
+\citep{trestle-maclellan}, operated over instances organized
 in a partonomic hierarchy, but flattened the representation during
-processing. A convolutional version of Cobweb \citep{convolutional-cobweb} learns over
-multiple levels of image descriptions, giving some effects of chunks
-without treating them explicitly.
+processing. A convolutional version of Cobweb \citep{convolutional-cobweb} learns over multiple levels of image descriptions, giving 
+some effects of chunks without treating them explicitly.
 
-A second line of Cobweb research treats problem solving and planning as
-the source of composite structures, making it closer to our concerns
-than the domain suggests. \citet{yoo-fisher-explanations}
-formed concepts over explanations and problem-solving traces, which are
-themselves derivation trees much like the parses we learn here, while
-\citet{yang-fisher-plans} clustered means-ends plans into categories of
-related solutions. Most directly, \citet{carlson-weinberg-fisher} used
-Cobweb to manage search over strings of a synthetic context-free
-language, letting learned categories prefer some analyses to others.
-\trellis/ differs in that it acquires the compositional structure
-itself rather than ranking analyses a given grammar supplies, but the
-connection suggests that our parsing module is a special case of using
-concepts to control search. Two further results bear on our design. \citet{fisher-pazzani-theory-guided} argued
-that clustering should be guided by the function that categories will
-serve, which is one way to read our decision to maintain separate
-content and context taxonomies. And \citet{fisher-iterative-optimization}
-showed that hierarchical clusterings can be simplified after the fact by
-choosing a frontier at which to predict, an idea close to our
-recognition threshold that suggests a principled route to setting it.
+% A second line of Cobweb research treats problem solving as
+% the source of composite structures. Yoo and Fisher's 
+% (\citeyear{yoo-fisher-explanations}) EXOR system 
+% formed concepts over explanations and problem-solving traces, which are
+% themselves derivation trees much like the parses we learn here, while
+% \citet{yang-fisher-plans} clustered means-ends plans into categories of
+% related solutions. Most directly, \citet{carlson-weinberg-fisher} used
+% Cobweb to manage search over strings of a synthetic context-free
+% language, letting learned categories prefer some analyses to others.
+% \trellis/ differs in that it acquires the compositional structure
+% itself rather than ranking analyses a given grammar supplies, but the
+% connection suggests that our parsing module is a special case of using
+% concepts to control search. Two further results bear on our design. 
+% \citet{fisher-pazzani-theory-guided} argued that clustering should 
+% be guided by the function that categories will serve, which is one 
+% way to read our decision to maintain separate content and context 
+% taxonomies. And \citet{fisher-iterative-optimization}
+% showed that hierarchical clusterings can be simplified after the fact 
+% by choosing a frontier at which to predict, an idea close to our 
+% recognition threshold that suggests a principled route to setting it.
+
+A second line of Cobweb research treats problem solving as the source 
+of composite structures. 
+Yoo and Fisher's (\citeyear{yoo-fisher-explanations}) EXOR system 
+formed concepts over successful problem decompositions, which
+had forms much like our parse trees, but it generated these from 
+domain rules provided in advance. In addition, EXOR constructed a 
+single taxonomic hierarchy, with each node storing both a chunk-like 
+decomposition and a probabilistic summary used to retrieve it. Other 
+work by Yang and Fisher (\citeyear{yang-fisher-plans}) and by Langley 
+and Allen (\citeyear{langley1993unified}) reported systems that used 
+Cobweb-like methods to cluster operators from successful means-ends 
+problem solving, but their taxonomies did not store explicit 
+decompositions. In addition, Fisher and Pazzani 
+(\citeyear{fisher-pazzani-theory-guided}) argued 
+that clustering should be guided by the function that categories 
+will serve, which is one way to read our decision to maintain 
+separate content and context taxonomies.
 
 Research on discrimination networks shares many features with the
 Cobweb family. EPAM \citep{feigenbaum-epam, epam-richman} organizes 
@@ -1351,10 +1384,12 @@ but predated them by 25 years. The CHREST architecture
 \citep{chrest-gobet-lane}
 extends EPAM on multiple fronts, including the addition of lateral
 links among nodes, similar to the interleaving in \trellis/. Moreover,
-the framework has always supported terminal nodes (e.g., letters) as
-tests for recognizing higher-level discriminants (e.g., words). But
-despite similar treatments of categorization, their accounts of
-chunking follow different paths.
+the framework has always supported using terminal nodes (e.g., letters) 
+as tests for recognizing higher-level discriminants (e.g., words). 
+But despite similar treatments of categorization, their accounts of
+chunking follow different paths. In particular, EPAM and CHREST 
+parse structures from the top down, whereas \trellis/ operates 
+from the bottom up. 
 
 Although seldom recognized, neural networks \citep{rumelhart-backprop} also offer a
 unified narrative about concepts and chunks. Nodes in such a network
@@ -1365,19 +1400,22 @@ combine simpler elements, as demonstrated by visualizations of learned
 `features' as weight maps. Taken together, this framework would offer
 a compelling unification of concepts and chunks if only it included
 operations for creating new structures, rather than merely updating
-weights, and supported more rapid, human-like learning.
+weights, did not suffer from catastrophic forgetting, and supported 
+more rapid, human-like learning.
 
 A fourth paradigm, with fewer links to cognitive science, involves
 the construction of context-free grammars from training cases.
-Classic systems in this paradigm \citep{wolff-grammar, grids-langley-stromsten} include operations for
+Classic systems in this paradigm \citep{grids-langley-stromsten, 
+wolff-grammar, wolff2026intelligence} include operations for
 inventing nonterminal symbols (creating chunks) and merging them
 (forming classes). Although most such systems are strongly committed
-to symbolic representations, the learned structures are organized in
-ways similar to neural networks. Research on predicate invention
-for inductive logic programming~\citep{muggleton-buntine-predinvention}
-has championed related ideas. Despite many differences from Cobweb and
-EPAM, this work is an important source of ideas about concepts and
-chunks. 
+to symbolic representations, the learned structures are organized in 
+what Langley (1996) has called {\it inference networks\/} that are 
+similar in spirit to neural networks. Research on predicate invention
+for inductive logic programming \citep{muggleton-buntine-predinvention}
+has championed related ideas for introducing chunk-like terms. 
+Despite many differences from Cobweb and EPAM, these lines of work 
+have been important sources for our ideas about concepts and chunks. 
 
 \section{Concluding Remarks}
 
@@ -1390,75 +1428,110 @@ into chunks. The extended framework assumes two linked taxonomies, one
 based on content descriptions and another on contextual ones. We also
 covered {\sl Trellis}, an implementation of the theory that invokes
 Cobweb as a subroutine and tested the system on its ability to learn
-grammatical expertise from sentence-parse pairs.
-
+grammatical expertise from sentence-parse pairs. 
 Our theory bridges the longstanding chasm between accounts of concepts
 and chunks, which are usually treated as disjoint phenomena. Moreover,
 experimental results with \trellis/ suggest not only that it can acquire
 syntactic knowledge, which involves both categories and chunks, but
-does so from a modest number of training sentences.
+does so from a modest number of training sentences and handle recursive 
+structures. 
 
-We close with a position the experiments support only indirectly but
-that motivates much of this work. A chunk is a compression device. Once a system has a concept for a configuration, it
-can refer to that configuration with a single element, so the context
-it must carry to interpret what comes next shrinks from a list of
-primitives to a handful of composites. This is why the two taxonomies
-reinforce each other: the context description of a composite spans the
-same stretch of experience as the descriptions of all its parts, but it
-occupies one slot rather than many. Contemporary language models take
-the opposite approach, retaining every token and paying for the
-privilege in the quadratic cost of relating them. We do not claim that
+% We close with a position the experiments support only indirectly but
+% that motivates much of this work. 
+
+The creation of chunks is a compression device. Once \trellis/ has 
+introduced a concept for some configuration, the system can refer to 
+it with a single symbol, so the context it must carry shrinks from 
+a large list of primitives to a handful of composites. This is how  
+the two taxonomies support each other: the context description of a 
+composite spans the same stretch of experience as the descriptions 
+of its parts, but it occupies one slot rather than many. Contemporary 
+language models take the opposite approach, retaining every token and 
+paying with the quadratic cost of relating them. We do not claim that 
 \trellis/ competes with such systems at their current scale. We do
-claim that a memory which builds its own units, and which can state
-what those units are, offers a different way to buy context than
-retaining the entire past, and that the sample efficiency we observe
-here is what that trade looks like in miniature.
+claim that a memory which builds and refers to its own units offers 
+a better way to handle context than retaining the entire past, and 
+the rapid learning in our experiments shows its benefits.
 
-\section{Directions for Future Research}
+% \section{Directions for Future Research}
+% 
+% \trellis/ learns from 
+% sentences paired with parses, so it is told what the constituents are
+% rather than discovering them. Its composition operator is binary and
+% its only relation is {\it before\/}, which suffices for strings but not
+% for richer structures. Its parser commits greedily and never
+% reconsiders, so an early mistake cannot be undone. Its recognition
+% threshold is tuned rather than derived. And our evidence comes from
+% synthetic grammars, which let us measure omission and commission
+% exactly but leave open how the system behaves on natural data. Each
+% limitation suggests work:
+% 
+% \vskip 0.05in
+% 
+% \bull
+% Can \trellis/ decide for itself which chunks are worth keeping? We
+% believe the answer lies in treating chunk formation as compression,
+% preferring vocabularies that describe the training experiences in the
+% fewest terms and pruning structures that rarely earn their keep.
+% Simplifying hierarchies after the fact
+% \citep{fisher-iterative-optimization} offers one concrete mechanism.
+% 
+% \bull
+% Can it parse without committing? A lattice that retains competing
+% analyses, scored by the inside and outside evidence for each, would let
+% the system weigh a chunk by the whole experience rather than by a local
+% decision, and would let it recover from early errors.
+% 
+% \bull
+% Can we represent composition more richly? Allowing a variable number of
+% constituents, and relations beyond linear order, would let the same
+% postulates address board positions, visual scenes, and plans, which is
+% where the claim of generality must ultimately be tested.
+% 
+% \bull
+% Can the framework scale to natural language and to other arenas? Chess
+% is the natural first target, given the role it has played in the
+% chunking literature, and treebanks offer a demanding test of
+% unsupervised induction.
 
-The account above has clear limits, which we should state plainly
-before describing where we intend to take it. \trellis/ learns from
-sentences paired with parses, so it is told what the constituents are
-rather than discovering them. Its composition operator is binary and
-its only relation is {\it before\/}, which suffices for strings but not
-for richer structures. Its parser commits greedily and never
-reconsiders, so an early mistake cannot be undone. Its recognition
-threshold is tuned rather than derived. And our evidence comes from
-synthetic grammars, which let us measure omission and commission
-exactly but leave open how the system behaves on natural data. Each
-limitation suggests work:
+Despite our progress to date, both the theory and its implementation
+have limits that we should address. Here are some open questions 
+that future work should attempt to answer: 
 
 \vskip 0.05in
 
 \bull
-Can \trellis/ decide for itself which chunks are worth keeping? We
-believe the answer lies in treating chunk formation as compression,
-preferring vocabularies that describe the training experiences in the
-fewest terms and pruning structures that rarely earn their keep.
-Simplifying hierarchies after the fact
-\citep{fisher-iterative-optimization} offers one concrete mechanism.
+Can we replace \trellis/' greedy parser with a more powerful one that
+reconsiders its choices when they lead it astray, as on garden path 
+sentences?
 
 \bull
-Can it parse without committing? A lattice that retains competing
-analyses, scored by the inside and outside evidence for each, would let
-the system weigh a chunk by the whole experience rather than by a local
-decision, and would let it recover from early errors.
+Can we extend chunk learning to identify constituents from sentences 
+alone, without providing sample parse trees, like some earlier systems 
+for grammar induction?
 
 \bull
-Can we represent composition more richly? Allowing a variable number of
-constituents, and relations beyond linear order, would let the same
-postulates address board positions, visual scenes, and plans, which is
-where the claim of generality must ultimately be tested.
+Can \trellis/ represent, use, and acquire not only context-free grammars
+but also context-sensitive ones, as suggested by its context taxonomy?
 
 \bull
-Can the framework scale to natural language and to other arenas? Chess
-is the natural first target, given the role it has played in the
-chunking literature, and treebanks offer a demanding test of
-unsupervised induction.
+Can the framework learn in other settings that require both generalization
+and composition, such as understanding scenes, generating plans, and
+playing games like chess?
+
+\bull
+Can \trellis/ acquire syntactic expertise not only from sentences 
+generated by synthetic grammars but also from natural corpora like 
+the Penn Treebank?
+
+\bull
+Can the system enable a new variety of large language model that 
+has more interpretable structures, performs more efficiently, and 
+learns more rapidly than existing ones?
 
 \vskip 0.05in
 \noindent
-We hope to address each of these challenges in future work by
+We hope to address each of these challenges in future research by
 continuing to incorporate ideas from earlier efforts and combining
 them in novel ways, following the tradition established by other
 researchers in the cognitive systems movement.
@@ -1584,15 +1657,48 @@ The Cobweb log-probability of an instance $\mathbf{i}$ under a concept $C$ is, b
 where $n_{C,a,v}$ counts value $v$ for attribute $a$ at $C$, $V_a$ is the value-vocabulary size, and $\alpha_a$ the uniform-prior smoothing. Candidates are ranked by the \emph{class posterior} $\log P(C \mid \mathbf{i}) = \log P(\mathbf{i} \mid C) + \log P(C) - \log P(\mathbf{i})$: normalizing out the instance marginal makes the score discriminative, so a non-constituent scores low. The ranking key sums the two posteriors, $s_c + s_x$.
 
 \paragraph{Recognition threshold.}
-The climbing-ancestor walk of Section~4.3 admits a candidate at the first non-root ancestor whose instance count exceeds $\tau_{\text{parse}}$, gating primitives on their context-hierarchy path and composites on their content-hierarchy path, since those identify them. Every reported condition uses $\tau_{\text{parse}} = 30$; the gate suppresses commits during the first few training sentences and is transparent thereafter.
+Parsing must decide whether a candidate chunk is familiar enough to
+commit, which \trellis/ settles by asking at what level of abstraction
+memory already knows about it. Sorting halts at some node, often a near
+singleton early on, so the module walks upward and admits the candidate
+at the first non-root ancestor whose count exceeds the recognition
+threshold $\tau_{\text{parse}}$. Primitives are gated along
+their context-hierarchy path and composites along their
+content-hierarchy path, since those descriptions identify them. The test
+is thus about accumulated evidence rather than any one node. At
+$\tau_{\text{parse}} = 30$ it suppresses commitments over the first
+several training sentences, then becomes transparent.
 
 \paragraph{Recall threshold.}
-The same climbing-ancestor notion fixes the level P6 samples from: the anchor above a seed leaf is the deepest ancestor whose count exceeds the recall threshold $\tau_{\text{gen}} = 50$, so one memory serves both processes through two gates. During training \trellis/ records every committed chunk as a tuple $(\text{parent-leaf}, \text{left-child}, \text{right-child})$, indexed by its parent-leaf identifier and that leaf's anchor. Generation seeds with a sentence-root chunk and recurses on each child: primitives are emitted directly, while composites are expanded by sampling from the anchor's replay pool, restricted to chunks whose context class matches what the parent expects at that slot (P7). The pool reaches recombinations no single leaf could produce, while context conditioning blocks wrong-type constituents.
+Generation faces the mirror problem of deciding how general a class to
+draw an expansion from, and the same walk settles it at the two levels
+P9 requires. The {\it substitution level\/} is the deepest ancestor of
+the seed's content leaf whose count exceeds $\tau_{\text{sub}}$, and
+resampling beneath it yields a novel constituent of the same type. The
+{\it recombination pool\/} gathers the chunks stored at a leaf across
+every leaf under its deepest ancestor with count above
+$\tau_{\text{gen}}$, making reachable those decompositions no single
+leaf could produce. Setting $\tau_{\text{sub}} = 20$ and
+$\tau_{\text{gen}} = 50$ keeps the substitution class pure in type while
+letting the pool generalize more widely, and the P9 context filter
+discards any chunk whose class does not match what the parent expects.
 
 \paragraph{Parameter values.}
-Across every condition: $\alpha_{\text{content}} = 10^{-4}$, $\alpha_{\text{context}} = 10^{-5}$, $\tau_{\text{parse}} = 30$, $\tau_{\text{gen}} = 50$. Context windows span five tokens with distance-based weighting, and each content instance stores up to three concept identifiers from depth four of the context hierarchy.
+Every condition used identical settings, with
+$\alpha_{\text{content}} = 10^{-4}$,
+$\alpha_{\text{context}} = 10^{-5}$, $\tau_{\text{parse}} = 30$,
+$\tau_{\text{sub}} = 20$, and $\tau_{\text{gen}} = 50$. Context windows
+span five tokens with distance-based weighting. We tuned nothing per
+corpus, as a system needing fresh values for each grammar has not
+learned to categorize and chunk in the sense the postulates intend.
 
 \paragraph{Content-instance encoding.}
-Each content attribute value is a small bag over concept identifiers rather than a single symbol, which preserves the concept's uncertainty instead of committing to its most-likely value. Because the context hierarchy restructures as instances arrive, references can dangle, so \trellis/ canonicalizes each to a recent ancestor of its target leaf and rewrites stored instances when the tree changes.
+The content field of Section~4.1 stores, for each child, not one
+identifier but a bag of up to three concept identifiers from depth four
+of the context hierarchy, which preserves the concept's own uncertainty
+rather than committing to its most likely value. Because the
+context hierarchy restructures as new instances arrive, these references
+can dangle, so \trellis/ canonicalizes each to a recent ancestor of its
+target leaf and rewrites stored instances whenever the tree changes.
 
 \end{document}
