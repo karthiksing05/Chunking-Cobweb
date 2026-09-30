@@ -1654,51 +1654,53 @@ The Cobweb log-probability of an instance $\mathbf{i}$ under a concept $C$ is, b
 \[
 \log P(\mathbf{i} \mid C) = \sum_{(a, v) \in \mathbf{i}} \log P(v \mid C, a), \qquad P(v \mid C, a) = \frac{n_{C,a,v} + \alpha_a}{n_{C,a} + V_a \alpha_a},
 \]
-where $n_{C,a,v}$ counts value $v$ for attribute $a$ at $C$, $V_a$ is the value-vocabulary size, and $\alpha_a$ the uniform-prior smoothing. Candidates are ranked by the \emph{class posterior} $\log P(C \mid \mathbf{i}) = \log P(\mathbf{i} \mid C) + \log P(C) - \log P(\mathbf{i})$: normalizing out the instance marginal makes the score discriminative, so a non-constituent scores low. The ranking key sums the two posteriors, $s_c + s_x$.
+where $n_{C,a,v}$ counts value $v$ for attribute $a$ at $C$, $V_a$ is the value-vocabulary size, and $\alpha_a$ the smoothing constant. Candidates are ranked by the \emph{class posterior} $\log P(C \mid \mathbf{i}) = \log P(\mathbf{i} \mid C) + \log P(C) - \log P(\mathbf{i})$: normalizing out the instance marginal makes the score discriminative, so a non-constituent scores low. The ranking key sums the two posteriors, $s_c + s_x$.
 
 \paragraph{Recognition threshold.}
 Parsing must decide whether a candidate chunk is familiar enough to
 commit, which \trellis/ settles by asking at what level of abstraction
-memory already knows about it. Sorting halts at some node, often a near
+memory already knows it. Sorting halts at some node, often a near
 singleton early on, so the module walks upward and admits the candidate
-at the first non-root ancestor whose count exceeds the recognition
-threshold $\tau_{\text{parse}}$. Primitives are gated along
+at the first non-root ancestor whose count exceeds
+$\tau_{\text{parse}}$. Primitives are gated along
 their context-hierarchy path and composites along their
-content-hierarchy path, since those descriptions identify them. The test
-is thus about accumulated evidence rather than any one node. At
-$\tau_{\text{parse}} = 30$ it suppresses commitments over the first
-several training sentences, then becomes transparent.
+content-hierarchy path, since those descriptions identify them. The gate
+suppresses commitments over the first several training sentences, when
+nearly every node is a singleton, then becomes transparent.
 
 \paragraph{Recall threshold.}
 Generation faces the mirror problem of deciding how general a class to
 draw an expansion from, and the same walk settles it at the two levels
 P9 requires. The {\it substitution level\/} is the deepest ancestor of
-the seed's content leaf whose count exceeds $\tau_{\text{sub}}$, and
+the seed's content leaf with count above $\tau_{\text{sub}}$, and
 resampling beneath it yields a novel constituent of the same type. The
-{\it recombination pool\/} gathers the chunks stored at a leaf across
-every leaf under its deepest ancestor with count above
-$\tau_{\text{gen}}$, making reachable those decompositions no single
-leaf could produce. Setting $\tau_{\text{sub}} = 20$ and
-$\tau_{\text{gen}} = 50$ keeps the substitution class pure in type while
-letting the pool generalize more widely, and the P9 context filter
-discards any chunk whose class does not match what the parent expects.
+{\it recombination pool\/} gathers a leaf's stored chunks across every
+leaf under its deepest ancestor with count above $\tau_{\text{gen}}$,
+reaching decompositions no single leaf could produce. The lower
+threshold keeps substitutions pure in type and the higher one widens
+the pool, while the P9 context filter discards any chunk whose class
+does not match what the parent expects.
 
 \paragraph{Parameter values.}
-Every condition used identical settings, with
-$\alpha_{\text{content}} = 10^{-4}$,
-$\alpha_{\text{context}} = 10^{-5}$, $\tau_{\text{parse}} = 30$,
-$\tau_{\text{sub}} = 20$, and $\tau_{\text{gen}} = 50$. Context windows
-span five tokens with distance-based weighting. We tuned nothing per
-corpus, as a system needing fresh values for each grammar has not
-learned to categorize and chunk in the sense the postulates intend.
+Every condition used the same settings, none of them tuned per corpus.
+The smoothing constants $\alpha_a$ of the recognition score, which fix
+how much probability an attribute holds back for unseen values, are
+$10^{-4}$ for content and $10^{-5}$ for context; the sharper context
+prior keeps the two separable. A context instance covers five positions
+on each side of an element,
+weighting the nearest by $1/2$ and halving each step out. The three
+thresholds above are the recognition threshold
+$\tau_{\text{parse}} = 30$, the substitution threshold
+$\tau_{\text{sub}} = 20$, and the pool threshold
+$\tau_{\text{gen}} = 50$.
 
 \paragraph{Content-instance encoding.}
-The content field of Section~4.1 stores, for each child, not one
+For each child, the content field of Section~4.1 stores not one
 identifier but a bag of up to three concept identifiers from depth four
-of the context hierarchy, which preserves the concept's own uncertainty
-rather than committing to its most likely value. Because the
-context hierarchy restructures as new instances arrive, these references
-can dangle, so \trellis/ canonicalizes each to a recent ancestor of its
-target leaf and rewrites stored instances whenever the tree changes.
+of the context hierarchy, which preserves the concept's uncertainty
+rather than committing to its likeliest value. Because the context
+hierarchy restructures as instances arrive, these references can dangle,
+so \trellis/ canonicalizes each to a recent ancestor of its target leaf
+and rewrites stored instances accordingly.
 
 \end{document}
