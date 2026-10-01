@@ -1701,13 +1701,7 @@ Parsing must decide whether a candidate chunk is familiar enough to
 commit, which \trellis/ determines by asking which level of the 
 taxonomy already knows it. When sorting halts at a node, the 
 system walks upward and selects the first non-root ancestor whose 
-count exceeds $\tau_{\text{parse}}$. Nodes are gated based on a 
-heuristic defined by
-\[
-  \text{admit}(\mathbf{i}) \iff
-  \exists\, C \in \text{path}(\mathbf{i}) \setminus \{\text{root}\}
-  \ \ \text{such that} \ \ \text{count}(C) > \tau_{\text{parse}} .
-\]
+count exceeds $\tau_{\text{parse}}$. 
 Primitives are gated on their context-hierarchy path and composites on
 their content-hierarchy path, since those are the paths that identify
 them. In every reported condition we use $\tau_{\text{parse}} = 30$.
