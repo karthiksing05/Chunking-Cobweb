@@ -1658,27 +1658,30 @@ where $n_{C,a,v}$ counts value $v$ for attribute $a$ at $C$, $V_a$ is the value-
 
 \paragraph{Recognition threshold.}
 Parsing must decide whether a candidate chunk is familiar enough to
-commit, which \trellis/ settles by asking at what level of abstraction
-memory already knows it. Sorting halts at some node, often a near
-singleton early on, so the module walks upward and admits the candidate
-at the first non-root ancestor whose count exceeds
-$\tau_{\text{parse}}$. Primitives are gated along
-their context-hierarchy path and composites along their
-content-hierarchy path, since those descriptions identify them. The gate
-suppresses commitments over the first several training sentences, when
-nearly every node is a singleton, then becomes transparent.
+commit, which \trellis/ determines by asking which level of the 
+taxonomy already knows it. When sorting halts at a node, the 
+system walks upward and selects the first non-root ancestor whose 
+count exceeds $\tau_{\text{parse}}$. Nodes are gated based on a 
+heuristic defined by
+\[
+  \text{admit}(\mathbf{i}) \iff
+  \exists\, C \in \text{path}(\mathbf{i}) \setminus \{\text{root}\}
+  \ \ \text{such that} \ \ \text{count}(C) > \tau_{\text{parse}} .
+\]
+This strategy keeps \trellis/ from using chunks until they have 
+been encountered at least a few times, increasing their reliability. 
 
 \paragraph{Recall threshold.}
-Generation faces the mirror problem of deciding how general a class to
-draw an expansion from, and the same walk settles it at the two levels
+Generation faces the analogous problem of deciding how general a 
+chunk to expand and the same walk settles it at the two levels
 P9 requires. The {\it substitution level\/} is the deepest ancestor of
 the seed's content leaf with count above $\tau_{\text{sub}}$, and
 resampling beneath it yields a novel constituent of the same type. The
 {\it recombination pool\/} gathers a leaf's stored chunks across every
 leaf under its deepest ancestor with count above $\tau_{\text{gen}}$,
-reaching decompositions no single leaf could produce. The lower
+allowing decompositions no single leaf could produce. The lower
 threshold keeps substitutions pure in type and the higher one widens
-the pool, while the P9 context filter discards any chunk whose class
+the pool, while the context filter discards chunk whose class 
 does not match what the parent expects.
 
 \paragraph{Parameter values.}
