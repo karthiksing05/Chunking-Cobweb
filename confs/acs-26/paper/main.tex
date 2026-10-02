@@ -1709,31 +1709,31 @@ This strategy keeps \trellis/ from using chunks until they have
 been encountered at least a few times, increasing their reliability. 
 
 \paragraph{Recall threshold.}
-Generation must decide how general a chunk to expand, and the same
-upward walk settles the question. \trellis/ applies it twice. First it
-climbs from the seed's leaf to the deepest ancestor whose count exceeds
-$\tau_{\text{sub}} = 20$, then samples a new leaf below that node. The
-result is a different constituent of the same kind. Second, it climbs
-to the deepest ancestor whose count exceeds $\tau_{\text{gen}} = 50$
-and collects the chunks stored beneath it. This is the recombination
-pool of Section~4.3, and it lets the system combine parts that never
-occurred together in training. The lower threshold keeps substitutions
-within a type and the higher one widens the pool, after which the
-context hierarchy rejects any chunk that does not fit the class its
-parent expects.
+Generation must also decide how general a chunk to expand, and
+\trellis/ answers this with the same upward walk, used twice. First,
+the system starts at the seed's leaf and climbs to the deepest ancestor
+with a count above $\tau_{\text{sub}}$, which we set to 20. It then
+samples a new leaf below that node, giving a different constituent of
+the same kind. Second, it climbs to the deepest ancestor with a count
+above $\tau_{\text{gen}}$, which we set to 50, and gathers the chunks
+stored below it. These form the recombination pool of Section~4.3,
+which lets the system combine parts that never appeared together in
+training. The lower threshold keeps a substitution within its type,
+whereas the higher one widens the pool. Finally, the context hierarchy
+rejects any chunk that does not fit the class its parent expects.
 
 \paragraph{Parameter values.}
-All conditions in our experiments used the same parameter settings.  
-the smoothing constants $\alpha_a$ in the recognition score, which 
-determines the probability for unseen attribute values, were 
-$10^{-4}$ for content and $10^{-5}$ for context, with the sharper 
-context prior keeping the two separable. Context instances covered 
-five positions on each side of an element, 
-weighting the nearest by $1/2$ and halving each step out. We set 
-the recognition threshold
-$\tau_{\text{parse}}$ to 30, the substitution threshold
-$\tau_{\text{sub}}$ to 20, and the pool threshold
-$\tau_{\text{gen}}$ to 50.
+All conditions in our experiments used the same parameter settings.
+The smoothing constants $\alpha_a$ in the recognition score decide how
+much probability an attribute holds back for unseen values. We set
+these to $10^{-4}$ in the content hierarchy and $10^{-5}$ in the
+context hierarchy, as the smaller value makes context sorting sharper
+and keeps the two taxonomies apart. Each context instance covers five
+positions on either side of an element. The nearest neighbor has a
+weight of one half, and each step further out has half as much again.
+We set the recognition threshold $\tau_{\text{parse}}$ to 30, the
+substitution threshold $\tau_{\text{sub}}$ to 20, and the pool
+threshold $\tau_{\text{gen}}$ to 50.
 
 \paragraph{Content-instance encoding.}
 For each child, the content field of Section~4.1 stores not one
