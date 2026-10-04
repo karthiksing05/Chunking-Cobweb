@@ -199,16 +199,16 @@ Generation commission (incremental / batch):
 | Condition | 40 sentences | 80 | 160 | 320 |
 |---|---|---|---|---|
 | small | 0.5% / 0.5% | 0.3% / 0.3% | 0.2% / 0.2% | 0.1% / 0.1% |
-| med | 65.7% / 63.5% | **33.3% / 49.0%** | 14.4% / 14.5% | 1.1% / 1.1% |
-| large | 34.4% / 34.4% | 27.3% / 27.3% | 27.0% / 29.2% | 9.2% / 9.2% |
-| term_low | **13.9% / 38.3%** | 1.7% / 1.5% | **0.2% / 16.9%** | 0.1% / 0.4% |
-| term_med | 60.0% / 60.0% | 38.7% / 40.8% | 5.8% / 7.3% | 0.4% / 1.7% |
-| term_high | 69.5% / 69.5% | **31.9% / 60.6%** | **11.3% / 29.4%** | 0.8% / 0.8% |
+| med | 63.4% / 63.4% | **33.2% / 43.2%** | 15.3% / 15.2% | 0.6% / 0.6% |
+| large | 31.4% / 31.4% | 26.6% / 28.5% | 18.8% / 20.1% | 8.5% / 9.0% |
+| term_low | 39.8% / 39.8% | 1.6% / 3.1% | **0.2% / 11.1%** | 0.4% / 0.4% |
+| term_med | 59.6% / 59.6% | 38.7% / 40.9% | 5.8% / 8.0% | 0.4% / 1.7% |
+| term_high | 65.8% / 65.8% | **31.9% / 78.0%** | **5.7% / 23.8%** | 0.7% / 0.9% |
 
-- **Early nights mostly coincide.** Up to 40 sentences a restart from word classes usually gives the shortest code (the stored analyses win 3 of 20 nights at 20–40 sentences).
-- **Then the stored analyses pay.** From 80 sentences on they win 16 of 30 nights (SMALL excluded, where both give the same grammar). At 80 and 160 sentences the incremental learner's training code is shorter or equal in all 10 cells, and its commission is lower in 8, by 16–29 points in 4. Both are equivalent at 320.
-- **Perception.** By 160 sentences each day's sentences are parsed almost completely (1.0–1.02 top-level chunks per sentence), at close to the held-out rate in bits.
-- **Cost.** A night costs about as much as a batch sleep over the same sentences; the six nights together cost 1.2–1.9× one batch sleep at 320 (timings from a shared machine, so approximate).
+- **Early nights coincide.** Up to 40 sentences a restart from word classes gives the shortest code (the stored analyses win none of the 20 nights at 20–40 sentences), so the two learners are identical there.
+- **Then the stored analyses pay.** From 80 sentences on they win 16 of 30 nights (SMALL excluded, where both give the same grammar). At 80 and 160 sentences the incremental learner's training code is shorter or equal in all 10 cells, and its commission is lower in 9, by 10–46 points in 4. Both are equivalent at 320.
+- **Perception.** By 160 sentences each day's sentences are parsed almost completely (1.00–1.01 top-level chunks per sentence), at close to the held-out rate in bits.
+- **Cost.** A night costs about as much as a batch sleep over the same sentences; the six nights together cost 1.2–1.6× one batch sleep at 320 (timings from a shared machine, so approximate).
 
 ### What the experiments established
 

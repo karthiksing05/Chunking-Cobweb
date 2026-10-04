@@ -259,11 +259,11 @@ The two hierarchies matter here. The grammar read directly off the search's anal
 
 *Figure 11. The incremental learner perceives the training sentences one at a time and sleeps at 10, 20, 40, 80, 160 and 320 sentences. At each of those points a fresh batch learner sleeps once over the same sentences (mean of two seeds; band = range).*
 
-- **Early nights mostly coincide.** Up to 40 sentences, restarting from word classes usually gives the shortest code (the stored analyses win 3 of 20 nights at 20–40 sentences), and the two learners are nearly identical.
-- **Then the stored analyses pay.** From 80 sentences on they win 16 of 30 nights (SMALL excluded, where both give the same grammar). At 80 and 160 sentences the incremental learner's training code is shorter or equal in all ten condition–size cells. Its commission is lower in eight, by 16–29 points in four (for example TERM_HIGH at 80 sentences: 31.9% against 60.6%).
+- **Early nights coincide.** Up to 40 sentences, restarting from word classes gives the shortest code (the stored analyses win none of the 20 nights at 20–40 sentences), and the two learners are identical.
+- **Then the stored analyses pay.** From 80 sentences on they win 16 of 30 nights (SMALL excluded, where both give the same grammar). At 80 and 160 sentences the incremental learner's training code is shorter or equal in all ten condition–size cells. Its commission is lower in nine, by 10–46 points in four (for example TERM_HIGH at 80 sentences: 31.9% against 78.0%).
 - **At 320 sentences** the two are equivalent (commission within 1.3 points).
-- **Perception.** By 160 sentences each day's sentences are parsed almost completely (1.0–1.02 top-level chunks per sentence), at close to the held-out rate in bits.
-- **Cost.** A night costs about as much as a batch sleep over the same sentences, and the six nights together 1.2–1.9 times one batch sleep at 320.
+- **Perception.** By 160 sentences each day's sentences are parsed almost completely (1.00–1.01 top-level chunks per sentence), at close to the held-out rate in bits.
+- **Cost.** A night costs about as much as a batch sleep over the same sentences, and the six nights together 1.2–1.6 times one batch sleep at 320.
 
 Detailed tables: [`V2_DESIGN.md`](V2_DESIGN.md), `experiments/v2/results/{main,unsupervised,incremental,search}/summary.md`.
 
