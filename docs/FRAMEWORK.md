@@ -392,7 +392,8 @@ Every generated character can be checked:
 | chunk types | 11 | 3 |
 
 - **Context and chunks compete.** With the context, castling no longer pays as a chunk: "a rook is already on the board" predicts where the king stands, so the context does globally what the castling chunks did locally, and description length keeps the cheaper. Fianchettos still pay. Reading the context first and chunking afterwards gives the shorter code.
-- **What still goes wrong is the number of queens and minor pieces**, for which no feature pays at α = 0.001. The concentration chosen by description length is α = 0.01; then the queens' features pay and 37% of generated positions pass every check (held-out 75.27 bits), but no chunk pays. A concentration per kind of table is the next step.
+- **More data lets more context pay.** With 8,000 training positions the queens' features pay too: 99.6% of generated positions have one king of each colour and 41.5% pass every check (held out: 74.42 bits per position).
+- **What still goes wrong is the number of minor pieces**, for which no feature pays at α = 0.001, and of queens with less data. On 4,000 positions the concentration that gives the shortest code is α = 0.01: the queens' features then pay and 37% of generated positions pass every check (held-out 75.27 bits), but no chunk pays, because one concentration prices both the read's rows and the chunk rows. Priced apart, the read alone would take α ≈ 0.1, which codes the training positions shortest but generates more impossible boards: the shortest code and coherent samples part ways in the rare cases. More data is the cleaner lever.
 
 ![Generated chess positions](../experiments/v2/results/chess/generated_positions.png)
 
