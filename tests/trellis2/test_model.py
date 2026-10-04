@@ -55,13 +55,33 @@ def test_unsupervised_chunking_compresses_and_generates_the_language():
     learner = UnsupervisedLearner(seed=13)
     for ex in train[:60]:
         learner.observe(ex.tokens)
-    learner.consolidate()
+    learner.sleep()
     flat = learner.history[0]["bits"]
     # Chunks were formed only because they shorten the description.
     assert learner.grammar.info["chunk types"] > 0
     assert learner.grammar.info["total bits"] < 0.75 * flat
     for ex in test[:10]:
         assert learner.parse(ex.tokens).is_valid()
+    cfg = CFG(target_grammar("small"))
+    samples, _ = learner.generate(200, np.random.default_rng(0))
+    assert np.mean([cfg.recognizes(t) for t, _ in samples]) > 0.95
+
+
+@needs_data
+def test_learning_by_day_and_by_night():
+    from trellis2.unsupervised import UnsupervisedLearner
+    examples = load_corpus(SMALL)
+    train, test = v1_split(examples, seed=13)
+    learner = UnsupervisedLearner(seed=13)
+    for ex in train[:20]:
+        assert learner.observe(ex.tokens) is None      # no grammar yet
+    learner.sleep()
+    for ex in train[20:60]:
+        tree = learner.observe(ex.tokens)              # perceived with the grammar
+        assert tree.n == len(ex.tokens) and tree.is_valid()
+    assert all(a is not None for a in learner.analyses)
+    learner.sleep()
+    assert [h["night"] for h in learner.history][-1] == 1
     cfg = CFG(target_grammar("small"))
     samples, _ = learner.generate(200, np.random.default_rng(0))
     assert np.mean([cfg.recognizes(t) for t, _ in samples]) > 0.95

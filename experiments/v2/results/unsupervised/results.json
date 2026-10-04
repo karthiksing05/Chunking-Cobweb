@@ -16,32 +16,31 @@
    "non_crossing": 0.75,
    "gen_commission": 0.0010000000000000009,
    "novelty": 0.539,
-   "steps": 4,
+   "steps": 2,
    "history": [
     {
+     "night": 0.0,
      "stage": "flat",
      "move": "start",
-     "bits": 6793.816789876496
+     "bits": 6793.816789876496,
+     "sentences": 320.0,
+     "seconds": 0.18744802474975586
     },
     {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('w', 'cat'))",
-     "bits": 4960.6994834538555
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 7 word classes",
+     "bits": 3189.080977415422,
+     "sentences": 320.0,
+     "seconds": 12.419623136520386
     },
     {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 0), ('w', 'admired'))",
-     "bits": 4484.985875290389
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('chunk', 0))",
-     "bits": 3189.0809774154245
-    },
-    {
+     "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 3250.6489661769006
+     "bits": 3250.6489661769006,
+     "sentences": 320.0,
+     "seconds": 13.946690082550049
     }
    ]
   },
@@ -60,13 +59,13 @@
    "gen_commission": 0.0010000000000000009,
    "novelty": 0.537
   },
-  "seconds": 5.647193193435669
+  "seconds": 26.937334060668945
  },
  {
   "condition": "small",
   "seed": 17,
   "unsupervised": {
-   "total_bits": 3251.7811764177977,
+   "total_bits": 3251.7811764178005,
    "model_bits": 218.2336840576758,
    "data_bits": 3033.5474923601237,
    "symbols": 6,
@@ -79,32 +78,31 @@
    "non_crossing": 0.75,
    "gen_commission": 0.0,
    "novelty": 0.545,
-   "steps": 4,
+   "steps": 2,
    "history": [
     {
+     "night": 0.0,
      "stage": "flat",
      "move": "start",
-     "bits": 6794.948768222437
+     "bits": 6794.948768222437,
+     "sentences": 320.0,
+     "seconds": 0.18859004974365234
     },
     {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('w', 'cat'))",
-     "bits": 4961.831461799796
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 6 word classes",
+     "bits": 3190.2129557613644,
+     "sentences": 320.0,
+     "seconds": 12.313541173934937
     },
     {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 0), ('w', 'admired'))",
-     "bits": 4486.1178536363295
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('chunk', 0))",
-     "bits": 3190.2129557613657
-    },
-    {
+     "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 3251.7811764177977
+     "bits": 3251.7811764178005,
+     "sentences": 320.0,
+     "seconds": 13.740545988082886
     }
    ]
   },
@@ -123,251 +121,50 @@
    "gen_commission": 0.0,
    "novelty": 0.536
   },
-  "seconds": 5.528296232223511
+  "seconds": 25.175129890441895
  },
  {
   "condition": "med",
   "seed": 13,
   "unsupervised": {
-   "total_bits": 7010.105832500134,
-   "model_bits": 607.7237050280432,
-   "data_bits": 6402.3821274721,
-   "symbols": 13,
+   "total_bits": 6489.425690258181,
+   "model_bits": 491.5199846637474,
+   "data_bits": 5997.905705594436,
+   "symbols": 12,
    "rule_classes": 28,
-   "chunk_types": 18,
-   "test_bits_per_sentence": 20.787797386478456,
+   "chunk_types": 10,
+   "test_bits_per_sentence": 19.483634534800462,
    "test_top_level_chunks": 1.0,
-   "omission": 0.8037037037037037,
-   "parse_commission": 0.8037037037037037,
-   "non_crossing": 0.1962962962962963,
-   "gen_commission": 0.492,
-   "novelty": 0.985,
-   "steps": 44,
+   "omission": 0.4666666666666667,
+   "parse_commission": 0.4666666666666667,
+   "non_crossing": 0.5333333333333333,
+   "gen_commission": 0.0040000000000000036,
+   "novelty": 0.967,
+   "steps": 2,
    "history": [
     {
+     "night": 0.0,
      "stage": "flat",
      "move": "start",
-     "bits": 11623.648652521633
+     "bits": 11623.648652521633,
+     "sentences": 320.0,
+     "seconds": 1.312319278717041
     },
     {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'cat'), ('w', 'admired'))",
-     "bits": 10639.873144056259
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 8 word classes",
+     "bits": 6539.275553803681,
+     "sentences": 320.0,
+     "seconds": 43.51319909095764
     },
     {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 0), ('w', 'a'))",
-     "bits": 9762.598367428687
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'big'), ('w', 'big'))",
-     "bits": 9437.675830084461
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 1))",
-     "bits": 9176.830523776593
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 2))",
-     "bits": 8910.43218242071
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 1))",
-     "bits": 8792.897755690263
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('w', 'big'))",
-     "bits": 8676.348300015863
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('w', 'cat'))",
-     "bits": 8585.358195359844
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 2), ('w', 'cat'))",
-     "bits": 8459.862363907388
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('chunk', 8))",
-     "bits": 8332.486235957249
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 2), ('w', 'big'))",
-     "bits": 8223.45768714197
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 10), ('w', 'cat'))",
-     "bits": 8155.755338358126
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 3), ('w', 'cat'))",
-     "bits": 8055.966159275151
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 5), ('w', 'cat'))",
-     "bits": 7949.00536012438
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 3), ('chunk', 2))",
-     "bits": 7885.566841827712
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 3), ('chunk', 8))",
-     "bits": 7820.424068682001
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 3), ('chunk', 7))",
-     "bits": 7749.1013494638155
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 3), ('chunk', 9))",
-     "bits": 7646.630907411531
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 14), ('chunk', 7))",
-     "bits": 7559.2351255075555
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 3), ('chunk', 11))",
-     "bits": 7474.23989789952
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 5), ('chunk', 8))",
-     "bits": 7394.288025664993
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 6), ('chunk', 7))",
-     "bits": 7331.211811758711
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 5), ('chunk', 7))",
-     "bits": 7245.77191704615
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 5), ('chunk', 11))",
-     "bits": 7157.934818916147
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 6), ('chunk', 9))",
-     "bits": 7069.3889751631505
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 14), ('chunk', 8))",
-     "bits": 7039.115837419437
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 12), ('chunk', 16))",
-     "bits": 7012.858876711714
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 12), ('chunk', 15))",
-     "bits": 6987.302936065348
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 12), ('chunk', 13))",
-     "bits": 6962.879781639851
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 12), ('chunk', 17))",
-     "bits": 6939.214263029766
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 12), ('chunk', 18))",
-     "bits": 6916.444393520989
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 12), ('chunk', 20))",
-     "bits": 6894.569993668684
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 12), ('chunk', 21))",
-     "bits": 6873.542748192652
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 12), ('chunk', 19))",
-     "bits": 6853.254861519763
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 12), ('chunk', 22))",
-     "bits": 6833.743365440138
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 12), ('chunk', 23))",
-     "bits": 6815.118223243038
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 3), ('chunk', 5))",
-     "bits": 6789.680612215927
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 12), ('chunk', 24))",
-     "bits": 6772.455425015601
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 12), ('chunk', 25))",
-     "bits": 6756.508390263261
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 7), ('chunk', 9))",
-     "bits": 6742.028672247564
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 14), ('chunk', 6))",
-     "bits": 6728.4745134851555
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 11), ('chunk', 7))",
-     "bits": 6727.408430172761
-    },
-    {
+     "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 7110.792945559013
-    },
-    {
-     "stage": "re-analysis",
-     "move": "viterbi",
-     "bits": 7010.105832500134
+     "bits": 6489.425690258181,
+     "sentences": 320.0,
+     "seconds": 74.3802580833435
     }
    ]
   },
@@ -386,246 +183,58 @@
    "gen_commission": 0.0010000000000000009,
    "novelty": 0.966
   },
-  "seconds": 72.82806921005249
+  "seconds": 96.05762791633606
  },
  {
   "condition": "med",
   "seed": 17,
   "unsupervised": {
-   "total_bits": 7069.180826058645,
-   "model_bits": 683.0865625228356,
-   "data_bits": 6386.094263535823,
+   "total_bits": 6505.7271296994395,
+   "model_bits": 546.2497581730428,
+   "data_bits": 5959.47737152639,
    "symbols": 14,
-   "rule_classes": 33,
-   "chunk_types": 20,
-   "test_bits_per_sentence": 18.61157972866362,
+   "rule_classes": 30,
+   "chunk_types": 12,
+   "test_bits_per_sentence": 17.494141585324538,
    "test_top_level_chunks": 1.0,
-   "omission": 0.7894736842105263,
-   "parse_commission": 0.7894736842105263,
-   "non_crossing": 0.21052631578947367,
-   "gen_commission": 0.42200000000000004,
-   "novelty": 0.991,
-   "steps": 43,
+   "omission": 0.35627530364372473,
+   "parse_commission": 0.35627530364372473,
+   "non_crossing": 0.6437246963562753,
+   "gen_commission": 0.0050000000000000044,
+   "novelty": 0.969,
+   "steps": 3,
    "history": [
     {
+     "night": 0.0,
      "stage": "flat",
      "move": "start",
-     "bits": 11562.422055843885
+     "bits": 11562.422055843885,
+     "sentences": 320.0,
+     "seconds": 1.1610691547393799
     },
     {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'cat'), ('w', 'admired'))",
-     "bits": 10583.319239874187
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 12 word classes",
+     "bits": 6465.529018420861,
+     "sentences": 320.0,
+     "seconds": 41.15062403678894
     },
     {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 0), ('w', 'a'))",
-     "bits": 9710.672801259834
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'big'), ('w', 'big'))",
-     "bits": 9383.153838874117
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 1))",
-     "bits": 9126.701151198034
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 2))",
-     "bits": 8854.468992692078
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('w', 'cat'))",
-     "bits": 8738.06068521873
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 2), ('w', 'cat'))",
-     "bits": 8588.159296617427
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('chunk', 6))",
-     "bits": 8460.38600569536
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 3), ('w', 'cat'))",
-     "bits": 8348.244311467353
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 3), ('chunk', 6))",
-     "bits": 8244.443139255492
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 3), ('chunk', 2))",
-     "bits": 8139.381076424115
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'big'), ('w', 'cat'))",
-     "bits": 8039.620646399361
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('w', 'big'))",
-     "bits": 7959.531730923025
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 1))",
-     "bits": 7886.474550456148
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 3), ('chunk', 5))",
-     "bits": 7821.013880498348
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 3), ('chunk', 7))",
-     "bits": 7705.402006490259
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 5))",
-     "bits": 7647.608719529211
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 7))",
-     "bits": 7555.393817285893
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 10), ('chunk', 5))",
-     "bits": 7500.337880788438
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 10), ('chunk', 11))",
-     "bits": 7418.982059652381
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 12), ('chunk', 5))",
-     "bits": 7343.770978726608
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 13), ('chunk', 5))",
-     "bits": 7261.137948876467
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 12), ('chunk', 7))",
-     "bits": 7204.991780605956
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 13), ('chunk', 2))",
-     "bits": 7158.84922099435
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 23), ('chunk', 11))",
-     "bits": 7095.1522076766105
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 14), ('chunk', 8))",
-     "bits": 7069.683551521097
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 14), ('chunk', 9))",
-     "bits": 7044.8944955532625
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 14), ('chunk', 16))",
-     "bits": 7021.13727793623
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 14), ('chunk', 15))",
-     "bits": 6998.292041444531
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 14), ('chunk', 18))",
-     "bits": 6976.259646579728
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 14), ('chunk', 17))",
-     "bits": 6955.145706288743
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 10), ('chunk', 6))",
-     "bits": 6933.641211630751
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 14), ('chunk', 20))",
-     "bits": 6912.664578133947
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 14), ('chunk', 19))",
-     "bits": 6892.472588706703
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 14), ('chunk', 21))",
-     "bits": 6873.052163906436
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 14), ('chunk', 22))",
-     "bits": 6854.815546206089
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 14), ('chunk', 24))",
-     "bits": 6837.149864765914
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 14), ('chunk', 25))",
-     "bits": 6820.655558292048
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 5), ('chunk', 7))",
-     "bits": 6805.073005398504
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 10), ('chunk', 23))",
-     "bits": 6796.65015331944
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 12), ('chunk', 13))",
-     "bits": 6788.903882164107
-    },
-    {
+     "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 7299.6664349885095
+     "bits": 6861.136872529648,
+     "sentences": 320.0,
+     "seconds": 76.93800401687622
     },
     {
+     "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 7069.180826058645
+     "bits": 6505.7271296994395,
+     "sentences": 320.0,
+     "seconds": 102.06213903427124
     }
    ]
   },
@@ -644,241 +253,58 @@
    "gen_commission": 0.010000000000000009,
    "novelty": 0.967
   },
-  "seconds": 67.37764406204224
+  "seconds": 121.80942487716675
  },
  {
   "condition": "large",
   "seed": 13,
   "unsupervised": {
-   "total_bits": 8007.973952951815,
-   "model_bits": 764.9524971930397,
-   "data_bits": 7243.021455758784,
-   "symbols": 11,
-   "rule_classes": 38,
-   "chunk_types": 12,
-   "test_bits_per_sentence": 23.761725890951613,
+   "total_bits": 8089.173360852002,
+   "model_bits": 844.309681100263,
+   "data_bits": 7244.863679751754,
+   "symbols": 12,
+   "rule_classes": 43,
+   "chunk_types": 16,
+   "test_bits_per_sentence": 23.81503799072688,
    "test_top_level_chunks": 1.075,
-   "omission": 0.2588235294117647,
-   "parse_commission": 0.2588235294117647,
-   "non_crossing": 0.7411764705882353,
-   "gen_commission": 0.08299999999999996,
-   "novelty": 0.994,
-   "steps": 42,
+   "omission": 0.1568627450980392,
+   "parse_commission": 0.1568627450980392,
+   "non_crossing": 0.8431372549019608,
+   "gen_commission": 0.09899999999999998,
+   "novelty": 0.996,
+   "steps": 3,
    "history": [
     {
+     "night": 0.0,
      "stage": "flat",
      "move": "start",
-     "bits": 12563.760621091655
+     "bits": 12563.760621091655,
+     "sentences": 320.0,
+     "seconds": 5.100132942199707
     },
     {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('w', 'boy'))",
-     "bits": 11655.836177595667
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 15 word classes",
+     "bits": 7800.363962152963,
+     "sentences": 320.0,
+     "seconds": 50.70559096336365
     },
     {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'big'), ('w', 'boy'))",
-     "bits": 11208.963208477597
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'big'), ('chunk', 1))",
-     "bits": 10564.0527633606
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 2))",
-     "bits": 10179.328800850548
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'big'), ('chunk', 2))",
-     "bits": 9961.31429433047
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 0), ('w', 'chased'))",
-     "bits": 9773.642984634022
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 4))",
-     "bits": 9600.280803522997
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 5), ('chunk', 0))",
-     "bits": 9509.838832612793
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 0), ('w', 'admired'))",
-     "bits": 9346.555880056501
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 3), ('w', 'chased'))",
-     "bits": 9268.049500400795
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 8), ('chunk', 0))",
-     "bits": 9211.116346924466
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 9), ('chunk', 0))",
-     "bits": 9158.894608336524
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'admired'), ('chunk', 0))",
-     "bits": 9087.637313872057
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 5), ('chunk', 3))",
-     "bits": 9044.349160727996
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'chased'), ('chunk', 0))",
-     "bits": 9016.861960210881
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 10), ('chunk', 7))",
-     "bits": 8996.756912529872
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 10), ('chunk', 13))",
-     "bits": 8977.515188848596
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 5), ('chunk', 10))",
-     "bits": 8953.847910868746
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 8), ('chunk', 10))",
-     "bits": 8924.221483721352
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 15), ('chunk', 16))",
-     "bits": 8904.559222957207
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 3), ('w', 'admired'))",
-     "bits": 8884.645596661025
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 15), ('chunk', 6))",
-     "bits": 8864.876738640245
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 3), ('chunk', 12))",
-     "bits": 8845.86454073671
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 11), ('chunk', 15))",
-     "bits": 8826.201586576664
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 5), ('chunk', 11))",
-     "bits": 8797.67188806142
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 18), ('chunk', 19))",
-     "bits": 8778.775775286253
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 17), ('chunk', 18))",
-     "bits": 8760.378028123108
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 14), ('chunk', 17))",
-     "bits": 8742.633148105646
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 8), ('chunk', 3))",
-     "bits": 8725.61309293496
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 14), ('chunk', 20))",
-     "bits": 8707.835883334716
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 14), ('w', 'who'))",
-     "bits": 8691.204030024543
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 8), ('chunk', 11))",
-     "bits": 8674.703080669973
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 14), ('chunk', 21))",
-     "bits": 8657.511795808627
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 14), ('w', 'which'))",
-     "bits": 8641.978482829214
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 9), ('chunk', 10))",
-     "bits": 8629.047347687318
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 14), ('chunk', 22))",
-     "bits": 8612.108461786098
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 9), ('chunk', 3))",
-     "bits": 8604.954366948814
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 14), ('chunk', 23))",
-     "bits": 8588.743058288432
-    },
-    {
+     "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 9159.487357722513
+     "bits": 8480.20400342828,
+     "sentences": 320.0,
+     "seconds": 80.0651478767395
     },
     {
+     "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 8260.25260935058
-    },
-    {
-     "stage": "re-analysis",
-     "move": "viterbi",
-     "bits": 8021.348180078144
-    },
-    {
-     "stage": "re-analysis",
-     "move": "viterbi",
-     "bits": 8007.973952951815
+     "bits": 8089.173360852002,
+     "sentences": 320.0,
+     "seconds": 100.61410784721375
     }
    ]
   },
@@ -897,186 +323,58 @@
    "gen_commission": 0.14800000000000002,
    "novelty": 0.992
   },
-  "seconds": 72.73674988746643
+  "seconds": 140.06169486045837
  },
  {
   "condition": "large",
   "seed": 17,
   "unsupervised": {
-   "total_bits": 8249.724514947782,
-   "model_bits": 953.5920359228894,
-   "data_bits": 7296.132479024897,
-   "symbols": 15,
-   "rule_classes": 39,
-   "chunk_types": 27,
-   "test_bits_per_sentence": 23.63562603217164,
+   "total_bits": 7973.702923334469,
+   "model_bits": 791.849260332768,
+   "data_bits": 7181.853663001703,
+   "symbols": 12,
+   "rule_classes": 37,
+   "chunk_types": 16,
+   "test_bits_per_sentence": 23.463085074306406,
    "test_top_level_chunks": 1.0,
-   "omission": 0.1853281853281853,
-   "parse_commission": 0.1853281853281853,
-   "non_crossing": 0.8146718146718147,
-   "gen_commission": 0.135,
-   "novelty": 0.997,
-   "steps": 31,
+   "omission": 0.11583011583011582,
+   "parse_commission": 0.11583011583011582,
+   "non_crossing": 0.8841698841698842,
+   "gen_commission": 0.08599999999999997,
+   "novelty": 0.992,
+   "steps": 3,
    "history": [
     {
+     "night": 0.0,
      "stage": "flat",
      "move": "start",
-     "bits": 12493.855998571404
+     "bits": 12493.855998571404,
+     "sentences": 320.0,
+     "seconds": 5.2299628257751465
     },
     {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('w', 'boy'))",
-     "bits": 11529.655404640704
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 16 word classes",
+     "bits": 7737.096237685915,
+     "sentences": 320.0,
+     "seconds": 50.74689078330994
     },
     {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 0), ('w', 'admired'))",
-     "bits": 11083.74689683106
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'big'), ('w', 'boy'))",
-     "bits": 10691.372685277147
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'big'), ('chunk', 2))",
-     "bits": 10116.149999982308
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 3))",
-     "bits": 9789.397247333536
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('chunk', 0))",
-     "bits": 9503.419909073895
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'big'), ('chunk', 3))",
-     "bits": 9303.37615379185
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'admired'), ('chunk', 0))",
-     "bits": 9124.751262123018
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 6))",
-     "bits": 8967.685464891132
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('chunk', 4))",
-     "bits": 8900.728543891932
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('w', 'admired'))",
-     "bits": 8818.761133721533
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('chunk', 5))",
-     "bits": 8763.219077031932
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('chunk', 9))",
-     "bits": 8706.357157138696
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 7))",
-     "bits": 8668.443688754984
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 8), ('chunk', 7))",
-     "bits": 8625.924427095595
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('chunk', 8))",
-     "bits": 8570.402311335092
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 10), ('chunk', 11))",
-     "bits": 8551.406699270072
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 9), ('chunk', 7))",
-     "bits": 8532.75957340307
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 10), ('chunk', 12))",
-     "bits": 8513.791229790524
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 10), ('chunk', 13))",
-     "bits": 8495.641657851176
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 10), ('chunk', 14))",
-     "bits": 8478.181817756998
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 10), ('chunk', 15))",
-     "bits": 8461.543694583517
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 10), ('chunk', 16))",
-     "bits": 8445.571099399178
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 8), ('chunk', 9))",
-     "bits": 8422.362731767316
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 10), ('w', 'which'))",
-     "bits": 8407.977618604986
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 7))",
-     "bits": 8399.979609739132
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 10), ('chunk', 17))",
-     "bits": 8385.593269922823
-    },
-    {
+     "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 9948.900812610327
+     "bits": 8353.079767427302,
+     "sentences": 320.0,
+     "seconds": 80.23010778427124
     },
     {
+     "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 8996.13365708699
-    },
-    {
-     "stage": "re-analysis",
-     "move": "viterbi",
-     "bits": 8661.799057863353
-    },
-    {
-     "stage": "re-analysis",
-     "move": "viterbi",
-     "bits": 8249.724514947782
+     "bits": 7973.702923334469,
+     "sentences": 320.0,
+     "seconds": 101.38805985450745
     }
    ]
   },
@@ -1095,316 +393,58 @@
    "gen_commission": 0.14200000000000002,
    "novelty": 0.994
   },
-  "seconds": 73.34844899177551
+  "seconds": 141.16414785385132
  },
  {
   "condition": "term_low",
   "seed": 13,
   "unsupervised": {
-   "total_bits": 5799.5000225994645,
-   "model_bits": 510.9085700890065,
-   "data_bits": 5288.591452510469,
-   "symbols": 19,
-   "rule_classes": 24,
-   "chunk_types": 20,
-   "test_bits_per_sentence": 16.524304866396527,
+   "total_bits": 5284.044600336405,
+   "model_bits": 312.99143475383556,
+   "data_bits": 4971.053165582581,
+   "symbols": 13,
+   "rule_classes": 18,
+   "chunk_types": 12,
+   "test_bits_per_sentence": 15.467532685396268,
    "test_top_level_chunks": 1.0,
-   "omission": 0.8388059701492537,
-   "parse_commission": 0.8388059701492537,
-   "non_crossing": 0.16119402985074627,
-   "gen_commission": 0.42700000000000005,
-   "novelty": 0.938,
-   "steps": 57,
+   "omission": 0.5044776119402985,
+   "parse_commission": 0.5044776119402985,
+   "non_crossing": 0.4955223880597015,
+   "gen_commission": 0.0010000000000000009,
+   "novelty": 0.924,
+   "steps": 3,
    "history": [
     {
+     "night": 0.0,
      "stage": "flat",
      "move": "start",
-     "bits": 11430.933331175878
+     "bits": 11430.933331175878,
+     "sentences": 320.0,
+     "seconds": 0.9560911655426025
     },
     {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'cat'), ('w', 'in'))",
-     "bits": 10198.985769944407
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 6 word classes",
+     "bits": 5883.92038546449,
+     "sentences": 320.0,
+     "seconds": 39.33691477775574
     },
     {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 0), ('w', 'a'))",
-     "bits": 9090.53209198039
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'big'), ('w', 'big'))",
-     "bits": 8825.499206154642
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 2), ('w', 'big'))",
-     "bits": 8560.61268967204
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 1))",
-     "bits": 8483.222143703473
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 2))",
-     "bits": 8323.94545517006
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 5), ('chunk', 1))",
-     "bits": 8106.079827894955
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 3))",
-     "bits": 7977.520468833778
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 7), ('chunk', 1))",
-     "bits": 7890.244866894439
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 2), ('w', 'cat'))",
-     "bits": 7820.823459988313
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 2), ('chunk', 1))",
-     "bits": 7699.20726974056
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 1))",
-     "bits": 7646.529480393724
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 3), ('w', 'cat'))",
-     "bits": 7603.369341254981
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 3), ('chunk', 1))",
-     "bits": 7509.031776504312
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 6), ('chunk', 1))",
-     "bits": 7462.1800675499
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 8), ('chunk', 1))",
-     "bits": 7431.051889796034
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 11), ('chunk', 9))",
-     "bits": 7411.929149201795
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 10), ('chunk', 11))",
-     "bits": 7393.569134804842
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 10), ('chunk', 12))",
-     "bits": 7376.031772159327
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 10), ('chunk', 14))",
-     "bits": 7359.463405079316
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 4), ('chunk', 6))",
-     "bits": 7333.82714928388
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 10))",
-     "bits": 7300.655643642601
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('w', 'cat'))",
-     "bits": 7207.93523591133
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 13))",
-     "bits": 7107.959688815864
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 2))",
-     "bits": 7077.334144769623
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 10), ('w', 'cat'))",
-     "bits": 7058.521890320809
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 10), ('chunk', 10))",
-     "bits": 7007.268705985742
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 16), ('w', 'cat'))",
-     "bits": 6978.314381040973
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 8), ('w', 'cat'))",
-     "bits": 6948.361068114828
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 18), ('w', 'cat'))",
-     "bits": 6902.332290360729
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 18), ('chunk', 10))",
-     "bits": 6871.257433702226
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 16), ('chunk', 10))",
-     "bits": 6839.251677501157
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 17), ('chunk', 20))",
-     "bits": 6815.8283237405085
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 17), ('chunk', 21))",
-     "bits": 6793.04798880794
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 17), ('chunk', 22))",
-     "bits": 6771.384096170512
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 17), ('chunk', 26))",
-     "bits": 6750.694472740902
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 17), ('chunk', 23))",
-     "bits": 6730.952170308885
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 17), ('chunk', 24))",
-     "bits": 6711.9260189097895
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 15), ('chunk', 17))",
-     "bits": 6693.711820148227
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 15), ('chunk', 25))",
-     "bits": 6676.125861007838
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 15), ('chunk', 19))",
-     "bits": 6659.347031099371
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 8), ('chunk', 10))",
-     "bits": 6649.794740279634
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 15), ('chunk', 27))",
-     "bits": 6633.014491419011
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 18), ('chunk', 8))",
-     "bits": 6620.728341666139
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 2), ('chunk', 10))",
-     "bits": 6610.692893350868
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 15), ('chunk', 28))",
-     "bits": 6594.861985082934
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 18), ('chunk', 13))",
-     "bits": 6590.432972655751
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 15), ('chunk', 29))",
-     "bits": 6574.801570730906
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 15), ('chunk', 10))",
-     "bits": 6563.953219863012
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 15), ('chunk', 30))",
-     "bits": 6548.060271652321
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 18), ('chunk', 15))",
-     "bits": 6544.14956845415
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 15), ('chunk', 31))",
-     "bits": 6528.457845852065
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 15), ('w', 'cat'))",
-     "bits": 6528.183018869131
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 15), ('chunk', 32))",
-     "bits": 6512.603394703444
-    },
-    {
+     "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 6339.16838030438
+     "bits": 5571.568651195958,
+     "sentences": 320.0,
+     "seconds": 64.80153203010559
     },
     {
+     "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 6086.947092441754
-    },
-    {
-     "stage": "re-analysis",
-     "move": "viterbi",
-     "bits": 5799.5000225994645
+     "bits": 5284.044600336405,
+     "sentences": 320.0,
+     "seconds": 79.39007091522217
     }
    ]
   },
@@ -1423,341 +463,58 @@
    "gen_commission": 0.0,
    "novelty": 0.901
   },
-  "seconds": 95.03957295417786
+  "seconds": 103.0395998954773
  },
  {
   "condition": "term_low",
   "seed": 17,
   "unsupervised": {
-   "total_bits": 5758.352198362233,
-   "model_bits": 631.5626112848147,
-   "data_bits": 5126.789587077417,
-   "symbols": 20,
-   "rule_classes": 29,
-   "chunk_types": 32,
-   "test_bits_per_sentence": 15.302814697229413,
+   "total_bits": 5339.892490000688,
+   "model_bits": 339.6184413306882,
+   "data_bits": 5000.274048669998,
+   "symbols": 13,
+   "rule_classes": 19,
+   "chunk_types": 14,
+   "test_bits_per_sentence": 15.047452369841494,
    "test_top_level_chunks": 1.0,
-   "omission": 0.8161993769470405,
-   "parse_commission": 0.8161993769470405,
-   "non_crossing": 0.1838006230529595,
-   "gen_commission": 0.07699999999999996,
-   "novelty": 0.881,
-   "steps": 62,
+   "omission": 0.44548286604361376,
+   "parse_commission": 0.44548286604361376,
+   "non_crossing": 0.5545171339563862,
+   "gen_commission": 0.007000000000000006,
+   "novelty": 0.89,
+   "steps": 3,
    "history": [
     {
+     "night": 0.0,
      "stage": "flat",
      "move": "start",
-     "bits": 11494.48401005112
+     "bits": 11494.48401005112,
+     "sentences": 320.0,
+     "seconds": 3.51347017288208
     },
     {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'cat'), ('w', 'in'))",
-     "bits": 10246.724212915757
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 6 word classes",
+     "bits": 5911.903772933595,
+     "sentences": 320.0,
+     "seconds": 41.26422691345215
     },
     {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 0), ('w', 'a'))",
-     "bits": 9125.66572500391
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'big'), ('w', 'big'))",
-     "bits": 8881.811968508784
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 2), ('w', 'big'))",
-     "bits": 8592.790455634786
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 1))",
-     "bits": 8540.465295736683
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 2))",
-     "bits": 8379.56489797123
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 5), ('chunk', 1))",
-     "bits": 8165.815344998173
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 3))",
-     "bits": 8014.717445554222
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 7), ('chunk', 1))",
-     "bits": 7912.641361887544
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 2), ('w', 'cat'))",
-     "bits": 7853.535980901339
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 2), ('chunk', 1))",
-     "bits": 7735.850696412888
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('w', 'cat'))",
-     "bits": 7686.96031557373
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('chunk', 9))",
-     "bits": 7618.952444584469
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('chunk', 3))",
-     "bits": 7552.634245028774
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 13), ('w', 'cat'))",
-     "bits": 7499.767842590365
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 4), ('chunk', 6))",
-     "bits": 7481.141716289961
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 10))",
-     "bits": 7428.824206138067
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 11))",
-     "bits": 7390.289196649534
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('w', 'cat'))",
-     "bits": 7341.442215699148
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 3))",
-     "bits": 7262.1659578256995
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 12))",
-     "bits": 7204.304521279442
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 9))",
-     "bits": 7125.862146965304
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 15), ('w', 'cat'))",
-     "bits": 7084.23071608304
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 15), ('chunk', 9))",
-     "bits": 7034.470652960741
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 14))",
-     "bits": 6992.8706056866195
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 18), ('chunk', 11))",
-     "bits": 6967.453855365413
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 17))",
-     "bits": 6942.05275326592
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 8))",
-     "bits": 6917.447394769655
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 18), ('w', 'cat'))",
-     "bits": 6893.152064488772
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 3), ('w', 'cat'))",
-     "bits": 6863.081963755028
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 20))",
-     "bits": 6837.930378355209
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 19))",
-     "bits": 6813.686500200506
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 21))",
-     "bits": 6790.286561308026
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 22))",
-     "bits": 6768.010746357333
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 24))",
-     "bits": 6746.551625741469
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 25))",
-     "bits": 6725.790743467347
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 23))",
-     "bits": 6705.772694360119
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 12), ('chunk', 14))",
-     "bits": 6677.831788232898
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 18), ('chunk', 12))",
-     "bits": 6615.615811225292
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 27))",
-     "bits": 6596.393583874571
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 11), ('chunk', 12))",
-     "bits": 6558.080671888465
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 2))",
-     "bits": 6538.227350115595
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 26))",
-     "bits": 6519.838500971595
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 28))",
-     "bits": 6502.554172682639
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 16), ('chunk', 11))",
-     "bits": 6489.00869031307
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 29))",
-     "bits": 6472.009292915032
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 16), ('w', 'cat'))",
-     "bits": 6460.198061263979
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 30))",
-     "bits": 6443.85841465768
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 5), ('chunk', 10))",
-     "bits": 6441.91615273456
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 31))",
-     "bits": 6425.278341067998
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 16), ('chunk', 10))",
-     "bits": 6424.348624082798
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 32))",
-     "bits": 6407.637413068931
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 16), ('chunk', 9))",
-     "bits": 6401.748800383284
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 2), ('chunk', 9))",
-     "bits": 6383.736298551266
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 33), ('chunk', 34))",
-     "bits": 6366.394738596929
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 33))",
-     "bits": 6350.682675405047
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 15), ('chunk', 16))",
-     "bits": 6339.466285627572
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 35))",
-     "bits": 6323.168614573016
-    },
-    {
+     "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 6294.8481617961725
+     "bits": 5358.9782911667935,
+     "sentences": 320.0,
+     "seconds": 67.10222506523132
     },
     {
+     "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 6016.7215179360655
-    },
-    {
-     "stage": "re-analysis",
-     "move": "viterbi",
-     "bits": 5966.9662262010315
-    },
-    {
-     "stage": "re-analysis",
-     "move": "viterbi",
-     "bits": 5758.352198362233
+     "bits": 5339.892490000688,
+     "sentences": 320.0,
+     "seconds": 92.29440999031067
     }
    ]
   },
@@ -1776,296 +533,58 @@
    "gen_commission": 0.0020000000000000018,
    "novelty": 0.908
   },
-  "seconds": 146.7162802219391
+  "seconds": 119.43942594528198
  },
  {
   "condition": "term_med",
   "seed": 13,
   "unsupervised": {
-   "total_bits": 8257.15125148892,
-   "model_bits": 643.4128860106925,
-   "data_bits": 7613.738365478221,
-   "symbols": 13,
-   "rule_classes": 27,
-   "chunk_types": 24,
-   "test_bits_per_sentence": 23.89853206228583,
+   "total_bits": 7843.891700638906,
+   "model_bits": 644.185241000728,
+   "data_bits": 7199.706459638177,
+   "symbols": 14,
+   "rule_classes": 29,
+   "chunk_types": 21,
+   "test_bits_per_sentence": 22.42082499139273,
    "test_top_level_chunks": 1.0,
-   "omission": 0.8354430379746836,
-   "parse_commission": 0.8354430379746836,
-   "non_crossing": 0.16455696202531644,
-   "gen_commission": 0.55,
-   "novelty": 0.984,
-   "steps": 53,
+   "omission": 0.47468354430379744,
+   "parse_commission": 0.47468354430379744,
+   "non_crossing": 0.5253164556962026,
+   "gen_commission": 0.04300000000000004,
+   "novelty": 0.978,
+   "steps": 3,
    "history": [
     {
+     "night": 0.0,
      "stage": "flat",
      "move": "start",
-     "bits": 13282.405069674827
+     "bits": 13282.405069674827,
+     "sentences": 320.0,
+     "seconds": 1.7595770359039307
     },
     {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'cat'), ('w', 'admired'))",
-     "bits": 12138.249662980163
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 11 word classes",
+     "bits": 8032.636471590834,
+     "sentences": 320.0,
+     "seconds": 26.901445865631104
     },
     {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 0), ('w', 'a'))",
-     "bits": 11110.758990199673
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'big'), ('w', 'big'))",
-     "bits": 10834.117375502265
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 2), ('w', 'big'))",
-     "bits": 10597.68330954318
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 1))",
-     "bits": 10489.209475176596
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 2))",
-     "bits": 10345.85068804129
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 5), ('chunk', 1))",
-     "bits": 10131.644608677023
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 3))",
-     "bits": 9985.695889294026
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 7), ('chunk', 1))",
-     "bits": 9886.750049603808
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 2), ('w', 'cat'))",
-     "bits": 9803.05034238105
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 2), ('chunk', 1))",
-     "bits": 9707.717704591338
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('w', 'cat'))",
-     "bits": 9678.756741792811
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('chunk', 9))",
-     "bits": 9600.96388970065
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 10), ('w', 'cat'))",
-     "bits": 9566.714161819527
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('w', 'cat'))",
-     "bits": 9533.71882638113
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 3), ('w', 'cat'))",
-     "bits": 9463.94888346449
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 6), ('w', 'cat'))",
-     "bits": 9434.352443635411
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 8), ('w', 'cat'))",
-     "bits": 9394.484212166079
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('chunk', 15))",
-     "bits": 9372.648199156512
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 11), ('chunk', 14))",
-     "bits": 9351.373042709713
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 11), ('chunk', 12))",
-     "bits": 9330.941649426128
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 11), ('chunk', 13))",
-     "bits": 9311.344443338658
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 11))",
-     "bits": 9277.07549091825
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 9))",
-     "bits": 9230.119460927945
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 10), ('chunk', 9))",
-     "bits": 9202.180997993757
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 19), ('chunk', 20))",
-     "bits": 9181.203222439919
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 3))",
-     "bits": 9160.110598337966
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 15))",
-     "bits": 9134.36494413531
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 19))",
-     "bits": 9112.809610126735
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 22))",
-     "bits": 9092.301243584185
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 23))",
-     "bits": 9072.511634982795
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 17))",
-     "bits": 9053.434011060912
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 6), ('chunk', 8))",
-     "bits": 9024.9689354406
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 6), ('chunk', 11))",
-     "bits": 8973.580054503023
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 6), ('chunk', 9))",
-     "bits": 8912.048517387133
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 6), ('chunk', 3))",
-     "bits": 8873.050457491916
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 2), ('chunk', 9))",
-     "bits": 8843.827870686178
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 6), ('chunk', 15))",
-     "bits": 8818.659645318865
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 24))",
-     "bits": 8796.64560317521
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 25))",
-     "bits": 8775.932772194423
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 5), ('chunk', 7))",
-     "bits": 8756.169846970168
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 18))",
-     "bits": 8737.23059634736
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 21))",
-     "bits": 8718.942043679677
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 26))",
-     "bits": 8701.402592642293
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 28))",
-     "bits": 8684.545539288956
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 27))",
-     "bits": 8668.502152479472
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 16))",
-     "bits": 8659.476244840365
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 29))",
-     "bits": 8643.748167731657
-    },
-    {
+     "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 9050.87382882187
+     "bits": 8206.597080964577,
+     "sentences": 320.0,
+     "seconds": 52.270668029785156
     },
     {
+     "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 8749.20793854246
-    },
-    {
-     "stage": "re-analysis",
-     "move": "viterbi",
-     "bits": 8626.141044396492
-    },
-    {
-     "stage": "re-analysis",
-     "move": "viterbi",
-     "bits": 8350.95808230948
-    },
-    {
-     "stage": "re-analysis",
-     "move": "viterbi",
-     "bits": 8257.15125148892
+     "bits": 7843.891700638906,
+     "sentences": 320.0,
+     "seconds": 76.32645893096924
     }
    ]
   },
@@ -2084,331 +603,58 @@
    "gen_commission": 0.02100000000000002,
    "novelty": 0.987
   },
-  "seconds": 117.6118540763855
+  "seconds": 97.45422792434692
  },
  {
   "condition": "term_med",
   "seed": 17,
   "unsupervised": {
-   "total_bits": 8270.084956373596,
-   "model_bits": 824.9197526781265,
-   "data_bits": 7445.165203695466,
-   "symbols": 17,
-   "rule_classes": 37,
-   "chunk_types": 27,
-   "test_bits_per_sentence": 21.82641315792779,
+   "total_bits": 7643.966042431742,
+   "model_bits": 588.3157743243949,
+   "data_bits": 7055.650268107338,
+   "symbols": 15,
+   "rule_classes": 29,
+   "chunk_types": 18,
+   "test_bits_per_sentence": 21.2257540921363,
    "test_top_level_chunks": 1.0,
-   "omission": 0.8154362416107382,
-   "parse_commission": 0.8154362416107382,
-   "non_crossing": 0.18456375838926176,
-   "gen_commission": 0.268,
+   "omission": 0.610738255033557,
+   "parse_commission": 0.610738255033557,
+   "non_crossing": 0.38926174496644295,
+   "gen_commission": 0.01100000000000001,
    "novelty": 0.983,
-   "steps": 60,
+   "steps": 3,
    "history": [
     {
+     "night": 0.0,
      "stage": "flat",
      "move": "start",
-     "bits": 13290.316226147674
+     "bits": 13290.316226147674,
+     "sentences": 320.0,
+     "seconds": 1.6363930702209473
     },
     {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'cat'), ('w', 'admired'))",
-     "bits": 12151.265375385487
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 8 word classes",
+     "bits": 8019.825319630947,
+     "sentences": 320.0,
+     "seconds": 25.932141065597534
     },
     {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 0), ('w', 'a'))",
-     "bits": 11127.249553818294
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'big'), ('w', 'big'))",
-     "bits": 10879.078359977786
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 2), ('w', 'big'))",
-     "bits": 10612.385071129498
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 1))",
-     "bits": 10505.268636823737
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 2))",
-     "bits": 10371.014856206304
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 5), ('chunk', 1))",
-     "bits": 10164.659719957666
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 3))",
-     "bits": 10007.129958334843
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 7), ('chunk', 1))",
-     "bits": 9895.38695235522
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 2), ('w', 'cat'))",
-     "bits": 9826.469365279041
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 2), ('chunk', 1))",
-     "bits": 9722.794278598838
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 10), ('w', 'cat'))",
-     "bits": 9690.820766063169
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('chunk', 9))",
-     "bits": 9663.345441111123
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('w', 'cat'))",
-     "bits": 9593.864913173426
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 3), ('w', 'cat'))",
-     "bits": 9562.118982609103
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('w', 'cat'))",
-     "bits": 9493.91359945273
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 6), ('w', 'cat'))",
-     "bits": 9445.612304190301
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 8), ('w', 'cat'))",
-     "bits": 9402.3049359733
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('chunk', 14))",
-     "bits": 9365.761269086463
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 13), ('chunk', 15))",
-     "bits": 9344.475618543276
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 12), ('chunk', 13))",
-     "bits": 9323.99791046579
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 3), ('chunk', 12))",
-     "bits": 9302.654714237127
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 11), ('chunk', 16))",
-     "bits": 9282.616269761984
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 11), ('chunk', 19))",
-     "bits": 9263.260252335042
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 11), ('chunk', 18))",
-     "bits": 9244.760357385101
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 11), ('chunk', 17))",
-     "bits": 9226.990688209058
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 6), ('chunk', 8))",
-     "bits": 9199.590274152279
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 5), ('chunk', 7))",
-     "bits": 9183.350156850356
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 10), ('chunk', 9))",
-     "bits": 9171.075384816902
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 11), ('chunk', 20))",
-     "bits": 9154.821822520958
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 9))",
-     "bits": 9138.760406118114
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 12))",
-     "bits": 9106.833297282192
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 11))",
-     "bits": 9022.228958528094
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 6), ('chunk', 11))",
-     "bits": 8977.032215849329
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 6), ('chunk', 9))",
-     "bits": 8923.646837040698
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 6), ('chunk', 12))",
-     "bits": 8871.716404223498
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 2), ('chunk', 9))",
-     "bits": 8828.22875531153
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 14))",
-     "bits": 8786.910213495257
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 6), ('chunk', 14))",
-     "bits": 8737.158646500435
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 22), ('chunk', 23))",
-     "bits": 8714.57775623004
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 22), ('chunk', 24))",
-     "bits": 8692.69189248662
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 21), ('chunk', 22))",
-     "bits": 8671.64481584995
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 21), ('chunk', 26))",
-     "bits": 8651.400427382274
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 21), ('chunk', 25))",
-     "bits": 8632.018132151932
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 11), ('chunk', 12))",
-     "bits": 8613.575512733878
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 4), ('chunk', 6))",
-     "bits": 8585.22827847143
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 28), ('chunk', 29))",
-     "bits": 8539.030002171485
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 3))",
-     "bits": 8516.049421455944
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('chunk', 27))",
-     "bits": 8498.269362669887
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 21), ('chunk', 28))",
-     "bits": 8480.510375192367
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 14), ('chunk', 9))",
-     "bits": 8462.099329099497
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 31))",
-     "bits": 8443.862861174523
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 21), ('chunk', 30))",
-     "bits": 8427.627381744607
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 21), ('chunk', 32))",
-     "bits": 8412.05404505678
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 11), ('chunk', 31))",
-     "bits": 8399.839786619244
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 4), ('chunk', 27))",
-     "bits": 8388.10290760207
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 21), ('chunk', 33))",
-     "bits": 8373.231511395248
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 14), ('chunk', 27))",
-     "bits": 8351.078951487565
-    },
-    {
+     "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 8473.54332349609
+     "bits": 8144.185943015129,
+     "sentences": 320.0,
+     "seconds": 45.62721514701843
     },
     {
+     "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 8270.084956373596
+     "bits": 7643.966042431742,
+     "sentences": 320.0,
+     "seconds": 66.37477517127991
     }
    ]
   },
@@ -2427,331 +673,50 @@
    "gen_commission": 0.03600000000000003,
    "novelty": 0.979
   },
-  "seconds": 87.02592992782593
+  "seconds": 85.43099904060364
  },
  {
   "condition": "term_high",
   "seed": 13,
   "unsupervised": {
-   "total_bits": 11323.644184594601,
-   "model_bits": 1039.5046283997658,
-   "data_bits": 10284.139556194827,
+   "total_bits": 10461.776265170316,
+   "model_bits": 873.9403773679487,
+   "data_bits": 9587.835887802368,
    "symbols": 14,
-   "rule_classes": 43,
-   "chunk_types": 25,
-   "test_bits_per_sentence": 32.0984409974023,
+   "rule_classes": 46,
+   "chunk_types": 14,
+   "test_bits_per_sentence": 30.302235004063128,
    "test_top_level_chunks": 1.0,
-   "omission": 0.8222222222222222,
-   "parse_commission": 0.8222222222222222,
-   "non_crossing": 0.17777777777777778,
-   "gen_commission": 0.5609999999999999,
-   "novelty": 1.0,
-   "steps": 60,
+   "omission": 0.6126984126984127,
+   "parse_commission": 0.6126984126984127,
+   "non_crossing": 0.3873015873015873,
+   "gen_commission": 0.007000000000000006,
+   "novelty": 0.999,
+   "steps": 2,
    "history": [
     {
+     "night": 0.0,
      "stage": "flat",
      "move": "start",
-     "bits": 16065.388863338705
+     "bits": 16065.388863338705,
+     "sentences": 320.0,
+     "seconds": 11.855494260787964
     },
     {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'apple'), ('w', 'admired'))",
-     "bits": 14907.906817166819
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 10 word classes",
+     "bits": 10589.068502258979,
+     "sentences": 320.0,
+     "seconds": 35.072468996047974
     },
     {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 0), ('w', 'a'))",
-     "bits": 13869.696809791607
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'ancient'), ('w', 'ancient'))",
-     "bits": 13577.428958673734
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 2), ('w', 'ancient'))",
-     "bits": 13355.652573988978
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('w', 'apple'))",
-     "bits": 13241.181503037651
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 2), ('w', 'apple'))",
-     "bits": 13059.947251381464
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('chunk', 5))",
-     "bits": 12860.314832038344
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 3), ('w', 'apple'))",
-     "bits": 12758.679300810356
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('chunk', 7))",
-     "bits": 12691.900702298364
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 2))",
-     "bits": 12629.362140789244
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('chunk', 2))",
-     "bits": 12521.151611703175
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 1))",
-     "bits": 12484.041705626618
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 3))",
-     "bits": 12435.574012834935
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 9), ('chunk', 1))",
-     "bits": 12396.639872203152
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 12), ('chunk', 1))",
-     "bits": 12323.545003008818
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 4))",
-     "bits": 12292.671058244361
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 10))",
-     "bits": 12234.38245334449
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 6))",
-     "bits": 12199.54256747852
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 8))",
-     "bits": 12166.361028006038
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 11), ('chunk', 15))",
-     "bits": 12145.054116024638
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 11), ('chunk', 13))",
-     "bits": 12124.74621385625
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 11), ('chunk', 16))",
-     "bits": 12105.191515461793
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 10), ('chunk', 4))",
-     "bits": 12084.391431293228
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 9), ('chunk', 10))",
-     "bits": 12043.137801895076
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 11), ('chunk', 10))",
-     "bits": 12006.293266070807
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 11), ('chunk', 6))",
-     "bits": 11968.885640210841
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 9), ('chunk', 6))",
-     "bits": 11925.857305031015
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 14), ('chunk', 10))",
-     "bits": 11889.690496017494
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 11), ('chunk', 3))",
-     "bits": 11853.617450464268
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 12), ('chunk', 10))",
-     "bits": 11821.239705791793
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 24), ('chunk', 10))",
-     "bits": 11796.120358150549
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 19), ('chunk', 20))",
-     "bits": 11771.970846610071
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 19), ('chunk', 21))",
-     "bits": 11748.523682978903
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 17), ('chunk', 19))",
-     "bits": 11726.140532062538
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 17), ('chunk', 22))",
-     "bits": 11704.760243280807
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 17), ('chunk', 23))",
-     "bits": 11684.080867867564
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 17), ('chunk', 25))",
-     "bits": 11664.188791324263
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 17), ('chunk', 26))",
-     "bits": 11645.128516443738
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 14), ('chunk', 24))",
-     "bits": 11618.605677411788
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 17), ('chunk', 18))",
-     "bits": 11600.958681750051
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 9), ('chunk', 2))",
-     "bits": 11587.193348062849
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 17), ('chunk', 27))",
-     "bits": 11569.888895875327
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 9), ('chunk', 8))",
-     "bits": 11557.311087686816
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 17), ('chunk', 28))",
-     "bits": 11540.14044626455
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 6), ('chunk', 8))",
-     "bits": 11522.825015892493
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 12), ('chunk', 6))",
-     "bits": 11499.274929136871
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 14), ('chunk', 6))",
-     "bits": 11474.166999704928
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 17), ('chunk', 30))",
-     "bits": 11456.647971772196
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 17), ('chunk', 29))",
-     "bits": 11439.890967722149
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 14), ('chunk', 3))",
-     "bits": 11422.712754936316
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 17), ('chunk', 31))",
-     "bits": 11406.578311369512
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 17), ('chunk', 10))",
-     "bits": 11385.016229389686
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 17), ('chunk', 32))",
-     "bits": 11368.950698866047
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 5), ('chunk', 7))",
-     "bits": 11354.015785480451
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 11), ('chunk', 6))",
-     "bits": 11350.088629806156
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 17), ('chunk', 33))",
-     "bits": 11297.001089724721
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 14), ('chunk', 9))",
-     "bits": 11294.281235089926
-    },
-    {
+     "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 12056.855730674639
-    },
-    {
-     "stage": "re-analysis",
-     "move": "viterbi",
-     "bits": 11978.605851008493
-    },
-    {
-     "stage": "re-analysis",
-     "move": "viterbi",
-     "bits": 11323.644184594601
+     "bits": 10461.776265170316,
+     "sentences": 320.0,
+     "seconds": 45.71784019470215
     }
    ]
   },
@@ -2770,286 +735,58 @@
    "gen_commission": 0.0020000000000000018,
    "novelty": 1.0
   },
-  "seconds": 117.2275321483612
+  "seconds": 69.06242489814758
  },
  {
   "condition": "term_high",
   "seed": 17,
   "unsupervised": {
-   "total_bits": 12201.391834403916,
-   "model_bits": 1345.872443905583,
-   "data_bits": 10855.519390498317,
+   "total_bits": 10498.810750415836,
+   "model_bits": 930.2887998743507,
+   "data_bits": 9568.52195054148,
    "symbols": 14,
    "rule_classes": 47,
-   "chunk_types": 26,
-   "test_bits_per_sentence": 35.05517976597323,
-   "test_top_level_chunks": 1.025,
-   "omission": 0.8322981366459627,
-   "parse_commission": 0.8322981366459627,
-   "non_crossing": 0.16770186335403728,
-   "gen_commission": 0.688,
-   "novelty": 0.999,
-   "steps": 51,
+   "chunk_types": 15,
+   "test_bits_per_sentence": 31.013774197409553,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.6211180124223603,
+   "parse_commission": 0.6211180124223603,
+   "non_crossing": 0.37888198757763975,
+   "gen_commission": 0.010000000000000009,
+   "novelty": 1.0,
+   "steps": 3,
    "history": [
     {
+     "night": 0.0,
      "stage": "flat",
      "move": "start",
-     "bits": 15991.706338200474
+     "bits": 15991.706338200474,
+     "sentences": 320.0,
+     "seconds": 9.943212032318115
     },
     {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'admired'), ('w', 'a'))",
-     "bits": 14840.737612086908
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 10 word classes",
+     "bits": 10585.836034837375,
+     "sentences": 320.0,
+     "seconds": 31.618677139282227
     },
     {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'apple'), ('chunk', 0))",
-     "bits": 13808.479710864895
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'ancient'), ('w', 'ancient'))",
-     "bits": 13534.79846011751
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 2), ('w', 'ancient'))",
-     "bits": 13295.73608440532
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('w', 'apple'))",
-     "bits": 13184.163903922532
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 2), ('w', 'apple'))",
-     "bits": 13023.459152715432
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('chunk', 5))",
-     "bits": 12822.747533522082
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 3), ('w', 'apple'))",
-     "bits": 12695.92936723033
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('chunk', 7))",
-     "bits": 12610.56473084567
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 2))",
-     "bits": 12557.166478730082
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 1))",
-     "bits": 12455.091832330003
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 9), ('chunk', 1))",
-     "bits": 12379.722011456754
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 3))",
-     "bits": 12331.675618875654
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 12), ('chunk', 1))",
-     "bits": 12269.470448913682
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 4))",
-     "bits": 12222.209117555034
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 6))",
-     "bits": 12174.778615673502
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('w', 'a'), ('chunk', 8))",
-     "bits": 12125.968536492295
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 10), ('chunk', 2))",
-     "bits": 12098.238485640528
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 11), ('chunk', 14))",
-     "bits": 12077.898060345055
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 11), ('chunk', 17))",
-     "bits": 12058.351276630701
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 11), ('chunk', 15))",
-     "bits": 12039.53398567182
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 4), ('chunk', 6))",
-     "bits": 12010.482770822551
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 10), ('chunk', 4))",
-     "bits": 11941.434054342933
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 9), ('chunk', 4))",
-     "bits": 11874.90426811233
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 10), ('chunk', 3))",
-     "bits": 11836.811436567197
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 2), ('chunk', 4))",
-     "bits": 11812.859568776283
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 12), ('chunk', 4))",
-     "bits": 11784.109240124182
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 11), ('chunk', 4))",
-     "bits": 11738.454992339939
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 3), ('chunk', 4))",
-     "bits": 11705.032626684952
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 20), ('chunk', 4))",
-     "bits": 11675.64445406115
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 13), ('chunk', 4))",
-     "bits": 11634.023511798256
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 18), ('chunk', 23))",
-     "bits": 11609.994631710668
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 18), ('chunk', 19))",
-     "bits": 11586.55818742431
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 18), ('chunk', 21))",
-     "bits": 11564.393086370876
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 18), ('chunk', 22))",
-     "bits": 11543.070063483081
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 18))",
-     "bits": 11522.649080655543
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 26))",
-     "bits": 11502.95248206117
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 11), ('chunk', 13))",
-     "bits": 11478.987861776168
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 12), ('chunk', 9))",
-     "bits": 11442.850913046952
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 11), ('chunk', 24))",
-     "bits": 11421.178696259236
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 25))",
-     "bits": 11402.938476606303
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 12), ('chunk', 8))",
-     "bits": 11384.584657722029
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 27))",
-     "bits": 11366.412800496273
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 28))",
-     "bits": 11348.933584442186
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 10), ('chunk', 20))",
-     "bits": 11332.63740730327
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 10), ('chunk', 8))",
-     "bits": 11298.266560009097
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 29))",
-     "bits": 11281.57611955233
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "chunk(('chunk', 1), ('chunk', 4))",
-     "bits": 11277.882833554846
-    },
-    {
-     "stage": "chunk and merge",
-     "move": "merge(('chunk', 16), ('chunk', 30))",
-     "bits": 11261.814000669867
-    },
-    {
+     "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 12477.221530837829
+     "bits": 10830.392624313097,
+     "sentences": 320.0,
+     "seconds": 52.57972025871277
     },
     {
+     "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 12201.391834403916
+     "bits": 10498.810750415836,
+     "sentences": 320.0,
+     "seconds": 72.75535726547241
     }
    ]
   },
@@ -3068,6 +805,6 @@
    "gen_commission": 0.041000000000000036,
    "novelty": 1.0
   },
-  "seconds": 91.71038675308228
+  "seconds": 95.92109107971191
  }
 ]

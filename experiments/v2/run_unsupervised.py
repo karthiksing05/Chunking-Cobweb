@@ -73,17 +73,17 @@ def evaluate(learner, grammar, test, cfg, train_sentences, seed, n_gen):
     }
 
 
-def run_one(condition: str, seed: int, n_gen: int, data_root: str) -> dict:
+def run_one(condition: str, seed: int, n_gen: int, data_root: str, search: dict) -> dict:
     t0 = time.time()
     examples = load_corpus(os.path.join(data_root, CONDITIONS[condition]))
     train, test = v1_split(examples, seed)
     cfg = CFG(target_grammar(condition))
     sentences = {e.sentence for e in train}
 
-    learner = UnsupervisedLearner(seed=seed)
+    learner = UnsupervisedLearner(seed=seed, **search)
     for e in train:
         learner.observe(e.tokens)
-    g = learner.consolidate()
+    g = learner.sleep()
     unsup = evaluate(learner, g, test, cfg, sentences, seed, n_gen)
     unsup["steps"] = len(learner.history) - 1
     unsup["history"] = [{k: (float(v) if isinstance(v, (int, float, np.floating)) else v)
@@ -132,12 +132,16 @@ def main():
     ap.add_argument("--n-gen", type=int, default=1000)
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--data-root", default=default_data_root())
+    ap.add_argument("--beam", type=int, default=4)
+    ap.add_argument("--patience", type=int, default=3)
+    ap.add_argument("--levels", type=int, default=12)
     ap.add_argument("--out", default=os.path.join(HERE, "results", "unsupervised"))
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
     jobs = [(c, int(s)) for c in args.conditions.split(",") for s in args.seeds.split(",")]
     with ProcessPoolExecutor(max_workers=args.workers) as pool:
-        rows = [f.result() for f in [pool.submit(run_one, c, s, args.n_gen, args.data_root)
+        search = {"beam": args.beam, "patience": args.patience, "levels": args.levels}
+        rows = [f.result() for f in [pool.submit(run_one, c, s, args.n_gen, args.data_root, search)
                                      for c, s in jobs]]
     with open(os.path.join(args.out, "results.json"), "w") as f:
         json.dump(rows, f, indent=1)
