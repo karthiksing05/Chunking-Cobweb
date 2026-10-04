@@ -1,6 +1,6 @@
 # TRELLIS v2: concepts and chunks in two hierarchies
 
-TRELLIS v2 learns how experiences are built from parts. Every element of an experience is both a **concept** (a category of things that behave alike) and a **chunk** (a whole made of parts). The learner keeps the two aspects in two Cobweb hierarchies and reads one probabilistic grammar off them. That grammar parses, generates, and measures how many bits the experiences cost to describe. Description length decides everything that a threshold decided in TRELLIS v1: which concepts serve as categories, which chunks exist, and which analysis of a sentence is right. The learner works from analysed sentences or from sentences alone, and learns incrementally, perceiving by day and consolidating by night.
+TRELLIS v2 learns how experiences are built from parts. Every element of an experience is both a **concept** (a category of things that behave alike) and a **chunk** (a whole made of parts). The learner keeps the two aspects in two Cobweb hierarchies: the **representation hierarchy** (concepts: how elements behave) and the **composition hierarchy** (chunks: what elements are made of). These two hierarchies are the core of v2. The grammar's categories and chunk types are cuts through them, and that one probabilistic grammar parses, generates, and measures how many bits the experiences cost to describe. Description length decides everything that a threshold decided in TRELLIS v1: which concepts serve as categories, which chunks exist, and which analysis of a sentence is right. The learner works from analysed sentences or from sentences alone, and learns incrementally, perceiving by day and consolidating by night.
 
 This document explains the whole framework: what is stored, how the grammar is formed, how it is used, how it is learned without supervision, and how well it works. [`V2_DESIGN.md`](V2_DESIGN.md) keeps the design decisions, the evidence behind each representational choice and the detailed result tables. Every figure here is drawn by [`figures/make_figures.py`](figures/make_figures.py) from models trained on the paper's corpora.
 
@@ -30,7 +30,7 @@ This document explains the whole framework: what is stored, how the grammar is f
 ## 1. Ideas
 
 - **Concepts and chunks are two aspects of one representation.** "the dog" is a chunk, made of *the* and *dog*. It is also an instance of a concept, the things that can be the subject of *saw*. TRELLIS v2 records both aspects of every element and lets each organize its own hierarchy.
-- **Two hierarchies, each holding primitives and composites.** The *representation hierarchy* groups elements by behaviour. The *composition hierarchy* groups them by make-up. Single words and multi-word chunks live in the same trees. There are no separate trees for words, phrases or non-constituents.
+- **Two hierarchies, each holding primitives and composites.** The *representation hierarchy* groups elements by behaviour. The *composition hierarchy* groups them by make-up. Single words and multi-word chunks live in the same trees. There are no separate trees for words, phrases or non-constituents. Both are load-bearing. Read straight off the unsupervised search's analyses, the grammar's generations break the target grammar 47–56% of the time on the TERM corpora; once the same analyses are consolidated into the two hierarchies and re-analysed, 0.1–4.3% ([section 10](#learning-from-sentences-alone)).
 - **The grammar is a cut through each hierarchy.** A cut is a set of concepts that partitions the elements. The cut through the representation hierarchy gives the categories (symbols); the cut through the composition hierarchy gives the chunk types (rule classes).
 - **One model for parsing, generation and learning.** The grammar is a normalized probabilistic grammar. The parser computes posteriors under it, generation samples from it, and its code lengths decide the cuts. There are no separate pools, filters or fallbacks.
 - **Description length replaces thresholds.** A category, a chunk type or a structure exists only if it shortens the description of the data, including the description of the grammar itself. "Minimize chunks while preserving performance" is the learning objective, not a heuristic.
@@ -313,10 +313,16 @@ Nothing in the framework is specific to the paper's corpora. It needs experience
 
 ### What the new domains show
 
-- **Concept formation transfers.** Base phrases in real text and positional classes of components in characters come out of the same representation hierarchy, cut by description length.
+- **Both hierarchies transfer.** In real text the representation hierarchy forms the categories of base phrases and the composition hierarchy their chunk types (noun groups such as `DT NN`, verb groups such as `MD VB`). In characters the representation hierarchy forms positional classes of components and the composition hierarchy chunk types such as `[⿰ 氵]`. Each is cut by description length, with nothing specific to the domain.
 - **Unsupervised structure is the open problem, for two different reasons.** On the paper's corpora the search builds complete analyses. On real text and on characters it stops at forests of local chunks, and a sequence of independent chunks generates poorly. Comparing codes shows why:
-  - *Real text: the objective prefers the forests.* The learner's forest grammar describes the treebank sentences in fewer bits than the grammar of their gold trees, and the gap grows with data: 8–10% at 434 sentences, 14–15% at about 1,100, 18% at about 1,900. Every gold-derived analysis costs more than the learner's own forests, whether the gold trees are binarized to the right (15,763 bits at 434 sentences, against 14,160) or to the left (16,349), or cut down to forests of gold base phrases (16,120). With this grammar family, linguists' sentence structure does not pay for itself; the representation, not the search, has to change.
-  - *Characters: the search falls short.* The gold structures give a shorter code than the learner's analyses (73,662 against 83,241 bits for 2,000 characters, 11.5% shorter), even in the plain code the search minimizes (71,703 against 79,740), so better structures exist and the search does not reach them. A wider beam barely helps (79,207 bits with 16 instead of 4). Starting categories do: from the supervised model's 26 token categories the same search builds nearly complete analyses (1.4 chunks per character instead of 4.3). Bigram word classes cannot see which slot a component fills, as they could not tell verbs from prepositions on MED.
+  - *Real text: the objective prefers the forests.* The learner's forest grammar describes the treebank sentences in fewer bits than the grammar of their gold trees, and the gap grows with data: 8–10% at 434 sentences, 14–15% at about 1,100, 18% at about 1,900. Every gold-derived analysis costs more than the learner's own forests, whether the gold trees are binarized to the right (15,763 bits at 434 sentences, against 14,160) or to the left (16,349), or cut down to forests of gold base phrases (16,120). Right-branching trees (14,421) also cost less than gold trees.
+  - *What the two hierarchies record decides what can pay* (`experiments/v2/treebank_codes.py`, every sentence of the sample).
+    - **Today: phrase categories, the costliest description.** The representation hierarchy keeps a phrase apart from its head (the kind attribute), and the composition hierarchy records a chunk as an unheaded pair. Sentence structure is therefore sent through phrase categories. On the 10-tag sentences, gold trees cost 38% more than a tag bigram with the treebank's labels, and 24% more with TRELLIS's own categories.
+    - **Recording heads in both hierarchies is the cheapest.** A phrase is described by its head's behaviour and its valence (whether it has taken dependents on each side, a refinement of the kind). Its make-up is head, dependent and side, as in dependency grammar.
+    - **Charging total probability helps too.** Charging each sentence its total probability over all trees, which bits-back coding achieves, instead of the cost of naming one tree, brings gold structure to 5.8% above the bigram, and to within 1% after EM on the 10-tag sentences.
+    - **Even then, description length cannot single out linguists' structure.** A structure with half the heads right codes slightly shorter than the one EM finds near the gold trees (72% right). Not even a tag trigram beats the bigram.
+    - **Conclusion.** Tags at this scale carry too little information for sentence structure to pay. Lexical heads are the candidate, and they need words and far more text.
+  - *Characters: the search falls short.* The gold structures give a shorter code than the learner's analyses (73,662 against 83,241 bits for 2,000 characters, 11.5% shorter), even in the plain code the search minimizes (71,703 against 79,740), so better structures exist and the search does not reach them. A wider beam barely helps (79,207 bits with 16 instead of 4). Starting categories do: from the supervised model's 26 token categories, which the representation hierarchy formed with chunk context and which therefore see each component's slot, the same search builds nearly complete analyses (1.4 chunks per character instead of 4.3). Bigram word classes cannot see which slot a component fills, as they could not tell verbs from prepositions on MED.
 - **A tried and dropped move.** Attaching a pair directly to an existing category (a chunk move followed by a merge, in one step) took cheap early attachments and ended in much longer codes on MED and LARGE.
 
 ## 12. Relation to TRELLIS v1 and the paper's postulates
@@ -395,7 +401,7 @@ cd cobweb-private && cmake -S . -B build && cmake --build build --target cobweb_
 Reproducing everything (times on a 12-core laptop):
 
 ```
-python -m pytest tests/trellis2 -q                                          # 25 tests, seconds
+python -m pytest tests/trellis2 -q                                          # 31 tests, seconds
 python experiments/v2/run_synthetic.py --out experiments/v2/results/main    # supervised curves, ~6 min
 python experiments/v2/plot_learning_curves.py experiments/v2/results/main
 python experiments/v2/run_unsupervised.py --seeds 13,17                     # ~10 min
@@ -403,6 +409,7 @@ python experiments/v2/run_incremental.py --seeds 13,17                      # ~1
 python experiments/v2/plot_incremental.py experiments/v2/results/incremental
 python experiments/v2/run_search_study.py                                   # ~2 min
 python experiments/v2/run_treebank.py --train-max-len 10 --out experiments/v2/results/treebank/wsj10
+python experiments/v2/treebank_codes.py --em --trellis --out experiments/v2/results/treebank/structure_codes.md
 python experiments/v2/run_characters.py                                     # ~1 h
 python docs/figures/make_figures.py                                         # this document's figures, ~30 s
 ```
@@ -411,14 +418,14 @@ The paper's corpora are read from `../trellis_v1/data` (the v1 snapshot), with `
 
 ## 14. Limitations and next steps
 
-- **Sentence-level structure without supervision.** On the paper's corpora the search builds complete analyses. On real text and on characters it stops at forests of local chunks: no single larger chunk pays for itself, and the moves cannot reach a set of chunks that pays together. This is the main open problem.
+- **Sentence-level structure without supervision.** On the paper's corpora the search builds complete analyses. On characters it stops at forests of local chunks although the gold structures code shorter: a search problem, from categories that cannot see a component's slot. On real-text tags it stops at forests because no description we know makes sentence structure pay at this scale ([section 11](#what-the-new-domains-show)).
 - **A weak sequence model on real data.** With about ten categories, the grammar makes the strong independence assumptions of a small probabilistic grammar, and tag bigrams describe real text more compactly.
 - **Binary concatenation only.** A chunk has two parts joined left to right. Two-dimensional composition is written as operator tokens, so the spatial relation is learned as context rather than represented as a typed relation.
 - **Scale.** Each night runs three full consolidations. With the compiled Cobweb a night on 320 synthetic sentences takes 6–85 seconds (about half the time before it); before it, a night took about an hour for 1,900 treebank sentences or 2,000 characters. The search, the grammar read-out and the charts are still Python.
 - **Nights repeat the batch search.** The search can only merge categories, so every night may start over from word classes. Split moves (refining a category together with the chunk categories built on it) would let nights continue from the stored analyses.
 - **Linguists' trees.** Description length identifies the language, not its conventional binarization; bracket agreement with gold trees is moderate.
 
-Next: unsupervised sentence-level structure; finer positional concepts in characters; the Dirichlet concentration chosen by description length; a compiled Cobweb; typed relations between parts; then chess.
+Next: for characters, starting categories read off the representation hierarchy, or split moves along it, and finer positional concepts; for real text with words at scale, heads recorded in both hierarchies and the total-probability code; the Dirichlet concentration chosen by description length; typed relations between parts in the composition hierarchy; then chess.
 
 ## 15. Glossary
 

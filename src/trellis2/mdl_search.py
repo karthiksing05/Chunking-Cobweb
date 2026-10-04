@@ -178,29 +178,6 @@ def word_classes(sentences: Sequence[Sequence[str]], alpha: float
     return path
 
 
-def _chunk(analyses, B, C, Y):
-    out = []
-    for tops in analyses:
-        new, t = [], 0
-        while t < len(tops):
-            if t + 1 < len(tops) and tops[t][0] == B and tops[t + 1][0] == C:
-                new.append((Y, (tops[t], tops[t + 1])))
-                t += 2
-            else:
-                new.append(tops[t])
-                t += 1
-        out.append(new)
-    return out
-
-
-def _relabel(node: Node, a, b) -> Node:
-    lab, body = node
-    lab = a if lab == b else lab
-    if isinstance(body, str):
-        return (lab, body)
-    return (lab, (_relabel(body[0], a, b), _relabel(body[1], a, b)))
-
-
 def _phi(c: float, alpha: float) -> float:
     """log Gamma(c + alpha) - log Gamma(alpha): one outcome's share of a row's code."""
     return math.lgamma(c + alpha) - math.lgamma(alpha) if c else 0.0

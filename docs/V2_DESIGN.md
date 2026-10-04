@@ -11,7 +11,7 @@ Status: first implementation, October 2026, on branch `inside-outside`.
 ## Decisions taken with the user
 
 1. The v1-era rules are relaxed (greedy-only parsing, never feeding parser output back, the generation lock, "no hints"). The parsing and generation loops are rebuilt around the new scheme.
-2. Exactly two hierarchies, and each holds **both primitives and composites**. There are no extra trees (for example, for non-constituents).
+2. Exactly two hierarchies, and each holds **both primitives and composites**: the **representation hierarchy** (how an element behaves) and the **composition hierarchy** (what it is made of). There are no extra trees (for example, for non-constituents). The two hierarchies are the essential core of v2 (stressed again by the user on 2026-10-04): the grammar's categories and chunk types are cuts through them, parsing and generation use that grammar, and learning replays experiences into them. Every change is stated as a change in what the two hierarchies record.
 3. Simplicity over patches. One probabilistic model does parsing, generation and description-length scoring, so generation samples from the very distribution the parser and the code lengths use. There are no pools, filters or fallbacks.
 4. The in-house Cobweb-MDL variant is not used (not ready). Concept formation is standard Cobweb (category utility). Description length decides only which level of each hierarchy acts as the grammar, and that code lives in `grammar.py` where a Cobweb-MDL variant could replace it.
 
@@ -252,6 +252,48 @@ Training on more sentences (every other sentence of up to 15 or 20 tags; the sam
 - Its grammar, like the supervised one, is a weaker sequence model than tag bigrams. The Dirichlet concentration is not the cause: the supervised grammar's code prefers α = 0.01 to 0.001 (15,439 vs 15,763 bits), with held-out bits unchanged (30.5 vs 30.6).
 - **The objective prefers the forests.** At every size the learner's forest grammar is shorter than the grammar of the binarized gold trees, and the gap grows with data (table). Binarization is not the reason: at 434 sentences (seed 13) the learner's analyses take 14,160 bits; right-binarized gold trees 15,763, left-binarized 16,349, and forests of gold base phrases 16,120. Sentence structure does not pay for itself with this grammar family; this is not a search failure.
 
+### Does sentence structure pay on real text?
+
+Code: `experiments/v2/treebank_codes.py`; output: `experiments/v2/results/treebank/structure_codes.md`. Every sentence of the treebank sample (3,901 sentences, 82,356 tags), each description an actual code (Dirichlet rows, concentration chosen by code length). A description that sends a tree is scored two ways: by its *derivation*, a message that names the tree, or by its *total probability*, summed over all trees by the inside algorithm. Bits-back coding achieves the second (Hinton & van Camp 1993; Townsend et al. 2019); the difference is the price of naming one tree. Heads follow Collins (1999); dependency trees are generated head-outward (Klein & Manning 2004).
+
+| Description of the tags | Sends | Bits | Against the tag bigram |
+|---|---|---|---|
+| tag unigram | – | 353,898 | +24.8% |
+| tag bigram | – | 283,596 | – |
+| tag trigram | – | 284,510 | +0.3% |
+| gold dependency trees, first order | derivation | 370,479 | +30.6% |
+| gold dependency trees, first order | total probability | 300,005 | +5.8% |
+| gold dependency trees, second order (sibling) | derivation | 356,700 | +25.8% |
+| gold dependency trees, second order (sibling) | total probability | 300,793 | +6.1% |
+| gold base phrases as headed chunks, Markov sequence of heads | derivation | 310,730 | +9.6% |
+
+- **Tags carry little beyond adjacent pairs at this scale.** Even a tag trigram does not pay (also at 542, 2,023 and 3,751 sentences).
+- **Phrase categories are the costliest way to send sentence structure.** On WSJ10 the plain PCFG over the treebank's own labels costs 38% more than the tag bigram (21,108 against 15,284 bits). With TRELLIS's own categories the gold trees of the 434 training sentences cost 24% more than the bigram (15,439 bits at the best concentration, against 12,419). Bits back return only 1.8 bits per sentence for labelled phrase categories, which leave almost no ambiguity, so their total probability is still 32% more.
+- **Heads are cheaper.** Gold dependency trees cost 31% more as derivations, but 18 bits per sentence come back, leaving 5.8% (WSJ10: 5.1%). The gap shrinks slowly with data: 7.6% at 10,000 tags, 6.8%, 6.2%, 5.8% at 82,000.
+- **Lexical heads add little.** Words given their tags cost 622,578 bits given the previous word and 621,433 given the head word; both together save another 1.1% (615,481).
+- **Even with heads and total probability, the code barely prefers linguists' structure.** On WSJ10, EM (40 iterations) from 18 starts:
+
+  | Start | Bits | Against the tag bigram | Heads right |
+  |---|---|---|---|
+  | random trees (best of 7) | 15,348 | +0.4% | 49.6% |
+  | the gold trees' parameters | 15,427 | +0.9% | 71.7% |
+  | left-branching chains | 15,540 | +1.7% | 34.1% |
+  | right-branching chains | 15,562 | +1.8% | 23.0% |
+  | harmonic (Klein & Manning) | 15,596 | +2.0% | 44.1% |
+  | uniform | 16,009 | +4.7% | 23.7% |
+  | other random trees and random parameters (12) | 15,539–16,153 | +1.7% to +5.7% | 26–56% |
+
+  Shorter codes go with better structure (rank correlation 0.54 between code length and heads missed), and the harmonic start gives 44%, close to Klein & Manning's 43%. But the shortest code found has half the heads right, 79 bits below the solution near the gold trees.
+- **Within TRELLIS's own code** (WSJ10, seed 13, full consolidation) the learner's forests remain the shortest analyses: 14,313 bits (14,160 with the night's warm start), against right-branching trees 14,421, left-branching trees 14,494, the forests completed left- or right-branching above their chunks 14,869 and 15,259, and gold trees 15,763.
+
+**Conclusion, in terms of the two hierarchies.** What the hierarchies record decides which structure can pay.
+
+- **Today.** The representation hierarchy keeps a phrase apart from its head (the kind attribute), and the composition hierarchy records a chunk as an unheaded pair. Sentence structure is therefore sent through phrase categories, the costliest description above.
+- **The cheapest description records heads in both hierarchies.** In the representation hierarchy, a composite is described by its head's behaviour and its valence (whether it has taken dependents on each side, a refinement of the kind). In the composition hierarchy, a composite is head, dependent and side. The grammar is still read off cuts through both, and each sentence is charged its total probability, which held-out bits already use.
+- **Even then, structure does not pay here.** On part-of-speech tags at this scale that description comes within about 1% of adjacency. There, linguistic, half-linguistic and chain-like structures all cost about the same, so description length cannot single out the linguistic one.
+- **What does pay are chunks** (base phrases), which is what the learner finds.
+- **What sentence structure needs is information tags at this scale do not carry.** Lexical heads are the candidate (de Marcken 1995), but at 82,000 words they save only 1.1%. Heads in both hierarchies and the total-probability code are the changes for real text once it is scaled up to words.
+
 ### Chinese characters (IDS)
 
 Code: `characters.py`, `experiments/v2/run_characters.py`. CJKVI IDS (under `data/ids`, not committed). Full decompositions into 270 atomic components and 12 operators, as prefix sequences; 13,297 characters of at most 11 tokens; 2,000 learned and 500 held out (seed 13). The gold tree groups an operator with its first part. Generated characters are checked for well-formedness, attested positions (operator, slot, component), and reality (held-out real characters rediscovered).
@@ -302,7 +344,7 @@ Folding a recurring top-level pair directly into an existing category (a chunk m
 | v2.0 ✓ | supervised core: hierarchies, MDL cuts and merging, inside-outside + MBR, generation, six-condition evaluation |
 | v2.1 ✓ | unsupervised learning from sentences: MDL objective, partial analyses, word classes, exact-scored beam search over chunk/merge moves from several starts |
 | v2.2 (in part) | learning by day and by night ✓ (perceive with the current grammar; consolidate at night from the stored analyses or a restart; the full code chooses among the best search results); split moves; attention-like long-range context |
-| v2.3 (in progress) | beyond the paper's corpora: Penn Treebank WSJ10 with gold tags ✓ (and larger training sets ✓); Chinese characters ✓. Open: sentence-level structure without supervision, finer positional concepts, α by description length, a compiled Cobweb |
+| v2.3 (in progress) | beyond the paper's corpora: Penn Treebank WSJ10 with gold tags ✓ (and larger training sets ✓; which descriptions make sentence structure pay ✓); Chinese characters ✓; a compiled Cobweb ✓. Open: starting categories that see structure (characters), finer positional concepts, α by description length; for real text, chunks categorized by their head and the total-probability code, with words at scale |
 | v2.4 | variable-arity templates, typed relations (two-dimensional composition as relations rather than tokens); chess |
 
 ## Reproducing
@@ -316,6 +358,7 @@ python experiments/v2/run_incremental.py --seeds 13,17    # ~1 h, 8 workers
 python experiments/v2/plot_incremental.py experiments/v2/results/incremental
 python experiments/v2/run_search_study.py                  # ~2 min
 python experiments/v2/run_treebank.py --train-max-len 10 --out experiments/v2/results/treebank/wsj10   # needs data/ptb_sample
+python experiments/v2/treebank_codes.py --em --trellis --out experiments/v2/results/treebank/structure_codes.md   # ~40 min, 9 workers
 python experiments/v2/run_characters.py                    # needs data/ids/ids.txt
 python docs/figures/make_figures.py                        # figures of FRAMEWORK.md
 ```
