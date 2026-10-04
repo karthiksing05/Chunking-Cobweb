@@ -139,6 +139,16 @@ def main():
         consistent += seen.brackets() == tree.brackets() and seen.roots == tree.roots
     measures = {"TRELLIS v2": generation_measures(samples, train_set, corpus_set, corpus_grams)}
     measures["TRELLIS v2"]["perceived with the analysis it was generated from"] = consistent / len(gen)
+    # Chunk-level coherence: every multi-word chunk inside a generated
+    # sentence, looked up as a word sequence anywhere in TinyStories.
+    text = " | " + " | ".join(" ".join(c) for c in corpus) + " | "
+    chunks_found = chunks_total = 0
+    for tokens, tree in gen:
+        for (i, j) in tree.brackets():
+            if j - i >= 2 and (i, j) not in tree.roots:
+                chunks_total += 1
+                chunks_found += f" {' '.join(tokens[i:j])} " in text
+    measures["TRELLIS v2"]["chunks inside sentences found in TinyStories"] = chunks_found / max(chunks_total, 1)
     for k in (2, 3):
         smp = [ngram_sample(models[k], k, rng) for _ in range(args.n_gen)]
         measures[f"word {k}-gram"] = generation_measures([s for s in smp if s] or [["-"]], train_set,
@@ -155,6 +165,7 @@ def main():
             if j - i >= 2 and (i, j) not in tree.roots:
                 chunks[" ".join(tokens[i:j])] += 1
     examples = {"held-out analyses": [learner.parse(s).to_string(s) for s in test[:25]],
+                "all generated": [tree.to_string(tokens) for tokens, tree in gen],
                 "generated": [tree.to_string(tokens) + ("" if tuple(tokens) in train_set else "  (new)")
                               for tokens, tree in gen[:40]]}
     results = {"train": len(train), "test": len(test), "vocabulary": args.vocab, "seconds": seconds,

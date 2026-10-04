@@ -1,0 +1,1361 @@
+{
+ "train": 2500,
+ "test": 500,
+ "vocabulary": 100,
+ "seconds": 1834.1351761817932,
+ "symbols": 31,
+ "rule classes": 100,
+ "chunk types": 43,
+ "training bits": 45757.28290890332,
+ "top-level chunks per sentence": 1.5064,
+ "whole trees": 0.6172,
+ "held-out bits per sentence": 17.138998689068668,
+ "baselines": {
+  "1-gram": 26.092138054059898,
+  "2-gram": 13.153468812373825,
+  "3-gram": 12.974481125426689
+ },
+ "generation": {
+  "TRELLIS v2": {
+   "new": 0.783,
+   "real": 0.3,
+   "new and real": 0.083,
+   "word pairs in TinyStories": 0.8842946490618485,
+   "word triples in TinyStories": 0.628348757915246,
+   "mean length": 3.878,
+   "perceived with the analysis it was generated from": 0.997,
+   "chunks inside sentences found in TinyStories": 0.9146067415730337
+  },
+  "word 2-gram": {
+   "new": 0.576,
+   "real": 0.483,
+   "new and real": 0.059,
+   "word pairs in TinyStories": 1.0,
+   "word triples in TinyStories": 0.8600275355667738,
+   "mean length": 4.126
+  },
+  "word 3-gram": {
+   "new": 0.228,
+   "real": 0.816,
+   "new and real": 0.044,
+   "word pairs in TinyStories": 1.0,
+   "word triples in TinyStories": 1.0,
+   "mean length": 3.994
+  }
+ },
+ "categories": [
+  {
+   "symbol": 0,
+   "count": 3766.0,
+   "yields": [
+    [
+     "it",
+     132.0
+    ],
+    [
+     "they are happy",
+     90.0
+    ],
+    [
+     "together",
+     85.0
+    ],
+    [
+     "too",
+     84.0
+    ],
+    [
+     "they were very happy",
+     83.0
+    ],
+    [
+     "tim was very happy",
+     63.0
+    ],
+    [
+     "you",
+     59.0
+    ],
+    [
+     "they have fun",
+     50.0
+    ]
+   ]
+  },
+  {
+   "symbol": 7,
+   "count": 1177.0,
+   "yields": [
+    [
+     "have fun",
+     71.0
+    ],
+    [
+     "like",
+     62.0
+    ],
+    [
+     "did",
+     53.0
+    ],
+    [
+     "wanted to help",
+     49.0
+    ],
+    [
+     "was",
+     49.0
+    ],
+    [
+     "mom",
+     47.0
+    ],
+    [
+     "had fun",
+     45.0
+    ],
+    [
+     "is",
+     45.0
+    ]
+   ]
+  },
+  {
+   "symbol": 18,
+   "count": 1130.0,
+   "yields": [
+    [
+     "they",
+     206.0
+    ],
+    [
+     "the",
+     94.0
+    ],
+    [
+     "a",
+     80.0
+    ],
+    [
+     "she",
+     77.0
+    ],
+    [
+     "you",
+     73.0
+    ],
+    [
+     "he",
+     66.0
+    ],
+    [
+     "to",
+     65.0
+    ],
+    [
+     "what",
+     59.0
+    ]
+   ]
+  },
+  {
+   "symbol": 23,
+   "count": 1026.0,
+   "yields": [
+    [
+     "was",
+     880.0
+    ],
+    [
+     "is",
+     68.0
+    ],
+    [
+     "felt",
+     60.0
+    ],
+    [
+     "little girl was",
+     6.0
+    ],
+    [
+     "big bird was",
+     4.0
+    ],
+    [
+     "little boy was",
+     3.0
+    ],
+    [
+     "little bird was",
+     3.0
+    ],
+    [
+     "big cat was",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 22,
+   "count": 1026.0,
+   "yields": [
+    [
+     "tim",
+     212.0
+    ],
+    [
+     "he",
+     167.0
+    ],
+    [
+     "she",
+     150.0
+    ],
+    [
+     "lily",
+     84.0
+    ],
+    [
+     "tom",
+     74.0
+    ],
+    [
+     "sue",
+     63.0
+    ],
+    [
+     "the bird",
+     39.0
+    ],
+    [
+     "the dog",
+     28.0
+    ]
+   ]
+  },
+  {
+   "symbol": 1,
+   "count": 1025.0,
+   "yields": [
+    [
+     "tim was",
+     191.0
+    ],
+    [
+     "he was",
+     137.0
+    ],
+    [
+     "she was",
+     119.0
+    ],
+    [
+     "lily was",
+     79.0
+    ],
+    [
+     "tom was",
+     65.0
+    ],
+    [
+     "sue was",
+     63.0
+    ],
+    [
+     "the bird was",
+     39.0
+    ],
+    [
+     "the dog was",
+     23.0
+    ]
+   ]
+  },
+  {
+   "symbol": 17,
+   "count": 912.0,
+   "yields": [
+    [
+     "happy",
+     791.0
+    ],
+    [
+     "sad",
+     113.0
+    ],
+    [
+     "fun",
+     5.0
+    ],
+    [
+     "tree",
+     1.0
+    ],
+    [
+     "very sad",
+     1.0
+    ],
+    [
+     "his",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 16,
+   "count": 796.0,
+   "yields": [
+    [
+     "very",
+     507.0
+    ],
+    [
+     "so",
+     199.0
+    ],
+    [
+     "not",
+     70.0
+    ],
+    [
+     "all",
+     16.0
+    ],
+    [
+     "a",
+     4.0
+    ]
+   ]
+  },
+  {
+   "symbol": 5,
+   "count": 795.0,
+   "yields": [
+    [
+     "very happy",
+     401.0
+    ],
+    [
+     "so happy",
+     190.0
+    ],
+    [
+     "very sad",
+     103.0
+    ],
+    [
+     "not happy",
+     66.0
+    ],
+    [
+     "all very happy",
+     12.0
+    ],
+    [
+     "so sad",
+     7.0
+    ],
+    [
+     "a happy",
+     4.0
+    ],
+    [
+     "all happy",
+     3.0
+    ]
+   ]
+  },
+  {
+   "symbol": 25,
+   "count": 478.0,
+   "yields": [
+    [
+     "were",
+     247.0
+    ],
+    [
+     "are",
+     207.0
+    ],
+    [
+     "felt",
+     12.0
+    ],
+    [
+     "all",
+     10.0
+    ],
+    [
+     "saw",
+     1.0
+    ],
+    [
+     "to be",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 19,
+   "count": 410.0,
+   "yields": [
+    [
+     "sad",
+     207.0
+    ],
+    [
+     "happy",
+     199.0
+    ],
+    [
+     "fun",
+     4.0
+    ]
+   ]
+  },
+  {
+   "symbol": 27,
+   "count": 364.0,
+   "yields": [
+    [
+     "they",
+     350.0
+    ],
+    [
+     "we",
+     8.0
+    ],
+    [
+     "friends",
+     6.0
+    ]
+   ]
+  },
+  {
+   "symbol": 3,
+   "count": 310.0,
+   "yields": [
+    [
+     "they were",
+     175.0
+    ],
+    [
+     "they are",
+     111.0
+    ],
+    [
+     "they all",
+     10.0
+    ],
+    [
+     "we are",
+     6.0
+    ],
+    [
+     "they felt",
+     5.0
+    ],
+    [
+     "friends were",
+     3.0
+    ]
+   ]
+  },
+  {
+   "symbol": 24,
+   "count": 300.0,
+   "yields": [
+    [
+     "play",
+     69.0
+    ],
+    [
+     "i",
+     54.0
+    ],
+    [
+     "can",
+     48.0
+    ],
+    [
+     "we",
+     40.0
+    ],
+    [
+     "bird",
+     16.0
+    ],
+    [
+     "said",
+     13.0
+    ],
+    [
+     "cat",
+     8.0
+    ],
+    [
+     "girl",
+     7.0
+    ]
+   ]
+  },
+  {
+   "symbol": 30,
+   "count": 295.0,
+   "yields": [
+    [
+     "can",
+     99.0
+    ],
+    [
+     "can i",
+     33.0
+    ],
+    [
+     "we",
+     31.0
+    ],
+    [
+     "the",
+     22.0
+    ],
+    [
+     "can we",
+     17.0
+    ],
+    [
+     "i",
+     16.0
+    ],
+    [
+     "little",
+     13.0
+    ],
+    [
+     "we can",
+     9.0
+    ]
+   ]
+  },
+  {
+   "symbol": 9,
+   "count": 262.0,
+   "yields": [
+    [
+     "lily",
+     62.0
+    ],
+    [
+     "tom",
+     53.0
+    ],
+    [
+     "sam",
+     39.0
+    ],
+    [
+     "ben",
+     29.0
+    ],
+    [
+     "tim",
+     29.0
+    ],
+    [
+     "sue",
+     20.0
+    ],
+    [
+     "was",
+     18.0
+    ],
+    [
+     "max",
+     7.0
+    ]
+   ]
+  },
+  {
+   "symbol": 2,
+   "count": 232.0,
+   "yields": [
+    [
+     "can i play",
+     33.0
+    ],
+    [
+     "can we",
+     23.0
+    ],
+    [
+     "can i",
+     21.0
+    ],
+    [
+     "we can",
+     20.0
+    ],
+    [
+     "can we play",
+     17.0
+    ],
+    [
+     "i can",
+     16.0
+    ],
+    [
+     "the bird",
+     8.0
+    ],
+    [
+     "we can play",
+     8.0
+    ]
+   ]
+  },
+  {
+   "symbol": 20,
+   "count": 190.0,
+   "yields": [
+    [
+     "with",
+     46.0
+    ],
+    [
+     "help",
+     24.0
+    ],
+    [
+     "together",
+     18.0
+    ],
+    [
+     "be",
+     17.0
+    ],
+    [
+     "do",
+     15.0
+    ],
+    [
+     "said",
+     15.0
+    ],
+    [
+     "have",
+     10.0
+    ],
+    [
+     "to",
+     9.0
+    ]
+   ]
+  },
+  {
+   "symbol": 4,
+   "count": 171.0,
+   "yields": [
+    [
+     "they are",
+     28.0
+    ],
+    [
+     "they were",
+     16.0
+    ],
+    [
+     "lily and tom are",
+     16.0
+    ],
+    [
+     "lily and ben are",
+     13.0
+    ],
+    [
+     "tim and sam were",
+     11.0
+    ],
+    [
+     "tim and sue were",
+     9.0
+    ],
+    [
+     "tom and sam are",
+     7.0
+    ],
+    [
+     "tim and sam are",
+     6.0
+    ]
+   ]
+  },
+  {
+   "symbol": 13,
+   "count": 158.0,
+   "yields": [
+    [
+     "wanted",
+     65.0
+    ],
+    [
+     "want",
+     32.0
+    ],
+    [
+     "big",
+     22.0
+    ],
+    [
+     "little",
+     10.0
+    ],
+    [
+     "looked",
+     6.0
+    ],
+    [
+     "go",
+     4.0
+    ],
+    [
+     "have",
+     4.0
+    ],
+    [
+     "came",
+     3.0
+    ]
+   ]
+  },
+  {
+   "symbol": 21,
+   "count": 158.0,
+   "yields": [
+    [
+     "friends",
+     76.0
+    ],
+    [
+     "sad",
+     66.0
+    ],
+    [
+     "happy",
+     16.0
+    ]
+   ]
+  },
+  {
+   "symbol": 14,
+   "count": 157.0,
+   "yields": [
+    [
+     "to help",
+     61.0
+    ],
+    [
+     "to play",
+     33.0
+    ],
+    [
+     "tree",
+     12.0
+    ],
+    [
+     "bird",
+     8.0
+    ],
+    [
+     "girl",
+     7.0
+    ],
+    [
+     "to go",
+     7.0
+    ],
+    [
+     "to",
+     6.0
+    ],
+    [
+     "sad",
+     6.0
+    ]
+   ]
+  },
+  {
+   "symbol": 29,
+   "count": 146.0,
+   "yields": [
+    [
+     "bird",
+     39.0
+    ],
+    [
+     "dog",
+     28.0
+    ],
+    [
+     "cat",
+     21.0
+    ],
+    [
+     "boy",
+     20.0
+    ],
+    [
+     "mom",
+     14.0
+    ],
+    [
+     "girl",
+     10.0
+    ],
+    [
+     "tree",
+     8.0
+    ],
+    [
+     "friend",
+     2.0
+    ]
+   ]
+  },
+  {
+   "symbol": 28,
+   "count": 146.0,
+   "yields": [
+    [
+     "the",
+     129.0
+    ],
+    [
+     "his",
+     9.0
+    ],
+    [
+     "her",
+     7.0
+    ],
+    [
+     "their",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 8,
+   "count": 129.0,
+   "yields": [
+    [
+     "and",
+     129.0
+    ]
+   ]
+  },
+  {
+   "symbol": 12,
+   "count": 116.0,
+   "yields": [
+    [
+     "have",
+     71.0
+    ],
+    [
+     "had",
+     45.0
+    ]
+   ]
+  },
+  {
+   "symbol": 15,
+   "count": 116.0,
+   "yields": [
+    [
+     "fun",
+     116.0
+    ]
+   ]
+  },
+  {
+   "symbol": 6,
+   "count": 113.0,
+   "yields": [
+    [
+     "and sam",
+     32.0
+    ],
+    [
+     "and tom",
+     26.0
+    ],
+    [
+     "and ben",
+     18.0
+    ],
+    [
+     "and sue",
+     14.0
+    ],
+    [
+     "and lily",
+     14.0
+    ],
+    [
+     "and max",
+     5.0
+    ],
+    [
+     "and spot",
+     2.0
+    ],
+    [
+     "a",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 26,
+   "count": 112.0,
+   "yields": [
+    [
+     "lily and tom",
+     20.0
+    ],
+    [
+     "lily and ben",
+     18.0
+    ],
+    [
+     "tim and sam",
+     17.0
+    ],
+    [
+     "tim and sue",
+     9.0
+    ],
+    [
+     "tom and sam",
+     9.0
+    ],
+    [
+     "tom and lily",
+     7.0
+    ],
+    [
+     "ben and sam",
+     5.0
+    ],
+    [
+     "tom and sue",
+     5.0
+    ]
+   ]
+  },
+  {
+   "symbol": 11,
+   "count": 106.0,
+   "yields": [
+    [
+     "help",
+     61.0
+    ],
+    [
+     "play",
+     33.0
+    ],
+    [
+     "go",
+     7.0
+    ],
+    [
+     "be",
+     3.0
+    ],
+    [
+     "lily",
+     2.0
+    ]
+   ]
+  },
+  {
+   "symbol": 10,
+   "count": 106.0,
+   "yields": [
+    [
+     "to",
+     104.0
+    ],
+    [
+     "and",
+     2.0
+    ]
+   ]
+  }
+ ],
+ "frequent chunks": [
+  [
+   "very happy",
+   401
+  ],
+  [
+   "tim was",
+   191
+  ],
+  [
+   "they were",
+   191
+  ],
+  [
+   "so happy",
+   190
+  ],
+  [
+   "they are",
+   139
+  ],
+  [
+   "he was",
+   137
+  ],
+  [
+   "she was",
+   119
+  ],
+  [
+   "very sad",
+   104
+  ],
+  [
+   "lily was",
+   79
+  ],
+  [
+   "have fun",
+   73
+  ],
+  [
+   "not happy",
+   66
+  ],
+  [
+   "tom was",
+   65
+  ],
+  [
+   "sue was",
+   63
+  ],
+  [
+   "to help",
+   61
+  ],
+  [
+   "can i",
+   54
+  ],
+  [
+   "wanted to help",
+   49
+  ],
+  [
+   "the bird",
+   48
+  ],
+  [
+   "had fun",
+   45
+  ],
+  [
+   "can we",
+   40
+  ],
+  [
+   "the bird was",
+   39
+  ],
+  [
+   "to play",
+   35
+  ],
+  [
+   "and sam",
+   34
+  ],
+  [
+   "can i play",
+   33
+  ],
+  [
+   "the dog",
+   29
+  ],
+  [
+   "and tom",
+   29
+  ],
+  [
+   "we can",
+   29
+  ],
+  [
+   "the cat",
+   28
+  ],
+  [
+   "the dog was",
+   23
+  ],
+  [
+   "lily and tom",
+   23
+  ],
+  [
+   "max was",
+   22
+  ],
+  [
+   "spot was",
+   22
+  ],
+  [
+   "the boy",
+   22
+  ],
+  [
+   "and lily",
+   22
+  ],
+  [
+   "the cat was",
+   21
+  ],
+  [
+   "and ben",
+   21
+  ],
+  [
+   "lily and ben",
+   21
+  ],
+  [
+   "he is",
+   21
+  ],
+  [
+   "want to play",
+   21
+  ],
+  [
+   "she is",
+   19
+  ],
+  [
+   "tim felt",
+   19
+  ],
+  [
+   "the boy was",
+   19
+  ],
+  [
+   "and sue",
+   18
+  ],
+  [
+   "tim and sam",
+   18
+  ],
+  [
+   "can we play",
+   17
+  ],
+  [
+   "sam was",
+   17
+  ],
+  [
+   "it was",
+   16
+  ],
+  [
+   "i can",
+   16
+  ],
+  [
+   "lily and tom are",
+   16
+  ],
+  [
+   "big tree",
+   13
+  ],
+  [
+   "lily and ben are",
+   13
+  ],
+  [
+   "wanted to play",
+   12
+  ],
+  [
+   "she felt",
+   12
+  ],
+  [
+   "all very happy",
+   12
+  ],
+  [
+   "little girl",
+   12
+  ],
+  [
+   "tom and lily",
+   12
+  ],
+  [
+   "tim and sue",
+   11
+  ],
+  [
+   "the girl",
+   11
+  ],
+  [
+   "tim and sam were",
+   11
+  ],
+  [
+   "they all",
+   10
+  ],
+  [
+   "they felt",
+   10
+  ]
+ ],
+ "examples": {
+  "held-out analyses": [
+   "[[she was] [very happy]]",
+   "[[they liked] [it too]]",
+   "[[they do] [[not like] tom]]",
+   "[[i have] [[a new] toy]]",
+   "[[[they are] not] [a toy]]",
+   "[[lily was] [not happy]]",
+   "[[they are] friends]",
+   "[[she was] [so happy]]",
+   "[they [have fun]]",
+   "[[they are] happy]",
+   "[and [[they were] [very happy]]]",
+   "[[[they played] together] [all day]]",
+   "[they [have fun]]",
+   "[[sue was] sad]",
+   "[[[they played] all] day]",
+   "[[they played] [and [had fun]]]",
+   "[[she saw] [[her friend] tim]]",
+   "[[they were] [very happy]]",
+   "[[lily was] sad]",
+   "[[max was] [very happy]]",
+   "[[would [you like]] [a toy]]",
+   "[[tim was] sad]",
+   "[[she was] sad]",
+   "[so [he [started [to play]]]]",
+   "[[tim was] [very happy]]"
+  ],
+  "generated": [
+   "not \u00b7 so  (new)",
+   "[[[the bird] was] [not happy]] \u00b7 [[can fun] happy]  (new)",
+   "[[she was] [very happy]]",
+   "[[sam felt] happy] \u00b7 [[tim was] happy] \u00b7 [the there] \u00b7 [the [had fun]]  (new)",
+   "[[she are] friends]  (new)",
+   "[they had]  (new)",
+   "[[he was] happy] \u00b7 [[they were] said] \u00b7 [tim help]  (new)",
+   "[they did] \u00b7 [[tom was] sad]  (new)",
+   "[what fun]  (new)",
+   "[what [have fun]]  (new)",
+   "day  (new)",
+   "[max fun]  (new)",
+   "[[[[little play] can] bird] cat] \u00b7 [[lily play] said]  (new)",
+   "said  (new)",
+   "[a help]  (new)",
+   "[[the can] said]  (new)",
+   "tim  (new)",
+   "[[spot was] sad]",
+   "[[ben was] happy]  (new)",
+   "[you not]  (new)",
+   "[the fun]  (new)",
+   "[it like]  (new)",
+   "[big happy]  (new)",
+   "it  (new)",
+   "[[tim is] [very happy]]",
+   "[they [wanted [to help]]]  (new)",
+   "[[spot was] [very happy]]",
+   "[[lily was] happy]",
+   "[[she is] sad]",
+   "it  (new)",
+   "[[sue was] [very happy]] \u00b7 [that ball]  (new)",
+   "[[[sue [and tom]] were] sad]",
+   "[[sue was] [very happy]] \u00b7 [too dog] \u00b7 [[tim was] sad]  (new)",
+   "[[[tom [and lily]] were] friends] \u00b7 [[can i] help]  (new)",
+   "[[she was] [so happy]]",
+   "sue \u00b7 [[she was] happy]  (new)",
+   "[he are] \u00b7 so  (new)",
+   "[[tim was] sad]",
+   "new  (new)",
+   "[to played]  (new)"
+  ]
+ },
+ "history": [
+  {
+   "night": 0,
+   "stage": "flat",
+   "move": "start",
+   "bits": 66727.8128680787,
+   "sentences": 2500,
+   "seconds": 0.45737123489379883
+  },
+  {
+   "night": 0,
+   "stage": "structure",
+   "move": "chunk and merge from 67 word classes",
+   "bits": 47819.646551836144,
+   "sentences": 2500,
+   "seconds": 325.8108251094818
+  },
+  {
+   "night": 0,
+   "stage": "concepts",
+   "move": "consolidate",
+   "bits": 52528.113779178726,
+   "sentences": 2500,
+   "seconds": 1834.0864350795746
+  },
+  {
+   "night": 0,
+   "stage": "re-analysis",
+   "move": "viterbi",
+   "bits": 47496.45055996877,
+   "sentences": 2500,
+   "seconds": 1834.0864400863647
+  },
+  {
+   "night": 0,
+   "stage": "re-analysis",
+   "move": "viterbi",
+   "bits": 46602.26265902407,
+   "sentences": 2500,
+   "seconds": 1834.086441040039
+  },
+  {
+   "night": 0,
+   "stage": "re-analysis",
+   "move": "viterbi",
+   "bits": 45757.28290890332,
+   "sentences": 2500,
+   "seconds": 1834.086441040039
+  }
+ ]
+}

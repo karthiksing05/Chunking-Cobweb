@@ -31,6 +31,7 @@ This document explains the whole framework: what is stored, how the grammar is f
 
 - **Concepts and chunks are two aspects of one representation.** "the dog" is a chunk, made of *the* and *dog*. It is also an instance of a concept, the things that can be the subject of *saw*. TRELLIS v2 records both aspects of every element and lets each organize its own hierarchy.
 - **Two hierarchies, each holding primitives and composites.** The *representation hierarchy* groups elements by behaviour. The *composition hierarchy* groups them by make-up. Single words and multi-word chunks live in the same trees. There are no separate trees for words, phrases or non-constituents. Both are load-bearing. Read straight off the unsupervised search's analyses, the grammar's generations break the target grammar 47–56% of the time on the TERM corpora; once the same analyses are consolidated into the two hierarchies and re-analysed, 0.1–4.3% ([section 10](#learning-from-sentences-alone)).
+- **A domain brings its context window and its relations.** What the representation hierarchy sees around an element depends on the data: the word on either side in a sentence, a star of rays and knight jumps on a chess board. What joins a chunk's parts depends on it too: order in a sentence, a direction and a distance on a board. Everything else is shared.
 - **The grammar is a cut through each hierarchy.** A cut is a set of concepts that partitions the elements. The cut through the representation hierarchy gives the categories (symbols); the cut through the composition hierarchy gives the chunk types (rule classes).
 - **One model for parsing, generation and learning.** The grammar is a normalized probabilistic grammar. The parser computes posteriors under it, generation samples from it, and its code lengths decide the cuts. There are no separate pools, filters or fallbacks.
 - **Description length replaces thresholds.** A category, a chunk type or a structure exists only if it shortens the description of the data, including the description of the grammar itself. "Minimize chunks while preserving performance" is the learning objective, not a heuristic.
@@ -266,7 +267,7 @@ Detailed tables: [`V2_DESIGN.md`](V2_DESIGN.md), `experiments/v2/results/{main,u
 
 ## 11. Beyond the synthetic grammars
 
-Nothing in the framework is specific to the paper's corpora. Three new domains test it: real English text, the structure of Chinese characters, and chess positions, where parts are joined by typed relations on a board rather than in a sequence.
+Nothing in the framework is specific to the paper's corpora. Four new domains test it: real English text (newspaper part-of-speech tags, and simple sentences from children's stories), the structure of Chinese characters, and chess positions, where parts are joined by typed relations on a board rather than in a sequence.
 
 ### Real text: the Penn Treebank
 
@@ -285,6 +286,42 @@ Nothing in the framework is specific to the paper's corpora. Three new domains t
 - **The grammar is a weaker sequence model than tag bigrams**, with or without supervision. Its ten or so categories over 32 tags make the strong independence assumptions of a small probabilistic grammar. The Dirichlet concentration is not the cause: the supervised grammar's training code prefers α = 0.01 to 0.001 on this data, but its held-out bits barely change.
 
 - **More data** (training on every other sentence of up to 15 or 20 tags, about 1,100 or 1,900 sentences; the same held-out sentences) gives more categories and chunk types (34 at 1,900 sentences) and slightly shorter held-out codes (29.6 bits per sentence), but no more linguist-like full trees (bracket omission 51–52%). A night grows from two minutes to about an hour.
+
+### Simple English: does the grammar generate coherent sentences?
+
+**Setup.** TinyStories (Eldan & Li 2023) are short stories written with the words a three- or four-year-old knows, made to test whether small models write coherent English (`trellis2/stories.py`). TRELLIS v2 learns from 2,500 of their sentences of three to five words over the 100 most frequent words, from the sentences alone; 500 are held out.
+
+There is no target grammar, so coherence is measured against the corpus. A generated sentence is *real* if it occurs word for word among the 497,000 sentences of TinyStories, and *new* if it is not a training sentence. The baselines are word bigram and trigram models trained on the same sentences.
+
+**What it learns.** 31 categories and 43 chunk types; 62% of training sentences are analysed as one whole tree. The categories are recognizably grammatical:
+
+- subjects (*tim, he, she, lily, the bird*);
+- subject plus copula (*tim was, she was*);
+- copulas (*was, is, felt*);
+- intensifiers (*very, so, not*);
+- predicate phrases (*very happy, not happy*).
+
+Held-out sentences are read as subject and predicate:
+
+```
+[[they do] [[not like] tom]]      [[i have] [[a new] toy]]      [[[they played] together] [all day]]
+```
+
+| 1,000 generated sentences | TRELLIS v2 | Word bigram | Word trigram |
+|---|---|---|---|
+| new | 78.3% | 57.6% | 22.8% |
+| real | 30.0% | 48.3% | 81.6% |
+| new and real | **8.3%** | 5.9% | 4.4% |
+| word triples found in TinyStories | 62.8% | 86.0% | 100% |
+| chunks inside the sentences found in TinyStories | 91.5% | – | – |
+| perceived again with the analysis it was generated from | 99.7% | – | – |
+
+- **Whole trees read as English, and they are new.** Generated sentences that come out as one tree are mostly good sentences, such as *ben was happy* and *tim is very happy*. More of TRELLIS v2's sentences are both new and real than either n-gram model's; those models mostly repeat training sentences.
+- **Parsing and generation agree.** Nearly every generated sentence is perceived again with the analysis it was generated from.
+- **Sentences left as chunks generate fragments.** The grammar draws top-level chunks independently, so the 38% of sentences analysed as a few chunks yield samples like *not · so*.
+- **Held-out code.** It is less compact than the n-gram models (17.1 bits per sentence against 13.0 for trigrams).
+
+Children's books from Project Gutenberg (Grimm; McGuffey readers, Aesop, Alice, Oz) were too sparse for this. Grimm's sentences use each of their words about ten times, and the grammar collapsed to three categories. With clauses instead of sentences there are 72 uses per word, and the chunks were sensible but the generations were strings of them.
 
 ### A domain beyond language: Chinese characters
 
@@ -349,6 +386,7 @@ Nothing in the framework is specific to the paper's corpora. Three new domains t
   - *Real text.* The representation hierarchy forms the categories of base phrases, and the composition hierarchy their chunk types (noun groups such as `DT NN`, verb groups such as `MD VB`).
   - *Characters.* The representation hierarchy forms positional classes of components, and the composition hierarchy chunk types such as `[⿰ 氵]` (Figure 13).
   - *Chess.* The star-shaped context window gives one category per kind of piece and one per chunk, and typed relations give castling and fianchetto chunks.
+  - *Simple English.* Categories of subjects, copulas, intensifiers and predicate phrases form from sentences alone, and generated whole trees are new, real sentences.
 - **Unsupervised structure is the open problem, for two different reasons.** On the paper's corpora the search builds complete analyses. On real text and on characters it stops at forests of local chunks, and a sequence of independent chunks generates poorly. Comparing codes shows why:
   - *Real text: the objective prefers the forests.* The learner's forest grammar describes the treebank sentences in fewer bits than the grammar of their gold trees, and the gap grows with data: 8–10% at 434 sentences, 14–15% at about 1,100, 18% at about 1,900. Every gold-derived analysis costs more than the learner's own forests, whether the gold trees are binarized to the right (15,763 bits at 434 sentences, against 14,160) or to the left (16,349), or cut down to forests of gold base phrases (16,120). Right-branching trees (14,421) also cost less than gold trees.
   - *What the two hierarchies record decides what can pay* (`experiments/v2/treebank_codes.py`, every sentence of the sample).

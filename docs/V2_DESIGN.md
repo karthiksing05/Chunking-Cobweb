@@ -14,6 +14,7 @@ Status: first implementation, October 2026, on branch `inside-outside`.
 2. Exactly two hierarchies, and each holds **both primitives and composites**: the **representation hierarchy** (how an element behaves) and the **composition hierarchy** (what it is made of). There are no extra trees (for example, for non-constituents). The two hierarchies are the essential core of v2 (stressed again by the user on 2026-10-04): the grammar's categories and chunk types are cuts through them, parsing and generation use that grammar, and learning replays experiences into them. Every change is stated as a change in what the two hierarchies record.
 3. Simplicity over patches. One probabilistic model does parsing, generation and description-length scoring, so generation samples from the very distribution the parser and the code lengths use. There are no pools, filters or fallbacks.
 4. The in-house Cobweb-MDL variant is not used (not ready). Concept formation is standard Cobweb (category utility). Description length decides only which level of each hierarchy acts as the grammar, and that code lives in `grammar.py` where a Cobweb-MDL variant could replace it.
+5. New data types and new fundamental relations are the focus (2026-10-04). The Penn Treebank is not a priority. On real English the test is whether the grammar generates coherent language, on simple language first. For chess, the context window is the user's star: the eight queen rays at any distance, plus the eight knight jumps.
 
 ## Architecture
 
@@ -315,7 +316,39 @@ The bigram row samples sequences from a maximum-likelihood token bigram trained 
 - **Starting categories read off the representation hierarchy do not help either.** Two variants were tried (2,000 characters, seed 13; the night itself reproduces 83,241 bits).
   - *Restart from the hierarchy's categories.* After the night, each token occurrence takes the category the representation hierarchy gives it, which sees the chunk context. The search restarts from flat sequences in those 31 categories. It reaches 83,244 bits in the plain code and 84,862 after consolidation, both worse than the night (79,740 and 83,241). The hierarchy can see a component's slot only where the analyses already hold the operator-plus-part chunks, and the night's analyses hold too few of them (4.2 chunks per character): a chicken-and-egg problem.
   - *Finer starts on the word-class merge path* (greedy search). Raw tokens reach 90,607 bits, 200 classes 87,487, 150 classes 83,309, 110 classes 80,679, and 82 classes 80,132. The most-merged partitions remain the best starts.
-- **Even the supervised model's categories leave the search 10% above the gold structures** (78,905 against 71,703 bits). So the gap is mostly in the search. The open move is a split: refine a category by its members' roles in the current analyses, and score the split together with the chunk moves it enables.
+- **Even the supervised model's categories leave the search 10% above the gold structures** (78,905 against 71,703 bits). So the gap is mostly in the search.
+- **Split moves, in two simple forms, do not open it either.** Both were alternated with the greedy chunk-and-merge search, each split scored exactly by the plain code. One splits a category's occurrences as the left or right part of a given chunk category; the other splits its top-level occurrences right after a given category. Two splits pay, 0.7% together (81,308 → 80,728 bits), and the search finds no new chunk after them (5.4 top-level chunks per character before and after). A component's slot depends on the operator several tokens back, and one category refined at a time does not reach it. Scoring each of the ten most promising splits by the code after a search helps a little: after eight rounds the search builds a few more chunks, and then no split pays (81,308 → 80,163 bits, 5.40 → 5.24 chunks per character). That is still above the night's own result (79,740) and far from the supervised categories (78,905, 1.4 chunks per character). The search sits in an optimum that single refinements barely move. What the supervised categories show is that a coordinated change of many categories at once can leave it, so the next attempt is a search over several moves at a time, or restarts from perturbed analyses.
+
+### Simple English: can the grammar generate coherent sentences?
+
+Code: `stories.py`, `experiments/v2/run_stories.py`. The question is whether a grammar learned from real sentences alone generates coherent ones, measured without a target grammar.
+
+- A generated sentence is **real** if it occurs, word for word, somewhere among the 497,000 sentences of TinyStories. It is **new** if it is not among the training sentences.
+- Coherence is also checked one level down: the share of generated word pairs and triples that occur in TinyStories, and the share of the multi-word chunks inside generated sentences that do.
+- **Consistency** is whether a generated sentence is perceived again (Viterbi) with the analysis it was generated from.
+
+**Children's books from Project Gutenberg were too sparse.**
+
+| Corpus (unsupervised, one night) | Sentences | Words | Uses per word | Result |
+|---|---|---|---|---|
+| Grimms' Fairy Tales: sentences of 3–10 words over the 500 most frequent words | 709 | 426 | about 10 | 3 categories, no whole sentence; held-out code worse than a word unigram (50.2 against 49.3 bits per sentence) |
+| McGuffey readers 1–5, two Aesop collections, Grimm, Alice, Oz: clauses of 3–8 words over 300 words | 4,375 | 299 | about 72 | 18 categories, 10% whole sentences; held-out 32.8 bits against a word bigram's 30.0; generations are strings of independent chunks |
+
+On the clause corpus, consolidation lengthened the code from the search's 142.7K to 158.1K bits. The cut through the representation hierarchy costs 143.7K, so the categories are not what lengthens it. The factored rule layer is: a rule class draws its two parts independently, and English agreement and selection make them dependent. A Markov top level and sentence templates were also tried over the search's analyses, and neither made the generations coherent. Pairs and triples of generated words stayed at about 46–55% and 4–9% found in training. The categories themselves were too coarse to generate from.
+
+**TinyStories** (Eldan & Li 2023) are short stories written with the words a three- or four-year-old knows, designed to test whether small models produce coherent English (CDLA-Sharing-1.0; the validation file, 4.4 million words, is enough). Its sentences of 3–5 words over its 100 most frequent words number 9,955. Examples: *lily was very happy*, *he wanted to help*, *tom and sam are sad*, *max wanted to help lily*. A single greedy search there analyses half of them as whole sentences (`[[tim [and sam]] [were sad]]`, `[she [was [not happy]]]`); with 250 words and 8-word sentences, it is 7%.
+
+| 2,500 TinyStories sentences of 3–5 words over 100 words (500 held out) | TRELLIS v2 | Word bigram | Word trigram |
+|---|---|---|---|
+| held-out bits per sentence | 17.1 | 13.2 | 13.0 |
+| generated sentences new | 78.3% | 57.6% | 22.8% |
+| generated sentences real | 30.0% | 48.3% | 81.6% |
+| generated sentences new and real | **8.3%** | 5.9% | 4.4% |
+| generated word triples found in TinyStories | 62.8% | 86.0% | 100% |
+| chunks inside generated sentences found in TinyStories | 91.5% | – | – |
+| generated sentences perceived with the analysis they were generated from | 99.7% | – | – |
+
+(`experiments/v2/results/stories_2500`.) The grammar has 31 categories and 43 chunk types, and 62% of training sentences are analysed as one tree. The categories are grammatical: subjects, subject plus copula, copulas, intensifiers, and predicate phrases. Whole generated trees are mostly good sentences, so more of TRELLIS v2's sentences are new and real than either n-gram model's. The 38% of sentences left as chunks generate fragments, because top-level chunks are drawn independently. Sentence-level structure that covers every sentence is the open step; it is the same missing piece as counting kings in chess.
 
 ### Chess: parts joined by typed relations
 
@@ -386,7 +419,7 @@ Folding a recurring top-level pair directly into an existing category (a chunk m
 | v2.1 ✓ | unsupervised learning from sentences: MDL objective, partial analyses, word classes, exact-scored beam search over chunk/merge moves from several starts |
 | v2.2 (in part) | learning by day and by night ✓ (perceive with the current grammar; consolidate at night from the stored analyses or a restart; the full code chooses among the best search results); split moves; attention-like long-range context |
 | v2.3 (in progress) | beyond the paper's corpora: Penn Treebank WSJ10 with gold tags ✓ (and larger training sets ✓; which descriptions make sentence structure pay ✓); Chinese characters ✓; a compiled Cobweb ✓. Open: starting categories that see structure (characters), finer positional concepts, α by description length; for real text, chunks categorized by their head and the total-probability code, with words at scale |
-| v2.4 | variable-arity templates, typed relations (two-dimensional composition as relations rather than tokens); chess |
+| v2.4 (in progress) | new data types and relations: a domain brings its own context window (the representation hierarchy's surface context) and its own typed relations (the composition hierarchy); chess positions with the star context and direction-and-distance relations ✓; simple English (TinyStories) for generated coherence; open: starting categories or split moves for characters, spatial relations for characters instead of operator tokens, variable arity |
 
 ## Reproducing
 
