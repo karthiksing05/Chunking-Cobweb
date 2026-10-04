@@ -3,9 +3,9 @@
 Status: first implementation, October 2026, on branch `inside-outside`.
 
 - Code: `src/trellis2/`
-- Tests: `tests/trellis2/` (33, including brute-force checks of the parser, exactness checks of the search, the compiled Cobweb against its Python reference, and the chess domain's star and scan code)
+- Tests: `tests/trellis2/` (37, including brute-force checks of the parser over whole trees and forests, exactness checks of the search, the compiled Cobweb against its Python reference, the chess domain's star, scan code and read context, and the relational characters' inside pass)
 - Experiments: `experiments/v2/`
-- Background: `reports/Trellis v2 inside outside literature review.md`
+- Background: [the literature behind v2](#background-the-literature-behind-v2), condensed from the October 2026 review (the full report and notes are in the git history, commit `fbe61901`)
 - **The framework explained end to end, with figures: [`FRAMEWORK.md`](FRAMEWORK.md)**
 
 ## Decisions taken with the user
@@ -133,9 +133,13 @@ The learner minimizes the bits needed to transmit the training sentences.
 
 ### Partial analyses
 
-A sentence may be a forest of top-level chunks: GRIDS-style partial parses, and the paper's "graceful failure". The top level has the simplest proper code, a symbol distribution plus a stop probability. Fully parsed sentences reduce exactly to the previous model.
+A sentence may be a forest of top-level chunks: GRIDS-style partial parses, and the paper's "graceful failure". The top level codes a sentence as **one tree or a forest of two or more pieces** (2026-10-04): a two-outcome row for which; the root's symbol from S when it is one tree; each piece's symbol from S<sub>piece</sub>, and after the second piece a stop-or-continue row, when it is a forest. The representation instance marks the difference too: the spine above a whole sentence's root records ROOT, and above a piece of a forest it records nothing (the chunk that would join the pieces is unknown).
 
-Inside-outside, Viterbi and sampling all handle forests, and brute-force tests cover them (`tests/trellis2/test_chart.py`).
+The first version had one symbol row for every top-level chunk and one stop row. On real text that made the start category hold whole sentences and leftover pieces alike (on 2,500 TinyStories sentences: 1,543 whole-sentence roots and 2,223 pieces, 919 of them single words such as *together*), so the grammar generated pieces as sentences. Under one row, telling the two apart costs as many bits in the symbol row as it saves in the rule rows, so description length never split the category. With two rows the split pays, and refitting the same analyses separated them exactly: held-out code 17.1 → 15.7 bits per sentence, and the sentences the grammar derives whole are 76% real instead of fragments ([Simple English](#simple-english-can-the-grammar-generate-coherent-sentences)). The ROOT marker alone did not split the category; the two-row code alone almost did (10 pieces stayed with the roots).
+
+When every sentence is one tree, the code is the previous one term for term (the mode row has the old stop row's counts; the piece rows are empty), so supervised results are unchanged; unsupervised synthetic runs match the previous ones in five of six conditions and are slightly shorter on LARGE (8,090 → 8,084 bits; 23.8 → 23.6 held-out bits per sentence). The structure search keeps its own unigram top level, which is the pressure towards chunks.
+
+Inside-outside, Viterbi and sampling all handle both modes, and brute-force tests cover them (`tests/trellis2/test_chart.py`). Generation can be conditioned on one tree (`generate(..., whole_only=True)`): the grammar's own sentences.
 
 ### Learning by day and by night
 
@@ -178,11 +182,11 @@ Two seeds, the v1 splits, 320 training sentences, compared with the supervised m
 | Condition | Train bits (unsup / gold trees) | Chunk types (unsup / gold trees) | Test bits/sentence (unsup / gold trees) | Gen. commission (unsup / gold trees) | Gen. commission in v2.1 | Brackets crossing no gold bracket |
 |---|---|---|---|---|---|---|
 | small | 3,251 / 3,251 | 3.0 / 3.0 | 9.5 / 9.5 | 0.1% / 0.1% | 0.1% | 75% |
-| med | **6,518 / 6,528** | 11.0 / 12.5 | 18.5 / 18.5 | 1.1% / 0.6% | 45.7% | 56% |
-| large | **8,031 / 8,356** | 16.0 / 18.5 | **23.6 / 24.0** | **9.2% / 14.5%** | 10.9% | 86% |
-| term_low | 5,312 / 5,284 | 13.0 / 12.0 | 15.3 / 15.3 | 0.4% / 0.1% | 25.2% | 53% |
+| med | **6,507 / 6,528** | 12.5 / 12.5 | 18.5 / 18.5 | 0.6% / 0.6% | 45.7% | 60% |
+| large | **8,029 / 8,356** | 14.5 / 18.5 | **23.5 / 24.0** | **9.0% / 14.5%** | 10.9% | 86% |
+| term_low | 5,311 / 5,284 | 12.0 / 12.0 | 15.3 / 15.3 | 0.4% / 0.1% | 25.2% | 53% |
 | term_med | **7,677 / 7,712** | 16.5 / 18.0 | 21.8 / 21.9 | **1.7% / 2.9%** | 40.9% | 47% |
-| term_high | **10,458 / 10,538** | 12.5 / 15.0 | 30.7 / 30.8 | **0.8% / 2.2%** | 62.4% | 48% |
+| term_high | **10,458 / 10,538** | 12.5 / 15.0 | 30.7 / 30.8 | **0.9% / 2.2%** | 62.4% | 48% |
 
 From sentences alone, the learner now matches the supervised model on every condition. Its code is within 0.6% of the gold-tree grammar's (shorter on MED, LARGE, TERM_MED and TERM_HIGH), and its commission is at most half a point higher (lower on three conditions). Novelty is 91–100% (SMALL 54%: its language is small).
 
@@ -297,20 +301,25 @@ Code: `experiments/v2/treebank_codes.py`; output: `experiments/v2/results/treeba
 
 ### Chinese characters (IDS)
 
-Code: `characters.py`, `experiments/v2/run_characters.py`. CJKVI IDS (under `data/ids`, not committed). Full decompositions into 270 atomic components and 12 operators, as prefix sequences; 13,297 characters of at most 11 tokens; 2,000 learned and 500 held out (seed 13). The gold tree groups an operator with its first part. Generated characters are checked for well-formedness, attested positions (operator, slot, component), and reality (held-out real characters rediscovered).
+Code: `characters.py`, `experiments/v2/run_characters.py`. CJKVI IDS (under `data/ids`, not committed). Full decompositions into 270 atomic components and 12 operators; 13,297 characters of at most 11 tokens; 2,000 learned and 500 held out (seed 13). A character is learned in one of two forms: as its prefix sequence with a gold tree that groups an operator with its first part (operators as tokens), or as a relational tree whose relations are the operators (below). Generated characters are checked for well-formedness, attested positions (operator, slot, component), and reality (held-out real characters rediscovered).
 
 | Model (2,000 characters, seed 13) | Held-out bits/character | Structure omission | Well formed | Positions attested | Rediscovered real | Novel and valid | Symbols | Chunk types |
 |---|---|---|---|---|---|---|---|---|
 | unigram tokens | 44.1 | – | – | – | – | – | – | – |
 | bigram tokens | 35.0 | – | 22% | 20% | 3.9% | 13% | – | – |
-| TRELLIS v2, IDS structures | **31.9** | **0.0%** | **96%** | 52% | 2.5% | **49%** | 36 | 132 |
-| TRELLIS v2, sequences alone | 37.2 | 28.2% | 7% | 4% | 0.7% | 3% | 35 | 53 |
+| TRELLIS v2, IDS structures, operators as relations | **30.3** | – (given) | **100%** | **84%** | **5.3%** | **77%** | 21 | 280 |
+| TRELLIS v2, IDS structures, operators as tokens | 31.9 | 0.0% | 96% | 52% | 2.5% | 49% | 36 | 132 |
+| TRELLIS v2, sequences alone | 36.8 | 31.7% | 8% | 6% | 0.7% | 5% | 41 | 67 |
 
 The bigram row samples sequences from a maximum-likelihood token bigram trained on the same characters.
 
-- From the structures, the representation hierarchy forms positional concepts: left-side radicals (92% on the left), top and bottom components, enclosing frames, overlaid strokes; chunk types include a radical in position (`[⿰ 氵]`).
-- The supervised grammar compresses better than token bigrams (31.9 vs 35.0 bits per character), parses every held-out structure, and generates well-formed characters 96% of the time. Its positional errors come from one large category that mixes right-side and bottom components.
-- **Here the search falls short.** The gold structures give a shorter code than the unsupervised learner's analyses (73,662 against 83,241 bits, 11.5% shorter), unlike the treebank, and also in the plain code the search minimizes (71,703 against 79,740). An unsupervised night on 2,000 characters takes about an hour.
+**Operators as relations** (2026-10-04). Written as tokens, an operator is a word of the sequence, and whether a part goes on the right or at the bottom is decided by an operator two or more tokens back, out of reach of the part's description. With operators as tokens, one large category mixed right-side and bottom components, and only half of the generated characters placed every component where a real character does. Read as a relational tree, a character is parts joined by relations, as pieces are on a board: 湖 = [氵 ⿰ [古 ⿰ 月]] (`CharacterMemory`). The operator is the relation of a composite and an entry of the grammar's relation table, and the representation hierarchy sees each part's **slot**: the operator that places it and which part it is (`⿰:0`, a left part). A three-part operator is written as two joins of its two-part counterpart, which lays the parts out the same way (⿲ A B C = ⿰ A ⿰ B C), so every generated tree is a well-formed character; real characters are compared in the same form. The held-out code is the inside pass over each known structure (`structure_log_prob`). It is comparable with the token models' codes because a prefix sequence and its structure determine each other.
+
+- **Categories become classes of position.** Top components (100% on top), bottom components (88%), left-side radicals (氵 木 亻 扌 言, 100%), right-side components (100%), overlaid strokes, upper-left frames (广 尸 厂 疒, 99%), and enclosed parts (100%).
+- **Coherence.** 84% of generated characters place every component where some real character places it (52% with operators as tokens), every one is well formed, 5.3% are held-out real characters rediscovered, and 77% are novel and valid. The code is also shorter: 30.3 bits per held-out character against 31.9.
+- **What the representation hierarchy should see** (each variant re-learned on the same 2,000 characters): slot, first and last component, and kind give 83.8% attested and 30.3 bits. Adding the nearest component across the join lowers attested placement to 75.1% (categories drift toward what stands beside a part); adding the parent's slot lowers it to 34.4% (14 categories that mix positions). Slot and kind alone give 84.0% and 31.0 bits; slot, first and last 82.2% and 30.7 bits.
+- **The remaining misplacements** come from the categories of composite parts (two components already joined), which mix slots.
+- **Here the search falls short.** The gold structures give a shorter code than the unsupervised learner's analyses (73,662 against 82,159 bits, 10.3% shorter; 83,241 with the previous top-level code, under which the diagnostics below were run), unlike the treebank, and also in the plain code the search minimizes (71,703 against 79,740). An unsupervised night on 2,000 characters takes about an hour. (With operators as relations, the same structures take 69,014 bits.)
 - **The starting categories are the bottleneck, not the search width.** A beam of 16 instead of 4 reaches 79,207 bits (3.7 chunks per character). From the supervised model's 26 token categories the same search builds nearly complete analyses (1.4 chunks per character, 78,905 bits). Bigram word classes cannot see which slot a component fills.
 - **Sleeping again does not help.** A second, third and fourth night on the same data, with the continuation of the stored analyses always evaluated, change the code by at most 0.2% (500 characters: 23,519 → 23,477 bits) and leave MED and WSJ10 unchanged. The continuation hits the same wall as the restarts.
 - **Starting categories read off the representation hierarchy do not help either.** Two variants were tried (2,000 characters, seed 13; the night itself reproduces 83,241 bits).
@@ -323,7 +332,7 @@ The bigram row samples sequences from a maximum-likelihood token bigram trained 
 
 Code: `stories.py`, `experiments/v2/run_stories.py`. The question is whether a grammar learned from real sentences alone generates coherent ones, measured without a target grammar.
 
-- A generated sentence is **real** if it occurs, word for word, somewhere among the 497,000 sentences of TinyStories. It is **new** if it is not among the training sentences.
+- A generated sentence is **real** if it occurs, word for word, somewhere among the 497,000 sentences of TinyStories. It is **new** if it is not among the training sentences. Both are also taken among generated sentences of the training sentences' length (3–5 words): a single word such as *mom* or *together* is new and real without being a coherent sentence. (The first report of these results missed this: 53 of TRELLIS v2's 83 "new and real" sentences out of 1,000 were single words, and its lead over the n-gram models disappeared within the training length.)
 - Coherence is also checked one level down: the share of generated word pairs and triples that occur in TinyStories, and the share of the multi-word chunks inside generated sentences that do.
 - **Consistency** is whether a generated sentence is perceived again (Viterbi) with the analysis it was generated from.
 
@@ -338,17 +347,20 @@ On the clause corpus, consolidation lengthened the code from the search's 142.7K
 
 **TinyStories** (Eldan & Li 2023) are short stories written with the words a three- or four-year-old knows, designed to test whether small models produce coherent English (CDLA-Sharing-1.0; the validation file, 4.4 million words, is enough). Its sentences of 3–5 words over its 100 most frequent words number 9,955. Examples: *lily was very happy*, *he wanted to help*, *tom and sam are sad*, *max wanted to help lily*. A single greedy search there analyses half of them as whole sentences (`[[tim [and sam]] [were sad]]`, `[she [was [not happy]]]`); with 250 words and 8-word sentences, it is 7%.
 
-| 2,500 TinyStories sentences of 3–5 words over 100 words (500 held out) | TRELLIS v2 | Word bigram | Word trigram |
-|---|---|---|---|
-| held-out bits per sentence | 17.1 | 13.2 | 13.0 |
-| generated sentences new | 78.3% | 57.6% | 22.8% |
-| generated sentences real | 30.0% | 48.3% | 81.6% |
-| generated sentences new and real | **8.3%** | 5.9% | 4.4% |
-| generated word triples found in TinyStories | 62.8% | 86.0% | 100% |
-| chunks inside generated sentences found in TinyStories | 91.5% | – | – |
-| generated sentences perceived with the analysis they were generated from | 99.7% | – | – |
+**One tree or a forest of pieces** (2026-10-04; [Partial analyses](#partial-analyses)). The first grammar coded every top-level chunk from one row, so one start category held whole sentences and the pieces of forests alike, and 17% of its samples were single words. With whole sentences and pieces coded apart, and ROOT marked only above a whole sentence's root:
 
-(`experiments/v2/results/stories_2500`.) The grammar has 31 categories and 43 chunk types, and 62% of training sentences are analysed as one tree. The categories are grammatical: subjects, subject plus copula, copulas, intensifiers, and predicate phrases. Whole generated trees are mostly good sentences, so more of TRELLIS v2's sentences are new and real than either n-gram model's. The 38% of sentences left as chunks generate fragments, because top-level chunks are drawn independently. Sentence-level structure that covers every sentence is the open step; it is the same missing piece as counting kings in chess.
+| 2,500 TinyStories sentences of 3–5 words over 100 words (500 held out; `results/stories_2500`) | TRELLIS v2, its own sentences | TRELLIS v2, all samples | Word bigram | Word trigram | Before: one top-level row (all samples) |
+|---|---|---|---|---|---|
+| held-out bits per sentence | 16.0 | 16.0 | 13.2 | 13.0 | 17.1 |
+| generated sentences 3–5 words long | **94%** | 85% | 71% | 93% | 47% |
+| real, among those of 3–5 words | 75% | 55% | 63% | 86% | 50% |
+| new and real, among those of 3–5 words | 4.6% | 4.2% | 4.0% | 3.4% | 4.2% |
+| new | 33% | 57% | 58% | 23% | 78% |
+| generated word triples found in TinyStories | 85% | 54% | 84% | 100% | 63% |
+| chunks inside generated sentences found in TinyStories | 92% | 88% | – | – | 92% |
+| perceived with the analysis they were generated from | 100% | 99% | – | – | 99.7% |
+
+The grammar has 34 categories and 50 chunk types, and 65% of training sentences are analysed as one tree (62% before). The categories are grammatical: subjects, subject plus copula, copulas and verbs, predicate phrases, whole sentences, and the pieces of forests. The grammar's own sentences (those it derives as one tree, `generate(..., whole_only=True)`) are English of the training length, real more often than a bigram's, about as often new and real as either n-gram model's; a trigram's are real more often because it mostly repeats its training sentences. All samples, forests included, still generate strings of pieces: a forest's pieces are drawn independently, and coding them in their context, as the chess read is, is the next step. Two words of context on each side instead of one (refit on the same analyses) left the grammar's own sentences unchanged (75% real within the length) and lengthened the training code by 292 bits.
 
 ### Chess: parts joined by typed relations
 
@@ -359,7 +371,7 @@ Code: `chess.py`, `experiments/v2/run_chess.py`. Middlegame positions from the L
 - *Elements.* A primitive is a piece; its token is its colour and kind. A composite joins two elements whose anchors see each other, and its anchor is its first part's anchor.
 - *Representation hierarchy.* An element's context window is the star: the first piece along each of the eight queen rays, at any distance, and the piece on each of the eight knight squares. The representation instance also holds the anchor piece (whole, and by colour and kind), the element's kind, its square, and the chunk context, as for sentences. The star is written as two bags, rays and jumps, whose values name their direction (`N:wP`).
 - *Composition hierarchy.* A composition is (category, relation, category), where the relation is the star direction and distance (`N1`, `E3`, `NNE`). `grammar.py` gained a relation table per rule class (`Rel`). Sequences have a single relation, and their codes and grammars are bit-identical to before.
-- *Top level.* A board is read square by square (a1 … h8). Every square not covered by an earlier chunk is coded as empty or as the anchor of a top-level element, from one Dirichlet row per square. So that a chunk is decoded at its first square, relations point forward in the scan: the N, NE, NW and E rays and the four upward knight jumps, 32 relations in all.
+- *Top level.* A board is read square by square (a1 … h8). Every square not covered by an earlier chunk is coded as empty or as the anchor of a top-level element, from one Dirichlet row per square and context (below). So that a chunk is decoded at its first square, relations point forward in the scan: the N, NE, NW and E rays and the four upward knight jumps, 32 relations in all.
 
 **Two first attempts failed.**
 
@@ -384,8 +396,30 @@ Code: `chess.py`, `experiments/v2/run_chess.py`. Middlegame positions from the L
 - **The chunks are castling and fianchetto structures.** King and rook appear at every stage of castling, with the distance as part of the relation. Castled on either wing, the rook is beside the king or has moved one square on. Uncastled, the squares between them are cleared. Bishops appear with the pawn that blocks or supports them.
 - **Categories.** The representation hierarchy forms one category per kind of piece and one per chunk type (17 symbols, 18 rule classes).
 - **Generation.** 94.7% of the chunks in 1,000 generated positions occur, piece for piece and square for square, in some held-out game. 5.8% of samples are rejected because a chunk would leave the board or land on an occupied square.
-- **Whole positions have no global sense.** 35% of generated positions have one king of each colour, the same as when each square is drawn on its own (37%). A square-by-square code has nothing that counts kings.
+- **Whole positions had no global sense.** 35% of generated positions had one king of each colour, the same as when each square is drawn on its own (37%), and 4% passed every check below. A square-by-square code has nothing that counts kings.
 - **Compression.** Chunks shorten the held-out code by 1.2%. At move 15, where pieces stand is most of what can be compressed, and a chunk pays only where pieces depend on each other beyond their squares.
+
+(The table above and the chunk types are the read without context: `experiments/v2/results/chess_plain`.)
+
+**The read learns its context** (2026-10-04; `select_context` in `chess.py`). A square is read in the light of the pieces on the squares before it. The context is a set of features "at least *m* pieces of kind *k* stand on earlier squares", added greedily while one shortens the code of the training positions, each square read on its own given the features. The search, the board's memory (its scan code) and the sampler all index the read by square and features, so parsing, the code and generation share one top level. Seven features pay for themselves on 4,000 positions: a white king, a black king, at least one and at least two rooks of each colour, and at least seven black pawns.
+
+- *Clusters of contexts did not work.* A representation hierarchy over "what has been placed so far" (a bag of pieces, or one count per kind of piece), cut by description length, compressed as well (held out 79.9–80.3 bits) but left one king of each colour at 46–54%: Cobweb groups contexts by how far the read has got, not by what they predict. Features chosen by what they save find "a king is already placed" first.
+- *A stricter check.* Besides one king each, no pawn on a back rank, at most eight pawns and at most sixteen pieces, a generated position now also has to have no more of any kind of piece than a side starts with (one queen, two rooks, …); every one of the 8,560 real positions passes all five.
+
+| 4,000 positions learned, 500 held out (`results/chess`) | Read without context | With the learned context |
+|---|---|---|
+| held-out bits per position | 81.74 | **76.47** |
+| one king each | 35.2% | **96.3%** |
+| at most 8 pawns each / at most 16 pieces each | 72.5% / 79.1% | 82.7% / 84.8% |
+| no more of any kind than at the start | 7.2% | 22.9% |
+| passes every check | 4.1% | **22.9%** |
+| generated chunks found, piece for piece, in a held-out game | 94.7% | 97.0% |
+| chunk types | 11 | 3 (fianchettos) |
+| model bits | 7,464 | 17,591 |
+
+- **Context and chunks compete.** With the context, castling no longer pays as a chunk: "a rook is already on the board" predicts where the king stands, so the context does globally what the castling chunks did locally. Reading the context first and chunking afterwards gives the shorter code: chunking first and choosing the context on the chunked analyses ends at 80.40 bits per training position and 77.37 held out, against 79.64 and 76.47.
+- **What still goes wrong is the number of minor pieces and queens.** No feature about queens, bishops or knights pays at α = 0.001.
+- **The concentration matters.** Choosing α by description length (the shortest code of the training positions, each table at the same α) favours α = 0.01 (`run_chess.py --alpha 0.01`, `results/chess_alpha01`): the queens' features then pay, held-out 75.27 bits per position, 37.2% of generated positions pass every check, but no chunk pays at all. One concentration prices both the read's rows (13 outcomes) and the chunk rows (thousands of possible compositions); a concentration per kind of table, each chosen by description length, is the next step.
 
 ### Tried and dropped: an attach move
 
@@ -411,6 +445,126 @@ Folding a recurring top-level pair directly into an existing category (a chunk m
   - Learning alternates day and night. By day each experience is perceived with the current grammar and stored. By night consolidation searches for shorter analyses, re-describes the experiences with current concepts and replays them.
   - MDL picks the level of generalization.
 
+## Hypotheses: playing chess from the two hierarchies
+
+The chess grammar describes positions; playing needs a choice of move. The aim is a player whose built-in knowledge is only the rules of movement and one or two "stupid" rules, whose judgement comes from the two hierarchies, and whose model is measured in bits and stays small next to engines and networks. None of this is built yet.
+
+**What the representation already offers.** A piece's star holds the first piece along each queen ray and on each knight square: the pieces it attacks or defends, and the pieces that could attack it along a line or a jump. The read context counts what is already on the board (the features that pay include "a white king is already placed"). The chunk types are king shelters and fianchettos, two of the stereotyped patterns in Chase & Simon's (1973) recall data; pawn chains, the most frequent there, are not yet found.
+
+**Hypotheses, each with its test.**
+
+1. **Typical positions are good positions.** Among the legal moves, play the one after which the position has the shortest code under the grammar. Expected to choose quiet moves well (castling, development, fianchettos) and to be blind to tactics. Test: agreement with the move played in the Lichess games (the PGN already holds the move after each position) by rating band, against a random legal move and against the same rule with squares read on their own. The grammar must then learn positions with either side to move.
+2. **A move is a composition.** In the composition hierarchy a move is a composite: the moving piece's category, the move relation (a direction and distance, or a knight jump, the relations the board already has) and what stands on the target square. Its rule class is conditioned on the moving piece's category in the representation hierarchy, which sees the piece in its star. This is the pattern-to-move association of CHUMP (Gobet & Jansen 1994) inside the two hierarchies, with no third net. Learned from (position, move) pairs; play the legal move with the shortest code. Test: move agreement, bits per move, and the Lichess puzzles (CC0) by theme and rating.
+3. **Attack and defence are relations.** With "attacks" and "defends" as relation types alongside direction and distance (both read off the star and the pieces' moves), a pawn chain is a run of defences and a pin is a chunk of two parts along one ray. Test: whether pawn chains and pins appear among the chunk types, and whether move agreement improves on tactical puzzles.
+4. **One stupid rule: do not hang pieces.** From the star alone: a piece is en prise if an enemy piece of lower value sees it along a ray or jump it moves on and nothing defends it. Filter such moves before applying 1 or 2. Test: puzzle solve rate, and games against a random mover and a one-ply material player.
+5. **Space.** The grammar's size is its model bits, reported by every run. Compare agreement and strength against stored size: CHREST's discrimination net of 300,000 nodes for master-level recall (Gobet & Simon 2000) and a 270-million-parameter transformer that plays at grandmaster level without search (Ruoss et al. 2024) bracket the range. A Cobweb hierarchy can hold far more counts than the grammar read off it, so both sizes are reported.
+
+**Measures.** Move agreement (top 1 and top 3) by rating band; bits per move; puzzles solved by theme and rating; results against a random mover and a one-ply material player; size in bits and in stored counts.
+
+**A first test of hypothesis 1** (`experiments/v2/run_chess_play.py`; the 500 held-out positions, White to move after ply 30, 37.7 legal moves on average):
+
+| Rule | Picks the move played | Among its top 3 |
+|---|---|---|
+| a random legal move | 3.2% | 9.3% |
+| capture the most valuable piece, else a random move | 19.4% | – |
+| shortest code: chunks and the read's context | 9.0% | 21.8% |
+| shortest code: the read's context, no chunks | 10.0% | 21.4% |
+| shortest code: each square on its own | 8.8% | 22.2% |
+| a capture that does not lose material, else the shortest code | 20.1% | – |
+
+Typicality triples the agreement of a random move, but chunks and the read's context barely change it: the codes of two candidate positions differ mostly by where the moved piece lands, which squares alone already price. One stupid capture rule does better on its own, because many moves at this point of a game are recaptures, which a position's code cannot see; together the two reach 20.1%. Seeing tactics is the job of hypotheses 2–4.
+
+## Background: the literature behind v2
+
+This section condenses the October 2026 literature review that preceded v2. The full report and its seven research notes (about 750 KB) are kept in the git history, commit `fbe61901` (`reports/` and `research_notes/`). Other systems' results are quoted in their own measures; v2's are omission and commission. The review's first recommendation, re-scoping the v1-era rules, became decision 1.
+
+| The review recommended | In v2 |
+|---|---|
+| Inside-outside posteriors and minimum-risk decoding | Yes |
+| Chart items scored directly by Cobweb, with a temperature | No: the chart runs over the grammar read off the cuts |
+| Constituent-versus-distituent odds from extra trees | No (decision 2) |
+| Chunk context at several granularities, from the outside pass | Partly: two granularities and a depth-2 spine, read from stored analyses |
+| Prequential description length | Yes: the Dirichlet-multinomial code of the grammar's tables |
+| A normalized generator, so that code length sees commission | Yes (decision 3) |
+| Per-chunk acceptance tests, a decaying frontier, probation | No: exact global search over chunk and merge moves |
+| Masked chunk prediction as the training regime | No |
+| Typed relations, with slot order supplied by the domain | Yes: chess (direction and distance) and characters (each IDS operator is the relation joining two parts) |
+| Language-level measures first; bracket agreement and a non-crossing check as diagnostics | Yes |
+
+### Parsing with a chart
+
+Inside-outside gives each span the weight of all ways to build it and of all ways the rest of the sentence can surround it; their normalized product is the posterior that the span is a chunk (Baker 1979; Lari & Young 1990). Minimum-risk decoding picks the tree with the most expected correct spans. Each decoder wins on the measure it optimizes (Goodman 1996), and on the WSJ, max-rule-product decoding beat the best single derivation by 1.7 points of bracket agreement (Petrov & Klein 2007). What spans are scored by matters more than how the chart is searched: trained on raw text, inside-outside reached 37% bracketing accuracy against 90% with brackets (Pereira & Schabes 1992), and CCM succeeded by scoring each span's yield and context separately for constituents and non-constituents, or distituents (Klein & Manning 2002).
+
+**v2.** Inside-outside over the factored grammar gives μ(i, j, A), the chunk's strength, in place of v1's recognition threshold. The minimum-risk tree is the parse; perception and unsupervised learning use the Viterbi analysis, which is also the shortest-code analysis. Spans with μ > 0.5 never cross and the chart exposes them, but learning does not use them yet. The rule tables have the low-rank form of tensor-decomposed PCFGs (Yang et al. 2021), which keeps each span at O(n·M). Not built: the review's chart of Cobweb-scored items, its distituent trees (an over-general grammar pays in code length instead), coarse-to-fine pruning, and a greedy parser trained against the chart.
+
+### What a chunk's context should be
+
+In Clark's syntactic concept lattice a category is a closed pair of strings and contexts, and composing two categories concatenates their strings and then closes the result through its contexts (Clark 2010): composition proposes, context categorizes. DIORA computes a span's outside from its parent's outside and its sibling's inside, which unrolls to a spine of sibling chunks (Drozdov et al. 2019). HVM defines a variable as the chunks that share preceding and succeeding chunks, and gets this chunk context by parsing first and counting afterwards (Wu, Thalmann et al. 2025). Abstraction should add to identity, not replace it: Cobweb context coded as leaf concepts did little better than chance, while whole ancestor paths did best (MacLellan et al. 2022).
+
+**v2.** The representation instance holds the neighbouring tokens, the first and last tokens, the element's kind, its children's categories and a depth-2 spine, with chunk attributes written at two granularities (the symbol and a finer node). The spine is read from the stored analyses, and consolidation iterates until the symbols are stable, much as in MacLellan et al.'s multi-pass labelling. Chunk context reaches the parser only through the categories it forms, so the grammar stays context-free and inside-outside stays exact. The spine took MED generation commission from 40% to 8% and LARGE from 46% to 17%; the second granularity took MED from 20% ± 17 to 8% ± 1. Tried and dropped: the element's own composition concept in its representation instance (LARGE commission 27% ± 14) and whole-sentence context bags. Not tried: context from the outside pass, four-level references, seam attributes, and a third hierarchy for long-range dependencies.
+
+### Learning a grammar by description length
+
+SNPR learned grammars by hierarchical chunking plus disjunctive categories under a compression measure (Wolff 1982). GRIDS rebuilt it with create and merge operators, a description-length bias and a beam of three, defined errors of omission and commission, and named an incremental version as the next step (Langley & Stromsten 2000). Bayesian model merging put both operators under one posterior and found that a new chunk often pays only after several merges, so best-first search fails (Stolcke & Omohundro 1994). Heuristics should propose and description length decide (Goldsmith 2001). Brown clustering merges word classes by the mutual information of adjacent classes (Brown et al. 1992), but grouping by mutual information alone prefers [V P] to [P N] (de Marcken 1995).
+
+**v2.** Each night's structure search is GRIDS, SNPR and model merging under one probabilistic code: global chunk (B, C) and merge (A, A′) moves, scored exactly from cached Dirichlet-multinomial rows, with a beam of 4 and Stolcke's lookahead. It starts from the last 12 partitions on the merge path of Brown clustering read as description length, and after the first night also from the stored analyses. Symbols come from a cut search followed by model merging. Re-analysis is hard (Viterbi) EM, which beat soft re-estimation for unsupervised dependency induction (Spitkovsky et al. 2010), kept only if the total code shrinks. There are no thresholds: exact scores of global moves replace the review's per-chunk tests (a compression gain with a mutual-information floor, significance margins, probation, and a decaying frontier as in online adaptor grammars; Zhai et al. 2014). An attach move was tried and dropped (MED 6,539 → 8,469 bits). One departure from the review: it read v1's history as showing that gains come from representation, never from search, but for unsupervised v2 the objective was right and the search was the bottleneck (over 201 searches, code length and commission rank-correlate at 0.71–0.98 per condition).
+
+### Information-theoretic foundations
+
+For multinomials with Dirichlet priors the prequential code, which charges each item its predictive probability given the past, equals the Bayesian marginal likelihood and does not depend on order (Grünwald & Roos 2019). Description length sees commission from positive data only if the code is the distribution that generates. A v1-era two-part MDL selection (met6) cut categories from 16 to 5 while generation commission rose from 18% to 38%; the review traced this to a pool-and-filter generator that defined no coded distribution. The structure function picks the best model within a class whether or not the true model is in it (Vereshchagin & Vitányi 2004), and nothing in a code prefers one of two equally compressive binarizations. Bits-back coding charges a sentence its total probability instead of the cost of naming one tree (Hinton & van Camp 1993).
+
+**v2.** Every grammar table is coded this way (α = 0.001), the grammar's size with Elias codes, and model bits are reported apart from data bits. One normalized model parses, generates and sets code lengths (decision 3). Category utility still forms the concepts; description length chooses the cuts, starting from the exact code-optimal cut found by a bottom-up dynamic program, and merges symbols (decision 4). The tie between binarizations shows up: with gold word classes, the MED search finds a grammar shorter than the gold one, with 0.0% commission, that shares 19% of the gold brackets, so bracket agreement is a diagnostic. Held-out bits use total probability; learning still charges derivations. Not used: the review's running test-then-train score over Cobweb's own counts, and a tempered likelihood against misspecification (Grünwald & van Ommen 2017).
+
+### Neural hierarchical chunking, the contrast
+
+Neural chunkers such as H-Net set boundaries anew for each input, where adjacent states differ (Hwang et al. 2025); across the systems reviewed, two or three levels of 3–6× compression per level were the useful range. None keeps a reusable chunk inventory, and chunk structure that the objective does not reward fades during training (Wu, Deshmukh et al. 2025). Diffusion models learn PCFG-like data by clustering features with similar contexts, one level at a time, with deeper levels needing more data (Favero et al. 2025).
+
+**v2.** Chunk types and categories are cuts through stored hierarchies, reused across inputs and learned without gradients, and description length rather than a target ratio sets how many there are. Masked chunk prediction and entropy-based boundaries were not taken. (The review also noted that the acs-26 `main.bib` entry `diffusion-grammar` gives arXiv:2502.12089, Favero et al., a title that matches no paper.)
+
+### Domains beyond language
+
+Langley's essay and the TRELLIS paper name chess as the first target beyond strings and call for relations beyond "before" (Langley 2025; Singaravadivelan & Langley 2026). Chess memory research scores recall by errors of omission and commission: a master recalled 7.7 chunks of 2.5 pieces on average, mostly pawn chains and castled kings (Chase & Simon 1973), and the CHREST model fits human omissions but not commissions (Gobet & Simon 2000). Ideographic Description Sequences give gold, relation-labelled trees for Chinese characters, whose radicals are position-specific (Taft et al. 1999). Penn Treebank scores shift by more than 20 points with the protocol (Li et al. 2020); WSJ10 with gold tags is the standard short-sentence track (Klein & Manning 2002).
+
+**v2.** Each domain brings its context window and its relations. In chess the representation hierarchy sees the user's star (queen rays and knight jumps), the composition hierarchy records a direction-and-distance relation, chunks join only elements whose anchors see each other, and a square-by-square scan supplies the order; the chunk types found are castling and fianchetto structures. Characters are relational trees whose relations are the IDS operators, a part's slot is part of what the representation hierarchy sees, and the hierarchy forms positional radical classes (left, right, top, bottom); an attested-position check measures commission. Real text uses WSJ10 with gold tags on NLTK's sample, and TinyStories (Eldan & Li 2023), added after the review. Not yet: chess recall against Gobet & Simon's tables, attack and defence relations, chunks with two separate parts (pins), human-rated pseudocharacters, the full-WSJ protocol (decision 5), music and plans.
+
+### References (background)
+
+- Baker (1979). Trainable grammars for speech recognition. *Speech Communication Papers, 97th Meeting of the Acoustical Society of America.*
+- Brown et al. (1992). Class-based n-gram models of natural language. *Computational Linguistics* 18(4).
+- Chase & Simon (1973). Perception in chess. *Cognitive Psychology* 4(1).
+- Clark (2010). Learning context free grammars with the syntactic concept lattice. *ICGI.*
+- de Marcken (1995). On the unsupervised induction of phrase-structure grammars. *Third Workshop on Very Large Corpora.*
+- Drozdov et al. (2019). Unsupervised latent tree induction with deep inside-outside recursive autoencoders. *NAACL.*
+- Eldan & Li (2023). TinyStories: How small can language models be and still speak coherent English? arXiv:2305.07759.
+- Favero et al. (2025). How compositional generalization and creativity improve as diffusion models are trained. *ICML.*
+- Gobet & Jansen (1994). Towards a chess program based on a model of human memory. *Advances in Computer Chess 7*, University of Limburg.
+- Gobet & Simon (2000). Five seconds or sixty? Presentation time in expert memory. *Cognitive Science* 24(4).
+- Goldsmith (2001). Unsupervised learning of the morphology of a natural language. *Computational Linguistics* 27(2).
+- Goodman (1996). Parsing algorithms and metrics. *ACL.*
+- Grünwald & Roos (2019). Minimum description length revisited. *International Journal of Mathematics for Industry* 11(1).
+- Grünwald & van Ommen (2017). Inconsistency of Bayesian inference for misspecified linear models, and a proposal for repairing it. *Bayesian Analysis* 12(4).
+- Hinton & van Camp (1993). Keeping the neural networks simple by minimizing the description length of the weights. *COLT.*
+- Hwang, Wang & Gu (2025). Dynamic chunking for end-to-end hierarchical sequence modeling. arXiv:2507.07955 (*ICLR* 2026).
+- Klein & Manning (2002). A generative constituent-context model for improved grammar induction. *ACL.*
+- Langley (2025). Concepts and chunks in cognitive systems. *Advances in Cognitive Systems* 11.
+- Langley & Stromsten (2000). Learning context-free grammars with a simplicity bias. *ECML.*
+- Lari & Young (1990). The estimation of stochastic context-free grammars using the inside-outside algorithm. *Computer Speech and Language* 4(1).
+- Li et al. (2020). An empirical comparison of unsupervised constituency parsing methods. *ACL.*
+- MacLellan, Matsakis & Langley (2022). Efficient induction of language models via probabilistic concept formation. *Advances in Cognitive Systems*; arXiv:2212.11937.
+- Pereira & Schabes (1992). Inside-outside reestimation from partially bracketed corpora. *ACL.*
+- Petrov & Klein (2007). Improved inference for unlexicalized parsing. *NAACL-HLT.*
+- Ruoss et al. (2024). Amortized planning with large-scale transformers: A case study on chess (first circulated as "Grandmaster-level chess without search"). *NeurIPS*; arXiv:2402.04494.
+- Singaravadivelan & Langley (2026). A unified account of concepts and chunks: Extending Cobweb from categorization to composition. *Advances in Cognitive Systems*; arXiv:2609.30414.
+- Spitkovsky et al. (2010). Viterbi training improves unsupervised dependency parsing. *CoNLL.*
+- Stolcke & Omohundro (1994). Inducing probabilistic grammars by Bayesian model merging. *ICGI.*
+- Taft, Zhu & Peng (1999). Positional specificity of radicals in Chinese character recognition. *Journal of Memory and Language* 40(4).
+- Vereshchagin & Vitányi (2004). Kolmogorov's structure functions and model selection. *IEEE Transactions on Information Theory* 50(12).
+- Wolff (1982). Language acquisition, data compression and generalization. *Language & Communication* 2(1).
+- Wu, Deshmukh et al. (2025). Unsupervised chunking with hierarchical RNN. *Computational Linguistics* 51(3).
+- Wu, Thalmann et al. (2025). Building, reusing, and generalizing abstract representations from concrete sequences. *ICLR.*
+- Yang, Zhao & Tu (2021). PCFGs can do better: Inducing probabilistic context-free grammars with many symbols. *NAACL.*
+- Zhai, Boyd-Graber & Cohen (2014). Online adaptor grammars with hybrid inference. *TACL* 2.
+
 ## Roadmap
 
 | Stage | Content |
@@ -419,7 +573,8 @@ Folding a recurring top-level pair directly into an existing category (a chunk m
 | v2.1 ✓ | unsupervised learning from sentences: MDL objective, partial analyses, word classes, exact-scored beam search over chunk/merge moves from several starts |
 | v2.2 (in part) | learning by day and by night ✓ (perceive with the current grammar; consolidate at night from the stored analyses or a restart; the full code chooses among the best search results); split moves; attention-like long-range context |
 | v2.3 (in progress) | beyond the paper's corpora: Penn Treebank WSJ10 with gold tags ✓ (and larger training sets ✓; which descriptions make sentence structure pay ✓); Chinese characters ✓; a compiled Cobweb ✓. Open: starting categories that see structure (characters), finer positional concepts, α by description length; for real text, chunks categorized by their head and the total-probability code, with words at scale |
-| v2.4 (in progress) | new data types and relations: a domain brings its own context window (the representation hierarchy's surface context) and its own typed relations (the composition hierarchy); chess positions with the star context and direction-and-distance relations ✓; simple English (TinyStories) for generated coherence; open: starting categories or split moves for characters, spatial relations for characters instead of operator tokens, variable arity |
+| v2.4 (in progress) | new data types and relations: a domain brings its own context window (the representation hierarchy's surface context) and its own typed relations (the composition hierarchy); chess positions with the star context and direction-and-distance relations ✓; simple English (TinyStories) for generated coherence ✓; characters with operators as relations ✓ |
+| v2.5 (in progress) | coherence from what the descriptions can see ✓: a sentence is one tree or a forest of pieces, coded apart; a part's slot in its description; a board's read with a context chosen by description length. Open: forests whose pieces are coded in their context; chess moves as compositions, attack and defence as relations ([hypotheses](#hypotheses-playing-chess-from-the-two-hierarchies)); a search over several moves at a time for characters from sequences; variable arity |
 
 ## Reproducing
 
@@ -433,7 +588,12 @@ python experiments/v2/plot_incremental.py experiments/v2/results/incremental
 python experiments/v2/run_search_study.py                  # ~2 min
 python experiments/v2/run_treebank.py --train-max-len 10 --out experiments/v2/results/treebank/wsj10   # needs data/ptb_sample
 python experiments/v2/treebank_codes.py --em --trellis --out experiments/v2/results/treebank/structure_codes.md   # ~40 min, 9 workers
-python experiments/v2/run_characters.py                    # needs data/ids/ids.txt
+python experiments/v2/run_characters.py                    # needs data/ids/ids.txt; ~1 h (the unsupervised mode)
+python experiments/v2/run_stories.py --vocab 100 --max-len 5 --train 2500 --out experiments/v2/results/stories_2500
+python experiments/v2/run_stories.py --vocab 100 --max-len 5 --train 5000 --out experiments/v2/results/stories   # hours
+python experiments/v2/run_chess.py --extract && python experiments/v2/run_chess.py    # needs the Lichess file in data/chess
+python experiments/v2/run_chess.py --no-context --out experiments/v2/results/chess_plain
+python experiments/v2/run_chess_play.py --extract && python experiments/v2/run_chess_play.py
 python docs/figures/make_figures.py                        # figures of FRAMEWORK.md
 ```
 

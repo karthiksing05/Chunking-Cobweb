@@ -91,14 +91,15 @@ class Trellis2:
         return Chart(self.grammar, tokens).log_prob
 
     def generate(self, n: int, rng: Optional[np.random.Generator] = None,
-                 max_len: int = 30, max_tries: int = 100
+                 max_len: int = 30, max_tries: int = 100, whole_only: bool = False
                  ) -> Tuple[List[Tuple[List[str], Tree]], int]:
-        """Sample ``n`` sentences; returns (samples, number rejected as too long)."""
+        """Sample ``n`` sentences; returns (samples, number rejected as too long).
+        With ``whole_only``, only sentences the grammar derives as one tree."""
         rng = rng if rng is not None else np.random.default_rng(self.seed)
         out, rejected = [], 0
         while len(out) < n:
             for _ in range(max_tries):
-                s = self.grammar.sample(rng, max_len=max_len)
+                s = self.grammar.sample(rng, max_len=max_len, whole_only=whole_only)
                 if s is not None:
                     out.append(s)
                     break

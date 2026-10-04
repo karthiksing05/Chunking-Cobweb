@@ -65,3 +65,59 @@ def test_chess_scan_code_covers_every_piece_once():
     s = np.zeros(len(mem.kind), dtype=np.int64)
     counts = mem.scan_counts(s, 1)
     assert counts.sum() == 63 and counts[:, 0].sum() == len(tops)
+
+
+def test_characters_as_relational_trees():
+    from trellis2.characters import CharacterMemory, canonical, from_relational, to_relational
+    # 湖 = [氵 ⿰ [古 ⿰ 月]]; a three-part operator becomes two joins.
+    structure = parse_prefix(["⿰", "氵", "⿰", "古", "月"])
+    assert to_relational(structure) == ("⿰", "氵", ("⿰", "古", "月"))
+    assert from_relational(to_relational(structure)) == structure
+    assert canonical(("⿲", "彳", "山", "攵")) == ("⿰", "彳", ("⿰", "山", "攵"))
+    mem = CharacterMemory()
+    mem.add_structure(to_relational(structure))
+    slots = {mem.describe(e): mem.surface(e)["slot"] for e in range(len(mem.kind))}
+    assert slots == {"氵": "⿰:0", "古": "⿰:0", "月": "⿰:1", "⿰古月": "⿰:1", "⿰氵⿰古月": "<root>"}
+
+
+def test_relational_tree_probability_matches_enumeration():
+    import itertools
+    import math
+    import numpy as np
+    from trellis2.characters import structure_log_prob
+    from trellis2.grammar import UNK, Grammar
+    rng = np.random.default_rng(0)
+
+    def dist(*shape):
+        x = rng.random(shape) + 0.05
+        return x / x.sum(axis=-1, keepdims=True)
+    K, M, vocab, rels = 2, 3, ["a", "b", UNK], ["⿰", "⿱"]
+    g = Grammar(vocab=vocab, S=dist(K), U=dist(K, M), pk=rng.uniform(0.2, 0.8, M), Lt=dist(M, K),
+                Rt=dist(M, K), E=dist(M, 3), alpha=0.0, relations=rels, Rel=dist(M, 2))
+    tree = ("⿱", "a", ("⿰", "b", "a"))
+    nodes = [tree, "a", ("⿰", "b", "a"), "b", "a"]          # pre-order
+    children = {0: (1, 2), 2: (3, 4)}
+    total = 0.0
+    for syms in itertools.product(range(K), repeat=5):
+        for rules in itertools.product(range(M), repeat=5):
+            p = g.S[syms[0]]
+            for i, node in enumerate(nodes):
+                c = rules[i]
+                p *= g.U[syms[i], c]
+                if isinstance(node, str):
+                    p *= g.pk[c] * g.E[c, vocab.index(node)]
+                else:
+                    l, r = children[i]
+                    p *= (1 - g.pk[c]) * g.Rel[c, rels.index(node[0])] * g.Lt[c, syms[l]] * g.Rt[c, syms[r]]
+            total += p
+    assert math.isclose(structure_log_prob(g, tree), math.log(total), rel_tol=1e-9)
+
+
+def test_chess_read_context_counts_earlier_pieces():
+    from trellis2.chess import parse_fen, scan_rows
+    pos = parse_fen("6k1/8/5n2/8/8/8/5PPP/5RK1")
+    rows = scan_rows(pos, [("wK", 1), ("wP", 2)])
+    # a1..g1 have no white king before them; from h1 on, one king (bit 2).
+    assert rows[6] == 6 * 4 and rows[7] == 7 * 4 + 2
+    # Two white pawns stand before h2 (f2, g2): both bits set there.
+    assert rows[15] == 15 * 4 + 3 and rows[13] == 13 * 4 + 2

@@ -169,7 +169,11 @@ class Memory:
             for d in range(1, self.spine_depth + 1):
                 p = self.parent[node] if node >= 0 else -1
                 if p < 0:
-                    x[f"a{d}.{g}"] = ROOT if (node >= 0 and lab is not None) else BLANK
+                    # ROOT marks the whole experience. A piece of a partial
+                    # analysis (a forest) is not the sentence: its parent is
+                    # unknown.
+                    whole = node >= 0 and self.top_left[node] < 0 and self.top_right[node] < 0
+                    x[f"a{d}.{g}"] = ROOT if (whole and lab is not None) else BLANK
                     # A top-level chunk's siblings are its top-level neighbours.
                     top = node >= 0
                     x[f"sl{d}.{g}"] = cat(self.top_left[node]) if top else BLANK

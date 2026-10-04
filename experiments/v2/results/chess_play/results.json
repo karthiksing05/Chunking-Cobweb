@@ -1,0 +1,45 @@
+{
+ "train": 4000,
+ "test": 500,
+ "seconds": 15.094322919845581,
+ "legal moves per position": 37.674,
+ "context of the read": [
+  "at least 2 bR",
+  "at least 1 wK",
+  "at least 1 bK",
+  "at least 2 wR",
+  "at least 1 wR",
+  "at least 7 bP",
+  "at least 1 bR"
+ ],
+ "chunk moves": [
+  "[wB N1 wP]",
+  "[bP N1 bB]"
+ ],
+ "agreement with the move played (top 1, top 3)": {
+  "a random legal move": [
+   0.031928130108222895,
+   0.09278439032466869
+  ],
+  "capture the most valuable piece, else a random move": [
+   0.19423080412837007,
+   null
+  ],
+  "shortest code: chunks and the read's context": [
+   0.09,
+   0.218
+  ],
+  "shortest code: the read's context, no chunks": [
+   0.1,
+   0.214
+  ],
+  "shortest code: each square on its own": [
+   0.088,
+   0.222
+  ],
+  "a capture that does not lose material, else the shortest code": [
+   0.20066666666666666,
+   null
+  ]
+ }
+}

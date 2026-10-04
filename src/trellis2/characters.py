@@ -17,6 +17,16 @@ how generated characters are checked:
   slot) where some real character places it;
 * real: the sequence is the decomposition of an existing character.
 
+**Operators as relations.** The same structure can be read as parts joined
+by typed relations, as pieces are joined on a board: 湖 = [氵 ⿰ [古 ⿰ 月]].
+The operator is then the relation of a composite, not a token, and what the
+representation hierarchy sees of a part includes its slot (the operator
+that places it and which part it is), so that categories of components form
+by where they go (``CharacterMemory``). A three-part operator is written as
+two joins of its two-part counterpart, which lays the parts out the same way
+(⿲ A B C = ⿰ A ⿰ B C), so that every generated tree is a well-formed
+character.
+
 The data are the CJKVI IDS database (based on CHISE; GPL), unpacked into
 ``data/ids/ids.txt``:
 
@@ -30,7 +40,11 @@ import re
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Sequence, Set, Tuple
 
+import numpy as np
+
 from .data import Tree
+from .grammar import UNK
+from .memory import ROOT, Memory, chunk_attrs
 
 ARITY = {"⿰": 2, "⿱": 2, "⿴": 2, "⿵": 2, "⿶": 2, "⿷": 2, "⿸": 2, "⿹": 2, "⿺": 2,
          "⿻": 2, "⿲": 3, "⿳": 3}
@@ -185,3 +199,134 @@ def load_characters(path: str, max_tokens: int = 11, seed: int = 0,
         chars.append(Character(c, tokens, gold_tree(tokens)))
     random.Random(seed).shuffle(chars)
     return chars, ids
+
+
+# --------------------------------------------------------------------------- #
+# Characters as relational trees
+# --------------------------------------------------------------------------- #
+RELATIONS = ["⿰", "⿱", "⿴", "⿵", "⿶", "⿷", "⿸", "⿹", "⿺", "⿻"]
+TWO_PART = {"⿲": "⿰", "⿳": "⿱"}
+
+
+def to_relational(structure):
+    """(op, a, b[, c]) as nested binary (relation, first, second) nodes."""
+    if isinstance(structure, str):
+        return structure
+    op, parts = structure[0], [to_relational(p) for p in structure[1:]]
+    if len(parts) == 2:
+        return (op, parts[0], parts[1])
+    rel = TWO_PART[op]
+    return (rel, parts[0], (rel, parts[1], parts[2]))
+
+
+def from_relational(node):
+    """The IDS structure of a relational tree (two-part operators only)."""
+    if isinstance(node, str):
+        return node
+    return (node[0], from_relational(node[1]), from_relational(node[2]))
+
+
+def canonical(structure):
+    """An IDS structure with three-part operators written as two joins."""
+    return from_relational(to_relational(structure))
+
+
+def structure_tokens(structure) -> List[str]:
+    """The prefix sequence of an IDS structure."""
+    if isinstance(structure, str):
+        return [structure]
+    return [structure[0]] + [t for p in structure[1:] for t in structure_tokens(p)]
+
+
+class CharacterMemory(Memory):
+    """Element records for characters as relational trees. What the
+    representation hierarchy sees of an element: its slot (the operator that
+    places it and which part it is; ROOT for the whole character), its first
+    and last components, its own operator (P for a component), and its chunk
+    context."""
+
+    relations = RELATIONS
+
+    def __init__(self, spine_depth: int = 2, granularities: int = 2):
+        super().__init__(spine_depth=spine_depth, granularities=granularities)
+        self.attrs = ["slot", "f", "e", "k"] + chunk_attrs(spine_depth, granularities)
+        self.first: List[str] = []
+        self.last: List[str] = []
+
+    def add_structure(self, node, weight: float = 1.0) -> None:
+        """Record every element of a character's relational tree, bottom up."""
+        sid = len(self.sentences)
+        self.sentences.append(node)
+
+        def record(n) -> int:
+            if isinstance(n, str):
+                a = b = -1
+                first = last = n
+            else:
+                a, b = record(n[1]), record(n[2])
+                first, last = self.first[a], self.last[b]
+            e = len(self.kind)
+            self.kind.append(self.PRIMITIVE if a < 0 else self.COMPOSITE)
+            self.token.append(n if a < 0 else None)
+            self.left.append(a)
+            self.right.append(b)
+            self.relation.append(None if a < 0 else n[0])
+            if a >= 0:
+                self.parent[a] = self.parent[b] = e
+            self.first.append(first)
+            self.last.append(last)
+            self.parent.append(-1)
+            self.top_left.append(-1)
+            self.top_right.append(-1)
+            self.is_root.append(False)
+            self.weight.append(weight)
+            self.sentence_of.append(sid)
+            self.span.append(None)
+            return e
+
+        self.is_root[record(node)] = True
+
+    def surface(self, e: int):
+        p = self.parent[e]
+        slot = ROOT if p < 0 else f"{self.relation[p]}:{0 if self.left[p] == e else 1}"
+        return {"slot": slot, "f": self.first[e], "e": self.last[e],
+                "k": "P" if self.kind[e] == self.PRIMITIVE else self.relation[e]}
+
+    def describe(self, e: int) -> str:
+        if self.kind[e] == self.PRIMITIVE:
+            return self.token[e]
+        return f"{self.relation[e]}{self.describe(self.left[e])}{self.describe(self.right[e])}"
+
+
+def structure_log_prob(g, node) -> float:
+    """ln P(relational tree) under a grammar: the inside pass over the known
+    structure, summing over every assignment of categories."""
+    rel_index = {r: i for i, r in enumerate(g.relations)}
+    unk = g.tok_index[UNK]
+
+    def inside(n):
+        if isinstance(n, str):
+            v = g.U @ (g.pk * g.E[:, g.tok_index.get(n, unk)])
+            scale = 0.0
+        else:
+            lx, vx = inside(n[1])
+            ly, vy = inside(n[2])
+            v = g.U @ (g.qk * g.Rel[:, rel_index[n[0]]] * (g.Lt @ vx) * (g.Rt @ vy))
+            scale = lx + ly
+        total = v.sum()
+        return scale + np.log(total), v / total
+
+    scale, v = inside(node)
+    return float(scale + np.log(v @ g.S) + g.log_whole)
+
+
+def sample_structure(g, rng: np.random.Generator, max_depth: int = 12):
+    """A relational tree read off the grammar: one tree from the start row."""
+    def expand(sym, depth):
+        c = int(rng.choice(g.M, p=g.U[sym]))
+        if rng.random() < g.pk[c] or depth >= max_depth:
+            return g.vocab[int(rng.choice(len(g.vocab), p=g.E[c]))]
+        b, d = int(rng.choice(g.K, p=g.Lt[c])), int(rng.choice(g.K, p=g.Rt[c]))
+        rel = g.relations[int(rng.choice(len(g.relations), p=g.Rel[c]))]
+        return (rel, expand(b, depth + 1), expand(d, depth + 1))
+    return expand(int(rng.choice(g.K, p=g.S)), 0)

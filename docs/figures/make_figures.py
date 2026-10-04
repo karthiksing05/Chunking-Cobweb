@@ -650,27 +650,42 @@ def fig_unsupervised():
 CJK_FONT = "/System/Library/Fonts/STHeiti Medium.ttc"
 
 
+_RELATIONAL = {}
+
+
+def relational_characters(n_train: int = 2000):
+    """TRELLIS v2 on character structures with operators as relations (the
+    model of ``run_characters.py --mode relational``), learned once."""
+    if n_train not in _RELATIONAL:
+        from trellis2.characters import (CharacterMemory, default_ids_path, load_characters,
+                                         parse_prefix, to_relational)
+        chars, _ = load_characters(default_ids_path(), seed=SEED)
+        memory = CharacterMemory()
+        model = Trellis2(seed=SEED, memory=memory)
+        for c in chars[:n_train]:
+            memory.add_structure(to_relational(parse_prefix(c.tokens)))
+        _RELATIONAL[n_train] = (model, model.consolidate())
+    return _RELATIONAL[n_train]
+
+
+def _slot_name(slot: str) -> str:
+    from trellis2.characters import SLOT_NAMES
+    rel, side = slot.split(":")
+    return SLOT_NAMES[(rel, int(side))]
+
+
 def fig_character_concepts(n_train: int = 2000, rows: int = 8):
     from matplotlib.font_manager import FontProperties
-    from trellis2.characters import (OPERATORS, SLOT_NAMES, default_ids_path, load_characters,
-                                     token_slots)
-    chars, _ = load_characters(default_ids_path(), seed=SEED)
-    model = Trellis2(seed=SEED)
-    for c in chars[:n_train]:
-        model.learn(c.tokens, c.tree)
-    _, _, g = consolidate_keeping_trees(model)
+    model, g = relational_characters(n_train)
     mem = model.memory
-    slots = [token_slots(c.tokens) for c in chars[:n_train]]
     members = defaultdict(Counter)       # symbol -> component -> count
     where = defaultdict(Counter)         # symbol -> slot name -> count
     for e in range(len(mem)):
-        if mem.kind[e] != mem.PRIMITIVE or mem.token[e] in OPERATORS:
+        if mem.kind[e] != mem.PRIMITIVE or mem.parent[e] < 0:
             continue
         sym = int(g.elem_symbol[e])
         members[sym][mem.token[e]] += 1
-        slot = slots[mem.sentence_of[e]][mem.span[e][0]]
-        if slot is not None:
-            where[sym][SLOT_NAMES[slot]] += 1
+        where[sym][_slot_name(mem.surface(e)["slot"])] += 1
     # Component categories, largest first; skip single-component categories.
     chosen = sorted((s_ for s_ in members if len(members[s_]) >= 3),
                     key=lambda s_: -sum(members[s_].values()))[:rows]
@@ -697,8 +712,8 @@ def fig_character_concepts(n_train: int = 2000, rows: int = 8):
     fig.subplots_adjust(left=0.02, right=0.98, bottom=0.03)
     ax.set_ylim(0.4, len(chosen) + 1.3)
     titles(fig, "Concepts of position: categories the representation hierarchy forms from character structures",
-           f"Supervised TRELLIS v2 on {n_train:,} Chinese characters (IDS). The largest categories of components, "
-           "described by the slots their members fill.", top=0.84)
+           f"TRELLIS v2 on {n_train:,} Chinese characters, operators as relations. The largest categories of "
+           "components, described by the slots their members fill.", top=0.84)
     path_out = out_path("character_concepts.png")
     fig.savefig(path_out, dpi=180)
     plt.close(fig)
@@ -707,94 +722,55 @@ def fig_character_concepts(n_train: int = 2000, rows: int = 8):
 
 def fig_character_chunks(n_train: int = 2000, rows: int = 6, per_row: int = 8):
     """The chunk types of characters: the composition hierarchy's largest
-    composite rule classes, each with its most frequent chunks drawn in place
-    (the parts a chunk holds in their slots, the slots it leaves open dashed)."""
+    composite rule classes, each with its most frequent chunks drawn as
+    characters."""
     from matplotlib.patches import Rectangle
     sys.path.insert(0, os.path.join(ROOT, "experiments", "v2"))
-    from run_characters import INNER, draw_structure
-    from trellis2.characters import ARITY, OPERATORS, SLOT_NAMES, default_ids_path, load_characters
-
-    chars, _ = load_characters(default_ids_path(), seed=SEED)
-    model = Trellis2(seed=SEED)
-    for c in chars[:n_train]:
-        model.learn(c.tokens, c.tree)
-    g = model.consolidate()
+    from run_characters import draw_structure
+    from trellis2.characters import from_relational
+    model, g = relational_characters(n_train)
     mem = model.memory
+
+    def node(e):
+        if mem.kind[e] == mem.PRIMITIVE:
+            return mem.token[e]
+        return (mem.relation[e], node(mem.left[e]), node(mem.right[e]))
     by_rule = defaultdict(Counter)
     for e in range(len(mem)):
-        if mem.kind[e] == mem.COMPOSITE:
-            i, j = mem.span[e]
-            by_rule[int(g.elem_rule[e])][tuple(mem.sentences[mem.sentence_of[e]][i:j])] += mem.weight[e]
-    # Reusable chunk types: skip rule classes whose chunks are one-off whole characters.
+        if mem.kind[e] == mem.COMPOSITE and mem.parent[e] >= 0:     # parts of larger characters
+            by_rule[int(g.elem_rule[e])][from_relational(node(e))] += mem.weight[e]
+    # Reusable chunk types: skip rule classes whose chunks occur once each.
     chosen = sorted((r for r in by_rule if by_rule[r].most_common(1)[0][1] >= 5),
                     key=lambda r: -sum(by_rule[r].values()))[:rows]
-
-    def parts_of(tokens):
-        pos, out = 0, []
-
-        def node():
-            nonlocal pos
-            t = tokens[pos]
-            pos += 1
-            return (t,) + tuple(node() for _ in range(ARITY[t])) if t in OPERATORS else t
-        while pos < len(tokens):
-            out.append(node())
-        return out
-
-    def slots(op, x0, y0, x1, y1):
-        n = ARITY[op]
-        if op in "⿰⿲":
-            return [(x0 + k * (x1 - x0) / n, y0, x0 + (k + 1) * (x1 - x0) / n, y1) for k in range(n)]
-        if op in "⿱⿳":
-            return [(x0, y1 - (k + 1) * (y1 - y0) / n, x1, y1 - k * (y1 - y0) / n) for k in range(n)]
-        if op == "⿻":
-            return [(x0, y0, x1, y1)] * 2
-        a, b, c, d = INNER[op]
-        w, h = x1 - x0, y1 - y0
-        return [(x0, y0, x1, y1), (x0 + a * w, y0 + b * h, x0 + c * w, y0 + d * h)]
-
+    layout = {"⿰": "left–right", "⿱": "top–bottom", "⿴": "surrounding", "⿵": "surrounding from above",
+              "⿶": "surrounding from below", "⿷": "surrounding from the left",
+              "⿸": "surrounding from the upper left", "⿹": "surrounding from the upper right",
+              "⿺": "surrounding from the lower left", "⿻": "overlaid"}
     fig, axes = plt.subplots(rows, per_row + 1, figsize=(1.25 * (per_row + 1) + 1.2, 1.35 * rows),
                              gridspec_kw={"width_ratios": [2.6] + [1] * per_row})
     for r, rule in enumerate(chosen):
         total = sum(by_rule[rule].values())
-        # Describe the type by its usual operator and how many of its parts it holds.
-        shape = Counter()
-        for tokens, n in by_rule[rule].items():
-            shape[(tokens[0], len(parts_of(tokens[1:])))] += n
-        (op, filled), _ = shape.most_common(1)[0]
-        layout = {"⿰": "left–right", "⿱": "top–bottom", "⿲": "left–middle–right",
-                  "⿳": "top–middle–bottom", "⿴": "surrounding", "⿵": "surrounding from above",
-                  "⿶": "surrounding from below", "⿷": "surrounding from the left",
-                  "⿸": "surrounding from the upper left", "⿹": "surrounding from the upper right",
-                  "⿺": "surrounding from the lower left", "⿻": "overlaid"}[op]
-        what = (f"the {SLOT_NAMES[(op, filled - 1)]} part\nof a {layout} pair" if filled < ARITY[op]
-                else f"a whole {layout}\ncomposition")
+        op = Counter({st[0]: n for st, n in by_rule[rule].items()}).most_common(1)[0][0]
         axes[r, 0].set_axis_off()
-        axes[r, 0].text(0, 0.5, f"Chunk type {r + 1}: {what}\n{total:,.0f} chunks", fontsize=9,
-                        color=INK, va="center", linespacing=1.3)
+        article = "an" if layout[op][0] in "aeiou" else "a"
+        axes[r, 0].text(0, 0.5, f"Chunk type {r + 1}: {article} {layout[op]}\npart of a larger character\n"
+                                f"{total:,.0f} chunks", fontsize=9, color=INK, va="center", linespacing=1.3)
+        items = by_rule[rule].most_common(per_row)
         for k in range(per_row):
             ax = axes[r, k + 1]
             ax.set_axis_off()
             ax.set_xlim(0, 1)
             ax.set_ylim(0, 1)
             ax.set_aspect("equal")
-            items = by_rule[rule].most_common(per_row)
             if k >= len(items):
                 continue
-            tokens, n = items[k]
-            op, parts = tokens[0], parts_of(tokens[1:])
+            structure, n = items[k]
             ax.add_patch(Rectangle((0.02, 0.02), 0.96, 0.96, facecolor="none", edgecolor=GRID, linewidth=0.8))
-            for s, (x0, y0, x1, y1) in enumerate(slots(op, 0.06, 0.06, 0.94, 0.94)):
-                if s < len(parts):
-                    draw_structure(ax, parts[s], x0, y0, x1, y1)
-                else:
-                    ax.add_patch(Rectangle((x0 + 0.03, y0 + 0.03), x1 - x0 - 0.06, y1 - y0 - 0.06,
-                                           facecolor="none", edgecolor=BLUE, linewidth=1.0, linestyle="--"))
+            draw_structure(ax, structure, 0.06, 0.06, 0.94, 0.94)
             ax.set_title(f"×{n:,.0f}", fontsize=7.5, color=MUTED, pad=1)
-    titles(fig, "Chunk types in Chinese characters: components in their slots",
-           f"Supervised TRELLIS v2 on {n_train:,} characters. Each row is one of the largest composite rule "
-           "classes of the composition hierarchy, with its most frequent chunks; dashed: the slot the chunk "
-           "leaves open.", top=0.88)
+    titles(fig, "Chunk types in Chinese characters: parts that recur inside larger characters",
+           f"TRELLIS v2 on {n_train:,} characters, operators as relations. Each row is one of the largest "
+           "composite rule classes of the composition hierarchy, with its most frequent chunks.", top=0.88)
     path_out = out_path("character_chunks.png")
     fig.savefig(path_out, dpi=170)
     plt.close(fig)

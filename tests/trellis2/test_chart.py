@@ -151,7 +151,7 @@ def test_posterior_samples_are_valid_trees():
 
 
 # --------------------------------------------------------------------------- #
-# Partial analyses: a sentence is a sequence of top-level chunks.
+# Partial analyses: a sentence is one tree or a forest of two or more pieces.
 # --------------------------------------------------------------------------- #
 def all_forests(n):
     """Every (roots, split) covering [0, n) with top-level chunks."""
@@ -175,10 +175,13 @@ def all_forests(n):
             yield roots, split
 
 
-def forest_grammar(seed, p_stop=0.6):
+def forest_grammar(seed, p_stop=0.6, p_whole=0.4):
+    """A grammar whose sentences are one tree (p_whole, root symbol from S) or
+    a forest of two or more pieces (symbols from S_piece)."""
     g = random_grammar(seed=seed)
+    piece = np.random.default_rng(seed + 100).random(g.K) + 0.05
     return Grammar(vocab=g.vocab, S=g.S, U=g.U, pk=g.pk, Lt=g.Lt, Rt=g.Rt, E=g.E,
-                   alpha=0.0, p_stop=p_stop)
+                   alpha=0.0, p_stop=p_stop, p_whole=p_whole, S_piece=piece / piece.sum())
 
 
 def brute_force_forests(g, tokens):
@@ -187,14 +190,18 @@ def brute_force_forests(g, tokens):
     rule = np.einsum("ac,c,cb,cd->abd", g.U, g.qk, g.Lt, g.Rt)
     lex = g.U @ (g.pk[:, None] * g.E)
     total, span_mass, label_mass, best = 0.0, {}, {}, (-1.0, None)
+    top_mass = {}
     for roots, split in all_forests(n):
         tree = Tree(n, split, roots=roots)
         spans = [(i, i + 1) for i in range(n)] + tree.composite_spans()
         for labels in itertools.product(range(g.K), repeat=len(spans)):
             lab = dict(zip(spans, labels))
-            p = (1 - g.p_stop) ** (len(roots) - 1) * g.p_stop
-            for r in roots:
-                p *= g.S[lab[r]]
+            if len(roots) == 1:
+                p = g.p_whole * g.S[lab[roots[0]]]
+            else:
+                p = (1 - g.p_whole) * (1 - g.p_stop) ** (len(roots) - 2) * g.p_stop
+                for r in roots:
+                    p *= g.S_piece[lab[r]]
             for (i, j) in spans:
                 if j - i == 1:
                     p *= lex[lab[(i, j)], ids[i]]
@@ -207,19 +214,23 @@ def brute_force_forests(g, tokens):
             for s in spans:
                 span_mass[s] = span_mass.get(s, 0.0) + p
                 label_mass[s + (lab[s],)] = label_mass.get(s + (lab[s],), 0.0) + p
-    return total, span_mass, label_mass, best
+            for r in roots:
+                top_mass[r] = top_mass.get(r, 0.0) + p
+    return total, span_mass, label_mass, best, top_mass
 
 
 @pytest.mark.parametrize("n,seed", [(2, 4), (3, 5), (4, 6)])
 def test_forest_inside_and_posteriors_match_enumeration(n, seed):
     g = forest_grammar(seed)
     tokens = [f"w{(seed + i) % 3}" for i in range(n)]
-    total, span_mass, label_mass, _ = brute_force_forests(g, tokens)
+    total, span_mass, label_mass, _, top_mass = brute_force_forests(g, tokens)
     chart = Chart(g, tokens)
     assert math.isclose(chart.log_prob, math.log(total), rel_tol=1e-9)
     mu = chart.label_posteriors()
+    tops = chart.top_level_posteriors()
     for i in range(n):
         for j in range(i + 1, n + 1):
+            assert tops[i, j] == pytest.approx(top_mass.get((i, j), 0.0) / total, abs=1e-10)
             for a in range(g.K):
                 expected = label_mass.get((i, j, a), 0.0) / total
                 assert mu[i, j, a] == pytest.approx(expected, abs=1e-10)
@@ -228,7 +239,7 @@ def test_forest_inside_and_posteriors_match_enumeration(n, seed):
 def test_forest_viterbi_finds_the_most_probable_analysis():
     g = forest_grammar(8, p_stop=0.5)
     tokens = ["w1", "w0", "w2", "w2"]
-    _, _, _, (_, (roots, brackets, lab)) = brute_force_forests(g, tokens)
+    _, _, _, (_, (roots, brackets, lab)), _ = brute_force_forests(g, tokens)
     got = Chart(g, tokens).viterbi_tree()
     assert tuple(got.roots) == roots and got.brackets() == brackets
     assert all(got.label[s] == lab[s] for s in got.label)
@@ -247,3 +258,15 @@ def test_forest_samples_match_posteriors():
     post = chart.span_posteriors()
     for s, c in counts.items():
         assert c / 4000 == pytest.approx(post[s], abs=0.03)
+
+
+def test_whole_only_samples_are_single_trees():
+    g = forest_grammar(3, p_stop=0.5, p_whole=0.3)
+    rng = np.random.default_rng(0)
+    for _ in range(200):
+        out = g.sample(rng, max_len=60, whole_only=True)
+        if out is not None:
+            assert len(out[1].roots) == 1
+    tops = [len(o[1].roots) for o in (g.sample(rng, max_len=60) for _ in range(2000)) if o is not None]
+    assert np.mean([t == 1 for t in tops]) == pytest.approx(0.3, abs=0.04)
+    assert min(t for t in tops if t > 1) == 2

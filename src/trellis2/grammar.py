@@ -255,16 +255,19 @@ def hill_climb(index: TreeIndex, cut: Sequence[int],
 @dataclass
 class Grammar:
     vocab: List[str]
-    S: np.ndarray       # (K,)   distribution of a top-level chunk's symbol
+    S: np.ndarray       # (K,)   symbol of a sentence analysed as one tree
     U: np.ndarray       # (K, M) P(rule class | symbol)
     pk: np.ndarray      # (M,)   P(primitive | rule class)
     Lt: np.ndarray      # (M, K) P(left child symbol | rule class, composite)
     Rt: np.ndarray      # (M, K) P(right child symbol | rule class, composite)
     E: np.ndarray       # (M, V) P(token | rule class, primitive)
     alpha: float
-    # A sentence is a sequence of top-level chunks: after each one it ends
-    # with probability p_stop (1 = always a single tree).
+    # A sentence is one tree (probability p_whole) or a partial analysis: a
+    # forest of two or more pieces, each with its symbol from S_piece, which
+    # after its second piece ends with probability p_stop.
     p_stop: float = 1.0
+    p_whole: float = 1.0
+    S_piece: Optional[np.ndarray] = None
     # The representation-tree nodes that make up each symbol (one node unless
     # model merging joined several).
     symbol_nodes: List[List[CobwebNode]] = field(default_factory=list)
@@ -298,9 +301,13 @@ class Grammar:
     def __post_init__(self):
         self.tok_index = {t: i for i, t in enumerate(self.vocab)}
         self.qk = 1.0 - self.pk
+        if self.S_piece is None:
+            self.S_piece = self.S
         with np.errstate(divide="ignore"):
             self.log_stop = float(np.log(self.p_stop))
             self.log_cont = float(np.log1p(-self.p_stop))
+            self.log_whole = float(np.log(self.p_whole))
+            self.log_forest = float(np.log1p(-self.p_whole))
 
     @property
     def K(self) -> int:
@@ -322,22 +329,29 @@ class Grammar:
         p = 1.0 / temperature
         g = Grammar(vocab=self.vocab, S=self.S ** p, U=self.U ** p, pk=self.pk ** p,
                     Lt=self.Lt ** p, Rt=self.Rt ** p, E=self.E ** p, alpha=self.alpha,
-                    p_stop=self.p_stop, info=dict(self.info))
+                    p_stop=self.p_stop, p_whole=self.p_whole, S_piece=self.S_piece ** p,
+                    info=dict(self.info))
         g.qk = self.qk ** p
         g.log_stop, g.log_cont = self.log_stop * p, self.log_cont * p
+        g.log_whole, g.log_forest = self.log_whole * p, self.log_forest * p
         return g
 
     def lexical(self, token_id: int) -> np.ndarray:
         """Inside probabilities of a single token, one per symbol."""
         return self.U @ (self.pk * self.E[:, token_id])
 
-    def sample(self, rng: np.random.Generator, max_len: int = 40):
+    def sample(self, rng: np.random.Generator, max_len: int = 40, whole_only: bool = False):
         """Sample (tokens, Tree with symbol labels) from the grammar; None if the
-        sentence exceeds ``max_len`` tokens (callers resample)."""
+        sentence exceeds ``max_len`` tokens (callers resample). With
+        ``whole_only`` the sentence is one tree: the grammar's distribution
+        given that it derives the whole sentence."""
         from .data import Tree
-        tops = [int(rng.choice(self.K, p=self.S))]
-        while rng.random() >= self.p_stop:
-            tops.append(int(rng.choice(self.K, p=self.S)))
+        if whole_only or rng.random() < self.p_whole:
+            tops = [int(rng.choice(self.K, p=self.S))]
+        else:
+            tops = [int(rng.choice(self.K, p=self.S_piece)) for _ in range(2)]
+            while rng.random() >= self.p_stop:
+                tops.append(int(rng.choice(self.K, p=self.S_piece)))
         # Expand depth-first, left to right; spans are filled in afterwards.
         tokens: List[str] = []
         nodes: List[list] = []  # [symbol, rule, token or None, left idx, right idx]
@@ -412,6 +426,7 @@ class _Elements:
     left: np.ndarray
     right: np.ndarray
     root: np.ndarray
+    whole: np.ndarray     # a top-level element with no top-level neighbours
     w: np.ndarray
     rel: np.ndarray       # relation id of composites (0 for primitives)
     n_rel: int            # 1 for sequences
@@ -428,6 +443,8 @@ def _elements(mem: Memory, leaves: Sequence[CobwebNode], rindex: TreeIndex,
         left=np.array(mem.left, dtype=np.int64),
         right=np.array(mem.right, dtype=np.int64),
         root=np.array(mem.is_root),
+        whole=np.array([r and a < 0 and b < 0
+                        for r, a, b in zip(mem.is_root, mem.top_left, mem.top_right)], dtype=bool),
         w=np.array(mem.weight, dtype=float),
         rel=np.array([rel_index.get(r, 0) for r in mem.relation], dtype=np.int64),
         n_rel=max(len(rel_index), 1),
@@ -455,10 +472,23 @@ def _plain_pcfg_code(el: _Elements, V: int, alpha: float, mem: Memory
             key[comp] = V + s[cl] * K + s[cr]
         else:
             key[comp] = V + (s[cl] * K + s[cr]) * el.n_rel + el.rel[comp]
-        top = (mem.top_level_nats(s, K, alpha) if board else
-               dm_code(np.zeros(int(el.root.sum()), dtype=np.int64), s[el.root], el.w[el.root], K, alpha))
+        top = mem.top_level_nats(s, K, alpha) if board else _sentence_top_nats(el, s, K, alpha)
         return top + dm_code(s, key, el.w, V + K * K * el.n_rel, alpha)
     return cost
+
+
+def _sentence_top_nats(el: _Elements, s: np.ndarray, K: int, alpha: float) -> float:
+    """The symbols at a sentence's top level: the roots of sentences analysed
+    as one tree, and the pieces of forests, each from its own row."""
+    whole, piece = el.whole, el.root & ~el.whole
+    return (dm_code(np.zeros(int(whole.sum()), dtype=np.int64), s[whole], el.w[whole], K, alpha)
+            + dm_code(np.zeros(int(piece.sum()), dtype=np.int64), s[piece], el.w[piece], K, alpha))
+
+
+def _beta_nats(n: np.ndarray, alpha: float) -> float:
+    """Code of a two-outcome row (Beta-binomial, concentration alpha each)."""
+    return float(gammaln(n.sum() + 2 * alpha) - gammaln(2 * alpha)
+                 - np.sum(gammaln(n + alpha) - gammaln(alpha)))
 
 
 def _factored_code(el: _Elements, s: np.ndarray, K: int, V: int, alpha: float,
@@ -589,13 +619,19 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
     # Tables: Dirichlet-multinomial posterior predictives.
     w = el.w
     prim, comp = el.prim, ~el.prim
-    n_start = np.bincount(s[el.root], weights=w[el.root], minlength=K)
-    # Top level: per sentence, (#top-level chunks - 1) continues and one stop.
+    board = hasattr(mem, "top_level_nats")
+    whole, piece = (el.root, el.root & False) if board else (el.whole, el.root & ~el.whole)
+    n_start = np.bincount(s[whole], weights=w[whole], minlength=K)
+    n_piece = np.bincount(s[piece], weights=w[piece], minlength=K)
+    # Top level of a sentence: one tree or a forest; a forest of m pieces has
+    # m - 2 continues and one stop.
     sent = np.array(mem.sentence_of)
-    n_tops = np.bincount(sent[el.root], weights=w[el.root], minlength=len(mem.sentences))
+    m = np.bincount(sent[el.root], minlength=len(mem.sentences))
     sent_w = np.zeros(len(mem.sentences))
     sent_w[sent[el.root]] = w[el.root]
-    n_stop_cont = np.array([sent_w.sum(), n_tops.sum() - sent_w.sum()])
+    forest = m >= 2
+    n_mode = np.array([sent_w[(m == 1)].sum(), sent_w[forest].sum()])
+    n_stop_cont = np.array([sent_w[forest].sum(), (sent_w * np.maximum(m - 2, 0)).sum()])
     n_U = np.zeros((K, M))
     np.add.at(n_U, (s, c), w)
     n_prim = np.bincount(c[prim], weights=w[prim], minlength=M)
@@ -613,19 +649,14 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
 
     n_Rel = np.zeros((M, el.n_rel))
     np.add.at(n_Rel, (c[comp], el.rel[comp]), w[comp])
-    board = hasattr(mem, "top_level_nats")
     if board:
         # A board is read square by square: the top level is the scan code.
         total_code = mem.top_level_nats(s, K, alpha) + ccost(cindex.assign(ccut))
         info["bits (factored grammar)"] = total_code / LN2
     else:
-        total_code = (dm_code(np.zeros(int(el.root.sum()), dtype=np.int64), s[el.root],
-                              w[el.root], K, alpha)
-                      + ccost(cindex.assign(ccut)))
+        total_code = _sentence_top_nats(el, s, K, alpha) + ccost(cindex.assign(ccut))
         info["bits (factored grammar)"] = total_code / LN2
-        stop_nats = float(gammaln(n_stop_cont.sum() + 2 * alpha) - gammaln(2 * alpha)
-                          - np.sum(gammaln(n_stop_cont + alpha) - gammaln(alpha)))
-        info["bits (factored grammar)"] += stop_nats / LN2
+        info["bits (factored grammar)"] += (_beta_nats(n_mode, alpha) + _beta_nats(n_stop_cont, alpha)) / LN2
     # The receiver also needs the grammar's size; Elias codes make the total
     # an actual message length.
     info["structure bits"] = elias_delta_bits(K) + elias_delta_bits(M)
@@ -638,7 +669,8 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
         n_Q = mem.scan_counts(s, K)
         tables = [(rows(n_Q), K + 1), (rows(n_Rel), el.n_rel)] + tables
     else:
-        tables = [(rows(n_start), K), (rows(n_stop_cont), 2)] + tables
+        tables = [(rows(n_start), K), (rows(n_piece), K), (rows(n_mode), 2),
+                  (rows(n_stop_cont), 2)] + tables
     model_bits, data_bits = split_bits(tables, alpha)
     info["model bits"] = model_bits + info["structure bits"]
     info["data bits"] = data_bits
@@ -668,6 +700,8 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
         U=normalize(n_U),
         pk=pk,
         p_stop=float((n_stop_cont[0] + alpha) / (n_stop_cont.sum() + 2 * alpha)),
+        p_whole=float((n_mode[0] + alpha) / (n_mode.sum() + 2 * alpha)),
+        S_piece=normalize(n_piece),
         Lt=normalize(n_L),
         Rt=normalize(n_R),
         E=normalize(n_E),

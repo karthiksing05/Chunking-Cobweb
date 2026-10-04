@@ -5,7 +5,10 @@ Each character is the prefix sequence of its full IDS decomposition (see
 at most 11 tokens from the main CJK block are shuffled with the seed; the
 first ``--train`` are learned and the next ``--test`` are held out.
 
-* supervised: TRELLIS v2 learns the gold IDS structures;
+* supervised: TRELLIS v2 learns the gold IDS structures as token sequences
+  with their trees (operators are tokens);
+* relational: TRELLIS v2 learns the same structures with each operator as
+  the relation that joins two parts, and each part's slot in its description;
 * unsupervised: TRELLIS v2 learns from the sequences alone (one night);
 * unigram and bigram token models (add-1/2) as references for held-out bits.
 
@@ -30,6 +33,7 @@ import os
 import sys
 import time
 from collections import Counter
+from typing import Tuple
 from concurrent.futures import ProcessPoolExecutor
 
 import matplotlib
@@ -47,8 +51,10 @@ ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 
 from trellis2 import Trellis2  # noqa: E402
-from trellis2.characters import (default_ids_path, load_characters, parse_prefix,  # noqa: E402
-                                 placements)
+from trellis2.characters import (OPERATORS, CharacterMemory, canonical, default_ids_path,  # noqa: E402
+                                 from_relational, load_characters, parse_prefix, placements,
+                                 sample_structure, structure_log_prob, structure_tokens,
+                                 to_relational)
 from trellis2.treebank import evaluable  # noqa: E402
 from trellis2.unsupervised import UnsupervisedLearner  # noqa: E402
 
@@ -75,6 +81,30 @@ def ngram_bits(train, test, order: int, alpha: float = 0.5) -> float:
     return total / len(test)
 
 
+def tally_generated(structures, trained, real, attested, n_gen) -> Tuple[dict, dict]:
+    """Shares of generated structures that are well formed, place every
+    component where real characters do, are real (and held out), or novel."""
+    tally = Counter()
+    examples = {"novel": [], "rediscovered": []}
+    for structure in structures:
+        if not isinstance(structure, tuple):     # ill formed, or a lone component
+            continue
+        tally["well formed"] += 1
+        if not placements(structure) <= attested:
+            continue
+        tally["positions attested"] += 1
+        if structure in real:
+            tally["real"] += 1
+            if structure not in trained:
+                tally["rediscovered"] += 1
+                examples["rediscovered"].append(real[structure])
+        else:
+            tally["novel"] += 1
+            examples["novel"].append(" ".join(structure_tokens(structure)))
+    share = {k: tally[k] / n_gen for k in ("well formed", "positions attested", "real", "rediscovered", "novel")}
+    return share, {k: v[:200] for k, v in examples.items()}
+
+
 def evaluate(chart_of, generate, train, test, real, attested, n_gen, seed) -> dict:
     hit = gold = pred = 0
     bits = 0.0
@@ -85,41 +115,42 @@ def evaluate(chart_of, generate, train, test, real, attested, n_gen, seed) -> di
         hit, gold, pred = hit + len(g & p), gold + len(g), pred + len(p)
         bits -= chart.log_prob / LN2
     samples, _ = generate(n_gen, np.random.default_rng(seed))
-    trained = {tuple(c.tokens) for c in train}
-    tally = Counter()
-    examples = {"novel": [], "rediscovered": []}
-    for tokens, _ in samples:
-        structure = parse_prefix(tokens)
-        if not isinstance(structure, tuple):     # ill formed, or a lone component
-            continue
-        tally["well formed"] += 1
-        if not placements(structure) <= attested:
-            continue
-        tally["positions attested"] += 1
-        key = tuple(tokens)
-        if key in real:
-            tally["real"] += 1
-            if key not in trained:
-                tally["rediscovered"] += 1
-                examples["rediscovered"].append(real[key])
-        else:
-            tally["novel"] += 1
-            examples["novel"].append(" ".join(tokens))
-    share = {k: tally[k] / n_gen for k in ("well formed", "positions attested", "real", "rediscovered", "novel")}
+    trained = {parse_prefix(c.tokens) for c in train}
+    share, examples = tally_generated([parse_prefix(t) for t, _ in samples], trained, real, attested, n_gen)
     return {"omission": 1 - hit / max(gold, 1), "commission": 1 - hit / max(pred, 1),
-            "test_bits_per_character": bits / len(test), "generation": share,
-            "examples": {k: v[:200] for k, v in examples.items()}}
+            "test_bits_per_character": bits / len(test), "generation": share, "examples": examples}
+
+
+def evaluate_relational(g, train, test, real, attested, n_gen, seed) -> dict:
+    """Held-out bits of the known structures (the inside pass over each tree);
+    generated trees are checked in the same canonical form as the real ones."""
+    bits = -sum(structure_log_prob(g, to_relational(parse_prefix(c.tokens))) for c in test) / LN2
+    rng = np.random.default_rng(seed)
+    structures = [from_relational(sample_structure(g, rng)) for _ in range(n_gen)]
+    trained = {canonical(parse_prefix(c.tokens)) for c in train}
+    share, examples = tally_generated(structures, trained, real, attested, n_gen)
+    return {"omission": None, "commission": None, "test_bits_per_character": bits / len(test),
+            "generation": share, "examples": examples}
 
 
 def run(mode: str, seed: int, n_train: int, n_test: int, n_gen: int, path: str) -> dict:
     chars, _ = load_characters(path, seed=seed)
     train, test = chars[:n_train], chars[n_train:n_train + n_test]
-    real = {tuple(c.tokens): c.char for c in chars}
+    # Relational trees write three-part operators as two joins; real
+    # characters are compared in the same form.
+    canon = canonical if mode == "relational" else (lambda structure: structure)
+    real = {canon(parse_prefix(c.tokens)): c.char for c in chars}
     attested = set()
     for c in chars:
-        placements(parse_prefix(c.tokens), attested)
+        placements(canon(parse_prefix(c.tokens)), attested)
     t0 = time.time()
-    if mode == "supervised":
+    if mode == "relational":
+        memory = CharacterMemory()
+        model = Trellis2(seed=seed, memory=memory)
+        for c in train:
+            memory.add_structure(to_relational(parse_prefix(c.tokens)))
+        g = model.consolidate()
+    elif mode == "supervised":
         model = Trellis2(seed=seed)
         for c in train:
             model.learn(c.tokens, c.tree)
@@ -132,13 +163,16 @@ def run(mode: str, seed: int, n_train: int, n_test: int, n_gen: int, path: str) 
         g = learner.sleep()
         chart_of, generate = learner.chart, learner.generate
     seconds = time.time() - t0
-    out = evaluate(chart_of, generate, train, test, real, attested, n_gen, seed)
+    if mode == "relational":
+        out = evaluate_relational(g, train, test, real, attested, n_gen, seed)
+    else:
+        out = evaluate(chart_of, generate, train, test, real, attested, n_gen, seed)
     out.update(mode=mode, seed=seed, train=n_train, test=n_test, seconds=seconds,
                total_bits=g.info["total bits"], symbols=g.K, rule_classes=g.M,
                chunk_types=g.info["chunk types"],
                baselines={"unigram": ngram_bits(train, test, 1), "bigram": ngram_bits(train, test, 2)})
-    print(f"[{mode} s{seed}] {seconds:.0f}s, test {out['test_bits_per_character']:.1f} b/char, omission "
-          f"{out['omission']:.3f}, generation {out['generation']}", flush=True)
+    print(f"[{mode} s{seed}] {seconds:.0f}s, test {out['test_bits_per_character']:.1f} b/char, "
+          f"generation {out['generation']}", flush=True)
     return out
 
 
@@ -207,9 +241,18 @@ def drawable(tokens) -> bool:
     return all(t in "⿰⿱⿲⿳⿴⿵⿶⿷⿸⿹⿺⿻" or ord(t) in _CMAP for t in tokens)
 
 
+LABELS = {"relational": "TRELLIS v2 from IDS structures, operators as relations",
+          "supervised": "TRELLIS v2 from IDS structures, operators as tokens",
+          "unsupervised": "TRELLIS v2 from sequences alone"}
+TITLES = {"relational": "From the IDS structures, operators as relations",
+          "supervised": "From the IDS structures, operators as tokens",
+          "unsupervised": "From the sequences alone (unsupervised)"}
+
+
 def figure(results, out_dir: str) -> str:
     """Novel characters generated by each model, drawn from their structure."""
-    rows = [r for r in results if r["seed"] == results[0]["seed"]]
+    rows = sorted([r for r in results if r["seed"] == results[0]["seed"]],
+                  key=lambda r: list(LABELS).index(r["mode"]))
     fig, axes = plt.subplots(len(rows), 1, figsize=(13, 2.15 * len(rows) + 0.5), facecolor=SURFACE)
     axes = np.atleast_1d(axes)
     for ax, r in zip(axes, rows):
@@ -220,14 +263,15 @@ def figure(results, out_dir: str) -> str:
             ax.add_patch(plt.Rectangle((x - 0.04, -0.04), 1.08, 1.08, facecolor="white",
                                        edgecolor="#e1e0d9", linewidth=0.8))
             draw_structure(ax, parse_prefix(tokens), x, 0, x + 1, 1)
-            label = "".join(tokens) if len(tokens) <= 7 else "".join(tokens[:6]) + "…"
+            parts = [t for t in tokens if t not in OPERATORS]      # the font has no IDS operators
+            label = "".join(parts) if len(parts) <= 6 else "".join(parts[:5]) + "…"
             ax.text(x + 0.5, -0.2, label, ha="center", va="top", fontsize=7.5,
                     color=INK2, fontproperties=_font())
         ax.set_xlim(-0.2, 16 * 1.25)
         ax.set_ylim(-0.55, 1.2)
         ax.set_aspect("equal")
         gen = r["generation"]
-        ax.set_title(f"{'From the IDS structures (supervised)' if r['mode'] == 'supervised' else 'From the sequences alone (unsupervised)'}"
+        ax.set_title(f"{TITLES[r['mode']]}"
                      f": {100 * gen['well formed']:.0f}% well formed, {100 * gen['positions attested']:.0f}% with every "
                      f"component in an attested position, {100 * gen['rediscovered']:.1f}% held-out real characters",
                      loc="left", fontsize=10, color=INK)
@@ -247,14 +291,15 @@ def summarise(results) -> str:
     r0 = results[0]
     lines.append(f"| unigram tokens | {r0['baselines']['unigram']:.1f} | – | – | – | – | – | – | – | – |")
     lines.append(f"| bigram tokens | {r0['baselines']['bigram']:.1f} | – | – | – | – | – | – | – | – |")
-    for mode in ("supervised", "unsupervised"):
+    for mode in LABELS:
         rs = [r for r in results if r["mode"] == mode]
         if not rs:
             continue
         m = lambda f: float(np.mean([f(r) for r in rs]))
+        brackets = ("– | –" if rs[0]["omission"] is None else
+                    f"{100 * m(lambda r: r['omission']):.1f}% | {100 * m(lambda r: r['commission']):.1f}%")
         lines.append(
-            f"| TRELLIS v2, {mode} | {m(lambda r: r['test_bits_per_character']):.1f} | "
-            f"{100 * m(lambda r: r['omission']):.1f}% | {100 * m(lambda r: r['commission']):.1f}% | "
+            f"| {LABELS[mode]} | {m(lambda r: r['test_bits_per_character']):.1f} | {brackets} | "
             f"{100 * m(lambda r: r['generation']['well formed']):.1f}% | "
             f"{100 * m(lambda r: r['generation']['positions attested']):.1f}% | "
             f"{100 * m(lambda r: r['generation']['rediscovered']):.1f}% | "
@@ -279,7 +324,7 @@ def main():
         with open(os.path.join(args.out, "results.json")) as f:
             print(figure(json.load(f), args.out))
         return
-    jobs = [(mode, int(s)) for s in args.seeds.split(",") for mode in ("unsupervised", "supervised")]
+    jobs = [(mode, int(s)) for s in args.seeds.split(",") for mode in ("unsupervised", "supervised", "relational")]
     with ProcessPoolExecutor(max_workers=len(jobs)) as pool:
         results = [f.result() for f in [pool.submit(run, m, s, args.train, args.test, args.n_gen, args.path)
                                         for m, s in jobs]]

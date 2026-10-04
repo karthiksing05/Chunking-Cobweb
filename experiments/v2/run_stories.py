@@ -10,10 +10,14 @@ Reported, with word unigram, bigram and trigram models as references:
 * held-out bits per sentence (summed over all analyses);
 * the grammar: categories, chunk types, how often a sentence is analysed as
   one whole tree;
-* generated sentences (1,000): new (not among the training sentences), real
-  (the sentence occurs, word for word, somewhere among the 497,000
-  sentences of TinyStories), and the share of their word pairs and triples
-  that occur in TinyStories;
+* generated sentences (1,000 each): the grammar's own sentences (those it
+  derives as one tree) and all of its samples (which include partial
+  analyses, forests of pieces). For each: new (not among the training
+  sentences), real (the sentence occurs, word for word, somewhere among the
+  497,000 sentences of TinyStories), both, and the share of word pairs and
+  triples that occur in TinyStories; and the same within the training
+  sentences' length range, because short fragments such as "mom" or
+  "together" are new and real without being coherent;
 * consistency: a generated sentence is perceived again (Viterbi analysis)
   with the analysis it was generated from.
 
@@ -23,9 +27,11 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
 import math
 import os
+import pickle
 import sys
 import time
 from collections import Counter, defaultdict
@@ -80,14 +86,26 @@ def ngram_sample(model, order, rng, max_len=20):
     return out
 
 
-def generation_measures(samples, train_set, corpus_set, corpus_grams):
-    n = len(samples)
-    new = [s for s in samples if tuple(s) not in train_set]
+def generation_measures(samples, train_set, corpus_set, corpus_grams, lengths):
+    """New, real and both, overall and among the samples whose length is in
+    the training range ``lengths`` = (shortest, longest)."""
+    lo, hi = lengths
+
+    def shares(ss):
+        if not ss:
+            return 0.0, 0.0, 0.0
+        new = [tuple(s) not in train_set for s in ss]
+        real = [tuple(s) in corpus_set for s in ss]
+        return float(np.mean(new)), float(np.mean(real)), float(np.mean([a and b for a, b in zip(new, real)]))
+    new, real, both = shares(samples)
+    inside = [s for s in samples if lo <= len(s) <= hi]
+    _, real_in, both_in = shares(inside)
     pairs = [tuple(s[i:i + 2]) in corpus_grams for s in samples for i in range(len(s) - 1)]
     triples = [tuple(s[i:i + 3]) in corpus_grams for s in samples for i in range(len(s) - 2)]
-    return {"new": len(new) / n,
-            "real": sum(tuple(s) in corpus_set for s in samples) / n,
-            "new and real": sum(tuple(s) in corpus_set for s in new) / n,
+    return {"new": new, "real": real, "new and real": both,
+            f"{lo}–{hi} words long": len(inside) / len(samples),
+            f"real, among those of {lo}–{hi} words": real_in,
+            f"new and real, among those of {lo}–{hi} words": both_in,
             "word pairs in TinyStories": float(np.mean(pairs)) if pairs else 0.0,
             "word triples in TinyStories": float(np.mean(triples)) if triples else 0.0,
             "mean length": float(np.mean([len(s) for s in samples]))}
@@ -131,28 +149,28 @@ def main():
           f"held out {held:.1f} bits/sentence vs {baselines}", flush=True)
 
     rng = np.random.default_rng(args.seed)
-    gen, _ = learner.generate(args.n_gen, rng, max_len=20)
-    samples = [tokens for tokens, _ in gen]
-    consistent = 0
-    for tokens, tree in gen:
-        seen = learner.analyse(tokens)
-        consistent += seen.brackets() == tree.brackets() and seen.roots == tree.roots
-    measures = {"TRELLIS v2": generation_measures(samples, train_set, corpus_set, corpus_grams)}
-    measures["TRELLIS v2"]["perceived with the analysis it was generated from"] = consistent / len(gen)
-    # Chunk-level coherence: every multi-word chunk inside a generated
-    # sentence, looked up as a word sequence anywhere in TinyStories.
+    lengths = (3, args.max_len)
     text = " | " + " | ".join(" ".join(c) for c in corpus) + " | "
-    chunks_found = chunks_total = 0
-    for tokens, tree in gen:
-        for (i, j) in tree.brackets():
-            if j - i >= 2 and (i, j) not in tree.roots:
-                chunks_total += 1
-                chunks_found += f" {' '.join(tokens[i:j])} " in text
-    measures["TRELLIS v2"]["chunks inside sentences found in TinyStories"] = chunks_found / max(chunks_total, 1)
+    measures, generated = {}, {}
+    for name, whole_only in (("TRELLIS v2: its own sentences (whole trees)", True),
+                             ("TRELLIS v2: all samples", False)):
+        gen, _ = learner.generate(args.n_gen, rng, max_len=20, whole_only=whole_only)
+        generated[name] = gen
+        m = generation_measures([tokens for tokens, _ in gen], train_set, corpus_set, corpus_grams, lengths)
+        # Consistency: perceived again with the analysis it was generated from.
+        seen = [learner.analyse(tokens) for tokens, _ in gen]
+        m["perceived with the analysis it was generated from"] = float(np.mean(
+            [a.brackets() == tree.brackets() and a.roots == tree.roots for a, (_, tree) in zip(seen, gen)]))
+        # Chunk-level coherence: every multi-word chunk inside a generated
+        # sentence, looked up as a word sequence anywhere in TinyStories.
+        inner = [" ".join(tokens[i:j]) for tokens, tree in gen for (i, j) in tree.brackets()
+                 if j - i >= 2 and (i, j) not in tree.roots]
+        m["chunks inside sentences found in TinyStories"] = float(np.mean([f" {c} " in text for c in inner])) if inner else 0.0
+        measures[name] = m
     for k in (2, 3):
         smp = [ngram_sample(models[k], k, rng) for _ in range(args.n_gen)]
         measures[f"word {k}-gram"] = generation_measures([s for s in smp if s] or [["-"]], train_set,
-                                                           corpus_set, corpus_grams)
+                                                           corpus_set, corpus_grams, lengths)
     print(json.dumps(measures, indent=1), flush=True)
 
     # The grammar: categories and chunk types.
@@ -164,10 +182,14 @@ def main():
         for (i, j) in tree.brackets():
             if j - i >= 2 and (i, j) not in tree.roots:
                 chunks[" ".join(tokens[i:j])] += 1
+    whole, every = generated.values()
     examples = {"held-out analyses": [learner.parse(s).to_string(s) for s in test[:25]],
-                "all generated": [tree.to_string(tokens) for tokens, tree in gen],
+                "all generated": [tree.to_string(tokens) for tokens, tree in whole],
+                "all generated, all samples": [tree.to_string(tokens) for tokens, tree in every],
                 "generated": [tree.to_string(tokens) + ("" if tuple(tokens) in train_set else "  (new)")
-                              for tokens, tree in gen[:40]]}
+                              for tokens, tree in whole[:40]],
+                "generated, all samples": [tree.to_string(tokens) + ("" if tuple(tokens) in train_set else "  (new)")
+                                           for tokens, tree in every[:40]]}
     results = {"train": len(train), "test": len(test), "vocabulary": args.vocab, "seconds": seconds,
                "symbols": g.K, "rule classes": g.M, "chunk types": g.info["chunk types"],
                "training bits": g.info["total bits"], "top-level chunks per sentence": float(np.mean(tops)),
@@ -177,6 +199,11 @@ def main():
                "examples": examples, "history": learner.history}
     with open(os.path.join(args.out, "results.json"), "w") as f:
         json.dump(results, f, indent=1, default=str)
+    # The grammar's tables (without the Cobweb nodes, which do not pickle),
+    # the training sentences and their analyses, for further study.
+    with open(os.path.join(args.out, "grammar.pkl"), "wb") as f:
+        pickle.dump({"grammar": dataclasses.replace(g, symbol_nodes=[], rule_nodes=[]),
+                     "train": train, "test": test, "trees": learner.trees}, f)
 
     lines = [f"TinyStories, sentences of 3–{args.max_len} words over the {args.vocab} most frequent words: "
              f"{len(train)} learned from sentences alone, {len(test)} held out (seed {args.seed}).", "",
@@ -188,7 +215,7 @@ def main():
               f"({np.mean(tops):.2f} top-level chunks per sentence).", "",
               f"| Generated sentences ({args.n_gen:,}) | " + " | ".join(measures) + " |",
               "|---|" + "---|" * len(measures)]
-    for k in measures["TRELLIS v2"]:
+    for k in next(iter(measures.values())):
         lines.append(f"| {k} | " + " | ".join(
             (f"{m[k]:.1%}" if k != "mean length" else f"{m[k]:.1f}") if k in m else "–"
             for m in measures.values()) + " |")
@@ -197,8 +224,10 @@ def main():
         lines.append(f"- S{c['symbol']} ({c['count']:.0f}): " + ", ".join(y for y, _ in c["yields"]))
     lines += ["", "Most frequent chunks inside training analyses: "
               + ", ".join(f"*{c}* ({n})" for c, n in chunks.most_common(20)), ""]
-    lines += ["", "Generated sentences (analysis as generated):", ""]
+    lines += ["", "The grammar's own sentences (analysis as generated):", ""]
     lines += [f"    {x}" for x in examples["generated"][:25]]
+    lines += ["", "All samples, including partial analyses (pieces joined by ·):", ""]
+    lines += [f"    {x}" for x in examples["generated, all samples"][:15]]
     lines += ["", "Held-out sentences (minimum-risk analysis):", ""]
     lines += [f"    {x}" for x in examples["held-out analyses"][:15]]
     with open(os.path.join(args.out, "summary.md"), "w") as f:

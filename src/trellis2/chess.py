@@ -25,10 +25,18 @@ their relation.
 **The top level.** A board is read square by square, a1 b1 ... h1 a2 ... h8,
 as a sentence is read word by word. Each square that no earlier chunk covers
 is coded as empty or as the anchor of a top-level element, from one
-Dirichlet row per square. So that a chunk is decoded at its first square,
-relations point forward in the scan: the N, NE, NW and E rays and the four
-upward knight jumps (32 relations). A chunk therefore pays for itself when
-it predicts its pieces better than their squares do.
+Dirichlet row per square and context. So that a chunk is decoded at its
+first square, relations point forward in the scan: the N, NE, NW and E rays
+and the four upward knight jumps (32 relations). A chunk therefore pays for
+itself when it predicts its pieces better than their squares do.
+
+**What has been read so far.** A square is read in the light of the pieces
+on the squares before it: the context of the read is a set of features "at
+least m pieces of kind k stand on earlier squares", each kept only if it
+shortens the code of the training positions (``select_context``). Read
+without it, every square is drawn on its own and a generated board has one
+king of each colour only a third of the time; the features that pay for
+themselves include "a white king is already on the board".
 
 The positions are middlegame positions from the Lichess database (CC0); see
 ``experiments/v2/run_chess.py`` for how they are extracted into
@@ -62,6 +70,9 @@ RELATIONS = [f"{d}{k}" for d in FORWARD_RAYS for k in range(1, 8)] + list(FORWAR
 OFFSET = {f"{d}{k}": (dx * k, dy * k) for d, (dx, dy) in RAYS if d in FORWARD_RAYS for k in range(1, 8)}
 OFFSET.update({d: v for d, v in JUMPS if d in FORWARD_JUMPS})
 Node = tuple    # (label, square) for a piece, (label, (node, relation, node)) for a chunk
+TOKENS = {c + p for c in "wb" for p in "KQRBNP"}
+KINDS = sorted(TOKENS)
+Feature = Tuple[str, int]   # at least m pieces of this kind on earlier squares
 
 
 def square_name(sq: Square) -> str:
@@ -154,6 +165,68 @@ def render(node: Node, position: Position) -> str:
 
 
 # --------------------------------------------------------------------------- #
+# The context of the square-by-square read
+# --------------------------------------------------------------------------- #
+def scan_rows(position: Position, features: Sequence[Feature]) -> np.ndarray:
+    """The row of every square's read: the square, and for each feature
+    whether at least m pieces of its kind stand on earlier squares."""
+    rows = np.zeros(64, dtype=np.int64)
+    placed: Counter = Counter()
+    for i in range(64):
+        r = i
+        for kind, m in features:
+            r = r * 2 + (placed[kind] >= m)
+        rows[i] = r
+        t = position.get((i % 8, i // 8))
+        if t is not None:
+            placed[t] += 1
+    return rows
+
+
+def select_context(positions: Sequence[Position], alpha: float = 0.001,
+                   max_count: int = 8) -> List[Feature]:
+    """Greedily add the feature "at least m pieces of kind k on earlier
+    squares" that most shortens the code of the positions read square by
+    square, while one does."""
+    outcomes = KINDS + [EMPTY]
+    index = {o: i for i, o in enumerate(outcomes)}
+    out, square, before = [], [], []
+    for position in positions:
+        placed = np.zeros(len(KINDS), dtype=np.int64)
+        for i in range(64):
+            t = position.get((i % 8, i // 8), EMPTY)
+            out.append(index[t])
+            square.append(i)
+            before.append(placed.copy())
+            if t != EMPTY:
+                placed[index[t]] += 1
+    out, square, before = np.array(out), np.array(square), np.array(before)
+    ones = np.ones(len(out))
+
+    def code(features):
+        rows = square.copy()
+        for k, m in features:
+            rows = rows * 2 + (before[:, k] >= m)
+        return dm_code(rows, out, ones, len(outcomes), alpha)
+
+    candidates = [(k, m) for k in range(len(KINDS)) for m in range(1, max_count + 1)
+                  if (before[:, k] >= m).any() and (before[:, k] < m).any()]
+    chosen: List[Tuple[int, int]] = []
+    current = code(chosen)
+    while True:
+        scored = [(code(chosen + [c]), c) for c in candidates if c not in chosen]
+        if not scored:
+            break
+        value, best = min(scored)
+        if value >= current - 1e-6:
+            break
+        chosen.append(best)
+        current = value
+    return [(KINDS[k], m) for k, m in chosen]
+
+
+
+# --------------------------------------------------------------------------- #
 # The board's memory: star context, relations, the scan code
 # --------------------------------------------------------------------------- #
 class BoardMemory(Memory):
@@ -162,9 +235,11 @@ class BoardMemory(Memory):
 
     relations = RELATIONS
 
-    def __init__(self, spine_depth: int = 2, granularities: int = 2):
+    def __init__(self, spine_depth: int = 2, granularities: int = 2,
+                 features: Sequence[Feature] = ()):
         super().__init__(spine_depth=spine_depth, granularities=granularities)
         self.attrs = ["rays", "jumps", "t", "colour", "piece", "k", "rank", "file"] + chunk_attrs(spine_depth, granularities)
+        self.features = list(features)
         self.anchor: List[Square] = []
         self.members: List[frozenset] = []
         self.label: List[Hashable] = []      # the analysis' own label of each element
@@ -233,9 +308,9 @@ class BoardMemory(Memory):
         return f"[{self.describe(self.left[e])} {self.relation[e]} {self.describe(self.right[e])}]"
 
     def _scan_arrays(self):
-        """Per square read in each position: (square index, the top-level
-        element anchored there or -1 if the square is empty, weight).
-        Squares covered by an earlier chunk are not read."""
+        """Per square read in each position: (its row: the square and its
+        context, the top-level element anchored there or -1 if the square is
+        empty, weight). Squares covered by an earlier chunk are not read."""
         if self._scan is None:
             at = {}
             for e, root in enumerate(self.is_root):
@@ -244,11 +319,12 @@ class BoardMemory(Memory):
             weight = {self.sentence_of[e]: self.weight[e] for e in at.values()}
             q, el, w = [], [], []
             for pid, position in enumerate(self.sentences):
+                rows = scan_rows(position, self.features)
                 for i in range(64):
                     sq = (i % 8, i // 8)
                     e = at.get((pid, sq))
                     if e is not None or sq not in position:
-                        q.append(i)
+                        q.append(rows[i])
                         el.append(-1 if e is None else e)
                         w.append(weight.get(pid, 1.0))
             self._scan = (np.array(q, dtype=np.int64), np.array(el, dtype=np.int64), np.array(w))
@@ -262,7 +338,7 @@ class BoardMemory(Memory):
     def scan_counts(self, s: np.ndarray, K: int) -> np.ndarray:
         q, el, w = self._scan_arrays()
         outcome = np.where(el >= 0, s[np.maximum(el, 0)], K)
-        counts = np.zeros((64, K + 1))
+        counts = np.zeros((64 * 2 ** len(self.features), K + 1))
         np.add.at(counts, (q, outcome), w)
         return counts
 
@@ -281,27 +357,38 @@ class BoardSearch:
     elements labelled B and C whose anchors stand in that relation (each
     element at most once, in scan order)."""
 
-    def __init__(self, positions: Sequence[Position], alpha: float = 0.001):
+    def __init__(self, positions: Sequence[Position], alpha: float = 0.001,
+                 features: Sequence[Feature] = ()):
         self.a = alpha
+        self.features = list(features)
         self.V = len({t for p in positions for t in p.values()}) + 1
         self.NR = len(RELATIONS)
         self.rows: Dict[Hashable, Counter] = defaultdict(Counter)
-        self.sq: List[Counter] = [Counter() for _ in range(64)]
+        self.sq: Dict[int, Counter] = defaultdict(Counter)     # scan row -> outcomes
         self.pos = []
         self.fresh = 0
         self.moves: List[tuple] = []      # (B, relation, C, Y) in the order applied
         for position in positions:
             tops = {}
+            rows = scan_rows(position, self.features)
             for i in range(64):
                 sq = (i % 8, i // 8)
                 if sq in position:
                     t = position[sq]
                     tops[sq] = (t, sq)
                     self.rows[t][("w", t)] += 1
-                    self.sq[i][t] += 1
+                    self.sq[rows[i]][t] += 1
                 else:
-                    self.sq[i][EMPTY] += 1
-            self.pos.append({"position": position, "tops": tops, "owner": {sq: sq for sq in position}})
+                    self.sq[rows[i]][EMPTY] += 1
+            self.pos.append({"position": position, "tops": tops, "owner": {sq: sq for sq in position},
+                             "rows": rows})
+        self._row_stats()
+
+    def _row_stats(self):
+        """Each scan row's total and the sum of its outcomes' log-gamma terms,
+        so that a move is scored from the rows it changes."""
+        self.row_tot = {r: sum(c.values()) for r, c in self.sq.items()}
+        self.row_phi = {r: sum(_phi(v, self.a) for v in c.values()) for r, c in self.sq.items()}
 
     def _row_nats(self, K: int) -> float:
         A = (self.V + K * K * self.NR) * self.a
@@ -312,7 +399,7 @@ class BoardSearch:
         K = len(self.rows)
         nats = self._row_nats(K)
         A = (K + 1) * self.a
-        for c in self.sq:
+        for c in self.sq.values():
             nats += math.lgamma(sum(c.values()) + A) - math.lgamma(A) - sum(_phi(v, self.a) for v in c.values())
         return nats / math.log(2)
 
@@ -347,21 +434,23 @@ class BoardSearch:
             base_rows[K] = self._row_nats(K)
         nats = base_rows[K] + math.lgamma(n + A) - math.lgamma(A) - _phi(n, a)
         change: Dict[int, Counter] = defaultdict(Counter)
-        for _, s, t in chosen:
-            i, j = s[1] * 8 + s[0], t[1] * 8 + t[0]
+        for pi, s, t in chosen:
+            rows = self.pos[pi]["rows"]
+            i, j = rows[s[1] * 8 + s[0]], rows[t[1] * 8 + t[0]]
             change[i][B] -= 1
             change[i]["Y"] += 1
             change[j][C] -= 1
         A = (K + 1) * a
-        for i, c in enumerate(self.sq):
-            d = change.get(i)
-            if d is None:
-                vals = list(c.values())
-            else:
-                new = Counter(c)
-                for o, dv in d.items():
-                    new[o] += dv
-                vals = [v for v in new.values() if v]
+        if ("scan", K) not in base_rows:
+            base_rows[("scan", K)] = sum(math.lgamma(t + A) - math.lgamma(A) - self.row_phi[r]
+                                         for r, t in self.row_tot.items())
+        nats += base_rows[("scan", K)]
+        for r, d in change.items():
+            new = Counter(self.sq[r])
+            for o, dv in d.items():
+                new[o] += dv
+            vals = [v for v in new.values() if v]
+            nats -= math.lgamma(self.row_tot[r] + A) - math.lgamma(A) - self.row_phi[r]
             nats += math.lgamma(sum(vals) + A) - math.lgamma(A) - sum(_phi(v, a) for v in vals)
         return nats / math.log(2)
 
@@ -378,11 +467,13 @@ class BoardSearch:
             for m, owner in list(p["owner"].items()):
                 if owner == t:
                     p["owner"][m] = s
-            i, j = s[1] * 8 + s[0], t[1] * 8 + t[0]
+            i, j = p["rows"][s[1] * 8 + s[0]], p["rows"][t[1] * 8 + t[0]]
             self.sq[i][B] -= 1
             self.sq[i][Y] += 1
             self.sq[j][C] -= 1
-        self.sq = [Counter({o: v for o, v in c.items() if v}) for c in self.sq]
+        self.sq = defaultdict(Counter, {r: Counter({o: v for o, v in c.items() if v})
+                                        for r, c in self.sq.items()})
+        self._row_stats()
         return Y
 
     def run(self, max_steps: int = 500, log=None) -> float:
@@ -413,7 +504,7 @@ class BoardSearch:
         learned chunk moves in order and coded with this search's counts
         (posterior predictive), and the same with no chunks (each square on
         its own, from the training positions' flat counts)."""
-        analysed = BoardSearch(positions, self.a)
+        analysed = BoardSearch(positions, self.a, self.features)
         for B, rel, C, Y in self.moves:
             pairs = [(pi, sq, t) for pi, p in enumerate(analysed.pos) for sq, x in p["tops"].items()
                      if x[0] == B for r, t in forward_neighbours(p["position"], sq)
@@ -422,19 +513,20 @@ class BoardSearch:
             if chosen:
                 analysed.fresh = Y[1]
                 analysed.apply((B, rel, C), chosen)
-        flat = BoardSearch([p["position"] for p in self.pos], self.a)
+        flat = BoardSearch([p["position"] for p in self.pos], self.a, self.features)
         return (self.code_of(analysed) / len(positions),
-                flat.code_of(BoardSearch(positions, self.a)) / len(positions))
+                flat.code_of(BoardSearch(positions, self.a, self.features)) / len(positions))
 
     def code_of(self, other: "BoardSearch") -> float:
         """Bits of another set of analyses under this search's counts."""
         a, K = self.a, len(self.rows)
         A = (self.V + K * K * self.NR) * a
         bits = 0.0
-        for i in range(64):
-            n = sum(self.sq[i].values())
-            for o, m in other.sq[i].items():
-                bits -= m * math.log2((self.sq[i].get(o, 0) + a) / (n + (K + 1) * a))
+        for r, theirs in other.sq.items():
+            mine = self.sq.get(r, Counter())
+            n = sum(mine.values())
+            for o, m in theirs.items():
+                bits -= m * math.log2((mine.get(o, 0) + a) / (n + (K + 1) * a))
         for lab, row in other.rows.items():
             mine = self.rows.get(lab, Counter())
             n = sum(mine.values())
@@ -451,8 +543,13 @@ class ChessLearner:
     consolidation into the two hierarchies forms the categories and rule
     classes, and the grammar read off them generates positions."""
 
-    def __init__(self, seed: int = 0, alpha: float = 0.001, max_steps: int = 500):
+    def __init__(self, seed: int = 0, alpha: float = 0.001, max_steps: int = 500,
+                 context: bool = True):
         self.seed, self.alpha, self.max_steps = seed, alpha, max_steps
+        # Whether the square-by-square read learns its context (it does by
+        # default; without it every square is read on its own).
+        self.context = context
+        self.features: List[Feature] = []
         self.model: Optional[Trellis2] = None
         self.search: Optional[BoardSearch] = None
         self.analyses: List[List[Node]] = []
@@ -460,7 +557,8 @@ class ChessLearner:
 
     def sleep(self, positions: Sequence[Position]) -> Grammar:
         t0 = time.time()
-        search = BoardSearch(positions, self.alpha)
+        self.features = select_context(positions, self.alpha) if self.context else []
+        search = BoardSearch(positions, self.alpha, self.features)
         flat = search.bits()
         self.history.append({"stage": "flat", "bits": flat, "seconds": 0.0})
 
@@ -470,7 +568,7 @@ class ChessLearner:
         search.run(self.max_steps, log)
         self.search = search
         self.analyses = search.analyses()
-        mem = BoardMemory()
+        mem = BoardMemory(features=self.features)
         model = Trellis2(seed=self.seed, alpha=self.alpha, memory=mem)
         for position, tops in zip(positions, self.analyses):
             mem.add_board(position, tops)
@@ -514,7 +612,8 @@ class ChessLearner:
             sq = (i % 8, i // 8)
             if sq in position:
                 continue
-            o = int(rng.choice(g.K + 1, p=g.Q[i]))
+            earlier = {s: t for s, t in position.items() if s[1] * 8 + s[0] < i}
+            o = int(rng.choice(g.K + 1, p=g.Q[scan_rows(earlier, self.features)[i]]))
             if o == g.K:
                 continue
             node = expand(o, sq, 0)
@@ -524,14 +623,18 @@ class ChessLearner:
         return position, tops
 
 
-TOKENS = {c + p for c in "wb" for p in "KQRBNP"}
+
+START = {"K": 1, "Q": 1, "R": 2, "B": 2, "N": 2, "P": 8}
 
 
 def plausibility(position: Position) -> Dict[str, bool]:
-    """Simple checks of a generated position's chess sense."""
+    """Simple checks of a generated position's chess sense. The last is the
+    strictest: no side has more of any kind of piece than it starts with
+    (promotions are rare by move 15)."""
     count = Counter(position.values())
     return {"one king each": count["wK"] == 1 and count["bK"] == 1,
             "no pawn on a back rank": all(not (t[1] == "P" and sq[1] in (0, 7)) for sq, t in position.items()),
             "at most 8 pawns each": count["wP"] <= 8 and count["bP"] <= 8,
             "at most 16 pieces each": sum(v for k, v in count.items() if k[0] == "w") <= 16
-                                       and sum(v for k, v in count.items() if k[0] == "b") <= 16}
+                                       and sum(v for k, v in count.items() if k[0] == "b") <= 16,
+            "no more of any kind than at the start": all(count[c + k] <= n for c in "wb" for k, n in START.items())}

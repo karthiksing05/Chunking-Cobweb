@@ -1,11 +1,11 @@
 """Inside-outside parsing over the factored grammar.
 
-A sentence is a sequence of top-level chunks (a single one when the grammar
-always stops after one, ``p_stop = 1``), each a binary tree. The inside pass
-fills, for every span, the probability that each symbol derives it ("the
-frontier of valid parses going up"). A forward-backward pass over the top
-level sums over every way of cutting the sentence into top-level chunks. A
-top-down pass then gives posteriors: ``mu[i, j, A]`` is the probability that
+A sentence is one binary tree, or, when the grammar cannot derive it whole,
+a forest of two or more top-level pieces (a partial analysis). The inside
+pass fills, for every span, the probability that each symbol derives it
+("the frontier of valid parses going up"). A forward-backward pass over the
+top level sums over the whole tree and every way of cutting the sentence
+into pieces. A top-down pass then gives posteriors: ``mu[i, j, A]`` is the probability that
 span (i, j) is a chunk of category A given the whole sentence, i.e. given
 its content (inside) and all of its context (outside) at once. The
 minimum-Bayes-risk decoder picks the binary tree with the largest expected
@@ -65,33 +65,54 @@ class Chart:
                 lam[i, j] = g.Lt @ a[i, j]
                 rho[i, j] = g.Rt @ a[i, j]
 
-        # Top level. top[i, j] = log sum_A S[A] inside(i, j, A); a chunk that
-        # does not start the sentence first pays log(1 - p_stop).
+        # Top level: the sentence is one tree (log_whole, root symbol from S),
+        # or a forest (log_forest) of two or more pieces whose symbols come
+        # from S_piece; after its second piece a forest stops (log_stop) or
+        # continues (log_cont). top[i, j] = log sum_A S_piece[A] inside(i, j, A).
         with np.errstate(divide="ignore"):
-            self.top = la + np.log(np.einsum("ijk,k->ij", a, g.S))
-        self.cont = np.full(n + 1, g.log_cont)
+            self.top = la + np.log(np.einsum("ijk,k->ij", a, g.S_piece))
+            whole = la[0, n] + np.log(a[0, n] @ g.S) if n else -np.inf
+        self.whole = g.log_whole + whole
+        F1 = self.F1 = np.full(n + 1, -np.inf)   # one piece covering [0, j)
+        H = self.H = np.full(n + 1, -np.inf)     # two or more pieces covering [0, j)
         if n:
-            self.cont[0] = 0.0
-        F = self.F = np.full(n + 1, -np.inf)   # all ways to cover [0, j)
-        G = self.G = np.full(n + 1, -np.inf)   # all ways to cover [j, n), with the stop
-        F[0] = 0.0
-        for j in range(1, n + 1):
-            F[j] = logsumexp(F[:j] + self.cont[:j] + self.top[:j, j])
-        G[n] = g.log_stop
-        for i in range(n - 1, -1, -1):
-            G[i] = logsumexp(self.cont[i] + self.top[i, i + 1:] + G[i + 1:])
-        self.log_prob = float(G[0]) if n else 0.0
+            F1[1:n] = g.log_forest + self.top[0, 1:n]
+        for j in range(2, n + 1):
+            H[j] = logsumexp(np.logaddexp(F1[1:j], g.log_cont + H[1:j]) + self.top[1:j, j])
+        G = self.G = np.full(n + 1, -np.inf)     # complete [j, n) after two or more pieces
+        G1 = self.G1 = np.full(n + 1, -np.inf)   # complete [j, n) after exactly one piece
+        if n:
+            G[n] = g.log_stop
+        for j in range(n - 1, 0, -1):
+            G1[j] = logsumexp(self.top[j, j + 1:] + G[j + 1:])
+            G[j] = g.log_cont + G1[j]
+        self.forest = H[n] + g.log_stop if n else -np.inf
+        self.log_prob = float(np.logaddexp(self.whole, self.forest)) if n else 0.0
         self._mu: Optional[np.ndarray] = None
 
     # ------------------------------------------------------------------ #
-    def top_level_posteriors(self) -> np.ndarray:
-        """P(span (i, j) is a top-level chunk | sentence)."""
+    def _top_posteriors(self) -> Tuple[float, np.ndarray]:
+        """(P(the sentence is one tree), P(span (i, j) is a piece of a forest))."""
         n = self.n
+        pieces = np.zeros((n + 1, n + 1))
+        if n == 0 or not np.isfinite(self.log_prob):
+            return 0.0, pieces
+        lp = np.full((n + 1, n + 1), -np.inf)
+        lp[0, 1:n] = self.F1[1:n] + self.G1[1:n]
+        before = np.logaddexp(self.F1, self.g.log_cont + self.H)
+        for i in range(1, n):
+            lp[i, i + 1:] = before[i] + self.top[i, i + 1:] + self.G[i + 1:]
         with np.errstate(invalid="ignore"):
-            lp = (self.F[:, None] + self.cont[:, None] + self.top + self.G[None, :]
-                  - self.log_prob)
-        lp[~np.isfinite(lp)] = -np.inf
-        return np.exp(lp) if n else np.zeros((1, 1))
+            pieces = np.exp(lp - self.log_prob)
+        return float(np.exp(self.whole - self.log_prob)), np.nan_to_num(pieces)
+
+    def top_level_posteriors(self) -> np.ndarray:
+        """P(span (i, j) is a top-level chunk | sentence): the whole sentence as
+        one tree, or a piece of a forest."""
+        p_whole, tops = self._top_posteriors()
+        if self.n:
+            tops[0, self.n] += p_whole
+        return tops
 
     def label_posteriors(self) -> np.ndarray:
         """mu[i, j, A] = P(span (i, j) is a chunk of category A | sentence)."""
@@ -102,11 +123,14 @@ class Chart:
         if n == 0 or not np.isfinite(self.log_prob):
             self._mu = mu
             return mu
-        tops = self.top_level_posteriors()
-        weighted = a * g.S[None, None, :]
+        p_whole, pieces = self._top_posteriors()
+        weighted = a * g.S_piece[None, None, :]
         norm = weighted.sum(axis=2, keepdims=True)
         with np.errstate(divide="ignore", invalid="ignore"):
-            mu += np.where(norm > 0, weighted / norm, 0.0) * tops[:, :, None]
+            mu += np.where(norm > 0, weighted / norm, 0.0) * pieces[:, :, None]
+        root = a[0, n] * g.S
+        if root.sum() > 0:
+            mu[0, n] += p_whole * root / root.sum()
         for length in range(n, 1, -1):
             for i in range(n - length + 1):
                 j = i + length
@@ -199,24 +223,35 @@ class Chart:
                 arg = np.argmax(flat, axis=1)
                 best[i, j] = flat[np.arange(K), arg]
                 back[(i, j)] = arg
-        # Best way to cut the sentence into top-level chunks.
-        chunk = log_start[None, None, :] + best                            # (i, j, A)
-        V = np.full(n + 1, -np.inf)
-        V[0] = 0.0
-        prev: Dict[int, Tuple[int, int]] = {}
-        for j in range(1, n + 1):
-            for i in range(j):
-                A = int(np.argmax(chunk[i, j]))
-                cand = V[i] + self.cont[i] + chunk[i, j, A]
-                if cand > V[j]:
-                    V[j], prev[j] = cand, (i, A)
-        roots, stack, j = [], [], n
-        while j > 0:
-            i, A = prev[j]
-            roots.append((i, j))
-            stack.append((i, j, A))
-            j = i
-        roots.reverse()
+        # The best whole tree, against the best forest of two or more pieces.
+        A0 = int(np.argmax(log_start + best[0, n]))
+        whole = g.log_whole + log_start[A0] + best[0, n, A0]
+        with np.errstate(divide="ignore"):
+            chunk = np.log(g.S_piece)[None, None, :] + best                 # (i, j, A)
+        piece_A, piece_v = chunk.argmax(axis=2), chunk.max(axis=2)
+        one = np.full(n + 1, -np.inf)       # one piece covering [0, j)
+        many = np.full(n + 1, -np.inf)      # two or more pieces covering [0, j)
+        prev: Dict[int, Tuple[int, bool]] = {}
+        one[1:n] = g.log_forest + piece_v[0, 1:n]
+        for j in range(2, n + 1):
+            for i in range(1, j):
+                for after_one, base in ((True, one[i]), (False, g.log_cont + many[i])):
+                    if base + piece_v[i, j] > many[j]:
+                        many[j], prev[j] = base + piece_v[i, j], (i, after_one)
+        if whole >= many[n] + g.log_stop:
+            roots, stack = [(0, n)], [(0, n, A0)]
+        else:
+            roots, stack, j = [], [], n
+            while True:
+                i, after_one = prev[j]
+                roots.append((i, j))
+                stack.append((i, j, int(piece_A[i, j])))
+                if after_one:
+                    roots.append((0, i))
+                    stack.append((0, i, int(piece_A[0, i])))
+                    break
+                j = i
+            roots.reverse()
         split: Dict[Span, int] = {}
         label: Dict[Span, int] = {}
         while stack:
@@ -243,15 +278,25 @@ class Chart:
         g, n, a, la = self.g, self.n, self.a, self.la
         if n == 0:
             return Tree(0, {})
-        roots, stack, i = [], [], 0
-        while i < n:
-            logits = self.cont[i] + self.top[i, i + 1:] + self.G[i + 1:]
+
+        def pick(logits):
             p = np.exp(logits - logsumexp(logits))
-            j = i + 1 + int(rng.choice(len(p), p=p / p.sum()))
-            w = g.S * a[i, j]
-            roots.append((i, j))
-            stack.append((i, j, int(rng.choice(g.K, p=w / w.sum()))))
-            i = j
+            return int(rng.choice(len(p), p=p / p.sum()))
+
+        if rng.random() < np.exp(self.whole - self.log_prob):
+            w = g.S * a[0, n]
+            roots, stack = [(0, n)], [(0, n, int(rng.choice(g.K, p=w / w.sum())))]
+        else:
+            # The first piece, then each next one; the stop at n is in G[n].
+            ends = [1 + pick(self.F1[1:n] + self.G1[1:n])]
+            while ends[-1] < n:
+                i = ends[-1]
+                ends.append(i + 1 + pick(self.top[i, i + 1:] + self.G[i + 1:]))
+            roots, stack = [], []
+            for i, j in zip([0] + ends[:-1], ends):
+                w = g.S_piece * a[i, j]
+                roots.append((i, j))
+                stack.append((i, j, int(rng.choice(g.K, p=w / w.sum()))))
         split: Dict[Span, int] = {}
         label: Dict[Span, int] = {}
         while stack:

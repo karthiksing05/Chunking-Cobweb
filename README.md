@@ -6,16 +6,15 @@ Work with Dr. Pat Langley and Dr. Chris MacLellan (ISLE internship) on a computa
 
 TRELLIS v2 keeps concepts and chunks in two Cobweb hierarchies: the **representation hierarchy** (how elements behave) and the **composition hierarchy** (what they are made of). It reads one probabilistic grammar off them by minimum description length, and learns from analysed experiences or from experiences alone, by day and by night. The two hierarchies are the core of v2: every other part is read off them or feeds them.
 
-The same machinery runs on sentences, on Chinese characters (components placed by spatial operators), and on chess positions, whose parts are joined by typed relations (the directions of a queen's rays and a knight's jumps) instead of left-to-right order.
+The same machinery runs on sentences, on Chinese characters, and on chess positions. In the last two, parts are joined by typed relations instead of left-to-right order: a character's components by its spatial operators (left of, above, inside, …), a position's pieces by the directions and distances of a queen's rays and a knight's jumps.
 
 ## Documentation
 
 | Document | What it is |
 |---|---|
 | [`docs/FRAMEWORK.md`](docs/FRAMEWORK.md) | **Start here.** TRELLIS v2 end to end, with figures: the two hierarchies, the grammar, description length, parsing and generation, learning by day and night, results, and every domain |
-| [`docs/V2_DESIGN.md`](docs/V2_DESIGN.md) | The design log: decisions taken with the user, the evidence behind each choice, and the detailed result tables |
+| [`docs/V2_DESIGN.md`](docs/V2_DESIGN.md) | The design log: decisions taken with the user, the evidence behind each choice, the detailed result tables, and the literature behind v2 (condensed from the October 2026 review, whose full report and notes are in the git history at commit `fbe61901`) |
 | [`confs/acs-26/RESULTS.md`](confs/acs-26/RESULTS.md) | TRELLIS v1, the paper "A Unified Framework of Concepts and Chunks" (frozen); the paper's source is in `confs/acs-26/paper/` |
-| [`reports/Trellis v2 inside outside literature review.md`](reports/Trellis%20v2%20inside%20outside%20literature%20review.md) | The literature review behind v2; its notes are in `research_notes/` |
 | `experiments/v2/results/*/summary.md` | Result tables, written by the experiment scripts |
 
 Working notes kept while the project evolved. They record how the ideas developed; where they differ from the documents above, the documents above are current.
