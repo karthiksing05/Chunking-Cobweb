@@ -1,0 +1,1865 @@
+[
+ {
+  "condition": "small",
+  "seed": 13,
+  "gold_bits": 3189.0809774154245,
+  "flat_bits": 6793.816789876496,
+  "runs": [
+   {
+    "word_classes": 13,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 4953.7534151235195,
+    "commission": 0.983,
+    "seconds": 0.10891914367675781
+   },
+   {
+    "word_classes": 13,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 4953.7534151235195,
+    "commission": 0.983,
+    "seconds": 0.47118401527404785
+   },
+   {
+    "word_classes": 13,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 3208.5424067050735,
+    "commission": 0.0,
+    "seconds": 5.520251989364624
+   },
+   {
+    "word_classes": 12,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 3208.5134295391963,
+    "commission": 0.0,
+    "seconds": 0.16978788375854492
+   },
+   {
+    "word_classes": 12,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 3208.5424067050735,
+    "commission": 0.0,
+    "seconds": 1.049422264099121
+   },
+   {
+    "word_classes": 12,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 3208.5424067050735,
+    "commission": 0.0,
+    "seconds": 5.692622900009155
+   },
+   {
+    "word_classes": 11,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 3354.486933555245,
+    "commission": 0.077,
+    "seconds": 0.19921302795410156
+   },
+   {
+    "word_classes": 11,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 3208.6083520232824,
+    "commission": 0.0,
+    "seconds": 1.0508999824523926
+   },
+   {
+    "word_classes": 11,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 3189.080977415422,
+    "commission": 0.0,
+    "seconds": 1.7364888191223145
+   },
+   {
+    "word_classes": 10,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 3354.486933555245,
+    "commission": 0.077,
+    "seconds": 0.17913508415222168
+   },
+   {
+    "word_classes": 10,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 3208.6083520232824,
+    "commission": 0.0,
+    "seconds": 0.9673027992248535
+   },
+   {
+    "word_classes": 10,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 3208.6083520232824,
+    "commission": 0.0,
+    "seconds": 4.924104928970337
+   },
+   {
+    "word_classes": 9,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 3427.0022454704663,
+    "commission": 0.077,
+    "seconds": 0.16294503211975098
+   },
+   {
+    "word_classes": 9,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 3208.5134295391963,
+    "commission": 0.0,
+    "seconds": 0.9761009216308594
+   },
+   {
+    "word_classes": 9,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 3189.080977415422,
+    "commission": 0.0,
+    "seconds": 1.5561280250549316
+   },
+   {
+    "word_classes": 8,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 3208.6063957446668,
+    "commission": 0.0,
+    "seconds": 0.17612791061401367
+   },
+   {
+    "word_classes": 8,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 3279.3768428722697,
+    "commission": 0.0,
+    "seconds": 0.8971078395843506
+   },
+   {
+    "word_classes": 8,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 3189.080977415422,
+    "commission": 0.0,
+    "seconds": 1.10337495803833
+   },
+   {
+    "word_classes": 7,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 3189.080977415422,
+    "commission": 0.0,
+    "seconds": 0.07694816589355469
+   },
+   {
+    "word_classes": 7,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 3189.080977415422,
+    "commission": 0.0,
+    "seconds": 0.2847461700439453
+   },
+   {
+    "word_classes": 7,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 3189.080977415422,
+    "commission": 0.0,
+    "seconds": 1.0607552528381348
+   },
+   {
+    "word_classes": 6,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 3189.080977415422,
+    "commission": 0.0,
+    "seconds": 0.07554197311401367
+   },
+   {
+    "word_classes": 6,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 3189.080977415422,
+    "commission": 0.0,
+    "seconds": 0.22628402709960938
+   },
+   {
+    "word_classes": 6,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 3189.080977415422,
+    "commission": 0.0,
+    "seconds": 0.8646373748779297
+   },
+   {
+    "word_classes": 5,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 3189.080977415422,
+    "commission": 0.0,
+    "seconds": 0.0617518424987793
+   },
+   {
+    "word_classes": 5,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 3189.080977415422,
+    "commission": 0.0,
+    "seconds": 0.19009780883789062
+   },
+   {
+    "word_classes": 5,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 3189.080977415422,
+    "commission": 0.0,
+    "seconds": 0.611997127532959
+   },
+   {
+    "word_classes": 4,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 3189.080977415422,
+    "commission": 0.0,
+    "seconds": 0.05526113510131836
+   },
+   {
+    "word_classes": 4,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 3189.080977415422,
+    "commission": 0.0,
+    "seconds": 0.13585782051086426
+   },
+   {
+    "word_classes": 4,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 3189.080977415422,
+    "commission": 0.0,
+    "seconds": 0.417125940322876
+   },
+   {
+    "word_classes": 3,
+    "final_partition": true,
+    "beam": 1,
+    "patience": 0,
+    "bits": 3189.080977415422,
+    "commission": 0.0,
+    "seconds": 0.05000495910644531
+   },
+   {
+    "word_classes": 3,
+    "final_partition": true,
+    "beam": 4,
+    "patience": 3,
+    "bits": 3189.080977415422,
+    "commission": 0.0,
+    "seconds": 0.1050570011138916
+   },
+   {
+    "word_classes": 3,
+    "final_partition": true,
+    "beam": 16,
+    "patience": 5,
+    "bits": 3189.080977415422,
+    "commission": 0.0,
+    "seconds": 0.3703620433807373
+   }
+  ],
+  "seconds": 31.70982003211975
+ },
+ {
+  "condition": "med",
+  "seed": 13,
+  "gold_bits": 6651.44602058979,
+  "flat_bits": 11623.648652521633,
+  "runs": [
+   {
+    "word_classes": 15,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 9467.928240036868,
+    "commission": 0.995,
+    "seconds": 0.17285394668579102
+   },
+   {
+    "word_classes": 15,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 8978.057077135963,
+    "commission": 0.973,
+    "seconds": 1.4175829887390137
+   },
+   {
+    "word_classes": 15,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 7666.177363410302,
+    "commission": 0.665,
+    "seconds": 11.459782838821411
+   },
+   {
+    "word_classes": 14,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 8734.83932902088,
+    "commission": 0.982,
+    "seconds": 0.23647618293762207
+   },
+   {
+    "word_classes": 14,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 7934.894762573359,
+    "commission": 0.931,
+    "seconds": 1.2607600688934326
+   },
+   {
+    "word_classes": 14,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 7766.389696460862,
+    "commission": 0.69,
+    "seconds": 11.272217988967896
+   },
+   {
+    "word_classes": 13,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 7924.500653836369,
+    "commission": 0.849,
+    "seconds": 0.25696492195129395
+   },
+   {
+    "word_classes": 13,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 7484.467271011106,
+    "commission": 0.721,
+    "seconds": 1.752333164215088
+   },
+   {
+    "word_classes": 13,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 7298.8622907917215,
+    "commission": 0.612,
+    "seconds": 9.249699831008911
+   },
+   {
+    "word_classes": 12,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 6887.081896091097,
+    "commission": 0.324,
+    "seconds": 0.253828763961792
+   },
+   {
+    "word_classes": 12,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 6573.386192317157,
+    "commission": 0.052,
+    "seconds": 1.361576795578003
+   },
+   {
+    "word_classes": 12,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 6511.526485115075,
+    "commission": 0.059,
+    "seconds": 7.323262929916382
+   },
+   {
+    "word_classes": 11,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 7988.441788841786,
+    "commission": 0.856,
+    "seconds": 0.17663788795471191
+   },
+   {
+    "word_classes": 11,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 7816.448357311528,
+    "commission": 0.797,
+    "seconds": 1.0359299182891846
+   },
+   {
+    "word_classes": 11,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 6822.700085772735,
+    "commission": 0.358,
+    "seconds": 5.321321964263916
+   },
+   {
+    "word_classes": 10,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 7601.900966271989,
+    "commission": 0.75,
+    "seconds": 0.2212228775024414
+   },
+   {
+    "word_classes": 10,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 7624.63101700301,
+    "commission": 0.735,
+    "seconds": 0.884148120880127
+   },
+   {
+    "word_classes": 10,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 7479.248478931457,
+    "commission": 0.639,
+    "seconds": 5.162451982498169
+   },
+   {
+    "word_classes": 9,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 7152.736707505358,
+    "commission": 0.517,
+    "seconds": 0.23045825958251953
+   },
+   {
+    "word_classes": 9,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 7076.420266435225,
+    "commission": 0.499,
+    "seconds": 1.0326499938964844
+   },
+   {
+    "word_classes": 9,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 6852.418880671376,
+    "commission": 0.387,
+    "seconds": 6.213068008422852
+   },
+   {
+    "word_classes": 8,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 6584.982252454297,
+    "commission": 0.118,
+    "seconds": 0.27942490577697754
+   },
+   {
+    "word_classes": 8,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 6539.275553803681,
+    "commission": 0.146,
+    "seconds": 1.1988050937652588
+   },
+   {
+    "word_classes": 8,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 6539.145022484199,
+    "commission": 0.146,
+    "seconds": 5.787445068359375
+   },
+   {
+    "word_classes": 7,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 6902.461626685165,
+    "commission": 0.308,
+    "seconds": 0.2890307903289795
+   },
+   {
+    "word_classes": 7,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 6829.367796798773,
+    "commission": 0.281,
+    "seconds": 1.424576997756958
+   },
+   {
+    "word_classes": 7,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 6677.233026442146,
+    "commission": 0.217,
+    "seconds": 5.394982099533081
+   },
+   {
+    "word_classes": 6,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 6845.450305737371,
+    "commission": 0.336,
+    "seconds": 0.2726149559020996
+   },
+   {
+    "word_classes": 6,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 6844.764919376664,
+    "commission": 0.342,
+    "seconds": 1.3047301769256592
+   },
+   {
+    "word_classes": 6,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 6822.0698651475,
+    "commission": 0.422,
+    "seconds": 3.9147050380706787
+   },
+   {
+    "word_classes": 5,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 6841.446667242224,
+    "commission": 0.401,
+    "seconds": 0.24952912330627441
+   },
+   {
+    "word_classes": 5,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 6817.239834213298,
+    "commission": 0.419,
+    "seconds": 1.1578991413116455
+   },
+   {
+    "word_classes": 5,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 6687.44085848708,
+    "commission": 0.349,
+    "seconds": 4.699269771575928
+   },
+   {
+    "word_classes": 4,
+    "final_partition": true,
+    "beam": 1,
+    "patience": 0,
+    "bits": 6727.40843017276,
+    "commission": 0.485,
+    "seconds": 0.19127988815307617
+   },
+   {
+    "word_classes": 4,
+    "final_partition": true,
+    "beam": 4,
+    "patience": 3,
+    "bits": 6750.5755297891865,
+    "commission": 0.431,
+    "seconds": 0.7827799320220947
+   },
+   {
+    "word_classes": 4,
+    "final_partition": true,
+    "beam": 16,
+    "patience": 5,
+    "bits": 6710.724986855002,
+    "commission": 0.419,
+    "seconds": 3.574658155441284
+   }
+  ],
+  "seconds": 97.78813815116882
+ },
+ {
+  "condition": "large",
+  "seed": 13,
+  "gold_bits": 7770.661922343176,
+  "flat_bits": 12563.760621091655,
+  "runs": [
+   {
+    "word_classes": 18,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 9778.757435653812,
+    "commission": 0.976,
+    "seconds": 0.1653909683227539
+   },
+   {
+    "word_classes": 18,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 9733.180670411384,
+    "commission": 0.984,
+    "seconds": 0.8169636726379395
+   },
+   {
+    "word_classes": 18,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 9732.546757991482,
+    "commission": 0.983,
+    "seconds": 4.010560035705566
+   },
+   {
+    "word_classes": 17,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 8168.08088986499,
+    "commission": 0.342,
+    "seconds": 0.29800987243652344
+   },
+   {
+    "word_classes": 17,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 8097.66956930736,
+    "commission": 0.293,
+    "seconds": 1.4379870891571045
+   },
+   {
+    "word_classes": 17,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 8097.66956930736,
+    "commission": 0.293,
+    "seconds": 6.83989405632019
+   },
+   {
+    "word_classes": 16,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 8179.268051479584,
+    "commission": 0.326,
+    "seconds": 0.2584269046783447
+   },
+   {
+    "word_classes": 16,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 7940.621833041795,
+    "commission": 0.151,
+    "seconds": 1.5969808101654053
+   },
+   {
+    "word_classes": 16,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 8033.908135657591,
+    "commission": 0.299,
+    "seconds": 6.590617895126343
+   },
+   {
+    "word_classes": 15,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 8237.469134689001,
+    "commission": 0.394,
+    "seconds": 0.24677395820617676
+   },
+   {
+    "word_classes": 15,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 7800.363962152963,
+    "commission": 0.082,
+    "seconds": 1.4262361526489258
+   },
+   {
+    "word_classes": 15,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 7793.2932912686665,
+    "commission": 0.097,
+    "seconds": 7.210254907608032
+   },
+   {
+    "word_classes": 14,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 9239.717496132345,
+    "commission": 0.89,
+    "seconds": 0.1878662109375
+   },
+   {
+    "word_classes": 14,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 8548.594615929644,
+    "commission": 0.721,
+    "seconds": 1.2747211456298828
+   },
+   {
+    "word_classes": 14,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 7752.61571901083,
+    "commission": 0.062,
+    "seconds": 7.0008299350738525
+   },
+   {
+    "word_classes": 13,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 8724.424153118687,
+    "commission": 0.775,
+    "seconds": 0.2159879207611084
+   },
+   {
+    "word_classes": 13,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 8387.451205097055,
+    "commission": 0.56,
+    "seconds": 1.287276029586792
+   },
+   {
+    "word_classes": 13,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 7739.796408107652,
+    "commission": 0.061,
+    "seconds": 5.806226968765259
+   },
+   {
+    "word_classes": 12,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 8719.600261901964,
+    "commission": 0.743,
+    "seconds": 0.20392799377441406
+   },
+   {
+    "word_classes": 12,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 8438.075797485068,
+    "commission": 0.559,
+    "seconds": 1.248790979385376
+   },
+   {
+    "word_classes": 12,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 8094.235955779109,
+    "commission": 0.359,
+    "seconds": 6.322671175003052
+   },
+   {
+    "word_classes": 11,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 8699.318434786444,
+    "commission": 0.756,
+    "seconds": 0.21036314964294434
+   },
+   {
+    "word_classes": 11,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 8679.860779466031,
+    "commission": 0.641,
+    "seconds": 1.160161018371582
+   },
+   {
+    "word_classes": 11,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 8488.074762710912,
+    "commission": 0.58,
+    "seconds": 6.439593076705933
+   },
+   {
+    "word_classes": 10,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 8566.308081835512,
+    "commission": 0.64,
+    "seconds": 0.21314191818237305
+   },
+   {
+    "word_classes": 10,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 8468.99940797237,
+    "commission": 0.602,
+    "seconds": 1.3252990245819092
+   },
+   {
+    "word_classes": 10,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 8472.895441791461,
+    "commission": 0.561,
+    "seconds": 6.235980033874512
+   },
+   {
+    "word_classes": 9,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 8729.451639517183,
+    "commission": 0.668,
+    "seconds": 0.19519591331481934
+   },
+   {
+    "word_classes": 9,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 8485.946499530759,
+    "commission": 0.557,
+    "seconds": 1.070889949798584
+   },
+   {
+    "word_classes": 9,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 8268.041877916761,
+    "commission": 0.447,
+    "seconds": 5.809988975524902
+   },
+   {
+    "word_classes": 8,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 8536.067687581106,
+    "commission": 0.658,
+    "seconds": 0.1981370449066162
+   },
+   {
+    "word_classes": 8,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 8519.754343773777,
+    "commission": 0.565,
+    "seconds": 1.069897174835205
+   },
+   {
+    "word_classes": 8,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 8142.5596726802005,
+    "commission": 0.363,
+    "seconds": 6.277078151702881
+   },
+   {
+    "word_classes": 7,
+    "final_partition": true,
+    "beam": 1,
+    "patience": 0,
+    "bits": 8588.743058288432,
+    "commission": 0.603,
+    "seconds": 0.17893075942993164
+   },
+   {
+    "word_classes": 7,
+    "final_partition": true,
+    "beam": 4,
+    "patience": 3,
+    "bits": 8242.548830876547,
+    "commission": 0.422,
+    "seconds": 0.8939628601074219
+   },
+   {
+    "word_classes": 7,
+    "final_partition": true,
+    "beam": 16,
+    "patience": 5,
+    "bits": 8191.8255412830595,
+    "commission": 0.458,
+    "seconds": 4.466953992843628
+   }
+  ],
+  "seconds": 93.87134885787964
+ },
+ {
+  "condition": "term_low",
+  "seed": 13,
+  "gold_bits": 5628.9852261504975,
+  "flat_bits": 11430.933331175878,
+  "runs": [
+   {
+    "word_classes": 11,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 8410.081815096779,
+    "commission": 0.982,
+    "seconds": 0.24753808975219727
+   },
+   {
+    "word_classes": 11,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 7003.9429620355495,
+    "commission": 0.828,
+    "seconds": 2.0775392055511475
+   },
+   {
+    "word_classes": 11,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 5851.385064136632,
+    "commission": 0.598,
+    "seconds": 9.412094831466675
+   },
+   {
+    "word_classes": 10,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 7620.965616343403,
+    "commission": 0.906,
+    "seconds": 0.3252568244934082
+   },
+   {
+    "word_classes": 10,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 6715.055094247566,
+    "commission": 0.856,
+    "seconds": 2.098910331726074
+   },
+   {
+    "word_classes": 10,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 7237.51228339616,
+    "commission": 0.977,
+    "seconds": 8.570190191268921
+   },
+   {
+    "word_classes": 9,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 6582.264411530234,
+    "commission": 0.683,
+    "seconds": 0.432279109954834
+   },
+   {
+    "word_classes": 9,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 7025.976848284188,
+    "commission": 0.865,
+    "seconds": 2.3015711307525635
+   },
+   {
+    "word_classes": 9,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 5831.7103660550165,
+    "commission": 0.59,
+    "seconds": 9.363375902175903
+   },
+   {
+    "word_classes": 8,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 7639.345636040335,
+    "commission": 0.962,
+    "seconds": 0.23116111755371094
+   },
+   {
+    "word_classes": 8,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 7456.512551375525,
+    "commission": 0.919,
+    "seconds": 1.1778879165649414
+   },
+   {
+    "word_classes": 8,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 7230.54794471355,
+    "commission": 0.935,
+    "seconds": 5.662190914154053
+   },
+   {
+    "word_classes": 7,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 6894.074086960644,
+    "commission": 0.885,
+    "seconds": 0.21402215957641602
+   },
+   {
+    "word_classes": 7,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 6351.348751084996,
+    "commission": 0.791,
+    "seconds": 1.3975377082824707
+   },
+   {
+    "word_classes": 7,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 6171.323720341012,
+    "commission": 0.73,
+    "seconds": 5.758054971694946
+   },
+   {
+    "word_classes": 6,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 6303.53527261686,
+    "commission": 0.722,
+    "seconds": 0.29346776008605957
+   },
+   {
+    "word_classes": 6,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 5883.92038546449,
+    "commission": 0.564,
+    "seconds": 1.089771032333374
+   },
+   {
+    "word_classes": 6,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 5660.107100869872,
+    "commission": 0.216,
+    "seconds": 7.801342010498047
+   },
+   {
+    "word_classes": 5,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 6620.709883408192,
+    "commission": 0.805,
+    "seconds": 0.26450395584106445
+   },
+   {
+    "word_classes": 5,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 6602.808485671167,
+    "commission": 0.75,
+    "seconds": 1.4499907493591309
+   },
+   {
+    "word_classes": 5,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 5901.340672961189,
+    "commission": 0.471,
+    "seconds": 7.4040207862854
+   },
+   {
+    "word_classes": 4,
+    "final_partition": true,
+    "beam": 1,
+    "patience": 0,
+    "bits": 6512.603394703443,
+    "commission": 0.781,
+    "seconds": 0.267258882522583
+   },
+   {
+    "word_classes": 4,
+    "final_partition": true,
+    "beam": 4,
+    "patience": 3,
+    "bits": 5927.489075057424,
+    "commission": 0.583,
+    "seconds": 1.604598045349121
+   },
+   {
+    "word_classes": 4,
+    "final_partition": true,
+    "beam": 16,
+    "patience": 5,
+    "bits": 5782.746098836903,
+    "commission": 0.6,
+    "seconds": 9.366657972335815
+   }
+  ],
+  "seconds": 78.98498678207397
+ },
+ {
+  "condition": "term_med",
+  "seed": 13,
+  "gold_bits": 7769.802174422238,
+  "flat_bits": 13282.405069674827,
+  "runs": [
+   {
+    "word_classes": 15,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 11138.954069900248,
+    "commission": 0.996,
+    "seconds": 0.19651317596435547
+   },
+   {
+    "word_classes": 15,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 10155.451406144786,
+    "commission": 0.967,
+    "seconds": 1.6302869319915771
+   },
+   {
+    "word_classes": 15,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 8919.690887829442,
+    "commission": 0.802,
+    "seconds": 11.0480318069458
+   },
+   {
+    "word_classes": 14,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 10559.629533982215,
+    "commission": 0.99,
+    "seconds": 0.2604849338531494
+   },
+   {
+    "word_classes": 14,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 10328.207144513197,
+    "commission": 0.991,
+    "seconds": 1.6062450408935547
+   },
+   {
+    "word_classes": 14,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 8919.690887829442,
+    "commission": 0.802,
+    "seconds": 11.316665649414062
+   },
+   {
+    "word_classes": 13,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 9775.032558392286,
+    "commission": 0.983,
+    "seconds": 0.23329687118530273
+   },
+   {
+    "word_classes": 13,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 9817.71133055064,
+    "commission": 0.983,
+    "seconds": 0.9988870620727539
+   },
+   {
+    "word_classes": 13,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 9817.71133055064,
+    "commission": 0.983,
+    "seconds": 4.93861198425293
+   },
+   {
+    "word_classes": 12,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 8406.414268087345,
+    "commission": 0.676,
+    "seconds": 0.2796919345855713
+   },
+   {
+    "word_classes": 12,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 8318.076205554333,
+    "commission": 0.624,
+    "seconds": 1.3548848628997803
+   },
+   {
+    "word_classes": 12,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 8317.325741602539,
+    "commission": 0.622,
+    "seconds": 6.506953001022339
+   },
+   {
+    "word_classes": 11,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 8205.598649263648,
+    "commission": 0.532,
+    "seconds": 0.2796330451965332
+   },
+   {
+    "word_classes": 11,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 8032.636471590834,
+    "commission": 0.549,
+    "seconds": 1.2820277214050293
+   },
+   {
+    "word_classes": 11,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 8004.688246910611,
+    "commission": 0.572,
+    "seconds": 7.605542898178101
+   },
+   {
+    "word_classes": 10,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 9323.989487049706,
+    "commission": 0.933,
+    "seconds": 0.18297195434570312
+   },
+   {
+    "word_classes": 10,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 8919.35618569999,
+    "commission": 0.896,
+    "seconds": 0.9804971218109131
+   },
+   {
+    "word_classes": 10,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 8521.265794008277,
+    "commission": 0.843,
+    "seconds": 4.971729040145874
+   },
+   {
+    "word_classes": 9,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 8742.479939403553,
+    "commission": 0.764,
+    "seconds": 0.3234250545501709
+   },
+   {
+    "word_classes": 9,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 8478.375823760263,
+    "commission": 0.794,
+    "seconds": 1.0785250663757324
+   },
+   {
+    "word_classes": 9,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 8453.873975453389,
+    "commission": 0.804,
+    "seconds": 5.868524074554443
+   },
+   {
+    "word_classes": 8,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 8598.452949803437,
+    "commission": 0.657,
+    "seconds": 0.2636399269104004
+   },
+   {
+    "word_classes": 8,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 8131.416288108707,
+    "commission": 0.392,
+    "seconds": 1.4986109733581543
+   },
+   {
+    "word_classes": 8,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 8005.136866119179,
+    "commission": 0.447,
+    "seconds": 6.73084282875061
+   },
+   {
+    "word_classes": 7,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 8652.908626032884,
+    "commission": 0.696,
+    "seconds": 0.29602599143981934
+   },
+   {
+    "word_classes": 7,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 8461.326692327992,
+    "commission": 0.673,
+    "seconds": 1.6546390056610107
+   },
+   {
+    "word_classes": 7,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 8013.754212572797,
+    "commission": 0.509,
+    "seconds": 6.228728771209717
+   },
+   {
+    "word_classes": 6,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 8939.09736508765,
+    "commission": 0.818,
+    "seconds": 0.26534318923950195
+   },
+   {
+    "word_classes": 6,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 8660.39357482811,
+    "commission": 0.668,
+    "seconds": 1.5504119396209717
+   },
+   {
+    "word_classes": 6,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 8095.177825054254,
+    "commission": 0.532,
+    "seconds": 4.961545944213867
+   },
+   {
+    "word_classes": 5,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 8957.867097393766,
+    "commission": 0.81,
+    "seconds": 0.22839784622192383
+   },
+   {
+    "word_classes": 5,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 8566.283418562463,
+    "commission": 0.635,
+    "seconds": 1.6294047832489014
+   },
+   {
+    "word_classes": 5,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 7978.539402037316,
+    "commission": 0.481,
+    "seconds": 3.9484970569610596
+   },
+   {
+    "word_classes": 4,
+    "final_partition": true,
+    "beam": 1,
+    "patience": 0,
+    "bits": 8643.748167731652,
+    "commission": 0.751,
+    "seconds": 0.23842716217041016
+   },
+   {
+    "word_classes": 4,
+    "final_partition": true,
+    "beam": 4,
+    "patience": 3,
+    "bits": 8508.79013368573,
+    "commission": 0.711,
+    "seconds": 1.3333678245544434
+   },
+   {
+    "word_classes": 4,
+    "final_partition": true,
+    "beam": 16,
+    "patience": 5,
+    "bits": 8278.705663555378,
+    "commission": 0.633,
+    "seconds": 6.4915502071380615
+   }
+  ],
+  "seconds": 101.33732390403748
+ },
+ {
+  "condition": "term_high",
+  "seed": 13,
+  "gold_bits": 10510.954418093243,
+  "flat_bits": 16065.388863338705,
+  "runs": [
+   {
+    "word_classes": 15,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 11454.844292681048,
+    "commission": 0.804,
+    "seconds": 0.2643420696258545
+   },
+   {
+    "word_classes": 15,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 11521.470581187601,
+    "commission": 0.834,
+    "seconds": 1.1283342838287354
+   },
+   {
+    "word_classes": 15,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 11399.269700805933,
+    "commission": 0.735,
+    "seconds": 6.514698028564453
+   },
+   {
+    "word_classes": 14,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 11399.169659777626,
+    "commission": 0.736,
+    "seconds": 0.29649877548217773
+   },
+   {
+    "word_classes": 14,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 11366.008267958803,
+    "commission": 0.725,
+    "seconds": 1.375797986984253
+   },
+   {
+    "word_classes": 14,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 11543.720243477632,
+    "commission": 0.748,
+    "seconds": 7.149609088897705
+   },
+   {
+    "word_classes": 13,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 11019.097127386101,
+    "commission": 0.574,
+    "seconds": 0.32640600204467773
+   },
+   {
+    "word_classes": 13,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 10898.63029013999,
+    "commission": 0.581,
+    "seconds": 1.6807260513305664
+   },
+   {
+    "word_classes": 13,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 10833.16075277926,
+    "commission": 0.579,
+    "seconds": 8.982347011566162
+   },
+   {
+    "word_classes": 12,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 11865.676648169348,
+    "commission": 0.884,
+    "seconds": 0.295886754989624
+   },
+   {
+    "word_classes": 12,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 11291.067301801952,
+    "commission": 0.856,
+    "seconds": 1.4042210578918457
+   },
+   {
+    "word_classes": 12,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 11281.559818928718,
+    "commission": 0.838,
+    "seconds": 7.2597880363464355
+   },
+   {
+    "word_classes": 11,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 11698.445529653516,
+    "commission": 0.811,
+    "seconds": 0.2801530361175537
+   },
+   {
+    "word_classes": 11,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 11220.184425400797,
+    "commission": 0.788,
+    "seconds": 1.331662893295288
+   },
+   {
+    "word_classes": 11,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 11196.166053853538,
+    "commission": 0.792,
+    "seconds": 6.865036964416504
+   },
+   {
+    "word_classes": 10,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 11553.784999202038,
+    "commission": 0.735,
+    "seconds": 0.25800395011901855
+   },
+   {
+    "word_classes": 10,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 10589.068502258979,
+    "commission": 0.474,
+    "seconds": 1.5943708419799805
+   },
+   {
+    "word_classes": 10,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 11288.08127953709,
+    "commission": 0.59,
+    "seconds": 7.058568954467773
+   },
+   {
+    "word_classes": 9,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 12035.962213283608,
+    "commission": 0.779,
+    "seconds": 0.2593069076538086
+   },
+   {
+    "word_classes": 9,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 11764.83853118221,
+    "commission": 0.753,
+    "seconds": 1.538926124572754
+   },
+   {
+    "word_classes": 9,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 10998.912887883193,
+    "commission": 0.537,
+    "seconds": 6.63966703414917
+   },
+   {
+    "word_classes": 8,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 12011.336481384014,
+    "commission": 0.814,
+    "seconds": 0.27171993255615234
+   },
+   {
+    "word_classes": 8,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 11774.319962095888,
+    "commission": 0.714,
+    "seconds": 1.6169869899749756
+   },
+   {
+    "word_classes": 8,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 10935.355848967927,
+    "commission": 0.513,
+    "seconds": 6.679495096206665
+   },
+   {
+    "word_classes": 7,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 12005.156827967978,
+    "commission": 0.857,
+    "seconds": 0.2507290840148926
+   },
+   {
+    "word_classes": 7,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 11461.055285637733,
+    "commission": 0.724,
+    "seconds": 1.4867448806762695
+   },
+   {
+    "word_classes": 7,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 10916.76890736202,
+    "commission": 0.572,
+    "seconds": 6.4942169189453125
+   },
+   {
+    "word_classes": 6,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 11797.588753604377,
+    "commission": 0.867,
+    "seconds": 0.2736220359802246
+   },
+   {
+    "word_classes": 6,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 11330.185836823184,
+    "commission": 0.67,
+    "seconds": 1.463392972946167
+   },
+   {
+    "word_classes": 6,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 11286.173705419616,
+    "commission": 0.658,
+    "seconds": 8.114037036895752
+   },
+   {
+    "word_classes": 5,
+    "final_partition": false,
+    "beam": 1,
+    "patience": 0,
+    "bits": 11543.77710383708,
+    "commission": 0.745,
+    "seconds": 0.29048800468444824
+   },
+   {
+    "word_classes": 5,
+    "final_partition": false,
+    "beam": 4,
+    "patience": 3,
+    "bits": 11525.723792797622,
+    "commission": 0.779,
+    "seconds": 1.5488221645355225
+   },
+   {
+    "word_classes": 5,
+    "final_partition": false,
+    "beam": 16,
+    "patience": 5,
+    "bits": 11185.774126262226,
+    "commission": 0.641,
+    "seconds": 7.532505035400391
+   },
+   {
+    "word_classes": 4,
+    "final_partition": true,
+    "beam": 1,
+    "patience": 0,
+    "bits": 11294.281235089922,
+    "commission": 0.701,
+    "seconds": 0.260012149810791
+   },
+   {
+    "word_classes": 4,
+    "final_partition": true,
+    "beam": 4,
+    "patience": 3,
+    "bits": 11294.448695934712,
+    "commission": 0.72,
+    "seconds": 1.3686017990112305
+   },
+   {
+    "word_classes": 4,
+    "final_partition": true,
+    "beam": 16,
+    "patience": 5,
+    "bits": 11001.169964825222,
+    "commission": 0.639,
+    "seconds": 6.884984970092773
+   }
+  ],
+  "seconds": 113.71947407722473
+ }
+]

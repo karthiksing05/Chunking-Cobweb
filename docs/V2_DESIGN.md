@@ -6,6 +6,7 @@ Status: first implementation, October 2026, on branch `inside-outside`.
 - Tests: `tests/trellis2/` (25, including brute-force checks of the parser and exactness checks of the search)
 - Experiments: `experiments/v2/`
 - Background: `reports/Trellis v2 inside outside literature review.md`
+- **The framework explained end to end, with figures: [`FRAMEWORK.md`](FRAMEWORK.md)**
 
 ## Decisions taken with the user
 
@@ -61,7 +62,7 @@ The first round has blank chunk attributes.
 - **Code.** The Dirichlet-multinomial marginal likelihood of the training derivations under the grammar's tables. This is a prequential code that does not depend on presentation order. Concentration α = 0.001 (a sparse prior).
 - **Symbols.** Search over cuts of the representation tree:
   - start points: the evidence-optimal cut (a bottom-up dynamic program) and a fine cut;
-  - moves: *refine* (replace a node by its children) and *collapse* (replace a subtree's cut nodes by their ancestor), with first-improvement passes and refine-everything "kicks";
+  - moves: *refine* (replace a node by its children) and *collapse* (replace a subtree's cut nodes by their ancestor), in first-improvement passes (refine-everything "kicks" were tried and removed: no effect);
   - then **Bayesian model merging**: greedily join any two symbols, siblings or not, while the code shrinks.
 - **Rule classes.** The composition tree is rebuilt over the attested compositions (in symbol terms), and its cut is searched the same way under the factored grammar's code.
 - **Tables.** The posterior predictive of each Dirichlet-multinomial. The model is normalized by construction, so the code lengths can see commission.
@@ -164,7 +165,7 @@ Plain-PCFG code of the 320 training sentences (bits, seed 13):
 | term_med | 7,770 | 8,644 | 8,206 | 8,033 |
 | term_high | 10,511 | 11,294 | 11,019 | 10,589 |
 
-Over 72 search runs on MED, LARGE and TERM_HIGH (several starts, beam widths 1–16), code length and the commission of the grammar read off the analyses have rank correlation 0.79–0.96. The objective was right; the search was the bottleneck. From one start, the LARGE beam recovers the gold nouns, verbs, prepositions, adjectives and determiners, but keeps *who* and *which* as two classes where the gold grammar has one relative-pronoun class.
+Over 201 searches (all six conditions, up to 12 starts each, beam widths 1, 4 and 16; `experiments/v2/results/search`, `run_search_study.py`), code length and the commission of the grammar read off the analyses have rank correlation 0.72–0.98 per condition (SMALL 0.68, where nearly every search reaches the same grammar). A wide beam (16) helps on some conditions and hurts on others, which is why the default stays at 4. The objective was right; the search was the bottleneck. From one start, the LARGE beam recovers the gold nouns, verbs, prepositions, adjectives and determiners, but keeps *who* and *which* as two classes where the gold grammar has one relative-pronoun class.
 
 ### Results: batch learning
 
