@@ -59,6 +59,7 @@ class TreeIndex:
     leaves under any node form a contiguous range ``[lo, hi)``."""
 
     def __init__(self, tree: CobwebTree):
+        self.tree = tree
         self.nodes: List[CobwebNode] = list(tree.nodes())
         pos = {n.id: i for i, n in enumerate(self.nodes)}
         n_nodes = len(self.nodes)
@@ -104,18 +105,8 @@ def evidence_cut(index: TreeIndex, alpha: float = 0.5, beta: float = 0.5) -> Lis
     instance belongs to. Used as the starting point of the grammar search.
     """
     nodes = index.nodes
-    root = nodes[0]
-    n_values = {a: max(len(d), 1) for a, d in root.av.items()}
     n_nodes = len(nodes)
-    own = np.zeros(n_nodes)
-    for i, node in enumerate(nodes):
-        tot = 0.0
-        for a, d in node.av.items():
-            cnt = np.fromiter(d.values(), dtype=float, count=len(d))
-            a_tot = n_values[a] * alpha
-            tot += (gammaln(cnt.sum() + a_tot) - gammaln(a_tot)
-                    - np.sum(gammaln(cnt + alpha) - gammaln(alpha)))
-        own[i] = tot
+    own = np.asarray(index.tree.concept_codes(alpha))
     best = np.zeros(n_nodes)
     keep = np.zeros(n_nodes, dtype=bool)
     for i in reversed(range(n_nodes)):

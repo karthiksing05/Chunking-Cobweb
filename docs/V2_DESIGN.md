@@ -3,7 +3,7 @@
 Status: first implementation, October 2026, on branch `inside-outside`.
 
 - Code: `src/trellis2/`
-- Tests: `tests/trellis2/` (25, including brute-force checks of the parser and exactness checks of the search)
+- Tests: `tests/trellis2/` (31, including brute-force checks of the parser, exactness checks of the search, and the compiled Cobweb against its Python reference)
 - Experiments: `experiments/v2/`
 - Background: `reports/Trellis v2 inside outside literature review.md`
 - **The framework explained end to end, with figures: [`FRAMEWORK.md`](FRAMEWORK.md)**
@@ -280,7 +280,7 @@ Folding a recurring top-level pair directly into an existing category (a chunk m
 - Word classes: exact deltas, about 300× faster (identical merge paths).
 - Search: incremental moves, about 5× faster on WSJ20 (identical result).
 - Cobweb: each node caches its total sum of squares, about 10% faster with identical hierarchies.
-- What remains is pure-Python Cobweb in consolidation, and the three full consolidations per night: about two minutes for 320 synthetic or 434 treebank sentences, and about an hour for 2,000 characters.
+- **Compiled Cobweb.** `cobweb_cu` (cobweb-private, branch `karthik-experimental`) reproduces the pure-Python reference (now `tests/trellis2/reference_cobweb.py`) bit for bit: a Python-compatible Mersenne Twister for the tie-breaking, CPython 3.12's compensated `sum()` where the reference sums (two operator scores tied to the last bit otherwise broke differently), insertion-ordered counts, and no fused multiply-adds. Hierarchies are identical on all six corpora and tree building is 10–20× faster. All 120 numbers of the batch results table reproduce exactly, and a batch run takes 2.2× less time (LARGE: 152 s → 60 s); the rest is now the search, the grammar read-out and the charts. Per-concept code lengths for the evidence cut are computed in the tree (`concept_codes`).
 
 ## Mapping to the paper's postulates
 

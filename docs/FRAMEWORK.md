@@ -67,7 +67,7 @@ The second group is the **chunk context**: it places the element inside the anal
 
 ## 4. The two hierarchies
 
-Both hierarchies are built by **Cobweb** (Fisher 1987). Cobweb sorts each instance down a tree of probabilistic concepts. At each level it chooses the operation (join the best child, create a new child, merge two children, split one) that maximizes *category utility*: how much better the children predict attribute values than their parent does. Cobweb is incremental: a new instance updates the counts along one path. Leaves are stable handles, and identical instances share a leaf. Instances carry weights, and attributes may be bags of values.
+Both hierarchies are built by **Cobweb** (Fisher 1987), compiled: `cobweb_cu` from cobweb-private reproduces the pure-Python reference implementation exactly, random tie-breaking included, 10–20 times faster. Cobweb sorts each instance down a tree of probabilistic concepts. At each level it chooses the operation (join the best child, create a new child, merge two children, split one) that maximizes *category utility*: how much better the children predict attribute values than their parent does. Cobweb is incremental: a new instance updates the counts along one path. Leaves are stable handles, and identical instances share a leaf. Instances carry weights, and attributes may be bags of values.
 
 - The **representation hierarchy** is built over representation instances. Its concepts group elements that behave alike.
 - The **composition hierarchy** is built over composition instances, written in symbol terms. Its concepts group compositions that are made alike.
@@ -344,7 +344,7 @@ The postulates carry over as follows:
 
 | Module (`src/trellis2/`) | Contents |
 |---|---|
-| `cobweb.py` | Cobweb: category utility, the four operators, weighted and bag-valued attributes |
+| `cobweb.py` | Cobweb (category utility, the four operators, weighted and bag-valued attributes, stable leaves): the compiled `cobweb_cu` of cobweb-private; the pure-Python reference is `tests/trellis2/reference_cobweb.py` |
 | `memory.py` | element records, representation instances, the representation hierarchy by replay |
 | `grammar.py` | cuts, their search, model merging, the composition hierarchy, the factored grammar and its code |
 | `chart.py` | inside-outside with forests, posteriors, minimum-risk and Viterbi decoding, sampling |
@@ -386,6 +386,12 @@ for i, ex in enumerate(train):
 print(learner.parse(test[0].tokens).to_string(test[0].tokens))
 ```
 
+The hierarchies run on the compiled `cobweb_cu` of cobweb-private (branch `karthik-experimental`). Install cobweb-private, or build the target and put its build directory on the Python path:
+
+```
+cd cobweb-private && cmake -S . -B build && cmake --build build --target cobweb_cu
+```
+
 Reproducing everything (times on a 12-core laptop):
 
 ```
@@ -408,7 +414,7 @@ The paper's corpora are read from `../trellis_v1/data` (the v1 snapshot), with `
 - **Sentence-level structure without supervision.** On the paper's corpora the search builds complete analyses. On real text and on characters it stops at forests of local chunks: no single larger chunk pays for itself, and the moves cannot reach a set of chunks that pays together. This is the main open problem.
 - **A weak sequence model on real data.** With about ten categories, the grammar makes the strong independence assumptions of a small probabilistic grammar, and tag bigrams describe real text more compactly.
 - **Binary concatenation only.** A chunk has two parts joined left to right. Two-dimensional composition is written as operator tokens, so the spatial relation is learned as context rather than represented as a typed relation.
-- **Scale.** Cobweb is pure Python, and each night runs three full consolidations. A night takes about two minutes for 320 synthetic or 434 treebank sentences, and about an hour for 1,900 treebank sentences or 2,000 characters.
+- **Scale.** Each night runs three full consolidations. With the compiled Cobweb a night on 320 synthetic sentences takes 6–85 seconds (about half the time before it); before it, a night took about an hour for 1,900 treebank sentences or 2,000 characters. The search, the grammar read-out and the charts are still Python.
 - **Nights repeat the batch search.** The search can only merge categories, so every night may start over from word classes. Split moves (refining a category together with the chunk categories built on it) would let nights continue from the stored analyses.
 - **Linguists' trees.** Description length identifies the language, not its conventional binarization; bracket agreement with gold trees is moderate.
 
