@@ -102,12 +102,12 @@ Five seeds, the paper's corpora and splits, 320 training sentences, 40 held-out 
 
 | Condition | Omission v2 | Omission v1 | Gen. commission v2 | Gen. commission v1 | Novelty v2 |
 |---|---|---|---|---|---|
-| small | 0.0% | 0.0% | 0.4% ± 0.5 | 0.0% | 55% |
-| med | 0.0% | 3.3% | 1.2% ± 0.9 | 1.1% | 96% |
-| large | 0.7% ± 1.1 | 6.2% | 14.0% ± 1.8 | 1.6% | 99% |
-| term_low | 0.0% | 5.7% | 0.4% ± 0.6 | 6.2% | 90% |
-| term_med | 0.0% | 7.0% | 1.8% ± 0.8 | 4.7% | 98% |
-| term_high | 0.0% | 9.7% | 2.5% ± 1.5 | 3.4% | 100% |
+| small | 0.0% | 0.0% | 0.2% ± 0.2 | 0.0% | 54% |
+| med | 0.0% | 3.3% | 0.9% ± 0.9 | 1.1% | 97% |
+| large | 0.7% ± 1.1 | 6.2% | 14.2% ± 1.1 | 1.6% | 99% |
+| term_low | 0.0% | 5.7% | 0.3% ± 0.3 | 6.2% | 90% |
+| term_med | 0.0% | 7.0% | 2.4% ± 1.1 | 4.7% | 98% |
+| term_high | 0.0% | 9.7% | 2.7% ± 1.7 | 3.4% | 100% |
 
 Learning curves: `experiments/v2/results/main/learning_curves.png`. Exploratory sweeps behind the table above: `experiments/v2/results/sweeps/`.
 
@@ -117,21 +117,61 @@ Learning curves: `experiments/v2/results/main/learning_curves.png`. Exploratory 
 
 Parse commission (1 − bracket precision) equals omission here, because every parse is a complete binary tree.
 
-## Unsupervised learning (v2.1, started)
+## Unsupervised learning (v2.1)
 
-`unsupervised.py` stores raw sentences and alternates (a) consolidating a grammar from the current analyses with (b) re-analysing every stored sentence. Re-analysis uses the Viterbi tree (hard EM: both steps lower the same description length) or a tree sampled from a tempered posterior (annealed stochastic EM). Several starting analyses and a short-sentences-first curriculum are available. The run with the shortest code is kept, so no gold trees are used to choose.
+Code: `unsupervised.py`, `mdl_search.py`, `mdl.py`.
 
-| Condition | Result |
-|---|---|
-| SMALL | Recovers the gold grammar exactly. Its code equals the supervised model's (3,237 bits) and beats right- or left-branching (3,250). 0% omission, 0.2% commission. |
-| MED | The objective is right but the search falls short. Gold trees code to **6,471 bits**. The best unsupervised analysis reaches 6,906–7,012 bits, chunking frequent non-constituents ("found the", "big lazy"): 44–70% bracket omission, 30–46% generation commission. |
+### Objective: an actual message length
 
-Next for unsupervised learning, from the literature review:
+The learner minimizes the bits needed to transmit the training sentences.
 
-- distituent evidence in the representation hierarchy (CCM-style);
-- split/merge moves on analyses across many sentences at once;
-- larger-scale MCMC over trees;
-- the chart's confident spans as the frontier of candidate chunks.
+- **The code.** Each analysis (derivation) is sent event by event with the Dirichlet-multinomial predictive of each grammar table. This is the Bayesian mixture code that arithmetic coding achieves, a prequential code that does not depend on order. The grammar's size (number of symbols and rule classes) is sent with Elias codes.
+- **The split.** The total divides into *data bits* (the cost under the best-fitting parameters) and *model bits* (the remainder: the price of learning the parameters).
+- **No thresholds.** A chunk type exists only if it pays for its definition. "Minimize chunks while preserving performance" is therefore the objective itself, not a heuristic.
+
+### Partial analyses
+
+A sentence may be a forest of top-level chunks: GRIDS-style partial parses, and the paper's "graceful failure". The top level has the simplest proper code, a symbol distribution plus a stop probability. Fully parsed sentences reduce exactly to the previous model.
+
+Inside-outside, Viterbi and sampling all handle forests, and brute-force tests cover them (`tests/trellis2/test_chart.py`).
+
+### Learner
+
+1. **Word classes.** Merge word types while a class-bigram code shrinks (Brown clustering read as description length).
+2. **Structure.** From flat sentences, greedy *chunk* (B, C) and *merge* (A, A') moves while the plain-PCFG code of the corpus shrinks. This is GRIDS, SNPR and Bayesian model merging under one probabilistic code. Every move is global, so analyses stay consistent.
+3. **Concepts.** Consolidate the analyses into the two hierarchies; the representation hierarchy re-forms categories with chunk context.
+4. **Re-analysis.** Hard EM: Viterbi trees under the full grammar, kept if the total code shrinks.
+
+### Results
+
+Two seeds, the v1 splits, 320 training sentences, compared with the supervised model on the same sentences' gold trees (`experiments/v2/results/unsupervised/summary.md`).
+
+| Condition | Train bits (unsup / gold trees) | Chunk types | Test bits/sentence | Gen. commission (unsup / gold trees) | Brackets crossing no gold bracket |
+|---|---|---|---|---|---|
+| small | 3,251 / 3,251 | 3.0 / 3.0 | 9.5 / 9.5 | 0.1% / 0.1% | 75% |
+| large | **8,129 / 8,356** | 19.5 / 18.5 | **23.7 / 24.0** | **10.9% / 14.5%** | 78% |
+| med | 7,040 / 6,528 | 19.0 / 12.5 | 19.7 / 18.5 | 45.7% / 0.6% | 20% |
+| term_low | 5,779 / 5,284 | 26.0 / 12.0 | 15.9 / 15.3 | 25.2% / 0.1% | 17% |
+| term_med | 8,264 / 7,712 | 25.5 / 18.0 | 22.9 / 21.9 | 40.9% / 2.9% | 18% |
+| term_high | 11,763 / 10,538 | 25.5 / 15.0 | 33.6 / 30.8 | 62.4% / 2.2% | 17% |
+
+### What the experiments established
+
+1. **Description length does not single out linguists' trees.** With gold word classes, the chunk-and-merge search on MED finds a grammar that is *shorter* than the gold-tree grammar (6,453 vs 6,651 bits) and generates the target language with **0.0%** commission, yet shares only 19% of the gold brackets. Strict MDL identifies the language and leaves its binarization underdetermined, as the user's notes anticipated. Language-level measures (compression, held-out bits, commission) are the primary yardstick; bracket agreement is a diagnostic.
+2. **With gold word classes the method works across grammars** (SMALL 0%, MED 0%, LARGE 4.9% commission).
+3. **The bottleneck is word classes.** In every MED-structured grammar, verbs and prepositions occur in identical local contexts (between a noun and a determiner). Distributional class induction merges them, and the grammar then over-generates. LARGE escapes because verbs also follow relative pronouns.
+4. **Things tried that did not fix it:**
+   - Cobweb re-formation after the search: the learned bracketing gives verbs and prepositions the same structural slots.
+   - Latent split-and-merge EM on the fixed trees: no split paid for itself.
+   - Whole-sentence context bags in the representation (`sentence_bags`): worse classes.
+   - Searching with Cobweb re-formation inside every step: about 60× slower, and trapped in high-PMI non-constituents such as "found the".
+
+### Next for unsupervised learning
+
+- **Coupled category refinement.** Split a class and the chunk categories built on it together, scored by the full code: verb vs preposition with VP vs PP.
+- **Beam search over chunk/merge sequences.** Stolcke & Omohundro needed a beam for exactly this.
+- **Incremental, day-time learning.** Perceive with the current grammar, store, consolidate in "sleep".
+- **Then PTB** (WSJ10 with gold tags, where the word-class problem is removed).
 
 ## Mapping to the paper's postulates
 
@@ -151,7 +191,7 @@ Next for unsupervised learning, from the literature review:
 | Stage | Content |
 |---|---|
 | v2.0 ✓ | supervised core: hierarchies, MDL cuts and merging, inside-outside + MBR, generation, six-condition evaluation |
-| v2.1 (started) | unsupervised learning from sentences: better search over analyses, distituent evidence, curriculum |
+| v2.1 (in progress) | unsupervised learning from sentences: MDL objective, partial analyses, word classes + chunk/merge search (done); coupled category refinement, beam search (next) |
 | v2.2 | incremental day-time learning between consolidations (perceive with the current grammar, then insert); attention-like long-range context |
 | v2.3 | variable-arity templates, typed relations; first non-language domain (IDS characters, then chess) |
 | v2.4 | Penn Treebank (WSJ10 with gold tags, then full WSJ) with a validated evaluator |
@@ -162,6 +202,7 @@ Next for unsupervised learning, from the literature review:
 python -m pytest tests/trellis2 -q
 python experiments/v2/run_synthetic.py --out experiments/v2/results/main      # ~6 min, 6 workers
 python experiments/v2/plot_learning_curves.py experiments/v2/results/main
+python experiments/v2/run_unsupervised.py --seeds 13,17   # ~3 min, 6 workers
 ```
 
 The paper corpora are read from `../trellis_v1/data` (the v1 snapshot), with `data/` as the fallback.

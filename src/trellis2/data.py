@@ -1,9 +1,11 @@
-"""Sentences, binary trees, and the paper's synthetic corpora.
+"""Sentences, binary analyses, and the paper's synthetic corpora.
 
 A ``Tree`` over ``n`` tokens is a binary bracketing of the half-open span
 ``[0, n)``. Every composite span ``(i, j)`` (``j - i >= 2``) stores its split
 point ``k`` (children ``(i, k)`` and ``(k, j)``). Token positions are the
-primitive spans ``(i, i + 1)``.
+primitive spans ``(i, i + 1)``. A partial analysis (a forest) lists its
+top-level spans in ``roots``; they tile ``[0, n)`` left to right. By default
+there is a single root, the whole sentence.
 """
 from __future__ import annotations
 
@@ -12,7 +14,7 @@ import json
 import os
 import random
 from dataclasses import dataclass, field
-from typing import Dict, List, Sequence, Set, Tuple
+from typing import Dict, List, Optional, Sequence, Set, Tuple
 
 Span = Tuple[int, int]
 
@@ -24,14 +26,35 @@ class Tree:
     # Optional category label per span (primitive or composite), e.g. the
     # symbol index chosen by a parser; not used by evaluation.
     label: Dict[Span, object] = field(default_factory=dict)
+    roots: Optional[List[Span]] = None
 
     def __post_init__(self):
-        if self.n >= 2 and (0, self.n) not in self.split:
-            raise ValueError("tree must contain the full span")
+        if self.roots is None:
+            self.roots = [(0, self.n)] if self.n else []
+            if self.n >= 2 and (0, self.n) not in self.split:
+                raise ValueError("tree must contain the full span")
+        else:
+            self.roots = [tuple(r) for r in self.roots]
+            pos = 0
+            for (i, j) in self.roots:
+                if i != pos or j <= i:
+                    raise ValueError("roots must tile [0, n) left to right")
+                pos = j
+            if pos != self.n:
+                raise ValueError("roots must tile [0, n) left to right")
+
+    @property
+    def is_forest(self) -> bool:
+        return len(self.roots) > 1
+
+    def copy(self, labels: bool = True) -> "Tree":
+        return Tree(self.n, dict(self.split), dict(self.label) if labels else {},
+                    list(self.roots))
 
     def composite_spans(self) -> List[Span]:
-        """Composite spans, root first (pre-order)."""
-        out, stack = [], [(0, self.n)] if self.n >= 2 else []
+        """Composite spans, each root's subtree in pre-order, left to right."""
+        out = []
+        stack = [r for r in reversed(self.roots) if r[1] - r[0] >= 2]
         while stack:
             i, j = stack.pop()
             out.append((i, j))
@@ -68,17 +91,18 @@ class Tree:
             if span in seen:
                 return False
             seen.add(span)
-        return len(seen) == max(self.n - 1, 0)
+        return len(seen) == sum(j - i - 1 for i, j in self.roots)
 
     def to_string(self, tokens: Sequence[str], labels: bool = False) -> str:
         def rec(i, j):
             if j - i == 1:
-                return tokens[i]
+                lab = self.label.get((i, j)) if labels and (i, j) in self.roots else None
+                return tokens[i] if lab is None else f"{tokens[i]}/{lab}"
             k = self.split[(i, j)]
             body = f"{rec(i, k)} {rec(k, j)}"
             lab = self.label.get((i, j)) if labels else None
             return f"[{lab} {body}]" if lab is not None else f"[{body}]"
-        return rec(0, self.n) if self.n else ""
+        return " · ".join(rec(i, j) for i, j in self.roots)
 
     @staticmethod
     def from_brackets(n: int, spans: Set[Span]) -> "Tree":

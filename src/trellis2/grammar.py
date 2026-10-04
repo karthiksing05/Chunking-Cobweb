@@ -23,6 +23,7 @@ import numpy as np
 from scipy.special import gammaln
 
 from .cobweb import CobwebNode, CobwebTree
+from .mdl import elias_delta_bits, split_bits
 from .memory import Memory
 
 LN2 = float(np.log(2.0))
@@ -256,13 +257,16 @@ def hill_climb(index: TreeIndex, cut: Sequence[int],
 @dataclass
 class Grammar:
     vocab: List[str]
-    S: np.ndarray       # (K,)   start distribution
+    S: np.ndarray       # (K,)   distribution of a top-level chunk's symbol
     U: np.ndarray       # (K, M) P(rule class | symbol)
     pk: np.ndarray      # (M,)   P(primitive | rule class)
     Lt: np.ndarray      # (M, K) P(left child symbol | rule class, composite)
     Rt: np.ndarray      # (M, K) P(right child symbol | rule class, composite)
     E: np.ndarray       # (M, V) P(token | rule class, primitive)
     alpha: float
+    # A sentence is a sequence of top-level chunks: after each one it ends
+    # with probability p_stop (1 = always a single tree).
+    p_stop: float = 1.0
     # The representation-tree nodes that make up each symbol (one node unless
     # model merging joined several).
     symbol_nodes: List[List[CobwebNode]] = field(default_factory=list)
@@ -275,6 +279,13 @@ class Grammar:
     # hierarchy above it (used to re-describe the elements next round).
     elem_symbol: Optional[np.ndarray] = None
     elem_fine: Optional[np.ndarray] = None
+    # The node above every training element in the representation tree's
+    # evidence-optimal cut (the tree's own clusters; used to propose chunks).
+    elem_evidence: Optional[np.ndarray] = None
+    # The ancestor of every training element at depths 1..D of the
+    # representation tree (column d-1 = depth d): every node is a candidate
+    # category when proposing chunks.
+    elem_depth: Optional[np.ndarray] = None
     # Rule class of every training element, and its composition leaf.
     elem_rule: Optional[np.ndarray] = None
     elem_rule_fine: Optional[np.ndarray] = None
@@ -282,6 +293,9 @@ class Grammar:
     def __post_init__(self):
         self.tok_index = {t: i for i, t in enumerate(self.vocab)}
         self.qk = 1.0 - self.pk
+        with np.errstate(divide="ignore"):
+            self.log_stop = float(np.log(self.p_stop))
+            self.log_cont = float(np.log1p(-self.p_stop))
 
     @property
     def K(self) -> int:
@@ -303,8 +317,9 @@ class Grammar:
         p = 1.0 / temperature
         g = Grammar(vocab=self.vocab, S=self.S ** p, U=self.U ** p, pk=self.pk ** p,
                     Lt=self.Lt ** p, Rt=self.Rt ** p, E=self.E ** p, alpha=self.alpha,
-                    info=dict(self.info))
+                    p_stop=self.p_stop, info=dict(self.info))
         g.qk = self.qk ** p
+        g.log_stop, g.log_cont = self.log_stop * p, self.log_cont * p
         return g
 
     def lexical(self, token_id: int) -> np.ndarray:
@@ -313,34 +328,37 @@ class Grammar:
 
     def sample(self, rng: np.random.Generator, max_len: int = 40):
         """Sample (tokens, Tree with symbol labels) from the grammar; None if the
-        derivation exceeds ``max_len`` tokens (callers resample)."""
+        sentence exceeds ``max_len`` tokens (callers resample)."""
         from .data import Tree
-        start = int(rng.choice(self.K, p=self.S))
+        tops = [int(rng.choice(self.K, p=self.S))]
+        while rng.random() >= self.p_stop:
+            tops.append(int(rng.choice(self.K, p=self.S)))
         # Expand depth-first, left to right; spans are filled in afterwards.
         tokens: List[str] = []
         nodes: List[list] = []  # [symbol, rule, token or None, left idx, right idx]
-        stack = [(start, -1, 0)]  # (symbol, parent node idx, side)
-        root = None
-        while stack:
-            sym, parent, side = stack.pop()
-            c = int(rng.choice(self.M, p=self.U[sym]))
-            idx = len(nodes)
-            if parent < 0:
-                root = idx
-            else:
-                nodes[parent][3 + side] = idx
-            if rng.random() < self.pk[c]:
-                w = int(rng.choice(len(self.vocab), p=self.E[c]))
-                nodes.append([sym, c, self.vocab[w], -1, -1])
-                tokens.append(self.vocab[w])
-                if len(tokens) > max_len:
-                    return None
-            else:
-                nodes.append([sym, c, None, -1, -1])
-                b = int(rng.choice(self.K, p=self.Lt[c]))
-                d = int(rng.choice(self.K, p=self.Rt[c]))
-                stack.append((d, idx, 1))
-                stack.append((b, idx, 0))
+        roots = []
+        for top in tops:
+            stack = [(top, -1, 0)]  # (symbol, parent node idx, side)
+            while stack:
+                sym, parent, side = stack.pop()
+                c = int(rng.choice(self.M, p=self.U[sym]))
+                idx = len(nodes)
+                if parent < 0:
+                    roots.append(idx)
+                else:
+                    nodes[parent][3 + side] = idx
+                if rng.random() < self.pk[c]:
+                    w = int(rng.choice(len(self.vocab), p=self.E[c]))
+                    nodes.append([sym, c, self.vocab[w], -1, -1])
+                    tokens.append(self.vocab[w])
+                    if len(tokens) > max_len:
+                        return None
+                else:
+                    nodes.append([sym, c, None, -1, -1])
+                    b = int(rng.choice(self.K, p=self.Lt[c]))
+                    d = int(rng.choice(self.K, p=self.Rt[c]))
+                    stack.append((d, idx, 1))
+                    stack.append((b, idx, 0))
         # Recover spans: leaves were emitted left to right in DFS order.
         split, label = {}, {}
         cursor = [0]
@@ -358,8 +376,8 @@ class Grammar:
             label[(i, j)] = sym
             return i, j
 
-        span_of(root)
-        return tokens, Tree(len(tokens), split, label)
+        root_spans = [span_of(r) for r in roots]
+        return tokens, Tree(len(tokens), split, label, root_spans)
 
     def describe(self, top: int = 6) -> str:
         """Human-readable summary of symbols and rule classes."""
@@ -493,6 +511,20 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
         info["R merges"] = merges
         info["bits (plain PCFG, after merges)"] = value / LN2
     _, fine = _compact(rindex.assign(starts["fine"])[el.leafpos])
+    _, evidence = _compact(rindex.assign(starts["evidence"])[el.leafpos])
+    depth_of = np.zeros(len(rindex.nodes), dtype=np.int64)
+    for i in range(1, len(rindex.nodes)):          # parents precede children
+        depth_of[i] = depth_of[rindex.parent[i]] + 1
+    max_depth = 8
+    leaf_anc = np.zeros((rindex.n_leaves, max_depth), dtype=np.int64)
+    for p, x in enumerate(rindex.node_of_leaf):
+        path = [x]
+        while rindex.parent[path[-1]] >= 0:
+            path.append(int(rindex.parent[path[-1]]))
+        path.reverse()                              # root ... leaf
+        for d in range(1, max_depth + 1):
+            leaf_anc[p, d - 1] = path[min(d, len(path) - 1)]
+    elem_depth = leaf_anc[el.leafpos]
     sym_reps, s = _compact(rarr[el.leafpos])
     K = len(sym_reps)
     members = defaultdict(list)
@@ -532,6 +564,12 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
     w = el.w
     prim, comp = el.prim, ~el.prim
     n_start = np.bincount(s[el.root], weights=w[el.root], minlength=K)
+    # Top level: per sentence, (#top-level chunks - 1) continues and one stop.
+    sent = np.array(mem.sentence_of)
+    n_tops = np.bincount(sent[el.root], weights=w[el.root], minlength=len(mem.sentences))
+    sent_w = np.zeros(len(mem.sentences))
+    sent_w[sent[el.root]] = w[el.root]
+    n_stop_cont = np.array([sent_w.sum(), n_tops.sum() - sent_w.sum()])
     n_U = np.zeros((K, M))
     np.add.at(n_U, (s, c), w)
     n_prim = np.bincount(c[prim], weights=w[prim], minlength=M)
@@ -551,9 +589,26 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
                           w[el.root], K, alpha)
                   + ccost(cindex.assign(ccut)))
     info["bits (factored grammar)"] = total_code / LN2
-    info["bits per sentence"] = total_code / LN2 / max(len(mem.sentences), 1)
+    # The receiver also needs the grammar's size; Elias codes make the total
+    # an actual message length.
+    info["structure bits"] = elias_delta_bits(K) + elias_delta_bits(M)
+    stop_nats = float(gammaln(n_stop_cont.sum() + 2 * alpha) - gammaln(2 * alpha)
+                      - np.sum(gammaln(n_stop_cont + alpha) - gammaln(alpha)))
+    info["bits (factored grammar)"] += stop_nats / LN2
+    info["total bits"] = info["bits (factored grammar)"] + info["structure bits"]
+    info["bits per sentence"] = info["total bits"] / max(len(mem.sentences), 1)
+    rows = lambda table: [dict(enumerate(r)) for r in np.atleast_2d(table)]
+    model_bits, data_bits = split_bits([
+        (rows(n_start), K), (rows(n_stop_cont), 2), (rows(n_U), M),
+        (rows(np.stack([n_prim, n_comp], axis=1)), 2),
+        (rows(n_E), V), (rows(n_L), K), (rows(n_R), K)], alpha)
+    info["model bits"] = model_bits + info["structure bits"]
+    info["data bits"] = data_bits
     info["symbols"] = K
     info["rule classes"] = M
+    info["composite rule classes"] = int(np.sum(n_comp > 0))
+    info["chunk types"] = len({(int(s[e]), int(s[el.left[e]]), int(s[el.right[e]]))
+                               for e in np.flatnonzero(comp)})
 
     symbol_yields = [Counter() for _ in range(K)]
     for e in range(len(s)):
@@ -572,6 +627,7 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
         S=normalize(n_start),
         U=normalize(n_U),
         pk=pk,
+        p_stop=float((n_stop_cont[0] + alpha) / (n_stop_cont.sum() + 2 * alpha)),
         Lt=normalize(n_L),
         Rt=normalize(n_R),
         E=normalize(n_E),
@@ -582,6 +638,8 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
         symbol_yields=symbol_yields,
         elem_symbol=s,
         elem_fine=fine,
+        elem_evidence=evidence,
+        elem_depth=elem_depth,
         elem_rule=c,
         elem_rule_fine=_compact(cleafpos)[1],
         rule_keys=rule_keys,

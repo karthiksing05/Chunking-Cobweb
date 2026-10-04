@@ -148,3 +148,102 @@ def test_posterior_samples_are_valid_trees():
     post = chart.span_posteriors()
     for s, c in counts.items():
         assert c / 4000 == pytest.approx(post[s], abs=0.03)
+
+
+# --------------------------------------------------------------------------- #
+# Partial analyses: a sentence is a sequence of top-level chunks.
+# --------------------------------------------------------------------------- #
+def all_forests(n):
+    """Every (roots, split) covering [0, n) with top-level chunks."""
+    def segmentations(i):
+        if i == n:
+            yield []
+            return
+        for j in range(i + 1, n + 1):
+            for rest in segmentations(j):
+                yield [(i, j)] + rest
+
+    for roots in segmentations(0):
+        def trees(idx):
+            if idx == len(roots):
+                yield {}
+                return
+            for t in all_trees(*roots[idx]):
+                for rest in trees(idx + 1):
+                    yield {**t, **rest}
+        for split in trees(0):
+            yield roots, split
+
+
+def forest_grammar(seed, p_stop=0.6):
+    g = random_grammar(seed=seed)
+    return Grammar(vocab=g.vocab, S=g.S, U=g.U, pk=g.pk, Lt=g.Lt, Rt=g.Rt, E=g.E,
+                   alpha=0.0, p_stop=p_stop)
+
+
+def brute_force_forests(g, tokens):
+    ids = g.token_ids(tokens)
+    n = len(tokens)
+    rule = np.einsum("ac,c,cb,cd->abd", g.U, g.qk, g.Lt, g.Rt)
+    lex = g.U @ (g.pk[:, None] * g.E)
+    total, span_mass, label_mass, best = 0.0, {}, {}, (-1.0, None)
+    for roots, split in all_forests(n):
+        tree = Tree(n, split, roots=roots)
+        spans = [(i, i + 1) for i in range(n)] + tree.composite_spans()
+        for labels in itertools.product(range(g.K), repeat=len(spans)):
+            lab = dict(zip(spans, labels))
+            p = (1 - g.p_stop) ** (len(roots) - 1) * g.p_stop
+            for r in roots:
+                p *= g.S[lab[r]]
+            for (i, j) in spans:
+                if j - i == 1:
+                    p *= lex[lab[(i, j)], ids[i]]
+                else:
+                    k = split[(i, j)]
+                    p *= rule[lab[(i, j)], lab[(i, k)], lab[(k, j)]]
+            total += p
+            if p > best[0]:
+                best = (p, (tuple(roots), tree.brackets(), lab))
+            for s in spans:
+                span_mass[s] = span_mass.get(s, 0.0) + p
+                label_mass[s + (lab[s],)] = label_mass.get(s + (lab[s],), 0.0) + p
+    return total, span_mass, label_mass, best
+
+
+@pytest.mark.parametrize("n,seed", [(2, 4), (3, 5), (4, 6)])
+def test_forest_inside_and_posteriors_match_enumeration(n, seed):
+    g = forest_grammar(seed)
+    tokens = [f"w{(seed + i) % 3}" for i in range(n)]
+    total, span_mass, label_mass, _ = brute_force_forests(g, tokens)
+    chart = Chart(g, tokens)
+    assert math.isclose(chart.log_prob, math.log(total), rel_tol=1e-9)
+    mu = chart.label_posteriors()
+    for i in range(n):
+        for j in range(i + 1, n + 1):
+            for a in range(g.K):
+                expected = label_mass.get((i, j, a), 0.0) / total
+                assert mu[i, j, a] == pytest.approx(expected, abs=1e-10)
+
+
+def test_forest_viterbi_finds_the_most_probable_analysis():
+    g = forest_grammar(8, p_stop=0.5)
+    tokens = ["w1", "w0", "w2", "w2"]
+    _, _, _, (_, (roots, brackets, lab)) = brute_force_forests(g, tokens)
+    got = Chart(g, tokens).viterbi_tree()
+    assert tuple(got.roots) == roots and got.brackets() == brackets
+    assert all(got.label[s] == lab[s] for s in got.label)
+
+
+def test_forest_samples_match_posteriors():
+    g = forest_grammar(2, p_stop=0.5)
+    chart = Chart(g, ["w0", "w2", "w1", "w1"])
+    rng = np.random.default_rng(1)
+    counts = {}
+    for _ in range(4000):
+        t = chart.sample_tree(rng)
+        assert t.is_valid()
+        for s in t.composite_spans():
+            counts[s] = counts.get(s, 0) + 1
+    post = chart.span_posteriors()
+    for s, c in counts.items():
+        assert c / 4000 == pytest.approx(post[s], abs=0.03)

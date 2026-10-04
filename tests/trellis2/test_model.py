@@ -48,18 +48,20 @@ def test_small_grammar_end_to_end():
 
 
 @needs_data
-def test_unsupervised_learner_recovers_small_grammar():
+def test_unsupervised_chunking_compresses_and_generates_the_language():
     from trellis2.unsupervised import UnsupervisedLearner
     examples = load_corpus(SMALL)
     train, test = v1_split(examples, seed=13)
-    learner = UnsupervisedLearner(inits=("balanced", "right"), em_iterations=4, seed=13)
-    for ex in train[:80]:
+    learner = UnsupervisedLearner(seed=13)
+    for ex in train[:60]:
         learner.observe(ex.tokens)
     learner.consolidate()
-    # Description length prefers the balanced analysis over right-branching;
-    # on SMALL that analysis is the gold one, so held-out parses match gold.
-    from trellis2.evaluation import BracketTally
-    tally = BracketTally()
+    flat = learner.history[0]["bits"]
+    # Chunks were formed only because they shorten the description.
+    assert learner.grammar.info["chunk types"] > 0
+    assert learner.grammar.info["total bits"] < 0.75 * flat
     for ex in test[:10]:
-        tally.add(ex.tree, learner.parse(ex.tokens))
-    assert tally.omission == 0.0
+        assert learner.parse(ex.tokens).is_valid()
+    cfg = CFG(target_grammar("small"))
+    samples, _ = learner.generate(200, np.random.default_rng(0))
+    assert np.mean([cfg.recognizes(t) for t, _ in samples]) > 0.95

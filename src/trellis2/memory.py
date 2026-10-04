@@ -45,11 +45,21 @@ def chunk_attrs(spine_depth: int, granularities: int) -> List[str]:
 
 
 def representation_attrs(width: int, spine_depth: int, granularities: int,
-                         composition_ref: bool) -> List[str]:
+                         composition_ref: bool, sentence_bags: bool = False) -> List[str]:
     return ([f"l{d}" for d in range(1, width + 1)]
             + [f"r{d}" for d in range(1, width + 1)]
             + ["f", "e", "k"] + chunk_attrs(spine_depth, granularities)
-            + ([f"c.{g}" for g in range(granularities)] if composition_ref else []))
+            + ([f"c.{g}" for g in range(granularities)] if composition_ref else [])
+            + (["bl", "br"] if sentence_bags else []))
+
+
+def _bag(tokens: Sequence[str]) -> Dict[str, float]:
+    if not tokens:
+        return {BLANK: 1.0}
+    out: Dict[str, float] = {}
+    for t in tokens:
+        out[t] = out.get(t, 0.0) + 1.0 / len(tokens)
+    return out
 
 
 class Memory:
@@ -59,18 +69,26 @@ class Memory:
     PRIMITIVE, COMPOSITE = 0, 1
 
     def __init__(self, context_width: int = 1, spine_depth: int = 2,
-                 granularities: int = 2, composition_ref: bool = False):
+                 granularities: int = 2, composition_ref: bool = False,
+                 sentence_bags: bool = False):
         self.context_width = context_width
         self.spine_depth = spine_depth
         self.granularities = granularities
         self.composition_ref = composition_ref
+        # Whole-sentence context: a bag of every token before the element and
+        # one of every token after it ("all levels of content before and after").
+        self.sentence_bags = sentence_bags
         self.attrs = representation_attrs(context_width, spine_depth, granularities,
-                                          composition_ref)
+                                          composition_ref, sentence_bags)
         self.kind: List[int] = []
         self.token: List[Optional[str]] = []
         self.left: List[int] = []
         self.right: List[int] = []
         self.parent: List[int] = []
+        # Top-level elements of a partial analysis: the neighbouring top-level
+        # chunks act as their level-1 siblings (-1 if none).
+        self.top_left: List[int] = []
+        self.top_right: List[int] = []
         self.is_root: List[bool] = []
         self.weight: List[float] = []
         self.sentence_of: List[int] = []
@@ -108,10 +126,16 @@ class Memory:
                 self.parent[left] = eid
                 self.parent[right] = eid
             self.parent.append(-1)
-            self.is_root.append((i, j) == (0, len(tokens)))
+            self.top_left.append(-1)
+            self.top_right.append(-1)
+            self.is_root.append((i, j) in tree.roots)
             self.weight.append(weight)
             self.sentence_of.append(sid)
             self.span.append((i, j))
+        tops = [eid_of[r] for r in tree.roots]
+        for a, b in zip(tops, tops[1:]):
+            self.top_right[a] = b
+            self.top_left[b] = a
         return eid_of
 
     def vocabulary(self) -> List[str]:
@@ -136,6 +160,9 @@ class Memory:
         x["f"] = tokens[i]
         x["e"] = tokens[j - 1]
         x["k"] = "P" if self.kind[e] == self.PRIMITIVE else "C"
+        if self.sentence_bags:
+            x["bl"] = _bag(tokens[:i])
+            x["br"] = _bag(tokens[j:])
         for g in range(self.granularities):
             lab = None if labels is None else labels[g]
 
@@ -151,7 +178,10 @@ class Memory:
                 p = self.parent[node] if node >= 0 else -1
                 if p < 0:
                     x[f"a{d}.{g}"] = ROOT if (node >= 0 and lab is not None) else BLANK
-                    x[f"sl{d}.{g}"] = x[f"sr{d}.{g}"] = BLANK
+                    # A top-level chunk's siblings are its top-level neighbours.
+                    top = node >= 0
+                    x[f"sl{d}.{g}"] = cat(self.top_left[node]) if top else BLANK
+                    x[f"sr{d}.{g}"] = cat(self.top_right[node]) if top else BLANK
                     node = -1
                     continue
                 is_left = self.left[p] == node

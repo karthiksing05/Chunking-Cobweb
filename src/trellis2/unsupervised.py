@@ -1,20 +1,23 @@
-"""Unsupervised learning: the analyses come from the learner's own parses.
+"""Unsupervised learning by minimum description length.
 
-Raw sentences are stored. Consolidation alternates two steps that lower the
-same description length (grammar plus derivations):
+Only sentences are given. The learner looks for analyses and a grammar that
+transmit the corpus in the fewest bits, so a chunk type exists only if it pays
+for its definition. Superfluous chunks never form; reusable ones do.
 
-1. learn a grammar from the current analyses (``Trellis2.consolidate``:
-   hierarchies rebuilt, cuts chosen by MDL);
-2. re-analyse every stored sentence: the Viterbi tree is the derivation with
-   the shortest code under that grammar; a tree sampled from the tempered
-   posterior explores alternatives (annealed stochastic EM).
+1. Word classes: word types are merged while the code of a class-bigram
+   model shrinks (``mdl_search.word_classes``).
+2. Structure: from flat sentences, greedy chunk and merge moves while the
+   plain-PCFG code of the corpus shrinks (``mdl_search.chunk_and_merge``).
+   The moves are global, so analyses stay mutually consistent; a sentence may
+   remain a forest of chunks if no larger chunk pays.
+3. Concepts: the analyses are consolidated into the two hierarchies
+   (``Trellis2``), which re-form the categories with chunk context, choose
+   the cuts by description length and read off the grammar used for parsing
+   and generation.
+4. Re-analysis (hard EM): every sentence gets its Viterbi analysis under that
+   grammar, kept only if the full description length shrinks.
 
-The stored sentences, not the trees, are the memory, so an early bad analysis
-is revisited at every consolidation rather than becoming ground truth. Every
-iteration's code is recorded and the shortest is kept (an MDL choice made
-without gold trees). With ``curriculum`` the learner first works on the
-shortest sentences and admits longer ones stage by stage, parsing each
-newcomer with the grammar learned so far ("baby steps").
+Sentences, not analyses, are the memory: every analysis is revisable.
 """
 from __future__ import annotations
 
@@ -25,118 +28,61 @@ import numpy as np
 from .chart import Chart
 from .data import Tree
 from .grammar import Grammar
+from .mdl_search import chunk_and_merge, code_bits, to_tree, word_classes
 from .model import Trellis2
 
 
-def initial_tree(n: int, kind: str, rng: np.random.Generator) -> Tree:
-    """A starting analysis: right-branching, left-branching, balanced or random."""
-    split = {}
-    stack = [(0, n)] if n >= 2 else []
-    while stack:
-        i, j = stack.pop()
-        if kind == "right":
-            k = i + 1
-        elif kind == "left":
-            k = j - 1
-        elif kind == "balanced":
-            k = (i + j) // 2
-        elif kind == "random":
-            k = int(rng.integers(i + 1, j))
-        else:
-            raise ValueError(kind)
-        split[(i, j)] = k
-        stack.extend(s for s in ((i, k), (k, j)) if s[1] - s[0] >= 2)
-    return Tree(n, split)
-
-
 class UnsupervisedLearner:
-    """EM over analyses, scored by description length.
-
-    ``temperatures`` gives, per iteration, the temperature at which new trees
-    are drawn from the posterior; ``None`` (or running past the list) means
-    the Viterbi tree.
-    """
-
-    def __init__(self, inits: Sequence[str] = ("random",), em_iterations: int = 10,
-                 temperatures: Optional[Sequence[Optional[float]]] = None,
-                 curriculum: bool = False, seed: int = 0, **trellis_kwargs):
-        self.inits = list(inits)
-        self.em_iterations = em_iterations
-        self.temperatures = list(temperatures) if temperatures is not None else []
-        self.curriculum = curriculum
+    def __init__(self, reanalysis_steps: int = 5, alpha: float = 0.001, seed: int = 0,
+                 **trellis_kwargs):
+        self.reanalysis_steps = reanalysis_steps
+        self.alpha = alpha
         self.seed = seed
         self.trellis_kwargs = trellis_kwargs
         self.sentences: List[List[str]] = []
         self.model: Optional[Trellis2] = None
         self.trees: List[Tree] = []
-        self.history: List[Dict[str, float]] = []
+        self.classes: Dict[str, object] = {}
+        self.history: List[Dict] = []
 
     def observe(self, tokens: Sequence[str]) -> None:
         self.sentences.append(list(tokens))
         self.model = None
 
-    def _fit(self, sentences: Sequence[List[str]], trees: Sequence[Tree]) -> Trellis2:
-        model = Trellis2(seed=self.seed, **self.trellis_kwargs)
-        for tokens, tree in zip(sentences, trees):
+    def _fit(self, trees: Sequence[Tree]) -> Tuple[Trellis2, float]:
+        model = Trellis2(seed=self.seed, alpha=self.alpha, **self.trellis_kwargs)
+        for tokens, tree in zip(self.sentences, trees):
             model.learn(tokens, tree)
-        model.consolidate()
-        return model
-
-    def _em(self, sentences: List[List[str]], trees: List[Tree], tag: str,
-            rng: np.random.Generator) -> Tuple[float, Trellis2, List[Tree]]:
-        best = None
-        for it in range(self.em_iterations):
-            model = self._fit(sentences, trees)
-            code = model.grammar.info["bits (factored grammar)"]
-            record = {"stage": tag, "iteration": it, "sentences": len(sentences),
-                      "bits": code, "symbols": model.grammar.K}
-            self.history.append(record)
-            if best is None or code < best[0]:
-                best = (code, model, trees)
-            temp = self.temperatures[it] if it < len(self.temperatures) else None
-            if temp is None:
-                new = [Chart(model.grammar, s).viterbi_tree() for s in sentences]
-            else:
-                hot = model.grammar.tempered(temp)
-                new = [Chart(hot, s).sample_tree(rng) for s in sentences]
-            changed = sum(a.brackets() != b.brackets() for a, b in zip(trees, new))
-            record["changed"], record["temperature"] = changed, temp
-            if changed == 0 and temp is None:
-                break
-            trees = new
-        return best
+        g = model.consolidate()
+        return model, g.info["total bits"]
 
     def consolidate(self) -> Grammar:
-        rng = np.random.default_rng(self.seed)
         self.history = []
-        best = None
-        for init in self.inits:
-            if not self.curriculum:
-                trees = [initial_tree(len(s), init, rng) for s in self.sentences]
-                result = self._em(self.sentences, trees, init, rng)
-                order = list(range(len(self.sentences)))
-            else:
-                order = sorted(range(len(self.sentences)), key=lambda i: len(self.sentences[i]))
-                lengths = sorted({len(self.sentences[i]) for i in order})
-                trees_of: Dict[int, Tree] = {}
-                model = None
-                for L in lengths:
-                    stage = [i for i in order if len(self.sentences[i]) <= L]
-                    for i in stage:
-                        if i not in trees_of:
-                            s = self.sentences[i]
-                            trees_of[i] = (Chart(model.grammar, s).viterbi_tree() if model
-                                           else initial_tree(len(s), init, rng))
-                    code, model, trees = self._em([self.sentences[i] for i in stage],
-                                                  [trees_of[i] for i in stage],
-                                                  f"{init}<= {L}", rng)
-                    trees_of.update(zip(stage, trees))
-                result = (code, model, trees)
-                order = stage
-            if best is None or result[0] < best[0]:
-                best = (result[0], result[1], [result[2][order.index(i)] for i in range(len(order))])
-        _, self.model, self.trees = best
-        return self.model.grammar
+        n_tokens = len({w for s in self.sentences for w in s}) + 1
+        self.classes = word_classes(self.sentences, self.alpha)
+        analyses = [[(("w", self.classes[w]), w) for w in s] for s in self.sentences]
+        self.history.append({"stage": "flat", "move": "start",
+                             "bits": code_bits(analyses, n_tokens, self.alpha)})
+
+        def log(step, move, bits):
+            self.history.append({"stage": "chunk and merge", "move": move, "bits": bits})
+
+        analyses, _ = chunk_and_merge(analyses, n_tokens, self.alpha, log=log)
+        trees = [Tree(t.n, t.split, {}, t.roots) for t in map(to_tree, analyses)]
+        model, bits = self._fit(trees)
+        self.history.append({"stage": "concepts", "move": "consolidate", "bits": bits})
+        for _ in range(self.reanalysis_steps):
+            new = [Chart(model.grammar, s).viterbi_tree() for s in self.sentences]
+            if all(a.brackets() == b.brackets() and a.roots == b.roots
+                   for a, b in zip(trees, new)):
+                break
+            m2, b2 = self._fit([Tree(t.n, t.split, {}, t.roots) for t in new])
+            if b2 >= bits - 1e-6:
+                break
+            trees, model, bits = new, m2, b2
+            self.history.append({"stage": "re-analysis", "move": "viterbi", "bits": bits})
+        self.model, self.trees = model, trees
+        return model.grammar
 
     @property
     def grammar(self) -> Grammar:
@@ -146,6 +92,10 @@ class UnsupervisedLearner:
 
     def parse(self, tokens: Sequence[str]) -> Tree:
         return Chart(self.grammar, tokens).mbr_tree()
+
+    def analyse(self, tokens: Sequence[str]) -> Tree:
+        """The shortest-code analysis (possibly partial: a forest of chunks)."""
+        return Chart(self.grammar, tokens).viterbi_tree()
 
     def chart(self, tokens: Sequence[str]) -> Chart:
         return Chart(self.grammar, tokens)

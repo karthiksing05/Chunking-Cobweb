@@ -1,12 +1,15 @@
 """Inside-outside parsing over the factored grammar.
 
-The inside pass fills, for every span, the probability that each symbol
-derives it ("the frontier of valid parses going up"). A top-down pass turns
-these into posteriors: ``mu[i, j, A]`` is the probability that span (i, j) is
-a chunk of category A given the whole sentence, i.e. given its content
-(inside) and all of its context (outside) at once. The minimum-Bayes-risk
-decoder then picks the binary tree with the largest expected number of
-correct spans ("the best non-intersecting set going down").
+A sentence is a sequence of top-level chunks (a single one when the grammar
+always stops after one, ``p_stop = 1``), each a binary tree. The inside pass
+fills, for every span, the probability that each symbol derives it ("the
+frontier of valid parses going up"). A forward-backward pass over the top
+level sums over every way of cutting the sentence into top-level chunks. A
+top-down pass then gives posteriors: ``mu[i, j, A]`` is the probability that
+span (i, j) is a chunk of category A given the whole sentence, i.e. given
+its content (inside) and all of its context (outside) at once. The
+minimum-Bayes-risk decoder picks the binary tree with the largest expected
+number of correct spans ("the best non-intersecting set going down").
 
 Inside vectors are stored normalised with a per-span log scale, so long
 sentences do not underflow. The factorisation
@@ -18,6 +21,7 @@ from __future__ import annotations
 from typing import Dict, Optional, Sequence, Tuple
 
 import numpy as np
+from scipy.special import logsumexp
 
 from .data import Span, Tree
 from .grammar import Grammar
@@ -60,14 +64,35 @@ class Chart:
                 la[i, j] = top + np.log(s)
                 lam[i, j] = g.Lt @ a[i, j]
                 rho[i, j] = g.Rt @ a[i, j]
-        if n == 0:
-            self.log_prob = 0.0
-        else:
-            z = g.S @ a[0, n]
-            self.log_prob = float(np.log(z) + la[0, n]) if z > 0 else -np.inf
+
+        # Top level. top[i, j] = log sum_A S[A] inside(i, j, A); a chunk that
+        # does not start the sentence first pays log(1 - p_stop).
+        with np.errstate(divide="ignore"):
+            self.top = la + np.log(np.einsum("ijk,k->ij", a, g.S))
+        self.cont = np.full(n + 1, g.log_cont)
+        if n:
+            self.cont[0] = 0.0
+        F = self.F = np.full(n + 1, -np.inf)   # all ways to cover [0, j)
+        G = self.G = np.full(n + 1, -np.inf)   # all ways to cover [j, n), with the stop
+        F[0] = 0.0
+        for j in range(1, n + 1):
+            F[j] = logsumexp(F[:j] + self.cont[:j] + self.top[:j, j])
+        G[n] = g.log_stop
+        for i in range(n - 1, -1, -1):
+            G[i] = logsumexp(self.cont[i] + self.top[i, i + 1:] + G[i + 1:])
+        self.log_prob = float(G[0]) if n else 0.0
         self._mu: Optional[np.ndarray] = None
 
     # ------------------------------------------------------------------ #
+    def top_level_posteriors(self) -> np.ndarray:
+        """P(span (i, j) is a top-level chunk | sentence)."""
+        n = self.n
+        with np.errstate(invalid="ignore"):
+            lp = (self.F[:, None] + self.cont[:, None] + self.top + self.G[None, :]
+                  - self.log_prob)
+        lp[~np.isfinite(lp)] = -np.inf
+        return np.exp(lp) if n else np.zeros((1, 1))
+
     def label_posteriors(self) -> np.ndarray:
         """mu[i, j, A] = P(span (i, j) is a chunk of category A | sentence)."""
         if self._mu is not None:
@@ -77,8 +102,11 @@ class Chart:
         if n == 0 or not np.isfinite(self.log_prob):
             self._mu = mu
             return mu
-        root = g.S * a[0, n]
-        mu[0, n] = root / root.sum()
+        tops = self.top_level_posteriors()
+        weighted = a * g.S[None, None, :]
+        norm = weighted.sum(axis=2, keepdims=True)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            mu += np.where(norm > 0, weighted / norm, 0.0) * tops[:, :, None]
         for length in range(n, 1, -1):
             for i in range(n - length + 1):
                 j = i + length
@@ -104,7 +132,8 @@ class Chart:
         return self.label_posteriors().sum(axis=2)
 
     def mbr_tree(self, threshold: float = 0.0) -> Tree:
-        """Binary tree maximising the expected number of correct spans.
+        """Binary tree over the whole sentence maximising the expected number
+        of correct spans.
 
         Each span contributes ``mu(i, j) - threshold``; every binary tree has
         the same number of spans, so the threshold only matters for callers
@@ -139,16 +168,16 @@ class Chart:
         return Tree(n, split, label)
 
     def viterbi_tree(self) -> Tree:
-        """The single most probable labelled tree.
+        """The single most probable labelled analysis (a forest when the
+        grammar prefers several top-level chunks).
 
         Given the grammar, this is the analysis with the shortest derivation
-        code, which is why unsupervised learning re-parses with it (hard EM
-        lowers one description length in both of its steps). Rule classes are
-        summed out: P(A -> B C) = sum_c U[A,c] (1 - pk[c]) Lt[c,B] Rt[c,C].
+        code, which is why unsupervised learning re-parses with it. Rule
+        classes are summed out: P(A -> B C) = sum_c U[A,c] (1-pk[c]) Lt[c,B] Rt[c,C].
         """
         g, n = self.g, self.n
-        if n < 2:
-            return Tree(n, {}, {(0, 1): int(np.argmax(g.S * self.a[0, 1]))} if n else {})
+        if n == 0:
+            return Tree(0, {})
         with np.errstate(divide="ignore"):
             log_rule = np.log(np.einsum("ac,c,cb,cd->abd", g.U, g.qk, g.Lt, g.Rt))
             ids = g.token_ids(self.tokens)
@@ -170,10 +199,26 @@ class Chart:
                 arg = np.argmax(flat, axis=1)
                 best[i, j] = flat[np.arange(K), arg]
                 back[(i, j)] = arg
-        root = int(np.argmax(log_start + best[0, n]))
+        # Best way to cut the sentence into top-level chunks.
+        chunk = log_start[None, None, :] + best                            # (i, j, A)
+        V = np.full(n + 1, -np.inf)
+        V[0] = 0.0
+        prev: Dict[int, Tuple[int, int]] = {}
+        for j in range(1, n + 1):
+            for i in range(j):
+                A = int(np.argmax(chunk[i, j]))
+                cand = V[i] + self.cont[i] + chunk[i, j, A]
+                if cand > V[j]:
+                    V[j], prev[j] = cand, (i, A)
+        roots, stack, j = [], [], n
+        while j > 0:
+            i, A = prev[j]
+            roots.append((i, j))
+            stack.append((i, j, A))
+            j = i
+        roots.reverse()
         split: Dict[Span, int] = {}
         label: Dict[Span, int] = {}
-        stack = [(0, n, root)]
         while stack:
             i, j, A = stack.pop()
             label[(i, j)] = A
@@ -183,7 +228,7 @@ class Chart:
             k = i + 1 + int(kk)
             split[(i, j)] = k
             stack.extend([(i, k, int(B)), (k, j, int(C))])
-        return Tree(n, split, label)
+        return Tree(n, split, label, roots)
 
     def confident_spans(self, threshold: float = 0.5):
         """Composite spans whose posterior exceeds ``threshold``. With
@@ -194,12 +239,19 @@ class Chart:
                 if post[i, j] > threshold]
 
     def sample_tree(self, rng: np.random.Generator) -> Tree:
-        """Draw one analysis from the posterior over trees."""
+        """Draw one analysis from the posterior over analyses."""
         g, n, a, la = self.g, self.n, self.a, self.la
-        if n < 2:
-            return Tree(n, {})
-        root = g.S * a[0, n]
-        stack = [(0, n, int(rng.choice(g.K, p=root / root.sum())))]
+        if n == 0:
+            return Tree(0, {})
+        roots, stack, i = [], [], 0
+        while i < n:
+            logits = self.cont[i] + self.top[i, i + 1:] + self.G[i + 1:]
+            p = np.exp(logits - logsumexp(logits))
+            j = i + 1 + int(rng.choice(len(p), p=p / p.sum()))
+            w = g.S * a[i, j]
+            roots.append((i, j))
+            stack.append((i, j, int(rng.choice(g.K, p=w / w.sum()))))
+            i = j
         split: Dict[Span, int] = {}
         label: Dict[Span, int] = {}
         while stack:
@@ -220,7 +272,7 @@ class Chart:
             pc = g.Rt[c] * a[k, j]
             stack.append((k, j, int(rng.choice(g.K, p=pc / pc.sum()))))
             stack.append((i, k, int(rng.choice(g.K, p=pb / pb.sum()))))
-        return Tree(n, split, label)
+        return Tree(n, split, label, roots)
 
 
 def parse(grammar: Grammar, tokens: Sequence[str]) -> Tuple[Tree, Chart]:

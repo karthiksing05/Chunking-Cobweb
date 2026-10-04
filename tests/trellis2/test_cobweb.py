@@ -34,3 +34,15 @@ def test_identical_instances_share_a_leaf():
     tree.ifit({"a": "y", "b": "q"})
     again = tree.ifit({"a": "x", "b": "p"})
     assert first is again and first.count == 2.0
+
+
+def test_bag_attributes_keep_counts_consistent():
+    rng = random.Random(4)
+    tree = CobwebTree(("a", "bag"), seed=3)
+    for _ in range(300):
+        words = [rng.choice("pqrst") for _ in range(rng.randint(1, 4))]
+        bag = {}
+        for w_ in words:
+            bag[w_] = bag.get(w_, 0.0) + 1.0 / len(words)
+        tree.ifit({"a": rng.choice("xy"), "bag": bag}, w=rng.choice([1.0, 0.5]))
+    tree.check_invariants()

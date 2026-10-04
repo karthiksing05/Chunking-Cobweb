@@ -1,7 +1,10 @@
 """A small discrete Cobweb (Fisher, 1987) used by both TRELLIS v2 hierarchies.
 
-Instances are dicts mapping every attribute of the tree to one hashable value,
-and each instance may carry a (possibly fractional) weight. Learning follows
+Instances are dicts mapping every attribute of the tree to one hashable value
+or to a bag (a dict of values to weights summing to one), and each instance
+may carry a (possibly fractional) weight. A bag spreads the instance's unit of
+evidence for that attribute over several values, so every attribute's counts
+still sum to the node's count and category utility applies unchanged. Learning follows
 the classic algorithm and its four operators (best host, new child, merge,
 split), scored with Fisher's category utility, mirroring the reference
 implementation in ``concept_formation``.
@@ -46,9 +49,10 @@ class CobwebNode:
             if d is None:
                 d = self.av[a] = {}
                 self.ss[a] = 0.0
-            n = d.get(v, 0.0)
-            d[v] = n + w
-            self.ss[a] += 2.0 * n * w + w * w
+            for u, p in (v.items() if isinstance(v, dict) else ((v, 1.0),)):
+                n = d.get(u, 0.0)
+                d[u] = n + w * p
+                self.ss[a] += 2.0 * n * w * p + (w * p) ** 2
         self.count += w
 
     def absorb(self, other: "CobwebNode") -> None:
@@ -101,8 +105,14 @@ class CobwebTree:
         tot = 0.0
         for a, v in x.items():
             d = node.av.get(a)
-            m = d.get(v, 0.0) if d else 0.0
-            tot += node.ss.get(a, 0.0) + 2.0 * m * w + w * w
+            tot += node.ss.get(a, 0.0)
+            if isinstance(v, dict):
+                for u, p in v.items():
+                    m = d.get(u, 0.0) if d else 0.0
+                    tot += 2.0 * m * w * p + (w * p) ** 2
+            else:
+                m = d.get(v, 0.0) if d else 0.0
+                tot += 2.0 * m * w + w * w
         return tot / (n * n) / self.n_attrs
 
     def _ec_merge(self, b1: CobwebNode, b2: CobwebNode,
@@ -115,10 +125,11 @@ class CobwebTree:
             d2 = b2.av.get(a, {})
             small, big = (d1, d2) if len(d1) <= len(d2) else (d2, d1)
             dot = sum(m * big.get(v, 0.0) for v, m in small.items())
+            tot += b1.ss.get(a, 0.0) + b2.ss.get(a, 0.0) + 2.0 * dot
             v = x[a]
-            mx = d1.get(v, 0.0) + d2.get(v, 0.0)
-            tot += (b1.ss.get(a, 0.0) + b2.ss.get(a, 0.0) + 2.0 * dot
-                    + 2.0 * mx * w + w * w)
+            for u, p in (v.items() if isinstance(v, dict) else ((v, 1.0),)):
+                mx = d1.get(u, 0.0) + d2.get(u, 0.0)
+                tot += 2.0 * mx * w * p + (w * p) ** 2
         return tot / (n * n) / self.n_attrs
 
     def _best_operation(self, cur: CobwebNode, x: Instance, w: float):
@@ -166,7 +177,13 @@ class CobwebTree:
     def _is_exact_match(self, leaf: CobwebNode, x: Instance) -> bool:
         for a, v in x.items():
             d = leaf.av.get(a)
-            if d is None or len(d) != 1 or v not in d:
+            if d is None:
+                return False
+            if isinstance(v, dict):
+                if len(d) != len(v) or any(abs(d.get(u, 0.0) - p * leaf.count) > 1e-9
+                                           for u, p in v.items()):
+                    return False
+            elif len(d) != 1 or v not in d:
                 return False
         return True
 
