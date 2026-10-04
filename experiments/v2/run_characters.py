@@ -23,6 +23,7 @@ in the boxes their operators define.
 
 Usage:
     python experiments/v2/run_characters.py --out experiments/v2/results/characters
+    python experiments/v2/run_characters.py --modes relational --train 6000 --out experiments/v2/results/characters_6000
 """
 from __future__ import annotations
 
@@ -314,6 +315,8 @@ def main():
     ap.add_argument("--train", type=int, default=2000)
     ap.add_argument("--test", type=int, default=500)
     ap.add_argument("--n-gen", type=int, default=1000)
+    ap.add_argument("--modes", default="unsupervised,supervised,relational",
+                    help="which models to learn (comma-separated)")
     ap.add_argument("--path", default=default_ids_path())
     ap.add_argument("--out", default=os.path.join(HERE, "results", "characters"))
     ap.add_argument("--figure-only", action="store_true",
@@ -324,7 +327,7 @@ def main():
         with open(os.path.join(args.out, "results.json")) as f:
             print(figure(json.load(f), args.out))
         return
-    jobs = [(mode, int(s)) for s in args.seeds.split(",") for mode in ("unsupervised", "supervised", "relational")]
+    jobs = [(mode, int(s)) for s in args.seeds.split(",") for mode in args.modes.split(",")]
     with ProcessPoolExecutor(max_workers=len(jobs)) as pool:
         results = [f.result() for f in [pool.submit(run, m, s, args.train, args.test, args.n_gen, args.path)
                                         for m, s in jobs]]
