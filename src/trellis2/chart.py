@@ -66,42 +66,50 @@ class Chart:
                 rho[i, j] = g.Rt @ a[i, j]
 
         # Top level: the sentence is one tree (log_whole, root symbol from S),
-        # or a forest (log_forest) of two or more pieces whose symbols come
-        # from S_piece; after its second piece a forest stops (log_stop) or
-        # continues (log_cont). top[i, j] = log sum_A S_piece[A] inside(i, j, A).
+        # or a forest (log_forest) of two or more pieces: the first piece's
+        # symbol from S_piece, each next one's from T_piece[previous symbol],
+        # and from the second piece on the forest ends (log_stop_v) or goes
+        # on (log_cont_v) given the last piece's symbol.
+        # ins[i, j, A] = log inside(i, j, A).
+        K = g.K
         with np.errstate(divide="ignore"):
-            self.top = la + np.log(np.einsum("ijk,k->ij", a, g.S_piece))
+            ins = self.ins = la[:, :, None] + np.log(a)
             whole = la[0, n] + np.log(a[0, n] @ g.S) if n else -np.inf
+            log_first = np.log(g.S_piece)
         self.whole = g.log_whole + whole
-        F1 = self.F1 = np.full(n + 1, -np.inf)   # one piece covering [0, j)
-        H = self.H = np.full(n + 1, -np.inf)     # two or more pieces covering [0, j)
+        F1 = self.F1 = np.full((n + 1, K), -np.inf)   # one piece covering [0, j), its symbol
+        H = self.H = np.full((n + 1, K), -np.inf)     # two or more pieces covering [0, j), the last one's symbol
+        P = self.P = np.full((n + 1, K), -np.inf)     # a further piece starting at i, its symbol
         if n:
-            F1[1:n] = g.log_forest + self.top[0, 1:n]
-        for j in range(2, n + 1):
-            H[j] = logsumexp(np.logaddexp(F1[1:j], g.log_cont + H[1:j]) + self.top[1:j, j])
-        G = self.G = np.full(n + 1, -np.inf)     # complete [j, n) after two or more pieces
-        G1 = self.G1 = np.full(n + 1, -np.inf)   # complete [j, n) after exactly one piece
+            F1[1:n] = g.log_forest + log_first[None, :] + ins[0, 1:n]
+        for i in range(1, n):
+            before = np.logaddexp(F1[i], H[i] + g.log_cont_v)
+            P[i] = logsumexp(before[:, None] + g.log_T, axis=0)
+            H[i + 1:] = np.logaddexp(H[i + 1:], P[i][None, :] + ins[i, i + 1:])
+        G = self.G = np.full((n + 1, K), -np.inf)     # complete [j, n) after a later piece of symbol B
+        G1 = self.G1 = np.full((n + 1, K), -np.inf)   # complete [j, n) after the first piece
         if n:
-            G[n] = g.log_stop
+            G[n] = g.log_stop_v
         for j in range(n - 1, 0, -1):
-            G1[j] = logsumexp(self.top[j, j + 1:] + G[j + 1:])
-            G[j] = g.log_cont + G1[j]
-        self.forest = H[n] + g.log_stop if n else -np.inf
+            nxt = logsumexp(ins[j, j + 1:] + G[j + 1:], axis=0)          # next piece's symbol C
+            G1[j] = logsumexp(g.log_T + nxt[None, :], axis=1)
+            G[j] = g.log_cont_v + G1[j]
+        self.forest = float(logsumexp(H[n] + g.log_stop_v)) if n else -np.inf
         self.log_prob = float(np.logaddexp(self.whole, self.forest)) if n else 0.0
         self._mu: Optional[np.ndarray] = None
 
     # ------------------------------------------------------------------ #
     def _top_posteriors(self) -> Tuple[float, np.ndarray]:
-        """(P(the sentence is one tree), P(span (i, j) is a piece of a forest))."""
-        n = self.n
-        pieces = np.zeros((n + 1, n + 1))
+        """(P(the sentence is one tree), P(span (i, j) is a piece of symbol A
+        of a forest)), the latter of shape (n+1, n+1, K)."""
+        n, K = self.n, self.g.K
+        pieces = np.zeros((n + 1, n + 1, K))
         if n == 0 or not np.isfinite(self.log_prob):
             return 0.0, pieces
-        lp = np.full((n + 1, n + 1), -np.inf)
+        lp = np.full((n + 1, n + 1, K), -np.inf)
         lp[0, 1:n] = self.F1[1:n] + self.G1[1:n]
-        before = np.logaddexp(self.F1, self.g.log_cont + self.H)
         for i in range(1, n):
-            lp[i, i + 1:] = before[i] + self.top[i, i + 1:] + self.G[i + 1:]
+            lp[i, i + 1:] = self.P[i][None, :] + self.ins[i, i + 1:] + self.G[i + 1:]
         with np.errstate(invalid="ignore"):
             pieces = np.exp(lp - self.log_prob)
         return float(np.exp(self.whole - self.log_prob)), np.nan_to_num(pieces)
@@ -109,7 +117,8 @@ class Chart:
     def top_level_posteriors(self) -> np.ndarray:
         """P(span (i, j) is a top-level chunk | sentence): the whole sentence as
         one tree, or a piece of a forest."""
-        p_whole, tops = self._top_posteriors()
+        p_whole, pieces = self._top_posteriors()
+        tops = pieces.sum(axis=2)
         if self.n:
             tops[0, self.n] += p_whole
         return tops
@@ -124,10 +133,7 @@ class Chart:
             self._mu = mu
             return mu
         p_whole, pieces = self._top_posteriors()
-        weighted = a * g.S_piece[None, None, :]
-        norm = weighted.sum(axis=2, keepdims=True)
-        with np.errstate(divide="ignore", invalid="ignore"):
-            mu += np.where(norm > 0, weighted / norm, 0.0) * pieces[:, :, None]
+        mu += pieces
         root = a[0, n] * g.S
         if root.sum() > 0:
             mu[0, n] += p_whole * root / root.sum()
@@ -227,30 +233,39 @@ class Chart:
         A0 = int(np.argmax(log_start + best[0, n]))
         whole = g.log_whole + log_start[A0] + best[0, n, A0]
         with np.errstate(divide="ignore"):
-            chunk = np.log(g.S_piece)[None, None, :] + best                 # (i, j, A)
-        piece_A, piece_v = chunk.argmax(axis=2), chunk.max(axis=2)
-        one = np.full(n + 1, -np.inf)       # one piece covering [0, j)
-        many = np.full(n + 1, -np.inf)      # two or more pieces covering [0, j)
-        prev: Dict[int, Tuple[int, bool]] = {}
-        one[1:n] = g.log_forest + piece_v[0, 1:n]
-        for j in range(2, n + 1):
-            for i in range(1, j):
-                for after_one, base in ((True, one[i]), (False, g.log_cont + many[i])):
-                    if base + piece_v[i, j] > many[j]:
-                        many[j], prev[j] = base + piece_v[i, j], (i, after_one)
-        if whole >= many[n] + g.log_stop:
+            log_first = np.log(g.S_piece)
+        one = np.full((n + 1, K), -np.inf)       # one piece covering [0, j), its symbol
+        many = np.full((n + 1, K), -np.inf)      # two or more, the last one's symbol
+        prev: Dict[Tuple[int, int], Tuple[int, int, bool]] = {}
+        one[1:n] = g.log_forest + log_first[None, :] + best[0, 1:n]
+        for i in range(1, n):
+            cand = np.stack([one[i], many[i] + g.log_cont_v])           # (2, A)
+            score = cand[:, :, None] + g.log_T[None, :, :]              # (2, A, B)
+            flat = score.reshape(-1, K)
+            arg = flat.argmax(axis=0)                                    # best (phase, A) per B
+            enter = flat[arg, np.arange(K)]
+            for jj in range(i + 1, n + 1):
+                val = enter + best[i, jj]
+                better = val > many[jj]
+                for B in np.flatnonzero(better):
+                    many[jj, B] = val[B]
+                    ph, A = divmod(int(arg[B]), K)
+                    prev[(jj, int(B))] = (i, A, ph == 0)
+        end = many[n] + g.log_stop_v
+        Bn = int(np.argmax(end)) if n else 0
+        if n < 2 or whole >= end[Bn]:
             roots, stack = [(0, n)], [(0, n, A0)]
         else:
-            roots, stack, j = [], [], n
+            roots, stack, jj, B = [], [], n, Bn
             while True:
-                i, after_one = prev[j]
-                roots.append((i, j))
-                stack.append((i, j, int(piece_A[i, j])))
-                if after_one:
+                i, A, from_one = prev[(jj, B)]
+                roots.append((i, jj))
+                stack.append((i, jj, B))
+                if from_one:
                     roots.append((0, i))
-                    stack.append((0, i, int(piece_A[0, i])))
+                    stack.append((0, i, A))
                     break
-                j = i
+                jj, B = i, A
             roots.reverse()
         split: Dict[Span, int] = {}
         label: Dict[Span, int] = {}
@@ -287,16 +302,17 @@ class Chart:
             w = g.S * a[0, n]
             roots, stack = [(0, n)], [(0, n, int(rng.choice(g.K, p=w / w.sum())))]
         else:
-            # The first piece, then each next one; the stop at n is in G[n].
-            ends = [1 + pick(self.F1[1:n] + self.G1[1:n])]
-            while ends[-1] < n:
-                i = ends[-1]
-                ends.append(i + 1 + pick(self.top[i, i + 1:] + self.G[i + 1:]))
-            roots, stack = [], []
-            for i, j in zip([0] + ends[:-1], ends):
-                w = g.S_piece * a[i, j]
-                roots.append((i, j))
-                stack.append((i, j, int(rng.choice(g.K, p=w / w.sum()))))
+            K = g.K
+            first = pick((self.F1[1:n] + self.G1[1:n]).ravel())
+            jj, A = 1 + first // K, first % K
+            roots, stack = [(0, jj)], [(0, jj, A)]
+            while jj < n:
+                # The next piece (jj, k) of symbol C; the stop at n is in G[n].
+                nxt = pick((g.log_T[A][None, :] + self.ins[jj, jj + 1:] + self.G[jj + 1:]).ravel())
+                k, C = jj + 1 + nxt // K, nxt % K
+                roots.append((jj, k))
+                stack.append((jj, k, C))
+                jj, A = k, C
         split: Dict[Span, int] = {}
         label: Dict[Span, int] = {}
         while stack:

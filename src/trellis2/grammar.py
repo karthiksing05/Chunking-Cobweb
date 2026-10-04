@@ -263,11 +263,16 @@ class Grammar:
     E: np.ndarray       # (M, V) P(token | rule class, primitive)
     alpha: float
     # A sentence is one tree (probability p_whole) or a partial analysis: a
-    # forest of two or more pieces, each with its symbol from S_piece, which
-    # after its second piece ends with probability p_stop.
+    # forest of two or more pieces. The first piece's symbol comes from
+    # S_piece and each next one's from T_piece[previous piece's symbol];
+    # from the second piece on, the forest ends after a piece of symbol B
+    # with probability stop_piece[B]. (Without T_piece and stop_piece every
+    # piece is drawn from S_piece and the forest ends with p_stop.)
     p_stop: float = 1.0
     p_whole: float = 1.0
     S_piece: Optional[np.ndarray] = None
+    T_piece: Optional[np.ndarray] = None
+    stop_piece: Optional[np.ndarray] = None
     # The representation-tree nodes that make up each symbol (one node unless
     # model merging joined several).
     symbol_nodes: List[List[CobwebNode]] = field(default_factory=list)
@@ -303,11 +308,18 @@ class Grammar:
         self.qk = 1.0 - self.pk
         if self.S_piece is None:
             self.S_piece = self.S
+        if self.T_piece is None:
+            self.T_piece = np.tile(self.S_piece, (len(self.S_piece), 1))
+        if self.stop_piece is None:
+            self.stop_piece = np.full(len(self.S_piece), self.p_stop)
         with np.errstate(divide="ignore"):
             self.log_stop = float(np.log(self.p_stop))
             self.log_cont = float(np.log1p(-self.p_stop))
             self.log_whole = float(np.log(self.p_whole))
             self.log_forest = float(np.log1p(-self.p_whole))
+            self.log_T = np.log(self.T_piece)
+            self.log_stop_v = np.log(self.stop_piece)
+            self.log_cont_v = np.log1p(-self.stop_piece)
 
     @property
     def K(self) -> int:
@@ -330,10 +342,11 @@ class Grammar:
         g = Grammar(vocab=self.vocab, S=self.S ** p, U=self.U ** p, pk=self.pk ** p,
                     Lt=self.Lt ** p, Rt=self.Rt ** p, E=self.E ** p, alpha=self.alpha,
                     p_stop=self.p_stop, p_whole=self.p_whole, S_piece=self.S_piece ** p,
-                    info=dict(self.info))
+                    T_piece=self.T_piece ** p, stop_piece=self.stop_piece, info=dict(self.info))
         g.qk = self.qk ** p
         g.log_stop, g.log_cont = self.log_stop * p, self.log_cont * p
         g.log_whole, g.log_forest = self.log_whole * p, self.log_forest * p
+        g.log_stop_v, g.log_cont_v = self.log_stop_v * p, self.log_cont_v * p
         return g
 
     def lexical(self, token_id: int) -> np.ndarray:
@@ -349,9 +362,10 @@ class Grammar:
         if whole_only or rng.random() < self.p_whole:
             tops = [int(rng.choice(self.K, p=self.S))]
         else:
-            tops = [int(rng.choice(self.K, p=self.S_piece)) for _ in range(2)]
-            while rng.random() >= self.p_stop:
-                tops.append(int(rng.choice(self.K, p=self.S_piece)))
+            tops = [int(rng.choice(self.K, p=self.S_piece))]
+            tops.append(int(rng.choice(self.K, p=self.T_piece[tops[-1]])))
+            while rng.random() >= self.stop_piece[tops[-1]]:
+                tops.append(int(rng.choice(self.K, p=self.T_piece[tops[-1]])))
         # Expand depth-first, left to right; spans are filled in afterwards.
         tokens: List[str] = []
         nodes: List[list] = []  # [symbol, rule, token or None, left idx, right idx]
@@ -427,6 +441,8 @@ class _Elements:
     right: np.ndarray
     root: np.ndarray
     whole: np.ndarray     # a top-level element with no top-level neighbours
+    prev: np.ndarray      # the previous top-level element (-1 if none)
+    last: np.ndarray      # no top-level element follows
     w: np.ndarray
     rel: np.ndarray       # relation id of composites (0 for primitives)
     n_rel: int            # 1 for sequences
@@ -445,6 +461,8 @@ def _elements(mem: Memory, leaves: Sequence[CobwebNode], rindex: TreeIndex,
         root=np.array(mem.is_root),
         whole=np.array([r and a < 0 and b < 0
                         for r, a, b in zip(mem.is_root, mem.top_left, mem.top_right)], dtype=bool),
+        prev=np.array(mem.top_left, dtype=np.int64),
+        last=np.array([b < 0 for b in mem.top_right], dtype=bool),
         w=np.array(mem.weight, dtype=float),
         rel=np.array([rel_index.get(r, 0) for r in mem.relation], dtype=np.int64),
         n_rel=max(len(rel_index), 1),
@@ -479,10 +497,15 @@ def _plain_pcfg_code(el: _Elements, V: int, alpha: float, mem: Memory
 
 def _sentence_top_nats(el: _Elements, s: np.ndarray, K: int, alpha: float) -> float:
     """The symbols at a sentence's top level: the roots of sentences analysed
-    as one tree, and the pieces of forests, each from its own row."""
+    as one tree; the first piece of each forest; each later piece given the
+    previous piece's symbol; and after each later piece, whether the forest
+    ends, given its symbol."""
     whole, piece = el.whole, el.root & ~el.whole
+    first, later = piece & (el.prev < 0), piece & (el.prev >= 0)
     return (dm_code(np.zeros(int(whole.sum()), dtype=np.int64), s[whole], el.w[whole], K, alpha)
-            + dm_code(np.zeros(int(piece.sum()), dtype=np.int64), s[piece], el.w[piece], K, alpha))
+            + dm_code(np.zeros(int(first.sum()), dtype=np.int64), s[first], el.w[first], K, alpha)
+            + dm_code(s[el.prev[later]], s[later], el.w[later], K, alpha)
+            + dm_code(s[later], el.last[later].astype(np.int64), el.w[later], 2, alpha))
 
 
 def _beta_nats(n: np.ndarray, alpha: float) -> float:
@@ -622,7 +645,12 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
     board = hasattr(mem, "top_level_nats")
     whole, piece = (el.root, el.root & False) if board else (el.whole, el.root & ~el.whole)
     n_start = np.bincount(s[whole], weights=w[whole], minlength=K)
-    n_piece = np.bincount(s[piece], weights=w[piece], minlength=K)
+    first, later = piece & (el.prev < 0), piece & (el.prev >= 0)
+    n_piece = np.bincount(s[first], weights=w[first], minlength=K)
+    n_T = np.zeros((K, K))
+    np.add.at(n_T, (s[el.prev[later]], s[later]), w[later])
+    n_end = np.zeros((K, 2))                       # columns: the forest ends, continues
+    np.add.at(n_end, (s[later], (~el.last[later]).astype(np.int64)), w[later])
     # Top level of a sentence: one tree or a forest; a forest of m pieces has
     # m - 2 continues and one stop.
     sent = np.array(mem.sentence_of)
@@ -656,7 +684,7 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
     else:
         total_code = _sentence_top_nats(el, s, K, alpha) + ccost(cindex.assign(ccut))
         info["bits (factored grammar)"] = total_code / LN2
-        info["bits (factored grammar)"] += (_beta_nats(n_mode, alpha) + _beta_nats(n_stop_cont, alpha)) / LN2
+        info["bits (factored grammar)"] += _beta_nats(n_mode, alpha) / LN2
     # The receiver also needs the grammar's size; Elias codes make the total
     # an actual message length.
     info["structure bits"] = elias_delta_bits(K) + elias_delta_bits(M)
@@ -669,8 +697,8 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
         n_Q = mem.scan_counts(s, K)
         tables = [(rows(n_Q), K + 1), (rows(n_Rel), el.n_rel)] + tables
     else:
-        tables = [(rows(n_start), K), (rows(n_piece), K), (rows(n_mode), 2),
-                  (rows(n_stop_cont), 2)] + tables
+        tables = [(rows(n_start), K), (rows(n_piece), K), (rows(n_T), K), (rows(n_end), 2),
+                  (rows(n_mode), 2)] + tables
     model_bits, data_bits = split_bits(tables, alpha)
     info["model bits"] = model_bits + info["structure bits"]
     info["data bits"] = data_bits
@@ -702,6 +730,8 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
         p_stop=float((n_stop_cont[0] + alpha) / (n_stop_cont.sum() + 2 * alpha)),
         p_whole=float((n_mode[0] + alpha) / (n_mode.sum() + 2 * alpha)),
         S_piece=normalize(n_piece),
+        T_piece=normalize(n_T) if not board else None,
+        stop_piece=((n_end[:, 0] + alpha) / (n_end.sum(axis=1) + 2 * alpha)) if not board else None,
         Lt=normalize(n_L),
         Rt=normalize(n_R),
         E=normalize(n_E),

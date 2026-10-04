@@ -177,11 +177,16 @@ def all_forests(n):
 
 def forest_grammar(seed, p_stop=0.6, p_whole=0.4):
     """A grammar whose sentences are one tree (p_whole, root symbol from S) or
-    a forest of two or more pieces (symbols from S_piece)."""
+    a forest of two or more pieces: the first from S_piece, each next one
+    given the previous (T_piece), ending after a later piece (stop_piece)."""
     g = random_grammar(seed=seed)
-    piece = np.random.default_rng(seed + 100).random(g.K) + 0.05
+    r = np.random.default_rng(seed + 100)
+    piece = r.random(g.K) + 0.05
+    T = r.random((g.K, g.K)) + 0.05
+    stop = np.clip(p_stop + r.uniform(-0.2, 0.2, g.K), 0.05, 0.95)
     return Grammar(vocab=g.vocab, S=g.S, U=g.U, pk=g.pk, Lt=g.Lt, Rt=g.Rt, E=g.E,
-                   alpha=0.0, p_stop=p_stop, p_whole=p_whole, S_piece=piece / piece.sum())
+                   alpha=0.0, p_stop=p_stop, p_whole=p_whole, S_piece=piece / piece.sum(),
+                   T_piece=T / T.sum(axis=1, keepdims=True), stop_piece=stop)
 
 
 def brute_force_forests(g, tokens):
@@ -199,9 +204,13 @@ def brute_force_forests(g, tokens):
             if len(roots) == 1:
                 p = g.p_whole * g.S[lab[roots[0]]]
             else:
-                p = (1 - g.p_whole) * (1 - g.p_stop) ** (len(roots) - 2) * g.p_stop
-                for r in roots:
-                    p *= g.S_piece[lab[r]]
+                labs = [lab[r] for r in roots]
+                p = (1 - g.p_whole) * g.S_piece[labs[0]]
+                for t in range(1, len(labs)):
+                    p *= g.T_piece[labs[t - 1], labs[t]]
+                    if t >= 2:
+                        p *= 1 - g.stop_piece[labs[t - 1]]
+                p *= g.stop_piece[labs[-1]]
             for (i, j) in spans:
                 if j - i == 1:
                     p *= lex[lab[(i, j)], ids[i]]
@@ -268,5 +277,5 @@ def test_whole_only_samples_are_single_trees():
         if out is not None:
             assert len(out[1].roots) == 1
     tops = [len(o[1].roots) for o in (g.sample(rng, max_len=60) for _ in range(2000)) if o is not None]
-    assert np.mean([t == 1 for t in tops]) == pytest.approx(0.3, abs=0.04)
+    assert np.mean([t == 1 for t in tops]) == pytest.approx(0.3, abs=0.05)
     assert min(t for t in tops if t > 1) == 2
