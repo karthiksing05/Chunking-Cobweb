@@ -212,10 +212,17 @@ def _outcome(body) -> tuple:
 
 class _State:
     """Analyses with the counts their code depends on, so that the code after
-    any chunk or merge move is computed exactly from a few changed rows."""
+    any chunk or merge move is computed exactly from a few changed rows.
+
+    Moves are applied incrementally. A child state shares every unchanged
+    sentence and row with its parent. A merge only renames: it records
+    A' -> A in a table that is applied whenever labels are read, so the
+    analyses themselves are rewritten only when they are needed
+    (``analyses``)."""
 
     def __init__(self, analyses: List[List[Node]], n_tokens: int, alpha: float):
-        self.analyses, self.n_tokens, self.alpha = analyses, n_tokens, alpha
+        self.tops, self.alias, self._analyses = analyses, {}, analyses
+        self.n_tokens, self.alpha, self._sig = n_tokens, alpha, None
         rows: Dict[Hashable, Counter] = defaultdict(Counter)
         start: Counter = Counter()
         self.cont = 0
@@ -225,13 +232,14 @@ class _State:
                 start[top[0]] += 1
                 for lab, body in _nodes(top):
                     rows[lab][_outcome(body)] += 1
-        self.rows, self.start, self.n_sent = rows, start, len(analyses)
+        self.rows, self.start, self.n_sent = dict(rows), start, len(analyses)
         self.parents: Dict[Hashable, set] = defaultdict(set)
         for lab, row in rows.items():
             for o in row:
                 if o[0] == "p":
                     self.parents[o[1]].add(lab)
                     self.parents[o[2]].add(lab)
+        self.parents = dict(self.parents)
         self.row_n = {lab: sum(r.values()) for lab, r in rows.items()}
         self.row_s = {lab: self._phis(r.values()) for lab, r in rows.items()}
         self.s_total = sum(self.row_s.values())
@@ -239,13 +247,31 @@ class _State:
         self.start_s = self._phis(start.values())
         self.fresh = 1 + max([lab[1] for lab in rows if isinstance(lab, tuple) and len(lab) == 2
                               and lab[0] == "chunk" and isinstance(lab[1], int)], default=-1)
-        K = len(rows)
+        self._set_nats()
+
+    def _set_nats(self):
+        K = len(self.rows)
         self.nats = self._nats(K, self._alphabet_term(K), self.s_total, self.start_n,
                                self.start_s, self.cont)
 
     @property
     def bits(self) -> float:
         return self.nats / LN2
+
+    @property
+    def analyses(self) -> List[List[Node]]:
+        """The analyses with every label renamed by the merges so far."""
+        if self._analyses is None:
+            alias = self.alias
+
+            def rename(node):
+                lab, body = node
+                lab = alias.get(lab, lab)
+                if isinstance(body, str):
+                    return (lab, body)
+                return (lab, (rename(body[0]), rename(body[1])))
+            self._analyses = [[rename(n) for n in tops] for tops in self.tops]
+        return self._analyses
 
     def _phis(self, counts) -> float:
         return sum(_phi(c, self.alpha) for c in counts)
@@ -263,12 +289,16 @@ class _State:
                 - _phi(self.n_sent, a) - _phi(cont, a))
         return rows + start + stop
 
+    def _labels(self, tops) -> list:
+        alias = self.alias
+        return [alias.get(t[0], t[0]) for t in tops]
+
     def pairs(self) -> Counter:
         """Adjacent top-level category pairs, counted as non-overlapping
         left-to-right replacements (a run of L equal categories holds L//2)."""
         pairs: Counter = Counter()
-        for tops in self.analyses:
-            labs = [t[0] for t in tops]
+        for tops in self.tops:
+            labs = self._labels(tops)
             run = 1
             for x, y in zip(labs, labs[1:]):
                 if x != y:
@@ -282,6 +312,30 @@ class _State:
                 pairs[(labs[-1], labs[-1])] += run // 2
         return pairs
 
+    def _start_after_chunk(self, B, C, n) -> float:
+        phi, sB, sC = self._phi_one, self.start[B], self.start[C]
+        if B != C:
+            return self.start_s - phi(sB) - phi(sC) + phi(sB - n) + phi(sC - n) + phi(n)
+        return self.start_s - phi(sB) + phi(sB - 2 * n) + phi(n)
+
+    def _merged_rows(self, A, B):
+        """Rows A and A' pooled, and every other row holding A' as a child,
+        with A' renamed A."""
+        def sub(o):
+            return o if o[0] == "w" else ("p", A if o[1] == B else o[1], A if o[2] == B else o[2])
+        merged: Counter = Counter()
+        for r in (A, B):
+            for o, c in self.rows[r].items():
+                merged[sub(o)] += c
+        moved = {}
+        for r in self.parents.get(B, ()):
+            if r != A and r != B:
+                row: Counter = Counter()
+                for o, c in self.rows[r].items():
+                    row[sub(o)] += c
+                moved[r] = row
+        return merged, moved
+
     def scored_moves(self):
         """Yield (nats after the move, move) for every chunk and merge move."""
         a, phi, lg = self.alpha, self._phi_one, math.lgamma
@@ -292,13 +346,8 @@ class _State:
         for (B, C), n in self.pairs().items():
             if n < 2:
                 continue
-            sB, sC = self.start[B], self.start[C]
-            if B != C:
-                start_s = self.start_s - phi(sB) - phi(sC) + phi(sB - n) + phi(sC - n) + phi(n)
-            else:
-                start_s = self.start_s - phi(sB) + phi(sB - 2 * n) + phi(n)
             nats = self._nats(K + 1, up + lg(n + aa), self.s_total + phi(n),
-                              self.start_n - n, start_s, self.cont - n)
+                              self.start_n - n, self._start_after_chunk(B, C, n), self.cont - n)
             yield nats, ("chunk", B, C)
         # Merge (A, A'): A' is renamed A everywhere, so rows A and A' pool and
         # every row holding A' as a child may see outcomes collide.
@@ -306,19 +355,10 @@ class _State:
         aa = (self.n_tokens + (K - 1) ** 2) * a
         labels = sorted(self.rows, key=str)
         for A, B in itertools.combinations(labels, 2):
-            sub = lambda o: o if o[0] == "w" else ("p", A if o[1] == B else o[1],
-                                                    A if o[2] == B else o[2])
-            merged: Counter = Counter()
-            for r in (A, B):
-                for o, c in self.rows[r].items():
-                    merged[sub(o)] += c
+            merged, moved = self._merged_rows(A, B)
             s_total = self.s_total - self.row_s[A] - self.row_s[B] + self._phis(merged.values())
-            for r in self.parents[B]:
-                if r != A and r != B:
-                    moved: Counter = Counter()
-                    for o, c in self.rows[r].items():
-                        moved[sub(o)] += c
-                    s_total += self._phis(moved.values()) - self.row_s[r]
+            for r, row in moved.items():
+                s_total += self._phis(row.values()) - self.row_s[r]
             nA, nB = self.row_n[A], self.row_n[B]
             sA, sB = self.start[A], self.start[B]
             nats = self._nats(K - 1, down - lg(nA + aa) - lg(nB + aa) + lg(nA + nB + aa),
@@ -329,34 +369,105 @@ class _State:
     def _phi_one(self, c) -> float:
         return _phi(c, self.alpha)
 
+    def _child(self) -> "_State":
+        c = object.__new__(_State)
+        c.n_tokens, c.alpha, c.n_sent = self.n_tokens, self.alpha, self.n_sent
+        c.tops, c.alias, c._analyses, c._sig = self.tops, self.alias, None, None
+        c.rows, c.row_n, c.row_s = dict(self.rows), dict(self.row_n), dict(self.row_s)
+        c.parents, c.start = dict(self.parents), Counter(self.start)
+        c.s_total, c.start_n, c.start_s = self.s_total, self.start_n, self.start_s
+        c.cont, c.fresh = self.cont, self.fresh
+        return c
+
     def apply(self, move) -> "_State":
         kind, x, y = move
+        c = self._child()
         if kind == "chunk":
-            analyses = _chunk(self.analyses, x, y, ("chunk", self.fresh))
+            B, C, Y = x, y, ("chunk", self.fresh)
+            c.fresh += 1
+            tops, n = [], 0
+            for sentence in self.tops:
+                labs = self._labels(sentence)
+                if not any(p == B and q == C for p, q in zip(labs, labs[1:])):
+                    tops.append(sentence)
+                    continue
+                out, t = [], 0
+                while t < len(sentence):
+                    if t + 1 < len(sentence) and labs[t] == B and labs[t + 1] == C:
+                        out.append((Y, (sentence[t], sentence[t + 1])))
+                        t += 2
+                        n += 1
+                    else:
+                        out.append(sentence[t])
+                        t += 1
+                tops.append(out)
+            c.tops = tops
+            c.rows[Y] = Counter({("p", B, C): n})
+            c.row_n[Y], c.row_s[Y] = n, self._phi_one(n)
+            c.s_total += c.row_s[Y]
+            c.start_s = self._start_after_chunk(B, C, n)
+            c.start[B] -= n
+            c.start[C] -= n
+            c.start[Y] = n
+            c.start_n -= n
+            c.cont -= n
+            for z in (B, C):
+                c.parents[z] = set(self.parents.get(z, ())) | {Y}
         else:
-            analyses = [[_relabel(n, x, y) for n in tops] for tops in self.analyses]
-        return _State(analyses, self.n_tokens, self.alpha)
+            A, B = x, y
+            merged, moved = self._merged_rows(A, B)
+            c.rows[A] = merged
+            c.row_n[A] = self.row_n[A] + self.row_n[B]
+            c.row_s[A] = self._phis(merged.values())
+            c.s_total += c.row_s[A] - self.row_s[A] - self.row_s[B]
+            for r, row in moved.items():
+                c.rows[r] = row
+                c.row_s[r] = self._phis(row.values())
+                c.s_total += c.row_s[r] - self.row_s[r]
+            for table in (c.rows, c.row_n, c.row_s):
+                del table[B]
+            # Rows that held A or A' as a child now hold A; the children of
+            # row A' now have row A as a parent.
+            holders = set(self.parents.get(A, ())) | set(self.parents.get(B, ()))
+            c.parents.pop(B, None)
+            c.parents[A] = {A if r == B else r for r in holders}
+            for o in self.rows[B]:
+                if o[0] == "p":
+                    for z in (o[1], o[2]):
+                        z = A if z == B else z
+                        c.parents[z] = {A if r == B else r for r in c.parents.get(z, ())} | {A}
+            sA, sB = self.start[A], self.start[B]
+            c.start_s = self.start_s - self._phi_one(sA) - self._phi_one(sB) + self._phi_one(sA + sB)
+            c.start[A] = sA + sB
+            del c.start[B]
+            c.alias = {k: (A if v == B else v) for k, v in self.alias.items()}
+            c.alias[B] = A
+        c.start = Counter({k: v for k, v in c.start.items() if v})
+        c._set_nats()
+        return c
 
     def signature(self) -> tuple:
         """The analyses with categories renamed in order of first appearance:
         equal for states that differ only in the names of their categories."""
-        canon: Dict[Hashable, int] = {}
-        out = []
-        for tops in self.analyses:
-            seq = []
-            for top in tops:
-                stack = [top]
-                while stack:
-                    lab, body = stack.pop()
-                    k = canon.setdefault(lab, len(canon))
-                    if isinstance(body, str):
-                        seq.append((k, body))
-                    else:
-                        seq.append(k)
-                        stack.append(body[1])
-                        stack.append(body[0])
-            out.append(tuple(seq))
-        return tuple(out)
+        if self._sig is None:
+            canon: Dict[Hashable, int] = {}
+            out = []
+            for tops in self.analyses:
+                seq = []
+                for top in tops:
+                    stack = [top]
+                    while stack:
+                        lab, body = stack.pop()
+                        k = canon.setdefault(lab, len(canon))
+                        if isinstance(body, str):
+                            seq.append((k, body))
+                        else:
+                            seq.append(k)
+                            stack.append(body[1])
+                            stack.append(body[0])
+                out.append(tuple(seq))
+            self._sig = tuple(out)
+        return self._sig
 
 
 def _describe(move) -> str:
@@ -378,18 +489,18 @@ def chunk_and_merge(analyses: List[List[Node]], n_tokens: int, alpha: float,
     best = _State(analyses, n_tokens, alpha)
     frontier, stale = [best], 0
     for step in range(max_steps):
+        # Codes equal to 1e-7 nats are ties, broken by the order of the moves.
         scored = sorted(((nats, i, move) for i, st in enumerate(frontier)
-                         for nats, move in st.scored_moves()), key=lambda x: x[0])
-        successors, seen = [], set()
+                         for nats, move in st.scored_moves()), key=lambda x: round(x[0], 7))
+        successors = []
         for nats, i, move in scored:
             if len(successors) == beam:
                 break
             child = frontier[i].apply(move)
-            if beam > 1:
-                sig = child.signature()
-                if sig in seen:
-                    continue
-                seen.add(sig)
+            # Two states can only be the same analyses if their codes are equal.
+            ties = [s for s, _ in successors if abs(s.nats - child.nats) < 1e-7]
+            if any(s.signature() == child.signature() for s in ties):
+                continue
             successors.append((child, move))
         if not successors:
             break

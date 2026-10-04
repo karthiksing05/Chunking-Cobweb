@@ -43,23 +43,28 @@ LN2 = math.log(2)
 
 class Tally:
     def __init__(self):
-        self.hit = self.gold = self.pred = 0
+        self.hit = self.gold = self.pred = self.base_hit = self.base = 0
 
-    def add(self, gold, pred, n):
-        g, p = evaluable(gold, n), evaluable(pred, n)
+    def add(self, sentence, pred):
+        n = len(sentence.tags)
+        g, p = evaluable(sentence.brackets, n), evaluable(pred, n)
         self.hit += len(g & p)
         self.gold += len(g)
         self.pred += len(p)
+        base = evaluable(sentence.base, n)
+        self.base_hit += len(base & p)
+        self.base += len(base)
 
     def result(self):
         return {"omission": 1 - self.hit / max(self.gold, 1),
-                "commission": 1 - self.hit / max(self.pred, 1)}
+                "commission": 1 - self.hit / max(self.pred, 1),
+                "base_phrase_omission": 1 - self.base_hit / max(self.base, 1)}
 
 
 def baseline(test, brackets_of) -> dict:
     t = Tally()
     for s in test:
-        t.add(s.brackets, brackets_of(len(s.tags)), len(s.tags))
+        t.add(s, brackets_of(len(s.tags)))
     return t.result()
 
 
@@ -87,7 +92,7 @@ def evaluate_model(chart_of, test) -> dict:
     t, bits, tops = Tally(), 0.0, []
     for s in test:
         chart = chart_of(s.tags)
-        t.add(s.brackets, chart.mbr_tree().brackets(), len(s.tags))
+        t.add(s, chart.mbr_tree().brackets())
         bits -= chart.log_prob / LN2
         tops.append(len(chart.viterbi_tree().roots))
     out = t.result()
@@ -95,10 +100,15 @@ def evaluate_model(chart_of, test) -> dict:
     return out
 
 
-def run_seed(seed: int, root: str) -> dict:
+def run_seed(seed: int, root: str, train_max_len: int = 10) -> dict:
+    """Test on held-out WSJ10 sentences; train on the rest of WSJ10 or, with
+    ``train_max_len`` > 10, on every other sentence of up to that many tags."""
     sentences = load_wsj(root)
     train, test = split(sentences, seed)
-    row = {"seed": seed, "train": len(train), "test": len(test),
+    if train_max_len > 10:
+        held_out = {tuple(s.words) for s in test}
+        train = [s for s in load_wsj(root, max_len=train_max_len) if tuple(s.words) not in held_out]
+    row = {"seed": seed, "train": len(train), "test": len(test), "train_max_len": train_max_len,
            "baselines": {
                "right-branching": baseline(test, lambda n: {(i, n) for i in range(n - 1)}),
                "left-branching": baseline(test, lambda n: {(0, j) for j in range(2, n + 1)}),
@@ -139,17 +149,20 @@ def summarise(rows) -> str:
         vals = [get(r) for r in rows]
         v = float(np.mean(vals))
         return f"{100 * v:.1f}%" if pct else fmt.format(v)
-    lines = ["| Model | Bracket omission | Bracket commission | Held-out bits/sentence | Symbols | Chunk types |",
-             "|---|---|---|---|---|---|"]
+    lines = ["| Model | Bracket omission | Bracket commission | Base-phrase omission | "
+             "Held-out bits/sentence | Symbols | Chunk types |",
+             "|---|---|---|---|---|---|---|"]
     for name in ("right-branching", "left-branching"):
-        lines.append(f"| {name} | {m(lambda r: r['baselines'][name]['omission'], pct=True)} | "
-                     f"{m(lambda r: r['baselines'][name]['commission'], pct=True)} | – | – | – |")
+        b = lambda key: m(lambda r: r['baselines'][name][key], pct=True)
+        lines.append(f"| {name} | {b('omission')} | {b('commission')} | {b('base_phrase_omission')} "
+                     f"| – | – | – |")
     for name, key in (("unigram tag model", "unigram bits/sentence"), ("bigram tag model", "bigram bits/sentence")):
-        lines.append(f"| {name} | – | – | {m(lambda r: r['baselines'][key])} | – | – |")
+        lines.append(f"| {name} | – | – | – | {m(lambda r: r['baselines'][key])} | – | – |")
     for name, side in (("TRELLIS v2, tags only (unsupervised)", "unsupervised"),
                        ("TRELLIS v2, binarized gold trees (supervised)", "supervised")):
         lines.append(f"| {name} | {m(lambda r: r[side]['omission'], pct=True)} | "
                      f"{m(lambda r: r[side]['commission'], pct=True)} | "
+                     f"{m(lambda r: r[side]['base_phrase_omission'], pct=True)} | "
                      f"{m(lambda r: r[side]['test_bits_per_sentence'])} | "
                      f"{m(lambda r: r[side]['symbols'])} | {m(lambda r: r[side]['chunk_types'])} |")
     return "\n".join(lines)
@@ -159,18 +172,21 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--seeds", default="13,17")
     ap.add_argument("--root", default=default_ptb_root())
+    ap.add_argument("--train-max-len", type=int, default=10)
     ap.add_argument("--out", default=os.path.join(HERE, "results", "treebank"))
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
     seeds = [int(s) for s in args.seeds.split(",")]
     with ProcessPoolExecutor(max_workers=len(seeds)) as pool:
-        rows = list(pool.map(run_seed, seeds, [args.root] * len(seeds)))
+        rows = list(pool.map(run_seed, seeds, [args.root] * len(seeds),
+                             [args.train_max_len] * len(seeds)))
     with open(os.path.join(args.out, "results.json"), "w") as f:
         json.dump(rows, f, indent=1)
     table = summarise(rows)
     with open(os.path.join(args.out, "summary.md"), "w") as f:
-        f.write(f"Penn Treebank WSJ10 (NLTK sample, {rows[0]['train']} training / {rows[0]['test']} test "
-                f"sentences per seed; mean over seeds {args.seeds}).\n\n{table}\n")
+        f.write(f"Penn Treebank, NLTK sample: trained on {rows[0]['train']} sentences of up to "
+                f"{args.train_max_len} tags, tested on {rows[0]['test']} held-out WSJ10 sentences "
+                f"(mean over seeds {args.seeds}).\n\n{table}\n")
     print("\n" + table)
 
 

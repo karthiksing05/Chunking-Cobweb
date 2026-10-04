@@ -146,11 +146,14 @@ The learner alternates two phases. Sleeping once after observing everything is b
   2. **Structure.** A beam search over *chunk* (B, C) and *merge* (A, A') moves lowers the plain-PCFG code of the corpus. This is GRIDS, SNPR and Bayesian model merging under one probabilistic code; every move is global, so analyses stay consistent. The search runs from flat sentences in each of the last 12 partitions on the merge path, and from the stored analyses, and keeps the shortest code.
   3. **Concepts.** The analyses are consolidated into the two hierarchies, starting from the search's categories.
   4. **Re-analysis.** Hard EM: Viterbi trees under the full grammar, kept if the total code shrinks. Consolidation starts from their labels.
-  5. The stored analyses are rewritten in the new grammar's categories, for the next day to perceive with and the next night to start from.
+  5. **Choice.** Steps 3–4 run on each of the three best distinct search results; the grammar with the shortest total code wins.
+  6. The stored analyses are rewritten in the new grammar's categories, for the next day to perceive with and the next night to start from.
 
 ### Search
 
 - **Exact scores.** The code is a sum of Dirichlet-multinomial row terms. A move changes a few rows, plus the alphabet size that every row's normalizer depends on, so each candidate is scored exactly from cached row sums. Scores agree with a full recomputation to 10⁻¹² bits, and greedy search is about 100× faster (MED: 17 s → 0.1 s).
+- **Incremental moves.** A child state shares every unchanged sentence and row with its parent. A chunk move rewrites only the sentences that hold the pair; a merge only records a renaming, applied when labels are read. Duplicate states are looked for only among successors with equal codes. On WSJ20 (27,000 tokens) one beam search went from 49 s to 9 s, with the same result. Codes equal to 10⁻⁷ nats are ties, broken by the order of the moves, so results do not depend on floating-point noise.
+- **Word classes** are scored the same way: merging two classes pools two rows and two columns of the class-bigram counts, so every pair is scored exactly from those counts (O(K³) per step). The merge path is identical to the from-scratch search on all six conditions and about 300× faster.
 - **Beam.** Each step keeps the 4 best distinct successors, even ones longer than their parent, as in GRIDS (width 3) and Stolcke (3–10). Duplicates are found by renaming categories in order of first appearance. The search stops after 3 steps without a new shortest code (Stolcke's lookahead) and returns the shortest found.
 - **Several starts.** Class-bigram merging never forms a preposition class. It adds the prepositions to the verb class one at a time, because both sit between a noun and a determiner. Its merge path is still a nested family of partitions, and searching from each of its last 12 lets the code with structure, not the bigram code, make the last class merges.
 
@@ -165,7 +168,7 @@ Plain-PCFG code of the 320 training sentences (bits, seed 13):
 | term_med | 7,770 | 8,644 | 8,206 | 8,033 |
 | term_high | 10,511 | 11,294 | 11,019 | 10,589 |
 
-Over 201 searches (all six conditions, up to 12 starts each, beam widths 1, 4 and 16; `experiments/v2/results/search`, `run_search_study.py`), code length and the commission of the grammar read off the analyses have rank correlation 0.72–0.98 per condition (SMALL 0.68, where nearly every search reaches the same grammar). A wide beam (16) helps on some conditions and hurts on others, which is why the default stays at 4. The objective was right; the search was the bottleneck. From one start, the LARGE beam recovers the gold nouns, verbs, prepositions, adjectives and determiners, but keeps *who* and *which* as two classes where the gold grammar has one relative-pronoun class.
+Over 201 searches (all six conditions, up to 12 starts each, beam widths 1, 4 and 16; `experiments/v2/results/search`, `run_search_study.py`), code length and the commission of the grammar read off the analyses have rank correlation 0.71–0.98 per condition (SMALL 0.67, where nearly every search reaches the same grammar). A wide beam (16) helps on some conditions and hurts on others, which is why the default stays at 4. The objective was right; the search was the bottleneck. From one start, the LARGE beam recovers the gold nouns, verbs, prepositions, adjectives and determiners, but keeps *who* and *which* as two classes where the gold grammar has one relative-pronoun class.
 
 ### Results: batch learning
 
@@ -174,13 +177,13 @@ Two seeds, the v1 splits, 320 training sentences, compared with the supervised m
 | Condition | Train bits (unsup / gold trees) | Chunk types (unsup / gold trees) | Test bits/sentence (unsup / gold trees) | Gen. commission (unsup / gold trees) | Gen. commission in v2.1 | Brackets crossing no gold bracket |
 |---|---|---|---|---|---|---|
 | small | 3,251 / 3,251 | 3.0 / 3.0 | 9.5 / 9.5 | 0.1% / 0.1% | 0.1% | 75% |
-| med | **6,498 / 6,528** | 11.0 / 12.5 | 18.5 / 18.5 | **0.5% / 0.6%** | 45.7% | 59% |
+| med | **6,518 / 6,528** | 11.0 / 12.5 | 18.5 / 18.5 | 1.1% / 0.6% | 45.7% | 56% |
 | large | **8,031 / 8,356** | 16.0 / 18.5 | **23.6 / 24.0** | **9.2% / 14.5%** | 10.9% | 86% |
 | term_low | 5,312 / 5,284 | 13.0 / 12.0 | 15.3 / 15.3 | 0.4% / 0.1% | 25.2% | 53% |
-| term_med | 7,744 / 7,712 | 19.5 / 18.0 | 21.8 / 21.9 | 2.7% / 2.9% | 40.9% | 46% |
-| term_high | **10,480 / 10,538** | 14.5 / 15.0 | 30.7 / 30.8 | **0.9% / 2.2%** | 62.4% | 38% |
+| term_med | **7,677 / 7,712** | 16.5 / 18.0 | 21.8 / 21.9 | **1.7% / 2.9%** | 40.9% | 47% |
+| term_high | **10,458 / 10,538** | 12.5 / 15.0 | 30.7 / 30.8 | **0.8% / 2.2%** | 62.4% | 48% |
 
-From sentences alone, the learner now matches the supervised model on every condition. Its code is within 0.6% of the gold-tree grammar's (shorter on MED, LARGE and TERM_HIGH), and its commission is at most 0.3 points higher (lower on four conditions). Novelty is 91–100% (SMALL 54%: its language is small).
+From sentences alone, the learner now matches the supervised model on every condition. Its code is within 0.6% of the gold-tree grammar's (shorter on MED, LARGE, TERM_MED and TERM_HIGH), and its commission is at most half a point higher (lower on three conditions). Novelty is 91–100% (SMALL 54%: its language is small).
 
 ### Results: by day and by night versus batch
 
@@ -191,24 +194,25 @@ Generation commission (incremental / batch):
 | Condition | 40 sentences | 80 | 160 | 320 |
 |---|---|---|---|---|
 | small | 0.5% / 0.5% | 0.3% / 0.3% | 0.2% / 0.2% | 0.1% / 0.1% |
-| med | 57.3% / 57.3% | **24.8% / 48.2%** | **14.4% / 36.9%** | 0.4% / 0.5% |
-| large | 34.4% / 34.4% | **27.3% / 43.2%** | 27.0% / 29.6% | 10.2% / 9.2% |
-| term_low | 38.1% / 38.1% | **4.0% / 36.2%** | **1.3% / 16.9%** | 0.6% / 0.4% |
-| term_med | 70.9% / 70.9% | 44.8% / 43.6% | 6.0% / 7.6% | 1.4% / 2.7% |
-| term_high | 69.5% / 69.5% | **31.9% / 72.1%** | **30.3% / 52.9%** | 0.8% / 0.9% |
+| med | 65.7% / 63.5% | **33.3% / 49.0%** | 14.4% / 14.5% | 1.1% / 1.1% |
+| large | 34.4% / 34.4% | 27.3% / 27.3% | 27.0% / 29.2% | 9.2% / 9.2% |
+| term_low | **13.9% / 38.3%** | 1.7% / 1.5% | **0.2% / 16.9%** | 0.1% / 0.4% |
+| term_med | 60.0% / 60.0% | 38.7% / 40.8% | 5.8% / 7.3% | 0.4% / 1.7% |
+| term_high | 69.5% / 69.5% | **31.9% / 60.6%** | **11.3% / 29.4%** | 0.8% / 0.8% |
 
-- **Early nights coincide.** For the first three nights the stored analyses never give the shortest code; a restart from word classes wins and the two learners are identical.
-- **Then the stored analyses pay.** From 80 sentences on they win 21 of 30 nights (SMALL excluded, where both give the same grammar). At 80 and 160 sentences the incremental learner's training code is shorter in all 10 cells and its held-out bits are lower or equal. Its commission is lower in 9 of the 10 cells, by 16 to 40 points in seven of them. At 320 sentences the two are equivalent (commission within 1.3 points).
-- **Perception.** By 160 sentences each day's sentences are parsed almost completely (1.0–1.1 top-level chunks per sentence), at close to the held-out rate in bits.
-- **Cost.** A night costs about as much as a batch sleep over the same sentences. All six nights together cost 1.3–3.8× one batch sleep at 320 (median 1.9×; timings from a shared machine, so approximate). At 320 sentences the 12-start beam search takes 39–64% of a night, and consolidation most of the rest.
+- **Early nights mostly coincide.** Up to 40 sentences a restart from word classes usually gives the shortest code (the stored analyses win 3 of 20 nights at 20–40 sentences).
+- **Then the stored analyses pay.** From 80 sentences on they win 16 of 30 nights (SMALL excluded, where both give the same grammar). At 80 and 160 sentences the incremental learner's training code is shorter or equal in all 10 cells, and its commission is lower in 8, by 16–29 points in 4. Both are equivalent at 320.
+- **Perception.** By 160 sentences each day's sentences are parsed almost completely (1.0–1.02 top-level chunks per sentence), at close to the held-out rate in bits.
+- **Cost.** A night costs about as much as a batch sleep over the same sentences; the six nights together cost 1.2–1.9× one batch sleep at 320 (timings from a shared machine, so approximate).
 
 ### What the experiments established
 
-1. **Description length does not single out linguists' trees.** With gold word classes, the chunk-and-merge search on MED finds a grammar *shorter* than the gold-tree grammar (6,453 vs 6,651 bits) that generates the target language with 0.0% commission, yet shares only 19% of the gold brackets. The learned grammars above match the gold-tree grammars in code and commission, while 38–86% of their brackets cross no gold bracket. Strict MDL identifies the language and leaves its binarization underdetermined. Language-level measures (compression, held-out bits, commission) are the yardstick; bracket agreement is a diagnostic.
+1. **Description length does not single out linguists' trees.** With gold word classes, the chunk-and-merge search on MED finds a grammar *shorter* than the gold-tree grammar (6,453 vs 6,651 bits) that generates the target language with 0.0% commission, yet shares only 19% of the gold brackets. The learned grammars above match the gold-tree grammars in code and commission, while 47–86% of their brackets cross no gold bracket. Strict MDL identifies the language and leaves its binarization underdetermined. Language-level measures (compression, held-out bits, commission) are the yardstick; bracket agreement is a diagnostic.
 2. **The bottleneck was search, not the objective.** Verbs and prepositions share every local context, so the class-bigram code merges them. The code with structure keeps them apart, but greedy search from the bigram classes could not get there. Exact scores, a beam and several starts do.
 3. **Consolidation must start from the search's categories.** Re-forming them from blank chunk context lost LARGE's distinctions (47.7% commission at seed 13, against 9.9% when starting from the search's categories).
-4. **Incremental learning must be able to refine categories.** The search can only merge categories, while more data pays for finer ones. A first version that continued only from the stored analyses got stuck: at 10 sentences the shortest grammar has a single category, and no merge undoes that. Letting every night also start over fixed it, and the stored analyses still win whenever they are better.
-5. **Earlier attempts that did not fix the verb/preposition merge:**
+4. **The plain code guides the search; the full code must decide.** Analyses whose plain codes differ by a bit can consolidate into very different grammars. When the search's tie-breaking changed, MED seed 17's best search result moved from 6,465.5 to 6,466.8 bits, and its final grammar from 6,506 bits and 0.5% commission to 6,771 bits and 13.4%. Each night now consolidates and re-analyses the three best distinct search results and keeps the shortest total code; choosing by the consolidated code before re-analysis was not enough (TERM_HIGH seed 17: 10,499 → 10,805 bits).
+5. **Incremental learning must be able to refine categories.** The search can only merge categories, while more data pays for finer ones. A first version that continued only from the stored analyses got stuck: at 10 sentences the shortest grammar has a single category, and no merge undoes that. Letting every night also start over fixed it, and the stored analyses still win whenever they are better.
+6. **Earlier attempts that did not fix the verb/preposition merge:**
    - Cobweb re-formation after the search;
    - latent split-and-merge EM on the fixed trees;
    - whole-sentence context bags in the representation (`sentence_bags`);
@@ -219,6 +223,54 @@ Generation commission (incremental / batch):
 - **Split moves (coupled category refinement):** split a class and the chunk categories built on it together, scored by the full code. With splits, a night could continue from the stored analyses instead of repeating the batch search, which would make nights cheaper.
 - **Faster nights.** The 12-start search and consolidation (Cobweb replay) now each take about half of a night.
 - **Penn Treebank** (WSJ10 with gold tags), then a non-language domain.
+
+## Beyond the synthetic grammars (v2.3, in progress)
+
+Details and figures: [`FRAMEWORK.md`](FRAMEWORK.md), section 11.
+
+### Penn Treebank: WSJ10 with gold tags
+
+Code: `treebank.py`, `experiments/v2/run_treebank.py`. NLTK's public sample of the treebank (about 3,900 WSJ sentences, kept under `data/ptb_sample`, not committed). Tokens are gold tags; punctuation and empty elements are removed; unary chains collapse; sentences of 2–10 tags: 542. Each seed holds out 20% (108 sentences). Unlabelled brackets, ignoring single tags and the whole sentence (Klein & Manning 2002); base phrases are constituents made of tags only.
+
+| Model (WSJ10, seeds 13 and 17) | Bracket omission | Bracket commission | Base-phrase omission | Held-out bits/sentence | Symbols | Chunk types |
+|---|---|---|---|---|---|---|
+| right-branching | 39.0% | 55.7% | 57.3% | – | – | – |
+| left-branching | 82.9% | 87.6% | 75.0% | – | – | – |
+| unigram / bigram tag model (add ½) | – | – | – | 33.4 / 27.2 | – | – |
+| TRELLIS v2, tags only | 55.3% | 67.6% | 33.1% | 30.1 | 11.5 | 11.5 |
+| TRELLIS v2, binarized gold trees | 19.1% | 41.3% | 20.7% | 30.9 | 9.0 | 25.5 |
+
+- The unsupervised learner forms base-phrase chunks (noun groups, verb groups, subject–verb pairs) and leaves sentences as forests of about five chunks: no larger chunk pays on 434 sentences.
+- Its grammar, like the supervised one, is a weaker sequence model than tag bigrams. The Dirichlet concentration is not the cause: the supervised grammar's code prefers α = 0.01 to 0.001 (15,439 vs 15,763 bits), with held-out bits unchanged (30.5 vs 30.6).
+- **The objective prefers the forests.** The learner's forest grammar is shorter than the grammar of the binarized gold trees (14,160 vs 15,763 bits at seed 13; 14,453 vs 15,685 at seed 17). Sentence structure does not pay for itself with this grammar family; this is not a search failure.
+
+### Chinese characters (IDS)
+
+Code: `characters.py`, `experiments/v2/run_characters.py`. CJKVI IDS (under `data/ids`, not committed). Full decompositions into 270 atomic components and 12 operators, as prefix sequences; 13,297 characters of at most 11 tokens; 2,000 learned and 500 held out (seed 13). The gold tree groups an operator with its first part. Generated characters are checked for well-formedness, attested positions (operator, slot, component), and reality (held-out real characters rediscovered).
+
+| Model (2,000 characters, seed 13) | Held-out bits/character | Structure omission | Well formed | Positions attested | Rediscovered real | Novel and valid | Symbols | Chunk types |
+|---|---|---|---|---|---|---|---|---|
+| unigram tokens | 44.1 | – | – | – | – | – | – | – |
+| bigram tokens | 35.0 | – | 22% | 20% | 3.9% | 13% | – | – |
+| TRELLIS v2, IDS structures | **31.9** | **0.0%** | **96%** | 52% | 2.5% | **49%** | 36 | 132 |
+| TRELLIS v2, sequences alone | 37.2 | 28.2% | 7% | 4% | 0.7% | 3% | 35 | 53 |
+
+The bigram row samples sequences from a maximum-likelihood token bigram trained on the same characters.
+
+- From the structures, the representation hierarchy forms positional concepts: left-side radicals (92% on the left), top and bottom components, enclosing frames, overlaid strokes; chunk types include a radical in position (`[⿰ 氵]`).
+- The supervised grammar compresses better than token bigrams (31.9 vs 35.0 bits per character), parses every held-out structure, and generates well-formed characters 96% of the time. Its positional errors come from one large category that mixes right-side and bottom components.
+- **Here the search falls short.** The gold structures give a shorter code than the unsupervised learner's analyses (73,662 against 83,241 bits, 11.5% shorter), unlike the treebank. An unsupervised night on 2,000 characters takes about an hour.
+
+### Tried and dropped: an attach move
+
+Folding a recurring top-level pair directly into an existing category (a chunk move followed by a merge, in one step) is exact and cheap to score. It made the search worse: plain-PCFG code at seed 13, MED 6,539 → 8,469 bits, LARGE 7,800 → 9,964 bits, WSJ10 13,697 → 13,707 bits. The beam takes cheap early attachments that produce over-general categories. Removed.
+
+### Speed
+
+- Word classes: exact deltas, about 300× faster (identical merge paths).
+- Search: incremental moves, about 5× faster on WSJ20 (identical result).
+- Cobweb: each node caches its total sum of squares, about 10% faster with identical hierarchies.
+- What remains is pure-Python Cobweb in consolidation, and the three full consolidations per night: about two minutes for 320 synthetic or 434 treebank sentences, and about an hour for 2,000 characters.
 
 ## Mapping to the paper's postulates
 
@@ -239,9 +291,9 @@ Generation commission (incremental / batch):
 |---|---|
 | v2.0 ✓ | supervised core: hierarchies, MDL cuts and merging, inside-outside + MBR, generation, six-condition evaluation |
 | v2.1 ✓ | unsupervised learning from sentences: MDL objective, partial analyses, word classes, exact-scored beam search over chunk/merge moves from several starts |
-| v2.2 (in part) | learning by day and by night ✓ (perceive with the current grammar; consolidate at night from the stored analyses or a restart); split moves; attention-like long-range context |
-| v2.3 | variable-arity templates, typed relations; first non-language domain (IDS characters, then chess) |
-| v2.4 | Penn Treebank (WSJ10 with gold tags, then full WSJ) with a validated evaluator |
+| v2.2 (in part) | learning by day and by night ✓ (perceive with the current grammar; consolidate at night from the stored analyses or a restart; the full code chooses among the best search results); split moves; attention-like long-range context |
+| v2.3 (in progress) | beyond the paper's corpora: Penn Treebank WSJ10 with gold tags ✓ (and larger training sets ✓); Chinese characters ✓. Open: sentence-level structure without supervision, finer positional concepts, α by description length, a compiled Cobweb |
+| v2.4 | variable-arity templates, typed relations (two-dimensional composition as relations rather than tokens); chess |
 
 ## Reproducing
 
@@ -249,9 +301,13 @@ Generation commission (incremental / batch):
 python -m pytest tests/trellis2 -q
 python experiments/v2/run_synthetic.py --out experiments/v2/results/main      # ~6 min, 6 workers
 python experiments/v2/plot_learning_curves.py experiments/v2/results/main
-python experiments/v2/run_unsupervised.py --seeds 13,17   # ~5 min, 6 workers
-python experiments/v2/run_incremental.py --seeds 13,17    # ~25 min, 6 workers
+python experiments/v2/run_unsupervised.py --seeds 13,17   # ~10 min, 6 workers
+python experiments/v2/run_incremental.py --seeds 13,17    # ~1 h, 8 workers
 python experiments/v2/plot_incremental.py experiments/v2/results/incremental
+python experiments/v2/run_search_study.py                  # ~2 min
+python experiments/v2/run_treebank.py --train-max-len 10 --out experiments/v2/results/treebank/wsj10   # needs data/ptb_sample
+python experiments/v2/run_characters.py                    # needs data/ids/ids.txt
+python docs/figures/make_figures.py                        # figures of FRAMEWORK.md
 ```
 
 The paper corpora are read from `../trellis_v1/data` (the v1 snapshot), with `data/` as the fallback.

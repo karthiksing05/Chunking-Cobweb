@@ -27,7 +27,7 @@ Instance = Dict[str, Hashable]
 class CobwebNode:
     """A concept: weighted attribute-value counts plus taxonomy links."""
 
-    __slots__ = ("id", "parent", "children", "count", "av", "ss")
+    __slots__ = ("id", "parent", "children", "count", "av", "ss", "sstot")
 
     def __init__(self, nid: int):
         self.id = nid
@@ -35,9 +35,10 @@ class CobwebNode:
         self.children: List[CobwebNode] = []
         self.count = 0.0
         self.av: Dict[str, Dict[Hashable, float]] = {}
-        # Per attribute, the sum of squared value counts; makes expected
-        # correct guesses O(#attributes) instead of O(#values).
+        # Per attribute, the sum of squared value counts, and their total
+        # over attributes: expected correct guesses in O(1).
         self.ss: Dict[str, float] = {}
+        self.sstot = 0.0
 
     def __repr__(self):
         kind = "leaf" if not self.children else f"{len(self.children)} children"
@@ -52,7 +53,9 @@ class CobwebNode:
             for u, p in (v.items() if isinstance(v, dict) else ((v, 1.0),)):
                 n = d.get(u, 0.0)
                 d[u] = n + w * p
-                self.ss[a] += 2.0 * n * w * p + (w * p) ** 2
+                inc = 2.0 * n * w * p + (w * p) ** 2
+                self.ss[a] += inc
+                self.sstot += inc
         self.count += w
 
     def absorb(self, other: "CobwebNode") -> None:
@@ -67,6 +70,7 @@ class CobwebNode:
                 n = d.get(v, 0.0)
                 d[v] = n + m
                 ss += 2.0 * n * m + m * m
+            self.sstot += ss - self.ss[a]
             self.ss[a] = ss
         self.count += other.count
 
@@ -97,15 +101,14 @@ class CobwebTree:
         """Expected correct guesses, averaged over attributes."""
         if node.count <= 0.0:
             return 0.0
-        return sum(node.ss.values()) / (node.count * node.count) / self.n_attrs
+        return node.sstot / (node.count * node.count) / self.n_attrs
 
     def _ec_with(self, node: CobwebNode, x: Instance, w: float) -> float:
         """Expected correct guesses of ``node`` if ``x`` were added to it."""
         n = node.count + w
-        tot = 0.0
+        tot = node.sstot                 # every instance defines every attribute
         for a, v in x.items():
             d = node.av.get(a)
-            tot += node.ss.get(a, 0.0)
             if isinstance(v, dict):
                 for u, p in v.items():
                     m = d.get(u, 0.0) if d else 0.0
@@ -119,13 +122,12 @@ class CobwebTree:
                   x: Instance, w: float) -> float:
         """Expected correct guesses of the union of b1, b2 and x."""
         n = b1.count + b2.count + w
-        tot = 0.0
+        tot = b1.sstot + b2.sstot
         for a in self.attrs:
             d1 = b1.av.get(a, {})
             d2 = b2.av.get(a, {})
             small, big = (d1, d2) if len(d1) <= len(d2) else (d2, d1)
-            dot = sum(m * big.get(v, 0.0) for v, m in small.items())
-            tot += b1.ss.get(a, 0.0) + b2.ss.get(a, 0.0) + 2.0 * dot
+            tot += 2.0 * sum(m * big.get(v, 0.0) for v, m in small.items())
             v = x[a]
             for u, p in (v.items() if isinstance(v, dict) else ((v, 1.0),)):
                 mx = d1.get(u, 0.0) + d2.get(u, 0.0)
@@ -295,3 +297,6 @@ class CobwebTree:
                 ss = sum(v * v for v in d.values())
                 assert abs(ss - node.ss[a]) < 1e-6 * max(1.0, ss), \
                     f"{node}: stale sum of squares for {a}"
+            total_ss = sum(node.ss.values())
+            assert abs(total_ss - node.sstot) < 1e-6 * max(1.0, total_ss), \
+                f"{node}: stale total sum of squares"

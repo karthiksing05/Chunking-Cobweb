@@ -27,6 +27,11 @@ def test_scored_moves_are_exact():
             for nats, move in moves:
                 child = state.apply(move)
                 assert abs(nats / 0.6931471805599453 - code_bits(child.analyses, 11, 0.001)) < 1e-6
+                # The incrementally updated counts equal those rebuilt from scratch.
+                ref = _State(child.analyses, 11, 0.001)
+                assert child.rows == ref.rows and child.start == ref.start
+                assert ({k: v for k, v in child.parents.items() if v}
+                        == {k: v for k, v in ref.parents.items() if v})
             state = state.apply(rng.choice(moves)[1])
 
 

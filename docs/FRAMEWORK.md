@@ -20,11 +20,12 @@ This document explains the whole framework: what is stored, how the grammar is f
 8. [Learning from sentences alone, by day and by night](#8-learning-from-sentences-alone-by-day-and-by-night)
 9. [Evaluation](#9-evaluation)
 10. [Results](#10-results)
-11. [Relation to TRELLIS v1 and the paper's postulates](#11-relation-to-trellis-v1-and-the-papers-postulates)
-12. [Using the code](#12-using-the-code)
-13. [Limitations and next steps](#13-limitations-and-next-steps)
-14. [Glossary](#14-glossary)
-15. [References](#15-references)
+11. [Beyond the synthetic grammars](#11-beyond-the-synthetic-grammars)
+12. [Relation to TRELLIS v1 and the paper's postulates](#12-relation-to-trellis-v1-and-the-papers-postulates)
+13. [Using the code](#13-using-the-code)
+14. [Limitations and next steps](#14-limitations-and-next-steps)
+15. [Glossary](#15-glossary)
+16. [References](#16-references)
 
 ## 1. Ideas
 
@@ -157,7 +158,7 @@ Without analyses the learner must find the structure itself. It looks for the an
 
 **By day** (`observe`), each sentence is perceived with the current grammar: its Viterbi analysis, which is also its shortest-code analysis. Where no larger chunk pays, the analysis is a forest of chunks, and unknown words get the category their context implies. The sentence is stored with its analysis. Before the first night there is no grammar, and sentences are stored as they come.
 
-**By night** (`sleep`), all stored sentences are consolidated in five steps.
+**By night** (`sleep`), all stored sentences are consolidated in six steps.
 
 1. **Word classes.** Word types are merged while the code of a class-bigram model shrinks: Brown clustering (Brown et al. 1992) read as description length. The whole merge path, from word types to the final classes, is kept.
 2. **Structure.** A search over two moves lowers the plain-PCFG code of the corpus:
@@ -167,7 +168,8 @@ Without analyses the learner must find the structure itself. It looks for the an
    Every move is global: it changes all sentences consistently, which is what lets a chunk type pay for itself. This is SNPR (Wolff 1982), GRIDS (Langley & Stromsten 2000) and Bayesian model merging under one probabilistic code.
 3. **Concepts.** The analyses are consolidated into the two hierarchies ([sections 4–6](#4-the-two-hierarchies)). Consolidation starts from the search's categories, which describe the chunk context of the first round.
 4. **Re-analysis.** Every sentence gets its Viterbi analysis under the new grammar, and the new analyses are kept only if the total code shrinks (hard EM).
-5. **Rewrite.** The stored analyses are written in the new grammar's categories, for the next day to perceive with and the next night to start from.
+5. **Choice.** Steps 3 and 4 run on each of the three best distinct search results, and the grammar with the shortest total code wins. The plain code is cheap enough to guide the search, but the full code makes the final choice: two analyses whose plain codes differ by a bit can consolidate into very different grammars.
+6. **Rewrite.** The stored analyses are written in the new grammar's categories, for the next day to perceive with and the next night to start from.
 
 ![The structure search on SMALL](figures/search_trajectory.png)
 
@@ -175,12 +177,12 @@ Without analyses the learner must find the structure itself. It looks for the an
 
 ### The search
 
-- **Exact scores.** The code is a sum of Dirichlet-multinomial row terms. A move changes only a few rows, plus the alphabet size that every row's normalizer depends on, so every candidate move is scored exactly from cached row sums, without rebuilding the analyses. The scores agree with a full recomputation to 10⁻¹² bits and make the search about a hundred times faster.
+- **Exact scores, incremental moves.** The code is a sum of Dirichlet-multinomial row terms. A move changes only a few rows, plus the alphabet size that every row's normalizer depends on, so every candidate move is scored exactly from cached row sums, without rebuilding the analyses. The scores agree with a full recomputation to 10⁻¹² bits. Applying a move is incremental too: a chunk move rewrites only the sentences that contain the pair, and a merge only records a renaming. Word classes are scored the same way: each merge of two classes changes two rows and two columns of the class-bigram counts.
 - **Beam.** Each step keeps the four best distinct successors, even ones longer than their parent (GRIDS used a beam of three; Stolcke, three to ten). Duplicates are found by renaming categories in order of first appearance. The search stops after three steps without a new shortest code and returns the shortest found.
 - **Several starts.** Class-bigram merging cannot tell a verb from a preposition, since both sit between a noun and a determiner. It adds the prepositions to the verb class one at a time. Its merge path is still a nested family of partitions, so the search runs from each of the last twelve and keeps the shortest code. The code with structure, not the bigram code, then makes the last class merges.
 - **Stored analyses as one more start.** After the first night the search also starts from the stored analyses. Categories can only merge during the search, and more data may call for finer categories, so every night is free to start over; the shortest code decides.
 
-**Why the search matters.** Across 201 searches (6 conditions, up to 12 starting partitions each, 3 search widths), a shorter code went with a better grammar. The rank correlation between code length and generation commission is 0.72–0.98 per condition, and 0.68 on SMALL, where nearly every search reaches the same grammar. The objective was right; greedy search could not reach its better solutions.
+**Why the search matters.** Across 201 searches (6 conditions, up to 12 starting partitions each, 3 search widths), a shorter code went with a better grammar. The rank correlation between code length and generation commission is 0.71–0.98 per condition, and 0.67 on SMALL, where nearly every search reaches the same grammar. The objective was right; greedy search could not reach its better solutions.
 
 ![A shorter code is a better grammar](figures/code_vs_commission.png)
 
@@ -235,13 +237,13 @@ Five seeds, 320 training sentences. Parsing omission is 0.0% in every condition 
 | Condition | Training code, bits (alone / gold trees) | Held-out bits per sentence (alone / gold trees) | Generation commission (alone / gold trees) |
 |---|---|---|---|
 | SMALL | 3,251 / 3,251 | 9.5 / 9.5 | 0.1% / 0.1% |
-| MED | **6,498 / 6,528** | 18.5 / 18.5 | **0.5% / 0.6%** |
+| MED | **6,518 / 6,528** | 18.5 / 18.5 | 1.1% / 0.6% |
 | LARGE | **8,031 / 8,356** | **23.6 / 24.0** | **9.2% / 14.5%** |
 | TERM_LOW | 5,312 / 5,284 | 15.3 / 15.3 | 0.4% / 0.1% |
-| TERM_MED | 7,744 / 7,712 | 21.8 / 21.9 | 2.7% / 2.9% |
-| TERM_HIGH | **10,480 / 10,538** | 30.7 / 30.8 | **0.9% / 2.2%** |
+| TERM_MED | **7,677 / 7,712** | 21.8 / 21.9 | **1.7% / 2.9%** |
+| TERM_HIGH | **10,458 / 10,538** | 30.7 / 30.8 | **0.8% / 2.2%** |
 
-From sentences alone the learner matches the supervised model on every condition: its code is within 0.6% of the gold-tree grammar's, and shorter on three conditions. Its commission is at most 0.3 points higher, and lower on four conditions. Novelty is 91–100% (SMALL 54%: its language is small).
+From sentences alone the learner matches the supervised model on every condition. Its code is within 0.6% of the gold-tree grammar's, and shorter on four conditions. Its commission is at most half a point higher, and lower on three conditions. Novelty is 91–100% (SMALL 54%: its language is small).
 
 The two hierarchies matter here. The grammar read directly off the search's analyses still over-generates on the TERM conditions (47–56% commission at seed 13). Consolidating the same analyses into the two hierarchies, with chunk context, and re-analysing brings it to 0.1–4.3%.
 
@@ -251,15 +253,71 @@ The two hierarchies matter here. The grammar read directly off the search's anal
 
 *Figure 11. The incremental learner perceives the training sentences one at a time and sleeps at 10, 20, 40, 80, 160 and 320 sentences. At each of those points a fresh batch learner sleeps once over the same sentences (mean of two seeds; band = range).*
 
-- For the first three nights (up to 40 sentences) the two learners are identical: restarting from word classes always gives the shortest code.
-- From 80 sentences on, the stored analyses give the shortest code in 21 of 30 nights. At 80 and 160 sentences the incremental learner's training code is shorter in all ten condition–size cells, and its commission is lower in nine, by 16–40 points in seven of them (for example TERM_LOW at 80 sentences: 4.0% against 36.2%).
-- At 320 sentences the two are equivalent.
-- By 160 sentences each day's sentences are parsed almost completely (1.0–1.1 top-level chunks per sentence).
-- A night costs about as much as a batch sleep over the same sentences, and the six nights together 1.3–3.8 times one batch sleep at 320.
+- **Early nights mostly coincide.** Up to 40 sentences, restarting from word classes usually gives the shortest code (the stored analyses win 3 of 20 nights at 20–40 sentences), and the two learners are nearly identical.
+- **Then the stored analyses pay.** From 80 sentences on they win 16 of 30 nights (SMALL excluded, where both give the same grammar). At 80 and 160 sentences the incremental learner's training code is shorter or equal in all ten condition–size cells. Its commission is lower in eight, by 16–29 points in four (for example TERM_HIGH at 80 sentences: 31.9% against 60.6%).
+- **At 320 sentences** the two are equivalent (commission within 1.3 points).
+- **Perception.** By 160 sentences each day's sentences are parsed almost completely (1.0–1.02 top-level chunks per sentence), at close to the held-out rate in bits.
+- **Cost.** A night costs about as much as a batch sleep over the same sentences, and the six nights together 1.2–1.9 times one batch sleep at 320.
 
 Detailed tables: [`V2_DESIGN.md`](V2_DESIGN.md), `experiments/v2/results/{main,unsupervised,incremental,search}/summary.md`.
 
-## 11. Relation to TRELLIS v1 and the paper's postulates
+## 11. Beyond the synthetic grammars
+
+Nothing in the framework is specific to the paper's corpora. It needs experiences that are sequences of tokens, with or without analyses. Two new domains test it: real English text, and the structure of Chinese characters.
+
+### Real text: the Penn Treebank
+
+**Setup.** NLTK's public sample of the Penn Treebank (about 3,900 Wall Street Journal sentences, `trellis2/treebank.py`). Following the standard setting for unsupervised parsing (Klein & Manning 2002), the tokens are the gold part-of-speech tags, punctuation and empty elements are removed, and sentences of 2–10 tags are kept: 542 sentences. Each seed holds out 20%. Brackets are compared without labels, ignoring single tags and the whole sentence. *Base phrases* are the lowest constituents, such as *the board* or *no asbestos*: the chunks of classic chunking.
+
+| Model (WSJ10, mean of two seeds) | Bracket omission | Bracket commission | Base-phrase omission | Held-out bits per sentence |
+|---|---|---|---|---|
+| right-branching trees | 39.0% | 55.7% | 57.3% | – |
+| left-branching trees | 82.9% | 87.6% | 75.0% | – |
+| unigram / bigram tag models | – | – | – | 33.4 / 27.2 |
+| TRELLIS v2 from tags alone | 55.3% | 67.6% | **33.1%** | 30.1 |
+| TRELLIS v2 from binarized gold trees | 19.1% | 41.3% | 20.7% | 30.9 |
+
+- **From tags alone, TRELLIS v2 finds chunks.** It recovers two thirds of the gold base phrases, against 43% for right-branching trees and 79% for the supervised model. Its chunks are noun groups (`DT NN`, `JJ JJ NN`, `NNP NNP`), verb groups (`MD VB`, `TO VB`, `VBD VBN`) and subject–verb pairs (`NN VBD`).
+- **It does not find sentence structure.** On 434 sentences no larger chunk pays for itself, so analyses stay forests of about five chunks, and full-tree bracket agreement is below that of right-branching trees.
+- **The grammar is a weaker sequence model than tag bigrams**, with or without supervision. Its ten or so categories over 32 tags make the strong independence assumptions of a small probabilistic grammar. The Dirichlet concentration is not the cause: the supervised grammar's training code prefers α = 0.01 to 0.001 on this data, but its held-out bits barely change.
+
+### A domain beyond language: Chinese characters
+
+**Setup.** An Ideographic Description Sequence describes a character as an operator that places two or three parts, for example 湖 = ⿰ 氵 胡 (water to the left of 胡), with 胡 = ⿰ 古 月. Expanding every part down to its 270 atomic components gives each character a prefix sequence such as `⿰ 氵 ⿰ 古 月`, built from components and 12 spatial operators (`trellis2/characters.py`, CJKVI IDS data). The gold tree groups an operator with its first part, so that a component *in position* (`[⿰ 氵]`, water on the left) is a chunk. 13,297 characters of the main block have at most 11 tokens; 2,000 are learned and 500 held out. Because prefix notation with known arities is unambiguous, every generated sequence can be checked:
+
+- *well formed*: it is a composed character, and every operator has its parts;
+- *positions attested*: every component sits only in a slot (operator and position) where some real character places it;
+- *real*: it is an existing character. Real characters that were held out from training have been rediscovered from learned parts and positions.
+
+| Model (2,000 characters) | Held-out bits per character | Structure omission | Well formed | Positions attested | Rediscovered real characters | Novel and valid |
+|---|---|---|---|---|---|---|
+| unigram tokens | 44.1 | – | – | – | – | – |
+| bigram tokens | 35.0 | – | 22% | 20% | 3.9% | 13% |
+| TRELLIS v2 from IDS structures | **31.9** | **0.0%** | **96%** | 52% | 2.5% | **49%** |
+| TRELLIS v2 from sequences alone | 37.2 | 28.2% | 7% | 4% | 0.7% | 3% |
+
+![Concepts of position](figures/character_concepts.png)
+
+*Figure 12. The largest categories of components that the representation hierarchy forms from character structures, described by the slots their members fill in real characters. Nobody told the learner about positions: it groups components by how they behave in the analyses.*
+
+- **Concepts of position emerge.** The representation hierarchy groups components by where they go: left-side radicals (氵 木 亻 扌 言 女 忄 虫 钅, 92% on the left), top components, bottom components (99% at the bottom), enclosing frames (冂 辶 匚 罒) and overlaid strokes. Chunk types include a radical in its position, such as `[⿰ 氵]` and `[⿰ 扌]`. These are the classical radical classes, found by category utility and description length alone.
+- **With the structures given, the grammar compresses characters better than token bigrams** and recovers the structure of every held-out character. It generates well-formed characters 96% of the time, half of them with every component in an attested position, and it rediscovers held-out real characters (2.5% of samples).
+- **Its positional errors have one source.** The largest category mixes components that go to the right and to the bottom (43% bottom, 33% right), so generation sometimes puts a bottom component on the right. Finer positional categories are the target.
+- **From sequences alone the learner stalls**, as on the treebank: it describes characters less compactly than token bigrams (37.2 bits per character), and only 7% of its samples are composed, well-formed characters.
+
+![Characters TRELLIS v2 invents](../experiments/v2/results/characters/generated_characters.png)
+
+*Figure 13. Characters generated by TRELLIS v2 and drawn by composing component glyphs in the boxes their operators define: novel, well-formed characters, with each model's rates.*
+
+### What the new domains show
+
+- **Concept formation transfers.** Base phrases in real text and positional classes of components in characters come out of the same representation hierarchy, cut by description length.
+- **Unsupervised structure is the open problem, for two different reasons.** On the paper's corpora the search builds complete analyses. On real text and on characters it stops at forests of local chunks, and a sequence of independent chunks generates poorly. Comparing codes shows why:
+  - *Real text: the objective prefers the forests.* The learner's forest grammar describes the treebank sentences in fewer bits than the grammar of their gold trees, by 10% at 434 sentences. With this grammar family, linguists' sentence structure does not pay for itself; the representation, not the search, has to change.
+  - *Characters: the search falls short.* The gold structures give a shorter code than the learner's analyses (73,662 against 83,241 bits for 2,000 characters, 11.5% shorter), so better structures exist and the search does not reach them, as on MED before the beam.
+- **A tried and dropped move.** Attaching a pair directly to an existing category (a chunk move followed by a merge, in one step) took cheap early attachments and ended in much longer codes on MED and LARGE.
+
+## 12. Relation to TRELLIS v1 and the paper's postulates
 
 | | TRELLIS v1 (the paper) | TRELLIS v2 |
 |---|---|---|
@@ -280,7 +338,7 @@ The postulates carry over as follows:
 - **P8–P10:** generation samples from the same grammar.
 - **Learning:** Cobweb's incremental operators are unchanged. Consolidation re-describes experiences with current concepts and replays them, and description length picks the level of generalization.
 
-## 12. Using the code
+## 13. Using the code
 
 | Module (`src/trellis2/`) | Contents |
 |---|---|
@@ -294,6 +352,8 @@ The postulates carry over as follows:
 | `unsupervised.py` | `UnsupervisedLearner`: learning by day and by night |
 | `evaluation.py` | target-grammar recognizer, bracket tallies |
 | `data.py` | trees, corpora, the v1 splits, the six conditions |
+| `treebank.py` | Penn Treebank sentences (WSJ10, gold tags): cleaning, gold and base-phrase brackets |
+| `characters.py` | Chinese characters from IDS: prefix sequences, gold trees, checks for generated characters |
 
 Learning from analysed sentences:
 
@@ -330,26 +390,29 @@ Reproducing everything (times on a 12-core laptop):
 python -m pytest tests/trellis2 -q                                          # 25 tests, seconds
 python experiments/v2/run_synthetic.py --out experiments/v2/results/main    # supervised curves, ~6 min
 python experiments/v2/plot_learning_curves.py experiments/v2/results/main
-python experiments/v2/run_unsupervised.py --seeds 13,17                     # ~5 min
-python experiments/v2/run_incremental.py --seeds 13,17                      # ~25 min
+python experiments/v2/run_unsupervised.py --seeds 13,17                     # ~10 min
+python experiments/v2/run_incremental.py --seeds 13,17                      # ~1 h
 python experiments/v2/plot_incremental.py experiments/v2/results/incremental
 python experiments/v2/run_search_study.py                                   # ~2 min
+python experiments/v2/run_treebank.py --train-max-len 10 --out experiments/v2/results/treebank/wsj10
+python experiments/v2/run_characters.py                                     # ~1 h
 python docs/figures/make_figures.py                                         # this document's figures, ~30 s
 ```
 
-The corpora are read from `../trellis_v1/data` (the v1 snapshot), with `data/` as the fallback.
+The paper's corpora are read from `../trellis_v1/data` (the v1 snapshot), with `data/` as the fallback. The treebank sample and the IDS database are downloaded into `data/` (see the docstrings of `treebank.py` and `characters.py`); they are not committed.
 
-## 13. Limitations and next steps
+## 14. Limitations and next steps
 
-- **Binary concatenation only.** A chunk has exactly two parts, joined left to right. Longer chunks are binarized, and two-dimensional or relational composition (Chinese characters, chess positions, scenes) needs typed relations between parts.
-- **Scale.** Cobweb is pure Python, and consolidation replays every element in every round. The framework has been run on corpora of 320 sentences (and 1,280 in one supervised check).
-- **Nights repeat the batch search.** The search can only merge categories, so every night may start over from word classes. Split moves (refining a category together with the chunk categories built on it) would let nights continue from the stored analyses, and make them cheaper.
+- **Sentence-level structure without supervision.** On the paper's corpora the search builds complete analyses. On real text and on characters it stops at forests of local chunks: no single larger chunk pays for itself, and the moves cannot reach a set of chunks that pays together. This is the main open problem.
+- **A weak sequence model on real data.** With about ten categories, the grammar makes the strong independence assumptions of a small probabilistic grammar, and tag bigrams describe real text more compactly.
+- **Binary concatenation only.** A chunk has two parts joined left to right. Two-dimensional composition is written as operator tokens, so the spatial relation is learned as context rather than represented as a typed relation.
+- **Scale.** Cobweb is pure Python, and each night runs three full consolidations. A night takes about two minutes for 320 synthetic sentences and about an hour for 2,000 characters.
+- **Nights repeat the batch search.** The search can only merge categories, so every night may start over from word classes. Split moves (refining a category together with the chunk categories built on it) would let nights continue from the stored analyses.
 - **Linguists' trees.** Description length identifies the language, not its conventional binarization; bracket agreement with gold trees is moderate.
-- **LARGE.** Relative clauses are rare at 320 sentences, and residual commission (9%) is concentrated there.
 
-The next stage takes the framework to larger and different data: real treebank text (Penn Treebank), larger synthetic corpora, and a first non-language domain.
+Next: unsupervised sentence-level structure; finer positional concepts in characters; the Dirichlet concentration chosen by description length; a compiled Cobweb; typed relations between parts; then chess.
 
-## 14. Glossary
+## 15. Glossary
 
 - **Element:** a node of an analysis, either a *primitive* (a token) or a *composite* (two parts).
 - **Chunk:** a composite element, or the composite rule class it instantiates.
@@ -362,7 +425,7 @@ The next stage takes the framework to larger and different data: real treebank t
 - **Perception:** the Viterbi (shortest-code) analysis of a new experience under the current grammar.
 - **Omission / commission:** the share of correct items a learner misses, and the share of its outputs that are wrong.
 
-## 15. References
+## 16. References
 
 - Baker, J. K. (1979). Trainable grammars for speech recognition. *Speech Communication Papers, 97th Meeting of the Acoustical Society of America.*
 - Brown, P. F., deSouza, P. V., Mercer, R. L., Della Pietra, V. J., & Lai, J. C. (1992). Class-based n-gram models of natural language. *Computational Linguistics, 18*(4).

@@ -33,6 +33,7 @@ class TreebankSentence:
     words: List[str]
     brackets: FrozenSet[Span]          # every constituent span of length >= 2 (n-ary gold)
     tree: Tree                         # the gold tree, right-binarized (for supervised training)
+    base: FrozenSet[Span]              # base phrases: constituents made of tags only
 
     @property
     def tokens(self) -> List[str]:
@@ -98,6 +99,16 @@ def _brackets(node, out: set) -> set:
     return out
 
 
+def _base_phrases(node, out: set) -> set:
+    if not isinstance(node, int):
+        if all(isinstance(child, int) for child in node):
+            out.add(_span(node))
+        else:
+            for child in node:
+                _base_phrases(child, out)
+    return out
+
+
 def _right_binarized(node, split: dict) -> dict:
     """Children c1 ... ck become c1 (c2 (... ck))."""
     if isinstance(node, int):
@@ -122,7 +133,8 @@ def load_wsj(root: str, max_len: int = 10, min_len: int = 2) -> List[TreebankSen
                 if node is None or not (min_len <= n <= max_len):
                     continue
                 out.append(TreebankSentence(tags, words, frozenset(_brackets(node, set())),
-                                            Tree(n, _right_binarized(node, {}))))
+                                            Tree(n, _right_binarized(node, {})),
+                                            frozenset(_base_phrases(node, set()))))
     return out
 
 

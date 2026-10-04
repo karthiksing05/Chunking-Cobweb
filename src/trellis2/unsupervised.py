@@ -17,13 +17,17 @@ By night (``sleep``) the stored analyses are consolidated:
    chunks if no larger chunk pays. The search runs from flat sentences, once
    from each partition on the word-class merge path
    (``mdl_search.word_classes``), and from the stored analyses in the
-   categories of the previous night, and keeps the shortest code.
+   categories of the previous night.
 2. Concepts: the analyses are consolidated into the two hierarchies
    (``Trellis2``), which re-form the categories with chunk context, starting
    from the search's categories, choose the cuts by description length and
    read off the grammar used for parsing and generation.
 3. Re-analysis (hard EM): every sentence gets its Viterbi analysis under that
    grammar, kept only if the full description length shrinks.
+
+Steps 2 and 3 run on each of the best few distinct search results, and the
+grammar with the shortest total code wins: the plain code guides the search,
+the full code decides.
 
 The stored analyses are then written in the new grammar's categories, which
 the next day perceives with and the next night starts from. Sleeping once
@@ -45,9 +49,10 @@ from .model import Trellis2
 
 class UnsupervisedLearner:
     def __init__(self, beam: int = 4, patience: int = 3, levels: int = 12,
-                 reanalysis_steps: int = 5, alpha: float = 0.001, seed: int = 0,
-                 **trellis_kwargs):
+                 consolidations: int = 3, reanalysis_steps: int = 5, alpha: float = 0.001,
+                 seed: int = 0, **trellis_kwargs):
         self.beam = beam
+        self.consolidations = consolidations
         self.patience = patience
         self.levels = levels
         self.reanalysis_steps = reanalysis_steps
@@ -82,10 +87,10 @@ class UnsupervisedLearner:
         night = self.nights
         n_tokens = len({w for s in self.sentences for w in s}) + 1
 
-        def log(stage, move, bits):
+        def log(stage, move, bits, seconds=None):
             self.history.append({"night": night, "stage": stage, "move": move, "bits": bits,
                                  "sentences": len(self.sentences),
-                                 "seconds": time.time() - t0})
+                                 "seconds": time.time() - t0 if seconds is None else seconds})
 
         # Starting points: flat sentences in each partition on the word-class
         # merge path, and (after the first night) the stored analyses, in the
@@ -100,17 +105,43 @@ class UnsupervisedLearner:
             starts.append(("perceived analyses", self.analyses))
         flat = [[(("w", path[-1][w]), w) for w in s] for s in self.sentences]
         log("flat", "start", code_bits(flat, n_tokens, self.alpha))
-        best = None
+        results = []
         for name, start in starts:
             analyses, bits = chunk_and_merge(start, n_tokens, self.alpha,
                                              beam=self.beam, patience=self.patience)
-            if best is None or bits < best[1]:
-                best = (analyses, bits, name)
-        log("structure", f"chunk and merge from {best[2]}", best[1])
+            results.append((bits, name, analyses))
+        search_seconds = time.time() - t0
+        # The plain code guides the search, but the night minimizes the full
+        # code: each of the best few distinct search results is consolidated
+        # and re-analysed, and the one whose grammar describes the corpus in
+        # the fewest bits wins.
+        results.sort(key=lambda r: r[0])
+        candidates = []
+        for r in results:
+            if all(abs(r[0] - c[0]) > 1e-6 for c in candidates):
+                candidates.append(r)
+            if len(candidates) == self.consolidations:
+                break
+        best = None
+        for bits_plain, name, analyses in candidates:
+            outcome = self._consolidate([to_tree(a) for a in analyses])
+            if best is None or outcome[1] < best[1]:
+                best = outcome + (name, bits_plain)
+        model, bits, trees, steps, name, bits_plain = best
+        log("structure", f"chunk and merge from {name}", bits_plain, search_seconds)
+        log("concepts", "consolidate", steps[0])
+        for b in steps[1:]:
+            log("re-analysis", "viterbi", b)
+        self.model, self.trees = model, trees
+        self.analyses = self._in_categories(model, trees)
+        self.nights += 1
+        return model.grammar
 
-        trees = [to_tree(a) for a in best[0]]
+    def _consolidate(self, trees: List[Tree]):
+        """Consolidate, then re-analyse (hard EM) while the total code shrinks.
+        Returns the model, its code, the analyses and the code after each step."""
         model, bits = self._fit(trees)
-        log("concepts", "consolidate", bits)
+        steps = [bits]
         for _ in range(self.reanalysis_steps):
             new = [Chart(model.grammar, s).viterbi_tree() for s in self.sentences]
             if all(a.brackets() == b.brackets() and a.roots == b.roots
@@ -120,11 +151,8 @@ class UnsupervisedLearner:
             if b2 >= bits - 1e-6:
                 break
             trees, model, bits = new, m2, b2
-            log("re-analysis", "viterbi", bits)
-        self.model, self.trees = model, trees
-        self.analyses = self._in_categories(model, trees)
-        self.nights += 1
-        return model.grammar
+            steps.append(bits)
+        return model, bits, trees, steps
 
     def _fit(self, trees: Sequence[Tree]) -> Tuple[Trellis2, float]:
         """Consolidate analysed sentences into the two hierarchies, starting

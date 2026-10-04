@@ -628,7 +628,7 @@ def fig_unsupervised():
     handles = [plt.Line2D([], [], marker="o", markersize=8, markerfacecolor=SURFACE, markeredgecolor=MUTED,
                           linestyle="none", label="unsupervised, v2.1 (greedy search)"),
                plt.Line2D([], [], marker="o", markersize=8, color=BLUE, linestyle="none",
-                          label="unsupervised, v2.2 (sentences only)"),
+                          label="unsupervised, current (sentences only)"),
                plt.Line2D([], [], marker="D", markersize=7, color=ORANGE, linestyle="none",
                           label="supervised on gold trees")]
     fig.legend(handles=handles, frameon=False, fontsize=8.5, labelcolor=INK2, loc="lower center",
@@ -639,6 +639,67 @@ def fig_unsupervised():
            "Generation commission, 320 training sentences, mean of two seeds. Labels: unsupervised vs supervised.",
            top=0.86)
     path_out = out_path("unsupervised_vs_gold.png")
+    fig.savefig(path_out, dpi=180)
+    plt.close(fig)
+    return path_out
+
+
+# ---------------------------------------------------------------------- #
+# Figure 12: concepts of position in Chinese characters
+# ---------------------------------------------------------------------- #
+CJK_FONT = "/System/Library/Fonts/STHeiti Medium.ttc"
+
+
+def fig_character_concepts(n_train: int = 2000, rows: int = 8):
+    from matplotlib.font_manager import FontProperties
+    from trellis2.characters import (OPERATORS, SLOT_NAMES, default_ids_path, load_characters,
+                                     token_slots)
+    chars, _ = load_characters(default_ids_path(), seed=SEED)
+    model = Trellis2(seed=SEED)
+    for c in chars[:n_train]:
+        model.learn(c.tokens, c.tree)
+    _, _, g = consolidate_keeping_trees(model)
+    mem = model.memory
+    slots = [token_slots(c.tokens) for c in chars[:n_train]]
+    members = defaultdict(Counter)       # symbol -> component -> count
+    where = defaultdict(Counter)         # symbol -> slot name -> count
+    for e in range(len(mem)):
+        if mem.kind[e] != mem.PRIMITIVE or mem.token[e] in OPERATORS:
+            continue
+        sym = int(g.elem_symbol[e])
+        members[sym][mem.token[e]] += 1
+        slot = slots[mem.sentence_of[e]][mem.span[e][0]]
+        if slot is not None:
+            where[sym][SLOT_NAMES[slot]] += 1
+    # Component categories, largest first; skip single-component categories.
+    chosen = sorted((s_ for s_ in members if len(members[s_]) >= 3),
+                    key=lambda s_: -sum(members[s_].values()))[:rows]
+    font = FontProperties(fname=CJK_FONT)
+    from fontTools.ttLib import TTCollection
+    cmap = TTCollection(CJK_FONT).fonts[0].getBestCmap()
+    fig, ax = plt.subplots(figsize=(11, 0.62 * len(chosen) + 1.2))
+    ax.set_axis_off()
+    for r, sym in enumerate(chosen):
+        y = len(chosen) - r
+        total = sum(where[sym].values())
+        top_slots = ", ".join(f"{name} {100 * k / total:.0f}%" for name, k in where[sym].most_common(2))
+        ax.text(0, y, f"S{r + 1}", fontsize=11, fontweight="bold", color=INK, va="center")
+        ax.text(0.55, y, top_slots, fontsize=9, color=INK2, va="center")
+        drawable = [c for c, _ in members[sym].most_common(20) if ord(c) in cmap][:12]
+        for k, comp in enumerate(drawable):
+            ax.text(4.4 + 0.55 * k, y, comp, fontproperties=font, fontsize=17, color=INK,
+                    va="center", ha="center")
+    ax.text(0.55, len(chosen) + 0.85, "slots its components fill", fontsize=9,
+            color=MUTED, va="center")
+    ax.text(4.2, len(chosen) + 0.85, "its most frequent components", fontsize=9, color=MUTED,
+            va="center")
+    ax.set_xlim(-0.1, 11)
+    fig.subplots_adjust(left=0.02, right=0.98, bottom=0.03)
+    ax.set_ylim(0.4, len(chosen) + 1.3)
+    titles(fig, "Concepts of position: categories the representation hierarchy forms from character structures",
+           f"Supervised TRELLIS v2 on {n_train:,} Chinese characters (IDS). The largest categories of components, "
+           "described by the slots their members fill.", top=0.84)
+    path_out = out_path("character_concepts.png")
     fig.savefig(path_out, dpi=180)
     plt.close(fig)
     return path_out
@@ -698,8 +759,8 @@ def fig_day_night():
           f'style="rounded,filled"; color="{VIOLET}"; fillcolor="{VIOLET_TINT}"; penwidth=1.5; '
           f'fontsize=13; margin=14;\n')
     d += f'    n1 [label={html("1. Word classes", "merge word types while a class-bigram", "code shrinks; keep the merge path")}];\n'
-    d += f'    n2 [label={html("2. Structure", "beam search over chunk and merge moves,", "each scored exactly; start from 12 word-class", "partitions and from the stored analyses;", "keep the shortest code")}];\n'
-    d += f'    n3 [label={html("3. Concepts", "replay into the two hierarchies, starting", "from the search\'s categories; MDL cuts", "→ the factored grammar")}];\n'
+    d += f'    n2 [label={html("2. Structure", "beam search over chunk and merge moves,", "each scored exactly; start from 12 word-class", "partitions and from the stored analyses")}];\n'
+    d += f'    n3 [label={html("3. Concepts", "consolidate the three best search results", "into the two hierarchies (from the search\'s", "categories); keep the shortest total code")}];\n'
     d += f'    n4 [label={html("4. Re-analysis", "Viterbi analyses under the new grammar;", "kept only if the total code shrinks")}];\n'
     d += f'    n5 [label={html("5. Rewrite", "the stored analyses in the", "new grammar\'s categories")}];\n'
     d += "    n1 -> n2 -> n3 -> n4 -> n5;\n  }\n"
@@ -714,7 +775,7 @@ def fig_day_night():
 FIGURES = {"overview": fig_overview, "element": fig_element, "hierarchies": fig_hierarchies,
            "mdl": fig_mdl_curve, "chart": fig_chart, "day_night": fig_day_night,
            "search": fig_search, "code_commission": fig_code_vs_commission,
-           "unsupervised": fig_unsupervised}
+           "unsupervised": fig_unsupervised, "character_concepts": fig_character_concepts}
 
 if __name__ == "__main__":
     names = sys.argv[1:] or list(FIGURES)
