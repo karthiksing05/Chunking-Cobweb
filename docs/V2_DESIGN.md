@@ -3,7 +3,7 @@
 Status: first implementation, October 2026, on branch `inside-outside`.
 
 - Code: `src/trellis2/`
-- Tests: `tests/trellis2/` (31, including brute-force checks of the parser, exactness checks of the search, and the compiled Cobweb against its Python reference)
+- Tests: `tests/trellis2/` (33, including brute-force checks of the parser, exactness checks of the search, the compiled Cobweb against its Python reference, and the chess domain's star and scan code)
 - Experiments: `experiments/v2/`
 - Background: `reports/Trellis v2 inside outside literature review.md`
 - **The framework explained end to end, with figures: [`FRAMEWORK.md`](FRAMEWORK.md)**
@@ -312,6 +312,47 @@ The bigram row samples sequences from a maximum-likelihood token bigram trained 
 - **Here the search falls short.** The gold structures give a shorter code than the unsupervised learner's analyses (73,662 against 83,241 bits, 11.5% shorter), unlike the treebank, and also in the plain code the search minimizes (71,703 against 79,740). An unsupervised night on 2,000 characters takes about an hour.
 - **The starting categories are the bottleneck, not the search width.** A beam of 16 instead of 4 reaches 79,207 bits (3.7 chunks per character). From the supervised model's 26 token categories the same search builds nearly complete analyses (1.4 chunks per character, 78,905 bits). Bigram word classes cannot see which slot a component fills.
 - **Sleeping again does not help.** A second, third and fourth night on the same data, with the continuation of the stored analyses always evaluated, change the code by at most 0.2% (500 characters: 23,519 → 23,477 bits) and leave MED and WSJ10 unchanged. The continuation hits the same wall as the restarts.
+- **Starting categories read off the representation hierarchy do not help either.** Two variants were tried (2,000 characters, seed 13; the night itself reproduces 83,241 bits).
+  - *Restart from the hierarchy's categories.* After the night, each token occurrence takes the category the representation hierarchy gives it, which sees the chunk context. The search restarts from flat sequences in those 31 categories. It reaches 83,244 bits in the plain code and 84,862 after consolidation, both worse than the night (79,740 and 83,241). The hierarchy can see a component's slot only where the analyses already hold the operator-plus-part chunks, and the night's analyses hold too few of them (4.2 chunks per character): a chicken-and-egg problem.
+  - *Finer starts on the word-class merge path* (greedy search). Raw tokens reach 90,607 bits, 200 classes 87,487, 150 classes 83,309, 110 classes 80,679, and 82 classes 80,132. The most-merged partitions remain the best starts.
+- **Even the supervised model's categories leave the search 10% above the gold structures** (78,905 against 71,703 bits). So the gap is mostly in the search. The open move is a split: refine a category by its members' roles in the current analyses, and score the split together with the chunk moves it enables.
+
+### Chess: parts joined by typed relations
+
+Code: `chess.py`, `experiments/v2/run_chess.py`. Middlegame positions from the Lichess database of January 2013 (CC0, under `data/chess`): games in which both players are rated at least 1800 and that last at least 40 plies, the position after ply 30. That gives 8,560 positions; 4,000 are learned and 500 held out (seed 13).
+
+**Design, in terms of the two hierarchies.**
+
+- *Elements.* A primitive is a piece; its token is its colour and kind. A composite joins two elements whose anchors see each other, and its anchor is its first part's anchor.
+- *Representation hierarchy.* An element's context window is the star: the first piece along each of the eight queen rays, at any distance, and the piece on each of the eight knight squares. The representation instance also holds the anchor piece (whole, and by colour and kind), the element's kind, its square, and the chunk context, as for sentences. The star is written as two bags, rays and jumps, whose values name their direction (`N:wP`).
+- *Composition hierarchy.* A composition is (category, relation, category), where the relation is the star direction and distance (`N1`, `E3`, `NNE`). `grammar.py` gained a relation table per rule class (`Rel`). Sequences have a single relation, and their codes and grammars are bit-identical to before.
+- *Top level.* A board is read square by square (a1 … h8). Every square not covered by an earlier chunk is coded as empty or as the anchor of a top-level element, from one Dirichlet row per square. So that a chunk is decoded at its first square, relations point forward in the scan: the N, NE, NW and E rays and the four upward knight jumps, 32 relations in all.
+
+**Two first attempts failed.**
+
+- *An unordered set at the top level.* The first top level coded a position's top-level elements as a set: categories, anchor squares, and a −log₂ k! credit for their order. Joining two elements loses log₂ k ≈ 4.7 bits of that credit, so on 1,000 positions only one chunk paid (black rook beside black king). The scan pays no such price.
+- *The star as sixteen attributes.* Then it outweighs what the element is. The categories mixed kinds of piece (white pawns, knights and bishops together), and the consolidated grammar coded positions in 95.8 bits per position, against 86.5 for the plain square code (1,500 positions). As two bags, the star weighs what a sentence element's two neighbours weigh. The categories then separate the kinds of piece, and the grammar is shorter than the plain code: 85.9 bits.
+
+**Results.**
+
+| Bits per position (4,000 positions) | Each square on its own | TRELLIS v2 |
+|---|---|---|
+| training | 84.39 | 83.80 (search alone: 83.91) |
+| held out (500) | 82.69 | 81.74 |
+
+| Chunk type | Count | Main anchors |
+|---|---|---|
+| `[bP N1 bB]` pawn with its bishop behind it | 2,164 | g6 (fianchetto), e6, b6 |
+| `[bR E1 bK]` castled black king | 2,110 | f8 |
+| `[wB N1 wP]` bishop with its pawn in front | 1,826 | g2 (fianchetto), d3, b2 |
+| `[bR E2 bK]`, `[bK E3 bR]`, `[bK E1 bR]` | 536, 380, 181 | e8, e8, c8 |
+| `[wK E3 wR]`, `[wK E1 wR]` | 298, 237 | e1, c1 |
+
+- **The chunks are castling and fianchetto structures.** King and rook appear at every stage of castling, with the distance as part of the relation. Castled on either wing, the rook is beside the king or has moved one square on. Uncastled, the squares between them are cleared. Bishops appear with the pawn that blocks or supports them.
+- **Categories.** The representation hierarchy forms one category per kind of piece and one per chunk type (17 symbols, 18 rule classes).
+- **Generation.** 94.7% of the chunks in 1,000 generated positions occur, piece for piece and square for square, in some held-out game. 5.8% of samples are rejected because a chunk would leave the board or land on an occupied square.
+- **Whole positions have no global sense.** 35% of generated positions have one king of each colour, the same as when each square is drawn on its own (37%). A square-by-square code has nothing that counts kings.
+- **Compression.** Chunks shorten the held-out code by 1.2%. At move 15, where pieces stand is most of what can be compressed, and a chunk pays only where pieces depend on each other beyond their squares.
 
 ### Tried and dropped: an attach move
 

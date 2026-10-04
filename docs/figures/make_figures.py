@@ -705,6 +705,102 @@ def fig_character_concepts(n_train: int = 2000, rows: int = 8):
     return path_out
 
 
+def fig_character_chunks(n_train: int = 2000, rows: int = 6, per_row: int = 8):
+    """The chunk types of characters: the composition hierarchy's largest
+    composite rule classes, each with its most frequent chunks drawn in place
+    (the parts a chunk holds in their slots, the slots it leaves open dashed)."""
+    from matplotlib.patches import Rectangle
+    sys.path.insert(0, os.path.join(ROOT, "experiments", "v2"))
+    from run_characters import INNER, draw_structure
+    from trellis2.characters import ARITY, OPERATORS, SLOT_NAMES, default_ids_path, load_characters
+
+    chars, _ = load_characters(default_ids_path(), seed=SEED)
+    model = Trellis2(seed=SEED)
+    for c in chars[:n_train]:
+        model.learn(c.tokens, c.tree)
+    g = model.consolidate()
+    mem = model.memory
+    by_rule = defaultdict(Counter)
+    for e in range(len(mem)):
+        if mem.kind[e] == mem.COMPOSITE:
+            i, j = mem.span[e]
+            by_rule[int(g.elem_rule[e])][tuple(mem.sentences[mem.sentence_of[e]][i:j])] += mem.weight[e]
+    # Reusable chunk types: skip rule classes whose chunks are one-off whole characters.
+    chosen = sorted((r for r in by_rule if by_rule[r].most_common(1)[0][1] >= 5),
+                    key=lambda r: -sum(by_rule[r].values()))[:rows]
+
+    def parts_of(tokens):
+        pos, out = 0, []
+
+        def node():
+            nonlocal pos
+            t = tokens[pos]
+            pos += 1
+            return (t,) + tuple(node() for _ in range(ARITY[t])) if t in OPERATORS else t
+        while pos < len(tokens):
+            out.append(node())
+        return out
+
+    def slots(op, x0, y0, x1, y1):
+        n = ARITY[op]
+        if op in "⿰⿲":
+            return [(x0 + k * (x1 - x0) / n, y0, x0 + (k + 1) * (x1 - x0) / n, y1) for k in range(n)]
+        if op in "⿱⿳":
+            return [(x0, y1 - (k + 1) * (y1 - y0) / n, x1, y1 - k * (y1 - y0) / n) for k in range(n)]
+        if op == "⿻":
+            return [(x0, y0, x1, y1)] * 2
+        a, b, c, d = INNER[op]
+        w, h = x1 - x0, y1 - y0
+        return [(x0, y0, x1, y1), (x0 + a * w, y0 + b * h, x0 + c * w, y0 + d * h)]
+
+    fig, axes = plt.subplots(rows, per_row + 1, figsize=(1.25 * (per_row + 1) + 1.2, 1.35 * rows),
+                             gridspec_kw={"width_ratios": [2.6] + [1] * per_row})
+    for r, rule in enumerate(chosen):
+        total = sum(by_rule[rule].values())
+        # Describe the type by its usual operator and how many of its parts it holds.
+        shape = Counter()
+        for tokens, n in by_rule[rule].items():
+            shape[(tokens[0], len(parts_of(tokens[1:])))] += n
+        (op, filled), _ = shape.most_common(1)[0]
+        layout = {"⿰": "left–right", "⿱": "top–bottom", "⿲": "left–middle–right",
+                  "⿳": "top–middle–bottom", "⿴": "surrounding", "⿵": "surrounding from above",
+                  "⿶": "surrounding from below", "⿷": "surrounding from the left",
+                  "⿸": "surrounding from the upper left", "⿹": "surrounding from the upper right",
+                  "⿺": "surrounding from the lower left", "⿻": "overlaid"}[op]
+        what = (f"the {SLOT_NAMES[(op, filled - 1)]} part\nof a {layout} pair" if filled < ARITY[op]
+                else f"a whole {layout}\ncomposition")
+        axes[r, 0].set_axis_off()
+        axes[r, 0].text(0, 0.5, f"Chunk type {r + 1}: {what}\n{total:,.0f} chunks", fontsize=9,
+                        color=INK, va="center", linespacing=1.3)
+        for k in range(per_row):
+            ax = axes[r, k + 1]
+            ax.set_axis_off()
+            ax.set_xlim(0, 1)
+            ax.set_ylim(0, 1)
+            ax.set_aspect("equal")
+            items = by_rule[rule].most_common(per_row)
+            if k >= len(items):
+                continue
+            tokens, n = items[k]
+            op, parts = tokens[0], parts_of(tokens[1:])
+            ax.add_patch(Rectangle((0.02, 0.02), 0.96, 0.96, facecolor="none", edgecolor=GRID, linewidth=0.8))
+            for s, (x0, y0, x1, y1) in enumerate(slots(op, 0.06, 0.06, 0.94, 0.94)):
+                if s < len(parts):
+                    draw_structure(ax, parts[s], x0, y0, x1, y1)
+                else:
+                    ax.add_patch(Rectangle((x0 + 0.03, y0 + 0.03), x1 - x0 - 0.06, y1 - y0 - 0.06,
+                                           facecolor="none", edgecolor=BLUE, linewidth=1.0, linestyle="--"))
+            ax.set_title(f"×{n:,.0f}", fontsize=7.5, color=MUTED, pad=1)
+    titles(fig, "Chunk types in Chinese characters: components in their slots",
+           f"Supervised TRELLIS v2 on {n_train:,} characters. Each row is one of the largest composite rule "
+           "classes of the composition hierarchy, with its most frequent chunks; dashed: the slot the chunk "
+           "leaves open.", top=0.88)
+    path_out = out_path("character_chunks.png")
+    fig.savefig(path_out, dpi=170)
+    plt.close(fig)
+    return path_out
+
+
 # ---------------------------------------------------------------------- #
 # Figure 1: the framework at a glance
 # ---------------------------------------------------------------------- #
@@ -775,7 +871,8 @@ def fig_day_night():
 FIGURES = {"overview": fig_overview, "element": fig_element, "hierarchies": fig_hierarchies,
            "mdl": fig_mdl_curve, "chart": fig_chart, "day_night": fig_day_night,
            "search": fig_search, "code_commission": fig_code_vs_commission,
-           "unsupervised": fig_unsupervised, "character_concepts": fig_character_concepts}
+           "unsupervised": fig_unsupervised, "character_concepts": fig_character_concepts,
+           "character_chunks": fig_character_chunks}
 
 if __name__ == "__main__":
     names = sys.argv[1:] or list(FIGURES)

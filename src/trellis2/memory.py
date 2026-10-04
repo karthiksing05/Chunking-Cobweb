@@ -21,7 +21,7 @@ is used.
 """
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, Hashable, List, Optional, Sequence, Tuple
 
 import numpy as np
 
@@ -84,6 +84,9 @@ class Memory:
         self.token: List[Optional[str]] = []
         self.left: List[int] = []
         self.right: List[int] = []
+        # The relation that joins a composite's parts: None for a primitive,
+        # and for concatenation (sequences have a single relation).
+        self.relation: List[Optional[Hashable]] = []
         self.parent: List[int] = []
         # Top-level elements of a partial analysis: the neighbouring top-level
         # chunks act as their level-1 siblings (-1 if none).
@@ -125,6 +128,7 @@ class Memory:
                 self.right.append(right)
                 self.parent[left] = eid
                 self.parent[right] = eid
+            self.relation.append(None)
             self.parent.append(-1)
             self.top_left.append(-1)
             self.top_right.append(-1)
@@ -150,19 +154,7 @@ class Memory:
         round). The optional composition reference (off by default; it made
         results worse and less stable) points an element's representation at
         the concept describing what it is made of."""
-        tokens = self.sentences[self.sentence_of[e]]
-        i, j = self.span[e]
-        n = len(tokens)
-        x: Instance = {}
-        for d in range(1, self.context_width + 1):
-            x[f"l{d}"] = tokens[i - d] if i - d >= 0 else BOS
-            x[f"r{d}"] = tokens[j + d - 1] if j + d - 1 < n else EOS
-        x["f"] = tokens[i]
-        x["e"] = tokens[j - 1]
-        x["k"] = "P" if self.kind[e] == self.PRIMITIVE else "C"
-        if self.sentence_bags:
-            x["bl"] = _bag(tokens[:i])
-            x["br"] = _bag(tokens[j:])
+        x = self.surface(e)
         for g in range(self.granularities):
             lab = None if labels is None else labels[g]
 
@@ -192,6 +184,30 @@ class Memory:
             if self.composition_ref:
                 x[f"c.{g}"] = BLANK if rules is None else f"R{int(rules[g][e])}"
         return x
+
+    def surface(self, e: int) -> Instance:
+        """The element's surface context: the tokens on either side, its first
+        and last token, and its kind."""
+        tokens = self.sentences[self.sentence_of[e]]
+        i, j = self.span[e]
+        n = len(tokens)
+        x: Instance = {}
+        for d in range(1, self.context_width + 1):
+            x[f"l{d}"] = tokens[i - d] if i - d >= 0 else BOS
+            x[f"r{d}"] = tokens[j + d - 1] if j + d - 1 < n else EOS
+        x["f"] = tokens[i]
+        x["e"] = tokens[j - 1]
+        x["k"] = "P" if self.kind[e] == self.PRIMITIVE else "C"
+        if self.sentence_bags:
+            x["bl"] = _bag(tokens[:i])
+            x["br"] = _bag(tokens[j:])
+        return x
+
+    def describe(self, e: int) -> str:
+        """A short rendering of the element's content (its tokens)."""
+        i, j = self.span[e]
+        toks = self.sentences[self.sentence_of[e]][i:j]
+        return " ".join(toks) if len(toks) <= 4 else " ".join(toks[:2] + ["…"] + toks[-1:])
 
     def build_hierarchy(self, labels: Optional[Sequence[np.ndarray]] = None,
                         rules: Optional[Sequence[np.ndarray]] = None,
