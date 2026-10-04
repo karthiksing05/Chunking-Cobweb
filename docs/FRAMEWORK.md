@@ -323,7 +323,7 @@ Held-out sentences are read as subject and predicate:
 
 - **Its own sentences are English.** 94% have the length of the training sentences, and three quarters of those occur in TinyStories, more than a word bigram's; a word trigram's are real more often, because it mostly repeats its training sentences (only 23% are new). About one in twenty is both new and real, about as often as for the n-gram models.
 - **Parsing and generation agree.** Every one of its own sentences is perceived again with the analysis it was generated from.
-- **Sentences left as forests still generate strings of pieces.** All samples together are real 55% of the time within the training length: a forest's pieces are drawn independently. Coding pieces in their context, as a chess board's read is, is the next step.
+- **Sentences left as forests still generate strings of pieces.** All samples together are real 55% of the time within the training length: a forest's pieces are drawn independently. Coding each piece given the previous one's category (a Markov code over pieces, branch `markov-forest-pieces`) describes held-out sentences a bit shorter (15.0 against 16.0 bits) and splits the pieces by role, but forests sampled from it are no more often real, so it is kept aside.
 - **Held-out code.** 16.0 bits per sentence (17.1 with one row for all top-level chunks), still less compact than the n-gram models (13.0 for trigrams).
 
 Children's books from Project Gutenberg (Grimm; McGuffey readers, Aesop, Alice, Oz) were too sparse for this. Grimm's sentences use each of their words about ten times, and the grammar collapsed to three categories. With clauses instead of sentences there are 72 uses per word, and the chunks were sensible but the generations were strings of them.
@@ -528,7 +528,7 @@ The paper's corpora are read from `../trellis_v1/data` (the v1 snapshot), with `
 - **Nights repeat the batch search.** The search can only merge categories, so every night may start over from word classes. Split moves (refining a category together with the chunk categories built on it) would let nights continue from the stored analyses.
 - **Linguists' trees.** Description length identifies the language, not its conventional binarization; bracket agreement with gold trees is moderate.
 
-Next: a sentence's pieces coded in their context (as the board's read is), so that forests generate coherently too; for characters learned from sequences, a search over several moves at a time; for chess, moves as compositions and attack and defence as relations ([`V2_DESIGN.md`](V2_DESIGN.md#hypotheses-playing-chess-from-the-two-hierarchies)); for real text with words at scale, heads recorded in both hierarchies and the total-probability code; the Dirichlet concentration chosen by description length.
+Next: fewer sentences left as forests, by sentence-level structure that pays; for characters learned from sequences, a search over several moves at a time; for chess, moves as compositions and attack and defence as relations ([`V2_DESIGN.md`](V2_DESIGN.md#hypotheses-playing-chess-from-the-two-hierarchies)); for real text with words at scale, heads recorded in both hierarchies and the total-probability code; the Dirichlet concentration chosen by description length.
 
 ## 15. Glossary
 
