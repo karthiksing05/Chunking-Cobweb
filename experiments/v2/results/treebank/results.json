@@ -1,0 +1,142 @@
+[
+ {
+  "seed": 13,
+  "train": 434,
+  "test": 108,
+  "baselines": {
+   "right-branching": {
+    "omission": 0.39331619537275064,
+    "commission": 0.5629629629629629
+   },
+   "left-branching": {
+    "omission": 0.8200514138817481,
+    "commission": 0.8703703703703703
+   },
+   "unigram bits/sentence": 32.8615748608508,
+   "bigram bits/sentence": 26.704314277729942
+  },
+  "unsupervised": {
+   "omission": 0.5629820051413882,
+   "commission": 0.6851851851851851,
+   "test_bits_per_sentence": 29.13179783272349,
+   "test_top_level_chunks": 4.648148148148148,
+   "total_bits": 14160.011520315598,
+   "symbols": 11,
+   "rule_classes": 29,
+   "chunk_types": 14,
+   "seconds": 51.76486110687256,
+   "history": [
+    {
+     "night": 0.0,
+     "stage": "flat",
+     "move": "start",
+     "bits": 14858.702902600005,
+     "sentences": 434.0,
+     "seconds": 3.450104236602783
+    },
+    {
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 24 word classes",
+     "bits": 13696.804451478198,
+     "sentences": 434.0,
+     "seconds": 13.438067197799683
+    },
+    {
+     "night": 0.0,
+     "stage": "concepts",
+     "move": "consolidate",
+     "bits": 15026.672645143646,
+     "sentences": 434.0,
+     "seconds": 25.38740611076355
+    },
+    {
+     "night": 0.0,
+     "stage": "re-analysis",
+     "move": "viterbi",
+     "bits": 14160.011520315598,
+     "sentences": 434.0,
+     "seconds": 38.79857420921326
+    }
+   ],
+   "train_top_level_chunks": 4.7695852534562215
+  },
+  "supervised": {
+   "omission": 0.1876606683804627,
+   "commission": 0.41481481481481486,
+   "test_bits_per_sentence": 30.61745392715445,
+   "test_top_level_chunks": 1.0,
+   "total_bits": 15763.264964862072,
+   "symbols": 8,
+   "rule_classes": 32,
+   "chunk_types": 21,
+   "seconds": 14.008594274520874
+  }
+ },
+ {
+  "seed": 17,
+  "train": 434,
+  "test": 108,
+  "baselines": {
+   "right-branching": {
+    "omission": 0.3870192307692307,
+    "commission": 0.5518453427065027
+   },
+   "left-branching": {
+    "omission": 0.8389423076923077,
+    "commission": 0.8822495606326889
+   },
+   "unigram bits/sentence": 34.01015832056209,
+   "bigram bits/sentence": 27.693205988909252
+  },
+  "unsupervised": {
+   "omission": 0.47115384615384615,
+   "commission": 0.6133567662565905,
+   "test_bits_per_sentence": 30.96999047196582,
+   "test_top_level_chunks": 4.898148148148148,
+   "total_bits": 14723.707185982159,
+   "symbols": 13,
+   "rule_classes": 30,
+   "chunk_types": 17,
+   "seconds": 22.26119303703308,
+   "history": [
+    {
+     "night": 0.0,
+     "stage": "flat",
+     "move": "start",
+     "bits": 14723.282353412538,
+     "sentences": 434.0,
+     "seconds": 3.0311148166656494
+    },
+    {
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 17 word classes",
+     "bits": 13526.769520227946,
+     "sentences": 434.0,
+     "seconds": 12.70703673362732
+    },
+    {
+     "night": 0.0,
+     "stage": "concepts",
+     "move": "consolidate",
+     "bits": 14723.707185982159,
+     "sentences": 434.0,
+     "seconds": 18.80566668510437
+    }
+   ],
+   "train_top_level_chunks": 4.88479262672811
+  },
+  "supervised": {
+   "omission": 0.19471153846153844,
+   "commission": 0.41124780316344467,
+   "test_bits_per_sentence": 31.221374197753644,
+   "test_top_level_chunks": 1.0,
+   "total_bits": 15685.427323371552,
+   "symbols": 10,
+   "rule_classes": 35,
+   "chunk_types": 30,
+   "seconds": 14.077400207519531
+  }
+ }
+]

@@ -76,43 +76,106 @@ def code_bits(analyses: Sequence[List[Node]], n_tokens: int, alpha: float) -> fl
     return nats / LN2
 
 
+def class_bigram_bits(sentences: Sequence[Sequence[str]], cls: Dict[str, Hashable],
+                      alpha: float) -> float:
+    """Code length (bits) of the sentences under a class-bigram model: a
+    transition row per previous class (outcomes: a class or the end of the
+    sentence) and an emission row per class (outcomes: words)."""
+    V = len({w for s in sentences for w in s}) + 1
+    trans, emit = defaultdict(Counter), defaultdict(Counter)
+    for s in sentences:
+        prev = "<s>"
+        for w in s:
+            c = cls[w]
+            trans[prev][c] += 1
+            emit[c][w] += 1
+            prev = c
+        trans[prev]["</s>"] += 1
+    K = len(set(cls.values()))
+    return (sum(_dm(r.values(), K + 1, alpha) for r in trans.values())
+            + sum(_dm(r.values(), V, alpha) for r in emit.values())) / LN2
+
+
 def word_classes(sentences: Sequence[Sequence[str]], alpha: float
                  ) -> List[Dict[str, Hashable]]:
     """Merge word types into classes while the class-bigram code shrinks.
 
     Returns the merge path: every partition from word types (first) to the
-    shortest-code partition (last).
+    shortest-code partition (last). Each step scores every pair of classes
+    exactly: a merge pools two transition rows, two transition columns and
+    two emission rows, and shrinks every transition row's alphabet by one,
+    so the change in code is computed from those counts alone
+    (O(K^3) per step for K classes). A merged class keeps the name of its
+    alphabetically first word, and ties go to the first pair in that order.
     """
     vocab = sorted({w for s in sentences for w in s})
-    V = len(vocab) + 1
-    cls = {w: w for w in vocab}
+    K, V, lg = len(vocab), len(vocab) + 1, gammaln
+    index = {w: i for i, w in enumerate(vocab)}
 
-    def bits(cls):
-        trans, emit = defaultdict(Counter), defaultdict(Counter)
-        for s in sentences:
-            prev = "<s>"
-            for w in s:
-                c = cls[w]
-                trans[prev][c] += 1
-                emit[c][w] += 1
-                prev = c
-            trans[prev]["</s>"] += 1
-        K = len(set(cls.values()))
-        return (sum(_dm(r.values(), K + 1, alpha) for r in trans.values())
-                + sum(_dm(r.values(), V, alpha) for r in emit.values())) / LN2
+    def phi(x):
+        return lg(x + alpha) - lg(alpha)
 
-    path, current = [cls], bits(cls)
-    while True:
-        best = None
-        for a, b in itertools.combinations(sorted(set(cls.values())), 2):
-            trial = {w: (a if c == b else c) for w, c in cls.items()}
-            value = bits(trial)
-            if value < current - 1e-9 and (best is None or value < best[0]):
-                best = (value, trial)
-        if best is None:
-            return path
-        current, cls = best
-        path.append(cls)
+    # T[r, c]: rows are classes and then <s>; columns are classes and then </s>.
+    T = np.zeros((K + 1, K + 1))
+    for s in sentences:
+        prev = K
+        for w in s:
+            T[prev, index[w]] += 1
+            prev = index[w]
+        T[prev, K] += 1
+    emitted = T[:, :K].sum(axis=0)          # tokens emitted by each class
+    members = [[w] for w in vocab]
+    alive = list(range(K))                  # classes in name order
+    path = [{w: w for w in vocab}]
+    while len(alive) > 1:
+        k = len(alive)
+        sub = T[np.ix_(alive + [K], alive + [K])]
+        X, P = sub[:, :k], phi(sub[:, :k])
+        # Column merge in every row: sum_r phi(X[r,a] + X[r,b]) - phi(X[r,a]) - phi(X[r,b]).
+        cols = np.zeros((k, k))
+        for r in range(k + 1):
+            cols += phi(X[r][:, None] + X[r][None, :]) - P[r][:, None] - P[r][None, :]
+        # Row merge over the class columns: sum_c phi(X[a,c] + X[b,c]).
+        rows = np.zeros((k, k))
+        for c in range(k):
+            rows += phi(X[:k, c][:, None] + X[:k, c][None, :])
+        d = np.diag(X[:k])
+        Xab = X[:k]                                          # Xab[a, b] = transitions a -> b
+        # Rows a and b are pooled (with their a/b columns merged), not column-merged.
+        col_change = (cols - (phi(d[:, None] + Xab) - phi(d)[:, None] - phi(Xab))
+                      - (phi(Xab.T + d[None, :]) - phi(Xab.T) - phi(d)[None, :]))
+        end = sub[:k, k]
+        row_change = (rows - phi(d[:, None] + Xab.T) - phi(Xab + d[None, :])
+                      + phi(d[:, None] + Xab + Xab.T + d[None, :])
+                      + phi(end[:, None] + end[None, :])
+                      - phi(sub[:k]).sum(axis=1)[:, None] - phi(sub[:k]).sum(axis=1)[None, :])
+        # Normalizers: every transition row's alphabet shrinks from k+1 to k.
+        N = sub.sum(axis=1)
+
+        def norm(n, a):
+            return np.where(n > 0, lg(n + a) - lg(a), 0.0)
+        after = norm(N, k * alpha)
+        norm_change = (after.sum() - after[:k][:, None] - after[:k][None, :]
+                       + norm(N[:k][:, None] + N[:k][None, :], k * alpha)
+                       - norm(N, (k + 1) * alpha).sum())
+        m = emitted[alive]
+        emit_change = (norm(m[:, None] + m[None, :], V * alpha)
+                       - norm(m, V * alpha)[:, None] - norm(m, V * alpha)[None, :])
+        change = (norm_change + emit_change - col_change - row_change) / LN2
+        iu = np.triu_indices(k, 1)
+        best = int(np.argmin(change[iu]))
+        if change[iu][best] >= -1e-9:
+            break
+        a, b = alive[iu[0][best]], alive[iu[1][best]]
+        T[a, :] += T[b, :]
+        T[:, a] += T[:, b]
+        T[b, :] = 0
+        T[:, b] = 0
+        emitted[a] += emitted[b]
+        members[a] += members[b]
+        alive.remove(b)
+        path.append({w: vocab[c] for c in alive for w in members[c]})
+    return path
 
 
 def _chunk(analyses, B, C, Y):

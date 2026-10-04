@@ -1,6 +1,8 @@
+import itertools
 import random
 
-from trellis2.mdl_search import _State, chunk_and_merge, code_bits, from_tree, to_tree
+from trellis2.mdl_search import (_State, chunk_and_merge, class_bigram_bits, code_bits, from_tree,
+                                  to_tree, word_classes)
 
 
 def random_corpus(seed, n=80):
@@ -44,3 +46,20 @@ def test_symbolic_analyses_round_trip_through_trees():
         tokens = [str(i) for i in range(tree.n)]
         back = from_tree(tokens, tree, tree.label.__getitem__)
         assert to_tree(back).brackets() == tree.brackets() and to_tree(back).roots == tree.roots
+
+
+def test_each_word_class_merge_is_the_best_by_the_full_code():
+    """Every step of the merge path takes the pair whose merge gives the
+    shortest class-bigram code, computed from scratch."""
+    rng = random.Random(5)
+    words = "abcdefgh"
+    sentences = [[rng.choice(words[:rng.randint(2, 8)]) for _ in range(rng.randint(1, 7))]
+                 for _ in range(60)]
+    path = word_classes(sentences, 0.001)
+    assert len(path) > 2
+    for before, after in zip(path, path[1:]):
+        classes = sorted(set(before.values()))
+        best = min(class_bigram_bits(sentences, {w: (a if c == b else c) for w, c in before.items()}, 0.001)
+                   for a, b in itertools.combinations(classes, 2))
+        assert abs(class_bigram_bits(sentences, after, 0.001) - best) < 1e-6
+        assert class_bigram_bits(sentences, after, 0.001) < class_bigram_bits(sentences, before, 0.001)
