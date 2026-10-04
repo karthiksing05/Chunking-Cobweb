@@ -240,9 +240,17 @@ Code: `treebank.py`, `experiments/v2/run_treebank.py`. NLTK's public sample of t
 | TRELLIS v2, tags only | 55.3% | 67.6% | 33.1% | 30.1 | 11.5 | 11.5 |
 | TRELLIS v2, binarized gold trees | 19.1% | 41.3% | 20.7% | 30.9 | 9.0 | 25.5 |
 
-- The unsupervised learner forms base-phrase chunks (noun groups, verb groups, subject–verb pairs) and leaves sentences as forests of about five chunks: no larger chunk pays on 434 sentences.
+Training on more sentences (every other sentence of up to 15 or 20 tags; the same held-out WSJ10 sentences; means of seeds 13 and 17):
+
+| Training sentences | Bracket omission (unsup / sup) | Base-phrase omission (unsup / sup) | Held-out bits/sentence (unsup / sup) | Symbols | Chunk types | Learner's code below the gold-tree grammar's | Unsupervised night |
+|---|---|---|---|---|---|---|---|
+| 434 (≤ 10 tags) | 55.3% / 19.1% | 33.1% / 20.7% | 30.1 / 30.9 | 11.5 | 11.5 | 8–10% | about 2 min |
+| about 1,100 (≤ 15 tags) | 51.0% / 17.9% | 24.9% / 18.4% | 29.7 / 31.1 | 16.5 | 24.5 | 14–15% | 16–22 min |
+| about 1,900 (≤ 20 tags) | 52.1% / 17.5% | 29.5% / 16.4% | 29.6 / 31.6 | 22.5 | 34.0 | 18% | 50–66 min |
+
+- The unsupervised learner forms base-phrase chunks (noun groups, verb groups, subject–verb pairs) and leaves sentences as forests (about 5 chunks per sentence at 434 sentences, 9 at 1,900, for longer sentences).
 - Its grammar, like the supervised one, is a weaker sequence model than tag bigrams. The Dirichlet concentration is not the cause: the supervised grammar's code prefers α = 0.01 to 0.001 (15,439 vs 15,763 bits), with held-out bits unchanged (30.5 vs 30.6).
-- **The objective prefers the forests.** The learner's forest grammar is shorter than the grammar of the binarized gold trees (14,160 vs 15,763 bits at seed 13; 14,453 vs 15,685 at seed 17). Sentence structure does not pay for itself with this grammar family; this is not a search failure.
+- **The objective prefers the forests.** At every size the learner's forest grammar is shorter than the grammar of the binarized gold trees, and the gap grows with data (table). Binarization is not the reason: at 434 sentences (seed 13) the learner's analyses take 14,160 bits; right-binarized gold trees 15,763, left-binarized 16,349, and forests of gold base phrases 16,120. Sentence structure does not pay for itself with this grammar family; this is not a search failure.
 
 ### Chinese characters (IDS)
 
@@ -259,7 +267,9 @@ The bigram row samples sequences from a maximum-likelihood token bigram trained 
 
 - From the structures, the representation hierarchy forms positional concepts: left-side radicals (92% on the left), top and bottom components, enclosing frames, overlaid strokes; chunk types include a radical in position (`[⿰ 氵]`).
 - The supervised grammar compresses better than token bigrams (31.9 vs 35.0 bits per character), parses every held-out structure, and generates well-formed characters 96% of the time. Its positional errors come from one large category that mixes right-side and bottom components.
-- **Here the search falls short.** The gold structures give a shorter code than the unsupervised learner's analyses (73,662 against 83,241 bits, 11.5% shorter), unlike the treebank. An unsupervised night on 2,000 characters takes about an hour.
+- **Here the search falls short.** The gold structures give a shorter code than the unsupervised learner's analyses (73,662 against 83,241 bits, 11.5% shorter), unlike the treebank, and also in the plain code the search minimizes (71,703 against 79,740). An unsupervised night on 2,000 characters takes about an hour.
+- **The starting categories are the bottleneck, not the search width.** A beam of 16 instead of 4 reaches 79,207 bits (3.7 chunks per character). From the supervised model's 26 token categories the same search builds nearly complete analyses (1.4 chunks per character, 78,905 bits). Bigram word classes cannot see which slot a component fills.
+- **Sleeping again does not help.** A second, third and fourth night on the same data, with the continuation of the stored analyses always evaluated, change the code by at most 0.2% (500 characters: 23,519 → 23,477 bits) and leave MED and WSJ10 unchanged. The continuation hits the same wall as the restarts.
 
 ### Tried and dropped: an attach move
 
