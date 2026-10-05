@@ -103,7 +103,7 @@ $$P(A \to B\,C) = \sum_c U[A,c]\; (1 - p_k[c])\; L[c,B]\; R[c,C]$$
 | `S[A]`, p<sub>whole</sub> | the category of a sentence's root when the sentence is one tree, and how often it is |
 | `S_piece[A]`, stop | the category of each piece of a partial analysis (a forest of two or more pieces), and whether another piece follows |
 | `Rel[c, r]` | in a domain with typed relations (chess, characters), which relation joins the two parts |
-| `Q[row, A]` | on a board, what the square being read holds, given the square and the pieces on earlier squares |
+| `Q[k, q, n]`, `T[k, q, A]` | on a board, whether an element is anchored on a piece of kind k at the square q being read, given n pieces of that kind on earlier squares; and its category |
 
 A sentence is one tree or, when the grammar cannot derive it whole, a partial analysis: a forest of two or more pieces. Both are proper derivations (graceful failure in the sense of the paper, and GRIDS-style partial parses), but they are coded apart, with a row for the roots of whole sentences and a row for the pieces of forests. With one row for both, the start category mixed whole sentences with leftover pieces such as *together*, and the grammar generated those pieces as sentences ([section 11](#simple-english-does-the-grammar-generate-coherent-sentences)).
 
@@ -374,41 +374,39 @@ Every generated character can be checked:
 
 - **The representation hierarchy sees a star.** A piece's context window reaches along the eight queen rays to the edge of the board (the first piece on each ray, at any distance) and to the eight squares a knight's jump away. It is written as two bags of direction-tagged values (`N:wP`, `NNE:bN`). As sixteen separate attributes it outweighed what the element is, and the categories mixed kinds of piece.
 - **The composition hierarchy records a typed relation.** A chunk joins an element to the first piece it sees along one direction of the star, at any distance, or a knight's jump away; like the star, it looks past its own pieces, so a chunk can grow along a ray. The relation (`N1`, `E3`, `NNE`) is part of the composition, and the grammar has a relation table per rule class.
-- **A board is read square by square,** as a sentence is read word by word. Each square not covered by an earlier chunk is coded as empty or as the anchor of a top-level element. Relations point forward in the scan: the N, NE, NW and E rays and the four upward knight jumps.
-- **The read has a context.** A square is read in the light of the pieces on the squares before it, through features "at least *m* pieces of kind *k* already on the board" that description length chooses (below).
+- **A board is read square by square, counting as it goes,** as a sentence is read word by word. At each square that no earlier chunk covers, the read asks of each kind of piece in turn whether a top-level element is anchored here on a piece of that kind, until one is or none is (the square is empty). Each question is answered given the square and how many pieces of that kind already stand on earlier squares. The element's category is then drawn given the kind and square of its anchor, and the element from its category. Relations point forward in the scan: the N, NE, NW and E rays and the four upward knight jumps.
 
 ![Chess chunks](../experiments/v2/results/chess_plain/chunk_types.png)
 
-*Figure 15. The chunk types TRELLIS v2 finds in 4,000 positions when every square is read on its own, each drawn at its most frequent place: castling at every stage, on either wing, and bishops with the pawn in front of or behind them (fianchettos on g2 and g7).*
+*Figure 15. The chunk types TRELLIS v2 finds in 4,000 positions when every square is read on its own, each drawn at its most frequent place: castling and fianchettos.*
 
-- **What pays is castling and fianchettos.** Where pieces stand at move 15 is most of what can be compressed. A chunk pays where pieces depend on each other beyond their squares: king and rook, and bishop and pawn. The representation hierarchy forms one category per kind of piece and one per chunk type. 94.7% of the chunks in 1,000 generated positions occur, piece for piece and square for square, in some held-out game.
-- **But whole positions had no global sense.** Read square by square, each square on its own, only 35% of generated positions had one king of each colour, and 4% passed every check (one king each, no pawn on a back rank, at most eight pawns and sixteen pieces, and no more of any kind of piece than a side starts with, which every real position passes).
-- **The read learns what to count.** Features of the earlier squares, "at least *m* pieces of kind *k* already on the board", are added while they shorten the code of the training positions. Seven pay: a king of each colour, one and two rooks of each colour, and seven black pawns. Grouping contexts in a Cobweb hierarchy did not find these (it groups them by how far the read has got); choosing them by what they save does.
+- **Read without counts, whole positions have no global sense.** Each square read on its own, generated positions have one king of each colour only about a third of the time, and very few pass every check (one king each, no pawn on a back rank, at most eight pawns and sixteen pieces, and no more of any kind of piece than a side starts with, which every real position passes). Chunks then pay where pieces depend on each other beyond their squares: castling and fianchettos.
+- **The read counts material.** Each question needs one count, that of its own kind: after one white king, "is a white king anchored here?" is all but always no. A read that asked one thirteen-way question per square (empty, or which piece) would need all twelve counts at once, too many contexts to learn, which is why an earlier version chose a few features of them by description length ("at least one white king already on the board", …). Asking twelve yes-or-no questions instead gives each its own count, and every position the grammar generates passes every check.
 
-| 4,000 positions learned, 500 held out | Read without context | With the learned context |
-|---|---|---|
-| held-out bits per position (each square on its own: 82.69) | 81.74 | **76.47** |
-| generated positions with one king each | 35% | **96%** |
-| generated positions passing every check | 4% | **23%** |
-| generated chunks found in a held-out game | 95% | 97% |
-| chunk types | 11 | 3 |
+| 4,000 positions learned, 500 held out | Squares on their own | Features chosen by description length (before) | **The read counts** |
+|---|---|---|---|
+| held-out bits per position | 81.93 | 76.47 | **73.33** |
+| generated positions with one king each | 38% | 96% | **100%** |
+| generated positions passing every check | 4% | 23% | **100%** |
+| generated chunks found in a held-out game | 93% | 97% | 99% |
+| chunk types | 12 | 3 | 1 |
 
-- **Context and chunks compete.** With the context, castling no longer pays as a chunk: "a rook is already on the board" predicts where the king stands, so the context does globally what the castling chunks did locally, and description length keeps the cheaper. Fianchettos still pay. Reading the context first and chunking afterwards gives the shorter code.
-- **More data lets more context pay.** With 8,000 training positions the queens' features pay too: 99.6% of generated positions have one king of each colour and 41.5% pass every check (held out: 74.42 bits per position).
-- **What still goes wrong is the number of minor pieces**, for which no feature pays at α = 0.001, and of queens with less data. On 4,000 positions the concentration that gives the shortest code is α = 0.01: the queens' features then pay and 37% of generated positions pass every check (held-out 75.27 bits), but no chunk pays, because one concentration prices both the read's rows and the chunk rows. Priced apart, the read alone would take α ≈ 0.1, which codes the training positions shortest but generates more impossible boards: the shortest code and coherent samples part ways in the rare cases. More data is the cleaner lever.
+- **Counting and chunks compete.** Once the read counts, castling and fianchettos no longer pay as chunks: where kings, rooks and bishops stand given how many are already placed is predicted as well by the read as by a chunk. One chunk pays: `[wP N1 bP]`, a white pawn blocked by a black pawn (2,788 times, on d4, e4 and e5), a structure that joins pieces of both colours.
+- **More data lets a fianchetto pay again.** On 8,000 positions the white fianchetto (`[wB N1 wP]`, 2,860 times) pays beside the blocked pawns, the held-out code is 72.41 bits per position, and 99.8% of generated positions pass every check.
+- **The default concentration is now also the shortest code.** With the counted read, α = 0.001 codes the training positions shortest (76.37 bits per position against 77.56 at α = 0.01); at α = 0.01 no chunk pays.
 
 ![Generated chess positions](../experiments/v2/results/chess/generated_positions.png)
 
-*Figure 16. Positions generated from the grammar with the learned context, fianchetto chunks outlined: kings now come one per side, usually castled.*
+*Figure 16. Positions generated from the grammar: every one has one king per side and no more of any piece than a side starts with.*
 
 ### What the new domains show
 
 - **Both hierarchies transfer.** The same machinery, cut by description length, works in each domain:
   - *Real text.* The representation hierarchy forms the categories of base phrases, and the composition hierarchy their chunk types (noun groups such as `DT NN`, verb groups such as `MD VB`).
   - *Characters.* With operators as relations, the representation hierarchy forms one category per position (top, bottom, left, right, frame, enclosed), and the composition hierarchy the parts that recur inside characters (Figures 12–13).
-  - *Chess.* The star-shaped context window gives one category per kind of piece and one per chunk, and typed relations give castling and fianchetto chunks.
+  - *Chess.* The star-shaped context window gives one category per kind of piece and one per chunk, and typed relations give castling and fianchetto chunks, or, once the read counts material, blocked pawn pairs.
   - *Simple English.* Categories of subjects, copulas, intensifiers and predicate phrases form from sentences alone, and the sentences the grammar derives whole are mostly real English.
-- **Coherence came from what the descriptions could see.** In each domain the first grammar generated things that were right locally and wrong as a whole, and each time the cause was something neither hierarchy's description nor the top level's code could see. English: whether a top-level chunk is a whole sentence or a leftover piece (fixed by coding the two apart, and marking the whole sentence's root). Characters: a part's slot (fixed by reading operators as relations and putting the slot in the description). Chess: what is already on the board (fixed by a read whose context description length chooses). In all three the held-out code also got shorter.
+- **Coherence came from what the descriptions could see.** In each domain the first grammar generated things that were right locally and wrong as a whole, and each time the cause was something neither hierarchy's description nor the top level's code could see. English: whether a top-level chunk is a whole sentence or a leftover piece (fixed by coding the two apart, and marking the whole sentence's root). Characters: a part's slot (fixed by reading operators as relations and putting the slot in the description). Chess: what is already on the board (fixed by a read that asks of each kind of piece in turn, given how many of that kind already stand on earlier squares). In all three the held-out code also got shorter.
 - **Unsupervised structure is the open problem, for two different reasons.** On the paper's corpora the search builds complete analyses. On real text and on characters it stops at forests of local chunks, and a sequence of independent chunks generates poorly. Comparing codes shows why:
   - *Real text: the objective prefers the forests.* The learner's forest grammar describes the treebank sentences in fewer bits than the grammar of their gold trees, and the gap grows with data: 8–10% at 434 sentences, 14–15% at about 1,100, 18% at about 1,900. Every gold-derived analysis costs more than the learner's own forests, whether the gold trees are binarized to the right (15,763 bits at 434 sentences, against 14,160) or to the left (16,349), or cut down to forests of gold base phrases (16,120). Right-branching trees (14,421) also cost less than gold trees.
   - *What the two hierarchies record decides what can pay* (`experiments/v2/treebank_codes.py`, every sentence of the sample).
@@ -495,15 +493,15 @@ print(learner.parse(test[0].tokens).to_string(test[0].tokens))
 
 ### One framework, three domains
 
-A domain says what an experience is. A subclass of `Memory` supplies the first four things below, and a subclass of `Learner` the fifth, for experiences that arrive without analyses. Everything else is shared code: the chunk context, the two hierarchies and their cuts, the grammar and its code, and consolidation. The same grammar tables serve every domain; a domain with typed relations adds the relation table `Rel`, and the board adds the read's table `Q`.
+A domain says what an experience is. A subclass of `Memory` supplies the first four things below, and a subclass of `Learner` the fifth, for experiences that arrive without analyses. Everything else is shared code: the chunk context, the two hierarchies and their cuts, the grammar and its code, and consolidation. The same grammar tables serve every domain; a domain with typed relations adds the relation table `Rel`, and the board adds the read's tables `Q` and `T`.
 
 | A domain supplies | Sentences (`Memory`) | Characters (`CharacterMemory`) | Chess positions (`BoardMemory`) |
 |---|---|---|---|
 | its elements and how two parts join (`add`, `relations`) | tokens, joined in order | components, joined by ten spatial operators (a three-part operator is two joins) | pieces, joined by 32 forward relations: a direction and a distance, or a knight's jump |
 | its context window, what the representation hierarchy sees besides chunk context (`surface`) | the token on either side; first and last token; kind | the slot (the operator that places it, and which part it is); first and last component; its own operator | the star (the first piece along each queen ray and on each knight square); the anchor piece; its square |
-| its reading order, how a whole experience is laid out and coded (`top_level_nats`, `layout_nats`, `top_level_tables`) | left to right, as one tree or a forest of pieces | one tree | square by square, each square in the light of the pieces on earlier squares |
-| how an experience is drawn from the grammar and coded (`sample`, `log_prob`) | the grammar's sampler; the inside pass over every analysis | a tree from the start row; the inside pass over the known structure | the read, square by square; the inside pass over each chunk of the analysis |
-| a structure search, for experiences that arrive without analyses (a `Learner`) | `UnsupervisedLearner`: chunk-and-merge beam from word classes, consolidation, re-analysis | not needed: a character's structure is given | `ChessLearner`: the read's context, then chunk moves under the scan code |
+| its reading order, how a whole experience is laid out and coded (`top_level_nats`, `layout_nats`, `top_level_tables`) | left to right, as one tree or a forest of pieces | one tree | square by square, asking of each kind of piece in turn, given how many of that kind stand on earlier squares |
+| how an experience is drawn from the grammar and coded (`sample`, `log_prob`) | the grammar's sampler; the inside pass over every analysis | a tree from the start row; the inside pass over the known structure | the read, square by square; at each anchor, the category given the anchor's kind and square, and the inside pass over the element |
+| a structure search, for experiences that arrive without analyses (a `Learner`) | `UnsupervisedLearner`: chunk-and-merge beam from word classes, consolidation, re-analysis | not needed: a character's structure is given | `ChessLearner`: chunk moves under the read's code |
 
 With analyses given, every domain uses `Trellis2`; from experiences alone, every domain's learner has the same calls:
 

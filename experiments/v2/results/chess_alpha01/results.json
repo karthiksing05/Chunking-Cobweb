@@ -1,31 +1,23 @@
 {
  "train": 4000,
  "test": 500,
- "seconds": 185.6206910610199,
+ "seconds": 377.6751301288605,
  "bits per position": {
-  "training, squares on their own": 79.18898073121166,
-  "training, after the search": 79.18898073121166,
-  "training, TRELLIS v2 (consolidated)": 79.48985659235933,
-  "held out, squares on their own": 75.27308048338908,
-  "held out, squares on their own, no context": 82.81280866791886,
-  "held out, learned chunks": 75.27308048338908
+  "training, the read alone": 76.86388610672999,
+  "training, after the search": 76.86388610672999,
+  "training, TRELLIS v2 (consolidated)": 77.55558679350219,
+  "held out, the read alone": 73.53882140524269,
+  "held out, squares on their own (no counts)": 82.89562345583292,
+  "held out, learned chunks": 73.53882140524269,
+  "held out, TRELLIS v2 (the grammar)": 73.26094574801809
  },
- "context of the read": [
-  "at least 2 bR",
-  "at least 1 wK",
-  "at least 1 bK",
-  "at least 2 wR",
-  "at least 1 wR",
-  "at least 1 bQ",
-  "at least 1 wQ",
-  "at least 7 bP"
- ],
+ "context of the read": "each kind's count on earlier squares (0 to 10)",
  "alpha": 0.01,
  "symbols": 12,
  "rule classes": 12,
  "chunk types (grammar)": 0,
- "model bits": 18827.613460863853,
- "data bits": 299131.81290857575,
+ "model bits": 12206.61624595359,
+ "data bits": 298015.73092805705,
  "search moves": [],
  "chunk types": [],
  "categories": [
@@ -510,22 +502,22 @@
   "attempts": 1000,
   "collision or off the board": 0.0,
   "checks": {
-   "one king each": 0.945,
-   "no pawn on a back rank": 0.989,
-   "at most 8 pawns each": 0.833,
-   "at most 16 pieces each": 0.838,
-   "no more of any kind than at the start": 0.375,
-   "passes every check": 0.372
+   "one king each": 1.0,
+   "no pawn on a back rank": 0.998,
+   "at most 8 pawns each": 1.0,
+   "at most 16 pieces each": 1.0,
+   "no more of any kind than at the start": 1.0,
+   "passes every check": 0.998
   },
-  "checks, squares drawn on their own": {
-   "one king each": 0.999,
+  "checks, the read alone": {
+   "one king each": 1.0,
    "no pawn on a back rank": 1.0,
-   "at most 8 pawns each": 0.788,
-   "at most 16 pieces each": 0.846,
-   "no more of any kind than at the start": 0.392,
-   "passes every check": 0.391
+   "at most 8 pawns each": 1.0,
+   "at most 16 pieces each": 0.997,
+   "no more of any kind than at the start": 0.997,
+   "passes every check": 0.997
   },
-  "generated chunks": 0,
+  "generated chunks": 1,
   "generated chunks found in a held-out position": 0.0
  }
 }

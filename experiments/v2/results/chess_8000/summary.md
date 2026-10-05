@@ -1,26 +1,26 @@
 Chess positions (Lichess, both players 1800+, after ply 30): 8000 learned, 560 held out.
 
-The context of the square-by-square read (features of the pieces on earlier squares that pay for themselves): at least 2 bR, at least 1 wK, at least 1 bK, at least 2 wR, at least 1 wR, at least 1 wQ, at least 1 bQ, at least 7 bP. Dirichlet concentration α = 0.001. Without the context, squares on their own: 82.26 held-out bits per position.
+The read asks, at each square, of each kind of piece in turn whether an element is anchored there on it, given how many pieces of that kind stand on earlier squares. Dirichlet concentration α = 0.001. Read without the counts, squares on their own: 82.29 held-out bits per position.
 
-| Bits per position | Squares on their own | TRELLIS v2 |
+| Bits per position | The read alone, no chunks | TRELLIS v2 |
 |---|---|---|
-| training | 77.97 | 77.99 (search alone: 77.92) |
-| held out | 74.51 | 74.42 (learned chunks) |
+| training | 75.10 | 74.87 (search alone: 74.94) |
+| held out | 72.62 | 72.41 (the grammar; the search's code with its chunks: 72.45) |
 
-Symbols: 14; rule classes: 14; chunk types: 3. The grammar's size: 35,129 model bits (and 588,784 data bits for the training positions).
+Symbols: 14; rule classes: 14; chunk types: 3. The grammar's size: 17,264 model bits (and 581,682 data bits for the training positions).
 
 | Chunk type | Count | Most frequent anchors |
 |---|---|---|
-| `[bP N1 bB]` | 4376 | g6 (1202), e6 (922), b6 (589) |
-| `[wB N1 wP]` | 3628 | g2 (809), d3 (704), b2 (397) |
+| `[wP N1 bP]` | 5604 | d4 (1329), e4 (877), e5 (790) |
+| `[wB N1 wP]` | 2860 | g2 (805), b2 (387), d3 (323) |
 
-| Generated positions (1,000) | TRELLIS v2 | Squares on their own |
+| Generated positions (1,000) | TRELLIS v2 | The read alone, no chunks |
 |---|---|---|
-| one king each | 99.6% | 100.0% |
-| no pawn on a back rank | 100.0% | 100.0% |
-| at most 8 pawns each | 82.0% | 81.5% |
-| at most 16 pieces each | 86.8% | 87.2% |
-| no more of any kind than at the start | 41.5% | 38.4% |
-| passes every check | 41.5% | 38.4% |
+| one king each | 100.0% | 100.0% |
+| no pawn on a back rank | 99.8% | 99.8% |
+| at most 8 pawns each | 99.9% | 100.0% |
+| at most 16 pieces each | 99.9% | 100.0% |
+| no more of any kind than at the start | 99.9% | 100.0% |
+| passes every check | 99.8% | 99.8% |
 | samples rejected (a chunk off the board or on an occupied square) | 0.2% | – |
-| generated chunks found, piece for piece, in a held-out position | 98.5% | – |
+| generated chunks found, piece for piece, in a held-out position | 98.6% | – |

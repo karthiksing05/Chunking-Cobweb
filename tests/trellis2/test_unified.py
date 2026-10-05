@@ -70,19 +70,20 @@ def test_chess_learner_end_to_end():
     for p in positions:
         learner.observe(p)
     g = learner.sleep()
-    # The search shortens the plain code with chunks of a king and its shield.
+    # The search shortens the plain code with a chunk of a king and its shield.
     searched = [h["bits"] for h in learner.history if h["stage"] in ("flat", "chunk")]
     assert searched[-1] < searched[0]
     chunks = {"".join(sorted((B, C))) for B, _, C, _ in learner.search.moves}
-    assert "wKwP" in chunks and "bKbP" in chunks
+    assert chunks & {"wKwP", "bKbP"}
     for p in positions[:10]:
         tops = learner.analyse(p)
         covered = Counter(sq for t in tops for sq in _squares(t))
         assert set(covered) == set(p) and max(covered.values()) == 1
         assert any("K" in render(t, p) and "P" in render(t, p) for t in tops)
         assert np.isfinite(learner.log_prob(p))
-    for table in (g.U, g.Lt, g.Rt, g.E, g.Rel, g.Q):
+    for table in (g.U, g.Lt, g.Rt, g.E, g.Rel, g.T):
         assert np.allclose(table.sum(axis=-1), 1.0)
+    assert ((g.Q > 0) & (g.Q < 1)).all()          # the read's yes-or-no questions
     samples, _ = learner.generate(200, np.random.default_rng(0))
     assert np.mean([plausibility(p)["one king each"] for p, _ in samples]) > 0.9
 

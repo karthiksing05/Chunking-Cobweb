@@ -3,7 +3,7 @@
 Status: first implementation, October 2026, on branch `inside-outside`.
 
 - Code: `src/trellis2/`
-- Tests: `tests/trellis2/` (43, including brute-force checks of the parser over whole trees and forests, exactness checks of the search, the compiled Cobweb against its Python reference, the chess domain's star, scan code and read context, the relational characters' inside pass, and, in every domain, that the grammar draws experiences as often as its code says)
+- Tests: `tests/trellis2/` (43, including brute-force checks of the parser over whole trees and forests, exactness checks of the search, the compiled Cobweb against its Python reference, the chess domain's star and its counted read, the relational characters' inside pass, and, in every domain, that the grammar draws experiences as often as its code says)
 - Experiments: `experiments/v2/`
 - Background: [the literature behind v2](#background-the-literature-behind-v2), condensed from the October 2026 review (the full report and notes are in the git history, commit `fbe61901`)
 - **The framework explained end to end, with figures: [`FRAMEWORK.md`](FRAMEWORK.md)**
@@ -390,7 +390,7 @@ Code: `chess.py`, `experiments/v2/run_chess.py`. Middlegame positions from the L
 - *Elements.* A primitive is a piece; its token is its colour and kind. A composite joins two elements whose anchors see each other, and its anchor is its first part's anchor.
 - *Representation hierarchy.* An element's context window is the star: the first piece along each of the eight queen rays, at any distance, and the piece on each of the eight knight squares. The representation instance also holds the anchor piece (whole, and by colour and kind), the element's kind, its square, and the chunk context, as for sentences. The star is written as two bags, rays and jumps, whose values name their direction (`N:wP`).
 - *Composition hierarchy.* A composition is (category, relation, category), where the relation is the star direction and distance (`N1`, `E3`, `NNE`). The composition's window is one direction of the star: a chunk joins an element to the first piece it sees along one forward ray, at any distance, or to the piece a forward knight's jump away; looking forward loses nothing, since of two pieces that see each other the later one in the read is always forward of the earlier. Like the star, the window looks past the element's own pieces (2026-10-05), so a chunk can grow along a ray: a pawn chain or a queen behind a bishop. On these positions that changes nothing: no longer chunk pays, and not even two pawns on a diagonal, because the square-by-square read already predicts where pawns stand. `grammar.py` gained a relation table per rule class (`Rel`). Sequences have a single relation, and their codes and grammars are bit-identical to before.
-- *Top level.* A board is read square by square (a1 … h8). Every square not covered by an earlier chunk is coded as empty or as the anchor of a top-level element, from one Dirichlet row per square and context (below). So that a chunk is decoded at its first square, relations point forward in the scan: the N, NE, NW and E rays and the four upward knight jumps, 32 relations in all.
+- *Top level.* A board is read square by square (a1 … h8). At every square not covered by an earlier chunk, the read asks of each kind of piece in turn whether a top-level element is anchored there on a piece of that kind, given the square and how many pieces of that kind stand on earlier squares (below); the element's category is drawn given the kind and square of its anchor, and the element from its category. So that a chunk is decoded at its first square, relations point forward in the scan: the N, NE, NW and E rays and the four upward knight jumps, 32 relations in all.
 
 **Two first attempts failed.**
 
@@ -401,8 +401,8 @@ Code: `chess.py`, `experiments/v2/run_chess.py`. Middlegame positions from the L
 
 | Bits per position (4,000 positions) | Each square on its own | TRELLIS v2 |
 |---|---|---|
-| training | 84.39 | 83.80 (search alone: 83.91) |
-| held out (500) | 82.69 | 81.74 |
+| training | 85.05 | 84.42 (search alone: 84.67) |
+| held out (500) | 82.75 | 81.93 |
 
 | Chunk type | Count | Main anchors |
 |---|---|---|
@@ -413,33 +413,33 @@ Code: `chess.py`, `experiments/v2/run_chess.py`. Middlegame positions from the L
 | `[wK E3 wR]`, `[wK E1 wR]` | 298, 237 | e1, c1 |
 
 - **The chunks are castling and fianchetto structures.** King and rook appear at every stage of castling, with the distance as part of the relation. Castled on either wing, the rook is beside the king or has moved one square on. Uncastled, the squares between them are cleared. Bishops appear with the pawn that blocks or supports them.
-- **Categories.** The representation hierarchy forms one category per kind of piece and one per chunk type (17 symbols, 18 rule classes).
-- **Generation.** 94.7% of the chunks in 1,000 generated positions occur, piece for piece and square for square, in some held-out game. 5.8% of samples are rejected because a chunk would leave the board or land on an occupied square.
-- **Whole positions had no global sense.** 35% of generated positions had one king of each colour, the same as when each square is drawn on its own (37%), and 4% passed every check below. A square-by-square code has nothing that counts kings.
-- **Compression.** Chunks shorten the held-out code by 1.2%. At move 15, where pieces stand is most of what can be compressed, and a chunk pays only where pieces depend on each other beyond their squares.
+- **Categories.** The representation hierarchy forms one category per kind of piece and one per chunk type (18 symbols, 19 rule classes).
+- **Generation.** 93.0% of the chunks in 1,000 generated positions occur, piece for piece and square for square, in some held-out game. 7.7% of samples are rejected because a chunk would leave the board or land on an occupied square.
+- **Whole positions had no global sense.** 38% of generated positions had one king of each colour, the same as when each square is drawn on its own with no chunks (38%), and 4% passed every check below. A square-by-square code that counts nothing cannot keep to one king.
+- **Compression.** Chunks shorten the held-out code by 1.0%. At move 15, where pieces stand is most of what can be compressed, and a chunk pays only where pieces depend on each other beyond their squares.
 
 (The table above and the chunk types are the read without context: `experiments/v2/results/chess_plain`.)
 
-**The read learns its context** (2026-10-04; `select_context` in `chess.py`). A square is read in the light of the pieces on the squares before it. The context is a set of features "at least *m* pieces of kind *k* stand on earlier squares", added greedily while one shortens the code of the training positions, each square read on its own given the features. The search, the board's memory (its scan code) and the sampler all index the read by square and features, so parsing, the code and generation share one top level. Seven features pay for themselves on 4,000 positions: a white king, a black king, at least one and at least two rooks of each colour, and at least seven black pawns.
+**The read learns its context** (2026-10-04, since replaced). A square was read in the light of the pieces on the squares before it through features "at least *m* pieces of kind *k* stand on earlier squares", added greedily while one shortened the code of the training positions. Seven paid on 4,000 positions (a king of each colour, one and two rooks of each colour, seven black pawns): one king each in 96.3% of generated positions, but only 22.9% passed every check (41.5% on 8,000 positions), because no feature about queens or minor pieces paid. A representation hierarchy over "what has been placed so far", cut by description length, compressed as well but grouped contexts by how far the read had got (one king each 46–54%). A stricter check was added then: no more of any kind of piece than a side starts with (one queen, two rooks, …); every one of the 8,560 real positions passes all five checks.
 
-- *Clusters of contexts did not work.* A representation hierarchy over "what has been placed so far" (a bag of pieces, or one count per kind of piece), cut by description length, compressed as well (held out 79.9–80.3 bits) but left one king of each colour at 46–54%: Cobweb groups contexts by how far the read has got, not by what they predict. Features chosen by what they save find "a king is already placed" first.
-- *A stricter check.* Besides one king each, no pawn on a back rank, at most eight pawns and at most sixteen pieces, a generated position now also has to have no more of any kind of piece than a side starts with (one queen, two rooks, …); every one of the 8,560 real positions passes all five.
+**The read counts material** (2026-10-05; `BoardMemory`, `BoardSearch` in `chess.py`). A square's content was one thirteen-way outcome (empty, or which piece), and predicting it from what is already on the board needs all twelve counts at once: too many contexts to learn, so features had to be chosen and most counts were left out. The read now asks twelve yes-or-no questions per square instead, one per kind of piece in a fixed order: is a top-level element anchored here on a piece of this kind? Each question needs one count, that of its own kind on earlier squares (0 to 10), and gets it. The code of the same events is the same whichever order the kinds are asked in (73.2–73.4 held-out bits per position across orders, read alone). The element's category is then drawn given the kind and square of its anchor (`T`), and the element from its category, its anchor's kind given (normalised by the probability that a derivation from that category is anchored on that kind). Every quantity the read conditions on is on the board, so the code of a known analysis stays exact, and the search scores a chunk move from the squares it changes: the second part's square is no longer read, and the anchor's label changes.
 
-| 4,000 positions learned, 500 held out (`results/chess`) | Read without context | With the learned context |
-|---|---|---|
-| held-out bits per position | 81.74 | **76.47** |
-| one king each | 35.2% | **96.3%** |
-| at most 8 pawns each / at most 16 pieces each | 72.5% / 79.1% | 82.7% / 84.8% |
-| no more of any kind than at the start | 7.2% | 22.9% |
-| passes every check | 4.1% | **22.9%** |
-| generated chunks found, piece for piece, in a held-out game | 94.7% | 97.0% |
-| chunk types | 11 | 3 (fianchettos) |
-| model bits | 7,464 | 17,591 |
+| 4,000 positions learned, 500 held out (`results/chess`) | Squares on their own (`results/chess_plain`) | Features chosen by description length (before) | **The read counts** |
+|---|---|---|---|
+| held-out bits per position | 81.93 | 76.47 | **73.33** |
+| one king each | 37.7% | 96.3% | **100.0%** |
+| at most 8 pawns each / at most 16 pieces each | 73.1% / 79.9% | 82.7% / 84.8% | **100.0% / 100.0%** |
+| no more of any kind than at the start | 7.7% | 22.9% | **100.0%** |
+| passes every check | 4.3% | 22.9% | **100.0%** |
+| generated chunks found, piece for piece, in a held-out game | 93.0% | 97.0% | 98.7% |
+| chunk types | 12 (castling, fianchettos) | 3 (fianchettos) | 1 (blocked pawns) |
+| model bits | 10,604 | 17,591 | 15,369 |
 
-- **Context and chunks compete.** With the context, castling no longer pays as a chunk: "a rook is already on the board" predicts where the king stands, so the context does globally what the castling chunks did locally. Reading the context first and chunking afterwards gives the shorter code: chunking first and choosing the context on the chunked analyses ends at 80.40 bits per training position and 77.37 held out, against 79.64 and 76.47.
-- **What still goes wrong is the number of minor pieces and queens.** No feature about queens, bishops or knights pays at α = 0.001 on 4,000 positions.
-- **More data lets more context pay.** On 8,000 positions (560 held out; `run_chess.py --train 8000 --test 560`, `results/chess_8000`) the queens' features pay too: one king each in 99.6% of generated positions, 41.5% pass every check, held-out 74.42 bits per position (82.26 with every square on its own), and 98.5% of generated chunks occur in a held-out game. The chunks are again the two fianchettos.
-- **The concentration matters.** Choosing α by description length (the shortest code of the training positions, each table at the same α) favours α = 0.01 (`run_chess.py --alpha 0.01`, `results/chess_alpha01`): the queens' features then pay, held-out 75.27 bits per position, 37.2% of generated positions pass every check, but no chunk pays at all. One concentration prices both the read's rows (13 outcomes) and the chunk rows (thousands of possible compositions). Priced apart, the read's code alone keeps shrinking up to α ≈ 0.1 (77.07 bits per position against 79.50 at 0.001), where the smoothing gives impossible boards (a second king) more probability: the shortest code and coherent samples part ways in the rare cases. More data is the cleaner lever (above).
+- **The chunk that pays joins two colours.** `[wP N1 bP]`, a white pawn with a black pawn on the square in front of it (2,788 times; d4, e4, e5): the pawn rams of closed centres. Castling and fianchettos no longer pay: given how many kings, rooks and bishops are already placed, the read predicts their squares as well as a chunk does.
+- **The read alone already generates legal-looking positions** (99.9% pass every check with no chunks); the grammar adds categories, the chunk, and a slightly shorter code (73.33 against 73.47 held-out bits).
+- **More data.** On 8,000 positions (560 held out; `run_chess.py --train 8000 --test 560`, `results/chess_8000`), the white fianchetto pays again beside the blocked pawns (`[wP N1 bP]` 5,604 times, `[wB N1 wP]` 2,860 times), the held-out code is 72.41 bits per position (72.62 for the read alone; 74.42 with the features before), and 99.8% of generated positions pass every check (41.5% before).
+- **The concentration.** With the counted read, α = 0.001 codes the training positions shortest (76.37 bits per position, against 77.56 at α = 0.01, `results/chess_alpha01`). At α = 0.01 the held-out code is 73.26 bits and no chunk pays; 99.8% of generated positions pass every check.
+- **A first version asked about categories, not kinds** (each of the grammar's categories in turn, counting elements of its category): the read then changes with every candidate cut, which made consolidation many times slower, and a category's count is not the count of a kind of piece once categories mix kinds or chunks hold pieces. Asking about the anchor's kind keeps the read fixed while the cuts are searched.
 
 ### Tried and dropped: an attach move
 
@@ -469,7 +469,7 @@ Folding a recurring top-level pair directly into an existing category (a chunk m
 
 The chess grammar describes positions; playing needs a choice of move. The aim is a player whose built-in knowledge is only the rules of movement and one or two "stupid" rules, whose judgement comes from the two hierarchies, and whose model is measured in bits and stays small next to engines and networks. None of this is built yet.
 
-**What the representation already offers.** A piece's star holds the first piece along each queen ray and on each knight square: the pieces it attacks or defends, and the pieces that could attack it along a line or a jump. The read context counts what is already on the board (the features that pay include "a white king is already placed"). The chunk types are king shelters and fianchettos, two of the stereotyped patterns in Chase & Simon's (1973) recall data; pawn chains, the most frequent there, are not yet found.
+**What the representation already offers.** A piece's star holds the first piece along each queen ray and on each knight square: the pieces it attacks or defends, and the pieces that could attack it along a line or a jump. The read counts what is already on the board, kind by kind. Read square by square without counts, the chunk types are king shelters and fianchettos, two of the stereotyped patterns in Chase & Simon's (1973) recall data; with counts, blocked pawn pairs, a piece of the pawn structures that are the most frequent pattern there.
 
 **Hypotheses, each with its test.**
 
@@ -487,12 +487,12 @@ The chess grammar describes positions; playing needs a choice of move. The aim i
 |---|---|---|
 | a random legal move | 3.2% | 9.3% |
 | capture the most valuable piece, else a random move | 19.4% | – |
-| shortest code: chunks and the read's context | 9.0% | 21.8% |
-| shortest code: the read's context, no chunks | 10.0% | 21.4% |
+| shortest code: chunks and the read's counts | 10.6% | 22.2% |
+| shortest code: the read's counts, no chunks | 9.0% | 21.4% |
 | shortest code: each square on its own | 8.8% | 22.2% |
-| a capture that does not lose material, else the shortest code | 20.1% | – |
+| a capture that does not lose material, else the shortest code | 20.7% | – |
 
-Typicality triples the agreement of a random move, but chunks and the read's context barely change it: the codes of two candidate positions differ mostly by where the moved piece lands, which squares alone already price. One stupid capture rule does better on its own, because many moves at this point of a game are recaptures, which a position's code cannot see; together the two reach 20.1%. Seeing tactics is the job of hypotheses 2–4.
+Typicality triples the agreement of a random move, but chunks and the read's counts barely change it: the codes of two candidate positions differ mostly by where the moved piece lands, which squares alone already price. (With the earlier read, whose context was chosen features, the shortest code picked the move played 9.0% of the time, and 20.1% with the capture rule.) One stupid capture rule does better on its own, because many moves at this point of a game are recaptures, which a position's code cannot see; together the two reach 20.7%. Seeing tactics is the job of hypotheses 2–4.
 
 ## Background: the literature behind v2
 
@@ -594,7 +594,7 @@ Langley's essay and the TRELLIS paper name chess as the first target beyond stri
 | v2.2 (in part) | learning by day and by night ✓ (perceive with the current grammar; consolidate at night from the stored analyses or a restart; the full code chooses among the best search results); split moves; attention-like long-range context |
 | v2.3 (in progress) | beyond the paper's corpora: Penn Treebank WSJ10 with gold tags ✓ (and larger training sets ✓; which descriptions make sentence structure pay ✓); Chinese characters ✓; a compiled Cobweb ✓. Open: starting categories that see structure (characters), finer positional concepts, α by description length; for real text, chunks categorized by their head and the total-probability code, with words at scale |
 | v2.4 (in progress) | new data types and relations: a domain brings its own context window (the representation hierarchy's surface context) and its own typed relations (the composition hierarchy); chess positions with the star context and direction-and-distance relations ✓; simple English (TinyStories) for generated coherence ✓; characters with operators as relations ✓ |
-| v2.5 (in progress) | coherence from what the descriptions can see ✓: a sentence is one tree or a forest of pieces, coded apart; a part's slot in its description; a board's read with a context chosen by description length. Tried and kept aside: a Markov code over a forest's pieces (shorter code, no more coherent samples). Open: fewer forests; chess moves as compositions, attack and defence as relations ([hypotheses](#hypotheses-playing-chess-from-the-two-hierarchies)); a search over several moves at a time for characters from sequences; variable arity |
+| v2.5 (in progress) | coherence from what the descriptions can see ✓: a sentence is one tree or a forest of pieces, coded apart; a part's slot in its description; a board's read that counts material, kind by kind. Tried and kept aside: a Markov code over a forest's pieces (shorter code, no more coherent samples). Open: fewer forests; chess moves as compositions, attack and defence as relations ([hypotheses](#hypotheses-playing-chess-from-the-two-hierarchies)); a search over several moves at a time for characters from sequences; variable arity |
 
 ## Reproducing
 

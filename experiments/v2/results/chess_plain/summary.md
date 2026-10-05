@@ -1,13 +1,13 @@
 Chess positions (Lichess, both players 1800+, after ply 30): 4000 learned, 500 held out.
 
-The read has no context: every square is read on its own (α = 0.001).
+The read counts nothing: every square is read on its own (α = 0.001).
 
-| Bits per position | Squares on their own | TRELLIS v2 |
+| Bits per position | The read alone, no chunks | TRELLIS v2 |
 |---|---|---|
-| training | 84.39 | 83.80 (search alone: 83.91) |
-| held out | 82.69 | 81.74 (learned chunks) |
+| training | 85.05 | 84.42 (search alone: 84.67) |
+| held out | 82.75 | 81.93 (the grammar; the search's code with its chunks: 81.81) |
 
-Symbols: 17; rule classes: 18; chunk types: 11. The grammar's size: 7,464 model bits (and 327,754 data bits for the training positions).
+Symbols: 18; rule classes: 19; chunk types: 12. The grammar's size: 10,604 model bits (and 327,081 data bits for the training positions).
 
 | Chunk type | Count | Most frequent anchors |
 |---|---|---|
@@ -20,13 +20,13 @@ Symbols: 17; rule classes: 18; chunk types: 11. The grammar's size: 7,464 model 
 | `[wK E1 wR]` | 237 | c1 (227), e1 (3), b1 (3) |
 | `[bK E1 bR]` | 181 | c8 (163), g8 (7), e8 (5) |
 
-| Generated positions (1,000) | TRELLIS v2 | Squares on their own |
+| Generated positions (1,000) | TRELLIS v2 | The read alone, no chunks |
 |---|---|---|
-| one king each | 35.2% | 36.8% |
+| one king each | 37.7% | 38.3% |
 | no pawn on a back rank | 100.0% | 100.0% |
-| at most 8 pawns each | 72.5% | 70.4% |
-| at most 16 pieces each | 79.1% | 79.6% |
-| no more of any kind than at the start | 7.2% | 6.4% |
-| passes every check | 4.1% | 3.8% |
-| samples rejected (a chunk off the board or on an occupied square) | 5.8% | – |
-| generated chunks found, piece for piece, in a held-out position | 94.7% | – |
+| at most 8 pawns each | 73.1% | 70.5% |
+| at most 16 pieces each | 79.9% | 79.2% |
+| no more of any kind than at the start | 7.7% | 5.8% |
+| passes every check | 4.3% | 3.8% |
+| samples rejected (a chunk off the board or on an occupied square) | 7.7% | – |
+| generated chunks found, piece for piece, in a held-out position | 93.0% | – |

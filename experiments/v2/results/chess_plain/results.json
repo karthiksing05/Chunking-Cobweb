@@ -1,22 +1,23 @@
 {
  "train": 4000,
  "test": 500,
- "seconds": 822.6958363056183,
+ "seconds": 1559.7422230243683,
  "bits per position": {
-  "training, squares on their own": 84.39446454021395,
-  "training, after the search": 83.91483308776837,
-  "training, TRELLIS v2 (consolidated)": 83.80436098101497,
-  "held out, squares on their own": 82.68868821688713,
-  "held out, squares on their own, no context": 82.68868821688713,
-  "held out, learned chunks": 81.74072131321519
+  "training, the read alone": 85.05218207932472,
+  "training, after the search": 84.67167039345037,
+  "training, TRELLIS v2 (consolidated)": 84.4213513961467,
+  "held out, the read alone": 82.74863388681197,
+  "held out, squares on their own (no counts)": 82.74863388681197,
+  "held out, learned chunks": 81.81415588125586,
+  "held out, TRELLIS v2 (the grammar)": 81.9318909862016
  },
- "context of the read": [],
+ "context of the read": "none",
  "alpha": 0.001,
- "symbols": 17,
- "rule classes": 18,
- "chunk types (grammar)": 11,
- "model bits": 7463.8982396332085,
- "data bits": 327753.54568442673,
+ "symbols": 18,
+ "rule classes": 19,
+ "chunk types (grammar)": 12,
+ "model bits": 10604.003152126286,
+ "data bits": 327081.40243246115,
  "search moves": [
   "[bR E1 bK] x2110",
   "[wB N1 wP] x1826",
@@ -103,7 +104,7 @@
  ],
  "categories": [
   {
-   "symbol": "0",
+   "symbol": "5",
    "count": 26691.0,
    "yields": [
     [
@@ -135,7 +136,7 @@
    ]
   },
   {
-   "symbol": "2",
+   "symbol": "4",
    "count": 26336.0,
    "yields": [
     [
@@ -167,19 +168,19 @@
    ]
   },
   {
-   "symbol": "1",
-   "count": 7849.0,
+   "symbol": "0",
+   "count": 7851.0,
    "yields": [
     [
      "bR",
      7847.0
     ],
     [
-     "wR",
-     1.0
+     "bK",
+     3.0
     ],
     [
-     "bK",
+     "wR",
      1.0
     ]
    ],
@@ -198,7 +199,7 @@
     ],
     [
      "e8",
-     594.0
+     595.0
     ],
     [
      "d8",
@@ -207,22 +208,18 @@
    ]
   },
   {
-   "symbol": "4",
-   "count": 7846.0,
+   "symbol": "3",
+   "count": 7842.0,
    "yields": [
     [
      "wR",
      7842.0
-    ],
-    [
-     "wB",
-     4.0
     ]
    ],
    "squares": [
     [
      "a1",
-     2692.0
+     2688.0
     ],
     [
      "f1",
@@ -243,7 +240,7 @@
    ]
   },
   {
-   "symbol": "7",
+   "symbol": "1",
    "count": 5955.0,
    "yields": [
     [
@@ -283,12 +280,12 @@
    ]
   },
   {
-   "symbol": "3",
-   "count": 5700.0,
+   "symbol": "6",
+   "count": 5704.0,
    "yields": [
     [
      "wB",
-     5700.0
+     5704.0
     ]
    ],
    "squares": [
@@ -315,7 +312,7 @@
    ]
   },
   {
-   "symbol": "11",
+   "symbol": "12",
    "count": 5412.0,
    "yields": [
     [
@@ -348,15 +345,11 @@
   },
   {
    "symbol": "16",
-   "count": 5342.0,
+   "count": 5333.0,
    "yields": [
     [
      "wN",
      5332.0
-    ],
-    [
-     "wK",
-     9.0
     ],
     [
      "wQ",
@@ -366,11 +359,11 @@
    "squares": [
     [
      "f3",
-     1502.0
+     1500.0
     ],
     [
      "c3",
-     1214.0
+     1212.0
     ],
     [
      "d2",
@@ -387,48 +380,12 @@
    ]
   },
   {
-   "symbol": "6",
+   "symbol": "7",
    "count": 3999.0,
    "yields": [
     [
-     "bK",
-     3998.0
-    ],
-    [
      "wK",
-     1.0
-    ]
-   ],
-   "squares": [
-    [
-     "g8",
-     2867.0
-    ],
-    [
-     "e8",
-     521.0
-    ],
-    [
-     "c8",
-     190.0
-    ],
-    [
-     "h8",
-     85.0
-    ],
-    [
-     "g7",
-     58.0
-    ]
-   ]
-  },
-  {
-   "symbol": "5",
-   "count": 3835.0,
-   "yields": [
-    [
-     "wK",
-     3835.0
+     3999.0
     ]
    ],
    "squares": [
@@ -455,47 +412,43 @@
    ]
   },
   {
-   "symbol": "15",
-   "count": 3731.0,
+   "symbol": "2",
+   "count": 3997.0,
    "yields": [
     [
-     "wQ",
-     3575.0
+     "bK",
+     3996.0
     ],
     [
      "wK",
-     155.0
-    ],
-    [
-     "wN",
      1.0
     ]
    ],
    "squares": [
     [
-     "d1",
-     1152.0
+     "g8",
+     2868.0
     ],
     [
-     "c2",
-     452.0
+     "e8",
+     520.0
     ],
     [
-     "d2",
-     429.0
-    ],
-    [
-     "e2",
-     416.0
-    ],
-    [
-     "d3",
+     "c8",
      188.0
+    ],
+    [
+     "h8",
+     85.0
+    ],
+    [
+     "g7",
+     58.0
     ]
    ]
   },
   {
-   "symbol": "12",
+   "symbol": "13",
    "count": 3604.0,
    "yields": [
     [
@@ -531,37 +484,73 @@
    ]
   },
   {
-   "symbol": "10",
-   "count": 2193.0,
+   "symbol": "17",
+   "count": 3576.0,
+   "yields": [
+    [
+     "wQ",
+     3575.0
+    ],
+    [
+     "wN",
+     1.0
+    ]
+   ],
+   "squares": [
+    [
+     "d1",
+     1152.0
+    ],
+    [
+     "c2",
+     448.0
+    ],
+    [
+     "d2",
+     412.0
+    ],
+    [
+     "e2",
+     380.0
+    ],
+    [
+     "d3",
+     187.0
+    ]
+   ]
+  },
+  {
+   "symbol": "11",
+   "count": 2184.0,
    "yields": [
     [
      "[bR E1 bK]",
-     2105.0
+     2102.0
     ],
     [
      "[bR E2 bK]",
-     88.0
+     82.0
     ]
    ],
    "squares": [
     [
      "f8",
-     2151.0
+     2148.0
     ],
     [
      "d8",
-     22.0
+     21.0
     ],
     [
      "c8",
      12.0
     ],
     [
-     "e8",
-     5.0
+     "a8",
+     1.0
     ],
     [
-     "a8",
+     "f7",
      1.0
     ]
    ]
@@ -599,7 +588,7 @@
    ]
   },
   {
-   "symbol": "14",
+   "symbol": "15",
    "count": 1826.0,
    "yields": [
     [
@@ -632,12 +621,8 @@
   },
   {
    "symbol": "9",
-   "count": 1014.0,
+   "count": 561.0,
    "yields": [
-    [
-     "[bR E2 bK]",
-     448.0
-    ],
     [
      "[bK E3 bR]",
      380.0
@@ -645,16 +630,12 @@
     [
      "[bK E1 bR]",
      181.0
-    ],
-    [
-     "[bR E1 bK]",
-     5.0
     ]
    ],
    "squares": [
     [
      "e8",
-     832.0
+     379.0
     ],
     [
      "c8",
@@ -675,7 +656,7 @@
    ]
   },
   {
-   "symbol": "13",
+   "symbol": "14",
    "count": 535.0,
    "yields": [
     [
@@ -709,28 +690,56 @@
      2.0
     ]
    ]
+  },
+  {
+   "symbol": "10",
+   "count": 462.0,
+   "yields": [
+    [
+     "[bR E2 bK]",
+     454.0
+    ],
+    [
+     "[bR E1 bK]",
+     8.0
+    ]
+   ],
+   "squares": [
+    [
+     "e8",
+     458.0
+    ],
+    [
+     "f8",
+     3.0
+    ],
+    [
+     "d8",
+     1.0
+    ]
+   ]
   }
  ],
  "generation": {
-  "attempts": 1062,
-  "collision or off the board": 0.0583804143126177,
+  "attempts": 1084,
+  "collision or off the board": 0.07749077490774908,
   "checks": {
-   "one king each": 0.352,
+   "one king each": 0.377,
    "no pawn on a back rank": 1.0,
-   "at most 8 pawns each": 0.725,
-   "at most 16 pieces each": 0.791,
-   "no more of any kind than at the start": 0.072,
-   "passes every check": 0.041
+   "at most 8 pawns each": 0.731,
+   "at most 16 pieces each": 0.799,
+   "no more of any kind than at the start": 0.077,
+   "passes every check": 0.043
   },
-  "checks, squares drawn on their own": {
-   "one king each": 0.368,
+  "checks, the read alone": {
+   "one king each": 0.383,
    "no pawn on a back rank": 1.0,
-   "at most 8 pawns each": 0.704,
-   "at most 16 pieces each": 0.796,
-   "no more of any kind than at the start": 0.064,
+   "at most 8 pawns each": 0.705,
+   "at most 16 pieces each": 0.792,
+   "no more of any kind than at the start": 0.058,
    "passes every check": 0.038
   },
-  "generated chunks": 1808,
-  "generated chunks found in a held-out position": 0.9474557522123894
+  "generated chunks": 1781,
+  "generated chunks found in a held-out position": 0.9298147108366086
  }
 }

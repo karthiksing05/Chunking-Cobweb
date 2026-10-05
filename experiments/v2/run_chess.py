@@ -3,7 +3,9 @@
 The domain is described in ``trellis2/chess.py``: a piece's context window is
 the star (the eight queen rays to any distance, the eight knight jumps), a
 chunk joins two elements whose anchors see each other along a star relation,
-and a board is read square by square.
+and a board is read square by square, each square asked of each kind of
+piece in turn whether an element is anchored there on it, in the light of
+how many pieces of that kind stand on earlier squares.
 
 Data: middlegame positions from the Lichess database of January 2013 (CC0):
 games in which both players are rated at least 1800 and that last at least
@@ -15,13 +17,12 @@ games in which both players are rated at least 1800 and that last at least
     python experiments/v2/run_chess.py --extract
     python experiments/v2/run_chess.py --train 4000 --test 500 --out experiments/v2/results/chess
 
-Reported: the context the square-by-square read learns (features of the
-pieces on earlier squares that pay for themselves); training and held-out
-bits per position against the code that reads each square on its own (with
-the same context, and with none); the chunk types the search finds and the
-categories the representation hierarchy forms; and for positions generated
-from the grammar, how many place every piece on a free square, simple chess
-checks, and how many of their chunks occur in held-out games.
+Reported: training and held-out bits per position against the read alone,
+with no chunks (counting earlier pieces, and not); the chunk types the
+search finds and the categories the representation hierarchy forms; and for
+positions generated from the grammar, how many place every piece on a free
+square, simple chess checks, and how many of their chunks occur in held-out
+games.
 """
 from __future__ import annotations
 
@@ -47,8 +48,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 
-from trellis2.chess import (EMPTY, BoardSearch, ChessLearner, default_positions_path,  # noqa: E402
-                            is_chunk, load_positions, plausibility, scan_rows, square_name)
+from trellis2.chess import (KINDS, BoardSearch, ChessLearner, default_positions_path,  # noqa: E402
+                            is_chunk, load_positions, plausibility, read_row, square_name)
 
 GLYPH = {"wK": "♔", "wQ": "♕", "wR": "♖", "wB": "♗", "wN": "♘", "wP": "♙",
          "bK": "♚", "bQ": "♛", "bR": "♜", "bB": "♝", "bN": "♞", "bP": "♟"}
@@ -147,7 +148,7 @@ def main():
     ap.add_argument("--alpha", type=float, default=0.001,
                     help="Dirichlet concentration of every table")
     ap.add_argument("--no-context", action="store_true",
-                    help="read every square on its own (no learned context)")
+                    help="read every square on its own (no counts of earlier pieces)")
     ap.add_argument("--test", type=int, default=500)
     ap.add_argument("--n-gen", type=int, default=1000)
     ap.add_argument("--seed", type=int, default=13)
@@ -164,7 +165,7 @@ def main():
     test = [positions[i] for i in order[args.train:args.train + args.test]]
 
     t0 = time.time()
-    learner = ChessLearner(seed=args.seed, alpha=args.alpha, context=not args.no_context)
+    learner = ChessLearner(seed=args.seed, alpha=args.alpha, counts=not args.no_context)
     for position in train:
         learner.observe(position)
     g = learner.sleep()
@@ -172,11 +173,12 @@ def main():
     flat_bits = learner.history[0]["bits"] / len(train)
     search_bits = [h for h in learner.history if h["stage"] in ("flat", "chunk")][-1]["bits"] / len(train)
     held_chunks, held_flat = learner.search.held_out_bits(test)
-    held_plain = BoardSearch(train, learner.alpha).code_of(BoardSearch(test, learner.alpha)) / len(test)
+    held_plain = (BoardSearch(train, learner.alpha, counts=False).code_of(BoardSearch(test, learner.alpha, counts=False))
+                  / len(test))
     # The grammar's own code of a held-out position, given its analysis.
     held_grammar = -sum(learner.log_prob(p) for p in test) / len(test) / math.log(2)
-    context = [f"at least {m} {kind}" for kind, m in learner.features]
-    print(f"context of the read: {', '.join(context)}; held out without it {held_plain:.2f} bits/position")
+    context = ("each kind's count on earlier squares (0 to 10)" if learner.counts else "none")
+    print(f"context of the read: {context}; held out without it {held_plain:.2f} bits/position")
     print(f"{len(train)} positions, night {seconds:.0f}s: flat {flat_bits:.2f}, search {search_bits:.2f}, "
           f"consolidated {g.info['total bits'] / len(train):.2f} bits/position; held out: grammar {held_grammar:.2f}, chunks {held_chunks:.2f}, "
           f"flat {held_flat:.2f}; {g.K} symbols, {g.info['chunk types']} chunk types", flush=True)
@@ -221,34 +223,37 @@ def main():
                 gen_chunks += 1
                 pcs = pieces_of(node, position)
                 exact += any(all(p.get(sq) == t for sq, t in pcs.items()) for p in test_sets)
-    # The same checks for positions whose squares are drawn on their own
-    # (each in the same context: the pieces on earlier squares).
-    flat = BoardSearch(train, learner.alpha, learner.features)
+    # The same checks for positions drawn by the read alone, with no chunks:
+    # each square asked of each kind in turn, given the same counts.
+    flat = BoardSearch(train, learner.alpha, learner.counts)
+    p_yes = (flat.read[..., 1] + learner.alpha) / (flat.read.sum(axis=-1) + 2 * learner.alpha)
     flat_checks = Counter()
     for _ in range(args.n_gen):
-        pos = {}
+        pos, before = {}, np.zeros(len(KINDS), dtype=np.int64)
         for i in range(64):
-            c = flat.sq.get(scan_rows(pos, learner.features)[i]) or Counter({EMPTY: 1})
-            o = rng.choice(list(c), p=np.array(list(c.values())) / sum(c.values()))
-            if o != EMPTY:
-                pos[(i % 8, i // 8)] = o
+            rows = read_row(i, before)
+            for k in range(len(KINDS)):
+                if rng.random() < p_yes[k, rows[k]]:
+                    pos[(i % 8, i // 8)] = KINDS[k]
+                    before[k] += learner.counts
+                    break
         ok = plausibility(pos)
         for k, v in ok.items():
             flat_checks[k] += v
         flat_checks["passes every check"] += all(ok.values())
     gen = {"attempts": args.n_gen + failed, "collision or off the board": failed / (args.n_gen + failed),
            "checks": {k: v / args.n_gen for k, v in checks.items()},
-           "checks, squares drawn on their own": {k: v / args.n_gen for k, v in flat_checks.items()},
+           "checks, the read alone": {k: v / args.n_gen for k, v in flat_checks.items()},
            "generated chunks": gen_chunks,
            "generated chunks found in a held-out position": exact / max(gen_chunks, 1)}
     print(json.dumps(gen, indent=1), flush=True)
 
     results = {"train": len(train), "test": len(test), "seconds": seconds,
-               "bits per position": {"training, squares on their own": flat_bits,
+               "bits per position": {"training, the read alone": flat_bits,
                                      "training, after the search": search_bits,
                                      "training, TRELLIS v2 (consolidated)": g.info["total bits"] / len(train),
-                                     "held out, squares on their own": held_flat,
-                                     "held out, squares on their own, no context": held_plain,
+                                     "held out, the read alone": held_flat,
+                                     "held out, squares on their own (no counts)": held_plain,
                                      "held out, learned chunks": held_chunks,
                                      "held out, TRELLIS v2 (the grammar)": held_grammar},
                "context of the read": context, "alpha": learner.alpha,
@@ -297,12 +302,12 @@ def main():
     plt.close(fig)
 
     lines = [f"Chess positions (Lichess, both players 1800+, after ply 30): {len(train)} learned, {len(test)} held out.", "",
-             (f"The context of the square-by-square read (features of the pieces on earlier squares that pay for "
-              f"themselves): {', '.join(context)}. Dirichlet concentration "
-              f"α = {learner.alpha:g}. Without the context, squares on their own: {held_plain:.2f} held-out bits "
-              f"per position." if context else
-              f"The read has no context: every square is read on its own (α = {learner.alpha:g})."), "",
-             "| Bits per position | Squares on their own | TRELLIS v2 |", "|---|---|---|",
+             (f"The read asks, at each square, of each kind of piece in turn whether an element is anchored "
+              f"there on it, given how many pieces of that kind stand on earlier squares. Dirichlet concentration "
+              f"α = {learner.alpha:g}. Read without the counts, squares on their own: {held_plain:.2f} held-out bits "
+              f"per position." if learner.counts else
+              f"The read counts nothing: every square is read on its own (α = {learner.alpha:g})."), "",
+             "| Bits per position | The read alone, no chunks | TRELLIS v2 |", "|---|---|---|",
              f"| training | {flat_bits:.2f} | {g.info['total bits'] / len(train):.2f} (search alone: {search_bits:.2f}) |",
              f"| held out | {held_flat:.2f} | {held_grammar:.2f} (the grammar; the search's code with its chunks: {held_chunks:.2f}) |", "",
              f"Symbols: {g.K}; rule classes: {g.M}; chunk types: {g.info['chunk types']}. The grammar's size: "
@@ -310,9 +315,9 @@ def main():
              "| Chunk type | Count | Most frequent anchors |", "|---|---|---|"]
     for ct in chunk_types[:15]:
         lines.append(f"| `{ct['chunk']}` | {ct['count']} | {', '.join(f'{a} ({n})' for a, n in ct['anchors'].items())} |")
-    lines += ["", "| Generated positions (1,000) | TRELLIS v2 | Squares on their own |", "|---|---|---|"]
+    lines += ["", "| Generated positions (1,000) | TRELLIS v2 | The read alone, no chunks |", "|---|---|---|"]
     for k in gen["checks"]:
-        lines.append(f"| {k} | {gen['checks'][k]:.1%} | {gen['checks, squares drawn on their own'][k]:.1%} |")
+        lines.append(f"| {k} | {gen['checks'][k]:.1%} | {gen['checks, the read alone'][k]:.1%} |")
     lines.append(f"| samples rejected (a chunk off the board or on an occupied square) | "
                  f"{gen['collision or off the board']:.1%} | – |")
     lines.append(f"| generated chunks found, piece for piece, in a held-out position | "

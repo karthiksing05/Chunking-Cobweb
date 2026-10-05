@@ -47,9 +47,11 @@ def dm_code(groups: np.ndarray, keys: np.ndarray, weights: np.ndarray,
                  - np.sum(gammaln(cnt + alpha) - gammaln(alpha)))
 
 
-def beta_nats(n: np.ndarray, alpha: float) -> float:
-    """Code (nats) of the counts of a two-outcome row (Beta-binomial)."""
-    return float(gammaln(n.sum() + 2 * alpha) - gammaln(2 * alpha)
+def rows_nats(n: np.ndarray, alpha: float) -> float:
+    """Code (nats) of count rows (one per row of ``n``), each a
+    Dirichlet-multinomial over its columns."""
+    a = n.shape[-1] * alpha
+    return float(np.sum(gammaln(n.sum(axis=-1) + a) - gammaln(a))
                  - np.sum(gammaln(n + alpha) - gammaln(alpha)))
 
 

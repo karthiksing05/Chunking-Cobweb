@@ -4,9 +4,10 @@ legal move after which the position has the shortest code.
 
 The positions are those of ``run_chess.py`` (Lichess, January 2013, both
 players rated 1800+, the position after ply 30), with the move played next.
-The grammar's code is the structure search's plain code: the read's context
-chosen on the 4,000 training positions, the chunk moves found on them
-replayed on each candidate position. Reported on the 500 held-out positions:
+The grammar's code is the structure search's plain code: the read (which
+counts the pieces of each kind on earlier squares) learned on the 4,000
+training positions, the chunk moves found on them replayed on each
+candidate position. Reported on the 500 held-out positions:
 how often each rule picks the move that was played (top 1 and top 3),
 against a random legal move and a rule that captures the most valuable piece.
 
@@ -31,8 +32,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 
-from trellis2.chess import (BoardSearch, default_positions_path, load_positions,  # noqa: E402
-                            parse_fen, select_context)
+from trellis2.chess import BoardSearch, default_positions_path, load_positions, parse_fen  # noqa: E402
 
 MOVES = os.path.join(os.path.dirname(default_positions_path()), "positions_1800_ply30_moves.jsonl")
 
@@ -76,7 +76,7 @@ def extract(min_elo: int = 1800, ply: int = 30, min_plies: int = 40) -> None:
 
 def position_bits(search: BoardSearch, position, alpha: float) -> float:
     """Bits of one position under a search's counts, its chunk moves replayed."""
-    a = BoardSearch([position], alpha, search.features)
+    a = BoardSearch([position], alpha, search.counts)
     a.replay(search.moves)
     return search.code_of(a)
 
@@ -105,12 +105,11 @@ def main():
     test = [recs[i] for i in order[args.train:args.train + args.test]]
 
     t0 = time.time()
-    features = select_context(train, args.alpha)
-    full = BoardSearch(train, args.alpha, features)
+    full = BoardSearch(train, args.alpha)
     full.run(500)
-    models = {"shortest code: chunks and the read's context": full,
-              "shortest code: the read's context, no chunks": BoardSearch(train, args.alpha, features),
-              "shortest code: each square on its own": BoardSearch(train, args.alpha)}
+    models = {"shortest code: chunks and the read's counts": full,
+              "shortest code: the read's counts, no chunks": BoardSearch(train, args.alpha),
+              "shortest code: each square on its own": BoardSearch(train, args.alpha, counts=False)}
     value = {chess.PAWN: 1, chess.KNIGHT: 3, chess.BISHOP: 3, chess.ROOK: 5, chess.QUEEN: 9, chess.KING: 100}
     hits = {name: [0, 0] for name in models}
     rand, greedy, combined, n_moves = [], [], [], []
@@ -159,14 +158,13 @@ def main():
     rows["a capture that does not lose material, else the shortest code"] = (float(np.mean(combined)), None)
     results = {"train": args.train, "test": n, "seconds": time.time() - t0,
                "legal moves per position": float(np.mean(n_moves)),
-               "context of the read": [f"at least {m} {k}" for k, m in features],
                "chunk moves": [f"[{B} {rel} {C}]" for B, rel, C, _ in full.moves],
                "agreement with the move played (top 1, top 3)": rows}
     with open(os.path.join(args.out, "results.json"), "w") as f:
         json.dump(results, f, indent=1)
     lines = [f"Choosing White's move after ply 30 in {n} held-out Lichess positions (both players 1800+; "
              f"{np.mean(n_moves):.1f} legal moves on average). The grammar's code was learned from "
-             f"{args.train} positions (the read's context: {', '.join(results['context of the read'])}; "
+             f"{args.train} positions (the read counts each kind's pieces on earlier squares; "
              f"chunks: {', '.join(results['chunk moves']) or 'none'}).", "",
              "| Rule | Picks the move played | Among its top 3 |", "|---|---|---|"]
     for name, (a, b) in rows.items():

@@ -275,11 +275,14 @@ class Grammar:
     elem_rule_fine: Optional[np.ndarray] = None
     # Typed relations (None for sequences): Rel[c, r] = P(relation r | rule
     # class c, composite), over ``relations``. A board's top level is read
-    # square by square: Q[q, A] = P(top-level symbol A anchored at square q),
-    # with column K for an empty square.
+    # square by square, asking of each kind of piece in turn whether an
+    # element is anchored there on a piece of that kind: Q[k, q, n] = P(yes |
+    # square q, n pieces of kind k on earlier squares); T[k, A] = P(its
+    # symbol is A | its anchor is of kind k).
     relations: Optional[List[Hashable]] = None
     Rel: Optional[np.ndarray] = None
     Q: Optional[np.ndarray] = None
+    T: Optional[np.ndarray] = None
 
     def __post_init__(self):
         self.tok_index = {t: i for i, t in enumerate(self.vocab)}

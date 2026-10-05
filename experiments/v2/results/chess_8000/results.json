@@ -1,77 +1,65 @@
 {
  "train": 8000,
  "test": 560,
- "seconds": 2249.032814025879,
+ "seconds": 3166.2345259189606,
  "bits per position": {
-  "training, squares on their own": 77.9684534211119,
-  "training, after the search": 77.9197874700421,
-  "training, TRELLIS v2 (consolidated)": 77.98913667762855,
-  "held out, squares on their own": 74.50739231247236,
-  "held out, squares on their own, no context": 82.25861517080205,
-  "held out, learned chunks": 74.41648654217174
+  "training, the read alone": 75.10036317808711,
+  "training, after the search": 74.94015986478196,
+  "training, TRELLIS v2 (consolidated)": 74.86825263995853,
+  "held out, the read alone": 72.6240389725649,
+  "held out, squares on their own (no counts)": 82.29192507828691,
+  "held out, learned chunks": 72.45449792082988,
+  "held out, TRELLIS v2 (the grammar)": 72.40729152348257
  },
- "context of the read": [
-  "at least 2 bR",
-  "at least 1 wK",
-  "at least 1 bK",
-  "at least 2 wR",
-  "at least 1 wR",
-  "at least 1 wQ",
-  "at least 1 bQ",
-  "at least 7 bP"
- ],
+ "context of the read": "each kind's count on earlier squares (0 to 10)",
  "alpha": 0.001,
  "symbols": 14,
  "rule classes": 14,
  "chunk types (grammar)": 3,
- "model bits": 35129.17129081047,
- "data bits": 588783.9221302195,
+ "model bits": 17263.521249330177,
+ "data bits": 581682.4998703358,
  "search moves": [
-  "[wB N1 wP] x3628",
-  "[bP N1 bB] x4376"
+  "[wP N1 bP] x5604",
+  "[wB N1 wP] x2860"
  ],
  "chunk types": [
   {
-   "chunk": "[bP N1 bB]",
-   "count": 4376,
+   "chunk": "[wP N1 bP]",
+   "count": 5604,
    "anchors": {
-    "g6": 1202,
-    "e6": 922,
-    "b6": 589
+    "d4": 1329,
+    "e4": 877,
+    "e5": 790
    }
   },
   {
    "chunk": "[wB N1 wP]",
-   "count": 3628,
+   "count": 2860,
    "anchors": {
-    "g2": 809,
-    "d3": 704,
-    "b2": 397
+    "g2": 805,
+    "b2": 387,
+    "d3": 323
    }
   }
  ],
  "categories": [
   {
-   "symbol": "12",
-   "count": 53455.0,
+   "symbol": "0",
+   "count": 53451.0,
    "yields": [
     [
      "bP",
-     53454.0
-    ],
-    [
-     "bB",
-     1.0
+     53451.0
     ]
    ],
    "squares": [
     [
      "f7",
-     5804.0
+     5803.0
     ],
     [
      "h7",
-     5368.0
+     5367.0
     ],
     [
      "g7",
@@ -88,12 +76,12 @@
    ]
   },
   {
-   "symbol": "0",
-   "count": 52731.0,
+   "symbol": "1",
+   "count": 52733.0,
    "yields": [
     [
      "wP",
-     52731.0
+     52733.0
     ]
    ],
    "squares": [
@@ -120,55 +108,7 @@
    ]
   },
   {
-   "symbol": "11",
-   "count": 15725.0,
-   "yields": [
-    [
-     "wR",
-     15679.0
-    ],
-    [
-     "wB",
-     41.0
-    ],
-    [
-     "bK",
-     1.0
-    ],
-    [
-     "wQ",
-     1.0
-    ],
-    [
-     "wK",
-     1.0
-    ]
-   ],
-   "squares": [
-    [
-     "a1",
-     5380.0
-    ],
-    [
-     "f1",
-     4208.0
-    ],
-    [
-     "e1",
-     1622.0
-    ],
-    [
-     "h1",
-     1539.0
-    ],
-    [
-     "d1",
-     1335.0
-    ]
-   ]
-  },
-  {
-   "symbol": "6",
+   "symbol": "3",
    "count": 15706.0,
    "yields": [
     [
@@ -200,16 +140,48 @@
    ]
   },
   {
-   "symbol": "10",
-   "count": 11893.0,
+   "symbol": "9",
+   "count": 15677.0,
+   "yields": [
+    [
+     "wR",
+     15677.0
+    ]
+   ],
+   "squares": [
+    [
+     "a1",
+     5378.0
+    ],
+    [
+     "f1",
+     4198.0
+    ],
+    [
+     "e1",
+     1622.0
+    ],
+    [
+     "h1",
+     1539.0
+    ],
+    [
+     "d1",
+     1334.0
+    ]
+   ]
+  },
+  {
+   "symbol": "7",
+   "count": 11890.0,
    "yields": [
     [
      "bB",
      11888.0
     ],
     [
-     "wB",
-     5.0
+     "bN",
+     2.0
     ]
    ],
    "squares": [
@@ -219,7 +191,7 @@
     ],
     [
      "c8",
-     1739.0
+     1738.0
     ],
     [
      "g7",
@@ -236,27 +208,23 @@
    ]
   },
   {
-   "symbol": "1",
-   "count": 11353.0,
+   "symbol": "2",
+   "count": 11395.0,
    "yields": [
     [
      "wB",
-     11345.0
+     11391.0
     ],
     [
-     "wN",
-     4.0
-    ],
-    [
-     "wP",
+     "wR",
      2.0
     ],
     [
-     "bN",
+     "bB",
      1.0
     ],
     [
-     "bB",
+     "bP",
      1.0
     ]
    ],
@@ -267,7 +235,7 @@
     ],
     [
      "c1",
-     1276.0
+     1304.0
     ],
     [
      "e2",
@@ -284,30 +252,22 @@
    ]
   },
   {
-   "symbol": "9",
-   "count": 10759.0,
+   "symbol": "5",
+   "count": 10761.0,
    "yields": [
     [
      "bN",
-     10746.0
-    ],
-    [
-     "wN",
-     12.0
-    ],
-    [
-     "bK",
-     1.0
+     10761.0
     ]
    ],
    "squares": [
     [
      "f6",
-     2605.0
+     2601.0
     ],
     [
      "c6",
-     1668.0
+     1667.0
     ],
     [
      "d7",
@@ -324,38 +284,30 @@
    ]
   },
   {
-   "symbol": "3",
-   "count": 10538.0,
+   "symbol": "10",
+   "count": 10532.0,
    "yields": [
     [
      "wN",
-     10511.0
+     10530.0
     ],
     [
      "bN",
-     17.0
-    ],
-    [
-     "wK",
-     9.0
-    ],
-    [
-     "wQ",
-     1.0
+     2.0
     ]
    ],
    "squares": [
     [
      "f3",
-     2918.0
+     2915.0
     ],
     [
      "c3",
-     2392.0
+     2387.0
     ],
     [
      "d2",
-     1005.0
+     1006.0
     ],
     [
      "e2",
@@ -363,27 +315,31 @@
     ],
     [
      "b1",
-     455.0
+     454.0
     ]
    ]
   },
   {
-   "symbol": "7",
-   "count": 7998.0,
+   "symbol": "4",
+   "count": 8002.0,
    "yields": [
     [
      "bK",
-     7997.0
+     8000.0
     ],
     [
-     "wK",
+     "bP",
+     1.0
+    ],
+    [
+     "bB",
      1.0
     ]
    ],
    "squares": [
     [
      "g8",
-     5658.0
+     5660.0
     ],
     [
      "e8",
@@ -391,7 +347,7 @@
     ],
     [
      "c8",
-     402.0
+     403.0
     ],
     [
      "h8",
@@ -404,20 +360,12 @@
    ]
   },
   {
-   "symbol": "5",
-   "count": 7993.0,
+   "symbol": "8",
+   "count": 8000.0,
    "yields": [
     [
      "wK",
-     7989.0
-    ],
-    [
-     "wN",
-     3.0
-    ],
-    [
-     "bK",
-     1.0
+     8000.0
     ]
    ],
    "squares": [
@@ -444,22 +392,22 @@
    ]
   },
   {
-   "symbol": "8",
-   "count": 7214.0,
+   "symbol": "6",
+   "count": 7207.0,
    "yields": [
     [
      "bQ",
-     7205.0
+     7206.0
     ],
     [
-     "wQ",
-     9.0
+     "bP",
+     1.0
     ]
    ],
    "squares": [
     [
      "d8",
-     2598.0
+     2597.0
     ],
     [
      "c7",
@@ -480,18 +428,18 @@
    ]
   },
   {
-   "symbol": "4",
-   "count": 7157.0,
+   "symbol": "11",
+   "count": 7168.0,
    "yields": [
     [
      "wQ",
-     7157.0
+     7168.0
     ]
    ],
    "squares": [
     [
      "d1",
-     2279.0
+     2280.0
     ],
     [
      "c2",
@@ -513,65 +461,69 @@
   },
   {
    "symbol": "13",
-   "count": 4376.0,
+   "count": 5603.0,
    "yields": [
     [
-     "[bP N1 bB]",
-     4376.0
+     "[wP N1 bP]",
+     5603.0
     ]
    ],
    "squares": [
     [
-     "g6",
-     1202.0
+     "d4",
+     1329.0
     ],
     [
-     "e6",
-     922.0
+     "e4",
+     877.0
     ],
     [
-     "b6",
-     589.0
+     "e5",
+     790.0
     ],
     [
      "d5",
-     369.0
+     565.0
     ],
     [
-     "c7",
-     266.0
+     "c4",
+     381.0
     ]
    ]
   },
   {
-   "symbol": "2",
-   "count": 3628.0,
+   "symbol": "12",
+   "count": 2861.0,
    "yields": [
     [
      "[wB N1 wP]",
-     3628.0
+     2860.0
+    ],
+    [
+     "[wP N1 bP]",
+     1.0
     ]
    ],
    "squares": [
     [
      "g2",
-     809.0
-    ],
-    [
-     "d3",
-     704.0
+     805.0
     ],
     [
      "b2",
-     397.0
+     387.0
     ],
     [
-     "e3",
-     381.0
+     "d3",
+     323.0
     ],
     [
      "e2",
-     316.0
+     253.0
+    ],
+    [
+     "e3",
+     226.0
     ]
    ]
   }
@@ -580,22 +532,22 @@
   "attempts": 1002,
   "collision or off the board": 0.001996007984031936,
   "checks": {
-   "one king each": 0.996,
-   "no pawn on a back rank": 1.0,
-   "at most 8 pawns each": 0.82,
-   "at most 16 pieces each": 0.868,
-   "no more of any kind than at the start": 0.415,
-   "passes every check": 0.415
-  },
-  "checks, squares drawn on their own": {
    "one king each": 1.0,
-   "no pawn on a back rank": 1.0,
-   "at most 8 pawns each": 0.815,
-   "at most 16 pieces each": 0.872,
-   "no more of any kind than at the start": 0.384,
-   "passes every check": 0.384
+   "no pawn on a back rank": 0.998,
+   "at most 8 pawns each": 0.999,
+   "at most 16 pieces each": 0.999,
+   "no more of any kind than at the start": 0.999,
+   "passes every check": 0.998
   },
-  "generated chunks": 1009,
-  "generated chunks found in a held-out position": 0.9851337958374629
+  "checks, the read alone": {
+   "one king each": 1.0,
+   "no pawn on a back rank": 0.998,
+   "at most 8 pawns each": 1.0,
+   "at most 16 pieces each": 1.0,
+   "no more of any kind than at the start": 1.0,
+   "passes every check": 0.998
+  },
+  "generated chunks": 1028,
+  "generated chunks found in a held-out position": 0.9863813229571985
  }
 }

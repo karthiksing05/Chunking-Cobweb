@@ -49,22 +49,25 @@ def test_chess_star_and_forward_relations():
     assert rel == {"N1": (5, 1), "NE1": (6, 1), "E1": (6, 0), "ENE": (7, 1)}
 
 
-def test_chess_scan_code_covers_every_piece_once():
-    import numpy as np
-    from trellis2.chess import BoardMemory, parse_fen
+def test_chess_read_covers_every_piece_once():
+    from trellis2.chess import KIND_INDEX, KINDS, BoardMemory, parse_fen
     pos = parse_fen("6k1/8/5n2/8/8/8/5PPP/5RK1")
     # f1 rook with the g1 king to its east as one chunk; everything else alone.
     tops = [("c", (("wR", (5, 0)), "E1", ("wK", (6, 0))))]
     tops += [(pos[sq], sq) for sq in pos if sq not in ((5, 0), (6, 0))]
     mem = BoardMemory()
     mem.add(pos, tops)
-    q, el, w = mem._scan_arrays()
+    sq, el, cnt, w = mem._read_arrays()
     # 64 squares, minus the king's square, which the chunk anchored at f1 covers.
-    assert len(q) == 63 and (q == 6).sum() == 0
+    assert len(sq) == 63 and 6 not in sq
     assert sorted(mem.describe(e) for e in range(len(mem.kind)) if mem.is_root[e])[0] == "[wR E1 wK]"
-    s = np.zeros(len(mem.kind), dtype=np.int64)
-    counts = mem.scan_counts(s, 1)
-    assert counts.sum() == 63 and counts[:, 0].sum() == len(tops)
+    # Each read square answers "no" for every kind before the kind of its
+    # anchor, then "yes"; an empty square answers "no" for every kind.
+    answers = mem._answers()
+    assert answers[..., 1].sum() == len(tops) and answers[KIND_INDEX["wR"], :, 1].sum() == 1
+    anchors = [KIND_INDEX[pos[sq]] for sq in pos if sq != (6, 0)]
+    for k in range(len(KINDS)):
+        assert answers[k].sum() == (64 - len(pos)) + sum(a >= k for a in anchors)
 
 
 def test_characters_as_relational_trees():
@@ -113,14 +116,14 @@ def test_relational_tree_probability_matches_enumeration():
     assert math.isclose(CharacterMemory().log_prob(g, tree), math.log(total), rel_tol=1e-9)
 
 
-def test_chess_read_context_counts_earlier_pieces():
-    from trellis2.chess import parse_fen, scan_rows
+def test_chess_read_counts_earlier_pieces():
+    from trellis2.chess import KIND_INDEX, counts_before, parse_fen
     pos = parse_fen("6k1/8/5n2/8/8/8/5PPP/5RK1")
-    rows = scan_rows(pos, [("wK", 1), ("wP", 2)])
-    # a1..g1 have no white king before them; from h1 on, one king (bit 2).
-    assert rows[6] == 6 * 4 and rows[7] == 7 * 4 + 2
-    # Two white pawns stand before h2 (f2, g2): both bits set there.
-    assert rows[15] == 15 * 4 + 3 and rows[13] == 13 * 4 + 2
+    before = counts_before(pos)
+    # a1..g1 have no white king before them; from h1 on, one.
+    assert before[6, KIND_INDEX["wK"]] == 0 and before[7, KIND_INDEX["wK"]] == 1
+    # Two white pawns stand before h2 (f2, g2), none before f2.
+    assert before[15, KIND_INDEX["wP"]] == 2 and before[13, KIND_INDEX["wP"]] == 0
 
 
 def test_chess_chunk_sees_past_its_own_pieces():

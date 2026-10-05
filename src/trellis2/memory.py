@@ -27,7 +27,7 @@ import numpy as np
 
 from .cobweb import CobwebNode, CobwebTree, Instance
 from .data import Span, Tree
-from .mdl import beta_nats, dm_code
+from .mdl import dm_code, rows_nats
 
 BOS, EOS = "<s>", "</s>"
 BLANK = "-"
@@ -284,7 +284,7 @@ class Memory:
         """Code (nats) of the layout that does not depend on the categories:
         whether each experience is one tree or a forest, and where a forest ends."""
         n_mode, n_stop = self._layout_counts()
-        return beta_nats(n_mode, alpha) + beta_nats(n_stop, alpha)
+        return rows_nats(np.stack([n_mode, n_stop]), alpha)
 
     def top_level_tables(self, s: np.ndarray, K: int, alpha: float):
         """The grammar's top-level fields, and the count tables behind them
