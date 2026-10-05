@@ -13,11 +13,17 @@ composite also draws its relation, Rel[c,r], and the composition hierarchy
 describes compositions by their relation too. Sequences have one relation
 (concatenation), and the formulas above are unchanged.
 
+Where the domain's read gives each element a context (for a sentence, the
+word read just before the element), the rule class is chosen in its light:
+U[A,c] becomes Uc[A,x,c], which backs off to U[A,c] for a context seldom or
+never seen with A (``mdl.backoff_code``).
+
 with every table the Dirichlet-multinomial posterior predictive (concentration
 ``alpha``) of counts aggregated through the cuts. Cuts are chosen by minimum
 description length: the code length of the training derivations is the sum of
 Dirichlet-multinomial marginal likelihoods of those tables (a prequential code
-that does not depend on presentation order).
+that does not depend on presentation order; the context-conditioned rule
+choices are coded prequentially in learning order).
 """
 from __future__ import annotations
 
@@ -29,11 +35,15 @@ import numpy as np
 from scipy.special import gammaln
 
 from .cobweb import CobwebNode, CobwebTree
-from .mdl import dm_code, elias_delta_bits, split_bits  # noqa: F401  (dm_code is re-exported)
-from .memory import Memory
+from .mdl import backoff_code, dm_code, elias_delta_bits, ml_row_nats, split_bits  # noqa: F401  (dm_code is re-exported)
+from .memory import BOS, Memory
 
 LN2 = float(np.log(2.0))
 UNK = "<unk>"
+# How strongly a rule choice's context is trusted against its symbol's own
+# distribution (the weight of the latter in each context; see
+# ``mdl.backoff_code``): the options description length chooses among.
+CONTEXT_WEIGHTS = (1.0, 4.0, 16.0)
 COMPOSITION_ATTRS = ("kind", "tok", "L", "R")
 RELATIONAL_COMPOSITION_ATTRS = ("kind", "tok", "L", "rel", "R")
 
@@ -283,9 +293,15 @@ class Grammar:
     Rel: Optional[np.ndarray] = None
     Q: Optional[np.ndarray] = None
     T: Optional[np.ndarray] = None
+    # The read's context of each rule choice (None: none): Uc[A, x, c] =
+    # P(rule class c | symbol A, context ``contexts[x]``); an unseen context
+    # uses U.
+    contexts: Optional[List[Hashable]] = None
+    Uc: Optional[np.ndarray] = None
 
     def __post_init__(self):
         self.tok_index = {t: i for i, t in enumerate(self.vocab)}
+        self.context_index = {x: i for i, x in enumerate(self.contexts or [])}
         self.qk = 1.0 - self.pk
         if self.S_piece is None:
             self.S_piece = self.S
@@ -316,15 +332,21 @@ class Grammar:
         g = Grammar(vocab=self.vocab, S=self.S ** p, U=self.U ** p, pk=self.pk ** p,
                     Lt=self.Lt ** p, Rt=self.Rt ** p, E=self.E ** p, alpha=self.alpha,
                     p_stop=self.p_stop, p_whole=self.p_whole, S_piece=self.S_piece ** p,
-                    info=dict(self.info))
+                    info=dict(self.info), contexts=self.contexts,
+                    Uc=None if self.Uc is None else self.Uc ** p)
         g.qk = self.qk ** p
         g.log_stop, g.log_cont = self.log_stop * p, self.log_cont * p
         g.log_whole, g.log_forest = self.log_whole * p, self.log_forest * p
         return g
 
-    def lexical(self, token_id: int) -> np.ndarray:
+    def rules(self, context: Hashable = None) -> np.ndarray:
+        """(K, M): P(rule class | symbol) in the light of the read's context."""
+        x = self.context_index.get(context)
+        return self.U if x is None else self.Uc[:, x, :]
+
+    def lexical(self, token_id: int, context: Hashable = None) -> np.ndarray:
         """Inside probabilities of a single token, one per symbol."""
-        return self.U @ (self.pk * self.E[:, token_id])
+        return self.rules(context) @ (self.pk * self.E[:, token_id])
 
     def sample(self, rng: np.random.Generator, max_len: int = 40, whole_only: bool = False):
         """Sample (tokens, Tree with symbol labels) from the grammar; None if the
@@ -346,7 +368,9 @@ class Grammar:
             stack = [(top, -1, 0)]  # (symbol, parent node idx, side)
             while stack:
                 sym, parent, side = stack.pop()
-                c = int(rng.choice(self.M, p=self.U[sym]))
+                # Leaves come out left to right, so the word before this
+                # element is the last one emitted.
+                c = int(rng.choice(self.M, p=self.rules(tokens[-1] if tokens else BOS)[sym]))
                 idx = len(nodes)
                 if parent < 0:
                     roots.append(idx)
@@ -446,12 +470,17 @@ class _Elements:
     w: np.ndarray
     rel: np.ndarray       # relation id of composites (0 for primitives)
     n_rel: int            # 1 for sequences
+    ctx: Optional[np.ndarray]           # the read's context of each element (None: none)
+    contexts: Optional[List[Hashable]]  # the context of each context id
 
 
 def _elements(mem: Memory, leaves: Sequence[CobwebNode], rindex: TreeIndex,
               tok_index: Dict[str, int]) -> _Elements:
     relations = getattr(mem, "relations", None)
     rel_index = {r: i for i, r in enumerate(relations or [])}
+    values = mem.contexts()
+    contexts = sorted(set(values)) if values is not None else None
+    ctx_index = {x: i for i, x in enumerate(contexts or [])}
     return _Elements(
         leafpos=np.array([rindex.leafpos_of_id[l.id] for l in leaves], dtype=np.int64),
         prim=np.array([k == Memory.PRIMITIVE for k in mem.kind]),
@@ -462,6 +491,8 @@ def _elements(mem: Memory, leaves: Sequence[CobwebNode], rindex: TreeIndex,
         w=np.array(mem.weight, dtype=float),
         rel=np.array([rel_index.get(r, 0) for r in mem.relation], dtype=np.int64),
         n_rel=max(len(rel_index), 1),
+        ctx=None if values is None else np.array([ctx_index[x] for x in values], dtype=np.int64),
+        contexts=contexts,
     )
 
 
@@ -491,9 +522,11 @@ def _plain_pcfg_code(el: _Elements, V: int, alpha: float, mem: Memory
 
 
 def _factored_code(el: _Elements, s: np.ndarray, K: int, V: int, alpha: float,
-                   cleafpos: np.ndarray) -> Callable[[np.ndarray], float]:
+                   cleafpos: np.ndarray, weight: Optional[float] = None) -> Callable[[np.ndarray], float]:
     """Code length of the derivations under the factored grammar (start term
-    omitted: it does not depend on the composition cut)."""
+    omitted: it does not depend on the composition cut). With a context
+    ``weight``, each rule choice is coded in the light of its element's
+    context."""
     prim, comp = el.prim, ~el.prim
     sl, sr = s[el.left[comp]], s[el.right[comp]]
     kind = comp.astype(np.int64)
@@ -501,7 +534,9 @@ def _factored_code(el: _Elements, s: np.ndarray, K: int, V: int, alpha: float,
     def cost(leaf_to_node: np.ndarray) -> float:
         _, c = _compact(leaf_to_node[cleafpos])
         M = int(c.max()) + 1
-        nats = (dm_code(s, c, el.w, M, alpha)
+        rules = (dm_code(s, c, el.w, M, alpha) if weight is None
+                 else backoff_code(s, el.ctx, c, el.w, M, alpha, weight))
+        nats = (rules
                 + dm_code(c, kind, el.w, 2, alpha)
                 + dm_code(c[prim], el.tok[prim], el.w[prim], V, alpha)
                 + dm_code(c[comp], sl, el.w[comp], K, alpha)
@@ -603,15 +638,31 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
         leaf_of_key[key] = C.ifit(_composition_instance(key), weight_of[key])
     cindex = TreeIndex(C)
     cleafpos = np.array([cindex.leafpos_of_id[leaf_of_key[k].id] for k in keys], dtype=np.int64)
-    ccost = _factored_code(el, s, K, V, alpha, cleafpos)
     cstarts = {"evidence": evidence_cut(cindex, alpha=evidence_alpha),
                "leaves": [int(i) for i in cindex.node_of_leaf]}
-    ccut = cstarts["evidence"]
     info["C leaves"] = cindex.n_leaves
-    if search:
-        ccut, value, name, moves = search_cut(cindex, ccost, cstarts)
-        info["C search start"] = name
-        info["C search moves"] = moves
+    # Where the domain's read gives each element a context, the rule choices
+    # are coded in its light only if that shortens the code: the composition
+    # cut is searched without the context and with it, and the shortest code
+    # decides, together with how strongly a context is trusted.
+    best = None
+    for weight in [None] + ([CONTEXT_WEIGHTS[1]] if el.ctx is not None else []):
+        cost = _factored_code(el, s, K, V, alpha, cleafpos, weight)
+        cut, found = cstarts["evidence"], None
+        if search:
+            cut, _, name, moves = search_cut(cindex, cost, cstarts)
+            found = (name, moves)
+        for w_ in [weight] if weight is None else CONTEXT_WEIGHTS:
+            value = _factored_code(el, s, K, V, alpha, cleafpos, w_)(cindex.assign(cut))
+            if best is None or value < best[0] - 1e-9:
+                best = (value, w_, cut, found)
+    _, weight, ccut, found = best
+    ccost = _factored_code(el, s, K, V, alpha, cleafpos, weight)
+    if found is not None:
+        info["C search start"], info["C search moves"] = found
+    info["read context weight"] = weight if weight is not None else 0.0
+    if weight is None:
+        el.ctx = None
     rule_nodes, c = _compact(cindex.assign(ccut)[cleafpos])
     M = len(rule_nodes)
 
@@ -620,6 +671,9 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
     prim, comp = el.prim, ~el.prim
     n_U = np.zeros((K, M))
     np.add.at(n_U, (s, c), w)
+    if el.ctx is not None:
+        n_Uc = np.zeros((K, len(el.contexts), M))
+        np.add.at(n_Uc, (s, el.ctx, c), w)
     n_prim = np.bincount(c[prim], weights=w[prim], minlength=M)
     n_comp = np.bincount(c[comp], weights=w[comp], minlength=M)
     n_E = np.zeros((M, V))
@@ -644,6 +698,9 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
     # The receiver also needs the grammar's size; Elias codes make the total
     # an actual message length.
     info["structure bits"] = elias_delta_bits(K) + elias_delta_bits(M)
+    if el.contexts is not None:
+        # Which of the context options was chosen.
+        info["structure bits"] += float(np.log2(1 + len(CONTEXT_WEIGHTS)))
     info["total bits"] = info["bits (factored grammar)"] + info["structure bits"]
     info["bits per sentence"] = info["total bits"] / max(len(mem.experiences), 1)
     rows = lambda table: [dict(enumerate(r)) for r in np.atleast_2d(table)]
@@ -651,8 +708,15 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
               + ([(rows(n_Rel), el.n_rel)] if relational else [])
               + [(rows(n_U), M), (rows(np.stack([n_prim, n_comp], axis=1)), 2),
                  (rows(n_E), V), (rows(n_L), K), (rows(n_R), K)])
-    model_bits, data_bits = split_bits(tables, alpha)
-    info["model bits"] = model_bits + info["structure bits"]
+    if el.ctx is None:
+        model_bits, data_bits = split_bits(tables, alpha)
+        info["model bits"] = model_bits + info["structure bits"]
+    else:
+        # The rule choices are coded in their contexts: the data bits are
+        # those of the best-fitting context rows, the model bits the rest.
+        tables[len(top_counts) + int(relational)] = (rows(n_Uc.reshape(-1, M)), M)
+        data_bits = sum(ml_row_nats([v for v in r.values() if v > 0]) for rws, _ in tables for r in rws) / LN2
+        info["model bits"] = info["total bits"] - data_bits
     info["data bits"] = data_bits
     info["symbols"] = K
     info["rule classes"] = M
@@ -696,4 +760,7 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
         rule_keys=rule_keys,
         relations=list(mem.relations) if relational else None,
         Rel=normalize(n_Rel) if relational else None,
+        contexts=None if el.ctx is None else el.contexts,
+        Uc=(None if el.ctx is None else
+            (n_Uc + weight * normalize(n_U)[:, None, :]) / (n_Uc.sum(axis=2, keepdims=True) + weight)),
     )

@@ -301,6 +301,13 @@ class CharacterMemory(Memory):
             return self.token[e]
         return f"{self.relation[e]}{self.describe(self.left[e])}{self.describe(self.right[e])}"
 
+    def contexts(self):
+        """None: a character is parts placed in space, not a sequence, so no
+        rule choice is made in the light of what was read before it. (Read
+        in its IDS prefix order, or given each part's slot, the code
+        shortens but more generated characters misplace a component.)"""
+        return None
+
     def sample(self, grammar, rng: np.random.Generator, max_depth: int = 12, **kw):
         """A relational tree read off the grammar: one tree from the start row."""
         g = grammar

@@ -187,8 +187,10 @@ def forest_grammar(seed, p_stop=0.6, p_whole=0.4):
 def brute_force_forests(g, tokens):
     ids = g.token_ids(tokens)
     n = len(tokens)
-    rule = np.einsum("ac,c,cb,cd->abd", g.U, g.qk, g.Lt, g.Rt)
-    lex = g.U @ (g.pk[:, None] * g.E)
+    # A span's rule choice is made in the light of the word before it.
+    U = [g.rules(tokens[i - 1] if i else "<s>") for i in range(n)]
+    rule = [np.einsum("ac,c,cb,cd->abd", u, g.qk, g.Lt, g.Rt) for u in U]
+    lex = [u @ (g.pk[:, None] * g.E) for u in U]
     total, span_mass, label_mass, best = 0.0, {}, {}, (-1.0, None)
     top_mass = {}
     for roots, split in all_forests(n):
@@ -204,10 +206,10 @@ def brute_force_forests(g, tokens):
                     p *= g.S_piece[lab[r]]
             for (i, j) in spans:
                 if j - i == 1:
-                    p *= lex[lab[(i, j)], ids[i]]
+                    p *= lex[i][lab[(i, j)], ids[i]]
                 else:
                     k = split[(i, j)]
-                    p *= rule[lab[(i, j)], lab[(i, k)], lab[(k, j)]]
+                    p *= rule[i][lab[(i, j)], lab[(i, k)], lab[(k, j)]]
             total += p
             if p > best[0]:
                 best = (p, (tuple(roots), tree.brackets(), lab))
@@ -219,9 +221,20 @@ def brute_force_forests(g, tokens):
     return total, span_mass, label_mass, best, top_mass
 
 
-@pytest.mark.parametrize("n,seed", [(2, 4), (3, 5), (4, 6)])
-def test_forest_inside_and_posteriors_match_enumeration(n, seed):
-    g = forest_grammar(seed)
+def context_grammar(seed, p_stop=0.6, p_whole=0.4):
+    """A forest grammar whose rule choices depend on the word before the
+    element; "w2" is a context it has never seen, which falls back to U."""
+    g = forest_grammar(seed, p_stop, p_whole)
+    Uc = np.random.default_rng(seed + 200).random((g.K, 3, g.M)) + 0.05
+    return Grammar(vocab=g.vocab, S=g.S, U=g.U, pk=g.pk, Lt=g.Lt, Rt=g.Rt, E=g.E, alpha=0.0,
+                   p_stop=p_stop, p_whole=p_whole, S_piece=g.S_piece, contexts=["<s>", "w0", "w1"],
+                   Uc=Uc / Uc.sum(axis=-1, keepdims=True))
+
+
+@pytest.mark.parametrize("n,seed,make", [(2, 4, "forest"), (3, 5, "forest"), (4, 6, "forest"),
+                                         (3, 9, "context"), (4, 10, "context")])
+def test_forest_inside_and_posteriors_match_enumeration(n, seed, make):
+    g = forest_grammar(seed) if make == "forest" else context_grammar(seed)
     tokens = [f"w{(seed + i) % 3}" for i in range(n)]
     total, span_mass, label_mass, _, top_mass = brute_force_forests(g, tokens)
     chart = Chart(g, tokens)
@@ -236,8 +249,9 @@ def test_forest_inside_and_posteriors_match_enumeration(n, seed):
                 assert mu[i, j, a] == pytest.approx(expected, abs=1e-10)
 
 
-def test_forest_viterbi_finds_the_most_probable_analysis():
-    g = forest_grammar(8, p_stop=0.5)
+@pytest.mark.parametrize("make", ["forest", "context"])
+def test_forest_viterbi_finds_the_most_probable_analysis(make):
+    g = forest_grammar(8, p_stop=0.5) if make == "forest" else context_grammar(8, p_stop=0.5)
     tokens = ["w1", "w0", "w2", "w2"]
     _, _, _, (_, (roots, brackets, lab)), _ = brute_force_forests(g, tokens)
     got = Chart(g, tokens).viterbi_tree()
@@ -245,8 +259,9 @@ def test_forest_viterbi_finds_the_most_probable_analysis():
     assert all(got.label[s] == lab[s] for s in got.label)
 
 
-def test_forest_samples_match_posteriors():
-    g = forest_grammar(2, p_stop=0.5)
+@pytest.mark.parametrize("make", ["forest", "context"])
+def test_forest_samples_match_posteriors(make):
+    g = forest_grammar(2, p_stop=0.5) if make == "forest" else context_grammar(2, p_stop=0.5)
     chart = Chart(g, ["w0", "w2", "w1", "w1"])
     rng = np.random.default_rng(1)
     counts = {}

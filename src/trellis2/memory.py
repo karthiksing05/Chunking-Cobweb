@@ -77,19 +77,22 @@ class Memory:
       besides its chunk context (its context window), and ``describe``;
     * the top level, how an experience's top-level elements are laid out and
       transmitted: ``top_level_nats``, ``layout_nats``, ``top_level_tables``;
+    * ``contexts``: what the read has seen just before each element, in whose
+      light its rule class is chosen (None: nothing);
     * ``sample`` and ``log_prob``: draw an experience from the grammar and
       code one, in the same reading order.
 
     The chunk context, the representation hierarchy, the cuts, the
     composition hierarchy and the grammar are shared. This class is the
-    domain of sentences: tokens in a row, read left to right.
+    domain of sentences: tokens in a row, read left to right, each rule
+    choice in the light of the word before the element.
     """
 
     PRIMITIVE, COMPOSITE = 0, 1
 
     def __init__(self, context_width: int = 1, spine_depth: int = 2,
                  granularities: int = 2, composition_ref: bool = False,
-                 sentence_bags: bool = False):
+                 sentence_bags: bool = False, previous_word: bool = True):
         self.context_width = context_width
         self.spine_depth = spine_depth
         self.granularities = granularities
@@ -97,6 +100,9 @@ class Memory:
         # Whole-sentence context: a bag of every token before the element and
         # one of every token after it ("all levels of content before and after").
         self.sentence_bags = sentence_bags
+        # Whether each rule choice is made in the light of the word read just
+        # before the element (``contexts``).
+        self.previous_word = previous_word
         self.attrs = representation_attrs(context_width, spine_depth, granularities,
                                           composition_ref, sentence_bags)
         self.kind: List[int] = []
@@ -174,6 +180,15 @@ class Memory:
         (inside-outside)."""
         from .chart import Chart
         return Chart(grammar, experience).log_prob
+
+    def contexts(self) -> Optional[List[Hashable]]:
+        """What the read has seen just before each element, in whose light its
+        rule class is chosen: for a sentence, the word before the element's
+        span (BOS at the start). None: every choice is made the same way."""
+        if not self.previous_word:
+            return None
+        return [self.experiences[s][i - 1] if i > 0 else BOS
+                for s, (i, _) in zip(self.experience_of, self.span)]
 
     def vocabulary(self) -> List[str]:
         return sorted({t for t in self.token if t is not None})

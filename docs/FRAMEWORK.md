@@ -31,7 +31,7 @@ This document explains the whole framework: what is stored, how the grammar is f
 
 - **Concepts and chunks are two aspects of one representation.** "the dog" is a chunk, made of *the* and *dog*. It is also an instance of a concept, the things that can be the subject of *saw*. TRELLIS v2 records both aspects of every element and lets each organize its own hierarchy.
 - **Two hierarchies, each holding primitives and composites.** The *representation hierarchy* groups elements by behaviour. The *composition hierarchy* groups them by make-up. Single words and multi-word chunks live in the same trees. There are no separate trees for words, phrases or non-constituents. Both are load-bearing. Read straight off the unsupervised search's analyses, the grammar's generations break the target grammar 47–56% of the time on the TERM corpora; once the same analyses are consolidated into the two hierarchies and re-analysed, 0.1–4.3% ([section 10](#learning-from-sentences-alone)).
-- **A domain brings its context window, its relations and its reading order.** What the representation hierarchy sees around an element depends on the data: the word on either side in a sentence, a star of rays and knight jumps on a chess board, a component's slot in a character. What joins a chunk's parts depends on it too: order in a sentence, a direction and a distance on a board, a spatial operator in a character. So does the order in which a whole experience is read: a sentence left to right, as one tree or a forest of pieces; a board square by square. Everything else is shared: the chunk context, both hierarchies, their cuts, the grammar and its code, parsing, generation and learning ([section 13](#one-framework-three-domains)).
+- **A domain brings its context window, its relations and its reading order.** What the representation hierarchy sees around an element depends on the data: the word on either side in a sentence, a star of rays and knight jumps on a chess board, a component's slot in a character. What joins a chunk's parts depends on it too: order in a sentence, a direction and a distance on a board, a spatial operator in a character. So does the order in which a whole experience is read, and what each decision sees of what has been read before it: a sentence left to right, as one tree or a forest of pieces, each rule choice in the light of the word before it; a board square by square, each square in the light of how many pieces of each kind are already placed. Everything else is shared: the chunk context, both hierarchies, their cuts, the grammar and its code, parsing, generation and learning ([section 13](#one-framework-three-domains)).
 - **The grammar is a cut through each hierarchy.** A cut is a set of concepts that partitions the elements. The cut through the representation hierarchy gives the categories (symbols); the cut through the composition hierarchy gives the chunk types (rule classes).
 - **One model for parsing, generation and learning.** The grammar is a normalized probabilistic grammar. The parser computes posteriors under it, generation samples from it, and its code lengths decide the cuts. There are no separate pools, filters or fallbacks.
 - **Description length replaces thresholds.** A category, a chunk type or a structure exists only if it shortens the description of the data, including the description of the grammar itself. "Minimize chunks while preserving performance" is the learning objective, not a heuristic.
@@ -103,6 +103,7 @@ $$P(A \to B\,C) = \sum_c U[A,c]\; (1 - p_k[c])\; L[c,B]\; R[c,C]$$
 | `S[A]`, p<sub>whole</sub> | the category of a sentence's root when the sentence is one tree, and how often it is |
 | `S_piece[A]`, stop | the category of each piece of a partial analysis (a forest of two or more pieces), and whether another piece follows |
 | `Rel[c, r]` | in a domain with typed relations (chess, characters), which relation joins the two parts |
+| `Uc[A, x, c]` | where the read gives each element a context x (in a sentence, the word before the element), the rule class chosen in its light; it backs off to `U[A, c]` for a context seldom seen with A, and is used only where it shortens the code |
 | `Q[k, q, n]`, `T[k, q, A]` | on a board, whether an element is anchored on a piece of kind k at the square q being read, given n pieces of that kind on earlier squares; and its category |
 
 A sentence is one tree or, when the grammar cannot derive it whole, a partial analysis: a forest of two or more pieces. Both are proper derivations (graceful failure in the sense of the paper, and GRIDS-style partial parses), but they are coded apart, with a row for the roots of whole sentences and a row for the pieces of forests. With one row for both, the start category mixed whole sentences with leftover pieces such as *together*, and the grammar generated those pieces as sentences ([section 11](#simple-english-does-the-grammar-generate-coherent-sentences)).
@@ -110,6 +111,8 @@ A sentence is one tree or, when the grammar cannot derive it whole, a partial an
 Rule classes share their child distributions. That is where the grammar generalizes: a rule class that has seen *Det N* and *Det AdjP* lets every determiner combine with every noun phrase body.
 
 Every table is the posterior predictive of a Dirichlet-multinomial with a sparse concentration, α = 0.001: (count + α) / (total + α × alphabet size). The model is normalized by construction, so a grammar that over-generates pays for it in code length.
+
+**What the read has just seen.** A rule choice can depend on more than its category. In a sentence it is made in the light of the word before the element: after *a*, the noun phrase that follows is made one way, after *very*, another, even when both words sit in one category. The context of each element is observable (in the chart, the word before a span is part of the input), so parsing stays exact. `Uc[A, x, c]` = (n(A, x, c) + β U[A, c]) / (n(A, x) + β): a context's own counts, backed off to the category's distribution with weight β. Description length decides whether the context is used at all, and with which weight (β ∈ {1, 4, 16}), comparing codes of the same derivations; the rule choices are then coded prequentially, each from the choices before it in learning order. With little data the context does not pay; on simple English it does, by 14% of the whole code.
 
 ## 6. Description length
 
@@ -124,7 +127,7 @@ The learner measures a grammar by the bits needed to transmit the training data 
 
 **Choosing the symbols.** The search over cuts of the representation hierarchy starts from two cuts: the evidence-optimal cut, found by a bottom-up dynamic program, and a fine cut. It hill-climbs from each with two moves: *refine* (replace a concept by its children) and *collapse* (replace concepts by their common ancestor). It keeps the shorter code. **Bayesian model merging** (Stolcke & Omohundro 1994) then joins any two symbols, siblings or not, while the code shrinks. Merging is how subject and object noun phrases became one symbol in Figure 3.
 
-**Choosing the rule classes.** The composition hierarchy is rebuilt over the attested compositions in symbol terms. Its cut is searched the same way, under the code of the full factored grammar.
+**Choosing the rule classes.** The composition hierarchy is rebuilt over the attested compositions in symbol terms. Its cut is searched the same way, under the code of the full factored grammar, once with the rule choices coded in their contexts and once without; the shorter code wins.
 
 ## 7. Parsing and generation
 
@@ -228,7 +231,7 @@ The learned grammar chunks subject and verb first, and adjectives from the left 
 
 ### Learning from analysed sentences
 
-Five seeds, 320 training sentences. Parsing omission is 0.0% in every condition except LARGE (0.7%); v1 had 0–10%. Generation commission is 0.2% (SMALL), 0.9% (MED), 14.2% (LARGE), 0.3%, 2.4% and 2.7% (TERM_LOW/MED/HIGH), with 54–100% novelty. LARGE is the open case: relative clauses are rare, and at 320 sentences they stay merged with adjective phrases; commission falls with more data.
+Five seeds, 320 training sentences. Parsing omission is 0.0% in every condition except LARGE (0.7%); v1 had 0–10%. Generation commission is 0.2% (SMALL), 0.9% (MED), 14.2% (LARGE), 0.5%, 2.4% and 2.7% (TERM_LOW/MED/HIGH), with 54–100% novelty. LARGE is the open case: relative clauses are rare, and at 320 sentences they stay merged with adjective phrases; commission falls with more data. Coding each rule choice in the light of the word before it would halve LARGE's commission (7.6%), but 320 sentences do not pay for that context, and description length leaves it out.
 
 ![Supervised learning curves](../experiments/v2/results/main/learning_curves.png)
 
@@ -259,11 +262,11 @@ The two hierarchies matter here. The grammar read directly off the search's anal
 
 *Figure 11. The incremental learner perceives the training sentences one at a time and sleeps at 10, 20, 40, 80, 160 and 320 sentences. At each of those points a fresh batch learner sleeps once over the same sentences (mean of two seeds; band = range).*
 
-- **Early nights coincide.** Up to 40 sentences, restarting from word classes gives the shortest code (the stored analyses win none of the 20 nights at 20–40 sentences), and the two learners are identical.
-- **Then the stored analyses pay.** From 80 sentences on they win 16 of 30 nights (SMALL excluded, where both give the same grammar). At 80 and 160 sentences the incremental learner's training code is shorter or equal in all ten condition–size cells. Its commission is lower in nine, by 10–46 points in four (for example TERM_HIGH at 80 sentences: 31.9% against 78.0%).
-- **At 320 sentences** the two are equivalent (commission within 1.3 points).
+- **Early nights nearly coincide.** Up to 40 sentences, restarting from word classes almost always gives the shortest code (the stored analyses win one of the 20 nights at 20–40 sentences), and the two learners are identical but for that night.
+- **Then the stored analyses pay.** From 80 sentences on they win 16 of 30 nights (SMALL excluded, where both give the same grammar). At 80 and 160 sentences the incremental learner's training code is shorter or equal in nine of ten condition–size cells. Its commission is lower in nine, by 5–45 points in four (for example TERM_HIGH at 80 sentences: 31.9% against 76.4%).
+- **At 320 sentences** the two are equivalent (commission within 1.4 points).
 - **Perception.** By 160 sentences each day's sentences are parsed almost completely (1.00–1.01 top-level chunks per sentence), at close to the held-out rate in bits.
-- **Cost.** A night costs about as much as a batch sleep over the same sentences, and the six nights together 1.2–1.6 times one batch sleep at 320.
+- **Cost.** The six nights together cost 1.5–2.6 times one batch sleep at 320 (measured with other experiments sharing the machine).
 
 Detailed tables: [`V2_DESIGN.md`](V2_DESIGN.md), `experiments/v2/results/{main,unsupervised,incremental,search}/summary.md`.
 
@@ -280,12 +283,12 @@ Nothing in the framework is specific to the paper's corpora. Four new domains te
 | right-branching trees | 39.0% | 55.7% | 57.3% | – |
 | left-branching trees | 82.9% | 87.6% | 75.0% | – |
 | unigram / bigram tag models | – | – | – | 33.4 / 27.2 |
-| TRELLIS v2 from tags alone | 55.3% | 67.6% | **33.1%** | 30.1 |
-| TRELLIS v2 from binarized gold trees | 19.1% | 41.3% | 20.7% | 30.9 |
+| TRELLIS v2 from tags alone | 48.3% | 62.5% | **26.2%** | 27.2 |
+| TRELLIS v2 from binarized gold trees | 16.0% | 39.1% | 15.7% | **26.6** |
 
-- **From tags alone, TRELLIS v2 finds chunks.** It recovers two thirds of the gold base phrases, against 43% for right-branching trees and 79% for the supervised model. Its chunks are noun groups (`DT NN`, `JJ JJ NN`, `NNP NNP`), verb groups (`MD VB`, `TO VB`, `VBD VBN`) and subject–verb pairs (`NN VBD`).
+- **Each rule choice sees the tag before it.** As in English (below), description length chooses to code each rule choice in the light of the tag read just before the element. Before it did (from tags alone: 55.3% bracket omission, 33.1% base-phrase omission, 30.1 held-out bits; from gold trees: 19.1%, 20.7%, 30.9 bits), the grammar was a weaker sequence model than tag bigrams; now the grammar learned from gold trees codes held-out sentences in fewer bits than a tag bigram, and the one learned from tags alone in as few.
+- **From tags alone, TRELLIS v2 finds chunks.** It recovers three quarters of the gold base phrases, against 43% for right-branching trees and 84% for the supervised model. Its chunks are noun groups (`DT NN`, `JJ JJ NN`, `NNP NNP`), verb groups (`MD VB`, `TO VB`, `VBD VBN`) and subject–verb pairs (`NN VBD`).
 - **It does not find sentence structure.** On 434 sentences no larger chunk pays for itself, so analyses stay forests of about five chunks, and full-tree bracket agreement is below that of right-branching trees.
-- **The grammar is a weaker sequence model than tag bigrams**, with or without supervision. Its ten or so categories over 32 tags make the strong independence assumptions of a small probabilistic grammar. The Dirichlet concentration is not the cause: the supervised grammar's training code prefers α = 0.01 to 0.001 on this data, but its held-out bits barely change.
 
 - **More data** (training on every other sentence of up to 15 or 20 tags, about 1,100 or 1,900 sentences; the same held-out sentences) gives more categories and chunk types (34 at 1,900 sentences) and slightly shorter held-out codes (29.6 bits per sentence), but no more linguist-like full trees (bracket omission 51–52%). A night grows from two minutes to about an hour.
 
@@ -500,7 +503,7 @@ A domain says what an experience is. A subclass of `Memory` supplies the first f
 |---|---|---|---|
 | its elements and how two parts join (`add`, `relations`) | tokens, joined in order | components, joined by ten spatial operators (a three-part operator is two joins) | pieces, joined by 32 forward relations: a direction and a distance, or a knight's jump |
 | its context window, what the representation hierarchy sees besides chunk context (`surface`) | the token on either side; first and last token; kind | the slot (the operator that places it, and which part it is); first and last component; its own operator | the star (the first piece along each queen ray and on each knight square); the anchor piece; its square |
-| its reading order, how a whole experience is laid out and coded (`top_level_nats`, `layout_nats`, `top_level_tables`) | left to right, as one tree or a forest of pieces | one tree | square by square, asking of each kind of piece in turn, given how many of that kind stand on earlier squares |
+| its reading order, how a whole experience is laid out and coded (`top_level_nats`, `layout_nats`, `top_level_tables`), and what each decision sees of what was read before it (`contexts`) | left to right, as one tree or a forest of pieces; each rule choice in the light of the word before it | one tree | square by square, asking of each kind of piece in turn, given how many of that kind stand on earlier squares |
 | how an experience is drawn from the grammar and coded (`sample`, `log_prob`) | the grammar's sampler; the inside pass over every analysis | a tree from the start row; the inside pass over the known structure | the read, square by square; at each anchor, the category given the anchor's kind and square, and the inside pass over the element |
 | a structure search, for experiences that arrive without analyses (a `Learner`) | `UnsupervisedLearner`: chunk-and-merge beam from word classes, consolidation, re-analysis | not needed: a character's structure is given | `ChessLearner`: chunk moves under the read's code |
 
@@ -541,7 +544,7 @@ cd cobweb-private && cmake -S . -B build && cmake --build build --target cobweb_
 Every test and experiment (times on a 12-core laptop):
 
 ```
-python -m pytest tests/trellis2 -q                                          # 44 tests, seconds
+python -m pytest tests/trellis2 -q                                          # 49 tests, seconds
 python experiments/v2/run_synthetic.py --out experiments/v2/results/main    # supervised curves, ~6 min
 python experiments/v2/plot_learning_curves.py experiments/v2/results/main
 python experiments/v2/run_unsupervised.py --seeds 13,17                     # ~10 min
@@ -563,7 +566,7 @@ The paper's corpora are read from `../trellis_v1/data` (the v1 snapshot), with `
 ## 14. Limitations and next steps
 
 - **Sentence-level structure without supervision.** On the paper's corpora the search builds complete analyses. On characters (as sequences) it stops at forests of local chunks although the gold structures code shorter: a search problem, from categories that cannot see a component's slot. On real-text tags it stops at forests because no description we know makes sentence structure pay at this scale ([section 11](#what-the-new-domains-show)). On simple English about a third of sentences stay forests, and a forest's pieces are generated independently.
-- **A weak sequence model on real data.** With about ten categories, the grammar makes the strong independence assumptions of a small probabilistic grammar, and tag bigrams describe real text more compactly.
+- **A small grammar on real data.** With about ten categories the grammar makes strong independence assumptions; coding each rule choice in the light of the tag before it brings it level with a tag bigram (from tags alone) or below (from gold trees), but not further.
 - **Counting and chunks compete on a board.** Once the read counts material, castling and fianchettos no longer pay as chunks at 4,000 positions (the fianchetto returns at 8,000): where pieces stand given how many of each are placed is most of what a position's code can use.
 - **Scale.** Each night runs three full consolidations. With the compiled Cobweb a night on 320 synthetic sentences takes 6–85 seconds (about half the time before it); before it, a night took about an hour for 1,900 treebank sentences or 2,000 characters. The search, the grammar read-out and the charts are still Python.
 - **Nights repeat the batch search.** The search can only merge categories, so every night may start over from word classes. Split moves (refining a category together with the chunk categories built on it) would let nights continue from the stored analyses.

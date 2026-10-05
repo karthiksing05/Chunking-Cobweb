@@ -3,8 +3,8 @@
   "condition": "small",
   "seed": 13,
   "unsupervised": {
-   "total_bits": 3250.6489661769006,
-   "model_bits": 218.2297615169584,
+   "total_bits": 3252.6489661769,
+   "model_bits": 220.2297615169584,
    "data_bits": 3032.4192046599455,
    "symbols": 6,
    "rule_classes": 12,
@@ -24,7 +24,7 @@
      "move": "start",
      "bits": 6793.816789876496,
      "sentences": 320.0,
-     "seconds": 0.014593124389648438
+     "seconds": 0.009988784790039062
     },
     {
      "night": 0.0,
@@ -32,21 +32,21 @@
      "move": "chunk and merge from 6 word classes",
      "bits": 3189.080977415414,
      "sentences": 320.0,
-     "seconds": 5.446916818618774
+     "seconds": 7.432827949523926
     },
     {
      "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 3250.6489661769006,
+     "bits": 3252.6489661769,
      "sentences": 320.0,
-     "seconds": 8.387310028076172
+     "seconds": 15.90167498588562
     }
    ]
   },
   "supervised": {
-   "total_bits": 3250.6489661769006,
-   "model_bits": 218.2297615169584,
+   "total_bits": 3252.6489661769,
+   "model_bits": 220.2297615169584,
    "data_bits": 3032.4192046599455,
    "symbols": 6,
    "rule_classes": 12,
@@ -59,14 +59,14 @@
    "gen_commission": 0.0010000000000000009,
    "novelty": 0.537
   },
-  "seconds": 9.727091073989868
+  "seconds": 20.072181940078735
  },
  {
   "condition": "small",
   "seed": 17,
   "unsupervised": {
-   "total_bits": 3251.7811764178005,
-   "model_bits": 218.2336840576758,
+   "total_bits": 3253.7811764178005,
+   "model_bits": 220.2336840576758,
    "data_bits": 3033.5474923601237,
    "symbols": 6,
    "rule_classes": 12,
@@ -86,7 +86,7 @@
      "move": "start",
      "bits": 6794.948768222437,
      "sentences": 320.0,
-     "seconds": 0.017037153244018555
+     "seconds": 0.012243986129760742
     },
     {
      "night": 0.0,
@@ -94,21 +94,21 @@
      "move": "chunk and merge from 6 word classes",
      "bits": 3190.2129557613607,
      "sentences": 320.0,
-     "seconds": 5.439841032028198
+     "seconds": 7.513185024261475
     },
     {
      "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 3251.7811764178005,
+     "bits": 3253.7811764178005,
      "sentences": 320.0,
-     "seconds": 11.617521286010742
+     "seconds": 27.974220037460327
     }
    ]
   },
   "supervised": {
-   "total_bits": 3251.7811764177955,
-   "model_bits": 218.2336840576758,
+   "total_bits": 3253.781176417795,
+   "model_bits": 220.2336840576758,
    "data_bits": 3033.5474923601237,
    "symbols": 6,
    "rule_classes": 12,
@@ -121,14 +121,14 @@
    "gen_commission": 0.0,
    "novelty": 0.536
   },
-  "seconds": 12.90730595588684
+  "seconds": 31.93162703514099
  },
  {
   "condition": "med",
   "seed": 13,
   "unsupervised": {
-   "total_bits": 6489.425690258181,
-   "model_bits": 491.5199846637474,
+   "total_bits": 6491.425690258181,
+   "model_bits": 493.5199846637474,
    "data_bits": 5997.905705594436,
    "symbols": 12,
    "rule_classes": 28,
@@ -148,7 +148,7 @@
      "move": "start",
      "bits": 11623.648652521633,
      "sentences": 320.0,
-     "seconds": 0.02674698829650879
+     "seconds": 0.02223491668701172
     },
     {
      "night": 0.0,
@@ -156,21 +156,21 @@
      "move": "chunk and merge from 8 word classes",
      "bits": 6539.2755538036845,
      "sentences": 320.0,
-     "seconds": 15.664212942123413
+     "seconds": 25.229342937469482
     },
     {
      "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 6489.425690258181,
+     "bits": 6491.425690258181,
      "sentences": 320.0,
-     "seconds": 41.10605478286743
+     "seconds": 128.75282096862793
     }
    ]
   },
   "supervised": {
-   "total_bits": 6489.455668576038,
-   "model_bits": 491.5499629815947,
+   "total_bits": 6491.455668576038,
+   "model_bits": 493.5499629815947,
    "data_bits": 5997.905705594436,
    "symbols": 12,
    "rule_classes": 28,
@@ -183,14 +183,14 @@
    "gen_commission": 0.0010000000000000009,
    "novelty": 0.966
   },
-  "seconds": 45.892991065979004
+  "seconds": 147.04748606681824
  },
  {
   "condition": "med",
   "seed": 17,
   "unsupervised": {
-   "total_bits": 6525.499593881095,
-   "model_bits": 551.8636129110606,
+   "total_bits": 6527.499593881094,
+   "model_bits": 553.8636129110606,
    "data_bits": 5973.635980970023,
    "symbols": 14,
    "rule_classes": 30,
@@ -210,7 +210,7 @@
      "move": "start",
      "bits": 11562.422055843885,
      "sentences": 320.0,
-     "seconds": 0.024766921997070312
+     "seconds": 0.018538951873779297
     },
     {
      "night": 0.0,
@@ -218,37 +218,37 @@
      "move": "chunk and merge from 12 word classes",
      "bits": 6466.7554610378365,
      "sentences": 320.0,
-     "seconds": 13.856634140014648
+     "seconds": 21.93359398841858
     },
     {
      "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 6816.383641933299,
+     "bits": 6818.3836419333,
      "sentences": 320.0,
-     "seconds": 72.25249409675598
+     "seconds": 253.45419001579285
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 6720.298434929671,
+     "bits": 6722.29843492967,
      "sentences": 320.0,
-     "seconds": 72.2524962425232
+     "seconds": 253.45419120788574
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 6525.499593881095,
+     "bits": 6527.499593881094,
      "sentences": 320.0,
-     "seconds": 72.25249719619751
+     "seconds": 253.45419192314148
     }
    ]
   },
   "supervised": {
-   "total_bits": 6567.266413070712,
-   "model_bits": 555.8675348586972,
+   "total_bits": 6569.266413070712,
+   "model_bits": 557.8675348586972,
    "data_bits": 6011.398878212017,
    "symbols": 12,
    "rule_classes": 30,
@@ -261,14 +261,14 @@
    "gen_commission": 0.010000000000000009,
    "novelty": 0.967
   },
-  "seconds": 77.0922269821167
+  "seconds": 268.37135004997253
  },
  {
   "condition": "large",
   "seed": 13,
   "unsupervised": {
-   "total_bits": 8083.594421599634,
-   "model_bits": 876.2803481245123,
+   "total_bits": 8085.594421599634,
+   "model_bits": 878.2803481245123,
    "data_bits": 7207.314073475131,
    "symbols": 12,
    "rule_classes": 36,
@@ -288,7 +288,7 @@
      "move": "start",
      "bits": 12563.760621091655,
      "sentences": 320.0,
-     "seconds": 0.03615689277648926
+     "seconds": 0.028013229370117188
     },
     {
      "night": 0.0,
@@ -296,29 +296,29 @@
      "move": "chunk and merge from 15 word classes",
      "bits": 7800.363962152963,
      "sentences": 320.0,
-     "seconds": 12.172284841537476
+     "seconds": 17.281429052352905
     },
     {
      "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 8401.588275922815,
+     "bits": 8403.588275922817,
      "sentences": 320.0,
-     "seconds": 89.52252864837646
+     "seconds": 311.8793890476227
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 8083.594421599634,
+     "bits": 8085.594421599634,
      "sentences": 320.0,
-     "seconds": 89.52253079414368
+     "seconds": 311.8793909549713
     }
    ]
   },
   "supervised": {
-   "total_bits": 8343.76231575429,
-   "model_bits": 944.734191741135,
+   "total_bits": 8345.76231575429,
+   "model_bits": 946.734191741135,
    "data_bits": 7399.028124013171,
    "symbols": 11,
    "rule_classes": 39,
@@ -331,14 +331,14 @@
    "gen_commission": 0.14800000000000002,
    "novelty": 0.992
   },
-  "seconds": 96.00154280662537
+  "seconds": 327.47707080841064
  },
  {
   "condition": "large",
   "seed": 17,
   "unsupervised": {
-   "total_bits": 7974.94143911256,
-   "model_bits": 797.353379150248,
+   "total_bits": 7976.941439112562,
+   "model_bits": 799.353379150248,
    "data_bits": 7177.588059962313,
    "symbols": 12,
    "rule_classes": 38,
@@ -358,7 +358,7 @@
      "move": "start",
      "bits": 12493.855998571404,
      "sentences": 320.0,
-     "seconds": 0.025884151458740234
+     "seconds": 0.022353172302246094
     },
     {
      "night": 0.0,
@@ -366,29 +366,29 @@
      "move": "chunk and merge from 16 word classes",
      "bits": 7737.096237685927,
      "sentences": 320.0,
-     "seconds": 11.990194082260132
+     "seconds": 16.717615127563477
     },
     {
      "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 8383.805964292947,
+     "bits": 8385.805964292947,
      "sentences": 320.0,
-     "seconds": 69.7018620967865
+     "seconds": 249.22975420951843
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 7974.94143911256,
+     "bits": 7976.941439112562,
      "sentences": 320.0,
-     "seconds": 69.70186305046082
+     "seconds": 249.22975611686707
     }
    ]
   },
   "supervised": {
-   "total_bits": 8368.685638379076,
-   "model_bits": 995.3106129045715,
+   "total_bits": 8370.685638379076,
+   "model_bits": 997.3106129045715,
    "data_bits": 7373.375025474503,
    "symbols": 12,
    "rule_classes": 42,
@@ -401,14 +401,14 @@
    "gen_commission": 0.14200000000000002,
    "novelty": 0.994
   },
-  "seconds": 74.89154696464539
+  "seconds": 265.7592179775238
  },
  {
   "condition": "term_low",
   "seed": 13,
   "unsupervised": {
-   "total_bits": 5284.044600336405,
-   "model_bits": 312.99143475383556,
+   "total_bits": 5286.044600336404,
+   "model_bits": 314.99143475383556,
    "data_bits": 4971.053165582581,
    "symbols": 13,
    "rule_classes": 18,
@@ -428,7 +428,7 @@
      "move": "start",
      "bits": 11430.933331175878,
      "sentences": 320.0,
-     "seconds": 0.01363515853881836
+     "seconds": 0.04729413986206055
     },
     {
      "night": 0.0,
@@ -436,29 +436,29 @@
      "move": "chunk and merge from 6 word classes",
      "bits": 5883.920385464486,
      "sentences": 320.0,
-     "seconds": 11.279974937438965
+     "seconds": 27.10779309272766
     },
     {
      "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 5448.06043060165,
+     "bits": 5450.06043060165,
      "sentences": 320.0,
-     "seconds": 83.88187098503113
+     "seconds": 253.12095403671265
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 5284.044600336405,
+     "bits": 5286.044600336404,
      "sentences": 320.0,
-     "seconds": 83.88187289237976
+     "seconds": 253.12095522880554
     }
    ]
   },
   "supervised": {
-   "total_bits": 5275.949970366352,
-   "model_bits": 286.9882817238552,
+   "total_bits": 5277.949970366352,
+   "model_bits": 288.9882817238552,
    "data_bits": 4988.961688642496,
    "symbols": 12,
    "rule_classes": 17,
@@ -471,14 +471,14 @@
    "gen_commission": 0.0,
    "novelty": 0.901
   },
-  "seconds": 92.30735301971436
+  "seconds": 272.2353460788727
  },
  {
   "condition": "term_low",
   "seed": 17,
   "unsupervised": {
-   "total_bits": 5337.087602690056,
-   "model_bits": 343.7837243010922,
+   "total_bits": 5339.087602690057,
+   "model_bits": 345.7837243010922,
    "data_bits": 4993.30387838897,
    "symbols": 13,
    "rule_classes": 19,
@@ -498,7 +498,7 @@
      "move": "start",
      "bits": 11494.48401005112,
      "sentences": 320.0,
-     "seconds": 0.006672859191894531
+     "seconds": 0.010393857955932617
     },
     {
      "night": 0.0,
@@ -506,21 +506,21 @@
      "move": "chunk and merge from 6 word classes",
      "bits": 5911.903772933576,
      "sentences": 320.0,
-     "seconds": 10.89332103729248
+     "seconds": 26.85523796081543
     },
     {
      "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 5337.087602690056,
+     "bits": 5339.087602690057,
      "sentences": 320.0,
-     "seconds": 80.88774681091309
+     "seconds": 302.5500748157501
     }
    ]
   },
   "supervised": {
-   "total_bits": 5291.759540792765,
-   "model_bits": 312.84288844454954,
+   "total_bits": 5293.759540792764,
+   "model_bits": 314.84288844454954,
    "data_bits": 4978.916652348225,
    "symbols": 13,
    "rule_classes": 18,
@@ -533,14 +533,14 @@
    "gen_commission": 0.0020000000000000018,
    "novelty": 0.908
   },
-  "seconds": 90.42787480354309
+  "seconds": 329.0133230686188
  },
  {
   "condition": "term_med",
   "seed": 13,
   "unsupervised": {
-   "total_bits": 7745.104578753511,
-   "model_bits": 651.9835940255014,
+   "total_bits": 7747.104578753511,
+   "model_bits": 653.9835940255014,
    "data_bits": 7093.120984728013,
    "symbols": 15,
    "rule_classes": 31,
@@ -560,7 +560,7 @@
      "move": "start",
      "bits": 13282.405069674827,
      "sentences": 320.0,
-     "seconds": 0.011149168014526367
+     "seconds": 0.05200815200805664
     },
     {
      "night": 0.0,
@@ -568,29 +568,29 @@
      "move": "chunk and merge from 8 word classes",
      "bits": 8131.416288108695,
      "sentences": 320.0,
-     "seconds": 16.853502988815308
+     "seconds": 34.43165826797485
     },
     {
      "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 8046.758439396403,
+     "bits": 8048.758439396403,
      "sentences": 320.0,
-     "seconds": 90.81806898117065
+     "seconds": 248.19164204597473
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 7745.104578753511,
+     "bits": 7747.104578753511,
      "sentences": 320.0,
-     "seconds": 90.81806993484497
+     "seconds": 248.19164323806763
     }
    ]
   },
   "supervised": {
-   "total_bits": 7718.5921661225775,
-   "model_bits": 583.1331559488334,
+   "total_bits": 7720.5921661225775,
+   "model_bits": 585.1331559488334,
    "data_bits": 7135.459010173757,
    "symbols": 12,
    "rule_classes": 29,
@@ -603,14 +603,14 @@
    "gen_commission": 0.02100000000000002,
    "novelty": 0.987
   },
-  "seconds": 98.67675495147705
+  "seconds": 265.5654830932617
  },
  {
   "condition": "term_med",
   "seed": 17,
   "unsupervised": {
-   "total_bits": 7608.746177962633,
-   "model_bits": 543.1085079870905,
+   "total_bits": 7610.746177962631,
+   "model_bits": 545.1085079870905,
    "data_bits": 7065.6376699755365,
    "symbols": 14,
    "rule_classes": 29,
@@ -630,7 +630,7 @@
      "move": "start",
      "bits": 13290.316226147674,
      "sentences": 320.0,
-     "seconds": 0.01766800880432129
+     "seconds": 0.023810148239135742
     },
     {
      "night": 0.0,
@@ -638,29 +638,29 @@
      "move": "chunk and merge from 11 word classes",
      "bits": 8147.844719507704,
      "sentences": 320.0,
-     "seconds": 15.695663928985596
+     "seconds": 22.342321157455444
     },
     {
      "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 7996.993522114843,
+     "bits": 7998.993522114842,
      "sentences": 320.0,
-     "seconds": 102.8146870136261
+     "seconds": 238.28639101982117
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 7608.746177962633,
+     "bits": 7610.746177962631,
      "sentences": 320.0,
-     "seconds": 102.81468892097473
+     "seconds": 238.28639316558838
     }
    ]
   },
   "supervised": {
-   "total_bits": 7705.1621924762885,
-   "model_bits": 549.8923239056297,
+   "total_bits": 7707.1621924762885,
+   "model_bits": 551.8923239056297,
    "data_bits": 7155.26986857066,
    "symbols": 12,
    "rule_classes": 28,
@@ -673,14 +673,14 @@
    "gen_commission": 0.03600000000000003,
    "novelty": 0.979
   },
-  "seconds": 109.56593084335327
+  "seconds": 251.08406901359558
  },
  {
   "condition": "term_high",
   "seed": 13,
   "unsupervised": {
-   "total_bits": 10417.027233463552,
-   "model_bits": 818.4156210991422,
+   "total_bits": 10419.027233463552,
+   "model_bits": 820.4156210991422,
    "data_bits": 9598.611612364393,
    "symbols": 12,
    "rule_classes": 44,
@@ -700,7 +700,7 @@
      "move": "start",
      "bits": 16065.388863338705,
      "sentences": 320.0,
-     "seconds": 0.07112598419189453
+     "seconds": 0.048125267028808594
     },
     {
      "night": 0.0,
@@ -708,29 +708,29 @@
      "move": "chunk and merge from 11 word classes",
      "bits": 11220.1844254008,
      "sentences": 320.0,
-     "seconds": 20.03081202507019
+     "seconds": 26.061106204986572
     },
     {
      "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 11284.715934561136,
+     "bits": 11286.715934561136,
      "sentences": 320.0,
-     "seconds": 62.35088491439819
+     "seconds": 140.4229612350464
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 10417.027233463552,
+     "bits": 10419.027233463552,
      "sentences": 320.0,
-     "seconds": 62.350887060165405
+     "seconds": 140.4229621887207
     }
    ]
   },
   "supervised": {
-   "total_bits": 10480.04972174719,
-   "model_bits": 845.0220534090678,
+   "total_bits": 10482.04972174719,
+   "model_bits": 847.0220534090678,
    "data_bits": 9635.027668338116,
    "symbols": 12,
    "rule_classes": 45,
@@ -743,14 +743,14 @@
    "gen_commission": 0.0020000000000000018,
    "novelty": 1.0
   },
-  "seconds": 70.08490204811096
+  "seconds": 159.6111180782318
  },
  {
   "condition": "term_high",
   "seed": 17,
   "unsupervised": {
-   "total_bits": 10498.810750415836,
-   "model_bits": 930.2887998743507,
+   "total_bits": 10500.810750415834,
+   "model_bits": 932.2887998743507,
    "data_bits": 9568.52195054148,
    "symbols": 14,
    "rule_classes": 47,
@@ -770,7 +770,7 @@
      "move": "start",
      "bits": 15991.706338200474,
      "sentences": 320.0,
-     "seconds": 0.04206275939941406
+     "seconds": 0.06609010696411133
     },
     {
      "night": 0.0,
@@ -778,29 +778,29 @@
      "move": "chunk and merge from 10 word classes",
      "bits": 10585.83603483737,
      "sentences": 320.0,
-     "seconds": 17.01949906349182
+     "seconds": 25.466766834259033
     },
     {
      "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 10830.392624313097,
+     "bits": 10832.392624313095,
      "sentences": 320.0,
-     "seconds": 78.41997385025024
+     "seconds": 191.6389079093933
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 10498.810750415836,
+     "bits": 10500.810750415834,
      "sentences": 320.0,
-     "seconds": 78.41997599601746
+     "seconds": 191.6389091014862
     }
    ]
   },
   "supervised": {
-   "total_bits": 10595.413706658519,
-   "model_bits": 914.1691403527659,
+   "total_bits": 10597.413706658519,
+   "model_bits": 916.1691403527659,
    "data_bits": 9681.244566305746,
    "symbols": 12,
    "rule_classes": 45,
@@ -813,6 +813,6 @@
    "gen_commission": 0.041000000000000036,
    "novelty": 1.0
   },
-  "seconds": 87.04126286506653
+  "seconds": 209.42135500907898
  }
 ]

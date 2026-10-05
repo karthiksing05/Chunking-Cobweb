@@ -288,6 +288,11 @@ class BoardMemory(Memory):
             return self.token[e]
         return f"[{self.describe(self.left[e])} {self.relation[e]} {self.describe(self.right[e])}]"
 
+    def contexts(self):
+        """The read's context is at the top level (the counts); inside an
+        element every rule choice is made the same way."""
+        return None
+
     # The read ----------------------------------------------------------- #
     def _read_arrays(self):
         """Per square read in each position: (the square, the top-level

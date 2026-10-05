@@ -68,3 +68,23 @@ def test_each_word_class_merge_is_the_best_by_the_full_code():
                    for a, b in itertools.combinations(classes, 2))
         assert abs(class_bigram_bits(sentences, after, 0.001) - best) < 1e-6
         assert class_bigram_bits(sentences, after, 0.001) < class_bigram_bits(sentences, before, 0.001)
+
+
+def test_backoff_code_is_the_sequential_code():
+    import math
+    from collections import Counter
+    import numpy as np
+    from trellis2.mdl import backoff_code
+    rng = np.random.default_rng(0)
+    n, G, X, A, alpha, beta = 300, 3, 4, 5, 0.01, 1.5
+    g, x, k = rng.integers(0, G, n), rng.integers(0, X, n), rng.integers(0, A, n)
+    n_gk, n_g, n_gxk, n_gx = Counter(), Counter(), Counter(), Counter()
+    nats = 0.0
+    for gi, xi, ki in zip(g, x, k):
+        p_g = (n_gk[gi, ki] + alpha) / (n_g[gi] + A * alpha)
+        nats -= math.log((n_gxk[gi, xi, ki] + beta * p_g) / (n_gx[gi, xi] + beta))
+        n_gk[gi, ki] += 1
+        n_g[gi] += 1
+        n_gxk[gi, xi, ki] += 1
+        n_gx[gi, xi] += 1
+    assert math.isclose(backoff_code(g, x, k, np.ones(n), A, alpha, beta), nats, rel_tol=1e-12)

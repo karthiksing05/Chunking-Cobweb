@@ -25,6 +25,7 @@ from scipy.special import logsumexp
 
 from .data import Span, Tree
 from .grammar import Grammar
+from .memory import BOS
 
 
 class Chart:
@@ -39,8 +40,10 @@ class Chart:
         la = self.la = np.full((n + 1, n + 1), -np.inf)
         lam = self.lam = np.zeros((n + 1, n + 1, M))
         rho = self.rho = np.zeros((n + 1, n + 1, M))
+        # A span's rule choice is made in the light of the word before it.
+        U = self.U = [g.rules(self.tokens[i - 1] if i else BOS) for i in range(n)]
         for i in range(n):
-            v = g.lexical(int(ids[i]))
+            v = g.lexical(int(ids[i]), self.tokens[i - 1] if i else BOS)
             s = v.sum()
             if s > 0:
                 a[i, i + 1] = v / s
@@ -56,7 +59,7 @@ class Chart:
                     continue
                 pair = lam[i, i + 1:j] * rho[i + 1:j, j]          # (splits, M)
                 gamma = g.qk * (np.exp(scale - top) @ pair)        # (M,)
-                v = g.U @ gamma                                    # (K,)
+                v = U[i] @ gamma                                   # (K,)
                 s = v.sum()
                 if s <= 0:
                     continue
@@ -138,7 +141,7 @@ class Chart:
                     continue
                 with np.errstate(divide="ignore", invalid="ignore"):
                     w = np.where(a[i, j] > 0, mu[i, j] / a[i, j], 0.0)
-                nu = (w @ g.U) * g.qk                                   # (M,)
+                nu = (w @ self.U[i]) * g.qk                             # (M,)
                 lam_l = self.lam[i, i + 1:j]                            # (splits, M)
                 rho_r = self.rho[i + 1:j, j]
                 rel = np.exp(la[i, i + 1:j] + la[i + 1:j, j] - la[i, j])
@@ -203,9 +206,15 @@ class Chart:
         if n == 0:
             return Tree(0, {})
         with np.errstate(divide="ignore"):
-            log_rule = np.log(np.einsum("ac,c,cb,cd->abd", g.U, g.qk, g.Lt, g.Rt))
+            # One table of binary rules per context (the word before a span).
+            rule_of = {}
+            for i in range(n):
+                key = id(self.U[i])
+                if key not in rule_of:
+                    rule_of[key] = np.log(np.einsum("ac,c,cb,cd->abd", self.U[i], g.qk, g.Lt, g.Rt))
+            log_rule = [rule_of[id(self.U[i])] for i in range(n)]
             ids = g.token_ids(self.tokens)
-            lex = np.log(g.U @ (g.pk[:, None] * g.E[:, ids])).T          # (n, K)
+            lex = np.log(np.stack([self.U[i] @ (g.pk * g.E[:, ids[i]]) for i in range(n)]))   # (n, K)
             log_start = np.log(g.S)
         K = g.K
         best = np.full((n + 1, n + 1, K), -np.inf)
@@ -218,7 +227,7 @@ class Chart:
                 scores = np.full((j - i - 1, K, K, K), -np.inf)
                 for kk, k in enumerate(range(i + 1, j)):
                     pair = best[i, k][:, None] + best[k, j][None, :]       # (B, C)
-                    scores[kk] = log_rule + pair[None, :, :]
+                    scores[kk] = log_rule[i] + pair[None, :, :]
                 flat = scores.transpose(1, 0, 2, 3).reshape(K, -1)         # A x (k, B, C)
                 arg = np.argmax(flat, axis=1)
                 best[i, j] = flat[np.arange(K), arg]
@@ -307,7 +316,7 @@ class Chart:
             lam_l = self.lam[i, i + 1:j]
             rho_r = self.rho[i + 1:j, j]
             rel = np.exp(la[i, i + 1:j] + la[i + 1:j, j] - la[i, j])
-            weight = (g.U[A] * g.qk)[None, :] * lam_l * rho_r * rel[:, None]
+            weight = (self.U[i][A] * g.qk)[None, :] * lam_l * rho_r * rel[:, None]
             flat = weight.ravel()
             pick = int(rng.choice(flat.size, p=flat / flat.sum()))
             kk, c = divmod(pick, g.M)

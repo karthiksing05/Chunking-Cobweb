@@ -3,7 +3,7 @@
 Status: first implementation, October 2026, on branch `inside-outside`.
 
 - Code: `src/trellis2/`
-- Tests: `tests/trellis2/` (44, including brute-force checks of the parser over whole trees and forests, exactness checks of the search, the compiled Cobweb against its Python reference, the chess domain's star and its counted read, the relational characters' inside pass, and, in every domain, that the grammar draws experiences as often as its code says)
+- Tests: `tests/trellis2/` (49, including brute-force checks of the parser over whole trees and forests, exactness checks of the search, the compiled Cobweb against its Python reference, the chess domain's star and its counted read, the relational characters' inside pass, and, in every domain, that the grammar draws experiences as often as its code says)
 - Experiments: `experiments/v2/`
 - Background: [the literature behind v2](#background-the-literature-behind-v2), condensed from the October 2026 review (the full report and notes are in the git history, commit `fbe61901`)
 - **The framework explained end to end, with figures: [`FRAMEWORK.md`](FRAMEWORK.md)**
@@ -71,6 +71,7 @@ The first round has blank chunk attributes.
   - then **Bayesian model merging**: greedily join any two symbols, siblings or not, while the code shrinks.
 - **Rule classes.** The composition tree is rebuilt over the attested compositions (in symbol terms), and its cut is searched the same way under the factored grammar's code.
 - **Tables.** The posterior predictive of each Dirichlet-multinomial. The model is normalized by construction, so the code lengths can see commission.
+- **The read's context of a rule choice** (2026-10-05). Where the domain's read gives each element a context (a sentence: the word before the element; `Memory.contexts`), the rule class is chosen in its light: `Uc[A, x, c]` = (n(A, x, c) + β U[A, c]) / (n(A, x) + β), coded prequentially in learning order (`mdl.backoff_code`). The composition cut is searched with and without the context, and description length keeps the shorter code and the weight β ∈ {1, 4, 16} (2 bits for the choice). The context of a span is the input word before it, so the chart stays exact (brute-force tests with contexts).
 
 ### Performance (`chart.py`)
 
@@ -111,7 +112,7 @@ Five seeds, the paper's corpora and splits, 320 training sentences, 40 held-out 
 | small | 0.0% | 0.0% | 0.2% ± 0.2 | 0.0% | 54% |
 | med | 0.0% | 3.3% | 0.9% ± 0.9 | 1.1% | 97% |
 | large | 0.7% ± 1.1 | 6.2% | 14.2% ± 1.1 | 1.6% | 99% |
-| term_low | 0.0% | 5.7% | 0.3% ± 0.3 | 6.2% | 90% |
+| term_low | 0.0% | 5.7% | 0.5% ± 0.5 | 6.2% | 90% |
 | term_med | 0.0% | 7.0% | 2.4% ± 1.1 | 4.7% | 98% |
 | term_high | 0.0% | 9.7% | 2.7% ± 1.7 | 3.4% | 100% |
 
@@ -119,7 +120,7 @@ Learning curves: `experiments/v2/results/main/learning_curves.png`. Exploratory 
 
 - **Parsing** is at 99–100% from about 40 sentences in every condition.
 - **Generation** improves steadily with data. Early on it is worse than v1 at the same small n, because description length favours very general grammars when evidence is scarce.
-- **LARGE** is the open case: relative clauses are rare, so they stay merged with adjective phrases at 320 sentences.
+- **LARGE** is the open case: relative clauses are rare, so they stay merged with adjective phrases at 320 sentences. Coding each rule choice in the light of the word before it would halve its commission (7.6%), but 320 sentences do not pay for that context, and description length leaves it out.
 
 Parse commission (1 − bracket precision) equals omission here, because every parse is a complete binary tree.
 
@@ -203,16 +204,18 @@ Generation commission (incremental / batch):
 | Condition | 40 sentences | 80 | 160 | 320 |
 |---|---|---|---|---|
 | small | 0.5% / 0.5% | 0.3% / 0.3% | 0.2% / 0.2% | 0.1% / 0.1% |
-| med | 63.4% / 63.4% | **33.2% / 43.2%** | 15.3% / 15.2% | 0.6% / 0.6% |
-| large | 31.4% / 31.4% | 26.6% / 28.5% | 18.8% / 20.1% | 8.5% / 9.0% |
-| term_low | 39.8% / 39.8% | 1.6% / 3.1% | **0.2% / 11.1%** | 0.4% / 0.4% |
-| term_med | 59.6% / 59.6% | 38.7% / 40.9% | 5.8% / 8.0% | 0.4% / 1.7% |
-| term_high | 65.8% / 65.8% | **31.9% / 78.0%** | **5.7% / 23.8%** | 0.7% / 0.9% |
+| med | 60.9% / 60.9% | **33.7% / 43.2%** | 16.2% / 15.2% | 0.6% / 0.6% |
+| large | 31.4% / 31.4% | 26.7% / 28.5% | 18.8% / 20.1% | 8.5% / 9.0% |
+| term_low | 25.9% / 25.9% | 1.6% / 3.1% | **0.2% / 5.2%** | 0.4% / 0.4% |
+| term_med | 59.6% / 59.6% | 38.6% / 45.0% | 5.8% / 8.0% | 0.4% / 1.7% |
+| term_high | 69.2% / 69.2% | **31.9% / 76.4%** | **5.7% / 23.8%** | 0.7% / 0.9% |
 
-- **Early nights coincide.** Up to 40 sentences a restart from word classes gives the shortest code (the stored analyses win none of the 20 nights at 20–40 sentences), so the two learners are identical there.
-- **Then the stored analyses pay.** From 80 sentences on they win 16 of 30 nights (SMALL excluded, where both give the same grammar). At 80 and 160 sentences the incremental learner's training code is shorter or equal in all 10 cells, and its commission is lower in 9, by 10–46 points in 4. Both are equivalent at 320.
+(Rerun 2026-10-05 with the read's context of a rule choice available: description length takes it in a few of the small runs, which moves some of the 10–40-sentence cells; at 320 nothing changes.)
+
+- **Early nights nearly coincide.** Up to 40 sentences a restart from word classes almost always gives the shortest code (the stored analyses win one of the 20 nights at 20–40 sentences, LARGE at 20 sentences with seed 17), so the two learners are identical there but for that night.
+- **Then the stored analyses pay.** From 80 sentences on they win 16 of 30 nights (SMALL excluded, where both give the same grammar). At 80 and 160 sentences the incremental learner's training code is shorter or equal in 9 of 10 cells, and its commission is lower in 9, by 5–45 points in 4. Both are equivalent at 320.
 - **Perception.** By 160 sentences each day's sentences are parsed almost completely (1.00–1.01 top-level chunks per sentence), at close to the held-out rate in bits.
-- **Cost.** A night costs about as much as a batch sleep over the same sentences; the six nights together cost 1.2–1.6× one batch sleep at 320 (timings from a shared machine, so approximate).
+- **Cost.** The six nights together cost 1.5–2.6× one batch sleep at 320 (timings from a machine running other experiments at the same time, so approximate).
 
 ### What the experiments established
 
@@ -324,6 +327,7 @@ The bigram row samples sequences from a maximum-likelihood token bigram trained 
 - **What the representation hierarchy should see** (each variant re-learned on the same 2,000 characters): slot, first and last component, and kind give 83.8% attested and 30.3 bits. Adding the nearest component across the join lowers attested placement to 75.1% (categories drift toward what stands beside a part); adding the parent's slot lowers it to 34.4% (14 categories that mix positions). Slot and kind alone give 84.0% and 31.0 bits; slot, first and last 82.2% and 30.7 bits.
 - **The remaining misplacements** come from the categories of composite parts (two components already joined), which mix slots.
 - **More data makes it more coherent.** Learned from 6,000 characters (`--modes relational --train 6000`, `results/characters_6000`), 93.0% of generated characters place every component where real characters do, and held-out characters take 29.4 bits (token bigram 32.8); from 10,000, 92.8% and 28.3 bits (bigram 31.8), with 32 categories and 742 chunk types. Fewer real characters remain to be rediscovered as more are learned (2.9% and 1.6% of samples).
+- **No read context for a character** (2026-10-05). Read in its IDS prefix order, with each rule choice in the light of the token written before it (a first part's operator, or the first part's last component), description length takes the context and the held-out code shortens (2,000 characters: 30.3 → 27.1 bits; 10,000: 28.3 → 24.6), but at scale fewer generated characters place every component where a real character does (10,000: 92.8% → 85.4%) and fewer chunk types pay (742 → 329). Given each part's slot as the context instead: 27.5 bits and 90.0% at 10,000 (14 symbols at 2,000, against 21, and 76.9%). The context takes over what categories and chunks did, and in rare contexts generation falls back on coarser categories. A character is parts placed in space, not a sequence, so `CharacterMemory` gives no context; the token-sequence models of characters are sequences and get the previous token, as sentences do.
 - **Here the search falls short.** The gold structures give a shorter code than the unsupervised learner's analyses (73,662 against 82,159 bits, 10.3% shorter; 83,241 with the previous top-level code, under which the diagnostics below were run), unlike the treebank, and also in the plain code the search minimizes (71,703 against 79,740). An unsupervised night on 2,000 characters takes about an hour. (With operators as relations, the same structures take 69,014 bits.)
 - **The starting categories are the bottleneck, not the search width.** A beam of 16 instead of 4 reaches 79,207 bits (3.7 chunks per character). From the supervised model's 26 token categories the same search builds nearly complete analyses (1.4 chunks per character, 78,905 bits). Bigram word classes cannot see which slot a component fills.
 - **Sleeping again does not help.** A second, third and fourth night on the same data, with the continuation of the stored analyses always evaluated, change the code by at most 0.2% (500 characters: 23,519 → 23,477 bits) and leave MED and WSJ10 unchanged. The continuation hits the same wall as the restarts.
@@ -395,8 +399,20 @@ As a model the grammar improves: a shorter held-out code, more sentences derived
 | each element also by the categories its word or phrase takes everywhere | 43,581 | 15.98 | 71.0% | 80.8% |
 | the same, with a one-level spine and one granularity | 41,933 | 15.27 | **77.1%** | **86.3%** |
 | a chunk's two parts drawn jointly in generation (drawn independently in the same test: 74.8%, 84.1%) | – | – | 74.2% | 82.9% |
+| consolidated from right-branching trees instead of the search's analyses | 44,262 | 15.87 | 42.4% | 44.5% |
+| from left-branching trees | 45,455 | 16.41 | 36.1% | 39.5% |
 
-The representation hierarchy itself groups *very, so, not, a* and *happy, sad, dog, cat* even at its evidence cut (61 categories): two occurrences in the same slot (*was [very happy]*, *was [a dog]*) are described alike, and the words that would tell them apart are rare. A lighter chunk context gives the shortest code (5% shorter) without changing coherence. Only one variant moves coherence: a lighter chunk context together with a bag, on every element, of the categories its word or phrase takes across all its occurrences (what it does elsewhere). It separates adjectives from nouns (*happy, sad, fun, big* apart from *dog, cat*), though *a* stays with *very*, and its own sentences are real 77.1% of the time. It does not carry over: on characters the same bag lowers attested placements (82.8% against 83.8%; 74.1% with a one-level spine), and chunk context written as bags, as the chess star is, does not help them either (83.6%). Nor would description length choose it: on characters the variant with the shortest code (the bag with a one-level spine, 68,228 bits against 69,014) places components worst, and on English the shortest code is not the most coherent variant. The representation stays as it is.
+The search's analyses matter: consolidated from fixed tree shapes, which re-analysis does not improve, the grammar's own sentences are far less coherent, even though right-branching trees read *[she [was [very happy]]]* as a linguist would. The representation hierarchy itself groups *very, so, not, a* and *happy, sad, dog, cat* even at its evidence cut (61 categories): two occurrences in the same slot (*was [very happy]*, *was [a dog]*) are described alike, and the words that would tell them apart are rare. A lighter chunk context gives the shortest code (5% shorter) without changing coherence. Only one variant moves coherence: a lighter chunk context together with a bag, on every element, of the categories its word or phrase takes across all its occurrences (what it does elsewhere). It separates adjectives from nouns (*happy, sad, fun, big* apart from *dog, cat*), though *a* stays with *very*, and its own sentences are real 77.1% of the time. It does not carry over: on characters the same bag lowers attested placements (82.8% against 83.8%; 74.1% with a one-level spine), and chunk context written as bags, as the chess star is, does not help them either (83.6%). Nor would description length choose it: on characters the variant with the shortest code (the bag with a one-level spine, 68,228 bits against 69,014) places components worst, and on English the shortest code is not the most coherent variant. The representation stays as it is.
+
+**The read's context: each rule choice in the light of the word before it** (2026-10-05). The errors above sit inside categories, where a frequent and a rare word of different kinds share one category. What tells them apart in a sentence is what was just read: after *a* a noun phrase is made one way, after *very* another. In the chess read, each question was answered in the light of what the read had already placed; here each rule choice is made in the light of the word before the element, which the chart knows for every span. The rule choices given the category and that word code 37,885 → 33,506 bits (Dirichlet rows, the same analyses), so the context pays for itself; sampling with it (without refitting) raises the grammar's own sentences with every triple attested from 84% to 95%, and among new sentences from 46% to 72%, at about the same number of new coherent sentences (the incoherent ones go). Built in (`Uc`, the back-off code, the context-aware chart and sampler) and chosen by description length:
+
+| Refit of the 2,500-sentence analyses | Training bits | Held-out bits per sentence | Own sentences real (3–5 words) | Every triple in TinyStories | All samples, every triple |
+|---|---|---|---|---|---|
+| without the context | 43,663 | 16.02 | 74.2% | 83.5% | 61.7% |
+| with it, weight chosen by description length | **37,461** | **12.44** | **83.5%** | **89.9%** | **75.9%** |
+| word bigram / trigram (held out) | – | 13.2 / 13.0 | – | – | – |
+
+For the first time the grammar describes held-out English more compactly than the n-gram models. On the Penn Treebank sample (WSJ10 tags, 434 training sentences) the context is chosen too: from tags alone, bracket omission 55.3% → 48.3%, base-phrase omission 33.1% → 26.2%, held-out 30.1 → 27.2 bits per sentence (the tag bigram's 27.2); from binarized gold trees, omission 19.1% → 16.0% and held-out 30.9 → 26.6 bits, below the tag bigram. On the paper's synthetic corpora, 320 sentences do not pay for the context (it is chosen in one run of 30 at 320 sentences, mostly at 10–40), so their results are unchanged; forced on, it would halve LARGE's generation commission (14.2% → 7.6%, novelty unchanged) at a longer code (26.0 → 28.0 training bits per sentence). Characters and chess have no such context (their reads are a tree from the top, and the board's counts at the top level).
 
 ### Chess: parts joined by typed relations
 

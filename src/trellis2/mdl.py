@@ -47,6 +47,42 @@ def dm_code(groups: np.ndarray, keys: np.ndarray, weights: np.ndarray,
                  - np.sum(gammaln(cnt + alpha) - gammaln(alpha)))
 
 
+def _before(keys: np.ndarray, weights: np.ndarray) -> np.ndarray:
+    """For each event, the weight of the earlier events with the same key."""
+    order = np.argsort(keys, kind="stable")
+    k, w = keys[order], weights[order]
+    total = np.cumsum(w)
+    starts = np.r_[0, np.flatnonzero(k[1:] != k[:-1]) + 1]
+    first = np.repeat(total[starts] - w[starts], np.diff(np.r_[starts, len(k)]))
+    out = np.empty_like(total)
+    out[order] = total - w - first
+    return out
+
+
+def backoff_code(groups: np.ndarray, contexts: np.ndarray, keys: np.ndarray, weights: np.ndarray,
+                 alphabet: int, alpha: float, beta: float) -> float:
+    """Prequential code (nats) of ``keys``, each predicted from the events
+    before it given its group and its context, backing off to the group:
+
+        P(k | g, x) = (n(g, x, k) + beta P(k | g)) / (n(g, x) + beta),
+        P(k | g)    = (n(g, k) + alpha) / (n(g) + alphabet alpha).
+
+    The code is that of arithmetic coding with this predictive, events in
+    the given order. A context seen with the group for the first time is
+    predicted by the group alone."""
+    if groups.size == 0:
+        return 0.0
+    g, x, k = groups.astype(np.int64), contexts.astype(np.int64), keys.astype(np.int64)
+    span_x, span_k = np.int64(x.max() + 1), np.int64(alphabet)
+    n_gk = _before(g * span_k + k, weights)
+    n_g = _before(g, weights)
+    n_gxk = _before((g * span_x + x) * span_k + k, weights)
+    n_gx = _before(g * span_x + x, weights)
+    p_g = (n_gk + alpha) / (n_g + alphabet * alpha)
+    p = (n_gxk + beta * p_g) / (n_gx + beta)
+    return float(-np.sum(weights * np.log(p)))
+
+
 def rows_nats(n: np.ndarray, alpha: float) -> float:
     """Code (nats) of count rows (one per row of ``n``), each a
     Dirichlet-multinomial over its columns."""
