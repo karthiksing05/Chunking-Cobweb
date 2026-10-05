@@ -1,9 +1,10 @@
 """TRELLIS v2 on simple English: sentences of TinyStories (see
 ``trellis2/stories.py``), learned from the sentences alone.
 
-The sentences are those of 3 to 8 words that use only the 250 most frequent
-words of the TinyStories validation file (about 54,000 sentences). Each seed
-shuffles them, holds out 500 and learns from the next ``--train``.
+The sentences are those of 3 to 5 words that use only the 100 most frequent
+words of the TinyStories validation file (``--max-len``, ``--vocab``; 3 to 8
+words over 250 words gives about 54,000 sentences). Each seed shuffles them,
+holds out 500 and learns from the next ``--train``.
 
 Reported, with word unigram, bigram and trigram models as references:
 
@@ -22,7 +23,9 @@ Reported, with word unigram, bigram and trigram models as references:
   with the analysis it was generated from.
 
 Usage:
+    python experiments/v2/run_stories.py --train 2500 --out experiments/v2/results/stories_2500
     python experiments/v2/run_stories.py --train 5000 --out experiments/v2/results/stories
+    python experiments/v2/run_stories.py --train 2500 --vocab 250 --max-len 8 --out experiments/v2/results/stories_250
 """
 from __future__ import annotations
 
@@ -115,8 +118,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--train", type=int, default=5000)
     ap.add_argument("--test", type=int, default=500)
-    ap.add_argument("--vocab", type=int, default=250)
-    ap.add_argument("--max-len", type=int, default=8)
+    ap.add_argument("--vocab", type=int, default=100)
+    ap.add_argument("--max-len", type=int, default=5)
     ap.add_argument("--n-gen", type=int, default=1000)
     ap.add_argument("--seed", type=int, default=13)
     ap.add_argument("--out", default=os.path.join(HERE, "results", "stories"))

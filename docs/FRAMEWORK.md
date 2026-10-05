@@ -287,10 +287,10 @@ Nothing in the framework is specific to the paper's corpora. Four new domains te
 | TRELLIS v2 from binarized gold trees | 16.0% | 39.1% | 15.7% | **26.6** |
 
 - **Each rule choice sees the tag before it.** As in English (below), description length chooses to code each rule choice in the light of the tag read just before the element. Before it did (from tags alone: 55.3% bracket omission, 33.1% base-phrase omission, 30.1 held-out bits; from gold trees: 19.1%, 20.7%, 30.9 bits), the grammar was a weaker sequence model than tag bigrams; now the grammar learned from gold trees codes held-out sentences in fewer bits than a tag bigram, and the one learned from tags alone in as few.
-- **From tags alone, TRELLIS v2 finds chunks.** It recovers three quarters of the gold base phrases, against 43% for right-branching trees and 84% for the supervised model. Its chunks are noun groups (`DT NN`, `JJ JJ NN`, `NNP NNP`), verb groups (`MD VB`, `TO VB`, `VBD VBN`) and subject–verb pairs (`NN VBD`).
+- **From tags alone, TRELLIS v2 finds chunks.** It recovers three quarters of the gold base phrases, against 43% for right-branching trees and 84% for the supervised model. Its chunks are noun groups (`DT NN`, `NNP NNP`, `DT JJ NN`), verb groups (`MD VB`, `TO VB`, `VBD VBN`) and subject–verb pairs (`PRP VBD`), from as few as four categories: the tag before each element now carries much of what categories did.
 - **It does not find sentence structure.** On 434 sentences no larger chunk pays for itself, so analyses stay forests of about five chunks, and full-tree bracket agreement is below that of right-branching trees.
 
-- **More data** (training on every other sentence of up to 15 or 20 tags, about 1,100 or 1,900 sentences; the same held-out sentences) gives more categories and chunk types (34 at 1,900 sentences) and slightly shorter held-out codes (29.6 bits per sentence), but no more linguist-like full trees (bracket omission 51–52%). A night grows from two minutes to about an hour.
+- **More data** (training on every other sentence of up to 15 or 20 tags, about 1,100 or 1,900 sentences; the same held-out sentences) gives shorter held-out codes from tags alone (26.7 and 27.1 bits per sentence, below the tag bigram's 27.1 and 27.3), but no more linguist-like full trees (bracket omission 52%). A night grows from two minutes to more than an hour.
 
 ### Simple English: does the grammar generate coherent sentences?
 
@@ -554,7 +554,9 @@ python experiments/v2/run_search_study.py                                   # ~2
 python experiments/v2/run_treebank.py --train-max-len 10 --out experiments/v2/results/treebank/wsj10
 python experiments/v2/treebank_codes.py --em --trellis --out experiments/v2/results/treebank/structure_codes.md
 python experiments/v2/run_characters.py                                     # ~1 h
-python experiments/v2/run_stories.py --train 5000                           # simple English
+python experiments/v2/run_stories.py --train 2500 --out experiments/v2/results/stories_2500   # simple English
+python experiments/v2/run_stories.py --train 5000                           # simple English, twice the sentences
+python experiments/v2/run_stories.py --train 2500 --vocab 250 --max-len 8 --out experiments/v2/results/stories_250
 python experiments/v2/run_chess.py --train 4000                             # chess (after --extract)
 python experiments/v2/run_chess.py --no-context --out experiments/v2/results/chess_plain   # squares read on their own
 python experiments/v2/run_chess_play.py                                    # choosing moves (after --extract)

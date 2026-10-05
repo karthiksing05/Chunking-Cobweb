@@ -249,20 +249,24 @@ Code: `treebank.py`, `experiments/v2/run_treebank.py`. NLTK's public sample of t
 | right-branching | 39.0% | 55.7% | 57.3% | – | – | – |
 | left-branching | 82.9% | 87.6% | 75.0% | – | – | – |
 | unigram / bigram tag model (add ½) | – | – | – | 33.4 / 27.2 | – | – |
-| TRELLIS v2, tags only | 55.3% | 67.6% | 33.1% | 30.1 | 11.5 | 11.5 |
-| TRELLIS v2, binarized gold trees | 19.1% | 41.3% | 20.7% | 30.9 | 9.0 | 25.5 |
+| TRELLIS v2, tags only | 48.3% | 62.5% | 26.2% | 27.2 | 6.5 | 4.0 |
+| TRELLIS v2, binarized gold trees | 16.0% | 39.1% | 15.7% | 26.6 | 9.0 | 24.5 |
+
+(Each rule choice in the light of the tag before it, chosen by description length, 2026-10-05; before: tags only 55.3% / 67.6% / 33.1% / 30.1 bits, gold trees 19.1% / 41.3% / 20.7% / 30.9 bits.)
 
 Training on more sentences (every other sentence of up to 15 or 20 tags; the same held-out WSJ10 sentences; means of seeds 13 and 17):
 
 | Training sentences | Bracket omission (unsup / sup) | Base-phrase omission (unsup / sup) | Held-out bits/sentence (unsup / sup) | Symbols | Chunk types | Learner's code below the gold-tree grammar's | Unsupervised night |
 |---|---|---|---|---|---|---|---|
-| 434 (≤ 10 tags) | 55.3% / 19.1% | 33.1% / 20.7% | 30.1 / 30.9 | 11.5 | 11.5 | 8–10% | about 2 min |
-| about 1,100 (≤ 15 tags) | 51.0% / 17.9% | 24.9% / 18.4% | 29.7 / 31.1 | 16.5 | 24.5 | 14–15% | 16–22 min |
-| about 1,900 (≤ 20 tags) | 52.1% / 17.5% | 29.5% / 16.4% | 29.6 / 31.6 | 22.5 | 34.0 | 18% | 50–66 min |
+| 434 (≤ 10 tags) | 48.3% / 16.0% | 26.2% / 15.7% | 27.2 / 26.6 | 6.5 | 4.0 | 8% | about 2–3 min |
+| about 1,100 (≤ 15 tags) | 51.9% / 16.4% | 28.2% / 15.2% | 26.7 / 26.8 | 12.5 | 11.0 | 9–10% | 28–33 min |
+| about 1,900 (≤ 20 tags) | 52.3% / 15.8% | 27.5% / 15.2% | 27.1 / 27.3 | 25.0 | 35.0 | 11–12% | 85–117 min |
+
+(Tag bigram, held out: 27.2, 27.1, 27.3 bits. Before the read's context: omission 55.3 / 51.0 / 52.1% unsupervised and 19.1 / 17.9 / 17.5% supervised; held out 30.1 / 29.7 / 29.6 and 30.9 / 31.1 / 31.6 bits; the learner's code 8–10%, 14–15% and 18% below the gold-tree grammar's. Night times are from a machine running other experiments.)
 
 - The unsupervised learner forms base-phrase chunks (noun groups, verb groups, subject–verb pairs) and leaves sentences as forests (about 5 chunks per sentence at 434 sentences, 9 at 1,900, for longer sentences).
-- Its grammar, like the supervised one, is a weaker sequence model than tag bigrams. The Dirichlet concentration is not the cause: the supervised grammar's code prefers α = 0.01 to 0.001 (15,439 vs 15,763 bits), with held-out bits unchanged (30.5 vs 30.6).
-- **The objective prefers the forests.** At every size the learner's forest grammar is shorter than the grammar of the binarized gold trees, and the gap grows with data (table). Binarization is not the reason: at 434 sentences (seed 13) the learner's analyses take 14,160 bits; right-binarized gold trees 15,763, left-binarized 16,349, and forests of gold base phrases 16,120. Sentence structure does not pay for itself with this grammar family; this is not a search failure.
+- With each rule choice in the light of the tag before it, its grammar codes held-out sentences as compactly as a tag bigram, and the supervised one too, at every size; without that context both were weaker sequence models than tag bigrams (and the Dirichlet concentration was not the cause: the supervised grammar's code preferred α = 0.01 to 0.001, 15,439 vs 15,763 bits, with held-out bits unchanged, 30.5 vs 30.6).
+- **The objective prefers the forests.** At every size the learner's forest grammar is shorter than the grammar of the binarized gold trees, and the gap grows with data (table; with the read's context the gap is smaller, 8–12%). Binarization is not the reason: at 434 sentences (seed 13) the learner's analyses take 14,160 bits; right-binarized gold trees 15,763, left-binarized 16,349, and forests of gold base phrases 16,120. Sentence structure does not pay for itself with this grammar family; this is not a search failure.
 
 ### Does sentence structure pay on real text?
 
