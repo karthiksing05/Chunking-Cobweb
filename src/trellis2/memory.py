@@ -27,6 +27,7 @@ import numpy as np
 
 from .cobweb import CobwebNode, CobwebTree, Instance
 from .data import Span, Tree
+from .mdl import beta_nats, dm_code
 
 BOS, EOS = "<s>", "</s>"
 BLANK = "-"
@@ -64,7 +65,25 @@ def _bag(tokens: Sequence[str]) -> Dict[str, float]:
 
 class Memory:
     """Element records plus the code that turns them into representation
-    instances and a representation hierarchy."""
+    instances and a representation hierarchy.
+
+    A domain is a subclass that says what an experience is. It supplies
+
+    * ``add``: record every element of an analysed experience (its kind,
+      token or two parts, the relation joining them, its parent, whether it is
+      a top-level element, and the analysis' own label for it);
+    * ``relations``: how two parts can be joined (None: concatenation only);
+    * ``surface``: what the representation hierarchy sees of an element
+      besides its chunk context (its context window), and ``describe``;
+    * the top level, how an experience's top-level elements are laid out and
+      transmitted: ``top_level_nats``, ``layout_nats``, ``top_level_tables``;
+    * ``sample`` and ``log_prob``: draw an experience from the grammar and
+      code one, in the same reading order.
+
+    The chunk context, the representation hierarchy, the cuts, the
+    composition hierarchy and the grammar are shared. This class is the
+    domain of sentences: tokens in a row, read left to right.
+    """
 
     PRIMITIVE, COMPOSITE = 0, 1
 
@@ -94,22 +113,25 @@ class Memory:
         self.top_right: List[int] = []
         self.is_root: List[bool] = []
         self.weight: List[float] = []
-        self.sentence_of: List[int] = []
+        self.label: List[Hashable] = []      # the analysis' own label of each element
+        self.experience_of: List[int] = []
         self.span: List[Span] = []
-        self.sentences: List[List[str]] = []
+        self.experiences: List = []
 
     def __len__(self) -> int:
         return len(self.kind)
 
-    def add_tree(self, tokens: Sequence[str], tree: Tree,
-                 weight: float = 1.0) -> Dict[Span, int]:
-        """Record every element of an analysed experience, bottom up.
-        Returns the element id of each span."""
-        tokens = list(tokens)
+    # ------------------------------------------------------------------ #
+    # The domain's experiences: record one, draw one, code one. A sentence
+    # is its tokens; its analysis is a Tree (a forest when partial).
+    # ------------------------------------------------------------------ #
+    def add(self, experience: Sequence[str], analysis: Tree, weight: float = 1.0) -> None:
+        """Record every element of an analysed sentence, bottom up."""
+        tokens, tree = list(experience), analysis
         if tree.n != len(tokens):
             raise ValueError("tree and token sequence disagree in length")
-        sid = len(self.sentences)
-        self.sentences.append(tokens)
+        sid = len(self.experiences)
+        self.experiences.append(tokens)
         eid_of: Dict[Span, int] = {}
         for (i, j) in tree.bottom_up():
             eid = len(self.kind)
@@ -134,13 +156,24 @@ class Memory:
             self.top_right.append(-1)
             self.is_root.append((i, j) in tree.roots)
             self.weight.append(weight)
-            self.sentence_of.append(sid)
+            self.label.append(tree.label.get((i, j)))
+            self.experience_of.append(sid)
             self.span.append((i, j))
         tops = [eid_of[r] for r in tree.roots]
         for a, b in zip(tops, tops[1:]):
             self.top_right[a] = b
             self.top_left[b] = a
-        return eid_of
+
+    def sample(self, grammar, rng: np.random.Generator, **kw):
+        """An experience and its analysis drawn from the grammar: (tokens,
+        Tree), or None if longer than ``max_len`` (callers resample)."""
+        return grammar.sample(rng, **kw)
+
+    def log_prob(self, grammar, experience, analysis=None) -> float:
+        """ln P(experience) under the grammar, summed over every analysis
+        (inside-outside)."""
+        from .chart import Chart
+        return Chart(grammar, experience).log_prob
 
     def vocabulary(self) -> List[str]:
         return sorted({t for t in self.token if t is not None})
@@ -192,7 +225,7 @@ class Memory:
     def surface(self, e: int) -> Instance:
         """The element's surface context: the tokens on either side, its first
         and last token, and its kind."""
-        tokens = self.sentences[self.sentence_of[e]]
+        tokens = self.experiences[self.experience_of[e]]
         i, j = self.span[e]
         n = len(tokens)
         x: Instance = {}
@@ -210,8 +243,62 @@ class Memory:
     def describe(self, e: int) -> str:
         """A short rendering of the element's content (its tokens)."""
         i, j = self.span[e]
-        toks = self.sentences[self.sentence_of[e]][i:j]
+        toks = self.experiences[self.experience_of[e]][i:j]
         return " ".join(toks) if len(toks) <= 4 else " ".join(toks[:2] + ["…"] + toks[-1:])
+
+    # ------------------------------------------------------------------ #
+    # The top level: how an experience's top-level elements are laid out.
+    # A sentence is one tree, or a forest of two or more pieces when the
+    # grammar cannot derive it whole; roots and pieces have rows of their own.
+    # ------------------------------------------------------------------ #
+    def _top_level(self) -> Tuple[np.ndarray, np.ndarray]:
+        """(the root of an experience analysed as one tree, a piece of a
+        forest) for every element."""
+        root = np.array(self.is_root, dtype=bool)
+        alone = (np.array(self.top_left) < 0) & (np.array(self.top_right) < 0)
+        return root & alone, root & ~alone
+
+    def _layout_counts(self) -> Tuple[np.ndarray, np.ndarray]:
+        """(one tree, a forest) per experience, and (stop, go on) after each
+        piece of a forest from the second on."""
+        root = np.array(self.is_root, dtype=bool)
+        w = np.array(self.weight, dtype=float)
+        sid = np.array(self.experience_of)
+        m = np.bincount(sid[root], minlength=len(self.experiences))
+        sent_w = np.zeros(len(self.experiences))
+        sent_w[sid[root]] = w[root]
+        forest = m >= 2
+        return (np.array([sent_w[m == 1].sum(), sent_w[forest].sum()]),
+                np.array([sent_w[forest].sum(), (sent_w * np.maximum(m - 2, 0)).sum()]))
+
+    def top_level_nats(self, s: np.ndarray, K: int, alpha: float) -> float:
+        """Code (nats) of the top-level elements' symbols ``s`` (one per
+        element, K of them): the part of the top level that depends on the
+        categories."""
+        whole, piece = self._top_level()
+        w = np.array(self.weight, dtype=float)
+        return (dm_code(np.zeros(int(whole.sum()), dtype=np.int64), s[whole], w[whole], K, alpha)
+                + dm_code(np.zeros(int(piece.sum()), dtype=np.int64), s[piece], w[piece], K, alpha))
+
+    def layout_nats(self, alpha: float) -> float:
+        """Code (nats) of the layout that does not depend on the categories:
+        whether each experience is one tree or a forest, and where a forest ends."""
+        n_mode, n_stop = self._layout_counts()
+        return beta_nats(n_mode, alpha) + beta_nats(n_stop, alpha)
+
+    def top_level_tables(self, s: np.ndarray, K: int, alpha: float):
+        """The grammar's top-level fields, and the count tables behind them
+        (for the model/data split)."""
+        whole, piece = self._top_level()
+        w = np.array(self.weight, dtype=float)
+        n_start = np.bincount(s[whole], weights=w[whole], minlength=K)
+        n_piece = np.bincount(s[piece], weights=w[piece], minlength=K)
+        n_mode, n_stop = self._layout_counts()
+        fields = {"S": (n_start + alpha) / (n_start + alpha).sum(),
+                  "S_piece": (n_piece + alpha) / (n_piece + alpha).sum(),
+                  "p_whole": float((n_mode[0] + alpha) / (n_mode.sum() + 2 * alpha)),
+                  "p_stop": float((n_stop[0] + alpha) / (n_stop.sum() + 2 * alpha))}
+        return fields, [(n_start, K), (n_piece, K), (n_mode, 2), (n_stop, 2)]
 
     def build_hierarchy(self, labels: Optional[Sequence[np.ndarray]] = None,
                         rules: Optional[Sequence[np.ndarray]] = None,

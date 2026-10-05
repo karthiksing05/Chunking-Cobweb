@@ -178,7 +178,7 @@ def main():
     categories = [{"symbol": int(a), "count": float(sum(g.symbol_yields[a].values())),
                    "yields": g.symbol_yields[a].most_common(8)} for a in by_size]
     chunks = Counter()
-    for tokens, tree in zip(learner.sentences, learner.trees):
+    for tokens, tree in zip(learner.experiences, learner.trees):
         for (i, j) in tree.brackets():
             if j - i >= 2 and (i, j) not in tree.roots:
                 chunks[" ".join(tokens[i:j])] += 1

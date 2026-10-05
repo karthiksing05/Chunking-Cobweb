@@ -148,14 +148,14 @@ def gold_majority(model, g, examples, condition) -> dict:
     gold = [cfg.gold_labels(e.tokens, e.tree) for e in examples]
     mem = model.memory
     votes = defaultdict(Counter)
-    for e, (sid, span) in enumerate(zip(mem.sentence_of, mem.span)):
+    for e, (sid, span) in enumerate(zip(mem.experience_of, mem.span)):
         votes[int(g.elem_symbol[e])][gold[sid].get(span, "?")] += mem.weight[e]
     return {s: c.most_common(1)[0][0] for s, c in votes.items()}
 
 
 def yield_text(mem, e) -> str:
     i, j = mem.span[e]
-    toks = mem.sentences[mem.sentence_of[e]][i:j]
+    toks = mem.experiences[mem.experience_of[e]][i:j]
     return " ".join(toks) if len(toks) <= 3 else " ".join(toks[:2] + ["…"] + toks[-1:])
 
 
@@ -167,9 +167,9 @@ def fig_element():
     names, gold = symbol_names(g), gold_majority(model, g, train, "small")
     mem = model.memory
     sid = 0
-    elems = [e for e in range(len(mem)) if mem.sentence_of[e] == sid]
+    elems = [e for e in range(len(mem)) if mem.experience_of[e] == sid]
     by_span = {mem.span[e]: e for e in elems}
-    tokens = mem.sentences[sid]
+    tokens = mem.experiences[sid]
     n = len(tokens)
     focus = by_span[(n - 2, n)]                       # the object noun phrase
     labels = [g.elem_symbol, g.elem_fine]
@@ -660,10 +660,9 @@ def relational_characters(n_train: int = 2000):
         from trellis2.characters import (CharacterMemory, default_ids_path, load_characters,
                                          parse_prefix, to_relational)
         chars, _ = load_characters(default_ids_path(), seed=SEED)
-        memory = CharacterMemory()
-        model = Trellis2(seed=SEED, memory=memory)
+        model = Trellis2(seed=SEED, memory=CharacterMemory())
         for c in chars[:n_train]:
-            memory.add_structure(to_relational(parse_prefix(c.tokens)))
+            model.learn(to_relational(parse_prefix(c.tokens)))
         _RELATIONAL[n_train] = (model, model.consolidate())
     return _RELATIONAL[n_train]
 

@@ -43,7 +43,7 @@ from typing import Dict, List, Optional, Sequence, Set, Tuple
 import numpy as np
 
 from .data import Tree
-from .grammar import UNK
+from .grammar import inside_of_analysis
 from .memory import ROOT, Memory, chunk_attrs
 
 ARITY = {"⿰": 2, "⿱": 2, "⿴": 2, "⿵": 2, "⿶": 2, "⿷": 2, "⿸": 2, "⿹": 2, "⿺": 2,
@@ -253,10 +253,13 @@ class CharacterMemory(Memory):
         self.first: List[str] = []
         self.last: List[str] = []
 
-    def add_structure(self, node, weight: float = 1.0) -> None:
+    # A character is recorded, drawn and coded as its relational tree, which
+    # is both the experience and its analysis.
+    def add(self, experience, analysis=None, weight: float = 1.0) -> None:
         """Record every element of a character's relational tree, bottom up."""
-        sid = len(self.sentences)
-        self.sentences.append(node)
+        node = experience if analysis is None else analysis
+        sid = len(self.experiences)
+        self.experiences.append(node)
 
         def record(n) -> int:
             if isinstance(n, str):
@@ -280,7 +283,8 @@ class CharacterMemory(Memory):
             self.top_right.append(-1)
             self.is_root.append(False)
             self.weight.append(weight)
-            self.sentence_of.append(sid)
+            self.label.append(None)
+            self.experience_of.append(sid)
             self.span.append(None)
             return e
 
@@ -297,36 +301,24 @@ class CharacterMemory(Memory):
             return self.token[e]
         return f"{self.relation[e]}{self.describe(self.left[e])}{self.describe(self.right[e])}"
 
+    def sample(self, grammar, rng: np.random.Generator, max_depth: int = 12, **kw):
+        """A relational tree read off the grammar: one tree from the start row."""
+        g = grammar
 
-def structure_log_prob(g, node) -> float:
-    """ln P(relational tree) under a grammar: the inside pass over the known
-    structure, summing over every assignment of categories."""
-    rel_index = {r: i for i, r in enumerate(g.relations)}
-    unk = g.tok_index[UNK]
+        def expand(sym, depth):
+            c = int(rng.choice(g.M, p=g.U[sym]))
+            if rng.random() < g.pk[c] or depth >= max_depth:
+                return g.vocab[int(rng.choice(len(g.vocab), p=g.E[c]))]
+            b, d = int(rng.choice(g.K, p=g.Lt[c])), int(rng.choice(g.K, p=g.Rt[c]))
+            rel = g.relations[int(rng.choice(len(g.relations), p=g.Rel[c]))]
+            return (rel, expand(b, depth + 1), expand(d, depth + 1))
+        return expand(int(rng.choice(g.K, p=g.S)), 0)
 
-    def inside(n):
-        if isinstance(n, str):
-            v = g.U @ (g.pk * g.E[:, g.tok_index.get(n, unk)])
-            scale = 0.0
-        else:
-            lx, vx = inside(n[1])
-            ly, vy = inside(n[2])
-            v = g.U @ (g.qk * g.Rel[:, rel_index[n[0]]] * (g.Lt @ vx) * (g.Rt @ vy))
-            scale = lx + ly
-        total = v.sum()
-        return scale + np.log(total), v / total
-
-    scale, v = inside(node)
-    return float(scale + np.log(v @ g.S) + g.log_whole)
-
-
-def sample_structure(g, rng: np.random.Generator, max_depth: int = 12):
-    """A relational tree read off the grammar: one tree from the start row."""
-    def expand(sym, depth):
-        c = int(rng.choice(g.M, p=g.U[sym]))
-        if rng.random() < g.pk[c] or depth >= max_depth:
-            return g.vocab[int(rng.choice(len(g.vocab), p=g.E[c]))]
-        b, d = int(rng.choice(g.K, p=g.Lt[c])), int(rng.choice(g.K, p=g.Rt[c]))
-        rel = g.relations[int(rng.choice(len(g.relations), p=g.Rel[c]))]
-        return (rel, expand(b, depth + 1), expand(d, depth + 1))
-    return expand(int(rng.choice(g.K, p=g.S)), 0)
+    def log_prob(self, grammar, experience, analysis=None) -> float:
+        """ln P(relational tree) under the grammar: the inside pass over the
+        known structure, summing over every assignment of categories."""
+        g = grammar
+        node = experience if analysis is None else analysis
+        scale, v = inside_of_analysis(g, node, parts=lambda n: None if isinstance(n, str) else (n[1], n[2]),
+                                      token=lambda n: n, relation=lambda n: n[0])
+        return float(scale + np.log(v @ g.S) + g.log_whole)

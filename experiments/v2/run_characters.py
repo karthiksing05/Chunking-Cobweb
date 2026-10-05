@@ -54,8 +54,7 @@ sys.path.insert(0, os.path.join(ROOT, "src"))
 from trellis2 import Trellis2  # noqa: E402
 from trellis2.characters import (OPERATORS, CharacterMemory, canonical, default_ids_path,  # noqa: E402
                                  from_relational, load_characters, parse_prefix, placements,
-                                 sample_structure, structure_log_prob, structure_tokens,
-                                 to_relational)
+                                 structure_tokens, to_relational)
 from trellis2.treebank import evaluable  # noqa: E402
 from trellis2.unsupervised import UnsupervisedLearner  # noqa: E402
 
@@ -122,12 +121,12 @@ def evaluate(chart_of, generate, train, test, real, attested, n_gen, seed) -> di
             "test_bits_per_character": bits / len(test), "generation": share, "examples": examples}
 
 
-def evaluate_relational(g, train, test, real, attested, n_gen, seed) -> dict:
+def evaluate_relational(model, train, test, real, attested, n_gen, seed) -> dict:
     """Held-out bits of the known structures (the inside pass over each tree);
     generated trees are checked in the same canonical form as the real ones."""
-    bits = -sum(structure_log_prob(g, to_relational(parse_prefix(c.tokens))) for c in test) / LN2
-    rng = np.random.default_rng(seed)
-    structures = [from_relational(sample_structure(g, rng)) for _ in range(n_gen)]
+    bits = -sum(model.log_prob(to_relational(parse_prefix(c.tokens))) for c in test) / LN2
+    samples, _ = model.generate(n_gen, np.random.default_rng(seed))
+    structures = [from_relational(tree) for tree in samples]
     trained = {canonical(parse_prefix(c.tokens)) for c in train}
     share, examples = tally_generated(structures, trained, real, attested, n_gen)
     return {"omission": None, "commission": None, "test_bits_per_character": bits / len(test),
@@ -146,10 +145,9 @@ def run(mode: str, seed: int, n_train: int, n_test: int, n_gen: int, path: str) 
         placements(canon(parse_prefix(c.tokens)), attested)
     t0 = time.time()
     if mode == "relational":
-        memory = CharacterMemory()
-        model = Trellis2(seed=seed, memory=memory)
+        model = Trellis2(seed=seed, memory=CharacterMemory())
         for c in train:
-            memory.add_structure(to_relational(parse_prefix(c.tokens)))
+            model.learn(to_relational(parse_prefix(c.tokens)))
         g = model.consolidate()
     elif mode == "supervised":
         model = Trellis2(seed=seed)
@@ -165,7 +163,7 @@ def run(mode: str, seed: int, n_train: int, n_test: int, n_gen: int, path: str) 
         chart_of, generate = learner.chart, learner.generate
     seconds = time.time() - t0
     if mode == "relational":
-        out = evaluate_relational(g, train, test, real, attested, n_gen, seed)
+        out = evaluate_relational(model, train, test, real, attested, n_gen, seed)
     else:
         out = evaluate(chart_of, generate, train, test, real, attested, n_gen, seed)
     out.update(mode=mode, seed=seed, train=n_train, test=n_test, seconds=seconds,

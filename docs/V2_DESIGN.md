@@ -3,7 +3,7 @@
 Status: first implementation, October 2026, on branch `inside-outside`.
 
 - Code: `src/trellis2/`
-- Tests: `tests/trellis2/` (37, including brute-force checks of the parser over whole trees and forests, exactness checks of the search, the compiled Cobweb against its Python reference, the chess domain's star, scan code and read context, and the relational characters' inside pass)
+- Tests: `tests/trellis2/` (43, including brute-force checks of the parser over whole trees and forests, exactness checks of the search, the compiled Cobweb against its Python reference, the chess domain's star, scan code and read context, the relational characters' inside pass, and, in every domain, that the grammar draws experiences as often as its code says)
 - Experiments: `experiments/v2/`
 - Background: [the literature behind v2](#background-the-literature-behind-v2), condensed from the October 2026 review (the full report and notes are in the git history, commit `fbe61901`)
 - **The framework explained end to end, with figures: [`FRAMEWORK.md`](FRAMEWORK.md)**
@@ -33,6 +33,10 @@ factored PCFG  P(A→w) = Σc U[A,c] pk[c] E[c,w],   P(A→B C) = Σc U[A,c](1�
    ├── generation:  top-down sampling from the same grammar
    └── learning:    code length of the derivations decides the cuts
 ```
+
+### Domains: one interface (`memory.py`, `model.py`)
+
+A domain says what an experience is, and nothing else. Its `Memory` subclass records an analysed experience element by element (`add`), names the relations that join two parts (`relations`), says what the representation hierarchy sees of an element besides its chunk context (`surface`: the context window), codes the top level in the domain's reading order (`top_level_nats`, `layout_nats`, `top_level_tables`), and draws and codes an experience with the grammar (`sample`, `log_prob`). For experiences that arrive without analyses, a `Learner` subclass supplies the structure search of the night (`sleep`) and the analysis of a new experience (`analyse`). Sentences use `Memory` and `UnsupervisedLearner`, characters `CharacterMemory` (their structure is given), chess positions `BoardMemory` and `ChessLearner`. Chunk context, both hierarchies, the cuts, the grammar and its code, and consolidation are shared, and every experiment goes through the same calls: `learn`, `consolidate`, `generate`, `log_prob` with analyses; `observe`, `sleep`, `generate`, `log_prob` without. FRAMEWORK.md, section 13, tabulates the three domains.
 
 ### Representation instances (`memory.py`)
 
@@ -313,7 +317,7 @@ Code: `characters.py`, `experiments/v2/run_characters.py`. CJKVI IDS (under `dat
 
 The bigram row samples sequences from a maximum-likelihood token bigram trained on the same characters.
 
-**Operators as relations** (2026-10-04). Written as tokens, an operator is a word of the sequence, and whether a part goes on the right or at the bottom is decided by an operator two or more tokens back, out of reach of the part's description. With operators as tokens, one large category mixed right-side and bottom components, and only half of the generated characters placed every component where a real character does. Read as a relational tree, a character is parts joined by relations, as pieces are on a board: 湖 = [氵 ⿰ [古 ⿰ 月]] (`CharacterMemory`). The operator is the relation of a composite and an entry of the grammar's relation table, and the representation hierarchy sees each part's **slot**: the operator that places it and which part it is (`⿰:0`, a left part). A three-part operator is written as two joins of its two-part counterpart, which lays the parts out the same way (⿲ A B C = ⿰ A ⿰ B C), so every generated tree is a well-formed character; real characters are compared in the same form. The held-out code is the inside pass over each known structure (`structure_log_prob`). It is comparable with the token models' codes because a prefix sequence and its structure determine each other.
+**Operators as relations** (2026-10-04). Written as tokens, an operator is a word of the sequence, and whether a part goes on the right or at the bottom is decided by an operator two or more tokens back, out of reach of the part's description. With operators as tokens, one large category mixed right-side and bottom components, and only half of the generated characters placed every component where a real character does. Read as a relational tree, a character is parts joined by relations, as pieces are on a board: 湖 = [氵 ⿰ [古 ⿰ 月]] (`CharacterMemory`). The operator is the relation of a composite and an entry of the grammar's relation table, and the representation hierarchy sees each part's **slot**: the operator that places it and which part it is (`⿰:0`, a left part). A three-part operator is written as two joins of its two-part counterpart, which lays the parts out the same way (⿲ A B C = ⿰ A ⿰ B C), so every generated tree is a well-formed character; real characters are compared in the same form. The held-out code is the inside pass over each known structure (`CharacterMemory.log_prob`). It is comparable with the token models' codes because a prefix sequence and its structure determine each other.
 
 - **Categories become classes of position.** Top components (100% on top), bottom components (88%), left-side radicals (氵 木 亻 扌 言, 100%), right-side components (100%), overlaid strokes, upper-left frames (广 尸 厂 疒, 99%), and enclosed parts (100%).
 - **Coherence.** 84% of generated characters place every component where some real character places it (52% with operators as tokens), every one is well formed, 5.3% are held-out real characters rediscovered, and 77% are novel and valid. The code is also shorter: 30.3 bits per held-out character against 31.9.

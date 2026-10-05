@@ -52,9 +52,10 @@ from typing import Dict, Hashable, Iterator, List, Optional, Sequence, Tuple
 
 import numpy as np
 
-from .grammar import Grammar, dm_code
+from .grammar import Grammar, inside_of_analysis
+from .mdl import dm_code
 from .memory import Memory, chunk_attrs
-from .model import Trellis2
+from .model import Learner
 
 Square = Tuple[int, int]            # (file 0-7, rank 0-7)
 Position = Dict[Square, str]        # square -> piece token
@@ -171,16 +172,21 @@ def render(node: Node, position: Position) -> str:
 # --------------------------------------------------------------------------- #
 # The context of the square-by-square read
 # --------------------------------------------------------------------------- #
+def scan_row(i: int, placed: Counter, features: Sequence[Feature]) -> int:
+    """The row of square i's read: the square, and for each feature whether
+    at least m pieces of its kind are among those ``placed`` before it."""
+    r = i
+    for kind, m in features:
+        r = r * 2 + (placed[kind] >= m)
+    return r
+
+
 def scan_rows(position: Position, features: Sequence[Feature]) -> np.ndarray:
-    """The row of every square's read: the square, and for each feature
-    whether at least m pieces of its kind stand on earlier squares."""
+    """The row of every square's read."""
     rows = np.zeros(64, dtype=np.int64)
     placed: Counter = Counter()
     for i in range(64):
-        r = i
-        for kind, m in features:
-            r = r * 2 + (placed[kind] >= m)
-        rows[i] = r
+        rows[i] = scan_row(i, placed, features)
         t = position.get((i % 8, i // 8))
         if t is not None:
             placed[t] += 1
@@ -246,13 +252,15 @@ class BoardMemory(Memory):
         self.features = list(features)
         self.anchor: List[Square] = []
         self.members: List[frozenset] = []
-        self.label: List[Hashable] = []      # the analysis' own label of each element
         self._scan = None
 
-    def add_board(self, position: Position, tops: Sequence[Node], weight: float = 1.0) -> None:
+    # A position is recorded with its analysis (its top-level elements),
+    # drawn from the grammar square by square, and coded the same way.
+    def add(self, experience: Position, analysis: Sequence[Node], weight: float = 1.0) -> None:
         """Record every element of an analysed position, bottom up."""
-        pid = len(self.sentences)
-        self.sentences.append(position)
+        position, tops = experience, analysis
+        pid = len(self.experiences)
+        self.experiences.append(position)
         self._scan = None
 
         def record(node: Node) -> int:
@@ -284,7 +292,7 @@ class BoardMemory(Memory):
             self.top_right.append(-1)
             self.is_root.append(False)
             self.weight.append(weight)
-            self.sentence_of.append(pid)
+            self.experience_of.append(pid)
             self.span.append(None)
             return e
 
@@ -292,7 +300,7 @@ class BoardMemory(Memory):
             self.is_root[record(node)] = True
 
     def surface(self, e: int):
-        position = self.sentences[self.sentence_of[e]]
+        position = self.experiences[self.experience_of[e]]
         sq = self.anchor[e]
         context = star(position, sq, self.members[e])
         x = {"rays": {f"{d}:{context[d]}": 1 / 8 for d, _ in RAYS},
@@ -319,10 +327,10 @@ class BoardMemory(Memory):
             at = {}
             for e, root in enumerate(self.is_root):
                 if root:
-                    at[(self.sentence_of[e], self.anchor[e])] = e
-            weight = {self.sentence_of[e]: self.weight[e] for e in at.values()}
+                    at[(self.experience_of[e], self.anchor[e])] = e
+            weight = {self.experience_of[e]: self.weight[e] for e in at.values()}
             q, el, w = [], [], []
-            for pid, position in enumerate(self.sentences):
+            for pid, position in enumerate(self.experiences):
                 rows = scan_rows(position, self.features)
                 for i in range(64):
                     sq = (i % 8, i // 8)
@@ -345,6 +353,80 @@ class BoardMemory(Memory):
         counts = np.zeros((64 * 2 ** len(self.features), K + 1))
         np.add.at(counts, (q, outcome), w)
         return counts
+
+    def layout_nats(self, alpha: float) -> float:
+        """A board's read codes every square, so nothing is left to code."""
+        return 0.0
+
+    def sample(self, grammar, rng: np.random.Generator, max_depth: int = 12, **kw):
+        """A position read off the grammar square by square: (position,
+        top-level elements), or None if a chunk would put a piece off the
+        board or on an occupied square."""
+        g = grammar
+        position: Position = {}
+        tops: List[Node] = []
+
+        def expand(sym: int, sq: Square, depth: int):
+            c = int(rng.choice(g.M, p=g.U[sym]))
+            if rng.random() < g.pk[c] or depth >= max_depth:
+                tok = g.vocab[int(rng.choice(len(g.vocab), p=g.E[c]))]
+                if not on_board(sq) or sq in position or tok not in TOKENS:
+                    return None
+                position[sq] = tok
+                return (sym, sq)
+            b, d = int(rng.choice(g.K, p=g.Lt[c])), int(rng.choice(g.K, p=g.Rt[c]))
+            rel = g.relations[int(rng.choice(len(g.relations), p=g.Rel[c]))]
+            x = expand(b, sq, depth + 1)
+            if x is None:
+                return None
+            dx, dy = OFFSET[rel]
+            y = expand(d, (sq[0] + dx, sq[1] + dy), depth + 1)
+            return None if y is None else (sym, (x, rel, y))
+
+        placed: Counter = Counter()       # the pieces on the squares read so far
+        for i in range(64):
+            sq = (i % 8, i // 8)
+            if sq not in position:
+                o = int(rng.choice(g.K + 1, p=g.Q[scan_row(i, placed, self.features)]))
+                if o < g.K:
+                    node = expand(o, sq, 0)
+                    if node is None:
+                        return None
+                    tops.append(node)
+            if sq in position:
+                placed[position[sq]] += 1
+        return position, tops
+
+    def log_prob(self, grammar, experience, analysis) -> float:
+        """ln P(position) under the grammar, given its analysis (its top-level
+        elements): the read square by square, each square empty or the
+        anchor of an element whose inside pass sums over its categories;
+        squares that an earlier chunk covers are not read."""
+        g, position = grammar, experience
+        rows = scan_rows(position, self.features)
+        anchored = {anchor_of(n): n for n in analysis}
+        lp = 0.0
+        for i in range(64):
+            sq = (i % 8, i // 8)
+            row = g.Q[rows[i]]
+            if sq in anchored:
+                scale, v = inside_of_analysis(
+                    g, anchored[sq], parts=lambda n: (n[1][0], n[1][2]) if is_chunk(n) else None,
+                    token=lambda n: position[n[1]], relation=lambda n: n[1][1])
+                lp += scale + np.log(row[:g.K] @ v)
+            elif sq not in position:
+                lp += np.log(row[g.K])
+        return float(lp)
+
+    def top_level_tables(self, s: np.ndarray, K: int, alpha: float):
+        """The read's rows Q[row, A] (column K: an empty square), and the
+        symbols of top-level elements (S)."""
+        root = np.array(self.is_root, dtype=bool)
+        n_top = np.bincount(s[root], weights=np.array(self.weight)[root], minlength=K)
+        n_Q = self.scan_counts(s, K)
+        return ({"S": (n_top + alpha) / (n_top + alpha).sum(),
+                 "Q": (n_Q + alpha) / (n_Q + alpha).sum(axis=1, keepdims=True)},
+                [(n_Q, K + 1)])
 
 
 # --------------------------------------------------------------------------- #
@@ -553,29 +635,30 @@ class BoardSearch:
 # --------------------------------------------------------------------------- #
 # Learning, and sampling positions from the grammar
 # --------------------------------------------------------------------------- #
-class ChessLearner:
-    """TRELLIS v2 on positions alone: the structure search proposes chunks,
-    consolidation into the two hierarchies forms the categories and rule
-    classes, and the grammar read off them generates positions."""
+class ChessLearner(Learner):
+    """Positions by day and by night: by night, the read's context is chosen
+    by description length, the structure search proposes chunks, and the
+    positions so analysed are consolidated into the two hierarchies; a new
+    position is analysed by replaying the chunk moves."""
 
     def __init__(self, seed: int = 0, alpha: float = 0.001, max_steps: int = 500,
                  context: bool = True):
-        self.seed, self.alpha, self.max_steps = seed, alpha, max_steps
+        super().__init__(seed=seed, alpha=alpha)
+        self.max_steps = max_steps
         # Whether the square-by-square read learns its context (it does by
         # default; without it every square is read on its own).
         self.context = context
         self.features: List[Feature] = []
-        self.model: Optional[Trellis2] = None
         self.search: Optional[BoardSearch] = None
-        self.analyses: List[List[Node]] = []
-        self.history: List[Dict] = []
 
-    def sleep(self, positions: Sequence[Position]) -> Grammar:
+    def sleep(self) -> Grammar:
+        """Learn from every position observed so far: the read's context, the
+        structure search, consolidation into the two hierarchies."""
+        positions = self.experiences
         t0 = time.time()
         self.features = select_context(positions, self.alpha) if self.context else []
         search = BoardSearch(positions, self.alpha, self.features)
-        flat = search.bits()
-        self.history.append({"stage": "flat", "bits": flat, "seconds": 0.0})
+        self.history.append({"stage": "flat", "bits": search.bits(), "seconds": 0.0})
 
         def log(step, key, n, bits):
             self.history.append({"stage": "chunk", "move": f"[{key[0]} {key[1]} {key[2]}] x{n}",
@@ -583,59 +666,17 @@ class ChessLearner:
         search.run(self.max_steps, log)
         self.search = search
         self.analyses = search.analyses()
-        mem = BoardMemory(features=self.features)
-        model = Trellis2(seed=self.seed, alpha=self.alpha, memory=mem)
-        for position, tops in zip(positions, self.analyses):
-            mem.add_board(position, tops)
-        ids: Dict[Hashable, int] = {}
-        labels = np.array([ids.setdefault(lab, len(ids)) for lab in mem.label])
-        g = model.consolidate(init_labels=[labels] * mem.granularities)
+        self.model = self.fit(self.analyses, BoardMemory(features=self.features))
+        g = self.model.grammar
         self.history.append({"stage": "consolidate", "bits": g.info["total bits"],
                              "seconds": time.time() - t0})
-        self.model = model
         return g
 
-    @property
-    def grammar(self) -> Grammar:
-        return self.model.grammar
-
-    def sample(self, rng: np.random.Generator, max_depth: int = 12):
-        """A position read off the grammar square by square, or None if a
-        chunk would put a piece off the board or on an occupied square."""
-        g = self.grammar
-        position: Position = {}
-        tops: List[Node] = []
-
-        def expand(sym: int, sq: Square, depth: int):
-            c = int(rng.choice(g.M, p=g.U[sym]))
-            if rng.random() < g.pk[c] or depth >= max_depth:
-                tok = g.vocab[int(rng.choice(len(g.vocab), p=g.E[c]))]
-                if not on_board(sq) or sq in position or tok not in TOKENS:
-                    return None
-                position[sq] = tok
-                return (sym, sq)
-            b, d = int(rng.choice(g.K, p=g.Lt[c])), int(rng.choice(g.K, p=g.Rt[c]))
-            rel = g.relations[int(rng.choice(len(g.relations), p=g.Rel[c]))]
-            x = expand(b, sq, depth + 1)
-            if x is None:
-                return None
-            dx, dy = OFFSET[rel]
-            y = expand(d, (sq[0] + dx, sq[1] + dy), depth + 1)
-            return None if y is None else (sym, (x, rel, y))
-
-        for i in range(64):
-            sq = (i % 8, i // 8)
-            if sq in position:
-                continue
-            earlier = {s: t for s, t in position.items() if s[1] * 8 + s[0] < i}
-            o = int(rng.choice(g.K + 1, p=g.Q[scan_rows(earlier, self.features)[i]]))
-            if o == g.K:
-                continue
-            node = expand(o, sq, 0)
-            if node is None:
-                return None
-            tops.append(node)
-        return position, tops
+    def analyse(self, position: Position) -> List[Node]:
+        """A position's top-level elements: the learned chunk moves replayed."""
+        search = BoardSearch([position], self.alpha, self.features)
+        search.replay(self.search.moves)
+        return search.analyses()[0]
 
 
 

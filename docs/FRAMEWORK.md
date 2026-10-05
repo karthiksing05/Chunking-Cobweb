@@ -31,7 +31,7 @@ This document explains the whole framework: what is stored, how the grammar is f
 
 - **Concepts and chunks are two aspects of one representation.** "the dog" is a chunk, made of *the* and *dog*. It is also an instance of a concept, the things that can be the subject of *saw*. TRELLIS v2 records both aspects of every element and lets each organize its own hierarchy.
 - **Two hierarchies, each holding primitives and composites.** The *representation hierarchy* groups elements by behaviour. The *composition hierarchy* groups them by make-up. Single words and multi-word chunks live in the same trees. There are no separate trees for words, phrases or non-constituents. Both are load-bearing. Read straight off the unsupervised search's analyses, the grammar's generations break the target grammar 47–56% of the time on the TERM corpora; once the same analyses are consolidated into the two hierarchies and re-analysed, 0.1–4.3% ([section 10](#learning-from-sentences-alone)).
-- **A domain brings its context window and its relations.** What the representation hierarchy sees around an element depends on the data: the word on either side in a sentence, a star of rays and knight jumps on a chess board. What joins a chunk's parts depends on it too: order in a sentence, a direction and a distance on a board. Everything else is shared.
+- **A domain brings its context window, its relations and its reading order.** What the representation hierarchy sees around an element depends on the data: the word on either side in a sentence, a star of rays and knight jumps on a chess board, a component's slot in a character. What joins a chunk's parts depends on it too: order in a sentence, a direction and a distance on a board, a spatial operator in a character. So does the order in which a whole experience is read: a sentence left to right, as one tree or a forest of pieces; a board square by square. Everything else is shared: the chunk context, both hierarchies, their cuts, the grammar and its code, parsing, generation and learning ([section 13](#one-framework-three-domains)).
 - **The grammar is a cut through each hierarchy.** A cut is a set of concepts that partitions the elements. The cut through the representation hierarchy gives the categories (symbols); the cut through the composition hierarchy gives the chunk types (rule classes).
 - **One model for parsing, generation and learning.** The grammar is a normalized probabilistic grammar. The parser computes posteriors under it, generation samples from it, and its code lengths decide the cuts. There are no separate pools, filters or fallbacks.
 - **Description length replaces thresholds.** A category, a chunk type or a structure exists only if it shortens the description of the data, including the description of the grammar itself. "Minimize chunks while preserving performance" is the learning objective, not a heuristic.
@@ -453,16 +453,16 @@ The postulates carry over as follows:
 | `memory.py` | element records, representation instances (surface context + chunk context), the representation hierarchy by replay |
 | `grammar.py` | cuts, their search, model merging, the composition hierarchy, the factored grammar (with typed relations when a domain has them) and its code |
 | `chart.py` | inside-outside over one tree or a forest of pieces, posteriors, minimum-risk and Viterbi decoding, sampling |
-| `model.py` | `Trellis2`: learn from analysed sentences, consolidate, parse, generate (a domain may bring its own memory) |
+| `model.py` | `Trellis2`: learn from analysed experiences, consolidate, parse, code, generate (a domain brings its own memory); `Learner`: learning from experiences alone, by day and by night, with a domain's structure search |
 | `mdl.py` | Elias codes, Dirichlet-multinomial rows, the model/data split |
 | `mdl_search.py` | symbolic analyses, word classes, the exact-scored beam search |
-| `unsupervised.py` | `UnsupervisedLearner`: learning by day and by night |
+| `unsupervised.py` | `UnsupervisedLearner`: sentences by day and by night (the chunk-and-merge search, consolidation, re-analysis) |
 | `evaluation.py` | target-grammar recognizer, bracket tallies |
 | `data.py` | trees, corpora, the v1 splits, the six conditions |
 | `treebank.py` | Penn Treebank sentences (WSJ10, gold tags): cleaning, gold and base-phrase brackets |
 | `characters.py` | Chinese characters from IDS: prefix sequences and gold trees; relational trees with operators as relations (`CharacterMemory`, the inside pass over a known structure, sampling); checks for generated characters |
 | `stories.py` | simple English from TinyStories: sentences over a small vocabulary |
-| `chess.py` | chess positions: the star context, typed relations, the square-by-square read and the context it learns, the relational search, learning and sampling positions |
+| `chess.py` | chess positions: the star context, typed relations, the square-by-square read and the context it learns (`BoardMemory`), the relational search, `ChessLearner` |
 
 Learning from analysed sentences:
 
@@ -493,16 +493,56 @@ for i, ex in enumerate(train):
 print(learner.parse(test[0].tokens).to_string(test[0].tokens))
 ```
 
+### One framework, three domains
+
+A domain says what an experience is. A subclass of `Memory` supplies the first four things below, and a subclass of `Learner` the fifth, for experiences that arrive without analyses. Everything else is shared code: the chunk context, the two hierarchies and their cuts, the grammar and its code, and consolidation. The same grammar tables serve every domain; a domain with typed relations adds the relation table `Rel`, and the board adds the read's table `Q`.
+
+| A domain supplies | Sentences (`Memory`) | Characters (`CharacterMemory`) | Chess positions (`BoardMemory`) |
+|---|---|---|---|
+| its elements and how two parts join (`add`, `relations`) | tokens, joined in order | components, joined by ten spatial operators (a three-part operator is two joins) | pieces, joined by 32 forward relations: a direction and a distance, or a knight's jump |
+| its context window, what the representation hierarchy sees besides chunk context (`surface`) | the token on either side; first and last token; kind | the slot (the operator that places it, and which part it is); first and last component; its own operator | the star (the first piece along each queen ray and on each knight square); the anchor piece; its square |
+| its reading order, how a whole experience is laid out and coded (`top_level_nats`, `layout_nats`, `top_level_tables`) | left to right, as one tree or a forest of pieces | one tree | square by square, each square in the light of the pieces on earlier squares |
+| how an experience is drawn from the grammar and coded (`sample`, `log_prob`) | the grammar's sampler; the inside pass over every analysis | a tree from the start row; the inside pass over the known structure | the read, square by square; the inside pass over each chunk of the analysis |
+| a structure search, for experiences that arrive without analyses (a `Learner`) | `UnsupervisedLearner`: chunk-and-merge beam from word classes, consolidation, re-analysis | not needed: a character's structure is given | `ChessLearner`: the read's context, then chunk moves under the scan code |
+
+With analyses given, every domain uses `Trellis2`; from experiences alone, every domain's learner has the same calls:
+
+```python
+from trellis2 import Trellis2
+from trellis2.characters import CharacterMemory
+from trellis2.chess import ChessLearner
+
+model = Trellis2(memory=CharacterMemory())   # the default memory is that of sentences
+for structure in characters:                 # e.g. ("⿰", "氵", ("⿰", "古", "月")) for 湖
+    model.learn(structure)                   # a character is its own analysis
+model.consolidate()
+samples, _ = model.generate(100)
+bits = -model.log_prob(characters[0]) / log(2)
+
+learner = ChessLearner(seed=13)              # sentences: UnsupervisedLearner
+for position in positions:
+    learner.observe(position)                # day: store
+learner.sleep()                              # night: search, consolidate
+samples, _ = learner.generate(100)           # [(position, analysis), ...]
+bits = -learner.log_prob(positions[0]) / log(2)
+```
+
+`tests/trellis2/test_unified.py` runs sentences, characters and chess positions through these calls. In every domain it checks that the grammar draws each experience as often as its code says it should.
+
+### Installing Cobweb
+
 The hierarchies run on the compiled `cobweb_cu` of cobweb-private (branch `karthik-experimental`). Install cobweb-private, or build the target and put its build directory on the Python path:
 
 ```
 cd cobweb-private && cmake -S . -B build && cmake --build build --target cobweb_cu
 ```
 
-Reproducing everything (times on a 12-core laptop):
+### Reproducing
+
+Every test and experiment (times on a 12-core laptop):
 
 ```
-python -m pytest tests/trellis2 -q                                          # 37 tests, seconds
+python -m pytest tests/trellis2 -q                                          # 43 tests, seconds
 python experiments/v2/run_synthetic.py --out experiments/v2/results/main    # supervised curves, ~6 min
 python experiments/v2/plot_learning_curves.py experiments/v2/results/main
 python experiments/v2/run_unsupervised.py --seeds 13,17                     # ~10 min

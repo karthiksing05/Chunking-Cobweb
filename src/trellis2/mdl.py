@@ -30,6 +30,29 @@ from scipy.special import gammaln
 LN2 = math.log(2.0)
 
 
+def dm_code(groups: np.ndarray, keys: np.ndarray, weights: np.ndarray,
+            alphabet: int, alpha: float) -> float:
+    """-log marginal likelihood (nats) of ``keys`` under one Dirichlet-multinomial
+    per group, each over ``alphabet`` outcomes with concentration ``alpha``."""
+    if groups.size == 0:
+        return 0.0
+    stride = np.int64(alphabet)
+    gk = groups.astype(np.int64) * stride + keys.astype(np.int64)
+    uniq, inv = np.unique(gk, return_inverse=True)
+    cnt = np.bincount(inv, weights=weights)
+    _, ginv = np.unique(uniq // stride, return_inverse=True)
+    totals = np.bincount(ginv, weights=cnt)
+    a_tot = alphabet * alpha
+    return float(np.sum(gammaln(totals + a_tot) - gammaln(a_tot))
+                 - np.sum(gammaln(cnt + alpha) - gammaln(alpha)))
+
+
+def beta_nats(n: np.ndarray, alpha: float) -> float:
+    """Code (nats) of the counts of a two-outcome row (Beta-binomial)."""
+    return float(gammaln(n.sum() + 2 * alpha) - gammaln(2 * alpha)
+                 - np.sum(gammaln(n + alpha) - gammaln(alpha)))
+
+
 def elias_delta_bits(n: int) -> float:
     """Length of Elias' delta code for a positive integer (a universal code)."""
     if n < 1:

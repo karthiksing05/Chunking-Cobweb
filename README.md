@@ -6,7 +6,7 @@ Work with Dr. Pat Langley and Dr. Chris MacLellan (ISLE internship) on a computa
 
 TRELLIS v2 keeps concepts and chunks in two Cobweb hierarchies: the **representation hierarchy** (how elements behave) and the **composition hierarchy** (what they are made of). It reads one probabilistic grammar off them by minimum description length, and learns from analysed experiences or from experiences alone, by day and by night. The two hierarchies are the core of v2: every other part is read off them or feeds them.
 
-The same machinery runs on sentences, on Chinese characters, and on chess positions. In the last two, parts are joined by typed relations instead of left-to-right order: a character's components by its spatial operators (left of, above, inside, …), a position's pieces by the directions and distances of a queen's rays and a knight's jumps.
+The same machinery runs on sentences, on Chinese characters, and on chess positions. In the last two, parts are joined by typed relations instead of left-to-right order: a character's components by its spatial operators (left of, above, inside, …), a position's pieces by the directions and distances of a queen's rays and a knight's jumps. A domain supplies only what an experience is: its elements and relations, its context window, its reading order, and how an experience is drawn and coded (and, for experiences without analyses, a structure search). The hierarchies, the grammar, parsing, generation and learning are shared ([`docs/FRAMEWORK.md`](docs/FRAMEWORK.md), section 13).
 
 ## Documentation
 

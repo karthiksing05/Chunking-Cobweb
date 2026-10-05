@@ -57,7 +57,7 @@ def test_chess_scan_code_covers_every_piece_once():
     tops = [("c", (("wR", (5, 0)), "E1", ("wK", (6, 0))))]
     tops += [(pos[sq], sq) for sq in pos if sq not in ((5, 0), (6, 0))]
     mem = BoardMemory()
-    mem.add_board(pos, tops)
+    mem.add(pos, tops)
     q, el, w = mem._scan_arrays()
     # 64 squares, minus the king's square, which the chunk anchored at f1 covers.
     assert len(q) == 63 and (q == 6).sum() == 0
@@ -75,7 +75,7 @@ def test_characters_as_relational_trees():
     assert from_relational(to_relational(structure)) == structure
     assert canonical(("⿲", "彳", "山", "攵")) == ("⿰", "彳", ("⿰", "山", "攵"))
     mem = CharacterMemory()
-    mem.add_structure(to_relational(structure))
+    mem.add(to_relational(structure))
     slots = {mem.describe(e): mem.surface(e)["slot"] for e in range(len(mem.kind))}
     assert slots == {"氵": "⿰:0", "古": "⿰:0", "月": "⿰:1", "⿰古月": "⿰:1", "⿰氵⿰古月": "<root>"}
 
@@ -84,7 +84,7 @@ def test_relational_tree_probability_matches_enumeration():
     import itertools
     import math
     import numpy as np
-    from trellis2.characters import structure_log_prob
+    from trellis2.characters import CharacterMemory
     from trellis2.grammar import UNK, Grammar
     rng = np.random.default_rng(0)
 
@@ -110,7 +110,7 @@ def test_relational_tree_probability_matches_enumeration():
                     l, r = children[i]
                     p *= (1 - g.pk[c]) * g.Rel[c, rels.index(node[0])] * g.Lt[c, syms[l]] * g.Rt[c, syms[r]]
             total += p
-    assert math.isclose(structure_log_prob(g, tree), math.log(total), rel_tol=1e-9)
+    assert math.isclose(CharacterMemory().log_prob(g, tree), math.log(total), rel_tol=1e-9)
 
 
 def test_chess_read_context_counts_earlier_pieces():

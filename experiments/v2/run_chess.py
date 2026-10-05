@@ -28,6 +28,7 @@ from __future__ import annotations
 import argparse
 import io
 import json
+import math
 import os
 import re
 import subprocess
@@ -164,16 +165,20 @@ def main():
 
     t0 = time.time()
     learner = ChessLearner(seed=args.seed, alpha=args.alpha, context=not args.no_context)
-    g = learner.sleep(train)
+    for position in train:
+        learner.observe(position)
+    g = learner.sleep()
     seconds = time.time() - t0
     flat_bits = learner.history[0]["bits"] / len(train)
     search_bits = [h for h in learner.history if h["stage"] in ("flat", "chunk")][-1]["bits"] / len(train)
     held_chunks, held_flat = learner.search.held_out_bits(test)
     held_plain = BoardSearch(train, learner.alpha).code_of(BoardSearch(test, learner.alpha)) / len(test)
+    # The grammar's own code of a held-out position, given its analysis.
+    held_grammar = -sum(learner.log_prob(p) for p in test) / len(test) / math.log(2)
     context = [f"at least {m} {kind}" for kind, m in learner.features]
     print(f"context of the read: {', '.join(context)}; held out without it {held_plain:.2f} bits/position")
     print(f"{len(train)} positions, night {seconds:.0f}s: flat {flat_bits:.2f}, search {search_bits:.2f}, "
-          f"consolidated {g.info['total bits'] / len(train):.2f} bits/position; held out: chunks {held_chunks:.2f}, "
+          f"consolidated {g.info['total bits'] / len(train):.2f} bits/position; held out: grammar {held_grammar:.2f}, chunks {held_chunks:.2f}, "
           f"flat {held_flat:.2f}; {g.K} symbols, {g.info['chunk types']} chunk types", flush=True)
 
     # Chunk types in the training analyses.
@@ -203,13 +208,7 @@ def main():
     # Generation.
     rng = np.random.default_rng(args.seed)
     test_sets = [dict(p) for p in test]
-    samples, failed = [], 0
-    while len(samples) < args.n_gen:
-        s = learner.sample(rng)
-        if s is None:
-            failed += 1
-            continue
-        samples.append(s)
+    samples, failed = learner.generate(args.n_gen, rng)
     checks = Counter()
     gen_chunks = exact = 0
     for position, tops in samples:
@@ -250,7 +249,8 @@ def main():
                                      "training, TRELLIS v2 (consolidated)": g.info["total bits"] / len(train),
                                      "held out, squares on their own": held_flat,
                                      "held out, squares on their own, no context": held_plain,
-                                     "held out, learned chunks": held_chunks},
+                                     "held out, learned chunks": held_chunks,
+                                     "held out, TRELLIS v2 (the grammar)": held_grammar},
                "context of the read": context, "alpha": learner.alpha,
                "symbols": g.K, "rule classes": g.M, "chunk types (grammar)": g.info["chunk types"],
                "model bits": g.info["model bits"], "data bits": g.info["data bits"],
@@ -304,7 +304,7 @@ def main():
               f"The read has no context: every square is read on its own (α = {learner.alpha:g})."), "",
              "| Bits per position | Squares on their own | TRELLIS v2 |", "|---|---|---|",
              f"| training | {flat_bits:.2f} | {g.info['total bits'] / len(train):.2f} (search alone: {search_bits:.2f}) |",
-             f"| held out | {held_flat:.2f} | {held_chunks:.2f} (learned chunks) |", "",
+             f"| held out | {held_flat:.2f} | {held_grammar:.2f} (the grammar; the search's code with its chunks: {held_chunks:.2f}) |", "",
              f"Symbols: {g.K}; rule classes: {g.M}; chunk types: {g.info['chunk types']}. The grammar's size: "
              f"{g.info['model bits']:,.0f} model bits (and {g.info['data bits']:,.0f} data bits for the training positions).", "",
              "| Chunk type | Count | Most frequent anchors |", "|---|---|---|"]

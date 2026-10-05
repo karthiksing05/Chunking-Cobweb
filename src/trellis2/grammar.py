@@ -29,7 +29,7 @@ import numpy as np
 from scipy.special import gammaln
 
 from .cobweb import CobwebNode, CobwebTree
-from .mdl import elias_delta_bits, split_bits
+from .mdl import dm_code, elias_delta_bits, split_bits  # noqa: F401  (dm_code is re-exported)
 from .memory import Memory
 
 LN2 = float(np.log(2.0))
@@ -41,23 +41,6 @@ RELATIONAL_COMPOSITION_ATTRS = ("kind", "tok", "L", "rel", "R")
 # --------------------------------------------------------------------------- #
 # Code lengths
 # --------------------------------------------------------------------------- #
-def dm_code(groups: np.ndarray, keys: np.ndarray, weights: np.ndarray,
-            alphabet: int, alpha: float) -> float:
-    """-log marginal likelihood (nats) of ``keys`` under one Dirichlet-multinomial
-    per group, each over ``alphabet`` outcomes with concentration ``alpha``."""
-    if groups.size == 0:
-        return 0.0
-    stride = np.int64(alphabet)
-    gk = groups.astype(np.int64) * stride + keys.astype(np.int64)
-    uniq, inv = np.unique(gk, return_inverse=True)
-    cnt = np.bincount(inv, weights=weights)
-    _, ginv = np.unique(uniq // stride, return_inverse=True)
-    totals = np.bincount(ginv, weights=cnt)
-    a_tot = alphabet * alpha
-    return float(np.sum(gammaln(totals + a_tot) - gammaln(a_tot))
-                 - np.sum(gammaln(cnt + alpha) - gammaln(alpha)))
-
-
 # --------------------------------------------------------------------------- #
 # Cuts through a Cobweb tree
 # --------------------------------------------------------------------------- #
@@ -417,6 +400,37 @@ class Grammar:
         return "\n".join(lines)
 
 
+def inside_of_analysis(g: Grammar, node, parts: Callable, token: Callable,
+                       relation: Callable) -> Tuple[float, np.ndarray]:
+    """The inside pass over one known analysed element: (log scale, inside
+    vector over symbols, normalised), summing over every assignment of
+    categories and rule classes. ``parts(node)`` gives a composite's two
+    parts (None for a primitive), ``token(node)`` a primitive's token and
+    ``relation(node)`` the relation joining a composite's parts (ignored when
+    the grammar has a single relation)."""
+    unk = g.tok_index[UNK]
+    rel_index = {r: i for i, r in enumerate(g.relations or [])}
+
+    def inside(n):
+        p = parts(n)
+        if p is None:
+            v = g.U @ (g.pk * g.E[:, g.tok_index.get(token(n), unk)])
+            scale = 0.0
+        else:
+            lx, vx = inside(p[0])
+            ly, vy = inside(p[1])
+            gamma = g.qk * (g.Lt @ vx) * (g.Rt @ vy)
+            if g.Rel is not None:
+                gamma = gamma * g.Rel[:, rel_index[relation(n)]]
+            v = g.U @ gamma
+            scale = lx + ly
+        total = v.sum()
+        if total <= 0:
+            return -np.inf, np.zeros(g.K)
+        return scale + np.log(total), v / total
+    return inside(node)
+
+
 @dataclass
 class _Elements:
     """Element records as arrays (one row per learned element)."""
@@ -426,7 +440,6 @@ class _Elements:
     left: np.ndarray
     right: np.ndarray
     root: np.ndarray
-    whole: np.ndarray     # a top-level element with no top-level neighbours
     w: np.ndarray
     rel: np.ndarray       # relation id of composites (0 for primitives)
     n_rel: int            # 1 for sequences
@@ -443,8 +456,6 @@ def _elements(mem: Memory, leaves: Sequence[CobwebNode], rindex: TreeIndex,
         left=np.array(mem.left, dtype=np.int64),
         right=np.array(mem.right, dtype=np.int64),
         root=np.array(mem.is_root),
-        whole=np.array([r and a < 0 and b < 0
-                        for r, a, b in zip(mem.is_root, mem.top_left, mem.top_right)], dtype=bool),
         w=np.array(mem.weight, dtype=float),
         rel=np.array([rel_index.get(r, 0) for r in mem.relation], dtype=np.int64),
         n_rel=max(len(rel_index), 1),
@@ -458,10 +469,10 @@ def _compact(nodes_of_elements: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
 
 def _plain_pcfg_code(el: _Elements, V: int, alpha: float, mem: Memory
                      ) -> Callable[[np.ndarray], float]:
-    """Code length of the derivations under a plain PCFG over the candidate symbols."""
+    """Code length of the derivations under a plain PCFG over the candidate
+    symbols, with the domain's code of its top level."""
     prim, comp = el.prim, ~el.prim
     cl, cr = el.left[comp], el.right[comp]
-    board = hasattr(mem, "top_level_nats")
 
     def cost(leaf_to_node: np.ndarray) -> float:
         _, s = _compact(leaf_to_node[el.leafpos])
@@ -472,23 +483,8 @@ def _plain_pcfg_code(el: _Elements, V: int, alpha: float, mem: Memory
             key[comp] = V + s[cl] * K + s[cr]
         else:
             key[comp] = V + (s[cl] * K + s[cr]) * el.n_rel + el.rel[comp]
-        top = mem.top_level_nats(s, K, alpha) if board else _sentence_top_nats(el, s, K, alpha)
-        return top + dm_code(s, key, el.w, V + K * K * el.n_rel, alpha)
+        return mem.top_level_nats(s, K, alpha) + dm_code(s, key, el.w, V + K * K * el.n_rel, alpha)
     return cost
-
-
-def _sentence_top_nats(el: _Elements, s: np.ndarray, K: int, alpha: float) -> float:
-    """The symbols at a sentence's top level: the roots of sentences analysed
-    as one tree, and the pieces of forests, each from its own row."""
-    whole, piece = el.whole, el.root & ~el.whole
-    return (dm_code(np.zeros(int(whole.sum()), dtype=np.int64), s[whole], el.w[whole], K, alpha)
-            + dm_code(np.zeros(int(piece.sum()), dtype=np.int64), s[piece], el.w[piece], K, alpha))
-
-
-def _beta_nats(n: np.ndarray, alpha: float) -> float:
-    """Code of a two-outcome row (Beta-binomial, concentration alpha each)."""
-    return float(gammaln(n.sum() + 2 * alpha) - gammaln(2 * alpha)
-                 - np.sum(gammaln(n + alpha) - gammaln(alpha)))
 
 
 def _factored_code(el: _Elements, s: np.ndarray, K: int, V: int, alpha: float,
@@ -619,19 +615,6 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
     # Tables: Dirichlet-multinomial posterior predictives.
     w = el.w
     prim, comp = el.prim, ~el.prim
-    board = hasattr(mem, "top_level_nats")
-    whole, piece = (el.root, el.root & False) if board else (el.whole, el.root & ~el.whole)
-    n_start = np.bincount(s[whole], weights=w[whole], minlength=K)
-    n_piece = np.bincount(s[piece], weights=w[piece], minlength=K)
-    # Top level of a sentence: one tree or a forest; a forest of m pieces has
-    # m - 2 continues and one stop.
-    sent = np.array(mem.sentence_of)
-    m = np.bincount(sent[el.root], minlength=len(mem.sentences))
-    sent_w = np.zeros(len(mem.sentences))
-    sent_w[sent[el.root]] = w[el.root]
-    forest = m >= 2
-    n_mode = np.array([sent_w[(m == 1)].sum(), sent_w[forest].sum()])
-    n_stop_cont = np.array([sent_w[forest].sum(), (sent_w * np.maximum(m - 2, 0)).sum()])
     n_U = np.zeros((K, M))
     np.add.at(n_U, (s, c), w)
     n_prim = np.bincount(c[prim], weights=w[prim], minlength=M)
@@ -649,28 +632,22 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
 
     n_Rel = np.zeros((M, el.n_rel))
     np.add.at(n_Rel, (c[comp], el.rel[comp]), w[comp])
-    if board:
-        # A board is read square by square: the top level is the scan code.
-        total_code = mem.top_level_nats(s, K, alpha) + ccost(cindex.assign(ccut))
-        info["bits (factored grammar)"] = total_code / LN2
-    else:
-        total_code = _sentence_top_nats(el, s, K, alpha) + ccost(cindex.assign(ccut))
-        info["bits (factored grammar)"] = total_code / LN2
-        info["bits (factored grammar)"] += (_beta_nats(n_mode, alpha) + _beta_nats(n_stop_cont, alpha)) / LN2
+    # The domain's top level (a sentence: one tree or a forest of pieces; a
+    # board: read square by square), the layout that does not depend on the
+    # categories, and the derivations below it.
+    top_fields, top_counts = mem.top_level_tables(s, K, alpha)
+    total_code = mem.top_level_nats(s, K, alpha) + mem.layout_nats(alpha) + ccost(cindex.assign(ccut))
+    info["bits (factored grammar)"] = total_code / LN2
     # The receiver also needs the grammar's size; Elias codes make the total
     # an actual message length.
     info["structure bits"] = elias_delta_bits(K) + elias_delta_bits(M)
     info["total bits"] = info["bits (factored grammar)"] + info["structure bits"]
-    info["bits per sentence"] = info["total bits"] / max(len(mem.sentences), 1)
+    info["bits per sentence"] = info["total bits"] / max(len(mem.experiences), 1)
     rows = lambda table: [dict(enumerate(r)) for r in np.atleast_2d(table)]
-    tables = [(rows(n_U), M), (rows(np.stack([n_prim, n_comp], axis=1)), 2),
-              (rows(n_E), V), (rows(n_L), K), (rows(n_R), K)]
-    if board:
-        n_Q = mem.scan_counts(s, K)
-        tables = [(rows(n_Q), K + 1), (rows(n_Rel), el.n_rel)] + tables
-    else:
-        tables = [(rows(n_start), K), (rows(n_piece), K), (rows(n_mode), 2),
-                  (rows(n_stop_cont), 2)] + tables
+    tables = ([(rows(n), alphabet) for n, alphabet in top_counts]
+              + ([(rows(n_Rel), el.n_rel)] if relational else [])
+              + [(rows(n_U), M), (rows(np.stack([n_prim, n_comp], axis=1)), 2),
+                 (rows(n_E), V), (rows(n_L), K), (rows(n_R), K)])
     model_bits, data_bits = split_bits(tables, alpha)
     info["model bits"] = model_bits + info["structure bits"]
     info["data bits"] = data_bits
@@ -696,12 +673,9 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
     pk = (n_prim + alpha) / (n_prim + n_comp + 2 * alpha)
     return Grammar(
         vocab=vocab,
-        S=normalize(n_start),
         U=normalize(n_U),
         pk=pk,
-        p_stop=float((n_stop_cont[0] + alpha) / (n_stop_cont.sum() + 2 * alpha)),
-        p_whole=float((n_mode[0] + alpha) / (n_mode.sum() + 2 * alpha)),
-        S_piece=normalize(n_piece),
+        **top_fields,
         Lt=normalize(n_L),
         Rt=normalize(n_R),
         E=normalize(n_E),
@@ -719,5 +693,4 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
         rule_keys=rule_keys,
         relations=list(mem.relations) if relational else None,
         Rel=normalize(n_Rel) if relational else None,
-        Q=normalize(mem.scan_counts(s, K)) if board else None,
     )
