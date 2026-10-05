@@ -363,6 +363,20 @@ On the clause corpus, consolidation lengthened the code from the search's 142.7K
 
 The grammar has 34 categories and 50 chunk types, and 65% of training sentences are analysed as one tree (62% before). The categories are grammatical: subjects, subject plus copula, copulas and verbs, predicate phrases, whole sentences, and the pieces of forests. The grammar's own sentences (those it derives as one tree, `generate(..., whole_only=True)`) are English of the training length, real more often than a bigram's, about as often new and real as either n-gram model's; a trigram's are real more often because it mostly repeats its training sentences. All samples, forests included, still generate strings of pieces: a forest's pieces are drawn independently. Coding each piece given the previous piece's category (branch `markov-forest-pieces`: a Markov code over a forest's pieces, with brute-force tests) was tried on the same analyses: the code shortens (43,663 → 42,008 bits; held out 16.02 → 15.03 bits per sentence) and the pieces split by role (clauses, noun phrases, *can we …*, single words), but forests sampled from it are no more often real (real among 3–5-word samples 56.5% → 49.5%), and the grammar's own sentences are slightly less often real (75.5% → 72.8%). It is kept aside. Two words of context on each side instead of one (refit on the same analyses) left the grammar's own sentences unchanged (75% real within the length) and lengthened the training code by 292 bits.
 
+**With twice the sentences** (5,000 learned, the same 500 held out; `results/stories`; a night of 4.6 hours):
+
+| TinyStories, 3–5 words over 100 words | 2,500 sentences | 5,000 sentences | Word bigram (5,000) | Word trigram (5,000) |
+|---|---|---|---|---|
+| held-out bits per sentence | 16.0 | **15.0** | 12.8 | 12.0 |
+| training sentences analysed as one tree | 65% | **73%** | – | – |
+| categories / chunk types | 34 / 50 | 58 / 87 | – | – |
+| own sentences 3–5 words long | 94% | 97% | 73% | 92% |
+| own sentences real, among those of 3–5 words | **75%** | 64% | 65% | 87% |
+| new and real, among those of 3–5 words | 4.6% | 1.2% | 1.1% | 1.2% |
+| word triples of own sentences found in TinyStories | 85% | 75% | 85% | 100% |
+
+As a model the grammar improves: a shorter held-out code, more sentences derived whole, more categories and chunk types. But its own sentences are real less often, at a bigram's level, which breaks the pattern of chess and characters, where more data made generations more coherent. The cause is two categories that mix words which do not combine alike: one holds intensifiers and determiners (*very, so, not, a, big, his, their*), another adjectives and nouns (*happy, sad, fun, dog, friend, toy*). One word of context on each side does not tell them apart at this size, and a rule class draws its two parts independently, so the grammar writes *she was so dog*. "New and real" falls to about 1% for every model, because 5,000 training sentences hold much of this small language.
+
 ### Chess: parts joined by typed relations
 
 Code: `chess.py`, `experiments/v2/run_chess.py`. Middlegame positions from the Lichess database of January 2013 (CC0, under `data/chess`): games in which both players are rated at least 1800 and that last at least 40 plies, the position after ply 30. That gives 8,560 positions; 4,000 are learned and 500 held out (seed 13).
