@@ -32,6 +32,7 @@ class Trellis2:
 
     def __init__(self, context_width: int = 1, spine_depth: int = 2, granularities: int = 2,
                  composition_ref: bool = False, sentence_bags: bool = False, previous_word: bool = True,
+                 sentence_parent: bool = False,
                  alpha: float = 0.001, seed: int = 0,
                  search: bool = True, merge: bool = True, max_rounds: int = 6,
                  memory: Optional[Memory] = None):
@@ -39,7 +40,8 @@ class Trellis2:
         # relations, e.g. ``chess.BoardMemory``); sentences use the default.
         self.memory = memory if memory is not None else Memory(
             context_width=context_width, spine_depth=spine_depth, granularities=granularities,
-            composition_ref=composition_ref, sentence_bags=sentence_bags, previous_word=previous_word)
+            composition_ref=composition_ref, sentence_bags=sentence_bags, previous_word=previous_word,
+            sentence_parent=sentence_parent)
         self.alpha = alpha
         self.seed = seed
         self.search = search

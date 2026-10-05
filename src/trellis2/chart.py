@@ -41,7 +41,9 @@ class Chart:
         lam = self.lam = np.zeros((n + 1, n + 1, M))
         rho = self.rho = np.zeros((n + 1, n + 1, M))
         # A span's rule choice is made in the light of the word before it.
-        U = self.U = [g.rules(self.tokens[i - 1] if i else BOS) for i in range(n)]
+        self.context = [self.tokens[i - 1] if i else BOS for i in range(n)]
+        by_context = {x: g.rules(x) for x in set(self.context)}
+        U = self.U = [by_context[x] for x in self.context]
         for i in range(n):
             v = g.lexical(int(ids[i]), self.tokens[i - 1] if i else BOS)
             s = v.sum()
@@ -207,12 +209,7 @@ class Chart:
             return Tree(0, {})
         with np.errstate(divide="ignore"):
             # One table of binary rules per context (the word before a span).
-            rule_of = {}
-            for i in range(n):
-                key = id(self.U[i])
-                if key not in rule_of:
-                    rule_of[key] = np.log(np.einsum("ac,c,cb,cd->abd", self.U[i], g.qk, g.Lt, g.Rt))
-            log_rule = [rule_of[id(self.U[i])] for i in range(n)]
+            log_rule = [g.log_binary(x) for x in self.context]
             ids = g.token_ids(self.tokens)
             lex = np.log(np.stack([self.U[i] @ (g.pk * g.E[:, ids[i]]) for i in range(n)]))   # (n, K)
             log_start = np.log(g.S)

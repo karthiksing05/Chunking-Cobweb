@@ -344,6 +344,16 @@ class Grammar:
         x = self.context_index.get(context)
         return self.U if x is None else self.Uc[:, x, :]
 
+    def log_binary(self, context: Hashable = None) -> np.ndarray:
+        """(K, K, K): ln P(A -> B C) in the light of the read's context, summed
+        over rule classes (kept, since every Viterbi parse asks for it)."""
+        cache = self.__dict__.setdefault("_log_binary", {})
+        key = context if context in self.context_index else None
+        if key not in cache:
+            with np.errstate(divide="ignore"):
+                cache[key] = np.log(np.einsum("ac,c,cb,cd->abd", self.rules(key), self.qk, self.Lt, self.Rt))
+        return cache[key]
+
     def lexical(self, token_id: int, context: Hashable = None) -> np.ndarray:
         """Inside probabilities of a single token, one per symbol."""
         return self.rules(context) @ (self.pk * self.E[:, token_id])

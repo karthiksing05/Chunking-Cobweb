@@ -32,6 +32,7 @@ from .mdl import dm_code, rows_nats
 BOS, EOS = "<s>", "</s>"
 BLANK = "-"
 ROOT = "<root>"
+SENTENCE = "<sentence>"
 
 
 def chunk_attrs(spine_depth: int, granularities: int) -> List[str]:
@@ -92,7 +93,8 @@ class Memory:
 
     def __init__(self, context_width: int = 1, spine_depth: int = 2,
                  granularities: int = 2, composition_ref: bool = False,
-                 sentence_bags: bool = False, previous_word: bool = True):
+                 sentence_bags: bool = False, previous_word: bool = True,
+                 sentence_parent: bool = False):
         self.context_width = context_width
         self.spine_depth = spine_depth
         self.granularities = granularities
@@ -103,6 +105,9 @@ class Memory:
         # Whether each rule choice is made in the light of the word read just
         # before the element (``contexts``).
         self.previous_word = previous_word
+        # Whether the sentence itself is the parent recorded above a whole
+        # tree's top parts and above a forest's pieces alike (``instance``).
+        self.sentence_parent = sentence_parent
         self.attrs = representation_attrs(context_width, spine_depth, granularities,
                                           composition_ref, sentence_bags)
         self.kind: List[int] = []
@@ -211,6 +216,11 @@ class Memory:
 
             x[f"cl.{g}"] = cat(self.left[e])
             x[f"cr.{g}"] = cat(self.right[e])
+            if self.sentence_parent:
+                self._sentence_spine(x, e, g, lab, cat)
+                if self.composition_ref:
+                    x[f"c.{g}"] = BLANK if rules is None else f"R{int(rules[g][e])}"
+                continue
             # The spine: walk up the analysis, recording each ancestor and the
             # sibling chunk beside the path at that level.
             node = e
@@ -236,6 +246,37 @@ class Memory:
             if self.composition_ref:
                 x[f"c.{g}"] = BLANK if rules is None else f"R{int(rules[g][e])}"
         return x
+
+    def _whole_root(self, n: int) -> bool:
+        return n >= 0 and self.parent[n] < 0 and self.top_left[n] < 0 and self.top_right[n] < 0
+
+    def _sentence_spine(self, x: Instance, e: int, g: int, lab, cat) -> None:
+        """The spine with the sentence as a parent: above a whole tree's top
+        parts and above a forest's pieces alike, the parent is SENTENCE (whose
+        join is known in the one case and unknown in the other), and above it
+        ROOT. A piece's siblings are its neighbouring pieces."""
+        known = lab is not None
+        node: object = e
+        for d in range(1, self.spine_depth + 1):
+            a = sl = sr = BLANK
+            if node == SENTENCE:
+                a, node = (ROOT if known else BLANK), None
+            elif node is not None:
+                p = self.parent[node]
+                if p < 0 and self._whole_root(node):
+                    a, node = (ROOT if known else BLANK), None        # the element is the sentence
+                elif p < 0:
+                    a = SENTENCE if known else BLANK                  # a piece of a forest
+                    sl, sr = cat(self.top_left[node]), cat(self.top_right[node])
+                    node = SENTENCE
+                else:
+                    is_left = self.left[p] == node
+                    top = self._whole_root(p)
+                    a = (SENTENCE if known else BLANK) if top else cat(p)
+                    sl = BLANK if is_left else cat(self.left[p])
+                    sr = cat(self.right[p]) if is_left else BLANK
+                    node = SENTENCE if top else p
+            x[f"a{d}.{g}"], x[f"sl{d}.{g}"], x[f"sr{d}.{g}"] = a, sl, sr
 
     def surface(self, e: int) -> Instance:
         """The element's surface context: the tokens on either side, its first

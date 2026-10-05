@@ -122,6 +122,8 @@ def main():
     ap.add_argument("--max-len", type=int, default=5)
     ap.add_argument("--n-gen", type=int, default=1000)
     ap.add_argument("--seed", type=int, default=13)
+    ap.add_argument("--sentence-parent", action="store_true",
+                    help="record the sentence as the parent above whole trees' top parts and forests' pieces")
     ap.add_argument("--out", default=os.path.join(HERE, "results", "stories"))
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
@@ -138,7 +140,7 @@ def main():
           f"holding out {len(test)}", flush=True)
 
     t0 = time.time()
-    learner = UnsupervisedLearner(seed=args.seed)
+    learner = UnsupervisedLearner(seed=args.seed, sentence_parent=args.sentence_parent)
     for s in train:
         learner.observe(s)
     g = learner.sleep()

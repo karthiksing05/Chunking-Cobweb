@@ -545,7 +545,7 @@ cd cobweb-private && cmake -S . -B build && cmake --build build --target cobweb_
 Every test and experiment (times on a 12-core laptop):
 
 ```
-python -m pytest tests/trellis2 -q                                          # 49 tests, seconds
+python -m pytest tests/trellis2 -q                                          # 50 tests, seconds
 python experiments/v2/run_synthetic.py --out experiments/v2/results/main    # supervised curves, ~6 min
 python experiments/v2/plot_learning_curves.py experiments/v2/results/main
 python experiments/v2/run_unsupervised.py --seeds 13,17                     # ~10 min

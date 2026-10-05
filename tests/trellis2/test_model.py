@@ -85,3 +85,18 @@ def test_learning_by_day_and_by_night():
     cfg = CFG(target_grammar("small"))
     samples, _ = learner.generate(200, np.random.default_rng(0))
     assert np.mean([cfg.recognizes(t) for t, _ in samples]) > 0.95
+
+
+def test_a_forest_piece_is_described_like_a_whole_trees_part():
+    from trellis2.memory import Memory, ROOT, SENTENCE
+    mem = Memory(sentence_parent=True)
+    mem.add(["tim", "was", "very", "happy"], Tree(4, {(0, 4): 2, (0, 2): 1, (2, 4): 3}, {}, [(0, 4)]))
+    mem.add(["it", "was", "so", "fun"], Tree(4, {(0, 2): 1, (2, 4): 3}, {}, [(0, 2), (2, 4)]))
+    labels = [np.zeros(len(mem), dtype=int)] * mem.granularities
+    spine = lambda e: {k: v for k, v in mem.instance(e, labels).items() if k[0] in "as"}
+    part = next(e for e in range(len(mem)) if mem.describe(e) == "tim was")
+    piece = next(e for e in range(len(mem)) if mem.describe(e) == "it was")
+    assert spine(part) == spine(piece)
+    assert spine(part)["a1.0"] == SENTENCE and spine(part)["a2.0"] == ROOT
+    root = next(e for e in range(len(mem)) if mem.describe(e) == "tim was very happy")
+    assert spine(root)["a1.0"] == ROOT
