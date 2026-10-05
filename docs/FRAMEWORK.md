@@ -449,7 +449,7 @@ The postulates carry over as follows:
 | Module (`src/trellis2/`) | Contents |
 |---|---|
 | `cobweb.py` | Cobweb (category utility, the four operators, weighted and bag-valued attributes, stable leaves): the compiled `cobweb_cu` of cobweb-private; the pure-Python reference is `tests/trellis2/reference_cobweb.py` |
-| `memory.py` | element records, representation instances (surface context + chunk context), the representation hierarchy by replay |
+| `memory.py` | the domain interface (`Memory`) and the sentence domain: element records, representation instances (surface context + chunk context), the representation hierarchy by replay, the top level (one tree or a forest of pieces) |
 | `grammar.py` | cuts, their search, model merging, the composition hierarchy, the factored grammar (with typed relations when a domain has them) and its code |
 | `chart.py` | inside-outside over one tree or a forest of pieces, posteriors, minimum-risk and Viterbi decoding, sampling |
 | `model.py` | `Trellis2`: learn from analysed experiences, consolidate, parse, code, generate (a domain brings its own memory); `Learner`: learning from experiences alone, by day and by night, with a domain's structure search |
