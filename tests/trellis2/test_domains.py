@@ -137,3 +137,31 @@ def test_chess_chunk_sees_past_its_own_pieces():
     search = BoardSearch([pos])
     search.apply(("wP", "NE1", "wP"), [(0, b2, c3)])
     assert (("chunk", 0), "NE2", "wP") in search.candidates()
+
+
+def test_left_corner_matches_sampled_derivations():
+    import numpy as np
+    from trellis2.chess import KINDS, left_corner
+    from trellis2.grammar import UNK, Grammar
+    rng = np.random.default_rng(0)
+
+    def dist(*shape):
+        x = rng.random(shape) + 0.05
+        return x / x.sum(axis=-1, keepdims=True)
+    K, M, vocab = 3, 4, KINDS[:3] + [UNK]
+    g = Grammar(vocab=vocab, S=dist(K), U=dist(K, M), pk=rng.uniform(0.4, 0.8, M), Lt=dist(M, K),
+                Rt=dist(M, K), E=dist(M, len(vocab)), alpha=0.0)
+    lc = left_corner(g)
+
+    def first(sym):
+        while True:
+            c = rng.choice(M, p=g.U[sym])
+            if rng.random() < g.pk[c]:
+                return vocab[rng.choice(len(vocab), p=g.E[c])]
+            sym = rng.choice(K, p=g.Lt[c])
+    n = 20000
+    for A in range(K):
+        seen = np.array([first(A) for _ in range(n)])
+        for k, t in enumerate(KINDS[:3]):
+            p = lc[A, k]
+            assert abs(np.mean(seen == t) - p) < 4 * np.sqrt(p * (1 - p) / n) + 1e-3

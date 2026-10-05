@@ -3,7 +3,7 @@
 Status: first implementation, October 2026, on branch `inside-outside`.
 
 - Code: `src/trellis2/`
-- Tests: `tests/trellis2/` (43, including brute-force checks of the parser over whole trees and forests, exactness checks of the search, the compiled Cobweb against its Python reference, the chess domain's star and its counted read, the relational characters' inside pass, and, in every domain, that the grammar draws experiences as often as its code says)
+- Tests: `tests/trellis2/` (44, including brute-force checks of the parser over whole trees and forests, exactness checks of the search, the compiled Cobweb against its Python reference, the chess domain's star and its counted read, the relational characters' inside pass, and, in every domain, that the grammar draws experiences as often as its code says)
 - Experiments: `experiments/v2/`
 - Background: [the literature behind v2](#background-the-literature-behind-v2), condensed from the October 2026 review (the full report and notes are in the git history, commit `fbe61901`)
 - **The framework explained end to end, with figures: [`FRAMEWORK.md`](FRAMEWORK.md)**
@@ -393,9 +393,10 @@ As a model the grammar improves: a shorter held-out code, more sentences derived
 | both (the shortest code) | **41,552** | **15.12** | 73.5% | 83.5% |
 | neighbours also by their word's category | 43,031 | 15.67 | 68.8% | 79.4% |
 | each element also by the categories its word or phrase takes everywhere | 43,581 | 15.98 | 71.0% | 80.8% |
+| the same, with a one-level spine and one granularity | 41,933 | 15.27 | **77.1%** | **86.3%** |
 | a chunk's two parts drawn jointly in generation (drawn independently in the same test: 74.8%, 84.1%) | – | – | 74.2% | 82.9% |
 
-The representation hierarchy itself groups *very, so, not, a* and *happy, sad, dog, cat* even at its evidence cut (61 categories): two occurrences in the same slot (*was [very happy]*, *was [a dog]*) are described alike, and the words that would tell them apart are rare. A lighter chunk context gives the shortest code (5% shorter) without changing coherence. Chunk context written as bags, as the chess star is, did not help characters either (83.6% of generated characters in attested slots, against 83.8%), and a one-level spine made them worse (80.5%), so the context's depth is a choice description length could make per domain: it prefers the two-level spine for characters and the one-level spine here.
+The representation hierarchy itself groups *very, so, not, a* and *happy, sad, dog, cat* even at its evidence cut (61 categories): two occurrences in the same slot (*was [very happy]*, *was [a dog]*) are described alike, and the words that would tell them apart are rare. A lighter chunk context gives the shortest code (5% shorter) without changing coherence. Only one variant moves coherence: a lighter chunk context together with a bag, on every element, of the categories its word or phrase takes across all its occurrences (what it does elsewhere). It separates adjectives from nouns (*happy, sad, fun, big* apart from *dog, cat*), though *a* stays with *very*, and its own sentences are real 77.1% of the time. It does not carry over: on characters the same bag lowers attested placements (82.8% against 83.8%; 74.1% with a one-level spine), and chunk context written as bags, as the chess star is, does not help them either (83.6%). Nor would description length choose it: on characters the variant with the shortest code (the bag with a one-level spine, 68,228 bits against 69,014) places components worst, and on English the shortest code is not the most coherent variant. The representation stays as it is.
 
 ### Chess: parts joined by typed relations
 
