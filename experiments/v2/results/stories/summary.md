@@ -5,94 +5,94 @@ TinyStories, sentences of 3–5 words over the 100 most frequent words: 5000 lea
 | word 1-gram model | 26.1 |
 | word 2-gram model | 12.8 |
 | word 3-gram model | 12.0 |
-| TRELLIS v2 | 15.0 |
+| TRELLIS v2 | 11.9 |
 
-Grammar: 58 categories, 87 chunk types; 73% of training sentences analysed as one tree (1.33 top-level chunks per sentence).
+Grammar: 52 categories, 63 chunk types; 64% of training sentences analysed as one tree (1.55 top-level chunks per sentence).
 
 | Generated sentences (1,000) | TRELLIS v2: its own sentences (whole trees) | TRELLIS v2: all samples | word 2-gram | word 3-gram |
 |---|---|---|---|---|
-| new | 39.3% | 57.1% | 53.6% | 21.1% |
-| real | 61.9% | 44.3% | 52.4% | 81.4% |
-| new and real | 1.2% | 1.4% | 6.0% | 2.5% |
-| 3–5 words long | 97.3% | 89.9% | 72.9% | 92.3% |
-| real, among those of 3–5 words | 63.6% | 49.2% | 64.7% | 86.7% |
-| new and real, among those of 3–5 words | 1.2% | 1.4% | 1.1% | 1.2% |
-| word pairs in TinyStories | 90.9% | 83.6% | 100.0% | 100.0% |
-| word triples in TinyStories | 75.5% | 55.1% | 84.6% | 100.0% |
-| mean length | 3.9 | 4.0 | 4.0 | 4.0 |
-| perceived with the analysis it was generated from | 99.6% | 98.9% | – | – |
-| chunks inside sentences found in TinyStories | 86.9% | 82.2% | – | – |
+| new | 16.1% | 41.2% | 55.6% | 21.3% |
+| real | 86.0% | 61.2% | 50.6% | 81.2% |
+| new and real | 2.1% | 2.4% | 6.2% | 2.5% |
+| 3–5 words long | 98.2% | 88.3% | 71.6% | 92.5% |
+| real, among those of 3–5 words | 87.4% | 68.5% | 63.5% | 86.4% |
+| new and real, among those of 3–5 words | 1.9% | 1.9% | 1.5% | 1.3% |
+| word pairs in TinyStories | 98.3% | 96.3% | 100.0% | 100.0% |
+| word triples in TinyStories | 92.7% | 80.7% | 83.9% | 100.0% |
+| mean length | 3.8 | 4.0 | 4.0 | 4.0 |
+| perceived with the analysis it was generated from | 99.4% | 98.7% | – | – |
+| chunks inside sentences found in TinyStories | 97.6% | 95.6% | – | – |
 
 Largest categories:
 
-- S20 (3673): they are happy, they were very happy, tim was very happy, he was very happy, tim was so happy, he was so happy, she was very happy, they were happy
-- S21 (2990): you, do, that, it was, said, they played, too, but
-- S7 (1728): very happy, so happy, sad, happy, very sad, not happy, so sad, so fun
-- S27 (1722): was, felt, looked, had
-- S6 (1713): was very happy, was so happy, was sad, was happy, was very sad, was not happy, felt very sad, was so sad
-- S46 (1478): they, she, he, it, i, tim, what, tom
-- S26 (1436): tim, he, she, lily, tom, sue, spot, max
-- S29 (1197): very, so, not, a, big, his, their, named
-- S28 (1194): happy, sad, fun, dog, friend, toy, mom, max
-- S17 (867): was, saw, is, played, can, asked, did not, said
-- S16 (843): a, the, like, and, together, her, his, their
-- S15 (834): it, ball, mom, toy, dog, all day, had fun, friend
+- S0 (4546): you, too, what, a, do, that, it was, and
+- S8 (3215): they are happy, they were very happy, tim was very happy, he was very happy, tim was so happy, he was so happy, she was very happy, they were happy
+- S24 (1616): was
+- S18 (1616): was very happy, was so happy, was sad, was happy, was very sad, was not happy, was not sad
+- S5 (1529): they, it, she, he, i, we, tim, tom
+- S3 (1525): is, was, can, saw, with, played, mom, was happy
+- S23 (1401): happy, sad, friends, not
+- S22 (1401): very, so, not, did, all
+- S20 (1399): very happy, so happy, very sad, not happy, not friends, all happy, not sad
+- S15 (1384): tim, he, she, lily, tom, sue, spot, max
+- S7 (724): the, a, not, her, had, very, his, play
+- S16 (662): they, she, lily, and
 
-Most frequent chunks inside training analyses: *very happy* (777), *was very happy* (542), *so happy* (384), *they were* (377), *was sad* (338), *was so happy* (335), *was happy* (270), *they are* (260), *very sad* (222), *was very sad* (178), *to help* (162), *to play* (139), *the bird* (132), *not happy* (128), *wanted to help* (116), *can i* (108), *felt sad* (104), *have fun* (81), *had fun* (79), *was not happy* (78)
+Most frequent chunks inside training analyses: *very happy* (774), *was very happy* (535), *so happy* (384), *they were* (375), *was so happy* (332), *was sad* (327), *they are* (255), *was happy* (255), *very sad* (192), *was very sad* (176), *the bird* (134), *wanted to help* (116), *to help* (116), *can i* (108), *felt sad* (102), *to play* (102), *not happy* (92), *have fun* (80), *the cat* (79), *can we* (75)
 
 
 The grammar's own sentences (analysis as generated):
 
-    [[[they friends] is] [very happy]]  (new)
-    [[the bird] [[liked all] together]]  (new)
-    [[it [little tree]] fun]  (new)
-    [[they are] sad]
-    [max [looked sad]]  (new)
-    [[he play] it]  (new)
-    [she [was [so dog]]]  (new)
-    [tom [liked [to help]]]  (new)
-    [[they are] happy]
-    [lily [the bird]]  (new)
-    [they [[[and ben] are] happy]]  (new)
-    [[the dog] [was [so toy]]]  (new)
-    [he [was [very sad]]]
-    [[her all] asked]  (new)
     [[they were] happy]
-    [he [felt sad]]
-    [[he [wanted [to play]]] friends]  (new)
-    [[the dog] too]  (new)
-    [[they are] help]  (new)
-    [tim [was [so happy]]]
-    [she [was [so happy]]]
-    [he [the bird]]  (new)
-    [we [[[and lily] are] happy]]  (new)
+    [she [was [very happy]]]
+    [she [was sad]]
+    [[he is] [wanted friends]]  (new)
+    [[he is] happy]
+    [she [was sad]]
+    [he [was [very happy]]]
+    [[they were] [very happy]]
+    [they [have fun]]
+    [[they were] happy]
+    [[they are] happy]
+    [lily [was [so happy]]]
+    [[the bird] [wanted [to help]]]
+    [she [was [very happy]]]
+    [it [was [not happy]]]  (new)
+    [they [liked [[to play] together]]]
     [tim [was sad]]
-    [[they were] [to happy]]  (new)
+    [she [was [very sad]]]
+    [it [was [so happy]]]
+    [[the bird] [looked sad]]
+    [she [felt happy]]
+    [he [was [very happy]]]
+    [[they were] [very happy]]
+    [they [felt sad]]
+    [tim [was [so happy]]]
 
 All samples, including partial analyses (pieces joined by ·):
 
-    [her mom] · [[[his friend] play] with] · [want [little tree]]  (new)
-    [we [did ball]]  (new)
-    [new fun] · [you [looked play]]  (new)
-    [lily [[[and sam] were] sad]]  (new)
-    [[her is] it]  (new)
-    lily · and  (new)
-    [[[his were] [was happy]] fun]  (new)
-    [they [have fun]]
-    [[[they were] [liked [had help]]] sad]  (new)
-    [tim saw] · [it played] · [i played] · [he saw]  (new)
-    [he [was [so sad]]]
-    [[they is] sue]  (new)
-    [[the played] [was happy]]  (new)
-    [sam is] · [it is]  (new)
-    [he [was not]] · [a mom]  (new)
+    [he was] · [so bird]  (new)
+    [tom [was sad]]
+    [[they are] sad]
+    [she liked] · [the toy] · was  (new)
+    and · [it do] · you · make · friends  (new)
+    [[they are] happy]
+    [[they were] happy] · too · [[very [[to play] together]] cat]  (new)
+    [lily [was happy]]
+    [she liked] · [tim said] · that · is  (new)
+    [sue [was sad]]
+    [tim [was [very happy]]]
+    [sue [was [so happy]]]
+    [he [was [very happy]]]
+    [max [felt sad]]
+    what · did  (new)
 
 Held-out sentences (minimum-risk analysis):
 
     [she [was [very happy]]]
     [[[they liked] it] too]
     [[[they do] not] [like tom]]
-    [[i have] [a [new toy]]]
+    [[i have] [[a new] toy]]
     [[[they are] not] [a toy]]
     [lily [was [not happy]]]
     [[they are] friends]
