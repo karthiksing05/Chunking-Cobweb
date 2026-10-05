@@ -298,38 +298,39 @@ Nothing in the framework is specific to the paper's corpora. Four new domains te
 
 There is no target grammar, so coherence is measured against the corpus. A generated sentence is *real* if it occurs word for word among the 497,000 sentences of TinyStories, and *new* if it is not a training sentence. A single word such as *mom* or *together* is new and real without being a coherent sentence, so the measures that matter are taken among generated sentences of three to five words, like the training sentences. The baselines are word bigram and trigram models trained on the same sentences.
 
-**What it learns.** 34 categories and 50 chunk types; 65% of training sentences are analysed as one whole tree. The categories are recognizably grammatical:
+**What it learns.** 34 categories and 56 chunk types; 59% of training sentences are analysed as one whole tree. Each rule choice is made in the light of the word before the element: description length takes that context ([section 6](#6-description-length)). The largest categories are recognizably grammatical:
 
 - subjects (*tim, he, she, lily, the bird*);
-- subject plus copula (*tim was, she was*);
-- copulas and verbs (*was, is, felt, wanted to help*);
+- subject plus copula (*tim was, they were*);
+- intensifiers (*very, so, not*);
 - predicate phrases (*very happy, so happy, not happy*);
-- whole sentences (*they are happy, tim was very happy*), and, apart from them, the pieces that sentences analysed as a forest leave (*it, together, too*).
+- whole sentences (*they are happy, tim was very happy*), and, apart from them, the pieces that sentences analysed as a forest leave (*it, you, together, too*).
 
 Held-out sentences are read as subject and predicate:
 
 ```
-[[they do] [[not like] tom]]      [[they are] [not [a toy]]]      [[lily was] [not happy]]
+[[they do] [[not like] tom]]      [[she was] [very happy]]      [[lily was] [not happy]]
 ```
 
 **A whole sentence, or a piece of one.** The first version coded every top-level chunk from one row. One start category then held whole sentences and the leftover pieces of forests alike (1,543 whole-sentence roots and 2,223 pieces, 919 of them single words), and the grammar wrote those pieces as sentences: a sixth of its output was one word. Under one row, telling the two apart costs as many bits as it saves, so description length never split them. With a row for the roots of whole sentences and one for pieces ([section 5](#5-from-hierarchies-to-a-grammar)), the split pays, and marking the root of a whole sentence (and only it) in its representation instance makes it exact. The grammar's *own sentences* are then the ones it derives as one tree.
 
-| 1,000 generated sentences each | TRELLIS v2, its own sentences | TRELLIS v2, all samples | Word bigram | Word trigram | TRELLIS v2 before (all samples) |
+| 1,000 generated sentences each | TRELLIS v2, its own sentences | TRELLIS v2, all samples | Word bigram | Word trigram | Its own sentences, without the read's context |
 |---|---|---|---|---|---|
-| 3–5 words long, like the training sentences | **94%** | 85% | 71% | 93% | 47% |
-| real, among those of 3–5 words | 75% | 55% | 63% | 86% | 50% |
-| new and real, among those of 3–5 words | 4.6% | 4.2% | 4.0% | 3.4% | 4.2% |
-| new | 33% | 57% | 58% | 23% | 78% |
-| word triples found in TinyStories | 85% | 54% | 84% | 100% | 63% |
-| chunks inside the sentences found in TinyStories | 92% | 88% | – | – | 92% |
-| perceived again with the analysis it was generated from | 100% | 99% | – | – | 99.7% |
+| 3–5 words long, like the training sentences | **99%** | 87% | 71% | 92% | 94% |
+| real, among those of 3–5 words | **90%** | 63% | 64% | 87% | 75% |
+| every word triple in TinyStories (sentence edges included) | **93%** | 73% | 83% | 100% | 84% |
+| new and real, among those of 3–5 words | 4.0% | 3.5% | 4.2% | 3.7% | 4.6% |
+| new | 15% | 48% | 58% | 24% | 33% |
+| word triples found in TinyStories | 94% | 76% | 85% | 100% | 85% |
+| chunks inside the sentences found in TinyStories | 96% | 95% | – | – | 92% |
+| perceived again with the analysis it was generated from | 100% | 96% | – | – | 100% |
 
-- **Its own sentences are English.** 94% have the length of the training sentences, and three quarters of those occur in TinyStories, more than a word bigram's; a word trigram's are real more often, because it mostly repeats its training sentences (only 23% are new). About one in twenty is both new and real, about as often as for the n-gram models.
+- **Its own sentences are English.** 99% have the length of the training sentences, and 90% of those occur in TinyStories, more often than a word bigram's (64%) or even a word trigram's (87%), which mostly repeats its training sentences; 93% have every word triple in TinyStories. They are more typical than before the read's context (15% new against 33%), and about one in twenty-five is both new and real, as for the n-gram models.
 - **Parsing and generation agree.** Every one of its own sentences is perceived again with the analysis it was generated from.
-- **What limits the grammar's own sentences is rare words.** By a fairer measure than *real*, every word triple of a sentence found in TinyStories, 83.5% of the grammar's own sentences pass, as do 83.1% of a word bigram's. Almost every failing sentence uses only category combinations seen in training: the errors are inside categories, where rare words are lumped with frequent words of another kind (*a* with *very*, *dog* with *happy*), because in these sentences, dominated by *X was very happy*, keeping them apart saves fewer bits than a category costs. Lighter chunk context shortens the code by 5%; no change to the descriptions tried, nor drawing a chunk's parts jointly, changes coherence ([`V2_DESIGN.md`](V2_DESIGN.md#simple-english-can-the-grammar-generate-coherent-sentences)).
-- **Sentences left as forests still generate strings of pieces.** All samples together are real 55% of the time within the training length: a forest's pieces are drawn independently. Coding each piece given the previous one's category (a Markov code over pieces, branch `markov-forest-pieces`) describes held-out sentences a bit shorter (15.0 against 16.0 bits) and splits the pieces by role, but forests sampled from it are no more often real, so it is kept aside.
-- **Held-out code.** 16.0 bits per sentence (17.1 with one row for all top-level chunks), still less compact than the n-gram models (13.0 for trigrams).
-- **With twice the sentences, a better model but not more coherent sentences.** Learned from 5,000 sentences, the grammar describes held-out sentences in 15.0 bits and derives 73% of training sentences whole, but its own sentences are real 64% of the time within the training length, a word bigram's level (65%). In the run's final grammar one category mixes intensifiers with determiners (*very, so, a, his*) and another adjectives with nouns (*happy, dog, toy*), so it writes *she was so dog*. One more round of re-analysis keeps those words apart (own sentences then 66.5% real), and more context does not help further (two or three words on each side, or bags of the whole sentence). The remaining errors are phrases in the wrong slot: predicate categories that also hold noun phrases and pieces of coordinations (*they [the mom]*).
+- **What the read's context fixed: rare words.** Without it, 83.5% of the grammar's own sentences had every word triple in TinyStories, as did 83.1% of a word bigram's. Almost every failing sentence used only category combinations seen in training: the errors were inside categories, where rare words are lumped with frequent words of another kind (*a* with *very*, *dog* with *happy*), because in these sentences, dominated by *X was very happy*, keeping them apart saves fewer bits than a category costs. No change to the descriptions fixed this, nor drawing a chunk's parts jointly. Making each rule choice in the light of the word before it does: after *a* a noun phrase is made one way, after *very* another, even within one category ([`V2_DESIGN.md`](V2_DESIGN.md#simple-english-can-the-grammar-generate-coherent-sentences)).
+- **Sentences left as forests still generate strings of pieces.** All samples together are real 63% of the time within the training length: a forest's pieces are drawn independently. Coding each piece given the previous one's category (a Markov code over pieces, branch `markov-forest-pieces`) describes held-out sentences a bit shorter (15.0 against 16.0 bits) and splits the pieces by role, but forests sampled from it are no more often real, so it is kept aside.
+- **Held-out code.** 12.8 bits per sentence, more compact than a word bigram (13.2) or trigram (13.0); 16.0 without the read's context, and 17.1 before that with one row for all top-level chunks.
+- **With twice the sentences, a better model but not more coherent sentences** (before the read's context; the rerun is in progress). Learned from 5,000 sentences, the grammar describes held-out sentences in 15.0 bits and derives 73% of training sentences whole, but its own sentences are real 64% of the time within the training length, a word bigram's level (65%). In the run's final grammar one category mixes intensifiers with determiners (*very, so, a, his*) and another adjectives with nouns (*happy, dog, toy*), so it writes *she was so dog*. One more round of re-analysis keeps those words apart (own sentences then 66.5% real), and more context does not help further (two or three words on each side, or bags of the whole sentence). The remaining errors are phrases in the wrong slot: predicate categories that also hold noun phrases and pieces of coordinations (*they [the mom]*).
 
 Children's books from Project Gutenberg (Grimm; McGuffey readers, Aesop, Alice, Oz) were too sparse for this. Grimm's sentences use each of their words about ten times, and the grammar collapsed to three categories. With clauses instead of sentences there are 72 uses per word, and the chunks were sensible but the generations were strings of them.
 
