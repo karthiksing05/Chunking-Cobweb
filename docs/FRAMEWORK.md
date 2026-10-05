@@ -350,9 +350,9 @@ Every generated character can be checked:
 |---|---|---|---|---|---|---|
 | unigram tokens | 44.1 | – | – | – | – | – |
 | bigram tokens | 35.0 | – | 22% | 20% | 3.9% | 13% |
-| TRELLIS v2, operators as relations | **30.3** | – (given) | **100%** | **84%** | **5.3%** | **77%** |
-| TRELLIS v2, operators as tokens | 31.9 | 0.0% | 96% | 52% | 2.5% | 49% |
-| TRELLIS v2 from sequences alone | 36.8 | 31.7% | 8% | 6% | 0.7% | 5% |
+| TRELLIS v2, operators as relations | 30.3 | – (given) | **100%** | **84%** | **5.3%** | **77%** |
+| TRELLIS v2, operators as tokens | **27.2** | 0.0% | 98% | 62% | 5.2% | 53% |
+| TRELLIS v2 from sequences alone | 30.5 | 33.8% | 15% | 12% | 1.3% | 10% |
 
 ![Concepts of position](figures/character_concepts.png)
 
@@ -363,10 +363,10 @@ Every generated character can be checked:
 *Figure 13. The largest composite rule classes of the composition hierarchy, each with its most frequent chunks: parts made of two components, one above the other, side by side or overlaid, that recur inside larger characters.*
 
 - **Concepts of position emerge.** The representation hierarchy groups components by where they go: top components (100% on top), bottom components (88%), left-side radicals (氵 木 亻 扌 言 女 忄 虫 钅, 100% on the left), right-side components (100%), overlaid strokes, upper-left frames (广 尸 厂 疒, 99%) and enclosed parts (100%). These are the classical radical classes, found by category utility and description length alone.
-- **The relation is what makes generation coherent.** With operators as tokens, a part's slot is decided by an operator two or more tokens back, out of reach of the part's description, and one large category mixed right-side and bottom components (43% bottom, 33% right): only half of the generated characters placed every component where real characters do. With operators as relations and the slot in the description, 84% do, every generated character is well formed, the code is shorter (30.3 bits per held-out character), and twice as many held-out real characters are rediscovered (5.3% of samples).
+- **The relation is what makes generation coherent.** With operators as tokens, a part's slot is decided by an operator two or more tokens back, out of reach of the part's description, and one large category mixed right-side and bottom components (43% bottom, 33% right): only half of the generated characters placed every component where real characters do (52%; 62% once each token is read in the light of the one before, which shortens that model's code to 27.2 bits). With operators as relations and the slot in the description, 84% do, every generated character is well formed, and as many held-out real characters are rediscovered (5.3% of samples).
 - **More data makes it more coherent.** Learned from 6,000 characters instead of 2,000, 93% of generated characters place every component where real characters do (from 10,000, also 93%), and held-out characters take 29.4 bits (28.3 from 10,000) against 32.8 (31.8) for a token bigram.
 - **What the description should hold matters.** Adding the nearest component across a join to a part's description lowers attested placement to 75%; adding the parent's slot lowers it to 34%. The remaining misplacements come from categories of composite parts, which mix slots.
-- **From sequences alone the learner stalls**, as on the treebank: it describes characters less compactly than token bigrams (36.8 bits per character), and only 8% of its samples are composed, well-formed characters.
+- **From sequences alone the learner stalls**, as on the treebank: with each token read in the light of the one before it describes characters more compactly than token bigrams (30.5 bits per character, against 35.0; 36.8 before), but only 15% of its samples are composed, well-formed characters.
 
 ![Characters TRELLIS v2 invents](../experiments/v2/results/characters/generated_characters.png)
 
