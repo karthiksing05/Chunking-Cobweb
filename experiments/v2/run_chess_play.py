@@ -31,8 +31,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 
-from trellis2.chess import (BoardSearch, default_positions_path, forward_neighbours,  # noqa: E402
-                            load_positions, parse_fen, select_context)
+from trellis2.chess import (BoardSearch, default_positions_path, load_positions,  # noqa: E402
+                            parse_fen, select_context)
 
 MOVES = os.path.join(os.path.dirname(default_positions_path()), "positions_1800_ply30_moves.jsonl")
 
@@ -77,15 +77,7 @@ def extract(min_elo: int = 1800, ply: int = 30, min_plies: int = 40) -> None:
 def position_bits(search: BoardSearch, position, alpha: float) -> float:
     """Bits of one position under a search's counts, its chunk moves replayed."""
     a = BoardSearch([position], alpha, search.features)
-    for B, rel, C, Y in search.moves:
-        p = a.pos[0]
-        pairs = [(0, sq, t) for sq, x in p["tops"].items() if x[0] == B
-                 for r, t in forward_neighbours(p["position"], sq)
-                 if r == rel and p["owner"][t] == t and t in p["tops"] and p["tops"][t][0] == C]
-        chosen = a.select(pairs)
-        if chosen:
-            a.fresh = Y[1]
-            a.apply((B, rel, C), chosen)
+    a.replay(search.moves)
     return search.code_of(a)
 
 

@@ -121,3 +121,16 @@ def test_chess_read_context_counts_earlier_pieces():
     assert rows[6] == 6 * 4 and rows[7] == 7 * 4 + 2
     # Two white pawns stand before h2 (f2, g2): both bits set there.
     assert rows[15] == 15 * 4 + 3 and rows[13] == 13 * 4 + 2
+
+
+def test_chess_chunk_sees_past_its_own_pieces():
+    from trellis2.chess import BoardSearch, forward_neighbours, parse_fen
+    # A pawn chain b2-c3-d4: from b2 the first piece to the north-east is c3;
+    # once c3 belongs to the chunk anchored at b2, the chunk sees d4 behind it.
+    pos = parse_fen("8/8/8/8/3P4/2P5/1P6/8")
+    b2, c3, d4 = (1, 1), (2, 2), (3, 3)
+    assert dict(forward_neighbours(pos, b2))["NE1"] == c3
+    assert dict(forward_neighbours(pos, b2, own=frozenset({b2, c3})))["NE2"] == d4
+    search = BoardSearch([pos])
+    search.apply(("wP", "NE1", "wP"), [(0, b2, c3)])
+    assert (("chunk", 0), "NE2", "wP") in search.candidates()

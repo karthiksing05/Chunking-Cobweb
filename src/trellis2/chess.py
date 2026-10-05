@@ -127,8 +127,12 @@ def star(position: Position, sq: Square, own: frozenset = frozenset()) -> Dict[s
     return x
 
 
-def forward_neighbours(position: Position, sq: Square) -> Iterator[Tuple[str, Square]]:
-    """The pieces seen from ``sq`` forward in the scan, with their relation."""
+def forward_neighbours(position: Position, sq: Square,
+                       own: frozenset = frozenset()) -> Iterator[Tuple[str, Square]]:
+    """The pieces seen from ``sq`` forward in the scan, with their relation:
+    along each forward ray the first piece at any distance, and on each
+    forward knight square the piece there. An element's own pieces (``own``)
+    do not block its view, as in its star: a chunk sees past its members."""
     for d, (dx, dy) in RAYS:
         if d not in FORWARD_RAYS:
             continue
@@ -136,13 +140,13 @@ def forward_neighbours(position: Position, sq: Square) -> Iterator[Tuple[str, Sq
             t = (sq[0] + dx * k, sq[1] + dy * k)
             if not on_board(t):
                 break
-            if t in position:
+            if t in position and t not in own:
                 yield f"{d}{k}", t
                 break
     for d in FORWARD_JUMPS:
         dx, dy = OFFSET[d]
         t = (sq[0] + dx, sq[1] + dy)
-        if t in position:
+        if t in position and t not in own:
             yield d, t
 
 
@@ -403,15 +407,33 @@ class BoardSearch:
             nats += math.lgamma(sum(c.values()) + A) - math.lgamma(A) - sum(_phi(v, self.a) for v in c.values())
         return nats / math.log(2)
 
+    @staticmethod
+    def _seen(p: dict, sq: Square) -> Iterator[Tuple[str, Square]]:
+        """(relation, anchor) of the top-level elements that the element
+        anchored at ``sq`` sees forward, looking past its own pieces."""
+        owner, tops = p["owner"], p["tops"]
+        own = frozenset(m for m, o in owner.items() if o == sq)
+        for rel, t in forward_neighbours(p["position"], sq, own):
+            if owner[t] == t and t in tops:
+                yield rel, t
+
     def candidates(self) -> Dict[tuple, List[tuple]]:
         out: Dict[tuple, List[tuple]] = defaultdict(list)
         for pi, p in enumerate(self.pos):
-            position, tops, owner = p["position"], p["tops"], p["owner"]
-            for sq, x in tops.items():
-                for rel, t in forward_neighbours(position, sq):
-                    if owner[t] == t and t in tops:
-                        out[(x[0], rel, tops[t][0])].append((pi, sq, t))
+            for sq, x in p["tops"].items():
+                for rel, t in self._seen(p, sq):
+                    out[(x[0], rel, p["tops"][t][0])].append((pi, sq, t))
         return out
+
+    def replay(self, moves: Sequence[tuple]) -> None:
+        """Apply chunk moves (B, relation, C, Y) learned elsewhere, in order."""
+        for B, rel, C, Y in moves:
+            pairs = [(pi, sq, t) for pi, p in enumerate(self.pos) for sq, x in p["tops"].items()
+                     if x[0] == B for r, t in self._seen(p, sq) if r == rel and p["tops"][t][0] == C]
+            chosen = self.select(pairs)
+            if chosen:
+                self.fresh = Y[1]
+                self.apply((B, rel, C), chosen)
 
     @staticmethod
     def select(pairs: List[tuple]) -> List[tuple]:
@@ -505,14 +527,7 @@ class BoardSearch:
         (posterior predictive), and the same with no chunks (each square on
         its own, from the training positions' flat counts)."""
         analysed = BoardSearch(positions, self.a, self.features)
-        for B, rel, C, Y in self.moves:
-            pairs = [(pi, sq, t) for pi, p in enumerate(analysed.pos) for sq, x in p["tops"].items()
-                     if x[0] == B for r, t in forward_neighbours(p["position"], sq)
-                     if r == rel and p["owner"][t] == t and t in p["tops"] and p["tops"][t][0] == C]
-            chosen = analysed.select(pairs)
-            if chosen:
-                analysed.fresh = Y[1]
-                analysed.apply((B, rel, C), chosen)
+        analysed.replay(self.moves)
         flat = BoardSearch([p["position"] for p in self.pos], self.a, self.features)
         return (self.code_of(analysed) / len(positions),
                 flat.code_of(BoardSearch(positions, self.a, self.features)) / len(positions))
