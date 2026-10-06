@@ -255,6 +255,17 @@ Code: `treebank.py`, `experiments/v2/run_treebank.py`. NLTK's public sample of t
 
 (Each rule choice in the light of the two tags before it, chosen by description length, 2026-10-06; with one tag: tags only 48.3% / 62.5% / 26.2% / 27.2 bits, gold trees 16.0% / 39.1% / 15.7% / 26.6 bits; before the read's context, 2026-10-05: tags only 55.3% / 67.6% / 33.1% / 30.1 bits, gold trees 19.1% / 41.3% / 20.7% / 30.9 bits.)
 
+**Generation** (2026-10-06; 1,000 tag sequences each, of 2–10 tags like the training sentences; `results/treebank/wsj10`). A generated tag sequence is *real* if it occurs among the treebank sample's sentences, and has *every tag triple attested* if every three consecutive tags, the sequence's edges included, occur somewhere in them:
+
+| WSJ10, mean of two seeds | Of the training length | Real | Every tag triple attested |
+|---|---|---|---|
+| tag bigram | 67% | 7.5% | 82% |
+| TRELLIS v2 from tags alone: its own sequences | 76% | **37%** | **97%** |
+| TRELLIS v2 from tags alone: all samples | 79% | 5.5% | 67% |
+| TRELLIS v2 from binarized gold trees | 89% | 2.7% | 64% |
+
+The sequences the unsupervised grammar derives as one tree are almost always coherent at the level of tag triples; its forests are strings of base phrases, less coherent than a bigram's samples. The grammar read from gold trees describes held-out sentences best but generates less coherently than a tag bigram: like LARGE's on the synthetic corpora, its phrase categories are broad enough that independently drawn parts combine into sequences the treebank does not hold.
+
 Training on more sentences (every other sentence of up to 15 or 20 tags; the same held-out WSJ10 sentences; means of seeds 13 and 17):
 
 | Training sentences | Bracket omission (unsup / sup) | Base-phrase omission (unsup / sup) | Held-out bits/sentence (unsup / sup) | Symbols | Chunk types | Learner's code below the gold-tree grammar's | Unsupervised night |

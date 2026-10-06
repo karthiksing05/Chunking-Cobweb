@@ -7,7 +7,12 @@ seed:
 * unsupervised TRELLIS v2 (tag sequences only, one night = batch learning);
 * supervised TRELLIS v2 trained on the right-binarized gold trees;
 * right- and left-branching trees, the classic baselines;
-* unigram and bigram tag models (add-1/2), as references for held-out bits.
+* unigram and bigram tag models (add-1/2), as references for held-out bits;
+* generation (1,000 tag sequences each, of the training length): how many
+  occur in the treebank sample, and how many have every tag triple, the
+  sequence's edges included, somewhere in it, for TRELLIS v2's own
+  sequences (those it derives as one tree), all its samples, and a tag
+  bigram's.
 
 Parsing is scored with unlabelled brackets (omission = gold brackets missed,
 commission = predicted brackets not in the gold tree), ignoring single tags
@@ -88,6 +93,42 @@ def ngram_bits(train, test, order: int, alpha: float = 0.5) -> float:
     return total / len(test)
 
 
+def generation(samples, attested, length) -> dict:
+    """Of the samples of the training length: real (the tag sequence occurs
+    in the treebank sample) and every tag triple attested (edges included)."""
+    lo, hi = length
+    ins = [tuple(t) for t in samples if lo <= len(t) <= hi]
+    seqs, triples = attested
+    def every(t):
+        p = ("<s>",) + t + ("</s>",)
+        return all(p[i:i + 3] in triples for i in range(len(p) - 2))
+    return {"of the training length": len(ins) / max(len(samples), 1),
+            "real": float(np.mean([t in seqs for t in ins])) if ins else 0.0,
+            "every triple attested": float(np.mean([every(t) for t in ins])) if ins else 0.0}
+
+
+def bigram_samples(train, n: int, rng: np.random.Generator, max_len: int = 40) -> list:
+    """Tag sequences from the maximum-likelihood tag bigram of the training sentences."""
+    nxt = {}
+    for s in train:
+        p = ["<s>"] + list(s.tags) + ["</s>"]
+        for a, b in zip(p, p[1:]):
+            nxt.setdefault(a, Counter())[b] += 1
+    out = []
+    while len(out) < n:
+        t, cur = [], "<s>"
+        while len(t) <= max_len:
+            c = nxt[cur]
+            keys = list(c)
+            cur = keys[int(rng.choice(len(keys), p=np.array([c[k] for k in keys], dtype=float) / sum(c.values())))]
+            if cur == "</s>":
+                break
+            t.append(cur)
+        if len(t) <= max_len:
+            out.append(t)
+    return out
+
+
 def evaluate_model(chart_of, test) -> dict:
     t, bits, tops = Tally(), 0.0, []
     for s in test:
@@ -108,12 +149,19 @@ def run_seed(seed: int, root: str, train_max_len: int = 10) -> dict:
     if train_max_len > 10:
         held_out = {tuple(s.words) for s in test}
         train = [s for s in load_wsj(root, max_len=train_max_len) if tuple(s.words) not in held_out]
+    everything = load_wsj(root, max_len=1000)
+    attested = ({tuple(s.tags) for s in everything},
+                {p[i:i + 3] for p in (("<s>",) + tuple(s.tags) + ("</s>",) for s in everything)
+                 for i in range(len(p) - 2)})
+    length = (min(len(s.tags) for s in train), max(len(s.tags) for s in train))
+    rng = np.random.default_rng(seed)
     row = {"seed": seed, "train": len(train), "test": len(test), "train_max_len": train_max_len,
            "baselines": {
                "right-branching": baseline(test, lambda n: {(i, n) for i in range(n - 1)}),
                "left-branching": baseline(test, lambda n: {(0, j) for j in range(2, n + 1)}),
                "unigram bits/sentence": ngram_bits(train, test, 1),
-               "bigram bits/sentence": ngram_bits(train, test, 2)}}
+               "bigram bits/sentence": ngram_bits(train, test, 2),
+               "bigram generation": generation(bigram_samples(train, 1000, rng), attested, length)}}
     t0 = time.time()
     learner = UnsupervisedLearner(seed=seed)
     for s in train:
@@ -124,7 +172,10 @@ def run_seed(seed: int, root: str, train_max_len: int = 10) -> dict:
                  chunk_types=g.info["chunk types"], seconds=time.time() - t0,
                  history=[{k: (float(v) if isinstance(v, (int, float)) else v) for k, v in h.items()}
                           for h in learner.history],
-                 train_top_level_chunks=float(np.mean([len(t.roots) for t in learner.trees])))
+                 train_top_level_chunks=float(np.mean([len(t.roots) for t in learner.trees])),
+                 own_generation=generation([t for t, _ in learner.generate(1000, rng, whole_only=True)[0]],
+                                           attested, length),
+                 all_generation=generation([t for t, _ in learner.generate(1000, rng)[0]], attested, length))
     row["unsupervised"] = unsup
     print(f"[seed {seed}] unsupervised: omission {unsup['omission']:.3f}, commission "
           f"{unsup['commission']:.3f}, {unsup['test_bits_per_sentence']:.1f} b/s "
@@ -136,7 +187,9 @@ def run_seed(seed: int, root: str, train_max_len: int = 10) -> dict:
     sg = model.consolidate()
     sup = evaluate_model(model.chart, test)
     sup.update(total_bits=sg.info["total bits"], symbols=sg.K, rule_classes=sg.M,
-               chunk_types=sg.info["chunk types"], seconds=time.time() - t0)
+               chunk_types=sg.info["chunk types"], seconds=time.time() - t0,
+               own_generation=generation([t for t, _ in model.generate(1000, rng, whole_only=True)[0]],
+                                         attested, length))
     row["supervised"] = sup
     print(f"[seed {seed}] supervised: omission {sup['omission']:.3f}, commission "
           f"{sup['commission']:.3f}, {sup['test_bits_per_sentence']:.1f} b/s ({sup['seconds']:.0f}s)",
@@ -165,6 +218,14 @@ def summarise(rows) -> str:
                      f"{m(lambda r: r[side]['base_phrase_omission'], pct=True)} | "
                      f"{m(lambda r: r[side]['test_bits_per_sentence'])} | "
                      f"{m(lambda r: r[side]['symbols'])} | {m(lambda r: r[side]['chunk_types'])} |")
+    lines += ["", "| Generated tag sequences (1,000 each) | Of the training length | Real, among those | "
+              "Every tag triple attested, among those |", "|---|---|---|---|"]
+    for name, get in (("tag bigram", lambda r: r["baselines"]["bigram generation"]),
+                      ("TRELLIS v2, tags only: its own sequences", lambda r: r["unsupervised"]["own_generation"]),
+                      ("TRELLIS v2, tags only: all samples", lambda r: r["unsupervised"]["all_generation"]),
+                      ("TRELLIS v2, gold trees: its own sequences", lambda r: r["supervised"]["own_generation"])):
+        lines.append(f"| {name} | " + " | ".join(m(lambda r, k=k: get(r)[k], pct=True)
+                     for k in ("of the training length", "real", "every triple attested")) + " |")
     return "\n".join(lines)
 
 
