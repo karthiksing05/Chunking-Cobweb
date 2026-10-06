@@ -1,0 +1,499 @@
+{
+ "train": 16000,
+ "test": 500,
+ "seconds": 5508.867542028427,
+ "bits per position": {
+  "training, the read alone": 76.42989074888207,
+  "training, after the search": 76.31618457881338,
+  "training, TRELLIS v2 (consolidated)": 76.27615347262228,
+  "held out, the read alone": 75.47660464188495,
+  "held out, squares on their own (no counts)": 85.20368806017164,
+  "held out, learned chunks": 75.37903953192237,
+  "held out, TRELLIS v2 (the grammar)": 75.37202131343072
+ },
+ "context of the read": "each kind's count on earlier squares (0 to 10)",
+ "alpha": 0.001,
+ "symbols": 13,
+ "rule classes": 13,
+ "chunk types (grammar)": 1,
+ "model bits": 18679.236309485797,
+ "data bits": 1201739.2192524755,
+ "search moves": [
+  "[wP N1 bP] x10799"
+ ],
+ "chunk types": [
+  {
+   "chunk": "[wP N1 bP]",
+   "count": 10799,
+   "anchors": {
+    "d4": 2215,
+    "e4": 1934,
+    "e5": 1427
+   }
+  }
+ ],
+ "categories": [
+  {
+   "symbol": "1",
+   "count": 107036.0,
+   "yields": [
+    [
+     "bP",
+     107036.0
+    ]
+   ],
+   "squares": [
+    [
+     "f7",
+     11067.0
+    ],
+    [
+     "h7",
+     10501.0
+    ],
+    [
+     "g7",
+     10370.0
+    ],
+    [
+     "a7",
+     9984.0
+    ],
+    [
+     "b7",
+     8351.0
+    ]
+   ]
+  },
+  {
+   "symbol": "0",
+   "count": 105656.0,
+   "yields": [
+    [
+     "wP",
+     105656.0
+    ]
+   ],
+   "squares": [
+    [
+     "g2",
+     11255.0
+    ],
+    [
+     "f2",
+     10541.0
+    ],
+    [
+     "a2",
+     10422.0
+    ],
+    [
+     "h2",
+     10089.0
+    ],
+    [
+     "b2",
+     9819.0
+    ]
+   ]
+  },
+  {
+   "symbol": "7",
+   "count": 31144.0,
+   "yields": [
+    [
+     "wR",
+     31143.0
+    ],
+    [
+     "bR",
+     1.0
+    ]
+   ],
+   "squares": [
+    [
+     "a1",
+     11613.0
+    ],
+    [
+     "f1",
+     7585.0
+    ],
+    [
+     "h1",
+     4582.0
+    ],
+    [
+     "e1",
+     2462.0
+    ],
+    [
+     "d1",
+     2242.0
+    ]
+   ]
+  },
+  {
+   "symbol": "2",
+   "count": 31107.0,
+   "yields": [
+    [
+     "bR",
+     31107.0
+    ]
+   ],
+   "squares": [
+    [
+     "a8",
+     11473.0
+    ],
+    [
+     "f8",
+     7830.0
+    ],
+    [
+     "h8",
+     4951.0
+    ],
+    [
+     "d8",
+     2065.0
+    ],
+    [
+     "e8",
+     1740.0
+    ]
+   ]
+  },
+  {
+   "symbol": "6",
+   "count": 22746.0,
+   "yields": [
+    [
+     "bB",
+     22746.0
+    ]
+   ],
+   "squares": [
+    [
+     "c8",
+     3175.0
+    ],
+    [
+     "e7",
+     2937.0
+    ],
+    [
+     "b7",
+     2243.0
+    ],
+    [
+     "g7",
+     2152.0
+    ],
+    [
+     "d7",
+     1452.0
+    ]
+   ]
+  },
+  {
+   "symbol": "9",
+   "count": 21352.0,
+   "yields": [
+    [
+     "wB",
+     21349.0
+    ],
+    [
+     "bB",
+     2.0
+    ],
+    [
+     "wQ",
+     1.0
+    ]
+   ],
+   "squares": [
+    [
+     "c1",
+     3007.0
+    ],
+    [
+     "d3",
+     2156.0
+    ],
+    [
+     "e2",
+     1891.0
+    ],
+    [
+     "e3",
+     1823.0
+    ],
+    [
+     "g2",
+     1644.0
+    ]
+   ]
+  },
+  {
+   "symbol": "4",
+   "count": 20675.0,
+   "yields": [
+    [
+     "bN",
+     20675.0
+    ]
+   ],
+   "squares": [
+    [
+     "f6",
+     4358.0
+    ],
+    [
+     "c6",
+     3094.0
+    ],
+    [
+     "d7",
+     2169.0
+    ],
+    [
+     "b8",
+     1540.0
+    ],
+    [
+     "e7",
+     1126.0
+    ]
+   ]
+  },
+  {
+   "symbol": "10",
+   "count": 20673.0,
+   "yields": [
+    [
+     "wN",
+     20671.0
+    ],
+    [
+     "wR",
+     1.0
+    ],
+    [
+     "wP",
+     1.0
+    ]
+   ],
+   "squares": [
+    [
+     "f3",
+     4948.0
+    ],
+    [
+     "c3",
+     4092.0
+    ],
+    [
+     "b1",
+     1952.0
+    ],
+    [
+     "d2",
+     1873.0
+    ],
+    [
+     "e2",
+     1033.0
+    ]
+   ]
+  },
+  {
+   "symbol": "8",
+   "count": 16001.0,
+   "yields": [
+    [
+     "wK",
+     16000.0
+    ],
+    [
+     "wN",
+     1.0
+    ]
+   ],
+   "squares": [
+    [
+     "g1",
+     9979.0
+    ],
+    [
+     "e1",
+     2920.0
+    ],
+    [
+     "c1",
+     1292.0
+    ],
+    [
+     "h1",
+     489.0
+    ],
+    [
+     "b1",
+     217.0
+    ]
+   ]
+  },
+  {
+   "symbol": "3",
+   "count": 16000.0,
+   "yields": [
+    [
+     "bK",
+     16000.0
+    ]
+   ],
+   "squares": [
+    [
+     "g8",
+     9410.0
+    ],
+    [
+     "e8",
+     3154.0
+    ],
+    [
+     "c8",
+     1337.0
+    ],
+    [
+     "h8",
+     385.0
+    ],
+    [
+     "e7",
+     252.0
+    ]
+   ]
+  },
+  {
+   "symbol": "5",
+   "count": 13723.0,
+   "yields": [
+    [
+     "bQ",
+     13723.0
+    ]
+   ],
+   "squares": [
+    [
+     "d8",
+     4806.0
+    ],
+    [
+     "c7",
+     1485.0
+    ],
+    [
+     "e7",
+     1208.0
+    ],
+    [
+     "d7",
+     998.0
+    ],
+    [
+     "b6",
+     638.0
+    ]
+   ]
+  },
+  {
+   "symbol": "11",
+   "count": 13584.0,
+   "yields": [
+    [
+     "wQ",
+     13584.0
+    ]
+   ],
+   "squares": [
+    [
+     "d1",
+     4612.0
+    ],
+    [
+     "e2",
+     1384.0
+    ],
+    [
+     "c2",
+     1290.0
+    ],
+    [
+     "d2",
+     1264.0
+    ],
+    [
+     "f3",
+     716.0
+    ]
+   ]
+  },
+  {
+   "symbol": "12",
+   "count": 10799.0,
+   "yields": [
+    [
+     "[wP N1 bP]",
+     10799.0
+    ]
+   ],
+   "squares": [
+    [
+     "d4",
+     2215.0
+    ],
+    [
+     "e4",
+     1934.0
+    ],
+    [
+     "e5",
+     1427.0
+    ],
+    [
+     "d5",
+     902.0
+    ],
+    [
+     "c4",
+     695.0
+    ]
+   ]
+  }
+ ],
+ "generation": {
+  "attempts": 1000,
+  "collision or off the board": 0.0,
+  "checks": {
+   "one king each": 1.0,
+   "no pawn on a back rank": 0.999,
+   "at most 8 pawns each": 0.999,
+   "at most 16 pieces each": 0.999,
+   "no more of any kind than at the start": 0.999,
+   "passes every check": 0.999
+  },
+  "checks, the read alone": {
+   "one king each": 1.0,
+   "no pawn on a back rank": 1.0,
+   "at most 8 pawns each": 1.0,
+   "at most 16 pieces each": 1.0,
+   "no more of any kind than at the start": 1.0,
+   "passes every check": 1.0
+  },
+  "generated chunks": 695,
+  "generated chunks found in a held-out position": 0.9798561151079137
+ }
+}
