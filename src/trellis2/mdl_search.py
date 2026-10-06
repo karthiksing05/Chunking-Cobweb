@@ -183,6 +183,18 @@ def _phi(c: float, alpha: float) -> float:
     return math.lgamma(c + alpha) - math.lgamma(alpha) if c else 0.0
 
 
+_PHI_TABLES: Dict[float, List[float]] = {}
+
+
+def _phi_table(alpha: float, n: int) -> List[float]:
+    """``_phi(c, alpha)`` for every count c up to at least n (the same values,
+    looked up instead of recomputed)."""
+    table = _PHI_TABLES.setdefault(alpha, [0.0])
+    while len(table) <= n:
+        table.append(_phi(len(table), alpha))
+    return table
+
+
 def _outcome(body) -> tuple:
     return ("w", body) if isinstance(body, str) else ("p", body[0][0], body[1][0])
 
@@ -200,6 +212,9 @@ class _State:
     def __init__(self, analyses: List[List[Node]], n_tokens: int, alpha: float):
         self.tops, self.alias, self._analyses = analyses, {}, analyses
         self.n_tokens, self.alpha, self._sig = n_tokens, alpha, None
+        # Terms of each merge's code, shared by every state of one search
+        # (see ``_merge_terms``).
+        self._merge_cache: Dict[tuple, tuple] = {}
         rows: Dict[Hashable, Counter] = defaultdict(Counter)
         start: Counter = Counter()
         self.cont = 0
@@ -251,6 +266,9 @@ class _State:
         return self._analyses
 
     def _phis(self, counts) -> float:
+        counts = list(counts)
+        if all(type(c) is int for c in counts):
+            return sum(map(_phi_table(self.alpha, max(counts, default=0)).__getitem__, counts))
         return sum(_phi(c, self.alpha) for c in counts)
 
     def _alphabet_term(self, K: int) -> float:
@@ -332,10 +350,10 @@ class _State:
         aa = (self.n_tokens + (K - 1) ** 2) * a
         labels = sorted(self.rows, key=str)
         for A, B in itertools.combinations(labels, 2):
-            merged, moved = self._merged_rows(A, B)
-            s_total = self.s_total - self.row_s[A] - self.row_s[B] + self._phis(merged.values())
-            for r, row in moved.items():
-                s_total += self._phis(row.values()) - self.row_s[r]
+            pooled, changes = self._merge_terms(A, B)
+            s_total = self.s_total - self.row_s[A] - self.row_s[B] + pooled
+            for change in changes:
+                s_total += change
             nA, nB = self.row_n[A], self.row_n[B]
             sA, sB = self.start[A], self.start[B]
             nats = self._nats(K - 1, down - lg(nA + aa) - lg(nB + aa) + lg(nA + nB + aa),
@@ -343,12 +361,32 @@ class _State:
                               self.start_s - phi(sA) - phi(sB) + phi(sA + sB), self.cont)
             yield nats, ("merge", A, B)
 
+    def _merge_terms(self, A, B) -> Tuple[float, List[float]]:
+        """The terms by which merging A' = B into A changes the rows' code:
+        the pooled row's, and each moved row's change, in the order they are
+        added. They depend only on rows A and A', the rows holding A', and
+        which rows those are; rows are never changed in place (a move gives
+        a state new rows), so the terms are reused while those are the same
+        objects, and the code is computed from them exactly as before."""
+        rows, holders = self.rows, self.parents.get(B)
+        hit = self._merge_cache.get((A, B))
+        if (hit is not None and hit[0] is rows[A] and hit[1] is rows[B] and hit[2] is holders
+                and all(rows[r] is row for r, row in hit[3])):
+            return hit[4], hit[5]
+        merged, moved = self._merged_rows(A, B)
+        pooled = self._phis(merged.values())
+        changes = [self._phis(row.values()) - self.row_s[r] for r, row in moved.items()]
+        self._merge_cache[(A, B)] = (rows[A], rows[B], holders, [(r, rows[r]) for r in moved],
+                                     pooled, changes)
+        return pooled, changes
+
     def _phi_one(self, c) -> float:
         return _phi(c, self.alpha)
 
     def _child(self) -> "_State":
         c = object.__new__(_State)
         c.n_tokens, c.alpha, c.n_sent = self.n_tokens, self.alpha, self.n_sent
+        c._merge_cache = self._merge_cache
         c.tops, c.alias, c._analyses, c._sig = self.tops, self.alias, None, None
         c.rows, c.row_n, c.row_s = dict(self.rows), dict(self.row_n), dict(self.row_s)
         c.parents, c.start = dict(self.parents), Counter(self.start)
