@@ -1,0 +1,4455 @@
+{
+ "train": 9000,
+ "test": 500,
+ "vocabulary": 100,
+ "seconds": 3774.5553970336914,
+ "symbols": 68,
+ "rule classes": 140,
+ "chunk types": 79,
+ "training bits": 116390.0662957642,
+ "top-level chunks per sentence": 1.4832222222222222,
+ "whole trees": 0.661,
+ "held-out bits per sentence": 11.025487863492694,
+ "baselines": {
+  "1-gram": 26.07109752063157,
+  "2-gram": 12.655165692573158,
+  "3-gram": 11.457719491666396
+ },
+ "generation": {
+  "TRELLIS v2: its own sentences (whole trees)": {
+   "new": 0.079,
+   "real": 0.926,
+   "new and real": 0.005,
+   "3\u20135 words long": 0.993,
+   "real, among those of 3\u20135 words": 0.9295065458207452,
+   "new and real, among those of 3\u20135 words": 0.002014098690835851,
+   "word pairs in TinyStories": 0.992231638418079,
+   "word triples in TinyStories": 0.9606986899563319,
+   "mean length": 3.832,
+   "perceived with the analysis it was generated from": 0.997,
+   "chunks inside sentences found in TinyStories": 0.9781659388646288
+  },
+  "TRELLIS v2: all samples": {
+   "new": 0.284,
+   "real": 0.719,
+   "new and real": 0.003,
+   "3\u20135 words long": 0.926,
+   "real, among those of 3\u20135 words": 0.7742980561555075,
+   "new and real, among those of 3\u20135 words": 0.0010799136069114472,
+   "word pairs in TinyStories": 0.982787156570672,
+   "word triples in TinyStories": 0.8936170212765957,
+   "mean length": 4.021,
+   "perceived with the analysis it was generated from": 0.992,
+   "chunks inside sentences found in TinyStories": 0.9747774480712166
+  },
+  "word 2-gram": {
+   "new": 0.573,
+   "real": 0.488,
+   "new and real": 0.061,
+   "3\u20135 words long": 0.695,
+   "real, among those of 3\u20135 words": 0.6172661870503597,
+   "new and real, among those of 3\u20135 words": 0.0028776978417266188,
+   "word pairs in TinyStories": 1.0,
+   "word triples in TinyStories": 0.8452554744525548,
+   "mean length": 3.984
+  },
+  "word 3-gram": {
+   "new": 0.218,
+   "real": 0.796,
+   "new and real": 0.014,
+   "3\u20135 words long": 0.921,
+   "real, among those of 3\u20135 words": 0.8490770901194354,
+   "new and real, among those of 3\u20135 words": 0.0,
+   "word pairs in TinyStories": 1.0,
+   "word triples in TinyStories": 1.0,
+   "mean length": 3.937
+  }
+ },
+ "categories": [
+  {
+   "symbol": 4,
+   "count": 7400.0,
+   "yields": [
+    [
+     "too",
+     305.0
+    ],
+    [
+     "it was",
+     160.0
+    ],
+    [
+     "that",
+     156.0
+    ],
+    [
+     "said",
+     135.0
+    ],
+    [
+     "can we",
+     132.0
+    ],
+    [
+     "what",
+     126.0
+    ],
+    [
+     "they played",
+     126.0
+    ],
+    [
+     "do you",
+     115.0
+    ]
+   ]
+  },
+  {
+   "symbol": 3,
+   "count": 5949.0,
+   "yields": [
+    [
+     "they are happy",
+     270.0
+    ],
+    [
+     "they were very happy",
+     238.0
+    ],
+    [
+     "tim was very happy",
+     232.0
+    ],
+    [
+     "he was very happy",
+     223.0
+    ],
+    [
+     "he was so happy",
+     157.0
+    ],
+    [
+     "they were happy",
+     140.0
+    ],
+    [
+     "tim was so happy",
+     138.0
+    ],
+    [
+     "she was very happy",
+     133.0
+    ]
+   ]
+  },
+  {
+   "symbol": 14,
+   "count": 3688.0,
+   "yields": [
+    [
+     "tim",
+     846.0
+    ],
+    [
+     "he",
+     606.0
+    ],
+    [
+     "she",
+     444.0
+    ],
+    [
+     "lily",
+     420.0
+    ],
+    [
+     "tom",
+     329.0
+    ],
+    [
+     "sue",
+     186.0
+    ],
+    [
+     "the bird",
+     159.0
+    ],
+    [
+     "the cat",
+     91.0
+    ]
+   ]
+  },
+  {
+   "symbol": 20,
+   "count": 3681.0,
+   "yields": [
+    [
+     "was very happy",
+     974.0
+    ],
+    [
+     "was so happy",
+     625.0
+    ],
+    [
+     "was sad",
+     591.0
+    ],
+    [
+     "was happy",
+     358.0
+    ],
+    [
+     "was very sad",
+     289.0
+    ],
+    [
+     "felt sad",
+     171.0
+    ],
+    [
+     "was not happy",
+     120.0
+    ],
+    [
+     "looked sad",
+     79.0
+    ]
+   ]
+  },
+  {
+   "symbol": 1,
+   "count": 2999.0,
+   "yields": [
+    [
+     "very happy",
+     1003.0
+    ],
+    [
+     "so happy",
+     627.0
+    ],
+    [
+     "sad",
+     591.0
+    ],
+    [
+     "happy",
+     358.0
+    ],
+    [
+     "very sad",
+     294.0
+    ],
+    [
+     "not happy",
+     126.0
+    ]
+   ]
+  },
+  {
+   "symbol": 50,
+   "count": 2974.0,
+   "yields": [
+    [
+     "was",
+     2966.0
+    ],
+    [
+     "felt",
+     8.0
+    ]
+   ]
+  },
+  {
+   "symbol": 62,
+   "count": 2648.0,
+   "yields": [
+    [
+     "very",
+     1712.0
+    ],
+    [
+     "so",
+     702.0
+    ],
+    [
+     "not",
+     215.0
+    ],
+    [
+     "help",
+     16.0
+    ],
+    [
+     "was",
+     2.0
+    ],
+    [
+     "play",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 51,
+   "count": 2625.0,
+   "yields": [
+    [
+     "happy",
+     2273.0
+    ],
+    [
+     "sad",
+     351.0
+    ],
+    [
+     "big",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 12,
+   "count": 2016.0,
+   "yields": [
+    [
+     "to",
+     169.0
+    ],
+    [
+     "a",
+     115.0
+    ],
+    [
+     "be",
+     85.0
+    ],
+    [
+     "do",
+     75.0
+    ],
+    [
+     "like",
+     73.0
+    ],
+    [
+     "play",
+     66.0
+    ],
+    [
+     "her",
+     65.0
+    ],
+    [
+     "the",
+     65.0
+    ]
+   ]
+  },
+  {
+   "symbol": 35,
+   "count": 1935.0,
+   "yields": [
+    [
+     "it",
+     265.0
+    ],
+    [
+     "together",
+     112.0
+    ],
+    [
+     "play",
+     105.0
+    ],
+    [
+     "fun",
+     103.0
+    ],
+    [
+     "happy",
+     98.0
+    ],
+    [
+     "friends",
+     98.0
+    ],
+    [
+     "friend",
+     95.0
+    ],
+    [
+     "you",
+     82.0
+    ]
+   ]
+  },
+  {
+   "symbol": 27,
+   "count": 1303.0,
+   "yields": [
+    [
+     "they",
+     1302.0
+    ],
+    [
+     "are",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 42,
+   "count": 977.0,
+   "yields": [
+    [
+     "are",
+     581.0
+    ],
+    [
+     "were",
+     365.0
+    ],
+    [
+     "to",
+     31.0
+    ]
+   ]
+  },
+  {
+   "symbol": 29,
+   "count": 879.0,
+   "yields": [
+    [
+     "they",
+     117.0
+    ],
+    [
+     "i",
+     105.0
+    ],
+    [
+     "he",
+     72.0
+    ],
+    [
+     "she",
+     60.0
+    ],
+    [
+     "the",
+     59.0
+    ],
+    [
+     "tim",
+     57.0
+    ],
+    [
+     "can",
+     48.0
+    ],
+    [
+     "what",
+     39.0
+    ]
+   ]
+  },
+  {
+   "symbol": 44,
+   "count": 807.0,
+   "yields": [
+    [
+     "is",
+     84.0
+    ],
+    [
+     "were",
+     65.0
+    ],
+    [
+     "like",
+     49.0
+    ],
+    [
+     "i",
+     47.0
+    ],
+    [
+     "are",
+     47.0
+    ],
+    [
+     "asked",
+     46.0
+    ],
+    [
+     "want",
+     31.0
+    ],
+    [
+     "liked",
+     31.0
+    ]
+   ]
+  },
+  {
+   "symbol": 13,
+   "count": 762.0,
+   "yields": [
+    [
+     "was happy",
+     107.0
+    ],
+    [
+     "did not",
+     79.0
+    ],
+    [
+     "all day",
+     55.0
+    ],
+    [
+     "wanted to help",
+     51.0
+    ],
+    [
+     "wanted to",
+     35.0
+    ],
+    [
+     "was sad",
+     33.0
+    ],
+    [
+     "wanted to play",
+     32.0
+    ],
+    [
+     "and lily",
+     32.0
+    ]
+   ]
+  },
+  {
+   "symbol": 61,
+   "count": 754.0,
+   "yields": [
+    [
+     "happy",
+     171.0
+    ],
+    [
+     "not",
+     97.0
+    ],
+    [
+     "sad",
+     67.0
+    ],
+    [
+     "day",
+     55.0
+    ],
+    [
+     "help",
+     53.0
+    ],
+    [
+     "play",
+     35.0
+    ],
+    [
+     "to",
+     35.0
+    ],
+    [
+     "lily",
+     32.0
+    ]
+   ]
+  },
+  {
+   "symbol": 24,
+   "count": 668.0,
+   "yields": [
+    [
+     "happy",
+     523.0
+    ],
+    [
+     "friends",
+     88.0
+    ],
+    [
+     "sad",
+     52.0
+    ],
+    [
+     "fun",
+     5.0
+    ]
+   ]
+  },
+  {
+   "symbol": 34,
+   "count": 667.0,
+   "yields": [
+    [
+     "tim",
+     71.0
+    ],
+    [
+     "they",
+     68.0
+    ],
+    [
+     "she",
+     63.0
+    ],
+    [
+     "lily",
+     60.0
+    ],
+    [
+     "he",
+     58.0
+    ],
+    [
+     "together",
+     55.0
+    ],
+    [
+     "tom",
+     38.0
+    ],
+    [
+     "was",
+     37.0
+    ]
+   ]
+  },
+  {
+   "symbol": 38,
+   "count": 665.0,
+   "yields": [
+    [
+     "you",
+     95.0
+    ],
+    [
+     "mom",
+     93.0
+    ],
+    [
+     "saw",
+     64.0
+    ],
+    [
+     "asked",
+     45.0
+    ],
+    [
+     "was",
+     44.0
+    ],
+    [
+     "said",
+     36.0
+    ],
+    [
+     "want",
+     34.0
+    ],
+    [
+     "are",
+     27.0
+    ]
+   ]
+  },
+  {
+   "symbol": 37,
+   "count": 665.0,
+   "yields": [
+    [
+     "he",
+     95.0
+    ],
+    [
+     "do",
+     91.0
+    ],
+    [
+     "she",
+     84.0
+    ],
+    [
+     "i",
+     63.0
+    ],
+    [
+     "her",
+     53.0
+    ],
+    [
+     "the",
+     50.0
+    ],
+    [
+     "tim",
+     39.0
+    ],
+    [
+     "his",
+     30.0
+    ]
+   ]
+  },
+  {
+   "symbol": 67,
+   "count": 665.0,
+   "yields": [
+    [
+     "was",
+     146.0
+    ],
+    [
+     "and",
+     88.0
+    ],
+    [
+     "did",
+     81.0
+    ],
+    [
+     "all",
+     55.0
+    ],
+    [
+     "little",
+     54.0
+    ],
+    [
+     "very",
+     44.0
+    ],
+    [
+     "wanted",
+     41.0
+    ],
+    [
+     "not",
+     31.0
+    ]
+   ]
+  },
+  {
+   "symbol": 19,
+   "count": 599.0,
+   "yields": [
+    [
+     "very happy",
+     351.0
+    ],
+    [
+     "not happy",
+     89.0
+    ],
+    [
+     "so happy",
+     75.0
+    ],
+    [
+     "very sad",
+     63.0
+    ],
+    [
+     "help you",
+     16.0
+    ],
+    [
+     "was sad",
+     2.0
+    ],
+    [
+     "was happy",
+     2.0
+    ],
+    [
+     "very big",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 17,
+   "count": 555.0,
+   "yields": [
+    [
+     "they are",
+     365.0
+    ],
+    [
+     "they were",
+     190.0
+    ]
+   ]
+  },
+  {
+   "symbol": 26,
+   "count": 505.0,
+   "yields": [
+    [
+     "the",
+     500.0
+    ],
+    [
+     "her",
+     5.0
+    ]
+   ]
+  },
+  {
+   "symbol": 21,
+   "count": 504.0,
+   "yields": [
+    [
+     "have fun",
+     129.0
+    ],
+    [
+     "liked to play together",
+     65.0
+    ],
+    [
+     "had fun",
+     57.0
+    ],
+    [
+     "the bird",
+     45.0
+    ],
+    [
+     "saw a big tree",
+     37.0
+    ],
+    [
+     "wanted to help",
+     31.0
+    ],
+    [
+     "like to play together",
+     30.0
+    ],
+    [
+     "loved to play together",
+     25.0
+    ]
+   ]
+  },
+  {
+   "symbol": 25,
+   "count": 504.0,
+   "yields": [
+    [
+     "they",
+     351.0
+    ],
+    [
+     "said",
+     63.0
+    ],
+    [
+     "he",
+     29.0
+    ],
+    [
+     "she",
+     20.0
+    ],
+    [
+     "asked",
+     19.0
+    ],
+    [
+     "i",
+     10.0
+    ],
+    [
+     "tom",
+     6.0
+    ],
+    [
+     "spot",
+     3.0
+    ]
+   ]
+  },
+  {
+   "symbol": 43,
+   "count": 500.0,
+   "yields": [
+    [
+     "were",
+     415.0
+    ],
+    [
+     "are",
+     70.0
+    ],
+    [
+     "is",
+     5.0
+    ],
+    [
+     "dog",
+     3.0
+    ],
+    [
+     "bird",
+     2.0
+    ],
+    [
+     "was",
+     1.0
+    ],
+    [
+     "mom",
+     1.0
+    ],
+    [
+     "found",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 23,
+   "count": 497.0,
+   "yields": [
+    [
+     "it",
+     134.0
+    ],
+    [
+     "you",
+     98.0
+    ],
+    [
+     "together",
+     42.0
+    ],
+    [
+     "sue",
+     34.0
+    ],
+    [
+     "friends",
+     32.0
+    ],
+    [
+     "lily",
+     27.0
+    ],
+    [
+     "her",
+     21.0
+    ],
+    [
+     "mom",
+     17.0
+    ]
+   ]
+  },
+  {
+   "symbol": 16,
+   "count": 488.0,
+   "yields": [
+    [
+     "can i play with",
+     100.0
+    ],
+    [
+     "tim wanted to help",
+     31.0
+    ],
+    [
+     "what is",
+     30.0
+    ],
+    [
+     "i like",
+     29.0
+    ],
+    [
+     "they were very happy",
+     19.0
+    ],
+    [
+     "can i have",
+     15.0
+    ],
+    [
+     "i want",
+     15.0
+    ],
+    [
+     "we are",
+     15.0
+    ]
+   ]
+  },
+  {
+   "symbol": 46,
+   "count": 444.0,
+   "yields": [
+    [
+     "bird",
+     159.0
+    ],
+    [
+     "cat",
+     91.0
+    ],
+    [
+     "boy",
+     79.0
+    ],
+    [
+     "dog",
+     61.0
+    ],
+    [
+     "girl",
+     40.0
+    ],
+    [
+     "tree",
+     9.0
+    ],
+    [
+     "mom",
+     5.0
+    ]
+   ]
+  },
+  {
+   "symbol": 52,
+   "count": 426.0,
+   "yields": [
+    [
+     "friends",
+     186.0
+    ],
+    [
+     "sad",
+     138.0
+    ],
+    [
+     "happy",
+     67.0
+    ],
+    [
+     "help",
+     31.0
+    ],
+    [
+     "tree",
+     3.0
+    ],
+    [
+     "play",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 0,
+   "count": 426.0,
+   "yields": [
+    [
+     "and ben are",
+     63.0
+    ],
+    [
+     "and sam are",
+     62.0
+    ],
+    [
+     "and sue were",
+     50.0
+    ],
+    [
+     "and sam were",
+     41.0
+    ],
+    [
+     "and tom are",
+     39.0
+    ],
+    [
+     "and lily are",
+     32.0
+    ],
+    [
+     "wanted to",
+     32.0
+    ],
+    [
+     "and tom were",
+     26.0
+    ]
+   ]
+  },
+  {
+   "symbol": 31,
+   "count": 423.0,
+   "yields": [
+    [
+     "can",
+     408.0
+    ],
+    [
+     "the",
+     6.0
+    ],
+    [
+     "it",
+     3.0
+    ],
+    [
+     "he",
+     2.0
+    ],
+    [
+     "what",
+     2.0
+    ],
+    [
+     "his",
+     1.0
+    ],
+    [
+     "i",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 18,
+   "count": 401.0,
+   "yields": [
+    [
+     "they were",
+     340.0
+    ],
+    [
+     "they are",
+     61.0
+    ]
+   ]
+  },
+  {
+   "symbol": 5,
+   "count": 392.0,
+   "yields": [
+    [
+     "and sam",
+     103.0
+    ],
+    [
+     "and ben",
+     74.0
+    ],
+    [
+     "and sue",
+     66.0
+    ],
+    [
+     "and tom",
+     65.0
+    ],
+    [
+     "and lily",
+     56.0
+    ],
+    [
+     "and max",
+     20.0
+    ],
+    [
+     "and spot",
+     7.0
+    ],
+    [
+     "a big",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 30,
+   "count": 391.0,
+   "yields": [
+    [
+     "and",
+     391.0
+    ]
+   ]
+  },
+  {
+   "symbol": 45,
+   "count": 391.0,
+   "yields": [
+    [
+     "sam",
+     103.0
+    ],
+    [
+     "ben",
+     74.0
+    ],
+    [
+     "sue",
+     66.0
+    ],
+    [
+     "tom",
+     65.0
+    ],
+    [
+     "lily",
+     56.0
+    ],
+    [
+     "max",
+     20.0
+    ],
+    [
+     "spot",
+     7.0
+    ]
+   ]
+  },
+  {
+   "symbol": 22,
+   "count": 366.0,
+   "yields": [
+    [
+     "it",
+     235.0
+    ],
+    [
+     "what",
+     44.0
+    ],
+    [
+     "he",
+     32.0
+    ],
+    [
+     "tom",
+     11.0
+    ],
+    [
+     "ben",
+     10.0
+    ],
+    [
+     "that",
+     9.0
+    ],
+    [
+     "sam",
+     7.0
+    ],
+    [
+     "she",
+     6.0
+    ]
+   ]
+  },
+  {
+   "symbol": 39,
+   "count": 366.0,
+   "yields": [
+    [
+     "is",
+     203.0
+    ],
+    [
+     "was",
+     155.0
+    ],
+    [
+     "looked",
+     7.0
+    ],
+    [
+     "saw",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 32,
+   "count": 347.0,
+   "yields": [
+    [
+     "to",
+     336.0
+    ],
+    [
+     "fun",
+     5.0
+    ],
+    [
+     "spot",
+     2.0
+    ],
+    [
+     "saw",
+     1.0
+    ],
+    [
+     "a big",
+     1.0
+    ],
+    [
+     "tom",
+     1.0
+    ],
+    [
+     "with",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 15,
+   "count": 313.0,
+   "yields": [
+    [
+     "she is",
+     74.0
+    ],
+    [
+     "he is",
+     51.0
+    ],
+    [
+     "they were all",
+     39.0
+    ],
+    [
+     "she felt",
+     17.0
+    ],
+    [
+     "can i",
+     16.0
+    ],
+    [
+     "he felt",
+     14.0
+    ],
+    [
+     "tom is",
+     13.0
+    ],
+    [
+     "ben is",
+     11.0
+    ]
+   ]
+  },
+  {
+   "symbol": 41,
+   "count": 311.0,
+   "yields": [
+    [
+     "is",
+     188.0
+    ],
+    [
+     "felt",
+     45.0
+    ],
+    [
+     "all",
+     43.0
+    ],
+    [
+     "i",
+     16.0
+    ],
+    [
+     "are",
+     7.0
+    ],
+    [
+     "looked",
+     6.0
+    ],
+    [
+     "mom",
+     4.0
+    ],
+    [
+     "said",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 53,
+   "count": 298.0,
+   "yields": [
+    [
+     "sad",
+     258.0
+    ],
+    [
+     "happy",
+     40.0
+    ]
+   ]
+  },
+  {
+   "symbol": 33,
+   "count": 296.0,
+   "yields": [
+    [
+     "wanted",
+     243.0
+    ],
+    [
+     "saw",
+     44.0
+    ],
+    [
+     "had",
+     5.0
+    ],
+    [
+     "and",
+     3.0
+    ],
+    [
+     "play",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 49,
+   "count": 292.0,
+   "yields": [
+    [
+     "felt",
+     211.0
+    ],
+    [
+     "looked",
+     79.0
+    ],
+    [
+     "was",
+     2.0
+    ]
+   ]
+  },
+  {
+   "symbol": 36,
+   "count": 289.0,
+   "yields": [
+    [
+     "we",
+     204.0
+    ],
+    [
+     "i",
+     43.0
+    ],
+    [
+     "you",
+     41.0
+    ],
+    [
+     "she",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 11,
+   "count": 262.0,
+   "yields": [
+    [
+     "wanted to",
+     211.0
+    ],
+    [
+     "saw a big",
+     42.0
+    ],
+    [
+     "had fun",
+     5.0
+    ],
+    [
+     "and spot",
+     2.0
+    ],
+    [
+     "and tom",
+     1.0
+    ],
+    [
+     "play with",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 28,
+   "count": 261.0,
+   "yields": [
+    [
+     "she",
+     91.0
+    ],
+    [
+     "he",
+     67.0
+    ],
+    [
+     "can",
+     16.0
+    ],
+    [
+     "tom",
+     14.0
+    ],
+    [
+     "tim",
+     13.0
+    ],
+    [
+     "ben",
+     12.0
+    ],
+    [
+     "lily",
+     11.0
+    ],
+    [
+     "it",
+     8.0
+    ]
+   ]
+  },
+  {
+   "symbol": 40,
+   "count": 245.0,
+   "yields": [
+    [
+     "played",
+     123.0
+    ],
+    [
+     "all",
+     38.0
+    ],
+    [
+     "looked",
+     12.0
+    ],
+    [
+     "want",
+     9.0
+    ],
+    [
+     "went",
+     8.0
+    ],
+    [
+     "make",
+     7.0
+    ],
+    [
+     "said",
+     7.0
+    ],
+    [
+     "go",
+     6.0
+    ]
+   ]
+  },
+  {
+   "symbol": 47,
+   "count": 225.0,
+   "yields": [
+    [
+     "play",
+     223.0
+    ],
+    [
+     "so",
+     2.0
+    ]
+   ]
+  },
+  {
+   "symbol": 6,
+   "count": 219.0,
+   "yields": [
+    [
+     "can i",
+     119.0
+    ],
+    [
+     "they were",
+     75.0
+    ],
+    [
+     "they are",
+     10.0
+    ],
+    [
+     "the dog",
+     3.0
+    ],
+    [
+     "it is",
+     3.0
+    ],
+    [
+     "what is",
+     2.0
+    ],
+    [
+     "the bird",
+     2.0
+    ],
+    [
+     "he was",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 65,
+   "count": 166.0,
+   "yields": [
+    [
+     "the",
+     82.0
+    ],
+    [
+     "had",
+     57.0
+    ],
+    [
+     "did",
+     13.0
+    ],
+    [
+     "play",
+     4.0
+    ],
+    [
+     "felt",
+     4.0
+    ],
+    [
+     "liked",
+     2.0
+    ],
+    [
+     "little",
+     1.0
+    ],
+    [
+     "found",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 56,
+   "count": 166.0,
+   "yields": [
+    [
+     "fun",
+     57.0
+    ],
+    [
+     "bird",
+     46.0
+    ],
+    [
+     "it",
+     16.0
+    ],
+    [
+     "cat",
+     15.0
+    ],
+    [
+     "dog",
+     12.0
+    ],
+    [
+     "together",
+     5.0
+    ],
+    [
+     "boy",
+     5.0
+    ],
+    [
+     "girl",
+     5.0
+    ]
+   ]
+  },
+  {
+   "symbol": 66,
+   "count": 133.0,
+   "yields": [
+    [
+     "little",
+     60.0
+    ],
+    [
+     "a",
+     54.0
+    ],
+    [
+     "looked",
+     7.0
+    ],
+    [
+     "have",
+     6.0
+    ],
+    [
+     "had",
+     2.0
+    ],
+    [
+     "did",
+     2.0
+    ],
+    [
+     "saw a big",
+     1.0
+    ],
+    [
+     "you",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 63,
+   "count": 129.0,
+   "yields": [
+    [
+     "have",
+     129.0
+    ]
+   ]
+  },
+  {
+   "symbol": 54,
+   "count": 129.0,
+   "yields": [
+    [
+     "fun",
+     129.0
+    ]
+   ]
+  },
+  {
+   "symbol": 10,
+   "count": 124.0,
+   "yields": [
+    [
+     "to play",
+     124.0
+    ]
+   ]
+  },
+  {
+   "symbol": 59,
+   "count": 123.0,
+   "yields": [
+    [
+     "together",
+     122.0
+    ],
+    [
+     "boy",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 2,
+   "count": 122.0,
+   "yields": [
+    [
+     "to play together",
+     121.0
+    ],
+    [
+     "not happy",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 64,
+   "count": 121.0,
+   "yields": [
+    [
+     "liked",
+     65.0
+    ],
+    [
+     "like",
+     30.0
+    ],
+    [
+     "loved",
+     25.0
+    ],
+    [
+     "started",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 48,
+   "count": 119.0,
+   "yields": [
+    [
+     "i",
+     119.0
+    ]
+   ]
+  },
+  {
+   "symbol": 60,
+   "count": 114.0,
+   "yields": [
+    [
+     "big",
+     54.0
+    ],
+    [
+     "girl",
+     22.0
+    ],
+    [
+     "boy",
+     19.0
+    ],
+    [
+     "bird",
+     16.0
+    ],
+    [
+     "dog",
+     3.0
+    ]
+   ]
+  },
+  {
+   "symbol": 7,
+   "count": 114.0,
+   "yields": [
+    [
+     "a big",
+     53.0
+    ],
+    [
+     "little girl",
+     22.0
+    ],
+    [
+     "little boy",
+     20.0
+    ],
+    [
+     "little bird",
+     16.0
+    ],
+    [
+     "little dog",
+     3.0
+    ]
+   ]
+  },
+  {
+   "symbol": 58,
+   "count": 110.0,
+   "yields": [
+    [
+     "help",
+     87.0
+    ],
+    [
+     "at",
+     7.0
+    ],
+    [
+     "fun",
+     6.0
+    ],
+    [
+     "are",
+     3.0
+    ],
+    [
+     "it",
+     3.0
+    ],
+    [
+     "a",
+     2.0
+    ],
+    [
+     "do",
+     1.0
+    ],
+    [
+     "play",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 9,
+   "count": 110.0,
+   "yields": [
+    [
+     "wanted to help",
+     87.0
+    ],
+    [
+     "looked at",
+     7.0
+    ],
+    [
+     "have fun",
+     6.0
+    ],
+    [
+     "and spot are",
+     2.0
+    ],
+    [
+     "had a",
+     2.0
+    ],
+    [
+     "did it",
+     2.0
+    ],
+    [
+     "you do",
+     1.0
+    ],
+    [
+     "and tom are",
+     1.0
+    ]
+   ]
+  },
+  {
+   "symbol": 55,
+   "count": 104.0,
+   "yields": [
+    [
+     "tree",
+     37.0
+    ],
+    [
+     "help",
+     31.0
+    ],
+    [
+     "you",
+     16.0
+    ],
+    [
+     "play",
+     9.0
+    ],
+    [
+     "together",
+     5.0
+    ],
+    [
+     "dog",
+     4.0
+    ],
+    [
+     "cat",
+     2.0
+    ]
+   ]
+  },
+  {
+   "symbol": 57,
+   "count": 102.0,
+   "yields": [
+    [
+     "with",
+     100.0
+    ],
+    [
+     "happy",
+     2.0
+    ]
+   ]
+  },
+  {
+   "symbol": 8,
+   "count": 102.0,
+   "yields": [
+    [
+     "play with",
+     100.0
+    ],
+    [
+     "so happy",
+     2.0
+    ]
+   ]
+  }
+ ],
+ "frequent chunks": [
+  [
+   "very happy",
+   1376
+  ],
+  [
+   "was very happy",
+   981
+  ],
+  [
+   "so happy",
+   706
+  ],
+  [
+   "they were",
+   655
+  ],
+  [
+   "was so happy",
+   626
+  ],
+  [
+   "was sad",
+   626
+  ],
+  [
+   "was happy",
+   467
+  ],
+  [
+   "they are",
+   454
+  ],
+  [
+   "very sad",
+   379
+  ],
+  [
+   "was very sad",
+   290
+  ],
+  [
+   "wanted to",
+   284
+  ],
+  [
+   "not happy",
+   247
+  ],
+  [
+   "the bird",
+   226
+  ],
+  [
+   "wanted to help",
+   200
+  ],
+  [
+   "can i",
+   182
+  ],
+  [
+   "felt sad",
+   181
+  ],
+  [
+   "have fun",
+   142
+  ],
+  [
+   "play with",
+   135
+  ],
+  [
+   "to play",
+   127
+  ],
+  [
+   "was not happy",
+   126
+  ],
+  [
+   "to play together",
+   124
+  ],
+  [
+   "the cat",
+   123
+  ],
+  [
+   "and sam",
+   113
+  ],
+  [
+   "can i play with",
+   100
+  ],
+  [
+   "the dog",
+   92
+  ],
+  [
+   "and ben",
+   91
+  ],
+  [
+   "a big",
+   88
+  ],
+  [
+   "and lily",
+   88
+  ],
+  [
+   "the boy",
+   86
+  ],
+  [
+   "looked sad",
+   81
+  ],
+  [
+   "had fun",
+   80
+  ],
+  [
+   "did not",
+   79
+  ],
+  [
+   "and tom",
+   79
+  ],
+  [
+   "and sue",
+   78
+  ],
+  [
+   "she is",
+   77
+  ],
+  [
+   "liked to play together",
+   65
+  ],
+  [
+   "and ben are",
+   63
+  ],
+  [
+   "and sam are",
+   62
+  ],
+  [
+   "saw a big",
+   55
+  ],
+  [
+   "all day",
+   55
+  ],
+  [
+   "he is",
+   54
+  ],
+  [
+   "felt happy",
+   52
+  ],
+  [
+   "and sue were",
+   50
+  ],
+  [
+   "and ben are friends",
+   49
+  ],
+  [
+   "and sam are friends",
+   49
+  ],
+  [
+   "they were all",
+   47
+  ],
+  [
+   "i like",
+   46
+  ],
+  [
+   "the girl",
+   46
+  ],
+  [
+   "wanted to play",
+   43
+  ],
+  [
+   "little girl",
+   43
+  ],
+  [
+   "and sam were",
+   41
+  ],
+  [
+   "what is",
+   41
+  ],
+  [
+   "saw a big tree",
+   40
+  ],
+  [
+   "and tom are",
+   40
+  ],
+  [
+   "and sue were sad",
+   35
+  ],
+  [
+   "it is",
+   33
+  ],
+  [
+   "and sam were sad",
+   33
+  ],
+  [
+   "and lily are",
+   32
+  ],
+  [
+   "little bird",
+   32
+  ],
+  [
+   "little boy",
+   31
+  ]
+ ],
+ "examples": {
+  "held-out analyses": [
+   "[she [was [very happy]]]",
+   "[[they [liked it]] too]",
+   "[[they [do not]] [like tom]]",
+   "[[[i have] a] [new toy]]",
+   "[[[[they are] not] a] toy]",
+   "[lily [was [not happy]]]",
+   "[[they are] friends]",
+   "[she [was [so happy]]]",
+   "[they [have fun]]",
+   "[[they are] happy]",
+   "[and [[they were] [very happy]]]",
+   "[[they played] [together [all day]]]",
+   "[they [have fun]]",
+   "[sue [was sad]]",
+   "[[they played] [all day]]",
+   "[[[they played] and] [had fun]]",
+   "[[[she saw] [her friend]] tim]",
+   "[[they were] [very happy]]",
+   "[lily [was sad]]",
+   "[max [was [very happy]]]",
+   "[[would you] [[like a] toy]]",
+   "[tim [was sad]]",
+   "[she [was sad]]",
+   "[so [[he started] [to play]]]",
+   "[tim [was [very happy]]]"
+  ],
+  "all generated": [
+   "[[[can were] [play with]] it]",
+   "[tim [was happy]]",
+   "[[they [[wanted [little boy]] at]] mom]",
+   "[[they are] sad]",
+   "[[they are] happy]",
+   "[[they were] [very sad]]",
+   "[[can [[saw to] help]] sue]",
+   "[tim [[[and sam] were] sad]]",
+   "[[the bird] [looked sad]]",
+   "[[[they are] were] asked]",
+   "[tim [[[and sam] are] friends]]",
+   "[[the [little girl]] [was sad]]",
+   "[asked [the bird]]",
+   "[tim [[[and sam] were] sad]]",
+   "[they [have fun]]",
+   "[he [was [so happy]]]",
+   "[[they [little help]] it]",
+   "[tim [was [very happy]]]",
+   "[tim [was [so happy]]]",
+   "[he [was [very sad]]]",
+   "[[the bird] [[wanted to] help]]",
+   "[she [was [very happy]]]",
+   "[[the [little girl]] [was sad]]",
+   "[[[they are] all] friends]",
+   "[[she liked] it]",
+   "[[they were] [very happy]]",
+   "[they [have fun]]",
+   "[tim [was [so happy]]]",
+   "[she [felt sad]]",
+   "[[[can i] [help happy]] together]",
+   "[tim [was [very happy]]]",
+   "[[he liked] lily]",
+   "[she [was [so happy]]]",
+   "[tom [was sad]]",
+   "[they [have fun]]",
+   "[they [have fun]]",
+   "[[they are] happy]",
+   "[she [was [very happy]]]",
+   "[he [was happy]]",
+   "[they [[wanted to] help]]",
+   "[they [had fun]]",
+   "[[they were] you]",
+   "[she [was [not happy]]]",
+   "[tim [was [very sad]]]",
+   "[[they were] [very happy]]",
+   "[he [was [not happy]]]",
+   "[[ben is] it]",
+   "[[they are] happy]",
+   "[lily [[[and max] were] sad]]",
+   "[they [[wanted [a big]] tree]]",
+   "[tom [was [so happy]]]",
+   "[sue [was [very happy]]]",
+   "[they [[wanted [a big]] tree]]",
+   "[he [felt sad]]",
+   "[[they were] happy]",
+   "[they [liked [[to play] together]]]",
+   "[[they are] friends]",
+   "[[they were] sad]",
+   "[[the cat] [was [very sad]]]",
+   "[spot [was [very happy]]]",
+   "[tim [was [very sad]]]",
+   "[[they are] sad]",
+   "[tim [was sad]]",
+   "[[they were] happy]",
+   "[[spot wanted] it]",
+   "[[they are] happy]",
+   "[[she is] happy]",
+   "[[the bird] [was sad]]",
+   "[he [was [very sad]]]",
+   "[she [was happy]]",
+   "[tim [was [very sad]]]",
+   "[it [was [very happy]]]",
+   "[lily [was [so happy]]]",
+   "[[they were] happy]",
+   "[they [loved [[to play] together]]]",
+   "[he [[wanted [little boy]] play]]",
+   "[she [was [very happy]]]",
+   "[he [was [so happy]]]",
+   "[they [did it]]",
+   "[[they were] [very happy]]",
+   "[tim [felt sad]]",
+   "[[they are] happy]",
+   "[she [was [not happy]]]",
+   "[tom [was [so happy]]]",
+   "[[i like] it]",
+   "[[the [little help]] lily]",
+   "[[the girl] [looked sad]]",
+   "[[they loved] it]",
+   "[lily [was [so happy]]]",
+   "[tim [was [so happy]]]",
+   "[max [felt sad]]",
+   "[lily [was [very happy]]]",
+   "[tim [was [so happy]]]",
+   "[he [was [not happy]]]",
+   "[max [was [so happy]]]",
+   "[[[can i] [play with]] you]",
+   "[tom [[[and lily] are] friends]]",
+   "[tim [[[and sue] are] friends]]",
+   "[lily [was [very happy]]]",
+   "[[the [little boy]] [was sad]]",
+   "[they [had fun]]",
+   "[[the bird] [was happy]]",
+   "[[the dog] [was sad]]",
+   "[[they are] happy]",
+   "[tim [was [very happy]]]",
+   "[tom [was happy]]",
+   "[[they played] [very sad]]",
+   "[[[can i] have] it]",
+   "[they [felt sad]]",
+   "[[the girl] [was sad]]",
+   "[[[they were] all] friends]",
+   "[she [was sad]]",
+   "[[[can i] [help happy]] together]",
+   "[[[can i] [play with]] it]",
+   "[he [was [so happy]]]",
+   "[tim [was sad]]",
+   "[[they are] friends]",
+   "[sue [was sad]]",
+   "[sue [was [very sad]]]",
+   "[[tom asked] tom]",
+   "[lily [[[and sam] are] friends]]",
+   "[[what is] you]",
+   "[[tim felt] [very happy]]",
+   "[tom [[[and sam] are] friends]]",
+   "[[they are] happy]",
+   "[tim [was happy]]",
+   "[[[can i] like] you]",
+   "[tim [was happy]]",
+   "[[they were] [very happy]]",
+   "[sue [[[and sam] were] sad]]",
+   "[they [have fun]]",
+   "[tom [was [very happy]]]",
+   "[she [felt sad]]",
+   "[he [was [very sad]]]",
+   "[[the boy] [was sad]]",
+   "[[the boy] [was happy]]",
+   "[[the cat] [looked sad]]",
+   "[[[can i] [play with]] it]",
+   "[she [was [so happy]]]",
+   "[[the boy] [looked sad]]",
+   "[[they were] happy]",
+   "[they [[saw [a big]] tree]]",
+   "[she [felt happy]]",
+   "[spot [was [very happy]]]",
+   "[ben [[[and ben] are] friends]]",
+   "[[they were] [very happy]]",
+   "[she [was [so happy]]]",
+   "[they [loved [[to play] together]]]",
+   "[[the cat] [was [very happy]]]",
+   "[tim [was [so happy]]]",
+   "[they [[wanted [little bird]] tree]]",
+   "[he [was [very sad]]]",
+   "[[she asked] it]",
+   "[he [felt sad]]",
+   "[[the cat] [was [so happy]]]",
+   "[they [loved [[to play] together]]]",
+   "[[tom is] [not happy]]",
+   "[tim [was [very sad]]]",
+   "[sue [was [very happy]]]",
+   "[lily [was [so happy]]]",
+   "[sue [was sad]]",
+   "[[they are] happy]",
+   "[[he is] [not happy]]",
+   "[[he is] happy]",
+   "[lily [was [very happy]]]",
+   "[[they are] happy]",
+   "[lily [was [so happy]]]",
+   "[sue [was [very happy]]]",
+   "[spot [was happy]]",
+   "[lily [was happy]]",
+   "[[the dog] asked]",
+   "[lily [was happy]]",
+   "[[the bird] [was [very happy]]]",
+   "[[the girl] [was [so happy]]]",
+   "[[the bird] [was [so happy]]]",
+   "[he [felt sad]]",
+   "[[the girl] [was sad]]",
+   "[[the girl] [was sad]]",
+   "[[the girl] [was [very happy]]]",
+   "[tim [was [so happy]]]",
+   "[[the boy] [was [very happy]]]",
+   "[sue [was [very sad]]]",
+   "[[the bird] [was [very happy]]]",
+   "[sue [was [very happy]]]",
+   "[[the boy] [was sad]]",
+   "[[tom is] happy]",
+   "[he [was happy]]",
+   "[he [was sad]]",
+   "[tom [[[and sam] are] friends]]",
+   "[he [was happy]]",
+   "[lily [was [very happy]]]",
+   "[he [was [so happy]]]",
+   "[she [was happy]]",
+   "[lily [was [very happy]]]",
+   "[[they are] happy]",
+   "[lily [was [so happy]]]",
+   "[they [like [[to play] together]]]",
+   "[it [was [very happy]]]",
+   "[she [was happy]]",
+   "[[ben is] [not happy]]",
+   "[[they are] [very happy]]",
+   "[[i like] it]",
+   "[tom [was [very sad]]]",
+   "[he [felt sad]]",
+   "[[they are] friends]",
+   "[she [was [very sad]]]",
+   "[[his mom] [was happy]]",
+   "[[they were] [very happy]]",
+   "[tim [was [very happy]]]",
+   "[they [have fun]]",
+   "[lily [was [so happy]]]",
+   "[tim [was [so happy]]]",
+   "[tom [was sad]]",
+   "[they [have fun]]",
+   "[they [had fun]]",
+   "[they [liked [[to play] together]]]",
+   "[he [was [so happy]]]",
+   "[tim [felt sad]]",
+   "[tim [[[and sam] are] friends]]",
+   "[tim [felt sad]]",
+   "[ben [was happy]]",
+   "[tom [[[and lily] are] friends]]",
+   "[he [was [very happy]]]",
+   "[[they were] [not happy]]",
+   "[he [was [not happy]]]",
+   "[[the boy] [was [very happy]]]",
+   "[they [loved [[to play] together]]]",
+   "[[they are] happy]",
+   "[[the cat] [was [not happy]]]",
+   "[ben [was sad]]",
+   "[said [the dog]]",
+   "[tom [was sad]]",
+   "[he [was sad]]",
+   "[tom [[[and lily] were] sad]]",
+   "[[i do] together]",
+   "[[she is] [not happy]]",
+   "[[she is] [not happy]]",
+   "[they [have fun]]",
+   "[she [was [not happy]]]",
+   "[he [was [very happy]]]",
+   "[[[i i] like] it]",
+   "[they [have fun]]",
+   "[[they were] happy]",
+   "[he [was [very happy]]]",
+   "[[they are] happy]",
+   "[lily [[[and tom] are] friends]]",
+   "[[what is] it]",
+   "[[they are] happy]",
+   "[[the bird] [was [very happy]]]",
+   "[tim [was sad]]",
+   "[he [was [very happy]]]",
+   "[[they were] happy]",
+   "[she [was [very happy]]]",
+   "[he [was [very happy]]]",
+   "[tom her]",
+   "[lily [was [very happy]]]",
+   "[[the boy] [was sad]]",
+   "[tim [[[and sam] were] sad]]",
+   "[lily [[[and ben] are] friends]]",
+   "[[they were] [so happy]]",
+   "[she [was [so happy]]]",
+   "[[they were] [very happy]]",
+   "[tim [was [very happy]]]",
+   "[[they are] happy]",
+   "[they [[saw [a big]] tree]]",
+   "[[the cat] [was [very happy]]]",
+   "[sue [was [very happy]]]",
+   "[[they are] happy]",
+   "[tom [was happy]]",
+   "[they [had fun]]",
+   "[[the [little girl]] [was sad]]",
+   "[tim [was [so happy]]]",
+   "[sue [was happy]]",
+   "[tom [was [very sad]]]",
+   "[tim [was [very happy]]]",
+   "[lily [was [very sad]]]",
+   "[he [felt sad]]",
+   "[[they were] [very happy]]",
+   "[tim [was [very sad]]]",
+   "[[ben felt] happy]",
+   "[he [was [very happy]]]",
+   "[[can i] it]",
+   "[he [was happy]]",
+   "[[they were] friends]",
+   "[he [was happy]]",
+   "[tim [was sad]]",
+   "[she [looked sad]]",
+   "[[they were] [very happy]]",
+   "[he [looked sad]]",
+   "[[the cat] [was [very happy]]]",
+   "[she [was [so happy]]]",
+   "[they [have fun]]",
+   "[tim [was [very happy]]]",
+   "[tim [was [very happy]]]",
+   "[max [was [very happy]]]",
+   "[tim [was sad]]",
+   "[[[can i] have] it]",
+   "[[they are] happy]",
+   "[[they are] happy]",
+   "[[the bird] [was [very happy]]]",
+   "[[he is] happy]",
+   "[[the dog] sue]",
+   "[lily [was happy]]",
+   "[[tom is] [very happy]]",
+   "[he [felt sad]]",
+   "[[tim asked] sue]",
+   "[tim [was sad]]",
+   "[[the bird] [was [so happy]]]",
+   "[[they are] sad]",
+   "[max [[[and tom] are] friends]]",
+   "[[the bird] asked]",
+   "[they [have fun]]",
+   "[[[can i] is] [not happy]]",
+   "[she [was [so happy]]]",
+   "[[the boy] [was sad]]",
+   "[tim [was [so happy]]]",
+   "[[the bird] [was [so happy]]]",
+   "[sam [felt sad]]",
+   "[[the [[wanted to] help]] sue]",
+   "[[they were] [very happy]]",
+   "[[they are] happy]",
+   "[he [was sad]]",
+   "[she [was [very happy]]]",
+   "[[they were] [very happy]]",
+   "[tim [felt sad]]",
+   "[tim [was sad]]",
+   "[they [loved [[to play] together]]]",
+   "[[the bird] [was happy]]",
+   "[[spot is] [very happy]]",
+   "[[the dog] [looked sad]]",
+   "[[they are] happy]",
+   "[she [[wanted to] play]]",
+   "[sue [was [so happy]]]",
+   "[[they are] happy]",
+   "[she [was sad]]",
+   "[[it looked] [very happy]]",
+   "[he [was [very happy]]]",
+   "[he [was [very happy]]]",
+   "[asked [the girl]]",
+   "[[[can were] [so happy]] together]",
+   "[she [was [not happy]]]",
+   "[she [was [so happy]]]",
+   "[tom [was [very happy]]]",
+   "[she [was [so happy]]]",
+   "[[the [little girl]] [was [very happy]]]",
+   "[she [felt sad]]",
+   "[she [was sad]]",
+   "[she [[saw to] help]]",
+   "[[the cat] [was [not happy]]]",
+   "[tim [was sad]]",
+   "[tim [was [very sad]]]",
+   "[he [was sad]]",
+   "[she [was [very sad]]]",
+   "[tom [was [very sad]]]",
+   "[tim [was sad]]",
+   "[[the cat] [was [very happy]]]",
+   "[[they were] happy]",
+   "[[the tree] [was [very sad]]]",
+   "[they [[wanted to] help]]",
+   "[tim [was [very sad]]]",
+   "[[she is] [not happy]]",
+   "[ben [was [so happy]]]",
+   "[[they were] [very sad]]",
+   "[tim [[[and sam] are] friends]]",
+   "[sam [was [very sad]]]",
+   "[[she is] [not happy]]",
+   "[she [was [very happy]]]",
+   "[tim [was happy]]",
+   "[tom [[[and sam] were] sad]]",
+   "[it [was happy]]",
+   "[[they are] happy]",
+   "[she [was [very sad]]]",
+   "[lily [was [so happy]]]",
+   "[tom [was [very happy]]]",
+   "[[they were] [so happy]]",
+   "[she [[wanted to] help]]",
+   "[[they are] happy]",
+   "[[they are] [very happy]]",
+   "[lily [felt happy]]",
+   "[[the bird] [was [very happy]]]",
+   "[tim [was happy]]",
+   "[[the cat] [was [very happy]]]",
+   "[sue [was [very happy]]]",
+   "[sam [was happy]]",
+   "[tim [was [so happy]]]",
+   "[[they are] happy]",
+   "[he [felt sad]]",
+   "[she [was [so happy]]]",
+   "[lily [was [so happy]]]",
+   "[he [was [very happy]]]",
+   "[[they were] [very happy]]",
+   "[she [was [so happy]]]",
+   "[[they are] happy]",
+   "[he [was [very sad]]]",
+   "[he [was [very sad]]]",
+   "[[they were] [very happy]]",
+   "[[the bird] [was [very sad]]]",
+   "[lily [was [very sad]]]",
+   "[she [was [very happy]]]",
+   "[they [had fun]]",
+   "[[the boy] [looked sad]]",
+   "[[tom is] happy]",
+   "[[they were] [very happy]]",
+   "[[they were] [very happy]]",
+   "[they [have fun]]",
+   "[tom [[[and lily] are] friends]]",
+   "[tom [was [very happy]]]",
+   "[tim [was [very happy]]]",
+   "[[they were] [so happy]]",
+   "[they [liked [[to play] together]]]",
+   "[tim [was [very happy]]]",
+   "[[he found] it]",
+   "[[they were] [very happy]]",
+   "[asked [the bird]]",
+   "[lily [[[and ben] are] friends]]",
+   "[they [loved [[to play] together]]]",
+   "[sam [[[and tom] are] friends]]",
+   "[he [was [very happy]]]",
+   "[[the [little girl]] [was happy]]",
+   "[he [was [very happy]]]",
+   "[[they are] happy]",
+   "[lily [was [very happy]]]",
+   "[tom [[[and sue] were] happy]]",
+   "[[he is] [not happy]]",
+   "[[[can i] [play with]] it]",
+   "[he [was [so happy]]]",
+   "[tom [[[and max] were] sad]]",
+   "[she [was [very happy]]]",
+   "[[she is] [not happy]]",
+   "[[they are] not]",
+   "[lily [[[and sam] were] happy]]",
+   "[tim [was sad]]",
+   "[he [was [very happy]]]",
+   "[he [was [so happy]]]",
+   "[she [was [very happy]]]",
+   "[she [was [very happy]]]",
+   "[[she is] happy]",
+   "[he [[wanted to] help]]",
+   "[lily [was sad]]",
+   "[tim [was [so happy]]]",
+   "[tom [[[and sam] are] friends]]",
+   "[[they are] friends]",
+   "[[they are] happy]",
+   "[[they were] [very happy]]",
+   "[[the dog] said]",
+   "[[they were] happy]",
+   "[max [was [so happy]]]",
+   "[lily [was [very sad]]]",
+   "[tim [was [very happy]]]",
+   "[[he felt] happy]",
+   "[tim [[[and sue] were] sad]]",
+   "[he [was [very happy]]]",
+   "[he [was [very happy]]]",
+   "[[the bird] [was sad]]",
+   "[max [was [very happy]]]",
+   "[he [was [very happy]]]",
+   "[[tim [[wanted to] help]] [was [so happy]]]",
+   "[tim [[[and sue] are] friends]]",
+   "[[she is] [not happy]]",
+   "[lily [[[and ben] are] friends]]",
+   "[he [was [very happy]]]",
+   "[tim [[wanted to] help]]",
+   "[she [was [very sad]]]",
+   "[he [felt sad]]",
+   "[they [have fun]]",
+   "[lily [was sad]]",
+   "[he [was [very happy]]]",
+   "[[they are] happy]",
+   "[spot [was [very happy]]]",
+   "[tom [[[and sue] were] sad]]",
+   "[tim [was sad]]",
+   "[[the [little bird]] [was [so happy]]]",
+   "[[they are] happy]",
+   "[tim [was [very sad]]]",
+   "[lily [was [so happy]]]",
+   "[sue [was sad]]",
+   "[tom [[[and lily] were] sad]]",
+   "[[the cat] [was [very happy]]]",
+   "[tom [was [so happy]]]",
+   "[she [was [very sad]]]",
+   "[he [was [very happy]]]",
+   "[they [like [[to play] together]]]",
+   "[[they were] [very sad]]",
+   "[tim [was [so happy]]]",
+   "[[it looked] [very happy]]",
+   "[he [was sad]]",
+   "[[the bird] [was [so happy]]]",
+   "[tim [was [so happy]]]",
+   "[tim [was [very sad]]]",
+   "[[[they were] [so happy]] together]",
+   "[[she is] [not happy]]",
+   "[tom [[[and sam] were] happy]]",
+   "[[they were] happy]",
+   "[[her mom] [was [so happy]]]",
+   "[sam [was [very happy]]]",
+   "[[they were] friends]",
+   "[they [have fun]]",
+   "[[the bird] [was sad]]",
+   "[tom [was [so happy]]]",
+   "[tim [[[and sam] are] friends]]",
+   "[[they are] happy]",
+   "[[they were] happy]",
+   "[[they were] happy]",
+   "[[they are] happy]",
+   "[sue [was [very sad]]]",
+   "[he [felt sad]]",
+   "[[the bird] [was [very happy]]]",
+   "[[can [you do]] you]",
+   "[[can i] help]",
+   "[lily [was sad]]",
+   "[lily [was [so happy]]]",
+   "[she [was [not happy]]]",
+   "[sue [was [so happy]]]",
+   "[sam [was [very happy]]]",
+   "[she [was [very happy]]]",
+   "[tim [was [very sad]]]",
+   "[[they were] happy]",
+   "[[they were] [very happy]]",
+   "[they [have fun]]",
+   "[tim [was happy]]",
+   "[he [felt happy]]",
+   "[tim [was [very sad]]]",
+   "[they [liked [[to play] together]]]",
+   "[tim [was [very happy]]]",
+   "[[the bird] [was [very sad]]]",
+   "[tom [was [not happy]]]",
+   "[he [was [so happy]]]",
+   "[tim [[[and sue] were] sad]]",
+   "[tim [was [so happy]]]",
+   "[[they are] [not happy]]",
+   "[tom [[[and sue] are] friends]]",
+   "[[he loved] it]",
+   "[[they were] [very happy]]",
+   "[tim [was [very sad]]]",
+   "[[can i] [help you]]",
+   "[tim [[[and sam] were] sad]]",
+   "[tim [was [very happy]]]",
+   "[she [was sad]]",
+   "[they [said bird]]",
+   "[he [was [so happy]]]",
+   "[he [was sad]]",
+   "[tom [was [very happy]]]",
+   "[[they were] [very happy]]",
+   "[they [[play [little boy]] help]]",
+   "[tim [was sad]]",
+   "[sam [looked sad]]",
+   "[[they were] [very happy]]",
+   "[she [was [very happy]]]",
+   "[they [like [[to play] together]]]",
+   "[[she is] [very sad]]",
+   "[she [was [very sad]]]",
+   "[[they are] happy]",
+   "[he [was [very happy]]]",
+   "[tim [was [so happy]]]",
+   "[[they were] happy]",
+   "[max [felt sad]]",
+   "[[they were] sad]",
+   "[tom [was [so happy]]]",
+   "[tom [[[and lily] were] friends]]",
+   "[max [was sad]]",
+   "[tim [was [so happy]]]",
+   "[lily [was [very happy]]]",
+   "[cat [was [very sad]]]",
+   "[he [was [very happy]]]",
+   "[[they are] happy]",
+   "[[[they were] all] happy]",
+   "[tim [was happy]]",
+   "[[you [[wanted to] help]] tom]",
+   "[[they were] [so happy]]",
+   "[[they are] happy]",
+   "[[they were] sad]",
+   "[[[can i] [play with]] you]",
+   "[lily [[[and ben] are] happy]]",
+   "[said [the bird]]",
+   "[tom [was [not happy]]]",
+   "[[the cat] you]",
+   "[spot [was sad]]",
+   "[[they were] happy]",
+   "[[tom is] happy]",
+   "[[the cat] [was [very happy]]]",
+   "[he [was [very happy]]]",
+   "[[the bird] [was [very happy]]]",
+   "[[the [little dog]] [was sad]]",
+   "[[they are] happy]",
+   "[she [was happy]]",
+   "[lily [[[and ben] are] friends]]",
+   "[[the bird] [was [very happy]]]",
+   "[[they are] happy]",
+   "[she [was sad]]",
+   "[he [felt sad]]",
+   "[tim [was [very happy]]]",
+   "[[they were] [very happy]]",
+   "[[the bird] [was sad]]",
+   "[tim [[[and spot] were] sad]]",
+   "[spot [was [very happy]]]",
+   "[she [was sad]]",
+   "[[they were] [very happy]]",
+   "[he [was [so happy]]]",
+   "[she [was sad]]",
+   "[[the bird] [looked sad]]",
+   "[tim [[[and sue] were] sad]]",
+   "[[the cat] [was [very sad]]]",
+   "[he [was [so happy]]]",
+   "[[you [[wanted [did girl]] help]] sue]",
+   "[tim [felt sad]]",
+   "[tim [was happy]]",
+   "[tom [was happy]]",
+   "[he [felt sad]]",
+   "[tom [was [very happy]]]",
+   "[he [was [very sad]]]",
+   "[[the dog] [was [so happy]]]",
+   "[she [was [very happy]]]",
+   "[[they are] happy]",
+   "[[[can i] [play with]] you]",
+   "[she [[wanted to] help]]",
+   "[[they were] happy]",
+   "[lily [[[and ben] are] sad]]",
+   "[[they are] happy]",
+   "[sue [was happy]]",
+   "[[they are] happy]",
+   "[[they are] happy]",
+   "[she [was [not happy]]]",
+   "[[they were] [very big]]",
+   "[he [was [very happy]]]",
+   "[she [was happy]]",
+   "[he [[wanted to] help]]",
+   "[tim [was [very happy]]]",
+   "[[she [[wanted to] help]] max]",
+   "[she [was [very sad]]]",
+   "[[[can i] [play with]] you]",
+   "[tom [[[and sam] were] sad]]",
+   "[[[they were] [very happy]] together]",
+   "[[the bird] [was [very happy]]]",
+   "[he [was [very happy]]]",
+   "[tim [was sad]]",
+   "[she [was [so happy]]]",
+   "[tim [was [very happy]]]",
+   "[he [was [very happy]]]",
+   "[[tim asked] lily]",
+   "[tom [was happy]]",
+   "[lily [[[and ben] are] happy]]",
+   "[[they were] [very happy]]",
+   "[she [was [so happy]]]",
+   "[tim [was [very happy]]]",
+   "[sue [was [very happy]]]",
+   "[he [looked sad]]",
+   "[she [[wanted to] help]]",
+   "[spot [was [very happy]]]",
+   "[[they are] happy]",
+   "[tim [was [very sad]]]",
+   "[tim [was [very sad]]]",
+   "[tim [was [very happy]]]",
+   "[sam [was [very sad]]]",
+   "[[they are] [not happy]]",
+   "[tim [was sad]]",
+   "[tim [[[and sam] were] sad]]",
+   "[[they are] friends]",
+   "[they [play together]]",
+   "[he [was sad]]",
+   "[[the boy] [was [very happy]]]",
+   "[he [was [so happy]]]",
+   "[she [was [very sad]]]",
+   "[[they were] happy]",
+   "[[they were] [so happy]]",
+   "[[they are] [not happy]]",
+   "[she [looked sad]]",
+   "[they [[saw to] help]]",
+   "[tim [was [very sad]]]",
+   "[[they were] happy]",
+   "[tim [was [very sad]]]",
+   "[[the [little girl]] [was [so happy]]]",
+   "[lily [was happy]]",
+   "[sue [was [very happy]]]",
+   "[[she liked] it]",
+   "[tim [was [very happy]]]",
+   "[[they were] [very happy]]",
+   "[she [was [not happy]]]",
+   "[tim [was happy]]",
+   "[tim [[[and sam] were] sad]]",
+   "[tim [was [very happy]]]",
+   "[[they were] you]",
+   "[[they were] [very sad]]",
+   "[[the boy] [felt sad]]",
+   "[she [was [not happy]]]",
+   "[tim [was [so happy]]]",
+   "[sue [was sad]]",
+   "[he [was [so happy]]]",
+   "[tim [[[and sue] are] friends]]",
+   "[tom [[[and sam] were] sad]]",
+   "[lily [[[and tom] are] friends]]",
+   "[[they were] [very happy]]",
+   "[sue [was [so happy]]]",
+   "[[the dog] [was [very happy]]]",
+   "[tim [was [very sad]]]",
+   "[tom [was sad]]",
+   "[[tim is] [not happy]]",
+   "[he [was [very happy]]]",
+   "[she [was [so happy]]]",
+   "[they [liked [[to play] together]]]",
+   "[lily [was [very happy]]]",
+   "[[they are] happy]",
+   "[[they were] [very happy]]",
+   "[[they are] happy]",
+   "[he [was [very happy]]]",
+   "[[they are] happy]",
+   "[[it [[wanted to] help]] lily]",
+   "[tom [was [so happy]]]",
+   "[[lily [[wanted to] help]] it]",
+   "[he [was [very sad]]]",
+   "[they [[saw to] help]]",
+   "[tim [was sad]]",
+   "[sue [looked sad]]",
+   "[tim [was [very happy]]]",
+   "[[they were] [very happy]]",
+   "[tom [was happy]]",
+   "[they [felt sad]]",
+   "[[they are] [very happy]]",
+   "[[they are] [not happy]]",
+   "[lily [was [very happy]]]",
+   "[[we are] happy]",
+   "[lily [was [very sad]]]",
+   "[[tim asked] sue]",
+   "[tom [was sad]]",
+   "[lily [[[and sam] are] happy]]",
+   "[[they were] [very happy]]",
+   "[[he is] happy]",
+   "[sue [was [very happy]]]",
+   "[[the bird] [was happy]]",
+   "[he [was [so happy]]]",
+   "[he [felt sad]]",
+   "[[the boy] [was sad]]",
+   "[[tom is] happy]",
+   "[[ben is] [not happy]]",
+   "[[they are] happy]",
+   "[[the boy] [was [very happy]]]",
+   "[[they were] [very happy]]",
+   "[lily [[[and ben] are] friends]]",
+   "[they [liked [[to play] together]]]",
+   "[he [was [so happy]]]",
+   "[max [was [so happy]]]",
+   "[tim [was [very sad]]]",
+   "[lily [[[and ben] are] friends]]",
+   "[[she liked] spot]",
+   "[said [the bird]]",
+   "[max [was [very happy]]]",
+   "[spot [was [very happy]]]",
+   "[they [liked [[to play] together]]]",
+   "[sam [was sad]]",
+   "[[[they are] [play with]] you]",
+   "[she [was [not happy]]]",
+   "[they [liked [[to play] together]]]",
+   "[she [was [very happy]]]",
+   "[she [was [very happy]]]",
+   "[[we [little help]] it]",
+   "[tom [was [not happy]]]",
+   "[he [was [so happy]]]",
+   "[[the dog] [looked sad]]",
+   "[[they were] [very happy]]",
+   "[he [was [very happy]]]",
+   "[[they are] friends]",
+   "[tim [was [very happy]]]",
+   "[spot [was [very happy]]]",
+   "[[they were] [so happy]]",
+   "[tim [felt sad]]",
+   "[he [was [very happy]]]",
+   "[tim [was [so happy]]]",
+   "[it [was [very sad]]]",
+   "[she [was [very happy]]]",
+   "[he [[wanted to] help]]",
+   "[they [[saw to] help]]",
+   "[tim [was [very sad]]]",
+   "[tim [[[and tom] are] sad]]",
+   "[[i like] it]",
+   "[tom [was sad]]",
+   "[tom [was happy]]",
+   "[tim [was sad]]",
+   "[lily [[[and ben] are] friends]]",
+   "[lily [was happy]]",
+   "[tim [was [very happy]]]",
+   "[[the bird] [looked sad]]",
+   "[[tim felt] [very happy]]",
+   "[[they are] happy]",
+   "[said [the bird]]",
+   "[tim [was sad]]",
+   "[[they were] you]",
+   "[[they were] happy]",
+   "[tom [was sad]]",
+   "[[they were] sad]",
+   "[[the bird] [was [very sad]]]",
+   "[sue [[[and tom] are] friends]]",
+   "[she [was [so happy]]]",
+   "[[they are] [very happy]]",
+   "[asked [the bird]]",
+   "[tim [felt sad]]",
+   "[he [was [very happy]]]",
+   "[[they are] happy]",
+   "[she [was [very sad]]]",
+   "[[i want] it]",
+   "[max [was happy]]",
+   "[he [was [so happy]]]",
+   "[spot [was [very happy]]]",
+   "[[she [looked at]] mom]",
+   "[they [had fun]]",
+   "[[they were] [not happy]]",
+   "[[the boy] [was sad]]",
+   "[she [was [so happy]]]",
+   "[[they were] [not happy]]",
+   "[she [was [so happy]]]",
+   "[she [was [so happy]]]",
+   "[spot [was [very sad]]]",
+   "[she [was [not happy]]]",
+   "[[the bird] [looked sad]]",
+   "[[they are] friends]",
+   "[they [loved [[to play] together]]]",
+   "[lily [was [very sad]]]",
+   "[[lily [[wanted to] help]] her]",
+   "[he [was [so happy]]]",
+   "[they [liked [[to play] together]]]",
+   "[he [was [very sad]]]",
+   "[lily [felt happy]]",
+   "[[they were] [very happy]]",
+   "[asked [the bird]]",
+   "[[they were] friends]",
+   "[he [was [very happy]]]",
+   "[[she [looked at]] lily]",
+   "[[they were] it]",
+   "[he [was [so happy]]]",
+   "[tim [was [so happy]]]",
+   "[[they were] [very happy]]",
+   "[he [was [so happy]]]",
+   "[he [was happy]]",
+   "[tim [was [not happy]]]",
+   "[said [the bird]]",
+   "[[[can i] like] it]",
+   "[tom [was [very happy]]]",
+   "[tom [was [very sad]]]",
+   "[tom [was [very happy]]]",
+   "[he [was [very happy]]]",
+   "[they [[wanted to] help]]",
+   "[[they were] [very happy]]",
+   "[tim [was sad]]",
+   "[tim [was [very happy]]]",
+   "[[max asked] ben]",
+   "[tim [was [very happy]]]",
+   "[[they are] [very happy]]",
+   "[she [was [so happy]]]",
+   "[sue [was sad]]",
+   "[lily [[[and tom] are] friends]]",
+   "[they [like [[to play] together]]]",
+   "[[they are] happy]",
+   "[he [felt sad]]",
+   "[tim [felt happy]]",
+   "[she [was [so happy]]]",
+   "[tom [was [so happy]]]",
+   "[they [have fun]]",
+   "[tim [was [not happy]]]",
+   "[[they were] happy]",
+   "[they [have fun]]",
+   "[sam [was sad]]",
+   "[they [had fun]]",
+   "[[they were] happy]",
+   "[[[can i] [help happy]] together]",
+   "[he [felt happy]]",
+   "[tom [was [very happy]]]",
+   "[tim [was [so happy]]]",
+   "[they [loved fun]]",
+   "[she [was [so happy]]]",
+   "[[they were] [very happy]]",
+   "[tom [[wanted to] help]]",
+   "[lily [was happy]]",
+   "[lily [[[and tom] were] friends]]",
+   "[[they were] [very happy]]",
+   "[tom [[[and max] are] friends]]",
+   "[he [was [very sad]]]",
+   "[tim [felt sad]]",
+   "[[we are] [very happy]]",
+   "[[they were] happy]",
+   "[[they were] [not happy]]",
+   "[[you are] not]",
+   "[they [like [[to play] together]]]",
+   "[[they were] [so happy]]",
+   "[[they were] [so happy]]",
+   "[he [was happy]]",
+   "[max [was [very sad]]]",
+   "[[it is] it]",
+   "[[they were] sad]",
+   "[they [liked [[to play] together]]]",
+   "[spot [was happy]]",
+   "[sue [was [so happy]]]",
+   "[tom [was sad]]",
+   "[lily [was [very happy]]]",
+   "[[they are] sad]",
+   "[[they were] [very happy]]",
+   "[[the boy] [was [very happy]]]",
+   "[max [was [so happy]]]",
+   "[ben [was happy]]",
+   "[sue [was sad]]",
+   "[[they were] happy]",
+   "[[he is] happy]",
+   "[tom [was [very happy]]]",
+   "[[they are] happy]",
+   "[[the boy] [was happy]]",
+   "[ben [was happy]]",
+   "[[he is] [not happy]]",
+   "[they [loved [[to play] together]]]",
+   "[[the cat] [was [very happy]]]",
+   "[he [was [so happy]]]",
+   "[[i want] it]",
+   "[tim [was sad]]",
+   "[tim [was [very happy]]]",
+   "[tom [was happy]]",
+   "[she [was [very sad]]]",
+   "[[they were] [very happy]]",
+   "[tom [was sad]]",
+   "[tim [was [so happy]]]",
+   "[he [was [so happy]]]",
+   "[[they were] [very happy]]",
+   "[tim [was [very happy]]]",
+   "[they [had fun]]",
+   "[lily [[[and tom] are] friends]]",
+   "[sue [was [very happy]]]",
+   "[tim [was [very happy]]]",
+   "[tim [was [so happy]]]",
+   "[lily [was [very happy]]]",
+   "[she [was [so happy]]]",
+   "[[[they were] [so with]] you]",
+   "[tim [was [so happy]]]",
+   "[cat [was [very happy]]]",
+   "[he [was [very sad]]]",
+   "[tim [was [so happy]]]",
+   "[he [was [so happy]]]",
+   "[[you is] it]",
+   "[lily [was [very sad]]]",
+   "[sue [was [so happy]]]",
+   "[she [was happy]]",
+   "[they [had fun]]",
+   "[she [felt sad]]",
+   "[sue [was happy]]",
+   "[he [was happy]]",
+   "[[the cat] [was [very happy]]]",
+   "[[the bird] [was sad]]",
+   "[[the dog] [was sad]]",
+   "[tom [[[and sue] were] sad]]",
+   "[[i found] it]",
+   "[tom [[[and lily] are] friends]]",
+   "[[they were] happy]",
+   "[[they are] happy]",
+   "[tim [was sad]]",
+   "[[mom is] [not happy]]",
+   "[tim [was [very happy]]]",
+   "[tim [was [so happy]]]",
+   "[[the cat] [was [not happy]]]",
+   "[lily [[[and ben] are] friends]]",
+   "[[the bird] [felt sad]]",
+   "[[they were] [very happy]]",
+   "[sue [was [very happy]]]",
+   "[he [felt sad]]",
+   "[tim [[[and sam] were] sad]]",
+   "[he [was [very sad]]]",
+   "[tim [felt sad]]",
+   "[[she is] happy]",
+   "[tim [was sad]]",
+   "[he [was [so happy]]]",
+   "[[her cat] [was happy]]",
+   "[he [was [so happy]]]",
+   "[[they played] you]",
+   "[she [was happy]]",
+   "[[can i] [help you]]",
+   "[[they are] fun]",
+   "[[they were] happy]",
+   "[[they are] [very happy]]",
+   "[lily [was [very sad]]]",
+   "[he [was [so happy]]]",
+   "[[we are] happy]",
+   "[lily [[[and tom] were] sad]]",
+   "[she [was [very sad]]]",
+   "[tim [felt sad]]",
+   "[lily [was sad]]",
+   "[tim [was sad]]",
+   "[[they are] friends]",
+   "[[they are] happy]",
+   "[she [was [so happy]]]",
+   "[lily [was happy]]",
+   "[[they were] happy]",
+   "[he [was [very happy]]]",
+   "[lily [was [so happy]]]",
+   "[tom [[wanted to] help]]",
+   "[she [was [very sad]]]",
+   "[[they are] friends]",
+   "[[[can i] have] it]",
+   "[sue [was [so happy]]]",
+   "[tim [was [so happy]]]",
+   "[sam [was [very happy]]]",
+   "[lily [[[and ben] are] sad]]",
+   "[tim [felt sad]]",
+   "[spot [was sad]]",
+   "[[the bird] [was [very happy]]]",
+   "[tim [felt sad]]",
+   "[i [did it]]",
+   "[sam [[[and lily] are] friends]]"
+  ],
+  "all generated, all samples": [
+   "[it is] \u00b7 big",
+   "[she [was sad]]",
+   "[[they are] happy]",
+   "[the cat] \u00b7 [not a] \u00b7 ball",
+   "[spot [was [very happy]]]",
+   "[and so] \u00b7 [they would]",
+   "[they played] \u00b7 [all day] \u00b7 [[can i] do]",
+   "[do you] \u00b7 want",
+   "[it was] \u00b7 a",
+   "[can we] \u00b7 do",
+   "[they [[wanted to] play]]",
+   "[she [[to play] girl]] \u00b7 asked",
+   "[she said] \u00b7 [she found]",
+   "[they [have fun]]",
+   "[[lily [[wanted to] help]] sam]",
+   "[[they were] happy]",
+   "[tim [was [very happy]]]",
+   "[max felt] \u00b7 [very happy]",
+   "[the big] \u00b7 bird",
+   "[that is] \u00b7 [a big]",
+   "tom \u00b7 went",
+   "[he is] \u00b7 sad",
+   "[[it looked] [so happy]]",
+   "[lily [was [very happy]]]",
+   "we \u00b7 [have fun]",
+   "[[[can were] [so happy]] together]",
+   "[we can] \u00b7 [play together] \u00b7 [very a]",
+   "but \u00b7 [[they are] happy] \u00b7 too \u00b7 [his friend]",
+   "[[they were] [very happy]]",
+   "said \u00b7 [his mom]",
+   "[they want] \u00b7 [to help] \u00b7 him",
+   "[tom [was happy]]",
+   "[lily [was happy]]",
+   "[can we] \u00b7 [be friends]",
+   "[she [was [so happy]]]",
+   "[tim [was happy]]",
+   "[she [felt sad]]",
+   "[spot [was [very happy]]]",
+   "[[lily asked] sam] \u00b7 [played together] \u00b7 [all his]",
+   "[tim [was [very happy]]]",
+   "[[they were] [very happy]]",
+   "[tim [was happy]]",
+   "[can we] \u00b7 [be friends] \u00b7 do \u00b7 that",
+   "[he wanted] \u00b7 [his mom]",
+   "[she [wanted to]] \u00b7 [be friends]",
+   "[[they were] [very happy]]",
+   "[tom [was [not happy]]]",
+   "[tim [[wanted [little boy]] help]]",
+   "[[they are] happy]",
+   "[[they were] [very happy]]",
+   "there \u00b7 [do you]",
+   "[he [felt sad]]",
+   "[[[can were] all] [very happy]]",
+   "[[they are] [not happy]]",
+   "[they saw] \u00b7 [the dog]",
+   "[what is] \u00b7 that",
+   "[tim [was [very happy]]]",
+   "[all asked] \u00b7 [a [little boy]]",
+   "[he [was [very sad]]]",
+   "[[the cat] [was [very happy]]]",
+   "[he went] \u00b7 up",
+   "[lily [[[and ben] are] friends]]",
+   "[they all] \u00b7 [[had fun] together]",
+   "[[the bird] [was [very happy]]]",
+   "[[the bird] [[wanted to] help]]",
+   "[[can i] play] \u00b7 too \u00b7 big",
+   "[[[they were] all] [very happy]]",
+   "[tim [was happy]] \u00b7 [to help]",
+   "[[she [[wanted to] help]] sue]",
+   "[he [was [very happy]]]",
+   "[spot [[wanted to] help]] \u00b7 too",
+   "[they played] \u00b7 and",
+   "[tim wanted] \u00b7 the",
+   "[she [was [so happy]]]",
+   "[tom [felt sad]] \u00b7 too",
+   "[lily [was sad]]",
+   "but \u00b7 [[it was] [not happy]]",
+   "[they [did not]] \u00b7 [like it]",
+   "[[they would] friends]",
+   "[their mom] \u00b7 said \u00b7 [[i found] it] \u00b7 [lily said]",
+   "[the [little girl]] \u00b7 asked \u00b7 [the [little boy]]",
+   "[tim [felt sad]]",
+   "[[the bird] [was sad]]",
+   "[they [felt happy]]",
+   "[[i found] it] \u00b7 [her mom] \u00b7 asked",
+   "[tim [[[and sam] were] sad]]",
+   "[[the cat] [was sad]]",
+   "[[they are] happy]",
+   "[[the bird] [was [very happy]]]",
+   "[[spot asked] sam] \u00b7 for",
+   "[[they were] [very sad]]",
+   "[[they were] [very happy]]",
+   "[[they were] [so happy]]",
+   "[we can] \u00b7 all \u00b7 [be friends] \u00b7 too \u00b7 big",
+   "[that is] \u00b7 fun",
+   "[[it is] mom]",
+   "we \u00b7 have",
+   "[her mom] \u00b7 asked \u00b7 [his friend]",
+   "what \u00b7 [can we]",
+   "[ben asked] \u00b7 what \u00b7 [are you]",
+   "[they played] \u00b7 and \u00b7 [had fun]",
+   "[[she is] happy]",
+   "[he [[wanted to] help]]",
+   "[sam [was sad]] \u00b7 too \u00b7 big",
+   "[[she is] happy]",
+   "[[she is] happy]",
+   "[tim [was [so happy]]]",
+   "[[ben is] happy]",
+   "[[they were] happy]",
+   "[tim [was [so happy]]]",
+   "[[the girl] [was sad]]",
+   "[the dog] \u00b7 came \u00b7 to \u00b7 her \u00b7 [to play]",
+   "[he [[saw to] help]]",
+   "[sue [was [very happy]]]",
+   "[lily [[[and tom] are] happy]]",
+   "[it was] \u00b7 [the cat]",
+   "[they [wanted to]] \u00b7 go \u00b7 could \u00b7 [not a]",
+   "[she [was [not happy]]]",
+   "[[they were] [very happy]]",
+   "we \u00b7 [did it]",
+   "[tom [felt sad]]",
+   "[can [you sad]] \u00b7 too \u00b7 little \u00b7 [can we]",
+   "[they played] \u00b7 [together [all day]]",
+   "and \u00b7 [[they were] sam]",
+   "[ben is] \u00b7 fun",
+   "[sam [was [very happy]]]",
+   "[tom [[wanted to] help]] \u00b7 him",
+   "[sam [felt not]] \u00b7 for",
+   "[[they were] happy]",
+   "[he [was happy]]",
+   "[lily [and max]] \u00b7 [the dog] \u00b7 was \u00b7 [not a]",
+   "[tim [was [very happy]]]",
+   "[[he asked] her] \u00b7 ball \u00b7 back",
+   "[can [you do]] \u00b7 that",
+   "[[can i] [help you]]",
+   "[they [have fun]]",
+   "[tim [was happy]]",
+   "[lily [[[and ben] were] sad]]",
+   "[can [you do]] \u00b7 that",
+   "[tim saw] \u00b7 [his make]",
+   "but \u00b7 [[he found] it]",
+   "[they [felt happy]]",
+   "[can we] \u00b7 [be friends]",
+   "[she [was [so happy]]]",
+   "[max [was sad]]",
+   "[he [[wanted to] play]]",
+   "[[the tree] [was sad]]",
+   "[[they are] happy]",
+   "[sue [was [very happy]]]",
+   "[[they were] [very sad]]",
+   "[they [had fun]]",
+   "[tim [was [so happy]]]",
+   "[[they were] happy]",
+   "[max [was [very happy]]]",
+   "[[the bird] [was sad]]",
+   "[tim [was [very sad]]]",
+   "[[the cat] [was [very happy]]]",
+   "[she saw] \u00b7 [her friend]",
+   "[[ben is] happy]",
+   "then \u00b7 [they saw]",
+   "what \u00b7 did \u00b7 [you do] \u00b7 that",
+   "[they of] \u00b7 the \u00b7 toy",
+   "[tim [was [so happy]]]",
+   "[lily [was sad]]",
+   "[she [[wanted to] help]]",
+   "[[they were] [very happy]]",
+   "[sue [was happy]] \u00b7 too",
+   "[[what is] it]",
+   "[[ben is] happy]",
+   "[tim [was [very happy]]]",
+   "[[the boy] [was [so happy]]]",
+   "[tom [[[and sue] were] happy]]",
+   "[it was] \u00b7 spot",
+   "[[the [little girl]] [was happy]]",
+   "[tim [was sad]]",
+   "[lily [was sad]]",
+   "[[the [little girl]] [was happy]]",
+   "[lily [was [very happy]]]",
+   "[tim [was [so happy]]]",
+   "[sue [was [so happy]]]",
+   "what \u00b7 [do we] \u00b7 do",
+   "said \u00b7 [the bird]",
+   "[he [felt sad]]",
+   "[[the cat] liked] \u00b7 [the bird]",
+   "what \u00b7 was",
+   "[[they are] happy]",
+   "[lily [was happy]]",
+   "[she [was happy]]",
+   "[sue [was [very happy]]]",
+   "[she [was [not happy]]]",
+   "[max [was [very happy]]]",
+   "[sue [looked sad]]",
+   "[lily [felt happy]] \u00b7 too \u00b7 but",
+   "[[they were] happy]",
+   "[[they [looked at]] mom]",
+   "[she [was [so happy]]]",
+   "[she [felt sad]]",
+   "[he [was [very happy]]]",
+   "[they went] \u00b7 up \u00b7 and",
+   "[[the dog] [was happy]]",
+   "[she [was [so happy]]]",
+   "[the cat] \u00b7 [very it]",
+   "[the boy] \u00b7 said \u00b7 [she a] \u00b7 [fun day] \u00b7 but \u00b7 [sue [[wanted to] help]]",
+   "[[she is] [not happy]]",
+   "[they [have fun]]",
+   "[tom [[[and sam] are] happy]]",
+   "[lily [was [so happy]]]",
+   "[we can] \u00b7 all \u00b7 [be happy] \u00b7 [to help]",
+   "[he [was [very sad]]]",
+   "[he [was sad]]",
+   "[she [was [very sad]]]",
+   "[can we] \u00b7 do",
+   "[lily [[[and tom] are] friends]]",
+   "[[they were] happy]",
+   "[i in] \u00b7 there \u00b7 too",
+   "[lily [was [very happy]]]",
+   "[[we are] happy] \u00b7 too \u00b7 little",
+   "[sue [was sad]]",
+   "[[[can i] [play with]] you]",
+   "[[they are] happy]",
+   "[tom [[[and sam] were] sad]]",
+   "[lily [was [so happy]]]",
+   "[they [had fun]]",
+   "[spot liked] \u00b7 them \u00b7 too",
+   "[he [felt sad]]",
+   "[he [was [very happy]]]",
+   "[[the dog] [was happy]]",
+   "[tom [[[and sue] were] sad]]",
+   "[sue [was [very happy]]]",
+   "[she [was [so happy]]]",
+   "[sam [was happy]]",
+   "[[they were] happy]",
+   "[[the [little bird]] [was [very happy]]]",
+   "[she [was [very happy]]]",
+   "[max [was sad]]",
+   "[tim [was happy]] \u00b7 too",
+   "[she [felt happy]]",
+   "we \u00b7 play \u00b7 too",
+   "[tom liked] \u00b7 [to play] \u00b7 too",
+   "what \u00b7 was \u00b7 that",
+   "[sue [was [very sad]]]",
+   "[[she felt] happy]",
+   "[she [was [not happy]]]",
+   "[tom [was [so happy]]]",
+   "[[i [[wanted to] help]] her]",
+   "[tim [was [very happy]]]",
+   "[[the bird] [was [so happy]]]",
+   "[they went] \u00b7 [to the]",
+   "[they [have fun]]",
+   "what \u00b7 do \u00b7 [i do]",
+   "[she [was [so happy]]]",
+   "[i can] \u00b7 [help you] \u00b7 [have fun] \u00b7 with",
+   "[[i [[wanted to] help]] sue]",
+   "[sue [was [not happy]]]",
+   "[[[can i] have] it]",
+   "but \u00b7 [[he started] you]",
+   "[lily [and max]] \u00b7 [have fun] \u00b7 with",
+   "tom \u00b7 [[saw [a big]] played]",
+   "and \u00b7 [[they were] happy]",
+   "[tim [was sad]]",
+   "[tom [was [so happy]]]",
+   "[he [was [very happy]]]",
+   "[you can] \u00b7 [do it]",
+   "[tim [was [very sad]]]",
+   "[they [had fun]]",
+   "[tim [was sad]]",
+   "[tim [was happy]]",
+   "[they [felt [very happy]]]",
+   "[do you] \u00b7 [like it] \u00b7 be \u00b7 together",
+   "[[the bird] [felt sad]]",
+   "[[the boy] loved] \u00b7 [do you]",
+   "[she [was [not happy]]]",
+   "[[the bird] [was [very happy]]]",
+   "[[tim saw] lily]",
+   "[[they were] happy]",
+   "[tom [[wanted to] help]]",
+   "it \u00b7 [[wanted to] play]",
+   "[he [was sad]]",
+   "[did you] \u00b7 [have fun] \u00b7 with",
+   "[he [was [so happy]]]",
+   "[her mom] \u00b7 [[looked at] her] \u00b7 [[friends were] happy]",
+   "[he is] \u00b7 a \u00b7 toy \u00b7 too",
+   "[he is] \u00b7 sad",
+   "[[they are] happy]",
+   "[she [was sad]]",
+   "[[they were] [very sad]]",
+   "[sam [looked sad]]",
+   "[tim [[[and sue] were] sad]]",
+   "[[he felt] [very sad]]",
+   "[max [felt sad]]",
+   "[[they are] happy]",
+   "[it was] \u00b7 not",
+   "[[we [[wanted to] help]] sue]",
+   "[sam [was sad]] \u00b7 too",
+   "[[[they were] [so with]] it]",
+   "[[they were] [very happy]]",
+   "[sue [was sad]]",
+   "max \u00b7 [did it]",
+   "[tom [was sad]]",
+   "[we can] \u00b7 [[do it] tom]",
+   "[[they were] happy]",
+   "[tim [[wanted to] play]] \u00b7 ball \u00b7 back",
+   "[she had] \u00b7 [[a big] boy]",
+   "[[tim asked] sam] \u00b7 had",
+   "[tim [was [very happy]]]",
+   "[we can] \u00b7 [do it]",
+   "[[the cat] [was sad]]",
+   "[[the bird] [was [very happy]]]",
+   "[tim [was [very happy]]]",
+   "[[they were] friends]",
+   "[she [was [so happy]]]",
+   "[it was] \u00b7 [their friend]",
+   "[do you] \u00b7 [like it] \u00b7 too",
+   "[i can] \u00b7 [help you]",
+   "[can we] \u00b7 [[play with] it] \u00b7 for",
+   "[he [was [very sad]]]",
+   "we \u00b7 [did it] \u00b7 too \u00b7 big",
+   "[[the [little girl]] [was sad]]",
+   "[i do] \u00b7 i",
+   "but \u00b7 [[she loved] [all day]]",
+   "[it is] \u00b7 [[not a] cat]",
+   "[it was] \u00b7 a",
+   "[they [did not]] \u00b7 like \u00b7 them",
+   "[tim [[[and sue] were] sad]]",
+   "[they looked] \u00b7 [for cat]",
+   "[she [was sad]]",
+   "[[the dog] [was [very sad]]]",
+   "[[the [little bird]] [was happy]]",
+   "[he [did not]] \u00b7 [like it]",
+   "[[the bird] [was [very sad]]]",
+   "[i can] \u00b7 [help you]",
+   "[they [liked [[to play] together]]]",
+   "then \u00b7 [a [little bird]] \u00b7 came",
+   "[tom [was [so happy]]]",
+   "[they played] \u00b7 and",
+   "[[they are] sad]",
+   "[[she is] [not happy]]",
+   "[[we are] [very happy]]",
+   "[[it is] not] \u00b7 fun \u00b7 with \u00b7 them",
+   "[[[can i] have] it]",
+   "[tim [was [so happy]]]",
+   "[it is] \u00b7 [their mom]",
+   "[[they were] [very happy]]",
+   "[[can i] do] \u00b7 that",
+   "[[tim loved] sue]",
+   "[lily [[[and ben] are] friends]]",
+   "[she [was sad]]",
+   "[lily [was sad]]",
+   "[[he is] happy]",
+   "[[they are] happy]",
+   "[lily [was [so happy]]]",
+   "[she [was [not happy]]]",
+   "[they played] \u00b7 [together [all day]]",
+   "[[they were] happy]",
+   "[tom [was [very happy]]]",
+   "[he [felt sad]]",
+   "[she [was [so happy]]]",
+   "[tom [was sad]]",
+   "[lily saw] \u00b7 it",
+   "[[the bird] [was sad]]",
+   "[he [was [very sad]]]",
+   "[he [was [very happy]]]",
+   "[tim [was happy]]",
+   "[[tim asked] her] \u00b7 back \u00b7 tim",
+   "[tom [[[and sam] were] sad]]",
+   "[they played] \u00b7 [together [all day]]",
+   "[[tim asked] sue]",
+   "[tim [was sad]]",
+   "[tim [was [very happy]]]",
+   "[tim [was [so happy]]]",
+   "tom \u00b7 [[looked at] spot]",
+   "[[they were] [so happy]]",
+   "[lily [was sad]]",
+   "[[[they were] [so with]] you]",
+   "[spot [was sad]]",
+   "[she [was [not happy]]]",
+   "[tom [and sam]] \u00b7 asked",
+   "[[what [[wanted to] help]] her]",
+   "[ben [and lily]] \u00b7 said",
+   "one \u00b7 would \u00b7 like \u00b7 that \u00b7 one",
+   "what \u00b7 [do you]",
+   "[they [loved [[to play] together]]]",
+   "[[the girl] [was [very sad]]]",
+   "[tom [was [very happy]]]",
+   "[[i have] it]",
+   "[he [was [so happy]]]",
+   "you \u00b7 [did it]",
+   "[tom [[[and lily] were] sad]]",
+   "[[she is] [not happy]]",
+   "[she [felt happy]]",
+   "[tom [was sad]]",
+   "[they [have fun]]",
+   "[the big] \u00b7 dog",
+   "[[the dog] [was [very happy]]]",
+   "[he [was [very sad]]]",
+   "[max [was sad]] \u00b7 too",
+   "what \u00b7 [[can i] play]",
+   "[the [little bird]] \u00b7 [it is]",
+   "[[they were] [very happy]]",
+   "[tim [was [very sad]]]",
+   "[the boy] \u00b7 said",
+   "[ben [[[and lily] were] sad]]",
+   "[[they are] happy]",
+   "[he [was [so happy]]]",
+   "[she [was [very happy]]]",
+   "[he [was [very sad]]]",
+   "[i can] \u00b7 [help you]",
+   "[her mom] \u00b7 asked",
+   "[i want] \u00b7 [to help]",
+   "[tim [felt sad]]",
+   "[can we] \u00b7 [be friends]",
+   "asked \u00b7 [the [little boy]]",
+   "[[[they were] [so with]] you]",
+   "[it is] \u00b7 so \u00b7 fun",
+   "[he is] \u00b7 [her mom] \u00b7 said",
+   "[[the [little dog]] [was [very sad]]]",
+   "[lily [[[and ben] are] friends]]",
+   "[tom [was sad]]",
+   "[[they were] happy]",
+   "[ben [[[and sue] were] happy]]",
+   "[[the boy] [was [so happy]]]",
+   "[lily [was sad]]",
+   "[tim [was happy]]",
+   "[tim [was [very sad]]]",
+   "so \u00b7 [they looked]",
+   "[tim [was [very happy]]]",
+   "we \u00b7 saw \u00b7 [his friend] \u00b7 sam",
+   "we \u00b7 want",
+   "[[i like] it]",
+   "[she [was [very happy]]]",
+   "[he said] \u00b7 back",
+   "you \u00b7 [did it]",
+   "[they [have fun]]",
+   "[[they are] happy]",
+   "[it is] \u00b7 too",
+   "[ben [[[and lily] are] happy]]",
+   "[[they were] you]",
+   "[[the bird] [was [so happy]]]",
+   "[[he felt] [so happy]]",
+   "[[they were] [very happy]]",
+   "[it was] \u00b7 [named dog]",
+   "[lily [[[and ben] are] sad]]",
+   "[[he [little are]] friends]",
+   "[tom was] \u00b7 [a cat] \u00b7 had \u00b7 sue",
+   "[he was] \u00b7 mom",
+   "[[they were] [very happy]]",
+   "[tom [was sad]]",
+   "[he [was [so happy]]]",
+   "[she [was [very sad]]]",
+   "[lily [felt happy]]",
+   "[mom [was [very sad]]]",
+   "[[the tree] asked]",
+   "[tom [[[and sam] are] happy]]",
+   "[[they were] [very happy]]",
+   "[[they were] happy]",
+   "[[they were] [very happy]]",
+   "[they all] \u00b7 [loved bird] \u00b7 said",
+   "[[they were] happy]",
+   "[[the boy] [was [so happy]]]",
+   "[what is] \u00b7 that",
+   "his \u00b7 [friends were]",
+   "[tim [was sad]]",
+   "[they played] \u00b7 [together [all day]] \u00b7 [i want] \u00b7 [to play]",
+   "[they all] \u00b7 [liked it]",
+   "[sue [looked sad]]",
+   "[she together]",
+   "[sam [was happy]] \u00b7 [to help]",
+   "[[they are] friends]",
+   "mom \u00b7 [[looked is] not] \u00b7 for \u00b7 help",
+   "[tom [was [very happy]]]",
+   "[she [was [very happy]]]",
+   "[tim [was [very happy]]]",
+   "[[the boy] [was [so happy]]]",
+   "[tim [[[and sam] were] sad]]",
+   "[they [had fun]]",
+   "[they [had fun]]",
+   "[lily [and sue]] \u00b7 [played together] \u00b7 [[i found] it]",
+   "[[the bird] [felt sad]]",
+   "[lily saw] \u00b7 [lily [was happy]]",
+   "they \u00b7 can",
+   "[tim [was [so happy]]]",
+   "[they [liked [[to play] together]]]",
+   "[i found] \u00b7 [they played] \u00b7 at",
+   "[[the cat] [was sad]]",
+   "[he [felt sad]]",
+   "[they [have fun]]",
+   "[do you] \u00b7 [like it]",
+   "[he [was [so happy]]]",
+   "[they [[had [a big]] happy]] \u00b7 too",
+   "[[[can i] [help happy]] together]",
+   "all \u00b7 [his mom] \u00b7 said",
+   "[tim [was happy]]",
+   "[[[can i] have] it]",
+   "but \u00b7 [[they liked] it] \u00b7 too \u00b7 tim",
+   "[they [wanted to]] \u00b7 go",
+   "[they were] \u00b7 there \u00b7 [so sad]",
+   "[tim [was [very happy]]]",
+   "[tim [was [so happy]]]",
+   "[[i found] a] \u00b7 ball",
+   "[it was] \u00b7 fun",
+   "[[i have] [play together]] \u00b7 but",
+   "what \u00b7 [can we]",
+   "[lily [[[and tom] were] happy]]",
+   "[[they were] [very happy]]",
+   "[[the tree] [was [very sad]]]",
+   "[her mom] \u00b7 asked \u00b7 [his friend] \u00b7 sue",
+   "[lily [was [not happy]]]",
+   "[it is] \u00b7 fun \u00b7 ben \u00b7 did",
+   "[[the dog] [was [very sad]]]",
+   "[tim [was sad]]",
+   "[it is] \u00b7 fun",
+   "[[she felt] [so happy]]",
+   "[she [was [so happy]]]",
+   "[tom [[[and max] were] sad]]",
+   "[[lily asked] sam] \u00b7 [said together]",
+   "[he loved] \u00b7 them",
+   "[[they are] sad]",
+   "[[they are] happy]",
+   "[can we] \u00b7 [[play with] it]",
+   "[[[can i] like] you]",
+   "[sue [was [so happy]]]",
+   "[tim [was [very happy]]]",
+   "[[the dog] [was [very happy]]]",
+   "[he [felt sad]]",
+   "[tom [was sad]]",
+   "[he [was [so happy]]]",
+   "[tim [was [very happy]]]",
+   "[tim [was happy]]",
+   "tom \u00b7 found",
+   "that \u00b7 [was fun]",
+   "[[they were] happy] \u00b7 too",
+   "[do you] \u00b7 have",
+   "[[what is] it]",
+   "[max [was [very happy]]]",
+   "[can we] \u00b7 [play together]",
+   "[they [wanted to]] \u00b7 go",
+   "[he [was [very happy]]]",
+   "[he saw] \u00b7 [his friend]",
+   "[[the girl] [was [very happy]]]",
+   "[[you are] you] \u00b7 ben \u00b7 [felt sad]",
+   "[she [was [so happy]]]",
+   "[she [was [very happy]]]",
+   "[she [[wanted to] help]] \u00b7 him",
+   "[lily [was [not happy]]]",
+   "[she [was [not happy]]]",
+   "[he [was [not happy]]]",
+   "[she [felt sad]]",
+   "[[the boy] [was sad]]",
+   "said \u00b7 [the big]",
+   "[[mom is] [not happy]]",
+   "[[they are] happy]",
+   "[[they are] happy]",
+   "[[they were] happy]",
+   "[[the cat] [was [very sad]]]",
+   "[[[they were] all] [very happy]]",
+   "what \u00b7 [can we] \u00b7 [be friends]",
+   "[tim [was [so happy]]]",
+   "[[they were] [very happy]]",
+   "[he loved] \u00b7 [lily said] \u00b7 [play together] \u00b7 [looked at]",
+   "what \u00b7 was \u00b7 that \u00b7 was",
+   "[tim [was [not happy]]]",
+   "[he [was [so happy]]]",
+   "[they [like [[to play] together]]]",
+   "[tom [[[and tom] are] friends]]",
+   "[they [loved [[to play] together]]]",
+   "[she [was [very happy]]]",
+   "[what is] \u00b7 that \u00b7 for",
+   "[she [was [very sad]]]",
+   "[[they were] [very happy]]",
+   "[[they were] happy]",
+   "[he [was [very happy]]]",
+   "[she [was happy]]",
+   "the \u00b7 toy \u00b7 was \u00b7 [[tim were] happy] \u00b7 too",
+   "[they played] \u00b7 [together [all day]]",
+   "[he is] \u00b7 [a boy]",
+   "[[they are] happy]",
+   "we \u00b7 want",
+   "[tom [was [very sad]]]",
+   "[[they were] happy]",
+   "[[the bird] [was sad]]",
+   "but \u00b7 [[he in] [[to play] together]]",
+   "[it was] \u00b7 [not a]",
+   "[ben [and lily]] \u00b7 said",
+   "[lily [[[and ben] are] friends]]",
+   "[she [was [very happy]]]",
+   "[[the [little girl]] [was sad]]",
+   "[[they were] [very happy]]",
+   "but \u00b7 [[it was] too] \u00b7 little \u00b7 help",
+   "[he [was [so happy]]]",
+   "could \u00b7 help",
+   "[tom [was [very happy]]]",
+   "[[tim felt] happy]",
+   "[he [was [very happy]]]",
+   "what \u00b7 [[can i] do]",
+   "[[sam asked] sam] \u00b7 said",
+   "[they [had fun]]",
+   "[she [was [very happy]]]",
+   "[lily [looked sad]]",
+   "[tom [[wanted to] help]] \u00b7 too",
+   "[he [was [very happy]]]",
+   "[what is] \u00b7 that",
+   "[lily [was [very happy]]]",
+   "[she [was [very happy]]]",
+   "[they [had a]] \u00b7 new",
+   "[said [the bird]]",
+   "[[spot asked] sue]",
+   "[they [felt sad]] \u00b7 too",
+   "[[sam is] [not happy]]",
+   "[tim [was sad]]",
+   "so \u00b7 [[he is] happy] \u00b7 too",
+   "[she [was [very happy]]]",
+   "[her mom] \u00b7 asked",
+   "[they all] \u00b7 [liked it]",
+   "[[the dog] [was [very sad]]]",
+   "but \u00b7 [[ben is] not]",
+   "[tim [was happy]]",
+   "[tim [was [so happy]]]",
+   "[tim [[[and sue] were] happy]]",
+   "[max [was sad]]",
+   "[[they are] friends]",
+   "[they were] \u00b7 there",
+   "[tom [was [very happy]]]",
+   "[[they were] sad]",
+   "[max [was [very happy]]]",
+   "[[tim loved] asked]",
+   "we \u00b7 want",
+   "[tim [was sad]]",
+   "[[they were] happy] \u00b7 too",
+   "[[she is] [not happy]]",
+   "[tom [was happy]]",
+   "[tim [felt sad]]",
+   "but \u00b7 [[i want] to]",
+   "[tim [was [so happy]]]",
+   "[she [wanted to]] \u00b7 [their friend] \u00b7 lily",
+   "what \u00b7 do \u00b7 that \u00b7 sam",
+   "[ben [and lily]] \u00b7 said",
+   "so \u00b7 [they did] \u00b7 what",
+   "[[the [little girl]] [was sad]]",
+   "[she [did not]] \u00b7 [have fun] \u00b7 [lily happy]",
+   "what \u00b7 [can we]",
+   "[she [was [very sad]]]",
+   "[[the bird] [was happy]]",
+   "[tim [was [very sad]]]",
+   "[[they are] happy]",
+   "[can we] \u00b7 [be friends]",
+   "[[they are] friends]",
+   "[lily [did not]] \u00b7 [like it]",
+   "[we can] \u00b7 [play together]",
+   "[[the dog] [was sad]]",
+   "[tom [[[and lily] are] friends]]",
+   "[[i like] [wanted to]] \u00b7 [play together] \u00b7 do \u00b7 that",
+   "[he [was [so happy]]]",
+   "[they [liked [[to play] together]]]",
+   "[i found] \u00b7 you \u00b7 spot",
+   "[he [was [very happy]]]",
+   "[sue [was [so happy]]]",
+   "[can we] \u00b7 [have fun]",
+   "[max [was [very sad]]]",
+   "[[the bird] [was [very happy]]]",
+   "[lily [was [very happy]]]",
+   "[tim [was [so happy]]]",
+   "[[they were] [very happy]]",
+   "[he [was [very sad]]]",
+   "[she said] \u00b7 [she to] \u00b7 said",
+   "[tim [was happy]]",
+   "and \u00b7 [we can]",
+   "what \u00b7 did \u00b7 [a dog]",
+   "[[the [little bird]] [was sad]]",
+   "[tim [was [very sad]]]",
+   "said \u00b7 the",
+   "[[they were] happy]",
+   "[her mom] \u00b7 said",
+   "there \u00b7 [a dog]",
+   "[tim [was [very happy]]]",
+   "[[spot were] happy] \u00b7 too",
+   "[sue [was happy]] \u00b7 too",
+   "[can we] \u00b7 help \u00b7 [they [did not]]",
+   "[[they were] sad]",
+   "[tom [[[and sam] were] sad]]",
+   "[tim [[[and sam] were] sad]]",
+   "[[the bird] [was happy]]",
+   "[she [[wanted [a big]] happy]] \u00b7 [to help] \u00b7 him",
+   "[[her mom] ben]",
+   "[tim [[[and sam] were] sad]]",
+   "[what is] \u00b7 that",
+   "[[they were] happy]",
+   "[ben [[[and lily] were] sad]]",
+   "[[the bird] [looked sad]]",
+   "[he [was [very happy]]]",
+   "[tim [was [very happy]]]",
+   "[can we] \u00b7 [play together]",
+   "[asked [the boy]]",
+   "[[the bird] [was [very sad]]]",
+   "[[you are] not] \u00b7 fun \u00b7 of",
+   "[[they were] sad]",
+   "[[they were] [very sad]]",
+   "[he is] \u00b7 sad \u00b7 too \u00b7 big \u00b7 ball",
+   "[[they were] [very happy]]",
+   "you \u00b7 [did it]",
+   "[they [like [[to play] together]]]",
+   "[[[they were] all] happy]",
+   "[you can] \u00b7 have \u00b7 them",
+   "[[[they were] [so with]] it]",
+   "[[they are] happy]",
+   "could \u00b7 [we can]",
+   "[sue [was [so happy]]]",
+   "[[the cat] [was sad]]",
+   "[can we] \u00b7 do \u00b7 that",
+   "[tim [was [very happy]]]",
+   "[we can] \u00b7 [[do it] was] \u00b7 [their mom] \u00b7 [what is]",
+   "sue \u00b7 looked \u00b7 [and looked]",
+   "[tom [was [very sad]]]",
+   "[he [was sad]]",
+   "[[she is] [very sad]]",
+   "[ben [was happy]] \u00b7 too \u00b7 big \u00b7 said",
+   "[[they were] [so happy]]",
+   "[he [was [very happy]]]",
+   "[she [was [very sad]]]",
+   "[the cat] \u00b7 was",
+   "[i can] \u00b7 [help you] \u00b7 like \u00b7 them",
+   "[tom [was [so happy]]]",
+   "[[[can i] is] [not happy]]",
+   "[[they were] [very happy]]",
+   "[they [have fun]]",
+   "[they go] \u00b7 mom",
+   "but \u00b7 [he [[wanted to] help]]",
+   "[lily [was happy]]",
+   "[i [had fun]] \u00b7 too",
+   "[he [was [very happy]]]",
+   "[he wanted] \u00b7 it \u00b7 too \u00b7 big \u00b7 [cat [was happy]] \u00b7 [to help]",
+   "[she [looked sad]]",
+   "[can we] \u00b7 [be friends] \u00b7 there",
+   "[[they are] happy]",
+   "want \u00b7 [to play]",
+   "[she [[wanted to] play]] \u00b7 too \u00b7 ben",
+   "[they [[play [had big]] tree]]",
+   "[[he felt] [very sad]]",
+   "[[she liked] together] \u00b7 [not a]",
+   "[tim [was [very happy]]]",
+   "[[they are] happy]",
+   "[[they were] happy]",
+   "[[they were] [so happy]]",
+   "[[[he i] [play with]] you]",
+   "[tim is] \u00b7 sad",
+   "[tom [was sad]]",
+   "[it is] \u00b7 could",
+   "[her mom] \u00b7 said",
+   "but \u00b7 [[it is] happy] \u00b7 too",
+   "[his mom] \u00b7 what",
+   "[she [was happy]]",
+   "[they [have fun]]",
+   "[sam [was [not happy]]]",
+   "[[[can i] [help happy]] together]",
+   "[[they were] friends]",
+   "[he [was [so happy]]]",
+   "[what is] \u00b7 that \u00b7 for",
+   "[can we] \u00b7 [be friends]",
+   "help \u00b7 it",
+   "[can we] \u00b7 do",
+   "[tim [felt sad]]",
+   "[she [was [very sad]]]",
+   "[i [had fun]] \u00b7 up",
+   "[can we] \u00b7 do",
+   "[sue [was sad]]",
+   "[[they saw] a] \u00b7 new \u00b7 toy",
+   "[[his mom] [was happy]]",
+   "[they [felt [very happy]]]",
+   "[and [have fun]]",
+   "[it was] \u00b7 a",
+   "[he [was [very happy]]]",
+   "asked \u00b7 [his friend]",
+   "[[the boy] [was sad]]",
+   "[she [was [very happy]]]",
+   "[she [was [very sad]]]",
+   "[do you] \u00b7 want",
+   "[[tim asked] sue]",
+   "[[his friend] [the bird]] \u00b7 did",
+   "[do you] \u00b7 have",
+   "[spot [was [very happy]]]",
+   "[[they have] it]",
+   "[lily [was happy]]",
+   "[[they are] happy]",
+   "[they [had fun]]",
+   "[tim [was happy]]",
+   "[he [was [very happy]]]",
+   "[[they were] happy]",
+   "[she [was sad]]",
+   "[[the girl] [was sad]]",
+   "[[the bird] [was happy]]",
+   "[i like] \u00b7 that \u00b7 [was fun]",
+   "[[they were] [very happy]]",
+   "[[they go] asked]",
+   "[he loved] \u00b7 them \u00b7 all",
+   "[we can] \u00b7 [do it]",
+   "[they [liked [[to play] together]]]",
+   "[they [did not]] \u00b7 want",
+   "[tim [felt sad]]",
+   "[sue [[wanted to] help]] \u00b7 him",
+   "[[she felt] happy]",
+   "[they played] \u00b7 [together [all day]] \u00b7 you \u00b7 max \u00b7 said",
+   "what \u00b7 was",
+   "can \u00b7 [help you]",
+   "[[they are] [very happy]]",
+   "[max [was [very happy]]]",
+   "[[it is] [very happy]] \u00b7 friends \u00b7 with",
+   "[tim [was [very happy]]]",
+   "[she [was [very happy]]]",
+   "[lily [[[and max] were] sad]]",
+   "[[they were] sad]",
+   "what \u00b7 [can we]",
+   "[[what is] their] \u00b7 [new friends]",
+   "[[the cat] [was [so happy]]]",
+   "[it is] \u00b7 fun \u00b7 dog",
+   "help \u00b7 help \u00b7 help \u00b7 [the dog] \u00b7 [liked it]",
+   "[[they were] [very sad]]",
+   "[tim [was happy]]",
+   "[[the bird] [looked sad]]",
+   "[she saw] \u00b7 [the dog]",
+   "[[they were] sad]",
+   "[she [felt sad]]",
+   "[[she is] [not happy]]",
+   "[tim saw] \u00b7 [her friend]",
+   "[spot [was [very happy]]]",
+   "[it was] \u00b7 [[a big] boy] \u00b7 said \u00b7 [to sue]",
+   "[lily [[[and ben] are] friends]]",
+   "[[they were] happy]",
+   "they \u00b7 had",
+   "[sue [[[and sue] were] happy]]",
+   "[[they are] happy]",
+   "[she [was [not happy]]]",
+   "[tim [was [very happy]]]",
+   "[lily [and sam]] \u00b7 [felt sad]",
+   "[[they are] happy]",
+   "[lily [felt happy]] \u00b7 too \u00b7 big \u00b7 ball",
+   "[lily [was [so happy]]]",
+   "[[they were] [very happy]]",
+   "[[they were] [so happy]]",
+   "[she [was [so happy]]]",
+   "[tom [[[and lily] are] friends]]",
+   "[they [have fun]]",
+   "[she asked] \u00b7 [her mom]",
+   "[[they were] [very happy]]",
+   "one \u00b7 [little dog]",
+   "[they played] \u00b7 [together [all day]]",
+   "[[they are] happy]",
+   "[ben [[[and lily] are] friends]]",
+   "[[they are] happy]",
+   "[tom saw] \u00b7 [her friend]",
+   "[he is] \u00b7 [[not asked] max]",
+   "[he [was happy]]",
+   "[she asked] \u00b7 [her mom] \u00b7 asked",
+   "[[they were] happy]",
+   "[he [was [so happy]]]",
+   "[can we] \u00b7 do \u00b7 that \u00b7 one",
+   "[[ben happy] together]",
+   "[they [wanted to]] \u00b7 [have fun] \u00b7 with",
+   "[[the cat] [felt sad]]",
+   "[lily [was [very happy]]]",
+   "[lily [[[and max] were] friends]]",
+   "[lily [and ben]] \u00b7 said",
+   "[i found] \u00b7 you",
+   "[she [was sad]]",
+   "sue \u00b7 said",
+   "[he [was [very happy]]]",
+   "[tom saw] \u00b7 [his friend]",
+   "[[they were] happy]",
+   "[they are] \u00b7 very \u00b7 fun",
+   "[tim [you do]] \u00b7 that",
+   "[[the boy] [was sad]]",
+   "[he [wanted to]] \u00b7 [play together]",
+   "[lily [and ben]] \u00b7 [felt sad]",
+   "[she [was happy]]",
+   "[she [was [so happy]]]",
+   "[[they were] [very happy]]",
+   "[max [was [very sad]]]",
+   "[lily [was [so happy]]]",
+   "[[the bird] [felt sad]]",
+   "[[they are] friends]",
+   "[he [was [so happy]]]",
+   "[she asked] \u00b7 [his mom] \u00b7 asked",
+   "[[the cat] [was [very sad]]]",
+   "[he saw] \u00b7 [his friend]",
+   "[sam [was [very happy]]]",
+   "[it was] \u00b7 [a dog]",
+   "[he [was [so happy]]]",
+   "[ben is] \u00b7 sad",
+   "[it was] \u00b7 [[not was] you]",
+   "[they [have fun]]",
+   "[it was] \u00b7 spot",
+   "[asked [the girl]]",
+   "but \u00b7 [[she in] a]",
+   "[asked [the girl]]",
+   "[tim [was [very sad]]]",
+   "[[they were] [so happy]]",
+   "[he [was [so happy]]]",
+   "[she [was [very happy]]]",
+   "[[they were] [very happy]]",
+   "[[what is] it] \u00b7 a",
+   "[she [was [so happy]]]",
+   "[[the [little boy]] [was sad]]",
+   "[lily [was [very happy]]]",
+   "[[they were] [so happy]]",
+   "[[they are] happy]",
+   "[they [looked help]] \u00b7 him",
+   "so \u00b7 [[he liked] to] \u00b7 [have fun]",
+   "[[[they were] [[can i] with]] you]",
+   "[[the boy] [looked sad]]",
+   "[[i like] you] \u00b7 too",
+   "then \u00b7 [[what is] it]",
+   "[[they were] friends]",
+   "[he [was sad]]",
+   "[tim [and sue]] \u00b7 and",
+   "said \u00b7 [[his were] happy]",
+   "[i [did it]]",
+   "[tim [felt sad]]",
+   "[tim [was [very sad]]]",
+   "[[the cat] [was sad]]",
+   "[they [had fun]]",
+   "[[tim is] happy]",
+   "[she [did not]] \u00b7 like \u00b7 that \u00b7 [was [very happy]]",
+   "[[the boy] [was sad]]",
+   "[spot [was [so happy]]]",
+   "[[[can i] [play with]] you]",
+   "[tim [was [very happy]]]",
+   "[max [felt help]] \u00b7 ben \u00b7 help \u00b7 them",
+   "[they [liked [[to play] together]]]",
+   "[they [wanted to]] \u00b7 go",
+   "[she [was [very happy]]]",
+   "[he [was [so happy]]]",
+   "[lily is] \u00b7 sad",
+   "what \u00b7 [do it] \u00b7 too",
+   "[[he asked] sam] \u00b7 for",
+   "[tim [felt sad]]",
+   "[[tim asked] mom]",
+   "[max [was [so happy]]]",
+   "[he [was [so happy]]]",
+   "[[the dog] [was sad]]",
+   "[lily [[[and tom] are] friends]]",
+   "[tim [was [very sad]]]",
+   "[they [like [[to play] together]]]",
+   "[sue [was [so happy]]]",
+   "[she [was [very happy]]]",
+   "tom \u00b7 [[looked at] lily]",
+   "[tim [[[and sue] are] sad]]",
+   "[[they are] [not happy]] \u00b7 too",
+   "[tim [felt sad]]",
+   "[ben asked] \u00b7 [the bird]",
+   "[[the dog] [was happy]]",
+   "[[they are] happy]",
+   "[[they are] happy]",
+   "[tom [was [very happy]]]",
+   "[they saw] \u00b7 [the dog] \u00b7 [wanted his] \u00b7 ball",
+   "[she [felt sad]]",
+   "[[they are] happy]",
+   "[they [do not]] \u00b7 like",
+   "[do you] \u00b7 want",
+   "[ben [[[and lily] are] friends]]",
+   "[tim [felt sad]]",
+   "[[the bird] [was [not happy]]]",
+   "could \u00b7 help",
+   "[what is] \u00b7 that",
+   "what \u00b7 [a dog] \u00b7 the",
+   "[tim [was sad]]",
+   "[[they were] [so happy]]",
+   "[he [was [so happy]]]",
+   "[tim [was [very happy]]]",
+   "[lily [was [so happy]]]",
+   "[[they are] happy]",
+   "[lily [[[and tom] are] friends]]",
+   "[can we] \u00b7 [play together]",
+   "but \u00b7 [[i want] it]",
+   "[tim [was [very happy]]]",
+   "[sam [was sad]]",
+   "[she [was happy]] \u00b7 too \u00b7 little",
+   "[she [was [very happy]]]",
+   "[she [was [so happy]]]",
+   "[tim [was [very happy]]]",
+   "what \u00b7 [started his] \u00b7 [friends were]",
+   "[he wanted] \u00b7 [do it] \u00b7 tim",
+   "[he [was [very happy]]]",
+   "[[he liked] it] \u00b7 too",
+   "[tim [was [very happy]]]",
+   "[[[they were] happy] together]",
+   "[[the dog] [was sad]]",
+   "[[they are] friends]",
+   "[[that is] happy]",
+   "[tim [was sad]]",
+   "[tom [was sad]]",
+   "[mom [was [very happy]]]",
+   "[they [have fun]]",
+   "[she asked] \u00b7 [her mom] \u00b7 said",
+   "[do you] \u00b7 [like it]",
+   "[she [was [not happy]]]",
+   "[[she is] [not happy]]",
+   "[do you] \u00b7 [like it]",
+   "[[they were] happy]",
+   "[lily [was [very happy]]]",
+   "[sue [was sad]]",
+   "[[the cat] [was [not happy]]]",
+   "[[you do] it] \u00b7 tim"
+  ],
+  "generated": [
+   "[[[can were] [play with]] it]  (new)",
+   "[tim [was happy]]",
+   "[[they [[wanted [little boy]] at]] mom]  (new)",
+   "[[they are] sad]",
+   "[[they are] happy]",
+   "[[they were] [very sad]]",
+   "[[can [[saw to] help]] sue]  (new)",
+   "[tim [[[and sam] were] sad]]",
+   "[[the bird] [looked sad]]",
+   "[[[they are] were] asked]  (new)",
+   "[tim [[[and sam] are] friends]]",
+   "[[the [little girl]] [was sad]]",
+   "[asked [the bird]]",
+   "[tim [[[and sam] were] sad]]",
+   "[they [have fun]]",
+   "[he [was [so happy]]]",
+   "[[they [little help]] it]  (new)",
+   "[tim [was [very happy]]]",
+   "[tim [was [so happy]]]",
+   "[he [was [very sad]]]",
+   "[[the bird] [[wanted to] help]]",
+   "[she [was [very happy]]]",
+   "[[the [little girl]] [was sad]]",
+   "[[[they are] all] friends]",
+   "[[she liked] it]",
+   "[[they were] [very happy]]",
+   "[they [have fun]]",
+   "[tim [was [so happy]]]",
+   "[she [felt sad]]",
+   "[[[can i] [help happy]] together]  (new)",
+   "[tim [was [very happy]]]",
+   "[[he liked] lily]",
+   "[she [was [so happy]]]",
+   "[tom [was sad]]",
+   "[they [have fun]]",
+   "[they [have fun]]",
+   "[[they are] happy]",
+   "[she [was [very happy]]]",
+   "[he [was happy]]",
+   "[they [[wanted to] help]]"
+  ],
+  "generated, all samples": [
+   "[it is] \u00b7 big",
+   "[she [was sad]]",
+   "[[they are] happy]",
+   "[the cat] \u00b7 [not a] \u00b7 ball  (new)",
+   "[spot [was [very happy]]]",
+   "[and so] \u00b7 [they would]  (new)",
+   "[they played] \u00b7 [all day] \u00b7 [[can i] do]  (new)",
+   "[do you] \u00b7 want  (new)",
+   "[it was] \u00b7 a  (new)",
+   "[can we] \u00b7 do  (new)",
+   "[they [[wanted to] play]]",
+   "[she [[to play] girl]] \u00b7 asked  (new)",
+   "[she said] \u00b7 [she found]  (new)",
+   "[they [have fun]]",
+   "[[lily [[wanted to] help]] sam]",
+   "[[they were] happy]",
+   "[tim [was [very happy]]]",
+   "[max felt] \u00b7 [very happy]",
+   "[the big] \u00b7 bird  (new)",
+   "[that is] \u00b7 [a big]  (new)",
+   "tom \u00b7 went  (new)",
+   "[he is] \u00b7 sad",
+   "[[it looked] [so happy]]  (new)",
+   "[lily [was [very happy]]]",
+   "we \u00b7 [have fun]",
+   "[[[can were] [so happy]] together]  (new)",
+   "[we can] \u00b7 [play together] \u00b7 [very a]  (new)",
+   "but \u00b7 [[they are] happy] \u00b7 too \u00b7 [his friend]  (new)",
+   "[[they were] [very happy]]",
+   "said \u00b7 [his mom]",
+   "[they want] \u00b7 [to help] \u00b7 him",
+   "[tom [was happy]]",
+   "[lily [was happy]]",
+   "[can we] \u00b7 [be friends]",
+   "[she [was [so happy]]]",
+   "[tim [was happy]]",
+   "[she [felt sad]]",
+   "[spot [was [very happy]]]",
+   "[[lily asked] sam] \u00b7 [played together] \u00b7 [all his]  (new)",
+   "[tim [was [very happy]]]"
+  ]
+ },
+ "history": [
+  {
+   "night": 0,
+   "stage": "flat",
+   "move": "start",
+   "bits": 233226.9292713588,
+   "sentences": 9000,
+   "seconds": 0.4765620231628418
+  },
+  {
+   "night": 0,
+   "stage": "structure",
+   "move": "chunk and merge from 77 word classes",
+   "bits": 150653.05429010672,
+   "sentences": 9000,
+   "seconds": 387.6520850658417
+  },
+  {
+   "night": 0,
+   "stage": "concepts",
+   "move": "consolidate",
+   "bits": 120329.52820680576,
+   "sentences": 9000,
+   "seconds": 3774.425807952881
+  },
+  {
+   "night": 0,
+   "stage": "re-analysis",
+   "move": "viterbi",
+   "bits": 119666.84879619488,
+   "sentences": 9000,
+   "seconds": 3774.425812959671
+  },
+  {
+   "night": 0,
+   "stage": "re-analysis",
+   "move": "viterbi",
+   "bits": 118884.5160021566,
+   "sentences": 9000,
+   "seconds": 3774.4258139133453
+  },
+  {
+   "night": 0,
+   "stage": "re-analysis",
+   "move": "viterbi",
+   "bits": 117936.30302904619,
+   "sentences": 9000,
+   "seconds": 3774.4258151054382
+  },
+  {
+   "night": 0,
+   "stage": "re-analysis",
+   "move": "viterbi",
+   "bits": 116390.0662957642,
+   "sentences": 9000,
+   "seconds": 3774.4258151054382
+  }
+ ]
+}
