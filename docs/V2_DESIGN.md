@@ -264,7 +264,7 @@ Code: `treebank.py`, `experiments/v2/run_treebank.py`. NLTK's public sample of t
 | TRELLIS v2 from tags alone: all samples | 79% | 5.5% | 67% |
 | TRELLIS v2 from binarized gold trees | 89% | 2.7% | 64% |
 
-The sequences the unsupervised grammar derives as one tree are almost always coherent at the level of tag triples; its forests are strings of base phrases, less coherent than a bigram's samples. The grammar read from gold trees describes held-out sentences best but generates less coherently than a tag bigram: like LARGE's on the synthetic corpora, its phrase categories are broad enough that independently drawn parts combine into sequences the treebank does not hold.
+The sequences the unsupervised grammar derives as one tree are almost always coherent at the level of tag triples; its forests are strings of base phrases, less coherent than a bigram's samples. The grammar read from gold trees describes held-out sentences best but generates less coherently than a tag bigram: like LARGE's on the synthetic corpora, its phrase categories are broad enough that independently drawn parts combine into sequences the treebank does not hold. With more training sentences the pattern holds (`results/treebank/wsj15`, `wsj20`): the unsupervised grammar's own sequences have every tag triple attested 94.5% and 92.8% of the time at about 1,100 and 1,900 sentences (tag bigram 77% and 73%), its forests 66–67%, the gold-tree grammar 58–62%.
 
 Training on more sentences (every other sentence of up to 15 or 20 tags; the same held-out WSJ10 sentences; means of seeds 13 and 17):
 
