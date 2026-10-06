@@ -1,0 +1,3392 @@
+[
+ {
+  "condition": "small",
+  "seed": 13,
+  "prompts": {
+   "seen": 81,
+   "unseen": 1
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 405,
+    "grammatical": 405,
+    "novel": 211,
+    "novel and grammatical": 211
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 405,
+    "grammatical": 405,
+    "novel": 244,
+    "novel and grammatical": 244
+   },
+   "word bigram|seen": {
+    "n": 405,
+    "grammatical": 183,
+    "novel": 339,
+    "novel and grammatical": 117
+   },
+   "word trigram|seen": {
+    "n": 405,
+    "grammatical": 193,
+    "novel": 309,
+    "novel and grammatical": 97
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 5,
+    "grammatical": 5,
+    "novel": 5,
+    "novel and grammatical": 5
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 5,
+    "grammatical": 5,
+    "novel": 5,
+    "novel and grammatical": 5
+   },
+   "word bigram|unseen": {
+    "n": 5,
+    "grammatical": 2,
+    "novel": 5,
+    "novel and grammatical": 2
+   },
+   "word trigram|unseen": {
+    "n": 5,
+    "grammatical": 1,
+    "novel": 5,
+    "novel and grammatical": 1
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 3.6677251864373908,
+   "TRELLIS v2, sentences alone|seen": 3.6677280959192866,
+   "word bigram|seen": 4.896544237349564,
+   "word trigram|seen": 5.475077458044158,
+   "TRELLIS v2, gold trees|unseen": 2.692777177336897,
+   "TRELLIS v2, sentences alone|unseen": 2.692788948827452,
+   "word bigram|unseen": 3.884802396696701,
+   "word trigram|unseen": 4.794131312560815
+  },
+  "examples": [
+   {
+    "prompt": "the man chased the",
+    "completion": "the man chased the woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "the man chased the",
+    "completion": "the man chased the woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "the man chased the",
+    "completion": "the man chased the cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "the man chased the",
+    "completion": "the man chased the woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "the man chased the",
+    "completion": "the man chased the woman",
+    "grammatical": true
+   }
+  ]
+ },
+ {
+  "condition": "small",
+  "seed": 17,
+  "prompts": {
+   "seen": 84,
+   "unseen": 3
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 420,
+    "grammatical": 420,
+    "novel": 261,
+    "novel and grammatical": 261
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 420,
+    "grammatical": 420,
+    "novel": 251,
+    "novel and grammatical": 251
+   },
+   "word bigram|seen": {
+    "n": 420,
+    "grammatical": 202,
+    "novel": 337,
+    "novel and grammatical": 119
+   },
+   "word trigram|seen": {
+    "n": 420,
+    "grammatical": 180,
+    "novel": 331,
+    "novel and grammatical": 91
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 15,
+    "grammatical": 15,
+    "novel": 15,
+    "novel and grammatical": 15
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 15,
+    "grammatical": 15,
+    "novel": 15,
+    "novel and grammatical": 15
+   },
+   "word bigram|unseen": {
+    "n": 15,
+    "grammatical": 8,
+    "novel": 15,
+    "novel and grammatical": 8
+   },
+   "word trigram|unseen": {
+    "n": 15,
+    "grammatical": 8,
+    "novel": 15,
+    "novel and grammatical": 8
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 3.624837568259918,
+   "TRELLIS v2, sentences alone|seen": 3.624840709016094,
+   "word bigram|seen": 4.812842105236347,
+   "word trigram|seen": 5.254720770888438,
+   "TRELLIS v2, gold trees|unseen": 2.5900340763338723,
+   "TRELLIS v2, sentences alone|unseen": 2.590045847820192,
+   "word bigram|unseen": 3.4298143610915575,
+   "word trigram|unseen": 3.4851489375609632
+  },
+  "examples": [
+   {
+    "prompt": "the telescope admired the",
+    "completion": "the telescope admired the telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "the telescope admired the",
+    "completion": "the telescope admired the woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "the telescope admired the",
+    "completion": "the telescope admired the cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "the telescope admired the",
+    "completion": "the telescope admired the man",
+    "grammatical": true
+   },
+   {
+    "prompt": "the telescope admired the",
+    "completion": "the telescope admired the cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "a dog liked a",
+    "completion": "a dog liked a telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "a dog liked a",
+    "completion": "a dog liked a cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "a dog liked a",
+    "completion": "a dog liked a cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "a dog liked a",
+    "completion": "a dog liked a woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "a dog liked a",
+    "completion": "a dog liked a cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "a telescope saw a",
+    "completion": "a telescope saw a cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "a telescope saw a",
+    "completion": "a telescope saw a man",
+    "grammatical": true
+   }
+  ]
+ },
+ {
+  "condition": "small",
+  "seed": 7,
+  "prompts": {
+   "seen": 79,
+   "unseen": 1
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 395,
+    "grammatical": 394,
+    "novel": 241,
+    "novel and grammatical": 240
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 395,
+    "grammatical": 395,
+    "novel": 240,
+    "novel and grammatical": 240
+   },
+   "word bigram|seen": {
+    "n": 395,
+    "grammatical": 171,
+    "novel": 319,
+    "novel and grammatical": 95
+   },
+   "word trigram|seen": {
+    "n": 395,
+    "grammatical": 177,
+    "novel": 321,
+    "novel and grammatical": 103
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 5,
+    "grammatical": 5,
+    "novel": 5,
+    "novel and grammatical": 5
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 5,
+    "grammatical": 5,
+    "novel": 5,
+    "novel and grammatical": 5
+   },
+   "word bigram|unseen": {
+    "n": 5,
+    "grammatical": 2,
+    "novel": 5,
+    "novel and grammatical": 2
+   },
+   "word trigram|unseen": {
+    "n": 5,
+    "grammatical": 2,
+    "novel": 5,
+    "novel and grammatical": 2
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 3.6283504019604154,
+   "TRELLIS v2, sentences alone|seen": 3.624991233599338,
+   "word bigram|seen": 4.96297377184866,
+   "word trigram|seen": 5.313380210837186,
+   "TRELLIS v2, gold trees|unseen": 2.782982843183553,
+   "TRELLIS v2, sentences alone|unseen": 2.782994443270884,
+   "word bigram|unseen": 3.7174078394083203,
+   "word trigram|unseen": 4.513566958940893
+  },
+  "examples": [
+   {
+    "prompt": "the cat admired the",
+    "completion": "the cat admired the telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "the cat admired the",
+    "completion": "the cat admired the park",
+    "grammatical": true
+   },
+   {
+    "prompt": "the cat admired the",
+    "completion": "the cat admired the cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "the cat admired the",
+    "completion": "the cat admired the dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "the cat admired the",
+    "completion": "the cat admired the park",
+    "grammatical": true
+   }
+  ]
+ },
+ {
+  "condition": "small",
+  "seed": 42,
+  "prompts": {
+   "seen": 77,
+   "unseen": 2
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 385,
+    "grammatical": 385,
+    "novel": 210,
+    "novel and grammatical": 210
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 385,
+    "grammatical": 385,
+    "novel": 207,
+    "novel and grammatical": 207
+   },
+   "word bigram|seen": {
+    "n": 385,
+    "grammatical": 179,
+    "novel": 314,
+    "novel and grammatical": 108
+   },
+   "word trigram|seen": {
+    "n": 385,
+    "grammatical": 183,
+    "novel": 271,
+    "novel and grammatical": 69
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 10,
+    "grammatical": 10,
+    "novel": 10,
+    "novel and grammatical": 10
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 10,
+    "grammatical": 10,
+    "novel": 10,
+    "novel and grammatical": 10
+   },
+   "word bigram|unseen": {
+    "n": 10,
+    "grammatical": 3,
+    "novel": 10,
+    "novel and grammatical": 3
+   },
+   "word trigram|unseen": {
+    "n": 10,
+    "grammatical": 7,
+    "novel": 10,
+    "novel and grammatical": 7
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 3.652784523727134,
+   "TRELLIS v2, sentences alone|seen": 3.6527876511598767,
+   "word bigram|seen": 4.957172617452747,
+   "word trigram|seen": 5.401746234004979,
+   "TRELLIS v2, gold trees|unseen": 2.508352945994348,
+   "TRELLIS v2, sentences alone|unseen": 2.508364717479099,
+   "word bigram|unseen": 3.4430792839593494,
+   "word trigram|unseen": 3.9242258647614516
+  },
+  "examples": [
+   {
+    "prompt": "the telescope admired the",
+    "completion": "the telescope admired the telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "the telescope admired the",
+    "completion": "the telescope admired the park",
+    "grammatical": true
+   },
+   {
+    "prompt": "the telescope admired the",
+    "completion": "the telescope admired the woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "the telescope admired the",
+    "completion": "the telescope admired the telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "the telescope admired the",
+    "completion": "the telescope admired the dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "a telescope saw a",
+    "completion": "a telescope saw a woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "a telescope saw a",
+    "completion": "a telescope saw a telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "a telescope saw a",
+    "completion": "a telescope saw a dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "a telescope saw a",
+    "completion": "a telescope saw a cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "a telescope saw a",
+    "completion": "a telescope saw a cat",
+    "grammatical": true
+   }
+  ]
+ },
+ {
+  "condition": "small",
+  "seed": 100,
+  "prompts": {
+   "seen": 75,
+   "unseen": 1
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 375,
+    "grammatical": 374,
+    "novel": 229,
+    "novel and grammatical": 228
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 375,
+    "grammatical": 375,
+    "novel": 210,
+    "novel and grammatical": 210
+   },
+   "word bigram|seen": {
+    "n": 375,
+    "grammatical": 169,
+    "novel": 305,
+    "novel and grammatical": 99
+   },
+   "word trigram|seen": {
+    "n": 375,
+    "grammatical": 162,
+    "novel": 297,
+    "novel and grammatical": 84
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 5,
+    "grammatical": 5,
+    "novel": 5,
+    "novel and grammatical": 5
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 5,
+    "grammatical": 5,
+    "novel": 5,
+    "novel and grammatical": 5
+   },
+   "word bigram|unseen": {
+    "n": 5,
+    "grammatical": 2,
+    "novel": 5,
+    "novel and grammatical": 2
+   },
+   "word trigram|unseen": {
+    "n": 5,
+    "grammatical": 3,
+    "novel": 5,
+    "novel and grammatical": 3
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 3.564608036741002,
+   "TRELLIS v2, sentences alone|seen": 3.5646116650117423,
+   "word bigram|seen": 4.84195550312156,
+   "word trigram|seen": 5.301638233359631,
+   "TRELLIS v2, gold trees|unseen": 2.607881634698712,
+   "TRELLIS v2, sentences alone|unseen": 2.6078934061844925,
+   "word bigram|unseen": 3.4125750066357163,
+   "word trigram|unseen": 3.2337594439041863
+  },
+  "examples": [
+   {
+    "prompt": "the dog liked the",
+    "completion": "the dog liked the telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "the dog liked the",
+    "completion": "the dog liked the woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "the dog liked the",
+    "completion": "the dog liked the telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "the dog liked the",
+    "completion": "the dog liked the park",
+    "grammatical": true
+   },
+   {
+    "prompt": "the dog liked the",
+    "completion": "the dog liked the cat",
+    "grammatical": true
+   }
+  ]
+ },
+ {
+  "condition": "med",
+  "seed": 13,
+  "prompts": {
+   "seen": 79,
+   "unseen": 23
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 395,
+    "grammatical": 395,
+    "novel": 383,
+    "novel and grammatical": 383
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 395,
+    "grammatical": 395,
+    "novel": 385,
+    "novel and grammatical": 385
+   },
+   "word bigram|seen": {
+    "n": 395,
+    "grammatical": 141,
+    "novel": 389,
+    "novel and grammatical": 135
+   },
+   "word trigram|seen": {
+    "n": 395,
+    "grammatical": 150,
+    "novel": 380,
+    "novel and grammatical": 135
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 115,
+    "grammatical": 115,
+    "novel": 115,
+    "novel and grammatical": 115
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 115,
+    "grammatical": 115,
+    "novel": 115,
+    "novel and grammatical": 115
+   },
+   "word bigram|unseen": {
+    "n": 115,
+    "grammatical": 21,
+    "novel": 115,
+    "novel and grammatical": 21
+   },
+   "word trigram|unseen": {
+    "n": 115,
+    "grammatical": 36,
+    "novel": 115,
+    "novel and grammatical": 36
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 13.150542976929389,
+   "TRELLIS v2, sentences alone|seen": 13.15041380048844,
+   "word bigram|seen": 15.881032200853667,
+   "word trigram|seen": 18.514387605554848,
+   "TRELLIS v2, gold trees|unseen": 10.78923713152359,
+   "TRELLIS v2, sentences alone|unseen": 10.78895102849316,
+   "word bigram|unseen": 13.408884106618443,
+   "word trigram|unseen": 15.604546916973284
+  },
+  "examples": [
+   {
+    "prompt": "a lazy red dog",
+    "completion": "a lazy red dog found the man",
+    "grammatical": true
+   },
+   {
+    "prompt": "a lazy red dog",
+    "completion": "a lazy red dog chased a man",
+    "grammatical": true
+   },
+   {
+    "prompt": "a lazy red dog",
+    "completion": "a lazy red dog liked a woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "a lazy red dog",
+    "completion": "a lazy red dog found the lazy lazy cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "a lazy red dog",
+    "completion": "a lazy red dog admired the dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "the red big quick",
+    "completion": "the red big quick cat saw the big red woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "the red big quick",
+    "completion": "the red big quick cat liked the woman in the park",
+    "grammatical": true
+   },
+   {
+    "prompt": "the red big quick",
+    "completion": "the red big quick quick man found a red big cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "the red big quick",
+    "completion": "the red big quick park saw a telescope on the lazy lazy park",
+    "grammatical": true
+   },
+   {
+    "prompt": "the red big quick",
+    "completion": "the red big quick park saw the small lazy lazy lazy woman in the telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "the lazy quick",
+    "completion": "the lazy quick lazy telescope chased the cat on the telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "the lazy quick",
+    "completion": "the lazy quick telescope liked the park",
+    "grammatical": true
+   }
+  ]
+ },
+ {
+  "condition": "med",
+  "seed": 17,
+  "prompts": {
+   "seen": 78,
+   "unseen": 10
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 390,
+    "grammatical": 388,
+    "novel": 377,
+    "novel and grammatical": 375
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 390,
+    "grammatical": 387,
+    "novel": 371,
+    "novel and grammatical": 368
+   },
+   "word bigram|seen": {
+    "n": 390,
+    "grammatical": 186,
+    "novel": 381,
+    "novel and grammatical": 177
+   },
+   "word trigram|seen": {
+    "n": 390,
+    "grammatical": 156,
+    "novel": 377,
+    "novel and grammatical": 143
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 50,
+    "grammatical": 50,
+    "novel": 50,
+    "novel and grammatical": 50
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 50,
+    "grammatical": 50,
+    "novel": 50,
+    "novel and grammatical": 50
+   },
+   "word bigram|unseen": {
+    "n": 50,
+    "grammatical": 16,
+    "novel": 50,
+    "novel and grammatical": 16
+   },
+   "word trigram|unseen": {
+    "n": 50,
+    "grammatical": 19,
+    "novel": 50,
+    "novel and grammatical": 19
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 10.841678283283901,
+   "TRELLIS v2, sentences alone|seen": 10.820463752242055,
+   "word bigram|seen": 13.329549750216016,
+   "word trigram|seen": 14.699137240552599,
+   "TRELLIS v2, gold trees|unseen": 13.099019624651362,
+   "TRELLIS v2, sentences alone|unseen": 13.053817705881807,
+   "word bigram|unseen": 15.747122263931365,
+   "word trigram|unseen": 20.176543199807483
+  },
+  "examples": [
+   {
+    "prompt": "the dog chased the",
+    "completion": "the dog chased the telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "the dog chased the",
+    "completion": "the dog chased the cat under the dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "the dog chased the",
+    "completion": "the dog chased the big big cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "the dog chased the",
+    "completion": "the dog chased the dog in a dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "the dog chased the",
+    "completion": "the dog chased the small red man",
+    "grammatical": true
+   },
+   {
+    "prompt": "a quick big",
+    "completion": "a quick big park chased the dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "a quick big",
+    "completion": "a quick big man admired a woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "a quick big",
+    "completion": "a quick big woman chased the dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "a quick big",
+    "completion": "a quick big cat found the cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "a quick big",
+    "completion": "a quick big cat admired a cat on a lazy small woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "a quick big quick",
+    "completion": "a quick big quick man chased the big red park",
+    "grammatical": true
+   },
+   {
+    "prompt": "a quick big quick",
+    "completion": "a quick big quick cat liked a lazy quick dog",
+    "grammatical": true
+   }
+  ]
+ },
+ {
+  "condition": "med",
+  "seed": 7,
+  "prompts": {
+   "seen": 64,
+   "unseen": 21
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 320,
+    "grammatical": 320,
+    "novel": 309,
+    "novel and grammatical": 309
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 320,
+    "grammatical": 315,
+    "novel": 307,
+    "novel and grammatical": 302
+   },
+   "word bigram|seen": {
+    "n": 320,
+    "grammatical": 125,
+    "novel": 319,
+    "novel and grammatical": 124
+   },
+   "word trigram|seen": {
+    "n": 320,
+    "grammatical": 117,
+    "novel": 311,
+    "novel and grammatical": 108
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 105,
+    "grammatical": 105,
+    "novel": 105,
+    "novel and grammatical": 105
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 105,
+    "grammatical": 104,
+    "novel": 105,
+    "novel and grammatical": 104
+   },
+   "word bigram|unseen": {
+    "n": 105,
+    "grammatical": 41,
+    "novel": 105,
+    "novel and grammatical": 41
+   },
+   "word trigram|unseen": {
+    "n": 105,
+    "grammatical": 30,
+    "novel": 105,
+    "novel and grammatical": 30
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 13.400102552424887,
+   "TRELLIS v2, sentences alone|seen": 13.412922148073644,
+   "word bigram|seen": 16.66670293509236,
+   "word trigram|seen": 18.091017947329107,
+   "TRELLIS v2, gold trees|unseen": 14.030555643932836,
+   "TRELLIS v2, sentences alone|unseen": 14.046587633937582,
+   "word bigram|unseen": 17.110188231101894,
+   "word trigram|unseen": 19.52076989568149
+  },
+  "examples": [
+   {
+    "prompt": "the quick small man",
+    "completion": "the quick small man found a big quick woman with a dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "the quick small man",
+    "completion": "the quick small man found the telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "the quick small man",
+    "completion": "the quick small man chased a woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "the quick small man",
+    "completion": "the quick small man found a cat with the telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "the quick small man",
+    "completion": "the quick small man admired the quick quick man",
+    "grammatical": true
+   },
+   {
+    "prompt": "a red red small",
+    "completion": "a red red small cat saw the lazy lazy man",
+    "grammatical": true
+   },
+   {
+    "prompt": "a red red small",
+    "completion": "a red red small red dog chased the lazy quick park",
+    "grammatical": true
+   },
+   {
+    "prompt": "a red red small",
+    "completion": "a red red small woman liked the telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "a red red small",
+    "completion": "a red red small dog saw a man under the red big small telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "a red red small",
+    "completion": "a red red small dog saw a cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "a red lazy",
+    "completion": "a red lazy cat admired a red big dog under the telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "a red lazy",
+    "completion": "a red lazy dog admired a big quick park",
+    "grammatical": true
+   }
+  ]
+ },
+ {
+  "condition": "med",
+  "seed": 42,
+  "prompts": {
+   "seen": 77,
+   "unseen": 18
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 385,
+    "grammatical": 382,
+    "novel": 373,
+    "novel and grammatical": 370
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 385,
+    "grammatical": 385,
+    "novel": 375,
+    "novel and grammatical": 375
+   },
+   "word bigram|seen": {
+    "n": 385,
+    "grammatical": 135,
+    "novel": 375,
+    "novel and grammatical": 125
+   },
+   "word trigram|seen": {
+    "n": 385,
+    "grammatical": 129,
+    "novel": 378,
+    "novel and grammatical": 122
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 90,
+    "grammatical": 90,
+    "novel": 90,
+    "novel and grammatical": 90
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 90,
+    "grammatical": 90,
+    "novel": 90,
+    "novel and grammatical": 90
+   },
+   "word bigram|unseen": {
+    "n": 90,
+    "grammatical": 34,
+    "novel": 90,
+    "novel and grammatical": 34
+   },
+   "word trigram|unseen": {
+    "n": 90,
+    "grammatical": 29,
+    "novel": 90,
+    "novel and grammatical": 29
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 10.197742926027487,
+   "TRELLIS v2, sentences alone|seen": 10.051005301600435,
+   "word bigram|seen": 12.609737029056063,
+   "word trigram|seen": 13.701209195074044,
+   "TRELLIS v2, gold trees|unseen": 9.302751640056876,
+   "TRELLIS v2, sentences alone|unseen": 9.257289155581617,
+   "word bigram|unseen": 11.657749004680534,
+   "word trigram|unseen": 13.14295688085813
+  },
+  "examples": [
+   {
+    "prompt": "the dog saw the",
+    "completion": "the dog saw the dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "the dog saw the",
+    "completion": "the dog saw the dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "the dog saw the",
+    "completion": "the dog saw the red small park",
+    "grammatical": true
+   },
+   {
+    "prompt": "the dog saw the",
+    "completion": "the dog saw the quick lazy red telescope under a lazy red telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "the dog saw the",
+    "completion": "the dog saw the red small cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "a dog saw the",
+    "completion": "a dog saw the dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "a dog saw the",
+    "completion": "a dog saw the red quick quick lazy dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "a dog saw the",
+    "completion": "a dog saw the man",
+    "grammatical": true
+   },
+   {
+    "prompt": "a dog saw the",
+    "completion": "a dog saw the small red red dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "a dog saw the",
+    "completion": "a dog saw the quick quick cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "the quick small cat",
+    "completion": "the quick small cat found a big red park in a woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "the quick small cat",
+    "completion": "the quick small cat admired the small lazy dog with a park",
+    "grammatical": true
+   }
+  ]
+ },
+ {
+  "condition": "med",
+  "seed": 100,
+  "prompts": {
+   "seen": 72,
+   "unseen": 20
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 360,
+    "grammatical": 357,
+    "novel": 344,
+    "novel and grammatical": 341
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 360,
+    "grammatical": 360,
+    "novel": 338,
+    "novel and grammatical": 338
+   },
+   "word bigram|seen": {
+    "n": 360,
+    "grammatical": 129,
+    "novel": 348,
+    "novel and grammatical": 117
+   },
+   "word trigram|seen": {
+    "n": 360,
+    "grammatical": 139,
+    "novel": 345,
+    "novel and grammatical": 124
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 100,
+    "grammatical": 99,
+    "novel": 100,
+    "novel and grammatical": 99
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 100,
+    "grammatical": 100,
+    "novel": 100,
+    "novel and grammatical": 100
+   },
+   "word bigram|unseen": {
+    "n": 100,
+    "grammatical": 28,
+    "novel": 100,
+    "novel and grammatical": 28
+   },
+   "word trigram|unseen": {
+    "n": 100,
+    "grammatical": 25,
+    "novel": 100,
+    "novel and grammatical": 25
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 13.279006606933375,
+   "TRELLIS v2, sentences alone|seen": 13.28909814061803,
+   "word bigram|seen": 16.573007991478985,
+   "word trigram|seen": 19.02180931235707,
+   "TRELLIS v2, gold trees|unseen": 11.686758943822195,
+   "TRELLIS v2, sentences alone|unseen": 11.781521331640324,
+   "word bigram|unseen": 14.65610042088061,
+   "word trigram|unseen": 16.980247373427495
+  },
+  "examples": [
+   {
+    "prompt": "a cat found the",
+    "completion": "a cat found the man",
+    "grammatical": true
+   },
+   {
+    "prompt": "a cat found the",
+    "completion": "a cat found the telescope with the cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "a cat found the",
+    "completion": "a cat found the big quick dog under the man",
+    "grammatical": true
+   },
+   {
+    "prompt": "a cat found the",
+    "completion": "a cat found the woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "a cat found the",
+    "completion": "a cat found the park",
+    "grammatical": true
+   },
+   {
+    "prompt": "a lazy big dog",
+    "completion": "a lazy big dog chased the cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "a lazy big dog",
+    "completion": "a lazy big dog saw a telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "a lazy big dog",
+    "completion": "a lazy big dog found the park",
+    "grammatical": true
+   },
+   {
+    "prompt": "a lazy big dog",
+    "completion": "a lazy big dog admired a woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "a lazy big dog",
+    "completion": "a lazy big dog saw a man",
+    "grammatical": true
+   },
+   {
+    "prompt": "the small red park",
+    "completion": "the small red park saw a dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "the small red park",
+    "completion": "the small red park saw the dog",
+    "grammatical": true
+   }
+  ]
+ },
+ {
+  "condition": "large",
+  "seed": 13,
+  "prompts": {
+   "seen": 55,
+   "unseen": 48
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 275,
+    "grammatical": 252,
+    "novel": 268,
+    "novel and grammatical": 245
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 275,
+    "grammatical": 262,
+    "novel": 272,
+    "novel and grammatical": 259
+   },
+   "word bigram|seen": {
+    "n": 275,
+    "grammatical": 111,
+    "novel": 272,
+    "novel and grammatical": 108
+   },
+   "word trigram|seen": {
+    "n": 275,
+    "grammatical": 97,
+    "novel": 273,
+    "novel and grammatical": 95
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 240,
+    "grammatical": 206,
+    "novel": 240,
+    "novel and grammatical": 206
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 240,
+    "grammatical": 220,
+    "novel": 240,
+    "novel and grammatical": 220
+   },
+   "word bigram|unseen": {
+    "n": 240,
+    "grammatical": 104,
+    "novel": 240,
+    "novel and grammatical": 104
+   },
+   "word trigram|unseen": {
+    "n": 240,
+    "grammatical": 111,
+    "novel": 240,
+    "novel and grammatical": 111
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 15.051084513762602,
+   "TRELLIS v2, sentences alone|seen": 14.25176818169405,
+   "word bigram|seen": 16.413921232225483,
+   "word trigram|seen": 20.68184239131552,
+   "TRELLIS v2, gold trees|unseen": 15.369827589921977,
+   "TRELLIS v2, sentences alone|unseen": 14.612792532603086,
+   "word bigram|unseen": 17.10673168743101,
+   "word trigram|unseen": 21.268623647672158
+  },
+  "examples": [
+   {
+    "prompt": "a big lazy",
+    "completion": "a big lazy man liked that boy",
+    "grammatical": true
+   },
+   {
+    "prompt": "a big lazy",
+    "completion": "a big lazy teacher carried that cat in that girl",
+    "grammatical": true
+   },
+   {
+    "prompt": "a big lazy",
+    "completion": "a big lazy telescope admired that big red cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "a big lazy",
+    "completion": "a big lazy teacher admired the boy",
+    "grammatical": true
+   },
+   {
+    "prompt": "a big lazy",
+    "completion": "a big lazy man chased a man near this man",
+    "grammatical": true
+   },
+   {
+    "prompt": "a big lazy boy",
+    "completion": "a big lazy boy admired a boy",
+    "grammatical": true
+   },
+   {
+    "prompt": "a big lazy boy",
+    "completion": "a big lazy boy saw that dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "a big lazy boy",
+    "completion": "a big lazy boy carried the cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "a big lazy boy",
+    "completion": "a big lazy boy chased a quick lazy lazy man",
+    "grammatical": true
+   },
+   {
+    "prompt": "a big lazy boy",
+    "completion": "a big lazy boy saw a girl",
+    "grammatical": true
+   },
+   {
+    "prompt": "this park chased a",
+    "completion": "this park chased a woman near this big lazy park",
+    "grammatical": true
+   },
+   {
+    "prompt": "this park chased a",
+    "completion": "this park chased a curious curious dog",
+    "grammatical": true
+   }
+  ]
+ },
+ {
+  "condition": "large",
+  "seed": 17,
+  "prompts": {
+   "seen": 60,
+   "unseen": 50
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 300,
+    "grammatical": 265,
+    "novel": 298,
+    "novel and grammatical": 263
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 300,
+    "grammatical": 269,
+    "novel": 298,
+    "novel and grammatical": 267
+   },
+   "word bigram|seen": {
+    "n": 300,
+    "grammatical": 87,
+    "novel": 295,
+    "novel and grammatical": 82
+   },
+   "word trigram|seen": {
+    "n": 300,
+    "grammatical": 108,
+    "novel": 297,
+    "novel and grammatical": 105
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 250,
+    "grammatical": 221,
+    "novel": 250,
+    "novel and grammatical": 221
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 250,
+    "grammatical": 232,
+    "novel": 250,
+    "novel and grammatical": 232
+   },
+   "word bigram|unseen": {
+    "n": 250,
+    "grammatical": 107,
+    "novel": 250,
+    "novel and grammatical": 107
+   },
+   "word trigram|unseen": {
+    "n": 250,
+    "grammatical": 123,
+    "novel": 250,
+    "novel and grammatical": 123
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 14.024055321724395,
+   "TRELLIS v2, sentences alone|seen": 13.919748300089667,
+   "word bigram|seen": 17.090521781489787,
+   "word trigram|seen": 20.46218366365305,
+   "TRELLIS v2, gold trees|unseen": 15.300427979933186,
+   "TRELLIS v2, sentences alone|unseen": 15.199547299063122,
+   "word bigram|unseen": 18.863920125562444,
+   "word trigram|unseen": 23.710744281261785
+  },
+  "examples": [
+   {
+    "prompt": "that teacher carried",
+    "completion": "that teacher carried this dog with a girl",
+    "grammatical": true
+   },
+   {
+    "prompt": "that teacher carried",
+    "completion": "that teacher carried the park",
+    "grammatical": true
+   },
+   {
+    "prompt": "that teacher carried",
+    "completion": "that teacher carried this woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "that teacher carried",
+    "completion": "that teacher carried this teacher near the cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "that teacher carried",
+    "completion": "that teacher carried the dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "that teacher carried a",
+    "completion": "that teacher carried a dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "that teacher carried a",
+    "completion": "that teacher carried a big big man",
+    "grammatical": true
+   },
+   {
+    "prompt": "that teacher carried a",
+    "completion": "that teacher carried a man",
+    "grammatical": true
+   },
+   {
+    "prompt": "that teacher carried a",
+    "completion": "that teacher carried a girl",
+    "grammatical": true
+   },
+   {
+    "prompt": "that teacher carried a",
+    "completion": "that teacher carried a boy",
+    "grammatical": true
+   },
+   {
+    "prompt": "a quick curious",
+    "completion": "a quick curious tall dog chased a telescope under this girl",
+    "grammatical": true
+   },
+   {
+    "prompt": "a quick curious",
+    "completion": "a quick curious woman found this park",
+    "grammatical": true
+   }
+  ]
+ },
+ {
+  "condition": "large",
+  "seed": 7,
+  "prompts": {
+   "seen": 56,
+   "unseen": 58
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 280,
+    "grammatical": 258,
+    "novel": 279,
+    "novel and grammatical": 257
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 280,
+    "grammatical": 262,
+    "novel": 278,
+    "novel and grammatical": 260
+   },
+   "word bigram|seen": {
+    "n": 280,
+    "grammatical": 90,
+    "novel": 279,
+    "novel and grammatical": 89
+   },
+   "word trigram|seen": {
+    "n": 280,
+    "grammatical": 88,
+    "novel": 278,
+    "novel and grammatical": 86
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 290,
+    "grammatical": 232,
+    "novel": 290,
+    "novel and grammatical": 232
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 290,
+    "grammatical": 242,
+    "novel": 290,
+    "novel and grammatical": 242
+   },
+   "word bigram|unseen": {
+    "n": 290,
+    "grammatical": 115,
+    "novel": 290,
+    "novel and grammatical": 115
+   },
+   "word trigram|unseen": {
+    "n": 290,
+    "grammatical": 116,
+    "novel": 290,
+    "novel and grammatical": 116
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 16.19319181937869,
+   "TRELLIS v2, sentences alone|seen": 15.685819567240856,
+   "word bigram|seen": 18.22403570793561,
+   "word trigram|seen": 22.20226695047661,
+   "TRELLIS v2, gold trees|unseen": 14.9300445012739,
+   "TRELLIS v2, sentences alone|unseen": 14.502831060268878,
+   "word bigram|unseen": 16.354546254468616,
+   "word trigram|unseen": 20.67943669612531
+  },
+  "examples": [
+   {
+    "prompt": "this teacher chased that",
+    "completion": "this teacher chased that telescope in that lazy small teacher",
+    "grammatical": true
+   },
+   {
+    "prompt": "this teacher chased that",
+    "completion": "this teacher chased that cat with a lazy big tall telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "this teacher chased that",
+    "completion": "this teacher chased that park in chased that tall big park",
+    "grammatical": false
+   },
+   {
+    "prompt": "this teacher chased that",
+    "completion": "this teacher chased that boy near the teacher",
+    "grammatical": true
+   },
+   {
+    "prompt": "this teacher chased that",
+    "completion": "this teacher chased that cat under this man",
+    "grammatical": true
+   },
+   {
+    "prompt": "the park who",
+    "completion": "the park who this boy",
+    "grammatical": false
+   },
+   {
+    "prompt": "the park who",
+    "completion": "the park who this big lazy woman in that woman",
+    "grammatical": false
+   },
+   {
+    "prompt": "the park who",
+    "completion": "the park who the woman in the big big girl",
+    "grammatical": false
+   },
+   {
+    "prompt": "the park who",
+    "completion": "the park who a boy with a telescope",
+    "grammatical": false
+   },
+   {
+    "prompt": "the park who",
+    "completion": "the park who a boy",
+    "grammatical": false
+   },
+   {
+    "prompt": "the park who liked",
+    "completion": "the park who liked a red curious lazy dog",
+    "grammatical": false
+   },
+   {
+    "prompt": "the park who liked",
+    "completion": "the park who liked",
+    "grammatical": false
+   }
+  ]
+ },
+ {
+  "condition": "large",
+  "seed": 42,
+  "prompts": {
+   "seen": 60,
+   "unseen": 51
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 300,
+    "grammatical": 273,
+    "novel": 296,
+    "novel and grammatical": 269
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 300,
+    "grammatical": 277,
+    "novel": 297,
+    "novel and grammatical": 274
+   },
+   "word bigram|seen": {
+    "n": 300,
+    "grammatical": 90,
+    "novel": 300,
+    "novel and grammatical": 90
+   },
+   "word trigram|seen": {
+    "n": 300,
+    "grammatical": 96,
+    "novel": 295,
+    "novel and grammatical": 91
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 255,
+    "grammatical": 232,
+    "novel": 255,
+    "novel and grammatical": 232
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 255,
+    "grammatical": 234,
+    "novel": 255,
+    "novel and grammatical": 234
+   },
+   "word bigram|unseen": {
+    "n": 255,
+    "grammatical": 94,
+    "novel": 255,
+    "novel and grammatical": 94
+   },
+   "word trigram|unseen": {
+    "n": 255,
+    "grammatical": 94,
+    "novel": 255,
+    "novel and grammatical": 94
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 14.762989070621833,
+   "TRELLIS v2, sentences alone|seen": 14.730378309027651,
+   "word bigram|seen": 17.809935851668264,
+   "word trigram|seen": 23.72376291389969,
+   "TRELLIS v2, gold trees|unseen": 11.615401390641797,
+   "TRELLIS v2, sentences alone|unseen": 11.583905973156462,
+   "word bigram|unseen": 14.255884887032806,
+   "word trigram|unseen": 19.064919781405326
+  },
+  "examples": [
+   {
+    "prompt": "that cat saw",
+    "completion": "that cat saw a telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "that cat saw",
+    "completion": "that cat saw that woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "that cat saw",
+    "completion": "that cat saw this park",
+    "grammatical": true
+   },
+   {
+    "prompt": "that cat saw",
+    "completion": "that cat saw that telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "that cat saw",
+    "completion": "that cat saw a telescope near that woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "that cat saw the",
+    "completion": "that cat saw the boy",
+    "grammatical": true
+   },
+   {
+    "prompt": "that cat saw the",
+    "completion": "that cat saw the man near this telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "that cat saw the",
+    "completion": "that cat saw the park",
+    "grammatical": true
+   },
+   {
+    "prompt": "that cat saw the",
+    "completion": "that cat saw the telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "that cat saw the",
+    "completion": "that cat saw the dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "a cat chased",
+    "completion": "a cat chased a park near the dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "a cat chased",
+    "completion": "a cat chased a man",
+    "grammatical": true
+   }
+  ]
+ },
+ {
+  "condition": "large",
+  "seed": 100,
+  "prompts": {
+   "seen": 68,
+   "unseen": 48
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 340,
+    "grammatical": 302,
+    "novel": 339,
+    "novel and grammatical": 301
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 340,
+    "grammatical": 327,
+    "novel": 332,
+    "novel and grammatical": 319
+   },
+   "word bigram|seen": {
+    "n": 340,
+    "grammatical": 118,
+    "novel": 334,
+    "novel and grammatical": 112
+   },
+   "word trigram|seen": {
+    "n": 340,
+    "grammatical": 109,
+    "novel": 330,
+    "novel and grammatical": 99
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 240,
+    "grammatical": 209,
+    "novel": 240,
+    "novel and grammatical": 209
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 240,
+    "grammatical": 229,
+    "novel": 240,
+    "novel and grammatical": 229
+   },
+   "word bigram|unseen": {
+    "n": 240,
+    "grammatical": 101,
+    "novel": 240,
+    "novel and grammatical": 101
+   },
+   "word trigram|unseen": {
+    "n": 240,
+    "grammatical": 98,
+    "novel": 240,
+    "novel and grammatical": 98
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 14.617568654326764,
+   "TRELLIS v2, sentences alone|seen": 14.46668913359062,
+   "word bigram|seen": 17.929941355136194,
+   "word trigram|seen": 22.944368516782795,
+   "TRELLIS v2, gold trees|unseen": 11.7550326536617,
+   "TRELLIS v2, sentences alone|unseen": 11.596248707421998,
+   "word bigram|unseen": 14.337896912663618,
+   "word trigram|unseen": 19.551016363311128
+  },
+  "examples": [
+   {
+    "prompt": "a telescope saw the",
+    "completion": "a telescope saw the man",
+    "grammatical": true
+   },
+   {
+    "prompt": "a telescope saw the",
+    "completion": "a telescope saw the telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "a telescope saw the",
+    "completion": "a telescope saw the dog under a man",
+    "grammatical": true
+   },
+   {
+    "prompt": "a telescope saw the",
+    "completion": "a telescope saw the man on the woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "a telescope saw the",
+    "completion": "a telescope saw the girl under a park",
+    "grammatical": true
+   },
+   {
+    "prompt": "this curious small dog",
+    "completion": "this curious small dog carried this teacher",
+    "grammatical": true
+   },
+   {
+    "prompt": "this curious small dog",
+    "completion": "this curious small dog found a girl",
+    "grammatical": true
+   },
+   {
+    "prompt": "this curious small dog",
+    "completion": "this curious small dog carried the girl under that dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "this curious small dog",
+    "completion": "this curious small dog chased a cat near the park",
+    "grammatical": true
+   },
+   {
+    "prompt": "this curious small dog",
+    "completion": "this curious small dog read that woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "a woman read a",
+    "completion": "a woman read a cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "a woman read a",
+    "completion": "a woman read a dog in this boy",
+    "grammatical": true
+   }
+  ]
+ },
+ {
+  "condition": "term_low",
+  "seed": 13,
+  "prompts": {
+   "seen": 57
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 285,
+    "grammatical": 285,
+    "novel": 265,
+    "novel and grammatical": 265
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 285,
+    "grammatical": 285,
+    "novel": 252,
+    "novel and grammatical": 252
+   },
+   "word bigram|seen": {
+    "n": 285,
+    "grammatical": 89,
+    "novel": 269,
+    "novel and grammatical": 73
+   },
+   "word trigram|seen": {
+    "n": 285,
+    "grammatical": 70,
+    "novel": 267,
+    "novel and grammatical": 52
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 10.526903026210968,
+   "TRELLIS v2, sentences alone|seen": 10.41007825993003,
+   "word bigram|seen": 13.922305136967582,
+   "word trigram|seen": 12.996662594189603
+  },
+  "examples": []
+ },
+ {
+  "condition": "term_low",
+  "seed": 17,
+  "prompts": {
+   "seen": 61,
+   "unseen": 1
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 305,
+    "grammatical": 304,
+    "novel": 267,
+    "novel and grammatical": 266
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 305,
+    "grammatical": 305,
+    "novel": 275,
+    "novel and grammatical": 275
+   },
+   "word bigram|seen": {
+    "n": 305,
+    "grammatical": 108,
+    "novel": 276,
+    "novel and grammatical": 79
+   },
+   "word trigram|seen": {
+    "n": 305,
+    "grammatical": 90,
+    "novel": 282,
+    "novel and grammatical": 67
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 5,
+    "grammatical": 5,
+    "novel": 5,
+    "novel and grammatical": 5
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 5,
+    "grammatical": 5,
+    "novel": 5,
+    "novel and grammatical": 5
+   },
+   "word bigram|unseen": {
+    "n": 5,
+    "grammatical": 2,
+    "novel": 5,
+    "novel and grammatical": 2
+   },
+   "word trigram|unseen": {
+    "n": 5,
+    "grammatical": 0,
+    "novel": 5,
+    "novel and grammatical": 0
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 10.551605737424621,
+   "TRELLIS v2, sentences alone|seen": 10.56944503425122,
+   "word bigram|seen": 13.953979665126532,
+   "word trigram|seen": 13.026019320972454,
+   "TRELLIS v2, gold trees|unseen": 7.212214011005881,
+   "TRELLIS v2, sentences alone|unseen": 7.22436446306327,
+   "word bigram|unseen": 9.87474124005242,
+   "word trigram|unseen": 9.283054437737965
+  },
+  "examples": [
+   {
+    "prompt": "a big small small",
+    "completion": "a big small small dog saw the man in a dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "a big small small",
+    "completion": "a big small small man liked a dog in the man",
+    "grammatical": true
+   },
+   {
+    "prompt": "a big small small",
+    "completion": "a big small small cat liked the dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "a big small small",
+    "completion": "a big small small cat saw a small big dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "a big small small",
+    "completion": "a big small small dog liked the cat with a man",
+    "grammatical": true
+   }
+  ]
+ },
+ {
+  "condition": "term_low",
+  "seed": 7,
+  "prompts": {
+   "seen": 58
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 290,
+    "grammatical": 290,
+    "novel": 263,
+    "novel and grammatical": 263
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 290,
+    "grammatical": 290,
+    "novel": 269,
+    "novel and grammatical": 269
+   },
+   "word bigram|seen": {
+    "n": 290,
+    "grammatical": 95,
+    "novel": 272,
+    "novel and grammatical": 77
+   },
+   "word trigram|seen": {
+    "n": 290,
+    "grammatical": 95,
+    "novel": 271,
+    "novel and grammatical": 76
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 10.21984929322126,
+   "TRELLIS v2, sentences alone|seen": 10.221523504121055,
+   "word bigram|seen": 13.530041570813138,
+   "word trigram|seen": 12.681865401870596
+  },
+  "examples": []
+ },
+ {
+  "condition": "term_low",
+  "seed": 42,
+  "prompts": {
+   "seen": 56
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 280,
+    "grammatical": 279,
+    "novel": 250,
+    "novel and grammatical": 249
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 280,
+    "grammatical": 279,
+    "novel": 246,
+    "novel and grammatical": 245
+   },
+   "word bigram|seen": {
+    "n": 280,
+    "grammatical": 91,
+    "novel": 263,
+    "novel and grammatical": 74
+   },
+   "word trigram|seen": {
+    "n": 280,
+    "grammatical": 93,
+    "novel": 255,
+    "novel and grammatical": 68
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 11.256253678338302,
+   "TRELLIS v2, sentences alone|seen": 11.143728979490032,
+   "word bigram|seen": 15.20901933048851,
+   "word trigram|seen": 14.183083065119694
+  },
+  "examples": []
+ },
+ {
+  "condition": "term_low",
+  "seed": 100,
+  "prompts": {
+   "seen": 61
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 305,
+    "grammatical": 303,
+    "novel": 275,
+    "novel and grammatical": 273
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 305,
+    "grammatical": 305,
+    "novel": 272,
+    "novel and grammatical": 272
+   },
+   "word bigram|seen": {
+    "n": 305,
+    "grammatical": 96,
+    "novel": 289,
+    "novel and grammatical": 80
+   },
+   "word trigram|seen": {
+    "n": 305,
+    "grammatical": 102,
+    "novel": 277,
+    "novel and grammatical": 74
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 10.613194392147388,
+   "TRELLIS v2, sentences alone|seen": 10.60871540954459,
+   "word bigram|seen": 14.021286948489605,
+   "word trigram|seen": 13.159277432194079
+  },
+  "examples": []
+ },
+ {
+  "condition": "term_med",
+  "seed": 13,
+  "prompts": {
+   "seen": 76,
+   "unseen": 17
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 380,
+    "grammatical": 371,
+    "novel": 375,
+    "novel and grammatical": 366
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 380,
+    "grammatical": 376,
+    "novel": 368,
+    "novel and grammatical": 364
+   },
+   "word bigram|seen": {
+    "n": 380,
+    "grammatical": 106,
+    "novel": 378,
+    "novel and grammatical": 104
+   },
+   "word trigram|seen": {
+    "n": 380,
+    "grammatical": 140,
+    "novel": 364,
+    "novel and grammatical": 124
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 85,
+    "grammatical": 83,
+    "novel": 85,
+    "novel and grammatical": 83
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 85,
+    "grammatical": 85,
+    "novel": 85,
+    "novel and grammatical": 85
+   },
+   "word bigram|unseen": {
+    "n": 85,
+    "grammatical": 19,
+    "novel": 85,
+    "novel and grammatical": 19
+   },
+   "word trigram|unseen": {
+    "n": 85,
+    "grammatical": 35,
+    "novel": 85,
+    "novel and grammatical": 35
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 16.596540255976652,
+   "TRELLIS v2, sentences alone|seen": 16.45278353778734,
+   "word bigram|seen": 20.44379505017922,
+   "word trigram|seen": 23.256414430674734,
+   "TRELLIS v2, gold trees|unseen": 14.726024953628444,
+   "TRELLIS v2, sentences alone|unseen": 14.529461097900967,
+   "word bigram|unseen": 17.98434118823464,
+   "word trigram|unseen": 21.141222515368547
+  },
+  "examples": [
+   {
+    "prompt": "the quick small big",
+    "completion": "the quick small big man liked a quick red lazy telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "the quick small big",
+    "completion": "the quick small big woman saw the dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "the quick small big",
+    "completion": "the quick small big man saw a dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "the quick small big",
+    "completion": "the quick small big park chased a park with a lazy quick dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "the quick small big",
+    "completion": "the quick small big telescope chased the woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "the quick big quick",
+    "completion": "the quick big quick man liked a woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "the quick big quick",
+    "completion": "the quick big quick man admired the telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "the quick big quick",
+    "completion": "the quick big quick cat liked the big lazy cat in the lazy red cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "the quick big quick",
+    "completion": "the quick big quick park liked a red small park in the red quick lazy woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "the quick big quick",
+    "completion": "the quick big quick woman chased the dog on a quick quick park",
+    "grammatical": true
+   },
+   {
+    "prompt": "the big lazy cat",
+    "completion": "the big lazy cat found the woman with a small small park",
+    "grammatical": true
+   },
+   {
+    "prompt": "the big lazy cat",
+    "completion": "the big lazy cat liked the quick quick quick woman on a telescope",
+    "grammatical": true
+   }
+  ]
+ },
+ {
+  "condition": "term_med",
+  "seed": 17,
+  "prompts": {
+   "seen": 73,
+   "unseen": 17
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 365,
+    "grammatical": 355,
+    "novel": 354,
+    "novel and grammatical": 344
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 365,
+    "grammatical": 365,
+    "novel": 359,
+    "novel and grammatical": 359
+   },
+   "word bigram|seen": {
+    "n": 365,
+    "grammatical": 116,
+    "novel": 358,
+    "novel and grammatical": 109
+   },
+   "word trigram|seen": {
+    "n": 365,
+    "grammatical": 122,
+    "novel": 354,
+    "novel and grammatical": 111
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 85,
+    "grammatical": 83,
+    "novel": 85,
+    "novel and grammatical": 83
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 85,
+    "grammatical": 85,
+    "novel": 85,
+    "novel and grammatical": 85
+   },
+   "word bigram|unseen": {
+    "n": 85,
+    "grammatical": 24,
+    "novel": 85,
+    "novel and grammatical": 24
+   },
+   "word trigram|unseen": {
+    "n": 85,
+    "grammatical": 19,
+    "novel": 85,
+    "novel and grammatical": 19
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 14.183453314586892,
+   "TRELLIS v2, sentences alone|seen": 14.14438953377187,
+   "word bigram|seen": 16.946613671941915,
+   "word trigram|seen": 19.052762357567858,
+   "TRELLIS v2, gold trees|unseen": 14.036585654759781,
+   "TRELLIS v2, sentences alone|unseen": 13.977385296192423,
+   "word bigram|unseen": 16.954038041886804,
+   "word trigram|unseen": 20.759856633121036
+  },
+  "examples": [
+   {
+    "prompt": "a red big cat",
+    "completion": "a red big cat found the red red telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "a red big cat",
+    "completion": "a red big cat saw a lazy lazy woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "a red big cat",
+    "completion": "a red big cat saw a telescope in the lazy small park",
+    "grammatical": true
+   },
+   {
+    "prompt": "a red big cat",
+    "completion": "a red big cat liked the lazy big park",
+    "grammatical": true
+   },
+   {
+    "prompt": "a red big cat",
+    "completion": "a red big cat saw the cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "the park chased a",
+    "completion": "the park chased a small big telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "the park chased a",
+    "completion": "the park chased a red red woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "the park chased a",
+    "completion": "the park chased a man",
+    "grammatical": true
+   },
+   {
+    "prompt": "the park chased a",
+    "completion": "the park chased a small small small lazy cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "the park chased a",
+    "completion": "the park chased a woman under a woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "a small red dog",
+    "completion": "a small red dog found a woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "a small red dog",
+    "completion": "a small red dog chased a woman",
+    "grammatical": true
+   }
+  ]
+ },
+ {
+  "condition": "term_med",
+  "seed": 7,
+  "prompts": {
+   "seen": 65,
+   "unseen": 21
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 325,
+    "grammatical": 317,
+    "novel": 318,
+    "novel and grammatical": 310
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 325,
+    "grammatical": 325,
+    "novel": 317,
+    "novel and grammatical": 317
+   },
+   "word bigram|seen": {
+    "n": 325,
+    "grammatical": 115,
+    "novel": 317,
+    "novel and grammatical": 107
+   },
+   "word trigram|seen": {
+    "n": 325,
+    "grammatical": 116,
+    "novel": 316,
+    "novel and grammatical": 107
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 105,
+    "grammatical": 103,
+    "novel": 105,
+    "novel and grammatical": 103
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 105,
+    "grammatical": 105,
+    "novel": 105,
+    "novel and grammatical": 105
+   },
+   "word bigram|unseen": {
+    "n": 105,
+    "grammatical": 30,
+    "novel": 105,
+    "novel and grammatical": 30
+   },
+   "word trigram|unseen": {
+    "n": 105,
+    "grammatical": 34,
+    "novel": 105,
+    "novel and grammatical": 34
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 16.15488792415859,
+   "TRELLIS v2, sentences alone|seen": 16.120095702674544,
+   "word bigram|seen": 20.103668855430872,
+   "word trigram|seen": 21.16633062570293,
+   "TRELLIS v2, gold trees|unseen": 15.32823422742983,
+   "TRELLIS v2, sentences alone|unseen": 15.282009080308672,
+   "word bigram|unseen": 19.470011531808524,
+   "word trigram|unseen": 20.20911401836282
+  },
+  "examples": [
+   {
+    "prompt": "the small quick cat",
+    "completion": "the small quick cat saw the woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "the small quick cat",
+    "completion": "the small quick cat liked a man on the woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "the small quick cat",
+    "completion": "the small quick cat chased a small lazy telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "the small quick cat",
+    "completion": "the small quick cat found a quick quick man",
+    "grammatical": true
+   },
+   {
+    "prompt": "the small quick cat",
+    "completion": "the small quick cat liked a woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "the red red",
+    "completion": "the red red man saw the cat with a cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "the red red",
+    "completion": "the red red woman admired the telescope under the cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "the red red",
+    "completion": "the red red small dog admired a cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "the red red",
+    "completion": "the red red woman saw a woman under a park",
+    "grammatical": true
+   },
+   {
+    "prompt": "the red red",
+    "completion": "the red red man chased the cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "the red red man",
+    "completion": "the red red man admired a woman with the red big man",
+    "grammatical": true
+   },
+   {
+    "prompt": "the red red man",
+    "completion": "the red red man chased a small big cat",
+    "grammatical": true
+   }
+  ]
+ },
+ {
+  "condition": "term_med",
+  "seed": 42,
+  "prompts": {
+   "seen": 76,
+   "unseen": 15
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 380,
+    "grammatical": 378,
+    "novel": 368,
+    "novel and grammatical": 366
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 380,
+    "grammatical": 380,
+    "novel": 374,
+    "novel and grammatical": 374
+   },
+   "word bigram|seen": {
+    "n": 380,
+    "grammatical": 143,
+    "novel": 366,
+    "novel and grammatical": 129
+   },
+   "word trigram|seen": {
+    "n": 380,
+    "grammatical": 133,
+    "novel": 368,
+    "novel and grammatical": 121
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 75,
+    "grammatical": 75,
+    "novel": 75,
+    "novel and grammatical": 75
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 75,
+    "grammatical": 75,
+    "novel": 75,
+    "novel and grammatical": 75
+   },
+   "word bigram|unseen": {
+    "n": 75,
+    "grammatical": 22,
+    "novel": 75,
+    "novel and grammatical": 22
+   },
+   "word trigram|unseen": {
+    "n": 75,
+    "grammatical": 23,
+    "novel": 75,
+    "novel and grammatical": 23
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 16.543939677240292,
+   "TRELLIS v2, sentences alone|seen": 16.53433771129156,
+   "word bigram|seen": 20.466737220394226,
+   "word trigram|seen": 23.519436630369157,
+   "TRELLIS v2, gold trees|unseen": 15.266329906339639,
+   "TRELLIS v2, sentences alone|unseen": 15.249863942601694,
+   "word bigram|unseen": 19.523113262494988,
+   "word trigram|unseen": 21.984752794296412
+  },
+  "examples": [
+   {
+    "prompt": "the lazy quick woman",
+    "completion": "the lazy quick woman liked a cat with a man",
+    "grammatical": true
+   },
+   {
+    "prompt": "the lazy quick woman",
+    "completion": "the lazy quick woman liked the red red park",
+    "grammatical": true
+   },
+   {
+    "prompt": "the lazy quick woman",
+    "completion": "the lazy quick woman saw a red quick park",
+    "grammatical": true
+   },
+   {
+    "prompt": "the lazy quick woman",
+    "completion": "the lazy quick woman chased a cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "the lazy quick woman",
+    "completion": "the lazy quick woman saw the quick red woman with a dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "a small big big",
+    "completion": "a small big big big park admired a cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "a small big big",
+    "completion": "a small big big big park liked the quick red woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "a small big big",
+    "completion": "a small big big telescope admired the park under the big red telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "a small big big",
+    "completion": "a small big big man found a cat under the quick lazy small quick woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "a small big big",
+    "completion": "a small big big cat found a small small quick quick woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "the park saw a",
+    "completion": "the park saw a man in a woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "the park saw a",
+    "completion": "the park saw a dog on a small small lazy dog",
+    "grammatical": true
+   }
+  ]
+ },
+ {
+  "condition": "term_med",
+  "seed": 100,
+  "prompts": {
+   "seen": 74,
+   "unseen": 22
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 370,
+    "grammatical": 359,
+    "novel": 362,
+    "novel and grammatical": 351
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 370,
+    "grammatical": 369,
+    "novel": 361,
+    "novel and grammatical": 360
+   },
+   "word bigram|seen": {
+    "n": 370,
+    "grammatical": 131,
+    "novel": 362,
+    "novel and grammatical": 123
+   },
+   "word trigram|seen": {
+    "n": 370,
+    "grammatical": 119,
+    "novel": 369,
+    "novel and grammatical": 118
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 110,
+    "grammatical": 107,
+    "novel": 110,
+    "novel and grammatical": 107
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 110,
+    "grammatical": 110,
+    "novel": 110,
+    "novel and grammatical": 110
+   },
+   "word bigram|unseen": {
+    "n": 110,
+    "grammatical": 36,
+    "novel": 110,
+    "novel and grammatical": 36
+   },
+   "word trigram|unseen": {
+    "n": 110,
+    "grammatical": 41,
+    "novel": 110,
+    "novel and grammatical": 41
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 15.709290776796223,
+   "TRELLIS v2, sentences alone|seen": 15.674172863936562,
+   "word bigram|seen": 19.404022991871187,
+   "word trigram|seen": 21.430605894439246,
+   "TRELLIS v2, gold trees|unseen": 17.69896151857193,
+   "TRELLIS v2, sentences alone|unseen": 17.658632215276473,
+   "word bigram|unseen": 22.19112336220584,
+   "word trigram|unseen": 24.491238283169036
+  },
+  "examples": [
+   {
+    "prompt": "a quick red park",
+    "completion": "a quick red park found a woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "a quick red park",
+    "completion": "a quick red park liked the lazy big woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "a quick red park",
+    "completion": "a quick red park admired the woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "a quick red park",
+    "completion": "a quick red park saw the dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "a quick red park",
+    "completion": "a quick red park liked a small small big man",
+    "grammatical": true
+   },
+   {
+    "prompt": "a big lazy man",
+    "completion": "a big lazy man saw the lazy red cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "a big lazy man",
+    "completion": "a big lazy man admired a park",
+    "grammatical": true
+   },
+   {
+    "prompt": "a big lazy man",
+    "completion": "a big lazy man liked a big quick man in a telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "a big lazy man",
+    "completion": "a big lazy man chased the park",
+    "grammatical": true
+   },
+   {
+    "prompt": "a big lazy man",
+    "completion": "a big lazy man admired a telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "a woman chased a",
+    "completion": "a woman chased a cat on a man",
+    "grammatical": true
+   },
+   {
+    "prompt": "a woman chased a",
+    "completion": "a woman chased a red small lazy telescope under the park",
+    "grammatical": true
+   }
+  ]
+ },
+ {
+  "condition": "term_high",
+  "seed": 13,
+  "prompts": {
+   "seen": 57,
+   "unseen": 54
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 285,
+    "grammatical": 284,
+    "novel": 285,
+    "novel and grammatical": 284
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 285,
+    "grammatical": 284,
+    "novel": 284,
+    "novel and grammatical": 283
+   },
+   "word bigram|seen": {
+    "n": 285,
+    "grammatical": 80,
+    "novel": 285,
+    "novel and grammatical": 80
+   },
+   "word trigram|seen": {
+    "n": 285,
+    "grammatical": 65,
+    "novel": 283,
+    "novel and grammatical": 63
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 270,
+    "grammatical": 267,
+    "novel": 270,
+    "novel and grammatical": 267
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 270,
+    "grammatical": 270,
+    "novel": 270,
+    "novel and grammatical": 270
+   },
+   "word bigram|unseen": {
+    "n": 270,
+    "grammatical": 113,
+    "novel": 270,
+    "novel and grammatical": 113
+   },
+   "word trigram|unseen": {
+    "n": 270,
+    "grammatical": 121,
+    "novel": 270,
+    "novel and grammatical": 121
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 23.608513679027507,
+   "TRELLIS v2, sentences alone|seen": 23.59905424372056,
+   "word bigram|seen": 28.10290831814708,
+   "word trigram|seen": 34.24000105054453,
+   "TRELLIS v2, gold trees|unseen": 19.27300590934494,
+   "TRELLIS v2, sentences alone|unseen": 19.2632267279236,
+   "word bigram|unseen": 23.164413058062838,
+   "word trigram|unseen": 29.301403007305666
+  },
+  "examples": [
+   {
+    "prompt": "this quick lazy",
+    "completion": "this quick lazy book knew the telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "this quick lazy",
+    "completion": "this quick lazy woman found that small quick bird near this dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "this quick lazy",
+    "completion": "this quick lazy woman knew that dog behind that wise ancient big dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "this quick lazy",
+    "completion": "this quick lazy book saw this telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "this quick lazy",
+    "completion": "this quick lazy telescope found the robot with that bird",
+    "grammatical": true
+   },
+   {
+    "prompt": "this quick lazy red",
+    "completion": "this quick lazy red bird liked that book with a man",
+    "grammatical": true
+   },
+   {
+    "prompt": "this quick lazy red",
+    "completion": "this quick lazy red telescope chased the girl with a telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "this quick lazy red",
+    "completion": "this quick lazy red man chased that apple",
+    "grammatical": true
+   },
+   {
+    "prompt": "this quick lazy red",
+    "completion": "this quick lazy red tall apple liked a lazy big apple in this blue blue robot",
+    "grammatical": true
+   },
+   {
+    "prompt": "this quick lazy red",
+    "completion": "this quick lazy red wise telescope chased the woman on that red ancient woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "the cat",
+    "completion": "the cat found that apple behind a man",
+    "grammatical": true
+   },
+   {
+    "prompt": "the cat",
+    "completion": "the cat knew the small blue cat in this girl",
+    "grammatical": true
+   }
+  ]
+ },
+ {
+  "condition": "term_high",
+  "seed": 17,
+  "prompts": {
+   "seen": 62,
+   "unseen": 56
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 310,
+    "grammatical": 302,
+    "novel": 309,
+    "novel and grammatical": 301
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 310,
+    "grammatical": 310,
+    "novel": 309,
+    "novel and grammatical": 309
+   },
+   "word bigram|seen": {
+    "n": 310,
+    "grammatical": 82,
+    "novel": 309,
+    "novel and grammatical": 81
+   },
+   "word trigram|seen": {
+    "n": 310,
+    "grammatical": 90,
+    "novel": 309,
+    "novel and grammatical": 89
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 280,
+    "grammatical": 271,
+    "novel": 280,
+    "novel and grammatical": 271
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 280,
+    "grammatical": 275,
+    "novel": 280,
+    "novel and grammatical": 275
+   },
+   "word bigram|unseen": {
+    "n": 280,
+    "grammatical": 94,
+    "novel": 280,
+    "novel and grammatical": 94
+   },
+   "word trigram|unseen": {
+    "n": 280,
+    "grammatical": 92,
+    "novel": 280,
+    "novel and grammatical": 92
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 23.908636456353925,
+   "TRELLIS v2, sentences alone|seen": 23.855460165232092,
+   "word bigram|seen": 29.607910358424878,
+   "word trigram|seen": 38.294150441635715,
+   "TRELLIS v2, gold trees|unseen": 19.386306003694603,
+   "TRELLIS v2, sentences alone|unseen": 19.35142638527912,
+   "word bigram|unseen": 24.116506262985958,
+   "word trigram|unseen": 31.051295604243364
+  },
+  "examples": [
+   {
+    "prompt": "that wise red apple",
+    "completion": "that wise red apple carried that man",
+    "grammatical": true
+   },
+   {
+    "prompt": "that wise red apple",
+    "completion": "that wise red apple saw this girl",
+    "grammatical": true
+   },
+   {
+    "prompt": "that wise red apple",
+    "completion": "that wise red apple read the red ancient park",
+    "grammatical": true
+   },
+   {
+    "prompt": "that wise red apple",
+    "completion": "that wise red apple read this red lazy lazy man",
+    "grammatical": true
+   },
+   {
+    "prompt": "that wise red apple",
+    "completion": "that wise red apple found the small lazy bird",
+    "grammatical": true
+   },
+   {
+    "prompt": "that small big",
+    "completion": "that small big book chased that wise red cat near a red quick apple",
+    "grammatical": true
+   },
+   {
+    "prompt": "that small big",
+    "completion": "that small big telescope carried the dog near this man",
+    "grammatical": true
+   },
+   {
+    "prompt": "that small big",
+    "completion": "that small big blue robot liked this wise quick cat in this quick blue bird",
+    "grammatical": true
+   },
+   {
+    "prompt": "that small big",
+    "completion": "that small big ancient dog liked this dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "that small big",
+    "completion": "that small big man read that robot with this wise ancient woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "that small big man",
+    "completion": "that small big man saw this boy with a big wise robot",
+    "grammatical": true
+   },
+   {
+    "prompt": "that small big man",
+    "completion": "that small big man knew that robot",
+    "grammatical": true
+   }
+  ]
+ },
+ {
+  "condition": "term_high",
+  "seed": 7,
+  "prompts": {
+   "seen": 56,
+   "unseen": 58
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 280,
+    "grammatical": 267,
+    "novel": 277,
+    "novel and grammatical": 264
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 280,
+    "grammatical": 278,
+    "novel": 279,
+    "novel and grammatical": 277
+   },
+   "word bigram|seen": {
+    "n": 280,
+    "grammatical": 74,
+    "novel": 279,
+    "novel and grammatical": 73
+   },
+   "word trigram|seen": {
+    "n": 280,
+    "grammatical": 82,
+    "novel": 279,
+    "novel and grammatical": 81
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 290,
+    "grammatical": 282,
+    "novel": 290,
+    "novel and grammatical": 282
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 290,
+    "grammatical": 289,
+    "novel": 290,
+    "novel and grammatical": 289
+   },
+   "word bigram|unseen": {
+    "n": 290,
+    "grammatical": 105,
+    "novel": 290,
+    "novel and grammatical": 105
+   },
+   "word trigram|unseen": {
+    "n": 290,
+    "grammatical": 121,
+    "novel": 290,
+    "novel and grammatical": 121
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 22.91429352972253,
+   "TRELLIS v2, sentences alone|seen": 22.75018733486799,
+   "word bigram|seen": 28.233165846277323,
+   "word trigram|seen": 36.665523025964255,
+   "TRELLIS v2, gold trees|unseen": 18.192484742993642,
+   "TRELLIS v2, sentences alone|unseen": 18.063053670635455,
+   "word bigram|unseen": 22.315461092291713,
+   "word trigram|unseen": 29.201074578632326
+  },
+  "examples": [
+   {
+    "prompt": "this lazy big",
+    "completion": "this lazy big park knew the girl behind this tall lazy quick apple",
+    "grammatical": true
+   },
+   {
+    "prompt": "this lazy big",
+    "completion": "this lazy big small dog carried a ancient small cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "this lazy big",
+    "completion": "this lazy big dog found that bird",
+    "grammatical": true
+   },
+   {
+    "prompt": "this lazy big",
+    "completion": "this lazy big ancient bird read that wise lazy dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "this lazy big",
+    "completion": "this lazy big boy found the girl",
+    "grammatical": true
+   },
+   {
+    "prompt": "this lazy big book",
+    "completion": "this lazy big book knew a woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "this lazy big book",
+    "completion": "this lazy big book admired that bird in the ancient red telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "this lazy big book",
+    "completion": "this lazy big book liked a big lazy park",
+    "grammatical": true
+   },
+   {
+    "prompt": "this lazy big book",
+    "completion": "this lazy big book admired this quick wise small boy",
+    "grammatical": true
+   },
+   {
+    "prompt": "this lazy big book",
+    "completion": "this lazy big book saw that bird",
+    "grammatical": true
+   },
+   {
+    "prompt": "that blue blue dog",
+    "completion": "that blue blue dog read a small quick apple under a robot",
+    "grammatical": true
+   },
+   {
+    "prompt": "that blue blue dog",
+    "completion": "that blue blue dog knew this cat near the big small boy",
+    "grammatical": true
+   }
+  ]
+ },
+ {
+  "condition": "term_high",
+  "seed": 42,
+  "prompts": {
+   "seen": 50,
+   "unseen": 59
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 250,
+    "grammatical": 242,
+    "novel": 250,
+    "novel and grammatical": 242
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 250,
+    "grammatical": 248,
+    "novel": 250,
+    "novel and grammatical": 248
+   },
+   "word bigram|seen": {
+    "n": 250,
+    "grammatical": 70,
+    "novel": 250,
+    "novel and grammatical": 70
+   },
+   "word trigram|seen": {
+    "n": 250,
+    "grammatical": 60,
+    "novel": 249,
+    "novel and grammatical": 59
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 295,
+    "grammatical": 287,
+    "novel": 295,
+    "novel and grammatical": 287
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 295,
+    "grammatical": 295,
+    "novel": 295,
+    "novel and grammatical": 295
+   },
+   "word bigram|unseen": {
+    "n": 295,
+    "grammatical": 114,
+    "novel": 295,
+    "novel and grammatical": 114
+   },
+   "word trigram|unseen": {
+    "n": 295,
+    "grammatical": 107,
+    "novel": 295,
+    "novel and grammatical": 107
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 20.88441995716274,
+   "TRELLIS v2, sentences alone|seen": 20.860182966081364,
+   "word bigram|seen": 25.488430894734265,
+   "word trigram|seen": 33.376562335400735,
+   "TRELLIS v2, gold trees|unseen": 17.546380098658563,
+   "TRELLIS v2, sentences alone|unseen": 17.52397406181263,
+   "word bigram|unseen": 21.649527533557457,
+   "word trigram|unseen": 27.873277190820183
+  },
+  "examples": [
+   {
+    "prompt": "a girl chased",
+    "completion": "a girl chased the boy with a red quick bird",
+    "grammatical": true
+   },
+   {
+    "prompt": "a girl chased",
+    "completion": "a girl chased this cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "a girl chased",
+    "completion": "a girl chased the book on this quick lazy ancient man",
+    "grammatical": true
+   },
+   {
+    "prompt": "a girl chased",
+    "completion": "a girl chased that wise ancient woman under that woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "a girl chased",
+    "completion": "a girl chased that girl on a book",
+    "grammatical": true
+   },
+   {
+    "prompt": "a girl chased that",
+    "completion": "a girl chased that robot under that quick tall wise wise dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "a girl chased that",
+    "completion": "a girl chased that blue big quick ancient woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "a girl chased that",
+    "completion": "a girl chased that woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "a girl chased that",
+    "completion": "a girl chased that woman in that bird",
+    "grammatical": true
+   },
+   {
+    "prompt": "a girl chased that",
+    "completion": "a girl chased that man near this telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "that telescope found a",
+    "completion": "that telescope found a lazy quick cat",
+    "grammatical": true
+   },
+   {
+    "prompt": "that telescope found a",
+    "completion": "that telescope found a park in a blue ancient cat",
+    "grammatical": true
+   }
+  ]
+ },
+ {
+  "condition": "term_high",
+  "seed": 100,
+  "prompts": {
+   "seen": 56,
+   "unseen": 58
+  },
+  "tally": {
+   "TRELLIS v2, gold trees|seen": {
+    "n": 280,
+    "grammatical": 271,
+    "novel": 280,
+    "novel and grammatical": 271
+   },
+   "TRELLIS v2, sentences alone|seen": {
+    "n": 280,
+    "grammatical": 274,
+    "novel": 279,
+    "novel and grammatical": 273
+   },
+   "word bigram|seen": {
+    "n": 280,
+    "grammatical": 78,
+    "novel": 280,
+    "novel and grammatical": 78
+   },
+   "word trigram|seen": {
+    "n": 280,
+    "grammatical": 89,
+    "novel": 277,
+    "novel and grammatical": 86
+   },
+   "TRELLIS v2, gold trees|unseen": {
+    "n": 290,
+    "grammatical": 279,
+    "novel": 290,
+    "novel and grammatical": 279
+   },
+   "TRELLIS v2, sentences alone|unseen": {
+    "n": 290,
+    "grammatical": 287,
+    "novel": 290,
+    "novel and grammatical": 287
+   },
+   "word bigram|unseen": {
+    "n": 290,
+    "grammatical": 100,
+    "novel": 290,
+    "novel and grammatical": 100
+   },
+   "word trigram|unseen": {
+    "n": 290,
+    "grammatical": 118,
+    "novel": 290,
+    "novel and grammatical": 118
+   }
+  },
+  "bits": {
+   "TRELLIS v2, gold trees|seen": 22.468534914375862,
+   "TRELLIS v2, sentences alone|seen": 22.455689962736624,
+   "word bigram|seen": 26.933664769110333,
+   "word trigram|seen": 34.91684026066014,
+   "TRELLIS v2, gold trees|unseen": 19.931938754144497,
+   "TRELLIS v2, sentences alone|unseen": 19.920088942501714,
+   "word bigram|unseen": 23.908713230458055,
+   "word trigram|unseen": 30.50729231327747
+  },
+  "examples": [
+   {
+    "prompt": "this dog found the",
+    "completion": "this dog found the robot behind the telescope",
+    "grammatical": true
+   },
+   {
+    "prompt": "this dog found the",
+    "completion": "this dog found the boy",
+    "grammatical": true
+   },
+   {
+    "prompt": "this dog found the",
+    "completion": "this dog found the ancient wise girl near that park",
+    "grammatical": true
+   },
+   {
+    "prompt": "this dog found the",
+    "completion": "this dog found the big big park with a woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "this dog found the",
+    "completion": "this dog found the apple behind that ancient quick lazy dog",
+    "grammatical": true
+   },
+   {
+    "prompt": "this quick wise ancient",
+    "completion": "this quick wise ancient park saw that wise small bird with this bird",
+    "grammatical": true
+   },
+   {
+    "prompt": "this quick wise ancient",
+    "completion": "this quick wise ancient apple found this woman",
+    "grammatical": true
+   },
+   {
+    "prompt": "this quick wise ancient",
+    "completion": "this quick wise ancient ancient dog carried the red blue book",
+    "grammatical": true
+   },
+   {
+    "prompt": "this quick wise ancient",
+    "completion": "this quick wise ancient book admired a bird",
+    "grammatical": true
+   },
+   {
+    "prompt": "this quick wise ancient",
+    "completion": "this quick wise ancient man saw that big wise girl",
+    "grammatical": true
+   },
+   {
+    "prompt": "that bird admired",
+    "completion": "that bird admired the apple",
+    "grammatical": true
+   },
+   {
+    "prompt": "that bird admired",
+    "completion": "that bird admired this man",
+    "grammatical": true
+   }
+  ]
+ }
+]

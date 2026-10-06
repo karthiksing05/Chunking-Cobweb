@@ -158,6 +158,15 @@ The learner measures a grammar by the bits needed to transmit the training data 
 
 The brackets are the learner's own: it chunks a subject with its verb before adding the object, where linguists attach the object to the verb ([section 8](#what-the-search-finds)).
 
+**Prompting** (`prompt.py`, `Trellis2.complete`). Given the beginning of a sentence, the grammar completes it in two steps. First a *scaffolded parse*: the prompt is analysed as the beginning of a sentence, with chunks that finish inside it and a right frontier of *open* chunks that cover its end and go on past it, each with the category of the part it still needs. The scaffold is drawn from the grammar's posterior given the prompt, which needs, for every category and position, the probability that the category derives a string beginning with the rest of the prompt (prefix probabilities, Jelinek & Lafferty 1991; a chunk open at the end of the prompt is open through its left part, whose left part may be open again, so each position takes one small linear solve). Then *completion*: the open chunks' missing parts are generated innermost first, chunk by chunk, each decomposed down to words in the light of the words read so far, until the parse closes. At temperature 1 the completions are drawn exactly from P(sentence | it begins with the prompt) (brute-force tested); below 1 each choice favours its likelier chunks. Completions of *the man chased the* and of *a cat* from the grammar learned from 320 SMALL sentences alone, with the scaffold's open chunks in ⟨ ⟩, finished chunks in [ ], and the prompt's end at |:
+
+```
+⟨[[the man] chased] ⟨⟨the⟩ | cat⟩⟩
+⟨⟨⟨a ⟨cat⟩⟩ | admired⟩ [a cat]⟩
+```
+
+On the paper's corpora a completion can be judged exactly by the target grammar (`run_prompts_synthetic.py`, prompts: the first 1–4 tokens of held-out sentences, five seeds). Prompts that begin no training sentence are completed grammatically 86–100% of the time from sentences alone (LARGE 91%, the others 99–100%), every completion a new sentence, where word bigram and trigram models manage 28–53%; and the grammar codes held-out continuations in fewer bits than either n-gram model in every condition ([section 11](#simple-english-does-the-grammar-generate-coherent-sentences) for English).
+
 ## 8. Learning from sentences alone, by day and by night
 
 Without analyses the learner must find the structure itself. It looks for the analyses and the grammar that transmit the corpus in the fewest bits ([section 6](#6-description-length)), so a chunk type forms only if it pays for its definition.

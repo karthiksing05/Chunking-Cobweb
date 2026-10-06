@@ -118,6 +118,17 @@ class Trellis2:
                 raise RuntimeError("grammar keeps producing over-long derivations")
         return out, rejected
 
+    def complete(self, prompt: Sequence[str], n: int = 1, rng: Optional[np.random.Generator] = None,
+                 temperature: float = 1.0, max_len: int = 30):
+        """Complete the beginning of a sentence: a scaffolded parse of the
+        prompt, drawn from the grammar's posterior given it, whose open chunks
+        are then finished chunk by chunk (``prompt.PromptChart``). Returns
+        ``n`` ``prompt.Completion``s; at temperature 1 they are drawn from
+        P(sentence | it begins with the prompt)."""
+        from .prompt import complete
+        rng = rng if rng is not None else np.random.default_rng(self.seed)
+        return complete(self.grammar, prompt, n, rng, temperature, max_len)
+
 
 class Learner:
     """TRELLIS v2 from experiences alone, by day and by night. ``observe``
@@ -173,3 +184,7 @@ class Learner:
     def generate(self, n: int, rng: Optional[np.random.Generator] = None, **kw):
         self.grammar  # ensure a night has passed
         return self.model.generate(n, rng, **kw)
+
+    def complete(self, prompt, n: int = 1, rng: Optional[np.random.Generator] = None, **kw):
+        self.grammar  # ensure a night has passed
+        return self.model.complete(prompt, n, rng, **kw)

@@ -1,0 +1,460 @@
+{
+ "prompts": 233,
+ "completions per prompt": 5,
+ "rows": [
+  {
+   "model": "TRELLIS v2, temperature 1",
+   "prompts": "seen",
+   "completions": 1055,
+   "of the training length": 0.8739336492890996,
+   "real": 0.6605206073752712,
+   "every triple attested": 0.7982646420824295,
+   "new": 0.36550976138828634,
+   "new and every triple attested": 0.16377440347071584
+  },
+  {
+   "model": "TRELLIS v2, temperature 1",
+   "prompts": "unseen",
+   "completions": 110,
+   "of the training length": 0.8636363636363636,
+   "real": 0.17894736842105263,
+   "every triple attested": 0.4631578947368421,
+   "new": 1.0,
+   "new and every triple attested": 0.4631578947368421
+  },
+  {
+   "model": "TRELLIS v2, temperature 0.5",
+   "prompts": "seen",
+   "completions": 1055,
+   "of the training length": 0.8663507109004739,
+   "real": 0.7166301969365426,
+   "every triple attested": 0.8665207877461707,
+   "new": 0.3041575492341357,
+   "new and every triple attested": 0.17067833698030635
+  },
+  {
+   "model": "TRELLIS v2, temperature 0.5",
+   "prompts": "unseen",
+   "completions": 110,
+   "of the training length": 0.8363636363636363,
+   "real": 0.16304347826086957,
+   "every triple attested": 0.4673913043478261,
+   "new": 1.0,
+   "new and every triple attested": 0.4673913043478261
+  },
+  {
+   "model": "word bigram",
+   "prompts": "seen",
+   "completions": 1055,
+   "of the training length": 0.7080568720379147,
+   "real": 0.5287817938420348,
+   "every triple attested": 0.7951807228915663,
+   "new": 0.499330655957162,
+   "new and every triple attested": 0.29451137884872824
+  },
+  {
+   "model": "word bigram",
+   "prompts": "unseen",
+   "completions": 110,
+   "of the training length": 0.6181818181818182,
+   "real": 0.07352941176470588,
+   "every triple attested": 0.5,
+   "new": 1.0,
+   "new and every triple attested": 0.5
+  },
+  {
+   "model": "word trigram",
+   "prompts": "seen",
+   "completions": 1055,
+   "of the training length": 0.9251184834123223,
+   "real": 0.7602459016393442,
+   "every triple attested": 1.0,
+   "new": 0.2725409836065574,
+   "new and every triple attested": 0.2725409836065574
+  },
+  {
+   "model": "word trigram",
+   "prompts": "unseen",
+   "completions": 110,
+   "of the training length": 0.7545454545454545,
+   "real": 0.3493975903614458,
+   "every triple attested": 0.8554216867469879,
+   "new": 1.0,
+   "new and every triple attested": 0.8554216867469879
+  }
+ ],
+ "examples": [
+  {
+   "group": "seen",
+   "prompt": "she",
+   "analysis": "\u27e8\u27e8she\u27e9 | [did not]\u27e9 \u00b7 [like it]",
+   "log_prob": -4.442102347828727
+  },
+  {
+   "group": "seen",
+   "prompt": "she",
+   "analysis": "\u27e8\u27e8she\u27e9 | asked\u27e9 \u00b7 [lily [did not]]",
+   "log_prob": -11.701185603895567
+  },
+  {
+   "group": "seen",
+   "prompt": "she",
+   "analysis": "\u27e8\u27e8she\u27e9 | [was happy]\u27e9",
+   "log_prob": -2.937750775153094
+  },
+  {
+   "group": "seen",
+   "prompt": "she",
+   "analysis": "\u27e8\u27e8she\u27e9 | [was sad]\u27e9",
+   "log_prob": -2.941127112070907
+  },
+  {
+   "group": "seen",
+   "prompt": "she",
+   "analysis": "\u27e8\u27e8she\u27e9 | [was sad]\u27e9",
+   "log_prob": -2.941127112070907
+  },
+  {
+   "group": "seen",
+   "prompt": "they",
+   "analysis": "\u27e8\u27e8they\u27e9 | [[liked [to play]] together]\u27e9",
+   "log_prob": -3.3221785095381255
+  },
+  {
+   "group": "seen",
+   "prompt": "they",
+   "analysis": "\u27e8\u27e8\u27e8they\u27e9 | were\u27e9 happy\u27e9",
+   "log_prob": -2.078476109062657
+  },
+  {
+   "group": "seen",
+   "prompt": "they",
+   "analysis": "\u27e8\u27e8they\u27e9 | [had fun]\u27e9",
+   "log_prob": -3.5103487439079135
+  },
+  {
+   "group": "seen",
+   "prompt": "they",
+   "analysis": "\u27e8\u27e8\u27e8they\u27e9 | felt\u27e9 [[liked [to play]] together]\u27e9",
+   "log_prob": -10.661225959925932
+  },
+  {
+   "group": "seen",
+   "prompt": "they",
+   "analysis": "\u27e8\u27e8they\u27e9 | played\u27e9 \u00b7 [and [tim happy]]",
+   "log_prob": -11.520385803383506
+  },
+  {
+   "group": "seen",
+   "prompt": "i",
+   "analysis": "\u27e8\u27e8\u27e8i\u27e9 | found\u27e9 it\u27e9",
+   "log_prob": -4.7373909989693646
+  },
+  {
+   "group": "seen",
+   "prompt": "i",
+   "analysis": "\u27e8\u27e8i\u27e9 | can\u27e9 \u00b7 help",
+   "log_prob": -2.4496879187704357
+  },
+  {
+   "group": "seen",
+   "prompt": "i",
+   "analysis": "\u27e8\u27e8\u27e8i\u27e9 | want\u27e9 to\u27e9 \u00b7 [the dog] \u00b7 [not fun]",
+   "log_prob": -16.582399544174606
+  },
+  {
+   "group": "seen",
+   "prompt": "i",
+   "analysis": "\u27e8\u27e8i\u27e9 | can\u27e9 \u00b7 [it was] \u00b7 [so sad]",
+   "log_prob": -12.993276578082884
+  },
+  {
+   "group": "seen",
+   "prompt": "i",
+   "analysis": "\u27e8\u27e8i\u27e9 | like\u27e9 \u00b7 that",
+   "log_prob": -4.659964465610947
+  },
+  {
+   "group": "seen",
+   "prompt": "lily",
+   "analysis": "\u27e8\u27e8lily\u27e9 | [was happy]\u27e9",
+   "log_prob": -2.9268860811292265
+  },
+  {
+   "group": "seen",
+   "prompt": "lily",
+   "analysis": "\u27e8\u27e8lily\u27e9 | [was [so happy]]\u27e9",
+   "log_prob": -2.2083602622186653
+  },
+  {
+   "group": "seen",
+   "prompt": "lily",
+   "analysis": "\u27e8\u27e8lily\u27e9 | [[[and tom] are] friends]\u27e9",
+   "log_prob": -3.133972929904324
+  },
+  {
+   "group": "seen",
+   "prompt": "lily",
+   "analysis": "\u27e8\u27e8lily\u27e9 | [[[and tom] were] happy]\u27e9",
+   "log_prob": -4.044253381193959
+  },
+  {
+   "group": "seen",
+   "prompt": "lily",
+   "analysis": "\u27e8\u27e8lily\u27e9 | [was [very happy]]\u27e9",
+   "log_prob": -1.9742202499216317
+  },
+  {
+   "group": "seen",
+   "prompt": "and",
+   "analysis": "\u27e8\u27e8and\u27e9 | [they did]\u27e9",
+   "log_prob": -1.817521667896501
+  },
+  {
+   "group": "seen",
+   "prompt": "and",
+   "analysis": "\u27e8\u27e8\u27e8and\u27e9 | is\u27e9 happy\u27e9",
+   "log_prob": -3.9011208711711918
+  },
+  {
+   "group": "seen",
+   "prompt": "and",
+   "analysis": "\u27e8\u27e8and\u27e9 | [[they wanted] [to help]]\u27e9",
+   "log_prob": -5.853994805622322
+  },
+  {
+   "group": "seen",
+   "prompt": "and",
+   "analysis": "\u27e8\u27e8and\u27e9 | [the park]\u27e9",
+   "log_prob": -5.716592612198961
+  },
+  {
+   "group": "seen",
+   "prompt": "and",
+   "analysis": "\u27e8\u27e8\u27e8and\u27e9 | like\u27e9 said\u27e9",
+   "log_prob": -10.90665161775095
+  },
+  {
+   "group": "seen",
+   "prompt": "sue",
+   "analysis": "\u27e8\u27e8sue\u27e9 | [was [so happy]]\u27e9",
+   "log_prob": -1.8010638213581385
+  },
+  {
+   "group": "seen",
+   "prompt": "sue",
+   "analysis": "\u27e8\u27e8sue\u27e9 | [was [very sad]]\u27e9",
+   "log_prob": -2.8664636655469438
+  },
+  {
+   "group": "seen",
+   "prompt": "sue",
+   "analysis": "\u27e8\u27e8sue\u27e9 | [was [very happy]]\u27e9",
+   "log_prob": -1.7426941350753924
+  },
+  {
+   "group": "seen",
+   "prompt": "sue",
+   "analysis": "\u27e8\u27e8sue\u27e9 | [was [so happy]]\u27e9",
+   "log_prob": -1.8010638213581385
+  },
+  {
+   "group": "seen",
+   "prompt": "sue",
+   "analysis": "\u27e8\u27e8sue\u27e9 | [was [so happy]]\u27e9",
+   "log_prob": -1.8010638213581385
+  },
+  {
+   "group": "seen",
+   "prompt": "max",
+   "analysis": "\u27e8\u27e8max\u27e9 | [was [very sad]]\u27e9",
+   "log_prob": -3.012326320113118
+  },
+  {
+   "group": "seen",
+   "prompt": "max",
+   "analysis": "\u27e8\u27e8max\u27e9 | [was [so happy]]\u27e9",
+   "log_prob": -2.0592802190050943
+  },
+  {
+   "group": "seen",
+   "prompt": "max",
+   "analysis": "\u27e8\u27e8max\u27e9 | was\u27e9 \u00b7 a \u00b7 [little girl]",
+   "log_prob": -9.511324052878074
+  },
+  {
+   "group": "seen",
+   "prompt": "max",
+   "analysis": "\u27e8\u27e8max\u27e9 | [was [very happy]]\u27e9",
+   "log_prob": -1.8888053419765525
+  },
+  {
+   "group": "seen",
+   "prompt": "max",
+   "analysis": "\u27e8max\u27e9 | \u00b7 [felt sad] \u00b7 too",
+   "log_prob": -8.804348426106657
+  },
+  {
+   "group": "seen",
+   "prompt": "would",
+   "analysis": "\u27e8would\u27e9 | \u00b7 you",
+   "log_prob": -0.4913150650013334
+  },
+  {
+   "group": "seen",
+   "prompt": "would",
+   "analysis": "\u27e8would\u27e9 | \u00b7 you",
+   "log_prob": -0.4913150650013334
+  },
+  {
+   "group": "seen",
+   "prompt": "would",
+   "analysis": "\u27e8would\u27e9 | \u00b7 you",
+   "log_prob": -0.4913150650013334
+  },
+  {
+   "group": "seen",
+   "prompt": "would",
+   "analysis": "\u27e8would\u27e9 | \u00b7 you",
+   "log_prob": -0.4913150650013334
+  },
+  {
+   "group": "seen",
+   "prompt": "would",
+   "analysis": "\u27e8would\u27e9 | \u00b7 you",
+   "log_prob": -0.4913150650013334
+  },
+  {
+   "group": "seen",
+   "prompt": "tim",
+   "analysis": "\u27e8\u27e8tim\u27e9 | [was sad]\u27e9",
+   "log_prob": -2.1983084355303775
+  },
+  {
+   "group": "seen",
+   "prompt": "tim",
+   "analysis": "\u27e8\u27e8tim\u27e9 | [felt sad]\u27e9",
+   "log_prob": -3.089296222729422
+  },
+  {
+   "group": "seen",
+   "prompt": "tim",
+   "analysis": "\u27e8\u27e8tim\u27e9 | [was [very happy]]\u27e9",
+   "log_prob": -1.4345449549124134
+  },
+  {
+   "group": "seen",
+   "prompt": "tim",
+   "analysis": "\u27e8\u27e8tim\u27e9 | is\u27e9 \u00b7 big \u00b7 tree \u00b7 [with her]",
+   "log_prob": -21.76807974639967
+  },
+  {
+   "group": "seen",
+   "prompt": "tim",
+   "analysis": "\u27e8\u27e8tim\u27e9 | [was [very happy]]\u27e9",
+   "log_prob": -1.4345449549124134
+  },
+  {
+   "group": "seen",
+   "prompt": "so",
+   "analysis": "\u27e8so\u27e9 | \u00b7 [[can do] it]",
+   "log_prob": -6.53681659482136
+  },
+  {
+   "group": "seen",
+   "prompt": "so",
+   "analysis": "\u27e8so\u27e9 | \u00b7 [he said]",
+   "log_prob": -4.178241815173559
+  },
+  {
+   "group": "seen",
+   "prompt": "so",
+   "analysis": "\u27e8so\u27e9 | \u00b7 [he did] \u00b7 [played happy]",
+   "log_prob": -13.03956700301902
+  },
+  {
+   "group": "seen",
+   "prompt": "so",
+   "analysis": "\u27e8so\u27e9 | \u00b7 [he did]",
+   "log_prob": -1.9098846813104284
+  },
+  {
+   "group": "seen",
+   "prompt": "so",
+   "analysis": "\u27e8so\u27e9 | \u00b7 [they did]",
+   "log_prob": -1.9699844052162359
+  },
+  {
+   "group": "seen",
+   "prompt": "he",
+   "analysis": "\u27e8\u27e8he\u27e9 | [was [so happy]]\u27e9",
+   "log_prob": -1.835364191859965
+  },
+  {
+   "group": "seen",
+   "prompt": "he",
+   "analysis": "\u27e8\u27e8he\u27e9 | [was [very happy]]\u27e9",
+   "log_prob": -1.4733348493281762
+  },
+  {
+   "group": "seen",
+   "prompt": "he",
+   "analysis": "\u27e8\u27e8he\u27e9 | was\u27e9 \u00b7 [so sad] \u00b7 too \u00b7 ben \u00b7 said",
+   "log_prob": -13.864636928403675
+  },
+  {
+   "group": "seen",
+   "prompt": "he",
+   "analysis": "\u27e8\u27e8he\u27e9 | [did not]\u27e9 \u00b7 [like it]",
+   "log_prob": -4.804210534390339
+  },
+  {
+   "group": "seen",
+   "prompt": "he",
+   "analysis": "\u27e8\u27e8he\u27e9 | [was happy]\u27e9",
+   "log_prob": -2.850894867427176
+  },
+  {
+   "group": "seen",
+   "prompt": "but",
+   "analysis": "\u27e8but\u27e9 | \u00b7 [[it was] not]",
+   "log_prob": -4.347011846010314
+  },
+  {
+   "group": "seen",
+   "prompt": "but",
+   "analysis": "\u27e8but\u27e9 | \u00b7 [he [wanted [to play]]]",
+   "log_prob": -6.136961770526778
+  },
+  {
+   "group": "seen",
+   "prompt": "but",
+   "analysis": "\u27e8but\u27e9 | \u00b7 [[they are] it] \u00b7 too \u00b7 little \u00b7 you",
+   "log_prob": -16.59771810397541
+  },
+  {
+   "group": "seen",
+   "prompt": "but",
+   "analysis": "\u27e8but\u27e9 | \u00b7 [sam found]",
+   "log_prob": -9.933241620326546
+  },
+  {
+   "group": "seen",
+   "prompt": "but",
+   "analysis": "\u27e8but\u27e9 | \u00b7 [she [did not]]",
+   "log_prob": -4.296940623151951
+  }
+ ],
+ "held-out continuation bits": {
+  "TRELLIS v2, seen prompts": 5.578135484047071,
+  "TRELLIS v2, unseen prompts": 8.355250664630477,
+  "word bigram, seen prompts": 6.959972889627348,
+  "word bigram, unseen prompts": 8.158143397405572,
+  "word trigram, seen prompts": 6.354066239366939,
+  "word trigram, unseen prompts": 10.261054694949202
+ },
+ "prompt counts": {
+  "seen": 211,
+  "unseen": 22
+ }
+}

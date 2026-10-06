@@ -84,6 +84,26 @@ The first round has blank chunk attributes.
   - **Posterior sampling**, optionally tempered.
 - **Confident spans.** Spans with μ > 0.5 never cross, so they can be learned as confirmed chunks.
 
+### Prompting (`prompt.py`)
+
+- **Prefix probabilities.** For a prompt w₀…w_{m−1}, π(i, A) = P(A derives a string beginning with w_i…w_{m−1}) is computed right to left: the last token itself (i = m − 1); a left part that finishes inside the prompt, [i, k), with the right part open at k; or the left part open at i again, the left-corner closure, π(i,·) = (I − R_i)⁻¹ b_i with R_i[A, B] = Σ_c U[A, c](1 − p_k[c]) L[c, B] in the read's context at i. One tree's root covers the prompt (and may end with it); a forest's piece that holds the prompt's last token starts at k after none, one or more finished pieces (the chart's forest recursion). Their sum is P(a sentence begins with the prompt): it equals P(the sentence is the prompt) plus the sum over tokens w of P(it begins with the prompt and w), which the tests check with no truncation.
+- **The scaffold** is drawn top down from the same terms: for each open chunk, its rule class and whether its left part is finished (then drawn from the inside chart) or open (then its right part's category is drawn and left pending).
+- **Completion** expands the pending parts innermost first, with the grammar's sampler, the read's context seeded by the prompt; a forest then draws its remaining pieces by its layout. At temperature 1 completions are drawn from P(sentence | prompt) (tests: frequencies against P(s) / P(prompt), with forests and one or two words of context); a temperature below 1 sharpens each choice. Each completion carries its analysis, its open spans and ln P(sentence | prompt).
+
+**Results** (2026-10-06):
+
+| Paper's corpora, unseen prompts (`results/prompts_synthetic`) | TRELLIS v2, gold trees | TRELLIS v2, sentences alone | word bigram | word trigram |
+|---|---|---|---|---|
+| SMALL (8 prompts × 5 seeds) | 100% | 100% | 43% | 53% |
+| MED (92) | 99.8% | 99.8% | 30% | 30% |
+| LARGE (255) | 86.3% | 90.7% | 41% | 43% |
+| TERM_MED (92) | 98.0% | 100% | 29% | 33% |
+| TERM_HIGH (285) | 97.3% | 99.4% | 37% | 39% |
+
+(Grammatical completions of prompts that begin no training sentence, all of them new sentences; the first 1–4 tokens of held-out sentences, 5 completions each, seeds 13, 17, 7, 42, 100. With prompts that do begin training sentences: 90–100% grammatical, 58–99% new and grammatical, against 22–37% for the n-grams. LARGE is completed more often grammatically than it generates unprompted, 86% at best: the scaffold fixes the structure the prompt begins.)
+
+On simple English (`run_prompts.py`, `results/prompts`; the first 1–3 words of held-out sentences, the 5,000-sentence grammar) the grammar codes the held-out sentences' actual continuations more compactly than the n-gram models when the prompt begins some training sentence (5.6 bits against the trigram's 6.4) and as compactly as a bigram when it begins none (8.4, bigram 8.2, trigram 10.3). Its completions of seen prompts have every word triple attested 80% of the time (one-tree completions 96%, forests 65%), but those of unseen prompts only 46% (trigram 86%). There, prompts the grammar reads as a finished piece are continued by pieces chained only by the words before them (*i have · one · friend*, *and i want very happy*); the triple measure also rejects good new English (*she played ball*).
+
 ## How the representation got here (evidence)
 
 All figures are for the MED or LARGE grammar at 320 training sentences, seed 13 unless stated. "Commission" is the share of generated sentences the target grammar rejects.
