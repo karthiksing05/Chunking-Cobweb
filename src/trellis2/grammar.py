@@ -35,7 +35,7 @@ import numpy as np
 from scipy.special import gammaln
 
 from .cobweb import CobwebNode, CobwebTree
-from .mdl import backoff_code, dm_code, elias_delta_bits, ml_row_nats, split_bits  # noqa: F401  (dm_code is re-exported)
+from .mdl import backoff_coder, dm_code, elias_delta_bits, ml_row_nats, split_bits  # noqa: F401  (dm_code is re-exported)
 from .memory import BOS, Memory
 
 LN2 = float(np.log(2.0))
@@ -507,27 +507,47 @@ def _elements(mem: Memory, leaves: Sequence[CobwebNode], rindex: TreeIndex,
 
 
 def _compact(nodes_of_elements: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-    uniq, inv = np.unique(nodes_of_elements, return_inverse=True)
-    return uniq, inv.astype(np.int64)
+    """(the nodes used, in increasing order; each element's index among them)."""
+    if nodes_of_elements.size == 0:
+        return nodes_of_elements.astype(np.int64), nodes_of_elements.astype(np.int64)
+    used = np.zeros(int(nodes_of_elements.max()) + 1, dtype=bool)
+    used[nodes_of_elements] = True
+    return np.flatnonzero(used), (np.cumsum(used) - 1)[nodes_of_elements]
 
 
 def _plain_pcfg_code(el: _Elements, V: int, alpha: float, mem: Memory
                      ) -> Callable[[np.ndarray], float]:
     """Code length of the derivations under a plain PCFG over the candidate
-    symbols, with the domain's code of its top level."""
-    prim, comp = el.prim, ~el.prim
-    cl, cr = el.left[comp], el.right[comp]
+    symbols, with the domain's code of its top level.
+
+    Under any cut, an element's symbol depends only on its representation
+    leaf, so elements with the same leaf, token or parts' leaves, and relation
+    are coded alike: the code is computed over these records, each weighted
+    by its elements (the same counts, so the same code)."""
+    lp = el.leafpos
+    prim_e = el.prim
+    rows = np.stack([lp, np.where(prim_e, el.tok, -1), np.where(prim_e, -1, lp[el.left]),
+                     np.where(prim_e, -1, lp[el.right]), np.where(prim_e, 0, el.rel)], axis=1)
+    rows, record = np.unique(rows, axis=0, return_inverse=True)
+    record = record.reshape(-1)
+    w = np.bincount(record, weights=el.w, minlength=len(rows))
+    leaf, tok, cl, cr, rel = rows.T
+    prim = tok >= 0
+    comp = ~prim
+    cl, cr, rel = cl[comp], cr[comp], rel[comp]
 
     def cost(leaf_to_node: np.ndarray) -> float:
-        _, s = _compact(leaf_to_node[el.leafpos])
+        _, s = _compact(leaf_to_node[leaf])
         K = int(s.max()) + 1
+        symbol_of_leaf = np.empty(len(leaf_to_node), dtype=np.int64)
+        symbol_of_leaf[leaf] = s
         key = np.empty_like(s)
-        key[prim] = el.tok[prim]
+        key[prim] = tok[prim]
         if el.n_rel == 1:
-            key[comp] = V + s[cl] * K + s[cr]
+            key[comp] = V + symbol_of_leaf[cl] * K + symbol_of_leaf[cr]
         else:
-            key[comp] = V + (s[cl] * K + s[cr]) * el.n_rel + el.rel[comp]
-        return mem.top_level_nats(s, K, alpha) + dm_code(s, key, el.w, V + K * K * el.n_rel, alpha)
+            key[comp] = V + (symbol_of_leaf[cl] * K + symbol_of_leaf[cr]) * el.n_rel + rel
+        return mem.top_level_nats(s[record], K, alpha) + dm_code(s, key, w, V + K * K * el.n_rel, alpha)
     return cost
 
 
@@ -536,23 +556,37 @@ def _factored_code(el: _Elements, s: np.ndarray, K: int, V: int, alpha: float,
     """Code length of the derivations under the factored grammar (start term
     omitted: it does not depend on the composition cut). With a context
     ``weight``, each rule choice is coded in the light of its element's
-    context."""
-    prim, comp = el.prim, ~el.prim
-    sl, sr = s[el.left[comp]], s[el.right[comp]]
+    context.
+
+    As in the plain code, the tables are counted over records of the
+    elements coded alike (same symbol, composition leaf and parts); rule
+    choices in the light of a context are coded element by element, in
+    learning order."""
+    prim_e = el.prim
+    rows = np.stack([s, cleafpos, np.where(prim_e, el.tok, -1), np.where(prim_e, -1, s[el.left]),
+                     np.where(prim_e, -1, s[el.right]), np.where(prim_e, 0, el.rel)], axis=1)
+    rows, record = np.unique(rows, axis=0, return_inverse=True)
+    record = record.reshape(-1)
+    w = np.bincount(record, weights=el.w, minlength=len(rows))
+    rs, leaf, tok, sl, sr, rel = rows.T
+    prim = tok >= 0
+    comp = ~prim
     kind = comp.astype(np.int64)
+    tok, sl, sr, rel = tok[prim], sl[comp], sr[comp], rel[comp]
+    in_context = None if weight is None else backoff_coder(s, el.ctx, el.w)
 
     def cost(leaf_to_node: np.ndarray) -> float:
-        _, c = _compact(leaf_to_node[cleafpos])
+        _, c = _compact(leaf_to_node[leaf])
         M = int(c.max()) + 1
-        rules = (dm_code(s, c, el.w, M, alpha) if weight is None
-                 else backoff_code(s, el.ctx, c, el.w, M, alpha, weight))
+        rules = (dm_code(rs, c, w, M, alpha) if in_context is None
+                 else in_context(c[record], M, alpha, weight))
         nats = (rules
-                + dm_code(c, kind, el.w, 2, alpha)
-                + dm_code(c[prim], el.tok[prim], el.w[prim], V, alpha)
-                + dm_code(c[comp], sl, el.w[comp], K, alpha)
-                + dm_code(c[comp], sr, el.w[comp], K, alpha))
+                + dm_code(c, kind, w, 2, alpha)
+                + dm_code(c[prim], tok, w[prim], V, alpha)
+                + dm_code(c[comp], sl, w[comp], K, alpha)
+                + dm_code(c[comp], sr, w[comp], K, alpha))
         if el.n_rel > 1:
-            nats += dm_code(c[comp], el.rel[comp], el.w[comp], el.n_rel, alpha)
+            nats += dm_code(c[comp], rel, w[comp], el.n_rel, alpha)
         return nats
     return cost
 

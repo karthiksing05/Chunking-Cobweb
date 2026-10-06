@@ -307,12 +307,20 @@ class Memory:
     # A sentence is one tree, or a forest of two or more pieces when the
     # grammar cannot derive it whole; roots and pieces have rows of their own.
     # ------------------------------------------------------------------ #
-    def _top_level(self) -> Tuple[np.ndarray, np.ndarray]:
-        """(the root of an experience analysed as one tree, a piece of a
-        forest) for every element."""
-        root = np.array(self.is_root, dtype=bool)
-        alone = (np.array(self.top_left) < 0) & (np.array(self.top_right) < 0)
-        return root & alone, root & ~alone
+    def _top_level(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """(the elements that are the root of an experience analysed as one
+        tree, those that are a piece of a forest, every element's weight).
+        The cut searches ask for it at every step, so it is kept until an
+        element is added."""
+        n = len(self.is_root)
+        kept = self.__dict__.get("_top_level_kept")
+        if kept is None or kept[0] != n:
+            root = np.array(self.is_root, dtype=bool)
+            alone = (np.array(self.top_left) < 0) & (np.array(self.top_right) < 0)
+            kept = (n, np.flatnonzero(root & alone), np.flatnonzero(root & ~alone),
+                    np.array(self.weight, dtype=float))
+            self._top_level_kept = kept
+        return kept[1:]
 
     def _layout_counts(self) -> Tuple[np.ndarray, np.ndarray]:
         """(one tree, a forest) per experience, and (stop, go on) after each
@@ -331,10 +339,9 @@ class Memory:
         """Code (nats) of the top-level elements' symbols ``s`` (one per
         element, K of them): the part of the top level that depends on the
         categories."""
-        whole, piece = self._top_level()
-        w = np.array(self.weight, dtype=float)
-        return (dm_code(np.zeros(int(whole.sum()), dtype=np.int64), s[whole], w[whole], K, alpha)
-                + dm_code(np.zeros(int(piece.sum()), dtype=np.int64), s[piece], w[piece], K, alpha))
+        whole, piece, w = self._top_level()
+        return (dm_code(np.zeros(len(whole), dtype=np.int64), s[whole], w[whole], K, alpha)
+                + dm_code(np.zeros(len(piece), dtype=np.int64), s[piece], w[piece], K, alpha))
 
     def layout_nats(self, alpha: float) -> float:
         """Code (nats) of the layout that does not depend on the categories:
@@ -345,8 +352,7 @@ class Memory:
     def top_level_tables(self, s: np.ndarray, K: int, alpha: float):
         """The grammar's top-level fields, and the count tables behind them
         (for the model/data split)."""
-        whole, piece = self._top_level()
-        w = np.array(self.weight, dtype=float)
+        whole, piece, w = self._top_level()
         n_start = np.bincount(s[whole], weights=w[whole], minlength=K)
         n_piece = np.bincount(s[piece], weights=w[piece], minlength=K)
         n_mode, n_stop = self._layout_counts()

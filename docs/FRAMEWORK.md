@@ -545,7 +545,7 @@ cd cobweb-private && cmake -S . -B build && cmake --build build --target cobweb_
 Every test and experiment (times on a 12-core laptop):
 
 ```
-python -m pytest tests/trellis2 -q                                          # 50 tests, seconds
+python -m pytest tests/trellis2 -q                                          # 51 tests, seconds
 python experiments/v2/run_synthetic.py --out experiments/v2/results/main    # supervised curves, ~6 min
 python experiments/v2/plot_learning_curves.py experiments/v2/results/main
 python experiments/v2/run_unsupervised.py --seeds 13,17                     # ~10 min
@@ -571,7 +571,7 @@ The paper's corpora are read from `../trellis_v1/data` (the v1 snapshot), with `
 - **Sentence-level structure without supervision.** On the paper's corpora the search builds complete analyses. On characters (as sequences) it stops at forests of local chunks although the gold structures code shorter: a search problem, from categories that cannot see a component's slot. On real-text tags it stops at forests because no description we know makes sentence structure pay at this scale ([section 11](#what-the-new-domains-show)). On simple English about a third of sentences stay forests, and a forest's pieces are generated independently. Describing a piece by what it is (the sentence as its parent, an option of `Memory`) lets the night join most of them (90% of 5,000 sentences whole, against 64%), but the grammar then codes the sentences longer and generates less coherent ones: as on the treebank, the objective prefers the forests.
 - **A small grammar on real data.** With about ten categories the grammar makes strong independence assumptions; coding each rule choice in the light of the tag before it brings it level with a tag bigram (from tags alone) or below (from gold trees), but not further.
 - **Counting and chunks compete on a board.** Once the read counts material, castling and fianchettos no longer pay as chunks at 4,000 positions (the fianchetto returns at 8,000): where pieces stand given how many of each are placed is most of what a position's code can use.
-- **Scale.** Each night runs three full consolidations. With the compiled Cobweb a night on 320 synthetic sentences takes 6–85 seconds (about half the time before it); before it, a night took about an hour for 1,900 treebank sentences or 2,000 characters. The search, the grammar read-out and the charts are still Python.
+- **Scale.** Each night runs three full consolidations. With the compiled Cobweb a night on 320 synthetic sentences takes 6–85 seconds (about half the time before it); before it, a night took about an hour for 1,900 treebank sentences or 2,000 characters. Consolidation now codes records of elements that every cut treats alike, and a night's independent searches and consolidations can run in parallel processes (`workers`), both with identical results: the 5,000-sentence English night takes 20 minutes on twelve cores instead of 12 hours. The search, the grammar read-out and the charts are still Python.
 - **Nights repeat the batch search.** The search can only merge categories, so every night may start over from word classes. Split moves (refining a category together with the chunk categories built on it) would let nights continue from the stored analyses.
 - **Linguists' trees.** Description length identifies the language, not its conventional binarization; bracket agreement with gold trees is moderate.
 

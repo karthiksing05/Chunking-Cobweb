@@ -32,11 +32,16 @@ the full code decides.
 The stored analyses are then written in the new grammar's categories, which
 the next day perceives with and the next night starts from. Sleeping once
 after observing everything is batch learning.
+
+The searches of step 1 are independent of each other, and so are the
+consolidations of steps 2–3; with ``workers`` > 1 they run in parallel
+processes, with the same result (every Cobweb tree has its own seed).
 """
 from __future__ import annotations
 
 import time
-from typing import Dict, List, Optional, Sequence, Tuple
+from concurrent.futures import ProcessPoolExecutor
+from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
 from .chart import Chart
 from .data import Tree
@@ -52,13 +57,14 @@ class UnsupervisedLearner(Learner):
 
     def __init__(self, beam: int = 4, patience: int = 3, levels: int = 12,
                  consolidations: int = 3, reanalysis_steps: int = 5, alpha: float = 0.001,
-                 seed: int = 0, **trellis_kwargs):
+                 seed: int = 0, workers: int = 1, **trellis_kwargs):
         super().__init__(seed=seed, alpha=alpha, **trellis_kwargs)
         self.beam = beam
         self.consolidations = consolidations
         self.patience = patience
         self.levels = levels
         self.reanalysis_steps = reanalysis_steps
+        self.workers = workers
         self.trees: List[Tree] = []
         self.nights = 0
 
@@ -99,11 +105,9 @@ class UnsupervisedLearner(Learner):
             starts.append(("perceived analyses", self.analyses))
         flat = [[(("w", path[-1][w]), w) for w in s] for s in self.experiences]
         log("flat", "start", code_bits(flat, n_tokens, self.alpha))
-        results = []
-        for name, start in starts:
-            analyses, bits = chunk_and_merge(start, n_tokens, self.alpha,
-                                             beam=self.beam, patience=self.patience)
-            results.append((bits, name, analyses))
+        searched = self._map(_search, [(start, n_tokens, self.alpha, self.beam, self.patience)
+                                       for _, start in starts])
+        results = [(bits, name, analyses) for (name, _), (analyses, bits) in zip(starts, searched)]
         search_seconds = time.time() - t0
         # The plain code guides the search, but the night minimizes the full
         # code: each of the best few distinct search results is consolidated
@@ -116,13 +120,20 @@ class UnsupervisedLearner(Learner):
                 candidates.append(r)
             if len(candidates) == self.consolidations:
                 break
+        if self.workers > 1:
+            worker = self._for_worker()
+            outcomes = self._map(_consolidated, [(worker, [to_tree(a) for a in analyses])
+                                                 for _, _, analyses in candidates])
+        else:                                # one model at a time
+            outcomes = (self._consolidate([to_tree(a) for a in analyses]) for _, _, analyses in candidates)
         best = None
-        for bits_plain, name, analyses in candidates:
-            outcome = self._consolidate([to_tree(a) for a in analyses])
+        for outcome, (bits_plain, name, _) in zip(outcomes, candidates):
             # Equal full codes (up to rounding): keep the shorter plain code.
             if best is None or outcome[1] < best[1] - 1e-6:
                 best = outcome + (name, bits_plain)
         model, bits, trees, steps, name, bits_plain = best
+        if model is None:                    # consolidated in another process
+            model = self.fit(trees)
         log("structure", f"chunk and merge from {name}", bits_plain, search_seconds)
         log("concepts", "consolidate", steps[0])
         for b in steps[1:]:
@@ -148,6 +159,23 @@ class UnsupervisedLearner(Learner):
             trees, model, bits = new, m2, b2
             steps.append(bits)
         return model, bits, trees, steps
+
+    def _map(self, fn: Callable, jobs: list) -> list:
+        """``fn`` over the jobs, in order; in parallel processes if
+        ``workers`` > 1."""
+        if self.workers <= 1 or len(jobs) <= 1:
+            return [fn(job) for job in jobs]
+        with ProcessPoolExecutor(max_workers=min(self.workers, len(jobs))) as pool:
+            return list(pool.map(fn, jobs))
+
+    def _for_worker(self) -> "UnsupervisedLearner":
+        """What a consolidation needs of the learner, without the current
+        model (whose Cobweb trees do not cross processes)."""
+        worker = object.__new__(type(self))
+        worker.__dict__.update(self.__dict__)
+        worker.model, worker.analyses, worker.trees, worker.history = None, [], [], []
+        worker.workers = 1
+        return worker
 
     def _fit(self, trees: Sequence[Tree]) -> Tuple[Trellis2, float]:
         """Consolidate, starting from the analyses' own categories (the
@@ -178,3 +206,17 @@ class UnsupervisedLearner(Learner):
     def log_prob(self, tokens: Sequence[str]) -> float:
         """ln P(sentence) under the grammar, summed over its analyses."""
         return Chart(self.grammar, tokens).log_prob
+
+
+def _search(job):
+    """One structure search of the night (a process's job)."""
+    start, n_tokens, alpha, beam, patience = job
+    return chunk_and_merge(start, n_tokens, alpha, beam=beam, patience=patience)
+
+
+def _consolidated(job):
+    """One consolidation of the night (a process's job): its code, analyses
+    and steps; the model is re-fitted by the caller if it wins."""
+    learner, trees = job
+    _, bits, trees, steps = learner._consolidate(trees)
+    return None, bits, trees, steps

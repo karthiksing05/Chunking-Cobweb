@@ -3,7 +3,7 @@
 Status: first implementation, October 2026, on branch `inside-outside`.
 
 - Code: `src/trellis2/`
-- Tests: `tests/trellis2/` (50, including brute-force checks of the parser over whole trees and forests, exactness checks of the search, the compiled Cobweb against its Python reference, the chess domain's star and its counted read, the relational characters' inside pass, and, in every domain, that the grammar draws experiences as often as its code says)
+- Tests: `tests/trellis2/` (51, including brute-force checks of the parser over whole trees and forests, exactness checks of the search, the compiled Cobweb against its Python reference, the chess domain's star and its counted read, the relational characters' inside pass, that a night run in parallel learns the same grammar, and, in every domain, that the grammar draws experiences as often as its code says)
 - Experiments: `experiments/v2/`
 - Background: [the literature behind v2](#background-the-literature-behind-v2), condensed from the October 2026 review (the full report and notes are in the git history, commit `fbe61901`)
 - **The framework explained end to end, with figures: [`FRAMEWORK.md`](FRAMEWORK.md)**
@@ -407,7 +407,7 @@ The search's analyses matter: consolidated from fixed tree shapes, which re-anal
 
 For the first time the grammar describes held-out English more compactly than the n-gram models, and its own sentences are real more often than a trigram's, though fewer of them are new (15%, against 33% before and 24% for the trigram; new and real 4.0%, against 4.6% before). Choosing a forest's pieces in the light of the word before them as well (each piece's category, and whether another follows) changes nothing (all samples real 64.5% → 63.0%, every triple attested 75.2% both): each piece's rule choices already see that word. On the Penn Treebank sample (WSJ10 tags, 434 training sentences) the context is chosen too: from tags alone, bracket omission 55.3% → 48.3%, base-phrase omission 33.1% → 26.2%, held-out 30.1 → 27.2 bits per sentence (the tag bigram's 27.2); from binarized gold trees, omission 19.1% → 16.0% and held-out 30.9 → 26.6 bits, below the tag bigram. On the paper's synthetic corpora, 320 sentences do not pay for the context (it is chosen in one run of 30 at 320 sentences, mostly at 10–40), so their results are unchanged; forced on, it would halve LARGE's generation commission (14.2% → 7.6%, novelty unchanged) at a longer code (26.0 → 28.0 training bits per sentence). Characters and chess have no such context (their reads are a tree from the top, and the board's counts at the top level).
 
-**With twice the sentences** (5,000 learned, the same 500 held out; `results/stories`; with the read's context, a night of 12 hours run alongside another):
+**With twice the sentences** (5,000 learned, the same 500 held out; `results/stories`; with the read's context, a night of 12 hours run alongside another; 20 minutes with the faster consolidation and twelve processes, with identical results):
 
 | TinyStories, 3–5 words over 100 words | 2,500 sentences | 5,000 sentences | Word bigram (5,000) | Word trigram (5,000) | 5,000 before the read's context |
 |---|---|---|---|---|---|
@@ -513,6 +513,8 @@ Folding a recurring top-level pair directly into an existing category (a chunk m
 - Word classes: exact deltas, about 300× faster (identical merge paths).
 - Search: incremental moves, about 5× faster on WSJ20 (identical result).
 - Cobweb: each node caches its total sum of squares, about 10% faster with identical hierarchies.
+- Consolidation (2026-10-05): the cut searches and model merging code records instead of elements (elements with the same representation leaf, token or parts, and relation are coded alike under every cut; 15,877 elements are 3,748 records for 2,500 sentences), count small tables without sorting, and keep what does not change during a search (the top level's elements, the context code's group counts). Identical codes and grammars in every domain (to the last bit; checked on English, chess, characters and the synthetic corpora); one consolidation of the 5,000 TinyStories analyses takes 126 seconds instead of 1,477.
+- Nights in parallel (`UnsupervisedLearner(workers=...)`, `run_stories.py --workers`): a night's searches (one per word-class start) and its consolidations (one per candidate) are independent, and run in parallel processes with the same result, since every Cobweb tree has its own seed. A 1,000-sentence night: 232 seconds with one process, 88 with twelve; the 5,000-sentence night of `results/stories` 20 minutes with twelve (12 hours before both changes), reproducing its results exactly.
 - **Compiled Cobweb.** `cobweb_cu` (cobweb-private, branch `karthik-experimental`) reproduces the pure-Python reference (now `tests/trellis2/reference_cobweb.py`) bit for bit: a Python-compatible Mersenne Twister for the tie-breaking, CPython 3.12's compensated `sum()` where the reference sums (two operator scores tied to the last bit otherwise broke differently), insertion-ordered counts, and no fused multiply-adds. Hierarchies are identical on all six corpora and tree building is 10–20× faster. All 120 numbers of the batch results table reproduce exactly, and a batch run takes 2.2× less time (LARGE: 152 s → 60 s); the rest is now the search, the grammar read-out and the charts. Per-concept code lengths for the evidence cut are computed in the tree (`concept_codes`).
 
 ## Mapping to the paper's postulates
@@ -675,7 +677,7 @@ python experiments/v2/run_characters.py                    # needs data/ids/ids.
 python experiments/v2/run_characters.py --modes relational --train 6000 --out experiments/v2/results/characters_6000
 python experiments/v2/run_chess.py --train 8000 --test 560 --out experiments/v2/results/chess_8000
 python experiments/v2/run_stories.py --vocab 100 --max-len 5 --train 2500 --out experiments/v2/results/stories_2500
-python experiments/v2/run_stories.py --vocab 100 --max-len 5 --train 5000 --out experiments/v2/results/stories   # hours
+python experiments/v2/run_stories.py --vocab 100 --max-len 5 --train 5000 --out experiments/v2/results/stories   # ~20 min on 12 cores
 python experiments/v2/run_chess.py --extract && python experiments/v2/run_chess.py    # needs the Lichess file in data/chess
 python experiments/v2/run_chess.py --no-context --out experiments/v2/results/chess_plain
 python experiments/v2/run_chess_play.py --extract && python experiments/v2/run_chess_play.py

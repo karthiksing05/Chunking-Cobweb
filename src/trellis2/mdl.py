@@ -38,10 +38,19 @@ def dm_code(groups: np.ndarray, keys: np.ndarray, weights: np.ndarray,
         return 0.0
     stride = np.int64(alphabet)
     gk = groups.astype(np.int64) * stride + keys.astype(np.int64)
-    uniq, inv = np.unique(gk, return_inverse=True)
-    cnt = np.bincount(inv, weights=weights)
-    _, ginv = np.unique(uniq // stride, return_inverse=True)
-    totals = np.bincount(ginv, weights=cnt)
+    n_groups = int(groups.max()) + 1
+    if n_groups * alphabet <= 16 * gk.size + 4096:
+        # A small table: count every cell directly instead of sorting (the
+        # same cells, counts and sums, in the same order).
+        uniq = np.flatnonzero(np.bincount(gk, minlength=n_groups * alphabet))
+        cnt = np.bincount(gk, weights=weights, minlength=n_groups * alphabet)[uniq]
+        g = uniq // stride
+        totals = np.bincount(g, weights=cnt, minlength=n_groups)[np.bincount(g, minlength=n_groups) > 0]
+    else:
+        uniq, inv = np.unique(gk, return_inverse=True)
+        cnt = np.bincount(inv, weights=weights)
+        _, ginv = np.unique(uniq // stride, return_inverse=True)
+        totals = np.bincount(ginv, weights=cnt)
     a_tot = alphabet * alpha
     return float(np.sum(gammaln(totals + a_tot) - gammaln(a_tot))
                  - np.sum(gammaln(cnt + alpha) - gammaln(alpha)))
@@ -72,15 +81,27 @@ def backoff_code(groups: np.ndarray, contexts: np.ndarray, keys: np.ndarray, wei
     predicted by the group alone."""
     if groups.size == 0:
         return 0.0
-    g, x, k = groups.astype(np.int64), contexts.astype(np.int64), keys.astype(np.int64)
-    span_x, span_k = np.int64(x.max() + 1), np.int64(alphabet)
-    n_gk = _before(g * span_k + k, weights)
+    return backoff_coder(groups, contexts, weights)(keys, alphabet, alpha, beta)
+
+
+def backoff_coder(groups: np.ndarray, contexts: np.ndarray, weights: np.ndarray):
+    """``backoff_code`` for fixed groups and contexts, as a function of
+    (keys, alphabet, alpha, beta): what depends only on the groups and
+    contexts is counted once (a cut search codes many keyings of the same
+    events)."""
+    g, x = groups.astype(np.int64), contexts.astype(np.int64)
+    gx = g * np.int64(x.max() + 1) + x
     n_g = _before(g, weights)
-    n_gxk = _before((g * span_x + x) * span_k + k, weights)
-    n_gx = _before(g * span_x + x, weights)
-    p_g = (n_gk + alpha) / (n_g + alphabet * alpha)
-    p = (n_gxk + beta * p_g) / (n_gx + beta)
-    return float(-np.sum(weights * np.log(p)))
+    n_gx = _before(gx, weights)
+
+    def code(keys: np.ndarray, alphabet: int, alpha: float, beta: float) -> float:
+        k, span_k = keys.astype(np.int64), np.int64(alphabet)
+        n_gk = _before(g * span_k + k, weights)
+        n_gxk = _before(gx * span_k + k, weights)
+        p_g = (n_gk + alpha) / (n_g + alphabet * alpha)
+        p = (n_gxk + beta * p_g) / (n_gx + beta)
+        return float(-np.sum(weights * np.log(p)))
+    return code
 
 
 def rows_nats(n: np.ndarray, alpha: float) -> float:

@@ -87,6 +87,29 @@ def test_learning_by_day_and_by_night():
     assert np.mean([cfg.recognizes(t) for t, _ in samples]) > 0.95
 
 
+@needs_data
+def test_parallel_nights_learn_the_same_grammar():
+    """A night's searches and consolidations are independent of each other,
+    so running them in parallel processes changes nothing (every Cobweb tree
+    has its own seed), on a first night and on one that starts from what the
+    day perceived."""
+    from trellis2.unsupervised import UnsupervisedLearner
+    train, _ = v1_split(load_corpus(SMALL), seed=13)
+    grammars = []
+    for workers in (1, 3):
+        learner = UnsupervisedLearner(seed=13, workers=workers)
+        for ex in train[:20]:
+            learner.observe(ex.tokens)
+        learner.sleep()
+        for ex in train[20:40]:
+            learner.observe(ex.tokens)
+        grammars.append(learner.sleep())
+    a, b = grammars
+    assert a.info["total bits"] == b.info["total bits"]
+    for table in ("S", "S_piece", "U", "pk", "Lt", "Rt", "E"):
+        assert np.array_equal(getattr(a, table), getattr(b, table))
+
+
 def test_a_forest_piece_is_described_like_a_whole_trees_part():
     from trellis2.memory import Memory, ROOT, SENTENCE
     mem = Memory(sentence_parent=True)
