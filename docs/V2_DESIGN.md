@@ -209,9 +209,9 @@ Generation commission (incremental / batch):
 | large | 31.4% / 31.4% | 26.7% / 28.5% | 18.8% / 20.1% | 8.5% / 9.0% |
 | term_low | 25.9% / 25.9% | 1.6% / 3.1% | **0.2% / 5.2%** | 0.4% / 0.4% |
 | term_med | 59.6% / 59.6% | 38.6% / 45.0% | 5.8% / 8.0% | 0.4% / 1.7% |
-| term_high | 69.2% / 69.2% | **31.9% / 76.4%** | **5.7% / 23.8%** | 0.7% / 0.9% |
+| term_high | 69.0% / 69.0% | **31.9% / 76.4%** | **5.7% / 23.8%** | 0.7% / 0.9% |
 
-(Rerun 2026-10-05 with the read's context of a rule choice available: description length takes it in a few of the small runs, which moves some of the 10–40-sentence cells; at 320 nothing changes.)
+(Rerun 2026-10-05 with the read's context of a rule choice available: description length takes it in a few of the small runs, which moves some of the 10–40-sentence cells; at 320 nothing changes. Rerun 2026-10-06 with two words available: only TERM_HIGH at 40 sentences moves, 69.2% → 69.0%, and the whole experiment takes 5 minutes instead of an hour.)
 
 - **Early nights nearly coincide.** Up to 40 sentences a restart from word classes almost always gives the shortest code (the stored analyses win one of the 20 nights at 20–40 sentences, LARGE at 20 sentences with seed 17), so the two learners are identical there but for that night.
 - **Then the stored analyses pay.** From 80 sentences on they win 16 of 30 nights (SMALL excluded, where both give the same grammar). At 80 and 160 sentences the incremental learner's training code is shorter or equal in 9 of 10 cells, and its commission is lower in 9, by 5–45 points in 4. Both are equivalent at 320.
