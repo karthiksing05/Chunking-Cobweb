@@ -444,6 +444,33 @@ Nor would a softer re-analysis or a joining move change this. Under either night
 
 **With twice the sentences** (5,000, full nights; the run without the option is `results/stories`). More data does make joins pay under the sentence as a parent: 89.5% of training sentences are analysed as one tree (45% at 2,500 sentences; 64% without the option). But it is still the worse grammar. It codes the training sentences 1.2% longer (71,311 against 70,480 bits) and held-out sentences slightly longer (11.95 against 11.87 bits per sentence), and its own sentences are less coherent (67.0% real within the training length against 87.4%; every word triple attested 79.5% against 91.6%), though more often new (37% against 16%). To derive more sentences whole it lumps what the grammar without the option mostly keeps apart: one category holds *very, so, not, a, to*, another *happy, sad, help, dog, fun, girl, boy, play*, and the predicate phrases take *a dog* and *to help* with *very happy*. All samples, forests included, are about as coherent either way (63.9% against 68.5% real, 75.8% against 78.3% with every triple attested). So with twice the data the objective still prefers the description that leaves forests, and the option stays off. Between these two grammars, charging each sentence its total probability over all its analyses (as bits-back coding does) instead of its single best analysis gives the same verdict: the held-out code is that total probability, and it prefers the grammar that leaves forests (11.87 against 11.95 bits per sentence at 5,000 sentences; 12.8 against 13.2 at 2,500).
 
+**The larger language, with four times the sentences** (2026-10-06; `--train 10000`, `results/stories_250_10000`; a night of 3.1 hours on twelve cores):
+
+| 250 words, sentences of 3–8 words | 2,500 sentences | 10,000 sentences | 10,000, sentence as parent | Word bigram (10,000) | Word trigram (10,000) |
+|---|---|---|---|---|---|
+| held-out bits per sentence | 26.1 | 23.5 | **23.46** | 23.9 | 24.2 |
+| training bits | 79,326 | **272,373** | 275,464 | – | – |
+| categories / chunk types | 34 / 45 | 69 / 112 | 73 / 138 | – | – |
+| top-level chunks per training sentence | 3.71 | 3.22 | 3.24 | – | – |
+| training sentences analysed as one tree | 10.2% | 0.3% | 0.0% | – | – |
+| own sentences of 3–8 words | 100% | 13.9% | 3.4% | – | – |
+| own sentences real, among those | **80.6%** | 12.2% | 35.3% (of 34) | – | – |
+| all samples real, among those of 3–8 words | 15.1% | 19.8% | 19.6% | 25.3% | 50.7% |
+| all samples with every word triple in TinyStories, among those | 32.5% | 42.7% | 46.3% | 53.0% | 100% |
+
+With four times the sentences the grammar describes held-out sentences better than either n-gram model, and its chunks grow (*something unexpected happened*, *wanted to*, *play with*, *an idea*), but sentence structure disappears: 0.3% of training sentences are analysed as one tree, and one category holds essentially every top-level chunk (32,218 elements, against 32,217 top-level chunks: *i, fun, happy, friends, sad, tim, very happy, it*). The roots of the few whole sentences share that category, so the grammar's own sentences are pieces (*can*, *[it is]*, *[tim was]*; mean length 1.9 words). All samples, strings of pieces, are a little more coherent than at 2,500 sentences but less than a word bigram's. The sentence as a parent does not change this: with no whole sentences for the pieces to resemble, every piece again records the same parent and siblings of its kind, and one category holds them all (32,417 elements). In this richer language more data makes the forests win more clearly. Pieces chained word by word by the read's context code the corpus more cheaply than any sentence structure the search finds, and the grammar becomes a chunk bigram: the best of the three models at describing held-out sentences, a poor generator of whole ones.
+
+**The read's context across a forest's pieces** (2026-10-06; `Memory(fresh_pieces=True)`, `run_stories.py --fresh-pieces`). The context of a rule choice is the word before the element, so the first element of a forest's piece is read in the light of the previous piece's last word: pieces that no rule joins are still chained word by word, which is much of what a join would capture. With the option, each piece is read afresh, its first word in the light of BOS as a sentence's is, so a forest's pieces share nothing and only a join can carry what links them (the chart keeps inside vectors of its own for the spans that start a piece; brute-force tested, with the sampler). Refits of the same analyses (one consolidation each, the standard description) show what it does to the trade-off between forests and whole trees:
+
+| 100 words, 3–5 words: analyses of | Whole trees | Context across pieces | Pieces read afresh |
+|---|---|---|---|
+| the 5,000-sentence night (`results/stories`) | 64% | **70,480** bits | 80,186 |
+| the 5,000-sentence night with the sentence as parent | 90% | 71,109 | **75,033** |
+| the 2,500-sentence night (`results/stories_2500`) | 59% | 39,089 | **43,939** |
+| the 2,500-sentence night with the sentence as parent | 45% | **37,995** | 44,331 |
+
+With the context across pieces the codes prefer the analyses with fewer whole trees at 5,000 sentences; with pieces read afresh they prefer the ones with more, at both sizes. Every code is longer with pieces read afresh (the forests lose the context they used), so description length alone would keep the context across pieces: the option is a decision about what a forest is (pieces understood apart), not one the code makes.
+
 ### Chess: parts joined by typed relations
 
 Code: `chess.py`, `experiments/v2/run_chess.py`. Middlegame positions from the Lichess database of January 2013 (CC0, under `data/chess`): games in which both players are rated at least 1800 and that last at least 40 plies, the position after ply 30. That gives 8,560 positions; 4,000 are learned and 500 held out (seed 13).

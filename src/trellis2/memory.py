@@ -94,7 +94,7 @@ class Memory:
     def __init__(self, context_width: int = 1, spine_depth: int = 2,
                  granularities: int = 2, composition_ref: bool = False,
                  sentence_bags: bool = False, previous_word: bool = True,
-                 sentence_parent: bool = False):
+                 sentence_parent: bool = False, fresh_pieces: bool = False):
         self.context_width = context_width
         self.spine_depth = spine_depth
         self.granularities = granularities
@@ -108,6 +108,10 @@ class Memory:
         # Whether the sentence itself is the parent recorded above a whole
         # tree's top parts and above a forest's pieces alike (``instance``).
         self.sentence_parent = sentence_parent
+        # Whether each piece of a forest is read afresh: an element at a
+        # piece's start is read in the light of BOS, not of the previous
+        # piece's last word (``contexts``).
+        self.fresh_pieces = fresh_pieces
         self.attrs = representation_attrs(context_width, spine_depth, granularities,
                                           composition_ref, sentence_bags)
         self.kind: List[int] = []
@@ -192,7 +196,11 @@ class Memory:
         span (BOS at the start). None: every choice is made the same way."""
         if not self.previous_word:
             return None
-        return [self.experiences[s][i - 1] if i > 0 else BOS
+        fresh = set()
+        if self.fresh_pieces:
+            fresh = {(self.experience_of[e], self.span[e][0]) for e in range(len(self.span))
+                     if self.is_root[e] and (self.top_left[e] >= 0 or self.top_right[e] >= 0)}
+        return [self.experiences[s][i - 1] if i > 0 and (s, i) not in fresh else BOS
                 for s, (i, _) in zip(self.experience_of, self.span)]
 
     def vocabulary(self) -> List[str]:

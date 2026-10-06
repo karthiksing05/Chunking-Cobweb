@@ -120,7 +120,7 @@ class UnsupervisedLearner(Learner):
                 candidates.append(r)
             if len(candidates) == self.consolidations:
                 break
-        if self.workers > 1:
+        if self.workers > 1 and len(candidates) > 1:
             worker = self._for_worker()
             outcomes = self._map(_consolidated, [(worker, [to_tree(a) for a in analyses])
                                                  for _, _, analyses in candidates])

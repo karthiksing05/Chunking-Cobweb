@@ -70,12 +70,44 @@ class Chart:
                 lam[i, j] = g.Lt @ a[i, j]
                 rho[i, j] = g.Rt @ a[i, j]
 
+        # A forest's pieces may be read afresh (``Grammar.fresh_pieces``): a
+        # piece's first word in the light of BOS, as a sentence's is. The
+        # spans that start a piece then have inside vectors of their own, b
+        # (their left parts start there too; their right parts are ordinary
+        # spans); otherwise b is a.
+        self.fresh = bool(g.fresh_pieces) and n > 1
+        self.b, self.lb, self.lamb = a, la, lam
+        if self.fresh:
+            b, lb, lamb = self.b, self.lb, self.lamb = a.copy(), la.copy(), lam.copy()
+            U0 = self.U0 = g.rules(BOS)
+            for i in range(1, n):
+                b[i], lb[i], lamb[i] = 0.0, -np.inf, 0.0
+                v = g.lexical(int(ids[i]), BOS)
+                s = v.sum()
+                if s > 0:
+                    b[i, i + 1] = v / s
+                    lb[i, i + 1] = np.log(s)
+                    lamb[i, i + 1] = g.Lt @ b[i, i + 1]
+                for j in range(i + 2, n + 1):
+                    scale = lb[i, i + 1:j] + la[i + 1:j, j]
+                    top = scale.max()
+                    if not np.isfinite(top):
+                        continue
+                    pair = lamb[i, i + 1:j] * rho[i + 1:j, j]
+                    v = U0 @ (g.qk * (np.exp(scale - top) @ pair))
+                    s = v.sum()
+                    if s <= 0:
+                        continue
+                    b[i, j] = v / s
+                    lb[i, j] = top + np.log(s)
+                    lamb[i, j] = g.Lt @ b[i, j]
+
         # Top level: the sentence is one tree (log_whole, root symbol from S),
         # or a forest (log_forest) of two or more pieces whose symbols come
         # from S_piece; after its second piece a forest stops (log_stop) or
         # continues (log_cont). top[i, j] = log sum_A S_piece[A] inside(i, j, A).
         with np.errstate(divide="ignore"):
-            self.top = la + np.log(np.einsum("ijk,k->ij", a, g.S_piece))
+            self.top = self.lb + np.log(np.einsum("ijk,k->ij", self.b, g.S_piece))
             whole = la[0, n] + np.log(a[0, n] @ g.S) if n else -np.inf
         self.whole = g.log_whole + whole
         F1 = self.F1 = np.full(n + 1, -np.inf)   # one piece covering [0, j)
@@ -129,32 +161,47 @@ class Chart:
             self._mu = mu
             return mu
         p_whole, pieces = self._top_posteriors()
-        weighted = a * g.S_piece[None, None, :]
+        b = self.b
+        # Read afresh, a piece's mass (and its left parts') is kept apart, in
+        # mu_b, and goes down through b.
+        mu_b = np.zeros_like(a) if self.fresh else mu
+        weighted = b * g.S_piece[None, None, :]
         norm = weighted.sum(axis=2, keepdims=True)
         with np.errstate(divide="ignore", invalid="ignore"):
-            mu += np.where(norm > 0, weighted / norm, 0.0) * pieces[:, :, None]
+            mu_b += np.where(norm > 0, weighted / norm, 0.0) * pieces[:, :, None]
         root = a[0, n] * g.S
         if root.sum() > 0:
             mu[0, n] += p_whole * root / root.sum()
         for length in range(n, 1, -1):
             for i in range(n - length + 1):
                 j = i + length
-                if mu[i, j].sum() <= 0:
-                    continue
-                with np.errstate(divide="ignore", invalid="ignore"):
-                    w = np.where(a[i, j] > 0, mu[i, j] / a[i, j], 0.0)
-                nu = (w @ self.U[i]) * g.qk                             # (M,)
-                lam_l = self.lam[i, i + 1:j]                            # (splits, M)
-                rho_r = self.rho[i + 1:j, j]
-                rel = np.exp(la[i, i + 1:j] + la[i + 1:j, j] - la[i, j])
-                post = nu[None, :] * lam_l * rho_r * rel[:, None]       # P(split k, rule c)
-                with np.errstate(divide="ignore", invalid="ignore"):
-                    left = np.where(lam_l > 0, post / lam_l, 0.0)
-                    right = np.where(rho_r > 0, post / rho_r, 0.0)
-                mu[i, i + 1:j] += a[i, i + 1:j] * (left @ g.Lt)
-                mu[i + 1:j, j] += a[i + 1:j, j] * (right @ g.Rt)
+                if mu[i, j].sum() > 0:
+                    self._down(mu, mu, mu, a, la, self.lam, self.U[i], i, j)
+                if self.fresh and mu_b[i, j].sum() > 0:
+                    self._down(mu_b, mu_b, mu, b, self.lb, self.lamb, self.U0, i, j)
+        if self.fresh:
+            mu = mu + mu_b
         self._mu = mu
         return mu
+
+    def _down(self, mu, mu_left, mu_right, a, la, lam, U, i, j):
+        """Pass span (i, j)'s posterior mass in ``mu`` (inside vectors ``a``,
+        log scales ``la``, left projections ``lam``, rule choices ``U``) down
+        to its parts: the left part's into ``mu_left``, the right part's
+        (an ordinary span) into ``mu_right``."""
+        g = self.g
+        with np.errstate(divide="ignore", invalid="ignore"):
+            w = np.where(a[i, j] > 0, mu[i, j] / a[i, j], 0.0)
+        nu = (w @ U) * g.qk                                     # (M,)
+        lam_l = lam[i, i + 1:j]                                 # (splits, M)
+        rho_r = self.rho[i + 1:j, j]
+        rel = np.exp(la[i, i + 1:j] + self.la[i + 1:j, j] - la[i, j])
+        post = nu[None, :] * lam_l * rho_r * rel[:, None]       # P(split k, rule c)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            left = np.where(lam_l > 0, post / lam_l, 0.0)
+            right = np.where(rho_r > 0, post / rho_r, 0.0)
+        mu_left[i, i + 1:j] += a[i, i + 1:j] * (left @ g.Lt)
+        mu_right[i + 1:j, j] += self.a[i + 1:j, j] * (right @ g.Rt)
 
     def span_posteriors(self) -> np.ndarray:
         """P(span (i, j) is a chunk | sentence), summed over categories."""
@@ -216,24 +263,41 @@ class Chart:
         K = g.K
         best = np.full((n + 1, n + 1, K), -np.inf)
         back: Dict[Tuple[int, int], np.ndarray] = {}
+
+        def fill(i, j, rule, left):
+            """The best analysis of (i, j) per symbol, its left part from
+            ``left`` (best, or best_b at a piece's start), its right part an
+            ordinary span."""
+            scores = np.full((j - i - 1, K, K, K), -np.inf)
+            for kk, k in enumerate(range(i + 1, j)):
+                pair = left[i, k][:, None] + best[k, j][None, :]           # (B, C)
+                scores[kk] = rule + pair[None, :, :]
+            flat = scores.transpose(1, 0, 2, 3).reshape(K, -1)             # A x (k, B, C)
+            arg = np.argmax(flat, axis=1)
+            return flat[np.arange(K), arg], arg
+
         for i in range(n):
             best[i, i + 1] = lex[i]
         for length in range(2, n + 1):
             for i in range(n - length + 1):
                 j = i + length
-                scores = np.full((j - i - 1, K, K, K), -np.inf)
-                for kk, k in enumerate(range(i + 1, j)):
-                    pair = best[i, k][:, None] + best[k, j][None, :]       # (B, C)
-                    scores[kk] = log_rule[i] + pair[None, :, :]
-                flat = scores.transpose(1, 0, 2, 3).reshape(K, -1)         # A x (k, B, C)
-                arg = np.argmax(flat, axis=1)
-                best[i, j] = flat[np.arange(K), arg]
-                back[(i, j)] = arg
+                best[i, j], back[(i, j)] = fill(i, j, log_rule[i], best)
+        # Pieces read afresh (see ``__init__``) have tables of their own.
+        best_b, back_b = best, back
+        if self.fresh:
+            best_b, back_b = best.copy(), dict(back)
+            with np.errstate(divide="ignore"):
+                rule0 = g.log_binary(BOS)
+                lex0 = np.log(self.U0 @ (g.pk[:, None] * g.E[:, ids]))     # (K, n)
+            for i in range(1, n):
+                best_b[i, i + 1] = lex0[:, i]
+                for j in range(i + 2, n + 1):
+                    best_b[i, j], back_b[(i, j)] = fill(i, j, rule0, best_b)
         # The best whole tree, against the best forest of two or more pieces.
         A0 = int(np.argmax(log_start + best[0, n]))
         whole = g.log_whole + log_start[A0] + best[0, n, A0]
         with np.errstate(divide="ignore"):
-            chunk = np.log(g.S_piece)[None, None, :] + best                 # (i, j, A)
+            chunk = np.log(g.S_piece)[None, None, :] + best_b               # (i, j, A)
         piece_A, piece_v = chunk.argmax(axis=2), chunk.max(axis=2)
         one = np.full(n + 1, -np.inf)       # one piece covering [0, j)
         many = np.full(n + 1, -np.inf)      # two or more pieces covering [0, j)
@@ -244,31 +308,32 @@ class Chart:
                 for after_one, base in ((True, one[i]), (False, g.log_cont + many[i])):
                     if base + piece_v[i, j] > many[j]:
                         many[j], prev[j] = base + piece_v[i, j], (i, after_one)
+        # Stack entries: (i, j, symbol, read as the start of a piece).
         if whole >= many[n] + g.log_stop:
-            roots, stack = [(0, n)], [(0, n, A0)]
+            roots, stack = [(0, n)], [(0, n, A0, False)]
         else:
             roots, stack, j = [], [], n
             while True:
                 i, after_one = prev[j]
                 roots.append((i, j))
-                stack.append((i, j, int(piece_A[i, j])))
+                stack.append((i, j, int(piece_A[i, j]), True))
                 if after_one:
                     roots.append((0, i))
-                    stack.append((0, i, int(piece_A[0, i])))
+                    stack.append((0, i, int(piece_A[0, i]), True))
                     break
                 j = i
             roots.reverse()
         split: Dict[Span, int] = {}
         label: Dict[Span, int] = {}
         while stack:
-            i, j, A = stack.pop()
+            i, j, A, fresh = stack.pop()
             label[(i, j)] = A
             if j - i < 2:
                 continue
-            kk, B, C = np.unravel_index(back[(i, j)][A], (j - i - 1, K, K))
+            kk, B, C = np.unravel_index((back_b if fresh else back)[(i, j)][A], (j - i - 1, K, K))
             k = i + 1 + int(kk)
             split[(i, j)] = k
-            stack.extend([(i, k, int(B)), (k, j, int(C))])
+            stack.extend([(i, k, int(B), fresh), (k, j, int(C), False)])
         return Tree(n, split, label, roots)
 
     def confident_spans(self, threshold: float = 0.5):
@@ -300,26 +365,30 @@ class Chart:
                 ends.append(i + 1 + pick(self.top[i, i + 1:] + self.G[i + 1:]))
             roots, stack = [], []
             for i, j in zip([0] + ends[:-1], ends):
-                w = g.S_piece * a[i, j]
+                w = g.S_piece * self.b[i, j]
                 roots.append((i, j))
                 stack.append((i, j, int(rng.choice(g.K, p=w / w.sum()))))
         split: Dict[Span, int] = {}
         label: Dict[Span, int] = {}
+        starts = {i for i, _ in roots} if len(roots) > 1 else set()   # pieces' starts
         while stack:
             i, j, A = stack.pop()
             label[(i, j)] = A
             if j - i < 2:
                 continue
-            lam_l = self.lam[i, i + 1:j]
+            # A span at a piece's start is read as the piece is (b, lb, lamb).
+            ai, lai, lami, U = ((self.b, self.lb, self.lamb, self.U0) if self.fresh and i in starts
+                                else (a, la, self.lam, self.U[i]))
+            lam_l = lami[i, i + 1:j]
             rho_r = self.rho[i + 1:j, j]
-            rel = np.exp(la[i, i + 1:j] + la[i + 1:j, j] - la[i, j])
-            weight = (self.U[i][A] * g.qk)[None, :] * lam_l * rho_r * rel[:, None]
+            rel = np.exp(lai[i, i + 1:j] + la[i + 1:j, j] - lai[i, j])
+            weight = (U[A] * g.qk)[None, :] * lam_l * rho_r * rel[:, None]
             flat = weight.ravel()
             pick = int(rng.choice(flat.size, p=flat / flat.sum()))
             kk, c = divmod(pick, g.M)
             k = i + 1 + kk
             split[(i, j)] = k
-            pb = g.Lt[c] * a[i, k]
+            pb = g.Lt[c] * ai[i, k]
             pc = g.Rt[c] * a[k, j]
             stack.append((k, j, int(rng.choice(g.K, p=pc / pc.sum()))))
             stack.append((i, k, int(rng.choice(g.K, p=pb / pb.sum()))))

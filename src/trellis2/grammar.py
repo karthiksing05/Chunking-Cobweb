@@ -298,6 +298,10 @@ class Grammar:
     # uses U.
     contexts: Optional[List[Hashable]] = None
     Uc: Optional[np.ndarray] = None
+    # Whether each piece of a forest is read afresh, its first word in the
+    # light of the sentence start (BOS) rather than of the previous piece's
+    # last word: the pieces of a partial analysis then share nothing.
+    fresh_pieces: bool = False
 
     def __post_init__(self):
         self.tok_index = {t: i for i, t in enumerate(self.vocab)}
@@ -333,7 +337,7 @@ class Grammar:
                     Lt=self.Lt ** p, Rt=self.Rt ** p, E=self.E ** p, alpha=self.alpha,
                     p_stop=self.p_stop, p_whole=self.p_whole, S_piece=self.S_piece ** p,
                     info=dict(self.info), contexts=self.contexts,
-                    Uc=None if self.Uc is None else self.Uc ** p)
+                    Uc=None if self.Uc is None else self.Uc ** p, fresh_pieces=self.fresh_pieces)
         g.qk = self.qk ** p
         g.log_stop, g.log_cont = self.log_stop * p, self.log_cont * p
         g.log_whole, g.log_forest = self.log_whole * p, self.log_forest * p
@@ -376,11 +380,13 @@ class Grammar:
         roots = []
         for top in tops:
             stack = [(top, -1, 0)]  # (symbol, parent node idx, side)
+            # A piece read afresh starts from BOS, as a sentence does.
+            start = len(tokens) if self.fresh_pieces else 0
             while stack:
                 sym, parent, side = stack.pop()
                 # Leaves come out left to right, so the word before this
                 # element is the last one emitted.
-                c = int(rng.choice(self.M, p=self.rules(tokens[-1] if tokens else BOS)[sym]))
+                c = int(rng.choice(self.M, p=self.rules(tokens[-1] if len(tokens) > start else BOS)[sym]))
                 idx = len(nodes)
                 if parent < 0:
                     roots.append(idx)
@@ -807,4 +813,5 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
         contexts=None if el.ctx is None else el.contexts,
         Uc=(None if el.ctx is None else
             (n_Uc + weight * normalize(n_U)[:, None, :]) / (n_Uc.sum(axis=2, keepdims=True) + weight)),
+        fresh_pieces=el.ctx is not None and getattr(mem, "fresh_pieces", False),
     )

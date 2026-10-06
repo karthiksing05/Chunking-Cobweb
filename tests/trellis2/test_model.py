@@ -123,3 +123,17 @@ def test_a_forest_piece_is_described_like_a_whole_trees_part():
     assert spine(part)["a1.0"] == SENTENCE and spine(part)["a2.0"] == ROOT
     root = next(e for e in range(len(mem)) if mem.describe(e) == "tim was very happy")
     assert spine(root)["a1.0"] == ROOT
+
+
+def test_a_piece_read_afresh_starts_from_bos():
+    from trellis2.memory import BOS, Memory
+    forest = Tree(4, {(0, 2): 1, (2, 4): 3}, {}, [(0, 2), (2, 4)])
+    whole = Tree(4, {(0, 4): 2, (0, 2): 1, (2, 4): 3}, {}, [(0, 4)])
+    for fresh in (False, True):
+        mem = Memory(fresh_pieces=fresh)
+        mem.add(["it", "was", "so", "fun"], forest)
+        mem.add(["tim", "was", "so", "happy"], whole)
+        ctx = dict(zip(((mem.experience_of[e], mem.span[e]) for e in range(len(mem))), mem.contexts()))
+        assert ctx[(0, (2, 4))] == ctx[(0, (2, 3))] == (BOS if fresh else "was")   # the second piece
+        assert ctx[(0, (3, 4))] == "so" and ctx[(1, (2, 4))] == "was"              # inside it; a whole tree
+
