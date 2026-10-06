@@ -51,7 +51,7 @@ from typing import Dict, Hashable, Iterable, Iterator, List, Optional, Sequence,
 import numpy as np
 
 from .grammar import Grammar, inside_of_analysis
-from .mdl import rows_nats
+from .mdl import dm_code, rows_nats
 from .memory import Memory, chunk_attrs
 from .model import Learner
 
@@ -219,7 +219,8 @@ class BoardMemory(Memory):
         self.anchor: List[Square] = []
         self.anchor_kind: List[int] = []     # the kind of piece on the anchor square
         self.members: List[frozenset] = []
-        self._read = self._answer_counts = None
+        self._read = self._answer_counts = self._roots = None
+        self._answer_nats: Dict[float, float] = {}
 
     # A position is recorded with its analysis (its top-level elements),
     # drawn from the grammar square by square, and coded the same way.
@@ -228,7 +229,8 @@ class BoardMemory(Memory):
         position, tops = experience, analysis
         pid = len(self.experiences)
         self.experiences.append(position)
-        self._read = self._answer_counts = None
+        self._read = self._answer_counts = self._roots = None
+        self._answer_nats = {}
 
         def record(node: Node) -> int:
             lab, body = node
@@ -337,16 +339,27 @@ class BoardMemory(Memory):
     def _symbols_at(self, s: np.ndarray, K: int) -> np.ndarray:
         """(kind and square, symbol): the symbols of top-level elements, by
         the kind and the square of their anchor."""
-        root = np.flatnonzero(self.is_root)
-        where = np.array([self.anchor[e][1] * 8 + self.anchor[e][0] for e in root], dtype=np.int64)
+        if self._roots is None:        # kept until an element is added
+            root = np.flatnonzero(self.is_root)
+            where = np.array([self.anchor[e][1] * 8 + self.anchor[e][0] for e in root], dtype=np.int64)
+            self._roots = (root, np.array(self.anchor_kind)[root] * 64 + where, np.array(self.weight)[root])
+        root, row, w = self._roots
         n = np.zeros((len(KINDS) * 64, K))
-        np.add.at(n, (np.array(self.anchor_kind)[root] * 64 + where, s[root]), np.array(self.weight)[root])
+        np.add.at(n, (row, s[root]), w)
         return n
 
     def top_level_nats(self, s: np.ndarray, K: int, alpha: float) -> float:
         """The read's answers, then each top-level element's symbol given the
-        kind and the square of its anchor."""
-        return rows_nats(self._answers().reshape(-1, 2), alpha) + rows_nats(self._symbols_at(s, K), alpha)
+        kind and the square of its anchor. The answers do not depend on the
+        symbols, so their code is kept until an element is added."""
+        if alpha not in self._answer_nats:
+            self._answer_nats[alpha] = rows_nats(self._answers().reshape(-1, 2), alpha)
+        if self._roots is None:
+            self._symbols_at(s, K)
+        root, row, w = self._roots
+        # One row per kind and square, coded over its seen symbols only (the
+        # table is sparse: most symbols never anchor a top-level element).
+        return self._answer_nats[alpha] + dm_code(row, s[root], w, K, alpha)
 
     def layout_nats(self, alpha: float) -> float:
         """A board's read codes every square, so nothing is left to code."""
