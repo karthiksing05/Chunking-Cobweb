@@ -471,6 +471,19 @@ With four times the sentences the grammar describes held-out sentences better th
 
 With the context across pieces the codes prefer the analyses with fewer whole trees at 5,000 sentences; with pieces read afresh they prefer the ones with more, at both sizes. Every code is longer with pieces read afresh (the forests lose the context they used), so description length alone would keep the context across pieces: the option is a decision about what a forest is (pieces understood apart), not one the code makes.
 
+Full nights with pieces read afresh confirm that the option is not a fix (100 words, sentences of 3–5 words):
+
+| | 2,500 sentences | 2,500, pieces read afresh | 5,000 sentences | 5,000, pieces read afresh |
+|---|---|---|---|---|
+| training sentences analysed as one tree | 59% | 60% | 64% | 73% |
+| held-out bits per sentence | **12.8** | 14.6 | **11.9** | 13.7 |
+| own sentences real (3–5 words) / every triple attested | **89.7% / 92.7%** | 84.7% / 89.3% | **87.4% / 91.6%** | 79.9% / 85.6% |
+| all samples real (3–5 words) / every triple attested | **62.9% / 73.3%** | 58.1% / 65.2% | **68.5% / 78.3%** | 63.3% / 69.8% |
+
+More sentences are derived whole, but every code is longer and generation less coherent: the context that chains a forest's pieces is worth more to coherence than the joins it replaces. The option stays off.
+
+**Why one category holds every piece** (2026-10-06; refits of the 2,500-sentence analyses). A piece has no parent, so its category does only one job, choosing the piece's expansion, which the rule choice already does: splitting the pieces into categories adds rows without shortening the code. Neither the description nor model merging is the cause alone. Without merging, every piece is still in one category; with everything a piece does not know (its parent, its parent's surroundings, its neighbours) written as uniform bags over the categories, so that no two pieces are alike by what they do not know, the pieces split exactly in two, first pieces and last ones, by position and not by kind (with merging, one category again; 39,871 against 39,089 training bits). Pieces fall into categories by kind only where their categories have other work to do, as when the sentence is their parent and some of them resemble a whole tree's top parts (above).
+
 ### Chess: parts joined by typed relations
 
 Code: `chess.py`, `experiments/v2/run_chess.py`. Middlegame positions from the Lichess database of January 2013 (CC0, under `data/chess`): games in which both players are rated at least 1800 and that last at least 40 plies, the position after ply 30. That gives 8,560 positions; 4,000 are learned and 500 held out (seed 13).
