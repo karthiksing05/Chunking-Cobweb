@@ -6,5 +6,5 @@ Penn Treebank, NLTK sample: trained on 434 sentences of up to 10 tags, tested on
 | left-branching | 82.9% | 87.6% | 75.0% | – | – | – |
 | unigram tag model | – | – | – | 33.4 | – | – |
 | bigram tag model | – | – | – | 27.2 | – | – |
-| TRELLIS v2, tags only (unsupervised) | 48.3% | 62.5% | 26.2% | 27.2 | 6.5 | 4.0 |
-| TRELLIS v2, binarized gold trees (supervised) | 16.0% | 39.1% | 15.7% | 26.6 | 9.0 | 24.5 |
+| TRELLIS v2, tags only (unsupervised) | 48.0% | 62.3% | 24.7% | 26.6 | 6.5 | 3.5 |
+| TRELLIS v2, binarized gold trees (supervised) | 16.9% | 39.7% | 15.7% | 26.0 | 9.0 | 24.5 |

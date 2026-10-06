@@ -94,7 +94,7 @@ class Memory:
     def __init__(self, context_width: int = 1, spine_depth: int = 2,
                  granularities: int = 2, composition_ref: bool = False,
                  sentence_bags: bool = False, previous_word: bool = True,
-                 sentence_parent: bool = False, fresh_pieces: bool = False, read_words: int = 1):
+                 sentence_parent: bool = False, fresh_pieces: bool = False, read_words: int = 2):
         self.context_width = context_width
         self.spine_depth = spine_depth
         self.granularities = granularities

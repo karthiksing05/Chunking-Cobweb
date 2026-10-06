@@ -130,7 +130,7 @@ def test_a_piece_read_afresh_starts_from_bos():
     forest = Tree(4, {(0, 2): 1, (2, 4): 3}, {}, [(0, 2), (2, 4)])
     whole = Tree(4, {(0, 4): 2, (0, 2): 1, (2, 4): 3}, {}, [(0, 4)])
     for fresh in (False, True):
-        mem = Memory(fresh_pieces=fresh)
+        mem = Memory(fresh_pieces=fresh, read_words=1)
         mem.add(["it", "was", "so", "fun"], forest)
         mem.add(["tim", "was", "so", "happy"], whole)
         ctx = dict(zip(((mem.experience_of[e], mem.span[e]) for e in range(len(mem))), mem.contexts()))

@@ -32,7 +32,7 @@ class Trellis2:
 
     def __init__(self, context_width: int = 1, spine_depth: int = 2, granularities: int = 2,
                  composition_ref: bool = False, sentence_bags: bool = False, previous_word: bool = True,
-                 sentence_parent: bool = False, fresh_pieces: bool = False, read_words: int = 1,
+                 sentence_parent: bool = False, fresh_pieces: bool = False, read_words: int = 2,
                  alpha: float = 0.001, seed: int = 0,
                  search: bool = True, merge: bool = True, max_rounds: int = 6,
                  memory: Optional[Memory] = None):

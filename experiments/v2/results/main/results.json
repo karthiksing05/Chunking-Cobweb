@@ -9,15 +9,15 @@
    "parse_commission": 0.0,
    "exact_match": 1.0,
    "gen_commission": 0.722,
-   "novelty": 0.99,
-   "grammatical_novel": 0.268,
+   "novelty": 0.976,
+   "grammatical_novel": 0.254,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 25.42071446637376,
-   "bits_per_test_sentence": 17.707606264722685,
+   "bits_per_train_sentence": 25.582765630124207,
+   "bits_per_test_sentence": 17.88492402914124,
    "symbols": 6,
    "rules": 7,
    "rounds": 3,
-   "seconds": 0.11844825744628906
+   "seconds": 0.14957475662231445
   },
   {
    "condition": "small",
@@ -30,12 +30,12 @@
    "novelty": 0.96,
    "grammatical_novel": 0.952,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 19.841541415592364,
+   "bits_per_train_sentence": 19.926563401499415,
    "bits_per_test_sentence": 9.630672373148432,
    "symbols": 6,
    "rules": 14,
    "rounds": 3,
-   "seconds": 0.1589679718017578
+   "seconds": 0.1550428867340088
   },
   {
    "condition": "small",
@@ -48,12 +48,12 @@
    "novelty": 0.92,
    "grammatical_novel": 0.916,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 14.656890450681527,
+   "bits_per_train_sentence": 14.699401443635054,
    "bits_per_test_sentence": 9.773362893401151,
    "symbols": 6,
    "rules": 14,
    "rounds": 4,
-   "seconds": 0.24806809425354004
+   "seconds": 0.2441551685333252
   },
   {
    "condition": "small",
@@ -66,12 +66,12 @@
    "novelty": 0.848,
    "grammatical_novel": 0.846,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 12.112438059312723,
+   "bits_per_train_sentence": 12.133693555789486,
    "bits_per_test_sentence": 9.616036072100217,
    "symbols": 6,
    "rules": 14,
    "rounds": 3,
-   "seconds": 0.34139418601989746
+   "seconds": 0.28711414337158203
   },
   {
    "condition": "small",
@@ -84,12 +84,12 @@
    "novelty": 0.764,
    "grammatical_novel": 0.764,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 10.789230943218554,
+   "bits_per_train_sentence": 10.799858691456937,
    "bits_per_test_sentence": 9.601826158619508,
    "symbols": 6,
    "rules": 12,
    "rounds": 3,
-   "seconds": 0.5842151641845703
+   "seconds": 0.5094819068908691
   },
   {
    "condition": "small",
@@ -102,12 +102,12 @@
    "novelty": 0.538,
    "grammatical_novel": 0.538,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 10.164528019302812,
+   "bits_per_train_sentence": 10.169841893422005,
    "bits_per_test_sentence": 9.524763430039553,
    "symbols": 6,
    "rules": 12,
    "rounds": 3,
-   "seconds": 1.2001771926879883
+   "seconds": 0.8107819557189941
   },
   {
    "condition": "small",
@@ -120,12 +120,12 @@
    "novelty": 0.996,
    "grammatical_novel": 0.148,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 27.022591618934467,
+   "bits_per_train_sentence": 27.192635590748573,
    "bits_per_test_sentence": 14.567702589945714,
    "symbols": 6,
    "rules": 6,
    "rounds": 3,
-   "seconds": 0.12207794189453125
+   "seconds": 0.12563490867614746
   },
   {
    "condition": "small",
@@ -138,12 +138,12 @@
    "novelty": 0.942,
    "grammatical_novel": 0.93,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 19.946252045834093,
+   "bits_per_train_sentence": 20.031274031741145,
    "bits_per_test_sentence": 9.896131901936617,
    "symbols": 6,
    "rules": 15,
    "rounds": 3,
-   "seconds": 0.1487109661102295
+   "seconds": 0.18436789512634277
   },
   {
    "condition": "small",
@@ -156,12 +156,12 @@
    "novelty": 0.91,
    "grammatical_novel": 0.9,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 14.707202584461902,
+   "bits_per_train_sentence": 14.749713577415429,
    "bits_per_test_sentence": 9.75755932263153,
    "symbols": 6,
    "rules": 14,
    "rounds": 3,
-   "seconds": 0.19355297088623047
+   "seconds": 0.20171284675598145
   },
   {
    "condition": "small",
@@ -174,12 +174,12 @@
    "novelty": 0.878,
    "grammatical_novel": 0.876,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 12.208703260173696,
+   "bits_per_train_sentence": 12.22995875665046,
    "bits_per_test_sentence": 9.568976851066035,
    "symbols": 6,
    "rules": 15,
    "rounds": 3,
-   "seconds": 0.3508179187774658
+   "seconds": 0.2733180522918701
   },
   {
    "condition": "small",
@@ -192,12 +192,12 @@
    "novelty": 0.75,
    "grammatical_novel": 0.75,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 10.78580500895406,
+   "bits_per_train_sentence": 10.796432757192441,
    "bits_per_test_sentence": 9.500061985575568,
    "symbols": 6,
    "rules": 12,
    "rounds": 3,
-   "seconds": 0.5978541374206543
+   "seconds": 0.5159869194030762
   },
   {
    "condition": "small",
@@ -210,12 +210,12 @@
    "novelty": 0.552,
    "grammatical_novel": 0.552,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 10.16806617630561,
+   "bits_per_train_sentence": 10.1733800504248,
    "bits_per_test_sentence": 9.504951850454052,
    "symbols": 6,
    "rules": 12,
    "rounds": 3,
-   "seconds": 1.1175830364227295
+   "seconds": 0.780426025390625
   },
   {
    "condition": "small",
@@ -228,12 +228,12 @@
    "novelty": 0.998,
    "grammatical_novel": 0.136,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 28.026479361420616,
+   "bits_per_train_sentence": 28.196523333234722,
    "bits_per_test_sentence": 12.865730912489289,
    "symbols": 6,
    "rules": 6,
    "rounds": 4,
-   "seconds": 0.1482102870941162
+   "seconds": 0.15834379196166992
   },
   {
    "condition": "small",
@@ -246,12 +246,12 @@
    "novelty": 0.964,
    "grammatical_novel": 0.956,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 19.776824499344766,
+   "bits_per_train_sentence": 19.86184648525182,
    "bits_per_test_sentence": 9.712663314340919,
    "symbols": 6,
    "rules": 14,
    "rounds": 5,
-   "seconds": 0.2177879810333252
+   "seconds": 0.21602320671081543
   },
   {
    "condition": "small",
@@ -264,12 +264,12 @@
    "novelty": 0.94,
    "grammatical_novel": 0.938,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 14.880106934500054,
+   "bits_per_train_sentence": 14.922617927453581,
    "bits_per_test_sentence": 9.571637153989688,
    "symbols": 6,
    "rules": 15,
    "rounds": 4,
-   "seconds": 0.2466449737548828
+   "seconds": 0.24538588523864746
   },
   {
    "condition": "small",
@@ -282,12 +282,12 @@
    "novelty": 0.89,
    "grammatical_novel": 0.89,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 12.06854551713694,
+   "bits_per_train_sentence": 12.089801013613704,
    "bits_per_test_sentence": 9.476289422669192,
    "symbols": 6,
    "rules": 12,
    "rounds": 4,
-   "seconds": 0.4246809482574463
+   "seconds": 0.3927628993988037
   },
   {
    "condition": "small",
@@ -300,12 +300,12 @@
    "novelty": 0.794,
    "grammatical_novel": 0.794,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 10.825973783123313,
+   "bits_per_train_sentence": 10.836601531361696,
    "bits_per_test_sentence": 9.490145226452505,
    "symbols": 6,
    "rules": 12,
    "rounds": 4,
-   "seconds": 0.7945237159729004
+   "seconds": 0.6690289974212646
   },
   {
    "condition": "small",
@@ -318,12 +318,12 @@
    "novelty": 0.562,
    "grammatical_novel": 0.556,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 10.28546498059724,
+   "bits_per_train_sentence": 10.290778854716432,
    "bits_per_test_sentence": 9.509452271210733,
    "symbols": 6,
    "rules": 12,
    "rounds": 5,
-   "seconds": 1.9190590381622314
+   "seconds": 1.360971212387085
   },
   {
    "condition": "small",
@@ -336,12 +336,12 @@
    "novelty": 0.984,
    "grammatical_novel": 0.304,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 27.219122304518187,
+   "bits_per_train_sentence": 27.389166276332293,
    "bits_per_test_sentence": 14.886426167109837,
    "symbols": 6,
    "rules": 8,
    "rounds": 4,
-   "seconds": 0.1401689052581787
+   "seconds": 0.16071701049804688
   },
   {
    "condition": "small",
@@ -354,12 +354,12 @@
    "novelty": 0.96,
    "grammatical_novel": 0.944,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 20.17273281835805,
+   "bits_per_train_sentence": 20.257754804265105,
    "bits_per_test_sentence": 9.994961302687118,
    "symbols": 6,
    "rules": 16,
    "rounds": 3,
-   "seconds": 0.1408538818359375
+   "seconds": 0.1547393798828125
   },
   {
    "condition": "small",
@@ -372,12 +372,12 @@
    "novelty": 0.934,
    "grammatical_novel": 0.922,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 14.831665120362524,
+   "bits_per_train_sentence": 14.87417611331605,
    "bits_per_test_sentence": 9.780365851765158,
    "symbols": 6,
    "rules": 15,
    "rounds": 3,
-   "seconds": 0.19765615463256836
+   "seconds": 0.16683125495910645
   },
   {
    "condition": "small",
@@ -390,12 +390,12 @@
    "novelty": 0.862,
    "grammatical_novel": 0.858,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 12.058510141410801,
+   "bits_per_train_sentence": 12.079765637887565,
    "bits_per_test_sentence": 9.598105888218491,
    "symbols": 6,
    "rules": 12,
    "rounds": 3,
-   "seconds": 0.34431910514831543
+   "seconds": 0.32382917404174805
   },
   {
    "condition": "small",
@@ -408,12 +408,12 @@
    "novelty": 0.756,
    "grammatical_novel": 0.754,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 10.945927335396068,
+   "bits_per_train_sentence": 10.95655508363445,
    "bits_per_test_sentence": 9.59202491074321,
    "symbols": 6,
    "rules": 16,
    "rounds": 3,
-   "seconds": 0.627831220626831
+   "seconds": 0.5275170803070068
   },
   {
    "condition": "small",
@@ -426,12 +426,12 @@
    "novelty": 0.51,
    "grammatical_novel": 0.508,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 10.165243968028356,
+   "bits_per_train_sentence": 10.170557842147549,
    "bits_per_test_sentence": 9.550918046558332,
    "symbols": 6,
    "rules": 12,
    "rounds": 3,
-   "seconds": 1.1370420455932617
+   "seconds": 0.8247599601745605
   },
   {
    "condition": "small",
@@ -444,12 +444,12 @@
    "novelty": 0.996,
    "grammatical_novel": 0.134,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 26.820938785841832,
+   "bits_per_train_sentence": 26.99098275765594,
    "bits_per_test_sentence": 14.3341804063855,
    "symbols": 6,
    "rules": 6,
    "rounds": 3,
-   "seconds": 0.11439323425292969
+   "seconds": 0.12929892539978027
   },
   {
    "condition": "small",
@@ -462,12 +462,12 @@
    "novelty": 0.948,
    "grammatical_novel": 0.936,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 19.48683087594187,
+   "bits_per_train_sentence": 19.57185286184892,
    "bits_per_test_sentence": 10.008123149951661,
    "symbols": 6,
    "rules": 14,
    "rounds": 3,
-   "seconds": 0.14934182167053223
+   "seconds": 0.14899182319641113
   },
   {
    "condition": "small",
@@ -480,12 +480,12 @@
    "novelty": 0.926,
    "grammatical_novel": 0.92,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 14.92078505334994,
+   "bits_per_train_sentence": 14.963296046303466,
    "bits_per_test_sentence": 9.568077305639562,
    "symbols": 6,
    "rules": 15,
    "rounds": 3,
-   "seconds": 0.2166152000427246
+   "seconds": 0.1966242790222168
   },
   {
    "condition": "small",
@@ -498,12 +498,12 @@
    "novelty": 0.876,
    "grammatical_novel": 0.872,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 12.078294343184284,
+   "bits_per_train_sentence": 12.099549839661048,
    "bits_per_test_sentence": 9.563846856510946,
    "symbols": 6,
    "rules": 12,
    "rounds": 3,
-   "seconds": 0.32814908027648926
+   "seconds": 0.29074788093566895
   },
   {
    "condition": "small",
@@ -516,12 +516,12 @@
    "novelty": 0.738,
    "grammatical_novel": 0.736,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 10.800673776628798,
+   "bits_per_train_sentence": 10.81130152486718,
    "bits_per_test_sentence": 9.576039672196506,
    "symbols": 6,
    "rules": 12,
    "rounds": 3,
-   "seconds": 0.5925998687744141
+   "seconds": 0.5125949382781982
   },
   {
    "condition": "small",
@@ -534,12 +534,12 @@
    "novelty": 0.546,
    "grammatical_novel": 0.544,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 10.167251998539353,
+   "bits_per_train_sentence": 10.172565872658543,
    "bits_per_test_sentence": 9.549925134574018,
    "symbols": 6,
    "rules": 12,
    "rounds": 3,
-   "seconds": 1.1643829345703125
+   "seconds": 0.7437269687652588
   },
   {
    "condition": "med",
@@ -552,12 +552,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.03,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 52.14375468988463,
+   "bits_per_train_sentence": 52.31379866169874,
    "bits_per_test_sentence": 38.44472900939694,
    "symbols": 5,
    "rules": 7,
    "rounds": 6,
-   "seconds": 0.25965404510498047
+   "seconds": 0.28625011444091797
   },
   {
    "condition": "med",
@@ -570,12 +570,12 @@
    "novelty": 0.996,
    "grammatical_novel": 0.524,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 41.524908374481285,
+   "bits_per_train_sentence": 41.60993036038834,
    "bits_per_test_sentence": 23.663602735400374,
    "symbols": 9,
    "rules": 25,
    "rounds": 6,
-   "seconds": 0.3928713798522949
+   "seconds": 0.3733329772949219
   },
   {
    "condition": "med",
@@ -588,12 +588,12 @@
    "novelty": 0.99,
    "grammatical_novel": 0.688,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 28.62262556169963,
+   "bits_per_train_sentence": 28.665136554653156,
    "bits_per_test_sentence": 21.095925809589026,
    "symbols": 9,
    "rules": 22,
    "rounds": 6,
-   "seconds": 0.7339670658111572
+   "seconds": 0.6368272304534912
   },
   {
    "condition": "med",
@@ -606,12 +606,12 @@
    "novelty": 0.984,
    "grammatical_novel": 0.626,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 23.688723048505928,
+   "bits_per_train_sentence": 23.709978544982693,
    "bits_per_test_sentence": 21.11965046360733,
    "symbols": 9,
    "rules": 22,
    "rounds": 6,
-   "seconds": 1.297025203704834
+   "seconds": 1.0035090446472168
   },
   {
    "condition": "med",
@@ -624,12 +624,12 @@
    "novelty": 0.988,
    "grammatical_novel": 0.644,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 22.140264827764344,
+   "bits_per_train_sentence": 22.150892576002725,
    "bits_per_test_sentence": 20.71937381038088,
    "symbols": 10,
    "rules": 20,
    "rounds": 6,
-   "seconds": 2.487452983856201
+   "seconds": 1.7505171298980713
   },
   {
    "condition": "med",
@@ -642,12 +642,12 @@
    "novelty": 0.966,
    "grammatical_novel": 0.966,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 20.28579896430012,
+   "bits_per_train_sentence": 20.29111283841931,
    "bits_per_test_sentence": 19.483615594424847,
    "symbols": 12,
    "rules": 28,
    "rounds": 6,
-   "seconds": 5.9610443115234375
+   "seconds": 3.34065580368042
   },
   {
    "condition": "med",
@@ -660,12 +660,12 @@
    "novelty": 0.998,
    "grammatical_novel": 0.208,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 57.04227539052257,
+   "bits_per_train_sentence": 57.21231936233668,
    "bits_per_test_sentence": 24.85684424932641,
    "symbols": 7,
    "rules": 15,
    "rounds": 6,
-   "seconds": 0.2768590450286865
+   "seconds": 0.32292985916137695
   },
   {
    "condition": "med",
@@ -678,12 +678,12 @@
    "novelty": 0.994,
    "grammatical_novel": 0.736,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 40.02618444359687,
+   "bits_per_train_sentence": 40.11120642950392,
    "bits_per_test_sentence": 20.025524557959965,
    "symbols": 10,
    "rules": 27,
    "rounds": 6,
-   "seconds": 0.4551210403442383
+   "seconds": 0.45467090606689453
   },
   {
    "condition": "med",
@@ -696,12 +696,12 @@
    "novelty": 0.998,
    "grammatical_novel": 0.562,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 30.087192857840925,
+   "bits_per_train_sentence": 30.129703850794453,
    "bits_per_test_sentence": 19.6409914956749,
    "symbols": 9,
    "rules": 26,
    "rounds": 6,
-   "seconds": 0.7152609825134277
+   "seconds": 0.6693861484527588
   },
   {
    "condition": "med",
@@ -714,12 +714,12 @@
    "novelty": 0.992,
    "grammatical_novel": 0.85,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 25.744431918003308,
+   "bits_per_train_sentence": 25.765687414480073,
    "bits_per_test_sentence": 17.898356050289742,
    "symbols": 11,
    "rules": 29,
    "rounds": 6,
-   "seconds": 1.8029890060424805
+   "seconds": 1.28143310546875
   },
   {
    "condition": "med",
@@ -732,12 +732,12 @@
    "novelty": 0.988,
    "grammatical_novel": 0.918,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 23.209353298057678,
+   "bits_per_train_sentence": 23.219981046296063,
    "bits_per_test_sentence": 17.529449345213933,
    "symbols": 12,
    "rules": 28,
    "rounds": 6,
-   "seconds": 3.21439790725708
+   "seconds": 2.0603559017181396
   },
   {
    "condition": "med",
@@ -750,12 +750,12 @@
    "novelty": 0.958,
    "grammatical_novel": 0.952,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 20.528957540845973,
+   "bits_per_train_sentence": 20.534271414965165,
    "bits_per_test_sentence": 17.47220802788086,
    "symbols": 12,
    "rules": 30,
    "rounds": 6,
-   "seconds": 6.373430013656616
+   "seconds": 3.3976540565490723
   },
   {
    "condition": "med",
@@ -768,12 +768,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.068,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 56.229893688882704,
+   "bits_per_train_sentence": 56.39993766069681,
    "bits_per_test_sentence": 35.41150474942181,
    "symbols": 4,
    "rules": 9,
    "rounds": 6,
-   "seconds": 0.25299787521362305
+   "seconds": 0.2973921298980713
   },
   {
    "condition": "med",
@@ -782,16 +782,16 @@
    "omission": 0.0,
    "parse_commission": 0.0,
    "exact_match": 1.0,
-   "gen_commission": 0.6639999999999999,
-   "novelty": 0.988,
-   "grammatical_novel": 0.324,
+   "gen_commission": 0.762,
+   "novelty": 0.996,
+   "grammatical_novel": 0.234,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 44.00934747022401,
-   "bits_per_test_sentence": 29.001118772746974,
+   "bits_per_train_sentence": 44.091704455746246,
+   "bits_per_test_sentence": 29.08885103094998,
    "symbols": 8,
    "rules": 23,
    "rounds": 4,
-   "seconds": 0.300814151763916
+   "seconds": 0.3438990116119385
   },
   {
    "condition": "med",
@@ -804,12 +804,12 @@
    "novelty": 0.994,
    "grammatical_novel": 0.886,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 30.226761692448434,
+   "bits_per_train_sentence": 30.269272685401962,
    "bits_per_test_sentence": 22.93929584443817,
    "symbols": 11,
    "rules": 26,
    "rounds": 6,
-   "seconds": 0.8759117126464844
+   "seconds": 0.7843141555786133
   },
   {
    "condition": "med",
@@ -822,12 +822,12 @@
    "novelty": 0.992,
    "grammatical_novel": 0.618,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 25.545360810202162,
+   "bits_per_train_sentence": 25.566616306678927,
    "bits_per_test_sentence": 21.95240028387329,
    "symbols": 10,
    "rules": 24,
    "rounds": 4,
-   "seconds": 1.047926902770996
+   "seconds": 0.7863638401031494
   },
   {
    "condition": "med",
@@ -840,12 +840,12 @@
    "novelty": 0.988,
    "grammatical_novel": 0.986,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 21.778952579030943,
+   "bits_per_train_sentence": 21.789580327269327,
    "bits_per_test_sentence": 20.942837340548074,
    "symbols": 12,
    "rules": 28,
    "rounds": 6,
-   "seconds": 3.3382229804992676
+   "seconds": 2.133939266204834
   },
   {
    "condition": "med",
@@ -858,12 +858,12 @@
    "novelty": 0.966,
    "grammatical_novel": 0.966,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 20.197900104485264,
+   "bits_per_train_sentence": 20.203213978604452,
    "bits_per_test_sentence": 20.87969089870446,
    "symbols": 12,
    "rules": 28,
    "rounds": 4,
-   "seconds": 4.9682838916778564
+   "seconds": 2.4897849559783936
   },
   {
    "condition": "med",
@@ -876,12 +876,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.302,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 61.09339354777218,
+   "bits_per_train_sentence": 61.26343751958628,
    "bits_per_test_sentence": 26.53872427116849,
    "symbols": 7,
    "rules": 16,
    "rounds": 6,
-   "seconds": 0.27659106254577637
+   "seconds": 0.3199019432067871
   },
   {
    "condition": "med",
@@ -894,12 +894,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.626,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 40.90054034782951,
+   "bits_per_train_sentence": 40.98556233373657,
    "bits_per_test_sentence": 19.206270987950397,
    "symbols": 9,
    "rules": 20,
    "rounds": 6,
-   "seconds": 0.5615379810333252
+   "seconds": 0.5127191543579102
   },
   {
    "condition": "med",
@@ -912,12 +912,12 @@
    "novelty": 0.996,
    "grammatical_novel": 0.89,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 31.615521955272378,
+   "bits_per_train_sentence": 31.658032948225905,
    "bits_per_test_sentence": 17.5996289825535,
    "symbols": 11,
    "rules": 27,
    "rounds": 6,
-   "seconds": 0.9369568824768066
+   "seconds": 0.7887868881225586
   },
   {
    "condition": "med",
@@ -930,12 +930,12 @@
    "novelty": 0.984,
    "grammatical_novel": 0.868,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 25.576494378389473,
+   "bits_per_train_sentence": 25.597749874866235,
    "bits_per_test_sentence": 17.367872109850143,
    "symbols": 12,
    "rules": 27,
    "rounds": 6,
-   "seconds": 1.7536702156066895
+   "seconds": 1.1594066619873047
   },
   {
    "condition": "med",
@@ -948,12 +948,12 @@
    "novelty": 0.978,
    "grammatical_novel": 0.94,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 22.412761951730047,
+   "bits_per_train_sentence": 22.423389699968432,
    "bits_per_test_sentence": 17.045876273018557,
    "symbols": 12,
    "rules": 27,
    "rounds": 6,
-   "seconds": 3.181957244873047
+   "seconds": 1.9775350093841553
   },
   {
    "condition": "med",
@@ -966,30 +966,30 @@
    "novelty": 0.972,
    "grammatical_novel": 0.952,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 21.005718277745917,
+   "bits_per_train_sentence": 21.011032151865106,
    "bits_per_test_sentence": 17.107195914390946,
    "symbols": 13,
    "rules": 32,
    "rounds": 6,
-   "seconds": 7.651481866836548
+   "seconds": 3.794283866882324
   },
   {
    "condition": "med",
    "seed": 100,
    "n_train": 10,
-   "omission": 0.2163120567375887,
-   "parse_commission": 0.2163120567375887,
+   "omission": 0.22695035460992907,
+   "parse_commission": 0.22695035460992907,
    "exact_match": 0.45,
-   "gen_commission": 0.99,
+   "gen_commission": 0.992,
    "novelty": 1.0,
-   "grammatical_novel": 0.01,
-   "gen_rejected_long": 3,
-   "bits_per_train_sentence": 61.067639194061464,
-   "bits_per_test_sentence": 33.205458969319075,
+   "grammatical_novel": 0.008,
+   "gen_rejected_long": 1,
+   "bits_per_train_sentence": 61.227130796819814,
+   "bits_per_test_sentence": 33.152179493310086,
    "symbols": 3,
    "rules": 6,
    "rounds": 6,
-   "seconds": 0.29390621185302734
+   "seconds": 0.3376791477203369
   },
   {
    "condition": "med",
@@ -998,16 +998,16 @@
    "omission": 0.010638297872340385,
    "parse_commission": 0.010638297872340385,
    "exact_match": 0.975,
-   "gen_commission": 0.91,
+   "gen_commission": 0.876,
    "novelty": 1.0,
-   "grammatical_novel": 0.09,
+   "grammatical_novel": 0.124,
    "gen_rejected_long": 1,
-   "bits_per_train_sentence": 48.26225450720846,
-   "bits_per_test_sentence": 30.056521765974423,
+   "bits_per_train_sentence": 48.210139468321415,
+   "bits_per_test_sentence": 30.384180035319474,
    "symbols": 7,
    "rules": 19,
    "rounds": 6,
-   "seconds": 0.46785402297973633
+   "seconds": 0.5051560401916504
   },
   {
    "condition": "med",
@@ -1020,12 +1020,12 @@
    "novelty": 0.99,
    "grammatical_novel": 0.566,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 31.001865038531434,
+   "bits_per_train_sentence": 31.044376031484962,
    "bits_per_test_sentence": 22.300740721912362,
    "symbols": 9,
    "rules": 21,
    "rounds": 6,
-   "seconds": 0.8772859573364258
+   "seconds": 0.7526960372924805
   },
   {
    "condition": "med",
@@ -1038,12 +1038,12 @@
    "novelty": 0.994,
    "grammatical_novel": 0.928,
    "gen_rejected_long": 1,
-   "bits_per_train_sentence": 26.66833801588936,
+   "bits_per_train_sentence": 26.689593512366127,
    "bits_per_test_sentence": 20.897016564498244,
    "symbols": 11,
    "rules": 28,
    "rounds": 6,
-   "seconds": 1.8834552764892578
+   "seconds": 1.3110179901123047
   },
   {
    "condition": "med",
@@ -1056,12 +1056,12 @@
    "novelty": 0.978,
    "grammatical_novel": 0.894,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 23.053321528840925,
+   "bits_per_train_sentence": 23.06394927707931,
    "bits_per_test_sentence": 20.53778889392375,
    "symbols": 13,
    "rules": 28,
    "rounds": 6,
-   "seconds": 2.968871831893921
+   "seconds": 2.038710832595825
   },
   {
    "condition": "med",
@@ -1074,12 +1074,12 @@
    "novelty": 0.964,
    "grammatical_novel": 0.946,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 20.558020005332178,
+   "bits_per_train_sentence": 20.56333387945137,
    "bits_per_test_sentence": 20.199663968518216,
    "symbols": 14,
    "rules": 30,
    "rounds": 6,
-   "seconds": 6.038726091384888
+   "seconds": 3.4541749954223633
   },
   {
    "condition": "large",
@@ -1092,12 +1092,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.012,
    "gen_rejected_long": 1,
-   "bits_per_train_sentence": 61.33926894362229,
+   "bits_per_train_sentence": 61.5093129154364,
    "bits_per_test_sentence": 46.93537155198687,
    "symbols": 4,
    "rules": 5,
    "rounds": 6,
-   "seconds": 0.2290489673614502
+   "seconds": 0.2992591857910156
   },
   {
    "condition": "large",
@@ -1110,12 +1110,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.092,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 56.24053666371246,
+   "bits_per_train_sentence": 56.325558649619516,
    "bits_per_test_sentence": 33.99945630303622,
    "symbols": 9,
    "rules": 19,
    "rounds": 6,
-   "seconds": 0.5107607841491699
+   "seconds": 0.5228462219238281
   },
   {
    "condition": "large",
@@ -1128,12 +1128,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.574,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 40.404922301854,
+   "bits_per_train_sentence": 40.447433294807524,
    "bits_per_test_sentence": 27.769431176463165,
    "symbols": 11,
    "rules": 35,
    "rounds": 6,
-   "seconds": 0.8641250133514404
+   "seconds": 0.7300431728363037
   },
   {
    "condition": "large",
@@ -1146,12 +1146,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.832,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 31.983369094023402,
+   "bits_per_train_sentence": 32.00462459050017,
    "bits_per_test_sentence": 24.83939940991715,
    "symbols": 11,
    "rules": 40,
    "rounds": 6,
-   "seconds": 1.7715048789978027
+   "seconds": 1.317206859588623
   },
   {
    "condition": "large",
@@ -1164,12 +1164,12 @@
    "novelty": 0.996,
    "grammatical_novel": 0.844,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 27.174004016620803,
+   "bits_per_train_sentence": 27.184631764859184,
    "bits_per_test_sentence": 24.449018682506853,
    "symbols": 11,
    "rules": 35,
    "rounds": 6,
-   "seconds": 3.1224687099456787
+   "seconds": 1.9761662483215332
   },
   {
    "condition": "large",
@@ -1182,12 +1182,12 @@
    "novelty": 0.992,
    "grammatical_novel": 0.866,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 26.080507236732153,
+   "bits_per_train_sentence": 26.085821110851345,
    "bits_per_test_sentence": 24.414588022332907,
    "symbols": 11,
    "rules": 39,
    "rounds": 6,
-   "seconds": 7.306850910186768
+   "seconds": 3.942941904067993
   },
   {
    "condition": "large",
@@ -1196,16 +1196,16 @@
    "omission": 0.21621621621621623,
    "parse_commission": 0.21621621621621623,
    "exact_match": 0.45,
-   "gen_commission": 1.0,
+   "gen_commission": 0.998,
    "novelty": 1.0,
-   "grammatical_novel": 0.0,
+   "grammatical_novel": 0.002,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 63.396895562916185,
-   "bits_per_test_sentence": 51.15506173190996,
+   "bits_per_train_sentence": 63.565597949601354,
+   "bits_per_test_sentence": 51.153100092308335,
    "symbols": 5,
    "rules": 5,
    "rounds": 4,
-   "seconds": 0.20412611961364746
+   "seconds": 0.21915602684020996
   },
   {
    "condition": "large",
@@ -1218,12 +1218,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.054,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 55.16132666500347,
+   "bits_per_train_sentence": 55.24634865091052,
    "bits_per_test_sentence": 36.58637067626182,
    "symbols": 9,
    "rules": 15,
    "rounds": 6,
-   "seconds": 0.3654153347015381
+   "seconds": 0.38947367668151855
   },
   {
    "condition": "large",
@@ -1236,12 +1236,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.462,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 41.676066376195294,
+   "bits_per_train_sentence": 41.718577369148825,
    "bits_per_test_sentence": 28.442649446714206,
    "symbols": 9,
    "rules": 27,
    "rounds": 6,
-   "seconds": 0.7196171283721924
+   "seconds": 0.6246442794799805
   },
   {
    "condition": "large",
@@ -1254,12 +1254,12 @@
    "novelty": 0.998,
    "grammatical_novel": 0.53,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 33.09456906424159,
+   "bits_per_train_sentence": 33.11582456071836,
    "bits_per_test_sentence": 26.860510904719245,
    "symbols": 10,
    "rules": 31,
    "rounds": 6,
-   "seconds": 1.3985421657562256
+   "seconds": 1.0984790325164795
   },
   {
    "condition": "large",
@@ -1272,12 +1272,12 @@
    "novelty": 0.998,
    "grammatical_novel": 0.824,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 28.226184432370218,
+   "bits_per_train_sentence": 28.2368121806086,
    "bits_per_test_sentence": 24.01396707116006,
    "symbols": 11,
    "rules": 37,
    "rounds": 6,
-   "seconds": 4.169491291046143
+   "seconds": 2.3774919509887695
   },
   {
    "condition": "large",
@@ -1290,12 +1290,12 @@
    "novelty": 0.994,
    "grammatical_novel": 0.852,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 26.158392619934613,
+   "bits_per_train_sentence": 26.163706494053805,
    "bits_per_test_sentence": 23.619493184966597,
    "symbols": 12,
    "rules": 42,
    "rounds": 6,
-   "seconds": 7.684993743896484
+   "seconds": 3.971538782119751
   },
   {
    "condition": "large",
@@ -1308,12 +1308,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.002,
    "gen_rejected_long": 1,
-   "bits_per_train_sentence": 68.12777107899942,
+   "bits_per_train_sentence": 68.29781505081353,
    "bits_per_test_sentence": 48.555428176377795,
    "symbols": 5,
    "rules": 6,
    "rounds": 6,
-   "seconds": 0.250762939453125
+   "seconds": 0.2763700485229492
   },
   {
    "condition": "large",
@@ -1326,12 +1326,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.07,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 53.95677308228119,
+   "bits_per_train_sentence": 54.04179506818824,
    "bits_per_test_sentence": 35.29273911824964,
    "symbols": 7,
    "rules": 23,
    "rounds": 6,
-   "seconds": 0.40789103507995605
+   "seconds": 0.4674088954925537
   },
   {
    "condition": "large",
@@ -1340,16 +1340,16 @@
    "omission": 0.03952569169960474,
    "parse_commission": 0.03952569169960474,
    "exact_match": 0.925,
-   "gen_commission": 0.758,
-   "novelty": 1.0,
-   "grammatical_novel": 0.242,
+   "gen_commission": 0.714,
+   "novelty": 0.998,
+   "grammatical_novel": 0.284,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 40.68776420196896,
-   "bits_per_test_sentence": 29.81857912141255,
+   "bits_per_train_sentence": 40.63267738819456,
+   "bits_per_test_sentence": 29.73806439981114,
    "symbols": 7,
    "rules": 26,
    "rounds": 6,
-   "seconds": 0.684208869934082
+   "seconds": 0.6825771331787109
   },
   {
    "condition": "large",
@@ -1362,12 +1362,12 @@
    "novelty": 0.998,
    "grammatical_novel": 0.796,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 31.941927543912538,
+   "bits_per_train_sentence": 31.963183040389303,
    "bits_per_test_sentence": 25.82585015019198,
    "symbols": 11,
    "rules": 38,
    "rounds": 6,
-   "seconds": 2.056851863861084
+   "seconds": 1.4612348079681396
   },
   {
    "condition": "large",
@@ -1380,12 +1380,12 @@
    "novelty": 0.998,
    "grammatical_novel": 0.674,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 29.378640089663996,
+   "bits_per_train_sentence": 29.389267837902377,
    "bits_per_test_sentence": 25.969776038235672,
    "symbols": 11,
    "rules": 36,
    "rounds": 6,
-   "seconds": 3.5886120796203613
+   "seconds": 2.129887104034424
   },
   {
    "condition": "large",
@@ -1398,12 +1398,12 @@
    "novelty": 0.996,
    "grammatical_novel": 0.86,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 26.230175344635995,
+   "bits_per_train_sentence": 26.235489218755184,
    "bits_per_test_sentence": 25.023412011680954,
    "symbols": 11,
    "rules": 42,
    "rounds": 6,
-   "seconds": 8.928667306900024
+   "seconds": 4.135468006134033
   },
   {
    "condition": "large",
@@ -1416,12 +1416,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.136,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 53.323383263350706,
+   "bits_per_train_sentence": 53.493427235164816,
    "bits_per_test_sentence": 43.109312154136646,
    "symbols": 7,
    "rules": 13,
    "rounds": 6,
-   "seconds": 0.2575860023498535
+   "seconds": 0.2634131908416748
   },
   {
    "condition": "large",
@@ -1434,12 +1434,12 @@
    "novelty": 0.998,
    "grammatical_novel": 0.37,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 48.71995876901859,
+   "bits_per_train_sentence": 48.804980754925644,
    "bits_per_test_sentence": 31.562078700870522,
    "symbols": 9,
    "rules": 25,
    "rounds": 6,
-   "seconds": 0.478381872177124
+   "seconds": 0.5437819957733154
   },
   {
    "condition": "large",
@@ -1452,12 +1452,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.4,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 40.652785680139935,
+   "bits_per_train_sentence": 40.695296673093466,
    "bits_per_test_sentence": 25.390195898595067,
    "symbols": 9,
    "rules": 27,
    "rounds": 6,
-   "seconds": 0.8955957889556885
+   "seconds": 0.8323931694030762
   },
   {
    "condition": "large",
@@ -1470,12 +1470,12 @@
    "novelty": 0.998,
    "grammatical_novel": 0.826,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 32.62940935888401,
+   "bits_per_train_sentence": 32.65066485536077,
    "bits_per_test_sentence": 22.47484813044558,
    "symbols": 11,
    "rules": 35,
    "rounds": 6,
-   "seconds": 1.8661811351776123
+   "seconds": 1.2811431884765625
   },
   {
    "condition": "large",
@@ -1488,12 +1488,12 @@
    "novelty": 0.998,
    "grammatical_novel": 0.878,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 27.6528920430245,
+   "bits_per_train_sentence": 27.663519791262882,
    "bits_per_test_sentence": 22.341862634263414,
    "symbols": 13,
    "rules": 39,
    "rounds": 6,
-   "seconds": 3.5627081394195557
+   "seconds": 2.0930240154266357
   },
   {
    "condition": "large",
@@ -1506,12 +1506,12 @@
    "novelty": 0.986,
    "grammatical_novel": 0.834,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 25.831079631490134,
+   "bits_per_train_sentence": 25.836393505609323,
    "bits_per_test_sentence": 22.190336737252412,
    "symbols": 12,
    "rules": 41,
    "rounds": 6,
-   "seconds": 8.577648162841797
+   "seconds": 4.181114196777344
   },
   {
    "condition": "large",
@@ -1524,12 +1524,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.0,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 62.978963322983894,
+   "bits_per_train_sentence": 63.149007294798004,
    "bits_per_test_sentence": 47.170760426672295,
    "symbols": 4,
    "rules": 5,
    "rounds": 6,
-   "seconds": 0.21656131744384766
+   "seconds": 0.2933661937713623
   },
   {
    "condition": "large",
@@ -1538,16 +1538,16 @@
    "omission": 0.17012448132780078,
    "parse_commission": 0.17012448132780078,
    "exact_match": 0.475,
-   "gen_commission": 0.9359999999999999,
+   "gen_commission": 0.928,
    "novelty": 1.0,
-   "grammatical_novel": 0.064,
+   "grammatical_novel": 0.072,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 52.13246785222732,
-   "bits_per_test_sentence": 35.662441279103355,
+   "bits_per_train_sentence": 52.15803219865012,
+   "bits_per_test_sentence": 35.5598194842983,
    "symbols": 6,
    "rules": 13,
    "rounds": 6,
-   "seconds": 0.4138529300689697
+   "seconds": 0.399442195892334
   },
   {
    "condition": "large",
@@ -1560,12 +1560,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.872,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 38.80399483799506,
+   "bits_per_train_sentence": 38.84650583094859,
    "bits_per_test_sentence": 23.477406025321322,
    "symbols": 10,
    "rules": 40,
    "rounds": 6,
-   "seconds": 0.8988211154937744
+   "seconds": 0.7523722648620605
   },
   {
    "condition": "large",
@@ -1578,12 +1578,12 @@
    "novelty": 0.998,
    "grammatical_novel": 0.874,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 30.93437808184176,
+   "bits_per_train_sentence": 30.955633578318526,
    "bits_per_test_sentence": 22.51210173513578,
    "symbols": 11,
    "rules": 40,
    "rounds": 6,
-   "seconds": 2.168092727661133
+   "seconds": 1.354842185974121
   },
   {
    "condition": "large",
@@ -1596,12 +1596,12 @@
    "novelty": 0.998,
    "grammatical_novel": 0.85,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 28.131340872943433,
+   "bits_per_train_sentence": 28.141968621181814,
    "bits_per_test_sentence": 22.36893259322695,
    "symbols": 11,
    "rules": 39,
    "rounds": 6,
-   "seconds": 3.0243310928344727
+   "seconds": 1.9892818927764893
   },
   {
    "condition": "large",
@@ -1614,12 +1614,12 @@
    "novelty": 0.99,
    "grammatical_novel": 0.834,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 25.94515282433904,
+   "bits_per_train_sentence": 25.95046669845823,
    "bits_per_test_sentence": 22.10326206782347,
    "symbols": 12,
    "rules": 43,
    "rounds": 6,
-   "seconds": 7.8838207721710205
+   "seconds": 3.923673152923584
   },
   {
    "condition": "term_low",
@@ -1628,16 +1628,16 @@
    "omission": 0.0,
    "parse_commission": 0.0,
    "exact_match": 1.0,
-   "gen_commission": 0.6839999999999999,
-   "novelty": 0.998,
-   "grammatical_novel": 0.314,
+   "gen_commission": 0.644,
+   "novelty": 1.0,
+   "grammatical_novel": 0.356,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 43.44940384126226,
-   "bits_per_test_sentence": 19.612762082555182,
+   "bits_per_train_sentence": 43.47092547603314,
+   "bits_per_test_sentence": 19.290905010116212,
    "symbols": 9,
    "rules": 17,
    "rounds": 6,
-   "seconds": 0.47387099266052246
+   "seconds": 0.6626288890838623
   },
   {
    "condition": "term_low",
@@ -1646,16 +1646,16 @@
    "omission": 0.0,
    "parse_commission": 0.0,
    "exact_match": 1.0,
-   "gen_commission": 0.5900000000000001,
-   "novelty": 0.994,
-   "grammatical_novel": 0.404,
-   "gen_rejected_long": 2,
-   "bits_per_train_sentence": 30.420605208467304,
-   "bits_per_test_sentence": 19.498980220861426,
+   "gen_commission": 0.5800000000000001,
+   "novelty": 0.998,
+   "grammatical_novel": 0.418,
+   "gen_rejected_long": 3,
+   "bits_per_train_sentence": 30.29797939432716,
+   "bits_per_test_sentence": 19.08534270548,
    "symbols": 8,
    "rules": 13,
    "rounds": 6,
-   "seconds": 0.6328251361846924
+   "seconds": 0.6641490459442139
   },
   {
    "condition": "term_low",
@@ -1668,12 +1668,12 @@
    "novelty": 0.994,
    "grammatical_novel": 0.94,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 23.832934459969177,
+   "bits_per_train_sentence": 23.875445452922705,
    "bits_per_test_sentence": 15.983513198502871,
    "symbols": 12,
    "rules": 18,
    "rounds": 6,
-   "seconds": 1.2985918521881104
+   "seconds": 0.9470460414886475
   },
   {
    "condition": "term_low",
@@ -1686,12 +1686,12 @@
    "novelty": 0.984,
    "grammatical_novel": 0.944,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 19.790390515224466,
+   "bits_per_train_sentence": 19.81164601170123,
    "bits_per_test_sentence": 15.737354146681174,
    "symbols": 12,
    "rules": 18,
    "rounds": 6,
-   "seconds": 2.3859410285949707
+   "seconds": 1.3918771743774414
   },
   {
    "condition": "term_low",
@@ -1704,12 +1704,12 @@
    "novelty": 0.974,
    "grammatical_novel": 0.972,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 17.710204446503134,
+   "bits_per_train_sentence": 17.720832194741515,
    "bits_per_test_sentence": 15.552773165717479,
    "symbols": 12,
    "rules": 18,
    "rounds": 5,
-   "seconds": 4.56029486656189
+   "seconds": 1.9025158882141113
   },
   {
    "condition": "term_low",
@@ -1722,12 +1722,12 @@
    "novelty": 0.878,
    "grammatical_novel": 0.878,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 16.49359365739485,
+   "bits_per_train_sentence": 16.498907531514043,
    "bits_per_test_sentence": 15.541674602515092,
    "symbols": 12,
    "rules": 17,
    "rounds": 6,
-   "seconds": 9.372221946716309
+   "seconds": 3.8468878269195557
   },
   {
    "condition": "term_low",
@@ -1736,16 +1736,16 @@
    "omission": 0.012461059190031154,
    "parse_commission": 0.012461059190031154,
    "exact_match": 0.95,
-   "gen_commission": 0.698,
-   "novelty": 1.0,
-   "grammatical_novel": 0.302,
-   "gen_rejected_long": 0,
-   "bits_per_train_sentence": 43.90627525088044,
-   "bits_per_test_sentence": 21.587267416794518,
+   "gen_commission": 0.6639999999999999,
+   "novelty": 0.99,
+   "grammatical_novel": 0.326,
+   "gen_rejected_long": 1,
+   "bits_per_train_sentence": 44.030555842804205,
+   "bits_per_test_sentence": 21.677430223797284,
    "symbols": 5,
    "rules": 12,
    "rounds": 6,
-   "seconds": 0.31955504417419434
+   "seconds": 0.38045310974121094
   },
   {
    "condition": "term_low",
@@ -1758,12 +1758,12 @@
    "novelty": 0.992,
    "grammatical_novel": 0.972,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 27.71867400926677,
+   "bits_per_train_sentence": 27.803695995173825,
    "bits_per_test_sentence": 16.843739324341204,
    "symbols": 10,
    "rules": 16,
    "rounds": 6,
-   "seconds": 0.6985468864440918
+   "seconds": 0.6322848796844482
   },
   {
    "condition": "term_low",
@@ -1776,12 +1776,12 @@
    "novelty": 0.988,
    "grammatical_novel": 0.886,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 23.16344388357901,
+   "bits_per_train_sentence": 23.205954876532537,
    "bits_per_test_sentence": 15.343365283059905,
    "symbols": 12,
    "rules": 17,
    "rounds": 5,
-   "seconds": 0.9409048557281494
+   "seconds": 0.7784759998321533
   },
   {
    "condition": "term_low",
@@ -1794,12 +1794,12 @@
    "novelty": 0.974,
    "grammatical_novel": 0.946,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 19.792543188093834,
+   "bits_per_train_sentence": 19.813798684570596,
    "bits_per_test_sentence": 15.217539672686026,
    "symbols": 12,
    "rules": 18,
    "rounds": 6,
-   "seconds": 2.186654806137085
+   "seconds": 1.4227619171142578
   },
   {
    "condition": "term_low",
@@ -1812,12 +1812,12 @@
    "novelty": 0.926,
    "grammatical_novel": 0.92,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 17.61475110416841,
+   "bits_per_train_sentence": 17.62537885240679,
    "bits_per_test_sentence": 15.275981613088664,
    "symbols": 12,
    "rules": 19,
    "rounds": 6,
-   "seconds": 4.911076784133911
+   "seconds": 2.2525010108947754
   },
   {
    "condition": "term_low",
@@ -1830,12 +1830,12 @@
    "novelty": 0.916,
    "grammatical_novel": 0.912,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 16.54299856497739,
+   "bits_per_train_sentence": 16.548312439096577,
    "bits_per_test_sentence": 15.03075826376821,
    "symbols": 13,
    "rules": 18,
    "rounds": 6,
-   "seconds": 13.931182146072388
+   "seconds": 4.564718008041382
   },
   {
    "condition": "term_low",
@@ -1844,16 +1844,16 @@
    "omission": 0.0,
    "parse_commission": 0.0,
    "exact_match": 1.0,
-   "gen_commission": 0.18200000000000005,
+   "gen_commission": 0.17600000000000005,
    "novelty": 0.974,
-   "grammatical_novel": 0.792,
-   "gen_rejected_long": 1,
-   "bits_per_train_sentence": 38.70518633854873,
-   "bits_per_test_sentence": 18.538334517696065,
+   "grammatical_novel": 0.798,
+   "gen_rejected_long": 3,
+   "bits_per_train_sentence": 38.82094471141318,
+   "bits_per_test_sentence": 18.34381546912901,
    "symbols": 9,
    "rules": 16,
    "rounds": 6,
-   "seconds": 0.44936275482177734
+   "seconds": 0.44632816314697266
   },
   {
    "condition": "term_low",
@@ -1866,12 +1866,12 @@
    "novelty": 0.984,
    "grammatical_novel": 0.454,
    "gen_rejected_long": 4,
-   "bits_per_train_sentence": 29.65626770664151,
+   "bits_per_train_sentence": 29.741289692548566,
    "bits_per_test_sentence": 17.915075947076815,
    "symbols": 9,
    "rules": 13,
    "rounds": 6,
-   "seconds": 0.6013669967651367
+   "seconds": 0.5553832054138184
   },
   {
    "condition": "term_low",
@@ -1884,12 +1884,12 @@
    "novelty": 0.986,
    "grammatical_novel": 0.842,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 25.80076322199941,
+   "bits_per_train_sentence": 25.84327421495294,
    "bits_per_test_sentence": 16.60927026256004,
    "symbols": 12,
    "rules": 20,
    "rounds": 6,
-   "seconds": 1.2841591835021973
+   "seconds": 0.9365332126617432
   },
   {
    "condition": "term_low",
@@ -1902,12 +1902,12 @@
    "novelty": 0.976,
    "grammatical_novel": 0.976,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 19.273392576760365,
+   "bits_per_train_sentence": 19.294648073237127,
    "bits_per_test_sentence": 15.457333985521819,
    "symbols": 12,
    "rules": 17,
    "rounds": 6,
-   "seconds": 2.142226219177246
+   "seconds": 1.444615125656128
   },
   {
    "condition": "term_low",
@@ -1920,12 +1920,12 @@
    "novelty": 0.98,
    "grammatical_novel": 0.978,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 17.782888290210487,
+   "bits_per_train_sentence": 17.79351603844887,
    "bits_per_test_sentence": 15.46954447235358,
    "symbols": 12,
    "rules": 18,
    "rounds": 6,
-   "seconds": 4.670580863952637
+   "seconds": 2.3642821311950684
   },
   {
    "condition": "term_low",
@@ -1938,12 +1938,12 @@
    "novelty": 0.904,
    "grammatical_novel": 0.904,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 16.5933075726036,
+   "bits_per_train_sentence": 16.59862144672279,
    "bits_per_test_sentence": 15.443683464512176,
    "symbols": 12,
    "rules": 17,
    "rounds": 6,
-   "seconds": 8.867267847061157
+   "seconds": 3.74509596824646
   },
   {
    "condition": "term_low",
@@ -1956,12 +1956,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.728,
    "gen_rejected_long": 5,
-   "bits_per_train_sentence": 41.63482221537336,
+   "bits_per_train_sentence": 41.80486618718747,
    "bits_per_test_sentence": 17.452542973135344,
    "symbols": 9,
    "rules": 16,
    "rounds": 6,
-   "seconds": 0.48403000831604004
+   "seconds": 0.5019230842590332
   },
   {
    "condition": "term_low",
@@ -1974,12 +1974,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.974,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 31.493826978409395,
+   "bits_per_train_sentence": 31.57884896431645,
    "bits_per_test_sentence": 16.523539047084338,
    "symbols": 10,
    "rules": 17,
    "rounds": 6,
-   "seconds": 0.720548152923584
+   "seconds": 0.6482658386230469
   },
   {
    "condition": "term_low",
@@ -1992,12 +1992,12 @@
    "novelty": 0.994,
    "grammatical_novel": 0.898,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 25.19216882031518,
+   "bits_per_train_sentence": 25.234679813268706,
    "bits_per_test_sentence": 14.930754542989689,
    "symbols": 12,
    "rules": 18,
    "rounds": 6,
-   "seconds": 1.2896277904510498
+   "seconds": 0.9351248741149902
   },
   {
    "condition": "term_low",
@@ -2010,12 +2010,12 @@
    "novelty": 0.984,
    "grammatical_novel": 0.838,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 22.52216686565258,
+   "bits_per_train_sentence": 22.54342236212934,
    "bits_per_test_sentence": 14.930102734487036,
    "symbols": 14,
    "rules": 21,
    "rounds": 6,
-   "seconds": 1.9653379917144775
+   "seconds": 1.368143081665039
   },
   {
    "condition": "term_low",
@@ -2028,12 +2028,12 @@
    "novelty": 0.964,
    "grammatical_novel": 0.95,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 18.02076476228288,
+   "bits_per_train_sentence": 18.031392510521265,
    "bits_per_test_sentence": 14.737612881299157,
    "symbols": 12,
    "rules": 17,
    "rounds": 6,
-   "seconds": 3.6503777503967285
+   "seconds": 2.009169101715088
   },
   {
    "condition": "term_low",
@@ -2046,12 +2046,12 @@
    "novelty": 0.884,
    "grammatical_novel": 0.87,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 16.712303058923222,
+   "bits_per_train_sentence": 16.717616933042414,
    "bits_per_test_sentence": 14.84425969503567,
    "symbols": 12,
    "rules": 17,
    "rounds": 6,
-   "seconds": 8.752701997756958
+   "seconds": 3.8330917358398438
   },
   {
    "condition": "term_low",
@@ -2064,12 +2064,12 @@
    "novelty": 0.992,
    "grammatical_novel": 0.22,
    "gen_rejected_long": 11,
-   "bits_per_train_sentence": 43.99382489540223,
+   "bits_per_train_sentence": 44.16386886721633,
    "bits_per_test_sentence": 20.492913459176386,
    "symbols": 6,
    "rules": 14,
    "rounds": 6,
-   "seconds": 0.4103541374206543
+   "seconds": 0.39664602279663086
   },
   {
    "condition": "term_low",
@@ -2082,12 +2082,12 @@
    "novelty": 0.996,
    "grammatical_novel": 0.264,
    "gen_rejected_long": 3,
-   "bits_per_train_sentence": 34.92214910897483,
+   "bits_per_train_sentence": 35.00717109488188,
    "bits_per_test_sentence": 17.881178706259153,
    "symbols": 10,
    "rules": 15,
    "rounds": 6,
-   "seconds": 0.8287458419799805
+   "seconds": 0.6843621730804443
   },
   {
    "condition": "term_low",
@@ -2100,12 +2100,12 @@
    "novelty": 0.984,
    "grammatical_novel": 0.974,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 23.73844942473465,
+   "bits_per_train_sentence": 23.780960417688178,
    "bits_per_test_sentence": 15.87040018656763,
    "symbols": 11,
    "rules": 18,
    "rounds": 6,
-   "seconds": 1.3461930751800537
+   "seconds": 1.069274663925171
   },
   {
    "condition": "term_low",
@@ -2118,12 +2118,12 @@
    "novelty": 0.96,
    "grammatical_novel": 0.952,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 19.22762048890687,
+   "bits_per_train_sentence": 19.24887598538363,
    "bits_per_test_sentence": 15.328800661342488,
    "symbols": 12,
    "rules": 17,
    "rounds": 6,
-   "seconds": 2.5099189281463623
+   "seconds": 1.4575588703155518
   },
   {
    "condition": "term_low",
@@ -2136,12 +2136,12 @@
    "novelty": 0.938,
    "grammatical_novel": 0.936,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 17.88581661810165,
+   "bits_per_train_sentence": 17.896444366340035,
    "bits_per_test_sentence": 15.371262130426874,
    "symbols": 14,
    "rules": 19,
    "rounds": 6,
-   "seconds": 3.8507301807403564
+   "seconds": 2.112229824066162
   },
   {
    "condition": "term_low",
@@ -2154,30 +2154,30 @@
    "novelty": 0.898,
    "grammatical_novel": 0.892,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 16.49703878782872,
+   "bits_per_train_sentence": 16.50235266194791,
    "bits_per_test_sentence": 15.243351754244177,
    "symbols": 12,
    "rules": 17,
    "rounds": 6,
-   "seconds": 7.629967927932739
+   "seconds": 3.4777750968933105
   },
   {
    "condition": "term_med",
    "seed": 13,
    "n_train": 10,
-   "omission": 0.3006329113924051,
-   "parse_commission": 0.3006329113924051,
-   "exact_match": 0.375,
-   "gen_commission": 0.998,
+   "omission": 0.2721518987341772,
+   "parse_commission": 0.2721518987341772,
+   "exact_match": 0.425,
+   "gen_commission": 0.996,
    "novelty": 1.0,
-   "grammatical_novel": 0.002,
-   "gen_rejected_long": 3,
-   "bits_per_train_sentence": 71.68250045813029,
-   "bits_per_test_sentence": 37.010307430346636,
+   "grammatical_novel": 0.004,
+   "gen_rejected_long": 1,
+   "bits_per_train_sentence": 71.84008064329228,
+   "bits_per_test_sentence": 36.969641862846586,
    "symbols": 5,
    "rules": 7,
    "rounds": 6,
-   "seconds": 0.2989058494567871
+   "seconds": 0.3415868282318115
   },
   {
    "condition": "term_med",
@@ -2190,12 +2190,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.628,
    "gen_rejected_long": 3,
-   "bits_per_train_sentence": 53.963411036580375,
+   "bits_per_train_sentence": 54.04843302248743,
    "bits_per_test_sentence": 25.110378224353703,
    "symbols": 10,
    "rules": 29,
    "rounds": 6,
-   "seconds": 0.7349379062652588
+   "seconds": 0.6741318702697754
   },
   {
    "condition": "term_med",
@@ -2208,12 +2208,12 @@
    "novelty": 0.992,
    "grammatical_novel": 0.81,
    "gen_rejected_long": 1,
-   "bits_per_train_sentence": 36.87517707414871,
+   "bits_per_train_sentence": 36.91768806710223,
    "bits_per_test_sentence": 23.64513692830683,
    "symbols": 11,
    "rules": 29,
    "rounds": 6,
-   "seconds": 1.098741054534912
+   "seconds": 0.9032697677612305
   },
   {
    "condition": "term_med",
@@ -2226,12 +2226,12 @@
    "novelty": 0.994,
    "grammatical_novel": 0.968,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 29.086546714177366,
+   "bits_per_train_sentence": 29.107802210654132,
    "bits_per_test_sentence": 22.553016734853227,
    "symbols": 12,
    "rules": 28,
    "rounds": 6,
-   "seconds": 2.4017200469970703
+   "seconds": 1.594508171081543
   },
   {
    "condition": "term_med",
@@ -2244,12 +2244,12 @@
    "novelty": 0.994,
    "grammatical_novel": 0.932,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 27.408299931970056,
+   "bits_per_train_sentence": 27.418927680208434,
    "bits_per_test_sentence": 22.529454520116744,
    "symbols": 12,
    "rules": 28,
    "rounds": 6,
-   "seconds": 4.877146005630493
+   "seconds": 2.6313726902008057
   },
   {
    "condition": "term_med",
@@ -2262,12 +2262,12 @@
    "novelty": 0.984,
    "grammatical_novel": 0.96,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 24.126850519133054,
+   "bits_per_train_sentence": 24.132164393252246,
    "bits_per_test_sentence": 22.3899569207018,
    "symbols": 12,
    "rules": 29,
    "rounds": 6,
-   "seconds": 9.517231702804565
+   "seconds": 4.637506008148193
   },
   {
    "condition": "term_med",
@@ -2280,12 +2280,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.036,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 72.16818509705313,
+   "bits_per_train_sentence": 72.33822906886724,
    "bits_per_test_sentence": 34.31028105489744,
    "symbols": 8,
    "rules": 25,
    "rounds": 6,
-   "seconds": 0.49776482582092285
+   "seconds": 0.4861440658569336
   },
   {
    "condition": "term_med",
@@ -2298,12 +2298,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.386,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 54.45869511227206,
+   "bits_per_train_sentence": 54.543717098179116,
    "bits_per_test_sentence": 24.272583209137636,
    "symbols": 10,
    "rules": 26,
    "rounds": 6,
-   "seconds": 0.819464921951294
+   "seconds": 0.6920890808105469
   },
   {
    "condition": "term_med",
@@ -2316,12 +2316,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.8,
    "gen_rejected_long": 1,
-   "bits_per_train_sentence": 37.16804401630825,
+   "bits_per_train_sentence": 37.210555009261775,
    "bits_per_test_sentence": 22.969198171615666,
    "symbols": 10,
    "rules": 28,
    "rounds": 6,
-   "seconds": 1.2966814041137695
+   "seconds": 0.971336841583252
   },
   {
    "condition": "term_med",
@@ -2334,12 +2334,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.984,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 30.053126368078836,
+   "bits_per_train_sentence": 30.0743818645556,
    "bits_per_test_sentence": 21.44783758725739,
    "symbols": 14,
    "rules": 31,
    "rounds": 6,
-   "seconds": 2.2821109294891357
+   "seconds": 1.4991858005523682
   },
   {
    "condition": "term_med",
@@ -2352,12 +2352,12 @@
    "novelty": 0.986,
    "grammatical_novel": 0.95,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 26.6273249284092,
+   "bits_per_train_sentence": 26.63795267664758,
    "bits_per_test_sentence": 21.375445505037376,
    "symbols": 12,
    "rules": 31,
    "rounds": 6,
-   "seconds": 4.492584228515625
+   "seconds": 2.5283427238464355
   },
   {
    "condition": "term_med",
@@ -2370,12 +2370,12 @@
    "novelty": 0.978,
    "grammatical_novel": 0.94,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 24.0848818514884,
+   "bits_per_train_sentence": 24.090195725607593,
    "bits_per_test_sentence": 21.325778656479624,
    "symbols": 12,
    "rules": 28,
    "rounds": 6,
-   "seconds": 8.696540355682373
+   "seconds": 4.369282007217407
   },
   {
    "condition": "term_med",
@@ -2388,12 +2388,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.006,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 61.51539690775902,
+   "bits_per_train_sentence": 61.68544087957313,
    "bits_per_test_sentence": 38.375205910677096,
    "symbols": 5,
    "rules": 10,
    "rounds": 6,
-   "seconds": 0.34951210021972656
+   "seconds": 0.35424017906188965
   },
   {
    "condition": "term_med",
@@ -2406,12 +2406,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.888,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 48.13001231426699,
+   "bits_per_train_sentence": 48.21503430017405,
    "bits_per_test_sentence": 24.49155795920995,
    "symbols": 10,
    "rules": 28,
    "rounds": 6,
-   "seconds": 0.7317409515380859
+   "seconds": 0.6107640266418457
   },
   {
    "condition": "term_med",
@@ -2424,12 +2424,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.874,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 36.16464590936611,
+   "bits_per_train_sentence": 36.20715690231963,
    "bits_per_test_sentence": 22.94967948359891,
    "symbols": 12,
    "rules": 29,
    "rounds": 6,
-   "seconds": 1.4405920505523682
+   "seconds": 1.048459768295288
   },
   {
    "condition": "term_med",
@@ -2442,12 +2442,12 @@
    "novelty": 0.994,
    "grammatical_novel": 0.968,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 29.51978300331016,
+   "bits_per_train_sentence": 29.541038499786925,
    "bits_per_test_sentence": 22.620744199741228,
    "symbols": 12,
    "rules": 29,
    "rounds": 6,
-   "seconds": 2.096212148666382
+   "seconds": 1.4044339656829834
   },
   {
    "condition": "term_med",
@@ -2460,12 +2460,12 @@
    "novelty": 0.994,
    "grammatical_novel": 0.974,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 26.44151827620012,
+   "bits_per_train_sentence": 26.452146024438502,
    "bits_per_test_sentence": 22.47513275776089,
    "symbols": 14,
    "rules": 29,
    "rounds": 6,
-   "seconds": 4.095211029052734
+   "seconds": 2.432252883911133
   },
   {
    "condition": "term_med",
@@ -2478,12 +2478,12 @@
    "novelty": 0.98,
    "grammatical_novel": 0.954,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 23.81644790899816,
+   "bits_per_train_sentence": 23.82176178311735,
    "bits_per_test_sentence": 22.514594089674386,
    "symbols": 12,
    "rules": 27,
    "rounds": 6,
-   "seconds": 8.122050046920776
+   "seconds": 4.221265077590942
   },
   {
    "condition": "term_med",
@@ -2496,12 +2496,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.004,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 57.420387920576545,
+   "bits_per_train_sentence": 57.590431892390654,
    "bits_per_test_sentence": 41.044375511850795,
    "symbols": 3,
    "rules": 6,
    "rounds": 6,
-   "seconds": 0.30342984199523926
+   "seconds": 0.41578221321105957
   },
   {
    "condition": "term_med",
@@ -2514,12 +2514,12 @@
    "novelty": 0.996,
    "grammatical_novel": 0.162,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 48.336813147404605,
+   "bits_per_train_sentence": 48.42183513331166,
    "bits_per_test_sentence": 31.742476036948744,
    "symbols": 8,
    "rules": 25,
    "rounds": 6,
-   "seconds": 0.5939681529998779
+   "seconds": 0.5868978500366211
   },
   {
    "condition": "term_med",
@@ -2532,12 +2532,12 @@
    "novelty": 0.994,
    "grammatical_novel": 0.928,
    "gen_rejected_long": 1,
-   "bits_per_train_sentence": 32.85225501504513,
+   "bits_per_train_sentence": 32.894766007998655,
    "bits_per_test_sentence": 24.95393676121234,
    "symbols": 11,
    "rules": 27,
    "rounds": 6,
-   "seconds": 1.36155104637146
+   "seconds": 0.9653708934783936
   },
   {
    "condition": "term_med",
@@ -2550,12 +2550,12 @@
    "novelty": 0.994,
    "grammatical_novel": 0.866,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 28.481714343517062,
+   "bits_per_train_sentence": 28.50296983999383,
    "bits_per_test_sentence": 24.045446384954722,
    "symbols": 12,
    "rules": 29,
    "rounds": 6,
-   "seconds": 2.1369879245758057
+   "seconds": 1.3333549499511719
   },
   {
    "condition": "term_med",
@@ -2568,12 +2568,12 @@
    "novelty": 0.982,
    "grammatical_novel": 0.966,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 25.51971810440732,
+   "bits_per_train_sentence": 25.530345852645702,
    "bits_per_test_sentence": 23.45267081984544,
    "symbols": 12,
    "rules": 29,
    "rounds": 6,
-   "seconds": 3.984179973602295
+   "seconds": 2.31984281539917
   },
   {
    "condition": "term_med",
@@ -2586,12 +2586,12 @@
    "novelty": 0.984,
    "grammatical_novel": 0.98,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 23.298939778129345,
+   "bits_per_train_sentence": 23.304253652248534,
    "bits_per_test_sentence": 23.37016363005332,
    "symbols": 12,
    "rules": 29,
    "rounds": 6,
-   "seconds": 8.645927906036377
+   "seconds": 4.256890773773193
   },
   {
    "condition": "term_med",
@@ -2604,12 +2604,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.002,
    "gen_rejected_long": 16,
-   "bits_per_train_sentence": 66.37730559483276,
+   "bits_per_train_sentence": 66.54734956664687,
    "bits_per_test_sentence": 39.87956997336964,
    "symbols": 2,
    "rules": 7,
    "rounds": 6,
-   "seconds": 0.2954440116882324
+   "seconds": 0.3149871826171875
   },
   {
    "condition": "term_med",
@@ -2622,12 +2622,12 @@
    "novelty": 0.998,
    "grammatical_novel": 0.544,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 51.199199746084105,
+   "bits_per_train_sentence": 51.28422173199116,
    "bits_per_test_sentence": 30.883450586216263,
    "symbols": 7,
    "rules": 28,
    "rounds": 6,
-   "seconds": 0.5680229663848877
+   "seconds": 0.500878095626831
   },
   {
    "condition": "term_med",
@@ -2640,12 +2640,12 @@
    "novelty": 0.998,
    "grammatical_novel": 0.376,
    "gen_rejected_long": 1,
-   "bits_per_train_sentence": 40.0890512456415,
+   "bits_per_train_sentence": 40.13156223859503,
    "bits_per_test_sentence": 25.253921190358366,
    "symbols": 10,
    "rules": 26,
    "rounds": 6,
-   "seconds": 1.296950101852417
+   "seconds": 0.9527690410614014
   },
   {
    "condition": "term_med",
@@ -2658,12 +2658,12 @@
    "novelty": 0.994,
    "grammatical_novel": 0.836,
    "gen_rejected_long": 1,
-   "bits_per_train_sentence": 30.219865598497744,
+   "bits_per_train_sentence": 30.24112109497451,
    "bits_per_test_sentence": 23.41284517426917,
    "symbols": 12,
    "rules": 28,
    "rounds": 6,
-   "seconds": 2.1670472621917725
+   "seconds": 1.437880277633667
   },
   {
    "condition": "term_med",
@@ -2676,12 +2676,12 @@
    "novelty": 0.99,
    "grammatical_novel": 0.906,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 26.5702292053521,
+   "bits_per_train_sentence": 26.580856953590477,
    "bits_per_test_sentence": 22.901566564222655,
    "symbols": 12,
    "rules": 29,
    "rounds": 6,
-   "seconds": 3.7817349433898926
+   "seconds": 2.3749911785125732
   },
   {
    "condition": "term_med",
@@ -2694,12 +2694,12 @@
    "novelty": 0.968,
    "grammatical_novel": 0.94,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 23.963158935892995,
+   "bits_per_train_sentence": 23.968472810012184,
    "bits_per_test_sentence": 22.709264927986496,
    "symbols": 12,
    "rules": 28,
    "rounds": 6,
-   "seconds": 10.797285795211792
+   "seconds": 4.7699432373046875
   },
   {
    "condition": "term_high",
@@ -2712,12 +2712,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.002,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 75.9134797757752,
+   "bits_per_train_sentence": 76.08352374758931,
    "bits_per_test_sentence": 56.200468228458384,
    "symbols": 6,
    "rules": 6,
    "rounds": 6,
-   "seconds": 0.32772278785705566
+   "seconds": 0.36645007133483887
   },
   {
    "condition": "term_high",
@@ -2730,12 +2730,12 @@
    "novelty": 0.998,
    "grammatical_novel": 0.072,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 62.99178090786436,
+   "bits_per_train_sentence": 63.076802893771415,
    "bits_per_test_sentence": 43.04045825051757,
    "symbols": 9,
    "rules": 20,
    "rounds": 6,
-   "seconds": 0.5094802379608154
+   "seconds": 0.5050182342529297
   },
   {
    "condition": "term_high",
@@ -2748,12 +2748,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.58,
    "gen_rejected_long": 1,
-   "bits_per_train_sentence": 49.35136172306328,
+   "bits_per_train_sentence": 49.3938727160168,
    "bits_per_test_sentence": 32.671073881618874,
    "symbols": 11,
    "rules": 39,
    "rounds": 6,
-   "seconds": 1.0839128494262695
+   "seconds": 0.8553290367126465
   },
   {
    "condition": "term_high",
@@ -2766,12 +2766,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.928,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 40.427699692416425,
+   "bits_per_train_sentence": 40.44895518889319,
    "bits_per_test_sentence": 30.7090543241142,
    "symbols": 12,
    "rules": 46,
    "rounds": 6,
-   "seconds": 2.379281759262085
+   "seconds": 1.596709966659546
   },
   {
    "condition": "term_high",
@@ -2784,12 +2784,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.98,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 34.912196437302114,
+   "bits_per_train_sentence": 34.9228241855405,
    "bits_per_test_sentence": 30.534911878447424,
    "symbols": 12,
    "rules": 44,
    "rounds": 6,
-   "seconds": 4.850685119628906
+   "seconds": 2.719487190246582
   },
   {
    "condition": "term_high",
@@ -2802,12 +2802,12 @@
    "novelty": 1.0,
    "grammatical_novel": 1.0,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 32.75640538045997,
+   "bits_per_train_sentence": 32.761719254579155,
    "bits_per_test_sentence": 30.42802287578585,
    "symbols": 12,
    "rules": 45,
    "rounds": 6,
-   "seconds": 11.435567140579224
+   "seconds": 5.056437015533447
   },
   {
    "condition": "term_high",
@@ -2820,12 +2820,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.0,
    "gen_rejected_long": 1,
-   "bits_per_train_sentence": 79.38462274444906,
+   "bits_per_train_sentence": 79.55466671626317,
    "bits_per_test_sentence": 63.62372607226963,
    "symbols": 6,
    "rules": 5,
    "rounds": 6,
-   "seconds": 0.32331013679504395
+   "seconds": 0.3774378299713135
   },
   {
    "condition": "term_high",
@@ -2838,12 +2838,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.004,
    "gen_rejected_long": 1,
-   "bits_per_train_sentence": 63.61171260914521,
+   "bits_per_train_sentence": 63.69673459505226,
    "bits_per_test_sentence": 47.783116013676135,
    "symbols": 6,
    "rules": 9,
    "rounds": 6,
-   "seconds": 0.516787052154541
+   "seconds": 0.5054960250854492
   },
   {
    "condition": "term_high",
@@ -2853,15 +2853,15 @@
    "parse_commission": 0.0,
    "exact_match": 1.0,
    "gen_commission": 0.874,
-   "novelty": 1.0,
-   "grammatical_novel": 0.126,
+   "novelty": 0.998,
+   "grammatical_novel": 0.124,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 56.25275886191001,
-   "bits_per_test_sentence": 39.261983938479204,
+   "bits_per_train_sentence": 56.170095136435236,
+   "bits_per_test_sentence": 39.274341267104454,
    "symbols": 11,
    "rules": 38,
    "rounds": 6,
-   "seconds": 1.035022258758545
+   "seconds": 0.894434928894043
   },
   {
    "condition": "term_high",
@@ -2870,16 +2870,16 @@
    "omission": 0.0,
    "parse_commission": 0.0,
    "exact_match": 1.0,
-   "gen_commission": 0.6719999999999999,
+   "gen_commission": 0.616,
    "novelty": 1.0,
-   "grammatical_novel": 0.328,
+   "grammatical_novel": 0.384,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 46.53572090979639,
-   "bits_per_test_sentence": 34.769590427703086,
+   "bits_per_train_sentence": 46.534398343864915,
+   "bits_per_test_sentence": 34.909075337980056,
    "symbols": 12,
    "rules": 49,
    "rounds": 6,
-   "seconds": 1.9936342239379883
+   "seconds": 1.5382859706878662
   },
   {
    "condition": "term_high",
@@ -2892,12 +2892,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.96,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 35.06895587812299,
+   "bits_per_train_sentence": 35.07958362636138,
    "bits_per_test_sentence": 31.184254206301908,
    "symbols": 12,
    "rules": 46,
    "rounds": 6,
-   "seconds": 5.460202693939209
+   "seconds": 2.7485311031341553
   },
   {
    "condition": "term_high",
@@ -2910,12 +2910,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.964,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 33.11691783330787,
+   "bits_per_train_sentence": 33.12223170742706,
    "bits_per_test_sentence": 31.091168561724107,
    "symbols": 12,
    "rules": 45,
    "rounds": 6,
-   "seconds": 11.081524848937988
+   "seconds": 4.792794227600098
   },
   {
    "condition": "term_high",
@@ -2928,12 +2928,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.0,
    "gen_rejected_long": 2,
-   "bits_per_train_sentence": 88.85932457750815,
+   "bits_per_train_sentence": 89.02936854932224,
    "bits_per_test_sentence": 52.84023444755284,
    "symbols": 4,
    "rules": 5,
    "rounds": 6,
-   "seconds": 0.3519160747528076
+   "seconds": 0.351970911026001
   },
   {
    "condition": "term_high",
@@ -2946,12 +2946,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.008,
    "gen_rejected_long": 3,
-   "bits_per_train_sentence": 75.80861571678994,
+   "bits_per_train_sentence": 75.89363770269699,
    "bits_per_test_sentence": 44.84727155911429,
    "symbols": 7,
    "rules": 19,
    "rounds": 6,
-   "seconds": 0.48932600021362305
+   "seconds": 0.4615349769592285
   },
   {
    "condition": "term_high",
@@ -2964,12 +2964,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.134,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 54.39514819358595,
+   "bits_per_train_sentence": 54.437659186539484,
    "bits_per_test_sentence": 35.9323729807643,
    "symbols": 12,
    "rules": 39,
    "rounds": 6,
-   "seconds": 1.008328914642334
+   "seconds": 0.9014558792114258
   },
   {
    "condition": "term_high",
@@ -2982,12 +2982,12 @@
    "novelty": 0.998,
    "grammatical_novel": 0.876,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 42.627016036911996,
+   "bits_per_train_sentence": 42.64827153338876,
    "bits_per_test_sentence": 30.10466356826322,
    "symbols": 12,
    "rules": 46,
    "rounds": 6,
-   "seconds": 2.539125919342041
+   "seconds": 1.6309559345245361
   },
   {
    "condition": "term_high",
@@ -3000,12 +3000,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.866,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 37.128232935560156,
+   "bits_per_train_sentence": 37.13886068379854,
    "bits_per_test_sentence": 30.049210070955713,
    "symbols": 12,
    "rules": 47,
    "rounds": 6,
-   "seconds": 5.682409048080444
+   "seconds": 2.8525218963623047
   },
   {
    "condition": "term_high",
@@ -3018,12 +3018,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.97,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 33.23624208301702,
+   "bits_per_train_sentence": 33.241555957136214,
    "bits_per_test_sentence": 29.777725014504192,
    "symbols": 12,
    "rules": 45,
    "rounds": 6,
-   "seconds": 12.151309967041016
+   "seconds": 5.029571056365967
   },
   {
    "condition": "term_high",
@@ -3036,12 +3036,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.004,
    "gen_rejected_long": 1,
-   "bits_per_train_sentence": 83.15639055045882,
+   "bits_per_train_sentence": 83.32643452227293,
    "bits_per_test_sentence": 54.075995411332215,
    "symbols": 4,
    "rules": 7,
    "rounds": 6,
-   "seconds": 0.3606691360473633
+   "seconds": 0.3943748474121094
   },
   {
    "condition": "term_high",
@@ -3054,12 +3054,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.06,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 67.76351920647541,
+   "bits_per_train_sentence": 67.84854119238246,
    "bits_per_test_sentence": 39.271084461568,
    "symbols": 10,
    "rules": 20,
    "rounds": 6,
-   "seconds": 0.5818018913269043
+   "seconds": 0.5408010482788086
   },
   {
    "condition": "term_high",
@@ -3072,12 +3072,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.274,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 58.04138815787314,
+   "bits_per_train_sentence": 58.083899150826674,
    "bits_per_test_sentence": 32.240228743308066,
    "symbols": 12,
    "rules": 45,
    "rounds": 6,
-   "seconds": 1.0196030139923096
+   "seconds": 0.9387869834899902
   },
   {
    "condition": "term_high",
@@ -3090,12 +3090,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.846,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 41.82385574555143,
+   "bits_per_train_sentence": 41.84511124202819,
    "bits_per_test_sentence": 29.15860370977988,
    "symbols": 12,
    "rules": 46,
    "rounds": 6,
-   "seconds": 2.71982479095459
+   "seconds": 1.6705372333526611
   },
   {
    "condition": "term_high",
@@ -3108,12 +3108,12 @@
    "novelty": 0.998,
    "grammatical_novel": 0.948,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 34.75044423181821,
+   "bits_per_train_sentence": 34.76107198005659,
    "bits_per_test_sentence": 28.953736319200253,
    "symbols": 12,
    "rules": 46,
    "rounds": 6,
-   "seconds": 4.371263027191162
+   "seconds": 2.4826111793518066
   },
   {
    "condition": "term_high",
@@ -3126,12 +3126,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.95,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 32.91390462764427,
+   "bits_per_train_sentence": 32.91921850176346,
    "bits_per_test_sentence": 28.849951615857027,
    "symbols": 12,
    "rules": 45,
    "rounds": 6,
-   "seconds": 9.885360956192017
+   "seconds": 4.363708019256592
   },
   {
    "condition": "term_high",
@@ -3144,12 +3144,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.0,
    "gen_rejected_long": 2,
-   "bits_per_train_sentence": 87.87243788829161,
+   "bits_per_train_sentence": 88.04248186010572,
    "bits_per_test_sentence": 58.6351667431605,
    "symbols": 3,
    "rules": 3,
    "rounds": 6,
-   "seconds": 0.3039517402648926
+   "seconds": 0.37326812744140625
   },
   {
    "condition": "term_high",
@@ -3162,12 +3162,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.01,
    "gen_rejected_long": 1,
-   "bits_per_train_sentence": 75.08917224687137,
+   "bits_per_train_sentence": 75.17419423277843,
    "bits_per_test_sentence": 45.01758553107754,
    "symbols": 9,
    "rules": 16,
    "rounds": 6,
-   "seconds": 0.5919430255889893
+   "seconds": 0.5397670269012451
   },
   {
    "condition": "term_high",
@@ -3180,12 +3180,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.226,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 56.78599662598522,
+   "bits_per_train_sentence": 56.82850761893875,
    "bits_per_test_sentence": 35.08887009422217,
    "symbols": 12,
    "rules": 44,
    "rounds": 6,
-   "seconds": 1.2681818008422852
+   "seconds": 0.9314208030700684
   },
   {
    "condition": "term_high",
@@ -3198,12 +3198,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.818,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 43.065154994574925,
+   "bits_per_train_sentence": 43.086410491051694,
    "bits_per_test_sentence": 31.850917329781396,
    "symbols": 12,
    "rules": 49,
    "rounds": 6,
-   "seconds": 2.3911149501800537
+   "seconds": 1.4734487533569336
   },
   {
    "condition": "term_high",
@@ -3216,12 +3216,12 @@
    "novelty": 1.0,
    "grammatical_novel": 0.962,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 36.16073553755056,
+   "bits_per_train_sentence": 36.171363285788935,
    "bits_per_test_sentence": 30.832618826254198,
    "symbols": 12,
    "rules": 47,
    "rounds": 6,
-   "seconds": 5.0618860721588135
+   "seconds": 2.4647271633148193
   },
   {
    "condition": "term_high",
@@ -3234,12 +3234,12 @@
    "novelty": 0.996,
    "grammatical_novel": 0.978,
    "gen_rejected_long": 0,
-   "bits_per_train_sentence": 33.05417976903952,
+   "bits_per_train_sentence": 33.05949364315871,
    "bits_per_test_sentence": 30.73036328668898,
    "symbols": 12,
    "rules": 46,
    "rounds": 6,
-   "seconds": 8.933286905288696
+   "seconds": 4.022560119628906
   }
  ]
 }

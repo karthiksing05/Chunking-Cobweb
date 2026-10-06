@@ -19,16 +19,16 @@
    "bigram bits/sentence": 26.58725976895053
   },
   "unsupervised": {
-   "omission": 0.48843187660668386,
-   "commission": 0.6314814814814815,
-   "base_phrase_omission": 0.2564102564102564,
-   "test_bits_per_sentence": 26.142567241808486,
-   "test_top_level_chunks": 4.425925925925926,
-   "total_bits": 46815.84333246735,
-   "symbols": 14,
+   "omission": 0.480719794344473,
+   "commission": 0.625925925925926,
+   "base_phrase_omission": 0.2512820512820513,
+   "test_bits_per_sentence": 25.655895498942,
+   "test_top_level_chunks": 4.444444444444445,
+   "total_bits": 46644.27349066556,
+   "symbols": 15,
    "rule_classes": 28,
-   "chunk_types": 8,
-   "seconds": 1968.5239281654358,
+   "chunk_types": 10,
+   "seconds": 467.41847014427185,
    "history": [
     {
      "night": 0.0,
@@ -36,7 +36,7 @@
      "move": "start",
      "bits": 54581.629592812395,
      "sentences": 1109.0,
-     "seconds": 0.06861019134521484
+     "seconds": 0.05690503120422363
     },
     {
      "night": 0.0,
@@ -44,46 +44,54 @@
      "move": "chunk and merge from 16 word classes",
      "bits": 48866.82404688445,
      "sentences": 1109.0,
-     "seconds": 81.84722304344177
+     "seconds": 53.054864168167114
     },
     {
      "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 47727.35422334818,
+     "bits": 47234.24852480026,
      "sentences": 1109.0,
-     "seconds": 1968.1340792179108
+     "seconds": 467.0915172100067
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 47025.32940230628,
+     "bits": 46745.34374500857,
      "sentences": 1109.0,
-     "seconds": 1968.1340820789337
+     "seconds": 467.0915198326111
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 46815.84333246735,
+     "bits": 46656.89320352071,
      "sentences": 1109.0,
-     "seconds": 1968.1340832710266
+     "seconds": 467.0915198326111
+    },
+    {
+     "night": 0.0,
+     "stage": "re-analysis",
+     "move": "viterbi",
+     "bits": 46644.27349066556,
+     "sentences": 1109.0,
+     "seconds": 467.091521024704
     }
    ],
-   "train_top_level_chunks": 6.975653742110009
+   "train_top_level_chunks": 6.926059513074843
   },
   "supervised": {
-   "omission": 0.16966580976863754,
-   "commission": 0.4018518518518519,
-   "base_phrase_omission": 0.16410256410256407,
-   "test_bits_per_sentence": 26.202871952327797,
+   "omission": 0.17480719794344468,
+   "commission": 0.40555555555555556,
+   "base_phrase_omission": 0.16923076923076918,
+   "test_bits_per_sentence": 25.578856004315863,
    "test_top_level_chunks": 1.0,
-   "total_bits": 51354.686609304146,
+   "total_bits": 51167.84193658814,
    "symbols": 13,
    "rule_classes": 41,
    "chunk_types": 40,
-   "seconds": 45.69420886039734
+   "seconds": 16.776941776275635
   }
  },
  {
@@ -106,16 +114,16 @@
    "bigram bits/sentence": 27.532169475084263
   },
   "unsupervised": {
-   "omission": 0.5504807692307692,
-   "commission": 0.671353251318102,
-   "base_phrase_omission": 0.3084577114427861,
-   "test_bits_per_sentence": 27.24479068092956,
-   "test_top_level_chunks": 4.342592592592593,
-   "total_bits": 46325.43601243241,
-   "symbols": 11,
-   "rule_classes": 27,
-   "chunk_types": 14,
-   "seconds": 1676.402265071869,
+   "omission": 0.5360576923076923,
+   "commission": 0.6608084358523726,
+   "base_phrase_omission": 0.31343283582089554,
+   "test_bits_per_sentence": 26.899352061035817,
+   "test_top_level_chunks": 4.731481481481482,
+   "total_bits": 46496.46303657171,
+   "symbols": 15,
+   "rule_classes": 39,
+   "chunk_types": 16,
+   "seconds": 335.3227527141571,
    "history": [
     {
      "night": 0.0,
@@ -123,62 +131,70 @@
      "move": "start",
      "bits": 54431.79285992369,
      "sentences": 1106.0,
-     "seconds": 0.08077383041381836
+     "seconds": 0.05254006385803223
     },
     {
      "night": 0.0,
      "stage": "structure",
-     "move": "chunk and merge from 24 word classes",
-     "bits": 48910.98550960615,
+     "move": "chunk and merge from 20 word classes",
+     "bits": 48948.059323807174,
      "sentences": 1106.0,
-     "seconds": 76.08008599281311
+     "seconds": 48.38649606704712
     },
     {
      "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 47916.029536511094,
+     "bits": 48468.02930204559,
      "sentences": 1106.0,
-     "seconds": 1676.1011707782745
+     "seconds": 335.07894802093506
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 47242.29151220306,
+     "bits": 46885.92081485596,
      "sentences": 1106.0,
-     "seconds": 1676.1011729240417
+     "seconds": 335.0789499282837
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 46670.88341563346,
+     "bits": 46544.18319585045,
      "sentences": 1106.0,
-     "seconds": 1676.1011729240417
+     "seconds": 335.078950881958
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 46325.43601243241,
+     "bits": 46508.100841008214,
      "sentences": 1106.0,
-     "seconds": 1676.101173877716
+     "seconds": 335.078950881958
+    },
+    {
+     "night": 0.0,
+     "stage": "re-analysis",
+     "move": "viterbi",
+     "bits": 46496.46303657171,
+     "sentences": 1106.0,
+     "seconds": 335.0789520740509
     }
    ],
-   "train_top_level_chunks": 6.768535262206148
+   "train_top_level_chunks": 7.1292947558770345
   },
   "supervised": {
-   "omission": 0.15865384615384615,
-   "commission": 0.38488576449912126,
-   "base_phrase_omission": 0.1393034825870647,
-   "test_bits_per_sentence": 27.40930113960168,
+   "omission": 0.15625,
+   "commission": 0.38312829525483305,
+   "base_phrase_omission": 0.13432835820895528,
+   "test_bits_per_sentence": 26.6642067064459,
    "test_top_level_chunks": 1.0,
-   "total_bits": 51391.25204922028,
+   "total_bits": 51156.17467075274,
    "symbols": 13,
-   "rule_classes": 40,
-   "chunk_types": 44,
-   "seconds": 51.88599181175232
+   "rule_classes": 36,
+   "chunk_types": 47,
+   "seconds": 18.258365154266357
   }
  }
 ]

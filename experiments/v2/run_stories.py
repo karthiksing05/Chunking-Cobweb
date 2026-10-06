@@ -124,10 +124,10 @@ def main():
     ap.add_argument("--seed", type=int, default=13)
     ap.add_argument("--sentence-parent", action="store_true",
                     help="record the sentence as the parent above whole trees' top parts and forests' pieces")
-    ap.add_argument("--read-words", type=int, default=1,
+    ap.add_argument("--read-words", type=int, default=2,
                     help="how many of the words just read each rule choice may see (description length decides)")
     ap.add_argument("--fresh-pieces", action="store_true",
-                    help="read each piece of a forest afresh, its first word in the light of BOS")
+                    help="read each piece of a forest afresh, its first word in the light of BOS (with --read-words 1)")
     ap.add_argument("--workers", type=int, default=os.cpu_count() or 1,
                     help="processes for the night's independent searches and consolidations (same result)")
     ap.add_argument("--out", default=os.path.join(HERE, "results", "stories"))
