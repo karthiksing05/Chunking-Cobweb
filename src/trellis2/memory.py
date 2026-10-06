@@ -94,7 +94,7 @@ class Memory:
     def __init__(self, context_width: int = 1, spine_depth: int = 2,
                  granularities: int = 2, composition_ref: bool = False,
                  sentence_bags: bool = False, previous_word: bool = True,
-                 sentence_parent: bool = False, fresh_pieces: bool = False):
+                 sentence_parent: bool = False, fresh_pieces: bool = False, read_words: int = 1):
         self.context_width = context_width
         self.spine_depth = spine_depth
         self.granularities = granularities
@@ -112,6 +112,12 @@ class Memory:
         # piece's start is read in the light of BOS, not of the previous
         # piece's last word (``contexts``).
         self.fresh_pieces = fresh_pieces
+        # How many of the words just read the memory offers as each rule
+        # choice's context (1 or 2); description length decides how many the
+        # grammar uses.
+        if read_words not in (1, 2) or (read_words == 2 and fresh_pieces):
+            raise ValueError("read_words is 1 or 2, and pieces are read afresh with one word only")
+        self.read_words = read_words
         self.attrs = representation_attrs(context_width, spine_depth, granularities,
                                           composition_ref, sentence_bags)
         self.kind: List[int] = []
@@ -193,13 +199,18 @@ class Memory:
     def contexts(self) -> Optional[List[Hashable]]:
         """What the read has seen just before each element, in whose light its
         rule class is chosen: for a sentence, the word before the element's
-        span (BOS at the start). None: every choice is made the same way."""
+        span (BOS at the start), or the two words before it (``read_words=2``;
+        the grammar then chooses by description length between none, one and
+        two). None: every choice is made the same way."""
         if not self.previous_word:
             return None
         fresh = set()
         if self.fresh_pieces:
             fresh = {(self.experience_of[e], self.span[e][0]) for e in range(len(self.span))
                      if self.is_root[e] and (self.top_left[e] >= 0 or self.top_right[e] >= 0)}
+        if self.read_words == 2:
+            return [(self.experiences[s][i - 2] if i > 1 else BOS, self.experiences[s][i - 1] if i > 0 else BOS)
+                    for s, (i, _) in zip(self.experience_of, self.span)]
         return [self.experiences[s][i - 1] if i > 0 and (s, i) not in fresh else BOS
                 for s, (i, _) in zip(self.experience_of, self.span)]
 

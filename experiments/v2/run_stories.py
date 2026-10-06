@@ -124,6 +124,8 @@ def main():
     ap.add_argument("--seed", type=int, default=13)
     ap.add_argument("--sentence-parent", action="store_true",
                     help="record the sentence as the parent above whole trees' top parts and forests' pieces")
+    ap.add_argument("--read-words", type=int, default=1,
+                    help="how many of the words just read each rule choice may see (description length decides)")
     ap.add_argument("--fresh-pieces", action="store_true",
                     help="read each piece of a forest afresh, its first word in the light of BOS")
     ap.add_argument("--workers", type=int, default=os.cpu_count() or 1,
@@ -145,7 +147,7 @@ def main():
 
     t0 = time.time()
     learner = UnsupervisedLearner(seed=args.seed, workers=args.workers, sentence_parent=args.sentence_parent,
-                                  fresh_pieces=args.fresh_pieces)
+                                  fresh_pieces=args.fresh_pieces, read_words=args.read_words)
     for s in train:
         learner.observe(s)
     g = learner.sleep()

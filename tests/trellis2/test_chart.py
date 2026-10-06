@@ -189,10 +189,10 @@ def brute_force_forests(g, tokens):
     n = len(tokens)
     # A span's rule choice is made in the light of the word before it, or of
     # BOS at the start of a piece read afresh.
-    U = [g.rules(tokens[i - 1] if i else "<s>") for i in range(n)]
+    U = [g.rules(g.read(tokens, i)) for i in range(n)]
     rule = [np.einsum("ac,c,cb,cd->abd", u, g.qk, g.Lt, g.Rt) for u in U]
     lex = [u @ (g.pk[:, None] * g.E) for u in U]
-    U0 = g.rules("<s>")
+    U0 = g.rules(g.read([], 0))
     rule0 = np.einsum("ac,c,cb,cd->abd", U0, g.qk, g.Lt, g.Rt)
     lex0 = U0 @ (g.pk[:, None] * g.E)
     total, span_mass, label_mass, best = 0.0, {}, {}, (-1.0, None)
@@ -237,15 +237,32 @@ def context_grammar(seed, p_stop=0.6, p_whole=0.4, fresh_pieces=False):
                    Uc=Uc / Uc.sum(axis=-1, keepdims=True), fresh_pieces=fresh_pieces)
 
 
+def pair_grammar(seed, p_stop=0.6, p_whole=0.4):
+    """A context grammar that also reads two words: some pairs, for some
+    symbols, have rows of their own; every other pair reads as its last
+    word."""
+    g = context_grammar(seed, p_stop, p_whole)
+    rng = np.random.default_rng(seed + 300)
+    Uc2 = {}
+    for pair in [("<s>", "<s>"), ("<s>", "w0"), ("w0", "w1"), ("w1", "w1"), ("w2", "w0")]:
+        A = np.sort(rng.choice(g.K, size=2, replace=False))
+        r = rng.random((2, g.M)) + 0.05
+        Uc2[pair] = (A, r / r.sum(axis=1, keepdims=True))
+    return Grammar(vocab=g.vocab, S=g.S, U=g.U, pk=g.pk, Lt=g.Lt, Rt=g.Rt, E=g.E, alpha=0.0,
+                   p_stop=p_stop, p_whole=p_whole, S_piece=g.S_piece, contexts=g.contexts, Uc=g.Uc, Uc2=Uc2)
+
+
 def make_grammar(make, seed, **kw):
     if make == "forest":
         return forest_grammar(seed, **kw)
+    if make == "pairs":
+        return pair_grammar(seed, **kw)
     return context_grammar(seed, fresh_pieces=make == "fresh", **kw)
 
 
 @pytest.mark.parametrize("n,seed,make", [(2, 4, "forest"), (3, 5, "forest"), (4, 6, "forest"),
                                          (3, 9, "context"), (4, 10, "context"),
-                                         (3, 11, "fresh"), (4, 12, "fresh")])
+                                         (3, 11, "fresh"), (4, 12, "fresh"), (3, 13, "pairs"), (4, 14, "pairs")])
 def test_forest_inside_and_posteriors_match_enumeration(n, seed, make):
     g = make_grammar(make, seed)
     tokens = [f"w{(seed + i) % 3}" for i in range(n)]
@@ -262,7 +279,7 @@ def test_forest_inside_and_posteriors_match_enumeration(n, seed, make):
                 assert mu[i, j, a] == pytest.approx(expected, abs=1e-10)
 
 
-@pytest.mark.parametrize("make", ["forest", "context", "fresh"])
+@pytest.mark.parametrize("make", ["forest", "context", "fresh", "pairs"])
 def test_forest_viterbi_finds_the_most_probable_analysis(make):
     g = make_grammar(make, 8, p_stop=0.5)
     tokens = ["w1", "w0", "w2", "w2"]
@@ -272,7 +289,7 @@ def test_forest_viterbi_finds_the_most_probable_analysis(make):
     assert all(got.label[s] == lab[s] for s in got.label)
 
 
-@pytest.mark.parametrize("make", ["forest", "context", "fresh"])
+@pytest.mark.parametrize("make", ["forest", "context", "fresh", "pairs"])
 def test_forest_samples_match_posteriors(make):
     g = make_grammar(make, 2, p_stop=0.5)
     chart = Chart(g, ["w0", "w2", "w1", "w1"])
@@ -300,11 +317,11 @@ def test_whole_only_samples_are_single_trees():
     assert min(t for t in tops if t > 1) == 2
 
 
-@pytest.mark.parametrize("fresh", [False, True])
-def test_the_grammar_draws_sentences_as_often_as_the_chart_codes_them(fresh):
-    """Each piece of a forest read in the light of the word before it, or
-    afresh from BOS: either way the sampler and the chart agree."""
-    g = context_grammar(5, p_stop=0.6, p_whole=0.3, fresh_pieces=fresh)
+@pytest.mark.parametrize("make", ["context", "fresh", "pairs"])
+def test_the_grammar_draws_sentences_as_often_as_the_chart_codes_them(make):
+    """Each piece of a forest read in the light of the word (or two) before
+    it, or afresh from BOS: either way the sampler and the chart agree."""
+    g = make_grammar(make, 5, p_stop=0.6, p_whole=0.3)
     rng = np.random.default_rng(0)
     n, counts = 20000, {}
     for _ in range(n):

@@ -152,14 +152,17 @@ def main():
     ap.add_argument("--test", type=int, default=500)
     ap.add_argument("--n-gen", type=int, default=1000)
     ap.add_argument("--seed", type=int, default=13)
+    ap.add_argument("--min-elo", type=int, default=1800,
+                    help="both players rated at least this (the positions file is named after it)")
     ap.add_argument("--out", default=os.path.join(HERE, "results", "chess"))
     args = ap.parse_args()
+    path = default_positions_path().replace("1800", str(args.min_elo))
     if args.extract:
         src = os.path.join(os.path.dirname(default_positions_path()), "lichess_db_standard_rated_2013-01.pgn.zst")
-        extract(src, default_positions_path())
+        extract(src, path, min_elo=args.min_elo)
         return
     os.makedirs(args.out, exist_ok=True)
-    positions = load_positions()
+    positions = load_positions(path)
     order = np.random.default_rng(args.seed).permutation(len(positions))
     train = [positions[i] for i in order[:args.train]]
     test = [positions[i] for i in order[args.train:args.train + args.test]]
@@ -301,7 +304,7 @@ def main():
     fig.savefig(os.path.join(args.out, "generated_positions.png"), dpi=150, facecolor=SURFACE)
     plt.close(fig)
 
-    lines = [f"Chess positions (Lichess, both players 1800+, after ply 30): {len(train)} learned, {len(test)} held out.", "",
+    lines = [f"Chess positions (Lichess, both players {args.min_elo}+, after ply 30): {len(train)} learned, {len(test)} held out.", "",
              (f"The read asks, at each square, of each kind of piece in turn whether an element is anchored "
               f"there on it, given how many pieces of that kind stand on earlier squares. Dirichlet concentration "
               f"α = {learner.alpha:g}. Read without the counts, squares on their own: {held_plain:.2f} held-out bits "

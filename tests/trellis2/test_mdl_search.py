@@ -88,3 +88,28 @@ def test_backoff_code_is_the_sequential_code():
         n_gxk[gi, xi, ki] += 1
         n_gx[gi, xi] += 1
     assert math.isclose(backoff_code(g, x, k, np.ones(n), A, alpha, beta), nats, rel_tol=1e-12)
+
+
+def test_backoff_chain_is_the_sequential_code():
+    """Two words of context backing off to one, then to none: the vectorised
+    prequential code equals coding the events one by one, and one level of
+    the chain is exactly ``backoff_coder``."""
+    import math
+    from collections import Counter
+    import numpy as np
+    from trellis2.mdl import backoff_chain_coder, backoff_coder
+    rng = np.random.default_rng(3)
+    n, A, alpha = 300, 5, 0.01
+    g, x1 = rng.integers(0, 3, n), rng.integers(0, 4, n)
+    x2 = x1 * 3 + rng.integers(0, 3, n)            # a pair refines its last word
+    k, w = rng.integers(0, A, n), np.ones(n)
+    assert backoff_chain_coder(g, [x1], w)(k, A, alpha, [4.0]) == backoff_coder(g, x1, w)(k, A, alpha, 4.0)
+    seen = Counter()
+    nats = 0.0
+    for gi, a, b, ki in zip(g, x1, x2, k):
+        p0 = (seen[(gi, ki)] + alpha) / (seen[gi] + A * alpha)
+        p1 = (seen[(gi, "1", a, ki)] + 4.0 * p0) / (seen[(gi, "1", a)] + 4.0)
+        p2 = (seen[(gi, "2", b, ki)] + 16.0 * p1) / (seen[(gi, "2", b)] + 16.0)
+        nats -= math.log(p2)
+        seen.update([(gi, ki), gi, (gi, "1", a, ki), (gi, "1", a), (gi, "2", b, ki), (gi, "2", b)])
+    assert math.isclose(backoff_chain_coder(g, [x1, x2], w)(k, A, alpha, [4.0, 16.0]), nats, rel_tol=1e-12)

@@ -104,6 +104,32 @@ def backoff_coder(groups: np.ndarray, contexts: np.ndarray, weights: np.ndarray)
     return code
 
 
+def backoff_chain_coder(groups: np.ndarray, contexts: Sequence[np.ndarray], weights: np.ndarray):
+    """``backoff_coder`` for a chain of contexts, each refining the one
+    before it (the word just read, then the two words just read): as a
+    function of (keys, alphabet, alpha, betas), the prequential code of
+
+        P_0(k | g)      = (n(g, k) + alpha) / (n(g) + alphabet alpha),
+        P_l(k | g, x_l) = (n(g, x_l, k) + beta_l P_{l-1}) / (n(g, x_l) + beta_l),
+
+    each event predicted by the last level from the events before it."""
+    g = groups.astype(np.int64)
+    gx = []
+    for x in contexts:
+        x = x.astype(np.int64)
+        gx.append(g * np.int64(x.max() + 1) + x)
+    n_g = _before(g, weights)
+    n_gx = [_before(k, weights) for k in gx]
+
+    def code(keys: np.ndarray, alphabet: int, alpha: float, betas: Sequence[float]) -> float:
+        k, span_k = keys.astype(np.int64), np.int64(alphabet)
+        p = (_before(g * span_k + k, weights) + alpha) / (n_g + alphabet * alpha)
+        for gxl, n, beta in zip(gx, n_gx, betas):
+            p = (_before(gxl * span_k + k, weights) + beta * p) / (n + beta)
+        return float(-np.sum(weights * np.log(p)))
+    return code
+
+
 def rows_nats(n: np.ndarray, alpha: float) -> float:
     """Code (nats) of count rows (one per row of ``n``), each a
     Dirichlet-multinomial over its columns."""

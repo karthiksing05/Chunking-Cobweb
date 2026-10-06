@@ -35,7 +35,7 @@ import numpy as np
 from scipy.special import gammaln
 
 from .cobweb import CobwebNode, CobwebTree
-from .mdl import backoff_coder, dm_code, elias_delta_bits, ml_row_nats, split_bits  # noqa: F401  (dm_code is re-exported)
+from .mdl import backoff_chain_coder, backoff_coder, dm_code, elias_delta_bits, ml_row_nats, split_bits  # noqa: F401  (dm_code is re-exported)
 from .memory import BOS, Memory
 
 LN2 = float(np.log(2.0))
@@ -298,6 +298,11 @@ class Grammar:
     # uses U.
     contexts: Optional[List[Hashable]] = None
     Uc: Optional[np.ndarray] = None
+    # Two words of the read's context (``Memory(read_words=2)``), where
+    # description length takes them: for each pair (w2, w1) seen in training,
+    # Uc2[(w2, w1)] = (the symbols seen with it, their rows), each row backing
+    # off to the one-word row Uc[A, w1]; any other pair reads as w1 alone.
+    Uc2: Optional[Dict[tuple, Tuple[np.ndarray, np.ndarray]]] = None
     # Whether each piece of a forest is read afresh, its first word in the
     # light of the sentence start (BOS) rather than of the previous piece's
     # last word: the pieces of a partial analysis then share nothing.
@@ -337,20 +342,48 @@ class Grammar:
                     Lt=self.Lt ** p, Rt=self.Rt ** p, E=self.E ** p, alpha=self.alpha,
                     p_stop=self.p_stop, p_whole=self.p_whole, S_piece=self.S_piece ** p,
                     info=dict(self.info), contexts=self.contexts,
-                    Uc=None if self.Uc is None else self.Uc ** p, fresh_pieces=self.fresh_pieces)
+                    Uc=None if self.Uc is None else self.Uc ** p, fresh_pieces=self.fresh_pieces,
+                    Uc2=None if self.Uc2 is None else {x: (A, r ** p) for x, (A, r) in self.Uc2.items()})
         g.qk = self.qk ** p
         g.log_stop, g.log_cont = self.log_stop * p, self.log_cont * p
         g.log_whole, g.log_forest = self.log_whole * p, self.log_forest * p
         return g
 
+    def read(self, tokens: Sequence[str], i: int) -> Hashable:
+        """The read's context of the element that starts at position i: the
+        word before it (BOS at the start), or the two words before it when the
+        grammar reads two."""
+        w1 = tokens[i - 1] if i > 0 else BOS
+        if self.Uc2 is None:
+            return w1
+        return (tokens[i - 2] if i > 1 else BOS, w1)
+
     def rules(self, context: Hashable = None) -> np.ndarray:
         """(K, M): P(rule class | symbol) in the light of the read's context."""
+        if isinstance(context, tuple):
+            base = self.rules(context[-1])
+            hit = None if self.Uc2 is None else self.Uc2.get(context)
+            if hit is None:
+                return base
+            out = base.copy()
+            out[hit[0]] = hit[1]
+            return out
         x = self.context_index.get(context)
         return self.U if x is None else self.Uc[:, x, :]
 
     def log_binary(self, context: Hashable = None) -> np.ndarray:
         """(K, K, K): ln P(A -> B C) in the light of the read's context, summed
-        over rule classes (kept, since every Viterbi parse asks for it)."""
+        over rule classes (kept, since every Viterbi parse asks for it, except
+        for pairs of words, which are many)."""
+        if isinstance(context, tuple):
+            if self.Uc2 is None or context not in self.Uc2:
+                return self.log_binary(context[-1])
+            K = self.K
+            pairs = self.__dict__.get("_pairs")
+            if pairs is None:
+                pairs = self._pairs = (self.Lt[:, :, None] * self.Rt[:, None, :]).reshape(self.M, K * K)
+            with np.errstate(divide="ignore"):
+                return np.log(((self.rules(context) * self.qk) @ pairs).reshape(K, K, K))
         cache = self.__dict__.setdefault("_log_binary", {})
         key = context if context in self.context_index else None
         if key not in cache:
@@ -384,9 +417,9 @@ class Grammar:
             start = len(tokens) if self.fresh_pieces else 0
             while stack:
                 sym, parent, side = stack.pop()
-                # Leaves come out left to right, so the word before this
-                # element is the last one emitted.
-                c = int(rng.choice(self.M, p=self.rules(tokens[-1] if len(tokens) > start else BOS)[sym]))
+                # Leaves come out left to right, so the words before this
+                # element are the last ones emitted.
+                c = int(rng.choice(self.M, p=self.rules(self.read(tokens[start:], len(tokens) - start))[sym]))
                 idx = len(nodes)
                 if parent < 0:
                     roots.append(idx)
@@ -488,6 +521,8 @@ class _Elements:
     n_rel: int            # 1 for sequences
     ctx: Optional[np.ndarray]           # the read's context of each element (None: none)
     contexts: Optional[List[Hashable]]  # the context of each context id
+    ctx2: Optional[np.ndarray] = None   # the two words read before it, if the memory offers them
+    contexts2: Optional[List[Hashable]] = None
 
 
 def _elements(mem: Memory, leaves: Sequence[CobwebNode], rindex: TreeIndex,
@@ -495,8 +530,13 @@ def _elements(mem: Memory, leaves: Sequence[CobwebNode], rindex: TreeIndex,
     relations = getattr(mem, "relations", None)
     rel_index = {r: i for i, r in enumerate(relations or [])}
     values = mem.contexts()
+    pairs = None
+    if values is not None and values and isinstance(values[0], tuple):
+        pairs, values = values, [x[-1] for x in values]
     contexts = sorted(set(values)) if values is not None else None
     ctx_index = {x: i for i, x in enumerate(contexts or [])}
+    contexts2 = sorted(set(pairs)) if pairs is not None else None
+    pair_index = {x: i for i, x in enumerate(contexts2 or [])}
     return _Elements(
         leafpos=np.array([rindex.leafpos_of_id[l.id] for l in leaves], dtype=np.int64),
         prim=np.array([k == Memory.PRIMITIVE for k in mem.kind]),
@@ -509,6 +549,8 @@ def _elements(mem: Memory, leaves: Sequence[CobwebNode], rindex: TreeIndex,
         n_rel=max(len(rel_index), 1),
         ctx=None if values is None else np.array([ctx_index[x] for x in values], dtype=np.int64),
         contexts=contexts,
+        ctx2=None if pairs is None else np.array([pair_index[x] for x in pairs], dtype=np.int64),
+        contexts2=contexts2,
     )
 
 
@@ -558,7 +600,7 @@ def _plain_pcfg_code(el: _Elements, V: int, alpha: float, mem: Memory
 
 
 def _factored_code(el: _Elements, s: np.ndarray, K: int, V: int, alpha: float,
-                   cleafpos: np.ndarray, weight: Optional[float] = None) -> Callable[[np.ndarray], float]:
+                   cleafpos: np.ndarray, weight=None) -> Callable[[np.ndarray], float]:
     """Code length of the derivations under the factored grammar (start term
     omitted: it does not depend on the composition cut). With a context
     ``weight``, each rule choice is coded in the light of its element's
@@ -579,7 +621,12 @@ def _factored_code(el: _Elements, s: np.ndarray, K: int, V: int, alpha: float,
     comp = ~prim
     kind = comp.astype(np.int64)
     tok, sl, sr, rel = tok[prim], sl[comp], sr[comp], rel[comp]
-    in_context = None if weight is None else backoff_coder(s, el.ctx, el.w)
+    if weight is None:
+        in_context = None
+    elif isinstance(weight, tuple):                 # two words, backing off to one
+        in_context = backoff_chain_coder(s, [el.ctx, el.ctx2], el.w)
+    else:
+        in_context = backoff_coder(s, el.ctx, el.w)
 
     def cost(leaf_to_node: np.ndarray) -> float:
         _, c = _compact(leaf_to_node[leaf])
@@ -595,6 +642,22 @@ def _factored_code(el: _Elements, s: np.ndarray, K: int, V: int, alpha: float,
             nats += dm_code(c[comp], rel, w[comp], el.n_rel, alpha)
         return nats
     return cost
+
+
+def _pair_rows(n2: np.ndarray, cell: np.ndarray, el: _Elements, n1: np.ndarray, u: np.ndarray,
+               beta1: float, beta2: float) -> Dict[tuple, Tuple[np.ndarray, np.ndarray]]:
+    """Uc2: each (symbol, pair of words) row backing off to the symbol's row
+    for the pair's last word, itself backing off to U."""
+    X2 = len(el.contexts2)
+    one = {x: i for i, x in enumerate(el.contexts)}
+    out: Dict[tuple, List] = defaultdict(lambda: ([], []))
+    for row, cl in zip(n2, cell):
+        A, x2 = divmod(int(cl), X2)
+        pair = el.contexts2[x2]
+        base = (n1[A, one[pair[-1]]] + beta1 * u[A]) / (n1[A, one[pair[-1]]].sum() + beta1)
+        out[pair][0].append(A)
+        out[pair][1].append((row + beta2 * base) / (row.sum() + beta2))
+    return {x: (np.array(A, dtype=np.int64), np.array(r)) for x, (A, r) in out.items()}
 
 
 def _composition_instance(key: tuple) -> Dict[str, Hashable]:
@@ -702,7 +765,10 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
         if search:
             cut, _, name, moves = search_cut(cindex, cost, cstarts)
             found = (name, moves)
-        for w_ in [weight] if weight is None else CONTEXT_WEIGHTS:
+        options = [weight] if weight is None else list(CONTEXT_WEIGHTS)
+        if weight is not None and el.ctx2 is not None:
+            options += [(b1, b2) for b1 in CONTEXT_WEIGHTS for b2 in CONTEXT_WEIGHTS]
+        for w_ in options:
             value = _factored_code(el, s, K, V, alpha, cleafpos, w_)(cindex.assign(cut))
             if best is None or value < best[0] - 1e-9:
                 best = (value, w_, cut, found)
@@ -710,9 +776,15 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
     ccost = _factored_code(el, s, K, V, alpha, cleafpos, weight)
     if found is not None:
         info["C search start"], info["C search moves"] = found
-    info["read context weight"] = weight if weight is not None else 0.0
+    two = isinstance(weight, tuple)
+    info["read context weight"] = (weight[0] if two else weight) if weight is not None else 0.0
+    info["read context weight, two words"] = weight[1] if two else 0.0
+    offered2 = el.ctx2 is not None
     if weight is None:
         el.ctx = None
+    if not two:
+        el.ctx2 = None
+    beta1 = weight[0] if two else weight
     rule_nodes, c = _compact(cindex.assign(ccut)[cleafpos])
     M = len(rule_nodes)
 
@@ -724,6 +796,11 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
     if el.ctx is not None:
         n_Uc = np.zeros((K, len(el.contexts), M))
         np.add.at(n_Uc, (s, el.ctx, c), w)
+    if el.ctx2 is not None:
+        # One row per (symbol, pair of words) seen together.
+        cell, row_of = np.unique(s * len(el.contexts2) + el.ctx2, return_inverse=True)
+        n_Uc2 = np.zeros((len(cell), M))
+        np.add.at(n_Uc2, (row_of.reshape(-1), c), w)
     n_prim = np.bincount(c[prim], weights=w[prim], minlength=M)
     n_comp = np.bincount(c[comp], weights=w[comp], minlength=M)
     n_E = np.zeros((M, V))
@@ -750,7 +827,8 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
     info["structure bits"] = elias_delta_bits(K) + elias_delta_bits(M)
     if el.contexts is not None:
         # Which of the context options was chosen.
-        info["structure bits"] += float(np.log2(1 + len(CONTEXT_WEIGHTS)))
+        n_options = 1 + len(CONTEXT_WEIGHTS) + (len(CONTEXT_WEIGHTS) ** 2 if offered2 else 0)
+        info["structure bits"] += float(np.log2(n_options))
     info["total bits"] = info["bits (factored grammar)"] + info["structure bits"]
     info["bits per sentence"] = info["total bits"] / max(len(mem.experiences), 1)
     rows = lambda table: [dict(enumerate(r)) for r in np.atleast_2d(table)]
@@ -764,7 +842,7 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
     else:
         # The rule choices are coded in their contexts: the data bits are
         # those of the best-fitting context rows, the model bits the rest.
-        tables[len(top_counts) + int(relational)] = (rows(n_Uc.reshape(-1, M)), M)
+        tables[len(top_counts) + int(relational)] = (rows(n_Uc2 if el.ctx2 is not None else n_Uc.reshape(-1, M)), M)
         data_bits = sum(ml_row_nats([v for v in r.values() if v > 0]) for rws, _ in tables for r in rws) / LN2
         info["model bits"] = info["total bits"] - data_bits
     info["data bits"] = data_bits
@@ -812,6 +890,7 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
         Rel=normalize(n_Rel) if relational else None,
         contexts=None if el.ctx is None else el.contexts,
         Uc=(None if el.ctx is None else
-            (n_Uc + weight * normalize(n_U)[:, None, :]) / (n_Uc.sum(axis=2, keepdims=True) + weight)),
+            (n_Uc + beta1 * normalize(n_U)[:, None, :]) / (n_Uc.sum(axis=2, keepdims=True) + beta1)),
+        Uc2=None if el.ctx2 is None else _pair_rows(n_Uc2, cell, el, n_Uc, normalize(n_U), beta1, weight[1]),
         fresh_pieces=el.ctx is not None and getattr(mem, "fresh_pieces", False),
     )

@@ -40,12 +40,13 @@ class Chart:
         la = self.la = np.full((n + 1, n + 1), -np.inf)
         lam = self.lam = np.zeros((n + 1, n + 1, M))
         rho = self.rho = np.zeros((n + 1, n + 1, M))
-        # A span's rule choice is made in the light of the word before it.
-        self.context = [self.tokens[i - 1] if i else BOS for i in range(n)]
+        # A span's rule choice is made in the light of the word (or two)
+        # before it.
+        self.context = [g.read(self.tokens, i) for i in range(n)]
         by_context = {x: g.rules(x) for x in set(self.context)}
         U = self.U = [by_context[x] for x in self.context]
         for i in range(n):
-            v = g.lexical(int(ids[i]), self.tokens[i - 1] if i else BOS)
+            v = g.lexical(int(ids[i]), self.context[i])
             s = v.sum()
             if s > 0:
                 a[i, i + 1] = v / s
@@ -79,10 +80,10 @@ class Chart:
         self.b, self.lb, self.lamb = a, la, lam
         if self.fresh:
             b, lb, lamb = self.b, self.lb, self.lamb = a.copy(), la.copy(), lam.copy()
-            U0 = self.U0 = g.rules(BOS)
+            U0 = self.U0 = g.rules(g.read([], 0))
             for i in range(1, n):
                 b[i], lb[i], lamb[i] = 0.0, -np.inf, 0.0
-                v = g.lexical(int(ids[i]), BOS)
+                v = g.lexical(int(ids[i]), g.read([], 0))
                 s = v.sum()
                 if s > 0:
                     b[i, i + 1] = v / s
@@ -287,7 +288,7 @@ class Chart:
         if self.fresh:
             best_b, back_b = best.copy(), dict(back)
             with np.errstate(divide="ignore"):
-                rule0 = g.log_binary(BOS)
+                rule0 = g.log_binary(g.read([], 0))
                 lex0 = np.log(self.U0 @ (g.pk[:, None] * g.E[:, ids]))     # (K, n)
             for i in range(1, n):
                 best_b[i, i + 1] = lex0[:, i]

@@ -137,3 +137,13 @@ def test_a_piece_read_afresh_starts_from_bos():
         assert ctx[(0, (2, 4))] == ctx[(0, (2, 3))] == (BOS if fresh else "was")   # the second piece
         assert ctx[(0, (3, 4))] == "so" and ctx[(1, (2, 4))] == "was"              # inside it; a whole tree
 
+
+def test_the_memory_offers_the_two_words_just_read():
+    from trellis2.memory import BOS, Memory
+    mem = Memory(read_words=2)
+    mem.add(["tim", "was", "so", "happy"], Tree(4, {(0, 4): 2, (0, 2): 1, (2, 4): 3}, {}, [(0, 4)]))
+    ctx = dict(zip(mem.span, mem.contexts()))
+    assert ctx[(0, 4)] == (BOS, BOS) and ctx[(1, 2)] == (BOS, "tim") and ctx[(2, 4)] == ("tim", "was")
+    with pytest.raises(ValueError):
+        Memory(read_words=2, fresh_pieces=True)
+
