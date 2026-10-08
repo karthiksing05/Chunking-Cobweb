@@ -165,7 +165,7 @@ The brackets are the learner's own: it chunks a subject with its verb before add
 ⟨⟨⟨a ⟨cat⟩⟩ | admired⟩ [a cat]⟩
 ```
 
-On the paper's corpora a completion can be judged exactly by the target grammar (`run_prompts_synthetic.py`, prompts: the first 1–4 tokens of held-out sentences, five seeds). Prompts that begin no training sentence are completed grammatically 86–100% of the time from sentences alone (LARGE 91%, the others 99–100%), every completion a new sentence, where word bigram and trigram models manage 28–53%; and the grammar codes held-out continuations in fewer bits than either n-gram model in every condition ([section 11](#simple-english-does-the-grammar-generate-coherent-sentences) for English).
+On the paper's corpora a completion can be judged exactly by the target grammar (`run_prompts_synthetic.py`, prompts: the first 1–4 tokens of held-out sentences, five seeds). Prompts that begin no training sentence are completed grammatically 86–100% of the time from sentences alone (LARGE 91%, the others 99–100%), every completion a new sentence, where word bigram and trigram models manage 29–53%; and the grammar codes held-out continuations in fewer bits than either n-gram model in every condition ([section 11](#simple-english-does-the-grammar-generate-coherent-sentences) for English).
 
 ## 8. Learning from sentences alone, by day and by night
 
@@ -177,7 +177,7 @@ Without analyses the learner must find the structure itself. It looks for the an
 
 **By day** (`observe`), each sentence is perceived with the current grammar: its Viterbi analysis, which is also its shortest-code analysis. Where no larger chunk pays, the analysis is a forest of chunks, and unknown words get the category their context implies. The sentence is stored with its analysis. Before the first night there is no grammar, and sentences are stored as they come.
 
-**By night** (`sleep`), all stored sentences are consolidated in six steps.
+**By night** (`sleep`), all stored sentences are consolidated in seven steps.
 
 1. **Word classes.** Word types are merged while the code of a class-bigram model shrinks: Brown clustering (Brown et al. 1992) read as description length. The whole merge path, from word types to the final classes, is kept.
 2. **Structure.** A search over two moves lowers the plain-PCFG code of the corpus:
@@ -187,8 +187,9 @@ Without analyses the learner must find the structure itself. It looks for the an
    Every move is global: it changes all sentences consistently, which is what lets a chunk type pay for itself. This is SNPR (Wolff 1982), GRIDS (Langley & Stromsten 2000) and Bayesian model merging under one probabilistic code.
 3. **Concepts.** The analyses are consolidated into the two hierarchies ([sections 4–6](#4-the-two-hierarchies)). Consolidation starts from the search's categories, which describe the chunk context of the first round.
 4. **Re-analysis.** Every sentence gets its Viterbi analysis under the new grammar, and the new analyses are kept only if the total code shrinks (hard EM).
-5. **Choice.** Steps 3 and 4 run on each of the three best distinct search results, and the grammar with the shortest total code wins. The plain code is cheap enough to guide the search, but the full code makes the final choice: two analyses whose plain codes differ by a bit can consolidate into very different grammars.
-6. **Rewrite.** The stored analyses are written in the new grammar's categories, for the next day to perceive with and the next night to start from.
+5. **Choice.** Steps 3 and 4 run on each of the three best distinct search results, and on each with its forests joined: a forest's pieces made the parts of one whole, right-branching in reading order, under one fresh category that consolidation re-forms. The grammar with the shortest total code wins. The plain code is cheap enough to guide the search, but the full code makes the final choice: two analyses whose plain codes differ by a bit can consolidate into very different grammars, and whether an experience is a forest of chunks or one whole is decided the same way.
+6. **Re-analysis without the read's context.** Where each rule choice is made in the light of the words just read, the context can stand in for structure. The winner's analyses are re-analysed under the grammar without that context, where the structure must carry everything (Viterbi while that grammar's code shrinks), then consolidated again with the context; they replace the winner's if the full code shrinks.
+7. **Rewrite.** The stored analyses are written in the new grammar's categories, for the next day to perceive with and the next night to start from.
 
 ![The structure search on SMALL](figures/search_trajectory.png)
 
@@ -255,14 +256,14 @@ Five seeds, 320 training sentences. Parsing omission is 0.0% in every condition 
 
 | Condition | Training code, bits (alone / gold trees) | Held-out bits per sentence (alone / gold trees) | Generation commission (alone / gold trees) |
 |---|---|---|---|
-| SMALL | 3,251 / 3,251 | 9.5 / 9.5 | 0.1% / 0.1% |
-| MED | **6,507 / 6,528** | 18.5 / 18.5 | 0.6% / 0.6% |
-| LARGE | **8,029 / 8,356** | **23.5 / 24.0** | **9.0% / 14.5%** |
-| TERM_LOW | 5,311 / 5,284 | 15.3 / 15.3 | 0.4% / 0.1% |
-| TERM_MED | **7,677 / 7,712** | 21.8 / 21.9 | **1.7% / 2.9%** |
-| TERM_HIGH | **10,458 / 10,538** | 30.7 / 30.8 | **0.9% / 2.2%** |
+| SMALL | 3,255 / 3,255 | 9.5 / 9.5 | 0.1% / 0.1% |
+| MED | **6,511 / 6,532** | 18.5 / 18.5 | 0.6% / 0.6% |
+| LARGE | **7,968 / 8,360** | **23.6 / 24.0** | **8.8% / 14.5%** |
+| TERM_LOW | 5,298 / 5,288 | 15.3 / 15.3 | 0.1% / 0.1% |
+| TERM_MED | **7,615 / 7,716** | 21.8 / 21.9 | **0.7% / 2.9%** |
+| TERM_HIGH | **10,462 / 10,541** | 30.7 / 30.8 | **0.9% / 2.2%** |
 
-From sentences alone the learner matches the supervised model on every condition. Its code is within 0.6% of the gold-tree grammar's, and shorter on four conditions. Its commission is at most half a point higher, and lower on three conditions. Novelty is 91–100% (SMALL 54%: its language is small).
+From sentences alone the learner matches the supervised model on every condition. Its code is within 0.2% of the gold-tree grammar's, and shorter on four conditions. Its commission is never higher, and lower on three conditions. Novelty is 91–100% (SMALL 54%: its language is small). (Two seeds; rerun 2026-10-07 with the night that also consolidates each search result with its forests joined, which wins 4 of the 12 nights, each with a shorter code: LARGE 8,033 → 7,968 bits, TERM_LOW 5,314 → 5,298, TERM_MED 7,681 → 7,615 with commission 1.7% → 0.7%.)
 
 The two hierarchies matter here. The grammar read directly off the search's analyses still over-generates on the TERM conditions (47–56% commission at seed 13). Consolidating the same analyses into the two hierarchies, with chunk context, and re-analysing brings it to 0.1–4.3%.
 
@@ -272,11 +273,11 @@ The two hierarchies matter here. The grammar read directly off the search's anal
 
 *Figure 11. The incremental learner perceives the training sentences one at a time and sleeps at 10, 20, 40, 80, 160 and 320 sentences. At each of those points a fresh batch learner sleeps once over the same sentences (mean of two seeds; band = range).*
 
-- **Early nights nearly coincide.** Up to 40 sentences, restarting from word classes almost always gives the shortest code (the stored analyses win one of the 20 nights at 20–40 sentences), and the two learners are identical but for that night.
-- **Then the stored analyses pay.** From 80 sentences on they win 16 of 30 nights (SMALL excluded, where both give the same grammar). At 80 and 160 sentences the incremental learner's training code is shorter or equal in nine of ten condition–size cells. Its commission is lower in nine, by 5–45 points in four (for example TERM_HIGH at 80 sentences: 31.9% against 76.4%).
-- **At 320 sentences** the two are equivalent (commission within 1.4 points).
+- **Early nights mostly coincide.** Up to 40 sentences, restarting from word classes usually gives the shortest code (the stored analyses win 5 of the 20 nights at 20–40 sentences), and the two learners are identical but for those nights. Where the search leaves forests, which is often at 10–80 sentences, the night's joined analyses are often the shortest code, and commission falls sharply in several cells (MED at 20 sentences 97.6% → 51.6%; TERM_MED at 80 sentences 38.6% → 6.6%).
+- **Then the stored analyses pay.** From 80 sentences on they win 18 of 30 nights (SMALL excluded, where both give the same grammar). At 80 and 160 sentences the incremental learner's training code is shorter or equal in eight of ten condition–size cells. Its commission is lower in seven, by 5–43 points in three (for example TERM_HIGH at 80 sentences: 31.8% against 75.0%).
+- **At 320 sentences** the two are equivalent (commission within 1.7 points).
 - **Perception.** By 160 sentences each day's sentences are parsed almost completely (1.00–1.01 top-level chunks per sentence), at close to the held-out rate in bits.
-- **Cost.** The six nights together cost 1.5–2.6 times one batch sleep at 320 (measured with other experiments sharing the machine).
+- **Cost.** The six nights together cost 1.2–2.2 times one batch sleep at 320 (measured with other experiments sharing the machine).
 
 Detailed tables: [`V2_DESIGN.md`](V2_DESIGN.md), `experiments/v2/results/{main,unsupervised,incremental,search}/summary.md`.
 
@@ -293,15 +294,15 @@ Nothing in the framework is specific to the paper's corpora. Four new domains te
 | right-branching trees | 39.0% | 55.7% | 57.3% | – |
 | left-branching trees | 82.9% | 87.6% | 75.0% | – |
 | unigram / bigram tag models | – | – | – | 33.4 / 27.2 |
-| TRELLIS v2 from tags alone | 48.0% | 62.3% | **24.7%** | 26.6 |
+| TRELLIS v2 from tags alone | 49.0% | 63.0% | **27.8%** | 26.8 |
 | TRELLIS v2 from binarized gold trees | 16.9% | 39.7% | 15.7% | **26.0** |
 
-- **Each rule choice sees the tags before it.** As in English (below), description length chooses to code each rule choice in the light of the two tags read just before the element, backing off to the last one. Without that context (from tags alone: 55.3% bracket omission, 33.1% base-phrase omission, 30.1 held-out bits; from gold trees: 19.1%, 20.7%, 30.9 bits) the grammar was a weaker sequence model than tag bigrams; with one tag it was as good (27.2 bits from tags alone, 26.6 from gold trees); with two it is better (26.6 and 26.0 bits).
-- **From tags alone, TRELLIS v2 finds chunks.** It recovers three quarters of the gold base phrases, against 43% for right-branching trees and 84% for the supervised model. Its chunks are noun groups (`DT NN`, `NNP NNP`, `DT JJ NN`), verb groups (`MD VB`, `TO VB`, `VBD VBN`) and subject–verb pairs (`PRP VBD`), from as few as six or seven categories: the tags before each element carry much of what categories did.
-- **What it generates.** The tag sequences the unsupervised grammar derives as one tree have every tag triple attested in the treebank sample 97% of the time, and 37% occur in it whole (a tag bigram's samples: 82% and 7.5%). Its forests, strings of base phrases, are less coherent (67%), and so is the grammar read from gold trees (64%), whose broad phrase categories combine independently drawn parts as the treebank does not.
+- **Each rule choice sees the tags before it.** As in English (below), description length chooses to code each rule choice in the light of the two tags read just before the element, backing off to the last one. Without that context (from tags alone: 55.3% bracket omission, 33.1% base-phrase omission, 30.1 held-out bits; from gold trees: 19.1%, 20.7%, 30.9 bits) the grammar was a weaker sequence model than tag bigrams; with one tag it was as good (27.2 bits from tags alone, 26.6 from gold trees); with two it is better (26.8 and 26.0 bits; 26.6 from tags alone before the night's re-analysis without the read's context, which shortens the training code by 1% and lengthens the held-out code a little at this size).
+- **From tags alone, TRELLIS v2 finds chunks.** It recovers nearly three quarters of the gold base phrases, against 43% for right-branching trees and 84% for the supervised model. Its chunks are noun groups (`DT NN`, `NNP NNP`, `DT JJ NN`), verb groups (`MD VB`, `TO VB`, `VBD VBN`) and subject–verb pairs (`PRP VBD`), from as few as six or seven categories: the tags before each element carry much of what categories did.
+- **What it generates.** The tag sequences the unsupervised grammar derives as one tree have every tag triple attested in the treebank sample 94% of the time, and 29% occur in it whole (a tag bigram's samples: 82% and 7.5%). Its forests, strings of base phrases, are less coherent (68%), and so is the grammar read from gold trees (65%), whose broad phrase categories combine independently drawn parts as the treebank does not.
 - **It does not find sentence structure.** On 434 sentences no larger chunk pays for itself, so analyses stay forests of about five chunks, and full-tree bracket agreement is below that of right-branching trees.
 
-- **More data** (training on every other sentence of up to 15 or 20 tags, about 1,100 or 1,900 sentences; the same held-out sentences) gives held-out codes below the tag bigram's from tags alone (26.3 and 26.7 bits per sentence, against 27.1 and 27.3) and from gold trees (26.1 and 26.8), but no more linguist-like full trees from tags alone (bracket omission 51–54%). A night grows from under a minute to about twenty minutes.
+- **More data** (training on every other sentence of up to 15 or 20 tags, about 1,100 or 1,900 sentences; the same held-out sentences) gives held-out codes below the tag bigram's from tags alone (26.3 and 26.7 bits per sentence, against 27.1 and 27.3) and from gold trees (26.1 and 26.8), but no more linguist-like full trees from tags alone (bracket omission 48–53%; at about 1,100 sentences the night's re-analysis without the read's context brings it from 51% to 48% and base-phrase omission from 28% to 26%). A night grows from a minute or two to about fifty minutes.
 
 ### Simple English: does the grammar generate coherent sentences?
 
@@ -309,39 +310,40 @@ Nothing in the framework is specific to the paper's corpora. Four new domains te
 
 There is no target grammar, so coherence is measured against the corpus. A generated sentence is *real* if it occurs word for word among the 497,000 sentences of TinyStories, and *new* if it is not a training sentence. A single word such as *mom* or *together* is new and real without being a coherent sentence, so the measures that matter are taken among generated sentences of three to five words, like the training sentences. The baselines are word bigram and trigram models trained on the same sentences.
 
-**What it learns.** 34 categories and 53 chunk types; 58% of training sentences are analysed as one whole tree. Each rule choice is made in the light of the two words before the element, backing off to the last one: description length takes that context ([section 6](#6-description-length)). The largest categories are recognizably grammatical:
+**What it learns.** 42 categories and 49 chunk types, and every training sentence is analysed as one whole tree. Each rule choice is made in the light of the two words before the element, backing off to the last one: description length takes that context ([section 6](#6-description-length)). The largest categories are recognizably grammatical:
 
-- subjects (*tim, he, she, lily, the bird*);
-- subject plus copula (*tim was, they were*);
+- whole sentences (*they are happy, tim was very happy*);
+- subjects (*tim, he, she, lily, the bird*), and coordinated subjects (*lily and tom, tim and sue*);
+- subject plus copula (*tim was, they were, the bird was*);
 - intensifiers (*very, so, not, all*);
-- predicate phrases (*very happy, so happy, not happy*);
-- whole sentences (*they are happy, tim was very happy*), and, apart from them, the pieces that sentences analysed as a forest leave (*it, you, together, too*).
+- predicate phrases (*very happy, so happy, not happy*) and verb phrases (*have fun, to play together, to help*).
 
 Held-out sentences are read as subject and predicate:
 
 ```
-[[they do] [[not like] tom]]      [[she was] [very happy]]      [[lily was] [not happy]]
+[[she was] [very happy]]      [[they do] [[not like] tom]]      [[i have] [a [new toy]]]
 ```
 
-**A whole sentence, or a piece of one.** The first version coded every top-level chunk from one row. One start category then held whole sentences and the leftover pieces of forests alike (1,543 whole-sentence roots and 2,223 pieces, 919 of them single words), and the grammar wrote those pieces as sentences: a sixth of its output was one word. Under one row, telling the two apart costs as many bits as it saves, so description length never split them. With a row for the roots of whole sentences and one for pieces ([section 5](#5-from-hierarchies-to-a-grammar)), the split pays, and marking the root of a whole sentence (and only it) in its representation instance makes it exact. The grammar's *own sentences* are then the ones it derives as one tree.
+**A whole sentence, or a piece of one.** The first version coded every top-level chunk from one row. One start category then held whole sentences and the leftover pieces of forests alike (1,543 whole-sentence roots and 2,223 pieces, 919 of them single words), and the grammar wrote those pieces as sentences: a sixth of its output was one word. Under one row, telling the two apart costs as many bits as it saves, so description length never split them. With a row for the roots of whole sentences and one for pieces ([section 5](#5-from-hierarchies-to-a-grammar)), the split pays, and marking the root of a whole sentence (and only it) in its representation instance makes it exact. The grammar's *own sentences* were then the ones it derived as one tree, and a forest's pieces were chained only by the read's context. Since the night also consolidates the search's forests joined into wholes ([section 8](#8-learning-from-sentences-alone-by-day-and-by-night)), description length prefers the joined analyses here: every sentence is one tree, so the grammar's own sentences and all its samples are the same.
 
-| 1,000 generated sentences each | TRELLIS v2, its own sentences | TRELLIS v2, all samples | Word bigram | Word trigram | Its own sentences, one word of context | Its own sentences, without the read's context |
-|---|---|---|---|---|---|---|
-| 3–5 words long, like the training sentences | **98%** | 88% | 72% | 92% | 99% | 94% |
-| real, among those of 3–5 words | **90%** | 68% | 63% | 87% | 90% | 75% |
-| every word triple in TinyStories (sentence edges included) | **93%** | 77% | 83% | 100% | 93% | 84% |
-| new and real, among those of 3–5 words | 1.4% | 2.7% | 4.2% | 3.7% | 4.0% | 4.6% |
-| new | 13% | 43% | 58% | 24% | 15% | 33% |
-| word triples found in TinyStories | 94% | 78% | 85% | 100% | 94% | 85% |
-| chunks inside the sentences found in TinyStories | 96% | 93% | – | – | 96% | 92% |
-| perceived again with the analysis it was generated from | 100% | 98% | – | – | 100% | 100% |
+| 1,000 generated sentences each | TRELLIS v2 | Word bigram | Word trigram | Before forests were joined: own sentences | Before: all samples |
+|---|---|---|---|---|---|
+| 3–5 words long, like the training sentences | **95%** | 69% | 91% | 98% | 88% |
+| real, among those of 3–5 words | 69.5% | 65% | **87%** | 90% | 68% |
+| every word triple in TinyStories (sentence edges included) | 79% | 83% | **100%** | 93% | 77% |
+| new and real, among those of 3–5 words | 2.1% | 3.3% | 3.9% | 1.4% | 2.7% |
+| new | 36% | 58% | 24% | 13% | 43% |
+| word triples found in TinyStories | 82% | 85% | 100% | 94% | 78% |
+| chunks inside the sentences found in TinyStories | 91% | – | – | 96% | 93% |
+| perceived again with the analysis it was generated from | 99% | – | – | 100% | 98% |
 
-- **Its own sentences are English.** 98% have the length of the training sentences, and 90% of those occur in TinyStories, more often than a word bigram's (63%) or even a word trigram's (87%), which mostly repeats its training sentences; 93% have every word triple in TinyStories. They are more typical than before the read's context (13% new against 33%), and fewer are both new and real (1.4% against the trigram's 3.7%): with two words of context the grammar, like a trigram, repeats more of what it has read.
-- **Parsing and generation agree.** Every one of its own sentences is perceived again with the analysis it was generated from.
+- **Its sentences are English two times in three, as often as before.** 95% have the length of the training sentences, and 69.5% of those occur in TinyStories, more often than a word bigram's (65%) though less than a word trigram's (87%), which mostly repeats its training sentences; 79% have every word triple in TinyStories. Before forests were joined, the sentences the grammar derived as one tree were real 90% of the time, but they were a subset of its samples (13% new); all its samples were real 68% of the time, as now.
+- **Parsing and generation agree.** 99% are perceived again with the analysis they were generated from.
 - **What the read's context fixed: rare words.** Without it, 83.5% of the grammar's own sentences had every word triple in TinyStories, as did 83.1% of a word bigram's. Almost every failing sentence used only category combinations seen in training: the errors were inside categories, where rare words are lumped with frequent words of another kind (*a* with *very*, *dog* with *happy*), because in these sentences, dominated by *X was very happy*, keeping them apart saves fewer bits than a category costs. No change to the descriptions fixed this, nor drawing a chunk's parts jointly. Making each rule choice in the light of the word before it does: after *a* a noun phrase is made one way, after *very* another, even within one category ([`V2_DESIGN.md`](V2_DESIGN.md#simple-english-can-the-grammar-generate-coherent-sentences)).
-- **Sentences left as forests still generate strings of pieces.** All samples together are real 68% of the time within the training length (63% with one word of context): a forest's pieces are joined by no rule, only chained by the read's context. Coding each piece given the previous one's category (a Markov code over pieces, branch `markov-forest-pieces`) describes held-out sentences a bit shorter (15.0 against 16.0 bits) and splits the pieces by role, but forests sampled from it are no more often real, so it is kept aside.
-- **Held-out code.** 12.3 bits per sentence, more compact than a word bigram (13.2) or trigram (13.0); 12.8 with one word of context, 16.0 without the read's context, and 17.1 before that with one row for all top-level chunks.
-- **With twice the sentences, a better model and more coherent sentences.** Learned from 5,000 sentences, the grammar describes held-out sentences in 11.4 bits (a word trigram 12.0) and derives 66% of training sentences whole (58% from 2,500). Its own sentences are more coherent than from 2,500: 93.1% are real within the training length (trigram 86.5%) and 94.3% have every word triple in TinyStories; all samples, forests included, rise from 68% to 75.6% real. From 9,000 sentences, nearly the whole language, held-out sentences take 11.0 bits (trigram 11.5), its own sentences are 93% real and all samples 77%. With one word of context the 5,000-sentence grammar was as coherent as the 2,500-sentence one (87.4% real); before the read's context, twice the sentences had given less coherent sentences (75% → 64% real, a bigram's level), because two categories mixed words that do not combine alike (*very, so, a, his*; *happy, dog, toy*), and the grammar wrote *she was so dog* ([`V2_DESIGN.md`](V2_DESIGN.md#simple-english-can-the-grammar-generate-coherent-sentences)).
+- **Joined forests: a better model, not more coherent sentences.** A third of the sentences stayed forests of chunks, whose pieces no rule joined. Joined into wholes, they describe the training and held-out sentences more compactly, partly because whether a sentence is one tree no longer needs coding; the joins are generic, and the samples are about as coherent as before, with fewer fragments outside the training length (5% against 12%). Re-analysis without the read's context then shortens the code further (37,921 → 37,356 bits) without changing what it generates.
+- **What is new is rarer, and less coherent.** Its new sentences have every word triple attested about a third of the time. Every change at generation time tried (a part's category in the light of the words before it, each rule choice also in the light of its parent's rule, drawing from the counts of the longest context seen, as an n-gram model does) trades new sentences for coherent ones along one curve; the categories substitute well where they hold one kind of thing (subjects for subjects: 97% of such swaps give a real sentence; predicates 98%) ([`V2_DESIGN.md`](V2_DESIGN.md#simple-english-can-the-grammar-generate-coherent-sentences)).
+- **Held-out code.** 11.8 bits per sentence, more compact than a word bigram (13.2) or trigram (13.0); 12.3 before forests were joined, 12.8 with one word of context, 16.0 without the read's context, and 17.1 before that with one row for all top-level chunks.
+- **With more sentences, a better model.** Learned from 5,000 sentences, the grammar describes held-out sentences in 11.1 bits (a word trigram 12.0); its samples are real 74.5% of the time within the training length (82.3% with every word triple attested; trigram 86%). From 9,000 sentences, nearly the whole language, held-out sentences take 10.7 bits (trigram 11.5), and its samples are real 75% of the time (84% with every word triple attested). Before forests were joined, these grammars' own sentences, two thirds of their samples, were real 93% of the time, and all their samples 76–77%. Before the read's context, twice the sentences had given less coherent sentences (75% → 64% real, a bigram's level), because two categories mixed words that do not combine alike (*very, so, a, his*; *happy, dog, toy*), and the grammar wrote *she was so dog* ([`V2_DESIGN.md`](V2_DESIGN.md#simple-english-can-the-grammar-generate-coherent-sentences)).
 
 Children's books from Project Gutenberg (Grimm; McGuffey readers, Aesop, Alice, Oz) were too sparse for this. Grimm's sentences use each of their words about ten times, and the grammar collapsed to three categories. With clauses instead of sentences there are 72 uses per word, and the chunks were sensible but the generations were strings of them.
 
@@ -364,7 +366,7 @@ Every generated character can be checked:
 | bigram tokens | 35.0 | – | 22% | 20% | 3.9% | 13% |
 | TRELLIS v2, operators as relations | 30.3 | – (given) | **100%** | **84%** | **5.3%** | **77%** |
 | TRELLIS v2, operators as tokens | **24.9** | 0.0% | 97% | 71% | **7.3%** | 57% |
-| TRELLIS v2 from sequences alone | 27.6 | 35.3% | 16% | 13% | 2.6% | 8% |
+| TRELLIS v2 from sequences alone | 25.9 | 28.1% | 53% | 40% | 5.5% | 30% |
 
 ![Concepts of position](figures/character_concepts.png)
 
@@ -378,7 +380,7 @@ Every generated character can be checked:
 - **The relation is what makes generation coherent.** With operators as tokens, a part's slot is decided by an operator two or more tokens back, out of reach of the part's description, and one large category mixed right-side and bottom components (43% bottom, 33% right): only half of the generated characters placed every component where real characters do (52%; 62% once each token is read in the light of the one before, 71% in the light of the two before, which shortens that model's code to 24.9 bits). With operators as relations and the slot in the description, 84% do, and every generated character is well formed.
 - **More data makes it more coherent.** Learned from 6,000 characters instead of 2,000, 93% of generated characters place every component where real characters do (from 10,000, also 93%), and held-out characters take 29.4 bits (28.3 from 10,000) against 32.8 (31.8) for a token bigram.
 - **What the description should hold matters.** Adding the nearest component across a join to a part's description lowers attested placement to 75%; adding the parent's slot lowers it to 34%. The remaining misplacements come from categories of composite parts, which mix slots.
-- **From sequences alone the learner stalls**, as on the treebank: with each token read in the light of the two before it describes characters more compactly than token bigrams (27.6 bits per character, against 35.0; 30.5 with one token, 36.8 without the context), but only 16% of its samples are composed, well-formed characters.
+- **From sequences alone the learner finds half the structure.** Its search builds each operator with its first part (*[⿰ 讠]*) but stops short of joining that chunk to the second part, leaving forests (only 16% of its samples were well formed). The night now also consolidates the search's forests joined into wholes, right-branching in reading order, which in prefix notation is often exactly the gold tree, and re-analyses the winner under the grammar without the read's context, where the structure must carry everything ([section 8](#8-learning-from-sentences-alone-by-day-and-by-night)). Description length takes both: held-out characters take 25.9 bits (token bigram 35.0; the gold structures 24.9), bracket omission falls from 35% to 28%, and 53% of samples are well-formed characters, 40% with every component in an attested position. The gold structures still code 5% shorter (62,037 against about 65,000 bits for the training characters), so the search remains the limit.
 
 ![Characters TRELLIS v2 invents](../experiments/v2/results/characters/generated_characters.png)
 
@@ -424,19 +426,19 @@ Every generated character can be checked:
   - *Simple English.* Categories of subjects, copulas, intensifiers and predicate phrases form from sentences alone, and the sentences the grammar derives whole are mostly real English.
 - **Coherence came from what the descriptions could see.** In each domain the first grammar generated things that were right locally and wrong as a whole, and each time the cause was something neither hierarchy's description nor the top level's code could see. English: whether a top-level chunk is a whole sentence or a leftover piece (fixed by coding the two apart, and marking the whole sentence's root). Characters: a part's slot (fixed by reading operators as relations and putting the slot in the description). Chess: what is already on the board (fixed by a read that asks of each kind of piece in turn, given how many of that kind already stand on earlier squares). In all three the held-out code also got shorter.
 - **Unsupervised structure is the open problem, for two different reasons.** On the paper's corpora the search builds complete analyses. On real text and on characters it stops at forests of local chunks, and a sequence of independent chunks generates poorly. Comparing codes shows why:
-  - *Real text: the objective prefers the forests.* The learner's forest grammar describes the treebank sentences in fewer bits than the grammar of their gold trees, and the gap grows with data: 8% at 434 sentences, 9% at about 1,100, 9–12% at about 1,900 (8–10%, 14–15% and 18% before the read's context). Every gold-derived analysis costs more than the learner's own forests, whether the gold trees are binarized to the right (15,763 bits at 434 sentences, against 14,160) or to the left (16,349), or cut down to forests of gold base phrases (16,120). Right-branching trees (14,421) also cost less than gold trees.
+  - *Real text: the objective prefers the forests.* The learner's forest grammar describes the treebank sentences in fewer bits than the grammar of their gold trees, and the gap grows with data: 8–9% at 434 sentences, 9–10% at about 1,100, 11–13% at about 1,900 (8–10%, 14–15% and 18% before the read's context). Every gold-derived analysis costs more than the learner's own forests, whether the gold trees are binarized to the right (15,763 bits at 434 sentences, against 14,160) or to the left (16,349), or cut down to forests of gold base phrases (16,120). Right-branching trees (14,421) also cost less than gold trees.
   - *What the two hierarchies record decides what can pay* (`experiments/v2/treebank_codes.py`, every sentence of the sample).
     - **Today: phrase categories, the costliest description.** The representation hierarchy keeps a phrase apart from its head (the kind attribute), and the composition hierarchy records a chunk as an unheaded pair. Sentence structure is therefore sent through phrase categories. On the 10-tag sentences, gold trees cost 38% more than a tag bigram with the treebank's labels, and 24% more with TRELLIS's own categories.
     - **Recording heads in both hierarchies is the cheapest.** A phrase is described by its head's behaviour and its valence (whether it has taken dependents on each side, a refinement of the kind). Its make-up is head, dependent and side, as in dependency grammar.
     - **Charging total probability helps too.** Charging each sentence its total probability over all trees, which bits-back coding achieves, instead of the cost of naming one tree, brings gold structure to 5.8% above the bigram, and to within 1% after EM on the 10-tag sentences.
     - **Even then, description length cannot single out linguists' structure.** A structure with half the heads right codes slightly shorter than the one EM finds near the gold trees (72% right). Not even a tag trigram beats the bigram.
     - **Conclusion.** Tags at this scale carry too little information for sentence structure to pay. Lexical heads are the candidate, and they need words and far more text.
-  - *Characters: the search falls short.* The gold structures give a shorter code than the learner's analyses (73,662 against 82,159 bits for 2,000 characters, 10.3% shorter), even in the plain code the search minimizes (71,703 against 79,740), so better structures exist and the search does not reach them. A wider beam barely helps (79,207 bits with 16 instead of 4). Starting categories do: from the supervised model's 26 token categories, which the representation hierarchy formed with chunk context and which therefore see each component's slot, the same search builds nearly complete analyses (1.4 chunks per character instead of 4.3). Bigram word classes cannot see which slot a component fills, as they could not tell verbs from prepositions on MED. Two ways of giving the search better starting categories were tried, and neither helps:
+  - *Characters: the search falls short.* Before the night joined forests, the gold structures gave a shorter code than the learner's analyses (73,662 against 82,159 bits for 2,000 characters, 10.3% shorter; 62,037 against 68,862 in today's code), even in the plain code the search minimizes (71,703 against 79,740), so better structures exist and the search does not reach them. Joining the search's forests and re-analysing without the read's context closes about half of that gap (64,852 bits; well-formed samples 16% → 53%), and further nights do not move it (64,909 and 64,778 bits). A wider beam barely helps (79,207 bits with 16 instead of 4). Starting categories do: from the supervised model's 26 token categories, which the representation hierarchy formed with chunk context and which therefore see each component's slot, the same search builds nearly complete analyses (1.4 chunks per character instead of 4.3). Bigram word classes cannot see which slot a component fills, as they could not tell verbs from prepositions on MED. Two ways of giving the search better starting categories were tried, and neither helps:
     - *restarting from the categories the representation hierarchy assigns after a night* (worse: 83,244 against 79,740 bits). The hierarchy sees a component's slot only through operator-plus-part chunks, and the night's analyses hold too few of them;
     - *starting from finer partitions*, down to raw tokens (worse at every level).
 
-    Even the supervised model's categories leave the search 10% above the gold structures, so this is mostly a search problem; split moves are the next attempt.
-- **A tried and dropped move.** Attaching a pair directly to an existing category (a chunk move followed by a merge, in one step) took cheap early attachments and ended in much longer codes on MED and LARGE.
+    Even the supervised model's categories leave the search 10% above the gold structures, so this is mostly a search problem.
+- **A tried and dropped move.** Attaching a pair directly to an existing category (a chunk move followed by a merge, in one step) took cheap early attachments and ended in much longer codes on MED and LARGE, and on characters (81,547 against 79,740 plain bits; 80 bits shorter when tried only after the search has converged).
 
 ## 12. Relation to TRELLIS v1 and the paper's postulates
 
@@ -469,8 +471,8 @@ The postulates carry over as follows:
 | `chart.py` | inside-outside over one tree or a forest of pieces, posteriors, minimum-risk and Viterbi decoding, sampling |
 | `model.py` | `Trellis2`: learn from analysed experiences, consolidate, parse, code, generate (a domain brings its own memory); `Learner`: learning from experiences alone, by day and by night, with a domain's structure search |
 | `mdl.py` | Elias codes, Dirichlet-multinomial rows, the model/data split |
-| `mdl_search.py` | symbolic analyses, word classes, the exact-scored beam search |
-| `unsupervised.py` | `UnsupervisedLearner`: sentences by day and by night (the chunk-and-merge search, consolidation, re-analysis) |
+| `mdl_search.py` | symbolic analyses, word classes, the exact-scored beam search, a forest's pieces joined into one whole |
+| `unsupervised.py` | `UnsupervisedLearner`: sentences by day and by night (the chunk-and-merge search, consolidation of its results with and without their forests joined, re-analysis, re-analysis without the read's context) |
 | `evaluation.py` | target-grammar recognizer, bracket tallies |
 | `data.py` | trees, corpora, the v1 splits, the six conditions |
 | `treebank.py` | Penn Treebank sentences (WSJ10, gold tags): cleaning, gold and base-phrase brackets |
@@ -556,7 +558,7 @@ cd cobweb-private && cmake -S . -B build && cmake --build build --target cobweb_
 Every test and experiment (times on a 12-core laptop):
 
 ```
-python -m pytest tests/trellis2 -q                                          # 65 tests, seconds
+python -m pytest tests/trellis2 -q                                          # 89 tests, about a minute
 python experiments/v2/run_synthetic.py --out experiments/v2/results/main    # supervised curves, ~6 min
 python experiments/v2/plot_learning_curves.py experiments/v2/results/main
 python experiments/v2/run_unsupervised.py --seeds 13,17                     # ~10 min
@@ -579,14 +581,14 @@ The paper's corpora are read from `../trellis_v1/data` (the v1 snapshot), with `
 
 ## 14. Limitations and next steps
 
-- **Sentence-level structure without supervision.** On the paper's corpora the search builds complete analyses. On characters (as sequences) it stops at forests of local chunks although the gold structures code shorter: a search problem, from categories that cannot see a component's slot. On real-text tags it stops at forests because no description we know makes sentence structure pay at this scale ([section 11](#what-the-new-domains-show)). On simple English about a third of sentences stay forests, and a forest's pieces are generated independently. Describing a piece by what it is (the sentence as its parent, an option of `Memory`) lets the night join most of them (90% of 5,000 sentences whole, against 64%), but the grammar then codes the sentences longer and generates less coherent ones: as on the treebank, the objective prefers the forests. In a richer language (250 words, sentences of 3–8 words) more data makes it worse: with one word of context, from 10,000 sentences only 0.3% are analysed whole (10% from 2,500), one category holds every top-level piece, and the grammar, though it describes held-out sentences better than word n-gram models, generates strings of pieces. With two words, 6% are whole and the grammar's own sentences are 75% real, but most sentences are still forests. Why one category holds every piece: a piece has no parent, so its category only chooses its expansion, which the rule choice already does, and description length merges the pieces' categories; neither describing a piece by its surroundings differently, nor reading each piece afresh (`fresh_pieces`), nor a second night (which joins the pieces with a generic rule) gives whole trees that generate coherently ([`V2_DESIGN.md`](V2_DESIGN.md#simple-english-can-the-grammar-generate-coherent-sentences)).
+- **Sentence-level structure without supervision.** On the paper's corpora the search builds complete analyses. Elsewhere it stops at forests of local chunks, and the night now also tries each search result with its forests joined into wholes (right-branching under a fresh category that consolidation re-forms), letting description length decide. On characters (as sequences) that recovers much of the structure the search misses (well-formed samples 16% → 53%), but the gold structures still code 5% shorter: a search problem, from categories that cannot see a component's slot, which further nights do not solve. On simple English the joined analyses win at every size: every sentence becomes one tree and held-out sentences take fewer bits, but the joins are generic, so the samples are only as coherent as before, and what the grammar writes that is new is less coherent than what it repeats. In the richer language (250 words, sentences of 3–8 words) the joined analyses also win, by 0.3% of the code at 2,500 sentences, and their samples are less often coherent per sample of the training length, though about as many per 1,000. On real-text tags the forests stay: no description we know makes sentence structure pay at this scale ([section 11](#what-the-new-domains-show)). Before forests were joined, one category held every piece of a forest, because a piece has no parent and its category only chooses its expansion, which the rule choice already does; neither describing a piece by its surroundings differently, nor reading each piece afresh (`fresh_pieces`), nor a second night gave whole trees that generate coherently ([`V2_DESIGN.md`](V2_DESIGN.md#simple-english-can-the-grammar-generate-coherent-sentences)).
 - **A small grammar on real data.** With about ten categories the grammar makes strong independence assumptions; coding each rule choice in the light of the two tags before it brings it below a tag bigram, from tags alone or from gold trees, by half a bit to a bit per sentence, but not further.
 - **Counting and chunks compete on a board.** Once the read counts material, castling and fianchettos no longer pay as chunks at 4,000 positions (the fianchetto returns at 8,000): where pieces stand given how many of each are placed is most of what a position's code can use.
 - **Scale.** Each night runs three full consolidations. With the compiled Cobweb a night on 320 synthetic sentences takes 6–85 seconds (about half the time before it); before it, a night took about an hour for 1,900 treebank sentences or 2,000 characters. Consolidation now codes records of elements that every cut treats alike, and a night's independent searches and consolidations can run in parallel processes (`workers`), both with identical results: the 5,000-sentence English night takes 20 minutes on twelve cores instead of 12 hours (25 with two words of context), the day-and-night experiment 5 minutes instead of an hour, and a 4,000-position chess night 2.5 minutes. With two words of context, re-analysis computes a rule table for each pair of words it reads, so a night on 10,000 sentences of the larger language takes about three hours. The search, the grammar read-out and the charts are still Python.
 - **Nights repeat the batch search.** The search can only merge categories, so every night may start over from word classes. Split moves (refining a category together with the chunk categories built on it) would let nights continue from the stored analyses.
 - **Linguists' trees.** Description length identifies the language, not its conventional binarization; bracket agreement with gold trees is moderate.
 
-Next: fewer sentences left as forests, by sentence-level structure that pays; for characters learned from sequences, a search over several moves at a time; for chess, moves as compositions and attack and defence as relations ([`V2_DESIGN.md`](V2_DESIGN.md#hypotheses-playing-chess-from-the-two-hierarchies)); for real text with words at scale, heads recorded in both hierarchies and the total-probability code; the Dirichlet concentration chosen by description length.
+Next: sentence-level structure that pays for itself rather than generic joins; for characters learned from sequences, a search over several moves at a time, or heads recorded in both hierarchies (an operator as the head that takes its parts); for chess, moves as compositions and attack and defence as relations ([`V2_DESIGN.md`](V2_DESIGN.md#hypotheses-playing-chess-from-the-two-hierarchies)); for real text with words at scale, heads recorded in both hierarchies and the total-probability code; the Dirichlet concentration chosen by description length.
 
 ## 15. Glossary
 

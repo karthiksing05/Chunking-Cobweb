@@ -88,6 +88,21 @@ def test_learning_by_day_and_by_night():
 
 
 @needs_data
+def test_a_night_that_may_join_forests_codes_no_longer():
+    """Joining each search result's forests into wholes only adds candidates
+    to the night, so its grammar's total code is never longer."""
+    from trellis2.unsupervised import UnsupervisedLearner
+    train, _ = v1_split(load_corpus(SMALL), seed=13)
+    bits = []
+    for join in (False, True):
+        learner = UnsupervisedLearner(seed=13, join_forests=join)
+        for ex in train[:40]:
+            learner.observe(ex.tokens)
+        bits.append(learner.sleep().info["total bits"])
+    assert bits[1] <= bits[0] + 1e-6
+
+
+@needs_data
 def test_parallel_nights_learn_the_same_grammar():
     """A night's searches and consolidations are independent of each other,
     so running them in parallel processes changes nothing (every Cobweb tree

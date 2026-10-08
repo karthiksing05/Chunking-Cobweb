@@ -531,6 +531,20 @@ def chunk_and_merge(analyses: List[List[Node]], n_tokens: int, alpha: float,
     return best.analyses, best.bits
 
 
+JOIN = ("join", 0)
+
+
+def joined(tops: List[Node], label: Hashable = JOIN) -> List[Node]:
+    """A forest's pieces joined into one whole, right-branching in reading
+    order under one fresh category (a whole stays as it is): the pieces
+    become parts of the experience they came from, and consolidation re-forms
+    the joins' categories."""
+    node = tops[-1]
+    for piece in reversed(tops[:-1]):
+        node = (label, (piece, node))
+    return [node]
+
+
 def to_tree(tops: List[Node]) -> Tree:
     """A symbolic analysis as a Tree (a forest if it has several top nodes)."""
     split, roots, label = {}, [], {}

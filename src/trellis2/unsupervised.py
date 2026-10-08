@@ -25,9 +25,19 @@ By night (``sleep``) the stored analyses are consolidated:
 3. Re-analysis (hard EM): every sentence gets its Viterbi analysis under that
    grammar, kept only if the full description length shrinks.
 
-Steps 2 and 3 run on each of the best few distinct search results, and the
-grammar with the shortest total code wins: the plain code guides the search,
-the full code decides.
+Steps 2 and 3 run on each of the best few distinct search results, and on
+each with its forests joined (``mdl_search.joined``: a forest's pieces made
+the parts of one whole, right-branching in reading order, the joins' categories
+left to consolidation). The grammar with the shortest total code wins: the
+plain code guides the search, the full code decides, including whether an
+experience is a forest of chunks or one whole.
+
+4. Re-analysis without the read's context: where each rule choice is made in
+   the light of the words just read, the context can stand in for structure.
+   So the winner's analyses are also re-analysed under the grammar without
+   that context (hard EM while its code shrinks), where the structure must
+   carry everything; consolidated again with the context, they replace the
+   winner's if the full code shrinks.
 
 The stored analyses are then written in the new grammar's categories, which
 the next day perceives with and the next night starts from. Sleeping once
@@ -46,7 +56,7 @@ from typing import Callable, Dict, List, Optional, Sequence, Tuple
 from .chart import Chart
 from .data import Tree
 from .grammar import Grammar
-from .mdl_search import Node, chunk_and_merge, code_bits, from_tree, to_tree, word_classes
+from .mdl_search import Node, chunk_and_merge, code_bits, from_tree, joined, to_tree, word_classes
 from .model import Learner, Trellis2
 
 
@@ -57,9 +67,15 @@ class UnsupervisedLearner(Learner):
 
     def __init__(self, beam: int = 4, patience: int = 3, levels: int = 12,
                  consolidations: int = 3, reanalysis_steps: int = 5, alpha: float = 0.001,
-                 seed: int = 0, workers: int = 1, **trellis_kwargs):
+                 seed: int = 0, workers: int = 1, join_forests: bool = True,
+                 context_free_steps: int = 10, **trellis_kwargs):
         super().__init__(seed=seed, alpha=alpha, **trellis_kwargs)
         self.beam = beam
+        # Whether each search result is also consolidated with its forests
+        # joined into wholes (the full code then decides between them).
+        self.join_forests = join_forests
+        # Re-analysis steps without the read's context (step 4; 0: none).
+        self.context_free_steps = context_free_steps
         self.consolidations = consolidations
         self.patience = patience
         self.levels = levels
@@ -120,6 +136,10 @@ class UnsupervisedLearner(Learner):
                 candidates.append(r)
             if len(candidates) == self.consolidations:
                 break
+        if self.join_forests:
+            candidates += [(code_bits(whole, n_tokens, self.alpha), f"{name}, forests joined", whole)
+                           for _, name, analyses in candidates if any(len(a) > 1 for a in analyses)
+                           for whole in [[joined(a) for a in analyses]]]
         if self.workers > 1 and len(candidates) > 1:
             worker = self._for_worker()
             outcomes = self._map(_consolidated, [(worker, [to_tree(a) for a in analyses])
@@ -138,6 +158,20 @@ class UnsupervisedLearner(Learner):
         log("concepts", "consolidate", steps[0])
         for b in steps[1:]:
             log("re-analysis", "viterbi", b)
+        if self.context_free_steps and model.memory.contexts() is not None:
+            plain = self._for_worker()
+            plain.trellis_kwargs = dict(self.trellis_kwargs, previous_word=False)
+            plain.reanalysis_steps = self.context_free_steps
+            _, _, found, plain_steps = plain._consolidate(trees)
+            if len(plain_steps) > 1:             # the analyses changed
+                m2, b2, t2, s2 = self._consolidate(found)
+                if b2 < bits - 1e-6:
+                    for b in plain_steps[1:]:
+                        log("re-analysis", "viterbi without the read's context (its code)", b)
+                    log("concepts", "consolidate with the read's context", s2[0])
+                    for b in s2[1:]:
+                        log("re-analysis", "viterbi", b)
+                    model, bits, trees = m2, b2, t2
         self.model, self.trees = model, trees
         self.analyses = self._in_categories(model, trees)
         self.nights += 1

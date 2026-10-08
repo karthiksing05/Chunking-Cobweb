@@ -2,7 +2,7 @@ import itertools
 import random
 
 from trellis2.mdl_search import (_State, chunk_and_merge, class_bigram_bits, code_bits, from_tree,
-                                  to_tree, word_classes)
+                                  joined, to_tree, word_classes)
 
 
 def random_corpus(seed, n=80):
@@ -42,6 +42,21 @@ def test_beam_search_shortens_the_code():
         analyses, bits = chunk_and_merge(corpus, 11, 0.001, beam=beam, patience=patience)
         assert abs(bits - code_bits(analyses, 11, 0.001)) < 1e-6
         assert bits < start
+
+
+def test_a_forest_joined_is_one_right_branching_whole_over_its_pieces():
+    analyses, _ = chunk_and_merge(random_corpus(3), 11, 0.001)
+    forests = [tops for tops in analyses if len(tops) > 2]
+    assert forests
+    for tops in forests:
+        whole = joined(tops)
+        assert len(whole) == 1
+        tree, pieces = to_tree(whole), to_tree(tops)
+        assert tree.is_valid() and tree.roots == [(0, pieces.n)]
+        # Every chunk of the forest is kept, and the joins nest to the right.
+        assert set(pieces.brackets()) <= set(tree.brackets())
+        assert {(i, pieces.n) for i, _ in pieces.roots[:-1]} <= set(tree.brackets()) | {(0, pieces.n)}
+    assert joined(analyses[0][:1]) == analyses[0][:1]
 
 
 def test_symbolic_analyses_round_trip_through_trees():

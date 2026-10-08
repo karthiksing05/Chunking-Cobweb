@@ -8,6 +8,8 @@ Status: first implementation, October 2026, on branch `inside-outside`.
 - Background: [the literature behind v2](#background-the-literature-behind-v2), condensed from the October 2026 review (the full report and notes are in the git history, commit `fbe61901`)
 - **The framework explained end to end, with figures: [`FRAMEWORK.md`](FRAMEWORK.md)**
 
+*Each `experiments/v2/results/` directory holds the latest run (the English, treebank, characters, synthetic, incremental and prompting runs were last rerun on 2026-10-07, all but the larger English language at 10,000 sentences, with the night that joins forests and re-analyses without the read's context); a dated entry below quotes the runs of its date, which git history keeps.*
+
 ## Decisions taken with the user
 
 1. The v1-era rules are relaxed (greedy-only parsing, never feeding parser output back, the generation lock, "no hints"). The parsing and generation loops are rebuilt around the new scheme.
@@ -90,19 +92,19 @@ The first round has blank chunk attributes.
 - **The scaffold** is drawn top down from the same terms: for each open chunk, its rule class and whether its left part is finished (then drawn from the inside chart) or open (then its right part's category is drawn and left pending).
 - **Completion** expands the pending parts innermost first, with the grammar's sampler, the read's context seeded by the prompt; a forest then draws its remaining pieces by its layout. At temperature 1 completions are drawn from P(sentence | prompt) (tests: frequencies against P(s) / P(prompt), with forests and one or two words of context); a temperature below 1 sharpens each choice. Each completion carries its analysis, its open spans and ln P(sentence | prompt).
 
-**Results** (2026-10-06):
+**Results** (2026-10-06; rerun 2026-10-07 with the night as it is now, unchanged within sampling noise):
 
 | Paper's corpora, unseen prompts (`results/prompts_synthetic`) | TRELLIS v2, gold trees | TRELLIS v2, sentences alone | word bigram | word trigram |
 |---|---|---|---|---|
 | SMALL (8 prompts × 5 seeds) | 100% | 100% | 43% | 53% |
 | MED (92) | 99.8% | 99.8% | 30% | 30% |
-| LARGE (255) | 86.3% | 90.7% | 41% | 43% |
-| TERM_MED (92) | 98.0% | 100% | 29% | 33% |
+| LARGE (255) | 86.1% | 90.9% | 38% | 41% |
+| TERM_MED (92) | 98.7% | 99.8% | 30% | 29% |
 | TERM_HIGH (285) | 97.3% | 99.4% | 37% | 39% |
 
 (Grammatical completions of prompts that begin no training sentence, all of them new sentences; the first 1–4 tokens of held-out sentences, 5 completions each, seeds 13, 17, 7, 42, 100. With prompts that do begin training sentences: 90–100% grammatical, 58–99% new and grammatical, against 22–37% for the n-grams. LARGE is completed more often grammatically than it generates unprompted, 86% at best: the scaffold fixes the structure the prompt begins.)
 
-On simple English (`run_prompts.py`, `results/prompts`; the first 1–3 words of held-out sentences, the 5,000-sentence grammar) the grammar codes the held-out sentences' actual continuations more compactly than the n-gram models when the prompt begins some training sentence (5.6 bits against the trigram's 6.4) and as compactly as a bigram when it begins none (8.4, bigram 8.2, trigram 10.3). Its completions of seen prompts have every word triple attested 80% of the time (one-tree completions 96%, forests 65%), but those of unseen prompts only 46% (trigram 86%). There, prompts the grammar reads as a finished piece are continued by pieces chained only by the words before them (*i have · one · friend*, *and i want very happy*); the triple measure also rejects good new English (*she played ball*).
+On simple English (`run_prompts.py`, `results/prompts`; the first 1–3 words of held-out sentences, the 5,000-sentence grammar) the grammar codes the held-out sentences' actual continuations more compactly than either n-gram model, whether the prompt begins some training sentence (5.2 bits, against 6.4 for the trigram and 7.0 for the bigram) or none (7.6, against 10.3 and 8.2). Its completions of seen prompts have every word triple attested 77% of the time at temperature 1 and 91% at 0.5; those of the 22 unseen prompts 39% and 56% (trigram 86%). Since forests are joined in the night (2026-10-07), every completion is one tree: *i have | a cat*, *her friend | was very sad*, *sue felt | sad*, and misses inside a category such as *and i | friend came* or *she played | not it*; the triple measure also rejects good new English (*she played ball*). (Before, with a third of the training sentences left as forests: 5.6 and 8.4 bits; seen prompts 80%, unseen 46% at temperature 1, unseen prompts continued by pieces chained only by the words before them, *i have · one · friend*.)
 
 ## How the representation got here (evidence)
 
@@ -177,8 +179,9 @@ The learner alternates two phases. Sleeping once after observing everything is b
   2. **Structure.** A beam search over *chunk* (B, C) and *merge* (A, A') moves lowers the plain-PCFG code of the corpus. This is GRIDS, SNPR and Bayesian model merging under one probabilistic code; every move is global, so analyses stay consistent. The search runs from flat sentences in each of the last 12 partitions on the merge path, and from the stored analyses, and keeps the shortest code.
   3. **Concepts.** The analyses are consolidated into the two hierarchies, starting from the search's categories.
   4. **Re-analysis.** Hard EM: Viterbi trees under the full grammar, kept if the total code shrinks. Consolidation starts from their labels.
-  5. **Choice.** Steps 3–4 run on each of the three best distinct search results; the grammar with the shortest total code wins.
-  6. The stored analyses are rewritten in the new grammar's categories, for the next day to perceive with and the next night to start from.
+  5. **Choice.** Steps 3–4 run on each of the three best distinct search results, and on each with its forests joined (`mdl_search.joined`: a forest's pieces made the parts of one whole, right-branching in reading order, under one fresh category that consolidation re-forms); the grammar with the shortest total code wins.
+  6. **Re-analysis without the read's context.** The winner's analyses are re-analysed under the grammar without the read's context (Viterbi while that grammar's code shrinks, up to `context_free_steps`), where the structure must carry what the context would, then consolidated again with the context; they replace the winner's if the full code shrinks.
+  7. The stored analyses are rewritten in the new grammar's categories, for the next day to perceive with and the next night to start from.
 
 ### Search
 
@@ -207,14 +210,16 @@ Two seeds, the v1 splits, 320 training sentences, compared with the supervised m
 
 | Condition | Train bits (unsup / gold trees) | Chunk types (unsup / gold trees) | Test bits/sentence (unsup / gold trees) | Gen. commission (unsup / gold trees) | Gen. commission in v2.1 | Brackets crossing no gold bracket |
 |---|---|---|---|---|---|---|
-| small | 3,251 / 3,251 | 3.0 / 3.0 | 9.5 / 9.5 | 0.1% / 0.1% | 0.1% | 75% |
-| med | **6,507 / 6,528** | 12.5 / 12.5 | 18.5 / 18.5 | 0.6% / 0.6% | 45.7% | 60% |
-| large | **8,029 / 8,356** | 14.5 / 18.5 | **23.5 / 24.0** | **9.0% / 14.5%** | 10.9% | 86% |
-| term_low | 5,311 / 5,284 | 12.0 / 12.0 | 15.3 / 15.3 | 0.4% / 0.1% | 25.2% | 53% |
-| term_med | **7,677 / 7,712** | 16.5 / 18.0 | 21.8 / 21.9 | **1.7% / 2.9%** | 40.9% | 47% |
-| term_high | **10,458 / 10,538** | 12.5 / 15.0 | 30.7 / 30.8 | **0.9% / 2.2%** | 62.4% | 48% |
+| small | 3,255 / 3,255 | 3.0 / 3.0 | 9.5 / 9.5 | 0.1% / 0.1% | 0.1% | 75% |
+| med | **6,511 / 6,532** | 12.5 / 12.5 | 18.5 / 18.5 | 0.6% / 0.6% | 45.7% | 60% |
+| large | **7,968 / 8,360** | 14.0 / 18.5 | **23.6 / 24.0** | **8.8% / 14.5%** | 10.9% | 87% |
+| term_low | 5,298 / 5,288 | 12.0 / 12.0 | 15.3 / 15.3 | 0.1% / 0.1% | 25.2% | 53% |
+| term_med | **7,615 / 7,716** | 12.5 / 18.0 | 21.8 / 21.9 | **0.7% / 2.9%** | 40.9% | 54% |
+| term_high | **10,462 / 10,541** | 12.5 / 15.0 | 30.7 / 30.8 | **0.9% / 2.2%** | 62.4% | 48% |
 
-From sentences alone, the learner now matches the supervised model on every condition. Its code is within 0.6% of the gold-tree grammar's (shorter on MED, LARGE, TERM_MED and TERM_HIGH), and its commission is at most half a point higher (lower on three conditions). Novelty is 91–100% (SMALL 54%: its language is small).
+From sentences alone, the learner now matches the supervised model on every condition. Its code is within 0.2% of the gold-tree grammar's (shorter on MED, LARGE, TERM_MED and TERM_HIGH), and its commission is never higher (lower on three conditions). Novelty is 91–100% (SMALL 54%: its language is small).
+
+(Rerun 2026-10-07 with forests joined as candidates of the night: they win 4 of the 12 nights, each with a shorter code (LARGE both seeds, TERM_LOW seed 17, TERM_MED seed 13). Commission falls in three of the four (LARGE seed 17 10.1% → 7.4%, TERM_LOW 0.6% → 0.1%, TERM_MED 3.0% → 0.9%) and rises in one (LARGE seed 13 8.0% → 10.3%). Re-analysis without the read's context changes nothing here: at 320 sentences the grammar does not take the context.)
 
 ### Results: by day and by night versus batch
 
@@ -225,18 +230,18 @@ Generation commission (incremental / batch):
 | Condition | 40 sentences | 80 | 160 | 320 |
 |---|---|---|---|---|
 | small | 0.5% / 0.5% | 0.3% / 0.3% | 0.2% / 0.2% | 0.1% / 0.1% |
-| med | 60.9% / 60.9% | **33.7% / 43.2%** | 16.2% / 15.2% | 0.6% / 0.6% |
-| large | 31.4% / 31.4% | 26.7% / 28.5% | 18.8% / 20.1% | 8.5% / 9.0% |
-| term_low | 25.9% / 25.9% | 1.6% / 3.1% | **0.2% / 5.2%** | 0.4% / 0.4% |
-| term_med | 59.6% / 59.6% | 38.6% / 45.0% | 5.8% / 8.0% | 0.4% / 1.7% |
-| term_high | 69.0% / 69.0% | **31.9% / 76.4%** | **5.7% / 23.8%** | 0.7% / 0.9% |
+| med | 49.9% / **18.3%** | **32.5% / 42.3%** | 21.6% / 20.6% | 0.6% / 0.6% |
+| large | 31.4% / 31.4% | 26.6% / 28.5% | 18.8% / 20.1% | 7.2% / 8.8% |
+| term_low | 10.9% / 10.9% | 1.7% / 3.1% | 0.2% / 0.2% | 0.1% / 0.1% |
+| term_med | 43.5% / 46.1% | 6.6% / 2.8% | 0.7% / 1.3% | 0.4% / 0.7% |
+| term_high | **57.9% / 69.0%** | **31.8% / 75.0%** | **5.7% / 23.8%** | 0.7% / 0.9% |
 
-(Rerun 2026-10-05 with the read's context of a rule choice available: description length takes it in a few of the small runs, which moves some of the 10–40-sentence cells; at 320 nothing changes. Rerun 2026-10-06 with two words available: only TERM_HIGH at 40 sentences moves, 69.2% → 69.0%, and the whole experiment takes 5 minutes instead of an hour.)
+(Rerun 2026-10-05 with the read's context of a rule choice available: description length takes it in a few of the small runs, which moves some of the 10–40-sentence cells; at 320 nothing changes. Rerun 2026-10-06 with two words available: only TERM_HIGH at 40 sentences moves, 69.2% → 69.0%, and the whole experiment takes 5 minutes instead of an hour. Rerun 2026-10-07 with the night that also consolidates the search's forests joined: at 10–80 sentences, where the search leaves many forests, the joined analyses are often the shortest code (43 of the 144 nights), and commission falls sharply in several cells: MED at 20 sentences 97.6% → 51.6%, at 40 sentences in batch 60.9% → 18.3%; TERM_LOW at 40 25.9% → 10.9%; TERM_MED at 80 38.6% → 6.6% incremental and 45.0% → 2.8% batch. MED at 160 rises, 16.2% → 21.6%. Before, from top to bottom at 40 / 80 / 160 / 320 sentences: 0.5 / 0.3 / 0.2 / 0.1%; 60.9 / 33.7–43.2 / 16.2–15.2 / 0.6%; 31.4 / 26.7–28.5 / 18.8–20.1 / 8.5–9.0%; 25.9 / 1.6–3.1 / 0.2–5.2 / 0.4%; 59.6 / 38.6–45.0 / 5.8–8.0 / 0.4–1.7%; 69.0 / 31.9–76.4 / 5.7–23.8 / 0.7–0.9%.)
 
-- **Early nights nearly coincide.** Up to 40 sentences a restart from word classes almost always gives the shortest code (the stored analyses win one of the 20 nights at 20–40 sentences, LARGE at 20 sentences with seed 17), so the two learners are identical there but for that night.
-- **Then the stored analyses pay.** From 80 sentences on they win 16 of 30 nights (SMALL excluded, where both give the same grammar). At 80 and 160 sentences the incremental learner's training code is shorter or equal in 9 of 10 cells, and its commission is lower in 9, by 5–45 points in 4. Both are equivalent at 320.
+- **Early nights mostly coincide.** Up to 40 sentences a restart from word classes usually gives the shortest code (the stored analyses win 5 of the 20 nights at 20–40 sentences; one before forests were joined), so the two learners are identical there but for those nights.
+- **Then the stored analyses pay.** From 80 sentences on they win 18 of 30 nights (SMALL excluded, where both give the same grammar). At 80 and 160 sentences the incremental learner's training code is shorter or equal in 8 of 10 cells, and its commission is lower in 7, by 5–43 points in 3. Both are equivalent at 320 (within 1.7 points). (Before forests were joined: 16 of 30; 9 of 10 cells; 9, by 5–45 points in 4.)
 - **Perception.** By 160 sentences each day's sentences are parsed almost completely (1.00–1.01 top-level chunks per sentence), at close to the held-out rate in bits.
-- **Cost.** The six nights together cost 1.5–2.6× one batch sleep at 320 (timings from a machine running other experiments at the same time, so approximate).
+- **Cost.** The six nights together cost 1.2–2.2× one batch sleep at 320 (timings from a machine running other experiments at the same time, so approximate).
 
 ### What the experiments established
 
@@ -270,35 +275,35 @@ Code: `treebank.py`, `experiments/v2/run_treebank.py`. NLTK's public sample of t
 | right-branching | 39.0% | 55.7% | 57.3% | – | – | – |
 | left-branching | 82.9% | 87.6% | 75.0% | – | – | – |
 | unigram / bigram tag model (add ½) | – | – | – | 33.4 / 27.2 | – | – |
-| TRELLIS v2, tags only | 48.0% | 62.3% | 24.7% | 26.6 | 6.5 | 3.5 |
+| TRELLIS v2, tags only | 49.0% | 63.0% | 27.8% | 26.8 | 7.0 | 4.5 |
 | TRELLIS v2, binarized gold trees | 16.9% | 39.7% | 15.7% | 26.0 | 9.0 | 24.5 |
 
-(Each rule choice in the light of the two tags before it, chosen by description length, 2026-10-06; with one tag: tags only 48.3% / 62.5% / 26.2% / 27.2 bits, gold trees 16.0% / 39.1% / 15.7% / 26.6 bits; before the read's context, 2026-10-05: tags only 55.3% / 67.6% / 33.1% / 30.1 bits, gold trees 19.1% / 41.3% / 20.7% / 30.9 bits.)
+(The night as it is since 2026-10-07: its re-analysis without the read's context is taken at both seeds, shortening the training code by 1%, and leaves held-out sentences slightly longer; before it, tags only 48.0% / 62.3% / 24.7% / 26.6 bits. Each rule choice in the light of the two tags before it, chosen by description length, 2026-10-06; with one tag: tags only 48.3% / 62.5% / 26.2% / 27.2 bits, gold trees 16.0% / 39.1% / 15.7% / 26.6 bits; before the read's context, 2026-10-05: tags only 55.3% / 67.6% / 33.1% / 30.1 bits, gold trees 19.1% / 41.3% / 20.7% / 30.9 bits.)
 
 **Generation** (2026-10-06; 1,000 tag sequences each, of 2–10 tags like the training sentences; `results/treebank/wsj10`). A generated tag sequence is *real* if it occurs among the treebank sample's sentences, and has *every tag triple attested* if every three consecutive tags, the sequence's edges included, occur somewhere in them:
 
 | WSJ10, mean of two seeds | Of the training length | Real | Every tag triple attested |
 |---|---|---|---|
 | tag bigram | 67% | 7.5% | 82% |
-| TRELLIS v2 from tags alone: its own sequences | 76% | **37%** | **97%** |
-| TRELLIS v2 from tags alone: all samples | 79% | 5.5% | 67% |
-| TRELLIS v2 from binarized gold trees | 89% | 2.7% | 64% |
+| TRELLIS v2 from tags alone: its own sequences | 78% | **29%** | **94%** |
+| TRELLIS v2 from tags alone: all samples | 81% | 5.1% | 68% |
+| TRELLIS v2 from binarized gold trees | 89% | 2.8% | 65% |
 
-The sequences the unsupervised grammar derives as one tree are almost always coherent at the level of tag triples; its forests are strings of base phrases, less coherent than a bigram's samples. The grammar read from gold trees describes held-out sentences best but generates less coherently than a tag bigram: like LARGE's on the synthetic corpora, its phrase categories are broad enough that independently drawn parts combine into sequences the treebank does not hold. With more training sentences the pattern holds (`results/treebank/wsj15`, `wsj20`): the unsupervised grammar's own sequences have every tag triple attested 94.5% and 92.8% of the time at about 1,100 and 1,900 sentences (tag bigram 77% and 73%), its forests 66–67%, the gold-tree grammar 58–62%.
+The sequences the unsupervised grammar derives as one tree are almost always coherent at the level of tag triples; its forests are strings of base phrases, less coherent than a bigram's samples. The grammar read from gold trees describes held-out sentences best but generates less coherently than a tag bigram: like LARGE's on the synthetic corpora, its phrase categories are broad enough that independently drawn parts combine into sequences the treebank does not hold. With more training sentences the pattern holds (`results/treebank/wsj15`, `wsj20`): the unsupervised grammar's own sequences have every tag triple attested 94.2% and 92.9% of the time at about 1,100 and 1,900 sentences (tag bigram 77% and 73%), its forests 68–70%, the gold-tree grammar 58–62%. (Before the night's re-analysis without the read's context: own sequences 97.0%, 94.5% and 92.8% at the three sizes, all samples 67.0%, 66.3% and 67.1%.)
 
 Training on more sentences (every other sentence of up to 15 or 20 tags; the same held-out WSJ10 sentences; means of seeds 13 and 17):
 
 | Training sentences | Bracket omission (unsup / sup) | Base-phrase omission (unsup / sup) | Held-out bits/sentence (unsup / sup) | Symbols | Chunk types | Learner's code below the gold-tree grammar's | Unsupervised night |
 |---|---|---|---|---|---|---|---|
-| 434 (≤ 10 tags) | 48.0% / 16.9% | 24.7% / 15.7% | 26.6 / 26.0 | 6.5 | 3.5 | 8% | under 1 min |
-| about 1,100 (≤ 15 tags) | 50.8% / 16.6% | 28.2% / 15.2% | 26.3 / 26.1 | 15.0 | 13.0 | 9% | 6–8 min |
-| about 1,900 (≤ 20 tags) | 53.5% / 14.8% | 28.5% / 12.6% | 26.7 / 26.8 | 22.5 | 46.5 | 9–12% | 19–20 min |
+| 434 (≤ 10 tags) | 49.0% / 16.9% | 27.8% / 15.7% | 26.8 / 26.0 | 7.0 | 4.5 | 8–9% | 1–2 min |
+| about 1,100 (≤ 15 tags) | **48.0%** / 16.6% | **25.5%** / 15.2% | 26.3 / 26.1 | 15.5 | 11.5 | 9–10% | 17–18 min |
+| about 1,900 (≤ 20 tags) | 53.2% / 14.8% | 29.5% / 12.6% | 26.7 / 26.8 | 20.5 | 32.0 | 11–13% | 51–54 min |
 
-(Tag bigram, held out: 27.2, 27.1, 27.3 bits. With one tag of context: omission 48.3 / 51.9 / 52.3% unsupervised and 16.0 / 16.4 / 15.8% supervised; held out 27.2 / 26.7 / 27.1 and 26.6 / 26.8 / 27.3 bits. Before the read's context: omission 55.3 / 51.0 / 52.1% unsupervised and 19.1 / 17.9 / 17.5% supervised; held out 30.1 / 29.7 / 29.6 and 30.9 / 31.1 / 31.6 bits; the learner's code 8–10%, 14–15% and 18% below the gold-tree grammar's. Night times are from a machine running other experiments.)
+(Tag bigram, held out: 27.2, 27.1, 27.3 bits. The night as it is since 2026-10-07, whose re-analysis without the read's context is taken at every size and seed and shortens the training code by 1–2%; before it: omission 48.0 / 50.8 / 53.5%, base phrases 24.7 / 28.2 / 28.5%, held out 26.6 / 26.3 / 26.7 bits, the learner's code 8%, 9% and 9–12% below the gold-tree grammar's. With one tag of context: omission 48.3 / 51.9 / 52.3% unsupervised and 16.0 / 16.4 / 15.8% supervised; held out 27.2 / 26.7 / 27.1 and 26.6 / 26.8 / 27.3 bits. Before the read's context: omission 55.3 / 51.0 / 52.1% unsupervised and 19.1 / 17.9 / 17.5% supervised; held out 30.1 / 29.7 / 29.6 and 30.9 / 31.1 / 31.6 bits; the learner's code 8–10%, 14–15% and 18% below the gold-tree grammar's. Night times are from a machine running other experiments.)
 
 - The unsupervised learner forms base-phrase chunks (noun groups, verb groups, subject–verb pairs) and leaves sentences as forests (about 5 chunks per sentence at 434 sentences, 9 at 1,900, for longer sentences).
 - With each rule choice in the light of the two tags before it, its grammar codes held-out sentences more compactly than a tag bigram, and the supervised one too, at every size (26.3–26.7 and 26.0–26.8 bits per sentence, against 27.1–27.3; with one tag, as compactly); without that context both were weaker sequence models than tag bigrams (and the Dirichlet concentration was not the cause: the supervised grammar's code preferred α = 0.01 to 0.001, 15,439 vs 15,763 bits, with held-out bits unchanged, 30.5 vs 30.6).
-- **The objective prefers the forests.** At every size the learner's forest grammar is shorter than the grammar of the binarized gold trees, and the gap grows with data (table; with the read's context the gap is smaller, 8–12%). Binarization is not the reason: at 434 sentences (seed 13) the learner's analyses take 14,160 bits; right-binarized gold trees 15,763, left-binarized 16,349, and forests of gold base phrases 16,120. Sentence structure does not pay for itself with this grammar family; this is not a search failure.
+- **The objective prefers the forests.** At every size the learner's forest grammar is shorter than the grammar of the binarized gold trees, and the gap grows with data (table; with the read's context the gap is smaller, 8–13%). Binarization is not the reason: at 434 sentences (seed 13) the learner's analyses take 14,160 bits; right-binarized gold trees 15,763, left-binarized 16,349, and forests of gold base phrases 16,120. Sentence structure does not pay for itself with this grammar family; this is not a search failure.
 
 ### Does sentence structure pay on real text?
 
@@ -352,9 +357,9 @@ Code: `characters.py`, `experiments/v2/run_characters.py`. CJKVI IDS (under `dat
 | bigram tokens | 35.0 | – | 22% | 20% | 3.9% | 13% | – | – |
 | TRELLIS v2, IDS structures, operators as relations | 30.3 | – (given) | **100%** | **84%** | **5.3%** | **77%** | 21 | 280 |
 | TRELLIS v2, IDS structures, operators as tokens | **24.9** | 0.0% | 97% | 71% | **7.3%** | 57% | 27 | 89 |
-| TRELLIS v2, sequences alone | 27.6 | 35.3% | 16% | 13% | 2.6% | 8% | 36 | 60 |
+| TRELLIS v2, sequences alone | 25.9 | 28.1% | 53% | 40% | 5.5% | 30% | 23 | 54 |
 
-(The two token-sequence models are sequences, so each rule choice is made in the light of the two tokens before it, which description length takes (2026-10-06; with one token, 2026-10-05: operators as tokens 27.2 bits, 98% well formed, 62% attested, 5.2% rediscovered; sequences alone 30.5 bits, 33.8% omission, 15%, 12%; without the context: operators as tokens 31.9 bits, 96% well formed, 52% attested, 2.5% rediscovered; sequences alone 36.8 bits, 31.7% omission, 8%, 6%). The relational model has no such context.)
+(The two token-sequence models are sequences, so each rule choice is made in the light of the two tokens before it, which description length takes (2026-10-06; with one token, 2026-10-05: operators as tokens 27.2 bits, 98% well formed, 62% attested, 5.2% rediscovered; sequences alone 30.5 bits, 33.8% omission, 15%, 12%; without the context: operators as tokens 31.9 bits, 96% well formed, 52% attested, 2.5% rediscovered; sequences alone 36.8 bits, 31.7% omission, 8%, 6%). The relational model has no such context. Sequences alone with the night as it is since 2026-10-07, which also consolidates the search's forests joined and re-analyses without the read's context; before it: 27.6 bits, 35.3% omission, 16% well formed, 13% attested, 2.6% rediscovered, 8% novel and valid.)
 
 The bigram row samples sequences from a maximum-likelihood token bigram trained on the same characters.
 
@@ -366,6 +371,7 @@ The bigram row samples sequences from a maximum-likelihood token bigram trained 
 - **The remaining misplacements** come from the categories of composite parts (two components already joined), which mix slots.
 - **More data makes it more coherent.** Learned from 6,000 characters (`--modes relational --train 6000`, `results/characters_6000`), 93.0% of generated characters place every component where real characters do, and held-out characters take 29.4 bits (token bigram 32.8); from 10,000, 92.8% and 28.3 bits (bigram 31.8), with 32 categories and 742 chunk types. Fewer real characters remain to be rediscovered as more are learned (2.9% and 1.6% of samples).
 - **No read context for a character** (2026-10-05). Read in its IDS prefix order, with each rule choice in the light of the token written before it (a first part's operator, or the first part's last component), description length takes the context and the held-out code shortens (2,000 characters: 30.3 → 27.1 bits; 10,000: 28.3 → 24.6), but at scale fewer generated characters place every component where a real character does (10,000: 92.8% → 85.4%) and fewer chunk types pay (742 → 329). Given each part's slot as the context instead: 27.5 bits and 90.0% at 10,000 (14 symbols at 2,000, against 21, and 76.9%). The context takes over what categories and chunks did, and in rare contexts generation falls back on coarser categories. A character is parts placed in space, not a sequence, so `CharacterMemory` gives no context; the token-sequence models of characters are sequences and get the previous token, as sentences do.
+- **Forests joined, and re-analysis without the read's context** (2026-10-07; [Coherent new sentences](#simple-english-can-the-grammar-generate-coherent-sentences) below has the details). The search finds each operator with its first part (*[⿰ 讠]*) but no join of that chunk with the second part, even in *[⿰ 讠] · 人*: a fresh chunk category is rare at the top level, and its start code costs more than the join saves. Joined right-branching in reading order, the forests are often exactly the gold trees (*[⿰ 女] · [⿱ [[⿱ 十] 一]] · [⿱ 罒] · [⿱ 目] · 八*), and in the full code they are shorter (68,950 → 66,684 bits; held-out 27.7 → 26.5; well formed 14% → 40%). Re-analysed under the grammar without the read's context, where the arity of an operator must be carried by categories, the structure moves further towards gold (bracket omission 35% → 30%; full code 65,069, well formed 52%). The night now does both, and description length takes both (table above). The gold structures still code 5% shorter (62,037 bits).
 - **Here the search falls short.** The gold structures give a shorter code than the unsupervised learner's analyses (73,662 against 82,159 bits, 10.3% shorter; 83,241 with the previous top-level code, under which the diagnostics below were run), unlike the treebank, and also in the plain code the search minimizes (71,703 against 79,740). An unsupervised night on 2,000 characters takes about an hour. (With operators as relations, the same structures take 69,014 bits.)
 - **The starting categories are the bottleneck, not the search width.** A beam of 16 instead of 4 reaches 79,207 bits (3.7 chunks per character). From the supervised model's 26 token categories the same search builds nearly complete analyses (1.4 chunks per character, 78,905 bits). Bigram word classes cannot see which slot a component fills.
 - **Sleeping again does not help.** A second, third and fourth night on the same data, with the continuation of the stored analyses always evaluated, change the code by at most 0.2% (500 characters: 23,519 → 23,477 bits) and leave MED and WSJ10 unchanged. The continuation hits the same wall as the restarts.
@@ -534,6 +540,53 @@ More sentences are derived whole, but every code is longer and generation less c
 
 **A second night on the same sentences** (2026-10-06; the search restarted from a night's analyses written in its grammar's categories, as the next night of the day/night loop does, then consolidated and re-analysed). With every piece in one category X, a few chunk moves (X, X) → Y join every forest at once. With one word of context, all training sentences become one tree, and both codes shorten: at 2,500 sentences 39,089 → 38,583 training bits and 12.8 → 12.3 held-out bits per sentence, at 5,000 70,480 → 69,693 and 11.9 → 11.5. But the joins are generic, and the grammar now generates from them: its own sentences are real 58% (2,500) and 69% (5,000) of the time within the training length, against 87–89% before, and all samples about as often as before (60% and 68%). The code is shorter because whether a sentence is one tree or a forest no longer needs coding, not because sentence structure was found. With two words of context a second night does not pay (39,241 against 38,996 bits at 2,500), and on the larger language (one word, 10,000 sentences) its search makes no move at all. In a batch night the continuation is only a candidate when its plain code is among the three best, which it is not at 5,000 sentences.
 
+**Coherent new sentences** (2026-10-07; refits of the 5,000-sentence analyses, two words of context, sentences of 3–5 words; 3,000 samples each). The grammar's own sentences are mostly real because most of them are training sentences. What is new is rarer and less coherent, and every change at generation time trades one for the other along a single curve:
+
+| How each choice is drawn | Own sentences new, per 1,000 | Of those, every word triple in TinyStories | New and real, per 1,000 |
+|---|---|---|---|
+| as the grammar says | 101 | 35% | 12 |
+| a part's category also in the light of the words read before it | 97 | 35% | 9 |
+| each rule choice also in the light of its parent's rule class | 67 | 44% | 9 |
+| from the counts of the longest context seen, as an n-gram model generates | 70 | 37% | 7 |
+| word trigram (all samples) | 164 | 100% (by construction) | 14 |
+
+- **A part's category is already fixed by its rule class.** The right part's category costs 764 bits over 12,520 chunks given the rule class; in the light of the words read before it, 712. Description length takes the parent's rule class as a further context, but barely (60,997 → 60,813 bits for the rule choices), and with it new sentences fall by a third while their coherent share rises.
+- **What could be new and real.** 15.6% of held-out sentences are not training sentences (12.4% at 9,000; 53% in the larger language at 10,000). A grammar that sampled this language exactly would write about 156 new real sentences per 1,000; every model here writes 10–25.
+- **Most categories substitute well; the pieces' category does not.** Replacing a chunk of a training sentence by another chunk of the same category gives a real sentence 97% of the time for the subjects (*tim, he, she, lily, the bird*), 98% for the predicates (*was very happy, felt sad*), 91% for the predicate complements (*very happy, to help*), 72–85% for the word classes inside them. The categories that hold the pieces of forests fail almost always: 2% for the largest category (4,171 elements: *you, too, a, what, do, that*), 2–11% for three others. Among cuts of the representation hierarchy the grammar's own is the best for substitution (14 new real sentences per 1,000 swaps; the evidence cut 11, the fine cut 6, single depths 6–10).
+- **The read's context does not cause the forests.** A night on the larger language (2,500 sentences) without any context (`run_stories.py --read-words 0`) analyses 16% of sentences whole, against 10% with two words, but its grammar is far worse: 34.0 held-out bits per sentence against 24.9, own sentences real 31% against 88%.
+
+**Forests joined, as candidates of the night** (2026-10-07; `mdl_search.joined`, `UnsupervisedLearner(join_forests=True)`, the default). Each of the three best search results is also consolidated with its forests' pieces joined into one whole, right-branching in reading order under one fresh category that consolidation then re-forms, and the full code chooses. Refits of committed nights' analyses first:
+
+| Analyses, consolidated and re-analysed | Full code (bits) | Held-out bits | Whole | Generation |
+|---|---|---|---|---|
+| characters (2,000, sequences alone): the search's forests (the night's best: 68,862) | 68,950 | 27.7 | 0% | 14% well formed |
+| the same forests joined right-branching | **66,684** | **26.5** | 100% | **40%** |
+| joined left-branching | 66,926 | 26.8 | 100% | 43% |
+| the gold structures | 62,037 | 25.2 | 100% | 97% |
+| English, 2,500 sentences: the night's analyses | 38,996 | 12.33 | 58% | all samples 67.8% real, 103 new with every triple attested per 1,000 |
+| joined right-branching | **38,239** | **11.72** | 100% | 68.1% real, 127 |
+| joined left-branching | 39,114 | 12.16 | 100% | – |
+| larger language, 2,500: the night's analyses | **77,481** | 24.87 | 10% | 22.6% real, 268 |
+| joined right-branching | 78,107 | 24.10 | 100% | 21.3% real, 198 |
+
+In prefix notation the right-branching join is often exactly the gold structure: the search finds operator-plus-first-part chunks (*[⿰ 讠]*) but no join of them with the second part, even in *[⿰ 讠] · 人*, because a fresh chunk category is rare at the top level and its start code costs more than the join saves; *[⿰ 女] · [⿱ [[⿱ 十] 一]] · [⿱ 罒] · [⿱ 目] · 八* joined to the right is its gold tree. For English the joins are generic, as in a second night: part of the shorter code is that a sentence's layout (one tree or a forest, where it stops) no longer needs coding, and all samples are about as coherent as before; what grows is the number of new combinations, and with it the coherent new ones. On the larger language the code keeps the forests, and its samples are indeed more coherent than the joined grammar's.
+
+**Re-analysis without the read's context** (2026-10-07; step 4 of the night, `context_free_steps`). Where each rule choice sees the two words just read, the context can stand in for structure. The night's winning analyses are therefore re-analysed under the grammar without the context (Viterbi while that grammar's code shrinks), where the structure must carry everything, then consolidated again with the context; they replace the winner's if the full code shrinks. On the refits above: characters 66,684 → **65,069** bits (held-out 25.9 bits, bracket omission 35.4% → 29.6%, well formed 40% → **52%**), English 2,500 (the night with joined forests) 37,921 → 37,356 (held-out and generation unchanged), the larger language 77,481 → 76,943 (unchanged). Restarting the search instead from the joined grammar's token categories shortens the full code too (63,971) but drifts to trees that branch right token by token (omission 77%), sequences the read's context codes cheaply.
+
+**An attach move, again.** A move that joins a pair directly into an existing category (*fold*, the attach move above) was tried on characters, during the search and after it: from 82 word classes it ends at 81,547 plain bits against 79,740 without it, and after the search has converged it gains 80 bits. Dropped again.
+
+**The nights with forests joined** (2026-10-07; every English run rerun with the night as it is now: forests joined as candidates, then re-analysis without the read's context). Wherever the night now leaves no forest, the grammar's *own sentences* and *all samples* are the same thing, so the comparison that holds is all samples against all samples. Every word triple counted with the sentence's edges; "per 1,000" counts samples of the training length.
+
+| TinyStories | Training sentences whole | Held-out bits per sentence | All samples of the training length | Real, among those | Every word triple in TinyStories, among those | New and real, among those |
+|---|---|---|---|---|---|---|
+| 100 words, 2,500: before → now | 58% → 100% | 12.3 → **11.8** | 88% → 95% | 68.1% → **69.5%** | 76.5% → **78.7%** | 2.7% → 2.1% |
+| 100 words, 5,000: before → now | 66% → 100% | 11.4 → **11.1** | 91% → 98% | 75.6% → 74.5% | 81.8% → **82.3%** | 1.1% → 1.0% |
+| 100 words, 9,000: before → now | 66% → 100% | 11.0 → **10.7** | 93% → 99% | 77.4% → 75.0% | 87.4% → 84.4% | 0.1% → 0.2% |
+| 250 words, 2,500: before → now | 10% → 100% | 24.9 → **24.3** | 73% → 93% | 24.1% → 22.2% | 43.0% → 34.1% | 8.9% → 5.7% |
+| 250 words, 10,000: before (rerun in progress) | 6% | 21.8 | 84% | 30.0% | 55.6% | 4.5% |
+
+On the 100-word language the night takes the joined analyses at every size: held-out sentences take fewer bits, and all samples are about as coherent as before (within three points either way: a little more at 2,500 sentences, a little less at 9,000), with fewer fragments outside the training length. The grammar's "own sentences" of before, 90–93% real, were the subset it derived whole; there is no such subset now. On the larger language at 2,500 sentences the joined analyses win by 0.3% of the code and describe held-out sentences better, but their samples are less often coherent among those of the training length (34% against 43% with every triple attested); since more of them have that length, the counts per 1,000 samples are about equal (318 against 315 with every triple attested, 207 against 177 real, 53 against 65 new and real). The pieces of a forest, chained only by the read's context, sampled locally coherent strings; the joined grammar samples whole sentences whose joins are generic (*[[the dog] [[did not] [know fun]]]*, *[one [day [[tom saw] [sam excited]]]]*).
+
 ### Chess: parts joined by typed relations
 
 Code: `chess.py`, `experiments/v2/run_chess.py`. Middlegame positions from the Lichess database of January 2013 (CC0, under `data/chess`): games in which both players are rated at least 1800 and that last at least 40 plies, the position after ply 30. That gives 8,560 positions; 4,000 are learned and 500 held out (seed 13).
@@ -597,7 +650,7 @@ Code: `chess.py`, `experiments/v2/run_chess.py`. Middlegame positions from the L
 
 ### Tried and dropped: an attach move
 
-Folding a recurring top-level pair directly into an existing category (a chunk move followed by a merge, in one step) is exact and cheap to score. It made the search worse: plain-PCFG code at seed 13, MED 6,539 → 8,469 bits, LARGE 7,800 → 9,964 bits, WSJ10 13,697 → 13,707 bits. The beam takes cheap early attachments that produce over-general categories. Removed.
+Folding a recurring top-level pair directly into an existing category (a chunk move followed by a merge, in one step) is exact and cheap to score. It made the search worse: plain-PCFG code at seed 13, MED 6,539 → 8,469 bits, LARGE 7,800 → 9,964 bits, WSJ10 13,697 → 13,707 bits. The beam takes cheap early attachments that produce over-general categories. Removed. Tried again on characters from sequences (2026-10-07), where joining an operator-plus-part chunk to the second part into the category of complete parts is exactly what the search misses: from the last three word-class partitions it ends at 81,547–81,790 plain bits against 79,740–80,902 without it, and run only after the search has converged it gains 80 bits. Joining the forests as candidates of the night does what the move was meant to (above).
 
 ### Speed
 
@@ -752,6 +805,7 @@ Langley's essay and the TRELLIS paper name chess as the first target beyond stri
 | v2.3 (in progress) | beyond the paper's corpora: Penn Treebank WSJ10 with gold tags ✓ (and larger training sets ✓; which descriptions make sentence structure pay ✓); Chinese characters ✓; a compiled Cobweb ✓. Open: starting categories that see structure (characters), finer positional concepts, α by description length; for real text, chunks categorized by their head and the total-probability code, with words at scale |
 | v2.4 (in progress) | new data types and relations: a domain brings its own context window (the representation hierarchy's surface context) and its own typed relations (the composition hierarchy); chess positions with the star context and direction-and-distance relations ✓; simple English (TinyStories) for generated coherence ✓; characters with operators as relations ✓ |
 | v2.5 (in progress) | coherence from what the descriptions can see ✓: a sentence is one tree or a forest of pieces, coded apart; a part's slot in its description; a board's read that counts material, kind by kind; each rule choice in the light of the one or two words before it, as description length chooses (English, the treebank). Tried and kept aside: a Markov code over a forest's pieces (shorter code, no more coherent samples); the sentence as a forest piece's parent (joins most forests at 5,000 sentences, but codes longer and generates less coherently); pieces read afresh; a second night on the same sentences (joins every forest with a generic rule). Open: fewer forests, which description length prefers in this grammar family; chess moves as compositions, attack and defence as relations ([hypotheses](#hypotheses-playing-chess-from-the-two-hierarchies)); a search over several moves at a time for characters from sequences; variable arity |
+| v2.6 (2026-10-07) | the night joins forests and re-analyses without the read's context ✓: each search result is also consolidated with its forests joined into wholes, and the winner is re-analysed under the grammar without the read's context, the full code deciding both. Characters from sequences: well formed 16% → 53%, held-out 27.6 → 25.9 bits. English: every sentence one tree, held-out codes shorter at every size, samples about as coherent as before. Prompting: a scaffolded parse of the prompt, its open chunks completed ✓. Open: sentence structure that pays rather than generic joins; the remaining 5% between the characters' learned and gold structures; coherent new sentences (every change at generation time trades novelty for coherence) |
 
 ## Reproducing
 
