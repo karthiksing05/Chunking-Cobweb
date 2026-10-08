@@ -14,7 +14,7 @@ The same machinery runs on sentences, on Chinese characters, and on chess positi
 |---|---|
 | [`docs/FRAMEWORK.md`](docs/FRAMEWORK.md) | **Start here.** TRELLIS v2 end to end, with figures: the two hierarchies, the grammar, description length, parsing and generation, learning by day and night, results, and every domain |
 | [`docs/V2_DESIGN.md`](docs/V2_DESIGN.md) | The design log: decisions taken with the user, the evidence behind each choice, the detailed result tables, and the literature behind v2 (condensed from the October 2026 review, whose full report and notes are in the git history at commit `fbe61901`) |
-| [`confs/acs-26/RESULTS.md`](confs/acs-26/RESULTS.md) | TRELLIS v1, the paper "A Unified Framework of Concepts and Chunks" (frozen); the paper's source is in `confs/acs-26/paper/` |
+| [`confs/acs-26/RESULTS.md`](confs/acs-26/RESULTS.md) | TRELLIS v1, the paper "A Unified Account of Concepts and Chunks: Extending Cobweb from Categorization to Composition" (frozen); the paper's source is in `confs/acs-26/paper/` |
 | `experiments/v2/results/*/summary.md` | Result tables, written by the experiment scripts |
 
 Working notes kept while the project evolved. They record how the ideas developed; where they differ from the documents above, the documents above are current.
