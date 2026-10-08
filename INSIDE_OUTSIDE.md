@@ -14,18 +14,11 @@ Honestly, humans kind of adopt a mental understanding of the sentence based on r
 
 List of things I want to address with inside-outside parsing is below! By the constraints of the above framework, here are the things I hope to weave into the final framework as a result of including inside-outside parsing. I mention these ideas here because they most likely have to be designed in conjunction with the pivot of parsing.
 
-*   Chunk Context! This is a big one - chunk context is extremely hard to standardize in a parsing scheme that is inherently greedy, but hopefully the process of 
-*   Unsupervised learning! This is also huge - having whole parses allows us to set up 
+*   Chunk Context! This is a big one - chunk context is extremely hard to standardize in a parsing scheme that is inherently greedy, but hopefully the process of full-parsing will allow us to refine existing representations with context
+*   Unsupervised learning! This is also huge - having whole parses allows us to set up thresholds in a way that's far easier. We can also do something where we maintain candidate parses in a frontier and then learn them once we can confirm that they're good enough!
+    *   Goal here is a little more precise - want to create a globally optimal and minimally viable grammar, borrowing from information-theory principles to do so in an incremental way
 
 ## Enriching our representations
-
-### Content and Context
-
-**Immediate Test** - Encode pairs of words with Cobweb!! Additionally encode distance?? Putting this in `attention-test.py` - we'll figure out results soon! -> moved this to [Cobweb-LLM](https://github.com/karthiksing05/cobweb-llm) repository!!
-
-Obviously, relationships need to be context-enriched and content-enriched, and that's what Q, K, V is for in Transformers. Additionally, the fact that embeddings can be trained in Transformers is what allows for the V ideas to be updated!
-
-So, it looks like we'll need to maintain a representation of each word or symbol over time and then locally enrich it but update that representation as well
 
 ### Chunk Context
 
@@ -33,5 +26,4 @@ We're observing a need to enrich context with higher-level structure!!
 
 ### Attention in Cobweb
 
-Generally, it's important that we enrich context with attention to maintain long-range dependencies! Again, the Cobweb-LLM repository (linked above) has important notes here
-
+Generally, it's important that we enrich context with attention to maintain long-range dependencies and make better representations! Again, the Cobweb-LLM repository (linked above) has important notes here, but hopefully we can simply do something more naive.
