@@ -177,7 +177,7 @@ Without analyses the learner must find the structure itself. It looks for the an
 
 **By day** (`observe`), each sentence is perceived with the current grammar: its Viterbi analysis, which is also its shortest-code analysis. Where no larger chunk pays, the analysis is a forest of chunks, and unknown words get the category their context implies. The sentence is stored with its analysis. Before the first night there is no grammar, and sentences are stored as they come.
 
-**By night** (`sleep`), all stored sentences are consolidated in seven steps.
+**By night** (`sleep`), all stored sentences are consolidated in eight steps.
 
 1. **Word classes.** Word types are merged while the code of a class-bigram model shrinks: Brown clustering (Brown et al. 1992) read as description length. The whole merge path, from word types to the final classes, is kept.
 2. **Structure.** A search over two moves lowers the plain-PCFG code of the corpus:
@@ -189,7 +189,8 @@ Without analyses the learner must find the structure itself. It looks for the an
 4. **Re-analysis.** Every sentence gets its Viterbi analysis under the new grammar, and the new analyses are kept only if the total code shrinks (hard EM).
 5. **Choice.** Steps 3 and 4 run on each of the three best distinct search results, and on each with its forests joined: a forest's pieces made the parts of one whole, right-branching in reading order, under one fresh category that consolidation re-forms. The grammar with the shortest total code wins. The plain code is cheap enough to guide the search, but the full code makes the final choice: two analyses whose plain codes differ by a bit can consolidate into very different grammars, and whether an experience is a forest of chunks or one whole is decided the same way.
 6. **Re-analysis without the read's context.** Where each rule choice is made in the light of the words just read, the context can stand in for structure. The winner's analyses are re-analysed under the grammar without that context, where the structure must carry everything (Viterbi while that grammar's code shrinks), then consolidated again with the context; they replace the winner's if the full code shrinks.
-7. **Rewrite.** The stored analyses are written in the new grammar's categories, for the next day to perceive with and the next night to start from.
+7. **Sampled re-analysis.** Re-analysis keeps one analysis per sentence, so it stops in the first optimum it reaches (hard EM). Instead, every sentence's analysis is drawn from the posterior of the grammar without the read's context, which is then refitted, round after round at a falling temperature (stochastic EM, annealed). Each round's analyses are scored by the full code, and the shortest, re-analysed as in step 4, replaces the winner's if the full code shrinks.
+8. **Rewrite.** The stored analyses are written in the new grammar's categories, for the next day to perceive with and the next night to start from.
 
 ![The structure search on SMALL](figures/search_trajectory.png)
 
@@ -258,12 +259,12 @@ Five seeds, 320 training sentences. Parsing omission is 0.0% in every condition 
 |---|---|---|---|
 | SMALL | 3,255 / 3,255 | 9.5 / 9.5 | 0.1% / 0.1% |
 | MED | **6,511 / 6,532** | 18.5 / 18.5 | 0.6% / 0.6% |
-| LARGE | **7,968 / 8,360** | **23.6 / 24.0** | **8.8% / 14.5%** |
+| LARGE | **7,961 / 8,360** | **23.5 / 24.0** | **7.4% / 14.5%** |
 | TERM_LOW | 5,298 / 5,288 | 15.3 / 15.3 | 0.1% / 0.1% |
 | TERM_MED | **7,615 / 7,716** | 21.8 / 21.9 | **0.7% / 2.9%** |
 | TERM_HIGH | **10,462 / 10,541** | 30.7 / 30.8 | **0.9% / 2.2%** |
 
-From sentences alone the learner matches the supervised model on every condition. Its code is within 0.2% of the gold-tree grammar's, and shorter on four conditions. Its commission is never higher, and lower on three conditions. Novelty is 91–100% (SMALL 54%: its language is small). (Two seeds; rerun 2026-10-07 with the night that also consolidates each search result with its forests joined, which wins 4 of the 12 nights, each with a shorter code: LARGE 8,033 → 7,968 bits, TERM_LOW 5,314 → 5,298, TERM_MED 7,681 → 7,615 with commission 1.7% → 0.7%.)
+From sentences alone the learner matches the supervised model on every condition. Its code is within 0.2% of the gold-tree grammar's, and shorter on four conditions. Its commission is never higher, and lower on three conditions. Novelty is 91–100% (SMALL 54%: its language is small). (Two seeds; rerun 2026-10-07/08 with the night that also consolidates each search result with its forests joined, which wins 4 of the 12 nights, each with a shorter code, and then samples analyses: LARGE 8,033 → 7,961 bits with commission 9.0% → 7.4%, TERM_LOW 5,314 → 5,298, TERM_MED 7,681 → 7,615 with commission 1.7% → 0.7%.)
 
 The two hierarchies matter here. The grammar read directly off the search's analyses still over-generates on the TERM conditions (47–56% commission at seed 13). Consolidating the same analyses into the two hierarchies, with chunk context, and re-analysing brings it to 0.1–4.3%.
 
@@ -453,14 +454,25 @@ Every generated character can be checked:
 | Learning | from gold analyses | from analyses, or from sentences alone, by day and by night |
 | Decisions | thresholds and gates | description length |
 
-The postulates carry over as follows:
+The paper states Cobweb's postulates (R1–R3, O1–O3, P1–P4, L1–L4) and extends them to chunks (R4–R6, O4–O5, P5–P10, and two claims about what learning takes in). Against v2 they are kept, recast (the same role, realized differently) or replaced by inference:
 
-- **R1–R3** (elements, primitives and composites) are unchanged.
-- **R4–R6:** an element's two descriptions are now representation and composition.
-- **O1–O5:** two taxonomies, each holding primitives and composites, and the grammar is a cut through each.
-- **P5–P7:** the recognition threshold is replaced by the chunk's posterior and minimum-risk decoding.
-- **P8–P10:** generation samples from the same grammar.
-- **Learning:** Cobweb's incremental operators are unchanged. Consolidation re-describes experiences with current concepts and replays them, and description length picks the level of generalization.
+| Postulate | In v2 | How |
+|---|---|---|
+| R1–R3: memory holds instances (attribute–value pairs) and concepts (a distribution over each attribute's values) | kept | both hierarchies are Cobweb trees of such instances and concepts |
+| O1–O3: one rooted taxonomy, instances at its leaves, each node a summary of the instances below it, children partitioning them | kept | unchanged, in each hierarchy |
+| P1–P4: performance is classification (sorting down to a halting node) and prediction there | recast | sorting builds the hierarchies when experiences are replayed; an element's category is where a cut crosses its path, not where sorting halts; parsing and generation run on the grammar |
+| L1: learning is incremental and fully interleaved with performance | recast | interleaved by day (perceive and store) and night (replay everything into fresh hierarchies) |
+| L2–L4: unsupervised; sorting updates probabilities; add, create, split and merge | kept | Cobweb's operators, unchanged; from experiences alone, no analyses are given either |
+| R4–R5: an experience is elements and their local relations; an element is primitive or composite | kept | the relations are the domain's: order, spatial operators, direction and distance |
+| R6: an element is described by its content or its context | recast | by its representation (behaviour, context included, in category terms) and its composition (make-up) |
+| O4–O5: a content taxonomy and a context taxonomy | recast | the composition and representation hierarchies, each holding primitives and composites |
+| P5–P6: parsing builds a partonomic tree bottom up, sorting candidates through both taxonomies and adding the best one recognized | replaced | inference over every analysis: a chunk's posterior under the whole analysis takes the place of recognition, with no threshold |
+| P7: parsing halts when nothing is recognized or one composite remains | recast | a partial analysis is an outcome with its own probability: one tree, or a forest of pieces, coded apart |
+| P8, P10: generation expands top-down until every element is primitive | kept | sampling from the grammar down to tokens |
+| P9: decompositions come from the content taxonomy, conditioned on the context taxonomy | recast | rule classes (a cut through the composition hierarchy) are the decompositions; categories and the words just read condition them |
+| Learning claims: composites enter both taxonomies, primitives only the context taxonomy; no separate mechanism creates chunks | recast | every element enters both hierarchies; learning from experiences alone adds a structure search, the one new mechanism |
+
+The style of the change: what memory stores and how it is organized is kept, and so is all of Cobweb; the procedures that parsed and generated with thresholds become inference in one normalized grammar read off the two hierarchies, and description length makes every decision a threshold made.
 
 ## 13. Using the code
 
@@ -473,7 +485,7 @@ The postulates carry over as follows:
 | `model.py` | `Trellis2`: learn from analysed experiences, consolidate, parse, code, generate (a domain brings its own memory); `Learner`: learning from experiences alone, by day and by night, with a domain's structure search |
 | `mdl.py` | Elias codes, Dirichlet-multinomial rows, the model/data split |
 | `mdl_search.py` | symbolic analyses, word classes, the exact-scored beam search, a forest's pieces joined into one whole |
-| `unsupervised.py` | `UnsupervisedLearner`: sentences by day and by night (the chunk-and-merge search, consolidation of its results with and without their forests joined, re-analysis, re-analysis without the read's context) |
+| `unsupervised.py` | `UnsupervisedLearner`: sentences by day and by night (the chunk-and-merge search, consolidation of its results with and without their forests joined, re-analysis, re-analysis without the read's context, sampled re-analysis) |
 | `evaluation.py` | target-grammar recognizer, bracket tallies |
 | `data.py` | trees, corpora, the v1 splits, the six conditions |
 | `treebank.py` | Penn Treebank sentences (WSJ10, gold tags): cleaning, gold and base-phrase brackets |

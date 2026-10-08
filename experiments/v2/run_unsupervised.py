@@ -135,12 +135,15 @@ def main():
     ap.add_argument("--beam", type=int, default=4)
     ap.add_argument("--patience", type=int, default=3)
     ap.add_argument("--levels", type=int, default=12)
+    ap.add_argument("--sampling", default="1.0,1.0,0.8,0.8,0.6,0.6,0.4,0.4,0.2",
+                    help="temperatures of the night's sampled re-analysis, comma-separated (empty: none)")
     ap.add_argument("--out", default=os.path.join(HERE, "results", "unsupervised"))
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
     jobs = [(c, int(s)) for c in args.conditions.split(",") for s in args.seeds.split(",")]
     with ProcessPoolExecutor(max_workers=args.workers) as pool:
-        search = {"beam": args.beam, "patience": args.patience, "levels": args.levels}
+        search = {"beam": args.beam, "patience": args.patience, "levels": args.levels,
+                  "sampling": tuple(float(t) for t in args.sampling.split(",") if t)}
         rows = [f.result() for f in [pool.submit(run_one, c, s, args.n_gen, args.data_root, search)
                                      for c, s in jobs]]
     with open(os.path.join(args.out, "results.json"), "w") as f:

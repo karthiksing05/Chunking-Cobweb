@@ -38,6 +38,13 @@ experience is a forest of chunks or one whole.
    that context (hard EM while its code shrinks), where the structure must
    carry everything; consolidated again with the context, they replace the
    winner's if the full code shrinks.
+5. Sampled re-analysis (stochastic EM, ``sampling``): hard EM keeps one
+   analysis per experience and stops in the first optimum. Instead every
+   experience's analysis is drawn from the posterior of the grammar without
+   the read's context, at a falling temperature, and that grammar refitted,
+   round after round; each round's analyses are scored by the full code, and
+   the shortest, re-analysed as in step 3, replaces the winner's if the full
+   code shrinks.
 
 The stored analyses are then written in the new grammar's categories, which
 the next day perceives with and the next night starts from. Sleeping once
@@ -51,6 +58,8 @@ from __future__ import annotations
 
 import time
 from concurrent.futures import ProcessPoolExecutor
+
+import numpy as np
 from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
 from .chart import Chart
@@ -68,7 +77,9 @@ class UnsupervisedLearner(Learner):
     def __init__(self, beam: int = 4, patience: int = 3, levels: int = 12,
                  consolidations: int = 3, reanalysis_steps: int = 5, alpha: float = 0.001,
                  seed: int = 0, workers: int = 1, join_forests: bool = True,
-                 context_free_steps: int = 10, **trellis_kwargs):
+                 context_free_steps: int = 10,
+                 sampling: Sequence[float] = (1.0, 1.0, 0.8, 0.8, 0.6, 0.6, 0.4, 0.4, 0.2),
+                 **trellis_kwargs):
         super().__init__(seed=seed, alpha=alpha, **trellis_kwargs)
         self.beam = beam
         # Whether each search result is also consolidated with its forests
@@ -76,6 +87,9 @@ class UnsupervisedLearner(Learner):
         self.join_forests = join_forests
         # Re-analysis steps without the read's context (step 4; 0: none).
         self.context_free_steps = context_free_steps
+        # The temperatures of the sampled re-analysis, one round each (step 5;
+        # empty: none).
+        self.sampling = tuple(sampling)
         self.consolidations = consolidations
         self.patience = patience
         self.levels = levels
@@ -172,10 +186,39 @@ class UnsupervisedLearner(Learner):
                     for b in s2[1:]:
                         log("re-analysis", "viterbi", b)
                     model, bits, trees = m2, b2, t2
+        if self.sampling:
+            model, bits, trees = self._sampled(model, bits, trees, log)
         self.model, self.trees = model, trees
         self.analyses = self._in_categories(model, trees)
         self.nights += 1
         return model.grammar
+
+    def _sampled(self, model, bits, trees, log):
+        """Step 5: annealed posterior sampling under the grammar without the
+        read's context; the shortest full code found is re-analysed and kept
+        if it is shorter than the winner's."""
+        plain = self._for_worker()
+        plain.trellis_kwargs = dict(self.trellis_kwargs, previous_word=False)
+        rng = np.random.default_rng(self.seed)
+        current = plain.fit(trees)
+        best_bits, best_trees = bits, None
+        for T in self.sampling:
+            g = current.grammar.tempered(T)
+            drawn = [Chart(g, s).sample_tree(rng) for s in self.experiences]
+            current = plain.fit(drawn)
+            b = self.fit(drawn).grammar.info["total bits"]
+            log("sampling", f"analyses drawn at temperature {T}", b)
+            if b < best_bits - 1e-6:
+                best_bits, best_trees = b, drawn
+        if best_trees is None:
+            return model, bits, trees
+        m2, b2, t2, s2 = self._consolidate(best_trees)
+        if b2 >= bits - 1e-6:
+            return model, bits, trees
+        log("concepts", "consolidate the shortest sampled analyses", s2[0])
+        for b in s2[1:]:
+            log("re-analysis", "viterbi", b)
+        return m2, b2, t2
 
     def _consolidate(self, trees: List[Tree]):
         """Consolidate, then re-analyse (hard EM) while the total code shrinks.

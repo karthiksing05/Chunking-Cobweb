@@ -103,6 +103,24 @@ def test_a_night_that_may_join_forests_codes_no_longer():
 
 
 @needs_data
+def test_a_night_with_sampled_reanalysis_codes_no_longer():
+    """The sampled re-analysis keeps its analyses only if they shorten the
+    full code, so the night's code is never longer with it; its rounds are
+    logged, and the same seed gives the same night."""
+    from trellis2.unsupervised import UnsupervisedLearner
+    train, _ = v1_split(load_corpus(SMALL), seed=13)
+    bits = []
+    for sampling in ((), (1.0, 0.5), (1.0, 0.5)):
+        learner = UnsupervisedLearner(seed=13, sampling=sampling)
+        for ex in train[:40]:
+            learner.observe(ex.tokens)
+        bits.append(learner.sleep().info["total bits"])
+        if sampling:
+            assert sum(h["stage"] == "sampling" for h in learner.history) == len(sampling)
+    assert bits[1] <= bits[0] + 1e-6 and bits[1] == bits[2]
+
+
+@needs_data
 def test_parallel_nights_learn_the_same_grammar():
     """A night's searches and consolidations are independent of each other,
     so running them in parallel processes changes nothing (every Cobweb tree

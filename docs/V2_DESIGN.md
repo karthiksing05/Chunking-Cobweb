@@ -8,7 +8,7 @@ Status: first implementation, October 2026, on branch `inside-outside`.
 - Background: [the literature behind v2](#background-the-literature-behind-v2), condensed from the October 2026 review (the full report and notes are in the git history, commit `fbe61901`)
 - **The framework explained end to end, with figures: [`FRAMEWORK.md`](FRAMEWORK.md)**
 
-*Each `experiments/v2/results/` directory holds the latest run (the English, treebank, characters, synthetic, incremental and prompting runs were last rerun on 2026-10-07, with the night that joins forests and re-analyses without the read's context); a dated entry below quotes the runs of its date, which git history keeps.*
+*Each `experiments/v2/results/` directory holds the latest run. The synthetic runs (`results/unsupervised`) include the night's sampled re-analysis (2026-10-08); the English, treebank, characters, incremental and prompting runs are those of 2026-10-07, with the night that joins forests and re-analyses without the read's context, and are being rerun with the sampled re-analysis. A dated entry below quotes the runs of its date, which git history keeps.*
 
 ## Decisions taken with the user
 
@@ -181,7 +181,8 @@ The learner alternates two phases. Sleeping once after observing everything is b
   4. **Re-analysis.** Hard EM: Viterbi trees under the full grammar, kept if the total code shrinks. Consolidation starts from their labels.
   5. **Choice.** Steps 3–4 run on each of the three best distinct search results, and on each with its forests joined (`mdl_search.joined`: a forest's pieces made the parts of one whole, right-branching in reading order, under one fresh category that consolidation re-forms); the grammar with the shortest total code wins.
   6. **Re-analysis without the read's context.** The winner's analyses are re-analysed under the grammar without the read's context (Viterbi while that grammar's code shrinks, up to `context_free_steps`), where the structure must carry what the context would, then consolidated again with the context; they replace the winner's if the full code shrinks.
-  7. The stored analyses are rewritten in the new grammar's categories, for the next day to perceive with and the next night to start from.
+  7. **Sampled re-analysis** (stochastic EM, `sampling`: temperatures 1, 1, 0.8, 0.8, 0.6, 0.6, 0.4, 0.4, 0.2). Each round draws every sentence's analysis from the posterior of the grammar without the read's context at that temperature and refits that grammar; each round's analyses are scored by the full code, and the shortest, re-analysed as in step 4, replaces the winner's if the full code shrinks.
+  8. The stored analyses are rewritten in the new grammar's categories, for the next day to perceive with and the next night to start from.
 
 ### Search
 
@@ -212,14 +213,14 @@ Two seeds, the v1 splits, 320 training sentences, compared with the supervised m
 |---|---|---|---|---|---|---|
 | small | 3,255 / 3,255 | 3.0 / 3.0 | 9.5 / 9.5 | 0.1% / 0.1% | 0.1% | 75% |
 | med | **6,511 / 6,532** | 12.5 / 12.5 | 18.5 / 18.5 | 0.6% / 0.6% | 45.7% | 60% |
-| large | **7,968 / 8,360** | 14.0 / 18.5 | **23.6 / 24.0** | **8.8% / 14.5%** | 10.9% | 87% |
+| large | **7,961 / 8,360** | 13.5 / 18.5 | **23.5 / 24.0** | **7.4% / 14.5%** | 10.9% | 87% |
 | term_low | 5,298 / 5,288 | 12.0 / 12.0 | 15.3 / 15.3 | 0.1% / 0.1% | 25.2% | 53% |
 | term_med | **7,615 / 7,716** | 12.5 / 18.0 | 21.8 / 21.9 | **0.7% / 2.9%** | 40.9% | 54% |
 | term_high | **10,462 / 10,541** | 12.5 / 15.0 | 30.7 / 30.8 | **0.9% / 2.2%** | 62.4% | 48% |
 
 From sentences alone, the learner now matches the supervised model on every condition. Its code is within 0.2% of the gold-tree grammar's (shorter on MED, LARGE, TERM_MED and TERM_HIGH), and its commission is never higher (lower on three conditions). Novelty is 91–100% (SMALL 54%: its language is small).
 
-(Rerun 2026-10-07 with forests joined as candidates of the night: they win 4 of the 12 nights, each with a shorter code (LARGE both seeds, TERM_LOW seed 17, TERM_MED seed 13). Commission falls in three of the four (LARGE seed 17 10.1% → 7.4%, TERM_LOW 0.6% → 0.1%, TERM_MED 3.0% → 0.9%) and rises in one (LARGE seed 13 8.0% → 10.3%). Re-analysis without the read's context changes nothing here: at 320 sentences the grammar does not take the context.)
+(Rerun 2026-10-07 with forests joined as candidates of the night: they win 4 of the 12 nights, each with a shorter code (LARGE both seeds, TERM_LOW seed 17, TERM_MED seed 13). Commission falls in three of the four (LARGE seed 17 10.1% → 7.4%, TERM_LOW 0.6% → 0.1%, TERM_MED 3.0% → 0.9%) and rises in one (LARGE seed 13 8.0% → 10.3%), which the sampled re-analysis then repairs (8,029 → 8,015 bits, commission 7.5%, held-out 23.71 → 23.53 bits); in the other eleven nights it finds no shorter code. Re-analysis without the read's context changes nothing here: at 320 sentences the grammar does not take the context.)
 
 ### Results: by day and by night versus batch
 
@@ -665,16 +666,12 @@ Folding a recurring top-level pair directly into an existing category (a chunk m
 
 ## Mapping to the paper's postulates
 
-- **R1–R3:** unchanged.
-- **R4–R6:** an element's two descriptions are now *representation* (behaviour: surface and chunk context) and *composition* (parts).
-- **O1–O3:** unchanged.
-- **O4–O5:** two taxonomies, each holding primitives and composites. The grammar is a cut through each. Representation categories become the values of composition instances.
-- **P5–P7:** the recognition threshold is replaced by the chunk's posterior under the whole analysis, and by MBR decoding.
-- **P8–P10:** generation samples from the same grammar.
-- **Learning:**
-  - Cobweb's incremental operators are unchanged.
-  - Learning alternates day and night. By day each experience is perceived with the current grammar and stored. By night consolidation searches for shorter analyses, re-describes the experiences with current concepts and replays them.
-  - MDL picks the level of generalization.
+The paper's numbering: Cobweb's postulates R1–R3, O1–O3, P1–P4, L1–L4; the extension to chunks R4–R6, O4–O5, P5–P10, plus two claims about what learning takes in (see [`FRAMEWORK.md`](FRAMEWORK.md#12-relation-to-trellis-v1-and-the-papers-postulates) for the full table).
+
+- **Kept:** R1–R3, O1–O3 and L2–L4 (all of Cobweb's representation, organization and learning operators); R4–R5 (experiences of elements and their relations, primitive or composite; the relations typed by the domain); P8 and P10 (generation top-down, down to primitives).
+- **Recast:** R6 and O4–O5 (content and context become composition and representation, and both hierarchies hold primitives and composites); P1–P4 (sorting builds the hierarchies; categories are cuts, not halting nodes); P7 (a partial analysis is a coded outcome, not a halt); P9 (decompositions are rule classes, conditioned by categories and the words just read); L1 (interleaving by day and night); the learning claims (every element enters both hierarchies; from experiences alone a structure search proposes the analyses).
+- **Replaced:** P5–P6 (greedy bottom-up parsing with a recognition threshold becomes inference over every analysis: a chunk's posterior under the whole analysis, decoded by minimum risk).
+- **Removed with them:** every threshold of v1 (recognition, recall, maturity gates). Description length decides instead.
 
 ## Hypotheses: playing chess from the two hierarchies
 
