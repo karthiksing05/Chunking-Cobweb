@@ -5,102 +5,102 @@ TinyStories, sentences of 3–8 words over the 250 most frequent words: 10000 le
 | word 1-gram model | 40.7 |
 | word 2-gram model | 23.9 |
 | word 3-gram model | 24.2 |
-| TRELLIS v2 | 21.8 |
+| TRELLIS v2 | 20.9 |
 
-Grammar: 57 categories, 171 chunk types; 6% of training sentences analysed as one tree (3.10 top-level chunks per sentence).
+Grammar: 65 categories, 163 chunk types; 100% of training sentences analysed as one tree (1.00 top-level chunks per sentence).
 
 | Generated sentences (1,000) | TRELLIS v2: its own sentences (whole trees) | TRELLIS v2: all samples | word 2-gram | word 3-gram |
 |---|---|---|---|---|
-| new | 25.9% | 78.7% | 84.0% | 62.1% |
-| real | 75.3% | 26.6% | 27.2% | 46.5% |
-| new and real | 1.2% | 5.3% | 11.2% | 8.6% |
-| 3–8 words long | 100.0% | 83.6% | 67.3% | 86.9% |
-| real, among those of 3–8 words | 75.3% | 30.0% | 28.4% | 51.6% |
-| new and real, among those of 3–8 words | 1.2% | 4.5% | 4.6% | 7.9% |
-| word pairs in TinyStories | 97.2% | 96.1% | 100.0% | 100.0% |
-| word triples in TinyStories | 90.3% | 80.0% | 76.6% | 100.0% |
-| mean length | 4.2 | 5.4 | 5.2 | 5.4 |
-| perceived with the analysis it was generated from | 99.4% | 98.3% | – | – |
-| chunks inside sentences found in TinyStories | 96.9% | 96.1% | – | – |
+| new | 68.7% | 68.1% | 86.8% | 63.0% |
+| real | 35.3% | 35.8% | 22.2% | 46.8% |
+| new and real | 4.0% | 3.9% | 9.0% | 9.8% |
+| 3–8 words long | 94.9% | 95.4% | 68.9% | 86.6% |
+| real, among those of 3–8 words | 37.1% | 37.4% | 24.4% | 52.4% |
+| new and real, among those of 3–8 words | 4.1% | 4.0% | 5.2% | 9.7% |
+| word pairs in TinyStories | 94.1% | 94.1% | 100.0% | 100.0% |
+| word triples in TinyStories | 79.0% | 79.4% | 77.5% | 100.0% |
+| mean length | 5.4 | 5.3 | 5.4 | 5.5 |
+| perceived with the analysis it was generated from | 98.7% | 98.5% | – | – |
+| chunks inside sentences found in TinyStories | 79.0% | 78.8% | – | – |
 
 Largest categories:
 
-- S11 (30412): i, fun, friends, happy, sad, very happy, it, they were
-- S56 (7174): happy, was, day, you, ball, and, help, sad
-- S33 (7102): very, and, the, to, so, a, you, it
-- S34 (2885): he, she, tim, you, it, tom, lily, one
-- S25 (2231): said, felt, is, mom, are, saw, day, asked
-- S31 (1714): they
-- S29 (1604): was
-- S26 (1377): were, had, are, played, all, have, like, became
-- S30 (1376): tim, he, it, she, lily, tom, sue, max
-- S12 (1238): did not, played together, wanted to help, liked to play, smiled and, loved to play, said yes, said thank you
-- S18 (934): tom, lily, ben, tim, sue, sam, max, mia
-- S7 (878): a big, wanted to, know what, a lot, all day, a big red, a fun, a small
+- S13 (10715): the, and, to, an, it, in, happy, a
+- S0 (10000): but then … happened, then something unexpected happened, they had … fun, they played … day, they are happy, do you … me, they were very happy, tim was very happy
+- S46 (6076): friends, idea, fun, together, day, it, you, ball
+- S16 (5805): happy, an idea, sad, very happy, friends, fun, scared, it
+- S22 (5805): they were, they are, they had, you are, they played together, one day, thank you, it is
+- S1 (4174): an idea, the park, help you, all day, fun together, in the park, and proud, and happy
+- S10 (4049): a, and, you, to, the, so, they, he
+- S33 (3671): was, had, big, saw, of, happy, help, to
+- S3 (2459): the park, an idea, a big tree, and smiled, the bird, all day, of friends, for you
+- S39 (2220): said, had, is, felt, saw, looked, asked, day
+- S38 (2144): were, are, had, became, have, played, looked, felt
+- S41 (1878): he, she, tim, it, one, lily, tom, thank
 
-Most frequent chunks inside training analyses: *wanted to* (367), *play with* (314), *something unexpected* (306), *something unexpected happened* (288), *a big* (240), *an idea* (227), *had an idea* (203), *thank you* (183), *did not* (165), *then something unexpected happened* (153), *liked to* (149), *played together* (141), *want to* (126), *loved to* (125), *the park* (119), *wanted to help* (109), *lily and* (107), *tom and* (98), *tim and* (96), *know what* (85)
+Most frequent chunks inside training analyses: *very happy* (395), *they were* (364), *wanted to* (362), *tim was* (310), *something unexpected* (310), *play with* (306), *something unexpected happened* (305), *it was* (259), *a big* (245), *an idea* (241), *he was* (239), *so happy* (234), *the bird* (220), *thank you* (218), *the cat* (215), *want to* (213), *they are* (190), *did not* (189), *she was* (182), *they had* (179)
 
 
 The grammar's own sentences (analysis as generated):
 
-    [[[tom and] sam] sara]  (new)
-    [lily [had [an idea]]]
-    [[[the dog] lily] tom]  (new)
-    [but [[something unexpected] happened]]
-    [but [then [[something unexpected] happened]]]
+    [bear [so too]]  (new)
+    [[they were] [happy [and [[said [thank you]] [mom happy]]]]]  (new)
+    [[max [[liked to] [play with]]] [his friends]]  (new)
+    [[they were] [very happy]]
+    [[lily said] [look [mom [a ball]]]]  (new)
+    [[sam was] [shiny [and scared]]]  (new)
+    [[[they [[like to] [play with]]] can] [[i be] fun]]  (new)
+    [[he ran] [out [playing together]]]  (new)
+    [[he was] [very [happy [ever fun]]]]  (new)
+    [[it was] [[a big] dad]]  (new)
+    [[you are] [my friend]]
+    [[you can] [have [as animals]]]  (new)
+    [[[the cat] ran] [to help]]  (new)
+    [[tim asked] [[his mom] said]]  (new)
+    [[[they all] played] together]
+    [[he was] scared]
+    [[[[sam and] [the dog]] are] happy]  (new)
+    [[he looked] [at [[[tim [play with]] was] [so [surprised is]]]]]  (new)
     [then [[something unexpected] happened]]
-    [then [had [an idea]]]  (new)
-    [but [then [[something unexpected] happened]]]
-    [tim [had [an idea]]]
-    [[[ben and] lily] asked]
-    [she [had [an idea]]]
-    [[he was] it]  (new)
-    [but [[something unexpected] happened]]
-    [[they always] mom]  (new)
-    [then [[something unexpected] happened]]
-    [then [tim [had [an idea]]]]
-    [then [[something unexpected] happened]]
-    [mia [had [an idea]]]
-    [but [then [[something unexpected] happened]]]
-    [but [then [[something unexpected] happened]]]
-    [tim [had [an idea]]]
-    [then [she [had [an idea]]]]
-    [and [they [played together]]]  (new)
-    [but [[something unexpected] happened]]
-    [they [had [an idea]]]
+    [then [[[a big] red] me]]  (new)
+    [[they were] [[so happy] [[to see] it]]]
+    [[they were] [very happy]]
+    [[he saw] [[[a big] red] ball]]
+    [they [[[want to] play] [[and have] fun]]]  (new)
+    [[[[lily and] ben] [says yes]] [i do]]  (new)
 
 All samples, including partial analyses (pieces joined by ·):
 
-    [[[tim and] lily] [smiled and]] · [said yes] · let's · [play together] · for  (new)
-    [he [[wanted to] [play with]]] · me · that  (new)
-    [you are] · so · fast
-    [you can] · have  (new)
-    [[[lily and] ben] were] · playing  (new)
-    [and [[something unexpected] happened]]  (new)
-    [they [did not]] · [[know what] to]  (new)
-    [they played] · [and had]  (new)
-    can · we · be  (new)
-    [they played] · [and had]  (new)
-    i'm · sorry · anna
-    [they are] · happy · were  (new)
-    [how [want to]] · play · together  (new)
-    [they became] · good · friends
-    [amy [[a to] play]] · [in [the park]]  (new)
+    [[lucy went] [to help]]  (new)
+    [[[[tom and] lily] are] friends]
+    [what [is [good [for you]]]]  (new)
+    [[max was] [surprised [but happy]]]  (new)
+    [but [then [[something unexpected] happened]]]
+    [[[they all] laughed] [[and walked] away]]  (new)
+    [yes [[let's play] [again soon]]]  (new)
+    [[[[lily and] max] became] [best do]]  (new)
+    [[they [[feel to] be]] pretty]  (new)
+    [what [can we]]  (new)
+    [[they had] [[so much] [[i be] scared]]]  (new)
+    [[they [played together]] [[all day] long]]
+    [i [will too]]  (new)
+    [[he [did not]] [like [the idea]]]  (new)
+    [then [[tim had] this]]  (new)
 
 Held-out sentences (minimum-risk analysis):
 
-    [[[she was] playing] [with him]]
+    [[she was] [playing [with him]]]
     [but [then [[something unexpected] happened]]]
-    [[[can [you help]] me] [find it]]
-    [[[[amy said] [to tom]] look] [[at my] toy]]
-    [[[he [[wanted to] [know what]]] was] [in it]]
+    [can [[you help] [me [find it]]]]
+    [[[[amy [said to]] tom] look] [at [my toy]]]
+    [[he [[wanted to] know]] [[what was] [in it]]]
     [[they [played together]] [[all day] long]]
-    [[[she thought] [[it was] too]] hard]
+    [[she thought] [[it was] [too hard]]]
     [[tom liked] [the idea]]
     [[tim was] [so happy]]
-    [[[[they [laughed and]] had] [lots of]] fun]
-    [[soon [[[he was] home] [and [he went]]]] inside]
+    [[[they [laughed and]] had] [[lots of] fun]]
+    [soon [[he was] [home [and [[he went] inside]]]]]
     [but [then [[something unexpected] happened]]]
-    [[but then] [[he found] [[a big] box]]]
+    [but [then [[he found] [[a big] box]]]]
     [i [am [[a nice] dog]]]
-    [[[it [[wanted to] be]] friends] [with bob]]
+    [[it [[wanted to] be]] [friends [with bob]]]
