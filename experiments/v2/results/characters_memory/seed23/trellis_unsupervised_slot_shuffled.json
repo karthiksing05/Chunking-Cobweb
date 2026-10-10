@@ -1,0 +1,793 @@
+{
+ "mode": "unsupervised",
+ "cond": "slot_shuffled",
+ "seed": 23,
+ "train": 2000,
+ "test": 500,
+ "seconds learn": 2736.7506127357483,
+ "total bits": 77801.4490443151,
+ "model bits": 16372.819425434107,
+ "data bits": 61428.629618880994,
+ "symbols": 20,
+ "rule classes": 113,
+ "chunk types": 51,
+ "total bits per character": 38.90072452215755,
+ "model bits per character": 8.186409712717053,
+ "data bits per character": 30.7143148094405,
+ "held-out bits per character": 35.85192993448298,
+ "validity": {
+  "chunk types": 51,
+  "type modal class": {
+   "component": 0.13725490196078433,
+   "operator + leading parts": 0.13725490196078433,
+   "complete, not listed": 0.29411764705882354,
+   "crosses components": 0.43137254901960786
+  },
+  "mean purity": 0.2884412343450791,
+  "types with purity >= 0.5": 12,
+  "type modal class (purity >= 0.5)": {
+   "component": 0.0,
+   "operator + leading parts": 0.16666666666666666,
+   "complete, not listed": 0.25,
+   "crosses components": 0.5833333333333334
+  },
+  "share of types: purity >= 0.5 and a database component used as a proper part": 0.0,
+  "share of types: modal yield a database component used as a proper part": 0.11764705882352941,
+  "share of types: modal yield only ever a whole character": 0.11764705882352941,
+  "count-weighted modal class": {
+   "component": 0.3389320234511171,
+   "operator + leading parts": 0.21438757724607826,
+   "complete, not listed": 0.1701790524481065,
+   "crosses components": 0.2765013468546981
+  },
+  "composite instances": 12622,
+  "instance class": {
+   "component": 0.044129298051022024,
+   "operator + leading parts": 0.20987165266994137,
+   "complete, not listed": 0.3112026620186975,
+   "crosses components": 0.4347963872603391
+  },
+  "distinct composite yields": 9374,
+  "distinct yield class": {
+   "component": 0.03552378920418178,
+   "operator + leading parts": 0.048431832728824405,
+   "complete, not listed": 0.3905483251546832,
+   "crosses components": 0.5254960529123106
+  },
+  "top types": [
+   {
+    "type": [
+     10,
+     19,
+     "None",
+     10
+    ],
+    "modal": "⿱ 一 一",
+    "purity": 0.005108556832694764,
+    "count": 2349.0,
+    "distinct": 2266,
+    "class": "component",
+    "entries": [
+     "二",
+     "𠄞",
+     "𠄟",
+     "𠄠"
+    ],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     6,
+     11,
+     "None",
+     13
+    ],
+    "modal": "⿱ 十",
+    "purity": 0.168,
+    "count": 1500.0,
+    "distinct": 128,
+    "class": "operator + leading parts",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     10,
+     17,
+     "None",
+     17
+    ],
+    "modal": "一 一",
+    "purity": 0.03758020164986251,
+    "count": 1091.0,
+    "distinct": 715,
+    "class": "crosses components",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     1,
+     16,
+     "None",
+     12
+    ],
+    "modal": "⿰ 氵",
+    "purity": 0.09551886792452831,
+    "count": 848.0,
+    "distinct": 100,
+    "class": "operator + leading parts",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     0,
+     1,
+     "None",
+     4
+    ],
+    "modal": "⿰ 亻 ⿱ 木 ⿱ 𠂊 ⿻ 口 丶",
+    "purity": 0.0013605442176870747,
+    "count": 735.0,
+    "distinct": 735,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": false,
+    "whole training character": true
+   },
+   {
+    "type": [
+     9,
+     19,
+     "None",
+     10
+    ],
+    "modal": "⿻ 一 丿 一",
+    "purity": 0.0029498525073746312,
+    "count": 678.0,
+    "distinct": 673,
+    "class": "crosses components",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     0,
+     15,
+     "None",
+     5
+    ],
+    "modal": "⿰ 口 乚",
+    "purity": 0.004451038575667656,
+    "count": 674.0,
+    "distinct": 669,
+    "class": "component",
+    "entries": [
+     "𠮜"
+    ],
+    "proper part": false,
+    "whole training character": true
+   },
+   {
+    "type": [
+     5,
+     2,
+     "None",
+     8
+    ],
+    "modal": "⿱ 一 一 乚",
+    "purity": 0.0037593984962406013,
+    "count": 532.0,
+    "distinct": 531,
+    "class": "crosses components",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     4,
+     18,
+     "None",
+     9
+    ],
+    "modal": "⿱ 一 一",
+    "purity": 0.00625,
+    "count": 480.0,
+    "distinct": 469,
+    "class": "component",
+    "entries": [
+     "二",
+     "𠄞",
+     "𠄟",
+     "𠄠"
+    ],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     8,
+     19,
+     "None",
+     10
+    ],
+    "modal": "⿱ 丿 一",
+    "purity": 0.006355932203389831,
+    "count": 472.0,
+    "distinct": 466,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     0,
+     14,
+     "None",
+     3
+    ],
+    "modal": "⿱ 一 又",
+    "purity": 0.004962779156327543,
+    "count": 403.0,
+    "distinct": 401,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": true
+   },
+   {
+    "type": [
+     10,
+     6,
+     "None",
+     17
+    ],
+    "modal": "⿻ 十 丨",
+    "purity": 0.01912568306010929,
+    "count": 366.0,
+    "distinct": 294,
+    "class": "component",
+    "entries": [
+     "卄",
+     "艹"
+    ],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     10,
+     6,
+     "None",
+     10
+    ],
+    "modal": "⿴ 𠂊 丶 又",
+    "purity": 0.008823529411764706,
+    "count": 340.0,
+    "distinct": 334,
+    "class": "crosses components",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     6,
+     11,
+     "None",
+     7
+    ],
+    "modal": "⿹ ⿹ 勹 丿",
+    "purity": 0.014035087719298246,
+    "count": 285.0,
+    "distinct": 266,
+    "class": "operator + leading parts",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     7,
+     6,
+     "None",
+     17
+    ],
+    "modal": "⿱ 十 一",
+    "purity": 0.0391304347826087,
+    "count": 230.0,
+    "distinct": 174,
+    "class": "component",
+    "entries": [
+     "土",
+     "士"
+    ],
+    "proper part": true,
+    "whole training character": true
+   },
+   {
+    "type": [
+     3,
+     19,
+     "None",
+     9
+    ],
+    "modal": "⿱ 白 工 ⿰ 忄 又",
+    "purity": 0.004761904761904762,
+    "count": 210.0,
+    "distinct": 210,
+    "class": "crosses components",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     0,
+     1,
+     "None",
+     17
+    ],
+    "modal": "⿰ 扌 㐄",
+    "purity": 0.01694915254237288,
+    "count": 177.0,
+    "distinct": 167,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": false,
+    "whole training character": true
+   },
+   {
+    "type": [
+     3,
+     6,
+     "None",
+     9
+    ],
+    "modal": "⿰ ⿻ 十 ⿰ 虫 𠃛 阝 八",
+    "purity": 0.0058823529411764705,
+    "count": 170.0,
+    "distinct": 170,
+    "class": "crosses components",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     9,
+     6,
+     "None",
+     10
+    ],
+    "modal": "⿴ 𠂊 丨 木",
+    "purity": 0.014084507042253521,
+    "count": 142.0,
+    "distinct": 140,
+    "class": "crosses components",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     4,
+     6,
+     "None",
+     17
+    ],
+    "modal": "⿱ 十 一",
+    "purity": 0.03731343283582089,
+    "count": 134.0,
+    "distinct": 120,
+    "class": "component",
+    "entries": [
+     "土",
+     "士"
+    ],
+    "proper part": true,
+    "whole training character": true
+   },
+   {
+    "type": [
+     4,
+     6,
+     "None",
+     9
+    ],
+    "modal": "⿵ 冂 ⿱ ⿱ 十 丶 丷",
+    "purity": 0.008264462809917356,
+    "count": 121.0,
+    "distinct": 121,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     9,
+     17,
+     "None",
+     17
+    ],
+    "modal": "一 一",
+    "purity": 0.02608695652173913,
+    "count": 115.0,
+    "distinct": 104,
+    "class": "crosses components",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     5,
+     6,
+     "None",
+     8
+    ],
+    "modal": "⿱ 十 ⿱ 罒 ⿰ 丿 𠃓 𠃌",
+    "purity": 0.012345679012345678,
+    "count": 81.0,
+    "distinct": 81,
+    "class": "crosses components",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     8,
+     6,
+     "None",
+     10
+    ],
+    "modal": "⿱ 十 ⿱ 山 亅",
+    "purity": 0.013333333333333334,
+    "count": 75.0,
+    "distinct": 75,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     7,
+     19,
+     "None",
+     10
+    ],
+    "modal": "⿻ 一 丨",
+    "purity": 0.028169014084507043,
+    "count": 71.0,
+    "distinct": 68,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": true
+   },
+   {
+    "type": [
+     1,
+     16,
+     "None",
+     7
+    ],
+    "modal": "⿰ ⿱ 十 一",
+    "purity": 0.06153846153846154,
+    "count": 65.0,
+    "distinct": 57,
+    "class": "operator + leading parts",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     5,
+     2,
+     "None",
+     17
+    ],
+    "modal": "口 乚",
+    "purity": 0.046153846153846156,
+    "count": 65.0,
+    "distinct": 61,
+    "class": "crosses components",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     8,
+     6,
+     "None",
+     17
+    ],
+    "modal": "⿹ 勹 丿",
+    "purity": 0.06896551724137931,
+    "count": 58.0,
+    "distinct": 54,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": true
+   },
+   {
+    "type": [
+     9,
+     6,
+     "None",
+     17
+    ],
+    "modal": "⿻ 十 丨",
+    "purity": 0.06666666666666667,
+    "count": 45.0,
+    "distinct": 42,
+    "class": "component",
+    "entries": [
+     "卄",
+     "艹"
+    ],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     3,
+     19,
+     "None",
+     17
+    ],
+    "modal": "一 又",
+    "purity": 0.09090909090909091,
+    "count": 22.0,
+    "distinct": 20,
+    "class": "crosses components",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     7,
+     6,
+     "None",
+     10
+    ],
+    "modal": "⿱ 乛 ⿱ 丿 虫",
+    "purity": 0.05,
+    "count": 20.0,
+    "distinct": 20,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     7,
+     17,
+     "None",
+     17
+    ],
+    "modal": "木 又",
+    "purity": 0.1,
+    "count": 20.0,
+    "distinct": 19,
+    "class": "crosses components",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     8,
+     17,
+     "None",
+     17
+    ],
+    "modal": "乚 丨",
+    "purity": 0.125,
+    "count": 8.0,
+    "distinct": 8,
+    "class": "crosses components",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     7,
+     19,
+     "None",
+     17
+    ],
+    "modal": "⿱ 子",
+    "purity": 0.3333333333333333,
+    "count": 6.0,
+    "distinct": 5,
+    "class": "operator + leading parts",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     0,
+     1,
+     "None",
+     5
+    ],
+    "modal": "⿰ 丿 ⿱ ⿱ 隹 丿 ⿹ 勹 ⿱ 十 𧘇",
+    "purity": 0.2,
+    "count": 5.0,
+    "distinct": 5,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": false,
+    "whole training character": true
+   },
+   {
+    "type": [
+     0,
+     1,
+     "None",
+     3
+    ],
+    "modal": "⿱ ⿻ 巾 丨 ⿱ 厶 ⿱ 一 米",
+    "purity": 0.2,
+    "count": 5.0,
+    "distinct": 5,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": false,
+    "whole training character": true
+   },
+   {
+    "type": [
+     3,
+     17,
+     "None",
+     17
+    ],
+    "modal": "一 丨",
+    "purity": 0.2,
+    "count": 5.0,
+    "distinct": 5,
+    "class": "crosses components",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     9,
+     19,
+     "None",
+     17
+    ],
+    "modal": "阝 八",
+    "purity": 0.25,
+    "count": 4.0,
+    "distinct": 4,
+    "class": "crosses components",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     7,
+     6,
+     "None",
+     9
+    ],
+    "modal": "⿻ 十 ⿰ 虫 𠃛",
+    "purity": 0.3333333333333333,
+    "count": 3.0,
+    "distinct": 3,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     10,
+     6,
+     "None",
+     19
+    ],
+    "modal": "⿱ 十 𧘇",
+    "purity": 1.0,
+    "count": 1.0,
+    "distinct": 1,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   }
+  ],
+  "valid modal examples": [
+   {
+    "modal": "⿱ 一 一",
+    "entries": [
+     "二",
+     "𠄞",
+     "𠄟",
+     "𠄠"
+    ],
+    "purity": 0.005108556832694764,
+    "count": 2349.0
+   },
+   {
+    "modal": "⿰ 口 乚",
+    "entries": [
+     "𠮜"
+    ],
+    "purity": 0.004451038575667656,
+    "count": 674.0
+   },
+   {
+    "modal": "⿱ 一 一",
+    "entries": [
+     "二",
+     "𠄞",
+     "𠄟",
+     "𠄠"
+    ],
+    "purity": 0.00625,
+    "count": 480.0
+   },
+   {
+    "modal": "⿻ 十 丨",
+    "entries": [
+     "卄",
+     "艹"
+    ],
+    "purity": 0.01912568306010929,
+    "count": 366.0
+   },
+   {
+    "modal": "⿱ 十 一",
+    "entries": [
+     "土",
+     "士"
+    ],
+    "purity": 0.0391304347826087,
+    "count": 230.0
+   },
+   {
+    "modal": "⿱ 十 一",
+    "entries": [
+     "土",
+     "士"
+    ],
+    "purity": 0.03731343283582089,
+    "count": 134.0
+   },
+   {
+    "modal": "⿻ 十 丨",
+    "entries": [
+     "卄",
+     "艹"
+    ],
+    "purity": 0.06666666666666667,
+    "count": 45.0
+   }
+  ]
+ },
+ "seconds total": 2739.9324436187744
+}

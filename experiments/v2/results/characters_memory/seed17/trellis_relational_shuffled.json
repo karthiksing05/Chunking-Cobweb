@@ -1,0 +1,735 @@
+{
+ "mode": "relational",
+ "cond": "shuffled",
+ "seed": 17,
+ "train": 2000,
+ "test": 500,
+ "seconds learn": 19.642045736312866,
+ "total bits": 76064.6132972824,
+ "model bits": 3252.405048418766,
+ "data bits": 72812.20824886365,
+ "symbols": 4,
+ "rule classes": 14,
+ "chunk types": 96,
+ "total bits per character": 38.032306648641196,
+ "model bits per character": 1.626202524209383,
+ "data bits per character": 36.40610412443183,
+ "held-out bits per character": 37.11514476815641,
+ "validity": {
+  "chunk types": 96,
+  "type modal class": {
+   "component": 0.020833333333333332,
+   "operator + leading parts": 0.0,
+   "complete, not listed": 0.9791666666666666,
+   "crosses components": 0.0
+  },
+  "mean purity": 0.21147487398117568,
+  "types with purity >= 0.5": 16,
+  "type modal class (purity >= 0.5)": {
+   "component": 0.0,
+   "operator + leading parts": 0.0,
+   "complete, not listed": 1.0,
+   "crosses components": 0.0
+  },
+  "share of types: purity >= 0.5 and a database component used as a proper part": 0.0,
+  "share of types: modal yield a database component used as a proper part": 0.020833333333333332,
+  "share of types: modal yield only ever a whole character": 0.3125,
+  "count-weighted modal class": {
+   "component": 0.21150830981498903,
+   "operator + leading parts": 0.0,
+   "complete, not listed": 0.788491690185011,
+   "crosses components": 0.0
+  },
+  "composite instances": 6378,
+  "instance class": {
+   "component": 0.047036688617121354,
+   "operator + leading parts": 0.0,
+   "complete, not listed": 0.9529633113828786,
+   "crosses components": 0.0
+  },
+  "distinct composite yields": 5901,
+  "distinct yield class": {
+   "component": 0.029147602101338755,
+   "operator + leading parts": 0.0,
+   "complete, not listed": 0.9708523978986613,
+   "crosses components": 0.0
+  },
+  "top types": [
+   {
+    "type": [
+     0,
+     3,
+     "⿰",
+     2
+    ],
+    "modal": "⿰ 口 ⿱ ⿱ ⿻ 乛 彳 日 ⿱ 匚 丶",
+    "purity": 0.0011123470522803114,
+    "count": 899.0,
+    "distinct": 899,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": false,
+    "whole training character": true
+   },
+   {
+    "type": [
+     1,
+     3,
+     "⿱",
+     3
+    ],
+    "modal": "⿱ 一 一",
+    "purity": 0.013528748590755355,
+    "count": 887.0,
+    "distinct": 703,
+    "class": "component",
+    "entries": [
+     "二",
+     "𠄞",
+     "𠄟",
+     "𠄠"
+    ],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     2,
+     3,
+     "⿱",
+     3
+    ],
+    "modal": "⿱ 一 一",
+    "purity": 0.015151515151515152,
+    "count": 462.0,
+    "distinct": 412,
+    "class": "component",
+    "entries": [
+     "二",
+     "𠄞",
+     "𠄟",
+     "𠄠"
+    ],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     2,
+     3,
+     "⿱",
+     1
+    ],
+    "modal": "⿱ 八 ⿱ 一 丿",
+    "purity": 0.0049382716049382715,
+    "count": 405.0,
+    "distinct": 403,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     2,
+     1,
+     "⿱",
+     3
+    ],
+    "modal": "⿱ ⿱ ⿻ 丿 日 山 丷",
+    "purity": 0.0030303030303030303,
+    "count": 330.0,
+    "distinct": 330,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     1,
+     3,
+     "⿻",
+     3
+    ],
+    "modal": "⿻ 一 十",
+    "purity": 0.019455252918287938,
+    "count": 257.0,
+    "distinct": 239,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     1,
+     3,
+     "⿰",
+     3
+    ],
+    "modal": "⿰ 丿 一",
+    "purity": 0.016666666666666666,
+    "count": 240.0,
+    "distinct": 212,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     0,
+     2,
+     "⿰",
+     2
+    ],
+    "modal": "⿰ ⿸ ⿱ 氵 人 人 ⿱ 丶 丿",
+    "purity": 0.005025125628140704,
+    "count": 199.0,
+    "distinct": 199,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": false,
+    "whole training character": true
+   },
+   {
+    "type": [
+     1,
+     3,
+     "⿱",
+     1
+    ],
+    "modal": "⿱ 十 ⿱ 丿 彳",
+    "purity": 0.010582010582010581,
+    "count": 189.0,
+    "distinct": 188,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     1,
+     1,
+     "⿱",
+     3
+    ],
+    "modal": "⿱ ⿻ 乛 彳 日",
+    "purity": 0.00558659217877095,
+    "count": 179.0,
+    "distinct": 179,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     0,
+     3,
+     "⿰",
+     3
+    ],
+    "modal": "⿰ 一 一",
+    "purity": 0.017142857142857144,
+    "count": 175.0,
+    "distinct": 164,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": true
+   },
+   {
+    "type": [
+     0,
+     2,
+     "⿱",
+     2
+    ],
+    "modal": "⿱ ⿰ 口 亅 ⿱ 厶 十",
+    "purity": 0.006024096385542169,
+    "count": 166.0,
+    "distinct": 166,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": false,
+    "whole training character": true
+   },
+   {
+    "type": [
+     2,
+     1,
+     "⿱",
+     1
+    ],
+    "modal": "⿱ ⿱ ⿻ 乛 彳 日 ⿱ 匚 丶",
+    "purity": 0.00625,
+    "count": 160.0,
+    "distinct": 160,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     2,
+     3,
+     "⿻",
+     3
+    ],
+    "modal": "⿻ 一 一",
+    "purity": 0.0273972602739726,
+    "count": 146.0,
+    "distinct": 131,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     0,
+     2,
+     "⿰",
+     3
+    ],
+    "modal": "⿰ ⿱ ⿻ 口 十 ⿱ 九 ⿻ 阝 木 亻",
+    "purity": 0.006993006993006993,
+    "count": 143.0,
+    "distinct": 143,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": false,
+    "whole training character": true
+   },
+   {
+    "type": [
+     0,
+     2,
+     "⿱",
+     3
+    ],
+    "modal": "⿱ ⿸ ⿻ ⿻ 一 十 人 日 又",
+    "purity": 0.009009009009009009,
+    "count": 111.0,
+    "distinct": 111,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": false,
+    "whole training character": true
+   },
+   {
+    "type": [
+     2,
+     3,
+     "⿰",
+     3
+    ],
+    "modal": "⿰ 十 丿",
+    "purity": 0.030927835051546393,
+    "count": 97.0,
+    "distinct": 91,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     2,
+     3,
+     "⿰",
+     1
+    ],
+    "modal": "⿰ 丶 ⿸ 人 人",
+    "purity": 0.011764705882352941,
+    "count": 85.0,
+    "distinct": 85,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     0,
+     3,
+     "⿱",
+     2
+    ],
+    "modal": "⿱ 口 ⿸ ⿱ 田 ⿴ 日 一 ⿺ 刂 钅",
+    "purity": 0.012658227848101266,
+    "count": 79.0,
+    "distinct": 79,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": false,
+    "whole training character": true
+   },
+   {
+    "type": [
+     1,
+     3,
+     "⿴",
+     3
+    ],
+    "modal": "⿴ 一 衤",
+    "purity": 0.02857142857142857,
+    "count": 70.0,
+    "distinct": 69,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     1,
+     1,
+     "⿻",
+     3
+    ],
+    "modal": "⿻ ⿻ 一 十 人",
+    "purity": 0.016666666666666666,
+    "count": 60.0,
+    "distinct": 60,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     2,
+     1,
+     "⿰",
+     3
+    ],
+    "modal": "⿰ ⿱ 一 隹 巾",
+    "purity": 0.017543859649122806,
+    "count": 57.0,
+    "distinct": 57,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     1,
+     3,
+     "⿹",
+     3
+    ],
+    "modal": "⿹ 目 女",
+    "purity": 0.04,
+    "count": 50.0,
+    "distinct": 49,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     2,
+     1,
+     "⿸",
+     3
+    ],
+    "modal": "⿸ ⿱ 氵 人 人",
+    "purity": 0.020833333333333332,
+    "count": 48.0,
+    "distinct": 48,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     2,
+     3,
+     "⿸",
+     1
+    ],
+    "modal": "⿸ 欠 ⿱ 勹 木",
+    "purity": 0.021739130434782608,
+    "count": 46.0,
+    "distinct": 46,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     0,
+     3,
+     "⿸",
+     2
+    ],
+    "modal": "⿸ 丷 ⿹ ⿱ 龶 𡿨 犭",
+    "purity": 0.021739130434782608,
+    "count": 46.0,
+    "distinct": 46,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": false,
+    "whole training character": true
+   },
+   {
+    "type": [
+     1,
+     3,
+     "⿻",
+     1
+    ],
+    "modal": "⿻ 世 ⿰ 一 𭕄",
+    "purity": 0.022727272727272728,
+    "count": 44.0,
+    "distinct": 44,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     2,
+     3,
+     "⿹",
+     3
+    ],
+    "modal": "⿹ 㐅 丿",
+    "purity": 0.023809523809523808,
+    "count": 42.0,
+    "distinct": 42,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     1,
+     3,
+     "⿺",
+     3
+    ],
+    "modal": "⿺ 刂 钅",
+    "purity": 0.024390243902439025,
+    "count": 41.0,
+    "distinct": 41,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     0,
+     3,
+     "⿱",
+     3
+    ],
+    "modal": "⿱ 口 隹",
+    "purity": 0.024390243902439025,
+    "count": 41.0,
+    "distinct": 41,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": false,
+    "whole training character": true
+   },
+   {
+    "type": [
+     2,
+     1,
+     "⿰",
+     1
+    ],
+    "modal": "⿰ ⿱ 辶 人 ⿱ 弓 丷",
+    "purity": 0.02631578947368421,
+    "count": 38.0,
+    "distinct": 38,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     0,
+     3,
+     "⿺",
+     2
+    ],
+    "modal": "⿺ 由 ⿱ 一 阝",
+    "purity": 0.03333333333333333,
+    "count": 30.0,
+    "distinct": 30,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": false,
+    "whole training character": true
+   },
+   {
+    "type": [
+     1,
+     3,
+     "⿸",
+     3
+    ],
+    "modal": "⿸ 人 人",
+    "purity": 0.06896551724137931,
+    "count": 29.0,
+    "distinct": 27,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     1,
+     1,
+     "⿱",
+     1
+    ],
+    "modal": "⿱ ⿱ 缶 木 ⿱ 十 十",
+    "purity": 0.037037037037037035,
+    "count": 27.0,
+    "distinct": 27,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     2,
+     1,
+     "⿻",
+     3
+    ],
+    "modal": "⿻ ⿱ 丨 衤 人",
+    "purity": 0.038461538461538464,
+    "count": 26.0,
+    "distinct": 26,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     1,
+     3,
+     "⿰",
+     1
+    ],
+    "modal": "⿰ 白 ⿰ 田 丷",
+    "purity": 0.041666666666666664,
+    "count": 24.0,
+    "distinct": 24,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     2,
+     1,
+     "⿵",
+     3
+    ],
+    "modal": "⿵ ⿰ 木 丨 一",
+    "purity": 0.045454545454545456,
+    "count": 22.0,
+    "distinct": 22,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     2,
+     3,
+     "⿸",
+     3
+    ],
+    "modal": "⿸ 丿 丨",
+    "purity": 0.09090909090909091,
+    "count": 22.0,
+    "distinct": 21,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     1,
+     3,
+     "⿵",
+     3
+    ],
+    "modal": "⿵ 一 干",
+    "purity": 0.045454545454545456,
+    "count": 22.0,
+    "distinct": 22,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     2,
+     1,
+     "⿹",
+     3
+    ],
+    "modal": "⿹ ⿹ 囗 丷 一",
+    "purity": 0.047619047619047616,
+    "count": 21.0,
+    "distinct": 21,
+    "class": "complete, not listed",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   }
+  ],
+  "valid modal examples": [
+   {
+    "modal": "⿱ 一 一",
+    "entries": [
+     "二",
+     "𠄞",
+     "𠄟",
+     "𠄠"
+    ],
+    "purity": 0.013528748590755355,
+    "count": 887.0
+   },
+   {
+    "modal": "⿱ 一 一",
+    "entries": [
+     "二",
+     "𠄞",
+     "𠄟",
+     "𠄠"
+    ],
+    "purity": 0.015151515151515152,
+    "count": 462.0
+   }
+  ]
+ },
+ "seconds total": 21.390376806259155
+}
