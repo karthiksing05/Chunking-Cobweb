@@ -1,0 +1,83 @@
+{
+ "grammar": "deep",
+ "train": 2000,
+ "seed": 17,
+ "sentence_parent": true,
+ "seconds": 558.6742317676544,
+ "total_bits": 188524.52060141898,
+ "symbols": 38,
+ "rule_classes": 106,
+ "root clause categories": {
+  "0": 2000
+ },
+ "embedded clause categories": {
+  "18": 544,
+  "1": 256,
+  "16": 255,
+  "21": 192,
+  "20": 61,
+  "14": 50,
+  "7": 34,
+  "3": 19,
+  "4": 11,
+  "15": 1
+ },
+ "embedded clauses in a root category": 0.0,
+ "test_bits_per_sentence": 77.44079827143784,
+ "test_top_level_chunks": 1.0,
+ "test_whole_trees": 1.0,
+ "omission": 0.24710024855012425,
+ "parse_commission": 0.24710024855012425,
+ "exact_trees": 0.22333333333333333,
+ "non_crossing": 0.7528997514498758,
+ "generation": {
+  "grammatical": 0.047,
+  "novel": 1.0,
+  "grammatical and novel": 0.047,
+  "mean length": 16.387,
+  "redrawn (over 45 words)": 52,
+  "whole trees": 1.0
+ },
+ "generation, whole trees only": {
+  "grammatical": 0.047,
+  "novel": 1.0,
+  "grammatical and novel": 0.047,
+  "mean length": 16.387
+ },
+ "sample_examples": [
+  "[[every [horse [[this [clever [cat [child [that [[each [[horse [that [[some [teachers [beside [this horse]]]] run]]] [[this teacher] sings]]] know]]]]]] sees]]] [sees [the girl]]]  \u2717  (new)",
+  "[[the [clever [big boys]]] [find [that [[the bird] [and [a cat]]]]]]  \u2717  (new)",
+  "[[the [[these children] [under [each [[king [beside [this [child [[these girls] help]]]]] [the [[old bird] [that [knows [with horse]]]]]]]]]] [find [the [[farmer [beside dog]] [but [[each bird] chases]]]]]]  \u2717  (new)",
+  "[[[a king] [and [the teachers]]] [run [that [[many [[small [[each boy] [near [some girls]]]] [behind [the [happy king]]]]] [who [finds [[this [[clever children] [who [[this [clever [child hopes]]] sees]]]] boy]]]]]]]  \u2717  (new)",
+  "[[[a king] [chases [each [old [farmer [thinks [that [run [sleep [near [few kings]]]]]]]]]]] [sees [few [[happy [[teachers [that sings]] [under [some birds]]]] [who [[[says [that [laugh [[the [clever [bird [beside sleep]]]] dog]]]] [and [every child]]] runs]]]]]]  \u2717  (new)",
+  "[[the boy] [runs [beside children]]]  \u2717  (new)",
+  "[[each [king [says [that [likes [a [bird run]]]]]]] [follows [each [clever [happy [child [behind [every [horse watches]]]]]]]]]  \u2717  (new)",
+  "[[[the kings] like] chase]  \u2717  (new)",
+  "[[the bird] [run [that [[every horse] [who [[this bird] laughs]]]]]]  \u2717  (new)",
+  "[[a [horse [with farmers]]] [wait [beside [few dogs]]]]  \u2717  (new)",
+  "[[a [some boys]] [laughs [that [[the [teachers [and [every teacher]]]] [that [find [who help]]]]]]]  \u2717  (new)",
+  "[[some teachers] think]  \u2717  (new)",
+  "[[the [teachers [who [[few [happy [king [behind [this horse]]]]] chases]]]] [hopes [that [[every child] watch]]]]  \u2717  (new)",
+  "[[every [[king [that [[every [[[[small teachers] [who [like [chase laughs]]]] [above waits]] [that [[each [bird [near [this [[king [that [[many birds] smile]]] [and [some girls]]]]]]] see]]]] run]]] [each [old [[cat [who [[these [tall [boy [sleeps wait]]]] knows]]] [and teacher]]]]]] chase]  \u2717  (new)",
+  "[[[every dog] [boy [and [this [small [old [child laughs]]]]]]] [likes [many [small [farmer [who find]]]]]]  \u2717  (new)",
+  "[[[every [big [[clever girl] [with [some girls]]]]] [and [the dogs]]] [sleeps [beside [[each bird] [above [these dogs]]]]]]  \u2713  (new)",
+  "[[a cat] follow]  \u2717  (new)",
+  "[[many [boys [with know]]] [laughs [behind [the [child [beside [every [bird help]]]]]]]]  \u2717  (new)",
+  "[[many [[teachers [that [[this teacher] likes]]] [this [cat [who [[every [clever dog]] watches]]]]]] [[helps [a [bird chases]]] [with [each horse]]]]  \u2717  (new)",
+  "[[every [cat sees]] [[few [tall [old [cat run]]]] [and like]]]  \u2717  (new)",
+  "[[the [cat [[each king] sees]]] [knows [[every girl] [and [few [birds [follow [a [king [who [see [above find]]]]]]]]]]]]  \u2717  (new)",
+  "[[a [king [beside [a [small [horse hope]]]]]] [smiles [that [[few cats] see]]]]  \u2717  (new)",
+  "[[[this horse] [smiles [and [the [big [girls [[these [[big [farmer [near [each [horse find]]]]] [the [[old horses] [who [[the horse] finds]]]]]] chases]]]]]]] [likes [this [[horse [who [[a [farmer [near [every dog]]]] like]]] [behind sleep]]]]]  \u2717  (new)",
+  "[[few horses] [think [behind [every [[old [old king]] [that [laughs [and [the horse]]]]]]]]]  \u2717  (new)",
+  "[[[the [children [with [the [[clever horse] [follows [follows [many teachers]]]]]]]] [and [laughs children]]] [says [this [teacher [run [that [thinks [that [[the teacher] [who [smiles dog]]]]]]]]]]]  \u2717  (new)",
+  "[[[many teachers] boy] waits]  \u2717  (new)",
+  "[[[every [[big cat] [[these teachers] watch]]] boy] [chase [that [[a dog] [that [say [that [[many [boys [with [few horses]]]] [and [finds [that sees]]]]]]]]]]]  \u2717  (new)",
+  "[[the [kings [behind kings]]] [but [[each dog] sleeps]]]  \u2717  (new)",
+  "[[the [[[dogs [who [[this [above [the [cats [and [the cat]]]]]] chase]]] [each [farmer [and [[these [farmers [that [smile [[each girl] chases]]]]] [a [child follow]]]]]]] [each child]]] [knows [[[a boy] [and [watch king]]] [smiles [and [follow child]]]]]]  \u2717  (new)",
+  "[[the king] [hopes [that [[a teacher] sing]]]]  \u2717  (new)"
+ ],
+ "eval_seconds": {
+  "parse": 80.03023481369019,
+  "generate": 2.545644760131836
+ }
+}
