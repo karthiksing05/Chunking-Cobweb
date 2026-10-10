@@ -2,11 +2,11 @@
  "train": 10000,
  "test": 500,
  "vocabulary": 250,
- "seconds": 27317.780105113983,
+ "seconds": 118384.09919595718,
  "symbols": 65,
  "rule classes": 299,
  "chunk types": 163,
- "training bits": 251509.9923739337,
+ "training bits": 251509.99237393387,
  "top-level chunks per sentence": 1.0,
  "whole trees": 1.0,
  "held-out bits per sentence": 20.90844810331357,
@@ -181,44 +181,6 @@
    ]
   },
   {
-   "symbol": 16,
-   "count": 5805.0,
-   "yields": [
-    [
-     "happy",
-     149.0
-    ],
-    [
-     "an idea",
-     149.0
-    ],
-    [
-     "sad",
-     143.0
-    ],
-    [
-     "very happy",
-     119.0
-    ],
-    [
-     "friends",
-     101.0
-    ],
-    [
-     "fun",
-     95.0
-    ],
-    [
-     "scared",
-     74.0
-    ],
-    [
-     "it",
-     73.0
-    ]
-   ]
-  },
-  {
    "symbol": 22,
    "count": 5805.0,
    "yields": [
@@ -253,6 +215,44 @@
     [
      "it is",
      77.0
+    ]
+   ]
+  },
+  {
+   "symbol": 16,
+   "count": 5805.0,
+   "yields": [
+    [
+     "happy",
+     149.0
+    ],
+    [
+     "an idea",
+     149.0
+    ],
+    [
+     "sad",
+     143.0
+    ],
+    [
+     "very happy",
+     119.0
+    ],
+    [
+     "friends",
+     101.0
+    ],
+    [
+     "fun",
+     95.0
+    ],
+    [
+     "scared",
+     74.0
+    ],
+    [
+     "it",
+     73.0
     ]
    ]
   },
@@ -561,24 +561,6 @@
    ]
   },
   {
-   "symbol": 36,
-   "count": 1787.0,
-   "yields": [
-    [
-     "was",
-     1758.0
-    ],
-    [
-     "were",
-     22.0
-    ],
-    [
-     "got",
-     7.0
-    ]
-   ]
-  },
-  {
    "symbol": 21,
    "count": 1787.0,
    "yields": [
@@ -613,6 +595,24 @@
     [
      "the cat was",
      54.0
+    ]
+   ]
+  },
+  {
+   "symbol": 36,
+   "count": 1787.0,
+   "yields": [
+    [
+     "was",
+     1758.0
+    ],
+    [
+     "were",
+     22.0
+    ],
+    [
+     "got",
+     7.0
     ]
    ]
   },
@@ -1741,6 +1741,32 @@
    ]
   },
   {
+   "symbol": 55,
+   "count": 348.0,
+   "yields": [
+    [
+     "play",
+     269.0
+    ],
+    [
+     "thank",
+     76.0
+    ],
+    [
+     "you",
+     1.0
+    ],
+    [
+     "the",
+     1.0
+    ],
+    [
+     "come",
+     1.0
+    ]
+   ]
+  },
+  {
    "symbol": 51,
    "count": 348.0,
    "yields": [
@@ -1774,32 +1800,6 @@
     ],
     [
      "room",
-     1.0
-    ]
-   ]
-  },
-  {
-   "symbol": 55,
-   "count": 348.0,
-   "yields": [
-    [
-     "play",
-     269.0
-    ],
-    [
-     "thank",
-     76.0
-    ],
-    [
-     "you",
-     1.0
-    ],
-    [
-     "the",
-     1.0
-    ],
-    [
-     "come",
      1.0
     ]
    ]
@@ -1925,20 +1925,6 @@
    ]
   },
   {
-   "symbol": 45,
-   "count": 297.0,
-   "yields": [
-    [
-     "i",
-     296.0
-    ],
-    [
-     "what",
-     1.0
-    ]
-   ]
-  },
-  {
    "symbol": 19,
    "count": 297.0,
    "yields": [
@@ -1973,6 +1959,20 @@
     [
      "want it",
      4.0
+    ]
+   ]
+  },
+  {
+   "symbol": 45,
+   "count": 297.0,
+   "yields": [
+    [
+     "i",
+     296.0
+    ],
+    [
+     "what",
+     1.0
     ]
    ]
   },
@@ -4681,81 +4681,153 @@
    "night": 0,
    "stage": "flat",
    "move": "start",
-   "bits": 428774.9986889487,
+   "bits": 428774.99868894886,
    "sentences": 10000,
-   "seconds": 39.40615701675415
+   "seconds": 49.45758104324341
   },
   {
    "night": 0,
    "stage": "structure",
    "move": "chunk and merge from 149 word classes, forests joined",
-   "bits": 341845.16652143025,
+   "bits": 341845.1665214303,
    "sentences": 10000,
-   "seconds": 2067.198413848877
+   "seconds": 1580.7531292438507
   },
   {
    "night": 0,
    "stage": "concepts",
    "move": "consolidate",
-   "bits": 258504.9375920875,
+   "bits": 258504.9375920877,
    "sentences": 10000,
-   "seconds": 15285.44148683548
+   "seconds": 35121.508890628815
   },
   {
    "night": 0,
    "stage": "re-analysis",
    "move": "viterbi without the read's context (its code)",
-   "bits": 333537.0550984964,
+   "bits": 333537.05509849626,
    "sentences": 10000,
-   "seconds": 27317.186691999435
+   "seconds": 63489.62229537964
   },
   {
    "night": 0,
    "stage": "re-analysis",
    "move": "viterbi without the read's context (its code)",
-   "bits": 329893.0412906599,
+   "bits": 329893.04129065986,
    "sentences": 10000,
-   "seconds": 27317.18670606613
+   "seconds": 63489.622302770615
   },
   {
    "night": 0,
    "stage": "re-analysis",
    "move": "viterbi without the read's context (its code)",
-   "bits": 328162.0733482149,
+   "bits": 328162.07334821485,
    "sentences": 10000,
-   "seconds": 27317.186707019806
+   "seconds": 63489.62230563164
   },
   {
    "night": 0,
    "stage": "re-analysis",
    "move": "viterbi without the read's context (its code)",
-   "bits": 326625.13604497205,
+   "bits": 326625.13604497217,
    "sentences": 10000,
-   "seconds": 27317.18670797348
+   "seconds": 63489.62230658531
   },
   {
    "night": 0,
    "stage": "re-analysis",
    "move": "viterbi without the read's context (its code)",
-   "bits": 323082.8281842668,
+   "bits": 323082.82818426704,
    "sentences": 10000,
-   "seconds": 27317.18670797348
+   "seconds": 63489.62230730057
   },
   {
    "night": 0,
    "stage": "re-analysis",
    "move": "viterbi without the read's context (its code)",
-   "bits": 322428.36520068574,
+   "bits": 322428.3652006861,
    "sentences": 10000,
-   "seconds": 27317.18670797348
+   "seconds": 63489.622307777405
   },
   {
    "night": 0,
    "stage": "concepts",
    "move": "consolidate with the read's context",
-   "bits": 251509.9923739337,
+   "bits": 251509.99237393387,
    "sentences": 10000,
-   "seconds": 27317.186708927155
+   "seconds": 63489.62231063843
+  },
+  {
+   "night": 0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 1.0",
+   "bits": 254833.3200994387,
+   "sentences": 10000,
+   "seconds": 72194.42061209679
+  },
+  {
+   "night": 0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 1.0",
+   "bits": 255122.7242187654,
+   "sentences": 10000,
+   "seconds": 77873.50127863884
+  },
+  {
+   "night": 0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.8",
+   "bits": 253320.57065548425,
+   "sentences": 10000,
+   "seconds": 84017.69310474396
+  },
+  {
+   "night": 0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.8",
+   "bits": 253504.77038104483,
+   "sentences": 10000,
+   "seconds": 90197.08983492851
+  },
+  {
+   "night": 0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.6",
+   "bits": 253409.4824266523,
+   "sentences": 10000,
+   "seconds": 95907.63177466393
+  },
+  {
+   "night": 0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.6",
+   "bits": 253729.0582282193,
+   "sentences": 10000,
+   "seconds": 102409.21054005623
+  },
+  {
+   "night": 0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.4",
+   "bits": 252378.40839124442,
+   "sentences": 10000,
+   "seconds": 107533.21566772461
+  },
+  {
+   "night": 0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.4",
+   "bits": 253700.24108074067,
+   "sentences": 10000,
+   "seconds": 113199.44681024551
+  },
+  {
+   "night": 0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.2",
+   "bits": 252540.4989434987,
+   "sentences": 10000,
+   "seconds": 118382.50720763206
   }
  ]
 }

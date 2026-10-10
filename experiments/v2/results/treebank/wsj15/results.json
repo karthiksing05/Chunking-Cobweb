@@ -29,35 +29,35 @@
    "base_phrase_omission": 0.23589743589743595,
    "test_bits_per_sentence": 25.659846364377948,
    "test_top_level_chunks": 4.148148148148148,
-   "total_bits": 46500.84915146484,
+   "total_bits": 46500.84915146454,
    "symbols": 15,
    "rule_classes": 32,
    "chunk_types": 8,
-   "seconds": 1095.6331250667572,
+   "seconds": 3823.7364735603333,
    "history": [
     {
      "night": 0.0,
      "stage": "flat",
      "move": "start",
-     "bits": 54581.629592812395,
+     "bits": 54581.62959281245,
      "sentences": 1109.0,
-     "seconds": 0.1201169490814209
+     "seconds": 0.3246490955352783
     },
     {
      "night": 0.0,
      "stage": "structure",
      "move": "chunk and merge from 16 word classes",
-     "bits": 48866.82404688445,
+     "bits": 48866.824046884445,
      "sentences": 1109.0,
-     "seconds": 69.98147296905518
+     "seconds": 185.94480729103088
     },
     {
      "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 47234.24852480026,
+     "bits": 47234.24852480025,
      "sentences": 1109.0,
-     "seconds": 1029.3560667037964
+     "seconds": 3186.5911457538605
     },
     {
      "night": 0.0,
@@ -65,23 +65,23 @@
      "move": "viterbi",
      "bits": 46745.34374500857,
      "sentences": 1109.0,
-     "seconds": 1029.3560719490051
+     "seconds": 3186.5911490917206
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 46656.89320352071,
+     "bits": 46656.89320352073,
      "sentences": 1109.0,
-     "seconds": 1029.3560729026794
+     "seconds": 3186.5911507606506
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 46644.27349066556,
+     "bits": 46644.27349066558,
      "sentences": 1109.0,
-     "seconds": 1029.3560738563538
+     "seconds": 3186.5911524295807
     },
     {
      "night": 0.0,
@@ -89,7 +89,7 @@
      "move": "viterbi without the read's context (its code)",
      "bits": 53426.05116413635,
      "sentences": 1109.0,
-     "seconds": 1095.1101367473602
+     "seconds": 3484.1885135173798
     },
     {
      "night": 0.0,
@@ -97,23 +97,23 @@
      "move": "viterbi without the read's context (its code)",
      "bits": 53263.92395739329,
      "sentences": 1109.0,
-     "seconds": 1095.1101438999176
+     "seconds": 3484.1885175704956
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi without the read's context (its code)",
-     "bits": 53173.57681015437,
+     "bits": 53173.576810154416,
      "sentences": 1109.0,
-     "seconds": 1095.1101438999176
+     "seconds": 3484.1885194778442
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi without the read's context (its code)",
-     "bits": 53139.40759746711,
+     "bits": 53139.40759746715,
      "sentences": 1109.0,
-     "seconds": 1095.1101450920105
+     "seconds": 3484.1885209083557
     },
     {
      "night": 0.0,
@@ -121,55 +121,127 @@
      "move": "viterbi without the read's context (its code)",
      "bits": 53130.02750794638,
      "sentences": 1109.0,
-     "seconds": 1095.1101450920105
+     "seconds": 3484.188522338867
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi without the read's context (its code)",
-     "bits": 53119.27656895021,
+     "bits": 53119.27656895025,
      "sentences": 1109.0,
-     "seconds": 1095.1101450920105
+     "seconds": 3484.1885232925415
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi without the read's context (its code)",
-     "bits": 53118.89666972666,
+     "bits": 53118.89666972668,
      "sentences": 1109.0,
-     "seconds": 1095.1101458072662
+     "seconds": 3484.188524723053
     },
     {
      "night": 0.0,
      "stage": "concepts",
      "move": "consolidate with the read's context",
-     "bits": 46600.31584119921,
+     "bits": 46600.31584119923,
      "sentences": 1109.0,
-     "seconds": 1095.1101467609406
+     "seconds": 3484.1885273456573
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 46519.13928505688,
+     "bits": 46519.13928505687,
      "sentences": 1109.0,
-     "seconds": 1095.1101467609406
+     "seconds": 3484.188529729843
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 46504.01726800215,
+     "bits": 46504.01726800247,
      "sentences": 1109.0,
-     "seconds": 1095.1101477146149
+     "seconds": 3484.1885311603546
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 46500.84915146484,
+     "bits": 46500.84915146454,
      "sentences": 1109.0,
-     "seconds": 1095.1101477146149
+     "seconds": 3484.188532114029
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 48393.80692970111,
+     "sentences": 1109.0,
+     "seconds": 3508.000839471817
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 48743.739523475175,
+     "sentences": 1109.0,
+     "seconds": 3600.1982469558716
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 48261.70641842378,
+     "sentences": 1109.0,
+     "seconds": 3621.158814907074
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 48177.23844097652,
+     "sentences": 1109.0,
+     "seconds": 3641.722425699234
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 47689.86859212128,
+     "sentences": 1109.0,
+     "seconds": 3661.8618655204773
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 47512.7150193342,
+     "sentences": 1109.0,
+     "seconds": 3757.952642917633
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 47196.49565154142,
+     "sentences": 1109.0,
+     "seconds": 3779.6123008728027
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 47134.95514492518,
+     "sentences": 1109.0,
+     "seconds": 3800.235809326172
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.2",
+     "bits": 46697.479527874966,
+     "sentences": 1109.0,
+     "seconds": 3822.0812289714813
     }
    ],
    "train_top_level_chunks": 6.54463480613165,
@@ -190,11 +262,11 @@
    "base_phrase_omission": 0.16923076923076918,
    "test_bits_per_sentence": 25.578856004315863,
    "test_top_level_chunks": 1.0,
-   "total_bits": 51167.84193658814,
+   "total_bits": 51167.841936588164,
    "symbols": 13,
    "rule_classes": 41,
    "chunk_types": 40,
-   "seconds": 17.96875524520874,
+   "seconds": 74.79656529426575,
    "own_generation": {
     "of the training length": 0.858,
     "real": 0.005827505827505828,
@@ -236,7 +308,7 @@
    "symbols": 16,
    "rule_classes": 39,
    "chunk_types": 15,
-   "seconds": 1022.9247963428497,
+   "seconds": 4211.13209605217,
    "history": [
     {
      "night": 0.0,
@@ -244,39 +316,39 @@
      "move": "start",
      "bits": 54431.79285992369,
      "sentences": 1106.0,
-     "seconds": 0.08510780334472656
+     "seconds": 0.24915432929992676
     },
     {
      "night": 0.0,
      "stage": "structure",
      "move": "chunk and merge from 20 word classes",
-     "bits": 48948.059323807174,
+     "bits": 48948.05932380721,
      "sentences": 1106.0,
-     "seconds": 61.525607109069824
+     "seconds": 168.25561571121216
     },
     {
      "night": 0.0,
      "stage": "concepts",
      "move": "consolidate",
-     "bits": 48468.02930204559,
+     "bits": 48468.029302045594,
      "sentences": 1106.0,
-     "seconds": 837.5824689865112
+     "seconds": 2501.965003013611
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 46885.92081485596,
+     "bits": 46885.92081485597,
      "sentences": 1106.0,
-     "seconds": 837.5824728012085
+     "seconds": 2501.9650070667267
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 46544.18319585045,
+     "bits": 46544.18319585047,
      "sentences": 1106.0,
-     "seconds": 837.5824728012085
+     "seconds": 2501.9650087356567
     },
     {
      "night": 0.0,
@@ -284,55 +356,55 @@
      "move": "viterbi",
      "bits": 46508.100841008214,
      "sentences": 1106.0,
-     "seconds": 837.5824739933014
+     "seconds": 2501.965010404587
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi",
-     "bits": 46496.46303657171,
+     "bits": 46496.46303657172,
      "sentences": 1106.0,
-     "seconds": 837.5824739933014
+     "seconds": 2501.965011358261
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi without the read's context (its code)",
-     "bits": 49847.36360988903,
+     "bits": 49847.363609889035,
      "sentences": 1106.0,
-     "seconds": 1022.3836929798126
+     "seconds": 3255.286794424057
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi without the read's context (its code)",
-     "bits": 49789.60912056818,
+     "bits": 49789.609120568144,
      "sentences": 1106.0,
-     "seconds": 1022.383702993393
+     "seconds": 3255.286798477173
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi without the read's context (its code)",
-     "bits": 49740.842069794184,
+     "bits": 49740.842069794235,
      "sentences": 1106.0,
-     "seconds": 1022.3837070465088
+     "seconds": 3255.2868003845215
     },
     {
      "night": 0.0,
      "stage": "re-analysis",
      "move": "viterbi without the read's context (its code)",
-     "bits": 49729.22832486181,
+     "bits": 49729.228324861826,
      "sentences": 1106.0,
-     "seconds": 1022.3837070465088
+     "seconds": 3255.2868015766144
     },
     {
      "night": 0.0,
      "stage": "concepts",
      "move": "consolidate with the read's context",
-     "bits": 46051.31773519681,
+     "bits": 46051.31773519682,
      "sentences": 1106.0,
-     "seconds": 1022.3837358951569
+     "seconds": 3255.2868041992188
     },
     {
      "night": 0.0,
@@ -340,7 +412,7 @@
      "move": "viterbi",
      "bits": 45974.647649220635,
      "sentences": 1106.0,
-     "seconds": 1022.3837418556213
+     "seconds": 3255.286806344986
     },
     {
      "night": 0.0,
@@ -348,7 +420,79 @@
      "move": "viterbi",
      "bits": 45972.74425205647,
      "sentences": 1106.0,
-     "seconds": 1022.3837418556213
+     "seconds": 3255.2868077754974
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 47476.49036276034,
+     "sentences": 1106.0,
+     "seconds": 3434.9362852573395
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 48062.08051373685,
+     "sentences": 1106.0,
+     "seconds": 3546.0242834091187
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 47567.67636486,
+     "sentences": 1106.0,
+     "seconds": 3668.1621611118317
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 47561.17603372229,
+     "sentences": 1106.0,
+     "seconds": 3810.0246391296387
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 47834.147304801045,
+     "sentences": 1106.0,
+     "seconds": 3942.1256110668182
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 47497.22353174597,
+     "sentences": 1106.0,
+     "seconds": 4003.8786849975586
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 46949.165772882356,
+     "sentences": 1106.0,
+     "seconds": 4074.8225309848785
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 46787.29561008473,
+     "sentences": 1106.0,
+     "seconds": 4145.541165828705
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.2",
+     "bits": 46440.06361520998,
+     "sentences": 1106.0,
+     "seconds": 4210.165114879608
     }
    ],
    "train_top_level_chunks": 6.982820976491863,
@@ -373,7 +517,7 @@
    "symbols": 13,
    "rule_classes": 36,
    "chunk_types": 47,
-   "seconds": 19.13976001739502,
+   "seconds": 39.81705284118652,
    "own_generation": {
     "of the training length": 0.876,
     "real": 0.003424657534246575,

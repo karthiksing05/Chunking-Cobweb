@@ -59,7 +59,9 @@ from trellis2.treebank import evaluable  # noqa: E402
 from trellis2.unsupervised import UnsupervisedLearner  # noqa: E402
 
 LN2 = math.log(2)
-FONT_PATH = "/System/Library/Fonts/STHeiti Medium.ttc"   # components and IDS operators
+FONT_PATH = next((p for p in ("/System/Library/Fonts/STHeiti Medium.ttc",   # macOS
+                               "/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf")  # Linux
+                  if os.path.exists(p)), "/System/Library/Fonts/STHeiti Medium.ttc")
 SURFACE, INK, INK2, MUTED, BLUE, ORANGE = "#fcfcfb", "#0b0b0b", "#52514e", "#898781", "#2a78d6", "#eb6834"
 
 
@@ -233,10 +235,11 @@ def draw_structure(ax, s, x0, y0, x1, y1, color=INK):
 
 
 def drawable(tokens) -> bool:
-    from fontTools.ttLib import TTCollection
+    from fontTools.ttLib import TTCollection, TTFont
     global _CMAP
     if "_CMAP" not in globals():
-        _CMAP = TTCollection(FONT_PATH).fonts[0].getBestCmap()
+        font = TTCollection(FONT_PATH).fonts[0] if FONT_PATH.endswith(".ttc") else TTFont(FONT_PATH)
+        _CMAP = font.getBestCmap()
     return all(t in "⿰⿱⿲⿳⿴⿵⿶⿷⿸⿹⿺⿻" or ord(t) in _CMAP for t in tokens)
 
 

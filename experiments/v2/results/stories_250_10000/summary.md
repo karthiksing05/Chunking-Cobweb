@@ -28,8 +28,8 @@ Largest categories:
 - S13 (10715): the, and, to, an, it, in, happy, a
 - S0 (10000): but then … happened, then something unexpected happened, they had … fun, they played … day, they are happy, do you … me, they were very happy, tim was very happy
 - S46 (6076): friends, idea, fun, together, day, it, you, ball
-- S16 (5805): happy, an idea, sad, very happy, friends, fun, scared, it
 - S22 (5805): they were, they are, they had, you are, they played together, one day, thank you, it is
+- S16 (5805): happy, an idea, sad, very happy, friends, fun, scared, it
 - S1 (4174): an idea, the park, help you, all day, fun together, in the park, and proud, and happy
 - S10 (4049): a, and, you, to, the, so, they, he
 - S33 (3671): was, had, big, saw, of, happy, help, to
