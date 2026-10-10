@@ -1,0 +1,27 @@
+{
+ "method": "trellis",
+ "kind": "real",
+ "N": 32000,
+ "test": 500,
+ "alpha": 0.001,
+ "seconds": 26063.659001350403,
+ "total bits": 2425170.126548696,
+ "model bits": 20306.932703520946,
+ "data bits": 2404863.1938451603,
+ "train bits/pos, TRELLIS v2 (two-part: model + data)": 75.78656645464675,
+ "train bits/pos, the read alone (adaptive code)": 75.92591664652952,
+ "train bits/pos, after the search": 75.79006912349351,
+ "train bits/pos, squares on their own (adaptive code)": 85.29665058907129,
+ "held-out bits/pos, TRELLIS v2 (the grammar)": 74.28770049836605,
+ "held-out bits/pos, learned chunks (search code)": 74.27748117809381,
+ "held-out bits/pos, the read alone": 74.41736755521714,
+ "held-out bits/pos, squares on their own": 84.0259683331418,
+ "symbols": 14,
+ "rule classes": 14,
+ "chunk types": 4,
+ "search moves": [
+  "[wP N1 bP] x21473",
+  "[('chunk', 0) NW1 ('chunk', 0)] x1497",
+  "[('chunk', 1) NW2 ('chunk', 0)] x99"
+ ]
+}

@@ -1,0 +1,273 @@
+{
+ "name": "eecoC_p16_n8000_plain_a0.0001_real",
+ "elo": "ecoC",
+ "ply": 16,
+ "N": 8000,
+ "test": 500,
+ "counts": false,
+ "alpha": 0.0001,
+ "kind": "real",
+ "positions available": 17899,
+ "seconds": 11293.089351892471,
+ "train bits/pos": {
+  "read alone": 62.89336323026257,
+  "after the search": 59.82236059106064,
+  "TRELLIS v2 total": 60.66495495472686
+ },
+ "held-out bits/pos": {
+  "read alone": 61.79442634071769,
+  "search code with chunks": 58.43724247960351,
+  "TRELLIS v2 grammar": 58.84225566678435
+ },
+ "chunk gain, train (read alone - search)": 3.071002639201936,
+ "chunk gain, train (read alone - TRELLIS total)": 2.2284082755357133,
+ "chunk gain, held out (read alone - grammar)": 2.9521706739333453,
+ "chunk gain, held out (read alone - search code)": 3.35718386111418,
+ "model bits": 11480.111756038845,
+ "data bits": 473839.5278817687,
+ "symbols": 28,
+ "rule classes": 36,
+ "chunk types (grammar)": 43,
+ "share of pieces inside a chunk": 0.18040122084926066,
+ "chunk types": [
+  {
+   "chunk": "[wK E3 wR]",
+   "count": 2806,
+   "anchors": {
+    "e1": 2806
+   }
+  },
+  {
+   "chunk": "[wR E1 wK]",
+   "count": 2708,
+   "anchors": {
+    "f1": 2705,
+    "d1": 2,
+    "e1": 1
+   }
+  },
+  {
+   "chunk": "[bR E1 bK]",
+   "count": 2215,
+   "anchors": {
+    "f8": 2203,
+    "d8": 11,
+    "g8": 1
+   }
+  },
+  {
+   "chunk": "[bK E1 bB]",
+   "count": 2075,
+   "anchors": {
+    "e8": 2068,
+    "f7": 5,
+    "d7": 2
+   }
+  },
+  {
+   "chunk": "[wP NE1 [wP N1 bP]]",
+   "count": 2034,
+   "anchors": {
+    "d3": 1729,
+    "c3": 126,
+    "c2": 63
+   }
+  },
+  {
+   "chunk": "[bN E1 bR]",
+   "count": 1850,
+   "anchors": {
+    "g8": 1848,
+    "e7": 1,
+    "c6": 1
+   }
+  },
+  {
+   "chunk": "[wP N1 bP]",
+   "count": 1624,
+   "anchors": {
+    "e4": 809,
+    "d4": 443,
+    "d5": 108
+   }
+  },
+  {
+   "chunk": "[[wK E1 wB] E3 wR]",
+   "count": 1005,
+   "anchors": {
+    "e1": 1005
+   }
+  },
+  {
+   "chunk": "[[wK E2 wN] E3 wR]",
+   "count": 507,
+   "anchors": {
+    "e1": 507
+   }
+  },
+  {
+   "chunk": "[wR E2 wK]",
+   "count": 473,
+   "anchors": {
+    "e1": 446,
+    "f1": 26,
+    "c1": 1
+   }
+  },
+  {
+   "chunk": "[[wP N1 bP] NE1 [wP N1 bP]]",
+   "count": 201,
+   "anchors": {
+    "d4": 169,
+    "d3": 17,
+    "c4": 9
+   }
+  },
+  {
+   "chunk": "[[wK E1 wB] E2 [wN E1 wR]]",
+   "count": 188,
+   "anchors": {
+    "e1": 188
+   }
+  },
+  {
+   "chunk": "[bP E1 [wP N1 bP]]",
+   "count": 162,
+   "anchors": {
+    "d5": 135,
+    "c5": 9,
+    "d4": 7
+   }
+  },
+  {
+   "chunk": "[bR E2 bK]",
+   "count": 157,
+   "anchors": {
+    "e8": 129,
+    "f8": 17,
+    "c8": 10
+   }
+  },
+  {
+   "chunk": "[[wP NE1 [wP N1 bP]] NE2 [wP N1 bP]]",
+   "count": 114,
+   "anchors": {
+    "c3": 85,
+    "c2": 18,
+    "b2": 9
+   }
+  },
+  {
+   "chunk": "[[bK E1 bR] E3 bB]",
+   "count": 99,
+   "anchors": {
+    "c8": 99
+   }
+  },
+  {
+   "chunk": "[[bP E1 [wP N1 bP]] WNW bQ]",
+   "count": 88,
+   "anchors": {
+    "d5": 88
+   }
+  },
+  {
+   "chunk": "[[wK E1 wR] E3 wB]",
+   "count": 59,
+   "anchors": {
+    "c1": 59
+   }
+  },
+  {
+   "chunk": "[wN E1 wR]",
+   "count": 58,
+   "anchors": {
+    "g1": 58
+   }
+  },
+  {
+   "chunk": "[[[wP N1 bP] NE1 [wP N1 bP]] NW2 bQ]",
+   "count": 56,
+   "anchors": {
+    "d4": 56
+   }
+  },
+  {
+   "chunk": "[bK E2 bB]",
+   "count": 44,
+   "anchors": {
+    "d8": 43,
+    "e7": 1
+   }
+  },
+  {
+   "chunk": "[wK E2 wR]",
+   "count": 36,
+   "anchors": {
+    "f1": 30,
+    "e1": 5,
+    "c1": 1
+   }
+  },
+  {
+   "chunk": "[wK E1 wR]",
+   "count": 35,
+   "anchors": {
+    "c1": 22,
+    "e1": 8,
+    "g1": 4
+   }
+  },
+  {
+   "chunk": "[bK E1 bR]",
+   "count": 34,
+   "anchors": {
+    "c8": 21,
+    "g8": 10,
+    "e8": 2
+   }
+  },
+  {
+   "chunk": "[wK E1 wB]",
+   "count": 12,
+   "anchors": {
+    "e1": 12
+   }
+  },
+  {
+   "chunk": "[wK E2 wN]",
+   "count": 3,
+   "anchors": {
+    "e1": 3
+   }
+  }
+ ],
+ "search moves": [
+  "[bR E1 bK] x2215",
+  "[wR E1 wK] x2708",
+  "[wR E2 wK] x473",
+  "[wP N1 bP] x4650",
+  "[bN E1 bR] x1850",
+  "[wP NE1 ('chunk', 3)] x2148",
+  "[bR E2 bK] x157",
+  "[bK E1 bR] x133",
+  "[wK E1 wB] x1205",
+  "[wK E3 wR] x2806",
+  "[wK E2 wN] x510",
+  "[('chunk', 8) E3 wR] x1005",
+  "[('chunk', 10) E3 wR] x507",
+  "[wN E1 wR] x246",
+  "[('chunk', 8) E2 ('chunk', 13)] x188",
+  "[wK E1 wR] x94",
+  "[bK E1 bB] x2075",
+  "[('chunk', 7) E3 bB] x99",
+  "[('chunk', 15) E3 wB] x59",
+  "[wK E2 wR] x36",
+  "[('chunk', 3) NE1 ('chunk', 3)] x257",
+  "[bP E1 ('chunk', 3)] x250",
+  "[('chunk', 21) WNW bQ] x88",
+  "[('chunk', 5) NE2 ('chunk', 3)] x114",
+  "[('chunk', 20) NW2 bQ] x56",
+  "[bK E2 bB] x44"
+ ]
+}

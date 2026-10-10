@@ -1,0 +1,23 @@
+{
+ "method": "trellis",
+ "kind": "random",
+ "N": 32000,
+ "test": 500,
+ "alpha": 0.001,
+ "seconds": 6251.461290597916,
+ "total bits": 4087167.241914754,
+ "model bits": 26322.6926318548,
+ "data bits": 4060844.5492829205,
+ "train bits/pos, TRELLIS v2 (two-part: model + data)": 127.72397630983606,
+ "train bits/pos, the read alone (adaptive code)": 127.74171864273916,
+ "train bits/pos, after the search": 127.74171864273916,
+ "train bits/pos, squares on their own (adaptive code)": 138.28230716045942,
+ "held-out bits/pos, TRELLIS v2 (the grammar)": 126.73291404278963,
+ "held-out bits/pos, learned chunks (search code)": 126.73576993087941,
+ "held-out bits/pos, the read alone": 126.73576993087941,
+ "held-out bits/pos, squares on their own": 137.82366339489639,
+ "symbols": 12,
+ "rule classes": 12,
+ "chunk types": 0,
+ "search moves": []
+}

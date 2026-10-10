@@ -1,0 +1,160 @@
+{
+ "model": "ar2",
+ "family": "ar",
+ "kind": "random",
+ "config": [
+  8,
+  1,
+  1
+ ],
+ "params (transmitted)": 1629,
+ "params (all)": 1629,
+ "steps": 20000,
+ "prequential": {
+  "16": {
+   "steps used": 500,
+   "block": "16-32",
+   "block bits/pos": 137.10035181045532
+  },
+  "32": {
+   "steps used": 500,
+   "block": "32-64",
+   "block bits/pos": 143.64316654205322
+  },
+  "64": {
+   "steps used": 500,
+   "block": "64-125",
+   "block bits/pos": 146.04327905373495
+  },
+  "125": {
+   "steps used": 550,
+   "block": "125-250",
+   "block bits/pos": 140.03912280273437
+  },
+  "250": {
+   "steps used": 550,
+   "block": "250-500",
+   "block bits/pos": 138.18167999267578
+  },
+  "500": {
+   "steps used": 1100,
+   "block": "500-1000",
+   "block bits/pos": 138.9214387512207
+  },
+  "1000": {
+   "steps used": 3750,
+   "block": "1000-2000",
+   "block bits/pos": 135.43661911010742,
+   "held-out bits/pos": 135.72222189331055
+  },
+  "2000": {
+   "steps used": 5150,
+   "block": "2000-4000",
+   "block bits/pos": 133.59115460205078
+  },
+  "4000": {
+   "steps used": 6550,
+   "block": "4000-8000",
+   "block bits/pos": 131.77848532867432,
+   "held-out bits/pos": 132.7382404022217
+  },
+  "8000": {
+   "steps used": 5550,
+   "block": "8000-16000",
+   "block bits/pos": 133.80360260391237
+  },
+  "16000": {
+   "steps used": 7125,
+   "block": "16000-32000",
+   "block bits/pos": 132.1799489889145,
+   "held-out bits/pos": 132.65758360290528
+  },
+  "32000": {
+   "steps used": 16611,
+   "held-out bits/pos": 131.43683012390136
+  }
+ },
+ "two-part": {
+  "1000": {
+   "float train bits/pos": 129.6641809692383,
+   "float held-out bits/pos": 133.04011862182617,
+   "b=8": {
+    "param bits": 13608,
+    "train data bits/pos": 130.23710299682617,
+    "total bits/pos": 143.84510299682617,
+    "held-out bits/pos": 133.46868284606933
+   },
+   "b=16": {
+    "param bits": 26640,
+    "train data bits/pos": 129.66424230194093,
+    "total bits/pos": 156.30424230194092,
+    "held-out bits/pos": 133.03979330444335
+   },
+   "seconds": 200.7442274093628
+  },
+  "4000": {
+   "float train bits/pos": 130.0329296207428,
+   "float held-out bits/pos": 131.41077587890624,
+   "b=8": {
+    "param bits": 13608,
+    "train data bits/pos": 131.4895906677246,
+    "total bits/pos": 134.8915906677246,
+    "held-out bits/pos": 132.96283407592773
+   },
+   "b=16": {
+    "param bits": 26640,
+    "train data bits/pos": 130.0329309310913,
+    "total bits/pos": 136.6929309310913,
+    "held-out bits/pos": 131.41042901611328
+   },
+   "seconds": 199.13595342636108
+  },
+  "16000": {
+   "float train bits/pos": 130.70760531902314,
+   "float held-out bits/pos": 131.2525199737549,
+   "b=8": {
+    "param bits": 13608,
+    "train data bits/pos": 131.60980172538757,
+    "total bits/pos": 132.46030172538758,
+    "held-out bits/pos": 132.06065339660645
+   },
+   "b=16": {
+    "param bits": 26640,
+    "train data bits/pos": 130.70760122585295,
+    "total bits/pos": 132.37260122585297,
+    "held-out bits/pos": 131.25272035217284
+   },
+   "seconds": 197.88923048973083
+  },
+  "32000": {
+   "float train bits/pos": 130.6285257561207,
+   "float held-out bits/pos": 130.38754081726074,
+   "b=8": {
+    "param bits": 13608,
+    "train data bits/pos": 131.3027509996891,
+    "total bits/pos": 131.7280009996891,
+    "held-out bits/pos": 131.08100793457032
+   },
+   "b=16": {
+    "param bits": 26640,
+    "train data bits/pos": 130.6286077401638,
+    "total bits/pos": 131.4611077401638,
+    "held-out bits/pos": 130.38809756469726
+   },
+   "seconds": 200.5380518436432
+  }
+ },
+ "prequential bits/pos": {
+  "1000": 140.9991069760884,
+  "4000": 135.90450882257434,
+  "16000": 133.82254983976833,
+  "32000": 133.0012494143414
+ },
+ "held-out bits/pos (early-stopped prefix model)": {
+  "1000": 135.72222189331055,
+  "4000": 132.7382404022217,
+  "16000": 132.65758360290528,
+  "32000": 131.43683012390136
+ },
+ "prequential seconds": 476.18121361732483
+}

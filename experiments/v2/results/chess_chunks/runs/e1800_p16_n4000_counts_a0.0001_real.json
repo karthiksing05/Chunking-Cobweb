@@ -1,0 +1,70 @@
+{
+ "name": "e1800_p16_n4000_counts_a0.0001_real",
+ "elo": "1800",
+ "ply": 16,
+ "N": 4000,
+ "test": 500,
+ "counts": true,
+ "alpha": 0.0001,
+ "kind": "real",
+ "positions available": 8560,
+ "seconds": 2075.410079240799,
+ "train bits/pos": {
+  "read alone": 53.71199440618528,
+  "after the search": 53.47756532876205,
+  "TRELLIS v2 total": 53.45967858873554
+ },
+ "held-out bits/pos": {
+  "read alone": 51.930361084263104,
+  "search code with chunks": 51.71482097394232,
+  "TRELLIS v2 grammar": 51.636125371867564
+ },
+ "chunk gain, train (read alone - search)": 0.23442907742323627,
+ "chunk gain, train (read alone - TRELLIS total)": 0.2523158174497411,
+ "chunk gain, held out (read alone - grammar)": 0.29423571239554036,
+ "chunk gain, held out (read alone - search code)": 0.2155401103207879,
+ "model bits": 12418.29774595992,
+ "data bits": 201420.4166089823,
+ "symbols": 14,
+ "rule classes": 16,
+ "chunk types (grammar)": 4,
+ "share of pieces inside a chunk": 0.06517498374376844,
+ "chunk types": [
+  {
+   "chunk": "[wB N1 wP]",
+   "count": 2606,
+   "anchors": {
+    "c1": 869,
+    "d3": 631,
+    "g2": 454
+   }
+  },
+  {
+   "chunk": "[wK E1 [wB N1 wP]]",
+   "count": 654,
+   "anchors": {
+    "e1": 654
+   }
+  },
+  {
+   "chunk": "[wK E1 wB]",
+   "count": 188,
+   "anchors": {
+    "e1": 188
+   }
+  },
+  {
+   "chunk": "[[wK E1 [wB N1 wP]] NW1 wB]",
+   "count": 67,
+   "anchors": {
+    "e1": 67
+   }
+  }
+ ],
+ "search moves": [
+  "[wB N1 wP] x3327",
+  "[wK E1 ('chunk', 0)] x721",
+  "[wK E1 wB] x188",
+  "[('chunk', 1) NW1 wB] x67"
+ ]
+}

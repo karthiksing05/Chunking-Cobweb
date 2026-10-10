@@ -1,0 +1,111 @@
+{
+ "name": "eopen4_p12_n4000_plain_a0.001_real",
+ "elo": "open4",
+ "ply": 12,
+ "N": 4000,
+ "test": 500,
+ "counts": false,
+ "alpha": 0.001,
+ "kind": "real",
+ "positions available": 4918,
+ "seconds": 2575.5711646080017,
+ "train bits/pos": {
+  "read alone": 44.917054723860154,
+  "after the search": 42.703690182932995,
+  "TRELLIS v2 total": 42.923682664638285
+ },
+ "held-out bits/pos": {
+  "read alone": 43.234270329583985,
+  "search code with chunks": 40.36910315814583,
+  "TRELLIS v2 grammar": 40.743431500867615
+ },
+ "chunk gain, train (read alone - search)": 2.2133645409271594,
+ "chunk gain, train (read alone - TRELLIS total)": 1.993372059221869,
+ "chunk gain, held out (read alone - grammar)": 2.4908388287163703,
+ "chunk gain, held out (read alone - search code)": 2.865167171438152,
+ "model bits": 5417.89846935598,
+ "data bits": 166276.8321891949,
+ "symbols": 20,
+ "rule classes": 21,
+ "chunk types (grammar)": 21,
+ "share of pieces inside a chunk": 0.12332105319297325,
+ "chunk types": [
+  {
+   "chunk": "[wK E3 wR]",
+   "count": 1974,
+   "anchors": {
+    "e1": 1974
+   }
+  },
+  {
+   "chunk": "[bN E1 bR]",
+   "count": 1408,
+   "anchors": {
+    "g8": 1408
+   }
+  },
+  {
+   "chunk": "[wR E1 wK]",
+   "count": 1192,
+   "anchors": {
+    "f1": 1192
+   }
+  },
+  {
+   "chunk": "[wB N2 bP]",
+   "count": 1168,
+   "anchors": {
+    "b5": 620,
+    "a4": 189,
+    "b3": 131
+   }
+  },
+  {
+   "chunk": "[bR E1 bK]",
+   "count": 571,
+   "anchors": {
+    "f8": 570,
+    "d8": 1
+   }
+  },
+  {
+   "chunk": "[wK E1 [wB E2 wR]]",
+   "count": 561,
+   "anchors": {
+    "e1": 561
+   }
+  },
+  {
+   "chunk": "[[wR E2 wK] NW1 wP]",
+   "count": 221,
+   "anchors": {
+    "e1": 221
+   }
+  },
+  {
+   "chunk": "[wR E2 wK]",
+   "count": 23,
+   "anchors": {
+    "e1": 23
+   }
+  },
+  {
+   "chunk": "[wB E2 wR]",
+   "count": 6,
+   "anchors": {
+    "f1": 6
+   }
+  }
+ ],
+ "search moves": [
+  "[wR E1 wK] x1192",
+  "[bR E1 bK] x571",
+  "[wR E2 wK] x244",
+  "[wB N2 bP] x1168",
+  "[wB E2 wR] x567",
+  "[wK E3 wR] x1974",
+  "[wK E1 ('chunk', 4)] x561",
+  "[bN E1 bR] x1408",
+  "[('chunk', 2) NW1 wP] x221"
+ ]
+}

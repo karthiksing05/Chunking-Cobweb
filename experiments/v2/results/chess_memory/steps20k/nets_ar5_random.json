@@ -1,0 +1,160 @@
+{
+ "model": "ar5",
+ "family": "ar",
+ "kind": "random",
+ "config": [
+  64,
+  3,
+  4
+ ],
+ "params (transmitted)": 155917,
+ "params (all)": 155917,
+ "steps": 20000,
+ "prequential": {
+  "16": {
+   "steps used": 450,
+   "block": "16-32",
+   "block bits/pos": 136.42376518249512
+  },
+  "32": {
+   "steps used": 450,
+   "block": "32-64",
+   "block bits/pos": 142.70655298233032
+  },
+  "64": {
+   "steps used": 450,
+   "block": "64-125",
+   "block bits/pos": 145.28881873459113
+  },
+  "125": {
+   "steps used": 550,
+   "block": "125-250",
+   "block bits/pos": 140.32524981689454
+  },
+  "250": {
+   "steps used": 550,
+   "block": "250-500",
+   "block bits/pos": 136.53206594848632
+  },
+  "500": {
+   "steps used": 650,
+   "block": "500-1000",
+   "block bits/pos": 133.10216822814942
+  },
+  "1000": {
+   "steps used": 750,
+   "block": "1000-2000",
+   "block bits/pos": 129.557388961792,
+   "held-out bits/pos": 129.81974281311034
+  },
+  "2000": {
+   "steps used": 800,
+   "block": "2000-4000",
+   "block bits/pos": 127.94577931976319
+  },
+  "4000": {
+   "steps used": 1100,
+   "block": "4000-8000",
+   "block bits/pos": 127.22481305885314,
+   "held-out bits/pos": 127.97663272094726
+  },
+  "8000": {
+   "steps used": 1300,
+   "block": "8000-16000",
+   "block bits/pos": 126.48248742198945
+  },
+  "16000": {
+   "steps used": 2052,
+   "block": "16000-32000",
+   "block bits/pos": 125.89647041559219,
+   "held-out bits/pos": 126.38979884338379
+  },
+  "32000": {
+   "steps used": 2712,
+   "held-out bits/pos": 125.38116580200196
+  }
+ },
+ "two-part": {
+  "1000": {
+   "float train bits/pos": 10.137622615814209,
+   "float held-out bits/pos": 1255.9037592773439,
+   "b=8": {
+    "param bits": 1248680,
+    "train data bits/pos": 11.217537961006165,
+    "total bits/pos": 1259.8975379610063,
+    "held-out bits/pos": 1254.3091259765624
+   },
+   "b=16": {
+    "param bits": 2496016,
+    "train data bits/pos": 10.13763918876648,
+    "total bits/pos": 2506.1536391887666,
+    "held-out bits/pos": 1255.891610595703
+   },
+   "seconds": 392.2669334411621
+  },
+  "4000": {
+   "float train bits/pos": 69.16102998828887,
+   "float held-out bits/pos": 406.3420741882324,
+   "b=8": {
+    "param bits": 1248680,
+    "train data bits/pos": 76.57907381916046,
+    "total bits/pos": 388.74907381916046,
+    "held-out bits/pos": 409.1963544921875
+   },
+   "b=16": {
+    "param bits": 2496016,
+    "train data bits/pos": 69.16119925308227,
+    "total bits/pos": 693.1651992530823,
+    "held-out bits/pos": 406.3380700988769
+   },
+   "seconds": 392.41482520103455
+  },
+  "16000": {
+   "float train bits/pos": 115.29533339786529,
+   "float held-out bits/pos": 138.75134321594237,
+   "b=8": {
+    "param bits": 1248680,
+    "train data bits/pos": 115.66572774362564,
+    "total bits/pos": 193.70822774362563,
+    "held-out bits/pos": 138.7314073791504
+   },
+   "b=16": {
+    "param bits": 2496016,
+    "train data bits/pos": 115.29534930324554,
+    "total bits/pos": 271.29634930324556,
+    "held-out bits/pos": 138.75093473815917
+   },
+   "seconds": 401.32058119773865
+  },
+  "32000": {
+   "float train bits/pos": 122.09661414265632,
+   "float held-out bits/pos": 127.97106538391114,
+   "b=8": {
+    "param bits": 1248680,
+    "train data bits/pos": 122.16311085915565,
+    "total bits/pos": 161.18436085915565,
+    "held-out bits/pos": 128.02259860229492
+   },
+   "b=16": {
+    "param bits": 2496016,
+    "train data bits/pos": 122.0966149866581,
+    "total bits/pos": 200.09711498665808,
+    "held-out bits/pos": 127.97098582458496
+   },
+   "seconds": 408.9590644836426
+  }
+ },
+ "prequential bits/pos": {
+  "1000": 137.62601498084913,
+  "4000": 130.76874064554187,
+  "16000": 127.73963213709348,
+  "32000": 126.81805127634283
+ },
+ "held-out bits/pos (early-stopped prefix model)": {
+  "1000": 129.81974281311034,
+  "4000": 127.97663272094726,
+  "16000": 126.38979884338379,
+  "32000": 125.38116580200196
+ },
+ "prequential seconds": 236.12075448036194
+}

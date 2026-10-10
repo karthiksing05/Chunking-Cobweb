@@ -1,0 +1,46 @@
+{
+ "name": "eecoC_p30_n4000_counts_a0.001_real",
+ "elo": "ecoC",
+ "ply": 30,
+ "N": 4000,
+ "test": 500,
+ "counts": true,
+ "alpha": 0.001,
+ "kind": "real",
+ "positions available": 17899,
+ "seconds": 382.0751121044159,
+ "train bits/pos": {
+  "read alone": 76.85085778552654,
+  "after the search": 76.81296907699338,
+  "TRELLIS v2 total": 76.8535613106328
+ },
+ "held-out bits/pos": {
+  "read alone": 73.14005633068672,
+  "search code with chunks": 72.92460046942365,
+  "TRELLIS v2 grammar": 72.82437725493791
+ },
+ "chunk gain, train (read alone - search)": 0.03788870853315984,
+ "chunk gain, train (read alone - TRELLIS total)": -0.002703525106255711,
+ "chunk gain, held out (read alone - grammar)": 0.31567907574880394,
+ "chunk gain, held out (read alone - search code)": 0.2154558612630666,
+ "model bits": 15969.244295170512,
+ "data bits": 291445.00094736426,
+ "symbols": 13,
+ "rule classes": 13,
+ "chunk types (grammar)": 2,
+ "share of pieces inside a chunk": 0.046455762413064955,
+ "chunk types": [
+  {
+   "chunk": "[wP N1 bP]",
+   "count": 2398,
+   "anchors": {
+    "e4": 744,
+    "d4": 428,
+    "e5": 265
+   }
+  }
+ ],
+ "search moves": [
+  "[wP N1 bP] x2398"
+ ]
+}

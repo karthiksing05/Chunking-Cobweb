@@ -1,0 +1,34 @@
+{
+ "name": "e1800_p30_n1000_counts_a0.001_real",
+ "elo": "1800",
+ "ply": 30,
+ "N": 1000,
+ "test": 500,
+ "counts": true,
+ "alpha": 0.001,
+ "kind": "real",
+ "positions available": 8560,
+ "seconds": 37.63714385032654,
+ "train bits/pos": {
+  "read alone": 84.5078198217203,
+  "after the search": 84.5078198217203,
+  "TRELLIS v2 total": 85.28239667142897
+ },
+ "held-out bits/pos": {
+  "read alone": 74.7667329816252,
+  "search code with chunks": 74.7667329816252,
+  "TRELLIS v2 grammar": 74.47368115782277
+ },
+ "chunk gain, train (read alone - search)": 0.0,
+ "chunk gain, train (read alone - TRELLIS total)": -0.7745768497086658,
+ "chunk gain, held out (read alone - grammar)": 0.2930518238024291,
+ "chunk gain, held out (read alone - search code)": 0.0,
+ "model bits": 12126.258396025556,
+ "data bits": 73156.13827540311,
+ "symbols": 12,
+ "rule classes": 12,
+ "chunk types (grammar)": 0,
+ "share of pieces inside a chunk": 0.0,
+ "chunk types": [],
+ "search moves": []
+}

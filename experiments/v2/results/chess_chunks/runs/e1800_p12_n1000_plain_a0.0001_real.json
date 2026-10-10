@@ -1,0 +1,125 @@
+{
+ "name": "e1800_p12_n1000_plain_a0.0001_real",
+ "elo": "1800",
+ "ply": 12,
+ "N": 1000,
+ "test": 500,
+ "counts": false,
+ "alpha": 0.0001,
+ "kind": "real",
+ "positions available": 8560,
+ "seconds": 252.1313831806183,
+ "train bits/pos": {
+  "read alone": 56.9542132097047,
+  "after the search": 55.18251839016064,
+  "TRELLIS v2 total": 55.32304040018477
+ },
+ "held-out bits/pos": {
+  "read alone": 52.2247261807921,
+  "search code with chunks": 49.66794329794423,
+  "TRELLIS v2 grammar": 49.54607624889306
+ },
+ "chunk gain, train (read alone - search)": 1.7716948195440594,
+ "chunk gain, train (read alone - TRELLIS total)": 1.6311728095199243,
+ "chunk gain, held out (read alone - grammar)": 2.678649931899045,
+ "chunk gain, held out (read alone - search code)": 2.5567828828478767,
+ "model bits": 5542.928965837517,
+ "data bits": 49780.111434347695,
+ "symbols": 21,
+ "rule classes": 21,
+ "chunk types (grammar)": 16,
+ "share of pieces inside a chunk": 0.19904702849123723,
+ "chunk types": [
+  {
+   "chunk": "[wB N1 wP]",
+   "count": 639,
+   "anchors": {
+    "c1": 352,
+    "d3": 100,
+    "g2": 89
+   }
+  },
+  {
+   "chunk": "[bP N1 bB]",
+   "count": 505,
+   "anchors": {
+    "c7": 283,
+    "e6": 89,
+    "b6": 55
+   }
+  },
+  {
+   "chunk": "[wK E1 wB]",
+   "count": 453,
+   "anchors": {
+    "e1": 453
+   }
+  },
+  {
+   "chunk": "[[[bP N1 bB] ENE bR] NW1 bK]",
+   "count": 386,
+   "anchors": {
+    "f7": 386
+   }
+  },
+  {
+   "chunk": "[bR E1 bK]",
+   "count": 185,
+   "anchors": {
+    "f8": 185
+   }
+  },
+  {
+   "chunk": "[wR E1 wK]",
+   "count": 145,
+   "anchors": {
+    "f1": 145
+   }
+  },
+  {
+   "chunk": "[[[bP N1 bB] WNW bP] NW1 bP]",
+   "count": 141,
+   "anchors": {
+    "g6": 129,
+    "d6": 6,
+    "e6": 5
+   }
+  },
+  {
+   "chunk": "[[bP N1 bB] WNW bP]",
+   "count": 23,
+   "anchors": {
+    "d6": 10,
+    "e6": 10,
+    "g6": 2
+   }
+  },
+  {
+   "chunk": "[wR E2 wK]",
+   "count": 22,
+   "anchors": {
+    "e1": 22
+   }
+  },
+  {
+   "chunk": "[[bP N1 bB] ENE bR]",
+   "count": 8,
+   "anchors": {
+    "f7": 6,
+    "c7": 2
+   }
+  }
+ ],
+ "search moves": [
+  "[bR E1 bK] x185",
+  "[wR E1 wK] x145",
+  "[bP N1 bB] x1063",
+  "[wR E2 wK] x22",
+  "[('chunk', 2) ENE bR] x394",
+  "[wK E1 wB] x453",
+  "[wB N1 wP] x639",
+  "[('chunk', 2) WNW bP] x164",
+  "[('chunk', 4) NW1 bK] x386",
+  "[('chunk', 7) NW1 bP] x141"
+ ]
+}

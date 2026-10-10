@@ -1,0 +1,75 @@
+{
+ "name": "eopen4_p30_n1000_plain_a0.0003_real",
+ "elo": "open4",
+ "ply": 30,
+ "N": 1000,
+ "test": 500,
+ "counts": false,
+ "alpha": 0.0003,
+ "kind": "real",
+ "positions available": 4918,
+ "seconds": 129.9631736278534,
+ "train bits/pos": {
+  "read alone": 85.46026562813736,
+  "after the search": 85.23271081870516,
+  "TRELLIS v2 total": 85.14461409051745
+ },
+ "held-out bits/pos": {
+  "read alone": 80.098999819643,
+  "search code with chunks": 79.46449380512124,
+  "TRELLIS v2 grammar": 79.08210803187589
+ },
+ "chunk gain, train (read alone - search)": 0.22755480943220618,
+ "chunk gain, train (read alone - TRELLIS total)": 0.3156515376199138,
+ "chunk gain, held out (read alone - grammar)": 1.0168917877671078,
+ "chunk gain, held out (read alone - search code)": 0.6345060145217616,
+ "model bits": 8716.763318403286,
+ "data bits": 76427.85077211422,
+ "symbols": 16,
+ "rule classes": 16,
+ "chunk types (grammar)": 5,
+ "share of pieces inside a chunk": 0.05796988069626442,
+ "chunk types": [
+  {
+   "chunk": "[bR E1 bK]",
+   "count": 444,
+   "anchors": {
+    "f8": 432,
+    "d8": 5,
+    "e8": 3
+   }
+  },
+  {
+   "chunk": "[bR E2 bK]",
+   "count": 124,
+   "anchors": {
+    "e8": 86,
+    "f8": 33,
+    "c8": 2
+   }
+  },
+  {
+   "chunk": "[bK E1 bR]",
+   "count": 96,
+   "anchors": {
+    "c8": 88,
+    "g8": 4,
+    "e8": 4
+   }
+  },
+  {
+   "chunk": "[wK E3 wR]",
+   "count": 77,
+   "anchors": {
+    "e1": 76,
+    "d1": 1
+   }
+  }
+ ],
+ "search moves": [
+  "[bK E1 bR] x96",
+  "[bR E1 bK] x444",
+  "[bR E2 bK] x124",
+  "[wK E3 wR] x77"
+ ]
+}

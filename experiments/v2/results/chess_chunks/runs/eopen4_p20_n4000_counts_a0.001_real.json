@@ -1,0 +1,34 @@
+{
+ "name": "eopen4_p20_n4000_counts_a0.001_real",
+ "elo": "open4",
+ "ply": 20,
+ "N": 4000,
+ "test": 500,
+ "counts": true,
+ "alpha": 0.001,
+ "kind": "real",
+ "positions available": 4918,
+ "seconds": 636.5149464607239,
+ "train bits/pos": {
+  "read alone": 56.51815318147401,
+  "after the search": 56.51815318147401,
+  "TRELLIS v2 total": 56.36278896781075
+ },
+ "held-out bits/pos": {
+  "read alone": 53.86948806452571,
+  "search code with chunks": 53.86948806452571,
+  "TRELLIS v2 grammar": 53.8126803419767
+ },
+ "chunk gain, train (read alone - search)": 0.0,
+ "chunk gain, train (read alone - TRELLIS total)": 0.1553642136632618,
+ "chunk gain, held out (read alone - grammar)": 0.05680772254901001,
+ "chunk gain, held out (read alone - search code)": 0.0,
+ "model bits": 11245.824355139554,
+ "data bits": 214205.331516105,
+ "symbols": 12,
+ "rule classes": 12,
+ "chunk types (grammar)": 0,
+ "share of pieces inside a chunk": 0.0,
+ "chunk types": [],
+ "search moves": []
+}

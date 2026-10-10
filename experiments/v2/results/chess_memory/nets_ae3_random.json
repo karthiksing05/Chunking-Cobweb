@@ -1,0 +1,192 @@
+{
+ "model": "ae3",
+ "family": "ae",
+ "kind": "random",
+ "config": [
+  32,
+  24,
+  256
+ ],
+ "params (transmitted)": 28376,
+ "params (all)": 247792,
+ "steps": 5000,
+ "prequential": {
+  "16": {
+   "steps used": 450,
+   "block": "16-32",
+   "block bits/pos": 198.117169380188
+  },
+  "32": {
+   "steps used": 450,
+   "block": "32-64",
+   "block bits/pos": 202.20138835906982
+  },
+  "64": {
+   "steps used": 450,
+   "block": "64-125",
+   "block bits/pos": 201.0024531630219
+  },
+  "125": {
+   "steps used": 450,
+   "block": "125-250",
+   "block bits/pos": 197.68830432128905
+  },
+  "250": {
+   "steps used": 500,
+   "block": "250-500",
+   "block bits/pos": 190.78308569335937
+  },
+  "500": {
+   "steps used": 550,
+   "block": "500-1000",
+   "block bits/pos": 186.64628424072265
+  },
+  "1000": {
+   "steps used": 650,
+   "block": "1000-2000",
+   "block bits/pos": 182.1040789642334,
+   "held-out bits/pos": 182.20055627441405,
+   "held-out latent, decoder bits/pos": [
+    54.472475730895994,
+    127.72808056640625
+   ]
+  },
+  "2000": {
+   "steps used": 5000,
+   "block": "2000-4000",
+   "block bits/pos": 155.52935285949707
+  },
+  "4000": {
+   "steps used": 5000,
+   "block": "4000-8000",
+   "block bits/pos": 147.89337348556518,
+   "held-out bits/pos": 149.06560804748534,
+   "held-out latent, decoder bits/pos": [
+    14.66916065311432,
+    134.39644744873047
+   ]
+  },
+  "8000": {
+   "steps used": 5000,
+   "block": "8000-16000",
+   "block bits/pos": 145.29400375270845
+  },
+  "16000": {
+   "steps used": 5000,
+   "block": "16000-32000",
+   "block bits/pos": 143.04943335199357,
+   "held-out bits/pos": 143.89352352905274,
+   "held-out latent, decoder bits/pos": [
+    10.725769136428834,
+    133.16775346374513
+   ]
+  },
+  "32000": {
+   "steps used": 5000,
+   "held-out bits/pos": 141.6825793609619,
+   "held-out latent, decoder bits/pos": [
+    7.651240598201752,
+    134.03133979797363
+   ]
+  }
+ },
+ "two-part": {
+  "1000": {
+   "float train bits/pos": 130.3190650100708,
+   "float held-out bits/pos": 208.6166907043457,
+   "b=8": {
+    "param bits": 227168,
+    "train data bits/pos": 130.39846816253663,
+    "total bits/pos": 357.56646816253664,
+    "held-out bits/pos": 208.73117413330078
+   },
+   "b=16": {
+    "param bits": 454176,
+    "train data bits/pos": 130.3190594406128,
+    "total bits/pos": 584.4950594406127,
+    "held-out bits/pos": 208.61651919555663
+   },
+   "train latent, decoder bits/pos (float)": [
+    44.14333016586304,
+    86.17573466491699
+   ],
+   "seconds": 14.552759647369385
+  },
+  "4000": {
+   "float train bits/pos": 142.67512128829955,
+   "float held-out bits/pos": 152.22081744384766,
+   "b=8": {
+    "param bits": 227168,
+    "train data bits/pos": 142.69632092285156,
+    "total bits/pos": 199.48832092285156,
+    "held-out bits/pos": 152.21978648376464
+   },
+   "b=16": {
+    "param bits": 454176,
+    "train data bits/pos": 142.67510650062562,
+    "total bits/pos": 256.2191065006256,
+    "held-out bits/pos": 152.22091467285156
+   },
+   "train latent, decoder bits/pos (float)": [
+    21.32479085755348,
+    121.35012804985047
+   ],
+   "seconds": 12.931655883789062
+  },
+  "16000": {
+   "float train bits/pos": 144.8403094973564,
+   "float held-out bits/pos": 147.87854231262207,
+   "b=8": {
+    "param bits": 227168,
+    "train data bits/pos": 144.85997326040268,
+    "total bits/pos": 159.0579732604027,
+    "held-out bits/pos": 147.89224938964844
+   },
+   "b=16": {
+    "param bits": 454176,
+    "train data bits/pos": 144.84032071781158,
+    "total bits/pos": 173.22632071781157,
+    "held-out bits/pos": 147.87862963867187
+   },
+   "train latent, decoder bits/pos (float)": [
+    16.898202495396138,
+    127.94214614343643
+   ],
+   "seconds": 13.123598337173462
+  },
+  "32000": {
+   "float train bits/pos": 144.7327219619751,
+   "float held-out bits/pos": 145.49919815063475,
+   "b=8": {
+    "param bits": 227168,
+    "train data bits/pos": 144.75923060917853,
+    "total bits/pos": 151.85823060917855,
+    "held-out bits/pos": 145.50841450500488
+   },
+   "b=16": {
+    "param bits": 454176,
+    "train data bits/pos": 144.7327008328438,
+    "total bits/pos": 158.92570083284377,
+    "held-out bits/pos": 145.49911587524414
+   },
+   "train latent, decoder bits/pos (float)": [
+    15.561256238251925,
+    129.17143774080276
+   ],
+   "seconds": 12.524470090866089
+  }
+ },
+ "prequential bits/pos": {
+  "1000": 191.42067063575638,
+  "4000": 171.14586382974596,
+  "16000": 152.40681120518198,
+  "32000": 147.7281222785878
+ },
+ "held-out bits/pos (early-stopped prefix model)": {
+  "1000": 182.20055627441405,
+  "4000": 149.06560804748534,
+  "16000": 143.89352352905274,
+  "32000": 141.6825793609619
+ },
+ "prequential seconds": 113.98027992248535
+}
