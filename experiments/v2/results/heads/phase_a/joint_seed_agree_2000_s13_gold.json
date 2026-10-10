@@ -1,0 +1,432 @@
+{
+ "grammar": "agree",
+ "side": "gold",
+ "unsplit bits": 65018.24391562047,
+ "unsplit purity": {
+  "nominal": 0.672,
+  "verbal": 0.532,
+  "determiner": 0.675
+ },
+ "oracle all: delta": -2196.8436123015927,
+ "oracle all: purity": {
+  "nominal": 1.0,
+  "verbal": 1.0,
+  "determiner": 1.0
+ },
+ "seeds": [
+  {
+   "seed symbol": 0,
+   "yields": [
+    "this teacher",
+    "a cat",
+    "the boy",
+    "a boy"
+   ],
+   "symbols split": 19,
+   "purity": {
+    "nominal": 0.743,
+    "verbal": 0.614,
+    "determiner": 0.918
+   },
+   "delta bits": 7734.401687560989,
+   "pruned: symbols split": 4,
+   "pruned: purity": {
+    "nominal": 0.73,
+    "verbal": 0.606,
+    "determiner": 0.918
+   },
+   "pruned: delta bits": 774.7009023409992
+  },
+  {
+   "seed symbol": 2,
+   "yields": [
+    "big dog",
+    "big teacher",
+    "old dog",
+    "happy cat"
+   ],
+   "symbols split": 20,
+   "purity": {
+    "nominal": 0.876,
+    "verbal": 0.612,
+    "determiner": 0.918
+   },
+   "delta bits": 9228.362676707191,
+   "pruned: symbols split": 5,
+   "pruned: purity": {
+    "nominal": 0.8,
+    "verbal": 0.606,
+    "determiner": 0.918
+   },
+   "pruned: delta bits": -107.98884677665774
+  },
+  {
+   "seed symbol": 3,
+   "yields": [
+    "old girl … boy",
+    "small big … bird",
+    "big cat … bird",
+    "happy happy … teachers"
+   ],
+   "symbols split": 18,
+   "purity": {
+    "nominal": 0.845,
+    "verbal": 0.609,
+    "determiner": 0.675
+   },
+   "delta bits": 10812.475149607046,
+   "pruned: symbols split": 3,
+   "pruned: purity": {
+    "nominal": 0.689,
+    "verbal": 0.606,
+    "determiner": 0.675
+   },
+   "pruned: delta bits": -237.34801289138704
+  },
+  {
+   "seed symbol": 4,
+   "yields": [
+    "under the boy",
+    "with a boy",
+    "small cat",
+    "under a cat"
+   ],
+   "symbols split": 18,
+   "purity": {
+    "nominal": 0.875,
+    "verbal": 0.539,
+    "determiner": 0.675
+   },
+   "delta bits": 9856.202084711702,
+   "pruned: symbols split": 4,
+   "pruned: purity": {
+    "nominal": 0.785,
+    "verbal": 0.532,
+    "determiner": 0.675
+   },
+   "pruned: delta bits": 1912.8828261212839
+  },
+  {
+   "seed symbol": 8,
+   "yields": [
+    "many small … boy",
+    "this old … boy",
+    "the boy … boy",
+    "this bird … dog"
+   ],
+   "symbols split": 19,
+   "purity": {
+    "nominal": 0.86,
+    "verbal": 0.612,
+    "determiner": 0.835
+   },
+   "delta bits": 5225.779013943051,
+   "pruned: symbols split": 4,
+   "pruned: purity": {
+    "nominal": 0.78,
+    "verbal": 0.606,
+    "determiner": 0.835
+   },
+   "pruned: delta bits": -237.31251228598558
+  },
+  {
+   "seed symbol": 9,
+   "yields": [
+    "a bird",
+    "this girl",
+    "a cat",
+    "a teacher"
+   ],
+   "symbols split": 19,
+   "purity": {
+    "nominal": 0.885,
+    "verbal": 0.607,
+    "determiner": 0.835
+   },
+   "delta bits": 9315.751667580182,
+   "pruned: symbols split": 4,
+   "pruned: purity": {
+    "nominal": 0.8,
+    "verbal": 0.606,
+    "determiner": 0.835
+   },
+   "pruned: delta bits": 287.4862042171808
+  },
+  {
+   "seed symbol": 10,
+   "yields": [
+    "follow a cat",
+    "chase every bird",
+    "help every boy",
+    "follows the … boy"
+   ],
+   "symbols split": 3,
+   "purity": {
+    "nominal": 0.672,
+    "verbal": 0.926,
+    "determiner": 0.675
+   },
+   "delta bits": 188.59446632772597,
+   "pruned: symbols split": 2,
+   "pruned: purity": {
+    "nominal": 0.672,
+    "verbal": 0.926,
+    "determiner": 0.675
+   },
+   "pruned: delta bits": 141.56276296291617
+  },
+  {
+   "seed symbol": 11,
+   "yields": [
+    "the teacher",
+    "a cat",
+    "the dog",
+    "the bird"
+   ],
+   "symbols split": 18,
+   "purity": {
+    "nominal": 0.857,
+    "verbal": 0.606,
+    "determiner": 0.675
+   },
+   "delta bits": 10711.026042021658,
+   "pruned: symbols split": 3,
+   "pruned: purity": {
+    "nominal": 0.805,
+    "verbal": 0.606,
+    "determiner": 0.675
+   },
+   "pruned: delta bits": 1667.7479284631336
+  },
+  {
+   "seed symbol": 12,
+   "yields": [
+    "happy boy",
+    "big dog",
+    "small teacher",
+    "old cat"
+   ],
+   "symbols split": 21,
+   "purity": {
+    "nominal": 0.832,
+    "verbal": 0.613,
+    "determiner": 0.836
+   },
+   "delta bits": 4810.70090519364,
+   "pruned: symbols split": 6,
+   "pruned: purity": {
+    "nominal": 0.777,
+    "verbal": 0.606,
+    "determiner": 0.836
+   },
+   "pruned: delta bits": -723.2433963366057
+  },
+  {
+   "seed symbol": 13,
+   "yields": [
+    "this dog",
+    "every boy",
+    "the teacher",
+    "this cat"
+   ],
+   "symbols split": 20,
+   "purity": {
+    "nominal": 0.849,
+    "verbal": 0.612,
+    "determiner": 0.835
+   },
+   "delta bits": 7404.746734880384,
+   "pruned: symbols split": 6,
+   "pruned: purity": {
+    "nominal": 0.784,
+    "verbal": 0.606,
+    "determiner": 0.835
+   },
+   "pruned: delta bits": -139.43083224646398
+  },
+  {
+   "seed symbol": 15,
+   "yields": [
+    "small bird",
+    "small girl",
+    "old cat",
+    "old girl"
+   ],
+   "symbols split": 19,
+   "purity": {
+    "nominal": 0.851,
+    "verbal": 0.606,
+    "determiner": 0.918
+   },
+   "delta bits": 9843.354673990056,
+   "pruned: symbols split": 4,
+   "pruned: purity": {
+    "nominal": 0.783,
+    "verbal": 0.606,
+    "determiner": 0.918
+   },
+   "pruned: delta bits": -116.74909660111734
+  },
+  {
+   "seed symbol": 16,
+   "yields": [
+    "happy girl",
+    "under this dog",
+    "big teacher",
+    "happy bird"
+   ],
+   "symbols split": 18,
+   "purity": {
+    "nominal": 0.769,
+    "verbal": 0.617,
+    "determiner": 0.918
+   },
+   "delta bits": 9706.440182864499,
+   "pruned: symbols split": 2,
+   "pruned: purity": {
+    "nominal": 0.676,
+    "verbal": 0.606,
+    "determiner": 0.675
+   },
+   "pruned: delta bits": -110.4689981029951
+  },
+  {
+   "seed symbol": 17,
+   "yields": [
+    "cat",
+    "teacher",
+    "dog",
+    "boy"
+   ],
+   "symbols split": 19,
+   "purity": {
+    "nominal": 0.881,
+    "verbal": 0.61,
+    "determiner": 0.835
+   },
+   "delta bits": 9172.085059513738,
+   "pruned: symbols split": 3,
+   "pruned: purity": {
+    "nominal": 0.771,
+    "verbal": 0.606,
+    "determiner": 0.835
+   },
+   "pruned: delta bits": -56.90933962048439
+  },
+  {
+   "seed symbol": 18,
+   "yields": [
+    "the",
+    "a",
+    "this",
+    "every"
+   ],
+   "symbols split": 20,
+   "purity": {
+    "nominal": 0.886,
+    "verbal": 0.608,
+    "determiner": 0.999
+   },
+   "delta bits": 5380.842720546811,
+   "pruned: symbols split": 9,
+   "pruned: purity": {
+    "nominal": 0.801,
+    "verbal": 0.606,
+    "determiner": 0.999
+   },
+   "pruned: delta bits": -134.29636564860994
+  },
+  {
+   "seed symbol": 19,
+   "yields": [
+    "big",
+    "small",
+    "happy",
+    "old"
+   ],
+   "symbols split": 18,
+   "purity": {
+    "nominal": 0.694,
+    "verbal": 0.546,
+    "determiner": 0.676
+   },
+   "delta bits": 5107.662414125116,
+   "pruned: symbols split": 3,
+   "pruned: purity": {
+    "nominal": 0.69,
+    "verbal": 0.532,
+    "determiner": 0.676
+   },
+   "pruned: delta bits": -86.12245539680589
+  },
+  {
+   "seed symbol": 20,
+   "yields": [
+    "laugh",
+    "sleep",
+    "run",
+    "sing"
+   ],
+   "symbols split": 2,
+   "purity": {
+    "nominal": 0.672,
+    "verbal": 0.606,
+    "determiner": 0.675
+   },
+   "delta bits": -286.9006639748186,
+   "pruned: symbols split": 1,
+   "pruned: purity": {
+    "nominal": 0.672,
+    "verbal": 0.606,
+    "determiner": 0.675
+   },
+   "pruned: delta bits": -296.82969906974904
+  },
+  {
+   "seed symbol": 21,
+   "yields": [
+    "see",
+    "sees",
+    "chase",
+    "follows"
+   ],
+   "symbols split": 3,
+   "purity": {
+    "nominal": 0.672,
+    "verbal": 0.925,
+    "determiner": 0.675
+   },
+   "delta bits": 216.08125943447521,
+   "pruned: symbols split": 2,
+   "pruned: purity": {
+    "nominal": 0.672,
+    "verbal": 0.925,
+    "determiner": 0.675
+   },
+   "pruned: delta bits": 169.0495332326027
+  },
+  {
+   "seed symbol": 23,
+   "yields": [
+    "near",
+    "under",
+    "behind",
+    "with"
+   ],
+   "symbols split": 18,
+   "purity": {
+    "nominal": 0.674,
+    "verbal": 0.544,
+    "determiner": 0.675
+   },
+   "delta bits": 2961.912518541394,
+   "pruned: symbols split": 5,
+   "pruned: purity": {
+    "nominal": 0.674,
+    "verbal": 0.532,
+    "determiner": 0.675
+   },
+   "pruned: delta bits": -899.5065351005687
+  }
+ ]
+}

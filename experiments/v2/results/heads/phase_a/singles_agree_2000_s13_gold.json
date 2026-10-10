@@ -1,0 +1,257 @@
+{
+ "grammar": "agree",
+ "train": 2000,
+ "side": "gold",
+ "unsplit bits": 65018.24391562047,
+ "all split: delta": -2196.8436123015927,
+ "categories split": 19,
+ "singles": [
+  {
+   "category": 0,
+   "singular": 1533,
+   "plural": 859,
+   "delta bits": 2135.021342539003,
+   "yields": [
+    "this teacher",
+    "a cat",
+    "the boy",
+    "a boy",
+    "every girl"
+   ]
+  },
+  {
+   "category": 2,
+   "singular": 780,
+   "plural": 435,
+   "delta bits": 1216.8072880478358,
+   "yields": [
+    "big dog",
+    "big teacher",
+    "old dog",
+    "happy cat",
+    "happy dog"
+   ]
+  },
+  {
+   "category": 3,
+   "singular": 247,
+   "plural": 128,
+   "delta bits": 391.58215436746104,
+   "yields": [
+    "old girl \u2026 boy",
+    "small big \u2026 bird",
+    "big cat \u2026 bird",
+    "happy happy \u2026 teachers",
+    "boy near a teacher"
+   ]
+  },
+  {
+   "category": 4,
+   "singular": 342,
+   "plural": 200,
+   "delta bits": 658.1421271236395,
+   "yields": [
+    "under the boy",
+    "with a boy",
+    "small cat",
+    "under a cat",
+    "big girl"
+   ]
+  },
+  {
+   "category": 8,
+   "singular": 251,
+   "plural": 130,
+   "delta bits": 381.1245104949412,
+   "yields": [
+    "many small \u2026 boy",
+    "this old \u2026 boy",
+    "the boy \u2026 boy",
+    "this bird \u2026 dog",
+    "a small \u2026 boy"
+   ]
+  },
+  {
+   "category": 9,
+   "singular": 649,
+   "plural": 435,
+   "delta bits": 1076.329691664003,
+   "yields": [
+    "a bird",
+    "this girl",
+    "a cat",
+    "a teacher",
+    "this boy"
+   ]
+  },
+  {
+   "category": 10,
+   "singular": 653,
+   "plural": 666,
+   "delta bits": 1086.7975765721858,
+   "yields": [
+    "follow a cat",
+    "chase every bird",
+    "help every boy",
+    "follows the \u2026 boy",
+    "chases the dog"
+   ]
+  },
+  {
+   "category": 11,
+   "singular": 984,
+   "plural": 510,
+   "delta bits": 1193.2727995811656,
+   "yields": [
+    "the teacher",
+    "a cat",
+    "the dog",
+    "the bird",
+    "every teacher"
+   ]
+  },
+  {
+   "category": 12,
+   "singular": 203,
+   "plural": 88,
+   "delta bits": 326.17406129852316,
+   "yields": [
+    "happy boy",
+    "big dog",
+    "small teacher",
+    "old cat",
+    "small bird"
+   ]
+  },
+  {
+   "category": 13,
+   "singular": 194,
+   "plural": 118,
+   "delta bits": 433.96044697437173,
+   "yields": [
+    "this dog",
+    "every boy",
+    "the teacher",
+    "this cat",
+    "a dog"
+   ]
+  },
+  {
+   "category": 15,
+   "singular": 545,
+   "plural": 182,
+   "delta bits": 677.3513500279587,
+   "yields": [
+    "small bird",
+    "small girl",
+    "old cat",
+    "old girl",
+    "big girl"
+   ]
+  },
+  {
+   "category": 16,
+   "singular": 121,
+   "plural": 49,
+   "delta bits": 186.3500447114202,
+   "yields": [
+    "happy girl",
+    "under this dog",
+    "big teacher",
+    "happy bird",
+    "small boy"
+   ]
+  },
+  {
+   "category": 17,
+   "singular": 3015,
+   "plural": 1456,
+   "delta bits": 1376.032520419314,
+   "yields": [
+    "cat",
+    "teacher",
+    "dog",
+    "boy",
+    "girl"
+   ]
+  },
+  {
+   "category": 18,
+   "singular": 3554,
+   "plural": 1710,
+   "delta bits": 1332.194994653597,
+   "yields": [
+    "the",
+    "a",
+    "this",
+    "every",
+    "these"
+   ]
+  },
+  {
+   "category": 19,
+   "singular": 527,
+   "plural": 250,
+   "delta bits": -149.33150228123122,
+   "yields": [
+    "big",
+    "small",
+    "happy",
+    "old",
+    "bird"
+   ]
+  },
+  {
+   "category": 20,
+   "singular": 247,
+   "plural": 434,
+   "delta bits": -296.82969906974904,
+   "yields": [
+    "laugh",
+    "sleep",
+    "run",
+    "sing",
+    "sleeps"
+   ]
+  },
+  {
+   "category": 21,
+   "singular": 653,
+   "plural": 664,
+   "delta bits": -5.808153416757705,
+   "yields": [
+    "see",
+    "sees",
+    "chase",
+    "follows",
+    "follow"
+   ]
+  },
+  {
+   "category": 22,
+   "singular": 5,
+   "plural": 3,
+   "delta bits": 17.754070360773767,
+   "yields": [
+    "with",
+    "behind",
+    "under",
+    "near",
+    "happy"
+   ]
+  },
+  {
+   "category": 23,
+   "singular": 25,
+   "plural": 11,
+   "delta bits": 51.96994938606804,
+   "yields": [
+    "near",
+    "under",
+    "behind",
+    "with",
+    "happy"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,28 @@
+{
+ "total_bits": 7596.405444375207,
+ "model_bits": NaN,
+ "data_bits": NaN,
+ "symbols": 14,
+ "rule_classes": 28,
+ "chunk_types": 16,
+ "test_bits_per_sentence": 21.197696310118396,
+ "test_top_level_chunks": 1.0,
+ "omission": 0.0,
+ "parse_commission": 0.0,
+ "non_crossing": 1.0,
+ "gen_commission": 0.0010000000000000009,
+ "novelty": 0.983,
+ "condition": "term_med",
+ "seed": 17,
+ "variant": "splits",
+ "substituted": [
+  "trellis2.chart.Chart",
+  "trellis2.model.Chart",
+  "trellis2.unsupervised.Chart",
+  "trellis2.model.compile_grammar (splits.compile_grammar_split)"
+ ],
+ "seconds": 25.213048934936523,
+ "splits_accepted": 2,
+ "unsplit_total_bits": 7616.236523420814,
+ "unsplit_stage_b_total_bits": 7616.236523420805
+}

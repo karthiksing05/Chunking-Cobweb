@@ -1,0 +1,192 @@
+{
+ "grammar": "agree",
+ "train": 2000,
+ "seed": 13,
+ "side": "gold",
+ "refit total bits": 65018.24391562047,
+ "refit seconds": 161.51977348327637,
+ "A1": {
+  "nominal": {
+   "elements": 14796.0,
+   "singular share": 0.636117869694512,
+   "categories holding them": 17,
+   "chosen categories: purity by number": 0.6723438767234388,
+   "categories mixing number (minority >= 5%)": {
+    "S17": {
+     "singular": 3015.0,
+     "plural": 1456.0
+    },
+    "S0": {
+     "singular": 1533.0,
+     "plural": 859.0
+    },
+    "S18": {
+     "singular": 1.0,
+     "plural": 2.0
+    },
+    "S23": {
+     "singular": 25.0,
+     "plural": 10.0
+    },
+    "S4": {
+     "singular": 342.0,
+     "plural": 200.0
+    },
+    "S13": {
+     "singular": 194.0,
+     "plural": 118.0
+    },
+    "S16": {
+     "singular": 121.0,
+     "plural": 49.0
+    },
+    "S2": {
+     "singular": 780.0,
+     "plural": 435.0
+    },
+    "S15": {
+     "singular": 545.0,
+     "plural": 182.0
+    },
+    "S9": {
+     "singular": 649.0,
+     "plural": 435.0
+    },
+    "S11": {
+     "singular": 984.0,
+     "plural": 510.0
+    },
+    "S19": {
+     "singular": 517.0,
+     "plural": 244.0
+    },
+    "S3": {
+     "singular": 247.0,
+     "plural": 128.0
+    },
+    "S8": {
+     "singular": 251.0,
+     "plural": 130.0
+    },
+    "S12": {
+     "singular": 203.0,
+     "plural": 88.0
+    },
+    "S22": {
+     "singular": 5.0,
+     "plural": 3.0
+    }
+   },
+   "best cut, 17 nodes": 0.7122195187888618,
+   "best cut, 34 nodes": 0.7428359015950257,
+   "leaves (finest cut)": 0.9999324141659908,
+   "fewest nodes for 95% purity": "> 68"
+  },
+  "verbal": {
+   "elements": 3317.0,
+   "singular share": 0.4681941513415737,
+   "categories holding them": 3,
+   "chosen categories: purity by number": 0.5318058486584263,
+   "categories mixing number (minority >= 5%)": {
+    "S10": {
+     "singular": 653.0,
+     "plural": 666.0
+    },
+    "S21": {
+     "singular": 653.0,
+     "plural": 664.0
+    },
+    "S20": {
+     "singular": 247.0,
+     "plural": 434.0
+    }
+   },
+   "best cut, 3 nodes": 0.5318058486584263,
+   "best cut, 6 nodes": 0.719626168224299,
+   "leaves (finest cut)": 1.0,
+   "fewest nodes for 95% purity": "> 12"
+  },
+  "determiner": {
+   "elements": 5278.0,
+   "singular share": 0.6750663129973474,
+   "categories holding them": 3,
+   "chosen categories: purity by number": 0.6752557787040546,
+   "categories mixing number (minority >= 5%)": {
+    "S18": {
+     "singular": 3553.0,
+     "plural": 1708.0
+    },
+    "S19": {
+     "singular": 10.0,
+     "plural": 6.0
+    }
+   },
+   "best cut, 3 nodes": 0.6750663129973474,
+   "best cut, 6 nodes": 0.6985600606290261,
+   "leaves (finest cut)": 0.9954528230390299,
+   "fewest nodes for 95% purity": "> 12"
+  },
+  "tree nodes": 38391,
+  "tree leaves": 25257
+ },
+ "A2": {
+  "unsplit (stage B re-run)": {
+   "total bits": 65018.24391562047,
+   "symbols": 24,
+   "rule classes": 74
+  },
+  "unsplit, chosen grammar": {
+   "total bits": 65018.24391562047,
+   "symbols": 24,
+   "rule classes": 74
+  },
+  "split": {
+   "categories split": 19,
+   "total bits": 62821.40030331888,
+   "symbols": 43,
+   "rule classes": 103
+  },
+  "split minus unsplit (bits)": -2196.8436123015927,
+  "generation, unsplit": {
+   "grammatical": 0.325,
+   "grammatical ignoring number": 0.676,
+   "novel": 0.999,
+   "grammatical and novel": 0.324,
+   "examples": [
+    "these cats and every dog sing \u2713",
+    "this girl near the boys and this boy sleep \u2713",
+    "every bird behind the cat sees a cat \u2713",
+    "many girls see the dog \u2713",
+    "many old happy dog sleep (agreement)",
+    "every teacher follows the girls boy \u2717",
+    "a big teacher likes this teacher \u2713",
+    "some girls under the teacher and the cat run \u2713",
+    "a small happy dogs see a teacher (agreement)",
+    "some old girl happy big dog see this old happy small behind happy cat under a boy \u2717",
+    "the big big boy and every happy girls laughs (agreement)",
+    "every bird near a boy follows this old girl \u2713"
+   ]
+  },
+  "generation, split": {
+   "grammatical": 0.715,
+   "grammatical ignoring number": 0.718,
+   "novel": 1.0,
+   "grammatical and novel": 0.715,
+   "examples": [
+    "every cat and this dog chase this bird \u2713",
+    "every boy follows a dog with these small dogs \u2713",
+    "these birds see these girls and these old birds \u2713",
+    "the teachers follow every big big this this teacher \u2717",
+    "a cat and every small cat see every small small this bird this cat behind this dog behind some girls \u2717",
+    "the dog follows a teacher under birds big dogs near the dog \u2717",
+    "every girl teacher and these cats see this teacher \u2717",
+    "some happy girls see this bird \u2713",
+    "many boys behind some happy cats laugh \u2713",
+    "a bird near every bird runs \u2713",
+    "these girls follow this small dog \u2713",
+    "every boy follows every girl \u2713"
+   ]
+  }
+ },
+ "seconds": 170.07589673995972
+}

@@ -1,0 +1,43 @@
+{
+ "part": "suspicion",
+ "grammar": "agree",
+ "train": 2000,
+ "seed": 13,
+ "night total bits": 59037.777522899356,
+ "no-heads check: factored bits (current / heads module)": [
+  59015.07708318121,
+  59015.077083181255
+ ],
+ "oracle split, current rules": {
+  "total bits": 57460.765434192894,
+  "symbols": 34,
+  "rule classes": 69,
+  "composite classes": 25,
+  "mixed classes": 0,
+  "mismatch probability of mixed classes (mean)": 0.0,
+  "grammatical": 0.805,
+  "agreement errors only": 0.189,
+  "structural errors": 0.006,
+  "agreement errors with a mismatched pair from a mixed class": 0.0,
+  "samples drawing a mismatched pair from a mixed class": 0.0
+ },
+ "oracle split, head-conditioned rules": {
+  "total bits": 57467.334991671785,
+  "symbols": 34,
+  "rule classes": 68,
+  "composite classes": 24,
+  "mixed classes": 0,
+  "mismatch probability of mixed classes (mean)": 0.0,
+  "grammatical": 0.791,
+  "agreement errors only": 0.2,
+  "structural errors": 0.009,
+  "agreement errors with a mismatched pair from a mixed class": 0.0,
+  "samples drawing a mismatched pair from a mixed class": 0.0,
+  "head beta": 1.0,
+  "classes by side (L, R, none)": [
+   19,
+   5,
+   0
+  ]
+ }
+}

@@ -1,0 +1,550 @@
+{
+ "profile": "experiments/v2/results/profile/stories_1000_v100_l5_s13.prof",
+ "total profiled seconds": 1739.752943209,
+ "wall seconds (unprofiled)": 1269.767784833908,
+ "self time by group (library time charged to the calling repo function)": {
+  "grammar read-out: cuts, code lengths (grammar.py, mdl.py)": 978.5601780662236,
+  "structure search (mdl_search: moves, scoring, apply)": 433.8993993060209,
+  "Cobweb calls (cobweb_cu)": 139.733548461,
+  "chart passes (chart.py)": 103.63121005977888,
+  "memory: instances, replay driver (memory.py)": 67.94775858134092,
+  "rest": 15.726164002928035,
+  "word classes (mdl_search.word_classes)": 0.2546847317075698
+ },
+ "self time by function (top 40)": [
+  [
+   "mdl.py:33(dm_code)",
+   522.3124559698417
+  ],
+  [
+   "grammar.py:557(_compact)",
+   151.47301689697142
+  ],
+  [
+   "profile_night.py:66(_cobweb_ifit)",
+   139.544330862
+  ],
+  [
+   "grammar.py:587(cost)",
+   116.17434180744236
+  ],
+  [
+   "mdl_search.py:316(_merged_rows)",
+   81.45965859213928
+  ],
+  [
+   "mdl_search.py:464(signature)",
+   71.90147796343928
+  ],
+  [
+   "chart.py:32(__init__)",
+   67.30667270333494
+  ],
+  [
+   "mdl.py:59(_before)",
+   39.95422696165218
+  ],
+  [
+   "mdl_search.py:259(rename)",
+   39.430288523017936
+  ],
+  [
+   "mdl_search.py:334(scored_moves)",
+   32.12454233200373
+  ],
+  [
+   "mdl_search.py:181(_phi)",
+   28.40902331599888
+  ],
+  [
+   "mdl_search.py:364(_merge_terms)",
+   28.15765640999
+  ],
+  [
+   "grammar.py:374(log_binary)",
+   27.463369399941183
+  ],
+  [
+   "grammar.py:195(hill_climb)",
+   27.40674344213913
+  ],
+  [
+   "mdl_search.py:268(_phis)",
+   26.348758042989786
+  ],
+  [
+   "chart.py:268(fill)",
+   25.29120448324029
+  ],
+  [
+   "memory.py:357(top_level_nats)",
+   24.55015686599241
+  ],
+  [
+   "mdl_search.py:278(_nats)",
+   20.73877462299997
+  ],
+  [
+   "grammar.py:674(compile_grammar)",
+   18.24845041171163
+  ],
+  [
+   "memory.py:221(instance)",
+   18.208134096000002
+  ],
+  [
+   "grammar.py:164(merge_symbols)",
+   16.942016074000428
+  ],
+  [
+   "mdl_search.py:270(<genexpr>)",
+   15.056726851
+  ],
+  [
+   "grammar.py:100(evidence_cut)",
+   14.098602245818734
+  ],
+  [
+   "mdl_search.py:319(sub)",
+   11.76919048
+  ],
+  [
+   "mdl_search.py:253(analyses)",
+   11.491952313
+  ],
+  [
+   "mdl_search.py:287(_labels)",
+   11.075223073998089
+  ],
+  [
+   "mdl.py:97(code)",
+   10.70709448304892
+  ],
+  [
+   "mdl_search.py:492(chunk_and_merge)",
+   9.74557032276542
+  ],
+  [
+   "model.py:60(consolidate)",
+   9.346679902002
+  ],
+  [
+   "mdl_search.py:383(_phi_one)",
+   7.896561714000001
+  ],
+  [
+   "mdl_search.py:291(pairs)",
+   7.694170210377715
+  ],
+  [
+   "memory.py:233(cat)",
+   7.035355316
+  ],
+  [
+   "chart.py:247(viterbi_tree)",
+   6.347819225861881
+  ],
+  [
+   "mdl_search.py:509(<lambda>)",
+   6.253287318
+  ],
+  [
+   "mdl_search.py:397(apply)",
+   5.742830548161076
+  ],
+  [
+   "mdl_search.py:189(_phi_table)",
+   5.13947382499612
+  ],
+  [
+   "mdl_search.py:374(<genexpr>)",
+   5.042591561
+  ],
+  [
+   "chart.py:348(sample_tree)",
+   4.6855136473417645
+  ],
+  [
+   "grammar.py:602(_factored_code)",
+   4.683110912818787
+  ],
+  [
+   "memory.py:300(surface)",
+   4.583193698998994
+  ]
+ ],
+ "cumulative time (repo and cobweb_cu functions, top 45)": [
+  [
+   "unsupervised.py:115(sleep)",
+   1739.834083704,
+   1
+  ],
+  [
+   "model.py:162(fit)",
+   1169.31558732,
+   43
+  ],
+  [
+   "model.py:60(consolidate)",
+   1164.86635157,
+   43
+  ],
+  [
+   "grammar.py:674(compile_grammar)",
+   981.510328758,
+   258
+  ],
+  [
+   "unsupervised.py:223(_consolidate)",
+   817.5889261660001,
+   9
+  ],
+  [
+   "grammar.py:587(cost)",
+   735.8618405750001,
+   1470187
+  ],
+  [
+   "unsupervised.py:257(_fit)",
+   705.1432746920001,
+   24
+  ],
+  [
+   "grammar.py:164(merge_symbols)",
+   637.545169103,
+   258
+  ],
+  [
+   "unsupervised.py:196(_sampled)",
+   580.940604901,
+   1
+  ],
+  [
+   "unsupervised.py:162(<genexpr>)",
+   580.307748018,
+   7
+  ],
+  [
+   "mdl.py:33(dm_code)",
+   536.094665595,
+   5009633
+  ],
+  [
+   "unsupervised.py:240(_map)",
+   432.84896660500004,
+   1
+  ],
+  [
+   "unsupervised.py:288(_search)",
+   432.84893721900005,
+   12
+  ],
+  [
+   "mdl_search.py:492(chunk_and_merge)",
+   432.814725908,
+   12
+  ],
+  [
+   "mdl_search.py:508(<genexpr>)",
+   281.86271374200004,
+   7415902
+  ],
+  [
+   "mdl_search.py:334(scored_moves)",
+   278.31933714300004,
+   7420306
+  ],
+  [
+   "grammar.py:153(search_cut)",
+   253.58701238,
+   696
+  ],
+  [
+   "grammar.py:195(hill_climb)",
+   253.57326075300003,
+   1392
+  ],
+  [
+   "memory.py:384(build_hierarchy)",
+   173.83615875700002,
+   258
+  ],
+  [
+   "mdl_search.py:364(_merge_terms)",
+   172.50564055700002,
+   6692716
+  ],
+  [
+   "memory.py:357(top_level_nats)",
+   165.197237825,
+   1470445
+  ],
+  [
+   "profile_night.py:59(ifit)",
+   141.248853743,
+   1799429
+  ],
+  [
+   "profile_night.py:66(_cobweb_ifit)",
+   139.544330862,
+   1799429
+  ],
+  [
+   "grammar.py:631(cost)",
+   133.14574524100001,
+   132273
+  ],
+  [
+   "mdl_search.py:517(<genexpr>)",
+   123.25639630200001,
+   11846
+  ],
+  [
+   "mdl_search.py:464(signature)",
+   122.69488139600001,
+   7282
+  ],
+  [
+   "grammar.py:557(_compact)",
+   103.609165723,
+   1603750
+  ],
+  [
+   "mdl_search.py:316(_merged_rows)",
+   93.15020157400001,
+   1885842
+  ],
+  [
+   "mdl.py:97(code)",
+   76.406313064,
+   61009
+  ],
+  [
+   "mdl.py:59(_before)",
+   72.121156314,
+   134258
+  ],
+  [
+   "chart.py:32(__init__)",
+   72.00157860200001,
+   28000
+  ],
+  [
+   "chart.py:247(viterbi_tree)",
+   57.259988849,
+   19000
+  ],
+  [
+   "mdl_search.py:253(analyses)",
+   50.914325517,
+   5010
+  ],
+  [
+   "mdl_search.py:268(_phis)",
+   46.544958719,
+   4475500
+  ],
+  [
+   "mdl_search.py:259(rename)",
+   39.422373204,
+   27864095
+  ],
+  [
+   "mdl_search.py:278(_nats)",
+   31.186178588,
+   7422639
+  ],
+  [
+   "memory.py:221(instance)",
+   29.826683111,
+   1768134
+  ],
+  [
+   "grammar.py:374(log_binary)",
+   29.079075375000002,
+   76190
+  ],
+  [
+   "grammar.py:602(_factored_code)",
+   28.883485284000002,
+   3114
+  ],
+  [
+   "mdl_search.py:181(_phi)",
+   28.409023316000003,
+   39267328
+  ],
+  [
+   "mdl_search.py:383(_phi_one)",
+   25.858181065,
+   24422050
+  ],
+  [
+   "chart.py:268(fill)",
+   21.815141889000003,
+   119890
+  ],
+  [
+   "mdl_search.py:291(pairs)",
+   15.250307813000001,
+   5884
+  ],
+  [
+   "mdl_search.py:270(<genexpr>)",
+   15.056726851,
+   79993033
+  ],
+  [
+   "grammar.py:100(evidence_cut)",
+   13.961584603,
+   516
+  ]
+ ],
+ "profiled wall seconds": 1739.9914689064026,
+ "night history": [
+  {
+   "night": 0.0,
+   "stage": "flat",
+   "move": "start",
+   "bits": 27542.663734423502,
+   "sentences": 1000.0,
+   "seconds": 1.2389051914215088
+  },
+  {
+   "night": 0.0,
+   "stage": "structure",
+   "move": "chunk and merge from 47 word classes, forests joined",
+   "bits": 19929.61308022925,
+   "sentences": 1000.0,
+   "seconds": 434.08789825439453
+  },
+  {
+   "night": 0.0,
+   "stage": "concepts",
+   "move": "consolidate",
+   "bits": 17810.704813701086,
+   "sentences": 1000.0,
+   "seconds": 1014.6600787639618
+  },
+  {
+   "night": 0.0,
+   "stage": "re-analysis",
+   "move": "viterbi",
+   "bits": 17639.761762903458,
+   "sentences": 1000.0,
+   "seconds": 1014.6600849628448
+  },
+  {
+   "night": 0.0,
+   "stage": "re-analysis",
+   "move": "viterbi without the read's context (its code)",
+   "bits": 19420.637020305145,
+   "sentences": 1000.0,
+   "seconds": 1158.8155419826508
+  },
+  {
+   "night": 0.0,
+   "stage": "concepts",
+   "move": "consolidate with the read's context",
+   "bits": 17274.830394184028,
+   "sentences": 1000.0,
+   "seconds": 1158.8155505657196
+  },
+  {
+   "night": 0.0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 1.0",
+   "bits": 17921.476324098716,
+   "sentences": 1000.0,
+   "seconds": 1233.6874873638153
+  },
+  {
+   "night": 0.0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 1.0",
+   "bits": 17593.96736847856,
+   "sentences": 1000.0,
+   "seconds": 1279.3429899215698
+  },
+  {
+   "night": 0.0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.8",
+   "bits": 17288.074498517024,
+   "sentences": 1000.0,
+   "seconds": 1328.4785025119781
+  },
+  {
+   "night": 0.0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.8",
+   "bits": 17243.2789611134,
+   "sentences": 1000.0,
+   "seconds": 1378.8843948841095
+  },
+  {
+   "night": 0.0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.6",
+   "bits": 17395.958134192842,
+   "sentences": 1000.0,
+   "seconds": 1434.3433232307434
+  },
+  {
+   "night": 0.0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.6",
+   "bits": 17342.25063743293,
+   "sentences": 1000.0,
+   "seconds": 1488.1541111469269
+  },
+  {
+   "night": 0.0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.4",
+   "bits": 17230.800785736013,
+   "sentences": 1000.0,
+   "seconds": 1543.0172801017761
+  },
+  {
+   "night": 0.0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.4",
+   "bits": 17233.294674678305,
+   "sentences": 1000.0,
+   "seconds": 1602.9322690963745
+  },
+  {
+   "night": 0.0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.2",
+   "bits": 17096.319121683802,
+   "sentences": 1000.0,
+   "seconds": 1646.3294191360474
+  },
+  {
+   "night": 0.0,
+   "stage": "concepts",
+   "move": "consolidate the shortest sampled analyses",
+   "bits": 17096.319121683802,
+   "sentences": 1000.0,
+   "seconds": 1739.7561540603638
+  },
+  {
+   "night": 0.0,
+   "stage": "re-analysis",
+   "move": "viterbi",
+   "bits": 16969.96210377394,
+   "sentences": 1000.0,
+   "seconds": 1739.7561645507812
+  },
+  {
+   "night": 0.0,
+   "stage": "re-analysis",
+   "move": "viterbi",
+   "bits": 16948.568484475403,
+   "sentences": 1000.0,
+   "seconds": 1739.7561688423157
+  }
+ ]
+}

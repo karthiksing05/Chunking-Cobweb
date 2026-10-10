@@ -1,0 +1,590 @@
+{
+ "profile": "experiments/v2/results/profile/complex_deep_300_s13.prof",
+ "total profiled seconds": 1471.072942617,
+ "wall seconds (unprofiled)": null,
+ "self time by group (library time charged to the calling repo function)": {
+  "grammar read-out: cuts, code lengths (grammar.py, mdl.py)": 567.5562069683157,
+  "Cobweb calls (cobweb_cu)": 391.64696893300004,
+  "chart passes (chart.py)": 259.77295962888314,
+  "structure search (mdl_search: moves, scoring, apply)": 136.13878776836106,
+  "memory: instances, replay driver (memory.py)": 62.82150492990026,
+  "rest": 53.0245193787845,
+  "word classes (mdl_search.word_classes)": 0.1119950097554851
+ },
+ "self time by function (top 40)": [
+  [
+   "profile_night.py:66(_cobweb_ifit)",
+   390.57436520100003
+  ],
+  [
+   "mdl.py:33(dm_code)",
+   233.98638196674835
+  ],
+  [
+   "chart.py:268(fill)",
+   124.03300921669468
+  ],
+  [
+   "chart.py:32(__init__)",
+   120.3726776700766
+  ],
+  [
+   "grammar.py:587(cost)",
+   69.26006710391077
+  ],
+  [
+   "grammar.py:557(_compact)",
+   66.43147172680239
+  ],
+  [
+   "grammar.py:674(compile_grammar)",
+   44.93813987110558
+  ],
+  [
+   "mdl_search.py:464(signature)",
+   42.72664756787786
+  ],
+  [
+   "grammar.py:100(evidence_cut)",
+   39.75712017839629
+  ],
+  [
+   "model.py:60(consolidate)",
+   37.656156350002
+  ],
+  [
+   "grammar.py:195(hill_climb)",
+   30.841628475656428
+  ],
+  [
+   "memory.py:221(instance)",
+   24.785727659000003
+  ],
+  [
+   "mdl_search.py:259(rename)",
+   24.452599112728894
+  ],
+  [
+   "mdl.py:59(_before)",
+   22.277284821205072
+  ],
+  [
+   "grammar.py:61(__init__)",
+   17.220272923670567
+  ],
+  [
+   "mdl_search.py:316(_merged_rows)",
+   12.916357605273662
+  ],
+  [
+   "memory.py:233(cat)",
+   10.533143763
+  ],
+  [
+   "grammar.py:602(_factored_code)",
+   9.906804733835651
+  ],
+  [
+   "memory.py:357(top_level_nats)",
+   8.201245401997587
+  ],
+  [
+   "grammar.py:164(merge_symbols)",
+   7.736834286389386
+  ],
+  [
+   "chart.py:247(viterbi_tree)",
+   7.274905051317996
+  ],
+  [
+   "mdl_search.py:253(analyses)",
+   7.189156507000001
+  ],
+  [
+   "mdl_search.py:287(_labels)",
+   6.7599812209972185
+  ],
+  [
+   "memory.py:300(surface)",
+   5.5837818019980405
+  ],
+  [
+   "model.py:162(fit)",
+   5.577866165425836
+  ],
+  [
+   "mdl_search.py:268(_phis)",
+   5.008470037993128
+  ],
+  [
+   "mdl_search.py:334(scored_moves)",
+   4.838904504003294
+  ],
+  [
+   "grammar.py:528(_elements)",
+   4.639024030738599
+  ],
+  [
+   "mdl.py:97(code)",
+   4.612828428194831
+  ],
+  [
+   "chart.py:354(pick)",
+   4.428184956215863
+  ],
+  [
+   "memory.py:384(build_hierarchy)",
+   4.379898680000999
+  ],
+  [
+   "mdl_search.py:364(_merge_terms)",
+   4.308203279997708
+  ],
+  [
+   "mdl_search.py:181(_phi)",
+   4.28917839599883
+  ],
+  [
+   "chart.py:348(sample_tree)",
+   3.66418273457798
+  ],
+  [
+   "mdl_search.py:291(pairs)",
+   3.521971926570882
+  ],
+  [
+   "mdl_search.py:492(chunk_and_merge)",
+   3.454472166455816
+  ],
+  [
+   "unsupervised.py:223(_consolidate)",
+   3.1582974840019995
+  ],
+  [
+   "mdl_search.py:278(_nats)",
+   3.0320596519999583
+  ],
+  [
+   "memory.py:149(add)",
+   2.757552595000032
+  ],
+  [
+   "mdl_search.py:397(apply)",
+   2.6489196225576226
+  ]
+ ],
+ "cumulative time (repo and cobweb_cu functions, top 45)": [
+  [
+   "unsupervised.py:115(sleep)",
+   1471.1169759900001,
+   1
+  ],
+  [
+   "model.py:162(fit)",
+   1084.28691739,
+   53
+  ],
+  [
+   "model.py:60(consolidate)",
+   1075.5643182390002,
+   53
+  ],
+  [
+   "unsupervised.py:223(_consolidate)",
+   956.8714243070001,
+   9
+  ],
+  [
+   "unsupervised.py:257(_fit)",
+   749.750111968,
+   34
+  ],
+  [
+   "unsupervised.py:162(<genexpr>)",
+   729.406965236,
+   7
+  ],
+  [
+   "grammar.py:674(compile_grammar)",
+   600.4390321960001,
+   318
+  ],
+  [
+   "memory.py:384(build_hierarchy)",
+   437.19800205300004,
+   318
+  ],
+  [
+   "unsupervised.py:196(_sampled)",
+   423.913884719,
+   1
+  ],
+  [
+   "profile_night.py:59(ifit)",
+   392.44579547700005,
+   2751216
+  ],
+  [
+   "profile_night.py:66(_cobweb_ifit)",
+   390.57436520100003,
+   2751216
+  ],
+  [
+   "grammar.py:587(cost)",
+   333.395863013,
+   564689
+  ],
+  [
+   "grammar.py:153(search_cut)",
+   254.23348085100002,
+   870
+  ],
+  [
+   "grammar.py:195(hill_climb)",
+   254.216010761,
+   1740
+  ],
+  [
+   "mdl.py:33(dm_code)",
+   216.27927355000003,
+   2027802
+  ],
+  [
+   "grammar.py:164(merge_symbols)",
+   168.053117181,
+   318
+  ],
+  [
+   "unsupervised.py:240(_map)",
+   135.473120251,
+   1
+  ],
+  [
+   "unsupervised.py:288(_search)",
+   135.47307223800001,
+   12
+  ],
+  [
+   "mdl_search.py:492(chunk_and_merge)",
+   135.437729955,
+   12
+  ],
+  [
+   "chart.py:32(__init__)",
+   120.57698259000001,
+   10500
+  ],
+  [
+   "chart.py:247(viterbi_tree)",
+   114.659532901,
+   7800
+  ],
+  [
+   "chart.py:268(fill)",
+   105.24964736800001,
+   1232114
+  ],
+  [
+   "grammar.py:631(cost)",
+   79.849879875,
+   73474
+  ],
+  [
+   "mdl_search.py:517(<genexpr>)",
+   74.66887713300001,
+   6141
+  ],
+  [
+   "mdl_search.py:464(signature)",
+   74.25622886500001,
+   2988
+  ],
+  [
+   "grammar.py:557(_compact)",
+   60.136541910000005,
+   639753
+  ],
+  [
+   "mdl.py:59(_before)",
+   55.828588657000005,
+   79306
+  ],
+  [
+   "memory.py:357(top_level_nats)",
+   51.222520973,
+   565007
+  ],
+  [
+   "mdl.py:97(code)",
+   49.979345457,
+   32165
+  ],
+  [
+   "mdl_search.py:508(<genexpr>)",
+   49.895334242000004,
+   1163182
+  ],
+  [
+   "mdl_search.py:334(scored_moves)",
+   49.387948486000006,
+   1165624
+  ],
+  [
+   "grammar.py:602(_factored_code)",
+   44.994289434,
+   3996
+  ],
+  [
+   "memory.py:221(instance)",
+   40.902653224000005,
+   2721858
+  ],
+  [
+   "grammar.py:100(evidence_cut)",
+   39.569782623,
+   636
+  ],
+  [
+   "mdl_search.py:253(analyses)",
+   31.636434019000003,
+   2486
+  ],
+  [
+   "mdl_search.py:364(_merge_terms)",
+   27.585675822000002,
+   886592
+  ],
+  [
+   "mdl_search.py:259(rename)",
+   24.447277512000003,
+   18591231
+  ],
+  [
+   "grammar.py:61(__init__)",
+   20.145227101,
+   636
+  ],
+  [
+   "mdl_search.py:316(_merged_rows)",
+   14.567295232000001,
+   457419
+  ],
+  [
+   "memory.py:233(cat)",
+   10.533143763,
+   30331104
+  ],
+  [
+   "mdl_search.py:268(_phis)",
+   8.480258227,
+   1229030
+  ],
+  [
+   "chart.py:348(sample_tree)",
+   8.114214187,
+   2700
+  ],
+  [
+   "mdl_search.py:291(pairs)",
+   7.841896285000001,
+   3268
+  ],
+  [
+   "mdl_search.py:287(_labels)",
+   6.759981221,
+   1519200
+  ],
+  [
+   "mdl_search.py:397(apply)",
+   6.2956048120000005,
+   4647
+  ]
+ ],
+ "profiled wall seconds": 1471.5686390399933,
+ "night history": [
+  {
+   "night": 0.0,
+   "stage": "flat",
+   "move": "start",
+   "bits": 33068.59523054342,
+   "sentences": 300.0,
+   "seconds": 0.6961414813995361
+  },
+  {
+   "night": 0.0,
+   "stage": "structure",
+   "move": "chunk and merge from 11 word classes",
+   "bits": 26371.704907861505,
+   "sentences": 300.0,
+   "seconds": 136.16932487487793
+  },
+  {
+   "night": 0.0,
+   "stage": "concepts",
+   "move": "consolidate",
+   "bits": 29523.235202738168,
+   "sentences": 300.0,
+   "seconds": 866.2862153053284
+  },
+  {
+   "night": 0.0,
+   "stage": "re-analysis",
+   "move": "viterbi",
+   "bits": 29417.54715444792,
+   "sentences": 300.0,
+   "seconds": 866.2862215042114
+  },
+  {
+   "night": 0.0,
+   "stage": "re-analysis",
+   "move": "viterbi",
+   "bits": 29013.035529086374,
+   "sentences": 300.0,
+   "seconds": 866.2862241268158
+  },
+  {
+   "night": 0.0,
+   "stage": "re-analysis",
+   "move": "viterbi",
+   "bits": 28672.03720654185,
+   "sentences": 300.0,
+   "seconds": 866.2862267494202
+  },
+  {
+   "night": 0.0,
+   "stage": "re-analysis",
+   "move": "viterbi",
+   "bits": 28473.065788783464,
+   "sentences": 300.0,
+   "seconds": 866.2862288951874
+  },
+  {
+   "night": 0.0,
+   "stage": "re-analysis",
+   "move": "viterbi without the read's context (its code)",
+   "bits": 29797.52565468211,
+   "sentences": 300.0,
+   "seconds": 1047.0834074020386
+  },
+  {
+   "night": 0.0,
+   "stage": "re-analysis",
+   "move": "viterbi without the read's context (its code)",
+   "bits": 29422.588340395392,
+   "sentences": 300.0,
+   "seconds": 1047.0834176540375
+  },
+  {
+   "night": 0.0,
+   "stage": "concepts",
+   "move": "consolidate with the read's context",
+   "bits": 28033.121038735673,
+   "sentences": 300.0,
+   "seconds": 1047.0834231376648
+  },
+  {
+   "night": 0.0,
+   "stage": "re-analysis",
+   "move": "viterbi",
+   "bits": 27986.986031967266,
+   "sentences": 300.0,
+   "seconds": 1047.0834262371063
+  },
+  {
+   "night": 0.0,
+   "stage": "re-analysis",
+   "move": "viterbi",
+   "bits": 27960.303397540523,
+   "sentences": 300.0,
+   "seconds": 1047.0834286212921
+  },
+  {
+   "night": 0.0,
+   "stage": "re-analysis",
+   "move": "viterbi",
+   "bits": 27954.13582992701,
+   "sentences": 300.0,
+   "seconds": 1047.0834307670593
+  },
+  {
+   "night": 0.0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 1.0",
+   "bits": 28234.136322718216,
+   "sentences": 300.0,
+   "seconds": 1099.8094475269318
+  },
+  {
+   "night": 0.0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 1.0",
+   "bits": 28447.32253181301,
+   "sentences": 300.0,
+   "seconds": 1137.8534719944
+  },
+  {
+   "night": 0.0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.8",
+   "bits": 28212.877351475538,
+   "sentences": 300.0,
+   "seconds": 1177.20694065094
+  },
+  {
+   "night": 0.0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.8",
+   "bits": 28338.695219326088,
+   "sentences": 300.0,
+   "seconds": 1215.6771647930145
+  },
+  {
+   "night": 0.0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.6",
+   "bits": 28096.514545977418,
+   "sentences": 300.0,
+   "seconds": 1253.9254188537598
+  },
+  {
+   "night": 0.0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.6",
+   "bits": 27918.10453651273,
+   "sentences": 300.0,
+   "seconds": 1295.6330518722534
+  },
+  {
+   "night": 0.0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.4",
+   "bits": 27322.464664245184,
+   "sentences": 300.0,
+   "seconds": 1338.5836935043335
+  },
+  {
+   "night": 0.0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.4",
+   "bits": 27110.30307312678,
+   "sentences": 300.0,
+   "seconds": 1380.6827600002289
+  },
+  {
+   "night": 0.0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.2",
+   "bits": 26913.332595553227,
+   "sentences": 300.0,
+   "seconds": 1423.212678194046
+  },
+  {
+   "night": 0.0,
+   "stage": "concepts",
+   "move": "consolidate the shortest sampled analyses",
+   "bits": 26913.332595553227,
+   "sentences": 300.0,
+   "seconds": 1470.997320175171
+  }
+ ]
+}

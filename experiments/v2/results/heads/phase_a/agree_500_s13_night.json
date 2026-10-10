@@ -1,0 +1,145 @@
+{
+ "grammar": "agree",
+ "train": 500,
+ "seed": 13,
+ "side": "night",
+ "refit total bits": 16496.51536922136,
+ "refit seconds": 18.1430242061615,
+ "recorded total bits": 16496.51536922136,
+ "A1": {
+  "nominal": {
+   "elements": 3074.0,
+   "singular share": 0.6525699414443722,
+   "categories holding them": 4,
+   "chosen categories: purity by number": 0.6616785946649317,
+   "categories mixing number (minority >= 5%)": {
+    "S1": {
+     "singular": 1207.0,
+     "plural": 611.0
+    },
+    "S0": {
+     "singular": 612.0,
+     "plural": 303.0
+    },
+    "S3": {
+     "singular": 122.0,
+     "plural": 61.0
+    },
+    "S6": {
+     "singular": 65.0,
+     "plural": 93.0
+    }
+   },
+   "best cut, 4 nodes": 0.6525699414443722,
+   "best cut, 8 nodes": 0.6717631750162655,
+   "leaves (finest cut)": 1.0,
+   "fewest nodes for 95% purity": "> 16"
+  },
+  "verbal": {
+   "elements": 727.0,
+   "singular share": 0.4580467675378267,
+   "categories holding them": 4,
+   "chosen categories: purity by number": 0.5735900962861072,
+   "categories mixing number (minority >= 5%)": {
+    "S11": {
+     "singular": 19.0,
+     "plural": 96.0
+    },
+    "S12": {
+     "singular": 164.0,
+     "plural": 156.0
+    },
+    "S9": {
+     "singular": 40.0,
+     "plural": 25.0
+    },
+    "S7": {
+     "singular": 110.0,
+     "plural": 117.0
+    }
+   },
+   "best cut, 4 nodes": 0.6066024759284732,
+   "best cut, 8 nodes": 0.671251719394773,
+   "leaves (finest cut)": 1.0,
+   "fewest nodes for 95% purity": "> 16"
+  },
+  "determiner": {
+   "elements": 1325.0,
+   "singular share": 0.6664150943396226,
+   "categories holding them": 1,
+   "chosen categories: purity by number": 0.6664150943396226,
+   "categories mixing number (minority >= 5%)": {
+    "S8": {
+     "singular": 883.0,
+     "plural": 442.0
+    }
+   },
+   "best cut, 1 nodes": 0.6664150943396226,
+   "best cut, 2 nodes": 0.6664150943396226,
+   "leaves (finest cut)": 0.9849056603773585,
+   "fewest nodes for 95% purity": "> 8"
+  },
+  "tree nodes": 8786,
+  "tree leaves": 6002
+ },
+ "A2": {
+  "unsplit (stage B re-run)": {
+   "total bits": 16496.51536922136,
+   "symbols": 14,
+   "rule classes": 55
+  },
+  "unsplit, chosen grammar": {
+   "total bits": 16496.51536922136,
+   "symbols": 14,
+   "rule classes": 55
+  },
+  "split": {
+   "categories split": 10,
+   "total bits": 16250.611574510272,
+   "symbols": 24,
+   "rule classes": 65
+  },
+  "split minus unsplit (bits)": -245.90379471108827,
+  "generation, unsplit": {
+   "grammatical": 0.213,
+   "grammatical ignoring number": 0.506,
+   "novel": 1.0,
+   "grammatical and novel": 0.213,
+   "examples": [
+    "a dog under this girl \u2717",
+    "these happy boys like every girl and this girl sleep \u2717",
+    "a teacher under the cat and the big teacher run \u2713",
+    "the bird sees a small cat laugh \u2717",
+    "this girl near this cat likes some birds and the boys \u2713",
+    "the cat likes many girls \u2713",
+    "the cat and every big boy sings (agreement)",
+    "the girl and this dog \u2717",
+    "many cat behind these girls with this big dog and every cat \u2717",
+    "these birds and these teachers \u2717",
+    "the old big teacher and every big dog chase every girl \u2713",
+    "this big dog with every teacher like this cat (agreement)"
+   ]
+  },
+  "generation, split": {
+   "grammatical": 0.396,
+   "grammatical ignoring number": 0.557,
+   "novel": 1.0,
+   "grammatical and novel": 0.396,
+   "examples": [
+    "a dog and this bird \u2717",
+    "many happy teachers help this girl follow a big teacher \u2717",
+    "every teacher with the big girl chase this dog chases many old boys \u2717",
+    "these happy boys with a old happy happy big teacher sees a cat (agreement)",
+    "this teacher near the dogs see some small old old boys (agreement)",
+    "every bird near the boy and these boys sleep \u2713",
+    "the big cat and these happy big boys \u2717",
+    "the dog sees many birds \u2713",
+    "this big cat and the old girl behind some dogs sing \u2713",
+    "a happy happy dog behind these birds near every old dog \u2717",
+    "this boy behind every teacher \u2717",
+    "this cat with a happy dog and this old teacher and many girls with this cat \u2717"
+   ]
+  }
+ },
+ "seconds": 21.133965969085693
+}
