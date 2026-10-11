@@ -1,0 +1,1021 @@
+{
+ "omission": 0.6342857142857143,
+ "commission": 0.6342857142857143,
+ "test_bits_per_character": 36.13871414179696,
+ "generation": {
+  "well formed": 0.205,
+  "positions attested": 0.075,
+  "real": 0.01,
+  "rediscovered": 0.01,
+  "novel": 0.065
+ },
+ "examples": {
+  "novel": [
+   "⿰ 广 虫",
+   "⿰ ⿱ 人 一 门",
+   "⿰ ⿱ 八 人 月",
+   "⿰ 小 ⿱ 弓 人",
+   "⿱ 丿 斗",
+   "⿵ ⿱ 丿 木 口",
+   "⿰ 虫 乀",
+   "⿰ 日 甲",
+   "⿰ 牛 ⿱ 一 丨",
+   "⿱ ⿻ 十 一 ⿱ 一 豆",
+   "⿱ ⿰ 非 言 ⿱ 日 一",
+   "⿰ ⿱ 一 ⿱ 一 丿 乚",
+   "⿰ 木 ⿵ ⿰ 牛 ⿻ 十 丨 巾"
+  ],
+  "rediscovered": [
+   "沺",
+   "沑"
+  ]
+ },
+ "validity": {
+  "chunk types": 9,
+  "type modal class": {
+   "component": 0.3333333333333333,
+   "operator + leading parts": 0.3333333333333333,
+   "complete, not listed": 0.0,
+   "crosses components": 0.3333333333333333
+  },
+  "mean purity": 0.2695143725297424,
+  "types with purity >= 0.5": 1,
+  "type modal class (purity >= 0.5)": {
+   "component": 0.0,
+   "operator + leading parts": 1.0,
+   "complete, not listed": 0.0,
+   "crosses components": 0.0
+  },
+  "share of types: purity >= 0.5 and a database component used as a proper part": 0.0,
+  "share of types: modal yield a database component used as a proper part": 0.2222222222222222,
+  "share of types: modal yield only ever a whole character": 0.1111111111111111,
+  "count-weighted modal class": {
+   "component": 0.3343534812547819,
+   "operator + leading parts": 0.11094108645753634,
+   "complete, not listed": 0.0,
+   "crosses components": 0.5547054322876818
+  },
+  "composite instances": 1307,
+  "instance class": {
+   "component": 0.33970925784238715,
+   "operator + leading parts": 0.11017597551644988,
+   "complete, not listed": 0.02142310635042081,
+   "crosses components": 0.5286916602907421
+  },
+  "distinct composite yields": 1019,
+  "distinct yield class": {
+   "component": 0.3650637880274779,
+   "operator + leading parts": 0.042198233562315994,
+   "complete, not listed": 0.017664376840039256,
+   "crosses components": 0.5750736015701668
+  },
+  "top types": [
+   {
+    "type": [
+     0,
+     6,
+     "None",
+     0
+    ],
+    "modal": "一 人",
+    "purity": 0.00796812749003984,
+    "count": 502.0,
+    "distinct": 446,
+    "class": "crosses components",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     3,
+     2,
+     "None",
+     5
+    ],
+    "modal": "⿰ 女 ⿱ ⿱ 十 一 ⿱ 罒 ⿱ 目 八",
+    "purity": 0.005,
+    "count": 200.0,
+    "distinct": 200,
+    "class": "component",
+    "entries": [
+     "嬻"
+    ],
+    "proper part": false,
+    "whole training character": true
+   },
+   {
+    "type": [
+     5,
+     6,
+     "None",
+     1
+    ],
+    "modal": "⿱ 宀 ⿱ 丿 ⿻ ㇀ 乚",
+    "purity": 0.010869565217391304,
+    "count": 184.0,
+    "distinct": 180,
+    "class": "component",
+    "entries": [
+     "宅",
+     "宅"
+    ],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     1,
+     6,
+     "None",
+     0
+    ],
+    "modal": "宀 ⿱ 丿 ⿻ ㇀ 乚",
+    "purity": 0.011764705882352941,
+    "count": 170.0,
+    "distinct": 166,
+    "class": "crosses components",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     2,
+     7,
+     "None",
+     8
+    ],
+    "modal": "⿰ 氵",
+    "purity": 0.14150943396226415,
+    "count": 106.0,
+    "distinct": 35,
+    "class": "operator + leading parts",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     4,
+     9,
+     "None",
+     10
+    ],
+    "modal": "十 一",
+    "purity": 0.4528301886792453,
+    "count": 53.0,
+    "distinct": 7,
+    "class": "crosses components",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     6,
+     12,
+     "None",
+     4
+    ],
+    "modal": "⿱ 十 一",
+    "purity": 0.4528301886792453,
+    "count": 53.0,
+    "distinct": 7,
+    "class": "component",
+    "entries": [
+     "土",
+     "士"
+    ],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     6,
+     11,
+     "None",
+     13
+    ],
+    "modal": "⿹ 勹",
+    "purity": 0.34285714285714286,
+    "count": 35.0,
+    "distinct": 12,
+    "class": "operator + leading parts",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   },
+   {
+    "type": [
+     6,
+     12,
+     "None",
+     13
+    ],
+    "modal": "⿱ 十",
+    "purity": 1.0,
+    "count": 4.0,
+    "distinct": 1,
+    "class": "operator + leading parts",
+    "entries": [],
+    "proper part": true,
+    "whole training character": false
+   }
+  ],
+  "valid modal examples": [
+   {
+    "modal": "⿰ 女 ⿱ ⿱ 十 一 ⿱ 罒 ⿱ 目 八",
+    "entries": [
+     "嬻"
+    ],
+    "purity": 0.005,
+    "count": 200.0
+   },
+   {
+    "modal": "⿱ 宀 ⿱ 丿 ⿻ ㇀ 乚",
+    "entries": [
+     "宅",
+     "宅"
+    ],
+    "purity": 0.010869565217391304,
+    "count": 184.0
+   },
+   {
+    "modal": "⿱ 十 一",
+    "entries": [
+     "土",
+     "士"
+    ],
+    "purity": 0.4528301886792453,
+    "count": 53.0
+   }
+  ],
+  "recall": {
+   "50": {
+    "K": 50,
+    "available": 50,
+    "modal yield of a chunk type": 0.04,
+    "modal yield of a category": 0.04,
+    "modal yield of a chunk type with purity >= 0.5": 0.0,
+    "modal yield of a category with purity >= 0.5": 0.0,
+    "occurrences analysed as one constituent (mean)": 0.44763636363636367,
+    "components analysed as one constituent in >= half their occurrences": 0.48
+   },
+   "100": {
+    "K": 100,
+    "available": 100,
+    "modal yield of a chunk type": 0.02,
+    "modal yield of a category": 0.02,
+    "modal yield of a chunk type with purity >= 0.5": 0.0,
+    "modal yield of a category with purity >= 0.5": 0.0,
+    "occurrences analysed as one constituent (mean)": 0.5638181818181818,
+    "components analysed as one constituent in >= half their occurrences": 0.59
+   },
+   "200": {
+    "K": 200,
+    "available": 200,
+    "modal yield of a chunk type": 0.01,
+    "modal yield of a category": 0.01,
+    "modal yield of a chunk type with purity >= 0.5": 0.0,
+    "modal yield of a category with purity >= 0.5": 0.0,
+    "occurrences analysed as one constituent (mean)": 0.6619090909090909,
+    "components analysed as one constituent in >= half their occurrences": 0.675
+   }
+  },
+  "top components": [
+   {
+    "yield": "⿱ 十 一",
+    "count": 27,
+    "entries": [
+     "土",
+     "士"
+    ],
+    "type modal": true,
+    "category modal": true
+   },
+   {
+    "yield": "⿻ 十 丨",
+    "count": 17,
+    "entries": [
+     "卄",
+     "艹"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ 一 ⿱ 十 一",
+    "count": 11,
+    "entries": [
+     "王",
+     "王"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ 一 一",
+    "count": 6,
+    "entries": [
+     "二",
+     "𠄞",
+     "𠄟"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ 丶 一",
+    "count": 6,
+    "entries": [
+     "亠"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ 人 ⿻ ⿱ 一 ⿱ 十 一 丷",
+    "count": 6,
+    "entries": [
+     "金",
+     "金"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿺ 乚 丿",
+    "count": 6,
+    "entries": [
+     "匕"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿻ 一 人",
+    "count": 6,
+    "entries": [
+     "大"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿰ 人 人",
+    "count": 5,
+    "entries": [
+     "从"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ 八 人",
+    "count": 5,
+    "entries": [
+     "火"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿳ 𠂊 田 灬",
+    "count": 5,
+    "entries": [
+     "魚"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿰ 𠁣 𠃛",
+    "count": 4,
+    "entries": [
+     "門"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ 𠂊 亅",
+    "count": 4,
+    "entries": [
+     "亇"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿰ 止 ⿺ 乚 丿",
+    "count": 3,
+    "entries": [
+     "此"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ ⿱ 十 一 ⿱ 十 一",
+    "count": 3,
+    "entries": [
+     "圭"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ ⿻ 甲 一 一",
+    "count": 3,
+    "entries": [
+     "里",
+     "里"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ 丿 木",
+    "count": 3,
+    "entries": [
+     "禾"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ 人 一",
+    "count": 3,
+    "entries": [
+     "亼"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ 人 丶",
+    "count": 3,
+    "entries": [
+     "亽"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ 十 豆",
+    "count": 3,
+    "entries": [
+     "壴"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ 宀 八",
+    "count": 3,
+    "entries": [
+     "穴"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿴ 𠂊 丶",
+    "count": 3,
+    "entries": [
+     "夕"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿵ 戊 一",
+    "count": 3,
+    "entries": [
+     "戌"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿺ ⿻ 十 月 丶",
+    "count": 3,
+    "entries": [
+     "甫"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿻ 丿 𠃌",
+    "count": 3,
+    "entries": [
+     "力",
+     "力"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿰ ⿱ 𠂊 亅 ⿱ 𠂊 亅",
+    "count": 2,
+    "entries": [
+     "竹"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿰ ⿴ 𠂊 丶 㐄",
+    "count": 2,
+    "entries": [
+     "舛"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿰ ⿻ 丿 𠃌 口",
+    "count": 2,
+    "entries": [
+     "加"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿰ 丨 丨",
+    "count": 2,
+    "entries": [
+     "〢"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿰ 亻 乍",
+    "count": 2,
+    "entries": [
+     "作"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿰ 口 口",
+    "count": 2,
+    "entries": [
+     "吅"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ ⺌ 月",
+    "count": 2,
+    "entries": [
+     "肖"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ ⿰ 止 ⿺ 乚 丿 角",
+    "count": 2,
+    "entries": [
+     "觜"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ ⿱ 丷 一 ⿱ 十 一",
+    "count": 2,
+    "entries": [
+     "𦍌"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ ⿱ 人 丶 龴",
+    "count": 2,
+    "entries": [
+     "令"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ ⿱ 十 一 口",
+    "count": 2,
+    "entries": [
+     "吉",
+     "𠮷"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ ⿱ 十 一 龰",
+    "count": 2,
+    "entries": [
+     "走"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ ⿻ 十 丨 ⿸ 𠂇 口",
+    "count": 2,
+    "entries": [
+     "若",
+     "若",
+     "若"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ 一 ⿱ 一 一",
+    "count": 2,
+    "entries": [
+     "三"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ 一 ㇉",
+    "count": 2,
+    "entries": [
+     "丂"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ 一 丿",
+    "count": 2,
+    "entries": [
+     "丆"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ 一 𧰨",
+    "count": 2,
+    "entries": [
+     "豕"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ 丷 一",
+    "count": 2,
+    "entries": [
+     "䒑"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ 丿 ⿻ ⿱ 一 一 乚",
+    "count": 2,
+    "entries": [
+     "毛"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ 丿 ⿻ ㇀ 乚",
+    "count": 2,
+    "entries": [
+     "乇"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ 宀 ⿱ 丿 ⿻ ㇀ 乚",
+    "count": 2,
+    "entries": [
+     "宅",
+     "宅"
+    ],
+    "type modal": true,
+    "category modal": true
+   },
+   {
+    "yield": "⿱ 日 ⿹ 勹 ⿱ 丿 丿",
+    "count": 2,
+    "entries": [
+     "易",
+     "易"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ 日 一",
+    "count": 2,
+    "entries": [
+     "旦"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ 止 ⿵ ⿵ 戊 一 𣥂",
+    "count": 2,
+    "entries": [
+     "歲"
+    ],
+    "type modal": false,
+    "category modal": false
+   },
+   {
+    "yield": "⿱ 米 ⿰ ⿴ 𠂊 丶 㐄",
+    "count": 2,
+    "entries": [
+     "粦"
+    ],
+    "type modal": false,
+    "category modal": false
+   }
+  ]
+ },
+ "total_bits": 9549.846501812648,
+ "model_bits": 4881.653324068305,
+ "data_bits": 4668.193177744343,
+ "symbols": 14,
+ "rule_classes": 33,
+ "chunk_types": 9,
+ "whole trees (train analyses)": 1.0,
+ "gold-exact (train analyses)": 0.11,
+ "variant": "final",
+ "seed": 13,
+ "train": 200,
+ "test": 100,
+ "seconds": 78.10731887817383,
+ "substituted": [
+  "refine_final on the saved baseline night"
+ ],
+ "history": [
+  {
+   "night": 0,
+   "stage": "flat",
+   "move": "start",
+   "bits": 11172.92056333563,
+   "sentences": 200,
+   "seconds": 11.617924928665161
+  },
+  {
+   "night": 0,
+   "stage": "structure",
+   "move": "chunk and merge from 41 word classes, forests joined",
+   "bits": 9786.31128783143,
+   "sentences": 200,
+   "seconds": 26.982871532440186
+  },
+  {
+   "night": 0,
+   "stage": "concepts",
+   "move": "consolidate",
+   "bits": 9963.92389677231,
+   "sentences": 200,
+   "seconds": 85.00275683403015
+  },
+  {
+   "night": 0,
+   "stage": "re-analysis",
+   "move": "viterbi",
+   "bits": 9815.990433161978,
+   "sentences": 200,
+   "seconds": 85.00276255607605
+  },
+  {
+   "night": 0,
+   "stage": "re-analysis",
+   "move": "viterbi",
+   "bits": 9675.635641474706,
+   "sentences": 200,
+   "seconds": 85.0027642250061
+  },
+  {
+   "night": 0,
+   "stage": "re-analysis",
+   "move": "viterbi without the read's context (its code)",
+   "bits": 10148.603439802533,
+   "sentences": 200,
+   "seconds": 107.82304668426514
+  },
+  {
+   "night": 0,
+   "stage": "concepts",
+   "move": "consolidate with the read's context",
+   "bits": 9565.490427850296,
+   "sentences": 200,
+   "seconds": 107.82305097579956
+  },
+  {
+   "night": 0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 1.0",
+   "bits": 9700.486275471203,
+   "sentences": 200,
+   "seconds": 127.37868475914001
+  },
+  {
+   "night": 0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 1.0",
+   "bits": 9961.004337104614,
+   "sentences": 200,
+   "seconds": 140.8883876800537
+  },
+  {
+   "night": 0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.8",
+   "bits": 9900.894295134978,
+   "sentences": 200,
+   "seconds": 154.10309958457947
+  },
+  {
+   "night": 0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.8",
+   "bits": 9842.524965915476,
+   "sentences": 200,
+   "seconds": 167.6317834854126
+  },
+  {
+   "night": 0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.6",
+   "bits": 9907.80880838228,
+   "sentences": 200,
+   "seconds": 181.19776558876038
+  },
+  {
+   "night": 0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.6",
+   "bits": 9758.869580149196,
+   "sentences": 200,
+   "seconds": 196.22640442848206
+  },
+  {
+   "night": 0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.4",
+   "bits": 9897.801727025593,
+   "sentences": 200,
+   "seconds": 210.61137342453003
+  },
+  {
+   "night": 0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.4",
+   "bits": 9677.019126409721,
+   "sentences": 200,
+   "seconds": 224.9676592350006
+  },
+  {
+   "night": 0,
+   "stage": "sampling",
+   "move": "analyses drawn at temperature 0.2",
+   "bits": 9666.575959389373,
+   "sentences": 200,
+   "seconds": 237.75803542137146
+  }
+ ],
+ "joint": [
+  {
+   "step": -1,
+   "full bits": 9565.490427850296
+  },
+  {
+   "step": 0,
+   "window": [
+    "('s', 7)",
+    "('s', 8)",
+    "('s', 10)"
+   ],
+   "shape": "(0, (1, 2))",
+   "occurrences": 52,
+   "plain delta": 13.111522500814317,
+   "full delta": -15.64392603764827,
+   "seconds": 31.8334538936615
+  },
+  {
+   "step": 0,
+   "window": [
+    "('s', 2)",
+    "('s', 4)",
+    "('s', 4)",
+    "('s', 13)"
+   ],
+   "shape": "(0, ((1, 2), 3))",
+   "occurrences": 170,
+   "plain delta": 14.728817720389998,
+   "full delta": 464.0161854551152,
+   "seconds": 31.833516597747803
+  },
+  {
+   "step": 0,
+   "window": [
+    "('s', 2)",
+    "('s', 4)",
+    "('s', 3)"
+   ],
+   "shape": "((0, 1), 2)",
+   "occurrences": 184,
+   "plain delta": 14.803472827090445,
+   "full delta": 23.01191060046949,
+   "seconds": 31.833542346954346
+  },
+  {
+   "step": 0,
+   "window": [
+    "('s', 5)",
+    "('s', 6)",
+    "('s', 1)"
+   ],
+   "shape": "(0, (1, 2))",
+   "occurrences": 106,
+   "plain delta": 15.501202588822707,
+   "full delta": 99.63390436749614,
+   "seconds": 31.833564281463623,
+   "accepted": true
+  },
+  {
+   "step": 1,
+   "window": [
+    "('s', 12)",
+    "('s', 9)",
+    "('s', 10)"
+   ],
+   "shape": "((0, 1), 2)",
+   "occurrences": 53,
+   "plain delta": 0.0,
+   "full delta": 128.29490790424097,
+   "seconds": 39.30203056335449
+  },
+  {
+   "step": 1,
+   "window": [
+    "('s', 2)",
+    "('s', 6)",
+    "('s', 6)",
+    "('s', 0)"
+   ],
+   "shape": "(0, ((1, 2), 3))",
+   "occurrences": 170,
+   "plain delta": 14.727062679668961,
+   "full delta": 299.4346698098361,
+   "seconds": 39.30235481262207
+  },
+  {
+   "step": 1,
+   "window": [
+    "('s', 2)",
+    "('s', 6)",
+    "('s', 1)"
+   ],
+   "shape": "((0, 1), 2)",
+   "occurrences": 184,
+   "plain delta": 14.801717786369409,
+   "full delta": 182.0470470374039,
+   "seconds": 39.30237889289856
+  },
+  {
+   "step": 1,
+   "window": [
+    "('s', 7)",
+    "('s', 8)",
+    "('s', 5)"
+   ],
+   "shape": "(0, (1, 2))",
+   "occurrences": 106,
+   "plain delta": 15.499447548105309,
+   "full delta": 254.88365382949632,
+   "seconds": 39.3024001121521
+  }
+ ],
+ "config": {
+  "max_leaves": 4,
+  "min_count": 3,
+  "top_windows": 60,
+  "reuse": true,
+  "final_candidates": 4,
+  "final_steps": 8,
+  "final_workers": 4,
+  "log": true
+ }
+}

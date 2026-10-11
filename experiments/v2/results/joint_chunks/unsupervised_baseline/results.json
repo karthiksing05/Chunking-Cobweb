@@ -1,0 +1,1690 @@
+[
+ {
+  "condition": "small",
+  "seed": 13,
+  "unsupervised": {
+   "total_bits": 3254.349405895048,
+   "model_bits": 221.93020123510146,
+   "data_bits": 3032.4192046599455,
+   "symbols": 6,
+   "rule_classes": 12,
+   "chunk_types": 3,
+   "test_bits_per_sentence": 9.524763430041071,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.25,
+   "parse_commission": 0.25,
+   "non_crossing": 0.75,
+   "gen_commission": 0.0010000000000000009,
+   "novelty": 0.539,
+   "steps": 11,
+   "history": [
+    {
+     "night": 0.0,
+     "stage": "flat",
+     "move": "start",
+     "bits": 6793.816789876496,
+     "sentences": 320.0,
+     "seconds": 0.062014102935791016
+    },
+    {
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 6 word classes",
+     "bits": 3189.0809774154127,
+     "sentences": 320.0,
+     "seconds": 20.586385011672974
+    },
+    {
+     "night": 0.0,
+     "stage": "concepts",
+     "move": "consolidate",
+     "bits": 3254.349405895048,
+     "sentences": 320.0,
+     "seconds": 33.14882779121399
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 3254.349405895048,
+     "sentences": 320.0,
+     "seconds": 37.54637169837952
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 3254.349405895048,
+     "sentences": 320.0,
+     "seconds": 39.80302405357361
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 3254.349405895048,
+     "sentences": 320.0,
+     "seconds": 42.12626576423645
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 3254.349405895048,
+     "sentences": 320.0,
+     "seconds": 44.46154522895813
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 3254.349405895048,
+     "sentences": 320.0,
+     "seconds": 46.779152631759644
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 3254.349405895048,
+     "sentences": 320.0,
+     "seconds": 49.094271183013916
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 3254.349405895048,
+     "sentences": 320.0,
+     "seconds": 51.37576222419739
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 3254.349405895048,
+     "sentences": 320.0,
+     "seconds": 53.69113111495972
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.2",
+     "bits": 3254.349405895048,
+     "sentences": 320.0,
+     "seconds": 55.99709987640381
+    }
+   ]
+  },
+  "supervised": {
+   "total_bits": 3254.3494058950505,
+   "model_bits": 221.93020123510146,
+   "data_bits": 3032.4192046599455,
+   "symbols": 6,
+   "rule_classes": 12,
+   "chunk_types": 3,
+   "test_bits_per_sentence": 9.524763430039553,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.0,
+   "parse_commission": 0.0,
+   "non_crossing": 1.0,
+   "gen_commission": 0.0010000000000000009,
+   "novelty": 0.537
+  },
+  "seconds": 62.56561851501465
+ },
+ {
+  "condition": "small",
+  "seed": 17,
+  "unsupervised": {
+   "total_bits": 3255.4816161359445,
+   "model_bits": 221.93412377581953,
+   "data_bits": 3033.5474923601237,
+   "symbols": 6,
+   "rule_classes": 12,
+   "chunk_types": 3,
+   "test_bits_per_sentence": 9.50495185045558,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.25,
+   "parse_commission": 0.25,
+   "non_crossing": 0.75,
+   "gen_commission": 0.0,
+   "novelty": 0.545,
+   "steps": 11,
+   "history": [
+    {
+     "night": 0.0,
+     "stage": "flat",
+     "move": "start",
+     "bits": 6794.948768222436,
+     "sentences": 320.0,
+     "seconds": 0.06350851058959961
+    },
+    {
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 6 word classes",
+     "bits": 3190.212955761358,
+     "sentences": 320.0,
+     "seconds": 20.035017728805542
+    },
+    {
+     "night": 0.0,
+     "stage": "concepts",
+     "move": "consolidate",
+     "bits": 3255.4816161359445,
+     "sentences": 320.0,
+     "seconds": 44.85648012161255
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 3255.4816161359445,
+     "sentences": 320.0,
+     "seconds": 49.47147536277771
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 3255.4816161359445,
+     "sentences": 320.0,
+     "seconds": 51.91876482963562
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 3255.4816161359445,
+     "sentences": 320.0,
+     "seconds": 54.29501724243164
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 3255.4816161359445,
+     "sentences": 320.0,
+     "seconds": 56.61380982398987
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 3255.4816161359445,
+     "sentences": 320.0,
+     "seconds": 59.05179691314697
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 3255.4816161359445,
+     "sentences": 320.0,
+     "seconds": 61.50186848640442
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 3255.4816161359445,
+     "sentences": 320.0,
+     "seconds": 63.95791172981262
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 3255.4816161359445,
+     "sentences": 320.0,
+     "seconds": 66.37754535675049
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.2",
+     "bits": 3255.4816161359445,
+     "sentences": 320.0,
+     "seconds": 68.7855761051178
+    }
+   ]
+  },
+  "supervised": {
+   "total_bits": 3255.4816161359417,
+   "model_bits": 221.93412377581953,
+   "data_bits": 3033.5474923601237,
+   "symbols": 6,
+   "rule_classes": 12,
+   "chunk_types": 3,
+   "test_bits_per_sentence": 9.504951850454052,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.0,
+   "parse_commission": 0.0,
+   "non_crossing": 1.0,
+   "gen_commission": 0.0,
+   "novelty": 0.536
+  },
+  "seconds": 75.04665493965149
+ },
+ {
+  "condition": "med",
+  "seed": 13,
+  "unsupervised": {
+   "total_bits": 6493.126129976316,
+   "model_bits": 495.22042438187793,
+   "data_bits": 5997.905705594436,
+   "symbols": 12,
+   "rule_classes": 28,
+   "chunk_types": 10,
+   "test_bits_per_sentence": 19.4836344904131,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.4666666666666667,
+   "parse_commission": 0.4666666666666667,
+   "non_crossing": 0.5333333333333333,
+   "gen_commission": 0.0040000000000000036,
+   "novelty": 0.967,
+   "steps": 11,
+   "history": [
+    {
+     "night": 0.0,
+     "stage": "flat",
+     "move": "start",
+     "bits": 11623.648652521624,
+     "sentences": 320.0,
+     "seconds": 0.08266735076904297
+    },
+    {
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 8 word classes",
+     "bits": 6539.275553803687,
+     "sentences": 320.0,
+     "seconds": 59.11782097816467
+    },
+    {
+     "night": 0.0,
+     "stage": "concepts",
+     "move": "consolidate",
+     "bits": 6493.126129976316,
+     "sentences": 320.0,
+     "seconds": 143.13112330436707
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 6493.126129976316,
+     "sentences": 320.0,
+     "seconds": 163.70583581924438
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 6493.126129976316,
+     "sentences": 320.0,
+     "seconds": 167.00665163993835
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 6493.126129976316,
+     "sentences": 320.0,
+     "seconds": 170.30881571769714
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 6493.126129976316,
+     "sentences": 320.0,
+     "seconds": 173.60270714759827
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 6493.126129976316,
+     "sentences": 320.0,
+     "seconds": 176.83531212806702
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 6493.126129976316,
+     "sentences": 320.0,
+     "seconds": 180.07817912101746
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 6493.126129976316,
+     "sentences": 320.0,
+     "seconds": 183.3175938129425
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 6493.126129976316,
+     "sentences": 320.0,
+     "seconds": 186.58387184143066
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.2",
+     "bits": 6493.126129976316,
+     "sentences": 320.0,
+     "seconds": 189.85244297981262
+    }
+   ]
+  },
+  "supervised": {
+   "total_bits": 6493.1561082941635,
+   "model_bits": 495.2504026997292,
+   "data_bits": 5997.905705594436,
+   "symbols": 12,
+   "rule_classes": 28,
+   "chunk_types": 11,
+   "test_bits_per_sentence": 19.48361559442485,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.0,
+   "parse_commission": 0.0,
+   "non_crossing": 1.0,
+   "gen_commission": 0.0010000000000000009,
+   "novelty": 0.966
+  },
+  "seconds": 200.59209823608398
+ },
+ {
+  "condition": "med",
+  "seed": 17,
+  "unsupervised": {
+   "total_bits": 6529.200033599233,
+   "model_bits": 555.5640526291991,
+   "data_bits": 5973.635980970023,
+   "symbols": 14,
+   "rule_classes": 30,
+   "chunk_types": 15,
+   "test_bits_per_sentence": 17.476592934788687,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.3441295546558705,
+   "parse_commission": 0.3441295546558705,
+   "non_crossing": 0.6558704453441295,
+   "gen_commission": 0.008000000000000007,
+   "novelty": 0.956,
+   "steps": 13,
+   "history": [
+    {
+     "night": 0.0,
+     "stage": "flat",
+     "move": "start",
+     "bits": 11562.422055843886,
+     "sentences": 320.0,
+     "seconds": 0.08657979965209961
+    },
+    {
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 12 word classes",
+     "bits": 6466.7554610378365,
+     "sentences": 320.0,
+     "seconds": 53.84521412849426
+    },
+    {
+     "night": 0.0,
+     "stage": "concepts",
+     "move": "consolidate",
+     "bits": 6820.084081651423,
+     "sentences": 320.0,
+     "seconds": 341.50137424468994
+    },
+    {
+     "night": 0.0,
+     "stage": "re-analysis",
+     "move": "viterbi",
+     "bits": 6723.998874647799,
+     "sentences": 320.0,
+     "seconds": 341.50137996673584
+    },
+    {
+     "night": 0.0,
+     "stage": "re-analysis",
+     "move": "viterbi",
+     "bits": 6529.200033599233,
+     "sentences": 320.0,
+     "seconds": 341.5013818740845
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 6529.200033599233,
+     "sentences": 320.0,
+     "seconds": 420.2943558692932
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 6529.200033599233,
+     "sentences": 320.0,
+     "seconds": 460.4741921424866
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 6529.200033599233,
+     "sentences": 320.0,
+     "seconds": 500.5470676422119
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 6529.200033599233,
+     "sentences": 320.0,
+     "seconds": 540.5850849151611
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 6529.200033599233,
+     "sentences": 320.0,
+     "seconds": 580.330356836319
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 6529.200033599233,
+     "sentences": 320.0,
+     "seconds": 620.19810795784
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 6529.200033599233,
+     "sentences": 320.0,
+     "seconds": 660.0736865997314
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 6529.200033599233,
+     "sentences": 320.0,
+     "seconds": 699.3932154178619
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.2",
+     "bits": 6529.200033599233,
+     "sentences": 320.0,
+     "seconds": 727.188268661499
+    }
+   ]
+  },
+  "supervised": {
+   "total_bits": 6570.966852788855,
+   "model_bits": 559.5679745768383,
+   "data_bits": 6011.398878212017,
+   "symbols": 12,
+   "rule_classes": 30,
+   "chunk_types": 14,
+   "test_bits_per_sentence": 17.47220802788086,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.0,
+   "parse_commission": 0.0,
+   "non_crossing": 1.0,
+   "gen_commission": 0.010000000000000009,
+   "novelty": 0.967
+  },
+  "seconds": 738.6887006759644
+ },
+ {
+  "condition": "large",
+  "seed": 13,
+  "unsupervised": {
+   "total_bits": 8014.880348963862,
+   "model_bits": 784.1868814571617,
+   "data_bits": 7230.693467506704,
+   "symbols": 11,
+   "rule_classes": 36,
+   "chunk_types": 13,
+   "test_bits_per_sentence": 23.53250649815121,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.15294117647058825,
+   "parse_commission": 0.15294117647058825,
+   "non_crossing": 0.8470588235294118,
+   "gen_commission": 0.07499999999999996,
+   "novelty": 0.995,
+   "steps": 13,
+   "history": [
+    {
+     "night": 0.0,
+     "stage": "flat",
+     "move": "start",
+     "bits": 12563.760621091647,
+     "sentences": 320.0,
+     "seconds": 0.13289237022399902
+    },
+    {
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 15 word classes, forests joined",
+     "bits": 7757.604870337498,
+     "sentences": 320.0,
+     "seconds": 41.322829246520996
+    },
+    {
+     "night": 0.0,
+     "stage": "concepts",
+     "move": "consolidate",
+     "bits": 8360.881878106986,
+     "sentences": 320.0,
+     "seconds": 454.98074746131897
+    },
+    {
+     "night": 0.0,
+     "stage": "re-analysis",
+     "move": "viterbi",
+     "bits": 8028.7359588964555,
+     "sentences": 320.0,
+     "seconds": 454.9807515144348
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 8100.0005774702195,
+     "sentences": 320.0,
+     "seconds": 512.4560234546661
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 8116.478044026934,
+     "sentences": 320.0,
+     "seconds": 544.3919966220856
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 8136.322217112324,
+     "sentences": 320.0,
+     "seconds": 574.5616500377655
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 8080.230130317675,
+     "sentences": 320.0,
+     "seconds": 604.7869851589203
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 8014.880348963862,
+     "sentences": 320.0,
+     "seconds": 633.8575811386108
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 8014.880348963862,
+     "sentences": 320.0,
+     "seconds": 662.8603637218475
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 8014.880348963862,
+     "sentences": 320.0,
+     "seconds": 680.3380897045135
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 8014.880348963862,
+     "sentences": 320.0,
+     "seconds": 697.6808390617371
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.2",
+     "bits": 8014.880348963862,
+     "sentences": 320.0,
+     "seconds": 715.1029515266418
+    },
+    {
+     "night": 0.0,
+     "stage": "concepts",
+     "move": "consolidate the shortest sampled analyses",
+     "bits": 8014.880348963862,
+     "sentences": 320.0,
+     "seconds": 725.055255651474
+    }
+   ]
+  },
+  "supervised": {
+   "total_bits": 8347.462755472436,
+   "model_bits": 948.4346314592655,
+   "data_bits": 7399.028124013171,
+   "symbols": 11,
+   "rule_classes": 39,
+   "chunk_types": 18,
+   "test_bits_per_sentence": 24.414588022332907,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.027450980392156876,
+   "parse_commission": 0.027450980392156876,
+   "non_crossing": 0.9725490196078431,
+   "gen_commission": 0.14800000000000002,
+   "novelty": 0.992
+  },
+  "seconds": 736.3669650554657
+ },
+ {
+  "condition": "large",
+  "seed": 17,
+  "unsupervised": {
+   "total_bits": 7907.961608198868,
+   "model_bits": 768.8035106177798,
+   "data_bits": 7139.158097581095,
+   "symbols": 12,
+   "rule_classes": 37,
+   "chunk_types": 14,
+   "test_bits_per_sentence": 23.44305679320421,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.11583011583011582,
+   "parse_commission": 0.11583011583011582,
+   "non_crossing": 0.8841698841698842,
+   "gen_commission": 0.07399999999999995,
+   "novelty": 0.992,
+   "steps": 12,
+   "history": [
+    {
+     "night": 0.0,
+     "stage": "flat",
+     "move": "start",
+     "bits": 12493.855998571404,
+     "sentences": 320.0,
+     "seconds": 0.14364933967590332
+    },
+    {
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 16 word classes, forests joined",
+     "bits": 7694.041165743404,
+     "sentences": 320.0,
+     "seconds": 39.313716411590576
+    },
+    {
+     "night": 0.0,
+     "stage": "concepts",
+     "move": "consolidate",
+     "bits": 8252.297114430003,
+     "sentences": 320.0,
+     "seconds": 351.0802991390228
+    },
+    {
+     "night": 0.0,
+     "stage": "re-analysis",
+     "move": "viterbi",
+     "bits": 7907.961608198868,
+     "sentences": 320.0,
+     "seconds": 351.08030366897583
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 8063.53595908327,
+     "sentences": 320.0,
+     "seconds": 419.63144397735596
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 8063.53595908327,
+     "sentences": 320.0,
+     "seconds": 453.4271786212921
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 8063.53595908327,
+     "sentences": 320.0,
+     "seconds": 487.2677059173584
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 8063.53595908327,
+     "sentences": 320.0,
+     "seconds": 520.9243667125702
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 8063.53595908327,
+     "sentences": 320.0,
+     "seconds": 554.4042775630951
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 8063.53595908327,
+     "sentences": 320.0,
+     "seconds": 587.9903738498688
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 8063.53595908327,
+     "sentences": 320.0,
+     "seconds": 621.489794254303
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 8063.53595908327,
+     "sentences": 320.0,
+     "seconds": 654.9849362373352
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.2",
+     "bits": 8063.53595908327,
+     "sentences": 320.0,
+     "seconds": 688.1765694618225
+    }
+   ]
+  },
+  "supervised": {
+   "total_bits": 8372.386078097223,
+   "model_bits": 999.0110526227126,
+   "data_bits": 7373.375025474503,
+   "symbols": 12,
+   "rule_classes": 42,
+   "chunk_types": 19,
+   "test_bits_per_sentence": 23.619493184966597,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.0,
+   "parse_commission": 0.0,
+   "non_crossing": 1.0,
+   "gen_commission": 0.14200000000000002,
+   "novelty": 0.994
+  },
+  "seconds": 709.3099582195282
+ },
+ {
+  "condition": "term_low",
+  "seed": 13,
+  "unsupervised": {
+   "total_bits": 5287.74504005455,
+   "model_bits": 316.69187447198186,
+   "data_bits": 4971.053165582581,
+   "symbols": 13,
+   "rule_classes": 18,
+   "chunk_types": 12,
+   "test_bits_per_sentence": 15.467532649409113,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.5044776119402985,
+   "parse_commission": 0.5044776119402985,
+   "non_crossing": 0.4955223880597015,
+   "gen_commission": 0.0010000000000000009,
+   "novelty": 0.924,
+   "steps": 12,
+   "history": [
+    {
+     "night": 0.0,
+     "stage": "flat",
+     "move": "start",
+     "bits": 11430.933331175882,
+     "sentences": 320.0,
+     "seconds": 0.06703042984008789
+    },
+    {
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 6 word classes",
+     "bits": 5883.920385464481,
+     "sentences": 320.0,
+     "seconds": 45.7012095451355
+    },
+    {
+     "night": 0.0,
+     "stage": "concepts",
+     "move": "consolidate",
+     "bits": 5451.760870319801,
+     "sentences": 320.0,
+     "seconds": 260.8096444606781
+    },
+    {
+     "night": 0.0,
+     "stage": "re-analysis",
+     "move": "viterbi",
+     "bits": 5287.74504005455,
+     "sentences": 320.0,
+     "seconds": 260.80965089797974
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 5287.74504005455,
+     "sentences": 320.0,
+     "seconds": 301.5337734222412
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 5287.74504005455,
+     "sentences": 320.0,
+     "seconds": 322.43184423446655
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 5287.74504005455,
+     "sentences": 320.0,
+     "seconds": 343.0970621109009
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 5287.74504005455,
+     "sentences": 320.0,
+     "seconds": 363.9433526992798
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 5287.74504005455,
+     "sentences": 320.0,
+     "seconds": 384.3774116039276
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 5287.74504005455,
+     "sentences": 320.0,
+     "seconds": 404.75454115867615
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 5287.74504005455,
+     "sentences": 320.0,
+     "seconds": 425.0080168247223
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 5287.74504005455,
+     "sentences": 320.0,
+     "seconds": 445.19106245040894
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.2",
+     "bits": 5287.74504005455,
+     "sentences": 320.0,
+     "seconds": 465.3840842247009
+    }
+   ]
+  },
+  "supervised": {
+   "total_bits": 5279.650410084496,
+   "model_bits": 290.68872144199827,
+   "data_bits": 4988.961688642496,
+   "symbols": 12,
+   "rule_classes": 17,
+   "chunk_types": 11,
+   "test_bits_per_sentence": 15.54167460251509,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.0,
+   "parse_commission": 0.0,
+   "non_crossing": 1.0,
+   "gen_commission": 0.0,
+   "novelty": 0.901
+  },
+  "seconds": 486.0873456001282
+ },
+ {
+  "condition": "term_low",
+  "seed": 17,
+  "unsupervised": {
+   "total_bits": 5309.060822397316,
+   "model_bits": 326.2817848165451,
+   "data_bits": 4982.779037580786,
+   "symbols": 13,
+   "rule_classes": 19,
+   "chunk_types": 12,
+   "test_bits_per_sentence": 15.038110068749711,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.44548286604361376,
+   "parse_commission": 0.44548286604361376,
+   "non_crossing": 0.5545171339563862,
+   "gen_commission": 0.0010000000000000009,
+   "novelty": 0.894,
+   "steps": 11,
+   "history": [
+    {
+     "night": 0.0,
+     "stage": "flat",
+     "move": "start",
+     "bits": 11494.484010051117,
+     "sentences": 320.0,
+     "seconds": 0.06632447242736816
+    },
+    {
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 6 word classes, forests joined",
+     "bits": 5889.519683798956,
+     "sentences": 320.0,
+     "seconds": 44.51976156234741
+    },
+    {
+     "night": 0.0,
+     "stage": "concepts",
+     "move": "consolidate",
+     "bits": 5309.060822397316,
+     "sentences": 320.0,
+     "seconds": 370.8158941268921
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 5343.592929718818,
+     "sentences": 320.0,
+     "seconds": 439.00344586372375
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 5343.592929718818,
+     "sentences": 320.0,
+     "seconds": 473.6408143043518
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 5343.592929718818,
+     "sentences": 320.0,
+     "seconds": 508.32291054725647
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 5343.592929718818,
+     "sentences": 320.0,
+     "seconds": 542.8971655368805
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 5343.592929718818,
+     "sentences": 320.0,
+     "seconds": 577.6143426895142
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 5343.592929718818,
+     "sentences": 320.0,
+     "seconds": 612.2281980514526
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 5343.592929718818,
+     "sentences": 320.0,
+     "seconds": 646.6791381835938
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 5343.592929718818,
+     "sentences": 320.0,
+     "seconds": 673.8734138011932
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.2",
+     "bits": 5343.592929718818,
+     "sentences": 320.0,
+     "seconds": 694.172914981842
+    }
+   ]
+  },
+  "supervised": {
+   "total_bits": 5295.459980510889,
+   "model_bits": 316.543328162684,
+   "data_bits": 4978.916652348225,
+   "symbols": 13,
+   "rule_classes": 18,
+   "chunk_types": 13,
+   "test_bits_per_sentence": 15.030758263768211,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.0,
+   "parse_commission": 0.0,
+   "non_crossing": 1.0,
+   "gen_commission": 0.0020000000000000018,
+   "novelty": 0.908
+  },
+  "seconds": 708.2995116710663
+ },
+ {
+  "condition": "term_med",
+  "seed": 13,
+  "unsupervised": {
+   "total_bits": 7618.13479063929,
+   "model_bits": 563.7918326327601,
+   "data_bits": 7054.342958006539,
+   "symbols": 14,
+   "rule_classes": 29,
+   "chunk_types": 13,
+   "test_bits_per_sentence": 22.339909149025697,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.46518987341772156,
+   "parse_commission": 0.46518987341772156,
+   "non_crossing": 0.5348101265822784,
+   "gen_commission": 0.009000000000000008,
+   "novelty": 0.978,
+   "steps": 12,
+   "history": [
+    {
+     "night": 0.0,
+     "stage": "flat",
+     "move": "start",
+     "bits": 13282.40506967483,
+     "sentences": 320.0,
+     "seconds": 0.09006214141845703
+    },
+    {
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 12 word classes, forests joined",
+     "bits": 8357.005303994118,
+     "sentences": 320.0,
+     "seconds": 60.8860547542572
+    },
+    {
+     "night": 0.0,
+     "stage": "concepts",
+     "move": "consolidate",
+     "bits": 8194.953260639948,
+     "sentences": 320.0,
+     "seconds": 385.77096676826477
+    },
+    {
+     "night": 0.0,
+     "stage": "re-analysis",
+     "move": "viterbi",
+     "bits": 7618.13479063929,
+     "sentences": 320.0,
+     "seconds": 385.77097058296204
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 7670.020930628677,
+     "sentences": 320.0,
+     "seconds": 471.3572907447815
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 7660.981594521719,
+     "sentences": 320.0,
+     "seconds": 512.5394747257233
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 7670.020930628677,
+     "sentences": 320.0,
+     "seconds": 557.0047600269318
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 7661.040078312965,
+     "sentences": 320.0,
+     "seconds": 600.4295840263367
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 7670.020930628677,
+     "sentences": 320.0,
+     "seconds": 644.7237005233765
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 7661.040078312965,
+     "sentences": 320.0,
+     "seconds": 685.6629772186279
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 7670.020930628677,
+     "sentences": 320.0,
+     "seconds": 712.5949239730835
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 7661.040078312965,
+     "sentences": 320.0,
+     "seconds": 738.3218276500702
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.2",
+     "bits": 7670.020930628677,
+     "sentences": 320.0,
+     "seconds": 765.0342936515808
+    }
+   ]
+  },
+  "supervised": {
+   "total_bits": 7722.29260584072,
+   "model_bits": 586.8335956669745,
+   "data_bits": 7135.459010173757,
+   "symbols": 12,
+   "rule_classes": 29,
+   "chunk_types": 19,
+   "test_bits_per_sentence": 22.389956920701806,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.0,
+   "parse_commission": 0.0,
+   "non_crossing": 1.0,
+   "gen_commission": 0.02100000000000002,
+   "novelty": 0.987
+  },
+  "seconds": 778.054524898529
+ },
+ {
+  "condition": "term_med",
+  "seed": 17,
+  "unsupervised": {
+   "total_bits": 7612.446617680763,
+   "model_bits": 546.8089477052264,
+   "data_bits": 7065.6376699755365,
+   "symbols": 14,
+   "rule_classes": 29,
+   "chunk_types": 12,
+   "test_bits_per_sentence": 21.272619280795652,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.4563758389261745,
+   "parse_commission": 0.4563758389261745,
+   "non_crossing": 0.5436241610738255,
+   "gen_commission": 0.0040000000000000036,
+   "novelty": 0.989,
+   "steps": 12,
+   "history": [
+    {
+     "night": 0.0,
+     "stage": "flat",
+     "move": "start",
+     "bits": 13290.316226147674,
+     "sentences": 320.0,
+     "seconds": 0.08856344223022461
+    },
+    {
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 11 word classes",
+     "bits": 8147.8447195077115,
+     "sentences": 320.0,
+     "seconds": 56.506797313690186
+    },
+    {
+     "night": 0.0,
+     "stage": "concepts",
+     "move": "consolidate",
+     "bits": 8000.693961832971,
+     "sentences": 320.0,
+     "seconds": 393.90300250053406
+    },
+    {
+     "night": 0.0,
+     "stage": "re-analysis",
+     "move": "viterbi",
+     "bits": 7612.446617680763,
+     "sentences": 320.0,
+     "seconds": 393.9030075073242
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 7780.416788267184,
+     "sentences": 320.0,
+     "seconds": 482.2158932685852
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 7671.866464114709,
+     "sentences": 320.0,
+     "seconds": 528.1436824798584
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 7612.446617680763,
+     "sentences": 320.0,
+     "seconds": 570.7134025096893
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 7780.416788267184,
+     "sentences": 320.0,
+     "seconds": 617.4285469055176
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 7671.866464114709,
+     "sentences": 320.0,
+     "seconds": 660.6785223484039
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 7612.446617680763,
+     "sentences": 320.0,
+     "seconds": 695.0489418506622
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 7780.416788267184,
+     "sentences": 320.0,
+     "seconds": 723.122043132782
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 7671.866464114709,
+     "sentences": 320.0,
+     "seconds": 749.3197529315948
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.2",
+     "bits": 7612.446617680763,
+     "sentences": 320.0,
+     "seconds": 774.6210558414459
+    }
+   ]
+  },
+  "supervised": {
+   "total_bits": 7708.862632194431,
+   "model_bits": 553.5927636237669,
+   "data_bits": 7155.26986857066,
+   "symbols": 12,
+   "rule_classes": 28,
+   "chunk_types": 17,
+   "test_bits_per_sentence": 21.325778656479624,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.0,
+   "parse_commission": 0.0,
+   "non_crossing": 1.0,
+   "gen_commission": 0.03600000000000003,
+   "novelty": 0.979
+  },
+  "seconds": 787.1999697685242
+ },
+ {
+  "condition": "term_high",
+  "seed": 13,
+  "unsupervised": {
+   "total_bits": 10420.727673181695,
+   "model_bits": 822.1160608172806,
+   "data_bits": 9598.611612364393,
+   "symbols": 12,
+   "rule_classes": 44,
+   "chunk_types": 10,
+   "test_bits_per_sentence": 30.42068928748433,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.42539682539682544,
+   "parse_commission": 0.42539682539682544,
+   "non_crossing": 0.5746031746031746,
+   "gen_commission": 0.006000000000000005,
+   "novelty": 0.999,
+   "steps": 12,
+   "history": [
+    {
+     "night": 0.0,
+     "stage": "flat",
+     "move": "start",
+     "bits": 16065.388863338705,
+     "sentences": 320.0,
+     "seconds": 0.17828059196472168
+    },
+    {
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 11 word classes",
+     "bits": 11220.1844254008,
+     "sentences": 320.0,
+     "seconds": 62.71178460121155
+    },
+    {
+     "night": 0.0,
+     "stage": "concepts",
+     "move": "consolidate",
+     "bits": 11288.416374279286,
+     "sentences": 320.0,
+     "seconds": 157.59958910942078
+    },
+    {
+     "night": 0.0,
+     "stage": "re-analysis",
+     "move": "viterbi",
+     "bits": 10420.727673181695,
+     "sentences": 320.0,
+     "seconds": 157.59959149360657
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 10420.727673181695,
+     "sentences": 320.0,
+     "seconds": 179.45081400871277
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 10420.727673181695,
+     "sentences": 320.0,
+     "seconds": 190.51759576797485
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 10420.727673181695,
+     "sentences": 320.0,
+     "seconds": 201.8117094039917
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 10420.727673181695,
+     "sentences": 320.0,
+     "seconds": 212.9876720905304
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 10420.727673181695,
+     "sentences": 320.0,
+     "seconds": 224.22707343101501
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 10420.727673181695,
+     "sentences": 320.0,
+     "seconds": 235.49334263801575
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 10420.727673181695,
+     "sentences": 320.0,
+     "seconds": 246.74676656723022
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 10420.727673181695,
+     "sentences": 320.0,
+     "seconds": 257.976331949234
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.2",
+     "bits": 10420.727673181695,
+     "sentences": 320.0,
+     "seconds": 269.26003527641296
+    }
+   ]
+  },
+  "supervised": {
+   "total_bits": 10483.750161465332,
+   "model_bits": 848.7224931272115,
+   "data_bits": 9635.027668338116,
+   "symbols": 12,
+   "rule_classes": 45,
+   "chunk_types": 13,
+   "test_bits_per_sentence": 30.42802287578585,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.0,
+   "parse_commission": 0.0,
+   "non_crossing": 1.0,
+   "gen_commission": 0.0020000000000000018,
+   "novelty": 1.0
+  },
+  "seconds": 284.1108684539795
+ },
+ {
+  "condition": "term_high",
+  "seed": 17,
+  "unsupervised": {
+   "total_bits": 10502.511190133977,
+   "model_bits": 933.989239592484,
+   "data_bits": 9568.52195054148,
+   "symbols": 14,
+   "rule_classes": 47,
+   "chunk_types": 15,
+   "test_bits_per_sentence": 31.01377416326349,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.6211180124223603,
+   "parse_commission": 0.6211180124223603,
+   "non_crossing": 0.37888198757763975,
+   "gen_commission": 0.01100000000000001,
+   "novelty": 1.0,
+   "steps": 12,
+   "history": [
+    {
+     "night": 0.0,
+     "stage": "flat",
+     "move": "start",
+     "bits": 15991.706338200474,
+     "sentences": 320.0,
+     "seconds": 0.17804932594299316
+    },
+    {
+     "night": 0.0,
+     "stage": "structure",
+     "move": "chunk and merge from 10 word classes",
+     "bits": 10585.83603483737,
+     "sentences": 320.0,
+     "seconds": 65.96930265426636
+    },
+    {
+     "night": 0.0,
+     "stage": "concepts",
+     "move": "consolidate",
+     "bits": 10834.093064031233,
+     "sentences": 320.0,
+     "seconds": 380.9558472633362
+    },
+    {
+     "night": 0.0,
+     "stage": "re-analysis",
+     "move": "viterbi",
+     "bits": 10502.511190133977,
+     "sentences": 320.0,
+     "seconds": 380.95585227012634
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 10502.511190133977,
+     "sentences": 320.0,
+     "seconds": 460.69171357154846
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 1.0",
+     "bits": 10502.511190133977,
+     "sentences": 320.0,
+     "seconds": 495.7157144546509
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 10502.511190133977,
+     "sentences": 320.0,
+     "seconds": 520.3260548114777
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.8",
+     "bits": 10502.511190133977,
+     "sentences": 320.0,
+     "seconds": 544.9087467193604
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 10502.511190133977,
+     "sentences": 320.0,
+     "seconds": 569.4671745300293
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.6",
+     "bits": 10502.511190133977,
+     "sentences": 320.0,
+     "seconds": 594.0561563968658
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 10502.511190133977,
+     "sentences": 320.0,
+     "seconds": 618.6422758102417
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.4",
+     "bits": 10502.511190133977,
+     "sentences": 320.0,
+     "seconds": 643.1869497299194
+    },
+    {
+     "night": 0.0,
+     "stage": "sampling",
+     "move": "analyses drawn at temperature 0.2",
+     "bits": 10502.511190133977,
+     "sentences": 320.0,
+     "seconds": 667.6688373088837
+    }
+   ]
+  },
+  "supervised": {
+   "total_bits": 10599.114146376667,
+   "model_bits": 917.8695800709097,
+   "data_bits": 9681.244566305746,
+   "symbols": 12,
+   "rule_classes": 45,
+   "chunk_types": 17,
+   "test_bits_per_sentence": 31.0911685617241,
+   "test_top_level_chunks": 1.0,
+   "omission": 0.0,
+   "parse_commission": 0.0,
+   "non_crossing": 1.0,
+   "gen_commission": 0.041000000000000036,
+   "novelty": 1.0
+  },
+  "seconds": 682.5783071517944
+ }
+]
