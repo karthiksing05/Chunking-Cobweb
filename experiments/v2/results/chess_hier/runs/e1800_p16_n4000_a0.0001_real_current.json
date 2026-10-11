@@ -1,0 +1,99 @@
+{
+ "name": "e1800_p16_n4000_a0.0001_real_current",
+ "method": "current",
+ "elo": "1800",
+ "ply": 16,
+ "N": 4000,
+ "test": 500,
+ "alpha": 0.0001,
+ "kind": "real",
+ "seconds": 2306.1801977157593,
+ "train bits/pos": {
+  "read alone": 53.71199440618528,
+  "after the search": 53.47756532876205,
+  "TRELLIS v2 total": 53.45967858873554
+ },
+ "held-out bits/pos": {
+  "read alone": 51.930361084263104,
+  "search code": 51.71482097394232,
+  "TRELLIS v2 grammar": 51.636125371867564
+ },
+ "chunk gain, train (read alone - search)": 0.23442907742323627,
+ "chunk gain, train (read alone - TRELLIS total)": 0.2523158174497411,
+ "chunk gain, held out (read alone - grammar)": 0.29423571239554036,
+ "chunk gain, held out (read alone - search code)": 0.2155401103207879,
+ "model bits": 12418.29774595992,
+ "data bits": 201420.4166089823,
+ "symbols": 14,
+ "rule classes": 16,
+ "chunk types (grammar)": 4,
+ "search chunk labels": 4,
+ "search labels": 16,
+ "merges": 0,
+ "chunk moves": 4,
+ "categories (rows with several outcomes)": [],
+ "top-level chunk levels (depth: count)": {
+  "1": 2794,
+  "2": 654,
+  "3": 67
+ },
+ "chunk shapes": 4,
+ "share of pieces inside a chunk": 0.06517498374376844,
+ "chunk types": [
+  {
+   "chunk": "[wB N1 wP]",
+   "count": 2606,
+   "anchors": {
+    "c1": 869,
+    "d3": 631,
+    "g2": 454
+   }
+  },
+  {
+   "chunk": "[wK E1 [wB N1 wP]]",
+   "count": 654,
+   "anchors": {
+    "e1": 654
+   }
+  },
+  {
+   "chunk": "[wK E1 wB]",
+   "count": 188,
+   "anchors": {
+    "e1": 188
+   }
+  },
+  {
+   "chunk": "[[wK E1 [wB N1 wP]] NW1 wB]",
+   "count": 67,
+   "anchors": {
+    "e1": 67
+   }
+  }
+ ],
+ "search moves": [
+  "[wB N1 wP] x3327",
+  "[wK E1 ('chunk', 0)] x721",
+  "[wK E1 wB] x188",
+  "[('chunk', 1) NW1 wB] x67"
+ ],
+ "generation": {
+  "attempts": 1004,
+  "collision or off the board": 0.00398406374501992,
+  "checks": {
+   "one king each": 1.0,
+   "no pawn on a back rank": 0.99,
+   "at most 8 pawns each": 0.991,
+   "at most 16 pieces each": 0.99,
+   "no more of any kind than at the start": 0.99,
+   "passes every check": 0.989
+  },
+  "generated chunks": 902,
+  "generated chunk depths": {
+   "1": 715,
+   "2": 181,
+   "3": 6
+  },
+  "generated chunks found in a held-out position": 0.991130820399113
+ }
+}

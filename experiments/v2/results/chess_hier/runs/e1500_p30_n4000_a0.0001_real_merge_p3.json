@@ -1,0 +1,173 @@
+{
+ "name": "e1500_p30_n4000_a0.0001_real_merge_p3",
+ "method": "merge_p3",
+ "elo": "1500",
+ "ply": 30,
+ "N": 4000,
+ "test": 500,
+ "alpha": 0.0001,
+ "kind": "real",
+ "seconds": 1189.935073375702,
+ "train bits/pos": {
+  "read alone": 79.96977402644066,
+  "after the search": 79.96324504169696,
+  "TRELLIS v2 total": 80.08847930152558
+ },
+ "held-out bits/pos": {
+  "read alone": 76.27768456262025,
+  "search code": 76.07842934053099,
+  "TRELLIS v2 grammar": 76.0050731178226
+ },
+ "chunk gain, train (read alone - search)": 0.006528984743695787,
+ "chunk gain, train (read alone - TRELLIS total)": -0.11870527508492046,
+ "chunk gain, held out (read alone - grammar)": 0.2726114447976471,
+ "chunk gain, held out (read alone - search code)": 0.19925522208926338,
+ "model bits": 19765.5572511728,
+ "data bits": 300588.35995493265,
+ "symbols": 13,
+ "rule classes": 14,
+ "chunk types (grammar)": 5,
+ "search chunk labels": 4,
+ "search labels": 13,
+ "merges": 4,
+ "chunk moves": 5,
+ "categories (rows with several outcomes)": [
+  {
+   "label": "('chunk', 0)",
+   "outcomes": [
+    [
+     "('p', ('chunk', 2), 'N1', ('chunk', 1))",
+     2675
+    ],
+    [
+     "('p', ('chunk', 2), 'N1', 'bK')",
+     5
+    ]
+   ],
+   "occurrences": 2680
+  },
+  {
+   "label": "('chunk', 1)",
+   "outcomes": [
+    [
+     "('w', 'bP')",
+     26651
+    ],
+    [
+     "('p', ('chunk', 1), 'NNE', 'wQ')",
+     4
+    ]
+   ],
+   "occurrences": 26655
+  },
+  {
+   "label": "('chunk', 2)",
+   "outcomes": [
+    [
+     "('w', 'wP')",
+     26342
+    ],
+    [
+     "('p', ('chunk', 2), 'N5', ('chunk', 2))",
+     2
+    ]
+   ],
+   "occurrences": 26344
+  },
+  {
+   "label": "('chunk', 4)",
+   "outcomes": [
+    [
+     "('w', 'wK')",
+     4000
+    ],
+    [
+     "('p', ('chunk', 4), 'NW1', ('chunk', 1))",
+     3
+    ]
+   ],
+   "occurrences": 4003
+  }
+ ],
+ "top-level chunk levels (depth: count)": {
+  "1": 2689
+ },
+ "chunk shapes": 5,
+ "share of pieces inside a chunk": 0.05131532494298827,
+ "chunk types": [
+  {
+   "chunk": "[wP N1 bP]",
+   "count": 2675,
+   "anchors": {
+    "d4": 529,
+    "e4": 485,
+    "e5": 361
+   }
+  },
+  {
+   "chunk": "[wP N1 bK]",
+   "count": 5,
+   "anchors": {
+    "c7": 1,
+    "b5": 1,
+    "h6": 1
+   }
+  },
+  {
+   "chunk": "[bP NNE wQ]",
+   "count": 4,
+   "anchors": {
+    "g6": 3,
+    "e6": 1
+   }
+  },
+  {
+   "chunk": "[wK NW1 bP]",
+   "count": 3,
+   "anchors": {
+    "c1": 1,
+    "d2": 1,
+    "e1": 1
+   }
+  },
+  {
+   "chunk": "[wP N5 wP]",
+   "count": 2,
+   "anchors": {
+    "b2": 2
+   }
+  }
+ ],
+ "search moves": [
+  "[wP N1 bP] x2675",
+  "[bP NNE wQ] x4",
+  "merge(('chunk', 1), bP)",
+  "[wP N5 wP] x2",
+  "merge(('chunk', 2), wP)",
+  "[('chunk', 2) N1 bK] x5",
+  "merge(('chunk', 0), ('chunk', 3))",
+  "[wK NW1 ('chunk', 1)] x3",
+  "merge(('chunk', 4), wK)",
+  "[('chunk', 1) NW2 wB] x2",
+  "merge(('chunk', 1), ('chunk', 5))",
+  "[bB E4 wR] x2",
+  "merge(('chunk', 6), bB)"
+ ],
+ "generation": {
+  "attempts": 1001,
+  "collision or off the board": 0.000999000999000999,
+  "checks": {
+   "one king each": 1.0,
+   "no pawn on a back rank": 1.0,
+   "at most 8 pawns each": 1.0,
+   "at most 16 pieces each": 1.0,
+   "no more of any kind than at the start": 1.0,
+   "passes every check": 1.0
+  },
+  "generated chunks": 637,
+  "generated chunk depths": {
+   "1": 637
+  },
+  "generated chunks found in a held-out position": 0.978021978021978
+ }
+}

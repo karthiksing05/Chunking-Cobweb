@@ -1,0 +1,10125 @@
+{
+ "setting": "e1500_p30_n4000_a0.0001",
+ "N": 4000,
+ "alpha": 0.0001,
+ "flat bits": 319879.09610576264,
+ "greedy bits": 319877.754678555,
+ "flat parts": {
+  "read": 317509.8899871616,
+  "top": 2150.7069314755686,
+  "rows": 218.49918712543933
+ },
+ "greedy parts": {
+  "read": 309714.253765967,
+  "top": 9911.369730123099,
+  "rows": 252.13118246496512
+ },
+ "greedy moves": [
+  "[wP N1 bP]"
+ ],
+ "mined": {
+  "2": [
+   [
+    "[wP E1 wP]",
+    7689
+   ],
+   [
+    "[bP E1 bP]",
+    7023
+   ],
+   [
+    "[wP N5 bP]",
+    5799
+   ],
+   [
+    "[bP NW1 bP]",
+    4543
+   ],
+   [
+    "[wP NE1 wP]",
+    4296
+   ],
+   [
+    "[bP NE1 bP]",
+    4252
+   ],
+   [
+    "[bP N1 bR]",
+    4026
+   ],
+   [
+    "[wR NE1 wP]",
+    3923
+   ],
+   [
+    "[wR N1 wP]",
+    3920
+   ],
+   [
+    "[wP NNE bP]",
+    3697
+   ],
+   [
+    "[wP N4 bP]",
+    3592
+   ],
+   [
+    "[wP NNW bP]",
+    3530
+   ],
+   [
+    "[bP NW1 bR]",
+    3384
+   ],
+   [
+    "[wP NW1 wP]",
+    3248
+   ],
+   [
+    "[bP WNW bP]",
+    3214
+   ],
+   [
+    "[bP ENE bP]",
+    3190
+   ],
+   [
+    "[wR ENE wP]",
+    3122
+   ],
+   [
+    "[wP ENE wP]",
+    2948
+   ],
+   [
+    "[wP N3 bP]",
+    2920
+   ],
+   [
+    "[bP WNW bR]",
+    2861
+   ],
+   [
+    "[wP N1 bP]",
+    2675
+   ],
+   [
+    "[wK N1 wP]",
+    2522
+   ],
+   [
+    "[bP NW1 bK]",
+    2394
+   ],
+   [
+    "[wK NW1 wP]",
+    2358
+   ],
+   [
+    "[bP NE1 bK]",
+    2274
+   ],
+   [
+    "[wP WNW wP]",
+    2248
+   ],
+   [
+    "[wK NE1 wP]",
+    2247
+   ],
+   [
+    "[bP N1 bK]",
+    2203
+   ],
+   [
+    "[wP NE2 bP]",
+    2050
+   ],
+   [
+    "[bP N1 bB]",
+    1968
+   ]
+  ],
+  "3": [
+   [
+    "[[wP E1 wP] N5 bP]",
+    2606
+   ],
+   [
+    "[[wR N1 wP] NE1 wP]",
+    2343
+   ],
+   [
+    "[[wR NE1 wP] ENE wP]",
+    2137
+   ],
+   [
+    "[[bP E1 bP] N1 bR]",
+    2106
+   ],
+   [
+    "[[wP E1 wP] E2 wP]",
+    2093
+   ],
+   [
+    "[[bP E1 bP] E2 bP]",
+    1822
+   ],
+   [
+    "[[wR N1 wP] N6 bP]",
+    1802
+   ],
+   [
+    "[[wK NW1 wP] N1 wP]",
+    1799
+   ],
+   [
+    "[[wP N5 bP] N6 bR]",
+    1779
+   ],
+   [
+    "[[bP E1 bP] NW1 bR]",
+    1636
+   ],
+   [
+    "[[wP E1 wP] ENE wP]",
+    1553
+   ],
+   [
+    "[[wR N1 wP] ENE wP]",
+    1537
+   ],
+   [
+    "[[bP E1 bP] NE1 bK]",
+    1526
+   ],
+   [
+    "[[bP WNW bP] NW1 bP]",
+    1484
+   ],
+   [
+    "[[wR E1 wK] NE1 wP]",
+    1426
+   ],
+   [
+    "[[wK N1 wP] NE1 wP]",
+    1404
+   ],
+   [
+    "[[bP N1 bR] NE1 bK]",
+    1340
+   ],
+   [
+    "[[bP WNW bR] NW1 bK]",
+    1305
+   ],
+   [
+    "[[bP NW1 bR] N1 bK]",
+    1296
+   ],
+   [
+    "[[wK NW1 wP] NE1 wP]",
+    1288
+   ],
+   [
+    "[[bP E1 bP] N1 bK]",
+    1253
+   ],
+   [
+    "[[bP NE1 bP] ENE bP]",
+    1236
+   ],
+   [
+    "[[wR E1 wK] ENE wP]",
+    1235
+   ],
+   [
+    "[[wR E1 wK] N1 wP]",
+    1231
+   ],
+   [
+    "[[bP NW1 bP] NE1 bP]",
+    1079
+   ],
+   [
+    "[[wP N1 bP] NNE bP]",
+    1058
+   ],
+   [
+    "[[wP E1 wP] N4 bP]",
+    1025
+   ],
+   [
+    "[[wP NE1 wP] NNE bP]",
+    1006
+   ],
+   [
+    "[[wR NE1 wP] NE2 wP]",
+    1003
+   ],
+   [
+    "[[wP E1 wP] N1 wN]",
+    981
+   ]
+  ],
+  "4": [
+   [
+    "[[[wR N1 wP] NE1 wP] ENE wP]",
+    1165
+   ],
+   [
+    "[[[wR N1 wP] N6 bP] N7 bR]",
+    1148
+   ],
+   [
+    "[[[wR E1 wK] N1 wP] NE1 wP]",
+    987
+   ],
+   [
+    "[[[bP E1 bP] N1 bR] NE1 bK]",
+    975
+   ],
+   [
+    "[[[wR E1 wK] NE1 wP] ENE wP]",
+    975
+   ],
+   [
+    "[[[bP E1 bP] E2 bP] N1 bR]",
+    970
+   ],
+   [
+    "[[[wR N1 wP] NE1 wP] N6 bP]",
+    966
+   ],
+   [
+    "[[[wK NW1 wP] N1 wP] NE1 wP]",
+    965
+   ],
+   [
+    "[[[wP E1 wP] N5 bP] N6 bR]",
+    942
+   ],
+   [
+    "[[[bP E1 bP] NW1 bR] N1 bK]",
+    896
+   ],
+   [
+    "[[[bP E1 bP] E2 bP] NE1 bK]",
+    882
+   ],
+   [
+    "[[[wR E1 wK] N1 wP] ENE wP]",
+    841
+   ],
+   [
+    "[[[wK NW1 wP] N1 wP] N6 bP]",
+    745
+   ],
+   [
+    "[[[wR N1 wP] NE1 wP] NE2 wP]",
+    687
+   ],
+   [
+    "[[[wP E1 wP] E2 wP] N5 bP]",
+    670
+   ],
+   [
+    "[[[wK NW1 wP] N1 wP] NNW wN]",
+    648
+   ],
+   [
+    "[[[bP WNW bP] NW1 bP] NW2 bR]",
+    642
+   ],
+   [
+    "[[[wK N1 wP] N6 bP] N7 bK]",
+    635
+   ],
+   [
+    "[[[wK N1 wP] NE1 wP] N6 bP]",
+    595
+   ],
+   [
+    "[[[wR N1 wP] ENE wP] N6 bP]",
+    566
+   ],
+   [
+    "[[[wP E1 wP] N5 bP] N6 bK]",
+    548
+   ],
+   [
+    "[[[bN N1 bP] NE1 bP] NNE bK]",
+    541
+   ],
+   [
+    "[[[bP WNW bQ] N1 bR] NE1 bK]",
+    536
+   ],
+   [
+    "[[[wP E1 wP] E2 wP] N1 wN]",
+    525
+   ],
+   [
+    "[[[bP NE1 bP] ENE bP] NE2 bK]",
+    515
+   ],
+   [
+    "[[[wK NW1 wP] N1 wP] NNE wP]",
+    511
+   ],
+   [
+    "[[[wK NW1 wP] NE1 wP] NNW wN]",
+    500
+   ],
+   [
+    "[[[bP NE1 bP] NNE bR] NE2 bK]",
+    490
+   ],
+   [
+    "[[[wR E1 wK] N1 wP] N2 wN]",
+    481
+   ],
+   [
+    "[[[wK N1 wP] NE1 wP] NNW wN]",
+    476
+   ]
+  ],
+  "5": [
+   [
+    "[[[[wR N1 wP] NE1 wP] N6 bP] N7 bR]",
+    683
+   ],
+   [
+    "[[[[bP E1 bP] E2 bP] N1 bR] NE1 bK]",
+    660
+   ],
+   [
+    "[[[[wR E1 wK] N1 wP] NE1 wP] ENE wP]",
+    649
+   ],
+   [
+    "[[[[wK NW1 wP] N1 wP] N6 bP] N7 bK]",
+    493
+   ],
+   [
+    "[[[[wK NW1 wP] N1 wP] NE1 wP] N6 bP]",
+    446
+   ],
+   [
+    "[[[[wR N1 wP] NE1 wP] ENE wP] N6 bP]",
+    433
+   ],
+   [
+    "[[[[wP E1 wP] E2 wP] N5 bP] N6 bR]",
+    432
+   ],
+   [
+    "[[[[wR E1 wK] N1 wP] NE1 wP] N2 wN]",
+    418
+   ],
+   [
+    "[[[[wK NW1 wP] N1 wP] NE1 wP] NNW wN]",
+    405
+   ],
+   [
+    "[[[[wK N1 wP] NE1 wP] N6 bP] N7 bK]",
+    402
+   ],
+   [
+    "[[[[bP NE1 bP] ENE bP] NNE bR] NE2 bK]",
+    396
+   ],
+   [
+    "[[[[wR N1 wP] ENE wP] N6 bP] N7 bR]",
+    387
+   ],
+   [
+    "[[[[bN N1 bP] NE1 bP] N2 bR] NNE bK]",
+    373
+   ],
+   [
+    "[[[[bP E1 bP] WNW bQ] N1 bR] NE1 bK]",
+    369
+   ],
+   [
+    "[[[[bN N1 bP] NE1 bP] ENE bP] NNE bK]",
+    342
+   ],
+   [
+    "[[[[wR E1 wK] N1 wP] ENE wP] N2 wN]",
+    320
+   ],
+   [
+    "[[[[bN N1 bP] ENE bP] N2 bR] NNE bK]",
+    313
+   ],
+   [
+    "[[[[wK NW1 wP] N1 wP] NNW wN] N6 bP]",
+    313
+   ],
+   [
+    "[[[[wR E1 wK] N1 wP] NE1 wP] NE2 wP]",
+    305
+   ],
+   [
+    "[[[[bP WNW bP] NW1 bP] NW2 bR] NNW bK]",
+    290
+   ],
+   [
+    "[[[[bP E1 bP] E2 bP] WNW bQ] NE1 bK]",
+    283
+   ],
+   [
+    "[[[[wR N1 wP] NE1 wP] ENE wP] N2 wN]",
+    280
+   ],
+   [
+    "[[[[wK N1 wP] NNW wN] N6 bP] N7 bK]",
+    267
+   ],
+   [
+    "[[[[bB E1 bP] E2 bP] NE1 bR] ENE bK]",
+    258
+   ],
+   [
+    "[[[[wR E5 wR] E6 wK] N1 wP] NE1 wP]",
+    251
+   ],
+   [
+    "[[[[wR N1 wP] NE1 wP] NE2 wP] N6 bP]",
+    250
+   ],
+   [
+    "[[[[bP NW1 bP] N1 bB] NE1 bP] N2 bK]",
+    249
+   ],
+   [
+    "[[[[bN N1 bP] NE1 bP] ENE bP] N2 bR]",
+    243
+   ],
+   [
+    "[[[[wK NW1 wP] N1 wP] NNE wP] N6 bP]",
+    233
+   ],
+   [
+    "[[[[bP E1 bP] E2 bP] NW1 bK] ENE bR]",
+    232
+   ]
+  ],
+  "6": [
+   [
+    "[[[[[wK NW1 wP] N1 wP] NE1 wP] N6 bP] N7 bK]",
+    299
+   ],
+   [
+    "[[[[[wR N1 wP] NE1 wP] ENE wP] N6 bP] N7 bR]",
+    294
+   ],
+   [
+    "[[[[[wR E1 wK] N1 wP] NE1 wP] ENE wP] N2 wN]",
+    269
+   ],
+   [
+    "[[[[[bN N1 bP] NE1 bP] ENE bP] N2 bR] NNE bK]",
+    240
+   ],
+   [
+    "[[[[[wK NW1 wP] N1 wP] NNW wN] N6 bP] N7 bK]",
+    236
+   ],
+   [
+    "[[[[[bP E1 bP] E2 bP] WNW bQ] N1 bR] NE1 bK]",
+    219
+   ],
+   [
+    "[[[[[wK NW1 wP] N1 wP] NE1 wP] NNW wN] N6 bP]",
+    190
+   ],
+   [
+    "[[[[[wK NW1 wP] N1 wP] NNE wP] N6 bP] N7 bK]",
+    183
+   ],
+   [
+    "[[[[[wR N1 wP] NE1 wP] NE2 wP] N6 bP] N7 bR]",
+    174
+   ],
+   [
+    "[[[[[bP NW1 bP] N1 bB] NE1 bP] NNW bR] N2 bK]",
+    172
+   ],
+   [
+    "[[[[[bB E1 bP] E2 bP] E3 bP] NE1 bR] ENE bK]",
+    166
+   ],
+   [
+    "[[[[[wR E5 wR] E6 wK] N1 wP] N6 bP] N7 bR]",
+    159
+   ],
+   [
+    "[[[[[bP NE1 bP] ENE bP] NNW bQ] NNE bR] NE2 bK]",
+    158
+   ],
+   [
+    "[[[[[wK N1 wP] NE1 wP] NNW wN] N6 bP] N7 bK]",
+    155
+   ],
+   [
+    "[[[[[bP E1 bN] NE1 bP] ENE bP] NNE bR] NE2 bK]",
+    154
+   ],
+   [
+    "[[[[[wR E1 wK] N1 wP] NE1 wP] ENE wP] NNW wP]",
+    151
+   ],
+   [
+    "[[[[[wP E1 wP] E2 wP] E5 wP] E6 wP] E7 wP]",
+    142
+   ],
+   [
+    "[[[[[wR N1 wP] NE1 wP] NE2 wN] N6 bP] N7 bR]",
+    142
+   ],
+   [
+    "[[[[[wR E5 wR] E6 wK] N1 wP] NE1 wP] N6 bP]",
+    142
+   ],
+   [
+    "[[[[[wR E1 wK] N1 wP] NE1 wP] N2 wN] NE2 wP]",
+    138
+   ],
+   [
+    "[[[[[wK NW1 wP] N1 wP] NW2 wP] N6 bP] N7 bK]",
+    132
+   ],
+   [
+    "[[[[[bN NW1 bB] N1 bP] NE1 bP] N2 bR] NNE bK]",
+    129
+   ],
+   [
+    "[[[[[wR E2 wB] N1 wP] NE1 wP] N6 bP] N7 bR]",
+    129
+   ],
+   [
+    "[[[[[wP E1 wP] E2 wP] E5 wP] N5 bP] N6 bR]",
+    128
+   ],
+   [
+    "[[[[[wP E1 wP] E2 wP] E5 wP] E6 wP] N5 bP]",
+    125
+   ],
+   [
+    "[[[[[wR E1 wK] N1 wP] N2 wN] N5 bN] N6 bP]",
+    122
+   ],
+   [
+    "[[[[[wP E1 wP] E2 wP] ENE wN] N5 bP] N6 bR]",
+    120
+   ],
+   [
+    "[[[[[bB E1 bP] E2 bP] NW1 bQ] NE1 bR] ENE bK]",
+    119
+   ],
+   [
+    "[[[[[bP N1 bB] NE1 bP] ENE bP] NNE bR] NE2 bK]",
+    119
+   ],
+   [
+    "[[[[[wR E3 wQ] N1 wP] NE1 wP] N6 bP] N7 bR]",
+    118
+   ]
+  ]
+ },
+ "configurations": [
+  {
+   "size": 3,
+   "configuration": "[[wP E1 wP] N5 bP]",
+   "classes": [],
+   "occurrences": 2606,
+   "positions": 2029,
+   "anchors": {
+    "a2": 1075,
+    "g2": 854,
+    "b2": 398,
+    "f2": 275
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 3050.05,
+      "n": 5627,
+      "read": -7618.22,
+      "top": 10634.06,
+      "rows": 34.21
+     },
+     {
+      "bits": 2710.91,
+      "n": 1717,
+      "read": -1203.28,
+      "top": 3877.85,
+      "rows": 36.34
+     }
+    ],
+    "total": 5760.96,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 5160.83,
+      "n": 2300,
+      "read": -1890.4,
+      "top": 7017.72,
+      "rows": 33.51
+     },
+     {
+      "bits": -1488.6,
+      "n": 2300,
+      "read": -1589.44,
+      "top": 64.34,
+      "rows": 36.5
+     }
+    ],
+    "total": 3672.23,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 2485.05,
+      "n": 5510,
+      "read": -7234.26,
+      "top": 9682.0,
+      "rows": 37.31
+     },
+     {
+      "bits": 2703.76,
+      "n": 1717,
+      "read": -1205.08,
+      "top": 3869.38,
+      "rows": 39.46
+     }
+    ],
+    "total": 5188.81,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 5137.24,
+      "n": 2299,
+      "read": -1889.68,
+      "top": 6990.41,
+      "rows": 36.51
+     },
+     {
+      "bits": -1491.33,
+      "n": 2299,
+      "read": -1590.89,
+      "top": 59.92,
+      "rows": 39.65
+     }
+    ],
+    "total": 3645.91,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[wP E1 wP] N5 bP]",
+      2606
+     ],
+     [
+      "[[wP E1 wP] E2 wP]",
+      2093
+     ],
+     [
+      "[[wP E1 wP] ENE wP]",
+      1553
+     ],
+     [
+      "[[wP E1 wP] N4 bP]",
+      1025
+     ],
+     [
+      "[[wP E1 wP] N1 wN]",
+      981
+     ],
+     [
+      "[[wP E1 wP] NW1 wP]",
+      867
+     ],
+     [
+      "[[wP E1 wP] WNW wP]",
+      752
+     ],
+     [
+      "[[wP E1 wP] NNW wP]",
+      712
+     ],
+     [
+      "[[wP E1 wP] NW1 wN]",
+      676
+     ],
+     [
+      "[[wP E1 wP] NE1 wN]",
+      592
+     ],
+     [
+      "[[wP E1 wP] ENE wN]",
+      578
+     ],
+     [
+      "[[wP E1 wP] NW2 wP]",
+      535
+     ],
+     [
+      "[[wP E1 wP] NE3 bP]",
+      515
+     ],
+     [
+      "[[wP E1 wP] WNW wB]",
+      507
+     ],
+     [
+      "[[wP E1 wP] N3 bP]",
+      496
+     ],
+     [
+      "[[wP E1 wP] NE2 bP]",
+      461
+     ],
+     [
+      "[[wP E1 wP] E5 wP]",
+      455
+     ],
+     [
+      "[[wP E1 wP] NW3 bP]",
+      448
+     ],
+     [
+      "[[wP E1 wP] E4 wP]",
+      430
+     ],
+     [
+      "[[wP E1 wP] NNW bP]",
+      428
+     ]
+    ],
+    "chunks of all variants (b)": 13437.23,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -2604.01,
+      "read": 0.0,
+      "top": -519.98,
+      "rows": -2084.02
+     },
+     {
+      "level": 2,
+      "bits": 438.98,
+      "read": 0.0,
+      "top": -12802.86,
+      "rows": 13241.84
+     }
+    ],
+    "total": 11272.21
+   }
+  },
+  {
+   "size": 3,
+   "configuration": "[[wR N1 wP] NE1 wP]",
+   "classes": [],
+   "occurrences": 2343,
+   "positions": 2052,
+   "anchors": {
+    "a1": 1304,
+    "f1": 1007,
+    "e1": 16,
+    "b1": 13
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 3056.8,
+      "n": 3920,
+      "read": -3489.29,
+      "top": 6512.16,
+      "rows": 33.93
+     },
+     {
+      "bits": 1077.46,
+      "n": 2343,
+      "read": -1809.14,
+      "top": 2850.02,
+      "rows": 36.58
+     }
+    ],
+    "total": 4134.26,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 3394.18,
+      "n": 2343,
+      "read": -1803.92,
+      "top": 5164.57,
+      "rows": 33.53
+     },
+     {
+      "bits": -1688.1,
+      "n": 2343,
+      "read": -1788.95,
+      "top": 64.34,
+      "rows": 36.51
+     }
+    ],
+    "total": 1706.08,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 3036.65,
+      "n": 3904,
+      "read": -3459.31,
+      "top": 6458.97,
+      "rows": 36.99
+     },
+     {
+      "bits": 1063.23,
+      "n": 2337,
+      "read": -1802.29,
+      "top": 2825.79,
+      "rows": 39.73
+     }
+    ],
+    "total": 4099.89,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 3381.34,
+      "n": 2340,
+      "read": -1801.49,
+      "top": 5146.3,
+      "rows": 36.53
+     },
+     {
+      "bits": -1638.78,
+      "n": 2337,
+      "read": -1782.25,
+      "top": 103.81,
+      "rows": 39.67
+     }
+    ],
+    "total": 1742.56,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[wR N1 wP] NE1 wP]",
+      2343
+     ],
+     [
+      "[[wR N1 wP] N6 bP]",
+      1802
+     ],
+     [
+      "[[wR N1 wP] ENE wP]",
+      1537
+     ],
+     [
+      "[[wR N1 wP] N2 wN]",
+      545
+     ],
+     [
+      "[[wR N1 wP] NNE wP]",
+      501
+     ],
+     [
+      "[[wR N1 wP] N5 bP]",
+      464
+     ],
+     [
+      "[[wR N1 wP] NNW wP]",
+      420
+     ]
+    ],
+    "chunks of all variants (b)": 5894.1,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -581.74,
+      "read": 0.0,
+      "top": -228.53,
+      "rows": -353.21
+     },
+     {
+      "level": 2,
+      "bits": 738.32,
+      "read": 0.0,
+      "top": -4935.36,
+      "rows": 5673.68
+     }
+    ],
+    "total": 6050.67
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[bP E1 bP] N1 bR]",
+    "chunks of both (b)": 3546.9,
+    "merge": 4358.71,
+    "read": 0.0,
+    "top": -56.07,
+    "rows": 4414.78
+   }
+  },
+  {
+   "size": 3,
+   "configuration": "[[wR NE1 wP] ENE wP]",
+   "classes": [],
+   "occurrences": 2137,
+   "positions": 1872,
+   "anchors": {
+    "f1": 1037,
+    "a1": 699,
+    "e1": 388,
+    "d1": 9
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 1868.45,
+      "n": 3923,
+      "read": -3407.08,
+      "top": 5241.6,
+      "rows": 33.93
+     },
+     {
+      "bits": 1249.27,
+      "n": 2125,
+      "read": -2493.44,
+      "top": 3706.21,
+      "rows": 36.49
+     }
+    ],
+    "total": 3117.72,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 3652.08,
+      "n": 2129,
+      "read": -1450.72,
+      "top": 5069.34,
+      "rows": 33.45
+     },
+     {
+      "bits": -2278.56,
+      "n": 2129,
+      "read": -2379.31,
+      "top": 64.34,
+      "rows": 36.42
+     }
+    ],
+    "total": 1373.52,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 1869.38,
+      "n": 3909,
+      "read": -3380.89,
+      "top": 5213.27,
+      "rows": 37.0
+     },
+     {
+      "bits": 1234.76,
+      "n": 2120,
+      "read": -2484.26,
+      "top": 3679.39,
+      "rows": 39.63
+     }
+    ],
+    "total": 3104.14,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 3640.03,
+      "n": 2126,
+      "read": -1448.36,
+      "top": 5051.94,
+      "rows": 36.44
+     },
+     {
+      "bits": -2258.43,
+      "n": 2124,
+      "read": -2371.67,
+      "top": 73.69,
+      "rows": 39.55
+     }
+    ],
+    "total": 1381.6,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[wR NE1 wP] ENE wP]",
+      2137
+     ],
+     [
+      "[[wR NE1 wP] NE2 wP]",
+      1003
+     ],
+     [
+      "[[wR NE1 wP] NE2 wN]",
+      512
+     ],
+     [
+      "[[wR NE1 wP] NNW wP]",
+      409
+     ],
+     [
+      "[[wR NE1 wP] N2 wP]",
+      388
+     ]
+    ],
+    "chunks of all variants (b)": 2620.09,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -379.49,
+      "read": 0.0,
+      "top": -174.62,
+      "rows": -204.87
+     },
+     {
+      "level": 2,
+      "bits": 33.99,
+      "read": 0.0,
+      "top": -4705.71,
+      "rows": 4739.7
+     }
+    ],
+    "total": 2274.59
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[bP E1 bP] NW1 bR]",
+    "chunks of both (b)": 3236.96,
+    "merge": 3630.06,
+    "read": 0.0,
+    "top": -56.07,
+    "rows": 3686.13
+   }
+  },
+  {
+   "size": 3,
+   "configuration": "[[bP E1 bP] N1 bR]",
+   "classes": [],
+   "occurrences": 2106,
+   "positions": 1873,
+   "anchors": {
+    "a7": 1074,
+    "f7": 1008,
+    "g7": 8,
+    "e7": 6
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 4320.18,
+      "n": 5237,
+      "read": -7120.92,
+      "top": 11406.95,
+      "rows": 34.16
+     },
+     {
+      "bits": 1639.27,
+      "n": 2097,
+      "read": -1720.22,
+      "top": 3322.98,
+      "rows": 36.51
+     }
+    ],
+    "total": 5959.45,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 3497.9,
+      "n": 2106,
+      "read": -1937.88,
+      "top": 5402.33,
+      "rows": 33.44
+     },
+     {
+      "bits": -1651.75,
+      "n": 2106,
+      "read": -1752.49,
+      "top": 64.34,
+      "rows": 36.4
+     }
+    ],
+    "total": 1846.15,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 3687.56,
+      "n": 5090,
+      "read": -6956.81,
+      "top": 10607.14,
+      "rows": 37.23
+     },
+     {
+      "bits": 1636.66,
+      "n": 2096,
+      "read": -1719.55,
+      "top": 3316.55,
+      "rows": 39.66
+     }
+    ],
+    "total": 5324.22,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 3487.35,
+      "n": 2105,
+      "read": -1938.52,
+      "top": 5389.43,
+      "rows": 36.43
+     },
+     {
+      "bits": -1652.36,
+      "n": 2105,
+      "read": -1751.81,
+      "top": 59.92,
+      "rows": 39.54
+     }
+    ],
+    "total": 1834.99,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[bP E1 bP] N1 bR]",
+      2106
+     ],
+     [
+      "[[bP E1 bP] E2 bP]",
+      1822
+     ],
+     [
+      "[[bP E1 bP] NW1 bR]",
+      1636
+     ],
+     [
+      "[[bP E1 bP] NE1 bK]",
+      1526
+     ],
+     [
+      "[[bP E1 bP] N1 bK]",
+      1253
+     ],
+     [
+      "[[bP E1 bP] ENE bR]",
+      760
+     ],
+     [
+      "[[bP E1 bP] NE1 bR]",
+      630
+     ],
+     [
+      "[[bP E1 bP] WNW bQ]",
+      621
+     ],
+     [
+      "[[bP E1 bP] WNW bR]",
+      495
+     ],
+     [
+      "[[bP E1 bP] ENE bB]",
+      423
+     ],
+     [
+      "[[bP E1 bP] NW1 bP]",
+      390
+     ]
+    ],
+    "chunks of all variants (b)": 8649.51,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -1104.16,
+      "read": 0.0,
+      "top": -320.6,
+      "rows": -783.56
+     },
+     {
+      "level": 2,
+      "bits": 2839.02,
+      "read": 0.0,
+      "top": -7947.58,
+      "rows": 10786.59
+     }
+    ],
+    "total": 10384.37
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[wR N1 wP] NE1 wP]",
+    "chunks of both (b)": 3546.9,
+    "merge": 4358.71,
+    "read": 0.0,
+    "top": -56.07,
+    "rows": 4414.78
+   }
+  },
+  {
+   "size": 3,
+   "configuration": "[[wP E1 wP] E2 wP]",
+   "classes": [],
+   "occurrences": 2093,
+   "positions": 1847,
+   "anchors": {
+    "f2": 1233,
+    "a2": 756,
+    "b2": 23,
+    "c4": 13
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 3050.05,
+      "n": 5627,
+      "read": -7618.22,
+      "top": 10634.06,
+      "rows": 34.21
+     },
+     {
+      "bits": 722.41,
+      "n": 2031,
+      "read": -3410.54,
+      "top": 4096.46,
+      "rows": 36.49
+     }
+    ],
+    "total": 3772.46,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 4353.23,
+      "n": 2061,
+      "read": -1490.05,
+      "top": 5809.86,
+      "rows": 33.43
+     },
+     {
+      "bits": -3051.79,
+      "n": 2061,
+      "read": -3147.89,
+      "top": 59.72,
+      "rows": 36.38
+     }
+    ],
+    "total": 1301.44,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 2485.05,
+      "n": 5510,
+      "read": -7234.26,
+      "top": 9682.0,
+      "rows": 37.31
+     },
+     {
+      "bits": 683.24,
+      "n": 2016,
+      "read": -3364.97,
+      "top": 4008.58,
+      "rows": 39.63
+     }
+    ],
+    "total": 3168.29,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 4263.96,
+      "n": 2049,
+      "read": -1472.11,
+      "top": 5699.67,
+      "rows": 36.41
+     },
+     {
+      "bits": -2991.59,
+      "n": 2046,
+      "read": -3081.61,
+      "top": 50.52,
+      "rows": 39.51
+     }
+    ],
+    "total": 1272.38,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[wP E1 wP] N5 bP]",
+      2606
+     ],
+     [
+      "[[wP E1 wP] E2 wP]",
+      2093
+     ],
+     [
+      "[[wP E1 wP] ENE wP]",
+      1553
+     ],
+     [
+      "[[wP E1 wP] N4 bP]",
+      1025
+     ],
+     [
+      "[[wP E1 wP] N1 wN]",
+      981
+     ],
+     [
+      "[[wP E1 wP] NW1 wP]",
+      867
+     ],
+     [
+      "[[wP E1 wP] WNW wP]",
+      752
+     ],
+     [
+      "[[wP E1 wP] NNW wP]",
+      712
+     ],
+     [
+      "[[wP E1 wP] NW1 wN]",
+      676
+     ],
+     [
+      "[[wP E1 wP] NE1 wN]",
+      592
+     ],
+     [
+      "[[wP E1 wP] ENE wN]",
+      578
+     ],
+     [
+      "[[wP E1 wP] NW2 wP]",
+      535
+     ],
+     [
+      "[[wP E1 wP] NE3 bP]",
+      515
+     ],
+     [
+      "[[wP E1 wP] WNW wB]",
+      507
+     ],
+     [
+      "[[wP E1 wP] N3 bP]",
+      496
+     ],
+     [
+      "[[wP E1 wP] NE2 bP]",
+      461
+     ],
+     [
+      "[[wP E1 wP] E5 wP]",
+      455
+     ],
+     [
+      "[[wP E1 wP] NW3 bP]",
+      448
+     ],
+     [
+      "[[wP E1 wP] E4 wP]",
+      430
+     ],
+     [
+      "[[wP E1 wP] NNW bP]",
+      428
+     ]
+    ],
+    "chunks of all variants (b)": 13437.23,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -2604.01,
+      "read": 0.0,
+      "top": -519.98,
+      "rows": -2084.02
+     },
+     {
+      "level": 2,
+      "bits": 438.98,
+      "read": 0.0,
+      "top": -12802.86,
+      "rows": 13241.84
+     }
+    ],
+    "total": 11272.21
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[bP E1 bP] E2 bP]",
+    "chunks of both (b)": 3908.68,
+    "merge": 3748.44,
+    "read": 0.0,
+    "top": -56.07,
+    "rows": 3804.51
+   }
+  },
+  {
+   "size": 3,
+   "configuration": "[[bP E1 bP] E2 bP]",
+   "classes": [],
+   "occurrences": 1822,
+   "positions": 1660,
+   "anchors": {
+    "f7": 1216,
+    "a7": 470,
+    "b7": 17,
+    "e6": 16
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 4320.18,
+      "n": 5237,
+      "read": -7120.92,
+      "top": 11406.95,
+      "rows": 34.16
+     },
+     {
+      "bits": 1746.7,
+      "n": 1750,
+      "read": -1942.06,
+      "top": 3652.41,
+      "rows": 36.35
+     }
+    ],
+    "total": 6066.88,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 4249.01,
+      "n": 1783,
+      "read": -1324.41,
+      "top": 5540.11,
+      "rows": 33.31
+     },
+     {
+      "bits": -1636.27,
+      "n": 1783,
+      "read": -1731.18,
+      "top": 58.67,
+      "rows": 36.23
+     }
+    ],
+    "total": 2612.74,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 3687.56,
+      "n": 5090,
+      "read": -6956.81,
+      "top": 10607.14,
+      "rows": 37.23
+     },
+     {
+      "bits": 1672.09,
+      "n": 1739,
+      "read": -1965.0,
+      "top": 3597.63,
+      "rows": 39.46
+     }
+    ],
+    "total": 5359.65,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 4166.66,
+      "n": 1773,
+      "read": -1312.27,
+      "top": 5442.66,
+      "rows": 36.28
+     },
+     {
+      "bits": -1575.28,
+      "n": 1768,
+      "read": -1743.25,
+      "top": 128.63,
+      "rows": 39.34
+     }
+    ],
+    "total": 2591.38,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[bP E1 bP] N1 bR]",
+      2106
+     ],
+     [
+      "[[bP E1 bP] E2 bP]",
+      1822
+     ],
+     [
+      "[[bP E1 bP] NW1 bR]",
+      1636
+     ],
+     [
+      "[[bP E1 bP] NE1 bK]",
+      1526
+     ],
+     [
+      "[[bP E1 bP] N1 bK]",
+      1253
+     ],
+     [
+      "[[bP E1 bP] ENE bR]",
+      760
+     ],
+     [
+      "[[bP E1 bP] NE1 bR]",
+      630
+     ],
+     [
+      "[[bP E1 bP] WNW bQ]",
+      621
+     ],
+     [
+      "[[bP E1 bP] WNW bR]",
+      495
+     ],
+     [
+      "[[bP E1 bP] ENE bB]",
+      423
+     ],
+     [
+      "[[bP E1 bP] NW1 bP]",
+      390
+     ]
+    ],
+    "chunks of all variants (b)": 8649.51,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -1104.16,
+      "read": 0.0,
+      "top": -320.6,
+      "rows": -783.56
+     },
+     {
+      "level": 2,
+      "bits": 2839.02,
+      "read": 0.0,
+      "top": -7947.58,
+      "rows": 10786.59
+     }
+    ],
+    "total": 10384.37
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[wP E1 wP] E2 wP]",
+    "chunks of both (b)": 3908.68,
+    "merge": 3748.44,
+    "read": 0.0,
+    "top": -56.07,
+    "rows": 3804.51
+   }
+  },
+  {
+   "size": 3,
+   "configuration": "[[wR E1 wK] NE1 wP]",
+   "classes": [
+    "castled king (K+R+pawns)"
+   ],
+   "occurrences": 1426,
+   "positions": 1426,
+   "anchors": {
+    "f1": 1416,
+    "e1": 5,
+    "g1": 2,
+    "c1": 1
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 598.83,
+      "n": 1797,
+      "read": -633.76,
+      "top": 1199.28,
+      "rows": 33.32
+     },
+     {
+      "bits": 515.0,
+      "n": 1426,
+      "read": -912.38,
+      "top": 1391.35,
+      "rows": 36.03
+     }
+    ],
+    "total": 1113.84,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 1486.74,
+      "n": 1426,
+      "read": -418.61,
+      "top": 1872.21,
+      "rows": 33.14
+     },
+     {
+      "bits": -812.03,
+      "n": 1426,
+      "read": -912.38,
+      "top": 64.34,
+      "rows": 36.0
+     }
+    ],
+    "total": 674.71,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 596.67,
+      "n": 1797,
+      "read": -633.76,
+      "top": 1194.14,
+      "rows": 36.29
+     },
+     {
+      "bits": 516.15,
+      "n": 1423,
+      "read": -909.75,
+      "top": 1386.78,
+      "rows": 39.11
+     }
+    ],
+    "total": 1112.82,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 1484.55,
+      "n": 1426,
+      "read": -418.61,
+      "top": 1867.07,
+      "rows": 36.08
+     },
+     {
+      "bits": -773.2,
+      "n": 1423,
+      "read": -909.75,
+      "top": 97.47,
+      "rows": 39.08
+     }
+    ],
+    "total": 711.35,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[wR E1 wK] NE1 wP]",
+      1426
+     ],
+     [
+      "[[wR E1 wK] ENE wP]",
+      1235
+     ],
+     [
+      "[[wR E1 wK] N1 wP]",
+      1231
+     ],
+     [
+      "[[wR E1 wK] NNW wP]",
+      370
+     ]
+    ],
+    "chunks of all variants (b)": 1765.24,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -273.0,
+      "read": 0.0,
+      "top": -141.35,
+      "rows": -131.66
+     },
+     {
+      "level": 2,
+      "bits": -274.41,
+      "read": 0.0,
+      "top": -1638.35,
+      "rows": 1363.94
+     }
+    ],
+    "total": 1217.82
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[bP NW1 bR] N1 bK]",
+    "chunks of both (b)": 2045.94,
+    "merge": 2636.78,
+    "read": 0.0,
+    "top": -56.07,
+    "rows": 2692.85
+   }
+  },
+  {
+   "size": 3,
+   "configuration": "[[bP N1 bR] NE1 bK]",
+   "classes": [
+    "castled king (K+R+pawns)"
+   ],
+   "occurrences": 1340,
+   "positions": 1340,
+   "anchors": {
+    "f7": 1337,
+    "g7": 2,
+    "d7": 1
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 4883.92,
+      "n": 4026,
+      "read": -3618.6,
+      "top": 8468.57,
+      "rows": 33.95
+     },
+     {
+      "bits": 498.4,
+      "n": 1340,
+      "read": -119.49,
+      "top": 581.82,
+      "rows": 36.08
+     }
+    ],
+    "total": 5382.32,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 1445.05,
+      "n": 1340,
+      "read": -1490.35,
+      "top": 2902.31,
+      "rows": 33.09
+     },
+     {
+      "bits": -19.22,
+      "n": 1340,
+      "read": -119.5,
+      "top": 64.34,
+      "rows": 35.94
+     }
+    ],
+    "total": 1425.84,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 4854.55,
+      "n": 4015,
+      "read": -3540.77,
+      "top": 8358.3,
+      "rows": 37.02
+     },
+     {
+      "bits": 497.21,
+      "n": 1339,
+      "read": -119.36,
+      "top": 577.41,
+      "rows": 39.16
+     }
+    ],
+    "total": 5351.77,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 1440.47,
+      "n": 1339,
+      "read": -1488.77,
+      "top": 2893.22,
+      "rows": 36.02
+     },
+     {
+      "bits": -20.43,
+      "n": 1339,
+      "read": -119.36,
+      "top": 59.92,
+      "rows": 39.01
+     }
+    ],
+    "total": 1420.04,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[bP N1 bR] NE1 bK]",
+      1340
+     ],
+     [
+      "[[bP N1 bR] ENE bB]",
+      488
+     ]
+    ],
+    "chunks of all variants (b)": 2214.27,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -96.43,
+      "read": 0.0,
+      "top": -56.07,
+      "rows": -40.36
+     },
+     {
+      "level": 2,
+      "bits": 1425.08,
+      "read": 0.0,
+      "top": -76.02,
+      "rows": 1501.09
+     }
+    ],
+    "total": 3542.92
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[wR E1 wK] N1 wP]",
+    "chunks of both (b)": 2356.79,
+    "merge": 2486.98,
+    "read": 0.0,
+    "top": -56.07,
+    "rows": 2543.05
+   }
+  },
+  {
+   "size": 3,
+   "configuration": "[[bP WNW bR] NW1 bK]",
+   "classes": [
+    "castled king (K+R+pawns)"
+   ],
+   "occurrences": 1305,
+   "positions": 1305,
+   "anchors": {
+    "h7": 1286,
+    "f7": 16,
+    "g7": 3
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 3068.55,
+      "n": 2861,
+      "read": -4146.91,
+      "top": 7181.77,
+      "rows": 33.68
+     },
+     {
+      "bits": 590.29,
+      "n": 1305,
+      "read": -158.16,
+      "top": 712.44,
+      "rows": 36.01
+     }
+    ],
+    "total": 3658.84,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 1536.39,
+      "n": 1305,
+      "read": -1418.88,
+      "top": 2922.19,
+      "rows": 33.07
+     },
+     {
+      "bits": -60.11,
+      "n": 1305,
+      "read": -160.36,
+      "top": 64.34,
+      "rows": 35.91
+     }
+    ],
+    "total": 1476.28,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 3057.01,
+      "n": 2843,
+      "read": -4117.33,
+      "top": 7137.63,
+      "rows": 36.71
+     },
+     {
+      "bits": 589.01,
+      "n": 1298,
+      "read": -157.25,
+      "top": 707.19,
+      "rows": 39.08
+     }
+    ],
+    "total": 3646.02,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 1535.09,
+      "n": 1298,
+      "read": -1407.78,
+      "top": 2906.88,
+      "rows": 36.0
+     },
+     {
+      "bits": -60.56,
+      "n": 1298,
+      "read": -159.45,
+      "top": 59.92,
+      "rows": 38.97
+     }
+    ],
+    "total": 1474.53,
+    "complete": true
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[wR E1 wK] ENE wP]",
+    "chunks of both (b)": 2283.94,
+    "merge": 2457.93,
+    "read": 0.0,
+    "top": -56.07,
+    "rows": 2514.0
+   }
+  },
+  {
+   "size": 3,
+   "configuration": "[[bP NW1 bR] N1 bK]",
+   "classes": [
+    "castled king (K+R+pawns)"
+   ],
+   "occurrences": 1296,
+   "positions": 1296,
+   "anchors": {
+    "g7": 1280,
+    "h7": 8,
+    "f7": 5,
+    "e7": 3
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 2484.95,
+      "n": 3384,
+      "read": -4662.06,
+      "top": 7113.2,
+      "rows": 33.82
+     },
+     {
+      "bits": 586.1,
+      "n": 1296,
+      "read": -134.07,
+      "top": 684.14,
+      "rows": 36.02
+     }
+    ],
+    "total": 3071.05,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 1411.69,
+      "n": 1296,
+      "read": -1494.38,
+      "top": 2873.0,
+      "rows": 33.07
+     },
+     {
+      "bits": -34.57,
+      "n": 1296,
+      "read": -134.81,
+      "top": 64.34,
+      "rows": 35.9
+     }
+    ],
+    "total": 1377.12,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 2480.58,
+      "n": 3376,
+      "read": -4600.92,
+      "top": 7044.64,
+      "rows": 36.86
+     },
+     {
+      "bits": 584.29,
+      "n": 1296,
+      "read": -134.07,
+      "top": 679.26,
+      "rows": 39.1
+     }
+    ],
+    "total": 3064.87,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 1408.43,
+      "n": 1296,
+      "read": -1494.38,
+      "top": 2866.81,
+      "rows": 35.99
+     },
+     {
+      "bits": -35.92,
+      "n": 1296,
+      "read": -134.81,
+      "top": 59.92,
+      "rows": 38.97
+     }
+    ],
+    "total": 1372.51,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[bP NW1 bR] N1 bK]",
+      1296
+     ],
+     [
+      "[[bP NW1 bR] NE1 bB]",
+      505
+     ],
+     [
+      "[[bP NW1 bR] ENE bQ]",
+      437
+     ],
+     [
+      "[[bP NW1 bR] NE1 bK]",
+      378
+     ]
+    ],
+    "chunks of all variants (b)": 3654.82,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -288.15,
+      "read": 0.0,
+      "top": -141.35,
+      "rows": -146.81
+     },
+     {
+      "level": 2,
+      "bits": 2808.45,
+      "read": 0.0,
+      "top": -1430.79,
+      "rows": 4239.25
+     }
+    ],
+    "total": 6175.12
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[wR E1 wK] NE1 wP]",
+    "chunks of both (b)": 2045.94,
+    "merge": 2636.78,
+    "read": 0.0,
+    "top": -56.07,
+    "rows": 2692.85
+   }
+  },
+  {
+   "size": 3,
+   "configuration": "[[wP NE1 wP] NE2 wP]",
+   "classes": [
+    "pawn chain"
+   ],
+   "occurrences": 703,
+   "positions": 621,
+   "anchors": {
+    "b2": 214,
+    "c2": 171,
+    "a2": 120,
+    "c3": 87
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 2546.18,
+      "n": 3669,
+      "read": -10706.91,
+      "top": 13219.21,
+      "rows": 33.88
+     },
+     {
+      "bits": 155.93,
+      "n": 551,
+      "read": -1707.59,
+      "top": 1828.27,
+      "rows": 35.26
+     }
+    ],
+    "total": 2702.11,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 2160.79,
+      "n": 627,
+      "read": -1457.08,
+      "top": 3585.37,
+      "rows": 32.5
+     },
+     {
+      "bits": -1607.17,
+      "n": 627,
+      "read": -1706.65,
+      "top": 64.33,
+      "rows": 35.16
+     }
+    ],
+    "total": 553.62,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 2527.87,
+      "n": 2869,
+      "read": -7958.97,
+      "top": 10450.12,
+      "rows": 36.72
+     },
+     {
+      "bits": 342.72,
+      "n": 268,
+      "read": -703.7,
+      "top": 1008.99,
+      "rows": 37.44
+     }
+    ],
+    "total": 2870.59,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 1779.37,
+      "n": 500,
+      "read": -1162.21,
+      "top": 2906.46,
+      "rows": 35.13
+     },
+     {
+      "bits": -236.85,
+      "n": 272,
+      "read": -695.27,
+      "top": 421.2,
+      "rows": 37.22
+     }
+    ],
+    "total": 1542.53,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[wP NE1 wP] NNE bP]",
+      1006
+     ],
+     [
+      "[[wP NE1 wP] N5 bP]",
+      934
+     ],
+     [
+      "[[wP NE1 wP] N3 bP]",
+      761
+     ],
+     [
+      "[[wP NE1 wP] NE2 wP]",
+      703
+     ],
+     [
+      "[[wP NE1 wP] NE3 bP]",
+      559
+     ],
+     [
+      "[[wP NE1 wP] N4 bP]",
+      543
+     ],
+     [
+      "[[wP NE1 wP] NNW bP]",
+      533
+     ]
+    ],
+    "chunks of all variants (b)": 5093.33,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -651.88,
+      "read": 0.0,
+      "top": -285.36,
+      "rows": -366.52
+     },
+     {
+      "level": 2,
+      "bits": 602.4,
+      "read": 0.0,
+      "top": -5653.39,
+      "rows": 6255.79
+     }
+    ],
+    "total": 5043.85
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[bP NW1 bP] NW2 bP]",
+    "chunks of both (b)": 927.72,
+    "merge": 1059.82,
+    "read": 0.0,
+    "top": -56.07,
+    "rows": 1115.9
+   }
+  },
+  {
+   "size": 3,
+   "configuration": "[[bP NE1 bP] NE2 bP]",
+   "classes": [
+    "pawn chain"
+   ],
+   "occurrences": 690,
+   "positions": 621,
+   "anchors": {
+    "d5": 385,
+    "f5": 75,
+    "e5": 52,
+    "c4": 50
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 2692.68,
+      "n": 3619,
+      "read": -5437.97,
+      "top": 8096.78,
+      "rows": 33.87
+     },
+     {
+      "bits": 551.7,
+      "n": 576,
+      "read": -710.06,
+      "top": 1226.47,
+      "rows": 35.3
+     }
+    ],
+    "total": 3244.38,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 1224.63,
+      "n": 631,
+      "read": -1285.78,
+      "top": 2477.92,
+      "rows": 32.5
+     },
+     {
+      "bits": -646.3,
+      "n": 631,
+      "read": -743.97,
+      "top": 62.51,
+      "rows": 35.16
+     }
+    ],
+    "total": 578.33,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 2801.17,
+      "n": 2782,
+      "read": -3642.57,
+      "top": 6407.05,
+      "rows": 36.69
+     },
+     {
+      "bits": 371.42,
+      "n": 244,
+      "read": -277.15,
+      "top": 611.22,
+      "rows": 37.34
+     }
+    ],
+    "total": 3172.59,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 753.08,
+      "n": 255,
+      "read": -567.56,
+      "top": 1286.12,
+      "rows": 34.52
+     },
+     {
+      "bits": -82.07,
+      "n": 248,
+      "read": -250.29,
+      "top": 131.19,
+      "rows": 37.03
+     }
+    ],
+    "total": 671.01,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[bP NE1 bP] ENE bP]",
+      1236
+     ],
+     [
+      "[[bP NE1 bP] NNE bR]",
+      698
+     ],
+     [
+      "[[bP NE1 bP] NNW bR]",
+      693
+     ],
+     [
+      "[[bP NE1 bP] NE2 bP]",
+      690
+     ],
+     [
+      "[[bP NE1 bP] NE2 bK]",
+      669
+     ],
+     [
+      "[[bP NE1 bP] NNW bQ]",
+      438
+     ],
+     [
+      "[[bP NE1 bP] N2 bR]",
+      395
+     ],
+     [
+      "[[bP NE1 bP] NNE bB]",
+      377
+     ]
+    ],
+    "chunks of all variants (b)": 6275.08,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -693.84,
+      "read": 0.0,
+      "top": -250.71,
+      "rows": -443.13
+     },
+     {
+      "level": 2,
+      "bits": 1322.17,
+      "read": 0.0,
+      "top": -3929.96,
+      "rows": 5252.14
+     }
+    ],
+    "total": 6903.42
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[wP NW1 wP] NW2 wP]",
+    "chunks of both (b)": 1101.65,
+    "merge": 1010.15,
+    "read": 0.0,
+    "top": -56.07,
+    "rows": 1066.22
+   }
+  },
+  {
+   "size": 3,
+   "configuration": "[[bP NW1 bP] NW2 bP]",
+   "classes": [
+    "pawn chain"
+   ],
+   "occurrences": 550,
+   "positions": 513,
+   "anchors": {
+    "e5": 150,
+    "d5": 149,
+    "c5": 120,
+    "c4": 29
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 1664.2,
+      "n": 4023,
+      "read": -6840.2,
+      "top": 8470.44,
+      "rows": 33.95
+     },
+     {
+      "bits": 183.12,
+      "n": 490,
+      "read": -1042.13,
+      "top": 1190.09,
+      "rows": 35.16
+     }
+    ],
+    "total": 1847.32,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 1206.6,
+      "n": 520,
+      "read": -1209.35,
+      "top": 2383.6,
+      "rows": 32.35
+     },
+     {
+      "bits": -826.43,
+      "n": 520,
+      "read": -925.54,
+      "top": 64.15,
+      "rows": 34.96
+     }
+    ],
+    "total": 380.17,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 1794.71,
+      "n": 3228,
+      "read": -4833.4,
+      "top": 6591.29,
+      "rows": 36.82
+     },
+     {
+      "bits": 205.0,
+      "n": 199,
+      "read": -371.37,
+      "top": 539.22,
+      "rows": 37.14
+     }
+    ],
+    "total": 1999.7,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 686.84,
+      "n": 205,
+      "read": -511.93,
+      "top": 1164.44,
+      "rows": 34.32
+     },
+     {
+      "bits": -176.89,
+      "n": 202,
+      "read": -313.62,
+      "top": 99.93,
+      "rows": 36.79
+     }
+    ],
+    "total": 509.95,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[bP NW1 bP] NE1 bP]",
+      1079
+     ],
+     [
+      "[[bP NW1 bP] NW2 bR]",
+      912
+     ],
+     [
+      "[[bP NW1 bP] N1 bB]",
+      753
+     ],
+     [
+      "[[bP NW1 bP] NNW bR]",
+      740
+     ],
+     [
+      "[[bP NW1 bP] ENE bP]",
+      692
+     ],
+     [
+      "[[bP NW1 bP] NNW bK]",
+      568
+     ],
+     [
+      "[[bP NW1 bP] NW2 bP]",
+      550
+     ],
+     [
+      "[[bP NW1 bP] NNE bP]",
+      476
+     ],
+     [
+      "[[bP NW1 bP] N2 bB]",
+      374
+     ]
+    ],
+    "chunks of all variants (b)": 5659.48,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -895.05,
+      "read": 0.0,
+      "top": -331.77,
+      "rows": -563.28
+     },
+     {
+      "level": 2,
+      "bits": 2603.8,
+      "read": 0.0,
+      "top": -5394.91,
+      "rows": 7998.71
+     }
+    ],
+    "total": 7368.23
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[wP NE1 wP] NE2 wP]",
+    "chunks of both (b)": 927.72,
+    "merge": 1059.82,
+    "read": 0.0,
+    "top": -56.07,
+    "rows": 1115.9
+   }
+  },
+  {
+   "size": 3,
+   "configuration": "[[wP NW1 wP] NW2 wP]",
+   "classes": [
+    "pawn chain"
+   ],
+   "occurrences": 544,
+   "positions": 474,
+   "anchors": {
+    "f2": 237,
+    "g2": 80,
+    "h2": 52,
+    "e3": 46
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 2264.54,
+      "n": 2773,
+      "read": -9113.21,
+      "top": 11344.09,
+      "rows": 33.66
+     },
+     {
+      "bits": 150.15,
+      "n": 406,
+      "read": -1333.63,
+      "top": 1448.84,
+      "rows": 34.95
+     }
+    ],
+    "total": 2414.7,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 1823.65,
+      "n": 475,
+      "read": -1221.41,
+      "top": 3012.78,
+      "rows": 32.28
+     },
+     {
+      "bits": -1293.89,
+      "n": 475,
+      "read": -1392.91,
+      "top": 64.16,
+      "rows": 34.87
+     }
+    ],
+    "total": 529.76,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 2122.63,
+      "n": 2109,
+      "read": -6665.06,
+      "top": 8751.26,
+      "rows": 36.44
+     },
+     {
+      "bits": 290.8,
+      "n": 215,
+      "read": -621.86,
+      "top": 875.49,
+      "rows": 37.17
+     }
+    ],
+    "total": 2413.43,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 1558.01,
+      "n": 405,
+      "read": -1062.41,
+      "top": 2585.48,
+      "rows": 34.94
+     },
+     {
+      "bits": -210.0,
+      "n": 219,
+      "read": -619.27,
+      "top": 372.3,
+      "rows": 36.97
+     }
+    ],
+    "total": 1348.01,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[wP NW1 wP] NNW bP]",
+      809
+     ],
+     [
+      "[[wP NW1 wP] N5 bP]",
+      620
+     ],
+     [
+      "[[wP NW1 wP] N3 bP]",
+      573
+     ],
+     [
+      "[[wP NW1 wP] NW2 wP]",
+      544
+     ],
+     [
+      "[[wP NW1 wP] ENE wP]",
+      432
+     ],
+     [
+      "[[wP NW1 wP] NNE bP]",
+      422
+     ],
+     [
+      "[[wP NW1 wP] NE1 wP]",
+      414
+     ],
+     [
+      "[[wP NW1 wP] NW3 bP]",
+      406
+     ],
+     [
+      "[[wP NW1 wP] N4 bP]",
+      402
+     ]
+    ],
+    "chunks of all variants (b)": 5772.6,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -946.72,
+      "read": 0.0,
+      "top": -399.33,
+      "rows": -547.38
+     },
+     {
+      "level": 2,
+      "bits": 194.84,
+      "read": 0.0,
+      "top": -5482.88,
+      "rows": 5677.72
+     }
+    ],
+    "total": 5020.72
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[bP NE1 bP] NE2 bP]",
+    "chunks of both (b)": 1101.65,
+    "merge": 1010.15,
+    "read": 0.0,
+    "top": -56.07,
+    "rows": 1066.22
+   }
+  },
+  {
+   "size": 3,
+   "configuration": "[[bP N1 bB] N2 bK]",
+   "classes": [
+    "fianchetto with king"
+   ],
+   "occurrences": 440,
+   "positions": 440,
+   "anchors": {
+    "g6": 343,
+    "e6": 85,
+    "b6": 8,
+    "h6": 1
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 1078.41,
+      "n": 1968,
+      "read": -6637.61,
+      "top": 7682.62,
+      "rows": 33.39
+     },
+     {
+      "bits": 616.81,
+      "n": 440,
+      "read": -270.09,
+      "top": 851.92,
+      "rows": 34.98
+     }
+    ],
+    "total": 1695.22,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 366.7,
+      "n": 440,
+      "read": -1268.39,
+      "top": 1602.87,
+      "rows": 32.22
+     },
+     {
+      "bits": -171.13,
+      "n": 440,
+      "read": -270.26,
+      "top": 64.34,
+      "rows": 34.79
+     }
+    ],
+    "total": 195.57,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 1056.85,
+      "n": 1627,
+      "read": -5233.84,
+      "top": 6254.5,
+      "rows": 36.2
+     },
+     {
+      "bits": 553.02,
+      "n": 389,
+      "read": -161.26,
+      "top": 676.53,
+      "rows": 37.75
+     }
+    ],
+    "total": 1609.87,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 204.28,
+      "n": 389,
+      "read": -1139.71,
+      "top": 1309.09,
+      "rows": 34.9
+     },
+     {
+      "bits": -63.81,
+      "n": 389,
+      "read": -161.29,
+      "top": 59.92,
+      "rows": 37.56
+     }
+    ],
+    "total": 140.47,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[bP N1 bB] NE1 bP]",
+      846
+     ],
+     [
+      "[[bP N1 bB] NNW bR]",
+      531
+     ],
+     [
+      "[[bP N1 bB] ENE bP]",
+      481
+     ],
+     [
+      "[[bP N1 bB] N2 bK]",
+      440
+     ]
+    ],
+    "chunks of all variants (b)": 1477.97,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -277.26,
+      "read": 0.0,
+      "top": -141.35,
+      "rows": -135.92
+     },
+     {
+      "level": 2,
+      "bits": -3.94,
+      "read": 0.0,
+      "top": -1499.77,
+      "rows": 1495.82
+     }
+    ],
+    "total": 1196.76
+   }
+  },
+  {
+   "size": 4,
+   "configuration": "[[[wR N1 wP] NE1 wP] ENE wP]",
+   "classes": [],
+   "occurrences": 1165,
+   "positions": 1101,
+   "anchors": {
+    "f1": 658,
+    "a1": 507
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 3056.8,
+      "n": 3920,
+      "read": -3489.29,
+      "top": 6512.16,
+      "rows": 33.93
+     },
+     {
+      "bits": 1077.46,
+      "n": 2343,
+      "read": -1809.14,
+      "top": 2850.02,
+      "rows": 36.58
+     },
+     {
+      "bits": 808.61,
+      "n": 1165,
+      "read": -1516.85,
+      "top": 2286.47,
+      "rows": 38.99
+     }
+    ],
+    "total": 4942.87,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 3122.98,
+      "n": 1165,
+      "read": -746.0,
+      "top": 3836.0,
+      "rows": 32.98
+     },
+     {
+      "bits": -596.61,
+      "n": 1165,
+      "read": -696.75,
+      "top": 64.34,
+      "rows": 35.79
+     },
+     {
+      "bits": -1261.03,
+      "n": 1165,
+      "read": -1359.69,
+      "top": 59.92,
+      "rows": 38.74
+     }
+    ],
+    "total": 1265.34,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 3036.65,
+      "n": 3904,
+      "read": -3459.31,
+      "top": 6458.97,
+      "rows": 36.99
+     },
+     {
+      "bits": 1063.23,
+      "n": 2337,
+      "read": -1802.29,
+      "top": 2825.79,
+      "rows": 39.73
+     },
+     {
+      "bits": 807.26,
+      "n": 1161,
+      "read": -1508.47,
+      "top": 2273.54,
+      "rows": 42.19
+     }
+    ],
+    "total": 4907.15,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 3115.77,
+      "n": 1163,
+      "read": -744.42,
+      "top": 3824.29,
+      "rows": 35.9
+     },
+     {
+      "bits": -555.28,
+      "n": 1161,
+      "read": -693.97,
+      "top": 99.85,
+      "rows": 38.84
+     },
+     {
+      "bits": -1259.55,
+      "n": 1161,
+      "read": -1354.28,
+      "top": 52.81,
+      "rows": 41.92
+     }
+    ],
+    "total": 1300.95,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[[wR N1 wP] NE1 wP] ENE wP]",
+      1165
+     ],
+     [
+      "[[[wR N1 wP] NE1 wP] N6 bP]",
+      966
+     ],
+     [
+      "[[[wR N1 wP] NE1 wP] NE2 wP]",
+      687
+     ],
+     [
+      "[[[wR N1 wP] NE1 wP] N2 wN]",
+      451
+     ],
+     [
+      "[[[wR N1 wP] NE1 wP] NE2 wN]",
+      344
+     ],
+     [
+      "[[[wR N1 wP] NE1 wP] N5 bP]",
+      296
+     ],
+     [
+      "[[[wR N1 wP] NE1 wP] NNW wP]",
+      223
+     ]
+    ],
+    "chunks of all variants (b)": 4469.01,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -624.87,
+      "read": 0.0,
+      "top": -175.22,
+      "rows": -449.65
+     },
+     {
+      "level": 2,
+      "bits": -574.02,
+      "read": 0.0,
+      "top": -218.98,
+      "rows": -355.04
+     },
+     {
+      "level": 3,
+      "bits": -116.57,
+      "read": 0.0,
+      "top": -3978.12,
+      "rows": 3861.55
+     }
+    ],
+    "total": 3153.55
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[[bP E1 bP] E2 bP] N1 bR]",
+    "chunks of both (b)": 2924.54,
+    "merge": 2041.76,
+    "read": 0.0,
+    "top": -49.7,
+    "rows": 2091.45
+   }
+  },
+  {
+   "size": 4,
+   "configuration": "[[[wR N1 wP] N6 bP] N7 bR]",
+   "classes": [],
+   "occurrences": 1148,
+   "positions": 1107,
+   "anchors": {
+    "a1": 864,
+    "h1": 180,
+    "f1": 102,
+    "b1": 2
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 3056.8,
+      "n": 3920,
+      "read": -3489.29,
+      "top": 6512.16,
+      "rows": 33.93
+     },
+     {
+      "bits": 2190.44,
+      "n": 1802,
+      "read": -1201.58,
+      "top": 3355.68,
+      "rows": 36.34
+     },
+     {
+      "bits": 1130.66,
+      "n": 1148,
+      "read": -616.01,
+      "top": 1707.73,
+      "rows": 38.94
+     }
+    ],
+    "total": 6377.9,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 3184.84,
+      "n": 1148,
+      "read": -831.46,
+      "top": 3983.33,
+      "rows": 32.97
+     },
+     {
+      "bits": -664.57,
+      "n": 1148,
+      "read": -764.69,
+      "top": 64.34,
+      "rows": 35.78
+     },
+     {
+      "bits": -517.37,
+      "n": 1148,
+      "read": -616.01,
+      "top": 59.92,
+      "rows": 38.72
+     }
+    ],
+    "total": 2002.9,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 3036.65,
+      "n": 3904,
+      "read": -3459.31,
+      "top": 6458.97,
+      "rows": 36.99
+     },
+     {
+      "bits": 2179.19,
+      "n": 1802,
+      "read": -1204.67,
+      "top": 3344.4,
+      "rows": 39.46
+     },
+     {
+      "bits": 1130.01,
+      "n": 1148,
+      "read": -616.01,
+      "top": 1703.87,
+      "rows": 42.14
+     }
+    ],
+    "total": 6345.85,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 3179.69,
+      "n": 1148,
+      "read": -831.46,
+      "top": 3975.26,
+      "rows": 35.88
+     },
+     {
+      "bits": -667.67,
+      "n": 1148,
+      "read": -766.42,
+      "top": 59.92,
+      "rows": 38.83
+     },
+     {
+      "bits": -518.04,
+      "n": 1148,
+      "read": -616.01,
+      "top": 56.07,
+      "rows": 41.9
+     }
+    ],
+    "total": 1993.98,
+    "complete": true
+   }
+  },
+  {
+   "size": 4,
+   "configuration": "[[[wR E1 wK] N1 wP] NE1 wP]",
+   "classes": [
+    "castled king (K+R+pawns)"
+   ],
+   "occurrences": 987,
+   "positions": 987,
+   "anchors": {
+    "f1": 986,
+    "g1": 1
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 598.83,
+      "n": 1797,
+      "read": -633.76,
+      "top": 1199.28,
+      "rows": 33.32
+     },
+     {
+      "bits": 856.08,
+      "n": 1231,
+      "read": -842.7,
+      "top": 1662.88,
+      "rows": 35.9
+     },
+     {
+      "bits": 415.73,
+      "n": 987,
+      "read": -582.54,
+      "top": 959.65,
+      "rows": 38.63
+     }
+    ],
+    "total": 1870.65,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 1855.21,
+      "n": 987,
+      "read": -229.47,
+      "top": 2051.83,
+      "rows": 32.85
+     },
+     {
+      "bits": -537.14,
+      "n": 987,
+      "read": -637.11,
+      "top": 64.34,
+      "rows": 35.62
+     },
+     {
+      "bits": -484.04,
+      "n": 987,
+      "read": -582.48,
+      "top": 59.92,
+      "rows": 38.52
+     }
+    ],
+    "total": 834.03,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 596.67,
+      "n": 1797,
+      "read": -633.76,
+      "top": 1194.14,
+      "rows": 36.29
+     },
+     {
+      "bits": 857.45,
+      "n": 1226,
+      "read": -837.86,
+      "top": 1656.35,
+      "rows": 38.96
+     },
+     {
+      "bits": 410.68,
+      "n": 983,
+      "read": -579.58,
+      "top": 948.46,
+      "rows": 41.79
+     }
+    ],
+    "total": 1864.8,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 1852.98,
+      "n": 987,
+      "read": -229.47,
+      "top": 2046.7,
+      "rows": 35.75
+     },
+     {
+      "bits": -509.58,
+      "n": 985,
+      "read": -635.32,
+      "top": 87.09,
+      "rows": 38.65
+     },
+     {
+      "bits": -452.32,
+      "n": 983,
+      "read": -579.52,
+      "top": 85.52,
+      "rows": 41.67
+     }
+    ],
+    "total": 891.08,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[[wR E1 wK] N1 wP] NE1 wP]",
+      987
+     ],
+     [
+      "[[[wR E1 wK] N1 wP] ENE wP]",
+      841
+     ],
+     [
+      "[[[wR E1 wK] N1 wP] N2 wN]",
+      481
+     ],
+     [
+      "[[[wR E1 wK] N1 wP] NNW wP]",
+      274
+     ],
+     [
+      "[[[wR E1 wK] N1 wP] NNE wP]",
+      198
+     ]
+    ],
+    "chunks of all variants (b)": 2480.81,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -365.24,
+      "read": 0.0,
+      "top": -139.77,
+      "rows": -225.47
+     },
+     {
+      "level": 2,
+      "bits": -358.95,
+      "read": 0.0,
+      "top": -166.31,
+      "rows": -192.64
+     },
+     {
+      "level": 3,
+      "bits": -365.49,
+      "read": 0.0,
+      "top": -1299.36,
+      "rows": 933.87
+     }
+    ],
+    "total": 1391.13
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[[bP E1 bP] N1 bR] NE1 bK]",
+    "chunks of both (b)": 2095.94,
+    "merge": 1881.69,
+    "read": 0.0,
+    "top": -49.7,
+    "rows": 1931.39
+   }
+  },
+  {
+   "size": 4,
+   "configuration": "[[[bP E1 bP] N1 bR] NE1 bK]",
+   "classes": [
+    "castled king (K+R+pawns)"
+   ],
+   "occurrences": 975,
+   "positions": 975,
+   "anchors": {
+    "f7": 974,
+    "g7": 1
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 4320.18,
+      "n": 5237,
+      "read": -7120.92,
+      "top": 11406.95,
+      "rows": 34.16
+     },
+     {
+      "bits": 1639.27,
+      "n": 2097,
+      "read": -1720.22,
+      "top": 3322.98,
+      "rows": 36.51
+     },
+     {
+      "bits": 251.34,
+      "n": 974,
+      "read": -76.36,
+      "top": 288.87,
+      "rows": 38.83
+     }
+    ],
+    "total": 6210.79,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 2121.38,
+      "n": 975,
+      "read": -607.22,
+      "top": 2695.76,
+      "rows": 32.84
+     },
+     {
+      "bits": -874.13,
+      "n": 975,
+      "read": -974.08,
+      "top": 64.34,
+      "rows": 35.61
+     },
+     {
+      "bits": 22.81,
+      "n": 975,
+      "read": -75.61,
+      "top": 59.92,
+      "rows": 38.5
+     }
+    ],
+    "total": 1270.06,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 3687.56,
+      "n": 5090,
+      "read": -6956.81,
+      "top": 10607.14,
+      "rows": 37.23
+     },
+     {
+      "bits": 1636.66,
+      "n": 2096,
+      "read": -1719.55,
+      "top": 3316.55,
+      "rows": 39.66
+     },
+     {
+      "bits": 250.66,
+      "n": 974,
+      "read": -76.36,
+      "top": 285.01,
+      "rows": 42.01
+     }
+    ],
+    "total": 5574.88,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 2116.26,
+      "n": 975,
+      "read": -607.59,
+      "top": 2688.11,
+      "rows": 35.74
+     },
+     {
+      "bits": -875.52,
+      "n": 975,
+      "read": -974.08,
+      "top": 59.92,
+      "rows": 38.64
+     },
+     {
+      "bits": 22.12,
+      "n": 975,
+      "read": -75.61,
+      "top": 56.07,
+      "rows": 41.66
+     }
+    ],
+    "total": 1262.86,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[[bP E1 bP] N1 bR] NE1 bK]",
+      975
+     ],
+     [
+      "[[[bP E1 bP] N1 bR] ENE bB]",
+      347
+     ]
+    ],
+    "chunks of all variants (b)": 1811.97,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -95.31,
+      "read": 0.0,
+      "top": -49.7,
+      "rows": -45.61
+     },
+     {
+      "level": 2,
+      "bits": -95.49,
+      "read": 0.0,
+      "top": -52.69,
+      "rows": -42.8
+     },
+     {
+      "level": 3,
+      "bits": 1017.7,
+      "read": 0.0,
+      "top": -56.07,
+      "rows": 1073.77
+     }
+    ],
+    "total": 2638.87
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[[wR E1 wK] N1 wP] NE1 wP]",
+    "chunks of both (b)": 2095.94,
+    "merge": 1881.69,
+    "read": 0.0,
+    "top": -49.7,
+    "rows": 1931.39
+   }
+  },
+  {
+   "size": 4,
+   "configuration": "[[[wR E1 wK] NE1 wP] ENE wP]",
+   "classes": [
+    "castled king (K+R+pawns)"
+   ],
+   "occurrences": 975,
+   "positions": 975,
+   "anchors": {
+    "f1": 969,
+    "e1": 5,
+    "d1": 1
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 598.83,
+      "n": 1797,
+      "read": -633.76,
+      "top": 1199.28,
+      "rows": 33.32
+     },
+     {
+      "bits": 515.0,
+      "n": 1426,
+      "read": -912.38,
+      "top": 1391.35,
+      "rows": 36.03
+     },
+     {
+      "bits": 572.73,
+      "n": 975,
+      "read": -815.78,
+      "top": 1349.87,
+      "rows": 38.64
+     }
+    ],
+    "total": 1686.56,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 1885.61,
+      "n": 975,
+      "read": -257.24,
+      "top": 2110.01,
+      "rows": 32.84
+     },
+     {
+      "bits": -461.28,
+      "n": 975,
+      "read": -561.23,
+      "top": 64.34,
+      "rows": 35.61
+     },
+     {
+      "bits": -715.86,
+      "n": 975,
+      "read": -814.28,
+      "top": 59.92,
+      "rows": 38.5
+     }
+    ],
+    "total": 708.47,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 596.67,
+      "n": 1797,
+      "read": -633.76,
+      "top": 1194.14,
+      "rows": 36.29
+     },
+     {
+      "bits": 516.15,
+      "n": 1423,
+      "read": -909.75,
+      "top": 1386.78,
+      "rows": 39.11
+     },
+     {
+      "bits": 565.05,
+      "n": 974,
+      "read": -814.62,
+      "top": 1337.86,
+      "rows": 41.8
+     }
+    ],
+    "total": 1677.87,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 1883.38,
+      "n": 975,
+      "read": -257.24,
+      "top": 2104.88,
+      "rows": 35.74
+     },
+     {
+      "bits": -442.44,
+      "n": 974,
+      "read": -560.52,
+      "top": 79.44,
+      "rows": 38.64
+     },
+     {
+      "bits": -719.66,
+      "n": 974,
+      "read": -813.12,
+      "top": 51.8,
+      "rows": 41.66
+     }
+    ],
+    "total": 721.28,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[[wR E1 wK] NE1 wP] ENE wP]",
+      975
+     ],
+     [
+      "[[[wR E1 wK] NE1 wP] NE2 wP]",
+      401
+     ],
+     [
+      "[[[wR E1 wK] NE1 wP] NNW wP]",
+      290
+     ],
+     [
+      "[[[wR E1 wK] NE1 wP] NW2 wB]",
+      213
+     ]
+    ],
+    "chunks of all variants (b)": 1318.51,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -266.97,
+      "read": 0.0,
+      "top": -116.3,
+      "rows": -150.67
+     },
+     {
+      "level": 2,
+      "bits": -267.22,
+      "read": 0.0,
+      "top": -134.12,
+      "rows": -133.1
+     },
+     {
+      "level": 3,
+      "bits": -260.81,
+      "read": 0.0,
+      "top": -1462.02,
+      "rows": 1201.21
+     }
+    ],
+    "total": 523.51
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[[bP E1 bP] NW1 bR] N1 bK]",
+    "chunks of both (b)": 2092.81,
+    "merge": 1788.42,
+    "read": 0.0,
+    "top": -49.7,
+    "rows": 1838.11
+   }
+  },
+  {
+   "size": 4,
+   "configuration": "[[[bP E1 bP] E2 bP] N1 bR]",
+   "classes": [],
+   "occurrences": 970,
+   "positions": 930,
+   "anchors": {
+    "f7": 666,
+    "a7": 304
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 4320.18,
+      "n": 5237,
+      "read": -7120.92,
+      "top": 11406.95,
+      "rows": 34.16
+     },
+     {
+      "bits": 1746.7,
+      "n": 1750,
+      "read": -1942.06,
+      "top": 3652.41,
+      "rows": 36.35
+     },
+     {
+      "bits": 992.11,
+      "n": 956,
+      "read": -768.16,
+      "top": 1721.48,
+      "rows": 38.79
+     }
+    ],
+    "total": 7058.99,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 3088.7,
+      "n": 970,
+      "read": -567.91,
+      "top": 3623.77,
+      "rows": 32.84
+     },
+     {
+      "bits": -742.67,
+      "n": 970,
+      "read": -842.62,
+      "top": 64.34,
+      "rows": 35.61
+     },
+     {
+      "bits": -678.89,
+      "n": 970,
+      "read": -777.31,
+      "top": 59.92,
+      "rows": 38.5
+     }
+    ],
+    "total": 1667.13,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 3687.56,
+      "n": 5090,
+      "read": -6956.81,
+      "top": 10607.14,
+      "rows": 37.23
+     },
+     {
+      "bits": 1672.09,
+      "n": 1739,
+      "read": -1965.0,
+      "top": 3597.63,
+      "rows": 39.46
+     },
+     {
+      "bits": 991.43,
+      "n": 956,
+      "read": -768.16,
+      "top": 1717.63,
+      "rows": 41.96
+     }
+    ],
+    "total": 6351.08,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 3083.63,
+      "n": 970,
+      "read": -568.18,
+      "top": 3616.07,
+      "rows": 35.73
+     },
+     {
+      "bits": -725.06,
+      "n": 969,
+      "read": -845.14,
+      "top": 81.45,
+      "rows": 38.63
+     },
+     {
+      "bits": -679.07,
+      "n": 969,
+      "read": -776.8,
+      "top": 56.07,
+      "rows": 41.65
+     }
+    ],
+    "total": 1679.49,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[[bP E1 bP] E2 bP] N1 bR]",
+      970
+     ],
+     [
+      "[[[bP E1 bP] E2 bP] NE1 bK]",
+      882
+     ],
+     [
+      "[[[bP E1 bP] E2 bP] WNW bQ]",
+      335
+     ],
+     [
+      "[[[bP E1 bP] E2 bP] ENE bR]",
+      321
+     ]
+    ],
+    "chunks of all variants (b)": 4383.15,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -290.65,
+      "read": 0.0,
+      "top": -116.3,
+      "rows": -174.35
+     },
+     {
+      "level": 2,
+      "bits": -283.31,
+      "read": 0.0,
+      "top": -134.12,
+      "rows": -149.19
+     },
+     {
+      "level": 3,
+      "bits": -128.1,
+      "read": 0.0,
+      "top": -2218.89,
+      "rows": 2090.8
+     }
+    ],
+    "total": 3681.1
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[[wR N1 wP] NE1 wP] ENE wP]",
+    "chunks of both (b)": 2924.54,
+    "merge": 2041.76,
+    "read": 0.0,
+    "top": -49.7,
+    "rows": 2091.45
+   }
+  },
+  {
+   "size": 4,
+   "configuration": "[[[bP E1 bP] NW1 bR] N1 bK]",
+   "classes": [
+    "castled king (K+R+pawns)"
+   ],
+   "occurrences": 896,
+   "positions": 896,
+   "anchors": {
+    "g7": 892,
+    "f7": 3,
+    "e7": 1
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 4320.18,
+      "n": 5237,
+      "read": -7120.92,
+      "top": 11406.95,
+      "rows": 34.16
+     },
+     {
+      "bits": 783.29,
+      "n": 666,
+      "read": -1306.12,
+      "top": 2053.94,
+      "rows": 35.47
+     },
+     {
+      "bits": 274.01,
+      "n": 236,
+      "read": -34.64,
+      "top": 271.45,
+      "rows": 37.2
+     }
+    ],
+    "total": 5377.49,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 2165.41,
+      "n": 896,
+      "read": -427.63,
+      "top": 2560.27,
+      "rows": 32.78
+     },
+     {
+      "bits": -784.43,
+      "n": 896,
+      "read": -884.29,
+      "top": 64.34,
+      "rows": 35.52
+     },
+     {
+      "bits": 11.64,
+      "n": 896,
+      "read": -86.68,
+      "top": 59.92,
+      "rows": 38.39
+     }
+    ],
+    "total": 1392.62,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 3687.56,
+      "n": 5090,
+      "read": -6956.81,
+      "top": 10607.14,
+      "rows": 37.23
+     },
+     {
+      "bits": 780.0,
+      "n": 666,
+      "read": -1306.12,
+      "top": 2047.66,
+      "rows": 38.46
+     },
+     {
+      "bits": 273.12,
+      "n": 236,
+      "read": -34.64,
+      "top": 267.6,
+      "rows": 40.16
+     }
+    ],
+    "total": 4740.69,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 2159.64,
+      "n": 896,
+      "read": -430.54,
+      "top": 2554.52,
+      "rows": 35.66
+     },
+     {
+      "bits": -785.83,
+      "n": 896,
+      "read": -884.29,
+      "top": 59.92,
+      "rows": 38.54
+     },
+     {
+      "bits": 10.93,
+      "n": 896,
+      "read": -86.68,
+      "top": 56.07,
+      "rows": 41.54
+     }
+    ],
+    "total": 1384.73,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[[bP E1 bP] NW1 bR] N1 bK]",
+      896
+     ],
+     [
+      "[[[bP E1 bP] NW1 bR] NE1 bK]",
+      264
+     ]
+    ],
+    "chunks of all variants (b)": 1866.14,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -94.8,
+      "read": 0.0,
+      "top": -49.7,
+      "rows": -45.1
+     },
+     {
+      "level": 2,
+      "bits": -95.06,
+      "read": 0.0,
+      "top": -52.69,
+      "rows": -42.37
+     },
+     {
+      "level": 3,
+      "bits": 573.68,
+      "read": 0.0,
+      "top": -287.08,
+      "rows": 860.76
+     }
+    ],
+    "total": 2249.96
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[[wR E1 wK] NE1 wP] ENE wP]",
+    "chunks of both (b)": 2092.81,
+    "merge": 1788.42,
+    "read": 0.0,
+    "top": -49.7,
+    "rows": 1838.11
+   }
+  },
+  {
+   "size": 4,
+   "configuration": "[[[wR E1 wK] N1 wP] ENE wP]",
+   "classes": [
+    "castled king (K+R+pawns)"
+   ],
+   "occurrences": 841,
+   "positions": 841,
+   "anchors": {
+    "f1": 841
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 598.83,
+      "n": 1797,
+      "read": -633.76,
+      "top": 1199.28,
+      "rows": 33.32
+     },
+     {
+      "bits": 856.08,
+      "n": 1231,
+      "read": -842.7,
+      "top": 1662.88,
+      "rows": 35.9
+     },
+     {
+      "bits": 542.37,
+      "n": 841,
+      "read": -679.33,
+      "top": 1183.24,
+      "rows": 38.46
+     }
+    ],
+    "total": 1997.29,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 1852.3,
+      "n": 841,
+      "read": -187.21,
+      "top": 2006.78,
+      "rows": 32.73
+     },
+     {
+      "bits": -422.47,
+      "n": 841,
+      "read": -522.27,
+      "top": 64.34,
+      "rows": 35.46
+     },
+     {
+      "bits": -581.1,
+      "n": 841,
+      "read": -679.33,
+      "top": 59.92,
+      "rows": 38.31
+     }
+    ],
+    "total": 848.74,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 596.67,
+      "n": 1797,
+      "read": -633.76,
+      "top": 1194.14,
+      "rows": 36.29
+     },
+     {
+      "bits": 857.45,
+      "n": 1226,
+      "read": -837.86,
+      "top": 1656.35,
+      "rows": 38.96
+     },
+     {
+      "bits": 540.09,
+      "n": 836,
+      "read": -674.63,
+      "top": 1173.11,
+      "rows": 41.6
+     }
+    ],
+    "total": 1994.21,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 1850.05,
+      "n": 841,
+      "read": -187.21,
+      "top": 2001.65,
+      "rows": 35.6
+     },
+     {
+      "bits": -375.99,
+      "n": 837,
+      "read": -519.01,
+      "top": 104.56,
+      "rows": 38.46
+     },
+     {
+      "bits": -557.65,
+      "n": 836,
+      "read": -674.63,
+      "top": 75.54,
+      "rows": 41.44
+     }
+    ],
+    "total": 916.41,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[[wR E1 wK] N1 wP] NE1 wP]",
+      987
+     ],
+     [
+      "[[[wR E1 wK] N1 wP] ENE wP]",
+      841
+     ],
+     [
+      "[[[wR E1 wK] N1 wP] N2 wN]",
+      481
+     ],
+     [
+      "[[[wR E1 wK] N1 wP] NNW wP]",
+      274
+     ],
+     [
+      "[[[wR E1 wK] N1 wP] NNE wP]",
+      198
+     ]
+    ],
+    "chunks of all variants (b)": 2480.81,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -365.24,
+      "read": 0.0,
+      "top": -139.77,
+      "rows": -225.47
+     },
+     {
+      "level": 2,
+      "bits": -358.95,
+      "read": 0.0,
+      "top": -166.31,
+      "rows": -192.64
+     },
+     {
+      "level": 3,
+      "bits": -365.49,
+      "read": 0.0,
+      "top": -1299.36,
+      "rows": 933.87
+     }
+    ],
+    "total": 1391.13
+   }
+  },
+  {
+   "size": 4,
+   "configuration": "[[[bP WNW bQ] N1 bR] NE1 bK]",
+   "classes": [
+    "castled king (K+R+pawns)"
+   ],
+   "occurrences": 536,
+   "positions": 536,
+   "anchors": {
+    "f7": 536
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 2669.0,
+      "n": 1315,
+      "read": -2525.02,
+      "top": 5160.94,
+      "rows": 33.08
+     },
+     {
+      "bits": 475.35,
+      "n": 583,
+      "read": -497.02,
+      "top": 937.19,
+      "rows": 35.18
+     },
+     {
+      "bits": 296.37,
+      "n": 536,
+      "read": -36.99,
+      "top": 295.51,
+      "rows": 37.85
+     }
+    ],
+    "total": 3440.72,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 1682.15,
+      "n": 536,
+      "read": -396.45,
+      "top": 2046.22,
+      "rows": 32.37
+     },
+     {
+      "bits": -346.38,
+      "n": 536,
+      "read": -445.72,
+      "top": 64.34,
+      "rows": 34.99
+     },
+     {
+      "bits": 60.66,
+      "n": 536,
+      "read": -36.99,
+      "top": 59.92,
+      "rows": 37.72
+     }
+    ],
+    "total": 1396.42,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 2586.81,
+      "n": 1232,
+      "read": -2178.48,
+      "top": 4729.34,
+      "rows": 35.95
+     },
+     {
+      "bits": 471.9,
+      "n": 583,
+      "read": -497.02,
+      "top": 930.78,
+      "rows": 38.13
+     },
+     {
+      "bits": 295.58,
+      "n": 536,
+      "read": -36.99,
+      "top": 291.66,
+      "rows": 40.91
+     }
+    ],
+    "total": 3354.3,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 1678.59,
+      "n": 536,
+      "read": -396.45,
+      "top": 2039.84,
+      "rows": 35.19
+     },
+     {
+      "bits": -347.86,
+      "n": 536,
+      "read": -445.72,
+      "top": 59.92,
+      "rows": 37.94
+     },
+     {
+      "bits": 59.87,
+      "n": 536,
+      "read": -36.99,
+      "top": 56.07,
+      "rows": 40.78
+     }
+    ],
+    "total": 1390.59,
+    "complete": true
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[[wQ E2 wR] E3 wK] ENE wP]",
+    "chunks of both (b)": 2097.5,
+    "merge": 852.37,
+    "read": 0.0,
+    "top": -49.7,
+    "rows": 902.06
+   }
+  },
+  {
+   "size": 4,
+   "configuration": "[[[bP NE1 bP] NNE bR] NE2 bK]",
+   "classes": [
+    "castled king (K+R+pawns)"
+   ],
+   "occurrences": 490,
+   "positions": 490,
+   "anchors": {
+    "e6": 490
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 2692.68,
+      "n": 3619,
+      "read": -5437.97,
+      "top": 8096.78,
+      "rows": 33.87
+     },
+     {
+      "bits": 1139.04,
+      "n": 498,
+      "read": -440.01,
+      "top": 1543.89,
+      "rows": 35.16
+     },
+     {
+      "bits": 191.77,
+      "n": 314,
+      "read": -20.5,
+      "top": 174.87,
+      "rows": 37.41
+     }
+    ],
+    "total": 4023.49,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 1228.22,
+      "n": 490,
+      "read": -224.8,
+      "top": 1420.72,
+      "rows": 32.3
+     },
+     {
+      "bits": -321.97,
+      "n": 490,
+      "read": -421.22,
+      "top": 64.34,
+      "rows": 34.9
+     },
+     {
+      "bits": 64.11,
+      "n": 490,
+      "read": -33.41,
+      "top": 59.92,
+      "rows": 37.6
+     }
+    ],
+    "total": 970.36,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 2801.17,
+      "n": 2782,
+      "read": -3642.57,
+      "top": 6407.05,
+      "rows": 36.69
+     },
+     {
+      "bits": 1054.4,
+      "n": 480,
+      "read": -380.63,
+      "top": 1396.99,
+      "rows": 38.04
+     },
+     {
+      "bits": 177.78,
+      "n": 315,
+      "read": -20.57,
+      "top": 157.98,
+      "rows": 40.37
+     }
+    ],
+    "total": 4033.35,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 967.41,
+      "n": 389,
+      "read": -168.61,
+      "top": 1101.12,
+      "rows": 34.9
+     },
+     {
+      "bits": -228.22,
+      "n": 389,
+      "read": -325.7,
+      "top": 59.92,
+      "rows": 37.56
+     },
+     {
+      "bits": 70.52,
+      "n": 389,
+      "read": -25.86,
+      "top": 56.07,
+      "rows": 40.31
+     }
+    ],
+    "total": 809.7,
+    "complete": true
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[[wR E1 wK] N1 wP] NNW wP]",
+    "chunks of both (b)": 1520.2,
+    "merge": 640.67,
+    "read": 0.0,
+    "top": -49.7,
+    "rows": 690.37
+   }
+  },
+  {
+   "size": 4,
+   "configuration": "[[[bP N1 bB] NE1 bP] N2 bK]",
+   "classes": [
+    "fianchetto with king"
+   ],
+   "occurrences": 381,
+   "positions": 381,
+   "anchors": {
+    "g6": 301,
+    "e6": 75,
+    "b6": 4,
+    "d5": 1
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 1078.41,
+      "n": 1968,
+      "read": -6637.61,
+      "top": 7682.62,
+      "rows": 33.39
+     },
+     {
+      "bits": 651.14,
+      "n": 846,
+      "read": -770.38,
+      "top": 1385.95,
+      "rows": 35.57
+     },
+     {
+      "bits": 444.82,
+      "n": 381,
+      "read": -205.76,
+      "top": 612.98,
+      "rows": 37.6
+     }
+    ],
+    "total": 2174.37,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 393.25,
+      "n": 381,
+      "read": -1068.21,
+      "top": 1429.35,
+      "rows": 32.11
+     },
+     {
+      "bits": -112.16,
+      "n": 381,
+      "read": -211.07,
+      "top": 64.27,
+      "rows": 34.64
+     },
+     {
+      "bits": -108.61,
+      "n": 381,
+      "read": -205.81,
+      "top": 59.92,
+      "rows": 37.27
+     }
+    ],
+    "total": 172.48,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 1056.85,
+      "n": 1627,
+      "read": -5233.84,
+      "top": 6254.5,
+      "rows": 36.2
+     },
+     {
+      "bits": 583.63,
+      "n": 690,
+      "read": -600.25,
+      "top": 1145.53,
+      "rows": 38.35
+     },
+     {
+      "bits": 410.6,
+      "n": 335,
+      "read": -116.63,
+      "top": 486.81,
+      "rows": 40.42
+     }
+    ],
+    "total": 2051.08,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 255.33,
+      "n": 335,
+      "read": -954.44,
+      "top": 1175.0,
+      "rows": 34.77
+     },
+     {
+      "bits": -82.3,
+      "n": 335,
+      "read": -179.6,
+      "top": 59.92,
+      "rows": 37.38
+     },
+     {
+      "bits": -20.49,
+      "n": 335,
+      "read": -116.65,
+      "top": 56.07,
+      "rows": 40.09
+     }
+    ],
+    "total": 152.54,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[[bP N1 bB] NE1 bP] N2 bK]",
+      381
+     ],
+     [
+      "[[[bP N1 bB] NE1 bP] NNW bR]",
+      325
+     ],
+     [
+      "[[[bP N1 bB] NE1 bP] ENE bP]",
+      270
+     ],
+     [
+      "[[[bP N1 bB] NE1 bP] NNE bR]",
+      183
+     ]
+    ],
+    "chunks of all variants (b)": 1556.55,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -284.27,
+      "read": 0.0,
+      "top": -116.3,
+      "rows": -167.97
+     },
+     {
+      "level": 2,
+      "bits": -278.8,
+      "read": 0.0,
+      "top": -134.11,
+      "rows": -144.69
+     },
+     {
+      "level": 3,
+      "bits": 84.83,
+      "read": 0.0,
+      "top": -1028.85,
+      "rows": 1113.68
+     }
+    ],
+    "total": 1078.31
+   }
+  },
+  {
+   "size": 4,
+   "configuration": "[[[bP NW1 bP] N1 bB] N2 bK]",
+   "classes": [
+    "fianchetto with king"
+   ],
+   "occurrences": 288,
+   "positions": 288,
+   "anchors": {
+    "g6": 271,
+    "e6": 8,
+    "b6": 6,
+    "h6": 1
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 1664.2,
+      "n": 4023,
+      "read": -6840.2,
+      "top": 8470.44,
+      "rows": 33.95
+     },
+     {
+      "bits": 85.25,
+      "n": 663,
+      "read": -2027.25,
+      "top": 2077.06,
+      "rows": 35.44
+     },
+     {
+      "bits": 348.21,
+      "n": 284,
+      "read": -79.69,
+      "top": 390.54,
+      "rows": 37.36
+     }
+    ],
+    "total": 2097.66,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 915.0,
+      "n": 288,
+      "read": -216.37,
+      "top": 1099.48,
+      "rows": 31.89
+     },
+     {
+      "bits": -730.78,
+      "n": 288,
+      "read": -829.48,
+      "top": 64.34,
+      "rows": 34.35
+     },
+     {
+      "bits": 9.89,
+      "n": 288,
+      "read": -86.94,
+      "top": 59.92,
+      "rows": 36.91
+     }
+    ],
+    "total": 194.11,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 1794.71,
+      "n": 3228,
+      "read": -4833.4,
+      "top": 6591.29,
+      "rows": 36.82
+     },
+     {
+      "bits": -10.16,
+      "n": 612,
+      "read": -1790.49,
+      "top": 1742.02,
+      "rows": 38.31
+     },
+     {
+      "bits": 338.06,
+      "n": 274,
+      "read": -61.41,
+      "top": 359.21,
+      "rows": 40.26
+     }
+    ],
+    "total": 2122.61,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 837.64,
+      "n": 277,
+      "read": -189.8,
+      "top": 992.84,
+      "rows": 34.6
+     },
+     {
+      "bits": -703.19,
+      "n": 277,
+      "read": -800.27,
+      "top": 59.92,
+      "rows": 37.16
+     },
+     {
+      "bits": 34.14,
+      "n": 277,
+      "read": -61.75,
+      "top": 56.07,
+      "rows": 39.81
+     }
+    ],
+    "total": 168.59,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[[bP NW1 bP] N1 bB] NE1 bP]",
+      375
+     ],
+     [
+      "[[[bP NW1 bP] N1 bB] NNW bR]",
+      350
+     ],
+     [
+      "[[[bP NW1 bP] N1 bB] N2 bK]",
+      288
+     ]
+    ],
+    "chunks of all variants (b)": 784.4,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -181.2,
+      "read": 0.0,
+      "top": -87.09,
+      "rows": -94.11
+     },
+     {
+      "level": 2,
+      "bits": -182.07,
+      "read": 0.0,
+      "top": -96.72,
+      "rows": -85.35
+     },
+     {
+      "level": 3,
+      "bits": -125.43,
+      "read": 0.0,
+      "top": -596.58,
+      "rows": 471.15
+     }
+    ],
+    "total": 295.7
+   }
+  },
+  {
+   "size": 4,
+   "configuration": "[[[bP N1 bB] NNW bR] N2 bK]",
+   "classes": [
+    "castled king (K+R+pawns)",
+    "fianchetto with king"
+   ],
+   "occurrences": 262,
+   "positions": 262,
+   "anchors": {
+    "g6": 262
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 1078.41,
+      "n": 1968,
+      "read": -6637.61,
+      "top": 7682.62,
+      "rows": 33.39
+     },
+     {
+      "bits": 687.98,
+      "n": 531,
+      "read": -438.6,
+      "top": 1091.43,
+      "rows": 35.15
+     },
+     {
+      "bits": 213.28,
+      "n": 262,
+      "read": -16.9,
+      "top": 193.03,
+      "rows": 37.15
+     }
+    ],
+    "total": 1979.67,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 159.21,
+      "n": 262,
+      "read": -744.4,
+      "top": 871.8,
+      "rows": 31.81
+     },
+     {
+      "bits": -95.6,
+      "n": 262,
+      "read": -194.2,
+      "top": 64.34,
+      "rows": 34.26
+     },
+     {
+      "bits": 79.81,
+      "n": 262,
+      "read": -16.9,
+      "top": 59.92,
+      "rows": 36.78
+     }
+    ],
+    "total": 143.41,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 1056.85,
+      "n": 1627,
+      "read": -5233.84,
+      "top": 6254.5,
+      "rows": 36.2
+     },
+     {
+      "bits": 636.66,
+      "n": 510,
+      "read": -406.6,
+      "top": 1005.23,
+      "rows": 38.03
+     },
+     {
+      "bits": 212.11,
+      "n": 258,
+      "read": -16.63,
+      "top": 188.67,
+      "rows": 40.07
+     }
+    ],
+    "total": 1905.63,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 148.83,
+      "n": 258,
+      "read": -732.32,
+      "top": 846.61,
+      "rows": 34.53
+     },
+     {
+      "bits": -94.07,
+      "n": 258,
+      "read": -191.07,
+      "top": 59.92,
+      "rows": 37.08
+     },
+     {
+      "bits": 79.15,
+      "n": 258,
+      "read": -16.63,
+      "top": 56.07,
+      "rows": 39.71
+     }
+    ],
+    "total": 133.91,
+    "complete": true
+   }
+  },
+  {
+   "size": 4,
+   "configuration": "[[[wP N4 bP] N5 bB] N6 bK]",
+   "classes": [
+    "fianchetto with king"
+   ],
+   "occurrences": 190,
+   "positions": 190,
+   "anchors": {
+    "g2": 185,
+    "b2": 5
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 6359.53,
+      "n": 3592,
+      "read": -6164.73,
+      "top": 12490.39,
+      "rows": 33.86
+     },
+     {
+      "bits": 22.87,
+      "n": 440,
+      "read": -1187.52,
+      "top": 1175.33,
+      "rows": 35.05
+     },
+     {
+      "bits": 299.47,
+      "n": 190,
+      "read": -45.57,
+      "top": 308.17,
+      "rows": 36.87
+     }
+    ],
+    "total": 6681.86,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 734.55,
+      "n": 190,
+      "read": -431.92,
+      "top": 1134.91,
+      "rows": 31.56
+     },
+     {
+      "bits": -422.9,
+      "n": 190,
+      "read": -521.17,
+      "top": 64.34,
+      "rows": 33.92
+     },
+     {
+      "bits": 50.71,
+      "n": 190,
+      "read": -45.57,
+      "top": 59.92,
+      "rows": 36.36
+     }
+    ],
+    "total": 362.36,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 6137.55,
+      "n": 3592,
+      "read": -6285.38,
+      "top": 12386.01,
+      "rows": 36.92
+     },
+     {
+      "bits": 21.56,
+      "n": 440,
+      "read": -1187.34,
+      "top": 1170.91,
+      "rows": 37.98
+     },
+     {
+      "bits": 298.55,
+      "n": 190,
+      "read": -45.57,
+      "top": 304.31,
+      "rows": 39.8
+     }
+    ],
+    "total": 6457.65,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 723.33,
+      "n": 190,
+      "read": -440.08,
+      "top": 1129.16,
+      "rows": 34.25
+     },
+     {
+      "bits": -424.45,
+      "n": 190,
+      "read": -521.09,
+      "top": 59.92,
+      "rows": 36.72
+     },
+     {
+      "bits": 49.76,
+      "n": 190,
+      "read": -45.57,
+      "top": 56.07,
+      "rows": 39.26
+     }
+    ],
+    "total": 348.64,
+    "complete": true
+   }
+  },
+  {
+   "size": 5,
+   "configuration": "[[[[wR N1 wP] NE1 wP] N6 bP] N7 bR]",
+   "classes": [],
+   "occurrences": 683,
+   "positions": 668,
+   "anchors": {
+    "a1": 603,
+    "f1": 80
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 3056.8,
+      "n": 3920,
+      "read": -3489.29,
+      "top": 6512.16,
+      "rows": 33.93
+     },
+     {
+      "bits": 1077.46,
+      "n": 2343,
+      "read": -1809.14,
+      "top": 2850.02,
+      "rows": 36.58
+     },
+     {
+      "bits": 1342.26,
+      "n": 966,
+      "read": -658.6,
+      "top": 1962.06,
+      "rows": 38.8
+     },
+     {
+      "bits": 551.59,
+      "n": 683,
+      "read": -399.26,
+      "top": 909.43,
+      "rows": 41.42
+     }
+    ],
+    "total": 6028.11,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 2279.6,
+      "n": 683,
+      "read": -471.78,
+      "top": 2718.81,
+      "rows": 32.56
+     },
+     {
+      "bits": -350.9,
+      "n": 683,
+      "read": -450.48,
+      "top": 64.34,
+      "rows": 35.24
+     },
+     {
+      "bits": -373.65,
+      "n": 683,
+      "read": -471.61,
+      "top": 59.92,
+      "rows": 38.04
+     },
+     {
+      "bits": -302.24,
+      "n": 683,
+      "read": -399.26,
+      "top": 56.07,
+      "rows": 40.94
+     }
+    ],
+    "total": 1252.81,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 3036.65,
+      "n": 3904,
+      "read": -3459.31,
+      "top": 6458.97,
+      "rows": 36.99
+     },
+     {
+      "bits": 1063.23,
+      "n": 2337,
+      "read": -1802.29,
+      "top": 2825.79,
+      "rows": 39.73
+     },
+     {
+      "bits": 1337.61,
+      "n": 966,
+      "read": -659.97,
+      "top": 1955.6,
+      "rows": 41.97
+     },
+     {
+      "bits": 551.46,
+      "n": 683,
+      "read": -399.26,
+      "top": 906.04,
+      "rows": 44.67
+     }
+    ],
+    "total": 5988.95,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 2275.77,
+      "n": 683,
+      "read": -471.78,
+      "top": 2712.13,
+      "rows": 35.41
+     },
+     {
+      "bits": -355.88,
+      "n": 683,
+      "read": -450.48,
+      "top": 56.38,
+      "rows": 38.22
+     },
+     {
+      "bits": -375.37,
+      "n": 683,
+      "read": -472.58,
+      "top": 56.07,
+      "rows": 41.14
+     },
+     {
+      "bits": -302.4,
+      "n": 683,
+      "read": -399.26,
+      "top": 52.69,
+      "rows": 44.17
+     }
+    ],
+    "total": 1242.11,
+    "complete": true
+   }
+  },
+  {
+   "size": 5,
+   "configuration": "[[[[bP E1 bP] E2 bP] N1 bR] NE1 bK]",
+   "classes": [
+    "castled king (K+R+pawns)"
+   ],
+   "occurrences": 660,
+   "positions": 660,
+   "anchors": {
+    "f7": 660
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 4320.18,
+      "n": 5237,
+      "read": -7120.92,
+      "top": 11406.95,
+      "rows": 34.16
+     },
+     {
+      "bits": 1746.7,
+      "n": 1750,
+      "read": -1942.06,
+      "top": 3652.41,
+      "rows": 36.35
+     },
+     {
+      "bits": 992.11,
+      "n": 956,
+      "read": -768.16,
+      "top": 1721.48,
+      "rows": 38.79
+     },
+     {
+      "bits": 112.97,
+      "n": 660,
+      "read": -47.09,
+      "top": 118.68,
+      "rows": 41.38
+     }
+    ],
+    "total": 7171.96,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 2000.82,
+      "n": 660,
+      "read": -308.34,
+      "top": 2276.62,
+      "rows": 32.54
+     },
+     {
+      "bits": -182.34,
+      "n": 660,
+      "read": -281.89,
+      "top": 64.34,
+      "rows": 35.21
+     },
+     {
+      "bits": -510.62,
+      "n": 660,
+      "read": -608.53,
+      "top": 59.92,
+      "rows": 37.99
+     },
+     {
+      "bits": 49.87,
+      "n": 660,
+      "read": -47.09,
+      "top": 56.07,
+      "rows": 40.89
+     }
+    ],
+    "total": 1357.74,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 3687.56,
+      "n": 5090,
+      "read": -6956.81,
+      "top": 10607.14,
+      "rows": 37.23
+     },
+     {
+      "bits": 1672.09,
+      "n": 1739,
+      "read": -1965.0,
+      "top": 3597.63,
+      "rows": 39.46
+     },
+     {
+      "bits": 991.43,
+      "n": 956,
+      "read": -768.16,
+      "top": 1717.63,
+      "rows": 41.96
+     },
+     {
+      "bits": 112.83,
+      "n": 660,
+      "read": -47.09,
+      "top": 115.3,
+      "rows": 44.62
+     }
+    ],
+    "total": 6463.91,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 1996.85,
+      "n": 660,
+      "read": -308.44,
+      "top": 2269.92,
+      "rows": 35.38
+     },
+     {
+      "bits": -185.52,
+      "n": 660,
+      "read": -283.62,
+      "top": 59.92,
+      "rows": 38.18
+     },
+     {
+      "bits": -511.37,
+      "n": 660,
+      "read": -608.53,
+      "top": 56.07,
+      "rows": 41.09
+     },
+     {
+      "bits": 49.71,
+      "n": 660,
+      "read": -47.09,
+      "top": 52.69,
+      "rows": 44.11
+     }
+    ],
+    "total": 1349.67,
+    "complete": true
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[[[wR E1 wK] N1 wP] NE1 wP] ENE wP]",
+    "chunks of both (b)": 2146.49,
+    "merge": 1228.1,
+    "read": 0.0,
+    "top": -44.63,
+    "rows": 1272.73
+   }
+  },
+  {
+   "size": 5,
+   "configuration": "[[[[wR E1 wK] N1 wP] NE1 wP] ENE wP]",
+   "classes": [
+    "castled king (K+R+pawns)"
+   ],
+   "occurrences": 649,
+   "positions": 649,
+   "anchors": {
+    "f1": 649
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 598.83,
+      "n": 1797,
+      "read": -633.76,
+      "top": 1199.28,
+      "rows": 33.32
+     },
+     {
+      "bits": 856.08,
+      "n": 1231,
+      "read": -842.7,
+      "top": 1662.88,
+      "rows": 35.9
+     },
+     {
+      "bits": 415.73,
+      "n": 987,
+      "read": -582.54,
+      "top": 959.65,
+      "rows": 38.63
+     },
+     {
+      "bits": 504.73,
+      "n": 649,
+      "read": -521.91,
+      "top": 985.48,
+      "rows": 41.16
+     }
+    ],
+    "total": 2375.38,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 1768.45,
+      "n": 649,
+      "read": -137.81,
+      "top": 1873.73,
+      "rows": 32.52
+     },
+     {
+      "bits": -288.71,
+      "n": 649,
+      "read": -388.24,
+      "top": 64.34,
+      "rows": 35.19
+     },
+     {
+      "bits": -258.49,
+      "n": 649,
+      "read": -356.38,
+      "top": 59.92,
+      "rows": 37.97
+     },
+     {
+      "bits": -424.7,
+      "n": 649,
+      "read": -521.63,
+      "top": 56.07,
+      "rows": 40.86
+     }
+    ],
+    "total": 796.56,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 596.67,
+      "n": 1797,
+      "read": -633.76,
+      "top": 1194.14,
+      "rows": 36.29
+     },
+     {
+      "bits": 857.45,
+      "n": 1226,
+      "read": -837.86,
+      "top": 1656.35,
+      "rows": 38.96
+     },
+     {
+      "bits": 410.68,
+      "n": 983,
+      "read": -579.58,
+      "top": 948.46,
+      "rows": 41.79
+     },
+     {
+      "bits": 501.7,
+      "n": 646,
+      "read": -518.82,
+      "top": 976.14,
+      "rows": 44.38
+     }
+    ],
+    "total": 2366.5,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 1766.16,
+      "n": 649,
+      "read": -137.81,
+      "top": 1868.6,
+      "rows": 35.37
+     },
+     {
+      "bits": -260.24,
+      "n": 647,
+      "read": -386.66,
+      "top": 88.27,
+      "rows": 38.16
+     },
+     {
+      "bits": -236.91,
+      "n": 646,
+      "read": -354.4,
+      "top": 76.44,
+      "rows": 41.06
+     },
+     {
+      "bits": -424.38,
+      "n": 646,
+      "read": -518.55,
+      "top": 50.1,
+      "rows": 44.07
+     }
+    ],
+    "total": 844.63,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[[[wR E1 wK] N1 wP] NE1 wP] ENE wP]",
+      649
+     ],
+     [
+      "[[[[wR E1 wK] N1 wP] NE1 wP] N2 wN]",
+      418
+     ],
+     [
+      "[[[[wR E1 wK] N1 wP] NE1 wP] NE2 wP]",
+      305
+     ],
+     [
+      "[[[[wR E1 wK] N1 wP] NE1 wP] NW2 wB]",
+      146
+     ],
+     [
+      "[[[[wR E1 wK] N1 wP] NE1 wP] N6 bP]",
+      144
+     ],
+     [
+      "[[[[wR E1 wK] N1 wP] NE1 wP] NW2 wP]",
+      124
+     ]
+    ],
+    "chunks of all variants (b)": 3084.3,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -498.2,
+      "read": 0.0,
+      "top": -130.73,
+      "rows": -367.48
+     },
+     {
+      "level": 2,
+      "bits": -470.14,
+      "read": 0.0,
+      "top": -153.5,
+      "rows": -316.63
+     },
+     {
+      "level": 3,
+      "bits": -452.08,
+      "read": 0.0,
+      "top": -186.07,
+      "rows": -266.01
+     },
+     {
+      "level": 4,
+      "bits": -452.51,
+      "read": 0.0,
+      "top": -1629.39,
+      "rows": 1176.88
+     }
+    ],
+    "total": 1211.37
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[[[bP E1 bP] E2 bP] N1 bR] NE1 bK]",
+    "chunks of both (b)": 2146.49,
+    "merge": 1228.1,
+    "read": 0.0,
+    "top": -44.63,
+    "rows": 1272.73
+   }
+  },
+  {
+   "size": 5,
+   "configuration": "[[[[wK NW1 wP] N1 wP] N6 bP] N7 bK]",
+   "classes": [],
+   "occurrences": 493,
+   "positions": 493,
+   "anchors": {
+    "g1": 490,
+    "h1": 2,
+    "c1": 1
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 994.54,
+      "n": 2358,
+      "read": -2116.8,
+      "top": 3077.8,
+      "rows": 33.53
+     },
+     {
+      "bits": 533.66,
+      "n": 1799,
+      "read": -1443.71,
+      "top": 1941.09,
+      "rows": 36.28
+     },
+     {
+      "bits": 1346.4,
+      "n": 745,
+      "read": -430.74,
+      "top": 1738.72,
+      "rows": 38.42
+     },
+     {
+      "bits": 695.52,
+      "n": 493,
+      "read": -37.04,
+      "top": 691.68,
+      "rows": 40.89
+     }
+    ],
+    "total": 3570.13,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 1671.9,
+      "n": 493,
+      "read": -281.31,
+      "top": 1920.9,
+      "rows": 32.31
+     },
+     {
+      "bits": -159.14,
+      "n": 493,
+      "read": -258.39,
+      "top": 64.34,
+      "rows": 34.91
+     },
+     {
+      "bits": -169.3,
+      "n": 493,
+      "read": -266.84,
+      "top": 59.92,
+      "rows": 37.61
+     },
+     {
+      "bits": 59.45,
+      "n": 493,
+      "read": -37.04,
+      "top": 56.07,
+      "rows": 40.42
+     }
+    ],
+    "total": 1402.91,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 978.74,
+      "n": 2343,
+      "read": -2091.0,
+      "top": 3033.22,
+      "rows": 36.53
+     },
+     {
+      "bits": 520.72,
+      "n": 1793,
+      "read": -1436.77,
+      "top": 1918.09,
+      "rows": 39.39
+     },
+     {
+      "bits": 1340.41,
+      "n": 744,
+      "read": -430.38,
+      "top": 1729.23,
+      "rows": 41.55
+     },
+     {
+      "bits": 694.94,
+      "n": 492,
+      "read": -36.97,
+      "top": 687.83,
+      "rows": 44.08
+     }
+    ],
+    "total": 3534.81,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 1665.62,
+      "n": 492,
+      "read": -280.58,
+      "top": 1911.08,
+      "rows": 35.12
+     },
+     {
+      "bits": -161.66,
+      "n": 492,
+      "read": -257.75,
+      "top": 58.26,
+      "rows": 37.84
+     },
+     {
+      "bits": -169.62,
+      "n": 492,
+      "read": -266.35,
+      "top": 56.07,
+      "rows": 40.66
+     },
+     {
+      "bits": 59.3,
+      "n": 492,
+      "read": -36.97,
+      "top": 52.69,
+      "rows": 43.58
+     }
+    ],
+    "total": 1393.64,
+    "complete": true
+   }
+  },
+  {
+   "size": 5,
+   "configuration": "[[[[wK NW1 wP] N1 wP] NE1 wP] N6 bP]",
+   "classes": [],
+   "occurrences": 446,
+   "positions": 446,
+   "anchors": {
+    "g1": 441,
+    "b1": 5
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 994.54,
+      "n": 2358,
+      "read": -2116.8,
+      "top": 3077.8,
+      "rows": 33.53
+     },
+     {
+      "bits": 533.66,
+      "n": 1799,
+      "read": -1443.71,
+      "top": 1941.09,
+      "rows": 36.28
+     },
+     {
+      "bits": 658.12,
+      "n": 965,
+      "read": -880.69,
+      "top": 1500.11,
+      "rows": 38.69
+     },
+     {
+      "bits": 835.26,
+      "n": 446,
+      "read": -247.25,
+      "top": 1041.71,
+      "rows": 40.8
+     }
+    ],
+    "total": 3021.58,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 1578.78,
+      "n": 446,
+      "read": -256.01,
+      "top": 1802.55,
+      "rows": 32.23
+     },
+     {
+      "bits": -135.54,
+      "n": 446,
+      "read": -234.69,
+      "top": 64.34,
+      "rows": 34.8
+     },
+     {
+      "bits": -236.75,
+      "n": 446,
+      "read": -334.15,
+      "top": 59.92,
+      "rows": 37.48
+     },
+     {
+      "bits": -150.92,
+      "n": 446,
+      "read": -247.25,
+      "top": 56.07,
+      "rows": 40.26
+     }
+    ],
+    "total": 1055.56,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 978.74,
+      "n": 2343,
+      "read": -2091.0,
+      "top": 3033.22,
+      "rows": 36.53
+     },
+     {
+      "bits": 520.72,
+      "n": 1793,
+      "read": -1436.77,
+      "top": 1918.09,
+      "rows": 39.39
+     },
+     {
+      "bits": 649.89,
+      "n": 962,
+      "read": -876.63,
+      "top": 1484.66,
+      "rows": 41.86
+     },
+     {
+      "bits": 832.65,
+      "n": 445,
+      "read": -246.73,
+      "top": 1035.4,
+      "rows": 43.98
+     }
+    ],
+    "total": 2982.01,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 1572.58,
+      "n": 445,
+      "read": -255.28,
+      "top": 1792.84,
+      "rows": 35.03
+     },
+     {
+      "bits": -137.92,
+      "n": 445,
+      "read": -234.06,
+      "top": 58.43,
+      "rows": 37.72
+     },
+     {
+      "bits": -238.34,
+      "n": 445,
+      "read": -333.24,
+      "top": 54.39,
+      "rows": 40.51
+     },
+     {
+      "bits": -150.64,
+      "n": 445,
+      "read": -246.73,
+      "top": 52.69,
+      "rows": 43.4
+     }
+    ],
+    "total": 1045.67,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[[[wK NW1 wP] N1 wP] NE1 wP] N6 bP]",
+      446
+     ],
+     [
+      "[[[[wK NW1 wP] N1 wP] NE1 wP] NNW wN]",
+      405
+     ],
+     [
+      "[[[[wK NW1 wP] N1 wP] NE1 wP] NW2 wP]",
+      183
+     ],
+     [
+      "[[[[wK NW1 wP] N1 wP] NE1 wP] N5 bP]",
+      154
+     ],
+     [
+      "[[[[wK NW1 wP] N1 wP] NE1 wP] NW3 wP]",
+      147
+     ],
+     [
+      "[[[[wK NW1 wP] N1 wP] NE1 wP] NW6 bP]",
+      103
+     ]
+    ],
+    "chunks of all variants (b)": 3765.12,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -543.01,
+      "read": 0.0,
+      "top": -130.73,
+      "rows": -412.28
+     },
+     {
+      "level": 2,
+      "bits": -501.85,
+      "read": 0.0,
+      "top": -153.5,
+      "rows": -348.35
+     },
+     {
+      "level": 3,
+      "bits": -471.98,
+      "read": 0.0,
+      "top": -186.07,
+      "rows": -285.91
+     },
+     {
+      "level": 4,
+      "bits": -464.97,
+      "read": 0.0,
+      "top": -1845.92,
+      "rows": 1380.95
+     }
+    ],
+    "total": 1783.3
+   }
+  },
+  {
+   "size": 5,
+   "configuration": "[[[[wR N1 wP] NE1 wP] ENE wP] N6 bP]",
+   "classes": [],
+   "occurrences": 433,
+   "positions": 424,
+   "anchors": {
+    "a1": 325,
+    "f1": 108
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 3056.8,
+      "n": 3920,
+      "read": -3489.29,
+      "top": 6512.16,
+      "rows": 33.93
+     },
+     {
+      "bits": 1077.46,
+      "n": 2343,
+      "read": -1809.14,
+      "top": 2850.02,
+      "rows": 36.58
+     },
+     {
+      "bits": 808.61,
+      "n": 1165,
+      "read": -1516.85,
+      "top": 2286.47,
+      "rows": 38.99
+     },
+     {
+      "bits": 756.37,
+      "n": 433,
+      "read": -272.54,
+      "top": 988.0,
+      "rows": 40.91
+     }
+    ],
+    "total": 5699.24,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 1920.76,
+      "n": 433,
+      "read": -280.83,
+      "top": 2169.38,
+      "rows": 32.21
+     },
+     {
+      "bits": -162.31,
+      "n": 433,
+      "read": -261.42,
+      "top": 64.34,
+      "rows": 34.77
+     },
+     {
+      "bits": -447.44,
+      "n": 433,
+      "read": -544.8,
+      "top": 59.92,
+      "rows": 37.44
+     },
+     {
+      "bits": -176.26,
+      "n": 433,
+      "read": -272.54,
+      "top": 56.07,
+      "rows": 40.21
+     }
+    ],
+    "total": 1134.75,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 3036.65,
+      "n": 3904,
+      "read": -3459.31,
+      "top": 6458.97,
+      "rows": 36.99
+     },
+     {
+      "bits": 1063.23,
+      "n": 2337,
+      "read": -1802.29,
+      "top": 2825.79,
+      "rows": 39.73
+     },
+     {
+      "bits": 807.26,
+      "n": 1161,
+      "read": -1508.47,
+      "top": 2273.54,
+      "rows": 42.19
+     },
+     {
+      "bits": 753.4,
+      "n": 433,
+      "read": -273.05,
+      "top": 982.36,
+      "rows": 44.09
+     }
+    ],
+    "total": 5660.54,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 1917.29,
+      "n": 433,
+      "read": -280.83,
+      "top": 2163.12,
+      "rows": 35.0
+     },
+     {
+      "bits": -165.81,
+      "n": 433,
+      "read": -261.42,
+      "top": 57.92,
+      "rows": 37.68
+     },
+     {
+      "bits": -449.02,
+      "n": 433,
+      "read": -544.8,
+      "top": 55.32,
+      "rows": 40.47
+     },
+     {
+      "bits": -177.01,
+      "n": 433,
+      "read": -273.05,
+      "top": 52.69,
+      "rows": 43.35
+     }
+    ],
+    "total": 1125.45,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[[[wR N1 wP] NE1 wP] ENE wP] N6 bP]",
+      433
+     ],
+     [
+      "[[[[wR N1 wP] NE1 wP] ENE wP] N2 wN]",
+      280
+     ],
+     [
+      "[[[[wR N1 wP] NE1 wP] ENE wP] NE2 wN]",
+      191
+     ],
+     [
+      "[[[[wR N1 wP] NE1 wP] ENE wP] NNW wP]",
+      152
+     ],
+     [
+      "[[[[wR N1 wP] NE1 wP] ENE wP] N5 bP]",
+      128
+     ],
+     [
+      "[[[[wR N1 wP] NE1 wP] ENE wP] NW2 wB]",
+      105
+     ]
+    ],
+    "chunks of all variants (b)": 3864.19,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -552.98,
+      "read": 0.0,
+      "top": -130.72,
+      "rows": -422.25
+     },
+     {
+      "level": 2,
+      "bits": -508.67,
+      "read": 0.0,
+      "top": -153.5,
+      "rows": -355.17
+     },
+     {
+      "level": 3,
+      "bits": -476.21,
+      "read": 0.0,
+      "top": -186.07,
+      "rows": -290.14
+     },
+     {
+      "level": 4,
+      "bits": -60.76,
+      "read": 0.0,
+      "top": -1733.11,
+      "rows": 1672.35
+     }
+    ],
+    "total": 2265.56
+   }
+  },
+  {
+   "size": 5,
+   "configuration": "[[[[wR E1 wK] N1 wP] NE1 wP] N2 wN]",
+   "classes": [
+    "castled king (K+R+pawns)"
+   ],
+   "occurrences": 418,
+   "positions": 418,
+   "anchors": {
+    "f1": 418
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 598.83,
+      "n": 1797,
+      "read": -633.76,
+      "top": 1199.28,
+      "rows": 33.32
+     },
+     {
+      "bits": 856.08,
+      "n": 1231,
+      "read": -842.7,
+      "top": 1662.88,
+      "rows": 35.9
+     },
+     {
+      "bits": 415.73,
+      "n": 987,
+      "read": -582.54,
+      "top": 959.65,
+      "rows": 38.63
+     },
+     {
+      "bits": 416.44,
+      "n": 418,
+      "read": -665.66,
+      "top": 1041.46,
+      "rows": 40.64
+     }
+    ],
+    "total": 2287.09,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 1494.5,
+      "n": 418,
+      "read": -84.23,
+      "top": 1546.55,
+      "rows": 32.18
+     },
+     {
+      "bits": -127.86,
+      "n": 418,
+      "read": -226.94,
+      "top": 64.34,
+      "rows": 34.74
+     },
+     {
+      "bits": -114.57,
+      "n": 418,
+      "read": -211.89,
+      "top": 59.92,
+      "rows": 37.4
+     },
+     {
+      "bits": -569.43,
+      "n": 418,
+      "read": -665.66,
+      "top": 56.07,
+      "rows": 40.15
+     }
+    ],
+    "total": 682.62,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 596.67,
+      "n": 1797,
+      "read": -633.76,
+      "top": 1194.14,
+      "rows": 36.29
+     },
+     {
+      "bits": 857.45,
+      "n": 1226,
+      "read": -837.86,
+      "top": 1656.35,
+      "rows": 38.96
+     },
+     {
+      "bits": 410.68,
+      "n": 983,
+      "read": -579.58,
+      "top": 948.46,
+      "rows": 41.79
+     },
+     {
+      "bits": 414.45,
+      "n": 418,
+      "read": -664.24,
+      "top": 1034.89,
+      "rows": 43.8
+     }
+    ],
+    "total": 2279.25,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 1492.15,
+      "n": 418,
+      "read": -84.23,
+      "top": 1541.41,
+      "rows": 34.97
+     },
+     {
+      "bits": -131.6,
+      "n": 418,
+      "read": -226.94,
+      "top": 57.7,
+      "rows": 37.64
+     },
+     {
+      "bits": -116.8,
+      "n": 418,
+      "read": -211.89,
+      "top": 54.68,
+      "rows": 40.42
+     },
+     {
+      "bits": -568.26,
+      "n": 418,
+      "read": -664.24,
+      "top": 52.69,
+      "rows": 43.29
+     }
+    ],
+    "total": 675.5,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[[[wR E1 wK] N1 wP] NE1 wP] ENE wP]",
+      649
+     ],
+     [
+      "[[[[wR E1 wK] N1 wP] NE1 wP] N2 wN]",
+      418
+     ],
+     [
+      "[[[[wR E1 wK] N1 wP] NE1 wP] NE2 wP]",
+      305
+     ],
+     [
+      "[[[[wR E1 wK] N1 wP] NE1 wP] NW2 wB]",
+      146
+     ],
+     [
+      "[[[[wR E1 wK] N1 wP] NE1 wP] N6 bP]",
+      144
+     ],
+     [
+      "[[[[wR E1 wK] N1 wP] NE1 wP] NW2 wP]",
+      124
+     ]
+    ],
+    "chunks of all variants (b)": 3084.3,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -498.2,
+      "read": 0.0,
+      "top": -130.73,
+      "rows": -367.48
+     },
+     {
+      "level": 2,
+      "bits": -470.14,
+      "read": 0.0,
+      "top": -153.5,
+      "rows": -316.63
+     },
+     {
+      "level": 3,
+      "bits": -452.08,
+      "read": 0.0,
+      "top": -186.07,
+      "rows": -266.01
+     },
+     {
+      "level": 4,
+      "bits": -452.51,
+      "read": 0.0,
+      "top": -1629.39,
+      "rows": 1176.88
+     }
+    ],
+    "total": 1211.37
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[[[bN N1 bP] NE1 bP] N2 bR] NNE bK]",
+    "chunks of both (b)": 1434.36,
+    "merge": 709.52,
+    "read": 0.0,
+    "top": -44.63,
+    "rows": 754.15
+   }
+  },
+  {
+   "size": 5,
+   "configuration": "[[[[bP NE1 bP] ENE bP] NNE bR] NE2 bK]",
+   "classes": [
+    "castled king (K+R+pawns)"
+   ],
+   "occurrences": 396,
+   "positions": 396,
+   "anchors": {
+    "e6": 396
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 2692.68,
+      "n": 3619,
+      "read": -5437.97,
+      "top": 8096.78,
+      "rows": 33.87
+     },
+     {
+      "bits": 786.33,
+      "n": 841,
+      "read": -1056.34,
+      "top": 1807.03,
+      "rows": 35.64
+     },
+     {
+      "bits": 397.61,
+      "n": 251,
+      "read": -210.55,
+      "top": 570.92,
+      "rows": 37.25
+     },
+     {
+      "bits": 116.26,
+      "n": 246,
+      "read": -15.81,
+      "top": 92.21,
+      "rows": 39.86
+     }
+    ],
+    "total": 3992.88,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 1183.29,
+      "n": 396,
+      "read": -158.59,
+      "top": 1309.74,
+      "rows": 32.14
+     },
+     {
+      "bits": -123.12,
+      "n": 396,
+      "read": -222.14,
+      "top": 64.34,
+      "rows": 34.68
+     },
+     {
+      "bits": -240.1,
+      "n": 396,
+      "read": -337.34,
+      "top": 59.92,
+      "rows": 37.32
+     },
+     {
+      "bits": 69.76,
+      "n": 396,
+      "read": -26.38,
+      "top": 56.07,
+      "rows": 40.06
+     }
+    ],
+    "total": 889.84,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 2801.17,
+      "n": 2782,
+      "read": -3642.57,
+      "top": 6407.05,
+      "rows": 36.69
+     },
+     {
+      "bits": 669.7,
+      "n": 804,
+      "read": -968.48,
+      "top": 1599.59,
+      "rows": 38.58
+     },
+     {
+      "bits": 366.19,
+      "n": 264,
+      "read": -221.61,
+      "top": 547.56,
+      "rows": 40.24
+     },
+     {
+      "bits": 121.8,
+      "n": 258,
+      "read": -16.63,
+      "top": 95.47,
+      "rows": 42.96
+     }
+    ],
+    "total": 3958.86,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 940.05,
+      "n": 319,
+      "read": -122.5,
+      "top": 1027.83,
+      "rows": 34.72
+     },
+     {
+      "bits": -73.71,
+      "n": 319,
+      "read": -170.96,
+      "top": 59.92,
+      "rows": 37.33
+     },
+     {
+      "bits": -169.88,
+      "n": 319,
+      "read": -265.97,
+      "top": 56.07,
+      "rows": 40.02
+     },
+     {
+      "bits": 74.64,
+      "n": 319,
+      "read": -20.85,
+      "top": 52.69,
+      "rows": 42.8
+     }
+    ],
+    "total": 771.09,
+    "complete": true
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[[[wR E1 wK] N1 wP] NE1 wP] NNW wP]",
+    "chunks of both (b)": 1462.1,
+    "merge": 488.35,
+    "read": 0.0,
+    "top": -44.63,
+    "rows": 532.98
+   }
+  },
+  {
+   "size": 5,
+   "configuration": "[[[[bN N1 bP] NE1 bP] N2 bR] NNE bK]",
+   "classes": [
+    "castled king (K+R+pawns)"
+   ],
+   "occurrences": 373,
+   "positions": 373,
+   "anchors": {
+    "f6": 373
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 1181.03,
+      "n": 1685,
+      "read": -1659.71,
+      "top": 2807.47,
+      "rows": 33.27
+     },
+     {
+      "bits": 778.58,
+      "n": 812,
+      "read": -598.25,
+      "top": 1341.31,
+      "rows": 35.51
+     },
+     {
+      "bits": 480.88,
+      "n": 390,
+      "read": -322.97,
+      "top": 766.25,
+      "rows": 37.6
+     },
+     {
+      "bits": 141.3,
+      "n": 368,
+      "read": -24.34,
+      "top": 125.36,
+      "rows": 40.29
+     }
+    ],
+    "total": 2581.79,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 995.86,
+      "n": 373,
+      "read": -139.76,
+      "top": 1103.54,
+      "rows": 32.09
+     },
+     {
+      "bits": -89.02,
+      "n": 373,
+      "read": -187.99,
+      "top": 64.34,
+      "rows": 34.62
+     },
+     {
+      "bits": -215.94,
+      "n": 373,
+      "read": -313.11,
+      "top": 59.92,
+      "rows": 37.25
+     },
+     {
+      "bits": 71.34,
+      "n": 373,
+      "read": -24.7,
+      "top": 56.07,
+      "rows": 39.97
+     }
+    ],
+    "total": 762.23,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 1128.2,
+      "n": 1685,
+      "read": -1710.38,
+      "top": 2802.34,
+      "rows": 36.23
+     },
+     {
+      "bits": 765.94,
+      "n": 809,
+      "read": -600.37,
+      "top": 1327.79,
+      "rows": 38.52
+     },
+     {
+      "bits": 480.06,
+      "n": 390,
+      "read": -322.97,
+      "top": 762.4,
+      "rows": 40.63
+     },
+     {
+      "bits": 141.05,
+      "n": 368,
+      "read": -24.34,
+      "top": 121.97,
+      "rows": 43.42
+     }
+    ],
+    "total": 2515.24,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 993.32,
+      "n": 373,
+      "read": -139.95,
+      "top": 1098.41,
+      "rows": 34.87
+     },
+     {
+      "bits": -90.65,
+      "n": 373,
+      "read": -188.08,
+      "top": 59.92,
+      "rows": 37.51
+     },
+     {
+      "bits": -216.79,
+      "n": 373,
+      "read": -313.11,
+      "top": 56.07,
+      "rows": 40.25
+     },
+     {
+      "bits": 71.07,
+      "n": 373,
+      "read": -24.7,
+      "top": 52.69,
+      "rows": 43.08
+     }
+    ],
+    "total": 756.95,
+    "complete": true
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[[[wR E1 wK] N1 wP] NE1 wP] N2 wN]",
+    "chunks of both (b)": 1434.36,
+    "merge": 709.52,
+    "read": 0.0,
+    "top": -44.63,
+    "rows": 754.15
+   }
+  },
+  {
+   "size": 5,
+   "configuration": "[[[[bP E1 bP] WNW bQ] N1 bR] NE1 bK]",
+   "classes": [
+    "castled king (K+R+pawns)"
+   ],
+   "occurrences": 369,
+   "positions": 369,
+   "anchors": {
+    "f7": 369
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 4320.18,
+      "n": 5237,
+      "read": -7120.92,
+      "top": 11406.95,
+      "rows": 34.16
+     },
+     {
+      "bits": 1515.45,
+      "n": 613,
+      "read": -560.74,
+      "top": 2040.79,
+      "rows": 35.4
+     },
+     {
+      "bits": 331.23,
+      "n": 385,
+      "read": -312.97,
+      "top": 606.49,
+      "rows": 37.7
+     },
+     {
+      "bits": 182.01,
+      "n": 369,
+      "read": -24.42,
+      "top": 166.01,
+      "rows": 40.41
+     }
+    ],
+    "total": 6348.86,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 1477.52,
+      "n": 369,
+      "read": -206.63,
+      "top": 1652.06,
+      "rows": 32.08
+     },
+     {
+      "bits": -154.3,
+      "n": 369,
+      "read": -253.25,
+      "top": 64.34,
+      "rows": 34.61
+     },
+     {
+      "bits": -202.55,
+      "n": 369,
+      "read": -299.7,
+      "top": 59.92,
+      "rows": 37.23
+     },
+     {
+      "bits": 71.61,
+      "n": 369,
+      "read": -24.42,
+      "top": 56.07,
+      "rows": 39.95
+     }
+    ],
+    "total": 1192.28,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 3687.56,
+      "n": 5090,
+      "read": -6956.81,
+      "top": 10607.14,
+      "rows": 37.23
+     },
+     {
+      "bits": 1493.75,
+      "n": 612,
+      "read": -556.97,
+      "top": 2012.34,
+      "rows": 38.37
+     },
+     {
+      "bits": 330.41,
+      "n": 385,
+      "read": -312.97,
+      "top": 602.64,
+      "rows": 40.73
+     },
+     {
+      "bits": 181.76,
+      "n": 369,
+      "read": -24.42,
+      "top": 162.63,
+      "rows": 43.55
+     }
+    ],
+    "total": 5693.47,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 1474.22,
+      "n": 369,
+      "read": -206.74,
+      "top": 1646.1,
+      "rows": 34.86
+     },
+     {
+      "bits": -155.84,
+      "n": 369,
+      "read": -253.25,
+      "top": 59.92,
+      "rows": 37.5
+     },
+     {
+      "bits": -203.4,
+      "n": 369,
+      "read": -299.7,
+      "top": 56.07,
+      "rows": 40.23
+     },
+     {
+      "bits": 71.34,
+      "n": 369,
+      "read": -24.42,
+      "top": 52.69,
+      "rows": 43.06
+     }
+    ],
+    "total": 1186.32,
+    "complete": true
+   }
+  },
+  {
+   "size": 5,
+   "configuration": "[[[[bP NW1 bP] N1 bB] NE1 bP] N2 bK]",
+   "classes": [
+    "fianchetto with king"
+   ],
+   "occurrences": 249,
+   "positions": 249,
+   "anchors": {
+    "g6": 239,
+    "e6": 7,
+    "b6": 3
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 1664.2,
+      "n": 4023,
+      "read": -6840.2,
+      "top": 8470.44,
+      "rows": 33.95
+     },
+     {
+      "bits": 85.25,
+      "n": 663,
+      "read": -2027.25,
+      "top": 2077.06,
+      "rows": 35.44
+     },
+     {
+      "bits": 331.19,
+      "n": 354,
+      "read": -283.95,
+      "top": 577.54,
+      "rows": 37.59
+     },
+     {
+      "bits": 255.93,
+      "n": 247,
+      "read": -45.46,
+      "top": 261.49,
+      "rows": 39.89
+     }
+    ],
+    "total": 2336.56,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 822.0,
+      "n": 249,
+      "read": -167.59,
+      "top": 957.82,
+      "rows": 31.77
+     },
+     {
+      "bits": -601.69,
+      "n": 249,
+      "read": -700.23,
+      "top": 64.34,
+      "rows": 34.2
+     },
+     {
+      "bits": -33.36,
+      "n": 249,
+      "read": -130.0,
+      "top": 59.92,
+      "rows": 36.72
+     },
+     {
+      "bits": 45.94,
+      "n": 249,
+      "read": -49.45,
+      "top": 56.07,
+      "rows": 39.32
+     }
+    ],
+    "total": 232.88,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 1794.71,
+      "n": 3228,
+      "read": -4833.4,
+      "top": 6591.29,
+      "rows": 36.82
+     },
+     {
+      "bits": -10.16,
+      "n": 612,
+      "read": -1790.49,
+      "top": 1742.02,
+      "rows": 38.31
+     },
+     {
+      "bits": 290.86,
+      "n": 337,
+      "read": -272.08,
+      "top": 522.43,
+      "rows": 40.51
+     },
+     {
+      "bits": 242.85,
+      "n": 239,
+      "read": -35.31,
+      "top": 235.29,
+      "rows": 42.88
+     }
+    ],
+    "total": 2318.26,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 771.92,
+      "n": 240,
+      "read": -143.33,
+      "top": 880.79,
+      "rows": 34.47
+     },
+     {
+      "bits": -580.45,
+      "n": 240,
+      "read": -677.36,
+      "top": 59.92,
+      "rows": 36.99
+     },
+     {
+      "bits": -30.7,
+      "n": 240,
+      "read": -126.37,
+      "top": 56.07,
+      "rows": 39.6
+     },
+     {
+      "bits": 57.67,
+      "n": 240,
+      "read": -37.31,
+      "top": 52.69,
+      "rows": 42.29
+     }
+    ],
+    "total": 218.45,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[[[bP NW1 bP] N1 bB] NE1 bP] N2 bK]",
+      249
+     ],
+     [
+      "[[[[bP NW1 bP] N1 bB] NE1 bP] NNW bR]",
+      212
+     ]
+    ],
+    "chunks of all variants (b)": 603.52,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -90.52,
+      "read": 0.0,
+      "top": -44.63,
+      "rows": -45.9
+     },
+     {
+      "level": 2,
+      "bits": -90.75,
+      "read": 0.0,
+      "top": -47.02,
+      "rows": -43.72
+     },
+     {
+      "level": 3,
+      "bits": -91.27,
+      "read": 0.0,
+      "top": -49.7,
+      "rows": -41.57
+     },
+     {
+      "level": 4,
+      "bits": 61.65,
+      "read": 0.0,
+      "top": -81.05,
+      "rows": 142.7
+     }
+    ],
+    "total": 392.63
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[[[wK NW1 wP] N1 wB] NE1 wP] N2 wP]",
+    "chunks of both (b)": 224.84,
+    "merge": 347.78,
+    "read": 0.0,
+    "top": -44.63,
+    "rows": 392.4
+   }
+  },
+  {
+   "size": 5,
+   "configuration": "[[[[bP N1 bB] NE1 bP] NNW bR] N2 bK]",
+   "classes": [
+    "castled king (K+R+pawns)",
+    "fianchetto with king"
+   ],
+   "occurrences": 227,
+   "positions": 227,
+   "anchors": {
+    "g6": 227
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 1078.41,
+      "n": 1968,
+      "read": -6637.61,
+      "top": 7682.62,
+      "rows": 33.39
+     },
+     {
+      "bits": 651.14,
+      "n": 846,
+      "read": -770.38,
+      "top": 1385.95,
+      "rows": 35.57
+     },
+     {
+      "bits": 433.83,
+      "n": 325,
+      "read": -292.66,
+      "top": 689.05,
+      "rows": 37.43
+     },
+     {
+      "bits": 159.19,
+      "n": 227,
+      "read": -14.52,
+      "top": 134.0,
+      "rows": 39.72
+     }
+    ],
+    "total": 2322.57,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 221.91,
+      "n": 227,
+      "read": -631.16,
+      "top": 821.36,
+      "rows": 31.7
+     },
+     {
+      "bits": -19.44,
+      "n": 227,
+      "read": -117.89,
+      "top": 64.34,
+      "rows": 34.11
+     },
+     {
+      "bits": -70.81,
+      "n": 227,
+      "read": -167.33,
+      "top": 59.92,
+      "rows": 36.6
+     },
+     {
+      "bits": 80.72,
+      "n": 227,
+      "read": -14.52,
+      "top": 56.07,
+      "rows": 39.17
+     }
+    ],
+    "total": 212.37,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 1056.85,
+      "n": 1627,
+      "read": -5233.84,
+      "top": 6254.5,
+      "rows": 36.2
+     },
+     {
+      "bits": 583.63,
+      "n": 690,
+      "read": -600.25,
+      "top": 1145.53,
+      "rows": 38.35
+     },
+     {
+      "bits": 407.38,
+      "n": 312,
+      "read": -268.89,
+      "top": 635.94,
+      "rows": 40.34
+     },
+     {
+      "bits": 158.77,
+      "n": 223,
+      "read": -14.26,
+      "top": 130.34,
+      "rows": 42.69
+     }
+    ],
+    "total": 2206.64,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 212.1,
+      "n": 223,
+      "read": -619.66,
+      "top": 797.36,
+      "rows": 34.4
+     },
+     {
+      "bits": -18.94,
+      "n": 223,
+      "read": -115.77,
+      "top": 59.92,
+      "rows": 36.91
+     },
+     {
+      "bits": -68.68,
+      "n": 223,
+      "read": -164.25,
+      "top": 56.07,
+      "rows": 39.49
+     },
+     {
+      "bits": 80.59,
+      "n": 223,
+      "read": -14.26,
+      "top": 52.69,
+      "rows": 42.16
+     }
+    ],
+    "total": 205.07,
+    "complete": true
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[[[wR E1 wK] NE1 wB] ENE wP] NNE wP]",
+    "chunks of both (b)": 400.01,
+    "merge": 268.7,
+    "read": 0.0,
+    "top": -44.63,
+    "rows": 313.32
+   }
+  },
+  {
+   "size": 5,
+   "configuration": "[[[[bP NW1 bP] N1 bB] NNW bR] N2 bK]",
+   "classes": [
+    "castled king (K+R+pawns)",
+    "fianchetto with king"
+   ],
+   "occurrences": 198,
+   "positions": 198,
+   "anchors": {
+    "g6": 198
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 1664.2,
+      "n": 4023,
+      "read": -6840.2,
+      "top": 8470.44,
+      "rows": 33.95
+     },
+     {
+      "bits": 85.25,
+      "n": 663,
+      "read": -2027.25,
+      "top": 2077.06,
+      "rows": 35.44
+     },
+     {
+      "bits": 414.43,
+      "n": 309,
+      "read": -200.99,
+      "top": 577.98,
+      "rows": 37.45
+     },
+     {
+      "bits": 135.4,
+      "n": 196,
+      "read": -12.45,
+      "top": 108.25,
+      "rows": 39.6
+     }
+    ],
+    "total": 2299.28,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 674.34,
+      "n": 198,
+      "read": -128.98,
+      "top": 771.72,
+      "rows": 31.6
+     },
+     {
+      "bits": -449.99,
+      "n": 198,
+      "read": -548.3,
+      "top": 64.34,
+      "rows": 33.97
+     },
+     {
+      "bits": -48.39,
+      "n": 198,
+      "read": -144.73,
+      "top": 59.92,
+      "rows": 36.42
+     },
+     {
+      "bits": 82.43,
+      "n": 198,
+      "read": -12.59,
+      "top": 56.07,
+      "rows": 38.95
+     }
+    ],
+    "total": 258.39,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 1794.71,
+      "n": 3228,
+      "read": -4833.4,
+      "top": 6591.29,
+      "rows": 36.82
+     },
+     {
+      "bits": -10.16,
+      "n": 612,
+      "read": -1790.49,
+      "top": 1742.02,
+      "rows": 38.31
+     },
+     {
+      "bits": 433.64,
+      "n": 321,
+      "read": -207.9,
+      "top": 601.09,
+      "rows": 40.45
+     },
+     {
+      "bits": 135.05,
+      "n": 194,
+      "read": -12.32,
+      "top": 104.78,
+      "rows": 42.59
+     }
+    ],
+    "total": 2353.24,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 658.55,
+      "n": 196,
+      "read": -127.86,
+      "top": 752.14,
+      "rows": 34.28
+     },
+     {
+      "bits": -445.54,
+      "n": 196,
+      "read": -542.21,
+      "top": 59.92,
+      "rows": 36.75
+     },
+     {
+      "bits": -47.92,
+      "n": 196,
+      "read": -143.29,
+      "top": 56.07,
+      "rows": 39.3
+     },
+     {
+      "bits": 82.17,
+      "n": 196,
+      "read": -12.45,
+      "top": 52.69,
+      "rows": 41.93
+     }
+    ],
+    "total": 247.26,
+    "complete": true
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[[[wR E1 wK] N1 wP] NE1 wB] NNE wP]",
+    "chunks of both (b)": 439.48,
+    "merge": 246.84,
+    "read": 0.0,
+    "top": -44.63,
+    "rows": 291.47
+   }
+  },
+  {
+   "size": 5,
+   "configuration": "[[[[wK NW1 wP] N1 wB] NE1 wP] N2 wP]",
+   "classes": [
+    "fianchetto with king"
+   ],
+   "occurrences": 184,
+   "positions": 184,
+   "anchors": {
+    "g1": 182,
+    "b1": 1,
+    "e1": 1
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 994.54,
+      "n": 2358,
+      "read": -2116.8,
+      "top": 3077.8,
+      "rows": 33.53
+     },
+     {
+      "bits": 355.63,
+      "n": 235,
+      "read": -847.1,
+      "top": 1168.3,
+      "rows": 34.43
+     },
+     {
+      "bits": 153.89,
+      "n": 189,
+      "read": -125.51,
+      "top": 242.67,
+      "rows": 36.72
+     },
+     {
+      "bits": -370.97,
+      "n": 184,
+      "read": -512.6,
+      "top": 102.39,
+      "rows": 39.23
+     }
+    ],
+    "total": 1133.09,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 996.48,
+      "n": 184,
+      "read": -102.83,
+      "top": 1067.77,
+      "rows": 31.54
+     },
+     {
+      "bits": -550.99,
+      "n": 184,
+      "read": -649.22,
+      "top": 64.34,
+      "rows": 33.89
+     },
+     {
+      "bits": -24.91,
+      "n": 184,
+      "read": -121.15,
+      "top": 59.92,
+      "rows": 36.32
+     },
+     {
+      "bits": -414.88,
+      "n": 184,
+      "read": -509.78,
+      "top": 56.07,
+      "rows": 38.83
+     }
+    ],
+    "total": 5.71,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 978.74,
+      "n": 2343,
+      "read": -2091.0,
+      "top": 3033.22,
+      "rows": 36.53
+     },
+     {
+      "bits": 353.2,
+      "n": 234,
+      "read": -842.89,
+      "top": 1158.82,
+      "rows": 37.27
+     },
+     {
+      "bits": 152.7,
+      "n": 188,
+      "read": -124.78,
+      "top": 237.85,
+      "rows": 39.63
+     },
+     {
+      "bits": -369.91,
+      "n": 182,
+      "read": -506.14,
+      "top": 94.0,
+      "rows": 42.23
+     }
+    ],
+    "total": 1114.73,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 989.93,
+      "n": 183,
+      "read": -102.31,
+      "top": 1058.02,
+      "rows": 34.22
+     },
+     {
+      "bits": -548.57,
+      "n": 183,
+      "read": -645.16,
+      "top": 59.92,
+      "rows": 36.67
+     },
+     {
+      "bits": -25.81,
+      "n": 183,
+      "read": -120.43,
+      "top": 55.41,
+      "rows": 39.2
+     },
+     {
+      "bits": -398.64,
+      "n": 182,
+      "read": -503.91,
+      "top": 63.46,
+      "rows": 41.8
+     }
+    ],
+    "total": 16.9,
+    "complete": true
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[[[bP NW1 bP] N1 bB] NE1 bP] N2 bK]",
+    "chunks of both (b)": 224.84,
+    "merge": 347.78,
+    "read": 0.0,
+    "top": -44.63,
+    "rows": 392.4
+   }
+  },
+  {
+   "size": 6,
+   "configuration": "[[[[[wK NW1 wP] N1 wP] NE1 wP] N6 bP] N7 bK]",
+   "classes": [],
+   "occurrences": 299,
+   "positions": 299,
+   "anchors": {
+    "g1": 299
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 994.54,
+      "n": 2358,
+      "read": -2116.8,
+      "top": 3077.8,
+      "rows": 33.53
+     },
+     {
+      "bits": 533.66,
+      "n": 1799,
+      "read": -1443.71,
+      "top": 1941.09,
+      "rows": 36.28
+     },
+     {
+      "bits": 658.12,
+      "n": 965,
+      "read": -880.69,
+      "top": 1500.11,
+      "rows": 38.69
+     },
+     {
+      "bits": 835.26,
+      "n": 446,
+      "read": -247.25,
+      "top": 1041.71,
+      "rows": 40.8
+     },
+     {
+      "bits": 491.45,
+      "n": 299,
+      "read": -19.45,
+      "top": 467.73,
+      "rows": 43.18
+     }
+    ],
+    "total": 3513.03,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 1273.9,
+      "n": 299,
+      "read": -164.91,
+      "top": 1406.9,
+      "rows": 31.92
+     },
+     {
+      "bits": -52.45,
+      "n": 299,
+      "read": -151.19,
+      "top": 64.34,
+      "rows": 34.39
+     },
+     {
+      "bits": -118.09,
+      "n": 299,
+      "read": -214.97,
+      "top": 59.92,
+      "rows": 36.96
+     },
+     {
+      "bits": -61.55,
+      "n": 299,
+      "read": -157.23,
+      "top": 56.07,
+      "rows": 39.61
+     },
+     {
+      "bits": 75.59,
+      "n": 299,
+      "read": -19.45,
+      "top": 52.69,
+      "rows": 42.35
+     }
+    ],
+    "total": 1117.4,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 978.74,
+      "n": 2343,
+      "read": -2091.0,
+      "top": 3033.22,
+      "rows": 36.53
+     },
+     {
+      "bits": 520.72,
+      "n": 1793,
+      "read": -1436.77,
+      "top": 1918.09,
+      "rows": 39.39
+     },
+     {
+      "bits": 649.89,
+      "n": 962,
+      "read": -876.63,
+      "top": 1484.66,
+      "rows": 41.86
+     },
+     {
+      "bits": 832.65,
+      "n": 445,
+      "read": -246.73,
+      "top": 1035.4,
+      "rows": 43.98
+     },
+     {
+      "bits": 491.18,
+      "n": 298,
+      "read": -19.39,
+      "top": 464.17,
+      "rows": 46.4
+     }
+    ],
+    "total": 3473.19,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 1267.78,
+      "n": 298,
+      "read": -164.22,
+      "top": 1397.33,
+      "rows": 34.66
+     },
+     {
+      "bits": -54.4,
+      "n": 298,
+      "read": -150.59,
+      "top": 58.95,
+      "rows": 37.25
+     },
+     {
+      "bits": -119.23,
+      "n": 298,
+      "read": -214.12,
+      "top": 54.97,
+      "rows": 39.92
+     },
+     {
+      "bits": -61.33,
+      "n": 298,
+      "read": -156.7,
+      "top": 52.69,
+      "rows": 42.68
+     },
+     {
+      "bits": 75.83,
+      "n": 298,
+      "read": -19.39,
+      "top": 49.69,
+      "rows": 45.52
+     }
+    ],
+    "total": 1108.65,
+    "complete": true
+   }
+  },
+  {
+   "size": 6,
+   "configuration": "[[[[[wR N1 wP] NE1 wP] ENE wP] N6 bP] N7 bR]",
+   "classes": [],
+   "occurrences": 294,
+   "positions": 290,
+   "anchors": {
+    "a1": 238,
+    "f1": 56
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 3056.8,
+      "n": 3920,
+      "read": -3489.29,
+      "top": 6512.16,
+      "rows": 33.93
+     },
+     {
+      "bits": 1077.46,
+      "n": 2343,
+      "read": -1809.14,
+      "top": 2850.02,
+      "rows": 36.58
+     },
+     {
+      "bits": 808.61,
+      "n": 1165,
+      "read": -1516.85,
+      "top": 2286.47,
+      "rows": 38.99
+     },
+     {
+      "bits": 756.37,
+      "n": 433,
+      "read": -272.54,
+      "top": 988.0,
+      "rows": 40.91
+     },
+     {
+      "bits": 338.13,
+      "n": 294,
+      "read": -167.44,
+      "top": 462.27,
+      "rows": 43.3
+     }
+    ],
+    "total": 6037.37,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 1495.01,
+      "n": 294,
+      "read": -189.85,
+      "top": 1652.95,
+      "rows": 31.9
+     },
+     {
+      "bits": -77.94,
+      "n": 294,
+      "read": -176.66,
+      "top": 64.34,
+      "rows": 34.37
+     },
+     {
+      "bits": -268.75,
+      "n": 294,
+      "read": -365.61,
+      "top": 59.92,
+      "rows": 36.93
+     },
+     {
+      "bits": -92.97,
+      "n": 294,
+      "read": -188.62,
+      "top": 56.07,
+      "rows": 39.58
+     },
+     {
+      "bits": -72.43,
+      "n": 294,
+      "read": -167.44,
+      "top": 52.69,
+      "rows": 42.32
+     }
+    ],
+    "total": 982.92,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 3036.65,
+      "n": 3904,
+      "read": -3459.31,
+      "top": 6458.97,
+      "rows": 36.99
+     },
+     {
+      "bits": 1063.23,
+      "n": 2337,
+      "read": -1802.29,
+      "top": 2825.79,
+      "rows": 39.73
+     },
+     {
+      "bits": 807.26,
+      "n": 1161,
+      "read": -1508.47,
+      "top": 2273.54,
+      "rows": 42.19
+     },
+     {
+      "bits": 753.4,
+      "n": 433,
+      "read": -273.05,
+      "top": 982.36,
+      "rows": 44.09
+     },
+     {
+      "bits": 338.36,
+      "n": 294,
+      "read": -167.44,
+      "top": 459.27,
+      "rows": 46.53
+     }
+    ],
+    "total": 5998.9,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 1491.93,
+      "n": 294,
+      "read": -189.85,
+      "top": 1647.13,
+      "rows": 34.65
+     },
+     {
+      "bits": -80.87,
+      "n": 294,
+      "read": -176.66,
+      "top": 58.56,
+      "rows": 37.23
+     },
+     {
+      "bits": -270.1,
+      "n": 294,
+      "read": -365.61,
+      "top": 55.61,
+      "rows": 39.9
+     },
+     {
+      "bits": -93.65,
+      "n": 294,
+      "read": -188.99,
+      "top": 52.69,
+      "rows": 42.66
+     },
+     {
+      "bits": -72.25,
+      "n": 294,
+      "read": -167.44,
+      "top": 49.69,
+      "rows": 45.49
+     }
+    ],
+    "total": 975.06,
+    "complete": true
+   }
+  },
+  {
+   "size": 6,
+   "configuration": "[[[[[wR E1 wK] N1 wP] NE1 wP] ENE wP] N2 wN]",
+   "classes": [
+    "castled king (K+R+pawns)"
+   ],
+   "occurrences": 269,
+   "positions": 269,
+   "anchors": {
+    "f1": 269
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 598.83,
+      "n": 1797,
+      "read": -633.76,
+      "top": 1199.28,
+      "rows": 33.32
+     },
+     {
+      "bits": 856.08,
+      "n": 1231,
+      "read": -842.7,
+      "top": 1662.88,
+      "rows": 35.9
+     },
+     {
+      "bits": 415.73,
+      "n": 987,
+      "read": -582.54,
+      "top": 959.65,
+      "rows": 38.63
+     },
+     {
+      "bits": 504.73,
+      "n": 649,
+      "read": -521.91,
+      "top": 985.48,
+      "rows": 41.16
+     },
+     {
+      "bits": 340.57,
+      "n": 269,
+      "read": -405.97,
+      "top": 703.54,
+      "rows": 43.0
+     }
+    ],
+    "total": 2715.95,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 1192.75,
+      "n": 269,
+      "read": -52.54,
+      "top": 1213.46,
+      "rows": 31.84
+     },
+     {
+      "bits": -40.79,
+      "n": 269,
+      "read": -139.42,
+      "top": 64.34,
+      "rows": 34.28
+     },
+     {
+      "bits": -34.33,
+      "n": 269,
+      "read": -131.07,
+      "top": 59.92,
+      "rows": 36.82
+     },
+     {
+      "bits": -96.81,
+      "n": 269,
+      "read": -192.32,
+      "top": 56.07,
+      "rows": 39.44
+     },
+     {
+      "bits": -311.13,
+      "n": 269,
+      "read": -405.97,
+      "top": 52.69,
+      "rows": 42.15
+     }
+    ],
+    "total": 709.69,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 596.67,
+      "n": 1797,
+      "read": -633.76,
+      "top": 1194.14,
+      "rows": 36.29
+     },
+     {
+      "bits": 857.45,
+      "n": 1226,
+      "read": -837.86,
+      "top": 1656.35,
+      "rows": 38.96
+     },
+     {
+      "bits": 410.68,
+      "n": 983,
+      "read": -579.58,
+      "top": 948.46,
+      "rows": 41.79
+     },
+     {
+      "bits": 501.7,
+      "n": 646,
+      "read": -518.82,
+      "top": 976.14,
+      "rows": 44.38
+     },
+     {
+      "bits": 339.36,
+      "n": 269,
+      "read": -405.06,
+      "top": 698.21,
+      "rows": 46.21
+     }
+    ],
+    "total": 2705.86,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 1190.35,
+      "n": 269,
+      "read": -52.54,
+      "top": 1208.33,
+      "rows": 34.57
+     },
+     {
+      "bits": -43.76,
+      "n": 269,
+      "read": -139.42,
+      "top": 58.54,
+      "rows": 37.13
+     },
+     {
+      "bits": -36.1,
+      "n": 269,
+      "read": -131.07,
+      "top": 55.2,
+      "rows": 39.77
+     },
+     {
+      "bits": -98.12,
+      "n": 269,
+      "read": -192.32,
+      "top": 51.7,
+      "rows": 42.5
+     },
+     {
+      "bits": -310.06,
+      "n": 269,
+      "read": -405.06,
+      "top": 49.69,
+      "rows": 45.3
+     }
+    ],
+    "total": 702.31,
+    "complete": true
+   },
+   "(c) variants as one category [flat]": {
+    "variants": [
+     [
+      "[[[[[wR E1 wK] N1 wP] NE1 wP] ENE wP] N2 wN]",
+      269
+     ],
+     [
+      "[[[[[wR E1 wK] N1 wP] NE1 wP] ENE wP] NNW wP]",
+      151
+     ],
+     [
+      "[[[[[wR E1 wK] N1 wP] NE1 wP] ENE wP] N6 bP]",
+      107
+     ],
+     [
+      "[[[[[wR E1 wK] N1 wP] NE1 wP] ENE wP] NW2 wB]",
+      104
+     ],
+     [
+      "[[[[[wR E1 wK] N1 wP] NE1 wP] ENE wP] N5 bN]",
+      75
+     ],
+     [
+      "[[[[[wR E1 wK] N1 wP] NE1 wP] ENE wP] NNW wB]",
+      60
+     ],
+     [
+      "[[[[[wR E1 wK] N1 wP] NE1 wP] ENE wP] NW2 wP]",
+      58
+     ]
+    ],
+    "chunks of all variants (b)": 4575.01,
+    "merges by level": [
+     {
+      "level": 1,
+      "bits": -739.0,
+      "read": 0.0,
+      "top": -119.83,
+      "rows": -619.17
+     },
+     {
+      "level": 2,
+      "bits": -675.39,
+      "read": 0.0,
+      "top": -138.54,
+      "rows": -536.86
+     },
+     {
+      "level": 3,
+      "bits": -617.67,
+      "read": 0.0,
+      "top": -164.31,
+      "rows": -453.35
+     },
+     {
+      "level": 4,
+      "bits": -571.93,
+      "read": 0.0,
+      "top": -202.12,
+      "rows": -369.81
+     },
+     {
+      "level": 5,
+      "bits": -550.88,
+      "read": 0.0,
+      "top": -1536.6,
+      "rows": 985.73
+     }
+    ],
+    "total": 1420.14
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[[[[bN N1 bP] NE1 bP] ENE bP] N2 bR] NNE bK]",
+    "chunks of both (b)": 1588.22,
+    "merge": 427.56,
+    "read": 0.0,
+    "top": -40.5,
+    "rows": 468.07
+   }
+  },
+  {
+   "size": 6,
+   "configuration": "[[[[[bN N1 bP] NE1 bP] ENE bP] N2 bR] NNE bK]",
+   "classes": [
+    "castled king (K+R+pawns)"
+   ],
+   "occurrences": 240,
+   "positions": 240,
+   "anchors": {
+    "f6": 240
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 1181.03,
+      "n": 1685,
+      "read": -1659.71,
+      "top": 2807.47,
+      "rows": 33.27
+     },
+     {
+      "bits": 778.58,
+      "n": 812,
+      "read": -598.25,
+      "top": 1341.31,
+      "rows": 35.51
+     },
+     {
+      "bits": 627.59,
+      "n": 420,
+      "read": -151.08,
+      "top": 741.0,
+      "rows": 37.68
+     },
+     {
+      "bits": 325.94,
+      "n": 239,
+      "read": -197.4,
+      "top": 483.55,
+      "rows": 39.78
+     },
+     {
+      "bits": 101.14,
+      "n": 237,
+      "read": -15.2,
+      "top": 73.87,
+      "rows": 42.47
+     }
+    ],
+    "total": 3014.28,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 883.01,
+      "n": 240,
+      "read": -67.53,
+      "top": 918.79,
+      "rows": 31.75
+     },
+     {
+      "bits": 6.5,
+      "n": 240,
+      "read": -92.0,
+      "top": 64.34,
+      "rows": 34.16
+     },
+     {
+      "bits": 21.83,
+      "n": 240,
+      "read": -74.76,
+      "top": 59.92,
+      "rows": 36.67
+     },
+     {
+      "bits": -102.86,
+      "n": 240,
+      "read": -198.19,
+      "top": 56.07,
+      "rows": 39.26
+     },
+     {
+      "bits": 79.21,
+      "n": 240,
+      "read": -15.4,
+      "top": 52.69,
+      "rows": 41.92
+     }
+    ],
+    "total": 887.7,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 1128.2,
+      "n": 1685,
+      "read": -1710.38,
+      "top": 2802.34,
+      "rows": 36.23
+     },
+     {
+      "bits": 765.94,
+      "n": 809,
+      "read": -600.37,
+      "top": 1327.79,
+      "rows": 38.52
+     },
+     {
+      "bits": 625.77,
+      "n": 420,
+      "read": -152.09,
+      "top": 737.15,
+      "rows": 40.72
+     },
+     {
+      "bits": 325.62,
+      "n": 239,
+      "read": -197.4,
+      "top": 480.16,
+      "rows": 42.85
+     },
+     {
+      "bits": 101.31,
+      "n": 237,
+      "read": -15.2,
+      "top": 70.87,
+      "rows": 45.64
+     }
+    ],
+    "total": 2946.84,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 880.52,
+      "n": 240,
+      "read": -67.6,
+      "top": 913.66,
+      "rows": 34.47
+     },
+     {
+      "bits": 4.88,
+      "n": 240,
+      "read": -92.03,
+      "top": 59.92,
+      "rows": 36.99
+     },
+     {
+      "bits": 20.58,
+      "n": 240,
+      "read": -75.09,
+      "top": 56.07,
+      "rows": 39.6
+     },
+     {
+      "bits": -103.21,
+      "n": 240,
+      "read": -198.19,
+      "top": 52.69,
+      "rows": 42.29
+     },
+     {
+      "bits": 79.35,
+      "n": 240,
+      "read": -15.4,
+      "top": 49.69,
+      "rows": 45.06
+     }
+    ],
+    "total": 882.12,
+    "complete": true
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[[[[wR E1 wK] N1 wP] NE1 wP] ENE wP] N2 wN]",
+    "chunks of both (b)": 1588.22,
+    "merge": 427.56,
+    "read": 0.0,
+    "top": -40.5,
+    "rows": 468.07
+   }
+  },
+  {
+   "size": 6,
+   "configuration": "[[[[[wK NW1 wP] N1 wP] NNW wN] N6 bP] N7 bK]",
+   "classes": [],
+   "occurrences": 236,
+   "positions": 236,
+   "anchors": {
+    "g1": 236
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 994.54,
+      "n": 2358,
+      "read": -2116.8,
+      "top": 3077.8,
+      "rows": 33.53
+     },
+     {
+      "bits": 533.66,
+      "n": 1799,
+      "read": -1443.71,
+      "top": 1941.09,
+      "rows": 36.28
+     },
+     {
+      "bits": 474.38,
+      "n": 648,
+      "read": -1130.74,
+      "top": 1566.84,
+      "rows": 38.28
+     },
+     {
+      "bits": 593.5,
+      "n": 313,
+      "read": -162.93,
+      "top": 716.11,
+      "rows": 40.33
+     },
+     {
+      "bits": 343.04,
+      "n": 236,
+      "read": -15.13,
+      "top": 315.42,
+      "rows": 42.75
+     }
+    ],
+    "total": 2939.12,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 1123.68,
+      "n": 236,
+      "read": -121.54,
+      "top": 1213.49,
+      "rows": 31.73
+     },
+     {
+      "bits": -15.62,
+      "n": 236,
+      "read": -114.11,
+      "top": 64.34,
+      "rows": 34.15
+     },
+     {
+      "bits": -258.29,
+      "n": 236,
+      "read": -354.86,
+      "top": 59.92,
+      "rows": 36.65
+     },
+     {
+      "bits": -22.5,
+      "n": 236,
+      "read": -117.8,
+      "top": 56.07,
+      "rows": 39.23
+     },
+     {
+      "bits": 79.45,
+      "n": 236,
+      "read": -15.13,
+      "top": 52.69,
+      "rows": 41.89
+     }
+    ],
+    "total": 906.71,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 978.74,
+      "n": 2343,
+      "read": -2091.0,
+      "top": 3033.22,
+      "rows": 36.53
+     },
+     {
+      "bits": 520.72,
+      "n": 1793,
+      "read": -1436.77,
+      "top": 1918.09,
+      "rows": 39.39
+     },
+     {
+      "bits": 470.85,
+      "n": 648,
+      "read": -1128.46,
+      "top": 1557.92,
+      "rows": 41.39
+     },
+     {
+      "bits": 593.16,
+      "n": 313,
+      "read": -163.02,
+      "top": 712.72,
+      "rows": 43.45
+     },
+     {
+      "bits": 343.22,
+      "n": 236,
+      "read": -15.13,
+      "top": 312.42,
+      "rows": 45.93
+     }
+    ],
+    "total": 2906.69,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 1120.06,
+      "n": 236,
+      "read": -121.54,
+      "top": 1207.15,
+      "rows": 34.45
+     },
+     {
+      "bits": -17.98,
+      "n": 236,
+      "read": -114.11,
+      "top": 59.16,
+      "rows": 36.97
+     },
+     {
+      "bits": -258.43,
+      "n": 236,
+      "read": -354.08,
+      "top": 56.07,
+      "rows": 39.58
+     },
+     {
+      "bits": -22.91,
+      "n": 236,
+      "read": -117.86,
+      "top": 52.69,
+      "rows": 42.26
+     },
+     {
+      "bits": 79.59,
+      "n": 236,
+      "read": -15.13,
+      "top": 49.69,
+      "rows": 45.02
+     }
+    ],
+    "total": 900.32,
+    "complete": true
+   }
+  },
+  {
+   "size": 6,
+   "configuration": "[[[[[bP E1 bP] E2 bP] WNW bQ] N1 bR] NE1 bK]",
+   "classes": [
+    "castled king (K+R+pawns)"
+   ],
+   "occurrences": 219,
+   "positions": 219,
+   "anchors": {
+    "f7": 219
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 4320.18,
+      "n": 5237,
+      "read": -7120.92,
+      "top": 11406.95,
+      "rows": 34.16
+     },
+     {
+      "bits": 1746.7,
+      "n": 1750,
+      "read": -1942.06,
+      "top": 3652.41,
+      "rows": 36.35
+     },
+     {
+      "bits": 935.22,
+      "n": 333,
+      "read": -234.11,
+      "top": 1131.65,
+      "rows": 37.69
+     },
+     {
+      "bits": 237.89,
+      "n": 221,
+      "read": -175.19,
+      "top": 373.16,
+      "rows": 39.93
+     },
+     {
+      "bits": 110.16,
+      "n": 219,
+      "read": -13.99,
+      "top": 81.53,
+      "rows": 42.61
+     }
+    ],
+    "total": 7350.16,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 1136.73,
+      "n": 219,
+      "read": -83.98,
+      "top": 1189.04,
+      "rows": 31.67
+     },
+     {
+      "bits": 15.63,
+      "n": 219,
+      "read": -82.79,
+      "top": 64.34,
+      "rows": 34.07
+     },
+     {
+      "bits": -45.18,
+      "n": 219,
+      "read": -141.65,
+      "top": 59.92,
+      "rows": 36.55
+     },
+     {
+      "bits": -78.56,
+      "n": 219,
+      "read": -173.75,
+      "top": 56.07,
+      "rows": 39.11
+     },
+     {
+      "bits": 80.45,
+      "n": 219,
+      "read": -13.99,
+      "top": 52.69,
+      "rows": 41.75
+     }
+    ],
+    "total": 1109.07,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 3687.56,
+      "n": 5090,
+      "read": -6956.81,
+      "top": 10607.14,
+      "rows": 37.23
+     },
+     {
+      "bits": 1672.09,
+      "n": 1739,
+      "read": -1965.0,
+      "top": 3597.63,
+      "rows": 39.46
+     },
+     {
+      "bits": 933.29,
+      "n": 333,
+      "read": -234.1,
+      "top": 1126.68,
+      "rows": 40.71
+     },
+     {
+      "bits": 237.57,
+      "n": 221,
+      "read": -175.19,
+      "top": 369.77,
+      "rows": 43.0
+     },
+     {
+      "bits": 110.32,
+      "n": 219,
+      "read": -13.99,
+      "top": 78.54,
+      "rows": 45.78
+     }
+    ],
+    "total": 6640.84,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 1133.8,
+      "n": 219,
+      "read": -84.01,
+      "top": 1183.43,
+      "rows": 34.38
+     },
+     {
+      "bits": 13.55,
+      "n": 219,
+      "read": -83.25,
+      "top": 59.92,
+      "rows": 36.88
+     },
+     {
+      "bits": -46.11,
+      "n": 219,
+      "read": -141.65,
+      "top": 56.07,
+      "rows": 39.47
+     },
+     {
+      "bits": -78.93,
+      "n": 219,
+      "read": -173.75,
+      "top": 52.69,
+      "rows": 42.13
+     },
+     {
+      "bits": 80.57,
+      "n": 219,
+      "read": -13.99,
+      "top": 49.69,
+      "rows": 44.86
+     }
+    ],
+    "total": 1102.89,
+    "complete": true
+   }
+  },
+  {
+   "size": 6,
+   "configuration": "[[[[[bP NW1 bP] N1 bB] NE1 bP] NNW bR] N2 bK]",
+   "classes": [
+    "castled king (K+R+pawns)",
+    "fianchetto with king"
+   ],
+   "occurrences": 172,
+   "positions": 172,
+   "anchors": {
+    "g6": 172
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 1664.2,
+      "n": 4023,
+      "read": -6840.2,
+      "top": 8470.44,
+      "rows": 33.95
+     },
+     {
+      "bits": 85.25,
+      "n": 663,
+      "read": -2027.25,
+      "top": 2077.06,
+      "rows": 35.44
+     },
+     {
+      "bits": 331.19,
+      "n": 354,
+      "read": -283.95,
+      "top": 577.54,
+      "rows": 37.59
+     },
+     {
+      "bits": 295.75,
+      "n": 202,
+      "read": -140.86,
+      "top": 396.95,
+      "rows": 39.66
+     },
+     {
+      "bits": 83.92,
+      "n": 172,
+      "read": -10.87,
+      "top": 52.69,
+      "rows": 42.1
+     }
+    ],
+    "total": 2460.29,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 654.06,
+      "n": 172,
+      "read": -97.96,
+      "top": 720.54,
+      "rows": 31.49
+     },
+     {
+      "bits": -370.19,
+      "n": 172,
+      "read": -468.36,
+      "top": 64.34,
+      "rows": 33.82
+     },
+     {
+      "bits": 9.95,
+      "n": 172,
+      "read": -86.21,
+      "top": 59.92,
+      "rows": 36.23
+     },
+     {
+      "bits": -30.42,
+      "n": 172,
+      "read": -125.22,
+      "top": 56.07,
+      "rows": 38.72
+     },
+     {
+      "bits": 83.1,
+      "n": 172,
+      "read": -10.87,
+      "top": 52.69,
+      "rows": 41.28
+     }
+    ],
+    "total": 346.5,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 1794.71,
+      "n": 3228,
+      "read": -4833.4,
+      "top": 6591.29,
+      "rows": 36.82
+     },
+     {
+      "bits": -10.16,
+      "n": 612,
+      "read": -1790.49,
+      "top": 1742.02,
+      "rows": 38.31
+     },
+     {
+      "bits": 290.86,
+      "n": 337,
+      "read": -272.08,
+      "top": 522.43,
+      "rows": 40.51
+     },
+     {
+      "bits": 295.75,
+      "n": 204,
+      "read": -141.28,
+      "top": 394.37,
+      "rows": 42.66
+     },
+     {
+      "bits": 84.1,
+      "n": 170,
+      "read": -10.74,
+      "top": 49.69,
+      "rows": 45.14
+     }
+    ],
+    "total": 2455.26,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 639.37,
+      "n": 170,
+      "read": -96.82,
+      "top": 702.03,
+      "rows": 34.15
+     },
+     {
+      "bits": -365.97,
+      "n": 170,
+      "read": -462.48,
+      "top": 59.92,
+      "rows": 36.59
+     },
+     {
+      "bits": 9.05,
+      "n": 170,
+      "read": -86.11,
+      "top": 56.07,
+      "rows": 39.09
+     },
+     {
+      "bits": -29.43,
+      "n": 170,
+      "read": -123.8,
+      "top": 52.69,
+      "rows": 41.67
+     },
+     {
+      "bits": 83.28,
+      "n": 170,
+      "read": -10.74,
+      "top": 49.69,
+      "rows": 44.32
+     }
+    ],
+    "total": 336.3,
+    "complete": true
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[[[[wR E1 wK] N1 wP] NE1 wB] ENE wP] NNE wP]",
+    "chunks of both (b)": 599.91,
+    "merge": 203.1,
+    "read": 0.0,
+    "top": -40.5,
+    "rows": 243.6
+   }
+  },
+  {
+   "size": 6,
+   "configuration": "[[[[[bB E1 bP] E2 bP] E3 bP] NE1 bR] ENE bK]",
+   "classes": [
+    "castled king (K+R+pawns)"
+   ],
+   "occurrences": 166,
+   "positions": 166,
+   "anchors": {
+    "e7": 166
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 1656.61,
+      "n": 1465,
+      "read": -1645.44,
+      "top": 3268.89,
+      "rows": 33.16
+     },
+     {
+      "bits": 379.45,
+      "n": 551,
+      "read": -496.65,
+      "top": 840.96,
+      "rows": 35.14
+     },
+     {
+      "bits": 447.36,
+      "n": 281,
+      "read": -141.25,
+      "top": 551.43,
+      "rows": 37.19
+     },
+     {
+      "bits": 253.55,
+      "n": 168,
+      "read": -124.61,
+      "top": 338.92,
+      "rows": 39.23
+     },
+     {
+      "bits": 112.07,
+      "n": 166,
+      "read": -10.48,
+      "top": 80.74,
+      "rows": 41.8
+     }
+    ],
+    "total": 2849.02,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 623.93,
+      "n": 166,
+      "read": -49.12,
+      "top": 641.6,
+      "rows": 31.46
+     },
+     {
+      "bits": 41.41,
+      "n": 166,
+      "read": -56.72,
+      "top": 64.34,
+      "rows": 33.78
+     },
+     {
+      "bits": 30.55,
+      "n": 166,
+      "read": -65.56,
+      "top": 59.92,
+      "rows": 36.19
+     },
+     {
+      "bits": -28.46,
+      "n": 166,
+      "read": -123.2,
+      "top": 56.07,
+      "rows": 38.66
+     },
+     {
+      "bits": 83.42,
+      "n": 166,
+      "read": -10.48,
+      "top": 52.69,
+      "rows": 41.21
+     }
+    ],
+    "total": 750.86,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 1558.0,
+      "n": 1459,
+      "read": -1726.61,
+      "top": 3248.51,
+      "rows": 36.1
+     },
+     {
+      "bits": 366.87,
+      "n": 550,
+      "read": -504.29,
+      "top": 833.06,
+      "rows": 38.1
+     },
+     {
+      "bits": 444.95,
+      "n": 281,
+      "read": -142.79,
+      "top": 547.57,
+      "rows": 40.17
+     },
+     {
+      "bits": 253.17,
+      "n": 168,
+      "read": -124.61,
+      "top": 335.54,
+      "rows": 42.24
+     },
+     {
+      "bits": 112.17,
+      "n": 166,
+      "read": -10.48,
+      "top": 77.74,
+      "rows": 44.9
+     }
+    ],
+    "total": 2735.15,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 621.41,
+      "n": 166,
+      "read": -49.19,
+      "top": 636.47,
+      "rows": 34.13
+     },
+     {
+      "bits": 39.74,
+      "n": 166,
+      "read": -56.74,
+      "top": 59.92,
+      "rows": 36.56
+     },
+     {
+      "bits": 29.2,
+      "n": 166,
+      "read": -65.93,
+      "top": 56.07,
+      "rows": 39.06
+     },
+     {
+      "bits": -28.88,
+      "n": 166,
+      "read": -123.2,
+      "top": 52.69,
+      "rows": 41.63
+     },
+     {
+      "bits": 83.49,
+      "n": 166,
+      "read": -10.48,
+      "top": 49.69,
+      "rows": 44.27
+     }
+    ],
+    "total": 744.96,
+    "complete": true
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[[[[wR E1 wK] NW1 wB] N1 wP] NE1 wP] ENE wP]",
+    "chunks of both (b)": 1291.94,
+    "merge": 189.6,
+    "read": 0.0,
+    "top": -40.5,
+    "rows": 230.11
+   }
+  },
+  {
+   "size": 6,
+   "configuration": "[[[[[bP NE1 bP] ENE bP] NNW bQ] NNE bR] NE2 bK]",
+   "classes": [
+    "castled king (K+R+pawns)"
+   ],
+   "occurrences": 158,
+   "positions": 158,
+   "anchors": {
+    "e6": 158
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 2692.68,
+      "n": 3619,
+      "read": -5437.97,
+      "top": 8096.78,
+      "rows": 33.87
+     },
+     {
+      "bits": 786.33,
+      "n": 841,
+      "read": -1056.34,
+      "top": 1807.03,
+      "rows": 35.64
+     },
+     {
+      "bits": 467.76,
+      "n": 133,
+      "read": -107.58,
+      "top": 538.76,
+      "rows": 36.59
+     },
+     {
+      "bits": 134.0,
+      "n": 95,
+      "read": -72.21,
+      "top": 167.57,
+      "rows": 38.64
+     },
+     {
+      "bits": 107.74,
+      "n": 94,
+      "read": -5.84,
+      "top": 72.53,
+      "rows": 41.05
+     }
+    ],
+    "total": 4188.52,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 771.34,
+      "n": 158,
+      "read": -64.59,
+      "top": 804.51,
+      "rows": 31.42
+     },
+     {
+      "bits": 13.58,
+      "n": 158,
+      "read": -84.5,
+      "top": 64.34,
+      "rows": 33.73
+     },
+     {
+      "bits": -3.76,
+      "n": 158,
+      "read": -99.81,
+      "top": 59.92,
+      "rows": 36.12
+     },
+     {
+      "bits": -27.19,
+      "n": 158,
+      "read": -121.84,
+      "top": 56.07,
+      "rows": 38.58
+     },
+     {
+      "bits": 83.85,
+      "n": 158,
+      "read": -9.95,
+      "top": 52.69,
+      "rows": 41.11
+     }
+    ],
+    "total": 837.82,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 2801.17,
+      "n": 2782,
+      "read": -3642.57,
+      "top": 6407.05,
+      "rows": 36.69
+     },
+     {
+      "bits": 669.7,
+      "n": 804,
+      "read": -968.48,
+      "top": 1599.59,
+      "rows": 38.58
+     },
+     {
+      "bits": 466.39,
+      "n": 142,
+      "read": -109.3,
+      "top": 536.18,
+      "rows": 39.5
+     },
+     {
+      "bits": 135.99,
+      "n": 103,
+      "read": -79.26,
+      "top": 173.61,
+      "rows": 41.64
+     },
+     {
+      "bits": 107.46,
+      "n": 102,
+      "read": -6.35,
+      "top": 69.65,
+      "rows": 44.15
+     }
+    ],
+    "total": 4180.7,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 635.93,
+      "n": 130,
+      "read": -51.29,
+      "top": 653.32,
+      "rows": 33.91
+     },
+     {
+      "bits": 28.06,
+      "n": 130,
+      "read": -68.13,
+      "top": 59.92,
+      "rows": 36.27
+     },
+     {
+      "bits": 13.46,
+      "n": 130,
+      "read": -81.32,
+      "top": 56.07,
+      "rows": 38.7
+     },
+     {
+      "bits": -6.35,
+      "n": 130,
+      "read": -100.23,
+      "top": 52.69,
+      "rows": 41.19
+     },
+     {
+      "bits": 85.3,
+      "n": 130,
+      "read": -8.14,
+      "top": 49.69,
+      "rows": 43.75
+     }
+    ],
+    "total": 756.4,
+    "complete": true
+   }
+  },
+  {
+   "size": 6,
+   "configuration": "[[[[[bP E1 bN] NE1 bP] ENE bP] NNE bR] NE2 bK]",
+   "classes": [
+    "castled king (K+R+pawns)"
+   ],
+   "occurrences": 154,
+   "positions": 154,
+   "anchors": {
+    "e6": 154
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 1665.04,
+      "n": 805,
+      "read": -2598.59,
+      "top": 4230.94,
+      "rows": 32.69
+     },
+     {
+      "bits": 459.95,
+      "n": 396,
+      "read": -275.05,
+      "top": 700.23,
+      "rows": 34.77
+     },
+     {
+      "bits": 213.34,
+      "n": 270,
+      "read": -174.37,
+      "top": 350.69,
+      "rows": 37.02
+     },
+     {
+      "bits": 223.1,
+      "n": 156,
+      "read": -124.25,
+      "top": 308.34,
+      "rows": 39.01
+     },
+     {
+      "bits": 118.69,
+      "n": 153,
+      "read": -9.63,
+      "top": 86.78,
+      "rows": 41.54
+     }
+    ],
+    "total": 2680.12,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 557.48,
+      "n": 154,
+      "read": -266.22,
+      "top": 792.31,
+      "rows": 31.4
+     },
+     {
+      "bits": 44.15,
+      "n": 154,
+      "read": -53.9,
+      "top": 64.34,
+      "rows": 33.71
+     },
+     {
+      "bits": 25.04,
+      "n": 154,
+      "read": -70.98,
+      "top": 59.92,
+      "rows": 36.09
+     },
+     {
+      "bits": -27.66,
+      "n": 154,
+      "read": -122.28,
+      "top": 56.07,
+      "rows": 38.54
+     },
+     {
+      "bits": 84.06,
+      "n": 154,
+      "read": -9.69,
+      "top": 52.69,
+      "rows": 41.06
+     }
+    ],
+    "total": 683.07,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 1428.73,
+      "n": 789,
+      "read": -2509.61,
+      "top": 3902.79,
+      "rows": 35.54
+     },
+     {
+      "bits": 447.72,
+      "n": 388,
+      "read": -271.55,
+      "top": 681.62,
+      "rows": 37.65
+     },
+     {
+      "bits": 209.29,
+      "n": 267,
+      "read": -172.14,
+      "top": 341.47,
+      "rows": 39.97
+     },
+     {
+      "bits": 221.48,
+      "n": 155,
+      "read": -123.35,
+      "top": 302.85,
+      "rows": 41.98
+     },
+     {
+      "bits": 118.78,
+      "n": 152,
+      "read": -9.56,
+      "top": 83.75,
+      "rows": 44.59
+     }
+    ],
+    "total": 2426.01,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 487.03,
+      "n": 153,
+      "read": -263.4,
+      "top": 716.37,
+      "rows": 34.06
+     },
+     {
+      "bits": 43.02,
+      "n": 153,
+      "read": -53.36,
+      "top": 59.92,
+      "rows": 36.46
+     },
+     {
+      "bits": 24.89,
+      "n": 153,
+      "read": -70.12,
+      "top": 56.07,
+      "rows": 38.94
+     },
+     {
+      "bits": -27.2,
+      "n": 153,
+      "read": -121.38,
+      "top": 52.69,
+      "rows": 41.48
+     },
+     {
+      "bits": 84.16,
+      "n": 153,
+      "read": -9.63,
+      "top": 49.69,
+      "rows": 44.1
+     }
+    ],
+    "total": 611.9,
+    "complete": true
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[[[[wR E1 wK] N1 wP] NE1 wP] NNW wP] N2 wN]",
+    "chunks of both (b)": 1222.0,
+    "merge": 180.66,
+    "read": 0.0,
+    "top": -40.5,
+    "rows": 221.16
+   }
+  },
+  {
+   "size": 6,
+   "configuration": "[[[[[bP N1 bB] NE1 bP] ENE bP] NNE bR] NE2 bK]",
+   "classes": [
+    "castled king (K+R+pawns)",
+    "fianchetto with king"
+   ],
+   "occurrences": 119,
+   "positions": 119,
+   "anchors": {
+    "e6": 119
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 1078.41,
+      "n": 1968,
+      "read": -6637.61,
+      "top": 7682.62,
+      "rows": 33.39
+     },
+     {
+      "bits": 651.14,
+      "n": 846,
+      "read": -770.38,
+      "top": 1385.95,
+      "rows": 35.57
+     },
+     {
+      "bits": 243.78,
+      "n": 268,
+      "read": -240.52,
+      "top": 447.07,
+      "rows": 37.23
+     },
+     {
+      "bits": 231.97,
+      "n": 121,
+      "read": -85.55,
+      "top": 278.58,
+      "rows": 38.94
+     },
+     {
+      "bits": 113.76,
+      "n": 119,
+      "read": -7.43,
+      "top": 79.78,
+      "rows": 41.41
+     }
+    ],
+    "total": 2319.06,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 424.86,
+      "n": 119,
+      "read": -284.21,
+      "top": 677.87,
+      "rows": 31.2
+     },
+     {
+      "bits": 52.89,
+      "n": 119,
+      "read": -44.89,
+      "top": 64.34,
+      "rows": 33.44
+     },
+     {
+      "bits": 44.06,
+      "n": 119,
+      "read": -51.62,
+      "top": 59.92,
+      "rows": 35.75
+     },
+     {
+      "bits": 8.47,
+      "n": 119,
+      "read": -85.73,
+      "top": 56.07,
+      "rows": 38.13
+     },
+     {
+      "bits": 85.82,
+      "n": 119,
+      "read": -7.43,
+      "top": 52.69,
+      "rows": 40.56
+     }
+    ],
+    "total": 616.1,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 1056.85,
+      "n": 1627,
+      "read": -5233.84,
+      "top": 6254.5,
+      "rows": 36.2
+     },
+     {
+      "bits": 583.63,
+      "n": 690,
+      "read": -600.25,
+      "top": 1145.53,
+      "rows": 38.35
+     },
+     {
+      "bits": 217.22,
+      "n": 185,
+      "read": -179.95,
+      "top": 357.45,
+      "rows": 39.72
+     },
+     {
+      "bits": 176.7,
+      "n": 91,
+      "read": -64.14,
+      "top": 199.43,
+      "rows": 41.41
+     },
+     {
+      "bits": 114.28,
+      "n": 89,
+      "read": -5.52,
+      "top": 75.95,
+      "rows": 43.86
+     }
+    ],
+    "total": 2148.68,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 346.77,
+      "n": 89,
+      "read": -210.22,
+      "top": 523.43,
+      "rows": 33.56
+     },
+     {
+      "bits": 62.42,
+      "n": 89,
+      "read": -33.33,
+      "top": 59.92,
+      "rows": 35.83
+     },
+     {
+      "bits": 56.12,
+      "n": 89,
+      "read": -38.09,
+      "top": 56.07,
+      "rows": 38.14
+     },
+     {
+      "bits": 29.38,
+      "n": 89,
+      "read": -63.82,
+      "top": 52.69,
+      "rows": 40.51
+     },
+     {
+      "bits": 87.11,
+      "n": 89,
+      "read": -5.52,
+      "top": 49.69,
+      "rows": 42.94
+     }
+    ],
+    "total": 581.81,
+    "complete": true
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[[[[wR E1 wK] NW1 wB] N1 wP] NE1 wP] NNW wP]",
+    "chunks of both (b)": 1095.27,
+    "merge": 76.93,
+    "read": 0.0,
+    "top": -40.5,
+    "rows": 117.43
+   }
+  },
+  {
+   "size": 6,
+   "configuration": "[[[[[wR E1 wK] N1 wP] NE1 wB] ENE wP] NNE wP]",
+   "classes": [
+    "castled king (K+R+pawns)",
+    "fianchetto with king"
+   ],
+   "occurrences": 117,
+   "positions": 117,
+   "anchors": {
+    "f1": 117
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 598.83,
+      "n": 1797,
+      "read": -633.76,
+      "top": 1199.28,
+      "rows": 33.32
+     },
+     {
+      "bits": 856.08,
+      "n": 1231,
+      "read": -842.7,
+      "top": 1662.88,
+      "rows": 35.9
+     },
+     {
+      "bits": 256.0,
+      "n": 145,
+      "read": -499.62,
+      "top": 718.98,
+      "rows": 36.63
+     },
+     {
+      "bits": 122.19,
+      "n": 122,
+      "read": -78.38,
+      "top": 161.66,
+      "rows": 38.91
+     },
+     {
+      "bits": -176.38,
+      "n": 117,
+      "read": -313.58,
+      "top": 95.87,
+      "rows": 41.34
+     }
+    ],
+    "total": 1656.73,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 732.08,
+      "n": 117,
+      "read": -22.17,
+      "top": 723.07,
+      "rows": 31.18
+     },
+     {
+      "bits": 37.48,
+      "n": 117,
+      "read": -60.28,
+      "top": 64.34,
+      "rows": 33.42
+     },
+     {
+      "bits": -300.6,
+      "n": 117,
+      "read": -396.25,
+      "top": 59.92,
+      "rows": 35.73
+     },
+     {
+      "bits": 19.21,
+      "n": 117,
+      "read": -74.97,
+      "top": 56.07,
+      "rows": 38.1
+     },
+     {
+      "bits": -220.36,
+      "n": 117,
+      "read": -313.58,
+      "top": 52.69,
+      "rows": 40.53
+     }
+    ],
+    "total": 267.8,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 596.67,
+      "n": 1797,
+      "read": -633.76,
+      "top": 1194.14,
+      "rows": 36.29
+     },
+     {
+      "bits": 857.45,
+      "n": 1226,
+      "read": -837.86,
+      "top": 1656.35,
+      "rows": 38.96
+     },
+     {
+      "bits": 255.07,
+      "n": 144,
+      "read": -495.77,
+      "top": 711.32,
+      "rows": 39.52
+     },
+     {
+      "bits": 121.77,
+      "n": 121,
+      "read": -77.68,
+      "top": 157.6,
+      "rows": 41.85
+     },
+     {
+      "bits": -172.32,
+      "n": 115,
+      "read": -308.17,
+      "top": 91.5,
+      "rows": 44.35
+     }
+    ],
+    "total": 1658.64,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 729.58,
+      "n": 117,
+      "read": -22.17,
+      "top": 717.94,
+      "rows": 33.81
+     },
+     {
+      "bits": 55.85,
+      "n": 116,
+      "read": -59.78,
+      "top": 79.49,
+      "rows": 36.14
+     },
+     {
+      "bits": -297.94,
+      "n": 116,
+      "read": -392.55,
+      "top": 56.07,
+      "rows": 38.53
+     },
+     {
+      "bits": 19.0,
+      "n": 116,
+      "read": -74.27,
+      "top": 52.28,
+      "rows": 40.99
+     },
+     {
+      "bits": -200.69,
+      "n": 115,
+      "read": -308.17,
+      "top": 63.99,
+      "rows": 43.49
+     }
+    ],
+    "total": 305.79,
+    "complete": true
+   },
+   "(c) either side as one category [flat]": {
+    "other side": "[[[[[bP NW1 bP] N1 bB] NE1 bP] NNW bR] N2 bK]",
+    "chunks of both (b)": 599.91,
+    "merge": 203.1,
+    "read": 0.0,
+    "top": -40.5,
+    "rows": 243.6
+   }
+  },
+  {
+   "size": 6,
+   "configuration": "[[[[[wK NW1 wP] N1 wB] NE1 wP] N2 wP] N6 bP]",
+   "classes": [
+    "fianchetto with king"
+   ],
+   "occurrences": 105,
+   "positions": 105,
+   "anchors": {
+    "g1": 105
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 994.54,
+      "n": 2358,
+      "read": -2116.8,
+      "top": 3077.8,
+      "rows": 33.53
+     },
+     {
+      "bits": 355.63,
+      "n": 235,
+      "read": -847.1,
+      "top": 1168.3,
+      "rows": 34.43
+     },
+     {
+      "bits": 153.89,
+      "n": 189,
+      "read": -125.51,
+      "top": 242.67,
+      "rows": 36.72
+     },
+     {
+      "bits": -370.97,
+      "n": 184,
+      "read": -512.6,
+      "top": 102.39,
+      "rows": 39.23
+     },
+     {
+      "bits": 235.95,
+      "n": 105,
+      "read": -51.41,
+      "top": 246.27,
+      "rows": 41.09
+     }
+    ],
+    "total": 1369.04,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 690.83,
+      "n": 105,
+      "read": -53.81,
+      "top": 713.54,
+      "rows": 31.1
+     },
+     {
+      "bits": -256.27,
+      "n": 105,
+      "read": -353.93,
+      "top": 64.34,
+      "rows": 33.31
+     },
+     {
+      "bits": 28.78,
+      "n": 105,
+      "read": -66.73,
+      "top": 59.92,
+      "rows": 35.59
+     },
+     {
+      "bits": -179.79,
+      "n": 105,
+      "read": -273.79,
+      "top": 56.07,
+      "rows": 37.92
+     },
+     {
+      "bits": 41.6,
+      "n": 105,
+      "read": -51.41,
+      "top": 52.69,
+      "rows": 40.32
+     }
+    ],
+    "total": 325.15,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 978.74,
+      "n": 2343,
+      "read": -2091.0,
+      "top": 3033.22,
+      "rows": 36.53
+     },
+     {
+      "bits": 353.2,
+      "n": 234,
+      "read": -842.89,
+      "top": 1158.82,
+      "rows": 37.27
+     },
+     {
+      "bits": 152.7,
+      "n": 188,
+      "read": -124.78,
+      "top": 237.85,
+      "rows": 39.63
+     },
+     {
+      "bits": -369.91,
+      "n": 182,
+      "read": -506.14,
+      "top": 94.0,
+      "rows": 42.23
+     },
+     {
+      "bits": 233.42,
+      "n": 105,
+      "read": -51.43,
+      "top": 240.75,
+      "rows": 44.1
+     }
+    ],
+    "total": 1348.15,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 687.79,
+      "n": 105,
+      "read": -53.81,
+      "top": 707.88,
+      "rows": 33.71
+     },
+     {
+      "bits": -257.99,
+      "n": 105,
+      "read": -353.93,
+      "top": 59.92,
+      "rows": 36.02
+     },
+     {
+      "bits": 27.36,
+      "n": 105,
+      "read": -66.73,
+      "top": 55.7,
+      "rows": 38.39
+     },
+     {
+      "bits": -185.33,
+      "n": 105,
+      "read": -273.56,
+      "top": 47.41,
+      "rows": 40.81
+     },
+     {
+      "bits": 41.55,
+      "n": 105,
+      "read": -51.43,
+      "top": 49.69,
+      "rows": 43.29
+     }
+    ],
+    "total": 313.38,
+    "complete": true
+   }
+  },
+  {
+   "size": 6,
+   "configuration": "[[[[[wK NW1 wP] N1 wP] N5 bP] N6 bB] N7 bK]",
+   "classes": [
+    "fianchetto with king"
+   ],
+   "occurrences": 103,
+   "positions": 103,
+   "anchors": {
+    "g1": 102,
+    "b1": 1
+   },
+   "(a) step by step, global [flat]": {
+    "steps": [
+     {
+      "bits": 994.54,
+      "n": 2358,
+      "read": -2116.8,
+      "top": 3077.8,
+      "rows": 33.53
+     },
+     {
+      "bits": 533.66,
+      "n": 1799,
+      "read": -1443.71,
+      "top": 1941.09,
+      "rows": 36.28
+     },
+     {
+      "bits": 640.36,
+      "n": 276,
+      "read": -625.68,
+      "top": 1228.65,
+      "rows": 37.39
+     },
+     {
+      "bits": 13.05,
+      "n": 136,
+      "read": -362.05,
+      "top": 335.88,
+      "rows": 39.22
+     },
+     {
+      "bits": 206.3,
+      "n": 103,
+      "read": -13.03,
+      "top": 177.94,
+      "rows": 41.38
+     }
+    ],
+    "total": 2387.91,
+    "complete": true
+   },
+   "(b) whole configuration [flat]": {
+    "steps": [
+     {
+      "bits": 694.74,
+      "n": 103,
+      "read": -54.9,
+      "top": 718.55,
+      "rows": 31.08
+     },
+     {
+      "bits": 46.98,
+      "n": 103,
+      "read": -50.66,
+      "top": 64.34,
+      "rows": 33.29
+     },
+     {
+      "bits": -133.18,
+      "n": 103,
+      "read": -228.66,
+      "top": 59.92,
+      "rows": 35.56
+     },
+     {
+      "bits": -177.27,
+      "n": 103,
+      "read": -271.23,
+      "top": 56.07,
+      "rows": 37.89
+     },
+     {
+      "bits": 79.94,
+      "n": 103,
+      "read": -13.03,
+      "top": 52.69,
+      "rows": 40.28
+     }
+    ],
+    "total": 511.21,
+    "complete": true
+   },
+   "(a) step by step, global [greedy]": {
+    "steps": [
+     {
+      "bits": 978.74,
+      "n": 2343,
+      "read": -2091.0,
+      "top": 3033.22,
+      "rows": 36.53
+     },
+     {
+      "bits": 520.72,
+      "n": 1793,
+      "read": -1436.77,
+      "top": 1918.09,
+      "rows": 39.39
+     },
+     {
+      "bits": 625.29,
+      "n": 276,
+      "read": -638.39,
+      "top": 1223.3,
+      "rows": 40.38
+     },
+     {
+      "bits": 12.71,
+      "n": 136,
+      "read": -361.99,
+      "top": 332.5,
+      "rows": 42.21
+     },
+     {
+      "bits": 206.33,
+      "n": 103,
+      "read": -13.03,
+      "top": 174.95,
+      "rows": 44.42
+     }
+    ],
+    "total": 2343.8,
+    "complete": true
+   },
+   "(b) whole configuration [greedy]": {
+    "steps": [
+     {
+      "bits": 691.71,
+      "n": 103,
+      "read": -54.9,
+      "top": 712.91,
+      "rows": 33.7
+     },
+     {
+      "bits": 44.94,
+      "n": 103,
+      "read": -50.66,
+      "top": 59.6,
+      "rows": 36.0
+     },
+     {
+      "bits": -138.44,
+      "n": 103,
+      "read": -232.87,
+      "top": 56.07,
+      "rows": 38.36
+     },
+     {
+      "bits": -177.72,
+      "n": 103,
+      "read": -271.19,
+      "top": 52.69,
+      "rows": 40.78
+     },
+     {
+      "bits": 79.91,
+      "n": 103,
+      "read": -13.03,
+      "top": 49.69,
+      "rows": 43.25
+     }
+    ],
+    "total": 500.4,
+    "complete": true
+   }
+  }
+ ],
+ "seconds": 761.5608894824982
+}

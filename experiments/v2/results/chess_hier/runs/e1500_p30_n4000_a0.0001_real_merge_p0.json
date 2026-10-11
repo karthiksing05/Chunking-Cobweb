@@ -1,0 +1,71 @@
+{
+ "name": "e1500_p30_n4000_a0.0001_real_merge_p0",
+ "method": "merge_p0",
+ "elo": "1500",
+ "ply": 30,
+ "N": 4000,
+ "test": 500,
+ "alpha": 0.0001,
+ "kind": "real",
+ "seconds": 1285.2298429012299,
+ "train bits/pos": {
+  "read alone": 79.96977402644066,
+  "after the search": 79.96943866963875,
+  "TRELLIS v2 total": 80.02034793015565
+ },
+ "held-out bits/pos": {
+  "read alone": 76.27768456262025,
+  "search code": 76.0330949392715,
+  "TRELLIS v2 grammar": 75.95938833438049
+ },
+ "chunk gain, train (read alone - search)": 0.0003353568019122122,
+ "chunk gain, train (read alone - TRELLIS total)": -0.05057390371499082,
+ "chunk gain, held out (read alone - grammar)": 0.31829622823975967,
+ "chunk gain, held out (read alone - search code)": 0.24458962334874457,
+ "model bits": 19721.041746140596,
+ "data bits": 300360.3499744827,
+ "symbols": 13,
+ "rule classes": 13,
+ "chunk types (grammar)": 1,
+ "search chunk labels": 1,
+ "search labels": 13,
+ "merges": 0,
+ "chunk moves": 1,
+ "categories (rows with several outcomes)": [],
+ "top-level chunk levels (depth: count)": {
+  "1": 2675
+ },
+ "chunk shapes": 1,
+ "share of pieces inside a chunk": 0.05104815701840596,
+ "chunk types": [
+  {
+   "chunk": "[wP N1 bP]",
+   "count": 2675,
+   "anchors": {
+    "d4": 529,
+    "e4": 485,
+    "e5": 361
+   }
+  }
+ ],
+ "search moves": [
+  "[wP N1 bP] x2675"
+ ],
+ "generation": {
+  "attempts": 1000,
+  "collision or off the board": 0.0,
+  "checks": {
+   "one king each": 1.0,
+   "no pawn on a back rank": 0.999,
+   "at most 8 pawns each": 0.999,
+   "at most 16 pieces each": 0.999,
+   "no more of any kind than at the start": 0.999,
+   "passes every check": 0.999
+  },
+  "generated chunks": 648,
+  "generated chunk depths": {
+   "1": 648
+  },
+  "generated chunks found in a held-out position": 0.9799382716049383
+ }
+}
