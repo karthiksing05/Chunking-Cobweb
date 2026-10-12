@@ -17,7 +17,15 @@ By night (``sleep``) the stored analyses are consolidated:
    chunks if no larger chunk pays. The search runs from flat sentences, once
    from each partition on the word-class merge path
    (``mdl_search.word_classes``), and from the stored analyses in the
-   categories of the previous night.
+   categories of the previous night. Each start is searched twice: with
+   chunk and merge moves only, and with the joint chunk move as well
+   (``joint_chunks``: a frequent window of adjacent top-level categories
+   grouped as a nested composite at all its occurrences at once, so that
+   wholes whose binary joins do not pay one at a time can form together).
+   The best few results of each kind are candidates below; the best of each
+   kind after consolidation goes through steps 4 and 5, and the full code at
+   the end of the night chooses, so the joint chunks are kept only where the
+   full code prefers them (their gains can appear only in those steps).
 2. Concepts: the analyses are consolidated into the two hierarchies
    (``Trellis2``), which re-form the categories with chunk context, starting
    from the search's categories, choose the cuts by description length and
@@ -77,7 +85,8 @@ class UnsupervisedLearner(Learner):
     def __init__(self, beam: int = 4, patience: int = 3, levels: int = 12,
                  consolidations: int = 3, reanalysis_steps: int = 5, alpha: float = 0.001,
                  seed: int = 0, workers: int = 1, join_forests: bool = True,
-                 context_free_steps: int = 10,
+                 context_free_steps: int = 10, joint_chunks: bool = True,
+                 joint_config: Optional[dict] = None,
                  sampling: Sequence[float] = (1.0, 1.0, 0.8, 0.8, 0.6, 0.6, 0.4, 0.4, 0.2),
                  **trellis_kwargs):
         super().__init__(seed=seed, alpha=alpha, **trellis_kwargs)
@@ -85,6 +94,11 @@ class UnsupervisedLearner(Learner):
         # Whether each search result is also consolidated with its forests
         # joined into wholes (the full code then decides between them).
         self.join_forests = join_forests
+        # Whether each start is also searched with the joint chunk move
+        # (both kinds are candidates; the full code chooses), and overrides
+        # of ``mdl_search.COMPOSITE_CONFIG``.
+        self.joint_chunks = joint_chunks
+        self.joint_config = dict(joint_config or {})
         # Re-analysis steps without the read's context (step 4; 0: none).
         self.context_free_steps = context_free_steps
         # The temperatures of the sampled re-analysis, one round each (step 5;
@@ -135,24 +149,30 @@ class UnsupervisedLearner(Learner):
             starts.append(("perceived analyses", self.analyses))
         flat = [[(("w", path[-1][w]), w) for w in s] for s in self.experiences]
         log("flat", "start", code_bits(flat, n_tokens, self.alpha))
-        searched = self._map(_search, [(start, n_tokens, self.alpha, self.beam, self.patience)
-                                       for _, start in starts])
-        results = [(bits, name, analyses) for (name, _), (analyses, bits) in zip(starts, searched)]
+        kinds = (False, True) if self.joint_chunks else (False,)
+        jobs = [(start, n_tokens, self.alpha, self.beam, self.patience, joint, self.joint_config)
+                for joint in kinds for _, start in starts]
+        searched = self._map(_search, jobs)
         search_seconds = time.time() - t0
         # The plain code guides the search, but the night minimizes the full
-        # code: each of the best few distinct search results is consolidated
-        # and re-analysed, and the one whose grammar describes the corpus in
-        # the fewest bits wins.
-        results.sort(key=lambda r: r[0])
+        # code: each of the best few distinct search results of each kind is
+        # consolidated and re-analysed, and the one whose grammar describes
+        # the corpus in the fewest bits wins.
         candidates = []
-        for r in results:
-            if all(abs(r[0] - c[0]) > 1e-6 for c in candidates):
-                candidates.append(r)
-            if len(candidates) == self.consolidations:
-                break
+        for joint in kinds:
+            results = sorted([(bits, name + (JOINT_TAG if joint else ""), analyses)
+                              for job, (name, _), (analyses, bits) in zip(jobs, starts * len(kinds), searched)
+                              if job[5] == joint], key=lambda r: r[0])
+            mine = []
+            for r in results:
+                if all(abs(r[0] - c[0]) > 1e-6 for c in mine):
+                    mine.append(r)
+                if len(mine) == self.consolidations:
+                    break
+            candidates += mine
         if self.join_forests:
             candidates += [(code_bits(whole, n_tokens, self.alpha), f"{name}, forests joined", whole)
-                           for _, name, analyses in candidates if any(len(a) > 1 for a in analyses)
+                           for _, name, analyses in list(candidates) if any(len(a) > 1 for a in analyses)
                            for whole in [[joined(a) for a in analyses]]]
         if self.workers > 1 and len(candidates) > 1:
             worker = self._for_worker()
@@ -160,18 +180,48 @@ class UnsupervisedLearner(Learner):
                                                  for _, _, analyses in candidates])
         else:                                # one model at a time
             outcomes = (self._consolidate([to_tree(a) for a in analyses]) for _, _, analyses in candidates)
-        best = None
+        # The best candidate of each kind (without and with joint chunks)
+        # goes through the rest of the night, steps 4 and 5, whose re-analyses
+        # can move one kind further than the other; the full code at the end
+        # of the night chooses between them.
+        best: Dict[bool, tuple] = {}
         for outcome, (bits_plain, name, _) in zip(outcomes, candidates):
+            joint = JOINT_TAG in name
             # Equal full codes (up to rounding): keep the shorter plain code.
-            if best is None or outcome[1] < best[1] - 1e-6:
-                best = outcome + (name, bits_plain)
-        model, bits, trees, steps, name, bits_plain = best
-        if model is None:                    # consolidated in another process
-            model = self.fit(trees)
-        log("structure", f"chunk and merge from {name}", bits_plain, search_seconds)
-        log("concepts", "consolidate", steps[0])
-        for b in steps[1:]:
-            log("re-analysis", "viterbi", b)
+            if joint not in best or outcome[1] < best[joint][1] - 1e-6:
+                best[joint] = outcome + (name, bits_plain)
+        finished = []
+        for joint in kinds:
+            if joint not in best:
+                continue
+            model, bits, trees, steps, name, bits_plain = best[joint]
+            if model is None:                    # consolidated in another process
+                model = self.fit(trees)
+            entries: List[tuple] = []
+
+            def note(stage, move, b, seconds=None, entries=entries):
+                entries.append((stage, move, b, seconds, time.time() - t0))
+            note("structure", f"chunk and merge from {name}", bits_plain, search_seconds)
+            note("concepts", "consolidate", steps[0])
+            for b in steps[1:]:
+                note("re-analysis", "viterbi", b)
+            model, bits, trees = self._rest_of_night(model, bits, trees, note)
+            finished.append((bits, joint, model, trees, entries))
+        bits, joint, model, trees, entries = min(finished, key=lambda f: (f[0], f[1]))
+        for stage, move, b, seconds, at in entries:
+            log(stage, move, b, at if seconds is None else seconds)
+        if len(finished) > 1:
+            log("choice", "; ".join(f"{'with' if j else 'without'} joint chunks: {b:.1f}"
+                                    for b, j, *_ in finished), bits)
+        self.model, self.trees = model, trees
+        self.analyses = self._in_categories(model, trees)
+        self.nights += 1
+        return model.grammar
+
+    def _rest_of_night(self, model, bits, trees, log):
+        """Steps 4 and 5 on a consolidated candidate: re-analysis without the
+        read's context, then sampled re-analysis; each kept only if the full
+        code shrinks."""
         if self.context_free_steps and model.memory.contexts() is not None:
             plain = self._for_worker()
             plain.trellis_kwargs = dict(self.trellis_kwargs, previous_word=False)
@@ -188,10 +238,7 @@ class UnsupervisedLearner(Learner):
                     model, bits, trees = m2, b2, t2
         if self.sampling:
             model, bits, trees = self._sampled(model, bits, trees, log)
-        self.model, self.trees = model, trees
-        self.analyses = self._in_categories(model, trees)
-        self.nights += 1
-        return model.grammar
+        return model, bits, trees
 
     def _sampled(self, model, bits, trees, log):
         """Step 5: annealed posterior sampling under the grammar without the
@@ -285,10 +332,16 @@ class UnsupervisedLearner(Learner):
         return Chart(self.grammar, tokens).log_prob
 
 
+JOINT_TAG = ", with joint chunks"
+
+
 def _search(job):
-    """One structure search of the night (a process's job)."""
-    start, n_tokens, alpha, beam, patience = job
-    return chunk_and_merge(start, n_tokens, alpha, beam=beam, patience=patience)
+    """One structure search of the night (a process's job), with or without
+    the joint chunk move."""
+    start, n_tokens, alpha, beam, patience = job[:5]
+    joint, config = (job[5], job[6]) if len(job) > 5 else (False, None)
+    return chunk_and_merge(start, n_tokens, alpha, beam=beam, patience=patience,
+                           composites=joint, composite_config=config)
 
 
 def _consolidated(job):

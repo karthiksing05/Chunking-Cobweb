@@ -20,13 +20,21 @@ Two searches lower the code, in the tradition of Brown et al. (1992), SNPR
   changes all sentences consistently, which is what lets a chunk type pay for
   itself. A move changes only a few rows of the code, so every candidate is
   scored exactly without rebuilding the analyses.
+
+A third move, the *joint chunk* (``composites=True``), groups a frequent
+window of 3..4 adjacent top-level categories as a nested composite (for
+example ((A B) C)) at all its occurrences at once, so that wholes whose
+binary joins do not pay one at a time can form together (``CompositeState``).
+The night searches with and without it and the full code chooses
+(``unsupervised.UnsupervisedLearner``, ``joint_chunks``).
 """
 from __future__ import annotations
 
+import functools
 import itertools
 import math
 from collections import Counter, defaultdict
-from typing import Dict, Hashable, List, Sequence, Tuple
+from typing import Dict, Hashable, List, Optional, Sequence, Tuple
 
 import numpy as np
 from scipy.special import gammaln
@@ -486,12 +494,15 @@ class _State:
 
 
 def _describe(move) -> str:
+    if move[0] == "composite":
+        return f"composite({' '.join(map(str, move[1]))} as {move[2]})"
     return f"{move[0]}({move[1]}, {move[2]})"
 
 
 def chunk_and_merge(analyses: List[List[Node]], n_tokens: int, alpha: float,
                     beam: int = 1, patience: int = 0, max_steps: int = 500,
-                    log=None) -> Tuple[List[List[Node]], float]:
+                    log=None, composites: bool = False,
+                    composite_config: Optional[dict] = None) -> Tuple[List[List[Node]], float]:
     """Beam search over chunk and merge moves for the shortest code.
 
     Each step expands every analysis set in the beam by all its chunk and
@@ -499,9 +510,15 @@ def chunk_and_merge(analyses: List[List[Node]], n_tokens: int, alpha: float,
     distinct ones, even if they are longer than their parent (GRIDS, Langley
     & Stromsten 2000). The search stops after ``patience`` consecutive steps
     without a new shortest code (Stolcke 1994) and returns the shortest found.
-    ``beam=1, patience=0`` is greedy best-first search.
+    ``beam=1, patience=0`` is greedy best-first search. With ``composites``
+    the joint chunk move is a third move of the beam (``CompositeState``;
+    ``composite_config`` overrides its ``COMPOSITE_CONFIG``).
     """
-    best = _State(analyses, n_tokens, alpha)
+    if composites:
+        best = CompositeState(analyses, n_tokens, alpha)
+        best.config = dict(COMPOSITE_CONFIG, **(composite_config or {}))
+    else:
+        best = _State(analyses, n_tokens, alpha)
     frontier, stale = [best], 0
     for step in range(max_steps):
         # Codes equal to 1e-7 nats are ties, broken by the order of the moves.
@@ -577,3 +594,220 @@ def from_tree(tokens: Sequence[str], tree: Tree, label_of) -> List[Node]:
         k = tree.split[(i, j)]
         return (label_of((i, j)), (rec(i, k), rec(k, j)))
     return [rec(i, j) for i, j in tree.roots]
+
+
+# --------------------------------------------------------------------------- #
+# The joint chunk move: a nested composite at all its occurrences at once
+# --------------------------------------------------------------------------- #
+# Proposals: the ``top_windows`` most frequent windows of 3..``max_leaves``
+# adjacent top-level categories with at least ``min_count`` non-overlapping
+# occurrences, each with every binary bracketing. An internal node takes the
+# existing category whose row already holds its pair of child categories
+# (``reuse``), else a fresh one (one per distinct pair in the composite).
+COMPOSITE_CONFIG = {"max_leaves": 4, "min_count": 3, "top_windows": 60, "reuse": True}
+
+
+@functools.lru_cache(maxsize=None)
+def shapes(lo: int, hi: int) -> Tuple:
+    """Every binary tree over leaves lo..hi-1 (a leaf is its index)."""
+    if hi - lo == 1:
+        return (lo,)
+    return tuple((a, b) for k in range(lo + 1, hi) for a in shapes(lo, k) for b in shapes(k, hi))
+
+
+def shape_spans(shape) -> List[Tuple[int, int]]:
+    """A shape's internal nodes as leaf-index spans, bottom up."""
+    out = []
+
+    def rec(s):
+        if isinstance(s, int):
+            return (s, s + 1)
+        a, b = rec(s[0]), rec(s[1])
+        out.append((a[0], b[1]))
+        return (a[0], b[1])
+    rec(shape)
+    return out
+
+
+def match_positions(labs: Sequence[Hashable], window: Tuple) -> List[int]:
+    """Non-overlapping occurrences of a window of categories, left to right."""
+    m, out, i = len(window), [], 0
+    while i + m <= len(labs):
+        if tuple(labs[i:i + m]) == window:
+            out.append(i)
+            i += m
+        else:
+            i += 1
+    return out
+
+
+def mine_windows(label_seqs, max_leaves: int, min_count: int, top: int) -> List[Tuple[Tuple, int]]:
+    """The ``top`` most frequent windows (counted with overlaps) with at least
+    ``min_count`` non-overlapping occurrences: (window, occurrences)."""
+    cnt: Counter = Counter()
+    for labs in label_seqs:
+        for m in range(3, min(max_leaves, len(labs)) + 1):
+            for i in range(len(labs) - m + 1):
+                cnt[tuple(labs[i:i + m])] += 1
+    cands = sorted((w for w, c in cnt.items() if c >= min_count), key=lambda w: (-cnt[w], str(w)))
+    out = []
+    for w in cands[:top * 2]:
+        n = sum(len(match_positions(labs, w)) for labs in label_seqs)
+        if n >= min_count:
+            out.append((w, n))
+        if len(out) == top:
+            break
+    return out
+
+
+def _holders(rows) -> Dict[tuple, Hashable]:
+    """Pair outcome -> the category whose row holds it most often."""
+    best: Dict[tuple, Tuple[int, Hashable]] = {}
+    for lab in sorted(rows, key=str):
+        for o, c in rows[lab].items():
+            if o[0] == "p" and (o not in best or c > best[o][0]):
+                best[o] = (c, lab)
+    return {o: lab for o, (c, lab) in best.items()}
+
+
+def plan_labels(window: Tuple, shape, holders: Dict, fresh_name):
+    """Categories of a composite's internal nodes, bottom up: (label, left,
+    right, is_new) per node, and the root's label."""
+    nodes, new = [], {}
+
+    def rec(s):
+        if isinstance(s, int):
+            return window[s]
+        l, r = rec(s[0]), rec(s[1])
+        if (l, r) in new:
+            lab, is_new = new[(l, r)], True
+        elif ("p", l, r) in holders:
+            lab, is_new = holders[("p", l, r)], False
+        else:
+            lab, is_new = fresh_name(len(new)), True
+            new[(l, r)] = lab
+        nodes.append((lab, l, r, is_new))
+        return lab
+    return nodes, rec(shape)
+
+
+class CompositeState(_State):
+    """``_State`` with the joint chunk move next to chunk and merge; its code
+    is computed exactly from the changed rows, like theirs.
+
+    The move needs of a domain only categories of top-level elements, an
+    adjacency between them, non-overlapping occurrences and the exact code
+    change; a domain whose search keeps Dirichlet-multinomial row counts
+    (rows, row sizes, a start row, continuations) can reuse ``_composite_nats``."""
+
+    config = COMPOSITE_CONFIG
+
+    def _child(self) -> "CompositeState":
+        c = _State._child(self)
+        c.__class__ = type(self)
+        c.config = self.config
+        return c
+
+    def scored_moves(self):
+        yield from _State.scored_moves(self)
+        cfg = self.config
+        seqs = [self._labels(t) for t in self.tops]
+        cache: dict = {}
+        holders = _holders(self.rows) if cfg["reuse"] else {}
+        for window, n in mine_windows(seqs, cfg["max_leaves"], cfg["min_count"], cfg["top_windows"]):
+            for shape in shapes(0, len(window)):
+                nodes, root = plan_labels(window, shape, holders, lambda k: ("chunk", self.fresh + k))
+                yield self._composite_nats(window, nodes, root, n, cache), ("composite", window, shape)
+
+    def _composite_nats(self, window, nodes, root, n: int, alphabet_cache: dict) -> float:
+        a, lg, phi = self.alpha, math.lgamma, self._phi_one
+        new_labels, added = [], defaultdict(Counter)
+        for lab, l, r, is_new in nodes:
+            added[lab][("p", l, r)] += n
+            if is_new and lab not in new_labels:
+                new_labels.append(lab)
+        K = len(self.rows) + len(new_labels)
+        if K not in alphabet_cache:
+            alphabet_cache[K] = self._alphabet_term(K)
+        aa = (self.n_tokens + K * K) * a
+        alphabet, s_total = alphabet_cache[K], self.s_total
+        for lab, add in added.items():
+            if lab in self.rows:
+                row, n0 = self.rows[lab], self.row_n[lab]
+                alphabet += lg(n0 + sum(add.values()) + aa) - lg(n0 + aa)
+                s_total += sum(phi(row.get(o, 0) + c) - phi(row.get(o, 0)) for o, c in add.items())
+            else:
+                alphabet += lg(sum(add.values()) + aa)
+                s_total += sum(phi(c) for c in add.values())
+        change = Counter()
+        for x in window:
+            change[x] -= n
+        change[root] += n
+        start_s = self.start_s
+        for x, d in change.items():
+            if d:
+                c0 = self.start.get(x, 0)
+                start_s += phi(c0 + d) - phi(c0)
+        m = len(window)
+        return self._nats(K, alphabet, s_total, self.start_n - n * (m - 1), start_s, self.cont - n * (m - 1))
+
+    def apply(self, move) -> "CompositeState":
+        if move[0] != "composite":
+            return _State.apply(self, move)
+        _, window, shape = move
+        holders = _holders(self.rows) if self.config["reuse"] else {}
+        nodes, root = plan_labels(window, shape, holders, lambda k: ("chunk", self.fresh + k))
+        label_of = {span: node[0] for node, span in zip(nodes, shape_spans(shape))}
+        c = self._child()
+        c.fresh += len({lab for lab, _, _, is_new in nodes if is_new})
+
+        def build(leaves):
+            def rec(s):
+                if isinstance(s, int):
+                    return (s, s + 1), leaves[s]
+                (i, _), x = rec(s[0])
+                (_, j), y = rec(s[1])
+                return (i, j), (label_of[(i, j)], (x, y))
+            return rec(shape)[1]
+        tops, n, m = [], 0, len(window)
+        for sentence in self.tops:
+            pos = match_positions(self._labels(sentence), window)
+            if not pos:
+                tops.append(sentence)
+                continue
+            out, t = [], 0
+            for i in pos:
+                out.extend(sentence[t:i])
+                out.append(build(sentence[i:i + m]))
+                t = i + m
+                n += 1
+            out.extend(sentence[t:])
+            tops.append(out)
+        c.tops = tops
+        added = defaultdict(Counter)
+        for lab, l, r, _ in nodes:
+            added[lab][("p", l, r)] += n
+        for lab, add in added.items():
+            row = Counter(self.rows.get(lab, Counter()))
+            row.update(add)
+            c.rows[lab] = row
+            c.row_n[lab] = self.row_n.get(lab, 0) + sum(add.values())
+            c.row_s[lab] = self._phis(row.values())
+            c.s_total += c.row_s[lab] - self.row_s.get(lab, 0.0)
+            for o in add:
+                for z in (o[1], o[2]):
+                    c.parents[z] = set(c.parents.get(z, ())) | {lab}
+        change = Counter()
+        for x in window:
+            change[x] -= n
+        change[root] += n
+        for x, d in change.items():
+            if d:
+                c0 = c.start.get(x, 0)
+                c.start_s += self._phi_one(c0 + d) - self._phi_one(c0)
+                c.start[x] = c0 + d
+        c.start_n -= n * (m - 1)
+        c.cont -= n * (m - 1)
+        c.start = Counter({k: v for k, v in c.start.items() if v})
+        c._set_nats()
+        return c

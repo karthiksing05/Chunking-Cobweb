@@ -612,6 +612,12 @@ def install(variant: str, config: Optional[dict] = None) -> List[str]:
         _SEARCH_CFG.clear()
         _SEARCH_CFG.update(CONFIG)
         return ["trellis2.unsupervised._search (joint_chunks._search_with_config)"]
+    if variant == "candidate":
+        _SEARCH_CFG.clear()
+        _SEARCH_CFG.update(CONFIG)
+        _CANDIDATE[0] = True
+        return ["UnsupervisedLearner.sleep (joint_chunks.candidate_sleep: searches with and without "
+                "the joint chunk move, both kinds consolidated, the full code chooses)"]
     if variant == "final":
         _FINAL[0] = True
         return ["UnsupervisedLearner.sleep (+ joint_chunks.refine_final on the final analyses)"]
@@ -620,6 +626,109 @@ def install(variant: str, config: Optional[dict] = None) -> List[str]:
 
 _SEARCH_CFG: dict = {}
 _FINAL = [False]
+_CANDIDATE = [False]
+
+
+def _search_either(job):
+    """One structure search of the night, without (``plain``) or with
+    (``joint``) the joint chunk move (a process's job)."""
+    kind, job = job
+    if kind == "joint":
+        return _search_with_config(job)
+    import trellis2.unsupervised as U
+    return U._search(job)
+
+
+_search_either.is_search = True
+
+
+def candidate_sleep(self):
+    """``UnsupervisedLearner.sleep`` with the joint chunk move as a candidate:
+    every start is searched without and with the move, the best few distinct
+    results of each kind (and each with its forests joined) are consolidated,
+    and the shortest full code chooses among all of them, as the night always
+    does. Everything after the choice is the night unchanged."""
+    import trellis2.unsupervised as U
+    from trellis2.mdl_search import joined, word_classes
+    t0 = time.time()
+    night = self.nights
+    n_tokens = len({w for s in self.experiences for w in s}) + 1
+
+    def log(stage, move, bits, seconds=None):
+        self.history.append({"night": night, "stage": stage, "move": move, "bits": bits,
+                             "sentences": len(self.experiences),
+                             "seconds": time.time() - t0 if seconds is None else seconds})
+
+    path = word_classes(self.experiences, self.alpha)
+    starts = [(f"{len(set(cls.values()))} word classes",
+               [[(("w", cls[w]), w) for w in s] for s in self.experiences])
+              for cls in path[-self.levels:]]
+    if self.model is not None:
+        starts.append(("perceived analyses", self.analyses))
+    flat = [[(("w", path[-1][w]), w) for w in s] for s in self.experiences]
+    log("flat", "start", code_bits(flat, n_tokens, self.alpha))
+    kinds = ("plain", "joint")
+    jobs = [(k, (start, n_tokens, self.alpha, self.beam, self.patience)) for k in kinds for _, start in starts]
+    searched = self._map(_search_either, jobs)
+    search_seconds = time.time() - t0
+    candidates = []
+    for k in kinds:
+        results = sorted([(bits, name + ("" if k == "plain" else ", with joint chunks"), analyses)
+                          for (kk, _), (name, _), (analyses, bits) in
+                          zip(jobs, starts * len(kinds), searched) if kk == k], key=lambda r: r[0])
+        mine = []
+        for r in results:
+            if all(abs(r[0] - c[0]) > 1e-6 for c in mine):
+                mine.append(r)
+            if len(mine) == self.consolidations:
+                break
+        candidates += mine
+    if self.join_forests:
+        candidates += [(code_bits(whole, n_tokens, self.alpha), f"{name}, forests joined", whole)
+                       for _, name, analyses in list(candidates) if any(len(a) > 1 for a in analyses)
+                       for whole in [[joined(a) for a in analyses]]]
+    if self.workers > 1 and len(candidates) > 1:
+        worker = self._for_worker()
+        outcomes = self._map(U._consolidated, [(worker, [to_tree(a) for a in analyses])
+                                               for _, _, analyses in candidates])
+    else:
+        outcomes = (self._consolidate([to_tree(a) for a in analyses]) for _, _, analyses in candidates)
+    best = None
+    self.candidate_codes = []
+    for outcome, (bits_plain, name, _) in zip(outcomes, candidates):
+        self.candidate_codes.append({"candidate": name, "plain bits": bits_plain, "full bits": outcome[1]})
+        if best is None or outcome[1] < best[1] - 1e-6:
+            best = outcome + (name, bits_plain)
+    model, bits, trees, steps, name, bits_plain = best
+    if model is None:
+        model = self.fit(trees)
+    log("structure", f"chunk and merge from {name}", bits_plain, search_seconds)
+    log("concepts", "consolidate", steps[0])
+    for b in steps[1:]:
+        log("re-analysis", "viterbi", b)
+    if self.context_free_steps and model.memory.contexts() is not None:
+        plain = self._for_worker()
+        plain.trellis_kwargs = dict(self.trellis_kwargs, previous_word=False)
+        plain.reanalysis_steps = self.context_free_steps
+        _, _, found, plain_steps = plain._consolidate(trees)
+        if len(plain_steps) > 1:
+            m2, b2, t2, s2 = self._consolidate(found)
+            if b2 < bits - 1e-6:
+                for b in plain_steps[1:]:
+                    log("re-analysis", "viterbi without the read's context (its code)", b)
+                log("concepts", "consolidate with the read's context", s2[0])
+                for b in s2[1:]:
+                    log("re-analysis", "viterbi", b)
+                model, bits, trees = m2, b2, t2
+    if self.sampling:
+        model, bits, trees = self._sampled(model, bits, trees, log)
+    self.model, self.trees = model, trees
+    self.analyses = self._in_categories(model, trees)
+    self.nights += 1
+    print(f"    night {night}: winner '{name}'; candidates "
+          + "; ".join(f"{c['candidate']}: plain {c['plain bits']:.0f}, full {c['full bits']:.0f}"
+                      for c in self.candidate_codes), flush=True)
+    return model.grammar
 
 
 def _search_with_config(job):
@@ -633,6 +742,14 @@ _SEARCH_FN = _search_with_config
 def LEARNER_CLASS(base):
     """The learner class for the installed placement: with ``final``, the
     night is followed by ``refine_final``."""
+    if _CANDIDATE[0]:
+        name = f"Candidate_{base.__name__}"
+        if name not in globals():
+            cls = type(name, (base,), {"sleep": candidate_sleep, "candidate_codes": None,
+                                       "__module__": __name__})
+            cls.__qualname__ = name
+            globals()[name] = cls
+        return globals()[name]
     if not _FINAL[0]:
         return base
 

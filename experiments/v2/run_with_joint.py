@@ -27,7 +27,7 @@ def main():
     rest = argv[argv.index("--") + 1:] if "--" in argv else []
     own = argv[:argv.index("--")] if "--" in argv else argv
     ap = argparse.ArgumentParser()
-    ap.add_argument("--variant", required=True, choices=("baseline", "search", "final"))
+    ap.add_argument("--variant", required=True, choices=("baseline", "search", "final", "candidate"))
     ap.add_argument("--script", required=True)
     ap.add_argument("--out-const", default=None)
     ap.add_argument("--config", default="{}", help="JSON overrides of joint_chunks.CONFIG")

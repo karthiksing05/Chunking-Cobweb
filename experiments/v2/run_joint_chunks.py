@@ -120,14 +120,16 @@ def run_night(args):
              "trees": learner.trees, "searched": learner.searched, "history": learner.history,
              "n_tokens": len({w for s in learner.experiences for w in s}) + 1,
              "total bits": learner.model.grammar.info["total bits"],
-             "joint": getattr(learner, "joint_log", None)}
+             "joint": getattr(learner, "joint_log", None),
+             "candidates": getattr(learner, "candidate_codes", None)}
     tag = args.variant + ("_from_state" if args.from_state else "")
     with open(os.path.join(args.out, f"state_{tag}_s{args.seed}.pkl"), "wb") as f:
         pickle.dump(state, f)
     out = evaluate_learner(learner, chars, train, test, args.seed, args.n_gen, args.path)
     out.update(variant=args.variant, seed=args.seed, train=args.train, test=args.test,
                seconds=seconds, substituted=names, history=learner.history,
-               joint=getattr(learner, "joint_log", None), config=dict(JC.CONFIG))
+               joint=getattr(learner, "joint_log", None), config=dict(JC.CONFIG),
+               candidates=getattr(learner, "candidate_codes", None))
     with open(os.path.join(args.out, f"night_{tag}_s{args.seed}.json"), "w", encoding="utf-8") as f:
         json.dump(out, f, indent=1, ensure_ascii=False, default=str)
     print(json.dumps({k: out[k] for k in ("omission", "commission", "test_bits_per_character", "generation",
@@ -143,7 +145,7 @@ def JC_CONFIG_FROM_ARGS(args) -> dict:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("cmd", choices=("night", "diag"))
-    ap.add_argument("--variant", default="baseline", choices=("baseline", "search", "final"))
+    ap.add_argument("--variant", default="baseline", choices=("baseline", "search", "final", "candidate"))
     ap.add_argument("--seed", type=int, default=13)
     ap.add_argument("--train", type=int, default=2000)
     ap.add_argument("--test", type=int, default=500)
