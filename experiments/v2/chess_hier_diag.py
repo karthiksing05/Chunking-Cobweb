@@ -228,7 +228,13 @@ def main():
     ap.add_argument("--top", type=int, default=6, help="most frequent configurations per size evaluated")
     ap.add_argument("--named", type=int, default=4, help="most frequent per named class and size")
     ap.add_argument("--minsup", type=float, default=0.01)
+    ap.add_argument("--context", action="store_true", help="top-level labels coded in context (chess_context)")
     args = ap.parse_args()
+    global OUT
+    Search = HierBoardSearch
+    if args.context:
+        from chess_context import ContextBoardSearch as Search
+        OUT = os.path.join(HERE, "results", "chess_context", "diag")
     t0 = time.time()
     positions = load(args.elo, args.ply, args.train)
     name = f"e{args.elo}_p{args.ply}_n{args.train}_a{args.alpha:g}"
@@ -236,7 +242,7 @@ def main():
     print(f"mined in {time.time() - t0:.0f}s:", {k: len(v) for k, v in mined.items()}, flush=True)
     index = {k: inst for sz in mined for k, inst in mined[sz]}
 
-    flat = HierBoardSearch(positions, args.alpha, True, merges=False)
+    flat = Search(positions, args.alpha, True, merges=False)
     greedy = copy.deepcopy(flat)
     greedy.run(500)
     print(f"flat {flat.bits() / len(positions):.3f} greedy {greedy.bits() / len(positions):.3f} bits/pos, "

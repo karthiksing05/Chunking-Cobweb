@@ -109,15 +109,17 @@ def main():
     ap.add_argument("--test", type=int, default=500)
     ap.add_argument("--alpha", type=float, default=1e-3)
     ap.add_argument("--kind", default="real", choices=["real", "random"])
-    ap.add_argument("--method", default="merge", choices=["merge", "current"])
+    ap.add_argument("--method", default="merge", choices=["merge", "current", "context", "context_merge"])
     ap.add_argument("--patience", type=int, default=0)
     ap.add_argument("--merge-kinds", default="any", choices=["any", "same"])
     ap.add_argument("--n-gen", type=int, default=1000)
     ap.add_argument("--seed", type=int, default=13)
+    ap.add_argument("--tag", default="", help="appended to the result's name")
     args = ap.parse_args()
-    tag = args.method if args.method == "current" else (
+    tag = args.method if args.method in ("current", "context", "context_merge") else (
         f"merge_p{args.patience}" + ("" if args.merge_kinds == "any" else "_same"))
-    name = f"e{args.elo}_p{args.ply}_n{args.train}_a{args.alpha:g}_{args.kind}_{tag}"
+    out_dir = OUT if not args.method.startswith("context") else os.path.join(HERE, "results", "chess_context", "runs")
+    name = f"e{args.elo}_p{args.ply}_n{args.train}_a{args.alpha:g}_{args.kind}_{tag}{args.tag}"
     with open(positions_path(args.elo, args.ply)) as f:
         fens = [line.strip() for line in f if line.strip()]
     if len(fens) < args.train + args.test:
@@ -133,6 +135,10 @@ def main():
     t0 = time.time()
     if args.method == "current":
         learner = ChessLearner(seed=args.seed, alpha=args.alpha)
+    elif args.method.startswith("context"):
+        from chess_context import ContextChessLearner
+        learner = ContextChessLearner(seed=args.seed, alpha=args.alpha, merges=args.method == "context_merge",
+                                      patience=args.patience)
     else:
         learner = HierChessLearner(seed=args.seed, alpha=args.alpha, patience=args.patience,
                                    merge_kinds=args.merge_kinds)
@@ -188,8 +194,11 @@ def main():
                            for k, c in found.most_common(40)],
            "search moves": [h["move"] for h in learner.history if h["stage"] in ("chunk", "merge")],
            "generation": gen}
-    os.makedirs(OUT, exist_ok=True)
-    with open(os.path.join(OUT, name + ".json"), "w", encoding="utf-8") as f:
+    if args.method.startswith("context"):
+        res["context option (depth, beta)"] = list(learner.search.option)
+        res["grammar context option"] = list(learner.model.memory._predictor(g)[:2])
+    os.makedirs(out_dir, exist_ok=True)
+    with open(os.path.join(out_dir, name + ".json"), "w", encoding="utf-8") as f:
         json.dump(res, f, indent=1)
     print(f"{name}: {seconds:.0f}s; train read {flat:.3f} search {search_bits:.3f} total {total:.3f}; "
           f"held read {held_flat:.3f} grammar {held_grammar:.3f} search {held_chunks:.3f}; "

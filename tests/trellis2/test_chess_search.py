@@ -1,17 +1,15 @@
 """The board search with merge moves: every move's score equals the code
 recomputed from scratch on the analyses it leaves."""
 import copy
-import os
-import sys
 
 import numpy as np
 import pytest
 
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.insert(0, os.path.join(ROOT, "experiments", "v2"))
+from trellis2.chess import BoardSearch, code_of_analyses, parse_fen
 
-from chess_search import HierBoardSearch, code_of_analyses  # noqa: E402
-from trellis2.chess import BoardSearch, parse_fen  # noqa: E402
+
+def HierBoardSearch(positions, alpha=0.001, counts=True, merges=True):
+    return BoardSearch(positions, alpha, counts, merges)
 
 FENS = [
     "r1bq1rk1/pp2ppbp/2np1np1/8/3NP3/2N1BP2/PPPQ2PP/R3KB1R",
@@ -76,12 +74,14 @@ def test_chunk_and_merge_scores_are_exact_along_a_search(counts):
     assert any(m[0] == "merge" for m in s.moves)
 
 
-def test_search_without_merges_is_board_search():
+def test_search_without_merges_takes_chunk_moves_only():
     positions = [parse_fen(f) for f in FENS]
     a = BoardSearch(positions, 0.01)
-    b = HierBoardSearch(positions, 0.01, merges=False)
-    assert abs(a.run(20) - b.run(20)) < 1e-9
-    assert a.analyses() == b.analyses()
+    assert {m[0] for _, m in a.scored_moves()} == {"chunk"}
+    a.run(20)
+    assert all(m[0] != "merge" for m in a.moves)
+    ref = code_of_analyses(positions, a.analyses(), 0.01)
+    assert abs(a.bits() - ref["total"]) < 1e-6
 
 
 def test_replay_reproduces_the_search_and_held_out_code():

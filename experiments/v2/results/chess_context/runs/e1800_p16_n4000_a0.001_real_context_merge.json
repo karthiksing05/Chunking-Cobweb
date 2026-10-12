@@ -1,0 +1,121 @@
+{
+ "name": "e1800_p16_n4000_a0.001_real_context_merge",
+ "method": "context_merge",
+ "elo": "1800",
+ "ply": 16,
+ "N": 4000,
+ "test": 500,
+ "alpha": 0.001,
+ "kind": "real",
+ "seconds": 14531.891902923584,
+ "train bits/pos": {
+  "read alone": 53.334273864255316,
+  "after the search": 52.44671105131882,
+  "TRELLIS v2 total": 52.41605999994617
+ },
+ "held-out bits/pos": {
+  "read alone": 51.82270247412824,
+  "search code": 50.460501048946114,
+  "TRELLIS v2 grammar": 50.55062676949948
+ },
+ "chunk gain, train (read alone - search)": 0.8875628129364941,
+ "chunk gain, train (read alone - TRELLIS total)": 0.9182138643091449,
+ "chunk gain, held out (read alone - grammar)": 1.2720757046287616,
+ "chunk gain, held out (read alone - search code)": 1.3622014251821284,
+ "model bits": 10709.343203455854,
+ "data bits": 202639.53171415825,
+ "symbols": 17,
+ "rule classes": 18,
+ "chunk types (grammar)": 8,
+ "search chunk labels": 5,
+ "search labels": 17,
+ "merges": 0,
+ "chunk moves": 5,
+ "categories (rows with several outcomes)": [],
+ "top-level chunk levels (depth: count)": {
+  "1": 3356,
+  "2": 732,
+  "3": 494
+ },
+ "chunk shapes": 5,
+ "share of pieces inside a chunk": 0.09073478166630541,
+ "chunk types": [
+  {
+   "chunk": "[wP NW1 wP]",
+   "count": 2294,
+   "anchors": {
+    "f2": 734,
+    "h2": 468,
+    "b2": 212
+   }
+  },
+  {
+   "chunk": "[wK E1 wB]",
+   "count": 909,
+   "anchors": {
+    "e1": 909
+   }
+  },
+  {
+   "chunk": "[bP NW1 [bP E1 bB]]",
+   "count": 732,
+   "anchors": {
+    "g6": 292,
+    "b6": 233,
+    "d5": 106
+   }
+  },
+  {
+   "chunk": "[[bP NW1 [bP E1 bB]] WNW bP]",
+   "count": 494,
+   "anchors": {
+    "g6": 426,
+    "d6": 24,
+    "c6": 14
+   }
+  },
+  {
+   "chunk": "[bP E1 bB]",
+   "count": 153,
+   "anchors": {
+    "c6": 27,
+    "e5": 20,
+    "c7": 19
+   }
+  }
+ ],
+ "search moves": [
+  "[wP NW1 wP] x2294",
+  "[bP E1 bB] x1379",
+  "[bP NW1 ('chunk', 1)] x1226",
+  "[('chunk', 2) WNW bP] x494",
+  "[wK E1 wB] x909"
+ ],
+ "generation": {
+  "attempts": 1059,
+  "collision or off the board": 0.05571293673276676,
+  "checks": {
+   "one king each": 0.996,
+   "no pawn on a back rank": 0.978,
+   "at most 8 pawns each": 0.979,
+   "at most 16 pieces each": 0.967,
+   "no more of any kind than at the start": 0.966,
+   "passes every check": 0.964
+  },
+  "generated chunks": 1062,
+  "generated chunk depths": {
+   "1": 797,
+   "2": 171,
+   "3": 94
+  },
+  "generated chunks found in a held-out position": 0.9209039548022598
+ },
+ "context option (depth, beta)": [
+  4,
+  16.0
+ ],
+ "grammar context option": [
+  4,
+  16.0
+ ]
+}

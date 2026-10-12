@@ -1,0 +1,159 @@
+{
+ "name": "e1800_p16_n8000_a0.001_real_context",
+ "method": "context",
+ "elo": "1800",
+ "ply": 16,
+ "N": 8000,
+ "test": 500,
+ "alpha": 0.001,
+ "kind": "real",
+ "seconds": 47680.6928088665,
+ "train bits/pos": {
+  "read alone": 52.33311045756765,
+  "after the search": 50.9944318394157,
+  "TRELLIS v2 total": 51.04695729253302
+ },
+ "held-out bits/pos": {
+  "read alone": 50.65496374369938,
+  "search code": 48.742996179205974,
+  "TRELLIS v2 grammar": 49.06973057941424
+ },
+ "chunk gain, train (read alone - search)": 1.3386786181519525,
+ "chunk gain, train (read alone - TRELLIS total)": 1.2861531650346265,
+ "chunk gain, held out (read alone - grammar)": 1.5852331642851425,
+ "chunk gain, held out (read alone - search code)": 1.911967564493409,
+ "model bits": 12568.674410418329,
+ "data bits": 407029.73450652935,
+ "symbols": 20,
+ "rule classes": 21,
+ "chunk types (grammar)": 16,
+ "search chunk labels": 9,
+ "search labels": 21,
+ "merges": 0,
+ "chunk moves": 9,
+ "categories (rows with several outcomes)": [],
+ "top-level chunk levels (depth: count)": {
+  "1": 9254,
+  "2": 2787,
+  "3": 1011
+ },
+ "chunk shapes": 9,
+ "share of pieces inside a chunk": 0.12883959755599456,
+ "chunk types": [
+  {
+   "chunk": "[wP NW1 wP]",
+   "count": 3393,
+   "anchors": {
+    "h2": 948,
+    "f2": 495,
+    "b2": 430
+   }
+  },
+  {
+   "chunk": "[wP NNW wP]",
+   "count": 3043,
+   "anchors": {
+    "f2": 1868,
+    "g2": 545,
+    "e2": 374
+   }
+  },
+  {
+   "chunk": "[wK E1 wB]",
+   "count": 1787,
+   "anchors": {
+    "e1": 1787
+   }
+  },
+  {
+   "chunk": "[bP NW1 [bP E1 bB]]",
+   "count": 1441,
+   "anchors": {
+    "g6": 561,
+    "b6": 506,
+    "d5": 201
+   }
+  },
+  {
+   "chunk": "[[wP NW1 wP] NW2 wP]",
+   "count": 1207,
+   "anchors": {
+    "f2": 962,
+    "g2": 120,
+    "e2": 57
+   }
+  },
+  {
+   "chunk": "[[bP NW1 [bP E1 bB]] WNW bP]",
+   "count": 1011,
+   "anchors": {
+    "g6": 878,
+    "d6": 46,
+    "c6": 29
+   }
+  },
+  {
+   "chunk": "[wN E2 wP]",
+   "count": 700,
+   "anchors": {
+    "f3": 554,
+    "d2": 101,
+    "e2": 16
+   }
+  },
+  {
+   "chunk": "[bP E1 bB]",
+   "count": 331,
+   "anchors": {
+    "c6": 68,
+    "c7": 38,
+    "d7": 36
+   }
+  },
+  {
+   "chunk": "[[wN E2 wP] NE2 bB]",
+   "count": 139,
+   "anchors": {
+    "f3": 139
+   }
+  }
+ ],
+ "search moves": [
+  "[wP NW1 wP] x4600",
+  "[bP E1 bB] x2783",
+  "[bP NW1 ('chunk', 1)] x2452",
+  "[('chunk', 2) WNW bP] x1011",
+  "[wK E1 wB] x1787",
+  "[wP NNW wP] x3043",
+  "[('chunk', 0) NW2 wP] x1207",
+  "[wN E2 wP] x839",
+  "[('chunk', 7) NE2 bB] x139"
+ ],
+ "generation": {
+  "attempts": 1105,
+  "collision or off the board": 0.09502262443438914,
+  "checks": {
+   "one king each": 0.995,
+   "no pawn on a back rank": 0.982,
+   "at most 8 pawns each": 0.983,
+   "at most 16 pieces each": 0.957,
+   "no more of any kind than at the start": 0.956,
+   "passes every check": 0.949
+  },
+  "generated chunks": 1593,
+  "generated chunk depths": {
+   "1": 1122,
+   "2": 349,
+   "3": 122
+  },
+  "generated chunks found in a held-out position": 0.9541745134965474
+ },
+ "context option (depth, beta)": [
+  4,
+  16.0
+ ],
+ "grammar context option": [
+  4,
+  16.0
+ ]
+}
