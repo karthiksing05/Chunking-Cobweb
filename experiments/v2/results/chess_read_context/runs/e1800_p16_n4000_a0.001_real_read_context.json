@@ -1,0 +1,87 @@
+{
+ "name": "e1800_p16_n4000_a0.001_real_read_context",
+ "method": "read_context",
+ "elo": "1800",
+ "ply": 16,
+ "N": 4000,
+ "test": 500,
+ "alpha": 0.001,
+ "kind": "real",
+ "seconds": 3995.1146352291107,
+ "train bits/pos": {
+  "read alone": 44.435118465855425,
+  "after the search": 44.351768458959995,
+  "TRELLIS v2 total": 44.22968751218288
+ },
+ "held-out bits/pos": {
+  "read alone": 41.057911262105165,
+  "search code": 40.959765137525906,
+  "TRELLIS v2 grammar": 40.84656620041256
+ },
+ "chunk gain, train (read alone - search)": 0.08335000689542937,
+ "chunk gain, train (read alone - TRELLIS total)": 0.20543095367254693,
+ "chunk gain, held out (read alone - grammar)": 0.21134506169260447,
+ "chunk gain, held out (read alone - search code)": 0.09814612457925875,
+ "model bits": 10209.2275572806,
+ "data bits": 204335.7977597283,
+ "symbols": 13,
+ "rule classes": 13,
+ "chunk types (grammar)": 1,
+ "search chunk labels": 1,
+ "search labels": 13,
+ "merges": 0,
+ "chunk moves": 1,
+ "categories (rows with several outcomes)": [],
+ "top-level chunk levels (depth: count)": {
+  "1": 2389
+ },
+ "chunk shapes": 1,
+ "share of pieces inside a chunk": 0.039831935575303866,
+ "chunk types": [
+  {
+   "chunk": "[wN N1 wP]",
+   "count": 2389,
+   "anchors": {
+    "b1": 1061,
+    "c3": 610,
+    "f3": 281
+   }
+  }
+ ],
+ "search moves": [
+  "[wN N1 wP] x2389"
+ ],
+ "generation": {
+  "attempts": 1003,
+  "collision or off the board": 0.0029910269192422734,
+  "checks": {
+   "one king each": 1.0,
+   "no pawn on a back rank": 0.996,
+   "at most 8 pawns each": 0.998,
+   "at most 16 pieces each": 0.998,
+   "no more of any kind than at the start": 0.998,
+   "passes every check": 0.996
+  },
+  "generated chunks": 610,
+  "generated chunk depths": {
+   "1": 610
+  },
+  "generated chunks found in a held-out position": 0.9918032786885246
+ },
+ "context option (depth, beta)": [
+  4,
+  16.0
+ ],
+ "grammar context option": [
+  4,
+  16.0
+ ],
+ "read context option (depth, beta)": [
+  4,
+  16.0
+ ],
+ "grammar read context option": [
+  4,
+  16.0
+ ]
+}

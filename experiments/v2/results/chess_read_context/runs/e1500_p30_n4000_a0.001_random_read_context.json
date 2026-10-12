@@ -1,0 +1,71 @@
+{
+ "name": "e1500_p30_n4000_a0.001_random_read_context",
+ "method": "read_context",
+ "elo": "1500",
+ "ply": 30,
+ "N": 4000,
+ "test": 500,
+ "alpha": 0.001,
+ "kind": "random",
+ "seconds": 3710.5122051239014,
+ "train bits/pos": {
+  "read alone": 132.66711514771617,
+  "after the search": 132.66711514771617,
+  "TRELLIS v2 total": 132.5575740764183
+ },
+ "held-out bits/pos": {
+  "read alone": 127.94902853020587,
+  "search code": 127.94902853020587,
+  "TRELLIS v2 grammar": 127.92852001290076
+ },
+ "chunk gain, train (read alone - search)": 0.0,
+ "chunk gain, train (read alone - TRELLIS total)": 0.10954107129788326,
+ "chunk gain, held out (read alone - grammar)": 0.02050851730510317,
+ "chunk gain, held out (read alone - search code)": 0.0,
+ "model bits": 23329.181798205467,
+ "data bits": 506926.9023538686,
+ "symbols": 12,
+ "rule classes": 12,
+ "chunk types (grammar)": 0,
+ "search chunk labels": 0,
+ "search labels": 12,
+ "merges": 0,
+ "chunk moves": 0,
+ "categories (rows with several outcomes)": [],
+ "top-level chunk levels (depth: count)": {},
+ "chunk shapes": 0,
+ "share of pieces inside a chunk": 0.0,
+ "chunk types": [],
+ "search moves": [],
+ "generation": {
+  "attempts": 1000,
+  "collision or off the board": 0.0,
+  "checks": {
+   "one king each": 0.998,
+   "no pawn on a back rank": 1.0,
+   "at most 8 pawns each": 1.0,
+   "at most 16 pieces each": 1.0,
+   "no more of any kind than at the start": 1.0,
+   "passes every check": 0.998
+  },
+  "generated chunks": 0,
+  "generated chunk depths": {},
+  "generated chunks found in a held-out position": 0.0
+ },
+ "context option (depth, beta)": [
+  4,
+  1.0
+ ],
+ "grammar context option": [
+  2,
+  1.0
+ ],
+ "read context option (depth, beta)": [
+  0,
+  0.0
+ ],
+ "grammar read context option": [
+  0,
+  0.0
+ ]
+}

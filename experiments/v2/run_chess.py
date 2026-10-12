@@ -168,7 +168,7 @@ def main():
     test = [positions[i] for i in order[args.train:args.train + args.test]]
 
     t0 = time.time()
-    learner = ChessLearner(seed=args.seed, alpha=args.alpha, counts=not args.no_context)
+    learner = ChessLearner(seed=args.seed, alpha=args.alpha, counts=not args.no_context, context=False)
     for position in train:
         learner.observe(position)
     g = learner.sleep()

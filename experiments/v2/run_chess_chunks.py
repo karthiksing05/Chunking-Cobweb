@@ -89,7 +89,7 @@ def run(elo, ply, n, counts, alpha, kind, test=500, seed=13, force=False):
     held = [to_position(b) for b in boards[n:n + test]]
 
     t0 = time.time()
-    learner = ChessLearner(seed=seed, alpha=alpha, counts=counts)
+    learner = ChessLearner(seed=seed, alpha=alpha, counts=counts, context=False)
     for p in train:
         learner.observe(p)
     g = learner.sleep()

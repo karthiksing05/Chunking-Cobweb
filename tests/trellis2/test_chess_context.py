@@ -134,3 +134,125 @@ def test_memory_code_and_predictive():
         assert np.isfinite(learner.log_prob(position))
     samples, _ = learner.generate(5, np.random.default_rng(0))
     assert len(samples) == 5
+
+
+# --------------------------------------------------------------------------- #
+# The read's answers in context
+# --------------------------------------------------------------------------- #
+from trellis2.chess import COUNTS, KINDS, backoff_terms, counts_before  # noqa: E402
+from trellis2.mdl import backoff_chain_coder  # noqa: E402
+
+
+def sequential_read_nats(positions, analyses, alpha, option):
+    """-sum log P(answer | kind, square, count, context) over every question
+    the read asks, each predicted from the answers before it (written out)."""
+    d, beta = option
+    n_g, n_gx = defaultdict(Counter), [defaultdict(Counter) for _ in range(d)]
+    nats = 0.0
+    for position, tops in zip(positions, analyses):
+        anchored = {anchor_of(n): n for n in tops}
+        before = counts_before(position)
+        for i in range(64):
+            sq = (i % 8, i // 8)
+            if sq in position and sq not in anchored:
+                continue                                   # covered by a chunk: not read
+            stop = KIND_INDEX[position[sq]] if sq in anchored else len(KINDS)
+            x = chain_values(position, sq)
+            for k in range(min(stop + 1, len(KINDS))):
+                g = (k, i, min(int(before[i][k]), COUNTS - 1))
+                ans = int(k == stop)
+                p = (n_g[g][ans] + alpha) / (sum(n_g[g].values()) + 2 * alpha)
+                for l in range(d):
+                    row = n_gx[l][(g, x[l])]
+                    p = (row[ans] + beta * p) / (sum(row.values()) + beta)
+                nats -= math.log(p)
+                n_g[g][ans] += 1
+                for l in range(d):
+                    n_gx[l][(g, x[l])][ans] += 1
+    return nats
+
+
+def reference_bits_read(search):
+    positions = [p["position"] for p in search.pos]
+    analyses = search.analyses()
+    ref = code_of_analyses(positions, analyses, search.a, search.counts)
+    K = len(search.rows)
+    top = min(sequential_top_nats(positions, analyses, K, search.a, o) for o in OPTIONS)
+    read = min(sequential_read_nats(positions, analyses, search.a, o) for o in OPTIONS)
+    return ref["rows"] + (top + read + 2 * CHOICE_NATS) / math.log(2)
+
+
+def test_backoff_terms_are_the_shared_coder():
+    rng = np.random.default_rng(0)
+    n = 500
+    g, k = rng.integers(0, 7, n), rng.integers(0, 3, n)
+    ctx = [rng.integers(0, 4, n), rng.integers(0, 9, n)]
+    w = rng.random(n) + 0.5
+    for beta in (1.0, 4.0):
+        t = backoff_terms(g, ctx, k, w, 3, 0.01, beta)
+        for d in range(3):
+            assert abs(t[d].sum() - backoff_chain_coder(g, ctx[:d], w)(k, 3, 0.01, [beta] * d)) < 1e-9
+
+
+def test_read_code_equals_sequential_log_probabilities():
+    positions = [parse_fen(f) for f in FENS]
+    h = HierBoardSearch(positions, A)
+    h.run(4)
+    s = ContextBoardSearch(positions, A, read_context=True)
+    s.replay(h.moves)
+    analyses = s.analyses()
+    for opt in OPTIONS:
+        assert abs(s._read_nats(opt) - sequential_read_nats(positions, analyses, A, opt)) < 1e-8
+    # Depth 0 is the counted read.
+    assert abs(s._read_nats((0, 0.0)) - h._read_nats()) < 1e-8
+    assert abs(s.bits() - reference_bits_read(s)) < 1e-6
+
+
+def test_read_context_move_scores_are_exact():
+    positions = [parse_fen(f) for f in FENS]
+    s = ContextBoardSearch(positions, A, merges=True, read_context=True)
+    rng = np.random.default_rng(2)
+    seen = set()
+    for step in range(4):
+        moves = list(s.scored_moves())
+        pick = [moves[i] for i in rng.choice(len(moves), size=min(20, len(moves)), replace=False)]
+        for bits, move in pick:
+            seen.add(move[0])
+            child = copy.deepcopy(s)
+            child.do(move)
+            assert abs(child.bits() - bits) < 1e-6, move[0]
+            assert abs(reference_bits_read(child) - bits) < 1e-6, move[0]
+        merges = [m for m in moves if m[1][0] == "merge"]
+        bits, move = min(merges if (merges and step % 2) else moves, key=lambda x: x[0])
+        s.do(move)
+        assert abs(s.bits() - bits) < 1e-6
+        # The per-row cache after the move equals a fresh computation.
+        fresh = s._read_codes(np.arange(len(s.r_g)))
+        for opt in OPTIONS:
+            assert np.allclose(fresh[opt], s.r_code[opt])
+    assert seen == {"chunk", "merge"}
+
+
+def test_memory_read_in_context():
+    positions = [parse_fen(f) for f in FENS]
+    learner = ChessLearner(seed=0, alpha=A, max_steps=3, merges=True, read_context=True)
+    for p in positions:
+        learner.observe(p)
+    learner.sleep()
+    mem = learner.model.memory
+    analyses = [[] for _ in positions]
+    for e in np.flatnonzero(mem.is_root):
+        analyses[mem.experience_of[e]].append((None, mem.anchor[e]) if mem.kind[e] == mem.PRIMITIVE
+                                              else _node(mem, e))
+    nats, opt = mem.answers_nats(A)
+    assert abs(nats - sequential_read_nats(positions, analyses, A, opt)) < 1e-8
+    for position in positions[:3]:
+        assert np.isfinite(learner.log_prob(position))
+    samples, _ = learner.generate(5, np.random.default_rng(0))
+    assert len(samples) == 5
+
+
+def _node(mem, e):
+    if mem.kind[e] == mem.PRIMITIVE:
+        return (None, mem.anchor[e])
+    return (None, (_node(mem, mem.left[e]), mem.relation[e], _node(mem, mem.right[e])))

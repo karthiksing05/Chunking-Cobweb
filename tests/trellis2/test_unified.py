@@ -63,10 +63,11 @@ def test_relational_characters_end_to_end():
     assert model.log_prob(("⿰", "氵", "古")) > model.log_prob(("⿰", "古", "氵")) + 5
 
 
-def test_chess_learner_end_to_end():
+@pytest.mark.parametrize("context", [False, True])
+def test_chess_learner_end_to_end(context):
     rng = random.Random(0)
     positions = [shielded_position(rng) for _ in range(40)]
-    learner = ChessLearner(seed=0, max_steps=40)
+    learner = ChessLearner(seed=0, max_steps=40, context=context)
     for p in positions:
         learner.observe(p)
     g = learner.sleep()
@@ -121,12 +122,12 @@ def _characters():
     return model, lambda s: s, model.log_prob
 
 
-def _chess():
+def _chess(context=False, read_context=False):
     # A king and three pawns per side in fixed places, and a knight on one of four squares.
     fixed = {(6, 0): "wK", (5, 1): "wP", (6, 1): "wP", (7, 1): "wP",
              (6, 7): "bK", (5, 6): "bP", (6, 6): "bP", (7, 6): "bP"}
     spots = [(2, 2), (3, 3), (4, 3), (1, 2)]
-    learner = ChessLearner(seed=0, max_steps=30)
+    learner = ChessLearner(seed=0, max_steps=30, context=context, read_context=read_context)
     for i in range(40):
         learner.observe({**fixed, spots[i % 4]: "wN"})
     learner.sleep()
@@ -134,12 +135,15 @@ def _chess():
     return learner, key, lambda s: learner.model.log_prob(s[0], s[1])
 
 
-@pytest.mark.parametrize("domain", ["sentences", "characters", "chess"])
+@pytest.mark.parametrize("domain", ["sentences", "characters", "chess", "chess in context",
+                                    "chess, read in context"])
 def test_the_grammar_draws_what_it_codes(domain):
     """Draw twice; the experiences drawn most often the first time are drawn
     the second time as often as exp(log_prob) says, once the draws the
     domain rejects (too long, a piece off the board) are accounted for."""
-    model, key, log_prob = {"sentences": _sentences, "characters": _characters, "chess": _chess}[domain]()
+    model, key, log_prob = {"sentences": _sentences, "characters": _characters, "chess": _chess,
+                             "chess in context": lambda: _chess(context=True),
+                             "chess, read in context": lambda: _chess(context=True, read_context=True)}[domain]()
     n = 6000
     first, _ = model.generate(n, np.random.default_rng(0))
     second, rejected = model.generate(n, np.random.default_rng(1))

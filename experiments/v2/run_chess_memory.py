@@ -135,7 +135,7 @@ def run_trellis(n: int, kind: str, alpha: float = 0.001):
     train = [to_position(b) for b in boards[:n]]
     test = [to_position(b) for b in boards[n:n + TEST]]
     t0 = time.time()
-    learner = ChessLearner(seed=SEED, alpha=alpha)
+    learner = ChessLearner(seed=SEED, alpha=alpha, context=False)
     for p in train:
         learner.observe(p)
     g = learner.sleep()

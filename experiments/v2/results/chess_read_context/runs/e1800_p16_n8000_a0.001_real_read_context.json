@@ -1,0 +1,96 @@
+{
+ "name": "e1800_p16_n8000_a0.001_real_read_context",
+ "method": "read_context",
+ "elo": "1800",
+ "ply": 16,
+ "N": 8000,
+ "test": 500,
+ "alpha": 0.001,
+ "kind": "real",
+ "seconds": 10151.002336502075,
+ "train bits/pos": {
+  "read alone": 42.005659456544734,
+  "after the search": 41.891328458708145,
+  "TRELLIS v2 total": 41.853586541178544
+ },
+ "held-out bits/pos": {
+  "read alone": 38.54190476628189,
+  "search code": 38.357732175499,
+  "TRELLIS v2 grammar": 38.34167033413028
+ },
+ "chunk gain, train (read alone - search)": 0.11433099783658918,
+ "chunk gain, train (read alone - TRELLIS total)": 0.1520729153661904,
+ "chunk gain, held out (read alone - grammar)": 0.20023443215161052,
+ "chunk gain, held out (read alone - search code)": 0.18417259078288595,
+ "model bits": 11723.538176370621,
+ "data bits": 412575.8238297953,
+ "symbols": 14,
+ "rule classes": 14,
+ "chunk types (grammar)": 3,
+ "search chunk labels": 2,
+ "search labels": 14,
+ "merges": 0,
+ "chunk moves": 2,
+ "categories (rows with several outcomes)": [],
+ "top-level chunk levels (depth: count)": {
+  "1": 7991
+ },
+ "chunk shapes": 2,
+ "share of pieces inside a chunk": 0.06660998441238007,
+ "chunk types": [
+  {
+   "chunk": "[wN N1 wP]",
+   "count": 4710,
+   "anchors": {
+    "b1": 2051,
+    "c3": 1224,
+    "g1": 582
+   }
+  },
+  {
+   "chunk": "[wQ E1 wK]",
+   "count": 3281,
+   "anchors": {
+    "d1": 3280,
+    "d2": 1
+   }
+  }
+ ],
+ "search moves": [
+  "[wN N1 wP] x4710",
+  "[wQ E1 wK] x3281"
+ ],
+ "generation": {
+  "attempts": 1002,
+  "collision or off the board": 0.001996007984031936,
+  "checks": {
+   "one king each": 1.0,
+   "no pawn on a back rank": 0.999,
+   "at most 8 pawns each": 0.999,
+   "at most 16 pieces each": 0.999,
+   "no more of any kind than at the start": 0.999,
+   "passes every check": 0.999
+  },
+  "generated chunks": 1044,
+  "generated chunk depths": {
+   "1": 1044
+  },
+  "generated chunks found in a held-out position": 0.9942528735632183
+ },
+ "context option (depth, beta)": [
+  4,
+  16.0
+ ],
+ "grammar context option": [
+  4,
+  16.0
+ ],
+ "read context option (depth, beta)": [
+  4,
+  16.0
+ ],
+ "grammar read context option": [
+  4,
+  16.0
+ ]
+}

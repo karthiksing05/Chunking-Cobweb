@@ -55,7 +55,7 @@ def test_chess_read_covers_every_piece_once():
     # f1 rook with the g1 king to its east as one chunk; everything else alone.
     tops = [("c", (("wR", (5, 0)), "E1", ("wK", (6, 0))))]
     tops += [(pos[sq], sq) for sq in pos if sq not in ((5, 0), (6, 0))]
-    mem = BoardMemory()
+    mem = BoardMemory(context=False)
     mem.add(pos, tops)
     sq, el, cnt, w = mem._read_arrays()
     # 64 squares, minus the king's square, which the chunk anchored at f1 covers.
