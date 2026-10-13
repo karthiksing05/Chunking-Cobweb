@@ -525,8 +525,10 @@ class _Elements:
     contexts2: Optional[List[Hashable]] = None
 
 
-def _elements(mem: Memory, leaves: Sequence[CobwebNode], rindex: TreeIndex,
+def _elements(mem: Memory, leaves: Optional[Sequence[CobwebNode]], rindex: Optional[TreeIndex],
               tok_index: Dict[str, int]) -> _Elements:
+    """The element records as arrays; without ``leaves`` (stage B alone,
+    ``compile_with_symbols``) the representation leaves are not recorded."""
     relations = getattr(mem, "relations", None)
     rel_index = {r: i for i, r in enumerate(relations or [])}
     values = mem.contexts()
@@ -538,7 +540,8 @@ def _elements(mem: Memory, leaves: Sequence[CobwebNode], rindex: TreeIndex,
     contexts2 = sorted(set(pairs)) if pairs is not None else None
     pair_index = {x: i for i, x in enumerate(contexts2 or [])}
     return _Elements(
-        leafpos=np.array([rindex.leafpos_of_id[l.id] for l in leaves], dtype=np.int64),
+        leafpos=(np.zeros(len(mem), dtype=np.int64) if leaves is None else
+                 np.array([rindex.leafpos_of_id[l.id] for l in leaves], dtype=np.int64)),
         prim=np.array([k == Memory.PRIMITIVE for k in mem.kind]),
         tok=np.array([tok_index[t] if t is not None else -1 for t in mem.token], dtype=np.int64),
         left=np.array(mem.left, dtype=np.int64),
@@ -732,7 +735,17 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
     for x in rcut:
         members[int(rarr[rindex.lo[x]])].append(rindex.nodes[x])
     symbol_nodes = [members[int(r)] for r in sym_reps]
+    # Stage B: the composition hierarchy, its cut and the tables.
+    return _stage_b(mem, el, s, K, V, vocab, alpha, seed, search, evidence_alpha, info,
+                    symbol_nodes, fine, evidence, elem_depth)
 
+
+def _stage_b(mem: Memory, el: _Elements, s: np.ndarray, K: int, V: int, vocab: List[str], alpha: float,
+             seed: int, search: bool, evidence_alpha: float, info: Dict[str, float],
+             symbol_nodes, fine, evidence, elem_depth) -> Grammar:
+    """Stage B of ``compile_grammar``: given the symbol ``s`` of every
+    element, the composition hierarchy, its cut (by description length) and
+    the grammar's tables."""
     # Stage B: rebuild the composition tree over compositions in symbol terms.
     relational = el.n_rel > 1
     keys: List[tuple] = []
@@ -894,3 +907,20 @@ def compile_grammar(mem: Memory, rtree: CobwebTree, leaves: Sequence[CobwebNode]
         Uc2=None if el.ctx2 is None else _pair_rows(n_Uc2, cell, el, n_Uc, normalize(n_U), beta1, weight[1]),
         fresh_pieces=el.ctx is not None and getattr(mem, "fresh_pieces", False),
     )
+
+
+def compile_with_symbols(mem: Memory, symbols: np.ndarray, alpha: float = 0.001, seed: int = 0,
+                         search: bool = True, evidence_alpha: float = 0.5) -> Grammar:
+    """The grammar for given symbols (one per recorded element): stage B of
+    ``compile_grammar`` (the composition hierarchy, its cut and the tables),
+    with the same code, so the symbols ``compile_grammar`` chose give its
+    grammar's code exactly. Used to score symbol moves (``splits``). The
+    symbols are renumbered in increasing order; the representation-side
+    fields (``symbol_nodes``, ``elem_depth``) are left empty."""
+    vocab = mem.vocabulary() + [UNK]
+    tok_index = {t: i for i, t in enumerate(vocab)}
+    el = _elements(mem, None, None, tok_index)
+    _, s = _compact(np.asarray(symbols, dtype=np.int64))
+    K = int(s.max()) + 1
+    return _stage_b(mem, el, s, K, len(vocab), vocab, alpha, seed, search, evidence_alpha, {},
+                    [[] for _ in range(K)], s, s, None)

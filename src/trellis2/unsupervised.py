@@ -86,7 +86,8 @@ class UnsupervisedLearner(Learner):
                  consolidations: int = 3, reanalysis_steps: int = 5, alpha: float = 0.001,
                  seed: int = 0, workers: int = 1, join_forests: bool = True,
                  context_free_steps: int = 10, joint_chunks: bool = True,
-                 joint_config: Optional[dict] = None,
+                 joint_config: Optional[dict] = None, joint_splits: bool = False,
+                 split_config: Optional[dict] = None,
                  sampling: Sequence[float] = (1.0, 1.0, 0.8, 0.8, 0.6, 0.6, 0.4, 0.4, 0.2),
                  **trellis_kwargs):
         super().__init__(seed=seed, alpha=alpha, **trellis_kwargs)
@@ -99,6 +100,12 @@ class UnsupervisedLearner(Learner):
         # of ``mdl_search.COMPOSITE_CONFIG``.
         self.joint_chunks = joint_chunks
         self.joint_config = dict(joint_config or {})
+        # Whether the night's chosen grammar is refined at its end by split
+        # moves (``splits.refine``: single and joint splits of its symbols,
+        # kept only if the full code shrinks), and overrides of
+        # ``splits.DEFAULT_CONFIG``.
+        self.joint_splits = joint_splits
+        self.split_config = dict(split_config or {})
         # Re-analysis steps without the read's context (step 4; 0: none).
         self.context_free_steps = context_free_steps
         # The temperatures of the sampled re-analysis, one round each (step 5;
@@ -213,6 +220,15 @@ class UnsupervisedLearner(Learner):
         if len(finished) > 1:
             log("choice", "; ".join(f"{'with' if j else 'without'} joint chunks: {b:.1f}"
                                     for b, j, *_ in finished), bits)
+        if self.joint_splits:
+            # The last step: split moves on the chosen grammar's symbols.
+            from .splits import refine
+            refined = refine(model.memory, model.grammar, alpha=self.alpha, seed=self.seed,
+                             search=model.search, config=self.split_config)
+            if refined is not model.grammar:
+                model._grammar = refined
+                log("splits", f"{refined.info['splits: accepted']} split moves "
+                    f"({refined.info['splits: joint accepted']} joint)", refined.info["total bits"])
         self.model, self.trees = model, trees
         self.analyses = self._in_categories(model, trees)
         self.nights += 1

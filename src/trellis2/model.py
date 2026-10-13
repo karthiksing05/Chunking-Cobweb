@@ -35,7 +35,8 @@ class Trellis2:
                  sentence_parent: bool = False, fresh_pieces: bool = False, read_words: int = 2,
                  alpha: float = 0.001, seed: int = 0,
                  search: bool = True, merge: bool = True, max_rounds: int = 6,
-                 memory: Optional[Memory] = None):
+                 memory: Optional[Memory] = None, joint_splits: bool = False,
+                 split_config: Optional[dict] = None):
         # A domain may bring its own memory (its own surface context and
         # relations, e.g. ``chess.BoardMemory``); sentences use the default.
         self.memory = memory if memory is not None else Memory(
@@ -47,6 +48,11 @@ class Trellis2:
         self.search = search
         self.merge = merge
         self.max_rounds = max_rounds
+        # Whether the consolidated grammar's symbols are refined by split
+        # moves (``splits.refine``, kept only if the full code shrinks; the
+        # rounds are not changed), and overrides of ``splits.DEFAULT_CONFIG``.
+        self.joint_splits = joint_splits
+        self.split_config = dict(split_config or {})
         self.history: List[Dict[str, float]] = []
         self._grammar: Optional[Grammar] = None
 
@@ -79,8 +85,16 @@ class Trellis2:
             labels = [g.elem_symbol, g.elem_fine][:self.memory.granularities]
             rules = [g.elem_rule, g.elem_rule_fine][:self.memory.granularities]
         best.info["consolidation rounds"] = len(self.history)
+        if self.joint_splits:
+            best = self.refine(best)
         self._grammar = best
         return best
+
+    def refine(self, grammar: Grammar) -> Grammar:
+        """Split moves on a consolidated grammar (``splits.refine``)."""
+        from .splits import refine
+        return refine(self.memory, grammar, alpha=self.alpha, seed=self.seed, search=self.search,
+                      config=self.split_config)
 
     @property
     def grammar(self) -> Grammar:
