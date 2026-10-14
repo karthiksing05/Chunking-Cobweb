@@ -43,7 +43,6 @@ from typing import Dict, List, Optional, Sequence, Set, Tuple
 import numpy as np
 
 from .data import Tree
-from .grammar import inside_of_analysis
 from .memory import ROOT, Memory, chunk_attrs
 
 ARITY = {"⿰": 2, "⿱": 2, "⿴": 2, "⿵": 2, "⿶": 2, "⿷": 2, "⿸": 2, "⿹": 2, "⿺": 2,
@@ -301,31 +300,5 @@ class CharacterMemory(Memory):
             return self.token[e]
         return f"{self.relation[e]}{self.describe(self.left[e])}{self.describe(self.right[e])}"
 
-    def contexts(self):
-        """None: a character is parts placed in space, not a sequence, so no
-        rule choice is made in the light of what was read before it. (Read
-        in its IDS prefix order, or given each part's slot, the code
-        shortens but more generated characters misplace a component.)"""
-        return None
 
-    def sample(self, grammar, rng: np.random.Generator, max_depth: int = 12, **kw):
-        """A relational tree read off the grammar: one tree from the start row."""
-        g = grammar
 
-        def expand(sym, depth):
-            c = int(rng.choice(g.M, p=g.U[sym]))
-            if rng.random() < g.pk[c] or depth >= max_depth:
-                return g.vocab[int(rng.choice(len(g.vocab), p=g.E[c]))]
-            b, d = int(rng.choice(g.K, p=g.Lt[c])), int(rng.choice(g.K, p=g.Rt[c]))
-            rel = g.relations[int(rng.choice(len(g.relations), p=g.Rel[c]))]
-            return (rel, expand(b, depth + 1), expand(d, depth + 1))
-        return expand(int(rng.choice(g.K, p=g.S)), 0)
-
-    def log_prob(self, grammar, experience, analysis=None) -> float:
-        """ln P(relational tree) under the grammar: the inside pass over the
-        known structure, summing over every assignment of categories."""
-        g = grammar
-        node = experience if analysis is None else analysis
-        scale, v = inside_of_analysis(g, node, parts=lambda n: None if isinstance(n, str) else (n[1], n[2]),
-                                      token=lambda n: n, relation=lambda n: n[0])
-        return float(scale + np.log(v @ g.S) + g.log_whole)

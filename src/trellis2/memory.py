@@ -185,34 +185,8 @@ class Memory:
             self.top_right[a] = b
             self.top_left[b] = a
 
-    def sample(self, grammar, rng: np.random.Generator, **kw):
-        """An experience and its analysis drawn from the grammar: (tokens,
-        Tree), or None if longer than ``max_len`` (callers resample)."""
-        return grammar.sample(rng, **kw)
 
-    def log_prob(self, grammar, experience, analysis=None) -> float:
-        """ln P(experience) under the grammar, summed over every analysis
-        (inside-outside)."""
-        from .chart import Chart
-        return Chart(grammar, experience).log_prob
 
-    def contexts(self) -> Optional[List[Hashable]]:
-        """What the read has seen just before each element, in whose light its
-        rule class is chosen: for a sentence, the word before the element's
-        span (BOS at the start), or the two words before it (``read_words=2``;
-        the grammar then chooses by description length between none, one and
-        two). None: every choice is made the same way."""
-        if not self.previous_word:
-            return None
-        fresh = set()
-        if self.fresh_pieces:
-            fresh = {(self.experience_of[e], self.span[e][0]) for e in range(len(self.span))
-                     if self.is_root[e] and (self.top_left[e] >= 0 or self.top_right[e] >= 0)}
-        if self.read_words == 2:
-            return [(self.experiences[s][i - 2] if i > 1 else BOS, self.experiences[s][i - 1] if i > 0 else BOS)
-                    for s, (i, _) in zip(self.experience_of, self.span)]
-        return [self.experiences[s][i - 1] if i > 0 and (s, i) not in fresh else BOS
-                for s, (i, _) in zip(self.experience_of, self.span)]
 
     def vocabulary(self) -> List[str]:
         return sorted({t for t in self.token if t is not None})
@@ -326,67 +300,8 @@ class Memory:
     # A sentence is one tree, or a forest of two or more pieces when the
     # grammar cannot derive it whole; roots and pieces have rows of their own.
     # ------------------------------------------------------------------ #
-    def _top_level(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """(the elements that are the root of an experience analysed as one
-        tree, those that are a piece of a forest, every element's weight).
-        The cut searches ask for it at every step, so it is kept until an
-        element is added."""
-        n = len(self.is_root)
-        kept = self.__dict__.get("_top_level_kept")
-        if kept is None or kept[0] != n:
-            root = np.array(self.is_root, dtype=bool)
-            alone = (np.array(self.top_left) < 0) & (np.array(self.top_right) < 0)
-            kept = (n, np.flatnonzero(root & alone), np.flatnonzero(root & ~alone),
-                    np.array(self.weight, dtype=float))
-            self._top_level_kept = kept
-        return kept[1:]
 
-    def _layout_counts(self) -> Tuple[np.ndarray, np.ndarray]:
-        """(one tree, a forest) per experience, and (stop, go on) after each
-        piece of a forest from the second on."""
-        root = np.array(self.is_root, dtype=bool)
-        w = np.array(self.weight, dtype=float)
-        sid = np.array(self.experience_of)
-        m = np.bincount(sid[root], minlength=len(self.experiences))
-        sent_w = np.zeros(len(self.experiences))
-        sent_w[sid[root]] = w[root]
-        forest = m >= 2
-        return (np.array([sent_w[m == 1].sum(), sent_w[forest].sum()]),
-                np.array([sent_w[forest].sum(), (sent_w * np.maximum(m - 2, 0)).sum()]))
 
-    def top_level_nats(self, s: np.ndarray, K: int, alpha: float) -> float:
-        """Code (nats) of the top-level elements' symbols ``s`` (one per
-        element, K of them): the part of the top level that depends on the
-        categories."""
-        whole, piece, w = self._top_level()
-        return (dm_code(np.zeros(len(whole), dtype=np.int64), s[whole], w[whole], K, alpha)
-                + dm_code(np.zeros(len(piece), dtype=np.int64), s[piece], w[piece], K, alpha))
 
-    def layout_nats(self, alpha: float) -> float:
-        """Code (nats) of the layout that does not depend on the categories:
-        whether each experience is one tree or a forest, and where a forest ends."""
-        n_mode, n_stop = self._layout_counts()
-        return rows_nats(np.stack([n_mode, n_stop]), alpha)
 
-    def top_level_tables(self, s: np.ndarray, K: int, alpha: float):
-        """The grammar's top-level fields, and the count tables behind them
-        (for the model/data split)."""
-        whole, piece, w = self._top_level()
-        n_start = np.bincount(s[whole], weights=w[whole], minlength=K)
-        n_piece = np.bincount(s[piece], weights=w[piece], minlength=K)
-        n_mode, n_stop = self._layout_counts()
-        fields = {"S": (n_start + alpha) / (n_start + alpha).sum(),
-                  "S_piece": (n_piece + alpha) / (n_piece + alpha).sum(),
-                  "p_whole": float((n_mode[0] + alpha) / (n_mode.sum() + 2 * alpha)),
-                  "p_stop": float((n_stop[0] + alpha) / (n_stop.sum() + 2 * alpha))}
-        return fields, [(n_start, K), (n_piece, K), (n_mode, 2), (n_stop, 2)]
 
-    def build_hierarchy(self, labels: Optional[Sequence[np.ndarray]] = None,
-                        rules: Optional[Sequence[np.ndarray]] = None,
-                        seed: int = 0) -> Tuple[CobwebTree, List[CobwebNode]]:
-        """Replay every element, in learning order, into a fresh Cobweb tree.
-        Returns the tree and the leaf that stores each element."""
-        tree = CobwebTree(self.attrs, seed=seed)
-        leaves = [tree.ifit(self.instance(e, labels, rules), self.weight[e])
-                  for e in range(len(self.kind))]
-        return tree, leaves

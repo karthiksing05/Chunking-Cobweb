@@ -1,14 +1,10 @@
-"""TRELLIS v2: concepts and chunks as two Cobweb hierarchies read as a grammar.
+"""TRELLIS: concepts and chunks in Cobweb hierarchies.
 
-See ``docs/V2_DESIGN.md`` for the design and its relation to the paper.
-"""
-from .chart import Chart, parse
+v2's grammar distillation (cuts read off the hierarchies by description
+length, night and incremental learners) is archived at git tag
+``archive/pcfg-v2``. What remains here is shared by v3: Cobweb trees (with
+insertion and removal), element descriptions, the domains and their data,
+and evaluation."""
 from .cobweb import CobwebNode, CobwebTree
 from .data import Example, Tree, load_corpus, tree_from_merges, v1_split
-from .grammar import Grammar, compile_grammar
 from .memory import Memory
-from .model import Trellis2
-
-__all__ = ["Chart", "CobwebNode", "CobwebTree", "Example", "Grammar", "Memory",
-           "Tree", "Trellis2", "compile_grammar", "load_corpus", "parse",
-           "tree_from_merges", "v1_split"]
