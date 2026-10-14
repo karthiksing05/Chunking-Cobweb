@@ -492,6 +492,8 @@ DEFAULT_CONFIG = {
     "surprise_after": 20,       # stalled experiences before a wider search step (0: never)
     "surprise_factor": 4,       # its budget factor
     "rollout_windows": 8,       # joint-chunk windows a rollout continuation scores (most frequent)
+    "join_forests": 0,          # every this many experiences, if the new one is a forest, propose joining every forest (0: never)
+    "wc_categories": False,     # primitives' categories are their word classes (shortest class-bigram code), kept current
     "first_choice": 0,          # take the k-th best first structure decision (a beam's hypotheses)              # best splits (of top-level elements) also scored with their best follow-up chunk
 }
 
@@ -552,6 +554,7 @@ class IncrementalLearner:
         self.wc = OnlineWordClasses(alpha)
         self._wc_path: List[Dict[str, str]] = []
         self._wc_at = -10 ** 9
+        self._join_at = -10 ** 9
         self.next_sym = 0
         self.next_cls = 0
         self._grammar: Optional[Grammar] = None
@@ -1459,6 +1462,8 @@ class IncrementalLearner:
 
     def _step(self, i: int) -> None:
         cfg = self.config
+        if cfg["wc_categories"]:
+            self._wc_refresh()
         # Surprise: after ``surprise_after`` experiences without an accepted
         # move, one step searches with a wider budget (more first moves and
         # splits rolled out); bounded, and on average cheap.
@@ -1540,7 +1545,7 @@ class IncrementalLearner:
     # ------------------------------------------------------------------ #
     # Moves
     # ------------------------------------------------------------------ #
-    STRUCTURE = ("chunk", "joint", "inner chunk", "rotate", "dissolve", "compound")
+    STRUCTURE = ("chunk", "joint", "inner chunk", "rotate", "dissolve", "compound", "join")
 
     def _best_move(self, i: int) -> bool:
         """Score the moves touching experience i and apply the best if it
@@ -1816,6 +1821,8 @@ class IncrementalLearner:
                     continue
                 seen.add((min(A, B), max(A, B)))
                 a, b = (A, B) if A < B else (B, A)
+                if self._mixes_classes(a, b):
+                    continue
                 for class_map in self._merge_class_maps(a, b):
                     patch, nc = self._merge_patch(a, b, class_map)
                     yield self.tables.delta(patch), ("merge", a, b, patch, nc)
@@ -1829,6 +1836,8 @@ class IncrementalLearner:
             own = self.own_classes({e: A for e in els})
             for B in all_syms:
                 if B == A:
+                    continue
+                if key[0] == "P" and self._mixes_classes(A, B, key[1]):
                     continue
                 for remap in self._join_classes(own, B):
                     patch, nc = self._profile_patch(prof, B, remap)
@@ -1855,6 +1864,10 @@ class IncrementalLearner:
             yield from self._rotation_moves(i)
         if self.config["inner_chunks"]:
             yield from self._inner_chunk_moves(i)
+        je = self.config["join_forests"]
+        if je and len(self.roots[i]) > 1 and len(self.experiences) - self._join_at >= je:
+            self._join_at = len(self.experiences)
+            yield from self._join_moves()
         for Y in sorted({self.sym[r] for r in self.roots[i] if m.kind[r] == Memory.COMPOSITE}):
             d, move = self._dissolve_move(Y)
             if move is not None:
@@ -2072,7 +2085,7 @@ class IncrementalLearner:
             if c >= self.next_cls:
                 self.next_cls = c + 1
             self._apply_classes(keys, c, patch)
-        elif kind in ("chunk", "dissolve", "joint", "rotate", "inner chunk"):
+        elif kind in ("chunk", "dissolve", "joint", "rotate", "inner chunk", "join"):
             _, rewrites, patch = move[:3]
             if callable(rewrites):
                 rewrites = rewrites()
@@ -2127,6 +2140,49 @@ class IncrementalLearner:
                 roots.append(spans[r])
                 r += 1
         return Tree(n, split, labels, roots), labels, classes
+
+    def _join_moves(self):
+        """The night's joined forests as one move: every stored analysis that
+        is a forest has its pieces joined into one whole, right-branching in
+        reading order under one new symbol J (``mdl_search.joined``); each new
+        composition key takes a new rule class (or its own if in use). Scored
+        exactly from the rows it changes; later splits and merges re-form J,
+        as the night's consolidation does."""
+        m = self.memory
+        forests = [i for i in range(len(self.experiences)) if len(self.roots[i]) > 1 and self.weight[i] > EPS]
+        if len(forests) < self.config["min_pair"]:
+            return
+        J = self.next_sym
+        nxt = self.next_cls
+        key_cls: Dict[tuple, int] = {}
+        plan = {}
+        patch = Patch()
+        for i in forests:
+            labs = self._top_syms(i)
+            spans = [m.span[x] for x in self.roots[i]]
+            nodes = []
+            right_lab, right_span = labs[-1], spans[-1]
+            for t in range(len(spans) - 2, -1, -1):
+                key = ("C", labs[t], right_lab)
+                if key not in key_cls:
+                    if key in self.class_of and self._key_weight(key) > EPS:
+                        key_cls[key] = self.class_of[key]
+                    else:
+                        key_cls[key] = nxt
+                        nxt += 1
+                span = (spans[t][0], right_span[1])
+                nodes.append((span, J, spans[t], right_span, key_cls[key]))
+                patch.record(J, key_cls[key], key, self.weight[i])
+                right_lab, right_span = J, span
+            patch.top(labs, -self.weight[i])
+            patch.top([J], self.weight[i])
+            plan[i] = nodes
+        d = self.tables.delta(patch)
+        fresh_cls = sorted({c for c in key_cls.values() if c >= self.next_cls})
+
+        def rewrites():
+            return {i: self._rewrite(i, {0: (len(self.roots[i]), nodes)}) for i, nodes in plan.items()}
+        yield d, ("join", rewrites, patch, {"syms": [J], "classes": fresh_cls})
 
     def _chunk_moves(self, pair):
         """Chunk (B, C): every non-overlapping top-level occurrence of the
@@ -2587,6 +2643,77 @@ class IncrementalLearner:
                 out.append([set(under[c.id])])
             node = kids[0]
         return out[:cap]
+
+    # ------------------------------------------------------------------ #
+    # Word classes as the primitives' categories (``wc_categories``)
+    # ------------------------------------------------------------------ #
+    def _word_class(self, w: str):
+        if not self._wc_path:
+            return None
+        return self._wc_path[-1].get(w)
+
+    def _classes_of(self, A: int) -> set:
+        m = self.memory
+        return {self._word_class(m.token[e]) for e in self.members.get(A, ())
+                if m.kind[e] == Memory.PRIMITIVE and self._word_class(m.token[e]) is not None}
+
+    def _mixes_classes(self, A: int, B: int, token: Optional[str] = None) -> bool:
+        """With word-class categories, whether joining A's primitives (or the
+        primitive ``token`` of A) with B's would put two word classes' words
+        under one symbol; the grammar's code never decides that, the
+        class-bigram code does."""
+        if not self.config["wc_categories"] or not self._wc_path:
+            return False
+        ca = {self._word_class(token)} if token is not None else self._classes_of(A)
+        cb = self._classes_of(B)
+        ca.discard(None)
+        cb.discard(None)
+        return bool(ca) and bool(cb) and len(ca | cb) > 1
+
+    def _wc_refresh(self) -> None:
+        """Every ``wc_every`` experiences, recompute the word classes (the
+        night's starting partition: the shortest class-bigram code) and move
+        each primitive whose symbol does not hold exactly its class to the
+        symbol of its class (the one holding most of the class's primitive
+        weight; a new symbol if none is free). Only words whose class changed
+        move: a sparse ripple, re-analysed through the queue."""
+        n = len(self.experiences)
+        if n - self._wc_at < self.config["wc_every"]:
+            return
+        self._wc_path, self._wc_at = self.wc.path(), n
+        if not self._wc_path:
+            return
+        cls = self._wc_path[-1]
+        m = self.memory
+        weight: Dict[Hashable, Counter] = defaultdict(Counter)
+        for A, els in self.members.items():
+            for e in els:
+                if m.kind[e] == Memory.PRIMITIVE and m.token[e] in cls:
+                    weight[cls[m.token[e]]][A] += m.weight[e]
+        home: Dict[Hashable, int] = {}
+        taken = set()
+        # Largest classes choose first; a symbol is the home of one class.
+        for c in sorted(weight, key=lambda c: (-sum(weight[c].values()), str(c))):
+            for A, _ in sorted(weight[c].items(), key=lambda kv: (-kv[1], kv[0])):
+                if A not in taken:
+                    home[c] = A
+                    taken.add(A)
+                    break
+        nxt = self.next_sym
+        for c in sorted(weight, key=str):
+            if c not in home:
+                home[c] = nxt
+                nxt += 1
+        mapping = {}
+        for A, els in self.members.items():
+            for e in els:
+                if m.kind[e] == Memory.PRIMITIVE and m.token[e] in cls and home[cls[m.token[e]]] != A:
+                    mapping[e] = home[cls[m.token[e]]]
+        if not mapping:
+            return
+        patch, nc = self._relabel_patch(mapping, self.own_classes(mapping))
+        self._apply(("relabel", mapping, nc, patch, "word classes"))
+        self.stats["word-class relabels"] += 1
 
     def _word_class_splits(self, A: int) -> List[List[set]]:
         """Split proposals for symbol A from the word classes: its primitive

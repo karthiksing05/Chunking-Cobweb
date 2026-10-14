@@ -1,0 +1,71 @@
+Running log of the incremental-learner iterations (gitignored; summary goes in the final report)
+
+it0 (proto1): Cobweb unfit + CodeTables exact + learner (merge, unit move, tree split, chunk, joint chunk, dissolve, class moves, reanalysis).
+  SMALL 3228/3229 (night 3254/3256), gen-comm 0.0%; MED s13 stuck K=1 M=1 11542 bits; MED s17 7009.
+  Diagnosis: early merges -> one category; splits never pay alone (symbol split needs class split) -> added own-class variants, multiway refine.
+it1: + coupled class moves: MED s13 still stuck at K=1 at 80 sentences; oracle POS split +44.8 alone, -126 with best chunk, -765 after 15 greedy moves.
+  -> compound move: split + best follow-up chunk (trial/undo, exact).  Rep-tree proposals are POS-pure (Det, N, V+P, Adj): compounds -32..-118 bits at 80 sentences.
+it2 (proto2): MED s13 escapes after 80 sentences, final 7882 (night 6493); MED s17 7010.
+  Night consolidation of my bracketings: 7789 / 7664 (no better than my state) -> categories fine, bracketing is the problem.
+  Rotations: -58 bits on s17, 0 on s13 (local optimum).
+  Trace: sentence 1 merges all words (correct MDL at n=1), sentence 3 joint chunk over the single category -> basin.
+  Word classes (class-bigram) right after 3-10 sentences ({the,a},{N},{Adj},{V+P}); added OnlineWordClasses (identical path to the night's) as split proposals.
+it3: all six corpora both seeds, joint vs no joint chunks (rotations, joint splits, wc proposals, compounds):
+  nojoint: small 3216/3217 (night 3254/3256), med 6824/6784 (6493/6519), large 8105/8077 (7957/7897), term_low 6206/5556 (5288/5306),
+           term_med 8352/8162 (7617/7610), term_high 11088/10902 (10421/10492). gen-comm 0/0, 45/42, 59/49, 44/4, 60/11, 58/61 %.
+  joint:   small 3228/3217, med 6839/7102, large 7918/8371, term_low 5956/6128, term_med 8420/8334, term_high 11111/11625.
+  Diagnosis (MED s13): left-branching ((N V) Det) chains; sentences become whole trees by ~40 sentences, after which top-level chunk moves never fire -> structure frozen.
+  -> inner chunk move (chunk (B,C) wherever adjacent inside trees, one rotation), exact.
+it3b: inner chunks: no gain on stuck MED states (local optimum for every single move and compound).
+  First-structure diagnosis (MED s13, sentence 15): best compound = word-class split then (N V) or (V Det) -34.6 bits vs (Det N) -18.5.
+  Greedy rollouts after each first move: (N V) first -> 643.2 bits; (Det N) first (+8.0 immediately) -> 611.4 bits (32 bits better).
+  Night's MED grammar: NP=(Det N), (Det Adj..) N; (NP V); ((NP V) NP); PP=(P NP); prepositions separate.
+  -> exact transactions (journal + table snapshot + memory truncation) for trials of every move kind; rollout lookahead
+     (width 4 first moves incl. compound follow-ups, 6 continuation moves over <= 8 touched experiences).
+  Trace MED s13 with lookahead: NP constituents (Det N), (Adj N), (NP V) chunk.
+it4: running (joint and nojoint).
+Note: the night's TinyStories grammar uses the read context (two words, weights 16/4): 37,529 with vs 43,501 without -> (b) needs context.
+it4 (lookahead): joint / nojoint (night): small 3216/3217 both (3254/3256); med 6516,6559 / 6395,6951 (6493/6519);
+  large 7985,7685 / 7991,8567 (7957/7897); term_low 6025,5264 / 6066,6143 (5288/5306); term_med 7936,8348 / 8206,7995 (7617/7610);
+  term_high 11283,10907 / 11383,11211 (10421/10492). gen-comm best cases: med s13 nojoint 0.1%, med s17 joint 0.3%, large s17 joint 5.4%, term_low s17 joint 0.3%.
+  Best-of-two per run: 6/12 runs within 2%; TERM_* corpora and large s13 stuck.
+it5 (online context option read into the grammar; snapshots per job): similar; rehearse_moves=1 no systematic gain.
+  Polish (sweeps over all experiences, diagnostic) on TERM states: <= 6.5 bits gain: true local optima.
+  Night uses context: stories (2 words, 16/4), agree (1 word, 16). Characters night took 3.6 h.
+it6: testing first_choice beam divergence (k=1,2,3) and wider lookahead (12 deep, 8 wide, 16 region).
+it6: first_choice k=1..3: TERM_LOW s13 6024.9 for every k -> first decision not the culprit. Wide lookahead (12/8/16): term_low s13 5772, term_high s13 11078, large s17 7719.
+it7: HedgedBeam (branch at runner-up structure decisions, width 4): slow, no gain on finished runs (large s13 8105).
+  lookahead_dissolve (rollouts may reopen top-level chunks): small 3216/3217, med 6565/6559, large 7943/7590 (all within 2% or better),
+  term_low 6182/5264, term_med 8027/8045, term_high 10784/11296.
+  TERM_MED s13 diagnosis: prepositions in the verb category (the night's V/P problem); the V/P split propagated 2 levels with own classes = -139 bits
+  immediately, but no proposal produced it (word classes merge V/P; hierarchy subtrees don't isolate them).
+  -> context splits: 2-means over units' structural profiles (ancestor/sibling symbols, 3 levels): finds {in,on,under,with} -> -139.1.
+it8: running (dissolve on; base and wide lookahead).
+it8 base (dissolve + context splits): small 3216/3217, med 6532/6465, large 7690/7590, term_low 6179/5264, term_med 7745/7979, term_high 10735/10520
+  -> 9/12 within 2% (7 shorter than night); gen-comm small 0/0, med 2.0/1.7, large 1.8/2.7 (night 7.9/7.3), term_low 62.8/0.1, term_med 6.4/8.1, term_high 8.3/3.5
+it8 wide (12/8/16): med 6757/6364, large 7716/7660, term_low 6118/5274, term_med 7483/-, term_high 10528/10145 (term_high s17 -3.3%, comm 0.0%)
+  TERM_LOW s13: V/P split proposed by context (+12.9) but pays only with a greedy continuation (+25.9 then -297 at depth 2).
+it9: splits rolled out too (lookahead_splits 3), continuation may take every move of 2 region experiences (rollout_full 2).
+it9 (splits rolled out, full continuation on 2 experiences): ~25-70 s per sentence -> not viable at scale; wide variant cancelled.
+d8 (iteration-8 learner) TinyStories 2500: held-out 13.93 (night 12.02, 3-gram 12.97), real own 46.9% / all 42.6% (night 67.3/63.1), no-context code 43139 (night full code 36538 with context), online context choice (4,4); 3.2 s/sentence mean, 27 s max.
+it10: IncrementalBeam of two persistent hypotheses (base, wide lookahead), dissolve on.
+it10 (two hypotheses base+wide, dissolve): small 3216/3217, med 6532/6364, large 7690/7590, term_low 6118/5264, term_med 7519/7979, term_high 10246/10145
+  -> 10/12 within 2% (fail term_low s13 +15.7%, term_med s17 +4.9%); term_high -1.7/-3.3% with 0.2/0.0% commission.
+d8 agree 2000 (it8 learner): 60584 bits order-free (night 59038 contextual), grammatical 18.8%, number-blind 99.8%, agreement-only errors 81%; 7.6 s/sentence mean.
+STEP 1 (coordinator 2026-10-14): hedged incorporation: k posterior samples per experience, weight 1/k (slots); hedged re-analysis
+  replaces a slot by a fresh sample; hard code (Viterbi analyses, evaluation only) reported beside the stored code. Test passes (exact tables over weighted samples).
+  it11 k=4 (single learner, base lookahead, dissolve), hard code: small 3216/3217, med 6458/6508, large 7872/7621, term_low 5738/5295,
+  term_med 7430/7510, term_high 10896/10414 -> 10/12 within 2% (fail term_low s13 +8.5% [was +16.9%], term_high s13 +4.6%);
+  term_med s17 fixed (+4.9% -> -1.3%); gen-comm med 0.1/0.5, large 7.8/3.5, term_med 0.0/0.1, term_high 34/15 (!), term_low 10.1/0.2.
+STEP 2: full_code(): rule choices coded as the night codes them (backoff/backoff_chain prequential, 13 options, experience order);
+  test: equals grammar._factored_code with the best option on the stored analyses. context_code=True accepts moves (best 4 in order)
+  and re-analyses only if this code shrinks (exact trial); the grammar reads the option that minimizes it. ~0.5 s/step at 120 stories.
+STEP 4 (agreement): graph propagation of splits (signature groups exploded to 100+ symbols; one part per symbol pruned back to the seed).
+  Oracle plural-noun seed +16.5, then greedy: verb split -430.7, cumulative -575 in 7 moves. Substantive splits (word classes, context)
+  rolled out; neighbour-split continuation (3 hops). Singular-verb split rollout -408 net -373 but ranked 10th.
+STEP 5: surprise budget: after 20 stalled experiences one step with x4 lookahead budget. On the agree state (budget 4): -476 in one step, -343 over 10 steps.
+STEP 3 (speed): characters profile: 6.2 s/char at 80 chars; 78% in rollouts; rewrites built for every candidate. Lazy rewrites
+  (built only when a move is applied; scores unchanged) + rollout joint windows bounded to the 8 most frequent -> 4.7 s/char.
+  Remaining: ~20 rollouts per character, word-class path recomputed every step over a large vocabulary.
+  Launched: synthetic final (two hypotheses base/wide, k=4, dissolve) it12; stories/agree (two hypotheses, k=4, context_code) d12;
+  characters (one hypothesis, k=1, wc_every 10, lookahead width 3, splits 2) d12.

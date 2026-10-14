@@ -413,3 +413,44 @@ def test_the_contextual_full_code_is_the_nights(small_learner):
     best = min(_factored_code(el, s, K, len(vocab), alpha, c, w)(np.arange(M)) for w in options)
     bits = (best + rest) / LN2 + elias_delta_bits(K) + elias_delta_bits(M) + CONTEXT_OPTION_BITS
     assert L.full_code()[0] == pytest.approx(bits, abs=1e-6)
+
+
+def test_joining_forests_is_scored_exactly(med_forests):
+    """The join move (every forest's pieces joined right-branching under one
+    new symbol) changes the code by exactly its score, and leaves no forest."""
+    import copy
+    L = copy.deepcopy(med_forests)
+    if not any(len(r) > 1 for r in L.roots):
+        pytest.skip("no forests")
+    moves = list(L._join_moves())
+    assert len(moves) == 1
+    d, move = moves[0]
+    before = L.tables.bits()
+    L._apply(move)                      # check=True: verified against a recount
+    assert L.tables.bits() - before == pytest.approx(d, abs=1e-6)
+    assert all(len(L.roots[i]) == 1 for i in range(len(L.experiences)) if L.weight[i] > 1e-9)
+
+
+def test_word_class_categories_keep_tables_exact_and_classes_apart():
+    """With word-class categories every refresh is an exact relabelling, and no
+    symbol holds the primitives of two word classes after a refresh."""
+    from trellis2 import load_corpus, v1_split
+    from trellis2.data import CONDITIONS, default_data_root
+    from trellis2.memory import Memory
+    import os
+    path = os.path.join(default_data_root(), CONDITIONS["med"])
+    if not os.path.exists(path):
+        pytest.skip("synthetic corpora not available")
+    train, _ = v1_split(load_corpus(path), 13)
+    L = IncrementalLearner(seed=13, check=True, config={"wc_categories": True, "wc_every": 5,
+                                                        "lookahead": 0, "compound": 0})
+    for k, e in enumerate(train[:30], 1):
+        L.observe(e.tokens)
+        if k % 5 == 0:
+            L.verify()
+            L._wc_at = -10 ** 9
+            L._wc_refresh()
+            L.verify()
+            for A, els in L.members.items():
+                classes = {L._word_class(L.memory.token[x]) for x in els if L.memory.kind[x] == Memory.PRIMITIVE}
+                assert len(classes) <= 1
