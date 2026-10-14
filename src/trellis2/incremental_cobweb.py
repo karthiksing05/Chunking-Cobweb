@@ -293,6 +293,19 @@ class IncrementalCobwebTree:
             parent.children = []
             parent.parent = None
 
+    def categorize(self, x: Instance, w: float = 1.0) -> List[CobwebNode]:
+        """The path (root first) along which ``x`` would be sorted, without
+        changing the tree: at each node the child that would best host it
+        (the same gain as insertion; ties to the larger child, then the
+        lower id)."""
+        node, path = self.root, [self.root]
+        while node.children:
+            best = max(node.children, key=lambda c: ((c.count + w) * self._ec_with(c, x, w)
+                                                     - c.count * self.ec(c), c.count, -c.id))
+            path.append(best)
+            node = best
+        return path
+
     def nodes(self) -> Iterator[CobwebNode]:
         stack = [self.root]
         while stack:
