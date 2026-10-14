@@ -23,7 +23,12 @@ sys.path.insert(0, ROOT)
 from trellis2 import load_corpus, v1_split  # noqa: E402
 from trellis2.candidates import CandidateLearner  # noqa: E402
 from trellis2.data import CONDITIONS, default_data_root, target_grammar  # noqa: E402
+from trellis2.data import Tree  # noqa: E402
 from trellis2.evaluation import CFG, BracketTally  # noqa: E402
+
+
+def right_branching(n: int) -> Tree:
+    return Tree(n, {(i, n): i + 1 for i in range(n - 1)}, {}, [(0, n)])
 
 
 def run(condition: str, seed: int, cfg: dict, n_gen: int) -> dict:
@@ -35,11 +40,12 @@ def run(condition: str, seed: int, cfg: dict, n_gen: int) -> dict:
     tr = BracketTally()
     for e, t in zip(train, trees):
         tr.add(e.tree, t)
-    te = BracketTally()
+    te, rb = BracketTally(), BracketTally()
     whole = 0
     for e in test:
         t, _ = L.parse(e.tokens)
         te.add(e.tree, t)
+        rb.add(e.tree, right_branching(len(e.tokens)))
         whole += len(t.roots) == 1
     g = CFG(target_grammar(condition))
     seen = {tuple(e.tokens) for e in train}
@@ -48,7 +54,7 @@ def run(condition: str, seed: int, cfg: dict, n_gen: int) -> dict:
     gram = [s for s in ok if g.recognizes(s)]
     row = {"condition": condition, "seed": seed, "config": cfg,
            "held-out omission": te.omission, "held-out commission": te.commission,
-           "held-out exact": te.exact_match, "held-out whole trees": whole / max(len(test), 1),
+           "held-out exact": te.exact_match, "right-branching omission": rb.omission, "held-out whole trees": whole / max(len(test), 1),
            "train omission": tr.omission, "train commission": tr.commission,
            "generated": len(ok) / n_gen, "grammatical": len(gram) / max(len(ok), 1),
            "novel": sum(tuple(s) not in seen for s in ok) / max(len(ok), 1),
@@ -77,7 +83,7 @@ def main():
             r = run(cond, seed, cfg, args.n_gen)
             rows.append(r)
             print(f"[{cond} s{seed}] held-out omission {r['held-out omission']:.3f} commission "
-                  f"{r['held-out commission']:.3f} whole {r['held-out whole trees']:.2f} | train omission "
+                  f"{r['held-out commission']:.3f} (right-branching {r['right-branching omission']:.3f}) whole {r['held-out whole trees']:.2f} | train omission "
                   f"{r['train omission']:.3f} | gen grammatical {r['grammatical']:.3f} novel {r['novel']:.3f} "
                   f"(generated {r['generated']:.2f}) | {r['seconds']:.0f}s", flush=True)
             for p in r["parses"][:4]:
