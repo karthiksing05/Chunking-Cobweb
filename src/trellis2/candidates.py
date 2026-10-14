@@ -50,6 +50,7 @@ class Element:
     cleaf: Optional[CobwebNode] = None     # its content instance's leaf
     ref: Optional[tuple] = None            # the hidden content reference stored with its context
     used: bool = False                     # committed in its experience's parse
+    idx: int = -1                          # its index among the stored records (stable)
 
     @property
     def is_primitive(self) -> bool:
@@ -68,7 +69,7 @@ def log_prob(node: CobwebNode, x: dict, root: CobwebNode, alpha: float) -> float
 
 
 def gain_along(path: List[CobwebNode], x: dict, root: CobwebNode, alpha: float,
-               min_count: float = 0.0) -> Tuple[float, Optional[CobwebNode]]:
+               min_count: float = 0.0, weight=None) -> Tuple[float, Optional[CobwebNode]]:
     """Best gain (bits) along a root-first path, and its concept:
     log2 share of the concept (strength) + log2 P(x|C) - log2 P(x|root) (fit);
     0 at the root, so a positive gain means coding x through C compresses."""
@@ -76,10 +77,14 @@ def gain_along(path: List[CobwebNode], x: dict, root: CobwebNode, alpha: float,
         return 0.0, None
     base = log_prob(root, x, root, alpha)
     best, arg = 0.0, None
+    total = weight(root) if weight else root.count
+    if total <= 0:
+        return 0.0, None
     for node in path[1:]:
-        if node.count < min_count or node.count <= 0:
+        share = weight(node) if weight else node.count
+        if node.count < min_count or node.count <= 0 or share <= 0:
             continue
-        g = (math.log(node.count / root.count) + log_prob(node, x, root, alpha) - base) / LN2
+        g = (math.log(share / total) + log_prob(node, x, root, alpha) - base) / LN2
         if g > best:
             best, arg = g, node
     return best, arg
@@ -88,7 +93,7 @@ def gain_along(path: List[CobwebNode], x: dict, root: CobwebNode, alpha: float,
 class CandidateLearner:
     def __init__(self, depth: int = 3, alpha: float = 1.0, seed: int = 0, refresh: bool = True,
                  min_count: float = 0.0, lookahead: bool = False, context_gain: bool = True,
-                 window: int = 2, gen_support: int = 2):
+                 window: int = 2, gen_support: int = 2, substitution: bool = True):
         self.depth, self.alpha, self.window = depth, alpha, window
         self.ctx_attrs = tuple(f"l{k}" for k in range(window, 0, -1)) + tuple(f"r{k}" for k in range(1, window + 1))
         self.ctx = IncrementalCobwebTree(self.ctx_attrs, seed=seed)
@@ -108,6 +113,10 @@ class CandidateLearner:
         # Generation expands a part from the smallest concept above the context
         # leaf it came from that holds at least gen_support distinct used references.
         self.gen_support = gen_support
+        # substitution (Harris): a candidate's surroundings count as evidence for
+        # it in proportion to the units in use (words and committed chunks) that
+        # occupy the same context concept, not to every stored candidate.
+        self.substitution = substitution
         self.stats = {"experiences": 0, "candidates stored": 0, "committed": 0, "re-described": 0}
 
     # Descriptions --------------------------------------------------------- #
@@ -153,7 +162,8 @@ class CandidateLearner:
         g, node = gain_along(cpath, c.content, self.cnt.root, self.alpha, self.min_count)
         if self.context_gain:
             xpath = self.ctx.ancestors(c.leaf)[::-1] if c.leaf is not None else self.ctx.categorize(c.ctx)
-            g += gain_along(xpath, c.ctx, self.ctx.root, self.alpha, self.min_count)[0]
+            used = (lambda n: sum(n.pav.get(USED, {}).values())) if self.substitution else None
+            g += gain_along(xpath, c.ctx, self.ctx.root, self.alpha, self.min_count, used)[0]
         c.score, c.concept = g, node
 
     def _candidate(self, tokens, a: Element, b: Element) -> Element:
@@ -165,11 +175,16 @@ class CandidateLearner:
     @staticmethod
     def _parts(c: Element) -> dict:
         """Hidden at the content leaf: the context leaves its parts came from."""
-        return {"Lpart": (c.left.leaf.id, c.left.ref), "Rpart": (c.right.leaf.id, c.right.ref)}
+        def part(el: Element):
+            # a word by its token; a composite by its record (its content leaf
+            # moves when it is re-described, the record does not)
+            return (el.leaf.id, ("tok", el.token) if el.is_primitive else ("rec", el.idx))
+        return {"Lpart": part(c.left), "Rpart": part(c.right)}
 
     def _store(self, c: Element) -> None:
         """A candidate into both trees: its content, then its context with the
         hidden reference to the content leaf."""
+        c.idx = len(self.records)
         c.content = self._content(c)
         c.cleaf = self.cnt.ifit(c.content)
         self.cleaves[c.cleaf.id] = c.cleaf
@@ -192,6 +207,7 @@ class CandidateLearner:
                 el.leaf = self.ctx.ifit(el.ctx)
                 self.xleaves[el.leaf.id] = el.leaf
                 self.ctx.hide(el.leaf, {REF: el.ref, USED: el.ref})
+                self.ctx.add_passive(el.leaf, USED, "word")
         made: Dict[Tuple[int, int], Element] = {}
         while len(frontier) > 1:
             new = []
@@ -221,7 +237,8 @@ class CandidateLearner:
             if learn:
                 self.stats["committed"] += 1
                 self.ctx.hide(best.leaf, {USED: best.ref})
-                self.cnt.hide(best.cleaf, {USED: True})
+                self.ctx.add_passive(best.leaf, USED, "unit")
+                self.cnt.add_passive(best.cleaf, USED, "unit")
                 best.used = True
         if learn:
             self.stats["experiences"] += 1
@@ -256,14 +273,14 @@ class CandidateLearner:
             new = self._content(c)
             if new == c.content:
                 continue
-            self.cnt.unfit(c.cleaf, c.content)
-            self.cnt.hide(c.cleaf, self._parts(c), -1.0)
             if c.used:
-                self.cnt.hide(c.cleaf, {USED: True}, -1.0)
+                self.cnt.add_passive(c.cleaf, USED, "unit", -1.0)
+            self.cnt.hide(c.cleaf, self._parts(c), -1.0)
+            self.cnt.unfit(c.cleaf, c.content)
             c.content, c.cleaf = new, self.cnt.ifit(new)
             self.cnt.hide(c.cleaf, self._parts(c))
             if c.used:
-                self.cnt.hide(c.cleaf, {USED: True})
+                self.cnt.add_passive(c.cleaf, USED, "unit")
             self.cleaves[c.cleaf.id] = c.cleaf
             ref = ("cnt", c.cleaf.id)
             if ref != c.ref:
@@ -310,7 +327,7 @@ class CandidateLearner:
         committed parses used (hidden counts), times P(partial | child)."""
         node = start or self.ctx.root
         while node.children:
-            ws = [sum(self.ctx.hidden_counts(c, USED).values()) * math.exp(log_prob(c, partial, self.ctx.root, self.alpha))
+            ws = [sum(c.pav.get(USED, {}).values()) * math.exp(log_prob(c, partial, self.ctx.root, self.alpha))
                   for c in node.children]
             if sum(ws) <= 0:
                 ws = [c.count * math.exp(log_prob(c, partial, self.ctx.root, self.alpha)) for c in node.children]
@@ -367,8 +384,8 @@ class CandidateLearner:
     def _sample_phrase(self, cleaf: CobwebNode) -> Optional[CobwebNode]:
         """Another composition for a phrase part: from the basic level above its
         content leaf (enough committed compositions), a used content leaf."""
-        used = lambda n: sum(self._used(self.cnt, n).values())
-        node = self._climb(self.cnt, cleaf, lambda n: len([x for x in self._leaves(n) if used(x)]) >= self.gen_support)
+        used = lambda n: sum(n.pav.get(USED, {}).values())
+        node = self._climb(self.cnt, cleaf, lambda n: used(n) >= self.gen_support)
         leaves = [n for n in self._leaves(node) if used(n)]
         if not leaves:
             return None
@@ -396,22 +413,32 @@ class CandidateLearner:
         def left() -> dict:
             return {f"l{k}": out[-k] if len(out) >= k else BOS for k in range(1, self.window + 1)}
 
+        fail = self.stats.setdefault("generation failures", {})
+
+        def why(reason: str) -> bool:
+            fail[reason] = fail.get(reason, 0) + 1
+            return False
+
         def expand(cleaf: CobwebNode, depth: int) -> bool:
-            if depth > max_depth or len(out) > max_len:
-                return False
+            if depth > max_depth:
+                return why("depth")
+            if len(out) > max_len:
+                return why("length")
             for side in ("L", "R"):
                 part = self._choice(cleaf.hidden.get(f"{side}part", {}))
                 if part is None:
-                    return False
+                    return why("no parts recorded")
                 xleaf_id, ref = part
                 if ref[0] == "tok":
                     w = self._sample_word(self.xleaves[xleaf_id], left())
                     if w is None:
-                        return False
+                        return why("no word")
                     out.append(w)
                 else:
-                    sub = self._sample_phrase(self.cleaves[ref[1]])
-                    if sub is None or not expand(sub, depth + 1):
+                    sub = self._sample_phrase(self.records[ref[1]].cleaf)
+                    if sub is None:
+                        return why("no phrase")
+                    if not expand(sub, depth + 1):
                         return False
             return True
         whole = {f"l{k}": BOS for k in range(1, self.window + 1)}

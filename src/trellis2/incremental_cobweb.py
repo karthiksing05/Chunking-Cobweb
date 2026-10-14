@@ -39,7 +39,7 @@ EPS = 1e-9
 class CobwebNode:
     """A concept: weighted attribute-value counts plus taxonomy links."""
 
-    __slots__ = ("id", "parent", "children", "count", "av", "ss", "sstot", "hidden")
+    __slots__ = ("id", "parent", "children", "count", "av", "ss", "sstot", "hidden", "pav")
 
     def __init__(self, nid: int):
         self.id = nid
@@ -52,6 +52,10 @@ class CobwebNode:
         # Hidden values (kept at the leaf that stores the instance; never used
         # for category utility, sorting or exact matching): attr -> value -> weight.
         self.hidden: Dict[str, Dict[Hashable, float]] = {}
+        # Passive counts: aggregated over the subtree like ``av`` (every node
+        # holds the sum of its children's), never used for category utility,
+        # sorting or exact matching: attr -> value -> weight.
+        self.pav: Dict[str, Dict[Hashable, float]] = {}
 
     def __repr__(self):
         kind = "leaf" if not self.children else f"{len(self.children)} children"
@@ -95,6 +99,10 @@ class CobwebNode:
             self.sstot = math.fsum(self.ss.values())
 
     def absorb(self, other: "CobwebNode") -> None:
+        for a, od in other.pav.items():
+            d = self.pav.setdefault(a, {})
+            for v, m in od.items():
+                d[v] = d.get(v, 0.0) + m
         for a, od in other.av.items():
             d = self.av.get(a)
             if d is None:
@@ -285,6 +293,23 @@ class IncrementalCobwebTree:
             else:
                 d[v] = n
 
+    def add_passive(self, leaf: CobwebNode, attr: str, value: Hashable, w: float = 1.0) -> None:
+        """Add (or with a negative ``w`` remove) a passive count at ``leaf`` and
+        every concept above it."""
+        node = leaf
+        while node is not None:
+            d = node.pav.setdefault(attr, {})
+            n = d.get(value, 0.0) + w
+            if abs(n) <= EPS * max(1.0, abs(w)):
+                d.pop(value, None)
+            else:
+                d[value] = n
+            node = node.parent
+
+    @staticmethod
+    def passive(node: CobwebNode, attr: str) -> Dict[Hashable, float]:
+        return node.pav.get(attr, {})
+
     def hidden_counts(self, node: CobwebNode, attr: str) -> Dict[Hashable, float]:
         """A hidden attribute's value counts over every leaf under ``node``:
         what the concept holds, inspected without having shaped it."""
@@ -395,5 +420,14 @@ class IncrementalCobwebTree:
                 assert all(m > 0 for m in d.values()), f"{node}: non-positive count in {a}"
                 ss = sum(v * v for v in d.values())
                 assert abs(ss - node.ss[a]) < 1e-6 * max(1.0, ss), f"{node}: stale sum of squares for {a}"
+            if node.children:
+                for a in set(node.pav) | {a for c in node.children for a in c.pav}:
+                    agg: Dict[Hashable, float] = {}
+                    for c in node.children:
+                        for v, m in c.pav.get(a, {}).items():
+                            agg[v] = agg.get(v, 0.0) + m
+                    mine = node.pav.get(a, {})
+                    assert all(abs(mine.get(v, 0.0) - agg.get(v, 0.0)) < tol * max(1.0, node.count)
+                               for v in set(mine) | set(agg)), f"{node}: passive {a} differs from its children's"
             total_ss = sum(node.ss.values())
             assert abs(total_ss - node.sstot) < 1e-6 * max(1.0, total_ss), f"{node}: stale total"
