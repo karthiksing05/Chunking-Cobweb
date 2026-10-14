@@ -86,7 +86,7 @@ class UnsupervisedLearner(Learner):
                  consolidations: int = 3, reanalysis_steps: int = 5, alpha: float = 0.001,
                  seed: int = 0, workers: int = 1, join_forests: bool = True,
                  context_free_steps: int = 10, joint_chunks: bool = True,
-                 joint_config: Optional[dict] = None, joint_splits: bool = False,
+                 joint_config: Optional[dict] = None, joint_splits: bool = True,
                  split_config: Optional[dict] = None,
                  sampling: Sequence[float] = (1.0, 1.0, 0.8, 0.8, 0.6, 0.6, 0.4, 0.4, 0.2),
                  **trellis_kwargs):

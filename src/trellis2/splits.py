@@ -29,6 +29,39 @@ while one pays. ``refine`` applies the moves once, to a consolidated
 grammar: earlier rounds are never changed (refining every round lets the
 rounds diverge, which cost characters' generation). Nothing here knows the
 domain.
+
+Interface (for reuse as a local move, e.g. by an incremental learner):
+
+* ``refine(mem, grammar, alpha, seed, search=True, config=None, log=None)
+  -> Grammar``: the whole move. ``mem`` is any domain's ``Memory`` holding
+  the recorded elements; ``grammar`` a grammar compiled from it (its
+  ``elem_symbol``: one symbol per element). Returns a new grammar whose
+  ``info["total bits"]`` is strictly shorter, or ``grammar`` itself
+  (``info["splits: accepted"] == 0``). The new grammar's info holds
+  ``splits: accepted / joint accepted / history / seconds``.
+* ``split_symbols(mem, symbols, score, alpha, config, log) -> (symbols,
+  grammar, history)``: the greedy loop on any scoring function
+  ``score(symbols) -> Grammar`` (``info["total bits"]`` is the code to
+  shorten); ``refine`` passes ``grammar.compile_with_symbols``.
+* ``grammar.compile_with_symbols(mem, symbols, alpha, seed, search)``: the
+  exact full code (and grammar) of any symbol assignment: stage B of
+  ``compile_grammar`` (the composition hierarchy, its cut, the tables), so
+  for the symbols ``compile_grammar`` chose it gives that grammar's code
+  exactly. Symbols are renumbered in increasing order.
+* ``_Context(mem)``: the elements as arrays; ``.keys(s)`` the composition
+  keys, ``.plain_code(s)`` the exact plain-PCFG code (nats) used to rank
+  candidates. ``propose(ctx, A, s, key, config)`` single-split masks for
+  symbol A; ``propagate(ctx, A, mask, s, key, config)`` a joint split (new
+  symbols numbered after the old) or None; ``prune(ctx, s_old, s_new,
+  alpha, keep)`` the propagated parts that pay.
+* ``DEFAULT_CONFIG``: the caps (candidates scored exactly per step and kind,
+  seeds of joint splits, rounds, ...); every entry can be overridden by
+  ``config``. Cost: about one exact refit (``compile_with_symbols``) per
+  candidate scored, i.e. up to ``2 * candidates`` per accepted split.
+
+Options: ``Trellis2(joint_splits=True)`` refines after ``consolidate``;
+``UnsupervisedLearner(joint_splits=True)`` (the default) refines the
+night's chosen grammar at its end.
 """
 from __future__ import annotations
 
@@ -42,12 +75,14 @@ from .grammar import UNK, Grammar, _compact, compile_with_symbols
 from .mdl import dm_code
 
 DEFAULT_CONFIG = {
-    "candidates": 3,         # scored exactly per step, of each kind (single, joint)
+    "candidates": 5,         # scored exactly per step, of each kind (single, joint)
     "max_splits": 40,
     "min_units": 2,
     "components": 3,         # principal directions tried per symbol
     "joint": True,
-    "joint_max_seeds": 20,   # single candidates (best plain code) that seed a joint split
+    "joint_max_seeds": 40,   # single candidates (best plain code) that seed a joint split
+                             # (40/5 against 20/3: agree +4 to +9 points grammatical at 2-3x the cost;
+                             # 60/8 adds nothing)
     "joint_rounds": 8,
     "joint_separation": 0.5,  # L1 distance between the 2-means centroids
     "joint_minority": 0.05,

@@ -229,12 +229,18 @@ def main():
     ap.add_argument("--named", type=int, default=4, help="most frequent per named class and size")
     ap.add_argument("--minsup", type=float, default=0.01)
     ap.add_argument("--context", action="store_true", help="top-level labels coded in context (chess_context)")
+    ap.add_argument("--elements", action="store_true", help="the context made of elements (chess_chunk_structure)")
     args = ap.parse_args()
     global OUT
     Search = HierBoardSearch
     if args.context:
         from chess_context import ContextBoardSearch as Search
         OUT = os.path.join(HERE, "results", "chess_context", "diag")
+    if args.elements:
+        from functools import partial
+        from chess_context import ContextBoardSearch
+        Search = partial(ContextBoardSearch, context_of="elements")
+        OUT = os.path.join(HERE, "results", "chess_chunk_structure", "diag")
     t0 = time.time()
     positions = load(args.elo, args.ply, args.train)
     name = f"e{args.elo}_p{args.ply}_n{args.train}_a{args.alpha:g}"

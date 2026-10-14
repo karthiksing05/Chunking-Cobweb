@@ -106,3 +106,49 @@ def test_merge_pools_chunks_over_a_category():
     assert any(k[0] == "wB" or k[2] == "wB" for k in pairs)
     ref = code_of_analyses(positions, s.analyses(), 0.01)
     assert abs(s.bits() - ref["total"]) < 1e-6
+
+
+# --------------------------------------------------------------------------- #
+# Typed relations: attack and defence
+# --------------------------------------------------------------------------- #
+from trellis2.chess import TACTICAL, interaction  # noqa: E402
+
+
+def test_interaction_types():
+    assert interaction("wP", "wP", "NE1") == "defends"       # b2-c3: the b2 pawn defends c3
+    assert interaction("wP", "wP", "NW1") == "defends"
+    assert interaction("bP", "bP", "NE1") == "defends"       # b5-c6: the c6 pawn defends b5
+    assert interaction("wP", "wP", "N1") is None            # a pawn does not defend straight ahead
+    assert interaction("wR", "wR", "N5") == "defends"       # doubled rooks, any distance
+    assert interaction("wB", "wQ", "NE3") == "defends"      # a battery
+    assert interaction("wR", "bQ", "E4") == "attacks"
+    assert interaction("wB", "bN", "N2") is None
+    assert interaction("wN", "bK", "NNE") == "attacks"
+    assert interaction("wK", "wN", "E3") is None            # a king reaches one square only
+    assert interaction("wK", "wR", "E3") == "defends"       # the rook defends the king along the rank
+    assert interaction("wK", "wR", "E1") == "defends"
+
+
+def test_typed_moves_are_exact_and_replay():
+    positions = [parse_fen(f) for f in FENS]
+    s = BoardSearch(positions, 0.01, typed=True)
+    moves = list(s.scored_moves())
+    typed = [m for m in moves if m[1][0] == "chunk" and m[1][1][1] in TACTICAL]
+    assert typed
+    for bits, move in sorted(typed, key=lambda x: x[0])[:15]:
+        child = copy.deepcopy(s)
+        child.do(move)
+        ref = code_of_analyses(positions, child.analyses(), 0.01)
+        assert abs(child.bits() - bits) < 1e-6 and abs(ref["total"] - bits) < 1e-6
+    # A typed chunk holds several geometric relations in one row.
+    bits, move = max(typed, key=lambda x: len({REL(s_, t) for _, s_, t in x[1][2]}))
+    s.do(move)
+    Y = s.moves[-1][3]
+    assert len(s.rows[Y]) > 1
+    r = BoardSearch(positions, 0.01, typed=True)
+    r.replay(s.moves)
+    assert r.analyses() == s.analyses() and abs(r.bits() - s.bits()) < 1e-9
+
+
+def REL(s, t):
+    return (t[0] - s[0], t[1] - s[1])

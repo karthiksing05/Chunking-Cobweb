@@ -59,7 +59,7 @@ from .chart import Chart
 from .data import Tree
 from .grammar import UNK, Grammar
 from .incremental_cobweb import IncrementalCobwebTree
-from .mdl import elias_delta_bits
+from .mdl import backoff_chain_coder, backoff_coder, elias_delta_bits
 from .memory import BOS, Memory
 
 LN2 = math.log(2.0)
@@ -159,6 +159,7 @@ class CodeTables:
         self.ref: Dict[str, Dict[Hashable, float]] = {"sym": {}, "cls": {}, "tok": {}}
         self.norm = {t: 0.0 for t in TABLES}
         self.phisum = {t: 0.0 for t in TABLES}
+        self.version = 0
 
     # Sizes ---------------------------------------------------------------- #
     @property
@@ -253,6 +254,7 @@ class CodeTables:
         return d / LN2 + self.structure_bits(K2, M2) - self.structure_bits()
 
     def commit(self, patch: Patch) -> None:
+        self.version += 1
         a = self.alpha
         K1, M1, V1 = self.K, self.M, self.V
         for (kind, key), v in patch.refs.items():
@@ -313,6 +315,7 @@ class CodeTables:
                 {k: dict(v) for k, v in self.ref.items()}, dict(self.norm), dict(self.phisum))
 
     def restore(self, snap) -> None:
+        self.version += 1
         cells, tot, phis, ref, norm, phisum = snap
         self.cells, self.tot, self.phis, self.ref = cells, tot, phis, ref
         self.norm, self.phisum = dict(norm), dict(phisum)
@@ -473,12 +476,22 @@ DEFAULT_CONFIG = {
     "lookahead": 6,             # greedy continuation moves scored after each first move (0: none)
     "lookahead_width": 4,       # first moves (structure moves, split compounds) scored by rollout
     "lookahead_region": 8,      # experiences a rollout's continuation looks at
-    "lookahead_splits": 0,      # best splits also scored by rollout
+    "lookahead_splits": 4,
+    "neighbour_splits": 6,
+    "neighbour_hops": 3,        # steps through the analyses from a split to the symbols whose splits may follow it      # symbols next to a rolled-out split whose splits continue it      # best splits also scored by rollout
     "rollout_full": 0,          # experiences of the region whose every move a rollout may take
     "lookahead_dissolve": False,  # rollouts may reopen top-level chunks (dissolve, then rebuild)
     "profile_depth": 3,         # levels of structure profiling a symbol's units for context splits (0: none)
     "graph_joint": 0,           # best splits carried through the composition graph per step (0: none)
-    "graph_rounds": 6,          # rounds of that propagation
+    "graph_rounds": 3,          # rounds of that propagation
+    "samples": 1,               # analyses stored per experience, drawn from the posterior (1: Viterbi)
+    "sample_temperature": 1.0,
+    "resample": "always",       # hedged re-analysis: a fresh sample replaces ("always") or only if shorter
+    "context_code": False,      # accept moves and re-analyses by the contextual full code
+    "context_checks": 4,        # candidates tried in order under it per move
+    "surprise_after": 20,       # stalled experiences before a wider search step (0: never)
+    "surprise_factor": 4,       # its budget factor
+    "rollout_windows": 8,       # joint-chunk windows a rollout continuation scores (most frequent)
     "first_choice": 0,          # take the k-th best first structure decision (a beam's hypotheses)              # best splits (of top-level elements) also scored with their best follow-up chunk
 }
 
@@ -497,13 +510,16 @@ class IncrementalLearner:
         self.config = dict(DEFAULT_CONFIG, **(config or {}))
         self.memory = memory if memory is not None else Memory(granularities=1, **memory_kwargs)
         self.rng = random.Random(seed)
+        self.np_rng = np.random.default_rng(seed)
         self.check = check
         self.tables = CodeTables(alpha)
         # Elements (memory ids): symbol, alive.
         self.sym: List[int] = []
         self.alive: List[bool] = []
         # Experiences: tokens, element ids of the current analysis, roots in order.
-        self.experiences: List[List[str]] = []
+        self.experiences: List[List[str]] = []     # per stored analysis (slot)
+        self.real_of: List[int] = []               # slot -> experience
+        self.slots: List[List[int]] = []           # experience -> its slots
         self.elems: List[List[int]] = []
         self.roots: List[List[int]] = []
         self.weight: List[float] = []
@@ -546,6 +562,8 @@ class IncrementalLearner:
         self._journal: Optional[list] = None
         self._rolling = False
         self._decided = False           # whether a structure move has been taken
+        self._stall = 0                 # experiences since a move was last accepted
+        self._budget = 1                # lookahead budget factor (surprise steps)
         self._branches: Optional[list] = None   # set by a HedgedBeam: where runner-ups go
         self._branched = False
         self.history: List[dict] = []
@@ -1215,14 +1233,21 @@ class IncrementalLearner:
                 "model bits": total - data, "symbols": K, "rule classes": M,
                 "composite rule classes": int(np.sum(kind[:, 1] > 0)),
                 "chunk types": sum(1 for (s, k) in self.rec if k[0] == "C"),
-                "bits per sentence": total / max(len(self.experiences), 1)}
+                "bits per sentence": total / max(len(self.slots), 1)}
         g = Grammar(vocab=vocab, S=normalize(nS), U=normalize(nU),
                     pk=(kind[:, 0] + a) / (kind.sum(axis=1) + 2 * a),
                     Lt=normalize(nL), Rt=normalize(nR), E=normalize(nE), alpha=a,
                     p_stop=float((stop.get(0, 0.0) + a) / (sum(stop.values()) + 2 * a)),
                     p_whole=float((mode.get(0, 0.0) + a) / (sum(mode.values()) + 2 * a)),
                     S_piece=normalize(nP), info=info)
-        opt = self.context_option if self.config["context"] else None
+        if not self.config["context"]:
+            opt = None
+        elif self.config["context_code"]:
+            opt = self.full_code()[1]
+            info["total bits (order-free)"] = info["total bits"]
+            info["total bits"] = self.full_code()[0]
+        else:
+            opt = self.context_option
         info["read context (online choice)"] = str(opt)
         if opt is not None:
             b1 = opt[0] if isinstance(opt, tuple) else opt
@@ -1256,7 +1281,17 @@ class IncrementalLearner:
         symbol labels and the classes of its keys (a key in use keeps its
         class; a new key takes the class that best derives it)."""
         g = self.grammar
-        tree = Chart(g, tokens).viterbi_tree()
+        return self._analysis(tokens, Chart(g, tokens).viterbi_tree(), g)
+
+    def _sample(self, tokens: Sequence[str]) -> Tuple[Tree, Dict, Dict]:
+        """An analysis drawn from the posterior under the current grammar (at
+        ``sample_temperature``), with the classes of its keys as ``_parse``."""
+        g = self.grammar
+        T = self.config["sample_temperature"]
+        gt = g if T == 1.0 else g.tempered(T)
+        return self._analysis(tokens, Chart(gt, tokens).sample_tree(self.np_rng), g)
+
+    def _analysis(self, tokens, tree: Tree, g: Grammar) -> Tuple[Tree, Dict, Dict]:
         syms, clss = g.inc_symbols, g.inc_classes
         labels = {span: syms[int(a)] for span, a in tree.label.items()}
         classes = {}
@@ -1283,63 +1318,82 @@ class IncrementalLearner:
         t0 = time.time()
         tokens = list(tokens)
         i = len(self.experiences)
-        self.experiences.append(tokens)
         self.wc.add(tokens)
-        if self.tables.K == 0:
-            tree, labels, classes = self._flat(tokens)
-        else:
-            tree, labels, classes = self._parse(tokens)
-            # A new word: its own symbol and rule class, merged below where the
-            # code says (so its first category is the code's, not the parse's).
-            if self.config["seed_merges"]:
-                tree, labels, classes = self._own_new_words(tokens, tree, labels, classes)
-        patch = Patch()
-        self._tree_patch(tokens, tree, labels, classes, 1.0, +1.0, patch)
-        self._prequential(tokens, tree, labels, classes)
-        self.tables.commit(patch)
-        self._install(i, tokens, tree, labels, classes, 1.0)
-        self._after_commit()
+        # Hedged incorporation: k analyses drawn from the posterior, each of
+        # weight 1/k (k = 1: the Viterbi analysis), all from the grammar
+        # before this experience.
+        k = self.config["samples"]
+        analyses = []
+        own: Dict[str, tuple] = {}
+        for t in range(k):
+            if self.tables.K == 0:
+                a = self._flat(tokens, own)
+            else:
+                a = self._parse(tokens) if k == 1 else self._sample(tokens)
+                # A new word: its own symbol and rule class, merged below where
+                # the code says (so its first category is the code's).
+                if self.config["seed_merges"]:
+                    a = self._own_new_words(tokens, *a, own=own)
+            analyses.append(a)
+        r = len(self.slots)
+        self.slots.append([])
+        for t, (tree, labels, classes) in enumerate(analyses):
+            # A key an earlier sample put in use keeps that sample's class.
+            classes = {key: self._class_for(key, c) for key, c in classes.items()}
+            slot = len(self.experiences)
+            self.experiences.append(tokens)
+            self.real_of.append(r)
+            self.slots[r].append(slot)
+            patch = Patch()
+            self._tree_patch(tokens, tree, labels, classes, 1.0 / k, +1.0, patch)
+            if t == 0:
+                self._prequential(tokens, tree, labels, classes)
+            self.tables.commit(patch)
+            self._install(slot, tokens, tree, labels, classes, 1.0 / k)
+            self._after_commit()
+        tree = analyses[0][0]
         self.stats["observed"] += 1
         self._step(i)
         self.history.append({"experience": i, "bits": self.tables.bits(), "seconds": time.time() - t0,
                              "symbols": self.tables.K, "rule classes": self.tables.M})
         return tree
 
-    def _flat(self, tokens):
+    def _flat(self, tokens, own=None):
         """Before any grammar: every word a piece, each new word type its own
         symbol and rule class."""
         n = len(tokens)
         tree = Tree(n, {}, {}, [(k, k + 1) for k in range(n)])
-        labels, classes, seen = {}, {}, {}
+        labels, classes = {}, {}
+        seen = own if own is not None else {}
         for k, w in enumerate(tokens):
             if w not in seen:
-                seen[w] = self._new_sym()
-                classes[("P", w)] = self._new_cls()
-            labels[(k, k + 1)] = seen[w]
+                seen[w] = (self._new_sym(), self._new_cls())
+            labels[(k, k + 1)] = seen[w][0]
+            classes[("P", w)] = seen[w][1]
         tree.label = dict(labels)
         return tree, labels, classes
 
-    def _own_new_words(self, tokens, tree, labels, classes):
+    def _own_new_words(self, tokens, tree, labels, classes, own=None):
         known = self.tables.ref["tok"]
         new = {w for w in tokens if w not in known}
         if not new:
             return tree, labels, classes
-        own: Dict[str, int] = {}
+        own = own if own is not None else {}
         for w in sorted(new):
-            own[w] = self._new_sym()
+            if w not in own:
+                own[w] = (self._new_sym(), self._new_cls())
         # Relabel the primitives of new words and the keys of their parents.
         labels = dict(labels)
         for k, w in enumerate(tokens):
             if w in own:
-                labels[(k, k + 1)] = own[w]
+                labels[(k, k + 1)] = own[w][0]
         classes = {}
-        g = self.grammar
         for span in tree.bottom_up():
             i, j = span
             if j - i == 1:
                 key = ("P", tokens[i])
                 if tokens[i] in own:
-                    classes[key] = self._new_cls()
+                    classes[key] = own[tokens[i]][1]
                 else:
                     classes[key] = self.class_of[key] if key in self.class_of else self._new_cls()
             else:
@@ -1405,9 +1459,23 @@ class IncrementalLearner:
 
     def _step(self, i: int) -> None:
         cfg = self.config
-        for _ in range(cfg["moves_per_step"]):
-            if not self._best_move(i):
-                break
+        # Surprise: after ``surprise_after`` experiences without an accepted
+        # move, one step searches with a wider budget (more first moves and
+        # splits rolled out); bounded, and on average cheap.
+        wide = cfg["surprise_after"] > 0 and self._stall >= cfg["surprise_after"]
+        if wide:
+            self._budget = cfg["surprise_factor"]
+            self._stall = 0
+            self.stats["surprise steps"] += 1
+        moved = False
+        try:
+            for _ in range(cfg["moves_per_step"]):
+                if not self._best_move(i):
+                    break
+                moved = True
+        finally:
+            self._budget = 1
+        self._stall = 0 if moved else self._stall + 1
         # Re-analysis: the new experience under the grammar it changed, the
         # experiences touched by moves, and a few rehearsed at random.
         todo = [i]
@@ -1435,7 +1503,8 @@ class IncrementalLearner:
         """Re-parse a stored experience under the current grammar; keep the
         new analysis if the total code shrinks."""
         tokens = self.experiences[i]
-        tree, labels, classes = self._parse(tokens)
+        hedged = self.config["samples"] > 1
+        tree, labels, classes = self._sample(tokens) if hedged else self._parse(tokens)
         if self._same_analysis(i, tree, labels):
             return False
         patch = Patch()
@@ -1443,7 +1512,11 @@ class IncrementalLearner:
         self._tree_patch(tokens, tree, labels, classes, self.weight[i], +1.0, patch)
         d = self.tables.delta(patch)
         self.stats["reanalyses scored"] += 1
-        if d >= -1e-9:
+        # Hedged: a fresh posterior sample replaces the stored one (the stored
+        # samples follow the posterior); otherwise kept only if shorter.
+        if self.config["context_code"] and not (hedged and self.config["resample"] == "always"):
+            d = self._full_delta(lambda: self._replace(i, tree, labels, classes, patch))
+        if d >= -1e-9 and not (hedged and self.config["resample"] == "always"):
             return False
         self._replace(i, tree, labels, classes, patch)
         self.stats["reanalyses accepted"] += 1
@@ -1496,7 +1569,7 @@ class IncrementalLearner:
                 joint = self._propagate_graph(seedmap, cfg["graph_rounds"])
                 self.stats["graph joint splits scored"] += 1
                 if len(joint) > len(seedmap):
-                    patch, nc = self._relabel_patch(joint, self.own_classes(joint), fresh_renamed=True)
+                    patch, nc = self._relabel_patch(joint, self.own_classes(joint))
                     jm = ("relabel", joint, nc, patch, "split")
                     dj = self.tables.delta(patch)
                     pool.append((dj, jm))
@@ -1516,10 +1589,22 @@ class IncrementalLearner:
         pool.sort(key=lambda x: x[0])
         best = pool[0] if pool[0][0] < -1e-9 else None
         if cfg["lookahead"] > 0:
-            firsts = [x for x in pool if x[1][0] in self.STRUCTURE][:cfg["lookahead_width"]]
+            budget = getattr(self, "_budget", 1)
+            firsts = [x for x in pool if x[1][0] in self.STRUCTURE][:cfg["lookahead_width"] * budget]
             if cfg["lookahead_splits"]:
-                # Splits whose gain shows only after the moves that use them.
-                firsts += sorted(splits, key=lambda x: x[0])[:cfg["lookahead_splits"]]
+                # Splits whose gain shows only after the moves that use them
+                # (the substantive groupings: word classes, structural context).
+                seen_sets = set()
+                for d, move in sorted(every, key=lambda x: x[0]):
+                    if move[4] not in ("word classes", "context"):
+                        continue
+                    sig = frozenset(move[1])
+                    if sig in seen_sets:
+                        continue
+                    seen_sets.add(sig)
+                    firsts.append((d, move))
+                    if len(seen_sets) >= cfg["lookahead_splits"] * budget:
+                        break
             if cfg["lookahead_dissolve"]:
                 # Reopening: dissolving the experience's top-level chunks never
                 # pays alone; it is judged by what the continuation rebuilds.
@@ -1558,6 +1643,15 @@ class IncrementalLearner:
                         child._apply(alts[0][2])
                         child.stats["branched"] += 1
                         branches.append(child)
+        if cfg["context_code"]:
+            # Accept under the code the grammar uses: the best candidates in
+            # order, the first that shortens the contextual full code.
+            order = ([best] if best is not None else []) + [x for x in pool if best is None or x[1] is not best[1]]
+            best = None
+            for d, move in order[:cfg["context_checks"]]:
+                if self._full_delta(lambda mv=move: self._apply(mv)) < -1e-9:
+                    best = (d, move)
+                    break
         if best is not None and best[1][0] in self.STRUCTURE:
             self._decided = True
         if best is None:
@@ -1575,6 +1669,21 @@ class IncrementalLearner:
         tok = self._txn_begin()
         try:
             q0, s0 = len(self.queue), self.next_sym
+            near = set()
+            if move[0] == "relabel" and self.config["neighbour_splits"]:
+                # After a split, the splits of the symbols next to it (its
+                # elements' parents, siblings and parts) are its follow-ups.
+                ring = set(list(move[1])[:2000])
+                seen_e = set(ring)
+                for _ in range(self.config["neighbour_hops"]):
+                    nxt_ring = set()
+                    for e in ring:
+                        for _, n in self._neighbours(e):
+                            if n not in seen_e:
+                                seen_e.add(n)
+                                nxt_ring.add(n)
+                                near.add(self.sym[n])
+                    ring = nxt_ring
             self._apply(move)
             total = 0.0
             cap = self.config["lookahead_region"]
@@ -1584,6 +1693,8 @@ class IncrementalLearner:
                 best = None
                 full = self.config["rollout_full"]
                 cands = (c for j in region[:full] for c in self._candidates(j)) if full else ()
+                if near:
+                    cands = itertools.chain(cands, self._neighbour_split_candidates(near))
                 for d, mv in itertools.chain(self._rollout_candidates(region, fresh), cands):
                     if best is None or d < best[0]:
                         best = (d, mv)
@@ -1594,6 +1705,12 @@ class IncrementalLearner:
             return total
         finally:
             self._txn_rollback(tok)
+
+    def _neighbour_split_candidates(self, syms):
+        cap = self.config["neighbour_splits"]
+        for B in sorted((b for b in syms if b in self.members), key=lambda b: -len(self.members[b]))[:cap]:
+            for groups in self._context_splits(B) + self._word_class_splits(B):
+                yield from self._split_candidates(groups)
 
     def _rollout_candidates(self, region: Sequence[int], fresh: Sequence[int]):
         win = self.config["chunk_window"]
@@ -1609,10 +1726,12 @@ class IncrementalLearner:
             yield from self._chunk_moves(pair)
         if windows:
             from .mdl_search import shapes
-            for window in sorted(windows):
-                occ = self._window_occ(window)
-                if sum(len(p) for p in occ.values()) < self.config["min_pair"]:
-                    continue
+            # Proposals bounded: the most frequent windows (occurrences), as
+            # the night keeps its ``top_windows``.
+            occs = [(w, self._window_occ(w)) for w in sorted(windows)]
+            occs = [(w, o, sum(len(p) for p in o.values())) for w, o in occs]
+            occs = sorted((x for x in occs if x[2] >= self.config["min_pair"]), key=lambda x: -x[2])
+            for window, occ, _ in occs[:self.config["rollout_windows"]]:
                 for shape in shapes(0, len(window)):
                     yield from self._joint_move(window, shape, occ)
         if self.config["inner_chunks"]:
@@ -1722,9 +1841,9 @@ class IncrementalLearner:
             for groups in self._tree_splits(A):
                 yield from self._split_candidates(groups)
             for groups in self._word_class_splits(A):
-                yield from self._split_candidates(groups)
+                yield from self._split_candidates(groups, "word classes")
             for groups in self._context_splits(A):
-                yield from self._split_candidates(groups)
+                yield from self._split_candidates(groups, "context")
         # Chunks of adjacent top-level categories, and dissolving chunks.
         labs = self._top_syms(i)
         for pair in sorted(set(zip(labs, labs[1:]))):
@@ -1769,7 +1888,7 @@ class IncrementalLearner:
     def _live_keys(self, c: int) -> List[tuple]:
         return sorted((k for k in self.keys_of_class.get(c, ()) if self._key_weight(k) > EPS), key=str)
 
-    def _split_candidates(self, groups: List[set]):
+    def _split_candidates(self, groups: List[set], source: str = "other"):
         """Groups of a symbol's elements, each relabelled to a new symbol:
         alone, and with their own rule classes (``own_classes``)."""
         mapping = {}
@@ -1780,7 +1899,7 @@ class IncrementalLearner:
             if remap is not None and not remap:
                 continue
             patch, nc = self._relabel_patch(mapping, remap)
-            yield self.tables.delta(patch), ("relabel", mapping, nc, patch, "split")
+            yield self.tables.delta(patch), ("relabel", mapping, nc, patch, source)
         # Joint splits: the split carried to the parents holding the new parts.
         last = len(mapping)
         for depth in range(1, self.config["joint_depth"] + 1):
@@ -1789,7 +1908,7 @@ class IncrementalLearner:
                 break
             last = len(joint)
             patch, nc = self._relabel_patch(joint, self.own_classes(joint), fresh_renamed=True)
-            yield self.tables.delta(patch), ("relabel", joint, nc, patch, "split")
+            yield self.tables.delta(patch), ("relabel", joint, nc, patch, source)
 
     def _neighbours(self, e: int):
         m = self.memory
@@ -1806,8 +1925,10 @@ class IncrementalLearner:
         split, ``splits.propagate``, but locally): each round, the elements
         next to moved ones (parent, sibling, parts) are grouped by which new
         symbols they neighbour, and every symbol whose elements so divide is
-        split by group; then each propagated part is merged back while that
-        shortens the exact code (pruning the parts that only cost)."""
+        split by group (the relations by which they touch moved elements, so
+        each symbol splits into a few parts at most); then each propagated
+        part is merged back while that shortens the exact code (pruning the
+        parts that only cost)."""
         mapping = dict(mapping)
         nxt = max(mapping.values()) + 1
         frontier = set(mapping)
@@ -1818,7 +1939,7 @@ class IncrementalLearner:
                 for _, n in self._neighbours(e):
                     if n in mapping:
                         continue
-                    key = tuple(sorted((rel, mapping[x]) for rel, x in self._neighbours(n) if x in mapping))
+                    key = ()                     # one part per symbol: its elements next to moved ones
                     sig[self.sym[n]][key].add(n)
             frontier = set()
             for B in sorted(sig):
@@ -1835,7 +1956,7 @@ class IncrementalLearner:
                 break
         if not parts:
             return mapping
-        score = lambda mp: self.tables.delta(self._relabel_patch(mp, self.own_classes(mp), fresh_renamed=True)[0])
+        score = lambda mp: self.tables.delta(self._relabel_patch(mp, self.own_classes(mp))[0])
         current = score(mapping)
         for part in sorted(parts, key=lambda q: len(parts[q])):
             trial = {e: v for e, v in mapping.items() if v != part}
@@ -1953,6 +2074,8 @@ class IncrementalLearner:
             self._apply_classes(keys, c, patch)
         elif kind in ("chunk", "dissolve", "joint", "rotate", "inner chunk"):
             _, rewrites, patch = move[:3]
+            if callable(rewrites):
+                rewrites = rewrites()
             self.tables.commit(patch)
             fresh = move[3] if len(move) > 3 else {}
             for s in fresh.get("syms", ()):
@@ -2057,11 +2180,14 @@ class IncrementalLearner:
                 best = (d, c, patch)
         d, c, patch = best
         m = self.memory
-        rewrites = {}
-        for i, pos in occ.items():
-            spans = [m.span[x] for x in self.roots[i]]
-            groups = {t: (2, [((spans[t][0], spans[t + 1][1]), Y, spans[t], spans[t + 1], c)]) for t in pos}
-            rewrites[i] = self._rewrite(i, groups)
+
+        def rewrites():                 # built only if the move is applied
+            out = {}
+            for i, pos in occ.items():
+                spans = [m.span[x] for x in self.roots[i]]
+                groups = {t: (2, [((spans[t][0], spans[t + 1][1]), Y, spans[t], spans[t + 1], c)]) for t in pos}
+                out[i] = self._rewrite(i, groups)
+            return out
         yield d, ("chunk", rewrites, patch, {"syms": [Y], "classes": [c]})
 
     def _joint_chunk_moves(self, labs, win):
@@ -2142,17 +2268,24 @@ class IncrementalLearner:
                     t += 1
             patch.top(labs, -self.weight[i])
             patch.top(new, self.weight[i])
-            spans = [m.span[x] for x in self.roots[i]]
-            groups = {}
-            for t0 in pos:
-                built = []
-                for (a, b), s, (a1, k1), (k2, b2), key in nodes:
-                    built.append(((spans[t0 + a][0], spans[t0 + b - 1][1]), s,
-                                  (spans[t0 + a1][0], spans[t0 + k1 - 1][1]),
-                                  (spans[t0 + k2][0], spans[t0 + b2 - 1][1]), classes[key]))
+            for _ in pos:
+                for (_, s, _, _, key) in nodes:
                     patch.record(s, classes[key], key, self.weight[i])
-                groups[t0] = (size, built)
-            rewrites[i] = self._rewrite(i, groups)
+
+        def rewrites():                 # built only if the move is applied
+            out = {}
+            for i, pos in occ.items():
+                spans = [m.span[x] for x in self.roots[i]]
+                groups = {}
+                for t0 in pos:
+                    built = []
+                    for (a, b), s, (a1, k1), (k2, b2), key in nodes:
+                        built.append(((spans[t0 + a][0], spans[t0 + b - 1][1]), s,
+                                      (spans[t0 + a1][0], spans[t0 + k1 - 1][1]),
+                                      (spans[t0 + k2][0], spans[t0 + b2 - 1][1]), classes[key]))
+                    groups[t0] = (size, built)
+                out[i] = self._rewrite(i, groups)
+            return out
         yield self.tables.delta(patch), ("joint", rewrites, patch, {"syms": fresh_syms, "classes": new_cls})
 
     def _rotation_moves(self, i: int):
@@ -2616,6 +2749,79 @@ class IncrementalLearner:
         assert len(self.placed) == live, (len(self.placed), live)
         assert abs(self.rtree.root.count - sum(self.memory.weight[e] for x in self.elems for e in x)) < 1e-6
 
+    def full_code(self) -> Tuple[float, object]:
+        """The total code with the rule choices coded as the night's grammar
+        codes them (``grammar._factored_code``): under each context option
+        (none; the word before at weights 1, 4, 16; the two words before at
+        the nine weight pairs) the rule-class choices are a prequential
+        backoff code in learning order (experiences in order, each analysis'
+        elements as ``Memory.add`` records them), and the shortest option
+        counts. Returns (bits, option). The rest of the code is the
+        order-free tables'. Exact; O(elements) per call (cached until the
+        next commit)."""
+        key = (self.tables.version, self._journal is None and len(self.memory))
+        hit = self.__dict__.get("_full_cache")
+        if hit is not None and hit[0] == key and self._journal is None:
+            return hit[1]
+        a = self.alpha
+        order = [e for x in self.slots for slot in x for e in self.elems[slot]]
+        sym = np.array([self.sym[e] for e in order], dtype=np.int64)
+        cls_ids: Dict[int, int] = {}
+        keys = np.array([cls_ids.setdefault(self.class_of[self._key(e)], len(cls_ids)) for e in order], dtype=np.int64)
+        x1_ids: Dict[Hashable, int] = {}
+        x2_ids: Dict[Hashable, int] = {}
+        x1, x2 = [], []
+        for e in order:
+            c1, c2 = self._ctx(e)
+            x1.append(x1_ids.setdefault(c1, len(x1_ids)))
+            x2.append(x2_ids.setdefault(c2, len(x2_ids)))
+        x1, x2 = np.array(x1, dtype=np.int64), np.array(x2, dtype=np.int64)
+        w = np.array([self.memory.weight[e] for e in order], dtype=float)
+        M = self.tables.M
+        u_nats = self.tables.norm["U"] - self.tables.phisum["U"]
+        best = (u_nats, None)
+        one = backoff_coder(sym, x1, w)
+        two = backoff_chain_coder(sym, [x1, x2], w)
+        for opt in CONTEXT_OPTIONS[1:]:
+            nats = two(keys, M, a, opt) if isinstance(opt, tuple) else one(keys, M, a, opt)
+            if nats < best[0] - 1e-9:
+                best = (nats, opt)
+        bits = (self.tables.nats() - u_nats + best[0]) / LN2 + self.tables.structure_bits()
+        out = (bits, best[1])
+        if self._journal is None:
+            self._full_cache = (key, out)
+        return out
+
+    def _full_delta(self, apply) -> float:
+        """Change of the contextual full code if ``apply()`` were done (a trial)."""
+        before = self.full_code()[0]
+        tok = self._txn_begin()
+        try:
+            apply()
+            after = self.full_code()[0]
+        finally:
+            self._txn_rollback(tok)
+        self.stats["contextual checks"] += 1
+        return after - before
+
+    def hard_code(self) -> float:
+        """Evaluation only (never used for learning): the total code of one
+        analysis per experience, its Viterbi analysis under the current
+        grammar, with the learner's rule classes (a key never seen takes the
+        class that best derives it). For a hedged learner this is the code
+        comparable to a learner that stores single analyses."""
+        tables = CodeTables(self.alpha, self.tables.extra_bits)
+        fixed: Dict[tuple, int] = {}
+        patch = Patch()
+        for x in self.slots:
+            tokens = self.experiences[x[0]]
+            tree, labels, classes = self._parse(tokens)
+            for key, c in classes.items():
+                fixed.setdefault(key, self.class_of.get(key, c))
+            self._tree_patch(tokens, tree, labels, fixed, 1.0, +1.0, patch)
+        tables.commit(patch)
+        return tables.bits()
+
     def chart(self, tokens: Sequence[str]) -> Chart:
         return Chart(self.grammar, tokens)
 
@@ -2649,11 +2855,12 @@ class IncrementalLearner:
         rng = rng if rng is not None else np.random.default_rng(self.seed)
         return complete(self.grammar, prompt, n, rng, temperature, max_len)
 
-    def stored_trees(self) -> List[Tree]:
-        """The stored analyses as Trees labelled with their symbols."""
+    def stored_trees(self, every: bool = False) -> List[Tree]:
+        """The stored analyses as Trees labelled with their symbols: one per
+        experience (its first sample), or every stored sample."""
         m = self.memory
         out = []
-        for i in range(len(self.elems)):
+        for i in (range(len(self.elems)) if every else [x[0] for x in self.slots]):
             split, labels = {}, {}
             for e in self.elems[i]:
                 labels[m.span[e]] = self.sym[e]

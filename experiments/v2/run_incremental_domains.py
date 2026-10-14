@@ -60,6 +60,7 @@ def stream(learner, items, checkpoints, evaluate, log):
             t1 = time.time()
             point = evaluate(k)
             point.update(experiences=k, learn_seconds=spent, eval_seconds=time.time() - t1,
+                         hard_bits=learner.hard_code(),
                          total_bits=learner.grammar.info["total bits"], symbols=learner.grammar.K,
                          rule_classes=learner.grammar.M, chunk_types=learner.grammar.info["chunk types"],
                          stats=dict(learner.stats))

@@ -69,10 +69,11 @@ def run_one(job) -> dict:
             if k in checkpoints or k == len(train):
                 point = evaluate(learner, learner.grammar, test, cfg,
                                  {x.sentence for x in train[:k]}, seed, args["n_gen"])
+                point["hard_bits"] = learner.hard_code()
                 point.update({"sentences": k, "learn_seconds": spent,
                               "stats": dict(learner.stats)})
                 curve.append(point)
-                print(f"[{condition} s{seed}] {k}: {point['total_bits']:.1f} bits, K={point['symbols']} "
+                print(f"[{condition} s{seed}] {k}: {point['total_bits']:.1f} bits (hard {point['hard_bits']:.1f}), K={point['symbols']} "
                       f"M={point['rule_classes']}, gen-comm {point['gen_commission']:.3f}, "
                       f"omission {point['omission']:.3f}, test {point['test_bits_per_sentence']:.2f} "
                       f"({spent:.0f}s)", flush=True)
@@ -95,7 +96,7 @@ def run_one(job) -> dict:
             row["trees"] = [[sorted(t.split.items()), t.roots, sorted(t.label.items())]
                             for t in learner.stored_trees()]
     f = row["final"]
-    print(f"[{condition} s{seed} {args['learner']}] final {f['total_bits']:.1f} bits, gen-comm "
+    print(f"[{condition} s{seed} {args['learner']}] final {f['total_bits']:.1f} bits (hard {f.get('hard_bits', float('nan')):.1f}), gen-comm "
           f"{f['gen_commission']:.3f}, omission {f['omission']:.3f}, commission {f['parse_commission']:.3f} "
           f"({row['seconds']:.0f}s)", flush=True)
     return row

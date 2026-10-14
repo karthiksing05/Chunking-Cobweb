@@ -109,17 +109,21 @@ def main():
     ap.add_argument("--test", type=int, default=500)
     ap.add_argument("--alpha", type=float, default=1e-3)
     ap.add_argument("--kind", default="real", choices=["real", "random"])
-    ap.add_argument("--method", default="merge", choices=["merge", "current", "context", "context_merge", "read_context"])
+    ap.add_argument("--method", default="merge", choices=["merge", "current", "context", "context_merge", "read_context", "element_context",
+                                                             "element_read_context", "typed", "element_typed"])
     ap.add_argument("--patience", type=int, default=0)
     ap.add_argument("--merge-kinds", default="any", choices=["any", "same"])
     ap.add_argument("--n-gen", type=int, default=1000)
     ap.add_argument("--seed", type=int, default=13)
     ap.add_argument("--tag", default="", help="appended to the result's name")
     args = ap.parse_args()
-    tag = args.method if args.method in ("current", "context", "context_merge", "read_context") else (
+    tag = args.method if args.method in ("current", "context", "context_merge", "read_context", "element_context",
+                                         "element_read_context", "typed", "element_typed") else (
         f"merge_p{args.patience}" + ("" if args.merge_kinds == "any" else "_same"))
     out_dir = (OUT if args.method in ("current", "merge") else
-               os.path.join(HERE, "results", "chess_read_context" if args.method == "read_context" else "chess_context",
+               os.path.join(HERE, "results", {"read_context": "chess_read_context", "element_context": "chess_chunk_structure",
+                                              "element_read_context": "chess_chunk_structure",
+                                              "typed": "chess_chunk_structure", "element_typed": "chess_chunk_structure"}.get(args.method, "chess_context"),
                             "runs"))
     name = f"e{args.elo}_p{args.ply}_n{args.train}_a{args.alpha:g}_{args.kind}_{tag}{args.tag}"
     with open(positions_path(args.elo, args.ply)) as f:
@@ -137,6 +141,11 @@ def main():
     t0 = time.time()
     if args.method == "current":
         learner = ChessLearner(seed=args.seed, alpha=args.alpha, context=False)
+    elif args.method.startswith("element") or args.method == "typed":
+        learner = ChessLearner(seed=args.seed, alpha=args.alpha, context=True,
+                               context_of="elements" if args.method.startswith("element") else "pieces",
+                               read_context=args.method == "element_read_context",
+                               typed=args.method.endswith("typed"))
     elif args.method == "read_context":
         learner = ChessLearner(seed=args.seed, alpha=args.alpha, context=True, read_context=True)
     elif args.method.startswith("context"):
@@ -198,10 +207,10 @@ def main():
                            for k, c in found.most_common(40)],
            "search moves": [h["move"] for h in learner.history if h["stage"] in ("chunk", "merge")],
            "generation": gen}
-    if args.method.startswith("context") or args.method == "read_context":
+    if args.method.startswith("context") or args.method.endswith("read_context") or args.method.startswith("element") or args.method == "typed":
         res["context option (depth, beta)"] = list(learner.search.option)
         res["grammar context option"] = list(learner.model.memory._predictor(g)[:2])
-    if args.method == "read_context":
+    if args.method.endswith("read_context"):
         learner.search._read_nats()
         res["read context option (depth, beta)"] = list(learner.search.read_option)
         res["grammar read context option"] = list(learner.model.memory.answers_nats(args.alpha)[1])

@@ -165,6 +165,46 @@ def forward_neighbours(position: Position, sq: Square,
             yield d, t
 
 
+# --------------------------------------------------------------------------- #
+# Typed relations: attack and defence
+# --------------------------------------------------------------------------- #
+# Beyond direction and distance, the domain supplies two relation types (as
+# characters supply their operators): two pieces on a line the board's
+# relations see (the first piece along a ray, or a knight's jump) *defend*
+# each other if either could capture onto the other's square and they are of
+# one colour, and *attack* if they are of different colours. A typed chunk
+# move joins every such pair whatever its direction and distance; each
+# instance keeps its geometric relation, so a typed chunk is a category of
+# geometric ones (Chase and Simon's chunks: attack, defence, same colour).
+TACTICAL = ("attacks", "defends")
+REL_OF = {v: k for k, v in OFFSET.items()}
+
+
+def hits(token: str, dx: int, dy: int) -> bool:
+    """Whether a piece could capture onto the square (dx, dy) away, the line
+    between them being clear."""
+    k, ax, ay = token[1], abs(dx), abs(dy)
+    if k == "N":
+        return (ax, ay) in ((1, 2), (2, 1))
+    if k == "K":
+        return max(ax, ay) == 1
+    if k == "R":
+        return dx == 0 or dy == 0
+    if k == "B":
+        return ax == ay
+    if k == "Q":
+        return dx == 0 or dy == 0 or ax == ay
+    return ax == 1 and dy == (1 if token[0] == "w" else -1)       # a pawn
+
+
+def interaction(a: str, c: str, rel: str) -> Optional[str]:
+    """The tactical type of two pieces, c standing in relation ``rel`` from a."""
+    dx, dy = OFFSET[rel]
+    if hits(a, dx, dy) or hits(c, -dx, -dy):
+        return "defends" if a[0] == c[0] else "attacks"
+    return None
+
+
 def is_chunk(node: Node) -> bool:
     return len(node[1]) == 3
 
@@ -226,8 +266,14 @@ class BoardMemory(Memory):
     relations = RELATIONS
 
     def __init__(self, spine_depth: int = 2, granularities: int = 2, counts: bool = True,
-                 context: bool = True, read_context: bool = False):
+                 context: bool = True, read_context: bool = False, context_of: str = "pieces"):
         super().__init__(spine_depth=spine_depth, granularities=granularities)
+        # What a context value is: the piece in that direction ("pieces"), or
+        # the symbol of the top-level element holding it ("elements": a chunk
+        # is one value; the top-level symbols are then coded explicitly).
+        if context_of not in ("pieces", "elements"):
+            raise ValueError(context_of)
+        self.context_of = context_of
         # Whether the read's yes-or-no answers are also coded in that context
         # (backing off to the counted row).
         self.read_context = read_context
@@ -389,7 +435,7 @@ class BoardMemory(Memory):
             self._answer_nats[alpha] = (self.answers_nats(alpha)[0] + CHOICE_NATS if self.read_context
                                         else rows_nats(self._answers().reshape(-1, 2), alpha))
         if self.context:
-            nats, _ = self.symbols_nats(s[np.flatnonzero(self.is_root)], K, alpha)
+            nats, _ = self.symbols_nats(s[np.flatnonzero(self.is_root)], K, alpha, s_all=s)
             return self._answer_nats[alpha] + nats + CHOICE_NATS
         if self._roots is None:
             self._symbols_at(s, K)
@@ -430,15 +476,49 @@ class BoardMemory(Memory):
             self._ctx = (root, g, [c[:, l] for l in range(len(CHAIN))], w)
             self._coders = {d: backoff_chain_coder(g, [c[:, l] for l in range(d)], w)
                             for d in range(len(CHAIN) + 1)}
+            if self.context_of == "elements":
+                # Per top-level element and backward direction: the top-level
+                # element holding the piece seen there, or EDGE (-1) / EMPTY (-2).
+                holder = {}
+                for e in root:
+                    for m in self.members[e]:
+                        holder[(self.experience_of[e], m)] = e
+                O = np.empty((len(root), len(BACK_DIRS)), dtype=np.int64)
+                for n, e in enumerate(root):
+                    pid = self.experience_of[e]
+                    b = backward_squares(self.experiences[pid], self.anchor[e])
+                    for j, d in enumerate(BACK_DIRS):
+                        v = b[d]
+                        O[n, j] = holder[(pid, v)] if isinstance(v, tuple) else (-1 if v == EDGE else -2)
+                self._holder = O
         return self._ctx
 
-    def symbols_nats(self, s_root: np.ndarray, K: int, alpha: float) -> Tuple[float, tuple]:
+    def _element_contexts(self, s_all: np.ndarray) -> List[np.ndarray]:
+        """Context ids level by level when the context is made of the
+        symbols of neighbouring top-level elements (under symbols ``s_all``)."""
+        O = self._holder
+        V = np.where(O >= 0, np.asarray(s_all)[np.maximum(O, 0)], O)
+        out = []
+        for dirs in CHAIN:
+            cols = [BACK_DIRS.index(d) for d in dirs]
+            _, inv = np.unique(V[:, cols], axis=0, return_inverse=True)
+            out.append(inv.reshape(-1).astype(np.int64))
+        return out
+
+    def symbols_nats(self, s_root: np.ndarray, K: int, alpha: float,
+                     s_all: Optional[np.ndarray] = None) -> Tuple[float, tuple]:
         """The top-level symbols' code in context (nats), the best of
-        ``CONTEXT_OPTIONS``, and that option."""
-        self._context_arrays()
+        ``CONTEXT_OPTIONS``, and that option. With a context made of
+        elements, ``s_all`` (every element's symbol) gives the neighbours'."""
+        root, g, _, w = self._context_arrays()
+        if self.context_of == "elements":
+            c = self._element_contexts(s_all)
+            coders = {d: backoff_chain_coder(g, c[:d], w) for d in range(len(CHAIN) + 1)}
+        else:
+            coders = self._coders
         best = None
         for d, b in CONTEXT_OPTIONS:
-            n = self._coders[d](s_root, K, alpha, [b] * d)
+            n = coders[d](s_root, K, alpha, [b] * d)
             if best is None or n < best[0] - 1e-12:
                 best = (n, (d, b))
         return best
@@ -448,31 +528,47 @@ class BoardMemory(Memory):
         the option description length chose for this grammar."""
         if id(g) not in self._fitted:
             root, grp, c, w = self._context_arrays()
-            s = np.asarray(g.elem_symbol)[root]
-            _, (d, beta) = self.symbols_nats(s, g.K, g.alpha)
+            s_all = np.asarray(g.elem_symbol)
+            s = s_all[root]
+            _, (d, beta) = self.symbols_nats(s, g.K, g.alpha, s_all=s_all)
             n_g = np.zeros((len(KINDS) * 64, g.K))
             np.add.at(n_g, (grp, s), w)
+            if self.context_of == "elements":
+                # Keyed by the context values themselves (neighbours' symbols).
+                O = self._holder
+                V = np.where(O >= 0, s_all[np.maximum(O, 0)], O)
+                c = [[tuple(int(V[n, BACK_DIRS.index(dd)]) for dd in dirs) for n in range(len(root))]
+                     for dirs in CHAIN]
             n_gx = []
             for l in range(d):
                 t: Dict[tuple, np.ndarray] = {}
                 for gg, cc, ss, ww in zip(grp, c[l], s, w):
-                    t.setdefault((int(gg), int(cc)), np.zeros(g.K))[ss] += ww
+                    key = (int(gg), cc if isinstance(cc, tuple) else int(cc))
+                    t.setdefault(key, np.zeros(g.K))[ss] += ww
                 n_gx.append(t)
             self._fitted[id(g)] = (d, beta, n_g, n_gx)
         return self._fitted[id(g)]
 
-    def top_row(self, g: Grammar, k: int, i: int, position: Position) -> np.ndarray:
+    def top_row(self, g: Grammar, k: int, i: int, position: Position, held: Optional[dict] = None) -> np.ndarray:
         """P(symbol | anchor kind k, square i, and, in context, what the read
-        has placed around it in ``position``)."""
+        has placed around it in ``position``; with a context made of
+        elements, ``held[square]`` is the symbol of the top-level element
+        holding the piece there)."""
         if not self.context:
             return g.T[k, i]
         d, beta, n_g, n_gx = self._predictor(g)
         grp = k * 64 + i
         p = (n_g[grp] + g.alpha) / (n_g[grp].sum() + g.K * g.alpha)
         if d:
-            ids = self.ctx_ids.ids(chain_values(position, (i % 8, i // 8)), grow=False)
+            sq = (i % 8, i // 8)
+            if self.context_of == "elements":
+                vals = chain_values(position, sq, value_of=lambda q: int(held[q]))
+                vals = [tuple(-1 if v == EDGE else -2 if v == EMPTY else v for v in lev) for lev in vals]
+                ids = vals
+            else:
+                ids = self.ctx_ids.ids(chain_values(position, sq), grow=False)
             for l in range(d):
-                r = n_gx[l].get((grp, ids[l])) if ids[l] >= 0 else None
+                r = n_gx[l].get((grp, ids[l])) if (isinstance(ids[l], tuple) or ids[l] >= 0) else None
                 if r is not None:
                     p = (r + beta * p) / (r.sum() + beta)
         return p
@@ -595,31 +691,38 @@ class BoardMemory(Memory):
             return None if y is None else (sym, (x, rel, y))
 
         before = np.zeros(len(KINDS), dtype=np.int64)    # pieces on the squares read so far
+        held: Dict[Square, int] = {}                     # square -> symbol of the element holding it
         for i in range(64):
             sq = (i % 8, i // 8)
             if sq not in position:
                 for k, yes in enumerate(self._asked(g, i, before, position)):
                     if rng.random() < yes:
-                        T = self.top_row(g, k, i, position)
+                        T = self.top_row(g, k, i, position, held)
                         node = expand(int(rng.choice(g.K, p=T / T.sum())), sq, 0, k)
                         if node is None:
                             return None
                         tops.append(node)
+                        for m in _squares_of(node):
+                            held[m] = node[0]
                         break
             if sq in position and self.counts:
                 before[KIND_INDEX[position[sq]]] += 1
         return position, tops
 
-    def log_prob(self, grammar, experience, analysis) -> float:
+    def log_prob(self, grammar, experience, analysis, chosen: Optional[list] = None) -> float:
         """ln P(position) under the grammar, given its analysis (its top-level
         elements): the read square by square; at an element's anchor, its
         symbol given the anchor's kind and the inside pass of the element
         given its symbol and that kind; squares that an earlier chunk covers
-        are not read."""
+        are not read. With a context made of elements, ``chosen`` (a list)
+        receives the top-level symbols coded, in reading order."""
         g, position = grammar, experience
         lc = left_corner(g)
         anchored = {anchor_of(n): n for n in analysis}
         before = counts_before(position) if self.counts else np.zeros((64, len(KINDS)), dtype=np.int64)
+        held: Dict[Square, int] = {}         # square -> symbol of the top-level element holding it
+        if self.context and self.context_of == "elements":
+            self._predictor(g)
         lp = 0.0
         for i in range(64):
             sq = (i % 8, i // 8)
@@ -631,7 +734,25 @@ class BoardMemory(Memory):
                     scale, v = inside_of_analysis(
                         g, anchored[sq], parts=lambda n: (n[1][0], n[1][2]) if is_chunk(n) else None,
                         token=lambda n: position[n[1]], relation=lambda n: n[1][1])
-                    lp += scale + np.log(self.top_row(g, k, i, position) @ (v / lc[:, k]))
+                    if self.context and self.context_of == "elements":
+                        # The top-level symbol is coded explicitly (the
+                        # neighbours' symbols are the context of later ones).
+                        # An analysis that names grammar symbols keeps them;
+                        # one that names the search's labels (a new position)
+                        # takes, element by element in reading order, the
+                        # symbol that codes it shortest: an encoder's choice
+                        # that the decoder reads, so the code stays exact.
+                        T = self.top_row(g, k, i, position, held)
+                        joint = T * v / lc[:, k]
+                        lab = anchored[sq][0]
+                        sym = int(lab) if isinstance(lab, (int, np.integer)) else int(np.argmax(joint))
+                        lp += scale + np.log(joint[sym])
+                        if chosen is not None:
+                            chosen.append(sym)
+                        for m in _squares_of(anchored[sq]):
+                            held[m] = sym
+                    else:
+                        lp += scale + np.log(self.top_row(g, k, i, position) @ (v / lc[:, k]))
                 else:
                     lp += np.log1p(-yes).sum()
         return float(lp)
@@ -654,29 +775,50 @@ _DIRECTION = dict(RAYS)
 _DIRECTION.update(JUMPS)
 
 
-def backward(position: Position, sq: Square) -> Dict[str, str]:
-    """The first piece along each backward ray from ``sq`` and the piece on
-    each backward knight square: what the read has placed around it."""
-    out = {}
+BACK_DIRS = BACK_RAYS + BACK_JUMPS
+
+
+def _squares_of(node: Node) -> List[Square]:
+    if is_chunk(node):
+        return _squares_of(node[1][0]) + _squares_of(node[1][2])
+    return [node[1]]
+
+
+def backward_squares(position: Position, sq: Square) -> Dict[str, object]:
+    """Per backward direction, the square of the first piece along the ray
+    (or on the knight square), else EDGE or EMPTY. Every such square comes
+    earlier in the read."""
+    out: Dict[str, object] = {}
     for d in BACK_RAYS:
         dx, dy = _DIRECTION[d]
         out[d] = EDGE
         f, r = sq[0] + dx, sq[1] + dy
         while 0 <= f < 8 and 0 <= r < 8:
             if (f, r) in position:
-                out[d] = position[(f, r)]
+                out[d] = (f, r)
                 break
             f, r = f + dx, r + dy
     for d in BACK_JUMPS:
         dx, dy = _DIRECTION[d]
         t = (sq[0] + dx, sq[1] + dy)
-        out[d] = EDGE if not on_board(t) else position.get(t, EMPTY)
+        out[d] = EDGE if not on_board(t) else (t if t in position else EMPTY)
     return out
 
 
-def chain_values(position: Position, sq: Square) -> Tuple[tuple, ...]:
-    """The context of a top-level element anchored at ``sq``, level by level."""
-    b = backward(position, sq)
+def backward(position: Position, sq: Square) -> Dict[str, str]:
+    """The first piece along each backward ray from ``sq`` and the piece on
+    each backward knight square: what the read has placed around it."""
+    return {d: (position[v] if isinstance(v, tuple) else v) for d, v in backward_squares(position, sq).items()}
+
+
+def chain_values(position: Position, sq: Square, value_of=None) -> Tuple[tuple, ...]:
+    """The context of a top-level element anchored at ``sq``, level by level:
+    what stands in each backward direction. By default the piece there;
+    ``value_of(square)`` gives instead the category of the top-level element
+    that holds that piece (context made of elements: a chunk is one value)."""
+    b = backward_squares(position, sq)
+    val = (lambda v: position[v]) if value_of is None else value_of
+    b = {d: (val(v) if isinstance(v, tuple) else v) for d, v in b.items()}
     return tuple(tuple(b[d] for d in dirs) for dirs in CHAIN)
 
 
@@ -763,8 +905,11 @@ class BoardSearch:
     category may hold labels anchored on different kinds."""
 
     def __init__(self, positions: Sequence[Position], alpha: float = 0.001, counts: bool = True,
-                 merges: bool = False, merge_kinds: str = "any"):
+                 merges: bool = False, merge_kinds: str = "any", typed: bool = False):
         self.a = alpha
+        # Whether chunk moves may also join pairs by a tactical type
+        # (``TACTICAL``), whatever their direction and distance.
+        self.typed = typed
         self.counts = counts
         self.merges = merges
         # "any": any two labels may merge; "same": only labels anchored on
@@ -800,7 +945,7 @@ class BoardSearch:
 
     def _like(self, positions: Sequence[Position]) -> "BoardSearch":
         """A fresh search of the same kind and settings over ``positions``."""
-        return BoardSearch(positions, self.a, self.counts, self.merges, self.merge_kinds)
+        return BoardSearch(positions, self.a, self.counts, self.merges, self.merge_kinds, self.typed)
 
     @staticmethod
     def _ask(read: np.ndarray, i: int, before: np.ndarray, stop: int, sign: float) -> None:
@@ -853,10 +998,23 @@ class BoardSearch:
     def candidates(self) -> Dict[tuple, List[tuple]]:
         out: Dict[tuple, List[tuple]] = defaultdict(list)
         for pi, p in enumerate(self.pos):
+            position = p["position"]
             for sq, x in p["tops"].items():
                 for rel, t in self._seen(p, sq):
                     out[(x[0], rel, p["tops"][t][0])].append((pi, sq, t))
+                    if self.typed:
+                        kind = interaction(position[sq], position[t], rel)
+                        if kind is not None:
+                            out[(x[0], kind, p["tops"][t][0])].append((pi, sq, t))
         return out
+
+    @staticmethod
+    def _relations(key: tuple, chosen: List[tuple]) -> Counter:
+        """The geometric relations of a move's instances (one for a
+        geometric chunk move; any for a typed one)."""
+        if key[1] not in TACTICAL:
+            return Counter({key[1]: len(chosen)})
+        return Counter(REL_OF[(t[0] - s[0], t[1] - s[1])] for _, s, t in chosen)
 
     @staticmethod
     def select(pairs: List[tuple]) -> List[tuple]:
@@ -884,18 +1042,20 @@ class BoardSearch:
             top(kB, i)[Y] += 1
             top(kC, j)[C] -= 1
 
-    def _chunk_rows_nats(self, n: int, base: Dict) -> float:
-        """The rows' code after a chunk move of n pairs (a new label)."""
+    def _chunk_rows_nats(self, relations: Counter, base: Dict) -> float:
+        """The rows' code after a chunk move (a new label whose row holds one
+        outcome per geometric relation of its instances)."""
         a, K = self.a, len(self.rows) + 1
         A = (self.V + K * K * self.NR) * a
         if K not in base:
             base[K] = self._row_nats(K)
-        return base[K] + math.lgamma(n + A) - math.lgamma(A) - _phi(n, a)
+        n = sum(relations.values())
+        return base[K] + math.lgamma(n + A) - math.lgamma(A) - sum(_phi(c, a) for c in relations.values())
 
     def score(self, key: tuple, chosen: List[tuple], base_rows: Dict) -> float:
         """Bits after the chunk move (exact)."""
         a, K = self.a, len(self.rows) + 1
-        nats = self._chunk_rows_nats(len(chosen), base_rows)
+        nats = self._chunk_rows_nats(self._relations(key, chosen), base_rows)
         if ("top", K) not in base_rows:
             base_rows[("top", K)] = self._top_nats(self.top.values(), K)
         read = self.read.copy()
@@ -929,11 +1089,12 @@ class BoardSearch:
         self.parents[C].add(Y)
         self.fresh += 1
         self.moves.append((B, rel, C, Y))
-        self.rows[Y][("p", B, rel, C)] += len(chosen)
         for pi, s, t in chosen:
+            r = rel if rel not in TACTICAL else REL_OF[(t[0] - s[0], t[1] - s[1])]
+            self.rows[Y][("p", B, r, C)] += 1
             p = self.pos[pi]
             x, y = p["tops"][s], p["tops"].pop(t)
-            p["tops"][s] = (Y, (x, rel, y))
+            p["tops"][s] = (Y, (x, r, y))
             for m, owner in list(p["owner"].items()):
                 if owner == t:
                     p["owner"][m] = s
@@ -1095,8 +1256,13 @@ class BoardSearch:
                     self.apply_merge(A, B)
                 continue
             B, rel, C, Y = move
-            pairs = [(pi, sq, t) for pi, p in enumerate(self.pos) for sq, x in p["tops"].items()
-                     if x[0] == B for r, t in self._seen(p, sq) if r == rel and p["tops"][t][0] == C]
+            if rel in TACTICAL:
+                pairs = [(pi, sq, t) for pi, p in enumerate(self.pos) for sq, x in p["tops"].items()
+                         if x[0] == B for r, t in self._seen(p, sq)
+                         if p["tops"][t][0] == C and interaction(p["position"][sq], p["position"][t], r) == rel]
+            else:
+                pairs = [(pi, sq, t) for pi, p in enumerate(self.pos) for sq, x in p["tops"].items()
+                         if x[0] == B for r, t in self._seen(p, sq) if r == rel and p["tops"][t][0] == C]
             chosen = self.select(pairs)
             if chosen:
                 self.fresh = Y[1]
@@ -1161,11 +1327,16 @@ class ContextBoardSearch(BoardSearch):
 
     def __init__(self, positions: Sequence[Position], alpha: float = 0.001, counts: bool = True,
                  merges: bool = False, merge_kinds: str = "any", ids: Optional[ContextIds] = None,
-                 read_context: bool = False):
-        super().__init__(positions, alpha, counts, merges, merge_kinds)
+                 read_context: bool = False, context_of: str = "pieces", typed: bool = False):
+        super().__init__(positions, alpha, counts, merges, merge_kinds, typed)
         self.ids = ids or ContextIds()
         self.read_context = read_context
+        # "pieces": the piece in each backward direction; "elements": the
+        # label of the top-level element holding it (a chunk is one value,
+        # and moves change the context of the elements that see it).
+        self.context_of = context_of
         grow = ids is None
+        self._grow = grow
         # One event per piece, in reading order; it is coded while it
         # anchors a top-level element.
         ev_g, ev_c, self.ev_at = [], [], {}
@@ -1188,12 +1359,56 @@ class ContextBoardSearch(BoardSearch):
             self.by_group[int(gs[a])] = np.sort(order[a:b])
         self.option = CONTEXT_OPTIONS[0]
         self._lid: Dict[Hashable, int] = {}
+        if context_of == "elements":
+            # What each event sees, and who sees each piece.
+            self.ev_where = [None] * len(ev_g)
+            self.ev_seen: List[Dict[str, object]] = [None] * len(ev_g)
+            self.watchers: Dict[tuple, List[int]] = defaultdict(list)
+            for (pi, sq), e in self.ev_at.items():
+                b = backward_squares(self.pos[pi]["position"], sq)
+                self.ev_where[e], self.ev_seen[e] = (pi, sq), b
+                for v in set(v for v in b.values() if isinstance(v, tuple)):
+                    self.watchers[(pi, v)].append(e)
         if read_context:
             self._init_read(grow)
 
     def _like(self, positions: Sequence[Position]) -> "ContextBoardSearch":
         return ContextBoardSearch(positions, self.a, self.counts, self.merges, self.merge_kinds,
-                                  read_context=self.read_context)
+                                  read_context=self.read_context, context_of=self.context_of, typed=self.typed)
+
+    # A context made of elements ------------------------------------------ #
+    def _holder_label(self, pi: int, sq: Square, override: Optional[dict] = None):
+        if override is not None and (pi, sq) in override:
+            return override[(pi, sq)]
+        p = self.pos[pi]
+        return p["tops"][p["owner"][sq]][0]
+
+    def _element_ids(self, e: int, override: Optional[dict] = None) -> List[int]:
+        pi, _ = self.ev_where[e]
+        b = self.ev_seen[e]
+        vals = tuple(tuple((self._holder_label(pi, b[d], override) if isinstance(b[d], tuple) else b[d])
+                           for d in dirs) for dirs in CHAIN)
+        ids = self.ids.ids(vals, self._grow)
+        return [len(self.ids.tables[l]) if v < 0 else v for l, v in enumerate(ids)]
+
+    def _refresh(self, events) -> None:
+        for e in events:
+            for l, v in enumerate(self._element_ids(e)):
+                self.ev_c[l][e] = v
+
+    def _owned(self, pi: int, anchor: Square) -> List[Square]:
+        return [m for m, o in self.pos[pi]["owner"].items() if o == anchor]
+
+    def _seen_change(self, pieces: Dict[tuple, Hashable], label_of: Dict[int, Hashable]):
+        """The coded events whose context changes when the pieces ``pieces``
+        come to be held by elements of the given labels: their new context
+        ids, level by level."""
+        out = {}
+        for pq in pieces:
+            for e in self.watchers.get(pq, ()):
+                if e in label_of and e not in out:
+                    out[e] = self._element_ids(e, pieces)
+        return out
 
     # The read's answers in context -------------------------------------- #
     def _init_read(self, grow: bool) -> None:
@@ -1290,7 +1505,15 @@ class ContextBoardSearch(BoardSearch):
             fresh = self._read_codes(np.concatenate([self.r_members[i] for i in gids]))
             for opt in CONTEXT_OPTIONS:
                 self.r_code[opt][gids] = fresh[opt][gids]
-        return super().apply(key, chosen)
+        Y = super().apply(key, chosen)
+        if self.context_of == "elements":
+            self._refresh({e for pi, s, _ in chosen for m in self._owned(pi, s) for e in self.watchers.get((pi, m), ())})
+        return Y
+
+    def apply_merge(self, A, B) -> None:
+        super().apply_merge(A, B)
+        if self.context_of == "elements":
+            self._refresh(range(len(self.ev_g)))
 
     def _event_labels(self) -> Dict[int, Hashable]:
         out = {}
@@ -1318,10 +1541,16 @@ class ContextBoardSearch(BoardSearch):
         start = np.repeat(first, np.diff(np.r_[first, len(uniq)]))
         return idx, (np.arange(len(uniq)) - start)[inv]
 
-    def _code(self, idx, keys, K: int, option) -> float:
+    def _code(self, idx, keys, K: int, option, new_ctx: Optional[dict] = None) -> float:
         if len(idx) == 0:
             return 0.0
-        return context_nats(2 * self.ev_g[idx], [c[idx] for c in self.ev_c], keys, K, self.a, option)
+        ctx = [c[idx] for c in self.ev_c]
+        if new_ctx:
+            for n, j in enumerate(idx):
+                if j in new_ctx:
+                    for l in range(len(CHAIN)):
+                        ctx[l][n] = new_ctx[j][l]
+        return context_nats(2 * self.ev_g[idx], ctx, keys, K, self.a, option)
 
     def top_nats(self, option=None) -> Tuple[float, tuple]:
         """The top-level labels' code (nats) and its option: the best of
@@ -1339,10 +1568,11 @@ class ContextBoardSearch(BoardSearch):
         nats, self.option = self.top_nats()
         return nats + CHOICE_NATS
 
-    def _replaced(self, cache: dict, K: int, groups, new_label_of) -> float:
+    def _replaced(self, cache: dict, K: int, groups, new_label_of, new_ctx: Optional[dict] = None) -> float:
         """The best over the options of the top-level code at K labels, with
         the events of ``groups`` relabelled by ``new_label_of`` (None: no
-        longer top level); the other groups' code is cached per K."""
+        longer top level) and given the contexts ``new_ctx``; the other
+        groups' code is cached per K."""
         label_of = cache.setdefault("label_of", self._event_labels())
         if ("base", K) not in cache:
             i, k = self._prep(np.array(sorted(label_of), dtype=np.int64), label_of)
@@ -1357,19 +1587,27 @@ class ContextBoardSearch(BoardSearch):
                 new[j] = lab
         oi, ok = self._prep(idx, label_of)
         ni, nk = self._prep(idx, new)
-        return min(base[opt] - self._code(oi, ok, K, opt) + self._code(ni, nk, K, opt) for opt in CONTEXT_OPTIONS)
+        return min(base[opt] - self._code(oi, ok, K, opt) + self._code(ni, nk, K, opt, new_ctx)
+                   for opt in CONTEXT_OPTIONS)
 
     def score(self, key: tuple, chosen: List[tuple], base_rows: Dict) -> float:
         """Bits after the chunk move (exact, the best of the options)."""
         K = len(self.rows) + 1
-        nats = self._chunk_rows_nats(len(chosen), base_rows)
+        nats = self._chunk_rows_nats(self._relations(key, chosen), base_rows)
         Y = ("chunk", self.fresh)
         new_label_of, groups = {}, set()
         for pi, s, t in chosen:
             es, et = self.ev_at[(pi, s)], self.ev_at[(pi, t)]
             new_label_of[es], new_label_of[et] = Y, None
             groups.update((int(self.ev_g[es]), int(self.ev_g[et])))
-        top = self._replaced(base_rows, K, sorted(groups), new_label_of)
+        new_ctx = None
+        if self.context_of == "elements":
+            label_of = base_rows.setdefault("label_of", self._event_labels())
+            pieces = {(pi, m): Y for pi, s, t in chosen for a in (s, t) for m in self._owned(pi, a)}
+            after = {j: lab for j, lab in label_of.items() if new_label_of.get(j, lab) is not None}
+            new_ctx = self._seen_change(pieces, after)
+            groups.update(int(self.ev_g[e]) for e in new_ctx)
+        top = self._replaced(base_rows, K, sorted(groups), new_label_of, new_ctx)
         read = self._read_after([(pi, t) for pi, _, t in chosen], base_rows)
         return (nats + read + top + CHOICE_NATS) / LN2
 
@@ -1378,15 +1616,28 @@ class ContextBoardSearch(BoardSearch):
         both labels change their pattern of equal labels."""
         K1 = len(self.rows) - 1
         ta, tb = self.top_of.get(A, {}), self.top_of.get(B, {})
-        groups = sorted(r[0] * 64 + r[1] for r in (ta.keys() & tb.keys()))
         label_of = cache.setdefault("label_of", self._event_labels())
+        if self.context_of == "elements":
+            # Every element labelled A' is renamed, and so is every context
+            # that sees one of its pieces.
+            renamed = {j: A for j, lab in label_of.items() if lab == B}
+            pieces = {}
+            for j in renamed:
+                pi, sq = self.ev_where[j]
+                for m in self._owned(pi, sq):
+                    pieces[(pi, m)] = A
+            new_ctx = self._seen_change(pieces, label_of)
+            groups = sorted({int(self.ev_g[j]) for j in renamed} | {int(self.ev_g[e]) for e in new_ctx})
+            top = self._replaced(cache, K1, groups, renamed, new_ctx)
+            return (self._merge_rows_nats(A, B, cache) + top + CHOICE_NATS) / LN2
+        groups = sorted(r[0] * 64 + r[1] for r in (ta.keys() & tb.keys()))
         idx = np.concatenate([self.by_group[g] for g in groups]) if groups else np.zeros(0, np.int64)
         top = self._replaced(cache, K1, groups, {j: A for j in idx if label_of.get(j) == B})
         return (self._merge_rows_nats(A, B, cache) + top + CHOICE_NATS) / LN2
 
     def held_out_bits(self, positions: Sequence[Position]) -> Tuple[float, float]:
         analysed = ContextBoardSearch(positions, self.a, self.counts, self.merges, self.merge_kinds, ids=self.ids,
-                                      read_context=self.read_context)
+                                      read_context=self.read_context, context_of=self.context_of, typed=self.typed)
         analysed.replay(self.moves)
         flat = self._like([p["position"] for p in self.pos])
         flat_held = ContextBoardSearch(positions, self.a, self.counts, ids=flat.ids, read_context=self.read_context)
@@ -1505,8 +1756,12 @@ class ChessLearner(Learner):
 
     def __init__(self, seed: int = 0, alpha: float = 0.001, max_steps: int = 500,
                  counts: bool = True, merges: bool = False, patience: int = 0, context: bool = True,
-                 read_context: bool = False):
+                 read_context: bool = False, context_of: str = "pieces", typed: bool = False):
         super().__init__(seed=seed, alpha=alpha)
+        self.typed = typed
+        # What the context is made of: "pieces" or "elements" (the categories
+        # of the neighbouring top-level elements; a chunk is one value).
+        self.context_of = context_of
         self.max_steps = max_steps
         # Whether the read counts the pieces on earlier squares (without, each
         # square is read on its own).
@@ -1522,9 +1777,9 @@ class ChessLearner(Learner):
         t0 = time.time()
         if self.context:
             search = ContextBoardSearch(self.experiences, self.alpha, self.counts, self.merges,
-                                        read_context=self.read_context)
+                                        read_context=self.read_context, context_of=self.context_of, typed=self.typed)
         else:
-            search = BoardSearch(self.experiences, self.alpha, self.counts, self.merges)
+            search = BoardSearch(self.experiences, self.alpha, self.counts, self.merges, typed=self.typed)
         self.history.append({"stage": "flat", "bits": search.bits(), "seconds": 0.0})
 
         def log(step, move, bits):
@@ -1539,7 +1794,8 @@ class ChessLearner(Learner):
         self.search = search
         self.analyses = search.analyses()
         self.model = self.fit(self.analyses, BoardMemory(counts=self.counts, context=self.context,
-                                                                read_context=self.read_context))
+                                                                read_context=self.read_context,
+                                                                context_of=self.context_of))
         g = self.model.grammar
         self.history.append({"stage": "consolidate", "bits": g.info["total bits"],
                              "seconds": time.time() - t0})

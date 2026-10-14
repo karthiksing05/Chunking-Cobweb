@@ -44,8 +44,16 @@ def night(learner, items):
     return time.time() - t0
 
 
+SAVE = {}
+
+
 def refined(learner):
-    """Apply the night's last step (split moves) to the learner's model."""
+    """Apply the night's last step (split moves) to the learner's model (the
+    night's analyses are saved first, for refining again with other settings)."""
+    if SAVE.get("path"):
+        import pickle
+        with open(SAVE["path"], "wb") as f:
+            pickle.dump({"trees": learner.trees, "experiences": learner.experiences}, f)
     t0 = time.time()
     model = learner.model
     g0 = model.grammar
@@ -183,6 +191,8 @@ def main():
     os.makedirs(args.out, exist_ok=True)
     kw = {"read_words": 2, "previous_word": True} if args.domain == "stories" else {}
     learner = UnsupervisedLearner(seed=args.seed, workers=args.workers, **kw)
+    name = f"{args.domain}_{args.grammar if args.domain in ('complex', 'paper') else ''}_{args.train}_s{args.seed}".replace("__", "_")
+    SAVE["path"] = os.path.join(args.out, name + "_night.pkl")
     t0 = time.time()
     res = {"stories": run_stories, "paper": run_paper, "complex": run_complex,
            "characters": run_characters}[args.domain](args, learner)

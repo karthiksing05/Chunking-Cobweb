@@ -256,7 +256,7 @@ def med_forests():
     if not os.path.exists(path):
         pytest.skip("synthetic corpora not available")
     train, _ = v1_split(load_corpus(path), 13)
-    learner = IncrementalLearner(seed=13, check=True, config={"compound": 0})
+    learner = IncrementalLearner(seed=13, check=True, config={"compound": 0, "lookahead": 0, "chunk_window": 2})
     for e in train[:25]:
         learner.observe(e.tokens)
     return learner
@@ -366,3 +366,50 @@ def test_every_kind_of_trial_is_rolled_back_exactly(small_learner, med_forests):
                 kinds.add(mv[0])
         L.verify()
     assert {"merge", "relabel", "classes", "chunk"} <= kinds
+
+
+def test_hedged_learner_keeps_exact_tables_over_weighted_samples():
+    """Each experience stored as k posterior samples of weight 1/k: the count
+    tables equal the samples' recounted counts after every commit."""
+    from trellis2 import load_corpus, v1_split
+    from trellis2.data import CONDITIONS, default_data_root
+    import os
+    path = os.path.join(default_data_root(), CONDITIONS["small"])
+    if not os.path.exists(path):
+        pytest.skip("synthetic corpora not available")
+    train, _ = v1_split(load_corpus(path), 13)
+    L = IncrementalLearner(seed=13, check=True, config={"samples": 4, "lookahead": 2})
+    for e in train[:20]:
+        L.observe(e.tokens)
+    assert len(L.slots) == 20 and len(L.elems) == 80
+    assert len(L.stored_trees()) == 20 and len(L.stored_trees(every=True)) == 80
+    assert all(abs(w - 0.25) < 1e-12 for w in L.weight)
+    assert L.hard_code() > 0
+
+
+def test_the_contextual_full_code_is_the_nights(small_learner):
+    """``full_code`` equals ``grammar._factored_code`` with the best of the
+    night's context options, on the stored analyses with the learner's
+    symbols and classes (learning order = experience order)."""
+    from trellis2.grammar import CONTEXT_WEIGHTS, UNK, _compact, _elements, _factored_code
+    from trellis2.mdl import elias_delta_bits
+    from trellis2.memory import Memory
+    L = small_learner
+    mem = Memory(granularities=1)
+    syms = []
+    for tokens, tree in zip([L.experiences[x[0]] for x in L.slots], L.stored_trees()):
+        start = len(mem)
+        mem.add(tokens, tree)
+        syms += [tree.label[mem.span[e]] for e in range(start, len(mem))]
+    keys = [("P", mem.token[e]) if mem.kind[e] == Memory.PRIMITIVE else ("C", syms[mem.left[e]], syms[mem.right[e]])
+            for e in range(len(mem))]
+    vocab = mem.vocabulary() + [UNK]
+    el = _elements(mem, None, None, {t: i for i, t in enumerate(vocab)})
+    _, s = _compact(np.array(syms))
+    _, c = _compact(np.array([L.class_of[k] for k in keys]))
+    K, M, alpha = int(s.max()) + 1, int(c.max()) + 1, L.alpha
+    options = [None] + list(CONTEXT_WEIGHTS) + [(a, b) for a in CONTEXT_WEIGHTS for b in CONTEXT_WEIGHTS]
+    rest = mem.top_level_nats(s, K, alpha) + mem.layout_nats(alpha)
+    best = min(_factored_code(el, s, K, len(vocab), alpha, c, w)(np.arange(M)) for w in options)
+    bits = (best + rest) / LN2 + elias_delta_bits(K) + elias_delta_bits(M) + CONTEXT_OPTION_BITS
+    assert L.full_code()[0] == pytest.approx(bits, abs=1e-6)

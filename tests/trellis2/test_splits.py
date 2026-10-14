@@ -135,14 +135,14 @@ def test_refinement_keeps_only_shorter_codes_and_recomputes_exactly():
 def test_option_off_is_the_old_learner():
     data = [t for t, _ in agreement_corpus(9, 60)]
     out = []
-    for kw in ({}, {"joint_splits": False}):
+    for kw in ({"joint_splits": False}, {"joint_splits": True, "split_config": {"max_splits": 0}}):
         u = UnsupervisedLearner(seed=9, sampling=(1.0,), **kw)
         for s in data:
             u.observe(s)
         g = u.sleep()
         out.append((g.info["total bits"], [t.brackets() for t in u.trees]))
     assert out[0] == out[1]
-    u = UnsupervisedLearner(seed=9, sampling=(1.0,), joint_splits=True)
+    u = UnsupervisedLearner(seed=9, sampling=(1.0,))          # the default: split moves on
     for s in data:
         u.observe(s)
     assert u.sleep().info["total bits"] <= out[0][0] + 1e-9
