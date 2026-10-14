@@ -6,6 +6,33 @@ archived at git tag `archive/pcfg-v2`. v3 follows Chris's direction: learn
 everything, distil nothing, and let strong chunks emerge from what accumulates
 in the trees.
 
+## How text functions, and the general form
+
+Each mechanism rests on how text works, stated so that it carries over to any
+domain whose experiences are parts in relations.
+
+* **Distribution defines category (Harris).** A word's category is the set of
+  contexts it occurs in, so the context tree describes an element only by its
+  surroundings. *General form:* an element is what it is by where it occurs —
+  its slot in a character, its neighbourhood on a board.
+* **Substitution defines constituency.** `the lazy dog` is a unit because a
+  simpler unit (`it`, `dog`) can stand where it stands; `dog saw` occupies a
+  place nothing simpler ever does. The context gain therefore counts the units
+  in use (words and committed chunks) under a candidate's context concept.
+  *General form:* a chunk is a unit when its surroundings are surroundings in
+  which simpler units already function.
+* **Cohesion: parts of a unit predict each other.** Inside a constituent the
+  parts co-vary (determiner with noun); across a boundary they do not. The
+  content gain measures how much better a concept codes the pair than the root.
+  *General form:* the parts of a chunk are more predictable together than
+  apart.
+* **Reuse is compression.** A unit worth having recurs across positions
+  (subject and object); naming it once and reusing it saves bits. The strength
+  term is the concept's share. *General form:* the same.
+* **Text is produced from its units.** Generation regenerates from the
+  compression: it recombines the units committed parses used, each part replaced
+  by material of its own type from its basic level.
+
 ## Memory
 
 Two Cobweb hierarchies (`incremental_cobweb.IncrementalCobwebTree`, which also
