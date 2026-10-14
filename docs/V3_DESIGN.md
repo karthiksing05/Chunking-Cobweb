@@ -9,17 +9,23 @@ in the trees.
 ## Memory
 
 Two Cobweb hierarchies (`incremental_cobweb.IncrementalCobwebTree`, which also
-supports removal):
+supports removal), with the ACS paper's unsupervised representation:
 
 * **context tree** — every element (primitive or candidate composite) described
-  by how it sits in the experience: its neighbours, first and last token, kind.
-* **content tree** — every candidate composite described by what it is made of:
-  each part named by its token (primitives) and its path in the context tree
-  (the concept ids at depths 1..D). Shared paths let `the dog` and `the cat`
-  fall under one concept.
+  only by its context: the two tokens on either side of its span (a composite's
+  window is taken over its outermost positions). A **hidden content reference**
+  is stored with it at its leaf, never used to sort: the token of a primitive,
+  the content leaf of a composite. A context concept's type (word-like or
+  phrase-like) is read off the references under it (`node_type`).
+* **content tree** — every candidate composite, naming its two parts by their
+  paths in the context tree (concept ids at depths 1..D), as `content-left` and
+  `content-right` do in the paper.
 
 Nothing is read out of the trees into a grammar. Every decision sorts an
 instance through a tree and uses the counts on its path, computed when needed.
+After each experience every stored content instance is re-described from its
+parts' current paths (leaves are stable handles; the concepts above them move),
+and its context's hidden reference follows it to its new content leaf.
 
 ## Learning: greedy parsing that stores every candidate
 
@@ -54,13 +60,11 @@ greedy procedure without storing.
 
 ## Generation: prediction from the trees
 
-A whole experience is generated top-down by prediction (Cobweb's P2):
-
-* a top-level element: sort the partial context instance (at the start, before
-  the end) through the context tree and predict its kind;
-* a composite: sort its partial content instance (its own context path) through
-  the content tree, predict its parts' names, and expand each part the same way
-  down to primitives.
+Left to right, top-down: a context concept at the experience's boundaries is
+sampled (sorting the partial context: start before, end after); under a context
+concept a leaf is sampled given the tokens already generated as its left
+context, and a hidden reference drawn from it: a token is emitted, a content
+leaf expanded, each of its parts under the context concept its path names.
 
 The same counts code and generate, so compressing well means being able to
 regenerate the original.

@@ -39,7 +39,7 @@ EPS = 1e-9
 class CobwebNode:
     """A concept: weighted attribute-value counts plus taxonomy links."""
 
-    __slots__ = ("id", "parent", "children", "count", "av", "ss", "sstot")
+    __slots__ = ("id", "parent", "children", "count", "av", "ss", "sstot", "hidden")
 
     def __init__(self, nid: int):
         self.id = nid
@@ -49,6 +49,9 @@ class CobwebNode:
         self.av: Dict[str, Dict[Hashable, float]] = {}
         self.ss: Dict[str, float] = {}
         self.sstot = 0.0
+        # Hidden values (kept at the leaf that stores the instance; never used
+        # for category utility, sorting or exact matching): attr -> value -> weight.
+        self.hidden: Dict[str, Dict[Hashable, float]] = {}
 
     def __repr__(self):
         kind = "leaf" if not self.children else f"{len(self.children)} children"
@@ -268,6 +271,33 @@ class IncrementalCobwebTree:
                 cur = self._merge(cur, best1, best2)
             else:
                 self._split(cur, best1)
+
+    # Hidden values -------------------------------------------------------- #
+    @staticmethod
+    def hide(leaf: CobwebNode, hidden: Dict[str, Hashable], w: float = 1.0) -> None:
+        """Record hidden values of an instance stored at ``leaf`` (or remove
+        them with a negative ``w``)."""
+        for a, v in hidden.items():
+            d = leaf.hidden.setdefault(a, {})
+            n = d.get(v, 0.0) + w
+            if abs(n) <= EPS * max(1.0, abs(w)):
+                d.pop(v, None)
+            else:
+                d[v] = n
+
+    def hidden_counts(self, node: CobwebNode, attr: str) -> Dict[Hashable, float]:
+        """A hidden attribute's value counts over every leaf under ``node``:
+        what the concept holds, inspected without having shaped it."""
+        out: Dict[Hashable, float] = {}
+        stack = [node]
+        while stack:
+            n = stack.pop()
+            if n.children:
+                stack.extend(n.children)
+            else:
+                for v, m in n.hidden.get(attr, {}).items():
+                    out[v] = out.get(v, 0.0) + m
+        return out
 
     def unfit(self, leaf: CobwebNode, x: Instance, w: float = 1.0) -> None:
         """Remove ``x`` (weight ``w``), stored at ``leaf``, from the tree."""

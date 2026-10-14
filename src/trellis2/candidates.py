@@ -1,11 +1,17 @@
 """TRELLIS v3: candidate trees (docs/V3_DESIGN.md).
 
 Learning is greedy parsing that stores every candidate: at each step every new
-adjacent pair on the frontier is stored in both Cobweb trees (context and
-content), then each pair is scored by the concepts it now sits under, and the
-best positive one is committed. Nothing is distilled: scores, parses and
-generation are computed from the trees' counts when needed, and stored
-descriptions are recomputed from stable leaf handles as the trees change.
+adjacent pair on the frontier is stored in both Cobweb trees, then each pair is
+scored by the concepts it now sits under, and the best positive one is
+committed. Nothing is distilled: scores, parses and generation are computed
+from the trees' counts when needed.
+
+The representation follows the ACS paper's unsupervised one. An element's
+context instance is only its context: the two tokens on either side of its
+span. A hidden content reference (the token of a primitive, the content leaf of
+a composite) is stored with it, never used to sort, so a context concept's type
+(word-like or phrase-like) is read off the references under it. A composite's
+content instance names its two parts by their paths in the context tree.
 """
 from __future__ import annotations
 
@@ -18,20 +24,15 @@ from .data import Tree
 from .incremental_cobweb import CobwebNode, IncrementalCobwebTree
 
 BOS, EOS = "<s>", "</s>"
-COMPOSITE, PRIMITIVE = "<C>", "<P>"
 BLANK = "-"
 LN2 = math.log(2.0)
-CTX_ATTRS = ("l1", "r1", "first", "last", "kind")
+CTX_ATTRS = ("l2", "l1", "r1", "r2")
+REF = "ref"
 
 
 def content_attrs(depth: int) -> Tuple[str, ...]:
-    """W: whether the composite is a whole experience; L, R: each part's kind;
-    L1..LD, R1..RD: each part's path in the context tree (how it behaves);
-    LC1..LCD, RC1..RCD: a composite part's path in the content tree (what it is
-    made of; blank for a primitive); S1..SD: the composite's own context path."""
-    d = range(1, depth + 1)
-    return (("W", "L", "R") + tuple(f"L{k}" for k in d) + tuple(f"R{k}" for k in d)
-            + tuple(f"LC{k}" for k in d) + tuple(f"RC{k}" for k in d) + tuple(f"S{k}" for k in d))
+    """L1..LD, R1..RD: the context-tree path of each part (depths 1..D)."""
+    return tuple(f"L{k}" for k in range(1, depth + 1)) + tuple(f"R{k}" for k in range(1, depth + 1))
 
 
 @dataclass(eq=False)
@@ -46,6 +47,7 @@ class Element:
     score: float = 0.0
     leaf: Optional[CobwebNode] = None      # its context instance's leaf (a stable handle)
     cleaf: Optional[CobwebNode] = None     # its content instance's leaf
+    ref: Optional[tuple] = None            # the hidden content reference stored with its context
 
     @property
     def is_primitive(self) -> bool:
@@ -82,11 +84,12 @@ def gain_along(path: List[CobwebNode], x: dict, root: CobwebNode, alpha: float,
 
 
 class CandidateLearner:
-    def __init__(self, depth: int = 3, alpha: float = 1.0, seed: int = 0,
-                 refresh: bool = True, min_count: float = 0.0, lookahead: bool = False,
-                 context_gain: bool = True, store_first: bool = True):
-        self.depth, self.alpha = depth, alpha
-        self.ctx = IncrementalCobwebTree(CTX_ATTRS, seed=seed)
+    def __init__(self, depth: int = 3, alpha: float = 1.0, seed: int = 0, refresh: bool = True,
+                 min_count: float = 0.0, lookahead: bool = False, context_gain: bool = True,
+                 window: int = 2):
+        self.depth, self.alpha, self.window = depth, alpha, window
+        self.ctx_attrs = tuple(f"l{k}" for k in range(window, 0, -1)) + tuple(f"r{k}" for k in range(1, window + 1))
+        self.ctx = IncrementalCobwebTree(self.ctx_attrs, seed=seed)
         self.cnt = IncrementalCobwebTree(content_attrs(depth), seed=seed + 1)
         self.rng = random.Random(seed)
         # refresh: after each experience, every stored content instance is
@@ -94,19 +97,22 @@ class CandidateLearner:
         # stored leaves). min_count: the support a concept needs to be proposed.
         # lookahead: each step commits the candidate whose greedy completion of
         # the parse compresses the experience most. context_gain: candidates are
-        # scored against both trees (P4). store_first: candidates are stored
-        # before they are scored, so each is judged by the concept it ends up in.
-        self.refresh, self.min_count, self.lookahead = refresh, min_count, lookahead
-        self.context_gain, self.store_first = context_gain, store_first
+        # scored against both trees (P4).
+        self.refresh, self.min_count = refresh, min_count
+        self.lookahead, self.context_gain = lookahead, context_gain
         self.records: List[Element] = []
+        self.cleaves: Dict[int, CobwebNode] = {}
         self.stats = {"experiences": 0, "candidates stored": 0, "committed": 0, "re-described": 0}
 
     # Descriptions --------------------------------------------------------- #
-    @staticmethod
-    def _ctx_instance(tokens: Sequence[str], span: Tuple[int, int], kind: str) -> dict:
+    def _ctx_instance(self, tokens: Sequence[str], span: Tuple[int, int]) -> dict:
+        """The window around the span's outermost positions."""
         i, j = span
-        return {"l1": tokens[i - 1] if i > 0 else BOS, "r1": tokens[j] if j < len(tokens) else EOS,
-                "first": tokens[i], "last": tokens[j - 1], "kind": kind}
+        x = {}
+        for k in range(1, self.window + 1):
+            x[f"l{k}"] = tokens[i - k] if i - k >= 0 else BOS
+            x[f"r{k}"] = tokens[j + k - 1] if j + k - 1 < len(tokens) else EOS
+        return x
 
     def _ids(self, path: List[CobwebNode]) -> List[str]:
         ids = [f"c{n.id}" for n in path[1:self.depth + 1]]
@@ -117,24 +123,19 @@ class CandidateLearner:
         path = self.ctx.ancestors(el.leaf)[::-1] if el.leaf is not None else self.ctx.categorize(el.ctx)
         return self._ids(path)
 
-    def _cnt_path(self, el: Element) -> List[str]:
-        """A composite's path in the content tree, now (blank for a primitive)."""
-        if el.is_primitive:
-            return [BLANK] * self.depth
-        if el.cleaf is not None:
-            return self._ids(self.cnt.ancestors(el.cleaf)[::-1])
-        return self._ids(self.cnt.categorize(el.content))
-
     def _content(self, c: Element) -> dict:
-        left, right = c.left, c.right
-        x = {"W": c.ctx["l1"] == BOS and c.ctx["r1"] == EOS,
-             "L": PRIMITIVE if left.is_primitive else COMPOSITE,
-             "R": PRIMITIVE if right.is_primitive else COMPOSITE}
-        for p, ids in (("L", self._ctx_path(left)), ("R", self._ctx_path(right)),
-                       ("LC", self._cnt_path(left)), ("RC", self._cnt_path(right)), ("S", self._ctx_path(c))):
-            for d, v in enumerate(ids, 1):
+        x = {}
+        for p, el in (("L", c.left), ("R", c.right)):
+            for d, v in enumerate(self._ctx_path(el), 1):
                 x[f"{p}{d}"] = v
         return x
+
+    def node_type(self, node: CobwebNode) -> float:
+        """The share of a context concept's elements that are primitives (read
+        off the hidden references under it)."""
+        refs = self.ctx.hidden_counts(node, REF)
+        tot = sum(refs.values())
+        return sum(m for r, m in refs.items() if r[0] == "tok") / tot if tot else 0.0
 
     # Scoring -------------------------------------------------------------- #
     def _score(self, c: Element) -> None:
@@ -151,18 +152,32 @@ class CandidateLearner:
 
     def _candidate(self, tokens, a: Element, b: Element) -> Element:
         span = (a.span[0], b.span[1])
-        c = Element(span, self._ctx_instance(tokens, span, "C"), left=a, right=b)
+        c = Element(span, self._ctx_instance(tokens, span), left=a, right=b)
         c.content = self._content(c)
         return c
+
+    def _store(self, c: Element) -> None:
+        """A candidate into both trees: its content, then its context with the
+        hidden reference to the content leaf."""
+        c.content = self._content(c)
+        c.cleaf = self.cnt.ifit(c.content)
+        self.cleaves[c.cleaf.id] = c.cleaf
+        c.ref = ("cnt", c.cleaf.id)
+        c.leaf = self.ctx.ifit(c.ctx)
+        self.ctx.hide(c.leaf, {REF: c.ref})
+        self.records.append(c)
+        self.stats["candidates stored"] += 1
 
     # Parsing -------------------------------------------------------------- #
     def parse(self, tokens: Sequence[str], learn: bool = False) -> Tuple[Tree, List[Element]]:
         tokens = list(tokens)
-        frontier = [Element((k, k + 1), self._ctx_instance(tokens, (k, k + 1), "P"), token=w)
+        frontier = [Element((k, k + 1), self._ctx_instance(tokens, (k, k + 1)), token=w)
                     for k, w in enumerate(tokens)]
         if learn:
             for el in frontier:
+                el.ref = ("tok", el.token)
                 el.leaf = self.ctx.ifit(el.ctx)
+                self.ctx.hide(el.leaf, {REF: el.ref})
         made: Dict[Tuple[int, int], Element] = {}
         while len(frontier) > 1:
             new = []
@@ -172,23 +187,11 @@ class CandidateLearner:
                     made[(id(a), id(b))] = c
                     new.append(c)
             if learn:
-                if not self.store_first:
-                    for c in new:
-                        self._score(c)
                 for c in new:
-                    c.leaf = self.ctx.ifit(c.ctx)
-                for c in new:
-                    c.content = self._content(c)
-                    c.cleaf = self.cnt.ifit(c.content)
-                    self.records.append(c)
-                    self.stats["candidates stored"] += 1
+                    self._store(c)
             pairs = [(made[(id(a), id(b))], t) for t, (a, b) in enumerate(zip(frontier, frontier[1:]))]
-            if learn and self.store_first:
-                for c, _ in pairs:                 # every pair, by the trees as they are now
-                    self._score(c)
-            elif not learn:
-                for c in new:
-                    self._score(c)
+            for c, _ in (pairs if learn else [(c, None) for c in new]):
+                self._score(c)                     # by the trees as they are now
             if self.lookahead:
                 pos = [(c, t) for c, t in pairs if c.score > 0.0]
                 if not pos:
@@ -230,14 +233,21 @@ class CandidateLearner:
         return total
 
     def _redescribe(self) -> None:
-        """Re-describe every stored content instance whose parts' paths changed
-        (remove the old description, insert the new one)."""
+        """Re-describe every stored content instance whose parts' paths changed;
+        its context's hidden reference follows it to its new content leaf."""
         for c in self.records:
             new = self._content(c)
-            if new != c.content:
-                self.cnt.unfit(c.cleaf, c.content)
-                c.content, c.cleaf = new, self.cnt.ifit(new)
-                self.stats["re-described"] += 1
+            if new == c.content:
+                continue
+            self.cnt.unfit(c.cleaf, c.content)
+            c.content, c.cleaf = new, self.cnt.ifit(new)
+            self.cleaves[c.cleaf.id] = c.cleaf
+            ref = ("cnt", c.cleaf.id)
+            if ref != c.ref:
+                self.ctx.hide(c.leaf, {REF: c.ref}, -1.0)
+                self.ctx.hide(c.leaf, {REF: ref})
+                c.ref = ref
+            self.stats["re-described"] += 1
 
     def learn(self, tokens: Sequence[str]) -> Tree:
         return self.parse(tokens, learn=True)[0]
@@ -269,16 +279,14 @@ class CandidateLearner:
             node = self.rng.choices(node.children, weights=ws)[0]
         return node
 
-    def _value(self, node: CobwebNode, a: str):
-        d = node.av.get(a, {})
+    def _choice(self, d: Dict) :
         if not d:
-            return BLANK
+            return None
         vals, ws = zip(*sorted(d.items(), key=lambda kv: str(kv[0])))
         return self.rng.choices(vals, weights=ws)[0]
 
-    @staticmethod
-    def _deepest(tree: IncrementalCobwebTree, ids: List[str]) -> Optional[CobwebNode]:
-        nodes = {f"c{n.id}": n for n in tree.nodes()}
+    def _deepest(self, ids: List[str]) -> Optional[CobwebNode]:
+        nodes = {f"c{n.id}": n for n in self.ctx.nodes()}
         out = None
         for v in ids:
             if v in nodes:
@@ -286,26 +294,37 @@ class CandidateLearner:
         return out
 
     def generate(self, max_depth: int = 12, max_len: int = 40) -> Optional[List[str]]:
-        """One experience sampled top-down: a whole-experience composite from the
-        content tree; each composite part expanded under its content path, each
-        primitive part's token drawn under its context path."""
+        """One experience sampled top-down: a context concept at the experience's
+        boundaries; under a context concept, a hidden reference sampled from one
+        of its leaves: a token is emitted, a content leaf expanded, each part
+        under the context concept its path names."""
         out: List[str] = []
+        whole = {f"l{k}": BOS for k in range(1, self.window + 1)}
+        whole.update({f"r{k}": EOS for k in range(1, self.window + 1)})
 
-        def expand(leaf: CobwebNode, depth: int) -> bool:
+        def known(partial: dict) -> dict:
+            """Left to right: the tokens already generated are the element's left context."""
+            x = dict(partial)
+            for k in range(1, self.window + 1):
+                x.setdefault(f"l{k}", out[-k] if len(out) >= k else BOS)
+            return x
+
+        def emit(node: Optional[CobwebNode], partial: dict, depth: int) -> bool:
             if depth > max_depth or len(out) > max_len:
                 return False
+            leaf = self._sample_leaf(self.ctx, known(partial), node)
+            ref = self._choice(leaf.hidden.get(REF, {}))
+            if ref is None:
+                return False
+            if ref[0] == "tok":
+                out.append(ref[1])
+                return True
+            cleaf = self.cleaves.get(ref[1])
+            if cleaf is None or cleaf.count <= 0:
+                return False
             for side in ("L", "R"):
-                kind = self._value(leaf, side)
-                if kind == COMPOSITE:
-                    ids = [self._value(leaf, f"{side}C{d}") for d in range(1, self.depth + 1)]
-                    start = self._deepest(self.cnt, ids)
-                    sub = self._sample_leaf(self.cnt, {"W": False}, start)
-                    if not expand(sub, depth + 1):
-                        return False
-                else:
-                    ids = [self._value(leaf, f"{side}{d}") for d in range(1, self.depth + 1)]
-                    start = self._deepest(self.ctx, ids)
-                    out.append(self._value(self._sample_leaf(self.ctx, {"kind": "P"}, start), "first"))
+                ids = [self._choice(cleaf.av.get(f"{side}{d}", {})) or BLANK for d in range(1, self.depth + 1)]
+                if not emit(self._deepest(ids), {}, depth + 1):
+                    return False
             return True
-        top = self._sample_leaf(self.cnt, {"W": True})
-        return out if expand(top, 0) and len(out) <= max_len else None
+        return out if emit(None, whole, 0) and len(out) <= max_len else None
