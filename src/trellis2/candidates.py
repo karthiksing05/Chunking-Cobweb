@@ -45,7 +45,8 @@ class Element:
     right: Optional["Element"] = None
     content: Optional[dict] = None
     concept: Optional[CobwebNode] = None   # the proposed non-terminal (content tree)
-    score: float = 0.0
+    score: float = 0.0                     # gain against the root: positive = the chunk compresses
+    rank: float = 0.0                      # what the parser chooses by (objective)
     leaf: Optional[CobwebNode] = None      # its context instance's leaf (a stable handle)
     cleaf: Optional[CobwebNode] = None     # its content instance's leaf
     ref: Optional[tuple] = None            # the hidden content reference stored with its context
@@ -92,8 +93,11 @@ def gain_along(path: List[CobwebNode], x: dict, root: CobwebNode, alpha: float,
 
 class CandidateLearner:
     def __init__(self, depth: int = 3, alpha: float = 1.0, seed: int = 0, refresh: bool = True,
-                 min_count: float = 0.0, lookahead: bool = False, context_gain: bool = True,
-                 window: int = 2, gen_support: int = 2, substitution: bool = True):
+                 min_count: float = 0.0, context_gain: bool = True,
+                 window: int = 2, gen_support: int = 2, substitution: bool = True,
+                 rehearse: int = 0, beam: int = 1, enrich: bool = False, support: float = 3.0,
+                 enrich_weight: float = 1.0, objective: str = "gain", candidates: str = "frontier",
+                 redescribe_budget: Optional[int] = None):
         self.depth, self.alpha, self.window = depth, alpha, window
         self.ctx_attrs = tuple(f"l{k}" for k in range(window, 0, -1)) + tuple(f"r{k}" for k in range(1, window + 1))
         self.ctx = IncrementalCobwebTree(self.ctx_attrs, seed=seed)
@@ -102,11 +106,10 @@ class CandidateLearner:
         # refresh: after each experience, every stored content instance is
         # re-described from its parts' current paths (dynamic recomputation over
         # stored leaves). min_count: the support a concept needs to be proposed.
-        # lookahead: each step commits the candidate whose greedy completion of
-        # the parse compresses the experience most. context_gain: candidates are
+        # context_gain: candidates are
         # scored against both trees (P4).
         self.refresh, self.min_count = refresh, min_count
-        self.lookahead, self.context_gain = lookahead, context_gain
+        self.context_gain = context_gain
         self.records: List[Element] = []
         self.cleaves: Dict[int, CobwebNode] = {}
         self.xleaves: Dict[int, CobwebNode] = {}
@@ -117,6 +120,28 @@ class CandidateLearner:
         # it in proportion to the units in use (words and committed chunks) that
         # occupy the same context concept, not to every stored candidate.
         self.substitution = substitution
+        # rehearse: earlier experiences re-parsed after each new one (their use
+        # follows the trees as they grow). beam: parses kept per step (1: greedy).
+        self.rehearse_n, self.beam = rehearse, beam
+        # enrich: the substitution test as a ratio: log2 of how over-represented
+        # units in use are, against all stored candidates, in the most specific
+        # context concept on the candidate's path holding at least ``support``
+        # elements (negative where the surroundings mostly host candidates never used).
+        self.enrich, self.support, self.enrich_weight = enrich, support, enrich_weight
+        # objective: "gain" chooses by the gain against the root (summed over a tree
+        # it rewards parts rare at the root); "code" chooses by the composite's code
+        # length through its concept, -log2 [share(C) P(x|C)], whose sum over a
+        # tree is the tree's description length (every full binary tree over n
+        # tokens has n - 1 composites); the gain still decides whether to chunk.
+        self.objective = objective
+        # candidates: "frontier" stores the pairs on the parser's own frontier;
+        # "all" stores every composite of an experience (every span, every split),
+        # so what is stored does not depend on the parser's own early choices.
+        # redescribe_budget: stored records re-described per experience (the new
+        # ones plus a round-robin slice of the rest; None: all).
+        self.candidates, self.redescribe_budget = candidates, redescribe_budget
+        self._rr = 0
+        self.experiences: List[dict] = []
         self.stats = {"experiences": 0, "candidates stored": 0, "committed": 0, "re-described": 0}
 
     # Descriptions --------------------------------------------------------- #
@@ -160,11 +185,41 @@ class CandidateLearner:
         sorting it."""
         cpath = self.cnt.ancestors(c.cleaf)[::-1] if c.cleaf is not None else self.cnt.categorize(c.content)
         g, node = gain_along(cpath, c.content, self.cnt.root, self.alpha, self.min_count)
-        if self.context_gain:
+        if self.enrich:
+            xpath = self.ctx.ancestors(c.leaf)[::-1] if c.leaf is not None else self.ctx.categorize(c.ctx)
+            g += self.enrich_weight * self._enrichment(xpath)
+        elif self.context_gain:
             xpath = self.ctx.ancestors(c.leaf)[::-1] if c.leaf is not None else self.ctx.categorize(c.ctx)
             used = (lambda n: sum(n.pav.get(USED, {}).values())) if self.substitution else None
             g += gain_along(xpath, c.ctx, self.ctx.root, self.alpha, self.min_count, used)[0]
         c.score, c.concept = g, node
+        if self.objective == "code":
+            root = self.cnt.root
+            best = -math.inf
+            for n in cpath[1:]:
+                if n.count <= 0 or n.count < self.min_count:
+                    continue
+                r = (math.log(n.count / root.count) + log_prob(n, c.content, root, self.alpha)) / LN2
+                if r > best:
+                    best, c.concept = r, n
+            c.rank = best if best > -math.inf else (log_prob(root, c.content, root, self.alpha) / LN2 if root.count > 0 else 0.0)
+            if self.context_gain and not self.enrich:
+                c.rank += g - gain_along(cpath, c.content, root, self.alpha, self.min_count)[0]
+        else:
+            c.rank = g
+
+    def _enrichment(self, path: List[CobwebNode]) -> float:
+        """log2 [(used_C / used_root) / (n_C / n_root)] at the deepest concept on
+        the path with at least ``support`` elements (Laplace-smoothed)."""
+        root = self.ctx.root
+        u = lambda n: sum(n.pav.get(USED, {}).values())
+        node = root
+        for n in path[1:]:
+            if n.count >= self.support:
+                node = n
+        if root.count <= 0:
+            return 0.0
+        return math.log2(((u(node) + 1.0) / (u(root) + 1.0)) / ((node.count + 1.0) / (root.count + 1.0)))
 
     def _candidate(self, tokens, a: Element, b: Element) -> Element:
         span = (a.span[0], b.span[1])
@@ -181,95 +236,155 @@ class CandidateLearner:
             return (el.leaf.id, ("tok", el.token) if el.is_primitive else ("rec", el.idx))
         return {"Lpart": part(c.left), "Rpart": part(c.right)}
 
-    def _store(self, c: Element) -> None:
+    def _store(self, c: Element, share: Optional[Element] = None) -> None:
         """A candidate into both trees: its content, then its context with the
-        hidden reference to the content leaf."""
+        hidden reference to the content leaf (with ``share``, the context leaf of
+        another composite of the same span: a span's context is stored once)."""
         c.idx = len(self.records)
         c.content = self._content(c)
         c.cleaf = self.cnt.ifit(c.content)
         self.cleaves[c.cleaf.id] = c.cleaf
         self.cnt.hide(c.cleaf, self._parts(c))
         c.ref = ("cnt", c.cleaf.id)
-        c.leaf = self.ctx.ifit(c.ctx)
+        c.leaf = share.leaf if share is not None else self.ctx.ifit(c.ctx)
         self.xleaves[c.leaf.id] = c.leaf
         self.ctx.hide(c.leaf, {REF: c.ref})
         self.records.append(c)
         self.stats["candidates stored"] += 1
 
     # Parsing -------------------------------------------------------------- #
-    def parse(self, tokens: Sequence[str], learn: bool = False) -> Tuple[Tree, List[Element]]:
-        tokens = list(tokens)
-        frontier = [Element((k, k + 1), self._ctx_instance(tokens, (k, k + 1)), token=w)
-                    for k, w in enumerate(tokens)]
-        if learn:
-            for el in frontier:
+    def _primitives(self, tokens: List[str], store: bool) -> List[Element]:
+        prims = [Element((k, k + 1), self._ctx_instance(tokens, (k, k + 1)), token=w) for k, w in enumerate(tokens)]
+        if store:
+            for el in prims:
                 el.ref = ("tok", el.token)
                 el.leaf = self.ctx.ifit(el.ctx)
                 self.xleaves[el.leaf.id] = el.leaf
                 self.ctx.hide(el.leaf, {REF: el.ref, USED: el.ref})
                 self.ctx.add_passive(el.leaf, USED, "word")
-        made: Dict[Tuple[int, int], Element] = {}
-        while len(frontier) > 1:
-            new = []
-            for a, b in zip(frontier, frontier[1:]):
-                if (id(a), id(b)) not in made:
-                    c = self._candidate(tokens, a, b)
-                    made[(id(a), id(b))] = c
-                    new.append(c)
-            if learn:
-                for c in new:
-                    self._store(c)
-            pairs = [(made[(id(a), id(b))], t) for t, (a, b) in enumerate(zip(frontier, frontier[1:]))]
-            for c, _ in (pairs if learn else [(c, None) for c in new]):
-                self._score(c)                     # by the trees as they are now
-            if self.lookahead:
-                pos = [(c, t) for c, t in pairs if c.score > 0.0]
-                if not pos:
-                    break
-                value = {t: c.score + self._completion(tokens, frontier[:t] + [c] + frontier[t + 2:], made)
-                         for c, t in pos}
-                best, t = max(pos, key=lambda p: (value[p[1]], -p[1]))
-            else:
-                best, t = max(pairs, key=lambda p: (p[0].score, -p[1]))
-                if best.score <= 0.0:
-                    break
-            frontier[t:t + 2] = [best]
-            if learn:
-                self.stats["committed"] += 1
-                self.ctx.hide(best.leaf, {USED: best.ref})
-                self.ctx.add_passive(best.leaf, USED, "unit")
-                self.cnt.add_passive(best.cleaf, USED, "unit")
-                best.used = True
-        if learn:
-            self.stats["experiences"] += 1
-            if self.refresh:
-                self._redescribe()
-        return self._tree(len(tokens), frontier), frontier
+        return prims
 
-    def _completion(self, tokens, frontier: List[Element], made: Dict) -> float:
-        """Total gain of completing a frontier greedily (the trees unchanged;
-        hypothetical candidates are memoised in ``made``, unstored)."""
-        frontier, total = list(frontier), 0.0
-        while len(frontier) > 1:
-            best, bt = None, -1
-            for t, (a, b) in enumerate(zip(frontier, frontier[1:])):
-                key = (id(a), id(b))
-                if key not in made:
-                    made[key] = self._candidate(tokens, a, b)
-                    self._score(made[key])
-                c = made[key]
-                if best is None or c.score > best.score:
-                    best, bt = c, t
-            if best.score <= 0.0:
-                break
-            total += best.score
-            frontier[bt:bt + 2] = [best]
-        return total
+    def _mark(self, c: Element, w: float) -> None:
+        """Record (w = +1) or withdraw (w = -1) a composite's use in a committed parse."""
+        self.ctx.hide(c.leaf, {USED: c.ref}, w)
+        self.ctx.add_passive(c.leaf, USED, "unit", w)
+        self.cnt.add_passive(c.cleaf, USED, "unit", w)
+        c.used = w > 0
+
+    def parse(self, tokens: Sequence[str], learn: bool = False, exp: Optional[dict] = None,
+              force: Optional[Tree] = None) -> Tuple[Tree, List[Element]]:
+        """Greedy parsing (or a beam, ``beam`` > 1, by the total gain). With
+        ``learn``, every candidate met is stored (once per experience: a
+        candidate is its span and split) and the committed parse is marked as
+        used; ``exp`` re-parses a stored experience with the trees as they are."""
+        tokens = list(tokens)
+        if learn:
+            if exp is None:
+                exp = {"tokens": tokens, "prims": self._primitives(tokens, True), "cands": {}, "used": [],
+                       "first": len(self.records)}
+                self.experiences.append(exp)
+                if self.candidates == "all":
+                    self._store_all(tokens, exp)
+            cands = exp["cands"]
+            start = list(exp["prims"])
+        else:
+            cands = {}
+            start = self._primitives(tokens, False)
+
+        def candidate(a: Element, b: Element) -> Element:
+            k = (a.span[0], a.span[1], b.span[1])
+            c = cands.get(k)
+            if c is None:
+                c = self._candidate(tokens, a, b)
+                cands[k] = c
+                if learn:
+                    self._store(c)
+                else:
+                    self._score(c)
+            return c
+
+        states = [(0.0, start, [])]             # (total gain, frontier, committed)
+        finals = []
+        width = max(1, self.beam)
+        while states:
+            grown, fresh = [], []
+            for total, frontier, done in states:
+                opts = [(candidate(a, b), t) for t, (a, b) in enumerate(zip(frontier, frontier[1:]))]
+                fresh.append((total, frontier, done, opts))
+            if learn:                           # stored first, then judged by the trees as they are
+                for _, _, _, opts in fresh:
+                    for c, _ in opts:
+                        self._score(c)
+            for total, frontier, done, opts in fresh:
+                if force is not None:           # diagnostics only: commit a given tree's composites
+                    gold = force.brackets()
+                    pos = [(c, t) for c, t in opts if c.span in gold]
+                else:
+                    pos = [(c, t) for c, t in opts if c.score > 0.0]
+                if not pos:
+                    finals.append((total, frontier, done))
+                    continue
+                pos.sort(key=lambda p: (-p[0].rank, p[1]))
+                for c, t in pos[:width]:
+                    grown.append((total + c.rank, frontier[:t] + [c] + frontier[t + 2:], done + [c]))
+            grown.sort(key=lambda s_: -s_[0])
+            seen, states = set(), []
+            for st in grown:
+                sig = tuple(el.span for el in st[1])
+                if sig not in seen:
+                    seen.add(sig)
+                    states.append(st)
+                if len(states) >= width:
+                    break
+        total, frontier, done = max(finals, key=lambda s_: s_[0])
+        if learn:
+            for c in done:
+                self._mark(c, 1.0)
+            exp["used"] = list(done)
+            self.stats["committed"] += len(done)
+        split = {c.span: c.left.span[1] for c in done}
+        label = {c.span: (f"n{c.concept.id}" if c.concept is not None else "?") for c in done}
+        return Tree(len(tokens), split, label, [el.span for el in frontier]), frontier
+
+    def _store_all(self, tokens: List[str], exp: dict) -> None:
+        """Every composite of the experience, shortest spans first: each span's
+        context stored once (its first split), every split's content stored."""
+        n = len(tokens)
+        rep_of = {el.span: el for el in exp["prims"]}
+        for length in range(2, n + 1):
+            for i in range(0, n - length + 1):
+                j = i + length
+                for k in range(i + 1, j):
+                    c = self._candidate(tokens, rep_of[(i, k)], rep_of[(k, j)])
+                    first = rep_of.get((i, j))
+                    self._store(c, share=first)
+                    exp["cands"][(i, k, j)] = c
+                    if first is None:
+                        rep_of[(i, j)] = c
+
+    def rehearse(self, i: int) -> None:
+        """Re-parse stored experience i with the trees as they are now: its old
+        parse's use is withdrawn and the new parse's recorded (bounded work)."""
+        exp = self.experiences[i]
+        for c in exp["used"]:
+            self._mark(c, -1.0)
+        exp["used"] = []
+        self.parse(exp["tokens"], learn=True, exp=exp)
+        self.stats["rehearsed"] = self.stats.get("rehearsed", 0) + 1
 
     def _redescribe(self) -> None:
         """Re-describe every stored content instance whose parts' paths changed;
         its context's hidden reference follows it to its new content leaf."""
-        for c in self.records:
+        todo = self.records
+        b = self.redescribe_budget
+        if b is not None and len(self.records) > b:
+            first = self.experiences[-1]["first"] if self.experiences else len(self.records)
+            old = self.records[:first]
+            start = self._rr % max(len(old), 1)
+            slice_ = (old[start:] + old[:start])[:b]
+            self._rr = (start + b) % max(len(old), 1)
+            todo = self.records[first:] + slice_
+        for c in todo:
             new = self._content(c)
             if new == c.content:
                 continue
@@ -292,8 +407,18 @@ class CandidateLearner:
                 c.ref = ref
             self.stats["re-described"] += 1
 
-    def learn(self, tokens: Sequence[str]) -> Tree:
-        return self.parse(tokens, learn=True)[0]
+    def learn(self, tokens: Sequence[str], force: Optional[Tree] = None) -> Tree:
+        """One experience: parsed and stored; then ``rehearse`` earlier ones
+        re-parsed; then stored descriptions brought up to date. ``force`` commits
+        a given tree's composites instead (diagnostics only)."""
+        tree = self.parse(tokens, learn=True, force=force)[0]
+        self.stats["experiences"] += 1
+        n = len(self.experiences)
+        for _ in range(self.rehearse_n if n > 1 else 0):
+            self.rehearse(self.rng.randrange(n - 1))
+        if self.refresh:
+            self._redescribe()
+        return tree
 
     @staticmethod
     def _tree(n: int, roots: List[Element]) -> Tree:

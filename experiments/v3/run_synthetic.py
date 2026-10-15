@@ -31,6 +31,25 @@ def right_branching(n: int) -> Tree:
     return Tree(n, {(i, n): i + 1 for i in range(n - 1)}, {}, [(0, n)])
 
 
+def category_purity(L, train, g, depth: int):
+    """Evaluation only: words grouped by their context-tree concept at ``depth``
+    (the concept their stored leaf sits under); the share of each group in its
+    majority gold part of speech, weighted, and the base rate (one group)."""
+    from collections import Counter, defaultdict
+    groups, overall = defaultdict(Counter), Counter()
+    for exp, e in zip(L.experiences, train):
+        labels = g.gold_labels(e.tokens, e.tree)
+        for el in exp["prims"]:
+            pos = labels.get(el.span, "?")
+            path = L.ctx.ancestors(el.leaf)[::-1]
+            node = path[min(depth, len(path) - 1)]
+            groups[node.id][pos] += 1
+            overall[pos] += 1
+    n = sum(overall.values())
+    return (sum(c.most_common(1)[0][1] for c in groups.values()) / n, overall.most_common(1)[0][1] / n,
+            len(groups))
+
+
 def run(condition: str, seed: int, cfg: dict, n_gen: int) -> dict:
     t0 = time.time()
     train, test = v1_split(load_corpus(os.path.join(default_data_root(), CONDITIONS[condition])), seed)
@@ -52,7 +71,9 @@ def run(condition: str, seed: int, cfg: dict, n_gen: int) -> dict:
     samples = [L.generate() for _ in range(n_gen)]
     ok = [s for s in samples if s is not None]
     gram = [s for s in ok if g.recognizes(s)]
+    purity = {d: category_purity(L, train, g, d) for d in (1, 2, 3)}
     row = {"condition": condition, "seed": seed, "config": cfg,
+           "category purity": {d: {"purity": p, "base rate": b, "groups": k} for d, (p, b, k) in purity.items()},
            "held-out omission": te.omission, "held-out commission": te.commission,
            "held-out exact": te.exact_match, "right-branching omission": rb.omission, "held-out whole trees": whole / max(len(test), 1),
            "train omission": tr.omission, "train commission": tr.commission,
@@ -85,7 +106,9 @@ def main():
             print(f"[{cond} s{seed}] held-out omission {r['held-out omission']:.3f} commission "
                   f"{r['held-out commission']:.3f} (right-branching {r['right-branching omission']:.3f}) whole {r['held-out whole trees']:.2f} | train omission "
                   f"{r['train omission']:.3f} | gen grammatical {r['grammatical']:.3f} novel {r['novel']:.3f} "
-                  f"(generated {r['generated']:.2f}) | {r['seconds']:.0f}s", flush=True)
+                  f"(generated {r['generated']:.2f}) | POS purity d2 {r['category purity'][2]['purity']:.2f} "
+                  f"d3 {r['category purity'][3]['purity']:.2f} (base {r['category purity'][3]['base rate']:.2f}, "
+                  f"{r['category purity'][3]['groups']} groups) | {r['seconds']:.0f}s", flush=True)
             for p in r["parses"][:4]:
                 print("    ", p, flush=True)
             for x in r["examples"][:6]:
