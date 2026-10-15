@@ -44,7 +44,7 @@ def log_prob(node: CobwebNode, x: dict, root: CobwebNode, alpha: float) -> float
 
 
 class ChunkLibrary:
-    def __init__(self, depth: int = 3, alpha: float = 1.0, seed: int = 0, window: int = 2,
+    def __init__(self, depth: int = 6, alpha: float = 1.0, seed: int = 0, window: int = 2,
                  redescribe_budget: Optional[int] = 2000):
         self.depth, self.alpha, self.window = depth, alpha, window
         self.ctx_attrs = tuple(f"l{k}" for k in range(window, 0, -1)) + tuple(f"r{k}" for k in range(1, window + 1))
@@ -154,85 +154,121 @@ class ChunkLibrary:
         V = len(self.ctx.root.pav.get(TOK, {})) + 1
         return -math.log2((d.get(w, 0.0) + self.alpha) / (tot + self.alpha * V))
 
-    def _best_concept(self, x: dict, coded: dict) -> Tuple[float, CobwebNode]:
-        """max over x's sorting path (root included) of log2 [share(C) P(coded|C)]."""
+    def _attr_bits(self, C: CobwebNode, attr: str, value) -> float:
         root = self.cnt.root
-        best, arg = -math.inf, root
-        for node in self.cnt.categorize(x):
-            if node.count <= 0:
-                continue
-            v = (math.log(node.count / root.count) + log_prob(node, coded, root, self.alpha)) / LN2
-            if v > best:
-                best, arg = v, node
-        return best, arg
+        d = C.av.get(attr, {})
+        size = len(root.av.get(attr, {})) + 1
+        return -math.log2((d.get(value, 0.0) + self.alpha) / (C.count + self.alpha * size))
 
-    def _comp_bits(self, lp, rp, sp) -> Tuple[float, CobwebNode]:
-        """Bits for a composite's parts given its own context path:
-        -log2 P(L, R, S) + log2 P(S), each through its best concept."""
-        x = self._content(lp, rp, sp)
-        joint, node = self._best_concept(x, self._coded(x))
-        own = {k: v for k, v in x.items() if k[0] == "S"}
-        marg, _ = self._best_concept(own, self._coded(x, ("SC",)))
-        return marg - joint, node
+    def _share_bits(self, C: CobwebNode) -> float:
+        return -math.log2(C.count / self.cnt.root.count)
 
-    def _top_bits(self, v: CobwebNode) -> float:
+    def _reach_bits(self, path: List[CobwebNode], partial: dict) -> List[float]:
+        """Bits to name each node of a context path (depth 0..) given what the
+        decoder already knows (``partial``): the probability of descending to it
+        when the context tree is sorted on that partial context."""
+        out, bits = [0.0], 0.0
         root = self.ctx.root
-        return -math.log2((v.count + self.alpha) / (root.count + self.alpha)) + 1.0
+        for parent, child in zip(path, path[1:]):
+            ws = [c.count * math.exp(log_prob(c, partial, root, self.alpha)) for c in parent.children]
+            w = child.count * math.exp(log_prob(child, partial, root, self.alpha))
+            bits -= math.log2(w / sum(ws)) if sum(ws) > 0 and w > 0 else 0.0
+            out.append(bits)
+        return out
 
     def read(self, tokens: Sequence[str]) -> dict:
-        """The shortest description of an experience under the trees (exact, by
-        dynamic programming over spans): its bits, its tree, and the content
-        concept each composite is coded through."""
+        """The shortest description of an experience under the trees, exact by
+        dynamic programming over spans and naming depths:
+
+        * E[span, d]: bits for a span's element once its name (its context
+          concept at depth d; 0 = the root) is known: primitive or composite
+          (from what the concept holds); a token among the concept's tokens; or a
+          composite through the content concept C coding it best:
+          -log2 share(C) + bits for its own name under C + for each part the
+          naming depth that is cheapest under C plus that part's E, minus the
+          bits of its own name alone (it is given);
+        * a top-level piece: its name given the words before it (sorting the
+          context tree on that left context), its E, one stop bit.
+
+        Every naming depth is chosen by the code, decision by decision."""
         tokens = list(tokens)
         n = len(tokens)
         if self.cnt.root.count <= 0 or self.ctx.root.count <= 0:
             raise ValueError("empty library")
-        path = {}
+        D = self.depth
+        path, ids = {}, {}
         for i in range(n):
             for j in range(i + 1, n + 1):
-                path[(i, j)] = self.ctx.categorize(self._ctx_instance(tokens, i, j))
-        E: Dict[Tuple[int, int], float] = {}
-        back: Dict[Tuple[int, int], Tuple[int, CobwebNode]] = {}
+                pth = self.ctx.categorize(self._ctx_instance(tokens, i, j))[:D + 1]
+                path[(i, j)] = pth
+                ids[(i, j)] = [f"c{nd.id}" for nd in pth]
+        E: Dict[Tuple[Tuple[int, int], int], float] = {}
+        back: Dict[Tuple[Tuple[int, int], int], tuple] = {}
         for i in range(n):
-            v = self._node(path[(i, i + 1)])
-            E[(i, i + 1)] = self._kind_bits(v, "P") + self._tok_bits(v, tokens[i])
+            for d, v in enumerate(path[(i, i + 1)]):
+                E[((i, i + 1), d)] = self._kind_bits(v, "P") + self._tok_bits(v, tokens[i])
         for length in range(2, n + 1):
             for i in range(0, n - length + 1):
                 j = i + length
-                best = (math.inf, -1, None)
+                own = path[(i, j)]
+                # -log2 P(own name at depth d), through its best concept
+                marg = [0.0]
+                for d in range(1, len(own)):
+                    part = {f"S{d}": ids[(i, j)][d]}
+                    marg.append(min(self._share_bits(C) + self._attr_bits(C, f"S{d}", ids[(i, j)][d])
+                                    for C in self.cnt.categorize(part) if C.count > 0))
+                best = [(math.inf, None)] * len(own)
                 for k in range(i + 1, j):
-                    bits, node = self._comp_bits(path[(i, k)], path[(k, j)], path[(i, j)])
-                    tot = bits + E[(i, k)] + E[(k, j)]
-                    if tot < best[0]:
-                        best = (tot, k, node)
-                E[(i, j)] = best[0] + self._kind_bits(self._node(path[(i, j)]), "C")
-                back[(i, j)] = (best[1], best[2])
+                    lp, rp = path[(i, k)], path[(k, j)]
+                    x = self._content(lp, rp, own)
+                    for C in self.cnt.categorize(x):
+                        if C.count <= 0:
+                            continue
+                        lb = min(((0.0 if d1 == 0 else self._attr_bits(C, f"L{d1}", ids[(i, k)][d1]))
+                                  + E[((i, k), d1)], d1) for d1 in range(len(lp)))
+                        rb = min(((0.0 if d2 == 0 else self._attr_bits(C, f"R{d2}", ids[(k, j)][d2]))
+                                  + E[((k, j), d2)], d2) for d2 in range(len(rp)))
+                        base = self._share_bits(C) + lb[0] + rb[0]
+                        for d in range(len(own)):
+                            name = 0.0 if d == 0 else self._attr_bits(C, f"S{d}", ids[(i, j)][d])
+                            tot = base + name - marg[d]
+                            if tot < best[d][0]:
+                                best[d] = (tot, (k, C, lb[1], rb[1]))
+                for d, v in enumerate(own):
+                    E[((i, j), d)] = best[d][0] + self._kind_bits(v, "C")
+                    back[((i, j), d)] = best[d][1]
         F = [0.0] + [math.inf] * n
-        cut = [0] * (n + 1)
+        cut = [None] * (n + 1)
         for j in range(1, n + 1):
             for i in range(j):
-                t = F[i] + self._top_bits(self._node(path[(i, j)])) + E[(i, j)]
-                if t < F[j]:
-                    F[j], cut[j] = t, i
+                left = {f"l{k}": tokens[i - k] if i - k >= 0 else BOS for k in range(1, self.window + 1)}
+                reach = self._reach_bits(path[(i, j)], left)
+                for d in range(len(path[(i, j)])):
+                    t = F[i] + 1.0 + reach[d] + E[((i, j), d)]
+                    if t < F[j]:
+                        F[j], cut[j] = t, (i, d)
         roots, j = [], n
         while j > 0:
-            roots.append((cut[j], j))
-            j = cut[j]
+            i, d = cut[j]
+            roots.append(((i, j), d))
+            j = i
         roots.reverse()
         split, label, concepts = {}, {}, []
 
-        def walk(i, j):
+        def walk(span, d):
+            i, j = span
             if j - i < 2:
                 return
-            k, node = back[(i, j)]
-            split[(i, j)] = k
-            label[(i, j)] = f"n{node.id}"
-            concepts.append(node.id)
-            walk(i, k)
-            walk(k, j)
-        for i, j in roots:
-            walk(i, j)
-        return {"bits": F[n], "tree": Tree(n, split, label, roots), "concepts": concepts}
+            k, C, d1, d2 = back[(span, d)]
+            split[span] = k
+            label[span] = f"n{C.id}"
+            concepts.append(C.id)
+            walk((i, k), d1)
+            walk((k, j), d2)
+        for span, d in roots:
+            walk(span, d)
+        return {"bits": F[n], "tree": Tree(n, split, label, [sp for sp, _ in roots]), "concepts": concepts,
+                "depths": [d for _, d in roots]}
 
     # Generation ----------------------------------------------------------- #
     def _descend(self, tree: IncrementalCobwebTree, partial: dict, start: Optional[CobwebNode] = None) -> CobwebNode:
