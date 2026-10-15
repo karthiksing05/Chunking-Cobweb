@@ -95,3 +95,23 @@ leaf expanded, each of its parts under the context concept its path names.
 
 The same counts code and generate, so compressing well means being able to
 regenerate the original.
+
+## State of the evidence (2026-10-15)
+
+* **Categories are found.** Without supervision, the context tree's concepts at
+  depth 3 group words by gold part of speech with 72-100% purity (base rates
+  28-40%) on all six synthetic corpora, four seeds.
+* **Chunks are found on some corpora.** Held-out bracket omission, four seeds,
+  best setting (code objective, content enrichment, rehearsal 2): large 0.18
+  (right-branching 0.32, better on 4/4 seeds), term_high 0.32 (0.38, 3/4),
+  small 0.15 (0.25); med 0.39, term_low 0.46, term_med 0.50 are worse than
+  right-branching. Characters: 0.58 with the gain objective (right-branching
+  0.68), at right-branching with the code objective.
+* **The objective agrees with gold when memory is right.** With trees learned
+  from gold commits, the gain objective prefers the gold tree over our parse on
+  med (31 vs 9 items) and large (34 vs 5); self-taught, it prefers our parse
+  (characters 261 vs 9). The main obstacle is self-reinforcement: what is stored
+  and used follows the parser's own early choices.
+* Tried and not adopted as defaults: beam over parses, whole-parse lookahead,
+  all-span candidates (helps med with the code objective, hurts generation),
+  enrichment on the context side, concepts-only / minimum-support non-terminals.
