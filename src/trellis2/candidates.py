@@ -52,6 +52,7 @@ class Element:
     ref: Optional[tuple] = None            # the hidden content reference stored with its context
     used: bool = False                     # committed in its experience's parse
     idx: int = -1                          # its index among the stored records (stable)
+    exp: int = -1                          # the experience it belongs to
 
     @property
     def is_primitive(self) -> bool:
@@ -97,7 +98,7 @@ class CandidateLearner:
                  window: int = 2, gen_support: int = 2, substitution: bool = True,
                  rehearse: int = 0, beam: int = 1, enrich: bool = False, support: float = 3.0,
                  enrich_weight: float = 1.0, objective: str = "gain", candidates: str = "frontier",
-                 redescribe_budget: Optional[int] = None):
+                 redescribe_budget: Optional[int] = None, content_enrich: float = 0.0):
         self.depth, self.alpha, self.window = depth, alpha, window
         self.ctx_attrs = tuple(f"l{k}" for k in range(window, 0, -1)) + tuple(f"r{k}" for k in range(1, window + 1))
         self.ctx = IncrementalCobwebTree(self.ctx_attrs, seed=seed)
@@ -140,6 +141,10 @@ class CandidateLearner:
         # redescribe_budget: stored records re-described per experience (the new
         # ones plus a round-robin slice of the rest; None: all).
         self.candidates, self.redescribe_budget = candidates, redescribe_budget
+        # content_enrich (CCM's yield side): weight of log2 of how over-represented
+        # compositions used in committed parses are, against all stored candidates,
+        # in the candidate's content concept (rehearsal re-estimates the use).
+        self.content_enrich = content_enrich
         self._rr = 0
         self.experiences: List[dict] = []
         self.stats = {"experiences": 0, "candidates stored": 0, "committed": 0, "re-described": 0}
@@ -193,6 +198,10 @@ class CandidateLearner:
             used = (lambda n: sum(n.pav.get(USED, {}).values())) if self.substitution else None
             g += gain_along(xpath, c.ctx, self.ctx.root, self.alpha, self.min_count, used)[0]
         c.score, c.concept = g, node
+        if self.content_enrich:
+            g_ce = self.content_enrich * self._enrichment(cpath, self.cnt)
+        else:
+            g_ce = 0.0
         if self.objective == "code":
             root = self.cnt.root
             best = -math.inf
@@ -207,11 +216,12 @@ class CandidateLearner:
                 c.rank += g - gain_along(cpath, c.content, root, self.alpha, self.min_count)[0]
         else:
             c.rank = g
+        c.rank += g_ce
 
-    def _enrichment(self, path: List[CobwebNode]) -> float:
+    def _enrichment(self, path: List[CobwebNode], tree: Optional[IncrementalCobwebTree] = None) -> float:
         """log2 [(used_C / used_root) / (n_C / n_root)] at the deepest concept on
         the path with at least ``support`` elements (Laplace-smoothed)."""
-        root = self.ctx.root
+        root = (tree or self.ctx).root
         u = lambda n: sum(n.pav.get(USED, {}).values())
         node = root
         for n in path[1:]:
@@ -233,7 +243,11 @@ class CandidateLearner:
         def part(el: Element):
             # a word by its token; a composite by its record (its content leaf
             # moves when it is re-described, the record does not)
-            return (el.leaf.id, ("tok", el.token) if el.is_primitive else ("rec", el.idx))
+            if el.is_primitive:
+                return (el.leaf.id, ("tok", el.token))
+            # a composite part by its span in its experience: generation expands
+            # the structure committed there now (it follows rehearsal)
+            return (el.leaf.id, ("span", el.exp, el.span) if el.exp >= 0 else ("rec", el.idx))
         return {"Lpart": part(c.left), "Rpart": part(c.right)}
 
     def _store(self, c: Element, share: Optional[Element] = None) -> None:
@@ -281,7 +295,7 @@ class CandidateLearner:
         if learn:
             if exp is None:
                 exp = {"tokens": tokens, "prims": self._primitives(tokens, True), "cands": {}, "used": [],
-                       "first": len(self.records)}
+                       "first": len(self.records), "id": len(self.experiences)}
                 self.experiences.append(exp)
                 if self.candidates == "all":
                     self._store_all(tokens, exp)
@@ -298,6 +312,7 @@ class CandidateLearner:
                 c = self._candidate(tokens, a, b)
                 cands[k] = c
                 if learn:
+                    c.exp = exp["id"]
                     self._store(c)
                 else:
                     self._score(c)
@@ -356,6 +371,7 @@ class CandidateLearner:
                 j = i + length
                 for k in range(i + 1, j):
                     c = self._candidate(tokens, rep_of[(i, k)], rep_of[(k, j)])
+                    c.exp = exp["id"]
                     first = rep_of.get((i, j))
                     self._store(c, share=first)
                     exp["cands"][(i, k, j)] = c
@@ -506,6 +522,22 @@ class CandidateLearner:
         leaf = self.rng.choices(leaves, weights=ws)[0]
         return self._choice(words(leaf))[1]
 
+    def _part_record(self, ref: tuple) -> Element:
+        """A composite part: by record, or by its span in its experience (the
+        element committed there now, else any stored composite of that span)."""
+        if ref[0] == "rec":
+            return self.records[ref[1]]
+        exp = self.experiences[ref[1]]
+        for c in exp["used"]:
+            if c.span == ref[2]:
+                return c
+        i, j = ref[2]
+        for k in range(i + 1, j):
+            c = exp["cands"].get((i, k, j))
+            if c is not None:
+                return c
+        raise KeyError(ref)
+
     def _sample_phrase(self, cleaf: CobwebNode) -> Optional[CobwebNode]:
         """Another composition for a phrase part: from the basic level above its
         content leaf (enough committed compositions), a used content leaf."""
@@ -560,7 +592,7 @@ class CandidateLearner:
                         return why("no word")
                     out.append(w)
                 else:
-                    sub = self._sample_phrase(self.records[ref[1]].cleaf)
+                    sub = self._sample_phrase(self._part_record(ref).cleaf)
                     if sub is None:
                         return why("no phrase")
                     if not expand(sub, depth + 1):
