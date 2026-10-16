@@ -154,6 +154,16 @@ class ChunkLibrary:
         V = len(self.ctx.root.pav.get(TOK, {})) + 1
         return -math.log2((d.get(w, 0.0) + self.alpha) / (tot + self.alpha * V))
 
+    def _ref_bits(self, v: CobwebNode, w: Optional[str]) -> float:
+        """One code for what an element at concept v is: a token (w), or a
+        composite (w = None), from v's tokens and composites together."""
+        toks = v.pav.get(TOK, {})
+        comp = v.pav.get(KIND, {}).get("C", 0.0)
+        V = len(self.ctx.root.pav.get(TOK, {})) + 1
+        n = sum(toks.values()) + comp
+        c = comp if w is None else toks.get(w, 0.0)
+        return -math.log2((c + self.alpha) / (n + self.alpha * (V + 1)))
+
     def _attr_bits(self, C: CobwebNode, attr: str, value) -> float:
         root = self.cnt.root
         d = C.av.get(attr, {})
@@ -202,11 +212,25 @@ class ChunkLibrary:
                 pth = self.ctx.categorize(self._ctx_instance(tokens, i, j))[:D + 1]
                 path[(i, j)] = pth
                 ids[(i, j)] = [f"c{nd.id}" for nd in pth]
+        # naming an element from the words before it (known to a left-to-right decoder)
+        reach = {}
+        for (i, j), pth in path.items():
+            left = {f"l{k}": tokens[i - k] if i - k >= 0 else BOS for k in range(1, self.window + 1)}
+            reach[(i, j)] = self._reach_bits(pth, left)
+
+        def name_bits(C, attr, span, d):
+            """A part's name: an even mixture of the code under the composite's
+            concept and the code from its left context."""
+            if d == 0:
+                return 0.0
+            a_, b_ = self._attr_bits(C, attr, ids[span][d]), reach[span][d]
+            return -math.log2(0.5 * 2.0 ** -a_ + 0.5 * 2.0 ** -b_)
+
         E: Dict[Tuple[Tuple[int, int], int], float] = {}
         back: Dict[Tuple[Tuple[int, int], int], tuple] = {}
         for i in range(n):
             for d, v in enumerate(path[(i, i + 1)]):
-                E[((i, i + 1), d)] = self._kind_bits(v, "P") + self._tok_bits(v, tokens[i])
+                E[((i, i + 1), d)] = self._ref_bits(v, tokens[i])
         for length in range(2, n + 1):
             for i in range(0, n - length + 1):
                 j = i + length
@@ -224,10 +248,8 @@ class ChunkLibrary:
                     for C in self.cnt.categorize(x):
                         if C.count <= 0:
                             continue
-                        lb = min(((0.0 if d1 == 0 else self._attr_bits(C, f"L{d1}", ids[(i, k)][d1]))
-                                  + E[((i, k), d1)], d1) for d1 in range(len(lp)))
-                        rb = min(((0.0 if d2 == 0 else self._attr_bits(C, f"R{d2}", ids[(k, j)][d2]))
-                                  + E[((k, j), d2)], d2) for d2 in range(len(rp)))
+                        lb = min((name_bits(C, f"L{d1}", (i, k), d1) + E[((i, k), d1)], d1) for d1 in range(len(lp)))
+                        rb = min((name_bits(C, f"R{d2}", (k, j), d2) + E[((k, j), d2)], d2) for d2 in range(len(rp)))
                         base = self._share_bits(C) + lb[0] + rb[0]
                         for d in range(len(own)):
                             name = 0.0 if d == 0 else self._attr_bits(C, f"S{d}", ids[(i, j)][d])
@@ -235,16 +257,14 @@ class ChunkLibrary:
                             if tot < best[d][0]:
                                 best[d] = (tot, (k, C, lb[1], rb[1]))
                 for d, v in enumerate(own):
-                    E[((i, j), d)] = best[d][0] + self._kind_bits(v, "C")
+                    E[((i, j), d)] = best[d][0] + self._ref_bits(v, None)
                     back[((i, j), d)] = best[d][1]
         F = [0.0] + [math.inf] * n
         cut = [None] * (n + 1)
         for j in range(1, n + 1):
             for i in range(j):
-                left = {f"l{k}": tokens[i - k] if i - k >= 0 else BOS for k in range(1, self.window + 1)}
-                reach = self._reach_bits(path[(i, j)], left)
                 for d in range(len(path[(i, j)])):
-                    t = F[i] + 1.0 + reach[d] + E[((i, j), d)]
+                    t = F[i] + 1.0 + reach[(i, j)][d] + E[((i, j), d)]
                     if t < F[j]:
                         F[j], cut[j] = t, (i, d)
         roots, j = [], n
