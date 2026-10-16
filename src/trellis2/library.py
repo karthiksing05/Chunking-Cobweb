@@ -29,7 +29,7 @@ from .incremental_cobweb import CobwebNode, IncrementalCobwebTree
 BOS, EOS = "<s>", "</s>"
 BLANK = "-"
 LN2 = math.log(2.0)
-KIND, TOK = "kind", "tok"
+KIND, TOK, YIELD = "kind", "tok", "yield"
 
 
 def log_prob(node: CobwebNode, x: dict, root: CobwebNode, alpha: float) -> float:
@@ -46,7 +46,7 @@ def log_prob(node: CobwebNode, x: dict, root: CobwebNode, alpha: float) -> float
 class ChunkLibrary:
     def __init__(self, depth: int = 6, alpha: float = 1.0, seed: int = 0, window: int = 2,
                  redescribe_budget: Optional[int] = 2000, confidence: float = 0.95,
-                 prediction: str = "descent", match_alpha: Optional[float] = None):
+                 prediction: str = "descent", match_alpha: Optional[float] = None, max_unit: int = 4):
         self.depth, self.alpha, self.window = depth, alpha, window
         self.ctx_attrs = tuple(f"l{k}" for k in range(window, 0, -1)) + tuple(f"r{k}" for k in range(1, window + 1))
         d = range(1, depth + 1)
@@ -70,6 +70,9 @@ class ChunkLibrary:
         # the prior with which a leaf's context is matched to the left context
         # (smaller: sharper matching); defaults to alpha
         self.match_alpha = alpha if match_alpha is None else match_alpha
+        # chunks as units of the code: a composite span of at most max_unit
+        # tokens records its yield at its context leaf (prediction "units")
+        self.max_unit = max_unit
         self._word_leaves = None
         self.records: List[list] = []     # [left leaf, right leaf, own leaf, description, content leaf]
         self._rr = 0
@@ -115,6 +118,8 @@ class ChunkLibrary:
                 self.ctx.add_passive(lf, KIND, "P" if length == 1 else "C")
                 if length == 1:
                     self.ctx.add_passive(lf, TOK, tokens[i])
+                elif length <= self.max_unit:
+                    self.ctx.add_passive(lf, YIELD, tuple(tokens[i:j]))
                 leaf[(i, j)] = lf
                 self.stats["spans stored"] += 1
         # the end of the experience, as an element after the last token: its
@@ -322,6 +327,59 @@ class ChunkLibrary:
             num += wt * (d.get(w, 0.0) + 1.0 / V) / (n + 1.0)
             den += wt
         return num / den if den > 0 else 1.0 / V
+
+    def _unit_probs(self, left: dict, units: List[tuple]) -> List[float]:
+        """P(next unit | left context) for each candidate unit (a 1-tuple is a
+        token, longer tuples are chunks): a mixture over every leaf holding
+        tokens or chunk yields, weighted by its count times its left-context
+        match; each leaf predicts from its own units, smoothed toward uniform
+        single tokens."""
+        if self._word_leaves is None:
+            self._word_leaves = [n for n in self.ctx.leaves() if n.pav.get(TOK) or n.pav.get(YIELD)]
+        root = self.ctx.root
+        V = len(root.pav.get(TOK, {})) + 1
+        num = [0.0] * len(units)
+        den = 0.0
+        for leaf in self._word_leaves:
+            toks, ylds = leaf.pav.get(TOK, {}), leaf.pav.get(YIELD, {})
+            n = sum(toks.values()) + sum(ylds.values())
+            wt = n * math.exp(log_prob(leaf, left, root, self.match_alpha))
+            den += wt
+            for q, u in enumerate(units):
+                c = toks.get(u[0], 0.0) if len(u) == 1 else ylds.get(u, 0.0)
+                prior = (1.0 / V) if len(u) == 1 else 0.0
+                num[q] += wt * (c + prior) / (n + 1.0)
+        return [x / den if den > 0 else (1.0 / V if len(u) == 1 else 0.0) for x, u in zip(num, units)]
+
+    def unit_code(self, tokens: Sequence[str]) -> dict:
+        """Bits for an experience coded as a sequence of units (tokens and stored
+        chunks), summed over every segmentation (forward algorithm), with the
+        end; and the best segmentation (Viterbi), whose chunks are the library
+        this experience uses."""
+        tokens = list(tokens)
+        n = len(tokens)
+        fwd = [0.0] * (n + 1)
+        vit = [0.0] * (n + 1)
+        back = [0] * (n + 1)
+        fwd[0] = vit[0] = 1.0
+        for i in range(n):
+            if fwd[i] <= 0:
+                continue
+            left = {f"l{k}": tokens[i - k] if i - k >= 0 else BOS for k in range(1, self.window + 1)}
+            js = list(range(i + 1, min(n, i + self.max_unit) + 1))
+            probs = self._unit_probs(left, [tuple(tokens[i:j]) for j in js])
+            for j, p in zip(js, probs):
+                fwd[j] += fwd[i] * p
+                if vit[i] * p > vit[j]:
+                    vit[j], back[j] = vit[i] * p, i
+        left = {f"l{k}": tokens[n - k] if n - k >= 0 else BOS for k in range(1, self.window + 1)}
+        p_end = self._unit_probs(left, [(EOS,)])[0]
+        segs, j = [], n
+        while j > 0:
+            segs.append(tuple(tokens[back[j]:j]))
+            j = back[j]
+        segs.reverse()
+        return {"bits": -math.log2(fwd[n] * p_end), "units": segs}
 
     def predict(self, tokens: Sequence[str], i: int, w: str) -> float:
         """P(token w at position i | the tokens before it), read off the context

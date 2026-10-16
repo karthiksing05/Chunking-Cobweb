@@ -41,6 +41,34 @@ def right_branching(n: int) -> Tree:
     return Tree(n, {(i, n): i + 1 for i in range(n - 1)}, {}, [(0, n)])
 
 
+def trigram_bits(train, test):
+    """A Witten-Bell interpolated trigram (with an end marker), bits per test experience."""
+    from collections import defaultdict
+    c1, c2, c3 = Counter(), defaultdict(Counter), defaultdict(Counter)
+    for s in train:
+        h = ["<s>", "<s>"] + list(s) + ["</s>"]
+        for t in range(2, len(h)):
+            c1[h[t]] += 1
+            c2[h[t - 1]][h[t]] += 1
+            c3[(h[t - 2], h[t - 1])][h[t]] += 1
+    V = len(c1) + 1
+    N = sum(c1.values())
+
+    def wb(cnt, lower):
+        n, types = sum(cnt.values()), len(cnt)
+        return lambda w: (cnt.get(w, 0) + types * lower(w)) / (n + types) if n else lower(w)
+    bits = 0.0
+    for s in test:
+        h = ["<s>", "<s>"] + list(s) + ["</s>"]
+        for t in range(2, len(h)):
+            w = h[t]
+            p1 = lambda x: (c1.get(x, 0) + 1) / (N + V)
+            p2 = wb(c2.get(h[t - 1], Counter()), p1)
+            p3 = wb(c3.get((h[t - 2], h[t - 1]), Counter()), p2)
+            bits -= math.log2(p3(w))
+    return bits / len(test)
+
+
 def ngram_bits(train, test):
     """Unigram and bigram (Laplace, end marker) bits per test experience."""
     uni, big, ctx = Counter(), Counter(), Counter()
@@ -117,13 +145,20 @@ def evaluate(name, seed, train, test, gold, judge, cfg, n_gen, n_reads):
         used.update(set(L.read(x)["concepts"]))
     reads = [L.read(x) for x in test] if not args_skip_read() else []
     pred_bits = sum(L.code_bits(x) for x in test) / len(test)
+    units = [L.unit_code(x) for x in test] if cfg.get("prediction") == "mixture" else []
+    unit_bits = sum(u["bits"] for u in units) / len(units) if units else float("nan")
+    chunk_use = Counter(u for r in units for u in r["units"] if len(u) > 1)
+    tri = trigram_bits(train, test)
     bits = sum(r["bits"] for r in reads) / len(reads) if reads else float("nan")
     uni, big = ngram_bits(train, test)
     held = [c for r in reads for c in r["concepts"]]
     reuse2 = sum(used[c] >= 2 for c in held) / max(len(held), 1)
     reuse5 = sum(used[c] >= 5 for c in held) / max(len(held), 1)
     row = {"domain": name, "seed": seed, "config": cfg, "train": len(train),
-           "bits per experience": bits, "predictive bits": pred_bits, "unigram bits": uni, "bigram bits": big,
+           "bits per experience": bits, "predictive bits": pred_bits, "unit bits": unit_bits,
+           "trigram bits": tri, "unigram bits": uni, "bigram bits": big,
+           "chunks used in held-out units (distinct, uses)": [len(chunk_use), sum(chunk_use.values())],
+           "top chunks": [" ".join(k) for k, _ in chunk_use.most_common(15)],
            "library concepts (training reads)": len(used),
            "held-out composites through concepts reused in >=2 / >=5 training reads": [reuse2, reuse5],
            "learn seconds": learn_s, "stats": L.stats}
@@ -171,7 +206,8 @@ def main():
             rows.append(r)
             side = (f" | omission {r['omission (side)']:.2f} (RB {r['right-branching omission (side)']:.2f})"
                     if "omission (side)" in r else "")
-            print(f"[{name} s{seed}] read bits {r['bits per experience']:.1f} predictive {r['predictive bits']:.1f} (unigram {r['unigram bits']:.1f}, bigram "
+            print(f"[{name} s{seed}] predictive {r['predictive bits']:.1f} units {r['unit bits']:.1f} "
+                  f"chunks {r['chunks used in held-out units (distinct, uses)']} (trigram {r['trigram bits']:.1f}, unigram {r['unigram bits']:.1f}, bigram "
                   f"{r['bigram bits']:.1f}) | library {r['library concepts (training reads)']} concepts, held-out reuse "
                   f"{r['held-out composites through concepts reused in >=2 / >=5 training reads'][0]:.2f}/"
                   f"{r['held-out composites through concepts reused in >=2 / >=5 training reads'][1]:.2f} | gen coherent "
