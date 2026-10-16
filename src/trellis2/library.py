@@ -45,7 +45,8 @@ def log_prob(node: CobwebNode, x: dict, root: CobwebNode, alpha: float) -> float
 
 class ChunkLibrary:
     def __init__(self, depth: int = 6, alpha: float = 1.0, seed: int = 0, window: int = 2,
-                 redescribe_budget: Optional[int] = 2000):
+                 redescribe_budget: Optional[int] = 2000, confidence: float = 0.95,
+                 prediction: str = "descent", match_alpha: Optional[float] = None):
         self.depth, self.alpha, self.window = depth, alpha, window
         self.ctx_attrs = tuple(f"l{k}" for k in range(window, 0, -1)) + tuple(f"r{k}" for k in range(1, window + 1))
         d = range(1, depth + 1)
@@ -59,6 +60,17 @@ class ChunkLibrary:
         self.cnt = IncrementalCobwebTree(self.cnt_attrs, seed=seed + 1)
         self.rng = random.Random(seed)
         self.redescribe_budget = redescribe_budget
+        # prediction descends while the left context picks a child this clearly
+        self.confidence = confidence
+        # prediction: "descent" (along the tree while the left context decides)
+        # or "mixture" (every leaf holding tokens, weighted by its count times how
+        # well its context matches the left context: Cobweb's prediction from the
+        # stored instances, nothing about later tokens used)
+        self.prediction = prediction
+        # the prior with which a leaf's context is matched to the left context
+        # (smaller: sharper matching); defaults to alpha
+        self.match_alpha = alpha if match_alpha is None else match_alpha
+        self._word_leaves = None
         self.records: List[list] = []     # [left leaf, right leaf, own leaf, description, content leaf]
         self._rr = 0
         self.stats = {"experiences": 0, "spans stored": 0, "composites stored": 0, "re-described": 0}
@@ -105,6 +117,11 @@ class ChunkLibrary:
                     self.ctx.add_passive(lf, TOK, tokens[i])
                 leaf[(i, j)] = lf
                 self.stats["spans stored"] += 1
+        # the end of the experience, as an element after the last token: its
+        # window is the last tokens, and what it "is" is the end marker
+        lf = self.ctx.ifit(self._ctx_instance(tokens, n, n))
+        self.ctx.add_passive(lf, KIND, "E")
+        self.ctx.add_passive(lf, TOK, EOS)
         first = len(self.records)
         for length in range(2, n + 1):
             for i in range(0, n - length + 1):
@@ -115,6 +132,7 @@ class ChunkLibrary:
                     self.records.append([a, b, s, x, self.cnt.ifit(x)])
                     self.stats["composites stored"] += 1
         self.stats["experiences"] += 1
+        self._word_leaves = None
         self._redescribe(first)
 
     def _redescribe(self, first: int) -> None:
@@ -289,6 +307,61 @@ class ChunkLibrary:
             walk(span, d)
         return {"bits": F[n], "tree": Tree(n, split, label, [sp for sp, _ in roots]), "concepts": concepts,
                 "depths": [d for _, d in roots]}
+
+    # Predictive code ------------------------------------------------------ #
+    def _mixture(self, left: dict, w: str) -> float:
+        if self._word_leaves is None:
+            self._word_leaves = [n for n in self.ctx.leaves() if n.pav.get(TOK)]
+        root = self.ctx.root
+        V = len(root.pav.get(TOK, {})) + 1
+        num = den = 0.0
+        for leaf in self._word_leaves:
+            d = leaf.pav[TOK]
+            n = sum(d.values())
+            wt = n * math.exp(log_prob(leaf, left, root, self.match_alpha))
+            num += wt * (d.get(w, 0.0) + 1.0 / V) / (n + 1.0)
+            den += wt
+        return num / den if den > 0 else 1.0 / V
+
+    def predict(self, tokens: Sequence[str], i: int, w: str) -> float:
+        """P(token w at position i | the tokens before it), read off the context
+        tree: the left context is sorted down the tree and each concept's token
+        counts are smoothed toward its parent's prediction (Witten-Bell), from
+        the root to the deepest concept. Nothing about later tokens is used."""
+        left = {f"l{k}": tokens[i - k] if i - k >= 0 else BOS for k in range(1, self.window + 1)}
+        if self.prediction == "mixture":
+            return self._mixture(left, w)
+        root = self.ctx.root
+        V = len(root.pav.get(TOK, {})) + 1
+        p = 1.0 / V
+        node = root
+        while True:
+            d = node.pav.get(TOK, {})
+            n = sum(d.values())
+            if n <= 0:
+                break
+            beta = len(d)
+            p = (d.get(w, 0.0) + beta * p) / (n + beta)
+            if not node.children:
+                break
+            # go deeper only while the left context decides the branch
+            ws = [c.count * math.exp(log_prob(c, left, root, self.alpha)) for c in node.children]
+            tot = sum(ws)
+            if tot <= 0:
+                break
+            k = max(range(len(ws)), key=ws.__getitem__)
+            if ws[k] / tot < self.confidence:
+                break
+            node = node.children[k]
+        return p
+
+    def code_bits(self, tokens: Sequence[str]) -> float:
+        """Bits for an experience coded word by word from the left (with the end)."""
+        tokens = list(tokens)
+        bits = 0.0
+        for i, w in enumerate(tokens + [EOS]):
+            bits -= math.log2(self.predict(tokens, i, w))
+        return bits
 
     # Generation ----------------------------------------------------------- #
     def _descend(self, tree: IncrementalCobwebTree, partial: dict, start: Optional[CobwebNode] = None) -> CobwebNode:

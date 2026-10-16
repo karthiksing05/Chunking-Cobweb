@@ -98,6 +98,13 @@ def load(args, seed):
     return [("stories", train, test, None, attested)]
 
 
+SKIP_READ = {"on": False}
+
+
+def args_skip_read():
+    return SKIP_READ["on"]
+
+
 def evaluate(name, seed, train, test, gold, judge, cfg, n_gen, n_reads):
     t0 = time.time()
     L = ChunkLibrary(seed=seed, **cfg)
@@ -106,16 +113,17 @@ def evaluate(name, seed, train, test, gold, judge, cfg, n_gen, n_reads):
     learn_s = time.time() - t0
     # the library as the training reads use it
     used = Counter()
-    for x in train[:n_reads]:
+    for x in ([] if args_skip_read() else train[:n_reads]):
         used.update(set(L.read(x)["concepts"]))
-    reads = [L.read(x) for x in test]
-    bits = sum(r["bits"] for r in reads) / len(reads)
+    reads = [L.read(x) for x in test] if not args_skip_read() else []
+    pred_bits = sum(L.code_bits(x) for x in test) / len(test)
+    bits = sum(r["bits"] for r in reads) / len(reads) if reads else float("nan")
     uni, big = ngram_bits(train, test)
     held = [c for r in reads for c in r["concepts"]]
     reuse2 = sum(used[c] >= 2 for c in held) / max(len(held), 1)
     reuse5 = sum(used[c] >= 5 for c in held) / max(len(held), 1)
     row = {"domain": name, "seed": seed, "config": cfg, "train": len(train),
-           "bits per experience": bits, "unigram bits": uni, "bigram bits": big,
+           "bits per experience": bits, "predictive bits": pred_bits, "unigram bits": uni, "bigram bits": big,
            "library concepts (training reads)": len(used),
            "held-out composites through concepts reused in >=2 / >=5 training reads": [reuse2, reuse5],
            "learn seconds": learn_s, "stats": L.stats}
@@ -150,10 +158,12 @@ def main():
     ap.add_argument("--config", default="{}")
     ap.add_argument("--n-gen", type=int, default=500)
     ap.add_argument("--n-reads", type=int, default=300)
+    ap.add_argument("--skip-read", action="store_true")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
     cfg = json.loads(args.config)
+    SKIP_READ["on"] = args.skip_read
     rows = []
     for seed in [int(s) for s in args.seeds.split(",")]:
         for name, train, test, gold, judge in load(args, seed):
@@ -161,7 +171,7 @@ def main():
             rows.append(r)
             side = (f" | omission {r['omission (side)']:.2f} (RB {r['right-branching omission (side)']:.2f})"
                     if "omission (side)" in r else "")
-            print(f"[{name} s{seed}] bits {r['bits per experience']:.1f} (unigram {r['unigram bits']:.1f}, bigram "
+            print(f"[{name} s{seed}] read bits {r['bits per experience']:.1f} predictive {r['predictive bits']:.1f} (unigram {r['unigram bits']:.1f}, bigram "
                   f"{r['bigram bits']:.1f}) | library {r['library concepts (training reads)']} concepts, held-out reuse "
                   f"{r['held-out composites through concepts reused in >=2 / >=5 training reads'][0]:.2f}/"
                   f"{r['held-out composites through concepts reused in >=2 / >=5 training reads'][1]:.2f} | gen coherent "
