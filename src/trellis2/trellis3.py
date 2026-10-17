@@ -43,6 +43,7 @@ from .incremental_cobweb import CobwebNode, IncrementalCobwebTree
 BOS, EOS, BLANK = "<s>", "</s>", "-"
 LN2 = math.log(2.0)
 CONST = "const"      # passive: constituent (posterior) mass of the stored elements
+WORD = "word"        # passive: the word a context concept's word elements are (v1's content reference)
 
 
 def log_prob(node: CobwebNode, x: dict, root: CobwebNode, alpha: float) -> float:
@@ -365,9 +366,17 @@ class Trellis3:
             for child, sib in ((node_of[(i, k)], node_of[(k, j)]), (node_of[(k, j)], node_of[(i, k)])):
                 child.par, child.sib = self._ctx_ids(parent), self._ctx_ids(sib)
         if self.store == "ccm":
-            weights = {key: 1.0 for key in comps}
-            for key, e in comps.items():
-                e.const = post.get(key, 0.0)
+            # each span is one observation (as in the constituent-context model):
+            # weight 1 shared among its splits by P(split | span), of which the
+            # constituent share is the span's posterior
+            span_post: Dict[Tuple[int, int], float] = {}
+            for (i, k, j), p in post.items():
+                span_post[(i, j)] = span_post.get((i, j), 0.0) + p
+            weights = {}
+            for (i, k, j), e in comps.items():
+                sp = span_post.get((i, j), 0.0)
+                weights[(i, k, j)] = post[(i, k, j)] / sp if sp > 1e-12 else 1.0 / (j - i - 1)
+                e.const = post.get((i, k, j), 0.0)
         elif self.store == "posterior":
             weights = {key: p for key, p in post.items()}
         elif self.store == "all":
@@ -379,6 +388,7 @@ class Trellis3:
             e.weight = 1.0
             e.ctx = self._full(self._context(tokens, e, analysed=True), self.ctx_attrs)
             e.leaf = self.ctx.ifit(e.ctx, 1.0)
+            self.ctx.add_passive(e.leaf, WORD, e.token, 1.0)
             if self.store == "ccm":
                 e.const = 1.0
                 self.ctx.add_passive(e.leaf, CONST, "c", 1.0)
@@ -437,8 +447,81 @@ class Trellis3:
             if new != e.ctx:
                 if e.const > 0:
                     self.ctx.add_passive(e.leaf, CONST, "c", -e.const)
+                if e.token is not None:
+                    self.ctx.add_passive(e.leaf, WORD, e.token, -1.0)
                 self.ctx.unfit(e.leaf, e.ctx, e.weight)
                 e.ctx, e.leaf = new, self.ctx.ifit(new, e.weight)
                 if e.const > 0:
                     self.ctx.add_passive(e.leaf, CONST, "c", e.const)
+                if e.token is not None:
+                    self.ctx.add_passive(e.leaf, WORD, e.token, 1.0)
                 self.stats["refreshed"] += 1
+
+    # ------------------------------------------------------------------ #
+    # Generation: top-down through the two hierarchies (no word-to-word step)
+    # ------------------------------------------------------------------ #
+    @staticmethod
+    def _index(tree):
+        idx, stack = {}, [(tree.root, 0)]
+        while stack:
+            n, d = stack.pop()
+            idx[f"c{n.id}"] = (n, d)
+            stack.extend((c, d + 1) for c in n.children)
+        return idx
+
+    def _pick(self, rng, counts: Dict, idx=None, skip=()):
+        """Sample a value by its count; concept ids only at their deepest named depth."""
+        items = [(v, m) for v, m in counts.items() if m > 0 and v not in skip]
+        if idx is not None:
+            items = [(v, m) for v, m in items if v in idx]
+            if items:
+                deep = max(idx[v][1] for v, _ in items)
+                items = [(v, m) for v, m in items if idx[v][1] == deep]
+        if not items:
+            return None
+        r = rng.random() * sum(m for _, m in items)
+        for v, m in items:
+            r -= m
+            if r <= 0:
+                return v
+        return items[-1][0]
+
+    def generate(self, rng: Optional[random.Random] = None, max_depth: int = 12) -> Optional[List[str]]:
+        """A sentence from memory, top-down: the sentence context (BOS ... EOS)
+        names, through its donated own-content facet, the content concepts that
+        fill it; a content concept names its parts' context concepts, content
+        concepts and heights; a part of height 0 is a word drawn from its
+        context concept's word counts, a taller part expands its content concept."""
+        rng = rng or self.rng
+        if not self.donate_ctx or not self.donate_cnt:
+            raise ValueError("generation reads the donated facets (donate_ctx and donate_cnt)")
+        cidx, nidx = self._index(self.ctx), self._index(self.cnt)
+        x = {f"l{k}": BOS for k in range(1, self.window + 1)}
+        x.update({f"r{k}": EOS for k in range(1, self.window + 1)})
+        path = self.ctx.categorize(x)
+        node = next((n for n in reversed(path) if self._pick(rng, n.av.get("cc", {}), nidx, (BLANK,))), None)
+        if node is None:
+            return None
+        top = self._pick(rng, node.av.get("cc", {}), nidx, (BLANK,))
+        out: List[str] = []
+
+        def word(ctx_id):
+            w = self._pick(rng, self.ctx.passive(cidx[ctx_id][0], WORD)) if ctx_id in cidx else None
+            if w is None:
+                raise LookupError
+            out.append(w)
+
+        def expand(cnt_id, d):
+            c = nidx[cnt_id][0]
+            for p in ("L", "R"):
+                h = self._pick(rng, c.av.get(f"{p}H", {}))
+                sub = self._pick(rng, c.av.get(f"{p}C", {}), nidx, (BLANK,))
+                if h == "0" or sub is None or d >= max_depth:
+                    word(self._pick(rng, c.av.get(p, {}), cidx, (BLANK,)))
+                else:
+                    expand(sub, d + 1)
+        try:
+            expand(top, 0)
+        except LookupError:
+            return None
+        return out
