@@ -525,3 +525,70 @@ class Trellis3:
         except LookupError:
             return None
         return out
+
+    def _members(self, tree: IncrementalCobwebTree, which: str):
+        """concept id -> (stored records under it, their weights), for one hierarchy."""
+        at: Dict[int, List[Elem]] = {}
+        for e in self.records:
+            leaf = e.leaf if which == "ctx" else e.cleaf
+            if leaf is not None:
+                at.setdefault(id(leaf), []).append(e)
+        out: Dict[str, List[Elem]] = {}
+
+        def walk(n):
+            got = list(at.get(id(n), [])) if not n.children else [r for c in n.children for r in walk(c)]
+            out[f"c{n.id}"] = got
+            return got
+        walk(tree.root)
+        return out
+
+    def generate_sub(self, rng: Optional[random.Random] = None, depth: Optional[int] = None,
+                     via: str = "ctx", max_depth: int = 12, members=None) -> Optional[List[str]]:
+        """A sentence by substitution (v1's substitutability): a stored sentence-
+        spanning element is expanded part by part, each part replaced by a stored
+        element drawn (by weight) from the part's concept at ``depth``: its
+        context concept (``via='ctx'``), or for a composite part its content
+        concept (``via='cnt'``); drawn words are emitted, drawn composites expand."""
+        rng = rng or self.rng
+        d = depth or self.depth
+        if members is None:
+            members = (self._members(self.ctx, "ctx"), self._members(self.cnt, "cnt"))
+        mctx, mcnt = members
+        roots = [e for e in self.records if e.token is None and e.ctx.get("l1") == BOS and e.ctx.get("r1") == EOS]
+        if not roots:
+            return None
+
+        def draw(pool):
+            pool = [r for r in pool if r.weight > 0]
+            if not pool:
+                return None
+            t = rng.random() * sum(r.weight for r in pool)
+            for r in pool:
+                t -= r.weight
+                if t <= 0:
+                    return r
+            return pool[-1]
+        out: List[str] = []
+
+        def expand(e, k):
+            for part in (e.left, e.right):
+                if via == "cnt" and part.token is None:
+                    cid = self._cnt_ids(part)[d - 1]
+                    pool = mcnt.get(cid, [])
+                else:
+                    cid = self._ctx_ids(part)[d - 1]
+                    pool = mctx.get(cid, [])
+                r = draw(pool) if k < max_depth else None
+                if r is None:
+                    r = part
+                if r.token is not None:
+                    out.append(r.token)
+                elif r.left is None:
+                    raise LookupError
+                else:
+                    expand(r, k + 1)
+        try:
+            expand(draw(roots), 0)
+        except (LookupError, RecursionError):
+            return None
+        return out
