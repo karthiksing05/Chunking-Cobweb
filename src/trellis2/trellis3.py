@@ -88,7 +88,8 @@ class Trellis3:
                  donate: bool = True, refresh_budget: Optional[int] = 3000, min_weight: float = 1e-3,
                  bags: bool = True, children: Optional[bool] = None, spine: Optional[bool] = None,
                  neighbour_concepts: bool = False, donate_ctx: Optional[bool] = None,
-                 donate_cnt: Optional[bool] = None, factor: str = "gain", support: float = 3.0):
+                 donate_cnt: Optional[bool] = None, factor: str = "gain", support: float = 3.0,
+                 naming: str = "depth", heights: bool = True, donate_own: bool = False):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -120,6 +121,17 @@ class Trellis3:
         # C)] at the deepest concept on the description's path holding at least
         # ``support`` elements, in both hierarchies; words count as constituents
         self.support = support
+        # how a facet names a concept: "depth" (its concepts at depths 1..D) or
+        # "path" (every concept on its path below the root, the own leaf left
+        # out): shared ancestry at every granularity, no fixed depth
+        self.naming = naming
+        # the parts' heights in the content (v1's complexity tag); without them a
+        # part that recurses (an N' where an N stands) is named only by its concepts
+        self.heights = heights
+        # donation of the element's OWN context concept into its content (the
+        # mirror of ``cc``): the context concept of its surface window, so a
+        # content concept groups chunks by makeup and by where they occur
+        self.donate_own = donate_own
         d = [""] if bags else [str(k) for k in range(1, depth + 1)]
         surface = tuple(f"l{k}" for k in range(window, 0, -1)) + tuple(f"r{k}" for k in range(1, window + 1))
         chunk = (tuple(f"{p}{k}" for p in ("cl", "cr") for k in d) if self.children else ()) + \
@@ -129,7 +141,8 @@ class Trellis3:
         self.ctx_attrs = surface + neigh + chunk + own
         parts = tuple(f"{p}{k}" for p in ("L", "R") for k in d)
         given = tuple(f"{p}{k}" for p in ("LC", "RC") for k in d) if self.donate_cnt else ()
-        self.cnt_attrs = parts + given + ("LH", "RH")
+        self.cnt_attrs = parts + given + (("LH", "RH") if heights else ()) + \
+            (tuple(f"oc{k}" for k in d) if donate_own else ())
         self.ctx = IncrementalCobwebTree(self.ctx_attrs, seed=seed)
         self.cnt = IncrementalCobwebTree(self.cnt_attrs, seed=seed + 1)
         self.rng = random.Random(seed)
@@ -168,6 +181,36 @@ class Trellis3:
             e.memo["cnt"] = self._ids(self.cnt.categorize(e.cnt))
         return e.memo["cnt"]
 
+    def _ctx_name(self, e: Elem) -> List[str]:
+        """The ids a facet names an element's context concept by."""
+        if self.naming == "depth":
+            return self._ctx_ids(e)
+        if e.leaf is not None:
+            path = self.ctx.ancestors(e.leaf)[::-1]
+        else:
+            if "ctxp" not in e.memo:
+                e.memo["ctxp"] = self.ctx.categorize(e.ctx)
+            path = e.memo["ctxp"]
+        return self._path_ids(path)
+
+    def _cnt_name(self, e: Elem) -> List[str]:
+        if self.naming == "depth":
+            return self._cnt_ids(e)
+        if e.token is not None:
+            return [BLANK]
+        if e.cleaf is not None:
+            path = self.cnt.ancestors(e.cleaf)[::-1]
+        else:
+            if "cntp" not in e.memo:
+                e.memo["cntp"] = self.cnt.categorize(e.cnt)
+            path = e.memo["cntp"]
+        return self._path_ids(path)
+
+    @staticmethod
+    def _path_ids(path) -> List[str]:
+        inner = path[1:-1] if len(path) > 1 and not path[-1].children else path[1:]
+        return [f"c{n.id}" for n in inner] or [BLANK]
+
     def _facet(self, x: dict, name: str, ids: List[str]) -> None:
         """Write a facet's concept ids: one bag attribute, or one attribute per depth."""
         if self.bags:
@@ -177,13 +220,24 @@ class Trellis3:
             for k, v in enumerate(ids, 1):
                 x[f"{name}{k}"] = v
 
+    def _own_ctx(self, e: Elem, tokens=None) -> List[str]:
+        """The context concept of the element's surface window (no donated facet)."""
+        if "own" not in e.memo:
+            x = {a: v for a, v in e.ctx.items() if a[0] in "lr" and a[1:].isdigit()}
+            path = self.ctx.categorize(x)
+            e.memo["own"] = self._path_ids(path) if self.naming == "path" else self._ids(path)
+        return e.memo["own"]
+
     def _content(self, e: Elem) -> dict:
         x = {}
+        if self.donate_own:
+            self._facet(x, "oc", self._own_ctx(e))
         for p, part in (("L", e.left), ("R", e.right)):
-            self._facet(x, p, self._ctx_ids(part))
+            self._facet(x, p, self._ctx_name(part))
             if self.donate_cnt:
-                self._facet(x, f"{p}C", self._cnt_ids(part))
-            x[f"{p}H"] = str(min(part.height, 4))
+                self._facet(x, f"{p}C", self._cnt_name(part))
+            if self.heights:
+                x[f"{p}H"] = str(min(part.height, 4))
         return x
 
     def _context(self, tokens, e: Elem, analysed: bool) -> dict:
@@ -202,7 +256,7 @@ class Trellis3:
                 for p, ids in (("par", e.par), ("sib", e.sib)):
                     self._facet(x, p, ids or [BLANK] * self.depth)
         if self.donate_ctx:
-            self._facet(x, "cc", self._cnt_ids(e))
+            self._facet(x, "cc", self._cnt_name(e))
         return x
 
     def _word_concept(self, tokens, pos: int) -> List[str]:
@@ -278,6 +332,7 @@ class Trellis3:
                 for k in range(i + 1, j):
                     a, b = best[(i, k)][1], best[(k, j)][1]
                     e = Elem((i, j), split=k, left=a, right=b)
+                    e.ctx = self._surface(tokens, i, j)
                     e.cnt = self._content(e)
                     e.ctx = self._context(tokens, e, analysed=False)
                     if self.factor == "ccm":
@@ -428,6 +483,7 @@ class Trellis3:
             self._rr = (s + b) % len(old)
         for e in todo:
             if e.token is None:
+                e.memo.pop("own", None)
                 new = self._content(e)
                 if new != e.cnt:
                     if e.const > 0:
@@ -443,7 +499,7 @@ class Trellis3:
                 for p, part in (("cl", e.left), ("cr", e.right)):
                     self._facet(new, p, self._ctx_ids(part))
             if self.donate_ctx:
-                self._facet(new, "cc", self._cnt_ids(e))
+                self._facet(new, "cc", self._cnt_name(e))
             if new != e.ctx:
                 if e.const > 0:
                     self.ctx.add_passive(e.leaf, CONST, "c", -e.const)
@@ -543,12 +599,15 @@ class Trellis3:
         return out
 
     def generate_sub(self, rng: Optional[random.Random] = None, depth: Optional[int] = None,
-                     via: str = "ctx", max_depth: int = 12, members=None) -> Optional[List[str]]:
+                     via: str = "ctx", max_depth: int = 12, members=None,
+                     up: Optional[int] = None) -> Optional[List[str]]:
         """A sentence by substitution (v1's substitutability): a stored sentence-
         spanning element is expanded part by part, each part replaced by a stored
         element drawn (by weight) from the part's concept at ``depth``: its
         context concept (``via='ctx'``), or for a composite part its content
-        concept (``via='cnt'``); drawn words are emitted, drawn composites expand."""
+        concept (``via='cnt'``); drawn words are emitted, drawn composites expand.
+        With ``up`` the concept is ``up`` levels above the part's own leaf
+        (leaf-relative granularity) instead of at a fixed depth."""
         rng = rng or self.rng
         d = depth or self.depth
         if members is None:
@@ -570,14 +629,18 @@ class Trellis3:
             return pool[-1]
         out: List[str] = []
 
+        def concept(tree, leaf, x):
+            path = tree.ancestors(leaf)[::-1] if leaf is not None else tree.categorize(x)
+            if up is not None:
+                return f"c{path[max(len(path) - 1 - up, 1 if len(path) > 1 else 0)].id}"
+            return f"c{path[min(d, len(path) - 1)].id}"
+
         def expand(e, k):
             for part in (e.left, e.right):
                 if via == "cnt" and part.token is None:
-                    cid = self._cnt_ids(part)[d - 1]
-                    pool = mcnt.get(cid, [])
+                    pool = mcnt.get(concept(self.cnt, part.cleaf, part.cnt), [])
                 else:
-                    cid = self._ctx_ids(part)[d - 1]
-                    pool = mctx.get(cid, [])
+                    pool = mctx.get(concept(self.ctx, part.leaf, part.ctx), [])
                 r = draw(pool) if k < max_depth else None
                 if r is None:
                     r = part
