@@ -83,7 +83,9 @@ class Trellis3:
     def __init__(self, depth: int = 3, alpha: float = 1.0, seed: int = 0, window: int = 2,
                  store: str = "posterior", tau: float = 1.0, chunk_context: bool = True,
                  donate: bool = True, refresh_budget: Optional[int] = 3000, min_weight: float = 1e-3,
-                 bags: bool = True, children: Optional[bool] = None, spine: Optional[bool] = None):
+                 bags: bool = True, children: Optional[bool] = None, spine: Optional[bool] = None,
+                 neighbour_concepts: bool = False, donate_ctx: Optional[bool] = None,
+                 donate_cnt: Optional[bool] = None):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -96,14 +98,23 @@ class Trellis3:
         # the chunk itself) and the spine, parent and sibling (from the analysis)
         self.children = chunk_context if children is None else children
         self.spine = chunk_context if spine is None else spine
+        # the window at the level of categories: the context concepts of the
+        # tokens just left and right of the span (known while parsing)
+        self.neighbour_concepts = neighbour_concepts
+        # donation's two directions: the element's own content concept into its
+        # context; the parts' content concepts into the content
+        self.donate_ctx = donate if donate_ctx is None else donate_ctx
+        self.donate_cnt = donate if donate_cnt is None else donate_cnt
+        self._word_ids: Dict[Tuple[tuple, int], List[str]] = {}
         d = [""] if bags else [str(k) for k in range(1, depth + 1)]
         surface = tuple(f"l{k}" for k in range(window, 0, -1)) + tuple(f"r{k}" for k in range(1, window + 1))
         chunk = (tuple(f"{p}{k}" for p in ("cl", "cr") for k in d) if self.children else ()) + \
             (tuple(f"{p}{k}" for p in ("par", "sib") for k in d) if self.spine else ())
-        own = tuple(f"cc{k}" for k in d) if donate else ()
-        self.ctx_attrs = surface + chunk + own
+        own = tuple(f"cc{k}" for k in d) if self.donate_ctx else ()
+        neigh = tuple(f"{p}{k}" for p in ("lc", "rc") for k in d) if neighbour_concepts else ()
+        self.ctx_attrs = surface + neigh + chunk + own
         parts = tuple(f"{p}{k}" for p in ("L", "R") for k in d)
-        given = tuple(f"{p}{k}" for p in ("LC", "RC") for k in d) if donate else ()
+        given = tuple(f"{p}{k}" for p in ("LC", "RC") for k in d) if self.donate_cnt else ()
         self.cnt_attrs = parts + given + ("LH", "RH")
         self.ctx = IncrementalCobwebTree(self.ctx_attrs, seed=seed)
         self.cnt = IncrementalCobwebTree(self.cnt_attrs, seed=seed + 1)
@@ -156,7 +167,7 @@ class Trellis3:
         x = {}
         for p, part in (("L", e.left), ("R", e.right)):
             self._facet(x, p, self._ctx_ids(part))
-            if self.donate:
+            if self.donate_cnt:
                 self._facet(x, f"{p}C", self._cnt_ids(part))
             x[f"{p}H"] = str(min(part.height, 4))
         return x
@@ -165,6 +176,10 @@ class Trellis3:
         """The context description; with ``analysed`` False the parts that need an
         analysis (parent, sibling) are left out (a partial instance)."""
         x = self._surface(tokens, *e.span)
+        if self.neighbour_concepts:
+            i, j = e.span
+            for p, pos in (("lc", i - 1), ("rc", j)):
+                self._facet(x, p, self._word_concept(tokens, pos))
         if self.children:
             for p, part in (("cl", e.left), ("cr", e.right)):
                 self._facet(x, p, self._ctx_ids(part) if part is not None else [BLANK] * self.depth)
@@ -172,9 +187,17 @@ class Trellis3:
             if analysed:
                 for p, ids in (("par", e.par), ("sib", e.sib)):
                     self._facet(x, p, ids or [BLANK] * self.depth)
-        if self.donate:
+        if self.donate_ctx:
             self._facet(x, "cc", self._cnt_ids(e))
         return x
+
+    def _word_concept(self, tokens, pos: int) -> List[str]:
+        """The context concept of the token at ``pos`` (sorting its surface window);
+        blank outside the experience."""
+        if pos < 0 or pos >= len(tokens):
+            return [BLANK] * self.depth
+        x = self._surface(tokens, pos, pos + 1)
+        return self._ids(self.ctx.categorize(x))
 
     def _full(self, x: dict, attrs) -> dict:
         """Complete an instance for storage (missing attributes blank)."""
@@ -351,7 +374,7 @@ class Trellis3:
             if self.children and e.token is None:
                 for p, part in (("cl", e.left), ("cr", e.right)):
                     self._facet(new, p, self._ctx_ids(part))
-            if self.donate:
+            if self.donate_ctx:
                 self._facet(new, "cc", self._cnt_ids(e))
             if new != e.ctx:
                 self.ctx.unfit(e.leaf, e.ctx, e.weight)
