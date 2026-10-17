@@ -83,7 +83,7 @@ class Trellis3:
     def __init__(self, depth: int = 3, alpha: float = 1.0, seed: int = 0, window: int = 2,
                  store: str = "posterior", tau: float = 1.0, chunk_context: bool = True,
                  donate: bool = True, refresh_budget: Optional[int] = 3000, min_weight: float = 1e-3,
-                 bags: bool = True):
+                 bags: bool = True, children: Optional[bool] = None, spine: Optional[bool] = None):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -92,9 +92,14 @@ class Trellis3:
         # concept ids at depths 1..D, so every facet counts once in category
         # utility however many levels it names (else one attribute per depth).
         self.bags = bags
+        # chunk context in two facets: the children's context concepts (fixed by
+        # the chunk itself) and the spine, parent and sibling (from the analysis)
+        self.children = chunk_context if children is None else children
+        self.spine = chunk_context if spine is None else spine
         d = [""] if bags else [str(k) for k in range(1, depth + 1)]
         surface = tuple(f"l{k}" for k in range(window, 0, -1)) + tuple(f"r{k}" for k in range(1, window + 1))
-        chunk = tuple(f"{p}{k}" for p in ("cl", "cr", "par", "sib") for k in d) if chunk_context else ()
+        chunk = (tuple(f"{p}{k}" for p in ("cl", "cr") for k in d) if self.children else ()) + \
+            (tuple(f"{p}{k}" for p in ("par", "sib") for k in d) if self.spine else ())
         own = tuple(f"cc{k}" for k in d) if donate else ()
         self.ctx_attrs = surface + chunk + own
         parts = tuple(f"{p}{k}" for p in ("L", "R") for k in d)
@@ -160,9 +165,10 @@ class Trellis3:
         """The context description; with ``analysed`` False the parts that need an
         analysis (parent, sibling) are left out (a partial instance)."""
         x = self._surface(tokens, *e.span)
-        if self.chunk_context:
+        if self.children:
             for p, part in (("cl", e.left), ("cr", e.right)):
                 self._facet(x, p, self._ctx_ids(part) if part is not None else [BLANK] * self.depth)
+        if self.spine:
             if analysed:
                 for p, ids in (("par", e.par), ("sib", e.sib)):
                     self._facet(x, p, ids or [BLANK] * self.depth)
@@ -342,7 +348,7 @@ class Trellis3:
                     self.stats["refreshed"] += 1
             # the context's named concepts (children, own content) follow too
             new = dict(e.ctx)
-            if self.chunk_context and e.token is None:
+            if self.children and e.token is None:
                 for p, part in (("cl", e.left), ("cr", e.right)):
                     self._facet(new, p, self._ctx_ids(part))
             if self.donate:
