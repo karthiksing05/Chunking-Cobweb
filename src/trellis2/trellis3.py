@@ -42,6 +42,7 @@ from .incremental_cobweb import CobwebNode, IncrementalCobwebTree
 
 BOS, EOS, BLANK = "<s>", "</s>", "-"
 LN2 = math.log(2.0)
+CONST = "const"      # passive: constituent (posterior) mass of the stored elements
 
 
 def log_prob(node: CobwebNode, x: dict, root: CobwebNode, alpha: float) -> float:
@@ -66,7 +67,7 @@ def logsumexp(xs: List[float]) -> float:
 
 class Elem:
     __slots__ = ("span", "split", "token", "left", "right", "ctx", "cnt", "leaf", "cleaf", "weight",
-                 "height", "gain", "par", "sib", "memo")
+                 "height", "gain", "par", "sib", "memo", "const")
 
     def __init__(self, span, split=None, token=None, left=None, right=None):
         self.span, self.split, self.token, self.left, self.right = span, split, token, left, right
@@ -77,6 +78,7 @@ class Elem:
         self.gain = 0.0
         self.par = self.sib = None          # context concept ids of parent / sibling in the analysis
         self.memo = {}                      # concept ids found by sorting (valid while unstored)
+        self.const = 0.0                    # its posterior of being a constituent (store "ccm")
 
 
 class Trellis3:
@@ -85,7 +87,7 @@ class Trellis3:
                  donate: bool = True, refresh_budget: Optional[int] = 3000, min_weight: float = 1e-3,
                  bags: bool = True, children: Optional[bool] = None, spine: Optional[bool] = None,
                  neighbour_concepts: bool = False, donate_ctx: Optional[bool] = None,
-                 donate_cnt: Optional[bool] = None):
+                 donate_cnt: Optional[bool] = None, factor: str = "gain", support: float = 3.0):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -106,6 +108,17 @@ class Trellis3:
         self.donate_ctx = donate if donate_ctx is None else donate_ctx
         self.donate_cnt = donate if donate_cnt is None else donate_cnt
         self._word_ids: Dict[Tuple[tuple, int], List[str]] = {}
+        # a chunk's factor in inside-outside: "gain" (against the roots) or
+        # "code": log2 of the chunk's probability under memory, max over its
+        # sorting path of share(C) P(x|C), in both hierarchies. Every full binary
+        # analysis has n - 1 chunks, so a tree's weight is then the joint
+        # probability of its chunks' descriptions, with no per-chunk baseline.
+        self.factor = factor
+        # "ccm" (Klein & Manning's constituent-context contrast, over Cobweb's
+        # concepts): log2 [(constituent share of C) / (non-constituent share of
+        # C)] at the deepest concept on the description's path holding at least
+        # ``support`` elements, in both hierarchies; words count as constituents
+        self.support = support
         d = [""] if bags else [str(k) for k in range(1, depth + 1)]
         surface = tuple(f"l{k}" for k in range(window, 0, -1)) + tuple(f"r{k}" for k in range(1, window + 1))
         chunk = (tuple(f"{p}{k}" for p in ("cl", "cr") for k in d) if self.children else ()) + \
@@ -206,6 +219,32 @@ class Trellis3:
     # ------------------------------------------------------------------ #
     # Scoring and inside-outside
     # ------------------------------------------------------------------ #
+    def _code(self, tree: IncrementalCobwebTree, x: dict) -> float:
+        """max over x's sorting path (root included) of log2 [share(C) P(x|C)]."""
+        root = tree.root
+        if root.count <= 0:
+            return 0.0
+        best = -math.inf
+        for node in tree.categorize(x):
+            if node.count <= 0:
+                continue
+            best = max(best, (math.log(node.count / root.count) + log_prob(node, x, root, self.alpha)) / LN2)
+        return best
+
+    def _contrast(self, tree: IncrementalCobwebTree, x: dict) -> float:
+        root = tree.root
+        if root.count <= 0:
+            return 0.0
+        node = root
+        for n in tree.categorize(x)[1:]:
+            if n.count >= self.support:
+                node = n
+        c = lambda n: sum(n.pav.get(CONST, {}).values())
+        cC, cR = c(node), c(root)
+        dC, dR = max(node.count - cC, 0.0), max(root.count - cR, 0.0)
+        eps = 0.5
+        return math.log2(((cC + eps) / (cR + eps)) / ((dC + eps) / (dR + eps)))
+
     def _gain(self, tree: IncrementalCobwebTree, x: dict) -> float:
         """Best over x's sorting path of log2 [share(C) P(x|C) / P(x|root)]; 0 at the root."""
         root = tree.root
@@ -240,7 +279,12 @@ class Trellis3:
                     e = Elem((i, j), split=k, left=a, right=b)
                     e.cnt = self._content(e)
                     e.ctx = self._context(tokens, e, analysed=False)
-                    e.gain = self._gain(self.cnt, e.cnt) + self._gain(self.ctx, e.ctx)
+                    if self.factor == "ccm":
+                        e.gain = self._contrast(self.cnt, e.cnt) + self._contrast(self.ctx, e.ctx)
+                    elif self.factor == "code":
+                        e.gain = self._code(self.cnt, e.cnt) + self._code(self.ctx, e.ctx)
+                    else:
+                        e.gain = self._gain(self.cnt, e.cnt) + self._gain(self.ctx, e.ctx)
                     comps[(i, k, j)] = e
                     v = best[(i, k)][0] + best[(k, j)][0] + e.gain
                     if (i, j) not in best or v > best[(i, j)][0]:
@@ -320,7 +364,11 @@ class Trellis3:
             parent = comps[(i, k, j)]
             for child, sib in ((node_of[(i, k)], node_of[(k, j)]), (node_of[(k, j)], node_of[(i, k)])):
                 child.par, child.sib = self._ctx_ids(parent), self._ctx_ids(sib)
-        if self.store == "posterior":
+        if self.store == "ccm":
+            weights = {key: 1.0 for key in comps}
+            for key, e in comps.items():
+                e.const = post.get(key, 0.0)
+        elif self.store == "posterior":
             weights = {key: p for key, p in post.items()}
         elif self.store == "all":
             weights = {key: 1.0 for key in comps}
@@ -331,6 +379,9 @@ class Trellis3:
             e.weight = 1.0
             e.ctx = self._full(self._context(tokens, e, analysed=True), self.ctx_attrs)
             e.leaf = self.ctx.ifit(e.ctx, 1.0)
+            if self.store == "ccm":
+                e.const = 1.0
+                self.ctx.add_passive(e.leaf, CONST, "c", 1.0)
             self.records.append(e)
             self.stats["words stored"] += 1
         first = len(self.records)
@@ -344,6 +395,9 @@ class Trellis3:
             e.cleaf = self.cnt.ifit(e.cnt, w)
             e.ctx = self._full(self._context(tokens, e, analysed=key in chosen), self.ctx_attrs)
             e.leaf = self.ctx.ifit(e.ctx, w)
+            if e.const > 0:
+                self.cnt.add_passive(e.cleaf, CONST, "c", e.const)
+                self.ctx.add_passive(e.leaf, CONST, "c", e.const)
             self.records.append(e)
             self.stats["composites stored"] += 1
         self.stats["experiences"] += 1
@@ -366,8 +420,12 @@ class Trellis3:
             if e.token is None:
                 new = self._content(e)
                 if new != e.cnt:
+                    if e.const > 0:
+                        self.cnt.add_passive(e.cleaf, CONST, "c", -e.const)
                     self.cnt.unfit(e.cleaf, e.cnt, e.weight)
                     e.cnt, e.cleaf = new, self.cnt.ifit(new, e.weight)
+                    if e.const > 0:
+                        self.cnt.add_passive(e.cleaf, CONST, "c", e.const)
                     self.stats["refreshed"] += 1
             # the context's named concepts (children, own content) follow too
             new = dict(e.ctx)
@@ -377,6 +435,10 @@ class Trellis3:
             if self.donate_ctx:
                 self._facet(new, "cc", self._cnt_ids(e))
             if new != e.ctx:
+                if e.const > 0:
+                    self.ctx.add_passive(e.leaf, CONST, "c", -e.const)
                 self.ctx.unfit(e.leaf, e.ctx, e.weight)
                 e.ctx, e.leaf = new, self.ctx.ifit(new, e.weight)
+                if e.const > 0:
+                    self.ctx.add_passive(e.leaf, CONST, "c", e.const)
                 self.stats["refreshed"] += 1
