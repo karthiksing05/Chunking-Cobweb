@@ -50,7 +50,10 @@ def log_prob(node: CobwebNode, x: dict, root: CobwebNode, alpha: float) -> float
     for a, v in x.items():
         d = node.av.get(a, {})
         size = len(root.av.get(a, {})) + 1
-        total += math.log((d.get(v, 0.0) + alpha) / (node.count + alpha * size))
+        if isinstance(v, dict):        # a bag: the expected log probability of its members
+            total += sum(p * math.log((d.get(u, 0.0) + alpha) / (node.count + alpha * size)) for u, p in v.items())
+        else:
+            total += math.log((d.get(v, 0.0) + alpha) / (node.count + alpha * size))
     return total
 
 
@@ -79,11 +82,17 @@ class Elem:
 class Trellis3:
     def __init__(self, depth: int = 3, alpha: float = 1.0, seed: int = 0, window: int = 2,
                  store: str = "posterior", tau: float = 1.0, chunk_context: bool = True,
-                 donate: bool = True, refresh_budget: Optional[int] = 3000, min_weight: float = 1e-3):
+                 donate: bool = True, refresh_budget: Optional[int] = 3000, min_weight: float = 1e-3,
+                 bags: bool = True):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
-        d = range(1, depth + 1)
+        # bags: each facet that names a concept (a part, a child, the parent, the
+        # sibling, the own content) is ONE attribute whose value is the bag of its
+        # concept ids at depths 1..D, so every facet counts once in category
+        # utility however many levels it names (else one attribute per depth).
+        self.bags = bags
+        d = [""] if bags else [str(k) for k in range(1, depth + 1)]
         surface = tuple(f"l{k}" for k in range(window, 0, -1)) + tuple(f"r{k}" for k in range(1, window + 1))
         chunk = tuple(f"{p}{k}" for p in ("cl", "cr", "par", "sib") for k in d) if chunk_context else ()
         own = tuple(f"cc{k}" for k in d) if donate else ()
@@ -129,14 +138,21 @@ class Trellis3:
             e.memo["cnt"] = self._ids(self.cnt.categorize(e.cnt))
         return e.memo["cnt"]
 
+    def _facet(self, x: dict, name: str, ids: List[str]) -> None:
+        """Write a facet's concept ids: one bag attribute, or one attribute per depth."""
+        if self.bags:
+            real = [v for v in ids if v != BLANK]
+            x[name] = {v: 1.0 / len(real) for v in real} if real else BLANK
+        else:
+            for k, v in enumerate(ids, 1):
+                x[f"{name}{k}"] = v
+
     def _content(self, e: Elem) -> dict:
         x = {}
         for p, part in (("L", e.left), ("R", e.right)):
-            for k, v in enumerate(self._ctx_ids(part), 1):
-                x[f"{p}{k}"] = v
+            self._facet(x, p, self._ctx_ids(part))
             if self.donate:
-                for k, v in enumerate(self._cnt_ids(part), 1):
-                    x[f"{p}C{k}"] = v
+                self._facet(x, f"{p}C", self._cnt_ids(part))
             x[f"{p}H"] = str(min(part.height, 4))
         return x
 
@@ -146,16 +162,12 @@ class Trellis3:
         x = self._surface(tokens, *e.span)
         if self.chunk_context:
             for p, part in (("cl", e.left), ("cr", e.right)):
-                ids = self._ctx_ids(part) if part is not None else [BLANK] * self.depth
-                for k, v in enumerate(ids, 1):
-                    x[f"{p}{k}"] = v
+                self._facet(x, p, self._ctx_ids(part) if part is not None else [BLANK] * self.depth)
             if analysed:
                 for p, ids in (("par", e.par), ("sib", e.sib)):
-                    for k, v in enumerate(ids or [BLANK] * self.depth, 1):
-                        x[f"{p}{k}"] = v
+                    self._facet(x, p, ids or [BLANK] * self.depth)
         if self.donate:
-            for k, v in enumerate(self._cnt_ids(e), 1):
-                x[f"cc{k}"] = v
+            self._facet(x, "cc", self._cnt_ids(e))
         return x
 
     def _full(self, x: dict, attrs) -> dict:
@@ -332,11 +344,9 @@ class Trellis3:
             new = dict(e.ctx)
             if self.chunk_context and e.token is None:
                 for p, part in (("cl", e.left), ("cr", e.right)):
-                    for k, v in enumerate(self._ctx_ids(part), 1):
-                        new[f"{p}{k}"] = v
+                    self._facet(new, p, self._ctx_ids(part))
             if self.donate:
-                for k, v in enumerate(self._cnt_ids(e), 1):
-                    new[f"cc{k}"] = v
+                self._facet(new, "cc", self._cnt_ids(e))
             if new != e.ctx:
                 self.ctx.unfit(e.leaf, e.ctx, e.weight)
                 e.ctx, e.leaf = new, self.ctx.ifit(new, e.weight)
