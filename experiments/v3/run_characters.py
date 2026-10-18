@@ -60,8 +60,8 @@ def main():
             _rng = _random.Random(seed)
             def _gen(max_len=15, _mem=[None]):
                 if _mem[0] is None or _mem[0][0] != len(L.records):
-                    _mem[0] = (len(L.records), (L._members(L.ctx, "ctx"), L._members(L.cnt, "cnt")))
-                s = L.generate_sub(_rng, via="ctx", up=1, members=_mem[0][1])
+                    _mem[0] = (len(L.records), L._members(L.ctx, "ctx"))
+                s = L.generate_expand(_rng, members=_mem[0][1], up=1)
                 return s if s is not None and len(s) <= max_len else None
             L.generate = _gen
         t0, done = time.time(), 0
