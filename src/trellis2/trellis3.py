@@ -674,12 +674,15 @@ class Trellis3:
             if leaf is not None:
                 at.setdefault(id(leaf), []).append(e)
         out: Dict[str, List[Elem]] = {}
-
-        def walk(n):
-            got = list(at.get(id(n), [])) if not n.children else [r for c in n.children for r in walk(c)]
-            out[f"c{n.id}"] = got
-            return got
-        walk(tree.root)
+        # post-order without recursion (trees can be deeper than Python's stack)
+        stack, order = [tree.root], []
+        while stack:
+            n = stack.pop()
+            order.append(n)
+            stack.extend(n.children)
+        for n in reversed(order):
+            out[f"c{n.id}"] = (list(at.get(id(n), [])) if not n.children
+                               else [r for c in n.children for r in out[f"c{c.id}"]])
         return out
 
     def generate_sub(self, rng: Optional[random.Random] = None, depth: Optional[int] = None,
