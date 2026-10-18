@@ -344,14 +344,18 @@ class IncrementalCobwebTree:
                     if d is None:
                         d = node.av[a] = {}
                         node.ss[a] = 0.0
+                    ss = node.ss[a]
                     for u, p in (v.items() if isinstance(v, dict) else ((v, 1.0),)):
-                        n = d.get(u, 0.0) + sign * w * p
+                        m = d.get(u, 0.0)
+                        n = m + sign * w * p
                         if abs(n) <= EPS * max(1.0, w):
                             d.pop(u, None)
+                            n = 0.0
                         else:
                             d[u] = n
-                    node.ss[a] = math.fsum(m * m for m in d.values())
-            node.sstot = math.fsum(node.ss.values())
+                        ss += n * n - m * m
+                    node.sstot += ss - node.ss[a]
+                    node.ss[a] = ss
             node = node.parent
 
     def unfit(self, leaf: CobwebNode, x: Instance, w: float = 1.0) -> None:
