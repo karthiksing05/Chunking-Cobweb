@@ -172,3 +172,32 @@ What the diagnostics showed:
 * **Generation.** Context-concept substitution gives 30-50% grammatical, novel
   sentences on med/large/term_high (bigram reference ~20%). Content concepts
   remain weak (2-17%).
+
+## TRELLIS v2 framing and the parse/generate commitments (2026-10-18)
+
+The trellis3 line is TRELLIS v2. The day/night learner is no longer part of
+the account.
+
+* **The grammar is implicit.** Inside-outside replaces v1's greedy chunking,
+  not the grammar. The grammar is whatever the two trees hold. It changes with
+  every experience, as a competitive frontier: every candidate composite is
+  stored by its posterior share, so evidence decides which chunks become
+  concepts.
+* **Readout by regeneration** (`readout="regen"`). Keep the analysis whose
+  chunks memory unpacks most probably: the sum over composites of
+  log2 P(parts | content concept). The concept is the deepest one on the sorting
+  path holding at least `support` instances. Unpacking the chunks then gives
+  back the experience.
+* **Expansive generation** (`generate_expand`).
+  * Sample a sentence-level root chunk.
+  * Expand top-down, left to right. Each slot carries metadata (its context
+    concept, and whether the part is a word or a chunk) and chunk context (the
+    tokens generated to its left, and the end marker when it is last).
+  * Draw a filler from the concept's stored members by probability matching:
+    stored weight times P(surroundings | member's concept).
+  * There is no word-to-word prediction.
+* **Window** is a parameter (`window`, default 2).
+* **Sustainable hierarchy.** The hierarchy stays current without rebuilds:
+  * there is no re-parse;
+  * relabelling happens in place on a stored leaf's path;
+  * a bounded round-robin refresh runs per experience.
