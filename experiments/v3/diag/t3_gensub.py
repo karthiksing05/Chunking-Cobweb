@@ -15,6 +15,15 @@ for e in train: L.learn(e.tokens)
 g = CFG(target_grammar(cond)); seen = {tuple(e.tokens) for e in train}
 mem = (L._members(L.ctx, "ctx"), L._members(L.cnt, "cnt"))
 print(cond, "learn %.0fs" % (time.time() - t0), flush=True)
+for up in (1, 2):
+    rng = random.Random(0)
+    S = [L.generate_expand(rng, members=mem[0], up=up) for _ in range(n)]; ok = [s for s in S if s]
+    gram = [s for s in ok if g.recognizes(s)]
+    print("  expand u%d generated %.2f grammatical %.3f novel %.2f gram+novel %.3f len %.1f distinct %.2f" % (
+        up, len(ok) / n, len(gram) / max(len(ok), 1), sum(tuple(s) not in seen for s in ok) / max(len(ok), 1),
+        sum(tuple(s) not in seen for s in gram) / max(len(ok), 1), sum(map(len, ok)) / max(len(ok), 1),
+        len(set(map(tuple, ok))) / max(len(ok), 1)), flush=True)
+    for s in ok[:3]: print("     ", " ".join(s), "✓" if g.recognizes(s) else "✗")
 for via in ("ctx", "cnt"):
     for d in ("d2", "d3", "u1", "u2", "u3"):
         rng = random.Random(0)

@@ -22,6 +22,7 @@ ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 
 from trellis2.candidates import CandidateLearner  # noqa: E402
+from trellis2.trellis3 import Trellis3  # noqa: E402
 from trellis2.characters import default_ids_path, load_characters, parse_prefix, placements  # noqa: E402
 from trellis2.data import Tree  # noqa: E402
 from trellis2.evaluation import BracketTally  # noqa: E402
@@ -38,6 +39,7 @@ def main():
     ap.add_argument("--seeds", default="13")
     ap.add_argument("--config", default="{}")
     ap.add_argument("--n-gen", type=int, default=500)
+    ap.add_argument("--learner", default="candidates", choices=["candidates", "trellis3"])
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
@@ -51,7 +53,17 @@ def main():
         attested = set()
         for c in chars:
             placements(parse_prefix(c.tokens), attested)
-        L = CandidateLearner(seed=seed, **cfg)
+        L = (Trellis3 if args.learner == "trellis3" else CandidateLearner)(seed=seed, **cfg)
+        parse = (lambda toks: (L.parse(toks)["tree"], None)) if args.learner == "trellis3" else L.parse
+        if args.learner == "trellis3":
+            import random as _random
+            _rng = _random.Random(seed)
+            def _gen(max_len=15, _mem=[None]):
+                if _mem[0] is None or _mem[0][0] != len(L.records):
+                    _mem[0] = (len(L.records), (L._members(L.ctx, "ctx"), L._members(L.cnt, "cnt")))
+                s = L.generate_sub(_rng, via="ctx", up=1, members=_mem[0][1])
+                return s if s is not None and len(s) <= max_len else None
+            L.generate = _gen
         t0, done = time.time(), 0
         for n in checkpoints:
             for c in chars[done:n]:
@@ -60,7 +72,7 @@ def main():
             learn_s = time.time() - t0
             te, rb, whole = BracketTally(), BracketTally(), 0
             for c in test:
-                t, _ = L.parse(c.tokens)
+                t, _ = parse(c.tokens)
                 te.add(c.tree, t)
                 rb.add(c.tree, right_branching(len(c.tokens)))
                 whole += len(t.roots) == 1
@@ -78,7 +90,7 @@ def main():
                    "real": sum(st in real for st in good) / max(len(samples), 1),
                    "novel": sum(tuple(s) not in seen for s in samples) / max(len(samples), 1),
                    "examples": [" ".join(s) for s in samples[:12]],
-                   "parses": [L.parse(c.tokens)[0].to_string(c.tokens) for c in test[:8]],
+                   "parses": [parse(c.tokens)[0].to_string(c.tokens) for c in test[:8]],
                    "gold": [c.tree.to_string(c.tokens) for c in test[:8]],
                    "stats": {k: v for k, v in L.stats.items()}, "learn seconds": learn_s}
             rows.append(row)

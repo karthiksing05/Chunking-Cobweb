@@ -90,7 +90,7 @@ class Trellis3:
                  neighbour_concepts: bool = False, donate_ctx: Optional[bool] = None,
                  donate_cnt: Optional[bool] = None, factor: str = "gain", support: float = 3.0,
                  naming: str = "depth", heights: bool = True, donate_own: bool = False,
-                 refresh: str = "refit"):
+                 refresh: str = "refit", readout: str = "mbr"):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -138,6 +138,11 @@ class Trellis3:
         # "refit" (taken out and re-inserted) or "relabel" (its counts updated
         # in place on its own path; it stays where it was stored)
         self.refresh = refresh
+        # the analysis read out of an experience: "mbr" (most expected correct
+        # composites) or "regen" (the analysis whose chunks memory regenerates
+        # most probably: the sum over its composites of log2 P(parts | content
+        # concept), so unpacking the chunks gives back the experience)
+        self.readout = readout
         d = [""] if bags else [str(k) for k in range(1, depth + 1)]
         surface = tuple(f"l{k}" for k in range(window, 0, -1)) + tuple(f"r{k}" for k in range(1, window + 1))
         chunk = (tuple(f"{p}{k}" for p in ("cl", "cr") for k in d) if self.children else ()) + \
@@ -395,6 +400,43 @@ class Trellis3:
                 for key in comps}
         return post, logZ
 
+    def _regen_bits(self, e: Elem) -> float:
+        """log2 P(e's content | its content concept): how probably memory
+        unpacks this chunk into these parts (the deepest concept on its sorting
+        path holding at least ``support`` instances; the root when none does)."""
+        if "regen" not in e.memo:
+            root = self.cnt.root
+            if root.count <= 0:
+                e.memo["regen"] = 0.0
+            else:
+                node = root
+                for c in self.cnt.categorize(e.cnt)[1:]:
+                    if c.count >= self.support:
+                        node = c
+                e.memo["regen"] = log_prob(node, e.cnt, root, self.alpha) / LN2
+        return e.memo["regen"]
+
+    def _regen(self, n: int, comps) -> Tuple[Tree, List[Tuple[int, int, int]]]:
+        """The analysis maximising the summed regeneration log probability of its chunks."""
+        best = {(i, i + 1): (0.0, None) for i in range(n)}
+        for length in range(2, n + 1):
+            for i in range(0, n - length + 1):
+                j = i + length
+                k = max(range(i + 1, j), key=lambda k: best[(i, k)][0] + best[(k, j)][0] + self._regen_bits(comps[(i, k, j)]))
+                best[(i, j)] = (best[(i, k)][0] + best[(k, j)][0] + self._regen_bits(comps[(i, k, j)]), k)
+        split, chosen = {}, []
+
+        def walk(i, j):
+            if j - i < 2:
+                return
+            k = best[(i, j)][1]
+            split[(i, j)] = k
+            chosen.append((i, k, j))
+            walk(i, k)
+            walk(k, j)
+        walk(0, n)
+        return Tree(n, split, {}, [(0, n)]), chosen
+
     def _mbr(self, n: int, post) -> Tuple[Tree, List[Tuple[int, int, int]]]:
         """The analysis maximising the expected number of correct composites."""
         span_post: Dict[Tuple[int, int], float] = {}
@@ -427,7 +469,7 @@ class Trellis3:
             return {"tree": Tree(n, {}, {}, [(0, n)] if n else []), "words": words, "comps": comps,
                     "post": {}, "chosen": []}
         post, logZ = self._inside_outside(n, comps)
-        tree, chosen = self._mbr(n, post)
+        tree, chosen = self._regen(n, comps) if self.readout == "regen" else self._mbr(n, post)
         return {"tree": tree, "words": words, "comps": comps, "post": post, "chosen": chosen, "logZ": logZ}
 
     # ------------------------------------------------------------------ #
@@ -685,6 +727,75 @@ class Trellis3:
                     expand(r, k + 1)
         try:
             expand(draw(roots), 0)
+        except (LookupError, RecursionError):
+            return None
+        return out
+
+    def generate_expand(self, rng: Optional[random.Random] = None, members=None, up: int = 1,
+                        max_depth: int = 12, kind: bool = True) -> Optional[List[str]]:
+        """Expansive generation. Sample a sentence-level chunk from memory as the
+        root, then expand top-down, left to right. Each slot carries metadata
+        (its context concept, ``up`` levels above the stored part's leaf, and
+        whether the part was a word or a chunk) and chunk context (the tokens
+        already generated to its left; the sentence end when the slot is last).
+        Every stored member of the slot's concept is weighted by its stored
+        weight times the probability its concept gives those surroundings, and
+        one is drawn in proportion (probability matching), then expanded the
+        same way: a word is emitted, a chunk's parts become new slots."""
+        rng = rng or self.rng
+        if members is None:
+            members = self._members(self.ctx, "ctx")
+        roots = [e for e in self.records if e.token is None and e.weight > 0
+                 and e.ctx.get("l1") == BOS and e.ctx.get("r1") == EOS]
+        if not roots:
+            return None
+        sizes = {a: max(len(self.ctx.root.av.get(a, {})), 1) for a in self.ctx_attrs}
+        out: List[str] = []
+
+        def surround(m, at_end):
+            node = m.leaf.parent if m.leaf is not None and m.leaf.parent is not None else m.leaf
+            if node is None:
+                return 1.0
+            p = 1.0
+            known = ([(f"l{k}", out[-k] if k <= len(out) else BOS) for k in range(1, self.window + 1)] +
+                     ([(f"r{k}", EOS) for k in range(1, self.window + 1)] if at_end else []))
+            for a, v in known:
+                d = node.av.get(a, {})
+                p *= (d.get(v, 0.0) + self.alpha) / (node.count + self.alpha * sizes[a])
+            return p
+
+        def draw(pool, at_end):
+            scored = [(m, m.weight * surround(m, at_end)) for m in pool if m.weight > 0]
+            tot = sum(w for _, w in scored)
+            if tot <= 0:
+                return None
+            t = rng.random() * tot
+            for m, w in scored:
+                t -= w
+                if t <= 0:
+                    return m
+            return scored[-1][0]
+
+        def concept(part):
+            path = self.ctx.ancestors(part.leaf)[::-1] if part.leaf is not None else self.ctx.categorize(part.ctx)
+            return f"c{path[max(len(path) - 1 - up, 1 if len(path) > 1 else 0)].id}"
+
+        def expand(e, d, at_end):
+            for side, part in (("L", e.left), ("R", e.right)):
+                last = at_end and side == "R"
+                pool = members.get(concept(part), [])
+                if kind:
+                    word = part.token is not None or d >= max_depth
+                    pool = [m for m in pool if (m.token is not None) == word]
+                m = draw(pool, last) or part
+                if m.token is not None:
+                    out.append(m.token)
+                elif m.left is None or d >= max_depth:
+                    raise LookupError
+                else:
+                    expand(m, d + 1, last)
+        try:
+            expand(draw(roots, True), 0, True)
         except (LookupError, RecursionError):
             return None
         return out
