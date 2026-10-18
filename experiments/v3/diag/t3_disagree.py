@@ -26,7 +26,8 @@ if mode == "gold":
 else:
     for e in train: L.learn(e.tokens)
 def parts(e):
-    return L._gain(L.cnt, e.cnt), L._gain(L.ctx, e.ctx)
+    f = L._climb if L.factor == "climb" else L._gain
+    return f(L.cnt, e.cnt), f(L.ctx, e.ctx)
 lost, won, shown = Counter(), Counter(), 0
 for e in test:
     n = len(e.tokens)

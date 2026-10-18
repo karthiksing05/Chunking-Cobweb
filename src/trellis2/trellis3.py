@@ -123,7 +123,8 @@ class Trellis3:
         self.support = support
         # how a facet names a concept: "depth" (its concepts at depths 1..D) or
         # "path" (every concept on its path below the root, the own leaf left
-        # out): shared ancestry at every granularity, no fixed depth
+        # out): shared ancestry at every granularity, no fixed depth; or "leaf":
+        # the D concepts just above its own leaf (the substitutable granularity)
         self.naming = naming
         # the parts' heights in the content (v1's complexity tag); without them a
         # part that recurses (an N' where an N stands) is named only by its concepts
@@ -206,9 +207,11 @@ class Trellis3:
             path = e.memo["cntp"]
         return self._path_ids(path)
 
-    @staticmethod
-    def _path_ids(path) -> List[str]:
+    def _path_ids(self, path) -> List[str]:
         inner = path[1:-1] if len(path) > 1 and not path[-1].children else path[1:]
+        if self.naming == "leaf":
+            # the D concepts nearest the element's own leaf (finest first)
+            inner = inner[::-1][:self.depth]
         return [f"c{n.id}" for n in inner] or [BLANK]
 
     def _facet(self, x: dict, name: str, ids: List[str]) -> None:
@@ -300,6 +303,21 @@ class Trellis3:
         eps = 0.5
         return math.log2(((cC + eps) / (cR + eps)) / ((dC + eps) / (dR + eps)))
 
+    def _climb(self, tree: IncrementalCobwebTree, x: dict) -> float:
+        """v1's recognition at the climbing ancestor: log2 P(x|A) / P(x|root),
+        A the deepest concept on x's sorting path holding at least ``support``
+        instances (the root when none does: an unrecognised chunk scores 0)."""
+        root = tree.root
+        if root.count <= 0:
+            return 0.0
+        node = root
+        for n in tree.categorize(x)[1:]:
+            if n.count >= self.support:
+                node = n
+        if node is root:
+            return 0.0
+        return (log_prob(node, x, root, self.alpha) - log_prob(root, x, root, self.alpha)) / LN2
+
     def _gain(self, tree: IncrementalCobwebTree, x: dict) -> float:
         """Best over x's sorting path of log2 [share(C) P(x|C) / P(x|root)]; 0 at the root."""
         root = tree.root
@@ -337,6 +355,8 @@ class Trellis3:
                     e.ctx = self._context(tokens, e, analysed=False)
                     if self.factor == "ccm":
                         e.gain = self._contrast(self.cnt, e.cnt) + self._contrast(self.ctx, e.ctx)
+                    elif self.factor == "climb":
+                        e.gain = self._climb(self.cnt, e.cnt) + self._climb(self.ctx, e.ctx)
                     elif self.factor == "code":
                         e.gain = self._code(self.cnt, e.cnt) + self._code(self.ctx, e.ctx)
                     else:
