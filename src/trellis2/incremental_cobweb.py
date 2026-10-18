@@ -324,6 +324,36 @@ class IncrementalCobwebTree:
                     out[v] = out.get(v, 0.0) + m
         return out
 
+    def relabel(self, leaf: CobwebNode, old: Instance, new: Instance, w: float = 1.0) -> None:
+        """Re-describe an instance in place: its stored description ``old``
+        becomes ``new`` on the path from its leaf to the root, the instance
+        staying where it is (as a stored leaf reference is re-read, not moved).
+        Only the attributes that differ are touched."""
+        if leaf.children:
+            raise ValueError("instances are stored at leaves")
+        a_old = {a: v for a, v in old.items() if new.get(a) != v}
+        a_new = {a: new[a] for a in a_old if a in new}
+        a_new.update({a: v for a, v in new.items() if a not in old})
+        if not a_old and not a_new:
+            return
+        node = leaf
+        while node is not None:
+            for x, sign in ((a_old, -1.0), (a_new, 1.0)):
+                for a, v in x.items():
+                    d = node.av.get(a)
+                    if d is None:
+                        d = node.av[a] = {}
+                        node.ss[a] = 0.0
+                    for u, p in (v.items() if isinstance(v, dict) else ((v, 1.0),)):
+                        n = d.get(u, 0.0) + sign * w * p
+                        if abs(n) <= EPS * max(1.0, w):
+                            d.pop(u, None)
+                        else:
+                            d[u] = n
+                    node.ss[a] = math.fsum(m * m for m in d.values())
+            node.sstot = math.fsum(node.ss.values())
+            node = node.parent
+
     def unfit(self, leaf: CobwebNode, x: Instance, w: float = 1.0) -> None:
         """Remove ``x`` (weight ``w``), stored at ``leaf``, from the tree."""
         if leaf.children:

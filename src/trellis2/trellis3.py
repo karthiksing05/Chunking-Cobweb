@@ -89,7 +89,8 @@ class Trellis3:
                  bags: bool = True, children: Optional[bool] = None, spine: Optional[bool] = None,
                  neighbour_concepts: bool = False, donate_ctx: Optional[bool] = None,
                  donate_cnt: Optional[bool] = None, factor: str = "gain", support: float = 3.0,
-                 naming: str = "depth", heights: bool = True, donate_own: bool = False):
+                 naming: str = "depth", heights: bool = True, donate_own: bool = False,
+                 refresh: str = "refit"):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -133,6 +134,10 @@ class Trellis3:
         # mirror of ``cc``): the context concept of its surface window, so a
         # content concept groups chunks by makeup and by where they occur
         self.donate_own = donate_own
+        # how a stored instance whose named concepts moved is re-described:
+        # "refit" (taken out and re-inserted) or "relabel" (its counts updated
+        # in place on its own path; it stays where it was stored)
+        self.refresh = refresh
         d = [""] if bags else [str(k) for k in range(1, depth + 1)]
         surface = tuple(f"l{k}" for k in range(window, 0, -1)) + tuple(f"r{k}" for k in range(1, window + 1))
         chunk = (tuple(f"{p}{k}" for p in ("cl", "cr") for k in d) if self.children else ()) + \
@@ -505,7 +510,11 @@ class Trellis3:
             if e.token is None:
                 e.memo.pop("own", None)
                 new = self._content(e)
-                if new != e.cnt:
+                if new != e.cnt and self.refresh == "relabel":
+                    self.cnt.relabel(e.cleaf, e.cnt, new, e.weight)
+                    e.cnt = new
+                    self.stats["refreshed"] += 1
+                elif new != e.cnt:
                     if e.const > 0:
                         self.cnt.add_passive(e.cleaf, CONST, "c", -e.const)
                     self.cnt.unfit(e.cleaf, e.cnt, e.weight)
@@ -520,7 +529,11 @@ class Trellis3:
                     self._facet(new, p, self._ctx_ids(part))
             if self.donate_ctx:
                 self._facet(new, "cc", self._cnt_name(e))
-            if new != e.ctx:
+            if new != e.ctx and self.refresh == "relabel":
+                self.ctx.relabel(e.leaf, e.ctx, new, e.weight)
+                e.ctx = new
+                self.stats["refreshed"] += 1
+            elif new != e.ctx:
                 if e.const > 0:
                     self.ctx.add_passive(e.leaf, CONST, "c", -e.const)
                 if e.token is not None:
