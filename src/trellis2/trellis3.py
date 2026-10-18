@@ -222,13 +222,22 @@ class Trellis3:
         if self.naming == "leaf":
             # the D concepts nearest the element's own leaf (finest first)
             inner = inner[::-1][:self.depth]
+        if self.naming == "ipath" and inner:
+            # each concept weighted by its information, -log2 of its share of
+            # the tree in whole bits: shared coarse ancestry counts little
+            total = max(path[0].count, 1e-9)
+            return [f"c{n.id}" for n in inner
+                    for _ in range(max(1, round(-math.log2(max(n.count, 1e-9) / total))))]
         return [f"c{n.id}" for n in inner] or [BLANK]
 
     def _facet(self, x: dict, name: str, ids: List[str]) -> None:
         """Write a facet's concept ids: one bag attribute, or one attribute per depth."""
         if self.bags:
             real = [v for v in ids if v != BLANK]
-            x[name] = {v: 1.0 / len(real) for v in real} if real else BLANK
+            bag: Dict[str, float] = {}
+            for v in real:
+                bag[v] = bag.get(v, 0.0) + 1.0 / len(real)
+            x[name] = bag if real else BLANK
         else:
             for k, v in enumerate(ids, 1):
                 x[f"{name}{k}"] = v
@@ -238,7 +247,7 @@ class Trellis3:
         if "own" not in e.memo:
             x = {a: v for a, v in e.ctx.items() if a[0] in "lr" and a[1:].isdigit()}
             path = self.ctx.categorize(x)
-            e.memo["own"] = self._path_ids(path) if self.naming == "path" else self._ids(path)
+            e.memo["own"] = self._path_ids(path) if self.naming in ("path", "ipath", "leaf") else self._ids(path)
         return e.memo["own"]
 
     def _content(self, e: Elem) -> dict:
