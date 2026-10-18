@@ -115,3 +115,60 @@ regenerate the original.
 * Tried and not adopted as defaults: beam over parses, whole-parse lookahead,
   all-span candidates (helps med with the code objective, hurts generation),
   enrichment on the context side, concepts-only / minimum-support non-terminals.
+
+## trellis3: v1's hierarchies with inside-outside (2026-10-17/18)
+
+`src/trellis2/trellis3.py` is a direct iteration on TRELLIS v1 (ACS paper):
+two hierarchies, context (an element's surface window) and content (a chunk's
+parts, named by their context concepts), with no grammar and no
+word-to-word prediction.
+
+* **Learning.** Each experience is parsed by inside-outside over every binary
+  analysis. A composite's factor is 2^(gain / tau), where gain is
+  log2[share(C) P(x|C) / P(x|root)] at the best concept on the sorting path, in
+  both trees. Every composite (span, split) is stored in both trees, weighted
+  by its posterior; words go into the context tree.
+* **Representation.**
+  * Each facet that names a concept is one bag-valued attribute, so a facet
+    counts once in category utility.
+  * Parts are named by their whole ancestry: the bag of every concept on the
+    path below the root ("path naming").
+  * Donation runs both ways. The element's own content concept goes into its
+    context (cc). The parts' content concepts go into the content (LC, RC).
+  * There are no height tags (v1 kept complexity hidden).
+* **No re-insertion.** When a stored element's named concepts move, its
+  description is relabelled in place on its own leaf's path
+  (`IncrementalCobwebTree.relabel`), for a round-robin slice of 300 records per
+  experience. This is v1's leaf remap and Chris's "dynamic recomputation over
+  stored leaves". It cut learning from hours to minutes.
+* **Analysis.** The reported tree maximises the expected number of correct
+  composites (MBR over span posteriors).
+* **Generation by substitution** (`generate_sub`; diagnostic
+  `experiments/v3/diag/t3_gensub.py`). Take a stored sentence element and
+  replace each part with a stored member of the part's concept one level
+  above its own leaf. This tests whether concepts are substitutability classes,
+  which is v1's premise.
+
+Evidence (four seeds unless noted; held-out omission is a side diagnostic):
+
+| setting | mean omission (RB 0.339) |
+|---|---|
+| depth naming, refit, heights (first trellis3 best) | 0.336 |
+| path naming, relabel 300, heights | 0.290 |
+| path naming, relabel 300, no heights | 0.239 (2 seeds) |
+
+What the diagnostics showed:
+* **Chunk context.** Children and spine facets in the context hurt. Children
+  describe content, not context. The spine is only known after an analysis.
+* **Donation.** The own-content donation into the context doubles the context
+  hierarchy's substitutability (med: 22-25% to 49-50% grammatical). The parts'
+  content concepts and height tags in the content hurt substitutability.
+* **Chunk factors.**
+  * CCM contrast: right when taught gold; fails self-taught from the start.
+  * Code: favours right-branching.
+  * v1 climbing ancestor: worse than gain.
+* **Recursion.** The adjective recursion `[lazy [red dog]]` is missed under
+  every setting, even gold-taught. Both bracketings are defensible.
+* **Generation.** Context-concept substitution gives 30-50% grammatical, novel
+  sentences on med/large/term_high (bigram reference ~20%). Content concepts
+  remain weak (2-17%).
