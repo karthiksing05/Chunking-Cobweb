@@ -58,7 +58,7 @@ for name, tree, which in (("ctx", L.ctx, "ctx"), ("cnt", L.cnt, "cnt")):
     if name == "cnt": cat = at
     else: ctxat = at
 rows, pos = defaultdict(list), []
-auc = {"cnt": [0.0, 0], "ctx": [0.0, 0]}
+auc = {k: [0.0, 0] for k in ("cnt", "ctx", "cnt regen", "cnt climb")}
 for e in test:
     r = L.parse(e.tokens); lab = g.gold_labels(e.tokens, e.tree)
     for (i, j) in e.tree.composite_spans():
@@ -71,8 +71,10 @@ for e in test:
                 if m.memo.get("gold"): labs[m.memo["gold"]] += m.weight
             rows[up].append((sum(labs.values()) / W, labs.get(lab.get((i, j), "?"), 0.0) / (sum(labs.values()) or 1e-9)))
     gs = {(i, e.tree.split[(i, j)], j) for (i, j) in e.tree.composite_spans()}
-    for name, tree, attr in (("cnt", L.cnt, "cnt"), ("ctx", L.ctx, "ctx")):
-        sc = {k: L._gain(tree, getattr(el, attr)) for k, el in r["comps"].items()}
+    scorers = (("cnt", lambda el: L._gain(L.cnt, el.cnt)), ("ctx", lambda el: L._gain(L.ctx, el.ctx)),
+               ("cnt regen", L._regen_bits), ("cnt climb", lambda el: L._climb(L.cnt, el.cnt)))
+    for name, f in scorers:
+        sc = {k: f(el) for k, el in r["comps"].items()}
         pos_ = [v for k, v in sc.items() if k in gs]; neg_ = [v for k, v in sc.items() if k not in gs]
         for a in pos_:
             for b in neg_:
@@ -84,7 +86,7 @@ for e in test:
 for up in (1, 2):
     out[f"cnt u{up} phrase share"] = round(sum(a for a, _ in rows[up]) / len(rows[up]), 2)
     out[f"cnt u{up} same type"] = round(sum(b for _, b in rows[up]) / len(rows[up]), 2)
-for name in ("cnt", "ctx"):
+for name in auc:
     out[f"{name} separates gold AUC"] = round(auc[name][0] / max(auc[name][1], 1), 3)
 grp = defaultdict(Counter)
 for c, l in pos: grp[c][l] += 1
