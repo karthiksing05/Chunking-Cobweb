@@ -392,6 +392,8 @@ class Trellis3:
                     elif self.factor == "regen":
                         # content scored by how probably memory unpacks it
                         e.gain = self._regen_bits(e) + self._gain(self.ctx, e.ctx)
+                    elif self.factor == "deriv":
+                        e.gain = self._deriv_bits(e)
                     elif self.factor == "regen2":
                         e.gain = self._regen_bits(e) + self._regen_tree(self.ctx, e.ctx)
                     elif self.factor == "climb":
@@ -445,6 +447,25 @@ class Trellis3:
                 e.memo["regen"] = log_prob(node, e.cnt, root, self.alpha) / LN2
         return e.memo["regen"]
 
+    def _deriv_bits(self, e: Elem) -> float:
+        """One node of a derivation through both trees: log2 P(parts | content
+        concept) plus log2 P(own content concept | context concept), the second
+        read through the donated cc facet (the context concept sorted from the
+        rest of the context instance, at the deepest supported level)."""
+        if "deriv" not in e.memo:
+            bits = self._regen_bits(e)
+            cc = {a: v for a, v in e.ctx.items() if a.startswith("cc")}
+            root = self.ctx.root
+            if cc and root.count > 0:
+                rest = {a: v for a, v in e.ctx.items() if not a.startswith("cc")}
+                node = root
+                for c in self.ctx.categorize(rest)[1:]:
+                    if c.count >= self.support:
+                        node = c
+                bits += log_prob(node, cc, root, self.alpha) / LN2
+            e.memo["deriv"] = bits
+        return e.memo["deriv"]
+
     def _regen_tree(self, tree: IncrementalCobwebTree, x: dict) -> float:
         """log2 P(x | the deepest concept on x's path with at least ``support`` instances)."""
         root = tree.root
@@ -456,14 +477,15 @@ class Trellis3:
                 node = c
         return log_prob(node, x, root, self.alpha) / LN2
 
-    def _regen(self, n: int, comps) -> Tuple[Tree, List[Tuple[int, int, int]]]:
+    def _regen(self, n: int, comps, score=None) -> Tuple[Tree, List[Tuple[int, int, int]]]:
         """The analysis maximising the summed regeneration log probability of its chunks."""
+        score = score or self._regen_bits
         best = {(i, i + 1): (0.0, None) for i in range(n)}
         for length in range(2, n + 1):
             for i in range(0, n - length + 1):
                 j = i + length
-                k = max(range(i + 1, j), key=lambda k: best[(i, k)][0] + best[(k, j)][0] + self._regen_bits(comps[(i, k, j)]))
-                best[(i, j)] = (best[(i, k)][0] + best[(k, j)][0] + self._regen_bits(comps[(i, k, j)]), k)
+                k = max(range(i + 1, j), key=lambda k: best[(i, k)][0] + best[(k, j)][0] + score(comps[(i, k, j)]))
+                best[(i, j)] = (best[(i, k)][0] + best[(k, j)][0] + score(comps[(i, k, j)]), k)
         split, chosen = {}, []
 
         def walk(i, j):
@@ -509,7 +531,10 @@ class Trellis3:
             return {"tree": Tree(n, {}, {}, [(0, n)] if n else []), "words": words, "comps": comps,
                     "post": {}, "chosen": []}
         post, logZ = self._inside_outside(n, comps)
-        tree, chosen = self._regen(n, comps) if self.readout == "regen" else self._mbr(n, post)
+        if self.readout in ("regen", "deriv"):
+            tree, chosen = self._regen(n, comps, self._deriv_bits if self.readout == "deriv" else self._regen_bits)
+        else:
+            tree, chosen = self._mbr(n, post)
         return {"tree": tree, "words": words, "comps": comps, "post": post, "chosen": chosen, "logZ": logZ}
 
     # ------------------------------------------------------------------ #
@@ -842,3 +867,31 @@ class Trellis3:
         except (LookupError, RecursionError):
             return None
         return out
+
+    def generate_best(self, rng: Optional[random.Random] = None, members=None, k: int = 8,
+                      up: int = 1) -> Optional[List[str]]:
+        """Expand ``k`` candidate sentences, then draw one in proportion to how
+        well memory recognises it: exp of the parser's log total weight over all
+        analyses, per composite (so length does not decide). The parser acts as
+        the critic of the generator; drawing in proportion keeps it novel."""
+        rng = rng or self.rng
+        if members is None:
+            members = self._members(self.ctx, "ctx")
+        cands = [s for s in (self.generate_expand(rng, members=members, up=up) for _ in range(k)) if s]
+        if not cands:
+            return None
+        scores = []
+        for s in cands:
+            if len(s) < 2:
+                scores.append(0.0)
+                continue
+            r = self.parse(s)
+            scores.append(r["logZ"] / (len(s) - 1))
+        m = max(scores)
+        w = [math.exp(v - m) for v in scores]
+        t = rng.random() * sum(w)
+        for s, v in zip(cands, w):
+            t -= v
+            if t <= 0:
+                return s
+        return cands[-1]
