@@ -90,7 +90,7 @@ class Trellis3:
                  neighbour_concepts: bool = False, donate_ctx: Optional[bool] = None,
                  donate_cnt: Optional[bool] = None, factor: str = "gain", support: float = 3.0,
                  naming: str = "depth", heights: bool = True, donate_own: bool = False,
-                 refresh: str = "refit", readout: str = "mbr"):
+                 refresh: str = "refit", readout: str = "mbr", cc_naming: Optional[str] = None):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -127,6 +127,9 @@ class Trellis3:
         # out): shared ancestry at every granularity, no fixed depth; or "leaf":
         # the D concepts just above its own leaf (the substitutable granularity)
         self.naming = naming
+        # the donated own-content facet in the context may be named differently
+        # from the parts (it keeps fine detail; parts take one clean name)
+        self.cc_naming = cc_naming or naming
         # the parts' heights in the content (v1's complexity tag); without them a
         # part that recurses (an N' where an N stands) is named only by its concepts
         self.heights = heights
@@ -204,8 +207,9 @@ class Trellis3:
             path = e.memo["ctxp"]
         return self._path_ids(path)
 
-    def _cnt_name(self, e: Elem) -> List[str]:
-        if self.naming == "depth":
+    def _cnt_name(self, e: Elem, naming: Optional[str] = None) -> List[str]:
+        naming = naming or self.naming
+        if naming == "depth":
             return self._cnt_ids(e)
         if e.token is not None:
             return [BLANK]
@@ -215,14 +219,15 @@ class Trellis3:
             if "cntp" not in e.memo:
                 e.memo["cntp"] = self.cnt.categorize(e.cnt)
             path = e.memo["cntp"]
-        return self._path_ids(path)
+        return self._path_ids(path, naming)
 
-    def _path_ids(self, path) -> List[str]:
+    def _path_ids(self, path, naming: Optional[str] = None) -> List[str]:
+        naming = naming or self.naming
         inner = path[1:-1] if len(path) > 1 and not path[-1].children else path[1:]
-        if self.naming == "leaf":
+        if naming == "leaf":
             # the D concepts nearest the element's own leaf (finest first)
             inner = inner[::-1][:self.depth]
-        if self.naming == "basic" and inner:
+        if naming == "basic" and inner:
             # the basic level (Corter & Gluck 1992): the concept on the path
             # maximising P(c) [sum P(v|c)^2 - sum P(v|root)^2], one categorical name
             root = path[0]
@@ -231,7 +236,7 @@ class Trellis3:
             def cu(n):
                 return (n.count / max(root.count, 1e-9)) * (n.sstot / max(n.count, 1e-9) ** 2 - base)
             return [f"c{max(inner, key=cu).id}"]
-        if self.naming == "ipath" and inner:
+        if naming == "ipath" and inner:
             # each concept weighted by its information, -log2 of its share of
             # the tree in whole bits: shared coarse ancestry counts little
             total = max(path[0].count, 1e-9)
@@ -288,7 +293,7 @@ class Trellis3:
                 for p, ids in (("par", e.par), ("sib", e.sib)):
                     self._facet(x, p, ids or [BLANK] * self.depth)
         if self.donate_ctx:
-            self._facet(x, "cc", self._cnt_name(e))
+            self._facet(x, "cc", self._cnt_name(e, self.cc_naming))
         return x
 
     def _word_concept(self, tokens, pos: int) -> List[str]:
@@ -589,7 +594,7 @@ class Trellis3:
                 for p, part in (("cl", e.left), ("cr", e.right)):
                     self._facet(new, p, self._ctx_ids(part))
             if self.donate_ctx:
-                self._facet(new, "cc", self._cnt_name(e))
+                self._facet(new, "cc", self._cnt_name(e, self.cc_naming))
             if new != e.ctx and self.refresh == "relabel":
                 self.ctx.relabel(e.leaf, e.ctx, new, e.weight)
                 e.ctx = new
