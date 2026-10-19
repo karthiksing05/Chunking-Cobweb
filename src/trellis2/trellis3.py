@@ -222,6 +222,15 @@ class Trellis3:
         if self.naming == "leaf":
             # the D concepts nearest the element's own leaf (finest first)
             inner = inner[::-1][:self.depth]
+        if self.naming == "basic" and inner:
+            # the basic level (Corter & Gluck 1992): the concept on the path
+            # maximising P(c) [sum P(v|c)^2 - sum P(v|root)^2], one categorical name
+            root = path[0]
+            base = root.sstot / max(root.count, 1e-9) ** 2
+
+            def cu(n):
+                return (n.count / max(root.count, 1e-9)) * (n.sstot / max(n.count, 1e-9) ** 2 - base)
+            return [f"c{max(inner, key=cu).id}"]
         if self.naming == "ipath" and inner:
             # each concept weighted by its information, -log2 of its share of
             # the tree in whole bits: shared coarse ancestry counts little
@@ -239,6 +248,7 @@ class Trellis3:
                 bag[v] = bag.get(v, 0.0) + 1.0 / len(real)
             x[name] = bag if real else BLANK
         else:
+            ids = (list(ids) + [BLANK] * self.depth)[:self.depth]
             for k, v in enumerate(ids, 1):
                 x[f"{name}{k}"] = v
 
@@ -247,7 +257,7 @@ class Trellis3:
         if "own" not in e.memo:
             x = {a: v for a, v in e.ctx.items() if a[0] in "lr" and a[1:].isdigit()}
             path = self.ctx.categorize(x)
-            e.memo["own"] = self._path_ids(path) if self.naming in ("path", "ipath", "leaf") else self._ids(path)
+            e.memo["own"] = self._path_ids(path) if self.naming in ("path", "ipath", "leaf", "basic") else self._ids(path)
         return e.memo["own"]
 
     def _content(self, e: Elem) -> dict:
