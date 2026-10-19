@@ -7,7 +7,9 @@ only), then reports:
             instance sorts: share of the concept's weight that is gold
             constituents, and same-label share among those
   context   word part-of-speech purity one level above each held-out word's leaf
-  generate  expansive generation: grammatical / novel (500 samples)"""
+  generate  expansive generation: grammatical / novel (500 samples)
+  separate  per tree, how often a gold composite (gold span and split) has a
+            higher chunk gain than a non-gold one in the same sentence (AUC)"""
 import os, sys, json, random, time
 from collections import Counter, defaultdict
 sys.path.insert(0, "src"); sys.path.insert(0, ".")
@@ -56,6 +58,7 @@ for name, tree, which in (("ctx", L.ctx, "ctx"), ("cnt", L.cnt, "cnt")):
     if name == "cnt": cat = at
     else: ctxat = at
 rows, pos = defaultdict(list), []
+auc = {"cnt": [0.0, 0], "ctx": [0.0, 0]}
 for e in test:
     r = L.parse(e.tokens); lab = g.gold_labels(e.tokens, e.tree)
     for (i, j) in e.tree.composite_spans():
@@ -67,12 +70,22 @@ for e in test:
             for m in ms:
                 if m.memo.get("gold"): labs[m.memo["gold"]] += m.weight
             rows[up].append((sum(labs.values()) / W, labs.get(lab.get((i, j), "?"), 0.0) / (sum(labs.values()) or 1e-9)))
+    gs = {(i, e.tree.split[(i, j)], j) for (i, j) in e.tree.composite_spans()}
+    for name, tree, attr in (("cnt", L.cnt, "cnt"), ("ctx", L.ctx, "ctx")):
+        sc = {k: L._gain(tree, getattr(el, attr)) for k, el in r["comps"].items()}
+        pos_ = [v for k, v in sc.items() if k in gs]; neg_ = [v for k, v in sc.items() if k not in gs]
+        for a in pos_:
+            for b in neg_:
+                auc[name][0] += 1.0 if a > b else 0.5 if a == b else 0.0
+                auc[name][1] += 1
     for w in r["words"]:
         path = L.ctx.categorize(w.ctx)
         pos.append((path[max(len(path) - 2, 0)].id, lab.get(w.span, "?")))
 for up in (1, 2):
     out[f"cnt u{up} phrase share"] = round(sum(a for a, _ in rows[up]) / len(rows[up]), 2)
     out[f"cnt u{up} same type"] = round(sum(b for _, b in rows[up]) / len(rows[up]), 2)
+for name in ("cnt", "ctx"):
+    out[f"{name} separates gold AUC"] = round(auc[name][0] / max(auc[name][1], 1), 3)
 grp = defaultdict(Counter)
 for c, l in pos: grp[c][l] += 1
 out["ctx u1 POS purity"] = round(sum(c.most_common(1)[0][1] for c in grp.values()) / len(pos), 2)
