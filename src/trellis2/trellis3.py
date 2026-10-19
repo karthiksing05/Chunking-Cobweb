@@ -389,6 +389,11 @@ class Trellis3:
                     e.ctx = self._context(tokens, e, analysed=False)
                     if self.factor == "ccm":
                         e.gain = self._contrast(self.cnt, e.cnt) + self._contrast(self.ctx, e.ctx)
+                    elif self.factor == "regen":
+                        # content scored by how probably memory unpacks it
+                        e.gain = self._regen_bits(e) + self._gain(self.ctx, e.ctx)
+                    elif self.factor == "regen2":
+                        e.gain = self._regen_bits(e) + self._regen_tree(self.ctx, e.ctx)
                     elif self.factor == "climb":
                         e.gain = self._climb(self.cnt, e.cnt) + self._climb(self.ctx, e.ctx)
                     elif self.factor == "code":
@@ -439,6 +444,17 @@ class Trellis3:
                         node = c
                 e.memo["regen"] = log_prob(node, e.cnt, root, self.alpha) / LN2
         return e.memo["regen"]
+
+    def _regen_tree(self, tree: IncrementalCobwebTree, x: dict) -> float:
+        """log2 P(x | the deepest concept on x's path with at least ``support`` instances)."""
+        root = tree.root
+        if root.count <= 0:
+            return 0.0
+        node = root
+        for c in tree.categorize(x)[1:]:
+            if c.count >= self.support:
+                node = c
+        return log_prob(node, x, root, self.alpha) / LN2
 
     def _regen(self, n: int, comps) -> Tuple[Tree, List[Tuple[int, int, int]]]:
         """The analysis maximising the summed regeneration log probability of its chunks."""
