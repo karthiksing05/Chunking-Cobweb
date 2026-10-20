@@ -76,17 +76,29 @@ def sample(rules, start, rng):
             S.append(out)
     return S
 
-for frac in (0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001, 0.0):
-    m = max(frac * root.count, 1.0)
+base = root.sstot / max(root.count, 1e-9) ** 2
+
+def cu(n):
+    """Corter & Gluck (1992): the category utility of one concept."""
+    return (n.count / max(root.count, 1e-9)) * (n.sstot / max(n.count, 1e-9) ** 2 - base)
+
+def basic(e):
+    p = path_of(e)[1:]
+    return max(p, key=cu).id if p else root.id
+
+cuts = [("basic", None)] + [(f, f) for f in (0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001, 0.0)]
+for frac, _ in cuts:
+    m = max(frac * root.count, 1.0) if frac != "basic" else None
+    catf = basic if frac == "basic" else (lambda e, m=m: cat(e, m))
     rules = defaultdict(lambda: defaultdict(float)); start = defaultdict(float)
     for e in L.records:
         if e.weight <= 0:
             continue
-        a = cat(e, m)
+        a = catf(e)
         if e.token is not None:
             rules[a][("w", e.token)] += 1.0
         else:
-            rules[a][("r", cat(e.left, m), cat(e.right, m))] += e.weight
+            rules[a][("r", catf(e.left), catf(e.right))] += e.weight
             if e.ctx.get("l1") == BOS and e.ctx.get("r1") == EOS:
                 start[a] += e.weight
     cats = {a for a, d in rules.items() if sum(d.values()) >= 1.0}
