@@ -90,7 +90,8 @@ class Trellis3:
                  neighbour_concepts: bool = False, donate_ctx: Optional[bool] = None,
                  donate_cnt: Optional[bool] = None, factor: str = "gain", support: float = 3.0,
                  naming: str = "depth", heights: bool = True, donate_own: bool = False,
-                 refresh: str = "refit", readout: str = "mbr", cc_naming: Optional[str] = None):
+                 refresh: str = "refit", readout: str = "mbr", cc_naming: Optional[str] = None,
+                 word_cc: bool = False):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -130,6 +131,10 @@ class Trellis3:
         # the donated own-content facet in the context may be named differently
         # from the parts (it keeps fine detail; parts take one clean name)
         self.cc_naming = cc_naming or naming
+        # a word's own content is the word itself: with word_cc its identity is
+        # donated into its context description as the cc facet, as a chunk's
+        # content concept is (otherwise a word's cc is blank)
+        self.word_cc = word_cc
         # the parts' heights in the content (v1's complexity tag); without them a
         # part that recurses (an N' where an N stands) is named only by its concepts
         self.heights = heights
@@ -244,6 +249,11 @@ class Trellis3:
                     for _ in range(max(1, round(-math.log2(max(n.count, 1e-9) / total))))]
         return [f"c{n.id}" for n in inner] or [BLANK]
 
+    def _cc_ids(self, e: Elem) -> List[str]:
+        if e.token is not None and self.word_cc:
+            return [f"w:{e.token}"]
+        return self._cnt_name(e, self.cc_naming)
+
     def _facet(self, x: dict, name: str, ids: List[str]) -> None:
         """Write a facet's concept ids: one bag attribute, or one attribute per depth."""
         if self.bags:
@@ -293,7 +303,7 @@ class Trellis3:
                 for p, ids in (("par", e.par), ("sib", e.sib)):
                     self._facet(x, p, ids or [BLANK] * self.depth)
         if self.donate_ctx:
-            self._facet(x, "cc", self._cnt_name(e, self.cc_naming))
+            self._facet(x, "cc", self._cc_ids(e))
         return x
 
     def _word_concept(self, tokens, pos: int) -> List[str]:
@@ -635,7 +645,7 @@ class Trellis3:
                 for p, part in (("cl", e.left), ("cr", e.right)):
                     self._facet(new, p, self._ctx_ids(part))
             if self.donate_ctx:
-                self._facet(new, "cc", self._cnt_name(e, self.cc_naming))
+                self._facet(new, "cc", self._cc_ids(e))
             if new != e.ctx and self.refresh == "relabel":
                 self.ctx.relabel(e.leaf, e.ctx, new, e.weight)
                 e.ctx = new
