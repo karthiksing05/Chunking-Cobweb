@@ -39,7 +39,7 @@ EPS = 1e-9
 class CobwebNode:
     """A concept: weighted attribute-value counts plus taxonomy links."""
 
-    __slots__ = ("id", "parent", "children", "count", "av", "ss", "sstot", "hidden", "pav")
+    __slots__ = ("id", "parent", "children", "count", "av", "ss", "sstot", "hidden", "pav", "na")
 
     def __init__(self, nid: int):
         self.id = nid
@@ -56,12 +56,17 @@ class CobwebNode:
         # holds the sum of its children's), never used for category utility,
         # sorting or exact matching: attr -> value -> weight.
         self.pav: Dict[str, Dict[Hashable, float]] = {}
+        # observed weight per attribute (instances that define it); equals
+        # count for an attribute every instance defines
+        self.na: Dict[str, float] = {}
 
     def __repr__(self):
         kind = "leaf" if not self.children else f"{len(self.children)} children"
         return f"CobwebNode(id={self.id}, count={self.count:g}, {kind})"
 
     def increment(self, x: Instance, w: float) -> None:
+        for a in x:
+            self.na[a] = self.na.get(a, 0.0) + w
         for a, v in x.items():
             d = self.av.get(a)
             if d is None:
@@ -78,6 +83,8 @@ class CobwebNode:
     def decrement(self, x: Instance, w: float) -> None:
         """Remove ``x`` (weight ``w``) from the counts; values that reach
         zero are dropped and the sums of squares recomputed."""
+        for a in x:
+            self.na[a] = self.na.get(a, 0.0) - w
         for a, v in x.items():
             d = self.av[a]
             for u, p in (v.items() if isinstance(v, dict) else ((v, 1.0),)):
@@ -99,6 +106,8 @@ class CobwebNode:
             self.sstot = math.fsum(self.ss.values())
 
     def absorb(self, other: "CobwebNode") -> None:
+        for a, m in other.na.items():
+            self.na[a] = self.na.get(a, 0.0) + m
         for a, od in other.pav.items():
             d = self.pav.setdefault(a, {})
             for v, m in od.items():
@@ -125,6 +134,10 @@ class IncrementalCobwebTree:
     def __init__(self, attrs: Sequence[str], seed: int = 0):
         self.attrs = tuple(attrs)
         self.n_attrs = len(self.attrs)
+        # partial instances: an attribute an instance does not observe is left
+        # out (it adds no value and so no shared similarity), as Cobweb treats
+        # a missing value
+        self.partial = False
         self._next_id = 0
         self.rng = random.Random(seed)
         self.root = self._new_node()
@@ -137,9 +150,33 @@ class IncrementalCobwebTree:
     def ec(self, node: CobwebNode) -> float:
         if node.count <= 0.0:
             return 0.0
+        if self.partial:
+            # each attribute over the instances that observe it, weighted by
+            # how often it is observed: sum_a P(a observed) sum_v P(v | a)^2
+            return sum(ss / (node.count * node.na[a]) for a, ss in node.ss.items()
+                       if node.na.get(a, 0.0) > 0) / self.n_attrs
         return node.sstot / (node.count * node.count) / self.n_attrs
 
+    @staticmethod
+    def _added(d, v, w):
+        """The change in an attribute's sum of squares when value(s) v of weight w are added."""
+        inc = 0.0
+        for u, p in (v.items() if isinstance(v, dict) else ((v, 1.0),)):
+            m = d.get(u, 0.0) if d else 0.0
+            inc += 2.0 * m * w * p + (w * p) ** 2
+        return inc
+
     def _ec_with(self, node: CobwebNode, x: Instance, w: float) -> float:
+        if self.partial:
+            n = node.count + w
+            tot = 0.0
+            for a in set(node.ss) | set(x):
+                ss = node.ss.get(a, 0.0); na = node.na.get(a, 0.0)
+                if a in x:
+                    ss += self._added(node.av.get(a), x[a], w); na += w
+                if na > 0:
+                    tot += ss / (n * na)
+            return tot / self.n_attrs
         n = node.count + w
         tot = node.sstot
         for a, v in x.items():
@@ -154,6 +191,22 @@ class IncrementalCobwebTree:
         return tot / (n * n) / self.n_attrs
 
     def _ec_merge(self, b1: CobwebNode, b2: CobwebNode, x: Instance, w: float) -> float:
+        if self.partial:
+            n = b1.count + b2.count + w
+            tot = 0.0
+            for a in self.attrs:
+                d1 = b1.av.get(a, {}); d2 = b2.av.get(a, {})
+                small, big = (d1, d2) if len(d1) <= len(d2) else (d2, d1)
+                ss = b1.ss.get(a, 0.0) + b2.ss.get(a, 0.0) + 2.0 * sum(m * big.get(v, 0.0) for v, m in small.items())
+                na = b1.na.get(a, 0.0) + b2.na.get(a, 0.0)
+                if a in x:
+                    merged = dict(d1)
+                    for v, m in d2.items():
+                        merged[v] = merged.get(v, 0.0) + m
+                    ss += self._added(merged, x[a], w); na += w
+                if na > 0:
+                    tot += ss / (n * na)
+            return tot / self.n_attrs
         n = b1.count + b2.count + w
         tot = b1.sstot + b2.sstot
         for a in self.attrs:
@@ -161,11 +214,20 @@ class IncrementalCobwebTree:
             d2 = b2.av.get(a, {})
             small, big = (d1, d2) if len(d1) <= len(d2) else (d2, d1)
             tot += 2.0 * sum(m * big.get(v, 0.0) for v, m in small.items())
+            if a not in x:
+                continue
             v = x[a]
             for u, p in (v.items() if isinstance(v, dict) else ((v, 1.0),)):
                 mx = d1.get(u, 0.0) + d2.get(u, 0.0)
                 tot += 2.0 * mx * w * p + (w * p) ** 2
         return tot / (n * n) / self.n_attrs
+
+    def _ec_alone(self, x: Instance) -> float:
+        """The expected correct guesses of a concept holding x alone (1 for a
+        full instance of single values, as the reference has it)."""
+        if not self.partial:
+            return 1.0
+        return sum(sum(p * p for p in v.values()) if isinstance(v, dict) else 1.0 for v in x.values()) / self.n_attrs
 
     def _best_operation(self, cur: CobwebNode, x: Instance, w: float):
         kids = cur.children
@@ -182,7 +244,7 @@ class IncrementalCobwebTree:
         best1 = ranked[0][3]
         best2 = ranked[1][3] if K > 1 else None
         ops = [(((S + ranked[0][0]) / n1 - ecp1) / K, self.rng.random(), "best"),
-               (((S + w) / n1 - ecp1) / (K + 1), self.rng.random(), "new")]
+               (((S + w * self._ec_alone(x)) / n1 - ecp1) / (K + 1), self.rng.random(), "new")]
         if K > 2 and best2 is not None:
             t1 = best1.count * self.ec(best1)
             t2 = best2.count * self.ec(best2)
@@ -199,6 +261,8 @@ class IncrementalCobwebTree:
 
     # Structure ---------------------------------------------------------- #
     def _is_exact_match(self, leaf: CobwebNode, x: Instance) -> bool:
+        if any(d and a not in x for a, d in leaf.av.items()):
+            return False
         for a, v in x.items():
             d = leaf.av.get(a)
             if d is None:
@@ -207,7 +271,7 @@ class IncrementalCobwebTree:
                 if len(d) != len(v) or any(abs(d.get(u, 0.0) - p * leaf.count) > 1e-9
                                            for u, p in v.items()):
                     return False
-            elif len(d) != 1 or v not in d:
+            elif len(d) != 1 or v not in d or abs(d[v] - leaf.count) > 1e-9 * max(1.0, leaf.count):
                 return False
         return True
 
@@ -250,7 +314,10 @@ class IncrementalCobwebTree:
     # Public API --------------------------------------------------------- #
     def ifit(self, x: Instance, w: float = 1.0) -> CobwebNode:
         """Incorporate ``x`` (weight ``w``); return the leaf storing it."""
-        if len(x) != self.n_attrs or any(a not in x for a in self.attrs):
+        if self.partial:
+            if any(a not in self.attrs for a in x):
+                raise ValueError(f"instance attributes must come from {self.attrs}; got {sorted(x)}")
+        elif len(x) != self.n_attrs or any(a not in x for a in self.attrs):
             raise ValueError(f"instance must define exactly {self.attrs}; got {sorted(x)}")
         if w <= 0.0:
             raise ValueError("instance weight must be positive")
@@ -339,6 +406,8 @@ class IncrementalCobwebTree:
         node = leaf
         while node is not None:
             for x, sign in ((a_old, -1.0), (a_new, 1.0)):
+                for a in x:
+                    node.na[a] = node.na.get(a, 0.0) + sign * w
                 for a, v in x.items():
                     d = node.av.get(a)
                     if d is None:

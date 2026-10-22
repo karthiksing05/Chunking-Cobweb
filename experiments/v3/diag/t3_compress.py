@@ -54,7 +54,7 @@ def project(catf):
             rules[a][("w", e.token)] += 1.0
         else:
             rules[a][("r", catf(e.left), catf(e.right))] += e.weight
-            if e.ctx.get("l1") == BOS and e.ctx.get("r1") == EOS:
+            if L.is_sentence(e):
                 start[a] += e.weight
     return rules, start
 
@@ -99,7 +99,7 @@ for frac, _ in cuts:
             rules[a][("w", e.token)] += 1.0
         else:
             rules[a][("r", catf(e.left), catf(e.right))] += e.weight
-            if e.ctx.get("l1") == BOS and e.ctx.get("r1") == EOS:
+            if L.is_sentence(e):
                 start[a] += e.weight
     cats = {a for a, d in rules.items() if sum(d.values()) >= 1.0}
     nrule = sum(1 for d in rules.values() for k, v in d.items() if k[0] == "r" and v >= 1.0)

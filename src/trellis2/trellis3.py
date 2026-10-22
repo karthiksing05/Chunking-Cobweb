@@ -91,7 +91,7 @@ class Trellis3:
                  donate_cnt: Optional[bool] = None, factor: str = "gain", support: float = 3.0,
                  naming: str = "depth", heights: bool = True, donate_own: bool = False,
                  refresh: str = "refit", readout: str = "mbr", cc_naming: Optional[str] = None,
-                 word_cc: bool = False):
+                 word_cc: bool = False, boundary: str = "marker"):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -135,6 +135,9 @@ class Trellis3:
         # donated into its context description as the cc facet, as a chunk's
         # content concept is (otherwise a word's cc is blank)
         self.word_cc = word_cc
+        # the sentence boundary in a window: "marker" (<s> / </s>, a value many
+        # instances share) or "missing" (the slot is simply not observed)
+        self.boundary = boundary
         # the parts' heights in the content (v1's complexity tag); without them a
         # part that recurses (an N' where an N stands) is named only by its concepts
         self.heights = heights
@@ -164,6 +167,7 @@ class Trellis3:
             (tuple(f"oc{k}" for k in d) if donate_own else ())
         self.ctx = IncrementalCobwebTree(self.ctx_attrs, seed=seed)
         self.cnt = IncrementalCobwebTree(self.cnt_attrs, seed=seed + 1)
+        self.ctx.partial = self.cnt.partial = (boundary == "missing")
         self.rng = random.Random(seed)
         self.records: List[Elem] = []
         self._rr = 0
@@ -175,9 +179,21 @@ class Trellis3:
     def _surface(self, tokens, i, j) -> dict:
         x = {}
         for k in range(1, self.window + 1):
-            x[f"l{k}"] = tokens[i - k] if i - k >= 0 else BOS
-            x[f"r{k}"] = tokens[j + k - 1] if j + k - 1 < len(tokens) else EOS
+            if i - k >= 0:
+                x[f"l{k}"] = tokens[i - k]
+            elif self.boundary == "marker":
+                x[f"l{k}"] = BOS
+            if j + k - 1 < len(tokens):
+                x[f"r{k}"] = tokens[j + k - 1]
+            elif self.boundary == "marker":
+                x[f"r{k}"] = EOS
         return x
+
+    def is_sentence(self, e: Elem) -> bool:
+        """A sentence-level element: nothing on either side."""
+        if self.boundary == "missing":
+            return "l1" not in e.ctx and "r1" not in e.ctx
+        return e.ctx.get("l1") == BOS and e.ctx.get("r1") == EOS
 
     def _ids(self, path: List[CobwebNode]) -> List[str]:
         ids = [f"c{n.id}" for n in path[1:self.depth + 1]]
@@ -315,7 +331,10 @@ class Trellis3:
         return self._ids(self.ctx.categorize(x))
 
     def _full(self, x: dict, attrs) -> dict:
-        """Complete an instance for storage (missing attributes blank)."""
+        """Complete an instance for storage (missing attributes blank; with
+        boundary="missing" the surface slots beyond the experience stay out)."""
+        if self.boundary == "missing":
+            return {a: x.get(a, BLANK) for a in attrs if a in x or not (a[0] in "lr" and a[1:].isdigit())}
         return {a: x.get(a, BLANK) for a in attrs}
 
     # ------------------------------------------------------------------ #
@@ -766,7 +785,7 @@ class Trellis3:
         if members is None:
             members = (self._members(self.ctx, "ctx"), self._members(self.cnt, "cnt"))
         mctx, mcnt = members
-        roots = [e for e in self.records if e.token is None and e.ctx.get("l1") == BOS and e.ctx.get("r1") == EOS]
+        roots = [e for e in self.records if e.token is None and self.is_sentence(e)]
         if not roots:
             return None
 
@@ -823,8 +842,7 @@ class Trellis3:
         rng = rng or self.rng
         if members is None:
             members = self._members(self.ctx, "ctx")
-        roots = [e for e in self.records if e.token is None and e.weight > 0
-                 and e.ctx.get("l1") == BOS and e.ctx.get("r1") == EOS]
+        roots = [e for e in self.records if e.token is None and e.weight > 0 and self.is_sentence(e)]
         if not roots:
             return None
         sizes = {a: max(len(self.ctx.root.av.get(a, {})), 1) for a in self.ctx_attrs}
@@ -835,8 +853,18 @@ class Trellis3:
             if node is None:
                 return 1.0
             p = 1.0
-            known = ([(f"l{k}", out[-k] if k <= len(out) else BOS) for k in range(1, self.window + 1)] +
-                     ([(f"r{k}", EOS) for k in range(1, self.window + 1)] if at_end else []))
+            if self.boundary == "missing":
+                known = [(f"l{k}", out[-k]) for k in range(1, min(self.window, len(out)) + 1)]
+                # a slot past an edge is unobserved: weight by how often the
+                # member's concept leaves that slot unobserved
+                edge = [f"l{k}" for k in range(len(out) + 1, self.window + 1)] + \
+                       ([f"r{k}" for k in range(1, self.window + 1)] if at_end else [])
+                for a in edge:
+                    seen_a = sum(node.av.get(a, {}).values())
+                    p *= (max(node.count - seen_a, 0.0) + self.alpha) / (node.count + 2 * self.alpha)
+            else:
+                known = ([(f"l{k}", out[-k] if k <= len(out) else BOS) for k in range(1, self.window + 1)] +
+                         ([(f"r{k}", EOS) for k in range(1, self.window + 1)] if at_end else []))
             for a, v in known:
                 d = node.av.get(a, {})
                 p *= (d.get(v, 0.0) + self.alpha) / (node.count + self.alpha * sizes[a])
