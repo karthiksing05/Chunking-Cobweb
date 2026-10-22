@@ -92,7 +92,8 @@ class Trellis3:
                  donate_cnt: Optional[bool] = None, factor: str = "gain", support: float = 3.0,
                  naming: str = "depth", heights: bool = True, donate_own: bool = False,
                  refresh: str = "refit", readout: str = "mbr", cc_naming: Optional[str] = None,
-                 word_cc: bool = False, boundary: str = "marker"):
+                 word_cc: bool = False, boundary: str = "marker", type_names: bool = False,
+                 type_top: int = 40):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -139,6 +140,14 @@ class Trellis3:
         # the sentence boundary in a window: "marker" (<s> / </s>, a value many
         # instances share) or "missing" (the slot is simply not observed)
         self.boundary = boundary
+        # type-level names (distributional, as in word2vec): a part is named by
+        # the aggregate of the context paths of every stored instance of its
+        # type (its token sequence; a word is the one-token case), not by the
+        # one context it occurred in. Substitutable types then share names
+        # wherever they occurred. The aggregate keeps its ``type_top`` heaviest
+        # concepts.
+        self.type_names, self.type_top = type_names, type_top
+        self.type_bag: Dict[tuple, Dict[str, float]] = {}
         # the parts' heights in the content (v1's complexity tag); without them a
         # part that recurses (an N' where an N stands) is named only by its concepts
         self.heights = heights
@@ -228,6 +237,10 @@ class Trellis3:
         """The ids a facet names an element's context concept by."""
         if self.naming == "depth":
             return self._ctx_ids(e)
+        if self.type_names:
+            bag = self.type_bag.get(self._type_key(e))
+            if bag:
+                return dict(sorted(bag.items(), key=lambda kv: -kv[1])[:self.type_top])
         if e.leaf is not None:
             path = self.ctx.ancestors(e.leaf)[::-1]
         else:
@@ -235,6 +248,24 @@ class Trellis3:
                 e.memo["ctxp"] = self.ctx.categorize(e.ctx)
             path = e.memo["ctxp"]
         return self._path_ids(path)
+
+    @staticmethod
+    def _type_key(e: Elem) -> tuple:
+        out, stack = [], [e]
+        while stack:
+            x = stack.pop()
+            if x.token is not None:
+                out.append(x.token)
+            else:
+                stack += [x.right, x.left]
+        return tuple(out)
+
+    def _add_type(self, e: Elem) -> None:
+        """Add a stored instance's context path to its type's aggregate."""
+        bag = self.type_bag.setdefault(self._type_key(e), {})
+        ids = self._path_ids(self.ctx.ancestors(e.leaf)[::-1])
+        for v in ids:
+            bag[v] = bag.get(v, 0.0) + e.weight / max(len(ids), 1)
 
     def _cnt_name(self, e: Elem, naming: Optional[str] = None) -> List[str]:
         naming = naming or self.naming
@@ -291,7 +322,10 @@ class Trellis3:
 
     def _facet(self, x: dict, name: str, ids: List[str]) -> None:
         """Write a facet's concept ids: one bag attribute, or one attribute per depth."""
-        if self.bags:
+        if self.bags and isinstance(ids, dict):            # a weighted aggregate (type names)
+            tot = sum(ids.values())
+            x[name] = {v: w / tot for v, w in ids.items()} if tot > 0 else BLANK
+        elif self.bags:
             real = [v for v in ids if v != BLANK]
             bag: Dict[str, float] = {}
             for v in real:
@@ -630,6 +664,8 @@ class Trellis3:
             if self.store == "ccm":
                 e.const = 1.0
                 self.ctx.add_passive(e.leaf, CONST, "c", 1.0)
+            if self.type_names:
+                self._add_type(e)
             self.records.append(e)
             self.stats["words stored"] += 1
         first = len(self.records)
@@ -646,6 +682,8 @@ class Trellis3:
             if e.const > 0:
                 self.cnt.add_passive(e.cleaf, CONST, "c", e.const)
                 self.ctx.add_passive(e.leaf, CONST, "c", e.const)
+            if self.type_names:
+                self._add_type(e)
             self.records.append(e)
             self.stats["composites stored"] += 1
         self.stats["experiences"] += 1
