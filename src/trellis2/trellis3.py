@@ -160,14 +160,14 @@ class Trellis3:
             (tuple(f"{p}{k}" for p in ("par", "sib") for k in d) if self.spine else ())
         own = tuple(f"cc{k}" for k in d) if self.donate_ctx else ()
         neigh = tuple(f"{p}{k}" for p in ("lc", "rc") for k in d) if neighbour_concepts else ()
-        self.ctx_attrs = surface + neigh + chunk + own
+        self.ctx_attrs = surface + neigh + chunk + own + (("le", "re") if boundary == "edge" else ())
         parts = tuple(f"{p}{k}" for p in ("L", "R") for k in d)
         given = tuple(f"{p}{k}" for p in ("LC", "RC") for k in d) if self.donate_cnt else ()
         self.cnt_attrs = parts + given + (("LH", "RH") if heights else ()) + \
             (tuple(f"oc{k}" for k in d) if donate_own else ())
         self.ctx = IncrementalCobwebTree(self.ctx_attrs, seed=seed)
         self.cnt = IncrementalCobwebTree(self.cnt_attrs, seed=seed + 1)
-        self.ctx.partial = self.cnt.partial = (boundary == "missing")
+        self.ctx.partial = self.cnt.partial = (boundary in ("missing", "edge"))
         self.rng = random.Random(seed)
         self.records: List[Elem] = []
         self._rr = 0
@@ -187,10 +187,17 @@ class Trellis3:
                 x[f"r{k}"] = tokens[j + k - 1]
             elif self.boundary == "marker":
                 x[f"r{k}"] = EOS
+        if self.boundary == "edge":
+            # whether a neighbour exists on each side, once per side; the
+            # neighbour slots past an edge stay unobserved
+            x["le"] = "edge" if i == 0 else "in"
+            x["re"] = "edge" if j == len(tokens) else "in"
         return x
 
     def is_sentence(self, e: Elem) -> bool:
         """A sentence-level element: nothing on either side."""
+        if self.boundary == "edge":
+            return e.ctx.get("le") == "edge" and e.ctx.get("re") == "edge"
         if self.boundary == "missing":
             return "l1" not in e.ctx and "r1" not in e.ctx
         return e.ctx.get("l1") == BOS and e.ctx.get("r1") == EOS
@@ -333,7 +340,7 @@ class Trellis3:
     def _full(self, x: dict, attrs) -> dict:
         """Complete an instance for storage (missing attributes blank; with
         boundary="missing" the surface slots beyond the experience stay out)."""
-        if self.boundary == "missing":
+        if self.boundary in ("missing", "edge"):
             return {a: x.get(a, BLANK) for a in attrs if a in x or not (a[0] in "lr" and a[1:].isdigit())}
         return {a: x.get(a, BLANK) for a in attrs}
 
@@ -853,7 +860,10 @@ class Trellis3:
             if node is None:
                 return 1.0
             p = 1.0
-            if self.boundary == "missing":
+            if self.boundary == "edge":
+                known = [(f"l{k}", out[-k]) for k in range(1, min(self.window, len(out)) + 1)]
+                known += [("le", "edge" if not out else "in"), ("re", "edge" if at_end else "in")]
+            elif self.boundary == "missing":
                 known = [(f"l{k}", out[-k]) for k in range(1, min(self.window, len(out)) + 1)]
                 # a slot past an edge is unobserved: weight by how often the
                 # member's concept leaves that slot unobserved
