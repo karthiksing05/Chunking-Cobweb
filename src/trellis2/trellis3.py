@@ -68,7 +68,7 @@ def logsumexp(xs: List[float]) -> float:
 
 class Elem:
     __slots__ = ("span", "split", "token", "left", "right", "ctx", "cnt", "leaf", "cleaf", "weight",
-                 "height", "gain", "par", "sib", "memo", "const")
+                 "height", "gain", "par", "sib", "memo", "const", "used")
 
     def __init__(self, span, split=None, token=None, left=None, right=None):
         self.span, self.split, self.token, self.left, self.right = span, split, token, left, right
@@ -80,6 +80,7 @@ class Elem:
         self.par = self.sib = None          # context concept ids of parent / sibling in the analysis
         self.memo = {}                      # concept ids found by sorting (valid while unstored)
         self.const = 0.0                    # its posterior of being a constituent (store "ccm")
+        self.used = 0.0                     # 1 if it is in the analysis memory chose for its experience
 
 
 class Trellis3:
@@ -584,6 +585,9 @@ class Trellis3:
         node_of = {(e.span[0], e.span[0] + 1): e for e in words}
         for key in chosen:
             node_of[(key[0], key[2])] = comps[key]
+            comps[key].used = 1.0
+        for w in words:
+            w.used = 1.0
         for (i, k, j) in chosen:
             parent = comps[(i, k, j)]
             for child, sib in ((node_of[(i, k)], node_of[(k, j)]), (node_of[(k, j)], node_of[(i, k)])):
@@ -836,7 +840,7 @@ class Trellis3:
         return out
 
     def generate_expand(self, rng: Optional[random.Random] = None, members=None, up: int = 1,
-                        max_depth: int = 12, kind: bool = True) -> Optional[List[str]]:
+                        max_depth: int = 12, kind: bool = True, by: str = "weight") -> Optional[List[str]]:
         """Expansive generation. Sample a sentence-level chunk from memory as the
         root, then expand top-down, left to right. Each slot carries metadata
         (its context concept, ``up`` levels above the stored part's leaf, and
@@ -845,11 +849,14 @@ class Trellis3:
         Every stored member of the slot's concept is weighted by its stored
         weight times the probability its concept gives those surroundings, and
         one is drawn in proportion (probability matching), then expanded the
-        same way: a word is emitted, a chunk's parts become new slots."""
+        same way: a word is emitted, a chunk's parts become new slots. With
+        by="used" a member counts only if it is in an analysis memory chose
+        (the chunks it committed to encode its experiences)."""
         rng = rng or self.rng
         if members is None:
             members = self._members(self.ctx, "ctx")
-        roots = [e for e in self.records if e.token is None and e.weight > 0 and self.is_sentence(e)]
+        wt = (lambda m: m.used) if by == "used" else (lambda m: m.weight)
+        roots = [e for e in self.records if e.token is None and wt(e) > 0 and self.is_sentence(e)]
         if not roots:
             return None
         sizes = {a: max(len(self.ctx.root.av.get(a, {})), 1) for a in self.ctx_attrs}
@@ -881,7 +888,7 @@ class Trellis3:
             return p
 
         def draw(pool, at_end):
-            scored = [(m, m.weight * surround(m, at_end)) for m in pool if m.weight > 0]
+            scored = [(m, wt(m) * surround(m, at_end)) for m in pool if wt(m) > 0]
             tot = sum(w for _, w in scored)
             if tot <= 0:
                 return None
@@ -917,7 +924,7 @@ class Trellis3:
         return out
 
     def generate_best(self, rng: Optional[random.Random] = None, members=None, k: int = 8,
-                      up: int = 1) -> Optional[List[str]]:
+                      up: int = 1, by: str = "weight") -> Optional[List[str]]:
         """Expand ``k`` candidate sentences, then draw one in proportion to how
         well memory recognises it: exp of the parser's log total weight over all
         analyses, per composite (so length does not decide). The parser acts as
@@ -925,7 +932,7 @@ class Trellis3:
         rng = rng or self.rng
         if members is None:
             members = self._members(self.ctx, "ctx")
-        cands = [s for s in (self.generate_expand(rng, members=members, up=up) for _ in range(k)) if s]
+        cands = [s for s in (self.generate_expand(rng, members=members, up=up, by=by) for _ in range(k)) if s]
         if not cands:
             return None
         scores = []
