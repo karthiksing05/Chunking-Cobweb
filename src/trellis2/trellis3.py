@@ -840,7 +840,8 @@ class Trellis3:
         return out
 
     def generate_expand(self, rng: Optional[random.Random] = None, members=None, up: int = 1,
-                        max_depth: int = 12, kind: bool = True, by: str = "weight") -> Optional[List[str]]:
+                        max_depth: int = 12, kind: bool = True, by: str = "weight",
+                        right_hint: bool = False) -> Optional[List[str]]:
         """Expansive generation. Sample a sentence-level chunk from memory as the
         root, then expand top-down, left to right. Each slot carries metadata
         (its context concept, ``up`` levels above the stored part's leaf, and
@@ -862,11 +863,15 @@ class Trellis3:
         sizes = {a: max(len(self.ctx.root.av.get(a, {})), 1) for a in self.ctx_attrs}
         out: List[str] = []
 
-        def surround(m, at_end):
+        def surround(m, at_end, hint=None):
             node = m.leaf.parent if m.leaf is not None and m.leaf.parent is not None else m.leaf
             if node is None:
                 return 1.0
             p = 1.0
+            if hint is not None and not at_end:
+                # the right neighbour the chunk being expanded leads us to expect
+                d = node.av.get("r1", {})
+                p *= (d.get(hint, 0.0) + self.alpha) / (node.count + self.alpha * sizes["r1"])
             if self.boundary == "edge":
                 known = [(f"l{k}", out[-k]) for k in range(1, min(self.window, len(out)) + 1)]
                 known += [("le", "edge" if not out else "in"), ("re", "edge" if at_end else "in")]
@@ -887,8 +892,8 @@ class Trellis3:
                 p *= (d.get(v, 0.0) + self.alpha) / (node.count + self.alpha * sizes[a])
             return p
 
-        def draw(pool, at_end):
-            scored = [(m, wt(m) * surround(m, at_end)) for m in pool if wt(m) > 0]
+        def draw(pool, at_end, hint=None):
+            scored = [(m, wt(m) * surround(m, at_end, hint)) for m in pool if wt(m) > 0]
             tot = sum(w for _, w in scored)
             if tot <= 0:
                 return None
@@ -903,20 +908,31 @@ class Trellis3:
             path = self.ctx.ancestors(part.leaf)[::-1] if part.leaf is not None else self.ctx.categorize(part.ctx)
             return f"c{path[max(len(path) - 1 - up, 1 if len(path) > 1 else 0)].id}"
 
-        def expand(e, d, at_end):
+        def first(x):
+            while x.token is None and x.left is not None:
+                x = x.left
+            return x.token
+
+        def expand(e, d, at_end, right=None):
             for side, part in (("L", e.left), ("R", e.right)):
                 last = at_end and side == "R"
+                # metadata of the chunk being expanded: a left part was followed by
+                # the first word of its stored sibling; a right part by what follows
+                # its parent
+                hint = None
+                if right_hint:
+                    hint = first(e.right) if side == "L" else right
                 pool = members.get(concept(part), [])
                 if kind:
                     word = part.token is not None or d >= max_depth
                     pool = [m for m in pool if (m.token is not None) == word]
-                m = draw(pool, last) or part
+                m = draw(pool, last, hint) or part
                 if m.token is not None:
                     out.append(m.token)
                 elif m.left is None or d >= max_depth:
                     raise LookupError
                 else:
-                    expand(m, d + 1, last)
+                    expand(m, d + 1, last, hint)
         try:
             expand(draw(roots, True), 0, True)
         except (LookupError, RecursionError):
