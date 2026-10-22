@@ -125,3 +125,24 @@ Run it on `small`, `med`, `large`, `term_low`, `term_med` and `term_high` (and o
 **B diagnosis.** A word's donated own-content facet is its token (`w:dog`), but a chunk's is its content-tree path. The two vocabularies never overlap, so "dog" and "big dog" cannot look alike in the context tree even with identical surroundings.
 
 **Next change: `cc_naming="tokens"`.** A chunk's own content becomes the bag of its tokens, and a word is the one-token case. This is domain-general and stable: it never needs relabelling. It is being checked with this file's diagnostics, plus generation and compression.
+
+### 22 October, `cc_naming="tokens"` (seed 13): B improves, generation drops
+
+| | best | tokens |
+|---|---|---|
+| B content AUC, cross length (`large` / `med`) | 0.54 / 0.50 | **0.72 / 0.60** |
+| A-and d2 precision / recall (`large`) | 0.45 / 0.54 | 0.52 / 0.79 |
+| A-or | fails both sides | unchanged |
+| generation grammatical (`med`, `large`) | 0.81, 0.74 | 0.77, 0.61 |
+| compact grammar (`large`, MDL up) | 13% | 0.4% |
+
+- **Kept as an option, not as the default.** The diagnosis of B was right, but the token bag throws away order, which generation needs.
+
+**4× data (MDL up, `large_x4`):** 18–23% grammatical at 54–104 categories, against 2–13% at 11–30 with 1× data. More data buys finer categories and better compact grammars, but only partly. Held-out bits are level with the bigram model (25.8–28.0 against 24.0–26.9).
+
+**The persistent failure is A-or.** Cobweb clusters tokens by their one context, so the same type in two positions (subject and object) lands far apart. Word2Vec instead represents a type by the aggregate of all its contexts.
+
+**Next: `type_names=True`.** A part is named by the aggregate of the context paths of every stored instance of its type; a type is its token sequence, and a word is the one-token case. This is joint, distributional learning, and it is unsupervised.
+
+- **On `small`:** A-and d1 precision rises from 0.73 to 0.91, and A-or d3 recall from 0.45 to 0.57. Learning takes 4× the time.
+- All grammars are running.
