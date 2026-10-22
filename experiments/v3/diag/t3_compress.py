@@ -20,7 +20,8 @@ from trellis2.trellis3 import Trellis3, BOS, EOS
 cond, cfg = sys.argv[1], json.loads(sys.argv[2]); seed = int(sys.argv[3]) if len(sys.argv) > 3 else 13
 # "ctx": every element categorised in the context tree; "two": as the two-
 # hierarchy theory reads it, a word by its context concept and a chunk by its
-# content concept (what it is made of), both cut at the same coarseness
+# content concept (what it is made of), both cut at the same coarseness;
+# "analysis": see below
 scheme = sys.argv[4] if len(sys.argv) > 4 else "ctx"
 train, _ = v1_split(load_corpus(os.path.join(default_data_root(), CONDITIONS[cond])), seed)
 L = Trellis3(seed=seed, **cfg)
@@ -101,6 +102,34 @@ def cut_on(path, m, top):
         if n.count >= m:
             node = n
     return node.id
+
+# "analysis": rules from the analyses memory itself gives the training
+# experiences (its readout), elements categorised in the context tree
+analyses = []
+if scheme == "analysis":
+    for e in train:
+        r = L.parse(e.tokens); t = r["tree"]; n = len(e.tokens)
+        el = {(w.span[0], w.span[1]): w for w in r["words"]}
+        for (i, k, j) in r["chosen"]:
+            el[(i, j)] = r["comps"][(i, k, j)]
+        analyses.append((n, t, el))
+
+def project_analysis(catf):
+    rules = defaultdict(lambda: defaultdict(float)); start = defaultdict(float)
+    for n, t, el in analyses:
+        for (i, j), x in el.items():
+            a = catf(x)
+            if j - i == 1:
+                rules[a][("w", x.token)] += 1.0
+            else:
+                k = t.split[(i, j)]
+                rules[a][("r", catf(el[(i, k)]), catf(el[(k, j)]))] += 1.0
+        if n > 1:
+            start[catf(el[(0, n)])] += 1.0
+    return rules, start
+
+if scheme == "analysis":
+    project = project_analysis
 
 for frac in (0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001, 0.0):
     m = max(frac * root.count, 1.0); mc = max(frac * croot.count, 1.0)
