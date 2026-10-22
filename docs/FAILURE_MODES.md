@@ -80,3 +80,48 @@ Run it on `small`, `med`, `large`, `term_low`, `term_med` and `term_high` (and o
 - The context tree (OR) is the weak side.
 - Cross-granularity comparability is the open question for B.
 - Co-evolution is weak, so whether more of it helps is the test now running (`rb3000`, `refit`).
+
+### 22 October, `large`, seed 13, current config
+
+| Check | Result | Reading |
+|---|---|---|
+| A-or precision / recall, u1 / u2 | 0.91 / 0.01, 0.84 / 0.03 | OR nodes near the leaf memorize: almost no same-category filler shares them |
+| A-or precision / recall, d3 / d2 / d1 | 0.63 / 0.35, 0.43 / 0.48, 0.21 / 0.55 | no level is both precise and complete: **OR nodes fail A on both sides** |
+| A-and precision / recall / recombination, u1 | 0.67 / 0.31 / 0.87 | chunk types are mediocre; recombining parts beats swapping whole members |
+| A-and, d2 | 0.45 / 0.54 / 0.63 | |
+| B AUC context: same length / cross length | 0.59 / 0.66 | context similarity barely tracks category |
+| B AUC content: same length / cross length | 0.64 / **0.54** | **B fails**: chunk types of different sizes are not comparable |
+| F systematicity | 0.851 / 0.851 | passes: no gap after swapping same-category constituents |
+| F productivity | 6.4% of samples longer than any training sentence, 59% of those grammatical | partial |
+| C stale content descriptions; misplaced leaves (context / content) | 0.89; 0.71 / 0.92 | co-evolution is far weaker than on `small` |
+
+**Ranking on `large`:**
+- A-or fails on both sides.
+- B fails across sizes.
+- A-and is weak.
+- Systematicity passes.
+- Memory is very stale. Whether staleness causes the A/B failures is what the `rb3000` and `refit` variants test.
+
+**Co-evolution variants on `small`:**
+- `rb3000` cuts stale descriptions from 0.45 to 0.05, but the misplaced leaves stay at 0.45 / 0.70. A-or d3 moves from 0.94 / 0.45 to 0.99 / 0.52.
+- `refit` brings misplaced leaves to 0.27 / 0.47 and A-and d2 to 1.0 / 1.0. A-or u1 recall rises from 0.07 to 0.14.
+- So moving stale leaves helps a little on `small`.
+
+### 22 October, co-evolution variants on `med` and `large` (seed 13): staleness is not the cause
+
+| | best | rb3000 | refit |
+|---|---|---|---|
+| `large`, A-or u1 recall | 0.01 | 0.02 | 0.04 |
+| `large`, A-or d2 precision / recall | 0.43 / 0.48 | 0.42 / 0.47 | 0.50 / 0.48 |
+| `large`, B content AUC, cross length | 0.54 | 0.56 | 0.54 |
+| `med`, B content AUC, cross length | 0.50 | 0.50 | 0.48 |
+| `large`, C stale descriptions | 0.89 | 0.49 | 0.96 |
+| learning time (`large`) | 10 min | 65 min | 81 min |
+
+- More refresh, or moving stale leaves, costs 6–8× the time and barely changes A or B.
+- Staleness stays high because naming parts by whole paths makes nearly every stored name change after every insertion.
+- **Conclusion:** the A and B failures come from the descriptions themselves, not from stale memory. Co-evolution by refresh is not worth exploiting here.
+
+**B diagnosis.** A word's donated own-content facet is its token (`w:dog`), but a chunk's is its content-tree path. The two vocabularies never overlap, so "dog" and "big dog" cannot look alike in the context tree even with identical surroundings.
+
+**Next change: `cc_naming="tokens"`.** A chunk's own content becomes the bag of its tokens, and a word is the one-token case. This is domain-general and stable: it never needs relabelling. It is being checked with this file's diagnostics, plus generation and compression.

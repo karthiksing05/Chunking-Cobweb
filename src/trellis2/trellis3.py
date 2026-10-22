@@ -276,6 +276,17 @@ class Trellis3:
     def _cc_ids(self, e: Elem) -> List[str]:
         if e.token is not None and self.word_cc:
             return [f"w:{e.token}"]
+        if self.cc_naming == "tokens":
+            # what a chunk is made of, in the same vocabulary as a word's own
+            # content: the bag of its tokens (a word is the one-token case)
+            out, stack = [], [e]
+            while stack:
+                x = stack.pop()
+                if x.token is not None:
+                    out.append(f"w:{x.token}")
+                else:
+                    stack += [x.right, x.left]
+            return out
         return self._cnt_name(e, self.cc_naming)
 
     def _facet(self, x: dict, name: str, ids: List[str]) -> None:
