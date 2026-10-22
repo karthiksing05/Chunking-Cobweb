@@ -209,12 +209,16 @@ CONDITIONS = {
     "term_med": "cfg_terminal_med",
     "term_high": "cfg_terminal_high",
 }
+# data-size test: 4x corpora drawn from the same grammars (scripts/generate_bigger_corpus.py)
+CONDITIONS.update({f"{c}_x4": f"{d}_x4" for c, d in list(CONDITIONS.items())})
 
 
 def target_grammar(condition: str) -> dict:
     """The generating CFG for a condition (used only for evaluation)."""
     from util.cfg import (LEXICON_VARIANTS, TEST_GRAMMAR_LARGE, TEST_GRAMMAR_MED,
                           TEST_GRAMMAR_SMALL, make_grammar_variant)
+    if condition.endswith("_x4"):
+        condition = condition[:-len("_x4")]
     if condition == "small":
         return TEST_GRAMMAR_SMALL
     if condition == "med":
