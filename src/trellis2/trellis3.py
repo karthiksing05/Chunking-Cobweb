@@ -101,7 +101,8 @@ class Trellis3:
                  naming: str = "depth", heights: bool = True, donate_own: bool = False,
                  refresh: str = "refit", readout: str = "mbr", cc_naming: Optional[str] = None,
                  word_cc: bool = False, boundary: str = "marker", type_names: bool = False, neighbour_types: bool = False,
-                 type_top: int = 40, type_k: int = 8, type_key: str = "tokens"):
+                 type_top: int = 40, type_k: int = 8, type_key: str = "tokens",
+                 word_content: Optional[str] = None):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -165,6 +166,14 @@ class Trellis3:
         self._type_rng = random.Random(seed + 7)
         self.neighbour_types = neighbour_types
         self.type_bag: Dict[tuple, Dict[str, float]] = {}
+        # a word's content name: what it builds. Each word keeps a weighted
+        # reservoir of ``type_k`` content leaves of the composites it is a direct
+        # part of, tagged by side; its name is the bag of side-tagged concepts on
+        # those leaves' current paths. "parts": a word part's LC/RC carry it;
+        # "cc": the word's own content in its context is it; "cc+token": half
+        # the token, half the bag.
+        self.word_content = word_content
+        self.word_res: Dict[str, List[Tuple[float, str, CobwebNode]]] = {}
         # the parts' heights in the content (v1's complexity tag); without them a
         # part that recurses (an N' where an N stands) is named only by its concepts
         self.heights = heights
@@ -318,6 +327,40 @@ class Trellis3:
         for v in ids:
             bag[v] = bag.get(v, 0.0) + e.weight / max(len(ids), 1)
 
+    def _add_word_content(self, e: Elem) -> None:
+        """A stored composite adds its content leaf to the reservoirs of its word parts."""
+        if e.weight <= 0 or e.cleaf is None:
+            return
+        for side, part in (("L", e.left), ("R", e.right)):
+            if part.token is None:
+                continue
+            res = self.word_res.setdefault(part.token, [])
+            key = self._type_rng.random() ** (1.0 / e.weight)
+            if len(res) < self.type_k:
+                res.append((key, side, e.cleaf))
+            else:
+                i = min(range(len(res)), key=lambda t: res[t][0])
+                if key > res[i][0]:
+                    res[i] = (key, side, e.cleaf)
+
+    def _word_content_bag(self, token: str) -> Optional[Dict[str, float]]:
+        """The bag of side-tagged content concepts a word's sampled composites sit under."""
+        cache = getattr(self, "_wc_cache", None)
+        if cache is not None and token in cache:
+            return cache[token]
+        res = self.word_res.get(token)
+        if not res:
+            return None
+        bag: Dict[str, float] = {}
+        for _, side, leaf in res:
+            ids = self._path_ids(self.cnt.ancestors(leaf)[::-1])
+            for v in ids:
+                bag[side + v] = bag.get(side + v, 0.0) + 1.0 / (len(ids) * len(res))
+        out = dict(sorted(bag.items(), key=lambda kv: -kv[1])[:self.type_top])
+        if cache is not None:
+            cache[token] = out
+        return out
+
     def _cnt_name(self, e: Elem, naming: Optional[str] = None) -> List[str]:
         naming = naming or self.naming
         if naming == "depth":
@@ -355,7 +398,16 @@ class Trellis3:
                     for _ in range(max(1, round(-math.log2(max(n.count, 1e-9) / total))))]
         return [f"c{n.id}" for n in inner] or [BLANK]
 
-    def _cc_ids(self, e: Elem) -> List[str]:
+    def _cc_ids(self, e: Elem):
+        if e.token is not None and self.word_content in ("cc", "cc+token"):
+            bag = self._word_content_bag(e.token)
+            if bag:
+                if self.word_content == "cc":
+                    return bag
+                tot = sum(bag.values())
+                out = {v: 0.5 * w / tot for v, w in bag.items()}
+                out[f"w:{e.token}"] = 0.5
+                return out
         if e.token is not None and self.word_cc:
             return [f"w:{e.token}"]
         if self.cc_naming == "tokens":
@@ -402,7 +454,8 @@ class Trellis3:
         for p, part in (("L", e.left), ("R", e.right)):
             self._facet(x, p, self._ctx_name(part))
             if self.donate_cnt:
-                self._facet(x, f"{p}C", self._cnt_name(part))
+                bag = self._word_content_bag(part.token) if (part.token is not None and self.word_content) else None
+                self._facet(x, f"{p}C", bag if bag else self._cnt_name(part))
             if self.heights:
                 x[f"{p}H"] = str(min(part.height, 4))
         return x
@@ -667,6 +720,7 @@ class Trellis3:
     def parse(self, tokens: Sequence[str]) -> dict:
         tokens = list(tokens)
         n = len(tokens)
+        self._wc_cache = {}                 # word content names, read once per experience
         words, comps = self._chart(tokens)
         if n < 2:
             return {"tree": Tree(n, {}, {}, [(0, n)] if n else []), "words": words, "comps": comps,
@@ -743,6 +797,8 @@ class Trellis3:
                 self.ctx.add_passive(e.leaf, CONST, "c", e.const)
             if self.type_names or self.neighbour_types:
                 self._add_type(e)
+            if self.word_content:
+                self._add_word_content(e)
             self.records.append(e)
             self.stats["composites stored"] += 1
         # what generation reads: the committed analysis as statistics of concepts
@@ -766,6 +822,7 @@ class Trellis3:
         """Re-describe stored instances whose named concepts moved: the newest
         and a round-robin slice of the rest (``refresh_budget``)."""
         recs = self.records
+        self._wc_cache = {}                 # re-read word content names after this experience
         b = self.refresh_budget
         if b is None or first <= b:
             todo = recs[first:] if b is not None and first > b else recs

@@ -274,3 +274,17 @@ The exported parses show it. For every composite on `med` (90 of 90) and `large`
   - total 100: 1.00 / 0.80, 0.40; 1.00 / 0.72, 0.31.
   - **Weaker smoothing loses at every setting; α=1 stays.**
   - Letting the content tree contribute through near-leaf concepts hurts. The lever is structural: the content tree is shallow and bushy (a depth-2 concept holds about 1% of instances), with no mid-level chunk types for the gain to find.
+- **Interim, two seeds (back-off β=1 + kind 1, words at leaf vs leaf; grammatical / grammatical-and-new):**
+  - `med` s13 0.94 / 0.85 vs 1.00 / 0.88; s17 0.97 / 0.87 vs 0.99 / 0.73.
+  - `large` s13 0.95 / 0.83 vs 1.00 / 0.79; s17 0.90 / 0.82 vs 1.00 / 0.83.
+  - `term_low` s13 0.95 / 0.81 vs 1.00 / 0.75.
+  - More grammatical-and-new in 3/5, about equal (within 0.03) in 2/5, at 2–10 points of grammaticality.
+  - kind 2 is worse on s17 (`med` 0.93 / 0.81, `large` 0.88 / 0.80) and is dropped.
+  - `term_low` s17 and `term_high` still running.
+- **Kind check, all eight runs** (back-off β=1 + kind 1, words at leaf vs leaf; grammatical / grammatical-and-new):
+  - `term_low` s17 0.88 / 0.64 vs 0.99 / 0.74.
+  - `term_high` s17 0.84 / 0.75 vs 0.98 / 0.68.
+  - `term_med` s13 0.93 / 0.86 vs 1.00 / 0.89.
+  - Overall: more grammatical-and-new on 4 of 8, about equal on 2, less on 2, at 2–16 points of grammaticality.
+  - **Not a consistent win; leaf stays the default.**
+  - The kind check repairs most of what climbing breaks. Climbing itself adds novelty only where leaves are sparse.
