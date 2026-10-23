@@ -92,7 +92,7 @@ class Trellis3:
                  donate_cnt: Optional[bool] = None, factor: str = "gain", support: float = 3.0,
                  naming: str = "depth", heights: bool = True, donate_own: bool = False,
                  refresh: str = "refit", readout: str = "mbr", cc_naming: Optional[str] = None,
-                 word_cc: bool = False, boundary: str = "marker", type_names: bool = False,
+                 word_cc: bool = False, boundary: str = "marker", type_names: bool = False, neighbour_types: bool = False,
                  type_top: int = 40):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
@@ -147,6 +147,7 @@ class Trellis3:
         # wherever they occurred. The aggregate keeps its ``type_top`` heaviest
         # concepts.
         self.type_names, self.type_top = type_names, type_top
+        self.neighbour_types = neighbour_types
         self.type_bag: Dict[tuple, Dict[str, float]] = {}
         # the parts' heights in the content (v1's complexity tag); without them a
         # part that recurses (an N' where an N stands) is named only by its concepts
@@ -169,7 +170,7 @@ class Trellis3:
         chunk = (tuple(f"{p}{k}" for p in ("cl", "cr") for k in d) if self.children else ()) + \
             (tuple(f"{p}{k}" for p in ("par", "sib") for k in d) if self.spine else ())
         own = tuple(f"cc{k}" for k in d) if self.donate_ctx else ()
-        neigh = tuple(f"{p}{k}" for p in ("lc", "rc") for k in d) if neighbour_concepts else ()
+        neigh = tuple(f"{p}{k}" for p in ("lc", "rc") for k in d) if (neighbour_concepts or neighbour_types) else ()
         self.ctx_attrs = surface + neigh + chunk + own + (("le", "re") if boundary == "edge" else ())
         parts = tuple(f"{p}{k}" for p in ("L", "R") for k in d)
         given = tuple(f"{p}{k}" for p in ("LC", "RC") for k in d) if self.donate_cnt else ()
@@ -360,7 +361,15 @@ class Trellis3:
         """The context description; with ``analysed`` False the parts that need an
         analysis (parent, sibling) are left out (a partial instance)."""
         x = self._surface(tokens, *e.span)
-        if self.neighbour_concepts:
+        if self.neighbour_types:
+            # the window at the level of types: each neighbouring word named by
+            # the aggregate of where its type has occurred
+            i, j = e.span
+            for p, pos in (("lc", i - 1), ("rc", j)):
+                bag = self.type_bag.get((tokens[pos],)) if 0 <= pos < len(tokens) else None
+                self._facet(x, p, dict(sorted(bag.items(), key=lambda kv: -kv[1])[:self.type_top])
+                            if bag else [BLANK])
+        elif self.neighbour_concepts:
             i, j = e.span
             for p, pos in (("lc", i - 1), ("rc", j)):
                 self._facet(x, p, self._word_concept(tokens, pos))
@@ -664,7 +673,7 @@ class Trellis3:
             if self.store == "ccm":
                 e.const = 1.0
                 self.ctx.add_passive(e.leaf, CONST, "c", 1.0)
-            if self.type_names:
+            if self.type_names or self.neighbour_types:
                 self._add_type(e)
             self.records.append(e)
             self.stats["words stored"] += 1
@@ -682,7 +691,7 @@ class Trellis3:
             if e.const > 0:
                 self.cnt.add_passive(e.cleaf, CONST, "c", e.const)
                 self.ctx.add_passive(e.leaf, CONST, "c", e.const)
-            if self.type_names:
+            if self.type_names or self.neighbour_types:
                 self._add_type(e)
             self.records.append(e)
             self.stats["composites stored"] += 1
