@@ -229,6 +229,15 @@ for rule in RULES:
     gens.append({"rule": rule["name"], "args": rule["args"], "samples": samples})
 
 # --------------------------------------------------------------- type names --
+def concept_info(key):
+    """Depth below the root and size of a named context concept ("c<id>")."""
+    try:
+        node = CTX[int(str(key).lstrip("c"))]
+    except (ValueError, KeyError):
+        return None
+    return {"depth": len(L.ctx.ancestors(node)) - 1, "count": round(node.count, 1), "surroundings": surroundings(node)}
+
+
 types = []
 if L.type_names == "sample":
     words = Counter(t for e in train for t in e.tokens)
@@ -240,9 +249,11 @@ if L.type_names == "sample":
             ids = L._path_ids(L.ctx.ancestors(leaf)[::-1])
             for v in ids:
                 bag[v] += 1.0 / (len(ids) * len(res))
-            sampled.append({"leaf": leaf.id, "surroundings": surroundings(leaf), "path length": len(ids)})
+            sampled.append({"leaf": leaf.id, "surroundings": surroundings(leaf), "path length": len(ids),
+                            "path": sorted(set(ids))})
         types.append({"type": w, "occurrences": words[w], "sampled leaves": sampled,
-                      "bag top": [[k, round(v, 4)] for k, v in bag.most_common(12)]})
+                      "bag top": [[k, round(v, 4)] for k, v in bag.most_common(12)],
+                      "bag concepts": {k: concept_info(k) for k, _ in bag.most_common(12)}})
 
 summary = {}
 for rule in RULES:

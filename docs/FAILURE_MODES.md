@@ -261,3 +261,9 @@ The exported parses show it. For every composite on `med` (90 of 90) and `large`
 - **Smoothing swamps small concepts.** Content attributes have 400–960 values, so α·V ≫ a depth-2 concept's count. The context window has 14 values and is unaffected.
 - **The content tree is shallow and bushy.** Paths are 3–7 long, against 5–13 for context. A depth-2 concept holds about 1% of instances, so even α=1/V only breaks even.
 - Probe running: `alpha=-1` (total pseudo-count 1 per attribute) → `logs/v3-gba1-*`, `v3-fail-a1-*`, `v3_export/a1/med.json`.
+- **`alpha=-1` (total pseudo-count 1) result, seed 13:** learning 6× faster (`med` 156 s vs ~1000 s), but worse on both measures.
+  - Leaf generation `med` 0.98 / 0.77 (α=1: 1.00 / 0.88), `large` 0.98 / 0.67 (1.00 / 0.79).
+  - Omission `med` 0.41 (0.32), `large` 0.38 (0.29).
+  - Content B (lengths differ) `large` 0.62 (0.64).
+  - Reading, not yet verified: with almost no smoothing, near-leaf content concepts code their own few instances almost perfectly, so the content tree rewards memorised pairs over chunk types.
+  - Sweep of total pseudo-mass 10 and 100 running (`logs/v3-gba10-*`, `v3-gba100-*`).
