@@ -1201,10 +1201,12 @@ class Trellis3:
                     node = leaf
                     fills = {f: c for f, c in self.ctx.passive(node, FILL).items() if (f[0] == "w") == primitive}
                 f = draw(fills)
+                entry = None
                 if trace is not None:
-                    trace.append({"depth": d, "composite": x.id, "part": "left" if a == LPART else "right",
-                                  "leaf": leaf.id, "concept": node.id, "primitive": primitive,
-                                  "instances": fills, "drawn": f})
+                    entry = {"depth": d, "composite": x.id, "part": "left" if a == LPART else "right",
+                             "leaf": leaf.id, "concept": node.id, "primitive": primitive,
+                             "instances": fills, "drawn": f, "start": len(out)}
+                    trace.append(entry)
                 if f is None:
                     raise LookupError
                 if f[0] == "w":
@@ -1213,6 +1215,8 @@ class Trellis3:
                     expand(cnt_ix[f[1]], d + 1)
                 else:
                     raise LookupError
+                if entry is not None:
+                    entry["end"] = len(out)
 
         root = draw(self.cnt.passive(self.cnt.root, SENT))
         if root is None or root not in cnt_ix:

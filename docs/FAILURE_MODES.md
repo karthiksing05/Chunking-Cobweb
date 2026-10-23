@@ -225,3 +225,25 @@ The leaf column gives grammatical / grammatical-and-new; the other columns give 
 - **Sampled bag-of-concepts type names keyed by chunk type are the best type names so far.**
 - **"Best concept" by share × P(surroundings) fails** on `med` and `large`. Common surroundings stay predictable near the root while share keeps growing, so the score peaks in mixed concepts. Adding content does not fix it.
 - **Next:** hierarchical back-off. Stay at a concept with probability n / (n + β), where n is the committed instances of the part's kind there; otherwise step up. β = 0.25 and β = 1 are running.
+
+### 23 October: back-off and the AND-side kind check (tsampc, seed 13; grammatical / grammatical-and-new)
+
+| rule | small | med |
+|---|---|---|
+| leaf | 1.00 / 0.50 | 1.00 / 0.88 |
+| back-off β=0.25 | — | 0.95 / 0.83 |
+| back-off β=1 | — | 0.84 / 0.79 |
+| back-off β=1 + kind 1 | 1.00 / 0.53 | 0.87 / 0.81 |
+| back-off β=1 + kind 1, words at leaf | 1.00 / 0.50 | 0.94 / 0.85 |
+| back-off β=1 + kind 2, words at leaf | 1.00 / 0.50 | 0.95 / 0.88 |
+| back-off β=4 + kind 1, words at leaf | 1.00 / 0.46 | 0.88 / 0.80 |
+| three levels up + kind 1, words at leaf | 1.00 / 0.53 | 0.42 / 0.40 |
+
+- Kind check: a composite drawn above the leaf must lie under the content concept `kind` levels above the content leaves of the leaf's own composite instances.
+- **The AND side repairs most of what climbing breaks** (A-or). Back-off grammaticality goes 0.84 → 0.95 and novelty matches leaf.
+- A fixed three-level climb still fails (0.42), so the kind check alone does not make high concepts kind-pure.
+- `large` is pending.
+- Learning curves (tsampc, leaf, seeds 13/17): 100% grammatical at every checkpoint. Grammatical-and-new on `large` 0.13/0.08 (20) → 0.41/0.49 (80) → 0.79/0.83 (320). `term_low` 0.63/0.54 at 80.
+- `large` (seed 13): leaf 1.00 / 0.79; back-off β=0.25 0.94 / 0.82; β=1 0.78 / 0.74; β=1 + kind 1 0.76 / 0.71; + kind 1, words at leaf 0.95 / 0.83; + kind 2, words at leaf 0.93 / 0.84; β=4 + kind 1, words at leaf 0.86 / 0.83; three levels up + kind 0.46 / 0.45.
+- **Kind-checked back-off with words at their leaf has the most grammatical-and-new samples on `large` (0.84 vs 0.79), ties on `med`.** It costs 5–7 points of grammaticality.
+- Seed 17 on `med`/`large`/`term_low`/`term_high` is running (`logs/v3-gbk17-*`).
