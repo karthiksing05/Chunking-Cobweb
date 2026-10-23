@@ -13,7 +13,10 @@ conds = sys.argv[3].split(",") if len(sys.argv) > 3 else ["small", "med", "large
 seed = int(sys.argv[4]) if len(sys.argv) > 4 else 13
 ks = [int(x) for x in sys.argv[5].split(",")] if len(sys.argv) > 5 else [1, 8]
 by = sys.argv[6] if len(sys.argv) > 6 else "weight"
-rh = len(sys.argv) > 7 and sys.argv[7] == "hint"
+opts = sys.argv[7].split(",") if len(sys.argv) > 7 else []
+rh = "hint" in opts
+up = next((int(o[2:]) for o in opts if o.startswith("up")), 1)
+mm = next((int(o[1:]) for o in opts if o.startswith("m") and o[1:].isdigit()), None)
 n = 300
 for cond in conds:
     train, test = v1_split(load_corpus(os.path.join(default_data_root(), CONDITIONS[cond])), seed)
@@ -23,10 +26,10 @@ for cond in conds:
     te = BracketTally()
     for e in test[:60]: te.add(e.tree, L.parse(e.tokens)["tree"])
     mem = L._members(L.ctx, "ctx")
-    row = {"by": by + ("+hint" if rh else ""), "tag": tag, "cond": cond, "seed": seed, "learn s": round(time.time() - t0), "omission (side)": round(te.omission, 3)}
+    row = {"by": by + ("+hint" if rh else ""), "up": up, "min members": mm, "tag": tag, "cond": cond, "seed": seed, "learn s": round(time.time() - t0), "omission (side)": round(te.omission, 3)}
     for k in ks:
         rng = random.Random(seed)
-        S = [s for s in ((L.generate_expand(rng, members=mem, by=by, right_hint=rh) if k == 1 else L.generate_best(rng, members=mem, k=k, by=by)) for _ in range(n)) if s]
+        S = [s for s in ((L.generate_expand(rng, members=mem, up=up, by=by, right_hint=rh, min_members=mm) if k == 1 else L.generate_best(rng, members=mem, k=k, by=by)) for _ in range(n)) if s]
         gram = [s for s in S if g.recognizes(s)]
         row[f"k{k} grammatical"] = round(len(gram) / max(len(S), 1), 3)
         row[f"k{k} gram+new"] = round(sum(tuple(s) not in seen for s in gram) / max(len(S), 1), 3)

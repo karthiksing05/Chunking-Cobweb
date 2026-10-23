@@ -899,7 +899,7 @@ class Trellis3:
 
     def generate_expand(self, rng: Optional[random.Random] = None, members=None, up: int = 1,
                         max_depth: int = 12, kind: bool = True, by: str = "weight",
-                        right_hint: bool = False) -> Optional[List[str]]:
+                        right_hint: bool = False, min_members: Optional[int] = None) -> Optional[List[str]]:
         """Expansive generation. Sample a sentence-level chunk from memory as the
         root, then expand top-down, left to right. Each slot carries metadata
         (its context concept, ``up`` levels above the stored part's leaf, and
@@ -980,10 +980,22 @@ class Trellis3:
                 hint = None
                 if right_hint:
                     hint = first(e.right) if side == "L" else right
-                pool = members.get(concept(part), [])
-                if kind:
-                    word = part.token is not None or d >= max_depth
-                    pool = [m for m in pool if (m.token is not None) == word]
+                word = part.token is not None or d >= max_depth
+                if min_members:
+                    # the deepest concept on the part's path whose committed
+                    # members of the part's kind hold ``min_members`` distinct
+                    # types: fine where evidence is dense, broader where sparse
+                    path = self.ctx.ancestors(part.leaf)[::-1] if part.leaf is not None \
+                        else self.ctx.categorize(part.ctx)
+                    for node in reversed(path[1:] if len(path) > 1 else path):
+                        pool = [m for m in members.get(f"c{node.id}", [])
+                                if wt(m) > 0 and (not kind or (m.token is not None) == word)]
+                        if len({self._type_key(m) for m in pool}) >= min_members:
+                            break
+                else:
+                    pool = members.get(concept(part), [])
+                    if kind:
+                        pool = [m for m in pool if (m.token is not None) == word]
                 m = draw(pool, last, hint) or part
                 if m.token is not None:
                     out.append(m.token)
