@@ -1081,7 +1081,7 @@ class Trellis3:
         return out[0], out[1]
 
     def generate_tree(self, rng: Optional[random.Random] = None, index=None, level: int = 0,
-                      choose: str = "leaf", max_depth: int = 12,
+                      choose: str = "leaf", beta: float = 1.0, max_depth: int = 12,
                       trace: Optional[list] = None) -> Optional[List[str]]:
         """Expansive generation from the two hierarchies alone. Every step reads
         statistics held by concepts: a whole experience is drawn from the content
@@ -1131,7 +1131,18 @@ class Trellis3:
                 scored[leaf.id] = out
             return scored[leaf.id]
 
-        def concept_for(leaf: CobwebNode) -> CobwebNode:
+        def concept_for(leaf: CobwebNode, primitive: bool = False) -> CobwebNode:
+            if choose == "backoff":
+                # hierarchical back-off (Dirichlet smoothing along the path): stay at
+                # a concept holding n committed instances of this kind with
+                # probability n / (n + beta), else step up to its parent
+                node = leaf
+                while node.parent is not None:
+                    n = sum(c for f, c in self.ctx.passive(node, FILL).items() if (f[0] == "w") == primitive)
+                    if n > 0 and rng.random() < n / (n + beta):
+                        break
+                    node = node.parent
+                return node
             if choose == "best":
                 return max(path_scores(leaf), key=lambda t: t[0])[1]
             if choose == "match":
@@ -1163,7 +1174,7 @@ class Trellis3:
                 if where is None or where[0] not in ctx_ix:
                     raise LookupError
                 leaf, primitive = ctx_ix[where[0]], where[1] or d >= max_depth
-                node = concept_for(leaf)
+                node = concept_for(leaf, primitive)
                 fills = {f: c for f, c in self.ctx.passive(node, FILL).items() if (f[0] == "w") == primitive}
                 if not fills:                      # the chosen concept holds none of this kind
                     node = leaf

@@ -19,6 +19,7 @@ up = next((int(o[2:]) for o in opts if o.startswith("up")), 0)
 mm = next((int(o[1:]) for o in opts if o.startswith("m") and o[1:].isdigit()), None)
 tree = "tree" in opts
 choose = next((o[7:] for o in opts if o.startswith("choose=")), "leaf")
+beta = next((float(o[5:]) for o in opts if o.startswith("beta=")), 1.0)
 su = next((int(o[5:]) for o in opts if o.startswith("level")), 0)
 n = 300
 for cond in conds:
@@ -30,14 +31,14 @@ for cond in conds:
     for e in test[:60]: te.add(e.tree, L.parse(e.tokens)["tree"])
     mem = L._members(L.ctx, "ctx") if not tree else None
     ix = L.concept_index() if tree else None
-    row = {"by": by + ("+hint" if rh else ""), "up": up, "min members": mm, "tree": tree, "level": su, "choose": choose, "tag": tag, "cond": cond, "seed": seed, "learn s": round(time.time() - t0), "omission (side)": round(te.omission, 3)}
+    row = {"by": by + ("+hint" if rh else ""), "up": up, "min members": mm, "tree": tree, "level": su, "choose": choose, "beta": beta, "tag": tag, "cond": cond, "seed": seed, "learn s": round(time.time() - t0), "omission (side)": round(te.omission, 3)}
     for k in ks:
         rng = random.Random(seed)
         def one():
             if k > 1:
                 return L.generate_best(rng, members=mem, k=k, by=by)
             if tree:
-                return L.generate_tree(rng, index=ix, level=su, choose=choose)
+                return L.generate_tree(rng, index=ix, level=su, choose=choose, beta=beta)
             return L.generate_expand(rng, members=mem, up=up, by=by, right_hint=rh, min_members=mm)
         S = [s for s in (one() for _ in range(n)) if s]
         gram = [s for s in S if g.recognizes(s)]
