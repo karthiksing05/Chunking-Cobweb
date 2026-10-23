@@ -172,3 +172,20 @@ The part's own leaf (`up=0`) is now the generation default.
 - Grammatical: 94–100% on every grammar and seed.
 - Grammatical and new: 0.63 on average, the same as `up=1` (whose grammatical rate is 64–85%).
 - So the leaf trades variety, not correct samples.
+
+### 23 October: representation variants with leaf-slot generation (`up=0`)
+
+| Grammar | best: grammatical / new | `type_names`: grammatical / new | `tokens`: grammatical / new |
+|---|---|---|---|
+| `small` | 1.00 / 0.38 | 1.00 / 0.44 | 1.00 / 0.00 |
+| `med` | 1.00 / 0.78 | 1.00 / **0.88** | 1.00 / 0.00 |
+| `large` | 0.97 / 0.78 | 1.00 / **0.85** | 1.00 / 0.00 |
+| `term_low` | 0.98 / 0.71 | 0.96 / **0.75** | 1.00 / 0.00 |
+| `term_med` | 1.00 / 0.58 | 1.00 / 0.55 (0.79 / 0.30) | 1.00 / 0.01 |
+| `term_high` | 1.00 / 0.53 | running | 1.00 / 0.00 |
+
+Values are means over 2 seeds; "new" means grammatical and new.
+
+- **`type_names` with leaf slots: best generation so far.** Novelty rises on `med`, `large` and `term_low`, with grammaticality unchanged. Type-aggregate names let committed chunks from different positions share leaves, so slots recombine across experiences.
+- **`tokens` with leaf slots copies (0% new).** The token bag makes a chunk's own content its exact string, so each leaf holds only identical chunks.
+- **Characters:** the runner hard-coded `up=1`. It is fixed, and best plus `type_names` are rerunning on characters.
