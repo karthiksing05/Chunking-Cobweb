@@ -146,3 +146,22 @@ Run it on `small`, `med`, `large`, `term_low`, `term_med` and `term_high` (and o
 
 - **On `small`:** A-and d1 precision rises from 0.73 to 0.91, and A-or d3 recall from 0.45 to 0.57. Learning takes 4× the time.
 - All grammars are running.
+
+### 23 October: generation from the part's own leaf (`up=0`) reaches 94–100% grammatical
+
+| Grammar | `up=1` grammatical (2 seeds) | `up=0` grammatical | `up=0` grammatical and new | `up=0` distinct |
+|---|---|---|---|---|
+| `small` | 1.00 | 1.00 / 1.00 | 0.25 / 0.50 | 0.69 / 0.75 |
+| `med` | 0.85 | 1.00 / 1.00 | 0.85 / 0.72 | 0.90 / 0.78 |
+| `large` | 0.68 | 1.00 / 0.94 | 0.74 / 0.82 | 0.59 / 0.93 |
+| `term_low` | 0.66 | 0.96 / 1.00 | 0.63 / 0.80 | 0.84 / 0.90 |
+| `term_med` | 0.64 | 1.00 / 1.00 | 0.86 / 0.29 | 0.89 / 0.62 |
+| `term_high` | 0.66 | 1.00 / 0.99 | 0.32 / 0.74 | 0.27 / 0.82 |
+
+**How this reads against A-or.**
+- Memory's fine OR nodes are precise (u1 precision 0.88–0.95 on every grammar). The generator's `up=1` slot was one level too coarse.
+- Novelty comes from recombining committed chunks whose leaves are shared, not from coarse slots.
+
+**Remaining failure: novelty collapses where leaves are sparse.**
+- Cases: `term_high` seed 13 (27% distinct), and `term_med` seed 17.
+- **Next:** `min_members`. Each slot takes the deepest concept whose committed members of the part's kind hold at least m distinct types. This is the same "deepest concept with enough evidence" rule as the regeneration readout. m = 2 and 3 are running.
