@@ -247,3 +247,17 @@ The leaf column gives grammatical / grammatical-and-new; the other columns give 
 - `large` (seed 13): leaf 1.00 / 0.79; back-off β=0.25 0.94 / 0.82; β=1 0.78 / 0.74; β=1 + kind 1 0.76 / 0.71; + kind 1, words at leaf 0.95 / 0.83; + kind 2, words at leaf 0.93 / 0.84; β=4 + kind 1, words at leaf 0.86 / 0.83; three levels up + kind 0.46 / 0.45.
 - **Kind-checked back-off with words at their leaf has the most grammatical-and-new samples on `large` (0.84 vs 0.79), ties on `med`.** It costs 5–7 points of grammaticality.
 - Seed 17 on `med`/`large`/`term_low`/`term_high` is running (`logs/v3-gbk17-*`).
+
+### 23 October: the content tree never contributes to the chunk factor
+
+The exported parses show it. For every composite on `med` (90 of 90) and `large` (80 of 80), and 45 of 60 on `small`, the content tree's best gain is the root's 0. Chunk factors therefore come from the context tree alone: substitutability counts, cohesion (parts predicting each other) does not. `t3_diag/t3_gainparts.py` on `small` (320 experiences) gives the mean fit summed over L, LC, R, RC:
+
+| content depth | fit, α=1 | fit, α=1/V | log2 share |
+|---|---|---|---|
+| 1 | +0.2 | +0.7 | −1.6 |
+| 2 | −5.1 | +6.3 | −6.6 |
+| 3 | −9.7 | +2.6 | −11.7 |
+
+- **Smoothing swamps small concepts.** Content attributes have 400–960 values, so α·V ≫ a depth-2 concept's count. The context window has 14 values and is unaffected.
+- **The content tree is shallow and bushy.** Paths are 3–7 long, against 5–13 for context. A depth-2 concept holds about 1% of instances, so even α=1/V only breaks even.
+- Probe running: `alpha=-1` (total pseudo-count 1 per attribute) → `logs/v3-gba1-*`, `v3-fail-a1-*`, `v3_export/a1/med.json`.

@@ -51,15 +51,19 @@ SENT = "sent"        # at a content concept: committed whole experiences below i
 
 
 def log_prob(node: CobwebNode, x: dict, root: CobwebNode, alpha: float) -> float:
-    """ln P(x | node), Laplace-smoothed, attributes independent; x may be partial."""
+    """ln P(x | node), Laplace-smoothed, attributes independent; x may be partial.
+    alpha < 0: a total pseudo-count |alpha| spread over the attribute's values
+    (|alpha| / size each), so smoothing does not swamp small concepts when an
+    attribute has many values."""
     total = 0.0
     for a, v in x.items():
         d = node.av.get(a, {})
         size = len(root.av.get(a, {})) + 1
+        al = alpha if alpha >= 0 else -alpha / size
         if isinstance(v, dict):        # a bag: the expected log probability of its members
-            total += sum(p * math.log((d.get(u, 0.0) + alpha) / (node.count + alpha * size)) for u, p in v.items())
+            total += sum(p * math.log((d.get(u, 0.0) + al) / (node.count + al * size)) for u, p in v.items())
         else:
-            total += math.log((d.get(v, 0.0) + alpha) / (node.count + alpha * size))
+            total += math.log((d.get(v, 0.0) + al) / (node.count + al * size))
     return total
 
 
