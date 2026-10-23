@@ -10,7 +10,7 @@ labels gold spans to score, and it never teaches anything.
 Memory is an AND/OR graph over two Cobweb trees.
 
 - **AND nodes are content concepts (chunk types).** A chunk is its left part AND its right part, so a content concept generalizes structure: which parts go together.
-- **OR nodes are context concepts (categories).** A slot is filled by one member OR another, so a context concept generalizes over compositions: which fillers can stand in the same place.
+- **OR nodes are context concepts (categories).** A part is filled by one committed instance OR another, so a context concept generalizes over compositions: which fillers can stand in the same place.
 
 Generation walks this graph. It picks a sentence-level AND node, expands its parts, fills each part's OR node with a member, and recurses.
 
@@ -23,7 +23,7 @@ Generation walks this graph. It picks a sentence-level AND node, expands its par
   - **Recall:** members of the same gold category share the concept.
   - **Failure signatures:**
     - low recall at every level means the concepts **undergeneralize** (memorized fillers);
-    - low precision at the level generation uses means they **overgeneralize** (a slot admits wrong fillers).
+    - low precision at the level generation uses means they **overgeneralize** (a part's concept admits wrong instances).
 - **AND nodes.** Measured by the same substitution test on content concepts, plus **recombination**. Recombination takes one member's left part with another member's right part. A chunk type whose parts are not independently recombinable is a **memorized pairing, not a rule**.
 
 **B. Representations are comparable across granularity.** A word, a two-word chunk and a five-word chunk that play the same role should look alike.
@@ -159,12 +159,12 @@ Run it on `small`, `med`, `large`, `term_low`, `term_med` and `term_high` (and o
 | `term_high` | 0.66 | 1.00 / 0.99 | 0.32 / 0.74 | 0.27 / 0.82 |
 
 **How this reads against A-or.**
-- Memory's fine OR nodes are precise (u1 precision 0.88–0.95 on every grammar). The generator's `up=1` slot was one level too coarse.
-- Novelty comes from recombining committed chunks whose leaves are shared, not from coarse slots.
+- Memory's fine OR nodes are precise (u1 precision 0.88–0.95 on every grammar). Generation with `up=1` read each part's instances from one concept too coarse.
+- Novelty comes from recombining committed chunks whose leaves are shared, not from coarse concepts.
 
 **Remaining failure: novelty collapses where leaves are sparse.**
 - Cases: `term_high` seed 13 (27% distinct), and `term_med` seed 17.
-- **Next:** `min_members`. Each slot takes the deepest concept whose committed members of the part's kind hold at least m distinct types. This is the same "deepest concept with enough evidence" rule as the regeneration readout. m = 2 and 3 are running.
+- **Next:** `min_members`. Each part takes the deepest concept whose committed members of the part's kind hold at least m distinct types. This is the same "deepest concept with enough evidence" rule as the regeneration readout. m = 2 and 3 are running.
 
 **`min_members` fails (23 October).** m = 2 gives 35–66% grammatical on the larger grammars, and m = 3 gives 19–58%. Climbing until a concept holds 2 distinct types usually passes through single-child chains into mixed concepts.
 
@@ -173,7 +173,7 @@ The part's own leaf (`up=0`) is now the generation default.
 - Grammatical and new: 0.63 on average, the same as `up=1` (whose grammatical rate is 64–85%).
 - So the leaf trades variety, not correct samples.
 
-### 23 October: representation variants with leaf-slot generation (`up=0`)
+### 23 October: representation variants with leaf-concept generation (`up=0`)
 
 | Grammar | best: grammatical / new | `type_names`: grammatical / new | `tokens`: grammatical / new |
 |---|---|---|---|
@@ -186,28 +186,28 @@ The part's own leaf (`up=0`) is now the generation default.
 
 Values are means over 2 seeds; "new" means grammatical and new.
 
-- **`type_names` with leaf slots: best generation so far.** Novelty rises on `med`, `large` and `term_low`, with grammaticality unchanged. Type-aggregate names let committed chunks from different positions share leaves, so slots recombine across experiences.
-- **`tokens` with leaf slots copies (0% new).** The token bag makes a chunk's own content its exact string, so each leaf holds only identical chunks.
+- **`type_names` with leaf concepts: best generation so far.** Novelty rises on `med`, `large` and `term_low`, with grammaticality unchanged. Type-aggregate names let committed chunks from different positions share leaves, so slots recombine across experiences.
+- **`tokens` with leaf concepts copies (0% new).** The token bag makes a chunk's own content its exact string, so each leaf holds only identical chunks.
 - **Characters:** the runner hard-coded `up=1`. It is fixed, and best plus `type_names` are rerunning on characters.
 
-### 23 October: `type_names` + leaf slots (`term_high`), characters, boundary, productivity
+### 23 October: `type_names` + leaf concepts (`term_high`), characters, boundary, productivity
 
 - **`type_names`, `term_high`:**
   - grammatical 1.00 / 1.00;
   - grammatical and new 0.70 / 0.74, against 0.32 / 0.74 for best.
   - Over the six grammars the mean grammatical-and-new is 0.70, against 0.63 for best.
-- **Characters, best config, leaf slots (250 characters, seed 13):**
+- **Characters, best config, leaf concepts (250 characters, seed 13):**
   - well formed 0.974 (was 0.640 with `up=1`);
   - real characters 0.746 (was 0.185);
   - novel 0.334 (was 0.883).
   - Omission is unchanged (0.635).
-  - So leaf slots carry over to a second domain.
-- **Boundary `missing` / `edge` with `type_names` + leaf slots:** the compact MDL grammar collapses (0–1% grammatical on `med` and `large`). Both are set aside for good.
-- **Productivity gap (F).** With leaf slots, `med` gives 100% grammatical but 0% of samples are longer than any training sentence (6–9% with `up=1`). Leaf slots recombine pieces but never nest a chunk deeper than it was seen. This is open.
+  - So leaf concepts carry over to a second domain.
+- **Boundary `missing` / `edge` with `type_names` + leaf concepts:** the compact MDL grammar collapses (0–1% grammatical on `med` and `large`). Both are set aside for good.
+- **Productivity gap (F).** With leaf concepts, `med` gives 100% grammatical but 0% of samples are longer than any training sentence (6–9% with `up=1`). Leaf concepts recombine pieces but never nest a chunk deeper than it was seen. This is open.
 
 ## Rule (user, 23 October): chunk context comes from the same level or below
 
 A node's context description may use only elements at its own level or below it: the surface window (tokens), its own content, and type aggregates of those. Nothing from above it may enter.
 
 - `spine` (parent and sibling) and `right_hint` (what follows the parent) are excluded on principle.
-- Top-down generation is allowed. A chunk's statistics name the slots of its parts (the AND node). A filler is chosen only from the slot's own statistics.
+- Top-down generation is allowed. A composite's statistics name where its parts stood (the AND node). An instance for a part is chosen only from the statistics of the part's context concept.

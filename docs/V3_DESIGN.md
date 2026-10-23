@@ -14,7 +14,7 @@ domain whose experiences are parts in relations.
 * **Distribution defines category (Harris).** A word's category is the set of
   contexts it occurs in, so the context tree describes an element only by its
   surroundings. *General form:* an element is what it is by where it occurs —
-  its slot in a character, its neighbourhood on a board.
+  its position in a character, its neighbourhood on a board.
 * **Substitution defines constituency.** `the lazy dog` is a unit because a
   simpler unit (`it`, `dog`) can stand where it stands; `dog saw` occupies a
   place nothing simpler ever does. The context gain therefore counts the units
@@ -188,14 +188,44 @@ the account.
   log2 P(parts | content concept). The concept is the deepest one on the sorting
   path holding at least `support` instances. Unpacking the chunks then gives
   back the experience.
-* **Expansive generation** (`generate_expand`).
-  * Sample a sentence-level root chunk.
-  * Expand top-down, left to right. Each slot carries metadata (its context
-    concept, and whether the part is a word or a chunk) and chunk context (the
-    tokens generated to its left, and the end marker when it is last).
-  * Draw a filler from the concept's stored members by probability matching:
-    stored weight times P(surroundings | member's concept).
-  * There is no word-to-word prediction.
+* **Expansive generation from the two hierarchies alone** (`generate_tree`,
+  23 October).
+  * **What learning records.** The committed analysis of each experience is
+    kept as passive statistics of concepts, summed up each tree and never
+    sorted on:
+    * `FILL` at a context concept: the committed instances that stood there,
+      a primitive (`("w", token)`) or a composite (`("c", content leaf)`).
+    * `LPART` / `RPART` at a content concept: where its parts stood (a context
+      leaf), and whether each part was primitive.
+    * `SENT` under the content root: committed whole experiences.
+  * **How generation runs.**
+    1. Draw a whole experience from the content root.
+    2. For each part, draw where it stood.
+    3. Choose a context concept on that leaf's path.
+    4. Draw a committed instance of the part's kind from that concept.
+    5. A primitive is emitted. A composite's content concept is expanded the same way.
+  * Every draw is probability matching. There are no records, part pointers or
+    grammar, and no word-to-word prediction.
+  * **Concept choice per part** (`choose`).
+    * `leaf`: the part's own leaf.
+    * `best`: maximise log2 share(C) + log2 P(surroundings | C) over the path.
+    * `best+content`: the same score, adding the part's own content.
+    * `match`: draw a concept in proportion to 2 ** score.
+  * The older `generate_expand` draws from stored records. It is kept for
+    comparison.
+* **Type names** (`type_names`). A part is named by where its type has stood,
+  not by its one occurrence. This is distributional, like word2vec.
+  * `True`: the aggregate of every occurrence's context path.
+  * `"sample"`: a bag of concepts.
+    * Each type keeps a weighted reservoir of `type_k` context leaves it stood at.
+    * Its name is the bag of concepts on those leaves' current paths, so it
+      stays bounded and is never stale.
+  * `type_key="concept"`: a composite's type is its content concept (chunk
+    type), so higher-level chunks aggregate across instances of a chunk type,
+    not only across identical strings.
+* **The record list** (`records`) is used only to relabel stored descriptions
+  when concepts move. Generation reads only the trees. Evaluation shows parse
+  trees and concepts unfolded from the trees.
 * **Window** is a parameter (`window`, default 2).
 * **Sustainable hierarchy.** The hierarchy stays current without rebuilds:
   * there is no re-parse;
