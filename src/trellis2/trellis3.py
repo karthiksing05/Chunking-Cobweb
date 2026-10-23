@@ -1081,7 +1081,8 @@ class Trellis3:
         return out[0], out[1]
 
     def generate_tree(self, rng: Optional[random.Random] = None, index=None, level: int = 0,
-                      choose: str = "leaf", beta: float = 1.0, max_depth: int = 12,
+                      choose: str = "leaf", beta: float = 1.0, kind: Optional[int] = None,
+                      primitive_leaf: bool = False, max_depth: int = 12,
                       trace: Optional[list] = None) -> Optional[List[str]]:
         """Expansive generation from the two hierarchies alone. Every step reads
         statistics held by concepts: a whole experience is drawn from the content
@@ -1174,8 +1175,28 @@ class Trellis3:
                 if where is None or where[0] not in ctx_ix:
                     raise LookupError
                 leaf, primitive = ctx_ix[where[0]], where[1] or d >= max_depth
-                node = concept_for(leaf, primitive)
+                node = leaf if (primitive and primitive_leaf) else concept_for(leaf, primitive)
                 fills = {f: c for f, c in self.ctx.passive(node, FILL).items() if (f[0] == "w") == primitive}
+                if kind is not None and not primitive and node is not leaf:
+                    # the AND side agrees: keep composites of the same kind as the
+                    # leaf's own, i.e. under the content concepts ``kind`` levels
+                    # above the content concepts of the leaf's composite instances
+                    kinds = set()
+                    for g in self.ctx.passive(leaf, FILL):
+                        if g[0] == "c" and g[1] in cnt_ix:
+                            y = cnt_ix[g[1]]
+                            for _ in range(kind):
+                                y = y.parent or y
+                            kinds.add(y.id)
+
+                    def under(cid):
+                        y = cnt_ix.get(cid)
+                        while y is not None:
+                            if y.id in kinds:
+                                return True
+                            y = y.parent
+                        return False
+                    fills = {f: c for f, c in fills.items() if under(f[1])}
                 if not fills:                      # the chosen concept holds none of this kind
                     node = leaf
                     fills = {f: c for f, c in self.ctx.passive(node, FILL).items() if (f[0] == "w") == primitive}
