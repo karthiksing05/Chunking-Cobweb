@@ -40,6 +40,7 @@ def main():
     ap.add_argument("--config", default="{}")
     ap.add_argument("--n-gen", type=int, default=500)
     ap.add_argument("--learner", default="candidates", choices=["candidates", "trellis3"])
+    ap.add_argument("--gen", default="records", choices=["records", "tree"])
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
@@ -59,6 +60,9 @@ def main():
             import random as _random
             _rng = _random.Random(seed)
             def _gen(max_len=15, _mem=[None]):
+                if args.gen == "tree":
+                    s = L.generate_tree(_rng)
+                    return s if s is not None and len(s) <= max_len else None
                 if _mem[0] is None or _mem[0][0] != len(L.records):
                     _mem[0] = (len(L.records), L._members(L.ctx, "ctx"))
                 s = L.generate_expand(_rng, members=_mem[0][1], by="used")

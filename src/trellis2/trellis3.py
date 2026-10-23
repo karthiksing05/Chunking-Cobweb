@@ -1039,7 +1039,7 @@ class Trellis3:
         return out[0], out[1]
 
     def generate_tree(self, rng: Optional[random.Random] = None, index=None, slot_up: int = 0,
-                      max_depth: int = 12) -> Optional[List[str]]:
+                      max_depth: int = 12, trace: Optional[list] = None) -> Optional[List[str]]:
         """Expansive generation from the two hierarchies alone. Every step reads
         statistics held by concepts: a whole experience is drawn from the content
         root (SENT); a content concept gives where its parts stood (LSLOT, RSLOT:
@@ -1074,6 +1074,9 @@ class Trellis3:
                     node = node.parent or node
                 fills = {f: c for f, c in self.ctx.passive(node, FILL).items() if (f[0] == "w") == word}
                 f = draw(fills)
+                if trace is not None:
+                    trace.append({"depth": d, "chunk": x.id, "side": a, "slot": node.id, "word slot": word,
+                                  "slot options": len(self.cnt.passive(x, a)), "fillers": fills, "drawn": f})
                 if f is None:
                     raise LookupError
                 if f[0] == "w":
