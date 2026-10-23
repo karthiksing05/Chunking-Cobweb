@@ -45,8 +45,8 @@ LN2 = math.log(2.0)
 CONST = "const"      # passive: constituent (posterior) mass of the stored elements
 WORD = "word"        # passive: the word a context concept's word elements are (v1's content reference)
 # generation statistics, held by the concepts themselves (passive: never sorted on)
-FILL = "fill"        # at a context concept: what committed elements stood there (("w", token) | ("c", content leaf id))
-LSLOT, RSLOT = "lslot", "rslot"   # at a content concept: where its parts stood ((context leaf id, is word))
+FILL = "fill"        # at a context concept: the committed instances that stood there (("w", token) | ("c", content leaf id))
+LPART, RPART = "lpart", "rpart"   # at a content concept: where its parts stood ((context leaf id, is primitive))
 SENT = "sent"        # at a content concept: committed whole experiences below it (content leaf id)
 
 
@@ -97,7 +97,7 @@ class Trellis3:
                  naming: str = "depth", heights: bool = True, donate_own: bool = False,
                  refresh: str = "refit", readout: str = "mbr", cc_naming: Optional[str] = None,
                  word_cc: bool = False, boundary: str = "marker", type_names: bool = False, neighbour_types: bool = False,
-                 type_top: int = 40):
+                 type_top: int = 40, type_k: int = 8, type_key: str = "tokens"):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -151,6 +151,14 @@ class Trellis3:
         # wherever they occurred. The aggregate keeps its ``type_top`` heaviest
         # concepts.
         self.type_names, self.type_top = type_names, type_top
+        # type_names="sample": a type keeps a weighted reservoir of ``type_k`` of
+        # the context leaves its instances stood at; its name is the bag of the
+        # concepts on those leaves' current paths (a sampled bag of concepts,
+        # never stale). type_key="concept": a composite's type is its content
+        # concept (chunk type) and not its exact token string.
+        self.type_k, self.type_key = type_k, type_key
+        self.type_res: Dict[tuple, List[Tuple[float, CobwebNode]]] = {}
+        self._type_rng = random.Random(seed + 7)
         self.neighbour_types = neighbour_types
         self.type_bag: Dict[tuple, Dict[str, float]] = {}
         # the parts' heights in the content (v1's complexity tag); without them a
@@ -242,7 +250,16 @@ class Trellis3:
         """The ids a facet names an element's context concept by."""
         if self.naming == "depth":
             return self._ctx_ids(e)
-        if self.type_names:
+        if self.type_names == "sample":
+            res = self.type_res.get(self._sample_key(e))
+            if res:
+                bag: Dict[str, float] = {}
+                for _, leaf in res:
+                    ids = self._path_ids(self.ctx.ancestors(leaf)[::-1])
+                    for v in ids:
+                        bag[v] = bag.get(v, 0.0) + 1.0 / (len(ids) * len(res))
+                return dict(sorted(bag.items(), key=lambda kv: -kv[1])[:self.type_top])
+        elif self.type_names:
             bag = self.type_bag.get(self._type_key(e))
             if bag:
                 return dict(sorted(bag.items(), key=lambda kv: -kv[1])[:self.type_top])
@@ -265,8 +282,33 @@ class Trellis3:
                 stack += [x.right, x.left]
         return tuple(out)
 
+    def _sample_key(self, e: Elem) -> tuple:
+        """A primitive's type is its token; a composite's is its token string, or
+        with type_key="concept" its content concept (where it is or would be stored)."""
+        if e.token is not None or self.type_key != "concept":
+            return self._type_key(e)
+        if e.cleaf is not None:
+            return ("c", e.cleaf.id)
+        if "cntp" not in e.memo:
+            e.memo["cntp"] = self.cnt.categorize(e.cnt)
+        return ("c", e.memo["cntp"][-1].id)
+
     def _add_type(self, e: Elem) -> None:
-        """Add a stored instance's context path to its type's aggregate."""
+        """Add a stored instance's context to its type: with type_names="sample"
+        into a weighted reservoir of ``type_k`` context leaves (A-Res: key
+        u ** (1 / weight), keep the largest), else into the full aggregate."""
+        if self.type_names == "sample":
+            if e.weight <= 0:
+                return
+            res = self.type_res.setdefault(self._sample_key(e), [])
+            key = self._type_rng.random() ** (1.0 / e.weight)
+            if len(res) < self.type_k:
+                res.append((key, e.leaf))
+            else:
+                i = min(range(len(res)), key=lambda t: res[t][0])
+                if key > res[i][0]:
+                    res[i] = (key, e.leaf)
+            return
         bag = self.type_bag.setdefault(self._type_key(e), {})
         ids = self._path_ids(self.ctx.ancestors(e.leaf)[::-1])
         for v in ids:
@@ -707,7 +749,7 @@ class Trellis3:
             if e.cleaf is None or e.leaf is None:
                 continue
             self.ctx.add_passive(e.leaf, FILL, ("c", e.cleaf.id), 1.0)
-            for a, part in ((LSLOT, e.left), (RSLOT, e.right)):
+            for a, part in ((LPART, e.left), (RPART, e.right)):
                 if part.leaf is not None:
                     self.cnt.add_passive(e.cleaf, a, (part.leaf.id, part.token is not None), 1.0)
             if e.span == (0, len(tokens)):
@@ -1038,19 +1080,70 @@ class Trellis3:
             out.append(idx)
         return out[0], out[1]
 
-    def generate_tree(self, rng: Optional[random.Random] = None, index=None, slot_up: int = 0,
-                      max_depth: int = 12, trace: Optional[list] = None) -> Optional[List[str]]:
+    def generate_tree(self, rng: Optional[random.Random] = None, index=None, level: int = 0,
+                      choose: str = "leaf", max_depth: int = 12,
+                      trace: Optional[list] = None) -> Optional[List[str]]:
         """Expansive generation from the two hierarchies alone. Every step reads
         statistics held by concepts: a whole experience is drawn from the content
-        root (SENT); a content concept gives where its parts stood (LSLOT, RSLOT:
-        context concepts and kind); a context concept gives what stood there
-        (FILL: a word, or a content concept to expand). Each draw is in proportion
-        to the counts (probability matching). ``slot_up`` reads a slot's fillers
-        from the context concept that many levels above the slot's leaf."""
+        root (SENT); a content concept gives where its parts stood (LPART, RPART:
+        a context concept, and whether the part was primitive); a context concept
+        gives the committed instances that stood there (FILL: a primitive, or a
+        content concept to expand). Each draw is in proportion to the counts
+        (probability matching).
+
+        Which context concept on a part's path supplies the instances:
+        ``choose="leaf"`` the part's own leaf, ``level`` concepts above it;
+        ``"best"`` the concept that best describes where the part stands, the
+        maximum over the path of log2 share(C) + log2 P(surroundings | C) (the
+        quantity learning weighs chunks by; it peaks at the largest concept whose
+        members share these surroundings); ``"match"`` a concept drawn in
+        proportion to 2 ** that score."""
         rng = rng or self.rng
         ctx_ix, cnt_ix = index or self.concept_index()
+        window = [a for a in self.ctx_attrs if a[0] in "lr" and a[1:].isdigit()]
+        content = choose.endswith("+content")
+        choose = choose.split("+")[0]
+        cc_size = len(self.ctx.root.av.get("cc", {})) + 1
+        root_n = max(self.ctx.root.count, 1e-9)
+        sizes = {a: len(self.ctx.root.av.get(a, {})) + 1 for a in window}
+        scored: Dict[int, List[Tuple[float, CobwebNode]]] = {}
 
-        def draw(d):
+        def path_scores(leaf: CobwebNode) -> List[Tuple[float, CobwebNode]]:
+            if leaf.id not in scored:
+                x = {a: max(leaf.av[a].items(), key=lambda kv: kv[1])[0] for a in window
+                     if isinstance(leaf.av.get(a), dict) and leaf.av[a]}
+                # with choose="...+content" the part's own content (the cc facet,
+                # what stands there) counts too: the leaf's distribution of it
+                own = {u: c / max(leaf.count, 1e-9) for u, c in leaf.av.get("cc", {}).items()} \
+                    if content else {}
+                out, node = [], leaf
+                while node is not None:
+                    s = math.log2(max(node.count, 1e-9) / root_n)
+                    for a, v in x.items():
+                        d = node.av.get(a, {})
+                        s += math.log2((d.get(v, 0.0) + self.alpha) / (node.count + self.alpha * sizes[a]))
+                    if own:
+                        d = node.av.get("cc", {})
+                        s += sum(p * math.log2((d.get(u, 0.0) + self.alpha) / (node.count + self.alpha * cc_size))
+                                 for u, p in own.items())
+                    out.append((s, node))
+                    node = node.parent
+                scored[leaf.id] = out
+            return scored[leaf.id]
+
+        def concept_for(leaf: CobwebNode) -> CobwebNode:
+            if choose == "best":
+                return max(path_scores(leaf), key=lambda t: t[0])[1]
+            if choose == "match":
+                ps = path_scores(leaf)
+                m = max(s for s, _ in ps)
+                return draw({id(n): 2.0 ** (s - m) for s, n in ps}, {id(n): n for _, n in ps})
+            node = leaf
+            for _ in range(level):
+                node = node.parent or node
+            return node
+
+        def draw(d, items=None):
             tot = sum(v for v in d.values() if v > 0)
             if tot <= 0:
                 return None
@@ -1059,24 +1152,27 @@ class Trellis3:
                 if v > 0:
                     t -= v
                     if t <= 0:
-                        return k
-            return k
+                        return items[k] if items else k
+            return items[k] if items else k
 
         out: List[str] = []
 
         def expand(x: CobwebNode, d: int) -> None:
-            for a in (LSLOT, RSLOT):
-                slot = draw(self.cnt.passive(x, a))
-                if slot is None or slot[0] not in ctx_ix:
+            for a in (LPART, RPART):
+                where = draw(self.cnt.passive(x, a))
+                if where is None or where[0] not in ctx_ix:
                     raise LookupError
-                node, word = ctx_ix[slot[0]], slot[1] or d >= max_depth
-                for _ in range(slot_up):
-                    node = node.parent or node
-                fills = {f: c for f, c in self.ctx.passive(node, FILL).items() if (f[0] == "w") == word}
+                leaf, primitive = ctx_ix[where[0]], where[1] or d >= max_depth
+                node = concept_for(leaf)
+                fills = {f: c for f, c in self.ctx.passive(node, FILL).items() if (f[0] == "w") == primitive}
+                if not fills:                      # the chosen concept holds none of this kind
+                    node = leaf
+                    fills = {f: c for f, c in self.ctx.passive(node, FILL).items() if (f[0] == "w") == primitive}
                 f = draw(fills)
                 if trace is not None:
-                    trace.append({"depth": d, "chunk": x.id, "side": a, "slot": node.id, "word slot": word,
-                                  "slot options": len(self.cnt.passive(x, a)), "fillers": fills, "drawn": f})
+                    trace.append({"depth": d, "composite": x.id, "part": "left" if a == LPART else "right",
+                                  "leaf": leaf.id, "concept": node.id, "primitive": primitive,
+                                  "instances": fills, "drawn": f})
                 if f is None:
                     raise LookupError
                 if f[0] == "w":
