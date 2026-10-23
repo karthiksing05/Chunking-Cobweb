@@ -44,6 +44,10 @@ BOS, EOS, BLANK = "<s>", "</s>", "-"
 LN2 = math.log(2.0)
 CONST = "const"      # passive: constituent (posterior) mass of the stored elements
 WORD = "word"        # passive: the word a context concept's word elements are (v1's content reference)
+# generation statistics, held by the concepts themselves (passive: never sorted on)
+FILL = "fill"        # at a context concept: what committed elements stood there (("w", token) | ("c", content leaf id))
+LSLOT, RSLOT = "lslot", "rslot"   # at a content concept: where its parts stood ((context leaf id, is word))
+SENT = "sent"        # at a content concept: committed whole experiences below it (content leaf id)
 
 
 def log_prob(node: CobwebNode, x: dict, root: CobwebNode, alpha: float) -> float:
@@ -695,6 +699,19 @@ class Trellis3:
                 self._add_type(e)
             self.records.append(e)
             self.stats["composites stored"] += 1
+        # what generation reads: the committed analysis as statistics of concepts
+        for e in words:
+            self.ctx.add_passive(e.leaf, FILL, ("w", e.token), 1.0)
+        for key in chosen:
+            e = comps[key]
+            if e.cleaf is None or e.leaf is None:
+                continue
+            self.ctx.add_passive(e.leaf, FILL, ("c", e.cleaf.id), 1.0)
+            for a, part in ((LSLOT, e.left), (RSLOT, e.right)):
+                if part.leaf is not None:
+                    self.cnt.add_passive(e.cleaf, a, (part.leaf.id, part.token is not None), 1.0)
+            if e.span == (0, len(tokens)):
+                self.cnt.add_passive(e.cleaf, SENT, e.cleaf.id, 1.0)
         self.stats["experiences"] += 1
         self._refresh(first, tokens)
         return r["tree"]
@@ -1005,6 +1022,72 @@ class Trellis3:
                     expand(m, d + 1, last, hint)
         try:
             expand(draw(roots, True), 0, True)
+        except (LookupError, RecursionError):
+            return None
+        return out
+
+    def concept_index(self) -> Tuple[Dict[int, CobwebNode], Dict[int, CobwebNode]]:
+        """node id -> node, for each hierarchy (generation addresses concepts by id)."""
+        out = []
+        for tree in (self.ctx, self.cnt):
+            idx, stack = {}, [tree.root]
+            while stack:
+                n = stack.pop()
+                idx[n.id] = n
+                stack.extend(n.children)
+            out.append(idx)
+        return out[0], out[1]
+
+    def generate_tree(self, rng: Optional[random.Random] = None, index=None, slot_up: int = 0,
+                      max_depth: int = 12) -> Optional[List[str]]:
+        """Expansive generation from the two hierarchies alone. Every step reads
+        statistics held by concepts: a whole experience is drawn from the content
+        root (SENT); a content concept gives where its parts stood (LSLOT, RSLOT:
+        context concepts and kind); a context concept gives what stood there
+        (FILL: a word, or a content concept to expand). Each draw is in proportion
+        to the counts (probability matching). ``slot_up`` reads a slot's fillers
+        from the context concept that many levels above the slot's leaf."""
+        rng = rng or self.rng
+        ctx_ix, cnt_ix = index or self.concept_index()
+
+        def draw(d):
+            tot = sum(v for v in d.values() if v > 0)
+            if tot <= 0:
+                return None
+            t = rng.random() * tot
+            for k, v in d.items():
+                if v > 0:
+                    t -= v
+                    if t <= 0:
+                        return k
+            return k
+
+        out: List[str] = []
+
+        def expand(x: CobwebNode, d: int) -> None:
+            for a in (LSLOT, RSLOT):
+                slot = draw(self.cnt.passive(x, a))
+                if slot is None or slot[0] not in ctx_ix:
+                    raise LookupError
+                node, word = ctx_ix[slot[0]], slot[1] or d >= max_depth
+                for _ in range(slot_up):
+                    node = node.parent or node
+                fills = {f: c for f, c in self.ctx.passive(node, FILL).items() if (f[0] == "w") == word}
+                f = draw(fills)
+                if f is None:
+                    raise LookupError
+                if f[0] == "w":
+                    out.append(f[1])
+                elif f[1] in cnt_ix:
+                    expand(cnt_ix[f[1]], d + 1)
+                else:
+                    raise LookupError
+
+        root = draw(self.cnt.passive(self.cnt.root, SENT))
+        if root is None or root not in cnt_ix:
+            return None
+        try:
+            expand(cnt_ix[root], 0)
         except (LookupError, RecursionError):
             return None
         return out

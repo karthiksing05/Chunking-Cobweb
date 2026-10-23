@@ -17,6 +17,8 @@ opts = sys.argv[7].split(",") if len(sys.argv) > 7 else []
 rh = "hint" in opts
 up = next((int(o[2:]) for o in opts if o.startswith("up")), 0)
 mm = next((int(o[1:]) for o in opts if o.startswith("m") and o[1:].isdigit()), None)
+tree = "tree" in opts
+su = next((int(o[6:]) for o in opts if o.startswith("slotup")), 0)
 n = 300
 for cond in conds:
     train, test = v1_split(load_corpus(os.path.join(default_data_root(), CONDITIONS[cond])), seed)
@@ -25,11 +27,12 @@ for cond in conds:
     g = CFG(target_grammar(cond)); seen = {tuple(e.tokens) for e in train}
     te = BracketTally()
     for e in test[:60]: te.add(e.tree, L.parse(e.tokens)["tree"])
-    mem = L._members(L.ctx, "ctx")
-    row = {"by": by + ("+hint" if rh else ""), "up": up, "min members": mm, "tag": tag, "cond": cond, "seed": seed, "learn s": round(time.time() - t0), "omission (side)": round(te.omission, 3)}
+    mem = L._members(L.ctx, "ctx") if not tree else None
+    ix = L.concept_index() if tree else None
+    row = {"by": by + ("+hint" if rh else ""), "up": up, "min members": mm, "tree": tree, "slot up": su, "tag": tag, "cond": cond, "seed": seed, "learn s": round(time.time() - t0), "omission (side)": round(te.omission, 3)}
     for k in ks:
         rng = random.Random(seed)
-        S = [s for s in ((L.generate_expand(rng, members=mem, up=up, by=by, right_hint=rh, min_members=mm) if k == 1 else L.generate_best(rng, members=mem, k=k, by=by)) for _ in range(n)) if s]
+        S = [s for s in ((L.generate_tree(rng, index=ix, slot_up=su) if tree else L.generate_expand(rng, members=mem, up=up, by=by, right_hint=rh, min_members=mm)) if k == 1 else L.generate_best(rng, members=mem, k=k, by=by)) for _ in range(n)) if s]
         gram = [s for s in S if g.recognizes(s)]
         row[f"k{k} grammatical"] = round(len(gram) / max(len(S), 1), 3)
         row[f"k{k} gram+new"] = round(sum(tuple(s) not in seen for s in gram) / max(len(S), 1), 3)
