@@ -211,3 +211,17 @@ A node's context description may use only elements at its own level or below it:
 
 - `spine` (parent and sibling) and `right_hint` (what follows the parent) are excluded on principle.
 - Top-down generation is allowed. A composite's statistics name where its parts stood (the AND node). An instance for a part is chosen only from the statistics of the part's context concept.
+
+### 23 October: concept choice and sampled type names (tree-only generation, seed 13)
+
+| type names \ concept choice | leaf | best | best+content | match+content |
+|---|---|---|---|---|
+| all contexts (`True`) | med 1.00 / 0.81, large 1.00 / 0.76 | 0.04, 0.03 | 0.02, 0.03 | 0.01, 0.01 |
+| sample, token key | 0.99 / 0.82, 1.00 / 0.78 | 0.05, 0.02 | 0.03, 0.02 | 0.02, 0.03 |
+| sample, concept key | **1.00 / 0.88, 1.00 / 0.79** | 0.03, 0.01 | 0.01, 0.03 | 0.01, 0.04 |
+
+The leaf column gives grammatical / grammatical-and-new; the other columns give grammatical only.
+
+- **Sampled bag-of-concepts type names keyed by chunk type are the best type names so far.**
+- **"Best concept" by share × P(surroundings) fails** on `med` and `large`. Common surroundings stay predictable near the root while share keeps growing, so the score peaks in mixed concepts. Adding content does not fix it.
+- **Next:** hierarchical back-off. Stay at a concept with probability n / (n + β), where n is the committed instances of the part's kind there; otherwise step up. β = 0.25 and β = 1 are running.
