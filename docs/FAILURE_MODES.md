@@ -189,3 +189,18 @@ Values are means over 2 seeds; "new" means grammatical and new.
 - **`type_names` with leaf slots: best generation so far.** Novelty rises on `med`, `large` and `term_low`, with grammaticality unchanged. Type-aggregate names let committed chunks from different positions share leaves, so slots recombine across experiences.
 - **`tokens` with leaf slots copies (0% new).** The token bag makes a chunk's own content its exact string, so each leaf holds only identical chunks.
 - **Characters:** the runner hard-coded `up=1`. It is fixed, and best plus `type_names` are rerunning on characters.
+
+### 23 October: `type_names` + leaf slots (`term_high`), characters, boundary, productivity
+
+- **`type_names`, `term_high`:**
+  - grammatical 1.00 / 1.00;
+  - grammatical and new 0.70 / 0.74, against 0.32 / 0.74 for best.
+  - Over the six grammars the mean grammatical-and-new is 0.70, against 0.63 for best.
+- **Characters, best config, leaf slots (250 characters, seed 13):**
+  - well formed 0.974 (was 0.640 with `up=1`);
+  - real characters 0.746 (was 0.185);
+  - novel 0.334 (was 0.883).
+  - Omission is unchanged (0.635).
+  - So leaf slots carry over to a second domain.
+- **Boundary `missing` / `edge` with `type_names` + leaf slots:** the compact MDL grammar collapses (0–1% grammatical on `med` and `large`). Both are set aside for good.
+- **Productivity gap (F).** With leaf slots, `med` gives 100% grammatical but 0% of samples are longer than any training sentence (6–9% with `up=1`). Leaf slots recombine pieces but never nest a chunk deeper than it was seen. This is open.
