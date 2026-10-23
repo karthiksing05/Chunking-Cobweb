@@ -198,8 +198,8 @@ report["F systematicity"] = {"pairs": n_sw, "swapped constituents found, origina
 
 # F: productivity -- grammatical samples by length, against the training maximum
 max_len = max(len(e.tokens) for e in train)
-mem = L._members(L.ctx, "ctx")
-S = [s for s in (L.generate_expand(rng, members=mem, by="used") for _ in range(500)) if s]
+ix = L.concept_index()
+S = [s for s in (L.generate_tree(rng, index=ix) for _ in range(500)) if s]
 longer = [s for s in S if len(s) > max_len]
 report["F productivity"] = {"samples": len(S), "grammatical": m([g.recognizes(s) for s in S]),
                             "training max length": max_len,
