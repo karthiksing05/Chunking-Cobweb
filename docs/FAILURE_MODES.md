@@ -267,3 +267,10 @@ The exported parses show it. For every composite on `med` (90 of 90) and `large`
   - Content B (lengths differ) `large` 0.62 (0.64).
   - Reading, not yet verified: with almost no smoothing, near-leaf content concepts code their own few instances almost perfectly, so the content tree rewards memorised pairs over chunk types.
   - Sweep of total pseudo-mass 10 and 100 running (`logs/v3-gba10-*`, `v3-gba100-*`).
+- **Pseudo-mass sweep, leaf generation, seed 13 (grammatical / grammatical-and-new, omission):**
+  - α=1 (current): `med` 1.00 / 0.88, 0.32; `large` 1.00 / 0.79, 0.29.
+  - total 1: 0.98 / 0.77, 0.41; 0.98 / 0.67, 0.38.
+  - total 10: 1.00 / 0.76, 0.42; 0.95 / 0.67, 0.34.
+  - total 100: 1.00 / 0.80, 0.40; 1.00 / 0.72, 0.31.
+  - **Weaker smoothing loses at every setting; α=1 stays.**
+  - Letting the content tree contribute through near-leaf concepts hurts. The lever is structural: the content tree is shallow and bushy (a depth-2 concept holds about 1% of instances), with no mid-level chunk types for the gain to find.
