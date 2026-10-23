@@ -32,7 +32,13 @@ for cond in conds:
     row = {"by": by + ("+hint" if rh else ""), "up": up, "min members": mm, "tree": tree, "slot up": su, "tag": tag, "cond": cond, "seed": seed, "learn s": round(time.time() - t0), "omission (side)": round(te.omission, 3)}
     for k in ks:
         rng = random.Random(seed)
-        S = [s for s in ((L.generate_tree(rng, index=ix, slot_up=su) if tree else L.generate_expand(rng, members=mem, up=up, by=by, right_hint=rh, min_members=mm)) if k == 1 else L.generate_best(rng, members=mem, k=k, by=by)) for _ in range(n)) if s]
+        def one():
+            if k > 1:
+                return L.generate_best(rng, members=mem, k=k, by=by)
+            if tree:
+                return L.generate_tree(rng, index=ix, slot_up=su)
+            return L.generate_expand(rng, members=mem, up=up, by=by, right_hint=rh, min_members=mm)
+        S = [s for s in (one() for _ in range(n)) if s]
         gram = [s for s in S if g.recognizes(s)]
         row[f"k{k} grammatical"] = round(len(gram) / max(len(S), 1), 3)
         row[f"k{k} gram+new"] = round(sum(tuple(s) not in seen for s in gram) / max(len(S), 1), 3)
