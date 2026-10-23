@@ -204,3 +204,10 @@ Values are means over 2 seeds; "new" means grammatical and new.
   - So leaf slots carry over to a second domain.
 - **Boundary `missing` / `edge` with `type_names` + leaf slots:** the compact MDL grammar collapses (0–1% grammatical on `med` and `large`). Both are set aside for good.
 - **Productivity gap (F).** With leaf slots, `med` gives 100% grammatical but 0% of samples are longer than any training sentence (6–9% with `up=1`). Leaf slots recombine pieces but never nest a chunk deeper than it was seen. This is open.
+
+## Rule (user, 23 October): chunk context comes from the same level or below
+
+A node's context description may use only elements at its own level or below it: the surface window (tokens), its own content, and type aggregates of those. Nothing from above it may enter.
+
+- `spine` (parent and sibling) and `right_hint` (what follows the parent) are excluded on principle.
+- Top-down generation is allowed. A chunk's statistics name the slots of its parts (the AND node). A filler is chosen only from the slot's own statistics.
