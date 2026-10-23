@@ -165,3 +165,10 @@ Run it on `small`, `med`, `large`, `term_low`, `term_med` and `term_high` (and o
 **Remaining failure: novelty collapses where leaves are sparse.**
 - Cases: `term_high` seed 13 (27% distinct), and `term_med` seed 17.
 - **Next:** `min_members`. Each slot takes the deepest concept whose committed members of the part's kind hold at least m distinct types. This is the same "deepest concept with enough evidence" rule as the regeneration readout. m = 2 and 3 are running.
+
+**`min_members` fails (23 October).** m = 2 gives 35–66% grammatical on the larger grammars, and m = 3 gives 19–58%. Climbing until a concept holds 2 distinct types usually passes through single-child chains into mixed concepts.
+
+The part's own leaf (`up=0`) is now the generation default.
+- Grammatical: 94–100% on every grammar and seed.
+- Grammatical and new: 0.63 on average, the same as `up=1` (whose grammatical rate is 64–85%).
+- So the leaf trades variety, not correct samples.

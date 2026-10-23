@@ -897,7 +897,7 @@ class Trellis3:
             return None
         return out
 
-    def generate_expand(self, rng: Optional[random.Random] = None, members=None, up: int = 1,
+    def generate_expand(self, rng: Optional[random.Random] = None, members=None, up: int = 0,
                         max_depth: int = 12, kind: bool = True, by: str = "weight",
                         right_hint: bool = False, min_members: Optional[int] = None) -> Optional[List[str]]:
         """Expansive generation. Sample a sentence-level chunk from memory as the
@@ -1010,7 +1010,7 @@ class Trellis3:
         return out
 
     def generate_best(self, rng: Optional[random.Random] = None, members=None, k: int = 8,
-                      up: int = 1, by: str = "weight") -> Optional[List[str]]:
+                      up: int = 0, by: str = "weight") -> Optional[List[str]]:
         """Expand ``k`` candidate sentences, then draw one in proportion to how
         well memory recognises it: exp of the parser's log total weight over all
         analyses, per composite (so length does not decide). The parser acts as

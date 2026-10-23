@@ -15,7 +15,7 @@ ks = [int(x) for x in sys.argv[5].split(",")] if len(sys.argv) > 5 else [1, 8]
 by = sys.argv[6] if len(sys.argv) > 6 else "weight"
 opts = sys.argv[7].split(",") if len(sys.argv) > 7 else []
 rh = "hint" in opts
-up = next((int(o[2:]) for o in opts if o.startswith("up")), 1)
+up = next((int(o[2:]) for o in opts if o.startswith("up")), 0)
 mm = next((int(o[1:]) for o in opts if o.startswith("m") and o[1:].isdigit()), None)
 n = 300
 for cond in conds:
