@@ -211,6 +211,8 @@ CONDITIONS = {
 }
 # data-size test: 4x corpora drawn from the same grammars (scripts/generate_bigger_corpus.py)
 CONDITIONS.update({f"{c}_x4": f"{d}_x4" for c, d in list(CONDITIONS.items())})
+# complex grammars (experiments/v2/complex_grammars.py): agreement, relative clauses, deep embedding
+CONDITIONS.update({f"c_{n}": f"cfg_complex_{n}/train" for n in ("agree", "relative", "deep")})
 
 
 def target_grammar(condition: str) -> dict:
@@ -225,6 +227,12 @@ def target_grammar(condition: str) -> dict:
         return TEST_GRAMMAR_MED
     if condition == "large":
         return TEST_GRAMMAR_LARGE
+    if condition.startswith("c_"):
+        import importlib.util, os
+        path = os.path.join(os.path.dirname(__file__), "..", "..", "experiments", "v2", "complex_grammars.py")
+        spec = importlib.util.spec_from_file_location("complex_grammars", path)
+        mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+        return mod.build(condition[2:])
     if condition.startswith("term_"):
         grammar, _ = make_grammar_variant(LEXICON_VARIANTS[condition[len("term_"):]])
         return grammar

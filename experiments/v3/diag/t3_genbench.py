@@ -22,10 +22,13 @@ choose = next((o[7:] for o in opts if o.startswith("choose=")), "leaf")
 beta = next((float(o[5:]) for o in opts if o.startswith("beta=")), 1.0)
 kind = next((int(o[5:]) for o in opts if o.startswith("kind=")), None)
 pleaf = "pleaf" in opts
+fn = "both" if "fillboth" in opts else ("build" if "fillbuild" in opts else ("fillname" in opts))
 su = next((int(o[5:]) for o in opts if o.startswith("level")), 0)
 n = 300
+ntrain = next((int(o[7:]) for o in opts if o.startswith("ntrain=")), None)
 for cond in conds:
     train, test = v1_split(load_corpus(os.path.join(default_data_root(), CONDITIONS[cond])), seed)
+    train = train[:ntrain] if ntrain else train
     L = Trellis3(seed=seed, **cfg); t0 = time.time()
     for e in train: L.learn(e.tokens)
     g = CFG(target_grammar(cond)); seen = {tuple(e.tokens) for e in train}
@@ -33,14 +36,14 @@ for cond in conds:
     for e in test[:60]: te.add(e.tree, L.parse(e.tokens)["tree"])
     mem = L._members(L.ctx, "ctx") if not tree else None
     ix = L.concept_index() if tree else None
-    row = {"by": by + ("+hint" if rh else ""), "up": up, "min members": mm, "tree": tree, "level": su, "choose": choose, "beta": beta, "kind": kind, "primitive leaf": pleaf, "tag": tag, "cond": cond, "seed": seed, "learn s": round(time.time() - t0), "omission (side)": round(te.omission, 3)}
+    row = {"by": by + ("+hint" if rh else ""), "up": up, "min members": mm, "tree": tree, "level": su, "choose": choose, "beta": beta, "kind": kind, "primitive leaf": pleaf, "fill name": fn, "tag": tag, "cond": cond, "seed": seed, "learn s": round(time.time() - t0), "omission (side)": round(te.omission, 3)}
     for k in ks:
         rng = random.Random(seed)
         def one():
             if k > 1:
                 return L.generate_best(rng, members=mem, k=k, by=by)
             if tree:
-                return L.generate_tree(rng, index=ix, level=su, choose=choose, beta=beta, kind=kind, primitive_leaf=pleaf)
+                return L.generate_tree(rng, index=ix, level=su, choose=choose, beta=beta, kind=kind, primitive_leaf=pleaf, fill_name=fn)
             return L.generate_expand(rng, members=mem, up=up, by=by, right_hint=rh, min_members=mm)
         S = [s for s in (one() for _ in range(n)) if s]
         gram = [s for s in S if g.recognizes(s)]
