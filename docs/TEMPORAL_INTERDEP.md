@@ -235,3 +235,30 @@ gram / gram+new, seeds 13, 17 (bands + sampled restructuring + nocc + track + bo
 Toy: dog~cat sharing at u2 is 0.000–0.003 with neighbour names, against 0.21 / 0.16 for nocc; the two words share only at u3. In the rare-noun test every variant puts 93–100% of nouns nearest a noun from 50 sentences on, so that test no longer separates them.
 
 Learned neighbour names remove the `med` verb/preposition swaps: grammaticality returns to 0.99–1.00. They also make contexts more specific, so the learner memorises more. Novelty drops sharply with finer names; at 2 bits it is 0.36–0.62, against 0.43–0.92 for nocc. Interdependence by construction costs novelty, and the toy link loses its u2 level. The trade-off is still open.
+
+## Round 12: neighbour names for rare types only (brief T6)
+
+`nb_rare=n`: an element gets its neighbours' learned names only while its own type has been seen fewer than n times; after that its own window describes it. The facet follows refresh, so it switches off as a type becomes frequent.
+
+gram / gram+new, seeds 13, 17:
+
+| | small | med | large |
+|---|---|---|---|
+| current setup | 1.00/0.50, 1.00/0.47 | 1.00/0.88, 0.99/0.73 | 1.00/0.79, 1.00/0.83 |
+| neighbour names for every word, ≤ 2 bits | 1.00/0.36, 1.00/0.36 | 0.99/0.41, 1.00/0.58 | 1.00/0.62, 1.00/0.44 |
+| n = 10, ≤ 2 bits | 1.00/0.41, 1.00/0.40 | 0.99/0.71, 0.99/0.73 | 0.99/0.72, 1.00/0.65 |
+| n = 10, all bands | 1.00/0.42, 1.00/0.39 | 0.99/0.65, 0.94/0.60 | –, 1.00/0.53 |
+| n = 3, ≤ 2 bits | 1.00/0.48, 1.00/0.19 | 0.94/0.79, 0.95/0.74 | 0.98/0.73, 1.00/0.72 |
+
+Word-category accuracy on `med` (nearest word by name has the same preterminal), mean over checkpoints 20–320 (22 word types, so one word is 0.045). `small` is 1.0 almost everywhere and does not separate the arms.
+
+| med | seed 13 | seed 17 | misplaced at bands ctx / cnt (13) |
+|---|---|---|---|
+| control (no neighbour facet) | 0.78 | 0.73 | 0.18 / 0.33 |
+| neighbour names for every word, ≤ 2 bits | 0.80 | 0.78 | 0.23 / 0.41 |
+| n = 10, ≤ 2 bits | 0.92 | 0.83 | 0.23 / 0.43 |
+| n = 10, all bands | 0.84 | 0.80 | 0.25 / 0.48 |
+| n = 3, ≤ 2 bits | 0.83 | 0.73 | 0.23 / 0.41 |
+| n = 3, all bands | 0.89 | 0.78 | 0.26 / 0.37 |
+
+n = 10 with coarse names is the most consistent arm: it has the best word categories on both seeds (+0.14 and +0.10 over the control), grammaticality within 2 points, and novelty below the current setup on 4 of 6 runs (equal on med seed 17). The `med` vocabulary is too small for these differences to be firm, so TinyStories (250 words, `experiments/v3/diag/t3_stories.py`) decides. Under relabel-only refresh, misplacement is still 18–35% context and 33–53% content; temporal currency needs `refresh="verify"` on top.
