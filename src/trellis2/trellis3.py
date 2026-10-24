@@ -1112,11 +1112,14 @@ class Trellis3:
             s = self._rr % len(old)
             todo = recs[first:] + (old[s:] + old[:s])[:b]
             self._rr = (s + b) % len(old)
+        lazy = self.refresh in ("relabel", "verify", "verify-changed")
         for e in todo:
+            moved_c = moved_x = False
             if e.token is None:
                 e.memo.pop("own", None)
                 new = self._content(e)
-                if new != e.cnt and (self.refresh in ("relabel", "verify") or
+                moved_c = new != e.cnt
+                if new != e.cnt and (lazy or
                                      (self.refresh == "drift" and _drift(e.cnt, new) <= self.drift_tau)):
                     self.cnt.relabel(e.cleaf, e.cnt, new, e.weight)
                     e.cnt = new
@@ -1135,7 +1138,8 @@ class Trellis3:
                 self._nb_facets(new, e)
             if self.window_names and e.win is not None:
                 new.update(self._named_window(e.win))
-            if new != e.ctx and (self.refresh in ("relabel", "verify") or
+            moved_x = new != e.ctx
+            if new != e.ctx and (lazy or
                                  (self.refresh == "drift" and _drift(e.ctx, new) <= self.drift_tau)):
                 self.ctx.relabel(e.leaf, e.ctx, new, e.weight)
                 e.ctx = new
@@ -1143,13 +1147,15 @@ class Trellis3:
             elif new != e.ctx:
                 self._move(e, "ctx", new)
                 self.stats["refreshed"] += 1
-            if self.refresh == "verify":
+            if self.refresh in ("verify", "verify-changed"):
                 # lazy repair by placement: move a record only when the concepts at its
                 # information bands are no longer those its current description sorts to
-                if e.token is None and e.cleaf is not None and self._misplaced(self.cnt, e.cleaf, e.cnt):
+                # ("verify-changed": checked only when its description just changed)
+                chk = self.refresh == "verify"
+                if (chk or moved_c) and e.token is None and e.cleaf is not None and self._misplaced(self.cnt, e.cleaf, e.cnt):
                     self._move(e, "cnt", e.cnt)
                     self.stats["reassigned"] = self.stats.get("reassigned", 0) + 1
-                if e.leaf is not None and self._misplaced(self.ctx, e.leaf, e.ctx):
+                if (chk or moved_x) and e.leaf is not None and self._misplaced(self.ctx, e.leaf, e.ctx):
                     self._move(e, "ctx", e.ctx)
                     self.stats["reassigned"] = self.stats.get("reassigned", 0) + 1
 
