@@ -123,7 +123,7 @@ class Trellis3:
                  word_cc: bool = False, boundary: str = "marker", type_names: bool = False, neighbour_types: bool = False,
                  type_top: int = 40, type_k: int = 8, type_key: str = "tokens",
                  word_content: Optional[str] = None, word_cnt: bool = False, restructure: str = "always", drift_tau: float = 0.25, word_name_bits: Optional[float] = None, tree: str = "python", tree_alpha: float = 1e-4, band_bits: Sequence[float] = (1, 2, 4, 6, 8, 12), relational: Optional[str] = None,
-                 rel_alpha: float = 0.5, rel_rounds: int = 2):
+                 rel_alpha: float = 0.5, rel_rounds: int = 2, nb_bits: Optional[float] = None):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -194,6 +194,9 @@ class Trellis3:
         self.type_res: Dict[tuple, List[Tuple[float, CobwebNode]]] = {}
         self._type_rng = random.Random(seed + 7)
         self.neighbour_types = neighbour_types
+        # a neighbour's learned name keeps only the bands up to nb_bits (its
+        # category; None: every band, which nearly identifies the word)
+        self.nb_bits = nb_bits
         self.type_bag: Dict[tuple, Dict[str, float]] = {}
         # a word's content name: what it builds. Each word keeps a weighted
         # reservoir of ``type_k`` content leaves of the composites it is a direct
@@ -663,7 +666,7 @@ class Trellis3:
         if self.type_names == "sample":
             cache = self.__dict__.setdefault("_nb_cache", {})
             if token not in cache:
-                cache[token] = self._res_bag((token,))
+                cache[token] = self._res_bag((token,), self.nb_bits)
             return cache[token]
         bag = self.type_bag.get((token,))
         return dict(sorted(bag.items(), key=lambda kv: -kv[1])[:self.type_top]) if bag else None

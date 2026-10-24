@@ -219,3 +219,19 @@ Both candidates keep well-formedness and attestedness, generate more novel chara
 `neighbour_types` read the full type aggregate (`type_bag`), which is only filled when `type_names` is not `"sample"`. Every configuration here used `type_names="sample"`, so `lc`/`rc` were blank for every record (`logs/v3_diag/t3_ntcheck.py`: 1000 of 1000 blank). Everything labelled "nt + nocc" above is in fact **nocc**: the word's identity left out of its context, with bands and sampled restructuring. The dog~cat link and the faster rare-noun cohesion come from that. Dog and cat are described only by their surface windows, which they share. Neighbours' learned representations played no part, so these results do not show interdependence as defined in the criteria.
 
 Fix: `_nb_name` reads a neighbour's sampled type name (its reservoir of context leaves through the current tree), and `_refresh` rewrites `lc`/`rc` from the stored neighbour words, so the facet stays current. Round 11 reruns the toy, rare-word, generation and temporal tests with the facet on (`logs/v3_nbfix_submit.sh`).
+
+## Round 11: the neighbour facet actually on
+
+gram / gram+new, seeds 13, 17 (bands + sampled restructuring + nocc + track + both-fill; `nb_bits` keeps a neighbour's name to its coarse bands):
+
+| | small | med | large |
+|---|---|---|---|
+| current setup | 1.00/0.50, 1.00/0.47 | 1.00/0.88, 0.99/0.73 | 1.00/0.79, 1.00/0.83 |
+| nocc (rounds 2–10 "nt + nocc") | 1.00/0.43, 1.00/0.54 | 0.92/0.86, 0.94/0.83 | 0.97/0.87, 0.98/0.92 |
+| neighbour names, all bands | 1.00/0.05, 1.00/0.06 | 1.00/0.08, 1.00/0.00 | 0.99/0.07, 1.00/0.02 |
+| neighbour names, ≤ 4 bits | 1.00/0.10, 1.00/0.12 | 1.00/0.09, 1.00/0.06 | 0.99/0.17, 1.00/0.08 |
+| neighbour names, ≤ 2 bits | 1.00/0.36, 1.00/0.36 | 0.99/0.41, 1.00/0.58 | 1.00/0.62, 1.00/0.44 |
+
+Toy: dog~cat sharing at u2 is 0.000–0.003 with neighbour names, against 0.21 / 0.16 for nocc; the two words share only at u3. In the rare-noun test every variant puts 93–100% of nouns nearest a noun from 50 sentences on, so that test no longer separates them.
+
+Learned neighbour names remove the `med` verb/preposition swaps: grammaticality returns to 0.99–1.00. They also make contexts more specific, so the learner memorises more. Novelty drops sharply with finer names; at 2 bits it is 0.36–0.62, against 0.43–0.92 for nocc. Interdependence by construction costs novelty, and the toy link loses its u2 level. The trade-off is still open.
