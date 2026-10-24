@@ -26,6 +26,8 @@ At each checkpoint:
 Usage: t3_evolve.py <cond|stories> <cfg json> <seed> <checkpoints> [tag] [fill] [vocab]
 """
 import json
+import os as _os
+LEVEL = int(_os.environ.get("GEN_LEVEL", "0"))   # generation draws fillers this many concepts above the leaf
 import math
 import os
 import random
@@ -190,7 +192,7 @@ for n in checks:
     seen = {tuple(s) for s in train[:n]}
     rng = random.Random(seed)
     ix = L.concept_index()
-    S = [s for s in (L.generate_tree(rng, index=ix, level=0, choose="leaf", fill_name=fill) for _ in range(300)) if s]
+    S = [s for s in (L.generate_tree(rng, index=ix, level=LEVEL, choose="leaf", fill_name=fill) for _ in range(300)) if s]
     gram = [grammatical(s) for s in S]
     nov = [tuple(s) not in seen for s in S]
     row = {"tag": tag, "cond": cond, "seed": seed, "experiences": n, "learn s": round(learn_s),

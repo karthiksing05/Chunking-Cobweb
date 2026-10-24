@@ -20,6 +20,8 @@ sequence is one of the corpus's), and attested + novel for each.
 Usage: t3_stories.py <cfg json> <seed> <n> [vocab] [tag] [fill]
 """
 import json
+import os as _os
+LEVEL = int(_os.environ.get("GEN_LEVEL", "0"))   # generation draws fillers this many concepts above the leaf
 import math
 import os
 import random
@@ -154,7 +156,7 @@ for r in random.Random(seed).sample(L.records, min(1500, len(L.records))):
 
 rng = random.Random(seed)
 ix = L.concept_index()
-S = [g for g in (L.generate_tree(rng, index=ix, level=0, choose="leaf", fill_name=fill) for _ in range(300)) if g]
+S = [g for g in (L.generate_tree(rng, index=ix, level=LEVEL, choose="leaf", fill_name=fill) for _ in range(300)) if g]
 seen_s = {tuple(s) for s in train}
 tri_ok = []
 pat_ok = []
