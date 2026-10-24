@@ -102,7 +102,8 @@ class Trellis3:
                  refresh: str = "refit", readout: str = "mbr", cc_naming: Optional[str] = None,
                  word_cc: bool = False, boundary: str = "marker", type_names: bool = False, neighbour_types: bool = False,
                  type_top: int = 40, type_k: int = 8, type_key: str = "tokens",
-                 word_content: Optional[str] = None):
+                 word_content: Optional[str] = None, word_cnt: bool = False, relational: Optional[str] = None,
+                 rel_alpha: float = 0.5, rel_rounds: int = 2):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -146,6 +147,10 @@ class Trellis3:
         # donated into its context description as the cc facet, as a chunk's
         # content concept is (otherwise a word's cc is blank)
         self.word_cc = word_cc
+        # with word_cnt a word part's content facet (LC/RC) is the word itself, so
+        # its identity lives on the content side (what a chunk is made of) and the
+        # context tree can describe a word only by where it stands (word_cc off)
+        self.word_cnt = word_cnt
         # the sentence boundary in a window: "marker" (<s> / </s>, a value many
         # instances share) or "missing" (the slot is simply not observed)
         self.boundary = boundary
@@ -174,6 +179,15 @@ class Trellis3:
         # the token, half the bag.
         self.word_content = word_content
         self.word_res: Dict[str, List[Tuple[float, str, CobwebNode]]] = {}
+        # relational names (docs/RELATIONAL.md): a word's anchor v (where it
+        # stands) and context role c (how it works as a neighbour) at the fixed
+        # point v = a P + (1-a) A c, c = a P + (1-a) A^T v, read from the trees:
+        # P from the word's sampled context leaves, A from those leaves' window
+        # counts, A^T from a reservoir of the words that stood next to it.
+        # "names": a word part's L/R is v; "window": a context also gets lc/rc,
+        # the context roles of its outside neighbours; "both".
+        self.relational, self.rel_alpha, self.rel_rounds = relational, rel_alpha, rel_rounds
+        self.nb_res: Dict[str, List[Tuple[float, str, str]]] = {}
         # the parts' heights in the content (v1's complexity tag); without them a
         # part that recurses (an N' where an N stands) is named only by its concepts
         self.heights = heights
@@ -195,7 +209,8 @@ class Trellis3:
         chunk = (tuple(f"{p}{k}" for p in ("cl", "cr") for k in d) if self.children else ()) + \
             (tuple(f"{p}{k}" for p in ("par", "sib") for k in d) if self.spine else ())
         own = tuple(f"cc{k}" for k in d) if self.donate_ctx else ()
-        neigh = tuple(f"{p}{k}" for p in ("lc", "rc") for k in d) if (neighbour_concepts or neighbour_types) else ()
+        neigh = tuple(f"{p}{k}" for p in ("lc", "rc") for k in d) \
+            if (neighbour_concepts or neighbour_types or relational in ("window", "both")) else ()
         self.ctx_attrs = surface + neigh + chunk + own + (("le", "re") if boundary == "edge" else ())
         parts = tuple(f"{p}{k}" for p in ("L", "R") for k in d)
         given = tuple(f"{p}{k}" for p in ("LC", "RC") for k in d) if self.donate_cnt else ()
@@ -263,15 +278,14 @@ class Trellis3:
         """The ids a facet names an element's context concept by."""
         if self.naming == "depth":
             return self._ctx_ids(e)
+        if e.token is not None and self.relational in ("names", "both"):
+            bag = self._rel_v(e.token, self.rel_rounds)
+            if bag:
+                return bag
         if self.type_names == "sample":
-            res = self.type_res.get(self._sample_key(e))
-            if res:
-                bag: Dict[str, float] = {}
-                for _, leaf in res:
-                    ids = self._path_ids(self.ctx.ancestors(leaf)[::-1])
-                    for v in ids:
-                        bag[v] = bag.get(v, 0.0) + 1.0 / (len(ids) * len(res))
-                return dict(sorted(bag.items(), key=lambda kv: -kv[1])[:self.type_top])
+            bag = self._res_bag(self._sample_key(e))
+            if bag:
+                return bag
         elif self.type_names:
             bag = self.type_bag.get(self._type_key(e))
             if bag:
@@ -283,6 +297,79 @@ class Trellis3:
                 e.memo["ctxp"] = self.ctx.categorize(e.ctx)
             path = e.memo["ctxp"]
         return self._path_ids(path)
+
+    def _res_bag(self, key) -> Optional[Dict[str, float]]:
+        """P: the bag of concepts on a type's sampled context leaves' current paths."""
+        res = self.type_res.get(key)
+        if not res:
+            return None
+        bag: Dict[str, float] = {}
+        for _, leaf in res:
+            ids = self._path_ids(self.ctx.ancestors(leaf)[::-1])
+            for v in ids:
+                bag[v] = bag.get(v, 0.0) + 1.0 / (len(ids) * len(res))
+        return dict(sorted(bag.items(), key=lambda kv: -kv[1])[:self.type_top])
+
+    def _rel_mix(self, own: Optional[Dict[str, float]], nbrs: Dict[Tuple[str, str], float], role, k: int) -> Dict[str, float]:
+        """a * own + (1 - a) * sum of the neighbours' bags (side-tagged, last hop only)."""
+        a = self.rel_alpha if own else 0.0
+        out: Dict[str, float] = {}
+        for v, w in (own or {}).items():
+            out[v] = out.get(v, 0.0) + a * w
+        tot = sum(nbrs.values())
+        for (side, u), w in nbrs.items():
+            for v, x in role(u, k).items():
+                key = side + ">" + v.split(">")[-1]
+                out[key] = out.get(key, 0.0) + (1 - a) * x * w / tot
+        s = sum(out.values())
+        top = sorted(out.items(), key=lambda kv: -kv[1])[:self.type_top]
+        return {v: w / s for v, w in top} if s > 0 else {}
+
+    def _rel_v(self, w: str, k: int) -> Dict[str, float]:
+        """Anchor name of word w after k rounds: where it stands, plus its neighbours' context roles."""
+        cache = self.__dict__.setdefault("_rel_cache", {})
+        if ("v", w, k) in cache:
+            return cache[("v", w, k)]
+        own = self._res_bag((w,)) or {}
+        nbrs: Dict[Tuple[str, str], float] = {}
+        if k > 0:
+            res = self.type_res.get((w,), [])
+            for _, leaf in res:                            # A: w's neighbours, from its leaves' window counts
+                for a, side in (("l1", "L"), ("r1", "R")):
+                    d = leaf.av.get(a)
+                    if not isinstance(d, dict):
+                        continue
+                    for u, c in d.items():
+                        if u not in (BOS, EOS) and isinstance(u, str):
+                            nbrs[(side, u)] = nbrs.get((side, u), 0.0) + c / max(leaf.count, 1e-9) / len(res)
+        out = self._rel_mix(own, nbrs, self._rel_c, k - 1) if nbrs else own
+        cache[("v", w, k)] = out
+        return out
+
+    def _rel_c(self, u: str, k: int) -> Dict[str, float]:
+        """Context role of word u after k rounds: its own placement plus the anchors of words next to it."""
+        cache = self.__dict__.setdefault("_rel_cache", {})
+        if ("c", u, k) in cache:
+            return cache[("c", u, k)]
+        own = self._res_bag((u,)) or {}
+        nbrs: Dict[Tuple[str, str], float] = {}
+        if k > 0:
+            for _, side, w in self.nb_res.get(u, []):      # A^T: the words that stood next to u
+                nbrs[(side, w)] = nbrs.get((side, w), 0.0) + 1.0
+        out = self._rel_mix(own, nbrs, self._rel_v, k - 1) if nbrs else own
+        cache[("c", u, k)] = out
+        return out
+
+    def _add_neighbour(self, u: str, side: str, w: str) -> None:
+        """Word w stood on ``side`` of word u: a reservoir of type_k (side, w) per u."""
+        res = self.nb_res.setdefault(u, [])
+        key = self._type_rng.random()
+        if len(res) < self.type_k:
+            res.append((key, side, w))
+        else:
+            i = min(range(len(res)), key=lambda t: res[t][0])
+            if key > res[i][0]:
+                res[i] = (key, side, w)
 
     @staticmethod
     def _type_key(e: Elem) -> tuple:
@@ -366,7 +453,7 @@ class Trellis3:
         if naming == "depth":
             return self._cnt_ids(e)
         if e.token is not None:
-            return [BLANK]
+            return [f"w:{e.token}"] if self.word_cnt else [BLANK]
         if e.cleaf is not None:
             path = self.cnt.ancestors(e.cleaf)[::-1]
         else:
@@ -472,6 +559,13 @@ class Trellis3:
                 bag = self.type_bag.get((tokens[pos],)) if 0 <= pos < len(tokens) else None
                 self._facet(x, p, dict(sorted(bag.items(), key=lambda kv: -kv[1])[:self.type_top])
                             if bag else [BLANK])
+        elif self.relational in ("window", "both"):
+            # the window at the level of roles: each outside neighbour named by its
+            # context role (how it works as a neighbour), a same-level element
+            i, j = e.span
+            for p, pos in (("lc", i - 1), ("rc", j)):
+                bag = self._rel_c(tokens[pos], self.rel_rounds) if 0 <= pos < len(tokens) else None
+                self._facet(x, p, bag if bag else [BLANK])
         elif self.neighbour_concepts:
             i, j = e.span
             for p, pos in (("lc", i - 1), ("rc", j)):
@@ -721,6 +815,7 @@ class Trellis3:
         tokens = list(tokens)
         n = len(tokens)
         self._wc_cache = {}                 # word content names, read once per experience
+        self._rel_cache = {}                # relational names likewise
         words, comps = self._chart(tokens)
         if n < 2:
             return {"tree": Tree(n, {}, {}, [(0, n)] if n else []), "words": words, "comps": comps,
@@ -779,6 +874,12 @@ class Trellis3:
                 self.ctx.add_passive(e.leaf, CONST, "c", 1.0)
             if self.type_names or self.neighbour_types:
                 self._add_type(e)
+            if self.relational:
+                i = e.span[0]
+                if i > 0:
+                    self._add_neighbour(tokens[i - 1], "R", e.token)
+                if i + 1 < len(tokens):
+                    self._add_neighbour(tokens[i + 1], "L", e.token)
             self.records.append(e)
             self.stats["words stored"] += 1
         first = len(self.records)
@@ -823,6 +924,7 @@ class Trellis3:
         and a round-robin slice of the rest (``refresh_budget``)."""
         recs = self.records
         self._wc_cache = {}                 # re-read word content names after this experience
+        self._rel_cache = {}
         b = self.refresh_budget
         if b is None or first <= b:
             todo = recs[first:] if b is not None and first > b else recs
