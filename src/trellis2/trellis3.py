@@ -125,7 +125,8 @@ class Trellis3:
                  type_top: int = 40, type_k: int = 8, type_key: str = "tokens",
                  word_content: Optional[str] = None, word_cnt: bool = False, restructure: str = "always", drift_tau: float = 0.25, word_name_bits: Optional[float] = None, tree: str = "python", tree_alpha: float = 1e-4, band_bits: Sequence[float] = (1, 2, 4, 6, 8, 12), relational: Optional[str] = None,
                  rel_alpha: float = 0.5, rel_rounds: int = 2, nb_bits: Optional[float] = None,
-                 nb_rare: Optional[int] = None, window_names: Optional[str] = None):
+                 nb_rare: Optional[int] = None, window_names: Optional[str] = None,
+                 name_level: Optional[str] = None):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -208,6 +209,10 @@ class Trellis3:
         # instead of its token; "near": the adjacent slots only, "all": every slot.
         # A word with no name yet stays its token; the sentence markers stay markers.
         self.window_names = window_names
+        # name_level="parent": a type's sampled name is the distribution of the parent
+        # concepts of its sampled context leaves (the finest category the tree forms
+        # around each instance, read from the current tree) instead of their band names
+        self.name_level = name_level
         self.type_seen: Dict[tuple, float] = {}
         self.type_bag: Dict[tuple, Dict[str, float]] = {}
         # a word's content name: what it builds. Each word keeps a weighted
@@ -378,7 +383,11 @@ class Trellis3:
         if max_bits is not None:
             self.band_bits = tuple(b for b in keep if b <= max_bits)
         for _, leaf in res:
-            ids = self._path_ids(self.ctx.ancestors(leaf)[::-1])
+            if self.name_level == "parent":
+                par = leaf.parent if not leaf.children else leaf
+                ids = [f"c{par.id}"] if par is not None else [BLANK]
+            else:
+                ids = self._path_ids(self.ctx.ancestors(leaf)[::-1])
             for v in ids:
                 bag[v] = bag.get(v, 0.0) + 1.0 / (len(ids) * len(res))
         self.band_bits = keep
