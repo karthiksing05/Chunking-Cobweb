@@ -287,3 +287,23 @@ The representation that works:
 | **mixed (k=4) + coarse parts + coarse fill** | **0.59 / 0.65** | 0.15 / 0.22, 0.15 / 0.26 | 0.41 / 0.36 | 0.93 / 0.95 | 0.34 / 0.31 |
 
 The mixed name converges fastest. Its category accuracy is 0.43 on both seeds at 50 sentences, against 0.43 / 0.27 for the control, and 0.57 / 0.54 at 400, above the raw-count baseline (0.53). This is interdependence that speeds convergence. Currency is at the control's level, but context misplacement is still 15%, against the ≤ 5% target, which needs cheaper reassignment. Generation is level with the control: attested + novel is higher on seed 13 and lower on seed 17.
+
+## Rounds 19–26: grammaticality under pooled word categories (2026-10-24)
+
+Grammars: `t3_evolve.py`, checkpoints 40–320, seeds 13 / 17, grammatical / grammatical and novel. TinyStories: `t3_stories.py`, 2000 sentences. Base config: the round-18 representation (parent names, `name_mix_k` 4, coarse parts).
+
+| round | change | grammars at 320 (gram / gram+new) | TinyStories attested + novel | category accuracy (TS) | misplaced ctx / cnt (TS) |
+|---|---|---|---|---|---|
+| original | (words as tokens, band names) | 1.00 / 0.73–0.88 | 0.19 | 0.48 / 0.51 | 0.12 / 0.26 |
+| 20 | fill: fine names, slot word capped at its best peer (`both+peer`) | med 0.88 / 0.80 | 0.37 / 0.38 | 0.59 / 0.65 | 0.15 / 0.22–0.26 |
+| 21 | window 3 / 4 (raw window) | gram 1.0, slow novelty (med 0.76 / 0.68) | 0.13–0.19 / 0.07–0.11 | 0.62 / 0.65 | |
+| 22 | fill one or two concepts above the leaf | grammaticality collapses (cancelled) | | | |
+| 22b | window 3, far slots as one categorical learned label (`window_names="far"`) | med 0.87–0.91, large 0.92 | 0.42 / 0.46 | 0.67 / – | 0.22–0.24 / 0.30–0.36 |
+| 23 | a word's own context slot = its learned category (`word_cc="cat"`), window 2 / window 3 far | 0.89–0.98 / 0.82–0.89; 0.86–0.99 / 0.77–0.90 | 0.33 (w2, s13) | 0.58 (w2, s13) | 0.17 / 0.30 |
+| 24 | a word's own context slot = its token (`word_cc=true`) | 0.996–1.00 / 0.62–0.78 (large 13: 0.996 / 0.78) | | 0.52 / 0.48 at 800 | |
+| 25 | fill weighted by P(candidate's category \| composite part) (`+predict`) | identical to round 23 (no-op) | | | |
+| 26 | category label at 3 / 4 bits (`nb_bits`) | 3 bits identical to 2; 4 bits: running | | | |
+
+**Where the grammaticality goes** (`t3_generr.py`, med, round-23 setup): every ungrammatical sentence under window 2 is a single verb↔preposition swap (33/33 on seed 13, 13/13 on seed 17). Under window 3 the same swap moves one level up: VP↔PP chunks (41 of 48 chunk errors on large 13). With two words of context, verbs and prepositions stand in the same contexts ("the dog eats the dog" / "the dog in the dog"); they share the coarse 2-bit category, so (a) their contexts pool at the same leaves, (b) chunks naming them as parts coincide ([V NP] = [P NP]), and (c) the round-25 prediction over that category cannot separate them. Their fine names do separate them (word-category accuracy 0.91–0.97 on the grammars), so the merge is the coarseness of the shared label, not the representation.
+
+**Reassignment cost at 2000 sentences** (round-18 config): `refresh="verify"` (budget 100) halves context misplacement to 0.07 (both seeds) and content to 0.15–0.16, at 13 200–14 200 s of learning (about 3–4× relabel at 400 sentences). Still above the ≤ 5% target.
