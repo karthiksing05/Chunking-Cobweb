@@ -207,7 +207,8 @@ class Trellis3:
         self.nb_rare = nb_rare
         # window_names: the surface window at the level of learned categories. Each
         # neighbouring word is written as its learned name (bands up to nb_bits)
-        # instead of its token; "near": the adjacent slots only, "all": every slot.
+        # instead of its token; "near": the adjacent slots only, "all": every slot,
+        # "far": every slot but the adjacent ones (those stay tokens).
         # A word with no name yet stays its token; the sentence markers stay markers.
         self.window_names = window_names
         # name_level="parent": a type's sampled name is the distribution of the parent
@@ -701,7 +702,8 @@ class Trellis3:
     def _named_window(self, win: dict) -> dict:
         out = {}
         for a, v in win.items():
-            if v in (BOS, EOS) or (self.window_names == "near" and a[1:] != "1"):
+            if v in (BOS, EOS) or (self.window_names == "near" and a[1:] != "1") or \
+                    (self.window_names == "far" and a[1:] == "1"):
                 out[a] = v
                 continue
             bag = self._nb_name(v)
