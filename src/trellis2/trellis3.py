@@ -699,6 +699,19 @@ class Trellis3:
             self._facet(x, "cc", self._cc_ids(e))
         return x
 
+    def _window_name(self, token: str) -> Optional[Dict[str, float]]:
+        """A window slot's learned name: a category, so the band names up to nb_bits
+        even when words are represented by finer names (name_level / name_mix_k)."""
+        cache = self.__dict__.setdefault("_nb_cache", {})
+        if ("win", token) not in cache:
+            keep = self.name_level
+            self.name_level = None
+            try:
+                cache[("win", token)] = self._res_bag((token,), self.nb_bits)
+            finally:
+                self.name_level = keep
+        return cache[("win", token)]
+
     def _named_window(self, win: dict) -> dict:
         out = {}
         for a, v in win.items():
@@ -706,7 +719,7 @@ class Trellis3:
                     (self.window_names == "far" and a[1:] == "1"):
                 out[a] = v
                 continue
-            bag = self._nb_name(v)
+            bag = self._window_name(v)
             out[a] = {u: w / sum(bag.values()) for u, w in bag.items()} if bag else v
         return out
 
