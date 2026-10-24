@@ -93,7 +93,7 @@ def logsumexp(xs: List[float]) -> float:
 
 class Elem:
     __slots__ = ("span", "split", "token", "left", "right", "ctx", "cnt", "leaf", "cleaf", "weight",
-                 "height", "gain", "par", "sib", "memo", "const", "used", "rid", "pas", "nbt")
+                 "height", "gain", "par", "sib", "memo", "const", "used", "rid", "pas", "nbt", "win")
 
     def __init__(self, span, split=None, token=None, left=None, right=None):
         self.span, self.split, self.token, self.left, self.right = span, split, token, left, right
@@ -109,6 +109,7 @@ class Elem:
         self.rid = None                     # its index in memory (stable; statistics refer to it)
         self.pas = []                       # the passive counts it contributed: (tree, attr, value, w)
         self.nbt = None                     # the words just outside it (neighbour_types), for refresh
+        self.win = None                     # its raw surface window (window_names), for refresh
 
 
 class Trellis3:
@@ -124,7 +125,7 @@ class Trellis3:
                  type_top: int = 40, type_k: int = 8, type_key: str = "tokens",
                  word_content: Optional[str] = None, word_cnt: bool = False, restructure: str = "always", drift_tau: float = 0.25, word_name_bits: Optional[float] = None, tree: str = "python", tree_alpha: float = 1e-4, band_bits: Sequence[float] = (1, 2, 4, 6, 8, 12), relational: Optional[str] = None,
                  rel_alpha: float = 0.5, rel_rounds: int = 2, nb_bits: Optional[float] = None,
-                 nb_rare: Optional[int] = None):
+                 nb_rare: Optional[int] = None, window_names: Optional[str] = None):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -202,6 +203,11 @@ class Trellis3:
         # been seen fewer than n times; a frequent type is described by its own window
         # (its evidence), a rare one borrows its neighbours' learned names
         self.nb_rare = nb_rare
+        # window_names: the surface window at the level of learned categories. Each
+        # neighbouring word is written as its learned name (bands up to nb_bits)
+        # instead of its token; "near": the adjacent slots only, "all": every slot.
+        # A word with no name yet stays its token; the sentence markers stay markers.
+        self.window_names = window_names
         self.type_seen: Dict[tuple, float] = {}
         self.type_bag: Dict[tuple, Dict[str, float]] = {}
         # a word's content name: what it builds. Each word keeps a weighted
@@ -634,6 +640,9 @@ class Trellis3:
         """The context description; with ``analysed`` False the parts that need an
         analysis (parent, sibling) are left out (a partial instance)."""
         x = self._surface(tokens, *e.span)
+        if self.window_names:
+            e.win = {a: v for a, v in x.items() if a[0] in "lr" and a[1:].isdigit()}
+            x.update(self._named_window(e.win))
         if self.neighbour_types:
             # the window at the level of types: each neighbouring word named by
             # the aggregate of where its type has occurred
@@ -661,6 +670,16 @@ class Trellis3:
         if self.donate_ctx:
             self._facet(x, "cc", self._cc_ids(e))
         return x
+
+    def _named_window(self, win: dict) -> dict:
+        out = {}
+        for a, v in win.items():
+            if v in (BOS, EOS) or (self.window_names == "near" and a[1:] != "1"):
+                out[a] = v
+                continue
+            bag = self._nb_name(v)
+            out[a] = {u: w / sum(bag.values()) for u, w in bag.items()} if bag else v
+        return out
 
     def _rare(self, e: Elem) -> bool:
         return self.nb_rare is None or self.type_seen.get(self._sample_key(e), 0.0) < self.nb_rare
@@ -1064,6 +1083,8 @@ class Trellis3:
                 self._facet(new, "cc", self._cc_ids(e))
             if self.neighbour_types and e.nbt is not None:
                 self._nb_facets(new, e)
+            if self.window_names and e.win is not None:
+                new.update(self._named_window(e.win))
             if new != e.ctx and (self.refresh in ("relabel", "verify") or
                                  (self.refresh == "drift" and _drift(e.ctx, new) <= self.drift_tau)):
                 self.ctx.relabel(e.leaf, e.ctx, new, e.weight)

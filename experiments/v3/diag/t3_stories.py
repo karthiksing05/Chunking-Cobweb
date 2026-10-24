@@ -106,6 +106,13 @@ def misplaced(L, tree, leaf, x):
 
 L = Trellis3(seed=seed, **cfg)
 seen = Counter()
+ctxv = defaultdict(Counter)        # baseline: raw counts of the words either side
+
+
+def cosine(a, b):
+    num = sum(v * b.get(u, 0) for u, v in a.items())
+    den = math.sqrt(sum(v * v for v in a.values()) * sum(v * v for v in b.values()))
+    return num / den if den else 0.0
 checks = sorted({50, 100, 200, 400, 800, 1600, n} & set(range(1, n + 1)))
 curve = {}
 t0 = time.time()
@@ -113,6 +120,10 @@ order = ["1", "2-3", "4-7", "8-15", "16+"]
 for k, s in enumerate(train, 1):
     L.learn(s)
     seen.update(s)
+    p = ["<s>"] + list(s) + ["</s>"]
+    for i in range(1, len(p) - 1):
+        ctxv[p[i]]["L:" + p[i - 1]] += 1
+        ctxv[p[i]]["R:" + p[i + 1]] += 1
     if k in checks:
         words = [w for w in seen if w in gold]
         nm = names(L, words)
@@ -123,7 +134,12 @@ for k, s in enumerate(train, 1):
             hit.append(ok)
             c = seen[w]
             by["1" if c == 1 else "2-3" if c <= 3 else "4-7" if c <= 7 else "8-15" if c <= 15 else "16+"].append(ok)
+        base = []
+        for w in words:
+            best = max((x for x in words if x != w), key=lambda x: cosine(ctxv[w], ctxv[x]), default=None)
+            base.append(best is not None and gold[best] == gold[w])
         curve[k] = {"words": len(words), "category accuracy": round(sum(hit) / max(len(hit), 1), 3),
+                    "baseline (raw window counts)": round(sum(base) / max(len(base), 1), 3),
                     "by count": {b: (round(sum(by[b]) / len(by[b]), 3), len(by[b])) for b in order if by[b]},
                     "s": round(time.time() - t0)}
         print(json.dumps({"checkpoint": k, **curve[k]}), flush=True)
