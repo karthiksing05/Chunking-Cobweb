@@ -32,3 +32,17 @@ The two hierarchies, donation, information-band names, sampled restructuring, re
 2. **Downstream (representation learning):** Lichess puzzle themes (fork, pin, skewer, mate in 2, back-rank mate, discovered attack, …). Learning sees only positions. A linear probe on each test position's bag of concepts (band names from both hierarchies, over its words and stored-analysis chunks) predicts each theme. Baselines are a piece-square bag and a piece-relation bag (the same relations, no learning). Accuracy is reported against the number of labelled examples.
 3. **Memorisation:** Chase–Simon reconstruction, as in the v1 chess runs.
 4. **Generation** (later): chunks from content concepts, checked for board consistency (`chess.plausibility`, and that every relation is realised).
+
+## First probe result (2026-10-24, paused afterwards)
+
+Run with `store="best"`, interdependent config (`nb_bits` 2), max chunk size 4, seed 13. Mean AUC over 16 Lichess themes, 2000 held-out puzzles, by number of labelled positions:
+
+| | 100 | 300 | 1000 | 3000 |
+|---|---|---|---|---|
+| piece-square | 0.60 | 0.60 | 0.62 | 0.63 |
+| piece-relation | 0.57 | 0.60 | 0.61 | 0.63 |
+| TRELLIS concepts, 300 positions learned | 0.57 | 0.58 | 0.58 | 0.60 |
+| TRELLIS concepts, 1000 positions learned | 0.57 | 0.57 | 0.58 | 0.60 |
+| TRELLIS + piece-square (1000 learned) | 0.57 | 0.58 | 0.59 | 0.63 |
+
+The learned concepts add nothing over the raw features, and learning 1000 positions instead of 300 does not help. This run used the band names that later proved lossy on TinyStories (docs/TEMPORAL_INTERDEP.md). Chess is paused until the representation is settled.
