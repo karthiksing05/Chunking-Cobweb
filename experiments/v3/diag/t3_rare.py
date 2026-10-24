@@ -60,7 +60,7 @@ for k, s in enumerate(corpus, 1):
     L.learn(s)
     seen.update(s)
     if k in checks:
-        L._rel_cache, L._wc_cache = {}, {}
+        L._rel_cache, L._wc_cache, L._nb_cache = {}, {}, {}
         words = [w for w in seen]
         nm = {w: as_bag(L._ctx_name(Elem((0, 1), token=w)) or {}) for w in words}
         by = defaultdict(list)

@@ -93,7 +93,7 @@ def logsumexp(xs: List[float]) -> float:
 
 class Elem:
     __slots__ = ("span", "split", "token", "left", "right", "ctx", "cnt", "leaf", "cleaf", "weight",
-                 "height", "gain", "par", "sib", "memo", "const", "used", "rid", "pas")
+                 "height", "gain", "par", "sib", "memo", "const", "used", "rid", "pas", "nbt")
 
     def __init__(self, span, split=None, token=None, left=None, right=None):
         self.span, self.split, self.token, self.left, self.right = span, split, token, left, right
@@ -108,6 +108,7 @@ class Elem:
         self.used = 0.0                     # 1 if it is in the analysis memory chose for its experience
         self.rid = None                     # its index in memory (stable; statistics refer to it)
         self.pas = []                       # the passive counts it contributed: (tree, attr, value, w)
+        self.nbt = None                     # the words just outside it (neighbour_types), for refresh
 
 
 class Trellis3:
@@ -613,10 +614,8 @@ class Trellis3:
             # the window at the level of types: each neighbouring word named by
             # the aggregate of where its type has occurred
             i, j = e.span
-            for p, pos in (("lc", i - 1), ("rc", j)):
-                bag = self.type_bag.get((tokens[pos],)) if 0 <= pos < len(tokens) else None
-                self._facet(x, p, dict(sorted(bag.items(), key=lambda kv: -kv[1])[:self.type_top])
-                            if bag else [BLANK])
+            e.nbt = tuple(tokens[pos] if 0 <= pos < len(tokens) else None for pos in (i - 1, j))
+            self._nb_facets(x, e)
         elif self.relational in ("window", "both"):
             # the window at the level of roles: each outside neighbour named by its
             # context role (how it works as a neighbour), a same-level element
@@ -638,6 +637,23 @@ class Trellis3:
         if self.donate_ctx:
             self._facet(x, "cc", self._cc_ids(e))
         return x
+
+    def _nb_facets(self, x: dict, e: Elem) -> None:
+        for p, tok in zip(("lc", "rc"), e.nbt):
+            bag = self._nb_name(tok) if tok is not None else None
+            self._facet(x, p, bag if bag else [BLANK])
+
+    def _nb_name(self, token: str) -> Optional[Dict[str, float]]:
+        """A neighbouring word's learned name: with type_names="sample" the bag of
+        concepts on its sampled context leaves' current paths (read once per
+        experience), else the aggregate of where its type has occurred."""
+        if self.type_names == "sample":
+            cache = self.__dict__.setdefault("_nb_cache", {})
+            if token not in cache:
+                cache[token] = self._res_bag((token,))
+            return cache[token]
+        bag = self.type_bag.get((token,))
+        return dict(sorted(bag.items(), key=lambda kv: -kv[1])[:self.type_top]) if bag else None
 
     def _word_concept(self, tokens, pos: int) -> List[str]:
         """The context concept of the token at ``pos`` (sorting its surface window);
@@ -874,6 +890,7 @@ class Trellis3:
         n = len(tokens)
         self._wc_cache = {}                 # word content names, read once per experience
         self._rel_cache = {}                # relational names likewise
+        self._nb_cache = {}                 # neighbours' learned names likewise
         words, comps = self._chart(tokens)
         if n < 2:
             return {"tree": Tree(n, {}, {}, [(0, n)] if n else []), "words": words, "comps": comps,
@@ -986,6 +1003,7 @@ class Trellis3:
         recs = self.records
         self._wc_cache = {}                 # re-read word content names after this experience
         self._rel_cache = {}
+        self._nb_cache = {}
         b = self.refresh_budget
         if b is None or first <= b:
             todo = recs[first:] if b is not None and first > b else recs
@@ -1013,6 +1031,8 @@ class Trellis3:
                     self._facet(new, p, self._ctx_ids(part))
             if self.donate_ctx:
                 self._facet(new, "cc", self._cc_ids(e))
+            if self.neighbour_types and e.nbt is not None:
+                self._nb_facets(new, e)
             if new != e.ctx and (self.refresh in ("relabel", "verify") or
                                  (self.refresh == "drift" and _drift(e.ctx, new) <= self.drift_tau)):
                 self.ctx.relabel(e.leaf, e.ctx, new, e.weight)

@@ -213,3 +213,9 @@ Both candidates keep well-formedness and attestedness, generate more novel chara
 
 - Temporal: yes, with `refresh="verify"` (band-level misplacement 2–8% context); cheap modes (relabel) keep names current but leave 13–16% of records misplaced.
 - Interdependent: yes, with neighbour names and no word identity in context (toy dog~cat share a concept at u2, rare nouns cohere after 50 sentences against 400). Cost: `med` grammaticality 0.89–0.94 from verb/preposition swaps that a two-word window cannot separate.
+
+## Correction (2026-10-24): the neighbour-type facet was blank in rounds 2–10
+
+`neighbour_types` read the full type aggregate (`type_bag`), which is only filled when `type_names` is not `"sample"`. Every configuration here used `type_names="sample"`, so `lc`/`rc` were blank for every record (`logs/v3_diag/t3_ntcheck.py`: 1000 of 1000 blank). Everything labelled "nt + nocc" above is in fact **nocc**: the word's identity left out of its context, with bands and sampled restructuring. The dog~cat link and the faster rare-noun cohesion come from that. Dog and cat are described only by their surface windows, which they share. Neighbours' learned representations played no part, so these results do not show interdependence as defined in the criteria.
+
+Fix: `_nb_name` reads a neighbour's sampled type name (its reservoir of context leaves through the current tree), and `_refresh` rewrites `lc`/`rc` from the stored neighbour words, so the facet stays current. Round 11 reruns the toy, rare-word, generation and temporal tests with the facet on (`logs/v3_nbfix_submit.sh`).

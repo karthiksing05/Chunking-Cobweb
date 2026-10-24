@@ -36,7 +36,7 @@ corpus = [np_() + [rng.choice(verbs)] + np_() for _ in range(n)]
 L = Trellis3(seed=seed, **cfg)
 for s in corpus:
     L.learn(s)
-L._rel_cache, L._wc_cache = {}, {}
+L._rel_cache, L._wc_cache, L._nb_cache = {}, {}, {}
 
 
 def name(w):

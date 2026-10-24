@@ -65,7 +65,7 @@ def desc_drift(old, new):
 
 
 def names(L, words):
-    L._rel_cache, L._wc_cache = {}, {}
+    L._rel_cache, L._wc_cache, L._nb_cache = {}, {}, {}
     return {w: as_bag(L._ctx_name(Elem((0, 1), token=w)) or {}) for w in words}
 
 
@@ -124,6 +124,8 @@ for r in random.Random(seed).sample(L.records, min(1500, len(L.records))):
     newx = dict(r.ctx)
     if L.donate_ctx:
         L._facet(newx, "cc", L._cc_ids(r))
+    if L.neighbour_types and r.nbt is not None:
+        L._nb_facets(newx, r)
     stale_x.append(newx != r.ctx)
     drift_x.append(desc_drift(r.ctx, newx))
     now = L.ctx.categorize(r.ctx)
