@@ -126,7 +126,7 @@ class Trellis3:
                  word_content: Optional[str] = None, word_cnt: bool = False, restructure: str = "always", drift_tau: float = 0.25, word_name_bits: Optional[float] = None, tree: str = "python", tree_alpha: float = 1e-4, band_bits: Sequence[float] = (1, 2, 4, 6, 8, 12), relational: Optional[str] = None,
                  rel_alpha: float = 0.5, rel_rounds: int = 2, nb_bits: Optional[float] = None,
                  nb_rare: Optional[int] = None, window_names: Optional[str] = None,
-                 name_level: Optional[str] = None):
+                 name_level: Optional[str] = None, name_mix_k: Optional[float] = None):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -213,6 +213,11 @@ class Trellis3:
         # concepts of its sampled context leaves (the finest category the tree forms
         # around each instance, read from the current tree) instead of their band names
         self.name_level = name_level
+        # name_mix_k=k (interdependence at readout): a word's name is its own sampled
+        # name with weight n / (n + k) (n: how often it has been seen) plus, with the
+        # rest, the names of the words that stood next to it, tagged by side. What is
+        # stored in the trees is unchanged; rare words lean on their neighbours.
+        self.name_mix_k = name_mix_k
         self.type_seen: Dict[tuple, float] = {}
         self.type_bag: Dict[tuple, Dict[str, float]] = {}
         # a word's content name: what it builds. Each word keeps a weighted
@@ -357,7 +362,7 @@ class Trellis3:
             if bag:
                 return bag
         if self.type_names == "sample":
-            bag = self._res_bag(self._sample_key(e))
+            bag = self._mixed_name(e.token) if (e.token is not None and self.name_mix_k) else self._res_bag(self._sample_key(e))
             if bag:
                 return bag
         elif self.type_names:
@@ -690,6 +695,29 @@ class Trellis3:
             out[a] = {u: w / sum(bag.values()) for u, w in bag.items()} if bag else v
         return out
 
+    def _mixed_name(self, token: str) -> Optional[Dict[str, float]]:
+        cache = self.__dict__.setdefault("_nb_cache", {})
+        if ("mix", token) in cache:
+            return cache[("mix", token)]
+        own = self._res_bag((token,)) or {}
+        nbrs = self.nb_res.get(token, [])
+        borrowed: Dict[str, float] = {}
+        for _, side, w in nbrs:
+            for v, x in (self._res_bag((w,)) or {}).items():
+                key = side + ">" + v
+                borrowed[key] = borrowed.get(key, 0.0) + x / len(nbrs)
+        n = self.type_seen.get((token,), 0.0)
+        a = n / (n + self.name_mix_k) if own else 0.0
+        out: Dict[str, float] = {}
+        for v, x in own.items():
+            out[v] = out.get(v, 0.0) + a * x / (sum(own.values()) or 1.0)
+        tb = sum(borrowed.values())
+        for v, x in borrowed.items():
+            out[v] = out.get(v, 0.0) + (1 - a) * x / tb
+        out = out or None
+        cache[("mix", token)] = out
+        return out
+
     def _rare(self, e: Elem) -> bool:
         return self.nb_rare is None or self.type_seen.get(self._sample_key(e), 0.0) < self.nb_rare
 
@@ -1009,7 +1037,7 @@ class Trellis3:
                 self._pas(e, "ctx", CONST, "c", 1.0)
             if self.type_names or self.neighbour_types:
                 self._add_type(e)
-            if self.relational:
+            if self.relational or self.name_mix_k:
                 i = e.span[0]
                 if i > 0:
                     self._add_neighbour(tokens[i - 1], "R", e.token)
