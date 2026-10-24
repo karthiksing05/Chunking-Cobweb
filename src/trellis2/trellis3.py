@@ -607,6 +607,11 @@ class Trellis3:
                 out = {v: 0.5 * w / tot for v, w in bag.items()}
                 out[f"w:{e.token}"] = 0.5
                 return out
+        if e.token is not None and self.word_cc == "cat":
+            # a word identified by its learned category: one stable value, its most
+            # common coarse concept (bands up to nb_bits), never its token
+            bag = self._window_name(e.token)
+            return [max(bag.items(), key=lambda kv: kv[1])[0]] if bag else [BLANK]
         if e.token is not None and self.word_cc == "name":
             # a word identified by its learned representation: its type name (where
             # its type has stood, read through the current context tree), not its token
