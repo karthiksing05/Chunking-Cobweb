@@ -262,3 +262,28 @@ Word-category accuracy on `med` (nearest word by name has the same preterminal),
 | n = 3, all bands | 0.89 | 0.78 | 0.26 / 0.37 |
 
 n = 10 with coarse names is the most consistent arm: it has the best word categories on both seeds (+0.14 and +0.10 over the control), grammaticality within 2 points, and novelty below the current setup on 4 of 6 runs (equal on med seed 17). The `med` vocabulary is too small for these differences to be firm, so TinyStories (250 words, `experiments/v3/diag/t3_stories.py`) decides. Under relabel-only refresh, misplacement is still 18–35% context and 33–53% content; temporal currency needs `refresh="verify"` on top.
+
+## Rounds 12–18 on TinyStories (`experiments/v3/diag/t3_stories.py`)
+
+Sentences of 3–8 words using the 250 most frequent words, 2000-sentence stream. Gold coarse POS (NLTK) only scores. Word-category accuracy: a word's nearest other word by learned name has the same tag. The raw-count baseline is cosine over left/right neighbour counts.
+
+What the toy grammars hid:
+
+- **Neighbour facets hurt on real text.** Any version that writes neighbours' learned names into the stored context lowers category accuracy, novelty and currency against the control. This covers a facet for every word, a facet for rare types (T6), and a window written in learned names; it holds for both band names and parent names. Examples at 2000 sentences: novelty 0.01–0.28 against the control's 0.37–0.41, content misplacement 0.27–0.51 against 0.19–0.23.
+- **Band names lose category information the tree holds** (`t3_names.py`, 800 sentences). Built from the same trees, a word named by the parent concept of every one of its leaves scores 0.60 / 0.59. The current name (bands over 8 sampled leaves) scores 0.48 / 0.54, and the raw-count baseline 0.54 / 0.59.
+
+The representation that works:
+
+1. `name_level="parent"`, `type_k=32`: a word is named by the parent concepts of its sampled instances, read from the current tree.
+2. `name_mix_k=4`: interdependence happens at readout only. A word's name is its own name with weight n/(n+4), plus the side-tagged names of the words that stood next to it. The stored descriptions do not change.
+3. `part_names="bands"`: chunks name their word parts by the coarse band names, so the content tree generalises. Generation fills word slots by these coarse names too, because a slot accepts the members of its category.
+
+| 2000 sentences, seeds 13 / 17 | category accuracy | misplaced ctx / cnt | novel | tag sequence attested | attested + novel |
+|---|---|---|---|---|---|
+| current setup (original) | 0.48 / 0.50 (at 1600) | | | | |
+| control (bands + sampled restructuring, nocc) | 0.46 / 0.54 | 0.15 / 0.19, 0.14 / 0.23 | 0.37 / 0.41 | | 0.31 / 0.35 |
+| parent names | 0.61 / 0.59 | 0.13 / 0.37, 0.16 / 0.35 | 0.26 / 0.27 | | 0.23 / 0.22 |
+| parent + coarse parts + coarse fill | 0.61 / 0.59 | 0.15 / 0.24, 0.14 / 0.25 | 0.46 / 0.36 | 0.92 / 0.94 | 0.38 / 0.30 |
+| **mixed (k=4) + coarse parts + coarse fill** | **0.59 / 0.65** | 0.15 / 0.22, 0.15 / 0.26 | 0.41 / 0.36 | 0.93 / 0.95 | 0.34 / 0.31 |
+
+The mixed name converges fastest. Its category accuracy is 0.43 on both seeds at 50 sentences, against 0.43 / 0.27 for the control, and 0.57 / 0.54 at 400, above the raw-count baseline (0.53). This is interdependence that speeds convergence. Currency is at the control's level, but context misplacement is still 15%, against the ≤ 5% target, which needs cheaper reassignment. Generation is level with the control: attested + novel is higher on seed 13 and lower on seed 17.
