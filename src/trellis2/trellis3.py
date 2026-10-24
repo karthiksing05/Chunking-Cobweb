@@ -1465,7 +1465,7 @@ class Trellis3:
     def generate_tree(self, rng: Optional[random.Random] = None, index=None, level: int = 0,
                       choose: str = "leaf", beta: float = 1.0, kind: Optional[int] = None,
                       primitive_leaf: bool = False, max_depth: int = 12,
-                      trace: Optional[list] = None, fill_name=False) -> Optional[List[str]]:
+                      trace: Optional[list] = None, fill_name=False, fill_peer: bool = False) -> Optional[List[str]]:
         """Expansive generation from the two hierarchies alone. Every step reads
         statistics held by concepts: a whole experience is drawn from the content
         root (SENT); a content concept gives where its parts stood (LPART, RPART:
@@ -1481,6 +1481,9 @@ class Trellis3:
         quantity learning weighs chunks by; it peaks at the largest concept whose
         members share these surroundings); ``"match"`` a concept drawn in
         proportion to 2 ** that score."""
+        if isinstance(fill_name, str) and fill_name.endswith("+peer"):
+            # "both+peer": compare by the fine names, the slot word counting as its closest peer
+            fill_name, fill_peer = fill_name[:-len("+peer")], True
         rng = rng or self.rng
         window = [a for a in self.ctx_attrs if a[0] in "lr" and a[1:].isdigit()]
         content = choose.endswith("+content")
@@ -1562,7 +1565,7 @@ class Trellis3:
         def name_of(tok: str) -> Dict[str, float]:
             if tok not in names:
                 # a slot accepts members of its category: compared as parts are named
-                bag = self._ctx_name(Elem((0, 1), token=tok), part=True) or {}
+                bag = self._ctx_name(Elem((0, 1), token=tok), part=not fill_peer) or {}
                 if isinstance(bag, list):
                     real = [u for u in bag if u != BLANK]
                     bag = {u: real.count(u) / len(real) for u in set(real)} if real else {}
@@ -1612,12 +1615,20 @@ class Trellis3:
                     # must match the slot word in what it builds and where it stands)
                     reps = {"build": [build_of], "both": [name_of, build_of]}.get(fill_name, [name_of])
                     slot_tok = self.records[where[0]].token
-                    weighted = {}
-                    for f, c in fills.items():
+                    sim = {}
+                    for f in fills:
+                        v = 1.0
                         for rep in reps:
                             own = rep(slot_tok)
-                            c *= sum(min(p, rep(f[1]).get(u, 0.0)) for u, p in own.items())
-                        weighted[f] = c
+                            v *= sum(min(p, rep(f[1]).get(u, 0.0)) for u, p in own.items())
+                        sim[f] = v
+                    if fill_peer and ("w", slot_tok) in sim:
+                        # the slot word is one member of its category: it counts as much
+                        # as its closest peer, not more for matching its own name
+                        peers = [v for f, v in sim.items() if f[1] != slot_tok]
+                        if peers and max(peers) > 0:
+                            sim[("w", slot_tok)] = min(sim[("w", slot_tok)], max(peers))
+                    weighted = {f: c * sim[f] for f, c in fills.items()}
                     if any(v > 0 for v in weighted.values()):
                         fills = weighted
                 f = draw(fills)
