@@ -126,7 +126,8 @@ class Trellis3:
                  word_content: Optional[str] = None, word_cnt: bool = False, restructure: str = "always", drift_tau: float = 0.25, word_name_bits: Optional[float] = None, tree: str = "python", tree_alpha: float = 1e-4, band_bits: Sequence[float] = (1, 2, 4, 6, 8, 12), relational: Optional[str] = None,
                  rel_alpha: float = 0.5, rel_rounds: int = 2, nb_bits: Optional[float] = None,
                  nb_rare: Optional[int] = None, window_names: Optional[str] = None,
-                 name_level: Optional[str] = None, name_mix_k: Optional[float] = None):
+                 name_level: Optional[str] = None, name_mix_k: Optional[float] = None,
+                 part_names: Optional[str] = None):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -218,6 +219,10 @@ class Trellis3:
         # rest, the names of the words that stood next to it, tagged by side. What is
         # stored in the trees is unchanged; rare words lean on their neighbours.
         self.name_mix_k = name_mix_k
+        # part_names="bands": a chunk names its parts by their band names even when the
+        # word's own representation (name_level / name_mix_k) is finer, so the content
+        # tree generalises over parts while words are identified by the finer name
+        self.part_names = part_names
         self.type_seen: Dict[tuple, float] = {}
         self.type_bag: Dict[tuple, Dict[str, float]] = {}
         # a word's content name: what it builds. Each word keeps a weighted
@@ -353,8 +358,16 @@ class Trellis3:
             e.memo["cnt"] = self._ids(self.cnt.categorize(e.cnt))
         return e.memo["cnt"]
 
-    def _ctx_name(self, e: Elem) -> List[str]:
-        """The ids a facet names an element's context concept by."""
+    def _ctx_name(self, e: Elem, part: bool = False) -> List[str]:
+        """The ids a facet names an element's context concept by (``part``: as a
+        chunk's part, which ``part_names`` may name more coarsely)."""
+        if part and self.part_names == "bands" and (self.name_level or self.name_mix_k):
+            keep = (self.name_level, self.name_mix_k)
+            self.name_level = self.name_mix_k = None
+            try:
+                return self._ctx_name(e)
+            finally:
+                self.name_level, self.name_mix_k = keep
         if self.naming == "depth":
             return self._ctx_ids(e)
         if e.token is not None and self.relational in ("names", "both"):
@@ -642,7 +655,7 @@ class Trellis3:
         if self.donate_own:
             self._facet(x, "oc", self._own_ctx(e))
         for p, part in (("L", e.left), ("R", e.right)):
-            self._facet(x, p, self._ctx_name(part))
+            self._facet(x, p, self._ctx_name(part, part=True))
             if self.donate_cnt:
                 bag = self._word_content_bag(part.token) if (part.token is not None and self.word_content in ("parts", "cc", "cc+token")) else None
                 self._facet(x, f"{p}C", bag if bag else self._cnt_name(part))
