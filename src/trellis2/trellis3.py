@@ -720,7 +720,9 @@ class Trellis3:
                 out[a] = v
                 continue
             bag = self._window_name(v)
-            out[a] = {u: w / sum(bag.values()) for u, w in bag.items()} if bag else v
+            # one categorical value: the neighbour's most common coarse concept (a bag
+            # re-sampled at every reading would make every stored context unique)
+            out[a] = max(bag.items(), key=lambda kv: kv[1])[0] if bag else v
         return out
 
     def _mixed_name(self, token: str) -> Optional[Dict[str, float]]:
