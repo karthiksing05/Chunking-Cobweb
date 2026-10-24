@@ -138,6 +138,11 @@ class IncrementalCobwebTree:
         # out (it adds no value and so no shared similarity), as Cobweb treats
         # a missing value
         self.partial = False
+        # sample_restructure: an instance of weight w (a posterior probability that
+        # it occurs) may merge or split concepts only with probability w, so the
+        # operators that change structure act, in expectation, as real
+        # observations do; its counts stay fractional
+        self.sample_restructure = False
         self._next_id = 0
         self.rng = random.Random(seed)
         self.root = self._new_node()
@@ -229,7 +234,7 @@ class IncrementalCobwebTree:
             return 1.0
         return sum(sum(p * p for p in v.values()) if isinstance(v, dict) else 1.0 for v in x.values()) / self.n_attrs
 
-    def _best_operation(self, cur: CobwebNode, x: Instance, w: float):
+    def _best_operation(self, cur: CobwebNode, x: Instance, w: float, restructure: bool = True):
         kids = cur.children
         K = len(kids)
         n1 = cur.count + w
@@ -245,13 +250,13 @@ class IncrementalCobwebTree:
         best2 = ranked[1][3] if K > 1 else None
         ops = [(((S + ranked[0][0]) / n1 - ecp1) / K, self.rng.random(), "best"),
                (((S + w * self._ec_alone(x)) / n1 - ecp1) / (K + 1), self.rng.random(), "new")]
-        if K > 2 and best2 is not None:
+        if restructure and K > 2 and best2 is not None:
             t1 = best1.count * self.ec(best1)
             t2 = best2.count * self.ec(best2)
             nm = best1.count + best2.count + w
             sm = S - t1 - t2 + nm * self._ec_merge(best1, best2, x, w)
             ops.append(((sm / n1 - ecp1) / (K - 1), self.rng.random(), "merge"))
-        if best1.children:
+        if restructure and best1.children:
             ss = (S - best1.count * self.ec(best1)
                   + sum(c.count * self.ec(c) for c in best1.children))
             ks = K - 1 + len(best1.children)
@@ -321,6 +326,7 @@ class IncrementalCobwebTree:
             raise ValueError(f"instance must define exactly {self.attrs}; got {sorted(x)}")
         if w <= 0.0:
             raise ValueError("instance weight must be positive")
+        restructure = not self.sample_restructure or self.rng.random() < w
         cur = self.root
         while True:
             if not cur.children:
@@ -334,7 +340,7 @@ class IncrementalCobwebTree:
                 cur.parent = p
                 p.increment(x, w)
                 return self._new_child(p, x, w)
-            op, best1, best2 = self._best_operation(cur, x, w)
+            op, best1, best2 = self._best_operation(cur, x, w, restructure)
             if op == "best":
                 cur.increment(x, w)
                 cur = best1

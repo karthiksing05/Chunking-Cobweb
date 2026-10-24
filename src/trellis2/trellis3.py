@@ -67,6 +67,23 @@ def log_prob(node: CobwebNode, x: dict, root: CobwebNode, alpha: float) -> float
     return total
 
 
+def _bag(v) -> Dict[str, float]:
+    if isinstance(v, dict):
+        t = sum(v.values()) or 1.0
+        return {u: p / t for u, p in v.items()}
+    return {v: 1.0}
+
+
+def _drift(old: dict, new: dict) -> float:
+    """Mean total-variation distance between two descriptions, over attributes."""
+    keys = set(old) | set(new)
+    tot = 0.0
+    for k in keys:
+        a, b = _bag(old.get(k, {})), _bag(new.get(k, {}))
+        tot += 0.5 * sum(abs(a.get(u, 0.0) - b.get(u, 0.0)) for u in set(a) | set(b))
+    return tot / max(len(keys), 1)
+
+
 def logsumexp(xs: List[float]) -> float:
     m = max(xs)
     if m == -math.inf:
@@ -76,7 +93,7 @@ def logsumexp(xs: List[float]) -> float:
 
 class Elem:
     __slots__ = ("span", "split", "token", "left", "right", "ctx", "cnt", "leaf", "cleaf", "weight",
-                 "height", "gain", "par", "sib", "memo", "const", "used")
+                 "height", "gain", "par", "sib", "memo", "const", "used", "rid", "pas")
 
     def __init__(self, span, split=None, token=None, left=None, right=None):
         self.span, self.split, self.token, self.left, self.right = span, split, token, left, right
@@ -89,6 +106,8 @@ class Elem:
         self.memo = {}                      # concept ids found by sorting (valid while unstored)
         self.const = 0.0                    # its posterior of being a constituent (store "ccm")
         self.used = 0.0                     # 1 if it is in the analysis memory chose for its experience
+        self.rid = None                     # its index in memory (stable; statistics refer to it)
+        self.pas = []                       # the passive counts it contributed: (tree, attr, value, w)
 
 
 class Trellis3:
@@ -102,7 +121,7 @@ class Trellis3:
                  refresh: str = "refit", readout: str = "mbr", cc_naming: Optional[str] = None,
                  word_cc: bool = False, boundary: str = "marker", type_names: bool = False, neighbour_types: bool = False,
                  type_top: int = 40, type_k: int = 8, type_key: str = "tokens",
-                 word_content: Optional[str] = None, word_cnt: bool = False, relational: Optional[str] = None,
+                 word_content: Optional[str] = None, word_cnt: bool = False, restructure: str = "always", drift_tau: float = 0.25, word_name_bits: Optional[float] = None, tree: str = "python", tree_alpha: float = 1e-4, band_bits: Sequence[float] = (1, 2, 4, 6, 8, 12), relational: Optional[str] = None,
                  rel_alpha: float = 0.5, rel_rounds: int = 2):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
@@ -151,6 +170,10 @@ class Trellis3:
         # its identity lives on the content side (what a chunk is made of) and the
         # context tree can describe a word only by where it stands (word_cc off)
         self.word_cnt = word_cnt
+        # naming="bands": a path is named by the first concept reaching each of these
+        # information levels (-log2 of its share of the tree), so a name holds a
+        # few concepts at matched resolution, not every concept on the path
+        self.band_bits = tuple(band_bits)
         # the sentence boundary in a window: "marker" (<s> / </s>, a value many
         # instances share) or "missing" (the slot is simply not observed)
         self.boundary = boundary
@@ -199,6 +222,13 @@ class Trellis3:
         # "refit" (taken out and re-inserted) or "relabel" (its counts updated
         # in place on its own path; it stays where it was stored)
         self.refresh = refresh
+        # refresh="drift" (lazy repair): a stored record whose description drifted by
+        # more than drift_tau (mean total variation over attributes) is reassigned
+        # (moved to where it now sorts); smaller drift is relabelled in place
+        self.drift_tau = drift_tau
+        # word_cc="name": a word's own-content facet keeps only the bands up to
+        # word_name_bits (its category-level representation; None: all bands)
+        self.word_name_bits = word_name_bits
         # the analysis read out of an experience: "mbr" (most expected correct
         # composites) or "regen" (the analysis whose chunks memory regenerates
         # most probably: the sum over its composites of log2 P(parts | content
@@ -216,9 +246,19 @@ class Trellis3:
         given = tuple(f"{p}{k}" for p in ("LC", "RC") for k in d) if self.donate_cnt else ()
         self.cnt_attrs = parts + given + (("LH", "RH") if heights else ()) + \
             (tuple(f"oc{k}" for k in d) if donate_own else ())
-        self.ctx = IncrementalCobwebTree(self.ctx_attrs, seed=seed)
-        self.cnt = IncrementalCobwebTree(self.cnt_attrs, seed=seed + 1)
+        if tree == "discrete":
+            # cobweb-private's CobwebDiscreteTree (entropy category utility, alpha
+            # pseudo-counts per value) in place of the pure-Python Fisher Cobweb
+            from .discrete_cobweb import DiscreteCobwebTree
+            self.ctx = DiscreteCobwebTree(self.ctx_attrs, seed=seed, alpha=tree_alpha)
+            self.cnt = DiscreteCobwebTree(self.cnt_attrs, seed=seed + 1, alpha=tree_alpha)
+        else:
+            self.ctx = IncrementalCobwebTree(self.ctx_attrs, seed=seed)
+            self.cnt = IncrementalCobwebTree(self.cnt_attrs, seed=seed + 1)
         self.ctx.partial = self.cnt.partial = (boundary in ("missing", "edge"))
+        # restructure="sample": a span stored with posterior weight w merges or
+        # splits concepts with probability w (see IncrementalCobwebTree)
+        self.ctx.sample_restructure = self.cnt.sample_restructure = (restructure == "sample")
         self.rng = random.Random(seed)
         self.records: List[Elem] = []
         self._rr = 0
@@ -298,16 +338,21 @@ class Trellis3:
             path = e.memo["ctxp"]
         return self._path_ids(path)
 
-    def _res_bag(self, key) -> Optional[Dict[str, float]]:
-        """P: the bag of concepts on a type's sampled context leaves' current paths."""
+    def _res_bag(self, key, max_bits: Optional[float] = None) -> Optional[Dict[str, float]]:
+        """P: the bag of concepts on a type's sampled context leaves' current paths
+        (with ``max_bits``, under naming="bands", only the bands up to that level)."""
         res = self.type_res.get(key)
         if not res:
             return None
         bag: Dict[str, float] = {}
+        keep = self.band_bits
+        if max_bits is not None:
+            self.band_bits = tuple(b for b in keep if b <= max_bits)
         for _, leaf in res:
             ids = self._path_ids(self.ctx.ancestors(leaf)[::-1])
             for v in ids:
                 bag[v] = bag.get(v, 0.0) + 1.0 / (len(ids) * len(res))
+        self.band_bits = keep
         return dict(sorted(bag.items(), key=lambda kv: -kv[1])[:self.type_top])
 
     def _rel_mix(self, own: Optional[Dict[str, float]], nbrs: Dict[Tuple[str, str], float], role, k: int) -> Dict[str, float]:
@@ -477,6 +522,14 @@ class Trellis3:
             def cu(n):
                 return (n.count / max(root.count, 1e-9)) * (n.sstot / max(n.count, 1e-9) ** 2 - base)
             return [f"c{max(inner, key=cu).id}"]
+        if naming == "bands" and inner:
+            total, out, k = max(path[0].count, 1e-9), [], 0
+            for n in inner:
+                b = -math.log2(max(n.count, 1e-9) / total)
+                while k < len(self.band_bits) and b >= self.band_bits[k]:
+                    out.append(f"c{n.id}")
+                    k += 1
+            return out or [BLANK]
         if naming == "ipath" and inner:
             # each concept weighted by its information, -log2 of its share of
             # the tree in whole bits: shared coarse ancestry counts little
@@ -495,6 +548,11 @@ class Trellis3:
                 out = {v: 0.5 * w / tot for v, w in bag.items()}
                 out[f"w:{e.token}"] = 0.5
                 return out
+        if e.token is not None and self.word_cc == "name":
+            # a word identified by its learned representation: its type name (where
+            # its type has stood, read through the current context tree), not its token
+            bag = self._res_bag(self._sample_key(e), self.word_name_bits)
+            return bag if bag else [BLANK]
         if e.token is not None and self.word_cc:
             return [f"w:{e.token}"]
         if self.cc_naming == "tokens":
@@ -531,7 +589,7 @@ class Trellis3:
         if "own" not in e.memo:
             x = {a: v for a, v in e.ctx.items() if a[0] in "lr" and a[1:].isdigit()}
             path = self.ctx.categorize(x)
-            e.memo["own"] = self._path_ids(path) if self.naming in ("path", "ipath", "leaf", "basic") else self._ids(path)
+            e.memo["own"] = self._path_ids(path) if self.naming in ("path", "ipath", "bands", "leaf", "basic") else self._ids(path)
         return e.memo["own"]
 
     def _content(self, e: Elem) -> dict:
@@ -541,7 +599,7 @@ class Trellis3:
         for p, part in (("L", e.left), ("R", e.right)):
             self._facet(x, p, self._ctx_name(part))
             if self.donate_cnt:
-                bag = self._word_content_bag(part.token) if (part.token is not None and self.word_content) else None
+                bag = self._word_content_bag(part.token) if (part.token is not None and self.word_content in ("parts", "cc", "cc+token")) else None
                 self._facet(x, f"{p}C", bag if bag else self._cnt_name(part))
             if self.heights:
                 x[f"{p}H"] = str(min(part.height, 4))
@@ -868,10 +926,11 @@ class Trellis3:
             e.weight = 1.0
             e.ctx = self._full(self._context(tokens, e, analysed=True), self.ctx_attrs)
             e.leaf = self.ctx.ifit(e.ctx, 1.0)
-            self.ctx.add_passive(e.leaf, WORD, e.token, 1.0)
+            e.rid = len(self.records)
+            self._pas(e, "ctx", WORD, e.token, 1.0)
             if self.store == "ccm":
                 e.const = 1.0
-                self.ctx.add_passive(e.leaf, CONST, "c", 1.0)
+                self._pas(e, "ctx", CONST, "c", 1.0)
             if self.type_names or self.neighbour_types:
                 self._add_type(e)
             if self.relational:
@@ -893,9 +952,10 @@ class Trellis3:
             e.cleaf = self.cnt.ifit(e.cnt, w)
             e.ctx = self._full(self._context(tokens, e, analysed=key in chosen), self.ctx_attrs)
             e.leaf = self.ctx.ifit(e.ctx, w)
+            e.rid = len(self.records)
             if e.const > 0:
-                self.cnt.add_passive(e.cleaf, CONST, "c", e.const)
-                self.ctx.add_passive(e.leaf, CONST, "c", e.const)
+                self._pas(e, "cnt", CONST, "c", e.const)
+                self._pas(e, "ctx", CONST, "c", e.const)
             if self.type_names or self.neighbour_types:
                 self._add_type(e)
             if self.word_content:
@@ -904,17 +964,18 @@ class Trellis3:
             self.stats["composites stored"] += 1
         # what generation reads: the committed analysis as statistics of concepts
         for e in words:
-            self.ctx.add_passive(e.leaf, FILL, ("w", e.token), 1.0)
+            self._pas(e, "ctx", FILL, ("w", e.token), 1.0)
         for key in chosen:
             e = comps[key]
             if e.cleaf is None or e.leaf is None:
                 continue
-            self.ctx.add_passive(e.leaf, FILL, ("c", e.cleaf.id), 1.0)
+            # statistics name records (stable), not leaves (which reassignment moves)
+            self._pas(e, "ctx", FILL, ("c", e.rid), 1.0)
             for a, part in ((LPART, e.left), (RPART, e.right)):
                 if part.leaf is not None:
-                    self.cnt.add_passive(e.cleaf, a, (part.leaf.id, part.token is not None), 1.0)
+                    self._pas(e, "cnt", a, (part.rid, part.token is not None), 1.0)
             if e.span == (0, len(tokens)):
-                self.cnt.add_passive(e.cleaf, SENT, e.cleaf.id, 1.0)
+                self._pas(e, "cnt", SENT, e.rid, 1.0)
         self.stats["experiences"] += 1
         self._refresh(first, tokens)
         return r["tree"]
@@ -937,17 +998,13 @@ class Trellis3:
             if e.token is None:
                 e.memo.pop("own", None)
                 new = self._content(e)
-                if new != e.cnt and self.refresh == "relabel":
+                if new != e.cnt and (self.refresh == "relabel" or
+                                     (self.refresh == "drift" and _drift(e.cnt, new) <= self.drift_tau)):
                     self.cnt.relabel(e.cleaf, e.cnt, new, e.weight)
                     e.cnt = new
                     self.stats["refreshed"] += 1
                 elif new != e.cnt:
-                    if e.const > 0:
-                        self.cnt.add_passive(e.cleaf, CONST, "c", -e.const)
-                    self.cnt.unfit(e.cleaf, e.cnt, e.weight)
-                    e.cnt, e.cleaf = new, self.cnt.ifit(new, e.weight)
-                    if e.const > 0:
-                        self.cnt.add_passive(e.cleaf, CONST, "c", e.const)
+                    self._move(e, "cnt", new)
                     self.stats["refreshed"] += 1
             # the context's named concepts (children, own content) follow too
             new = dict(e.ctx)
@@ -956,22 +1013,40 @@ class Trellis3:
                     self._facet(new, p, self._ctx_ids(part))
             if self.donate_ctx:
                 self._facet(new, "cc", self._cc_ids(e))
-            if new != e.ctx and self.refresh == "relabel":
+            if new != e.ctx and (self.refresh == "relabel" or
+                                 (self.refresh == "drift" and _drift(e.ctx, new) <= self.drift_tau)):
                 self.ctx.relabel(e.leaf, e.ctx, new, e.weight)
                 e.ctx = new
                 self.stats["refreshed"] += 1
             elif new != e.ctx:
-                if e.const > 0:
-                    self.ctx.add_passive(e.leaf, CONST, "c", -e.const)
-                if e.token is not None:
-                    self.ctx.add_passive(e.leaf, WORD, e.token, -1.0)
-                self.ctx.unfit(e.leaf, e.ctx, e.weight)
-                e.ctx, e.leaf = new, self.ctx.ifit(new, e.weight)
-                if e.const > 0:
-                    self.ctx.add_passive(e.leaf, CONST, "c", e.const)
-                if e.token is not None:
-                    self.ctx.add_passive(e.leaf, WORD, e.token, 1.0)
+                self._move(e, "ctx", new)
                 self.stats["refreshed"] += 1
+
+    def _pas(self, e: Elem, which: str, attr: str, value, w: float) -> None:
+        """Add a passive count at the record's leaf in one hierarchy and remember
+        it, so that reassigning the record carries its statistics along."""
+        tree, leaf = (self.ctx, e.leaf) if which == "ctx" else (self.cnt, e.cleaf)
+        tree.add_passive(leaf, attr, value, w)
+        e.pas.append((which, attr, value, w))
+
+    def _move(self, e: Elem, which: str, new: dict) -> None:
+        """Reassignment: take the record out of one hierarchy and insert it again
+        with its current description, its passive counts moving with it."""
+        mine = [(a, v, w) for t, a, v, w in e.pas if t == which]
+        if which == "ctx":
+            for a, v, w in mine:
+                self.ctx.add_passive(e.leaf, a, v, -w)
+            self.ctx.unfit(e.leaf, e.ctx, e.weight)
+            e.ctx, e.leaf = new, self.ctx.ifit(new, e.weight)
+            for a, v, w in mine:
+                self.ctx.add_passive(e.leaf, a, v, w)
+        else:
+            for a, v, w in mine:
+                self.cnt.add_passive(e.cleaf, a, v, -w)
+            self.cnt.unfit(e.cleaf, e.cnt, e.weight)
+            e.cnt, e.cleaf = new, self.cnt.ifit(new, e.weight)
+            for a, v, w in mine:
+                self.cnt.add_passive(e.cleaf, a, v, w)
 
     # ------------------------------------------------------------------ #
     # Generation: top-down through the two hierarchies (no word-to-word step)
@@ -1246,7 +1321,7 @@ class Trellis3:
     def generate_tree(self, rng: Optional[random.Random] = None, index=None, level: int = 0,
                       choose: str = "leaf", beta: float = 1.0, kind: Optional[int] = None,
                       primitive_leaf: bool = False, max_depth: int = 12,
-                      trace: Optional[list] = None) -> Optional[List[str]]:
+                      trace: Optional[list] = None, fill_name=False) -> Optional[List[str]]:
         """Expansive generation from the two hierarchies alone. Every step reads
         statistics held by concepts: a whole experience is drawn from the content
         root (SENT); a content concept gives where its parts stood (LPART, RPART:
@@ -1263,7 +1338,6 @@ class Trellis3:
         members share these surroundings); ``"match"`` a concept drawn in
         proportion to 2 ** that score."""
         rng = rng or self.rng
-        ctx_ix, cnt_ix = index or self.concept_index()
         window = [a for a in self.ctx_attrs if a[0] in "lr" and a[1:].isdigit()]
         content = choose.endswith("+content")
         choose = choose.split("+")[0]
@@ -1330,14 +1404,35 @@ class Trellis3:
                         return items[k] if items else k
             return items[k] if items else k
 
+        names: Dict[str, Dict[str, float]] = {}
+
+        builds: Dict[str, Dict[str, float]] = {}
+
+        def build_of(tok: str) -> Dict[str, float]:
+            if tok not in builds:
+                bag = self._word_content_bag(tok) or {}
+                tot = sum(bag.values()) or 1.0
+                builds[tok] = {u: p / tot for u, p in bag.items()}
+            return builds[tok]
+
+        def name_of(tok: str) -> Dict[str, float]:
+            if tok not in names:
+                bag = self._ctx_name(Elem((0, 1), token=tok)) or {}
+                if isinstance(bag, list):
+                    real = [u for u in bag if u != BLANK]
+                    bag = {u: real.count(u) / len(real) for u in set(real)} if real else {}
+                tot = sum(bag.values()) or 1.0
+                names[tok] = {u: p / tot for u, p in bag.items()}
+            return names[tok]
+
         out: List[str] = []
 
         def expand(x: CobwebNode, d: int) -> None:
             for a in (LPART, RPART):
                 where = draw(self.cnt.passive(x, a))
-                if where is None or where[0] not in ctx_ix:
+                if where is None or self.records[where[0]].leaf is None:
                     raise LookupError
-                leaf, primitive = ctx_ix[where[0]], where[1] or d >= max_depth
+                leaf, primitive = self.records[where[0]].leaf, where[1] or d >= max_depth
                 node = leaf if (primitive and primitive_leaf) else concept_for(leaf, primitive)
                 fills = {f: c for f, c in self.ctx.passive(node, FILL).items() if (f[0] == "w") == primitive}
                 if kind is not None and not primitive and node is not leaf:
@@ -1346,14 +1441,14 @@ class Trellis3:
                     # above the content concepts of the leaf's composite instances
                     kinds = set()
                     for g in self.ctx.passive(leaf, FILL):
-                        if g[0] == "c" and g[1] in cnt_ix:
-                            y = cnt_ix[g[1]]
+                        if g[0] == "c" and self.records[g[1]].cleaf is not None:
+                            y = self.records[g[1]].cleaf
                             for _ in range(kind):
                                 y = y.parent or y
                             kinds.add(y.id)
 
                     def under(cid):
-                        y = cnt_ix.get(cid)
+                        y = self.records[cid].cleaf
                         while y is not None:
                             if y.id in kinds:
                                 return True
@@ -1363,29 +1458,46 @@ class Trellis3:
                 if not fills:                      # the chosen concept holds none of this kind
                     node = leaf
                     fills = {f: c for f, c in self.ctx.passive(node, FILL).items() if (f[0] == "w") == primitive}
+                if fill_name and primitive and self.records[where[0]].token is not None:
+                    # a word slot: weight each candidate word by how much its learned
+                    # representation overlaps that of the word stored in the slot: its
+                    # context name, or with fill_name="build" what it builds (the AND
+                    # side: the content concepts of the composites it is a part of)
+                    # with fill_name="both", the product of the two overlaps (a candidate
+                    # must match the slot word in what it builds and where it stands)
+                    reps = {"build": [build_of], "both": [name_of, build_of]}.get(fill_name, [name_of])
+                    slot_tok = self.records[where[0]].token
+                    weighted = {}
+                    for f, c in fills.items():
+                        for rep in reps:
+                            own = rep(slot_tok)
+                            c *= sum(min(p, rep(f[1]).get(u, 0.0)) for u, p in own.items())
+                        weighted[f] = c
+                    if any(v > 0 for v in weighted.values()):
+                        fills = weighted
                 f = draw(fills)
                 entry = None
                 if trace is not None:
                     entry = {"depth": d, "composite": x.id, "part": "left" if a == LPART else "right",
                              "leaf": leaf.id, "concept": node.id, "primitive": primitive,
-                             "instances": fills, "drawn": f, "start": len(out)}
+                             "instances": fills, "drawn": f, "slot": where[0], "start": len(out)}
                     trace.append(entry)
                 if f is None:
                     raise LookupError
                 if f[0] == "w":
                     out.append(f[1])
-                elif f[1] in cnt_ix:
-                    expand(cnt_ix[f[1]], d + 1)
+                elif self.records[f[1]].cleaf is not None:
+                    expand(self.records[f[1]].cleaf, d + 1)
                 else:
                     raise LookupError
                 if entry is not None:
                     entry["end"] = len(out)
 
         root = draw(self.cnt.passive(self.cnt.root, SENT))
-        if root is None or root not in cnt_ix:
+        if root is None or self.records[root].cleaf is None:
             return None
         try:
-            expand(cnt_ix[root], 0)
+            expand(self.records[root].cleaf, 0)
         except (LookupError, RecursionError):
             return None
         return out

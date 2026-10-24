@@ -288,3 +288,16 @@ The exported parses show it. For every composite on `med` (90 of 90) and `large`
   - Overall: more grammatical-and-new on 4 of 8, about equal on 2, less on 2, at 2–16 points of grammaticality.
   - **Not a consistent win; leaf stays the default.**
   - The kind check repairs most of what climbing breaks. Climbing itself adds novelty only where leaves are sparse.
+- **Correction (`t3_cgain.py`, `small`, current configuration):** the content tree is not shallow.
+  - Stored content leaves sit 12.8 levels deep on average; context leaves 10.3.
+  - Held-out composites are what stop early: their sorting path ends 2–4 levels down, where Cobweb would open a new branch. The content tree does not recognise new chunks as members of the deeper chunk types it holds.
+  - On `small`, 25% of held-out composites get positive content gain (mean +0.19 bits; context +1.23).
+  - Next: name words by what they build as well as where they stand (`word_content`), so content instances of new chunks share values with stored ones.
+
+## 23 October: the content tree's chain is a merge ladder from low-weight spans
+
+`logs/v3_diag/t3_chain.py`, `t3_chain2.py`, `med`, seed 13, current config:
+- Descents never go below depth ~19, yet content leaves sit at mean depth 103 (max 551). The depth is built by merges: 13,037 of the 13,716 content merges wrap a node an earlier merge made, so every merge pushes a whole subtree one level deeper.
+- 13,520 of 20,451 content instances are spans with posterior weight < 0.05, and they trigger 12,251 of the merges. A near-zero-weight instance barely changes the merge score, so merges fire on the existing structure alone, again and again.
+- Allowing merge/split only at weight ≥ 0.5: content depth 103 → 5.5 and context depth 15.9 → 9.3 on `med`. On `small` the content depth rises (12.8 → 44.5), so a hard threshold is the wrong form.
+- Principled form, `restructure="sample"`: a span stored with posterior weight w may merge or split concepts with probability w. Restructuring then acts, in expectation, as real observations would; counts stay fractional. Running on small/med/large, with and without `word_cc`.
