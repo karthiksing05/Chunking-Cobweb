@@ -123,7 +123,8 @@ class Trellis3:
                  word_cc: bool = False, boundary: str = "marker", type_names: bool = False, neighbour_types: bool = False,
                  type_top: int = 40, type_k: int = 8, type_key: str = "tokens",
                  word_content: Optional[str] = None, word_cnt: bool = False, restructure: str = "always", drift_tau: float = 0.25, word_name_bits: Optional[float] = None, tree: str = "python", tree_alpha: float = 1e-4, band_bits: Sequence[float] = (1, 2, 4, 6, 8, 12), relational: Optional[str] = None,
-                 rel_alpha: float = 0.5, rel_rounds: int = 2, nb_bits: Optional[float] = None):
+                 rel_alpha: float = 0.5, rel_rounds: int = 2, nb_bits: Optional[float] = None,
+                 nb_rare: Optional[int] = None):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -197,6 +198,11 @@ class Trellis3:
         # a neighbour's learned name keeps only the bands up to nb_bits (its
         # category; None: every band, which nearly identifies the word)
         self.nb_bits = nb_bits
+        # nb_rare=n (brief T6): the neighbour facet only for elements whose own type has
+        # been seen fewer than n times; a frequent type is described by its own window
+        # (its evidence), a rare one borrows its neighbours' learned names
+        self.nb_rare = nb_rare
+        self.type_seen: Dict[tuple, float] = {}
         self.type_bag: Dict[tuple, Dict[str, float]] = {}
         # a word's content name: what it builds. Each word keeps a weighted
         # reservoir of ``type_k`` content leaves of the composites it is a direct
@@ -462,6 +468,8 @@ class Trellis3:
         if self.type_names == "sample":
             if e.weight <= 0:
                 return
+            k = self._sample_key(e)
+            self.type_seen[k] = self.type_seen.get(k, 0.0) + e.weight
             res = self.type_res.setdefault(self._sample_key(e), [])
             key = self._type_rng.random() ** (1.0 / e.weight)
             if len(res) < self.type_k:
@@ -654,7 +662,14 @@ class Trellis3:
             self._facet(x, "cc", self._cc_ids(e))
         return x
 
+    def _rare(self, e: Elem) -> bool:
+        return self.nb_rare is None or self.type_seen.get(self._sample_key(e), 0.0) < self.nb_rare
+
     def _nb_facets(self, x: dict, e: Elem) -> None:
+        if not self._rare(e):
+            for p in ("lc", "rc"):
+                self._facet(x, p, [BLANK])
+            return
         for p, tok in zip(("lc", "rc"), e.nbt):
             bag = self._nb_name(tok) if tok is not None else None
             self._facet(x, p, bag if bag else [BLANK])
