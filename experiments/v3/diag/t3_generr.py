@@ -27,6 +27,7 @@ train, _ = v1_split(load_corpus(os.path.join(default_data_root(), CONDITIONS[con
 g = CFG(target_grammar(cond))
 L = Trellis3(seed=seed, **cfg)
 src, label = {}, {}
+wgold = {}
 for e in train:
     n0 = len(L.records)
     L.learn(e.tokens)
@@ -34,6 +35,9 @@ for e in train:
     for r in L.records[n0:]:
         src[r.rid] = e.tokens
         label[r.rid] = gl.get(r.span, "-")
+    for i, w in enumerate(e.tokens):
+        wgold.setdefault(w, Counter())[gl.get((i, i + 1), "-")] += 1
+wgold = {w: c.most_common(1)[0][0] for w, c in wgold.items()}
 
 
 def words(rid):
@@ -50,6 +54,7 @@ def cats(toks):
 ix = L.concept_index()
 rng = random.Random(seed)
 bad, steps, mism, kinds = 0, 0, 0, Counter()
+wmism, wkinds = 0, Counter()
 shown = 0
 for _ in range(n):
     tr = []
@@ -69,6 +74,9 @@ for _ in range(n):
         if f[0] == "c" and lab_d != lab_s:
             mism += 1
             kinds[(lab_s, lab_d)] += 1
+        if f[0] == "w" and wgold.get(f[1]) != lab_s:
+            wmism += 1
+            wkinds[(lab_s, wgold.get(f[1]))] += 1
         lines.append(f"  d{t['depth']} {t['part']:5s} slot=[{words(slot)}]:{lab_s}  drawn=[{got}]:{lab_d}  -> '{' '.join(sub)}' {cats(sub)}")
     if shown < 12:
         print("✗", " ".join(s))
@@ -76,4 +84,6 @@ for _ in range(n):
         shown += 1
 print(json.dumps({"tag": tag, "cond": cond, "seed": seed, "ungrammatical": bad, "steps": steps,
                   "composite drawn with a label differing from the slot's": mism,
-                  "top (slot, drawn) label pairs": [[list(k), v] for k, v in kinds.most_common(10)]}), flush=True)
+                  "top (slot, drawn) label pairs": [[list(k), v] for k, v in kinds.most_common(10)],
+                  "word drawn whose gold category differs from the slot's": wmism,
+                  "top (slot, word) pairs": [[list(k), v] for k, v in wkinds.most_common(10)]}), flush=True)
