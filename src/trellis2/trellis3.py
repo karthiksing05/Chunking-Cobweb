@@ -236,17 +236,17 @@ class Trellis3:
         # concept), so unpacking the chunks gives back the experience)
         self.readout = readout
         d = [""] if bags else [str(k) for k in range(1, depth + 1)]
-        surface = tuple(f"l{k}" for k in range(window, 0, -1)) + tuple(f"r{k}" for k in range(1, window + 1))
+        surface = self._surface_names(window)
         chunk = (tuple(f"{p}{k}" for p in ("cl", "cr") for k in d) if self.children else ()) + \
             (tuple(f"{p}{k}" for p in ("par", "sib") for k in d) if self.spine else ())
         own = tuple(f"cc{k}" for k in d) if self.donate_ctx else ()
-        neigh = tuple(f"{p}{k}" for p in ("lc", "rc") for k in d) \
+        neigh = self._neigh_names(d) \
             if (neighbour_concepts or neighbour_types or relational in ("window", "both")) else ()
         self.ctx_attrs = surface + neigh + chunk + own + (("le", "re") if boundary == "edge" else ())
         parts = tuple(f"{p}{k}" for p in ("L", "R") for k in d)
         given = tuple(f"{p}{k}" for p in ("LC", "RC") for k in d) if self.donate_cnt else ()
         self.cnt_attrs = parts + given + (("LH", "RH") if heights else ()) + \
-            (tuple(f"oc{k}" for k in d) if donate_own else ())
+            (tuple(f"oc{k}" for k in d) if donate_own else ()) + self._extra_cnt_names()
         if tree == "discrete":
             # cobweb-private's CobwebDiscreteTree (entropy category utility, alpha
             # pseudo-counts per value) in place of the pure-Python Fisher Cobweb
@@ -268,6 +268,19 @@ class Trellis3:
     # ------------------------------------------------------------------ #
     # Descriptions
     # ------------------------------------------------------------------ #
+    # attribute names (a relational domain names its own; trellis_graph.py)
+    @staticmethod
+    def _surface_names(window: int) -> tuple:
+        return tuple(f"l{k}" for k in range(window, 0, -1)) + tuple(f"r{k}" for k in range(1, window + 1))
+
+    @staticmethod
+    def _neigh_names(d) -> tuple:
+        return tuple(f"{p}{k}" for p in ("lc", "rc") for k in d)
+
+    @staticmethod
+    def _extra_cnt_names() -> tuple:
+        return ()
+
     def _surface(self, tokens, i, j) -> dict:
         x = {}
         for k in range(1, self.window + 1):
