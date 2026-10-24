@@ -1555,7 +1555,8 @@ class Trellis3:
 
         def name_of(tok: str) -> Dict[str, float]:
             if tok not in names:
-                bag = self._ctx_name(Elem((0, 1), token=tok)) or {}
+                # a slot accepts members of its category: compared as parts are named
+                bag = self._ctx_name(Elem((0, 1), token=tok), part=True) or {}
                 if isinstance(bag, list):
                     real = [u for u in bag if u != BLANK]
                     bag = {u: real.count(u) / len(real) for u in set(real)} if real else {}
