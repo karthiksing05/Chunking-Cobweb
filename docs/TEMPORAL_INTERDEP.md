@@ -184,3 +184,32 @@ The build role recovers about half the `med` loss. The remaining errors (28 of 3
 | current setup, window 3 | | 1.00/0.36, 0.98/0.30 | |
 
 Toy dog~cat at window 3: overlap 0.42 / 0.36, shared at u2 0.00 / 0.00. A wider window removes the verb/preposition swaps but makes contexts nearly unique, so the trees memorise and the interdependent link is lost. The window stays at two words.
+
+## Round 10: reassignment only where the record is misplaced (`refresh="verify"`), seed 13
+
+On nt + nocc + `word_content="track"` + both-fill. A record is moved (unfit, re-ifit with its passive counts) only when the concepts at its information bands differ from where its current description sorts now. `verifyN`: up to N records checked per sentence.
+
+| seed 13 | misplaced at bands ctx / cnt, small | med | learn s small / med | gram / gram+new small | med | large |
+|---|---|---|---|---|---|---|
+| relabel only (round 4) | ~0.13–0.16 / 0.34–0.37 | | ~50 / ~120 | 1.00/0.43 | 0.92/0.86 | 0.97/0.87 |
+| verify 300 | 0.02 / 0.14 | 0.065 / 0.27 | 1010 / 1331 | 1.00/0.51 | 0.89/0.85 | 0.996/0.89 |
+| verify 100 | 0.07 / 0.28 | 0.08 / 0.24 | 458 / 907 | 1.00/0.52 | 0.90/0.82 | 0.986/0.85 |
+
+Verify reassignment makes context representations temporal (2–8% of records sit where they would no longer sort) without hurting generation; content misplacement halves. The cost is 10–20× the learning time on `small`; it is the knob that trades currency for speed.
+
+## Characters (seed 13): the candidates on a second domain
+
+well formed / attested / real / novel:
+
+| | 250 | 500 | time at 500 |
+|---|---|---|---|
+| current | 0.994 / 0.980 / 0.824 / 0.227 | 0.928 / 0.908 / 0.688 / 0.357 | 7523 s |
+| bands + sampled restructuring | 0.972 / 0.940 / 0.801 / 0.244 | 0.930 / 0.897 / 0.618 / 0.429 | 1491 s |
+| nt + nocc + both-fill | 0.985 / 0.982 / 0.753 / 0.290 | 0.921 / 0.904 / 0.635 / 0.430 | 1180 s |
+
+Both candidates keep well-formedness and attestedness, generate more novel characters at 500, and run 5–6× faster. They produce fewer real (dictionary) characters at 500 (0.62–0.64 against 0.69).
+
+## Where this stands
+
+- Temporal: yes, with `refresh="verify"` (band-level misplacement 2–8% context); cheap modes (relabel) keep names current but leave 13–16% of records misplaced.
+- Interdependent: yes, with neighbour names and no word identity in context (toy dog~cat share a concept at u2, rare nouns cohere after 50 sentences against 400). Cost: `med` grammaticality 0.89–0.94 from verb/preposition swaps that a two-word window cannot separate.

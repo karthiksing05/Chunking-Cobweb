@@ -998,7 +998,7 @@ class Trellis3:
             if e.token is None:
                 e.memo.pop("own", None)
                 new = self._content(e)
-                if new != e.cnt and (self.refresh == "relabel" or
+                if new != e.cnt and (self.refresh in ("relabel", "verify") or
                                      (self.refresh == "drift" and _drift(e.cnt, new) <= self.drift_tau)):
                     self.cnt.relabel(e.cleaf, e.cnt, new, e.weight)
                     e.cnt = new
@@ -1013,7 +1013,7 @@ class Trellis3:
                     self._facet(new, p, self._ctx_ids(part))
             if self.donate_ctx:
                 self._facet(new, "cc", self._cc_ids(e))
-            if new != e.ctx and (self.refresh == "relabel" or
+            if new != e.ctx and (self.refresh in ("relabel", "verify") or
                                  (self.refresh == "drift" and _drift(e.ctx, new) <= self.drift_tau)):
                 self.ctx.relabel(e.leaf, e.ctx, new, e.weight)
                 e.ctx = new
@@ -1021,6 +1021,22 @@ class Trellis3:
             elif new != e.ctx:
                 self._move(e, "ctx", new)
                 self.stats["refreshed"] += 1
+            if self.refresh == "verify":
+                # lazy repair by placement: move a record only when the concepts at its
+                # information bands are no longer those its current description sorts to
+                if e.token is None and e.cleaf is not None and self._misplaced(self.cnt, e.cleaf, e.cnt):
+                    self._move(e, "cnt", e.cnt)
+                    self.stats["reassigned"] = self.stats.get("reassigned", 0) + 1
+                if e.leaf is not None and self._misplaced(self.ctx, e.leaf, e.ctx):
+                    self._move(e, "ctx", e.ctx)
+                    self.stats["reassigned"] = self.stats.get("reassigned", 0) + 1
+
+    def _misplaced(self, tree, leaf, x: dict) -> bool:
+        """Do the band-level concepts above a stored leaf differ from those its
+        description sorts to now?"""
+        stored = tree.ancestors(leaf)[::-1][:-1]
+        now = tree.categorize(x)[:-1]
+        return self._path_ids(stored + [leaf], "bands") != self._path_ids(now + [leaf], "bands")
 
     def _pas(self, e: Elem, which: str, attr: str, value, w: float) -> None:
         """Add a passive count at the record's leaf in one hierarchy and remember
