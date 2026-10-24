@@ -1503,6 +1503,11 @@ class Trellis3:
         quantity learning weighs chunks by; it peaks at the largest concept whose
         members share these surroundings); ``"match"`` a concept drawn in
         proportion to 2 ** that score."""
+        fill_predict = isinstance(fill_name, str) and fill_name.endswith("+predict")
+        if fill_predict:
+            # "...+predict": a word slot also weights each candidate by the probability
+            # of its learned category (word_cc="cat") at this part of the composite
+            fill_name = fill_name[:-len("+predict")] or False
         if isinstance(fill_name, str) and fill_name.endswith("+peer"):
             # "both+peer": compare by the fine names, the slot word counting as its closest peer
             fill_name, fill_peer = fill_name[:-len("+peer")], True
@@ -1652,6 +1657,24 @@ class Trellis3:
                             sim[("w", slot_tok)] = min(sim[("w", slot_tok)], max(peers))
                     weighted = {f: c * sim[f] for f, c in fills.items()}
                     if any(v > 0 for v in weighted.values()):
+                        fills = weighted
+                if fill_predict and primitive and fills:
+                    # Cobweb prediction from the AND side: the categories of the words that
+                    # stood in this part of the composite concept, each read as it is now
+                    def cat_of(tok):
+                        bag = self._window_name(tok)
+                        return max(bag.items(), key=lambda kv: kv[1])[0] if bag else None
+                    cats: Dict[str, float] = {}
+                    for (rid, _), c in self.cnt.passive(x, a).items():
+                        tok = self.records[rid].token
+                        if tok is not None:
+                            k = cat_of(tok)
+                            cats[k] = cats.get(k, 0.0) + c
+                    tot = sum(cats.values())
+                    if tot > 0:
+                        size = len(cats) + 1
+                        weighted = {f: c * (cats.get(cat_of(f[1]), 0.0) + self.alpha) / (tot + self.alpha * size)
+                                    for f, c in fills.items()}
                         fills = weighted
                 f = draw(fills)
                 entry = None
