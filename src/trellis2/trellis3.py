@@ -1134,7 +1134,38 @@ class Trellis3:
             s = self._rr % len(old)
             todo = recs[first:] + (old[s:] + old[:s])[:b]
             self._rr = (s + b) % len(old)
-        lazy = self.refresh in ("relabel", "verify", "verify-changed")
+        lazy = self.refresh in ("relabel", "verify", "verify-changed", "verify-events")
+        if self.refresh == "verify-events":
+            # event-driven repair: besides the records whose description changed,
+            # check those stored under a concept a merge or split just changed
+            # (at most refresh_budget of them, the rest wait for a later event)
+            hit = []
+            for which, tree in (("cnt", self.cnt), ("ctx", self.ctx)):
+                dirty = getattr(tree, "restructured", None)
+                if not dirty:
+                    continue
+                leaves = set()
+                for d in dirty:
+                    stack = [d]
+                    while stack:
+                        n = stack.pop()
+                        if n.children:
+                            stack.extend(n.children)
+                        else:
+                            leaves.add(id(n))
+                dirty.clear()
+                for e in recs[:first]:
+                    if id(e.cleaf if which == "cnt" else e.leaf) in leaves:
+                        hit.append((which, e))
+            if b is not None and len(hit) > b:
+                hit = random.Random(len(recs)).sample(hit, b)
+            for which, e in hit:
+                if which == "cnt" and e.token is None and e.cleaf is not None and self._misplaced(self.cnt, e.cleaf, e.cnt):
+                    self._move(e, "cnt", e.cnt)
+                    self.stats["reassigned"] = self.stats.get("reassigned", 0) + 1
+                elif which == "ctx" and e.leaf is not None and self._misplaced(self.ctx, e.leaf, e.ctx):
+                    self._move(e, "ctx", e.ctx)
+                    self.stats["reassigned"] = self.stats.get("reassigned", 0) + 1
         for e in todo:
             moved_c = moved_x = False
             if e.token is None:
@@ -1169,11 +1200,11 @@ class Trellis3:
             elif new != e.ctx:
                 self._move(e, "ctx", new)
                 self.stats["refreshed"] += 1
-            if self.refresh in ("verify", "verify-changed"):
+            if self.refresh in ("verify", "verify-changed", "verify-events"):
                 # lazy repair by placement: move a record only when the concepts at its
                 # information bands are no longer those its current description sorts to
                 # ("verify-changed": checked only when its description just changed)
-                chk = self.refresh == "verify"
+                chk = self.refresh == "verify"     # "verify-events": changed descriptions here
                 if (chk or moved_c) and e.token is None and e.cleaf is not None and self._misplaced(self.cnt, e.cleaf, e.cnt):
                     self._move(e, "cnt", e.cnt)
                     self.stats["reassigned"] = self.stats.get("reassigned", 0) + 1

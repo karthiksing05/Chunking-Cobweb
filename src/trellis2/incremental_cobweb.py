@@ -143,6 +143,9 @@ class IncrementalCobwebTree:
         # operators that change structure act, in expectation, as real
         # observations do; its counts stay fractional
         self.sample_restructure = False
+        # concepts whose children a merge or split changed since the caller last
+        # cleared this set (the partitions under them may now sort differently)
+        self.restructured: set = set()
         self._next_id = 0
         self.rng = random.Random(seed)
         self.root = self._new_node()
@@ -306,6 +309,7 @@ class IncrementalCobwebTree:
         cur.children.remove(b1)
         cur.children.remove(b2)
         cur.children.append(m)
+        self.restructured.add(m)
         return m
 
     def _split(self, cur, best) -> None:
@@ -315,6 +319,7 @@ class IncrementalCobwebTree:
             cur.children.append(c)
         best.children = []
         best.parent = None
+        self.restructured.add(cur)
 
     # Public API --------------------------------------------------------- #
     def ifit(self, x: Instance, w: float = 1.0) -> CobwebNode:
