@@ -1683,7 +1683,10 @@ class Trellis3:
     def generate_tree(self, rng: Optional[random.Random] = None, index=None, level: int = 0,
                       choose: str = "leaf", beta: float = 1.0, kind: Optional[int] = None,
                       primitive_leaf: bool = False, max_depth: int = 12,
-                      trace: Optional[list] = None, fill_name=False, fill_peer: bool = False) -> Optional[List[str]]:
+                      trace: Optional[list] = None, fill_name=False, fill_peer: bool = False,
+                      pattern: Optional[Sequence[str]] = None, ctx_fill: bool = False,
+                      budget: int = 4000, gap: Optional[Tuple[Sequence[str], Sequence[str]]] = None,
+                      gap_beta: float = 1.0, gap_mode: str = "window") -> Optional[List[str]]:
         """Expansive generation from the two hierarchies alone. Every step reads
         statistics held by concepts: a whole experience is drawn from the content
         root (SENT); a content concept gives where its parts stood (LPART, RPART:
@@ -1698,7 +1701,25 @@ class Trellis3:
         maximum over the path of log2 share(C) + log2 P(surroundings | C) (the
         quantity learning weighs chunks by; it peaks at the largest concept whose
         members share these surroundings); ``"match"`` a concept drawn in
-        proportion to 2 ** that score."""
+        proportion to 2 ** that score.
+
+        Prompting: ``pattern`` constrains the output to a template of words and
+        wildcards ("*": one or more words, "?": one word), e.g. a prefix
+        ["tom", "and", "*"] or an infill ["the", "*", "was", "happy"]. Candidate
+        fillers of a slot are drawn without replacement and the derivation
+        backtracks when the words so far cannot complete the template (at most
+        ``budget`` candidate tries). ``ctx_fill``: a slot's fillers come from the
+        context concept its actual surroundings sort to (the words generated on its
+        left, the stored slot's right neighbours) instead of the stored slot's own
+        leaf, so what was generated (or prompted) conditions what follows.
+        ``gap=(left words, right words)``: generate only the missing piece between
+        them (infill; a prefix completion is right = []): the gap's surroundings are
+        given, and a committed instance (a word, or a chunk then expanded) is drawn
+        by its posterior of standing there (``_gap_fills``). ``gap_mode="sibling"``
+        (a prefix, right = []): the prompt is parsed into one chunk, a stored whole
+        experience is drawn by the posterior that its left part is such a chunk
+        (``_sibling_fills``: its part name and content), and only its right part is
+        generated, so the continuation is conditioned on the whole prompt chunk."""
         fill_predict = isinstance(fill_name, str) and fill_name.endswith("+predict")
         if fill_predict:
             # "...+predict": a word slot also weights each candidate by the probability
@@ -1797,15 +1818,59 @@ class Trellis3:
             return names[tok]
 
         out: List[str] = []
+        pat = list(pattern) if pattern is not None else None
+        window_attrs = [a for a in window if a in ("l1", "l2", "r1", "r2")]
+        tries = [0]
 
-        def expand(x: CobwebNode, d: int) -> None:
+        def states(toks) -> set:
+            st = {0}
+            for t in toks:
+                nx = set()
+                for q in st:
+                    if q < len(pat):
+                        if pat[q] == "*":
+                            nx.update((q, q + 1))
+                        elif pat[q] == "?" or pat[q] == t:
+                            nx.add(q + 1)
+                st = nx
+                if not st:
+                    break
+            return st
+
+        def viable() -> bool:
+            return pat is None or bool(states(out))
+
+        def surroundings_leaf(slot: Elem) -> Optional[List[CobwebNode]]:
+            q = {}
+            for a in window_attrs:
+                k = int(a[1:])
+                if a[0] == "l":
+                    q[a] = out[-k] if len(out) >= k else BOS
+                elif slot.ctx is not None and a in slot.ctx:
+                    q[a] = slot.ctx[a]
+            return self._query_path(q) if q else None
+
+        def expand(x: CobwebNode, d: int) -> bool:
             for a in (LPART, RPART):
+                if not part(x, a, d):
+                    return False
+            return True
+
+        def part(x: CobwebNode, a: str, d: int) -> bool:
+            if True:
                 where = draw(self.cnt.passive(x, a))
                 if where is None or self.records[where[0]].leaf is None:
                     raise LookupError
                 leaf, primitive = self.records[where[0]].leaf, where[1] or d >= max_depth
                 node = leaf if (primitive and primitive_leaf) else concept_for(leaf, primitive)
                 fills = {f: c for f, c in self.ctx.passive(node, FILL).items() if (f[0] == "w") == primitive}
+                if ctx_fill:
+                    path = surroundings_leaf(self.records[where[0]])
+                    for nd in reversed(path or []):
+                        got = {f: c for f, c in self.ctx.passive(nd, FILL).items() if (f[0] == "w") == primitive}
+                        if got:
+                            node, fills = nd, got
+                            break
                 if kind is not None and not primitive and node is not leaf:
                     # the AND side agrees: keep composites of the same kind as the
                     # leaf's own, i.e. under the content concepts ``kind`` levels
@@ -1872,32 +1937,244 @@ class Trellis3:
                         weighted = {f: c * (cats.get(cat_of(f[1]), 0.0) + self.alpha) / (tot + self.alpha * size)
                                     for f, c in fills.items()}
                         fills = weighted
-                f = draw(fills)
-                entry = None
-                if trace is not None:
-                    entry = {"depth": d, "composite": x.id, "part": "left" if a == LPART else "right",
-                             "leaf": leaf.id, "concept": node.id, "primitive": primitive,
-                             "instances": fills, "drawn": f, "slot": where[0], "start": len(out)}
-                    trace.append(entry)
-                if f is None:
-                    raise LookupError
-                if f[0] == "w":
-                    out.append(f[1])
-                elif self.records[f[1]].cleaf is not None:
-                    expand(self.records[f[1]].cleaf, d + 1)
-                else:
-                    raise LookupError
-                if entry is not None:
-                    entry["end"] = len(out)
+                if pat is None:
+                    f = draw(fills)
+                    entry = None
+                    if trace is not None:
+                        entry = {"depth": d, "composite": x.id, "part": "left" if a == LPART else "right",
+                                 "leaf": leaf.id, "concept": node.id, "primitive": primitive,
+                                 "instances": fills, "drawn": f, "slot": where[0], "start": len(out)}
+                        trace.append(entry)
+                    if f is None:
+                        raise LookupError
+                    if f[0] == "w":
+                        out.append(f[1])
+                    elif self.records[f[1]].cleaf is not None:
+                        expand(self.records[f[1]].cleaf, d + 1)
+                    else:
+                        raise LookupError
+                    if entry is not None:
+                        entry["end"] = len(out)
+                    return True
+                # prompted: fillers without replacement, backtracking on a dead end
+                left = dict(fills)
+                while left:
+                    tries[0] += 1
+                    if tries[0] > budget:
+                        raise LookupError
+                    f = draw(left)
+                    if f is None:
+                        break
+                    del left[f]
+                    mark = len(out)
+                    if f[0] == "w":
+                        out.append(f[1])
+                        if viable():
+                            return True
+                    elif self.records[f[1]].cleaf is not None:
+                        try:
+                            if expand(self.records[f[1]].cleaf, d + 1) and viable():
+                                return True
+                        except LookupError:
+                            if tries[0] > budget:
+                                raise
+                    del out[mark:]
+                return False
 
-        root = draw(self.cnt.passive(self.cnt.root, SENT))
-        if root is None or self.records[root].cleaf is None:
+        if gap is not None and gap_mode == "sibling" and not gap[1]:
+            lw = list(gap[0])
+            post = self._sibling_fills(lw, gap_beta)
+            if trace is not None:
+                top = sorted(post.items(), key=lambda kv: -kv[1])[:10]
+                trace.append({"sibling sentences": [(" ".join(self._type_key(self.records[r])), round(v, 4)) for r, v in top]})
+            for _ in range(20):
+                r = draw(post)
+                if r is None:
+                    return None
+                out.clear()
+                try:
+                    if part(self.records[r].cleaf, RPART, 1):
+                        return lw + list(out)
+                except (LookupError, RecursionError):
+                    continue
             return None
-        try:
-            expand(self.records[root].cleaf, 0)
-        except (LookupError, RecursionError):
+        if gap is not None:
+            lw, rw = list(gap[0]), list(gap[1])
+            q = {}
+            for a in window_attrs:
+                k = int(a[1:])
+                if a[0] == "l":
+                    q[a] = lw[-k] if len(lw) >= k else BOS
+                else:
+                    q[a] = rw[k - 1] if len(rw) >= k else EOS
+            fills = self._gap_fills(q, gap_beta)
+            if trace is not None:
+                top = sorted(fills.items(), key=lambda kv: -kv[1])[:10]
+                trace.append({"gap fillers": [(f, round(v, 4)) for f, v in top]})
+            for _ in range(20):
+                f = draw(fills)
+                if f is None:
+                    return None
+                out.clear()
+                try:
+                    if f[0] == "w":
+                        out.append(f[1])
+                    elif self.records[f[1]].cleaf is not None:
+                        expand(self.records[f[1]].cleaf, 1)
+                    else:
+                        continue
+                except (LookupError, RecursionError):
+                    continue
+                return lw + list(out) + rw
             return None
-        return out
+        if pat is None:
+            root = draw(self.cnt.passive(self.cnt.root, SENT))
+            if root is None or self.records[root].cleaf is None:
+                return None
+            try:
+                expand(self.records[root].cleaf, 0)
+            except (LookupError, RecursionError):
+                return None
+            return out
+        roots = {r: c for r, c in self.cnt.passive(self.cnt.root, SENT).items() if self.records[r].cleaf is not None}
+        while roots:
+            r = draw(roots)
+            del roots[r]
+            out.clear()
+            try:
+                if expand(self.records[r].cleaf, 0) and len(pat) in states(out):
+                    return list(out)
+            except LookupError:
+                if tries[0] > budget:
+                    return None
+            except RecursionError:
+                return None
+        return None
+
+    def _gap_fills(self, q: dict, beta: float = 1.0) -> Dict[tuple, float]:
+        """P(filler | surroundings q) over the committed instances: proportional to
+        prod over q's attributes of P(value | the instance's context leaf), each
+        estimated along the leaf's path with hierarchical Dirichlet back-off
+        P(v | C) = (n_C(v) + beta P(v | parent)) / (n_C + beta) from a Laplace root,
+        so a chunk is scored by how probably it stands in these surroundings and
+        unseen combinations borrow from the concepts above its leaf."""
+        root = self.ctx.root
+        sizes = {a: len(root.av.get(a, {})) + 1 for a in q}
+        memo: Dict[int, Dict[str, float]] = {}
+
+        def probs(node) -> Dict[str, float]:
+            if node.id in memo:
+                return memo[node.id]
+            if node.parent is None:
+                out = {a: (node.av.get(a, {}).get(v, 0.0) + self.alpha) / (node.count + self.alpha * sizes[a])
+                       for a, v in q.items()}
+            else:
+                up = probs(node.parent)
+                out = {a: (node.av.get(a, {}).get(v, 0.0) + beta * up[a]) / (node.count + beta)
+                       for a, v in q.items()}
+            memo[node.id] = out
+            return out
+
+        cache = self.__dict__.setdefault("_gap_cache", {})
+        key = (tuple(sorted(q.items())), len(self.records), self.stats.get("experiences", 0), beta)
+        if key in cache:
+            return cache[key]
+        if len(cache) > 256:
+            cache.clear()
+        mass: Dict[tuple, float] = {}
+        for e in self.records:
+            if e.leaf is None:
+                continue
+            for which, attr, value, w in e.pas:
+                if which == "ctx" and attr == FILL:
+                    lp = sum(math.log(max(v, 1e-300)) for v in probs(e.leaf).values())
+                    mass[value] = mass.get(value, 0.0) + w * math.exp(lp)
+        cache[key] = mass
+        return mass
+
+    def _sibling_fills(self, left: Sequence[str], beta: float = 1.0) -> Dict[int, float]:
+        """P(committed composite | its left part is a chunk on the prompt's right
+        edge): the prompt is parsed; a continuation attaches to one of the units
+        ending at the prompt's end (the last word, each chosen composite ending
+        there, up to the whole prompt), each described as a left part is (part name
+        L, content LC). A committed composite is scored by the expected
+        log-probability of such a description at its content leaf (hierarchical
+        Dirichlet back-off along the leaf's path, as ``_gap_fills``), summed over the
+        attachment points; its right part is then what the gap generates."""
+        left = list(left)
+        cache = self.__dict__.setdefault("_sib_cache", {})
+        key = (tuple(left), len(self.records), self.stats.get("experiences", 0), beta)
+        if key in cache:
+            return cache[key]
+        if len(cache) > 256:
+            cache.clear()
+        n = len(left)
+        units = [Elem((n - 1, n), token=left[-1])]
+        if n > 1:
+            r = self.parse(left)
+            units += [r["comps"][k] for k in sorted(r["chosen"], key=lambda k: -k[0]) if k[2] == n]
+        post: Dict[int, float] = {}
+        for el in units:
+            for rid, v in self._left_part_post(el, beta).items():
+                post[rid] = post.get(rid, 0.0) + v
+        cache[key] = post
+        return post
+
+    def _left_part_post(self, el: Elem, beta: float) -> Dict[int, float]:
+        """Committed composites scored by P(their left part is ``el``) (see _sibling_fills)."""
+        x = {}
+        self._facet(x, "L", self._ctx_name(el, part=True))
+        if self.donate_cnt:
+            self._facet(x, "LC", self._cnt_name(el))
+        q = {a: (v if isinstance(v, dict) else {v: 1.0}) for a, v in x.items()}
+        tree = self.cnt
+        sizes = {a: len(tree.root.av.get(a, {})) + 1 for a in q}
+        memo: Dict[int, Dict[str, Dict]] = {}
+
+        def probs(node):
+            if node.id in memo:
+                return memo[node.id]
+            out = {}
+            up = probs(node.parent) if node.parent is not None else None
+            for a, bag in q.items():
+                d = node.av.get(a, {})
+                if up is None:
+                    out[a] = {v: (d.get(v, 0.0) + self.alpha) / (node.count + self.alpha * sizes[a]) for v in bag}
+                else:
+                    out[a] = {v: (d.get(v, 0.0) + beta * up[a][v]) / (node.count + beta) for v in bag}
+            memo[node.id] = out
+            return out
+
+        post: Dict[int, float] = {}
+        for e in self.records:
+            if e.cleaf is None:
+                continue
+            for which, attr, value, w in e.pas:
+                if which == "ctx" and attr == FILL:
+                    pr = probs(e.cleaf)
+                    lp = sum(p * math.log(max(pr[a][v], 1e-300)) for a, bag in q.items() for v, p in bag.items())
+                    post[e.rid] = post.get(e.rid, 0.0) + w * math.exp(lp)
+        return post
+
+    def _query_path(self, x: dict) -> List[CobwebNode]:
+        """Sort a partial description by probability: at each concept the child
+        maximising log share + sum over the given attributes of log P(value | child)
+        (Laplace-smoothed with ``alpha``; attributes not given are not scored), so a
+        query that leaves out some attributes still lands among instances that
+        share the given ones."""
+        tree = self.ctx
+        node, path = tree.root, [tree.root]
+        sizes = {a: len(tree.root.av.get(a, {})) + 1 for a in x}
+        while node.children:
+            def score(c):
+                s = math.log(max(c.count, 1e-9))
+                for a, v in x.items():
+                    d = c.av.get(a, {})
+                    s += math.log((d.get(v, 0.0) + self.alpha) / (c.count + self.alpha * sizes[a]))
+                return s
+            node = max(node.children, key=score)
+            path.append(node)
+        return path
 
     def generate_best(self, rng: Optional[random.Random] = None, members=None, k: int = 8,
                       up: int = 0, by: str = "weight") -> Optional[List[str]]:

@@ -48,3 +48,23 @@ def simple_sentences(sentences: Sequence[Sequence[str]], vocab_size: int = 250,
     ``vocab_size`` most frequent words of ``sentences``, in their order."""
     vocab = {w for w, _ in Counter(w for s in sentences for w in s).most_common(vocab_size)}
     return [list(s) for s in sentences if min_len <= len(s) <= max_len and all(w in vocab for w in s)]
+
+
+def load_corpus(vocab_size: int = 250) -> List[List[str]]:
+    """The experiment corpus named by the CORPUS environment variable: "tinystories"
+    (default; ``simple_sentences`` of the TinyStories file) or "babi" (bAbI stories and
+    question-answer lines, every task, 3-12 words)."""
+    name = os.environ.get("CORPUS", "tinystories")
+    if name == "babi":
+        from .babi import babi_sentences
+        return [s for s in babi_sentences("train") if 3 <= len(s) <= 12]
+    return simple_sentences(read_sentences(), vocab_size=vocab_size)
+
+
+def heldout_path(seed: int = 13) -> str:
+    """The held-out sentence file shared by the measurement scripts (per corpus)."""
+    name = os.environ.get("CORPUS", "tinystories")
+    here = os.path.dirname(os.path.abspath(__file__))
+    tag = "" if name == "tinystories" else name + "_"
+    return os.path.abspath(os.path.join(here, "..", "..", "experiments", "v3", "results", "silver",
+                                        f"heldout_{tag}s{seed}.json"))

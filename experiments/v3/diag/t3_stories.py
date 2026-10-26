@@ -32,7 +32,7 @@ from collections import Counter, defaultdict
 sys.path.insert(0, "src")
 sys.path.insert(0, ".")
 import nltk  # noqa: E402
-from trellis2.stories import read_sentences, simple_sentences  # noqa: E402
+from trellis2.stories import heldout_path, load_corpus  # noqa: E402
 from trellis2.trellis3 import Elem, Trellis3  # noqa: E402
 
 cfg, seed, n = json.loads(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])
@@ -41,7 +41,7 @@ tag = sys.argv[5] if len(sys.argv) > 5 else ""
 fill = sys.argv[6] if len(sys.argv) > 6 else "both"
 fill = {"none": False, "name": True}.get(fill, fill)
 
-corpus = simple_sentences(read_sentences(), vocab_size=vocab)
+corpus = load_corpus(vocab_size=vocab)
 random.Random(seed).shuffle(corpus)
 train = corpus[:n]
 
