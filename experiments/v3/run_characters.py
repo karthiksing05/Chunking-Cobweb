@@ -94,6 +94,8 @@ def main():
                    "positions attested": len(attest) / max(len(samples), 1),
                    "real": sum(st in real for st in good) / max(len(samples), 1),
                    "novel": sum(tuple(s) not in seen for s in samples) / max(len(samples), 1),
+                   "real + novel": sum(st is not None and st in real and tuple(s) not in seen
+                                       for s, st in zip(samples, structs)) / max(len(samples), 1),
                    "examples": [" ".join(s) for s in samples[:12]],
                    "parses": [parse(c.tokens)[0].to_string(c.tokens) for c in test[:8]],
                    "gold": [c.tree.to_string(c.tokens) for c in test[:8]],
@@ -102,7 +104,7 @@ def main():
             print(f"[characters s{seed} {n}] omission {te.omission:.3f} commission {te.commission:.3f} "
                   f"(right-branching {rb.omission:.3f}) whole {row['held-out whole']:.2f} | well formed "
                   f"{row['well formed']:.3f} attested {row['positions attested']:.3f} real {row['real']:.3f} "
-                  f"novel {row['novel']:.3f} | {learn_s:.0f}s", flush=True)
+                  f"novel {row['novel']:.3f} real+novel {row['real + novel']:.3f} | {learn_s:.0f}s", flush=True)
             for p, g in zip(row["parses"][:4], row["gold"][:4]):
                 print("    ", p, "   gold", g, flush=True)
             with open(os.path.join(args.out, "results.json"), "w", encoding="utf-8") as f:

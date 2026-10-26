@@ -371,3 +371,38 @@ It also passes the grammar guard on all four grammars, and it is up on TinyStori
 | references + repair beside reached leaves (200 / sentence) | 0.226 | 0.090 | 5 468 |
 
 Name churn changes what records should sit with, not only how they are described. So synced counts still need records moved, and moving records (unfit + ifit) is what costs time. Update on read is kept as an option for exact descriptions; it is not needed for the target.
+
+## Rounds 38–45: low-weight records, and repair on use (2026-10-26)
+
+**Rounds 38 and 42: `min_weight`** (chunks below this posterior weight are not stored), with verify 700.
+
+- At 0.05 the target is met by record count: misplaced at own weight ctx / cnt 0.009 / 0.026 and 0.005 / 0.033; learning 2.3–2.8× the original's; attested + novel 0.253 / 0.302.
+- At 0.05 the grammar guard fails large-17: 0.98 / 0.803 against 0.993 / 0.833.
+- At 0.03 the grammar guard passes all four grammars: 1.0 / 0.87, 0.993 / 0.877, 1.0 / 0.844, 1.0 / 0.896.
+- 0.02 fails large-13 (0.682).
+- **Characters fail at both thresholds.** Real at 500 is 0.614 / 0.586 at 0.03, and 0.588 on s17 at 0.05, against the original's 0.647 / 0.741. A character has only a few parts, and its low-weight alternative analyses carry information.
+
+**Rounds 43–45: repair on use** (`repair_use=k`, `refresh_budget` 0, no sweep). A sort through either tree marks the records it reaches, and generation marks the records it draws. After each experience, up to k marked records are re-described and moved if misplaced, least recently checked first. Records nothing reaches are left alone. Measure (`t3_use.py`): the records that parsing 200 held-out sentences, 100 samples and 100 prefix-2 gap completions reach. "By use" weights each record by how often it was reached.
+
+- **End concept only (round 43).** Records under the concept a sort ends at.
+  - It is cheap: 2 500–2 950 s at 2000, against the original's 3 578 / 4 231.
+  - It improves generation (attested + novel 0.20–0.33).
+  - It leaves used content misplaced at 9–12%, so it fails med-13 on the guard.
+- **Whole sort path (`repair_path`, round 44).** Scoring reads every concept on the path, so each concept a sort passes contributes one record drawn beneath it by counts. Repair then follows how much each region is used.
+
+| 1000 sentences, s13 / s17 | used misplaced by use, ctx | used misplaced by use, cnt | whole tree ctx / cnt | learn s |
+|---|---|---|---|---|
+| original | 0.094 / 0.116 | 0.102 / 0.063 | 0.17 / 0.30, 0.14 / 0.27 | 877 / 1 000 |
+| verify 700 | 0.025 / 0.044 | 0.060 / 0.062 | 0.06 / 0.19, 0.07 / 0.19 | 2 920 / 2 699 |
+| path, budget 3000 | 0.084 / 0.086 | **0.006 / 0.009** | 0.10 / 0.23, 0.09 / 0.19 | 1 338 / 1 317 |
+
+  - **Grammar guard (path 3000): passes all four:** 1.0 / 0.876, 0.996 / 0.886, 0.996 / 0.854, 0.993 / 0.85. Path 700 also passes.
+  - **Characters** (real / real-and-unseen at 500, s13; s17):
+    - original 0.647 / 0.046; 0.741 / 0.072
+    - verify 700 0.711 / 0.043; 0.687 / 0.090
+    - path 700 0.739 / 0.036; 0.647 / 0.074
+    - path 3000 0.681 / 0.044; 0.612 / 0.082
+  - Every variant is up on s13 and down on s17. Real-and-unseen is too rare (4–9%) to separate them.
+- **Four draws per concept (round 45)** fails the guard on large-17 (0.968 / 0.80).
+
+Status: repair on use along the sort path keeps the content that TinyStories uses correctly placed (under 1%) at about 1.4× the original's cost, and it passes the grammar guard. Used context stays at about 8.5%, and characters s17 loses real characters, so the goal is not met yet.

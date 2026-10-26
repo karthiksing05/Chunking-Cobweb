@@ -93,7 +93,7 @@ def logsumexp(xs: List[float]) -> float:
 
 class Elem:
     __slots__ = ("span", "split", "token", "left", "right", "ctx", "cnt", "leaf", "cleaf", "weight",
-                 "height", "gain", "par", "sib", "memo", "const", "used", "rid", "pas", "nbt", "win", "placed", "nbe")
+                 "height", "gain", "par", "sib", "memo", "const", "used", "rid", "pas", "nbt", "win", "placed", "nbe", "chk")
 
     def __init__(self, span, split=None, token=None, left=None, right=None):
         self.span, self.split, self.token, self.left, self.right = span, split, token, left, right
@@ -112,6 +112,21 @@ class Elem:
         self.win = None                     # its raw surface window (window_names), for refresh
         self.placed = None                  # descriptions it was last placed or verified by (verify-drift)
         self.nbe = None                     # its same-width neighbours (neighbour_chunks), for refresh
+        self.chk = -1                       # experience at which it was last re-described and verified (repair_use)
+
+
+class _UseList(list):
+    """The record list; while ``marking`` (generation), reading a record marks it used."""
+
+    def __init__(self, owner):
+        super().__init__()
+        self.owner, self.marking = owner, False
+
+    def __getitem__(self, i):
+        e = super().__getitem__(i)
+        if self.marking and isinstance(i, int):
+            self.owner._used[id(e)] = e
+        return e
 
 
 class Trellis3:
@@ -130,7 +145,8 @@ class Trellis3:
                  nb_rare: Optional[int] = None, window_names: Optional[str] = None,
                  name_level: Optional[str] = None, name_mix_k: Optional[float] = None,
                  part_names: Optional[str] = None, verify_weight: str = "one",
-                 ref_names: bool = False, repair_reached: int = 0):
+                 ref_names: bool = False, repair_reached: int = 0, repair_use: int = 0,
+                 repair_path: bool = False, repair_draws: int = 1):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -282,6 +298,22 @@ class Trellis3:
         # most k per hierarchy
         self.repair_reached = repair_reached
         self._at: Dict[str, Dict[int, List[Elem]]] = {"ctx": {}, "cnt": {}}
+        # repair_use=k (repair on use): every sort through a tree (learning, parsing,
+        # prediction) marks the records stored under the concept it ends at, and
+        # generation marks every record it draws; after each experience up to k of the
+        # marked records (least recently checked first, each at most once per
+        # experience) are re-described and moved if misplaced. Records nothing reaches
+        # are left as they are. Use with refresh="verify", refresh_budget=0.
+        self.repair_use = repair_use
+        self._used: Dict[int, Elem] = {}
+        # repair_path: a sort also uses every concept on its path (scoring reads
+        # them all), so each concept a sort passed in the experience contributes one
+        # record drawn from beneath it (a walk down by counts): repair in proportion
+        # to how much each part of memory is used
+        self.repair_path = repair_path
+        self.repair_draws = repair_draws    # records drawn beneath each concept passed
+        self._passed: Dict[Tuple[str, int], object] = {}
+        self._quiet = False                 # sorts made while repairing mark nothing
         # word_cc="name": a word's own-content facet keeps only the bands up to
         # word_name_bits (its category-level representation; None: all bands)
         self.word_name_bits = word_name_bits
@@ -334,8 +366,11 @@ class Trellis3:
         # splits concepts with probability w (see IncrementalCobwebTree)
         self.ctx.sample_restructure = self.cnt.sample_restructure = (restructure == "sample")
         self.rng = random.Random(seed)
-        self.records: List[Elem] = []
+        self.records: List[Elem] = _UseList(self) if repair_use else []
         self._rr = 0
+        if repair_use:
+            for which in ("ctx", "cnt"):
+                self._hook(getattr(self, which), which)
         self.stats = {"experiences": 0, "words stored": 0, "composites stored": 0, "refreshed": 0}
 
     # ------------------------------------------------------------------ #
@@ -1209,6 +1244,32 @@ class Trellis3:
             s = self._rr % len(old)
             todo = recs[first:] + (old[s:] + old[:s])[:b]
             self._rr = (s + b) % len(old)
+        if self.repair_use:
+            exp = self.stats["experiences"]
+            for (which, _), top in self._passed.items():
+                for _ in range(self.repair_draws):
+                    nd = top
+                    while nd.children:
+                        ws = [max(c.count, 1e-9) for c in nd.children]
+                        nd = self.rng.choices(nd.children, weights=ws)[0]
+                    for e in self._at[which].get(id(nd), ()):
+                        self._used[id(e)] = e
+            self._passed = {}
+            new = {id(e) for e in recs[first:]}
+            pool = [e for e in self._used.values() if id(e) not in new and e.chk < exp]
+            pool.sort(key=lambda e: e.chk)
+            todo = list(todo) + pool[:self.repair_use]
+            self.stats["use repaired"] = self.stats.get("use repaired", 0) + min(len(pool), self.repair_use)
+            self._used = {}
+            for e in todo:
+                e.chk = exp
+            self._quiet = True
+        try:
+            self._refresh_todo(todo, b, recs, first)
+        finally:
+            self._quiet = False
+
+    def _refresh_todo(self, todo, b, recs, first) -> None:
         lazy = self.refresh in ("relabel", "verify", "verify-changed", "verify-events", "verify-drift")
         if self.refresh == "verify-events":
             # event-driven repair: besides the records whose description changed,
@@ -1367,13 +1428,36 @@ class Trellis3:
             self.names.set(key, self._key_value(key))
         self.stats["name changes"] = self.stats.get("name changes", 0) + self.names.version - n0
 
+    def _hook(self, tree, which: str) -> None:
+        """Make every sort through ``tree`` mark the records under where it ends."""
+        orig = tree.categorize
+
+        def categorize(x, w=1.0):
+            path = orig(x, w)
+            if path and not self._quiet:
+                self._reach(which, path[-1])
+                if self.repair_path:
+                    for nd in path[1:-1]:
+                        self._passed[(which, id(nd))] = nd
+            return path
+        tree.categorize = categorize
+
+    def _reach(self, which: str, node) -> None:
+        """The records a sort ending at ``node`` reaches: those at it if it is a leaf,
+        else those at its leaf children."""
+        at = self._at[which]
+        for c in ([node] if not node.children else node.children):
+            if not c.children:
+                for e in at.get(id(c), ()):
+                    self._used[id(e)] = e
+
     def _at_add(self, e: Elem, which: str) -> None:
-        if self.repair_reached:
+        if self.repair_reached or self.repair_use:
             leaf = e.leaf if which == "ctx" else e.cleaf
             self._at[which].setdefault(id(leaf), []).append(e)
 
     def _at_remove(self, e: Elem, which: str) -> None:
-        if self.repair_reached:
+        if self.repair_reached or self.repair_use:
             leaf = e.leaf if which == "ctx" else e.cleaf
             lst = self._at[which].get(id(leaf), [])
             if e in lst:
@@ -1714,7 +1798,17 @@ class Trellis3:
             out.append(idx)
         return out[0], out[1]
 
-    def generate_tree(self, rng: Optional[random.Random] = None, index=None, level: int = 0,
+    def generate_tree(self, *args, **kwargs):
+        """Generation (``_generate_tree``); with repair_use the records it draws are marked as used."""
+        if not self.repair_use:
+            return self._generate_tree(*args, **kwargs)
+        self.records.marking = True
+        try:
+            return self._generate_tree(*args, **kwargs)
+        finally:
+            self.records.marking = False
+
+    def _generate_tree(self, rng: Optional[random.Random] = None, index=None, level: int = 0,
                       choose: str = "leaf", beta: float = 1.0, kind: Optional[int] = None,
                       primitive_leaf: bool = False, max_depth: int = 12,
                       trace: Optional[list] = None, fill_name=False, fill_peer: bool = False,
