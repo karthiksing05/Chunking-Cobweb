@@ -98,9 +98,9 @@ def band_ids(L, path):
     return out
 
 
-def misplaced(L, tree, leaf, x):
+def misplaced(L, tree, leaf, x, w=1.0):
     st = tree.ancestors(leaf)[::-1][:-1]
-    now = tree.categorize(x)[:-1]
+    now = tree.categorize(x, w)[:-1]
     a, b = band_ids(L, st) if st else [], band_ids(L, now) if now else []
     m = max(len(a), len(b))
     return 1 - (sum(p == q for p, q in zip(a, b)) / m if m else 1.0)
@@ -147,12 +147,16 @@ for k, s in enumerate(train, 1):
         print(json.dumps({"checkpoint": k, **curve[k]}), flush=True)
 learn_s = time.time() - t0
 
-mx, mc = [], []
+mx, mc, ox, oc, wx, wc = [], [], [], [], [], []
 for r in random.Random(seed).sample(L.records, min(1500, len(L.records))):
     if r.leaf is not None:
         mx.append(misplaced(L, L.ctx, r.leaf, r.ctx))
+        ox.append(misplaced(L, L.ctx, r.leaf, r.ctx, r.weight))
+        wx.append(r.weight)
     if r.token is None and r.cleaf is not None:
         mc.append(misplaced(L, L.cnt, r.cleaf, r.cnt))
+        oc.append(misplaced(L, L.cnt, r.cleaf, r.cnt, r.weight))
+        wc.append(r.weight)
 
 rng = random.Random(seed)
 ix = L.concept_index()
@@ -168,7 +172,11 @@ nov = [tuple(g) not in seen_s for g in S]
 m = lambda v: round(sum(v) / len(v), 3) if v else None
 out = {"tag": tag, "seed": seed, "n": n, "vocab": vocab, "fill": fill, "cfg": cfg, "learn s": round(learn_s),
        "types": len(seen), "CONVERGENCE": curve,
-       "TEMPORAL": {"misplaced at bands context / content": [m(mx), m(mc)]},
+       "TEMPORAL": {"misplaced at bands context / content": [m(mx), m(mc)],
+                    "misplaced at own weight context / content": [m(ox), m(oc)],
+                    "share of stored weight misplaced context / content": [
+                        round(sum(a * b for a, b in zip(ox, wx)) / max(sum(wx), 1e-9), 3),
+                        round(sum(a * b for a, b in zip(oc, wc)) / max(sum(wc), 1e-9), 3)]},
        "GENERATION": {"generated": len(S), "distinct": m([1] * len(set(map(tuple, S)))) and round(len(set(map(tuple, S))) / max(len(S), 1), 3),
                       "novel": m(nov), "trigrams attested": m(tri_ok), "tag pattern attested": m(pat_ok),
                       "trigrams attested + novel": m([a and b for a, b in zip(tri_ok, nov)]),

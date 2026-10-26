@@ -93,7 +93,7 @@ def logsumexp(xs: List[float]) -> float:
 
 class Elem:
     __slots__ = ("span", "split", "token", "left", "right", "ctx", "cnt", "leaf", "cleaf", "weight",
-                 "height", "gain", "par", "sib", "memo", "const", "used", "rid", "pas", "nbt", "win")
+                 "height", "gain", "par", "sib", "memo", "const", "used", "rid", "pas", "nbt", "win", "placed")
 
     def __init__(self, span, split=None, token=None, left=None, right=None):
         self.span, self.split, self.token, self.left, self.right = span, split, token, left, right
@@ -110,6 +110,7 @@ class Elem:
         self.pas = []                       # the passive counts it contributed: (tree, attr, value, w)
         self.nbt = None                     # the words just outside it (neighbour_types), for refresh
         self.win = None                     # its raw surface window (window_names), for refresh
+        self.placed = None                  # descriptions it was last placed or verified by (verify-drift)
 
 
 class Trellis3:
@@ -123,11 +124,12 @@ class Trellis3:
                  refresh: str = "refit", readout: str = "mbr", cc_naming: Optional[str] = None,
                  word_cc: bool = False, boundary: str = "marker", type_names: bool = False, neighbour_types: bool = False,
                  type_top: int = 40, type_k: int = 8, type_key: str = "tokens",
-                 word_content: Optional[str] = None, word_cnt: bool = False, restructure: str = "always", drift_tau: float = 0.25, word_name_bits: Optional[float] = None, tree: str = "python", tree_alpha: float = 1e-4, band_bits: Sequence[float] = (1, 2, 4, 6, 8, 12), relational: Optional[str] = None,
+                 word_content: Optional[str] = None, word_cnt: bool = False, restructure: str = "always", drift_tau: float = 0.25, word_name_bits: Optional[float] = None, tree: str = "python", tree_alpha: float = 1e-4, tree_fast: bool = True, band_bits: Sequence[float] = (1, 2, 4, 6, 8, 12), relational: Optional[str] = None,
                  rel_alpha: float = 0.5, rel_rounds: int = 2, nb_bits: Optional[float] = None,
                  nb_rare: Optional[int] = None, window_names: Optional[str] = None,
                  name_level: Optional[str] = None, name_mix_k: Optional[float] = None,
-                 part_names: Optional[str] = None):
+                 part_names: Optional[str] = None, verify_weight: str = "one",
+                 ref_names: bool = False, repair_reached: int = 0):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -258,6 +260,22 @@ class Trellis3:
         # more than drift_tau (mean total variation over attributes) is reassigned
         # (moved to where it now sorts); smaller drift is relabelled in place
         self.drift_tau = drift_tau
+        # verify_weight="own": a reassignment check sorts the record at its own
+        # (posterior) weight, the weight ifit placed it with; "one": at weight 1
+        self.verify_weight = verify_weight
+        # ref_names (update on read, docs/UPDATE_ON_READ.md): a stored record's
+        # name-copying fields (parts' names L/R, parts' content LC/RC, a chunk's own
+        # content cc) hold references into a shared name table that TRELLIS updates
+        # after each experience; the trees apply name changes to a concept's counts
+        # when a sort reaches it, so stored descriptions never go stale and no
+        # refresh re-describes them (refresh_budget then only checks placement)
+        self.ref_names = ref_names
+        # repair_reached=k (repair where there is activity): after an experience,
+        # the records stored at the leaves beside where its records were sorted (the
+        # concepts its sorts just changed) are checked and moved if misplaced, at
+        # most k per hierarchy
+        self.repair_reached = repair_reached
+        self._at: Dict[str, Dict[int, List[Elem]]] = {"ctx": {}, "cnt": {}}
         # word_cc="name": a word's own-content facet keeps only the bands up to
         # word_name_bits (its category-level representation; None: all bands)
         self.word_name_bits = word_name_bits
@@ -284,9 +302,27 @@ class Trellis3:
             from .discrete_cobweb import DiscreteCobwebTree
             self.ctx = DiscreteCobwebTree(self.ctx_attrs, seed=seed, alpha=tree_alpha)
             self.cnt = DiscreteCobwebTree(self.cnt_attrs, seed=seed + 1, alpha=tree_alpha)
+        elif tree == "cu":
+            # cobweb_cu (compiled Fisher Cobweb): the same trees as the Python one;
+            # tree_fast=False gives its reference arithmetic (bit-identical to the
+            # Python tree with tree_fast=False), True its fast path (same scores
+            # up to rounding)
+            from .cu_cobweb import CUCobwebTree
+            self.ctx = CUCobwebTree(self.ctx_attrs, seed=seed, fast=tree_fast)
+            self.cnt = CUCobwebTree(self.cnt_attrs, seed=seed + 1, fast=tree_fast)
+        elif ref_names:
+            from .ref_cobweb import NameTable, RefCobwebTree
+            self.names = NameTable()
+            self.ref_keys: set = set()
+            self.ctx = RefCobwebTree(self.ctx_attrs, seed=seed, table=self.names)
+            self.cnt = RefCobwebTree(self.cnt_attrs, seed=seed + 1, table=self.names)
+            if not tree_fast:
+                self.ctx.fast_ec = self.cnt.fast_ec = False
         else:
             self.ctx = IncrementalCobwebTree(self.ctx_attrs, seed=seed)
             self.cnt = IncrementalCobwebTree(self.cnt_attrs, seed=seed + 1)
+            if not tree_fast:
+                self.ctx.fast_ec = self.cnt.fast_ec = False
         self.ctx.partial = self.cnt.partial = (boundary in ("missing", "edge"))
         # restructure="sample": a span stored with posterior weight w merges or
         # splits concepts with probability w (see IncrementalCobwebTree)
@@ -1066,6 +1102,7 @@ class Trellis3:
             e.ctx = self._full(self._context(tokens, e, analysed=True), self.ctx_attrs)
             e.leaf = self.ctx.ifit(e.ctx, 1.0)
             e.rid = len(self.records)
+            self._at_add(e, "ctx")
             self._pas(e, "ctx", WORD, e.token, 1.0)
             if self.store == "ccm":
                 e.const = 1.0
@@ -1087,11 +1124,17 @@ class Trellis3:
                 continue
             e = comps[key]
             e.weight = w
+            e.rid = len(self.records)
             e.cnt = self._content(e)
+            if self.ref_names:
+                e.cnt = self._ref_content(e, e.cnt)
             e.cleaf = self.cnt.ifit(e.cnt, w)
             e.ctx = self._full(self._context(tokens, e, analysed=key in chosen), self.ctx_attrs)
+            if self.ref_names and self.donate_ctx and self.bags:
+                e.ctx["cc"] = self._ref(("cc", e.rid), e.ctx["cc"])
             e.leaf = self.ctx.ifit(e.ctx, w)
-            e.rid = len(self.records)
+            self._at_add(e, "ctx")
+            self._at_add(e, "cnt")
             if e.const > 0:
                 self._pas(e, "cnt", CONST, "c", e.const)
                 self._pas(e, "ctx", CONST, "c", e.const)
@@ -1116,6 +1159,8 @@ class Trellis3:
             if e.span == (0, len(tokens)):
                 self._pas(e, "cnt", SENT, e.rid, 1.0)
         self.stats["experiences"] += 1
+        if self.repair_reached:
+            self._repair(words + [comps[k] for k in comps if comps[k].rid is not None])
         self._refresh(first, tokens)
         return r["tree"]
 
@@ -1126,6 +1171,8 @@ class Trellis3:
         self._wc_cache = {}                 # re-read word content names after this experience
         self._rel_cache = {}
         self._nb_cache = {}
+        if self.ref_names:
+            self._update_names()
         b = self.refresh_budget
         if b is None or first <= b:
             todo = recs[first:] if b is not None and first > b else recs
@@ -1134,7 +1181,7 @@ class Trellis3:
             s = self._rr % len(old)
             todo = recs[first:] + (old[s:] + old[:s])[:b]
             self._rr = (s + b) % len(old)
-        lazy = self.refresh in ("relabel", "verify", "verify-changed", "verify-events")
+        lazy = self.refresh in ("relabel", "verify", "verify-changed", "verify-events", "verify-drift")
         if self.refresh == "verify-events":
             # event-driven repair: besides the records whose description changed,
             # check those stored under a concept a merge or split just changed
@@ -1160,15 +1207,19 @@ class Trellis3:
             if b is not None and len(hit) > b:
                 hit = random.Random(len(recs)).sample(hit, b)
             for which, e in hit:
-                if which == "cnt" and e.token is None and e.cleaf is not None and self._misplaced(self.cnt, e.cleaf, e.cnt):
+                if which == "cnt" and e.token is None and e.cleaf is not None and self._misplaced(self.cnt, e.cleaf, e.cnt, e.weight):
                     self._move(e, "cnt", e.cnt)
                     self.stats["reassigned"] = self.stats.get("reassigned", 0) + 1
-                elif which == "ctx" and e.leaf is not None and self._misplaced(self.ctx, e.leaf, e.ctx):
+                elif which == "ctx" and e.leaf is not None and self._misplaced(self.ctx, e.leaf, e.ctx, e.weight):
                     self._move(e, "ctx", e.ctx)
                     self.stats["reassigned"] = self.stats.get("reassigned", 0) + 1
         for e in todo:
             moved_c = moved_x = False
-            if e.token is None:
+            if self.refresh == "verify-drift" and e.placed is None:
+                e.placed = {"cnt": e.cnt, "ctx": e.ctx}
+            if self.ref_names:
+                pass                        # descriptions are references: nothing to re-describe
+            elif e.token is None:
                 e.memo.pop("own", None)
                 new = self._content(e)
                 moved_c = new != e.cnt
@@ -1182,10 +1233,12 @@ class Trellis3:
                     self.stats["refreshed"] += 1
             # the context's named concepts (children, own content) follow too
             new = dict(e.ctx)
+            if self.ref_names:
+                new = e.ctx
             if self.children and e.token is None:
                 for p, part in (("cl", e.left), ("cr", e.right)):
                     self._facet(new, p, self._ctx_ids(part))
-            if self.donate_ctx:
+            if self.donate_ctx and not self.ref_names:
                 self._facet(new, "cc", self._cc_ids(e))
             if self.neighbour_types and e.nbt is not None:
                 self._nb_facets(new, e)
@@ -1205,18 +1258,128 @@ class Trellis3:
                 # information bands are no longer those its current description sorts to
                 # ("verify-changed": checked only when its description just changed)
                 chk = self.refresh == "verify"     # "verify-events": changed descriptions here
-                if (chk or moved_c) and e.token is None and e.cleaf is not None and self._misplaced(self.cnt, e.cleaf, e.cnt):
+                if (chk or moved_c) and e.token is None and e.cleaf is not None and self._misplaced(self.cnt, e.cleaf, e.cnt, e.weight):
                     self._move(e, "cnt", e.cnt)
                     self.stats["reassigned"] = self.stats.get("reassigned", 0) + 1
-                if (chk or moved_x) and e.leaf is not None and self._misplaced(self.ctx, e.leaf, e.ctx):
+                if (chk or moved_x) and e.leaf is not None and self._misplaced(self.ctx, e.leaf, e.ctx, e.weight):
                     self._move(e, "ctx", e.ctx)
                     self.stats["reassigned"] = self.stats.get("reassigned", 0) + 1
+            elif self.refresh == "verify-drift":
+                # descriptions follow every visit (cheap); placement is checked only once
+                # a description has drifted by more than drift_tau since it was last placed
+                # or checked, so small shifts in name weights cost no sort
+                for which, tree, leaf in (("cnt", self.cnt, e.cleaf), ("ctx", self.ctx, e.leaf)):
+                    cur = e.cnt if which == "cnt" else e.ctx
+                    if leaf is None or (which == "cnt" and e.token is not None):
+                        continue
+                    if _drift(e.placed[which], cur) <= self.drift_tau:
+                        continue
+                    self.stats["checked"] = self.stats.get("checked", 0) + 1
+                    if self._misplaced(tree, leaf, cur, e.weight):
+                        self._move(e, which, cur)
+                        self.stats["reassigned"] = self.stats.get("reassigned", 0) + 1
+                    e.placed[which] = cur
 
-    def _misplaced(self, tree, leaf, x: dict) -> bool:
+    # ------------------------------------------------------------------ #
+    # Reference names (ref_names)
+    # ------------------------------------------------------------------ #
+    def _fv(self, ids):
+        x = {}
+        self._facet(x, "t", ids)
+        return x["t"]
+
+    def _ref(self, key, value):
+        """A reference to ``key`` whose current value is ``value`` (entered in the table)."""
+        self.names.set(key, value)
+        self.ref_keys.add(key)
+        from .ref_cobweb import Ref
+        return Ref(key)
+
+    def _part_key(self, part: Elem, kind: str):
+        if part.token is not None:
+            return (kind, "w", part.token) if kind == "P" else None
+        return (kind, part.rid) if part.rid is not None and part.cleaf is not None else None
+
+    def _ref_content(self, e: Elem, x: dict) -> dict:
+        """The content description with each part's name (and a chunk part's content) as references."""
+        if not self.bags:
+            return x
+        x = dict(x)
+        for p, part in (("L", e.left), ("R", e.right)):
+            k = self._part_key(part, "P")
+            if k is not None:
+                x[p] = self._ref(k, x[p])
+            if self.donate_cnt:
+                k = self._part_key(part, "C")
+                if k is not None:
+                    x[f"{p}C"] = self._ref(k, x[f"{p}C"])
+        return x
+
+    def _key_value(self, key):
+        kind = key[0]
+        if kind == "P" and key[1] == "w":
+            return self._fv(self._ctx_name(Elem((0, 1), token=key[2]), part=True))
+        e = self.records[key[1]]
+        if kind == "P":
+            return self._fv(self._ctx_name(e, part=True))
+        if kind == "C":
+            return self._fv(self._cnt_name(e))
+        return self._fv(self._cc_ids(e))                        # "cc"
+
+    def _update_names(self) -> None:
+        """Enter every referenced name's current value (after an experience)."""
+        n0 = self.names.version
+        for key in self.ref_keys:
+            self.names.set(key, self._key_value(key))
+        self.stats["name changes"] = self.stats.get("name changes", 0) + self.names.version - n0
+
+    def _at_add(self, e: Elem, which: str) -> None:
+        if self.repair_reached:
+            leaf = e.leaf if which == "ctx" else e.cleaf
+            self._at[which].setdefault(id(leaf), []).append(e)
+
+    def _at_remove(self, e: Elem, which: str) -> None:
+        if self.repair_reached:
+            leaf = e.leaf if which == "ctx" else e.cleaf
+            lst = self._at[which].get(id(leaf), [])
+            if e in lst:
+                lst.remove(e)
+            if not lst:
+                self._at[which].pop(id(leaf), None)
+
+    def _repair(self, new: List[Elem]) -> None:
+        """Check the records stored beside the experience's records (the leaves under
+        the concepts its sorts reached) and move the misplaced ones."""
+        for which, tree in (("cnt", self.cnt), ("ctx", self.ctx)):
+            mine = {id(e) for e in new}
+            todo, seen = [], set()
+            for e in new:
+                leaf = e.leaf if which == "ctx" else e.cleaf
+                if leaf is None or leaf.parent is None:
+                    continue
+                for c in leaf.parent.children:
+                    if c.children or id(c) in seen:
+                        continue
+                    seen.add(id(c))
+                    todo.extend(r for r in self._at[which].get(id(c), []) if id(r) not in mine)
+            if len(todo) > self.repair_reached:
+                todo = self.rng.sample(todo, self.repair_reached)
+            for r in todo:
+                leaf = r.leaf if which == "ctx" else r.cleaf
+                x = r.ctx if which == "ctx" else r.cnt
+                if leaf is None or (which == "cnt" and r.token is not None):
+                    continue
+                self.stats["repair checked"] = self.stats.get("repair checked", 0) + 1
+                if self._misplaced(tree, leaf, x, r.weight):
+                    self._move(r, which, x)
+                    self.stats["repaired"] = self.stats.get("repaired", 0) + 1
+
+    def _misplaced(self, tree, leaf, x: dict, w: float = 1.0) -> bool:
         """Do the band-level concepts above a stored leaf differ from those its
-        description sorts to now?"""
+        description sorts to now? (verify_weight="own": sorted at the record's own
+        weight, as ifit placed it; else at weight 1)"""
         stored = tree.ancestors(leaf)[::-1][:-1]
-        now = tree.categorize(x)[:-1]
+        now = tree.categorize(x, w if self.verify_weight == "own" else 1.0)[:-1]
         return self._path_ids(stored + [leaf], "bands") != self._path_ids(now + [leaf], "bands")
 
     def _pas(self, e: Elem, which: str, attr: str, value, w: float) -> None:
@@ -1230,6 +1393,7 @@ class Trellis3:
         """Reassignment: take the record out of one hierarchy and insert it again
         with its current description, its passive counts moving with it."""
         mine = [(a, v, w) for t, a, v, w in e.pas if t == which]
+        self._at_remove(e, which)
         if which == "ctx":
             for a, v, w in mine:
                 self.ctx.add_passive(e.leaf, a, v, -w)
@@ -1244,6 +1408,7 @@ class Trellis3:
             e.cnt, e.cleaf = new, self.cnt.ifit(new, e.weight)
             for a, v, w in mine:
                 self.cnt.add_passive(e.cleaf, a, v, w)
+        self._at_add(e, which)
 
     # ------------------------------------------------------------------ #
     # Generation: top-down through the two hierarchies (no word-to-word step)

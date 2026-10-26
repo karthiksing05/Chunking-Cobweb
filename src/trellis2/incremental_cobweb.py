@@ -131,6 +131,11 @@ class IncrementalCobwebTree:
     """Cobweb (Fisher 1987) over nominal and bag-valued attributes, with
     insertion (``ifit``, identical to the reference) and removal (``unfit``)."""
 
+    # fast_ec: score an instance against a node with the fast path of _ec_with
+    # (same value up to rounding); False gives the reference arithmetic, which
+    # cobweb_cu (cu_cobweb.CUCobwebTree with fast=False) reproduces bit for bit
+    fast_ec = True
+
     def __init__(self, attrs: Sequence[str], seed: int = 0):
         self.attrs = tuple(attrs)
         self.n_attrs = len(self.attrs)
@@ -174,7 +179,42 @@ class IncrementalCobwebTree:
             inc += 2.0 * m * w * p + (w * p) ** 2
         return inc
 
-    def _ec_with(self, node: CobwebNode, x: Instance, w: float) -> float:
+    @staticmethod
+    def _sq(x: Instance, w: float) -> float:
+        """sum_a sum_v (w p)^2: the part of _ec_with that does not depend on the node."""
+        s = 0.0
+        for v in x.values():
+            if isinstance(v, dict):
+                for p in v.values():
+                    s += (w * p) ** 2
+            else:
+                s += w * w
+        return s
+
+    def _ec_with(self, node: CobwebNode, x: Instance, w: float, sq: Optional[float] = None) -> float:
+        if sq is not None and not self.partial:
+            # same value as below: sstot + 2w <counts, x> + sq, the dot product
+            # over the smaller of the node's and the instance's value sets
+            dot = 0.0
+            for a, v in x.items():
+                d = node.av.get(a)
+                if not d:
+                    continue
+                if isinstance(v, dict):
+                    if len(d) < len(v):
+                        for u, m in d.items():
+                            p = v.get(u)
+                            if p:
+                                dot += m * p
+                    else:
+                        for u, p in v.items():
+                            m = d.get(u)
+                            if m:
+                                dot += m * p
+                else:
+                    dot += d.get(v, 0.0)
+            n = node.count + w
+            return (node.sstot + 2.0 * w * dot + sq) / (n * n) / self.n_attrs
         if self.partial:
             n = node.count + w
             tot = 0.0
@@ -241,12 +281,13 @@ class IncrementalCobwebTree:
         kids = cur.children
         K = len(kids)
         n1 = cur.count + w
-        ecp1 = self._ec_with(cur, x, w)
+        sq = self._sq(x, w) if self.fast_ec else None
+        ecp1 = self._ec_with(cur, x, w, sq)
         terms = [c.count * self.ec(c) for c in kids]
         S = sum(terms)
         ranked = []
         for c, t in zip(kids, terms):
-            gain = (c.count + w) * self._ec_with(c, x, w) - t
+            gain = (c.count + w) * self._ec_with(c, x, w, sq) - t
             ranked.append((gain, c.count, self.rng.random(), c))
         ranked.sort(key=lambda r: (r[0], r[1], r[2]), reverse=True)
         best1 = ranked[0][3]
@@ -468,8 +509,9 @@ class IncrementalCobwebTree:
         (the same gain as insertion; ties to the larger child, then the
         lower id)."""
         node, path = self.root, [self.root]
+        sq = self._sq(x, w) if self.fast_ec else None
         while node.children:
-            best = max(node.children, key=lambda c: ((c.count + w) * self._ec_with(c, x, w)
+            best = max(node.children, key=lambda c: ((c.count + w) * self._ec_with(c, x, w, sq)
                                                      - c.count * self.ec(c), c.count, -c.id))
             path.append(best)
             node = best

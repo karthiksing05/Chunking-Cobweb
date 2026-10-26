@@ -307,3 +307,67 @@ Grammars: `t3_evolve.py`, checkpoints 40–320, seeds 13 / 17, grammatical / gra
 **Where the grammaticality goes** (`t3_generr.py`, med, round-23 setup): every ungrammatical sentence under window 2 is a single verb↔preposition swap (33/33 on seed 13, 13/13 on seed 17). Under window 3 the same swap moves one level up: VP↔PP chunks (41 of 48 chunk errors on large 13). With two words of context, verbs and prepositions stand in the same contexts ("the dog eats the dog" / "the dog in the dog"); they share the coarse 2-bit category, so (a) their contexts pool at the same leaves, (b) chunks naming them as parts coincide ([V NP] = [P NP]), and (c) the round-25 prediction over that category cannot separate them. Their fine names do separate them (word-category accuracy 0.91–0.97 on the grammars), so the merge is the coarseness of the shared label, not the representation.
 
 **Reassignment cost at 2000 sentences** (round-18 config): `refresh="verify"` (budget 100) halves context misplacement to 0.07 (both seeds) and content to 0.15–0.16, at 13 200–14 200 s of learning (about 3–4× relabel at 400 sentences). Still above the ≤ 5% target.
+
+## Rounds 27–32: speed, the compiled tree, and what the misplacement measure counts (2026-10-25/26)
+
+Base: the round-28 representation (parent names, `type_k` 32, `name_mix_k` 4, `word_cc` true, bands, sampled restructuring, fill `both+peer`).
+
+- **Rounds 29–30** (`verify-events`: check records under a concept a merge or split just changed; `verify-drift`: check placement only once a description has drifted by more than `drift_tau`) both failed the grammar guard (med-13 0.783, large-17 0.804; round 30 failed 2 of 4) and were slower. Cancelled.
+- **Profile:** refresh was 65% of the learning time and `_ec_with` dominated it. The Python fast path (`_sq`, dot product over the smaller side) gives about 1.5×.
+- **Compiled Fisher tree** (`tree="cu"`, cobweb-private `trellis-discrete` b2fb112, module `cobweb_cu_trellis`): reference arithmetic is bit-identical to the Python tree (40 / 40 random streams; TRELLIS end-to-end on med-40 and stories-300). Fast mode matches within 1e-9 except at near-ties. On stories-300, learning takes 33 s (cu fast), 104 s (cu ref), 313 s (Python fast) and 517 s (Python ref).
+
+**Round 31** (cu, `refresh="verify"`, budget sweep):
+
+| | grammars at 320, gram / gram+new | TinyStories 2000, misplaced ctx / cnt (weight-1 measure) | TS learn s |
+|---|---|---|---|
+| original | med 1.0 / 0.868, 0.996 / 0.745; large 1.0 / 0.799, 0.993 / 0.833 | 0.123 / 0.252, 0.114 / 0.294 | 3 994 / 5 150 |
+| verify 100 | fails large-13 (0.975) | 0.055 / 0.258, 0.069 / 0.23 | 3 179 / 3 283 |
+| verify 300 | fails med-13 gram+new (0.854) | 0.056 / 0.218, 0.058 / 0.213 | 6 478 / 6 152 |
+| verify 1000 | passes all 4 (1.0 / 0.871, 1.0 / 0.895, 0.986 / 0.858, 0.993 / 0.848) | running | > 10 000 |
+| verify 3000 | passes all 4 | running | |
+
+Content misplacement did not respond to the budget. Name churn (`t3_namechurn.py`, 1000 sentences): after one sentence, 25% of word names change which concepts they name, and 91% of those changes go to concepts that already existed.
+
+**Round 32: the measure** (`t3_misplace_why.py`, 600 sentences, seed 13). The TEMPORAL measure sorts a record's stored description at weight 1, while `ifit` placed the record at its posterior weight (often below 0.1). Measured on records just stored:
+
+| | ctx at weight 1 | ctx at own weight | cnt at weight 1 | cnt at own weight |
+|---|---|---|---|---|
+| fresh, no reassignment | 0.141 | 0.007 | 0.21 | 0.015 |
+| end, no reassignment | 0.169 | 0.099 | 0.327 | 0.242 |
+| end, verify 300 at weight 1 (445 s) | 0.094 | 0.026 | 0.173 | 0.052 |
+| end, verify 100 at own weight (190 s) | 0.098 | 0.024 | 0.317 | 0.119 |
+| end, verify 300 at own weight (344 s) | 0.102 | 0.028 | 0.31 | 0.072 |
+| end, verify 1000 at own weight (805 s) | 0.086 | 0.010 | 0.257 | 0.055 |
+
+So about 0.2 of the reported content misplacement is a mismatch of weights at insertion: a record sits where its own weight sorts it. Real drift still builds up without reassignment (0.24 content at 600 sentences), and verification removes most of it. Measured at own weight, verify 300 is near the 5% target at 600 sentences. `t3_stories.py` now reports both measures, and `verify_weight="own"` makes the check sort at the record's own weight. Round 33 re-measures at 2000 sentences.
+
+## Rounds 33–36: the target met at verify 700 (2026-10-26)
+
+Measures at 2000 TinyStories sentences (seeds 13 / 17). "Own weight" sorts each record's stored description at the weight `ifit` placed it with. "Share of stored weight" weights each record by its posterior weight, i.e. how much of an instance it put into the tree. Grammars: gram / gram+new at 320, against the original's med 1.0 / 0.868 and 0.996 / 0.745, and large 1.0 / 0.799 and 0.993 / 0.833.
+
+| run (cu tree) | misplaced ctx / cnt, own weight | share of stored weight misplaced, ctx / cnt | learn s | attested + novel | category acc. | grammar guard |
+|---|---|---|---|---|---|---|
+| original | 0.088 / 0.213, 0.081 / 0.229 | | 4 091 / 5 207 | 0.218 / 0.225 | 0.455 / 0.504 | reference |
+| verify 300 | 0.020 / 0.062, 0.015 / 0.076 | | 6 873 / 6 545 | 0.300 / 0.226 | 0.520 / 0.560 | fails med-13 (0.854) |
+| verify 500 | 0.019 / 0.065, 0.025 / 0.076 | 0.011 / 0.028, 0.010 / 0.037 | 10 180 / 9 047 | 0.275 / 0.230 | 0.549 / 0.488 | fails med-13 (0.850) |
+| **verify 700** | **0.005 / 0.076, 0.005 / 0.062** | **0.001 / 0.026, 0.003 / 0.029** | 12 818 / 11 941 | **0.290 / 0.277** | **0.533 / 0.548** | **passes all 4**: 1.0 / 0.871, 1.0 / 0.892, 0.996 / 0.846, 0.993 / 0.839 |
+| verify 300 at own weight | 0.021 / 0.078, 0.014 / 0.124 | 0.018 / 0.045, – | 5 931 / 4 835 | 0.259 / 0.260 | 0.524 / 0.524 | fails med-13 (0.836) |
+| verify 1000 at own weight | 0.013 / 0.067, 0.010 / 0.083 | | 14 558 / 12 624 | 0.236 / 0.275 | 0.520 / 0.532 | fails med-13 (0.841) |
+
+**Verify 700** (`refresh="verify"`, `refresh_budget` 700, weight-1 check) meets the temporal target:
+- context misplacement is 0.5%;
+- content misplacement is 2.6–2.9% of stored weight (6–8% of records, almost all of weight below 0.1);
+- learning time is 2.3–3.1× the original's.
+
+It also passes the grammar guard on all four grammars, and it is up on TinyStories generation (attested + novel 0.29 / 0.28 against 0.22 / 0.23) and on category accuracy (interdependent names: 0.53 / 0.55 against 0.46 / 0.50). Checking at the record's own weight moves fewer records, but repairs less per check: the weight-1 check re-inserts almost every low-weight record it visits, which acts as a refit.
+
+**Update on read (rounds 34–35, `ref_names`, `src/trellis2/ref_cobweb.py`, 600 sentences, Python tree).** Reference-valued descriptions, a versioned name table, and nodes that sync when a sort reaches them. With these, stored descriptions are current: drift 0.000–0.01, against 0.07–0.27 for copies. Test `tests/trellis2/test_ref_cobweb.py`: identical to the base tree when names are fixed; when names change, synced counts equal the current names summed. Placement is no better, and the cost is no lower:
+
+| 600 sentences, against current descriptions | cnt misplaced | ctx misplaced | s |
+|---|---|---|---|
+| copies, verify 300 / 1000 | 0.087 / 0.061 | 0.024 / 0.011 | 4 772 / 10 916 |
+| references, verify 300 / 1000 | 0.096 / 0.050 | 0.018 / 0.010 | 5 119 / 11 433 |
+| references, no reassignment | 0.349 | 0.095 | 1 529 |
+| references + repair beside reached leaves (200 / sentence) | 0.226 | 0.090 | 5 468 |
+
+Name churn changes what records should sit with, not only how they are described. So synced counts still need records moved, and moving records (unfit + ifit) is what costs time. Update on read is kept as an option for exact descriptions; it is not needed for the target.
