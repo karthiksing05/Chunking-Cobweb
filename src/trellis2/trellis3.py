@@ -93,7 +93,7 @@ def logsumexp(xs: List[float]) -> float:
 
 class Elem:
     __slots__ = ("span", "split", "token", "left", "right", "ctx", "cnt", "leaf", "cleaf", "weight",
-                 "height", "gain", "par", "sib", "memo", "const", "used", "rid", "pas", "nbt", "win", "placed")
+                 "height", "gain", "par", "sib", "memo", "const", "used", "rid", "pas", "nbt", "win", "placed", "nbe")
 
     def __init__(self, span, split=None, token=None, left=None, right=None):
         self.span, self.split, self.token, self.left, self.right = span, split, token, left, right
@@ -111,6 +111,7 @@ class Elem:
         self.nbt = None                     # the words just outside it (neighbour_types), for refresh
         self.win = None                     # its raw surface window (window_names), for refresh
         self.placed = None                  # descriptions it was last placed or verified by (verify-drift)
+        self.nbe = None                     # its same-width neighbours (neighbour_chunks), for refresh
 
 
 class Trellis3:
@@ -118,7 +119,7 @@ class Trellis3:
                  store: str = "posterior", tau: float = 1.0, chunk_context: bool = True,
                  donate: bool = True, refresh_budget: Optional[int] = 3000, min_weight: float = 1e-3,
                  bags: bool = True, children: Optional[bool] = None, spine: Optional[bool] = None,
-                 neighbour_concepts: bool = False, donate_ctx: Optional[bool] = None,
+                 neighbour_concepts: bool = False, neighbour_chunks: bool = False, donate_ctx: Optional[bool] = None,
                  donate_cnt: Optional[bool] = None, factor: str = "gain", support: float = 3.0,
                  naming: str = "depth", heights: bool = True, donate_own: bool = False,
                  refresh: str = "refit", readout: str = "mbr", cc_naming: Optional[str] = None,
@@ -148,6 +149,11 @@ class Trellis3:
         # donation's two directions: the element's own content concept into its
         # context; the parts' content concepts into the content
         self.donate_ctx = donate if donate_ctx is None else donate_ctx
+        # neighbour_chunks: a context also names the units beside the element at its
+        # own level: the adjacent span of the same width (cut at the experience's
+        # edge), by the content concept of memory's best analysis of it (a word's
+        # neighbour is a word). Same level, content only: nothing from above.
+        self.neighbour_chunks = neighbour_chunks
         self.donate_cnt = donate if donate_cnt is None else donate_cnt
         self._word_ids: Dict[Tuple[tuple, int], List[str]] = {}
         # a chunk's factor in inside-outside: "gain" (against the roots) or
@@ -290,7 +296,7 @@ class Trellis3:
             (tuple(f"{p}{k}" for p in ("par", "sib") for k in d) if self.spine else ())
         own = tuple(f"cc{k}" for k in d) if self.donate_ctx else ()
         neigh = self._neigh_names(d) \
-            if (neighbour_concepts or neighbour_types or relational in ("window", "both")) else ()
+            if (neighbour_concepts or neighbour_types or neighbour_chunks or relational in ("window", "both")) else ()
         self.ctx_attrs = surface + neigh + chunk + own + (("le", "re") if boundary == "edge" else ())
         parts = tuple(f"{p}{k}" for p in ("L", "R") for k in d)
         given = tuple(f"{p}{k}" for p in ("LC", "RC") for k in d) if self.donate_cnt else ()
@@ -725,6 +731,9 @@ class Trellis3:
             for p, pos in (("lc", i - 1), ("rc", j)):
                 bag = self._rel_c(tokens[pos], self.rel_rounds) if 0 <= pos < len(tokens) else None
                 self._facet(x, p, bag if bag else [BLANK])
+        elif self.neighbour_chunks:
+            for p, nb in zip(("lc", "rc"), e.nbe or (None, None)):
+                self._facet(x, p, self._cc_ids(nb) if nb is not None else [BLANK])
         elif self.neighbour_concepts:
             i, j = e.span
             for p, pos in (("lc", i - 1), ("rc", j)):
@@ -907,26 +916,45 @@ class Trellis3:
                     e.ctx = self._surface(tokens, i, j)
                     e.cnt = self._content(e)
                     e.ctx = self._context(tokens, e, analysed=False)
-                    if self.factor == "ccm":
-                        e.gain = self._contrast(self.cnt, e.cnt) + self._contrast(self.ctx, e.ctx)
-                    elif self.factor == "regen":
-                        # content scored by how probably memory unpacks it
-                        e.gain = self._regen_bits(e) + self._gain(self.ctx, e.ctx)
-                    elif self.factor == "deriv":
-                        e.gain = self._deriv_bits(e)
-                    elif self.factor == "regen2":
-                        e.gain = self._regen_bits(e) + self._regen_tree(self.ctx, e.ctx)
-                    elif self.factor == "climb":
-                        e.gain = self._climb(self.cnt, e.cnt) + self._climb(self.ctx, e.ctx)
-                    elif self.factor == "code":
-                        e.gain = self._code(self.cnt, e.cnt) + self._code(self.ctx, e.ctx)
-                    else:
-                        e.gain = self._gain(self.cnt, e.cnt) + self._gain(self.ctx, e.ctx)
+                    e.gain = self._factor(e)
                     comps[(i, k, j)] = e
                     v = best[(i, k)][0] + best[(k, j)][0] + e.gain
                     if (i, j) not in best or v > best[(i, j)][0]:
                         best[(i, j)] = (v, e)
+        if self.neighbour_chunks:
+            # second pass: every element named with its same-width neighbours, read
+            # from the first pass's best analyses (whose contexts lack them)
+            def nbs(i, j):
+                m = j - i
+                return (best[(max(0, i - m), i)][1] if i > 0 else None,
+                        best[(j, min(n, j + m))][1] if j < n else None)
+            for e in words:
+                e.nbe = nbs(*e.span)
+                e.ctx = self._context(tokens, e, analysed=False)
+            for (i, k, j), e in comps.items():
+                e.nbe = nbs(i, j)
+                e.ctx = self._context(tokens, e, analysed=False)
+                e.memo.pop("ctx", None)
+                e.gain = self._factor(e)
+        self._best = best
         return words, comps
+
+    def _factor(self, e: Elem) -> float:
+        """A composite's factor in inside-outside, from both hierarchies."""
+        if self.factor == "ccm":
+            return self._contrast(self.cnt, e.cnt) + self._contrast(self.ctx, e.ctx)
+        if self.factor == "regen":
+            # content scored by how probably memory unpacks it
+            return self._regen_bits(e) + self._gain(self.ctx, e.ctx)
+        if self.factor == "deriv":
+            return self._deriv_bits(e)
+        if self.factor == "regen2":
+            return self._regen_bits(e) + self._regen_tree(self.ctx, e.ctx)
+        if self.factor == "climb":
+            return self._climb(self.cnt, e.cnt) + self._climb(self.ctx, e.ctx)
+        if self.factor == "code":
+            return self._code(self.cnt, e.cnt) + self._code(self.ctx, e.ctx)
+        return self._gain(self.cnt, e.cnt) + self._gain(self.ctx, e.ctx)
 
     def _inside_outside(self, n: int, comps):
         """Log inside/outside over binary analyses with factors 2^(gain/tau);
@@ -1242,6 +1270,12 @@ class Trellis3:
                 self._facet(new, "cc", self._cc_ids(e))
             if self.neighbour_types and e.nbt is not None:
                 self._nb_facets(new, e)
+            if self.neighbour_chunks and e.nbe is not None:
+                for p, nb in zip(("lc", "rc"), e.nbe):
+                    if nb is not None and nb.cleaf is None:
+                        nb.memo.pop("cntp", None)
+                        nb.memo.pop("cnt", None)
+                    self._facet(new, p, self._cc_ids(nb) if nb is not None else [BLANK])
             if self.window_names and e.win is not None:
                 new.update(self._named_window(e.win))
             moved_x = new != e.ctx
@@ -2007,7 +2041,8 @@ class Trellis3:
                     q[a] = lw[-k] if len(lw) >= k else BOS
                 else:
                     q[a] = rw[k - 1] if len(rw) >= k else EOS
-            fills = self._gap_fills(q, gap_beta)
+            nbq = self._gap_neighbours(lw, rw) if self.neighbour_chunks else None
+            fills = self._gap_fills(q, gap_beta, nbq)
             if trace is not None:
                 top = sorted(fills.items(), key=lambda kv: -kv[1])[:10]
                 trace.append({"gap fillers": [(f, round(v, 4)) for f, v in top]})
@@ -2051,7 +2086,30 @@ class Trellis3:
                 return None
         return None
 
-    def _gap_fills(self, q: dict, beta: float = 1.0) -> Dict[tuple, float]:
+    def _gap_neighbours(self, lw: Sequence[str], rw: Sequence[str], widths: int = 12) -> Dict[int, dict]:
+        """With neighbour_chunks: the gap's same-level neighbours for a filler of
+        each width m, as learning names them: the content concept of memory's best
+        analysis of the m words before the gap (and after it), cut at the prompt's
+        edge; blank where the prompt ends."""
+        sides = {}
+        for p, ws, at_end in (("lc", list(lw), True), ("rc", list(rw), False)):
+            n = len(ws)
+            if n == 0:
+                sides[p] = {m: {BLANK: 1.0} for m in range(1, widths + 1)}
+                continue
+            self.parse(ws)
+            best = self._best
+            out = {}
+            for m in range(1, widths + 1):
+                span = (max(0, n - m), n) if at_end else (0, min(n, m))
+                x = {}
+                self._facet(x, p, self._cc_ids(best[span][1]))
+                v = x[p]
+                out[m] = v if isinstance(v, dict) else {v: 1.0}
+            sides[p] = out
+        return {m: {p: sides[p][m] for p in sides} for m in range(1, widths + 1)}
+
+    def _gap_fills(self, q: dict, beta: float = 1.0, nbq: Optional[Dict[int, dict]] = None) -> Dict[tuple, float]:
         """P(filler | surroundings q) over the committed instances: proportional to
         prod over q's attributes of P(value | the instance's context leaf), each
         estimated along the leaf's path with hierarchical Dirichlet back-off
@@ -2076,11 +2134,26 @@ class Trellis3:
             return out
 
         cache = self.__dict__.setdefault("_gap_cache", {})
-        key = (tuple(sorted(q.items())), len(self.records), self.stats.get("experiences", 0), beta)
+        key = (tuple(sorted(q.items())), repr(nbq), len(self.records), self.stats.get("experiences", 0), beta)
         if key in cache:
             return cache[key]
         if len(cache) > 256:
             cache.clear()
+        # the neighbour facets are bags: expected log-probability under the same back-off
+        nsize = {a: len(root.av.get(a, {})) + 1 for a in ("lc", "rc")}
+        nmemo: Dict[Tuple[int, str, str], float] = {}
+
+        def nprob(node, a, v) -> float:
+            k = (node.id, a, v)
+            if k not in nmemo:
+                d = node.av.get(a, {})
+                if node.parent is None:
+                    nmemo[k] = (d.get(v, 0.0) + self.alpha) / (node.count + self.alpha * nsize[a])
+                else:
+                    nmemo[k] = (d.get(v, 0.0) + beta * nprob(node.parent, a, v)) / (node.count + beta)
+            return nmemo[k]
+
+        top = max(nbq) if nbq else 0
         mass: Dict[tuple, float] = {}
         for e in self.records:
             if e.leaf is None:
@@ -2088,6 +2161,9 @@ class Trellis3:
             for which, attr, value, w in e.pas:
                 if which == "ctx" and attr == FILL:
                     lp = sum(math.log(max(v, 1e-300)) for v in probs(e.leaf).values())
+                    if nbq:
+                        for a, bag in nbq[min(e.span[1] - e.span[0], top)].items():
+                            lp += sum(p * math.log(max(nprob(e.leaf, a, v), 1e-300)) for v, p in bag.items())
                     mass[value] = mass.get(value, 0.0) + w * math.exp(lp)
         cache[key] = mass
         return mass
@@ -2109,10 +2185,8 @@ class Trellis3:
         if len(cache) > 256:
             cache.clear()
         n = len(left)
-        units = [Elem((n - 1, n), token=left[-1])]
-        if n > 1:
-            r = self.parse(left)
-            units += [r["comps"][k] for k in sorted(r["chosen"], key=lambda k: -k[0]) if k[2] == n]
+        r = self.parse(left)
+        units = [r["words"][-1]] + [r["comps"][k] for k in sorted(r["chosen"], key=lambda k: -k[0]) if k[2] == n]
         post: Dict[int, float] = {}
         for el in units:
             for rid, v in self._left_part_post(el, beta).items():
