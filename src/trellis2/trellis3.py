@@ -246,7 +246,9 @@ class Trellis3:
         self.name_mix_k = name_mix_k
         # part_names="bands": a chunk names its parts by their band names even when the
         # word's own representation (name_level / name_mix_k) is finer, so the content
-        # tree generalises over parts while words are identified by the finer name
+        # tree generalises over parts while words are identified by the finer name;
+        # part_names="own": a part is named by its own learned name (name_level) without
+        # the neighbours' names mixed in (name_mix_k)
         self.part_names = part_names
         self.type_seen: Dict[tuple, float] = {}
         self.type_bag: Dict[tuple, Dict[str, float]] = {}
@@ -452,6 +454,13 @@ class Trellis3:
                 return self._ctx_name(e)
             finally:
                 self.name_level, self.name_mix_k = keep
+        if part and self.part_names == "own" and self.name_mix_k:
+            keep = self.name_mix_k
+            self.name_mix_k = None
+            try:
+                return self._ctx_name(e)
+            finally:
+                self.name_mix_k = keep
         if self.naming == "depth":
             return self._ctx_ids(e)
         if e.token is not None and self.relational in ("names", "both"):
@@ -739,11 +748,15 @@ class Trellis3:
             e.memo["own"] = self._path_ids(path) if self.naming in ("path", "ipath", "bands", "leaf", "basic") else self._ids(path)
         return e.memo["own"]
 
-    def _content(self, e: Elem) -> dict:
+    def _content(self, e: Elem, sides: str = "LR") -> dict:
+        """The content description (``sides="L"``: only the left part's facets, the
+        partial instance of a composite whose left part is known)."""
         x = {}
-        if self.donate_own:
+        if self.donate_own and sides == "LR":
             self._facet(x, "oc", self._own_ctx(e))
         for p, part in (("L", e.left), ("R", e.right)):
+            if p not in sides:
+                continue
             self._facet(x, p, self._ctx_name(part, part=True))
             if self.donate_cnt:
                 bag = self._word_content_bag(part.token) if (part.token is not None and self.word_content in ("parts", "cc", "cc+token")) else None
@@ -1838,7 +1851,8 @@ class Trellis3:
                       trace: Optional[list] = None, fill_name=False, fill_peer: bool = False,
                       pattern: Optional[Sequence[str]] = None, ctx_fill: bool = False,
                       budget: int = 4000, gap: Optional[Tuple[Sequence[str], Sequence[str]]] = None,
-                      gap_beta: float = 1.0, gap_mode: str = "window") -> Optional[List[str]]:
+                      gap_beta: float = 1.0, gap_mode: str = "window",
+                      sibling: Optional[int] = None) -> Optional[List[str]]:
         """Expansive generation from the two hierarchies alone. Every step reads
         statistics held by concepts: a whole experience is drawn from the content
         root (SENT); a content concept gives where its parts stood (LPART, RPART:
@@ -1871,7 +1885,13 @@ class Trellis3:
         (a prefix, right = []): the prompt is parsed into one chunk, a stored whole
         experience is drawn by the posterior that its left part is such a chunk
         (``_sibling_fills``: its part name and content), and only its right part is
-        generated, so the continuation is conditioned on the whole prompt chunk."""
+        generated, so the continuation is conditioned on the whole prompt chunk.
+
+        ``sibling=k``: a composite's right part is conditioned on its generated (now
+        frozen) left part. The partial content instance of that left part (its name
+        and content facets) is sorted in the content tree; the concept ``k`` levels
+        above where it ends predicts the right part's facets, and each candidate
+        filler is weighted by that prediction over the root's (k sets how specific)."""
         fill_predict = isinstance(fill_name, str) and fill_name.endswith("+predict")
         if fill_predict:
             # "...+predict": a word slot also weights each candidate by the probability
@@ -2002,13 +2022,45 @@ class Trellis3:
                     q[a] = slot.ctx[a]
             return self._query_path(q) if q else None
 
-        def expand(x: CobwebNode, d: int) -> bool:
-            for a in (LPART, RPART):
-                if not part(x, a, d):
-                    return False
-            return True
+        last: List[Optional[tuple]] = [None]
+        right_desc: Dict[tuple, dict] = {}
 
-        def part(x: CobwebNode, a: str, d: int) -> bool:
+        def as_elem(f: tuple) -> Elem:
+            return Elem((0, 1), token=f[1]) if f[0] == "w" else self.records[f[1]]
+
+        def sibling_concept() -> Optional[CobwebNode]:
+            """Where the frozen left part's partial content instance sorts, ``sibling``
+            levels above its end (never the root)."""
+            if last[0] is None:
+                return None
+            left = as_elem(last[0])
+            path = self.cnt.categorize(self._content(Elem((0, 2), left=left, right=left), sides="L"))
+            return path[max(1, len(path) - 1 - sibling)] if len(path) > 1 else None
+
+        def lift(node: CobwebNode, f: tuple) -> float:
+            """P(the candidate's right-part facets | node) / P(them | root): Cobweb's
+            prediction of the missing right part from the concept the left part sorts to."""
+            if f not in right_desc:
+                e = as_elem(f)
+                right_desc[f] = self._content(Elem((0, 2), left=e, right=e), sides="R")
+            out = 1.0
+            for a, bag in right_desc[f].items():
+                if not isinstance(bag, dict):
+                    bag = {bag: 1.0}
+                size = len(self.cnt.root.av.get(a, {})) + 1
+                p = []
+                for nd in (node, self.cnt.root):
+                    d = nd.av.get(a, {})
+                    p.append(sum(w * (d.get(v, 0.0) + self.alpha) / (nd.count + self.alpha * size) for v, w in bag.items()))
+                out *= p[0] / max(p[1], 1e-12)
+            return out
+
+        def expand(x: CobwebNode, d: int) -> bool:
+            if not part(x, LPART, d):
+                return False
+            return part(x, RPART, d, sibling_concept() if sibling is not None else None)
+
+        def part(x: CobwebNode, a: str, d: int, sib: Optional[CobwebNode] = None) -> bool:
             if True:
                 where = draw(self.cnt.passive(x, a))
                 if where is None or self.records[where[0]].leaf is None:
@@ -2089,6 +2141,12 @@ class Trellis3:
                         weighted = {f: c * (cats.get(cat_of(f[1]), 0.0) + self.alpha) / (tot + self.alpha * size)
                                     for f, c in fills.items()}
                         fills = weighted
+                if sib is not None and fills:
+                    # the frozen left sibling predicts the right part: each candidate
+                    # weighted by how much more likely its facets are under that concept
+                    weighted = {f: c * lift(sib, f) for f, c in fills.items()}
+                    if any(v > 0 for v in weighted.values()):
+                        fills = weighted
                 if pat is None:
                     f = draw(fills)
                     entry = None
@@ -2107,6 +2165,7 @@ class Trellis3:
                         raise LookupError
                     if entry is not None:
                         entry["end"] = len(out)
+                    last[0] = f
                     return True
                 # prompted: fillers without replacement, backtracking on a dead end
                 left = dict(fills)
