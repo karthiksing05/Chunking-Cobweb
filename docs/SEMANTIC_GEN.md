@@ -79,3 +79,24 @@ one level up the context concepts group by the other facets, so the topic does
 not reach a general concept yet. Next: let `pv` direct general concepts (the
 slots' fills and higher concepts), so that a topic-matched structure is filled
 with new words that stay on topic.
+
+## Round 60: the prompt directs a general concept (`story_fill`)
+
+`story_fill=b`: a slot's fillers come from a concept above the stored leaf
+(`level` 1, or `backoff`), and each candidate is weighted by exp(b × lift of the
+prompt as `pv`) at the context leaves of its own records under that concept
+(`_pv_fills`). The root is drawn as in round 59 (leaf, β 2).
+
+| arm (seed 13 / seed 17) | cross share 1000 | cross share 2000 | tag pattern attested 2000 | novel 2000 |
+|---|---|---|---|---|
+| unconditioned | −0.06 / 0.01 | −0.13 / −0.04 | 0.895 / 0.895 | 10% / 9% |
+| leaf (round 59) | 0.35 / 0.39 | 0.34 / 0.51 | 0.912 / 0.909 | 2% / 3% |
+| level 1, story_fill 3 | 0.39 / 0.49 | 0.43 / 0.50 | 0.877 / 0.862 | 9% / 9% |
+| level 1, story_fill 4 | 0.42 / 0.44 | 0.40 / 0.54 | 0.884 / 0.875 | 8% / 7% |
+| backoff, story_fill 3 | 0.40 / 0.47 | 0.39 / 0.54 | 0.858 / 0.842 | 12% / 15% |
+| retrieve (reference) | 0.41 / 0.42 | 0.66 / 0.68 | — | — |
+
+A general concept directed by the previous sentence fits the prompt as well as
+or better than copying a stored sentence, with three to five times the novel
+sentences; it costs 2–7 points of tag-pattern grammar against unconditioned
+generation. Retrieval pulls ahead as memory grows (0.66–0.68 at 2000).
