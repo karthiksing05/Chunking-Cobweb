@@ -1823,6 +1823,21 @@ class Trellis3:
             return None
         return out
 
+    def _part_owner(self) -> Dict[int, Elem]:
+        """left-part record id -> the committed composite it is the left part of (cached
+        until the next experience)."""
+        stamp = (self.stats["experiences"], len(self.records))
+        got = self.__dict__.get("_owner")
+        if got is None or got[0] != stamp:
+            own = {}
+            for e in self.records:
+                if e.token is None:
+                    for which, attr, value, _ in e.pas:
+                        if attr == LPART:
+                            own[value[0]] = e
+            got = self._owner = (stamp, own)
+        return got[1]
+
     def concept_index(self) -> Tuple[Dict[int, CobwebNode], Dict[int, CobwebNode]]:
         """node id -> node, for each hierarchy (generation addresses concepts by id)."""
         out = []
@@ -1852,7 +1867,8 @@ class Trellis3:
                       pattern: Optional[Sequence[str]] = None, ctx_fill: bool = False,
                       budget: int = 4000, gap: Optional[Tuple[Sequence[str], Sequence[str]]] = None,
                       gap_beta: float = 1.0, gap_mode: str = "window",
-                      sibling: Optional[int] = None) -> Optional[List[str]]:
+                      sibling: Optional[int] = None, sibling_beta: float = 1.0,
+                      sibling_mode: str = "lift") -> Optional[List[str]]:
         """Expansive generation from the two hierarchies alone. Every step reads
         statistics held by concepts: a whole experience is drawn from the content
         root (SENT); a content concept gives where its parts stood (LPART, RPART:
@@ -1891,7 +1907,11 @@ class Trellis3:
         frozen) left part. The partial content instance of that left part (its name
         and content facets) is sorted in the content tree; the concept ``k`` levels
         above where it ends predicts the right part's facets, and each candidate
-        filler is weighted by that prediction over the root's (k sets how specific)."""
+        filler is weighted by that prediction over the root's, raised to
+        ``sibling_beta`` (k sets how specific, beta how strongly it counts).
+        ``sibling_mode="pair"``: the right part's slot itself comes from the content
+        tree: a stored composite is drawn among those whose left parts sit under that
+        concept, and its own right part is the slot (filled from its context leaf)."""
         fill_predict = isinstance(fill_name, str) and fill_name.endswith("+predict")
         if fill_predict:
             # "...+predict": a word slot also weights each candidate by the probability
@@ -2055,14 +2075,66 @@ class Trellis3:
                 out *= p[0] / max(p[1], 1e-12)
             return out
 
-        def expand(x: CobwebNode, d: int) -> bool:
+        left_bags: Dict[int, Dict[str, float]] = {}
+
+        def bag_of(e: Elem) -> Dict[str, float]:
+            """A part's name as a normalised bag (its ``L`` facet)."""
+            key = e.rid if e.rid is not None else ("w", e.token)
+            if key not in left_bags:
+                b = self._content(Elem((0, 2), left=e, right=e), sides="L").get("L")
+                left_bags[key] = b if isinstance(b, dict) else ({b: 1.0} if b and b != BLANK else {})
+            return left_bags[key]
+
+        def paired_slots(h: Optional[int]) -> Optional[Dict[tuple, float]]:
+            """sibling_mode="pair": the right parts of the stored composites whose left
+            parts sit under the concept the frozen left part sorts to (``sibling``
+            levels above its end): a general concept, made specific by the sibling. A
+            part is lower than the chunk it belongs to (height below ``h``)."""
+            node = sibling_concept()
+            while node is not None and node.parent is not None:
+                lefts = self.cnt.passive(node, LPART)
+                if lefts:
+                    owner = self._part_owner()
+                    me = bag_of(as_elem(last[0])) if sibling_beta else None
+                    out: Dict[tuple, float] = {}
+                    for (lrid, _), c in lefts.items():
+                        e = owner.get(lrid)
+                        if e is not None and e.right.leaf is not None and (h is None or e.right.height < h):
+                            k = (e.right.rid, e.right.token is not None)
+                            if me is not None:
+                                # the concept parameterised by the sibling: each member
+                                # counts by how well its own left part matches the frozen one
+                                other = bag_of(e.left)
+                                c *= sum(min(p, other.get(u, 0.0)) for u, p in me.items()) ** sibling_beta
+                            out[k] = out.get(k, 0.0) + c
+                    return out if any(v > 0 for v in out.values()) else None
+                node = node.parent
+            return None
+
+        def expand(x: CobwebNode, d: int, h: Optional[int] = None) -> bool:
             if not part(x, LPART, d):
                 return False
+            if sibling is not None and sibling_mode == "pair":
+                cands = paired_slots(h)
+                # a paired slot whose context leaf holds no filler of its kind is
+                # passed over for another (at most five tries)
+                for _ in range(5):
+                    if not cands:
+                        break
+                    slot = draw(cands)
+                    mark = len(out)
+                    try:
+                        return part(x, RPART, d, slots={slot: 1.0})
+                    except LookupError:
+                        del out[mark:]
+                        cands.pop(slot, None)
+                return part(x, RPART, d)
             return part(x, RPART, d, sibling_concept() if sibling is not None else None)
 
-        def part(x: CobwebNode, a: str, d: int, sib: Optional[CobwebNode] = None) -> bool:
+        def part(x: CobwebNode, a: str, d: int, sib: Optional[CobwebNode] = None,
+                 slots: Optional[Dict[tuple, float]] = None) -> bool:
             if True:
-                where = draw(self.cnt.passive(x, a))
+                where = draw(slots or self.cnt.passive(x, a))
                 if where is None or self.records[where[0]].leaf is None:
                     raise LookupError
                 leaf, primitive = self.records[where[0]].leaf, where[1] or d >= max_depth
@@ -2144,7 +2216,7 @@ class Trellis3:
                 if sib is not None and fills:
                     # the frozen left sibling predicts the right part: each candidate
                     # weighted by how much more likely its facets are under that concept
-                    weighted = {f: c * lift(sib, f) for f, c in fills.items()}
+                    weighted = {f: c * lift(sib, f) ** sibling_beta for f, c in fills.items()}
                     if any(v > 0 for v in weighted.values()):
                         fills = weighted
                 if pat is None:
@@ -2160,7 +2232,7 @@ class Trellis3:
                     if f[0] == "w":
                         out.append(f[1])
                     elif self.records[f[1]].cleaf is not None:
-                        expand(self.records[f[1]].cleaf, d + 1)
+                        expand(self.records[f[1]].cleaf, d + 1, self.records[f[1]].height)
                     else:
                         raise LookupError
                     if entry is not None:
@@ -2244,7 +2316,7 @@ class Trellis3:
             if root is None or self.records[root].cleaf is None:
                 return None
             try:
-                expand(self.records[root].cleaf, 0)
+                expand(self.records[root].cleaf, 0, self.records[root].height)
             except (LookupError, RecursionError):
                 return None
             return out

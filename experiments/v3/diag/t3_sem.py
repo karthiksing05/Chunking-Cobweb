@@ -14,9 +14,10 @@ words of the 250-word vocabulary). A sentence scores the mean PMI of its pairs.
 Grammar as in t3_use.py: trigrams attested, novel, attested + novel.
 
 Usage: t3_sem.py <cfg json> <seed> <n> <tag> <arms>
-  arms: comma list of level:sibling (level = context concepts above the slot leaf
-  the fillers come from; sibling = levels above where the frozen left part sorts,
-  "none" = no sibling conditioning); "0:none" = the current generator
+  arms: a JSON list of generate_tree keyword sets, e.g. [{}, {"sibling": 1},
+  {"choose": "match"}, {"choose": "backoff", "beta": 2}]; choose defaults to "leaf".
+  ({} is the current generator; "sibling": k conditions a right part on its frozen
+  left part, "sibling_beta" sharpens that.)
 """
 import json
 import math
@@ -33,8 +34,8 @@ from trellis2.stories import heldout_path, load_corpus, read_sentences  # noqa: 
 from trellis2.trellis3 import Trellis3  # noqa: E402
 
 cfg, seed, n, tag = json.loads(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), sys.argv[4]
-arms = [tuple(None if v == "none" else int(v) for v in a.split(":")) for a in sys.argv[5].split(",")]
-FILL, N_GEN = "both+peer", 300
+arms = json.loads(sys.argv[5])
+FILL, N_GEN = "both+peer", 600
 
 corpus = load_corpus(vocab_size=250)
 vocab = {w for s in corpus for w in s}
@@ -120,17 +121,17 @@ for s in train:
 learn_s = time.time() - t0
 L._quiet = True
 ix = L.concept_index()
-for level, arm in arms:
+for arm in arms:
     g_rng = random.Random(seed + 7)
     t1 = time.time()
-    S = [g for g in (L.generate_tree(g_rng, index=ix, choose="leaf", level=level, fill_name=FILL, sibling=arm) for _ in range(N_GEN)) if g]
+    S = [g for g in (L.generate_tree(g_rng, index=ix, fill_name=FILL, **{"choose": "leaf", **arm}) for _ in range(N_GEN)) if g]
     coh, cn = coherence(S)
     nov_S = [g for g in S if tuple(g) not in seen]
     ncoh, ncn = coherence(nov_S)
     nshuf, _ = coherence(shuffled(nov_S, random.Random(seed + 13)))
     shuf, _ = coherence(shuffled(S, random.Random(seed + 11)))
     share = (coh - shuf) / (r_coh - r_shuf) if coh is not None and shuf is not None else None
-    print(json.dumps({"tag": tag, "seed": seed, "n": n, "level": level, "sibling": arm, "learn s": round(learn_s), "gen s": round(time.time() - t1),
+    print(json.dumps({"tag": tag, "seed": seed, "n": n, "arm": arm, "learn s": round(learn_s), "gen s": round(time.time() - t1),
                       "generated": len(S), **grammar(S),
                       "coherence": None if coh is None else round(coh, 3), "shuffled": None if shuf is None else round(shuf, 3),
                       "share": None if share is None else round(share, 3), "sentences scored": cn,
