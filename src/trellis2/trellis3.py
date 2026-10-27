@@ -1895,7 +1895,7 @@ class Trellis3:
                       sibling_mode: str = "lift", sibling_facets: Sequence[str] = ("L",),
                       sibling_window: int = 0, after: Optional[Sequence[str]] = None,
                       after_level: int = 0, after_mode: str = "next",
-                      story_beta: float = 1.0) -> Optional[List[str]]:
+                      story_beta: float = 1.0, story_fill: Optional[float] = None) -> Optional[List[str]]:
         """Expansive generation from the two hierarchies alone. Every step reads
         statistics held by concepts: a whole experience is drawn from the content
         root (SENT); a content concept gives where its parts stood (LPART, RPART:
@@ -1950,7 +1950,12 @@ class Trellis3:
         the content root's SENT. ``after_mode="pv"`` (with story_facet): every whole
         experience of SENT is weighted by how much more likely the prompt's words are as
         "pv" (what came before) at the context concept ``after_level`` levels above its
-        own context leaf than at the root, raised to ``story_beta``."""
+        own context leaf than at the root, raised to ``story_beta``. ``story_fill=b``
+        (with after): every slot's fillers are also directed by the prompt, each
+        weighted by exp(b * lift) at the context leaves of its records under the slot's
+        concept (``_pv_fills``), so a general concept (level, backoff) keeps its members
+        but favours those that stood after sentences like the prompt."""
+        pv_lift = self._pv_lift(after) if after and story_fill is not None and self.story_facet else None
         fill_predict = isinstance(fill_name, str) and fill_name.endswith("+predict")
         if fill_predict:
             # "...+predict": a word slot also weights each candidate by the probability
@@ -2268,6 +2273,11 @@ class Trellis3:
                         weighted = {f: c * (cats.get(cat_of(f[1]), 0.0) + self.alpha) / (tot + self.alpha * size)
                                     for f, c in fills.items()}
                         fills = weighted
+                if pv_lift is not None and fills:
+                    # the prompt (what came before) directs the concept's members
+                    weighted = self._pv_fills(node, fills, pv_lift, story_fill)
+                    if any(v > 0 for v in weighted.values()):
+                        fills = weighted
                 if sib is not None and fills:
                     # the frozen left sibling predicts the right part: each candidate
                     # weighted by how much more likely its facets are under that concept
@@ -2490,21 +2500,16 @@ class Trellis3:
                 return pool
         return None
 
-    def _pv_pool(self, prev: Sequence[str], level: int = 0, beta: float = 1.0) -> Optional[Dict[int, float]]:
-        """SENT's whole experiences, each weighted by lift(prev as "pv") at the context
-        concept ``level`` levels above its context leaf: the product over prev's words of
-        P(word | concept) / P(word | root) (smoothed by alpha), to ``beta`` (beta 1: the
-        posterior of the experience given what came before; round 57 used the geometric mean)."""
-        if not self.story_facet:
-            return None
+    def _pv_lift(self, prev: Sequence[str]):
+        """log lift of ``prev`` as "pv" (what came before) at a context concept: the sum
+        over prev's words of log P(word | concept) / P(word | root), each estimated by
+        hierarchical Dirichlet back-off along the path (as _left_part_post):
+        P(w | C) = (n_C(w) + P(w | parent)) / (n_C + 1), the root smoothed by alpha."""
         root = self.ctx.root
         size = len(root.av.get("pv", {})) + 1
-
         memo: Dict[int, List[float]] = {}
 
         def probs(node):
-            # hierarchical Dirichlet back-off along the path (as _left_part_post):
-            # P(w | C) = (n_C(w) + P(w | parent)) / (n_C + 1), the root smoothed by alpha
             if node.id in memo:
                 return memo[node.id]
             d = node.av.get("pv", {})
@@ -2516,9 +2521,17 @@ class Trellis3:
             memo[node.id] = out
             return out
 
-        def lp(node):
-            return sum(math.log(p) for p in probs(node))
-        base = lp(root)
+        base = sum(math.log(p) for p in probs(root))
+        return lambda node: sum(math.log(p) for p in probs(node)) - base
+
+    def _pv_pool(self, prev: Sequence[str], level: int = 0, beta: float = 1.0) -> Optional[Dict[int, float]]:
+        """SENT's whole experiences, each weighted by the lift of ``prev`` as "pv" at the
+        context concept ``level`` levels above its context leaf (``_pv_lift``, the
+        posterior given what came before), raised to ``beta``. Round 57 used the
+        geometric mean of the word lifts and round 58 a flat alpha; both left the pool flat."""
+        if not self.story_facet:
+            return None
+        lift = self._pv_lift(prev)
         pool = {}
         for r, c in self.cnt.passive(self.cnt.root, SENT).items():
             node = self.records[r].leaf
@@ -2526,8 +2539,28 @@ class Trellis3:
                 continue
             for _ in range(level):
                 node = node.parent or node
-            pool[r] = c * math.exp(beta * (lp(node) - base))
+            pool[r] = c * math.exp(beta * lift(node))
         return pool
+
+    def _pv_fills(self, node, fills: Dict[tuple, float], lift, beta: float) -> Dict[tuple, float]:
+        """A general concept's fillers directed by what came before: each candidate
+        (("w", token) or ("c", record id)) weighted by the mean, over its committed
+        records stored under ``node``, of exp(beta * lift) at the record's own context
+        leaf. Candidates with no record under the concept keep weight 0."""
+        tot: Dict[tuple, float] = {}
+        cnt: Dict[tuple, int] = {}
+        stack = [node]
+        while stack:
+            n = stack.pop()
+            if n.children:
+                stack.extend(n.children)
+                continue
+            for r in self._at["ctx"].get(id(n), []):
+                f = ("w", r.token) if r.token is not None else ("c", r.rid)
+                if f in fills:
+                    tot[f] = tot.get(f, 0.0) + math.exp(beta * lift(n))
+                    cnt[f] = cnt.get(f, 0) + 1
+        return {f: c * tot[f] / cnt[f] for f, c in fills.items() if f in tot}
 
     def _sibling_fills(self, left: Sequence[str], beta: float = 1.0) -> Dict[int, float]:
         """P(committed composite | its left part is a chunk on the prompt's right
