@@ -147,7 +147,8 @@ class Trellis3:
                  name_level: Optional[str] = None, name_mix_k: Optional[float] = None,
                  part_names: Optional[str] = None, verify_weight: str = "one",
                  ref_names: bool = False, repair_reached: int = 0, repair_use: int = 0,
-                 repair_path: bool = False, repair_draws: int = 1, repair_now: bool = False):
+                 repair_path: bool = False, repair_draws: int = 1, repair_now: bool = False,
+                 story_facet: bool = False):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -245,6 +246,12 @@ class Trellis3:
         # rest, the names of the words that stood next to it, tagged by side. What is
         # stored in the trees is unchanged; rare words lean on their neighbours.
         self.name_mix_k = name_mix_k
+        # story_facet: an experience that follows another (learn(follows=True)) gives
+        # every element a context facet "pv", the bag of the previous experience's
+        # words (a same-level chunk context one level up: the neighbouring sentence);
+        # otherwise it is blank. Context concepts then also sort by what came before.
+        self.story_facet = story_facet
+        self._pv = None
         # part_names="bands": a chunk names its parts by their band names even when the
         # word's own representation (name_level / name_mix_k) is finer, so the content
         # tree generalises over parts while words are identified by the finer name;
@@ -338,7 +345,8 @@ class Trellis3:
         own = tuple(f"cc{k}" for k in d) if self.donate_ctx else ()
         neigh = self._neigh_names(d) \
             if (neighbour_concepts or neighbour_types or neighbour_chunks or relational in ("window", "both")) else ()
-        self.ctx_attrs = surface + neigh + chunk + own + (("le", "re") if boundary == "edge" else ())
+        self.ctx_attrs = surface + neigh + chunk + own + (("le", "re") if boundary == "edge" else ()) + \
+            (("pv",) if story_facet else ())
         parts = tuple(f"{p}{k}" for p in ("L", "R") for k in d)
         given = tuple(f"{p}{k}" for p in ("LC", "RC") for k in d) if self.donate_cnt else ()
         self.cnt_attrs = parts + given + (("LH", "RH") if heights else ()) + \
@@ -802,6 +810,8 @@ class Trellis3:
                     self._facet(x, p, ids or [BLANK] * self.depth)
         if self.donate_ctx:
             self._facet(x, "cc", self._cc_ids(e))
+        if self.story_facet:
+            self._facet(x, "pv", self._pv or [BLANK])
         return x
 
     def _window_name(self, token: str) -> Optional[Dict[str, float]]:
@@ -1151,6 +1161,10 @@ class Trellis3:
         (the next sentence of a story); the previous whole experience then records
         this one as what followed it (NEXT, a same-level chunk context)."""
         tokens = list(tokens)
+        if self.story_facet:
+            prev = self.__dict__.get("_last_tokens")
+            self._pv = list(prev) if follows and prev else None
+            self._last_tokens = tokens
         r = self.parse(tokens)
         words, comps, post, chosen = r["words"], r["comps"], r["post"], set(r["chosen"])
         # chunk context from the analysis: parent and sibling of its elements
@@ -1880,7 +1894,8 @@ class Trellis3:
                       sibling: Optional[int] = None, sibling_beta: float = 1.0,
                       sibling_mode: str = "lift", sibling_facets: Sequence[str] = ("L",),
                       sibling_window: int = 0, after: Optional[Sequence[str]] = None,
-                      after_level: int = 0) -> Optional[List[str]]:
+                      after_level: int = 0, after_mode: str = "next",
+                      story_beta: float = 1.0) -> Optional[List[str]]:
         """Expansive generation from the two hierarchies alone. Every step reads
         statistics held by concepts: a whole experience is drawn from the content
         root (SENT); a content concept gives where its parts stood (LPART, RPART:
@@ -1932,8 +1947,11 @@ class Trellis3:
         whole chunk sorted in the content tree; the first concept at or above
         ``after_level`` levels over its leaf that holds NEXT statistics gives the
         whole experience to expand (what followed sentences like it), in place of
-        the content root's SENT."""
-        fill_predict =isinstance(fill_name, str) and fill_name.endswith("+predict")
+        the content root's SENT. ``after_mode="pv"`` (with story_facet): every whole
+        experience of SENT is weighted by how much more likely the prompt's words are as
+        "pv" (what came before) at the context concept ``after_level`` levels above its
+        own context leaf than at the root, raised to ``story_beta``."""
+        fill_predict = isinstance(fill_name, str) and fill_name.endswith("+predict")
         if fill_predict:
             # "...+predict": a word slot also weights each candidate by the probability
             # of its learned category (word_cc="cat") at this part of the composite
@@ -2349,7 +2367,8 @@ class Trellis3:
                 return lw + list(out) + rw
             return None
         if pat is None:
-            pool = self._next_pool(after, after_level) if after else None
+            pool = (self._pv_pool(after, after_level, story_beta) if after_mode == "pv" else
+                    self._next_pool(after, after_level)) if after else None
             root = draw(pool or self.cnt.passive(self.cnt.root, SENT))
             if root is None or self.records[root].cleaf is None:
                 return None
@@ -2470,6 +2489,29 @@ class Trellis3:
             if pool:
                 return pool
         return None
+
+    def _pv_pool(self, prev: Sequence[str], level: int = 0, beta: float = 1.0) -> Optional[Dict[int, float]]:
+        """SENT's whole experiences, each weighted by lift(prev as "pv") at the context
+        concept ``level`` levels above its context leaf: the geometric mean over prev's
+        words of P(word | concept) / P(word | root) (smoothed by alpha), to ``beta``."""
+        if not self.story_facet:
+            return None
+        root = self.ctx.root
+        size = len(root.av.get("pv", {})) + 1
+
+        def lp(node):
+            d = node.av.get("pv", {})
+            return sum(math.log((d.get(w, 0.0) + self.alpha) / (node.count + self.alpha * size)) for w in prev) / len(prev)
+        base = lp(root)
+        pool = {}
+        for r, c in self.cnt.passive(self.cnt.root, SENT).items():
+            node = self.records[r].leaf
+            if node is None or self.records[r].cleaf is None:
+                continue
+            for _ in range(level):
+                node = node.parent or node
+            pool[r] = c * math.exp(beta * (lp(node) - base))
+        return pool
 
     def _sibling_fills(self, left: Sequence[str], beta: float = 1.0) -> Dict[int, float]:
         """P(committed composite | its left part is a chunk on the prompt's right

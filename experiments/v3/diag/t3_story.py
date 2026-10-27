@@ -11,11 +11,12 @@ words); PMI from within-sentence co-occurrence over the whole TinyStories file.
   random      a random held-out sentence (floor)
   share       (generated - random) / (real next - random)
 
-The unconditioned generator ({} arm) gets the same prompts, so its share is the
+Each prompt gets DRAWS generations and DRAWS random sentences. The unconditioned
+generator ({} arm) gets the same prompts, so its share is the
 floor up to sampling. Grammar: tag pattern attested (first 20000 corpus sentences),
 novel, and within-sentence coherence share as in t3_sem.py.
 
-Usage: t3_story.py <cfg json> <seed> <n> <tag> <arms>
+Usage: t3_story.py <cfg json> <seed> <n> <tag> <arms> [adjacent|story]
   arms: JSON list of generate_tree keyword sets; "cond": true passes the prompt
   as ``after`` (with "after_level"), e.g. [{}, {"cond": true}, {"cond": true, "after_level": 2}]
 """
@@ -36,7 +37,8 @@ from trellis2.trellis3 import Trellis3  # noqa: E402
 
 cfg, seed, n, tag = json.loads(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), sys.argv[4]
 arms = json.loads(sys.argv[5])
-FILL, N_PROMPT, N_TEST_STORIES = "both+peer", 400, 1500
+FOLLOW = sys.argv[6] if len(sys.argv) > 6 else "adjacent"
+FILL, N_PROMPT, N_TEST_STORIES, DRAWS = "both+peer", 400, 1500, 4
 
 # stories as lists of sentences (as read_sentences splits them)
 with open(default_tinystories_path(), encoding="utf-8") as f:
@@ -52,13 +54,14 @@ vocab = {w for w, _ in Counter(w for s in all_sents for w in s).most_common(250)
 keep = lambda s: 3 <= len(s) <= 8 and all(w in vocab for w in s)
 random.Random(seed).shuffle(stories)
 test, train_st = stories[:N_TEST_STORIES], stories[N_TEST_STORIES:]
-
-# training stream: kept sentences in story order, follows = the previous sentence of the story was kept
+# training stream: kept sentences in story order; follows = the previous sentence of the
+# story was kept (FOLLOW "adjacent") or any earlier sentence of the story was (FOLLOW "story":
+# the nearest earlier kept sentence then counts as the previous experience)
 train = []
 for st in train_st:
     for i, s in enumerate(st):
         if keep(s):
-            train.append((s, i > 0 and keep(st[i - 1])))
+            train.append((s, (i > 0 and keep(st[i - 1])) if FOLLOW == "adjacent" else any(keep(t) for t in st[:i])))
     if len(train) >= n:
         break
 train = train[:n]
@@ -127,7 +130,7 @@ def shuffled(sents, rng):
 rng = random.Random(seed + 11)
 P = [p for p, _ in pairs]
 real_c, _ = cross(P, [q for _, q in pairs])
-rand_c, _ = cross(P, [rng.choice(held) for _ in P])
+rand_c, _ = cross([p for p in P for _ in range(DRAWS)], [rng.choice(held) for _ in P for _ in range(DRAWS)])
 w_real = within([q for _, q in pairs])
 w_shuf = within(shuffled([q for _, q in pairs], rng))
 print(json.dumps({"tag": tag, "seed": seed, "train": len(train), "follows": sum(f for _, f in train), "prompts": len(P),
@@ -146,8 +149,9 @@ for arm in arms:
     cond = arm.pop("cond", False)
     g_rng = random.Random(seed + 7)
     t1 = time.time()
-    G = [L.generate_tree(g_rng, index=ix, fill_name=FILL, **({"after": p} if cond else {}), **{"choose": "leaf", **arm}) for p in P]
-    ok = [(p, g) for p, g in zip(P, G) if g]
+    PP = [p for p in P for _ in range(DRAWS)]
+    G = [L.generate_tree(g_rng, index=ix, fill_name=FILL, **({"after": p} if cond else {}), **{"choose": "leaf", **arm}) for p in PP]
+    ok = [(p, g) for p, g in zip(PP, G) if g]
     c, cn = cross(*zip(*ok)) if ok else (None, 0)
     S = [g for _, g in ok]
     pat = [tuple(t[:2] for _, t in nltk.pos_tag(g)) in patterns for g in S]
