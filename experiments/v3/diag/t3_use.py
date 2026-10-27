@@ -53,9 +53,9 @@ def band_ids(path):
     return out
 
 
-def misplaced(tree, leaf, x):
+def misplaced(tree, leaf, x, w=1.0):
     st = tree.ancestors(leaf)[::-1][:-1]
-    now = tree.categorize(x, 1.0)[:-1]
+    now = tree.categorize(x, w)[:-1]
     a, b = band_ids(st) if st else [], band_ids(now) if now else []
     m = max(len(a), len(b))
     return 1 - (sum(p == q for p, q in zip(a, b)) / m if m else 1.0)
@@ -146,6 +146,8 @@ for c in checks:
     L._quiet = True                  # measuring is not use
     st, mp, wst, wmp = {"ctx": [], "cnt": []}, {"ctx": [], "cnt": []}, {"ctx": 0.0, "cnt": 0.0}, {"ctx": 0.0, "cnt": 0.0}
     tot = {"ctx": 0.0, "cnt": 0.0}
+    brk = Counter()
+    wown = {"ctx": 0.0, "cnt": 0.0}
     for k, e in recs.items():
         cnt, ctx = current(e)
         for which, tree, leaf, old, new in (("ctx", L.ctx, e.leaf, e.ctx, ctx), ("cnt", L.cnt, e.cleaf, e.cnt, cnt)):
@@ -153,11 +155,16 @@ for c in checks:
                 continue
             s_ = float(new != old)
             m_ = misplaced(tree, leaf, new)
+            o_ = misplaced(tree, leaf, new, e.weight)
+            wown[which] += hits[k] * o_
             st[which].append(s_)
             mp[which].append(m_)
             wst[which] += hits[k] * s_
             wmp[which] += hits[k] * m_
             tot[which] += hits[k]
+            if which == "ctx" and m_ > 0:
+                brk["word" if e.token is not None else "chunk"] += hits[k] * m_
+                brk["checked last" if getattr(e, "chk", -1) >= L.stats["experiences"] else "not checked last"] += hits[k] * m_
     whole = {"ctx": [], "cnt": []}
     for r in random.Random(seed).sample(list(L.records), min(1500, len(L.records))):
         if r.leaf is not None:
@@ -171,8 +178,10 @@ for c in checks:
            "reached stale ctx / cnt": [m(st["ctx"]), m(st["cnt"])],
            "reached misplaced ctx / cnt": [m(mp["ctx"]), m(mp["cnt"])],
            "reached misplaced, by use ctx / cnt": [round(wmp[w] / max(tot[w], 1e-9), 3) for w in ("ctx", "cnt")],
+           "reached misplaced at own weight, by use ctx / cnt": [round(wown[w] / max(tot[w], 1e-9), 3) for w in ("ctx", "cnt")],
            "whole tree misplaced ctx / cnt": [m(whole["ctx"]), m(whole["cnt"])],
-           "use repaired so far": L.stats.get("use repaired", 0)}
+           "use repaired so far": L.stats.get("use repaired", 0),
+           "misplaced ctx use-mass by kind": {k: round(v / max(tot["ctx"], 1e-9), 4) for k, v in brk.items()}}
     print(json.dumps(row), flush=True)
     rows.append(row)
 t1 = time.time()

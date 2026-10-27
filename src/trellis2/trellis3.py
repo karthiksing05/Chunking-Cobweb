@@ -146,7 +146,7 @@ class Trellis3:
                  name_level: Optional[str] = None, name_mix_k: Optional[float] = None,
                  part_names: Optional[str] = None, verify_weight: str = "one",
                  ref_names: bool = False, repair_reached: int = 0, repair_use: int = 0,
-                 repair_path: bool = False, repair_draws: int = 1):
+                 repair_path: bool = False, repair_draws: int = 1, repair_now: bool = False):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -312,6 +312,12 @@ class Trellis3:
         # to how much each part of memory is used
         self.repair_path = repair_path
         self.repair_draws = repair_draws    # records drawn beneath each concept passed
+        # repair_now: a stale record is repaired the moment a sort finds it: the records
+        # at the leaf a sort ends at are re-described and re-sorted first (each at most
+        # once per experience, up to repair_use per experience), and the sort is then
+        # redone, so what it returns reflects current memory
+        self.repair_now = repair_now
+        self._now_count = 0
         self._passed: Dict[Tuple[str, int], object] = {}
         self._quiet = False                 # sorts made while repairing mark nothing
         # word_cc="name": a word's own-content facet keeps only the bands up to
@@ -1255,6 +1261,7 @@ class Trellis3:
                     for e in self._at[which].get(id(nd), ()):
                         self._used[id(e)] = e
             self._passed = {}
+            self._now_count = 0
             new = {id(e) for e in recs[first:]}
             pool = [e for e in self._used.values() if id(e) not in new and e.chk < exp]
             pool.sort(key=lambda e: e.chk)
@@ -1435,6 +1442,23 @@ class Trellis3:
         def categorize(x, w=1.0):
             path = orig(x, w)
             if path and not self._quiet:
+                if self.repair_now and self._now_count < self.repair_use:
+                    nxt = self.stats["experiences"] + 1
+                    node = path[-1]
+                    found = [e for c in ([node] if not node.children else node.children) if not c.children
+                             for e in self._at[which].get(id(c), ()) if e.chk < nxt]
+                    if found:
+                        found = found[:self.repair_use - self._now_count]
+                        self._now_count += len(found)
+                        self.stats["repaired now"] = self.stats.get("repaired now", 0) + len(found)
+                        for e in found:
+                            e.chk = nxt
+                        self._quiet = True
+                        try:
+                            self._refresh_todo(found, None, self.records, len(self.records))
+                        finally:
+                            self._quiet = False
+                        path = orig(x, w)
                 self._reach(which, path[-1])
                 if self.repair_path:
                     for nd in path[1:-1]:
