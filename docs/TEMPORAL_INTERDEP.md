@@ -452,3 +452,18 @@ Status: **path repair on use, budget 700** (`refresh="verify"`, `refresh_budget`
 Path 700 holds misplacement under 1% at 2.0–2.3× cost on both seeds, and grammaticality stays within 1 point. Grammatical and novel moves with the seed: +3.4 points on s13, −5.5 on s17. With 300 samples one standard error is about 2.5 points, so the mean change (−1.1) is within noise, though s17 alone is about two standard errors down. `repair_now` loses 2.4 points of grammaticality on s13, so it stays off.
 
 Status: **the temporal target is met by path repair on use, budget 700**, at 1000 and 2000 on both seeds. It passes the grammar guard and holds characters. Open: interdependence (faster convergence with generation kept).
+
+## Round 47: interdependence under path repair, and a configuration error (2026-10-27)
+
+**Configuration error, rounds 27–47.** The submit scripts from round 27 on (`logs/v3_cu_submit.sh` onward) leave out `part_names`, whose default is off. The recipe described above has `part_names="bands"`. So every run in rounds 27–47 built content descriptions from each word part's fine mixed name (`name_mix_k`), not from its band name. Those names change at every experience, which explains three things: used content records 0.85 stale, a heavy repair load, and the cost of mixing. The results of rounds 27–47 hold for the configuration that ran, not for the documented one. Round 48 reruns path repair 700 with `part_names="bands"`.
+
+**Name mixing under path repair, as run (no `part_names`).** Category accuracy (nearest word by learned name has the same coarse tag), seeds 13 / 17:
+
+| | 50 | 200 | 800 | 2000 |
+|---|---|---|---|---|
+| mixing (`name_mix_k` 4) | 0.46 / 0.42 | 0.49 / 0.47 | 0.45 / 0.51 | – / 0.52 |
+| no mixing | 0.29 / 0.25 | 0.33 / 0.28 | 0.40 / 0.44 | 0.44 / 0.45 |
+
+Through `t3_use.py` (fill `both+peer`, 2000), no mixing: used misplaced at own weight 0.016 / 0.033 and 0.020 / 0.033, grammatical 0.974 / 0.989, grammatical and novel 0.357 / 0.285, against 0.281 / 0.227 with mixing.
+
+**Learning time alone** (`t3_time.py`; `t3_use.py` and `t3_stories.py` count checkpoint measurement as learning). At 1000: original 948 / 1 059 s, path 700 with mixing 1 230 / 1 167 s, path 700 without mixing 279 / 261 s. A profile (300 experiences after 300) puts 72% of learning in `_refresh_todo`, mostly the misplacement sort.
