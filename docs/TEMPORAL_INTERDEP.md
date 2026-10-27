@@ -437,3 +437,18 @@ At 2000 the original's s13 run gives 0.038 / 0.064.
 Seeds vary far more than settings: the original alone ranges from 0.620 to 0.938. The seed-17 drop seen earlier is seed noise. Every repair keeps real characters within 1 point of the original and raises real and unseen.
 
 Status: **path repair on use, budget 700** (`refresh="verify"`, `refresh_budget` 0, `repair_path`, `repair_use` 700) meets the temporal target among used records at 1000 (under 1% at own weight, 1.4× cost). It passes the four-grammar guard and holds characters on the five-seed mean. The 2000-sentence check is pending.
+
+**At 2000 sentences** (`t3_use.py`, both seeds). "Grammatical" is the share of 300 TinyStories samples whose trigrams are all attested.
+
+| 2000 | used misplaced at own weight, ctx / cnt | learn s (× original) | grammatical | grammatical and novel |
+|---|---|---|---|---|
+| original s13 | 0.038 / 0.064 | 3 620 | 0.992 | 0.247 |
+| path 700 s13 | **0.006 / 0.006** | 8 178 (**2.3×**) | 0.985 | 0.281 |
+| path 700 + repair_now s13 | 0.006 / 0.002 | 9 837 (2.7×) | 0.968 | 0.348 |
+| original s17 | 0.073 / 0.103 | 4 059 | 0.988 | 0.282 |
+| path 700 s17 | **0.006 / 0.005** | 8 120 (**2.0×**) | 0.980 | 0.227 |
+| path 700 + repair_now s17 | 0.006 / 0.027 | 8 677 (2.1×) | 0.987 | 0.209 |
+
+Path 700 holds misplacement under 1% at 2.0–2.3× cost on both seeds, and grammaticality stays within 1 point. Grammatical and novel moves with the seed: +3.4 points on s13, −5.5 on s17. With 300 samples one standard error is about 2.5 points, so the mean change (−1.1) is within noise, though s17 alone is about two standard errors down. `repair_now` loses 2.4 points of grammaticality on s13, so it stays off.
+
+Status: **the temporal target is met by path repair on use, budget 700**, at 1000 and 2000 on both seeds. It passes the grammar guard and holds characters. Open: interdependence (faster convergence with generation kept).
