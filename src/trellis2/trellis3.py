@@ -1869,7 +1869,7 @@ class Trellis3:
                       gap_beta: float = 1.0, gap_mode: str = "window",
                       sibling: Optional[int] = None, sibling_beta: float = 1.0,
                       sibling_mode: str = "lift", sibling_facets: Sequence[str] = ("L",),
-                      sibling_window: bool = False) -> Optional[List[str]]:
+                      sibling_window: int = 0) -> Optional[List[str]]:
         """Expansive generation from the two hierarchies alone. Every step reads
         statistics held by concepts: a whole experience is drawn from the content
         root (SENT); a content concept gives where its parts stood (LPART, RPART:
@@ -1914,7 +1914,8 @@ class Trellis3:
         tree: a stored composite is drawn among those whose left parts sit under that
         concept, and its own right part is the slot (filled from its context leaf);
         ``sibling_facets`` ("L", "LC") are the left facets members are matched on and
-        ``sibling_window`` keeps right parts that stood after the word just generated."""
+        ``sibling_window=n`` keeps right parts that stood after the n words just
+        generated and that end the experience exactly when their composite does."""
         fill_predict = isinstance(fill_name, str) and fill_name.endswith("+predict")
         if fill_predict:
             # "...+predict": a word slot also weights each candidate by the probability
@@ -2089,7 +2090,16 @@ class Trellis3:
                                   for a, b in x.items()}
             return left_bags[key]
 
-        def paired_slots(h: Optional[int]) -> Optional[Dict[tuple, float]]:
+        def fits(ctx: dict, fin: bool) -> bool:
+            """A stored right part fits where it would stand: it followed the last
+            ``sibling_window`` words generated, and it ended its experience exactly when
+            the composite being generated ends the experience."""
+            for k in range(1, int(sibling_window) + 1):
+                if ctx.get(f"l{k}") != (out[-k] if len(out) >= k else BOS):
+                    return False
+            return (ctx.get("r1") == EOS) == fin
+
+        def paired_slots(h: Optional[int], fin: bool) -> Optional[Dict[tuple, float]]:
             """sibling_mode="pair": the right parts of the stored composites whose left
             parts sit under the concept the frozen left part sorts to (``sibling``
             levels above its end): a general concept, made specific by the sibling. A
@@ -2101,13 +2111,12 @@ class Trellis3:
                 if lefts:
                     owner = self._part_owner()
                     me = bags_of(as_elem(last[0])) if sibling_beta else None
-                    prev = out[-1] if out else BOS
                     slots: Dict[tuple, float] = {}
                     for (lrid, _), c in lefts.items():
                         e = owner.get(lrid)
                         if e is None or e.right.leaf is None or (h is not None and e.right.height >= h):
                             continue
-                        if sibling_window and (e.right.ctx or {}).get("l1") != prev:
+                        if sibling_window and not fits(e.right.ctx or {}, fin):
                             continue
                         if me is not None:
                             # the concept parameterised by the sibling: each member counts
@@ -2122,11 +2131,11 @@ class Trellis3:
                 node = node.parent
             return None
 
-        def expand(x: CobwebNode, d: int, h: Optional[int] = None) -> bool:
+        def expand(x: CobwebNode, d: int, h: Optional[int] = None, fin: bool = False) -> bool:
             if not part(x, LPART, d):
                 return False
             if sibling is not None and sibling_mode == "pair":
-                cands = paired_slots(h)
+                cands = paired_slots(h, fin)
                 # a paired slot whose context leaf holds no filler of its kind is
                 # passed over for another (at most five tries)
                 for _ in range(5):
@@ -2135,14 +2144,14 @@ class Trellis3:
                     slot = draw(cands)
                     mark = len(out)
                     try:
-                        return part(x, RPART, d, slots={slot: 1.0})
+                        return part(x, RPART, d, slots={slot: 1.0}, fin=fin)
                     except LookupError:
                         del out[mark:]
                         cands.pop(slot, None)
-                return part(x, RPART, d)
-            return part(x, RPART, d, sibling_concept() if sibling is not None else None)
+                return part(x, RPART, d, fin=fin)
+            return part(x, RPART, d, sibling_concept() if sibling is not None else None, fin=fin)
 
-        def part(x: CobwebNode, a: str, d: int, sib: Optional[CobwebNode] = None,
+        def part(x: CobwebNode, a: str, d: int, sib: Optional[CobwebNode] = None, fin: bool = False,
                  slots: Optional[Dict[tuple, float]] = None) -> bool:
             if True:
                 where = draw(slots or self.cnt.passive(x, a))
@@ -2243,7 +2252,7 @@ class Trellis3:
                     if f[0] == "w":
                         out.append(f[1])
                     elif self.records[f[1]].cleaf is not None:
-                        expand(self.records[f[1]].cleaf, d + 1, self.records[f[1]].height)
+                        expand(self.records[f[1]].cleaf, d + 1, self.records[f[1]].height, fin)
                     else:
                         raise LookupError
                     if entry is not None:
@@ -2327,7 +2336,7 @@ class Trellis3:
             if root is None or self.records[root].cleaf is None:
                 return None
             try:
-                expand(self.records[root].cleaf, 0, self.records[root].height)
+                expand(self.records[root].cleaf, 0, self.records[root].height, True)
             except (LookupError, RecursionError):
                 return None
             return out

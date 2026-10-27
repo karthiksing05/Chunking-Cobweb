@@ -11,7 +11,9 @@ words of the 250-word vocabulary). A sentence scores the mean PMI of its pairs.
   share       (sentences - shuffled) / (real - real shuffled): 0 = no more
               coherent than chance words of the right category, 1 = as real text
 
-Grammar as in t3_use.py: trigrams attested, novel, attested + novel.
+Grammar as in t3_use.py: trigrams attested, novel, attested + novel; and, independent
+of any word window, tag pattern attested (the coarse tag sequence of the sentence
+occurs in the first 20000 corpus sentences).
 
 Usage: t3_sem.py <cfg json> <seed> <n> <tag> <arms>
   arms: a JSON list of generate_tree keyword sets, e.g. [{}, {"sibling": 1},
@@ -51,8 +53,11 @@ for s in corpus:
 
 # gold tags (scoring only)
 gold_ct = defaultdict(Counter)
+patterns = set()
 for s in corpus[:20000]:
-    for w, t in nltk.pos_tag(s):
+    tagged = nltk.pos_tag(s)
+    patterns.add(tuple(t[:2] for _, t in tagged))
+    for w, t in tagged:
         gold_ct[w][t[:2]] += 1
 gold = {w: c.most_common(1)[0][0] for w, c in gold_ct.items()}
 CONTENT = {"NN", "VB", "JJ"}
@@ -105,7 +110,9 @@ def grammar(S):
     tri = [all(t in trigrams for t in zip(p, p[1:], p[2:])) for p in (["<s>", "<s>"] + list(g) + ["</s>"] for g in S)]
     nov = [tuple(g) not in seen for g in S]
     m = lambda v: round(sum(v) / max(len(v), 1), 3)
-    return {"trigrams attested": m(tri), "novel": m(nov), "attested + novel": m([a and b for a, b in zip(tri, nov)])}
+    pat = [tuple(t[:2] for _, t in nltk.pos_tag(g)) in patterns for g in S]
+    return {"trigrams attested": m(tri), "novel": m(nov), "attested + novel": m([a and b for a, b in zip(tri, nov)]),
+            "tag pattern attested": m(pat), "tag pattern attested + novel": m([a and b for a, b in zip(pat, nov)])}
 
 
 rng = random.Random(seed + 11)
