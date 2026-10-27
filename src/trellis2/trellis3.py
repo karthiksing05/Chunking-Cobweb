@@ -2500,9 +2500,24 @@ class Trellis3:
         root = self.ctx.root
         size = len(root.av.get("pv", {})) + 1
 
-        def lp(node):
+        memo: Dict[int, List[float]] = {}
+
+        def probs(node):
+            # hierarchical Dirichlet back-off along the path (as _left_part_post):
+            # P(w | C) = (n_C(w) + P(w | parent)) / (n_C + 1), the root smoothed by alpha
+            if node.id in memo:
+                return memo[node.id]
             d = node.av.get("pv", {})
-            return sum(math.log((d.get(w, 0.0) + self.alpha) / (node.count + self.alpha * size)) for w in prev)
+            if node.parent is None:
+                out = [(d.get(w, 0.0) + self.alpha) / (node.count + self.alpha * size) for w in prev]
+            else:
+                up = probs(node.parent)
+                out = [(d.get(w, 0.0) + u) / (node.count + 1.0) for w, u in zip(prev, up)]
+            memo[node.id] = out
+            return out
+
+        def lp(node):
+            return sum(math.log(p) for p in probs(node))
         base = lp(root)
         pool = {}
         for r, c in self.cnt.passive(self.cnt.root, SENT).items():
