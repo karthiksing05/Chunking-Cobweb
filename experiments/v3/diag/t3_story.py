@@ -133,9 +133,31 @@ real_c, _ = cross(P, [q for _, q in pairs])
 rand_c, _ = cross([p for p in P for _ in range(DRAWS)], [rng.choice(held) for _ in P for _ in range(DRAWS)])
 w_real = within([q for _, q in pairs])
 w_shuf = within(shuffled([q for _, q in pairs], rng))
+# references without the learner: what memory of the training stream could give at most
+#   retrieve  the stored next sentence whose previous sentence shares the most idf-weighted
+#             words with the prompt (no gold; ties broken at random)
+#   oracle    the training sentence with the highest gold cross PMI with the prompt
+stored = [(train[i - 1][0], s) for i, (s, fol) in enumerate(train) if fol and i > 0]
+df = Counter(w for s, _ in train for w in set(s))
+idf = {w: math.log(len(train) / c) for w, c in df.items()}
+ret = []
+for p in P:
+    ps = set(p)
+    sc = [sum(idf.get(w, 0.0) for w in ps & set(a)) + 1e-6 * rng.random() for a, _ in stored]
+    ret.append(stored[max(range(len(stored)), key=sc.__getitem__)][1] if stored else [])
+ret_c, _ = cross(P, ret)
+cands = [s for s, _ in train]
+orc = [max(cands, key=lambda g: cross([p], [g])[0] if cross([p], [g])[0] is not None else -1e9) for p in P[:100]]
+orc_c, _ = cross(P[:100], orc)
+orc_real, _ = cross(P[:100], [q for _, q in pairs[:100]])
+orc_rand, _ = cross(P[:100], [rng.choice(held) for _ in P[:100]])
 print(json.dumps({"tag": tag, "seed": seed, "train": len(train), "follows": sum(f for _, f in train), "prompts": len(P),
                   "REAL next": round(real_c, 3), "RANDOM": round(rand_c, 3),
-                  "within real": round(w_real, 3), "within shuffled": round(w_shuf, 3)}), flush=True)
+                  "within real": round(w_real, 3), "within shuffled": round(w_shuf, 3),
+                  "retrieve share": round((ret_c - rand_c) / (real_c - rand_c), 3),
+                  "oracle share (100 prompts)": round((orc_c - orc_rand) / (orc_real - orc_rand), 3)}), flush=True)
+if len(sys.argv) > 7 and sys.argv[7] == "refs":
+    sys.exit()
 
 L = Trellis3(seed=seed, **cfg)
 t0 = time.time()

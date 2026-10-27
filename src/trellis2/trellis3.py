@@ -2492,8 +2492,9 @@ class Trellis3:
 
     def _pv_pool(self, prev: Sequence[str], level: int = 0, beta: float = 1.0) -> Optional[Dict[int, float]]:
         """SENT's whole experiences, each weighted by lift(prev as "pv") at the context
-        concept ``level`` levels above its context leaf: the geometric mean over prev's
-        words of P(word | concept) / P(word | root) (smoothed by alpha), to ``beta``."""
+        concept ``level`` levels above its context leaf: the product over prev's words of
+        P(word | concept) / P(word | root) (smoothed by alpha), to ``beta`` (beta 1: the
+        posterior of the experience given what came before; round 57 used the geometric mean)."""
         if not self.story_facet:
             return None
         root = self.ctx.root
@@ -2501,7 +2502,7 @@ class Trellis3:
 
         def lp(node):
             d = node.av.get("pv", {})
-            return sum(math.log((d.get(w, 0.0) + self.alpha) / (node.count + self.alpha * size)) for w in prev) / len(prev)
+            return sum(math.log((d.get(w, 0.0) + self.alpha) / (node.count + self.alpha * size)) for w in prev)
         base = lp(root)
         pool = {}
         for r, c in self.cnt.passive(self.cnt.root, SENT).items():
