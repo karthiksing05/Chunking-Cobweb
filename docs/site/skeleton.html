@@ -1,0 +1,968 @@
+<title>Concepts, Chunks, Compression</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+/* Layout: sticky left contents, one page shown at a time (hash routing), ~68ch reading column with figures allowed to run wider.
+   Palette: linen ground, warm ink, one clear blue accent. Diagrams follow the ACS paper: green = context, blue = content, amber = focus. */
+:root {
+  --bg: #f6f1e7; --surface: #fcf9f3; --surface-2: #efe8db; --ink: #1f1b16; --ink2: #4a443b; --muted: #7a7266; --rule: #e1d7c5;
+  --accent: #2b5a88; --tint: #e2eaf3;
+  --ctx: #2e7549; --cnt: #2f5f8f; --foc: #b86508; --focf: #fbe8bf; --cand: #5a3a7a; --candf: #e6dbef;
+  --wordf: #f2c4b9; --words: #8c4440; --catf: #c3d6ef; --cats: #3b5e8c; --grey: #d9d1c2;
+  --s1: #2a6fc0; --s2: #d9622b; --s3: #1a9068; --gridc: #ebe3d3; --heat: #2e7549;
+  --ink-2: var(--ink2); --ink-3: var(--muted); --accent-soft: var(--tint);
+  --serif: "Source Serif 4", "Source Serif Pro", Georgia, "Times New Roman", serif;
+  --sans: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  --font-display: var(--serif); --font-body: var(--sans); --font-mono: var(--mono);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #15171a; --surface: #1c1f23; --surface-2: #23272c; --ink: #e8e5df; --ink2: #b9b4ab; --muted: #8e8981; --rule: #33373c;
+    --accent: #8db3dc; --tint: #1e2a36;
+    --ctx: #4fae78; --cnt: #79a6d6; --foc: #e2a646; --focf: #3a2f17; --cand: #a88bd0; --candf: #2c2338;
+    --wordf: #4a2a28; --words: #d08a83; --catf: #22344d; --cats: #7fa6d8; --grey: #3a3f46;
+    --s1: #4a8fe6; --s2: #e26a30; --s3: #16a58c; --gridc: #2a2f35; --heat: #3fa56e;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #15171a; --surface: #1c1f23; --surface-2: #23272c; --ink: #e8e5df; --ink2: #b9b4ab; --muted: #8e8981; --rule: #33373c;
+  --accent: #8db3dc; --tint: #1e2a36;
+  --ctx: #4fae78; --cnt: #79a6d6; --foc: #e2a646; --focf: #3a2f17; --cand: #a88bd0; --candf: #2c2338;
+  --wordf: #4a2a28; --words: #d08a83; --catf: #22344d; --cats: #7fa6d8; --grey: #3a3f46;
+  --s1: #4a8fe6; --s2: #e26a30; --s3: #16a58c; --gridc: #2a2f35; --heat: #3fa56e;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--serif); font-size: 17px; line-height: 1.62; margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); font-optical-sizing: auto; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+a { color: var(--accent); text-underline-offset: 2px; text-decoration-thickness: 1px; }
+a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+.shell { display: grid; grid-template-columns: 236px minmax(0, 1fr); gap: 52px; max-width: 1220px; margin: 0 auto; padding-block: 36px 72px; }
+/* navigation */
+.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 28px); align-self: start; font-family: var(--sans); font-size: 13.5px; line-height: 1.45; max-height: calc(100vh - 56px); overflow-y: auto; padding-right: 4px; }
+.toc .brand { font-family: var(--serif); font-weight: 600; font-size: 18px; color: var(--ink); margin: 0 0 18px; line-height: 1.25; }
+.toc .brand span { display: block; font-family: var(--sans); font-weight: 400; font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+.toc h2 { font-family: var(--sans); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 20px 0 6px; }
+.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
+.toc li { margin: 0; max-width: none; }
+.toc a { display: grid; grid-template-columns: 28px 1fr; padding: 5px 8px; border-radius: 4px; color: var(--ink2); text-decoration: none; }
+.toc a .n { color: var(--muted); font-variant-numeric: tabular-nums; }
+.toc a:hover { background: var(--surface-2); color: var(--ink); }
+.toc a[aria-current="page"] { background: var(--tint); color: var(--ink); font-weight: 500; }
+.toc a[aria-current="page"] .n { color: var(--accent); }
+.topbar { display: none; }
+/* pages */
+main { min-width: 0; }
+.page { max-width: 900px; }
+.page[hidden] { display: none; }
+.eyebrow { font-family: var(--sans); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; font-weight: 500; }
+h1 { font-family: var(--serif); font-weight: 600; font-size: 34px; line-height: 1.18; margin: 0 0 14px; text-wrap: balance; }
+h2 { font-family: var(--serif); font-weight: 600; font-size: 23px; line-height: 1.3; margin: 40px 0 10px; text-wrap: balance; }
+h3 { font-family: var(--sans); font-weight: 600; font-size: 15.5px; line-height: 1.4; margin: 28px 0 6px; color: var(--ink); }
+p, li { max-width: 68ch; }
+p { margin: 0 0 14px; }
+.lede { font-size: 19.5px; line-height: 1.55; color: var(--ink2); margin-bottom: 26px; max-width: 62ch; }
+.col { max-width: 68ch; }
+ul, ol { padding-left: 1.3em; margin: 0 0 16px; }
+li { margin: 0 0 6px; }
+code, .mono { font-family: var(--mono); font-size: 0.84em; }
+code { background: var(--surface-2); padding: 1px 5px; border-radius: 3px; }
+.small { font-size: 14.5px; color: var(--ink2); }
+.note { border: 1px solid var(--rule); background: var(--surface); border-radius: 6px; padding: 14px 18px; margin: 18px 0 22px; font-size: 15.5px; color: var(--ink2); }
+.note p:last-child { margin-bottom: 0; }
+.note .note-head { font-family: var(--sans); font-weight: 600; font-size: 12px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink2); margin-bottom: 6px; }
+/* tables */
+.tbl-wrap { overflow-x: auto; margin: 14px 0 22px; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }
+table.tbl { border-collapse: collapse; width: 100%; min-width: 560px; font-family: var(--sans); font-size: 14px; line-height: 1.45; font-variant-numeric: tabular-nums; }
+.tbl th, .tbl td { padding: 8px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--rule); }
+.tbl thead th { font-weight: 600; font-size: 12.5px; color: var(--ink2); background: var(--surface-2); }
+.tbl tbody tr:last-child td, .tbl tbody tr:last-child th { border-bottom: 0; }
+.tbl tbody tr.hl td, .tbl tbody tr.hl th { background: var(--tint); }
+.tbl td.num, .tbl th.num { text-align: right; white-space: nowrap; }
+.tbl tbody th { font-weight: 500; }
+.tbl .best { font-weight: 600; }
+.tbl caption { caption-side: bottom; text-align: left; padding: 8px 12px; font-size: 12.5px; color: var(--muted); }
+.tablewrap { overflow-x: auto; margin-top: 18px; }
+.tablewrap table, .scrolly table { border-collapse: collapse; font-family: var(--sans); font-size: 14.5px; width: 100%; min-width: 560px; }
+.tablewrap th, .tablewrap td, .scrolly th, .scrolly td { text-align: left; padding: 7px 14px 7px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.tablewrap th, .scrolly th { font-weight: 600; color: var(--ink2); font-size: 13px; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; padding-right: 18px; white-space: nowrap; }
+td.what { color: var(--ink2); font-size: 14px; }
+.st { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; font-weight: 600; }
+.st-kept { color: var(--ctx); } .st-set { color: var(--muted); } .st-run { color: var(--foc); }
+/* key figures */
+dl.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; margin: 18px 0 26px; font-family: var(--sans); }
+dl.facts div { background: var(--surface); padding: 12px 14px; }
+dl.facts dt { font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+dl.facts dd { margin: 0; font-size: 15px; color: var(--ink); line-height: 1.4; }
+/* results index */
+.rlist { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 10px; }
+.rlist li { max-width: none; margin: 0; }
+.rlist a { display: grid; grid-template-columns: 44px 1fr; gap: 4px 12px; padding: 14px 16px; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); color: var(--ink); text-decoration: none; }
+.rlist a:hover { border-color: var(--accent); }
+.rlist .rn { font-family: var(--sans); font-weight: 600; color: var(--accent); font-size: 14px; padding-top: 2px; }
+.rlist .rt { font-weight: 600; font-size: 17px; line-height: 1.35; }
+.rlist .ra { grid-column: 2; font-size: 15px; color: var(--ink2); line-height: 1.5; }
+.toc-list { font-family: var(--sans); font-size: 15px; }
+/* pager */
+.pager { display: flex; justify-content: space-between; gap: 12px; margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule); max-width: 900px; font-family: var(--sans); font-size: 14px; }
+.pager a { display: flex; flex-direction: column; gap: 2px; text-decoration: none; color: var(--ink); max-width: 48%; }
+.pager a small { color: var(--muted); font-size: 12px; }
+.pager a.next { text-align: right; margin-left: auto; }
+.pager a:hover span { text-decoration: underline; }
+/* principles */
+.principles { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 22px 34px; margin-top: 24px; }
+.principles > div { min-width: 0; border-top: 1px solid var(--rule); padding-top: 12px; }
+.principles b { display: block; font-family: var(--serif); font-size: 18px; font-weight: 600; line-height: 1.3; }
+.principles p { margin-top: 6px; font-size: 16px; color: var(--ink2); }
+.principles .ev { display: block; margin-top: 8px; font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
+/* figures */
+figure { margin: 22px 0 6px; }
+.fig { overflow-x: auto; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 14px; }
+figure svg.dg { display: block; width: 100%; min-width: 640px; height: auto; }
+figure img.plot { display: block; width: 100%; min-width: 620px; height: auto; border-radius: 4px; background: #fff; }
+figcaption { font-size: 14.5px; color: var(--ink2); margin: 10px 0 26px; max-width: 72ch; font-family: var(--serif); }
+figcaption b { color: var(--ink); font-weight: 600; }
+.samples { font-family: var(--serif); font-size: 16.5px; margin: 8px 0 18px; display: grid; gap: 4px; padding-left: 0; list-style: none; }
+.samples li { margin: 0; }
+.samples .bad { color: var(--muted); }
+
+svg.dg text { font-family: var(--font-body); font-size: 13px; fill: var(--ink); }
+svg.dg text.sf { font-family: var(--font-display); }
+svg.dg text.mo { font-family: var(--font-mono); font-size: 11.5px; }
+svg.dg text.b { font-weight: 700; }
+svg.dg text.mu { fill: var(--muted); }
+svg.dg text.wh { fill: var(--surface); }
+svg.dg text.dk { fill: var(--ink); }
+svg.dg text.tctx { fill: var(--ctx); } svg.dg text.tcnt { fill: var(--cnt); }
+svg.dg text.tfoc { fill: var(--foc); } svg.dg text.tcand { fill: var(--cand); }
+svg.dg .w { fill: var(--wordf); stroke: var(--words); stroke-width: 1.6; }
+svg.dg .c { fill: var(--catf); stroke: var(--cats); stroke-width: 2; }
+svg.dg .fo { fill: var(--focf); stroke: var(--foc); stroke-width: 2.4; }
+svg.dg .cd { fill: var(--candf); stroke: var(--cand); stroke-width: 1.6; }
+svg.dg .ln { stroke: var(--ink2); stroke-width: 1.4; fill: none; }
+svg.dg .lnf { stroke: var(--muted); stroke-width: 1.1; fill: none; }
+svg.dg .dot { stroke: var(--cand); stroke-width: 1.3; stroke-dasharray: 2 4; fill: none; }
+svg.dg .gr { fill: var(--grey); stroke: var(--ink2); stroke-width: 1.3; }
+svg.dg .lf { fill: var(--surface); stroke: var(--ink2); stroke-width: 1.3; }
+svg.dg .nctx { fill: var(--ctx); } svg.dg .ncnt { fill: var(--cnt); } svg.dg .nfoc { fill: var(--foc); }
+svg.dg .card { fill: var(--surface); stroke: var(--rule); stroke-width: 1.2; }
+svg.dg .panel { fill: none; stroke: var(--ink2); stroke-width: 1.3; }
+svg.dg .phead { fill: var(--ink); }
+svg.dg .pnum { fill: var(--surface); }
+svg.dg text.inv { fill: var(--surface); }
+svg.dg .bctx { fill: var(--surface); stroke: var(--ctx); stroke-width: 2; }
+svg.dg .bcnt { fill: var(--surface); stroke: var(--cnt); stroke-width: 2; }
+svg.dg .bfoc { fill: var(--surface); stroke: var(--foc); stroke-width: 2; }
+svg.dg .bfocd { fill: var(--focf); stroke: var(--foc); stroke-width: 2; stroke-dasharray: 5 4; }
+svg.dg .bcand { fill: var(--surface); stroke: var(--cand); stroke-width: 1.8; }
+svg.dg .actx { stroke: var(--ctx); stroke-width: 2; fill: none; }
+svg.dg .actxw { stroke: var(--ctx); stroke-width: 3.4; fill: none; stroke-linecap: round; }
+svg.dg .acnt { stroke: var(--cnt); stroke-width: 2; fill: none; }
+svg.dg .afoc { stroke: var(--foc); stroke-width: 2; fill: none; }
+svg.dg .afocd { stroke: var(--foc); stroke-width: 2; fill: none; stroke-dasharray: 5 4; }
+svg.dg .acand { stroke: var(--cand); stroke-width: 1.8; fill: none; }
+svg.dg .aink { stroke: var(--ink2); stroke-width: 1.6; fill: none; }
+svg.dg .mctx { fill: var(--ctx); } svg.dg .mcnt { fill: var(--cnt); } svg.dg .mfoc { fill: var(--foc); }
+svg.dg .mcand { fill: var(--cand); } svg.dg .mink { fill: var(--ink2); }
+svg.dg .ghost { fill: none; stroke: var(--muted); stroke-width: 1.3; stroke-dasharray: 3 3; }
+svg.dg .bar { fill: var(--cand); }
+svg.dg .barc { fill: var(--ctx); }
+
+/* explorers */
+.picker { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 8; background: var(--bg); border-bottom: 1px solid var(--rule);
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding-block: 10px; margin-bottom: 22px; max-width: 900px; font-family: var(--sans); }
+.picker .meta { font-size: 13.5px; color: var(--ink2); }
+.lab { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.segs { display: flex; flex-wrap: wrap; gap: 6px; }
+button.seg { font-family: var(--mono); font-size: 13px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink2); padding: 5px 12px; border-radius: 999px; cursor: pointer; line-height: 1.3; }
+button.seg:hover { border-color: var(--ink2); }
+button.seg[aria-pressed="true"] { background: var(--accent); color: var(--surface); border-color: var(--accent); }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button:disabled { opacity: 0.4; cursor: default; }
+.lay { display: grid; gap: 14px; margin-top: 18px; }
+.lay.c2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.lay.c12 { grid-template-columns: minmax(240px, 1fr) minmax(0, 2fr); }
+.lay.c21 { grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr); }
+@media (max-width: 1100px) { .lay.c2, .lay.c12, .lay.c21 { grid-template-columns: minmax(0, 1fr); } }
+.card { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 14px 16px; min-width: 0; display: flex; flex-direction: column; font-family: var(--sans); }
+.card h4 { margin: 0; font-family: var(--serif); font-size: 17px; font-weight: 600; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.card h4 .n { font-family: var(--mono); font-size: 11.5px; color: var(--surface); background: var(--ink); border-radius: 999px; padding: 1px 8px; }
+.hint { font-size: 14px; color: var(--ink2); margin: 4px 0 0; max-width: 90ch; }
+.hint b { color: var(--ink); }
+ul.hint li { max-width: none; margin: 2px 0; }
+.body { position: relative; overflow: hidden; margin-top: 10px; height: 300px; }
+.body.h220 { height: 220px; } .body.h260 { height: 260px; } .body.h360 { height: 360px; } .body.h420 { height: 420px; }
+.body > svg { position: absolute; inset: 0; }
+.wide { overflow-x: auto; } .wide > .body { min-width: 640px; }
+.scrolly { overflow: auto; margin-top: 8px; }
+.scrolly.h300 { max-height: 300px; } .scrolly.h420 { max-height: 420px; }
+svg.ch { display: block; }
+svg.ch text { font-family: var(--font-body); font-size: 13px; fill: var(--ink2); }
+svg.ch text.mo { font-family: var(--font-mono); font-size: 12px; }
+svg.ch text.sf { font-family: var(--font-display); font-size: 16px; fill: var(--ink); }
+svg.ch text.ink { fill: var(--ink); }
+svg.ch text.b { font-weight: 600; }
+svg.ch text.mu { fill: var(--muted); }
+svg.ch text.inv { fill: var(--surface); }
+svg.ch .grid { stroke: var(--gridc); stroke-width: 1; }
+svg.ch .axis { stroke: var(--rule); stroke-width: 1; }
+svg.ch .hit { fill: transparent; cursor: pointer; }
+svg.ch .sel { fill: var(--focf); }
+svg.ch .selr { fill: none; stroke: var(--foc); stroke-width: 2.5; }
+.rows { display: grid; gap: 3px; }
+button.row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; align-items: center; text-align: left; width: 100%;
+  border: 1px solid transparent; background: none; color: var(--ink); font: inherit; font-size: 15px; padding: 5px 8px; border-radius: 6px; cursor: pointer; }
+button.row:hover { background: var(--tint); }
+button.row[aria-pressed="true"] { border-color: var(--foc); background: var(--focf); }
+button.row .t { font-family: var(--font-display); font-size: 16px; overflow-wrap: anywhere; }
+button.row .t i { font-style: normal; color: var(--muted); padding: 0 3px; }
+button.row .v { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink2); text-align: right; white-space: nowrap; }
+button.row .bars { grid-column: 1 / -1; display: grid; gap: 2px; }
+.rulegrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 6px; margin-top: 10px; }
+.mbar { display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 12px; color: var(--ink2); }
+.mbar i { display: block; height: 8px; border-radius: 0 3px 3px 0; background: var(--c); }
+.tag2 { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ctx); margin-left: 6px; }
+.toks { display: flex; flex-wrap: wrap; gap: 4px; font-family: var(--font-display); font-size: 21px; margin-top: 10px; }
+.toks span { padding: 0 6px; border-radius: 4px; border: 1px solid transparent; }
+.toks span.on { background: var(--focf); border-color: var(--foc); }
+.toks span.todo { color: var(--muted); }
+.stepper { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 10px; }
+.stepper input[type=range] { flex: 1 1 160px; min-width: 0; accent-color: var(--foc); }
+.what { font-size: 15px; color: var(--ink2); margin-top: 8px; }
+.what b { color: var(--ink); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-family: var(--sans); font-size: 13.5px; color: var(--ink2); margin-top: 8px; }
+.legend span::before { content: ""; display: inline-block; width: 14px; height: 3px; border-radius: 2px; background: var(--c); vertical-align: middle; margin-right: 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips span { font-family: var(--font-mono); font-size: 13px; background: var(--tint); color: var(--ink); border-radius: 4px; padding: 3px 8px; }
+.inst { display: grid; gap: 2px; font-size: 15px; }
+.inst div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; padding: 3px 6px; border-radius: 4px; }
+.inst div.drawn { background: var(--focf); }
+.inst .t { font-family: var(--font-display); font-size: 16px; overflow-wrap: anywhere; }
+.inst .c { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink2); }
+td.heat { text-align: center; white-space: nowrap; border-left: 2px solid var(--surface); padding: 6px 8px; }
+td.heat b { font-family: var(--font-mono); font-size: 14.5px; font-weight: 600; }
+td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; }
+.mini { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px 18px; margin-top: 12px; }
+.mini > div { min-width: 0; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 8px 10px 4px; }
+.mini h5 { margin: 0; font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--ink); }
+.mini .body { height: 200px; margin-top: 2px; }
+.empty { color: var(--muted); font-size: 14.5px; }
+#tip { position: fixed; z-index: 20; pointer-events: none; background: var(--ink); color: var(--bg); font-family: var(--sans); font-size: 13.5px; line-height: 1.45; padding: 7px 10px; border-radius: 6px; max-width: 340px; box-shadow: 0 2px 10px rgba(0,0,0,.2); }
+#tip .m { font-family: var(--font-mono); font-size: 12px; }
+@media (max-width: 920px) {
+  .shell { grid-template-columns: 1fr; gap: 0; padding-top: 12px; }
+  .toc { display: none; }
+  .topbar { display: block; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); border-bottom: 1px solid var(--rule); margin-inline: -16px; padding: 10px 16px; font-family: var(--sans); }
+  .topbar details summary { cursor: pointer; font-size: 14px; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  .topbar details summary::-webkit-details-marker { display: none; }
+  .topbar details summary::after { content: "Contents"; font-weight: 400; color: var(--accent); }
+  .topbar details[open] summary::after { content: "Close"; }
+  .topbar .toc-inner { display: block; position: static; max-height: 70vh; overflow-y: auto; margin-top: 8px; }
+  .topbar .toc-inner .brand { display: none; }
+  .picker { position: static; }
+  h1 { font-size: 28px; }
+  .lede { font-size: 18px; }
+}
+@media (max-width: 560px) { .body { height: 260px; } .body.h420, .body.h360 { height: 340px; } }
+@media (max-width: 480px) { body { font-size: 16px; } h2 { font-size: 21px; } }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<div class="topbar"><details id="topnav"><summary><span id="topbar-title">Concepts, Chunks, Compression</span></summary><div class="toc-inner" id="toc-mobile"></div></details></div>
+
+<div class="shell">
+<nav class="toc" aria-label="Contents" id="toc">
+  <p class="brand">Concepts, Chunks, Compression<span>TRELLIS v2: two Cobweb hierarchies that learn categories and chunks from raw experience</span></p>
+  <h2>Framework</h2>
+  <ol>
+    <li><a href="#overview"><span class="n">–</span><span>Overview</span></a></li>
+    <li><a href="#status"><span class="n">–</span><span>Where we stand</span></a></li>
+    <li><a href="#principles"><span class="n">1</span><span>Principles</span></a></li>
+    <li><a href="#representation"><span class="n">2</span><span>Representation</span></a></li>
+  </ol>
+  <h2>Mechanism</h2>
+  <ol>
+    <li><a href="#learning"><span class="n">3</span><span>Learning</span></a></li>
+    <li><a href="#sustain"><span class="n">4</span><span>Sustaining memory</span></a></li>
+    <li><a href="#parse"><span class="n">5</span><span>Parsing, step by step</span></a></li>
+    <li><a href="#generate"><span class="n">6</span><span>Generation, step by step</span></a></li>
+    <li><a href="#types"><span class="n">7</span><span>Type names</span></a></li>
+    <li><a href="#rules"><span class="n">8</span><span>Concept-choice rules</span></a></li>
+  </ol>
+  <h2>Studies</h2>
+  <ol>
+    <li><a href="#s-prompt"><span class="n">S1</span><span>Prompted generation</span></a></li>
+    <li><a href="#s-consist"><span class="n">S2</span><span>Parse consistency</span></a></li>
+    <li><a href="#s-probe"><span class="n">S3</span><span>Chunk representations</span></a></li>
+    <li><a href="#s-babi"><span class="n">S4</span><span>bAbI questions</span></a></li>
+    <li><a href="#s-chars"><span class="n">S5</span><span>Chinese characters</span></a></li>
+    <li><a href="#s-chess"><span class="n">S6</span><span>Chess</span></a></li>
+  </ol>
+  <h2>Failure points</h2>
+  <ol>
+    <li><a href="#failures"><span class="n">F1</span><span>AND/OR failure checks</span></a></li>
+    <li><a href="#f-known"><span class="n">F2</span><span>Known failures</span></a></li>
+  </ol>
+  <h2>Results</h2>
+  <ol>
+    <li><a href="#results"><span class="n">–</span><span>Index of results</span></a></li>
+    <li><a href="#curves"><span class="n">R1</span><span>Learning curves</span></a></li>
+    <li><a href="#iterations"><span class="n">R2</span><span>Kept and set aside</span></a></li>
+    <li><a href="#next"><span class="n">R3</span><span>What to iterate next</span></a></li>
+  </ol>
+</nav>
+
+<main id="main">
+
+<div class="picker" id="picker" role="region" aria-label="Preloaded example" hidden>
+  <span class="lab">Grammar in memory</span>
+  <div class="segs" id="exsegs"></div>
+  <span class="meta" id="exmeta"></span>
+</div>
+
+<!-- ============================================================ OVERVIEW -->
+<section class="page" data-page="overview">
+  <p class="eyebrow">Overview · ISLE · TRELLIS v2</p>
+  <h1>Concepts and chunks from raw experience</h1>
+  <p class="lede">Two Cobweb hierarchies learn categories and chunks one experience at a time, parse by inside-outside, and generate by expanding concepts top-down, with nothing outside the two trees.</p>
+  <p>TRELLIS v2 iterates directly on TRELLIS v1 (ACS 2026). Every element of an experience is described twice: by where it occurs, in a <em>context hierarchy</em>, and by what it is made of, in a <em>content hierarchy</em>. No grammar is extracted. The grammar is implicit in the two trees and shifts a little with every experience. Inside-outside replaces v1's greedy chunking. Generation reads only statistics held by the trees' concepts.</p>
+  <p>Every mechanism is unsupervised and sees only raw tokens; the generating grammar, gold trees and part-of-speech tags are used only to score. The explorers in Sections 5–8 run on real memory: three grammars learned from their 320 training experiences (seed 13, configuration of 23 October).</p>
+
+  <dl class="facts">
+    <div><dt>Hierarchies</dt><dd>2 Cobweb trees: context (where an element occurs) and content (what it is made of)</dd></div>
+    <div><dt>Learning</dt><dd>one pass; inside-outside; every composite stored, weighted by its posterior</dd></div>
+    <div><dt>Parsing</dt><dd>the analysis with the most expected correct chunks (minimum Bayes risk)</dd></div>
+    <div><dt>Generation</dt><dd>top-down from a sampled whole experience; prompts by gap filling</dd></div>
+    <div><dt>Domains</dt><dd>toy grammars, TinyStories, bAbI, Chinese characters, chess</dd></div>
+    <div><dt>Supervision</dt><dd>none; gold only scores</dd></div>
+  </dl>
+
+  <h2>Summary of results</h2>
+  <p><b>Generation from the trees alone</b> is 99.7–100% grammatical on the <code>small</code>, <code>med</code>, <code>large</code> and <code>term_low</code> grammars, and 0.75–0.88 of the samples are also new. On <code>large</code>, the share that is grammatical and new grows from 0.11 to 0.81 between 20 and 320 experiences (<a href="#curves">R1</a>).</p>
+  <p><b>Memory stays current without rebuilds.</b> Checking 700 records per experience and moving the misplaced ones (verify 700) brings misplaced context to 0.5% and misplaced content to 2.6–2.9% of stored weight on 2,000 TinyStories sentences, at 2.3–3.1 times the original learning time, and passes the grammar guard. Repair on use keeps the content that memory actually uses under 1% misplaced at about 1.4 times the original's cost (<a href="#sustain">Section 4</a>).</p>
+  <p><b>Parses agree across seeds as memory grows</b>: bracket F1 between two seeds rises from 0.64 at 250 sentences to 0.90 at 2,000, with no gold trees (<a href="#s-consist">S2</a>).</p>
+  <p><b>Gap filling continues prompts</b>: 0.86 of trigrams attested after a one-word prefix and 0.84 after two words; infill stays at 0.22 (<a href="#s-prompt">S1</a>). On bAbI, the same mechanism answers with an answer of the right type 0.60 of the time, against 0.20 for a frequency baseline (<a href="#s-babi">S4</a>).</p>
+  <p><b>Chess chunks reproduce Chase and Simon.</b> After 4,000 positions, recall of real positions exceeds recall of scrambled ones (0.77 vs 0.54 and 0.88 vs 0.73 at θ 16), when chunks are recognised by where their pieces stand (<a href="#s-chess">S6</a>).</p>
+  <p><b>Still failing:</b> the content tree adds no gain to the chunk factor on held-out composites, infill fails to fit both sides, and chunk context through neighbouring chunks makes the learner memorise (<a href="#f-known">F2</a>).</p>
+
+  <h2>Reading guide</h2>
+  <ol class="toc-list">
+    <li><a href="#status">Where we stand</a>: the current recipe, the temporal scoreboard, the findings that held up, runs in progress and open questions (27 October).</li>
+    <li><a href="#principles">Principles</a> and <a href="#representation">representation</a>: the two instances every element gets.</li>
+    <li>Mechanism: <a href="#learning">learning by inside-outside</a>, <a href="#sustain">keeping memory current</a>, and interactive walk-throughs of <a href="#parse">parsing</a>, <a href="#generate">generation</a>, <a href="#types">type names</a> and <a href="#rules">concept-choice rules</a>.</li>
+    <li>Studies: <a href="#s-prompt">prompted generation</a>, <a href="#s-consist">parse consistency</a>, <a href="#s-probe">chunk representations</a>, <a href="#s-babi">bAbI questions</a>, <a href="#s-chars">Chinese characters</a> and <a href="#s-chess">chess</a>.</li>
+    <li><a href="#failures">Failure points</a>: the AND/OR checks run after every change, and the known failures.</li>
+    <li><a href="#results">Results</a>: learning curves, what was kept and set aside, and what to iterate next.</li>
+  </ol>
+</section>
+
+<!-- ============================================================ STATUS -->
+<section class="page" data-page="status" hidden>
+  <p class="eyebrow">27 October 2026</p>
+  <h1>Where we stand</h1>
+  <p class="lede">The temporal target is met by repairing memory as it is used: records that parsing and generation reach are re-sorted when stale, which keeps used memory under 1% misplaced at about twice the original cost. Gap filling answers prompts and bAbI questions, and chess chunks show the expert recall advantage. Interdependence, infill, the content tree's gain and chunk context remain open.</p>
+
+  <dl class="facts">
+    <div><dt>Temporal target</dt><dd>met by path repair on use, budget 700: used records 0.6% misplaced (ctx and cnt) at 2,000 sentences</dd></div>
+    <div><dt>Cost</dt><dd>2.0–2.3× the original learning time (target ≤3×)</dd></div>
+    <div><dt>Grammar guard</dt><dd>passes on all 4 runs (med, large × seeds 13, 17); characters held over 5 seeds</dd></div>
+    <div><dt>Parse agreement</dt><dd>cross-seed bracket F1 0.90 at 2,000 sentences</dd></div>
+    <div><dt>Prompting</dt><dd>prefix trigrams attested 0.86 / 0.84; infill 0.22</dd></div>
+  </dl>
+
+  <h2>The current recipe</h2>
+  <p>The settings below make up the configuration measured on this page since 24 October. The explorers in Sections 5–8 show the 23 October configuration.</p>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Part</th><th>Setting</th></tr></thead>
+    <tbody>
+      <tr><th>Trees</th><td>Two Cobweb trees, compiled (<code>tree="cu"</code>, cobweb-private <code>trellis-discrete</code>), bit-identical to the Python tree in reference arithmetic</td></tr>
+      <tr><th>Context instance</th><td>Window of two tokens on each side (<code>l2 l1 r1 r2</code>) and the element's own content <code>cc</code>; a word's <code>cc</code> is its token (<code>word_cc</code>). Neighbouring chunks (<code>neighbour_chunks</code>) are off.</td></tr>
+      <tr><th>Content instance</th><td>The parts' names <code>L R</code> and the parts' content concepts <code>LC RC</code>; word parts are named by coarse band names (<code>part_names="bands"</code>)</td></tr>
+      <tr><th>Word names</th><td>The parent concepts of 32 sampled instances (<code>name_level="parent"</code>, <code>type_k</code> 32), mixed at readout with the names of neighbouring words, weight n/(n+4) for its own (<code>name_mix_k</code> 4)</td></tr>
+      <tr><th>Learning</th><td>Inside-outside over every composite; each stored in both trees with its posterior weight (dropped below 0.001); a record may merge or split concepts with probability equal to its weight (<code>restructure="sample"</code>)</td></tr>
+      <tr><th>Keeping memory current</th><td>Relabel in place, plus repair on use: every sort marks the records under the concept it ends at, and every concept it passes contributes records by a random walk down its children (<code>repair_path</code>). After each experience, up to 700 marked records, oldest-checked first, are re-described and moved if they no longer sort where they sit (<code>repair_use</code> 700, <code>refresh_budget</code> 0). No background sweep.</td></tr>
+      <tr><th>Parsing</th><td>Minimum Bayes risk over span posteriors</td></tr>
+      <tr><th>Generation</th><td>A whole experience drawn from <code>SENT</code>, expanded top-down; each part from its own leaf; word slots filled by fine names, capped at the best peer (<code>both+peer</code>)</td></tr>
+      <tr><th>Prompting</th><td>Gap filling: a committed instance drawn by its posterior of standing in the gap's surroundings (<a href="#s-prompt">S1</a>)</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Scoreboard</h2>
+  <p>Temporal currency on TinyStories, 2,000 sentences, seeds 13 / 17. "Own weight" sorts each record's stored description at the weight it was placed with. The grammar guard asks for grammaticality within 2 points of the original and more grammatical-and-new samples on <code>med</code> and <code>large</code>, seeds 13 and 17, at 320 experiences.</p>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Run</th><th class="num">Misplaced ctx / cnt, own weight</th><th class="num">Share of stored weight misplaced, cnt</th><th class="num">Learning time</th><th>Grammar guard (gram / gram+new)</th></tr></thead>
+    <tbody>
+      <tr><th>original</th><td class="num">0.088 / 0.213, 0.081 / 0.229</td><td class="num">–</td><td class="num">1×</td><td>1.0 / 0.868, 0.996 / 0.745, 1.0 / 0.799, 0.993 / 0.833</td></tr>
+      <tr class="hl"><th>verify 700</th><td class="num best">0.005 / 0.076, 0.005 / 0.062</td><td class="num best">0.026 / 0.029</td><td class="num">2.3–3.1×</td><td>passes all 4: 1.0 / 0.871, 1.0 / 0.892, 0.996 / 0.846, 0.993 / 0.839</td></tr>
+      <tr><th>verify 700, min_weight 0.05</th><td class="num">0.009 / 0.026, 0.005 / 0.033</td><td class="num">–</td><td class="num">2.3–2.8×</td><td>fails large-17 (0.98 / 0.803); fails characters</td></tr>
+      <tr><th>verify 700, min_weight 0.03</th><td class="num">–</td><td class="num">–</td><td class="num">–</td><td>passes all 4; fails characters (real at 500: 0.614 / 0.586 vs 0.647 / 0.741)</td></tr>
+    </tbody>
+  </table></div>
+  <p>Repair on use is measured on the records that memory actually reaches: parsing 200 held-out sentences, 100 samples and 100 prefix-2 gap completions. Each record counts by how often it is reached, and is sorted at its own weight. TinyStories, 2,000 sentences; generation is 300 samples ("grammatical" = every trigram attested).</p>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Run, seed</th><th class="num">Used, misplaced ctx / cnt</th><th class="num">Learning s (× original)</th><th class="num">Grammatical</th><th class="num">Grammatical and novel</th></tr></thead>
+    <tbody>
+      <tr><th>original, 13</th><td class="num">0.038 / 0.064</td><td class="num">3,620</td><td class="num">0.992</td><td class="num">0.247</td></tr>
+      <tr class="hl"><th>path repair 700, 13</th><td class="num best">0.006 / 0.006</td><td class="num">8,178 (2.3×)</td><td class="num">0.985</td><td class="num best">0.281</td></tr>
+      <tr><th>path repair 700 + repair now, 13</th><td class="num">0.006 / 0.002</td><td class="num">9,837 (2.7×)</td><td class="num">0.968</td><td class="num">0.348</td></tr>
+      <tr><th>original, 17</th><td class="num">0.073 / 0.103</td><td class="num">4,059</td><td class="num">0.988</td><td class="num best">0.282</td></tr>
+      <tr class="hl"><th>path repair 700, 17</th><td class="num best">0.006 / 0.005</td><td class="num">8,120 (2.0×)</td><td class="num">0.980</td><td class="num">0.227</td></tr>
+      <tr><th>path repair 700 + repair now, 17</th><td class="num">0.006 / 0.027</td><td class="num">8,677 (2.1×)</td><td class="num">0.987</td><td class="num">0.209</td></tr>
+    </tbody>
+  </table></div>
+  <p>"Repair now" also repairs records the moment a sort finds them. It loses 2.4 points of grammaticality on seed 13 and fails one grammar-guard run, so it stays off. Grammatical and novel moves with the seed under path repair (+3.4 points on 13, −5.5 on 17); one standard error over 300 samples is about 2.5 points.</p>
+  <p>Chinese characters, 500 learned, mean over five seeds (13, 17, 19, 23, 29). Seeds vary far more than settings: the original alone ranges from 0.620 to 0.938 real.</p>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Run</th><th class="num">Real</th><th class="num">Real and unseen</th></tr></thead>
+    <tbody>
+      <tr><th>original</th><td class="num">0.762</td><td class="num">0.053</td></tr>
+      <tr><th>verify 700</th><td class="num">0.756</td><td class="num">0.059</td></tr>
+      <tr class="hl"><th>path repair 700</th><td class="num best">0.769</td><td class="num">0.059</td></tr>
+      <tr><th>path repair 700 + repair now</th><td class="num">0.760</td><td class="num best">0.068</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Findings that have held up</h2>
+  <h3>1. The trees alone generate grammatical, new sentences</h3>
+  <p>Drawing each part from the context leaf where it stood gives 99.7–100% grammatical samples on four grammars, and novelty rises as leaves collect more committed instances (<a href="#curves">R1</a>). No records or pointers are read.</p>
+  <h3>2. Verify 700 meets the temporal target</h3>
+  <p>Most of the reported content misplacement was a mismatch of weights: the check sorted records at weight 1 while learning had placed them at their posterior weight. The rest is real drift, and moving records repairs it. At 700 checks per experience, context misplacement is 0.5% and content 2.6–2.9% of stored weight. Generation on TinyStories rises (attested and novel 0.29 / 0.28 against 0.22 / 0.23), and so does word-category accuracy (0.53 / 0.55 against 0.46 / 0.50).</p>
+  <h3>3. Repair on use meets the temporal target</h3>
+  <p>Re-sorting stale records where the trees are used, with no background sweep, keeps used context and content under 1% misplaced at 1,000 and 2,000 sentences on both seeds, at 2.0–2.3 times the original cost. The used context misplacement seen earlier (about 8.5%) was the weight mismatch again: low-weight chunks were judged at weight 1. Path repair passes the grammar guard on all four runs and holds characters on the five-seed mean.</p>
+  <h3>4. Parses are consistent without gold</h3>
+  <p>Two seeds agree on 0.90 of brackets at 2,000 sentences, and a parse barely changes when a word is replaced by a similar one (<a href="#s-consist">S2</a>).</p>
+  <h3>5. Gap filling answers prompts</h3>
+  <p>Drawing the filler by its posterior of standing in the gap's surroundings gives attested trigrams after short prefixes (0.84–0.86) and the right answer type on bAbI at 3,000 sentences (0.60–0.63 against 0.23–0.26 without the gap posterior; 0.72–0.73 when the story is in memory, exact 0.26) (<a href="#s-prompt">S1</a>, <a href="#s-babi">S4</a>).</p>
+  <h3>6. Recognition by context explains expert recall</h3>
+  <p>Chess chunks recognised by content and context give experts better recall of real positions than of scrambled ones. Recognition by content alone gives almost no advantage (0.74 against 0.63) (<a href="#s-chess">S6</a>).</p>
+
+  <h2>Running now</h2>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Run</th><th>Question</th></tr></thead>
+    <tbody>
+      <tr><th>Verify 700 at 2,000 sentences, used records</th><td>How does the background sweep compare with repair on use on the records memory reaches?</td></tr>
+      <tr><th>Chess Elo at larger checkpoints</th><td>Does play improve after 1,000 and 4,000 learned positions?</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Open questions</h2>
+  <ol>
+    <li><b>How should infill fit both sides?</b> A gap fill satisfies each side's window separately: "the * the tree" becomes "the all the tree".</li>
+    <li><b>How can chunk context enter without memorisation?</b> Neighbouring chunks' content helps one-word prefixes and fails the novelty guard.</li>
+    <li><b>Why does the content tree add no gain on held-out composites?</b> Their sorting paths end 2–4 levels down, where Cobweb opens a new branch.</li>
+    <li><b>How do representations become interdependent?</b> A word's name should draw on its neighbours' learned names so that learning converges faster with generation kept; this is the remaining representation goal.</li>
+    <li><b>Can answers come by analogy?</b> Story-conditioned answering needs the question's chunks aligned with the story sentence that shares its entity and role.</li>
+    <li><b>What is the absolute Elo?</b> It needs a calibrated engine such as Stockfish; downloading one is not yet permitted.</li>
+  </ol>
+</section>
+
+<!-- ============================================================ PRINCIPLES -->
+<section class="page" data-page="principles" hidden>
+  <p class="eyebrow">Section 1</p>
+  <h1>What the system holds to</h1>
+  <p class="lede">Ten principles constrain every change. None of them mentions words: sentences are the first domain, and characters, bAbI stories and chess positions run on the same code.</p>
+@@L 246-257@@
+</section>
+
+<!-- ============================================================ REPRESENTATION -->
+<section class="page" data-page="representation" hidden>
+  <p class="eyebrow">Section 2</p>
+  <h1>Two instances for every element</h1>
+  <p class="lede">Every word or chunk is described by where it occurs, in the context tree, and by what it is made of, in the content tree. Each tree describes elements in the other's terms.</p>
+@@L 263-311@@
+@@L 313-364@@
+  <div class="note"><div class="note-head">Current naming</div><p>Since 24 October a word is named by the parent concepts of 32 sampled instances, mixed at readout with the names of the words beside it (weight n/(n+4) on its own name), and chunks name word parts by coarse band names. The option <code>neighbour_chunks</code> adds the content concepts of the same-width neighbouring chunks as <code>lc</code>/<code>rc</code> to the context instance; it fails the novelty guard and is off by default (<a href="#s-prompt">S1</a>).</p></div>
+</section>
+
+<!-- ============================================================ LEARNING -->
+<section class="page" data-page="learning" hidden>
+  <p class="eyebrow">Section 3</p>
+  <h1>Inside-outside in place of greedy chunking</h1>
+  <p class="lede">For each new experience, inside-outside weighs every composite by both trees, and every composite is stored with its posterior as weight. Chunks are the concepts that keep winning that mass.</p>
+  <div class="col">
+    <p>v1 committed chunks greedily, one recognized pair at a time. v2 replaces that step with inside-outside. For a new experience it builds a chart of every composite (every span, every split point). Each composite gets a factor from how much better the concepts it sorts to describe it than the root does, in both trees. Inside-outside turns these factors into a posterior for every composite.</p>
+    <p>Then every composite is stored, in both trees, with its posterior as its weight (Figure 3). Only composites with a posterior under 0.001 are dropped. A chunk that recurs collects weight under concepts that recur with it, and a chunk the evidence does not support adds a sliver of weight that the trees absorb. Over time this is a competitive frontier: the candidates compete for each experience's posterior mass, and the concepts that win are the chunks. Since 24 October a stored record restructures the tree (merges and splits) with probability equal to its weight, so low-weight spans no longer build long merge ladders.</p>
+  </div>
+@@L 374-430@@
+</section>
+
+<!-- ============================================================ SUSTAIN -->
+<section class="page" data-page="sustain" hidden>
+  <p class="eyebrow">Section 4</p>
+  <h1>Memory that stays current without rebuilds</h1>
+  <p class="lede">Stored descriptions name concepts, and Cobweb keeps restructuring. Descriptions are updated in place; records that no longer sort where they sit are moved, either by a fixed check budget or where memory is used.</p>
+  <div class="col">
+    <p>A stored chunk whose part was named <code>{c7, c31, c88}</code> may find c88 merged away. Earlier versions took the chunk out of the tree and re-inserted it with its new description. With path naming nearly every path changes after each insertion, and re-insertion took 96% of learning time. Name churn is large: after one TinyStories sentence, 25% of word names change which concepts they name, and 91% of those changes go to concepts that already existed.</p>
+    <h2>Relabel in place</h2>
+    <p>A record's description is updated where it sits (Figure 4a). Its old description is taken off the counts along its leaf's path to the root, and the new one is added along the same path. This is v1's leaf remap, and Chris's &ldquo;dynamic recomputation over stored leaves&rdquo;. It keeps descriptions current, but a record whose new description belongs elsewhere stays where it was.</p>
+    <h2>Verify and move (<code>refresh="verify"</code>, budget 700)</h2>
+    <p>After each experience, its new records and a round-robin slice of 700 older ones are re-described and checked (Figure 4b). A record is moved, taken out and re-inserted (unfit and ifit), when the concepts at its information bands differ from where its current description now sorts. This meets the temporal target on 2,000 TinyStories sentences: 0.5% of context and 2.6–2.9% of content weight misplaced, at 2.3–3.1 times the original learning time, with the grammar guard passed.</p>
+    <h2>Repair on use (<code>repair_use</code>, <code>repair_path</code>)</h2>
+    <p>Nothing is swept (Figure 4c). Every sort through either tree, in learning, parsing and prediction, passes a path of concepts. Each concept a sort passes contributes one record, drawn beneath it by walking down the children in proportion to their counts; records that generation draws are marked too. After the experience, up to k marked records, least recently checked first, are re-described and moved if misplaced. Records nothing reaches are left alone, so repair follows how much each region of memory is used.</p>
+  </div>
+  <figure>
+    <div class="fig">
+    <svg class="dg" viewBox="0 0 1000 330" role="img" aria-label="Three ways memory stays current. a: relabel in place, the description is updated on the counts along the record's own leaf path. b: verify, the re-described record is sorted again and moved by unfit and ifit when it no longer sorts where it sits. c: repair on use, each concept a sort passes contributes one record drawn beneath it by counts, and those records are re-described and moved if misplaced.">
+      <defs>
+        <marker id="m4f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mfoc"/></marker>
+        <marker id="m4c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mctx"/></marker>
+      </defs>
+      <rect x="6" y="6" width="320" height="318" rx="6" class="panel"/><rect x="12" y="12" width="308" height="30" rx="4" class="phead"/>
+      <circle cx="29" cy="27" r="10" class="pnum"/><text x="29" y="32" class="sf b" text-anchor="middle" style="font-size:14px">a</text><text x="46" y="32" class="sf b inv" style="font-size:14.5px">Relabel in place</text>
+      <rect x="340" y="6" width="320" height="318" rx="6" class="panel"/><rect x="346" y="12" width="308" height="30" rx="4" class="phead"/>
+      <circle cx="363" cy="27" r="10" class="pnum"/><text x="363" y="32" class="sf b" text-anchor="middle" style="font-size:14px">b</text><text x="380" y="32" class="sf b inv" style="font-size:14.5px">Verify and move (budget 700)</text>
+      <rect x="674" y="6" width="320" height="318" rx="6" class="panel"/><rect x="680" y="12" width="308" height="30" rx="4" class="phead"/>
+      <circle cx="697" cy="27" r="10" class="pnum"/><text x="697" y="32" class="sf b" text-anchor="middle" style="font-size:14px">c</text><text x="714" y="32" class="sf b inv" style="font-size:14.5px">Repair on use (sort path)</text>
+
+      <!-- a: relabel -->
+      <line x1="166" y1="78" x2="106" y2="126" class="ln"/><line x1="166" y1="78" x2="236" y2="126" class="ln"/>
+      <line x1="106" y1="126" x2="76" y2="174" class="ln"/><line x1="106" y1="126" x2="136" y2="174" class="ln"/>
+      <line x1="136" y1="174" x2="121" y2="218" class="ln"/><line x1="136" y1="174" x2="151" y2="218" class="ln"/>
+      <circle cx="166" cy="78" r="10" class="nfoc"/><circle cx="106" cy="126" r="10" class="nfoc"/><circle cx="236" cy="126" r="9" class="gr"/>
+      <circle cx="76" cy="174" r="9" class="gr"/><circle cx="136" cy="174" r="10" class="nfoc"/>
+      <circle cx="121" cy="218" r="4" class="lf"/><circle cx="151" cy="218" r="6" class="fo"/>
+      <path d="M164 214 C 214 196, 214 104, 178 82" class="afocd" marker-end="url(#m4f)"/>
+      <text x="212" y="160" class="mo tfoc">−old +new</text>
+      <text x="212" y="176" class="mo tfoc">on each node</text>
+      <rect x="22" y="240" width="288" height="30" rx="4" class="bfoc"/><text x="166" y="260" class="mo" text-anchor="middle">L {c7, c31, c88} → {c7, c31, c96}</text>
+      <text x="22" y="292" class="mu" style="font-size:12.5px">the record stays at its leaf;</text>
+      <text x="22" y="309" class="mu" style="font-size:12.5px">its description is current</text>
+
+      <!-- b: verify -->
+      <line x1="500" y1="78" x2="430" y2="126" class="ln"/><line x1="500" y1="78" x2="570" y2="126" class="ln"/>
+      <line x1="430" y1="126" x2="400" y2="174" class="ln"/><line x1="430" y1="126" x2="460" y2="174" class="ln"/>
+      <line x1="570" y1="126" x2="540" y2="174" class="ln"/><line x1="570" y1="126" x2="600" y2="174" class="ln"/>
+      <line x1="400" y1="174" x2="390" y2="214" class="lnf"/><line x1="600" y1="174" x2="610" y2="214" class="lnf"/>
+      <circle cx="500" cy="78" r="10" class="nctx"/><circle cx="430" cy="126" r="9" class="gr"/><circle cx="570" cy="126" r="10" class="nctx"/>
+      <circle cx="400" cy="174" r="9" class="gr"/><circle cx="460" cy="174" r="9" class="gr"/><circle cx="540" cy="174" r="9" class="gr"/><circle cx="600" cy="174" r="10" class="nctx"/>
+      <circle cx="390" cy="218" r="6" class="ghost"/><circle cx="610" cy="218" r="6" class="fo"/>
+      <path d="M394 228 C 440 268, 560 268, 604 230" class="afoc" marker-end="url(#m4f)"/>
+      <text x="372" y="250" class="mo tfoc" text-anchor="middle">unfit</text><text x="634" y="250" class="mo tfoc" text-anchor="middle">ifit</text>
+      <text x="610" y="104" class="mo tctx" text-anchor="middle">sorts here now</text>
+      <text x="356" y="292" class="mu" style="font-size:12.5px">re-describe, sort again; move when its</text>
+      <text x="356" y="309" class="mu" style="font-size:12.5px">band concepts differ from where it sits</text>
+
+      <!-- c: repair on use -->
+      <line x1="834" y1="78" x2="764" y2="126" class="ln"/><line x1="834" y1="78" x2="904" y2="126" class="ln"/>
+      <line x1="764" y1="126" x2="734" y2="174" class="ln"/><line x1="764" y1="126" x2="794" y2="174" class="ln"/>
+      <line x1="904" y1="126" x2="874" y2="174" class="ln"/><line x1="904" y1="126" x2="934" y2="174" class="ln"/>
+      <line x1="734" y1="174" x2="724" y2="214" class="lnf"/><line x1="734" y1="174" x2="744" y2="214" class="lnf"/>
+      <line x1="794" y1="174" x2="784" y2="214" class="lnf"/><line x1="794" y1="174" x2="804" y2="214" class="lnf"/>
+      <line x1="874" y1="174" x2="864" y2="214" class="lnf"/><line x1="874" y1="174" x2="884" y2="214" class="lnf"/>
+      <line x1="934" y1="174" x2="924" y2="214" class="lnf"/><line x1="934" y1="174" x2="944" y2="214" class="lnf"/>
+      <path d="M834 78 L764 126 L794 174 L804 214" class="actxw"/>
+      <path d="M840 86 L900 128 L930 176 L942 206" class="afocd" marker-end="url(#m4f)"/>
+      <path d="M758 134 L738 172 L727 206" class="afocd" marker-end="url(#m4f)"/>
+      <path d="M790 182 L786 206" class="afocd" marker-end="url(#m4f)"/>
+      <circle cx="834" cy="78" r="10" class="nctx"/><circle cx="764" cy="126" r="10" class="nctx"/><circle cx="904" cy="126" r="9" class="gr"/>
+      <circle cx="734" cy="174" r="9" class="gr"/><circle cx="794" cy="174" r="10" class="nctx"/><circle cx="874" cy="174" r="9" class="gr"/><circle cx="934" cy="174" r="9" class="gr"/>
+      <circle cx="744" cy="218" r="4" class="lf"/><circle cx="804" cy="218" r="4" class="lf"/><circle cx="864" cy="218" r="4" class="lf"/><circle cx="884" cy="218" r="4" class="lf"/><circle cx="924" cy="218" r="4" class="lf"/>
+      <circle cx="724" cy="218" r="6" class="fo"/><circle cx="784" cy="218" r="6" class="fo"/><circle cx="944" cy="218" r="6" class="fo"/>
+      <text x="690" y="250" class="tctx" style="font-size:12.5px">— a sort's path (learn, parse, predict)</text>
+      <text x="690" y="268" class="tfoc" style="font-size:12.5px">- - one record drawn beneath each concept</text>
+      <text x="690" y="292" class="mu" style="font-size:12.5px">plus records generation draws; up to k</text>
+      <text x="690" y="309" class="mu" style="font-size:12.5px">re-described, moved if misplaced</text>
+    </svg>
+    </div>
+  </figure>
+  <figcaption><b>Figure 4.</b> Keeping memory current. (a) A record's description is updated on its own leaf's path. (b) Verify re-sorts a budget of records and moves misplaced ones. (c) Repair on use draws records beneath the concepts a sort passed (green path) and repairs those (amber). Concept ids are illustrative.</figcaption>
+
+  <h2>What each method costs and repairs</h2>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Method</th><th>What it checks</th><th>TinyStories result</th><th>Cost</th></tr></thead>
+    <tbody>
+      <tr><th>Relabel only</th><td>nothing is moved</td><td>misplaced ctx / cnt at own weight 0.088 / 0.213, 0.081 / 0.229 (2,000 sentences)</td><td class="num">1×</td></tr>
+      <tr class="hl"><th>Verify 700</th><td>new records + 700 older ones per experience</td><td>0.005 / 0.076, 0.005 / 0.062; 2.6–2.9% of content weight</td><td class="num">2.3–3.1×</td></tr>
+      <tr><th>Repair on use, path, k 3000</th><td>records drawn beneath the concepts sorts pass</td><td>used content 0.006 / 0.009; used context 0.084 / 0.086 (1,000 sentences)</td><td class="num">about 1.4×</td></tr>
+      <tr><th>Update on read (<code>ref_names</code>)</th><td>descriptions as references, synced when a sort reaches a node</td><td>descriptions exact (drift ≤ 0.01); placement no better than copies</td><td class="num">same as copies</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">Update on read is kept as an option for exact descriptions. Name churn changes what a record should sit with, so records must still be moved, and moving them is what costs time.</p>
+</section>
+
+<!-- ============================================================ PARSE -->
+<section class="page" data-page="parse" hidden>
+  <p class="eyebrow">Section 5</p>
+  <h1>Parsing, step by step</h1>
+  <p class="lede">Parsing runs the learning procedure without storing anything. Choose a held-out sentence and follow its three steps. Every number is read from the trees. Pick the grammar in the bar above.</p>
+@@L 481-509@@
+</section>
+
+<!-- ============================================================ GENERATE -->
+<section class="page" data-page="generate" hidden>
+  <p class="eyebrow">Section 6</p>
+  <h1>Generation, step by step</h1>
+  <p class="lede">Unprompted generation samples a whole experience from the content root and expands it part by part. Prompted generation fills a gap in a given sentence (<a href="#s-prompt">S1</a>).</p>
+@@L 515-576@@
+</section>
+
+<!-- ============================================================ TYPES -->
+<section class="page" data-page="types" hidden>
+  <p class="eyebrow">Section 7</p>
+  <h1>Naming a part by where its type has stood</h1>
+  <p class="lede">A content instance names its parts in context-tree terms. A type name is re-read from the tree each time it is used, so it never goes stale.</p>
+@@L 582-602@@
+  <p class="small" style="margin-top:14px">The explorer shows the 23 October configuration: a reservoir of 8 leaves named by the concepts on their paths. The current recipe names a word by the parent concepts of 32 sampled instances and mixes in its neighbours' names at readout (<a href="#status">Where we stand</a>).</p>
+</section>
+
+<!-- ============================================================ RULES -->
+<section class="page" data-page="rules" hidden>
+  <p class="eyebrow">Section 8</p>
+  <h1>Which concept should a part draw from?</h1>
+  <p class="lede">Each rule decides how far a part climbs from its leaf before drawing an instance. The leaf stays the default.</p>
+@@L 608-616@@
+</section>
+
+<!-- ============================================================ S1 PROMPT -->
+<section class="page" data-page="s-prompt" hidden>
+  <p class="eyebrow">Study S1</p>
+  <h1>Prompted generation</h1>
+  <p class="lede">Given part of a sentence, memory generates only the missing piece. The filler is a committed instance drawn by its posterior of standing in the gap's surroundings, then expanded if it is a chunk.</p>
+  <div class="col">
+    <p>Prompts come from held-out sentences: a one-word prefix <code>[w1 *]</code>, a two-word prefix <code>[w1 w2 *]</code>, and infill <code>[w1 * w(n−1) w(n)]</code>. The gap's surroundings form a context description <code>q</code> with the same window as a stored context instance; missing positions take the sentence-boundary markers.</p>
+    <p>Every committed instance, word or chunk, is scored by its stored weight times the probability of <code>q</code> at its context leaf. Each attribute's probability is estimated along the leaf's path with hierarchical Dirichlet back-off, P(v | C) = (n<sub>C</sub>(v) + β P(v | parent)) / (n<sub>C</sub> + β), from a Laplace-smoothed root, so unseen combinations borrow from the concepts above the leaf (<code>_gap_fills</code>). One instance is drawn in proportion to its score; a chunk is expanded top-down like any generated part.</p>
+  </div>
+  <figure>
+    <div class="fig">
+    <svg class="dg" viewBox="0 0 1000 300" role="img" aria-label="Gap filling in three steps. 1: the gap's surroundings, l2 = sentence start, l1 = lily, r1 = and, r2 = laughed. 2: every committed instance is scored by its weight times the probability of these surroundings at its context leaf, with back-off along the leaf's path. 3: one filler is drawn and expanded; here the word played gives lily played and laughed.">
+      <rect x="6" y="6" width="320" height="288" rx="6" class="panel"/><rect x="12" y="12" width="308" height="30" rx="4" class="phead"/>
+      <circle cx="29" cy="27" r="10" class="pnum"/><text x="29" y="32" class="sf b" text-anchor="middle" style="font-size:14px">1</text><text x="46" y="32" class="sf b inv" style="font-size:14.5px">The gap's surroundings</text>
+      <rect x="340" y="6" width="320" height="288" rx="6" class="panel"/><rect x="346" y="12" width="308" height="30" rx="4" class="phead"/>
+      <circle cx="363" cy="27" r="10" class="pnum"/><text x="363" y="32" class="sf b" text-anchor="middle" style="font-size:14px">2</text><text x="380" y="32" class="sf b inv" style="font-size:14.5px">Score every committed instance</text>
+      <rect x="674" y="6" width="320" height="288" rx="6" class="panel"/><rect x="680" y="12" width="308" height="30" rx="4" class="phead"/>
+      <circle cx="697" cy="27" r="10" class="pnum"/><text x="697" y="32" class="sf b" text-anchor="middle" style="font-size:14px">3</text><text x="714" y="32" class="sf b inv" style="font-size:14.5px">Draw one, expand it</text>
+      <polygon points="328,142 339,150 328,158" class="mink"/><polygon points="662,142 673,150 662,158" class="mink"/>
+
+      <text x="24" y="80" class="mu" style="font-size:12.5px">prompt: lily * and laughed</text>
+      <rect x="24" y="104" width="52" height="30" rx="4" class="ghost"/><text x="50" y="124" class="mo mu" text-anchor="middle">⟨s⟩</text>
+      <rect x="82" y="104" width="52" height="30" rx="4" class="w"/><text x="108" y="124" class="sf dk" text-anchor="middle" style="font-size:16px">lily</text>
+      <rect x="140" y="104" width="52" height="30" rx="4" class="bfocd"/><text x="166" y="124" class="sf b tfoc" text-anchor="middle" style="font-size:16px">?</text>
+      <rect x="198" y="104" width="52" height="30" rx="4" class="w"/><text x="224" y="124" class="sf dk" text-anchor="middle" style="font-size:16px">and</text>
+      <rect x="256" y="104" width="52" height="30" rx="4" class="w"/><text x="282" y="124" class="sf dk" text-anchor="middle" style="font-size:15px">laughed</text>
+      <text x="50" y="154" class="mo tctx" text-anchor="middle">l2</text><text x="108" y="154" class="mo tctx" text-anchor="middle">l1</text>
+      <text x="224" y="154" class="mo tctx" text-anchor="middle">r1</text><text x="282" y="154" class="mo tctx" text-anchor="middle">r2</text>
+      <rect x="24" y="180" width="284" height="56" rx="4" class="bctx"/>
+      <text x="36" y="202" class="mo">q = { l2: ⟨s⟩, l1: lily,</text>
+      <text x="72" y="222" class="mo">r1: and, r2: laughed }</text>
+      <text x="24" y="266" class="mu" style="font-size:12.5px">the same window a stored context</text>
+      <text x="24" y="283" class="mu" style="font-size:12.5px">instance holds</text>
+
+      <text x="356" y="72" class="mo" style="font-size:12px">score(x) ∝ w(x) · Π P(q_a | leaf(x))</text>
+      <text x="356" y="94" class="mo mu" style="font-size:11px">P(v|C) = (n_C(v) + β·P(v|parent)) / (n_C + β)</text>
+      <text x="356" y="124" class="mo mu">posterior over fillers</text>
+      <rect x="356" y="134" width="150" height="14" rx="2" class="barc"/><text x="514" y="145" class="mo">played</text>
+      <rect x="356" y="156" width="104" height="14" rx="2" class="barc"/><text x="468" y="167" class="mo">smiled</text>
+      <rect x="356" y="178" width="60" height="14" rx="2" class="barc"/><text x="424" y="189" class="mo">ran</text>
+      <rect x="356" y="200" width="26" height="14" rx="2" class="bar"/><text x="390" y="211" class="mo">[looked at me] chunk</text>
+      <rect x="356" y="222" width="10" height="14" rx="2" class="bar"/><text x="374" y="233" class="mo">…</text>
+      <text x="356" y="266" class="mu" style="font-size:12.5px">words (green) and chunks (purple)</text>
+      <text x="356" y="283" class="mu" style="font-size:12.5px">compete; scores are illustrative</text>
+
+      <text x="690" y="80" class="mu" style="font-size:12.5px">drawn: played (a word)</text>
+      <rect x="690" y="104" width="52" height="30" rx="4" class="w"/><text x="716" y="124" class="sf dk" text-anchor="middle" style="font-size:16px">lily</text>
+      <rect x="748" y="104" width="60" height="30" rx="4" class="fo"/><text x="778" y="124" class="sf dk" text-anchor="middle" style="font-size:16px">played</text>
+      <rect x="814" y="104" width="52" height="30" rx="4" class="w"/><text x="840" y="124" class="sf dk" text-anchor="middle" style="font-size:16px">and</text>
+      <rect x="872" y="104" width="60" height="30" rx="4" class="w"/><text x="902" y="124" class="sf dk" text-anchor="middle" style="font-size:15px">laughed</text>
+      <text x="690" y="176" class="mu" style="font-size:12.5px">a drawn chunk is expanded top-down,</text>
+      <text x="690" y="193" class="mu" style="font-size:12.5px">each part from its own leaf (Section 6)</text>
+      <text x="690" y="230" class="mu" style="font-size:12.5px">each side is fitted by its own window:</text>
+      <text x="690" y="247" class="mu" style="font-size:12.5px">the source of infill errors such as</text>
+      <text x="690" y="264" class="mo tfoc">the * the tree → the all the tree</text>
+    </svg>
+    </div>
+  </figure>
+  <figcaption><b>Figure 5.</b> Gap filling (<code>gap_mode="window"</code>). The filler is drawn by its posterior of standing in the gap's surroundings. Fillers and scores in step 2 are illustrative; &ldquo;lily played and laughed&rdquo; is an infill memory produced.</figcaption>
+
+  <h2>Results on TinyStories</h2>
+  <p>2,000 sentences, verify 700, seed 17. Gap filling, share of generated trigrams attested in the corpus:</p>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Prompt</th><th class="num">600 sentences</th><th class="num">2,000 sentences</th></tr></thead>
+    <tbody>
+      <tr><th>prefix-1 <code>[w1 *]</code></th><td class="num">0.77</td><td class="num best">0.86</td></tr>
+      <tr><th>prefix-2 <code>[w1 w2 *]</code></th><td class="num">0.69</td><td class="num best">0.84</td></tr>
+      <tr><th>infill <code>[w1 * w(n−1) w(n)]</code></th><td class="num">0.20</td><td class="num">0.22</td></tr>
+    </tbody>
+  </table></div>
+  <p>Examples:</p>
+  <ul class="samples">
+    <li>lily smiled and laughed</li>
+    <li>sam will help you</li>
+    <li class="bad">the all the tree (error)</li>
+    <li class="bad">i am and ben (error)</li>
+  </ul>
+  <p>On bAbI (3,000 sentences), gap filling after a prefix gives 0.87–0.92 of trigrams attested.</p>
+
+  <h2>Neighbouring chunks and sibling mode</h2>
+  <p>With <code>neighbour_chunks</code>, a context also names the same-width units beside the element by the content concept of memory's best analysis, and a filler of width m is scored against the prompt's m-word chunk beside the gap. On 600 sentences (verify 700, seeds 13 / 17) prefix-1 improves (trigrams attested 0.78 → 0.87), while prefix-2 and infill get worse. It fails the novelty guard: grammatical and new at 320 falls to 0.67 / 0.73 / 0.51 / 0.60, against 0.871 / 0.892 / 0.846 / 0.839. A more specific context makes the learner memorise, so the option stays off.</p>
+  <p>Sibling mode (<code>gap_mode="sibling"</code>, <code>_sibling_fills</code>) parses the prompt and draws a committed composite whose left part matches a unit on the parse's right edge; the gap is that composite's right part. It is weak in every setting (trigrams attested 0.19–0.37).</p>
+</section>
+
+<!-- ============================================================ S2 CONSISTENCY -->
+<section class="page" data-page="s-consist" hidden>
+  <p class="eyebrow">Study S2</p>
+  <h1>Parse consistency without gold</h1>
+  <p class="lede">Without gold trees, a parser can still be judged by whether it agrees with itself: across seeds, across checkpoints, and when a word is replaced.</p>
+  <div class="col">
+    <p>400 held-out TinyStories sentences are parsed by memories learned from different seeds and stream sizes (original configuration). Cross-seed F1 compares the brackets of seed 13 and seed 17. Substitution F1 compares a sentence's parse with the parse after one word is replaced by a near or a far word. Stability compares a checkpoint's parses with the previous checkpoint's.</p>
+  </div>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Sentences learned</th><th class="num">250</th><th class="num">500</th><th class="num">1,000</th><th class="num">2,000</th></tr></thead>
+    <tbody>
+      <tr><th>Cross-seed bracket F1</th><td class="num">0.64</td><td class="num">0.78</td><td class="num">0.79</td><td class="num best">0.90</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>Substitution F1 at 2,000 sentences (seed 17): 0.962 for a near word, 0.893 for a far word.</li>
+    <li>Stability against the previous checkpoint reaches 0.92.</li>
+    <li>Verify 700 is less stable: cross-seed 0.77–0.79 at 2,000, substitution 0.84–0.87 near and 0.77–0.79 far.</li>
+    <li>bAbI parses look like <code>[[sandra travelled] [to [the garden]]]</code>, with phrase consistency 0.91.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ S3 PROBE -->
+<section class="page" data-page="s-probe" hidden>
+  <p class="eyebrow">Study S3</p>
+  <h1>Chunk representations</h1>
+  <p class="lede">Do the chunk types memory forms group by phrase type? A 2-D map and a nearest-neighbour probe answer it for the 600 most frequent chunk types.</p>
+  <div class="col">
+    <p>Each chunk type, learned from 2,000 TinyStories sentences (verify 700), is represented by its context description and by its content description. Phrase types come from NLTK and are used for the diagnosis only. Purity is the share of a type's 5 nearest neighbours (cosine) with the same phrase type; the shuffled baseline permutes the labels.</p>
+  </div>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Representation</th><th class="num">5-NN purity, seed 13</th><th class="num">Shuffled</th><th class="num">5-NN purity, seed 17</th><th class="num">Shuffled</th></tr></thead>
+    <tbody>
+      <tr><th>Context</th><td class="num best">0.50</td><td class="num">0.25</td><td class="num best">0.49</td><td class="num">0.24</td></tr>
+      <tr><th>Content</th><td class="num">0.33</td><td class="num">0.25</td><td class="num">0.31</td><td class="num">0.24</td></tr>
+    </tbody>
+  </table></div>
+  <figure>
+    <div class="fig"><img class="plot" src="chunks_tsne_v700_s13.png" alt="Two t-SNE maps of TRELLIS chunk types, seed 13. Left: content representation, purity 0.33 against 0.25 shuffled, with most types in one dense cluster. Right: context representation, purity 0.50 against 0.24, with separate groups for sentence-start chunks such as he was and she wanted, verb phrases such as was happy and played together, and noun phrases such as the park and every day." loading="lazy"></div>
+  </figure>
+  <figcaption><b>Figure 6.</b> t-SNE (cosine) of 600 chunk types, seed 13, coloured by NLTK phrase type. The context representation separates subject-verb starts, verb phrases and noun phrases; the content representation puts most types in one dense cluster.</figcaption>
+  <p>The context tree carries phrase type; the content tree carries it only weakly, consistent with the content tree adding no gain to the chunk factor (<a href="#f-known">F2</a>).</p>
+</section>
+
+<!-- ============================================================ S4 BABI -->
+<section class="page" data-page="s-babi" hidden>
+  <p class="eyebrow">Study S4</p>
+  <h1>bAbI questions as gap filling</h1>
+  <p class="lede">The question plus a question mark is the prompt, and the answer is the generated gap. Memory reaches the right kind of answer three times as often as a frequency baseline; exact answers need the story.</p>
+  <div class="col">
+    <p>The stream holds each story's sentences once and lines of the form <code>&lt;question&gt; ? &lt;answer&gt;</code>: 76,610 sentences, 4,114 distinct, 150 words, from the 20 bAbI tasks. Type accuracy asks whether the answer is one the task ever has; story-restricted exact accuracy limits fillers to the story's words and closed answers such as yes or no. The baseline draws an answer from the training answers by frequency.</p>
+  </div>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>600 sentences, seeds 13 / 17</th><th class="num">Right type</th><th class="num">Exact</th><th class="num">Exact, story-restricted</th></tr></thead>
+    <tbody>
+      <tr class="hl"><th>Gap filling</th><td class="num best">0.60 / 0.58</td><td class="num">0.21 / 0.17</td><td class="num">0.25 / 0.24</td></tr>
+      <tr><th>Gap filling + neighbour chunks</th><td class="num">0.64 / 0.63</td><td class="num">0.19 / 0.19</td><td class="num">–</td></tr>
+      <tr><th>Frequency baseline</th><td class="num">0.20 / 0.23</td><td class="num">0.06 / 0.06</td><td class="num">–</td></tr>
+    </tbody>
+  </table></div>
+  <p>Neighbouring chunks give no real gain. Long questions fail: &ldquo;where was the apple before the bathroom ?&rdquo; is answered yes or no, because the window sees only &ldquo;bathroom ?&rdquo;. QA lines parse as <code>[where [is [[mary ?] bathroom]]]</code>. The next step is answering by analogy: align the question's chunks with the story sentence that shares its entity and role, and answer with the filler in the aligned slot.</p>
+</section>
+
+<!-- ============================================================ S5 CHARACTERS -->
+<section class="page" data-page="s-chars" hidden>
+  <p class="eyebrow">Study S5</p>
+  <h1>Chinese characters</h1>
+  <p class="lede">The same code runs on character decompositions, with components in spatial relations. A character has only a few parts, so it is a hard test for any change that drops low-weight analyses.</p>
+  <div class="col">
+    <ul>
+      <li><em>Well formed</em>: the sample reads back into a structure.</li>
+      <li><em>Real</em>: the sample is an existing character.</li>
+      <li><em>Novel</em>: the sample was not in training.</li>
+    </ul>
+    <p>Omission is measured on held-out characters; right-branching scores 0.678.</p>
+  </div>
+@@L 636-636@@
+  <h2>Characters as a guard for memory repair</h2>
+  <p>Real and real-and-unseen characters at 500 experiences, seeds 13; 17:</p>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Run</th><th class="num">Seed 13</th><th class="num">Seed 17</th></tr></thead>
+    <tbody>
+      <tr><th>original</th><td class="num">0.647 / 0.046</td><td class="num">0.741 / 0.072</td></tr>
+      <tr><th>verify 700</th><td class="num">0.711 / 0.043</td><td class="num">0.687 / 0.090</td></tr>
+      <tr><th>repair on use, path 700</th><td class="num">0.739 / 0.036</td><td class="num">0.647 / 0.074</td></tr>
+      <tr><th>repair on use, path 3000</th><td class="num">0.681 / 0.044</td><td class="num">0.612 / 0.082</td></tr>
+      <tr><th>min_weight 0.03 (real only)</th><td class="num">0.614</td><td class="num">0.586</td></tr>
+    </tbody>
+  </table></div>
+  <p>Every repair variant is up on seed 13 and down on seed 17. Real-and-unseen is too rare (4–9%) to separate them. Dropping low-weight records fails here because a character's alternative analyses carry information.</p>
+  <figure>
+    <div class="fig"><img class="plot" src="generated_characters.png" alt="Rows of characters generated by TRELLIS v2 with their component sequences, under three encodings: IDS operators as relations, IDS operators as tokens, and sequences alone." loading="lazy"></div>
+  </figure>
+  <figcaption><b>Figure 7.</b> Characters TRELLIS v2 invents: new combinations of learned components in learned positions, under three encodings (an earlier export; rates as printed above each row).</figcaption>
+</section>
+
+<!-- ============================================================ S6 CHESS -->
+<section class="page" data-page="s-chess" hidden>
+  <p class="eyebrow">Study S6</p>
+  <h1>Chess: Chase and Simon recall, and an Elo study</h1>
+  <p class="lede">Memory learned from real positions recalls real positions better than scrambled ones, as chess experts do, when it recognises chunks by where their pieces stand. Recognition alone does not yet play well.</p>
+  <div class="col">
+    <p>GraphTrellis learns real positions (Lichess 1800+, ply 30), with positions as board graphs. At each checkpoint it sees 100 held-out positions and the same pieces scattered at random.</p>
+    <ul>
+      <li><b>Recognition</b> (CHREST-like): a chunk is one unit if its recognition bits, from climbing both trees by content and context, are at least θ; otherwise it falls apart into its parts.</li>
+      <li><b>Short-term memory</b>: 7 units, the largest kept.</li>
+      <li><b>Recall</b>: the share of pieces inside the kept units.</li>
+    </ul>
+  </div>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Recall, 4,000 learned positions</th><th class="num">Real, s13</th><th class="num">Scrambled, s13</th><th class="num">Real, s17</th><th class="num">Scrambled, s17</th></tr></thead>
+    <tbody>
+      <tr><th>θ 16</th><td class="num best">0.77</td><td class="num">0.54</td><td class="num best">0.88</td><td class="num">0.73</td></tr>
+      <tr><th>θ 20</th><td class="num best">0.48</td><td class="num">0.28</td><td class="num best">0.64</td><td class="num">0.38</td></tr>
+      <tr><th>Novice (0 learned)</th><td class="num">0.265</td><td class="num">0.265</td><td class="num">0.265</td><td class="num">0.265</td></tr>
+    </tbody>
+  </table></div>
+  <p>Recognising by content alone gives almost no advantage (0.74 against 0.63): a chunk's content names only its pieces' categories, which scrambled boards share. Where pieces stand is what experts recognise.</p>
+  <figure>
+    <div class="fig"><img class="plot" src="chess_chunk_types.png" alt="Eight chunk types TRELLIS v2 finds in middlegame positions, each drawn at its most frequent place, for example a black pawn and bishop on the g-file seen 2164 times and a rook and king on the back rank seen 2110 times." loading="lazy"></div>
+  </figure>
+  <figcaption><b>Figure 8.</b> Chunks TRELLIS v2 finds in middlegame positions, each at its most frequent place, with its count (an earlier export).</figcaption>
+
+  <h2>Elo</h2>
+  <p>The TRELLIS player plays the legal move after which memory recognises the position best (summed chunk recognition bits), with no search and no material count. The <code>+safe</code> variant first excludes moves that lose material to the best one-ply reply. Elo comes from Bradley–Terry over all games, with the random mover at 0; references are a random mover, a one-ply material-greedy player and a two-ply material minimax player.</p>
+  <ul>
+    <li>Memory only: about as strong as random (−9 to −13 at 300 positions).</li>
+    <li><code>+safe</code>: 210–308.</li>
+    <li>Learning 300 positions did not improve play.</li>
+    <li>Absolute Elo needs a calibrated engine; downloading Stockfish is not yet permitted.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ F1 FAILURES -->
+<section class="page" data-page="failures" hidden>
+  <p class="eyebrow">Failure point F1</p>
+  <h1>Memory as an AND/OR graph</h1>
+  <p class="lede">Four checks run after every change, on every grammar. They ask whether chunk types generate their parts, whether categories substitute, whether representations compare across sizes, and whether stored descriptions keep up.</p>
+@@L 642-652@@
+</section>
+
+<!-- ============================================================ F2 KNOWN -->
+<section class="page" data-page="f-known" hidden>
+  <p class="eyebrow">Failure point F2</p>
+  <h1>Known failures</h1>
+  <p class="lede">Three failures stay open. Each has a measurement that shows it and a reading of its cause.</p>
+  <h2>The content tree adds no gain</h2>
+  <p>For every composite on <code>med</code> (90 of 90) and <code>large</code> (80 of 80), and 45 of 60 on <code>small</code>, the content tree's best gain is the root's 0 bits. Chunk factors come from the context tree alone, so substitutability counts and cohesion (parts predicting each other) does not. Weaker smoothing lets near-leaf concepts reward memorised pairs and worsens every measure. The tree is deep (stored content leaves sit 12.8 levels down on <code>small</code>), but held-out composites stop 2–4 levels down, where Cobweb would open a new branch: the content tree does not recognise new chunks as members of the deeper chunk types it holds. The chunk probe agrees: content purity is 0.31–0.33 against 0.24–0.25 shuffled (<a href="#s-probe">S3</a>).</p>
+  <h2>Infill does not fit both sides</h2>
+  <p>Gap filling scores a filler by the gap's window, and each side is satisfied separately: &ldquo;the * the tree&rdquo; becomes &ldquo;the all the tree&rdquo;, and &ldquo;i * and ben&rdquo; becomes &ldquo;i am and ben&rdquo;. Infill trigrams attested stay at 0.20–0.22 while prefixes reach 0.84–0.86 (<a href="#s-prompt">S1</a>).</p>
+  <h2>Chunk context trades novelty for fit</h2>
+  <p>Naming the same-width neighbouring chunks in the context helps one-word prefixes (0.78 → 0.87) and makes the learner memorise: grammatical and new at 320 falls to 0.51–0.73 against 0.84–0.89. Learned neighbour names failed the same way on TinyStories in round 11. Chunk context stays off until a form passes the novelty guard.</p>
+</section>
+
+<!-- ============================================================ RESULTS INDEX -->
+<section class="page" data-page="results" hidden>
+  <p class="eyebrow">Results</p>
+  <h1>Results</h1>
+  <p class="lede">Each result is a separate page: the learning curves on the grammars, the record of changes kept and set aside, and the plan for the next iterations.</p>
+  <ul class="rlist">
+    <li><a href="#curves"><span class="rn">R1</span><span class="rt">Learning curves</span><span class="ra">What memory can generate after 10 to 320 experiences on six grammars, averaged over seeds 13 and 17.</span></a></li>
+    <li><a href="#iterations"><span class="rn">R2</span><span class="rt">Kept and set aside</span><span class="ra">Every change tried since 23 October, with its status and what it did.</span></a></li>
+    <li><a href="#next"><span class="rn">R3</span><span class="rt">What to iterate next</span><span class="ra">The open levers: infill, the content gain, used context, chunk context, and the next domains.</span></a></li>
+  </ul>
+</section>
+
+<!-- ============================================================ R1 CURVES -->
+<section class="page" data-page="curves" hidden>
+  <p class="eyebrow">Result R1</p>
+  <h1>What memory can generate as experience accumulates</h1>
+  <p class="lede">Leaf generation after 10 to 320 experiences, averaged over seeds 13 and 17. Grammaticality stays at 97–100% from the first checkpoint, and novelty rises as leaves collect more than one committed instance.</p>
+  <p class="small">Hover a panel for values. Characters are on <a href="#s-chars">S5</a>.</p>
+@@L 625-627@@
+</section>
+
+<!-- ============================================================ R2 ITERATIONS -->
+<section class="page" data-page="iterations" hidden>
+  <p class="eyebrow">Result R2</p>
+  <h1>Kept and set aside</h1>
+  <p class="lede">Each change is kept when it holds or raises grammatical, new generation and passes the guards; otherwise it is set aside with the measurement that decided it.</p>
+  <h2>24–26 October: memory currency and prompting</h2>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Change</th><th>Status</th><th>What it did</th></tr></thead>
+      <tbody>
+        <tr><td>Verify 700 (<code>refresh="verify"</code>, weight-1 check)</td><td><span class="st st-kept">kept</span></td><td class="what">Misplaced ctx 0.5%, cnt 2.6–2.9% of stored weight on 2,000 TinyStories sentences; passes all 4 grammar runs; 2.3–3.1× learning time.</td></tr>
+        <tr><td>Verify 300 / 500, verify at own weight</td><td><span class="st st-set">set aside</span></td><td class="what">Each fails med-13 on the grammar guard (gram+new 0.836–0.854).</td></tr>
+        <tr><td>Compiled tree (<code>tree="cu"</code>)</td><td><span class="st st-kept">kept</span></td><td class="what">Bit-identical in reference arithmetic; stories-300 learns in 33 s against 517 s.</td></tr>
+        <tr><td>Repair on use along the sort path (k 3000)</td><td><span class="st st-run">testing</span></td><td class="what">Used content 0.6–0.9% misplaced at about 1.4× cost; passes the guard; used context about 8.5%, characters s17 down.</td></tr>
+        <tr><td>Repair on use, end concept only</td><td><span class="st st-set">set aside</span></td><td class="what">Cheap, but used content stays 9–12% misplaced and med-13 fails the guard.</td></tr>
+        <tr><td>Four draws per concept</td><td><span class="st st-set">set aside</span></td><td class="what">Fails large-17 (0.968 / 0.80).</td></tr>
+        <tr><td><code>min_weight</code> 0.05 / 0.03</td><td><span class="st st-set">set aside</span></td><td class="what">0.05 fails large-17; both fail characters (real at 500: 0.614 / 0.586 at 0.03).</td></tr>
+        <tr><td>Update on read (<code>ref_names</code>)</td><td><span class="st st-set">option</span></td><td class="what">Exact descriptions; placement and cost no better than copies.</td></tr>
+        <tr><td>Verify on restructuring events or on drift</td><td><span class="st st-set">set aside</span></td><td class="what">Fail the grammar guard (med-13 0.783, large-17 0.804) and run slower.</td></tr>
+        <tr><td>Gap filling (<code>gap_mode="window"</code>)</td><td><span class="st st-kept">kept</span></td><td class="what">Prefix trigrams attested 0.84–0.86; success 1.0 against 0.53–0.73 for rejection and pattern.</td></tr>
+        <tr><td>Neighbour chunks (<code>neighbour_chunks</code>)</td><td><span class="st st-set">off</span></td><td class="what">Prefix-1 better, prefix-2 and infill worse; fails the novelty guard.</td></tr>
+        <tr><td>Sibling mode, <code>ctx_fill</code></td><td><span class="st st-set">set aside</span></td><td class="what">Sibling 0.19–0.37 trigrams attested; <code>ctx_fill</code> gives word salad.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h2>Up to 23 October: generation and naming</h2>
+@@L 658-675@@
+</section>
+
+<!-- ============================================================ R3 NEXT -->
+<section class="page" data-page="next" hidden>
+  <p class="eyebrow">Result R3</p>
+  <h1>What to iterate next</h1>
+  <p class="lede">The levers below are ordered by what blocks the most measures.</p>
+  <ol>
+    <li><b>Infill.</b> A filler must fit both sides of the gap at once. Gap fills now satisfy each side's window separately.</li>
+    <li><b>Used context and characters under repair on use.</b> Used content is current; used context stays near 8.5% and characters s17 lose real characters. The 2,000-sentence run will show whether the gap holds at size.</li>
+    <li><b>Content gain.</b> Held-out composites stop 2–4 levels down the content tree, where Cobweb opens a new branch. Next: name words by what they build as well as where they stand, so new chunks share values with stored ones.</li>
+    <li><b>Chunk context without memorisation.</b> Same-level chunk context helps one-word prefixes and fails the novelty guard. A beam between v1's greedy chunking and inside-outside, with chunk context (same level or below) in every candidate's score, is the planned form.</li>
+    <li><b>Answering by analogy (bAbI).</b> Align the question's chunks with the story sentence that shares its entity and role, and answer with the filler in the aligned slot.</li>
+    <li><b>Chess.</b> Elo at 1,000 and 4,000 positions; absolute Elo once a calibrated engine is allowed. Chess as board graphs has priority among the next domains; prompting then means parsing incomplete structure and generating from a scaffold.</li>
+  </ol>
+  <p class="small">Data: <code>experiments/v3/diag/t3_export.py</code>, <code>t3_learncurve.py</code>, <code>t3_genbench.py</code>, <code>t3_failure.py</code>, <code>t3_stories.py</code>, <code>t3_use.py</code>, <code>t3_prompt.py</code>, <code>t3_babi_qa.py</code>, <code>t3_chunk_probe.py</code>, <code>run_characters.py</code>; <code>experiments/v3/chess_recall.py</code>, <code>chess_play.py</code>; docs <code>TEMPORAL_INTERDEP.md</code>, <code>PROMPTING.md</code>, <code>BABI.md</code>, <code>CHESS_CS.md</code>, <code>FAILURE_MODES.md</code>.</p>
+</section>
+
+<nav class="pager" id="pager" aria-label="Page navigation"></nav>
+</main>
+</div>
+
+@@DATA@@
+
+@@SCRIPT@@
+
+<script>
+(function () {
+const ORDER = ["overview", "status", "principles", "representation", "learning", "sustain", "parse", "generate", "types", "rules",
+  "s-prompt", "s-consist", "s-probe", "s-babi", "s-chars", "s-chess", "failures", "f-known", "results", "curves", "iterations", "next"];
+const TITLES = { overview: "Overview", status: "Where we stand", principles: "1 Principles", representation: "2 Representation",
+  learning: "3 Learning", sustain: "4 Sustaining memory", parse: "5 Parsing, step by step", generate: "6 Generation, step by step",
+  types: "7 Type names", rules: "8 Concept-choice rules", "s-prompt": "S1 Prompted generation", "s-consist": "S2 Parse consistency",
+  "s-probe": "S3 Chunk representations", "s-babi": "S4 bAbI questions", "s-chars": "S5 Chinese characters", "s-chess": "S6 Chess",
+  failures: "F1 AND/OR failure checks", "f-known": "F2 Known failures", results: "Results", curves: "R1 Learning curves",
+  iterations: "R2 Kept and set aside", next: "R3 What to iterate next" };
+const PICKER = ["parse", "generate", "types"];
+const LIVE = ["parse", "generate", "types", "rules", "curves", "failures", "s-chars"];
+const q = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function show(page) {
+  if (!ORDER.includes(page)) page = "overview";
+  document.querySelectorAll(".page").forEach(s => { s.hidden = s.dataset.page !== page; });
+  document.querySelectorAll(".toc a, #toc-mobile a").forEach(a => {
+    if (a.getAttribute("href") === "#" + page) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+  });
+  q("#picker").hidden = !PICKER.includes(page);
+  const i = ORDER.indexOf(page), prev = i > 0 ? ORDER[i - 1] : null, next = i < ORDER.length - 1 ? ORDER[i + 1] : null;
+  q("#pager").innerHTML = (prev ? `<a class="prev" href="#${prev}"><small>Previous</small><span>${esc(TITLES[prev])}</span></a>` : "") +
+    (next ? `<a class="next" href="#${next}"><small>Next</small><span>${esc(TITLES[next])}</span></a>` : "");
+  q("#topbar-title").textContent = TITLES[page];
+  const d = q("#topnav"); if (d) d.open = false;
+  window.scrollTo(0, 0);
+  // the explorers draw at their box's real width, so redraw once the page is visible
+  if (LIVE.includes(page) && window.__trellisRender) { try { window.__trellisRender(); } catch (e) { console.error(e); } }
+}
+function route() { show((location.hash || "#overview").slice(1)); }
+q("#toc-mobile").innerHTML = q("#toc").innerHTML;
+window.addEventListener("hashchange", route);
+route();
+})();
+</script>
