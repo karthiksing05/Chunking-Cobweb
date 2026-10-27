@@ -1868,7 +1868,8 @@ class Trellis3:
                       budget: int = 4000, gap: Optional[Tuple[Sequence[str], Sequence[str]]] = None,
                       gap_beta: float = 1.0, gap_mode: str = "window",
                       sibling: Optional[int] = None, sibling_beta: float = 1.0,
-                      sibling_mode: str = "lift") -> Optional[List[str]]:
+                      sibling_mode: str = "lift", sibling_facets: Sequence[str] = ("L",),
+                      sibling_window: bool = False) -> Optional[List[str]]:
         """Expansive generation from the two hierarchies alone. Every step reads
         statistics held by concepts: a whole experience is drawn from the content
         root (SENT); a content concept gives where its parts stood (LPART, RPART:
@@ -1911,7 +1912,9 @@ class Trellis3:
         ``sibling_beta`` (k sets how specific, beta how strongly it counts).
         ``sibling_mode="pair"``: the right part's slot itself comes from the content
         tree: a stored composite is drawn among those whose left parts sit under that
-        concept, and its own right part is the slot (filled from its context leaf)."""
+        concept, and its own right part is the slot (filled from its context leaf);
+        ``sibling_facets`` ("L", "LC") are the left facets members are matched on and
+        ``sibling_window`` keeps right parts that stood after the word just generated."""
         fill_predict = isinstance(fill_name, str) and fill_name.endswith("+predict")
         if fill_predict:
             # "...+predict": a word slot also weights each candidate by the probability
@@ -2075,39 +2078,47 @@ class Trellis3:
                 out *= p[0] / max(p[1], 1e-12)
             return out
 
-        left_bags: Dict[int, Dict[str, float]] = {}
+        left_bags: Dict[object, Dict[str, Dict[str, float]]] = {}
 
-        def bag_of(e: Elem) -> Dict[str, float]:
-            """A part's name as a normalised bag (its ``L`` facet)."""
+        def bags_of(e: Elem) -> Dict[str, Dict[str, float]]:
+            """A part's left facets (its name ``L`` and content ``LC``) as normalised bags."""
             key = e.rid if e.rid is not None else ("w", e.token)
             if key not in left_bags:
-                b = self._content(Elem((0, 2), left=e, right=e), sides="L").get("L")
-                left_bags[key] = b if isinstance(b, dict) else ({b: 1.0} if b and b != BLANK else {})
+                x = self._content(Elem((0, 2), left=e, right=e), sides="L")
+                left_bags[key] = {a: (b if isinstance(b, dict) else ({b: 1.0} if b and b != BLANK else {}))
+                                  for a, b in x.items()}
             return left_bags[key]
 
         def paired_slots(h: Optional[int]) -> Optional[Dict[tuple, float]]:
             """sibling_mode="pair": the right parts of the stored composites whose left
             parts sit under the concept the frozen left part sorts to (``sibling``
             levels above its end): a general concept, made specific by the sibling. A
-            part is lower than the chunk it belongs to (height below ``h``)."""
+            part is lower than the chunk it belongs to (height below ``h``). With
+            ``sibling_window`` a right part must have stood after the word just generated."""
             node = sibling_concept()
             while node is not None and node.parent is not None:
                 lefts = self.cnt.passive(node, LPART)
                 if lefts:
                     owner = self._part_owner()
-                    me = bag_of(as_elem(last[0])) if sibling_beta else None
-                    out: Dict[tuple, float] = {}
+                    me = bags_of(as_elem(last[0])) if sibling_beta else None
+                    prev = out[-1] if out else BOS
+                    slots: Dict[tuple, float] = {}
                     for (lrid, _), c in lefts.items():
                         e = owner.get(lrid)
-                        if e is not None and e.right.leaf is not None and (h is None or e.right.height < h):
-                            k = (e.right.rid, e.right.token is not None)
-                            if me is not None:
-                                # the concept parameterised by the sibling: each member
-                                # counts by how well its own left part matches the frozen one
-                                other = bag_of(e.left)
-                                c *= sum(min(p, other.get(u, 0.0)) for u, p in me.items()) ** sibling_beta
-                            out[k] = out.get(k, 0.0) + c
-                    return out if any(v > 0 for v in out.values()) else None
+                        if e is None or e.right.leaf is None or (h is not None and e.right.height >= h):
+                            continue
+                        if sibling_window and (e.right.ctx or {}).get("l1") != prev:
+                            continue
+                        if me is not None:
+                            # the concept parameterised by the sibling: each member counts
+                            # by how well its own left part matches the frozen one, facet by facet
+                            other = bags_of(e.left)
+                            for a in sibling_facets:
+                                c *= sum(min(p, other.get(a, {}).get(u, 0.0)) for u, p in me.get(a, {}).items()) ** sibling_beta
+                        k = (e.right.rid, e.right.token is not None)
+                        slots[k] = slots.get(k, 0.0) + c
+                    if any(v > 0 for v in slots.values()):
+                        return slots
                 node = node.parent
             return None
 
