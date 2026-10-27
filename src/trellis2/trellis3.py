@@ -48,6 +48,7 @@ WORD = "word"        # passive: the word a context concept's word elements are (
 FILL = "fill"        # at a context concept: the committed instances that stood there (("w", token) | ("c", content leaf id))
 LPART, RPART = "lpart", "rpart"   # at a content concept: where its parts stood ((context leaf id, is primitive))
 SENT = "sent"        # at a content concept: committed whole experiences below it (content leaf id)
+NEXT = "next"        # at a content concept: the whole experiences that followed those below it (record id)
 
 
 def log_prob(node: CobwebNode, x: dict, root: CobwebNode, alpha: float) -> float:
@@ -1145,7 +1146,10 @@ class Trellis3:
     # ------------------------------------------------------------------ #
     # Learning
     # ------------------------------------------------------------------ #
-    def learn(self, tokens: Sequence[str]) -> Tree:
+    def learn(self, tokens: Sequence[str], follows: bool = False) -> Tree:
+        """One experience. ``follows``: it came right after the previous experience
+        (the next sentence of a story); the previous whole experience then records
+        this one as what followed it (NEXT, a same-level chunk context)."""
         tokens = list(tokens)
         r = self.parse(tokens)
         words, comps, post, chosen = r["words"], r["comps"], r["post"], set(r["chosen"])
@@ -1229,6 +1233,7 @@ class Trellis3:
         # what generation reads: the committed analysis as statistics of concepts
         for e in words:
             self._pas(e, "ctx", FILL, ("w", e.token), 1.0)
+        whole = None
         for key in chosen:
             e = comps[key]
             if e.cleaf is None or e.leaf is None:
@@ -1240,6 +1245,11 @@ class Trellis3:
                     self._pas(e, "cnt", a, (part.rid, part.token is not None), 1.0)
             if e.span == (0, len(tokens)):
                 self._pas(e, "cnt", SENT, e.rid, 1.0)
+                whole = e
+        prev = self.__dict__.get("_last_whole")
+        if follows and prev is not None and whole is not None and prev.cleaf is not None:
+            self._pas(prev, "cnt", NEXT, whole.rid, 1.0)
+        self._last_whole = whole
         self.stats["experiences"] += 1
         if self.repair_reached:
             self._repair(words + [comps[k] for k in comps if comps[k].rid is not None])
@@ -1869,7 +1879,8 @@ class Trellis3:
                       gap_beta: float = 1.0, gap_mode: str = "window",
                       sibling: Optional[int] = None, sibling_beta: float = 1.0,
                       sibling_mode: str = "lift", sibling_facets: Sequence[str] = ("L",),
-                      sibling_window: int = 0) -> Optional[List[str]]:
+                      sibling_window: int = 0, after: Optional[Sequence[str]] = None,
+                      after_level: int = 0) -> Optional[List[str]]:
         """Expansive generation from the two hierarchies alone. Every step reads
         statistics held by concepts: a whole experience is drawn from the content
         root (SENT); a content concept gives where its parts stood (LPART, RPART:
@@ -1915,8 +1926,14 @@ class Trellis3:
         concept, and its own right part is the slot (filled from its context leaf);
         ``sibling_facets`` ("L", "LC") are the left facets members are matched on and
         ``sibling_window=n`` keeps right parts that stood after the n words just
-        generated and that end the experience exactly when their composite does."""
-        fill_predict = isinstance(fill_name, str) and fill_name.endswith("+predict")
+        generated and that end the experience exactly when their composite does.
+
+        ``after``: a previous sentence (learned with ``follows``). It is parsed and its
+        whole chunk sorted in the content tree; the first concept at or above
+        ``after_level`` levels over its leaf that holds NEXT statistics gives the
+        whole experience to expand (what followed sentences like it), in place of
+        the content root's SENT."""
+        fill_predict =isinstance(fill_name, str) and fill_name.endswith("+predict")
         if fill_predict:
             # "...+predict": a word slot also weights each candidate by the probability
             # of its learned category (word_cc="cat") at this part of the composite
@@ -2332,7 +2349,8 @@ class Trellis3:
                 return lw + list(out) + rw
             return None
         if pat is None:
-            root = draw(self.cnt.passive(self.cnt.root, SENT))
+            pool = self._next_pool(after, after_level) if after else None
+            root = draw(pool or self.cnt.passive(self.cnt.root, SENT))
             if root is None or self.records[root].cleaf is None:
                 return None
             try:
@@ -2436,6 +2454,22 @@ class Trellis3:
                     mass[value] = mass.get(value, 0.0) + w * math.exp(lp)
         cache[key] = mass
         return mass
+
+    def _next_pool(self, prev: Sequence[str], level: int = 0) -> Optional[Dict[int, float]]:
+        """The whole experiences that followed sentences like ``prev`` (NEXT at the
+        first concept from ``level`` above its content leaf up that has any; the root
+        holds them all, so this ends at the unconditioned pool at worst)."""
+        r = self.parse(list(prev))
+        n = len(prev)
+        el = next((r["comps"][k] for k in r["chosen"] if k[0] == 0 and k[2] == n), None)
+        if el is None:
+            return None
+        path = self.cnt.categorize(self._content(el))
+        for node in reversed(path[:max(1, len(path) - level)]):
+            pool = {v: c for v, c in self.cnt.passive(node, NEXT).items() if self.records[v].cleaf is not None}
+            if pool:
+                return pool
+        return None
 
     def _sibling_fills(self, left: Sequence[str], beta: float = 1.0) -> Dict[int, float]:
         """P(committed composite | its left part is a chunk on the prompt's right
