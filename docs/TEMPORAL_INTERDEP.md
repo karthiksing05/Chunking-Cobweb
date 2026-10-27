@@ -406,3 +406,34 @@ Name churn changes what records should sit with, not only how they are described
 - **Four draws per concept (round 45)** fails the guard on large-17 (0.968 / 0.80).
 
 Status: repair on use along the sort path keeps the content that TinyStories uses correctly placed (under 1%) at about 1.4× the original's cost, and it passes the grammar guard. Used context stays at about 8.5%, and characters s17 loses real characters, so the goal is not met yet.
+
+## Round 46: repair as found, own-weight measure, characters over five seeds (2026-10-27)
+
+**Diagnosis.** In path repair, over 99% of the misplaced context mass among used records came from chunks, and most of those chunks had just been repaired (`t3_use.py` breakdown, s13). Chunks are stored at their posterior weight w < 1, and repair re-inserts them at w. The measure judged placement by sorting at weight 1, so a correctly placed low-weight chunk counted as misplaced. The temporal target already uses own-weight placement, so `t3_use.py` now also reports "reached misplaced at own weight".
+
+**`repair_now`.** When a sort lands on records not yet checked this experience, they are re-described and re-sorted first, and the sort is redone, so what parsing or generation reads is current.
+
+| used misplaced at own weight, by use, ctx / cnt | 1000 s13 | 1000 s17 | learn s (1000) |
+|---|---|---|---|
+| original | 0.053 / 0.095 | 0.060 / 0.053 | 878 / 935 |
+| path 700 (deferred) | **0.007 / 0.003** | **0.008 / 0.009** | 1 238 / 1 310 |
+| path 700 + repair_now | 0.003 / 0.002 | 0.005 / 0.035 | 1 660 / 1 612 |
+
+At 2000 the original's s13 run gives 0.038 / 0.064.
+
+**Grammar guard.**
+- `repair_now` passes 3 of 4 (large-17 grammaticality 0.971, 2.2 points down).
+- Deferred path 700 passes all 4: 1.0 / 0.926, 0.982 / 0.892, 0.993 / 0.814, 0.989 / 0.849.
+
+**Characters, five seeds (13, 17, 19, 23, 29), 500 characters, mean real / real and unseen.**
+
+| | real | real and unseen |
+|---|---|---|
+| original | 0.762 | 0.053 |
+| verify 700 | 0.756 | 0.059 |
+| path 700 | **0.769** | **0.059** |
+| path 700 + repair_now | 0.760 | **0.068** |
+
+Seeds vary far more than settings: the original alone ranges from 0.620 to 0.938. The seed-17 drop seen earlier is seed noise. Every repair keeps real characters within 1 point of the original and raises real and unseen.
+
+Status: **path repair on use, budget 700** (`refresh="verify"`, `refresh_budget` 0, `repair_path`, `repair_use` 700) meets the temporal target among used records at 1000 (under 1% at own weight, 1.4× cost). It passes the four-grammar guard and holds characters on the five-seed mean. The 2000-sentence check is pending.
