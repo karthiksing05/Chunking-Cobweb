@@ -365,11 +365,11 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
 <section class="page" data-page="status" hidden>
   <p class="eyebrow">27 October 2026</p>
   <h1>Where we stand</h1>
-  <p class="lede">The temporal target is met by repairing memory as it is used: records that parsing and generation reach are re-sorted when stale, which keeps used memory under 1% misplaced at about twice the original cost. Gap filling answers prompts and bAbI questions, and chess chunks show the expert recall advantage. Interdependence, infill, the content tree's gain and chunk context remain open.</p>
+  <p class="lede">The temporal target is met by repairing memory as it is used: records that parsing and generation reach are re-sorted when stale, which keeps used memory under 1% misplaced at under twice the original learning time. Mixing neighbours' names into a word's name speeds word-category convergence while generation holds, which meets the interdependence target. Gap filling answers prompts and bAbI questions, and chess chunks show the expert recall advantage. Infill, the content tree's gain and chunk context remain open.</p>
 
   <dl class="facts">
     <div><dt>Temporal target</dt><dd>met by path repair on use, budget 700: used records 0.6% misplaced (ctx and cnt) at 2,000 sentences</dd></div>
-    <div><dt>Cost</dt><dd>2.0–2.3× the original learning time (target ≤3×)</dd></div>
+    <div><dt>Cost</dt><dd>1.8–2.1× the original learning time alone at 2,000 sentences (target ≤3×)</dd></div>
     <div><dt>Grammar guard</dt><dd>passes on all 4 runs (med, large × seeds 13, 17); characters held over 5 seeds</dd></div>
     <div><dt>Parse agreement</dt><dd>cross-seed bracket F1 0.90 at 2,000 sentences</dd></div>
     <div><dt>Prompting</dt><dd>prefix trigrams attested 0.86 / 0.84; infill 0.22</dd></div>
@@ -382,7 +382,7 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
     <tbody>
       <tr><th>Trees</th><td>Two Cobweb trees, compiled (<code>tree="cu"</code>, cobweb-private <code>trellis-discrete</code>), bit-identical to the Python tree in reference arithmetic</td></tr>
       <tr><th>Context instance</th><td>Window of two tokens on each side (<code>l2 l1 r1 r2</code>) and the element's own content <code>cc</code>; a word's <code>cc</code> is its token (<code>word_cc</code>). Neighbouring chunks (<code>neighbour_chunks</code>) are off.</td></tr>
-      <tr><th>Content instance</th><td>The parts' names <code>L R</code> and the parts' content concepts <code>LC RC</code>; word parts are named by coarse band names (<code>part_names="bands"</code>)</td></tr>
+      <tr><th>Content instance</th><td>The parts' names <code>L R</code> and the parts' content concepts <code>LC RC</code>; word parts are named by their fine mixed names (<code>part_names</code> unset); band names (<code>part_names="bands"</code>) halve the cost but lose about 8 points of real characters and one guard grammar</td></tr>
       <tr><th>Word names</th><td>The parent concepts of 32 sampled instances (<code>name_level="parent"</code>, <code>type_k</code> 32), mixed at readout with the names of neighbouring words, weight n/(n+4) for its own (<code>name_mix_k</code> 4)</td></tr>
       <tr><th>Learning</th><td>Inside-outside over every composite; each stored in both trees with its posterior weight (dropped below 0.001); a record may merge or split concepts with probability equal to its weight (<code>restructure="sample"</code>)</td></tr>
       <tr><th>Keeping memory current</th><td>Relabel in place, plus repair on use: every sort marks the records under the concept it ends at, and every concept it passes contributes records by a random walk down its children (<code>repair_path</code>). After each experience, up to 700 marked records, oldest-checked first, are re-described and moved if they no longer sort where they sit (<code>repair_use</code> 700, <code>refresh_budget</code> 0). No background sweep.</td></tr>
@@ -433,7 +433,9 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
   <h3>2. Verify 700 meets the temporal target</h3>
   <p>Most of the reported content misplacement was a mismatch of weights: the check sorted records at weight 1 while learning had placed them at their posterior weight. The rest is real drift, and moving records repairs it. At 700 checks per experience, context misplacement is 0.5% and content 2.6–2.9% of stored weight. Generation on TinyStories rises (attested and novel 0.29 / 0.28 against 0.22 / 0.23), and so does word-category accuracy (0.53 / 0.55 against 0.46 / 0.50).</p>
   <h3>3. Repair on use meets the temporal target</h3>
-  <p>Re-sorting stale records where the trees are used, with no background sweep, keeps used context and content under 1% misplaced at 1,000 and 2,000 sentences on both seeds, at 2.0–2.3 times the original cost. The used context misplacement seen earlier (about 8.5%) was the weight mismatch again: low-weight chunks were judged at weight 1. Path repair passes the grammar guard on all four runs and holds characters on the five-seed mean.</p>
+  <p>Re-sorting stale records where the trees are used, with no background sweep, keeps used context and content under 1% misplaced at 1,000 and 2,000 sentences on both seeds, at 1.8–2.1 times the original learning time (timed without measurement). The used context misplacement seen earlier (about 8.5%) was the weight mismatch again: low-weight chunks were judged at weight 1. Path repair passes the grammar guard on all four runs and holds characters on the five-seed mean.</p>
+  <h3>3b. Mixed names make words interdependent</h3>
+  <p>A word's name mixes its own parent concept with its neighbours' names (<code>name_mix_k</code> 4). Under path repair, mixing raises word-category accuracy at every checkpoint (0.46 / 0.42 against 0.29 / 0.25 after 50 sentences), and grammaticality stays within 1 point of the original. Grammatical and novel samples move with the seed (+3.4 points on s13, −5.5 on s17), a mean change within noise.</p>
   <h3>4. Parses are consistent without gold</h3>
   <p>Two seeds agree on 0.90 of brackets at 2,000 sentences, and a parse barely changes when a word is replaced by a similar one (<a href="#s-consist">S2</a>).</p>
   <h3>5. Gap filling answers prompts</h3>
@@ -1186,6 +1188,9 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
         <tr><td>Verify 300 / 500, verify at own weight</td><td><span class="st st-set">set aside</span></td><td class="what">Each fails med-13 on the grammar guard (gram+new 0.836–0.854).</td></tr>
         <tr><td>Compiled tree (<code>tree="cu"</code>)</td><td><span class="st st-kept">kept</span></td><td class="what">Bit-identical in reference arithmetic; stories-300 learns in 33 s against 517 s.</td></tr>
         <tr><td>Repair on use along the sort path (k 3000)</td><td><span class="st st-run">testing</span></td><td class="what">Used content 0.6–0.9% misplaced at about 1.4× cost; passes the guard; used context about 8.5%, characters s17 down.</td></tr>
+        <tr><td>Path repair on use, budget 700 (<code>repair_use</code> 700)</td><td><span class="st st-kept">kept</span></td><td class="what">Used ctx and cnt 0.5–0.6% misplaced at 2,000; 1.8–2.1× learning time alone; passes all 4 grammar runs; characters 0.769 over 5 seeds (original 0.762).</td></tr>
+        <tr><td>Band part names (<code>part_names="bands"</code>)</td><td><span class="st st-set">option</span></td><td class="what">0.4–0.6× the original cost and more novelty, but characters 0.684 and med-17 fails the guard. Rounds 27–47 ran without it; earlier text claiming it was a configuration error.</td></tr>
+        <tr><td>Own part names (<code>part_names="own"</code>)</td><td><span class="st st-set">set aside</span></td><td class="what">Fails large-13 (−2.2 grammatical); characters 0.707.</td></tr>
         <tr><td>Repair on use, end concept only</td><td><span class="st st-set">set aside</span></td><td class="what">Cheap, but used content stays 9–12% misplaced and med-13 fails the guard.</td></tr>
         <tr><td>Four draws per concept</td><td><span class="st st-set">set aside</span></td><td class="what">Fails large-17 (0.968 / 0.80).</td></tr>
         <tr><td><code>min_weight</code> 0.05 / 0.03</td><td><span class="st st-set">set aside</span></td><td class="what">0.05 fails large-17; both fail characters (real at 500: 0.614 / 0.586 at 0.03).</td></tr>

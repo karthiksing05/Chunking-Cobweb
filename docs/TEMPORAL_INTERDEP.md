@@ -467,3 +467,21 @@ Status: **the temporal target is met by path repair on use, budget 700**, at 100
 Through `t3_use.py` (fill `both+peer`, 2000), no mixing: used misplaced at own weight 0.016 / 0.033 and 0.020 / 0.033, grammatical 0.974 / 0.989, grammatical and novel 0.357 / 0.285, against 0.281 / 0.227 with mixing.
 
 **Learning time alone** (`t3_time.py`; `t3_use.py` and `t3_stories.py` count checkpoint measurement as learning). At 1000: original 948 / 1 059 s, path 700 with mixing 1 230 / 1 167 s, path 700 without mixing 279 / 261 s. A profile (300 experiences after 300) puts 72% of learning in `_refresh_todo`, mostly the misplacement sort.
+
+## Rounds 48–50: how word parts are named (2026-10-27)
+
+Three ways to name a word part inside a chunk's content description, all with path repair 700 and `name_mix_k` 4 unless noted. Seeds 13 / 17, 2000 sentences; time is learning alone (`t3_time.py`) against the original's 3 754 / 4 332 s.
+
+| part names | used misplaced ctx / cnt (s13; s17) | learn s (× original) | grammatical and novel | guard (4 grammars) | characters real, 5-seed mean |
+|---|---|---|---|---|---|
+| original | 0.038 / 0.064; 0.073 / 0.103 | 3 754 / 4 332 | 0.247 / 0.282 | – | 0.762 |
+| fine mixed (unset; as run in rounds 27–47) | 0.006 / 0.006; 0.006 / 0.005 | 7 793 / 7 654 (2.1× / 1.8×) | 0.281 / 0.227 | **4 / 4** | **0.769** |
+| bands, mixing | 0.012 / 0.017; 0.007 / 0.006 | 2 409 / 1 835 (0.4–0.6×) | 0.308 / 0.267 | 3 / 4 (med17 −2.0 grammatical) | 0.684 |
+| bands, no mixing | 0.017 / 0.016; 0.019 / 0.022 | 2 551 / 2 339 | **0.365 / 0.331** | – | – |
+| own (parent name, unmixed) | 0.011 / 0.034; 0.014 / 0.035 | – / 1 289 at 1000 | 0.292 / 0.322 | 2 / 4 (large13 −2.2; large17 novel down) | 0.707 |
+
+Category accuracy at 2000 with band parts: mixing 0.484 / 0.528, no mixing 0.411 / 0.419. Mixing speeds category convergence with every part naming.
+
+**Decision: the recipe keeps fine mixed part names (`part_names` unset).** It is the only setting that passes all four guard grammars and holds characters, and it keeps used memory under 1% misplaced. Band parts cost about half as much and give more novelty, but lose about 8 points of real characters and one guard grammar. Own names lose the guard on large13.
+
+Interdependence holds under this recipe. Mixing raises category accuracy over no mixing at every checkpoint (0.46 vs 0.29 at 50 on s13), and grammaticality stays within 1 point of the original. Grammatical and novel is +3.4 points on s13 and −5.5 on s17, a mean change within noise.
