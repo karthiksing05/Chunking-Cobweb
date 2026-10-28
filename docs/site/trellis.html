@@ -1389,7 +1389,19 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
     <li>The code is lossless, yet a linear value head on its items reaches only R² 0.04. Each chunk is one indicator with its own weight (6,599 features against 2,500 labelled positions), so the head cannot share what a pawn is worth across chunks. A search would decode the code to the board before evaluating, and the value is then the raw board's.</li>
     <li>The autoencoder and contrastive bits (8 bits per dimension) and the VQ-VAE bits count lossy codes, so they are not comparable with this table until each is paired with its reconstruction error.</li>
   </ul>
-  <p>So far TRELLIS works as a compressor of chess positions, not as a feature set for a value head. The next test puts the code inside the search: a transposition table keyed by the chunk code, and the memory a search needs at a fixed node budget.</p>
+  <p><b>With the dictionary's own cost, against a co-occurrence baseline.</b> Storing a chunk costs its pieces written as a piece-square list. Pruning the TRELLIS dictionary to chunks memory chose in at least m training positions trades code length for dictionary size. The baseline mines its chunks by co-occurrence alone: byte-pair merging on piece-square sets, up to 4 pieces, from the same 2,000 training positions, coded and charged the same way. Bits are per position over the 3,500 held-out positions, including the dictionary's cost spread across them.</p>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Lossless code</th><th class="num">Chunks</th><th class="num">Code bits</th><th class="num">+ dictionary</th><th class="num">Total</th></tr></thead>
+    <tbody>
+      <tr><th>piece-square list, entropy-coded</th><td class="num">0</td><td class="num">189.9</td><td class="num">0</td><td class="num">189.9</td></tr>
+      <tr><th>TRELLIS, every chosen chunk (m 1)</th><td class="num">5,831</td><td class="num">151.4</td><td class="num">49.2</td><td class="num">200.6</td></tr>
+      <tr><th>TRELLIS, m 5 (best)</th><td class="num">824</td><td class="num">157.4</td><td class="num">5.5</td><td class="num">162.9</td></tr>
+      <tr><th>TRELLIS, m 20</th><td class="num">178</td><td class="num">164.3</td><td class="num">1.1</td><td class="num">165.4</td></tr>
+      <tr><th>co-occurrence merges, 200</th><td class="num">200</td><td class="num">130.7</td><td class="num">1.3</td><td class="num">132.0</td></tr>
+      <tr><th>co-occurrence merges, 800 (best)</th><td class="num">800</td><td class="num best">120.9</td><td class="num">5.8</td><td class="num best">126.6</td></tr>
+    </tbody>
+  </table></div>
+  <p>Counting its own cost, the TRELLIS dictionary saves 14% over entropy-coded piece-squares, and plain co-occurrence saves 33%. At a matched dictionary size (about 800 chunks) co-occurrence chunks code a position in 121 bits against TRELLIS's 157. TRELLIS's joins are chosen by concept gain along rays at any distance, not by how often pieces stand together, and half of its recognised units have no identical stored chunk. As a lossless compressor of chess positions, TRELLIS is beaten by the simplest frequency baseline. Its own case has to rest on what frequency mining lacks: recognising a chunk type it has not stored exactly, recall under scrambling, and transfer.</p>
 </section>
 
 <!-- ============================================================ S7 SEMANTIC GENERATION -->
@@ -1418,8 +1430,20 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
     <li>Two earlier forms failed. A next-sentence statistic on the content tree groups sentences by shape, not topic (round 56). A geometric-mean or flat-smoothed weighting left the pool flat (rounds 57–58).</li>
     <li>One level up, concepts group by their other facets, so the topic reaches a general concept only through its members' records (<code>story_fill</code>).</li>
     <li>Pairing right parts with the frozen left part raises novelty to 24–55% and lowers grammar to 0.67–0.82 (round 61). Requiring the left neighbour recovers only 0.5–1.4 points (round 62).</li>
+    <li>Round 63 requires the right neighbour too: a filler counts only through records that also stood before the stored slot's right neighbour, a sentence end included (<code>story_window="both"</code>). The table below is 1,000 sentences, seeds 13 / 17 / 21.</li>
     <li>Retrieval pulls ahead as memory grows. Matching it with new sentences is the open target.</li>
   </ul>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Round 63, 1,000 sentences (s13 / s17 / s21)</th><th class="num">Cross share</th><th class="num">Tag pattern attested</th><th class="num">New</th></tr></thead>
+    <tbody>
+      <tr><th>Level 1, left neighbour</th><td class="num">0.39 / 0.45 / 0.39</td><td class="num">0.897 / 0.841 / 0.875</td><td class="num">8% / 10% / 9%</td></tr>
+      <tr><th>Level 1, both neighbours</th><td class="num">0.34 / 0.48 / 0.36</td><td class="num best">0.920 / 0.839 / 0.902</td><td class="num">5% / 9% / 5%</td></tr>
+      <tr><th>Level 2, left neighbour</th><td class="num">0.43 / 0.46 / 0.32</td><td class="num">0.760 / 0.706 / 0.789</td><td class="num best">34% / 34% / 27%</td></tr>
+      <tr><th>Level 2, both neighbours</th><td class="num">0.35 / 0.46 / 0.41</td><td class="num">0.889 / 0.825 / 0.885</td><td class="num">14% / 14% / 11%</td></tr>
+      <tr><th>Back-off, both neighbours</th><td class="num">0.43 / 0.46 / 0.36</td><td class="num">0.917 / 0.837 / 0.891</td><td class="num">6% / 10% / 7%</td></tr>
+    </tbody>
+  </table></div>
+  <p>The right neighbour carries the grammar that level 2 lost: tag-pattern grammar rises 10–13 points, to the level of the level-1 arms. It also halves novelty, because a filler that must match both stored neighbours is closer to a copy. Level 2 with both neighbours is the best point found so far on the three-way trade-off. Averaged over the seeds it has the grammar of level 1 with the left neighbour (0.866 against 0.871), the same topic (cross share 0.41 against 0.41), and 13% new sentences against 9%. The gain is real but small; grammar against novelty remains the open trade-off.</p>
   <h2>Case studies</h2>
   <p>Each case shows one claim on real output: held-out story prompts from round 60 (2,000 sentences, the first prompts of the test set, four draws each, nothing selected). "Directed" is a general concept one level above each slot, directed by the prompt (<code>story_fill</code> 3); "leaf" draws only the root by the prompt.</p>
 

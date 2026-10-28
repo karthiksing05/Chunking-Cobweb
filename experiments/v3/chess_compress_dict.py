@@ -13,6 +13,8 @@ chunk (the same pieces on the same squares), so every code decodes to the positi
   bits        items are entropy-coded with their usage frequencies on the training
               positions (Laplace, plus one stop item per position)
   baseline    the same code with no chunks: piece-square items only
+  dictionary  storing it costs each used chunk written as a piece-square list; it is
+              pruned to chunks chosen in at least m training positions, m = 1 .. 20
 
 Also reported: the share of the units recognised at ``theta`` (as chess_recall.py)
 that have an identical stored chunk. Writes an npz that stage B reads (``trellis``
@@ -87,39 +89,42 @@ def units(e):
     return units(e.left) + units(e.right)
 
 
-def items(fen):
-    """(dictionary items of the lossless code, recognised units, of them with a stored twin)"""
+def parse_once(fen):
+    """(the parse's top units and its experience, recognised units, of them with a stored twin)"""
     r = L.parse(C.parse_fen(fen))
-    exp, out = r["exp"], []
+    exp, rec, twin = r["exp"], 0, 0
+    for top in r["top"]:
+        for u in units(top):
+            if u.token is None:
+                rec += 1
+                twin += key(u, exp) in store
+    return r["top"], exp, rec, twin
+
+
+def items(parsed, D):
+    """The items of the lossless code with dictionary D (a set of chunk keys)."""
+    tops, exp = parsed[0], parsed[1]
+    out = []
 
     def code(e):
         if e.token is not None:
             out.append(("p", ps(e, exp)))
             return
         k = key(e, exp)
-        if k in store:
+        if k in D:
             out.append(("c", k))
             return
         code(e.left)
         code(e.right)
-    rec = twin = 0
-    for top in r["top"]:
+    for top in tops:
         code(top)
-        for u in units(top):
-            if u.token is None:
-                rec += 1
-                twin += key(u, exp) in store
-    return out, rec, twin
+    return out
 
 
 t1 = time.time()
-train_items = [items(f) for f in rep_fens[:n_learn]]
-lab_items = [items(f) for f in lab_fens]
+train_parsed = [parse_once(f) for f in rep_fens[:n_learn]]
+lab_parsed = [parse_once(f) for f in lab_fens]
 code_s = time.time() - t1
-
-use = Counter(it for its, _, _ in train_items for it in its)
-use_raw = Counter(("p", i) for f in rep_fens[:n_learn] for i in
-                  [KINDS.index(t) * 64 + r * 8 + fl for (fl, r), t in C.parse_fen(f).items()])
 
 
 def coder(counts):
@@ -130,40 +135,54 @@ def coder(counts):
     return cost, stop
 
 
-cost_d, stop_d = coder(use)
+use_raw = Counter(("p", KINDS.index(t) * 64 + r * 8 + fl) for f in rep_fens[:n_learn] for (fl, r), t in C.parse_fen(f).items())
 cost_r, stop_r = coder(use_raw)
-vocab = {it: j for j, it in enumerate(sorted({it for it in use if it[0] == "c"}, key=lambda it: sorted(it[1])))}
-feats = np.zeros((len(lab_fens), len(vocab) + 768), dtype=np.float32)
-dbits, rbits, n_items, n_chunks = (np.zeros(len(lab_fens), dtype=np.float32) for _ in range(4))
-rec_tot = twin_tot = 0
-for j, (f, (its, rec, twin)) in enumerate(zip(lab_fens, lab_items)):
-    for it in its:
-        if it[0] == "c":
-            if it in vocab:
-                feats[j, vocab[it]] += 1.0
-            else:                                    # in the dictionary but never used in training: its pieces
-                for (fl, r), t in it[1]:
-                    feats[j, len(vocab) + KINDS.index(t) * 64 + r * 8 + fl] = 1.0
-            n_chunks[j] += 1
-        else:
-            feats[j, len(vocab) + it[1]] = 1.0
-        dbits[j] += cost_d(it)
-    dbits[j] += stop_d
-    n_items[j] = len(its)
-    rbits[j] = sum(cost_r(("p", KINDS.index(t) * 64 + r * 8 + fl)) for (fl, r), t in C.parse_fen(f).items()) + stop_r
-    rec_tot += rec
-    twin_tot += twin
+rbits = np.array([sum(cost_r(("p", KINDS.index(t) * 64 + r * 8 + fl)) for (fl, r), t in C.parse_fen(f).items()) + stop_r
+                  for f in lab_fens], dtype=np.float32)
+n_lab = len(lab_fens)
+summary = {"tag": tag, "seed": seed, "theta": theta, "max size": max_size, "learn s": round(learn_s), "code s": round(code_s),
+           "dictionary chunks": len(store),
+           "piece-square bits mean (held out)": round(float(rbits.mean()), 1),
+           "uniform piece-square bits mean": round(float(A["boards"][n_rep:].sum(1).mean() * math.log2(768)), 1),
+           "recognised units per position": round(sum(p[2] for p in lab_parsed) / n_lab, 2),
+           "recognised units with an identical stored chunk": round(sum(p[3] for p in lab_parsed) / max(sum(p[2] for p in lab_parsed), 1), 3),
+           "by minimum use": []}
+best = None
+for m in (1, 2, 3, 5, 10, 20):
+    # the dictionary: chunks memory chose in at least m training positions
+    D = {k for k, c in store.items() if c >= m}
+    train_items = [items(p, D) for p in train_parsed]
+    lab_items = [items(p, D) for p in lab_parsed]
+    use = Counter(it for its in train_items for it in its)
+    cost_d, stop_d = coder(use)
+    used = sorted({it for it in use if it[0] == "c"}, key=lambda it: sorted(it[1]))
+    # storing the dictionary: each chunk it uses written as a piece-square list
+    dict_bits = sum(sum(cost_r(("p", KINDS.index(t) * 64 + r * 8 + fl)) for (fl, r), t in it[1]) + stop_r for it in used)
+    dbits = np.array([sum(cost_d(it) for it in its) + stop_d for its in lab_items], dtype=np.float32)
+    row = {"min use": m, "chunks": len(used), "bits per position": round(float(dbits.mean()), 1),
+           "dictionary bits": round(dict_bits), "dictionary bits per held-out position": round(dict_bits / n_lab, 1),
+           "total per position (1,000 held out)": round(float(dbits.mean()) + dict_bits / n_lab, 1),
+           "break-even positions": round(dict_bits / max(float(rbits.mean() - dbits.mean()), 1e-9)) if dbits.mean() < rbits.mean() else None,
+           "items per position": round(float(np.mean([len(i) for i in lab_items])), 2),
+           "chunks per position": round(float(np.mean([sum(it[0] == "c" for it in i) for i in lab_items])), 2)}
+    summary["by minimum use"].append(row)
+    print(json.dumps(row), flush=True)
+    if m == 1:
+        vocab = {it: j for j, it in enumerate(used)}
+        feats = np.zeros((n_lab, len(vocab) + 768), dtype=np.float32)
+        for j, its in enumerate(lab_items):
+            for it in its:
+                if it[0] == "c" and it in vocab:
+                    feats[j, vocab[it]] += 1.0
+                elif it[0] == "c":                   # in the dictionary but never used in training: its pieces
+                    for (fl, r), t in it[1]:
+                        feats[j, len(vocab) + KINDS.index(t) * 64 + r * 8 + fl] = 1.0
+                else:
+                    feats[j, len(vocab) + it[1]] = 1.0
+        best = (feats, dbits, np.array([len(i) for i in lab_items], dtype=np.float32))
 
 out_dir = os.path.join(ROOT, "experiments", "v3", "results", "chess_compress")
 np.savez_compressed(os.path.join(out_dir, f"{tag}_s{seed}.npz"), boards=A["boards"], n_rep=n_rep, n_train=n_train,
-                    values=A["values"], trellis=feats, trellis_bits=dbits, trellis_units=n_items, raw_coded_bits=rbits)
-summary = {"tag": tag, "seed": seed, "theta": theta, "max size": max_size, "learn s": round(learn_s), "code s": round(code_s),
-           "dictionary chunks": len(store), "chunks used in training": len(vocab),
-           "chunk bits mean (held out)": round(float(dbits.mean()), 1),
-           "piece-square bits mean (held out)": round(float(rbits.mean()), 1),
-           "uniform piece-square bits mean": round(float(A["boards"][n_rep:].sum(1).mean() * math.log2(768)), 1),
-           "items per position": round(float(n_items.mean()), 2), "chunks per position": round(float(n_chunks.mean()), 2),
-           "recognised units per position": round(rec_tot / len(lab_fens), 2),
-           "recognised units with an identical stored chunk": round(twin_tot / max(rec_tot, 1), 3)}
+                    values=A["values"], trellis=best[0], trellis_bits=best[1], trellis_units=best[2], raw_coded_bits=rbits)
 json.dump(summary, open(os.path.join(out_dir, f"{tag}_s{seed}.json"), "w", encoding="utf-8"), indent=1)
 print(json.dumps(summary), flush=True)

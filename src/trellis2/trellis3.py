@@ -1958,7 +1958,8 @@ class Trellis3:
         but favours those that stood after sentences like the prompt; ``story_window``:
         only records that stood right after the word just generated count (the frozen
         left neighbour), so members that never followed it drop out (all of them, if
-        none did, are kept as without the prompt)."""
+        none did, are kept as without the prompt); ``story_window="both"``: also only
+        records whose right neighbour was the stored slot's (a sentence end included)."""
         pv_lift = self._pv_lift(after) if after and story_fill is not None and self.story_facet else None
         fill_predict = isinstance(fill_name, str) and fill_name.endswith("+predict")
         if fill_predict:
@@ -2279,8 +2280,10 @@ class Trellis3:
                         fills = weighted
                 if pv_lift is not None and fills:
                     # the prompt (what came before) directs the concept's members
+                    # story_window="both": the slot's stored right neighbour must match too
                     weighted = self._pv_fills(node, fills, pv_lift, story_fill,
-                                              (out[-1] if out else BOS) if story_window else None)
+                                              (out[-1] if out else BOS) if story_window else None,
+                                              (self.records[where[0]].ctx or {}).get("r1") if story_window == "both" else None)
                     if any(v > 0 for v in weighted.values()):
                         fills = weighted
                 if sib is not None and fills:
@@ -2548,12 +2551,13 @@ class Trellis3:
         return pool
 
     def _pv_fills(self, node, fills: Dict[tuple, float], lift, beta: float,
-                  left: Optional[str] = None) -> Dict[tuple, float]:
+                  left: Optional[str] = None, right: Optional[str] = None) -> Dict[tuple, float]:
         """A general concept's fillers directed by what came before: each candidate
         (("w", token) or ("c", record id)) weighted by the mean, over its committed
         records stored under ``node``, of exp(beta * lift) at the record's own context
         leaf. Candidates with no record under the concept keep weight 0. ``left``: only
-        records whose left neighbour (l1) was this word count."""
+        records whose left neighbour (l1) was this word count; ``right``: and whose
+        right neighbour (r1) was this word (the stored slot's, EOS at a sentence end)."""
         tot: Dict[tuple, float] = {}
         cnt: Dict[tuple, int] = {}
         stack = [node]
@@ -2564,7 +2568,7 @@ class Trellis3:
                 continue
             for r in self._at["ctx"].get(id(n), []):
                 f = ("w", r.token) if r.token is not None else ("c", r.rid)
-                if f in fills and (left is None or r.ctx.get("l1") == left):
+                if f in fills and (left is None or r.ctx.get("l1") == left) and (right is None or r.ctx.get("r1") == right):
                     tot[f] = tot.get(f, 0.0) + math.exp(beta * lift(n))
                     cnt[f] = cnt.get(f, 0) + 1
         return {f: c * tot[f] / cnt[f] for f, c in fills.items() if f in tot}

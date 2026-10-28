@@ -120,3 +120,22 @@ candidate counts only through records that stood after the word just generated
 is not mainly at the left boundary. Across rounds 60–62 the prompt keeps the
 topic at every level of generality (cross share 0.39–0.49 against 0.35–0.39 for
 copying), and the trade-off left is grammar against novelty.
+
+## Round 63: the right neighbour too (`story_window="both"`)
+
+A filler counts only through records that stood after the word just generated and
+before the stored slot's right neighbour (a sentence end included). 1000
+sentences, seeds 13 / 17 / 21:
+
+| arm | cross share | tag pattern attested | novel |
+|---|---|---|---|
+| level 1, left | 0.39 / 0.45 / 0.39 | 0.897 / 0.841 / 0.875 | 8% / 10% / 9% |
+| level 1, both | 0.34 / 0.48 / 0.36 | 0.920 / 0.839 / 0.902 | 5% / 9% / 5% |
+| level 2, left | 0.43 / 0.46 / 0.32 | 0.760 / 0.706 / 0.789 | 34% / 34% / 27% |
+| level 2, both | 0.35 / 0.46 / 0.41 | 0.889 / 0.825 / 0.885 | 14% / 14% / 11% |
+| backoff, both | 0.43 / 0.46 / 0.36 | 0.917 / 0.837 / 0.891 | 6% / 10% / 7% |
+
+The right neighbour restores the grammar level 2 lost (+10 to +13 points) and
+halves its novelty. Level 2 + both: grammar 0.866 and cross share 0.41 (seed
+means), as level 1 + left (0.871, 0.41), with 13% new sentences against 9%: the
+best point so far, a small gain. Grammar against novelty remains the trade-off.
