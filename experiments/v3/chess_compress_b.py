@@ -165,6 +165,7 @@ def scores(pred):
 
 reps = {"raw": (lab.numpy(), float(lab[n_train:].sum(1).mean()) * math.log2(768), {}),
         "trellis": (z["trellis"], float(z["trellis_bits"][n_train:].mean()), {"units": float(z["trellis_units"][n_train:].mean())})}
+reps["material"] = (lab.numpy().reshape(len(lab), 12, 64).sum(-1), 12 * math.log2(9), {})   # piece counts: a reference, not a state code
 X, b, l = train_ae()
 reps["ae"] = (X, b, {"loss": round(l, 4)})
 X, b, l, used = train_vq()

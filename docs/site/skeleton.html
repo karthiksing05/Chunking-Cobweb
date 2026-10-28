@@ -713,6 +713,45 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
   <h2>Neighbouring chunks and sibling mode</h2>
   <p>With <code>neighbour_chunks</code>, a context also names the same-width units beside the element by the content concept of memory's best analysis, and a filler of width m is scored against the prompt's m-word chunk beside the gap. On 600 sentences (verify 700, seeds 13 / 17) prefix-1 improves (trigrams attested 0.78 → 0.87), while prefix-2 and infill get worse. It fails the novelty guard: grammatical and new at 320 falls to 0.67 / 0.73 / 0.51 / 0.60, against 0.871 / 0.892 / 0.846 / 0.839. A more specific context makes the learner memorise, so the option stays off.</p>
   <p>Sibling mode (<code>gap_mode="sibling"</code>, <code>_sibling_fills</code>) parses the prompt and draws a committed composite whose left part matches a unit on the parse's right edge; the gap is that composite's right part. It is weak in every setting (trigrams attested 0.19–0.37).</p>
+
+  <h2>Case studies</h2>
+  <div class="case">
+    <p class="ch">Case 1 · claim: after a prefix, the filler is usually a whole chunk</p>
+    <p class="claim">Gap filling draws committed instances, words and chunks alike. After a prefix, most of the probable fillers are multi-word chunks, so one draw completes the sentence.</p>
+<div class="ex"><span class="p">prompt            five most probable fillers (share of the top ten)</span>
+the bird *        was very sad and scared · was happy and thanked them · was too big · …   (chunks, 0.10 each)
+i am *            a new friend for you 0.20 · sorry if i scared you 0.20 · sorry tim 0.18 · very big · sorry sam   (all chunks)
+they played *     together 0.25 (word) · by the water and had fun · at the park every day · all day in the tree   (chunks, 0.08 each)
+
+<span class="p">three draws each</span>
+the bird *        <span class="ok">the bird flew away</span> · <span class="ok">the bird was happy and thanked them</span> (twice)
+lily *            <span class="ok">lily and tom were playing in the park</span> · <span class="ok">lily was sad</span> · <span class="ok">lily was so happy</span>
+i am *            <span class="ok">i am a new friend for you</span> · <span class="ok">i am sorry sam</span> · <span class="ok">i am sorry tim</span>
+the *             <span class="ok">the bird wanted to help</span> · <span class="err">the is happy</span> · <span class="ok">the animals were sad</span></div>
+    <p class="reads">The run is the one in the table: verify 700, seed 17, 2,000 sentences, and every fixed prompt is shown. Whole chunks keep the completion grammatical, which is why prefix prompts reach 0.84–0.86 of trigrams attested. They also make the completion a stored phrase: "i am sorry tim" is a phrase memory has seen. The one prefix error, "the is happy", draws a chunk that should follow a noun.</p>
+  </div>
+  <div class="case">
+    <p class="ch">Case 2 · claim: infill fails when the filler must fit both sides at once</p>
+    <p class="claim">Each attribute of the gap's surroundings is scored separately, so a filler can fit the word on its left and the word on its right without fitting the two together. Infill reaches only 0.22 of trigrams attested.</p>
+<div class="ex"><span class="p">prompt               three draws</span>
+lily * and laughed   <span class="ok">lily thought and laughed</span> · <span class="ok">lily picked it up and laughed</span> · <span class="err">lily tim and laughed</span>
+sam * help you       <span class="ok">sam will help you</span> · <span class="ok">sam and mia help you</span> · <span class="err">sam was sad help you</span>
+it * for him         <span class="ok">it felt sorry for him</span> (all three)
+the * the tree       <span class="err">the little girl the tree</span> · <span class="err">the car the tree</span> (twice)
+i * and ben          <span class="err">i was happy and ben</span> (all three)
+they * day long      <span class="err">they knew they would day long</span> (all three)</div>
+    <p class="reads">The same run, all six infill prompts. Where one filler can carry the sentence alone ("will", "felt sorry"), infill succeeds. It fails where the gap needs a verb that governs the right side: "the * the tree" needs a verb such as "saw", and "i * and ben" needs one such as "played with tim". Each filler fits its left neighbour and could precede the word on its right, but nothing checks the whole span. The three identical draws on the failures suggest one filler takes nearly all the posterior there.</p>
+  </div>
+  <div class="case">
+    <p class="ch">Case 3 · claim: sibling mode is weak</p>
+    <p class="claim">Sibling mode completes a prompt with the right part of a stored composite whose left part resembles the prompt's last unit. The right part is often the second half of a phrase that needs a different first half.</p>
+<div class="ex"><span class="p">600 sentences, verify 700, seed 17, prefix-1</span>
+<span class="ok">i * → i know what to do</span>             <span class="ok">they * → they play with it every day</span>
+<span class="err">he * → he an idea</span>                  <span class="err">it * → it lots of fun</span>
+<span class="err">they * → they it in the park</span>       <span class="err">lily * → lily their mom</span>
+<span class="err">sam * → sam to play outside with her friends</span></div>
+    <p class="reads">These are the logged examples in order (<code>logs/v3-base-prompt600-17.log</code>). The bad completions are object or complement phrases ("an idea", "lots of fun") with the verb that should introduce them ("had", "was") missing. They likely come from composites such as [had [an idea]], where the left part matched the prompt only by context. Trigrams attested: 0.37 here, against 0.77 for gap filling on the same memory.</p>
+  </div>
 </section>
 
 <!-- ============================================================ S2 CONSISTENCY -->
@@ -1037,6 +1076,18 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
     <li>The comparison is against other representation learners: raw piece-square features, an autoencoder, a VQ-VAE (discrete codes) and a contrastive board encoder. The same comparison goes into the Chinese characters study (S5).</li>
     <li>Measures: Elo at a fixed node budget, bits per state, nodes searched to reach an Elo, and how each changes with the number of positions seen.</li>
   </ul>
+  <p><b>First result (seed 13).</b> The value head is a ridge regression fitted on 2,500 positions and scored on 1,000 held-out positions. Its target is a depth-3 alpha-beta score with capture quiescence, material plus piece-square terms. Every representation learner trains on the same 4,000 unlabelled positions; TRELLIS learns from 2,000 of them, θ 12.</p>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Representation</th><th class="num">Bits per position</th><th class="num">R²</th><th class="num">Spearman</th></tr></thead>
+    <tbody>
+      <tr><th>raw piece-square (768)</th><td class="num">254.7</td><td class="num best">0.43</td><td class="num best">0.60</td></tr>
+      <tr><th>TRELLIS (concepts at levels 1–2 + unrecognised pieces)</th><td class="num">112.2</td><td class="num">0.01</td><td class="num">0.05</td></tr>
+      <tr><th>autoencoder, 32 dims</th><td class="num">256</td><td class="num">0.01</td><td class="num">0.11</td></tr>
+      <tr><th>VQ-VAE, 8 codes of 64</th><td class="num">48</td><td class="num">0.00</td><td class="num">0.03</td></tr>
+      <tr><th>contrastive, 32 dims</th><td class="num">256</td><td class="num">0.00</td><td class="num">0.08</td></tr>
+    </tbody>
+  </table></div>
+  <p>Only the raw board predicts the score. Each compressed representation, TRELLIS included, keeps too little of the material balance for a linear head to recover. This TRELLIS row understates TRELLIS: its 112 bits count each recognised chunk exactly, but the features used only the concepts one and two levels above that chunk (182 indicators). A rerun adds the exact chunk to the features, plus a reference row with piece counts alone. A one-hidden-layer head did worse than ridge for every representation, the raw board included, and is not reported.</p>
 </section>
 
 <!-- ============================================================ S7 SEMANTIC GENERATION -->

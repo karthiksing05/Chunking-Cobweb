@@ -144,7 +144,11 @@ def teacher(fen):
 
 t0 = time.time()
 values, nodes = [], []
-for f in lab_fens:
+if os.environ.get("TEACHER_FROM"):                 # reuse the labels of an earlier run (same seed and sizes)
+    values = [float(v) for v in np.load(os.environ["TEACHER_FROM"])["values"]]
+    assert len(values) == len(lab_fens)
+    nodes = [0]
+for f in ([] if values else lab_fens):
     v, n = teacher(f)
     values.append(v)
     nodes.append(n)
