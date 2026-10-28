@@ -78,6 +78,9 @@ FORWARD_JUMPS = ("NNE", "ENE", "WNW", "NNW")
 RELATIONS = [f"{d}{k}" for d in FORWARD_RAYS for k in range(1, 8)] + list(FORWARD_JUMPS)
 OFFSET = {f"{d}{k}": (dx * k, dy * k) for d, (dx, dy) in RAYS if d in FORWARD_RAYS for k in range(1, 8)}
 OFFSET.update({d: v for d, v in JUMPS if d in FORWARD_JUMPS})
+for _d, (_dx, _dy) in RAYS:                     # every direction (ChessDomain join="any")
+    OFFSET.update({f"{_d}{k}": (_dx * k, _dy * k) for k in range(1, 8) if f"{_d}{k}" not in OFFSET})
+OFFSET.update({d: v for d, v in JUMPS if d not in OFFSET})
 Node = tuple    # (label, square) for a piece, (label, (node, relation, node)) for a chunk
 TOKENS = {c + p for c in "wb" for p in "KQRBNP"}
 KINDS = sorted(TOKENS)

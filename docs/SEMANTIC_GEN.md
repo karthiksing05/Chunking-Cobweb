@@ -153,3 +153,27 @@ backoff β1 (r63) 0.42 / 0.882 / 8%; backoff β4 0.43 / 0.871 / 10%; level 2 (r6
 0.41 / 0.866 / 13%; backoff β16 0.36 / 0.850 / 16%; level 3 0.40 / 0.836 / 18%;
 backoff β64 0.34 / 0.821 / 20%. One frontier: about half a point of grammar per
 point of novelty, and topic weakens past 13%. Tuning generality does not move it.
+
+## Round 64, judged: acceptability of the novel sentences
+
+The tag-pattern check is unreliable on novel sentences (it fails "sue was happy to
+have new friends", passes "they decided to her mommy"). Every generation was dumped
+(STORY_DUMP) and scored by a few-shot LM judge, Qwen2.5-3B-Instruct, evaluation only
+(t3_judge.py). Calibration on 300 held-out sentences per seed: real 0.89 / 0.91
+pass, word order scrambled 0.12 / 0.11, content words swapped by tag 0.05 / 0.06 —
+so the judge measures acceptability (grammar and sense), not grammar alone.
+
+| arm (s13 / s17) | judged acceptable | novel | novel acceptable | acceptable novel per generation |
+|---|---|---|---|---|
+| unconditioned | 0.849 / 0.857 | 9% / 7% | 0.78 / 0.43 | 6.9% / 3.0% |
+| leaf (copy) | 0.853 / 0.862 | 1% / 4% | 0.25 / 0.11 | 0.2% / 0.4% |
+| level 1, left | 0.819 / 0.826 | 8% / 10% | 0.31 / 0.14 | 2.5% / 1.4% |
+| backoff, both | 0.854 / 0.841 | 6% / 10% | 0.53 / 0.29 | 3.3% / 3.0% |
+| level 2, left | 0.632 / 0.627 | 34% / 34% | 0.19 / 0.13 | 6.4% / 4.6% |
+| level 2, both | 0.825 / 0.832 | 14% / 14% | 0.46 / 0.42 | 6.3% / 5.9% |
+| backoff β64, both | 0.762 / 0.797 | 20% / 19% | 0.33 / 0.33 | 6.6% / 6.3% |
+
+Topic-directed generation (level 2 both, β64 both) yields 6–7% acceptable novel
+sentences per draw while holding the topic, about the unconditioned rate (5% mean)
+which has no topic. Under half the novel sentences are acceptable in every arm: the
+open problem is the acceptability of what is new, not the amount of novelty.

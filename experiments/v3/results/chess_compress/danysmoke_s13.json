@@ -1,0 +1,96 @@
+{
+ "tag": "danysmoke",
+ "seed": 13,
+ "theta": 16.0,
+ "max size": 4,
+ "learn s": 111,
+ "code s": 200,
+ "dictionary chunks": 2238,
+ "piece-square bits mean (held out)": 192.1,
+ "uniform piece-square bits mean": 253.7,
+ "recognised units per position": 0.0,
+ "recognised units with an identical stored chunk": 0.0,
+ "dictionary by size (chunks, chosen in 5+ positions)": {
+  "2": [
+   505,
+   32
+  ],
+  "3": [
+   790,
+   20
+  ],
+  "4": [
+   943,
+   3
+  ]
+ },
+ "top chunks of 4+ pieces that are chains": 0.998,
+ "by minimum use": [
+  {
+   "min use": 1,
+   "chunks": 646,
+   "bits per position": 170.5,
+   "dictionary bits": 17486,
+   "dictionary bits per held-out position": 116.6,
+   "total per position (1,000 held out)": 287.0,
+   "break-even positions": 807,
+   "items per position": 19.0,
+   "chunks per position": 4.25
+  },
+  {
+   "min use": 2,
+   "chunks": 231,
+   "bits per position": 171.4,
+   "dictionary bits": 5213,
+   "dictionary bits per held-out position": 34.8,
+   "total per position (1,000 held out)": 206.2,
+   "break-even positions": 252,
+   "items per position": 20.51,
+   "chunks per position": 3.69
+  },
+  {
+   "min use": 3,
+   "chunks": 126,
+   "bits per position": 173.1,
+   "dictionary bits": 2669,
+   "dictionary bits per held-out position": 17.8,
+   "total per position (1,000 held out)": 190.9,
+   "break-even positions": 140,
+   "items per position": 21.29,
+   "chunks per position": 3.34
+  },
+  {
+   "min use": 5,
+   "chunks": 54,
+   "bits per position": 176.6,
+   "dictionary bits": 1100,
+   "dictionary bits per held-out position": 7.3,
+   "total per position (1,000 held out)": 183.9,
+   "break-even positions": 71,
+   "items per position": 22.43,
+   "chunks per position": 2.77
+  },
+  {
+   "min use": 10,
+   "chunks": 23,
+   "bits per position": 180.0,
+   "dictionary bits": 437,
+   "dictionary bits per held-out position": 2.9,
+   "total per position (1,000 held out)": 182.9,
+   "break-even positions": 36,
+   "items per position": 23.43,
+   "chunks per position": 2.45
+  },
+  {
+   "min use": 20,
+   "chunks": 6,
+   "bits per position": 183.9,
+   "dictionary bits": 105,
+   "dictionary bits per held-out position": 0.7,
+   "total per position (1,000 held out)": 184.6,
+   "break-even positions": 13,
+   "items per position": 24.67,
+   "chunks per position": 1.69
+  }
+ ]
+}

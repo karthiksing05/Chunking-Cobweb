@@ -1,0 +1,111 @@
+{
+ "tag": "gcode",
+ "seed": 13,
+ "learn s": 1962,
+ "parse s": 941,
+ "positions coded": 1000,
+ "piece-square bits mean": 188.3,
+ "eps": 0.05,
+ "by levels": [
+  {
+   "content level": 0,
+   "context level": 0,
+   "bits per position": 330.9,
+   "top concepts": 7236,
+   "s": 13,
+   "per position": {
+    "anchors": 30.44,
+    "chunk parts (count)": 7.13,
+    "chunk parts generated (count)": 1.29,
+    "chunk parts, choosing the concept": 0.0,
+    "chunk roots": 83.61,
+    "chunk tops (count)": 6.46,
+    "piece parts": 20.97,
+    "piece parts (count)": 8.83,
+    "piece parts generated (count)": 7.21,
+    "relation + source": 42.99,
+    "single tops": 18.75
+   }
+  },
+  {
+   "content level": 1,
+   "context level": 0,
+   "bits per position": 210.6,
+   "top concepts": 346,
+   "s": 106,
+   "per position": {
+    "anchors": 27.27,
+    "chunk parts (count)": 10.93,
+    "chunk parts generated (count)": 10.04,
+    "chunk parts, choosing the concept": 30.21,
+    "chunk roots": 45.04,
+    "chunk tops (count)": 6.46,
+    "piece parts": 52.32,
+    "piece parts (count)": 22.44,
+    "piece parts generated (count)": 22.27,
+    "relation + source": 17.05,
+    "single tops": 18.27
+   }
+  },
+  {
+   "content level": 1,
+   "context level": 1,
+   "bits per position": 215.7,
+   "top concepts": 346,
+   "s": 119,
+   "per position": {
+    "anchors": 27.27,
+    "chunk parts (count)": 11.42,
+    "chunk parts generated (count)": 10.99,
+    "chunk parts, choosing the concept": 45.61,
+    "chunk roots": 45.04,
+    "chunk tops (count)": 6.46,
+    "piece parts": 56.4,
+    "piece parts (count)": 24.14,
+    "piece parts generated (count)": 24.13,
+    "relation + source": 18.1,
+    "single tops": 18.27
+   }
+  },
+  {
+   "content level": 2,
+   "context level": 1,
+   "bits per position": 238.0,
+   "top concepts": 180,
+   "s": 362,
+   "per position": {
+    "anchors": 28.02,
+    "chunk parts (count)": 11.47,
+    "chunk parts generated (count)": 10.83,
+    "chunk parts, choosing the concept": 41.49,
+    "chunk roots": 38.02,
+    "chunk tops (count)": 6.46,
+    "piece parts": 65.94,
+    "piece parts (count)": 24.36,
+    "piece parts generated (count)": 24.36,
+    "relation + source": 44.31,
+    "single tops": 18.26
+   }
+  },
+  {
+   "content level": 2,
+   "context level": 2,
+   "bits per position": 249.8,
+   "top concepts": 180,
+   "s": 434,
+   "per position": {
+    "anchors": 28.02,
+    "chunk parts (count)": 11.48,
+    "chunk parts generated (count)": 10.05,
+    "chunk parts, choosing the concept": 44.64,
+    "chunk roots": 38.02,
+    "chunk tops (count)": 6.46,
+    "piece parts": 77.57,
+    "piece parts (count)": 24.41,
+    "piece parts generated (count)": 24.41,
+    "relation + source": 44.37,
+    "single tops": 18.26
+   }
+  }
+ ]
+}

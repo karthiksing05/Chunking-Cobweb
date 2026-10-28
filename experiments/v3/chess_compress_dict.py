@@ -89,10 +89,21 @@ def units(e):
     return units(e.left) + units(e.right)
 
 
-def parse_once(fen):
+def depth(e):
+    return 0 if e.token is not None else 1 + max(depth(e.left), depth(e.right))
+
+
+chain_tops = Counter()                               # (size, chain?) of the top chunks of held-out parses
+
+
+def parse_once(fen, held=False):
     """(the parse's top units and its experience, recognised units, of them with a stored twin)"""
     r = L.parse(C.parse_fen(fen))
     exp, rec, twin = r["exp"], 0, 0
+    if held:
+        for top in r["top"]:
+            if top.token is None and len(top.span) >= 4:
+                chain_tops[(len(top.span), depth(top) == len(top.span) - 1)] += 1
     for top in r["top"]:
         for u in units(top):
             if u.token is None:
@@ -123,7 +134,7 @@ def items(parsed, D):
 
 t1 = time.time()
 train_parsed = [parse_once(f) for f in rep_fens[:n_learn]]
-lab_parsed = [parse_once(f) for f in lab_fens]
+lab_parsed = [parse_once(f, held=True) for f in lab_fens]
 code_s = time.time() - t1
 
 
@@ -146,6 +157,8 @@ summary = {"tag": tag, "seed": seed, "theta": theta, "max size": max_size, "lear
            "uniform piece-square bits mean": round(float(A["boards"][n_rep:].sum(1).mean() * math.log2(768)), 1),
            "recognised units per position": round(sum(p[2] for p in lab_parsed) / n_lab, 2),
            "recognised units with an identical stored chunk": round(sum(p[3] for p in lab_parsed) / max(sum(p[2] for p in lab_parsed), 1), 3),
+           "dictionary by size (chunks, chosen in 5+ positions)": {s: [sum(1 for k in store if len(k) == s), sum(1 for k, c in store.items() if len(k) == s and c >= 5)] for s in sorted({len(k) for k in store})},
+           "top chunks of 4+ pieces that are chains": round(sum(c for (s, ch), c in chain_tops.items() if ch) / max(sum(chain_tops.values()), 1), 3),
            "by minimum use": []}
 best = None
 for m in (1, 2, 3, 5, 10, 20):

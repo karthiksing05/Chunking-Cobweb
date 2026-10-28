@@ -22,6 +22,7 @@ Usage: t3_story.py <cfg json> <seed> <n> <tag> <arms> [adjacent|story]
 """
 import json
 import math
+import os
 import random
 import re
 import sys
@@ -166,13 +167,28 @@ for s, fol in train:
 learn_s = time.time() - t0
 L._quiet = True
 ix = L.concept_index()
-for arm in arms:
+DUMP = os.environ.get("STORY_DUMP")            # a directory: every generation of every arm, as JSON lines
+if DUMP:                                         # judge calibration: held-out sentences, their words in random order, content words swapped by tag
+    os.makedirs(DUMP, exist_ok=True)
+    ref = random.Random(seed + 21).sample(held, min(300, len(held)))
+    with open(os.path.join(DUMP, f"{tag}_s{seed}_n{n}_refs.jsonl"), "w", encoding="utf-8") as fh:
+        prng = random.Random(seed + 23)
+        for s, t in zip(ref, shuffled(ref, random.Random(seed + 22))):
+            fh.write(json.dumps({"real": " ".join(s), "word order scrambled": " ".join(prng.sample(s, len(s))),
+                                 "content swapped": " ".join(t)}) + "\n")
+for ai, arm in enumerate(arms):
     arm = dict(arm)
     cond = arm.pop("cond", False)
+    critic = arm.pop("critic", 0)          # draw this many and keep the one memory parses best per word
     g_rng = random.Random(seed + 7)
     t1 = time.time()
     PP = [p for p in P for _ in range(DRAWS)]
-    G = [L.generate_tree(g_rng, index=ix, fill_name=FILL, **({"after": p} if cond else {}), **{"choose": "leaf", **arm}) for p in PP]
+    gen = lambda p: L.generate_tree(g_rng, index=ix, fill_name=FILL, **({"after": p} if cond else {}), **{"choose": "leaf", **arm})
+
+    def best(p):
+        cands = [g for g in (gen(p) for _ in range(critic)) if g]
+        return max(cands, key=lambda g: L.parse(g)["logZ"] / max(len(g) - 1, 1)) if cands else None
+    G = [best(p) if critic else gen(p) for p in PP]
     ok = [(p, g) for p, g in zip(PP, G) if g]
     c, cn = cross(*zip(*ok)) if ok else (None, 0)
     S = [g for _, g in ok]
@@ -181,10 +197,18 @@ for arm in arms:
     w = within(S)
     ws = within(shuffled(S, random.Random(seed + 13)))
     m = lambda v: round(sum(v) / max(len(v), 1), 3)
-    print(json.dumps({"tag": tag, "seed": seed, "n": n, "arm": {"cond": cond, **arm}, "learn s": round(learn_s),
+    print(json.dumps({"tag": tag, "seed": seed, "n": n, "arm": {"cond": cond, **({"critic": critic} if critic else {}), **arm}, "learn s": round(learn_s),
                       "gen s": round(time.time() - t1), "generated": len(S),
                       "cross": None if c is None else round(c, 3), "cross scored": cn,
                       "cross share": None if c is None else round((c - rand_c) / (real_c - rand_c), 3),
                       "tag pattern attested": m(pat), "novel": m(nov),
+                      "novel tag pattern attested": m([a for a, b in zip(pat, nov) if b]),
                       "within share": None if w is None or ws is None else round((w - ws) / (w_real - w_shuf), 3),
-                      "examples": [" ".join(p) + "  ->  " + " ".join(g) for p, g in ok[:12]]}), flush=True)
+                      "examples": [" ".join(p) + "  ->  " + " ".join(g) for p, g in ok[:12]],
+                      "novel examples": [(" ".join(g), a) for (_, g), a, b in zip(ok, pat, nov) if b][:16]}), flush=True)
+    if DUMP:
+        os.makedirs(DUMP, exist_ok=True)
+        with open(os.path.join(DUMP, f"{tag}_s{seed}_n{n}_arm{ai}.jsonl"), "w", encoding="utf-8") as fh:
+            fh.write(json.dumps({"arm": {"cond": cond, **({"critic": critic} if critic else {}), **arm}}) + "\n")
+            for (p, g), a, b in zip(ok, pat, nov):
+                fh.write(json.dumps({"prompt": " ".join(p), "gen": " ".join(g), "pattern": a, "novel": b}) + "\n")

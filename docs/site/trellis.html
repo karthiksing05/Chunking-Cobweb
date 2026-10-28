@@ -1402,6 +1402,32 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
     </tbody>
   </table></div>
   <p>Counting its own cost, the TRELLIS dictionary saves 14% over entropy-coded piece-squares, and plain co-occurrence saves 33%. At a matched dictionary size (about 800 chunks) co-occurrence chunks code a position in 121 bits against TRELLIS's 157. TRELLIS's joins are chosen by concept gain along rays at any distance, not by how often pieces stand together, and half of its recognised units have no identical stored chunk. As a lossless compressor of chess positions, TRELLIS is beaten by the simplest frequency baseline. Its own case has to rest on what frequency mining lacks: recognising a chunk type it has not stored exactly, recall under scrambling, and transfer.</p>
+
+  <h2>Recall with reproducible chunks</h2>
+  <p>Recall as above counts every recognised chunk, but a chunk helps recall only if memory can put its pieces back. Here a recognised chunk counts only when an identical chunk is stored (verified). The same test also runs on chunks mined by co-occurrence alone, the byte-pair dictionary used as CHREST uses its chunks. Short-term memory keeps the 7 largest units; 100 held-out positions; recall on real / scrambled boards, θ 12.</p>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Positions learned (seed 13)</th><th class="num">300</th><th class="num">1,000</th><th class="num">2,000</th><th class="num">4,000</th></tr></thead>
+    <tbody>
+      <tr><th>recognised (as above)</th><td class="num">0.55 / 0.42</td><td class="num">0.82 / 0.71</td><td class="num">0.86 / 0.78</td><td class="num">0.89 / 0.83</td></tr>
+      <tr><th>verified</th><td class="num">0.44 / 0.27</td><td class="num">0.62 / 0.29</td><td class="num">0.67 / 0.29</td><td class="num">0.71 / 0.30</td></tr>
+      <tr><th>verified, pieces in content (<code>word_cnt</code>)</th><td class="num">0.57 / 0.29</td><td class="num">0.71 / 0.31</td><td class="num">0.75 / 0.31</td><td class="num">0.77 / 0.34</td></tr>
+      <tr><th>co-occurrence chunks</th><td class="num best">0.74 / 0.31</td><td class="num best">0.80 / 0.33</td><td class="num best">0.81 / 0.34</td><td class="num best">0.84 / 0.35</td></tr>
+    </tbody>
+  </table></div>
+  <p>Seed 17 agrees (verified 0.75 / 0.32 at 4,000). With reproducible chunks the Chase &amp; Simon effect is clean: recall of real positions grows with experience while recall of scrambled ones stays near 0.3. The recognised count's high scrambled recall (0.83) came from chunks memory recognises but cannot reproduce. Putting the pieces into the content description adds 6–13 points. Co-occurrence chunks still recall more of real positions: 17 points more than the best TRELLIS arm at 300 positions, 6–9 points from 1,000 on.</p>
+
+  <h2>Decoding by generation</h2>
+  <p>A unified code uses TRELLIS's own generator as the probability model. A position's code is the sequence of choices generation makes to produce exactly that position, each costing −log2 of its probability, so a decoder recovers the board by running generation on the coded choices (<code>chess_compress_gen.py</code>). A top chunk's content concept is coded by TOP, its anchor by the anchors stored under that concept, and each part by generation's draw: a mixture over the concept's part slots of FILL at the slot's context concept, recursively. The right part is placed by the concept's relation distribution. A part memory cannot generate escapes to a piece-square list. These are code bits only: the memory itself is not charged. 2,000 positions learned, 1,000 coded.</p>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Bits per position (levels content, context 1, 1)</th><th class="num">Total</th><th class="num">Roots</th><th class="num">Anchors</th><th class="num">Sub-chunk concepts</th><th class="num">Piece identities</th><th class="num">Relations</th></tr></thead>
+    <tbody>
+      <tr><th>content = parts' learned names</th><td class="num">215.7</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td></tr>
+      <tr><th>pieces in content (<code>word_cnt</code>)</th><td class="num best">193.1</td><td class="num">59.4</td><td class="num">25.7</td><td class="num">59.0</td><td class="num">5.6</td><td class="num">27.2</td></tr>
+      <tr><th>piece-square list, entropy-coded</th><td class="num">189.9</td><td colspan="5" class="mu">—</td></tr>
+      <tr><th>co-occurrence chunks, code bits only</th><td class="num">≈120</td><td colspan="5" class="mu">—</td></tr>
+    </tbody>
+  </table></div>
+  <p>With pieces in the content description, generation predicts a part's piece almost for free: 5.6 bits for the whole board. The cost is structure: roots, nested sub-chunk choices, anchors and relations. 99.8% of four-piece chunks are chains built one piece at a time, the same with the join rule relaxed so that two chunks can join. In the dictionary code, 7,425 of 14,534 stored chunks are four-piece chains, 3% of them reused. The chain structure is what the code pays for. The next steps are flat chunk descriptions (a chunk as a template of pieces at offsets) and a working-memory limit during learning.</p>
 </section>
 
 <!-- ============================================================ S7 SEMANTIC GENERATION -->
@@ -1468,6 +1494,19 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
     </tbody>
   </table></div>
   <p>The settings trace one frontier. Each point of novelty costs about half a point of grammar, and past 13% new sentences the topic weakens too. No setting of how general the filler may be moves the frontier, so the next gain has to come from a different mechanism, not from tuning generality.</p>
+  <p><b>The tag-pattern check fails on new sentences.</b> It rejects "sue was happy to have new friends" and accepts "they decided to her mommy". Every generation was therefore scored by a few-shot LM judge, used for evaluation only (Qwen2.5-3B-Instruct, <code>t3_judge.py</code>). On 300 held-out sentences per seed it passes 0.89 / 0.91 of real sentences, 0.12 / 0.11 with the word order scrambled, and 0.05 / 0.06 with content words swapped by tag. It therefore measures acceptability, grammar and sense together.</p>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Judged, 1,000 sentences (s13 / s17)</th><th class="num">New</th><th class="num">New judged acceptable</th><th class="num">Acceptable new per generation</th></tr></thead>
+    <tbody>
+      <tr><th>unconditioned</th><td class="num">9% / 7%</td><td class="num best">0.78 / 0.43</td><td class="num">6.9% / 3.0%</td></tr>
+      <tr><th>copy a stored next sentence</th><td class="num">1% / 4%</td><td class="num">0.25 / 0.11</td><td class="num">0.2% / 0.4%</td></tr>
+      <tr><th>level 1, left neighbour</th><td class="num">8% / 10%</td><td class="num">0.31 / 0.14</td><td class="num">2.5% / 1.4%</td></tr>
+      <tr><th>level 2, left neighbour</th><td class="num best">34% / 34%</td><td class="num">0.19 / 0.13</td><td class="num">6.4% / 4.6%</td></tr>
+      <tr><th>level 2, both neighbours</th><td class="num">14% / 14%</td><td class="num">0.46 / 0.42</td><td class="num">6.3% / 5.9%</td></tr>
+      <tr><th>back-off β 64, both neighbours</th><td class="num">20% / 19%</td><td class="num">0.33 / 0.33</td><td class="num best">6.6% / 6.3%</td></tr>
+    </tbody>
+  </table></div>
+  <p>Directed by the prompt, the general concepts yield acceptable new sentences as often as unconditioned generation (6–7% per draw, against 5% on average), and they keep the topic. Level 1 with the left neighbour, the best by tag patterns, is among the worst once judged. In every arm fewer than half of the new sentences are acceptable. The open problem is the acceptability of what is new, not how much is new.</p>
   <h2>Case studies</h2>
   <p>Each case shows one claim on real output: held-out story prompts from round 60 (2,000 sentences, the first prompts of the test set, four draws each, nothing selected). "Directed" is a general concept one level above each slot, directed by the prompt (<code>story_fill</code> 3); "leaf" draws only the root by the prompt.</p>
 

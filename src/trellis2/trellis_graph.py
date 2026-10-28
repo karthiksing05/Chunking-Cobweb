@@ -73,8 +73,15 @@ class ChessDomain:
     to A when a piece of A sees B's anchor forward along a ray (first piece, any
     distance, A's own pieces not blocking) or a knight's jump (``chess.forward_neighbours``).
     The surface is the anchor's star (two bags: rays and jumps, each value
-    ``direction:piece``) and the anchor's square."""
+    ``direction:piece``) and the anchor's square.
+
+    ``join="any"``: B attaches to A when any piece of A sees any piece of B, in any
+    direction (the first piece along a ray, A's own pieces not blocking, or a
+    knight's jump), so two chunks can join as well as a chunk and a piece."""
     surface_attrs = ("rays", "jumps", "sq")
+
+    def __init__(self, join: str = "anchor"):
+        self.join = join
 
     def prepare(self, position: C.Position) -> Experience:
         sqs = sorted(position, key=lambda s: (s[1], s[0]))
@@ -84,6 +91,23 @@ class ChessDomain:
         pos, sqs, _ = exp.data
         target, own = sqs[min(b)], frozenset(sqs[i] for i in a)
         out = []
+        if self.join == "any":
+            targets = {sqs[i] for i in b}
+            for i in sorted(a):
+                sq = sqs[i]
+                for d, (dx, dy) in C.RAYS:
+                    for k in range(1, 8):
+                        t = (sq[0] + dx * k, sq[1] + dy * k)
+                        if not C.on_board(t):
+                            break
+                        if t in pos and t not in own:
+                            if t in targets:
+                                out.append(f"{d}{k}")
+                            break
+                for d, (dx, dy) in C.JUMPS:
+                    if (sq[0] + dx, sq[1] + dy) in targets:
+                        out.append(d)
+            return out
         for i in sorted(a):
             for rel, t in C.forward_neighbours(pos, sqs[i], own):
                 if t == target:
@@ -118,7 +142,8 @@ class ChessDomain:
 
 class GraphTrellis(Trellis3):
     def __init__(self, domain=None, max_size: int = 4, samples: int = 16, **kw):
-        self.dom = domain or ChessDomain()
+        join = kw.pop("chess_join", "anchor")
+        self.dom = domain or ChessDomain(join)
         self.max_size, self.samples = max_size, samples
         super().__init__(**kw)
         self._sample_rng = random.Random(kw.get("seed", 0) + 11)
