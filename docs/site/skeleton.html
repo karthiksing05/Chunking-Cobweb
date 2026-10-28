@@ -1090,7 +1090,23 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
     </tbody>
   </table></div>
   <p>Only the raw board and the piece counts predict the score. Piece counts alone (0.57) beat the full board (0.43), so this teacher's score is mostly material. Each compressed representation keeps too little of the material balance for a linear head to recover it.</p>
-  <p>*The TRELLIS bit counts are not comparable with the others. A chunk's content description holds its parts' learned context names, not their pieces. Its concept, even its exact leaf, therefore does not say which pieces it holds, and the 112 bits name chunk types without coding the board. Adding the exact leaf (3,462 indicators in place of 182) changed nothing. The corrected test codes a chunk only as a pointer to an identical stored chunk, the same pieces on the same squares, as CHREST does. Its codes decode to the position, and its bits compare with an entropy-coded piece-square list. That run is in progress. A one-hidden-layer head did worse than ridge on every representation except piece counts and is not reported.</p>
+  <p>*The TRELLIS bit counts are not comparable with the others. A chunk's content description holds its parts' learned context names, not their pieces. Its concept, even its exact leaf, therefore does not say which pieces it holds, and the 112 bits name chunk types without coding the board. Adding the exact leaf (3,462 indicators in place of 182) changed nothing. The corrected test codes a chunk only as a pointer to an identical stored chunk, the same pieces on the same squares, as CHREST does. Its codes decode to the position, and its bits compare with an entropy-coded piece-square list. A one-hidden-layer head did worse than ridge on every representation except piece counts and is not reported.</p>
+  <p><b>Lossless chunk code.</b> The dictionary holds the composites memory chose for its 2,000 training positions, each keyed by its exact pieces and squares (14,534 chunks). A held-out position's parse is read top-down. A unit with an identical stored chunk becomes one item; otherwise its parts are coded in turn, down to single pieces. Items are entropy-coded with their usage frequencies on the training positions. The baseline is the same code with no chunks.</p>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Lossless code (held-out positions)</th><th class="num">Bits per position</th><th class="num">Items</th><th class="num">Value head R²</th></tr></thead>
+    <tbody>
+      <tr><th>piece-square list, uniform</th><td class="num">254.7</td><td class="num">26.6</td><td class="num">0.43</td></tr>
+      <tr><th>piece-square list, entropy-coded</th><td class="num">189.9</td><td class="num">26.6</td><td class="num">0.43</td></tr>
+      <tr><th>TRELLIS chunk dictionary + leftover pieces</th><td class="num best">151.4</td><td class="num best">14.1</td><td class="num">0.04</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>Chunks shorten the code by 20% over entropy-coded piece-squares: 6.0 chunks and 8.1 single pieces per position in place of 26.6 pieces. Neither count includes the cost of storing the dictionary or the frequency table.</li>
+    <li>53% of the units recognised at θ 12 have an identical stored chunk (91% in a 200-position smoke run). Recognition names a chunk type; about half the time memory also holds that exact chunk.</li>
+    <li>The code is lossless, yet a linear value head on its items reaches only R² 0.04. Each chunk is one indicator with its own weight (6,599 features against 2,500 labelled positions), so the head cannot share what a pawn is worth across chunks. A search would decode the code to the board before evaluating, and the value is then the raw board's.</li>
+    <li>The autoencoder and contrastive bits (8 bits per dimension) and the VQ-VAE bits count lossy codes, so they are not comparable with this table until each is paired with its reconstruction error.</li>
+  </ul>
+  <p>So far TRELLIS works as a compressor of chess positions, not as a feature set for a value head. The next test puts the code inside the search: a transposition table keyed by the chunk code, and the memory a search needs at a fixed node budget.</p>
 </section>
 
 <!-- ============================================================ S7 SEMANTIC GENERATION -->
