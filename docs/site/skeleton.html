@@ -271,6 +271,15 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
 @media (max-width: 560px) { .body { height: 260px; } .body.h420, .body.h360 { height: 340px; } }
 @media (max-width: 480px) { body { font-size: 16px; } h2 { font-size: 21px; } }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+/* case studies: one boxed worked example per claim */
+.case { background: var(--surface); border: 1px solid var(--rule); border-left: 3px solid var(--accent); border-radius: 6px; padding: 14px 16px; margin: 18px 0; min-width: 0; }
+.case > .ch { font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin: 0 0 4px; }
+.case > .claim { font-family: var(--serif); font-size: 16.5px; font-weight: 600; margin: 0 0 8px; color: var(--ink); }
+.case .ex { font-family: var(--mono); font-size: 13px; line-height: 1.55; overflow-x: auto; margin: 6px 0; padding: 8px 10px; background: var(--surface-2); border-radius: 4px; white-space: pre; }
+.case .ex .p { color: var(--muted); }
+.case .ex .ok { color: var(--ctx); }
+.case .ex .err { color: var(--words); }
+.case .reads { font-size: 14.5px; color: var(--ink2); margin: 6px 0 0; }
 </style>
 
 <div class="topbar"><details id="topnav"><summary><span id="topbar-title">Concepts, Chunks, Compression</span></summary><div class="toc-inner" id="toc-mobile"></div></details></div>
@@ -456,7 +465,7 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
 
   <h2>Open questions</h2>
   <ol>
-    <li><b>How should infill fit both sides?</b> A gap fill satisfies each side's window separately: "the * the tree" becomes "the all the tree".</li>
+    <li><b>How should infill fit both sides?</b> A gap fill satisfies each side's window separately: "the * the tree" becomes "the man the tree".</li>
     <li><b>How can chunk context enter without memorisation?</b> Neighbouring chunks' content helps one-word prefixes and fails the novelty guard.</li>
     <li><b>Why does the content tree add no gain on held-out composites?</b> Their sorting paths end 2–4 levels down, where Cobweb opens a new branch.</li>
     <li><b>How can a general concept make new, on-topic sentences without losing grammar?</b> Directed by the previous sentence it fits as well as copying, but each step up in generality costs grammar (<a href="#s-sem">S7</a>).</li>
@@ -676,11 +685,11 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
       <text x="690" y="193" class="mu" style="font-size:12.5px">each part from its own leaf (Section 6)</text>
       <text x="690" y="230" class="mu" style="font-size:12.5px">each side is fitted by its own window:</text>
       <text x="690" y="247" class="mu" style="font-size:12.5px">the source of infill errors such as</text>
-      <text x="690" y="264" class="mo tfoc">the * the tree → the all the tree</text>
+      <text x="690" y="264" class="mo tfoc">the * the tree → the man the tree</text>
     </svg>
     </div>
   </figure>
-  <figcaption><b>Figure 5.</b> Gap filling (<code>gap_mode="window"</code>). The filler is drawn by its posterior of standing in the gap's surroundings. Fillers and scores in step 2 are illustrative; &ldquo;lily played and laughed&rdquo; is an infill memory produced.</figcaption>
+  <figcaption><b>Figure 5.</b> Gap filling (<code>gap_mode="window"</code>). The filler is drawn by its posterior of standing in the gap's surroundings. Fillers and scores in step 2 are illustrative; &ldquo;lily played and laughed&rdquo; is an infill memory produced with neighbouring chunks on (600 sentences, seed 17); the default gap filling gives &ldquo;lily smiled and laughed&rdquo; on the same prompt.</figcaption>
 
   <h2>Results on TinyStories</h2>
   <p>2,000 sentences, verify 700, seed 17. Gap filling, share of generated trigrams attested in the corpus:</p>
@@ -696,8 +705,8 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
   <ul class="samples">
     <li>lily smiled and laughed</li>
     <li>sam will help you</li>
-    <li class="bad">the all the tree (error)</li>
-    <li class="bad">i am and ben (error)</li>
+    <li class="bad">the man the tree (error; "the * the tree")</li>
+    <li class="bad">i can and ben (error; "i * and ben")</li>
   </ul>
   <p>On bAbI (3,000 sentences), gap filling after a prefix gives 0.87–0.92 of trigrams attested.</p>
 
@@ -726,6 +735,55 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
     <li>Verify 700 is less stable: cross-seed 0.77–0.79 at 2,000, substitution 0.84–0.87 near and 0.77–0.79 far.</li>
     <li>bAbI parses look like <code>[[sandra travelled] [to [the garden]]]</code>, with phrase consistency 0.91.</li>
   </ul>
+
+  <h2>Case studies</h2>
+  <div class="case">
+    <p class="ch">Case 1 · claim: two seeds come to agree as memory grows</p>
+    <p class="claim">At 250 sentences the two seeds bracket the same held-out sentence differently; at 2,000 they mostly agree.</p>
+<div class="ex"><span class="p">250 sentences       seed 13</span>                                <span class="p">seed 17</span>
+he was very happy    [[[he was] very] happy]                    [[he was] [very happy]]
+lily was so …        [[[lily [[was so] surprised]] and] laughed]  [[[[[lily was] so] surprised] and] laughed]
+it was a big day …   [[[[it was] [[a big] day]] for] him]       [[[[[it was] a] big] [day for]] him]
+
+<span class="p">2,000 sentences</span>
+lily was so …        <span class="ok">[[[[lily was] so] surprised] [and laughed]]</span>  (both seeds)
+it was a big day …   [[[it was] [a big]] [[day for] him]]       [[[[it was] [a big]] [day for]] him]</div>
+    <p class="reads">Original configuration, the first held-out sentences, nothing selected. At 2,000 sentences the seeds differ on "it was a big day for him" only in where "him" attaches. The seed-13 parses at 2,000 are drawn from its saved spans (<code>experiments/v3/results/consistency/orig_s13.json</code>); its log stops at 1,000.</p>
+  </div>
+  <div class="case">
+    <p class="ch">Case 2 · claim: verify 700 is less stable across seeds</p>
+    <p class="claim">With verify 700, the seeds still disagree at 2,000 sentences, sometimes at the top split.</p>
+<div class="ex"><span class="p">2,000 sentences, verify 700   seed 13</span>                    <span class="p">seed 17</span>
+the bird asked the tree        [[[[the bird] asked] the] tree]    [[the bird] [[asked the] tree]]
+it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [a [[big [day for]] him]]]</div>
+    <p class="reads">Both seeds find "the bird" and "it was", and they split the rest differently: cross-seed F1 0.77–0.79 against 0.90 for the original.</p>
+  </div>
+  <div class="case">
+    <p class="ch">Case 3 · claim: a parse survives replacing one word</p>
+    <p class="claim">Swapping one word for its nearest word by learned name leaves the rest of the parse in place; the "near" word is not always a substitute.</p>
+<div class="ex"><span class="p">original</span>               [[[[lily was] so] surprised] [and laughed]]
+<span class="p">near  laughed→thought</span>  [[[[lily was] so] surprised] <span class="ok">[and thought]</span>]
+<span class="p">far   laughed→she</span>      [[[[lily was] so] surprised] [and she]]
+
+<span class="p">original</span>               [[[the bird] [asked the]] tree]
+<span class="p">near  asked→says</span>       <span class="ok">[[[the bird] [says the]] tree]</span>
+<span class="p">far   asked→a</span>          [[[the bird] a] <span class="err">[the tree]</span>]
+
+<span class="p">original</span>               [[[[it was] [a big]] [day for]] him]
+<span class="p">near  day→anymore</span>      [[[[it was] a] big] <span class="err">[anymore [for him]]</span>]
+
+<span class="p">original</span>               [[[[he said] no] i'm] not]
+<span class="p">near  said→bad</span>         [[[[he bad] no] i'm] not]</div>
+    <p class="reads">Original configuration, seed 17, 2,000 sentences; the first eight held-out sentences with a replaceable word, of which four are shown. A true substitute ("asked → says") keeps every bracket, while a function word ("asked → a") moves one. The nearest word by learned name is often no substitute ("day → anymore", "said → bad"). The parse may then stay the same for the wrong reason, so the near-word F1 of 0.962 likely overstates invariance.</p>
+  </div>
+  <div class="case">
+    <p class="ch">Case 4 · claim: bAbI parses are phrase-like and stable within a seed</p>
+    <p class="claim">A bAbI statement keeps one phrase-like parse as memory grows; another seed may choose a different one.</p>
+<div class="ex"><span class="p">seed 13, at 300, 1,000 and 3,000</span>   <span class="ok">[[sandra travelled] [to [the garden]]]</span>
+<span class="p">seed 17, at 3,000</span>                  [[sandra [travelled to]] [the garden]]
+<span class="p">seed 13, question line</span>             [[where is] [john [? hallway]]]</div>
+    <p class="reads">Phrase consistency (0.91) asks whether one memory brackets a repeated string the same way everywhere; it does not ask whether two seeds agree. Question lines parse less like phrases than statements.</p>
+  </div>
 </section>
 
 <!-- ============================================================ S3 PROBE -->
@@ -748,6 +806,25 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
   </figure>
   <figcaption><b>Figure 6.</b> t-SNE (cosine) of 600 chunk types, seed 13, coloured by NLTK phrase type. The context representation separates subject-verb starts, verb phrases and noun phrases; the content representation puts most types in one dense cluster.</figcaption>
   <p>The context tree carries phrase type; the content tree carries it only weakly, consistent with the content tree adding no gain to the chunk factor (<a href="#f-known">F2</a>).</p>
+
+  <h2>Case studies</h2>
+  <div class="case">
+    <p class="ch">Case 1 · claim: the context representation groups chunks by phrase type</p>
+    <p class="claim">A chunk's nearest neighbours by context are chunks of the same kind.</p>
+<div class="ex"><span class="p">the bird (NP)</span>    the dog · the cat · the bear · the boy · the man            <span class="ok">5 of 5 NP</span>
+<span class="p">was happy (VP)</span>   was sad · was surprised · looked sad · felt sad · was scared <span class="ok">5 of 5 VP</span>
+<span class="p">very happy</span>       very sad · very surprised · so happy · happy again · very excited
+<span class="p">in the park (PP)</span> to play too · a big red ball · thank you tim · much fun together · what to do  <span class="err">1 of 5</span></div>
+    <p class="reads">Five nearest chunk types by cosine over the context description, seed 13, 2,000 sentences, verify 700. Substitutable chunks stand in the same places, so they share context. "in the park" fails; its neighbours mostly end sentences, so the likely reason is that sentence-final chunks share a context whatever their type.</p>
+  </div>
+  <div class="case">
+    <p class="ch">Case 2 · claim: the content representation carries phrase type only weakly</p>
+    <p class="claim">By content, most chunk types share the same few neighbours.</p>
+<div class="ex"><span class="p">the bird</span>         very happy · unexpected happened · they were · tim was · but then
+<span class="p">played together</span>  very happy · unexpected happened · they were · the bird · tim was
+<span class="p">was happy</span>        very happy · unexpected happened · they were · the bird · tim was</div>
+    <p class="reads">The same five frequent types answer every query: the dense cluster in Figure 6. This fits the content tree's missing gain (F2): content descriptions do not yet separate kinds of chunk.</p>
+  </div>
 </section>
 
 <!-- ============================================================ S4 BABI -->
@@ -767,6 +844,42 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
     </tbody>
   </table></div>
   <p>Neighbouring chunks give no real gain. Long questions fail: &ldquo;where was the apple before the bathroom ?&rdquo; is answered yes or no, because the window sees only &ldquo;bathroom ?&rdquo;. QA lines parse as <code>[where [is [[mary ?] bathroom]]]</code>. The next step is answering by analogy: align the question's chunks with the story sentence that shares its entity and role, and answer with the filler in the aligned slot.</p>
+
+  <h2>Case studies</h2>
+  <p>Seed 13, 600 sentences, verify 700: the first test questions of tasks 1, 3, 6 and 15, nothing selected. "Memory" answers from the question alone; "story" keeps only fillers made of the story's words.</p>
+  <div class="case">
+    <p class="ch">Case 1 · claim: memory gives the right kind of answer, not the right one</p>
+    <p class="claim">Asked where someone is, memory names a location, but not the one the story says.</p>
+<div class="ex"><span class="p">story</span>     john travelled to the hallway · mary journeyed to the bathroom
+<span class="p">question</span>  where is john ?
+<span class="p">memory</span>    kitchen       <span class="p">story</span> bathroom      <span class="p">gold</span> hallway      <span class="ok">right type</span>, <span class="err">wrong answer</span></div>
+    <p class="reads">The gap's window sees "john ?" and fills a word that stands there in training: some location. Nothing ties it to this story. Restricting to the story's words picks one of its two locations, here the wrong one.</p>
+  </div>
+  <div class="case">
+    <p class="ch">Case 2 · claim: exact answers need the story</p>
+    <p class="claim">When the story names one location for the person, restricting to its words gives the right answer.</p>
+<div class="ex"><span class="p">story</span>     … john went to the hallway · sandra journeyed to the kitchen
+<span class="p">question</span>  where is sandra ?
+<span class="p">memory</span>    garden        <span class="p">story</span> <span class="ok">kitchen</span>       <span class="p">gold</span> kitchen</div>
+    <p class="reads">Story restriction raises exact accuracy only from 0.21 to 0.25. It filters words; it does not find the sentence about sandra. Answering by analogy, aligning the question's chunks with that sentence, is the next step.</p>
+  </div>
+  <div class="case">
+    <p class="ch">Case 3 · claim: long questions fail</p>
+    <p class="claim">A question with a second clause is answered as a yes/no question.</p>
+<div class="ex"><span class="p">story</span>     38 sentences of objects picked up, moved and dropped
+<span class="p">question</span>  where was the apple before the bathroom ?
+<span class="p">memory</span>    <span class="err">no</span>            <span class="p">story</span> <span class="err">no</span>            <span class="p">gold</span> office
+<span class="p">parse</span>     [where [[was [[[the [apple before]] [the bathroom]] ?]] office]]</div>
+    <p class="reads">The two-word window sees "the bathroom ?", which is also how task-6 yes/no questions end ("is john in the kitchen ? no"). The parse joins "apple before", so the question's own chunks do not isolate "where … the apple".</p>
+  </div>
+  <div class="case">
+    <p class="ch">Case 4 · claim: an exact answer can be right by frequency</p>
+    <p class="claim">A correct answer to a deduction question does not show deduction.</p>
+<div class="ex"><span class="p">story</span>     wolves are afraid of mice · … · emily is a cat · gertrude is a wolf
+<span class="p">what is gertrude afraid of ?</span>   memory <span class="ok">mouse</span>   gold mouse
+<span class="p">what is emily afraid of ?</span>      memory <span class="err">mouse</span>   gold wolf</div>
+    <p class="reads">Memory answers "mouse" to both. Task 15 has four answers (cat 29%, mouse 27%, sheep 24%, wolf 21% of training answers), so one in four guesses of the right type is exact by chance.</p>
+  </div>
 </section>
 
 <!-- ============================================================ S5 CHARACTERS -->
@@ -800,6 +913,36 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
     <div class="fig"><img class="plot" src="generated_characters.png" alt="Rows of characters generated by TRELLIS v2 with their component sequences, under three encodings: IDS operators as relations, IDS operators as tokens, and sequences alone." loading="lazy"></div>
   </figure>
   <figcaption><b>Figure 7.</b> Characters TRELLIS v2 invents: new combinations of learned components in learned positions, under three encodings (an earlier export; rates as printed above each row).</figcaption>
+
+  <h2>Case studies</h2>
+  <div class="case">
+    <p class="ch">Case 1 · claim: samples are well formed, and some are real characters</p>
+    <p class="claim">Generated decompositions read back into structures, and some spell existing characters.</p>
+<div class="ex"><span class="p">sample</span>             <span class="p">existing character</span>
+⿰ 月 彡            <span class="ok">肜</span>   (left 月, right 彡)
+⿱ 宀 疌            <span class="ok">寁</span>   (top 宀, bottom 疌)
+⿺ 瓜 ⿹ 勹 丶       <span class="ok">瓝</span>   (瓜 wrapping 勺 = ⿹勹丶)
+⿰ 言 ⿴ 囗 ⿰ 丿 乚   well formed; not matched to a character</div>
+    <p class="reads">Seed 13, 500 experiences, original configuration (real 0.647). Matches are against the IDS file. The nested sample shows that a part can itself be a composite (勺 inside 瓝).</p>
+  </div>
+  <div class="case">
+    <p class="ch">Case 2 · claim: new characters combine learned components in learned positions</p>
+    <p class="claim">Novel samples put familiar components in positions those components take in real characters.</p>
+<div class="ex">⿰ 虫 ⿱ 𠂉 皿      insect radical on the left, a stacked right side
+⿸ 广 ⿱ 田 口      广 enclosing from the top left, as in 店 or 庫
+⿰ 扌 ⿱ 八 丨      hand radical on the left
+⿱ 八 豆          <span class="ok">real and unseen: 𧯚</span></div>
+    <p class="reads">TRELLIS v2 export (Figure 7 source, 2,000 training characters, seed 13), from its labelled novel lists. One "novel" sample is a real character that was not in training. Such cases are rare (real and unseen 4–9% in v3), which is why they cannot separate the repair variants.</p>
+  </div>
+  <div class="case">
+    <p class="ch">Case 3 · claim: parsing misses part of held-out structure</p>
+    <p class="claim">Parsing a held-out character recovers the top split but not always the inner one.</p>
+<div class="ex"><span class="p">楮  gold</span>   [[⿰ 木] [[⿸ 耂] 日]]
+<span class="p">    parse</span>  [[⿰ 木] [⿸ [耂 日]]]      <span class="err">[⿸ 耂] missed</span>
+<span class="p">gold</span>       [[⿵ ⺆] [[⿱ [[⿱ 十] 一]] 口]]
+<span class="p">parse</span>      [[⿵ ⺆] [⿱ [⿱ [十 [一 口]]]]]   <span class="err">right-branches inside</span></div>
+    <p class="reads">Seed 13, 500 experiences. Omission is the share of gold brackets the parse lacks: 0.585 on held-out characters, against 0.678 for right-branching.</p>
+  </div>
 </section>
 
 <!-- ============================================================ S6 CHESS -->
@@ -835,6 +978,25 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
     </tbody>
   </table></div>
   <p>The expert advantage on real positions replicates. Chase and Simon's masters recalled scrambled boards about as poorly as novices; here scrambled recall also rises, to 0.54 / 0.73. Gobet and Simon (1996) found a small expert edge on scrambled boards, but this one is larger.</p>
+
+  <div class="case">
+    <p class="ch">Case 1 · claim: experience lets memory hold a real board in a few chunks</p>
+    <p class="claim">One held-out position: a novice keeps 7 single pieces; after 1,000 positions, 6 chunks hold 23 of its 28 pieces.</p>
+    <figure>
+      <div class="fig"><img class="plot" src="chess_case.png" alt="One held-out position and its scrambled twin at 0, 1,000 and 4,000 learned positions. Recalled pieces are drawn in full and each chunk is ringed in its own colour. Real: recall 0.25, 0.82, 0.86. Scrambled: 0.25, 0.25, 0.57." loading="lazy"></div>
+    </figure>
+    <p class="reads">Seed 13, θ 16, seven units kept; recalled pieces in full, each chunk ringed in its own colour. At 1,000 the real board's seven units are six chunks and one piece. One chunk is local: white's rooks d1 and f1 with king g1 and bishop c3. Others join across the board: pawns f2 and g2 with black's g7 and king g8, up the g-file, and a3 with a5 and rook a8 along the a-file. These are the long joins discussed below. At 1,000 the scrambled board yields no chunk at all. At 4,000 it yields four chunks of two or three pieces (16 of 28 pieces), and that is the rise in scrambled recall Chase and Simon did not see.</p>
+  </div>
+  <div class="case">
+    <p class="ch">Case 2 · claim: the advantage is an average, not a rule for every board</p>
+    <p class="claim">Over the first eight held-out positions, real beats scrambled at 4,000 learned on all eight, by 0.07 to 0.35.</p>
+<div class="ex"><span class="p">learned   real / scrambled recall, positions 1–8</span>
+0         0.27/0.27  0.26/0.26  0.25/0.25  0.23/0.23  0.32/0.32  0.26/0.26  0.25/0.25  0.25/0.25
+1,000     0.39/<span class="err">0.50</span>  0.67/0.37  0.43/0.43  0.57/0.40  0.64/0.32  0.59/0.52  0.82/0.25  0.50/0.25
+2,000     0.81/0.65  0.63/<span class="err">0.74</span>  0.54/0.36  0.83/0.40  0.68/0.55  0.78/0.52  0.86/0.36  0.68/0.36
+4,000     0.81/0.46  0.67/0.56  0.64/0.36  0.83/0.67  0.91/0.64  0.78/0.44  0.86/0.57  0.79/0.64</div>
+    <p class="reads">At 0 learned every piece is its own unit, so real and scrambled recall agree exactly. At 1,000 and 2,000 a scrambled board sometimes wins: position 1 at 1,000 and position 2 at 2,000, marked. By 4,000 the real board wins on all eight.</p>
+  </div>
 
   <h2>Chunks at every size</h2>
   <p>After 2,000 positions, memory holds about 12,900 committed two-piece chunks, 11,800 three-piece and 10,800 four-piece chunks (s13, chunks up to four pieces). The content tree sorts them into 33, 460 and 571 concepts. The most frequent concepts are familiar chess patterns:</p>
@@ -905,7 +1067,54 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
     <li>Pairing right parts with the frozen left part raises novelty to 24–55% and lowers grammar to 0.67–0.82 (round 61). Requiring the left neighbour recovers only 0.5–1.4 points (round 62).</li>
     <li>Retrieval pulls ahead as memory grows. Matching it with new sentences is the open target.</li>
   </ul>
-  <p class="small">Data: <code>experiments/v3/diag/t3_sem.py</code>, <code>t3_story.py</code>; doc <code>SEMANTIC_GEN.md</code>.</p>
+  <h2>Case studies</h2>
+  <p>Each case shows one claim on real output: held-out story prompts from round 60 (2,000 sentences, the first prompts of the test set, four draws each, nothing selected). "Directed" is a general concept one level above each slot, directed by the prompt (<code>story_fill</code> 3); "leaf" draws only the root by the prompt.</p>
+
+  <div class="case">
+    <p class="ch">Case 1 · claim: the previous sentence carries its topic into the next</p>
+    <p class="claim">A dog prompt gets a dog sentence; a scared prompt gets a sentence about being scared.</p>
+<div class="ex"><span class="p">prompt</span>  a small dog named sam heard tom      <span class="p">(seed 13)</span>
+<span class="p">unconditioned</span>  can i come with you · i want to play some more · he was very excited · tom and anna are scared
+<span class="p">directed</span>       <span class="ok">spot was a good dog</span> (all four draws)
+
+<span class="p">prompt</span>  ben and mia are scared               <span class="p">(seed 17)</span>
+<span class="p">unconditioned</span>  can i see it · no we don't · be careful and have fun · the dog and the cat came too
+<span class="p">directed</span>       i don't know · i don't know · <span class="ok">they are not scared anymore</span> · i don't know</div>
+    <p class="reads">Unconditioned sentences are grammatical and unrelated to the prompt. The directed ones share its topic: a dog, or being scared.</p>
+  </div>
+
+  <div class="case">
+    <p class="ch">Case 2 · claim: the leaf alone copies a stored sentence</p>
+    <p class="claim">Drawing only the root by the prompt repeats one stored sentence.</p>
+<div class="ex"><span class="p">prompt</span>  it was a big red ball                <span class="p">(seed 17, leaf)</span>
+<span class="p">directed</span>  they were both very happy · they were both very happy · they were both very happy · they were both very happy
+<span class="p">prompt</span>  ben and mia are scared
+<span class="p">directed</span>  i don't know · i don't know · i don't know · i don't know</div>
+    <p class="reads">The root posterior concentrates on the stored sentences that followed sentences like the prompt, and each is expanded from its own leaves, so the same words return (2–3% new at 2,000 sentences).</p>
+  </div>
+
+  <div class="case">
+    <p class="ch">Case 3 · claim: a general concept makes new sentences and can break grammar</p>
+    <p class="claim">One level up, the prompt picks members that share its topic, and a shared chunk can land after the wrong left part.</p>
+<div class="ex"><span class="p">prompt</span>  sue and max wanted to help tim       <span class="p">(seed 13)</span>
+<span class="p">leaf</span>             they both many animals · they saw some toys · they opened the box · they both the box
+<span class="p">general concept</span>  <span class="ok">they both felt sad</span> · <span class="err">do you felt sad</span> · <span class="err">bear liked felt sad</span> · <span class="ok">they both felt sad</span>
+
+<span class="p">prompt</span>  it was a big red ball                <span class="p">(seed 17)</span>
+<span class="p">leaf</span>             they were both very happy (×4)
+<span class="p">general concept</span>  <span class="ok">tom was so happy</span> · they were both very happy · they were both very happy · <span class="ok">tom was so happy</span></div>
+    <p class="reads">"felt sad" is one stored right part reached from several left parts. With "they both" it is grammatical. With "do you" and "bear liked" it is not. That is where the 1–5 points of grammar go. The leaf also errs ("they both many animals"): its slots are refilled from their own leaves. Retrieval, with no learner, returns whole stored sentences and makes neither error.</p>
+  </div>
+
+  <div class="case">
+    <p class="ch">Case 4 · claim: within one sentence, pairing recombines and errs</p>
+    <p class="claim">Conditioning a right part on its frozen left part yields more recombination, and some combinations do not fit.</p>
+<div class="ex"><span class="p">base</span>     her mom asked · his friends were happy that tom was safe · tom wanted to help the bird
+<span class="p">paired</span>   lucy was happy · max felt bad · <span class="err">they are friends were surprised</span> · <span class="err">he said thank you like that</span></div>
+    <p class="reads">Round 55, seed 17, 2,000 sentences, window 1. Each paired right part is a stored chunk whose left part sat under the same concept, so the pairing can join two clauses.</p>
+  </div>
+
+  <p class="small">Data: <code>experiments/v3/diag/t3_sem.py</code>, <code>t3_story.py</code>; examples from <code>logs/v3-r60-story-2000-13.log</code>, <code>-17.log</code>, <code>logs/v3-r55-sem-2000-17.log</code>; doc <code>SEMANTIC_GEN.md</code>.</p>
 </section>
 
 <!-- ============================================================ F1 FAILURES -->
@@ -924,7 +1133,7 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
   <h2>The content tree adds no gain</h2>
   <p>For every composite on <code>med</code> (90 of 90) and <code>large</code> (80 of 80), and 45 of 60 on <code>small</code>, the content tree's best gain is the root's 0 bits. Chunk factors come from the context tree alone, so substitutability counts and cohesion (parts predicting each other) does not. Weaker smoothing lets near-leaf concepts reward memorised pairs and worsens every measure. The tree is deep (stored content leaves sit 12.8 levels down on <code>small</code>), but held-out composites stop 2–4 levels down, where Cobweb would open a new branch: the content tree does not recognise new chunks as members of the deeper chunk types it holds. The chunk probe agrees: content purity is 0.31–0.33 against 0.24–0.25 shuffled (<a href="#s-probe">S3</a>).</p>
   <h2>Infill does not fit both sides</h2>
-  <p>Gap filling scores a filler by the gap's window, and each side is satisfied separately: &ldquo;the * the tree&rdquo; becomes &ldquo;the all the tree&rdquo;, and &ldquo;i * and ben&rdquo; becomes &ldquo;i am and ben&rdquo;. Infill trigrams attested stay at 0.20–0.22 while prefixes reach 0.84–0.86 (<a href="#s-prompt">S1</a>).</p>
+  <p>Gap filling scores a filler by the gap's window, and each side is satisfied separately: &ldquo;the * the tree&rdquo; becomes &ldquo;the man the tree&rdquo;, and &ldquo;i * and ben&rdquo; becomes &ldquo;i can and ben&rdquo; (600 sentences, seed 17). Infill trigrams attested stay at 0.20–0.22 while prefixes reach 0.84–0.86 (<a href="#s-prompt">S1</a>).</p>
   <h2>Chunk context trades novelty for fit</h2>
   <p>Naming the same-width neighbouring chunks in the context helps one-word prefixes (0.78 → 0.87) and makes the learner memorise: grammatical and new at 320 falls to 0.51–0.73 against 0.84–0.89. Learned neighbour names failed the same way on TinyStories in round 11. Chunk context stays off until a form passes the novelty guard.</p>
 </section>
