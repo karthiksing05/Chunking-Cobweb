@@ -100,3 +100,23 @@ A general concept directed by the previous sentence fits the prompt as well as
 or better than copying a stored sentence, with three to five times the novel
 sentences; it costs 2–7 points of tag-pattern grammar against unconditioned
 generation. Retrieval pulls ahead as memory grows (0.66–0.68 at 2000).
+
+## Rounds 61–62: recovering grammar (1000 sentences, seed 13 / seed 17)
+
+| arm | cross share | tag pattern attested | novel |
+|---|---|---|---|
+| leaf (round 59) | 0.35 / 0.39 | 0.930 / 0.874 | 1% / 4% |
+| level 1, story_fill 3 | 0.39 / 0.49 | 0.892 / 0.827 | 9% / 13% |
+| + pair window 2, β 4 (61) | 0.31 / 0.44 | 0.821 / 0.722 | 24% / 40% |
+| + pair window 2, β 0 (61) | 0.30 / 0.40 | 0.734 / 0.667 | 46% / 55% |
+| + story_window (62) | 0.39 / 0.45 | 0.897 / 0.841 | 8% / 10% |
+| level 2 + story_window (62) | 0.43 / 0.46 | 0.760 / 0.706 | 34% / 34% |
+| backoff + story_window (62) | 0.39 / 0.45 | 0.877 / 0.811 | 10% / 15% |
+
+Round 61 combined the prompt with paired right parts (round 55): novelty rises
+steeply, topic mostly holds, grammar falls. Round 62, `story_window`: a
+candidate counts only through records that stood after the word just generated
+(the frozen left neighbour); grammar rises by 0.5–1.4 points only, so the loss
+is not mainly at the left boundary. Across rounds 60–62 the prompt keeps the
+topic at every level of generality (cross share 0.39–0.49 against 0.35–0.39 for
+copying), and the trade-off left is grammar against novelty.
