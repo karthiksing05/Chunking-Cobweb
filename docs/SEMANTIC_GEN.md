@@ -139,3 +139,9 @@ The right neighbour restores the grammar level 2 lost (+10 to +13 points) and
 halves its novelty. Level 2 + both: grammar 0.866 and cross share 0.41 (seed
 means), as level 1 + left (0.871, 0.41), with 13% new sentences against 9%: the
 best point so far, a small gain. Grammar against novelty remains the trade-off.
+
+At 2000 sentences (seed 13 / 17): level 1 left 0.42/0.51, 0.882/0.877, 8%/8%;
+level 1 both 0.45/0.51, 0.886/0.889, 7%/6%; level 2 left 0.41/0.57,
+0.771/0.766, 29%/32%; level 2 both 0.42/0.52, 0.855/0.861, 14%/13%; backoff
+both 0.43/0.58, 0.882/0.874, 8%/9% (cross share, tag pattern attested, novel).
+The pattern holds.

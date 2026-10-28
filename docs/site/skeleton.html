@@ -1161,6 +1161,17 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
     </tbody>
   </table></div>
   <p>The right neighbour carries the grammar that level 2 lost: tag-pattern grammar rises 10–13 points, to the level of the level-1 arms. It also halves novelty, because a filler that must match both stored neighbours is closer to a copy. Level 2 with both neighbours is the best point found so far on the three-way trade-off. Averaged over the seeds it has the grammar of level 1 with the left neighbour (0.866 against 0.871), the same topic (cross share 0.41 against 0.41), and 13% new sentences against 9%. The gain is real but small; grammar against novelty remains the open trade-off.</p>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Round 63, 2,000 sentences (s13 / s17)</th><th class="num">Cross share</th><th class="num">Tag pattern attested</th><th class="num">New</th></tr></thead>
+    <tbody>
+      <tr><th>Level 1, left neighbour</th><td class="num">0.42 / 0.51</td><td class="num">0.882 / 0.877</td><td class="num">8% / 8%</td></tr>
+      <tr><th>Level 1, both neighbours</th><td class="num">0.45 / 0.51</td><td class="num best">0.886 / 0.889</td><td class="num">7% / 6%</td></tr>
+      <tr><th>Level 2, left neighbour</th><td class="num">0.41 / 0.57</td><td class="num">0.771 / 0.766</td><td class="num best">29% / 32%</td></tr>
+      <tr><th>Level 2, both neighbours</th><td class="num">0.42 / 0.52</td><td class="num">0.855 / 0.861</td><td class="num">14% / 13%</td></tr>
+      <tr><th>Back-off, both neighbours</th><td class="num">0.43 / 0.58</td><td class="num">0.882 / 0.874</td><td class="num">8% / 9%</td></tr>
+    </tbody>
+  </table></div>
+  <p>At 2,000 sentences the pattern holds. Level 2 with both neighbours trades about 2 points of grammar against level 1 for 5–6 more points of new sentences, at the same cross share.</p>
   <h2>Case studies</h2>
   <p>Each case shows one claim on real output: held-out story prompts from round 60 (2,000 sentences, the first prompts of the test set, four draws each, nothing selected). "Directed" is a general concept one level above each slot, directed by the prompt (<code>story_fill</code> 3); "leaf" draws only the root by the prompt.</p>
 
