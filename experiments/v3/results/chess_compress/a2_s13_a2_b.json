@@ -1,0 +1,73 @@
+[
+ {
+  "tag": "a2",
+  "representation": "raw",
+  "dims": 768,
+  "bits per position": 254.7,
+  "ridge R2": 0.425,
+  "ridge spearman": 0.601,
+  "lambda": 1,
+  "mlp R2": -0.013,
+  "mlp spearman": 0.357
+ },
+ {
+  "tag": "a2",
+  "representation": "trellis",
+  "dims": 4230,
+  "bits per position": 112.2,
+  "ridge R2": -0.004,
+  "ridge spearman": 0.081,
+  "lambda": 10000,
+  "mlp R2": -0.896,
+  "mlp spearman": 0.084,
+  "units": 10.97599983215332
+ },
+ {
+  "tag": "a2",
+  "representation": "material",
+  "dims": 12,
+  "bits per position": 38.0,
+  "ridge R2": 0.569,
+  "ridge spearman": 0.597,
+  "lambda": 1,
+  "mlp R2": 0.658,
+  "mlp spearman": 0.624
+ },
+ {
+  "tag": "a2",
+  "representation": "ae",
+  "dims": 32,
+  "bits per position": 256.0,
+  "ridge R2": 0.007,
+  "ridge spearman": 0.11,
+  "lambda": 1000,
+  "mlp R2": -0.379,
+  "mlp spearman": 0.075,
+  "loss": 0.0148
+ },
+ {
+  "tag": "a2",
+  "representation": "vqvae",
+  "dims": 512,
+  "bits per position": 48.0,
+  "ridge R2": -0.002,
+  "ridge spearman": 0.025,
+  "lambda": 10000,
+  "mlp R2": -0.638,
+  "mlp spearman": -0.033,
+  "loss": 0.0657,
+  "codes used": 48
+ },
+ {
+  "tag": "a2",
+  "representation": "contrastive",
+  "dims": 32,
+  "bits per position": 256.0,
+  "ridge R2": 0.002,
+  "ridge spearman": 0.083,
+  "lambda": 10000,
+  "mlp R2": -0.359,
+  "mlp spearman": 0.044,
+  "loss": 2.0408
+ }
+]

@@ -1081,13 +1081,16 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
     <thead><tr><th>Representation</th><th class="num">Bits per position</th><th class="num">R²</th><th class="num">Spearman</th></tr></thead>
     <tbody>
       <tr><th>raw piece-square (768)</th><td class="num">254.7</td><td class="num best">0.43</td><td class="num best">0.60</td></tr>
-      <tr><th>TRELLIS (concepts at levels 1–2 + unrecognised pieces)</th><td class="num">112.2</td><td class="num">0.01</td><td class="num">0.05</td></tr>
+      <tr><th>piece counts only (12; a reference, not a state code)</th><td class="num">38</td><td class="num">0.57</td><td class="num">0.60</td></tr>
+      <tr><th>TRELLIS (content concepts + unrecognised pieces)</th><td class="num">112.2*</td><td class="num">0.01</td><td class="num">0.05</td></tr>
+      <tr><th>TRELLIS, with each chunk's exact leaf added</th><td class="num">112.2*</td><td class="num">0.00</td><td class="num">0.08</td></tr>
       <tr><th>autoencoder, 32 dims</th><td class="num">256</td><td class="num">0.01</td><td class="num">0.11</td></tr>
       <tr><th>VQ-VAE, 8 codes of 64</th><td class="num">48</td><td class="num">0.00</td><td class="num">0.03</td></tr>
       <tr><th>contrastive, 32 dims</th><td class="num">256</td><td class="num">0.00</td><td class="num">0.08</td></tr>
     </tbody>
   </table></div>
-  <p>Only the raw board predicts the score. Each compressed representation, TRELLIS included, keeps too little of the material balance for a linear head to recover. This TRELLIS row understates TRELLIS: its 112 bits count each recognised chunk exactly, but the features used only the concepts one and two levels above that chunk (182 indicators). A rerun adds the exact chunk to the features, plus a reference row with piece counts alone. A one-hidden-layer head did worse than ridge for every representation, the raw board included, and is not reported.</p>
+  <p>Only the raw board and the piece counts predict the score. Piece counts alone (0.57) beat the full board (0.43), so this teacher's score is mostly material. Each compressed representation keeps too little of the material balance for a linear head to recover it.</p>
+  <p>*The TRELLIS bit counts are not comparable with the others. A chunk's content description holds its parts' learned context names, not their pieces. Its concept, even its exact leaf, therefore does not say which pieces it holds, and the 112 bits name chunk types without coding the board. Adding the exact leaf (3,462 indicators in place of 182) changed nothing. The corrected test codes a chunk only as a pointer to an identical stored chunk, the same pieces on the same squares, as CHREST does. Its codes decode to the position, and its bits compare with an entropy-coded piece-square list. That run is in progress. A one-hidden-layer head did worse than ridge on every representation except piece counts and is not reported.</p>
 </section>
 
 <!-- ============================================================ S7 SEMANTIC GENERATION -->
