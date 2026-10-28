@@ -302,6 +302,7 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
     <li><a href="#s-babi"><span class="n">S4</span><span>bAbI questions</span></a></li>
     <li><a href="#s-chars"><span class="n">S5</span><span>Chinese characters</span></a></li>
     <li><a href="#s-chess"><span class="n">S6</span><span>Chess</span></a></li>
+    <li><a href="#s-sem"><span class="n">S7</span><span>Semantic generation</span></a></li>
   </ol>
   <h2>Failure points</h2>
   <ol>
@@ -348,6 +349,7 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
   <p><b>Parses agree across seeds as memory grows</b>: bracket F1 between two seeds rises from 0.64 at 250 sentences to 0.90 at 2,000, with no gold trees (<a href="#s-consist">S2</a>).</p>
   <p><b>Gap filling continues prompts</b>: 0.86 of trigrams attested after a one-word prefix and 0.84 after two words; infill stays at 0.22 (<a href="#s-prompt">S1</a>). On bAbI, the same mechanism answers with an answer of the right type 0.60 of the time, against 0.20 for a frequency baseline (<a href="#s-babi">S4</a>).</p>
   <p><b>Chess chunks reproduce Chase and Simon.</b> After 4,000 positions, recall of real positions exceeds recall of scrambled ones (0.77 vs 0.54 and 0.88 vs 0.73 at θ 16), when chunks are recognised by where their pieces stand (<a href="#s-chess">S6</a>).</p>
+  <p><b>The previous sentence directs the next.</b> Given a story sentence, a general concept directed by it makes a next sentence that fits (cross share 0.40 / 0.54, against −0.13 / −0.04 unconditioned and 0.34 / 0.51 for copying a stored sentence), with three to five times more new sentences and a cost of 1–5 points of grammar (<a href="#s-sem">S7</a>).</p>
   <p><b>Still failing:</b> the content tree adds no gain to the chunk factor on held-out composites, infill fails to fit both sides, and chunk context through neighbouring chunks makes the learner memorise (<a href="#f-known">F2</a>).</p>
 
   <h2>Reading guide</h2>
@@ -355,7 +357,7 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
     <li><a href="#status">Where we stand</a>: the current recipe, the temporal scoreboard, the findings that held up, runs in progress and open questions (27 October).</li>
     <li><a href="#principles">Principles</a> and <a href="#representation">representation</a>: the two instances every element gets.</li>
     <li>Mechanism: <a href="#learning">learning by inside-outside</a>, <a href="#sustain">keeping memory current</a>, and interactive walk-throughs of <a href="#parse">parsing</a>, <a href="#generate">generation</a>, <a href="#types">type names</a> and <a href="#rules">concept-choice rules</a>.</li>
-    <li>Studies: <a href="#s-prompt">prompted generation</a>, <a href="#s-consist">parse consistency</a>, <a href="#s-probe">chunk representations</a>, <a href="#s-babi">bAbI questions</a>, <a href="#s-chars">Chinese characters</a> and <a href="#s-chess">chess</a>.</li>
+    <li>Studies: <a href="#s-prompt">prompted generation</a>, <a href="#s-consist">parse consistency</a>, <a href="#s-probe">chunk representations</a>, <a href="#s-babi">bAbI questions</a>, <a href="#s-chars">Chinese characters</a>, <a href="#s-chess">chess</a> and <a href="#s-sem">semantic generation</a>.</li>
     <li><a href="#failures">Failure points</a>: the AND/OR checks run after every change, and the known failures.</li>
     <li><a href="#results">Results</a>: learning curves, what was kept and set aside, and what to iterate next.</li>
   </ol>
@@ -365,7 +367,7 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
 <section class="page" data-page="status" hidden>
   <p class="eyebrow">27 October 2026</p>
   <h1>Where we stand</h1>
-  <p class="lede">The temporal target is met by repairing memory as it is used: records that parsing and generation reach are re-sorted when stale, which keeps used memory under 1% misplaced at under twice the original learning time. Mixing neighbours' names into a word's name speeds word-category convergence while generation holds, which meets the interdependence target. Gap filling answers prompts and bAbI questions, and chess chunks show the expert recall advantage. Infill, the content tree's gain and chunk context remain open.</p>
+  <p class="lede">The temporal target is met by repairing memory as it is used: records that parsing and generation reach are re-sorted when stale, which keeps used memory under 1% misplaced at under twice the original learning time. Mixing neighbours' names into a word's name speeds word-category convergence while generation holds, which meets the interdependence target. Gap filling answers prompts and bAbI questions, and chess chunks show the expert recall advantage. Given the previous sentence of a story, generation makes a next sentence that belongs with it. Infill, the content tree's gain and grammar under semantic direction remain open.</p>
 
   <dl class="facts">
     <div><dt>Temporal target</dt><dd>met by path repair on use, budget 700: used records 0.6% misplaced (ctx and cnt) at 2,000 sentences</dd></div>
@@ -447,8 +449,8 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
   <div class="tbl-wrap"><table class="tbl">
     <thead><tr><th>Run</th><th>Question</th></tr></thead>
     <tbody>
-      <tr><th>Verify 700 at 2,000 sentences, used records</th><td>How does the background sweep compare with repair on use on the records memory reaches?</td></tr>
-      <tr><th>Chess Elo at larger checkpoints</th><td>Does play improve after 1,000 and 4,000 learned positions?</td></tr>
+      <tr><th>Chess chunks up to eight pieces</th><td>Do larger chunks form and get recognised, and are they local on the board?</td></tr>
+      <tr><th>Semantic generation, next</th><td>Can a prompt-directed general concept keep grammar while it makes new sentences that stay on topic?</td></tr>
     </tbody>
   </table></div>
 
@@ -457,9 +459,9 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
     <li><b>How should infill fit both sides?</b> A gap fill satisfies each side's window separately: "the * the tree" becomes "the all the tree".</li>
     <li><b>How can chunk context enter without memorisation?</b> Neighbouring chunks' content helps one-word prefixes and fails the novelty guard.</li>
     <li><b>Why does the content tree add no gain on held-out composites?</b> Their sorting paths end 2–4 levels down, where Cobweb opens a new branch.</li>
-    <li><b>How do representations become interdependent?</b> A word's name should draw on its neighbours' learned names so that learning converges faster with generation kept; this is the remaining representation goal.</li>
+    <li><b>How can a general concept make new, on-topic sentences without losing grammar?</b> Directed by the previous sentence it fits as well as copying, but each step up in generality costs grammar (<a href="#s-sem">S7</a>).</li>
     <li><b>Can answers come by analogy?</b> Story-conditioned answering needs the question's chunks aligned with the story sentence that shares its entity and role.</li>
-    <li><b>What is the absolute Elo?</b> It needs a calibrated engine such as Stockfish; downloading one is not yet permitted.</li>
+    <li><b>Does TRELLIS compress chess states better than other representation learners?</b> The next study puts each representation under the same search and value head (<a href="#s-chess">S6</a>).</li>
   </ol>
 </section>
 
@@ -803,8 +805,8 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
 <!-- ============================================================ S6 CHESS -->
 <section class="page" data-page="s-chess" hidden>
   <p class="eyebrow">Study S6</p>
-  <h1>Chess: Chase and Simon recall, and an Elo study</h1>
-  <p class="lede">Memory learned from real positions recalls real positions better than scrambled ones, as chess experts do, when it recognises chunks by where their pieces stand. Recognition alone does not yet play well.</p>
+  <h1>Chess: Chase and Simon recall, and chunks at every size</h1>
+  <p class="lede">Memory learned from real positions recalls real positions better than scrambled ones, as chess experts do, and the chunks it recognises are familiar chess patterns. Scrambled recall still rises more than Chase and Simon found.</p>
   <div class="col">
     <p>GraphTrellis learns real positions (Lichess 1800+, ply 30), with positions as board graphs. At each checkpoint it sees 100 held-out positions and the same pieces scattered at random.</p>
     <ul>
@@ -822,19 +824,78 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
     </tbody>
   </table></div>
   <p>Recognising by content alone gives almost no advantage (0.74 against 0.63): a chunk's content names only its pieces' categories, which scrambled boards share. Where pieces stand is what experts recognise.</p>
-  <figure>
-    <div class="fig"><img class="plot" src="chess_chunk_types.png" alt="Eight chunk types TRELLIS v2 finds in middlegame positions, each drawn at its most frequent place, for example a black pawn and bishop on the g-file seen 2164 times and a rook and king on the back rank seen 2110 times." loading="lazy"></div>
-  </figure>
-  <figcaption><b>Figure 8.</b> Chunks TRELLIS v2 finds in middlegame positions, each at its most frequent place, with its count (an earlier export).</figcaption>
 
-  <h2>Elo</h2>
-  <p>The TRELLIS player plays the legal move after which memory recognises the position best (summed chunk recognition bits), with no search and no material count. The <code>+safe</code> variant first excludes moves that lose material to the best one-ply reply. Elo comes from Bradley–Terry over all games, with the random mover at 0; references are a random mover, a one-ply material-greedy player and a two-ply material minimax player.</p>
+  <h2>Recall grows with experience</h2>
+  <p>Experience stands in for rating: the more positions memory has seen, the more of a real board it holds in seven units.</p>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Recall at θ 16 (s13 / s17)</th><th class="num">0</th><th class="num">300</th><th class="num">1,000</th><th class="num">2,000</th><th class="num">4,000</th></tr></thead>
+    <tbody>
+      <tr><th>Real</th><td class="num">0.27 / 0.27</td><td class="num">0.30 / 0.43</td><td class="num">0.58 / 0.70</td><td class="num">0.71 / 0.83</td><td class="num best">0.77 / 0.88</td></tr>
+      <tr><th>Scrambled</th><td class="num">0.27 / 0.27</td><td class="num">0.27 / 0.31</td><td class="num">0.39 / 0.46</td><td class="num">0.48 / 0.66</td><td class="num">0.54 / 0.73</td></tr>
+    </tbody>
+  </table></div>
+  <p>The expert advantage on real positions replicates. Chase and Simon's masters recalled scrambled boards about as poorly as novices; here scrambled recall also rises, to 0.54 / 0.73. Gobet and Simon (1996) found a small expert edge on scrambled boards, but this one is larger.</p>
+
+  <h2>Chunks at every size</h2>
+  <p>After 2,000 positions, memory holds about 12,900 committed two-piece chunks, 11,800 three-piece and 10,800 four-piece chunks (s13, chunks up to four pieces). The content tree sorts them into 33, 460 and 571 concepts. The most frequent concepts are familiar chess patterns:</p>
   <ul>
-    <li>Memory only: about as strong as random (−9 to −13 at 300 positions).</li>
-    <li><code>+safe</code>: 210–308.</li>
-    <li>Learning 300 positions did not improve play.</li>
-    <li>Absolute Elo needs a calibrated engine; downloading Stockfish is not yet permitted.</li>
+    <li>the castled king, rook f1 and king g1 (4,545);</li>
+    <li>the pawn chain e6–f7 (4,033);</li>
+    <li>the king's shelter: king g8 with pawns g6 and h7, here with a bishop on g5 (483);</li>
+    <li>the back rank, queen d1, rook f1 and king g1 (846).</li>
   </ul>
+  <figure>
+    <div class="fig"><img class="plot" src="chess_m4_types.png" alt="Five most frequent content concepts at each chunk size two, three and four pieces after 2,000 positions, each drawn on a board by its most frequent instance, such as rook f1 and king g1 seen 4,545 times." loading="lazy"></div>
+  </figure>
+  <figcaption><b>Figure 8.</b> Chunk concepts by size after 2,000 positions (s13, chunks up to four pieces). Each board shows a concept's most frequent instance; n counts the committed chunks under the concept, and "distinct" the different placements among them.</figcaption>
+  <p>On held-out positions at θ 16, memory recognises about 4.3 multi-piece chunks per real position and 2.2 per scrambled one. It leaves 11.0 real pieces outside any recognised chunk, against 18.9 scrambled.</p>
+  <figure>
+    <div class="fig"><img class="plot" src="chess_m4_nested.png" alt="Four held-out positions with their stored analysis drawn as lines between pieces, coloured by the size of the chunk each join makes." loading="lazy"></div>
+  </figure>
+  <figcaption><b>Figure 9.</b> Held-out positions as nested chunks: each join is drawn between its two parts' anchor pieces, coloured by the size of the chunk it makes.</figcaption>
+  <p>Many joins span the board: a part joins the first piece along a ray, at any distance and of either colour. Chase and Simon's chunks are compact and mostly of one colour. Long joins also fit scrambled boards, which may explain the rise in scrambled recall. Joining only nearby pieces, in the board-graph rework, is the change that would test this.</p>
+
+  <h2>From move choice to state compression</h2>
+  <p>The first Elo study let memory choose the move after which it recognises the position best. That player was about as strong as random (−58 to 84 Elo, random = 0) and did not improve with experience. A safety filter that rejects moves losing material lifted it to 210–317, but that strength came from the filter. The study was stopped on 27 October.</p>
+  <p>TRELLIS is a representation learner, so the next chess study tests it as one:</p>
+  <ul>
+    <li>One search, alpha-beta minimax at a fixed depth, with a small value head; the arms change only the state representation.</li>
+    <li>The value head trains on scores from a deeper search on the same positions.</li>
+    <li>TRELLIS enters in two ways: its concept codes as the value head's features, and its concepts as a transposition table, where positions in one concept share a stored value.</li>
+    <li>The comparison is against other representation learners: raw piece-square features, an autoencoder, a VQ-VAE (discrete codes) and a contrastive board encoder. The same comparison goes into the Chinese characters study (S5).</li>
+    <li>Measures: Elo at a fixed node budget, bits per state, nodes searched to reach an Elo, and how each changes with the number of positions seen.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ S7 SEMANTIC GENERATION -->
+<section class="page" data-page="s-sem" hidden>
+  <p class="eyebrow">Study S7</p>
+  <h1>Semantic generation</h1>
+  <p class="lede">The previous sentence, given as a frozen same-level chunk, makes the next sentence belong with it. A general concept directed by that sentence fits as well as copying a stored sentence and makes three to five times more new sentences, at a cost in grammar.</p>
+  <p>The goal is text that holds together in meaning. General concepts keep their general knowledge and context directs them to a specific output, as a diffusion model's step is directed. Generation comes mostly from chunks around a slot and chunks below it that are already frozen; top-down conditioning stays optional. Gold part-of-speech tags and PMI score only.</p>
+
+  <h2>Within a sentence (rounds 51–55)</h2>
+  <p>Coherence is the mean PMI between the content words of a sentence, as a share of real text's over random words of the same tag. Conditioning a right part on its frozen left part raises coherence over all sentences (0.77 → 0.88 on s13 at 2,000), mostly by recombining stored structure. On new sentences it does not beat the base, which already reaches about 0.82 of real text.</p>
+
+  <h2>Across sentences (rounds 56–62)</h2>
+  <p>Stories are read in order. A sentence that follows another in its story gives every element a context facet, <code>pv</code>: the words of the previous sentence. Given a prompt sentence, generation draws a whole stored experience by the posterior of the prompt as its <code>pv</code>, and, with <code>story_fill</code>, weights the fillers of a general concept above each slot the same way. Cross share is 0 for a random held-out sentence and 1 for the story's real next sentence.</p>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>2,000 sentences (s13 / s17)</th><th class="num">Cross share</th><th class="num">Tag pattern attested</th><th class="num">New</th></tr></thead>
+    <tbody>
+      <tr><th>Unconditioned</th><td class="num">−0.13 / −0.04</td><td class="num">0.895 / 0.895</td><td class="num">10% / 9%</td></tr>
+      <tr><th>Copy a stored next sentence</th><td class="num">0.34 / 0.51</td><td class="num best">0.912 / 0.909</td><td class="num">2% / 3%</td></tr>
+      <tr><th>General concept, prompt-directed</th><td class="num best">0.40 / 0.54</td><td class="num">0.884 / 0.875</td><td class="num">8% / 7%</td></tr>
+      <tr><th>Same, back-off</th><td class="num">0.39 / 0.54</td><td class="num">0.858 / 0.842</td><td class="num best">12% / 15%</td></tr>
+      <tr><th>Retrieval, no learner (reference)</th><td class="num">0.66 / 0.68</td><td class="num">—</td><td class="num">—</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>Two earlier forms failed. A next-sentence statistic on the content tree groups sentences by shape, not topic (round 56). A geometric-mean or flat-smoothed weighting left the pool flat (rounds 57–58).</li>
+    <li>One level up, concepts group by their other facets, so the topic reaches a general concept only through its members' records (<code>story_fill</code>).</li>
+    <li>Pairing right parts with the frozen left part raises novelty to 24–55% and lowers grammar to 0.67–0.82 (round 61). Requiring the left neighbour recovers only 0.5–1.4 points (round 62).</li>
+    <li>Retrieval pulls ahead as memory grows. Matching it with new sentences is the open target.</li>
+  </ul>
+  <p class="small">Data: <code>experiments/v3/diag/t3_sem.py</code>, <code>t3_story.py</code>; doc <code>SEMANTIC_GEN.md</code>.</p>
 </section>
 
 <!-- ============================================================ F1 FAILURES -->
@@ -938,11 +999,11 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
 <script>
 (function () {
 const ORDER = ["overview", "status", "principles", "representation", "learning", "sustain", "parse", "generate", "types", "rules",
-  "s-prompt", "s-consist", "s-probe", "s-babi", "s-chars", "s-chess", "failures", "f-known", "results", "curves", "iterations", "next"];
+  "s-prompt", "s-consist", "s-probe", "s-babi", "s-chars", "s-chess", "s-sem", "failures", "f-known", "results", "curves", "iterations", "next"];
 const TITLES = { overview: "Overview", status: "Where we stand", principles: "1 Principles", representation: "2 Representation",
   learning: "3 Learning", sustain: "4 Sustaining memory", parse: "5 Parsing, step by step", generate: "6 Generation, step by step",
   types: "7 Type names", rules: "8 Concept-choice rules", "s-prompt": "S1 Prompted generation", "s-consist": "S2 Parse consistency",
-  "s-probe": "S3 Chunk representations", "s-babi": "S4 bAbI questions", "s-chars": "S5 Chinese characters", "s-chess": "S6 Chess",
+  "s-probe": "S3 Chunk representations", "s-babi": "S4 bAbI questions", "s-chars": "S5 Chinese characters", "s-chess": "S6 Chess", "s-sem": "S7 Semantic generation",
   failures: "F1 AND/OR failure checks", "f-known": "F2 Known failures", results: "Results", curves: "R1 Learning curves",
   iterations: "R2 Kept and set aside", next: "R3 What to iterate next" };
 const PICKER = ["parse", "generate", "types"];
