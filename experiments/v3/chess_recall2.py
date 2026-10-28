@@ -12,10 +12,10 @@ Arms, each on real held-out positions and on the same pieces on random squares:
   bpe         the position covered by byte-pair merges learned from the same
               training positions (merges of pairs that co-occur in 2+ positions,
               chunks of up to ``max_size`` pieces), applied in order
-Short-term memory keeps the ``K`` largest units; recall = share of the position's
+Short-term memory keeps the ``K`` largest units (several K: a test-time check only); recall = share of the position's
 pieces inside them.
 
-Usage: chess_recall2.py <cfg json> <seed> <checkpoints> <tag> [K] [thetas] [n test] [bpe merges]
+Usage: chess_recall2.py <cfg json> <seed> <checkpoints> <tag> [K list] [thetas] [n test] [bpe merges]
 """
 from __future__ import annotations
 
@@ -37,7 +37,7 @@ from trellis2.trellis_graph import GraphTrellis  # noqa: E402
 cfg, seed = json.loads(sys.argv[1]), int(sys.argv[2])
 checks = [int(x) for x in sys.argv[3].split(",")]
 tag = sys.argv[4]
-K = int(sys.argv[5]) if len(sys.argv) > 5 else 7
+KS = [int(k) for k in (sys.argv[5] if len(sys.argv) > 5 else "7").split(",")]   # short-term memory sizes, tested at recall only
 thetas = [float(x) for x in (sys.argv[6] if len(sys.argv) > 6 else "8,12,16").split(",")]
 n_test = int(sys.argv[7]) if len(sys.argv) > 7 else 100
 n_merges = int(sys.argv[8]) if len(sys.argv) > 8 else 2000
@@ -89,7 +89,7 @@ def units(e, exp, theta, need_stored):
 def recall_of(sizes, n):
     sizes = sorted(sizes, reverse=True)
     chunks = [s for s in sizes if s > 1]
-    return {"recall": sum(sizes[:K]) / n, "pieces in chunks": sum(chunks) / n,
+    return {**{(f"recall K{k}" if len(KS) > 1 else "recall"): sum(sizes[:k]) / n for k in KS}, "pieces in chunks": sum(chunks) / n,
             "mean chunk size": sum(chunks) / len(chunks) if chunks else 1.0}
 
 
@@ -137,7 +137,7 @@ for c in checks:
         for k in r["chosen"]:
             store.add(key(r["comps"][k], r["exp"]))
     done = c
-    row = {"tag": tag, "seed": seed, "positions learned": c, "learn s": round(time.time() - t0), "K": K,
+    row = {"tag": tag, "seed": seed, "positions learned": c, "learn s": round(time.time() - t0), "K": KS,
            "stored chunks": len(store)}
     t1 = time.time()
     merges = bpe(train[:c]) if c > 0 else []

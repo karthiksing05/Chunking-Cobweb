@@ -1144,7 +1144,27 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
       <tr><th>co-occurrence chunks, code bits only</th><td class="num">≈120</td><td colspan="5" class="mu">—</td></tr>
     </tbody>
   </table></div>
-  <p>With pieces in the content description, generation predicts a part's piece almost for free: 5.6 bits for the whole board. The cost is structure: roots, nested sub-chunk choices, anchors and relations. 99.8% of four-piece chunks are chains built one piece at a time, the same with the join rule relaxed so that two chunks can join. In the dictionary code, 7,425 of 14,534 stored chunks are four-piece chains, 3% of them reused. The chain structure is what the code pays for. The next steps are flat chunk descriptions (a chunk as a template of pieces at offsets) and a working-memory limit during learning.</p>
+  <p>With pieces in the content description, generation predicts a part's piece almost for free: 5.6 bits for the whole board. The cost is structure: roots, nested sub-chunk choices, anchors and relations. 99.8% of four-piece chunks are chains built one piece at a time, the same with the join rule relaxed so that two chunks can join. In the dictionary code, 7,425 of 14,534 stored chunks are four-piece chains, 3% of them reused. The chain structure is what the code pays for.</p>
+
+  <h2>Flat chunks with interactions (one level up)</h2>
+  <p><code>chess_flat</code> builds chunks from pieces only (compositional depth one) and stores only the pieces and the top chunks of each analysis, so a chain's pairs and triples are never stored. Generality comes from the concept hierarchy, not from nesting.</p>
+  <ul>
+    <li><b>Content</b> is what the chunk holds: its pieces, each piece at its offset from the anchor, and how its pieces interact (<code>wP defends wP</code>, <code>wK defends wP</code>; from <code>chess.interactions</code>: the first piece in each direction, and whether it is attacked, defended or only seen, both ways).</li>
+    <li><b>Context</b> (the anchor-context) adds, for every element, how its pieces interact with the pieces outside it (<code>wK attacked by bQ</code>).</li>
+    <li>Two join rules: <code>any</code> (some piece of one sees some piece of the other) and <code>interact</code> (some piece attacks or defends a piece of the other, either way).</li>
+    <li>Working memory is checked at test time only: recall with 4 and with 7 units.</li>
+  </ul>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>4,000 positions, seed 13 (real / random)</th><th class="num">Stored chunks</th><th class="num">Verified, K 7</th><th class="num">Stored, K 7</th><th class="num">Stored, K 4</th></tr></thead>
+    <tbody>
+      <tr><th>nested, pieces in content (<code>word_cnt</code>)</th><td class="num">20,797</td><td class="num">0.77 / 0.34</td><td class="num">0.79 / 0.35</td><td class="num">0.55 / 0.24</td></tr>
+      <tr><th>flat, join any, up to 4 pieces</th><td class="num">20,947</td><td class="num best">0.80 / 0.32</td><td class="num best">0.82 / 0.34</td><td class="num best">0.57 / 0.23</td></tr>
+      <tr><th>flat, join interact, up to 4 pieces</th><td class="num best">13,456</td><td class="num">0.76 / 0.32</td><td class="num">0.78 / 0.34</td><td class="num">0.55 / 0.23</td></tr>
+      <tr><th>co-occurrence chunks</th><td class="num">—</td><td class="num">—</td><td class="num">0.84 / 0.35</td><td class="num">0.57 / 0.24</td></tr>
+    </tbody>
+  </table></div>
+  <p>Flat chunks joined by sight are the best TRELLIS arm, and at a working memory of 4 units they recall as much as co-occurrence chunks. Chunks joined by interactions recall about as much with 35% fewer stored chunks. Up to 6 pieces is worse at 2,000 positions (verified 0.60–0.63): larger flat chunks recur less often.</p>
+  <p>In the generator code a flat chunk is predicted whole by its concept, as Cobweb predicts attributes. The code gives its size, then each piece at its offset, backed off along the concept's path, and mixes the levels of that path. Interaction joins, 2,000 positions learned, 1,000 coded: <b>198.7</b> bits per position, against 205.1 for the best single level, 193.1 for nested chunks with pieces in content, and 188.3 for entropy-coded piece-squares. Flat chunks recall well but do not yet compress: at a chunk's own concept its root costs about 11 bits and its pieces about 13. A co-occurrence chunk of the same pieces is one frequent item.</p>
 </section>
 
 <!-- ============================================================ S7 SEMANTIC GENERATION -->
@@ -1224,6 +1244,7 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
     </tbody>
   </table></div>
   <p>Directed by the prompt, the general concepts yield acceptable new sentences as often as unconditioned generation (6–7% per draw, against 5% on average), and they keep the topic. Level 1 with the left neighbour, the best by tag patterns, is among the worst once judged. In every arm fewer than half of the new sentences are acceptable. The open problem is the acceptability of what is new, not how much is new.</p>
+  <p>Round 65 draws k candidates and keeps the one memory's own parser scores best per word (the critic used for bAbI answers). Acceptable new sentences per generation, without → with the critic (s13 / s17): back-off β 64 with both neighbours 6.6 / 6.3% → <b>8.0 / 9.2%</b>; unconditioned 6.9 / 3.0% → 9.0 / 4.2%; level 2 with the left neighbour 6.4 / 4.6% → 7.5 / 5.8% (k 8: 7.3 / 6.7%); level 2 with both 6.3 / 5.9% → 6.3 / 6.2%. The critic adds 1.5–2 points, mostly by choosing more novel candidates, not more acceptable ones: the parse does not measure acceptability. The best topic-held arm is now back-off β 64, both neighbours, critic 4: 8.6% on average.</p>
   <h2>Case studies</h2>
   <p>Each case shows one claim on real output: held-out story prompts from round 60 (2,000 sentences, the first prompts of the test set, four draws each, nothing selected). "Directed" is a general concept one level above each slot, directed by the prompt (<code>story_fill</code> 3); "leaf" draws only the root by the prompt.</p>
 

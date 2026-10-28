@@ -196,6 +196,35 @@ def hits(token: str, dx: int, dy: int) -> bool:
     return ax == 1 and dy == (1 if token[0] == "w" else -1)       # a pawn
 
 
+def interactions(position: Position, sq: Square) -> List[Tuple[Square, str, Optional[str]]]:
+    """Every piece seen from ``sq``: the first piece along each of the eight rays
+    (any distance) and the piece on each knight square (when one of the two is a
+    knight), with what the piece on ``sq`` does to it (attacks, defends, or only
+    sees it) and what it does back (attacked by, defended by, or nothing)."""
+    a, out = position[sq], []
+    for d, (dx, dy) in RAYS:
+        for k in range(1, 8):
+            t = (sq[0] + dx * k, sq[1] + dy * k)
+            if not on_board(t):
+                break
+            if t in position:
+                out.append((t, dx * k, dy * k, False))
+                break
+    for d, (dx, dy) in JUMPS:
+        t = (sq[0] + dx, sq[1] + dy)
+        if t in position:
+            out.append((t, dx, dy, True))
+    res = []
+    for t, dx, dy, jump in out:
+        c, same = position[t], position[t][0] == a[0]
+        fwd = ("defends" if same else "attacks") if hits(a, dx, dy) else "sees"
+        back = ("defended by" if same else "attacked by") if hits(c, -dx, -dy) else None
+        if jump and fwd == "sees" and back is None:
+            continue                         # a knight square matters only to a knight
+        res.append((t, fwd, back))
+    return res
+
+
 def interaction(a: str, c: str, rel: str) -> Optional[str]:
     """The tactical type of two pieces, c standing in relation ``rel`` from a."""
     dx, dy = OFFSET[rel]

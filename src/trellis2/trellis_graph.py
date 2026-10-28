@@ -77,11 +77,20 @@ class ChessDomain:
 
     ``join="any"``: B attaches to A when any piece of A sees any piece of B, in any
     direction (the first piece along a ray, A's own pieces not blocking, or a
-    knight's jump), so two chunks can join as well as a chunk and a piece."""
+    knight's jump), so two chunks can join as well as a chunk and a piece.
+    ``join="interact"``: B attaches to A when a piece of A attacks or defends a
+    piece of B or is attacked or defended by one (``chess.interactions``).
+
+    ``flat``: chunks are one level up from pieces and described by what they hold
+    (``flat_content``: the pieces, their offsets from the anchor, and how they
+    interact with each other); every element's surface also holds how its pieces
+    interact with the pieces outside it (``ext``), the anchor-context."""
     surface_attrs = ("rays", "jumps", "sq")
 
-    def __init__(self, join: str = "anchor"):
-        self.join = join
+    def __init__(self, join: str = "anchor", flat: bool = False):
+        self.join, self.flat = join, flat
+        if flat:
+            self.surface_attrs = ("rays", "jumps", "sq", "ext")
 
     def prepare(self, position: C.Position) -> Experience:
         sqs = sorted(position, key=lambda s: (s[1], s[0]))
@@ -91,6 +100,13 @@ class ChessDomain:
         pos, sqs, _ = exp.data
         target, own = sqs[min(b)], frozenset(sqs[i] for i in a)
         out = []
+        if self.join == "interact":
+            targets = {sqs[i] for i in b}
+            for i in sorted(a):
+                for t, fwd, back in C.interactions(pos, sqs[i]):
+                    if t in targets and (fwd != "sees" or back):
+                        out.append(fwd if fwd != "sees" else back)
+            return out
         if self.join == "any":
             targets = {sqs[i] for i in b}
             for i in sorted(a):
@@ -120,7 +136,44 @@ class ChessDomain:
         st = C.star(pos, sq, frozenset(sqs[i] for i in ext))
         rays = {f"{d}:{st[d]}": 1.0 / 8 for d, _ in C.RAYS}
         jumps = {f"{d}:{st[d]}": 1.0 / 8 for d, _ in C.JUMPS}
-        return {"rays": rays, "jumps": jumps, "sq": C.square_name(sq)}
+        x = {"rays": rays, "jumps": jumps, "sq": C.square_name(sq)}
+        if self.flat:
+            x["ext"] = self._bag(self._ties(pos, [sqs[i] for i in ext], inside=False))
+        return x
+
+    @staticmethod
+    def _bag(items: List[str]) -> dict:
+        if not items:
+            return {"-": 1.0}
+        out: Dict[str, float] = {}
+        for v in items:
+            out[v] = out.get(v, 0.0) + 1.0 / len(items)
+        return out
+
+    @staticmethod
+    def _ties(pos, members, inside: bool) -> List[str]:
+        """How the pieces on ``members`` interact with the pieces inside (or outside)
+        their set: "member does other" for every attack or defence either way."""
+        own, out = set(members), []
+        for sq in members:
+            for t, fwd, back in C.interactions(pos, sq):
+                if (t in own) != inside:
+                    continue
+                if fwd != "sees":
+                    out.append(f"{pos[sq]} {fwd} {pos[t]}")
+                if back and not inside:      # inside, the pair is met from both ends
+                    out.append(f"{pos[sq]} {back} {pos[t]}")
+        return out
+
+    def flat_content(self, exp: Experience, ext: frozenset) -> dict:
+        """A chunk as what it holds: its pieces, each piece at its offset from the
+        anchor, and how its pieces interact with one another."""
+        pos, sqs, _ = exp.data
+        members = [sqs[i] for i in sorted(ext)]
+        a = members[0]
+        return {"pc": self._bag([pos[s] for s in members]),
+                "tpl": self._bag([f"{s[0] - a[0]},{s[1] - a[1]}:{pos[s]}" for s in members]),
+                "int": self._bag(self._ties(pos, members, inside=True))}
 
     def neighbours(self, exp: Experience, ext: frozenset) -> List[int]:
         pos, sqs, index = exp.data
@@ -142,8 +195,9 @@ class ChessDomain:
 
 class GraphTrellis(Trellis3):
     def __init__(self, domain=None, max_size: int = 4, samples: int = 16, **kw):
-        join = kw.pop("chess_join", "anchor")
-        self.dom = domain or ChessDomain(join)
+        join, flat = kw.pop("chess_join", "anchor"), kw.pop("chess_flat", False)
+        self.dom = domain or ChessDomain(join, flat)
+        self._exp: Optional[Experience] = None
         self.max_size, self.samples = max_size, samples
         super().__init__(**kw)
         self._sample_rng = random.Random(kw.get("seed", 0) + 11)
@@ -156,7 +210,7 @@ class GraphTrellis(Trellis3):
         return ("nb",)
 
     def _extra_cnt_names(self) -> tuple:
-        return ("rel",)
+        return ("pc", "tpl", "int") if self.dom.flat else ("rel",)
 
     # descriptions --------------------------------------------------------- #
     def _context(self, exp: Experience, e: Elem, analysed: bool) -> dict:
@@ -184,7 +238,12 @@ class GraphTrellis(Trellis3):
                 bag[v] = bag.get(v, 0.0) + w / tot / len(named)
         self._facet(x, "nb", dict(sorted(bag.items(), key=lambda kv: -kv[1])[:self.type_top]) if bag else [BLANK])
 
-    def _content(self, e: Elem) -> dict:
+    def _content(self, e: Elem, sides: str = "LR") -> dict:
+        if self.dom.flat:                       # what the chunk holds, kept with the element
+            if "flat" not in e.memo:
+                e.memo["flat"] = self.dom.flat_content(self._exp, e.span)
+            # the part facets stay blank (constant, so they carry nothing)
+            return {a: e.memo["flat"].get(a, BLANK) for a in self.cnt_attrs}
         x = super()._content(e)
         rels = list(e.split)
         x["rel"] = {r: rels.count(r) / len(rels) for r in set(rels)}
@@ -244,6 +303,7 @@ class GraphTrellis(Trellis3):
 
     def parse(self, experience) -> dict:
         exp = experience if isinstance(experience, Experience) else self.dom.prepare(experience)
+        self._exp = exp
         self._wc_cache, self._rel_cache, self._nb_cache = {}, {}, {}
         words = []
         for i, t in enumerate(exp.tokens):
@@ -267,6 +327,8 @@ class GraphTrellis(Trellis3):
         r = self.parse(experience)
         exp, words, comps, post = r["exp"], r["words"], r["comps"], r["post"]
         chosen = set(r["chosen"])
+        if self.dom.flat:                       # chunks one level up: only the top chunks are stored
+            chosen &= {id(e) for e in r["top"] if e.token is None}
         for k in chosen:
             comps[k].used = 1.0
         for w in words:
@@ -299,7 +361,8 @@ class GraphTrellis(Trellis3):
             if w < self.min_weight:
                 continue
             e = comps[k]
-            if (e.left.token is None and e.left.rid is None) or (e.right.token is None and e.right.rid is None):
+            if not self.dom.flat and ((e.left.token is None and e.left.rid is None) or
+                                      (e.right.token is None and e.right.rid is None)):
                 continue                        # a part too improbable to be stored itself
             e.weight = w
             e.cnt = self._content(e)
@@ -320,6 +383,8 @@ class GraphTrellis(Trellis3):
             if e.cleaf is None or e.leaf is None:
                 continue
             self._pas(e, "ctx", FILL, ("c", e.rid), 1.0)
+            if self.dom.flat:
+                continue
             for a, part in ((LPART, e.left), (RPART, e.right)):
                 if part.leaf is not None:
                     self._pas(e, "cnt", a, (part.rid, part.token is not None), 1.0)

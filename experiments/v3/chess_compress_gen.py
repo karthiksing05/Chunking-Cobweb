@@ -106,16 +106,39 @@ class Model:
     def __init__(self, kc, kx):
         self.kc, self.kx = kc, kx
         tops = L.cnt.passive(L.cnt.root, TOP)
-        self.top_c, self.anchor = Counter(), {}
+        self.top_c, self.anchor, self.size = Counter(), {}, {}
         for rid, c in tops.items():
             cid = lvl(cpath_of_record(rid), kc).id
             self.top_c[cid] += c
             sq = (L.records[rid].ctx or {}).get("sq")
             if sq:
                 self.anchor.setdefault(cid, Counter())[sq] += c
+            self.size.setdefault(cid, Counter())[len(L.records[rid].span)] += c
         self.n_concepts = len(self.top_c) + 1
         self.top_tot = sum(self.top_c.values()) + sum(single_tops.values()) + n_pos + ALPHA * (self.n_concepts + 768) + 1
         self.fill_cache = {}
+
+    def template_bits(self, cnode, e):
+        """A flat chunk from its concept, as Cobweb predicts attributes: how many
+        pieces (by the sizes of the top chunks stored under it), then each piece at
+        its offset from the anchor by the concept's ``tpl`` distribution, backed off
+        along its path (P(v | C) = (n_C(v) + P(v | parent)) / (n_C + 1), from a
+        Laplace-smoothed root, as the generator's other look-ups)."""
+        sizes = self.size.get(cnode.id, {})
+        n = len(e.span)
+        bits = -math.log2((sizes.get(n, 0) + ALPHA) / (sum(sizes.values()) + ALPHA * max_size))
+        path, node = [], cnode
+        while node is not None:
+            path.append(node)
+            node = node.parent
+        for v in e.cnt["tpl"]:
+            p = None
+            for node in reversed(path):
+                d = node.av.get("tpl", {})
+                tot = sum(d.values())
+                p = (d.get(v, 0.0) + ALPHA) / (tot + ALPHA * 15 * 15 * 12) if p is None else (d.get(v, 0.0) + p) / (tot + 1.0)
+            bits -= math.log2(p)
+        return bits
 
     def top_bits(self, cid):
         return -math.log2((self.top_c.get(cid, 0) + ALPHA) / self.top_tot)
@@ -232,6 +255,11 @@ def code_bits(M, r):
         ACC["chunk roots"] += M.top_bits(cn.id)
         ACC["anchors"] += M.anchor_bits(cn.id, C.square_name(sqs[min(e.span)]))
         ACC["chunk tops (count)"] += 1
+        if L.dom.flat:                       # one level up: the concept predicts the whole chunk
+            tb = M.template_bits(cn, e)
+            ACC["templates"] += tb
+            bits += M.top_bits(cn.id) + M.anchor_bits(cn.id, C.square_name(sqs[min(e.span)])) + tb
+            continue
         bits += M.top_bits(cn.id) + M.anchor_bits(cn.id, C.square_name(sqs[min(e.span)])) + inside_bits(M, e, exp, cn, memo)
     return bits
 
@@ -255,6 +283,37 @@ for kc, kx in LEVELS:
     row = {"content level": kc, "context level": kx, "bits per position": round(sum(b) / len(b), 1),
            "top concepts": len(M.top_c), "s": round(time.time() - t2),
            "per position": {k: round(v / len(parsed), 2) for k, v in sorted(ACC.items())}}
+    summary["by levels"].append(row)
+    print(json.dumps(row), flush=True)
+
+
+def mix(costs):
+    """-log2 of the uniform mixture of codes with these lengths."""
+    m = min(costs)
+    return m - math.log2(sum(2.0 ** (m - c) for c in costs) / len(costs))
+
+
+if L.dom.flat:
+    # every top item coded by a mixture of the codes at content levels 0..3 of its
+    # concept path, so each chunk is predicted from whichever concept on its path
+    # predicts it best (at most log2 4 bits above that level)
+    Ms = [Model(k, 0) for k in range(4)]
+    b = []
+    for r in parsed:
+        exp, memo = r["exp"], r["memo"]
+        sqs = exp.data[1]
+        bits = mix([M.stop_bits() for M in Ms])
+        for e in r["top"]:
+            if e.token is not None:
+                (i,) = tuple(e.span)
+                bits += mix([M.single_bits(e.token, sqs[i]) for M in Ms])
+                continue
+            path = memo.setdefault(id(e), L.cnt.categorize(e.cnt))
+            anchor = C.square_name(sqs[min(e.span)])
+            bits += mix([M.top_bits(lvl(path, M.kc).id) + M.anchor_bits(lvl(path, M.kc).id, anchor) +
+                         M.template_bits(lvl(path, M.kc), e) for M in Ms])
+        b.append(bits)
+    row = {"content level": "mixture of 0-3", "bits per position": round(sum(b) / len(b), 1)}
     summary["by levels"].append(row)
     print(json.dumps(row), flush=True)
 out_dir = os.path.join(ROOT, "experiments", "v3", "results", "chess_compress")

@@ -177,3 +177,17 @@ Topic-directed generation (level 2 both, β64 both) yields 6–7% acceptable nov
 sentences per draw while holding the topic, about the unconditioned rate (5% mean)
 which has no topic. Under half the novel sentences are acceptable in every arm: the
 open problem is the acceptability of what is new, not the amount of novelty.
+
+## Round 65: parse critic (draw k, keep the best parse per word), judged
+
+| arm (s13 / s17) | acceptable novel per generation (no critic -> critic) | novel acceptable |
+|---|---|---|
+| backoff β64, both, critic 4 | 6.6 / 6.3% -> 8.0 / 9.2% | 0.33 / 0.44 |
+| unconditioned, critic 4 | 6.9 / 3.0% -> 9.0 / 4.2% | 0.86 / 0.64 |
+| level 2, left, critic 4 | 6.4 / 4.6% -> 7.5 / 5.8% | 0.20 / 0.17 |
+| level 2, left, critic 8 | -> 7.3 / 6.7% | 0.18 / 0.18 |
+| level 2, both, critic 4 | 6.3 / 5.9% -> 6.3 / 6.2% | 0.40 / 0.46 |
+
+The memory's own parse adds 1.5-2 points of acceptable novel sentences, mostly by
+choosing more novel candidates, not more acceptable ones. Best topic-held arm:
+backoff β64 + both + critic 4, 8.6% on average.
