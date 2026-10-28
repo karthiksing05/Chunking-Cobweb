@@ -1895,7 +1895,8 @@ class Trellis3:
                       sibling_mode: str = "lift", sibling_facets: Sequence[str] = ("L",),
                       sibling_window: int = 0, after: Optional[Sequence[str]] = None,
                       after_level: int = 0, after_mode: str = "next",
-                      story_beta: float = 1.0, story_fill: Optional[float] = None) -> Optional[List[str]]:
+                      story_beta: float = 1.0, story_fill: Optional[float] = None,
+                      story_window: bool = False) -> Optional[List[str]]:
         """Expansive generation from the two hierarchies alone. Every step reads
         statistics held by concepts: a whole experience is drawn from the content
         root (SENT); a content concept gives where its parts stood (LPART, RPART:
@@ -1954,7 +1955,10 @@ class Trellis3:
         (with after): every slot's fillers are also directed by the prompt, each
         weighted by exp(b * lift) at the context leaves of its records under the slot's
         concept (``_pv_fills``), so a general concept (level, backoff) keeps its members
-        but favours those that stood after sentences like the prompt."""
+        but favours those that stood after sentences like the prompt; ``story_window``:
+        only records that stood right after the word just generated count (the frozen
+        left neighbour), so members that never followed it drop out (all of them, if
+        none did, are kept as without the prompt)."""
         pv_lift = self._pv_lift(after) if after and story_fill is not None and self.story_facet else None
         fill_predict = isinstance(fill_name, str) and fill_name.endswith("+predict")
         if fill_predict:
@@ -2275,7 +2279,8 @@ class Trellis3:
                         fills = weighted
                 if pv_lift is not None and fills:
                     # the prompt (what came before) directs the concept's members
-                    weighted = self._pv_fills(node, fills, pv_lift, story_fill)
+                    weighted = self._pv_fills(node, fills, pv_lift, story_fill,
+                                              (out[-1] if out else BOS) if story_window else None)
                     if any(v > 0 for v in weighted.values()):
                         fills = weighted
                 if sib is not None and fills:
@@ -2542,11 +2547,13 @@ class Trellis3:
             pool[r] = c * math.exp(beta * lift(node))
         return pool
 
-    def _pv_fills(self, node, fills: Dict[tuple, float], lift, beta: float) -> Dict[tuple, float]:
+    def _pv_fills(self, node, fills: Dict[tuple, float], lift, beta: float,
+                  left: Optional[str] = None) -> Dict[tuple, float]:
         """A general concept's fillers directed by what came before: each candidate
         (("w", token) or ("c", record id)) weighted by the mean, over its committed
         records stored under ``node``, of exp(beta * lift) at the record's own context
-        leaf. Candidates with no record under the concept keep weight 0."""
+        leaf. Candidates with no record under the concept keep weight 0. ``left``: only
+        records whose left neighbour (l1) was this word count."""
         tot: Dict[tuple, float] = {}
         cnt: Dict[tuple, int] = {}
         stack = [node]
@@ -2557,7 +2564,7 @@ class Trellis3:
                 continue
             for r in self._at["ctx"].get(id(n), []):
                 f = ("w", r.token) if r.token is not None else ("c", r.rid)
-                if f in fills:
+                if f in fills and (left is None or r.ctx.get("l1") == left):
                     tot[f] = tot.get(f, 0.0) + math.exp(beta * lift(n))
                     cnt[f] = cnt.get(f, 0) + 1
         return {f: c * tot[f] / cnt[f] for f, c in fills.items() if f in tot}
