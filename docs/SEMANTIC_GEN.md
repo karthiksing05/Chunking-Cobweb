@@ -145,3 +145,11 @@ level 1 both 0.45/0.51, 0.886/0.889, 7%/6%; level 2 left 0.41/0.57,
 0.771/0.766, 29%/32%; level 2 both 0.42/0.52, 0.855/0.861, 14%/13%; backoff
 both 0.43/0.58, 0.882/0.874, 8%/9% (cross share, tag pattern attested, novel).
 The pattern holds.
+
+## Round 64: how far generality reaches (story_window "both")
+
+Seed means (13 / 17 / 21, 1000 sentences), cross share / tag pattern attested / novel:
+backoff β1 (r63) 0.42 / 0.882 / 8%; backoff β4 0.43 / 0.871 / 10%; level 2 (r63)
+0.41 / 0.866 / 13%; backoff β16 0.36 / 0.850 / 16%; level 3 0.40 / 0.836 / 18%;
+backoff β64 0.34 / 0.821 / 20%. One frontier: about half a point of grammar per
+point of novelty, and topic weakens past 13%. Tuning generality does not move it.

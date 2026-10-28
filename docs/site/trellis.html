@@ -1455,6 +1455,19 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
     </tbody>
   </table></div>
   <p>At 2,000 sentences the pattern holds. Level 2 with both neighbours trades about 2 points of grammar against level 1 for 5–6 more points of new sentences, at the same cross share.</p>
+  <p>Round 64 sweeps how far generality reaches, with both neighbours required: back-off strength β (a slot climbs above a concept holding n fillers with probability β / (n + β)) and level 3. Seed means over 13 / 17 / 21, 1,000 sentences:</p>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Both neighbours, seed means</th><th class="num">Cross share</th><th class="num">Tag pattern attested</th><th class="num">New</th></tr></thead>
+    <tbody>
+      <tr><th>back-off β 1 (round 63)</th><td class="num">0.42</td><td class="num best">0.882</td><td class="num">8%</td></tr>
+      <tr><th>back-off β 4</th><td class="num best">0.43</td><td class="num">0.871</td><td class="num">10%</td></tr>
+      <tr><th>level 2 (round 63)</th><td class="num">0.41</td><td class="num">0.866</td><td class="num">13%</td></tr>
+      <tr><th>back-off β 16</th><td class="num">0.36</td><td class="num">0.850</td><td class="num">16%</td></tr>
+      <tr><th>level 3</th><td class="num">0.40</td><td class="num">0.836</td><td class="num">18%</td></tr>
+      <tr><th>back-off β 64</th><td class="num">0.34</td><td class="num">0.821</td><td class="num best">20%</td></tr>
+    </tbody>
+  </table></div>
+  <p>The settings trace one frontier. Each point of novelty costs about half a point of grammar, and past 13% new sentences the topic weakens too. No setting of how general the filler may be moves the frontier, so the next gain has to come from a different mechanism, not from tuning generality.</p>
   <h2>Case studies</h2>
   <p>Each case shows one claim on real output: held-out story prompts from round 60 (2,000 sentences, the first prompts of the test set, four draws each, nothing selected). "Directed" is a general concept one level above each slot, directed by the prompt (<code>story_fill</code> 3); "leaf" draws only the root by the prompt.</p>
 
