@@ -449,7 +449,7 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
   <div class="tbl-wrap"><table class="tbl">
     <thead><tr><th>Run</th><th>Question</th></tr></thead>
     <tbody>
-      <tr><th>Chess chunks up to eight pieces</th><td>Do larger chunks form and get recognised, and are they local on the board?</td></tr>
+      <tr><th>Chess state compression (next)</th><td>Under one search and value head, does TRELLIS compress chess states better than other representation learners?</td></tr>
       <tr><th>Semantic generation, next</th><td>Can a prompt-directed general concept keep grammar while it makes new sentences that stay on topic?</td></tr>
     </tbody>
   </table></div>
@@ -853,6 +853,16 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
     <div class="fig"><img class="plot" src="chess_m4_nested.png" alt="Four held-out positions with their stored analysis drawn as lines between pieces, coloured by the size of the chunk each join makes." loading="lazy"></div>
   </figure>
   <figcaption><b>Figure 9.</b> Held-out positions as nested chunks: each join is drawn between its two parts' anchor pieces, coloured by the size of the chunk it makes.</figcaption>
+  <p>With chunks of up to eight pieces (s13, 2,000 positions), memory stores 4,600–6,300 chunks at each size from four to eight. Mid-sized concepts are whole formations:</p>
+  <ul>
+    <li>black's castled king with f7 and g7, alone (929) or with h6 (269) or a knight on f6 (188);</li>
+    <li>white's queenside corner, rook a1 with pawns a2 and b2 and bishop c1 (302).</li>
+  </ul>
+  <p>At seven and eight pieces, nearly every instance is unique: one concept gathers 215 chunks in 214 placements. These largest chunks join white's pawn wall to black pawns across the board. On held-out positions, memory recognises 2.0 chunks of five to eight pieces per real position and 1.4 per scrambled one, and leaves 10.4 real pieces outside any recognised chunk against 15.5 scrambled.</p>
+  <figure>
+    <div class="fig"><img class="plot" src="chess_m8_types.png" alt="Five most frequent content concepts at each chunk size from two to eight pieces after 2,000 positions, each drawn by its most frequent instance, such as rook f8 and king g8 seen 7,523 times and black's castled king with pawns f7, g7 and h6 seen 269 times." loading="lazy"></div>
+  </figure>
+  <figcaption><b>Figure 10.</b> Chunk concepts by size, two to eight pieces (s13, 2,000 positions, chunks up to eight pieces).</figcaption>
   <p>Many joins span the board: a part joins the first piece along a ray, at any distance and of either colour. Chase and Simon's chunks are compact and mostly of one colour. Long joins also fit scrambled boards, which may explain the rise in scrambled recall. Joining only nearby pieces, in the board-graph rework, is the change that would test this.</p>
 
   <h2>From move choice to state compression</h2>
