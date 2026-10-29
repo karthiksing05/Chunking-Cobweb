@@ -1,0 +1,88 @@
+{
+ "tag": "ext-interact-2000",
+ "seed": 13,
+ "learn s": 577,
+ "parse s": 276,
+ "positions coded": 1000,
+ "piece-square bits mean": 188.3,
+ "eps": 0.05,
+ "stored chunks": 5767,
+ "stored records": 13639,
+ "memory bits (distinct chunks as piece-square lists)": 186033,
+ "by levels": [
+  {
+   "content level": 0,
+   "context level": 0,
+   "bits per position": 217.3,
+   "top concepts": 4876,
+   "s": 5,
+   "per position": {
+    "anchors": 24.04,
+    "chunk roots": 75.13,
+    "chunk tops (count)": 6.95,
+    "single tops": 26.61,
+    "templates": 87.87
+   }
+  },
+  {
+   "content level": 1,
+   "context level": 0,
+   "bits per position": 210.3,
+   "top concepts": 130,
+   "s": 3,
+   "per position": {
+    "anchors": 22.21,
+    "chunk roots": 39.13,
+    "chunk tops (count)": 6.95,
+    "single tops": 26.12,
+    "templates": 119.27
+   }
+  },
+  {
+   "content level": 1,
+   "context level": 1,
+   "bits per position": 210.3,
+   "top concepts": 130,
+   "s": 2,
+   "per position": {
+    "anchors": 22.21,
+    "chunk roots": 39.13,
+    "chunk tops (count)": 6.95,
+    "single tops": 26.12,
+    "templates": 119.27
+   }
+  },
+  {
+   "content level": 2,
+   "context level": 1,
+   "bits per position": 215.8,
+   "top concepts": 77,
+   "s": 2,
+   "per position": {
+    "anchors": 22.91,
+    "chunk roots": 34.61,
+    "chunk tops (count)": 6.95,
+    "single tops": 26.11,
+    "templates": 128.6
+   }
+  },
+  {
+   "content level": 2,
+   "context level": 2,
+   "bits per position": 215.8,
+   "top concepts": 77,
+   "s": 2,
+   "per position": {
+    "anchors": 22.91,
+    "chunk roots": 34.61,
+    "chunk tops (count)": 6.95,
+    "single tops": 26.11,
+    "templates": 128.6
+   }
+  },
+  {
+   "content level": "mixture of 0-3",
+   "bits per position": 201.8
+  }
+ ]
+}

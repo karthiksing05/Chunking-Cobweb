@@ -1448,6 +1448,33 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
   </table></div>
   <p>Flat chunks joined by sight are the best TRELLIS arm, and at a working memory of 4 units they recall as much as co-occurrence chunks. Chunks joined by interactions recall about as much with 35% fewer stored chunks. Up to 6 pieces is worse at 2,000 positions (verified 0.60–0.63): larger flat chunks recur less often.</p>
   <p>In the generator code a flat chunk is predicted whole by its concept, as Cobweb predicts attributes. The code gives its size, then each piece at its offset, backed off along the concept's path, and mixes the levels of that path. Interaction joins, 2,000 positions learned, 1,000 coded: <b>198.7</b> bits per position, against 205.1 for the best single level, 193.1 for nested chunks with pieces in content, and 188.3 for entropy-coded piece-squares. Flat chunks recall well but do not yet compress: at a chunk's own concept its root costs about 11 bits and its pieces about 13. A co-occurrence chunk of the same pieces is one frequent item.</p>
+
+  <h2>Learning curves and how bits are counted</h2>
+  <p>Every method codes the same 1,000 held-out positions after learning 300, 1,000, 2,000 and 4,000 positions (seed 13). Bits are counted in two parts:</p>
+  <ul>
+    <li><b>Code:</b> the cost of describing a position with what was learned. For TRELLIS, generation's own choices, each at −log<sub>2</sub> of its probability: the top concept, the anchor, the parts or template, the relation.</li>
+    <li><b>Memory:</b> the cost of writing out what was learned, per coded position. Each distinct stored chunk is charged as a piece-square list plus a stop item. For TRELLIS this is a lower bound, since its trees also keep statistics that are not charged.</li>
+  </ul>
+  <p>Code alone favours whoever stores most. Code plus memory is a two-part (MDL) code and the fair comparison. The cleaner measure for an online learner is the prequential code: each training position coded by the model learned so far, summed. It has no separate memory term and is the next step.</p>
+  <div class="fig"><img class="plot" src="curve_recall.png" alt="Two panels of recall against positions learned, with 7 and 4 units in short-term memory. Every TRELLIS arm rises from 0.42-0.57 at 300 positions to 0.71-0.80 at 4,000 with 7 units; co-occurrence chunks rise from 0.74 to 0.84. Scrambled positions stay between 0.2 and 0.35 for every method." loading="lazy"></div>
+  <p>Recall rises with experience for every arm and the gap to co-occurrence chunks closes from about 0.2 to 0.04–0.13 with 7 units; with 4 units the arms meet. Scrambled positions gain little: the expertise effect holds throughout.</p>
+  <div class="fig"><img class="plot" src="curve_compress.png" alt="Two panels of bits per held-out position against positions learned. Left, code: dashed lines without copying stay between 183 and 226 bits; solid lines with copying fall, flat chunks with absolute squares from 180 to 155, flat chunks without from 205 to 162, nested from 217 to 179; co-occurrence chunks fall from 135 to 113; piece-square list near 188. Right, code plus memory: TRELLIS arms rise from 218-293 to 476-818 bits; co-occurrence chunks fall from 141 to 131." loading="lazy"></div>
+  <p>Two changes to the code moved TRELLIS below the piece-square list (dashed lines: neither):</p>
+  <ul>
+    <li><b>Copying.</b> A chunk may be coded as one stored instance under its concept (P(exact pieces at their offsets | concept)), mixed evenly with generating it. Without copying the code stalls near 185–195 bits; with it the code keeps falling. The gain comes from specific stored chunks, not from general concepts.</li>
+    <li><b>Absolute squares</b> (<code>chess_abs</code>). Flat content holds each piece on its own square beside its offset from the anchor; category utility weighs the two, and the code mixes a relative route (anchor + offsets) and an absolute route. About 5 of every 7 chunks code cheaper by squares. Recall is unchanged (0.76 at 4,000 with interaction joins).</li>
+  </ul>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Bits per held-out position, 4,000 learned</th><th class="num">Code</th><th class="num">Distinct chunks</th><th class="num">Code + memory</th></tr></thead>
+    <tbody>
+      <tr><th>flat, join interact, absolute squares, copying</th><td class="num best">155.0</td><td class="num">9,798</td><td class="num">475</td></tr>
+      <tr><th>flat, join interact, copying</th><td class="num">161.8</td><td class="num">9,749</td><td class="num">481</td></tr>
+      <tr><th>nested, pieces in content, copying</th><td class="num">178.6</td><td class="num">20,797</td><td class="num">818</td></tr>
+      <tr><th>piece-square list</th><td class="num">188</td><td class="num">—</td><td class="num">188</td></tr>
+      <tr><th>co-occurrence chunks (best merge count)</th><td class="num">113.4</td><td class="num">≤ 2,000 merges</td><td class="num best">131</td></tr>
+    </tbody>
+  </table></div>
+  <p>The open problem is memory. TRELLIS stores about 6.7 top chunks per position, about half of them new, so memory grows faster than the code shrinks and code plus memory rises with learning. Proposed (awaiting decision): keep a chunk only once it recurs (CHREST familiarisation), and code the memory through the concept tree so that good concepts make their members cheap to store. The anchor-context alone (<code>chess_ctx="ext"</code>) did not help: within 2% on code, and recall 0.05 lower with interaction joins.</p>
 </section>
 
 <!-- ============================================================ S7 SEMANTIC GENERATION -->
@@ -1528,6 +1555,8 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
   </table></div>
   <p>Directed by the prompt, the general concepts yield acceptable new sentences as often as unconditioned generation (6–7% per draw, against 5% on average), and they keep the topic. Level 1 with the left neighbour, the best by tag patterns, is among the worst once judged. In every arm fewer than half of the new sentences are acceptable. The open problem is the acceptability of what is new, not how much is new.</p>
   <p>Round 65 draws k candidates and keeps the one memory's own parser scores best per word (the critic used for bAbI answers). Acceptable new sentences per generation, without → with the critic (s13 / s17): back-off β 64 with both neighbours 6.6 / 6.3% → <b>8.0 / 9.2%</b>; unconditioned 6.9 / 3.0% → 9.0 / 4.2%; level 2 with the left neighbour 6.4 / 4.6% → 7.5 / 5.8% (k 8: 7.3 / 6.7%); level 2 with both 6.3 / 5.9% → 6.3 / 6.2%. The critic adds 1.5–2 points, mostly by choosing more novel candidates, not more acceptable ones: the parse does not measure acceptability. The best topic-held arm is now back-off β 64, both neighbours, critic 4: 8.6% on average.</p>
+  <div class="fig"><img class="plot" src="curve_semantic.png" alt="Two panels against sentences learned (500, 1,000, 2,000), mean of seeds 13 and 17. Left, acceptable new sentences per generation: unconditioned rises from 4.0 to 6.3%, topic-directed falls from 8.0 to 6.2%, topic-directed with the critic stays between 7.5 and 8.6%. Right, topic carried (cross share): both topic-directed arms stay between 0.36 and 0.49, unconditioned near zero." loading="lazy"></div>
+  <p>More data alone does not raise the yield. Between 500 and 2,000 sentences, unconditioned generation rises from 4.0 to 6.3% but stays off topic. Topic-directed generation falls from 8.0 to 6.2%. With the critic it stays near 8% (7.5–8.6%) and keeps the topic (cross share 0.37–0.44). About a third of new sentences are judged acceptable at every size. The judge accepts 89% of real sentences, 12% with scrambled word order and 5% with swapped content. Most failures are grammatical in form but do not fit in meaning ("the cat played with your room"), so the next mechanism is a check that combined parts fit in meaning.</p>
   <h2>Case studies</h2>
   <p>Each case shows one claim on real output: held-out story prompts from round 60 (2,000 sentences, the first prompts of the test set, four draws each, nothing selected). "Directed" is a general concept one level above each slot, directed by the prompt (<code>story_fill</code> 3); "leaf" draws only the root by the prompt.</p>
 

@@ -1,0 +1,178 @@
+{
+ "tag": "leaf-flat-interact-1000",
+ "seed": 13,
+ "learn s": 279,
+ "parse s": 240,
+ "positions coded": 1000,
+ "piece-square bits mean": 188.7,
+ "eps": 0.05,
+ "stored chunks": 3428,
+ "stored records": 6608,
+ "memory bits (distinct chunks as piece-square lists)": 108971,
+ "by levels": [
+  {
+   "content level": 0,
+   "context level": 0,
+   "copy": false,
+   "bits per position": 222.3,
+   "top concepts": 2982,
+   "s": 2,
+   "per position": {
+    "anchors": 25.48,
+    "chunk roots": 72.16,
+    "chunk tops (count)": 6.81,
+    "single tops": 25.27,
+    "templates": 95.65
+   }
+  },
+  {
+   "content level": 0,
+   "context level": 0,
+   "copy": true,
+   "bits per position": 194.5,
+   "top concepts": 2982,
+   "s": 2,
+   "per position": {
+    "anchors": 25.48,
+    "chunk roots": 72.16,
+    "chunk tops (count)": 6.81,
+    "chunk tops copied (count)": 4.54,
+    "copy, choosing the instance": 0.02,
+    "single tops": 25.27,
+    "templates": 95.65
+   }
+  },
+  {
+   "content level": 1,
+   "context level": 0,
+   "copy": false,
+   "bits per position": 210.4,
+   "top concepts": 116,
+   "s": 2,
+   "per position": {
+    "anchors": 22.07,
+    "chunk roots": 34.8,
+    "chunk tops (count)": 6.81,
+    "single tops": 24.74,
+    "templates": 125.24
+   }
+  },
+  {
+   "content level": 1,
+   "context level": 0,
+   "copy": true,
+   "bits per position": 179.4,
+   "top concepts": 116,
+   "s": 2,
+   "per position": {
+    "anchors": 22.07,
+    "chunk roots": 34.8,
+    "chunk tops (count)": 6.81,
+    "chunk tops copied (count)": 4.54,
+    "copy, choosing the instance": 19.68,
+    "single tops": 24.74,
+    "templates": 125.24
+   }
+  },
+  {
+   "content level": 1,
+   "context level": 1,
+   "copy": false,
+   "bits per position": 210.4,
+   "top concepts": 116,
+   "s": 2,
+   "per position": {
+    "anchors": 22.07,
+    "chunk roots": 34.8,
+    "chunk tops (count)": 6.81,
+    "single tops": 24.74,
+    "templates": 125.24
+   }
+  },
+  {
+   "content level": 1,
+   "context level": 1,
+   "copy": true,
+   "bits per position": 179.4,
+   "top concepts": 116,
+   "s": 2,
+   "per position": {
+    "anchors": 22.07,
+    "chunk roots": 34.8,
+    "chunk tops (count)": 6.81,
+    "chunk tops copied (count)": 4.54,
+    "copy, choosing the instance": 19.68,
+    "single tops": 24.74,
+    "templates": 125.24
+   }
+  },
+  {
+   "content level": 2,
+   "context level": 1,
+   "copy": false,
+   "bits per position": 220.4,
+   "top concepts": 65,
+   "s": 1,
+   "per position": {
+    "anchors": 24.39,
+    "chunk roots": 29.88,
+    "chunk tops (count)": 6.81,
+    "single tops": 24.73,
+    "templates": 137.86
+   }
+  },
+  {
+   "content level": 2,
+   "context level": 1,
+   "copy": true,
+   "bits per position": 179.6,
+   "top concepts": 65,
+   "s": 2,
+   "per position": {
+    "anchors": 24.39,
+    "chunk roots": 29.88,
+    "chunk tops (count)": 6.81,
+    "chunk tops copied (count)": 4.54,
+    "copy, choosing the instance": 22.92,
+    "single tops": 24.73,
+    "templates": 137.86
+   }
+  },
+  {
+   "content level": 2,
+   "context level": 2,
+   "copy": false,
+   "bits per position": 220.4,
+   "top concepts": 65,
+   "s": 1,
+   "per position": {
+    "anchors": 24.39,
+    "chunk roots": 29.88,
+    "chunk tops (count)": 6.81,
+    "single tops": 24.73,
+    "templates": 137.86
+   }
+  },
+  {
+   "content level": 2,
+   "context level": 2,
+   "copy": true,
+   "bits per position": 179.6,
+   "top concepts": 65,
+   "s": 2,
+   "per position": {
+    "anchors": 24.39,
+    "chunk roots": 29.88,
+    "chunk tops (count)": 6.81,
+    "chunk tops copied (count)": 4.54,
+    "copy, choosing the instance": 22.92,
+    "single tops": 24.73,
+    "templates": 137.86
+   }
+  },
+  {
+   "content level": "mixture of 0-3",
+   "bits per position": 202.4
+  }
+ ]
+}

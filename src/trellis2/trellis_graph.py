@@ -84,11 +84,17 @@ class ChessDomain:
     ``flat``: chunks are one level up from pieces and described by what they hold
     (``flat_content``: the pieces, their offsets from the anchor, and how they
     interact with each other); every element's surface also holds how its pieces
-    interact with the pieces outside it (``ext``), the anchor-context."""
+    interact with the pieces outside it (``ext``), the anchor-context. ``ctx="ext"``:
+    the context is only that and the anchor square (the anchor's first-piece star
+    blank), so a chunk keeps the same context wherever its pattern recurs.
+    ``absolute``: a flat chunk's content also holds each piece on its own square
+    (``abs``), beside the offsets from the anchor (``tpl``); category utility
+    weighs the two by how well each predicts, so a concept keeps whichever is
+    stable for it (a castled king its squares, a pawn chain its shape)."""
     surface_attrs = ("rays", "jumps", "sq")
 
-    def __init__(self, join: str = "anchor", flat: bool = False):
-        self.join, self.flat = join, flat
+    def __init__(self, join: str = "anchor", flat: bool = False, ctx: str = "star", absolute: bool = False):
+        self.join, self.flat, self.ctx, self.absolute = join, flat, ctx, absolute
         if flat:
             self.surface_attrs = ("rays", "jumps", "sq", "ext")
 
@@ -137,6 +143,8 @@ class ChessDomain:
         rays = {f"{d}:{st[d]}": 1.0 / 8 for d, _ in C.RAYS}
         jumps = {f"{d}:{st[d]}": 1.0 / 8 for d, _ in C.JUMPS}
         x = {"rays": rays, "jumps": jumps, "sq": C.square_name(sq)}
+        if self.flat and self.ctx == "ext":      # the anchor-context: where it stands and what it does
+            x["rays"], x["jumps"] = {"-": 1.0}, {"-": 1.0}
         if self.flat:
             x["ext"] = self._bag(self._ties(pos, [sqs[i] for i in ext], inside=False))
         return x
@@ -171,9 +179,12 @@ class ChessDomain:
         pos, sqs, _ = exp.data
         members = [sqs[i] for i in sorted(ext)]
         a = members[0]
-        return {"pc": self._bag([pos[s] for s in members]),
-                "tpl": self._bag([f"{s[0] - a[0]},{s[1] - a[1]}:{pos[s]}" for s in members]),
-                "int": self._bag(self._ties(pos, members, inside=True))}
+        out = {"pc": self._bag([pos[s] for s in members]),
+               "tpl": self._bag([f"{s[0] - a[0]},{s[1] - a[1]}:{pos[s]}" for s in members]),
+               "int": self._bag(self._ties(pos, members, inside=True))}
+        if self.absolute:
+            out["abs"] = self._bag([f"{C.square_name(s)}:{pos[s]}" for s in members])
+        return out
 
     def neighbours(self, exp: Experience, ext: frozenset) -> List[int]:
         pos, sqs, index = exp.data
@@ -196,7 +207,8 @@ class ChessDomain:
 class GraphTrellis(Trellis3):
     def __init__(self, domain=None, max_size: int = 4, samples: int = 16, **kw):
         join, flat = kw.pop("chess_join", "anchor"), kw.pop("chess_flat", False)
-        self.dom = domain or ChessDomain(join, flat)
+        self.join_gain = kw.pop("join_gain", "both")
+        self.dom = domain or ChessDomain(join, flat, kw.pop("chess_ctx", "star"), kw.pop("chess_abs", False))
         self._exp: Optional[Experience] = None
         self.max_size, self.samples = max_size, samples
         super().__init__(**kw)
@@ -210,7 +222,9 @@ class GraphTrellis(Trellis3):
         return ("nb",)
 
     def _extra_cnt_names(self) -> tuple:
-        return ("pc", "tpl", "int") if self.dom.flat else ("rel",)
+        if not self.dom.flat:
+            return ("rel",)
+        return ("pc", "tpl", "int", "abs") if self.dom.absolute else ("pc", "tpl", "int")
 
     # descriptions --------------------------------------------------------- #
     def _context(self, exp: Experience, e: Elem, analysed: bool) -> dict:
@@ -261,7 +275,9 @@ class GraphTrellis(Trellis3):
                 e = Elem(a.span | b.span, split=tuple(rels), left=a, right=b)
                 e.cnt = self._content(e)
                 e.ctx = self._context(exp, e, analysed=False)
-                e.gain = self._gain(self.cnt, e.cnt) + self._gain(self.ctx, e.ctx)
+                # join_gain="content": a join is scored by what the chunk holds alone, so the
+                # same pieces group the same way whatever surrounds them
+                e.gain = self._gain(self.cnt, e.cnt) + (self._gain(self.ctx, e.ctx) if self.join_gain != "content" else 0.0)
         memo[key] = e
         return e
 

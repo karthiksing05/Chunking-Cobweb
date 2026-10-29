@@ -17,6 +17,14 @@ For each top unit of the position's parse (a chunk, or a single piece):
             concept (then its own parts, recursively)
   relation  the right part's anchor: the relation from the concept's ``rel``
             distribution, and which left piece it starts from (uniform)
+  copy      (leaf match) alternatively the whole chunk as one stored instance under its
+            concept: P(exact pieces at their offsets from the anchor | concept), by the
+            stored top chunks under it; the chunk's code mixes the copy and generate
+            routes (at most 1 bit above the better one); rows tagged "copy"
+  absolute  (flat chunks with ``chess_abs``) the chunk's pieces may instead be coded on their
+            own squares by the concept's ``abs`` distribution (the anchor then comes free);
+            the chunk's code mixes the relative route (anchor + offsets) and the absolute
+            route evenly (at most 1 bit above the better one)
   escape    a part is generated from memory with probability 1 - eps or written as
             a piece-square list with eps (both routes count), so every position
             has a code
@@ -58,13 +66,26 @@ def psq(tok, sq):
     return KINDS.index(tok) * 64 + sq[1] * 8 + sq[0]
 
 
+def offsets(span, exp):
+    sqs = exp.data[1]
+    ax, ay = sqs[min(span)]
+    return frozenset((exp.tokens[i], sqs[i][0] - ax, sqs[i][1] - ay) for i in span)
+
+
 L = GraphTrellis(max_size=max_size, seed=seed, **cfg)
 single_tops = Counter()
+stored = Counter()                                   # distinct stored chunks (exact pieces and squares): the memory
+rel_key = {}                                         # record id -> its pieces at their offsets from the anchor
 n_pos = 0
 t0 = time.time()
 for f in learn_fens:
     r = L.learn(C.parse_fen(f))
     sqs = r["exp"].data[1]
+    for k in r["chosen"]:
+        e = r["comps"][k]
+        if e.rid is not None:
+            stored[frozenset((sqs[i], r["exp"].tokens[i]) for i in e.span)] += 1
+            rel_key[e.rid] = offsets(e.span, r["exp"])
     for e in r["top"]:
         if e.token is not None:
             (i,) = tuple(e.span)
@@ -106,7 +127,7 @@ class Model:
     def __init__(self, kc, kx):
         self.kc, self.kx = kc, kx
         tops = L.cnt.passive(L.cnt.root, TOP)
-        self.top_c, self.anchor, self.size = Counter(), {}, {}
+        self.top_c, self.anchor, self.size, self.keys = Counter(), {}, {}, {}
         for rid, c in tops.items():
             cid = lvl(cpath_of_record(rid), kc).id
             self.top_c[cid] += c
@@ -114,11 +135,13 @@ class Model:
             if sq:
                 self.anchor.setdefault(cid, Counter())[sq] += c
             self.size.setdefault(cid, Counter())[len(L.records[rid].span)] += c
+            if rid in rel_key:
+                self.keys.setdefault(cid, Counter())[rel_key[rid]] += c
         self.n_concepts = len(self.top_c) + 1
         self.top_tot = sum(self.top_c.values()) + sum(single_tops.values()) + n_pos + ALPHA * (self.n_concepts + 768) + 1
         self.fill_cache = {}
 
-    def template_bits(self, cnode, e):
+    def template_bits(self, cnode, e, attr="tpl"):
         """A flat chunk from its concept, as Cobweb predicts attributes: how many
         pieces (by the sizes of the top chunks stored under it), then each piece at
         its offset from the anchor by the concept's ``tpl`` distribution, backed off
@@ -131,12 +154,13 @@ class Model:
         while node is not None:
             path.append(node)
             node = node.parent
-        for v in e.cnt["tpl"]:
+        n_values = 15 * 15 * 12 if attr == "tpl" else 64 * 12
+        for v in e.cnt[attr]:
             p = None
             for node in reversed(path):
-                d = node.av.get("tpl", {})
+                d = node.av.get(attr, {})
                 tot = sum(d.values())
-                p = (d.get(v, 0.0) + ALPHA) / (tot + ALPHA * 15 * 15 * 12) if p is None else (d.get(v, 0.0) + p) / (tot + 1.0)
+                p = (d.get(v, 0.0) + ALPHA) / (tot + ALPHA * n_values) if p is None else (d.get(v, 0.0) + p) / (tot + 1.0)
             bits -= math.log2(p)
         return bits
 
@@ -180,6 +204,11 @@ class Model:
                 continue
             p += c / tot * self.fill_prob(up(L.records[rid].leaf, self.kx), key, prim)
         return p
+
+    def copy_bits(self, cid, key):
+        d = self.keys.get(cid, {})
+        n = d.get(key, 0)
+        return -math.log2(n / sum(d.values())) if n else float("inf")
 
     def rel_bits(self, cnode, rel):
         d = cnode.av.get("rel", {})
@@ -240,7 +269,24 @@ def part_bits(M, part, exp, cnode, side, memo):
     return -(m + math.log2(2 ** (a - m) + 2 ** (b - m)))
 
 
-def code_bits(M, r):
+def either(a, b):
+    """-log2 of the even mixture of two routes with these code lengths."""
+    m = min(a, b)
+    return m - math.log2((2.0 ** (m - a) + 2.0 ** (m - b)) / 2)
+
+
+def flat_bits(M, cn, e, anchor):
+    """A flat chunk given its concept: anchor + offsets, or (with ``abs``) the even
+    mixture of that and its pieces on their own squares."""
+    rel = M.anchor_bits(cn.id, anchor) + M.template_bits(cn, e)
+    if "abs" not in e.cnt:
+        return rel
+    ab = M.template_bits(cn, e, "abs")
+    ACC["absolute route cheaper (count)"] += ab < rel
+    return either(rel, ab)
+
+
+def code_bits(M, r, copy=False):
     exp, memo = r["exp"], r["memo"]
     sqs = exp.data[1]
     bits = M.stop_bits()
@@ -255,12 +301,18 @@ def code_bits(M, r):
         ACC["chunk roots"] += M.top_bits(cn.id)
         ACC["anchors"] += M.anchor_bits(cn.id, C.square_name(sqs[min(e.span)]))
         ACC["chunk tops (count)"] += 1
-        if L.dom.flat:                       # one level up: the concept predicts the whole chunk
-            tb = M.template_bits(cn, e)
-            ACC["templates"] += tb
-            bits += M.top_bits(cn.id) + M.anchor_bits(cn.id, C.square_name(sqs[min(e.span)])) + tb
-            continue
-        bits += M.top_bits(cn.id) + M.anchor_bits(cn.id, C.square_name(sqs[min(e.span)])) + inside_bits(M, e, exp, cn, memo)
+        anchor = C.square_name(sqs[min(e.span)])
+        if L.dom.flat:                       # one level up: the concept predicts the whole chunk (anchor included)
+            inner = flat_bits(M, cn, e, anchor)
+            ACC["templates"] += inner
+        else:
+            inner = M.anchor_bits(cn.id, anchor) + inside_bits(M, e, exp, cn, memo)
+        if copy:
+            cb = M.anchor_bits(cn.id, anchor) + M.copy_bits(cn.id, offsets(e.span, exp))
+            ACC["chunk tops copied (count)"] += cb < inner
+            ACC["copy, choosing the instance"] += cb if cb < inner else 0.0
+            inner = either(cb, inner)
+        bits += M.top_bits(cn.id) + inner
     return bits
 
 
@@ -273,14 +325,21 @@ for f in code_fens:
 parse_s = time.time() - t1
 rbits = sum(sum(raw_bits(t, sq) for sq, t in C.parse_fen(f).items()) - math.log2((n_pos + 1) / (sum(raw_use.values()) + n_pos + 769))
             for f in code_fens) / len(code_fens)
+stop_raw = -math.log2((n_pos + 1) / (sum(raw_use.values()) + n_pos + 769))   # one stop item per listed chunk, as the dictionaries
+
 summary = {"tag": tag, "seed": seed, "learn s": round(learn_s), "parse s": round(parse_s), "positions coded": len(code_fens),
-           "piece-square bits mean": round(rbits, 1), "eps": EPS, "by levels": []}
-for kc, kx in LEVELS:
+           "piece-square bits mean": round(rbits, 1), "eps": EPS,
+           # the memory as the dictionaries are charged: every distinct stored chunk written as a
+           # piece-square list (a lower bound: TRELLIS also keeps repeated records and concept statistics)
+           "stored chunks": len(stored), "stored records": sum(stored.values()),
+           "memory bits (distinct chunks as piece-square lists)": round(sum(sum(raw_bits(t, sq) for sq, t in k) + stop_raw for k in stored)),
+           "by levels": []}
+for (kc, kx), copy in [(lv, cp) for lv in LEVELS for cp in (False, True)]:
     t2 = time.time()
     M = Model(kc, kx)
     ACC.clear()
-    b = [code_bits(M, r) for r in parsed]
-    row = {"content level": kc, "context level": kx, "bits per position": round(sum(b) / len(b), 1),
+    b = [code_bits(M, r, copy) for r in parsed]
+    row = {"content level": kc, "context level": kx, "copy": copy, "bits per position": round(sum(b) / len(b), 1),
            "top concepts": len(M.top_c), "s": round(time.time() - t2),
            "per position": {k: round(v / len(parsed), 2) for k, v in sorted(ACC.items())}}
     summary["by levels"].append(row)
@@ -310,8 +369,7 @@ if L.dom.flat:
                 continue
             path = memo.setdefault(id(e), L.cnt.categorize(e.cnt))
             anchor = C.square_name(sqs[min(e.span)])
-            bits += mix([M.top_bits(lvl(path, M.kc).id) + M.anchor_bits(lvl(path, M.kc).id, anchor) +
-                         M.template_bits(lvl(path, M.kc), e) for M in Ms])
+            bits += mix([M.top_bits(lvl(path, M.kc).id) + flat_bits(M, lvl(path, M.kc), e, anchor) for M in Ms])
         b.append(bits)
     row = {"content level": "mixture of 0-3", "bits per position": round(sum(b) / len(b), 1)}
     summary["by levels"].append(row)
