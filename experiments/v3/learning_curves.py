@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 OUT = os.path.join(ROOT, "docs", "site")
 # fixed categorical order (one hue per arm, the same arm keeps its hue in every figure)
-HUE = {"flat, join any": "#2a78d6", "flat, join interact, absolute squares": "#8a5cd6", "flat, join interact": "#eb6834", "nested, pieces in content": "#1baf7a",
+HUE = {"flat, absolute squares, code-chosen cover": "#d6336c", "flat, join any": "#2a78d6", "flat, join interact, absolute squares": "#8a5cd6", "flat, join interact": "#eb6834", "nested, pieces in content": "#1baf7a",
        "nested, original": "#eda100", "co-occurrence chunks": "#6b6a64", "piece-square list": "#a8a79f"}
 INK, MUTED, GRID = "#1f1f1d", "#6b6a64", "#e4e3dc"
 
@@ -94,7 +94,7 @@ plt.close(fig)
 # ---------------------------------------------------------------- compression
 res = os.path.join(ROOT, "experiments", "v3", "results", "chess_compress")
 ARMS = {"nested, pieces in content": "leaf-nested", "flat, join interact": "leaf-flat-interact",
-        "flat, join interact, absolute squares": "abs-interact"}
+        "flat, join interact, absolute squares": "abs-interact", "flat, absolute squares, code-chosen cover": "recog-abs-interact"}
 fig, axes = plt.subplots(1, 2, figsize=(10, 3.8))
 ps = {}
 for name, tag in ARMS.items():
@@ -102,7 +102,7 @@ for name, tag in ARMS.items():
     for f in glob.glob(os.path.join(res, f"{tag}-*_s13.json")):
         d = json.load(open(f))
         n = int(re.search(r"-(\d+)_s13", f).group(1))
-        rows_ = [r for r in d["by levels"] if "copy" in r]
+        rows_ = [r for r in d["by levels"] if "copy" in r and r["bits per position"] is not None]
         copy = min(r["bits per position"] for r in rows_ if r["copy"])
         plain = min(r["bits per position"] for r in d["by levels"] if not r.get("copy"))
         pts.append((n, copy, plain))
@@ -114,7 +114,8 @@ for name, tag in ARMS.items():
         axes[0].plot(x, [p[2] for p in pts], color=HUE[name], lw=1.5, ls="--", marker="o", ms=4, mfc="white")
 # prequential: every position coded by what was learned before it, model included (cumulative mean)
 PREQ = {"nested, pieces in content": "nested", "flat, join interact": "flat-interact",
-        "flat, join interact, absolute squares": "abs-interact", "co-occurrence chunks": "bpe"}
+        "flat, join interact, absolute squares": "abs-interact", "flat, absolute squares, code-chosen cover": "cover",
+        "co-occurrence chunks": "bpe"}
 pq_raw = {}
 for name, t in PREQ.items():
     if not os.path.exists(logs(f"chess-preq-{t}.log")):

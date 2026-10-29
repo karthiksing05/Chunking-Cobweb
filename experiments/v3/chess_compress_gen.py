@@ -41,6 +41,17 @@ For each top unit of the position's parse (a chunk, or a single piece):
   abs copy  (ACOPY=1 in the environment) the copy route also offers the stored instance on its own
             squares: P(exact pieces on exact squares | concept), by the stored top chunks under it
             (the anchor then comes free); the copy route is the even mixture of the two
+  routes    (ROUTEW=1, flat chunks with copy) the routes (generate by offsets, generate on squares,
+            copy by offsets, copy on squares) are mixed by learned weights instead of evenly: each
+            route's share of the chunks coded so far that it coded best (Krichevsky-Trofimov,
+            counts updated after each chunk, so a decoder keeps the same counts); with ROUTEW=2 a
+            fifth route writes the chunk as its pieces, each a single top unit (no concept charged)
+  cover     (COVER=1, flat chunks) the units coded are chosen for the code, as TRELLIS parses by
+            compression gain: among every chunk the parse built (greedy and sampled analyses),
+            non-overlapping chunks are taken greedily by how many bits they save over their pieces
+            written singly (their cheapest route); the other pieces are single units. The encoder
+            chooses the cover, so it costs nothing to send; COVER=2 also offers every stored chunk
+            whose exact pieces stand on the board (recognition), described and coded as any chunk
 Bits are code bits only: the memory itself (the model) is not charged.
 
 PREQ=<block> (environment) instead codes prequentially: each of the first n_learn
@@ -67,7 +78,7 @@ ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 
 from trellis2 import chess as C  # noqa: E402
-from trellis2.trellis3 import FILL, LPART, RPART  # noqa: E402
+from trellis2.trellis3 import BLANK, FILL, LPART, RPART, Elem  # noqa: E402
 from trellis2.trellis_graph import TOP, GraphTrellis  # noqa: E402
 
 cfg, seed, tag = json.loads(sys.argv[1]), int(sys.argv[2]), sys.argv[3]
@@ -77,6 +88,9 @@ EPS, ALPHA = 0.05, 0.5
 PREQ = int(os.environ.get("PREQ", 0))
 CTXR = int(os.environ.get("CTXR", 0))
 ACOPY = int(os.environ.get("ACOPY", 0))
+ROUTEW = int(os.environ.get("ROUTEW", 0))
+COVER = int(os.environ.get("COVER", 0))
+ROUTES = {}                                          # (content level, context level) -> wins per route
 LEVELS = [(0, 0), (1, 0), (1, 1), (2, 1), (2, 2)]
 
 fens = [l.strip() for l in open(os.path.join(ROOT, "data", "chess", "settings", "positions_1800_ply30.fen")) if l.strip()]
@@ -101,6 +115,7 @@ single_tops = Counter()
 stored = Counter()                                   # distinct stored chunks (exact pieces and squares): the memory
 rel_key = {}                                         # record id -> its pieces at their offsets from the anchor
 abs_key = {}                                         # record id -> its pieces on their own squares
+stored_by_first = {}                                 # a stored chunk's least piece-square -> the chunks
 n_pos = 0
 raw_use, raw_n = Counter(), 0                        # piece-square counts of the positions learned so far
 
@@ -115,7 +130,10 @@ def learn_one(f):
     for k in r["chosen"]:
         e = r["comps"][k]
         if e.rid is not None:
-            stored[frozenset((sqs[i], r["exp"].tokens[i]) for i in e.span)] += 1
+            key = frozenset((sqs[i], r["exp"].tokens[i]) for i in e.span)
+            if key not in stored:
+                stored_by_first.setdefault(min(key), []).append(key)
+            stored[key] += 1
             rel_key[e.rid] = offsets(e.span, r["exp"])
             abs_key[e.rid] = frozenset((sqs[i], r["exp"].tokens[i]) for i in e.span)
     for e in r["top"]:
@@ -371,12 +389,58 @@ def partial_context(board, anchor_sq):
     return x
 
 
+def cover(M, r, copy):
+    """The units to code: chunks the parse built, chosen greedily by bits saved."""
+    exp, memo = r["exp"], r["memo"]
+    sqs = exp.data[1]
+    single = {i: M.single_bits(exp.tokens[i], sqs[i]) for i in range(len(exp.tokens))}
+    by_span = {}
+    for e in r["comps"].values():
+        by_span.setdefault(e.span, e)
+    if COVER == 2:                                   # recognition: stored chunks present on the board
+        index, here = exp.data[2], {(sqs[i], exp.tokens[i]) for i in range(len(sqs))}
+        L._exp = exp
+        for ps in here:
+            for key in stored_by_first.get(ps, ()):
+                if key <= here:
+                    span = frozenset(index[sq] for sq, _ in key)
+                    if span not in by_span:
+                        e = Elem(span, token="-")
+                        e.token = None
+                        flat = L.dom.flat_content(exp, span)
+                        e.cnt = {a: flat.get(a, BLANK) for a in L.cnt_attrs}
+                        by_span[span] = e
+    scored = []
+    for span, e in by_span.items():
+        path = memo.setdefault(id(e), L.cnt.categorize(e.cnt))
+        cn = lvl(path, M.kc)
+        anchor = C.square_name(sqs[min(span)])
+        ls = [M.anchor_bits(cn.id, anchor) + M.template_bits(cn, e)]
+        if "abs" in e.cnt:
+            ls.append(M.template_bits(cn, e, "abs"))
+        if copy:
+            ls.append(M.anchor_bits(cn.id, anchor) + M.copy_bits(cn.id, offsets(span, exp)))
+            if ACOPY:
+                ls.append(M.abs_copy_bits(cn.id, frozenset((sqs[i], exp.tokens[i]) for i in span)))
+        save = sum(single[i] for i in span) - (M.top_bits(cn.id) + min(ls))
+        if save > 0:
+            scored.append((save, e))
+    scored.sort(key=lambda t: -t[0])
+    used, out = set(), []
+    for _, e in scored:
+        if not (e.span & used):
+            used |= e.span
+            out.append(e)
+    out += [w for w in r["words"] if not (w.span & used)]
+    return sorted(out, key=lambda e: min(e.span))
+
+
 def code_bits(M, r, copy=False):
     exp, memo = r["exp"], r["memo"]
     sqs = exp.data[1]
     bits = M.stop_bits()
     board, occupied = {}, set()
-    for e in r["top"]:
+    for e in (cover(M, r, copy) if COVER and L.dom.flat else r["top"]):
         units = [(exp.tokens[i], sqs[i]) for i in e.span]
         if e.token is not None:
             (i,) = tuple(e.span)
@@ -405,6 +469,23 @@ def code_bits(M, r, copy=False):
             ACC["chunk tops copied (count)"] += cb < inner
             ACC["copy, choosing the instance"] += cb if cb < inner else 0.0
             inner = either(cb, inner)
+            if ROUTEW and L.dom.flat:
+                key = frozenset((sqs[i], exp.tokens[i]) for i in e.span)
+                ls = [M.anchor_bits(cn.id, anchor) + M.template_bits(cn, e),
+                      M.template_bits(cn, e, "abs") if "abs" in e.cnt else float("inf"),
+                      M.anchor_bits(cn.id, anchor) + M.copy_bits(cn.id, offsets(e.span, exp)),
+                      M.abs_copy_bits(cn.id, key) if ACOPY else float("inf")]
+                top = M.top_bits(cn.id)
+                ls = [top + v for v in ls] + [sum(M.single_bits(exp.tokens[i], sqs[i]) for i in e.span)]
+                wins = ROUTES.setdefault((M.kc, M.kx), [0.0] * 5)
+                live = [k for k in range(5) if not (k == 1 and "abs" not in e.cnt) and not (k == 3 and not ACOPY)
+                        and not (k == 4 and ROUTEW < 2)]
+                n = sum(wins[k] for k in live)
+                m = min(ls)
+                inner = m - math.log2(sum((wins[k] + 0.5) / (n + 0.5 * len(live)) * 2.0 ** (m - ls[k]) for k in live))
+                wins[min(live, key=lambda k: ls[k])] += 1
+                ACC["written as pieces (count)"] += min(live, key=lambda k: ls[k]) == 4
+                inner -= M.top_bits(cn.id)           # the concept is already inside each route
         head = M.top_bits(cn.id) + inner
         if CTXR and L.dom.flat:
             xk = ("ctx", id(e))
