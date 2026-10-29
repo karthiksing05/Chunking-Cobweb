@@ -103,6 +103,10 @@ LEVELS = [(0, 0), (1, 0), (1, 1), (2, 1), (2, 2)]
 fens = [l.strip() for l in open(os.path.join(ROOT, "data", "chess", "settings", "positions_1800_ply30.fen")) if l.strip()]
 random.Random(seed).shuffle(fens)
 learn_fens, code_fens = fens[:n_learn], fens[n_rep:n_rep + n_code]
+if os.environ.get("LEARN_FILE"):                     # transfer: learn one set, code another
+    learn_fens = [l.strip() for l in open(os.environ["LEARN_FILE"], encoding="utf-8") if l.strip()][:n_learn]
+if os.environ.get("CODE_FILE"):
+    code_fens = [l.strip() for l in open(os.environ["CODE_FILE"], encoding="utf-8") if l.strip()][:n_code]
 preq_fens, learn_fens = (learn_fens, []) if PREQ else ([], learn_fens)
 KINDS = sorted(C.TOKENS)
 

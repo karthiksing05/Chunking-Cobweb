@@ -31,6 +31,12 @@ fens = [l.strip() for l in open(os.path.join(ROOT, "data", "chess", "settings", 
 random.Random(seed).shuffle(fens)
 train = [frozenset(((f, r), t) for (f, r), t in C.parse_fen(x).items()) for x in fens[:n_learn]]
 held = [frozenset(((f, r), t) for (f, r), t in C.parse_fen(x).items()) for x in fens[n_rep:n_rep + n_train + n_test]]
+if os.environ.get("LEARN_FILE"):                     # transfer: learn one set, code another
+    lf = [l.strip() for l in open(os.environ["LEARN_FILE"], encoding="utf-8") if l.strip()][:n_learn]
+    train = [frozenset(((f, r), t) for (f, r), t in C.parse_fen(x).items()) for x in lf]
+if os.environ.get("CODE_FILE"):
+    cf = [l.strip() for l in open(os.environ["CODE_FILE"], encoding="utf-8") if l.strip()][:n_train + n_test]
+    held = [frozenset(((f, r), t) for (f, r), t in C.parse_fen(x).items()) for x in cf]
 
 
 def single(ps):
