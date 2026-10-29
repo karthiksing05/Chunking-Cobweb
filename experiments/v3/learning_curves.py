@@ -105,15 +105,29 @@ for name, tag in ARMS.items():
         rows_ = [r for r in d["by levels"] if "copy" in r]
         copy = min(r["bits per position"] for r in rows_ if r["copy"])
         plain = min(r["bits per position"] for r in d["by levels"] if not r.get("copy"))
-        mem = d["memory bits (distinct chunks as piece-square lists)"] / d["positions coded"]
-        pts.append((n, copy, copy + mem, plain))
+        pts.append((n, copy, plain))
         ps[n] = d["piece-square bits mean"]
     pts.sort()
     if pts:
         x = [p[0] for p in pts]
         axes[0].plot(x, [p[1] for p in pts], color=HUE[name], lw=2, marker="o", ms=5, label=name)
-        axes[0].plot(x, [p[3] for p in pts], color=HUE[name], lw=1.5, ls="--", marker="o", ms=4, mfc="white")
-        axes[1].plot(x, [p[2] for p in pts], color=HUE[name], lw=2, marker="o", ms=5, label=name)
+        axes[0].plot(x, [p[2] for p in pts], color=HUE[name], lw=1.5, ls="--", marker="o", ms=4, mfc="white")
+# prequential: every position coded by what was learned before it, model included (cumulative mean)
+PREQ = {"nested, pieces in content": "nested", "flat, join interact": "flat-interact",
+        "flat, join interact, absolute squares": "abs-interact", "co-occurrence chunks": "bpe"}
+pq_raw = {}
+for name, t in PREQ.items():
+    if not os.path.exists(logs(f"chess-preq-{t}.log")):
+        continue
+    pr = {r["positions"]: r for r in rows(logs(f"chess-preq-{t}.log")) if "positions" in r}
+    xs = sorted(pr)
+    if xs:
+        axes[1].plot(xs, [pr[x]["mean bits per position"] for x in xs], color=HUE[name], lw=2,
+                     marker="s" if t == "bpe" else "o", ms=5)
+        pq_raw.update({x: pr[x]["piece-square mean"] for x in xs})
+if pq_raw:
+    xs = sorted(pq_raw)
+    axes[1].plot(xs, [pq_raw[x] for x in xs], color=HUE["piece-square list"], lw=2, ls=":", marker="^", ms=5)
 bp = []
 for f in glob.glob(logs("chess-curve-bpe-*.log")):
     rr = [r for r in rows(f) if "merges" in r and "total per position" in r]
@@ -121,17 +135,17 @@ for f in glob.glob(logs("chess-curve-bpe-*.log")):
         n = int(re.search(r"bpe-(\d+)\.log", f).group(1))
         bp.append((n, min(r["bits per position"] for r in rr), min(r["total per position"] for r in rr)))
 bp.sort()
-for ax, j in zip(axes, (1, 2)):
-    if bp:
-        ax.plot([p[0] for p in bp], [p[j] for p in bp], color=HUE["co-occurrence chunks"], lw=2, marker="s", ms=5,
-                label="co-occurrence chunks (best merge count)")
-    if ps:
-        xs = sorted(ps)
-        ax.plot(xs, [ps[x] for x in xs], color=HUE["piece-square list"], lw=2, ls=":", marker="^", ms=5,
-                label="piece-square list, entropy-coded")
+if bp:
+    axes[0].plot([p[0] for p in bp], [p[1] for p in bp], color=HUE["co-occurrence chunks"], lw=2, marker="s", ms=5,
+                 label="co-occurrence chunks (best merge count)")
+if ps:
+    xs = sorted(ps)
+    axes[0].plot(xs, [ps[x] for x in xs], color=HUE["piece-square list"], lw=2, ls=":", marker="^", ms=5,
+                 label="piece-square list, entropy-coded")
+for ax in axes:
     ax.set_xscale("log")
 style(axes[0], "positions learned", "bits per held-out position", "Code (dashed: without copying from memory)")
-style(axes[1], "positions learned", "bits per held-out position", "Code + memory (chunk store written out)")
+style(axes[1], "positions seen", "mean bits per position so far", "Prequential: model included")
 h, lab = axes[0].get_legend_handles_labels()
 fig.legend(h, lab, loc="lower center", ncol=3, fontsize=8, frameon=False)
 fig.tight_layout(rect=(0, 0.12, 1, 1))

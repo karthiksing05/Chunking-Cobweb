@@ -30,6 +30,13 @@ For each top unit of the position's parse (a chunk, or a single piece):
             has a code
 Bits are code bits only: the memory itself (the model) is not charged.
 
+PREQ=<block> (environment) instead codes prequentially: each of the first n_learn
+positions is coded by the model learned from the positions before it (code models
+rebuilt every <block> positions; the trees are live), then learned. The sum is the
+whole description of the data, model included, with no separate memory term. Each
+position's code is the even mixture of the copy codes at every level and the
+piece-square list (at most log2 6 bits above the best).
+
 Usage: chess_compress_gen.py <cfg json> <seed> <tag> [n_rep n_learn n_code]
 """
 from __future__ import annotations
@@ -54,11 +61,13 @@ cfg, seed, tag = json.loads(sys.argv[1]), int(sys.argv[2]), sys.argv[3]
 n_rep, n_learn, n_code = [int(x) for x in sys.argv[4:7]] if len(sys.argv) > 6 else [4000, 2000, 1000]
 max_size = cfg.pop("max_size", 4)
 EPS, ALPHA = 0.05, 0.5
+PREQ = int(os.environ.get("PREQ", 0))
 LEVELS = [(0, 0), (1, 0), (1, 1), (2, 1), (2, 2)]
 
 fens = [l.strip() for l in open(os.path.join(ROOT, "data", "chess", "settings", "positions_1800_ply30.fen")) if l.strip()]
 random.Random(seed).shuffle(fens)
 learn_fens, code_fens = fens[:n_learn], fens[n_rep:n_rep + n_code]
+preq_fens, learn_fens = (learn_fens, []) if PREQ else ([], learn_fens)
 KINDS = sorted(C.TOKENS)
 
 
@@ -77,9 +86,15 @@ single_tops = Counter()
 stored = Counter()                                   # distinct stored chunks (exact pieces and squares): the memory
 rel_key = {}                                         # record id -> its pieces at their offsets from the anchor
 n_pos = 0
-t0 = time.time()
-for f in learn_fens:
-    r = L.learn(C.parse_fen(f))
+raw_use, raw_n = Counter(), 0                        # piece-square counts of the positions learned so far
+
+
+def learn_one(f):
+    global n_pos, raw_n
+    pos = C.parse_fen(f)
+    raw_use.update(psq(t, sq) for sq, t in pos.items())
+    raw_n += len(pos)
+    r = L.learn(pos)
     sqs = r["exp"].data[1]
     for k in r["chosen"]:
         e = r["comps"][k]
@@ -91,15 +106,17 @@ for f in learn_fens:
             (i,) = tuple(e.span)
             single_tops[psq(e.token, sqs[i])] += 1
     n_pos += 1
+
+
+t0 = time.time()
+for f in learn_fens:
+    learn_one(f)
 learn_s = time.time() - t0
 L._quiet = True
 
-raw_use = Counter(psq(t, sq) for f in learn_fens for sq, t in C.parse_fen(f).items())
-raw_tot = sum(raw_use.values()) + 768
-
 
 def raw_bits(tok, sq):
-    return -math.log2((raw_use.get(psq(tok, sq), 0) + 1) / raw_tot)
+    return -math.log2((raw_use.get(psq(tok, sq), 0) + 1) / (raw_n + 768))
 
 
 def lvl(path, k):
@@ -316,6 +333,44 @@ def code_bits(M, r, copy=False):
     return bits
 
 
+def position_raw_bits(pos):
+    """A position as a piece-square list with a stop item."""
+    return sum(raw_bits(t, sq) for sq, t in pos.items()) - math.log2((n_pos + 1) / (raw_n + n_pos + 769))
+
+
+if PREQ:
+    out, Ms, tot, tot_raw, t0 = [], None, 0.0, 0.0, time.time()
+    marks = {300, 1000, 2000, 4000, len(preq_fens)}
+    for i, f in enumerate(preq_fens):
+        pos = C.parse_fen(f)
+        raw = position_raw_bits(pos)
+        if i and i % PREQ == 0:
+            cpath_cache.clear()
+            Ms = [Model(kc, kx) for kc, kx in LEVELS]
+        if Ms:
+            L._quiet = True
+            r = L.parse(pos)
+            L._quiet = False
+            r["memo"] = {}
+            costs = [code_bits(M, r, True) for M in Ms] + [raw]
+            m = min(costs)
+            bits = m - math.log2(sum(2.0 ** (m - c) for c in costs) / len(costs))
+        else:
+            bits = raw
+        tot, tot_raw = tot + bits, tot_raw + raw
+        learn_one(f)
+        if i + 1 in marks:
+            row = {"positions": i + 1, "total bits": round(tot), "mean bits per position": round(tot / (i + 1), 1),
+                   "piece-square total bits": round(tot_raw), "piece-square mean": round(tot_raw / (i + 1), 1),
+                   "stored chunks": len(stored), "s": round(time.time() - t0)}
+            out.append(row)
+            print(json.dumps(row), flush=True)
+    summary = {"tag": tag, "seed": seed, "prequential block": PREQ, "eps": EPS, "curve": out}
+    out_dir = os.path.join(ROOT, "experiments", "v3", "results", "chess_compress")
+    json.dump(summary, open(os.path.join(out_dir, f"{tag}_s{seed}.json"), "w", encoding="utf-8"), indent=1)
+    print(json.dumps(summary), flush=True)
+    sys.exit(0)
+
 t1 = time.time()
 parsed = []
 for f in code_fens:
@@ -323,9 +378,8 @@ for f in code_fens:
     r["memo"] = {}
     parsed.append(r)
 parse_s = time.time() - t1
-rbits = sum(sum(raw_bits(t, sq) for sq, t in C.parse_fen(f).items()) - math.log2((n_pos + 1) / (sum(raw_use.values()) + n_pos + 769))
-            for f in code_fens) / len(code_fens)
-stop_raw = -math.log2((n_pos + 1) / (sum(raw_use.values()) + n_pos + 769))   # one stop item per listed chunk, as the dictionaries
+rbits = sum(position_raw_bits(C.parse_fen(f)) for f in code_fens) / len(code_fens)
+stop_raw = -math.log2((n_pos + 1) / (raw_n + n_pos + 769))   # one stop item per listed chunk, as the dictionaries
 
 summary = {"tag": tag, "seed": seed, "learn s": round(learn_s), "parse s": round(parse_s), "positions coded": len(code_fens),
            "piece-square bits mean": round(rbits, 1), "eps": EPS,
