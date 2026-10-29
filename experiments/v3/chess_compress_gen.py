@@ -94,6 +94,7 @@ CTXR = int(os.environ.get("CTXR", 0))
 ACOPY = int(os.environ.get("ACOPY", 0))
 ROUTEW = int(os.environ.get("ROUTEW", 0))
 COVER = int(os.environ.get("COVER", 0))
+TOPC = int(os.environ.get("TOPC", 0))            # learning stores the code-chosen cover as its top units
 ROUTES = {}                                          # (content level, context level) -> wins per route
 USED = float(os.environ.get("USED", 0))
 USES = {}                                            # (content level, context level) -> units the code used
@@ -126,12 +127,12 @@ n_pos = 0
 raw_use, raw_n = Counter(), 0                        # piece-square counts of the positions learned so far
 
 
-def learn_one(f):
+def learn_one(f, top=None):
     global n_pos, raw_n
     pos = C.parse_fen(f)
     raw_use.update(psq(t, sq) for sq, t in pos.items())
     raw_n += len(pos)
-    r = L.learn(pos)
+    r = L.learn(pos, top)
     sqs = r["exp"].data[1]
     for k in r["chosen"]:
         e = r["comps"][k]
@@ -455,7 +456,9 @@ def code_bits(M, r, copy=False):
     bits = M.stop_bits()
     board, occupied = {}, set()
     M.pending = ["stop"]                     # the units this code used, counted once the position is coded
-    for e in (cover(M, r, copy) if COVER and L.dom.flat else r["top"]):
+    todo = cover(M, r, copy) if COVER and L.dom.flat else r["top"]
+    M.units = [e.span for e in todo]        # TOPC: learning stores these as its analysis
+    for e in todo:
         units = [(exp.tokens[i], sqs[i]) for i in e.span]
         if e.token is not None:
             (i,) = tuple(e.span)
@@ -550,10 +553,12 @@ if PREQ:
                 u[None] += len(M.pending)
             m = min(costs)
             bits = m - math.log2(sum(2.0 ** (m - c) for c in costs) / len(costs))
+            best = min(range(len(Ms)), key=lambda j: costs[j])
+            top = Ms[best].units if TOPC and costs[best] <= raw else None
         else:
-            bits = raw
+            bits, top = raw, None
         tot, tot_raw = tot + bits, tot_raw + raw
-        learn_one(f)
+        learn_one(f, top)
         if i + 1 in marks:
             row = {"positions": i + 1, "total bits": round(tot), "mean bits per position": round(tot / (i + 1), 1),
                    "piece-square total bits": round(tot_raw), "piece-square mean": round(tot_raw / (i + 1), 1),

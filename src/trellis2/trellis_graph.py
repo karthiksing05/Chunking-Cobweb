@@ -339,9 +339,26 @@ class GraphTrellis(Trellis3):
                 "chosen": [id(e) for e in chosen], "top": top}
 
     # learning ------------------------------------------------------------- #
-    def learn(self, experience) -> dict:
+    def learn(self, experience, top=None) -> dict:
         r = self.parse(experience)
         exp, words, comps, post = r["exp"], r["words"], r["comps"], r["post"]
+        if top is not None and self.dom.flat:   # the units a code chose (spans): stored as the analysis
+            by_span = {}
+            for e in comps.values():
+                by_span.setdefault(e.span, e)
+            units = []
+            for s in top:
+                if len(s) < 2:
+                    continue
+                e = by_span.get(s)
+                if e is None:                   # a stored chunk recognised on the board
+                    e = Elem(s, token="-")
+                    e.token = None
+                    comps[id(e)] = by_span[s] = e
+                units.append(e)
+            covered = set().union(*(e.span for e in units))
+            r["top"] = sorted(units + [w for w in words if not (w.span & covered)], key=lambda e: min(e.span))
+            r["chosen"] = [id(e) for e in units]
         chosen = set(r["chosen"])
         if self.dom.flat:                       # chunks one level up: only the top chunks are stored
             chosen &= {id(e) for e in r["top"] if e.token is None}
@@ -351,6 +368,8 @@ class GraphTrellis(Trellis3):
             w.used = 1.0
         for k in chosen:
             parent = comps[k]
+            if parent.left is None:
+                continue
             for child, sib in ((parent.left, parent.right), (parent.right, parent.left)):
                 child.par, child.sib = self._ctx_ids(parent), self._ctx_ids(sib)
         if self.store == "posterior":
