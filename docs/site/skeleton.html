@@ -1339,6 +1339,7 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
   </table></div>
   <p>The weakest-join critic is the best topic-held arm so far (9.5% on average, against 8.6%), keeping the critic's novelty while more of what is new is acceptable. The gain is under a point; every arm since round 63 lies between 6 and 10%.</p>
   <p>Round 69 learns 2,000 sentences in place of 1,000. The weakest-join critic gives 7.7 / 6.9% grammatical new sentences per generation with 4 candidates and 8.3 / 7.1% with 8 (s13 / s17), below its 1,000-sentence 8.9 / 10.0%. With more memory fewer outputs are new (21–25%), while about a third of the new ones are acceptable, as before. The other arms have not yet been run at 2,000 sentences.</p>
+  <p>Round 70 checks each join while building: a filler is kept only if the pair of categories it makes with the word just generated stood together in memory (<code>join_check</code>, 1,000 sentences). Alone it gives 6.9 / 7.0% grammatical new sentences per generation; with the weakest-join critic of 4, 8.7 / 8.2%, below that critic alone (8.9 / 10.0%). The check trims novelty (about 20% new) more than it helps acceptability, so it stays off.</p>
   <h2>Case studies</h2>
   <p>Each case shows one claim on real output: held-out story prompts from round 60 (2,000 sentences, the first prompts of the test set, four draws each, nothing selected). "Directed" is a general concept one level above each slot, directed by the prompt (<code>story_fill</code> 3); "leaf" draws only the root by the prompt.</p>
 
