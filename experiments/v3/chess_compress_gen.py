@@ -95,6 +95,7 @@ ACOPY = int(os.environ.get("ACOPY", 0))
 ROUTEW = int(os.environ.get("ROUTEW", 0))
 COVER = int(os.environ.get("COVER", 0))
 TOPC = int(os.environ.get("TOPC", 0))            # learning stores the code-chosen cover as its top units
+ANCH = int(os.environ.get("ANCH", 0))            # anchors backed off along the concept path (1), and renormalised to where the shape fits (2)
 ROUTES = {}                                          # (content level, context level) -> wins per route
 USED = float(os.environ.get("USED", 0))
 USES = {}                                            # (content level, context level) -> units the code used
@@ -109,6 +110,26 @@ if os.environ.get("CODE_FILE"):
     code_fens = [l.strip() for l in open(os.environ["CODE_FILE"], encoding="utf-8") if l.strip()][:n_code]
 preq_fens, learn_fens = (learn_fens, []) if PREQ else ([], learn_fens)
 KINDS = sorted(C.TOKENS)
+
+
+SQUARES = [C.square_name((x, y)) for x in range(8) for y in range(8)]
+_fits = {}
+
+
+def shape_of(e):
+    """A chunk's pieces as offsets from its anchor (from its tpl bag), or None."""
+    tpl = (e.cnt or {}).get("tpl") if e.cnt else None
+    if not isinstance(tpl, dict):
+        return None
+    return frozenset(tuple(int(v) for v in k.split(":")[0].split(",")) for k in tpl)
+
+
+def fits(shape):
+    """The anchor squares at which every piece of the shape lands on the board."""
+    if shape not in _fits:
+        _fits[shape] = [C.square_name((x, y)) for x in range(8) for y in range(8)
+                        if all(0 <= x + dx < 8 and 0 <= y + dy < 8 for dx, dy in shape)]
+    return _fits[shape]
 
 
 def psq(tok, sq):
@@ -191,12 +212,18 @@ class Model:
         self.kc, self.kx = kc, kx
         tops = L.cnt.passive(L.cnt.root, TOP)
         self.top_c, self.anchor, self.size, self.keys, self.akeys = Counter(), {}, {}, {}, {}
+        self.nodes, self.anchor_up, self.avec = {}, {}, {}
         for rid, c in tops.items():
-            cid = lvl(cpath_of_record(rid), kc).id
+            node = lvl(cpath_of_record(rid), kc)
+            cid = node.id
+            self.nodes[cid] = node
             self.top_c[cid] += c
             sq = (L.records[rid].ctx or {}).get("sq")
             if sq:
                 self.anchor.setdefault(cid, Counter())[sq] += c
+                while node is not None:                  # ANCH: anchors counted up the concept's path
+                    self.anchor_up.setdefault(node.id, Counter())[sq] += c
+                    node = node.parent
             self.size.setdefault(cid, Counter())[len(L.records[rid].span)] += c
             if rid in rel_key:
                 self.keys.setdefault(cid, Counter())[rel_key[rid]] += c
@@ -249,9 +276,26 @@ class Model:
     def stop_bits(self):
         return self.used("stop", (n_pos + 1) / self.top_tot)
 
-    def anchor_bits(self, cid, sq):
-        d = self.anchor.get(cid, {})
-        return -math.log2((d.get(sq, 0) + ALPHA) / (sum(d.values()) + 64 * ALPHA))
+    def anchor_bits(self, cid, sq, shape=None):
+        if not ANCH or cid not in self.nodes:
+            d = self.anchor.get(cid, {})
+            return -math.log2((d.get(sq, 0) + ALPHA) / (sum(d.values()) + 64 * ALPHA))
+        if cid not in self.avec:                         # P(sq | C) backed off along C's path, as template_bits
+            path, node = [], self.nodes[cid]
+            while node is not None:
+                path.append(node)
+                node = node.parent
+            p = None
+            for node in reversed(path):
+                d = self.anchor_up.get(node.id, {})
+                tot = sum(d.values())
+                p = {s: (d.get(s, 0) + ALPHA) / (tot + 64 * ALPHA) for s in SQUARES} if p is None else \
+                    {s: (d.get(s, 0) + p[s]) / (tot + 1.0) for s in SQUARES}
+            self.avec[cid] = p
+        p = self.avec[cid]
+        if ANCH >= 2 and shape:                          # only anchors where the shape fits on the board
+            return -math.log2(p[sq] / sum(p[s] for s in fits(shape)))
+        return -math.log2(p[sq])
 
     def fill_prob(self, xnode, key, prim):
         """P(filler | the context concept xnode), within its kind (piece or chunk)."""
@@ -388,7 +432,7 @@ def either(a, b):
 def flat_bits(M, cn, e, anchor):
     """A flat chunk given its concept: anchor + offsets, or (with ``abs``) the even
     mixture of that and its pieces on their own squares."""
-    rel = M.anchor_bits(cn.id, anchor) + M.template_bits(cn, e)
+    rel = M.anchor_bits(cn.id, anchor, shape_of(e)) + M.template_bits(cn, e)
     if "abs" not in e.cnt:
         return rel
     ab = M.template_bits(cn, e, "abs")
@@ -434,11 +478,11 @@ def cover(M, r, copy):
         path = memo.setdefault(id(e), L.cnt.categorize(e.cnt))
         cn = lvl(path, M.kc)
         anchor = C.square_name(sqs[min(span)])
-        ls = [M.anchor_bits(cn.id, anchor) + M.template_bits(cn, e)]
+        ls = [M.anchor_bits(cn.id, anchor, shape_of(e)) + M.template_bits(cn, e)]
         if "abs" in e.cnt:
             ls.append(M.template_bits(cn, e, "abs"))
         if copy:
-            ls.append(M.anchor_bits(cn.id, anchor) + M.copy_bits(cn.id, offsets(span, exp)))
+            ls.append(M.anchor_bits(cn.id, anchor, shape_of(e)) + M.copy_bits(cn.id, offsets(span, exp)))
             if ACOPY:
                 ls.append(M.abs_copy_bits(cn.id, frozenset((sqs[i], exp.tokens[i]) for i in span)))
         save = sum(single[i] for i in span) - (M.top_bits(cn.id) + min(ls))
@@ -476,16 +520,16 @@ def code_bits(M, r, copy=False):
         cn = lvl(path, M.kc)
         M.pending.append(("c", cn.id))
         ACC["chunk roots"] += M.top_bits(cn.id)
-        ACC["anchors"] += M.anchor_bits(cn.id, C.square_name(sqs[min(e.span)]))
+        ACC["anchors"] += M.anchor_bits(cn.id, C.square_name(sqs[min(e.span)]), shape_of(e))
         ACC["chunk tops (count)"] += 1
         anchor = C.square_name(sqs[min(e.span)])
         if L.dom.flat:                       # one level up: the concept predicts the whole chunk (anchor included)
             inner = flat_bits(M, cn, e, anchor)
             ACC["templates"] += inner
         else:
-            inner = M.anchor_bits(cn.id, anchor) + inside_bits(M, e, exp, cn, memo)
+            inner = M.anchor_bits(cn.id, anchor, shape_of(e)) + inside_bits(M, e, exp, cn, memo)
         if copy:
-            cb = M.anchor_bits(cn.id, anchor) + M.copy_bits(cn.id, offsets(e.span, exp))
+            cb = M.anchor_bits(cn.id, anchor, shape_of(e)) + M.copy_bits(cn.id, offsets(e.span, exp))
             if ACOPY:
                 ab = M.abs_copy_bits(cn.id, frozenset((sqs[i], exp.tokens[i]) for i in e.span))
                 ACC["abs copy cheaper (count)"] += ab < cb
@@ -495,9 +539,9 @@ def code_bits(M, r, copy=False):
             inner = either(cb, inner)
             if ROUTEW and L.dom.flat:
                 key = frozenset((sqs[i], exp.tokens[i]) for i in e.span)
-                ls = [M.anchor_bits(cn.id, anchor) + M.template_bits(cn, e),
+                ls = [M.anchor_bits(cn.id, anchor, shape_of(e)) + M.template_bits(cn, e),
                       M.template_bits(cn, e, "abs") if "abs" in e.cnt else float("inf"),
-                      M.anchor_bits(cn.id, anchor) + M.copy_bits(cn.id, offsets(e.span, exp)),
+                      M.anchor_bits(cn.id, anchor, shape_of(e)) + M.copy_bits(cn.id, offsets(e.span, exp)),
                       M.abs_copy_bits(cn.id, key) if ACOPY else float("inf")]
                 top = M.top_bits(cn.id)
                 ls = [top + v for v in ls] + [sum(M.single_bits(exp.tokens[i], sqs[i]) for i in e.span)]
@@ -522,7 +566,7 @@ def code_bits(M, r, copy=False):
                 body = either(body, M.template_bits(cn, e, "abs"))
             if copy:
                 body = either(M.copy_bits(cn.id, offsets(e.span, exp)), body)
-            ACC["context head cheaper (count)"] += hb < M.top_bits(cn.id) + M.anchor_bits(cn.id, anchor)
+            ACC["context head cheaper (count)"] += hb < M.top_bits(cn.id) + M.anchor_bits(cn.id, anchor, shape_of(e))
             ACC["context head"] += hb
             head = either(head, hb + body)
         bits += head
