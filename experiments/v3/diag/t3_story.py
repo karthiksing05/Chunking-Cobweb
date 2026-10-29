@@ -34,6 +34,7 @@ import nltk
 
 sys.path.insert(0, "src")
 from trellis2.stories import WORD, default_tinystories_path, read_sentences  # noqa: E402
+from trellis2.chart_gen import ChartGen  # noqa: E402
 from trellis2.trellis3 import Trellis3  # noqa: E402
 
 cfg, seed, n, tag = json.loads(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), sys.argv[4]
@@ -184,7 +185,14 @@ for ai, arm in enumerate(arms):
     g_rng = random.Random(seed + 7)
     t1 = time.time()
     PP = [p for p in P for _ in range(DRAWS)]
-    gen = lambda p: L.generate_tree(g_rng, index=ix, fill_name=FILL, **({"after": p} if cond else {}), **{"choose": "leaf", **arm})
+    chart = arm.pop("chart", None)         # chart generation (chart_gen.py) with these settings
+    if chart is not None:
+        CG = ChartGen(L, **chart)
+        print(json.dumps({"tag": tag, "seed": seed, "chart": chart, **CG.stats}), flush=True)
+        gen = lambda p: CG.generate(["*"], g_rng, prev=p if cond else None)
+        arm["chart"] = chart
+    else:
+        gen = lambda p: L.generate_tree(g_rng, index=ix, fill_name=FILL, **({"after": p} if cond else {}), **{"choose": "leaf", **arm})
 
     def score(g):
         r = L.parse(g)
@@ -221,3 +229,46 @@ for ai, arm in enumerate(arms):
             fh.write(json.dumps({"arm": {"cond": cond, **({"critic": critic} if critic else {}), **({"critic_mode": "weakest"} if weakest else {}), **arm}}) + "\n")
             for (p, g), a, b in zip(ok, pat, nov):
                 fh.write(json.dumps({"prompt": " ".join(p), "gen": " ".join(g), "pattern": a, "novel": b}) + "\n")
+
+# infill (INFILL=<n>): mask 1-3 consecutive words of held-out sentences; the gap is filled
+# by expansion (generate_tree's gap mode: one stored instance standing there) and by the
+# chart (chart_gen.py: parts of several constituents may cover it)
+N_INF = int(os.environ.get("INFILL", 0))
+if N_INF:
+    irng, g_rng = random.Random(seed + 31), random.Random(seed + 37)
+    CG = ChartGen(L, **json.loads(os.environ.get("CHART", "{}")))
+    items = []
+    for s in held:
+        if len(s) >= 4 and len(items) < N_INF:
+            m_ = irng.randint(1, 3)
+            i = irng.randint(0, len(s) - m_)
+            items.append((s, i, m_))
+    methods = {"expand gap": lambda s, i, m_: L.generate_tree(g_rng, index=ix, fill_name=FILL, choose="leaf",
+                                                              gap=(s[:i], s[i + m_:])),
+               "chart": lambda s, i, m_: CG.generate(s[:i] + ["*"] + s[i + m_:], g_rng)}
+    for mi, (name, f) in enumerate(methods.items()):
+        t1, outs = time.time(), []
+        for s, i, m_ in items:
+            try:
+                g = f(s, i, m_)
+            except Exception as ex:                    # a failed fill counts as no output
+                g = None
+            outs.append(g)
+        ok = [(it, g) for it, g in zip(items, outs) if g]
+        S = [g for _, g in ok]
+        pat = [tuple(t[:2] for _, t in nltk.pos_tag(g)) in patterns for g in S]
+        nov = [tuple(g) not in seen for g in S]
+        exact = [g == it[0] for it, g in ok]
+        m = lambda v: round(sum(v) / max(len(v), 1), 3)
+        print(json.dumps({"tag": tag, "seed": seed, "infill": name, "items": len(items), "filled": m([g is not None for g in outs]),
+                          "gen s": round(time.time() - t1), "exact original": m(exact), "novel": m(nov),
+                          "tag pattern attested": m(pat), "novel tag pattern attested": m([a for a, b in zip(pat, nov) if b]),
+                          "examples": [" ".join(it[0][:it[1]] + ["[" + " ".join(g[it[1]:len(g) - (len(it[0]) - it[1] - it[2])]) + "]"] +
+                                                it[0][it[1] + it[2]:]) for it, g in ok[:16]]}), flush=True)
+        if DUMP:
+            with open(os.path.join(DUMP, f"{tag}_s{seed}_n{n}_arm{90 + mi}.jsonl"), "w", encoding="utf-8") as fh:
+                fh.write(json.dumps({"arm": {"infill": name}}) + "\n")
+                for (s, i, m_), g in ok:
+                    fh.write(json.dumps({"prompt": " ".join(s[:i] + ["*"] + s[i + m_:]), "gen": " ".join(g),
+                                         "pattern": tuple(t[:2] for _, t in nltk.pos_tag(g)) in patterns,
+                                         "novel": tuple(g) not in seen}) + "\n")
