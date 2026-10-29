@@ -114,7 +114,7 @@ for name, tag in ARMS.items():
         axes[0].plot(x, [p[2] for p in pts], color=HUE[name], lw=1.5, ls="--", marker="o", ms=4, mfc="white")
 # prequential: every position coded by what was learned before it, model included (cumulative mean)
 PREQ = {"nested, pieces in content": "nested", "flat, join interact": "flat-interact",
-        "flat, join interact, absolute squares": "abs-interact", "flat, absolute squares, code-chosen cover": "cover",
+        "flat, join interact, absolute squares": "abs-interact", "flat, absolute squares, code-chosen cover": "recog",
         "co-occurrence chunks": "bpe"}
 pq_raw = {}
 for name, t in PREQ.items():
