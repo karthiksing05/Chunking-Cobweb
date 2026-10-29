@@ -52,6 +52,10 @@ For each top unit of the position's parse (a chunk, or a single piece):
             written singly (their cheapest route); the other pieces are single units. The encoder
             chooses the cover, so it costs nothing to send; COVER=2 also offers every stored chunk
             whose exact pieces stand on the board (recognition), described and coded as any chunk
+  used      (USED=<b>, prequential) a unit's probability (concept, single piece, stop) also counts
+            how often the code itself used it: P(u) = (n_code(u) + b P_top(u)) / (N_code + b), where
+            P_top is the estimate from learning's top units; a decoder sees the same cover and keeps
+            the same counts
 Bits are code bits only: the memory itself (the model) is not charged.
 
 PREQ=<block> (environment) instead codes prequentially: each of the first n_learn
@@ -91,6 +95,8 @@ ACOPY = int(os.environ.get("ACOPY", 0))
 ROUTEW = int(os.environ.get("ROUTEW", 0))
 COVER = int(os.environ.get("COVER", 0))
 ROUTES = {}                                          # (content level, context level) -> wins per route
+USED = float(os.environ.get("USED", 0))
+USES = {}                                            # (content level, context level) -> units the code used
 LEVELS = [(0, 0), (1, 0), (1, 1), (2, 1), (2, 2)]
 
 fens = [l.strip() for l in open(os.path.join(ROOT, "data", "chess", "settings", "positions_1800_ply30.fen")) if l.strip()]
@@ -197,6 +203,7 @@ class Model:
         self.ctx_fill = {}
         self.top_tot = sum(self.top_c.values()) + sum(single_tops.values()) + n_pos + ALPHA * (self.n_concepts + 768) + 1
         self.fill_cache = {}
+        self.pending = []
 
     def template_bits(self, cnode, e, attr="tpl"):
         """A flat chunk from its concept, as Cobweb predicts attributes: how many
@@ -221,14 +228,21 @@ class Model:
             bits -= math.log2(p)
         return bits
 
+    def used(self, key, p):
+        """P(unit) from the code's own use, backed off to learning's estimate p."""
+        if not USED:
+            return -math.log2(p)
+        u =USES.setdefault((self.kc, self.kx), Counter())
+        return -math.log2((u.get(key, 0) + USED * p) / (u.get(None, 0) + USED))
+
     def top_bits(self, cid):
-        return -math.log2((self.top_c.get(cid, 0) + ALPHA) / self.top_tot)
+        return self.used(("c", cid), (self.top_c.get(cid, 0) + ALPHA) / self.top_tot)
 
     def single_bits(self, tok, sq):
-        return -math.log2((single_tops.get(psq(tok, sq), 0) + ALPHA) / self.top_tot)
+        return self.used(("s", psq(tok, sq)), (single_tops.get(psq(tok, sq), 0) + ALPHA) / self.top_tot)
 
     def stop_bits(self):
-        return -math.log2((n_pos + 1) / self.top_tot)
+        return self.used("stop", (n_pos + 1) / self.top_tot)
 
     def anchor_bits(self, cid, sq):
         d = self.anchor.get(cid, {})
@@ -440,10 +454,12 @@ def code_bits(M, r, copy=False):
     sqs = exp.data[1]
     bits = M.stop_bits()
     board, occupied = {}, set()
+    M.pending = ["stop"]                     # the units this code used, counted once the position is coded
     for e in (cover(M, r, copy) if COVER and L.dom.flat else r["top"]):
         units = [(exp.tokens[i], sqs[i]) for i in e.span]
         if e.token is not None:
             (i,) = tuple(e.span)
+            M.pending.append(("s", psq(e.token, sqs[i])))
             ACC["single tops"] += M.single_bits(e.token, sqs[i])
             bits += M.single_bits(e.token, sqs[i])
             board.update({sq: t for t, sq in units})
@@ -451,6 +467,7 @@ def code_bits(M, r, copy=False):
             continue
         path = memo.setdefault(id(e), L.cnt.categorize(e.cnt))
         cn = lvl(path, M.kc)
+        M.pending.append(("c", cn.id))
         ACC["chunk roots"] += M.top_bits(cn.id)
         ACC["anchors"] += M.anchor_bits(cn.id, C.square_name(sqs[min(e.span)]))
         ACC["chunk tops (count)"] += 1
@@ -527,6 +544,10 @@ if PREQ:
             L._quiet = False
             r["memo"] = {}
             costs = [code_bits(M, r, True) for M in Ms] + [raw]
+            for M in Ms if USED else ():
+                u = USES.setdefault((M.kc, M.kx), Counter())
+                u.update(M.pending)
+                u[None] += len(M.pending)
             m = min(costs)
             bits = m - math.log2(sum(2.0 ** (m - c) for c in costs) / len(costs))
         else:
