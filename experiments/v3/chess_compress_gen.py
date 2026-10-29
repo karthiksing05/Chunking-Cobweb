@@ -28,6 +28,19 @@ For each top unit of the position's parse (a chunk, or a single piece):
   escape    a part is generated from memory with probability 1 - eps or written as
             a piece-square list with eps (both routes count), so every position
             has a code
+  context   (flat chunks, CTXR=1 in the environment) alternatively a chunk's concept from what is
+            already on the board, as generation fills a slot from its neighbours: its anchor
+            by the anchor squares of all stored top chunks (occupied squares left out), then
+            the star seen from the anchor over the units decoded so far, sorted in the context
+            tree, and the content concept by FILL along that context path (backed off from the
+            root as Cobweb predicts: P(c | X) = (n_X(c) + P(c | parent)) / (n_X + 1)); the
+            chunk's code mixes this head and the concept-first head evenly
+            (CTXR=2: a diagnostic only, not decodable: the chunk's own full context instead)
+            (CTXR=3: the even mixture of each path concept's prediction, so a partial board
+            that sorts too deep still reads the general concepts above)
+  abs copy  (ACOPY=1 in the environment) the copy route also offers the stored instance on its own
+            squares: P(exact pieces on exact squares | concept), by the stored top chunks under it
+            (the anchor then comes free); the copy route is the even mixture of the two
 Bits are code bits only: the memory itself (the model) is not charged.
 
 PREQ=<block> (environment) instead codes prequentially: each of the first n_learn
@@ -62,6 +75,8 @@ n_rep, n_learn, n_code = [int(x) for x in sys.argv[4:7]] if len(sys.argv) > 6 el
 max_size = cfg.pop("max_size", 4)
 EPS, ALPHA = 0.05, 0.5
 PREQ = int(os.environ.get("PREQ", 0))
+CTXR = int(os.environ.get("CTXR", 0))
+ACOPY = int(os.environ.get("ACOPY", 0))
 LEVELS = [(0, 0), (1, 0), (1, 1), (2, 1), (2, 2)]
 
 fens = [l.strip() for l in open(os.path.join(ROOT, "data", "chess", "settings", "positions_1800_ply30.fen")) if l.strip()]
@@ -85,6 +100,7 @@ L = GraphTrellis(max_size=max_size, seed=seed, **cfg)
 single_tops = Counter()
 stored = Counter()                                   # distinct stored chunks (exact pieces and squares): the memory
 rel_key = {}                                         # record id -> its pieces at their offsets from the anchor
+abs_key = {}                                         # record id -> its pieces on their own squares
 n_pos = 0
 raw_use, raw_n = Counter(), 0                        # piece-square counts of the positions learned so far
 
@@ -101,6 +117,7 @@ def learn_one(f):
         if e.rid is not None:
             stored[frozenset((sqs[i], r["exp"].tokens[i]) for i in e.span)] += 1
             rel_key[e.rid] = offsets(e.span, r["exp"])
+            abs_key[e.rid] = frozenset((sqs[i], r["exp"].tokens[i]) for i in e.span)
     for e in r["top"]:
         if e.token is not None:
             (i,) = tuple(e.span)
@@ -144,7 +161,7 @@ class Model:
     def __init__(self, kc, kx):
         self.kc, self.kx = kc, kx
         tops = L.cnt.passive(L.cnt.root, TOP)
-        self.top_c, self.anchor, self.size, self.keys = Counter(), {}, {}, {}
+        self.top_c, self.anchor, self.size, self.keys, self.akeys = Counter(), {}, {}, {}, {}
         for rid, c in tops.items():
             cid = lvl(cpath_of_record(rid), kc).id
             self.top_c[cid] += c
@@ -154,7 +171,12 @@ class Model:
             self.size.setdefault(cid, Counter())[len(L.records[rid].span)] += c
             if rid in rel_key:
                 self.keys.setdefault(cid, Counter())[rel_key[rid]] += c
+                self.akeys.setdefault(cid, Counter())[abs_key[rid]] += c
         self.n_concepts = len(self.top_c) + 1
+        self.anchor_all = Counter()
+        for d in self.anchor.values():
+            self.anchor_all.update(d)
+        self.ctx_fill = {}
         self.top_tot = sum(self.top_c.values()) + sum(single_tops.values()) + n_pos + ALPHA * (self.n_concepts + 768) + 1
         self.fill_cache = {}
 
@@ -221,6 +243,38 @@ class Model:
                 continue
             p += c / tot * self.fill_prob(up(L.records[rid].leaf, self.kx), key, prim)
         return p
+
+    def chunk_fills(self, xnode):
+        """The content concepts (at level kc) of the chunks filled at a context concept."""
+        if xnode.id not in self.ctx_fill:
+            out = Counter()
+            for f, c in L.ctx.passive(xnode, FILL).items():
+                if f[0] == "c":
+                    out[lvl(cpath_of_record(f[1]), self.kc).id] += c
+            self.ctx_fill[xnode.id] = out
+        return self.ctx_fill[xnode.id]
+
+    def context_bits(self, xpath, cid, anchor, occupied):
+        """A chunk's head from the board decoded so far: that a chunk comes, its anchor
+        among the free squares, then its content concept by FILL along the context path."""
+        tot_c = sum(self.top_c.values())
+        bits = -math.log2((tot_c + ALPHA) / self.top_tot)
+        free = sum(c for s, c in self.anchor_all.items() if s not in occupied)
+        bits -= math.log2((self.anchor_all.get(anchor, 0) + ALPHA) / (free + ALPHA * (64 - len(occupied))))
+        p, ps = None, []
+        for node in xpath:
+            d = self.chunk_fills(node)
+            n = sum(d.values())
+            p = (d.get(cid, 0) + ALPHA) / (n + ALPHA * self.n_concepts) if p is None else (d.get(cid, 0) + p) / (n + 1.0)
+            ps.append(p)
+        if CTXR == 3:                        # every concept on the path predicts; their even mixture
+            return bits - math.log2(sum(ps) / len(ps))
+        return bits - math.log2(p)
+
+    def abs_copy_bits(self, cid, key):
+        d = self.akeys.get(cid, {})
+        n = d.get(key, 0)
+        return -math.log2(n / sum(d.values())) if n else float("inf")
 
     def copy_bits(self, cid, key):
         d = self.keys.get(cid, {})
@@ -289,6 +343,8 @@ def part_bits(M, part, exp, cnode, side, memo):
 def either(a, b):
     """-log2 of the even mixture of two routes with these code lengths."""
     m = min(a, b)
+    if m == float("inf"):
+        return m
     return m - math.log2((2.0 ** (m - a) + 2.0 ** (m - b)) / 2)
 
 
@@ -303,15 +359,31 @@ def flat_bits(M, cn, e, anchor):
     return either(rel, ab)
 
 
+def partial_context(board, anchor_sq):
+    """The star seen from an empty anchor square over the pieces decoded so far: only the
+    pieces seen count (a ray or jump that meets nothing yet is left out, not EDGE/EMPTY)."""
+    st = C.star(board, anchor_sq)
+    x = {"sq": C.square_name(anchor_sq)}
+    for name, dirs in (("rays", C.RAYS), ("jumps", C.JUMPS)):
+        hits = {f"{d}:{st[d]}": 1.0 / 8 for d, _ in dirs if st[d] not in (C.EDGE, C.EMPTY)}
+        if hits:
+            x[name] = hits
+    return x
+
+
 def code_bits(M, r, copy=False):
     exp, memo = r["exp"], r["memo"]
     sqs = exp.data[1]
     bits = M.stop_bits()
+    board, occupied = {}, set()
     for e in r["top"]:
+        units = [(exp.tokens[i], sqs[i]) for i in e.span]
         if e.token is not None:
             (i,) = tuple(e.span)
             ACC["single tops"] += M.single_bits(e.token, sqs[i])
             bits += M.single_bits(e.token, sqs[i])
+            board.update({sq: t for t, sq in units})
+            occupied.add(C.square_name(sqs[i]))
             continue
         path = memo.setdefault(id(e), L.cnt.categorize(e.cnt))
         cn = lvl(path, M.kc)
@@ -326,10 +398,31 @@ def code_bits(M, r, copy=False):
             inner = M.anchor_bits(cn.id, anchor) + inside_bits(M, e, exp, cn, memo)
         if copy:
             cb = M.anchor_bits(cn.id, anchor) + M.copy_bits(cn.id, offsets(e.span, exp))
+            if ACOPY:
+                ab = M.abs_copy_bits(cn.id, frozenset((sqs[i], exp.tokens[i]) for i in e.span))
+                ACC["abs copy cheaper (count)"] += ab < cb
+                cb = either(cb, ab)
             ACC["chunk tops copied (count)"] += cb < inner
             ACC["copy, choosing the instance"] += cb if cb < inner else 0.0
             inner = either(cb, inner)
-        bits += M.top_bits(cn.id) + inner
+        head = M.top_bits(cn.id) + inner
+        if CTXR and L.dom.flat:
+            xk = ("ctx", id(e))
+            if xk not in memo:
+                memo[xk] = L.ctx.categorize(e.ctx if CTXR == 2 else partial_context(board, sqs[min(e.span)]))
+            xpath = memo[xk][:max(1, len(memo[xk]) - M.kx)]
+            hb = M.context_bits(xpath, cn.id, anchor, occupied)
+            body = M.template_bits(cn, e)
+            if "abs" in e.cnt:
+                body = either(body, M.template_bits(cn, e, "abs"))
+            if copy:
+                body = either(M.copy_bits(cn.id, offsets(e.span, exp)), body)
+            ACC["context head cheaper (count)"] += hb < M.top_bits(cn.id) + M.anchor_bits(cn.id, anchor)
+            ACC["context head"] += hb
+            head = either(head, hb + body)
+        bits += head
+        board.update({sq: t for t, sq in units})
+        occupied.update(C.square_name(sq) for _, sq in units)
     return bits
 
 
