@@ -1896,7 +1896,7 @@ class Trellis3:
                       sibling_window: int = 0, after: Optional[Sequence[str]] = None,
                       after_level: int = 0, after_mode: str = "next",
                       story_beta: float = 1.0, story_fill: Optional[float] = None,
-                      story_window: bool = False) -> Optional[List[str]]:
+                      story_window: bool = False, join_check: bool = False) -> Optional[List[str]]:
         """Expansive generation from the two hierarchies alone. Every step reads
         statistics held by concepts: a whole experience is drawn from the content
         root (SENT); a content concept gives where its parts stood (LPART, RPART:
@@ -1959,7 +1959,12 @@ class Trellis3:
         only records that stood right after the word just generated count (the frozen
         left neighbour), so members that never followed it drop out (all of them, if
         none did, are kept as without the prompt); ``story_window="both"``: also only
-        records whose right neighbour was the stored slot's (a sentence end included)."""
+        records whose right neighbour was the stored slot's (a sentence end included).
+
+        ``join_check``: a filler is kept only if the join it makes is attested: the
+        learned category of the word just generated followed by the learned category of
+        the filler's first word stood together in some stored experience (categories as
+        window slots are named, read as they are now; all fillers are kept if none is)."""
         pv_lift = self._pv_lift(after) if after and story_fill is not None and self.story_facet else None
         fill_predict = isinstance(fill_name, str) and fill_name.endswith("+predict")
         if fill_predict:
@@ -2057,6 +2062,24 @@ class Trellis3:
                 tot = sum(bag.values()) or 1.0
                 names[tok] = {u: p / tot for u, p in bag.items()}
             return names[tok]
+
+        def cat_of(tok: str):
+            if tok in (BOS, EOS):
+                return tok
+            bag = self._window_name(tok)
+            return max(bag.items(), key=lambda kv: kv[1])[0] if bag else tok
+
+        def first_word(f: tuple) -> Optional[str]:
+            e = as_elem(f)
+            while e is not None and e.token is None:
+                e = e.left
+            return e.token if e is not None else None
+
+        joins = set()
+        if join_check:
+            for e in self.records:
+                if e.token is not None and e.ctx and "l1" in e.ctx:
+                    joins.add((cat_of(e.ctx["l1"]), cat_of(e.token)))
 
         out: List[str] = []
         pat = list(pattern) if pattern is not None else None
@@ -2263,19 +2286,19 @@ class Trellis3:
                 if fill_predict and primitive and fills:
                     # Cobweb prediction from the AND side: the categories of the words that
                     # stood in this part of the composite concept, each read as it is now
-                    def cat_of(tok):
+                    def kind_of(tok):
                         bag = self._window_name(tok)
                         return max(bag.items(), key=lambda kv: kv[1])[0] if bag else None
                     cats: Dict[str, float] = {}
                     for (rid, _), c in self.cnt.passive(x, a).items():
                         tok = self.records[rid].token
                         if tok is not None:
-                            k = cat_of(tok)
+                            k = kind_of(tok)
                             cats[k] = cats.get(k, 0.0) + c
                     tot = sum(cats.values())
                     if tot > 0:
                         size = len(cats) + 1
-                        weighted = {f: c * (cats.get(cat_of(f[1]), 0.0) + self.alpha) / (tot + self.alpha * size)
+                        weighted = {f: c * (cats.get(kind_of(f[1]), 0.0) + self.alpha) / (tot + self.alpha * size)
                                     for f, c in fills.items()}
                         fills = weighted
                 if pv_lift is not None and fills:
@@ -2286,6 +2309,12 @@ class Trellis3:
                                               (self.records[where[0]].ctx or {}).get("r1") if story_window == "both" else None)
                     if any(v > 0 for v in weighted.values()):
                         fills = weighted
+                if join_check and fills:
+                    # the join this filler makes with the word just generated is attested
+                    prev = cat_of(out[-1] if out else BOS)
+                    kept = {f: c for f, c in fills.items() if (prev, cat_of(first_word(f) or EOS)) in joins}
+                    if kept:
+                        fills = kept
                 if sib is not None and fills:
                     # the frozen left sibling predicts the right part: each candidate
                     # weighted by how much more likely its facets are under that concept
