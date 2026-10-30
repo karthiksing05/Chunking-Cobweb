@@ -66,8 +66,17 @@ def curve_panel(ax, data, title, ymax, label_end=True):
         ys = data[p]
         ax.plot(range(1, len(ys) + 1), ys, color=PLAYER[p], marker=MARK[p], ms=4.5, lw=1.6,
                 ls="-" if p == "M" else "--" if p == "A" else ":")
-        if label_end:
-            ax.annotate(p, (len(ys), ys[-1]), xytext=(4, 0), textcoords="offset points", color=PLAYER[p],
+    if label_end:
+        # end labels, nudged apart when curves finish at the same height
+        ends = sorted(((data[p][-1], len(data[p]), p) for p in ("M", "A", "B")), reverse=True)
+        placed = []
+        for y, x, p in ends:
+            yl = y
+            for q in placed:
+                if abs(q - yl) < ymax * 0.06:
+                    yl = q - ymax * 0.06
+            placed.append(yl)
+            ax.annotate(p, (x, y), xytext=(x + 0.18, yl), textcoords="data", color=PLAYER[p],
                         fontweight="bold", va="center", fontsize=8.5)
     ax.set_xlim(0.6, 7.6)
     ax.set_ylim(0, ymax)
@@ -81,8 +90,9 @@ def fig_recall(runs, phase, n_pieces, fname):
              for k in (phase, "random " + phase)}
     ymax = n_pieces + 2
     for col, (src, data) in enumerate((("Chase & Simon (1973)", CS_FIG1), ("TRELLIS", model))):
-        curve_panel(axes[0, col], data[phase], f"{src} · {'middle' if phase == 'middle' else 'end'} games", ymax)
-        curve_panel(axes[1, col], data["random " + phase], f"{src} · random {'middle' if phase == 'middle' else 'end'} games", ymax)
+        word = "middle-game" if phase == "middle" else "end-game"
+        curve_panel(axes[0, col], data[phase], f"{src}\n{word} positions", ymax)
+        curve_panel(axes[1, col], data["random " + phase], f"{src}\nrandom positions, same pieces", ymax)
         for ax in axes[:, col]:
             ax.axhline(n_pieces, color=RULE, lw=1, zorder=0)
     for ax in axes[1]:
@@ -107,14 +117,16 @@ def fig_chunks(runs):
                 else:
                     sizes = avg(runs, lambda r: r["players"][p][phase]["successive chunk sizes"])
                     per = avg(runs, lambda r: r["players"][p][phase]["chunks per trial"])
-                xs = [i + 1 for i, v in enumerate(sizes) if v is not None]
-                ys = [v for v in sizes if v is not None]
-                ax.plot(xs, ys, color=PLAYER[p], marker=MARK[p], ms=4, lw=1.5)
-                ax.annotate(f"{p}  {per:.1f}/trial", (xs[-1], ys[-1]), xytext=(5, 0), textcoords="offset points",
-                            color=PLAYER[p], fontsize=7.5, va="center")
-            ax.set_title(f"{src} · {phase} games", loc="left")
+                # a chunk slot nobody filled (TRELLIS holds 7 units) is absent, not size 0
+                xs = [i + 1 for i, v in enumerate(sizes) if v]
+                ys = [v for v in sizes if v]
+                ax.plot(xs, ys, color=PLAYER[p], marker=MARK[p], ms=4, lw=1.5,
+                        ls="-" if p == "M" else "--" if p == "A" else ":", label=f"{p}  ({per:.1f} chunks/trial)")
+            ax.set_title(f"{src}\n{phase}-game positions", loc="left")
             ax.set_xticks(range(1, 9))
-            ax.set_xlim(0.6, 10.2)
+            ax.set_xlim(0.6, 8.4)
+            ax.set_ylim(0, 4.4)
+            ax.legend(fontsize=7, loc="upper right")
     for ax in axes[1]:
         ax.set_xlabel("Successive chunk on trial 1")
     for ax in axes[:, 0]:
@@ -221,8 +233,9 @@ def fig_scaling():
         ax.set_title(title, loc="left")
         ax.set_xlabel("Positions learned")
     axes[0].set_ylabel("Bits per held-out position")
-    axes[-1].legend(fontsize=7.5, loc="upper right", bbox_to_anchor=(1.02, 1.0))
-    fig.tight_layout()
+    h, l = axes[0].get_legend_handles_labels()
+    fig.legend(h, l, loc="lower center", ncol=len(l), fontsize=8, bbox_to_anchor=(0.5, -0.04))
+    fig.tight_layout(rect=(0, 0.07, 1, 1))
     fig.savefig(os.path.join(OUT, "chess_chunkers.png"))
     plt.close(fig)
     return table

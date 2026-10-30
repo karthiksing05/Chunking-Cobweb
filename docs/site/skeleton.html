@@ -254,6 +254,8 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
 .empty { color: var(--muted); font-size: 14.5px; }
 #tip { position: fixed; z-index: 20; pointer-events: none; background: var(--ink); color: var(--bg); font-family: var(--sans); font-size: 13.5px; line-height: 1.45; padding: 7px 10px; border-radius: 6px; max-width: 340px; box-shadow: 0 2px 10px rgba(0,0,0,.2); }
 #tip .m { font-family: var(--font-mono); font-size: 12px; }
+details.history { margin-top: 2.5rem; border-top: 1px solid var(--rule); padding-top: 1rem; }
+details.history > summary { cursor: pointer; font-weight: 600; color: var(--accent); margin-bottom: 1rem; }
 @media (max-width: 920px) {
   .shell { grid-template-columns: 1fr; gap: 0; padding-top: 12px; }
   .toc { display: none; }
@@ -357,7 +359,7 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
   <p><b>Memory stays current without rebuilds.</b> Checking 700 records per experience and moving the misplaced ones (verify 700) brings misplaced context to 0.5% and misplaced content to 2.6–2.9% of stored weight on 2,000 TinyStories sentences, at 2.3–3.1 times the original learning time, and passes the grammar guard. Repair on use keeps the content that memory actually uses under 1% misplaced at about 1.4 times the original's cost (<a href="#sustain">Section 4</a>).</p>
   <p><b>Parses agree across seeds as memory grows</b>: bracket F1 between two seeds rises from 0.64 at 250 sentences to 0.90 at 2,000, with no gold trees (<a href="#s-consist">S2</a>).</p>
   <p><b>Gap filling continues prompts</b>: 0.86 of trigrams attested after a one-word prefix and 0.84 after two words; infill stays at 0.22 (<a href="#s-prompt">S1</a>). On bAbI, the same mechanism answers with an answer of the right type 0.60 of the time, against 0.20 for a frequency baseline (<a href="#s-babi">S4</a>).</p>
-  <p><b>Chess chunks reproduce Chase and Simon.</b> After 4,000 positions, recall of real positions exceeds recall of scrambled ones (0.77 vs 0.54 and 0.88 vs 0.73 at θ 16), when chunks are recognised by where their pieces stand (<a href="#s-chess">S6</a>).</p>
+  <p><b>Chess chunks reproduce the shape of Chase and Simon (1973).</b> Rerunning their experiments figure for figure, more experience recalls more of a real board (trial 1: 14.5, 17.3, 19.1 pieces after 300, 1,000, 4,000 positions) with a third of that spread on random boards, the first chunk is the largest, and chunk relations correlate with theirs (r 0.61 within, 0.82 between). Recall is too high and saturates by trial 3. As a coder TRELLIS wins only on shapes moved to new squares, and shape-based BPE nearly matches it there (<a href="#s-chess">S6</a>).</p>
   <p><b>The previous sentence directs the next.</b> Given a story sentence, a general concept directed by it makes a next sentence that fits (cross share 0.40 / 0.54, against −0.13 / −0.04 unconditioned and 0.34 / 0.51 for copying a stored sentence), with three to five times more new sentences and a cost of 1–5 points of grammar (<a href="#s-sem">S7</a>).</p>
   <p><b>Still failing:</b> the content tree adds no gain to the chunk factor on held-out composites, infill fails to fit both sides, and chunk context through neighbouring chunks makes the learner memorise (<a href="#f-known">F2</a>).</p>
 
@@ -987,8 +989,107 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
 <!-- ============================================================ S6 CHESS -->
 <section class="page" data-page="s-chess" hidden>
   <p class="eyebrow">Study S6</p>
-  <h1>Chess: Chase and Simon recall, and chunks at every size</h1>
-  <p class="lede">Memory learned from real positions recalls real positions better than scrambled ones, as chess experts do, and the chunks it recognises are familiar chess patterns. Scrambled recall still rises more than Chase and Simon found.</p>
+  <h1>Chess: Chase and Simon, figure for figure, and chunks that move</h1>
+  <p class="lede">TRELLIS reproduces the shape of Chase and Simon's (1973) findings: more experience means more of a real board recalled, a small effect on random boards, big chunks first, and chunks held together by chess relations. It recalls too much too soon. As a compressor it beats co-occurrence chunks only where familiar shapes stand on new squares.</p>
+
+  <h2>Chase and Simon (1973), figure for figure</h2>
+  <div class="col">
+    <p>Each of the paper's experiments is rerun on a TRELLIS player (flat chunks, interaction joins, absolute squares). The paper's own numbers are on the left of each figure, TRELLIS's on the right, both seeds averaged (s13, s17).</p>
+    <ul>
+      <li><b>Players.</b> Experience stands in for rating: B (beginner) learns 300 positions, A (class A) 1,000, M (master) 4,000, all from Lichess games rated 1800 and above.</li>
+      <li><b>Positions.</b> 100 held-out middle-game positions (ply 41, 24 to 26 pieces) and end-game positions (ply 81, 12 to 15 pieces). Each also appears as a random position: the same pieces on random squares.</li>
+      <li><b>Trials.</b> One 5-second view per trial puts 7 units in short-term memory: a recognised stored chunk counts as one unit, any other piece as one unit. The board is rebuilt from them, and the rebuild is kept for the next trial, as subjects kept their board.</li>
+    </ul>
+  </div>
+  <figure>
+    <div class="fig"><img class="plot" src="cs_fig1.png" alt="Four panels, pieces placed correctly against trial. Chase and Simon middle games: master 16 on trial 1, class A 8.5, beginner 4.5. TRELLIS middle games: master 19.1, class A 17.3, beginner 14.5, all reaching the full board by trial 3. Random positions: Chase and Simon players 2 to 3 pieces on trial 1, master lowest after; TRELLIS players 7.9 to 9.6 on trial 1, all full by trial 4." loading="lazy"></div>
+  </figure>
+  <figcaption><b>Figure 11a.</b> Middle-game recall by trial (Chase and Simon's Fig. 1). The grey line is the full board.</figcaption>
+  <figure>
+    <div class="fig"><img class="plot" src="cs_fig2.png" alt="Four panels, pieces placed correctly against trial for end-game positions. Chase and Simon: master 8, class A 7, beginner 4.5 on trial 1. TRELLIS: master 11.2, class A 10.2, beginner 9.1, all full by trial 2. Random end games: Chase and Simon 2 to 3 pieces; TRELLIS 7.4 to 8.2." loading="lazy"></div>
+  </figure>
+  <figcaption><b>Figure 11b.</b> End-game recall by trial (Chase and Simon's Fig. 2).</figcaption>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Pieces on trial 1</th><th class="num">B, real</th><th class="num">A, real</th><th class="num">M, real</th><th class="num">M − B, real</th><th class="num">M − B, random</th></tr></thead>
+    <tbody>
+      <tr><th>Chase &amp; Simon, middle games</th><td class="num">4.5</td><td class="num">8.5</td><td class="num">16</td><td class="num">11.5</td><td class="num">−0.5</td></tr>
+      <tr><th>TRELLIS, middle games</th><td class="num">14.5</td><td class="num">17.3</td><td class="num">19.1</td><td class="num">4.6</td><td class="num">1.7</td></tr>
+      <tr><th>Chase &amp; Simon, end games</th><td class="num">4.5</td><td class="num">7</td><td class="num">8</td><td class="num">3.5</td><td class="num">0</td></tr>
+      <tr><th>TRELLIS, end games</th><td class="num">9.1</td><td class="num">10.2</td><td class="num">11.2</td><td class="num">2.1</td><td class="num">0.8</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><b>What replicates.</b> Recall of real positions rises with experience, and the gap between players on real boards is about three times the gap on random boards. End games show the same order with a smaller spread, as in the paper.</li>
+    <li><b>What does not.</b> The levels are too high: a TRELLIS beginner's 7 units always hold at least 7 pieces, where Chase and Simon's beginner placed 4.5, and every player rebuilds the whole board by trial 3. Random recall still rises a little with experience (1.7 pieces), where the paper's master did no better than the beginner. Short-term memory is the same 7 units for every player; nothing here was fitted to the paper.</li>
+  </ul>
+  <figure>
+    <div class="fig"><img class="plot" src="cs_chunks.png" alt="Pieces per chunk against successive chunk on trial 1. Chase and Simon middle games: master's first chunk 3.8 pieces, falling to about 2; class A and beginner start near 2.5. TRELLIS middle games: master 4.0, class A 3.9, beginner 3.6, all falling to 1 by the seventh chunk. End games: both fall from 2.2 to 3.2 to about 1." loading="lazy"></div>
+  </figure>
+  <figcaption><b>Figure 11c.</b> Size of each successive chunk on trial 1 (Chase and Simon's Table 8). The legend gives chunks per trial.</figcaption>
+  <p>As in the paper, the first chunk is the largest and the master's is the largest of all (4.0 pieces against Chase and Simon's 3.8). TRELLIS always uses all 7 units, so its chunk count does not grow with skill; Chase and Simon's masters recalled more chunks (7.7) than their beginners (5.3). TRELLIS's chunk sizes fall steadily because it fills short-term memory largest first.</p>
+  <figure>
+    <div class="fig"><img class="plot" src="cs_relations.png" alt="Probability of each combination of chess relations between two successively placed pieces, within a chunk and between chunks, against the a priori probability over all pairs. Chase and Simon and TRELLIS both put pairs with defense, proximity and same colour mostly within chunks, and unrelated pairs mostly between chunks. Correlation with Chase and Simon: within 0.61, between 0.82." loading="lazy"></div>
+  </figure>
+  <figcaption><b>Figure 11d.</b> Relations between pairs of pieces within a chunk, between chunks, and over all pairs (Chase and Simon's Table 6). A attack, D defense, P proximity, C same colour, S same type.</figcaption>
+  <p>The relations that hold a TRELLIS chunk together are the ones that held Chase and Simon's subjects' chunks together: pairs that defend each other, stand close and share a colour (DPC, DCS, PCS, DPCS) fall within chunks far above their a priori rate, and unrelated pairs (−) fall between chunks. The profiles correlate with the paper's at r 0.61 within chunks and 0.82 between. TRELLIS over-uses same-colour, same-type pairs (CS) within chunks, its pawn chains.</p>
+  <figure>
+    <div class="fig"><img class="plot" src="cs_fig5.png" alt="Left, Chase and Simon Fig. 5: latency between placements falls from 5.8 seconds for pairs with no relation to 1.0 second for four relations. Right, TRELLIS: the share of pairs held in one chunk rises from 0 for no relation to 0.65 for four relations, for every player." loading="lazy"></div>
+  </figure>
+  <figcaption><b>Figure 11e.</b> More relations, tighter binding (Chase and Simon's Fig. 5). TRELLIS has no latencies, so the proxy is the share of pairs held in one chunk.</figcaption>
+  <p>Pieces with more relations between them are bound more tightly: Chase and Simon's subjects placed them faster, and TRELLIS holds them in one chunk more often (0 with no relation, 0.65 with four). The more experienced player binds more at every count.</p>
+
+  <h2>Familiar shapes on new squares</h2>
+  <p>A co-occurrence chunk (byte-pair merging on piece-square sets) is an exact set of pieces on exact squares, so the same shape one file over is a new, unseen item. TRELLIS describes a chunk by its pieces at offsets from an anchor (and, in one arm, also by its squares) and can copy a stored chunk at a new anchor. Both learn 4,000 move-30 positions from ECO C games (1.e4 e5 and the French) with White's king on files e–h, then code 1,000 unlearned positions from each test set (<code>chess_transfer_sets.py</code>, seed 13). Held-out code bits per position, the model not charged; co-occurrence at its best merge count (2,000).</p>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Test set</th><th class="num">Piece-square list</th><th class="num">Co-occurrence chunks</th><th class="num">TRELLIS (offsets + squares)</th><th class="num">TRELLIS (offsets only)</th></tr></thead>
+    <tbody>
+      <tr><th>control: same kind of position</th><td class="num">183.2</td><td class="num best">108.6</td><td class="num">127.7</td><td class="num">130.7</td></tr>
+      <tr><th>dropped: control's pieces on one edge file removed</th><td class="num">167.1</td><td class="num best">112.1</td><td class="num">123.6</td><td class="num">125.6</td></tr>
+      <tr><th>family: queen's-pawn openings (ECO D, E)</th><td class="num">192.4</td><td class="num best">124.1</td><td class="num">138.6</td><td class="num">138.3</td></tr>
+      <tr><th>wing: White castled queenside</th><td class="num">199.4</td><td class="num best">143.8</td><td class="num">158.5</td><td class="num">154.6</td></tr>
+      <tr><th>shift: the dropped positions moved one file</th><td class="num">210.2</td><td class="num">206.7</td><td class="num">151.6</td><td class="num best">147.2</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><b>Shift.</b> Moving every piece one file (the pieces falling off the far edge removed, at most 3, kings kept) erases co-occurrence chunks' saving: 3.5 bits below the piece-square list, against 55 on the same positions unmoved. TRELLIS keeps a 58–62 bit saving and codes the shifted positions 55–60 bits cheaper. Moving costs co-occurrence chunks 95 bits per position, TRELLIS 28 (with squares) or 22 (offsets only).</li>
+    <li><b>Why.</b> TRELLIS still copies about 5.3 chunks per shifted position, as it does unmoved, but by offsets: copies on their own squares fall from 4.4 to 1.7 per position. The extra cost is the anchors (14.5 to 27.6 bits), which each concept predicts from the squares it was seen on.</li>
+    <li><b>Natural shifts.</b> On other openings and the other wing co-occurrence chunks still win, but the gap narrows from 19 bits (control) to 14 (family) and 11 (wing, offsets only). Queenside castling and queen's-pawn structures are mostly new shapes, not old shapes moved.</li>
+    <li><b>Squares in the description</b> help on the control (127.7 against 130.7) and hurt wherever shapes move (shift 151.6 against 147.2): they tie concepts to places.</li>
+  </ul>
+
+  <h2>Six coders, four test sets, four amounts of learning</h2>
+  <p>Do chunks described by shape, not square, close the gap for other chunkers too? Each coder learns 300 to 4,000 positions and codes 1,000 unlearned positions from four of the sets above (seed 13, held-out code bits, model not charged):</p>
+  <ul>
+    <li><b>BPE, squares:</b> byte-pair merging on piece-square sets (the co-occurrence chunks above).</li>
+    <li><b>BPE, shapes:</b> the same merging on translation-free shapes, each chunk coded as its shape plus an anchor square.</li>
+    <li><b>Krimp:</b> MDL itemset mining (Vreeken et al., 2011), with its standard cover.</li>
+    <li><b>xz:</b> a general-purpose compressor, each position coded given all learned positions.</li>
+    <li><b>TRELLIS:</b> the better of its two arms (offsets only, or offsets + squares).</li>
+  </ul>
+  <figure>
+    <div class="fig"><img class="plot" src="chess_chunkers.png" alt="Four panels of bits per held-out position against positions learned, 300 to 4,000. Control: BPE on squares falls to 108.8, BPE on shapes 111.3, xz 122.7, TRELLIS 127.7, Krimp 142.3, piece-square list 183.2. Other openings: BPE shapes 121.4, TRELLIS 138.3. Other wing: BPE shapes 141.2, TRELLIS 154.6. Shifted one file: TRELLIS 147.2, BPE shapes 149.7, xz 181.3, Krimp 198.3, BPE squares 205.5, piece-square list 210.2." loading="lazy"></div>
+  </figure>
+  <figcaption><b>Figure 12.</b> Held-out bits per position as learning grows, by coder and test set (lower is better).</figcaption>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>4,000 learned</th><th class="num">Control</th><th class="num">Other openings</th><th class="num">Other wing</th><th class="num">Shifted</th></tr></thead>
+    <tbody>
+      <tr><th>piece-square list</th><td class="num">183.2</td><td class="num">192.4</td><td class="num">199.4</td><td class="num">210.2</td></tr>
+      <tr><th>BPE, squares</th><td class="num best">108.8</td><td class="num">123.4</td><td class="num">142.4</td><td class="num">205.5</td></tr>
+      <tr><th>BPE, shapes</th><td class="num">111.3</td><td class="num best">121.4</td><td class="num best">141.2</td><td class="num">149.7</td></tr>
+      <tr><th>Krimp</th><td class="num">142.3</td><td class="num">156.1</td><td class="num">173.4</td><td class="num">198.3</td></tr>
+      <tr><th>xz</th><td class="num">122.7</td><td class="num">132.2</td><td class="num">153.0</td><td class="num">181.3</td></tr>
+      <tr><th>TRELLIS</th><td class="num">127.7</td><td class="num">138.3</td><td class="num">154.6</td><td class="num best">147.2</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><b>Shapes rescue BPE.</b> Describing chunks by shape rather than square costs BPE only 2.5 bits on the control and saves it 56 bits on shifted positions. Shape BPE then trails TRELLIS on shifted positions by only 2.5 bits at 4,000 positions (7 at 300), and beats it by 14–16 bits everywhere else.</li>
+    <li><b>TRELLIS is not the best coder.</b> It wins only on shifted positions, narrowly. Its advantage in the transfer test came from describing chunks by shape, which a frequency miner can also do.</li>
+    <li><b>Square-bound coders do not transfer.</b> BPE on squares, Krimp and xz all lose most of their saving on shifted positions, and BPE on squares and xz get worse there as they learn more.</li>
+    <li><b>Every learner improves with data</b> except Krimp, which flattens by 1,000 positions.</li>
+  </ul>
+
+  <details class="history">
+  <summary>Earlier chess studies: recognition recall, chunk types, move choice, lossless codes and learning curves</summary>
   <div class="col">
     <p>GraphTrellis learns real positions (Lichess 1800+, ply 30), with positions as board graphs. At each checkpoint it sees 100 held-out positions and the same pieces scattered at random.</p>
     <ul>
@@ -1215,25 +1316,8 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
   </ul>
   <p>At 4,000 positions the gap to co-occurrence chunks falls from 42 to 17 bits on held-out positions and from 35 to 8.5 on the latest prequential positions. Now 6.2 of 6.5 coded chunks are exact copies; the rest of the gap is in their probabilities. TRELLIS reads how often a chunk was a top unit of learning's parse, while the code now chooses its own units; co-occurrence counts are counts of exactly the items their code uses. Making learning's top units the compression-chosen cover would align the two. Tried as a side flag (<code>TOPC=1</code>), it does worse: 142.0 bits per position prequentially at 4,000 positions against 136.1, and 137.0 against 130.2 on the latest 2,000. Memory stops growing (2,366 distinct chunks against 9,798), because a chunk joins the cover only once it already saves bits. Counting the code's own uses on top of learning's counts (<code>USED</code>) also does worse (154.6 against 149.0 at 1,000). The remaining gap is the price of a memory that keeps learning new chunks, not a mismatch of counts.</p>
 
-  <h3>Where co-occurrence chunks fail: familiar shapes on new squares (round of 29 October)</h3>
-  <p>A co-occurrence chunk is an exact set of pieces on exact squares, so the same shape one file over is a new, unseen item. TRELLIS describes a chunk by its pieces at offsets from an anchor (and, in one arm, also by its squares) and can copy a stored chunk at a new anchor. Both learn 4,000 move-30 positions from ECO C games (1.e4 e5 and the French) with White's king on files e–h, then code 1,000 unlearned positions from each test set (<code>chess_transfer_sets.py</code>, seed 13). Held-out code bits per position, the model not charged; co-occurrence at its best merge count (2,000).</p>
-  <div class="tbl-wrap"><table class="tbl">
-    <thead><tr><th>Test set</th><th class="num">Piece-square list</th><th class="num">Co-occurrence chunks</th><th class="num">TRELLIS (offsets + squares)</th><th class="num">TRELLIS (offsets only)</th></tr></thead>
-    <tbody>
-      <tr><th>control: same kind of position</th><td class="num">183.2</td><td class="num best">108.6</td><td class="num">127.7</td><td class="num">130.7</td></tr>
-      <tr><th>dropped: control's pieces on one edge file removed</th><td class="num">167.1</td><td class="num best">112.1</td><td class="num">123.6</td><td class="num">125.6</td></tr>
-      <tr><th>family: queen's-pawn openings (ECO D, E)</th><td class="num">192.4</td><td class="num best">124.1</td><td class="num">138.6</td><td class="num">138.3</td></tr>
-      <tr><th>wing: White castled queenside</th><td class="num">199.4</td><td class="num best">143.8</td><td class="num">158.5</td><td class="num">154.6</td></tr>
-      <tr><th>shift: the dropped positions moved one file</th><td class="num">210.2</td><td class="num">206.7</td><td class="num">151.6</td><td class="num best">147.2</td></tr>
-    </tbody>
-  </table></div>
-  <ul>
-    <li><b>Shift.</b> Moving every piece one file (the pieces falling off the far edge removed, at most 3, kings kept) erases co-occurrence chunks' saving: 3.5 bits below the piece-square list, against 55 on the same positions unmoved. TRELLIS keeps a 58–62 bit saving and codes the shifted positions 55–60 bits cheaper than co-occurrence chunks. Moving costs co-occurrence chunks 95 bits per position, TRELLIS 28 (with squares) or 22 (offsets only).</li>
-    <li><b>Why.</b> TRELLIS still copies about 5.3 chunks per shifted position, as it does unmoved, but by offsets: copies on their own squares fall from 4.4 to 1.7 per position. The extra cost is the anchors (14.5 to 27.6 bits), which each concept predicts from the squares it was seen on.</li>
-    <li><b>Natural shifts.</b> On other openings and the other wing co-occurrence chunks still win, but the gap narrows from 19 bits (control) to 14 (family) and 11 (wing, offsets only). Queenside castling and queen's-pawn structures are mostly new shapes, not old shapes moved, so they are not a pure test of place.</li>
-    <li><b>Squares in the description.</b> Describing chunks by their squares helps on the control (127.7 against 130.7) and hurts wherever shapes move (shift 151.6 against 147.2, wing 158.5 against 154.6): it ties concepts to places.</li>
-  </ul>
   <p>With the model included, every TRELLIS arm codes the data in fewer bits than the piece-square list, and its cost per position keeps falling with learning. The best arm saves 26 bits per position on average and 32 on the latest positions. Co-occurrence chunks remain about 35 bits per position cheaper. The gap is the code itself: about seven concept choices per position at several bits each, where a frequent co-occurrence chunk is one cheap item. Memory growth is not the obstacle it appeared to be under the two-part count. The anchor-context alone (<code>chess_ctx="ext"</code>) did not help: within 2% on code, and recall 0.05 lower with interaction joins.</p>
+  </details>
 </section>
 
 <!-- ============================================================ S7 SEMANTIC GENERATION -->
