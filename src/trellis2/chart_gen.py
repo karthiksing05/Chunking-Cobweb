@@ -22,7 +22,8 @@ For every expansion of the gaps (up to ``gap_max`` words each) the inside pass
 sums over every tree whose yield matches, the prompt's words fixed and each free
 position summed over all words, so Z(expansion) is the grammar's own probability
 of that shape. An expansion is drawn by Z, a decomposition is drawn top-down from
-the inside scores and frozen, and each free position is filled left to right by
+the inside scores (or, with ``decomp="max"``, the likeliest split at each node) and
+frozen, and each free position is filled left to right by
 Cobweb prediction from its surroundings (``_gap_fills`` on the words placed so far,
 the prompt's fixed words and, with a story facet, the previous sentence), among
 words of the category the chart gave it.
@@ -44,9 +45,11 @@ HOLE = "_"
 
 class ChartGen:
     def __init__(self, L, cut: int = 3, lam: float = 1.0, alpha: float = 0.1, gap_max: int = 4,
-                 length=(3, 8), word_sym: str = "category", ctx_cut: int = 3, follow: bool = False):
+                 length=(3, 8), word_sym: str = "category", ctx_cut: int = 3, follow: bool = False,
+                 decomp: str = "sample"):
         self.L, self.cut, self.lam, self.alpha, self.gap_max, self.length = L, cut, lam, alpha, gap_max, length
         self.follow = follow
+        self.decomp = decomp      # "sample": each split drawn by its share of the inside score; "max": the likeliest split
         self.word_sym, self.ctx_cut = word_sym, ctx_cut   # "category" (window name), "token" (the word), or
         # "context": each occurrence named by its context concept at depth ctx_cut (where it stood)
         self._cat: Dict[str, object] = {}
@@ -261,7 +264,10 @@ class ChartGen:
         top = max(ls)
         p = np.concatenate([w * math.exp(l - top) for w, l in zip(ws, ls)])
         p = p / p.sum()
-        r = int(np.searchsorted(np.cumsum(p), rng.random() * (1 - 1e-12)))
+        if self.decomp == "max":
+            r = int(np.argmax(p))
+        else:
+            r = int(np.searchsorted(np.cumsum(p), rng.random() * (1 - 1e-12)))
         k, A, B = ks[r // len(As)], int(As[r % len(As)]), int(Bs[r % len(As)])
         self._draw_tree(ins, i, k, A, rng, leaves, tree)
         self._draw_tree(ins, k, j, B, rng, leaves, tree)
