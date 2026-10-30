@@ -189,6 +189,7 @@ for ai, arm in enumerate(arms):
     if chart is not None:
         CG = ChartGen(L, **chart)
         print(json.dumps({"tag": tag, "seed": seed, "chart": chart, **CG.stats}), flush=True)
+        print(json.dumps(CG.describe()), flush=True)
         gen = lambda p: CG.generate(["*"], g_rng, prev=p if cond else None)
         arm["chart"] = chart
     else:
@@ -236,7 +237,7 @@ for ai, arm in enumerate(arms):
 N_INF = int(os.environ.get("INFILL", 0))
 if N_INF:
     irng, g_rng = random.Random(seed + 31), random.Random(seed + 37)
-    CG = ChartGen(L, **json.loads(os.environ.get("CHART", "{}")))
+    CG = ChartGen(L, **next((a["chart"] for a in arms if "chart" in a), {}))   # the first chart arm's settings
     items = []
     for s in held:
         if len(s) >= 4 and len(items) < N_INF:

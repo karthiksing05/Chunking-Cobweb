@@ -40,13 +40,17 @@ HOLE = "_"
 
 class ChartGen:
     def __init__(self, L, cut: int = 3, lam: float = 1.0, alpha: float = 0.1, gap_max: int = 4,
-                 length=(3, 8)):
+                 length=(3, 8), word_sym: str = "category", ctx_cut: int = 3):
         self.L, self.cut, self.lam, self.alpha, self.gap_max, self.length = L, cut, lam, alpha, gap_max, length
+        self.word_sym, self.ctx_cut = word_sym, ctx_cut   # "category" (window name), "token" (the word), or
+        # "context": each occurrence named by its context concept at depth ctx_cut (where it stood)
         self._cat: Dict[str, object] = {}
         self._build()
 
     # ------------------------------------------------------------ grammar
     def cat(self, tok: str):
+        if tok not in self._cat and self.word_sym == "token":
+            self._cat[tok] = ("t", tok)
         if tok not in self._cat:
             bag = self.L._window_name(tok)
             self._cat[tok] = ("w", max(bag.items(), key=lambda kv: kv[1])[0]) if bag else ("t", tok)
@@ -62,17 +66,39 @@ class ChartGen:
         if path[-1] is not self.L.cnt.root:                   # a stale leaf: sort it again
             path = list(reversed(self.L.cnt.categorize(e.cnt)))
         path.reverse()
-        return ("c", path[min(self.cut, len(path) - 1)].id)
+        path = path[:self.cut + 1]
+        sym = ("c", path[-1].id)
+        self._path[sym] = [n.id for n in path]                 # root ... the symbol's own concept
+        return sym
+
+    def _word_context(self, e):
+        node = e.leaf
+        if node is None:
+            return None
+        path = [node]
+        while path[-1].parent is not None:
+            path.append(path[-1].parent)
+        if path[-1] is not self.L.ctx.root:
+            path = list(reversed(self.L.ctx.categorize(e.ctx)))
+        path.reverse()
+        return ("x", path[min(self.ctx_cut, len(path) - 1)].id)
 
     def sym_of(self, e):
-        return self.cat(e.token) if e.token is not None else self._concept(e)
+        if e.token is None:
+            return self._concept(e)
+        if self.word_sym == "context":
+            return self._word_context(e)
+        return self.cat(e.token)
 
     def _build(self):
         L = self.L
+        self._path = {}
         rules, emit, start = Counter(), defaultdict(Counter), Counter()
         for e in L.records:
             if e.token is not None:
-                emit[self.cat(e.token)][e.token] += 1.0
+                s = self.sym_of(e)
+                if s is not None:
+                    emit[s][e.token] += 1.0
                 continue
             if e.left is None or e.right is None or e.weight <= 0:
                 continue
@@ -93,7 +119,22 @@ class ChartGen:
         self.rB = np.array([self.ix[b] for _, b, _ in keys], dtype=np.int64)
         self.rC = np.array([self.ix[c] for _, _, c in keys], dtype=np.int64)
         self.rw = np.array([rules[k] for k in keys])
-        self.N = np.bincount(self.rC, weights=self.rw, minlength=S)
+        # back-off along the content tree: a symbol's rules, then those of its ancestors
+        # at each depth up to the root, then the pairs of every composite (P_glob):
+        # P_l(AB | C) = (n_{anc_l(C)}(AB) + lam P_{l-1}(AB | C)) / (n_{anc_l(C)} + lam)
+        comp_syms = [s for s in syms if s[0] == "c"]
+        self.levels = []                                      # per depth: (anc index of each rule, of each symbol, totals)
+        for d in range(self.cut + 1):
+            anc = lambda s: self._path[s][min(d, len(self._path[s]) - 1)]
+            ids = sorted({anc(s) for s in comp_syms})
+            pos = {x: i for i, x in enumerate(ids)}
+            r_ix = np.array([pos[anc(c)] for _, _, c in keys], dtype=np.int64)
+            s_ix = np.full(S, -1, dtype=np.int64)
+            for s in comp_syms:
+                s_ix[self.ix[s]] = pos[anc(s)]
+            N = np.bincount(r_ix, weights=self.rw, minlength=len(ids))
+            self.levels.append((r_ix, s_ix, N))
+        self.comp_ix = np.array([self.ix[s] for s in comp_syms], dtype=np.int64)
         g = Counter()
         for (a, b, _), w in rules.items():
             g[(a, b)] += w
@@ -101,7 +142,6 @@ class ChartGen:
         self.gA = np.array([self.ix[a] for a, _ in gk], dtype=np.int64)
         self.gB = np.array([self.ix[b] for _, b in gk], dtype=np.int64)
         self.gw = np.array([g[k] for k in gk]) / max(sum(g.values()), 1e-12)
-        self.denom = np.where(self.is_word, np.inf, self.N + self.lam)
         st = np.zeros(S)
         for c, n in start.items():
             st[self.ix[c]] = n
@@ -126,9 +166,15 @@ class ChartGen:
 
     def _split(self, a, b):
         """Unnormalised vector over parents C of sum over rules of P(A B | C) a_A b_B."""
-        obs = np.bincount(self.rC, weights=self.rw * a[self.rA] * b[self.rB], minlength=len(self.syms))
-        glob = float(np.dot(self.gw, a[self.gA] * b[self.gB]))
-        return (obs + self.lam * glob) / self.denom
+        prod = self.rw * a[self.rA] * b[self.rB]
+        prev = np.full(len(self.syms), float(np.dot(self.gw, a[self.gA] * b[self.gB])))
+        for r_ix, s_ix, N in self.levels:
+            obs = np.bincount(r_ix, weights=prod, minlength=len(N))
+            val = np.zeros(len(self.syms))
+            c = self.comp_ix
+            val[c] = (obs[s_ix[c]] + self.lam * prev[c]) / (N[s_ix[c]] + self.lam)
+            prev = val
+        return prev
 
     def inside(self, toks: Sequence[Optional[str]]):
         n = len(toks)
@@ -167,10 +213,16 @@ class ChartGen:
             tree.append((i, j, self.syms[C]))
             return
         tree.append((i, j, self.syms[C]))
-        mask_obs = self.rC == C
-        A_o, B_o, w_o = self.rA[mask_obs], self.rB[mask_obs], self.rw[mask_obs]
-        As, Bs = np.concatenate([A_o, self.gA]), np.concatenate([B_o, self.gB])
-        base = np.concatenate([w_o, self.lam * self.gw])
+        # P(AB | C) unrolled: each depth's rules times the share left to it by the deeper ones
+        parts_A, parts_B, parts_w, carry = [], [], [], 1.0
+        for r_ix, s_ix, N in reversed(self.levels):
+            k = s_ix[C]
+            m = r_ix == k
+            parts_A.append(self.rA[m]); parts_B.append(self.rB[m])
+            parts_w.append(carry * self.rw[m] / (N[k] + self.lam))
+            carry *= self.lam / (N[k] + self.lam)
+        parts_A.append(self.gA); parts_B.append(self.gB); parts_w.append(carry * self.gw)
+        As, Bs, base = np.concatenate(parts_A), np.concatenate(parts_B), np.concatenate(parts_w)
         ks, ws, ls = [], [], []
         for k in range(i + 1, j):
             (a, la), (b, lb) = ins[(i, k)], ins[(k, j)]
@@ -243,7 +295,8 @@ class ChartGen:
                     q = dict(raw)
                 q = {a: v for a, v in q.items() if not (a in raw and raw[a] == HOLE)}
                 fills = L._gap_fills(q)
-                cand = {f[1]: w for f, w in fills.items() if f[0] == "w" and w > 0 and self.cat(f[1]) == want}
+                members = self.emit.get(leaves[i], {})
+                cand = {f[1]: w for f, w in fills.items() if f[0] == "w" and w > 0 and f[1] in members}
                 if not cand:                                  # the context knows none: the category's own words
                     cand = dict(self.emit.get(leaves[i], {}))
                 if not cand:
@@ -253,3 +306,11 @@ class ChartGen:
         finally:
             L._pv = keep_pv
         return out
+
+    def describe(self, top: int = 12) -> dict:
+        """Each word symbol's most frequent words, and the commonest rules (a diagnostic)."""
+        cats = {repr(self.syms[i]): [w for w, _ in c.most_common(top)] + [f"({int(sum(c.values()))})"]
+                for i, c in sorted(self.emit.items(), key=lambda kv: -sum(kv[1].values()))}
+        order = np.argsort(-self.rw)[:30]
+        rules = [f"{self.syms[self.rC[k]]} -> {self.syms[self.rA[k]]} {self.syms[self.rB[k]]} ({self.rw[k]:.1f})" for k in order]
+        return {"word symbols": cats, "top rules": rules}
