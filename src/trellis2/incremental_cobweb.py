@@ -148,6 +148,11 @@ class IncrementalCobwebTree:
         # operators that change structure act, in expectation, as real
         # observations do; its counts stay fractional
         self.sample_restructure = False
+        # exact_alone: the "new" operator scores a concept holding the instance alone
+        # by its own expected correct guesses (sum of squared bag shares per
+        # attribute), as the tree scores every other concept; off, it counts 1, which
+        # overrates new concepts for bag-valued instances
+        self.exact_alone = False
         # concepts whose children a merge or split changed since the caller last
         # cleared this set (the partitions under them may now sort differently)
         self.restructured: set = set()
@@ -273,7 +278,7 @@ class IncrementalCobwebTree:
     def _ec_alone(self, x: Instance) -> float:
         """The expected correct guesses of a concept holding x alone (1 for a
         full instance of single values, as the reference has it)."""
-        if not self.partial:
+        if not self.partial and not self.exact_alone:
             return 1.0
         return sum(sum(p * p for p in v.values()) if isinstance(v, dict) else 1.0 for v in x.values()) / self.n_attrs
 

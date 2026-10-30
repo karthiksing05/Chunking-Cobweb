@@ -22,7 +22,8 @@ as dict keys do). A node has one wrapper per id (nodes are never freed), and a
 node's decoded ``av``/``pav`` tables are cached until its counts change (a
 generation counter per node). The tables returned are the cache: read only.
 The compiled module is imported from ``$TRELLIS_CWP_BUILD`` (default: the
-``build-trellis`` directory of the ``cobweb-private-trellis`` worktree).
+``build-trellis-alone`` directory of the ``cobweb-private-trellis`` worktree; ``build-trellis``
+is the same tree without ``exact_alone``).
 """
 from __future__ import annotations
 
@@ -31,7 +32,7 @@ import os
 import sys
 from typing import Dict, Hashable, Iterator, List, Sequence
 
-_BUILD = os.environ.get("TRELLIS_CWP_BUILD", "/coc/flash10/ksingara3/cobweb-private-trellis/build-trellis")
+_BUILD = os.environ.get("TRELLIS_CWP_BUILD", "/coc/flash10/ksingara3/cobweb-private-trellis/build-trellis-alone")
 if _BUILD not in sys.path:
     sys.path.insert(0, _BUILD)
 import cobweb_cu_trellis as _cu  # noqa: E402
@@ -198,6 +199,14 @@ class CUCobwebTree:
     @sample_restructure.setter
     def sample_restructure(self, on: bool) -> None:
         self.tree.sample_restructure = bool(on)
+
+    @property
+    def exact_alone(self) -> bool:
+        return self.tree.exact_alone
+
+    @exact_alone.setter
+    def exact_alone(self, on: bool) -> None:
+        self.tree.exact_alone = bool(on)
 
     @property
     def fast(self) -> bool:

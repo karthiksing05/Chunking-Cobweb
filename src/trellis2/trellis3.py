@@ -148,7 +148,7 @@ class Trellis3:
                  part_names: Optional[str] = None, verify_weight: str = "one",
                  ref_names: bool = False, repair_reached: int = 0, repair_use: int = 0,
                  repair_path: bool = False, repair_draws: int = 1, repair_now: bool = False,
-                 story_facet: bool = False):
+                 story_facet: bool = False, exact_alone: bool = False):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -382,6 +382,10 @@ class Trellis3:
         # restructure="sample": a span stored with posterior weight w merges or
         # splits concepts with probability w (see IncrementalCobwebTree)
         self.ctx.sample_restructure = self.cnt.sample_restructure = (restructure == "sample")
+        # exact_alone: a new concept is scored by what it holds (sum of squared bag
+        # shares), so bag-valued descriptions are not filed as new leaves by default
+        if exact_alone:                     # opt-in (older compiled trees lack the flag)
+            self.ctx.exact_alone = self.cnt.exact_alone = True
         self.rng = random.Random(seed)
         self.records: List[Elem] = _UseList(self) if repair_use else []
         self._rr = 0
