@@ -295,6 +295,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     <li><a href="#status"><span class="n">–</span><span>Where we stand</span></a></li>
     <li><a href="#principles"><span class="n">1</span><span>Principles</span></a></li>
     <li><a href="#representation"><span class="n">2</span><span>Representation</span></a></li>
+    <li><a href="#instances"><span class="n">2a</span><span>Instances and concepts</span></a></li>
   </ol>
   <h2>Mechanism</h2>
   <ol>
@@ -491,7 +492,87 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
   <p class="lede">Every word or chunk is described by where it occurs, in the context tree, and by what it is made of, in the content tree. Each tree describes elements in the other's terms.</p>
 @@L 263-311@@
 @@L 313-364@@
-  <div class="note"><div class="note-head">Current naming</div><p>Since 24 October a word is named by the parent concepts of 32 sampled instances, mixed at readout with the names of the words beside it (weight n/(n+4) on its own name), and chunks name word parts by coarse band names. The option <code>neighbour_chunks</code> adds the content concepts of the same-width neighbouring chunks as <code>lc</code>/<code>rc</code> to the context instance; it fails the novelty guard and is off by default (<a href="#s-prompt">S1</a>).</p></div>
+  <div class="note"><div class="note-head">Current naming</div><p>Since 24 October a word is named by the parent concepts of 32 sampled instances, mixed at readout with the names of the words beside it (weight n/(n+4) on its own name); a word is named the same way when it is a chunk's part (coarse band names, <code>part_names</code>, were tried in rounds 48–50 and are off in the S7 runs; values in <a href="#instances">2a</a>). The option <code>neighbour_chunks</code> adds the content concepts of the same-width neighbouring chunks as <code>lc</code>/<code>rc</code> to the context instance; it fails the novelty guard and is off by default (<a href="#s-prompt">S1</a>).</p></div>
+</section>
+
+<!-- ============================================================ INSTANCES -->
+<section class="page" data-page="instances" hidden>
+  <p class="eyebrow">Section 2a</p>
+  <h1>Instances and concepts, exactly</h1>
+  <p class="lede">Every value on this page was read from a learned memory: the configuration of the S7 rounds (1,000 story sentences, seed 13), with the sentence "the dog ran to get it" re-parsed after learning. It followed "the cat said go get that ball" in its story.</p>
+
+  <h2>What is stored, and in which order</h2>
+  <div class="col">
+    <p>Each experience is parsed first. Memory's analysis here is <code>[[[the dog] ran] [to [get it]]]</code>. Inside-outside gives every span and split of the sentence a posterior. Then the elements are stored, in this order:</p>
+    <ol>
+      <li><b>Each word</b>, weight 1: its context instance goes into the context tree. A word has no content instance.</li>
+      <li><b>Each composite</b>, smallest span first, weight equal to its posterior (dropped below 0.001): first its content instance into the content tree, then its context instance into the context tree. The context instance names the content leaf just made (the <code>cc</code> facet), so content must come first.</li>
+      <li><b>Generation statistics</b> for the chosen analysis only, as passive counts at the leaves (below).</li>
+    </ol>
+    <p>Every value of a facet that names concepts is a <b>bag</b>: one attribute whose value is a weighted set of concept ids summing to 1. A concept adds weight × share to each id's count, so a facet counts once in category utility however many ids it holds. Raw window tokens are single values.</p>
+  </div>
+
+  <h2>The context instance: where an element stood</h2>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Attribute</th><th>How it is built</th><th>"dog" (a word)</th><th>"the dog" (a chunk, posterior 0.64)</th></tr></thead>
+    <tbody>
+      <tr><th><code>l2 l1 r1 r2</code></th><td>The raw tokens two places either side of the span; <code>&lt;s&gt;</code> / <code>&lt;/s&gt;</code> past the edges.</td><td><code>&lt;s&gt; the · ran to</code></td><td><code>&lt;s&gt; &lt;s&gt; · ran to</code></td></tr>
+      <tr><th><code>cc</code></th><td>The element's own content, donated. A word: its identity <code>w:token</code>. A chunk: its content path in bands (below).</td><td><code>{w:dog: 1}</code></td><td><code>{c111: 1}</code></td></tr>
+      <tr><th><code>pv</code></th><td>Story runs only: the previous sentence's tokens, each 1/n; blank when no kept sentence came just before.</td><td colspan="2"><code>{the, cat, said, go, get, that, ball: 1/7 each}</code></td></tr>
+    </tbody>
+  </table></div>
+  <p class="col">Switched off in this configuration: the parent and sibling of the analysis (<code>spine</code>), the parts' context concepts (<code>children</code>), named neighbours and neighbouring chunks.</p>
+
+  <h2>The content instance: what a composite is made of</h2>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Attribute</th><th>How it is built</th><th>"the dog"</th><th>"the dog ran"</th></tr></thead>
+    <tbody>
+      <tr><th><code>L</code>, <code>R</code></th><td>Each part's <b>type name</b>: the parent concepts of up to 32 context leaves sampled from where that type has stood (weighted reservoir, A-Res). A word's type is its token; a chunk's is its content leaf. A word's name is mixed with its sampled neighbours' names (tagged <code>L&gt;</code> / <code>R&gt;</code>) at weight 1 − n/(n+4), n = how often it has been seen.</td><td>L = name of "the": <code>{-: 0.18, c52891: 0.09, c93822: 0.06, …}</code></td><td>L = name of "the dog": <code>{-: 1}</code><br>R = name of "ran": <code>{c122209: 0.15, c94133: 0.15, …, L&gt;…}</code></td></tr>
+      <tr><th><code>LC</code>, <code>RC</code></th><td>Each part's content path in bands. A word part has no content, so <code>-</code>.</td><td><code>-</code> / <code>-</code></td><td><code>{c111: 1}</code> / <code>-</code></td></tr>
+    </tbody>
+  </table></div>
+  <div class="col">
+    <p><b>Bands.</b> A path is named by a few of its concepts, chosen by information: walking down from the root (root and own leaf left out), a concept is written once for each threshold of 1, 2, 4, 6, 8 and 12 bits that its −log₂(share of the tree) first passes. The whole sentence's content path is <code>root → c23 (1.5 bits) → c2184 (2.7) → c2725 (2.8) → leaf</code>, so its <code>cc</code> is <code>{c23: ½, c2184: ½}</code>; "the dog ran" sits at <code>c4 (1.8) → c1761 (2.8) → c2675 (4.8)</code> and is named <code>{c4, c1761, c2675}</code>, ⅓ each.</p>
+  </div>
+
+  <h2>A concept</h2>
+  <div class="col">
+    <p>A concept is a node of a Cobweb tree (the compiled Fisher category-utility tree). It holds a count (the summed weight of the instances below it), for every attribute the weighted counts of its values with their sums of squares (what category utility reads), and <b>passive counts</b>: statistics summed up the tree like the others but never used to sort or score. Sorting, merging and splitting see only the instance attributes; a record restructures the tree with probability equal to its weight.</p>
+  </div>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Passive</th><th>Tree</th><th>Added at</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><th><code>word</code></th><td>context</td><td>every stored word's leaf</td><td>the token</td></tr>
+      <tr><th><code>fill</code></th><td>context</td><td>each word and chosen chunk of the analysis</td><td>the token, or the chunk's record</td></tr>
+      <tr><th><code>lpart</code>, <code>rpart</code></th><td>content</td><td>each chosen chunk</td><td>its left / right part's record</td></tr>
+      <tr><th><code>sent</code></th><td>content</td><td>the whole experience</td><td>its record</td></tr>
+      <tr><th><code>next</code></th><td>content</td><td>the previous whole experience, when this one followed it</td><td>this experience's record</td></tr>
+    </tbody>
+  </table></div>
+  <div class="case">
+    <p class="ch">Two real concepts</p>
+<div class="ex"><span class="p">context concept c98929</span>  (just above "dog"; 12.2 bits, count 2.03)
+  l2 &lt;s&gt; 2.03 · l1 the 2.03 · r1 went 1, ran 1 · r2 to 2.03
+  cc  w:cat 1, w:dog 1 · pv the 0.40, cat 0.39, felt 0.25, …
+  <span class="p">passive</span> word: cat 1, dog 1 · fill: cat 1, dog 1          <span class="ok">cat and dog share one slot: after "the", before a verb and "to"</span>
+
+<span class="p">content concept c2725</span>  (above the whole sentence; 2.8 bits, count 603, 3,516 children)
+  L   -: 41, c328 10.2, c580 8.7, …       LC  -: 527, c23 10.9, c4 10.9, …
+  R   c722 81.6, c1198 36.2, c110 33.9, …  RC  c23 137, c1952 61.8, c2184 52.3, …
+  <span class="p">passive</span> lpart: they 103, he 43, she 32 · rpart: "to go home" 5, "became good friends" 5, …
+          sent: "can i play with you" 5, "they played together every day" 4, …
+          next: "then something unexpected happened" 2, "they became good friends" 2, …</div>
+    <p class="reads">The context concept holds a substitution class (cat / dog after "the", before a verb and "to"). The content concept holds sentences whose left part is a pronoun-like word and whose right part is a verb phrase; its passives are what generation reads.</p>
+  </div>
+
+  <h2>What the dump shows that is wrong</h2>
+  <div class="col">
+    <ul>
+      <li><b>The content tree is flat where it matters most.</b> Every two-word chunk has <code>LC = RC = -</code>, so it differs from the others only by its parts' type names. They all sit as leaves directly under one concept: c111 (1.4 bits) holds 4,306 leaves and no intermediate concepts, and "the dog" and "get it" both name their content <code>{c111}</code>. At depth 2, where chart generation reads its rules, each such chunk is its own leaf, and its rules back off straight to c111, the class of every two-word chunk.</li>
+      <li><b>Part names are partly blank.</b> "the dog" names itself <code>{-: 1}</code> as a part, and 18% of the name of "the" is <code>-</code>. A type name reads <code>-</code> for a sampled context leaf that no longer hangs in the tree. Counted over every type in this memory, <b>16,858 of 33,960 sampled leaves (50%) are detached</b>, so half of all name mass is blank. The reservoirs keep leaf objects and are not updated when the tree drops a leaf; which operation drops them (repair moves or restructuring) is not yet traced.</li>
+    </ul>
+    <p>Both bear on the grammar of chart generation (S7): rules over a flat concept with blank part names cannot tell a good split from a bad one.</p>
+  </div>
 </section>
 
 <!-- ============================================================ LEARNING -->
@@ -1586,9 +1667,9 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
 
 <script>
 (function () {
-const ORDER = ["overview", "status", "principles", "representation", "learning", "sustain", "parse", "generate", "types", "rules",
+const ORDER = ["overview", "status", "principles", "representation", "instances", "learning", "sustain", "parse", "generate", "types", "rules",
   "s-prompt", "s-consist", "s-probe", "s-babi", "s-chars", "s-chess", "s-sem", "failures", "f-known", "results", "curves", "iterations", "next"];
-const TITLES = { overview: "Overview", status: "Where we stand", principles: "1 Principles", representation: "2 Representation",
+const TITLES = { overview: "Overview", status: "Where we stand", principles: "1 Principles", representation: "2 Representation", instances: "2a Instances and concepts",
   learning: "3 Learning", sustain: "4 Sustaining memory", parse: "5 Parsing, step by step", generate: "6 Generation, step by step",
   types: "7 Type names", rules: "8 Concept-choice rules", "s-prompt": "S1 Prompted generation", "s-consist": "S2 Parse consistency",
   "s-probe": "S3 Chunk representations", "s-babi": "S4 bAbI questions", "s-chars": "S5 Chinese characters", "s-chess": "S6 Chess", "s-sem": "S7 Semantic generation",
