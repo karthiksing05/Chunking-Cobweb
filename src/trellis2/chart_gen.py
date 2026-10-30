@@ -11,7 +11,10 @@ as a grammar over concepts:
              its stored weight, backed off to the pairs of all composites:
              (n_C(A B) + lam g(A B)) / (n_C + lam)
   emission   P(w | category) from the stored words
-  start      P(C) from the whole experiences (SENT)
+  start      P(C) from the whole experiences (SENT); with ``follow`` and a previous
+             sentence, P(C | prev) from the experiences that followed sentences
+             like it (NEXT, via ``_next_pool``), backed off to P(C):
+             (n_prev(C) + lam P(C)) / (n_prev + lam)
 
 A prompt is a list of words and gaps ("*": one or more words, "?": exactly one).
 For every expansion of the gaps (up to ``gap_max`` words each) the inside pass
@@ -40,8 +43,9 @@ HOLE = "_"
 
 class ChartGen:
     def __init__(self, L, cut: int = 3, lam: float = 1.0, alpha: float = 0.1, gap_max: int = 4,
-                 length=(3, 8), word_sym: str = "category", ctx_cut: int = 3):
+                 length=(3, 8), word_sym: str = "category", ctx_cut: int = 3, follow: bool = False):
         self.L, self.cut, self.lam, self.alpha, self.gap_max, self.length = L, cut, lam, alpha, gap_max, length
+        self.follow = follow
         self.word_sym, self.ctx_cut = word_sym, ctx_cut   # "category" (window name), "token" (the word), or
         # "context": each occurrence named by its context concept at depth ctx_cut (where it stood)
         self._cat: Dict[str, object] = {}
@@ -201,9 +205,24 @@ class ChartGen:
                 ins[(i, j)] = (v / m, top + math.log(m)) if m > 0 else (v, -math.inf)
         return ins
 
-    def logZ(self, ins, n):
+    def start_given(self, prev: Optional[List[str]]):
+        """P(C | prev): the top concepts of the experiences that followed sentences like
+        ``prev`` (NEXT), backed off to the unconditioned start."""
+        if not (self.follow and prev):
+            return self.start
+        pool = self.L._next_pool(list(prev))
+        if not pool:
+            return self.start
+        n = np.zeros(len(self.syms))
+        for rid, w in pool.items():
+            c = self._concept(self.L.records[rid])
+            if c is not None and c in self.ix:
+                n[self.ix[c]] += w
+        return (n + self.lam * self.start) / (n.sum() + self.lam)
+
+    def logZ(self, ins, n, start=None):
         v, l = ins[(0, n)]
-        z = float(np.dot(self.start, v))
+        z = float(np.dot(self.start if start is None else start, v))
         return l + math.log(z) if z > 0 and l > -math.inf else -math.inf
 
     # ------------------------------------------------------------ sampling
@@ -254,10 +273,11 @@ class ChartGen:
     def generate(self, pattern: Sequence[str], rng: random.Random, prev: Optional[List[str]] = None,
                  info: Optional[dict] = None) -> Optional[List[str]]:
         pattern = list(pattern)
+        start = self.start_given(prev)
         options = []
         for toks in self._expansions(pattern):
             ins = self.inside(toks)
-            z = self.logZ(ins, len(toks))
+            z = self.logZ(ins, len(toks), start)
             if z > -math.inf:
                 options.append((toks, ins, z))
         if not options:
@@ -266,7 +286,7 @@ class ChartGen:
         toks, ins, _ = options[rng.choices(range(len(options)), weights=[math.exp(z - top) for _, _, z in options])[0]]
         n = len(toks)
         v, _ = ins[(0, n)]
-        root = rng.choices(range(len(self.syms)), weights=self.start * v)[0]
+        root = rng.choices(range(len(self.syms)), weights=start * v)[0]
         leaves, tree = {}, []
         self._draw_tree(ins, 0, n, root, rng, leaves, tree)
         out = self._fill(toks, leaves, rng, prev)
