@@ -13,8 +13,9 @@ as a grammar over concepts:
   emission   P(w | category) from the stored words
   start      P(C) from the whole experiences (SENT); with ``follow`` and a previous
              sentence, P(C | prev) from the experiences that followed sentences
-             like it (NEXT, via ``_next_pool``), backed off to P(C):
-             (n_prev(C) + lam P(C)) / (n_prev + lam)
+             like it (NEXT), by hierarchical back-off down prev's content path
+             (as _pv_lift): P(C | node) = (n_node(C) + P(C | parent)) / (n_node + 1),
+             starting from P(C)
 
 A prompt is a list of words and gaps ("*": one or more words, "?": exactly one).
 For every expansion of the gaps (up to ``gap_max`` words each) the inside pass
@@ -36,7 +37,7 @@ from typing import Dict, List, Optional, Sequence
 
 import numpy as np
 
-from .trellis3 import SENT, Elem
+from .trellis3 import NEXT, SENT, Elem
 
 HOLE = "_"
 
@@ -207,18 +208,25 @@ class ChartGen:
 
     def start_given(self, prev: Optional[List[str]]):
         """P(C | prev): the top concepts of the experiences that followed sentences like
-        ``prev`` (NEXT), backed off to the unconditioned start."""
+        ``prev`` (NEXT at each concept on prev's content path), each level backed off
+        to the one above it, the root to the unconditioned start."""
         if not (self.follow and prev):
             return self.start
-        pool = self.L._next_pool(list(prev))
-        if not pool:
+        L = self.L
+        r = L.parse(list(prev))
+        n = len(prev)
+        el = next((r["comps"][k] for k in r["chosen"] if k[0] == 0 and k[2] == n), None)
+        if el is None:
             return self.start
-        n = np.zeros(len(self.syms))
-        for rid, w in pool.items():
-            c = self._concept(self.L.records[rid])
-            if c is not None and c in self.ix:
-                n[self.ix[c]] += w
-        return (n + self.lam * self.start) / (n.sum() + self.lam)
+        p = self.start
+        for node in L.cnt.categorize(L._content(el)):      # root ... leaf
+            cnt = np.zeros(len(self.syms))
+            for rid, w in L.cnt.passive(node, NEXT).items():
+                c = self._concept(L.records[rid]) if L.records[rid].cleaf is not None else None
+                if c is not None and c in self.ix:
+                    cnt[self.ix[c]] += w
+            p = (cnt + p) / (cnt.sum() + 1.0)
+        return p
 
     def logZ(self, ins, n, start=None):
         v, l = ins[(0, n)]
