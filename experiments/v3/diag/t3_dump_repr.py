@@ -131,7 +131,7 @@ print(json.dumps(dump, ensure_ascii=False, default=str, indent=1))
 # how many sampled type leaves no longer hang in the context tree (their name reads blank)
 dead = tot = 0
 for k, res in L.type_res.items():
-    for _, leaf in res:
+    for leaf in (r.leaf for _, r in res):
         tot += 1
         dead += leaf is not None and leaf.parent is None and leaf is not L.ctx.root
 wide = sorted(((len(n.children), n.count, f"c{n.id}") for n in [L.cnt.root] + list(L.cnt.root.children)), reverse=True)[:5]

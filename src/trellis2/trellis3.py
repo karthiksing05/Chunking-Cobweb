@@ -216,12 +216,12 @@ class Trellis3:
         # concepts.
         self.type_names, self.type_top = type_names, type_top
         # type_names="sample": a type keeps a weighted reservoir of ``type_k`` of
-        # the context leaves its instances stood at; its name is the bag of the
-        # concepts on those leaves' current paths (a sampled bag of concepts,
+        # its stored instances; its name is the bag of the concepts on their
+        # context leaves' current paths (records, so a moved record is followed;
         # never stale). type_key="concept": a composite's type is its content
         # concept (chunk type) and not its exact token string.
         self.type_k, self.type_key = type_k, type_key
-        self.type_res: Dict[tuple, List[Tuple[float, CobwebNode]]] = {}
+        self.type_res: Dict[tuple, List[Tuple[float, "Elem"]]] = {}
         self._type_rng = random.Random(seed + 7)
         self.neighbour_types = neighbour_types
         # a neighbour's learned name keeps only the bands up to nb_bits (its
@@ -267,7 +267,7 @@ class Trellis3:
         # "cc": the word's own content in its context is it; "cc+token": half
         # the token, half the bag.
         self.word_content = word_content
-        self.word_res: Dict[str, List[Tuple[float, str, CobwebNode]]] = {}
+        self.word_res: Dict[str, List[Tuple[float, str, "Elem"]]] = {}
         # relational names (docs/RELATIONAL.md): a word's anchor v (where it
         # stands) and context role c (how it works as a neighbour) at the fixed
         # point v = a P + (1-a) A c, c = a P + (1-a) A^T v, read from the trees:
@@ -502,7 +502,8 @@ class Trellis3:
         keep = self.band_bits
         if max_bits is not None:
             self.band_bits = tuple(b for b in keep if b <= max_bits)
-        for _, leaf in res:
+        for _, rec in res:
+            leaf = rec.leaf                                 # where the record is now (reassignment moves it)
             if self.name_level == "parent":
                 par = leaf.parent if not leaf.children else leaf
                 ids = [f"c{par.id}"] if par is not None else [BLANK]
@@ -537,7 +538,7 @@ class Trellis3:
         nbrs: Dict[Tuple[str, str], float] = {}
         if k > 0:
             res = self.type_res.get((w,), [])
-            for _, leaf in res:                            # A: w's neighbours, from its leaves' window counts
+            for leaf in (rec.leaf for _, rec in res):      # A: w's neighbours, from its leaves' window counts
                 for a, side in (("l1", "L"), ("r1", "R")):
                     d = leaf.av.get(a)
                     if not isinstance(d, dict):
@@ -598,8 +599,9 @@ class Trellis3:
 
     def _add_type(self, e: Elem) -> None:
         """Add a stored instance's context to its type: with type_names="sample"
-        into a weighted reservoir of ``type_k`` context leaves (A-Res: key
-        u ** (1 / weight), keep the largest), else into the full aggregate."""
+        into a weighted reservoir of ``type_k`` stored records, read at their
+        current context leaves (A-Res: key u ** (1 / weight), keep the largest),
+        else into the full aggregate."""
         if self.type_names == "sample":
             if e.weight <= 0:
                 return
@@ -608,11 +610,11 @@ class Trellis3:
             res = self.type_res.setdefault(self._sample_key(e), [])
             key = self._type_rng.random() ** (1.0 / e.weight)
             if len(res) < self.type_k:
-                res.append((key, e.leaf))
+                res.append((key, e))                       # the record: its name reads its current leaf
             else:
                 i = min(range(len(res)), key=lambda t: res[t][0])
                 if key > res[i][0]:
-                    res[i] = (key, e.leaf)
+                    res[i] = (key, e)
             return
         bag = self.type_bag.setdefault(self._type_key(e), {})
         ids = self._path_ids(self.ctx.ancestors(e.leaf)[::-1])
@@ -620,7 +622,7 @@ class Trellis3:
             bag[v] = bag.get(v, 0.0) + e.weight / max(len(ids), 1)
 
     def _add_word_content(self, e: Elem) -> None:
-        """A stored composite adds its content leaf to the reservoirs of its word parts."""
+        """A stored composite adds itself (read at its current content leaf) to the reservoirs of its word parts."""
         if e.weight <= 0 or e.cleaf is None:
             return
         for side, part in (("L", e.left), ("R", e.right)):
@@ -629,11 +631,11 @@ class Trellis3:
             res = self.word_res.setdefault(part.token, [])
             key = self._type_rng.random() ** (1.0 / e.weight)
             if len(res) < self.type_k:
-                res.append((key, side, e.cleaf))
+                res.append((key, side, e))
             else:
                 i = min(range(len(res)), key=lambda t: res[t][0])
                 if key > res[i][0]:
-                    res[i] = (key, side, e.cleaf)
+                    res[i] = (key, side, e)
 
     def _word_content_bag(self, token: str) -> Optional[Dict[str, float]]:
         """The bag of side-tagged content concepts a word's sampled composites sit under."""
@@ -644,8 +646,8 @@ class Trellis3:
         if not res:
             return None
         bag: Dict[str, float] = {}
-        for _, side, leaf in res:
-            ids = self._path_ids(self.cnt.ancestors(leaf)[::-1])
+        for _, side, rec in res:
+            ids = self._path_ids(self.cnt.ancestors(rec.cleaf)[::-1])
             for v in ids:
                 bag[side + v] = bag.get(side + v, 0.0) + 1.0 / (len(ids) * len(res))
         out = dict(sorted(bag.items(), key=lambda kv: -kv[1])[:self.type_top])

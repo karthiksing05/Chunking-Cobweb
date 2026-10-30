@@ -245,7 +245,7 @@ if L.type_names == "sample":
         res = L.type_res.get((w,), [])
         bag = Counter()
         sampled = []
-        for _, leaf in res:
+        for leaf in (rec.leaf for _, rec in res):
             ids = L._path_ids(L.ctx.ancestors(leaf)[::-1])
             for v in ids:
                 bag[v] += 1.0 / (len(ids) * len(res))

@@ -84,7 +84,7 @@ def acc(names, sim=overlap):
 
 L._rel_cache, L._wc_cache, L._nb_cache = {}, {}, {}
 path_of = lambda leaf: L.ctx.ancestors(leaf)[::-1]
-res = {w: [lf for _, lf in L.type_res.get((w,), [])] for w in words}
+res = {w: [r.leaf for _, r in L.type_res.get((w,), [])] for w in words}
 win = lambda r: Counter({f"{a}:{v}": 1 for a, v in r.ctx.items() if a[0] in "lr" and a[1:].isdigit() and isinstance(v, str)})
 out = {"cfg": cfg, "seed": seed, "n": n, "words": len(words), "records": len(L.records), "ctx nodes": sum(1 for _ in L.ctx.nodes()) if hasattr(L.ctx, "nodes") else None,
        "accuracy": {
