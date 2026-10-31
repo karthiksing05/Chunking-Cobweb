@@ -46,8 +46,12 @@ HOLE = "_"
 class ChartGen:
     def __init__(self, L, cut: int = 3, lam: float = 1.0, alpha: float = 0.1, gap_max: int = 4,
                  length=(3, 8), word_sym: str = "category", ctx_cut: int = 3, follow: bool = False,
-                 decomp: str = "sample"):
+                 decomp: str = "sample", cut_by: str = "depth"):
         self.L, self.cut, self.lam, self.alpha, self.gap_max, self.length = L, cut, lam, alpha, gap_max, length
+        # cut_by "bits": cut and ctx_cut are information levels (-log2 of a concept's share
+        # of its tree); a symbol is the deepest ancestor within that many bits, so the
+        # grammar's grain does not hang on how deep or bushy the tree grew
+        self.cut_by = cut_by
         self.follow = follow
         self.decomp = decomp      # "sample": each split drawn by its share of the inside score; "max": the likeliest split
         self.word_sym, self.ctx_cut = word_sym, ctx_cut   # "category" (window name), "token" (the word), or
@@ -74,7 +78,7 @@ class ChartGen:
         if path[-1] is not self.L.cnt.root:                   # a stale leaf: sort it again
             path = list(reversed(self.L.cnt.categorize(e.cnt)))
         path.reverse()
-        path = path[:self.cut + 1]
+        path = self._cut(path, self.L.cnt, self.cut)
         sym = ("c", path[-1].id)
         self._path[sym] = [n.id for n in path]                 # root ... the symbol's own concept
         return sym
@@ -89,7 +93,16 @@ class ChartGen:
         if path[-1] is not self.L.ctx.root:
             path = list(reversed(self.L.ctx.categorize(e.ctx)))
         path.reverse()
-        return ("x", path[min(self.ctx_cut, len(path) - 1)].id)
+        return ("x", self._cut(path, self.L.ctx, self.ctx_cut)[-1].id)
+
+    def _cut(self, path, tree, cut):
+        """The root-first path down to the symbol's concept: ``cut`` levels deep, or
+        with cut_by "bits", every concept within ``cut`` bits."""
+        if self.cut_by != "bits":
+            return path[:cut + 1]
+        tot = max(tree.root.count, 1e-9)
+        keep = [n for n in path if -math.log2(max(n.count, 1e-9) / tot) <= cut]
+        return keep or path[:1]
 
     def sym_of(self, e):
         if e.token is None:
@@ -132,7 +145,8 @@ class ChartGen:
         # P_l(AB | C) = (n_{anc_l(C)}(AB) + lam P_{l-1}(AB | C)) / (n_{anc_l(C)} + lam)
         comp_syms = [s for s in syms if s[0] == "c"]
         self.levels = []                                      # per depth: (anc index of each rule, of each symbol, totals)
-        for d in range(self.cut + 1):
+        depth = self.cut if self.cut_by != "bits" else max((len(p) for p in self._path.values()), default=1) - 1
+        for d in range(depth + 1):
             anc = lambda s: self._path[s][min(d, len(self._path[s]) - 1)]
             ids = sorted({anc(s) for s in comp_syms})
             pos = {x: i for i, x in enumerate(ids)}

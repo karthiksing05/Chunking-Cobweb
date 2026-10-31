@@ -14,7 +14,7 @@ token no coder has seen costs log2 of the whole token inventory on top of its es
              frequency with an escape to single tokens, then an end mark
   xz         xz(train + one test character) - xz(train), averaged over the first 200
 
-Usage: chars_coders.py <seed> <checkpoints, e.g. 250,500,1000> <out.json> [config json]
+Usage: chars_coders.py <seed> <checkpoints, e.g. 250,500,1000> <out.json> [config json] [charts json]
 """
 import json
 import lzma
@@ -38,6 +38,7 @@ CHARTS = [{"cut": 2, "lam": 4, "word_sym": "context", "ctx_cut": 2},
           {"cut": 3, "lam": 4, "word_sym": "context", "ctx_cut": 3},
           {"cut": 2, "lam": 4, "word_sym": "category"},
           {"cut": 3, "lam": 4, "word_sym": "token"}]
+CHARTS = json.loads(sys.argv[5]) if len(sys.argv) > 5 else CHARTS   # optional chart list
 
 chars, _ = load_characters(default_ids_path(), seed=seed)
 test = [c.tokens for c in chars[-N_TEST:] if len(c.tokens) > 1]
