@@ -43,6 +43,8 @@ def main():
     ap.add_argument("--gen", default="records", choices=["records", "tree"])
     ap.add_argument("--out", required=True)
     ap.add_argument("--fill", default="", help="generate_tree fill_name: name, build or both")
+    ap.add_argument("--choose", default="leaf", help="generate_tree choose: leaf, backoff, best, match")
+    ap.add_argument("--beta", type=float, default=1.0, help="generate_tree beta (choose=backoff)")
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
     cfg = json.loads(args.config)
@@ -62,7 +64,8 @@ def main():
             _rng = _random.Random(seed)
             def _gen(max_len=15, _mem=[None]):
                 if args.gen == "tree":
-                    s = L.generate_tree(_rng, fill_name=({"name": True}.get(args.fill, args.fill) or False))
+                    s = L.generate_tree(_rng, fill_name=({"name": True}.get(args.fill, args.fill) or False),
+                                        choose=args.choose, beta=args.beta)
                     return s if s is not None and len(s) <= max_len else None
                 if _mem[0] is None or _mem[0][0] != len(L.records):
                     _mem[0] = (len(L.records), L._members(L.ctx, "ctx"))
