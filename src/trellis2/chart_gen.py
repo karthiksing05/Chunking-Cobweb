@@ -46,12 +46,18 @@ HOLE = "_"
 class ChartGen:
     def __init__(self, L, cut: int = 3, lam: float = 1.0, alpha: float = 0.1, gap_max: int = 4,
                  length=(3, 8), word_sym: str = "category", ctx_cut: int = 3, follow: bool = False,
-                 decomp: str = "sample", cut_by: str = "depth"):
+                 decomp: str = "sample", cut_by: str = "depth", topic: Optional[float] = None):
         self.L, self.cut, self.lam, self.alpha, self.gap_max, self.length = L, cut, lam, alpha, gap_max, length
         # cut_by "bits": cut and ctx_cut are information levels (-log2 of a concept's share
         # of its tree); a symbol is the deepest ancestor within that many bits, so the
         # grammar's grain does not hang on how deep or bushy the tree grew
         self.cut_by = cut_by
+        # topic=beta (generalization as a function, y = G(x)): with a previous sentence x
+        # and word_sym "context", a free position's word symbol is itself a context
+        # concept G, so it counts by the lift P(x | G) / P(x | root) (L._pv_lift, back-off
+        # along the path) raised to beta / n, n the free positions: the sentence's
+        # geometric mean, so x is counted once for the whole sentence, not once per word
+        self.topic = topic
         self.follow = follow
         self.decomp = decomp      # "sample": each split drawn by its share of the inside score; "max": the likeliest split
         self.word_sym, self.ctx_cut = word_sym, ctx_cut   # "category" (window name), "token" (the word), or
@@ -83,7 +89,8 @@ class ChartGen:
         self._path[sym] = [n.id for n in path]                 # root ... the symbol's own concept
         return sym
 
-    def _word_context(self, e):
+    def _ctx_concept(self, e):
+        """The context concept the grammar states ``e`` over: its context leaf cut at ctx_cut."""
         node = e.leaf
         if node is None:
             return None
@@ -93,7 +100,14 @@ class ChartGen:
         if path[-1] is not self.L.ctx.root:
             path = list(reversed(self.L.ctx.categorize(e.ctx)))
         path.reverse()
-        return ("x", self._cut(path, self.L.ctx, self.ctx_cut)[-1].id)
+        return self._cut(path, self.L.ctx, self.ctx_cut)[-1]
+
+    def _word_context(self, e):
+        node = self._ctx_concept(e)
+        if node is None:
+            return None
+        self._xnode[("x", node.id)] = node
+        return ("x", node.id)
 
     def _cut(self, path, tree, cut):
         """The root-first path down to the symbol's concept: ``cut`` levels deep, or
@@ -115,6 +129,7 @@ class ChartGen:
         L = self.L
         self._path = {}
         rules, emit, start = Counter(), defaultdict(Counter), Counter()
+        self._xnode = {}                                      # each context word symbol's concept (for topic)
         for e in L.records:
             if e.token is not None:
                 s = self.sym_of(e)
@@ -198,11 +213,14 @@ class ChartGen:
             prev = val
         return prev
 
-    def inside(self, toks: Sequence[Optional[str]]):
+    def inside(self, toks: Sequence[Optional[str]], lift=None):
         n = len(toks)
         ins = {}
+        free = sum(t is None for t in toks)
         for i, t in enumerate(toks):
             v = self._leaf(t)
+            if t is None and lift is not None:              # P(x | G)^(beta / free), G the symbol
+                v = v * np.exp(lift / free)                 # unshifted, so Z stays comparable across lengths
             m = v.max()
             ins[(i, i + 1)] = (v / m if m > 0 else v, math.log(m) if m > 0 else -math.inf)
         for span in range(2, n + 1):
@@ -244,6 +262,19 @@ class ChartGen:
                     cnt[self.ix[c]] += w
             p = (cnt + p) / (cnt.sum() + 1.0)
         return p
+
+    def topic_lift(self, prev: Optional[List[str]]):
+        """log P(prev | G) / P(prev | root) for each context word symbol G (zero elsewhere),
+        times ``topic``; None without a topic, a previous sentence or context symbols."""
+        L = self.L
+        if not (self.topic and prev and getattr(L, "story_facet", False)) or not self._xnode:
+            return None
+        lift = L._pv_lift(prev)
+        out = np.zeros(len(self.syms))
+        for s, node in self._xnode.items():
+            if s in self.ix:
+                out[self.ix[s]] = self.topic * lift(node)
+        return out
 
     def logZ(self, ins, n, start=None):
         v, l = ins[(0, n)]
@@ -302,9 +333,10 @@ class ChartGen:
                  info: Optional[dict] = None) -> Optional[List[str]]:
         pattern = list(pattern)
         start = self.start_given(prev)
+        lift = self.topic_lift(prev)                         # free positions read through x's generalizations
         options = []
         for toks in self._expansions(pattern):
-            ins = self.inside(toks)
+            ins = self.inside(toks, lift)
             z = self.logZ(ins, len(toks), start)
             if z > -math.inf:
                 options.append((toks, ins, z))
