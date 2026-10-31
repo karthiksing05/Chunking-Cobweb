@@ -573,6 +573,22 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     </ul>
     <p>Both bear on the grammar of chart generation (S7): rules over a flat concept with blank part names cannot tell a good split from a bad one.</p>
   </div>
+
+  <h2>Fixes (rounds 75–79)</h2>
+  <div class="col">
+    <ul>
+      <li><b>Detached names.</b> Re-placing a record (a repair move) unfits it and files it again, which gives it a new leaf; the reservoirs held the old leaf. They now hold the record and read its current leaf, so a name always follows where its instance sits now. Detached share after the fix: 0.</li>
+      <li><b>Flat content tree.</b> Cobweb scored a new leaf as if a lone instance predicted all its values with certainty. For a bag-valued description (a name spread over many concepts) it does not, so every chunk looked best as its own leaf. With <code>exact_alone</code> a new leaf is scored by what it holds (the sum of its squared bag shares). The widest content concept drops from 4,307 children to 3; on the 200-sentence check, max children falls from 866 to 23 (content) and 432 to 20 (context).</li>
+      <li><b>Surrounding chunks.</b> The context instance also carries the neighbouring chunks' content (<code>lc</code> / <code>rc</code>, same level or below), so a chunk's context is described by chunks, not only raw words.</li>
+    </ul>
+    <p>Story generation (expansion, weakest-join critic), 1,000 sentences, seeds 13 / 17: acceptable new sentences per generation.</p>
+    <table>
+      <tr><th>Setup</th><th>β 1</th><th>β 4</th><th>β 64</th><th>Cross share (β 1)</th></tr>
+      <tr><td>Name fix</td><td>0.029 / 0.014</td><td>0.048 / 0.035</td><td>0.072 / 0.076</td><td>0.30 / 0.36</td></tr>
+      <tr><td>+ <code>exact_alone</code> + surrounding chunks</td><td>0.055 / 0.069</td><td>0.122 / 0.119</td><td>0.161 / 0.152</td><td>0.33 / 0.31</td></tr>
+    </table>
+    <p>The full combination doubles the yield at every back-off strength and keeps the topic. Sentences want a strong back-off (β 64); characters want a weak one (β 1, where the combination is neutral: real and novel 0.048–0.057 across setups at 500 learned). The combination is adopted for all further runs, in both domains; the back-off strength still differs by domain.</p>
+  </div>
 </section>
 
 <!-- ============================================================ LEARNING -->
@@ -1517,6 +1533,7 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
     </tbody>
   </table></div>
   <p>The chart doubles the yield of acceptable new sentences (about 21% per generation against 9–10%) because four in five outputs are new, but fewer of the new ones are acceptable (0.21–0.29, against 0.38–0.46). It also loses the topic: cross share falls to about zero. Round 72 drew the chart's root from the concepts that followed sentences like the prompt (NEXT), using only the most specific level; the draws did not change. Round 73 backs off down the prompt's whole content path, one pseudo-count per level, as the story facet does elsewhere. The draws now change, but cross share stays near zero: the prompt picks only a depth-2 root, too general to carry a topic, and the rules below it ignore the prompt. For filling a gap inside a real sentence, expansion still wins (0.39 / 0.31 acceptable new per item against 0.27 / 0.23 for the chart). Round 74 keeps the likeliest split at each node of the tree in place of drawing one: 20.0 / 21.9% acceptable new per generation at depth 2 (new judged acceptable 0.26 / 0.29, cross share −0.10 / 0.20), the same as drawing. The grammar is not lost in the choice of tree; it is in the rules themselves. The open problems are the chart's grammar (a quarter of its new sentences are acceptable) and carrying the topic through the rules.</p>
+  <p>Rounds 75–79 fix two representation defects found in the dump on page 2a (blank part names, a flat content tree) and add surrounding chunks to the context. Expansion's yield of acceptable new sentences rises from 0.089 / 0.100 (round 68) to 0.161 / 0.152 at β 64, with 41% of outputs new; at β 1 the gain halves but holds (0.055 / 0.069 against 0.029 / 0.014 without it).</p>
   <h2>Case studies</h2>
   <p>Each case shows one claim on real output: held-out story prompts from round 60 (2,000 sentences, the first prompts of the test set, four draws each, nothing selected). "Directed" is a general concept one level above each slot, directed by the prompt (<code>story_fill</code> 3); "leaf" draws only the root by the prompt.</p>
 
