@@ -1572,7 +1572,8 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
     <tr><td>Chart, topic β 2</td><td class="num best">0.161 / 0.161</td><td class="num">60 / 61%</td><td class="num best">0.32 / 0.19</td></tr>
     <tr><td>Expansion, β 64 (round 79)</td><td class="num">0.161 / 0.152</td><td class="num">41%</td><td class="num">≈ 0.3</td></tr>
   </table>
-  <p>Conditioning on x gives the chart the topic it lacked (cross share up 0.2 on average at β 2) and raises its yield to match expansion. A previous-sentence weight was the missing piece; the rules themselves were not. β 1, the plain posterior, holds the topic but does not raise the yield; β 2 counts the prompt as two observations. The next step is to read x through every generalization on its path and let the data pick among them, in place of β.</p>
+  <p>Seeds 19 / 23 (round 82b, the three arms together): no topic 0.151 / 0.133 acceptable new per generation with cross share 0.00 / 0.14; β 1 0.158 / 0.144 with 0.10 / 0.43; β 2 0.160 / 0.152 with 0.10 / 0.55. Over the four seeds β 2 lifts the yield on every seed (mean 0.144 → 0.159) and cross share from 0.05 to 0.29.</p>
+  <p>Conditioning on x gives the chart the topic it lacked and raises its yield to match expansion. A previous-sentence weight was the missing piece; the rules themselves were not. β 1, the plain posterior, holds the topic but does not raise the yield; β 2 counts the prompt as two observations. The next step is to read x through every generalization on its path and let the data pick among them, in place of β.</p>
   <h2>Case studies</h2>
   <p>Each case shows one claim on real output: held-out story prompts from round 60 (2,000 sentences, the first prompts of the test set, four draws each, nothing selected). "Directed" is a general concept one level above each slot, directed by the prompt (<code>story_fill</code> 3); "leaf" draws only the root by the prompt.</p>
 
