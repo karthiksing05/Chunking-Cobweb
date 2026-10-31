@@ -148,7 +148,8 @@ class Trellis3:
                  part_names: Optional[str] = None, verify_weight: str = "one",
                  ref_names: bool = False, repair_reached: int = 0, repair_use: int = 0,
                  repair_path: bool = False, repair_draws: int = 1, repair_now: bool = False,
-                 story_facet: bool = False, exact_alone: bool = False):
+                 story_facet: bool = False, exact_alone: bool = False,
+                 search: str = "chart", beam: int = 8):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -338,6 +339,11 @@ class Trellis3:
         # most probably: the sum over its composites of log2 P(parts | content
         # concept), so unpacking the chunks gives back the experience)
         self.readout = readout
+        # search: how an experience is analysed. "chart": every (span, split) scored and
+        # inside-outside over all binary analyses; "beam": the ``beam`` best analyses
+        # grown bottom-up, each join's chunk context its neighbours on that analysis'
+        # frontier (_beam). beam=1 is the greedy parse.
+        self.search, self.beam = search, beam
         d = [""] if bags else [str(k) for k in range(1, depth + 1)]
         surface = self._surface_names(window)
         chunk = (tuple(f"{p}{k}" for p in ("cl", "cr") for k in d) if self.children else ()) + \
@@ -1010,6 +1016,60 @@ class Trellis3:
         self._best = best
         return words, comps
 
+    def _beam(self, tokens: List[str]):
+        """search="beam": analyses grown bottom-up in place of the chart. An analysis is
+        a frontier of units; a step joins two adjacent units into a composite scored by
+        its factor, named with its neighbours on that frontier (same level or below) as
+        its chunk context. The ``beam`` best analyses survive each step; a composite's
+        posterior is its share of the complete analyses (each 2^(score/tau)) holding it,
+        so beam=1 is the greedy parse and a wide beam approaches inside-outside over the
+        analyses it reached. Returns words, composites, posteriors, log Z and the best
+        analysis' composites."""
+        n = len(tokens)
+        words = [Elem((i, i + 1), token=w) for i, w in enumerate(tokens)]
+        for i, e in enumerate(words):
+            if self.neighbour_chunks:
+                e.nbe = (words[i - 1] if i > 0 else None, words[i + 1] if i + 1 < n else None)
+            e.ctx = self._context(tokens, e, analysed=False)
+        comps: Dict[Tuple[int, int, int], Elem] = {}
+
+        def join(units, x):
+            a, b = units[x], units[x + 1]
+            key = (a.span[0], b.span[0], b.span[1])
+            if key not in comps:                # first reached: parts and neighbours from that frontier
+                e = Elem((key[0], key[2]), split=key[1], left=a, right=b)
+                e.ctx = self._surface(tokens, key[0], key[2])
+                e.cnt = self._content(e)
+                if self.neighbour_chunks:
+                    e.nbe = (units[x - 1] if x > 0 else None, units[x + 2] if x + 2 < len(units) else None)
+                e.ctx = self._context(tokens, e, analysed=False)
+                e.gain = self._factor(e)
+                comps[key] = e
+            return key, comps[key]
+
+        beam = [(0.0, tuple(words), frozenset())]
+        for _ in range(n - 1):
+            cand = {}
+            for score, units, keys in beam:
+                for x in range(len(units) - 1):
+                    key, e = join(units, x)
+                    ks = keys | {key}           # the same composites make the same frontier
+                    if ks not in cand:
+                        cand[ks] = (score + e.gain, units[:x] + (e,) + units[x + 2:], ks)
+            beam = sorted(cand.values(), key=lambda t: -t[0])[:self.beam]
+        f = [s * LN2 / self.tau for s, _, _ in beam]
+        logZ = logsumexp(f)
+        post: Dict[Tuple[int, int, int], float] = {}
+        for fi, (_, _, keys) in zip(f, beam):
+            for key in keys:
+                post[key] = post.get(key, 0.0) + math.exp(fi - logZ)
+        best: Dict[Tuple[int, int], Tuple[float, Elem]] = {(i, i + 1): (0.0, words[i]) for i in range(n)}
+        for (i, k, j), e in comps.items():
+            if (i, j) not in best or e.gain > best[(i, j)][0]:
+                best[(i, j)] = (e.gain, e)
+        self._best = best
+        return words, comps, post, logZ, sorted(beam[0][2], key=lambda t: (t[2] - t[0], t))
+
     def _factor(self, e: Elem) -> float:
         """A composite's factor in inside-outside, from both hierarchies."""
         if self.factor == "ccm":
@@ -1142,12 +1202,17 @@ class Trellis3:
         walk(0, n)
         return Tree(n, split, {}, [(0, n)]), chosen
 
-    def parse(self, tokens: Sequence[str]) -> dict:
+    def parse(self, tokens: Sequence[str], search: Optional[str] = None) -> dict:
         tokens = list(tokens)
         n = len(tokens)
         self._wc_cache = {}                 # word content names, read once per experience
         self._rel_cache = {}                # relational names likewise
         self._nb_cache = {}                 # neighbours' learned names likewise
+        if (search or self.search) == "beam" and n >= 2:
+            words, comps, post, logZ, chosen = self._beam(tokens)
+            split = {(i, j): k for i, k, j in chosen}
+            return {"tree": Tree(n, split, {}, [(0, n)]), "words": words, "comps": comps,
+                    "post": post, "chosen": chosen, "logZ": logZ}
         words, comps = self._chart(tokens)
         if n < 2:
             return {"tree": Tree(n, {}, {}, [(0, n)] if n else []), "words": words, "comps": comps,
@@ -2456,7 +2521,7 @@ class Trellis3:
             if n == 0:
                 sides[p] = {m: {BLANK: 1.0} for m in range(1, widths + 1)}
                 continue
-            self.parse(ws)
+            self.parse(ws, search="chart")      # every prefix and suffix span named
             best = self._best
             out = {}
             for m in range(1, widths + 1):
