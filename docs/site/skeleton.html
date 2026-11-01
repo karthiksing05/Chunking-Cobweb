@@ -1574,6 +1574,22 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
   </table>
   <p>Seeds 19 / 23 (round 82b, the three arms together): no topic 0.151 / 0.133 acceptable new per generation with cross share 0.00 / 0.14; β 1 0.158 / 0.144 with 0.10 / 0.43; β 2 0.160 / 0.152 with 0.10 / 0.55. Over the four seeds β 2 lifts the yield on every seed (mean 0.144 → 0.159) and cross share from 0.05 to 0.29.</p>
   <p>Conditioning on x gives the chart the topic it lacked and raises its yield to match expansion. A previous-sentence weight was the missing piece; the rules themselves were not. β 1, the plain posterior, holds the topic but does not raise the yield; β 2 counts the prompt as two observations. The next step is to read x through every generalization on its path and let the data pick among them, in place of β.</p>
+  <h3>Every knob trades novelty for grammar (rounds 83–88)</h3>
+  <p>Starting from the round 82 chart (12 bits, λ 4, topic β 2: 0.161 / 0.161), each round moves one setting. Seeds 13 / 17, acceptable new sentences per generation:</p>
+  <table>
+    <tr><th>Change</th><th>Acceptable new per generation</th><th>What moves</th></tr>
+    <tr><td>Round 82 chart (control)</td><td class="num best">0.161 / 0.161</td><td></td></tr>
+    <tr><td>Cut 10 / 11 bits</td><td class="num">0.150 / 0.141, 0.129 / 0.148</td><td>more new, less grammatical</td></tr>
+    <tr><td>Cut 14 / 16 bits</td><td class="num">0.062 / 0.052, 0.062 / 0.047</td><td>copies</td></tr>
+    <tr><td>Cut by count ≥ 2 / 4 / 8</td><td class="num">0.131 / 0.139, 0.123 / 0.123, 0.145 / 0.109</td><td>worse than bits</td></tr>
+    <tr><td>Rule back-off λ 0.25 / 1 / 16 / 64</td><td class="num">0.161 / 0.160, 0.142 / 0.168, 0.138 / 0.133, 0.093 / 0.109</td><td>flat to λ 4, then worse</td></tr>
+    <tr><td>Context cut 13 / 14 bits</td><td class="num">0.133 / 0.161, 0.072 / 0.077</td><td>copies</td></tr>
+    <tr><td>Re-fill the weakest word, 1 / 2 passes</td><td class="num">0.126 / 0.148, 0.142 / 0.131</td><td>worse; removed</td></tr>
+    <tr><td>Best of 4 by the parser (log Z per word)</td><td class="num">0.147 / 0.174</td><td>63% new, 47–52% grammatical</td></tr>
+    <tr><td>Best of 4 by the chart's own log Z per word</td><td class="num">0.143 / 0.160</td><td>47% new, 58–64% grammatical</td></tr>
+  </table>
+  <p>None beats the control on both seeds. Each setting buys grammar with novelty or the reverse; the chart critic, for one, lifts the grammatical share by 11 points by choosing copies. On characters the count cut also loses to the bit cut (28.3 bits against 27.5, seed 17).</p>
+  <p>Where the new sentences fail (round 82, β 2): those whose tag order is attested are 36–39% grammatical, the rest 13%. The errors are of two kinds. A head does not fit its complement ("they became together", "they look something"), and a sentence stops before its phrase ends ("he opened the"). Both are about what a word needs on its right, which a left-to-right fill restricted to one symbol's members cannot see. That points to an outside pass (each position scored by the whole sentence around it) rather than another setting.</p>
   <h2>Case studies</h2>
   <p>Each case shows one claim on real output: held-out story prompts from round 60 (2,000 sentences, the first prompts of the test set, four draws each, nothing selected). "Directed" is a general concept one level above each slot, directed by the prompt (<code>story_fill</code> 3); "leaf" draws only the root by the prompt.</p>
 

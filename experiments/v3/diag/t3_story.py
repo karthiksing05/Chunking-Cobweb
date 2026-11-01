@@ -181,7 +181,8 @@ for ai, arm in enumerate(arms):
     arm = dict(arm)
     cond = arm.pop("cond", False)
     critic = arm.pop("critic", 0)          # draw this many and keep the one memory parses best per word
-    weakest = arm.pop("critic_mode", "mean") == "weakest"   # ... or whose least-attested join (factor) is best
+    critic_mode = arm.pop("critic_mode", "mean")   # "mean": parsed best per word; "weakest": least-attested join best; "chart": chart probability
+    weakest = critic_mode == "weakest"
     g_rng = random.Random(seed + 7)
     t1 = time.time()
     PP = [p for p in P for _ in range(DRAWS)]
@@ -196,6 +197,8 @@ for ai, arm in enumerate(arms):
         gen = lambda p: L.generate_tree(g_rng, index=ix, fill_name=FILL, **({"after": p} if cond else {}), **{"choose": "leaf", **arm})
 
     def score(g):
+        if critic_mode == "chart":          # the chart's own probability of the filled sentence, per word (as the coder)
+            return CG.logZ(CG.inside(list(g)), len(g)) / len(g)
         r = L.parse(g)
         mean = r["logZ"] / max(len(g) - 1, 1)
         if not weakest:
@@ -215,7 +218,7 @@ for ai, arm in enumerate(arms):
     w = within(S)
     ws = within(shuffled(S, random.Random(seed + 13)))
     m = lambda v: round(sum(v) / max(len(v), 1), 3)
-    print(json.dumps({"tag": tag, "seed": seed, "n": n, "arm": {"cond": cond, **({"critic": critic} if critic else {}), **({"critic_mode": "weakest"} if weakest else {}), **arm}, "learn s": round(learn_s),
+    print(json.dumps({"tag": tag, "seed": seed, "n": n, "arm": {"cond": cond, **({"critic": critic} if critic else {}), **({"critic_mode": critic_mode} if critic_mode != "mean" else {}), **arm}, "learn s": round(learn_s),
                       "gen s": round(time.time() - t1), "generated": len(S),
                       "cross": None if c is None else round(c, 3), "cross scored": cn,
                       "cross share": None if c is None else round((c - rand_c) / (real_c - rand_c), 3),
@@ -227,7 +230,7 @@ for ai, arm in enumerate(arms):
     if DUMP:
         os.makedirs(DUMP, exist_ok=True)
         with open(os.path.join(DUMP, f"{tag}_s{seed}_n{n}_arm{ai}.jsonl"), "w", encoding="utf-8") as fh:
-            fh.write(json.dumps({"arm": {"cond": cond, **({"critic": critic} if critic else {}), **({"critic_mode": "weakest"} if weakest else {}), **arm}}) + "\n")
+            fh.write(json.dumps({"arm": {"cond": cond, **({"critic": critic} if critic else {}), **({"critic_mode": critic_mode} if critic_mode != "mean" else {}), **arm}}) + "\n")
             for (p, g), a, b in zip(ok, pat, nov):
                 fh.write(json.dumps({"prompt": " ".join(p), "gen": " ".join(g), "pattern": a, "novel": b}) + "\n")
 

@@ -1346,8 +1346,11 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
       <tr><td>TRELLIS, before the fixes (best chart)</td><td class="num">38.9 / 40.3</td><td class="num">37.3 / 38.3</td><td class="num">35.4 / 36.7</td></tr>
       <tr><td>TRELLIS, fixes, chart cut at depth 3</td><td class="num">38.7 / 39.4</td><td class="num">37.1 / 37.8</td><td class="num">35.4 / 36.0</td></tr>
       <tr><td>TRELLIS, fixes, chart cut at 12 bits</td><td class="num">35.7 / 36.3</td><td class="num">32.5 / 32.4</td><td class="num">28.4 / 28.7</td></tr>
+      <tr><td>TRELLIS, fixes, chart cut at 16 bits</td><td class="num">33.5 / 33.8</td><td class="num">30.5 / 30.1</td><td class="num">27.9 / 27.8</td></tr>
+      <tr><td>TRELLIS, fixes, whole tree</td><td class="num">33.6 / 33.9</td><td class="num">30.5 / 30.2</td><td class="num">27.8 / 27.5</td></tr>
+      <tr><td>TRELLIS, beam 4 learning, cut at 14 bits</td><td class="num">—</td><td class="num">—</td><td class="num">30.2 / 29.3</td></tr>
     </table>
-    <p>The representation fixes (page 2a) make the trees deep and narrow, so a chart cut at a fixed depth holds only 6–20 concepts. Cutting by information (every concept within 12 bits of the root, about 3,400 at 2,000 learned) puts TRELLIS ahead of BPE at every size and within 2.0 / 2.7 bits of the trigram at 2,000. Finer cuts are better so far (6 bits: 37.0, 9 bits: 32.8, 12 bits: 28.4 at 2,000, seed 13); 14 bits, 16 bits and the whole tree are running.</p>
+    <p>The representation fixes (page 2a) make the trees deep and narrow, so a chart cut at a fixed depth holds only 6–20 concepts. Cutting by information (every concept within a number of bits of the root) fixes that, and the finer the cut the better: 6 bits 37.0, 9 bits 32.8, 12 bits 28.4, 16 bits 27.9, the whole tree 27.8 at 2,000 (seed 13). With the whole tree TRELLIS beats BPE at every size by 1.6–5 bits and ends 1.4 / 1.5 bits behind the trigram. On characters the cut needs no setting: the whole tree is best. Learning with a beam of 4 (round 80) costs 1.5–2.5 bits here, at a quarter of the learning time.</p>
   </div>
 
   <h2>Case studies</h2>
@@ -1841,7 +1844,35 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
     <tr><td>Beam 4</td><td class="num best">0.074 / 0.062</td><td class="num best">0.139 / 0.115</td><td class="num">283 / 291 s</td></tr>
     <tr><td>Beam 16</td><td class="num">0.062 / 0.058</td><td class="num">0.106 / 0.100</td><td class="num">398 / 470 s</td></tr>
   </table>
-  <p>Nothing is lost: beam 4 matches inside-outside (means 0.068 and 0.127 against 0.062 and 0.121) at about half the learning time, and even the greedy parse loses only 0.01–0.04. A wider beam is not better. The differences between beam 4, beam 16 and inside-outside are within the spread between seeds. Beam 4 on characters is running.</p>
+  <p>Nothing is lost: beam 4 matches inside-outside (means 0.068 and 0.127 against 0.062 and 0.121) at about half the learning time, and even the greedy parse loses only 0.01–0.04. A wider beam is not better. The differences between beam 4, beam 16 and inside-outside are within the spread between seeds. On characters beam 4 costs 1.5–2.5 bits per character (S5).</p>
+  <h3>The chart conditioned on the prompt: y = G(x) (rounds 81–82)</h3>
+  <p>Round 81 cuts the chart by information (as on characters). At 12 bits it gives 0.146 / 0.144 acceptable new sentences per generation with 68% new; the whole tree only copies (3% new). Its cross share stays near zero (−0.06 / 0.12): the rules ignore the prompt.</p>
+  <p>Round 82 reads generation as a function of the prompt x through the generalizations that cover it. Each free position's symbol is a context concept G, so the chart weights it by how well G explains x: P(x | G) / P(x | root), the lift of the previous sentence at G with back-off along the path, raised to β / n for n free positions. The geometric mean counts x once per sentence, not once per word. Three earlier forms reweighted the stored rules instead: globally (the grammar lost its shape and repeated fragments), and within each parent (no change, since a parent's instances share one context). 1,000 sentences, seeds 13 / 17:</p>
+  <table>
+    <tr><th>Generator</th><th>Acceptable new per generation</th><th>New</th><th>Cross share</th></tr>
+    <tr><td>Chart, 12 bits, no topic (round 81)</td><td class="num">0.146 / 0.144</td><td class="num">68%</td><td class="num">−0.06 / 0.12</td></tr>
+    <tr><td>Chart, topic β 1</td><td class="num">0.146 / 0.135</td><td class="num">60 / 57%</td><td class="num">0.18 / 0.22</td></tr>
+    <tr><td>Chart, topic β 2</td><td class="num best">0.161 / 0.161</td><td class="num">60 / 61%</td><td class="num best">0.32 / 0.19</td></tr>
+    <tr><td>Expansion, β 64 (round 79)</td><td class="num">0.161 / 0.152</td><td class="num">41%</td><td class="num">≈ 0.3</td></tr>
+  </table>
+  <p>Seeds 19 / 23 (round 82b, the three arms together): no topic 0.151 / 0.133 acceptable new per generation with cross share 0.00 / 0.14; β 1 0.158 / 0.144 with 0.10 / 0.43; β 2 0.160 / 0.152 with 0.10 / 0.55. Over the four seeds β 2 lifts the yield on every seed (mean 0.144 → 0.159) and cross share from 0.05 to 0.29.</p>
+  <p>Conditioning on x gives the chart the topic it lacked and raises its yield to match expansion. A previous-sentence weight was the missing piece; the rules themselves were not. β 1, the plain posterior, holds the topic but does not raise the yield; β 2 counts the prompt as two observations. The next step is to read x through every generalization on its path and let the data pick among them, in place of β.</p>
+  <h3>Every knob trades novelty for grammar (rounds 83–88)</h3>
+  <p>Starting from the round 82 chart (12 bits, λ 4, topic β 2: 0.161 / 0.161), each round moves one setting. Seeds 13 / 17, acceptable new sentences per generation:</p>
+  <table>
+    <tr><th>Change</th><th>Acceptable new per generation</th><th>What moves</th></tr>
+    <tr><td>Round 82 chart (control)</td><td class="num best">0.161 / 0.161</td><td></td></tr>
+    <tr><td>Cut 10 / 11 bits</td><td class="num">0.150 / 0.141, 0.129 / 0.148</td><td>more new, less grammatical</td></tr>
+    <tr><td>Cut 14 / 16 bits</td><td class="num">0.062 / 0.052, 0.062 / 0.047</td><td>copies</td></tr>
+    <tr><td>Cut by count ≥ 2 / 4 / 8</td><td class="num">0.131 / 0.139, 0.123 / 0.123, 0.145 / 0.109</td><td>worse than bits</td></tr>
+    <tr><td>Rule back-off λ 0.25 / 1 / 16 / 64</td><td class="num">0.161 / 0.160, 0.142 / 0.168, 0.138 / 0.133, 0.093 / 0.109</td><td>flat to λ 4, then worse</td></tr>
+    <tr><td>Context cut 13 / 14 bits</td><td class="num">0.133 / 0.161, 0.072 / 0.077</td><td>copies</td></tr>
+    <tr><td>Re-fill the weakest word, 1 / 2 passes</td><td class="num">0.126 / 0.148, 0.142 / 0.131</td><td>worse; removed</td></tr>
+    <tr><td>Best of 4 by the parser (log Z per word)</td><td class="num">0.147 / 0.174</td><td>63% new, 47–52% grammatical</td></tr>
+    <tr><td>Best of 4 by the chart's own log Z per word</td><td class="num">0.143 / 0.160</td><td>47% new, 58–64% grammatical</td></tr>
+  </table>
+  <p>None beats the control on both seeds. Each setting buys grammar with novelty or the reverse; the chart critic, for one, lifts the grammatical share by 11 points by choosing copies. On characters the count cut also loses to the bit cut (28.3 bits against 27.5, seed 17).</p>
+  <p>Where the new sentences fail (round 82, β 2): those whose tag order is attested are 36–39% grammatical, the rest 13%. The errors are of two kinds. A head does not fit its complement ("they became together", "they look something"), and a sentence stops before its phrase ends ("he opened the"). Both are about what a word needs on its right, which a left-to-right fill restricted to one symbol's members cannot see. That points to an outside pass (each position scored by the whole sentence around it) rather than another setting.</p>
   <h2>Case studies</h2>
   <p>Each case shows one claim on real output: held-out story prompts from round 60 (2,000 sentences, the first prompts of the test set, four draws each, nothing selected). "Directed" is a general concept one level above each slot, directed by the prompt (<code>story_fill</code> 3); "leaf" draws only the root by the prompt.</p>
 
