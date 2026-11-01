@@ -69,7 +69,13 @@ for f in sorted(glob.glob(os.path.join(d, "*_arm*.jsonl"))):
            "novel": m(nov), "novel judged grammatical": m([a for a, b in zip(ok, nov) if b]),
            "grammatical novel per generation": m([a and b for a, b in zip(ok, nov)]),
            "tag pattern attested": m([r["pattern"] for r in rows]),
+           # where the new sentences fail: an attested tag order with the wrong words, or an unattested order
+           "novel attested-pattern share": m([r["pattern"] for r in rows if r["novel"]]),
+           "novel judged grammatical, pattern attested": m([a for a, r in zip(ok, rows) if r["novel"] and r["pattern"]]),
+           "novel judged grammatical, pattern unattested": m([a for a, r in zip(ok, rows) if r["novel"] and not r["pattern"]]),
            "novel examples": [(r["gen"], round(p, 2)) for r, p in zip(rows, ps) if r["novel"]][:12]}
     res["arms"].append(row)
     print(json.dumps(row), flush=True)
+    with open(f[:-len(".jsonl")] + ".scores.json", "w", encoding="utf-8") as g:   # each generation's judged probability
+        json.dump([round(p, 4) for p in ps], g)
 json.dump(res, open(out_path, "w", encoding="utf-8"), indent=1)

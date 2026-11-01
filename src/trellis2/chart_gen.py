@@ -50,7 +50,9 @@ class ChartGen:
         self.L, self.cut, self.lam, self.alpha, self.gap_max, self.length = L, cut, lam, alpha, gap_max, length
         # cut_by "bits": cut and ctx_cut are information levels (-log2 of a concept's share
         # of its tree); a symbol is the deepest ancestor within that many bits, so the
-        # grammar's grain does not hang on how deep or bushy the tree grew
+        # grammar's grain does not hang on how deep or bushy the tree grew; cut_by "count":
+        # the deepest ancestor holding at least ``cut`` instances (a generalization covers
+        # more than one instance at cut 2), so the grain does not hang on the tree's size
         self.cut_by = cut_by
         # topic=beta (generalization as a function, y = G(x)): with a previous sentence x
         # and word_sym "context", a free position's word symbol is itself a context
@@ -111,9 +113,12 @@ class ChartGen:
 
     def _cut(self, path, tree, cut):
         """The root-first path down to the symbol's concept: ``cut`` levels deep, or
-        with cut_by "bits", every concept within ``cut`` bits."""
-        if self.cut_by != "bits":
+        with cut_by "bits", every concept within ``cut`` bits; with "count", every concept
+        holding at least ``cut`` instances."""
+        if self.cut_by == "depth":
             return path[:cut + 1]
+        if self.cut_by == "count":
+            return [n for n in path if n.count >= cut] or path[:1]
         tot = max(tree.root.count, 1e-9)
         keep = [n for n in path if -math.log2(max(n.count, 1e-9) / tot) <= cut]
         return keep or path[:1]
@@ -160,7 +165,7 @@ class ChartGen:
         # P_l(AB | C) = (n_{anc_l(C)}(AB) + lam P_{l-1}(AB | C)) / (n_{anc_l(C)} + lam)
         comp_syms = [s for s in syms if s[0] == "c"]
         self.levels = []                                      # per depth: (anc index of each rule, of each symbol, totals)
-        depth = self.cut if self.cut_by != "bits" else max((len(p) for p in self._path.values()), default=1) - 1
+        depth = self.cut if self.cut_by == "depth" else max((len(p) for p in self._path.values()), default=1) - 1
         for d in range(depth + 1):
             anc = lambda s: self._path[s][min(d, len(self._path[s]) - 1)]
             ids = sorted({anc(s) for s in comp_syms})
@@ -365,7 +370,6 @@ class ChartGen:
             for i, t in enumerate(toks):
                 if t is not None:
                     continue
-                want = self.syms[leaves[i]]
                 e = Elem((i, i + 1), token=HOLE)
                 e.token = None
                 raw = L._surface(out, i, i + 1)
