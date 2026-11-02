@@ -1599,6 +1599,27 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
     <tr><td>Chart marginal × Cobweb</td><td class="num best">0.177 / 0.183 / 0.158 / 0.185 (mean 0.176)</td><td class="num best">59–63%</td><td class="num">50–56%</td><td class="num">0.26 / 0.18 / 0.14 / 0.55</td></tr>
   </table>
   <p>The product raises the yield by 11% (three seeds up, one level) and keeps the topic (cross share 0.28 against 0.29). Among new sentences with an attested tag order, the grammatical share rises from 36–39% to 42–48%. This is the first change since round 82 that is not a trade: it gives up some novelty (10 points) but raises grammar by more. Each half fails alone. The marginal alone knows the sentence's structure but not which word suits its neighbours, so it is novel and ungrammatical. Cobweb alone knows the neighbours but not where the phrase must go. Their product asks both.</p>
+  <h3>The cut stops mattering (rounds 90–91)</h3>
+  <p>With the tree drawn first, fine symbols made the chart copy (cut 14: 0.06; the whole tree: 3% new). With each word read from the whole sentence, they no longer do. Fill "both", λ 4, topic β 2, acceptable new sentences per generation:</p>
+  <table>
+    <tr><th>Symbols</th><th>Seeds 13 / 17 / 19 / 23</th><th>Mean</th><th>Cross share (mean)</th></tr>
+    <tr><td>Cut 12 bits (round 89)</td><td class="num">0.177 / 0.183 / 0.158 / 0.185</td><td class="num">0.176</td><td class="num">0.28</td></tr>
+    <tr><td>Cut 13 bits</td><td class="num">0.188 / 0.196 / 0.164 / 0.182</td><td class="num">0.183</td><td class="num">0.34</td></tr>
+    <tr><td>Cut 14 / 16 bits</td><td class="num">0.177 / 0.191, 0.179 / 0.194</td><td class="num">–</td><td class="num">0.31 / 0.29</td></tr>
+    <tr><td>Context cut 13 (content cut 12)</td><td class="num">0.155 / 0.192</td><td class="num">–</td><td class="num">0.30</td></tr>
+    <tr><td>The whole tree (no cut)</td><td class="num best">0.198 / 0.185 / 0.150 / 0.209</td><td class="num best">0.186</td><td class="num">0.34</td></tr>
+  </table>
+  <p>The whole tree ties the best cut and so removes the cut as a parameter: every composite is its own content leaf, and back-off along the tree (λ) carries the generalization the cut used to fix. It generates at about half the speed (each inside pass has more symbols).</p>
+  <h3>The topic weight cannot be set by likelihood (round 92)</h3>
+  <p>β 2 was set by hand. One principled replacement is to pick β by the probability of real next sentences given their previous sentence: log Z<sub>β</sub>(y) − log Z<sub>β</sub>(any y of that length), with x weighing every position. The fit must use held-out pairs: on pairs from the training stream the chart recalls the stored sentence whole, and the score improves with β without bound. On 105 pairs from stories the stream never reached (seed 13, cut 13), every form of the lift peaks at β 0:</p>
+  <table>
+    <tr><th>Lift</th><th>β 0</th><th>0.5</th><th>1</th><th>2</th><th>4</th><th>8</th></tr>
+    <tr><td>Summed over x's words, at the symbol</td><td class="num best">−22.66</td><td class="num">−25.38</td><td class="num">−27.59</td><td class="num">−31.92</td><td class="num">−37.01</td><td class="num">−40.83</td></tr>
+    <tr><td>Per word of x, at the symbol</td><td class="num best">−22.66</td><td class="num">−23.89</td><td class="num">−24.27</td><td class="num">−24.90</td><td class="num">−26.54</td><td class="num">−30.27</td></tr>
+    <tr><td>Summed, at the ancestor that explains x best</td><td class="num best">−22.66</td><td class="num">−22.76</td><td class="num">−22.98</td><td class="num">−23.72</td><td class="num">−26.51</td><td class="num">−31.93</td></tr>
+    <tr><td>Per word, at the best ancestor</td><td class="num best">−22.66</td><td class="num">−22.68</td><td class="num">−22.70</td><td class="num">−22.76</td><td class="num">−22.91</td><td class="num">−23.45</td></tr>
+  </table>
+  <p>Treating x as one observation, and reading it at the generalization that explains it best, nearly flattens the curve, so the summed lift was overconfident. But no form makes the real next sentence likelier. A sentence's probability is almost all grammar, and what the previous sentence tells about the next one's words is worth less than 0.05 nats. Yet the same weight raises cross share from 0.05 to 0.29. Likelihood over the whole sentence is the wrong yardstick for the topic; β stays at 2 until a criterion that weighs the topic itself is chosen.</p>
   <h2>Case studies</h2>
   <p>Each case shows one claim on real output: held-out story prompts from round 60 (2,000 sentences, the first prompts of the test set, four draws each, nothing selected). "Directed" is a general concept one level above each slot, directed by the prompt (<code>story_fill</code> 3); "leaf" draws only the root by the prompt.</p>
 
