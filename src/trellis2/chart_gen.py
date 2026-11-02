@@ -46,7 +46,8 @@ HOLE = "_"
 class ChartGen:
     def __init__(self, L, cut: int = 3, lam: float = 1.0, alpha: float = 0.1, gap_max: int = 4,
                  length=(3, 8), word_sym: str = "category", ctx_cut: int = 3, follow: bool = False,
-                 decomp: str = "sample", cut_by: str = "depth", topic: Optional[float] = None):
+                 decomp: str = "sample", cut_by: str = "depth", topic: Optional[float] = None,
+                 fill: str = "cobweb"):
         self.L, self.cut, self.lam, self.alpha, self.gap_max, self.length = L, cut, lam, alpha, gap_max, length
         # cut_by "bits": cut and ctx_cut are information levels (-log2 of a concept's share
         # of its tree); a symbol is the deepest ancestor within that many bits, so the
@@ -60,6 +61,12 @@ class ChartGen:
         # along the path) raised to beta / n, n the free positions: the sentence's
         # geometric mean, so x is counted once for the whole sentence, not once per word
         self.topic = topic
+        # fill "cobweb": a drawn tree's leaves filled left to right by Cobweb prediction among
+        # each leaf symbol's words; "chart": no tree is frozen, each free position in turn
+        # draws its word from the chart's marginal given the words placed so far (the rest
+        # summed out: an outside pass), so a head's complement is read after the head is
+        # chosen; "both": that marginal times the Cobweb prediction
+        self.fill = fill
         self.follow = follow
         self.decomp = decomp      # "sample": each split drawn by its share of the inside score; "max": the likeliest split
         self.word_sym, self.ctx_cut = word_sym, ctx_cut   # "category" (window name), "token" (the word), or
@@ -350,6 +357,8 @@ class ChartGen:
         top = max(z for _, _, z in options)
         toks, ins, _ = options[rng.choices(range(len(options)), weights=[math.exp(z - top) for _, _, z in options])[0]]
         n = len(toks)
+        if self.fill != "cobweb":
+            return self._fill_chart(toks, rng, prev, lift, start)
         v, _ = ins[(0, n)]
         root = rng.choices(range(len(self.syms)), weights=start * v)[0]
         leaves, tree = {}, []
@@ -360,6 +369,19 @@ class ChartGen:
         return out
 
     # ------------------------------------------------------------ filling
+    def _cobweb_fills(self, out, i):
+        """Cobweb's prediction for position i from the words around it: {word: weight}."""
+        L = self.L
+        e = Elem((i, i + 1), token=HOLE)
+        e.token = None
+        raw = L._surface(out, i, i + 1)
+        try:
+            q = L._context(out, e, analysed=False)
+        except Exception:
+            q = dict(raw)
+        q = {a: v for a, v in q.items() if not (a in raw and raw[a] == HOLE)}
+        return {f[1]: w for f, w in L._gap_fills(q).items() if f[0] == "w" and w > 0}
+
     def _fill(self, toks, leaves, rng, prev):
         L = self.L
         keep_pv = L.__dict__.get("_pv")
@@ -370,17 +392,8 @@ class ChartGen:
             for i, t in enumerate(toks):
                 if t is not None:
                     continue
-                e = Elem((i, i + 1), token=HOLE)
-                e.token = None
-                raw = L._surface(out, i, i + 1)
-                try:
-                    q = L._context(out, e, analysed=False)
-                except Exception:
-                    q = dict(raw)
-                q = {a: v for a, v in q.items() if not (a in raw and raw[a] == HOLE)}
-                fills = L._gap_fills(q)
                 members = self.emit.get(leaves[i], {})
-                cand = {f[1]: w for f, w in fills.items() if f[0] == "w" and w > 0 and f[1] in members}
+                cand = {w: x for w, x in self._cobweb_fills(out, i).items() if w in members}
                 if not cand:                                  # the context knows none: the category's own words
                     cand = dict(self.emit.get(leaves[i], {}))
                 if not cand:
@@ -390,6 +403,80 @@ class ChartGen:
         finally:
             L._pv = keep_pv
         return out
+
+    def _fill_chart(self, toks, rng, prev, lift, start):
+        """Each free position, left to right, draws its word from P(w at i | placed words):
+        sum over symbols s of mu_i(s) P(w | s), mu_i the chart's posterior of s at i (the
+        gradient of log Z in i's leaf), times Cobweb's prediction with fill "both"."""
+        L = self.L
+        keep_pv = L.__dict__.get("_pv")
+        if getattr(L, "story_facet", False):
+            L._pv = list(prev) if prev else None
+        lifted = [t is None for t in toks]                    # x weighs the symbols of the free positions
+        out = [t if t is not None else HOLE for t in toks]
+        try:
+            for i in [k for k, f in enumerate(lifted) if f]:
+                mu = self._marginal([None if w == HOLE else w for w in out], lifted, lift, start, i)
+                if mu is None:
+                    return None
+                pc = defaultdict(float)
+                for k in np.nonzero(mu > mu.max() * 1e-6)[0]:
+                    c = self.emit.get(int(k))
+                    if c:
+                        tot = sum(c.values())
+                        for w, x in c.items():
+                            pc[w] += mu[k] * x / tot
+                cand = dict(pc)
+                if self.fill == "both":
+                    cf = self._cobweb_fills(out, i)
+                    cand = {w: x * cf[w] for w, x in pc.items() if w in cf} or cand
+                if not cand:
+                    return None
+                words, ws = zip(*cand.items())
+                out[i] = rng.choices(words, weights=ws)[0]
+        finally:
+            L._pv = keep_pv
+        return out
+
+    def _marginal(self, toks, lifted, lift, start, i):
+        """The chart's posterior over symbols at position i (fixed words emitted, free
+        positions summed over every word): leaf_i times its outside score, over Z."""
+        S, c = len(self.syms), self.comp_ix
+        n, free = len(toks), sum(lifted)
+        ins = {}                                              # unscaled: n is small, float64 holds it
+        for p, tok in enumerate(toks):
+            v = self._leaf(tok)
+            if lifted[p] and lift is not None:
+                v = v * np.exp(lift / free)
+            ins[(p, p + 1)] = v
+        for span in range(2, n + 1):
+            for a in range(0, n - span + 1):
+                b = a + span
+                ins[(a, b)] = sum(self._split(ins[(a, k)], ins[(k, b)]) for k in range(a + 1, b))
+        z = float(np.dot(start, ins[(0, n)]))
+        if not z > 0:
+            return None
+        out = defaultdict(lambda: np.zeros(S))
+        out[(0, n)] = np.asarray(start, dtype=float)
+        for span in range(n, 1, -1):                          # outside, top down: _split transposed
+            for a in range(0, n - span + 1):
+                b = a + span
+                g = out[(a, b)]
+                g_prod, g_glob = np.zeros(len(self.rw)), 0.0
+                for r_ix, s_ix, N in reversed(self.levels):
+                    sc = s_ix[c]
+                    d = g[c] / (N[sc] + self.lam)
+                    g_prod += np.bincount(sc, weights=d, minlength=len(N))[r_ix]
+                    g = np.zeros(S)
+                    g[c] = self.lam * d
+                g_glob = g.sum()                              # the first level's back-off is one shared scalar
+                for k in range(a + 1, b):
+                    L_, R_ = ins[(a, k)], ins[(k, b)]
+                    out[(a, k)] += (np.bincount(self.rA, weights=g_prod * self.rw * R_[self.rB], minlength=S)
+                                    + np.bincount(self.gA, weights=g_glob * self.gw * R_[self.gB], minlength=S))
+                    out[(k, b)] += (np.bincount(self.rB, weights=g_prod * self.rw * L_[self.rA], minlength=S)
+                                    + np.bincount(self.gB, weights=g_glob * self.gw * L_[self.gA], minlength=S))
+        return ins[(i, i + 1)] * out[(i, i + 1)] / z
 
     def describe(self, top: int = 12) -> dict:
         """Each word symbol's most frequent words, and the commonest rules (a diagnostic)."""
