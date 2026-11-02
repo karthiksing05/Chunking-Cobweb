@@ -377,9 +377,9 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
 
 <!-- ============================================================ STATUS -->
 <section class="page" data-page="status" hidden>
-  <p class="eyebrow">27 October 2026</p>
+  <p class="eyebrow">2 November 2026</p>
   <h1>Where we stand</h1>
-  <p class="lede">The temporal target is met by repairing memory as it is used: records that parsing and generation reach are re-sorted when stale, which keeps used memory under 1% misplaced at under twice the original learning time. Mixing neighbours' names into a word's name speeds word-category convergence while generation holds, which meets the interdependence target. Gap filling answers prompts and bAbI questions, and chess chunks show the expert recall advantage. Given the previous sentence of a story, generation makes a next sentence that belongs with it. Infill, the content tree's gain and grammar under semantic direction remain open.</p>
+  <p class="lede">The temporal target is met by repairing memory as it is used: records that parsing and generation reach are re-sorted when stale, which keeps used memory under 1% misplaced at under twice the original learning time. Mixing neighbours' names into a word's name speeds word-category convergence while generation holds, which meets the interdependence target. Gap filling answers prompts and bAbI questions, and chess chunks show the expert recall advantage. Story generation now reads memory as a grammar over concepts (the chart): conditioned on the previous sentence and filled word by word from the whole sentence, it makes 0.186 acceptable new sentences per generation over four seeds, against 0.159 for the best earlier generator, while holding the topic. Infill, the content tree's gain and a principled topic weight remain open.</p>
 
   <dl class="facts">
     <div><dt>Temporal target</dt><dd>met by path repair on use, budget 700: used records 0.6% misplaced (ctx and cnt) at 2,000 sentences</dd></div>
@@ -387,6 +387,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     <div><dt>Grammar guard</dt><dd>passes on all 4 runs (med, large × seeds 13, 17); characters held over 5 seeds</dd></div>
     <div><dt>Parse agreement</dt><dd>cross-seed bracket F1 0.90 at 2,000 sentences</dd></div>
     <div><dt>Prompting</dt><dd>prefix trigrams attested 0.86 / 0.84; infill 0.22</dd></div>
+    <div><dt>Story generation</dt><dd>0.186 acceptable new per generation (4 seeds; judged by Qwen2.5-3B), cross share 0.34; round 82 chart 0.159, expansion 0.161 / 0.152 (2 seeds)</dd></div>
   </dl>
 
   <h2>The current recipe</h2>
@@ -402,6 +403,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
       <tr><th>Keeping memory current</th><td>Relabel in place, plus repair on use: every sort marks the records under the concept it ends at, and every concept it passes contributes records by a random walk down its children (<code>repair_path</code>). After each experience, up to 700 marked records, oldest-checked first, are re-described and moved if they no longer sort where they sit (<code>repair_use</code> 700, <code>refresh_budget</code> 0). No background sweep.</td></tr>
       <tr><th>Parsing</th><td>Minimum Bayes risk over span posteriors</td></tr>
       <tr><th>Generation</th><td>A whole experience drawn from <code>SENT</code>, expanded top-down; each part from its own leaf; word slots filled by fine names, capped at the best peer (<code>both+peer</code>)</td></tr>
+      <tr><th>Story generation (chart)</th><td>Memory read as a grammar over concepts (<code>chart_gen.py</code>): composites at their content leaves (the whole tree), words at their context concepts within 12 bits, rules backed off along the content tree (λ 4). Start given the previous sentence x (<code>follow</code>); each free position weighted by x's lift at its concept (β 2). Words drawn left to right from the chart's marginal given the words placed (an outside pass) times Cobweb's prediction (<code>fill="both"</code>) (<a href="#s-sem">S7</a>)</td></tr>
       <tr><th>Prompting</th><td>Gap filling: a committed instance drawn by its posterior of standing in the gap's surroundings (<a href="#s-prompt">S1</a>)</td></tr>
     </tbody>
   </table></div>
@@ -456,13 +458,17 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
   <p>Drawing the filler by its posterior of standing in the gap's surroundings gives attested trigrams after short prefixes (0.84–0.86) and the right answer type on bAbI at 3,000 sentences (0.60–0.63 against 0.23–0.26 without the gap posterior; 0.72–0.73 when the story is in memory, exact 0.26) (<a href="#s-prompt">S1</a>, <a href="#s-babi">S4</a>).</p>
   <h3>6. Recognition by context explains expert recall</h3>
   <p>Chess chunks recognised by content and context give experts better recall of real positions than of scrambled ones. Recognition by content alone gives almost no advantage (0.74 against 0.63) (<a href="#s-chess">S6</a>).</p>
+  <h3>7. Reading each word from the whole sentence raises grammar without trading novelty</h3>
+  <p>Every setting of the chart (cut, back-off, critics, re-fill) traded novelty for grammar. Filling each word from the chart's posterior given the words already placed, times Cobweb's prediction from its neighbours, is the first change that is not a trade: 0.159 → 0.176 acceptable new per generation over four seeds, and with it the grammar's grain no longer needs a cut (the whole tree, 0.186). Neither half works alone (<a href="#s-sem">S7</a>).</p>
+  <h3>8. Likelihood cannot set the topic weight</h3>
+  <p>On held-out story pairs every form of the previous-sentence lift is best at weight 0: a sentence's probability is almost all grammar. The same lift raises cross share from 0.05 to 0.29, so the topic needs its own yardstick (<a href="#s-sem">S7</a>).</p>
 
   <h2>Running now</h2>
   <div class="tbl-wrap"><table class="tbl">
     <thead><tr><th>Run</th><th>Question</th></tr></thead>
     <tbody>
       <tr><th>Chess state compression (next)</th><td>Under one search and value head, does TRELLIS compress chess states better than other representation learners?</td></tr>
-      <tr><th>Semantic generation, next</th><td>Can a prompt-directed general concept keep grammar while it makes new sentences that stay on topic?</td></tr>
+      <tr><th>Story generation (paused for review)</th><td>Next candidates: back-off λ on the whole tree (round 93, cancelled before results); a criterion for the topic weight that weighs the topic itself</td></tr>
     </tbody>
   </table></div>
 
@@ -471,7 +477,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     <li><b>How should infill fit both sides?</b> A gap fill satisfies each side's window separately: "the * the tree" becomes "the man the tree".</li>
     <li><b>How can chunk context enter without memorisation?</b> Neighbouring chunks' content helps one-word prefixes and fails the novelty guard.</li>
     <li><b>Why does the content tree add no gain on held-out composites?</b> Their sorting paths end 2–4 levels down, where Cobweb opens a new branch.</li>
-    <li><b>How can a general concept make new, on-topic sentences without losing grammar?</b> Directed by the previous sentence it fits as well as copying, but each step up in generality costs grammar (<a href="#s-sem">S7</a>).</li>
+    <li><b>What should set the topic weight?</b> The chart conditioned on the previous sentence makes new, on-topic sentences with better grammar than before, but its weight β 2 is set by hand, and whole-sentence likelihood always picks 0 (<a href="#s-sem">S7</a>).</li>
     <li><b>Can answers come by analogy?</b> Story-conditioned answering needs the question's chunks aligned with the story sentence that shares its entity and role.</li>
     <li><b>Does TRELLIS compress chess states better than other representation learners?</b> The next study puts each representation under the same search and value head (<a href="#s-chess">S6</a>).</li>
   </ol>
