@@ -47,7 +47,7 @@ class ChartGen:
     def __init__(self, L, cut: int = 3, lam: float = 1.0, alpha: float = 0.1, gap_max: int = 4,
                  length=(3, 8), word_sym: str = "category", ctx_cut: int = 3, follow: bool = False,
                  decomp: str = "sample", cut_by: str = "depth", topic: Optional[float] = None,
-                 fill: str = "cobweb"):
+                 fill: str = "cobweb", topic_by: str = "symbol", topic_mean: bool = False):
         self.L, self.cut, self.lam, self.alpha, self.gap_max, self.length = L, cut, lam, alpha, gap_max, length
         # cut_by "bits": cut and ctx_cut are information levels (-log2 of a concept's share
         # of its tree); a symbol is the deepest ancestor within that many bits, so the
@@ -60,7 +60,11 @@ class ChartGen:
         # concept G, so it counts by the lift P(x | G) / P(x | root) (L._pv_lift, back-off
         # along the path) raised to beta / n, n the free positions: the sentence's
         # geometric mean, so x is counted once for the whole sentence, not once per word
-        self.topic = topic
+        self.topic = topic        # a number, or "fit": beta chosen by likelihood on stored pairs (fit_topic)
+        # topic_by "symbol": x read at G itself; "best": at whichever of G's ancestors (or G)
+        # explains x best, so the grain x is read at is chosen per symbol, not fixed by the cut
+        self.topic_by = topic_by
+        self.topic_mean = topic_mean   # the lift per word of x (its geometric mean) rather than the sum
         # fill "cobweb": a drawn tree's leaves filled left to right by Cobweb prediction among
         # each leaf symbol's words; "chart": no tree is frozen, each free position in turn
         # draws its word from the chart's marginal given the words placed so far (the rest
@@ -225,13 +229,14 @@ class ChartGen:
             prev = val
         return prev
 
-    def inside(self, toks: Sequence[Optional[str]], lift=None):
+    def inside(self, toks: Sequence[Optional[str]], lift=None, lifted=None):
         n = len(toks)
         ins = {}
-        free = sum(t is None for t in toks)
+        lifted = lifted or [t is None for t in toks]           # the positions x weighs (the free ones by default)
+        free = sum(lifted)
         for i, t in enumerate(toks):
             v = self._leaf(t)
-            if t is None and lift is not None:              # P(x | G)^(beta / free), G the symbol
+            if lifted[i] and lift is not None:              # P(x | G)^(beta / free), G the symbol
                 v = v * np.exp(lift / free)                 # unshifted, so Z stays comparable across lengths
             m = v.max()
             ins[(i, i + 1)] = (v / m if m > 0 else v, math.log(m) if m > 0 else -math.inf)
@@ -285,8 +290,39 @@ class ChartGen:
         out = np.zeros(len(self.syms))
         for s, node in self._xnode.items():
             if s in self.ix:
-                out[self.ix[s]] = self.topic * lift(node)
-        return out
+                if self.topic_by == "best":                   # the generalization on G's path that explains x best
+                    path = [node]
+                    while path[-1].parent is not None:
+                        path.append(path[-1].parent)
+                    out[self.ix[s]] = max(lift(a) for a in path)
+                else:
+                    out[self.ix[s]] = lift(node)
+        if self.topic_mean:                                   # x's words as one observation, not |x| independent ones
+            out = out / len(prev)
+        return self.topic * out
+
+    def fit_topic(self, pairs, grid=(0, 0.5, 1, 2, 4, 8, 16)):
+        """beta by likelihood: the mean over stored (previous, next) experiences of
+        log P(next | previous, its length) = log Z_beta(next) - log Z_beta(n free positions),
+        x weighing every position; the best beta on the grid is kept. Returns each beta's score."""
+        self.topic = 1.0
+        data = []
+        for x, y in pairs:
+            ell = self.topic_lift(x)
+            if ell is not None:
+                data.append((list(y), ell, self.start_given(x)))
+        if not data:
+            return {}
+        score = {}
+        for b in grid:
+            tot = 0.0
+            for y, ell, st in data:
+                n = len(y)
+                tot += (self.logZ(self.inside(y, b * ell, lifted=[True] * n), n, st)
+                        - self.logZ(self.inside([None] * n, b * ell), n, st))
+            score[b] = tot / len(data)
+        self.topic = max(score, key=score.get)
+        return score
 
     def logZ(self, ins, n, start=None):
         v, l = ins[(0, n)]

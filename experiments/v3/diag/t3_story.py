@@ -60,7 +60,7 @@ test, train_st = stories[:N_TEST_STORIES], stories[N_TEST_STORIES:]
 # story was kept (FOLLOW "adjacent") or any earlier sentence of the story was (FOLLOW "story":
 # the nearest earlier kept sentence then counts as the previous experience)
 train = []
-for st in train_st:
+for k, st in enumerate(train_st):
     for i, s in enumerate(st):
         if keep(s):
             train.append((s, (i > 0 and keep(st[i - 1])) if FOLLOW == "adjacent" else any(keep(t) for t in st[:i])))
@@ -68,7 +68,9 @@ for st in train_st:
         break
 train = train[:n]
 seen = {tuple(s) for s, _ in train}
-pairs = [(st[i - 1], st[i]) for st in test for i in range(1, len(st)) if keep(st[i - 1]) and keep(st[i])]
+adj = lambda sts: [(st[i - 1], st[i]) for st in sts for i in range(1, len(st)) if keep(st[i - 1]) and keep(st[i])]
+val = adj(train_st[k + 1:k + 400])[:200]   # pairs of stories the stream never reached: for fitting the topic weight
+pairs = adj(test)
 random.Random(seed + 1).shuffle(pairs)
 pairs = pairs[:N_PROMPT]
 held = [s for st in test for s in st if keep(s)]
@@ -190,6 +192,12 @@ for ai, arm in enumerate(arms):
     if chart is not None:
         CG = ChartGen(L, **chart)
         print(json.dumps({"tag": tag, "seed": seed, "chart": chart, **CG.stats}), flush=True)
+        if chart.get("topic") == "fit":    # beta by likelihood on held-out pairs (stored pairs are recalled whole)
+            fit = CG.fit_topic(val)
+            print(json.dumps({"tag": tag, "seed": seed, "fit pairs": len(val), "fit topic": {str(b): round(v, 4) for b, v in fit.items()},
+                              "beta": CG.topic}), flush=True)
+            if os.environ.get("FIT_ONLY"):     # a diagnostic: the fit alone, no generation
+                continue
         print(json.dumps(CG.describe()), flush=True)
         gen = lambda p: CG.generate(["*"], g_rng, prev=p if cond else None)
         arm["chart"] = chart
