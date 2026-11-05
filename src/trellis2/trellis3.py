@@ -401,8 +401,11 @@ class Trellis3:
         self.ctx.sample_restructure = self.cnt.sample_restructure = (restructure == "sample")
         # exact_alone: a new concept is scored by what it holds (sum of squared bag
         # shares), so bag-valued descriptions are not filed as new leaves by default
-        if exact_alone:                     # opt-in (older compiled trees lack the flag)
-            self.ctx.exact_alone = self.cnt.exact_alone = True
+        # True for both trees, or "content" / "context" for one of them.
+        if exact_alone in (True, "context"):    # opt-in (older compiled trees lack the flag)
+            self.ctx.exact_alone = True
+        if exact_alone in (True, "content"):
+            self.cnt.exact_alone = True
         self.rng = random.Random(seed)
         self.records: List[Elem] = _UseList(self) if repair_use else []
         self._rr = 0
