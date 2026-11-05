@@ -332,6 +332,8 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
         <li><a href="#failures"><span class="n">A13</span><span>Failure checks</span></a></li>
         <li><a href="#f-known"><span class="n">A14</span><span>Known failures</span></a></li>
         <li><a href="#iterations"><span class="n">A15</span><span>Kept and set aside</span></a></li>
+        <li><a href="#a-window"><span class="n">A16</span><span>Ablation: window size</span></a></li>
+        <li><a href="#a-copying"><span class="n">A17</span><span>Ablation: toy-grammar copying</span></a></li>
       </ol></li>
   </ol>
 </nav>
@@ -700,6 +702,8 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     <li><a href="#failures"><span class="rn">A13</span><span class="rt">AND/OR failure checks</span><span class="ra">The checks run after every change.</span></a></li>
     <li><a href="#f-known"><span class="rn">A14</span><span class="rt">Known failures</span><span class="ra">Measurements of what stayed open as of late October.</span></a></li>
     <li><a href="#iterations"><span class="rn">A15</span><span class="rt">Kept and set aside</span><span class="ra">Each change tried from 23 to 26 October, and its fate.</span></a></li>
+    <li><a href="#a-window"><span class="rn">A16</span><span class="rt">Ablation: window size</span><span class="ra">Windows of 1 to 4 words on stories and characters.</span></a></li>
+    <li><a href="#a-copying"><span class="rn">A17</span><span class="rt">Ablation: toy-grammar copying</span><span class="ra">Which mechanisms made generation copy, and where inside-outside loses grammar.</span></a></li>
   </ul>
 </section>
 
@@ -709,6 +713,20 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
   <h1>Ablation: one hierarchy</h1>
   <p class="lede">What happens if content and context are held in one Cobweb tree, used in the same ways?</p>
   <div id="unified-body">@@UNIFIED@@</div>
+</section>
+
+<section class="page" data-page="a-window" hidden>
+  <p class="eyebrow">Appendix A16</p>
+  <h1>Ablation: window size</h1>
+  <p class="lede">How many neighbouring words should a context hold?</p>
+  <div id="window-body">@@WINDOW@@</div>
+</section>
+
+<section class="page" data-page="a-copying" hidden>
+  <p class="eyebrow">Appendix A17</p>
+  <h1>Ablation: toy-grammar copying</h1>
+  <p class="lede">Why does generation on the toy grammars copy what it has seen, and where does inside-outside lose grammar?</p>
+  <div id="copying-body">@@COPYING@@</div>
 </section>
 
 <!-- ============================================================ PARSING -->
@@ -2120,13 +2138,13 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
 (function () {
 const ORDER = ["intro", "hierarchies", "representations", "parse", "io-generation", "learning", "d-domains", "d-evals", "d-competitors",
   "results", "curves", "r-stories", "s-babi", "s-chars", "s-chess", "conclusion", "appendices", "a-unified", "s-sem", "generate", "types", "rules",
-  "s-prompt", "s-consist", "s-probe", "sustain", "status", "a-fixes", "representation", "failures", "f-known", "iterations"];
+  "s-prompt", "s-consist", "s-probe", "sustain", "status", "a-fixes", "representation", "failures", "f-known", "iterations", "a-window", "a-copying"];
 const TITLES = { intro: "Introduction", hierarchies: "Hierarchies", representations: "Representations", parse: "Parsing", "io-generation": "Generation", learning: "Learning",
   "d-domains": "Design: domains", "d-evals": "Design: evaluations", "d-competitors": "Design: competitors", results: "Results", curves: "Results: toy grammars",
   "r-stories": "Results: TinyStories", "s-babi": "Results: bAbI", "s-chars": "Results: Chinese characters", "s-chess": "Results: chess", conclusion: "Conclusion and next steps",
   appendices: "Appendices", "a-unified": "A1 Ablation: one hierarchy", "s-sem": "A2 Story rounds", generate: "A3 Expansion generation", types: "A4 Type names", rules: "A5 Concept-choice rules",
   "s-prompt": "A6 Prompted generation", "s-consist": "A7 Parse consistency", "s-probe": "A8 Chunk representations", sustain: "A9 Sustaining memory", status: "A10 Memory scoreboard",
-  "a-fixes": "A11 Representation fixes", representation: "A12 Earlier representation", failures: "A13 Failure checks", "f-known": "A14 Known failures", iterations: "A15 Kept and set aside" };
+  "a-fixes": "A11 Representation fixes", representation: "A12 Earlier representation", failures: "A13 Failure checks", "f-known": "A14 Known failures", iterations: "A15 Kept and set aside", "a-window": "A16 Ablation: window size", "a-copying": "A17 Ablation: toy-grammar copying" };
 const ALIAS = { overview: "intro", instances: "representations", principles: "intro", next: "conclusion", "s-prompts": "s-prompt" };
 const GROUPS = { design: ["d-domains", "d-evals", "d-competitors"], results: ["results", "curves", "r-stories", "s-babi", "s-chars", "s-chess"],
   appendices: ["appendices", "a-unified", "s-sem", "generate", "types", "rules", "s-prompt", "s-consist", "s-probe", "sustain", "status", "a-fixes", "representation", "failures", "f-known", "iterations"] };

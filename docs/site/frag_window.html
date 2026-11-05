@@ -1,0 +1,24 @@
+<p><b>Larger windows are worse in both domains, and window 1 is at least as good as window 2.</b> The window here sets both the stored context and the window used at generation, so these results do not separate the two roles. Toy grammars and chess were not run.</p>
+<h2>Stories</h2>
+<div class="tablewrap"><table>
+  <thead><tr><th class="num">Window (words each side)</th><th class="num">Grammatical new per generation, s13 / s17</th><th class="num">Judged grammatical</th><th class="num">New</th></tr></thead>
+  <tbody>
+    <tr><td class="num">1</td><td class="num best">.207 / .207</td><td class="num">56 / 53%</td><td class="num">60 / 66%</td></tr>
+    <tr><td class="num">2 (current)</td><td class="num">.198 / .185</td><td class="num">60 / 59%</td><td class="num">53 / 56%</td></tr>
+    <tr><td class="num">3</td><td class="num">.152 / .152</td><td class="num">57 / 64%</td><td class="num">50 / 47%</td></tr>
+    <tr><td class="num">4</td><td class="num">.117 / .119</td><td class="num">58 / 61%</td><td class="num">43 / 45%</td></tr>
+  </tbody>
+</table></div>
+<p>A wider window lowers novelty and does not reliably raise grammaticality. Narrowing from 2 to 1 gains novelty and loses a few points of grammaticality; the net gain in yield is small on two seeds.</p>
+<h2>Characters</h2>
+<div class="tablewrap"><table>
+  <thead><tr><th class="num">Window</th><th class="num">500, s13 / s17</th><th class="num">1,000</th><th class="num">2,000</th></tr></thead>
+  <tbody>
+    <tr><td class="num">1</td><td class="num">32.86 / 34.01</td><td class="num">29.81 / 30.34</td><td class="num best">27.23 / 27.49</td></tr>
+    <tr><td class="num">2 (current)</td><td class="num">33.59 / 33.90</td><td class="num">30.50 / 30.15</td><td class="num">27.79 / 27.46</td></tr>
+    <tr><td class="num">3</td><td class="num">34.53 / 35.73</td><td class="num">31.51 / 31.55</td><td class="num">28.88 / 28.06</td></tr>
+    <tr><td class="num">4</td><td class="num">34.97 / 35.80</td><td class="num">31.57 / 31.98</td><td class="num">28.81 / 29.25</td></tr>
+  </tbody>
+</table></div>
+<p class="small">Bits per held-out character; lower is better. Trigram at 2,000: 26.43 / 26.02.</p>
+<p>The window stays at 2 for now. Window 1 needs fewer attributes and loses nothing here, so it is the next one to test, on the toy grammars and alongside the removals in <a href="#a-copying">A17</a>.</p>

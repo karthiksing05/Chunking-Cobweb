@@ -1,0 +1,46 @@
+<style>#unified-body .tablewrap,#window-body .tablewrap,#copying-body .tablewrap{margin-bottom:14px}</style>
+<p><b>Verdict so far: keep two trees.</b> One shared tree is rejected. One joint tree generates and compresses at least as well, but organises chunks worse, and chess has not been tested. So this is not settled for every domain.</p>
+<h2>The two designs</h2>
+<ul>
+  <li><b>Shared.</b> One tree. Content and context are still filed as separate instances, so each element appears in it twice.</li>
+  <li><b>Joint.</b> One tree. Each element is one instance holding both its content and its context attributes. Attributes an instance lacks take the value <code>blank</code>.</li>
+</ul>
+<p>Everything else is the current recipe, used in the same ways for parsing, naming and generation.</p>
+<h2>Results</h2>
+<div class="tablewrap"><table>
+  <thead><tr><th>Test</th><th class="num">Two trees</th><th class="num">Shared</th><th class="num">Joint</th></tr></thead>
+  <tbody>
+    <tr><td>Stories: grammatical new per generation, s13 / s17 / s19 / s23</td><td class="num">.198 / .185 / .150 / .209</td><td class="num">.224 / .179 / .155 / .199</td><td class="num">.200 / .205 / .208 / .195</td></tr>
+    <tr><td>Stories: mean of those four</td><td class="num">.186</td><td class="num">.189</td><td class="num best">.202</td></tr>
+    <tr><td>Stories: judged grammatical, range</td><td class="num">59–60%</td><td class="num">56–61%</td><td class="num best">65–70%</td></tr>
+    <tr><td>Stories: new, range</td><td class="num">53–57%</td><td class="num best">53–59%</td><td class="num">48–51%</td></tr>
+    <tr><td>Characters: bits per held-out character, 500, s13 / s17</td><td class="num">33.59 / 33.90</td><td class="num">32.97 / 33.96</td><td class="num best">32.46 / 33.21</td></tr>
+    <tr><td>Characters: 1,000</td><td class="num">30.50 / 30.15</td><td class="num">30.08 / 30.64</td><td class="num best">29.43 / 29.59</td></tr>
+    <tr><td>Characters: 2,000</td><td class="num">27.79 / 27.46</td><td class="num">27.86 / 27.69</td><td class="num best">26.68 / 26.92</td></tr>
+    <tr><td><code>small</code>: grammatical / new at 320, s13; s17</td><td class="num">1.00 / .085; 1.00 / .085</td><td class="num">1.00 / .145; 1.00 / .115</td><td class="num">1.00 / .10; 1.00 / .08</td></tr>
+    <tr><td><code>med</code>: grammatical / new at 320, s13; s17</td><td class="num">.46 / .32; .48 / .29</td><td class="num">.39 / .27; .325 / .23</td><td class="num best">.535 / .37; .49 / .32</td></tr>
+    <tr><td><code>large</code>: grammatical / new at 320, s13; s17</td><td class="num best">.52 / .43; .555 / .40</td><td class="num">.38 / .27; .36 / .255</td><td class="num">.465 / .32; .50 / .38</td></tr>
+    <tr><td>Mean posterior of the chosen analysis, s13 / s17</td><td class="num best">.80 / .79</td><td class="num">.67 / .65</td><td class="num">.46 / .42</td></tr>
+    <tr><td>Chunk tag-pattern purity at 12 bits</td><td class="num best">.93</td><td class="num">.81</td><td class="num">.53</td></tr>
+    <tr><td>Stored records after 1,000 sentences, s13 / s17</td><td class="num best">28,870 / 26,852</td><td class="num">37,972 / 35,224</td><td class="num">38,330 / 35,275</td></tr>
+  </tbody>
+</table></div>
+<p class="small">Trigram beats all three on characters at every size (26.43 / 26.02 at 2,000); joint comes within 0.25 bits on seed 13 and 0.90 on seed 17. Toy grammars use inside-outside generation here.</p>
+<h2>Why one tree organises chunks worse</h2>
+<p>A joint instance asks one tree to sort by what a chunk is and by where it stands at once, and in practice it sorts mostly by where:</p>
+<div class="tablewrap"><table>
+  <thead><tr><th>Pairs falling in one concept within 6 bits</th><th class="num">Two trees: content</th><th class="num">Two trees: context</th><th class="num">Joint</th></tr></thead>
+  <tbody>
+    <tr><td>Same chunk, different window</td><td class="num best">.91 / .93</td><td class="num">.17</td><td class="num">.31 / .23</td></tr>
+    <tr><td>Same window, different chunk</td><td class="num">.16 / .14</td><td class="num">.34 / .32</td><td class="num">.57 / .54</td></tr>
+  </tbody>
+</table></div>
+<p>The tree also spends its top split on a bookkeeping difference: blank content attributes separate words from composites perfectly (purity 1.0). Word grouping is unaffected (tag purity about .87 at 12 bits for both). Chunk grouping is what suffers, and it is what the parser reads: the same chunk is split across concepts, and the mean posterior of the chosen analysis falls from about .80 to .44.</p>
+<p>Shared has no such single cause we can point to. It stores a third more records and loses to two trees on most measures, with no compensating gain at 2,000 on characters or on the larger toy grammars.</p>
+<h2>What this does not settle</h2>
+<ul>
+  <li><b>Characters.</b> Joint wins by 0.5 to 1.1 bits at every size despite the worse chunks. We have not tested why, so we cannot yet call this an advantage of one tree rather than a side effect of how characters are coded.</li>
+  <li><b>Stories.</b> Joint's lead in yield is smaller than the spread between seeds for two trees. It trades novelty for grammaticality; it is not simply better.</li>
+  <li><b>Chess.</b> Not run. The chess learner has no joint path yet.</li>
+  <li><b>Recipe.</b> All arms use the current recipe. If <a href="#a-copying">the removals in A17</a> are adopted, this comparison should be rerun.</li>
+</ul>

@@ -1,0 +1,28 @@
+<p><b>Under the current recipe, expansion generation on the toy grammars almost only copies. Turning off two mechanisms together fixes that.</b> The recipe has not changed yet: the same removal is being tested on stories and characters, and chess has not been tested.</p>
+<h2>Which removal restores novelty (expansion)</h2>
+<div class="tablewrap"><table>
+  <thead><tr><th>Grammatical and new at 320, s13 / s17</th><th class="num"><code>med</code></th><th class="num"><code>large</code></th><th class="num"><code>term_med</code></th></tr></thead>
+  <tbody>
+    <tr><td>Current recipe</td><td class="num">.00 / .00</td><td class="num">.02 / .01</td><td class="num">.01 / .02</td></tr>
+    <tr><td>Neighbour chunks off</td><td class="num">.22 / .20</td><td class="num">.04 / .10</td><td class="num">.21 / .23</td></tr>
+    <tr><td><code>exact_alone</code> off</td><td class="num">.14 / .58</td><td class="num">.70 / .61</td><td class="num">.79 / .85</td></tr>
+    <tr><td><b>Both off</b></td><td class="num best">.91 / .89</td><td class="num best">.83 / .86</td><td class="num best">.87 / .83</td></tr>
+  </tbody>
+</table></div>
+<p>Every cell is 96–100% grammatical; the current recipe and both-off are 99–100%. Scored by the grammar, which never teaches. Neighbour chunks alone explain little, and <code>exact_alone</code> alone varies with seed on <code>med</code>. Only removing both is reliable across these grammars and seeds. <code>exact_alone</code> was added to fix a real fault, content concepts with thousands of leaf children, so removing it has to pass elsewhere before it is adopted.</p>
+<h2>Inside-outside generation is not fixed by this</h2>
+<p>The same removals leave it at 57–60% grammatical and .27–.28 new on <code>med</code> with both off. The other arms are still finishing. So we also changed one generation setting at a time, keeping the memory fixed:</p>
+<div class="tablewrap"><table>
+  <thead><tr><th>Inside-outside, grammatical; new (s13 / s17)</th><th class="num"><code>med</code>, 160 experiences</th><th class="num"><code>large</code>, 80 experiences</th></tr></thead>
+  <tbody>
+    <tr><td>Base</td><td class="num">.48 / .50; .27 / .22</td><td class="num">.51 / .53; .20 / .21</td></tr>
+    <tr><td>Back-off λ 1</td><td class="num">.51 / .51; .19 / .14</td><td class="num">.60 / .64; .18 / .18</td></tr>
+    <tr><td>Back-off λ 16</td><td class="num">.44 / .45; .33 / .31</td><td class="num">.43 / .45; .32 / .26</td></tr>
+    <tr><td>Words cut at 8 bits</td><td class="num">.46 / .41; .39 / .37</td><td class="num">.41 / .39; .32 / .35</td></tr>
+    <tr><td>Content cut at 0 bits (no chunk identity)</td><td class="num">.31 / .27; .29 / .23</td><td class="num">.34 / .29; .30 / .26</td></tr>
+    <tr><td><b>Content cut at 8 bits</b></td><td class="num best">.55 / .61; .49 / .52</td><td class="num">.57 / .47; .47 / .26</td></tr>
+    <tr><td>Chart marginal only, no window</td><td class="num">.10 / .19; .05 / .09</td><td class="num">.21 / .25; .11 / .13</td></tr>
+  </tbody>
+</table></div>
+<p class="small">150 generations per arm. "New" here is grammatical and new, as a share of everything generated. Words cut at 16 bits or the whole tree matched the base exactly on both grammars.</p>
+<p>Without the window, grammaticality collapses, so the window supplies much of it. A coarse content cut at 8 bits is the best single setting, but on <code>large</code> it varies with seed. No arm reaches the grammaticality expansion has. On toy grammars, expansion with both mechanisms off now clearly beats inside-outside, and that weakens the toy-grammar case for inside-outside. Its case on stories, that chunk concepts carry information about the next word, is a separate measurement and stands.</p>
