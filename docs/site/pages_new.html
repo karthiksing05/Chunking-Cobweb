@@ -1,0 +1,451 @@
+<!-- ============================================================ INTRODUCTION -->
+<section class="page" data-page="intro">
+  <p class="eyebrow">Introduction</p>
+  <h1>Concepts and chunks from raw experience</h1>
+  <p class="lede">TRELLIS learns from a stream of tokens, one experience at a time, with no supervision and no offline phase. It holds what it learns in two Cobweb hierarchies, and it parses and generates by inside-outside over them.</p>
+  <h2>The theory</h2>
+  <div class="col">
+    <p>Two operations compress experience. <b>Composition</b> binds parts that occur together into a chunk, so a whole can be stored and recalled as one unit. <b>Generalization</b> groups instances into a concept, so what is known of some carries over to others. Neither is enough alone: chunks without concepts cannot say what a new chunk resembles, and concepts without chunks have only single tokens to generalize over.</p>
+    <p>TRELLIS makes each operation the other's vocabulary. Every element is described by <em>where it occurs</em> and by <em>what it is made of</em>, and Cobweb organizes each description into a hierarchy of concepts. A chunk's parts are named by concepts of where those parts occur. An element's context carries a name for what it is made of. So learning a better category sharpens the chunks built from it, and the reverse.</p>
+    <p>Generation is the same idea run forward: <b>y = G(x)</b>. A general concept holds what its instances share, and the context x specializes it to one output. Grammatical novelty comes from that step. A concept that covers many instances can produce a combination none of them had, and the surroundings pick a combination that fits. Compression and generation are then two readings of one model: a good memory gives high probability to what it has not seen but could have.</p>
+    <p>The upcoming iterations follow from this theory:</p>
+    <ul>
+      <li><b>Choose the concept from the data.</b> Which generalization of x should predict y is now partly fixed by hand (a topic weight and a cut on words). The theory says memory should choose it.</li>
+      <li><b>One machinery everywhere.</b> Parsing, generating and coding should read the same probabilities. Inside-outside now does this for generating and coding characters. Parsing still scores chunks by a separate factor.</li>
+      <li><b>Earn every hierarchy.</b> Two hierarchies are an assumption. An ablation will test a single hierarchy holding content and context together.</li>
+      <li><b>Domain generality.</b> Every mechanism must work on characters and chess as well as sentences. Chess still loses to simple shape-based coders in most tests, so its representation is due a rethink.</li>
+    </ul>
+  </div>
+  <dl class="facts">
+    <div><dt>Hierarchies</dt><dd>2 Cobweb trees: context (where an element occurs) and content (what it is made of)</dd></div>
+    <div><dt>Parsing</dt><dd>inside-outside over every span and split; the analysis with the most expected correct chunks</dd></div>
+    <div><dt>Generation</dt><dd>inside-outside over concepts, one word at a time</dd></div>
+    <div><dt>Learning</dt><dd>one pass; every composite stored, weighted by its posterior; no night</dd></div>
+    <div><dt>Domains</dt><dd>toy grammars, TinyStories, bAbI, Chinese characters, chess</dd></div>
+    <div><dt>Supervision</dt><dd>none; gold labels only score</dd></div>
+  </dl>
+  <h2>Principles</h2>
+  <p>Ten principles constrain every change. None of them mentions words.</p>
+@@L 246-257@@
+  <h2>Results at a glance</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Domain</th><th>Measure</th><th>TRELLIS</th><th>Reference</th></tr></thead>
+    <tbody>
+      <tr><td><a href="#curves">Toy grammars</a></td><td>Grammatical; grammatical and new (320 experiences)</td><td class="num">99.7–100%; 0.75–0.88 new</td><td>Grammar known exactly</td></tr>
+      <tr><td><a href="#r-stories">TinyStories</a></td><td>Judged grammatical and new, per generation (1,000 sentences, 4 seeds)</td><td class="num best">0.186</td><td>0.159 tree drawn first; 0.161 / 0.152 expansion (2 seeds)</td></tr>
+      <tr><td><a href="#s-babi">bAbI</a></td><td>Answer of the right type</td><td class="num">0.60–0.63</td><td>0.20–0.23 frequency baseline</td></tr>
+      <tr><td><a href="#s-chars">Characters</a></td><td>Bits per held-out character (2,000 learned)</td><td class="num">27.8 / 27.5</td><td><b>Trigram 26.4 / 26.0</b>; BPE 29.6 / 29.1</td></tr>
+      <tr><td><a href="#s-chess">Chess</a></td><td>Bits per held-out position (4,000 learned): control; shifted</td><td class="num">127.7; <b>147.2</b></td><td><b>BPE squares 108.8</b>; 205.5. BPE shapes 111.3; 149.7</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">The artifact's layout: how the system works (<a href="#hierarchies">Hierarchies</a>, <a href="#representations">Representations</a>, <a href="#parse">Parsing</a>, <a href="#io-generation">Generation</a>, <a href="#learning">Learning</a>), how it is tested (<a href="#d-domains">Experimental design</a>), what happened (<a href="#results">Results</a>), what is left (<a href="#conclusion">Conclusion and next steps</a>), and older methods and ablations (<a href="#appendices">Appendices</a>).</p>
+</section>
+
+<!-- ============================================================ HIERARCHIES -->
+<section class="page" data-page="hierarchies" hidden>
+  <p class="eyebrow">How it works</p>
+  <h1>Two hierarchies</h1>
+  <p class="lede">The context hierarchy says where an element stands. The content hierarchy says what it is made of. Each one names things in the other's terms, and every mechanism reads both.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th></th><th>Context hierarchy</th><th>Content hierarchy</th></tr></thead>
+    <tbody>
+      <tr><th>Question it answers</th><td>Where does this element occur?</td><td>What is this element made of?</td></tr>
+      <tr><th>What goes in</th><td>Every word and every composite</td><td>Every composite (words have no parts)</td></tr>
+      <tr><th>An instance holds</th><td>The window around the element, its own content, the neighbouring chunks and, on stories, the previous sentence</td><td>Each part's type name and each part's content path</td></tr>
+      <tr><th>What its concepts are</th><td>Categories and roles: things that can stand in the same place</td><td>Chunk types: things built the same way</td></tr>
+      <tr><th>Weight of an instance</th><td>1 for a word; the posterior for a composite</td><td>The posterior</td></tr>
+      <tr><th>Tree</th><td colspan="2">Each is a Cobweb tree, sorted, merged and split by category utility, one instance at a time</td></tr>
+    </tbody>
+  </table></div>
+  <h2>How each is used</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Step</th><th>Context hierarchy</th><th>Content hierarchy</th></tr></thead>
+    <tbody>
+      <tr><th>Naming</th><td>Names a word or chunk when it is a part: its <em>type name</em> is the parent concepts of where it has stood</td><td>Names a chunk by its path: the concepts it sorts through, chosen by information (<em>bands</em>)</td></tr>
+      <tr><th><a href="#parse">Parsing</a></th><td>Half of a chunk's score: how much better its concepts explain its surroundings than the root does</td><td>The other half: the same for its parts</td></tr>
+      <tr><th><a href="#io-generation">Generation</a></th><td>Word symbols, and so which words can stand where. Reads the previous sentence's lift, and predicts a word from its window</td><td>Composite symbols and the rules that split them. Reads which sentences followed sentences like the previous one</td></tr>
+      <tr><th><a href="#learning">Learning</a></th><td>Receives each word and composite. Its leaves feed the type names</td><td>Receives each composite first, so that its context can carry the name of its new leaf</td></tr>
+      <tr><th>Coding</th><td colspan="2">Both, through the same probabilities generation draws from (<a href="#s-chars">characters</a>)</td></tr>
+    </tbody>
+  </table></div>
+  <h2>What passes between them</h2>
+  <div class="col">
+    <ul>
+      <li><b>Context to content.</b> A composite's <code>L</code> and <code>R</code> name its parts by the context concepts where those parts have stood. So "the dog" and "a cat" can share values, though they share no token.</li>
+      <li><b>Content to context.</b> An element's <code>cc</code>, and its neighbours' <code>lc</code> and <code>rc</code>, name what the element and its neighbours are made of. So the context hierarchy can separate positions by the kind of chunk that stands in them.</li>
+    </ul>
+    <p>The names keep changing as the trees restructure, so nothing here is a fixed code. Stored descriptions are updated and re-checked as memory is used (<a href="#sustain">sustaining memory</a>).</p>
+    <p>Whether two hierarchies are needed at all is an open question. It is being tested by an ablation with one hierarchy that holds both descriptions (<a href="#a-unified">Appendix</a>).</p>
+  </div>
+</section>
+
+<!-- ============================================================ GENERATION -->
+<section class="page" data-page="io-generation" hidden>
+  <p class="eyebrow">How it works</p>
+  <h1>Inside-outside generation</h1>
+  <p class="lede">Memory is read as a grammar over concepts. A sentence is written one word at a time, and each word is drawn from what the whole sentence around it allows: the words placed so far, and every way the rest could still finish.</p>
+  <h2>Step 1: read the grammar from memory</h2>
+  <div class="col">
+    <p>Generation reads the stored records without changing them. Nothing is learned here, and no separate grammar is kept: it is recomputed from the trees whenever it is needed, so it follows whatever memory now holds. Every number is a statistic of the two trees.</p>
+  </div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Piece</th><th>What it is</th><th>Read from</th></tr></thead>
+    <tbody>
+      <tr><th>Composite symbols</th><td>The content leaf of each stored composite</td><td>Content tree</td></tr>
+      <tr><th>Word symbols</th><td>The context concept of each word occurrence, the deepest within 12 bits of the root. The same word has different symbols by where it stood</td><td>Context tree</td></tr>
+      <tr><th>Rules</th><td>P(A B | C) from each stored composite's own parts, counted by its posterior. Each rule backs off along the content tree, then to the pairs of all composites: P<sub>l</sub>(AB | C) = (n<sub>l</sub>(AB) + λ P<sub>l−1</sub>(AB | C)) / (n<sub>l</sub> + λ), λ = 4</td><td>Stored composites, content tree</td></tr>
+      <tr><th>Emissions</th><td>P(w | s): the words stored under each word symbol</td><td>Stored words</td></tr>
+      <tr><th>Start</th><td>P(C): the whole experiences (<code>SENT</code>)</td><td>Content tree</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">The back-off carries generalization. A rare concept's rules lean on its ancestors', so a fine symbol can still produce what only its ancestors have seen. With this fill the content tree needs no cut (see below).</p>
+  <h2>Step 2: read the prompt x</h2>
+  <div class="col">
+    <p>Given the previous sentence x, two quantities change.</p>
+    <ul>
+      <li><b>The start.</b> P(C | x) comes from the experiences that followed sentences like x (<code>NEXT</code>), walking down x's content path. Each level backs off to the one above: P(C | node) = (n<sub>node</sub>(C) + P(C | parent)) / (n<sub>node</sub> + 1).</li>
+      <li><b>The topic.</b> Each word symbol G is a context concept, so it has a lift: how much more likely x is as "what came before" at G than at the root, P(x | G) / P(x | root). A free position's symbols are weighted by the lift raised to β / n, with n the free positions. That is a geometric mean, so x counts once for the sentence, not once per word. β = 2, set by hand.</li>
+    </ul>
+  </div>
+  <h2>Step 3: choose the length</h2>
+  <div class="col">
+    <p>For each length from 3 to 8, the inside pass computes Z, the grammar's probability of any sentence of that length, summed over every tree and every word. One length is drawn in proportion to Z. A prompt with gaps works the same way: its fixed words are emitted, and its gaps are expanded to each allowed width.</p>
+  </div>
+  <h2>Step 4: fill each word from the whole sentence</h2>
+  <div class="col">
+    <p>No tree is frozen. For each free position i, left to right:</p>
+    <ol>
+      <li><b>Inside.</b> Sum over every analysis of every span, with the placed words emitted and the unplaced positions summed over all words.</li>
+      <li><b>Outside.</b> Pass the probabilities back down to give each position's outside score: the probability of everything around it, for each symbol that could stand there. It is the inside pass transposed through the back-off levels, and it matches finite differences to 10<sup>−10</sup>.</li>
+      <li><b>Symbol posterior.</b> μ<sub>i</sub>(s) = inside<sub>i</sub>(s) × outside<sub>i</sub>(s) / Z.</li>
+      <li><b>Word distribution.</b> P<sub>IO</sub>(w) = Σ<sub>s</sub> μ<sub>i</sub>(s) P(w | s).</li>
+      <li><b>Window prediction.</b> P<sub>C</sub>(w) is the context tree's prediction from the surface window: the placed words within two places.</li>
+      <li><b>Draw.</b> w ∝ P<sub>IO</sub>(w) × P<sub>C</sub>(w), then fix it and move on. If the two share no word, P<sub>IO</sub> alone.</li>
+    </ol>
+    <p>Once "became" is placed, the next position is read with "became" fixed, so its complement is chosen knowing its head. Without the window term this is exact sampling from the grammar's distribution over sentences.</p>
+  </div>
+  <h2>Why inside-outside</h2>
+  <div class="col">
+    <p>Earlier generators chose structure first and words afterwards. Expansion (<a href="#generate">Appendix</a>) draws a stored whole experience and expands it down. Drawing a tree before the words (round 82) has the same flaw: the slot after "became" was chosen before anyone knew it would be "became". Inside-outside removes the order: structure and words stay summed together until each word is fixed. Three reasons follow, and the third has its own test.</p>
+    <ul>
+      <li><b>It gains on grammar without trading away what makes it useful.</b> Every setting of the earlier generator traded novelty for grammar. This fill raised judged-grammatical new sentences from a mean of 0.159 to 0.176 over four seeds.</li>
+      <li><b>It removes a parameter.</b> With the tree drawn first, fine symbols copy (whole tree: 3% new). With this fill they do not, and the whole tree scores 0.186, level with the best cut (0.183).</li>
+      <li><b>It makes effective use of chunk context.</b> See below.</li>
+    </ul>
+  </div>
+  <h2>Chunk context</h2>
+  <div class="col">
+    <p>A word depends on chunks around it, not only on the words next to it: a verb's object may start several words later, and a subject may end several words earlier. <b>Chunk context</b> means describing a position by the chunks around it at the same level or below. It has been hard to use. Writing neighbouring chunks into the stored context helped one-word prefixes on the toy grammars (0.78 → 0.87) but made the learner memorize (grammatical and new at 320 fell to 0.51–0.73 from 0.84–0.89; <a href="#f-known">known failures</a>). A window can see only two words on each side.</p>
+    <p>Inside-outside reads chunk context without storing it. The outside score of a position sums over every parent C and sibling B that could surround it, in concept terms: that sum <em>is</em> the position's chunk context, in both directions. On the left it holds the chunks built from the placed words. On the right it holds the chunks that could still finish the sentence. Nothing is added to any instance, so there is no new facet to memorize.</p>
+    <p>This is the only route by which chunks reach word choice. While writing this page we found that the window prediction never saw chunks: its full query raised an error on free positions and silently fell back to the raw window, so neither neighbouring chunks nor the previous sentence reached it in any round. The code now says so plainly and the results are unchanged. So every effect of chunk context on generation goes through inside-outside.</p>
+  </div>
+  <h3>Does it carry information? (round 94)</h3>
+  <p>Held-out story sentences are read left to right, and the real next word is scored under each source. Higher is better; 1,000 sentences learned, 200 held-out sentences.</p>
+  <div id="r94-table">@@R94@@</div>
+  <h2>A worked generation</h2>
+  <div class="col">
+    <p>Real output of the current recipe (1,000 sentences learned, seed 13 unless marked; the judge's probability of grammatical in brackets; each sentence is absent from training). Prompts are held-out story sentences.</p>
+  </div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Previous sentence x</th><th>Generated y</th></tr></thead>
+    <tbody>
+      <tr><td>the ball and the cat played together</td><td>one day she saw a big cat (1.00)</td></tr>
+      <tr><td>he could not play with his friends</td><td>tom and max wanted to play together (1.00)</td></tr>
+      <tr><td>you are nice</td><td>you are a nice friend (0.95)</td></tr>
+      <tr><td>tim and his mom were surprised</td><td>they played with the toy car (1.00)</td></tr>
+      <tr><td>they knew they did something bad (s17)</td><td>then the unexpected happened (1.00)</td></tr>
+      <tr><td>tom sue and the bird became friends (s17)</td><td>the bear wanted to eat it (1.00)</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">These were picked by hand for reading from sentences the judge rates above 0.9. They show what the method can do, not how often: about 40% of all outputs are judged ungrammatical, and the judge also passes sentences a reader would not, such as "lily was so much fun" (0.98).</p>
+  <h2>What is still set by hand</h2>
+  <div class="col">
+    <p>β = 2, λ = 4 and the 12-bit cut on word symbols. Whole-sentence likelihood cannot set β: on held-out pairs it peaks at β = 0 for every form of the lift, while β lifts cross share from 0.05 to 0.29 (<a href="#s-sem">story rounds</a>). The reading of the grammar is also a pass over all stored records, so its cost grows with memory; the whole tree generates at about half the speed of a 13-bit cut.</p>
+  </div>
+</section>
+
+<!-- ============================================================ DESIGN: DOMAINS -->
+<section class="page" data-page="d-domains" hidden>
+  <p class="eyebrow">Experimental design</p>
+  <h1>Domains</h1>
+  <p class="lede">The same code runs on each domain. A change is checked on more than one, because a mechanism that works only on sentences is not domain-general.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Domain</th><th>What an experience is</th><th>Scale</th><th>What it tests</th></tr></thead>
+    <tbody>
+      <tr><th>Toy grammars</th><td>A sentence from a known grammar (<code>small</code>, <code>med</code>, <code>large</code>, <code>term_low</code> and others)</td><td>10 to 320 experiences</td><td>Grammaticality can be checked exactly. Used as the guard on every change</td></tr>
+      <tr><th>TinyStories</th><td>A sentence of 3 to 8 words, using the 250 commonest words, read in story order</td><td>250 to 2,000 sentences; 1,500 held-out stories; 400 prompts, 4 draws each</td><td>Grammatical, new, on-topic generation from real text</td></tr>
+      <tr><th>bAbI</th><td>A story sentence, or a line <code>question ? answer</code>, from the 20 tasks</td><td>76,610 sentences, 4,114 distinct, 150 words; 600 to 3,000 learned</td><td>Answering as gap filling</td></tr>
+      <tr><th>Chinese characters</th><td>A character's IDS decomposition as a token sequence</td><td>500 to 2,000 characters; 300 held out</td><td>Compression and well-formed novelty on very short experiences, where alternative analyses carry information</td></tr>
+      <tr><th>Chess</th><td>A position as a board graph, from Lichess games rated 1800 and above</td><td>300 to 4,000 positions; 1,000 held out; 100 for recall</td><td>Compression of states, transfer to new squares, and Chase and Simon's (1973) recall experiments</td></tr>
+    </tbody>
+  </table></div>
+  <h2>The configuration under test</h2>
+  <div class="tablewrap"><table class="tbl">
+    <thead><tr><th>Part</th><th>Setting</th></tr></thead>
+    <tbody>
+      <tr><th>Trees</th><td>Two compiled Cobweb trees (<code>tree="cu"</code>), bit-identical to the Python tree in reference arithmetic. A new leaf is scored by its bag's own expected correct guesses (<code>exact_alone</code>)</td></tr>
+      <tr><th>Context instance</th><td>Window of two tokens each side, own content <code>cc</code>, neighbouring chunks <code>lc rc</code>, previous sentence <code>pv</code> (stories)</td></tr>
+      <tr><th>Content instance</th><td>Parts' type names <code>L R</code> and parts' content paths <code>LC RC</code></td></tr>
+      <tr><th>Names</th><td>Parent concepts of 32 sampled instances, mixed with neighbours' names at weight n/(n+4) for a word's own; content paths in information bands</td></tr>
+      <tr><th>Learning</th><td>Inside-outside over every composite; stored with posterior weight, dropped below 0.001; restructures with probability equal to its weight</td></tr>
+      <tr><th>Keeping current</th><td>Relabel in place; repair on use, up to 700 records per experience; no sweep</td></tr>
+      <tr><th>Parsing</th><td>Minimum Bayes risk over span posteriors</td></tr>
+      <tr><th>Generation</th><td>Inside-outside: whole content tree, words within 12 bits, λ 4, β 2, marginal times window prediction</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">The toy-grammar curves, the character generation guard and the chess recall studies were measured on earlier configurations; each result page says which. The explorers on the Parsing page show the configuration of 23 October.</p>
+</section>
+
+<!-- ============================================================ DESIGN: EVALUATIONS -->
+<section class="page" data-page="d-evals" hidden>
+  <p class="eyebrow">Experimental design</p>
+  <h1>Evaluations</h1>
+  <p class="lede">A change is kept when the system generates more grammatical new output or holds a more compressible memory. Gold labels only score; nothing they say reaches the learner.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Measure</th><th>Definition</th><th>Domains</th><th>Limits</th></tr></thead>
+    <tbody>
+      <tr><th>Grammatical, new</th><td>Share of samples the grammar accepts and training lacks</td><td>Toy grammars</td><td>Small languages saturate</td></tr>
+      <tr><th>Grammatical new per generation</th><td>Share of generations Qwen2.5-3B judges grammatical (few-shot, P(yes) above 0.5) and training lacks. The headline</td><td>TinyStories</td><td>The judge is imperfect and passes some bad sentences. It is calibrated on each run's real, scrambled and content-swapped sentences</td></tr>
+      <tr><th>Cross share</th><td>Mean PMI of the prompt's content words with the output's, as a share from random held-out (0) to the real next sentence (1)</td><td>TinyStories</td><td>Varies widely by seed (0.10 to 0.55)</td></tr>
+      <tr><th>Bits</th><td>Held-out code length under the learned model, model not charged</td><td>Characters, chess</td><td>Favours large memories; storage is reported apart</td></tr>
+      <tr><th>Parse agreement</th><td>Bracket F1 across seeds, across stream sizes and under word substitution</td><td>TinyStories</td><td>Agreement is not correctness</td></tr>
+      <tr><th>Prompts</th><td>Attested trigrams in filled gaps; right answer type and exact answer on bAbI</td><td>TinyStories, bAbI</td><td>Trigrams reward the common</td></tr>
+      <tr><th>Recall</th><td>Pieces rebuilt from 7 units, on real and random boards, against Chase and Simon's numbers</td><td>Chess</td><td>Experience stands in for rating; no latencies</td></tr>
+      <tr><th>Memory currency</th><td>Share of used records that no longer sort where they sit; learning time</td><td>TinyStories</td><td></td></tr>
+    </tbody>
+  </table></div>
+  <h2>Guards and seeds</h2>
+  <div class="col">
+    <p>Each change must pass the guard: grammaticality within 2 points of the original and more grammatical-and-new samples on <code>med</code> and <code>large</code>, seeds 13 and 17, plus characters held. Story rounds use seeds 13 and 17, and a change that survives is confirmed on 19 and 23. No result here has a significance test; differences are read against the spread between seeds.</p>
+  </div>
+</section>
+
+<!-- ============================================================ DESIGN: COMPETITORS -->
+<section class="page" data-page="d-competitors" hidden>
+  <p class="eyebrow">Experimental design</p>
+  <h1>Competitors</h1>
+  <p class="lede">Where a standard coder exists, TRELLIS is compared to it. Generation has only internal references so far, which is a gap in this study.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Competitor</th><th>What it is</th><th>Used on</th></tr></thead>
+    <tbody>
+      <tr><th>Unigram, trigram (Witten-Bell)</th><td>Frequency coders over tokens</td><td>Characters</td></tr>
+      <tr><th>BPE, squares</th><td>Byte-pair merging; on chess, chunks are exact pieces on exact squares</td><td>Characters, chess</td></tr>
+      <tr><th>BPE, shapes</th><td>The same merging on translation-free shapes, each coded with an anchor square</td><td>Chess</td></tr>
+      <tr><th>Krimp</th><td>MDL itemset mining (Vreeken et al., 2011)</td><td>Chess</td></tr>
+      <tr><th>xz</th><td>General compressor, each position coded given all learned positions</td><td>Chess</td></tr>
+      <tr><th>Piece-square list</th><td>No learning: each piece and its square</td><td>Chess</td></tr>
+      <tr><th>Frequency baseline</th><td>The most common answers</td><td>bAbI</td></tr>
+      <tr><th>Copy, retrieval, oracle</th><td>A stored next sentence; the stored next sentence with the most shared idf-weighted words; the training sentence with the highest cross PMI</td><td>TinyStories (references, not learners)</td></tr>
+      <tr><th>Earlier generators</th><td>Expansion from stored experiences; inside-outside grammar with the tree drawn first; the marginal alone</td><td>TinyStories</td></tr>
+      <tr><th>Ablations</th><td>Beam and greedy search in place of inside-outside; no chunk identity; one hierarchy (in progress)</td><td>TinyStories, characters</td></tr>
+    </tbody>
+  </table></div>
+  <div class="col"><p>No neural language model or standard grammar inducer has yet been run on the generation task under these constraints. A fair comparison would learn online from the same few sentences.</p></div>
+</section>
+
+<!-- ============================================================ RESULTS INDEX -->
+<section class="page" data-page="results" hidden>
+  <p class="eyebrow">Results</p>
+  <h1>Results by domain</h1>
+  <p class="lede">Generation works on grammars and improves on real text. As a coder TRELLIS beats BPE on characters but loses to a trigram coder there and wins on chess only where shapes move. Each domain has its own page with its curves, chunks and tables.</p>
+  <ul class="rlist">
+    <li><a href="#curves"><span class="rn">1</span><span class="rt">Toy grammars</span><span class="ra">What memory generates after 10 to 320 experiences on each grammar.</span></a></li>
+    <li><a href="#r-stories"><span class="rn">2</span><span class="rt">TinyStories</span><span class="ra">Grammatical, new, on-topic generation; chunks and concepts; parse agreement; prompts.</span></a></li>
+    <li><a href="#s-babi"><span class="rn">3</span><span class="rt">bAbI</span><span class="ra">Questions answered by filling a gap.</span></a></li>
+    <li><a href="#s-chars"><span class="rn">4</span><span class="rt">Chinese characters</span><span class="ra">Compression against other coders; new characters.</span></a></li>
+    <li><a href="#s-chess"><span class="rn">5</span><span class="rt">Chess</span><span class="ra">Chase and Simon, figure for figure; compression; shapes on new squares; chunks.</span></a></li>
+  </ul>
+</section>
+
+<!-- ============================================================ RESULTS: STORIES -->
+<section class="page" data-page="r-stories" hidden>
+  <p class="eyebrow">Results</p>
+  <h1>TinyStories</h1>
+  <p class="lede">Inside-outside generation gives 0.186 judged-grammatical new sentences per generation at 1,000 sentences, against 0.159 for the best earlier inside-outside form, while holding the topic of the previous sentence.</p>
+  <h2>Generation</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Generator (1,000 sentences; topic β 2)</th><th class="num">s13</th><th class="num">s17</th><th class="num">s19</th><th class="num">s23</th><th class="num">Mean</th><th class="num">Grammatical</th><th class="num">New</th><th class="num">Cross share</th></tr></thead>
+    <tbody>
+      <tr><td>Expansion (round 79, β 64 back-off)</td><td class="num">0.161</td><td class="num">0.152</td><td class="num">–</td><td class="num">–</td><td class="num">0.157</td><td class="num">–</td><td class="num">41%</td><td class="num">about 0.3</td></tr>
+      <tr><td>No topic, tree drawn first</td><td class="num">0.146</td><td class="num">0.144</td><td class="num">0.151</td><td class="num">0.133</td><td class="num">0.144</td><td class="num">–</td><td class="num">68%</td><td class="num">0.05</td></tr>
+      <tr><td>Tree drawn first (round 82)</td><td class="num">0.161</td><td class="num">0.161</td><td class="num">0.160</td><td class="num">0.152</td><td class="num">0.159</td><td class="num">47–56%</td><td class="num">59–65%</td><td class="num">0.29</td></tr>
+      <tr><td>Marginal alone</td><td class="num">0.124</td><td class="num">0.148</td><td class="num">–</td><td class="num">–</td><td class="num">0.136</td><td class="num">40–46%</td><td class="num">68–70%</td><td class="num">0.26</td></tr>
+      <tr><td>Marginal × window, 12-bit cut</td><td class="num">0.177</td><td class="num">0.183</td><td class="num">0.158</td><td class="num">0.185</td><td class="num">0.176</td><td class="num">59–63%</td><td class="num">50–56%</td><td class="num">0.28</td></tr>
+      <tr><td>Marginal × window, 13-bit cut</td><td class="num">0.188</td><td class="num">0.196</td><td class="num">0.164</td><td class="num">0.182</td><td class="num">0.183</td><td class="num">60–64%</td><td class="num">51–56%</td><td class="num">0.34</td></tr>
+      <tr><td><b>Marginal × window, whole tree</b></td><td class="num">0.198</td><td class="num">0.185</td><td class="num">0.150</td><td class="num">0.209</td><td class="num best">0.186</td><td class="num">59–60%</td><td class="num">53–57%</td><td class="num">0.34</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">The whole tree and the 13-bit cut are level: their difference is far smaller than the spread between seeds. Seed 19 falls below the earlier form on the whole tree (0.150 against 0.160). The full record of settings and rounds is in <a href="#s-sem">story rounds</a>.</p>
+  <h2>Learning curve</h2>
+  <div id="r95-curve">@@R95@@</div>
+  <h2>Chunks and concepts</h2>
+  <div id="story-chunks">@@CHUNKS@@</div>
+  <h2>Parse agreement</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Sentences learned</th><th class="num">250</th><th class="num">500</th><th class="num">1,000</th><th class="num">2,000</th></tr></thead>
+    <tbody><tr><td>Cross-seed bracket F1 (original configuration)</td><td class="num">0.64</td><td class="num">0.78</td><td class="num">0.79</td><td class="num">0.90</td></tr></tbody>
+  </table></div>
+  <p class="small">At 2,000 sentences a parse barely changes when one word is replaced: substitution F1 0.962 for a near word, 0.893 for a far one (<a href="#s-consist">parse consistency</a>).</p>
+  <h2>Prompts</h2>
+  <p>Prefix continuation by gap filling reaches 0.84–0.86 attested trigrams. Infill stays at 0.20–0.22, because a filler satisfies each side separately (<a href="#s-prompt">prompted generation</a>). These use expansion and gap filling, not yet inside-outside generation.</p>
+  <h2>Memory</h2>
+  <p>At 2,000 sentences, used records are 0.6% misplaced in both trees, at 1.8–2.1 times the learning time without repair (<a href="#status">scoreboard</a>).</p>
+</section>
+
+<!-- ============================================================ CONCLUSION -->
+<section class="page" data-page="conclusion" hidden>
+  <p class="eyebrow">Conclusion and next steps</p>
+  <h1>What holds, and what does not yet</h1>
+  <p class="lede">Two hierarchies learned online, read by inside-outside, generate new sentences from real text with no gold and no offline phase. They do not yet compress as well as simple coders, and several settings remain hand-set.</p>
+  <h2>Why this matters</h2>
+  <div class="col">
+    <p>Most systems that generate well need many passes over much data, and what they know is not inspectable. TRELLIS learns from each experience once, stores what it learns in concepts one can read, and uses the same memory to parse, generate and compress. It applies unchanged to sentences, characters and chess. If it can match simple coders and reach good grammar from a few thousand experiences, that gives a transparent, always-learning account of how structure and generalization can arise together. It is not there yet, and the gaps below are real.</p>
+  </div>
+  <h2>What has been shown</h2>
+  <div class="col">
+    <ul>
+      <li>Trees alone generate grammatically on toy grammars, and new output grows with experience.</li>
+      <li>Memory stays current online: used records under 1% misplaced at about twice the learning time.</li>
+      <li>On TinyStories, reading each word from the whole sentence raised grammatical new output by 17% over the best earlier form, held the topic and removed the content cut.</li>
+      <li>On chess, TRELLIS reproduces the shape of Chase and Simon's findings.</li>
+    </ul>
+  </div>
+  <h2>What we have not figured out</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Open problem</th><th>What is known</th><th>Next</th></tr></thead>
+    <tbody>
+      <tr><th>Topic weight</th><td>β 2 is hand-set. Whole-sentence likelihood always picks 0, since a sentence's probability is almost all grammar</td><td>A criterion that weighs the topic itself; let memory choose the concept that predicts from x</td></tr>
+      <tr><th>Grammar</th><td>About 40% of output is still judged ungrammatical. Head-complement fit and unfinished endings were the main errors before the new fill; not yet re-measured</td><td>Re-measure the errors; re-test λ on the whole tree (round 93 was cancelled)</td></tr>
+      <tr><th>Do two hierarchies earn their cost?</th><td>Untested</td><td>The unified-hierarchy ablation</td></tr>
+      <tr><th>Parsing and generation read different scores</th><td>Parsing uses a separate chunk factor; generation and coding read the grammar's probabilities</td><td>Test parsing and learning by the same probabilities</td></tr>
+      <tr><th>The content tree's gain</th><td>On toy grammars, held-out composites stop 2–4 levels down and gain no bits there. Not re-measured since the representation fixes</td><td>Re-measure; name words by what they build as well as where they stand</td></tr>
+      <tr><th>Infill and prompts</th><td>Infill fails to fit both sides under gap filling</td><td>Run prompts through inside-outside generation, which already handles gaps</td></tr>
+      <tr><th>Characters</th><td>Beats BPE, loses to a trigram coder</td><td>Find what the trigram coder captures that the grammar misses</td></tr>
+      <tr><th>Chess</th><td>Wins only on shifted boards, narrowly, for a reason BPE on shapes shares. Recall saturates too early</td><td>Rethink the representation of positions; chunk probabilities</td></tr>
+      <tr><th>Answering (bAbI)</th><td>Right type, rarely the exact answer</td><td>Answer by analogy: align the question's chunks with the story sentence that shares its role</td></tr>
+      <tr><th>Scale and comparison</th><td>Story results stop at 2,000 sentences and a 250-word vocabulary, with no external generation baseline</td><td>Larger streams; a fair online baseline</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============================================================ APPENDICES -->
+<section class="page" data-page="appendices" hidden>
+  <p class="eyebrow">Appendices</p>
+  <h1>Older methods, ablations and records</h1>
+  <p class="lede">What was tried on the way here, and the detail behind the main pages. Pages describing older methods say which configuration they show.</p>
+  <ul class="rlist">
+    <li><a href="#a-unified"><span class="rn">A1</span><span class="rt">Ablation: one hierarchy</span><span class="ra">Content and context held in a single tree.</span></a></li>
+    <li><a href="#s-sem"><span class="rn">A2</span><span class="rt">Story rounds</span><span class="ra">Every story-generation round: settings swept, critics, search, the topic weight.</span></a></li>
+    <li><a href="#generate"><span class="rn">A3</span><span class="rt">Expansion generation</span><span class="ra">The earlier generator, with its explorer.</span></a></li>
+    <li><a href="#types"><span class="rn">A4</span><span class="rt">Type names</span><span class="ra">Explorer for naming a part by where its type has stood.</span></a></li>
+    <li><a href="#rules"><span class="rn">A5</span><span class="rt">Concept-choice rules</span><span class="ra">Which concept a part draws from under expansion.</span></a></li>
+    <li><a href="#s-prompt"><span class="rn">A6</span><span class="rt">Prompted generation</span><span class="ra">Gap filling in detail.</span></a></li>
+    <li><a href="#s-consist"><span class="rn">A7</span><span class="rt">Parse consistency</span><span class="ra">Agreement across seeds, sizes and substitutions.</span></a></li>
+    <li><a href="#s-probe"><span class="rn">A8</span><span class="rt">Chunk representations</span><span class="ra">Probes and maps of what chunks hold.</span></a></li>
+    <li><a href="#sustain"><span class="rn">A9</span><span class="rt">Sustaining memory</span><span class="ra">Relabel, verify and repair on use.</span></a></li>
+    <li><a href="#status"><span class="rn">A10</span><span class="rt">Memory scoreboard</span><span class="ra">Temporal-currency numbers by run.</span></a></li>
+    <li><a href="#a-fixes"><span class="rn">A11</span><span class="rt">Representation fixes</span><span class="ra">What the memory dump showed was wrong, and rounds 75–79.</span></a></li>
+    <li><a href="#representation"><span class="rn">A12</span><span class="rt">Earlier representation</span><span class="ra">The description of 23 October, with figures.</span></a></li>
+    <li><a href="#failures"><span class="rn">A13</span><span class="rt">AND/OR failure checks</span><span class="ra">The checks run after every change.</span></a></li>
+    <li><a href="#f-known"><span class="rn">A14</span><span class="rt">Known failures</span><span class="ra">Measurements of what stayed open as of late October.</span></a></li>
+    <li><a href="#iterations"><span class="rn">A15</span><span class="rt">Kept and set aside</span><span class="ra">Each change tried from 23 to 26 October, and its fate.</span></a></li>
+  </ul>
+</section>
+
+<!-- ============================================================ APPENDIX: UNIFIED -->
+<section class="page" data-page="a-unified" hidden>
+  <p class="eyebrow">Appendix A1</p>
+  <h1>Ablation: one hierarchy</h1>
+  <p class="lede">What happens if content and context are held in one Cobweb tree, used in the same ways?</p>
+  <div id="unified-body"><p>In progress. Design and results will appear here.</p></div>
+</section>
+
+<!-- ============================================================ PARSING -->
+<section class="page" data-page="parse" hidden>
+  <p class="eyebrow">How it works</p>
+  <h1>Parsing</h1>
+  <p class="lede">Parsing scores every way of grouping an experience, using both trees, and returns the analysis with the most expected correct chunks. It stores nothing.</p>
+  <h2>What gets evaluated</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Element</th><th>How many</th><th>Its instances</th><th>Its score</th></tr></thead>
+    <tbody>
+      <tr><th>Word</th><td>n</td><td>Context only</td><td>None: words are given</td></tr>
+      <tr><th>Composite (i, k, j)</th><td>Every span and split: on the order of n³/6</td><td>Content and context, built from its two parts</td><td>A gain from each tree, in bits</td></tr>
+    </tbody>
+  </table></div>
+  <div class="col">
+    <p>The gain of an instance x in a tree is the best, over the concepts C on its sorting path, of</p>
+    <p style="text-align:center">gain(x) = max<sub>C</sub> log<sub>2</sub> [ share(C) · P(x | C) / P(x | root) ], or 0 at the root,</p>
+    <p>so it is how far the best concept beats the root at explaining x, after charging for how rare the concept is. A composite's factor is gain(content) + gain(context). Sorting here is read-only: <code>categorize</code> walks the tree without inserting.</p>
+  </div>
+  <h2>What runs, in order</h2>
+  <div class="col">
+    <ol>
+      <li><b>Words.</b> Build each word's context instance from its window, its token and the previous sentence.</li>
+      <li><b>Composites, bottom-up.</b> For each span, shortest first, and each split, take the best analysis so far of the left and right spans as the parts. Build the content instance from their names, sort it, and take its bands as the <code>cc</code> of the context instance. Sort that too. The factor is the two gains. A span's best analysis is the split with the highest summed gain.</li>
+      <li><b>Chunk context, second pass.</b> The neighbours of a span are the best analyses of the same-width spans on each side, which only exist once the first pass is done. Rewrite every element's <code>lc</code> and <code>rc</code> from them and recompute every factor.</li>
+      <li><b>Inside-outside.</b> With factors 2<sup>gain</sup>, inside and outside sums over every binary analysis give each composite's posterior and log Z.</li>
+      <li><b>Readout.</b> A dynamic program picks the analysis with the highest total span posterior (minimum Bayes risk).</li>
+    </ol>
+  </div>
+  <h2>What gets passed up</h2>
+  <div class="col">
+    <p>Only representations pass up the chart; no tokens are compared at higher levels. When span (i, j) is built from parts a and b, it receives:</p>
+    <ul>
+      <li><code>L</code>, <code>R</code>: each part's <b>type name</b>. A word's is the parent concepts of its 32 sampled occurrences, mixed with its neighbours' names. A chunk's is read from its content leaf's own sample.</li>
+      <li><code>LC</code>, <code>RC</code>: each part's <b>content path in bands</b> (blank for a word).</li>
+    </ul>
+    <p>The composite's own path through the content tree then becomes its name, and the parent above takes that name as its <code>LC</code> or <code>RC</code>. So a representation is built by sorting: parts' names form an instance, the tree places it, and the path it takes is the new name. A long span is described by concepts, not by a growing list of tokens, so its description stays the same size at every level.</p>
+    <p>A part is one analysis of its span, the best by summed gain. The posterior then sums over every split at every span, but each composite's description holds only its parts' best analyses.</p>
+  </div>
+  <h2>Explorer</h2>
+  <p class="small">The walk-through below runs on real memory of the toy grammars. It shows the configuration of 23 October, so it has no <code>lc</code>, <code>rc</code> or <code>pv</code>. Pick the grammar in the bar above.</p>
+@@L 481-509@@
+</section>
+
+<!-- ============================================================ LEARNING -->
+<section class="page" data-page="learning" hidden>
+  <p class="eyebrow">How it works</p>
+  <h1>Learning</h1>
+  <p class="lede">Learning parses each experience once, then stores every composite in both trees, weighted by its posterior. Chunks are the concepts that keep winning that mass. There is no threshold, no second pass over the data and no offline phase.</p>
+  <h2>What gets evaluated</h2>
+  <div class="col"><p>Everything parsing evaluates: each composite's factor, posterior and the best analysis (<a href="#parse">Parsing</a>). Then each stored description is read again, because storing its parts can change what it should say.</p></div>
+  <h2>What runs, in order</h2>
+  <div class="col">
+    <ol>
+      <li><b>Parse</b> the experience against memory as it stands.</li>
+      <li><b>Store words.</b> Each word's context instance goes into the context tree at weight 1. The new leaf joins the word's sample of 32 occurrences (weighted reservoir), and each neighbour joins its neighbour sample.</li>
+      <li><b>Store composites, smallest span first.</b> Each with a posterior of at least 0.001:
+        <ol type="a">
+          <li>Read its content instance again from its parts, whose names may have changed, and insert it into the content tree at its posterior weight.</li>
+          <li>Read its context instance, with <code>cc</code> naming the path just made, and insert it into the context tree at the same weight. Content must go first, for this reason.</li>
+          <li>A record merges or splits concepts with probability equal to its weight. Low-weight spans therefore do not restructure the tree much.</li>
+        </ol>
+      </li>
+      <li><b>Generation statistics.</b> For the chosen analysis only, add passive counts at the leaves: its words and chunks (<code>fill</code>), its parts (<code>lpart</code>, <code>rpart</code>), its whole experience (<code>sent</code>), and on the previous experience's whole, this one as what followed (<code>next</code>). Passive counts are summed up the tree but never sort anything.</li>
+      <li><b>Keep memory current.</b> Every sort this experience passed marks records under the concepts it went through. Up to 700 of them, least recently checked first, are re-described and moved if they no longer sort where they sit. Descriptions are relabelled in place (<a href="#sustain">sustaining memory</a>).</li>
+    </ol>
+  </div>
+  <h2>What gets passed up, and how new representations are made</h2>
+  <div class="col">
+    <p>New concepts arise inside Cobweb: an inserted instance can open a new leaf, or merge and split nodes, whichever raises category utility. The representations built from them are read off afterwards:</p>
+    <ul>
+      <li>A <b>new leaf</b> in the content tree gives the composite a chunk type and a band name, which its context takes as <code>cc</code> and its parents take as <code>LC</code> or <code>RC</code>.</li>
+      <li>A <b>new leaf</b> in the context tree changes its type's sample, so the next read of that type's name differs. Names are not stored; each is read from where the samples sit now.</li>
+      <li>A <b>merge or split</b> changes the names of everything beneath it. After one sentence, 25% of word names have changed, and 91% of those changes go to concepts that already existed.</li>
+    </ul>
+    <p>A chunk that recurs collects weight under concepts that recur with it. A span the evidence does not support adds a sliver of weight that the trees absorb. Over time the candidates compete for each experience's posterior mass, and the winners are the chunks.</p>
+  </div>
+@@L 374-430@@
+  <h2>How this extends v1</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th></th><th>TRELLIS v1</th><th>TRELLIS v2</th></tr></thead>
+    <tbody>
+      <tr><th>Chunking</th><td>Greedy, one recognized pair at a time</td><td>Inside-outside over every span and split</td></tr>
+      <tr><th>Commitment</th><td>Commits to the chunks it recognizes</td><td>Stores every composite, weighted by posterior</td></tr>
+      <tr><th>Donation between trees</th><td>From one tree to the other</td><td>Both ways</td></tr>
+      <tr><th>Stale descriptions</th><td>Leaf remap</td><td>The same relabel, plus moving misplaced records where memory is used</td></tr>
+    </tbody>
+  </table></div>
+  <div class="col"><p>Inside-outside is not what drives the generation gains. A beam of 4 analyses matches it on stories at about half the learning time (0.127 against 0.121), and greedy search loses only 0.01–0.04. On characters, beam 4 costs 1.5–2.5 bits. The case for it is its treatment of alternative analyses on short experiences, and its match with generation (<a href="#s-sem">story rounds</a>).</p></div>
+</section>

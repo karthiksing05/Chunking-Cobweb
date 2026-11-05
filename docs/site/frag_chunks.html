@@ -1,0 +1,45 @@
+<p>Read from one learned memory (1,000 sentences, seed 13; 26,852 records). Each row is one concept, with the chunks that hold most weight under it. No labels were used, and these lists are unedited except for choosing which concepts to show.</p>
+<h3>Chunk types: concepts of the content hierarchy</h3>
+<div class="tablewrap"><table>
+  <thead><tr><th class="num">Bits</th><th>Chunks under one concept</th><th>What it found</th></tr></thead>
+  <tbody>
+    <tr><td class="num">5.0</td><td>the park · the dog · the bird · the cat · the little · the car · the sun</td><td>Determiner plus what follows</td></tr>
+    <tr><td class="num">5.3</td><td>they had · they all · they said · they became · they did · they loved · they saw</td><td>"they" plus a predicate's start</td></tr>
+    <tr><td class="num">7.0</td><td>was happy · were happy · are happy · not happy · and happy · is happy · him happy</td><td>Anything ending in "happy"</td></tr>
+    <tr><td class="num">7.0</td><td>with it · yes it · like it · get it · find it · at it · do it</td><td>Anything ending in "it"</td></tr>
+    <tr><td class="num">7.1</td><td>to do · to play · to go · to help · to see · to share · to look</td><td>Infinitives</td></tr>
+    <tr><td class="num">7.1</td><td>unexpected happened · what happened · had happened</td><td>Anything ending in "happened"</td></tr>
+    <tr><td class="num">5.1</td><td>know what to do · look at each other · looked at each other · very happy and excited · with the toy car · with his toy car</td><td>Longer phrases, mixed</td></tr>
+    <tr><td class="num">5.0</td><td>can i play with you · he did not like it · the little girl was sad · tom and mia are friends · lily and ben were scared · they said they were sorry</td><td>Whole sentences</td></tr>
+    <tr><td class="num">7.1</td><td>max asked sam for help · soon they became best friends · we just liked it a lot · we have to go now</td><td>Whole sentences, more specific</td></tr>
+  </tbody>
+</table></div>
+<p class="small">The specific chunk types group strongly by their last word or by their head. That is partly a limit: "with it" and "yes it" share a concept though they are not the same kind of phrase, which suggests the content hierarchy groups by a part's name more than by the whole's role.</p>
+<h3>Word categories: concepts of the context hierarchy</h3>
+<div class="tablewrap"><table>
+  <thead><tr><th class="num">Bits</th><th>Words under one concept</th></tr></thead>
+  <tbody>
+    <tr><td class="num">3.1</td><td>he · but · she · i · then · you · yes · lily · let's <span class="small">(sentence openers)</span></td></tr>
+    <tr><td class="num">3.2</td><td>was · and · had · said · are · played · is · wanted · were</td></tr>
+    <tr><td class="num">3.2</td><td>friends · fun · together · idea · ball · it · day · too · lily <span class="small">(sentence enders)</span></td></tr>
+    <tr><td class="num">5.6</td><td>were · played · are · had · said · all · became · did · have <span class="small">(after "they")</span></td></tr>
+    <tr><td class="num">5.6</td><td>happy · nice · ball · safe · toy · toys · long · together · idea</td></tr>
+    <tr><td class="num">5.8</td><td>tim · it · she · lily · he · sue · tom · max · everyone <span class="small">(subjects)</span></td></tr>
+  </tbody>
+</table></div>
+<p class="small">Context concepts near the top are coarse and depend heavily on position in the sentence, and frequent words appear in many of them. Glosses in brackets are ours, for reading.</p>
+<h3>Parses of held-out sentences</h3>
+<div class="tablewrap"><table>
+  <thead><tr><th>Sentence</th><th>Chunks chosen (span posterior)</th></tr></thead>
+  <tbody>
+    <tr><td>tim had an idea</td><td>tim had (0.95) · an idea (0.93)</td></tr>
+    <tr><td>her mom said yes</td><td>her mom (0.94) · said yes (0.91)</td></tr>
+    <tr><td>i loved that toy car</td><td>i loved (0.91) · toy car (0.93) · that toy car (0.77)</td></tr>
+    <tr><td>tom and mia were best friends</td><td>tom and (0.97) · tom and mia (0.71) · best friends (0.98) · were best friends (0.66)</td></tr>
+    <tr><td>tom and sue were not happy</td><td>tom and (0.98) · tom and sue (0.87) · tom and sue were (0.66) · not happy (0.96)</td></tr>
+    <tr><td>they feel scared and sorry</td><td>they feel (0.96) · and sorry (0.96) · scared and sorry (0.54)</td></tr>
+  </tbody>
+</table></div>
+<p class="small">"tim had" is not a constituent, nor is "tom and" or "and sorry", so a good share of chunks are frequent pairs and not phrases. "that toy car" and "best friends" are. Whole-sentence chunks are left out of the table.</p>
+<h3>New sentences it wrote</h3>
+<p class="small">Examples, with the judge above 0.9: "one day she saw a big cat", "tom and max wanted to play together", "then the unexpected happened", "the bear wanted to eat it", "you are a nice friend". They were picked by hand; about 40% of all outputs are judged ungrammatical (<a href="#io-generation">Generation</a>).</p>

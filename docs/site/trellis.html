@@ -54,6 +54,10 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px soli
 .toc a:hover { background: var(--surface-2); color: var(--ink); }
 .toc a[aria-current="page"] { background: var(--tint); color: var(--ink); font-weight: 500; }
 .toc a[aria-current="page"] .n { color: var(--accent); }
+.toc ol.sub { display: none; margin: 2px 0 6px 28px; }
+.toc ol.sub.open { display: grid; }
+.toc ol.sub a { grid-template-columns: 30px 1fr; font-size: 12.5px; padding: 3px 8px; }
+.toc > ol { gap: 3px; }
 .topbar { display: none; }
 /* pages */
 main { min-width: 0; }
@@ -289,44 +293,46 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
 <div class="shell">
 <nav class="toc" aria-label="Contents" id="toc">
   <p class="brand">Concepts, Chunks, Compression<span>TRELLIS v2: two Cobweb hierarchies that learn categories and chunks from raw experience</span></p>
-  <h2>Framework</h2>
   <ol>
-    <li><a href="#overview"><span class="n">–</span><span>Overview</span></a></li>
-    <li><a href="#status"><span class="n">–</span><span>Where we stand</span></a></li>
-    <li><a href="#principles"><span class="n">1</span><span>Principles</span></a></li>
-    <li><a href="#representation"><span class="n">2</span><span>Representation</span></a></li>
-    <li><a href="#instances"><span class="n">2a</span><span>Instances and concepts</span></a></li>
-  </ol>
-  <h2>Mechanism</h2>
-  <ol>
-    <li><a href="#learning"><span class="n">3</span><span>Learning</span></a></li>
-    <li><a href="#sustain"><span class="n">4</span><span>Sustaining memory</span></a></li>
-    <li><a href="#parse"><span class="n">5</span><span>Parsing, step by step</span></a></li>
-    <li><a href="#generate"><span class="n">6</span><span>Generation, step by step</span></a></li>
-    <li><a href="#types"><span class="n">7</span><span>Type names</span></a></li>
-    <li><a href="#rules"><span class="n">8</span><span>Concept-choice rules</span></a></li>
-  </ol>
-  <h2>Studies</h2>
-  <ol>
-    <li><a href="#s-prompt"><span class="n">S1</span><span>Prompted generation</span></a></li>
-    <li><a href="#s-consist"><span class="n">S2</span><span>Parse consistency</span></a></li>
-    <li><a href="#s-probe"><span class="n">S3</span><span>Chunk representations</span></a></li>
-    <li><a href="#s-babi"><span class="n">S4</span><span>bAbI questions</span></a></li>
-    <li><a href="#s-chars"><span class="n">S5</span><span>Chinese characters</span></a></li>
-    <li><a href="#s-chess"><span class="n">S6</span><span>Chess</span></a></li>
-    <li><a href="#s-sem"><span class="n">S7</span><span>Semantic generation</span></a></li>
-  </ol>
-  <h2>Failure points</h2>
-  <ol>
-    <li><a href="#failures"><span class="n">F1</span><span>AND/OR failure checks</span></a></li>
-    <li><a href="#f-known"><span class="n">F2</span><span>Known failures</span></a></li>
-  </ol>
-  <h2>Results</h2>
-  <ol>
-    <li><a href="#results"><span class="n">–</span><span>Index of results</span></a></li>
-    <li><a href="#curves"><span class="n">R1</span><span>Learning curves</span></a></li>
-    <li><a href="#iterations"><span class="n">R2</span><span>Kept and set aside</span></a></li>
-    <li><a href="#next"><span class="n">R3</span><span>What to iterate next</span></a></li>
+    <li><a href="#intro"><span class="n">1</span><span>Introduction</span></a></li>
+    <li><a href="#hierarchies"><span class="n">2</span><span>Hierarchies</span></a></li>
+    <li><a href="#representations"><span class="n">3</span><span>Representations</span></a></li>
+    <li><a href="#parse"><span class="n">4</span><span>Parsing</span></a></li>
+    <li><a href="#io-generation"><span class="n">5</span><span>Generation</span></a></li>
+    <li><a href="#learning"><span class="n">6</span><span>Learning</span></a></li>
+    <li><a href="#d-domains"><span class="n">7</span><span>Experimental design</span></a>
+      <ol class="sub" data-group="design">
+        <li><a href="#d-domains"><span class="n"></span><span>Domains</span></a></li>
+        <li><a href="#d-evals"><span class="n"></span><span>Evaluations</span></a></li>
+        <li><a href="#d-competitors"><span class="n"></span><span>Competitors</span></a></li>
+      </ol></li>
+    <li><a href="#results"><span class="n">8</span><span>Results</span></a>
+      <ol class="sub" data-group="results">
+        <li><a href="#curves"><span class="n"></span><span>Toy grammars</span></a></li>
+        <li><a href="#r-stories"><span class="n"></span><span>TinyStories</span></a></li>
+        <li><a href="#s-babi"><span class="n"></span><span>bAbI</span></a></li>
+        <li><a href="#s-chars"><span class="n"></span><span>Chinese characters</span></a></li>
+        <li><a href="#s-chess"><span class="n"></span><span>Chess</span></a></li>
+      </ol></li>
+    <li><a href="#conclusion"><span class="n">9</span><span>Conclusion and next steps</span></a></li>
+    <li><a href="#appendices"><span class="n">A</span><span>Appendices</span></a>
+      <ol class="sub" data-group="appendices">
+        <li><a href="#a-unified"><span class="n">A1</span><span>Ablation: one hierarchy</span></a></li>
+        <li><a href="#s-sem"><span class="n">A2</span><span>Story rounds</span></a></li>
+        <li><a href="#generate"><span class="n">A3</span><span>Expansion generation</span></a></li>
+        <li><a href="#types"><span class="n">A4</span><span>Type names</span></a></li>
+        <li><a href="#rules"><span class="n">A5</span><span>Concept-choice rules</span></a></li>
+        <li><a href="#s-prompt"><span class="n">A6</span><span>Prompted generation</span></a></li>
+        <li><a href="#s-consist"><span class="n">A7</span><span>Parse consistency</span></a></li>
+        <li><a href="#s-probe"><span class="n">A8</span><span>Chunk representations</span></a></li>
+        <li><a href="#sustain"><span class="n">A9</span><span>Sustaining memory</span></a></li>
+        <li><a href="#status"><span class="n">A10</span><span>Memory scoreboard</span></a></li>
+        <li><a href="#a-fixes"><span class="n">A11</span><span>Representation fixes</span></a></li>
+        <li><a href="#representation"><span class="n">A12</span><span>Earlier representation</span></a></li>
+        <li><a href="#failures"><span class="n">A13</span><span>Failure checks</span></a></li>
+        <li><a href="#f-known"><span class="n">A14</span><span>Known failures</span></a></li>
+        <li><a href="#iterations"><span class="n">A15</span><span>Kept and set aside</span></a></li>
+      </ol></li>
   </ol>
 </nav>
 
@@ -338,76 +344,603 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
   <span class="meta" id="exmeta"></span>
 </div>
 
-<!-- ============================================================ OVERVIEW -->
-<section class="page" data-page="overview">
-  <p class="eyebrow">Overview · ISLE · TRELLIS v2</p>
+<!-- ============================================================ INTRODUCTION -->
+<section class="page" data-page="intro">
+  <p class="eyebrow">Introduction</p>
   <h1>Concepts and chunks from raw experience</h1>
-  <p class="lede">Two Cobweb hierarchies learn categories and chunks one experience at a time, parse by inside-outside, and generate by expanding concepts top-down, with nothing outside the two trees.</p>
-  <p>TRELLIS v2 iterates directly on TRELLIS v1 (ACS 2026). Every element of an experience is described twice: by where it occurs, in a <em>context hierarchy</em>, and by what it is made of, in a <em>content hierarchy</em>. No grammar is extracted. The grammar is implicit in the two trees and shifts a little with every experience. Inside-outside replaces v1's greedy chunking. Generation reads only statistics held by the trees' concepts.</p>
-  <p>Every mechanism is unsupervised and sees only raw tokens; the generating grammar, gold trees and part-of-speech tags are used only to score. The explorers in Sections 5–8 run on real memory: three grammars learned from their 320 training experiences (seed 13, configuration of 23 October).</p>
-
+  <p class="lede">TRELLIS learns from a stream of tokens, one experience at a time, with no supervision and no offline phase. It holds what it learns in two Cobweb hierarchies, and it parses and generates by inside-outside over them.</p>
+  <h2>The theory</h2>
+  <div class="col">
+    <p>Two operations compress experience. <b>Composition</b> binds parts that occur together into a chunk, so a whole can be stored and recalled as one unit. <b>Generalization</b> groups instances into a concept, so what is known of some carries over to others. Neither is enough alone: chunks without concepts cannot say what a new chunk resembles, and concepts without chunks have only single tokens to generalize over.</p>
+    <p>TRELLIS makes each operation the other's vocabulary. Every element is described by <em>where it occurs</em> and by <em>what it is made of</em>, and Cobweb organizes each description into a hierarchy of concepts. A chunk's parts are named by concepts of where those parts occur. An element's context carries a name for what it is made of. So learning a better category sharpens the chunks built from it, and the reverse.</p>
+    <p>Generation is the same idea run forward: <b>y = G(x)</b>. A general concept holds what its instances share, and the context x specializes it to one output. Grammatical novelty comes from that step. A concept that covers many instances can produce a combination none of them had, and the surroundings pick a combination that fits. Compression and generation are then two readings of one model: a good memory gives high probability to what it has not seen but could have.</p>
+    <p>The upcoming iterations follow from this theory:</p>
+    <ul>
+      <li><b>Choose the concept from the data.</b> Which generalization of x should predict y is now partly fixed by hand (a topic weight and a cut on words). The theory says memory should choose it.</li>
+      <li><b>One machinery everywhere.</b> Parsing, generating and coding should read the same probabilities. Inside-outside now does this for generating and coding characters. Parsing still scores chunks by a separate factor.</li>
+      <li><b>Earn every hierarchy.</b> Two hierarchies are an assumption. An ablation will test a single hierarchy holding content and context together.</li>
+      <li><b>Domain generality.</b> Every mechanism must work on characters and chess as well as sentences. Chess still loses to simple shape-based coders in most tests, so its representation is due a rethink.</li>
+    </ul>
+  </div>
   <dl class="facts">
     <div><dt>Hierarchies</dt><dd>2 Cobweb trees: context (where an element occurs) and content (what it is made of)</dd></div>
-    <div><dt>Learning</dt><dd>one pass; inside-outside; every composite stored, weighted by its posterior</dd></div>
-    <div><dt>Parsing</dt><dd>the analysis with the most expected correct chunks (minimum Bayes risk)</dd></div>
-    <div><dt>Generation</dt><dd>top-down from a sampled whole experience; prompts by gap filling</dd></div>
+    <div><dt>Parsing</dt><dd>inside-outside over every span and split; the analysis with the most expected correct chunks</dd></div>
+    <div><dt>Generation</dt><dd>inside-outside over concepts, one word at a time</dd></div>
+    <div><dt>Learning</dt><dd>one pass; every composite stored, weighted by its posterior; no night</dd></div>
     <div><dt>Domains</dt><dd>toy grammars, TinyStories, bAbI, Chinese characters, chess</dd></div>
-    <div><dt>Supervision</dt><dd>none; gold only scores</dd></div>
+    <div><dt>Supervision</dt><dd>none; gold labels only score</dd></div>
   </dl>
-
-  <h2>Summary of results</h2>
-  <p><b>Generation from the trees alone</b> is 99.7–100% grammatical on the <code>small</code>, <code>med</code>, <code>large</code> and <code>term_low</code> grammars, and 0.75–0.88 of the samples are also new. On <code>large</code>, the share that is grammatical and new grows from 0.11 to 0.81 between 20 and 320 experiences (<a href="#curves">R1</a>).</p>
-  <p><b>Memory stays current without rebuilds.</b> Checking 700 records per experience and moving the misplaced ones (verify 700) brings misplaced context to 0.5% and misplaced content to 2.6–2.9% of stored weight on 2,000 TinyStories sentences, at 2.3–3.1 times the original learning time, and passes the grammar guard. Repair on use keeps the content that memory actually uses under 1% misplaced at about 1.4 times the original's cost (<a href="#sustain">Section 4</a>).</p>
-  <p><b>Parses agree across seeds as memory grows</b>: bracket F1 between two seeds rises from 0.64 at 250 sentences to 0.90 at 2,000, with no gold trees (<a href="#s-consist">S2</a>).</p>
-  <p><b>Gap filling continues prompts</b>: 0.86 of trigrams attested after a one-word prefix and 0.84 after two words; infill stays at 0.22 (<a href="#s-prompt">S1</a>). On bAbI, the same mechanism answers with an answer of the right type 0.60 of the time, against 0.20 for a frequency baseline (<a href="#s-babi">S4</a>).</p>
-  <p><b>Chess chunks reproduce the shape of Chase and Simon (1973).</b> Rerunning their experiments figure for figure, more experience recalls more of a real board (trial 1: 14.5, 17.3, 19.1 pieces after 300, 1,000, 4,000 positions) with a third of that spread on random boards, the first chunk is the largest, and chunk relations correlate with theirs (r 0.61 within, 0.82 between). Recall is too high and saturates by trial 3. As a coder TRELLIS wins only on shapes moved to new squares, and shape-based BPE nearly matches it there (<a href="#s-chess">S6</a>).</p>
-  <p><b>The previous sentence directs the next.</b> Given a story sentence, a general concept directed by it makes a next sentence that fits (cross share 0.40 / 0.54, against −0.13 / −0.04 unconditioned and 0.34 / 0.51 for copying a stored sentence), with three to five times more new sentences and a cost of 1–5 points of grammar (<a href="#s-sem">S7</a>).</p>
-  <p><b>Still failing:</b> the content tree adds no gain to the chunk factor on held-out composites, infill fails to fit both sides, and chunk context through neighbouring chunks makes the learner memorise (<a href="#f-known">F2</a>).</p>
-
-  <h2>Reading guide</h2>
-  <ol class="toc-list">
-    <li><a href="#status">Where we stand</a>: the current recipe, the temporal scoreboard, the findings that held up, runs in progress and open questions (27 October).</li>
-    <li><a href="#principles">Principles</a> and <a href="#representation">representation</a>: the two instances every element gets.</li>
-    <li>Mechanism: <a href="#learning">learning by inside-outside</a>, <a href="#sustain">keeping memory current</a>, and interactive walk-throughs of <a href="#parse">parsing</a>, <a href="#generate">generation</a>, <a href="#types">type names</a> and <a href="#rules">concept-choice rules</a>.</li>
-    <li>Studies: <a href="#s-prompt">prompted generation</a>, <a href="#s-consist">parse consistency</a>, <a href="#s-probe">chunk representations</a>, <a href="#s-babi">bAbI questions</a>, <a href="#s-chars">Chinese characters</a>, <a href="#s-chess">chess</a> and <a href="#s-sem">semantic generation</a>.</li>
-    <li><a href="#failures">Failure points</a>: the AND/OR checks run after every change, and the known failures.</li>
-    <li><a href="#results">Results</a>: learning curves, what was kept and set aside, and what to iterate next.</li>
-  </ol>
-</section>
-
-<!-- ============================================================ STATUS -->
-<section class="page" data-page="status" hidden>
-  <p class="eyebrow">2 November 2026</p>
-  <h1>Where we stand</h1>
-  <p class="lede">The temporal target is met by repairing memory as it is used: records that parsing and generation reach are re-sorted when stale, which keeps used memory under 1% misplaced at under twice the original learning time. Mixing neighbours' names into a word's name speeds word-category convergence while generation holds, which meets the interdependence target. Gap filling answers prompts and bAbI questions, and chess chunks show the expert recall advantage. Story generation now reads memory as a grammar over concepts (the chart): conditioned on the previous sentence and filled word by word from the whole sentence, it makes 0.186 acceptable new sentences per generation over four seeds, against 0.159 for the best earlier generator, while holding the topic. Infill, the content tree's gain and a principled topic weight remain open.</p>
-
-  <dl class="facts">
-    <div><dt>Temporal target</dt><dd>met by path repair on use, budget 700: used records 0.6% misplaced (ctx and cnt) at 2,000 sentences</dd></div>
-    <div><dt>Cost</dt><dd>1.8–2.1× the original learning time alone at 2,000 sentences (target ≤3×)</dd></div>
-    <div><dt>Grammar guard</dt><dd>passes on all 4 runs (med, large × seeds 13, 17); characters held over 5 seeds</dd></div>
-    <div><dt>Parse agreement</dt><dd>cross-seed bracket F1 0.90 at 2,000 sentences</dd></div>
-    <div><dt>Prompting</dt><dd>prefix trigrams attested 0.86 / 0.84; infill 0.22</dd></div>
-    <div><dt>Story generation</dt><dd>0.186 acceptable new per generation (4 seeds; judged by Qwen2.5-3B), cross share 0.34; round 82 chart 0.159, expansion 0.161 / 0.152 (2 seeds)</dd></div>
-  </dl>
-
-  <h2>The current recipe</h2>
-  <p>The settings below make up the configuration measured on this page since 24 October. The explorers in Sections 5–8 show the 23 October configuration.</p>
-  <div class="tbl-wrap"><table class="tbl">
-    <thead><tr><th>Part</th><th>Setting</th></tr></thead>
+  <h2>Principles</h2>
+  <p>Ten principles constrain every change. None of them mentions words.</p>
+  <div class="principles">
+    <div><b>Two descriptions of every element</b><p>Where it occurs (context) and what it is made of (content), each organized by Cobweb into its own hierarchy. Categories are concepts of the context tree; chunk types are concepts of the content tree.</p><span class="ev">From v1</span></div>
+    <div><b>Each hierarchy describes in the other's terms</b><p>A chunk's parts are named by their context concepts. An element's context description carries its own content concept. Donation runs both ways, so each tree sorts by what the other has learned.</p><span class="ev">v1, made two-way in v2</span></div>
+    <div><b>The grammar stays implicit</b><p>No grammar is kept. Parsing reads the trees directly, and generation recomputes a grammar over concepts from them, so the grammar is whatever the two hierarchies currently hold and changes as they do.</p><span class="ev">v2</span></div>
+    <div><b>Evidence decides chunks</b><p>Every candidate chunk is stored, weighted by its share of the inside-outside posterior. Chunks that keep recurring collect weight and concepts; the rest fade into the mass of their concepts. It is a competitive frontier with no threshold.</p><span class="ev">v2</span></div>
+    <div><b>Learning never stops</b><p>Each experience is learned once, as it arrives. There is no night, no batch rebuild and no re-parse of older experiences. Old memories stay current by relabelling in place, and records that no longer sort where they sit are moved.</p><span class="ev">Hard rule since 14 October</span></div>
+    <div><b>Report the expected-best analysis</b><p>Memory stores every analysis weighted by its posterior. It reports, and commits to for generation, the analysis with the most expected correct chunks (minimum Bayes risk over span posteriors).</p><span class="ev">Kept after a regeneration readout was tested, 18 October</span></div>
+    <div><b>Generate by inside-outside</b><p>Read a grammar over concepts from the trees and stored records, then draw each word from what the whole sentence around it allows. The previous sentence directs the draw.</p><span class="ev">Since 1 November</span></div>
+    <div><b>Unsupervised throughout</b><p>Every mechanism sees only raw tokens. The generating grammar and gold trees enter only to score, never to teach a probe, choose a category or tune a factor.</p><span class="ev">Since 21 October</span></div>
+    <div><b>Judged by what it generates</b><p>A change is kept when the system reproduces more grammatical, new sentences or holds a more compressible grammar. Gold brackets are a side check.</p><span class="ev">Since 19 October</span></div>
+    <div><b>Mechanisms are domain-general</b><p>Linguistic knowledge enters only as an oracle that diagnoses and scores. Every change is checked on more than one domain.</p><span class="ev">Since 9 October</span></div>
+  </div>
+  <h2>Results at a glance</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Domain</th><th>Measure</th><th>TRELLIS</th><th>Reference</th></tr></thead>
     <tbody>
-      <tr><th>Trees</th><td>Two Cobweb trees, compiled (<code>tree="cu"</code>, cobweb-private <code>trellis-discrete</code>), bit-identical to the Python tree in reference arithmetic</td></tr>
-      <tr><th>Context instance</th><td>Window of two tokens on each side (<code>l2 l1 r1 r2</code>) and the element's own content <code>cc</code>; a word's <code>cc</code> is its token (<code>word_cc</code>). Neighbouring chunks (<code>neighbour_chunks</code>) are off.</td></tr>
-      <tr><th>Content instance</th><td>The parts' names <code>L R</code> and the parts' content concepts <code>LC RC</code>; word parts are named by their fine mixed names (<code>part_names</code> unset); band names (<code>part_names="bands"</code>) halve the cost but lose about 8 points of real characters and one guard grammar</td></tr>
-      <tr><th>Word names</th><td>The parent concepts of 32 sampled instances (<code>name_level="parent"</code>, <code>type_k</code> 32), mixed at readout with the names of neighbouring words, weight n/(n+4) for its own (<code>name_mix_k</code> 4)</td></tr>
-      <tr><th>Learning</th><td>Inside-outside over every composite; each stored in both trees with its posterior weight (dropped below 0.001); a record may merge or split concepts with probability equal to its weight (<code>restructure="sample"</code>)</td></tr>
-      <tr><th>Keeping memory current</th><td>Relabel in place, plus repair on use: every sort marks the records under the concept it ends at, and every concept it passes contributes records by a random walk down its children (<code>repair_path</code>). After each experience, up to 700 marked records, oldest-checked first, are re-described and moved if they no longer sort where they sit (<code>repair_use</code> 700, <code>refresh_budget</code> 0). No background sweep.</td></tr>
-      <tr><th>Parsing</th><td>Minimum Bayes risk over span posteriors</td></tr>
-      <tr><th>Generation</th><td>A whole experience drawn from <code>SENT</code>, expanded top-down; each part from its own leaf; word slots filled by fine names, capped at the best peer (<code>both+peer</code>)</td></tr>
-      <tr><th>Story generation (chart)</th><td>Memory read as a grammar over concepts (<code>chart_gen.py</code>): composites at their content leaves (the whole tree), words at their context concepts within 12 bits, rules backed off along the content tree (λ 4). Start given the previous sentence x (<code>follow</code>); each free position weighted by x's lift at its concept (β 2). Words drawn left to right from the chart's marginal given the words placed (an outside pass) times Cobweb's prediction (<code>fill="both"</code>) (<a href="#s-sem">S7</a>)</td></tr>
-      <tr><th>Prompting</th><td>Gap filling: a committed instance drawn by its posterior of standing in the gap's surroundings (<a href="#s-prompt">S1</a>)</td></tr>
+      <tr><td><a href="#curves">Toy grammars</a></td><td>Grammatical; grammatical and new (320 experiences)</td><td class="num">99.7–100%; 0.75–0.88 new</td><td>Grammar known exactly</td></tr>
+      <tr><td><a href="#r-stories">TinyStories</a></td><td>Judged grammatical and new, per generation (1,000 sentences, 4 seeds)</td><td class="num best">0.186</td><td>0.159 tree drawn first; 0.161 / 0.152 expansion (2 seeds)</td></tr>
+      <tr><td><a href="#s-babi">bAbI</a></td><td>Answer of the right type</td><td class="num">0.60–0.63</td><td>0.20–0.23 frequency baseline</td></tr>
+      <tr><td><a href="#s-chars">Characters</a></td><td>Bits per held-out character (2,000 learned)</td><td class="num">27.8 / 27.5</td><td><b>Trigram 26.4 / 26.0</b>; BPE 29.6 / 29.1</td></tr>
+      <tr><td><a href="#s-chess">Chess</a></td><td>Bits per held-out position (4,000 learned): control; shifted</td><td class="num">127.7; <b>147.2</b></td><td><b>BPE squares 108.8</b>; 205.5. BPE shapes 111.3; 149.7</td></tr>
     </tbody>
   </table></div>
+  <p class="small">The artifact's layout: how the system works (<a href="#hierarchies">Hierarchies</a>, <a href="#representations">Representations</a>, <a href="#parse">Parsing</a>, <a href="#io-generation">Generation</a>, <a href="#learning">Learning</a>), how it is tested (<a href="#d-domains">Experimental design</a>), what happened (<a href="#results">Results</a>), what is left (<a href="#conclusion">Conclusion and next steps</a>), and older methods and ablations (<a href="#appendices">Appendices</a>).</p>
+</section>
 
+<!-- ============================================================ HIERARCHIES -->
+<section class="page" data-page="hierarchies" hidden>
+  <p class="eyebrow">How it works</p>
+  <h1>Two hierarchies</h1>
+  <p class="lede">The context hierarchy says where an element stands. The content hierarchy says what it is made of. Each one names things in the other's terms, and every mechanism reads both.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th></th><th>Context hierarchy</th><th>Content hierarchy</th></tr></thead>
+    <tbody>
+      <tr><th>Question it answers</th><td>Where does this element occur?</td><td>What is this element made of?</td></tr>
+      <tr><th>What goes in</th><td>Every word and every composite</td><td>Every composite (words have no parts)</td></tr>
+      <tr><th>An instance holds</th><td>The window around the element, its own content, the neighbouring chunks and, on stories, the previous sentence</td><td>Each part's type name and each part's content path</td></tr>
+      <tr><th>What its concepts are</th><td>Categories and roles: things that can stand in the same place</td><td>Chunk types: things built the same way</td></tr>
+      <tr><th>Weight of an instance</th><td>1 for a word; the posterior for a composite</td><td>The posterior</td></tr>
+      <tr><th>Tree</th><td colspan="2">Each is a Cobweb tree, sorted, merged and split by category utility, one instance at a time</td></tr>
+    </tbody>
+  </table></div>
+  <h2>How each is used</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Step</th><th>Context hierarchy</th><th>Content hierarchy</th></tr></thead>
+    <tbody>
+      <tr><th>Naming</th><td>Names a word or chunk when it is a part: its <em>type name</em> is the parent concepts of where it has stood</td><td>Names a chunk by its path: the concepts it sorts through, chosen by information (<em>bands</em>)</td></tr>
+      <tr><th><a href="#parse">Parsing</a></th><td>Half of a chunk's score: how much better its concepts explain its surroundings than the root does</td><td>The other half: the same for its parts</td></tr>
+      <tr><th><a href="#io-generation">Generation</a></th><td>Word symbols, and so which words can stand where. Reads the previous sentence's lift, and predicts a word from its window</td><td>Composite symbols and the rules that split them. Reads which sentences followed sentences like the previous one</td></tr>
+      <tr><th><a href="#learning">Learning</a></th><td>Receives each word and composite. Its leaves feed the type names</td><td>Receives each composite first, so that its context can carry the name of its new leaf</td></tr>
+      <tr><th>Coding</th><td colspan="2">Both, through the same probabilities generation draws from (<a href="#s-chars">characters</a>)</td></tr>
+    </tbody>
+  </table></div>
+  <h2>What passes between them</h2>
+  <div class="col">
+    <ul>
+      <li><b>Context to content.</b> A composite's <code>L</code> and <code>R</code> name its parts by the context concepts where those parts have stood. So "the dog" and "a cat" can share values, though they share no token.</li>
+      <li><b>Content to context.</b> An element's <code>cc</code>, and its neighbours' <code>lc</code> and <code>rc</code>, name what the element and its neighbours are made of. So the context hierarchy can separate positions by the kind of chunk that stands in them.</li>
+    </ul>
+    <p>The names keep changing as the trees restructure, so nothing here is a fixed code. Stored descriptions are updated and re-checked as memory is used (<a href="#sustain">sustaining memory</a>).</p>
+    <p>Whether two hierarchies are needed at all is an open question. It is being tested by an ablation with one hierarchy that holds both descriptions (<a href="#a-unified">Appendix</a>).</p>
+  </div>
+</section>
+
+<!-- ============================================================ GENERATION -->
+<section class="page" data-page="io-generation" hidden>
+  <p class="eyebrow">How it works</p>
+  <h1>Inside-outside generation</h1>
+  <p class="lede">Memory is read as a grammar over concepts. A sentence is written one word at a time, and each word is drawn from what the whole sentence around it allows: the words placed so far, and every way the rest could still finish.</p>
+  <h2>Step 1: read the grammar from memory</h2>
+  <div class="col">
+    <p>Generation reads the stored records without changing them. Nothing is learned here, and no separate grammar is kept: it is recomputed from the trees whenever it is needed, so it follows whatever memory now holds. Every number is a statistic of the two trees.</p>
+  </div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Piece</th><th>What it is</th><th>Read from</th></tr></thead>
+    <tbody>
+      <tr><th>Composite symbols</th><td>The content leaf of each stored composite</td><td>Content tree</td></tr>
+      <tr><th>Word symbols</th><td>The context concept of each word occurrence, the deepest within 12 bits of the root. The same word has different symbols by where it stood</td><td>Context tree</td></tr>
+      <tr><th>Rules</th><td>P(A B | C) from each stored composite's own parts, counted by its posterior. Each rule backs off along the content tree, then to the pairs of all composites: P<sub>l</sub>(AB | C) = (n<sub>l</sub>(AB) + λ P<sub>l−1</sub>(AB | C)) / (n<sub>l</sub> + λ), λ = 4</td><td>Stored composites, content tree</td></tr>
+      <tr><th>Emissions</th><td>P(w | s): the words stored under each word symbol</td><td>Stored words</td></tr>
+      <tr><th>Start</th><td>P(C): the whole experiences (<code>SENT</code>)</td><td>Content tree</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">The back-off carries generalization. A rare concept's rules lean on its ancestors', so a fine symbol can still produce what only its ancestors have seen. With this fill the content tree needs no cut (see below).</p>
+  <h2>Step 2: read the prompt x</h2>
+  <div class="col">
+    <p>Given the previous sentence x, two quantities change.</p>
+    <ul>
+      <li><b>The start.</b> P(C | x) comes from the experiences that followed sentences like x (<code>NEXT</code>), walking down x's content path. Each level backs off to the one above: P(C | node) = (n<sub>node</sub>(C) + P(C | parent)) / (n<sub>node</sub> + 1).</li>
+      <li><b>The topic.</b> Each word symbol G is a context concept, so it has a lift: how much more likely x is as "what came before" at G than at the root, P(x | G) / P(x | root). A free position's symbols are weighted by the lift raised to β / n, with n the free positions. That is a geometric mean, so x counts once for the sentence, not once per word. β = 2, set by hand.</li>
+    </ul>
+  </div>
+  <h2>Step 3: choose the length</h2>
+  <div class="col">
+    <p>For each length from 3 to 8, the inside pass computes Z, the grammar's probability of any sentence of that length, summed over every tree and every word. One length is drawn in proportion to Z. A prompt with gaps works the same way: its fixed words are emitted, and its gaps are expanded to each allowed width.</p>
+  </div>
+  <h2>Step 4: fill each word from the whole sentence</h2>
+  <div class="col">
+    <p>No tree is frozen. For each free position i, left to right:</p>
+    <ol>
+      <li><b>Inside.</b> Sum over every analysis of every span, with the placed words emitted and the unplaced positions summed over all words.</li>
+      <li><b>Outside.</b> Pass the probabilities back down to give each position's outside score: the probability of everything around it, for each symbol that could stand there. It is the inside pass transposed through the back-off levels, and it matches finite differences to 10<sup>−10</sup>.</li>
+      <li><b>Symbol posterior.</b> μ<sub>i</sub>(s) = inside<sub>i</sub>(s) × outside<sub>i</sub>(s) / Z.</li>
+      <li><b>Word distribution.</b> P<sub>IO</sub>(w) = Σ<sub>s</sub> μ<sub>i</sub>(s) P(w | s).</li>
+      <li><b>Window prediction.</b> P<sub>C</sub>(w) is the context tree's prediction from the surface window: the placed words within two places.</li>
+      <li><b>Draw.</b> w ∝ P<sub>IO</sub>(w) × P<sub>C</sub>(w), then fix it and move on. If the two share no word, P<sub>IO</sub> alone.</li>
+    </ol>
+    <p>Once "became" is placed, the next position is read with "became" fixed, so its complement is chosen knowing its head. Without the window term this is exact sampling from the grammar's distribution over sentences.</p>
+  </div>
+  <h2>Why inside-outside</h2>
+  <div class="col">
+    <p>Earlier generators chose structure first and words afterwards. Expansion (<a href="#generate">Appendix</a>) draws a stored whole experience and expands it down. Drawing a tree before the words (round 82) has the same flaw: the slot after "became" was chosen before anyone knew it would be "became". Inside-outside removes the order: structure and words stay summed together until each word is fixed. Three reasons follow, and the third has its own test.</p>
+    <ul>
+      <li><b>It gains on grammar without trading away what makes it useful.</b> Every setting of the earlier generator traded novelty for grammar. This fill raised judged-grammatical new sentences from a mean of 0.159 to 0.176 over four seeds.</li>
+      <li><b>It removes a parameter.</b> With the tree drawn first, fine symbols copy (whole tree: 3% new). With this fill they do not, and the whole tree scores 0.186, level with the best cut (0.183).</li>
+      <li><b>It makes effective use of chunk context.</b> See below.</li>
+    </ul>
+  </div>
+  <h2>Chunk context</h2>
+  <div class="col">
+    <p>A word depends on chunks around it, not only on the words next to it: a verb's object may start several words later, and a subject may end several words earlier. <b>Chunk context</b> means describing a position by the chunks around it at the same level or below. It has been hard to use. Writing neighbouring chunks into the stored context helped one-word prefixes on the toy grammars (0.78 → 0.87) but made the learner memorize (grammatical and new at 320 fell to 0.51–0.73 from 0.84–0.89; <a href="#f-known">known failures</a>). A window can see only two words on each side.</p>
+    <p>Inside-outside reads chunk context without storing it. The outside score of a position sums over every parent C and sibling B that could surround it, in concept terms: that sum <em>is</em> the position's chunk context, in both directions. On the left it holds the chunks built from the placed words. On the right it holds the chunks that could still finish the sentence. Nothing is added to any instance, so there is no new facet to memorize.</p>
+    <p>This is the only route by which chunks reach word choice. While writing this page we found that the window prediction never saw chunks: its full query raised an error on free positions and silently fell back to the raw window, so neither neighbouring chunks nor the previous sentence reached it in any round. The code now says so plainly and the results are unchanged. So every effect of chunk context on generation goes through inside-outside.</p>
+  </div>
+  <h3>Does it carry information? (round 94)</h3>
+  <p>Held-out story sentences are read left to right, and the real next word is scored under each source. Higher is better; 1,000 sentences learned, 200 held-out sentences.</p>
+  <div id="r94-table"><p class="small">Running; numbers will appear here when the round finishes.</p></div>
+  <h2>A worked generation</h2>
+  <div class="col">
+    <p>Real output of the current recipe (1,000 sentences learned, seed 13 unless marked; the judge's probability of grammatical in brackets; each sentence is absent from training). Prompts are held-out story sentences.</p>
+  </div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Previous sentence x</th><th>Generated y</th></tr></thead>
+    <tbody>
+      <tr><td>the ball and the cat played together</td><td>one day she saw a big cat (1.00)</td></tr>
+      <tr><td>he could not play with his friends</td><td>tom and max wanted to play together (1.00)</td></tr>
+      <tr><td>you are nice</td><td>you are a nice friend (0.95)</td></tr>
+      <tr><td>tim and his mom were surprised</td><td>they played with the toy car (1.00)</td></tr>
+      <tr><td>they knew they did something bad (s17)</td><td>then the unexpected happened (1.00)</td></tr>
+      <tr><td>tom sue and the bird became friends (s17)</td><td>the bear wanted to eat it (1.00)</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">These were picked by hand for reading from sentences the judge rates above 0.9. They show what the method can do, not how often: about 40% of all outputs are judged ungrammatical, and the judge also passes sentences a reader would not, such as "lily was so much fun" (0.98).</p>
+  <h2>What is still set by hand</h2>
+  <div class="col">
+    <p>β = 2, λ = 4 and the 12-bit cut on word symbols. Whole-sentence likelihood cannot set β: on held-out pairs it peaks at β = 0 for every form of the lift, while β lifts cross share from 0.05 to 0.29 (<a href="#s-sem">story rounds</a>). The reading of the grammar is also a pass over all stored records, so its cost grows with memory; the whole tree generates at about half the speed of a 13-bit cut.</p>
+  </div>
+</section>
+
+<!-- ============================================================ DESIGN: DOMAINS -->
+<section class="page" data-page="d-domains" hidden>
+  <p class="eyebrow">Experimental design</p>
+  <h1>Domains</h1>
+  <p class="lede">The same code runs on each domain. A change is checked on more than one, because a mechanism that works only on sentences is not domain-general.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Domain</th><th>What an experience is</th><th>Scale</th><th>What it tests</th></tr></thead>
+    <tbody>
+      <tr><th>Toy grammars</th><td>A sentence from a known grammar (<code>small</code>, <code>med</code>, <code>large</code>, <code>term_low</code> and others)</td><td>10 to 320 experiences</td><td>Grammaticality can be checked exactly. Used as the guard on every change</td></tr>
+      <tr><th>TinyStories</th><td>A sentence of 3 to 8 words, using the 250 commonest words, read in story order</td><td>250 to 2,000 sentences; 1,500 held-out stories; 400 prompts, 4 draws each</td><td>Grammatical, new, on-topic generation from real text</td></tr>
+      <tr><th>bAbI</th><td>A story sentence, or a line <code>question ? answer</code>, from the 20 tasks</td><td>76,610 sentences, 4,114 distinct, 150 words; 600 to 3,000 learned</td><td>Answering as gap filling</td></tr>
+      <tr><th>Chinese characters</th><td>A character's IDS decomposition as a token sequence</td><td>500 to 2,000 characters; 300 held out</td><td>Compression and well-formed novelty on very short experiences, where alternative analyses carry information</td></tr>
+      <tr><th>Chess</th><td>A position as a board graph, from Lichess games rated 1800 and above</td><td>300 to 4,000 positions; 1,000 held out; 100 for recall</td><td>Compression of states, transfer to new squares, and Chase and Simon's (1973) recall experiments</td></tr>
+    </tbody>
+  </table></div>
+  <h2>The configuration under test</h2>
+  <div class="tablewrap"><table class="tbl">
+    <thead><tr><th>Part</th><th>Setting</th></tr></thead>
+    <tbody>
+      <tr><th>Trees</th><td>Two compiled Cobweb trees (<code>tree="cu"</code>), bit-identical to the Python tree in reference arithmetic. A new leaf is scored by its bag's own expected correct guesses (<code>exact_alone</code>)</td></tr>
+      <tr><th>Context instance</th><td>Window of two tokens each side, own content <code>cc</code>, neighbouring chunks <code>lc rc</code>, previous sentence <code>pv</code> (stories)</td></tr>
+      <tr><th>Content instance</th><td>Parts' type names <code>L R</code> and parts' content paths <code>LC RC</code></td></tr>
+      <tr><th>Names</th><td>Parent concepts of 32 sampled instances, mixed with neighbours' names at weight n/(n+4) for a word's own; content paths in information bands</td></tr>
+      <tr><th>Learning</th><td>Inside-outside over every composite; stored with posterior weight, dropped below 0.001; restructures with probability equal to its weight</td></tr>
+      <tr><th>Keeping current</th><td>Relabel in place; repair on use, up to 700 records per experience; no sweep</td></tr>
+      <tr><th>Parsing</th><td>Minimum Bayes risk over span posteriors</td></tr>
+      <tr><th>Generation</th><td>Inside-outside: whole content tree, words within 12 bits, λ 4, β 2, marginal times window prediction</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">The toy-grammar curves, the character generation guard and the chess recall studies were measured on earlier configurations; each result page says which. The explorers on the Parsing page show the configuration of 23 October.</p>
+</section>
+
+<!-- ============================================================ DESIGN: EVALUATIONS -->
+<section class="page" data-page="d-evals" hidden>
+  <p class="eyebrow">Experimental design</p>
+  <h1>Evaluations</h1>
+  <p class="lede">A change is kept when the system generates more grammatical new output or holds a more compressible memory. Gold labels only score; nothing they say reaches the learner.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Measure</th><th>Definition</th><th>Domains</th><th>Limits</th></tr></thead>
+    <tbody>
+      <tr><th>Grammatical, new</th><td>Share of samples the grammar accepts and training lacks</td><td>Toy grammars</td><td>Small languages saturate</td></tr>
+      <tr><th>Grammatical new per generation</th><td>Share of generations Qwen2.5-3B judges grammatical (few-shot, P(yes) above 0.5) and training lacks. The headline</td><td>TinyStories</td><td>The judge is imperfect and passes some bad sentences. It is calibrated on each run's real, scrambled and content-swapped sentences</td></tr>
+      <tr><th>Cross share</th><td>Mean PMI of the prompt's content words with the output's, as a share from random held-out (0) to the real next sentence (1)</td><td>TinyStories</td><td>Varies widely by seed (0.10 to 0.55)</td></tr>
+      <tr><th>Bits</th><td>Held-out code length under the learned model, model not charged</td><td>Characters, chess</td><td>Favours large memories; storage is reported apart</td></tr>
+      <tr><th>Parse agreement</th><td>Bracket F1 across seeds, across stream sizes and under word substitution</td><td>TinyStories</td><td>Agreement is not correctness</td></tr>
+      <tr><th>Prompts</th><td>Attested trigrams in filled gaps; right answer type and exact answer on bAbI</td><td>TinyStories, bAbI</td><td>Trigrams reward the common</td></tr>
+      <tr><th>Recall</th><td>Pieces rebuilt from 7 units, on real and random boards, against Chase and Simon's numbers</td><td>Chess</td><td>Experience stands in for rating; no latencies</td></tr>
+      <tr><th>Memory currency</th><td>Share of used records that no longer sort where they sit; learning time</td><td>TinyStories</td><td></td></tr>
+    </tbody>
+  </table></div>
+  <h2>Guards and seeds</h2>
+  <div class="col">
+    <p>Each change must pass the guard: grammaticality within 2 points of the original and more grammatical-and-new samples on <code>med</code> and <code>large</code>, seeds 13 and 17, plus characters held. Story rounds use seeds 13 and 17, and a change that survives is confirmed on 19 and 23. No result here has a significance test; differences are read against the spread between seeds.</p>
+  </div>
+</section>
+
+<!-- ============================================================ DESIGN: COMPETITORS -->
+<section class="page" data-page="d-competitors" hidden>
+  <p class="eyebrow">Experimental design</p>
+  <h1>Competitors</h1>
+  <p class="lede">Where a standard coder exists, TRELLIS is compared to it. Generation has only internal references so far, which is a gap in this study.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Competitor</th><th>What it is</th><th>Used on</th></tr></thead>
+    <tbody>
+      <tr><th>Unigram, trigram (Witten-Bell)</th><td>Frequency coders over tokens</td><td>Characters</td></tr>
+      <tr><th>BPE, squares</th><td>Byte-pair merging; on chess, chunks are exact pieces on exact squares</td><td>Characters, chess</td></tr>
+      <tr><th>BPE, shapes</th><td>The same merging on translation-free shapes, each coded with an anchor square</td><td>Chess</td></tr>
+      <tr><th>Krimp</th><td>MDL itemset mining (Vreeken et al., 2011)</td><td>Chess</td></tr>
+      <tr><th>xz</th><td>General compressor, each position coded given all learned positions</td><td>Chess</td></tr>
+      <tr><th>Piece-square list</th><td>No learning: each piece and its square</td><td>Chess</td></tr>
+      <tr><th>Frequency baseline</th><td>The most common answers</td><td>bAbI</td></tr>
+      <tr><th>Copy, retrieval, oracle</th><td>A stored next sentence; the stored next sentence with the most shared idf-weighted words; the training sentence with the highest cross PMI</td><td>TinyStories (references, not learners)</td></tr>
+      <tr><th>Earlier generators</th><td>Expansion from stored experiences; inside-outside grammar with the tree drawn first; the marginal alone</td><td>TinyStories</td></tr>
+      <tr><th>Ablations</th><td>Beam and greedy search in place of inside-outside; no chunk identity; one hierarchy (in progress)</td><td>TinyStories, characters</td></tr>
+    </tbody>
+  </table></div>
+  <div class="col"><p>No neural language model or standard grammar inducer has yet been run on the generation task under these constraints. A fair comparison would learn online from the same few sentences.</p></div>
+</section>
+
+<!-- ============================================================ RESULTS INDEX -->
+<section class="page" data-page="results" hidden>
+  <p class="eyebrow">Results</p>
+  <h1>Results by domain</h1>
+  <p class="lede">Generation works on grammars and improves on real text. As a coder TRELLIS beats BPE on characters but loses to a trigram coder there and wins on chess only where shapes move. Each domain has its own page with its curves, chunks and tables.</p>
+  <ul class="rlist">
+    <li><a href="#curves"><span class="rn">1</span><span class="rt">Toy grammars</span><span class="ra">What memory generates after 10 to 320 experiences on each grammar.</span></a></li>
+    <li><a href="#r-stories"><span class="rn">2</span><span class="rt">TinyStories</span><span class="ra">Grammatical, new, on-topic generation; chunks and concepts; parse agreement; prompts.</span></a></li>
+    <li><a href="#s-babi"><span class="rn">3</span><span class="rt">bAbI</span><span class="ra">Questions answered by filling a gap.</span></a></li>
+    <li><a href="#s-chars"><span class="rn">4</span><span class="rt">Chinese characters</span><span class="ra">Compression against other coders; new characters.</span></a></li>
+    <li><a href="#s-chess"><span class="rn">5</span><span class="rt">Chess</span><span class="ra">Chase and Simon, figure for figure; compression; shapes on new squares; chunks.</span></a></li>
+  </ul>
+</section>
+
+<!-- ============================================================ RESULTS: STORIES -->
+<section class="page" data-page="r-stories" hidden>
+  <p class="eyebrow">Results</p>
+  <h1>TinyStories</h1>
+  <p class="lede">Inside-outside generation gives 0.186 judged-grammatical new sentences per generation at 1,000 sentences, against 0.159 for the best earlier inside-outside form, while holding the topic of the previous sentence.</p>
+  <h2>Generation</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Generator (1,000 sentences)</th><th class="num">s13</th><th class="num">s17</th><th class="num">s19</th><th class="num">s23</th><th class="num">Mean</th><th class="num">Grammatical</th><th class="num">New</th><th class="num">Cross share</th></tr></thead>
+    <tbody>
+      <tr><td>Expansion (round 79, β 64 back-off)</td><td class="num">0.161</td><td class="num">0.152</td><td class="num">–</td><td class="num">–</td><td class="num">0.157</td><td class="num">–</td><td class="num">41%</td><td class="num">about 0.3</td></tr>
+      <tr><td>No topic, tree drawn first</td><td class="num">0.146</td><td class="num">0.144</td><td class="num">0.151</td><td class="num">0.133</td><td class="num">0.144</td><td class="num">–</td><td class="num">68%</td><td class="num">0.05</td></tr>
+      <tr><td>Tree drawn first (round 82)</td><td class="num">0.161</td><td class="num">0.161</td><td class="num">0.160</td><td class="num">0.152</td><td class="num">0.159</td><td class="num">47–56%</td><td class="num">59–65%</td><td class="num">0.29</td></tr>
+      <tr><td>Marginal alone</td><td class="num">0.124</td><td class="num">0.148</td><td class="num">–</td><td class="num">–</td><td class="num">0.136</td><td class="num">40–46%</td><td class="num">68–70%</td><td class="num">0.26</td></tr>
+      <tr><td>Marginal × window, 12-bit cut</td><td class="num">0.177</td><td class="num">0.183</td><td class="num">0.158</td><td class="num">0.185</td><td class="num">0.176</td><td class="num">59–63%</td><td class="num">50–56%</td><td class="num">0.28</td></tr>
+      <tr><td>Marginal × window, 13-bit cut</td><td class="num">0.188</td><td class="num">0.196</td><td class="num">0.164</td><td class="num">0.182</td><td class="num">0.183</td><td class="num">60–64%</td><td class="num">51–56%</td><td class="num">0.34</td></tr>
+      <tr><td><b>Marginal × window, whole tree</b></td><td class="num">0.198</td><td class="num">0.185</td><td class="num">0.150</td><td class="num">0.209</td><td class="num best">0.186</td><td class="num">59–60%</td><td class="num">53–57%</td><td class="num">0.34</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">The whole tree and the 13-bit cut are level: their difference is far smaller than the spread between seeds. Seed 19 falls below the earlier form on the whole tree (0.150 against 0.160). The full record of settings and rounds is in <a href="#s-sem">story rounds</a>.</p>
+  <h2>Learning curve</h2>
+  <div id="r95-curve"><p class="small">Running; numbers will appear here when the round finishes.</p></div>
+  <h2>Chunks and concepts</h2>
+  <div id="story-chunks"><p>Read from one learned memory (1,000 sentences, seed 13; 26,852 records). Each row is one concept, with the chunks that hold most weight under it. No labels were used, and these lists are unedited except for choosing which concepts to show.</p>
+<h3>Chunk types: concepts of the content hierarchy</h3>
+<div class="tablewrap"><table>
+  <thead><tr><th class="num">Bits</th><th>Chunks under one concept</th><th>What it found</th></tr></thead>
+  <tbody>
+    <tr><td class="num">5.0</td><td>the park · the dog · the bird · the cat · the little · the car · the sun</td><td>Determiner plus what follows</td></tr>
+    <tr><td class="num">5.3</td><td>they had · they all · they said · they became · they did · they loved · they saw</td><td>"they" plus a predicate's start</td></tr>
+    <tr><td class="num">7.0</td><td>was happy · were happy · are happy · not happy · and happy · is happy · him happy</td><td>Anything ending in "happy"</td></tr>
+    <tr><td class="num">7.0</td><td>with it · yes it · like it · get it · find it · at it · do it</td><td>Anything ending in "it"</td></tr>
+    <tr><td class="num">7.1</td><td>to do · to play · to go · to help · to see · to share · to look</td><td>Infinitives</td></tr>
+    <tr><td class="num">7.1</td><td>unexpected happened · what happened · had happened</td><td>Anything ending in "happened"</td></tr>
+    <tr><td class="num">5.1</td><td>know what to do · look at each other · looked at each other · very happy and excited · with the toy car · with his toy car</td><td>Longer phrases, mixed</td></tr>
+    <tr><td class="num">5.0</td><td>can i play with you · he did not like it · the little girl was sad · tom and mia are friends · lily and ben were scared · they said they were sorry</td><td>Whole sentences</td></tr>
+    <tr><td class="num">7.1</td><td>max asked sam for help · soon they became best friends · we just liked it a lot · we have to go now</td><td>Whole sentences, more specific</td></tr>
+  </tbody>
+</table></div>
+<p class="small">The specific chunk types group strongly by their last word or by their head. That is partly a limit: "with it" and "yes it" share a concept though they are not the same kind of phrase, which suggests the content hierarchy groups by a part's name more than by the whole's role.</p>
+<h3>Word categories: concepts of the context hierarchy</h3>
+<div class="tablewrap"><table>
+  <thead><tr><th class="num">Bits</th><th>Words under one concept</th></tr></thead>
+  <tbody>
+    <tr><td class="num">3.1</td><td>he · but · she · i · then · you · yes · lily · let's <span class="small">(sentence openers)</span></td></tr>
+    <tr><td class="num">3.2</td><td>was · and · had · said · are · played · is · wanted · were</td></tr>
+    <tr><td class="num">3.2</td><td>friends · fun · together · idea · ball · it · day · too · lily <span class="small">(sentence enders)</span></td></tr>
+    <tr><td class="num">5.6</td><td>were · played · are · had · said · all · became · did · have <span class="small">(after "they")</span></td></tr>
+    <tr><td class="num">5.6</td><td>happy · nice · ball · safe · toy · toys · long · together · idea</td></tr>
+    <tr><td class="num">5.8</td><td>tim · it · she · lily · he · sue · tom · max · everyone <span class="small">(subjects)</span></td></tr>
+  </tbody>
+</table></div>
+<p class="small">Context concepts near the top are coarse and depend heavily on position in the sentence, and frequent words appear in many of them. Glosses in brackets are ours, for reading.</p>
+<h3>Parses of held-out sentences</h3>
+<div class="tablewrap"><table>
+  <thead><tr><th>Sentence</th><th>Chunks chosen (span posterior)</th></tr></thead>
+  <tbody>
+    <tr><td>tim had an idea</td><td>tim had (0.95) · an idea (0.93)</td></tr>
+    <tr><td>her mom said yes</td><td>her mom (0.94) · said yes (0.91)</td></tr>
+    <tr><td>i loved that toy car</td><td>i loved (0.91) · toy car (0.93) · that toy car (0.77)</td></tr>
+    <tr><td>tom and mia were best friends</td><td>tom and (0.97) · tom and mia (0.71) · best friends (0.98) · were best friends (0.66)</td></tr>
+    <tr><td>tom and sue were not happy</td><td>tom and (0.98) · tom and sue (0.87) · tom and sue were (0.66) · not happy (0.96)</td></tr>
+    <tr><td>they feel scared and sorry</td><td>they feel (0.96) · and sorry (0.96) · scared and sorry (0.54)</td></tr>
+  </tbody>
+</table></div>
+<p class="small">"tim had" is not a constituent, nor is "tom and" or "and sorry", so a good share of chunks are frequent pairs and not phrases. "that toy car" and "best friends" are. Whole-sentence chunks are left out of the table.</p>
+<h3>New sentences it wrote</h3>
+<p class="small">Examples, with the judge above 0.9: "one day she saw a big cat", "tom and max wanted to play together", "then the unexpected happened", "the bear wanted to eat it", "you are a nice friend". They were picked by hand; about 40% of all outputs are judged ungrammatical (<a href="#io-generation">Generation</a>).</p>
+</div>
+  <h2>Parse agreement</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Sentences learned</th><th class="num">250</th><th class="num">500</th><th class="num">1,000</th><th class="num">2,000</th></tr></thead>
+    <tbody><tr><td>Cross-seed bracket F1 (original configuration)</td><td class="num">0.64</td><td class="num">0.78</td><td class="num">0.79</td><td class="num">0.90</td></tr></tbody>
+  </table></div>
+  <p class="small">At 2,000 sentences a parse barely changes when one word is replaced: substitution F1 0.962 for a near word, 0.893 for a far one (<a href="#s-consist">parse consistency</a>).</p>
+  <h2>Prompts</h2>
+  <p>Prefix continuation by gap filling reaches 0.84–0.86 attested trigrams. Infill stays at 0.20–0.22, because a filler satisfies each side separately (<a href="#s-prompt">prompted generation</a>). These use expansion and gap filling, not yet inside-outside generation.</p>
+  <h2>Memory</h2>
+  <p>At 2,000 sentences, used records are 0.6% misplaced in both trees, at 1.8–2.1 times the learning time without repair (<a href="#status">scoreboard</a>).</p>
+</section>
+
+<!-- ============================================================ CONCLUSION -->
+<section class="page" data-page="conclusion" hidden>
+  <p class="eyebrow">Conclusion and next steps</p>
+  <h1>What holds, and what does not yet</h1>
+  <p class="lede">Two hierarchies learned online, read by inside-outside, generate new sentences from real text with no gold and no offline phase. They do not yet compress as well as simple coders, and several settings remain hand-set.</p>
+  <h2>Why this matters</h2>
+  <div class="col">
+    <p>Most systems that generate well need many passes over much data, and what they know is not inspectable. TRELLIS learns from each experience once, stores what it learns in concepts one can read, and uses the same memory to parse, generate and compress. It applies unchanged to sentences, characters and chess. If it can match simple coders and reach good grammar from a few thousand experiences, that gives a transparent, always-learning account of how structure and generalization can arise together. It is not there yet, and the gaps below are real.</p>
+  </div>
+  <h2>What has been shown</h2>
+  <div class="col">
+    <ul>
+      <li>Trees alone generate grammatically on toy grammars, and new output grows with experience.</li>
+      <li>Memory stays current online: used records under 1% misplaced at about twice the learning time.</li>
+      <li>On TinyStories, reading each word from the whole sentence raised grammatical new output by 17% over the best earlier form, held the topic and removed the content cut.</li>
+      <li>On chess, TRELLIS reproduces the shape of Chase and Simon's findings.</li>
+    </ul>
+  </div>
+  <h2>What we have not figured out</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Open problem</th><th>What is known</th><th>Next</th></tr></thead>
+    <tbody>
+      <tr><th>Topic weight</th><td>β 2 is hand-set. Whole-sentence likelihood always picks 0, since a sentence's probability is almost all grammar</td><td>A criterion that weighs the topic itself; let memory choose the concept that predicts from x</td></tr>
+      <tr><th>Grammar</th><td>About 40% of output is still judged ungrammatical. Head-complement fit and unfinished endings were the main errors before the new fill; not yet re-measured</td><td>Re-measure the errors; re-test λ on the whole tree (round 93 was cancelled)</td></tr>
+      <tr><th>Do two hierarchies earn their cost?</th><td>Untested</td><td>The unified-hierarchy ablation</td></tr>
+      <tr><th>Parsing and generation read different scores</th><td>Parsing uses a separate chunk factor; generation and coding read the grammar's probabilities</td><td>Test parsing and learning by the same probabilities</td></tr>
+      <tr><th>The content tree's gain</th><td>On toy grammars, held-out composites stop 2–4 levels down and gain no bits there. Not re-measured since the representation fixes</td><td>Re-measure; name words by what they build as well as where they stand</td></tr>
+      <tr><th>Infill and prompts</th><td>Infill fails to fit both sides under gap filling</td><td>Run prompts through inside-outside generation, which already handles gaps</td></tr>
+      <tr><th>Characters</th><td>Beats BPE, loses to a trigram coder</td><td>Find what the trigram coder captures that the grammar misses</td></tr>
+      <tr><th>Chess</th><td>Wins only on shifted boards, narrowly, for a reason BPE on shapes shares. Recall saturates too early</td><td>Rethink the representation of positions; chunk probabilities</td></tr>
+      <tr><th>Answering (bAbI)</th><td>Right type, rarely the exact answer</td><td>Answer by analogy: align the question's chunks with the story sentence that shares its role</td></tr>
+      <tr><th>Scale and comparison</th><td>Story results stop at 2,000 sentences and a 250-word vocabulary, with no external generation baseline</td><td>Larger streams; a fair online baseline</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============================================================ APPENDICES -->
+<section class="page" data-page="appendices" hidden>
+  <p class="eyebrow">Appendices</p>
+  <h1>Older methods, ablations and records</h1>
+  <p class="lede">What was tried on the way here, and the detail behind the main pages. Pages describing older methods say which configuration they show.</p>
+  <ul class="rlist">
+    <li><a href="#a-unified"><span class="rn">A1</span><span class="rt">Ablation: one hierarchy</span><span class="ra">Content and context held in a single tree.</span></a></li>
+    <li><a href="#s-sem"><span class="rn">A2</span><span class="rt">Story rounds</span><span class="ra">Every story-generation round: settings swept, critics, search, the topic weight.</span></a></li>
+    <li><a href="#generate"><span class="rn">A3</span><span class="rt">Expansion generation</span><span class="ra">The earlier generator, with its explorer.</span></a></li>
+    <li><a href="#types"><span class="rn">A4</span><span class="rt">Type names</span><span class="ra">Explorer for naming a part by where its type has stood.</span></a></li>
+    <li><a href="#rules"><span class="rn">A5</span><span class="rt">Concept-choice rules</span><span class="ra">Which concept a part draws from under expansion.</span></a></li>
+    <li><a href="#s-prompt"><span class="rn">A6</span><span class="rt">Prompted generation</span><span class="ra">Gap filling in detail.</span></a></li>
+    <li><a href="#s-consist"><span class="rn">A7</span><span class="rt">Parse consistency</span><span class="ra">Agreement across seeds, sizes and substitutions.</span></a></li>
+    <li><a href="#s-probe"><span class="rn">A8</span><span class="rt">Chunk representations</span><span class="ra">Probes and maps of what chunks hold.</span></a></li>
+    <li><a href="#sustain"><span class="rn">A9</span><span class="rt">Sustaining memory</span><span class="ra">Relabel, verify and repair on use.</span></a></li>
+    <li><a href="#status"><span class="rn">A10</span><span class="rt">Memory scoreboard</span><span class="ra">Temporal-currency numbers by run.</span></a></li>
+    <li><a href="#a-fixes"><span class="rn">A11</span><span class="rt">Representation fixes</span><span class="ra">What the memory dump showed was wrong, and rounds 75–79.</span></a></li>
+    <li><a href="#representation"><span class="rn">A12</span><span class="rt">Earlier representation</span><span class="ra">The description of 23 October, with figures.</span></a></li>
+    <li><a href="#failures"><span class="rn">A13</span><span class="rt">AND/OR failure checks</span><span class="ra">The checks run after every change.</span></a></li>
+    <li><a href="#f-known"><span class="rn">A14</span><span class="rt">Known failures</span><span class="ra">Measurements of what stayed open as of late October.</span></a></li>
+    <li><a href="#iterations"><span class="rn">A15</span><span class="rt">Kept and set aside</span><span class="ra">Each change tried from 23 to 26 October, and its fate.</span></a></li>
+  </ul>
+</section>
+
+<!-- ============================================================ APPENDIX: UNIFIED -->
+<section class="page" data-page="a-unified" hidden>
+  <p class="eyebrow">Appendix A1</p>
+  <h1>Ablation: one hierarchy</h1>
+  <p class="lede">What happens if content and context are held in one Cobweb tree, used in the same ways?</p>
+  <div id="unified-body"><p>In progress. Design and results will appear here.</p></div>
+</section>
+
+<!-- ============================================================ PARSING -->
+<section class="page" data-page="parse" hidden>
+  <p class="eyebrow">How it works</p>
+  <h1>Parsing</h1>
+  <p class="lede">Parsing scores every way of grouping an experience, using both trees, and returns the analysis with the most expected correct chunks. It stores nothing.</p>
+  <h2>What gets evaluated</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Element</th><th>How many</th><th>Its instances</th><th>Its score</th></tr></thead>
+    <tbody>
+      <tr><th>Word</th><td>n</td><td>Context only</td><td>None: words are given</td></tr>
+      <tr><th>Composite (i, k, j)</th><td>Every span and split: on the order of n³/6</td><td>Content and context, built from its two parts</td><td>A gain from each tree, in bits</td></tr>
+    </tbody>
+  </table></div>
+  <div class="col">
+    <p>The gain of an instance x in a tree is the best, over the concepts C on its sorting path, of</p>
+    <p style="text-align:center">gain(x) = max<sub>C</sub> log<sub>2</sub> [ share(C) · P(x | C) / P(x | root) ], or 0 at the root,</p>
+    <p>so it is how far the best concept beats the root at explaining x, after charging for how rare the concept is. A composite's factor is gain(content) + gain(context). Sorting here is read-only: <code>categorize</code> walks the tree without inserting.</p>
+  </div>
+  <h2>What runs, in order</h2>
+  <div class="col">
+    <ol>
+      <li><b>Words.</b> Build each word's context instance from its window, its token and the previous sentence.</li>
+      <li><b>Composites, bottom-up.</b> For each span, shortest first, and each split, take the best analysis so far of the left and right spans as the parts. Build the content instance from their names, sort it, and take its bands as the <code>cc</code> of the context instance. Sort that too. The factor is the two gains. A span's best analysis is the split with the highest summed gain.</li>
+      <li><b>Chunk context, second pass.</b> The neighbours of a span are the best analyses of the same-width spans on each side, which only exist once the first pass is done. Rewrite every element's <code>lc</code> and <code>rc</code> from them and recompute every factor.</li>
+      <li><b>Inside-outside.</b> With factors 2<sup>gain</sup>, inside and outside sums over every binary analysis give each composite's posterior and log Z.</li>
+      <li><b>Readout.</b> A dynamic program picks the analysis with the highest total span posterior (minimum Bayes risk).</li>
+    </ol>
+  </div>
+  <h2>What gets passed up</h2>
+  <div class="col">
+    <p>Only representations pass up: a composite's content instance holds no tokens. When span (i, j) is built from parts a and b, it receives:</p>
+    <ul>
+      <li><code>L</code>, <code>R</code>: each part's <b>type name</b>. A word's is the parent concepts of its 32 sampled occurrences, mixed with its neighbours' names. A chunk's is read from its content leaf's own sample.</li>
+      <li><code>LC</code>, <code>RC</code>: each part's <b>content path in bands</b> (blank for a word).</li>
+    </ul>
+    <p>The composite's own path through the content tree then becomes its name, and the parent above takes that name as its <code>LC</code> or <code>RC</code>. So a representation is built by sorting: parts' names form an instance, the tree places it, and the path it takes is the new name. A long span is described by concepts, not by a growing list of tokens, so its description stays about the same size at every level.</p>
+    <p>A part is one analysis of its span, the best by summed gain. The posterior then sums over every split at every span, but each composite's description holds only its parts' best analyses.</p>
+  </div>
+  <h2>Explorer</h2>
+  <p class="small">The walk-through below runs on real memory of the toy grammars. It shows the configuration of 23 October, so it has no <code>lc</code>, <code>rc</code> or <code>pv</code>. Pick the grammar in the bar above.</p>
+  <div class="lay c12">
+    <div class="card">
+      <h4>Sentence</h4>
+      <div class="rows" id="psents" style="margin-top:8px"></div>
+      <h4 style="margin-top:14px">Leading composites</h4>
+      <p class="hint">By posterior. Click one to score it in step 2.</p>
+      <div class="scrolly h300"><div class="rows" id="comps"></div></div>
+    </div>
+    <div class="card">
+      <h4><span class="n">1</span>Weigh every span at once</h4>
+      <p class="hint">Inside-outside builds a chart of every composite (every span and split). Each composite gets a factor 2<sup>gain/τ</sup> from both trees. Each cell is a span's posterior: the probability, summed over splits, that it is a chunk. Darker means more mass. Click a cell to score its leading composite.</p>
+      <div class="body h360" id="spanchart"></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h4><span class="n">2</span>Score the composite by climbing both trees</h4>
+    <p class="hint">The composite's two instances are sorted down each tree without storing anything. At every concept C on the path, <b>gain = log2 share(C) + fit</b>, where fit = log2 P(x|C) − log2 P(x|root). Strength falls with depth; fit rises. The composite's gain is the best concept in each tree, summed over the two trees. Bits (y) by depth from the root (x); hover for values.</p>
+    <div class="legend"><span style="--c:var(--s1)">gain</span><span style="--c:var(--s2)">log2 share</span><span style="--c:var(--s3)">fit</span></div>
+    <div class="lay c2" style="margin-top:4px">
+      <div class="body h260" id="gainctx" style="margin-top:0"></div>
+      <div class="body h260" id="gaincnt" style="margin-top:0"></div>
+    </div>
+    <p class="hint" id="gainnote" style="margin-top:10px"></p>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h4><span class="n">3</span>Commit to the expected-best analysis</h4>
+    <p class="hint" id="tnote"></p>
+    <div class="wide"><div class="body h360" id="tboth"></div></div>
+  </div>
+</section>
+
+<!-- ============================================================ LEARNING -->
+<section class="page" data-page="learning" hidden>
+  <p class="eyebrow">How it works</p>
+  <h1>Learning</h1>
+  <p class="lede">Learning parses each experience once, then stores every composite in both trees, weighted by its posterior. Chunks are the concepts that keep winning that mass. There is no threshold, no second pass over the data and no offline phase.</p>
+  <h2>What gets evaluated</h2>
+  <div class="col"><p>Everything parsing evaluates: each composite's factor, posterior and the best analysis (<a href="#parse">Parsing</a>). Then each stored description is read again, because storing its parts can change what it should say.</p></div>
+  <h2>What runs, in order</h2>
+  <div class="col">
+    <ol>
+      <li><b>Parse</b> the experience against memory as it stands.</li>
+      <li><b>Store words.</b> Each word's context instance goes into the context tree at weight 1. The new leaf joins the word's sample of 32 occurrences (weighted reservoir), and each neighbour joins its neighbour sample.</li>
+      <li><b>Store composites, smallest span first.</b> Each with a posterior of at least 0.001:
+        <ol type="a">
+          <li>Read its content instance again from its parts, whose names may have changed, and insert it into the content tree at its posterior weight.</li>
+          <li>Read its context instance, with <code>cc</code> naming the path just made, and insert it into the context tree at the same weight. Content must go first, for this reason.</li>
+          <li>A record merges or splits concepts with probability equal to its weight. Low-weight spans therefore do not restructure the tree much.</li>
+        </ol>
+      </li>
+      <li><b>Generation statistics.</b> For the chosen analysis only, add passive counts at the leaves: its words and chunks (<code>fill</code>), its parts (<code>lpart</code>, <code>rpart</code>), its whole experience (<code>sent</code>), and on the previous experience's whole, this one as what followed (<code>next</code>). Passive counts are summed up the tree but never sort anything.</li>
+      <li><b>Keep memory current.</b> Every sort this experience passed marks records under the concepts it went through. Up to 700 of them, least recently checked first, are re-described and moved if they no longer sort where they sit. Descriptions are relabelled in place (<a href="#sustain">sustaining memory</a>).</li>
+    </ol>
+  </div>
+  <h2>What gets passed up, and how new representations are made</h2>
+  <div class="col">
+    <p>New concepts arise inside Cobweb: an inserted instance can open a new leaf, or merge and split nodes, whichever raises category utility. The representations built from them are read off afterwards:</p>
+    <ul>
+      <li>A <b>new leaf</b> in the content tree gives the composite a chunk type and a band name, which its context takes as <code>cc</code> and its parents take as <code>LC</code> or <code>RC</code>.</li>
+      <li>A <b>new leaf</b> in the context tree changes its type's sample, so the next read of that type's name differs. Names are not stored; each is read from where the samples sit now.</li>
+      <li>A <b>merge or split</b> changes the names of everything beneath it. After one sentence, 25% of word names have changed, and 91% of those changes go to concepts that already existed.</li>
+    </ul>
+    <p>A chunk that recurs collects weight under concepts that recur with it. A span the evidence does not support adds a sliver of weight that the trees absorb. Over time the candidates compete for each experience's posterior mass, and the winners are the chunks.</p>
+  </div>
+  <figure class="fig">
+    <svg class="dg" viewBox="0 0 1000 300" role="img" aria-label="Learning in three steps. 1: a chart of every composite over the five words. 2: inside-outside gives each composite a posterior from factors read off both trees. 3: every composite is stored in both trees with its posterior as weight; recurring chunks collect weight.">
+      <defs><marker id="m3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mink"/></marker></defs>
+      <rect x="6" y="6" width="320" height="288" rx="6" class="panel"/><rect x="12" y="12" width="308" height="30" rx="4" class="phead"/>
+      <circle cx="29" cy="27" r="10" class="pnum"/><text x="29" y="32" class="sf b" text-anchor="middle" style="font-size:14px">1</text><text x="46" y="32" class="sf b inv" style="font-size:14.5px">Every composite</text>
+      <rect x="340" y="6" width="320" height="288" rx="6" class="panel"/><rect x="346" y="12" width="308" height="30" rx="4" class="phead"/>
+      <circle cx="363" cy="27" r="10" class="pnum"/><text x="363" y="32" class="sf b" text-anchor="middle" style="font-size:14px">2</text><text x="380" y="32" class="sf b inv" style="font-size:14.5px">Weigh by both trees</text>
+      <rect x="674" y="6" width="320" height="288" rx="6" class="panel"/><rect x="680" y="12" width="308" height="30" rx="4" class="phead"/>
+      <circle cx="697" cy="27" r="10" class="pnum"/><text x="697" y="32" class="sf b" text-anchor="middle" style="font-size:14px">3</text><text x="714" y="32" class="sf b inv" style="font-size:14.5px">Store all, by posterior</text>
+      <polygon points="328,142 339,150 328,158" class="mink"/><polygon points="662,142 673,150 662,158" class="mink"/>
+      <g>
+        <line x1="79" y1="215" x2="50" y2="236" class="dot"/><line x1="79" y1="215" x2="108" y2="236" class="dot"/>
+        <line x1="137" y1="215" x2="108" y2="236" class="dot"/><line x1="137" y1="215" x2="166" y2="236" class="dot"/>
+        <line x1="195" y1="215" x2="166" y2="236" class="dot"/><line x1="195" y1="215" x2="224" y2="236" class="dot"/>
+        <line x1="253" y1="215" x2="224" y2="236" class="dot"/><line x1="253" y1="215" x2="282" y2="236" class="dot"/>
+        <line x1="108" y1="175" x2="79" y2="193" class="dot"/><line x1="108" y1="175" x2="137" y2="193" class="dot"/>
+        <line x1="166" y1="175" x2="137" y2="193" class="dot"/><line x1="166" y1="175" x2="195" y2="193" class="dot"/>
+        <line x1="224" y1="175" x2="195" y2="193" class="dot"/><line x1="224" y1="175" x2="253" y2="193" class="dot"/>
+        <line x1="137" y1="135" x2="108" y2="153" class="dot"/><line x1="137" y1="135" x2="166" y2="153" class="dot"/>
+        <line x1="195" y1="135" x2="166" y2="153" class="dot"/><line x1="195" y1="135" x2="224" y2="153" class="dot"/>
+        <line x1="166" y1="95" x2="137" y2="113" class="dot"/><line x1="166" y1="95" x2="195" y2="113" class="dot"/>
+        <circle cx="79" cy="204" r="11" class="cd"/><circle cx="137" cy="204" r="11" class="cd"/><circle cx="195" cy="204" r="11" class="cd"/><circle cx="253" cy="204" r="11" class="cd"/>
+        <circle cx="108" cy="164" r="11" class="cd"/><circle cx="166" cy="164" r="11" class="cd"/><circle cx="224" cy="164" r="11" class="cd"/>
+        <circle cx="137" cy="124" r="11" class="cd"/><circle cx="195" cy="124" r="11" class="cd"/><circle cx="166" cy="84" r="11" class="cd"/>
+      </g>
+      <rect x="24" y="237" width="52" height="30" rx="4" class="w"/><text x="50" y="257" class="sf dk" text-anchor="middle" style="font-size:17px">the</text>
+      <rect x="82" y="237" width="52" height="30" rx="4" class="w"/><text x="108" y="257" class="sf dk" text-anchor="middle" style="font-size:17px">cat</text>
+      <rect x="140" y="237" width="52" height="30" rx="4" class="w"/><text x="166" y="257" class="sf dk" text-anchor="middle" style="font-size:17px">saw</text>
+      <rect x="198" y="237" width="52" height="30" rx="4" class="w"/><text x="224" y="257" class="sf dk" text-anchor="middle" style="font-size:17px">a</text>
+      <rect x="256" y="237" width="52" height="30" rx="4" class="w"/><text x="282" y="257" class="sf dk" text-anchor="middle" style="font-size:17px">dog</text>
+      <text x="166" y="284" class="mu" text-anchor="middle" style="font-size:12px">every span, every split</text>
+
+      <rect x="360" y="60" width="280" height="44" rx="4" class="bctx"/>
+      <text x="500" y="78" class="tctx b" text-anchor="middle" style="font-size:13px">context tree: how well a concept</text>
+      <text x="500" y="95" class="tctx" text-anchor="middle" style="font-size:12.5px">describes the span's surroundings</text>
+      <rect x="360" y="114" width="280" height="44" rx="4" class="bcnt"/>
+      <text x="500" y="132" class="tcnt b" text-anchor="middle" style="font-size:13px">content tree: how well a concept</text>
+      <text x="500" y="149" class="tcnt" text-anchor="middle" style="font-size:12.5px">describes the span's two parts</text>
+      <rect x="360" y="176" width="280" height="50" rx="4" class="bcand"/>
+      <text x="500" y="197" class="mo" text-anchor="middle" style="font-size:12px">posterior = inside × outside / Z</text>
+      <text x="500" y="216" class="tcand" text-anchor="middle" style="font-size:12.5px">every composite keeps its share</text>
+      <text x="500" y="262" class="mu" text-anchor="middle" style="font-size:12.5px">only posteriors under 0.001 are dropped</text>
+
+      <text x="700" y="70" class="mo mu">stored weight</text>
+      <rect x="700" y="80" width="150" height="14" rx="2" class="bar"/><text x="858" y="91" class="mo">[the cat] .82</text>
+      <rect x="700" y="100" width="128" height="14" rx="2" class="bar"/><text x="836" y="111" class="mo">[a dog] .71</text>
+      <rect x="700" y="120" width="104" height="14" rx="2" class="bar"/><text x="812" y="131" class="mo">[saw [a dog]] .57</text>
+      <rect x="700" y="140" width="30" height="14" rx="2" class="bar"/><text x="738" y="151" class="mo">[cat saw] .16</text>
+      <rect x="700" y="160" width="9" height="14" rx="2" class="bar"/><text x="717" y="171" class="mo">[saw a] .05</text>
+      <text x="700" y="206" class="mu" style="font-size:12.5px">all go into both trees; chunks</text>
+      <text x="700" y="223" class="mu" style="font-size:12.5px">that recur collect weight and</text>
+      <text x="700" y="240" class="mu" style="font-size:12.5px">become concepts</text>
+      <text x="834" y="284" class="mu" text-anchor="middle" style="font-size:12px">weights are illustrative</text>
+    </svg>
+  </figure>
+  <figcaption><b>Figure 3.</b> One experience learned: (1) the chart of every composite; (2) each weighed by both trees, with posteriors from inside and outside probabilities; (3) every composite stored in both trees with its posterior as weight (dropped below 0.001).</figcaption>
+  <div class="note">How a posterior concentrates as memory grows (<code>med</code> grammar): the analysis finally kept carries 40% of an experience's mass after 40 experiences, 58% after 80, and 65% after 320. Early experiences are stored thinly and are never revisited.</div>
+  <h2>How this extends v1</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th></th><th>TRELLIS v1</th><th>TRELLIS v2</th></tr></thead>
+    <tbody>
+      <tr><th>Chunking</th><td>Greedy, one recognized pair at a time</td><td>Inside-outside over every span and split</td></tr>
+      <tr><th>Commitment</th><td>Commits to the chunks it recognizes</td><td>Stores every composite, weighted by posterior</td></tr>
+      <tr><th>Donation between trees</th><td>From one tree to the other</td><td>Both ways</td></tr>
+      <tr><th>Stale descriptions</th><td>Leaf remap</td><td>The same relabel, plus moving misplaced records where memory is used</td></tr>
+    </tbody>
+  </table></div>
+  <div class="col"><p>Inside-outside is not what drives the generation gains. A beam of 4 analyses matches it on stories at about half the learning time (0.127 against 0.121), and greedy search loses only 0.01–0.04. On characters, beam 4 costs 1.5–2.5 bits. So far its measured advantage is on characters (<a href="#s-sem">story rounds</a>).</p></div>
+</section>
+
+<!-- ============================================================ A10 SCOREBOARD -->
+<section class="page" data-page="status" hidden>
+  <p class="eyebrow">Appendix A10</p>
+  <h1>Memory scoreboard</h1>
+  <p class="lede">Numbers behind the claim that memory stays current online, measured with the configurations of 24–27 October. Repair on use keeps used memory under 1% misplaced at under twice the learning time.</p>
   <h2>Scoreboard</h2>
   <p>Temporal currency on TinyStories, 2,000 sentences, seeds 13 / 17. "Own weight" sorts each record's stored description at the weight it was placed with. The grammar guard asks for grammaticality within 2 points of the original and more grammatical-and-new samples on <code>med</code> and <code>large</code>, seeds 13 and 17, at 320 experiences.</p>
   <div class="tbl-wrap"><table class="tbl">
@@ -443,68 +976,11 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     </tbody>
   </table></div>
 
-  <h2>Findings that have held up</h2>
-  <h3>1. The trees alone generate grammatical, new sentences</h3>
-  <p>Drawing each part from the context leaf where it stood gives 99.7–100% grammatical samples on four grammars, and novelty rises as leaves collect more committed instances (<a href="#curves">R1</a>). No records or pointers are read.</p>
-  <h3>2. Verify 700 meets the temporal target</h3>
-  <p>Most of the reported content misplacement was a mismatch of weights: the check sorted records at weight 1 while learning had placed them at their posterior weight. The rest is real drift, and moving records repairs it. At 700 checks per experience, context misplacement is 0.5% and content 2.6–2.9% of stored weight. Generation on TinyStories rises (attested and novel 0.29 / 0.28 against 0.22 / 0.23), and so does word-category accuracy (0.53 / 0.55 against 0.46 / 0.50).</p>
-  <h3>3. Repair on use meets the temporal target</h3>
-  <p>Re-sorting stale records where the trees are used, with no background sweep, keeps used context and content under 1% misplaced at 1,000 and 2,000 sentences on both seeds, at 1.8–2.1 times the original learning time (timed without measurement). The used context misplacement seen earlier (about 8.5%) was the weight mismatch again: low-weight chunks were judged at weight 1. Path repair passes the grammar guard on all four runs and holds characters on the five-seed mean.</p>
-  <h3>3b. Mixed names make words interdependent</h3>
-  <p>A word's name mixes its own parent concept with its neighbours' names (<code>name_mix_k</code> 4). Under path repair, mixing raises word-category accuracy at every checkpoint (0.46 / 0.42 against 0.29 / 0.25 after 50 sentences), and grammaticality stays within 1 point of the original. Grammatical and novel samples move with the seed (+3.4 points on s13, −5.5 on s17), a mean change within noise.</p>
-  <h3>4. Parses are consistent without gold</h3>
-  <p>Two seeds agree on 0.90 of brackets at 2,000 sentences, and a parse barely changes when a word is replaced by a similar one (<a href="#s-consist">S2</a>).</p>
-  <h3>5. Gap filling answers prompts</h3>
-  <p>Drawing the filler by its posterior of standing in the gap's surroundings gives attested trigrams after short prefixes (0.84–0.86) and the right answer type on bAbI at 3,000 sentences (0.60–0.63 against 0.23–0.26 without the gap posterior; 0.72–0.73 when the story is in memory, exact 0.26) (<a href="#s-prompt">S1</a>, <a href="#s-babi">S4</a>).</p>
-  <h3>6. Recognition by context explains expert recall</h3>
-  <p>Chess chunks recognised by content and context give experts better recall of real positions than of scrambled ones. Recognition by content alone gives almost no advantage (0.74 against 0.63) (<a href="#s-chess">S6</a>).</p>
-  <h3>7. Reading each word from the whole sentence raises grammar without trading novelty</h3>
-  <p>Every setting of the chart (cut, back-off, critics, re-fill) traded novelty for grammar. Filling each word from the chart's posterior given the words already placed, times Cobweb's prediction from its neighbours, is the first change that is not a trade: 0.159 → 0.176 acceptable new per generation over four seeds, and with it the grammar's grain no longer needs a cut (the whole tree, 0.186). Neither half works alone (<a href="#s-sem">S7</a>).</p>
-  <h3>8. Likelihood cannot set the topic weight</h3>
-  <p>On held-out story pairs every form of the previous-sentence lift is best at weight 0: a sentence's probability is almost all grammar. The same lift raises cross share from 0.05 to 0.29, so the topic needs its own yardstick (<a href="#s-sem">S7</a>).</p>
-
-  <h2>Running now</h2>
-  <div class="tbl-wrap"><table class="tbl">
-    <thead><tr><th>Run</th><th>Question</th></tr></thead>
-    <tbody>
-      <tr><th>Chess state compression (next)</th><td>Under one search and value head, does TRELLIS compress chess states better than other representation learners?</td></tr>
-      <tr><th>Story generation (paused for review)</th><td>Next candidates: back-off λ on the whole tree (round 93, cancelled before results); a criterion for the topic weight that weighs the topic itself</td></tr>
-    </tbody>
-  </table></div>
-
-  <h2>Open questions</h2>
-  <ol>
-    <li><b>How should infill fit both sides?</b> A gap fill satisfies each side's window separately: "the * the tree" becomes "the man the tree".</li>
-    <li><b>How can chunk context enter without memorisation?</b> Neighbouring chunks' content helps one-word prefixes and fails the novelty guard.</li>
-    <li><b>Why does the content tree add no gain on held-out composites?</b> Their sorting paths end 2–4 levels down, where Cobweb opens a new branch.</li>
-    <li><b>What should set the topic weight?</b> The chart conditioned on the previous sentence makes new, on-topic sentences with better grammar than before, but its weight β 2 is set by hand, and whole-sentence likelihood always picks 0 (<a href="#s-sem">S7</a>).</li>
-    <li><b>Can answers come by analogy?</b> Story-conditioned answering needs the question's chunks aligned with the story sentence that shares its entity and role.</li>
-    <li><b>Does TRELLIS compress chess states better than other representation learners?</b> The next study puts each representation under the same search and value head (<a href="#s-chess">S6</a>).</li>
-  </ol>
-</section>
-
-<!-- ============================================================ PRINCIPLES -->
-<section class="page" data-page="principles" hidden>
-  <p class="eyebrow">Section 1</p>
-  <h1>What the system holds to</h1>
-  <p class="lede">Ten principles constrain every change. None of them mentions words: sentences are the first domain, and characters, bAbI stories and chess positions run on the same code.</p>
-  <div class="principles">
-    <div><b>Two descriptions of every element</b><p>Where it occurs (context) and what it is made of (content), each organized by Cobweb into its own hierarchy. Categories are concepts of the context tree; chunk types are concepts of the content tree.</p><span class="ev">From v1</span></div>
-    <div><b>Each hierarchy describes in the other's terms</b><p>A chunk's parts are named by their context concepts. An element's context description carries its own content concept. Donation runs both ways, so each tree sorts by what the other has learned.</p><span class="ev">v1, made two-way in v2</span></div>
-    <div><b>The grammar stays implicit</b><p>No rules are read off the trees. Parsing and generation read the trees directly, so the grammar is whatever the two hierarchies currently hold and changes as they do.</p><span class="ev">v2</span></div>
-    <div><b>Evidence decides chunks</b><p>Every candidate chunk is stored, weighted by its share of the inside-outside posterior. Chunks that keep recurring collect weight and concepts; the rest fade into the mass of their concepts. It is a competitive frontier with no threshold.</p><span class="ev">v2</span></div>
-    <div><b>Learning never stops</b><p>Each experience is learned once, as it arrives. There is no night, no batch rebuild and no re-parse of older experiences. Old memories stay current by relabelling in place, and records that no longer sort where they sit are moved.</p><span class="ev">Hard rule since 14 October</span></div>
-    <div><b>Report the expected-best analysis</b><p>Memory stores every analysis weighted by its posterior. It reports, and commits to for generation, the analysis with the most expected correct chunks (minimum Bayes risk over span posteriors).</p><span class="ev">Kept after a regeneration readout was tested, 18 October</span></div>
-    <div><b>Generate from the trees alone</b><p>Sample a whole experience and expand it top-down. Each part draws where it stood, then a committed instance from the concept there, in proportion to the counts. Generation reads no records or pointers and never predicts a word from the words before it.</p><span class="ev">Since 23 October</span></div>
-    <div><b>Unsupervised throughout</b><p>Every mechanism sees only raw tokens. The generating grammar and gold trees enter only to score, never to teach a probe, choose a category or tune a factor.</p><span class="ev">Since 21 October</span></div>
-    <div><b>Judged by what it generates</b><p>A change is kept when the system reproduces more grammatical, new sentences or holds a more compressible grammar. Gold brackets are a side check.</p><span class="ev">Since 19 October</span></div>
-    <div><b>Mechanisms are domain-general</b><p>Linguistic knowledge enters only as an oracle that diagnoses and scores. Every change is checked on more than one domain.</p><span class="ev">Since 9 October</span></div>
-  </div>
 </section>
 
 <!-- ============================================================ REPRESENTATION -->
 <section class="page" data-page="representation" hidden>
-  <p class="eyebrow">Section 2</p>
+  <p class="eyebrow">Appendix A12: configuration of 23 October</p>
   <h1>Two instances for every element</h1>
   <p class="lede">Every word or chunk is described by where it occurs, in the context tree, and by what it is made of, in the content tree. Each tree describes elements in the other's terms.</p>
   <div class="col">
@@ -608,15 +1084,43 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     </svg>
   </figure>
   <figcaption><b>Figure 2.</b> Each tree describes elements in the other's terms. Coloured nodes mark the path a description names; grey nodes are other concepts; white nodes are leaves.</figcaption>
-  <div class="note"><div class="note-head">Current naming</div><p>Since 24 October a word is named by the parent concepts of 32 sampled instances, mixed at readout with the names of the words beside it (weight n/(n+4) on its own name); a word is named the same way when it is a chunk's part (coarse band names, <code>part_names</code>, were tried in rounds 48–50 and are off in the S7 runs; values in <a href="#instances">2a</a>). The option <code>neighbour_chunks</code> adds the content concepts of the same-width neighbouring chunks as <code>lc</code>/<code>rc</code> to the context instance; it fails the novelty guard and is off by default (<a href="#s-prompt">S1</a>).</p></div>
+  <div class="note"><div class="note-head">Current naming</div><p>Since 24 October a word is named by the parent concepts of 32 sampled instances, mixed at readout with the names of the words beside it (weight n/(n+4) on its own name); a word is named the same way when it is a chunk's part (coarse band names, <code>part_names</code>, were tried in rounds 48–50 and are off in the S7 runs; values in <a href="#representations">2a</a>). The option <code>neighbour_chunks</code> adds the content concepts of the same-width neighbouring chunks as <code>lc</code>/<code>rc</code> to the context instance; it fails the novelty guard and is off by default (<a href="#s-prompt">prompted generation</a>).</p></div>
 </section>
 
-<!-- ============================================================ INSTANCES -->
-<section class="page" data-page="instances" hidden>
-  <p class="eyebrow">Section 2a</p>
-  <h1>Instances and concepts, exactly</h1>
-  <p class="lede">Every value on this page was read from a learned memory: the configuration of the S7 rounds (1,000 story sentences, seed 13), with the sentence "the dog ran to get it" re-parsed after learning. It followed "the cat said go get that ball" in its story.</p>
-
+<!-- ============================================================ REPRESENTATIONS -->
+<section class="page" data-page="representations" hidden>
+  <p class="eyebrow">How it works</p>
+  <h1>Representations</h1>
+  <p class="lede">An instance is a set of attribute values. A word has one instance and a composite has two. This page gives each attribute, how it is calculated, and why it is there.</p>
+  <h2>Why these instances</h2>
+  <div class="col">
+    <p>The aim is a description that lets Cobweb find useful generalizations with no labels, in any domain. Each choice follows from that.</p>
+    <ul>
+      <li><b>An element is two things: where it stands and what it is made of.</b> These are the two sources of similarity available without labels. Things that occur in the same places can substitute for one another. Things built the same way can do the same work. Neither implies the other, so each gets its own description. Whether they need separate trees is tested in <a href="#a-unified">Appendix A1</a>.</li>
+      <li><b>Parts are named by concepts, not tokens.</b> If "the dog" were stored as two tokens, it would share nothing with "a cat". Named by where each part stands, the two share values. Generalization starts from the description, not after it.</li>
+      <li><b>A name describes a type, not one occurrence.</b> A word's name samples everywhere it has stood, so its meaning is not hostage to one sentence, and it can be read fresh whenever needed. So names stay current as the tree changes.</li>
+      <li><b>Rare words borrow from their neighbours.</b> A word seen a few times has little evidence of its own, so it leans on the names of the words around it, then weans off as n grows. Representations are interdependent and change over time, as word meanings do.</li>
+      <li><b>The window stays raw.</b> Raw tokens are the one description that never drifts, and they anchor the rest against the circularity of names defined by names.</li>
+      <li><b>Paths are named by information, not depth.</b> Trees grow unevenly, so a concept at depth 4 may be general in one branch and specific in another. A band picks concepts by −log₂ of their share of the tree, so a name's grain means the same thing everywhere.</li>
+      <li><b>Context comes from the same level or below.</b> A chunk may be described by what stands beside it and what it holds, never by a parent not yet built. So an instance can always be computed bottom-up from what is known, as an experience arrives.</li>
+      <li><b>Evidence is carried by weight.</b> A composite enters at its posterior, so doubt is stored as doubt, with no threshold to tune.</li>
+    </ul>
+  </div>
+  <h2>How each value is calculated</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Quantity</th><th>Calculation</th></tr></thead>
+    <tbody>
+      <tr><th>Type sample</th><td>A weighted reservoir (A-Res) of up to 32 records for each type: key u<sup>1/weight</sup>, the largest keys kept. A word's type is its token, and a chunk's is its content leaf. Records are kept, not leaves, so a sample follows a record that moves</td></tr>
+      <tr><th>Type name</th><td>The parent concept of each sampled record's current context leaf, as a bag whose weights sum to 1</td></tr>
+      <tr><th>Mixed name (words)</th><td>a × own name + (1 − a) × the neighbours' names, tagged <code>L&gt;</code> or <code>R&gt;</code> by side, with a = n / (n + 4) and n the word's count</td></tr>
+      <tr><th>Bands (content paths)</th><td>Walk from the root down, leaving out the root and own leaf. A concept is written once for each of 1, 2, 4, 6, 8, 12 bits that its −log₂(share) first passes</td></tr>
+      <tr><th>Bag</th><td>One attribute whose value is a weighted set of ids summing to 1. A concept adds weight × share to each id's count, so a facet counts once in category utility however many ids it holds</td></tr>
+      <tr><th><code>pv</code></th><td>The previous sentence's tokens, each 1/n; blank when no kept sentence came just before</td></tr>
+      <tr><th><code>lc</code>, <code>rc</code></th><td>The content name (<code>cc</code>) of the best analysis of the same-width span on each side, blank at an edge. For a word, that is the neighbouring word</td></tr>
+    </tbody>
+  </table></div>
+  <h2>Exactly what is stored, on a real example</h2>
+  <p class="small">Values below were read from a learned memory (1,000 story sentences, seed 13), with the sentence "the dog ran to get it" re-parsed after learning. It followed "the cat said go get that ball" in its story. This dump predates the fixes of rounds 75–79 (<a href="#a-fixes">Appendix A11</a>), so it shows no <code>lc</code> or <code>rc</code>, which current runs have, and its concept ids differ from a current memory's.</p>
   <h2>What is stored, and in which order</h2>
   <div class="col">
     <p>Each experience is parsed first. Memory's analysis here is <code>[[[the dog] ran] [to [get it]]]</code>. Inside-outside gives every span and split of the sentence a posterior. Then the elements are stored, in this order:</p>
@@ -681,13 +1185,20 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     <p class="reads">The context concept holds a substitution class (cat / dog after "the", before a verb and "to"). The content concept holds sentences whose left part is a pronoun-like word and whose right part is a verb phrase; its passives are what generation reads.</p>
   </div>
 
+</section>
+
+<!-- ============================================================ A11 FIXES -->
+<section class="page" data-page="a-fixes" hidden>
+  <p class="eyebrow">Appendix A11</p>
+  <h1>Representation fixes</h1>
+  <p class="lede">What a dump of real memory showed was wrong in late October, and the fixes of rounds 75–79, now part of the configuration.</p>
   <h2>What the dump shows that is wrong</h2>
   <div class="col">
     <ul>
       <li><b>The content tree is flat where it matters most.</b> Every two-word chunk has <code>LC = RC = -</code>, so it differs from the others only by its parts' type names. They all sit as leaves directly under one concept: c111 (1.4 bits) holds 4,306 leaves and no intermediate concepts, and "the dog" and "get it" both name their content <code>{c111}</code>. At depth 2, where chart generation reads its rules, each such chunk is its own leaf, and its rules back off straight to c111, the class of every two-word chunk.</li>
       <li><b>Part names are partly blank.</b> "the dog" names itself <code>{-: 1}</code> as a part, and 18% of the name of "the" is <code>-</code>. A type name reads <code>-</code> for a sampled context leaf that no longer hangs in the tree. Counted over every type in this memory, <b>16,858 of 33,960 sampled leaves (50%) are detached</b>, so half of all name mass is blank. The reservoirs keep leaf objects and are not updated when the tree drops a leaf; which operation drops them (repair moves or restructuring) is not yet traced.</li>
     </ul>
-    <p>Both bear on the grammar of chart generation (S7): rules over a flat concept with blank part names cannot tell a good split from a bad one.</p>
+    <p>Both bear on the grammar of inside-outside generation (<a href="#s-sem">story rounds</a>): rules over a flat concept with blank part names cannot tell a good split from a bad one.</p>
   </div>
 
   <h2>Fixes (rounds 75–79)</h2>
@@ -707,77 +1218,9 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
   </div>
 </section>
 
-<!-- ============================================================ LEARNING -->
-<section class="page" data-page="learning" hidden>
-  <p class="eyebrow">Section 3</p>
-  <h1>Inside-outside in place of greedy chunking</h1>
-  <p class="lede">For each new experience, inside-outside weighs every composite by both trees, and every composite is stored with its posterior as weight. Chunks are the concepts that keep winning that mass.</p>
-  <div class="col">
-    <p>v1 committed chunks greedily, one recognized pair at a time. v2 replaces that step with inside-outside. For a new experience it builds a chart of every composite (every span, every split point). Each composite gets a factor from how much better the concepts it sorts to describe it than the root does, in both trees. Inside-outside turns these factors into a posterior for every composite.</p>
-    <p>Then every composite is stored, in both trees, with its posterior as its weight (Figure 3). Only composites with a posterior under 0.001 are dropped. A chunk that recurs collects weight under concepts that recur with it, and a chunk the evidence does not support adds a sliver of weight that the trees absorb. Over time this is a competitive frontier: the candidates compete for each experience's posterior mass, and the concepts that win are the chunks. Since 24 October a stored record restructures the tree (merges and splits) with probability equal to its weight, so low-weight spans no longer build long merge ladders.</p>
-  </div>
-  <figure class="fig">
-    <svg class="dg" viewBox="0 0 1000 300" role="img" aria-label="Learning in three steps. 1: a chart of every composite over the five words. 2: inside-outside gives each composite a posterior from factors read off both trees. 3: every composite is stored in both trees with its posterior as weight; recurring chunks collect weight.">
-      <defs><marker id="m3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mink"/></marker></defs>
-      <rect x="6" y="6" width="320" height="288" rx="6" class="panel"/><rect x="12" y="12" width="308" height="30" rx="4" class="phead"/>
-      <circle cx="29" cy="27" r="10" class="pnum"/><text x="29" y="32" class="sf b" text-anchor="middle" style="font-size:14px">1</text><text x="46" y="32" class="sf b inv" style="font-size:14.5px">Every composite</text>
-      <rect x="340" y="6" width="320" height="288" rx="6" class="panel"/><rect x="346" y="12" width="308" height="30" rx="4" class="phead"/>
-      <circle cx="363" cy="27" r="10" class="pnum"/><text x="363" y="32" class="sf b" text-anchor="middle" style="font-size:14px">2</text><text x="380" y="32" class="sf b inv" style="font-size:14.5px">Weigh by both trees</text>
-      <rect x="674" y="6" width="320" height="288" rx="6" class="panel"/><rect x="680" y="12" width="308" height="30" rx="4" class="phead"/>
-      <circle cx="697" cy="27" r="10" class="pnum"/><text x="697" y="32" class="sf b" text-anchor="middle" style="font-size:14px">3</text><text x="714" y="32" class="sf b inv" style="font-size:14.5px">Store all, by posterior</text>
-      <polygon points="328,142 339,150 328,158" class="mink"/><polygon points="662,142 673,150 662,158" class="mink"/>
-      <g>
-        <line x1="79" y1="215" x2="50" y2="236" class="dot"/><line x1="79" y1="215" x2="108" y2="236" class="dot"/>
-        <line x1="137" y1="215" x2="108" y2="236" class="dot"/><line x1="137" y1="215" x2="166" y2="236" class="dot"/>
-        <line x1="195" y1="215" x2="166" y2="236" class="dot"/><line x1="195" y1="215" x2="224" y2="236" class="dot"/>
-        <line x1="253" y1="215" x2="224" y2="236" class="dot"/><line x1="253" y1="215" x2="282" y2="236" class="dot"/>
-        <line x1="108" y1="175" x2="79" y2="193" class="dot"/><line x1="108" y1="175" x2="137" y2="193" class="dot"/>
-        <line x1="166" y1="175" x2="137" y2="193" class="dot"/><line x1="166" y1="175" x2="195" y2="193" class="dot"/>
-        <line x1="224" y1="175" x2="195" y2="193" class="dot"/><line x1="224" y1="175" x2="253" y2="193" class="dot"/>
-        <line x1="137" y1="135" x2="108" y2="153" class="dot"/><line x1="137" y1="135" x2="166" y2="153" class="dot"/>
-        <line x1="195" y1="135" x2="166" y2="153" class="dot"/><line x1="195" y1="135" x2="224" y2="153" class="dot"/>
-        <line x1="166" y1="95" x2="137" y2="113" class="dot"/><line x1="166" y1="95" x2="195" y2="113" class="dot"/>
-        <circle cx="79" cy="204" r="11" class="cd"/><circle cx="137" cy="204" r="11" class="cd"/><circle cx="195" cy="204" r="11" class="cd"/><circle cx="253" cy="204" r="11" class="cd"/>
-        <circle cx="108" cy="164" r="11" class="cd"/><circle cx="166" cy="164" r="11" class="cd"/><circle cx="224" cy="164" r="11" class="cd"/>
-        <circle cx="137" cy="124" r="11" class="cd"/><circle cx="195" cy="124" r="11" class="cd"/><circle cx="166" cy="84" r="11" class="cd"/>
-      </g>
-      <rect x="24" y="237" width="52" height="30" rx="4" class="w"/><text x="50" y="257" class="sf dk" text-anchor="middle" style="font-size:17px">the</text>
-      <rect x="82" y="237" width="52" height="30" rx="4" class="w"/><text x="108" y="257" class="sf dk" text-anchor="middle" style="font-size:17px">cat</text>
-      <rect x="140" y="237" width="52" height="30" rx="4" class="w"/><text x="166" y="257" class="sf dk" text-anchor="middle" style="font-size:17px">saw</text>
-      <rect x="198" y="237" width="52" height="30" rx="4" class="w"/><text x="224" y="257" class="sf dk" text-anchor="middle" style="font-size:17px">a</text>
-      <rect x="256" y="237" width="52" height="30" rx="4" class="w"/><text x="282" y="257" class="sf dk" text-anchor="middle" style="font-size:17px">dog</text>
-      <text x="166" y="284" class="mu" text-anchor="middle" style="font-size:12px">every span, every split</text>
-
-      <rect x="360" y="60" width="280" height="44" rx="4" class="bctx"/>
-      <text x="500" y="78" class="tctx b" text-anchor="middle" style="font-size:13px">context tree: how well a concept</text>
-      <text x="500" y="95" class="tctx" text-anchor="middle" style="font-size:12.5px">describes the span's surroundings</text>
-      <rect x="360" y="114" width="280" height="44" rx="4" class="bcnt"/>
-      <text x="500" y="132" class="tcnt b" text-anchor="middle" style="font-size:13px">content tree: how well a concept</text>
-      <text x="500" y="149" class="tcnt" text-anchor="middle" style="font-size:12.5px">describes the span's two parts</text>
-      <rect x="360" y="176" width="280" height="50" rx="4" class="bcand"/>
-      <text x="500" y="197" class="mo" text-anchor="middle" style="font-size:12px">posterior = inside × outside / Z</text>
-      <text x="500" y="216" class="tcand" text-anchor="middle" style="font-size:12.5px">every composite keeps its share</text>
-      <text x="500" y="262" class="mu" text-anchor="middle" style="font-size:12.5px">only posteriors under 0.001 are dropped</text>
-
-      <text x="700" y="70" class="mo mu">stored weight</text>
-      <rect x="700" y="80" width="150" height="14" rx="2" class="bar"/><text x="858" y="91" class="mo">[the cat] .82</text>
-      <rect x="700" y="100" width="128" height="14" rx="2" class="bar"/><text x="836" y="111" class="mo">[a dog] .71</text>
-      <rect x="700" y="120" width="104" height="14" rx="2" class="bar"/><text x="812" y="131" class="mo">[saw [a dog]] .57</text>
-      <rect x="700" y="140" width="30" height="14" rx="2" class="bar"/><text x="738" y="151" class="mo">[cat saw] .16</text>
-      <rect x="700" y="160" width="9" height="14" rx="2" class="bar"/><text x="717" y="171" class="mo">[saw a] .05</text>
-      <text x="700" y="206" class="mu" style="font-size:12.5px">all go into both trees; chunks</text>
-      <text x="700" y="223" class="mu" style="font-size:12.5px">that recur collect weight and</text>
-      <text x="700" y="240" class="mu" style="font-size:12.5px">become concepts</text>
-      <text x="834" y="284" class="mu" text-anchor="middle" style="font-size:12px">weights are illustrative</text>
-    </svg>
-  </figure>
-  <figcaption><b>Figure 3.</b> One experience learned: (1) the chart of every composite; (2) each weighed by both trees, with posteriors from inside and outside probabilities; (3) every composite stored in both trees with its posterior as weight (dropped below 0.001).</figcaption>
-  <div class="note">How a posterior concentrates as memory grows (<code>med</code> grammar): the analysis finally kept carries 40% of an experience's mass after 40 experiences, 58% after 80, and 65% after 320. Early experiences are stored thinly and are never revisited.</div>
-</section>
-
 <!-- ============================================================ SUSTAIN -->
 <section class="page" data-page="sustain" hidden>
-  <p class="eyebrow">Section 4</p>
+  <p class="eyebrow">Appendix A9</p>
   <h1>Memory that stays current without rebuilds</h1>
   <p class="lede">Stored descriptions name concepts, and Cobweb keeps restructuring. Descriptions are updated in place; records that no longer sort where they sit are moved, either by a fixed check budget or where memory is used.</p>
   <div class="col">
@@ -869,47 +1312,11 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
   <p class="small">Update on read is kept as an option for exact descriptions. Name churn changes what a record should sit with, so records must still be moved, and moving them is what costs time.</p>
 </section>
 
-<!-- ============================================================ PARSE -->
-<section class="page" data-page="parse" hidden>
-  <p class="eyebrow">Section 5</p>
-  <h1>Parsing, step by step</h1>
-  <p class="lede">Parsing runs the learning procedure without storing anything. Choose a held-out sentence and follow its three steps. Every number is read from the trees. Pick the grammar in the bar above.</p>
-  <div class="lay c12">
-    <div class="card">
-      <h4>Sentence</h4>
-      <div class="rows" id="psents" style="margin-top:8px"></div>
-      <h4 style="margin-top:14px">Leading composites</h4>
-      <p class="hint">By posterior. Click one to score it in step 2.</p>
-      <div class="scrolly h300"><div class="rows" id="comps"></div></div>
-    </div>
-    <div class="card">
-      <h4><span class="n">1</span>Weigh every span at once</h4>
-      <p class="hint">Inside-outside builds a chart of every composite (every span and split). Each composite gets a factor 2<sup>gain/τ</sup> from both trees. Each cell is a span's posterior: the probability, summed over splits, that it is a chunk. Darker means more mass. Click a cell to score its leading composite.</p>
-      <div class="body h360" id="spanchart"></div>
-    </div>
-  </div>
-  <div class="card" style="margin-top:14px">
-    <h4><span class="n">2</span>Score the composite by climbing both trees</h4>
-    <p class="hint">The composite's two instances are sorted down each tree without storing anything. At every concept C on the path, <b>gain = log2 share(C) + fit</b>, where fit = log2 P(x|C) − log2 P(x|root). Strength falls with depth; fit rises. The composite's gain is the best concept in each tree, summed over the two trees. Bits (y) by depth from the root (x); hover for values.</p>
-    <div class="legend"><span style="--c:var(--s1)">gain</span><span style="--c:var(--s2)">log2 share</span><span style="--c:var(--s3)">fit</span></div>
-    <div class="lay c2" style="margin-top:4px">
-      <div class="body h260" id="gainctx" style="margin-top:0"></div>
-      <div class="body h260" id="gaincnt" style="margin-top:0"></div>
-    </div>
-    <p class="hint" id="gainnote" style="margin-top:10px"></p>
-  </div>
-  <div class="card" style="margin-top:14px">
-    <h4><span class="n">3</span>Commit to the expected-best analysis</h4>
-    <p class="hint" id="tnote"></p>
-    <div class="wide"><div class="body h360" id="tboth"></div></div>
-  </div>
-</section>
-
 <!-- ============================================================ GENERATE -->
 <section class="page" data-page="generate" hidden>
-  <p class="eyebrow">Section 6</p>
+  <p class="eyebrow">Appendix A3: the earlier generator</p>
   <h1>Generation, step by step</h1>
-  <p class="lede">Unprompted generation samples a whole experience from the content root and expands it part by part. Prompted generation fills a gap in a given sentence (<a href="#s-prompt">S1</a>).</p>
+  <p class="lede">Unprompted generation samples a whole experience from the content root and expands it part by part. Prompted generation fills a gap in a given sentence (<a href="#s-prompt">prompted generation</a>).</p>
   <div class="col">
     <p>Learning keeps three passive statistics on concepts. They are summed up each tree and never used for sorting:</p>
     <ul>
@@ -976,7 +1383,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
 
 <!-- ============================================================ TYPES -->
 <section class="page" data-page="types" hidden>
-  <p class="eyebrow">Section 7</p>
+  <p class="eyebrow">Appendix A4</p>
   <h1>Naming a part by where its type has stood</h1>
   <p class="lede">A content instance names its parts in context-tree terms. A type name is re-read from the tree each time it is used, so it never goes stale.</p>
   <div class="col">
@@ -1005,7 +1412,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
 
 <!-- ============================================================ RULES -->
 <section class="page" data-page="rules" hidden>
-  <p class="eyebrow">Section 8</p>
+  <p class="eyebrow">Appendix A5</p>
   <h1>Which concept should a part draw from?</h1>
   <p class="lede">Each rule decides how far a part climbs from its leaf before drawing an instance. The leaf stays the default.</p>
   <div class="col">
@@ -1021,7 +1428,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
 
 <!-- ============================================================ S1 PROMPT -->
 <section class="page" data-page="s-prompt" hidden>
-  <p class="eyebrow">Study S1</p>
+  <p class="eyebrow">Appendix A6</p>
   <h1>Prompted generation</h1>
   <p class="lede">Given part of a sentence, memory generates only the missing piece. The filler is a committed instance drawn by its posterior of standing in the gap's surroundings, then expanded if it is a chunk.</p>
   <div class="col">
@@ -1070,7 +1477,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
       <rect x="814" y="104" width="52" height="30" rx="4" class="w"/><text x="840" y="124" class="sf dk" text-anchor="middle" style="font-size:16px">and</text>
       <rect x="872" y="104" width="60" height="30" rx="4" class="w"/><text x="902" y="124" class="sf dk" text-anchor="middle" style="font-size:15px">laughed</text>
       <text x="690" y="176" class="mu" style="font-size:12.5px">a drawn chunk is expanded top-down,</text>
-      <text x="690" y="193" class="mu" style="font-size:12.5px">each part from its own leaf (Section 6)</text>
+      <text x="690" y="193" class="mu" style="font-size:12.5px">each part from its own leaf (Appendix A3)</text>
       <text x="690" y="230" class="mu" style="font-size:12.5px">each side is fitted by its own window:</text>
       <text x="690" y="247" class="mu" style="font-size:12.5px">the source of infill errors such as</text>
       <text x="690" y="264" class="mo tfoc">the * the tree → the man the tree</text>
@@ -1144,7 +1551,7 @@ they * day long      <span class="err">they knew they would day long</span> (all
 
 <!-- ============================================================ S2 CONSISTENCY -->
 <section class="page" data-page="s-consist" hidden>
-  <p class="eyebrow">Study S2</p>
+  <p class="eyebrow">Appendix A7</p>
   <h1>Parse consistency without gold</h1>
   <p class="lede">Without gold trees, a parser can still be judged by whether it agrees with itself: across seeds, across checkpoints, and when a word is replaced.</p>
   <div class="col">
@@ -1215,7 +1622,7 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
 
 <!-- ============================================================ S3 PROBE -->
 <section class="page" data-page="s-probe" hidden>
-  <p class="eyebrow">Study S3</p>
+  <p class="eyebrow">Appendix A8</p>
   <h1>Chunk representations</h1>
   <p class="lede">Do the chunk types memory forms group by phrase type? A 2-D map and a nearest-neighbour probe answer it for the 600 most frequent chunk types.</p>
   <div class="col">
@@ -1232,7 +1639,7 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
     <div class="fig"><img class="plot" src="chunks_tsne_v700_s13.png" alt="Two t-SNE maps of TRELLIS chunk types, seed 13. Left: content representation, purity 0.33 against 0.25 shuffled, with most types in one dense cluster. Right: context representation, purity 0.50 against 0.24, with separate groups for sentence-start chunks such as he was and she wanted, verb phrases such as was happy and played together, and noun phrases such as the park and every day." loading="lazy"></div>
   </figure>
   <figcaption><b>Figure 6.</b> t-SNE (cosine) of 600 chunk types, seed 13, coloured by NLTK phrase type. The context representation separates subject-verb starts, verb phrases and noun phrases; the content representation puts most types in one dense cluster.</figcaption>
-  <p>The context tree carries phrase type; the content tree carries it only weakly, consistent with the content tree adding no gain to the chunk factor (<a href="#f-known">F2</a>).</p>
+  <p>The context tree carries phrase type; the content tree carries it only weakly, consistent with the content tree adding no gain to the chunk factor (<a href="#f-known">known failures</a>).</p>
 
   <h2>Case studies</h2>
   <div class="case">
@@ -1250,13 +1657,13 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
 <div class="ex"><span class="p">the bird</span>         very happy · unexpected happened · they were · tim was · but then
 <span class="p">played together</span>  very happy · unexpected happened · they were · the bird · tim was
 <span class="p">was happy</span>        very happy · unexpected happened · they were · the bird · tim was</div>
-    <p class="reads">The same five frequent types answer every query: the dense cluster in Figure 6. This fits the content tree's missing gain (F2): content descriptions do not yet separate kinds of chunk.</p>
+    <p class="reads">The same five frequent types answer every query: the dense cluster in Figure 6. This fits the content tree's missing gain (<a href="#f-known">known failures</a>): content descriptions do not yet separate kinds of chunk.</p>
   </div>
 </section>
 
 <!-- ============================================================ S4 BABI -->
 <section class="page" data-page="s-babi" hidden>
-  <p class="eyebrow">Study S4</p>
+  <p class="eyebrow">Results</p>
   <h1>bAbI questions as gap filling</h1>
   <p class="lede">The question plus a question mark is the prompt, and the answer is the generated gap. Memory reaches the right kind of answer three times as often as a frequency baseline; exact answers need the story.</p>
   <div class="col">
@@ -1311,7 +1718,7 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
 
 <!-- ============================================================ S5 CHARACTERS -->
 <section class="page" data-page="s-chars" hidden>
-  <p class="eyebrow">Study S5</p>
+  <p class="eyebrow">Results</p>
   <h1>Chinese characters</h1>
   <p class="lede">The same code runs on character decompositions, with components in spatial relations. A character has only a few parts, so it is a hard test for any change that drops low-weight analyses.</p>
   <div class="col">
@@ -1343,20 +1750,20 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
 
   <h2>TRELLIS as a coder of characters</h2>
   <div class="col">
-    <p>Each coder learns the first n characters (IDS decompositions as token sequences) and codes 300 held-out characters; bits per character, the model not charged. TRELLIS codes a character by the probability its chart grammar (S7) gives the sequence, the same machinery it generates from. Seeds 13 / 17.</p>
+    <p>Each coder learns the first n characters (IDS decompositions as token sequences) and codes 300 held-out characters; bits per character, the model not charged. TRELLIS codes a character by the probability its grammar grammar (S7) gives the sequence, the same machinery it generates from. Seeds 13 / 17.</p>
     <table>
       <tr><th>Coder</th><th>500 learned</th><th>1,000</th><th>2,000</th></tr>
       <tr><td>Unigram</td><td class="num">45.6 / 46.6</td><td class="num">45.1 / 45.8</td><td class="num">44.7 / 45.5</td></tr>
       <tr><td>Trigram (Witten-Bell)</td><td class="num best">31.9 / 32.7</td><td class="num best">29.1 / 28.8</td><td class="num best">26.4 / 26.0</td></tr>
       <tr><td>BPE</td><td class="num">38.6 / 41.0</td><td class="num">33.7 / 33.5</td><td class="num">29.6 / 29.1</td></tr>
-      <tr><td>TRELLIS, before the fixes (best chart)</td><td class="num">38.9 / 40.3</td><td class="num">37.3 / 38.3</td><td class="num">35.4 / 36.7</td></tr>
-      <tr><td>TRELLIS, fixes, chart cut at depth 3</td><td class="num">38.7 / 39.4</td><td class="num">37.1 / 37.8</td><td class="num">35.4 / 36.0</td></tr>
-      <tr><td>TRELLIS, fixes, chart cut at 12 bits</td><td class="num">35.7 / 36.3</td><td class="num">32.5 / 32.4</td><td class="num">28.4 / 28.7</td></tr>
-      <tr><td>TRELLIS, fixes, chart cut at 16 bits</td><td class="num">33.5 / 33.8</td><td class="num">30.5 / 30.1</td><td class="num">27.9 / 27.8</td></tr>
+      <tr><td>TRELLIS, before the fixes (best grammar)</td><td class="num">38.9 / 40.3</td><td class="num">37.3 / 38.3</td><td class="num">35.4 / 36.7</td></tr>
+      <tr><td>TRELLIS, fixes, grammar cut at depth 3</td><td class="num">38.7 / 39.4</td><td class="num">37.1 / 37.8</td><td class="num">35.4 / 36.0</td></tr>
+      <tr><td>TRELLIS, fixes, grammar cut at 12 bits</td><td class="num">35.7 / 36.3</td><td class="num">32.5 / 32.4</td><td class="num">28.4 / 28.7</td></tr>
+      <tr><td>TRELLIS, fixes, grammar cut at 16 bits</td><td class="num">33.5 / 33.8</td><td class="num">30.5 / 30.1</td><td class="num">27.9 / 27.8</td></tr>
       <tr><td>TRELLIS, fixes, whole tree</td><td class="num">33.6 / 33.9</td><td class="num">30.5 / 30.2</td><td class="num">27.8 / 27.5</td></tr>
       <tr><td>TRELLIS, beam 4 learning, cut at 14 bits</td><td class="num">—</td><td class="num">—</td><td class="num">30.2 / 29.3</td></tr>
     </table>
-    <p>The representation fixes (page 2a) make the trees deep and narrow, so a chart cut at a fixed depth holds only 6–20 concepts. Cutting by information (every concept within a number of bits of the root) fixes that, and the finer the cut the better: 6 bits 37.0, 9 bits 32.8, 12 bits 28.4, 16 bits 27.9, the whole tree 27.8 at 2,000 (seed 13). With the whole tree TRELLIS beats BPE at every size by 1.6–5 bits and ends 1.4 / 1.5 bits behind the trigram. On characters the cut needs no setting: the whole tree is best. Learning with a beam of 4 (round 80) costs 1.5–2.5 bits here, at a quarter of the learning time.</p>
+    <p>The representation fixes (<a href="#a-fixes">Appendix A11</a>) make the trees deep and narrow, so a grammar cut at a fixed depth holds only 6–20 concepts. Cutting by information (every concept within a number of bits of the root) fixes that, and the finer the cut the better: 6 bits 37.0, 9 bits 32.8, 12 bits 28.4, 16 bits 27.9, the whole tree 27.8 at 2,000 (seed 13). With the whole tree TRELLIS beats BPE at every size by 1.6–5 bits and ends 1.4 / 1.5 bits behind the trigram. On characters the cut needs no setting: the whole tree is best. Learning with a beam of 4 (round 80) costs 1.5–2.5 bits here, at a quarter of the learning time.</p>
   </div>
 
   <h2>Case studies</h2>
@@ -1392,7 +1799,7 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
 
 <!-- ============================================================ S6 CHESS -->
 <section class="page" data-page="s-chess" hidden>
-  <p class="eyebrow">Study S6</p>
+  <p class="eyebrow">Results</p>
   <h1>Chess: Chase and Simon, figure for figure, and chunks that move</h1>
   <p class="lede">TRELLIS reproduces the shape of Chase and Simon's (1973) findings: more experience means more of a real board recalled, a small effect on random boards, big chunks first, and chunks held together by chess relations. It recalls too much too soon. As a compressor it beats co-occurrence chunks only where familiar shapes stand on new squares.</p>
 
@@ -1726,8 +2133,9 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
 
 <!-- ============================================================ S7 SEMANTIC GENERATION -->
 <section class="page" data-page="s-sem" hidden>
-  <p class="eyebrow">Study S7</p>
-  <h1>Semantic generation</h1>
+  <p class="eyebrow">Appendix A2</p>
+  <h1>Story rounds</h1>
+  <p class="small">The record of every story round, in order. Inside-outside generation is the method these rounds led to (<a href="#io-generation">Generation</a>); the current summary is in <a href="#r-stories">Results</a>. A later check found the window prediction never saw the previous sentence or chunks in any of these rounds; the numbers stand, as measured.</p>
   <p class="lede">The previous sentence, given as a frozen same-level chunk, makes the next sentence belong with it. A general concept directed by that sentence fits as well as copying a stored sentence and makes three to five times more new sentences, at a cost in grammar.</p>
   <p>The goal is text that holds together in meaning. General concepts keep their general knowledge and context directs them to a specific output, as a diffusion model's step is directed. Generation comes mostly from chunks around a slot and chunks below it that are already frozen; top-down conditioning stays optional. Gold part-of-speech tags and PMI score only.</p>
 
@@ -1828,19 +2236,19 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
   <p>The weakest-join critic is the best topic-held arm so far (9.5% on average, against 8.6%), keeping the critic's novelty while more of what is new is acceptable. The gain is under a point; every arm since round 63 lies between 6 and 10%.</p>
   <p>Round 69 learns 2,000 sentences in place of 1,000. The weakest-join critic gives 7.7 / 6.9% grammatical new sentences per generation with 4 candidates and 8.3 / 7.1% with 8 (s13 / s17), below its 1,000-sentence 8.9 / 10.0%. With more memory fewer outputs are new (21–25%), while about a third of the new ones are acceptable, as before. The other arms have not yet been run at 2,000 sentences.</p>
   <p>Round 70 checks each join while building: a filler is kept only if the pair of categories it makes with the word just generated stood together in memory (<code>join_check</code>, 1,000 sentences). Alone it gives 6.9 / 7.0% grammatical new sentences per generation; with the weakest-join critic of 4, 8.7 / 8.2%, below that critic alone (8.9 / 10.0%). The check trims novelty (about 20% new) more than it helps acceptability, so it stays off.</p>
-  <h3>Chart generation (rounds 71–73)</h3>
-  <p>Expansion fills a slot only with one stored chunk whose span fits it, so most outputs repeat memory (about 20% new). Chart generation reads memory as a grammar over concepts: a composite's content concept at depth 2 rewrites to the pairs of parts its stored members had, backed off up the content tree; each word slot is named by its context concept (depth 2 or 3) and emits the words stored there. An inside pass sums over every tree of the sentence, a tree is drawn top-down and kept, and each word is filled by Cobweb prediction from its neighbours among the words of its slot. Nothing is learned differently; the chart reads the same two trees.</p>
+  <h3>Inside-outside generation (rounds 71–73)</h3>
+  <p>Expansion fills a slot only with one stored chunk whose span fits it, so most outputs repeat memory (about 20% new). Inside-outside generation reads memory as a grammar over concepts: a composite's content concept at depth 2 rewrites to the pairs of parts its stored members had, backed off up the content tree; each word slot is named by its context concept (depth 2 or 3) and emits the words stored there. An inside pass sums over every tree of the sentence, a tree is drawn top-down and kept, and each word is filled by Cobweb prediction from its neighbours among the words of its slot. Nothing is learned differently; the grammar reads the same two trees.</p>
   <div class="tbl-wrap"><table class="tbl">
     <thead><tr><th>1,000 sentences (s13 / s17)</th><th class="num">Cross share</th><th class="num">New</th><th class="num">New judged acceptable</th><th class="num">Acceptable new per generation</th></tr></thead>
     <tbody>
       <tr><th>expansion, weakest-join critic (round 68)</th><td class="num best">0.27 / 0.44</td><td class="num">23% / 22%</td><td class="num best">0.38 / 0.46</td><td class="num">8.9 / 10.0%</td></tr>
-      <tr><th>chart, context depth 3 (round 71)</th><td class="num">−0.02 / 0.12</td><td class="num best">82% / 86%</td><td class="num">0.24 / 0.21</td><td class="num">19.4 / 18.3%</td></tr>
-      <tr><th>chart, context depth 2 (round 71)</th><td class="num">−0.02 / 0.13</td><td class="num">80% / 81%</td><td class="num">0.25 / 0.27</td><td class="num">20.3 / 21.8%</td></tr>
-      <tr><th>chart, depth 2, start follows the prompt (round 73)</th><td class="num">−0.05 / 0.10</td><td class="num">79% / 80%</td><td class="num">0.26 / 0.29</td><td class="num best">20.7 / 23.0%</td></tr>
+      <tr><th>grammar, context depth 3 (round 71)</th><td class="num">−0.02 / 0.12</td><td class="num best">82% / 86%</td><td class="num">0.24 / 0.21</td><td class="num">19.4 / 18.3%</td></tr>
+      <tr><th>grammar, context depth 2 (round 71)</th><td class="num">−0.02 / 0.13</td><td class="num">80% / 81%</td><td class="num">0.25 / 0.27</td><td class="num">20.3 / 21.8%</td></tr>
+      <tr><th>grammar, depth 2, start follows the prompt (round 73)</th><td class="num">−0.05 / 0.10</td><td class="num">79% / 80%</td><td class="num">0.26 / 0.29</td><td class="num best">20.7 / 23.0%</td></tr>
     </tbody>
   </table></div>
-  <p>The chart doubles the yield of acceptable new sentences (about 21% per generation against 9–10%) because four in five outputs are new, but fewer of the new ones are acceptable (0.21–0.29, against 0.38–0.46). It also loses the topic: cross share falls to about zero. Round 72 drew the chart's root from the concepts that followed sentences like the prompt (NEXT), using only the most specific level; the draws did not change. Round 73 backs off down the prompt's whole content path, one pseudo-count per level, as the story facet does elsewhere. The draws now change, but cross share stays near zero: the prompt picks only a depth-2 root, too general to carry a topic, and the rules below it ignore the prompt. For filling a gap inside a real sentence, expansion still wins (0.39 / 0.31 acceptable new per item against 0.27 / 0.23 for the chart). Round 74 keeps the likeliest split at each node of the tree in place of drawing one: 20.0 / 21.9% acceptable new per generation at depth 2 (new judged acceptable 0.26 / 0.29, cross share −0.10 / 0.20), the same as drawing. The grammar is not lost in the choice of tree; it is in the rules themselves. The open problems are the chart's grammar (a quarter of its new sentences are acceptable) and carrying the topic through the rules.</p>
-  <p>Rounds 75–79 fix two representation defects found in the dump on page 2a (blank part names, a flat content tree) and add surrounding chunks to the context. Expansion's yield of acceptable new sentences rises from 0.089 / 0.100 (round 68) to 0.161 / 0.152 at β 64, with 41% of outputs new; at β 1 the gain halves but holds (0.055 / 0.069 against 0.029 / 0.014 without it).</p>
+  <p>The grammar doubles the yield of acceptable new sentences (about 21% per generation against 9–10%) because four in five outputs are new, but fewer of the new ones are acceptable (0.21–0.29, against 0.38–0.46). It also loses the topic: cross share falls to about zero. Round 72 drew the grammar's root from the concepts that followed sentences like the prompt (NEXT), using only the most specific level; the draws did not change. Round 73 backs off down the prompt's whole content path, one pseudo-count per level, as the story facet does elsewhere. The draws now change, but cross share stays near zero: the prompt picks only a depth-2 root, too general to carry a topic, and the rules below it ignore the prompt. For filling a gap inside a real sentence, expansion still wins (0.39 / 0.31 acceptable new per item against 0.27 / 0.23 for the grammar). Round 74 keeps the likeliest split at each node of the tree in place of drawing one: 20.0 / 21.9% acceptable new per generation at depth 2 (new judged acceptable 0.26 / 0.29, cross share −0.10 / 0.20), the same as drawing. The grammar is not lost in the choice of tree; it is in the rules themselves. The open problems are the grammar's grammar (a quarter of its new sentences are acceptable) and carrying the topic through the rules.</p>
+  <p>Rounds 75–79 fix two representation defects found in the dump (<a href="#representations">Representations</a>) (blank part names, a flat content tree) and add surrounding chunks to the context. Expansion's yield of acceptable new sentences rises from 0.089 / 0.100 (round 68) to 0.161 / 0.152 at β 64, with 41% of outputs new; at β 1 the gain halves but holds (0.055 / 0.069 against 0.029 / 0.014 without it).</p>
   <h3>Beam search in place of inside-outside (round 80)</h3>
   <p>Learning analyses each sentence with a beam: analyses grow bottom-up, each step joins two neighbouring units into a chunk scored as in inside-outside, and each chunk's context is its neighbours on that analysis' frontier. The best B analyses survive; a chunk is stored with its share of the complete analyses that hold it. Width 1 is the greedy parse. Round 79's setting, 1,000 sentences, seeds 13 / 17; acceptable new sentences per generation:</p>
   <table>
@@ -1851,23 +2259,23 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
     <tr><td>Beam 16</td><td class="num">0.062 / 0.058</td><td class="num">0.106 / 0.100</td><td class="num">398 / 470 s</td></tr>
   </table>
   <p>Nothing is lost: beam 4 matches inside-outside (means 0.068 and 0.127 against 0.062 and 0.121) at about half the learning time, and even the greedy parse loses only 0.01–0.04. A wider beam is not better. The differences between beam 4, beam 16 and inside-outside are within the spread between seeds. On characters beam 4 costs 1.5–2.5 bits per character (S5).</p>
-  <h3>The chart conditioned on the prompt: y = G(x) (rounds 81–82)</h3>
-  <p>Round 81 cuts the chart by information (as on characters). At 12 bits it gives 0.146 / 0.144 acceptable new sentences per generation with 68% new; the whole tree only copies (3% new). Its cross share stays near zero (−0.06 / 0.12): the rules ignore the prompt.</p>
-  <p>Round 82 reads generation as a function of the prompt x through the generalizations that cover it. Each free position's symbol is a context concept G, so the chart weights it by how well G explains x: P(x | G) / P(x | root), the lift of the previous sentence at G with back-off along the path, raised to β / n for n free positions. The geometric mean counts x once per sentence, not once per word. Three earlier forms reweighted the stored rules instead: globally (the grammar lost its shape and repeated fragments), and within each parent (no change, since a parent's instances share one context). 1,000 sentences, seeds 13 / 17:</p>
+  <h3>The grammar conditioned on the prompt: y = G(x) (rounds 81–82)</h3>
+  <p>Round 81 cuts the grammar by information (as on characters). At 12 bits it gives 0.146 / 0.144 acceptable new sentences per generation with 68% new; the whole tree only copies (3% new). Its cross share stays near zero (−0.06 / 0.12): the rules ignore the prompt.</p>
+  <p>Round 82 reads generation as a function of the prompt x through the generalizations that cover it. Each free position's symbol is a context concept G, so the grammar weights it by how well G explains x: P(x | G) / P(x | root), the lift of the previous sentence at G with back-off along the path, raised to β / n for n free positions. The geometric mean counts x once per sentence, not once per word. Three earlier forms reweighted the stored rules instead: globally (the grammar lost its shape and repeated fragments), and within each parent (no change, since a parent's instances share one context). 1,000 sentences, seeds 13 / 17:</p>
   <table>
     <tr><th>Generator</th><th>Acceptable new per generation</th><th>New</th><th>Cross share</th></tr>
-    <tr><td>Chart, 12 bits, no topic (round 81)</td><td class="num">0.146 / 0.144</td><td class="num">68%</td><td class="num">−0.06 / 0.12</td></tr>
-    <tr><td>Chart, topic β 1</td><td class="num">0.146 / 0.135</td><td class="num">60 / 57%</td><td class="num">0.18 / 0.22</td></tr>
-    <tr><td>Chart, topic β 2</td><td class="num best">0.161 / 0.161</td><td class="num">60 / 61%</td><td class="num best">0.32 / 0.19</td></tr>
+    <tr><td>Grammar, 12 bits, no topic (round 81)</td><td class="num">0.146 / 0.144</td><td class="num">68%</td><td class="num">−0.06 / 0.12</td></tr>
+    <tr><td>Grammar, topic β 1</td><td class="num">0.146 / 0.135</td><td class="num">60 / 57%</td><td class="num">0.18 / 0.22</td></tr>
+    <tr><td>Grammar, topic β 2</td><td class="num best">0.161 / 0.161</td><td class="num">60 / 61%</td><td class="num best">0.32 / 0.19</td></tr>
     <tr><td>Expansion, β 64 (round 79)</td><td class="num">0.161 / 0.152</td><td class="num">41%</td><td class="num">≈ 0.3</td></tr>
   </table>
   <p>Seeds 19 / 23 (round 82b, the three arms together): no topic 0.151 / 0.133 acceptable new per generation with cross share 0.00 / 0.14; β 1 0.158 / 0.144 with 0.10 / 0.43; β 2 0.160 / 0.152 with 0.10 / 0.55. Over the four seeds β 2 lifts the yield on every seed (mean 0.144 → 0.159) and cross share from 0.05 to 0.29.</p>
-  <p>Conditioning on x gives the chart the topic it lacked and raises its yield to match expansion. A previous-sentence weight was the missing piece; the rules themselves were not. β 1, the plain posterior, holds the topic but does not raise the yield; β 2 counts the prompt as two observations. The next step is to read x through every generalization on its path and let the data pick among them, in place of β.</p>
+  <p>Conditioning on x gives the grammar the topic it lacked and raises its yield to match expansion. A previous-sentence weight was the missing piece; the rules themselves were not. β 1, the plain posterior, holds the topic but does not raise the yield; β 2 counts the prompt as two observations. The next step is to read x through every generalization on its path and let the data pick among them, in place of β.</p>
   <h3>Every knob trades novelty for grammar (rounds 83–88)</h3>
-  <p>Starting from the round 82 chart (12 bits, λ 4, topic β 2: 0.161 / 0.161), each round moves one setting. Seeds 13 / 17, acceptable new sentences per generation:</p>
+  <p>Starting from the round 82 grammar (12 bits, λ 4, topic β 2: 0.161 / 0.161), each round moves one setting. Seeds 13 / 17, acceptable new sentences per generation:</p>
   <table>
     <tr><th>Change</th><th>Acceptable new per generation</th><th>What moves</th></tr>
-    <tr><td>Round 82 chart (control)</td><td class="num best">0.161 / 0.161</td><td></td></tr>
+    <tr><td>Round 82 grammar (control)</td><td class="num best">0.161 / 0.161</td><td></td></tr>
     <tr><td>Cut 10 / 11 bits</td><td class="num">0.150 / 0.141, 0.129 / 0.148</td><td>more new, less grammatical</td></tr>
     <tr><td>Cut 14 / 16 bits</td><td class="num">0.062 / 0.052, 0.062 / 0.047</td><td>copies</td></tr>
     <tr><td>Cut by count ≥ 2 / 4 / 8</td><td class="num">0.131 / 0.139, 0.123 / 0.123, 0.145 / 0.109</td><td>worse than bits</td></tr>
@@ -1875,21 +2283,21 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
     <tr><td>Context cut 13 / 14 bits</td><td class="num">0.133 / 0.161, 0.072 / 0.077</td><td>copies</td></tr>
     <tr><td>Re-fill the weakest word, 1 / 2 passes</td><td class="num">0.126 / 0.148, 0.142 / 0.131</td><td>worse; removed</td></tr>
     <tr><td>Best of 4 by the parser (log Z per word)</td><td class="num">0.147 / 0.174</td><td>63% new, 47–52% grammatical</td></tr>
-    <tr><td>Best of 4 by the chart's own log Z per word</td><td class="num">0.143 / 0.160</td><td>47% new, 58–64% grammatical</td></tr>
+    <tr><td>Best of 4 by the grammar's own log Z per word</td><td class="num">0.143 / 0.160</td><td>47% new, 58–64% grammatical</td></tr>
   </table>
-  <p>None beats the control on both seeds. Each setting buys grammar with novelty or the reverse; the chart critic, for one, lifts the grammatical share by 11 points by choosing copies. On characters the count cut also loses to the bit cut (28.3 bits against 27.5, seed 17).</p>
+  <p>None beats the control on both seeds. Each setting buys grammar with novelty or the reverse; the grammar critic, for one, lifts the grammatical share by 11 points by choosing copies. On characters the count cut also loses to the bit cut (28.3 bits against 27.5, seed 17).</p>
   <p>Where the new sentences fail (round 82, β 2): those whose tag order is attested are 36–39% grammatical, the rest 13%. The errors are of two kinds. A head does not fit its complement ("they became together", "they look something"), and a sentence stops before its phrase ends ("he opened the"). Both are about what a word needs on its right, which a left-to-right fill restricted to one symbol's members cannot see. That points to an outside pass (each position scored by the whole sentence around it) rather than another setting.</p>
   <h3>Each word read from the whole sentence (round 89)</h3>
-  <p>The chart drew a whole tree before choosing any word, so the slot after "became" was chosen without knowing its head was "became". Round 89 freezes no tree. Each free position in turn, left to right, draws its word from P(w at i | the words placed so far) = Σ<sub>s</sub> μ<sub>i</sub>(s) P(w | s). Here μ<sub>i</sub> is the chart's posterior over symbols at i, with the placed words emitted and the later positions summed over every word: the leaf's inside score times its outside score, over Z. The outside pass is the inside pass transposed through the back-off levels, and it matches finite differences to 10<sup>−10</sup>. With fill "chart" the word comes from μ alone; with "both" it comes from μ times Cobweb's prediction from the surrounding words. 1,000 sentences, 12 bits, λ 4, topic β 2:</p>
+  <p>The grammar drew a whole tree before choosing any word, so the slot after "became" was chosen without knowing its head was "became". Round 89 freezes no tree. Each free position in turn, left to right, draws its word from P(w at i | the words placed so far) = Σ<sub>s</sub> μ<sub>i</sub>(s) P(w | s). Here μ<sub>i</sub> is the grammar's posterior over symbols at i, with the placed words emitted and the later positions summed over every word: the leaf's inside score times its outside score, over Z. The outside pass is the inside pass transposed through the back-off levels, and it matches finite differences to 10<sup>−10</sup>. With fill "grammar" the word comes from μ alone; with "both" it comes from μ times Cobweb's prediction from the surrounding words. 1,000 sentences, 12 bits, λ 4, topic β 2:</p>
   <table>
     <tr><th>Fill</th><th>Acceptable new per generation, seeds 13 / 17 / 19 / 23</th><th>Judged grammatical</th><th>New</th><th>Cross share</th></tr>
     <tr><td>Tree drawn first, Cobweb fills its leaves (round 82)</td><td class="num">0.161 / 0.161 / 0.160 / 0.152 (mean 0.159)</td><td class="num">47–56%</td><td class="num">59–65%</td><td class="num">0.32 / 0.19 / 0.10 / 0.55</td></tr>
-    <tr><td>Chart marginal alone</td><td class="num">0.124 / 0.148 / – / –</td><td class="num">40 / 46%</td><td class="num">70 / 68%</td><td class="num">0.31 / 0.21</td></tr>
-    <tr><td>Chart marginal × Cobweb</td><td class="num best">0.177 / 0.183 / 0.158 / 0.185 (mean 0.176)</td><td class="num best">59–63%</td><td class="num">50–56%</td><td class="num">0.26 / 0.18 / 0.14 / 0.55</td></tr>
+    <tr><td>Inside-outside marginal alone</td><td class="num">0.124 / 0.148 / – / –</td><td class="num">40 / 46%</td><td class="num">70 / 68%</td><td class="num">0.31 / 0.21</td></tr>
+    <tr><td>Inside-outside marginal × Cobweb</td><td class="num best">0.177 / 0.183 / 0.158 / 0.185 (mean 0.176)</td><td class="num best">59–63%</td><td class="num">50–56%</td><td class="num">0.26 / 0.18 / 0.14 / 0.55</td></tr>
   </table>
   <p>The product raises the yield by 11% (three seeds up, one level) and keeps the topic (cross share 0.28 against 0.29). Among new sentences with an attested tag order, the grammatical share rises from 36–39% to 42–48%. This is the first change since round 82 that is not a trade: it gives up some novelty (10 points) but raises grammar by more. Each half fails alone. The marginal alone knows the sentence's structure but not which word suits its neighbours, so it is novel and ungrammatical. Cobweb alone knows the neighbours but not where the phrase must go. Their product asks both.</p>
   <h3>The cut stops mattering (rounds 90–91)</h3>
-  <p>With the tree drawn first, fine symbols made the chart copy (cut 14: 0.06; the whole tree: 3% new). With each word read from the whole sentence, they no longer do. Fill "both", λ 4, topic β 2, acceptable new sentences per generation:</p>
+  <p>With the tree drawn first, fine symbols made the grammar copy (cut 14: 0.06; the whole tree: 3% new). With each word read from the whole sentence, they no longer do. Fill "both", λ 4, topic β 2, acceptable new sentences per generation:</p>
   <table>
     <tr><th>Symbols</th><th>Seeds 13 / 17 / 19 / 23</th><th>Mean</th><th>Cross share (mean)</th></tr>
     <tr><td>Cut 12 bits (round 89)</td><td class="num">0.177 / 0.183 / 0.158 / 0.185</td><td class="num">0.176</td><td class="num">0.28</td></tr>
@@ -1900,7 +2308,7 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
   </table>
   <p>The whole tree ties the best cut and so removes the cut as a parameter: every composite is its own content leaf, and back-off along the tree (λ) carries the generalization the cut used to fix. It generates at about half the speed (each inside pass has more symbols).</p>
   <h3>The topic weight cannot be set by likelihood (round 92)</h3>
-  <p>β 2 was set by hand. One principled replacement is to pick β by the probability of real next sentences given their previous sentence: log Z<sub>β</sub>(y) − log Z<sub>β</sub>(any y of that length), with x weighing every position. The fit must use held-out pairs: on pairs from the training stream the chart recalls the stored sentence whole, and the score improves with β without bound. On 105 pairs from stories the stream never reached (seed 13, cut 13), every form of the lift peaks at β 0:</p>
+  <p>β 2 was set by hand. One principled replacement is to pick β by the probability of real next sentences given their previous sentence: log Z<sub>β</sub>(y) − log Z<sub>β</sub>(any y of that length), with x weighing every position. The fit must use held-out pairs: on pairs from the training stream the grammar recalls the stored sentence whole, and the score improves with β without bound. On 105 pairs from stories the stream never reached (seed 13, cut 13), every form of the lift peaks at β 0:</p>
   <table>
     <tr><th>Lift</th><th>β 0</th><th>0.5</th><th>1</th><th>2</th><th>4</th><th>8</th></tr>
     <tr><td>Summed over x's words, at the symbol</td><td class="num best">−22.66</td><td class="num">−25.38</td><td class="num">−27.59</td><td class="num">−31.92</td><td class="num">−37.01</td><td class="num">−40.83</td></tr>
@@ -1961,7 +2369,7 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
 
 <!-- ============================================================ F1 FAILURES -->
 <section class="page" data-page="failures" hidden>
-  <p class="eyebrow">Failure point F1</p>
+  <p class="eyebrow">Appendix A13</p>
   <h1>Memory as an AND/OR graph</h1>
   <p class="lede">Four checks run after every change, on every grammar. They ask whether chunk types generate their parts, whether categories substitute, whether representations compare across sizes, and whether stored descriptions keep up.</p>
   <div class="col">
@@ -1979,35 +2387,23 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
 
 <!-- ============================================================ F2 KNOWN -->
 <section class="page" data-page="f-known" hidden>
-  <p class="eyebrow">Failure point F2</p>
+  <p class="eyebrow">Appendix A14: as of late October</p>
   <h1>Known failures</h1>
   <p class="lede">Three failures stay open. Each has a measurement that shows it and a reading of its cause.</p>
   <h2>The content tree adds no gain</h2>
-  <p>For every composite on <code>med</code> (90 of 90) and <code>large</code> (80 of 80), and 45 of 60 on <code>small</code>, the content tree's best gain is the root's 0 bits. Chunk factors come from the context tree alone, so substitutability counts and cohesion (parts predicting each other) does not. Weaker smoothing lets near-leaf concepts reward memorised pairs and worsens every measure. The tree is deep (stored content leaves sit 12.8 levels down on <code>small</code>), but held-out composites stop 2–4 levels down, where Cobweb would open a new branch: the content tree does not recognise new chunks as members of the deeper chunk types it holds. The chunk probe agrees: content purity is 0.31–0.33 against 0.24–0.25 shuffled (<a href="#s-probe">S3</a>).</p>
+  <p>For every composite on <code>med</code> (90 of 90) and <code>large</code> (80 of 80), and 45 of 60 on <code>small</code>, the content tree's best gain is the root's 0 bits. Chunk factors come from the context tree alone, so substitutability counts and cohesion (parts predicting each other) does not. Weaker smoothing lets near-leaf concepts reward memorised pairs and worsens every measure. The tree is deep (stored content leaves sit 12.8 levels down on <code>small</code>), but held-out composites stop 2–4 levels down, where Cobweb would open a new branch: the content tree does not recognise new chunks as members of the deeper chunk types it holds. The chunk probe agrees: content purity is 0.31–0.33 against 0.24–0.25 shuffled (<a href="#s-probe">chunk representations</a>).</p>
   <h2>Infill does not fit both sides</h2>
-  <p>Gap filling scores a filler by the gap's window, and each side is satisfied separately: &ldquo;the * the tree&rdquo; becomes &ldquo;the man the tree&rdquo;, and &ldquo;i * and ben&rdquo; becomes &ldquo;i can and ben&rdquo; (600 sentences, seed 17). Infill trigrams attested stay at 0.20–0.22 while prefixes reach 0.84–0.86 (<a href="#s-prompt">S1</a>).</p>
+  <p>Gap filling scores a filler by the gap's window, and each side is satisfied separately: &ldquo;the * the tree&rdquo; becomes &ldquo;the man the tree&rdquo;, and &ldquo;i * and ben&rdquo; becomes &ldquo;i can and ben&rdquo; (600 sentences, seed 17). Infill trigrams attested stay at 0.20–0.22 while prefixes reach 0.84–0.86 (<a href="#s-prompt">prompted generation</a>).</p>
   <h2>Chunk context trades novelty for fit</h2>
   <p>Naming the same-width neighbouring chunks in the context helps one-word prefixes (0.78 → 0.87) and makes the learner memorise: grammatical and new at 320 falls to 0.51–0.73 against 0.84–0.89. Learned neighbour names failed the same way on TinyStories in round 11. Chunk context stays off until a form passes the novelty guard.</p>
 </section>
 
-<!-- ============================================================ RESULTS INDEX -->
-<section class="page" data-page="results" hidden>
-  <p class="eyebrow">Results</p>
-  <h1>Results</h1>
-  <p class="lede">Each result is a separate page: the learning curves on the grammars, the record of changes kept and set aside, and the plan for the next iterations.</p>
-  <ul class="rlist">
-    <li><a href="#curves"><span class="rn">R1</span><span class="rt">Learning curves</span><span class="ra">What memory can generate after 10 to 320 experiences on six grammars, averaged over seeds 13 and 17.</span></a></li>
-    <li><a href="#iterations"><span class="rn">R2</span><span class="rt">Kept and set aside</span><span class="ra">Every change tried since 23 October, with its status and what it did.</span></a></li>
-    <li><a href="#next"><span class="rn">R3</span><span class="rt">What to iterate next</span><span class="ra">The open levers: infill, the content gain, used context, chunk context, and the next domains.</span></a></li>
-  </ul>
-</section>
-
 <!-- ============================================================ R1 CURVES -->
 <section class="page" data-page="curves" hidden>
-  <p class="eyebrow">Result R1</p>
+  <p class="eyebrow">Results</p>
   <h1>What memory can generate as experience accumulates</h1>
   <p class="lede">Leaf generation after 10 to 320 experiences, averaged over seeds 13 and 17. Grammaticality stays at 97–100% from the first checkpoint, and novelty rises as leaves collect more than one committed instance.</p>
-  <p class="small">Hover a panel for values. Characters are on <a href="#s-chars">S5</a>.</p>
+  <p class="small">Hover a panel for values. Characters are on <a href="#s-chars">characters</a>.</p>
   <div class="segs" id="cmetric" style="margin-top:16px"></div>
   <div class="legend" id="clegend"></div>
   <div class="mini" id="cpanels"></div>
@@ -2015,7 +2411,7 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
 
 <!-- ============================================================ R2 ITERATIONS -->
 <section class="page" data-page="iterations" hidden>
-  <p class="eyebrow">Result R2</p>
+  <p class="eyebrow">Appendix A15</p>
   <h1>Kept and set aside</h1>
   <p class="lede">Each change is kept when it holds or raises grammatical, new generation and passes the guards; otherwise it is set aside with the measurement that decided it.</p>
   <h2>24–26 October: memory currency and prompting</h2>
@@ -2060,22 +2456,6 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
       </tbody>
     </table>
   </div>
-</section>
-
-<!-- ============================================================ R3 NEXT -->
-<section class="page" data-page="next" hidden>
-  <p class="eyebrow">Result R3</p>
-  <h1>What to iterate next</h1>
-  <p class="lede">The levers below are ordered by what blocks the most measures.</p>
-  <ol>
-    <li><b>Infill.</b> A filler must fit both sides of the gap at once. Gap fills now satisfy each side's window separately.</li>
-    <li><b>Used context and characters under repair on use.</b> Used content is current; used context stays near 8.5% and characters s17 lose real characters. The 2,000-sentence run will show whether the gap holds at size.</li>
-    <li><b>Content gain.</b> Held-out composites stop 2–4 levels down the content tree, where Cobweb opens a new branch. Next: name words by what they build as well as where they stand, so new chunks share values with stored ones.</li>
-    <li><b>Chunk context without memorisation.</b> Same-level chunk context helps one-word prefixes and fails the novelty guard. A beam between v1's greedy chunking and inside-outside, with chunk context (same level or below) in every candidate's score, is the planned form.</li>
-    <li><b>Answering by analogy (bAbI).</b> Align the question's chunks with the story sentence that shares its entity and role, and answer with the filler in the aligned slot.</li>
-    <li><b>Chess.</b> Elo at 1,000 and 4,000 positions; absolute Elo once a calibrated engine is allowed. Chess as board graphs has priority among the next domains; prompting then means parsing incomplete structure and generating from a scaffold.</li>
-  </ol>
-  <p class="small">Data: <code>experiments/v3/diag/t3_export.py</code>, <code>t3_learncurve.py</code>, <code>t3_genbench.py</code>, <code>t3_failure.py</code>, <code>t3_stories.py</code>, <code>t3_use.py</code>, <code>t3_prompt.py</code>, <code>t3_babi_qa.py</code>, <code>t3_chunk_probe.py</code>, <code>run_characters.py</code>; <code>experiments/v3/chess_recall.py</code>, <code>chess_play.py</code>; docs <code>TEMPORAL_INTERDEP.md</code>, <code>PROMPTING.md</code>, <code>BABI.md</code>, <code>CHESS_CS.md</code>, <code>FAILURE_MODES.md</code>.</p>
 </section>
 
 <nav class="pager" id="pager" aria-label="Page navigation"></nav>
@@ -2527,20 +2907,25 @@ renderAll();
 
 <script>
 (function () {
-const ORDER = ["overview", "status", "principles", "representation", "instances", "learning", "sustain", "parse", "generate", "types", "rules",
-  "s-prompt", "s-consist", "s-probe", "s-babi", "s-chars", "s-chess", "s-sem", "failures", "f-known", "results", "curves", "iterations", "next"];
-const TITLES = { overview: "Overview", status: "Where we stand", principles: "1 Principles", representation: "2 Representation", instances: "2a Instances and concepts",
-  learning: "3 Learning", sustain: "4 Sustaining memory", parse: "5 Parsing, step by step", generate: "6 Generation, step by step",
-  types: "7 Type names", rules: "8 Concept-choice rules", "s-prompt": "S1 Prompted generation", "s-consist": "S2 Parse consistency",
-  "s-probe": "S3 Chunk representations", "s-babi": "S4 bAbI questions", "s-chars": "S5 Chinese characters", "s-chess": "S6 Chess", "s-sem": "S7 Semantic generation",
-  failures: "F1 AND/OR failure checks", "f-known": "F2 Known failures", results: "Results", curves: "R1 Learning curves",
-  iterations: "R2 Kept and set aside", next: "R3 What to iterate next" };
+const ORDER = ["intro", "hierarchies", "representations", "parse", "io-generation", "learning", "d-domains", "d-evals", "d-competitors",
+  "results", "curves", "r-stories", "s-babi", "s-chars", "s-chess", "conclusion", "appendices", "a-unified", "s-sem", "generate", "types", "rules",
+  "s-prompt", "s-consist", "s-probe", "sustain", "status", "a-fixes", "representation", "failures", "f-known", "iterations"];
+const TITLES = { intro: "Introduction", hierarchies: "Hierarchies", representations: "Representations", parse: "Parsing", "io-generation": "Generation", learning: "Learning",
+  "d-domains": "Design: domains", "d-evals": "Design: evaluations", "d-competitors": "Design: competitors", results: "Results", curves: "Results: toy grammars",
+  "r-stories": "Results: TinyStories", "s-babi": "Results: bAbI", "s-chars": "Results: Chinese characters", "s-chess": "Results: chess", conclusion: "Conclusion and next steps",
+  appendices: "Appendices", "a-unified": "A1 Ablation: one hierarchy", "s-sem": "A2 Story rounds", generate: "A3 Expansion generation", types: "A4 Type names", rules: "A5 Concept-choice rules",
+  "s-prompt": "A6 Prompted generation", "s-consist": "A7 Parse consistency", "s-probe": "A8 Chunk representations", sustain: "A9 Sustaining memory", status: "A10 Memory scoreboard",
+  "a-fixes": "A11 Representation fixes", representation: "A12 Earlier representation", failures: "A13 Failure checks", "f-known": "A14 Known failures", iterations: "A15 Kept and set aside" };
+const ALIAS = { overview: "intro", instances: "representations", principles: "intro", next: "conclusion", "s-prompts": "s-prompt" };
+const GROUPS = { design: ["d-domains", "d-evals", "d-competitors"], results: ["results", "curves", "r-stories", "s-babi", "s-chars", "s-chess"],
+  appendices: ["appendices", "a-unified", "s-sem", "generate", "types", "rules", "s-prompt", "s-consist", "s-probe", "sustain", "status", "a-fixes", "representation", "failures", "f-known", "iterations"] };
 const PICKER = ["parse", "generate", "types"];
 const LIVE = ["parse", "generate", "types", "rules", "curves", "failures", "s-chars"];
 const q = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 function show(page) {
-  if (!ORDER.includes(page)) page = "overview";
+  page = ALIAS[page] || page; if (!ORDER.includes(page)) page = "intro";
+  document.querySelectorAll("ol.sub").forEach(o => { o.classList.toggle("open", (GROUPS[o.dataset.group] || []).includes(page)); });
   document.querySelectorAll(".page").forEach(s => { s.hidden = s.dataset.page !== page; });
   document.querySelectorAll(".toc a, #toc-mobile a").forEach(a => {
     if (a.getAttribute("href") === "#" + page) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
@@ -2555,7 +2940,7 @@ function show(page) {
   // the explorers draw at their box's real width, so redraw once the page is visible
   if (LIVE.includes(page) && window.__trellisRender) { try { window.__trellisRender(); } catch (e) { console.error(e); } }
 }
-function route() { show((location.hash || "#overview").slice(1)); }
+function route() { show((location.hash || "#intro").slice(1)); }
 q("#toc-mobile").innerHTML = q("#toc").innerHTML;
 window.addEventListener("hashchange", route);
 route();
