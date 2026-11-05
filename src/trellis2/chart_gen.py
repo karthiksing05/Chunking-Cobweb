@@ -394,7 +394,9 @@ class ChartGen:
         toks, ins, _ = options[rng.choices(range(len(options)), weights=[math.exp(z - top) for _, _, z in options])[0]]
         n = len(toks)
         if self.fill != "cobweb":
-            return self._fill_chart(toks, rng, prev, lift, start)
+            if info is not None:
+                info.update({"length": n, "lengths": [(len(t), round(z, 3)) for t, _, z in options], "steps": []})
+            return self._fill_chart(toks, rng, prev, lift, start, info)
         v, _ = ins[(0, n)]
         root = rng.choices(range(len(self.syms)), weights=start * v)[0]
         leaves, tree = {}, []
@@ -434,7 +436,7 @@ class ChartGen:
             L._pv = keep_pv
         return out
 
-    def _fill_chart(self, toks, rng, prev, lift, start):
+    def _fill_chart(self, toks, rng, prev, lift, start, info=None):
         """Each free position, left to right, draws its word from P(w at i | placed words):
         sum over symbols s of mu_i(s) P(w | s), mu_i the chart's posterior of s at i (the
         gradient of log Z in i's leaf), times Cobweb's prediction with fill "both"."""
@@ -464,6 +466,17 @@ class ChartGen:
                     return None
                 words, ws = zip(*cand.items())
                 out[i] = rng.choices(words, weights=ws)[0]
+                if info is not None:                          # what the explorer shows: this position's sources
+                    cf_ = cf if self.fill == "both" else {}
+                    norm = lambda d: {w: x / max(sum(d.values()), 1e-300) for w, x in d.items()}
+                    p_io, p_w, p_all = norm(pc), norm(cf_), norm(cand)
+                    best = sorted(p_all, key=p_all.get, reverse=True)[:8]
+                    if out[i] not in best:
+                        best.append(out[i])
+                    syms = [(self.syms[int(k)], float(mu[k])) for k in np.argsort(-mu)[:5] if mu[k] > 0]
+                    info["steps"].append({"i": i, "word": out[i],
+                                          "words": [(w, round(p_io.get(w, 0.0), 4), round(p_w.get(w, 0.0), 4), round(p_all[w], 4)) for w in best],
+                                          "symbols": [(s[1], round(m, 4), [w for w, _ in Counter(self.emit.get(self.ix[s], {})).most_common(6)]) for s, m in syms]})
         finally:
             L._pv = keep_pv
         return out

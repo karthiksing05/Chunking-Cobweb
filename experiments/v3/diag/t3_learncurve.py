@@ -12,6 +12,7 @@ from trellis2 import load_corpus, v1_split
 from trellis2.data import CONDITIONS, default_data_root, target_grammar
 from trellis2.evaluation import CFG, BracketTally
 from trellis2.trellis3 import Trellis3
+from trellis2.chart_gen import ChartGen
 
 tag, cfg = sys.argv[1], json.loads(sys.argv[2])
 conds = sys.argv[3].split(",")
@@ -44,7 +45,12 @@ for cond in conds:
         seen = {tuple(e.tokens) for e in train[:n]}
         rng = random.Random(seed)
         ix = L.concept_index()
-        S = [s for s in (L.generate_tree(rng, index=ix) for _ in range(n_gen)) if s]
+        if os.environ.get("CURVE_GEN") == "io":   # inside-outside generation over the whole tree
+            lens = sorted(len(e.tokens) for e in train)
+            CG = ChartGen(L, cut=64, ctx_cut=12, lam=4, word_sym="context", cut_by="bits", fill="both", length=(lens[0], lens[-1]))
+            S = [s for s in (CG.generate(["*"], rng) for _ in range(n_gen)) if s]
+        else:
+            S = [s for s in (L.generate_tree(rng, index=ix) for _ in range(n_gen)) if s]
         gram = [s for s in S if g.recognizes(s)]
         te = BracketTally()
         for e in test[:60]:
