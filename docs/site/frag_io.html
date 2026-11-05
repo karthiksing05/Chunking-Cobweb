@@ -1,0 +1,50 @@
+<div class="ioex" id="ioex">
+  <label class="small" for="io-prompt">Previous sentence</label>
+  <select id="io-prompt"></select>
+  <p class="io-sent" id="io-sent"></p>
+  <div class="io-nav"><button type="button" id="io-prev">Previous word</button> <span class="small" id="io-pos"></span> <button type="button" id="io-next">Next word</button></div>
+  <div class="tablewrap"><table id="io-table"><thead><tr><th>Word</th><th>Inside-outside</th><th>Window</th><th>Product (drawn from)</th></tr></thead><tbody></tbody></table></div>
+  <h4>Symbols the sentence allows here</h4>
+  <div class="tablewrap"><table id="io-syms"><thead><tr><th>Context concept</th><th class="num">Posterior</th><th>Its commonest words</th></tr></thead><tbody></tbody></table></div>
+  <p class="small" id="io-len"></p>
+</div>
+<style>
+.ioex select { font: inherit; max-width: 100%; margin: 4px 0 10px; padding: 4px 6px; background: var(--surface); color: var(--ink); border: 1px solid var(--rule); border-radius: 4px; }
+.io-sent { font-size: 18px; margin: 8px 0; }
+.io-sent .on { background: var(--tint); font-weight: 600; padding: 0 3px; border-radius: 3px; }
+.io-sent .todo { color: var(--muted); }
+.io-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 10px; }
+.io-nav button { font: inherit; font-size: 14px; padding: 4px 10px; background: var(--surface); color: var(--ink); border: 1px solid var(--rule); border-radius: 4px; cursor: pointer; }
+.io-nav button:disabled { opacity: .45; cursor: default; }
+.iobar { display: grid; grid-template-columns: 1fr 44px; align-items: center; gap: 6px; min-width: 90px; }
+.iobar i { display: block; height: 8px; background: var(--accent); border-radius: 0 4px 4px 0; min-width: 1px; }
+.iobar span { font-size: 12.5px; text-align: right; font-variant-numeric: tabular-nums; }
+#io-table tr.drawn td:first-child { font-weight: 700; }
+</style>
+<script type="application/json" id="io-data">@@IOJSON@@</script>
+<script>
+(function () {
+  const D = JSON.parse(document.getElementById("io-data").textContent).cases;
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  let c = 0, k = 0;
+  const bar = (p, top) => `<div class="iobar"><div><i style="width:${Math.max(p / Math.max(top, 1e-9) * 100, 0.5)}%"></i></div><span>${(p * 100).toFixed(1)}%</span></div>`;
+  function draw() {
+    const x = D[c], st = x.steps[k], gen = x.generated.split(" ");
+    $("io-sent").innerHTML = gen.map((w, i) => i < k ? esc(w) : i === k ? `<span class="on">${esc(w)}</span>` : `<span class="todo">${esc(w)}</span>`).join(" ");
+    $("io-pos").textContent = `Word ${k + 1} of ${gen.length}`;
+    $("io-prev").disabled = k === 0; $("io-next").disabled = k === x.steps.length - 1;
+    const t = i => Math.max(...st.words.map(r => r[i]));
+    $("io-table").tBodies[0].innerHTML = st.words.map(r => `<tr class="${r[0] === st.word ? "drawn" : ""}"><td>${esc(r[0])}${r[0] === st.word ? " (drawn)" : ""}</td><td>${bar(r[1], t(1))}</td><td>${bar(r[2], t(2))}</td><td>${bar(r[3], t(3))}</td></tr>`).join("");
+    $("io-syms").tBodies[0].innerHTML = st.symbols.map(s => `<tr><td>c${s[0]}</td><td class="num">${(s[1] * 100).toFixed(1)}%</td><td>${s[2].map(esc).join(" · ")}</td></tr>`).join("");
+    const top = Math.max(...x.lengths.map(l => l[1]));
+    const ps = x.lengths.map(l => [l[0], Math.exp(l[1] - top)]), tot = ps.reduce((a, b) => a + b[1], 0);
+    $("io-len").textContent = "Length chosen by Z: " + ps.map(p => `${p[0]} words ${(p[1] / tot * 100).toFixed(0)}%`).join(", ") + `. It drew ${gen.length}. The story's real next sentence: "${x["real next"]}".`;
+  }
+  $("io-prompt").innerHTML = D.map((x, i) => `<option value="${i}">${esc(x.prompt)}</option>`).join("");
+  $("io-prompt").addEventListener("change", e => { c = +e.target.value; k = 0; draw(); });
+  $("io-prev").addEventListener("click", () => { k--; draw(); });
+  $("io-next").addEventListener("click", () => { k++; draw(); });
+  draw();
+})();
+</script>

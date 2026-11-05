@@ -28,7 +28,7 @@ failures = [r for r in rows("logs/v3-xf-*.log") if "A-or (context concepts)" in 
 chars = []
 for f in sorted(glob.glob(R + "/chars/*/results.json")):
     for r in json.load(open(f, encoding="utf-8")):
-        chars.append({"run": "CURRENT", "seed": r["seed"], "experiences": r["train"], "omission": r["held-out omission"],
+        chars.append({"run": "s%d" % r["seed"], "seed": r["seed"], "experiences": r["train"], "omission": r["held-out omission"],
                       "well formed": r["well formed"], "attested": r["positions attested"], "real": r["real"], "novel": r["novel"]})
 examples = {c: json.load(open(f"{R}/ex_{c}.json", encoding="utf-8")) for c in ("small", "med", "large")}
 json.dump({"curves": curves, "rules": rules, "failures": failures, "characters": chars, "examples": examples},

@@ -377,7 +377,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
   <div class="tablewrap"><table>
     <thead><tr><th>Domain</th><th>Measure</th><th>TRELLIS</th><th>Reference</th></tr></thead>
     <tbody>
-      <tr><td><a href="#curves">Toy grammars</a></td><td>Grammatical; grammatical and new (320 experiences)</td><td class="num">99.7–100%; 0.75–0.88 new</td><td>Grammar known exactly</td></tr>
+      <tr><td><a href="#curves">Toy grammars</a></td><td>Grammatical; grammatical and new (320 experiences), current recipe</td><td class="num">Inside-outside: small 100%, 0.11–0.14 new; med 46–48%, 0.29–0.32 new</td><td>Expansion: 100%, 0.00–0.12 new. Grammar known exactly</td></tr>
       <tr><td><a href="#r-stories">TinyStories</a></td><td>Judged grammatical and new, per generation (1,000 sentences, 4 seeds)</td><td class="num best">0.186</td><td>0.159 tree drawn first; 0.161 / 0.152 expansion (2 seeds)</td></tr>
       <tr><td><a href="#s-babi">bAbI</a></td><td>Answer of the right type</td><td class="num">0.60–0.63</td><td>0.20–0.23 frequency baseline</td></tr>
       <tr><td><a href="#s-chars">Characters</a></td><td>Bits per held-out character (2,000 learned)</td><td class="num">27.8 / 27.5</td><td><b>Trigram 26.4 / 26.0</b>; BPE 29.6 / 29.1</td></tr>
@@ -476,7 +476,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     <ul>
       <li><b>It gains on grammar without trading away what makes it useful.</b> Every setting of the earlier generator traded novelty for grammar. This fill raised judged-grammatical new sentences from a mean of 0.159 to 0.176 over four seeds.</li>
       <li><b>It removes a parameter.</b> With the tree drawn first, fine symbols copy (whole tree: 3% new). With this fill they do not, and the whole tree scores 0.186, level with the best cut (0.183).</li>
-      <li><b>It makes effective use of chunk context.</b> See below.</li>
+      <li><b>It makes effective use of chunk context.</b> Given the same two words as the window, it predicts the next word about 0.7 nats better, and removing chunk identity costs about 15% of the yield. The gain comes from chunk concepts and the slots still to come. Words further back do not add to it, as the test below shows.</li>
     </ul>
   </div>
   <h2>Chunk context</h2>
@@ -488,6 +488,9 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
   <h3>Does it carry information? (round 94)</h3>
   <p>Held-out story sentences are read left to right, and the real next word is scored under each source. Higher is better; 1,000 sentences learned, 200 held-out sentences.</p>
   <div id="r94-table">@@R94@@</div>
+  <h2>Explorer: one sentence, word by word</h2>
+  <p>Real traces of the current recipe (1,000 sentences learned, seed 13, unselected prompts). At each position the table shows the three distributions over the top words, and the lower table shows which word symbols the sentence allows there.</p>
+  @@IOEXP@@
   <h2>A worked generation</h2>
   <div class="col">
     <p>Real output of the current recipe (1,000 sentences learned, seed 13 unless marked; the judge's probability of grammatical in brackets; each sentence is absent from training). Prompts are held-out story sentences.</p>
@@ -539,7 +542,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
       <tr><th>Generation</th><td>Inside-outside: whole content tree, words within 12 bits, λ 4, β 2, marginal times window prediction</td></tr>
     </tbody>
   </table></div>
-  <p class="small">The toy-grammar curves, the character generation guard and the chess recall studies were measured on earlier configurations; each result page says which. The explorers on the Parsing page show the configuration of 23 October.</p>
+  <p class="small">The chess recall studies and older character rows were measured on earlier configurations; each result page says which. The toy-grammar curves and the explorers were regenerated with the current recipe on 4 November.</p>
 </section>
 
 <!-- ============================================================ DESIGN: EVALUATIONS -->
@@ -593,7 +596,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
 <section class="page" data-page="results" hidden>
   <p class="eyebrow">Results</p>
   <h1>Results by domain</h1>
-  <p class="lede">Generation works on grammars and improves on real text. As a coder TRELLIS beats BPE on characters but loses to a trigram coder there and wins on chess only where shapes move. Each domain has its own page with its curves, chunks and tables.</p>
+  <p class="lede">Generation improves on real text but has a problem on grammars: under the current recipe, expansion mostly copies and inside-outside loses grammar on the larger ones. As a coder TRELLIS beats BPE on characters but loses to a trigram coder there and wins on chess only where shapes move. Each domain has its own page with its curves, chunks and tables.</p>
   <ul class="rlist">
     <li><a href="#curves"><span class="rn">1</span><span class="rt">Toy grammars</span><span class="ra">What memory generates after 10 to 320 experiences on each grammar.</span></a></li>
     <li><a href="#r-stories"><span class="rn">2</span><span class="rt">TinyStories</span><span class="ra">Grammatical, new, on-topic generation; chunks and concepts; parse agreement; prompts.</span></a></li>
@@ -650,7 +653,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
   <h2>What has been shown</h2>
   <div class="col">
     <ul>
-      <li>Trees alone generate grammatically on toy grammars, and new output grows with experience.</li>
+      <li>Trees alone generate grammatically on toy grammars by expansion. Under earlier configurations most of that output was new (0.75–0.88 at 320); under the current recipe almost none is.</li>
       <li>Memory stays current online: used records under 1% misplaced at about twice the learning time.</li>
       <li>On TinyStories, reading each word from the whole sentence raised grammatical new output by 17% over the best earlier form, held the topic and removed the content cut.</li>
       <li>On chess, TRELLIS reproduces the shape of Chase and Simon's findings.</li>
@@ -661,6 +664,8 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     <thead><tr><th>Open problem</th><th>What is known</th><th>Next</th></tr></thead>
     <tbody>
       <tr><th>Topic weight</th><td>β 2 is hand-set. Whole-sentence likelihood always picks 0, since a sentence's probability is almost all grammar</td><td>A criterion that weighs the topic itself; let memory choose the concept that predicts from x</td></tr>
+      <tr><th>Toy grammars</th><td>Under the current recipe, expansion is grammatical but copies, and inside-outside is new but 46–48% grammatical on <code>med</code>. Neither reaches both, which earlier configurations did. Cause untested</td><td>Find which change lost the novelty; test where inside-outside overgenerates</td></tr>
+      <tr><th>Words beyond the window</th><td>Inside-outside predicts worse given all earlier words than given the nearest two (round 94). The drawn product has the worst likelihood and the best yield</td><td>Test why far words hurt; find a criterion likelihood and yield agree on</td></tr>
       <tr><th>Grammar</th><td>About 40% of output is still judged ungrammatical. Head-complement fit and unfinished endings were the main errors before the new fill; not yet re-measured</td><td>Re-measure the errors; re-test λ on the whole tree (round 93 was cancelled)</td></tr>
       <tr><th>Do two hierarchies earn their cost?</th><td>Untested</td><td>The unified-hierarchy ablation</td></tr>
       <tr><th>Parsing and generation read different scores</th><td>Parsing uses a separate chunk factor; generation and coding read the grammar's probabilities</td><td>Test parsing and learning by the same probabilities</td></tr>
@@ -703,7 +708,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
   <p class="eyebrow">Appendix A1</p>
   <h1>Ablation: one hierarchy</h1>
   <p class="lede">What happens if content and context are held in one Cobweb tree, used in the same ways?</p>
-  <div id="unified-body"><p>In progress. Design and results will appear here.</p></div>
+  <div id="unified-body">@@UNIFIED@@</div>
 </section>
 
 <!-- ============================================================ PARSING -->
@@ -745,7 +750,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     <p>A part is one analysis of its span, the best by summed gain. The posterior then sums over every split at every span, but each composite's description holds only its parts' best analyses.</p>
   </div>
   <h2>Explorer</h2>
-  <p class="small">The walk-through below runs on real memory of the toy grammars. It shows the configuration of 23 October, so it has no <code>lc</code>, <code>rc</code> or <code>pv</code>. Pick the grammar in the bar above.</p>
+  <p class="small">The walk-through below runs on real memory of the toy grammars. It shows the current recipe, where <code>lc</code> and <code>rc</code> are off and toy grammars have no previous sentence. Pick the grammar in the bar above.</p>
 @@L 481-509@@
 </section>
 
@@ -1087,7 +1092,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
   <h1>Naming a part by where its type has stood</h1>
   <p class="lede">A content instance names its parts in context-tree terms. A type name is re-read from the tree each time it is used, so it never goes stale.</p>
 @@L 582-602@@
-  <p class="small" style="margin-top:14px">The explorer shows the 23 October configuration: a reservoir of 8 leaves named by the concepts on their paths. The current recipe names a word by the parent concepts of 32 sampled instances and mixes in its neighbours' names at readout (<a href="#status">Where we stand</a>).</p>
+  <p class="small" style="margin-top:14px">The explorer shows the current recipe: a word is named by the parent concepts of 32 sampled instances, with its neighbours' names mixed in at readout.</p>
 </section>
 
 <!-- ============================================================ RULES -->
@@ -1399,7 +1404,7 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
       <li><em>Real</em>: the sample is an existing character.</li>
       <li><em>Novel</em>: the sample was not in training.</li>
     </ul>
-    <p>Omission is measured on held-out characters; right-branching scores 0.678.</p>
+    <p>Omission is measured on held-out characters; right-branching scores 0.678. Under the current recipe expansion is close to copying here too (0–5% novel, up from 0–1% at 250). Figure 7 and the guard table below come from earlier configurations.</p>
   </div>
 @@L 636-636@@
   <h2>Characters as a guard for memory repair</h2>
@@ -2064,7 +2069,7 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
 <section class="page" data-page="curves" hidden>
   <p class="eyebrow">Results</p>
   <h1>What memory can generate as experience accumulates</h1>
-  <p class="lede">Leaf generation after 10 to 320 experiences, averaged over seeds 13 and 17. Grammaticality stays at 97–100% from the first checkpoint, and novelty rises as leaves collect more than one committed instance.</p>
+  <p class="lede">Both generators after 10 to 320 experiences, current recipe, seeds 13 and 17. Expansion stays fully grammatical but now mostly copies (0.00–0.12 grammatical and new at 320). Earlier configurations reached 0.75–0.88 new here, and we have not tested which change caused the drop. Inside-outside produces more new output but only about half of it is grammatical on <code>med</code>; it stays fully grammatical on <code>small</code>. Expansion with a broader draw does better than either: three levels up with the kind check gives 100% grammatical and 0.40 new on <code>med</code> (seed 13, <a href="#rules">concept-choice rules</a>), so the loss of novelty lies in the leaf default rather than in the trees.</p>
   <p class="small">Hover a panel for values. Characters are on <a href="#s-chars">characters</a>.</p>
 @@L 625-627@@
 </section>
