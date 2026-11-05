@@ -24,9 +24,9 @@ position summed over all words, so Z(expansion) is the grammar's own probability
 of that shape. An expansion is drawn by Z, a decomposition is drawn top-down from
 the inside scores (or, with ``decomp="max"``, the likeliest split at each node) and
 frozen, and each free position is filled left to right by
-Cobweb prediction from its surroundings (``_gap_fills`` on the words placed so far,
-the prompt's fixed words and, with a story facet, the previous sentence), among
-words of the category the chart gave it.
+Cobweb prediction from its surface window (``_gap_fills`` on the placed words within
+two places), among words of the category the chart gave it. With ``fill`` "chart" or
+"both" no tree is frozen: see the constructor.
 """
 from __future__ import annotations
 
@@ -406,17 +406,11 @@ class ChartGen:
 
     # ------------------------------------------------------------ filling
     def _cobweb_fills(self, out, i):
-        """Cobweb's prediction for position i from the words around it: {word: weight}."""
-        L = self.L
-        e = Elem((i, i + 1), token=HOLE)
-        e.token = None
-        raw = L._surface(out, i, i + 1)
-        try:
-            q = L._context(out, e, analysed=False)
-        except Exception:
-            q = dict(raw)
-        q = {a: v for a, v in q.items() if not (a in raw and raw[a] == HOLE)}
-        return {f[1]: w for f, w in L._gap_fills(q).items() if f[0] == "w" and w > 0}
+        """Cobweb's prediction for position i from its surface window alone (the placed
+        words within two places): {word: weight}. It sees no chunks and not the previous
+        sentence; chunk context and the topic reach generation through the chart."""
+        q = {a: v for a, v in self.L._surface(out, i, i + 1).items() if v != HOLE}
+        return {f[1]: w for f, w in self.L._gap_fills(q).items() if f[0] == "w" and w > 0}
 
     def _fill(self, toks, leaves, rng, prev):
         L = self.L
