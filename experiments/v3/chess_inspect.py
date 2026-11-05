@@ -40,9 +40,15 @@ n_nested = int(sys.argv[6]) if len(sys.argv) > 6 else 6
 max_size = cfg.pop("max_size", 4)
 n_test = 100
 
-positions = C.load_positions(os.path.join(ROOT, "data", "chess", "settings", "positions_1800_ply30.fen"))
-random.Random(seed).shuffle(positions)
-test_real, train = positions[-n_test:], positions[:-n_test]
+if os.environ.get("LEARN_FILE"):   # the transfer sets: learn and code from separate files, as chess_compress_gen.py
+    train = C.load_positions(os.environ["LEARN_FILE"])
+    test_real = C.load_positions(os.environ["CODE_FILE"], n=n_test)
+    positions = None
+else:
+    positions = C.load_positions(os.path.join(ROOT, "data", "chess", "settings", "positions_1800_ply30.fen"))
+if positions is not None:
+    random.Random(seed).shuffle(positions)
+    test_real, train = positions[-n_test:], positions[:-n_test]
 rng = random.Random(seed + 1)
 
 
@@ -103,6 +109,7 @@ for size, concepts in sorted(by_size.items()):
         kinds = Counter(tok for m, _ in members for _, tok in m)
         rows.append({"concept": cid, "count": len(members), "distinct": len(set(members)),
                      "example": [list(x) for x in top[0]], "example rel": list(top[1]), "example count": n_top,
+                     "instances": [[[list(x) for x in m[0]], c] for m, c in Counter(members).most_common(6)],
                      "pieces": dict(kinds.most_common(6))})
     inventory[size] = {"committed": sum(len(v) for v in concepts.values()), "concepts": len(concepts), "top": rows}
 

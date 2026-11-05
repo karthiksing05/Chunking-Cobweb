@@ -1,0 +1,6198 @@
+{
+ "tag": "cur_abs",
+ "seed": 13,
+ "positions learned": 4000,
+ "max size": 4,
+ "theta": 16.0,
+ "learn s": 877,
+ "inventory": {
+  "2": {
+   "committed": 5551,
+   "concepts": 533,
+   "top": [
+    {
+     "concept": 27550,
+     "count": 491,
+     "distinct": 1,
+     "example": [
+      [
+       "g7",
+       "bP"
+      ],
+      [
+       "h6",
+       "bP"
+      ]
+     ],
+     "example rel": [
+      "defended by"
+     ],
+     "example count": 491,
+     "instances": [
+      [
+       [
+        [
+         "g7",
+         "bP"
+        ],
+        [
+         "h6",
+         "bP"
+        ]
+       ],
+       491
+      ]
+     ],
+     "pieces": {
+      "bP": 982
+     }
+    },
+    {
+     "concept": 1141,
+     "count": 256,
+     "distinct": 1,
+     "example": [
+      [
+       "a6",
+       "bP"
+      ],
+      [
+       "b7",
+       "bP"
+      ]
+     ],
+     "example rel": [
+      "defended by"
+     ],
+     "example count": 256,
+     "instances": [
+      [
+       [
+        [
+         "a6",
+         "bP"
+        ],
+        [
+         "b7",
+         "bP"
+        ]
+       ],
+       256
+      ]
+     ],
+     "pieces": {
+      "bP": 512
+     }
+    },
+    {
+     "concept": 26699,
+     "count": 250,
+     "distinct": 1,
+     "example": [
+      [
+       "b2",
+       "wP"
+      ],
+      [
+       "c3",
+       "wP"
+      ]
+     ],
+     "example rel": [
+      "defends"
+     ],
+     "example count": 250,
+     "instances": [
+      [
+       [
+        [
+         "b2",
+         "wP"
+        ],
+        [
+         "c3",
+         "wP"
+        ]
+       ],
+       250
+      ]
+     ],
+     "pieces": {
+      "wP": 500
+     }
+    },
+    {
+     "concept": 6001,
+     "count": 189,
+     "distinct": 1,
+     "example": [
+      [
+       "c7",
+       "bP"
+      ],
+      [
+       "d6",
+       "bP"
+      ]
+     ],
+     "example rel": [
+      "defended by"
+     ],
+     "example count": 189,
+     "instances": [
+      [
+       [
+        [
+         "c7",
+         "bP"
+        ],
+        [
+         "d6",
+         "bP"
+        ]
+       ],
+       189
+      ]
+     ],
+     "pieces": {
+      "bP": 378
+     }
+    },
+    {
+     "concept": 25633,
+     "count": 182,
+     "distinct": 1,
+     "example": [
+      [
+       "a6",
+       "bP"
+      ],
+      [
+       "b5",
+       "bP"
+      ]
+     ],
+     "example rel": [
+      "defended by"
+     ],
+     "example count": 182,
+     "instances": [
+      [
+       [
+        [
+         "a6",
+         "bP"
+        ],
+        [
+         "b5",
+         "bP"
+        ]
+       ],
+       182
+      ]
+     ],
+     "pieces": {
+      "bP": 364
+     }
+    },
+    {
+     "concept": 1957,
+     "count": 173,
+     "distinct": 1,
+     "example": [
+      [
+       "b7",
+       "bP"
+      ],
+      [
+       "c6",
+       "bP"
+      ]
+     ],
+     "example rel": [
+      "defended by"
+     ],
+     "example count": 173,
+     "instances": [
+      [
+       [
+        [
+         "b7",
+         "bP"
+        ],
+        [
+         "c6",
+         "bP"
+        ]
+       ],
+       173
+      ]
+     ],
+     "pieces": {
+      "bP": 346
+     }
+    },
+    {
+     "concept": 8102,
+     "count": 141,
+     "distinct": 1,
+     "example": [
+      [
+       "a3",
+       "wP"
+      ],
+      [
+       "b2",
+       "wP"
+      ]
+     ],
+     "example rel": [
+      "defends"
+     ],
+     "example count": 141,
+     "instances": [
+      [
+       [
+        [
+         "a3",
+         "wP"
+        ],
+        [
+         "b2",
+         "wP"
+        ]
+       ],
+       141
+      ]
+     ],
+     "pieces": {
+      "wP": 282
+     }
+    },
+    {
+     "concept": 2200,
+     "count": 106,
+     "distinct": 2,
+     "example": [
+      [
+       "d6",
+       "bP"
+      ],
+      [
+       "e5",
+       "bP"
+      ]
+     ],
+     "example rel": [
+      "defended by"
+     ],
+     "example count": 103,
+     "instances": [
+      [
+       [
+        [
+         "d6",
+         "bP"
+        ],
+        [
+         "e5",
+         "bP"
+        ]
+       ],
+       103
+      ],
+      [
+       [
+        [
+         "e5",
+         "bP"
+        ],
+        [
+         "f4",
+         "bP"
+        ]
+       ],
+       3
+      ]
+     ],
+     "pieces": {
+      "bP": 212
+     }
+    },
+    {
+     "concept": 5453,
+     "count": 90,
+     "distinct": 1,
+     "example": [
+      [
+       "c2",
+       "wP"
+      ],
+      [
+       "d3",
+       "wP"
+      ]
+     ],
+     "example rel": [
+      "defends"
+     ],
+     "example count": 90,
+     "instances": [
+      [
+       [
+        [
+         "c2",
+         "wP"
+        ],
+        [
+         "d3",
+         "wP"
+        ]
+       ],
+       90
+      ]
+     ],
+     "pieces": {
+      "wP": 180
+     }
+    },
+    {
+     "concept": 24122,
+     "count": 85,
+     "distinct": 1,
+     "example": [
+      [
+       "a3",
+       "wP"
+      ],
+      [
+       "b4",
+       "wP"
+      ]
+     ],
+     "example rel": [
+      "defends"
+     ],
+     "example count": 85,
+     "instances": [
+      [
+       [
+        [
+         "a3",
+         "wP"
+        ],
+        [
+         "b4",
+         "wP"
+        ]
+       ],
+       85
+      ]
+     ],
+     "pieces": {
+      "wP": 170
+     }
+    },
+    {
+     "concept": 26012,
+     "count": 75,
+     "distinct": 1,
+     "example": [
+      [
+       "d3",
+       "wP"
+      ],
+      [
+       "e4",
+       "wP"
+      ]
+     ],
+     "example rel": [
+      "defends"
+     ],
+     "example count": 75,
+     "instances": [
+      [
+       [
+        [
+         "d3",
+         "wP"
+        ],
+        [
+         "e4",
+         "wP"
+        ]
+       ],
+       75
+      ]
+     ],
+     "pieces": {
+      "wP": 150
+     }
+    },
+    {
+     "concept": 16800,
+     "count": 72,
+     "distinct": 1,
+     "example": [
+      [
+       "g2",
+       "wP"
+      ],
+      [
+       "h3",
+       "wP"
+      ]
+     ],
+     "example rel": [
+      "defends"
+     ],
+     "example count": 72,
+     "instances": [
+      [
+       [
+        [
+         "g2",
+         "wP"
+        ],
+        [
+         "h3",
+         "wP"
+        ]
+       ],
+       72
+      ]
+     ],
+     "pieces": {
+      "wP": 144
+     }
+    }
+   ]
+  },
+  "3": {
+   "committed": 5490,
+   "concepts": 1512,
+   "top": [
+    {
+     "concept": 24728,
+     "count": 151,
+     "distinct": 1,
+     "example": [
+      [
+       "g1",
+       "wK"
+      ],
+      [
+       "g2",
+       "wP"
+      ],
+      [
+       "h2",
+       "wP"
+      ]
+     ],
+     "example rel": [
+      "defends"
+     ],
+     "example count": 151,
+     "instances": [
+      [
+       [
+        [
+         "g1",
+         "wK"
+        ],
+        [
+         "g2",
+         "wP"
+        ],
+        [
+         "h2",
+         "wP"
+        ]
+       ],
+       151
+      ]
+     ],
+     "pieces": {
+      "wP": 302,
+      "wK": 151
+     }
+    },
+    {
+     "concept": 4129,
+     "count": 146,
+     "distinct": 1,
+     "example": [
+      [
+       "c7",
+       "bP"
+      ],
+      [
+       "d6",
+       "bP"
+      ],
+      [
+       "e5",
+       "bP"
+      ]
+     ],
+     "example rel": [
+      "defended by"
+     ],
+     "example count": 146,
+     "instances": [
+      [
+       [
+        [
+         "c7",
+         "bP"
+        ],
+        [
+         "d6",
+         "bP"
+        ],
+        [
+         "e5",
+         "bP"
+        ]
+       ],
+       146
+      ]
+     ],
+     "pieces": {
+      "bP": 438
+     }
+    },
+    {
+     "concept": 21368,
+     "count": 124,
+     "distinct": 1,
+     "example": [
+      [
+       "a2",
+       "wP"
+      ],
+      [
+       "b2",
+       "wP"
+      ],
+      [
+       "c3",
+       "wN"
+      ]
+     ],
+     "example rel": [
+      "defended by"
+     ],
+     "example count": 124,
+     "instances": [
+      [
+       [
+        [
+         "a2",
+         "wP"
+        ],
+        [
+         "b2",
+         "wP"
+        ],
+        [
+         "c3",
+         "wN"
+        ]
+       ],
+       124
+      ]
+     ],
+     "pieces": {
+      "wP": 248,
+      "wN": 124
+     }
+    },
+    {
+     "concept": 8140,
+     "count": 117,
+     "distinct": 1,
+     "example": [
+      [
+       "a1",
+       "wR"
+      ],
+      [
+       "a2",
+       "wP"
+      ],
+      [
+       "b1",
+       "wN"
+      ]
+     ],
+     "example rel": [
+      "defends"
+     ],
+     "example count": 117,
+     "instances": [
+      [
+       [
+        [
+         "a1",
+         "wR"
+        ],
+        [
+         "a2",
+         "wP"
+        ],
+        [
+         "b1",
+         "wN"
+        ]
+       ],
+       117
+      ]
+     ],
+     "pieces": {
+      "wR": 117,
+      "wP": 117,
+      "wN": 117
+     }
+    },
+    {
+     "concept": 14408,
+     "count": 106,
+     "distinct": 2,
+     "example": [
+      [
+       "a7",
+       "bP"
+      ],
+      [
+       "b7",
+       "bP"
+      ],
+      [
+       "c6",
+       "bN"
+      ]
+     ],
+     "example rel": [
+      "defended by"
+     ],
+     "example count": 53,
+     "instances": [
+      [
+       [
+        [
+         "a7",
+         "bP"
+        ],
+        [
+         "b7",
+         "bP"
+        ],
+        [
+         "c6",
+         "bN"
+        ]
+       ],
+       53
+      ],
+      [
+       [
+        [
+         "a7",
+         "bP"
+        ],
+        [
+         "b7",
+         "bP"
+        ],
+        [
+         "c6",
+         "bN"
+        ]
+       ],
+       53
+      ]
+     ],
+     "pieces": {
+      "bP": 212,
+      "bN": 106
+     }
+    },
+    {
+     "concept": 7253,
+     "count": 100,
+     "distinct": 1,
+     "example": [
+      [
+       "a7",
+       "bP"
+      ],
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "b8",
+       "bN"
+      ]
+     ],
+     "example rel": [
+      "defended by"
+     ],
+     "example count": 100,
+     "instances": [
+      [
+       [
+        [
+         "a7",
+         "bP"
+        ],
+        [
+         "a8",
+         "bR"
+        ],
+        [
+         "b8",
+         "bN"
+        ]
+       ],
+       100
+      ]
+     ],
+     "pieces": {
+      "bP": 100,
+      "bR": 100,
+      "bN": 100
+     }
+    },
+    {
+     "concept": 13738,
+     "count": 99,
+     "distinct": 1,
+     "example": [
+      [
+       "f6",
+       "bN"
+      ],
+      [
+       "g7",
+       "bP"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "example rel": [
+      "defended by"
+     ],
+     "example count": 99,
+     "instances": [
+      [
+       [
+        [
+         "f6",
+         "bN"
+        ],
+        [
+         "g7",
+         "bP"
+        ],
+        [
+         "h7",
+         "bP"
+        ]
+       ],
+       99
+      ]
+     ],
+     "pieces": {
+      "bP": 198,
+      "bN": 99
+     }
+    },
+    {
+     "concept": 5257,
+     "count": 76,
+     "distinct": 1,
+     "example": [
+      [
+       "b7",
+       "bP"
+      ],
+      [
+       "c6",
+       "bP"
+      ],
+      [
+       "d5",
+       "bP"
+      ]
+     ],
+     "example rel": [
+      "defended by"
+     ],
+     "example count": 76,
+     "instances": [
+      [
+       [
+        [
+         "b7",
+         "bP"
+        ],
+        [
+         "c6",
+         "bP"
+        ],
+        [
+         "d5",
+         "bP"
+        ]
+       ],
+       76
+      ]
+     ],
+     "pieces": {
+      "bP": 228
+     }
+    },
+    {
+     "concept": 15249,
+     "count": 66,
+     "distinct": 3,
+     "example": [
+      [
+       "f6",
+       "bN"
+      ],
+      [
+       "g7",
+       "bP"
+      ],
+      [
+       "h6",
+       "bP"
+      ]
+     ],
+     "example rel": [
+      "defended by"
+     ],
+     "example count": 60,
+     "instances": [
+      [
+       [
+        [
+         "f6",
+         "bN"
+        ],
+        [
+         "g7",
+         "bP"
+        ],
+        [
+         "h6",
+         "bP"
+        ]
+       ],
+       60
+      ],
+      [
+       [
+        [
+         "f6",
+         "bN"
+        ],
+        [
+         "g7",
+         "bP"
+        ],
+        [
+         "h6",
+         "bP"
+        ]
+       ],
+       5
+      ],
+      [
+       [
+        [
+         "g5",
+         "bN"
+        ],
+        [
+         "g7",
+         "bP"
+        ],
+        [
+         "h6",
+         "bP"
+        ]
+       ],
+       1
+      ]
+     ],
+     "pieces": {
+      "bP": 132,
+      "bN": 66
+     }
+    },
+    {
+     "concept": 25527,
+     "count": 65,
+     "distinct": 1,
+     "example": [
+      [
+       "g2",
+       "wP"
+      ],
+      [
+       "h1",
+       "wK"
+      ],
+      [
+       "h2",
+       "wP"
+      ]
+     ],
+     "example rel": [
+      "defends"
+     ],
+     "example count": 65,
+     "instances": [
+      [
+       [
+        [
+         "g2",
+         "wP"
+        ],
+        [
+         "h1",
+         "wK"
+        ],
+        [
+         "h2",
+         "wP"
+        ]
+       ],
+       65
+      ]
+     ],
+     "pieces": {
+      "wP": 130,
+      "wK": 65
+     }
+    },
+    {
+     "concept": 15709,
+     "count": 62,
+     "distinct": 1,
+     "example": [
+      [
+       "g1",
+       "wK"
+      ],
+      [
+       "g2",
+       "wP"
+      ],
+      [
+       "h3",
+       "wP"
+      ]
+     ],
+     "example rel": [
+      "defends"
+     ],
+     "example count": 62,
+     "instances": [
+      [
+       [
+        [
+         "g1",
+         "wK"
+        ],
+        [
+         "g2",
+         "wP"
+        ],
+        [
+         "h3",
+         "wP"
+        ]
+       ],
+       62
+      ]
+     ],
+     "pieces": {
+      "wP": 124,
+      "wK": 62
+     }
+    },
+    {
+     "concept": 18892,
+     "count": 60,
+     "distinct": 1,
+     "example": [
+      [
+       "c2",
+       "wP"
+      ],
+      [
+       "d3",
+       "wP"
+      ],
+      [
+       "e4",
+       "wP"
+      ]
+     ],
+     "example rel": [
+      "defends"
+     ],
+     "example count": 60,
+     "instances": [
+      [
+       [
+        [
+         "c2",
+         "wP"
+        ],
+        [
+         "d3",
+         "wP"
+        ],
+        [
+         "e4",
+         "wP"
+        ]
+       ],
+       60
+      ]
+     ],
+     "pieces": {
+      "wP": 180
+     }
+    }
+   ]
+  },
+  "4": {
+   "committed": 15734,
+   "concepts": 3368,
+   "top": [
+    {
+     "concept": 7481,
+     "count": 1058,
+     "distinct": 1,
+     "example": [
+      [
+       "f2",
+       "wP"
+      ],
+      [
+       "g1",
+       "wK"
+      ],
+      [
+       "g2",
+       "wP"
+      ],
+      [
+       "h2",
+       "wP"
+      ]
+     ],
+     "example rel": [
+      "defends"
+     ],
+     "example count": 1058,
+     "instances": [
+      [
+       [
+        [
+         "f2",
+         "wP"
+        ],
+        [
+         "g1",
+         "wK"
+        ],
+        [
+         "g2",
+         "wP"
+        ],
+        [
+         "h2",
+         "wP"
+        ]
+       ],
+       1058
+      ]
+     ],
+     "pieces": {
+      "wP": 3174,
+      "wK": 1058
+     }
+    },
+    {
+     "concept": 15173,
+     "count": 622,
+     "distinct": 3,
+     "example": [
+      [
+       "f2",
+       "wP"
+      ],
+      [
+       "g1",
+       "wK"
+      ],
+      [
+       "g2",
+       "wP"
+      ],
+      [
+       "h3",
+       "wP"
+      ]
+     ],
+     "example rel": [
+      "defends"
+     ],
+     "example count": 619,
+     "instances": [
+      [
+       [
+        [
+         "f2",
+         "wP"
+        ],
+        [
+         "g1",
+         "wK"
+        ],
+        [
+         "g2",
+         "wP"
+        ],
+        [
+         "h3",
+         "wP"
+        ]
+       ],
+       619
+      ],
+      [
+       [
+        [
+         "f1",
+         "wK"
+        ],
+        [
+         "f2",
+         "wP"
+        ],
+        [
+         "g2",
+         "wP"
+        ],
+        [
+         "h3",
+         "wP"
+        ]
+       ],
+       2
+      ],
+      [
+       [
+        [
+         "f2",
+         "wP"
+        ],
+        [
+         "g2",
+         "wK"
+        ],
+        [
+         "g4",
+         "wP"
+        ],
+        [
+         "h3",
+         "wP"
+        ]
+       ],
+       1
+      ]
+     ],
+     "pieces": {
+      "wP": 1866,
+      "wK": 622
+     }
+    },
+    {
+     "concept": 25798,
+     "count": 377,
+     "distinct": 2,
+     "example": [
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "d8",
+       "bQ"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g8",
+       "bK"
+      ]
+     ],
+     "example rel": [
+      "defends"
+     ],
+     "example count": 376,
+     "instances": [
+      [
+       [
+        [
+         "a8",
+         "bR"
+        ],
+        [
+         "d8",
+         "bQ"
+        ],
+        [
+         "f8",
+         "bR"
+        ],
+        [
+         "g8",
+         "bK"
+        ]
+       ],
+       376
+      ],
+      [
+       [
+        [
+         "a8",
+         "bR"
+        ],
+        [
+         "b8",
+         "bQ"
+        ],
+        [
+         "f8",
+         "bR"
+        ],
+        [
+         "g8",
+         "bK"
+        ]
+       ],
+       1
+      ]
+     ],
+     "pieces": {
+      "bR": 754,
+      "bQ": 377,
+      "bK": 377
+     }
+    },
+    {
+     "concept": 8456,
+     "count": 296,
+     "distinct": 3,
+     "example": [
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g8",
+       "bK"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "example rel": [
+      "defended by"
+     ],
+     "example count": 279,
+     "instances": [
+      [
+       [
+        [
+         "a8",
+         "bR"
+        ],
+        [
+         "f8",
+         "bR"
+        ],
+        [
+         "g8",
+         "bK"
+        ],
+        [
+         "h7",
+         "bP"
+        ]
+       ],
+       279
+      ],
+      [
+       [
+        [
+         "a8",
+         "bR"
+        ],
+        [
+         "f8",
+         "bR"
+        ],
+        [
+         "h7",
+         "bP"
+        ],
+        [
+         "h8",
+         "bK"
+        ]
+       ],
+       14
+      ],
+      [
+       [
+        [
+         "a8",
+         "bR"
+        ],
+        [
+         "f8",
+         "bR"
+        ],
+        [
+         "g8",
+         "bK"
+        ],
+        [
+         "h7",
+         "bN"
+        ]
+       ],
+       3
+      ]
+     ],
+     "pieces": {
+      "bR": 592,
+      "bK": 296,
+      "bP": 293,
+      "bN": 3
+     }
+    },
+    {
+     "concept": 6267,
+     "count": 210,
+     "distinct": 1,
+     "example": [
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g8",
+       "bK"
+      ]
+     ],
+     "example rel": [
+      "defended by"
+     ],
+     "example count": 210,
+     "instances": [
+      [
+       [
+        [
+         "a8",
+         "bR"
+        ],
+        [
+         "f7",
+         "bP"
+        ],
+        [
+         "f8",
+         "bR"
+        ],
+        [
+         "g8",
+         "bK"
+        ]
+       ],
+       210
+      ]
+     ],
+     "pieces": {
+      "bR": 420,
+      "bP": 210,
+      "bK": 210
+     }
+    },
+    {
+     "concept": 6007,
+     "count": 189,
+     "distinct": 4,
+     "example": [
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "c8",
+       "bB"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g8",
+       "bK"
+      ]
+     ],
+     "example rel": [
+      "defended by"
+     ],
+     "example count": 152,
+     "instances": [
+      [
+       [
+        [
+         "a8",
+         "bR"
+        ],
+        [
+         "c8",
+         "bB"
+        ],
+        [
+         "f8",
+         "bR"
+        ],
+        [
+         "g8",
+         "bK"
+        ]
+       ],
+       152
+      ],
+      [
+       [
+        [
+         "a8",
+         "bR"
+        ],
+        [
+         "c8",
+         "bB"
+        ],
+        [
+         "f8",
+         "bR"
+        ],
+        [
+         "g8",
+         "bK"
+        ]
+       ],
+       34
+      ],
+      [
+       [
+        [
+         "a8",
+         "bR"
+        ],
+        [
+         "d8",
+         "bB"
+        ],
+        [
+         "f8",
+         "bR"
+        ],
+        [
+         "g8",
+         "bK"
+        ]
+       ],
+       2
+      ],
+      [
+       [
+        [
+         "a8",
+         "bR"
+        ],
+        [
+         "d8",
+         "bB"
+        ],
+        [
+         "f8",
+         "bR"
+        ],
+        [
+         "g8",
+         "bK"
+        ]
+       ],
+       1
+      ]
+     ],
+     "pieces": {
+      "bR": 378,
+      "bB": 189,
+      "bK": 189
+     }
+    },
+    {
+     "concept": 11536,
+     "count": 105,
+     "distinct": 4,
+     "example": [
+      [
+       "a1",
+       "wR"
+      ],
+      [
+       "c1",
+       "wB"
+      ],
+      [
+       "d1",
+       "wQ"
+      ],
+      [
+       "f1",
+       "wR"
+      ]
+     ],
+     "example rel": [
+      "defends"
+     ],
+     "example count": 69,
+     "instances": [
+      [
+       [
+        [
+         "a1",
+         "wR"
+        ],
+        [
+         "c1",
+         "wB"
+        ],
+        [
+         "d1",
+         "wQ"
+        ],
+        [
+         "f1",
+         "wR"
+        ]
+       ],
+       69
+      ],
+      [
+       [
+        [
+         "a1",
+         "wR"
+        ],
+        [
+         "c1",
+         "wB"
+        ],
+        [
+         "d1",
+         "wQ"
+        ],
+        [
+         "f1",
+         "wR"
+        ]
+       ],
+       34
+      ],
+      [
+       [
+        [
+         "a1",
+         "wR"
+        ],
+        [
+         "b1",
+         "wB"
+        ],
+        [
+         "d1",
+         "wQ"
+        ],
+        [
+         "f1",
+         "wR"
+        ]
+       ],
+       1
+      ],
+      [
+       [
+        [
+         "a1",
+         "wR"
+        ],
+        [
+         "b1",
+         "wB"
+        ],
+        [
+         "d1",
+         "wQ"
+        ],
+        [
+         "f1",
+         "wR"
+        ]
+       ],
+       1
+      ]
+     ],
+     "pieces": {
+      "wR": 210,
+      "wB": 105,
+      "wQ": 105
+     }
+    },
+    {
+     "concept": 19563,
+     "count": 104,
+     "distinct": 3,
+     "example": [
+      [
+       "a2",
+       "wP"
+      ],
+      [
+       "b2",
+       "wP"
+      ],
+      [
+       "c3",
+       "wN"
+      ],
+      [
+       "e4",
+       "wP"
+      ]
+     ],
+     "example rel": [
+      "defended by"
+     ],
+     "example count": 67,
+     "instances": [
+      [
+       [
+        [
+         "a2",
+         "wP"
+        ],
+        [
+         "b2",
+         "wP"
+        ],
+        [
+         "c3",
+         "wN"
+        ],
+        [
+         "e4",
+         "wP"
+        ]
+       ],
+       67
+      ],
+      [
+       [
+        [
+         "a2",
+         "wP"
+        ],
+        [
+         "b2",
+         "wP"
+        ],
+        [
+         "c3",
+         "wN"
+        ],
+        [
+         "e4",
+         "wP"
+        ]
+       ],
+       36
+      ],
+      [
+       [
+        [
+         "a4",
+         "wP"
+        ],
+        [
+         "b2",
+         "wP"
+        ],
+        [
+         "c3",
+         "wN"
+        ],
+        [
+         "e4",
+         "wP"
+        ]
+       ],
+       1
+      ]
+     ],
+     "pieces": {
+      "wP": 312,
+      "wN": 104
+     }
+    },
+    {
+     "concept": 23517,
+     "count": 99,
+     "distinct": 2,
+     "example": [
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "e8",
+       "bK"
+      ],
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "h8",
+       "bR"
+      ]
+     ],
+     "example rel": [
+      "defended by"
+     ],
+     "example count": 97,
+     "instances": [
+      [
+       [
+        [
+         "a8",
+         "bR"
+        ],
+        [
+         "e8",
+         "bK"
+        ],
+        [
+         "f7",
+         "bP"
+        ],
+        [
+         "h8",
+         "bR"
+        ]
+       ],
+       97
+      ],
+      [
+       [
+        [
+         "b8",
+         "bR"
+        ],
+        [
+         "e8",
+         "bK"
+        ],
+        [
+         "f7",
+         "bP"
+        ],
+        [
+         "h8",
+         "bR"
+        ]
+       ],
+       2
+      ]
+     ],
+     "pieces": {
+      "bR": 198,
+      "bK": 99,
+      "bP": 99
+     }
+    },
+    {
+     "concept": 24258,
+     "count": 97,
+     "distinct": 1,
+     "example": [
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "d8",
+       "bQ"
+      ],
+      [
+       "e8",
+       "bR"
+      ],
+      [
+       "g8",
+       "bK"
+      ]
+     ],
+     "example rel": [
+      "defends"
+     ],
+     "example count": 97,
+     "instances": [
+      [
+       [
+        [
+         "a8",
+         "bR"
+        ],
+        [
+         "d8",
+         "bQ"
+        ],
+        [
+         "e8",
+         "bR"
+        ],
+        [
+         "g8",
+         "bK"
+        ]
+       ],
+       97
+      ]
+     ],
+     "pieces": {
+      "bR": 194,
+      "bQ": 97,
+      "bK": 97
+     }
+    },
+    {
+     "concept": 21123,
+     "count": 75,
+     "distinct": 2,
+     "example": [
+      [
+       "e7",
+       "bB"
+      ],
+      [
+       "f6",
+       "bN"
+      ],
+      [
+       "g7",
+       "bP"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "example rel": [
+      "defended by"
+     ],
+     "example count": 74,
+     "instances": [
+      [
+       [
+        [
+         "e7",
+         "bB"
+        ],
+        [
+         "f6",
+         "bN"
+        ],
+        [
+         "g7",
+         "bP"
+        ],
+        [
+         "h7",
+         "bP"
+        ]
+       ],
+       74
+      ],
+      [
+       [
+        [
+         "e7",
+         "bB"
+        ],
+        [
+         "f6",
+         "bN"
+        ],
+        [
+         "g7",
+         "bP"
+        ],
+        [
+         "h7",
+         "bP"
+        ]
+       ],
+       1
+      ]
+     ],
+     "pieces": {
+      "bP": 150,
+      "bB": 75,
+      "bN": 75
+     }
+    },
+    {
+     "concept": 15319,
+     "count": 74,
+     "distinct": 3,
+     "example": [
+      [
+       "f2",
+       "wP"
+      ],
+      [
+       "g1",
+       "wK"
+      ],
+      [
+       "g3",
+       "wP"
+      ],
+      [
+       "h2",
+       "wP"
+      ]
+     ],
+     "example rel": [
+      "defends"
+     ],
+     "example count": 49,
+     "instances": [
+      [
+       [
+        [
+         "f2",
+         "wP"
+        ],
+        [
+         "g1",
+         "wK"
+        ],
+        [
+         "g3",
+         "wP"
+        ],
+        [
+         "h2",
+         "wP"
+        ]
+       ],
+       49
+      ],
+      [
+       [
+        [
+         "f2",
+         "wP"
+        ],
+        [
+         "g1",
+         "wK"
+        ],
+        [
+         "g3",
+         "wP"
+        ],
+        [
+         "h2",
+         "wP"
+        ]
+       ],
+       24
+      ],
+      [
+       [
+        [
+         "f2",
+         "wP"
+        ],
+        [
+         "g2",
+         "wK"
+        ],
+        [
+         "g3",
+         "wP"
+        ],
+        [
+         "h2",
+         "wP"
+        ]
+       ],
+       1
+      ]
+     ],
+     "pieces": {
+      "wP": 222,
+      "wK": 74
+     }
+    }
+   ]
+  }
+ },
+ "recognised units per position": {
+  "real": {
+   "1": 26.05,
+   "2": 0.02
+  },
+  "random": {
+   "1": 25.13,
+   "2": 0.24,
+   "3": 0.08,
+   "4": 0.06
+  }
+ },
+ "nested": [
+  {
+   "fen": {
+    "a8": "bR",
+    "b8": "bN",
+    "f8": "bR",
+    "g8": "bK",
+    "a7": "bP",
+    "b7": "bP",
+    "d7": "bN",
+    "f7": "bP",
+    "h7": "bP",
+    "c6": "bP",
+    "d6": "bQ",
+    "e6": "bB",
+    "g6": "bP",
+    "d5": "bP",
+    "d4": "wP",
+    "c3": "wP",
+    "d3": "wB",
+    "f3": "wN",
+    "a2": "wP",
+    "b2": "wP",
+    "c2": "wQ",
+    "e2": "wR",
+    "f2": "wP",
+    "g2": "wP",
+    "h2": "wP",
+    "e1": "wR",
+    "g1": "wK"
+   },
+   "top": [
+    {
+     "piece": "wP",
+     "sq": "a2"
+    },
+    {
+     "piece": "bP",
+     "sq": "g6"
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "f2",
+       "wP"
+      ],
+      [
+       "g1",
+       "wK"
+      ],
+      [
+       "g2",
+       "wP"
+      ],
+      [
+       "h2",
+       "wP"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "f2",
+         "wP"
+        ],
+        [
+         "g1",
+         "wK"
+        ],
+        [
+         "g2",
+         "wP"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "g1",
+           "wK"
+          ],
+          [
+           "g2",
+           "wP"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "wK",
+           "sq": "g1"
+          },
+          {
+           "piece": "wP",
+           "sq": "g2"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "wP",
+         "sq": "f2"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "wP",
+       "sq": "h2"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "c2",
+       "wQ"
+      ],
+      [
+       "d3",
+       "wB"
+      ],
+      [
+       "e1",
+       "wR"
+      ],
+      [
+       "e2",
+       "wR"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defended by"
+       ],
+       "pieces": [
+        [
+         "d3",
+         "wB"
+        ],
+        [
+         "e1",
+         "wR"
+        ],
+        [
+         "e2",
+         "wR"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "e1",
+           "wR"
+          ],
+          [
+           "e2",
+           "wR"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "wR",
+           "sq": "e1"
+          },
+          {
+           "piece": "wR",
+           "sq": "e2"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "wB",
+         "sq": "d3"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "wQ",
+       "sq": "c2"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 3,
+     "rel": [
+      "defended by"
+     ],
+     "pieces": [
+      [
+       "b7",
+       "bP"
+      ],
+      [
+       "c6",
+       "bP"
+      ],
+      [
+       "d5",
+       "bP"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 2,
+       "rel": [
+        "defended by"
+       ],
+       "pieces": [
+        [
+         "c6",
+         "bP"
+        ],
+        [
+         "d5",
+         "bP"
+        ]
+       ],
+       "parts": [
+        {
+         "piece": "bP",
+         "sq": "d5"
+        },
+        {
+         "piece": "bP",
+         "sq": "c6"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "bP",
+       "sq": "b7"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g8",
+       "bK"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defended by"
+       ],
+       "pieces": [
+        [
+         "f7",
+         "bP"
+        ],
+        [
+         "f8",
+         "bR"
+        ],
+        [
+         "g8",
+         "bK"
+        ]
+       ],
+       "parts": [
+        {
+         "piece": "bP",
+         "sq": "f7"
+        },
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "f8",
+           "bR"
+          ],
+          [
+           "g8",
+           "bK"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "bR",
+           "sq": "f8"
+          },
+          {
+           "piece": "bK",
+           "sq": "g8"
+          }
+         ],
+         "rid": null
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "bP",
+       "sq": "h7"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 3,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "d6",
+       "bQ"
+      ],
+      [
+       "d7",
+       "bN"
+      ],
+      [
+       "e6",
+       "bB"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 2,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "d6",
+         "bQ"
+        ],
+        [
+         "e6",
+         "bB"
+        ]
+       ],
+       "parts": [
+        {
+         "piece": "bQ",
+         "sq": "d6"
+        },
+        {
+         "piece": "bB",
+         "sq": "e6"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "bN",
+       "sq": "d7"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 3,
+     "rel": [
+      "defended by"
+     ],
+     "pieces": [
+      [
+       "a7",
+       "bP"
+      ],
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "b8",
+       "bN"
+      ]
+     ],
+     "parts": [
+      {
+       "piece": "bP",
+       "sq": "a7"
+      },
+      {
+       "size": 2,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "a8",
+         "bR"
+        ],
+        [
+         "b8",
+         "bN"
+        ]
+       ],
+       "parts": [
+        {
+         "piece": "bR",
+         "sq": "a8"
+        },
+        {
+         "piece": "bN",
+         "sq": "b8"
+        }
+       ],
+       "rid": null
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "b2",
+       "wP"
+      ],
+      [
+       "c3",
+       "wP"
+      ],
+      [
+       "d4",
+       "wP"
+      ],
+      [
+       "f3",
+       "wN"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 2,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "b2",
+         "wP"
+        ],
+        [
+         "c3",
+         "wP"
+        ]
+       ],
+       "parts": [
+        {
+         "piece": "wP",
+         "sq": "b2"
+        },
+        {
+         "piece": "wP",
+         "sq": "c3"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "size": 2,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "d4",
+         "wP"
+        ],
+        [
+         "f3",
+         "wN"
+        ]
+       ],
+       "parts": [
+        {
+         "piece": "wN",
+         "sq": "f3"
+        },
+        {
+         "piece": "wP",
+         "sq": "d4"
+        }
+       ],
+       "rid": null
+      }
+     ],
+     "rid": null
+    }
+   ],
+   "recognised": []
+  },
+  {
+   "fen": {
+    "b8": "bR",
+    "c8": "bB",
+    "d8": "bQ",
+    "f8": "bR",
+    "g8": "bK",
+    "g7": "bP",
+    "h7": "bP",
+    "a6": "bP",
+    "c6": "bP",
+    "e6": "bP",
+    "f6": "bB",
+    "d5": "bP",
+    "d4": "wP",
+    "f4": "wP",
+    "g4": "wP",
+    "h4": "bN",
+    "c3": "wN",
+    "e3": "wB",
+    "a2": "wP",
+    "b2": "wP",
+    "e2": "wB",
+    "h2": "wP",
+    "a1": "wR",
+    "d1": "wQ",
+    "f1": "wR",
+    "g1": "wK"
+   },
+   "top": [
+    {
+     "piece": "wP",
+     "sq": "g4"
+    },
+    {
+     "piece": "bP",
+     "sq": "a6"
+    },
+    {
+     "piece": "bP",
+     "sq": "h7"
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defended by",
+      "defends"
+     ],
+     "pieces": [
+      [
+       "a1",
+       "wR"
+      ],
+      [
+       "d1",
+       "wQ"
+      ],
+      [
+       "e2",
+       "wB"
+      ],
+      [
+       "f1",
+       "wR"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "a1",
+         "wR"
+        ],
+        [
+         "d1",
+         "wQ"
+        ],
+        [
+         "f1",
+         "wR"
+        ]
+       ],
+       "parts": [
+        {
+         "piece": "wR",
+         "sq": "a1"
+        },
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "d1",
+           "wQ"
+          ],
+          [
+           "f1",
+           "wR"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "wQ",
+           "sq": "d1"
+          },
+          {
+           "piece": "wR",
+           "sq": "f1"
+          }
+         ],
+         "rid": null
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "wB",
+       "sq": "e2"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defended by"
+     ],
+     "pieces": [
+      [
+       "c8",
+       "bB"
+      ],
+      [
+       "d8",
+       "bQ"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g8",
+       "bK"
+      ]
+     ],
+     "parts": [
+      {
+       "piece": "bB",
+       "sq": "c8"
+      },
+      {
+       "size": 3,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "d8",
+         "bQ"
+        ],
+        [
+         "f8",
+         "bR"
+        ],
+        [
+         "g8",
+         "bK"
+        ]
+       ],
+       "parts": [
+        {
+         "piece": "bQ",
+         "sq": "d8"
+        },
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "f8",
+           "bR"
+          ],
+          [
+           "g8",
+           "bK"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "bR",
+           "sq": "f8"
+          },
+          {
+           "piece": "bK",
+           "sq": "g8"
+          }
+         ],
+         "rid": null
+        }
+       ],
+       "rid": null
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 3,
+     "rel": [
+      "defended by"
+     ],
+     "pieces": [
+      [
+       "c6",
+       "bP"
+      ],
+      [
+       "d5",
+       "bP"
+      ],
+      [
+       "e6",
+       "bP"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 2,
+       "rel": [
+        "defended by"
+       ],
+       "pieces": [
+        [
+         "d5",
+         "bP"
+        ],
+        [
+         "e6",
+         "bP"
+        ]
+       ],
+       "parts": [
+        {
+         "piece": "bP",
+         "sq": "d5"
+        },
+        {
+         "piece": "bP",
+         "sq": "e6"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "bP",
+       "sq": "c6"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "e3",
+       "wB"
+      ],
+      [
+       "f4",
+       "wP"
+      ],
+      [
+       "g1",
+       "wK"
+      ],
+      [
+       "h2",
+       "wP"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defended by"
+       ],
+       "pieces": [
+        [
+         "e3",
+         "wB"
+        ],
+        [
+         "g1",
+         "wK"
+        ],
+        [
+         "h2",
+         "wP"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "g1",
+           "wK"
+          ],
+          [
+           "h2",
+           "wP"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "wK",
+           "sq": "g1"
+          },
+          {
+           "piece": "wP",
+           "sq": "h2"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "wB",
+         "sq": "e3"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "wP",
+       "sq": "f4"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "attacked by"
+     ],
+     "pieces": [
+      [
+       "a2",
+       "wP"
+      ],
+      [
+       "b2",
+       "wP"
+      ],
+      [
+       "b8",
+       "bR"
+      ],
+      [
+       "c3",
+       "wN"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defended by"
+       ],
+       "pieces": [
+        [
+         "a2",
+         "wP"
+        ],
+        [
+         "b2",
+         "wP"
+        ],
+        [
+         "c3",
+         "wN"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defended by"
+         ],
+         "pieces": [
+          [
+           "a2",
+           "wP"
+          ],
+          [
+           "c3",
+           "wN"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "wP",
+           "sq": "a2"
+          },
+          {
+           "piece": "wN",
+           "sq": "c3"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "wP",
+         "sq": "b2"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "bR",
+       "sq": "b8"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "attacked by"
+     ],
+     "pieces": [
+      [
+       "d4",
+       "wP"
+      ],
+      [
+       "f6",
+       "bB"
+      ],
+      [
+       "g7",
+       "bP"
+      ],
+      [
+       "h4",
+       "bN"
+      ]
+     ],
+     "parts": [
+      {
+       "piece": "wP",
+       "sq": "d4"
+      },
+      {
+       "size": 3,
+       "rel": [
+        "defended by"
+       ],
+       "pieces": [
+        [
+         "f6",
+         "bB"
+        ],
+        [
+         "g7",
+         "bP"
+        ],
+        [
+         "h4",
+         "bN"
+        ]
+       ],
+       "parts": [
+        {
+         "piece": "bN",
+         "sq": "h4"
+        },
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "f6",
+           "bB"
+          ],
+          [
+           "g7",
+           "bP"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "bB",
+           "sq": "f6"
+          },
+          {
+           "piece": "bP",
+           "sq": "g7"
+          }
+         ],
+         "rid": null
+        }
+       ],
+       "rid": null
+      }
+     ],
+     "rid": null
+    }
+   ],
+   "recognised": []
+  },
+  {
+   "fen": {
+    "a8": "bR",
+    "c8": "bB",
+    "d8": "bQ",
+    "h8": "bK",
+    "a7": "bB",
+    "b7": "bP",
+    "c7": "bP",
+    "e7": "bN",
+    "f7": "wB",
+    "g7": "bP",
+    "h7": "bP",
+    "c6": "bN",
+    "b4": "bP",
+    "a3": "wP",
+    "b3": "wQ",
+    "c3": "wP",
+    "d3": "wP",
+    "h3": "wP",
+    "f2": "wP",
+    "g2": "wP",
+    "a1": "wR",
+    "b1": "wN",
+    "c1": "wB",
+    "e1": "wR",
+    "g1": "wK"
+   },
+   "top": [
+    {
+     "piece": "wP",
+     "sq": "c3"
+    },
+    {
+     "piece": "wP",
+     "sq": "d3"
+    },
+    {
+     "piece": "bP",
+     "sq": "c7"
+    },
+    {
+     "piece": "bP",
+     "sq": "g7"
+    },
+    {
+     "piece": "bP",
+     "sq": "h7"
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "a1",
+       "wR"
+      ],
+      [
+       "b1",
+       "wN"
+      ],
+      [
+       "b3",
+       "wQ"
+      ],
+      [
+       "f7",
+       "wB"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defended by"
+       ],
+       "pieces": [
+        [
+         "a1",
+         "wR"
+        ],
+        [
+         "b1",
+         "wN"
+        ],
+        [
+         "b3",
+         "wQ"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "a1",
+           "wR"
+          ],
+          [
+           "b1",
+           "wN"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "wR",
+           "sq": "a1"
+          },
+          {
+           "piece": "wN",
+           "sq": "b1"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "wQ",
+         "sq": "b3"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "wB",
+       "sq": "f7"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "f2",
+       "wP"
+      ],
+      [
+       "g1",
+       "wK"
+      ],
+      [
+       "g2",
+       "wP"
+      ],
+      [
+       "h3",
+       "wP"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "f2",
+         "wP"
+        ],
+        [
+         "g1",
+         "wK"
+        ],
+        [
+         "g2",
+         "wP"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "f2",
+           "wP"
+          ],
+          [
+           "g1",
+           "wK"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "wK",
+           "sq": "g1"
+          },
+          {
+           "piece": "wP",
+           "sq": "f2"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "wP",
+         "sq": "g2"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "wP",
+       "sq": "h3"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "c8",
+       "bB"
+      ],
+      [
+       "d8",
+       "bQ"
+      ],
+      [
+       "h8",
+       "bK"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defended by"
+       ],
+       "pieces": [
+        [
+         "a8",
+         "bR"
+        ],
+        [
+         "c8",
+         "bB"
+        ],
+        [
+         "d8",
+         "bQ"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "a8",
+           "bR"
+          ],
+          [
+           "c8",
+           "bB"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "bR",
+           "sq": "a8"
+          },
+          {
+           "piece": "bB",
+           "sq": "c8"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "bQ",
+         "sq": "d8"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "bK",
+       "sq": "h8"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "a7",
+       "bB"
+      ],
+      [
+       "b7",
+       "bP"
+      ],
+      [
+       "c6",
+       "bN"
+      ],
+      [
+       "e7",
+       "bN"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defended by"
+       ],
+       "pieces": [
+        [
+         "b7",
+         "bP"
+        ],
+        [
+         "c6",
+         "bN"
+        ],
+        [
+         "e7",
+         "bN"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "c6",
+           "bN"
+          ],
+          [
+           "e7",
+           "bN"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "bN",
+           "sq": "c6"
+          },
+          {
+           "piece": "bN",
+           "sq": "e7"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "bP",
+         "sq": "b7"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "bB",
+       "sq": "a7"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "attacks"
+     ],
+     "pieces": [
+      [
+       "a3",
+       "wP"
+      ],
+      [
+       "b4",
+       "bP"
+      ],
+      [
+       "c1",
+       "wB"
+      ],
+      [
+       "e1",
+       "wR"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "a3",
+         "wP"
+        ],
+        [
+         "c1",
+         "wB"
+        ],
+        [
+         "e1",
+         "wR"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defended by"
+         ],
+         "pieces": [
+          [
+           "c1",
+           "wB"
+          ],
+          [
+           "e1",
+           "wR"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "wB",
+           "sq": "c1"
+          },
+          {
+           "piece": "wR",
+           "sq": "e1"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "wP",
+         "sq": "a3"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "bP",
+       "sq": "b4"
+      }
+     ],
+     "rid": null
+    }
+   ],
+   "recognised": []
+  },
+  {
+   "fen": {
+    "e8": "bK",
+    "f8": "bB",
+    "h8": "bR",
+    "b7": "bB",
+    "f7": "bP",
+    "g7": "bP",
+    "h7": "bP",
+    "c6": "bP",
+    "e6": "bP",
+    "g6": "bN",
+    "a5": "bR",
+    "c5": "bN",
+    "d5": "bP",
+    "e5": "wP",
+    "g5": "wB",
+    "f3": "wN",
+    "a2": "wP",
+    "e2": "wB",
+    "f2": "wP",
+    "g2": "wP",
+    "h2": "wP",
+    "a1": "wR",
+    "b1": "wN",
+    "e1": "wK",
+    "h1": "wR"
+   },
+   "top": [
+    {
+     "piece": "wP",
+     "sq": "f2"
+    },
+    {
+     "piece": "bP",
+     "sq": "g7"
+    },
+    {
+     "size": 3,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "a1",
+       "wR"
+      ],
+      [
+       "a2",
+       "wP"
+      ],
+      [
+       "b1",
+       "wN"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 2,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "a1",
+         "wR"
+        ],
+        [
+         "b1",
+         "wN"
+        ]
+       ],
+       "parts": [
+        {
+         "piece": "wR",
+         "sq": "a1"
+        },
+        {
+         "piece": "wN",
+         "sq": "b1"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "wP",
+       "sq": "a2"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 2,
+     "rel": [
+      "defended by"
+     ],
+     "pieces": [
+      [
+       "g6",
+       "bN"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "parts": [
+      {
+       "piece": "bN",
+       "sq": "g6"
+      },
+      {
+       "piece": "bP",
+       "sq": "h7"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defended by"
+     ],
+     "pieces": [
+      [
+       "e8",
+       "bK"
+      ],
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bB"
+      ],
+      [
+       "h8",
+       "bR"
+      ]
+     ],
+     "parts": [
+      {
+       "piece": "bP",
+       "sq": "f7"
+      },
+      {
+       "size": 3,
+       "rel": [
+        "defended by"
+       ],
+       "pieces": [
+        [
+         "e8",
+         "bK"
+        ],
+        [
+         "f8",
+         "bB"
+        ],
+        [
+         "h8",
+         "bR"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "e8",
+           "bK"
+          ],
+          [
+           "f8",
+           "bB"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "bK",
+           "sq": "e8"
+          },
+          {
+           "piece": "bB",
+           "sq": "f8"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "bR",
+         "sq": "h8"
+        }
+       ],
+       "rid": null
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "e1",
+       "wK"
+      ],
+      [
+       "e2",
+       "wB"
+      ],
+      [
+       "h1",
+       "wR"
+      ],
+      [
+       "h2",
+       "wP"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "e1",
+         "wK"
+        ],
+        [
+         "e2",
+         "wB"
+        ],
+        [
+         "h1",
+         "wR"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defended by"
+         ],
+         "pieces": [
+          [
+           "e1",
+           "wK"
+          ],
+          [
+           "h1",
+           "wR"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "wK",
+           "sq": "e1"
+          },
+          {
+           "piece": "wR",
+           "sq": "h1"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "wB",
+         "sq": "e2"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "wP",
+       "sq": "h2"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defended by"
+     ],
+     "pieces": [
+      [
+       "b7",
+       "bB"
+      ],
+      [
+       "c6",
+       "bP"
+      ],
+      [
+       "d5",
+       "bP"
+      ],
+      [
+       "e6",
+       "bP"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defended by"
+       ],
+       "pieces": [
+        [
+         "c6",
+         "bP"
+        ],
+        [
+         "d5",
+         "bP"
+        ],
+        [
+         "e6",
+         "bP"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defended by"
+         ],
+         "pieces": [
+          [
+           "d5",
+           "bP"
+          ],
+          [
+           "e6",
+           "bP"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "bP",
+           "sq": "d5"
+          },
+          {
+           "piece": "bP",
+           "sq": "e6"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "bP",
+         "sq": "c6"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "bB",
+       "sq": "b7"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 2,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "a5",
+       "bR"
+      ],
+      [
+       "c5",
+       "bN"
+      ]
+     ],
+     "parts": [
+      {
+       "piece": "bR",
+       "sq": "a5"
+      },
+      {
+       "piece": "bN",
+       "sq": "c5"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "e5",
+       "wP"
+      ],
+      [
+       "f3",
+       "wN"
+      ],
+      [
+       "g2",
+       "wP"
+      ],
+      [
+       "g5",
+       "wB"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "e5",
+         "wP"
+        ],
+        [
+         "f3",
+         "wN"
+        ],
+        [
+         "g2",
+         "wP"
+        ]
+       ],
+       "parts": [
+        {
+         "piece": "wP",
+         "sq": "g2"
+        },
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "e5",
+           "wP"
+          ],
+          [
+           "f3",
+           "wN"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "wN",
+           "sq": "f3"
+          },
+          {
+           "piece": "wP",
+           "sq": "e5"
+          }
+         ],
+         "rid": null
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "wB",
+       "sq": "g5"
+      }
+     ],
+     "rid": null
+    }
+   ],
+   "recognised": []
+  },
+  {
+   "fen": {
+    "c8": "bK",
+    "d8": "bR",
+    "h8": "bR",
+    "a7": "bP",
+    "b7": "bP",
+    "c7": "bP",
+    "d7": "bQ",
+    "f7": "bP",
+    "h7": "bP",
+    "b6": "bB",
+    "d6": "bP",
+    "b5": "wP",
+    "e5": "bP",
+    "g5": "wQ",
+    "c4": "wB",
+    "e4": "wP",
+    "f4": "bN",
+    "a3": "wP",
+    "d3": "wP",
+    "f3": "wP",
+    "c2": "wP",
+    "f2": "wP",
+    "h2": "wK",
+    "a1": "wR",
+    "b1": "wN",
+    "c1": "wB"
+   },
+   "top": [
+    {
+     "piece": "wK",
+     "sq": "h2"
+    },
+    {
+     "piece": "bN",
+     "sq": "f4"
+    },
+    {
+     "piece": "bP",
+     "sq": "b7"
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defended by"
+     ],
+     "pieces": [
+      [
+       "c8",
+       "bK"
+      ],
+      [
+       "d8",
+       "bR"
+      ],
+      [
+       "h7",
+       "bP"
+      ],
+      [
+       "h8",
+       "bR"
+      ]
+     ],
+     "parts": [
+      {
+       "piece": "bP",
+       "sq": "h7"
+      },
+      {
+       "size": 3,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "c8",
+         "bK"
+        ],
+        [
+         "d8",
+         "bR"
+        ],
+        [
+         "h8",
+         "bR"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "c8",
+           "bK"
+          ],
+          [
+           "d8",
+           "bR"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "bK",
+           "sq": "c8"
+          },
+          {
+           "piece": "bR",
+           "sq": "d8"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "bR",
+         "sq": "h8"
+        }
+       ],
+       "rid": null
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defended by"
+     ],
+     "pieces": [
+      [
+       "c2",
+       "wP"
+      ],
+      [
+       "d3",
+       "wP"
+      ],
+      [
+       "e4",
+       "wP"
+      ],
+      [
+       "f3",
+       "wP"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "c2",
+         "wP"
+        ],
+        [
+         "d3",
+         "wP"
+        ],
+        [
+         "e4",
+         "wP"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "c2",
+           "wP"
+          ],
+          [
+           "d3",
+           "wP"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "wP",
+           "sq": "c2"
+          },
+          {
+           "piece": "wP",
+           "sq": "d3"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "wP",
+         "sq": "e4"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "wP",
+       "sq": "f3"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "attacked by"
+     ],
+     "pieces": [
+      [
+       "c7",
+       "bP"
+      ],
+      [
+       "d6",
+       "bP"
+      ],
+      [
+       "e5",
+       "bP"
+      ],
+      [
+       "g5",
+       "wQ"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defended by"
+       ],
+       "pieces": [
+        [
+         "c7",
+         "bP"
+        ],
+        [
+         "d6",
+         "bP"
+        ],
+        [
+         "e5",
+         "bP"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defended by"
+         ],
+         "pieces": [
+          [
+           "d6",
+           "bP"
+          ],
+          [
+           "e5",
+           "bP"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "bP",
+           "sq": "e5"
+          },
+          {
+           "piece": "bP",
+           "sq": "d6"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "bP",
+         "sq": "c7"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "wQ",
+       "sq": "g5"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defended by"
+     ],
+     "pieces": [
+      [
+       "a1",
+       "wR"
+      ],
+      [
+       "a3",
+       "wP"
+      ],
+      [
+       "b1",
+       "wN"
+      ],
+      [
+       "c1",
+       "wB"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "a1",
+         "wR"
+        ],
+        [
+         "a3",
+         "wP"
+        ],
+        [
+         "b1",
+         "wN"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "a1",
+           "wR"
+          ],
+          [
+           "b1",
+           "wN"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "wR",
+           "sq": "a1"
+          },
+          {
+           "piece": "wN",
+           "sq": "b1"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "wP",
+         "sq": "a3"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "wB",
+       "sq": "c1"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "attacked by",
+      "attacks"
+     ],
+     "pieces": [
+      [
+       "b5",
+       "wP"
+      ],
+      [
+       "c4",
+       "wB"
+      ],
+      [
+       "d7",
+       "bQ"
+      ],
+      [
+       "f7",
+       "bP"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 2,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "b5",
+         "wP"
+        ],
+        [
+         "c4",
+         "wB"
+        ]
+       ],
+       "parts": [
+        {
+         "piece": "wB",
+         "sq": "c4"
+        },
+        {
+         "piece": "wP",
+         "sq": "b5"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "size": 2,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "d7",
+         "bQ"
+        ],
+        [
+         "f7",
+         "bP"
+        ]
+       ],
+       "parts": [
+        {
+         "piece": "bQ",
+         "sq": "d7"
+        },
+        {
+         "piece": "bP",
+         "sq": "f7"
+        }
+       ],
+       "rid": null
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 3,
+     "rel": [
+      "attacked by"
+     ],
+     "pieces": [
+      [
+       "a7",
+       "bP"
+      ],
+      [
+       "b6",
+       "bB"
+      ],
+      [
+       "f2",
+       "wP"
+      ]
+     ],
+     "parts": [
+      {
+       "piece": "wP",
+       "sq": "f2"
+      },
+      {
+       "size": 2,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "a7",
+         "bP"
+        ],
+        [
+         "b6",
+         "bB"
+        ]
+       ],
+       "parts": [
+        {
+         "piece": "bB",
+         "sq": "b6"
+        },
+        {
+         "piece": "bP",
+         "sq": "a7"
+        }
+       ],
+       "rid": null
+      }
+     ],
+     "rid": null
+    }
+   ],
+   "recognised": []
+  },
+  {
+   "fen": {
+    "a8": "bR",
+    "f8": "bR",
+    "g8": "bK",
+    "b7": "bP",
+    "f7": "bP",
+    "g7": "bB",
+    "h7": "bP",
+    "a6": "bP",
+    "b6": "bQ",
+    "d6": "bP",
+    "f6": "bN",
+    "g6": "bP",
+    "g5": "wB",
+    "a4": "wP",
+    "c4": "bP",
+    "e4": "wP",
+    "f4": "wP",
+    "g4": "bN",
+    "b3": "wB",
+    "c3": "wN",
+    "h3": "wQ",
+    "b2": "wP",
+    "c2": "wP",
+    "e2": "wN",
+    "g2": "wP",
+    "h2": "wP",
+    "a1": "wR",
+    "f1": "wR",
+    "g1": "wK"
+   },
+   "top": [
+    {
+     "piece": "bN",
+     "sq": "g4"
+    },
+    {
+     "piece": "wB",
+     "sq": "g5"
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defended by"
+     ],
+     "pieces": [
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g8",
+       "bK"
+      ]
+     ],
+     "parts": [
+      {
+       "piece": "bP",
+       "sq": "f7"
+      },
+      {
+       "size": 3,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "a8",
+         "bR"
+        ],
+        [
+         "f8",
+         "bR"
+        ],
+        [
+         "g8",
+         "bK"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "a8",
+           "bR"
+          ],
+          [
+           "f8",
+           "bR"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "bR",
+           "sq": "a8"
+          },
+          {
+           "piece": "bR",
+           "sq": "f8"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "bK",
+         "sq": "g8"
+        }
+       ],
+       "rid": null
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defended by"
+     ],
+     "pieces": [
+      [
+       "e2",
+       "wN"
+      ],
+      [
+       "g1",
+       "wK"
+      ],
+      [
+       "g2",
+       "wP"
+      ],
+      [
+       "h2",
+       "wP"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "g1",
+         "wK"
+        ],
+        [
+         "g2",
+         "wP"
+        ],
+        [
+         "h2",
+         "wP"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "g1",
+           "wK"
+          ],
+          [
+           "g2",
+           "wP"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "wK",
+           "sq": "g1"
+          },
+          {
+           "piece": "wP",
+           "sq": "g2"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "wP",
+         "sq": "h2"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "wN",
+       "sq": "e2"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "f6",
+       "bN"
+      ],
+      [
+       "g6",
+       "bP"
+      ],
+      [
+       "g7",
+       "bB"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defended by"
+       ],
+       "pieces": [
+        [
+         "f6",
+         "bN"
+        ],
+        [
+         "g7",
+         "bB"
+        ],
+        [
+         "h7",
+         "bP"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "f6",
+           "bN"
+          ],
+          [
+           "h7",
+           "bP"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "bN",
+           "sq": "f6"
+          },
+          {
+           "piece": "bP",
+           "sq": "h7"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "bB",
+         "sq": "g7"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "bP",
+       "sq": "g6"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "a1",
+       "wR"
+      ],
+      [
+       "a4",
+       "wP"
+      ],
+      [
+       "f1",
+       "wR"
+      ],
+      [
+       "f4",
+       "wP"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "a1",
+         "wR"
+        ],
+        [
+         "a4",
+         "wP"
+        ],
+        [
+         "f1",
+         "wR"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "a1",
+           "wR"
+          ],
+          [
+           "f1",
+           "wR"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "wR",
+           "sq": "a1"
+          },
+          {
+           "piece": "wR",
+           "sq": "f1"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "wP",
+         "sq": "a4"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "wP",
+       "sq": "f4"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defended by"
+     ],
+     "pieces": [
+      [
+       "b2",
+       "wP"
+      ],
+      [
+       "c3",
+       "wN"
+      ],
+      [
+       "e4",
+       "wP"
+      ],
+      [
+       "h3",
+       "wQ"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "b2",
+         "wP"
+        ],
+        [
+         "c3",
+         "wN"
+        ],
+        [
+         "e4",
+         "wP"
+        ]
+       ],
+       "parts": [
+        {
+         "piece": "wP",
+         "sq": "b2"
+        },
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "c3",
+           "wN"
+          ],
+          [
+           "e4",
+           "wP"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "wN",
+           "sq": "c3"
+          },
+          {
+           "piece": "wP",
+           "sq": "e4"
+          }
+         ],
+         "rid": null
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "wQ",
+       "sq": "h3"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defended by"
+     ],
+     "pieces": [
+      [
+       "a6",
+       "bP"
+      ],
+      [
+       "b6",
+       "bQ"
+      ],
+      [
+       "b7",
+       "bP"
+      ],
+      [
+       "d6",
+       "bP"
+      ]
+     ],
+     "parts": [
+      {
+       "piece": "bP",
+       "sq": "a6"
+      },
+      {
+       "size": 3,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "b6",
+         "bQ"
+        ],
+        [
+         "b7",
+         "bP"
+        ],
+        [
+         "d6",
+         "bP"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "b6",
+           "bQ"
+          ],
+          [
+           "b7",
+           "bP"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "bQ",
+           "sq": "b6"
+          },
+          {
+           "piece": "bP",
+           "sq": "b7"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "bP",
+         "sq": "d6"
+        }
+       ],
+       "rid": null
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 3,
+     "rel": [
+      "attacks"
+     ],
+     "pieces": [
+      [
+       "b3",
+       "wB"
+      ],
+      [
+       "c2",
+       "wP"
+      ],
+      [
+       "c4",
+       "bP"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 2,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "b3",
+         "wB"
+        ],
+        [
+         "c2",
+         "wP"
+        ]
+       ],
+       "parts": [
+        {
+         "piece": "wP",
+         "sq": "c2"
+        },
+        {
+         "piece": "wB",
+         "sq": "b3"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "bP",
+       "sq": "c4"
+      }
+     ],
+     "rid": null
+    }
+   ],
+   "recognised": []
+  },
+  {
+   "fen": {
+    "a8": "bR",
+    "c8": "bB",
+    "e8": "bN",
+    "f8": "bR",
+    "g8": "bK",
+    "a7": "bP",
+    "b7": "bP",
+    "c7": "bP",
+    "d7": "bP",
+    "f7": "bP",
+    "c6": "bN",
+    "g6": "bP",
+    "h6": "bP",
+    "b5": "wN",
+    "c5": "bB",
+    "e5": "wP",
+    "c4": "wB",
+    "f4": "wP",
+    "a3": "wP",
+    "b2": "wP",
+    "g2": "wP",
+    "h2": "wP",
+    "b1": "wR",
+    "c1": "wB",
+    "f1": "wR",
+    "h1": "wK"
+   },
+   "top": [
+    {
+     "piece": "bP",
+     "sq": "g6"
+    },
+    {
+     "piece": "bP",
+     "sq": "h6"
+    },
+    {
+     "piece": "bP",
+     "sq": "c7"
+    },
+    {
+     "size": 2,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "c8",
+       "bB"
+      ]
+     ],
+     "parts": [
+      {
+       "piece": "bR",
+       "sq": "a8"
+      },
+      {
+       "piece": "bB",
+       "sq": "c8"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 3,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "g2",
+       "wP"
+      ],
+      [
+       "h1",
+       "wK"
+      ],
+      [
+       "h2",
+       "wP"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 2,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "h1",
+         "wK"
+        ],
+        [
+         "h2",
+         "wP"
+        ]
+       ],
+       "parts": [
+        {
+         "piece": "wK",
+         "sq": "h1"
+        },
+        {
+         "piece": "wP",
+         "sq": "h2"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "wP",
+       "sq": "g2"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "b5",
+       "wN"
+      ],
+      [
+       "c1",
+       "wB"
+      ],
+      [
+       "c4",
+       "wB"
+      ],
+      [
+       "f1",
+       "wR"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defended by"
+       ],
+       "pieces": [
+        [
+         "c1",
+         "wB"
+        ],
+        [
+         "c4",
+         "wB"
+        ],
+        [
+         "f1",
+         "wR"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defended by"
+         ],
+         "pieces": [
+          [
+           "c1",
+           "wB"
+          ],
+          [
+           "f1",
+           "wR"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "wB",
+           "sq": "c1"
+          },
+          {
+           "piece": "wR",
+           "sq": "f1"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "wB",
+         "sq": "c4"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "wN",
+       "sq": "b5"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defended by"
+     ],
+     "pieces": [
+      [
+       "a7",
+       "bP"
+      ],
+      [
+       "b7",
+       "bP"
+      ],
+      [
+       "c6",
+       "bN"
+      ],
+      [
+       "d7",
+       "bP"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "a7",
+         "bP"
+        ],
+        [
+         "c6",
+         "bN"
+        ],
+        [
+         "d7",
+         "bP"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defended by"
+         ],
+         "pieces": [
+          [
+           "c6",
+           "bN"
+          ],
+          [
+           "d7",
+           "bP"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "bN",
+           "sq": "c6"
+          },
+          {
+           "piece": "bP",
+           "sq": "d7"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "bP",
+         "sq": "a7"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "bP",
+       "sq": "b7"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "e8",
+       "bN"
+      ],
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g8",
+       "bK"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defended by"
+       ],
+       "pieces": [
+        [
+         "f7",
+         "bP"
+        ],
+        [
+         "f8",
+         "bR"
+        ],
+        [
+         "g8",
+         "bK"
+        ]
+       ],
+       "parts": [
+        {
+         "piece": "bP",
+         "sq": "f7"
+        },
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "f8",
+           "bR"
+          ],
+          [
+           "g8",
+           "bK"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "bR",
+           "sq": "f8"
+          },
+          {
+           "piece": "bK",
+           "sq": "g8"
+          }
+         ],
+         "rid": null
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "bN",
+       "sq": "e8"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 2,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "e5",
+       "wP"
+      ],
+      [
+       "f4",
+       "wP"
+      ]
+     ],
+     "parts": [
+      {
+       "piece": "wP",
+       "sq": "f4"
+      },
+      {
+       "piece": "wP",
+       "sq": "e5"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "a3",
+       "wP"
+      ],
+      [
+       "b1",
+       "wR"
+      ],
+      [
+       "b2",
+       "wP"
+      ],
+      [
+       "c5",
+       "bB"
+      ]
+     ],
+     "parts": [
+      {
+       "piece": "wR",
+       "sq": "b1"
+      },
+      {
+       "size": 3,
+       "rel": [
+        "attacked by"
+       ],
+       "pieces": [
+        [
+         "a3",
+         "wP"
+        ],
+        [
+         "b2",
+         "wP"
+        ],
+        [
+         "c5",
+         "bB"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "a3",
+           "wP"
+          ],
+          [
+           "b2",
+           "wP"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "wP",
+           "sq": "b2"
+          },
+          {
+           "piece": "wP",
+           "sq": "a3"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "bB",
+         "sq": "c5"
+        }
+       ],
+       "rid": null
+      }
+     ],
+     "rid": null
+    }
+   ],
+   "recognised": []
+  },
+  {
+   "fen": {
+    "a8": "bR",
+    "f8": "bR",
+    "g8": "bK",
+    "a7": "bP",
+    "c7": "bP",
+    "d7": "bP",
+    "e7": "bQ",
+    "f7": "bP",
+    "g7": "bP",
+    "h7": "bP",
+    "c6": "bB",
+    "f6": "bB",
+    "b3": "wQ",
+    "f3": "wN",
+    "a2": "wP",
+    "d2": "wB",
+    "e2": "wB",
+    "f2": "wP",
+    "g2": "wP",
+    "h2": "wP",
+    "f1": "wR",
+    "g1": "wK"
+   },
+   "top": [
+    {
+     "piece": "bP",
+     "sq": "a7"
+    },
+    {
+     "piece": "bP",
+     "sq": "c7"
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "f2",
+       "wP"
+      ],
+      [
+       "g1",
+       "wK"
+      ],
+      [
+       "g2",
+       "wP"
+      ],
+      [
+       "h2",
+       "wP"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "g1",
+         "wK"
+        ],
+        [
+         "g2",
+         "wP"
+        ],
+        [
+         "h2",
+         "wP"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "g1",
+           "wK"
+          ],
+          [
+           "g2",
+           "wP"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "wK",
+           "sq": "g1"
+          },
+          {
+           "piece": "wP",
+           "sq": "g2"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "wP",
+         "sq": "h2"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "wP",
+       "sq": "f2"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defended by"
+     ],
+     "pieces": [
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g8",
+       "bK"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "parts": [
+      {
+       "piece": "bP",
+       "sq": "h7"
+      },
+      {
+       "size": 3,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "a8",
+         "bR"
+        ],
+        [
+         "f8",
+         "bR"
+        ],
+        [
+         "g8",
+         "bK"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "a8",
+           "bR"
+          ],
+          [
+           "f8",
+           "bR"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "bR",
+           "sq": "a8"
+          },
+          {
+           "piece": "bR",
+           "sq": "f8"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "bK",
+         "sq": "g8"
+        }
+       ],
+       "rid": null
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 2,
+     "rel": [
+      "defended by"
+     ],
+     "pieces": [
+      [
+       "e2",
+       "wB"
+      ],
+      [
+       "f1",
+       "wR"
+      ]
+     ],
+     "parts": [
+      {
+       "piece": "wR",
+       "sq": "f1"
+      },
+      {
+       "piece": "wB",
+       "sq": "e2"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "e7",
+       "bQ"
+      ],
+      [
+       "f6",
+       "bB"
+      ],
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "g7",
+       "bP"
+      ]
+     ],
+     "parts": [
+      {
+       "size": 3,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "e7",
+         "bQ"
+        ],
+        [
+         "f6",
+         "bB"
+        ],
+        [
+         "g7",
+         "bP"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "defends"
+         ],
+         "pieces": [
+          [
+           "e7",
+           "bQ"
+          ],
+          [
+           "f6",
+           "bB"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "bB",
+           "sq": "f6"
+          },
+          {
+           "piece": "bQ",
+           "sq": "e7"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "bP",
+         "sq": "g7"
+        }
+       ],
+       "rid": null
+      },
+      {
+       "piece": "bP",
+       "sq": "f7"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 2,
+     "rel": [
+      "defends"
+     ],
+     "pieces": [
+      [
+       "a2",
+       "wP"
+      ],
+      [
+       "b3",
+       "wQ"
+      ]
+     ],
+     "parts": [
+      {
+       "piece": "wP",
+       "sq": "a2"
+      },
+      {
+       "piece": "wQ",
+       "sq": "b3"
+      }
+     ],
+     "rid": null
+    },
+    {
+     "size": 4,
+     "rel": [
+      "defended by"
+     ],
+     "pieces": [
+      [
+       "c6",
+       "bB"
+      ],
+      [
+       "d2",
+       "wB"
+      ],
+      [
+       "d7",
+       "bP"
+      ],
+      [
+       "f3",
+       "wN"
+      ]
+     ],
+     "parts": [
+      {
+       "piece": "wB",
+       "sq": "d2"
+      },
+      {
+       "size": 3,
+       "rel": [
+        "defends"
+       ],
+       "pieces": [
+        [
+         "c6",
+         "bB"
+        ],
+        [
+         "d7",
+         "bP"
+        ],
+        [
+         "f3",
+         "wN"
+        ]
+       ],
+       "parts": [
+        {
+         "size": 2,
+         "rel": [
+          "attacked by"
+         ],
+         "pieces": [
+          [
+           "c6",
+           "bB"
+          ],
+          [
+           "f3",
+           "wN"
+          ]
+         ],
+         "parts": [
+          {
+           "piece": "wN",
+           "sq": "f3"
+          },
+          {
+           "piece": "bB",
+           "sq": "c6"
+          }
+         ],
+         "rid": null
+        },
+        {
+         "piece": "bP",
+         "sq": "d7"
+        }
+       ],
+       "rid": null
+      }
+     ],
+     "rid": null
+    }
+   ],
+   "recognised": []
+  }
+ ]
+}
