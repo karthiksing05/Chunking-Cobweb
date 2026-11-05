@@ -307,3 +307,21 @@ class CUCobwebTree:
 
     def check_invariants(self, tol: float = 1e-6) -> None:
         self.tree.check_invariants(tol)
+
+
+class BlankFilledTree(CUCobwebTree):
+    """One tree holding instances that define only some of its attributes (the
+    hierarchy ablations): every attribute an instance lacks takes the value ``blank``."""
+
+    def __init__(self, attrs, seed: int = 0, fast: bool = True, blank: Hashable = "-"):
+        super().__init__(attrs, seed=seed, fast=fast)
+        self._blank = {a: blank for a in self.attrs}
+
+    def ifit(self, x: dict, w: float = 1.0) -> CUNode:
+        return super().ifit({**self._blank, **x}, w)
+
+    def unfit(self, leaf: CUNode, x: dict, w: float = 1.0) -> None:
+        super().unfit(leaf, {**self._blank, **x}, w)
+
+    def categorize(self, x: dict, w: float = 1.0) -> List[CUNode]:
+        return super().categorize({**self._blank, **x}, w)

@@ -271,7 +271,7 @@ class ChartGen:
         if el is None:
             return self.start
         p = self.start
-        for node in L.cnt.categorize(L._content(el)):      # root ... leaf
+        for node in L.cnt.categorize(L._jx(el) if L.hierarchy == "joint" else L._content(el)):      # root ... leaf
             cnt = np.zeros(len(self.syms))
             for rid, w in L.cnt.passive(node, NEXT).items():
                 c = self._concept(L.records[rid]) if L.records[rid].cleaf is not None else None

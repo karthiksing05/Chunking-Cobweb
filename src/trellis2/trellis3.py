@@ -149,7 +149,7 @@ class Trellis3:
                  ref_names: bool = False, repair_reached: int = 0, repair_use: int = 0,
                  repair_path: bool = False, repair_draws: int = 1, repair_now: bool = False,
                  story_facet: bool = False, exact_alone: bool = False,
-                 search: str = "chart", beam: int = 8):
+                 search: str = "chart", beam: int = 8, hierarchy: str = "two"):
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -384,6 +384,17 @@ class Trellis3:
             self.cnt = IncrementalCobwebTree(self.cnt_attrs, seed=seed + 1)
             if not tree_fast:
                 self.ctx.fast_ec = self.cnt.fast_ec = False
+        # hierarchy (ablation): "two", the two trees; "shared", one tree that receives
+        # a composite's content and context instances as two records; "joint", one tree
+        # and one record per element holding both descriptions (a word's content
+        # attributes are blank), with no own-content facet, since the instance holds
+        # its own content. Both read every name from the one tree.
+        self.hierarchy = hierarchy
+        if hierarchy != "two":
+            if tree != "cu":
+                raise ValueError("hierarchy ablations run on the compiled tree")
+            from .cu_cobweb import BlankFilledTree
+            self.ctx = self.cnt = BlankFilledTree(self.ctx_attrs + self.cnt_attrs, seed=seed, fast=tree_fast, blank=BLANK)
         self.ctx.partial = self.cnt.partial = (boundary in ("missing", "edge"))
         # restructure="sample": a span stored with posterior weight w merges or
         # splits concepts with probability w (see IncrementalCobwebTree)
@@ -460,7 +471,7 @@ class Trellis3:
         if e.cleaf is not None:
             return self._ids(self.cnt.ancestors(e.cleaf)[::-1])
         if "cnt" not in e.memo:
-            e.memo["cnt"] = self._ids(self.cnt.categorize(e.cnt))
+            e.memo["cnt"] = self._ids(self.cnt.categorize(self._cq(e)))
         return e.memo["cnt"]
 
     def _ctx_name(self, e: Elem, part: bool = False) -> List[str]:
@@ -604,7 +615,7 @@ class Trellis3:
         if e.cleaf is not None:
             return ("c", e.cleaf.id)
         if "cntp" not in e.memo:
-            e.memo["cntp"] = self.cnt.categorize(e.cnt)
+            e.memo["cntp"] = self.cnt.categorize(self._cq(e))
         return ("c", e.memo["cntp"][-1].id)
 
     def _add_type(self, e: Elem) -> None:
@@ -675,7 +686,7 @@ class Trellis3:
             path = self.cnt.ancestors(e.cleaf)[::-1]
         else:
             if "cntp" not in e.memo:
-                e.memo["cntp"] = self.cnt.categorize(e.cnt)
+                e.memo["cntp"] = self.cnt.categorize(self._cq(e))
             path = e.memo["cntp"]
         return self._path_ids(path, naming)
 
@@ -820,7 +831,7 @@ class Trellis3:
             if analysed:
                 for p, ids in (("par", e.par), ("sib", e.sib)):
                     self._facet(x, p, ids or [BLANK] * self.depth)
-        if self.donate_ctx:
+        if self.donate_ctx and (self.hierarchy != "joint" or e.token is not None):
             self._facet(x, "cc", self._cc_ids(e))
         if self.story_facet:
             self._facet(x, "pv", self._pv or [BLANK])
@@ -1085,6 +1096,8 @@ class Trellis3:
             return self._climb(self.cnt, e.cnt) + self._climb(self.ctx, e.ctx)
         if self.factor == "code":
             return self._code(self.cnt, e.cnt) + self._code(self.ctx, e.ctx)
+        if self.hierarchy == "joint":
+            return self._gain(self.ctx, self._jx(e))
         return self._gain(self.cnt, e.cnt) + self._gain(self.ctx, e.ctx)
 
     def _inside_outside(self, n: int, comps):
@@ -1120,7 +1133,7 @@ class Trellis3:
                 e.memo["regen"] = 0.0
             else:
                 node = root
-                for c in self.cnt.categorize(e.cnt)[1:]:
+                for c in self.cnt.categorize(self._cq(e))[1:]:
                     if c.count >= self.support:
                         node = c
                 e.memo["regen"] = log_prob(node, e.cnt, root, self.alpha) / LN2
@@ -1271,7 +1284,7 @@ class Trellis3:
         for e in words:
             e.weight = 1.0
             e.ctx = self._full(self._context(tokens, e, analysed=True), self.ctx_attrs)
-            e.leaf = self.ctx.ifit(e.ctx, 1.0)
+            e.leaf = self.ctx.ifit(self._jx(e) if self.hierarchy == "joint" else e.ctx, 1.0)
             e.rid = len(self.records)
             self._at_add(e, "ctx")
             self._pas(e, "ctx", WORD, e.token, 1.0)
@@ -1299,11 +1312,15 @@ class Trellis3:
             e.cnt = self._content(e)
             if self.ref_names:
                 e.cnt = self._ref_content(e, e.cnt)
-            e.cleaf = self.cnt.ifit(e.cnt, w)
-            e.ctx = self._full(self._context(tokens, e, analysed=key in chosen), self.ctx_attrs)
-            if self.ref_names and self.donate_ctx and self.bags:
-                e.ctx["cc"] = self._ref(("cc", e.rid), e.ctx["cc"])
-            e.leaf = self.ctx.ifit(e.ctx, w)
+            if self.hierarchy == "joint":
+                e.ctx = self._full(self._context(tokens, e, analysed=key in chosen), self.ctx_attrs)
+                e.leaf = e.cleaf = self.ctx.ifit(self._jx(e), w)
+            else:
+                e.cleaf = self.cnt.ifit(e.cnt, w)
+                e.ctx = self._full(self._context(tokens, e, analysed=key in chosen), self.ctx_attrs)
+                if self.ref_names and self.donate_ctx and self.bags:
+                    e.ctx["cc"] = self._ref(("cc", e.rid), e.ctx["cc"])
+                e.leaf = self.ctx.ifit(e.ctx, w)
             self._at_add(e, "ctx")
             self._at_add(e, "cnt")
             if e.const > 0:
@@ -1442,7 +1459,7 @@ class Trellis3:
             if self.children and e.token is None:
                 for p, part in (("cl", e.left), ("cr", e.right)):
                     self._facet(new, p, self._ctx_ids(part))
-            if self.donate_ctx and not self.ref_names:
+            if self.donate_ctx and not self.ref_names and (self.hierarchy != "joint" or e.token is not None):
                 self._facet(new, "cc", self._cc_ids(e))
             if self.neighbour_types and e.nbt is not None:
                 self._nb_facets(new, e)
@@ -1468,6 +1485,11 @@ class Trellis3:
                 # information bands are no longer those its current description sorts to
                 # ("verify-changed": checked only when its description just changed)
                 chk = self.refresh == "verify"     # "verify-events": changed descriptions here
+                if self.hierarchy == "joint":
+                    if (chk or moved_c or moved_x) and e.leaf is not None and self._misplaced(self.ctx, e.leaf, self._jx(e), e.weight):
+                        self._move_joint(e)
+                        self.stats["reassigned"] = self.stats.get("reassigned", 0) + 1
+                    continue
                 if (chk or moved_c) and e.token is None and e.cleaf is not None and self._misplaced(self.cnt, e.cleaf, e.cnt, e.weight):
                     self._move(e, "cnt", e.cnt)
                     self.stats["reassigned"] = self.stats.get("reassigned", 0) + 1
@@ -1638,6 +1660,36 @@ class Trellis3:
         tree, leaf = (self.ctx, e.leaf) if which == "ctx" else (self.cnt, e.cleaf)
         tree.add_passive(leaf, attr, value, w)
         e.pas.append((which, attr, value, w))
+
+    def _jx(self, e: Elem) -> dict:
+        """hierarchy="joint": an element's one instance, both descriptions together."""
+        x = {a: BLANK for a in self.ctx_attrs + self.cnt_attrs}
+        x.update(e.cnt or {})
+        x.update(e.ctx or {})
+        return x
+
+    def _cq(self, e: Elem) -> dict:
+        """What sorts an unstored composite when its content is wanted."""
+        return self._jx(e) if self.hierarchy == "joint" else e.cnt
+
+    def _move_joint(self, e: Elem) -> None:
+        """hierarchy="joint": _move for the one record."""
+        comp = e.token is None
+        self._at_remove(e, "ctx")
+        if comp:
+            self._at_remove(e, "cnt")
+        for _, a, v, w in e.pas:
+            self.ctx.add_passive(e.leaf, a, v, -w)
+        x = self._jx(e)
+        self.ctx.unfit(e.leaf, x, e.weight)
+        e.leaf = self.ctx.ifit(x, e.weight)
+        if comp:
+            e.cleaf = e.leaf
+        for _, a, v, w in e.pas:
+            self.ctx.add_passive(e.leaf, a, v, w)
+        self._at_add(e, "ctx")
+        if comp:
+            self._at_add(e, "cnt")
 
     def _move(self, e: Elem, which: str, new: dict) -> None:
         """Reassignment: take the record out of one hierarchy and insert it again
