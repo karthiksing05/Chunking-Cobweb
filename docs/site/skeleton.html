@@ -482,7 +482,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
   <h2>Chunk context</h2>
   <div class="col">
     <p>A word depends on chunks around it, not only on the words next to it: a verb's object may start several words later, and a subject may end several words earlier. <b>Chunk context</b> means describing a position by the chunks around it at the same level or below. It has been hard to use. Writing neighbouring chunks into the stored context helped one-word prefixes on the toy grammars (0.78 → 0.87) but made the learner memorize (grammatical and new at 320 fell to 0.51–0.73 from 0.84–0.89; <a href="#f-known">known failures</a>). A window can see only two words on each side.</p>
-    <p>Inside-outside reads chunk context without storing it. The outside score of a position sums over every parent C and sibling B that could surround it, in concept terms: that sum <em>is</em> the position's chunk context, in both directions. On the left it holds the chunks built from the placed words. On the right it holds the chunks that could still finish the sentence. Nothing is added to any instance, so there is no new facet to memorize.</p>
+    <p>Inside-outside reads chunk context at generation time. The outside score of a position sums over every parent C and sibling B that could surround it, in concept terms: that sum <em>is</em> the position's chunk context, in both directions. On the left it holds the chunks built from the placed words. On the right it holds the chunks that could still finish the sentence. It adds nothing to any instance. Stored contexts do also carry <code>lc</code> and <code>rc</code> in the current recipe, which shapes which concepts form; that is a separate use, and the memorizing cost above may still apply to it (round 99 tests this on the toy grammars).</p>
     <p>This is the only route by which chunks reach word choice. While writing this page we found that the window prediction never saw chunks: its full query raised an error on free positions and silently fell back to the raw window, so neither neighbouring chunks nor the previous sentence reached it in any round. The code now says so plainly and the results are unchanged. So every effect of chunk context on generation goes through inside-outside.</p>
   </div>
   <h3>Does it carry information? (round 94)</h3>
@@ -664,7 +664,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     <thead><tr><th>Open problem</th><th>What is known</th><th>Next</th></tr></thead>
     <tbody>
       <tr><th>Topic weight</th><td>β 2 is hand-set. Whole-sentence likelihood always picks 0, since a sentence's probability is almost all grammar</td><td>A criterion that weighs the topic itself; let memory choose the concept that predicts from x</td></tr>
-      <tr><th>Toy grammars</th><td>Under the current recipe, expansion is grammatical but copies, and inside-outside is new but 46–48% grammatical on <code>med</code>. Neither reaches both, which earlier configurations did. Cause untested</td><td>Find which change lost the novelty; test where inside-outside overgenerates</td></tr>
+      <tr><th>Toy grammars</th><td>Under the current recipe, expansion is grammatical but copies, and inside-outside is new but 46–48% grammatical on <code>med</code>. Neither reaches both, which earlier configurations did. Neighbour chunks are the first suspect; round 99 is testing removals</td><td>Find which change lost the novelty; test where inside-outside overgenerates</td></tr>
       <tr><th>Words beyond the window</th><td>Inside-outside predicts worse given all earlier words than given the nearest two (round 94). The drawn product has the worst likelihood and the best yield</td><td>Test why far words hurt; find a criterion likelihood and yield agree on</td></tr>
       <tr><th>Grammar</th><td>About 40% of output is still judged ungrammatical. Head-complement fit and unfinished endings were the main errors before the new fill; not yet re-measured</td><td>Re-measure the errors; re-test λ on the whole tree (round 93 was cancelled)</td></tr>
       <tr><th>Do two hierarchies earn their cost?</th><td>Untested</td><td>The unified-hierarchy ablation</td></tr>
@@ -750,7 +750,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     <p>A part is one analysis of its span, the best by summed gain. The posterior then sums over every split at every span, but each composite's description holds only its parts' best analyses.</p>
   </div>
   <h2>Explorer</h2>
-  <p class="small">The walk-through below runs on real memory of the toy grammars. It shows the current recipe, where <code>lc</code> and <code>rc</code> are off and toy grammars have no previous sentence. Pick the grammar in the bar above.</p>
+  <p class="small">The walk-through below runs on real memory of the toy grammars. It shows the current recipe, with <code>lc</code> and <code>rc</code> on; toy grammars have no previous sentence. Pick the grammar in the bar above.</p>
 @@L 481-509@@
 </section>
 
@@ -2071,7 +2071,7 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
 <section class="page" data-page="curves" hidden>
   <p class="eyebrow">Results</p>
   <h1>What memory can generate as experience accumulates</h1>
-  <p class="lede">Both generators after 10 to 320 experiences, current recipe, seeds 13 and 17. Expansion stays fully grammatical but now mostly copies (0.00–0.12 grammatical and new at 320). Earlier configurations reached 0.75–0.88 new here, and we have not tested which change caused the drop. Inside-outside produces more new output but only about half of it is grammatical on <code>med</code>; it stays fully grammatical on <code>small</code>. Expansion with a broader draw does better than either: three levels up with the kind check gives 100% grammatical and 0.40 new on <code>med</code> (seed 13, <a href="#rules">concept-choice rules</a>), so the loss of novelty lies in the leaf default rather than in the trees.</p>
+  <p class="lede">Both generators after 10 to 320 experiences, current recipe, seeds 13 and 17. Expansion stays fully grammatical but now mostly copies (0.00–0.12 grammatical and new at 320). Earlier configurations reached 0.75–0.88 new here, and round 99 is testing which change caused the drop. Inside-outside produces more new output but only about half of it is grammatical on <code>med</code>; it stays fully grammatical on <code>small</code>. Expansion with a broader draw does better than either: three levels up with the kind check gives 100% grammatical and 0.40 new on <code>med</code> (seed 13, <a href="#rules">concept-choice rules</a>), so the loss of novelty lies in the leaf default rather than in the trees.</p>
   <p class="small">Hover a panel for values. Characters are on <a href="#s-chars">characters</a>.</p>
 @@L 625-627@@
 </section>
@@ -2099,7 +2099,7 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
         <tr><td>Update on read (<code>ref_names</code>)</td><td><span class="st st-set">option</span></td><td class="what">Exact descriptions; placement and cost no better than copies.</td></tr>
         <tr><td>Verify on restructuring events or on drift</td><td><span class="st st-set">set aside</span></td><td class="what">Fail the grammar guard (med-13 0.783, large-17 0.804) and run slower.</td></tr>
         <tr><td>Gap filling (<code>gap_mode="window"</code>)</td><td><span class="st st-kept">kept</span></td><td class="what">Prefix trigrams attested 0.84–0.86; success 1.0 against 0.53–0.73 for rejection and pattern.</td></tr>
-        <tr><td>Neighbour chunks (<code>neighbour_chunks</code>)</td><td><span class="st st-set">off</span></td><td class="what">Prefix-1 better, prefix-2 and infill worse; fails the novelty guard.</td></tr>
+        <tr><td>Neighbour chunks (<code>neighbour_chunks</code>)</td><td><span class="st st-kept">on</span></td><td class="what">Set aside at first: prefix-1 better, prefix-2 and infill worse, failed the novelty guard. It is on in the current recipe. Round 99 re-tests whether it causes the copying on toy grammars.</td></tr>
         <tr><td>Sibling mode, <code>ctx_fill</code></td><td><span class="st st-set">set aside</span></td><td class="what">Sibling 0.19–0.37 trigrams attested; <code>ctx_fill</code> gives word salad.</td></tr>
       </tbody>
     </table>

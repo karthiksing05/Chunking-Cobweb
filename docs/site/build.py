@@ -60,7 +60,7 @@ out = sub(out, "<b>Generate from the trees alone</b><p>Sample a whole experience
 out = sub(out, "Old memories stay current by relabelling in place.",
           "Old memories stay current by relabelling in place, and records that no longer sort where they sit are moved.")
 out = sub(out, "cc = the chunk's own content</text>", "cc = own content path, donated;</text>")
-out = sub(out, "concept path, donated</text>", "lc / rc (neighbour chunks): off</text>")
+out = sub(out, "concept path, donated</text>", "lc / rc (neighbour chunks): on</text>")
 out = sub(out, "no threshold gates a chunk</text>", "only posteriors under 0.001 are dropped</text>")
 out = sub(out, "every composite stored in both trees with its posterior as weight.</figcaption>",
           "every composite stored in both trees with its posterior as weight (dropped below 0.001).</figcaption>")
