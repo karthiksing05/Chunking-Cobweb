@@ -334,6 +334,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
         <li><a href="#iterations"><span class="n">A15</span><span>Kept and set aside</span></a></li>
         <li><a href="#a-window"><span class="n">A16</span><span>Ablation: window size</span></a></li>
         <li><a href="#a-copying"><span class="n">A17</span><span>Ablation: toy-grammar copying</span></a></li>
+        <li><a href="#a-rationale"><span class="n">A18</span><span>Why the architecture is this way</span></a></li>
       </ol></li>
   </ol>
 </nav>
@@ -386,6 +387,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
       <tr><td><a href="#s-chess">Chess</a></td><td>Bits per held-out position (4,000 learned): control; shifted</td><td class="num">127.7; <b>147.2</b></td><td><b>BPE squares 108.8</b>; 205.5. BPE shapes 111.3; 149.7</td></tr>
     </tbody>
   </table></div>
+  <p class="small">These numbers are for the older recipe. <a href="#a-rationale">A18</a> reports a simpler candidate that does better on stories, characters and toy expansion and has not been adopted.</p>
   <p class="small">The artifact's layout: how the system works (<a href="#hierarchies">Hierarchies</a>, <a href="#representations">Representations</a>, <a href="#parse">Parsing</a>, <a href="#io-generation">Generation</a>, <a href="#learning">Learning</a>), how it is tested (<a href="#d-domains">Experimental design</a>), what happened (<a href="#results">Results</a>), what is left (<a href="#conclusion">Conclusion and next steps</a>), and older methods and ablations (<a href="#appendices">Appendices</a>).</p>
 </section>
 
@@ -648,6 +650,8 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
   <p class="eyebrow">Conclusion and next steps</p>
   <h1>What holds, and what does not yet</h1>
   <p class="lede">Two hierarchies learned online, read by inside-outside, generate new sentences from real text with no gold and no offline phase. They do not yet compress as well as simple coders, and several settings remain hand-set.</p>
+  <h2>Latest: a simpler candidate recipe</h2>
+  <p>Removing each part alone (<a href="#a-rationale">A18</a>) found a recipe without <code>word_cc</code>, type names or neighbour chunks. Story yield rises from .186 to .224 on four seeds, characters at 2,000 fall from 27.8 / 27.5 to 26.7 / 26.5 bits (trigram 26.4 / 26.0), and expansion on <code>med</code> and <code>large</code> goes from copying to .80–.89 grammatical and new. The word's identity in its context description caused the copying. It has not been adopted, and the rest of this site still describes the older recipe. The largest open conflict is <code>exact_alone</code>: off, characters tie trigram and chess improves, but story yield and chunk grouping fall.</p>
   <h2>Why this matters</h2>
   <div class="col">
     <p>Most systems that generate well need many passes over much data, and what they know is not inspectable. TRELLIS learns from each experience once, stores what it learns in concepts one can read, and uses the same memory to parse, generate and compress. It applies unchanged to sentences, characters and chess. If it can match simple coders and reach good grammar from a few thousand experiences, that gives a transparent, always-learning account of how structure and generalization can arise together. It is not there yet, and the gaps below are real.</p>
@@ -666,10 +670,10 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     <thead><tr><th>Open problem</th><th>What is known</th><th>Next</th></tr></thead>
     <tbody>
       <tr><th>Topic weight</th><td>β 2 is hand-set. Whole-sentence likelihood always picks 0, since a sentence's probability is almost all grammar</td><td>A criterion that weighs the topic itself; let memory choose the concept that predicts from x</td></tr>
-      <tr><th>Toy grammars</th><td>Under the current recipe, expansion is grammatical but copies, and inside-outside is new but 46–48% grammatical on <code>med</code>. Neither reaches both, which earlier configurations did. Neighbour chunks are the first suspect; round 99 is testing removals</td><td>Find which change lost the novelty; test where inside-outside overgenerates</td></tr>
+      <tr><th>Toy grammars</th><td>The copying is explained and fixed in the candidate recipe (<a href="#a-rationale">A18</a>). Inside-outside remains 46–49% grammatical on <code>med</code> and <code>large</code>, and expansion is weak on <code>term_low</code></td><td>Test where inside-outside overgenerates</td></tr>
       <tr><th>Words beyond the window</th><td>Inside-outside predicts worse given all earlier words than given the nearest two (round 94). The drawn product has the worst likelihood and the best yield</td><td>Test why far words hurt; find a criterion likelihood and yield agree on</td></tr>
       <tr><th>Grammar</th><td>About 40% of output is still judged ungrammatical. Head-complement fit and unfinished endings were the main errors before the new fill; not yet re-measured</td><td>Re-measure the errors; re-test λ on the whole tree (round 93 was cancelled)</td></tr>
-      <tr><th>Do two hierarchies earn their cost?</th><td>Untested</td><td>The unified-hierarchy ablation</td></tr>
+      <tr><th>Do two hierarchies earn their cost?</th><td>On the candidate recipe, one tree is within seed spread on yield, and two trees group chunks best (<a href="#a-rationale">A18</a>)</td><td>More seeds; a chess path for one tree</td></tr>
       <tr><th>Parsing and generation read different scores</th><td>Parsing uses a separate chunk factor; generation and coding read the grammar's probabilities</td><td>Test parsing and learning by the same probabilities</td></tr>
       <tr><th>The content tree's gain</th><td>On toy grammars, held-out composites stop 2–4 levels down and gain no bits there. Not re-measured since the representation fixes</td><td>Re-measure; name words by what they build as well as where they stand</td></tr>
       <tr><th>Infill and prompts</th><td>Infill fails to fit both sides under gap filling</td><td>Run prompts through inside-outside generation, which already handles gaps</td></tr>
@@ -704,6 +708,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     <li><a href="#iterations"><span class="rn">A15</span><span class="rt">Kept and set aside</span><span class="ra">Each change tried from 23 to 26 October, and its fate.</span></a></li>
     <li><a href="#a-window"><span class="rn">A16</span><span class="rt">Ablation: window size</span><span class="ra">Windows of 1 to 4 words on stories and characters.</span></a></li>
     <li><a href="#a-copying"><span class="rn">A17</span><span class="rt">Ablation: toy-grammar copying</span><span class="ra">Which mechanisms made generation copy, and where inside-outside loses grammar.</span></a></li>
+    <li><a href="#a-rationale"><span class="rn">A18</span><span class="rt">Why the architecture is this way</span><span class="ra">Each decision removed alone: its reason, what removal did, and whether the reason held.</span></a></li>
   </ul>
 </section>
 
@@ -720,6 +725,13 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
   <h1>Ablation: window size</h1>
   <p class="lede">How many neighbouring words should a context hold?</p>
   <div id="window-body">@@WINDOW@@</div>
+</section>
+
+<section class="page" data-page="a-rationale" hidden>
+  <p class="eyebrow">Appendix A18</p>
+  <h1>Why the architecture is this way</h1>
+  <p class="lede">Each design decision, its reason, what removing it did on every domain, and whether the reason held.</p>
+  <div id="rationale-body">@@RATIONALE@@</div>
 </section>
 
 <section class="page" data-page="a-copying" hidden>
@@ -768,7 +780,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     <p>A part is one analysis of its span, the best by summed gain. The posterior then sums over every split at every span, but each composite's description holds only its parts' best analyses.</p>
   </div>
   <h2>Explorer</h2>
-  <p class="small">The walk-through below runs on real memory of the toy grammars. It shows the current recipe, with <code>lc</code> and <code>rc</code> on; toy grammars have no previous sentence. Pick the grammar in the bar above.</p>
+  <p class="small">The walk-through below runs on real memory of the toy grammars, under the older recipe, with <code>lc</code> and <code>rc</code> on; toy grammars have no previous sentence. Pick the grammar in the bar above. <b>That recipe parses badly on <code>med</code> at seed 13: its examples there are nearly left-branching chains, and it does worse than a fixed right-branching parser on average</b> (<a href="#a-rationale">A18</a>).</p>
 @@L 481-509@@
 </section>
 
@@ -1559,6 +1571,7 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
     </tbody>
   </table></div>
   <ul>
+    <li><b>Correction.</b> The offset coder's 147.2 here comes from a run with <code>exact_alone</code> off, although the recipe says it is on. With it on, shift costs 153.6 and control is unchanged (<a href="#a-rationale">A18</a>). Rerun on today's code: the numbers reproduce.</li>
     <li><b>Shift.</b> Moving every piece one file (the pieces falling off the far edge removed, at most 3, kings kept) erases co-occurrence chunks' saving: 3.5 bits below the piece-square list, against 55 on the same positions unmoved. TRELLIS keeps a 58–62 bit saving and codes the shifted positions 55–60 bits cheaper. Moving costs co-occurrence chunks 95 bits per position, TRELLIS 28 (with squares) or 22 (offsets only).</li>
     <li><b>Why.</b> TRELLIS still copies about 5.3 chunks per shifted position, as it does unmoved, but by offsets: copies on their own squares fall from 4.4 to 1.7 per position. The extra cost is the anchors (14.5 to 27.6 bits), which each concept predicts from the squares it was seen on.</li>
     <li><b>Natural shifts.</b> On other openings and the other wing co-occurrence chunks still win, but the gap narrows from 19 bits (control) to 14 (family) and 11 (wing, offsets only). Queenside castling and queen's-pawn structures are mostly new shapes, not old shapes moved.</li>
@@ -2138,16 +2151,16 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
 (function () {
 const ORDER = ["intro", "hierarchies", "representations", "parse", "io-generation", "learning", "d-domains", "d-evals", "d-competitors",
   "results", "curves", "r-stories", "s-babi", "s-chars", "s-chess", "conclusion", "appendices", "a-unified", "s-sem", "generate", "types", "rules",
-  "s-prompt", "s-consist", "s-probe", "sustain", "status", "a-fixes", "representation", "failures", "f-known", "iterations", "a-window", "a-copying"];
+  "s-prompt", "s-consist", "s-probe", "sustain", "status", "a-fixes", "representation", "failures", "f-known", "iterations", "a-window", "a-copying", "a-rationale"];
 const TITLES = { intro: "Introduction", hierarchies: "Hierarchies", representations: "Representations", parse: "Parsing", "io-generation": "Generation", learning: "Learning",
   "d-domains": "Design: domains", "d-evals": "Design: evaluations", "d-competitors": "Design: competitors", results: "Results", curves: "Results: toy grammars",
   "r-stories": "Results: TinyStories", "s-babi": "Results: bAbI", "s-chars": "Results: Chinese characters", "s-chess": "Results: chess", conclusion: "Conclusion and next steps",
   appendices: "Appendices", "a-unified": "A1 Ablation: one hierarchy", "s-sem": "A2 Story rounds", generate: "A3 Expansion generation", types: "A4 Type names", rules: "A5 Concept-choice rules",
   "s-prompt": "A6 Prompted generation", "s-consist": "A7 Parse consistency", "s-probe": "A8 Chunk representations", sustain: "A9 Sustaining memory", status: "A10 Memory scoreboard",
-  "a-fixes": "A11 Representation fixes", representation: "A12 Earlier representation", failures: "A13 Failure checks", "f-known": "A14 Known failures", iterations: "A15 Kept and set aside", "a-window": "A16 Ablation: window size", "a-copying": "A17 Ablation: toy-grammar copying" };
+  "a-fixes": "A11 Representation fixes", representation: "A12 Earlier representation", failures: "A13 Failure checks", "f-known": "A14 Known failures", iterations: "A15 Kept and set aside", "a-window": "A16 Ablation: window size", "a-rationale": "A18 Why the architecture is this way", "a-copying": "A17 Ablation: toy-grammar copying" };
 const ALIAS = { overview: "intro", instances: "representations", principles: "intro", next: "conclusion", "s-prompts": "s-prompt" };
 const GROUPS = { design: ["d-domains", "d-evals", "d-competitors"], results: ["results", "curves", "r-stories", "s-babi", "s-chars", "s-chess"],
-  appendices: ["appendices", "a-unified", "s-sem", "generate", "types", "rules", "s-prompt", "s-consist", "s-probe", "sustain", "status", "a-fixes", "representation", "failures", "f-known", "iterations"] };
+  appendices: ["appendices", "a-unified", "s-sem", "generate", "types", "rules", "s-prompt", "s-consist", "s-probe", "sustain", "status", "a-fixes", "representation", "failures", "f-known", "iterations", "a-window", "a-copying", "a-rationale"] };
 const PICKER = ["parse", "generate", "types"];
 const LIVE = ["parse", "generate", "types", "rules", "curves", "failures", "s-chars"];
 const q = s => document.querySelector(s);
@@ -2167,11 +2180,4 @@ function show(page) {
   const d = q("#topnav"); if (d) d.open = false;
   window.scrollTo(0, 0);
   // the explorers draw at their box's real width, so redraw once the page is visible
-  if (LIVE.includes(page) && window.__trellisRender) { try { window.__trellisRender(); } catch (e) { console.error(e); } }
-}
-function route() { show((location.hash || "#intro").slice(1)); }
-q("#toc-mobile").innerHTML = q("#toc").innerHTML;
-window.addEventListener("hashchange", route);
-route();
-})();
-</script>
+  if (LIVE.includes(page) && window.__trellisRender) { try { window.__trellisRender(); } catch (e) {
