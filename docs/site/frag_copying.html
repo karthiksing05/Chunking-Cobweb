@@ -1,4 +1,4 @@
-<p><b>Under the current recipe, expansion generation on the toy grammars almost only copies. Turning off two mechanisms together fixes that.</b> The recipe has not changed yet: the same removal is being tested on stories and characters, and chess has not been tested.</p>
+<p><b>Resolved: the word's identity in its context description caused the copying.</b> With <code>word_cc</code> on, about 76% of word occurrences sit under a concept holding only that word, so a generation slot can only give the word back. With it off, that share falls to 8–19% and expansion reaches .80 on <code>med</code>, with characters unchanged. The tables below are the earlier search, which found <code>exact_alone</code> and neighbour chunks first; removing them also helps, but costs compression. See <a href="#a-rationale">A18</a>.</p>
 <h2>Which removal restores novelty (expansion)</h2>
 <div class="tablewrap"><table>
   <thead><tr><th>Grammatical and new at 320, s13 / s17</th><th class="num"><code>med</code></th><th class="num"><code>large</code></th><th class="num"><code>term_med</code></th></tr></thead>
