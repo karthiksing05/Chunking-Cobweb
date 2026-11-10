@@ -739,6 +739,101 @@ if BASE or DIAG:
         # the offer's weight: its score relative to the standing word's; a pair licence has no such
         # score for the standing word (its pairs are stored), so its own value stands
         return s[:i - 2] + list(y) + s[i - 2 + m_:], (c[y] / own_v if own_v else (c[y] if frame in ("tree", "count") else None))
+    _ns = {}
+
+    def nswap_build(kind):
+        """Word-level trees (pair licences) and unit-level trees (votes) built from the stream;
+        units are words, and with kind "ngrams" also 2- and 3-word spans seen at least twice."""
+        if kind in _ns:
+            return _ns[kind]
+        from trellis2.type_trees import SideTrees
+        WT = SideTrees(seed)
+        for s_ in sents:
+            WT.observe(s_)
+        ms = (1, 2, 3) if kind == "ngrams" else (1,)
+        spans = Counter(tuple(s_[i:i + m_]) for s_ in sents for m_ in (2, 3) for i in range(len(s_) - m_ + 1)) if kind == "ngrams" else Counter()
+        qual = {g for g, k in spans.items() if k >= 2}
+        units = {(w,) for s_ in sents for w in s_} | qual
+        ST = SideTrees(seed)
+        F_lr, F_wide = defaultdict(set), defaultdict(set)
+        for s_ in sents:
+            t_ = ["<s>", "<s>"] + s_ + ["</s>", "</s>"]
+            occ = []
+            for i in range(len(s_)):
+                for m_ in ms:
+                    if i + m_ > len(s_):
+                        break
+                    u = tuple(s_[i:i + m_])
+                    if m_ > 1 and u not in qual:
+                        continue
+                    a, b = i + 2, i + 2 + m_        # position in t_
+                    occ.append((u, s_[i - 1] if i else None, s_[i + m_] if i + m_ < len(s_) else None))
+                    F_lr[(t_[a - 1], t_[b])].add(u)
+                    F_wide[(t_[a - 2], t_[a - 1], t_[b], t_[b + 1])].add(u)
+            ST.observe_occurrences(occ)
+        _ns[kind] = {"WT": WT, "ST": ST, "units": units, "F_lr": F_lr, "F_wide": F_wide,
+                     "pairs": set(pairc), "lic": {}, "V": {}, "va": {}}
+        return _ns[kind]
+
+    def nswap_once(NS, s, rng, new_only):
+        ST, WT, units, pairs = NS["ST"], NS["WT"], NS["units"], NS["pairs"]
+        t = ["<s>", "<s>"] + s + ["</s>", "</s>"]
+        offers = []
+        for i in range(len(s)):
+            for j in range(i + 1, min(i + 3, len(s)) + 1):
+                own = tuple(s[i:j])
+                if j - i >= len(s) or own not in units:
+                    continue
+                a, b = i + 2, j + 2
+                l, r = t[a - 1], t[b]
+                k_lr, k_w = (l, r), (t[a - 2], l, r, t[b + 1])
+                V = NS["V"].get((k_lr, k_w))
+                if V is None:
+                    V = defaultdict(float)
+                    for key, F, tab in ((k_lr, NS["F_lr"], "lr"), (k_w, NS["F_wide"], "w")):
+                        if (tab, key) not in NS["va"]:
+                            NS["va"][(tab, key)] = ST.votes_all(F[key]) if key in F else {}
+                        for y, v in NS["va"][(tab, key)].items():
+                            V[y] += v
+                    NS["V"][(k_lr, k_w)] = V
+                ov = V.get(own, 0.0)
+                if ov <= 0:
+                    continue
+                best, cand = 0.0, []
+                for y, v in V.items():
+                    if y == own or not 3 <= len(s) - (j - i) + len(y) <= 8:
+                        continue
+                    sc_, unstored, ok_ = v, 0, True
+                    for x_, z_ in ((l, y[0]), (y[-1], r)):
+                        if (x_, z_) in pairs:
+                            continue
+                        unstored += 1
+                        if x_ == "<s>" or z_ == "</s>":
+                            ok_ = False
+                            break
+                        f = NS["lic"].get((x_, z_))
+                        if f is None:
+                            f = NS["lic"][(x_, z_)] = WT.licence(x_, z_)
+                        if f <= 0:
+                            ok_ = False
+                            break
+                        sc_ *= f
+                    if not ok_ or (new_only and not unstored):
+                        continue
+                    if sc_ > best * (1 - 1e-12):
+                        if sc_ > best:
+                            best = sc_
+                        cand.append((sc_, y))
+                if not cand:
+                    continue
+                tied = sorted(y for sc_, y in cand if sc_ >= best * (1 - 1e-12))
+                offers.append((i, j, rng.choice(tied), best / ov, own))
+        if not offers:
+            return None
+        offers.sort(key=lambda o: (o[0], o[1], o[2]))
+        top = max(o[3] for o in offers)
+        i, j, y, ratio, own = rng.choice([o for o in offers if o[3] >= top * (1 - 1e-12)])
+        return s[:i] + list(y) + s[j:], own, y, ratio
     for ai, arm in enumerate(json.loads(BASE)):
         g_rng = random.Random(seed + 7)
         t1 = time.time()
@@ -758,6 +853,27 @@ if BASE or DIAG:
                             break
                         out.append(w); h.append(w)
                     if 3 <= len(out) <= 8:
+                        return out
+                return None
+        elif "nswap" in arm:
+            NS = nswap_build(arm["nswap"])
+            new_only = bool(arm.get("new", False))
+            nstat = {"multi": 0, "ratio": 0.0, "n": 0}
+
+            def gen(p):
+                for _ in range(200):
+                    if stored:
+                        ps_ = set(p)
+                        sc = [sum(idf.get(w, 0.0) for w in ps_ & set(a)) + 1e-6 * g_rng.random() for a, _ in stored]
+                        s = list(stored[max(range(len(stored)), key=sc.__getitem__)][1])
+                    else:
+                        s = list(g_rng.choice(sents))
+                    x = nswap_once(NS, s, g_rng, new_only)
+                    if x:
+                        out, own, y, ratio = x
+                        nstat["n"] += 1
+                        nstat["ratio"] += ratio
+                        nstat["multi"] += int(len(own) > 1 or len(y) > 1)
                         return out
                 return None
         else:
@@ -785,6 +901,8 @@ if BASE or DIAG:
                           "cross share": None if c is None else round((c - rand_c) / (real_c - rand_c), 3),
                           "tag pattern attested": m(pat), "novel": m(nov),
                           "every bigram stored": m([attested(g, 2) for g in S]), "every trigram stored": m([attested(g, 3) for g in S]),
+                          **({"multiword": round(nstat["multi"] / max(nstat["n"], 1), 3), "unit types": len(NS["units"]),
+                              "mean ratio": round(nstat["ratio"] / max(nstat["n"], 1), 3)} if "nswap" in arm else {}),
                           "examples": [" ".join(p) + "  ->  " + " ".join(g) for p, g in ok[:12]]}), flush=True)
         if DUMP:
             with open(os.path.join(DUMP, f"{tag}_s{seed}_n{n}_arm{ai}.jsonl"), "w", encoding="utf-8") as fh:
