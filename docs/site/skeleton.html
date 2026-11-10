@@ -335,6 +335,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
         <li><a href="#a-window"><span class="n">A16</span><span>Ablation: window size</span></a></li>
         <li><a href="#a-copying"><span class="n">A17</span><span>Ablation: toy-grammar copying</span></a></li>
         <li><a href="#a-rationale"><span class="n">A18</span><span>Why the architecture is this way</span></a></li>
+        <li><a href="#a-refs"><span class="n">A19</span><span>Against simple references</span></a></li>
       </ol></li>
   </ol>
 </nav>
@@ -650,7 +651,9 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
   <p class="eyebrow">Conclusion and next steps</p>
   <h1>What holds, and what does not yet</h1>
   <p class="lede">Two hierarchies learned online, read by inside-outside, generate new sentences from real text with no gold and no offline phase. They do not yet compress as well as simple coders, and several settings remain hand-set.</p>
-  <h2>Latest: a simpler candidate recipe</h2>
+  <h2>Latest: simple references, and a licence that generalizes</h2>
+  <p>Story generation had no outside baseline until 10 November. Simple generators on the same stream, prompts and judge beat every TRELLIS recipe (<a href="#a-refs">A19</a>): a trigram sampler yields .40 new grammatical sentences per generation and a stored sentence with one word swapped in the same frame .57, against .22 for the candidate recipe below. TRELLIS's errors come from word pairs it never saw side by side, and its context concepts predict such pairs no better than word frequency. Two Cobweb trees over word types, read by counting each member word once, do far better. A generator that replaces one word of a retrieved stored sentence, where two readings of those trees agree, yields about .68 at 1,000 sentences with every output containing a never-seen pair, and the same trees shorten the code for held-out sentences. This reads the stream, one word at a time; it is not inside the learner yet, and the learner's chunks did not help as units.</p>
+  <h2>Earlier: a simpler candidate recipe</h2>
   <p>Removing each part alone (<a href="#a-rationale">A18</a>) found a recipe without <code>word_cc</code>, type names or neighbour chunks. Story yield rises from .186 to .224 on four seeds, characters at 2,000 fall from 27.8 / 27.5 to 26.7 / 26.5 bits (trigram 26.4 / 26.0), and expansion on <code>med</code> and <code>large</code> goes from copying to .80–.89 grammatical and new. The word's identity in its context description caused the copying. It has not been adopted, and the rest of this site still describes the older recipe. The largest open conflict is <code>exact_alone</code>: off, characters tie trigram and chess improves, but story yield and chunk grouping fall.</p>
   <h2>Why this matters</h2>
   <div class="col">
@@ -709,6 +712,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     <li><a href="#a-window"><span class="rn">A16</span><span class="rt">Ablation: window size</span><span class="ra">Windows of 1 to 4 words on stories and characters.</span></a></li>
     <li><a href="#a-copying"><span class="rn">A17</span><span class="rt">Ablation: toy-grammar copying</span><span class="ra">Which mechanisms made generation copy, and where inside-outside loses grammar.</span></a></li>
     <li><a href="#a-rationale"><span class="rn">A18</span><span class="rt">Why the architecture is this way</span><span class="ra">Each decision removed alone: its reason, what removal did, and whether the reason held.</span></a></li>
+    <li><a href="#a-refs"><span class="rn">A19</span><span class="rt">Against simple references</span><span class="ra">Trigram and one-swap generators on the same stream, prompts and judge; where the errors come from.</span></a></li>
   </ul>
 </section>
 
@@ -732,6 +736,13 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
   <h1>Why the architecture is this way</h1>
   <p class="lede">Each design decision, its reason, what removing it did on every domain, and whether the reason held.</p>
   <div id="rationale-body">@@RATIONALE@@</div>
+</section>
+
+<section class="page" data-page="a-refs" hidden>
+  <p class="eyebrow">Appendix A19</p>
+  <h1>Against simple references</h1>
+  <p class="lede">What do a trigram sampler and a one-word swap yield on the same stream, prompts and judge, and where do TRELLIS's errors come from?</p>
+  <div id="refs-body">@@REFS@@</div>
 </section>
 
 <section class="page" data-page="a-copying" hidden>
@@ -2151,16 +2162,16 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
 (function () {
 const ORDER = ["intro", "hierarchies", "representations", "parse", "io-generation", "learning", "d-domains", "d-evals", "d-competitors",
   "results", "curves", "r-stories", "s-babi", "s-chars", "s-chess", "conclusion", "appendices", "a-unified", "s-sem", "generate", "types", "rules",
-  "s-prompt", "s-consist", "s-probe", "sustain", "status", "a-fixes", "representation", "failures", "f-known", "iterations", "a-window", "a-copying", "a-rationale"];
+  "s-prompt", "s-consist", "s-probe", "sustain", "status", "a-fixes", "representation", "failures", "f-known", "iterations", "a-window", "a-copying", "a-rationale", "a-refs"];
 const TITLES = { intro: "Introduction", hierarchies: "Hierarchies", representations: "Representations", parse: "Parsing", "io-generation": "Generation", learning: "Learning",
   "d-domains": "Design: domains", "d-evals": "Design: evaluations", "d-competitors": "Design: competitors", results: "Results", curves: "Results: toy grammars",
   "r-stories": "Results: TinyStories", "s-babi": "Results: bAbI", "s-chars": "Results: Chinese characters", "s-chess": "Results: chess", conclusion: "Conclusion and next steps",
   appendices: "Appendices", "a-unified": "A1 Ablation: one hierarchy", "s-sem": "A2 Story rounds", generate: "A3 Expansion generation", types: "A4 Type names", rules: "A5 Concept-choice rules",
   "s-prompt": "A6 Prompted generation", "s-consist": "A7 Parse consistency", "s-probe": "A8 Chunk representations", sustain: "A9 Sustaining memory", status: "A10 Memory scoreboard",
-  "a-fixes": "A11 Representation fixes", representation: "A12 Earlier representation", failures: "A13 Failure checks", "f-known": "A14 Known failures", iterations: "A15 Kept and set aside", "a-window": "A16 Ablation: window size", "a-rationale": "A18 Why the architecture is this way", "a-copying": "A17 Ablation: toy-grammar copying" };
+  "a-fixes": "A11 Representation fixes", representation: "A12 Earlier representation", failures: "A13 Failure checks", "f-known": "A14 Known failures", iterations: "A15 Kept and set aside", "a-window": "A16 Ablation: window size", "a-rationale": "A18 Why the architecture is this way", "a-refs": "A19 Against simple references", "a-copying": "A17 Ablation: toy-grammar copying" };
 const ALIAS = { overview: "intro", instances: "representations", principles: "intro", next: "conclusion", "s-prompts": "s-prompt" };
 const GROUPS = { design: ["d-domains", "d-evals", "d-competitors"], results: ["results", "curves", "r-stories", "s-babi", "s-chars", "s-chess"],
-  appendices: ["appendices", "a-unified", "s-sem", "generate", "types", "rules", "s-prompt", "s-consist", "s-probe", "sustain", "status", "a-fixes", "representation", "failures", "f-known", "iterations", "a-window", "a-copying", "a-rationale"] };
+  appendices: ["appendices", "a-unified", "s-sem", "generate", "types", "rules", "s-prompt", "s-consist", "s-probe", "sustain", "status", "a-fixes", "representation", "failures", "f-known", "iterations", "a-window", "a-copying", "a-rationale", "a-refs"] };
 const PICKER = ["parse", "generate", "types"];
 const LIVE = ["parse", "generate", "types", "rules", "curves", "failures", "s-chars"];
 const q = s => document.querySelector(s);
@@ -2180,4 +2191,11 @@ function show(page) {
   const d = q("#topnav"); if (d) d.open = false;
   window.scrollTo(0, 0);
   // the explorers draw at their box's real width, so redraw once the page is visible
-  if (LIVE.includes(page) && window.__trellisRender) { try { window.__trellisRender(); } catch (e) {
+  if (LIVE.includes(page) && window.__trellisRender) { try { window.__trellisRender(); } catch (e) { console.error(e); } }
+}
+function route() { show((location.hash || "#intro").slice(1)); }
+q("#toc-mobile").innerHTML = q("#toc").innerHTML;
+window.addEventListener("hashchange", route);
+route();
+})();
+</script>
