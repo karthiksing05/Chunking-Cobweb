@@ -387,6 +387,52 @@ if LIC:
                               **ap(lambda a, b: read_side(a, "R", b) + read_side(b, "L", a))}), flush=True)
             print(json.dumps({"licence": "word trees by side, by types, sum", "seed": seed, "n": n,
                               **ap(lambda a, b: math.sqrt(read_side(a, "R", b) * read_side(b, "L", a)))}), flush=True)
+            if "code" in LIC:
+                # the same licence as a coder: bits per held-out sentence under a bigram model whose
+                # back-off for the next word is (i) the words' shares (Witten-Bell, the usual coder),
+                # (ii) half that and half the licence's distribution over next words, (iii) the same
+                # with the analogy count as the licence. Boundaries back off to the shares alone.
+                V = len(words_) + 2
+                unig = Counter(w for s_ in _sents for w in s_ + ["</s>"])
+                n_uni, t_uni = sum(unig.values()), len(unig)
+                p_uni = lambda b: (unig.get(b, 0) + t_uni / V) / (n_uni + t_uni)
+                ctx_n, ctx_t, bg = Counter(), Counter(), Counter()
+                for s_ in _sents:
+                    t_ = ["<s>"] + s_ + ["</s>"]
+                    for a, b in zip(t_, t_[1:]):
+                        if not bg[(a, b)]:
+                            ctx_t[a] += 1
+                        bg[(a, b)] += 1
+                        ctx_n[a] += 1
+                qmemo = {}
+
+                def q_of(a, fn):
+                    k = (a, fn)
+                    if k not in qmemo:
+                        d = {b: fn(a, b) for b in words_}
+                        z = sum(d.values())
+                        qmemo[k] = {b: v / z for b, v in d.items()} if z > 0 else None
+                    return qmemo[k]
+                lic_tree = lambda a, b: math.sqrt(read_side(a, "R", b) * read_side(b, "L", a))
+                lic_cnt = lambda a, b: float(lic_support(a, b)) if (a, b) not in pc else float(pc[(a, b)])
+
+                def bits(sent, fn):
+                    t_, tot = ["<s>"] + sent + ["</s>"], 0.0
+                    for a, b in zip(t_, t_[1:]):
+                        back = p_uni(b)
+                        if fn is not None and a in wc_ and b in wc_:
+                            q = q_of(a, fn)
+                            if q is not None:
+                                back = 0.5 * back + 0.5 * q.get(b, 0.0)
+                        pr = (bg[(a, b)] + ctx_t[a] * back) / (ctx_n[a] + ctx_t[a]) if ctx_n[a] else back
+                        tot -= math.log2(max(pr, 1e-300))
+                    return tot
+                test_ = [list(s_) for s_ in held if all(w in wc_ for w in s_)][:2000]
+                n_w = sum(len(s_) + 1 for s_ in test_)
+                for name, fn in (("shares", None), ("shares and the two trees' licence", lic_tree), ("shares and the analogy count", lic_cnt)):
+                    tb = sum(bits(s_, fn) for s_ in test_)
+                    print(json.dumps({"coder": "bigram, backed off to " + name, "seed": seed, "n": n, "held-out sentences": len(test_),
+                                      "bits per sentence": round(tb / len(test_), 3), "bits per word": round(tb / n_w, 4)}), flush=True)
         for how in ("sum", "back-off"):
             print(json.dumps({"licence": f"word tree by types, {how}", "seed": seed, "n": n,
                               **ap(lambda a, b: math.sqrt(read_types(a, "R", b, how) * read_types(b, "L", a, how)))}), flush=True)
@@ -629,6 +675,7 @@ if BASE or DIAG:
 
     def _swap_at(s, t, i, m_, rng, frame, unit, mn, pick):
         own, l, r = tuple(t[i:i + m_]), t[i - 1], t[i + m_]
+        own_score = None
         if frame == "wide":
             c = {(w,): k for w, k in widef[(t[i - 2], l, r, t[i + 2])].items()}
         elif frame == "rect":      # at least one new pair, each new pair supported by analogy
@@ -655,6 +702,15 @@ if BASE or DIAG:
                 v = sum(frame_vote(w, f) for f in places if f)
                 if v > 0:
                     c[(w,)] = v
+            own_score = c.get(own)
+            if "new" in frame:             # only replacements that make a pair the stream never showed
+                c = {k: v for k, v in c.items() if not pairc[(l, k[0])] or not pairc[(k[0], r)]}
+            if "pair" in frame:            # and each new pair must also hold by the pair licence: the two readings multiplied
+                for k in list(c):
+                    for x, y in ((l, k[0]), (k[0], r)):
+                        if not pairc[(x, y)]:
+                            c[k] *= side_licence(x, y) if x != "<s>" and y != "</s>" else 0.0
+                c = {k: v for k, v in c.items() if v > 0}
         elif frame in ("tree", "count"):   # at least one new pair; a stored pair counts 1, a new one by its licence
             c = {}
             lic_ = side_licence if frame == "tree" else support
@@ -671,6 +727,7 @@ if BASE or DIAG:
         else:
             c = {y: k for y, k in spanf[(l, r)].items() if unit == "span" or len(y) == 1}
         own_v = c.pop(own, None)
+        own_v = own_score if own_score is not None else own_v
         c = {y: k for y, k in c.items() if 3 <= len(s) - m_ + len(y) <= 8}
         if not c:
             return None
@@ -679,7 +736,9 @@ if BASE or DIAG:
             y = rng.choice(sorted(k for k, v in c.items() if v >= top * (1 - 1e-12)))
         else:
             y = rng.choices(list(c), weights=list(c.values()))[0]
-        return s[:i - 2] + list(y) + s[i - 2 + m_:], (c[y] / own_v if own_v else None)
+        # the offer's weight: its score relative to the standing word's; a pair licence has no such
+        # score for the standing word (its pairs are stored), so its own value stands
+        return s[:i - 2] + list(y) + s[i - 2 + m_:], (c[y] / own_v if own_v else (c[y] if frame in ("tree", "count") else None))
     for ai, arm in enumerate(json.loads(BASE)):
         g_rng = random.Random(seed + 7)
         t1 = time.time()
