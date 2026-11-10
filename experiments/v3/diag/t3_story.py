@@ -344,7 +344,24 @@ if LIC:
             for attr, vec in (("R", rvec), ("L", lvec)):
                 T_ = _Tree((attr + "b",), seed=seed)
                 T_.exact_alone = "exact" in LIC
-                lf_ = {w: T_.ifit({attr + "b": share(vec[w])}, float(wc_[w]) if "tok" in LIC else 1.0) for w in first}
+                if "inc" in LIC:
+                    # kept current one occurrence at a time, as a learner without nights must: at each
+                    # occurrence the word's old description leaves the tree and its new one enters
+                    lf_, cur_, seen_n, nbs_ = {}, {}, Counter(), defaultdict(dict)
+                    for s_ in _sents:
+                        for pos, w in enumerate(s_):
+                            v = (s_[pos + 1] if pos + 1 < len(s_) else None) if attr == "R" else (s_[pos - 1] if pos else None)
+                            if v is not None:
+                                nbs_[w][v] = nbs_[w].get(v, 0) + 1
+                            seen_n[w] += 1
+                            x_ = {attr + "b": share(nbs_[w])}
+                            wt = float(seen_n[w]) if "tok" in LIC else 1.0
+                            if w in cur_:
+                                T_.unfit(lf_[w], *cur_[w])
+                            lf_[w] = T_.ifit(x_, wt)
+                            cur_[w] = (x_, wt)
+                else:
+                    lf_ = {w: T_.ifit({attr + "b": share(vec[w])}, float(wc_[w]) if "tok" in LIC else 1.0) for w in first}
                 ch_, mem_ = {}, defaultdict(set)
                 for w, nd in lf_.items():
                     chain = []
@@ -580,10 +597,37 @@ if BASE or DIAG:
             return tot
         return math.sqrt(rd(a, "R", b) * rd(b, "L", a))
 
+    def frame_vote(w, fillers):
+        """How far the words grouped with w have stood where the slot is: over both word-type
+        trees and every concept on w's path, the share of the concept's members among the
+        words stored in that place (``fillers``). w itself counts where it stood there."""
+        if not _side:
+            side_licence("<none>", "<none>")
+        tot = 0.0
+        for attr in ("R", "L"):
+            ch_, mem_, _ = _side[attr]
+            for c in ch_.get(w, ())[1:]:
+                tot += len(mem_[c] & fillers) / len(mem_[c])
+        return tot
+
     def swap_once(s, rng, frame, unit, mn=1, pick="draw"):
         t = ["<s>", "<s>"] + s + ["</s>", "</s>"]
         m_ = rng.choice([k for k in (1, 2, 3) if k < len(s)]) if unit == "span" else 1
-        i = rng.randrange(2, len(t) - 2 - m_ + 1)
+        if pick.startswith("slot"):
+            # the slot is chosen too: each position offers its best replacement, weighed by its
+            # score relative to the score of the word that stood there ("slot": drawn by that
+            # ratio; "slot-best": the highest ratio)
+            opts = [x for x in (_swap_at(s, t, i, 1, rng, frame, unit, mn, "best") for i in range(2, len(t) - 2)) if x and x[1]]
+            if not opts:
+                return None
+            if pick == "slot-best":
+                top = max(v for _, v in opts)
+                return rng.choice([o for o, v in opts if v >= top * (1 - 1e-12)])
+            return rng.choices([o for o, _ in opts], weights=[v for _, v in opts])[0]
+        x = _swap_at(s, t, rng.randrange(2, len(t) - 2 - m_ + 1), m_, rng, frame, unit, mn, pick)
+        return x[0] if x else None
+
+    def _swap_at(s, t, i, m_, rng, frame, unit, mn, pick):
         own, l, r = tuple(t[i:i + m_]), t[i - 1], t[i + m_]
         if frame == "wide":
             c = {(w,): k for w, k in widef[(t[i - 2], l, r, t[i + 2])].items()}
@@ -600,6 +644,17 @@ if BASE or DIAG:
                         new_ += 1
                 if new_ and sc_ > 0:
                     c[(w,)] = sc_
+        elif frame.startswith("vote"):     # every word a candidate, by the votes of its groups in the places around the slot
+            places = [set(y[0] for y in spanf[(l, r)] if len(y) == 1)]                      # between the two neighbours
+            if "wide" in frame or "all" in frame:
+                places.append(set(widef[(t[i - 2], l, r, t[i + 2])]))                    # between two neighbours each side
+            if "all" in frame:
+                places += [set(rights[l]), set(lefts[r])]                                 # after the left one; before the right one
+            c = {}
+            for w in unic:
+                v = sum(frame_vote(w, f) for f in places if f)
+                if v > 0:
+                    c[(w,)] = v
         elif frame in ("tree", "count"):   # at least one new pair; a stored pair counts 1, a new one by its licence
             c = {}
             lic_ = side_licence if frame == "tree" else support
@@ -615,7 +670,7 @@ if BASE or DIAG:
             c = {(w,): big[(l, w)] * big[(w, r)] / unic[w] for w in unic if big[(l, w)] and big[(w, r)]}
         else:
             c = {y: k for y, k in spanf[(l, r)].items() if unit == "span" or len(y) == 1}
-        c.pop(own, None)
+        own_v = c.pop(own, None)
         c = {y: k for y, k in c.items() if 3 <= len(s) - m_ + len(y) <= 8}
         if not c:
             return None
@@ -624,7 +679,7 @@ if BASE or DIAG:
             y = rng.choice(sorted(k for k, v in c.items() if v >= top * (1 - 1e-12)))
         else:
             y = rng.choices(list(c), weights=list(c.values()))[0]
-        return s[:i - 2] + list(y) + s[i - 2 + m_:]
+        return s[:i - 2] + list(y) + s[i - 2 + m_:], (c[y] / own_v if own_v else None)
     for ai, arm in enumerate(json.loads(BASE)):
         g_rng = random.Random(seed + 7)
         t1 = time.time()
@@ -761,6 +816,137 @@ def t_swap(p, unit, up, by, rng):
         y = rng.choices(list(pool), weights=list(pool.values()))[0]
         return s[:i] + list(y) + s[j:]
     return None
+
+
+_us = {}
+_us_log = []                                   # (a chunk was involved, ratio of the chosen offer), read and cleared by the arm loop
+
+
+def _us_build(units):
+    """Unit occurrences of the whole stream (words, and committed chunks when units == "chunks"), their place fillers,
+    and two Cobweb trees over the unit types (words stored after / before each type), with chains and members."""
+    from trellis2.cu_cobweb import CUCobwebTree as _Tree
+    U = {"units": units, "count": defaultdict(int), "after": defaultdict(set), "before": defaultdict(set), "order": [],
+         "F": {k: defaultdict(set) for k in ("lr", "wide", "after", "before")}, "slots": [], "votes": {}}
+    for t, (s, a0, b0) in enumerate(EXP):
+        spans = {(i, i + 1) for i in range(len(s))}
+        if units == "chunks":
+            spans |= {e.span for e in L.records[a0:b0]
+                      if e.token is None and e.used and e.leaf is not None and e.span[1] - e.span[0] < len(s)}
+        occ = []
+        for (i, j) in sorted(spans):
+            y = tuple(s[i:j])
+            l = s[i - 1] if i > 0 else "<s>"
+            r = s[j] if j < len(s) else "</s>"
+            l2 = s[i - 2] if i > 1 else "<s>"
+            r2 = s[j + 1] if j + 1 < len(s) else "</s>"
+            if y not in U["count"]:
+                U["order"].append(y)
+            U["count"][y] += 1
+            U["after"][y].add(r)
+            U["before"][y].add(l)
+            U["F"]["lr"][(l, r)].add(y)
+            U["F"]["wide"][(l2, l, r, r2)].add(y)
+            U["F"]["after"][l].add(y)
+            U["F"]["before"][r].add(y)
+            occ.append((i, j, y, l, r, l2, r2))
+        U["slots"].append(occ)
+    for attr, side in (("R", "after"), ("L", "before")):
+        T = _Tree((attr,), seed=seed)
+        T.exact_alone = True
+        leaf = {}
+        for y in U["order"]:
+            d = U[side][y]
+            leaf[y] = T.ifit({attr: {v: 1.0 / len(d) for v in d}}, float(U["count"][y]))
+        chain, mem = {}, defaultdict(set)
+        for y, nd in leaf.items():
+            ch = []
+            while nd is not None:
+                ch.append(nd.id)
+                mem[nd.id].add(y)
+                nd = nd.parent
+            chain[y] = ch
+        U[attr] = (chain, mem)
+    return U
+
+
+def _us_votes(U, kind, key):
+    """Vote of every unit type in the place (kind, key): over both trees and every concept on its path (leaf excluded),
+    the share of the concept's members among the place's fillers. Sparse dict, cached per place."""
+    ck = (kind, key)
+    if ck in U["votes"]:
+        return U["votes"][ck]
+    F = U["F"][kind].get(key)
+    out = {}
+    if F:
+        for attr in ("R", "L"):
+            chain, mem = U[attr]
+            cnt = defaultdict(int)
+            for f in F:
+                for c in chain[f]:
+                    cnt[c] += 1
+            nodes = set(cnt)
+            for y in U["order"]:
+                tot = 0.0
+                for c in chain[y][1:]:
+                    k = cnt.get(c)
+                    if k:
+                        tot += k / len(mem[c])
+                if tot:
+                    out[y] = out.get(y, 0.0) + tot
+    U["votes"][ck] = out
+    return out
+
+
+def u_swap(p, units, places, pick, rng):
+    """Slot-and-swap over stored units: each unit occurrence (a word, or a committed chunk) of the retrieved stored sentence
+    offers its best replacement, weighed by its votes relative to the votes of the unit standing there; one offer is taken
+    ("slot": drawn by that ratio; "slot-best": the highest)."""
+    if units not in _us:
+        _us[units] = _us_build(units)
+    U = _us[units]
+    if not _mem:
+        _mem["m"] = L._members(L.ctx, "ctx")
+        _mem["next"] = [i for i, (_, fol) in enumerate(train) if fol and i > 0]
+    ps_ = set(p)
+    if _mem["next"]:
+        sc = [sum(idf.get(w, 0.0) for w in ps_ & set(train[i - 1][0])) + 1e-6 * rng.random() for i in _mem["next"]]
+        t = _mem["next"][max(range(len(sc)), key=sc.__getitem__)]
+    else:
+        t = rng.randrange(len(EXP))
+    s = EXP[t][0]
+    offers = []
+    for (i, j, own, l, r, l2, r2) in U["slots"][t]:
+        pv = [_us_votes(U, "lr", (l, r))]
+        if places in ("wide", "all"):
+            pv.append(_us_votes(U, "wide", (l2, l, r, r2)))
+        if places == "all":
+            pv += [_us_votes(U, "after", l), _us_votes(U, "before", r)]
+        pv = [v for v in pv if v]
+        sown = sum(v.get(own, 0.0) for v in pv)
+        if sown <= 0:
+            continue
+        score = defaultdict(float)
+        for v in pv:
+            for y, x in v.items():
+                score[y] += x
+        base = len(s) - (j - i)
+        cand = {y: x for y, x in score.items() if y != own and 3 <= base + len(y) <= 8}
+        if not cand:
+            continue
+        top = max(cand.values())
+        y = rng.choice(sorted(y for y, x in cand.items() if x == top))
+        offers.append((top / sown, i, j, own, y))
+    if not offers:
+        return None
+    if pick == "slot-best":
+        top = max(o[0] for o in offers)
+        o = rng.choice([o for o in offers if o[0] == top])
+    else:
+        o = rng.choices(offers, weights=[o[0] for o in offers])[0]
+    ratio, i, j, own, y = o
+    _us_log.append((len(own) > 1 or len(y) > 1, ratio))
+    return s[:i] + list(y) + s[j:]
 L._quiet = True
 ix = L.concept_index()
 DUMP = os.environ.get("STORY_DUMP")            # a directory: every generation of every arm, as JSON lines
@@ -783,10 +969,17 @@ for ai, arm in enumerate(arms):
     PP = [p for p in P for _ in range(DRAWS)]
     chart = arm.pop("chart", None)         # chart generation (chart_gen.py) with these settings
     tsw = arm.pop("tswap", None)           # one stored unit swapped (t_swap)
+    usw = arm.pop("uswap", None)           # one stored unit (word or chunk) swapped by Cobweb-tree votes (u_swap)
+    extra = {}
+    _us_log.clear()
     if tsw is not None:
         up_, by_ = arm.pop("up", 1), arm.pop("by", "concept")
         gen = lambda p: t_swap(p, tsw, up_, by_, g_rng)
         arm.update({"tswap": tsw, "up": up_, "by": by_})
+    elif usw is not None:
+        pl_, pk_ = arm.pop("places", "wide"), arm.pop("pick", "slot")
+        gen = lambda p: u_swap(p, usw, pl_, pk_, g_rng)
+        arm.update({"uswap": usw, "places": pl_, "pick": pk_})
     elif chart is not None:
         CG = ChartGen(L, **chart)
         print(json.dumps({"tag": tag, "seed": seed, "chart": chart, **CG.stats}), flush=True)
@@ -817,6 +1010,11 @@ for ai, arm in enumerate(arms):
         return max(cands, key=score) if cands else None
     G = [best(p) if critic else gen(p) for p in PP]
     ok = [(p, g) for p, g in zip(PP, G) if g]
+    if usw is not None:
+        extra = {"chunk for chunk": round(sum(a for a, _ in _us_log) / max(len(_us_log), 1), 3),
+                 "unit types": len(_us[usw]["order"]),
+                 "mean ratio": round(sum(b for _, b in _us_log) / max(len(_us_log), 1), 3)}
+        _us_log.clear()
     c, cn = cross(*zip(*ok)) if ok else (None, 0)
     S = [g for _, g in ok]
     pat = [tuple(t[:2] for _, t in nltk.pos_tag(g)) in patterns for g in S]
@@ -830,6 +1028,7 @@ for ai, arm in enumerate(arms):
                       "cross share": None if c is None else round((c - rand_c) / (real_c - rand_c), 3),
                       "tag pattern attested": m(pat), "novel": m(nov),
                       "every bigram stored": m([attested(g, 2) for g in S]), "every trigram stored": m([attested(g, 3) for g in S]),
+                      **extra,
                       "novel tag pattern attested": m([a for a, b in zip(pat, nov) if b]),
                       "within share": None if w is None or ws is None else round((w - ws) / (w_real - w_shuf), 3),
                       "examples": [" ".join(p) + "  ->  " + " ".join(g) for p, g in ok[:12]],
