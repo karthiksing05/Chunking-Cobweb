@@ -49,6 +49,11 @@ class ChartGen:
                  decomp: str = "sample", cut_by: str = "depth", topic: Optional[float] = None,
                  fill: str = "cobweb", topic_by: str = "symbol", topic_mean: bool = False):
         self.L, self.cut, self.lam, self.alpha, self.gap_max, self.length = L, cut, lam, alpha, gap_max, length
+        # lam "wb" (Witten-Bell, as PPM's escape): a concept backs off by the number of distinct
+        # part pairs seen under it, T, in place of a fixed lam: (n_C(AB) + T_C P_up) / (n_C + T_C),
+        # so a concept whose instances all split one way keeps its mass and a varied one shares it.
+        # alpha "wb": a word symbol's emission likewise, (n_s(w) + T_s P(w)) / (n_s + T_s), P the
+        # stored words' shares smoothed the same way toward uniform
         # cut_by "bits": cut and ctx_cut are information levels (-log2 of a concept's share
         # of its tree); a symbol is the deepest ancestor within that many bits, so the
         # grammar's grain does not hang on how deep or bushy the tree grew; cut_by "count":
@@ -186,7 +191,13 @@ class ChartGen:
             for s in comp_syms:
                 s_ix[self.ix[s]] = pos[anc(s)]
             N = np.bincount(r_ix, weights=self.rw, minlength=len(ids))
-            self.levels.append((r_ix, s_ix, N))
+            if self.lam == "wb":
+                types = {(pos[anc(c)], a, b) for a, b, c in keys}
+                lamv = np.bincount(np.array([t[0] for t in types], dtype=np.int64), minlength=len(ids)).astype(float)
+                lamv = np.maximum(lamv, 1.0)
+            else:
+                lamv = np.full(len(ids), float(self.lam))
+            self.levels.append((r_ix, s_ix, N, lamv))
         self.comp_ix = np.array([self.ix[s] for s in comp_syms], dtype=np.int64)
         g = Counter()
         for (a, b, _), w in rules.items():
@@ -202,6 +213,10 @@ class ChartGen:
         st[comp] += 0.5
         self.start = st / st.sum()
         self.emit = {self.ix[s]: c for s, c in emit.items()}
+        uni = Counter()
+        for c in emit.values():
+            uni.update(c)
+        self._uni, self._uni_n = uni, sum(uni.values())
         self.vocab = sorted({w for c in emit.values() for w in c})
         self.stats = {"symbols": S, "word categories": int(self.is_word.sum()), "concepts": int(comp.sum()),
                       "rules": len(keys), "part pairs": len(gk)}
@@ -213,6 +228,12 @@ class ChartGen:
             v[self.is_word] = 1.0
             return v
         V = len(self.vocab) + 1
+        if self.alpha == "wb":
+            T0 = len(self._uni)
+            pu = (self._uni.get(tok, 0.0) + T0 / V) / (self._uni_n + T0)
+            for i, c in self.emit.items():
+                v[i] = (c.get(tok, 0.0) + len(c) * pu) / (sum(c.values()) + len(c))
+            return v
         for i, c in self.emit.items():
             v[i] = (c.get(tok, 0.0) + self.alpha / V) / (sum(c.values()) + self.alpha)
         return v
@@ -221,11 +242,11 @@ class ChartGen:
         """Unnormalised vector over parents C of sum over rules of P(A B | C) a_A b_B."""
         prod = self.rw * a[self.rA] * b[self.rB]
         prev = np.full(len(self.syms), float(np.dot(self.gw, a[self.gA] * b[self.gB])))
-        for r_ix, s_ix, N in self.levels:
+        for r_ix, s_ix, N, lamv in self.levels:
             obs = np.bincount(r_ix, weights=prod, minlength=len(N))
             val = np.zeros(len(self.syms))
             c = self.comp_ix
-            val[c] = (obs[s_ix[c]] + self.lam * prev[c]) / (N[s_ix[c]] + self.lam)
+            val[c] = (obs[s_ix[c]] + lamv[s_ix[c]] * prev[c]) / (N[s_ix[c]] + lamv[s_ix[c]])
             prev = val
         return prev
 
@@ -338,12 +359,12 @@ class ChartGen:
         tree.append((i, j, self.syms[C]))
         # P(AB | C) unrolled: each depth's rules times the share left to it by the deeper ones
         parts_A, parts_B, parts_w, carry = [], [], [], 1.0
-        for r_ix, s_ix, N in reversed(self.levels):
+        for r_ix, s_ix, N, lamv in reversed(self.levels):
             k = s_ix[C]
             m = r_ix == k
             parts_A.append(self.rA[m]); parts_B.append(self.rB[m])
-            parts_w.append(carry * self.rw[m] / (N[k] + self.lam))
-            carry *= self.lam / (N[k] + self.lam)
+            parts_w.append(carry * self.rw[m] / (N[k] + lamv[k]))
+            carry *= lamv[k] / (N[k] + lamv[k])
         parts_A.append(self.gA); parts_B.append(self.gB); parts_w.append(carry * self.gw)
         As, Bs, base = np.concatenate(parts_A), np.concatenate(parts_B), np.concatenate(parts_w)
         ks, ws, ls = [], [], []
@@ -506,12 +527,12 @@ class ChartGen:
                 b = a + span
                 g = out[(a, b)]
                 g_prod, g_glob = np.zeros(len(self.rw)), 0.0
-                for r_ix, s_ix, N in reversed(self.levels):
+                for r_ix, s_ix, N, lamv in reversed(self.levels):
                     sc = s_ix[c]
-                    d = g[c] / (N[sc] + self.lam)
+                    d = g[c] / (N[sc] + lamv[sc])
                     g_prod += np.bincount(sc, weights=d, minlength=len(N))[r_ix]
                     g = np.zeros(S)
-                    g[c] = self.lam * d
+                    g[c] = lamv[sc] * d
                 g_glob = g.sum()                              # the first level's back-off is one shared scalar
                 for k in range(a + 1, b):
                     L_, R_ = ins[(a, k)], ins[(k, b)]
