@@ -78,6 +78,7 @@ ARMS = [
     ("Neighbour chunks back on, with type names", "v3-r103", "wc-nb"),
     ("<code>exact_alone</code> off", "v3-r104", "exact-off"),
     ("<code>exact_alone</code> on both trees", "v3-r104", "exact-both"),
+    ("<code>exact_alone</code> on the context tree only", "v3-r106", "exact-ctx"),
     ("One shared tree", "v3-r104", "shared"),
     ("One joint tree", "v3-r104", "joint"),
     ("Content not donated to context", "v3-r104", "donate-ctx"),
@@ -177,6 +178,42 @@ for name, t in SL:
     t6.append(f"<tr><td>{name}</td><td class=\"num\">{c('med', 'mean distinct words')}</td><td class=\"num\">{c('med', 'share under a one-word concept')}</td>"
               f"<td class=\"num\">{c('large', 'mean distinct words')}</td><td class=\"num\">{c('large', 'share under a one-word concept')}</td></tr>")
 
+# parsing against gold on the toy grammars
+PG = ("small", "med", "large", "term_low", "term_med")
+PA = [("Older recipe", "older"), ("<code>word_cc</code> on, type names on, no neighbour chunks", "cnt"), ("<code>word_cc</code> off, type names on", "wc"),
+      ("<code>word_cc</code> on, type names off", "tn-wcon"), ("<b>Candidate base</b>", "base"), ("<code>exact_alone</code> off", "exact-off"),
+      ("<code>exact_alone</code> on the context tree only", "exact-ctx")]
+t7 = []
+fixed = None
+for name, t in PA:
+    r = {(x["cond"], x["seed"]): x for s in (13, 17) for x in jlines(f"logs/v3-shape-{t}-{s}.log")}
+    fixed = r
+    cells = "".join(f"<td class=\"num\">{f2(r[(c, 13)]['omission'])} / {f2(r[(c, 17)]['omission'])}</td>" for c in PG)
+    m = mean([r[(c, s)]["omission"] for c in PG for s in (13, 17)])
+    t7.append(f"<tr><td>{name}</td>{cells}<td class=\"num\">{f2(m)}</td></tr>")
+cells = "".join(f"<td class=\"num\">{f2(fixed[(c, 13)]['right-branching omission'])} / {f2(fixed[(c, 17)]['right-branching omission'])}</td>" for c in PG)
+t7.append(f"<tr><td>A fixed right-branching parser</td>{cells}<td class=\"num\">{f2(mean([fixed[(c, s)]['right-branching omission'] for c in PG for s in (13, 17)]))}</td></tr>")
+
+# the candidate with more or less data
+t8 = []
+for n in (500, 1000, 2000, 4000):
+    t = "base" if n == 1000 else f"n{n}"
+    pre = "v3-r104" if n == 1000 else "v3-r106"
+    rows = {int(re.search(r"_s(\d+)_", r["file"]).group(1)): r for r in jlines(f"logs/{pre}-judge-{t}.log") if r.get("file") and "arm0" in r["file"]}
+    def c(k):
+        return " / ".join(f2(rows[s][k]) if s in rows else "–" for s in (13, 17))
+    ch = chars("v3-r104", "base")
+    ch.update(chars("v3-r106", "base-4000"))
+    bits = " / ".join(f"{ch[(n, s)][0]:.2f}" if (n, s) in ch else "–" for s in (13, 17))
+    tri = {}
+    for s in (13, 17):
+        for pth in (f"logs/v3-r104c-base-{s}.log", f"logs/v3-r106c-base-4000-{s}.log"):
+            for r in jlines(pth):
+                if "trigram" in r:
+                    tri[(r["train"], s)] = r["trigram"]
+    tb = " / ".join(f"{tri[(n, s)]:.2f}" if (n, s) in tri else "–" for s in (13, 17))
+    t8.append(f"<tr><td>{n:,}</td><td class=\"num\">{c('grammatical novel per generation')}</td><td class=\"num\">{c('judged grammatical')}</td><td class=\"num\">{c('novel')}</td><td class=\"num\">{bits}</td><td class=\"num\">{tb}</td></tr>")
+
 HTML = f"""
 <p><b>Verdict so far.</b> Removing parts one at a time produced a simpler candidate recipe that generates and compresses better than the recipe the main pages describe, and learns faster. Four decisions held up with a measured reason, four are weakly supported, and two remain real conflicts between generation and compression. The candidate has not been adopted, and the main pages still describe the older recipe.</p>
 <p><b>The candidate recipe.</b> Two trees; posterior storage; names in information bands; sampled restructuring; repair; window 2; <code>exact_alone</code> on the content tree; the story facet on stories. It drops <code>word_cc</code>, type names and neighbour chunks. With type names off, <code>name_level</code>, <code>name_mix_k</code>, <code>type_k</code>, <code>type_key</code> and <code>word_content</code> no longer do anything: the run without them reproduces the story yields, character bits and toy results of the run with them, to the last digit.</p>
@@ -193,6 +230,15 @@ HTML = f"""
   <thead><tr><th>Arm</th><th class="num">Yield, mean</th><th class="num">Yield by seed</th><th class="num">Grammatical</th><th class="num">New</th><th class="num">Cross share</th><th class="num">Characters</th><th class="num">Learning, min</th></tr></thead>
   <tbody>{OLD_STORY}{''.join(t1)}</tbody>
 </table></div>
+<h2>The candidate with more data</h2>
+<div class="tablewrap"><table>
+  <thead><tr><th>Learned, s13 / s17</th><th class="num">Yield</th><th class="num">Grammatical</th><th class="num">New</th><th class="num">Characters, bits</th><th class="num">Trigram, bits</th></tr></thead>
+  <tbody>{''.join(t8)}</tbody>
+</table></div>
+<ul>
+  <li><b>Compression improves with data faster than trigram does.</b> At 4,000 the candidate beats trigram on both seeds (24.89 against 25.48, 24.82 against 24.87); at 2,000 it was 0.3–0.5 bits behind.</li>
+  <li><b>Generation does not improve with data.</b> Yield is .26 / .25 at 500 and .21 / .17 at 2,000. Grammaticality stays near 60% throughout; the share of new sentences moves little. So the remaining grammar errors are not a shortage of data: they come from how generation reads memory. We have not yet measured why yield falls as memory grows.</li>
+</ul>
 <h2>Toy grammars</h2>
 <div class="tablewrap"><table>
   <thead><tr><th>Arm</th><th class="num">Expansion, new: <code>med</code></th><th class="num"><code>large</code></th><th class="num"><code>term_low</code></th><th class="num">Inside-outside, grammatical; new: <code>med</code></th><th class="num"><code>large</code></th></tr></thead>
@@ -206,6 +252,17 @@ HTML = f"""
 </table></div>
 <p class="small">The older recipe's arm with <code>word_cc</code> on and type names on had word purity about .87 and chunk purity about .91.</p>
 
+<h2>Parsing against gold trees</h2>
+<div class="tablewrap"><table>
+  <thead><tr><th>Omission at 320 experiences, s13 / s17</th><th class="num"><code>small</code></th><th class="num"><code>med</code></th><th class="num"><code>large</code></th><th class="num"><code>term_low</code></th><th class="num"><code>term_med</code></th><th class="num">Mean</th></tr></thead>
+  <tbody>{''.join(t7)}</tbody>
+</table></div>
+<ul>
+  <li><b>The older recipe parses worse than a fixed right-branching parser</b>, and it can collapse: on <code>med</code>, seed 13, it reads almost every sentence as one left-branching chain. The example on the Parsing explorer is one of these. Neighbour chunks cause it: turning them off alone brings <code>med</code> to .31 / .25 and <code>large</code> to .22 / .30 (60 test sentences), and <code>exact_alone</code> makes little further difference. Keeping them with <code>exact_alone</code> on content only gives .40 / .29 and .31 / .40.</li>
+  <li><b>The candidate beats the fixed parser on average</b> (.28 against .33), by a modest margin: clearly on <code>large</code>, about level on the rest. No recipe here parses well.</li>
+  <li><b><code>small</code> looks like a loss for the candidate, but the evidence for that is thin.</b> Every sentence has the shape Det N V Det N, and the only bracket missed is whether the verb joins the subject or the object. Word sequences give little to separate these in this grammar, and earlier recipes flip between .00 and .25 on the same data. So we read this as an ambiguity that recipes resolve arbitrarily rather than a capability <code>word_cc</code> provides. We have not tested that reading.</li>
+</ul>
+
 <h2>Parts removed</h2>
 <h3><code>word_cc</code>: the word's identity in its context description</h3>
 <p><b>Reason.</b> A chunk's content concept is donated into its context, so a word's own content, the word itself, was donated the same way.</p>
@@ -215,7 +272,7 @@ HTML = f"""
   <thead><tr><th>Concept above a word's leaf, 320 experiences, s13 / s17</th><th class="num"><code>med</code>: distinct words</th><th class="num">Share of occurrences alone with their word</th><th class="num"><code>large</code>: distinct words</th><th class="num">Share alone</th></tr></thead>
   <tbody>{''.join(t6)}</tbody>
 </table></div>
-<p><b>Verdict.</b> Removed. The reason was an analogy, and it caused the copying. The losses are real: word grouping is coarser at 12 bits, and sentences stay on topic less. Bracket omission on the toy grammars did not get systematically worse.</p>
+<p><b>Verdict.</b> Removed. The reason was an analogy, and it caused the copying. The losses are real: word grouping is coarser at 12 bits, and sentences stay on topic less. Parsing against gold trees is about the same overall (see the table above).</p>
 <h3>Type names</h3>
 <p><b>Reason.</b> Naming a part by where all instances of its type have stood lets substitutable types share names wherever they occur.</p>
 <p><b>What removal did.</b> Yield rose from .190 to .224, on all four seeds, learning became about three times faster, and five parameters stopped mattering. Characters lose 0.3 bits on seed 13 at 2,000 and are unchanged on seed 17.</p>
@@ -251,6 +308,7 @@ HTML = f"""
 <h3><code>exact_alone</code></h3>
 <p><b>Reason.</b> Cobweb scored a new leaf as if a lone instance predicted all its values with certainty. For a bag-valued description that files nearly everything as a new leaf, giving content concepts with thousands of leaf children.</p>
 <p><b>What removal does.</b> It improves characters to 26.09 / 26.05 at 2,000. Against trigram that is 0.34 bits better on seed 13 and 0.03 worse on seed 17, with the same pattern at 1,000 and a small win on both seeds at 500. It also improves chess on shifted boards from 153.6 to 147.2, with control unchanged. It lowers yield to .194 on all four seeds, and collapses chunk purity from .76 to .12. Learning takes about 2.4 times as long on characters and three times on chess.</p>
+<p><b>On the context tree only.</b> Turning it on for context and off for content was meant to keep grouping while letting content stay flat. It does neither: yield falls to .174 on all four seeds, below every other arm; characters are mixed (27.04 / 26.33 at 2,000, against 26.69 / 26.52); learning takes about four times as long; expansion on toy grammars is weaker on <code>med</code> and <code>large</code> and level on <code>term_low</code>; and parsing omission rises to .31. So the setting must be on for the content tree, and the context tree does not need it.</p>
 <p><b>Verdict.</b> The reason holds: the flat tree is real and it damages grouping. The surprise is that a flat content tree compresses better, plausibly because exact chunks behave more like a large memory of seen sequences, though we have not tested that. The same setting cannot currently serve generation and compression, and this is the largest obstacle to a single recipe.</p>
 <h3>Window size</h3>
 <p><b>Reason.</b> Two tokens each side give the context tree enough to separate uses of a word.</p>
@@ -273,8 +331,8 @@ HTML = f"""
 <p><b>A correction.</b> The 147.2 reported on the chess page came from a run with <code>exact_alone</code> off, while the recipe table says it is on. With it on, shifted boards cost 153.6. Today's code reproduces both numbers.</p>
 <h2>What this does not settle</h2>
 <ul>
-  <li>Most generation arms and all chess arms have one or two seeds, and all stories stop at 1,000 sentences.</li>
-  <li>Purity and posterior say how memory is organised. On stories we have no gold parse, so we cannot say what their fall costs in parsing quality there.</li>
+  <li>Most generation arms and all chess arms have one or two seeds, and only the base was run with more data.</li>
+  <li>Purity and posterior say how memory is organised. On stories we have no gold parse, so we cannot say what their fall costs in parsing quality there. Toy parsing was measured for six recipes, not for every arm above.</li>
   <li>The candidate has not been run on bAbI, nor with the chart settings re-tuned for it.</li>
 </ul>
 """
