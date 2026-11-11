@@ -907,6 +907,20 @@ for ai, arm in enumerate(arms):
         new_ = arm.pop("new", False)       # never return a stored sentence (redraw)
         q_ = float(arm.pop("q", 0.5))
         near_ = arm.pop("near", None)      # the licence read at the k concepts nearest each occurrence (r158)
+        spec_ = arm.pop("spec", None)      # specialise: a drawn word may be replaced by any member (by type) of the context
+        _mem_, _occ_ = {}, {}              # concept spec_ levels above one of its occurrences whose pair with l1 passes the gate
+        if spec_:
+            for e in L.records:
+                if e.leaf is None:
+                    continue
+                for which, attr, value, _w in e.pas:
+                    if which == "ctx" and attr == "fill" and isinstance(value, tuple) and value[0] == "w":
+                        path, nd = [], e.leaf
+                        while nd is not None:
+                            path.append(nd.id)
+                            _mem_.setdefault(nd.id, set()).add(value[1])
+                            nd = nd.parent
+                        _occ_.setdefault(value[1], []).append(path)
         pair_ = arm.pop("pair", None)      # "gate": a filler whose first word was never stored after l1 is kept
         _cz = {}                           # only if the context tree read by types licenses the pair at or above
         if pair_:                          # the median over stored pairs (as chart_gen's pair_lic gate)
@@ -954,11 +968,17 @@ for ai, arm in enumerate(arms):
                     if not vs or sum(ws) <= 0:
                         break
                     (v, done) = _rng.choices(vs, weights=ws)[0]
+                    if spec_ and v[0] == "w" and v[1] in _occ_:
+                        p_ = _rng.choice(_occ_[v[1]])
+                        c_ = p_[min(spec_, len(p_) - 1)]
+                        alts = sorted(m for m in _mem_[c_] if _ok(t_[-1], m))
+                        if alts:
+                            v = ("w", _rng.choice(alts))
                     out += _words(v)
                 if done and 3 <= len(out) <= 8 and not (new_ and tuple(out) in seen):
                     return out
             return None
-        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"new": True} if new_ else {}), **({"q": q_} if q_ != 0.5 else {}), **({"near": near_} if near_ else {})})
+        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"new": True} if new_ else {}), **({"q": q_} if q_ != 0.5 else {}), **({"near": near_} if near_ else {}), **({"spec": spec_} if spec_ else {})})
     elif chart is not None:
         CG = ChartGen(L, **chart)
         print(json.dumps({"tag": tag, "seed": seed, "chart": chart, **CG.stats}), flush=True)
