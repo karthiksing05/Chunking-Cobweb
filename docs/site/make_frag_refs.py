@@ -283,6 +283,8 @@ LIC_ROWS = [
     ("Product of the two words' frequencies", R118, "frequency of the two words", SEEDS, None, True),
     ("Cobweb's prediction from the candidate memory (the current learner)", R113, "Cobweb, both", S2, None, False),
     None,  # best of the recipe variants (round 114)
+    ("<b>The same memory's context tree, read by types (round 143)</b>", "logs/v3-r143-lic-n{n}-{s}.log",
+     "context tree by types, mean", SEEDS, None, True),
     ("A Cobweb tree over word pairs", R115, "pair tree, all levels", S2, None, True),
     ("Words with similar neighbours vote (reference)", R118, "similar words", SEEDS, None, True),
     ("<b>Analogy count (reference)</b>", R118, "analogy, count", SEEDS, None, True),
@@ -382,10 +384,16 @@ p4 = ("<ul>"
 
 p5 = ("<ul>"
       "<li><b>The current learner generalizes about neighbours no better than word frequency.</b> Every recipe variant we could score "
-      "ranks unstored pairs about as well as multiplying the two words' frequencies. This is the measured cause of the errors in Table 3.</li>"
-      "<li><b>Two counts over the stream do about twice as well.</b> The analogy count and similar-word votes read nothing but stored "
-      "pairs. A repair of the learner's generalization step should first move its own row above them here, where one run takes minutes, "
-      "before generation is judged again.</li>"
+      "ranks unstored pairs about as well as multiplying the two words' frequencies, when the memory is read by token counts: each "
+      "stored occurrence votes with how probable the neighbour is at its context leaf. This is the measured cause of the errors in Table 3.</li>"
+      "<li><b>Read by types, the same context tree does about twice as well.</b> A context concept's members are the distinct words "
+      "that filled the occurrences under it. An unstored (a, b) is licensed by the share of the members of the concepts above b's "
+      "occurrences that a was stored right before, and the same from a's side. Nothing in the tree changes, only how it is read: one "
+      "frequent collocation now counts as one member, not as its count. It passes similar-word votes at 4,000 sentences and stays "
+      "below the analogy count at every size. Weighing the path differently (the root left out, each concept by its information, "
+      "only the nearest concepts) moves it by less than .01.</li>"
+      "<li><b>The analogy count is still ahead.</b> It reads nothing but stored pairs. The learner method is "
+      "<code>Trellis3.type_licence</code>; round 144 judges chart generation with it.</li>"
       "<li><b>A Cobweb tree over word pairs does worse than word frequency.</b></li></ul>")
 
 
