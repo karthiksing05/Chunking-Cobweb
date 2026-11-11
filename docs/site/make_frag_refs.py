@@ -569,9 +569,11 @@ lead = (f"<p>Simple reference generators, run on the same stream, prompts and ju
         "<p><b>What worked.</b> Two Cobweb trees over word types, read by counting each member word once, decide which unseen word pairs "
         "may be produced far better than the learner's context concepts do (Table 5). A generator that replaces one word of a retrieved "
         "stored sentence, and accepts a replacement only when two readings of those trees agree, produces sentences that all contain a "
-        "never-seen word pair and are about as often grammatical as the best reference, which never leaves stored pairs (Table 6). The same "
-        "trees shorten the code for held-out sentences (Table 7). None of this is inside the learner yet: it reads the stream, one word "
-        "at a time, and the learner's chunks did not help as units.</p>")
+        "never-seen word pair and are grammatical about 60% of the time, from 500 to 4,000 sentences, with the trees kept current in one "
+        "pass (Table 8). The best reference, which never leaves stored pairs, is grammatical 67 to 70% of the time; TRELLIS's chart "
+        "generation is grammatical 14% of the time on sentences with a never-seen pair. The same trees shorten the code for held-out "
+        "sentences and for held-out Chinese characters (Table 7). None of this is inside the learner yet: it reads the stream, one word "
+        "at a time, and neither the learner's chunks nor recurring spans helped as units.</p>")
 
 p_how = ("<h3>How to read this page</h3>"
          "<p><b>Yield</b> is the number of judged-grammatical new sentences per generation. <b>Cross share</b> is the topic agreement with "
@@ -622,19 +624,112 @@ p6 = ("<ul>"
       "<li><b>One reading of the trees is not enough to generalize.</b> When an unstored pair is required, frame votes alone or the pair "
       "licence alone are grammatical 39 to 52% of the time. The analogy count, which ranked pairs well in Table 5, is grammatical 10 to "
       "16% of the time: its best-scoring pairs are pairs of frequent words.</li>"
-      "<li><b>Two readings that agree generalize as well as reuse.</b> Scoring a replacement by its frame votes times the pair licence of "
+      "<li><b>Two readings that agree come close to reuse.</b> Scoring a replacement by its frame votes times the pair licence of "
       "each unstored pair it makes gives 67 to 68% grammatical output at 1,000 sentences and 59 to 61% at 4,000, with every output new and "
-      "containing a never-seen pair. The reference swap, which makes no unstored pair, is 69% and 67% grammatical. Yield is .67 to .68 "
-      "against .57 at 1,000 sentences and .59 to .61 against .51 at 4,000. With the best slot and no requirement, the outputs that "
-      "contain an unstored pair are at least as often grammatical as those that do not.</li>"
+      "containing a never-seen pair. The reference swap, which makes no unstored pair, is 69% and 67% grammatical. Since every output is "
+      "new, yield equals the grammatical share: .67 to .68 against the reference's .57 at 1,000 sentences and .59 to .61 against .51 at "
+      "4,000. Table 8 repeats this at four sizes and finds 1,000 sentences the most favourable; about 60% is the fairer figure.</li>"
       "<li><b>The learner's chunks do not help as units.</b> Running the same procedure on the learner's memory with its committed chunks "
       "as units gives equal or lower yield than words alone (round 123 rows). Its parses are weak (A18), so its chunks are poor units "
       "to substitute.</li></ul>"
-      "<p class=\"small\">The judge passes 86 to 91% of real held-out sentences, so about 68% is still short of real text. The topic "
+      "<p class=\"small\">The judge passes 86 to 91% of real held-out sentences, so about 60 to 68% is still short of real text. The topic "
       "comes from retrieval: these generators inherit the cross share of the stored sentence they start from.</p>")
+
+# Chinese characters coder table (rounds 127, 104c, 106c)
+def trellis_chart_bits(sd, t):
+    p = f"logs/v3-r106c-base-4000-{sd}.log" if t == 4000 else f"logs/v3-r104c-base-{sd}.log"
+    for r in jlines(p):
+        if r.get("train") == t and isinstance(r.get("trellis 0"), dict) and r["trellis 0"].get("bits") is not None:
+            return r["trellis 0"]["bits"]
+    return None
+
+
+def s13_17(vals):
+    return " / ".join("–" if v is None else f"{v:.2f}" for v in vals)
+
+
+tch = []
+for t in (500, 1000, 2000, 4000):
+    rr = {}
+    for sd in S2:
+        for r in jlines(f"logs/v3-r127-chars-{sd}.log"):
+            if r.get("train") == t:
+                rr[sd] = r
+    cells = [s13_17([rr.get(sd, {}).get(f) for sd in S2]) for f in ("trigram", "trigram + licence", "bigram", "bigram + licence")]
+    cells.append(s13_17([trellis_chart_bits(sd, t) for sd in S2]))
+    tch.append(row(f"{t:,}", cells))
+TCH = table(["Characters learned", "Trigram", "Trigram with the licence", "Bigram", "Bigram with the licence",
+             "TRELLIS chart coder"], tch)
+p_ch_lead = "<p>The same mix in the back-off of the n-gram coders for Chinese characters (bits per held-out character):</p>"
+
+# Table 8: one-pass trees and longer units (rounds 127 to 129)
+def mlh(vals, full=4):
+    if not vals:
+        return "–"
+    lo, hi = min(vals), max(vals)
+    g = lambda x: f"{x:.2f}".lstrip("0") if x < 1 else f"{x:.2f}"
+    cell = f"{f2(mean(vals))} ({g(lo)}–{g(hi)})"
+    return cell + ("" if len(vals) >= full else f", {len(vals)} seed{'s' if len(vals) != 1 else ''}")
+
+
+def build_vals(jpath, n, arm, field):
+    j = judge(jpath, n)
+    k = key(arm)
+    return [r[field] for (kk, sd), r in sorted(j.items(), key=lambda kv: kv[0][1] or 0) if kk == k and r.get(field) is not None]
+
+
+def mk8(newflag, field):
+    specs = [("Once at the end", "r129", {"nswap": "words", "new": newflag, "build": "batch"}, False),
+             ("Each sentence", "r128", {"nswap": "words", "new": newflag}, False),
+             ("<b>When its neighbours change</b>", "r129", {"nswap": "words", "new": newflag, "build": "lazy"}, True),
+             ("Each sentence, with recurring two- and three-word spans as units", "r128", {"nswap": "ngrams", "new": newflag}, False)]
+    rows = []
+    for label, rd, arm, _ in specs:
+        rows.append(row(label, [mlh(build_vals(f"logs/v3-{rd}-judge-n{n}.log", n, arm, field)) for n in NS5]))
+    rows.append(row("Reference: word stored between the same two neighbours" + (" (no unstored pair)" if newflag else ""),
+                    [mlh(build_vals(f"logs/v3-r109-judge-n{n}.log", n, {"swap": "retrieve"}, field)) for n in NS5]))
+    return rows
+
+
+H8 = ["Build", "500 sentences", "1,000", "2,000", "4,000"]
+T8a = table(["Build (judged grammatical, mean (lowest–highest) over seeds)"] + H8[1:], mk8(True, "judged grammatical"))
+T8b = table(["Build (yield, mean (lowest–highest) over seeds)"] + H8[1:], mk8(False, "grammatical novel per generation"))
+uns8 = []
+for n in NS5:
+    v = []
+    for sd in SEEDS:
+        for r in jlines(f"logs/v3-r129-build-n{n}-{sd}.log"):
+            if "arm" in r and r["arm"] == {"nswap": "words", "new": False, "build": "lazy"} and r.get("every bigram stored") is not None:
+                v.append(1 - r["every bigram stored"])
+                break
+    uns8.append(f"{n:,} sentences {pct(mean(v))}")
+T8s = ('<p class="small">For the row "When its neighbours change" without the requirement, the seed-mean share of outputs with an unstored '
+       'bigram is ' + "; ".join(uns8) + ".</p>")
+p8_intro = ("<p>The generators of Table 6 built the two trees once, at the end of the stream. A learner without an offline phase must keep "
+            "them current. These rows use the module <code>src/trellis2/type_trees.py</code>: words only, the best slot, frame votes (with "
+            "two neighbours each side) times pair licence. \"Once at the end\" enters every word once with its final description. \"Each "
+            "sentence\" re-enters every word of a sentence after that sentence. \"When its neighbours change\" re-enters a word only when "
+            "its set of neighbours grew. The last rows add recurring two- and three-word spans as units.</p>")
 
 p7 = ("<p>The licence shortens the code at every size on both seeds. The saving shrinks as the stream grows, since more of the pairs a "
       "held-out sentence needs are already stored. The two trees and the analogy count save about the same.</p>")
+
+p9 = ("<ul>"
+      "<li><b>The module reproduces the earlier generator.</b> With the trees built once at the end it gives the same judged share on each "
+      "of the four seeds at 1,000 sentences as the round 126 row of Table 6.</li>"
+      "<li><b>One pass is as good as building at the end, on average.</b> Re-entering a word only when its set of neighbours grows gives "
+      "59 to 64% grammatical output at the four sizes, against 56 to 68% for the build at the end. The build changes which candidate wins "
+      "on a given sentence, and single seeds move by ten points or more between builds, so differences between rows at one size are "
+      "within that spread.</li>"
+      "<li><b>Against the reference.</b> The reference swap is grammatical 67 to 70% of the time and makes no unstored pair. Without the "
+      "requirement the generator's yield is about .60 at every size up to 2,000, while the reference falls from .60 to .51 as the stream grows.</li>"
+      "<li><b>Recurring spans are not units.</b> Adding every two- or three-word span that recurs lowers the grammatical share by 13 to "
+      "17 points and the yield by .17 to .21. Recurrence does not make a span substitutable. With the learner's chunks (round 123) this "
+      "leaves longer units unsolved.</li></ul>"
+      "<p class=\"small\">Tried on the test of Table 5 and set aside: discounting a concept's vote by how surprising the word's silence "
+      "is under the concept's own rate (so that a frequent word that never showed a pattern is blocked from it). It lowers average "
+      "precision at every size, from .34 to .30 at 1,000 sentences and from .33 to .22 at 4,000; a softer form that lets the rate vary "
+      "between words lowers it to .31 and .26. Most unstored pairs that are right involve frequent words.</p>")
 
 p8 = ("<h3>What follows</h3><ul>"
       "<li><b>For the learner.</b> Its context tree describes occurrences by their windows. The licence that works describes types by "
@@ -647,7 +742,8 @@ p8 = ("<h3>What follows</h3><ul>"
       "their groups, is a unit. Using that test to find chunks has not been tried.</li></ul>"
       "<h3>What this does not settle</h3><ul>"
       "<li>Everything here replaces one word. Two or more substitutions, and units longer than a word, are open.</li>"
-      "<li>Stories only. Characters and chess have not been run with these trees.</li>"
+      "<li>Generation was run on stories only. Characters were run as a coder only; chess has not been run with these trees.</li>"
+      "<li>Agreement errors remain (\"they was happy\"): the trees group singular and plural subjects together.</li>"
       "<li>The coder's half-and-half mix is hand-set.</li>"
       "<li>Rounds 110 and 119 to 123 are judged on fewer seeds where the tables say so.</li></ul>")
 
@@ -658,7 +754,10 @@ out = (lead + p_how + "<h3>Table 1. Reference generators at 1,000 sentences, 4 s
        "<h3>Table 5. The generalization step alone</h3>" + p5_intro + T5 + T5v + T5s + p5_defs + p5 +
        "<h3>Table 6. Generating by one licensed substitution</h3>" + p6_intro +
        "<h4>1,000 sentences</h4>" + T6[1000] + "<h4>4,000 sentences</h4>" + T6[4000] + p6_defs + p6 +
-       "<h3>Table 7. The same licence as a coder</h3>" + p7_intro + T7 + p7 + p8)
+       "<h3>Table 7. The same licence as a coder</h3>" + p7_intro + T7 + p_ch_lead + TCH + p7 +
+       "<h3>Table 8. One-pass trees and longer units</h3>" + p8_intro +
+       "<h4>8a. An unstored pair required (every output is new and contains one)</h4>" + T8a +
+       "<h4>8b. No requirement</h4>" + T8b + T8s + p9 + p8)
 with open("docs/site/frag_refs.html", "w", encoding="utf-8") as f:
     f.write(out)
 

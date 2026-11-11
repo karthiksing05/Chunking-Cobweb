@@ -381,6 +381,36 @@ if LIC:
                         memo[k] = sum(1 for m_ in mem_[c] if ((m_, v) if attr == "R" else (v, m_)) in pc) / len(mem_[c])
                     tot += memo[k]
                 return tot
+            # entrenchment: a concept's vote for (w, v) is discounted by how surprising w's silence is
+            # under that concept's own rate. Its other members stand with v at rate r (tokens with v
+            # over their tokens); a word like them, seen count(w) times, would have shown v with
+            # probability 1 - exp(-count(w) r). The vote keeps the share exp(-count(w) r): a rare
+            # word borrows freely from its group, a frequent word that never showed v does not.
+            rate_memo = {}
+
+            def read_side_e(w, attr, v, soft=False):
+                ch_, mem_, memo = side[attr]
+                tot = 0.0
+                for c in ch_[w][1:]:
+                    k = (c, v)
+                    if k not in memo:
+                        memo[k] = sum(1 for m_ in mem_[c] if ((m_, v) if attr == "R" else (v, m_)) in pc) / len(mem_[c])
+                    if not memo[k]:
+                        continue
+                    kr = (attr, c, v, w)
+                    if kr not in rate_memo:
+                        others = [m_ for m_ in mem_[c] if m_ != w]
+                        den = sum(wc_[m_] for m_ in others)
+                        num = sum(pc.get((m_, v) if attr == "R" else (v, m_), 0) for m_ in others)
+                        rate_memo[kr] = wc_[w] * num / den if den else 0.0      # the expected count of (w, v)
+                    # the group's rate known exactly: silence has probability exp(-E); known only as a
+                    # mean (an exponential prior on the word's own rate): 1 / (1 + E)
+                    tot += memo[k] * (1.0 / (1.0 + rate_memo[kr]) if soft else math.exp(-rate_memo[kr]))
+                return tot
+            print(json.dumps({"licence": "word trees by side, by types, entrenched, uncertain rate", "seed": seed, "n": n,
+                              **ap(lambda a, b: math.sqrt(read_side_e(a, "R", b, True) * read_side_e(b, "L", a, True)))}), flush=True)
+            print(json.dumps({"licence": "word trees by side, by types, entrenched", "seed": seed, "n": n,
+                              **ap(lambda a, b: math.sqrt(read_side_e(a, "R", b) * read_side_e(b, "L", a)))}), flush=True)
             print(json.dumps({"licence": "word trees by side", "mode": LIC, "seed": seed, "n": n,
                               "mean path": {a_: round(sum(len(v) for v in side[a_][0].values()) / len(first), 1) for a_ in side}}), flush=True)
             print(json.dumps({"licence": "word trees by side, by types, sum, added", "seed": seed, "n": n,
@@ -741,21 +771,29 @@ if BASE or DIAG:
         return s[:i - 2] + list(y) + s[i - 2 + m_:], (c[y] / own_v if own_v else (c[y] if frame in ("tree", "count") else None))
     _ns = {}
 
-    def nswap_build(kind):
+    def nswap_build(kind, build="sentence"):
         """Word-level trees (pair licences) and unit-level trees (votes) built from the stream;
-        units are words, and with kind "ngrams" also 2- and 3-word spans seen at least twice."""
-        if kind in _ns:
-            return _ns[kind]
+        units are words, and with kind "ngrams" also 2- and 3-word spans seen at least twice.
+        build "sentence": the trees kept current one sentence at a time; "lazy": likewise, a unit
+        re-entering a tree only when its neighbour set grew; "batch": every unit entered once, at
+        the end, with its final description (the prototype's build, not a one-pass learner's)."""
+        if (kind, build) in _ns:
+            return _ns[(kind, build)]
         from trellis2.type_trees import SideTrees
-        WT = SideTrees(seed)
-        for s_ in sents:
-            WT.observe(s_)
+        WT = SideTrees(seed, refit="set" if build == "lazy" else "always")
+        if build == "batch":
+            WT.observe_occurrences([(w, s_[i - 1] if i else None, s_[i + 1] if i + 1 < len(s_) else None)
+                                    for s_ in sents for i, w in enumerate(s_)])
+        else:
+            for s_ in sents:
+                WT.observe(s_)
         ms = (1, 2, 3) if kind == "ngrams" else (1,)
         spans = Counter(tuple(s_[i:i + m_]) for s_ in sents for m_ in (2, 3) for i in range(len(s_) - m_ + 1)) if kind == "ngrams" else Counter()
         qual = {g for g, k in spans.items() if k >= 2}
         units = {(w,) for s_ in sents for w in s_} | qual
-        ST = SideTrees(seed)
+        ST = SideTrees(seed, refit="set" if build == "lazy" else "always")
         F_lr, F_wide = defaultdict(set), defaultdict(set)
+        all_occ = []
         for s_ in sents:
             t_ = ["<s>", "<s>"] + s_ + ["</s>", "</s>"]
             occ = []
@@ -770,10 +808,15 @@ if BASE or DIAG:
                     occ.append((u, s_[i - 1] if i else None, s_[i + m_] if i + m_ < len(s_) else None))
                     F_lr[(t_[a - 1], t_[b])].add(u)
                     F_wide[(t_[a - 2], t_[a - 1], t_[b], t_[b + 1])].add(u)
-            ST.observe_occurrences(occ)
-        _ns[kind] = {"WT": WT, "ST": ST, "units": units, "F_lr": F_lr, "F_wide": F_wide,
+            if build == "batch":
+                all_occ += occ
+            else:
+                ST.observe_occurrences(occ)
+        if build == "batch":
+            ST.observe_occurrences(all_occ)
+        _ns[(kind, build)] = {"WT": WT, "ST": ST, "units": units, "F_lr": F_lr, "F_wide": F_wide,
                      "pairs": set(pairc), "lic": {}, "V": {}, "va": {}}
-        return _ns[kind]
+        return _ns[(kind, build)]
 
     def nswap_once(NS, s, rng, new_only):
         ST, WT, units, pairs = NS["ST"], NS["WT"], NS["units"], NS["pairs"]
@@ -856,7 +899,7 @@ if BASE or DIAG:
                         return out
                 return None
         elif "nswap" in arm:
-            NS = nswap_build(arm["nswap"])
+            NS = nswap_build(arm["nswap"], arm.get("build", "sentence"))
             new_only = bool(arm.get("new", False))
             nstat = {"multi": 0, "ratio": 0.0, "n": 0}
 

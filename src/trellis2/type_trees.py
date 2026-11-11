@@ -29,8 +29,12 @@ NONE = "<none>"   # description of a type with no neighbour on a side
 
 
 class SideTrees:
-    def __init__(self, seed: int = 0):
+    def __init__(self, seed: int = 0, refit: str = "always"):
         self.seed = seed
+        # refit "always": a unit re-enters both trees at every experience it occurs in (its
+        # weight changed); "set": only when its neighbour set on that side grew (or it is new),
+        # so the trees are restructured far less often and weights lag between changes
+        self.refit = refit
         self._order: List[Hashable] = []                       # types by first occurrence
         self._count: Counter = Counter()
         self._pairs: Set[Tuple[Hashable, Hashable]] = set()
@@ -69,6 +73,7 @@ class SideTrees:
         occ = list(occ)
         touched: List[Hashable] = []
         seen_t: Set[Hashable] = set()
+        grew: Dict[str, Set[Hashable]] = {"R": set(), "L": set()}
         for w, left, right in occ:
             if w not in self._count:
                 self._order.append(w)
@@ -78,12 +83,18 @@ class SideTrees:
             self._count[w] += 1
             if left is not None:
                 self._pairs.add((left, w))
+                if left not in self._nb["L"][w]:
+                    grew["L"].add(w)
                 self._nb["L"][w][left] = True
             if right is not None:
                 self._pairs.add((w, right))
+                if right not in self._nb["R"][w]:
+                    grew["R"].add(w)
                 self._nb["R"][w][right] = True
         for side in ("R", "L"):
             for w in touched:                    # once per type per tree, after the whole sequence
+                if self.refit == "set" and w in self._cur[side] and w not in grew[side]:
+                    continue
                 if w in self._cur[side]:
                     self._tree[side].unfit(self._leaf[side][w], *self._cur[side][w])
                 x, wt = self._describe(side, w), float(self._count[w])
