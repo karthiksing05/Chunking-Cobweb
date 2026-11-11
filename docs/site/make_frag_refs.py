@@ -722,9 +722,11 @@ p7 = ("<ul>"
       "tokens. Relative tokens with the licence are ahead on both sets at once. The licence helps in every cell; on shifted boards "
       "with absolute tokens it saves 15 bits, because it carries what was learned about a piece on one square to the next square. "
       "This is one seed.</li>"
-      "<li><b>The mix.</b> On characters at 1,000 (seed 13) the code length is the same for a weight of 0.5 and 0.75 and within "
-      "0.1 bits from 0.25 to 0.9. A weight estimated from the last tenth of the stream came out at 0.2 and cost 0.13 bits more than "
-      "the half, so the half stays.</li></ul>")
+      "<li><b>The mix.</b> Round 134 varied the weight on characters (two seeds, 1,000 and 4,000) and chess (both token kinds, both "
+      "sets). Every weight from 0.1 to 0.9 beats the plain trigram in every run. Between 0.5 and 0.9 the code length moves by "
+      "under 0.1 bits on characters and under 0.6 bits on chess, except shifted boards with absolute tokens, where 0.9 saves a "
+      "further 2.4 bits. A weight estimated from the last tenth of the stream was unreliable (0.03 to 0.80 across runs) and "
+      "usually worse than the half, so the half stays as a fixed, untuned number.</li></ul>")
 
 p10 = ("<ul>"
        "<li><b>The gap to the references widens with data.</b> The references produce fewer new sentences as the stream grows: the swap "
