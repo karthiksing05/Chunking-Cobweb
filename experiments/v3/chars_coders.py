@@ -182,6 +182,7 @@ def chart_bits(CG, seen, s):
 
 CAUSAL = int(os.environ.get("CAUSAL", 0))
 DIAG = int(os.environ.get("DIAG", 0))
+LENGTH = int(os.environ.get("LENGTH", 0))   # code the length from stored lengths (see the chart loop)
 if CAUSAL or DIAG:
     import random
     import numpy as np
@@ -467,6 +468,20 @@ for n in checkpoints:
         ok = [b for b in bs if b is not None]
         row[f"trellis {k}"] = {"chart": ch, "bits": mean(ok) if ok else None, "coded": len(ok) / len(bs),
                                "stats": CG.stats, "s": round(time.time() - t1)}
+        if LENGTH:
+            # the chart's own length distribution leaks mass onto lengths characters never have (even ones):
+            # code the length from the stored characters' lengths (add-half over 1..64), then the string given
+            # its length, P_chart(s) / Z_n with Z_n the chart's mass on length n
+            lc = Counter(len(s) for s in train)
+            p_len = lambda m: (lc.get(m, 0) + 0.5) / (len(train) + 0.5 * 64)
+            zn = {}
+            for s, b in zip(test, bs):
+                if b is not None and len(s) not in zn:
+                    zn[len(s)] = CG.logZ(CG.inside([None] * len(s)), len(s))
+            bl = [None if b is None or zn[len(s)] == -math.inf else
+                  b + zn[len(s)] / LN2 - math.log2(p_len(len(s))) for s, b in zip(test, bs)]
+            okl = [b for b in bl if b is not None]
+            row[f"trellis {k} + stored lengths"] = mean(okl) if okl else None
         if k == 0 and (CAUSAL or DIAG):                        # the first chart is the one mixed and diagnosed
             CG0, bs0 = CG, bs
     if CAUSAL:
