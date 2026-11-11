@@ -285,6 +285,8 @@ LIC_ROWS = [
     None,  # best of the recipe variants (round 114)
     ("<b>The same memory's context tree, read by types (round 143)</b>", "logs/v3-r143-lic-n{n}-{s}.log",
      "context tree by types, mean", SEEDS, None, True),
+    ("<b>The same, read at the 4 concepts nearest each occurrence (rounds 158–159)</b>", "logs/v3-r159-lic-n{n}-{s}.log",
+     "context tree by types, path near4, geo", S2, None, True),
     ("A Cobweb tree over word pairs", R115, "pair tree, all levels", S2, None, True),
     ("Words with similar neighbours vote (reference)", R118, "similar words", SEEDS, None, True),
     ("<b>Analogy count (reference)</b>", R118, "analogy, count", SEEDS, None, True),
@@ -390,10 +392,14 @@ p5 = ("<ul>"
       "that filled the occurrences under it. An unstored (a, b) is licensed by the share of the members of the concepts above b's "
       "occurrences that a was stored right before, and the same from a's side. Nothing in the tree changes, only how it is read: one "
       "frequent collocation now counts as one member, not as its count. It passes similar-word votes at 4,000 sentences and stays "
-      "below the analogy count at every size. Weighing the path differently (the root left out, each concept by its information, "
+      "below the analogy count at every size. At 200 sentences, weighing the path differently (the root left out, each concept by its information, "
       "only the nearest concepts) moves it by less than .01.</li>"
-      "<li><b>The analogy count is still ahead.</b> It reads nothing but stored pairs. The learner method is "
-      "<code>Trellis3.type_licence</code>; round 144 judges chart generation with it.</li>"
+      "<li><b>Read at the concepts nearest each occurrence, it passes the analogy count from 2,000 sentences on.</b> The whole path "
+      "lets broad concepts near the root, which mix word classes, speak for a pair. Summing over only the four concepts nearest each "
+      "occurrence gives .350 / .348 at 1,000, .367 / .376 at 2,000 and .353 / .356 at 4,000 (seeds 13 / 17), against the analogy "
+      "count's .338 / .321, .340 / .326 and .291 / .290; at 500 it is level on one seed and behind on the other. Its precision at 5% "
+      "recall is .76 to .80 from 2,000 on. Weighting each concept by its information does almost as well. The learner method is "
+      "<code>Trellis3.type_licence(near=4)</code>.</li>"
       "<li><b>A Cobweb tree over word pairs does worse than word frequency.</b></li></ul>")
 
 
@@ -596,6 +602,9 @@ T7 = table(["Generator (1,000 sentences)", "Yield, mean", "Yield by seed (13 / 1
             t7_row("Causal, words, gate at the 25th percentile (round 156)", "r156-quant", "r156", lambda a: a.get("causal") and a.get("q") == 0.25),
             t7_row("Causal, words, gate at the 10th percentile", "r156-quant", "r156", lambda a: a.get("causal") and a.get("q") == 0.1),
             t7_row("Causal, words, gate at the 2nd percentile", "r156-quant", "r156", lambda a: a.get("causal") and a.get("q") == 0.02),
+            t7_row("<b>Causal, words, nearest-4 licence, median gate (round 159)</b>", "r159-near", "r159", lambda a: a.get("causal") and a.get("near") == 4 and not a.get("q")),
+            t7_row("Causal, words, nearest-4 licence, gate at the 10th percentile", "r159-near", "r159", lambda a: a.get("causal") and a.get("near") == 4 and a.get("q") == 0.1),
+            t7_row("Causal, words, nearest-4 licence, gate at the 2nd percentile", "r159-near", "r159", lambda a: a.get("causal") and a.get("near") == 4 and a.get("q") == 0.02),
             t7_row("Causal, words, gated, never a stored sentence (round 155)", "r155-new", "r155", _ca("words", "gate", True)),
             t7_row("Causal, words and chunks, gated, never a stored sentence", "r155-new", "r155", _ca("both", "gate", True)),
             t7_row("Reference: retrieved one-word swap", "r155-new", "r155", lambda a: a.get("swap") == "retrieve" and not a.get("new")),
@@ -616,7 +625,10 @@ p7 = ("<ul>"
       "grammatical, and the type licence does not raise that in chart generation either (11 to 16%). Loosening the gate (round 156) "
       "shows the licence does order them, weakly: sentences with a never-stored pair are about 13% grammatical ungated, 22% when "
       "the pair must pass the 2nd percentile of stored pairs' licences, 24% at the 10th, and roughly 27% at the 25th (few outputs), "
-      "against about 66% for new sentences of stored pairs. Generalization past stored pairs is still unsolved.</li>"
+      "against about 66% for new sentences of stored pairs. With the licence read at the four nearest concepts (round 159), the pairs that pass the 10th-percentile gate are about 65% "
+      "grammatical, level with new sentences of stored pairs, but they appear in under 1% of outputs; at the 2nd percentile they are "
+      "about 35% grammatical in 2 to 3% of outputs. The best of the learner's generalizations are now as good as its reuse; there are "
+      "too few of them to move the yield.</li>"
       "<li><b>Chunks raise grammaticality and lower novelty.</b> With committed chunks as fillers, 73 to 86% of outputs are judged "
       "grammatical, but most are stored sentences, so yield falls.</li>"
       "<li><b>Never returning a stored sentence lifts every generator, and the n-grams most.</b> With the same rule for all, causal "
