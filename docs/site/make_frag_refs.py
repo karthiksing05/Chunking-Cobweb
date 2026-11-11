@@ -410,6 +410,13 @@ def s13_17(vals):
     return " / ".join("–" if v is None else f"{v:.2f}" for v in vals)
 
 
+def _len157(sd, t):
+    for r in jlines(f"logs/v3-r157c-{'len-4000' if t == 4000 else 'len'}-{sd}.log"):
+        if r.get("train") == t:
+            return r.get("trellis 0 + stored lengths")
+    return None
+
+
 tch = []
 for t in (500, 1000, 2000, 4000):
     rr = {}
@@ -419,8 +426,10 @@ for t in (500, 1000, 2000, 4000):
                 rr[sd] = r
     cells = [s13_17([rr.get(sd, {}).get(f) for sd in S2]) for f in ("bigram", "trigram")]
     cells.append(s13_17([trellis_chart_bits(sd, t) for sd in S2]))
+    cells.append(s13_17([_len157(sd, t) for sd in S2]))
     tch.append(row(f"{t:,}", cells))
-TCH = table(["Characters learned", "Bigram (s13 / s17)", "Trigram (s13 / s17)", "TRELLIS chart coder (s13 / s17)"], tch)
+TCH = table(["Characters learned", "Bigram (s13 / s17)", "Trigram (s13 / s17)", "TRELLIS chart coder (s13 / s17)",
+             "<b>TRELLIS, lengths from stored characters (round 157)</b>"], tch)
 
 # chess reference coders (rounds 132 and 141): 4,000 positions learned, seeds 13 / 17 / 19
 CS = (13, 17, 19)
@@ -514,7 +523,14 @@ p6 = ("<ul>"
       "about 11.8, because each piece's backward star already sees the earlier pieces of its own pattern. On chess, then, what "
       "chunks carry is carried as well by the context of each piece.</li>"
       "<li><b>On characters, TRELLIS's chart coder trails the trigram up to 2,000 characters and passes it at 4,000</b>, by 0.6 "
-      "bits on seed 13 and 0.05 on seed 17.</li></ul>"
+      "bits on seed 13 and 0.05 on seed 17.</li>"
+      "<li><b>With lengths coded from the stored characters, TRELLIS beats the trigram at every size (round 157).</b> The chart's "
+      "own length distribution put about 47% of its mass on even lengths, which about 10% of characters have (binary operators "
+      "make odd lengths). Coding the length from the lengths of the characters learned (add-half over 1 to 64) and the string under "
+      "the chart given its length saves 0.8 to 1.0 bits per character: 31.53 / 32.01 at 500 against the trigram's 31.94 / 32.67, "
+      "and 24.04 / 23.82 at 4,000 against 25.48 / 24.87. A causal context route like chess's adds at most 0.1 to 0.4 bits here "
+      "(round 153): the chart already conditions each token through its grammar, and the context tree spreads the occurrences "
+      "that follow a token over many concepts.</li></ul>"
       '<p class="small">The co-occurrence and TRELLIS rows come from the chess page\'s coders, which treat unseen items a little '
       "differently.</p>")
 p8 = ("<h3>What this means for the two-hierarchy learner</h3><ul>"
