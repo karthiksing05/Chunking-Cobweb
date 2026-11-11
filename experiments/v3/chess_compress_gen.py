@@ -56,6 +56,8 @@ For each top unit of the position's parse (a chunk, or a single piece):
             how often the code itself used it: P(u) = (n_code(u) + b P_top(u)) / (N_code + b), where
             P_top is the estimate from learning's top units; a decoder sees the same cover and keeps
             the same counts
+  gap       (GAP=1 or 2, flat chunks) positions coded relatively: units in increasing anchor order,
+            each anchor by its gap from the previous unit's (see GAP below)
 Bits are code bits only: the memory itself (the model) is not charged.
 
 PREQ=<block> (environment) instead codes prequentially: each of the first n_learn
@@ -99,6 +101,18 @@ ANCH = int(os.environ.get("ANCH", 0))            # anchors backed off along the 
 ROUTES = {}                                          # (content level, context level) -> wins per route
 USED = float(os.environ.get("USED", 0))
 USES = {}                                            # (content level, context level) -> units the code used
+# GAP=1: positions coded relatively. Units go in increasing anchor order along the reading
+# order (square index y*8+x, as the experience reads pieces); each unit's anchor is coded as the
+# gap from the previous unit's anchor (-1 before the first), renormalised over the gaps that keep
+# it on the board: a single piece by P(piece, gap), a chunk by P(gap | concept) backed off along
+# the concept's path to a gap distribution pooled over all units (then uniform). Every route of a
+# chunk then codes its body given the decoded anchor (copy on squares: P(instance | concept, anchor)).
+# GAP=2: as 1, but the routes on squares code the anchor themselves (no gap charged), the copy on
+# squares renormalised over the stored instances whose anchor lies after the previous unit's.
+# Counts come from the learner's stored top units of the training positions, in reading order.
+GAP = int(os.environ.get("GAP", 0))
+GAP_DEBUG = int(os.environ.get("GAP_DEBUG", 0))      # assert the GAP distributions sum to 1 on their supports
+gap_single, gap_chunk, gap_all = Counter(), Counter(), Counter()   # (token, gap), (record id, gap), gap
 LEVELS = [(0, 0), (1, 0), (1, 1), (2, 1), (2, 2)]
 
 fens = [l.strip() for l in open(os.path.join(ROOT, "data", "chess", "settings", "positions_1800_ply30.fen")) if l.strip()]
@@ -134,6 +148,11 @@ def fits(shape):
 
 def psq(tok, sq):
     return KINDS.index(tok) * 64 + sq[1] * 8 + sq[0]
+
+
+def ridx(sq):
+    """A square's index in the reading order (a1, b1, ..., h1, a2, ..., h8)."""
+    return sq[1] * 8 + sq[0]
 
 
 def offsets(span, exp):
@@ -172,6 +191,16 @@ def learn_one(f, top=None):
         if e.token is not None:
             (i,) = tuple(e.span)
             single_tops[psq(e.token, sqs[i])] += 1
+    if GAP:                                          # the stored top units in reading order, as gaps
+        prev = -1
+        for e in sorted(r["top"], key=lambda e: min(e.span)):
+            a = ridx(sqs[min(e.span)])
+            gap_all[a - prev] += 1
+            if e.token is not None:
+                gap_single[(e.token, a - prev)] += 1
+            elif e.rid is not None and getattr(e, "cleaf", None) is not None:   # as TOP counts it
+                gap_chunk[(e.rid, a - prev)] += 1
+            prev = a
     n_pos += 1
 
 
@@ -236,6 +265,113 @@ class Model:
         self.top_tot = sum(self.top_c.values()) + sum(single_tops.values()) + n_pos + ALPHA * (self.n_concepts + 768) + 1
         self.fill_cache = {}
         self.pending = []
+        if GAP:
+            self.init_gaps()
+
+    # GAP: relative positions ------------------------------------------------ #
+    def init_gaps(self):
+        self.gap_up, self.gvec, self.acum = {}, {}, {}
+        for (rid, g), c in gap_chunk.items():            # each top chunk's gap, counted up its concept's path
+            node = lvl(cpath_of_record(rid), self.kc)
+            while node is not None:
+                self.gap_up.setdefault(node.id, Counter())[g] += c
+                node = node.parent
+        n_all = sum(gap_all.values())
+        self.gap_pool = [0.0] + [(gap_all.get(g, 0) + ALPHA) / (n_all + 64 * ALPHA) for g in range(1, 65)]
+        # single pieces: the top alphabet's single-piece mass, split over (piece, gap) by Laplace counts
+        self.single_mass = (sum(single_tops.values()) + 768 * ALPHA) / self.top_tot
+        per_g = [0.0] * 65
+        for (_, g), c in gap_single.items():
+            per_g[g] += c
+        self.single_z = [0.0]                            # single_z[m]: the (piece, gap) mass over gaps 1..m
+        for g in range(1, 65):
+            self.single_z.append(self.single_z[-1] + per_g[g] + len(KINDS) * ALPHA)
+        self.akey_anchor = {}                            # concept -> stored instances' weight by anchor index
+        for cid, d in self.akeys.items():
+            out = Counter()
+            for key, n in d.items():
+                out[min(ridx(sq) for sq, _ in key)] += n
+            self.akey_anchor[cid] = out
+        if GAP_DEBUG:
+            self.check_gaps()
+
+    def gap_vec(self, node):
+        """P(gap | concept) over gaps 1..64, backed off along the concept's path from the root
+        (P(g | C) = (n_C(g) + P(g | parent)) / (n_C + 1)), the root's parent the pooled gaps."""
+        if node.id not in self.gvec:
+            path, up_ = [], node
+            while up_ is not None:
+                path.append(up_)
+                up_ = up_.parent
+            p = self.gap_pool
+            for n in reversed(path):
+                d = self.gap_up.get(n.id, {})
+                tot = sum(d.values())
+                p = [0.0] + [(d.get(g, 0) + p[g]) / (tot + 1.0) for g in range(1, 65)]
+            cum = [0.0]
+            for g in range(1, 65):
+                cum.append(cum[-1] + p[g])
+            self.gvec[path[0].id] = (p, cum)
+        return self.gvec[node.id]
+
+    def chunk_gap_bits(self, cnode, g, prev):
+        """-log2 P(gap | concept), renormalised over the gaps 1..63-prev that stay on the board."""
+        p, cum = self.gap_vec(cnode)
+        return -math.log2(p[g] / cum[63 - prev])
+
+    def single_gap_bits(self, tok, g, prev):
+        """A single top piece: P(single) P(piece, gap | single), over the feasible gaps."""
+        p = self.single_mass * (gap_single.get((tok, g), 0) + ALPHA) / self.single_z[63 - prev]
+        return self.used(("s", KINDS.index(tok) * 64 + prev + g), p)
+
+    def pieces_gap_bits(self, toks_idx, prev):
+        """A chunk written as its pieces, each a single top unit by its gap from the one before."""
+        bits = 0.0
+        for tok, a in toks_idx:
+            bits += self.single_gap_bits(tok, a - prev, prev)
+            prev = a
+        return bits
+
+    def abs_copy_gap_bits(self, cid, key, a, prev):
+        """Copy on squares: GAP=1 given the decoded anchor a (the stored instances at a); GAP=2
+        anchor included, over the stored instances whose anchor lies after prev."""
+        n = self.akeys.get(cid, {}).get(key, 0)
+        if not n:
+            return float("inf")
+        by_a = self.akey_anchor[cid]
+        if GAP == 1:
+            return -math.log2(n / by_a[a])
+        ck = (cid, prev)
+        if ck not in self.acum:
+            self.acum[ck] = sum(v for b, v in by_a.items() if b > prev)
+        return -math.log2(n / self.acum[ck])
+
+    def check_gaps(self):
+        """GAP_DEBUG: every new distribution sums to 1 over its feasible support."""
+        nodes = list(self.nodes.values())[:50] + [L.cnt.root]
+        for prev in (-1, 0, 7, 31, 50, 62):
+            for node in nodes:
+                s = sum(2.0 ** -self.chunk_gap_bits(node, g, prev) for g in range(1, 64 - prev))
+                assert abs(s - 1) < 1e-9, (node.id, prev, s)
+            s = sum(2.0 ** -self.single_gap_bits(t, g, prev) for t in KINDS for g in range(1, 64 - prev))
+            assert USED or abs(s - self.single_mass) < 1e-9, (prev, s, self.single_mass)
+            for cid in list(self.akeys)[:50]:
+                keys = self.akeys[cid]
+                anchors = {k: min(ridx(sq) for sq, _ in k) for k in keys}
+                if GAP == 1:
+                    for a in set(anchors.values()):
+                        s = sum(2.0 ** -self.abs_copy_gap_bits(cid, k, a, prev) for k in keys if anchors[k] == a)
+                        assert abs(s - 1) < 1e-9, (cid, a, s)
+                else:
+                    ks = [k for k in keys if anchors[k] > prev]
+                    if ks:
+                        s = sum(2.0 ** -self.abs_copy_gap_bits(cid, k, anchors[k], prev) for k in ks)
+                        assert abs(s - 1) < 1e-9, (cid, prev, s)
+        # the top alphabet (stop, every concept, the single-piece mass) stays within 1
+        top = (n_pos + 1 + sum(self.top_c.values()) + ALPHA * len(self.top_c)) / self.top_tot + self.single_mass
+        assert top <= 1 + 1e-12, top
+        print(json.dumps({"GAP_DEBUG ok": [self.kc, self.kx], "top alphabet mass": top,
+                          "nodes checked": len(nodes)}), flush=True)
 
     def template_bits(self, cnode, e, attr="tpl"):
         """A flat chunk from its concept, as Cobweb predicts attributes: how many
@@ -429,13 +565,13 @@ def either(a, b):
     return m - math.log2((2.0 ** (m - a) + 2.0 ** (m - b)) / 2)
 
 
-def flat_bits(M, cn, e, anchor):
+def flat_bits(M, cn, e, anchor, pb=None):
     """A flat chunk given its concept: anchor + offsets, or (with ``abs``) the even
-    mixture of that and its pieces on their own squares."""
-    rel = M.anchor_bits(cn.id, anchor, shape_of(e)) + M.template_bits(cn, e)
+    mixture of that and its pieces on their own squares. ``pb``: GAP, the anchor's gap bits."""
+    rel = (M.anchor_bits(cn.id, anchor, shape_of(e)) if pb is None else pb) + M.template_bits(cn, e)
     if "abs" not in e.cnt:
         return rel
-    ab = M.template_bits(cn, e, "abs")
+    ab = M.template_bits(cn, e, "abs") + (pb if GAP == 1 else 0.0)
     ACC["absolute route cheaper (count)"] += ab < rel
     return either(rel, ab)
 
@@ -457,6 +593,10 @@ def cover(M, r, copy):
     exp, memo = r["exp"], r["memo"]
     sqs = exp.data[1]
     single = {i: M.single_bits(exp.tokens[i], sqs[i]) for i in range(len(exp.tokens))}
+    if GAP:                                          # the encoder's estimate: each piece's gap from the piece before it
+        idx = [ridx(s) for s in sqs]
+        before = [idx[i - 1] if i else -1 for i in range(len(idx))]
+        single = {i: M.single_gap_bits(exp.tokens[i], idx[i] - before[i], before[i]) for i in range(len(idx))}
     by_span = {}
     for e in r["comps"].values():
         by_span.setdefault(e.span, e)
@@ -473,11 +613,29 @@ def cover(M, r, copy):
                         flat = L.dom.flat_content(exp, span)
                         e.cnt = {a: flat.get(a, BLANK) for a in L.cnt_attrs}
                         by_span[span] = e
+    # memo is keyed by id(e): every element offered here must outlive the memo, or a freed one's
+    # address can be reused by a later chunk, which then reads a stale concept path
+    r.setdefault("alive", []).extend(by_span.values())
     scored = []
     for span, e in by_span.items():
         path = memo.setdefault(id(e), L.cnt.categorize(e.cnt))
         cn = lvl(path, M.kc)
         anchor = C.square_name(sqs[min(span)])
+        if GAP:
+            i0 = min(span)
+            pb = M.chunk_gap_bits(cn, idx[i0] - before[i0], before[i0])
+            key = frozenset((sqs[i], exp.tokens[i]) for i in span)
+            ls = [pb + M.template_bits(cn, e)]
+            if "abs" in e.cnt:
+                ls.append(M.template_bits(cn, e, "abs") + (pb if GAP == 1 else 0.0))
+            if copy:
+                ls.append(pb + M.copy_bits(cn.id, offsets(span, exp)))
+                if ACOPY:
+                    ls.append((pb if GAP == 1 else 0.0) + M.abs_copy_gap_bits(cn.id, key, idx[i0], before[i0]))
+            save = sum(single[i] for i in span) - (M.top_bits(cn.id) + min(ls))
+            if save > 0:
+                scored.append((save, e))
+            continue
         ls = [M.anchor_bits(cn.id, anchor, shape_of(e)) + M.template_bits(cn, e)]
         if "abs" in e.cnt:
             ls.append(M.template_bits(cn, e, "abs"))
@@ -506,13 +664,23 @@ def code_bits(M, r, copy=False):
     M.pending = ["stop"]                     # the units this code used, counted once the position is coded
     todo = cover(M, r, copy) if COVER and L.dom.flat else r["top"]
     M.units = [e.span for e in todo]        # TOPC: learning stores these as its analysis
+    if GAP:                                  # units in increasing anchor order; anchors as gaps
+        todo = sorted(todo, key=lambda e: min(e.span))
+    prev = -1
     for e in todo:
         units = [(exp.tokens[i], sqs[i]) for i in e.span]
+        a = ridx(sqs[min(e.span)])
         if e.token is not None:
             (i,) = tuple(e.span)
             M.pending.append(("s", psq(e.token, sqs[i])))
-            ACC["single tops"] += M.single_bits(e.token, sqs[i])
-            bits += M.single_bits(e.token, sqs[i])
+            if GAP:
+                sb = M.single_gap_bits(e.token, a - prev, prev)
+                ACC["single tops"] += sb
+                bits += sb
+                prev = a
+            else:
+                ACC["single tops"] += M.single_bits(e.token, sqs[i])
+                bits += M.single_bits(e.token, sqs[i])
             board.update({sq: t for t, sq in units})
             occupied.add(C.square_name(sqs[i]))
             continue
@@ -523,15 +691,21 @@ def code_bits(M, r, copy=False):
         ACC["anchors"] += M.anchor_bits(cn.id, C.square_name(sqs[min(e.span)]), shape_of(e))
         ACC["chunk tops (count)"] += 1
         anchor = C.square_name(sqs[min(e.span)])
+        pb = None
+        if GAP:                              # the anchor's code on the gap routes, in place of anchor_bits
+            pb = M.chunk_gap_bits(cn, a - prev, prev)
+            ACC["chunk gaps"] += pb
+            akey = frozenset((sqs[i], exp.tokens[i]) for i in e.span)
+            abc = (pb if GAP == 1 else 0.0) + M.abs_copy_gap_bits(cn.id, akey, a, prev) if ACOPY else float("inf")
         if L.dom.flat:                       # one level up: the concept predicts the whole chunk (anchor included)
-            inner = flat_bits(M, cn, e, anchor)
+            inner = flat_bits(M, cn, e, anchor, pb)
             ACC["templates"] += inner
         else:
-            inner = M.anchor_bits(cn.id, anchor, shape_of(e)) + inside_bits(M, e, exp, cn, memo)
+            inner = (M.anchor_bits(cn.id, anchor, shape_of(e)) if pb is None else pb) + inside_bits(M, e, exp, cn, memo)
         if copy:
-            cb = M.anchor_bits(cn.id, anchor, shape_of(e)) + M.copy_bits(cn.id, offsets(e.span, exp))
+            cb = (M.anchor_bits(cn.id, anchor, shape_of(e)) if pb is None else pb) + M.copy_bits(cn.id, offsets(e.span, exp))
             if ACOPY:
-                ab = M.abs_copy_bits(cn.id, frozenset((sqs[i], exp.tokens[i]) for i in e.span))
+                ab = M.abs_copy_bits(cn.id, frozenset((sqs[i], exp.tokens[i]) for i in e.span)) if pb is None else abc
                 ACC["abs copy cheaper (count)"] += ab < cb
                 cb = either(cb, ab)
             ACC["chunk tops copied (count)"] += cb < inner
@@ -539,12 +713,20 @@ def code_bits(M, r, copy=False):
             inner = either(cb, inner)
             if ROUTEW and L.dom.flat:
                 key = frozenset((sqs[i], exp.tokens[i]) for i in e.span)
-                ls = [M.anchor_bits(cn.id, anchor, shape_of(e)) + M.template_bits(cn, e),
-                      M.template_bits(cn, e, "abs") if "abs" in e.cnt else float("inf"),
-                      M.anchor_bits(cn.id, anchor, shape_of(e)) + M.copy_bits(cn.id, offsets(e.span, exp)),
-                      M.abs_copy_bits(cn.id, key) if ACOPY else float("inf")]
-                top = M.top_bits(cn.id)
-                ls = [top + v for v in ls] + [sum(M.single_bits(exp.tokens[i], sqs[i]) for i in e.span)]
+                if GAP:
+                    ls = [pb + M.template_bits(cn, e),
+                          M.template_bits(cn, e, "abs") + (pb if GAP == 1 else 0.0) if "abs" in e.cnt else float("inf"),
+                          pb + M.copy_bits(cn.id, offsets(e.span, exp)),
+                          abc]
+                    top = M.top_bits(cn.id)
+                    ls = [top + v for v in ls] + [M.pieces_gap_bits([(exp.tokens[i], ridx(sqs[i])) for i in sorted(e.span)], prev)]
+                else:
+                    ls = [M.anchor_bits(cn.id, anchor, shape_of(e)) + M.template_bits(cn, e),
+                          M.template_bits(cn, e, "abs") if "abs" in e.cnt else float("inf"),
+                          M.anchor_bits(cn.id, anchor, shape_of(e)) + M.copy_bits(cn.id, offsets(e.span, exp)),
+                          M.abs_copy_bits(cn.id, key) if ACOPY else float("inf")]
+                    top = M.top_bits(cn.id)
+                    ls = [top + v for v in ls] + [sum(M.single_bits(exp.tokens[i], sqs[i]) for i in e.span)]
                 wins = ROUTES.setdefault((M.kc, M.kx), [0.0] * 5)
                 live = [k for k in range(5) if not (k == 1 and "abs" not in e.cnt) and not (k == 3 and not ACOPY)
                         and not (k == 4 and ROUTEW < 2)]
@@ -570,6 +752,7 @@ def code_bits(M, r, copy=False):
             ACC["context head"] += hb
             head = either(head, hb + body)
         bits += head
+        prev = a
         board.update({sq: t for t, sq in units})
         occupied.update(C.square_name(sq) for _, sq in units)
     return bits
@@ -636,6 +819,8 @@ summary = {"tag": tag, "seed": seed, "learn s": round(learn_s), "parse s": round
            "stored chunks": len(stored), "stored records": sum(stored.values()),
            "memory bits (distinct chunks as piece-square lists)": round(sum(sum(raw_bits(t, sq) for sq, t in k) + stop_raw for k in stored)),
            "by levels": []}
+if GAP:
+    summary["gap"] = GAP
 for (kc, kx), copy in [(lv, cp) for lv in LEVELS for cp in (False, True)]:
     t2 = time.time()
     M = Model(kc, kx)
@@ -664,14 +849,25 @@ if L.dom.flat:
         exp, memo = r["exp"], r["memo"]
         sqs = exp.data[1]
         bits = mix([M.stop_bits() for M in Ms])
-        for e in r["top"]:
+        prev = -1
+        for e in (sorted(r["top"], key=lambda e: min(e.span)) if GAP else r["top"]):
+            a = ridx(sqs[min(e.span)])
             if e.token is not None:
                 (i,) = tuple(e.span)
-                bits += mix([M.single_bits(e.token, sqs[i]) for M in Ms])
+                if GAP:
+                    bits += mix([M.single_gap_bits(e.token, a - prev, prev) for M in Ms])
+                    prev = a
+                else:
+                    bits += mix([M.single_bits(e.token, sqs[i]) for M in Ms])
                 continue
             path = memo.setdefault(id(e), L.cnt.categorize(e.cnt))
             anchor = C.square_name(sqs[min(e.span)])
-            bits += mix([M.top_bits(lvl(path, M.kc).id) + flat_bits(M, lvl(path, M.kc), e, anchor) for M in Ms])
+            if GAP:
+                bits += mix([M.top_bits(lvl(path, M.kc).id) + flat_bits(M, lvl(path, M.kc), e, anchor,
+                             M.chunk_gap_bits(lvl(path, M.kc), a - prev, prev)) for M in Ms])
+                prev = a
+            else:
+                bits += mix([M.top_bits(lvl(path, M.kc).id) + flat_bits(M, lvl(path, M.kc), e, anchor) for M in Ms])
         b.append(bits)
     row = {"content level": "mixture of 0-3", "bits per position": round(sum(b) / len(b), 1)}
     summary["by levels"].append(row)
