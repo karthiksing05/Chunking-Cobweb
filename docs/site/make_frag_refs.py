@@ -462,6 +462,23 @@ for lab, run in (("TRELLIS, chess page recipe (seed 13)", "ab-control"), ("TRELL
         except Exception:
             return "–"
     tc.append(row(lab, [f"{_best('control')} / – / –", f"{_best('shift')} / – / –"]))
+
+
+def _cb(name):
+    try:
+        with open(f"experiments/v3/results/chess_compress/{name}.json", encoding="utf-8") as fh:
+            v = [r["bits per position"] for r in json.load(fh)["by levels"] if r.get("copy")]
+        return min(v) if v else None
+    except Exception:
+        return None
+
+
+for lab, pat in (("TRELLIS, chess page recipe, rerun (round 146)", "r146-gap0-{S}_s{s}"),
+                 ("TRELLIS, positions coded by gaps in reading order (round 146)", "r146-gap2-{S}_s{s}"),
+                 ("<b>TRELLIS, gaps and a causal context (rounds 147–148)</b>", "{r}-causalond-4k-{S}_s{s}"),
+                 ("The same, context read at the root only (ablation)", "{r}-causalonr-4k-{S}_s{s}")):
+    tc.append(row(lab, [by_seed([_cb(pat.format(S=S, s=s, r="r147" if s == 13 else "r148")) for s in CS])
+                        for S in ("control", "shift")]))
 TCHESS = table(["Coder (4,000 positions learned)", "Control (s13 / s17 / s19)", "Shifted (s13 / s17 / s19)"], tc)
 
 p6_intro = ("<p>The same question for coding: bits per held-out item for count-based coders that read only the stream. A chess "
@@ -470,7 +487,16 @@ p6_intro = ("<p>The same question for coding: bits per held-out item for count-b
             "log of the inventory size.</p>")
 p6 = ("<ul>"
       "<li><b>On chess, a trigram over relative tokens beats TRELLIS and the co-occurrence chunks</b> on control and shifted positions, "
-      "on every seed run. TRELLIS's chess coder has been run on seed 13 only.</li>"
+      "on every seed run.</li>"
+      "<li><b>Two repairs inside TRELLIS close a third of the gap on control and half on shifted boards.</b> The diagnosis: TRELLIS coded every unit with no "
+      "conditioning on what came before, its context tree did no work in the code (context levels 0, 1 and 2 gave identical bits), "
+      "and squares were absolute. Coding each unit's place as a gap from the previous unit in reading order saves 4 to 6 bits on "
+      "control and 12 to 14 on shifted boards, on all three seeds. Describing each occurrence by what a reader has already decoded "
+      "(the backward half of its star, the previous unit and the gap) and coding each unit's symbol from its context concept saves "
+      "another 5 to 9 bits. Reading the same route at the root only gives back most of the control gain: the context tree is worth "
+      "about 7 bits on control and 1.5 to 2.5 on shifted boards. The relative trigram is still about 19 bits ahead on control and "
+      "21 on shifted boards. Conditioning "
+      "the gap on the context gains about 1 bit (round 149): the context tree is organised by the square and the gap themselves.</li>"
       "<li><b>On characters, TRELLIS's chart coder trails the trigram up to 2,000 characters and passes it at 4,000</b>, by 0.6 "
       "bits on seed 13 and 0.05 on seed 17.</li></ul>"
       '<p class="small">The co-occurrence and TRELLIS rows come from the chess page\'s coders, which treat unseen items a little '
