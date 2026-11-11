@@ -1260,6 +1260,14 @@ for ai, arm in enumerate(arms):
         arm.update({"uswap": usw, "places": pl_, "pick": pk_})
     elif chart is not None:
         CG = ChartGen(L, **chart)
+        if chart.get("fill") == "coder":   # the substitution learner taught the same stream supplies the local licence
+            _cc = globals().setdefault("_coder_cache", {})
+            if "coder" not in _cc:
+                from trellis2.substitution import SubstitutionLearner
+                _cc["coder"] = SubstitutionLearner(seed)
+                for s_, fol_ in train:
+                    _cc["coder"].learn(s_, follows=fol_)
+            CG.coder = _cc["coder"]
         print(json.dumps({"tag": tag, "seed": seed, "chart": chart, **CG.stats}), flush=True)
         if chart.get("topic") == "fit":    # beta by likelihood on held-out pairs (stored pairs are recalled whole)
             fit = CG.fit_topic(val)

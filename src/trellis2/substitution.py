@@ -201,6 +201,11 @@ class SubstitutionLearner:
             pr = (c.get(t, 0) + types * pr) / (tot + types)
         return pr
 
+    def next_prob(self, before: Sequence[Hashable], t) -> float:
+        """The coder's probability that ``t`` (or the end mark "</s>") comes after ``before``."""
+        ctx = ([BOS] * (self.order - 1) + list(before))[-(self.order - 1):] if self.order > 1 else []
+        return self._p(ctx, t, len(self._seen) + 1)
+
     def bits(self, seq: Sequence[Hashable], escape: float = 0.0, vocab_size: Optional[int] = None) -> float:
         """Code length of seq in bits; `escape` is added for each token never learned.
         vocab_size overrides V (default: token types learned + 1)."""

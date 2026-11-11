@@ -483,12 +483,20 @@ class ChartGen:
                 if self.fill == "both":
                     cf = self._cobweb_fills(out, i)
                     cand = {w: x * cf[w] for w, x in pc.items() if w in cf} or cand
+                elif self.fill == "coder":
+                    # the chart's marginal times the substitution learner's coder (self.coder, set by
+                    # the caller): the word given the words placed before it, and at the last
+                    # position also the chance that the sentence ends there
+                    before = [w for w in out[:i] if w != HOLE]
+                    cf = {w: self.coder.next_prob(before, w) * (self.coder.next_prob(before + [w], "</s>") if i == len(toks) - 1 else 1.0)
+                          for w in pc}
+                    cand = {w: x * cf[w] for w, x in pc.items() if cf[w] > 0} or cand
                 if not cand:
                     return None
                 words, ws = zip(*cand.items())
                 out[i] = rng.choices(words, weights=ws)[0]
                 if info is not None:                          # what the explorer shows: this position's sources
-                    cf_ = cf if self.fill == "both" else {}
+                    cf_ = cf if self.fill in ("both", "coder") else {}
                     norm = lambda d: {w: x / max(sum(d.values()), 1e-300) for w, x in d.items()}
                     p_io, p_w, p_all = norm(pc), norm(cf_), norm(cand)
                     best = sorted(p_all, key=p_all.get, reverse=True)[:8]
