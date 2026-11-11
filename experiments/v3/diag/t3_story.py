@@ -816,9 +816,21 @@ if BASE or DIAG:
         else:
             for s_ in sents:
                 WT.observe(s_)
-        ms = (1, 2, 3) if kind == "ngrams" else (1,)
-        spans = Counter(tuple(s_[i:i + m_]) for s_ in sents for m_ in (2, 3) for i in range(len(s_) - m_ + 1)) if kind == "ngrams" else Counter()
+        ms = (1, 2, 3) if kind in ("ngrams", "wordlike") else (1,)
+        spans = Counter(tuple(s_[i:i + m_]) for s_ in sents for m_ in (2, 3) for i in range(len(s_) - m_ + 1)) if len(ms) > 1 else Counter()
         qual = {g for g, k in spans.items() if k >= 2}
+        if kind == "wordlike":
+            # the substitution test: a recurring span is a unit only if it stood between the same two
+            # neighbours as some single word (as "the dog" and "it" do)
+            fr_w, fr_g = set(), defaultdict(set)
+            for s_ in sents:
+                t_ = ["<s>"] + s_ + ["</s>"]
+                for i in range(len(s_)):
+                    fr_w.add((t_[i], t_[i + 2]))
+                    for m_ in (2, 3):
+                        if i + m_ <= len(s_) and tuple(s_[i:i + m_]) in qual:
+                            fr_g[tuple(s_[i:i + m_])].add((t_[i], t_[i + m_ + 1]))
+            qual = {g for g in qual if fr_g[g] & fr_w}
         units = {(w,) for s_ in sents for w in s_} | qual
         ST = SideTrees(seed, refit="set" if build == "lazy" else "always")
         F_lr, F_wide = defaultdict(set), defaultdict(set)
