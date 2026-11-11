@@ -576,7 +576,14 @@ T7 = table(["Generator (1,000 sentences)", "Yield, mean", "Yield by seed (13 / 1
             t7_row("Causal, words (round 154)", "r154-causal", "r154", _ca("words", None)),
             t7_row("<b>Causal, words, gated</b>", "r154-causal", "r154", _ca("words", "gate")),
             t7_row("Causal, words and chunks", "r154-causal", "r154", _ca("both", None)),
-            t7_row("Causal, words and chunks, gated", "r154-causal", "r154", _ca("both", "gate"))])
+            t7_row("Causal, words and chunks, gated", "r154-causal", "r154", _ca("both", "gate")),
+            t7_row("Causal, words, gated, never a stored sentence (round 155)", "r155-new", "r155", _ca("words", "gate", True)),
+            t7_row("Causal, words and chunks, gated, never a stored sentence", "r155-new", "r155", _ca("both", "gate", True)),
+            t7_row("Reference: retrieved one-word swap", "r155-new", "r155", lambda a: a.get("swap") == "retrieve" and not a.get("new")),
+            t7_row("Reference: retrieved one-word swap, never a stored sentence", "r155-new", "r155", lambda a: a.get("swap") == "retrieve" and a.get("new")),
+            t7_row("Reference: trigram sampler", "r155-ngram", "r155b", lambda a: a.get("ngram") == 3 and not a.get("new")),
+            t7_row("Reference: trigram sampler, never a stored sentence", "r155-ngram", "r155b", lambda a: a.get("ngram") == 3 and a.get("new")),
+            t7_row("Reference: 4-gram sampler, never a stored sentence", "r155-ngram", "r155b", lambda a: a.get("ngram") == 4 and a.get("new"))])
 p7_intro = ("<p>Chart generation builds a sentence top-down from the learner's grammar and fills each position from the chart's "
             "marginal times Cobweb's prediction. Causal generation is the story counterpart of chess's causal context: left to right, "
             "each filler (a word, or also a committed chunk, which places its words) is drawn from the learner's context tree given the "
@@ -591,6 +598,11 @@ p7 = ("<ul>"
       "is still unsolved.</li>"
       "<li><b>Chunks raise grammaticality and lower novelty.</b> With committed chunks as fillers, 73 to 86% of outputs are judged "
       "grammatical, but most are stored sentences, so yield falls.</li>"
+      "<li><b>Never returning a stored sentence lifts every generator, and the n-grams most.</b> With the same rule for all, causal "
+      "generation with chunks yields .68 to .71, ahead of the retrieved swap (.62 to .68) and behind the trigram sampler (.71 to .73); "
+      "the 4-gram sampler reaches .83 to .88 by splicing stored sentences where they share three words. Under this rule yield rewards "
+      "splicing as much as generalization, so it cannot tell them apart; the column on never-stored pairs is the measure of "
+      "generalization, and there every generator here stays near zero or ungrammatical.</li>"
       "<li><b>Topic.</b> Causal generation ignores the previous sentence (cross share near 0, against .25 to .28 for the chart).</li></ul>")
 
 out = (lead + p_how + "<h3>Table 1. Reference generators at 1,000 sentences, 4 seeds</h3>" + T1 + p1 +
