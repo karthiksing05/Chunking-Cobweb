@@ -97,9 +97,9 @@ class SubstitutionLearner:
             self._V[(vote, k_lr, k_w)] = V
         return V
 
-    def _once(self, s: list, rng, require_new: bool, vote: str, min_len, max_len) -> Optional[list]:
+    def _once(self, s: list, rng, require_new: bool, vote: str, min_len, max_len, pick: str = "ratio") -> Optional[list]:
         t = [BOS, BOS] + s + [EOS, EOS]
-        offers = []
+        offers, every = [], []
         for i in range(len(s)):
             if len(s) <= 1:                           # replacing the only token leaves nothing standing
                 break
@@ -130,6 +130,7 @@ class SubstitutionLearner:
                     sc_ *= f
                 if not ok or (require_new and not unstored):
                     continue
+                every.append((i, y))
                 if sc_ > best * (1 - 1e-12):
                     if sc_ > best:
                         best = sc_
@@ -140,20 +141,28 @@ class SubstitutionLearner:
             offers.append((i, rng.choice(tied), best / ov))
         if not offers:
             return None
+        if pick in ("bits", "bits-all"):
+            # the coder chooses: among the slots' best offers ("bits") or among every licensed
+            # replacement ("bits-all"), the sentence this same memory codes in the fewest bits
+            pool = [(i, y) for i, y, _ in offers] if pick == "bits" else every
+            scored = sorted(((self.bits(s[:i] + [y] + s[i + 1:]), i, repr(y), y) for i, y in pool), key=lambda x: x[:3])
+            low = scored[0][0]
+            _, i, _, y = rng.choice([x for x in scored if x[0] <= low + 1e-9])
+            return s[:i] + [y] + s[i + 1:]
         offers.sort(key=lambda o: (o[0], o[1]))
         top = max(o[2] for o in offers)
         i, y, _ = rng.choice([o for o in offers if o[2] >= top * (1 - 1e-12)])
         return s[:i] + [y] + s[i + 1:]
 
     def generate(self, prev=None, rng: Optional[random.Random] = None, require_new: bool = False,
-                 vote: str = "sum", min_len=None, max_len=None) -> Optional[list]:
+                 vote: str = "sum", min_len=None, max_len=None, pick: str = "ratio") -> Optional[list]:
         """Retrieve, then replace one token; retried (fresh retrieval) up to 200 times. None if
         the memory is empty or no try finds a slot with an offer."""
         rng = rng or random.Random(self.seed)
         if not self._seqs:
             return None
         for _ in range(200):
-            x = self._once(self._retrieve(prev, rng), rng, require_new, vote, min_len, max_len)
+            x = self._once(self._retrieve(prev, rng), rng, require_new, vote, min_len, max_len, pick)
             if x:
                 return x
         return None

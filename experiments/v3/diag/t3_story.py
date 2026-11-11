@@ -975,7 +975,7 @@ if BASE or DIAG:
 
             def gen(p):
                 return L_.generate(prev=p, rng=g_rng, require_new=bool(arm.get("new", False)),
-                                   vote=arm.get("vote", "sum"), min_len=3, max_len=8)
+                                   vote=arm.get("vote", "sum"), min_len=3, max_len=8, pick=arm.get("pick", "ratio"))
         else:
             def gen(p):
                 for _ in range(200):
