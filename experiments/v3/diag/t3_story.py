@@ -895,13 +895,14 @@ for ai, arm in enumerate(arms):
         from trellis2.trellis3 import BOS as T3BOS, EOS as T3EOS
         units_ = arm.pop("units", "both")
         new_ = arm.pop("new", False)       # never return a stored sentence (redraw)
+        q_ = float(arm.pop("q", 0.5))
         pair_ = arm.pop("pair", None)      # "gate": a filler whose first word was never stored after l1 is kept
         _cz = {}                           # only if the context tree read by types licenses the pair at or above
         if pair_:                          # the median over stored pairs (as chart_gen's pair_lic gate)
             _w_, _ix_, _M_ = L.type_licence()
             _st_ = set(getattr(L, "_pair_counts", {}))
             _vals_ = sorted(float(_M_[_ix_[a], _ix_[b]]) for a, b in _st_ if a in _ix_ and b in _ix_)
-            _med_ = _vals_[len(_vals_) // 2] if _vals_ else 0.0
+            _med_ = _vals_[min(len(_vals_) - 1, int(len(_vals_) * q_))] if _vals_ else 0.0   # q_: the quantile of stored pairs (median by default)
 
         def _ok(l1, w):
             if not pair_ or l1 == T3BOS or (l1, w) in _st_:
@@ -946,7 +947,7 @@ for ai, arm in enumerate(arms):
                 if done and 3 <= len(out) <= 8 and not (new_ and tuple(out) in seen):
                     return out
             return None
-        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"new": True} if new_ else {})})
+        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"new": True} if new_ else {}), **({"q": q_} if q_ != 0.5 else {})})
     elif chart is not None:
         CG = ChartGen(L, **chart)
         print(json.dumps({"tag": tag, "seed": seed, "chart": chart, **CG.stats}), flush=True)
