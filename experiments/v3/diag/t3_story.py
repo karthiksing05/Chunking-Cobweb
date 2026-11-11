@@ -553,6 +553,115 @@ if LIC_SET:                                    # the learner's licence: Cobweb's
                      ("Cobweb, word given the one after", lambda a, b: PR[b].get(a, 0.0)),
                      ("Cobweb, both", lambda a, b: math.sqrt(PL[a].get(b, 0.0) * PR[b].get(a, 0.0)))):
         print(json.dumps({"licence": name, "seed": seed, "n": n, "learn s": round(learn_s), **ap(fn)}), flush=True)
+    # The same context tree read by types: a context concept's members are the distinct words
+    # that filled the occurrences under it. An unstored (a, b) is licensed on b's side by the
+    # share of the members of the concepts above b's occurrences that a was stored before, and
+    # on a's side by the share of the members above a's occurrences that b was stored after.
+    # "union": each concept above any occurrence counts once; "mean": the path sums averaged
+    # over the word's occurrences; "leafless": the occurrence's own leaf left out.
+    from trellis2.trellis3 import FILL as T3FILL
+    t3_ = time.time()
+    members, occ_paths = defaultdict(set), defaultdict(list)
+    for e in L.records:
+        if e.leaf is None:
+            continue
+        for which, attr, value, w in e.pas:
+            if which == "ctx" and attr == T3FILL and isinstance(value, tuple) and value[0] == "w":
+                path, nd = [], e.leaf
+                while nd is not None:
+                    path.append(nd.id)
+                    members[nd.id].add(value[1])
+                    nd = nd.parent
+                occ_paths[value[1]].append(path)
+    pc_set = set(pc)
+    sh_memo = {}
+
+    def share(cid, x, side):                  # side "R": members m with (x, m) stored; "L": with (m, x)
+        k = (cid, x, side)
+        if k not in sh_memo:
+            mem = members[cid]
+            sh_memo[k] = len(mem & (Rt[x] if side == "R" else Lf[x])) / len(mem)
+        return sh_memo[k]
+    cpaths = {}
+
+    def concepts(w, how):
+        k = (w, how)
+        if k not in cpaths:
+            ps = occ_paths.get(w, [])
+            if how == "union":
+                cpaths[k] = [sorted({c for p in ps for c in p[1:]})]
+            elif how == "union-all":
+                cpaths[k] = [sorted({c for p in ps for c in p})]
+            else:                                 # mean
+                cpaths[k] = [p[1:] for p in ps]
+        return cpaths[k]
+
+    def side_read(w, x, side, how):
+        ps = concepts(w, how)
+        if not ps:
+            return 0.0
+        return sum(sum(share(c, x, side) for c in p) for p in ps) / len(ps)
+    stats_ = {"filler words": len(occ_paths), "concepts with members": len(members),
+              "mean occurrences per word": round(sum(len(v) for v in occ_paths.values()) / max(len(occ_paths), 1), 1),
+              "mean path": round(sum(len(p) for v in occ_paths.values() for p in v) / max(sum(len(v) for v in occ_paths.values()), 1), 1)}
+    print(json.dumps({"licence": "context tree by types, setup", "seed": seed, "n": n, **stats_}), flush=True)
+    for how in ("union", "union-all", "mean"):
+        print(json.dumps({"licence": f"context tree by types, {how}", "seed": seed, "n": n,
+                          **ap(lambda a, b: math.sqrt(side_read(b, a, "R", how) * side_read(a, b, "L", how)))}), flush=True)
+        print(json.dumps({"licence": f"context tree by types, {how}, b's side only", "seed": seed, "n": n,
+                          **ap(lambda a, b: side_read(b, a, "R", how))}), flush=True)
+    print(json.dumps({"licence": "context tree by types, done", "seed": seed, "n": n, "s": round(time.time() - t3_)}), flush=True)
+    t4_ = time.time()
+    _w, _ix, _M = L.type_licence()                 # the learner's own method: should equal "mean" above
+    print(json.dumps({"licence": "learner type_licence", "seed": seed, "n": n, "s": round(time.time() - t4_, 1),
+                      **ap(lambda a, b: float(_M[_ix[a], _ix[b]]) if a in _ix and b in _ix else 0.0)}), flush=True)
+    # How the path is weighed (same tree, same members): every concept alike (as above), the root
+    # left out, each concept by its information (log2 of the root's count over its own), or only the
+    # k concepts nearest the occurrence.
+    import numpy as np
+    cnt_of, depth_from_leaf = {}, defaultdict(list)
+    for e in L.records:
+        if e.leaf is None:
+            continue
+        nd = e.leaf
+        while nd is not None:
+            cnt_of[nd.id] = nd.count
+            nd = nd.parent
+    root_id = L.ctx.root.id
+    wl = sorted(occ_paths)
+    wi = {w: i for i, w in enumerate(wl)}
+    cl = sorted(members)
+    ci = {c: k for k, c in enumerate(cl)}
+    Mem = np.zeros((len(cl), len(wl)))
+    for c, ms in members.items():
+        for m_ in ms:
+            Mem[ci[c], wi[m_]] = 1.0 / len(ms)
+    aft, bef = np.zeros((len(wl), len(wl))), np.zeros((len(wl), len(wl)))
+    for (x_, y_) in pc:
+        if x_ in wi and y_ in wi:
+            aft[wi[x_], wi[y_]] = 1.0
+            bef[wi[y_], wi[x_]] = 1.0
+    sh_a, sh_b = Mem @ aft.T, Mem @ bef.T
+    n_root = max(cnt_of.get(root_id, 1.0), 1e-9)
+
+    def weigh(mode):
+        Wm = np.zeros((len(wl), len(cl)))
+        for w, ps in occ_paths.items():
+            for p in ps:
+                above = p[1:]
+                if mode.startswith("near"):
+                    above = above[:int(mode[4:])]
+                for c in above:
+                    if mode == "noroot" and c == root_id:
+                        continue
+                    f = math.log2(n_root / max(cnt_of.get(c, n_root), 1e-9)) if mode == "bits" else 1.0
+                    Wm[wi[w], ci[c]] += f / len(ps)
+        return Wm
+    for mode in ("noroot", "bits", "near2", "near4", "near6"):
+        Wm = weigh(mode)
+        Mx = np.sqrt((Wm @ sh_a).T * (Wm @ sh_b))
+        print(json.dumps({"licence": f"context tree by types, path {mode}", "seed": seed, "n": n,
+                          **ap(lambda a, b: float(Mx[wi[a], wi[b]]) if a in wi and b in wi else 0.0)}), flush=True)
     sys.exit()
 
 

@@ -47,7 +47,8 @@ class ChartGen:
     def __init__(self, L, cut: int = 3, lam: float = 1.0, alpha: float = 0.1, gap_max: int = 4,
                  length=(3, 8), word_sym: str = "category", ctx_cut: int = 3, follow: bool = False,
                  decomp: str = "sample", cut_by: str = "depth", topic: Optional[float] = None,
-                 fill: str = "cobweb", topic_by: str = "symbol", topic_mean: bool = False):
+                 fill: str = "cobweb", topic_by: str = "symbol", topic_mean: bool = False,
+                 pair_lic: Optional[str] = None):
         self.L, self.cut, self.lam, self.alpha, self.gap_max, self.length = L, cut, lam, alpha, gap_max, length
         # lam "wb" (Witten-Bell, as PPM's escape): a concept backs off by the number of distinct
         # part pairs seen under it, T, in place of a fixed lam: (n_C(AB) + T_C P_up) / (n_C + T_C),
@@ -76,6 +77,16 @@ class ChartGen:
         # summed out: an outside pass), so a head's complement is read after the head is
         # chosen; "both": that marginal times the Cobweb prediction
         self.fill = fill
+        # pair_lic (chart fills only): a word placed after a word it was never stored after is
+        # weighed by the learner's context tree read by types (L.type_licence), relative to the
+        # median licence of the pairs it has stored. "weight": min(1, licence / median);
+        # "gate": kept only at or above the median. A stored pair keeps its weight.
+        self.pair_lic = pair_lic
+        if pair_lic:
+            words_, ix_, M_ = L.type_licence()
+            stored_ = getattr(L, "_pair_counts", {})
+            vals = sorted(float(M_[ix_[a], ix_[b]]) for a, b in stored_ if a in ix_ and b in ix_)
+            self._lic = (ix_, M_, set(stored_), vals[len(vals) // 2] if vals else 0.0)
         self.follow = follow
         self.decomp = decomp      # "sample": each split drawn by its share of the inside score; "max": the likeliest split
         self.word_sym, self.ctx_cut = word_sym, ctx_cut   # "category" (window name), "token" (the word), or
@@ -483,6 +494,18 @@ class ChartGen:
                 if self.fill == "both":
                     cf = self._cobweb_fills(out, i)
                     cand = {w: x * cf[w] for w, x in pc.items() if w in cf} or cand
+                if self.pair_lic and i > 0 and out[i - 1] != HOLE:
+                    ix_, M_, stored_, med = self._lic
+                    a = out[i - 1]
+
+                    def factor(w):
+                        if (a, w) in stored_:
+                            return 1.0
+                        if a not in ix_ or w not in ix_ or med <= 0:
+                            return 0.0
+                        r = float(M_[ix_[a], ix_[w]]) / med
+                        return min(1.0, r) if self.pair_lic == "weight" else (1.0 if r >= 1.0 else 0.0)
+                    cand = {w: x * f for w, x in cand.items() for f in (factor(w),) if f > 0}
                 if not cand:
                     return None
                 words, ws = zip(*cand.items())

@@ -1356,6 +1356,9 @@ class Trellis3:
             self._pas(prev, "cnt", NEXT, whole.rid, 1.0)
         self._last_whole = whole
         self.stats["experiences"] += 1
+        pairs = self.__dict__.setdefault("_pair_counts", {})        # what stood next to what
+        for ab in zip(tokens, tokens[1:]):
+            pairs[ab] = pairs.get(ab, 0) + 1
         if self.repair_reached:
             self._repair(words + [comps[k] for k in comps if comps[k].rid is not None])
         self._refresh(first, tokens)
@@ -2587,6 +2590,63 @@ class Trellis3:
                 out[m] = v if isinstance(v, dict) else {v: 1.0}
             sides[p] = out
         return {m: {p: sides[p][m] for p in sides} for m in range(1, widths + 1)}
+
+    def type_licence(self):
+        """The context tree read by types, for every pair of filler words: (words, index, M)
+        with M[ia, ib] the licence for b right after a.
+
+        A context concept's members are the distinct words that filled the committed
+        occurrences under it. b's side: the share of the members of each concept above
+        b's occurrences (its own leaf left out) that a was stored right before, summed
+        along the path and averaged over b's occurrences. a's side: likewise, the share of
+        the members above a's occurrences that b was stored right after. M is the
+        geometric mean of the two sides. Read by types, one frequent collocation counts
+        as one member, not as its count."""
+        import numpy as np
+        key = (len(self.records), self.stats.get("experiences", 0))
+        got = self.__dict__.get("_type_licence")
+        if got is not None and got[0] == key:
+            return got[1]
+        members: Dict[int, set] = {}
+        occ: Dict[str, List[List[int]]] = {}
+        for e in self.records:
+            if e.leaf is None:
+                continue
+            for which, attr, value, _ in e.pas:
+                if which == "ctx" and attr == FILL and isinstance(value, tuple) and value[0] == "w":
+                    path, nd = [], e.leaf
+                    while nd is not None:
+                        path.append(nd.id)
+                        members.setdefault(nd.id, set()).add(value[1])
+                        nd = nd.parent
+                    occ.setdefault(value[1], []).append(path)
+        words = sorted(occ)
+        ix = {w: i for i, w in enumerate(words)}
+        cids = sorted(members)
+        cx = {c: k for k, c in enumerate(cids)}
+        W = np.zeros((len(words), len(cids)))
+        for w, ps in occ.items():
+            for p in ps:
+                for c in p[1:]:
+                    W[ix[w], cx[c]] += 1.0 / len(ps)
+        pairs = self.__dict__.get("_pair_counts", {})
+        after, before = np.zeros((len(words), len(words))), np.zeros((len(words), len(words)))
+        for (a, b) in pairs:
+            if a in ix and b in ix:
+                after[ix[a], ix[b]] = 1.0          # after[a, m]: m was stored right after a
+                before[ix[b], ix[a]] = 1.0         # before[b, m]: m was stored right before b
+        Mem = np.zeros((len(cids), len(words)))
+        for c, ms in members.items():
+            for m in ms:
+                Mem[cx[c], ix[m]] = 1.0 / len(ms)
+        share_after = Mem @ after.T                # [c, a]: share of c's members stored right after a
+        share_before = Mem @ before.T              # [c, b]: share of c's members stored right before b
+        b_side = W @ share_after                   # [b, a]
+        a_side = W @ share_before                  # [a, b]
+        M = np.sqrt(b_side.T * a_side)
+        out = (words, ix, M)
+        self._type_licence = (key, out)
+        return out
 
     def _gap_fills(self, q: dict, beta: float = 1.0, nbq: Optional[Dict[int, dict]] = None) -> Dict[tuple, float]:
         """P(filler | surroundings q) over the committed instances: proportional to
