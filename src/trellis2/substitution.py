@@ -97,12 +97,17 @@ class SubstitutionLearner:
             self._V[(vote, k_lr, k_w)] = V
         return V
 
-    def _once(self, s: list, rng, require_new: bool, vote: str, min_len, max_len, pick: str = "ratio") -> Optional[list]:
+    def _once(self, s: list, rng, require_new: bool, vote: str, min_len, max_len, pick: str = "ratio",
+              skip=(), where: Optional[list] = None) -> Optional[list]:
+        """``skip``: positions not to replace (those an earlier substitution changed); ``where``: a
+        list that receives the position replaced."""
         t = [BOS, BOS] + s + [EOS, EOS]
         offers, every = [], []
         for i in range(len(s)):
             if len(s) <= 1:                           # replacing the only token leaves nothing standing
                 break
+            if i in skip:
+                continue
             own = s[i]
             l, r = t[i + 1], t[i + 3]
             V = self._votes(vote, (l, r), (t[i], l, r, t[i + 4]))
@@ -148,21 +153,27 @@ class SubstitutionLearner:
             scored = sorted(((self.bits(s[:i] + [y] + s[i + 1:]), i, repr(y), y) for i, y in pool), key=lambda x: x[:3])
             low = scored[0][0]
             _, i, _, y = rng.choice([x for x in scored if x[0] <= low + 1e-9])
+            if where is not None:
+                where.append(i)
             return s[:i] + [y] + s[i + 1:]
         offers.sort(key=lambda o: (o[0], o[1]))
         top = max(o[2] for o in offers)
         i, y, _ = rng.choice([o for o in offers if o[2] >= top * (1 - 1e-12)])
+        if where is not None:
+            where.append(i)
         return s[:i] + [y] + s[i + 1:]
 
     def generate(self, prev=None, rng: Optional[random.Random] = None, require_new: bool = False,
-                 vote: str = "sum", min_len=None, max_len=None, pick: str = "ratio") -> Optional[list]:
+                 vote: str = "sum", min_len=None, max_len=None, pick: str = "ratio", swaps: int = 1) -> Optional[list]:
         """Retrieve, then replace one token; retried (fresh retrieval) up to 200 times. None if
         the memory is empty or no try finds a slot with an offer."""
         rng = rng or random.Random(self.seed)
         if not self._seqs:
             return None
         for _ in range(200):
-            x = self._once(self._retrieve(prev, rng), rng, require_new, vote, min_len, max_len, pick)
+            x, done = self._retrieve(prev, rng), []
+            for _k in range(swaps):                  # each further substitution at a position not yet changed
+                x = self._once(x, rng, require_new, vote, min_len, max_len, pick, skip=tuple(done), where=done) if x else None
             if x:
                 return x
         return None
