@@ -51,7 +51,9 @@ For each top unit of the position's parse (a chunk, or a single piece):
             non-overlapping chunks are taken greedily by how many bits they save over their pieces
             written singly (their cheapest route); the other pieces are single units. The encoder
             chooses the cover, so it costs nothing to send; COVER=2 also offers every stored chunk
-            whose exact pieces stand on the board (recognition), described and coded as any chunk
+            whose exact pieces stand on the board (recognition), described and coded as any chunk;
+            with COVERC=1 (chess_causal) pieces and chunks are scored by the cheaper of the existing code
+            and their causal route (estimated with the piece before the anchor as the previous unit)
   used      (USED=<b>, prequential) a unit's probability (concept, single piece, stop) also counts
             how often the code itself used it: P(u) = (n_code(u) + b P_top(u)) / (N_code + b), where
             P_top is the estimate from learning's top units; a decoder sees the same cover and keeps
@@ -200,6 +202,12 @@ DEPTHG = {}                                          # CAUSALD>=3: (kc, kx, copy
 # shorter path's leaf standing in for the deeper ones), mixed by Bayesian weights (each expert's probability of
 # the gaps coded so far, uniform prior) instead of win counts
 GAPW = int(os.environ.get("GAPW", 0))
+# COVERC=1 (CAUSAL, COVER): the cover is chosen by what units will cost: each piece and each chunk by the cheaper
+# of the existing code and its causal route (causal_estimate), not by the existing code alone
+COVERC = int(os.environ.get("COVERC", 0))
+if COVERC and not (CAUSAL and COVER and GAP):
+    raise SystemExit("COVERC needs chess_causal, COVER and GAP")
+FROZEN = [False]                                     # COVERC: mixture weights read, not updated, while estimating
 GAP_DEPTHS = (0, 1, 2, 3, 4, 6, 8, 12, 16, 24)
 single_tops = Counter()
 stored = Counter()                                   # distinct stored chunks (exact pieces and squares): the memory
@@ -765,6 +773,8 @@ def cover(M, r, copy):
         idx = [ridx(s) for s in sqs]
         before = [idx[i - 1] if i else -1 for i in range(len(idx))]
         single = {i: M.single_gap_bits(exp.tokens[i], idx[i] - before[i], before[i]) for i in range(len(idx))}
+    if COVERC:                                       # each piece by the cheaper of the existing and the causal route
+        single = {i: min(single[i], causal_estimate(M, w, exp, r, copy)) for i, w in enumerate(r["words"])}
     by_span = {}
     for e in r["comps"].values():
         by_span.setdefault(e.span, e)
@@ -800,7 +810,10 @@ def cover(M, r, copy):
                 ls.append(pb + M.copy_bits(cn.id, offsets(span, exp)))
                 if ACOPY:
                     ls.append((pb if GAP == 1 else 0.0) + M.abs_copy_gap_bits(cn.id, key, idx[i0], before[i0]))
-            save = sum(single[i] for i in span) - (M.top_bits(cn.id) + min(ls))
+            cost = M.top_bits(cn.id) + min(ls)
+            if COVERC:
+                cost = min(cost, causal_estimate(M, e, exp, r, copy))
+            save = sum(single[i] for i in span) - cost
             if save > 0:
                 scored.append((save, e))
             continue
@@ -833,7 +846,8 @@ def kt_mix(wins, ls, live):
     if m == float("inf"):
         return m
     out = m - math.log2(sum((wins[k] + 0.5) / (n + 0.5 * len(live)) * 2.0 ** (m - ls[k]) for k in live))
-    wins[min(live, key=lambda k: ls[k])] += 1
+    if not FROZEN[0]:
+        wins[min(live, key=lambda k: ls[k])] += 1
     return out
 
 
@@ -845,9 +859,31 @@ def bayes_mix(cum, ls):
     m1 = min(cum[k] + ls[k] for k in keys)
     num = sum(2.0 ** (m1 - cum[k] - ls[k]) for k in keys)
     den = sum(2.0 ** (m0 - cum[k]) for k in keys)
-    for k in keys:
-        cum[k] += ls[k]
+    if not FROZEN[0]:
+        for k in keys:
+            cum[k] += ls[k]
     return m1 - math.log2(num) - (m0 - math.log2(den))
+
+
+def causal_estimate(M, e, exp, r, copy):
+    """COVERC: the encoder's estimate of a unit's causal-route cost when chosen for the cover, its
+    previous unit taken as the piece just before its anchor (the reading of the board as single
+    pieces); the mixture weights are read, not updated, and nothing is counted. The cover is the
+    encoder's choice, so this costs nothing to send and the decoder never needs it."""
+    i0 = min(e.span)
+    sqs = exp.data[1]
+    prev_e = r["words"][i0 - 1] if i0 else None
+    prev = ridx(sqs[i0 - 1]) if i0 else -1
+    keep_acc, keep_cx = Counter(ACC), M.last_cx
+    FROZEN[0] = True
+    try:
+        b = causal_bits(M, e, exp, prev_e, prev, exp.data[0], copy, r["memo"])[0]
+    finally:
+        FROZEN[0] = False
+        ACC.clear()
+        ACC.update(keep_acc)
+        M.last_cx = keep_cx
+    return b
 
 
 def causal_bits(M, e, exp, prev_e, prev, board, copy, memo):
