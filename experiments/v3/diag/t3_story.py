@@ -875,6 +875,7 @@ for ai, arm in enumerate(arms):
     chart = arm.pop("chart", None)         # chart generation (chart_gen.py) with these settings
     tsw = arm.pop("tswap", None)           # one stored unit swapped (t_swap)
     usw = arm.pop("uswap", None)           # one stored unit (word or chunk) swapped by Cobweb-tree votes (u_swap)
+    causal = arm.pop("causal", None)       # left to right from the context tree (see below)
     extra = {}
     _us_log.clear()
     if tsw is not None:
@@ -885,6 +886,66 @@ for ai, arm in enumerate(arms):
         pl_, pk_ = arm.pop("places", "wide"), arm.pop("pick", "slot")
         gen = lambda p: u_swap(p, usw, pl_, pk_, g_rng)
         arm.update({"uswap": usw, "places": pl_, "pick": pk_})
+    elif causal is not None:
+        # Causal generation, the story counterpart of chess's causal context: left to right, each filler
+        # (a word, or with units "both" also a committed chunk, which places its words) is drawn from the
+        # context tree given what is already placed (l2, l1), jointly with whether the sentence ends right
+        # after it: Cobweb's filler prediction with r1 = end marker (end) and without it minus that (go on).
+        # Lengths outside 3..8 are redrawn.
+        from trellis2.trellis3 import BOS as T3BOS, EOS as T3EOS
+        units_ = arm.pop("units", "both")
+        pair_ = arm.pop("pair", None)      # "gate": a filler whose first word was never stored after l1 is kept
+        _cz = {}                           # only if the context tree read by types licenses the pair at or above
+        if pair_:                          # the median over stored pairs (as chart_gen's pair_lic gate)
+            _w_, _ix_, _M_ = L.type_licence()
+            _st_ = set(getattr(L, "_pair_counts", {}))
+            _vals_ = sorted(float(_M_[_ix_[a], _ix_[b]]) for a, b in _st_ if a in _ix_ and b in _ix_)
+            _med_ = _vals_[len(_vals_) // 2] if _vals_ else 0.0
+
+        def _ok(l1, w):
+            if not pair_ or l1 == T3BOS or (l1, w) in _st_:
+                return True
+            return l1 in _ix_ and w in _ix_ and float(_M_[_ix_[l1], _ix_[w]]) >= _med_ > 0
+
+        def _fills(l2, l1):
+            k = (l2, l1)
+            if k not in _cz:
+                q = {"l2": l2, "l1": l1}
+                a_, e_ = L._gap_fills(q), L._gap_fills({**q, "r1": T3EOS})
+                vs, ws = [], []
+                for v, m_ in a_.items():
+                    if units_ == "words" and v[0] != "w":
+                        continue
+                    if not _ok(l1, _words(v)[0]):
+                        continue
+                    me = e_.get(v, 0.0)
+                    vs += [(v, True), (v, False)]
+                    ws += [me, max(m_ - me, 0.0)]
+                _cz[k] = (vs, ws)
+            return _cz[k]
+        _yc = {}
+
+        def _words(v):
+            if v[0] == "w":
+                return [v[1]]
+            if v[1] not in _yc:
+                _yc[v[1]] = yield_of(L.records[v[1]])
+            return _yc[v[1]]
+
+        def gen(p, _rng=g_rng):
+            for _ in range(50):
+                out, done = [], False
+                while not done and len(out) <= 8:
+                    t_ = [T3BOS, T3BOS] + out
+                    vs, ws = _fills(t_[-2], t_[-1])
+                    if not vs or sum(ws) <= 0:
+                        break
+                    (v, done) = _rng.choices(vs, weights=ws)[0]
+                    out += _words(v)
+                if done and 3 <= len(out) <= 8:
+                    return out
+            return None
+        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {})})
     elif chart is not None:
         CG = ChartGen(L, **chart)
         print(json.dumps({"tag": tag, "seed": seed, "chart": chart, **CG.stats}), flush=True)
