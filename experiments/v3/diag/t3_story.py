@@ -494,7 +494,7 @@ if BASE or DIAG:
                         if w == "</s>":
                             break
                         out.append(w); h.append(w)
-                    if 3 <= len(out) <= 8:
+                    if 3 <= len(out) <= 8 and not (arm.get("new") and tuple(out) in seen):   # "new": never a stored sentence
                         return out
                 return None
         else:
@@ -508,7 +508,7 @@ if BASE or DIAG:
                         s = list(g_rng.choice(sents))
                     for _k in range(arm.get("n", 1)):
                         s = swap_once(s, g_rng, arm.get("frame", "lr"), arm.get("unit", "word"), arm.get("min", 1), arm.get("pick", "draw")) if s else None
-                    if s:
+                    if s and not (arm.get("new") and tuple(s) in seen):
                         return s
                 return None
         G = [gen(p) for p in PP]
@@ -894,6 +894,7 @@ for ai, arm in enumerate(arms):
         # Lengths outside 3..8 are redrawn.
         from trellis2.trellis3 import BOS as T3BOS, EOS as T3EOS
         units_ = arm.pop("units", "both")
+        new_ = arm.pop("new", False)       # never return a stored sentence (redraw)
         pair_ = arm.pop("pair", None)      # "gate": a filler whose first word was never stored after l1 is kept
         _cz = {}                           # only if the context tree read by types licenses the pair at or above
         if pair_:                          # the median over stored pairs (as chart_gen's pair_lic gate)
@@ -942,10 +943,10 @@ for ai, arm in enumerate(arms):
                         break
                     (v, done) = _rng.choices(vs, weights=ws)[0]
                     out += _words(v)
-                if done and 3 <= len(out) <= 8:
+                if done and 3 <= len(out) <= 8 and not (new_ and tuple(out) in seen):
                     return out
             return None
-        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {})})
+        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"new": True} if new_ else {})})
     elif chart is not None:
         CG = ChartGen(L, **chart)
         print(json.dumps({"tag": tag, "seed": seed, "chart": chart, **CG.stats}), flush=True)

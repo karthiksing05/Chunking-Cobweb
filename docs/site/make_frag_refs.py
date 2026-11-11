@@ -525,13 +525,82 @@ p8 = ("<h3>What this means for the two-hierarchy learner</h3><ul>"
       "<li><b>Dropped.</b> A separate substitution learner reported here until 10 November has been dropped to focus on the "
       "two-hierarchy learner. Its code is in the repository history at commit 6b084ffb.</li></ul>")
 
+# Table 7: generation from the two-hierarchy learner (rounds 144, 154, 155)
+def _judge_arms(d):
+    try:
+        with open(f"experiments/v3/results/story_gen/{d}/judge.json", encoding="utf-8") as fh:
+            return json.load(fh)["arms"]
+    except Exception:
+        return []
+
+
+def _diag_rows(rnd, s):
+    out_ = {}
+    for r in jlines(f"logs/v3-{rnd}-diag-{s}.log"):
+        if str(r.get("diag", "")).startswith("story_"):
+            out_[r["diag"]] = r
+    return out_
+
+
+def t7_row(label, d, rnd, match, seeds=SEEDS):
+    arms = [a for a in _judge_arms(d) if match(a["arm"]) and a["file"].startswith("story_")]
+    by = {}
+    for a in arms:
+        m = re.search(r"_s(\d+)_", a["file"])
+        if m:
+            by[int(m.group(1))] = a
+    ys_ = [by.get(s, {}).get("grammatical novel per generation") for s in seeds]
+    gr = [by.get(s, {}).get("judged grammatical") for s in seeds]
+    nv = [by.get(s, {}).get("novel") for s in seeds]
+    un = []
+    for s in seeds:
+        if s in by:
+            dr = _diag_rows(rnd, s).get(by[s]["file"], {}).get("2-grams not all stored, new", {})
+            if dr.get("share of generations") is not None:
+                un.append((dr["share of generations"], dr.get("judged grammatical")))
+    ok = [v for v in ys_ if v is not None]
+    rng_ = lambda v: "–" if not [x for x in v if x is not None] else (
+        f"{pct(min(x for x in v if x is not None))}–{pct(max(x for x in v if x is not None))}")
+    uns = "–" if not un else ("under 1% of outputs" if mean([a for a, _ in un]) < 0.01 else
+                               f"{pct(mean([a for a, _ in un]))} of outputs; {pct(mean([b for _, b in un if b is not None]))} grammatical")
+    return row(label, [f2(mean(ok)) if ok else "–", " / ".join("–" if v is None else f2(v) for v in ys_), rng_(gr), rng_(nv), uns])
+
+
+_ch = lambda pl: (lambda a: "chart" in a and a["chart"].get("pair_lic") == pl)
+_ca = lambda u, p, nw=False: (lambda a: a.get("causal") and a.get("units") == u and a.get("pair") == p and bool(a.get("new")) == nw)
+T7 = table(["Generator (1,000 sentences)", "Yield, mean", "Yield by seed (13 / 17 / 19 / 23)", "Grammatical", "New",
+            "New sentences with a never-stored pair"],
+           [t7_row("Chart generation, candidate recipe (round 144 control)", "r144-typelic", "r144", _ch(None)),
+            t7_row("Chart, never-stored pairs weighted by the type licence", "r144-typelic", "r144", _ch("weight")),
+            t7_row("Chart, never-stored pairs gated at the median licence", "r144-typelic", "r144", _ch("gate")),
+            t7_row("Causal, words (round 154)", "r154-causal", "r154", _ca("words", None)),
+            t7_row("<b>Causal, words, gated</b>", "r154-causal", "r154", _ca("words", "gate")),
+            t7_row("Causal, words and chunks", "r154-causal", "r154", _ca("both", None)),
+            t7_row("Causal, words and chunks, gated", "r154-causal", "r154", _ca("both", "gate"))])
+p7_intro = ("<p>Chart generation builds a sentence top-down from the learner's grammar and fills each position from the chart's "
+            "marginal times Cobweb's prediction. Causal generation is the story counterpart of chess's causal context: left to right, "
+            "each filler (a word, or also a committed chunk, which places its words) is drawn from the learner's context tree given the "
+            "two words already placed, jointly with whether the sentence ends after it. The gate keeps a never-stored pair only if the "
+            "context tree read by types (Table 5) licenses it at or above the median over stored pairs. Yield is new judged-grammatical "
+            "sentences per generated sentence, as in Table 1; the trigram sampler there yields .412 / .404 / .388 / .395.</p>")
+p7 = ("<ul>"
+      "<li><b>Causal generation from the learner's own context tree reaches the trigram sampler.</b> Gated, it yields .38 to .40 on "
+      "every seed against the trigram's .39 to .41, and against .19 to .26 for the chart.</li>"
+      "<li><b>The gate works by reuse.</b> Gated arms almost never make a never-stored pair; ungated, sentences that do are 10 to 21% "
+      "grammatical, and the type licence does not raise that in chart generation either (11 to 16%). Generalization past stored pairs "
+      "is still unsolved.</li>"
+      "<li><b>Chunks raise grammaticality and lower novelty.</b> With committed chunks as fillers, 73 to 86% of outputs are judged "
+      "grammatical, but most are stored sentences, so yield falls.</li>"
+      "<li><b>Topic.</b> Causal generation ignores the previous sentence (cross share near 0, against .25 to .28 for the chart).</li></ul>")
+
 out = (lead + p_how + "<h3>Table 1. Reference generators at 1,000 sentences, 4 seeds</h3>" + T1 + p1 +
        "<h3>Table 2. With more data (seeds 13 / 17)</h3>" + T2 + p2 +
        "<h3>Table 3. Where TRELLIS's errors come from (1,000 sentences, seeds 13 / 17)</h3>" + T3 + T3b + p3 +
        "<h3>Table 4. One substitution at a time (round 110)</h3>" + T4 + p4 +
        "<h3>Table 5. The generalization step alone</h3>" + p5_intro + T5 + T5v + T5s + p5_defs + p5 +
        "<h3>Table 6. Reference coders</h3>" + p6_intro + "<h4>6a. Chess (bits per held-out position)</h4>" + TCHESS +
-       "<h4>6b. Chinese characters (bits per held-out character)</h4>" + TCH + p6 + p8)
+       "<h4>6b. Chinese characters (bits per held-out character)</h4>" + TCH + p6 +
+       "<h3>Table 7. Generating from the two-hierarchy learner</h3>" + p7_intro + T7 + p7 + p8)
 with open("docs/site/frag_refs.html", "w", encoding="utf-8") as f:
     f.write(out)
 
