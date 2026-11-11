@@ -577,6 +577,9 @@ T7 = table(["Generator (1,000 sentences)", "Yield, mean", "Yield by seed (13 / 1
             t7_row("<b>Causal, words, gated</b>", "r154-causal", "r154", _ca("words", "gate")),
             t7_row("Causal, words and chunks", "r154-causal", "r154", _ca("both", None)),
             t7_row("Causal, words and chunks, gated", "r154-causal", "r154", _ca("both", "gate")),
+            t7_row("Causal, words, gate at the 25th percentile (round 156)", "r156-quant", "r156", lambda a: a.get("causal") and a.get("q") == 0.25),
+            t7_row("Causal, words, gate at the 10th percentile", "r156-quant", "r156", lambda a: a.get("causal") and a.get("q") == 0.1),
+            t7_row("Causal, words, gate at the 2nd percentile", "r156-quant", "r156", lambda a: a.get("causal") and a.get("q") == 0.02),
             t7_row("Causal, words, gated, never a stored sentence (round 155)", "r155-new", "r155", _ca("words", "gate", True)),
             t7_row("Causal, words and chunks, gated, never a stored sentence", "r155-new", "r155", _ca("both", "gate", True)),
             t7_row("Reference: retrieved one-word swap", "r155-new", "r155", lambda a: a.get("swap") == "retrieve" and not a.get("new")),
@@ -594,8 +597,10 @@ p7 = ("<ul>"
       "<li><b>Causal generation from the learner's own context tree reaches the trigram sampler.</b> Gated, it yields .38 to .40 on "
       "every seed against the trigram's .39 to .41, and against .19 to .26 for the chart.</li>"
       "<li><b>The gate works by reuse.</b> Gated arms almost never make a never-stored pair; ungated, sentences that do are 10 to 21% "
-      "grammatical, and the type licence does not raise that in chart generation either (11 to 16%). Generalization past stored pairs "
-      "is still unsolved.</li>"
+      "grammatical, and the type licence does not raise that in chart generation either (11 to 16%). Loosening the gate (round 156) "
+      "shows the licence does order them, weakly: sentences with a never-stored pair are about 13% grammatical ungated, 22% when "
+      "the pair must pass the 2nd percentile of stored pairs' licences, 24% at the 10th, and roughly 27% at the 25th (few outputs), "
+      "against about 66% for new sentences of stored pairs. Generalization past stored pairs is still unsolved.</li>"
       "<li><b>Chunks raise grammaticality and lower novelty.</b> With committed chunks as fillers, 73 to 86% of outputs are judged "
       "grammatical, but most are stored sentences, so yield falls.</li>"
       "<li><b>Never returning a stored sentence lifts every generator, and the n-grams most.</b> With the same rule for all, causal "
