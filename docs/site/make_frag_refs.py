@@ -479,6 +479,9 @@ for lab, pat in (("TRELLIS, chess page recipe, rerun (round 146)", "r146-gap0-{S
                  ("The same, context read at the root only (ablation)", "{r}-causalonr-4k-{S}_s{s}")):
     tc.append(row(lab, [by_seed([_cb(pat.format(S=S, s=s, r="r147" if s == 13 else "r148")) for s in CS])
                         for S in ("control", "shift")]))
+tc.append(row("<b>TRELLIS, causal context without the absolute square (rounds 150–151; no chunks stored)</b>",
+              [by_seed([_cb(f"r150-d4b-dropsq-4k-{S}_s13" if s == 13 else f"r151-d4b-dropsq-4k-{S}_s{s}") for s in CS])
+               for S in ("control", "shift")]))
 TCHESS = table(["Coder (4,000 positions learned)", "Control (s13 / s17 / s19)", "Shifted (s13 / s17 / s19)"], tc)
 
 p6_intro = ("<p>The same question for coding: bits per held-out item for count-based coders that read only the stream. A chess "
@@ -497,6 +500,13 @@ p6 = ("<ul>"
       "about 7 bits on control and 1.5 to 2.5 on shifted boards. The relative trigram is still about 19 bits ahead on control and "
       "21 on shifted boards. Conditioning "
       "the gap on the context gains about 1 bit (round 149): the context tree is organised by the square and the gap themselves.</li>"
+      "<li><b>Without the absolute square, TRELLIS's context tree matches the trigram, but no chunks form.</b> Leaving the anchor's "
+      "square out of the causal description, so concepts organise by what a reader knows (the backward star, the previous unit "
+      "and the gap), brings TRELLIS to 99.4 to 99.9 bits on control and 104.4 to 105.0 on shifted boards on three seeds: within "
+      "about 1 bit of the relative trigram on control and 3.5 to 6 bits better on shifted boards. The gap is also predicted from "
+      "the previous unit's context path. But the learner then stores no chunks: the square's context gain was what started "
+      "chunking. This is the context hierarchy coding piece by piece; the content hierarchy does no work here, and whether "
+      "chunks help on top of it is open.</li>"
       "<li><b>On characters, TRELLIS's chart coder trails the trigram up to 2,000 characters and passes it at 4,000</b>, by 0.6 "
       "bits on seed 13 and 0.05 on seed 17.</li></ul>"
       '<p class="small">The co-occurrence and TRELLIS rows come from the chess page\'s coders, which treat unseen items a little '
