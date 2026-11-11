@@ -769,7 +769,8 @@ p8 = ("<h3>What follows</h3><ul>"
       "their groups, is a unit. Using that test to find chunks has not been tried.</li></ul>"
       "<h3>What this does not settle</h3><ul>"
       "<li>Everything here replaces one word. Two or more substitutions, and units longer than a word, are open.</li>"
-      "<li>Generation was run on stories only. Characters and chess were run as coders only, chess on one seed.</li>"
+      "<li>Generation was run on stories and Chinese characters (Table 10), where the learner leads clearly only on well-formed "
+      "output. Chess was run as a coder only, on one seed.</li>"
       "<li>The n-gram coders for chess are new references as well as carriers of the licence: most of their lead over the site's "
       "chess coders comes from reading the board in order, and the licence adds 1 to 15 bits.</li>"
       "<li>Agreement errors remain (\"they was happy\"): the trees group singular and plural subjects together.</li>"
@@ -859,6 +860,44 @@ p9_intro = ("<p>The same generators from 500 to 16,000 sentences. Yield is new j
 T9y = table9("grammatical novel per generation", f2)
 T9g = table9("judged grammatical", pct)
 
+# Table 10: generating Chinese characters (round 136)
+CG = {}
+for sd in S2:
+    for r in jlines(f"logs/v3-r136-chargen-{sd}.log"):
+        if "generator" in r and r.get("train") is not None:
+            CG[(r["generator"], r["train"], sd)] = r
+CG_ROWS = [("learner, no requirement, votes multiplied", "<b>Learner, votes multiplied</b>"),
+           ("learner, no requirement", "Learner, votes added"),
+           ("learner, an unstored pair required", "Learner, an unstored pair of components required"),
+           ("reference: one token swapped in the same frame", "Reference: component stored between the same two neighbours"),
+           ("reference: trigram sampler", "Reference: trigram sampler")]
+
+
+def table10(field, fmt, title):
+    rows = []
+    for g, lab in CG_ROWS:
+        cells = []
+        for t in NS5:
+            v = [CG[(g, t, sd)][field] for sd in S2 if (g, t, sd) in CG and CG[(g, t, sd)].get(field) is not None]
+            cells.append(fmt(mean(v)) if v else "–")
+        rows.append(row(lab, cells))
+    return table([title] + [f"{t:,} characters learned" if t == 500 else f"{t:,}" for t in NS5], rows)
+
+
+T10a = table10("real and new", lambda x: "–" if x is None else f"{100 * x:.1f}%", "Real and new, share of generations")
+T10b = table10("well-formed", pct, "Well-formed")
+p10t_intro = ("<p>The same learner on a second domain, with no judge. A character is a sequence of components and layout operators. Each "
+              "generator produces 2,000 sequences; one is <b>real and new</b> when it is the decomposition of a real character among the "
+              "13,297 in the data that the learner was not taught, and <b>well-formed</b> when it is one complete layout expression. Seeds 13 "
+              "and 17; the learner starts from a stored character drawn at random.</p>")
+p10t = ("<ul><li><b>Level with the trigram sampler on real characters, ahead of the swap.</b> Few generated decompositions are real "
+        "characters for any generator: the space of well-formed decompositions is far larger than the 13,297 real ones. The learner with "
+        "multiplied votes and the trigram sampler are about level; the reference swap is lower.</li><li><b>Far ahead on well-formed "
+        "output.</b> The learner's sequences are complete layout expressions about nine times in ten, the swap's three times in four and "
+        "the trigram sampler's half the time. The learner keeps the stored character's structure and changes one component.</li>"
+        "<li><b>Generalization is rarely a real character.</b> When a pair of components never seen together is required, 3 to 6% of "
+        "outputs are real characters; the references make no such pair.</li></ul>")
+
 out = (lead + p_how + "<h3>Table 1. Reference generators at 1,000 sentences, 4 seeds</h3>" + T1 + p1 +
        "<h3>Table 2. With more data (seeds 13 / 17)</h3>" + T2 + p2 +
        "<h3>Table 3. Where TRELLIS's errors come from (1,000 sentences, seeds 13 / 17)</h3>" + T3 + T3b + p3 +
@@ -871,7 +910,9 @@ out = (lead + p_how + "<h3>Table 1. Reference generators at 1,000 sentences, 4 s
        "<h4>8a. An unstored pair required (every output is new and contains one)</h4>" + T8a +
        "<h4>8b. No requirement</h4>" + T8b + T8s + p9 +
        "<h3>Table 9. With more data</h3>" + p9_intro + "<h4>Yield</h4>" + T9y + "<h4>Judged grammatical</h4>" + T9g +
-       p10 + p8)
+       p10 +
+       "<h3>Table 10. Generating Chinese characters</h3>" + p10t_intro + "<h4>10a. Real and new, share of generations</h4>" + T10a +
+       "<h4>10b. Well-formed</h4>" + T10b + p10t + p8)
 with open("docs/site/frag_refs.html", "w", encoding="utf-8") as f:
     f.write(out)
 
