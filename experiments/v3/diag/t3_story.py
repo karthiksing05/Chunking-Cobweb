@@ -818,7 +818,9 @@ if BASE or DIAG:
                      "pairs": set(pairc), "lic": {}, "V": {}, "va": {}}
         return _ns[(kind, build)]
 
-    def nswap_once(NS, s, rng, new_only):
+    def nswap_once(NS, s, rng, new_only, vmode="sum"):
+        # vmode "sum": a candidate's votes between the two neighbours and between two neighbours each
+        # side are added; "product": multiplied, so its groups must have stood in both places
         ST, WT, units, pairs = NS["ST"], NS["WT"], NS["units"], NS["pairs"]
         t = ["<s>", "<s>"] + s + ["</s>", "</s>"]
         offers = []
@@ -830,7 +832,7 @@ if BASE or DIAG:
                 a, b = i + 2, j + 2
                 l, r = t[a - 1], t[b]
                 k_lr, k_w = (l, r), (t[a - 2], l, r, t[b + 1])
-                V = NS["V"].get((k_lr, k_w))
+                V = NS["V"].get((vmode, k_lr, k_w))
                 if V is None:
                     V = defaultdict(float)
                     for key, F, tab in ((k_lr, NS["F_lr"], "lr"), (k_w, NS["F_wide"], "w")):
@@ -838,7 +840,10 @@ if BASE or DIAG:
                             NS["va"][(tab, key)] = ST.votes_all(F[key]) if key in F else {}
                         for y, v in NS["va"][(tab, key)].items():
                             V[y] += v
-                    NS["V"][(k_lr, k_w)] = V
+                    if vmode == "product":
+                        a_, b_ = NS["va"][("lr", k_lr)], NS["va"][("w", k_w)]
+                        V = {y: v * b_[y] for y, v in a_.items() if y in b_}
+                    NS["V"][(vmode, k_lr, k_w)] = V
                 ov = V.get(own, 0.0)
                 if ov <= 0:
                     continue
@@ -911,7 +916,7 @@ if BASE or DIAG:
                         s = list(stored[max(range(len(stored)), key=sc.__getitem__)][1])
                     else:
                         s = list(g_rng.choice(sents))
-                    x = nswap_once(NS, s, g_rng, new_only)
+                    x = nswap_once(NS, s, g_rng, new_only, arm.get("vote", "sum"))
                     if x:
                         out, own, y, ratio = x
                         nstat["n"] += 1
