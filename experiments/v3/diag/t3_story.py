@@ -924,6 +924,17 @@ if BASE or DIAG:
                         nstat["multi"] += int(len(own) > 1 or len(y) > 1)
                         return out
                 return None
+        elif "learner" in arm:                 # the packaged class: same generator as the nswap words arm
+            if "_L" not in _ns:
+                from trellis2.substitution import SubstitutionLearner
+                _ns["_L"] = SubstitutionLearner(seed)
+                for s_, fol_ in train:
+                    _ns["_L"].learn(s_, follows=fol_)
+            L_ = _ns["_L"]
+
+            def gen(p):
+                return L_.generate(prev=p, rng=g_rng, require_new=bool(arm.get("new", False)),
+                                   vote=arm.get("vote", "sum"), min_len=3, max_len=8)
         else:
             def gen(p):
                 for _ in range(200):
