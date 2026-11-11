@@ -25,6 +25,7 @@ reassignment, names) is ``Trellis3``'s.
 """
 from __future__ import annotations
 
+import bisect
 import math
 import random
 from typing import Dict, List, Optional, Sequence, Tuple
@@ -90,13 +91,37 @@ class ChessDomain:
     ``absolute``: a flat chunk's content also holds each piece on its own square
     (``abs``), beside the offsets from the anchor (``tpl``); category utility
     weighs the two by how well each predicts, so a concept keeps whichever is
-    stable for it (a castled king its squares, a pawn chain its shape)."""
-    surface_attrs = ("rays", "jumps", "sq")
+    stable for it (a castled king its squares, a pawn chain its shape).
 
-    def __init__(self, join: str = "anchor", flat: bool = False, ctx: str = "star", absolute: bool = False):
-        self.join, self.flat, self.ctx, self.absolute = join, flat, ctx, absolute
+    ``causal`` (learner config "chess_causal"): an occurrence's context is what a reader
+    has already decoded when the unit arrives in reading order: the backward half of the
+    anchor's star (the rays SE, S, SW, W and the jumps ESE, SSE, SSW, WSW, whose squares all
+    come before the anchor, so they hold no piece of the element itself and every piece on
+    them belongs to an earlier unit), the anchor square, and (once the analysis is known)
+    the previous top unit, ``pu`` (a chunk by its content concept's band names, a piece by
+    its kind, "<s>" for none) and the gap ``gp`` from its anchor (square indices y*8+x; from
+    -1 for the first unit). No forward star, no outside ties, no own content (cc)."""
+    surface_attrs = ("rays", "jumps", "sq")
+    BACK_RAYS = ("SE", "S", "SW", "W")
+    BACK_JUMPS = ("ESE", "SSE", "SSW", "WSW")
+
+    def __init__(self, join: str = "anchor", flat: bool = False, ctx: str = "star", absolute: bool = False,
+                 causal: bool = False):
+        self.join, self.flat, self.ctx, self.absolute, self.causal = join, flat, ctx, absolute, causal
         if flat:
             self.surface_attrs = ("rays", "jumps", "sq", "ext")
+        if causal:
+            self.surface_attrs = ("rays", "jumps", "sq", "pu", "gp")
+
+    @classmethod
+    def causal_star(cls, board, sq) -> dict:
+        """The backward half of the star at ``sq`` on ``board`` (square -> piece) and the
+        square: only squares before ``sq`` in the reading order are read, so a board holding
+        just the units decoded so far gives the same description as the full position."""
+        st = C.star(board, sq)
+        return {"rays": {f"{d}:{st[d]}": 1.0 / 4 for d in cls.BACK_RAYS},
+                "jumps": {f"{d}:{st[d]}": 1.0 / 4 for d in cls.BACK_JUMPS},
+                "sq": C.square_name(sq)}
 
     def prepare(self, position: C.Position) -> Experience:
         sqs = sorted(position, key=lambda s: (s[1], s[0]))
@@ -139,6 +164,8 @@ class ChessDomain:
     def surface(self, exp: Experience, ext: frozenset) -> dict:
         pos, sqs, _ = exp.data
         sq = sqs[min(ext)]
+        if self.causal:
+            return self.causal_star(pos, sq)
         st = C.star(pos, sq, frozenset(sqs[i] for i in ext))
         rays = {f"{d}:{st[d]}": 1.0 / 8 for d, _ in C.RAYS}
         jumps = {f"{d}:{st[d]}": 1.0 / 8 for d, _ in C.JUMPS}
@@ -208,7 +235,11 @@ class GraphTrellis(Trellis3):
     def __init__(self, domain=None, max_size: int = 4, samples: int = 16, **kw):
         join, flat = kw.pop("chess_join", "anchor"), kw.pop("chess_flat", False)
         self.join_gain = kw.pop("join_gain", "both")
-        self.dom = domain or ChessDomain(join, flat, kw.pop("chess_ctx", "star"), kw.pop("chess_abs", False))
+        causal = kw.pop("chess_causal", False)
+        if causal:                              # the own content is not known before the unit: no cc facet
+            kw["donate_ctx"] = False
+        self.dom = domain or ChessDomain(join, flat, kw.pop("chess_ctx", "star"), kw.pop("chess_abs", False), causal)
+        self.causal = bool(getattr(self.dom, "causal", False))
         self._exp: Optional[Experience] = None
         self.max_size, self.samples = max_size, samples
         super().__init__(**kw)
@@ -227,7 +258,58 @@ class GraphTrellis(Trellis3):
         return ("pc", "tpl", "int", "abs") if self.dom.absolute else ("pc", "tpl", "int")
 
     # descriptions --------------------------------------------------------- #
+    # causal contexts (chess_causal) -------------------------------------- #
+    def _prev_name(self, prev: Optional[Elem]) -> List[str]:
+        """The previous unit as a reader names it: a piece by its kind, a chunk by its
+        content concept at the learner's naming (band names), "<s>" before the first."""
+        if prev is None:
+            return ["<s>"]
+        if prev.token is not None:
+            return [f"w:{prev.token}"]
+        return self._cnt_name(prev)
+
+    def causal_context(self, board, sq, prev: Optional[Elem], gap: Optional[int]) -> dict:
+        """The causal context of a unit anchored at ``sq``: the backward half-star on
+        ``board``, the square, and (gap not None) the previous unit and the gap from it.
+        Learning calls it with the full position, the coder with the decoded board."""
+        x = self.dom.causal_star(board, sq)
+        if gap is not None:
+            self._facet(x, "pu", self._prev_name(prev))
+            x["gp"] = str(gap)
+        return x
+
+    def _set_prev(self, exp: Experience, elems, top) -> None:
+        """Each element's previous unit: the top unit of the analysis with the greatest
+        anchor before its anchor (for a top unit, the unit read just before it)."""
+        sqs = exp.data[1]
+        order = sorted(top, key=lambda u: min(u.span))
+        anchors = [min(u.span) for u in order]
+        for e in elems:
+            i = min(e.span)
+            k = bisect.bisect_left(anchors, i) - 1
+            prev = order[k] if k >= 0 else None
+            pa = sqs[min(prev.span)][1] * 8 + sqs[min(prev.span)][0] if prev is not None else -1
+            e.memo["cprev"] = (prev, sqs[i][1] * 8 + sqs[i][0] - pa)
+
+    def _refresh_todo(self, todo, b, recs, first) -> None:
+        if self.causal:                         # the previous unit's name follows its concept
+            for e in todo:
+                cp = e.memo.get("cprev")
+                if cp is None or e.leaf is None or cp[0] is None or cp[0].token is not None:
+                    continue
+                new = dict(e.ctx)
+                self._facet(new, "pu", self._prev_name(cp[0]))
+                if new != e.ctx:
+                    self.ctx.relabel(e.leaf, e.ctx, new, e.weight)
+                    e.ctx = new
+                    self.stats["refreshed"] += 1
+        super()._refresh_todo(todo, b, recs, first)
+
     def _context(self, exp: Experience, e: Elem, analysed: bool) -> dict:
+        if self.causal:                         # what is decoded when the unit arrives, nothing else
+            cp = e.memo.get("cprev") if analysed else None
+            return self.causal_context(exp.data[0], exp.data[1][min(e.span)],
+                                       cp[0] if cp else None, cp[1] if cp else None)
         x = self.dom.surface(exp, e.span)
         if self.neighbour_types:
             e.nbt = tuple(exp.tokens[p] for p in self.dom.neighbours(exp, e.span))
@@ -359,6 +441,8 @@ class GraphTrellis(Trellis3):
             covered = set().union(*(e.span for e in units))
             r["top"] = sorted(units + [w for w in words if not (w.span & covered)], key=lambda e: min(e.span))
             r["chosen"] = [id(e) for e in units]
+        if self.causal:                         # each element's previous unit in the final analysis
+            self._set_prev(exp, list(words) + list(comps.values()), r["top"])
         chosen = set(r["chosen"])
         if self.dom.flat:                       # chunks one level up: only the top chunks are stored
             chosen &= {id(e) for e in r["top"] if e.token is None}
@@ -402,7 +486,7 @@ class GraphTrellis(Trellis3):
             e.weight = w
             e.cnt = self._content(e)
             e.cleaf = self.cnt.ifit(e.cnt, w)
-            e.ctx = self._full(self._context(exp, e, analysed=k in chosen), self.ctx_attrs)
+            e.ctx = self._full(self._context(exp, e, analysed=k in chosen or self.causal), self.ctx_attrs)
             e.leaf = self.ctx.ifit(e.ctx, w)
             e.rid = len(self.records)
             if self.type_names or self.neighbour_types:

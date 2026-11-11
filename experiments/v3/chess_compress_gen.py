@@ -58,6 +58,18 @@ For each top unit of the position's parse (a chunk, or a single piece):
             the same counts
   gap       (GAP=1 or 2, flat chunks) positions coded relatively: units in increasing anchor order,
             each anchor by its gap from the previous unit's (see GAP below)
+  causal    (learner config "chess_causal", needs GAP) the context tree holds each occurrence by what
+            a reader has decoded when the unit arrives (the anchor's backward half-star, its square,
+            the previous unit's name and the gap from it: ChessDomain causal), and every unit gains a
+            causal route: that a unit comes (the top alphabet's non-stop mass), its gap (pooled over
+            all top units), its symbol (piece kind, or content concept at level kc) by P(symbol |
+            context concept), the concept found by sorting the causal description computed on the
+            board decoded so far (the earlier units), and a chunk's body given its concept and anchor
+            (generate by offsets / on squares, copy by offsets / on squares at that anchor, learned
+            weights); the route and the existing code are mixed by learned weights, one pair of counts
+            for all units. P(symbol | X) backs off from the root along the path (n_X(v) + P(v |
+            parent)) / (n_X + 1); with CAUSALD=1 every concept on the path predicts, mixed by learned
+            weights per depth
 Bits are code bits only: the memory itself (the model) is not charged.
 
 PREQ=<block> (environment) instead codes prequentially: each of the first n_learn
@@ -162,6 +174,16 @@ def offsets(span, exp):
 
 
 L = GraphTrellis(max_size=max_size, seed=seed, **cfg)
+# chess_causal (learner config): the context tree holds each occurrence by what a reader has decoded
+# when the unit arrives (ChessDomain causal: backward half-star, square, previous unit, gap), and the
+# code gains a causal route per unit: P(go) P(gap | prev) P(symbol | context concept) P(body | symbol,
+# anchor), the symbol a piece kind or a content concept, mixed with the existing code by learned weights
+CAUSAL = bool(getattr(L, "causal", False))
+if CAUSAL and not GAP:
+    raise SystemExit("chess_causal codes units in reading order: set GAP=1 or 2")
+top_units = []                                       # CAUSAL: (record, "w" token | "c" record id) of every stored top unit
+CTXW, CBODY, DEPTHW = {}, {}, {}                     # CAUSAL: (kc, kx, copy) -> wins per route (existing, causal); per body route; per path depth
+CAUSALD = int(os.environ.get("CAUSALD", 0))          # CAUSAL: 1 = the symbol by a learned mixture over the context path's concepts; 2 = root only (ablation)
 single_tops = Counter()
 stored = Counter()                                   # distinct stored chunks (exact pieces and squares): the memory
 rel_key = {}                                         # record id -> its pieces at their offsets from the anchor
@@ -188,6 +210,11 @@ def learn_one(f, top=None):
             rel_key[e.rid] = offsets(e.span, r["exp"])
             abs_key[e.rid] = frozenset((sqs[i], r["exp"].tokens[i]) for i in e.span)
     for e in r["top"]:
+        if CAUSAL and e.leaf is not None:            # its context leaf is read when the code is built (records move)
+            if e.token is not None:
+                top_units.append((e, "w", e.token))
+            elif e.rid is not None and getattr(e, "cleaf", None) is not None:
+                top_units.append((e, "c", e.rid))
         if e.token is not None:
             (i,) = tuple(e.span)
             single_tops[psq(e.token, sqs[i])] += 1
@@ -267,6 +294,64 @@ class Model:
         self.pending = []
         if GAP:
             self.init_gaps()
+        if CAUSAL:
+            self.init_causal()
+
+    # CAUSAL: the unit's top symbol from its causal context concept --------- #
+    def init_causal(self):
+        """Counts of each stored top unit's symbol (piece kind, or content concept at level kc)
+        at every concept on its context leaf's current path; the alphabet: the 12 kinds, the
+        top concepts and one slot for a concept never stored as a top unit."""
+        self.cx = {}
+        for e, k, v in top_units:
+            sym = ("w", v) if k == "w" else ("c", lvl(cpath_of_record(v), self.kc).id)
+            node = e.leaf
+            while node is not None:
+                self.cx.setdefault(node.id, Counter())[sym] += 1
+                node = node.parent
+        self.cx_n = {nid: sum(d.values()) for nid, d in self.cx.items()}
+        self.n_sym = len(KINDS) + len(self.top_c) + 1
+        self.p_go = 1.0 - (n_pos + 1) / self.top_tot     # the top alphabet's non-stop mass
+        self.pool_cum = [0.0]
+        for g in range(1, 65):
+            self.pool_cum.append(self.pool_cum[-1] + self.gap_pool[g])
+        if GAP_DEBUG:
+            self.check_causal()
+
+    def sym_probs(self, xpath, sym):
+        """P(symbol | X) at every concept X on the path (root first), each backed off from the
+        root as Cobweb predicts: P(v | X) = (n_X(v) + P(v | parent)) / (n_X + 1), the root
+        Laplace-smoothed; the last is P(symbol | the context concept)."""
+        p, ps = None, []
+        for node in xpath:
+            d, n = self.cx.get(node.id, {}), self.cx_n.get(node.id, 0)
+            c = d.get(sym, 0)
+            p = (c + ALPHA) / (n + ALPHA * self.n_sym) if p is None else (c + p) / (n + 1.0)
+            ps.append(p)
+        return ps
+
+    def sym_prob(self, xpath, sym):
+        return self.sym_probs(xpath, sym)[-1]
+
+    def causal_gap_bits(self, g, prev):
+        """P(gap) pooled over all top units, renormalised over the gaps that stay on the board."""
+        return -math.log2(self.gap_pool[g] / self.pool_cum[63 - prev])
+
+    def check_causal(self):
+        """GAP_DEBUG: P(symbol | X) sums to 1 over the alphabet along sampled context paths."""
+        alphabet = [("w", t) for t in KINDS] + [("c", c) for c in self.top_c] + [("c", "novel")]
+        assert len(alphabet) == self.n_sym
+        leaves = [e.leaf for e, _, _ in top_units[:40]]
+        for leaf in leaves + [L.ctx.root]:
+            path = L.ctx.ancestors(leaf)[::-1]
+            for k in (0, 1, 2):
+                xp = path[:max(1, len(path) - k)]
+                s = sum(self.sym_prob(xp, v) for v in alphabet)
+                assert abs(s - 1) < 1e-9, (leaf.id, k, s)
+        for prev in (-1, 0, 7, 31, 62):
+            s = sum(2.0 ** -self.causal_gap_bits(g, prev) for g in range(1, 64 - prev))
+            assert abs(s - 1) < 1e-9, (prev, s)
+        print(json.dumps({"CAUSAL_DEBUG ok": [self.kc, self.kx], "alphabet": self.n_sym}), flush=True)
 
     # GAP: relative positions ------------------------------------------------ #
     def init_gaps(self):
@@ -656,11 +741,89 @@ def cover(M, r, copy):
     return sorted(out, key=lambda e: min(e.span))
 
 
+def kt_mix(wins, ls, live):
+    """-log2 of the mixture of routes ``live`` with code lengths ``ls``, weighted by each
+    route's share of the units it coded best so far (Krichevsky-Trofimov); the winner's
+    count goes up after the unit, so a decoder keeps the same counts."""
+    n = sum(wins[k] for k in live)
+    m = min(ls[k] for k in live)
+    if m == float("inf"):
+        return m
+    out = m - math.log2(sum((wins[k] + 0.5) / (n + 0.5 * len(live)) * 2.0 ** (m - ls[k]) for k in live))
+    wins[min(live, key=lambda k: ls[k])] += 1
+    return out
+
+
+def causal_bits(M, e, exp, prev_e, prev, board, copy, memo):
+    """CAUSAL: the unit by the causal route: that a unit comes (the top alphabet's non-stop mass),
+    its gap from the previous unit (pooled), its symbol from its causal context concept, then (a
+    chunk) its body given its concept and its now known anchor. The context is the learner's own
+    causal description computed on the board decoded so far (``board``: the earlier units' pieces),
+    sorted in the context tree, so a decoder that has decoded the earlier units finds the same
+    concept before reading the symbol."""
+    sqs = exp.data[1]
+    sq = sqs[min(e.span)]
+    a = ridx(sq)
+    ck = ("cx", id(e), id(prev_e))
+    if ck not in memo:
+        x = L._full(L.causal_context(board, sq, prev_e, a - prev), L.ctx_attrs)
+        if GAP_DEBUG:                        # the decoded board gives the description of the full position
+            assert x == L._full(L.causal_context(exp.data[0], sq, prev_e, a - prev), L.ctx_attrs), (x, sq)
+        memo[ck] = L.ctx.categorize(x)
+    path = memo[ck]
+    xpath = path[:max(1, len(path) - M.kx)]
+    go, gb = -math.log2(M.p_go), M.causal_gap_bits(a - prev, prev)
+
+    def sym_bits(sym):
+        if CAUSALD == 2:                     # ablation: the root only (the context tree does no work)
+            return -math.log2(M.sym_prob(xpath[:1], sym))
+        if not CAUSALD:                      # the context concept's own prediction
+            return -math.log2(M.sym_prob(xpath, sym))
+        # CAUSALD=1: every concept on the path predicts (root to context concept), mixed by
+        # learned weights per depth (one set for all units, so the mixture is one distribution)
+        ls = [-math.log2(p) for p in M.sym_probs(xpath, sym)]
+        return kt_mix(DEPTHW.setdefault((M.kc, M.kx, copy), Counter()), ls, range(len(ls)))
+    if e.token is not None:
+        sb = sym_bits(("w", e.token))
+        ACC["causal: single symbols"] += sb
+        return go + gb + sb, go, gb, 0.0
+    cn = lvl(memo[id(e)], M.kc)
+    sb = sym_bits(("c", cn.id))
+    ACC["causal: chunk symbols"] += sb
+    ls = [M.template_bits(cn, e),
+          M.template_bits(cn, e, "abs") if "abs" in e.cnt else float("inf"),
+          M.copy_bits(cn.id, offsets(e.span, exp)) if copy else float("inf"),
+          float("inf")]
+    if copy and ACOPY:                       # the stored instance on its squares, given the anchor
+        key = frozenset((sqs[i], exp.tokens[i]) for i in e.span)
+        n = M.akeys.get(cn.id, {}).get(key, 0)
+        ls[3] = -math.log2(n / M.akey_anchor[cn.id][a]) if n else float("inf")
+    live = [k for k in range(4) if not (k == 1 and "abs" not in e.cnt) and not (k >= 2 and not copy)
+            and not (k == 3 and not ACOPY)]
+    body = kt_mix(CBODY.setdefault((M.kc, M.kx, copy), [0.0] * 4), ls, live)
+    return go + gb + sb + body, go, gb, body
+
+
+def causal_mix(M, old, new, go, gb, copy):
+    """One unit's code: the existing code and the causal route mixed by learned weights (one
+    pair of counts for every unit, single or chunk, so the mixture is one distribution)."""
+    ACC["existing route, unit bits"] += old
+    ACC["causal route, unit bits"] += new
+    ACC["causal: go"] += go
+    ACC["causal: gaps"] += gb
+    ACC["causal route cheaper (count)"] += new < old
+    ACC["units (count)"] += 1
+    b = kt_mix(CTXW.setdefault((M.kc, M.kx, copy), [0.0, 0.0]), [old, new], [0, 1])
+    ACC["mixed, unit bits"] += b
+    return b
+
+
 def code_bits(M, r, copy=False):
     exp, memo = r["exp"], r["memo"]
     sqs = exp.data[1]
     bits = M.stop_bits()
     board, occupied = {}, set()
+    prev_e = None                            # CAUSAL: the unit coded just before
     M.pending = ["stop"]                     # the units this code used, counted once the position is coded
     todo = cover(M, r, copy) if COVER and L.dom.flat else r["top"]
     M.units = [e.span for e in todo]        # TOPC: learning stores these as its analysis
@@ -676,6 +839,10 @@ def code_bits(M, r, copy=False):
             if GAP:
                 sb = M.single_gap_bits(e.token, a - prev, prev)
                 ACC["single tops"] += sb
+                if CAUSAL:                   # the existing code and the causal route, mixed by learned weights
+                    cb, go, gb, _ = causal_bits(M, e, exp, prev_e, prev, board, copy, memo)
+                    sb = causal_mix(M, sb, cb, go, gb, copy)
+                    prev_e = e
                 bits += sb
                 prev = a
             else:
@@ -751,6 +918,11 @@ def code_bits(M, r, copy=False):
             ACC["context head cheaper (count)"] += hb < M.top_bits(cn.id) + M.anchor_bits(cn.id, anchor, shape_of(e))
             ACC["context head"] += hb
             head = either(head, hb + body)
+        if CAUSAL:
+            cb, go, gb, body = causal_bits(M, e, exp, prev_e, prev, board, copy, memo)
+            ACC["causal: chunk bodies"] += body
+            head = causal_mix(M, head, cb, go, gb, copy)
+            prev_e = e
         bits += head
         prev = a
         board.update({sq: t for t, sq in units})
