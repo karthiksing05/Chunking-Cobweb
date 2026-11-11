@@ -45,11 +45,23 @@ def test_insertion_reproduces_the_reference_and_the_compiled_tree():
     data = list(_instances(1500, 5))
     ref = Reference(("a", "b", "bag"), seed=7)
     inc = IncrementalCobwebTree(("a", "b", "bag"), seed=7)
+    inc.fast_ec = False                 # the reference's arithmetic; the fast path agrees only up to rounding
     fast = Compiled(("a", "b", "bag"), seed=7)
     ids = [inc.ifit(x, w).id for x, w in data]
     assert ids == [ref.ifit(x, w).id for x, w in data] == [fast.ifit(x, w).id for x, w in data]
     assert _shape(inc) == _shape(ref) == _shape(fast)
     assert np.allclose(inc.concept_codes(0.5), fast.concept_codes(0.5), rtol=1e-12, atol=1e-9)
+
+
+def test_the_fast_path_builds_a_valid_tree():
+    # fast_ec (the default) ranks near-tied operators by rounding-level differences, so its tree
+    # need not match the reference; it must still hold every instance with consistent counts
+    tree = IncrementalCobwebTree(("a", "b", "bag"), seed=7)
+    data = list(_instances(1500, 5))
+    for x, w in data:
+        tree.ifit(x, w)
+    tree.check_invariants(tol=1e-6)
+    assert tree.root.count == pytest.approx(sum(w for _, w in data))
 
 
 def test_insert_then_remove_restores_the_counts():
