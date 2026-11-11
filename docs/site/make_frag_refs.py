@@ -452,7 +452,16 @@ for tokens, tname in (("abs", "absolute"), ("rel", "relative")):
                       [by_seed([CHESS.get((sd, tag, tokens), {}).get(field) for sd in CS]) for tag in ("control", "shift")]))
 for kind, lab in (("abs", "Co-occurrence chunks on squares"), ("rel", "Co-occurrence chunks on shapes")):
     tc.append(row(lab, [by_seed([bpe_best(kind, sd, tag) for sd in CS]) for tag in ("control", "shift")]))
-tc.append(row("TRELLIS, offsets only (chess page, seed 13)", ["130.7 / – / –", "153.6 / – / –"]))
+for lab, run in (("TRELLIS, chess page recipe (seed 13)", "ab-control"), ("TRELLIS, absolute transfer run (seed 13)", "xfer-abs"),
+                 ("TRELLIS, relative transfer run (seed 13)", "xfer-rel")):
+    def _best(tag, run=run):
+        try:
+            with open(f"experiments/v3/results/chess_compress/{run}-{tag}_s13.json", encoding="utf-8") as fh:
+                v = [r["bits per position"] for r in json.load(fh)["by levels"] if r.get("copy")]
+            return f"{min(v):.1f}" if v else "–"
+        except Exception:
+            return "–"
+    tc.append(row(lab, [f"{_best('control')} / – / –", f"{_best('shift')} / – / –"]))
 TCHESS = table(["Coder (4,000 positions learned)", "Control (s13 / s17 / s19)", "Shifted (s13 / s17 / s19)"], tc)
 
 p6_intro = ("<p>The same question for coding: bits per held-out item for count-based coders that read only the stream. A chess "

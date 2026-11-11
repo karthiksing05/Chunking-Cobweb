@@ -385,7 +385,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
       <tr><td><a href="#r-stories">TinyStories</a></td><td>Judged grammatical and new, per generation (1,000 sentences, 4 seeds)</td><td class="num best">0.186</td><td>0.159 tree drawn first; 0.161 / 0.152 expansion (2 seeds)</td></tr>
       <tr><td><a href="#s-babi">bAbI</a></td><td>Answer of the right type</td><td class="num">0.60–0.63</td><td>0.20–0.23 frequency baseline</td></tr>
       <tr><td><a href="#s-chars">Characters</a></td><td>Bits per held-out character (2,000 learned)</td><td class="num">27.8 / 27.5</td><td><b>Trigram 26.4 / 26.0</b>; BPE 29.6 / 29.1</td></tr>
-      <tr><td><a href="#s-chess">Chess</a></td><td>Bits per held-out position (4,000 learned): control; shifted</td><td class="num">127.7; <b>147.2</b></td><td><b>BPE squares 108.8</b>; 205.5. BPE shapes 111.3; 149.7</td></tr>
+      <tr><td><a href="#s-chess">Chess</a></td><td>Bits per held-out position (4,000 learned): control; shifted</td><td class="num">127.7 (squares in the description); <b>147.2</b> (offsets only, <code>exact_alone</code> off): two runs, each best on one set</td><td><b>BPE squares 108.8</b>; 205.5. BPE shapes 111.3; 149.7</td></tr>
     </tbody>
   </table></div>
   <p class="small">These numbers are for the older recipe. <a href="#a-rationale">A18</a> reports a simpler candidate that does better on stories, characters and toy expansion and has not been adopted.</p>
@@ -396,7 +396,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
       <tr><td>TinyStories</td><td>Judged grammatical and new, per generation (1,000 sentences, 4 seeds)</td><td class="num">.22</td><td class="best">Trigram sampler .40; stored sentence with one word swapped in the same frame .57</td></tr>
       <tr><td>TinyStories</td><td>The same at 4,000 sentences (seeds 13 / 17)</td><td class="num">.21 / .20</td><td class="best">Trigram .41 / .39; swap .51 / .51</td></tr>
       <tr><td>Characters</td><td>Bits per held-out character (4,000 learned, s13 / s17)</td><td class="num best">24.89 / 24.82</td><td>Trigram 25.48 / 24.87 (TRELLIS trails it up to 2,000)</td></tr>
-      <tr><td>Chess</td><td>Bits per held-out position (4,000 learned): control; shifted</td><td class="num">127.7; 147.2 (older recipe, seed 13)</td><td class="best">Trigram over relative tokens 98.5 to 98.9; 108.5 to 110.9 (seeds 13, 17, 19)</td></tr>
+      <tr><td>Chess</td><td>Bits per held-out position (4,000 learned): control; shifted</td><td class="num">130.7; 147.2 (older recipe, seed 13, one run)</td><td class="best">Trigram over relative tokens 98.5 to 98.9; 108.5 to 110.9 (seeds 13, 17, 19)</td></tr>
     </tbody>
   </table></div>
   <p class="small">The references read only the stream. TRELLIS's story errors come from word pairs it never saw side by side, and its memory ranks such pairs no better than word frequency (A19, Table 5).</p>
