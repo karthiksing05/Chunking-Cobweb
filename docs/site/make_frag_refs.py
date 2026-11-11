@@ -284,12 +284,8 @@ LIC_ROWS = [
     ("Cobweb's prediction from the candidate memory (the current learner)", R113, "Cobweb, both", S2, None, False),
     None,  # best of the recipe variants (round 114)
     ("A Cobweb tree over word pairs", R115, "pair tree, all levels", S2, None, True),
-    ("One Cobweb tree over word types, read by token counts", R117, "word tree, back-off", S2, None, True),
-    ("The same tree, read by types (each member word counts once)", R117, "word tree by types, sum", S2, None, True),
-    ("Words with similar neighbours vote", R118, "similar words", SEEDS, None, True),
-    ("Analogy count", R118, "analogy, count", SEEDS, None, True),
-    ("<b>Two Cobweb trees over word types, one per side, read by types</b>", R118, "word trees by side, by types, sum", SEEDS, None, True),
-    ("The same two trees, kept current one occurrence at a time", R122, "word trees by side, by types, sum", SEEDS, None, True),
+    ("Words with similar neighbours vote (reference)", R118, "similar words", SEEDS, None, True),
+    ("<b>Analogy count (reference)</b>", R118, "analogy, count", SEEDS, None, True),
 ]
 
 # round 114: best of the recipe variants, 1,000 sentences, "Cobweb, both"
@@ -339,222 +335,8 @@ p5_intro = ("<p>A generator has to decide which word pairs it may produce that t
             "has it at least twice. Average precision ranks the pairs by the licence; the base rate is the share of unstored pairs that are "
             "right. No generation and no judge are involved, so one run takes minutes.</p>")
 p5_defs = ("<p>Analogy count: for an unstored pair (a, b), the number of stored pairs (a2, b2) such that (a, b2) and (a2, b) are also stored. "
-           "Two trees by side: each word type is described by the set of words stored just after it in one tree and just before it in the other; "
-           "a word weighs as its count; a new concept is scored by its own expected correct guesses (exact_alone). The licence for (a, b) is "
-           "the share of the words grouped with a that b followed, summed over the concepts on a's path, combined with the same reading for b's side.</p>")
-
-# ---------------------------------------------------------------- table 6 (one licensed substitution)
-FRAME = {"vote": "Frame votes (between the two neighbours)", "vote-wide": "Frame votes (plus two neighbours each side)",
-         "vote-all": "Frame votes (plus each neighbour alone)"}
-
-
-def pick_vote(a):
-    p = a.get("pick")
-    if p == "best":
-        return ", random slot, best candidate"
-    if p == "slot":
-        return ", slot drawn by ratio"
-    if p == "slot-best":
-        return ", best slot"
-    return ", random slot, drawn by votes"
-
-
-def lab119(a):
-    base = {"tree": "An unstored pair forced; two-tree pair licence", "count": "An unstored pair forced; analogy count"}.get(a.get("frame"), str(a))
-    return base + (", best candidate" if a.get("pick") == "best" else ", drawn by licence")
-
-
-def lab120(a):
-    return FRAME.get(a.get("frame"), str(a)) + pick_vote(a)
-
-
-def lab123(a):
-    unit = {"words": "TRELLIS memory, word units", "chunks": "TRELLIS memory, committed chunks as units"}.get(a.get("uswap"), str(a))
-    places = {"wide": " (two neighbours each side)", "all": " (plus each neighbour alone)"}.get(a.get("places"), "")
-    return unit + places + pick_vote(a) + (", conditioned" if a.get("cond") else "")
-
-
-PAIR_REQ = "An unstored pair required; "
-
-
-def pick_slot(a):
-    p = a.get("pick")
-    if p == "slot-best":
-        return ", best slot"
-    if p == "slot":
-        return ", slot drawn by ratio"
-    return pick_vote(a)
-
-
-def lab125(a):
-    fr = {"vote-new": "frame votes (between the two neighbours)", "vote-wide-new": "frame votes (plus two neighbours each side)",
-          "vote-all-new": "frame votes (plus each neighbour alone)", "tree": "two-tree pair licence", "count": "analogy count"}
-    return PAIR_REQ + fr.get(a.get("frame"), str(a)) + pick_slot(a)
-
-
-def lab126(a):
-    fr = {"vote-new-pair": PAIR_REQ + "frame votes times pair licence (between the two neighbours)",
-          "vote-wide-new-pair": PAIR_REQ + "frame votes times pair licence (plus two neighbours each side)",
-          "vote-wide-pair": "Frame votes times pair licence on new pairs (plus two neighbours each side)"}
-    lab = fr.get(a.get("frame"), str(a)) + pick_slot(a)
-    return f"<b>{lab}</b>" if a.get("frame") == "vote-wide-new-pair" else lab
-
-
-REQUIRED_FRAMES = {"vote-new", "vote-wide-new", "vote-all-new", "tree", "count", "vote-new-pair", "vote-wide-new-pair"}
-
-
-def armidx(name):
-    m = re.search(r"arm(\d+)", name or "")
-    return int(m.group(1)) if m else None
-
-
-def rounds6(n):
-    """Sources per round for sentence count n: (label fn, judge path, generation paths, diag paths)."""
-    ss = SEEDS if n == 1000 else S2
-    return [
-        (lab119, f"logs/v3-r119-judge-n{n}.log", [f"logs/v3-r119-lic-n{n}-{x}.log" for x in ss], [], False),
-        (lab120, f"logs/v3-r120-judge-n{n}.log", [f"logs/v3-r120-vote-n{n}-{x}.log" for x in ss],
-         [f"logs/v3-r120-diag-n{n}-{x}.log" for x in ss], False),
-        (lab120, f"logs/v3-r121-judge-n{n}.log", [f"logs/v3-r121-slot-n{n}-{x}.log" for x in ss],
-         [f"logs/v3-r121-diag-n{n}-{x}.log" for x in ss], False),
-        (lab125, f"logs/v3-r125-judge-n{n}.log", [f"logs/v3-r125-new-n{n}-{x}.log" for x in ss], [], False, True),
-        (lab126, f"logs/v3-r126-judge-n{n}.log", [f"logs/v3-r126-pair-n{n}-{x}.log" for x in ss],
-         [f"logs/v3-r126-diag-n{n}-{x}.log" for x in ss], False, True),
-        (lab123, f"logs/v3-r123-judge-n{n}.log", [f"logs/v3-r123-uswap-n{n}-{x}.log" for x in ss],
-         [f"logs/v3-r123-diag-n{n}-{x}.log" for x in ss], True),
-    ]
-
-
-def diagmap(paths):
-    out = {}
-    for p in paths:
-        for r in jlines(p):
-            if "diag" in r and str(r["diag"]).endswith(".jsonl"):
-                out[r["diag"]] = r
-    return out
-
-
-def dgm(dm, files, field, k):
-    return mean([(dm.get(f, {}).get(k) or {}).get(field) for f in files])
-
-
-def row6(label, j, gens, dm, arm, full, withchunk, ordered, req=False):
-    k = key(arm)
-    isreq = bool(req) and arm.get("frame") in REQUIRED_FRAMES
-    sd = [x for x in full if (k, x) in j]
-    if not sd:
-        return None
-    files = [j[(k, x)]["file"] for x in sd]
-    g = []
-    for x in sd:
-        r = gens.get((k, x))
-        if r is None and ordered.get(x):  # fall back to the arm's position in the seed's generation log
-            i = armidx(j[(k, x)]["file"])
-            if i is not None and i < len(ordered[x]):
-                r = ordered[x][i]
-        if r is not None:
-            g.append(r)
-    ebs = [r.get("every bigram stored") for r in g]
-    unst = None if not ebs or any(e is None for e in ebs) else 1 - mean(ebs)
-    ys_ = [j[(k, x)]["grammatical novel per generation"] for x in sd]
-    cells = [f2(mean(ys_)) + ("" if len(sd) == len(full) else f" ({len(sd)} seed{'s' if len(sd) != 1 else ''})"),
-             pct(mean([j[(k, x)]["judged grammatical"] for x in sd])), pct(mean([j[(k, x)]["novel"] for x in sd])),
-             f2(mean([r.get("cross share") for r in g])), pct(unst),
-             (f2(mean([j[(k, x)]["judged grammatical"] for x in sd])) if isreq
-              else f2(dgm(dm, files, "judged grammatical", "2-grams not all stored, new"))),
-             "–" if isreq else f2(dgm(dm, files, "judged grammatical", "2-grams all stored, new")),
-             f2(mean([r.get("chunk for chunk") for r in g])) if withchunk else "–"]
-    return row(label, cells)
-
-
-def table6(n):
-    full = SEEDS if n == 1000 else S2
-    rows = []
-    # references
-    j, gens = REFJ[n], REFG[n]
-    ordd = {}
-    dm = diagmap([f"logs/v3-r109-base-n{n}-{x}.log" for x in full])
-    r_ = row6("Reference: word stored between the same two neighbours", j, gens, dm, {"swap": "retrieve"}, full, False, ordd)
-    if r_:
-        rows.append(r_)
-    # TRELLIS candidate recipe
-    trn = TR[n]
-    sd = [x for x in full if x in trn]
-    if sd:
-        cr = [TRCROSS.get(x) for x in sd] if n == 1000 else []
-        stored = [tr_trigram_bigram(x) for x in sd] if n == 1000 else []
-        files = [trn[x]["file"] for x in sd]
-        dmt = dm if n == 1000 else {}
-        unst = None if not stored or any(v is None for v in stored) else 1 - mean(stored)
-        rows.append(row("TRELLIS candidate recipe (chart generation)", [
-            f2(mean([trn[x]["grammatical novel per generation"] for x in sd])) + ("" if len(sd) == len(full) else f" ({len(sd)} seeds)"),
-            pct(mean([trn[x]["judged grammatical"] for x in sd])), pct(mean([trn[x]["novel"] for x in sd])),
-            f2(mean(cr)) if cr and None not in cr else "–", pct(unst),
-            f2(dgm(dmt, files, "judged grammatical", "2-grams not all stored, new")),
-            f2(dgm(dmt, files, "judged grammatical", "2-grams all stored, new")), "–"]))
-    for labfn, jp, gp, dp, wc, *rq in rounds6(n):
-        jr = judge(jp, n)
-        if not jr:
-            continue
-        gens = genrows(gp)
-        ordd = {}
-        for p in gp:
-            rs = [r for r in jlines(p) if "cross share" in r and "arm" in r]
-            if rs:
-                ordd[rs[0]["seed"]] = rs
-        dm = diagmap(dp)
-        arms = {}
-        for (k, x), r in sorted(jr.items(), key=lambda kv: (armidx(kv[1]["file"]) if armidx(kv[1]["file"]) is not None else 99, kv[0][1] or 0)):
-            arms.setdefault(k, r["arm"])
-        for k, a in arms.items():
-            r_ = row6(labfn(a), jr, gens, dm, a, full, wc, ordd, bool(rq and rq[0]))
-            if r_:
-                rows.append(r_)
-    head = [f"{n:,} sentences (seeds {' / '.join(str(x) for x in full)})", "Yield, mean", "Grammatical", "New", "Cross share",
-            "Outputs with an unstored bigram", "New with an unstored bigram, judged grammatical",
-            "New with every bigram stored, judged grammatical", "Chunk involved"]
-    return table(head, rows) if rows else '<p class="small">–</p>'
-
-
-def tr_trigram_bigram(seed):
-    d = diags(1000, seed).get(f"story_s{seed}_n1000_arm0.jsonl")
-    if not d:
-        return None
-    a = d.get("2-grams all stored, new", {}).get("share of generations")
-    b = d.get("2-grams all stored, stored sentence", {}).get("share of generations")
-    return None if a is None or b is None else a + b
-
-
-T6 = {n: table6(n) for n in (1000, 4000)}
-p6_intro = ("<p>Each generator below takes the stored sentence that followed the stored sentence most like the prompt and replaces one unit. "
-            "They differ in what may replace it and how the slot is chosen.</p>")
-p6_defs = ("<p>Frame votes: a candidate word is scored by how often the words grouped with it, in the two word-type trees, stood in the place "
-           "around the slot; the candidate itself counts where it stood there. Best slot: every position offers its best candidate, weighed by "
-           "that candidate's votes relative to the votes of the word standing there, and the highest ratio is taken. The references and rounds "
-           "119 to 121 read only the stream; round 123 runs the same procedure on the learner's memory. "
-           "Pair licence: the two-tree licence of Table 5 for a pair of neighbouring words. Frame votes times pair licence: a replacement that "
-           "makes an unstored pair is scored by its frame votes multiplied by the pair licence of each unstored pair it makes, so it must be "
-           "supported by both readings of the trees.</p>")
-
-# ---------------------------------------------------------------- table 7 (the licence as a coder)
-CODERS = ["bigram, backed off to shares", "bigram, backed off to shares and the two trees' licence",
-          "bigram, backed off to shares and the analogy count"]
-t7 = []
-for n in (500, 1000, 2000, 4000):
-    bits = {c: {} for c in CODERS}
-    for sd in S2:
-        for r in jlines(f"logs/v3-r124-code-n{n}-{sd}.log"):
-            if r.get("coder") in bits and r.get("bits per sentence") is not None:
-                bits[r["coder"]][sd] = r["bits per sentence"]
-    cells = [" / ".join(f2(bits[c].get(sd)) if bits[c].get(sd) is None else f"{bits[c][sd]:.2f}" for sd in S2) for c in CODERS]
-    sv = [bits[CODERS[0]][sd] - bits[CODERS[1]][sd] for sd in S2 if sd in bits[CODERS[0]] and sd in bits[CODERS[1]]]
-    cells.append("–" if not sv else f"{mean(sv):.2f}")
-    t7.append(row(f"{n:,}", cells))
-T7 = table(["Sentences", "Bigram backed off to shares (bits per held-out sentence, seeds 13 / 17)",
-            "Plus the two trees' licence", "Plus the analogy count", "Saving of the two-tree coder over the baseline (bits, seed mean)"], t7)
-p7_intro = ("<p>The licence gives a distribution over the next word, so it can be used to code held-out sentences. The baseline is a bigram "
-            "model backed off to word shares by Witten-Bell. The other two mix the licence's distribution over next words, half and half, "
-            "into that back-off. The half is hand-set.</p>")
+           "Similar words: words whose stored followers resemble a's vote with how often b followed them, and likewise on b's side. "
+           "Cobweb's prediction: after learning, the learner's memory predicts a word from one neighbour, in both directions.</p>")
 
 # ---------------------------------------------------------------- page
 def s(x):
@@ -565,16 +347,9 @@ lead = (f"<p>Simple reference generators, run on the same stream, prompts and ju
         f"At 1,000 sentences TRELLIS's candidate recipe yields {s(ty)} per generation; the trigram sampler yields {s(tri)}, "
         f"the one-word swap on a retrieved sentence {s(swr)}, and the best reference ({best[0] or '–'}) {s(best[1])}, "
         f"{'–' if ratio is None else f'{ratio:.1f}'} times TRELLIS. TRELLIS's errors come from word pairs it never saw next to each other. "
-        f"This page reports the references, the split of TRELLIS's errors and what follows from it.</p>"
-        "<p><b>What worked.</b> Two Cobweb trees over word types, read by counting each member word once, decide which unseen word pairs "
-        "may be produced far better than the learner's context concepts do (Table 5). A generator that replaces one word of a retrieved "
-        "stored sentence, and accepts a replacement only when two readings of those trees agree, produces sentences that all contain a "
-        "never-seen word pair and are grammatical about 60% of the time, from 500 to 4,000 sentences, with the trees kept current in one "
-        "pass (Table 8). The best reference, which never leaves stored pairs, is grammatical 67 to 70% of the time; TRELLIS's chart "
-        "generation is grammatical 14% of the time on sentences with a never-seen pair. The same trees shorten the code for held-out "
-        "sentences, Chinese characters and chess positions (Table 7), and the generator's lead over the references grows up to 16,000 "
-        "sentences (Table 9). This is a separate small learner, not TRELLIS's two-hierarchy learner: it works one word at a time, and "
-        "neither TRELLIS's chunks nor recurring spans helped as units.</p>")
+        f"Its memory ranks such pairs no better than the product of the two words' frequencies (Table 5), and fixed-order n-gram coders "
+        f"code chess positions in fewer bits than it does (Table 6). This page sets the bar the two-hierarchy learner has to clear: the "
+        f"references for generation, the split of its errors, the test of its generalization step, and the reference coders.</p>")
 
 p_how = ("<h3>How to read this page</h3>"
          "<p><b>Yield</b> is the number of judged-grammatical new sentences per generation. <b>Cross share</b> is the topic agreement with "
@@ -608,33 +383,11 @@ p4 = ("<ul>"
 p5 = ("<ul>"
       "<li><b>The current learner generalizes about neighbours no better than word frequency.</b> Every recipe variant we could score "
       "ranks unstored pairs about as well as multiplying the two words' frequencies. This is the measured cause of the errors in Table 3.</li>"
-      "<li><b>Three changes were each needed.</b> Describing word types by their neighbours, instead of occurrences by their windows, "
-      "helps a little when the tree is read by token counts. Reading the same tree by types, each member word counting once, helps much "
-      "more: one frequent collocation no longer stands for its whole group. Splitting the description into one tree per side reaches the "
-      "analogy count. A tree over word pairs does worse than word frequency.</li>"
-      "<li><b>It fits one-pass learning and grows with data.</b> Kept current one occurrence at a time, the two trees score the same as "
-      "when built at the end. They pass the analogy count at 2,000 and 4,000 sentences.</li>"
-      "<li><b>exact_alone is required.</b> Without it the word-type tree stays nearly flat (a mean path of about three concepts) and "
-      "ranks pairs no better than word frequency.</li></ul>")
+      "<li><b>Two counts over the stream do about twice as well.</b> The analogy count and similar-word votes read nothing but stored "
+      "pairs. A repair of the learner's generalization step should first move its own row above them here, where one run takes minutes, "
+      "before generation is judged again.</li>"
+      "<li><b>A Cobweb tree over word pairs does worse than word frequency.</b></li></ul>")
 
-p6 = ("<ul>"
-      "<li><b>Take the best candidate; do not draw.</b> Drawing a replacement in proportion to its votes is grammatical about a quarter "
-      "of the time: most of the vote mass lies on many weakly supported words.</li>"
-      "<li><b>Choosing the slot matters as much as choosing the word.</b> Letting every position offer its best replacement and taking "
-      "the best offer beats the reference swap on yield. Most of that gain is reuse: few of its outputs contain an unstored pair.</li>"
-      "<li><b>One reading of the trees is not enough to generalize.</b> When an unstored pair is required, frame votes alone or the pair "
-      "licence alone are grammatical 39 to 52% of the time. The analogy count, which ranked pairs well in Table 5, is grammatical 10 to "
-      "16% of the time: its best-scoring pairs are pairs of frequent words.</li>"
-      "<li><b>Two readings that agree come close to reuse.</b> Scoring a replacement by its frame votes times the pair licence of "
-      "each unstored pair it makes gives 67 to 68% grammatical output at 1,000 sentences and 59 to 61% at 4,000, with every output new and "
-      "containing a never-seen pair. The reference swap, which makes no unstored pair, is 69% and 67% grammatical. Since every output is "
-      "new, yield equals the grammatical share: .67 to .68 against the reference's .57 at 1,000 sentences and .59 to .61 against .51 at "
-      "4,000. Table 8 repeats this at four sizes and finds 1,000 sentences the most favourable; about 60% is the fairer figure.</li>"
-      "<li><b>The learner's chunks do not help as units.</b> Running the same procedure on the learner's memory with its committed chunks "
-      "as units gives equal or lower yield than words alone (round 123 rows). Its parses are weak (A18), so its chunks are poor units "
-      "to substitute.</li></ul>"
-      "<p class=\"small\">The judge passes 86 to 91% of real held-out sentences, so about 60 to 68% is still short of real text. The topic "
-      "comes from retrieval: these generators inherit the cross share of the stored sentence they start from.</p>")
 
 # Chinese characters coder table (rounds 127, 104c, 106c)
 def trellis_chart_bits(sd, t):
@@ -656,270 +409,70 @@ for t in (500, 1000, 2000, 4000):
         for r in jlines(f"logs/v3-r127-chars-{sd}.log"):
             if r.get("train") == t:
                 rr[sd] = r
-    cells = [s13_17([rr.get(sd, {}).get(f) for sd in S2]) for f in ("trigram", "trigram + licence", "bigram", "bigram + licence")]
+    cells = [s13_17([rr.get(sd, {}).get(f) for sd in S2]) for f in ("bigram", "trigram")]
     cells.append(s13_17([trellis_chart_bits(sd, t) for sd in S2]))
     tch.append(row(f"{t:,}", cells))
-TCH = table(["Characters learned", "Trigram", "Trigram with the licence", "Bigram", "Bigram with the licence",
-             "TRELLIS chart coder"], tch)
-p_ch_lead = "<p>The same mix in the back-off of the n-gram coders for Chinese characters (bits per held-out character):</p>"
+TCH = table(["Characters learned", "Bigram (s13 / s17)", "Trigram (s13 / s17)", "TRELLIS chart coder (s13 / s17)"], tch)
 
-# Table 8: one-pass trees and longer units (rounds 127 to 129)
-def mlh(vals, full=4):
-    if not vals:
-        return "–"
-    lo, hi = min(vals), max(vals)
-    g = lambda x: f"{x:.2f}".lstrip("0") if x < 1 else f"{x:.2f}"
-    cell = f"{f2(mean(vals))} ({g(lo)}–{g(hi)})"
-    return cell + ("" if len(vals) >= full else f", {len(vals)} seed{'s' if len(vals) != 1 else ''}")
-
-
-def build_vals(jpath, n, arm, field):
-    j = judge(jpath, n)
-    k = key(arm)
-    return [r[field] for (kk, sd), r in sorted(j.items(), key=lambda kv: kv[0][1] or 0) if kk == k and r.get(field) is not None]
-
-
-def mk8(newflag, field):
-    specs = [("Once at the end", "r129", {"nswap": "words", "new": newflag, "build": "batch"}, False),
-             ("Each sentence", "r128", {"nswap": "words", "new": newflag}, False),
-             ("<b>When its neighbours change</b>", "r129", {"nswap": "words", "new": newflag, "build": "lazy"}, True),
-             ("Each sentence, with recurring two- and three-word spans as units", "r128", {"nswap": "ngrams", "new": newflag}, False)]
-    rows = []
-    for label, rd, arm, _ in specs:
-        rows.append(row(label, [mlh(build_vals(f"logs/v3-{rd}-judge-n{n}.log", n, arm, field)) for n in NS5]))
-    rows.append(row("Reference: word stored between the same two neighbours" + (" (no unstored pair)" if newflag else ""),
-                    [mlh(build_vals(f"logs/v3-r109-judge-n{n}.log", n, {"swap": "retrieve"}, field)) for n in NS5]))
-    return rows
-
-
-H8 = ["Build", "500 sentences", "1,000", "2,000", "4,000"]
-T8a = table(["Build (judged grammatical, mean (lowest–highest) over seeds)"] + H8[1:], mk8(True, "judged grammatical"))
-T8b = table(["Build (yield, mean (lowest–highest) over seeds)"] + H8[1:], mk8(False, "grammatical novel per generation"))
-uns8 = []
-for n in NS5:
-    v = []
-    for sd in SEEDS:
-        for r in jlines(f"logs/v3-r129-build-n{n}-{sd}.log"):
-            if "arm" in r and r["arm"] == {"nswap": "words", "new": False, "build": "lazy"} and r.get("every bigram stored") is not None:
-                v.append(1 - r["every bigram stored"])
-                break
-    uns8.append(f"{n:,} sentences {pct(mean(v))}")
-T8s = ('<p class="small">For the row "When its neighbours change" without the requirement, the seed-mean share of outputs with an unstored '
-       'bigram is ' + "; ".join(uns8) + ".</p>")
-p8_intro = ("<p>The generators of Table 6 built the two trees once, at the end of the stream. A learner without an offline phase must keep "
-            "them current. These rows use the module <code>src/trellis2/type_trees.py</code>: words only, the best slot, frame votes (with "
-            "two neighbours each side) times pair licence. \"Once at the end\" enters every word once with its final description. \"Each "
-            "sentence\" re-enters every word of a sentence after that sentence. \"When its neighbours change\" re-enters a word only when "
-            "its set of neighbours grew. The last rows add recurring two- and three-word spans as units.</p>")
-
-p7 = ("<ul>"
-      "<li><b>Stories.</b> The licence shortens the code at every size on both seeds. The saving shrinks as the stream grows, since more "
-      "of the pairs a held-out sentence needs are already stored. The two trees and the analogy count save about the same.</li>"
-      "<li><b>Chinese characters.</b> The licence saves about 0.4 bits per character from 1,000 characters on, on both seeds. At 4,000 "
-      "the trigram coder with the licence is ahead of TRELLIS's chart coder on one seed and behind on the other.</li>"
-      "<li><b>Chess.</b> An n-gram coder that reads a position in a fixed square order beats every chess coder on this site, with or "
-      "without the licence: by 29 to 31 bits on control with absolute tokens and by 39 to 40 bits on shifted boards with relative "
-      "tokens. Relative tokens with the licence are ahead on both sets at once. The licence helps in every cell; on shifted boards "
-      "with absolute tokens it saves 15 bits, because it carries what was learned about a piece on one square to the next square. "
-      "This is one seed.</li>"
-      "<li><b>The mix.</b> Round 134 varied the weight on characters (two seeds, 1,000 and 4,000) and chess (both token kinds, both "
-      "sets). Every weight from 0.1 to 0.9 beats the plain trigram in every run. Between 0.5 and 0.9 the code length moves by "
-      "under 0.1 bits on characters and under 0.6 bits on chess, except shifted boards with absolute tokens, where 0.9 saves a "
-      "further 2.4 bits. A weight estimated from the last tenth of the stream was unreliable (0.03 to 0.80 across runs) and "
-      "usually worse than the half, so the half stays as a fixed, untuned number.</li></ul>")
-
-p10 = ("<ul>"
-       "<li><b>The gap to the references widens with data.</b> The references produce fewer new sentences as the stream grows: the swap "
-       "falls from .60 to .45 and the trigram sampler from .41 to .35. The substitution generator stays between .55 and .64.</li>"
-       "<li><b>Generalization does not improve with data either.</b> With an unstored pair required the grammatical share stays near "
-       "60% and is lowest at 16,000 sentences (55%). More data adds stored pairs; it does not make the trees' unseen pairs more often right.</li>"
-       "<li><b>Chart generation was not run past 4,000 sentences</b>; one arm there takes hours, against seconds for these generators.</li></ul>")
-
-p9 = ("<ul>"
-      "<li><b>The module reproduces the earlier generator.</b> With the trees built once at the end it gives the same judged share on each "
-      "of the four seeds at 1,000 sentences as the round 126 row of Table 6.</li>"
-      "<li><b>One pass is as good as building at the end, on average.</b> Re-entering a word only when its set of neighbours grows gives "
-      "59 to 64% grammatical output at the four sizes, against 56 to 68% for the build at the end. The build changes which candidate wins "
-      "on a given sentence, and single seeds move by ten points or more between builds, so differences between rows at one size are "
-      "within that spread.</li>"
-      "<li><b>Against the reference.</b> The reference swap is grammatical 67 to 70% of the time and makes no unstored pair. Without the "
-      "requirement the generator's yield is about .60 at every size up to 2,000, while the reference falls from .60 to .51 as the stream grows.</li>"
-      "<li><b>Requiring both places does not raise generalization.</b> Multiplying a candidate's votes in the two places, so that its "
-      "groups must have stood between the two neighbours and between two neighbours each side (round 131, four seeds, one-pass trees), "
-      "gives 56 to 65% grammatical output with an unstored pair required, the same as adding them. Without the requirement it is "
-      "grammatical 75 to 79% of the time, above the reference, with 77 to 86% of outputs new, and its yield stays near .60.</li>"
-      "<li><b>The coder is a worse chooser than the votes.</b> Letting the learner's own coder pick the sentence it codes in the fewest "
-      "bits (round 138, four seeds) lowers the grammatical share with an unstored pair required, from 61% and 64% at 1,000 and 4,000 "
-      "sentences to 55% and 62% when it picks among the slots' best offers and to 40% and 37% when it picks among every licensed "
-      "replacement. Without the requirement it raises the grammatical share to 78 to 83% by keeping more stored sentences, and yield falls.</li>"
-      "<li><b>Recurring spans are not units.</b> Adding every two- or three-word span that recurs lowers the grammatical share by 13 to "
-      "17 points and the yield by .17 to .21. Recurrence does not make a span substitutable. A stricter test does no better (round 137, four "
-      "seeds): keeping only recurring spans that stood between the same two neighbours as some single word gives 52% and 46% "
-      "grammatical output at 1,000 and 4,000 sentences with an unstored pair required, and a yield of .43 to .44 without the "
-      "requirement against .60 and .56 for words alone. Swapping a span for a word mostly shortens the sentence into one already "
-      "stored, or breaks it. With the learner's chunks (round 123) this leaves longer units unsolved.</li></ul>"
-      "<p class=\"small\">Tried on the test of Table 5 and set aside: discounting a concept's vote by how surprising the word's silence "
-      "is under the concept's own rate (so that a frequent word that never showed a pattern is blocked from it). It lowers average "
-      "precision at every size, from .34 to .30 at 1,000 sentences and from .33 to .22 at 4,000; a softer form that lets the rate vary "
-      "between words lowers it to .31 and .26. Most unstored pairs that are right involve frequent words.</p>")
-
-p8 = ("<h3>What follows</h3><ul>"
-      "<li><b>For the learner.</b> Its context tree describes occurrences by their windows. The licence that works describes types by "
-      "their sets of neighbours, one tree per side, and reads concepts by types. Moving this into the learner is the next step; "
-      "<code>src/trellis2/type_trees.py</code> holds the trees and <code>src/trellis2/substitution.py</code> one small learner over one "
-      "memory with three calls: learn an experience, generate one, and code one. It reproduces the generator of Table 8 output for "
-      "output and the characters coder of Table 7 to three decimals. Its hand-set numbers are the n-gram order and the coder's half.</li>"
-      "<li><b>For generation.</b> Chart generation draws every word from smoothed distributions and pays for it in unstored pairs. "
-      "Substitution on a retrieved analysis keeps what is stored and generalizes only where two readings agree. It has no cut, no "
-      "smoothing weight and no topic weight.</li>"
-      "<li><b>For chunks.</b> The frame votes are a substitution test: a span that stands where single words stand, and is voted for by "
-      "their groups, is a unit. Using that test to find chunks has not been tried.</li></ul>"
-      "<h3>What this does not settle</h3><ul>"
-      "<li>Everything here replaces one word. Two or more substitutions, and units longer than a word, are open.</li>"
-      "<li>Generation was run on stories and Chinese characters (Table 10), where the learner leads clearly only on well-formed "
-      "output. Chess was run as a coder only, on one seed.</li>"
-      "<li>The n-gram coders for chess are new references as well as carriers of the licence: most of their lead over the site's "
-      "chess coders comes from reading the board in order, and the licence adds 1 to 15 bits.</li>"
-      "<li>Agreement errors remain (\"they was happy\"): the trees group singular and plural subjects together.</li>"
-      "<li>The coder's half-and-half mix is hand-set.</li>"
-      "<li>Rounds 110 and 119 to 123 are judged on fewer seeds where the tables say so.</li></ul>")
-
-# chess coder tables (round 132)
-p_chess_lead = ("<p>The same mix for chess positions, 4,000 positions learned, seed 13 (bits per held-out position). A position is read in a "
-                "fixed square order; absolute tokens name a piece and its square, relative tokens name a piece and its distance from the "
-                "previous piece in that order:</p>")
+# chess reference coders (rounds 132 and 141): 4,000 positions learned, seeds 13 / 17 / 19
+CS = (13, 17, 19)
 CHESS = {}
-for tag in ("control", "shift"):
-    for r in jlines(f"logs/v3-r132-chess-{tag}.log"):
-        if r.get("tag") == tag and r.get("learn") is not None and r.get("tokens"):
-            CHESS[(tag, r["learn"], r["tokens"])] = r
+for sd in CS:
+    for tag in ("control", "shift"):
+        path = f"logs/v3-r132-chess-{tag}.log" if sd == 13 else f"logs/v3-r141-chess-{tag}-{sd}.log"
+        for r in jlines(path):
+            if r.get("tag") == tag and r.get("learn") == 4000 and r.get("tokens"):
+                CHESS[(sd, tag, r["tokens"])] = r
 
 
-def chv(tag, learn, tokens, field):
-    v = CHESS.get((tag, learn, tokens), {}).get(field)
-    return "–" if v is None else f"{v:.1f}"
+def bpe_best(kind, sd, tag):
+    try:
+        with open(f"experiments/v3/results/chess_compress/r141-bpe-{kind}_s{sd}.json", encoding="utf-8") as fh:
+            return json.load(fh)["sets"][tag]["best"]
+    except Exception:
+        return None
+
+
+def by_seed(vals):
+    return " / ".join("–" if v is None else f"{v:.1f}" for v in vals)
 
 
 tc = []
 for tokens, tname in (("abs", "absolute"), ("rel", "relative")):
-    for field, nm in (("unigram", "Unigram"), ("bigram", "Bigram"), ("bigram + licence", "Bigram"),
-                      ("trigram", "Trigram"), ("trigram + licence", "Trigram")):
-        if field == "unigram" and False:
-            continue
-        lab = f"{nm}, {tname} tokens" + (", with the licence" if "licence" in field else "")
-        if tokens == "rel" and field == "trigram + licence":
-            lab = f"<b>{lab}</b>"
-        tc.append(row(lab, [f"{chv('control', 4000, tokens, field)} / {chv('shift', 4000, tokens, field)}"]))
-for lab, v in (("Co-occurrence chunks on squares", "108.6 / 205.5"), ("Co-occurrence chunks on shapes", "111.3 / 149.7"),
-               ("TRELLIS, offsets only", "130.7 / 153.6")):
-    tc.append(row(lab, [v]))
-TCHESS = table(["Coder (4,000 positions learned)", "Control / shifted"], tc)
-p_chess_note = ('<p class="small">The last three rows are the chess page\'s numbers for the same learn and test sets; their coders treat '
-                'unseen items a little differently.</p>')
-tcl = []
-for lrn in (1000, 2000, 4000):
-    tcl.append(row(f"{lrn:,}", [chv("control", lrn, "rel", "trigram + licence"), chv("shift", lrn, "rel", "trigram + licence"),
-                                chv("control", lrn, "abs", "bigram + licence"), chv("shift", lrn, "abs", "bigram + licence")]))
-TCHESS2 = ("<p>By positions learned (relative tokens, trigram with the licence; and absolute tokens, bigram with the licence):</p>" +
-           table(["Positions learned", "Relative trigram + licence, control", "Relative trigram + licence, shifted",
-                  "Absolute bigram + licence, control", "Absolute bigram + licence, shifted"], tcl))
+    for field, nm in (("unigram", "Unigram"), ("bigram", "Bigram"), ("trigram", "Trigram")):
+        tc.append(row(f"{nm}, {tname} tokens",
+                      [by_seed([CHESS.get((sd, tag, tokens), {}).get(field) for sd in CS]) for tag in ("control", "shift")]))
+for kind, lab in (("abs", "Co-occurrence chunks on squares"), ("rel", "Co-occurrence chunks on shapes")):
+    tc.append(row(lab, [by_seed([bpe_best(kind, sd, tag) for sd in CS]) for tag in ("control", "shift")]))
+tc.append(row("TRELLIS, offsets only (chess page, seed 13)", ["130.7 / – / –", "153.6 / – / –"]))
+TCHESS = table(["Coder (4,000 positions learned)", "Control (s13 / s17 / s19)", "Shifted (s13 / s17 / s19)"], tc)
 
-# Table 9: with more data
-SC = (500, 1000, 2000, 4000, 8000, 16000)
-S9 = (13, 17)
-
-
-def sc_vals(arm, n, field, small, big):
-    """Per-seed values (seeds 13, 17) of one arm at n sentences."""
-    path = f"logs/v3-{big}-judge-n{n}.log" if n >= 8000 else small.format(n=n)
-    j = judge(path, n)
-    k = key(arm)
-    return [j[(k, sd)][field] for sd in S9 if (k, sd) in j and j[(k, sd)].get(field) is not None]
-
-
-def tr_vals(n, field):
-    if n > 4000:
-        return []
-    return [TR[n][sd][field] for sd in S9 if sd in TR[n] and TR[n][sd].get(field) is not None]
-
-
-SC_ROWS = [("One-pass trees, an unstored pair required", {"nswap": "words", "new": True, "build": "lazy"}, "logs/v3-r129-judge-n{n}.log"),
-           ("One-pass trees, no requirement, votes multiplied",
-            {"nswap": "words", "new": False, "build": "lazy", "vote": "product"}, "logs/v3-r131-judge-n{n}.log"),
-           ("Reference: word stored between the same two neighbours", {"swap": "retrieve"}, "logs/v3-r109-judge-n{n}.log"),
-           ("Reference: trigram sampler", {"ngram": 3}, "logs/v3-r109-judge-n{n}.log"),
-           ("TRELLIS candidate recipe (chart generation)", None, None)]
-
-
-def table9(field, fmt):
-    rows = []
-    for lab, arm, small in SC_ROWS:
-        cells = []
-        for n in SC:
-            v = tr_vals(n, field) if arm is None else sc_vals(arm, n, field, small, "r133")
-            cells.append(fmt(mean(v)) if v else "–")
-        rows.append(row(lab, cells))
-    return table(["Generator (seed mean of 13 and 17)"] + [f"{n:,} sentences" if n == 500 else f"{n:,}" for n in SC], rows)
-
-
-p9_intro = ("<p>The same generators from 500 to 16,000 sentences. Yield is new judged-grammatical sentences per generation; seeds 13 and 17 at "
-            "every size (the first two rows also have seeds 19 and 23 up to 4,000, not used here, so every cell is the same two seeds).</p>")
-T9y = table9("grammatical novel per generation", f2)
-T9g = table9("judged grammatical", pct)
-
-# Table 10: generating Chinese characters (round 136)
-CG = {}
-for sd in S2:
-    for r in jlines(f"logs/v3-r136-chargen-{sd}.log"):
-        if "generator" in r and r.get("train") is not None:
-            CG[(r["generator"], r["train"], sd)] = r
-CG_ROWS = [("learner, no requirement, votes multiplied", "<b>Learner, votes multiplied</b>"),
-           ("learner, no requirement", "Learner, votes added"),
-           ("learner, an unstored pair required", "Learner, an unstored pair of components required"),
-           ("reference: one token swapped in the same frame", "Reference: component stored between the same two neighbours"),
-           ("reference: trigram sampler", "Reference: trigram sampler")]
-
-
-def table10(field, fmt, title):
-    rows = []
-    for g, lab in CG_ROWS:
-        cells = []
-        for t in NS5:
-            v = [CG[(g, t, sd)][field] for sd in S2 if (g, t, sd) in CG and CG[(g, t, sd)].get(field) is not None]
-            cells.append(fmt(mean(v)) if v else "–")
-        rows.append(row(lab, cells))
-    return table([title] + [f"{t:,} characters learned" if t == 500 else f"{t:,}" for t in NS5], rows)
-
-
-T10a = table10("real and new", lambda x: "–" if x is None else f"{100 * x:.1f}%", "Real and new, share of generations")
-T10b = table10("well-formed", pct, "Well-formed")
-p10t_intro = ("<p>The same learner on a second domain, with no judge. A character is a sequence of components and layout operators. Each "
-              "generator produces 2,000 sequences; one is <b>real and new</b> when it is the decomposition of a real character among the "
-              "13,297 in the data that the learner was not taught, and <b>well-formed</b> when it is one complete layout expression. Seeds 13 "
-              "and 17; the learner starts from a stored character drawn at random.</p>")
-p10t = ("<ul><li><b>Level with the trigram sampler on real characters, ahead of the swap.</b> Few generated decompositions are real "
-        "characters for any generator: the space of well-formed decompositions is far larger than the 13,297 real ones. The learner with "
-        "multiplied votes and the trigram sampler are about level; the reference swap is lower.</li><li><b>Far ahead on well-formed "
-        "output.</b> The learner's sequences are complete layout expressions about nine times in ten, the swap's three times in four and "
-        "the trigram sampler's half the time. The learner keeps the stored character's structure and changes one component.</li>"
-        "<li><b>Generalization is rarely a real character.</b> When a pair of components never seen together is required, 3 to 6% of "
-        "outputs are real characters; the references make no such pair.</li></ul>")
+p6_intro = ("<p>The same question for coding: bits per held-out item for count-based coders that read only the stream. A chess "
+            "position is read in a fixed square order; absolute tokens name a piece and its square, relative tokens name a piece and its "
+            "distance from the previous piece in that order. The n-grams back off by Witten-Bell; a token never seen in training costs the "
+            "log of the inventory size.</p>")
+p6 = ("<ul>"
+      "<li><b>On chess, a trigram over relative tokens beats TRELLIS and the co-occurrence chunks</b> on control and shifted positions, "
+      "on every seed run. TRELLIS's chess coder has been run on seed 13 only.</li>"
+      "<li><b>On characters, TRELLIS's chart coder trails the trigram up to 2,000 characters and passes it at 4,000</b>, by 0.6 "
+      "bits on seed 13 and 0.05 on seed 17.</li></ul>"
+      '<p class="small">The co-occurrence and TRELLIS rows come from the chess page\'s coders, which treat unseen items a little '
+      "differently.</p>")
+p8 = ("<h3>What this means for the two-hierarchy learner</h3><ul>"
+      "<li><b>The weak step is generalization.</b> Sentences TRELLIS builds from stored pairs are mostly grammatical; those with a pair "
+      "it never saw mostly are not (Table 3), and its memory ranks such pairs at the level of word frequency (Table 5).</li>"
+      "<li><b>The bar.</b> Generation: the trigram sampler and the retrieved one-word swap at every size in Tables 1 and 2. Coding: the "
+      "n-gram rows of Table 6. The fast test of Table 5 comes first, because it needs no judge.</li>"
+      "<li><b>Dropped.</b> A separate substitution learner reported here until 10 November has been dropped to focus on the "
+      "two-hierarchy learner. Its code is in the repository history at commit 6b084ffb.</li></ul>")
 
 out = (lead + p_how + "<h3>Table 1. Reference generators at 1,000 sentences, 4 seeds</h3>" + T1 + p1 +
        "<h3>Table 2. With more data (seeds 13 / 17)</h3>" + T2 + p2 +
        "<h3>Table 3. Where TRELLIS's errors come from (1,000 sentences, seeds 13 / 17)</h3>" + T3 + T3b + p3 +
        "<h3>Table 4. One substitution at a time (round 110)</h3>" + T4 + p4 +
        "<h3>Table 5. The generalization step alone</h3>" + p5_intro + T5 + T5v + T5s + p5_defs + p5 +
-       "<h3>Table 6. Generating by one licensed substitution</h3>" + p6_intro +
-       "<h4>1,000 sentences</h4>" + T6[1000] + "<h4>4,000 sentences</h4>" + T6[4000] + p6_defs + p6 +
-       "<h3>Table 7. The same licence as a coder</h3>" + p7_intro + T7 + p_ch_lead + TCH + p_chess_lead + TCHESS + p_chess_note + TCHESS2 + p7 +
-       "<h3>Table 8. One-pass trees and longer units</h3>" + p8_intro +
-       "<h4>8a. An unstored pair required (every output is new and contains one)</h4>" + T8a +
-       "<h4>8b. No requirement</h4>" + T8b + T8s + p9 +
-       "<h3>Table 9. With more data</h3>" + p9_intro + "<h4>Yield</h4>" + T9y + "<h4>Judged grammatical</h4>" + T9g +
-       p10 +
-       "<h3>Table 10. Generating Chinese characters</h3>" + p10t_intro + "<h4>10a. Real and new, share of generations</h4>" + T10a +
-       "<h4>10b. Well-formed</h4>" + T10b + p10t + p8)
+       "<h3>Table 6. Reference coders</h3>" + p6_intro + "<h4>6a. Chess (bits per held-out position)</h4>" + TCHESS +
+       "<h4>6b. Chinese characters (bits per held-out character)</h4>" + TCH + p6 + p8)
 with open("docs/site/frag_refs.html", "w", encoding="utf-8") as f:
     f.write(out)
 
