@@ -2591,7 +2591,7 @@ class Trellis3:
             sides[p] = out
         return {m: {p: sides[p][m] for p in sides} for m in range(1, widths + 1)}
 
-    def type_licence(self):
+    def type_licence(self, near: Optional[int] = None):
         """The context tree read by types, for every pair of filler words: (words, index, M)
         with M[ia, ib] the licence for b right after a.
 
@@ -2603,7 +2603,7 @@ class Trellis3:
         geometric mean of the two sides. Read by types, one frequent collocation counts
         as one member, not as its count."""
         import numpy as np
-        key = (len(self.records), self.stats.get("experiences", 0))
+        key = (len(self.records), self.stats.get("experiences", 0), near)   # near: only the k concepts nearest each occurrence (r158)
         got = self.__dict__.get("_type_licence")
         if got is not None and got[0] == key:
             return got[1]
@@ -2627,7 +2627,7 @@ class Trellis3:
         W = np.zeros((len(words), len(cids)))
         for w, ps in occ.items():
             for p in ps:
-                for c in p[1:]:
+                for c in (p[1:] if near is None else p[1:1 + near]):
                     W[ix[w], cx[c]] += 1.0 / len(ps)
         pairs = self.__dict__.get("_pair_counts", {})
         after, before = np.zeros((len(words), len(words))), np.zeros((len(words), len(words)))

@@ -220,7 +220,7 @@ if LIC:
             if good[x]:
                 hit += 1
                 tot += hit / i
-                for r in (0.1, 0.25, 0.5):
+                for r in (0.01, 0.05, 0.1, 0.25, 0.5):
                     if str(r) not in at and hit >= r * n_pos:
                         at[str(r)] = round(hit / i, 3)
         return {"average precision": round(tot / max(n_pos, 1), 3), "precision at recall": at}
@@ -368,6 +368,15 @@ if BASE or DIAG:
                         sel = [p > 0.5 for r, p in zip(rows, ps) if r["novel"] == nov and attested(r["gen"].split(), k) == att]
                         out[f"{k}-grams {'all' if att else 'not all'} stored, {'new' if nov else 'stored sentence'}"] = \
                             {"share of generations": round(len(sel) / max(len(rows), 1), 3), "judged grammatical": round(sum(sel) / max(len(sel), 1), 3)}
+            if os.environ.get("STORY_EXAMPLES"):      # the new sentences with an unstored pair, the pair marked, and the score
+                ex = []
+                for r, p in zip(rows, ps):
+                    g = r["gen"].split()
+                    if r["novel"] and not attested(g, 2):
+                        t_ = ["<s>"] + g + ["</s>"]
+                        bad = [f"{a}_{b}" for a, b in zip(t_, t_[1:]) if (a, b) not in have[2]]
+                        ex.append(f"{p:.2f} | {' '.join(g)} | {' '.join(bad)}")
+                out["unstored examples"] = ex[:60]
             print(json.dumps(out), flush=True)
         ref = random.Random(seed + 21).sample(held, min(300, len(held)))
         print(json.dumps({"diag": "held-out real sentences", "seed": seed,
@@ -657,11 +666,12 @@ if LIC_SET:                                    # the learner's licence: Cobweb's
                     f = math.log2(n_root / max(cnt_of.get(c, n_root), 1e-9)) if mode == "bits" else 1.0
                     Wm[wi[w], ci[c]] += f / len(ps)
         return Wm
-    for mode in ("noroot", "bits", "near2", "near4", "near6"):
+    for mode in ("all", "noroot", "bits", "near2", "near4", "near6"):
         Wm = weigh(mode)
-        Mx = np.sqrt((Wm @ sh_a).T * (Wm @ sh_b))
-        print(json.dumps({"licence": f"context tree by types, path {mode}", "seed": seed, "n": n,
-                          **ap(lambda a, b: float(Mx[wi[a], wi[b]]) if a in wi and b in wi else 0.0)}), flush=True)
+        B_, A_ = (Wm @ sh_a).T, (Wm @ sh_b)            # b's side [a, b], a's side [a, b]
+        for comb, Mx in (("geo", np.sqrt(B_ * A_)), ("min", np.minimum(B_ / max(B_.mean(), 1e-12), A_ / max(A_.mean(), 1e-12)))):
+            print(json.dumps({"licence": f"context tree by types, path {mode}, {comb}", "seed": seed, "n": n,
+                              **ap(lambda a, b: float(Mx[wi[a], wi[b]]) if a in wi and b in wi else 0.0)}), flush=True)
     sys.exit()
 
 
@@ -896,10 +906,11 @@ for ai, arm in enumerate(arms):
         units_ = arm.pop("units", "both")
         new_ = arm.pop("new", False)       # never return a stored sentence (redraw)
         q_ = float(arm.pop("q", 0.5))
+        near_ = arm.pop("near", None)      # the licence read at the k concepts nearest each occurrence (r158)
         pair_ = arm.pop("pair", None)      # "gate": a filler whose first word was never stored after l1 is kept
         _cz = {}                           # only if the context tree read by types licenses the pair at or above
         if pair_:                          # the median over stored pairs (as chart_gen's pair_lic gate)
-            _w_, _ix_, _M_ = L.type_licence()
+            _w_, _ix_, _M_ = L.type_licence(near=near_)
             _st_ = set(getattr(L, "_pair_counts", {}))
             _vals_ = sorted(float(_M_[_ix_[a], _ix_[b]]) for a, b in _st_ if a in _ix_ and b in _ix_)
             _med_ = _vals_[min(len(_vals_) - 1, int(len(_vals_) * q_))] if _vals_ else 0.0   # q_: the quantile of stored pairs (median by default)
@@ -947,7 +958,7 @@ for ai, arm in enumerate(arms):
                 if done and 3 <= len(out) <= 8 and not (new_ and tuple(out) in seen):
                     return out
             return None
-        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"new": True} if new_ else {}), **({"q": q_} if q_ != 0.5 else {})})
+        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"new": True} if new_ else {}), **({"q": q_} if q_ != 0.5 else {}), **({"near": near_} if near_ else {})})
     elif chart is not None:
         CG = ChartGen(L, **chart)
         print(json.dumps({"tag": tag, "seed": seed, "chart": chart, **CG.stats}), flush=True)
