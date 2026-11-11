@@ -572,8 +572,9 @@ lead = (f"<p>Simple reference generators, run on the same stream, prompts and ju
         "never-seen word pair and are grammatical about 60% of the time, from 500 to 4,000 sentences, with the trees kept current in one "
         "pass (Table 8). The best reference, which never leaves stored pairs, is grammatical 67 to 70% of the time; TRELLIS's chart "
         "generation is grammatical 14% of the time on sentences with a never-seen pair. The same trees shorten the code for held-out "
-        "sentences and for held-out Chinese characters (Table 7). None of this is inside the learner yet: it reads the stream, one word "
-        "at a time, and neither the learner's chunks nor recurring spans helped as units.</p>")
+        "sentences, Chinese characters and chess positions (Table 7), and the generator's lead over the references grows up to 16,000 "
+        "sentences (Table 9). This is a separate small learner, not TRELLIS's two-hierarchy learner: it works one word at a time, and "
+        "neither TRELLIS's chunks nor recurring spans helped as units.</p>")
 
 p_how = ("<h3>How to read this page</h3>"
          "<p><b>Yield</b> is the number of judged-grammatical new sentences per generation. <b>Cross share</b> is the topic agreement with "
@@ -711,8 +712,26 @@ p8_intro = ("<p>The generators of Table 6 built the two trees once, at the end o
             "sentence\" re-enters every word of a sentence after that sentence. \"When its neighbours change\" re-enters a word only when "
             "its set of neighbours grew. The last rows add recurring two- and three-word spans as units.</p>")
 
-p7 = ("<p>The licence shortens the code at every size on both seeds. The saving shrinks as the stream grows, since more of the pairs a "
-      "held-out sentence needs are already stored. The two trees and the analogy count save about the same.</p>")
+p7 = ("<ul>"
+      "<li><b>Stories.</b> The licence shortens the code at every size on both seeds. The saving shrinks as the stream grows, since more "
+      "of the pairs a held-out sentence needs are already stored. The two trees and the analogy count save about the same.</li>"
+      "<li><b>Chinese characters.</b> The licence saves about 0.4 bits per character from 1,000 characters on, on both seeds. At 4,000 "
+      "the trigram coder with the licence is ahead of TRELLIS's chart coder on one seed and behind on the other.</li>"
+      "<li><b>Chess.</b> An n-gram coder that reads a position in a fixed square order beats every chess coder on this site, with or "
+      "without the licence: by 29 to 31 bits on control with absolute tokens and by 39 to 40 bits on shifted boards with relative "
+      "tokens. Relative tokens with the licence are ahead on both sets at once. The licence helps in every cell; on shifted boards "
+      "with absolute tokens it saves 15 bits, because it carries what was learned about a piece on one square to the next square. "
+      "This is one seed.</li>"
+      "<li><b>The mix.</b> On characters at 1,000 (seed 13) the code length is the same for a weight of 0.5 and 0.75 and within "
+      "0.1 bits from 0.25 to 0.9. A weight estimated from the last tenth of the stream came out at 0.2 and cost 0.13 bits more than "
+      "the half, so the half stays.</li></ul>")
+
+p10 = ("<ul>"
+       "<li><b>The gap to the references widens with data.</b> The references produce fewer new sentences as the stream grows: the swap "
+       "falls from .60 to .45 and the trigram sampler from .41 to .35. The substitution generator stays between .55 and .64.</li>"
+       "<li><b>Generalization does not improve with data either.</b> With an unstored pair required the grammatical share stays near "
+       "60% and is lowest at 16,000 sentences (55%). More data adds stored pairs; it does not make the trees' unseen pairs more often right.</li>"
+       "<li><b>Chart generation was not run past 4,000 sentences</b>; one arm there takes hours, against seconds for these generators.</li></ul>")
 
 p9 = ("<ul>"
       "<li><b>The module reproduces the earlier generator.</b> With the trees built once at the end it gives the same judged share on each "
@@ -738,7 +757,9 @@ p9 = ("<ul>"
 p8 = ("<h3>What follows</h3><ul>"
       "<li><b>For the learner.</b> Its context tree describes occurrences by their windows. The licence that works describes types by "
       "their sets of neighbours, one tree per side, and reads concepts by types. Moving this into the learner is the next step; "
-      "<code>src/trellis2/type_trees.py</code> holds the mechanism.</li>"
+      "<code>src/trellis2/type_trees.py</code> holds the trees and <code>src/trellis2/substitution.py</code> one small learner over one "
+      "memory with three calls: learn an experience, generate one, and code one. It reproduces the generator of Table 8 output for "
+      "output and the characters coder of Table 7 to three decimals. Its hand-set numbers are the n-gram order and the coder's half.</li>"
       "<li><b>For generation.</b> Chart generation draws every word from smoothed distributions and pays for it in unstored pairs. "
       "Substitution on a retrieved analysis keeps what is stored and generalizes only where two readings agree. It has no cut, no "
       "smoothing weight and no topic weight.</li>"
@@ -746,10 +767,95 @@ p8 = ("<h3>What follows</h3><ul>"
       "their groups, is a unit. Using that test to find chunks has not been tried.</li></ul>"
       "<h3>What this does not settle</h3><ul>"
       "<li>Everything here replaces one word. Two or more substitutions, and units longer than a word, are open.</li>"
-      "<li>Generation was run on stories only. Characters were run as a coder only; chess has not been run with these trees.</li>"
+      "<li>Generation was run on stories only. Characters and chess were run as coders only, chess on one seed.</li>"
+      "<li>The n-gram coders for chess are new references as well as carriers of the licence: most of their lead over the site's "
+      "chess coders comes from reading the board in order, and the licence adds 1 to 15 bits.</li>"
       "<li>Agreement errors remain (\"they was happy\"): the trees group singular and plural subjects together.</li>"
       "<li>The coder's half-and-half mix is hand-set.</li>"
       "<li>Rounds 110 and 119 to 123 are judged on fewer seeds where the tables say so.</li></ul>")
+
+# chess coder tables (round 132)
+p_chess_lead = ("<p>The same mix for chess positions, 4,000 positions learned, seed 13 (bits per held-out position). A position is read in a "
+                "fixed square order; absolute tokens name a piece and its square, relative tokens name a piece and its distance from the "
+                "previous piece in that order:</p>")
+CHESS = {}
+for tag in ("control", "shift"):
+    for r in jlines(f"logs/v3-r132-chess-{tag}.log"):
+        if r.get("tag") == tag and r.get("learn") is not None and r.get("tokens"):
+            CHESS[(tag, r["learn"], r["tokens"])] = r
+
+
+def chv(tag, learn, tokens, field):
+    v = CHESS.get((tag, learn, tokens), {}).get(field)
+    return "–" if v is None else f"{v:.1f}"
+
+
+tc = []
+for tokens, tname in (("abs", "absolute"), ("rel", "relative")):
+    for field, nm in (("unigram", "Unigram"), ("bigram", "Bigram"), ("bigram + licence", "Bigram"),
+                      ("trigram", "Trigram"), ("trigram + licence", "Trigram")):
+        if field == "unigram" and False:
+            continue
+        lab = f"{nm}, {tname} tokens" + (", with the licence" if "licence" in field else "")
+        if tokens == "rel" and field == "trigram + licence":
+            lab = f"<b>{lab}</b>"
+        tc.append(row(lab, [f"{chv('control', 4000, tokens, field)} / {chv('shift', 4000, tokens, field)}"]))
+for lab, v in (("Co-occurrence chunks on squares", "108.6 / 205.5"), ("Co-occurrence chunks on shapes", "111.3 / 149.7"),
+               ("TRELLIS, offsets only", "130.7 / 153.6")):
+    tc.append(row(lab, [v]))
+TCHESS = table(["Coder (4,000 positions learned)", "Control / shifted"], tc)
+p_chess_note = ('<p class="small">The last three rows are the chess page\'s numbers for the same learn and test sets; their coders treat '
+                'unseen items a little differently.</p>')
+tcl = []
+for lrn in (1000, 2000, 4000):
+    tcl.append(row(f"{lrn:,}", [chv("control", lrn, "rel", "trigram + licence"), chv("shift", lrn, "rel", "trigram + licence"),
+                                chv("control", lrn, "abs", "bigram + licence"), chv("shift", lrn, "abs", "bigram + licence")]))
+TCHESS2 = ("<p>By positions learned (relative tokens, trigram with the licence; and absolute tokens, bigram with the licence):</p>" +
+           table(["Positions learned", "Relative trigram + licence, control", "Relative trigram + licence, shifted",
+                  "Absolute bigram + licence, control", "Absolute bigram + licence, shifted"], tcl))
+
+# Table 9: with more data
+SC = (500, 1000, 2000, 4000, 8000, 16000)
+S9 = (13, 17)
+
+
+def sc_vals(arm, n, field, small, big):
+    """Per-seed values (seeds 13, 17) of one arm at n sentences."""
+    path = f"logs/v3-{big}-judge-n{n}.log" if n >= 8000 else small.format(n=n)
+    j = judge(path, n)
+    k = key(arm)
+    return [j[(k, sd)][field] for sd in S9 if (k, sd) in j and j[(k, sd)].get(field) is not None]
+
+
+def tr_vals(n, field):
+    if n > 4000:
+        return []
+    return [TR[n][sd][field] for sd in S9 if sd in TR[n] and TR[n][sd].get(field) is not None]
+
+
+SC_ROWS = [("One-pass trees, an unstored pair required", {"nswap": "words", "new": True, "build": "lazy"}, "logs/v3-r129-judge-n{n}.log"),
+           ("One-pass trees, no requirement, votes multiplied",
+            {"nswap": "words", "new": False, "build": "lazy", "vote": "product"}, "logs/v3-r131-judge-n{n}.log"),
+           ("Reference: word stored between the same two neighbours", {"swap": "retrieve"}, "logs/v3-r109-judge-n{n}.log"),
+           ("Reference: trigram sampler", {"ngram": 3}, "logs/v3-r109-judge-n{n}.log"),
+           ("TRELLIS candidate recipe (chart generation)", None, None)]
+
+
+def table9(field, fmt):
+    rows = []
+    for lab, arm, small in SC_ROWS:
+        cells = []
+        for n in SC:
+            v = tr_vals(n, field) if arm is None else sc_vals(arm, n, field, small, "r133")
+            cells.append(fmt(mean(v)) if v else "–")
+        rows.append(row(lab, cells))
+    return table(["Generator (seed mean of 13 and 17)"] + [f"{n:,} sentences" if n == 500 else f"{n:,}" for n in SC], rows)
+
+
+p9_intro = ("<p>The same generators from 500 to 16,000 sentences. Yield is new judged-grammatical sentences per generation; seeds 13 and 17 at "
+            "every size (the first two rows also have seeds 19 and 23 up to 4,000, not used here, so every cell is the same two seeds).</p>")
+T9y = table9("grammatical novel per generation", f2)
+T9g = table9("judged grammatical", pct)
 
 out = (lead + p_how + "<h3>Table 1. Reference generators at 1,000 sentences, 4 seeds</h3>" + T1 + p1 +
        "<h3>Table 2. With more data (seeds 13 / 17)</h3>" + T2 + p2 +
@@ -758,10 +864,12 @@ out = (lead + p_how + "<h3>Table 1. Reference generators at 1,000 sentences, 4 s
        "<h3>Table 5. The generalization step alone</h3>" + p5_intro + T5 + T5v + T5s + p5_defs + p5 +
        "<h3>Table 6. Generating by one licensed substitution</h3>" + p6_intro +
        "<h4>1,000 sentences</h4>" + T6[1000] + "<h4>4,000 sentences</h4>" + T6[4000] + p6_defs + p6 +
-       "<h3>Table 7. The same licence as a coder</h3>" + p7_intro + T7 + p_ch_lead + TCH + p7 +
+       "<h3>Table 7. The same licence as a coder</h3>" + p7_intro + T7 + p_ch_lead + TCH + p_chess_lead + TCHESS + p_chess_note + TCHESS2 + p7 +
        "<h3>Table 8. One-pass trees and longer units</h3>" + p8_intro +
        "<h4>8a. An unstored pair required (every output is new and contains one)</h4>" + T8a +
-       "<h4>8b. No requirement</h4>" + T8b + T8s + p9 + p8)
+       "<h4>8b. No requirement</h4>" + T8b + T8s + p9 +
+       "<h3>Table 9. With more data</h3>" + p9_intro + "<h4>Yield</h4>" + T9y + "<h4>Judged grammatical</h4>" + T9g +
+       p10 + p8)
 with open("docs/site/frag_refs.html", "w", encoding="utf-8") as f:
     f.write(out)
 

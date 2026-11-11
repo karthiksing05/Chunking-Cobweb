@@ -372,6 +372,35 @@ if LIC:
                     ch_[w] = chain
                 side[attr] = (ch_, mem_, {})
 
+            if "second" in LIC:
+                # second order: a word described by the groups its neighbours belong to, not by the
+                # neighbours themselves. In the tree of what follows a word, each follower is named
+                # by the concepts on its own path in the other tree (words grouped by what precedes
+                # them), so two words whose followers differ but fall in the same groups come close.
+                # Rounds: the trees are rebuilt from the previous round's paths ("second2": twice).
+                for _round in range(2 if "second2" in LIC else 1):
+                    new_side = {}
+                    for attr, vec, other in (("R", rvec, "L"), ("L", lvec, "R")):
+                        och = side[other][0]
+                        T_ = _Tree((attr + "b",), seed=seed)
+                        T_.exact_alone = True
+                        lf_ = {}
+                        for w in first:
+                            ids_ = sorted({(other, c) for v in vec[w] for c in och[v][1:-1]} | ({("w", v) for v in vec[w]} if "both" in LIC else set()),
+                                          key=repr)
+                            x_ = {attr + "b": {k: 1.0 / len(ids_) for k in ids_} if ids_ else {"<none>": 1.0}}
+                            lf_[w] = T_.ifit(x_, float(wc_[w]) if "tok" in LIC else 1.0)
+                        ch_, mem_ = {}, defaultdict(set)
+                        for w, nd in lf_.items():
+                            chain = []
+                            while nd is not None:
+                                chain.append(nd.id)
+                                mem_[nd.id].add(w)
+                                nd = nd.parent
+                            ch_[w] = chain
+                        new_side[attr] = (ch_, mem_, {})
+                    side = new_side
+
             def read_side(w, attr, v):
                 ch_, mem_, memo = side[attr]
                 tot = 0.0
