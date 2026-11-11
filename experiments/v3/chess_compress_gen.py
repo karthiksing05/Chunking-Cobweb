@@ -69,7 +69,11 @@ For each top unit of the position's parse (a chunk, or a single piece):
             weights); the route and the existing code are mixed by learned weights, one pair of counts
             for all units. P(symbol | X) backs off from the root along the path (n_X(v) + P(v |
             parent)) / (n_X + 1); with CAUSALD=1 every concept on the path predicts, mixed by learned
-            weights per depth
+            weights per depth; CAUSALD=3 also codes the gap from the context: the partial description
+            {pu} sorted in the context tree, P(gap | each concept on its path) by the stored top units'
+            gp (backed off from the pooled gaps), mixed by learned depth weights and renormalised over
+            the gaps that stay on the board; CAUSALD=4 adds the previous unit's own context path,
+            predicting the gap to the unit after it
 Bits are code bits only: the memory itself (the model) is not charged.
 
 PREQ=<block> (environment) instead codes prequentially: each of the first n_learn
@@ -184,6 +188,17 @@ if CAUSAL and not GAP:
 top_units = []                                       # CAUSAL: (record, "w" token | "c" record id) of every stored top unit
 CTXW, CBODY, DEPTHW = {}, {}, {}                     # CAUSAL: (kc, kx, copy) -> wins per route (existing, causal); per body route; per path depth
 CAUSALD = int(os.environ.get("CAUSALD", 0))          # CAUSAL: 1 = the symbol by a learned mixture over the context path's concepts; 2 = root only (ablation)
+# 3 = 1 plus the gap from the context: the partial description {pu} (all a reader knows of the new unit's
+# description before its anchor) sorted in the context tree, P(gap | each concept on that path) from the stored
+# top units' gp, backed off from the pooled gaps, mixed along the path by learned depth weights;
+# 4 = 3 plus the previous unit's own (full, decoded) context path predicting the gap that follows it
+top_next = []                                        # CAUSALD=4: (record, gap to the next top unit) of every stored top unit
+DEPTHG = {}                                          # CAUSALD>=3: (kc, kx, copy) -> wins per (path, depth) of the gap mixture
+# GAPW=1 (CAUSALD>=3): the gap's experts are the concepts at depths GAP_DEPTHS from the root of each path (a
+# shorter path's leaf standing in for the deeper ones), mixed by Bayesian weights (each expert's probability of
+# the gaps coded so far, uniform prior) instead of win counts
+GAPW = int(os.environ.get("GAPW", 0))
+GAP_DEPTHS = (0, 1, 2, 3, 4, 6, 8, 12, 16, 24)
 single_tops = Counter()
 stored = Counter()                                   # distinct stored chunks (exact pieces and squares): the memory
 rel_key = {}                                         # record id -> its pieces at their offsets from the anchor
@@ -218,6 +233,11 @@ def learn_one(f, top=None):
         if e.token is not None:
             (i,) = tuple(e.span)
             single_tops[psq(e.token, sqs[i])] += 1
+    if CAUSAL and CAUSALD == 4:                      # each stored top unit and the gap to the unit after it
+        order = sorted(r["top"], key=lambda e: min(e.span))
+        for u, v in zip(order, order[1:]):
+            if u.leaf is not None and (u.token is not None or (u.rid is not None and getattr(u, "cleaf", None) is not None)):
+                top_next.append((u, ridx(sqs[min(v.span)]) - ridx(sqs[min(u.span)])))
     if GAP:                                          # the stored top units in reading order, as gaps
         prev = -1
         for e in sorted(r["top"], key=lambda e: min(e.span)):
@@ -315,6 +335,15 @@ class Model:
         self.pool_cum = [0.0]
         for g in range(1, 65):
             self.pool_cum.append(self.pool_cum[-1] + self.gap_pool[g])
+        if CAUSALD >= 3:                                 # gap counts at every concept on each stored top unit's context path
+            self.gcx, self.gvc = {"own": {}, "next": {}}, {}
+            src = [("own", e, int(e.ctx["gp"])) for e, _, _ in top_units]
+            src += [("next", e, g) for e, g in top_next]
+            for which, e, g in src:
+                node, tab = e.leaf, self.gcx[which]
+                while node is not None:
+                    tab.setdefault(node.id, Counter())[g] += 1
+                    node = node.parent
         if GAP_DEBUG:
             self.check_causal()
 
@@ -337,6 +366,46 @@ class Model:
         """P(gap) pooled over all top units, renormalised over the gaps that stay on the board."""
         return -math.log2(self.gap_pool[g] / self.pool_cum[63 - prev])
 
+    def gap_ctx_vec(self, which, node):
+        """CAUSALD>=3: P(gap | context concept) over gaps 1..64 and its cumulative sums, backed off
+        from the pooled gaps along the path: P(g | C) = (n_C(g) + P(g | parent)) / (n_C + 1), the
+        root's parent the pooled distribution (``which``: "own" the unit's own gap, "next" the gap
+        to the unit after it)."""
+        key = (which, node.id)
+        if key not in self.gvc:
+            p0 = self.gap_ctx_vec(which, node.parent)[0] if node.parent is not None else self.gap_pool
+            d = self.gcx[which].get(node.id, {})
+            tot = sum(d.values())
+            p = [0.0] + [(d.get(g, 0) + p0[g]) / (tot + 1.0) for g in range(1, 65)]
+            cum = [0.0]
+            for g in range(1, 65):
+                cum.append(cum[-1] + p[g])
+            self.gvc[key] = (p, cum)
+        return self.gvc[key]
+
+    def ctx_gap_bits(self, paths, g, prev, wins):
+        """CAUSALD>=3: the gap by the learned mixture over every concept on the given context paths
+        (each concept's P(gap | C) renormalised over the gaps that stay on the board)."""
+        for which, path in paths:                        # diagnostic: each capped depth alone
+            for d in GAP_DEPTHS:
+                p, cum = self.gap_ctx_vec(which, path[min(d, len(path) - 1)])
+                ACC[f"gap alone, {which} depth {d}"] += -math.log2(p[g] / cum[63 - prev])
+        if GAPW:                                         # Bayesian weights over the capped depths (always live)
+            ls = {}
+            for which, path in paths:
+                for d in GAP_DEPTHS:
+                    p, cum = self.gap_ctx_vec(which, path[min(d, len(path) - 1)])
+                    ls[(which, d)] = -math.log2(p[g] / cum[63 - prev])
+            return bayes_mix(wins, ls)
+        ls, live = {}, []
+        for which, path in paths:
+            for d, node in enumerate(path):
+                p, cum = self.gap_ctx_vec(which, node)
+                k = (which, d)
+                ls[k] = -math.log2(p[g] / cum[63 - prev])
+                live.append(k)
+        return kt_mix(wins, ls, live)
+
     def check_causal(self):
         """GAP_DEBUG: P(symbol | X) sums to 1 over the alphabet along sampled context paths."""
         alphabet = [("w", t) for t in KINDS] + [("c", c) for c in self.top_c] + [("c", "novel")]
@@ -351,6 +420,18 @@ class Model:
         for prev in (-1, 0, 7, 31, 62):
             s = sum(2.0 ** -self.causal_gap_bits(g, prev) for g in range(1, 64 - prev))
             assert abs(s - 1) < 1e-9, (prev, s)
+            if CAUSALD >= 3:                             # every concept's gap distribution, and their mixture
+                for leaf in leaves + [L.ctx.root]:
+                    path = L.ctx.ancestors(leaf)[::-1]
+                    for which in ("own", "next"):
+                        for node in path:
+                            p, cum = self.gap_ctx_vec(which, node)
+                            s = sum(p[g] / cum[63 - prev] for g in range(1, 64 - prev))
+                            assert abs(s - 1) < 1e-9, (which, node.id, prev, s)
+                    w = Counter({("own", 0): 3, ("next", 1): 1})
+                    s = sum(2.0 ** -self.ctx_gap_bits([("own", path), ("next", path)], g, prev, Counter(w))
+                            for g in range(1, 64 - prev))
+                    assert abs(s - 1) < 1e-9, ("mixture", prev, s)
         print(json.dumps({"CAUSAL_DEBUG ok": [self.kc, self.kx], "alphabet": self.n_sym}), flush=True)
 
     # GAP: relative positions ------------------------------------------------ #
@@ -754,6 +835,19 @@ def kt_mix(wins, ls, live):
     return out
 
 
+def bayes_mix(cum, ls):
+    """-log2 of the Bayesian mixture of experts with code lengths ``ls`` (dict), each weighted by its
+    probability of everything it coded before (``cum``: expert -> past bits, updated after the unit)."""
+    keys = list(ls)
+    m0 = min(cum[k] for k in keys)
+    m1 = min(cum[k] + ls[k] for k in keys)
+    num = sum(2.0 ** (m1 - cum[k] - ls[k]) for k in keys)
+    den = sum(2.0 ** (m0 - cum[k]) for k in keys)
+    for k in keys:
+        cum[k] += ls[k]
+    return m1 - math.log2(num) - (m0 - math.log2(den))
+
+
 def causal_bits(M, e, exp, prev_e, prev, board, copy, memo):
     """CAUSAL: the unit by the causal route: that a unit comes (the top alphabet's non-stop mass),
     its gap from the previous unit (pooled), its symbol from its causal context concept, then (a
@@ -773,6 +867,18 @@ def causal_bits(M, e, exp, prev_e, prev, board, copy, memo):
     path = memo[ck]
     xpath = path[:max(1, len(path) - M.kx)]
     go, gb = -math.log2(M.p_go), M.causal_gap_bits(a - prev, prev)
+    if CAUSALD >= 3:                         # the gap from what is known before the anchor
+        ACC["causal: gaps, pooled"] += gb
+        gk = ("cg", id(prev_e))
+        if gk not in memo:                   # the partial description {pu}: missing attributes are left out
+            x = {}
+            L._facet(x, "pu", L._prev_name(prev_e))
+            memo[gk] = L.ctx.categorize(x)
+        paths = [("own", memo[gk][:max(1, len(memo[gk]) - M.kx)])]
+        if CAUSALD == 4 and M.last_cx is not None:   # the previous unit's own decoded context path
+            paths.append(("next", M.last_cx[:max(1, len(M.last_cx) - M.kx)]))
+        gb = M.ctx_gap_bits(paths, a - prev, prev, DEPTHG.setdefault((M.kc, M.kx, copy), Counter()))
+    M.last_cx = path
 
     def sym_bits(sym):
         if CAUSALD == 2:                     # ablation: the root only (the context tree does no work)
@@ -824,6 +930,8 @@ def code_bits(M, r, copy=False):
     bits = M.stop_bits()
     board, occupied = {}, set()
     prev_e = None                            # CAUSAL: the unit coded just before
+    if CAUSAL:
+        M.last_cx = None                     # CAUSALD=4: that unit's context path
     M.pending = ["stop"]                     # the units this code used, counted once the position is coded
     todo = cover(M, r, copy) if COVER and L.dom.flat else r["top"]
     M.units = [e.span for e in todo]        # TOPC: learning stores these as its analysis
