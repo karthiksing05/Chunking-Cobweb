@@ -73,7 +73,9 @@ For each top unit of the position's parse (a chunk, or a single piece):
             {pu} sorted in the context tree, P(gap | each concept on its path) by the stored top units'
             gp (backed off from the pooled gaps), mixed by learned depth weights and renormalised over
             the gaps that stay on the board; CAUSALD=4 adds the previous unit's own context path,
-            predicting the gap to the unit after it
+            predicting the gap to the unit after it. Learner config "chess_causal_drop" ("sq" or
+            "sq+gp") leaves those attributes out of the causal description (gap counts then come
+            from the stored units' own gaps, anchor counts from their anchor squares)
 Bits are code bits only: the memory itself (the model) is not charged.
 
 PREQ=<block> (environment) instead codes prequentially: each of the first n_learn
@@ -294,7 +296,7 @@ class Model:
             cid = node.id
             self.nodes[cid] = node
             self.top_c[cid] += c
-            sq = (L.records[rid].ctx or {}).get("sq")
+            sq = (L.records[rid].ctx or {}).get("sq") or L.records[rid].memo.get("anchor_sq")   # chess_causal_drop: not in ctx
             if sq:
                 self.anchor.setdefault(cid, Counter())[sq] += c
                 while node is not None:                  # ANCH: anchors counted up the concept's path
@@ -337,7 +339,7 @@ class Model:
             self.pool_cum.append(self.pool_cum[-1] + self.gap_pool[g])
         if CAUSALD >= 3:                                 # gap counts at every concept on each stored top unit's context path
             self.gcx, self.gvc = {"own": {}, "next": {}}, {}
-            src = [("own", e, int(e.ctx["gp"])) for e, _, _ in top_units]
+            src = [("own", e, int(e.ctx["gp"]) if "gp" in e.ctx else e.memo["cprev"][1]) for e, _, _ in top_units]
             src += [("next", e, g) for e, g in top_next]
             for which, e, g in src:
                 node, tab = e.leaf, self.gcx[which]

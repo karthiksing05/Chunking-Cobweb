@@ -106,12 +106,15 @@ class ChessDomain:
     BACK_JUMPS = ("ESE", "SSE", "SSW", "WSW")
 
     def __init__(self, join: str = "anchor", flat: bool = False, ctx: str = "star", absolute: bool = False,
-                 causal: bool = False):
+                 causal: bool = False, causal_drop: Sequence[str] = ()):
         self.join, self.flat, self.ctx, self.absolute, self.causal = join, flat, ctx, absolute, causal
+        # causal_drop (learner config "chess_causal_drop": "sq" or "sq+gp"): attributes left out of the
+        # causal description, so its concepts organise only by what remains (relative geometry, previous unit)
+        self.causal_drop = tuple(causal_drop)
         if flat:
             self.surface_attrs = ("rays", "jumps", "sq", "ext")
         if causal:
-            self.surface_attrs = ("rays", "jumps", "sq", "pu", "gp")
+            self.surface_attrs = tuple(a for a in ("rays", "jumps", "sq", "pu", "gp") if a not in self.causal_drop)
 
     @classmethod
     def causal_star(cls, board, sq) -> dict:
@@ -122,6 +125,13 @@ class ChessDomain:
         return {"rays": {f"{d}:{st[d]}": 1.0 / 4 for d in cls.BACK_RAYS},
                 "jumps": {f"{d}:{st[d]}": 1.0 / 4 for d in cls.BACK_JUMPS},
                 "sq": C.square_name(sq)}
+
+    def causal_x(self, board, sq) -> dict:
+        """causal_star without the dropped attributes."""
+        x = self.causal_star(board, sq)
+        if "sq" in self.causal_drop:
+            del x["sq"]
+        return x
 
     def prepare(self, position: C.Position) -> Experience:
         sqs = sorted(position, key=lambda s: (s[1], s[0]))
@@ -165,7 +175,7 @@ class ChessDomain:
         pos, sqs, _ = exp.data
         sq = sqs[min(ext)]
         if self.causal:
-            return self.causal_star(pos, sq)
+            return self.causal_x(pos, sq)
         st = C.star(pos, sq, frozenset(sqs[i] for i in ext))
         rays = {f"{d}:{st[d]}": 1.0 / 8 for d, _ in C.RAYS}
         jumps = {f"{d}:{st[d]}": 1.0 / 8 for d, _ in C.JUMPS}
@@ -238,7 +248,12 @@ class GraphTrellis(Trellis3):
         causal = kw.pop("chess_causal", False)
         if causal:                              # the own content is not known before the unit: no cc facet
             kw["donate_ctx"] = False
-        self.dom = domain or ChessDomain(join, flat, kw.pop("chess_ctx", "star"), kw.pop("chess_abs", False), causal)
+        drop = kw.pop("chess_causal_drop", None)
+        drop = tuple(drop.split("+")) if drop else ()
+        if drop and (not causal or not set(drop) <= {"sq", "gp"}):
+            raise ValueError("chess_causal_drop: 'sq' or 'sq+gp', with chess_causal")
+        self.dom = domain or ChessDomain(join, flat, kw.pop("chess_ctx", "star"), kw.pop("chess_abs", False), causal,
+                                         drop)
         self.causal = bool(getattr(self.dom, "causal", False))
         self._exp: Optional[Experience] = None
         self.max_size, self.samples = max_size, samples
@@ -272,10 +287,11 @@ class GraphTrellis(Trellis3):
         """The causal context of a unit anchored at ``sq``: the backward half-star on
         ``board``, the square, and (gap not None) the previous unit and the gap from it.
         Learning calls it with the full position, the coder with the decoded board."""
-        x = self.dom.causal_star(board, sq)
+        x = self.dom.causal_x(board, sq)
         if gap is not None:
             self._facet(x, "pu", self._prev_name(prev))
-            x["gp"] = str(gap)
+            if "gp" not in self.dom.causal_drop:
+                x["gp"] = str(gap)
         return x
 
     def _set_prev(self, exp: Experience, elems, top) -> None:
@@ -290,6 +306,8 @@ class GraphTrellis(Trellis3):
             prev = order[k] if k >= 0 else None
             pa = sqs[min(prev.span)][1] * 8 + sqs[min(prev.span)][0] if prev is not None else -1
             e.memo["cprev"] = (prev, sqs[i][1] * 8 + sqs[i][0] - pa)
+            if self.dom.causal_drop:            # the anchor square, for the coder's anchor counts (not described)
+                e.memo["anchor_sq"] = C.square_name(sqs[i])
 
     def _refresh_todo(self, todo, b, recs, first) -> None:
         if self.causal:                         # the previous unit's name follows its concept
