@@ -235,7 +235,12 @@ class CausalCoder:
         if key not in self.paths:
             quiet, self.L._quiet = self.L._quiet, True
             try:
-                self.paths[key] = list(self.L.ctx.categorize({f"l{k + 1}": v for k, v in enumerate(key)}))
+                if getattr(self.L, "nest", False):     # nested suffixes (trellis_causal, r164)
+                    from trellis2.trellis_causal import suffixes
+                    q = suffixes(list(key), self.width)
+                else:
+                    q = {f"l{k + 1}": v for k, v in enumerate(key)}
+                self.paths[key] = list(self.L.ctx.categorize(q))
             finally:
                 self.L._quiet = quiet
         return self.paths[key]
