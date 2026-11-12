@@ -615,6 +615,10 @@ T7 = table(["Generator (1,000 sentences)", "Yield, mean", "Yield by seed (13 / 1
             t7_row("Causal, three-word window, words and chunks, gated", "r161-w3", "r161", _ca("both", "gate")),
             t7_row("<b>Causal, three-word window, words, gated, never a stored sentence</b>", "r161-w3", "r161", _ca("words", "gate", True)),
             t7_row("Causal, three-word window, words and chunks, gated, never a stored sentence", "r161-w3", "r161", _ca("both", "gate", True)),
+            t7_row("<b>Context tree only (no chunks stored), words, gated (round 162)</b>", "r162-nochunk-w2", "r162w2", _ca("words", "gate")),
+            t7_row("Context tree only, words, gated, never a stored sentence", "r162-nochunk-w2", "r162w2", _ca("words", "gate", True)),
+            t7_row("Context tree only, three-word window, words, gated", "r162-nochunk-w3", "r162w3", _ca("words", "gate")),
+            t7_row("Context tree only, three-word window, words, gated, never a stored sentence", "r162-nochunk-w3", "r162w3", _ca("words", "gate", True)),
             t7_row("Reference: retrieved one-word swap", "r155-new", "r155", lambda a: a.get("swap") == "retrieve" and not a.get("new")),
             t7_row("Reference: retrieved one-word swap, never a stored sentence", "r155-new", "r155", lambda a: a.get("swap") == "retrieve" and a.get("new")),
             t7_row("Reference: trigram sampler", "r155-ngram", "r155b", lambda a: a.get("ngram") == 3 and not a.get("new")),
@@ -654,6 +658,11 @@ p7 = ("<ul>"
       "grammatical, against about 66% with two. Never returning a stored sentence, it yields .74 to .79, ahead of the trigram (.71 to .73) "
       "and behind the 4-gram (.83 to .88); without that rule it yields .24 to .25, ahead of the 4-gram's .18 to .21, because it copies "
       "less. Never-stored pairs stay at 1 to 3% of outputs, mostly ungrammatical: context depth buys splicing, as it does for n-grams.</li>"
+      "<li><b>The content hierarchy adds nothing to story generation (round 162).</b> With no chunk stored, so that the learner is "
+      "its context tree alone, causal generation yields .39 to .40 (.64 to .68 never returning a stored sentence), level with the "
+      "full learner, and .22 to .26 (.73 to .77) with a three-word window. Dropping the chunk context as well changes no output. "
+      "The fast licence test agrees: the nearest-4 reading scores .35 / .35 at 1,000 and .37 / .38 at 2,000 without chunks, as "
+      "with them. As on chess (Table 6), what generates and codes is the context hierarchy.</li>"
       "<li><b>Topic.</b> Causal generation ignores the previous sentence (cross share near 0, against .25 to .28 for the chart).</li></ul>")
 
 out = (lead + p_how + "<h3>Table 1. Reference generators at 1,000 sentences, 4 seeds</h3>" + T1 + p1 +
