@@ -1281,6 +1281,8 @@ class Trellis3:
             weights = {key: p for key, p in post.items()}
         elif self.store == "all":
             weights = {key: 1.0 for key in comps}
+        elif self.store == "none":                  # context tree only: no chunk is stored (ablation of the content hierarchy)
+            weights = {}
         else:
             weights = {key: 1.0 for key in chosen}
         # words first, then composites bottom-up: content (so a context can name it), then context
