@@ -605,12 +605,21 @@ T7 = table(["Generator (1,000 sentences)", "Yield, mean", "Yield by seed (13 / 1
             t7_row("<b>Causal, words, nearest-4 licence, median gate (round 159)</b>", "r159-near", "r159", lambda a: a.get("causal") and a.get("near") == 4 and not a.get("q")),
             t7_row("Causal, words, nearest-4 licence, gate at the 10th percentile", "r159-near", "r159", lambda a: a.get("causal") and a.get("near") == 4 and a.get("q") == 0.1),
             t7_row("Causal, words, nearest-4 licence, gate at the 2nd percentile", "r159-near", "r159", lambda a: a.get("causal") and a.get("near") == 4 and a.get("q") == 0.02),
+            t7_row("Causal, nearest-4, specialised one level up, median gate (round 160)", "r160-spec", "r160", lambda a: a.get("spec") == 1 and not a.get("q")),
+            t7_row("Causal, nearest-4, specialised one level up, 10th-percentile gate", "r160-spec", "r160", lambda a: a.get("spec") == 1 and a.get("q") == 0.1),
+            t7_row("Causal, nearest-4, specialised two levels up, 10th-percentile gate", "r160-spec", "r160", lambda a: a.get("spec") == 2),
+            t7_row("Causal, nearest-4, specialised three levels up, 10th-percentile gate", "r160-spec", "r160", lambda a: a.get("spec") == 3),
             t7_row("Causal, words, gated, never a stored sentence (round 155)", "r155-new", "r155", _ca("words", "gate", True)),
             t7_row("Causal, words and chunks, gated, never a stored sentence", "r155-new", "r155", _ca("both", "gate", True)),
+            t7_row("<b>Causal, three-word window, words, gated (round 161)</b>", "r161-w3", "r161", _ca("words", "gate")),
+            t7_row("Causal, three-word window, words and chunks, gated", "r161-w3", "r161", _ca("both", "gate")),
+            t7_row("<b>Causal, three-word window, words, gated, never a stored sentence</b>", "r161-w3", "r161", _ca("words", "gate", True)),
+            t7_row("Causal, three-word window, words and chunks, gated, never a stored sentence", "r161-w3", "r161", _ca("both", "gate", True)),
             t7_row("Reference: retrieved one-word swap", "r155-new", "r155", lambda a: a.get("swap") == "retrieve" and not a.get("new")),
             t7_row("Reference: retrieved one-word swap, never a stored sentence", "r155-new", "r155", lambda a: a.get("swap") == "retrieve" and a.get("new")),
             t7_row("Reference: trigram sampler", "r155-ngram", "r155b", lambda a: a.get("ngram") == 3 and not a.get("new")),
             t7_row("Reference: trigram sampler, never a stored sentence", "r155-ngram", "r155b", lambda a: a.get("ngram") == 3 and a.get("new")),
+            t7_row("Reference: 4-gram sampler (round 161)", "r161-w3-ref", "r161r", lambda a: a.get("ngram") == 4 and not a.get("new")),
             t7_row("Reference: 4-gram sampler, never a stored sentence", "r155-ngram", "r155b", lambda a: a.get("ngram") == 4 and a.get("new"))])
 p7_intro = ("<p>Chart generation builds a sentence top-down from the learner's grammar and fills each position from the chart's "
             "marginal times Cobweb's prediction. Causal generation is the story counterpart of chess's causal context: left to right, "
@@ -629,6 +638,10 @@ p7 = ("<ul>"
       "grammatical, level with new sentences of stored pairs, but they appear in under 1% of outputs; at the 2nd percentile they are "
       "about 35% grammatical in 2 to 3% of outputs. The best of the learner's generalizations are now as good as its reuse; there are "
       "too few of them to move the yield.</li>"
+      "<li><b>Specialising a drawn word raises generalization volume and lowers quality (round 160).</b> Replacing a drawn word with a "
+      "licensed member of its context concept one level up puts a never-stored pair in about 18% of outputs, about 32% of them "
+      "grammatical, but new sentences of stored pairs fall from about 66% to about 54% grammatical; yield stays at .37 to .41. Two "
+      "and three levels up are worse (.30 and .20).</li>"
       "<li><b>Chunks raise grammaticality and lower novelty.</b> With committed chunks as fillers, 73 to 86% of outputs are judged "
       "grammatical, but most are stored sentences, so yield falls.</li>"
       "<li><b>Never returning a stored sentence lifts every generator, and the n-grams most.</b> With the same rule for all, causal "
@@ -636,6 +649,11 @@ p7 = ("<ul>"
       "the 4-gram sampler reaches .83 to .88 by splicing stored sentences where they share three words. Under this rule yield rewards "
       "splicing as much as generalization, so it cannot tell them apart; the column on never-stored pairs is the measure of "
       "generalization, and there every generator here stays near zero or ungrammatical.</li>"
+      "<li><b>A three-word window makes the learner a better splicer, not a better generalizer (round 161).</b> With the learner's "
+      "window widened to three words and each filler drawn given the three words placed, new sentences of stored pairs are 74 to 83% "
+      "grammatical, against about 66% with two. Never returning a stored sentence, it yields .74 to .79, ahead of the trigram (.71 to .73) "
+      "and behind the 4-gram (.83 to .88); without that rule it yields .24 to .25, ahead of the 4-gram's .18 to .21, because it copies "
+      "less. Never-stored pairs stay at 1 to 3% of outputs, mostly ungrammatical: context depth buys splicing, as it does for n-grams.</li>"
       "<li><b>Topic.</b> Causal generation ignores the previous sentence (cross share near 0, against .25 to .28 for the chart).</li></ul>")
 
 out = (lead + p_how + "<h3>Table 1. Reference generators at 1,000 sentences, 4 seeds</h3>" + T1 + p1 +
