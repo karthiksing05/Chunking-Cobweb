@@ -183,7 +183,8 @@ def chart_bits(CG, seen, s):
 CAUSAL = int(os.environ.get("CAUSAL", 0))
 DIAG = int(os.environ.get("DIAG", 0))
 LENGTH = int(os.environ.get("LENGTH", 0))   # code the length from stored lengths (see the chart loop)
-if CAUSAL or DIAG:
+MIX = os.environ.get("MIX")      # JSON learner config of a causal reader (r169; see mix_rows)
+if CAUSAL or DIAG or MIX:
     import random
     import numpy as np
     from trellis2.characters import OPERATORS, token_slots   # diagnostics only: never read by a coder
@@ -292,6 +293,53 @@ class CausalCoder:
                 # and the share of every stored occurrence after the same token that the concept holds
                 self.ACC[f"l1 recall at the path's {name} (sum)"] += l1.get(q, 0.0) / all_q if all_q else 0.0
         return out
+
+
+def mix_rows(CG, LC, train, seen, test, chart_len):
+    """MIX (r169): one left-to-right code per character from two predictions of each next token, both
+    learned: the chart's, P(t_i | t_<i, n) = Z(t_<=i, free rest) / Z(t_<i, free rest), which carries the
+    grammar state (which part of a structure the next token completes), and the causal context tree's
+    (LC, a seq_causal nest learner, Witten-Bell along its sorted path, the end mark excluded since the
+    length is coded first), which carries local context. The length is coded from stored lengths (as
+    LENGTH); each token by a Bayesian mixture over linear blends w * chart + (1 - w) * causal, w in
+    0, .1, .. 1, weighted by each blend's probability of every token coded before (a decoder keeps the
+    same weights). Rows: chart alone, causal alone, the mixture, on the characters the chart codes."""
+    lc = Counter(len(s) for s in train)
+    p_len = lambda m: (lc.get(m, 0) + 0.5) / (len(train) + 0.5 * 64)
+    C = CausalCoder(LC, train, seen, "wb", LC.window)
+    W = [k / 10 for k in range(11)]
+    cum = [0.0] * len(W)
+    tot, n_ok, best = Counter(), 0, Counter()
+    for s, cb in zip(test, chart_len):
+        if cb is None:
+            continue
+        n = len(s)
+        zprev = CG.logZ(CG.inside([None] * n), n)
+        lb = -math.log2(p_len(n))
+        b = Counter({"chart": lb, "causal": lb, "mixture": lb})
+        steps = []
+        for i, t in enumerate(s):
+            zi = CG.logZ(CG.inside(list(s[:i + 1]) + [None] * (n - i - 1)), n)
+            if zi == -math.inf or zprev == -math.inf:
+                steps = None
+                break
+            pch, zprev = math.exp(zi - zprev), zi
+            path = C.path(s, i)
+            v = t if t in seen else NOVEL
+            pc = C.probs(path, v)[-1] / max(1e-12, 1.0 - C.probs(path, EOS)[-1])
+            steps.append((pch, min(pc, 1.0), ESC if v == NOVEL else 0.0))
+        if steps is None:
+            continue
+        for pch, pc, esc in steps:
+            b["chart"] += -math.log2(pch) + esc
+            b["causal"] += -math.log2(pc) + esc
+            b["mixture"] += bayes_mix(cum, [-math.log2(w * pch + (1 - w) * pc) for w in W]) + esc
+        tot.update(b)
+        n_ok += 1
+    out = {k: v / n_ok for k, v in tot.items()} if n_ok else {}
+    out["coded"] = n_ok / len(test)
+    out["best blend (chart weight)"] = W[min(range(len(W)), key=lambda k: cum[k])]
+    return out
 
 
 def ngram_steps(train, order):
@@ -449,10 +497,15 @@ if cfg.pop("seq_causal", False):          # the learner's context tree holds cau
     L = CausalTrellis(seed=seed, **cfg)
 else:
     L = Trellis3(seed=seed, **cfg)
+if MIX:                                  # the causal reader, learned on the same stream (r169)
+    from trellis2.trellis_causal import CausalTrellis
+    LC = CausalTrellis(seed=seed, **json.loads(MIX))
 rows, done, t0 = [], 0, time.time()
 for n in checkpoints:
     for c in chars[done:n]:
         L.learn(c.tokens)
+        if MIX:
+            LC.learn(c.tokens)
     done = n
     train = [c.tokens for c in chars[:n]]
     seen = {t for s in train for t in s}
@@ -487,6 +540,10 @@ for n in checkpoints:
                   b + zn[len(s)] / LN2 - math.log2(p_len(len(s))) for s, b in zip(test, bs)]
             okl = [b for b in bl if b is not None]
             row[f"trellis {k} + stored lengths"] = mean(okl) if okl else None
+            if MIX and k == 0:
+                t2 = time.time()
+                row["mix"] = mix_rows(CG, LC, train, seen, test, bl)
+                row["mix"]["s"] = round(time.time() - t2)
         if k == 0 and (CAUSAL or DIAG):                        # the first chart is the one mixed and diagnosed
             CG0, bs0 = CG, bs
     if CAUSAL:
