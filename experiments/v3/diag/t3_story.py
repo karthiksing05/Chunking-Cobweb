@@ -978,6 +978,56 @@ for ai, arm in enumerate(arms):
                 if done and 3 <= len(out) <= 8 and not (new_ and tuple(out) in seen):
                     return out
             return None
+
+        blend_ = arm.pop("blend", None)    # r170: each word from w * chart + (1 - w) * context tree (as characters, r169)
+        if blend_ is not None:
+            # The chart's P(w at i | placed words, length n) (its posterior at i with the rest free, as _fill_chart)
+            # carries the grammar state; the context tree's causal prediction (go on, or end at the last place)
+            # the local context. n is drawn from the stored sentences' lengths (3..8). The gate applies to the blend.
+            import numpy as _np
+            CGb = ChartGen(L, **(chart or {}))
+            _lens = [len(s) for s in seen if 3 <= len(s) <= 8]
+
+            def _norm(d):
+                t_ = sum(d.values())
+                return {k: x / t_ for k, x in d.items()} if t_ > 0 else {}
+
+            def _pchart(out, n, i):
+                toks = list(out) + [None] * (n - len(out))
+                mu = CGb._marginal(toks, [t is None for t in toks], None, CGb.start, i)
+                if mu is None:
+                    return {}
+                pc = defaultdict(float)
+                for k in _np.nonzero(mu > mu.max() * 1e-6)[0]:
+                    c = CGb.emit.get(int(k))
+                    if c:
+                        tot = sum(c.values())
+                        for w, x in c.items():
+                            pc[w] += mu[k] * x / tot
+                return _norm(pc)
+
+            def gen(p, _rng=g_rng):
+                for _ in range(50):
+                    n = _rng.choice(_lens)
+                    out = []
+                    for i in range(n):
+                        t_ = [T3BOS, T3BOS] + out
+                        vs, ws = _fills(t_[-2], t_[-1])
+                        last = i == n - 1
+                        pk = _norm({v[1]: x for (v, d), x in zip(vs, ws) if v[0] == "w" and d == last})
+                        pc = _pchart(out, n, i)
+                        cand = {w: blend_ * pc.get(w, 0.0) + (1 - blend_) * pk.get(w, 0.0) for w in set(pc) | set(pk)}
+                        cand = {w: x for w, x in cand.items() if x > 0 and _ok(t_[-1], w)}
+                        if not cand:
+                            break
+                        words, wts = zip(*cand.items())
+                        out.append(_rng.choices(words, weights=wts)[0])
+                    if len(out) == n and not (new_ and tuple(out) in seen):
+                        return out
+                return None
+            arm["blend"] = blend_
+            if chart:
+                arm["chart"] = chart
         arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"new": True} if new_ else {}), **({"q": q_} if q_ != 0.5 else {}), **({"near": near_} if near_ else {}), **({"spec": spec_} if spec_ else {})})
     elif chart is not None:
         CG = ChartGen(L, **chart)
