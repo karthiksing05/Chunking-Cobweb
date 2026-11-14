@@ -497,14 +497,16 @@ if cfg.pop("seq_causal", False):          # the learner's context tree holds cau
     L = CausalTrellis(seed=seed, **cfg)
 else:
     L = Trellis3(seed=seed, **cfg)
-if MIX:                                  # the causal reader, learned on the same stream (r169)
+if MIX == "self":                        # one learner (r171): the chart and the causal reader read the same seq_causal learner
+    LC = L
+elif MIX:                                # the causal reader, learned on the same stream (r169)
     from trellis2.trellis_causal import CausalTrellis
     LC = CausalTrellis(seed=seed, **json.loads(MIX))
 rows, done, t0 = [], 0, time.time()
 for n in checkpoints:
     for c in chars[done:n]:
         L.learn(c.tokens)
-        if MIX:
+        if MIX and LC is not L:
             LC.learn(c.tokens)
     done = n
     train = [c.tokens for c in chars[:n]]
