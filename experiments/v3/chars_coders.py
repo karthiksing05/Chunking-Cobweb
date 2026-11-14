@@ -295,6 +295,30 @@ class CausalCoder:
         return out
 
 
+MIXREAD = os.environ.get("MIXREAD")   # "fills" (r173): the causal reader is Cobweb's prediction of the missing filler
+_fp = {}
+
+
+def fills_prob(LC, s, i, v, V, eps=0.01):
+    """MIXREAD=fills (r173): P(next word = v | left context) as Cobweb predicts a missing attribute from a
+    partial description: the learner's _gap_fills over its stored occurrences given only the left suffixes
+    (what a reader has decoded), marginalizing over everything it cannot see (own content, right side).
+    Word fillers, normalized; a uniform floor eps over the V seen tokens + escape. The same call story
+    generation draws from (t3_story causal), so one reading of one learner serves both domains."""
+    from trellis2.trellis_causal import suffixes
+    left = tuple(s[i - k] if i - k >= 0 else BOS for k in range(1, LC.window + 1))
+    if left not in _fp:
+        quiet, LC._quiet = LC._quiet, True
+        try:
+            m = LC._gap_fills(suffixes(list(left), LC.window))
+        finally:
+            LC._quiet = quiet
+        d = {f[1]: x for f, x in m.items() if f[0] == "w" and x > 0}
+        z = sum(d.values())
+        _fp[left] = {k: x / z for k, x in d.items()} if z > 0 else {}
+    return (1 - eps) * _fp[left].get(v, 0.0) + eps / V
+
+
 def mix_rows(CG, LC, train, seen, test, chart_len):
     """MIX (r169): one left-to-right code per character from two predictions of each next token, both
     learned: the chart's, P(t_i | t_<i, n) = Z(t_<=i, free rest) / Z(t_<i, free rest), which carries the
@@ -304,6 +328,7 @@ def mix_rows(CG, LC, train, seen, test, chart_len):
     LENGTH); each token by a Bayesian mixture over linear blends w * chart + (1 - w) * causal, w in
     0, .1, .. 1, weighted by each blend's probability of every token coded before (a decoder keeps the
     same weights). Rows: chart alone, causal alone, the mixture, on the characters the chart codes."""
+    _fp.clear()
     lc = Counter(len(s) for s in train)
     p_len = lambda m: (lc.get(m, 0) + 0.5) / (len(train) + 0.5 * 64)
     C = CausalCoder(LC, train, seen, "wb", LC.window)
@@ -324,9 +349,12 @@ def mix_rows(CG, LC, train, seen, test, chart_len):
                 steps = None
                 break
             pch, zprev = math.exp(zi - zprev), zi
-            path = C.path(s, i)
             v = t if t in seen else NOVEL
-            pc = C.probs(path, v)[-1] / max(1e-12, 1.0 - C.probs(path, EOS)[-1])
+            if MIXREAD == "fills":
+                pc = fills_prob(LC, s, i, v, len(seen) + 1)
+            else:
+                path = C.path(s, i)
+                pc = C.probs(path, v)[-1] / max(1e-12, 1.0 - C.probs(path, EOS)[-1])
             steps.append((pch, min(pc, 1.0), ESC if v == NOVEL else 0.0))
         if steps is None:
             continue
