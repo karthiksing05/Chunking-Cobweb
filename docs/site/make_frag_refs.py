@@ -641,6 +641,10 @@ T7 = table(["Generator (1,000 sentences)", "Yield, mean", "Yield by seed (13 / 1
             t7_row("Context tree only, words, gated, never a stored sentence", "r162-nochunk-w2", "r162w2", _ca("words", "gate", True)),
             t7_row("Context tree only, three-word window, words, gated", "r162-nochunk-w3", "r162w3", _ca("words", "gate")),
             t7_row("Context tree only, three-word window, words, gated, never a stored sentence", "r162-nochunk-w3", "r162w3", _ca("words", "gate", True)),
+            t7_row("<b>Causal, length drawn from stored lengths, words, gated (round 170)</b>", "r170-blend", "r170", lambda a: a.get("blend") == 0),
+            t7_row("Length drawn, .3 chart + .7 context tree per word", "r170-blend", "r170", lambda a: a.get("blend") == 0.3),
+            t7_row("Length drawn, .5 chart + .5 context tree per word", "r170-blend", "r170", lambda a: a.get("blend") == 0.5),
+            t7_row("Length drawn, chart only, left to right", "r170-blend", "r170", lambda a: a.get("blend") == 1),
             t7_row("Reference: retrieved one-word swap", "r155-new", "r155", lambda a: a.get("swap") == "retrieve" and not a.get("new")),
             t7_row("Reference: retrieved one-word swap, never a stored sentence", "r155-new", "r155", lambda a: a.get("swap") == "retrieve" and a.get("new")),
             t7_row("Reference: trigram sampler", "r155-ngram", "r155b", lambda a: a.get("ngram") == 3 and not a.get("new")),
@@ -685,6 +689,13 @@ p7 = ("<ul>"
       "full learner, and .22 to .26 (.73 to .77) with a three-word window. Dropping the chunk context as well changes no output. "
       "The fast licence test agrees: the nearest-4 reading scores .35 / .35 at 1,000 and .37 / .38 at 2,000 without chunks, as "
       "with them. As on chess (Table 6), what generates and codes is the context hierarchy.</li>"
+      "<li><b>Mixing the chart into story generation hurts (round 170).</b> As for characters (Table 6b), each word is drawn from "
+      "w times the chart's posterior given the words placed and a length drawn from stored lengths, plus 1 - w times the context "
+      "tree's causal prediction. With w = 0 the yield is .39 to .44, the best gated causal arm so far; with w = .3, .5 and 1 it falls "
+      "to .37 to .39, .33 to .37 and .26 to .28. The chart's share of sentences with a never-stored pair rises from 5 to 10% to 43 to "
+      "48%, and only 10 to 27% of those are grammatical. Drawing the length up front makes 86 to 88% of outputs new, but some end "
+      "mid-phrase, so new sentences of stored pairs fall to about 50% grammatical. The chart's grammar state pays on characters, "
+      "whose structure is a tree the chart parses exactly; on stories it adds unlicensed pairs.</li>"
       "<li><b>Topic.</b> Causal generation ignores the previous sentence (cross share near 0, against .25 to .28 for the chart).</li></ul>")
 
 out = (lead + p_how + "<h3>Table 1. Reference generators at 1,000 sentences, 4 seeds</h3>" + T1 + p1 +
