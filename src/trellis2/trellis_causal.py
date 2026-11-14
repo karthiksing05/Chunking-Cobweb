@@ -14,12 +14,17 @@ occurrences that follow one token over many subtrees (at the sorted leaf 93% sha
 token but hold only 42% of its occurrences), so the tree's back-off is not nested the way a
 reader's knowledge is. Suffix values let category utility group by the last token first.
 
+right=True (r172, with nest) adds the right context as nested prefixes (r1, "r1 r2", ...) and keeps
+the own-content facet: the learner is two-sided again, so the chart reads both sides (r171 found
+the chart on a left-only learner ~3.5 bits/char worse), while a causal reader sorts only the
+left suffixes into the same tree (a partial description). One learner for both codes.
+
 Used by experiments/v3/chars_coders.py with the learner config "seq_causal": true (off by
 default). Kept out of trellis3.py so the base learner is untouched.
 """
 from __future__ import annotations
 
-from .trellis3 import BOS, Trellis3
+from .trellis3 import BOS, EOS, Trellis3
 
 
 def suffixes(left, window):
@@ -27,10 +32,18 @@ def suffixes(left, window):
     return {("l1" if k == 1 else f"l1{k}"): " ".join(reversed(left[:k])) for k in range(1, window + 1)}
 
 
+def prefixes(right, window):
+    """{r1: t1, r12: "t1 t2", ...}: the nested prefixes of the right context (right[0] = r1)."""
+    return {("r1" if k == 1 else f"r1{k}"): " ".join(right[:k]) for k in range(1, window + 1)}
+
+
 class CausalTrellis(Trellis3):
-    def __init__(self, nest: bool = False, **kw):
-        self.nest = nest
-        kw["donate_ctx"] = False                 # the own content is not known before the unit
+    def __init__(self, nest: bool = False, right: bool = False, **kw):
+        self.nest, self.right = nest, right
+        if right and not nest:
+            raise ValueError("seq_causal right: needs nest")
+        if not right:
+            kw["donate_ctx"] = False             # the own content is not known before the unit
         super().__init__(**kw)
         if self.boundary != "marker" or self.window_names or self.neighbour_types or \
                 self.neighbour_concepts or self.neighbour_chunks or self.relational:
@@ -38,11 +51,17 @@ class CausalTrellis(Trellis3):
 
     def _surface_names(self, window: int) -> tuple:
         if self.nest:
-            return tuple("l1" if k == 1 else f"l1{k}" for k in range(1, window + 1))
+            names = tuple("l1" if k == 1 else f"l1{k}" for k in range(1, window + 1))
+            if self.right:
+                names += tuple("r1" if k == 1 else f"r1{k}" for k in range(1, window + 1))
+            return names
         return tuple(f"l{k}" for k in range(window, 0, -1))
 
     def _surface(self, tokens, i, j) -> dict:
         left = [tokens[i - k] if i - k >= 0 else BOS for k in range(1, self.window + 1)]
         if self.nest:
-            return suffixes(left, self.window)
+            x = suffixes(left, self.window)
+            if self.right:
+                x.update(prefixes([tokens[j + k] if j + k < len(tokens) else EOS for k in range(self.window)], self.window))
+            return x
         return {f"l{k}": left[k - 1] for k in range(1, self.window + 1)}
