@@ -2650,8 +2650,33 @@ class Trellis3:
         self._type_licence = (key, out)
         return out
 
+    def _type_index(self, attrs: tuple):
+        """For _gap_fills(backoff="types"): per context concept, the distinct fillers whose
+        occurrence had each value of ``attrs`` ({node: {(a, v): set}}), and per attribute the
+        sum of those set sizes ({node: {a: n}}). Cached until memory changes."""
+        key = (attrs, len(self.records), self.stats.get("experiences", 0))
+        got = self.__dict__.get("_tix")
+        if got is not None and got[0] == key:
+            return got[1]
+        sets: Dict[int, Dict[tuple, set]] = {}
+        for e in self.records:
+            if e.leaf is None:
+                continue
+            for which, attr, value, _ in e.pas:
+                if which == "ctx" and attr == FILL:
+                    vals = [(a, e.ctx.get(a)) for a in attrs if a in e.ctx]
+                    nd = e.leaf
+                    while nd is not None:
+                        d = sets.setdefault(nd.id, {})
+                        for av in vals:
+                            d.setdefault(av, set()).add(value)
+                        nd = nd.parent
+        tot = {n: {a: sum(len(s) for (a2, _), s in d.items() if a2 == a) for a in attrs} for n, d in sets.items()}
+        self._tix = (key, (sets, tot))
+        return self._tix[1]
+
     def _gap_fills(self, q: dict, beta: float = 1.0, nbq: Optional[Dict[int, dict]] = None,
-                   gamma: float = 1.0) -> Dict[tuple, float]:
+                   gamma: float = 1.0, backoff: str = "tokens") -> Dict[tuple, float]:
         """P(filler | surroundings q) over the committed instances: proportional to
         prod over q's attributes of P(value | the instance's context leaf), each
         estimated along the leaf's path with hierarchical Dirichlet back-off
@@ -2660,7 +2685,11 @@ class Trellis3:
         unseen combinations borrow from the concepts above its leaf.
         gamma (r177): a filler's mass is its mean instance likelihood times its weight
         to the power gamma; 1 is the token sum (the default), 0 reads by types (each
-        filler by how typical q is of its own occurrences, its frequency left out)."""
+        filler by how typical q is of its own occurrences, its frequency left out).
+        backoff "types" (r178, Kneser-Ney's principle): a concept backs off to its parent's
+        TYPE distribution, P_T(v | C) = (t_C(v) + beta P_T(v | parent)) / (t_C + beta), t_C(v) the
+        number of distinct fillers under C whose occurrence had value v (as type_licence reads
+        the tree); the concept's own token counts are kept."""
         root = self.ctx.root
         sizes = {a: len(root.av.get(a, {})) + 1 for a in q}
         memo: Dict[int, Dict[str, float]] = {}
@@ -2672,14 +2701,30 @@ class Trellis3:
                 out = {a: (node.av.get(a, {}).get(v, 0.0) + self.alpha) / (node.count + self.alpha * sizes[a])
                        for a, v in q.items()}
             else:
-                up = probs(node.parent)
+                up = probs(node.parent) if backoff != "types" else tprobs(node.parent)
                 out = {a: (node.av.get(a, {}).get(v, 0.0) + beta * up[a]) / (node.count + beta)
                        for a, v in q.items()}
             memo[node.id] = out
             return out
 
+        tmemo: Dict[int, Dict[str, float]] = {}
+        if backoff == "types":
+            tix = self._type_index(tuple(sorted(q)))
+
+        def tprobs(node) -> Dict[str, float]:
+            if node.id not in tmemo:
+                t, tt = tix[0].get(node.id, {}), tix[1].get(node.id, {})
+                if node.parent is None:
+                    tmemo[node.id] = {a: (len(t.get((a, v), ())) + self.alpha) / (tt.get(a, 0) + self.alpha * sizes[a])
+                                      for a, v in q.items()}
+                else:
+                    up = tprobs(node.parent)
+                    tmemo[node.id] = {a: (len(t.get((a, v), ())) + beta * up[a]) / (tt.get(a, 0) + beta)
+                                      for a, v in q.items()}
+            return tmemo[node.id]
+
         cache = self.__dict__.setdefault("_gap_cache", {})
-        key = (tuple(sorted(q.items())), repr(nbq), len(self.records), self.stats.get("experiences", 0), beta, gamma)
+        key = (tuple(sorted(q.items())), repr(nbq), len(self.records), self.stats.get("experiences", 0), beta, gamma, backoff)
         if key in cache:
             return cache[key]
         if len(cache) > 256:

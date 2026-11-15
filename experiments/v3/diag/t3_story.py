@@ -547,10 +547,12 @@ for s, fol in train:
     L.learn(s, follows=fol)
     EXP.append((list(s), a0, len(L.records)))
 learn_s = time.time() - t0
-if os.environ.get("FILL_GAMMA"):               # r177: read Cobweb's fills by types (0) .. tokens (1, default); test-time only
-    import functools
-    L._gap_fills = functools.partial(L._gap_fills, gamma=float(os.environ["FILL_GAMMA"]))
-    print(json.dumps({"fill gamma": float(os.environ["FILL_GAMMA"])}), flush=True)
+if os.environ.get("FILL_GAMMA") or os.environ.get("FILL_BACKOFF"):   # test-time reads of Cobweb's fills
+    import functools                           # r177 FILL_GAMMA: fillers by types (0) .. tokens (1); r178 FILL_BACKOFF=types
+    _fk = {**({"gamma": float(os.environ["FILL_GAMMA"])} if os.environ.get("FILL_GAMMA") else {}),
+           **({"backoff": os.environ["FILL_BACKOFF"]} if os.environ.get("FILL_BACKOFF") else {})}
+    L._gap_fills = functools.partial(L._gap_fills, **_fk)
+    print(json.dumps({"fill read": _fk}), flush=True)
 
 
 if os.environ.get("STORY_BOUND"):             # r177 pre-test: where held-out unstored bigrams fall in the learner's parse
