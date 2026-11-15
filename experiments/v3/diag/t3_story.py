@@ -947,6 +947,26 @@ for ai, arm in enumerate(arms):
             _st_ = set(getattr(L, "_pair_counts", {}))
             _vals_ = sorted(float(_M_[_ix_[a], _ix_[b]]) for a, b in _st_ if a in _ix_ and b in _ix_)
             _med_ = _vals_[min(len(_vals_) - 1, int(len(_vals_) * q_))] if _vals_ else 0.0   # q_: the quantile of stored pairs (median by default)
+        if esc_ == "gated2":               # r180: the same type licence over pairs two apart (a _ b), read off the same tree
+            _pc0_ = L._pair_counts
+            _sk_ = {}
+            for _s_, _ in train:
+                for ab in zip(_s_, _s_[2:]):
+                    _sk_[ab] = _sk_.get(ab, 0) + 1
+            L._pair_counts = _sk_
+            L.__dict__.pop("_type_licence", None)
+            _w2_, _ix2_, _M2_ = L.type_licence(near=near_)
+            L._pair_counts = _pc0_
+            L.__dict__.pop("_type_licence", None)
+            L.type_licence(near=near_)
+            _st2_ = set(_sk_)
+            _v2_ = sorted(float(_M2_[_ix2_[a], _ix2_[b]]) for a, b in _st2_ if a in _ix2_ and b in _ix2_)
+            _med2_ = _v2_[min(len(_v2_) - 1, int(len(_v2_) * q_))] if _v2_ else 0.0
+
+        def _ok2(l2, w):
+            if esc_ != "gated2" or l2 == T3BOS or (l2, w) in _st2_:
+                return True
+            return l2 in _ix2_ and w in _ix2_ and float(_M2_[_ix2_[l2], _ix2_[w]]) >= _med2_ > 0
 
         def _ok(l1, w):
             if not pair_ or l1 == T3BOS or (l1, w) in _st_:
@@ -974,7 +994,7 @@ for ai, arm in enumerate(arms):
                     d_, c_ = len(succ), sum(succ.values())
                     row = _M_[_ix_[l1]]
                     nov = [(w, float(row[_ix_[w]])) for w in _w_ if w not in succ and w not in (T3BOS, T3EOS)
-                           and float(row[_ix_[w]]) > 0 and (esc_ != "gated" or _ok(l1, w))]
+                           and float(row[_ix_[w]]) > 0 and (esc_ == "licence" or (_ok(l1, w) and _ok2(l2, w)))]
                     zs, zn = sum(ws), sum(m for _, m in nov)
                     if zs > 0 and zn > 0 and d_ > 0:
                         e_mass = d_ / (d_ + c_)
