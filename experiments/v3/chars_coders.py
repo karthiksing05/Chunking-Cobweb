@@ -299,7 +299,7 @@ MIXREAD = os.environ.get("MIXREAD")   # "fills" (r173): the causal reader is Cob
 _fp = {}
 
 
-def fills_prob(LC, s, i, v, V, eps=0.01):
+def fills_prob(LC, s, i, v, V, eps=0.01, only=None):
     """MIXREAD=fills (r173): P(next word = v | left context) as Cobweb predicts a missing attribute from a
     partial description: the learner's _gap_fills over its stored occurrences given only the left suffixes
     (what a reader has decoded), marginalizing over everything it cannot see (own content, right side).
@@ -307,16 +307,21 @@ def fills_prob(LC, s, i, v, V, eps=0.01):
     generation draws from (t3_story causal), so one reading of one learner serves both domains."""
     from trellis2.trellis_causal import suffixes
     left = tuple(s[i - k] if i - k >= 0 else BOS for k in range(1, LC.window + 1))
-    if left not in _fp:
+    key = (left, only)
+    if key not in _fp:
         quiet, LC._quiet = LC._quiet, True
+        q = suffixes(list(left), LC.window)
+        if only is not None:               # r176: one suffix depth alone (nested suffixes are redundant evidence)
+            a = "l1" if only == 1 else f"l1{only}"
+            q = {a: q[a]}
         try:
-            m = LC._gap_fills(suffixes(list(left), LC.window))
+            m = LC._gap_fills(q)
         finally:
             LC._quiet = quiet
         d = {f[1]: x for f, x in m.items() if f[0] == "w" and x > 0}
         z = sum(d.values())
-        _fp[left] = {k: x / z for k, x in d.items()} if z > 0 else {}
-    return (1 - eps) * _fp[left].get(v, 0.0) + eps / V
+        _fp[key] = {k: x / z for k, x in d.items()} if z > 0 else {}
+    return (1 - eps) * _fp[key].get(v, 0.0) + eps / V
 
 
 def mix_rows(CG, LC, train, seen, test, chart_len):
@@ -329,6 +334,7 @@ def mix_rows(CG, LC, train, seen, test, chart_len):
     0, .1, .. 1, weighted by each blend's probability of every token coded before (a decoder keeps the
     same weights). Rows: chart alone, causal alone, the mixture, on the characters the chart codes."""
     _fp.clear()
+    cumd = [0.0] * LC.window if MIXREAD == "depths" else None
     lc = Counter(len(s) for s in train)
     p_len = lambda m: (lc.get(m, 0) + 0.5) / (len(train) + 0.5 * 64)
     C = CausalCoder(LC, train, seen, "wb", LC.window)
@@ -352,6 +358,8 @@ def mix_rows(CG, LC, train, seen, test, chart_len):
             v = t if t in seen else NOVEL
             if MIXREAD == "fills":
                 pc = fills_prob(LC, s, i, v, len(seen) + 1)
+            elif MIXREAD == "depths":            # r176: each suffix depth read alone, Bayesian mixture over depths
+                pc = 2.0 ** -bayes_mix(cumd, [-math.log2(fills_prob(LC, s, i, v, len(seen) + 1, only=k)) for k in range(1, LC.window + 1)])
             else:
                 path = C.path(s, i)
                 pc = C.probs(path, v)[-1] / max(1e-12, 1.0 - C.probs(path, EOS)[-1])
