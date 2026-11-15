@@ -38,8 +38,8 @@ def prefixes(right, window):
 
 
 class CausalTrellis(Trellis3):
-    def __init__(self, nest: bool = False, right: bool = False, **kw):
-        self.nest, self.right = nest, right
+    def __init__(self, nest: bool = False, right: bool = False, right_window: int = 0, **kw):
+        self.nest, self.right, self.right_window = nest, right, right_window   # right_window (r175): right prefixes kept (0 = window)
         if right and not nest:
             raise ValueError("seq_causal right: needs nest")
         if not right:
@@ -53,7 +53,7 @@ class CausalTrellis(Trellis3):
         if self.nest:
             names = tuple("l1" if k == 1 else f"l1{k}" for k in range(1, window + 1))
             if self.right:
-                names += tuple("r1" if k == 1 else f"r1{k}" for k in range(1, window + 1))
+                names += tuple("r1" if k == 1 else f"r1{k}" for k in range(1, (self.right_window or window) + 1))
             return names
         return tuple(f"l{k}" for k in range(window, 0, -1))
 
@@ -62,6 +62,7 @@ class CausalTrellis(Trellis3):
         if self.nest:
             x = suffixes(left, self.window)
             if self.right:
-                x.update(prefixes([tokens[j + k] if j + k < len(tokens) else EOS for k in range(self.window)], self.window))
+                rw = self.right_window or self.window
+                x.update(prefixes([tokens[j + k] if j + k < len(tokens) else EOS for k in range(rw)], rw))
             return x
         return {f"l{k}": left[k - 1] for k in range(1, self.window + 1)}
