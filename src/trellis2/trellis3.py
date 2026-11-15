@@ -2650,13 +2650,17 @@ class Trellis3:
         self._type_licence = (key, out)
         return out
 
-    def _gap_fills(self, q: dict, beta: float = 1.0, nbq: Optional[Dict[int, dict]] = None) -> Dict[tuple, float]:
+    def _gap_fills(self, q: dict, beta: float = 1.0, nbq: Optional[Dict[int, dict]] = None,
+                   gamma: float = 1.0) -> Dict[tuple, float]:
         """P(filler | surroundings q) over the committed instances: proportional to
         prod over q's attributes of P(value | the instance's context leaf), each
         estimated along the leaf's path with hierarchical Dirichlet back-off
         P(v | C) = (n_C(v) + beta P(v | parent)) / (n_C + beta) from a Laplace root,
         so a chunk is scored by how probably it stands in these surroundings and
-        unseen combinations borrow from the concepts above its leaf."""
+        unseen combinations borrow from the concepts above its leaf.
+        gamma (r177): a filler's mass is its mean instance likelihood times its weight
+        to the power gamma; 1 is the token sum (the default), 0 reads by types (each
+        filler by how typical q is of its own occurrences, its frequency left out)."""
         root = self.ctx.root
         sizes = {a: len(root.av.get(a, {})) + 1 for a in q}
         memo: Dict[int, Dict[str, float]] = {}
@@ -2675,7 +2679,7 @@ class Trellis3:
             return out
 
         cache = self.__dict__.setdefault("_gap_cache", {})
-        key = (tuple(sorted(q.items())), repr(nbq), len(self.records), self.stats.get("experiences", 0), beta)
+        key = (tuple(sorted(q.items())), repr(nbq), len(self.records), self.stats.get("experiences", 0), beta, gamma)
         if key in cache:
             return cache[key]
         if len(cache) > 256:
@@ -2696,6 +2700,7 @@ class Trellis3:
 
         top = max(nbq) if nbq else 0
         mass: Dict[tuple, float] = {}
+        wt: Dict[tuple, float] = {}
         for e in self.records:
             if e.leaf is None:
                 continue
@@ -2706,6 +2711,9 @@ class Trellis3:
                         for a, bag in nbq[min(e.span[1] - e.span[0], top)].items():
                             lp += sum(p * math.log(max(nprob(e.leaf, a, v), 1e-300)) for v, p in bag.items())
                     mass[value] = mass.get(value, 0.0) + w * math.exp(lp)
+                    wt[value] = wt.get(value, 0.0) + w
+        if gamma != 1.0:
+            mass = {v: m / wt[v] * wt[v] ** gamma for v, m in mass.items() if wt[v] > 0}
         cache[key] = mass
         return mass
 

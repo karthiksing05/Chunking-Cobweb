@@ -547,6 +547,10 @@ for s, fol in train:
     L.learn(s, follows=fol)
     EXP.append((list(s), a0, len(L.records)))
 learn_s = time.time() - t0
+if os.environ.get("FILL_GAMMA"):               # r177: read Cobweb's fills by types (0) .. tokens (1, default); test-time only
+    import functools
+    L._gap_fills = functools.partial(L._gap_fills, gamma=float(os.environ["FILL_GAMMA"]))
+    print(json.dumps({"fill gamma": float(os.environ["FILL_GAMMA"])}), flush=True)
 
 
 if LIC_SET:                                    # the learner's licence: Cobweb's prediction from one neighbour
