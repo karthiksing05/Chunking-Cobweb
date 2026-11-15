@@ -553,6 +553,27 @@ if os.environ.get("FILL_GAMMA"):               # r177: read Cobweb's fills by ty
     print(json.dumps({"fill gamma": float(os.environ["FILL_GAMMA"])}), flush=True)
 
 
+if os.environ.get("STORY_BOUND"):             # r177 pre-test: where held-out unstored bigrams fall in the learner's parse
+    # Each adjacent pair (t_i, t_i+1) of a held-out sentence is joined by the one split of the parse at i+1;
+    # its children's sizes say whether the pair is word+word (inside a phrase) or joins larger units
+    # (a phrase junction). Phrase-boundary recombination can reach an unstored pair only at a junction.
+    L._quiet = True
+    ref = random.Random(seed + 21).sample(held, min(300, len(held)))
+    tab = {True: Counter(), False: Counter()}
+    for s in ref:
+        if len(s) < 2:
+            continue
+        r = L.parse(list(s))
+        for (i_, k_, j_) in r["chosen"]:
+            pair = (s[k_ - 1], s[k_])
+            cls = "word+word" if (k_ - i_ == 1 and j_ - k_ == 1) else ("unit+unit" if (k_ - i_ >= 2 and j_ - k_ >= 2) else "word+unit")
+            tab[pair in have[2]][cls] += 1
+    for st, c in tab.items():
+        z = sum(c.values()) or 1
+        print(json.dumps({"bound": "stored" if st else "unstored", "seed": seed, "pairs": z,
+                          **{k: round(c[k] / z, 3) for k in ("word+word", "word+unit", "unit+unit")}}), flush=True)
+    sys.exit()
+
 if LIC_SET:                                    # the learner's licence: Cobweb's prediction from one neighbour
     cand, ap, words_ = LIC_SET
 
