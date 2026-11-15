@@ -937,6 +937,9 @@ for ai, arm in enumerate(arms):
         # ("spec", r160, swapped a drawn word for a member of its context concept: no better than trigram; deleted r171)
         sweep_ = int(arm.pop("sweep", 0))  # r171: k Gibbs passes over the draft, each word redrawn from the context tree
                                            # given both sides (l2, l1, r1, r2), the gate on both of its pairs
+        esc_ = arm.pop("esc", None)        # r179 "licence": unstored next words drawn FROM the type licence, with the
+                                           # Witten-Bell escape mass d/(d+c) of l1 (d distinct stored successors, c tokens);
+                                           # the context tree draws the stored successors with the rest
         pair_ = arm.pop("pair", None)      # "gate": a filler whose first word was never stored after l1 is kept
         _cz = {}                           # only if the context tree read by types licenses the pair at or above
         if pair_:                          # the median over stored pairs (as chart_gen's pair_lic gate)
@@ -964,6 +967,20 @@ for ai, arm in enumerate(arms):
                     me = e_.get(v, 0.0)
                     vs += [(v, True), (v, False)]
                     ws += [me, max(m_ - me, 0.0)]
+                if esc_ and l1 != T3BOS and l1 in _ix_:
+                    keep = [j for j, (v, _) in enumerate(vs) if (l1, _words(v)[0]) in _st_]
+                    vs, ws = [vs[j] for j in keep], [ws[j] for j in keep]
+                    succ = {b: c for (a, b), c in L._pair_counts.items() if a == l1}
+                    d_, c_ = len(succ), sum(succ.values())
+                    row = _M_[_ix_[l1]]
+                    nov = [(w, float(row[_ix_[w]])) for w in _w_ if w not in succ and w not in (T3BOS, T3EOS)
+                           and float(row[_ix_[w]]) > 0 and (esc_ != "gated" or _ok(l1, w))]
+                    zs, zn = sum(ws), sum(m for _, m in nov)
+                    if zs > 0 and zn > 0 and d_ > 0:
+                        e_mass = d_ / (d_ + c_)
+                        ws = [x * (1 - e_mass) / zs for x in ws]
+                        vs += [(("w", w), False) for w, _ in nov]
+                        ws += [e_mass * m / zn for _, m in nov]
                 _cz[k] = (vs, ws)
             return _cz[k]
         _yc = {}
@@ -1038,7 +1055,7 @@ for ai, arm in enumerate(arms):
             arm["blend"] = blend_
             if chart:
                 arm["chart"] = chart
-        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"new": True} if new_ else {}), **({"q": q_} if q_ != 0.5 else {}), **({"near": near_} if near_ else {}), **({"sweep": sweep_} if sweep_ else {})})
+        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"esc": esc_} if esc_ else {}), **({"new": True} if new_ else {}), **({"q": q_} if q_ != 0.5 else {}), **({"near": near_} if near_ else {}), **({"sweep": sweep_} if sweep_ else {})})
         if sweep_:
             _tw = {}
 
