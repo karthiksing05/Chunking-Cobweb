@@ -645,6 +645,23 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
   <div id="r95-curve">@@R95@@</div>
   <h2>Chunks and concepts</h2>
   <div id="story-chunks">@@CHUNKS@@</div>
+  <h2>What story chunks encode as learning goes on (15 November)</h2>
+  <div class="col">
+    <p>The language counterpart of the chess analysis (Figures C2 to C4). The current recipe learns TinyStories sentences in story order. At 250, 500, 1,000, 2,000 and 4,000 sentences, every multi-word chunk committed in the window is labelled by the phrases of a shallow parse (NLTK tags and a regular-expression chunker; scoring only, the learner never sees them): an exact noun, prepositional, verb or adjective phrase, a verb group, subject + verb (<i>tim was</i>), a span strictly inside one phrase, or a span that crosses a phrase boundary. Chance is a span of the same length from the same sentence, and a span of the same length that starts on the same tag. Code <code>experiments/v3/story_chunks.py</code>; seeds 13 and 17.</p>
+  </div>
+  <figure>
+    <div class="fig"><img class="plot" src="story_chunks_curves.png" alt="Nine panels, share of committed chunks with each phrase label against sentences learned, with random-span and same-tag chance dashed and held-out recognised chunks in green. Crossing a phrase boundary falls from 0.29 to 0.20 against 0.34 for random spans. Noun phrases rise from 0.069 to 0.082 against 0.045 chance; verb phrases from 0.065 to 0.080 against about 0.05; prepositional phrases about 0.02 against 0.013." loading="lazy"></div>
+  </figure>
+  <figcaption><b>Figure S1.</b> Phrase labels of the chunks committed in each learning window (thin lines are seeds) against chance (dashed, dotted), and of the chunks recognised in 300 held-out sentences (span posterior at least 0.5; green).</figcaption>
+  <ul>
+    <li><b>Chunks learn to respect phrase boundaries.</b> The share of committed chunks that cut across a phrase falls from 0.29 to 0.20 (0.86 to 0.63 times random spans) as learning goes on.</li>
+    <li><b>They favour whole phrases.</b> Noun phrases 1.6 to 1.8 times chance, prepositional phrases 1.4 to 1.6, verb phrases about 1.35, and subject + verb frames (<i>tim was</i>, <i>they were</i>) about 1.2, the story's stock opening.</li>
+    <li><b>Recognition grows.</b> Held-out sentences hold 1.75 recognised chunks at 250 sentences and 2.45 at 4,000. The most frequent chunks at 4,000 are <i>to play</i>, <i>unexpected happened</i>, <i>very happy</i>, <i>the bird</i>, <i>an idea</i> and <i>but then something</i>: TinyStories' set phrases.</li>
+  </ul>
+  <figure>
+    <div class="fig"><img class="plot" src="story_chunks_cases.png" alt="Six held-out sentences at 250, 500, 1,000, 2,000 and 4,000 sentences learned, with recognised chunks in square brackets and other chosen chunks in round brackets. For example tim had an idea is bracketed tim had, an idea from 250 on; i loved that toy car becomes i loved, that toy car by 4,000." loading="lazy"></div>
+  </figure>
+  <figcaption><b>Figure S2.</b> Case studies, seed 13: held-out sentences bracketed by the learner as learning goes on. [ ] recognised, ( ) chosen below the recognition threshold.</figcaption>
   <h2>Parse agreement</h2>
   <div class="tablewrap"><table>
     <thead><tr><th>Sentences learned</th><th class="num">250</th><th class="num">500</th><th class="num">1,000</th><th class="num">2,000</th></tr></thead>
