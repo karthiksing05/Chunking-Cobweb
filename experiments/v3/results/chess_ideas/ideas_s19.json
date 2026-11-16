@@ -1,0 +1,3605 @@
+{
+ "tag": "ideas",
+ "seed": 19,
+ "theta": 16.0,
+ "max size": 4,
+ "ideas": [
+  "pawn chain",
+  "pawn phalanx",
+  "doubled pawns",
+  "pawn ram",
+  "king shelter",
+  "castled king",
+  "fianchetto",
+  "pawn-guarded",
+  "battery",
+  "undeveloped",
+  "attack"
+ ],
+ "checkpoints": [
+  {
+   "learned": 100,
+   "seconds": 87,
+   "window chunks": 579,
+   "mean size": 3.72,
+   "size counts": {
+    "2": 52,
+    "4": 469,
+    "3": 58
+   },
+   "rate": {
+    "pawn chain": 0.1969,
+    "pawn phalanx": 0.2176,
+    "doubled pawns": 0.0121,
+    "pawn ram": 0.0121,
+    "king shelter": 0.0311,
+    "castled king": 0.1002,
+    "fianchetto": 0.0121,
+    "pawn-guarded": 0.0604,
+    "battery": 0.1934,
+    "undeveloped": 0.076,
+    "attack": 0.076
+   },
+   "chance random": {
+    "pawn chain": 0.057,
+    "pawn phalanx": 0.0587,
+    "doubled pawns": 0.0069,
+    "pawn ram": 0.0138,
+    "king shelter": 0.0069,
+    "castled king": 0.0777,
+    "fianchetto": 0.0035,
+    "pawn-guarded": 0.0345,
+    "battery": 0.057,
+    "undeveloped": 0.0207,
+    "attack": 0.1952
+   },
+   "chance nearby": {
+    "pawn chain": 0.1606,
+    "pawn phalanx": 0.1744,
+    "doubled pawns": 0.0155,
+    "pawn ram": 0.0225,
+    "king shelter": 0.038,
+    "castled king": 0.1434,
+    "fianchetto": 0.0138,
+    "pawn-guarded": 0.1071,
+    "battery": 0.0691,
+    "undeveloped": 0.0449,
+    "attack": 0.1813
+   },
+   "lift nearby": {
+    "pawn chain": 1.226,
+    "pawn phalanx": 1.248,
+    "doubled pawns": 0.781,
+    "pawn ram": 0.538,
+    "king shelter": 0.818,
+    "castled king": 0.699,
+    "fianchetto": 0.877,
+    "pawn-guarded": 0.564,
+    "battery": 2.799,
+    "undeveloped": 1.693,
+    "attack": 0.419
+   },
+   "held-out recognised per position": 0.37,
+   "held-out mean size": 2.108,
+   "held-out rate": {
+    "pawn chain": 0.0,
+    "pawn phalanx": 0.0,
+    "doubled pawns": 0.0,
+    "pawn ram": 0.0,
+    "king shelter": 0.0,
+    "castled king": 0.0,
+    "fianchetto": 0.0,
+    "pawn-guarded": 0.0,
+    "battery": 0.3784,
+    "undeveloped": 0.0,
+    "attack": 0.0
+   },
+   "top": [
+    {
+     "pieces": [
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g7",
+       "bP"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "count": 14,
+     "ideas": [
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "count": 5,
+     "ideas": [
+      "battery"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g7",
+       "bP"
+      ]
+     ],
+     "count": 4,
+     "ideas": [
+      "battery",
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g7",
+       "bB"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "count": 4,
+     "ideas": []
+    },
+    {
+     "pieces": [
+      [
+       "g7",
+       "bP"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "count": 3,
+     "ideas": [
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a6",
+       "bP"
+      ],
+      [
+       "b7",
+       "bP"
+      ]
+     ],
+     "count": 3,
+     "ideas": [
+      "pawn chain"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "b7",
+       "bP"
+      ]
+     ],
+     "count": 3,
+     "ideas": []
+    },
+    {
+     "pieces": [
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "g7",
+       "bP"
+      ],
+      [
+       "g8",
+       "bK"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "count": 3,
+     "ideas": [
+      "castled king",
+      "king shelter",
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "g7",
+       "bP"
+      ],
+      [
+       "g8",
+       "bK"
+      ]
+     ],
+     "count": 3,
+     "ideas": [
+      "castled king"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "e5",
+       "wP"
+      ],
+      [
+       "f4",
+       "wP"
+      ],
+      [
+       "g2",
+       "wP"
+      ],
+      [
+       "h2",
+       "wP"
+      ]
+     ],
+     "count": 2,
+     "ideas": [
+      "pawn chain",
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "g7",
+       "bP"
+      ],
+      [
+       "h7",
+       "bP"
+      ],
+      [
+       "h8",
+       "bR"
+      ]
+     ],
+     "count": 2,
+     "ideas": [
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a7",
+       "bP"
+      ],
+      [
+       "a8",
+       "bR"
+      ]
+     ],
+     "count": 2,
+     "ideas": []
+    },
+    {
+     "pieces": [
+      [
+       "e3",
+       "wP"
+      ],
+      [
+       "f2",
+       "wP"
+      ],
+      [
+       "g2",
+       "wP"
+      ],
+      [
+       "h2",
+       "wP"
+      ]
+     ],
+     "count": 2,
+     "ideas": [
+      "pawn chain",
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a2",
+       "wP"
+      ],
+      [
+       "b3",
+       "wP"
+      ],
+      [
+       "c4",
+       "wP"
+      ]
+     ],
+     "count": 2,
+     "ideas": [
+      "pawn chain"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a1",
+       "wR"
+      ],
+      [
+       "b2",
+       "wB"
+      ],
+      [
+       "e2",
+       "wQ"
+      ],
+      [
+       "f1",
+       "wR"
+      ]
+     ],
+     "count": 2,
+     "ideas": [
+      "battery"
+     ]
+    }
+   ]
+  },
+  {
+   "learned": 300,
+   "seconds": 241,
+   "window chunks": 1331,
+   "mean size": 3.715,
+   "size counts": {
+    "4": 1083,
+    "2": 131,
+    "3": 117
+   },
+   "rate": {
+    "pawn chain": 0.278,
+    "pawn phalanx": 0.2239,
+    "doubled pawns": 0.0173,
+    "pawn ram": 0.0015,
+    "king shelter": 0.0421,
+    "castled king": 0.1142,
+    "fianchetto": 0.0113,
+    "pawn-guarded": 0.0661,
+    "battery": 0.2089,
+    "undeveloped": 0.1134,
+    "attack": 0.0135
+   },
+   "chance random": {
+    "pawn chain": 0.0669,
+    "pawn phalanx": 0.0518,
+    "doubled pawns": 0.0083,
+    "pawn ram": 0.0135,
+    "king shelter": 0.0045,
+    "castled king": 0.0676,
+    "fianchetto": 0.0023,
+    "pawn-guarded": 0.0376,
+    "battery": 0.0466,
+    "undeveloped": 0.0316,
+    "attack": 0.2119
+   },
+   "chance nearby": {
+    "pawn chain": 0.1473,
+    "pawn phalanx": 0.1796,
+    "doubled pawns": 0.0098,
+    "pawn ram": 0.0195,
+    "king shelter": 0.0481,
+    "castled king": 0.1345,
+    "fianchetto": 0.0128,
+    "pawn-guarded": 0.1037,
+    "battery": 0.0781,
+    "undeveloped": 0.0579,
+    "attack": 0.151
+   },
+   "lift nearby": {
+    "pawn chain": 1.887,
+    "pawn phalanx": 1.247,
+    "doubled pawns": 1.765,
+    "pawn ram": 0.077,
+    "king shelter": 0.875,
+    "castled king": 0.849,
+    "fianchetto": 0.883,
+    "pawn-guarded": 0.637,
+    "battery": 2.675,
+    "undeveloped": 1.959,
+    "attack": 0.089
+   },
+   "held-out recognised per position": 1.49,
+   "held-out mean size": 3.537,
+   "held-out rate": {
+    "pawn chain": 0.0,
+    "pawn phalanx": 0.1544,
+    "doubled pawns": 0.0067,
+    "pawn ram": 0.0,
+    "king shelter": 0.1409,
+    "castled king": 0.3221,
+    "fianchetto": 0.0,
+    "pawn-guarded": 0.0134,
+    "battery": 0.3557,
+    "undeveloped": 0.2416,
+    "attack": 0.0
+   },
+   "top": [
+    {
+     "pieces": [
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g7",
+       "bP"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "count": 19,
+     "ideas": [
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a7",
+       "bP"
+      ],
+      [
+       "a8",
+       "bR"
+      ]
+     ],
+     "count": 14,
+     "ideas": []
+    },
+    {
+     "pieces": [
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g7",
+       "bP"
+      ]
+     ],
+     "count": 12,
+     "ideas": [
+      "battery",
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "count": 8,
+     "ideas": [
+      "battery"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a7",
+       "bP"
+      ],
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "b7",
+       "bP"
+      ]
+     ],
+     "count": 7,
+     "ideas": [
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a1",
+       "wR"
+      ],
+      [
+       "c1",
+       "wB"
+      ],
+      [
+       "d1",
+       "wQ"
+      ],
+      [
+       "f1",
+       "wR"
+      ]
+     ],
+     "count": 7,
+     "ideas": [
+      "battery",
+      "undeveloped"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "h7",
+       "bP"
+      ],
+      [
+       "h8",
+       "bR"
+      ]
+     ],
+     "count": 6,
+     "ideas": []
+    },
+    {
+     "pieces": [
+      [
+       "e4",
+       "wP"
+      ],
+      [
+       "f2",
+       "wP"
+      ],
+      [
+       "g3",
+       "wP"
+      ],
+      [
+       "h2",
+       "wP"
+      ]
+     ],
+     "count": 5,
+     "ideas": [
+      "pawn chain"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a1",
+       "wR"
+      ],
+      [
+       "d1",
+       "wQ"
+      ],
+      [
+       "e2",
+       "wB"
+      ],
+      [
+       "f1",
+       "wR"
+      ]
+     ],
+     "count": 5,
+     "ideas": [
+      "battery",
+      "undeveloped"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a2",
+       "wP"
+      ],
+      [
+       "b2",
+       "wP"
+      ]
+     ],
+     "count": 5,
+     "ideas": [
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a1",
+       "wR"
+      ],
+      [
+       "c1",
+       "wB"
+      ],
+      [
+       "d1",
+       "wQ"
+      ],
+      [
+       "e1",
+       "wR"
+      ]
+     ],
+     "count": 5,
+     "ideas": [
+      "battery",
+      "undeveloped"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a6",
+       "bP"
+      ],
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "b7",
+       "bP"
+      ]
+     ],
+     "count": 4,
+     "ideas": [
+      "pawn chain"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a6",
+       "bP"
+      ],
+      [
+       "b7",
+       "bP"
+      ]
+     ],
+     "count": 4,
+     "ideas": [
+      "pawn chain"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "c8",
+       "bB"
+      ],
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "count": 3,
+     "ideas": []
+    },
+    {
+     "pieces": [
+      [
+       "g1",
+       "wK"
+      ],
+      [
+       "g2",
+       "wP"
+      ],
+      [
+       "g3",
+       "wN"
+      ],
+      [
+       "h2",
+       "wP"
+      ]
+     ],
+     "count": 3,
+     "ideas": [
+      "castled king",
+      "king shelter",
+      "pawn phalanx",
+      "pawn-guarded"
+     ]
+    }
+   ]
+  },
+  {
+   "learned": 1000,
+   "seconds": 862,
+   "window chunks": 4771,
+   "mean size": 3.722,
+   "size counts": {
+    "4": 3915,
+    "3": 386,
+    "2": 470
+   },
+   "rate": {
+    "pawn chain": 0.2765,
+    "pawn phalanx": 0.2528,
+    "doubled pawns": 0.014,
+    "pawn ram": 0.0044,
+    "king shelter": 0.0585,
+    "castled king": 0.1167,
+    "fianchetto": 0.0073,
+    "pawn-guarded": 0.0453,
+    "battery": 0.1809,
+    "undeveloped": 0.1061,
+    "attack": 0.0174
+   },
+   "chance random": {
+    "pawn chain": 0.0574,
+    "pawn phalanx": 0.0597,
+    "doubled pawns": 0.0063,
+    "pawn ram": 0.0109,
+    "king shelter": 0.004,
+    "castled king": 0.0667,
+    "fianchetto": 0.0054,
+    "pawn-guarded": 0.0306,
+    "battery": 0.0631,
+    "undeveloped": 0.0342,
+    "attack": 0.2046
+   },
+   "chance nearby": {
+    "pawn chain": 0.1633,
+    "pawn phalanx": 0.1796,
+    "doubled pawns": 0.0138,
+    "pawn ram": 0.0228,
+    "king shelter": 0.0578,
+    "castled king": 0.1364,
+    "fianchetto": 0.0155,
+    "pawn-guarded": 0.1,
+    "battery": 0.0763,
+    "undeveloped": 0.0522,
+    "attack": 0.1375
+   },
+   "lift nearby": {
+    "pawn chain": 1.693,
+    "pawn phalanx": 1.408,
+    "doubled pawns": 1.014,
+    "pawn ram": 0.193,
+    "king shelter": 1.012,
+    "castled king": 0.856,
+    "fianchetto": 0.471,
+    "pawn-guarded": 0.453,
+    "battery": 2.371,
+    "undeveloped": 2.033,
+    "attack": 0.127
+   },
+   "held-out recognised per position": 3.47,
+   "held-out mean size": 3.703,
+   "held-out rate": {
+    "pawn chain": 0.1585,
+    "pawn phalanx": 0.3026,
+    "doubled pawns": 0.0086,
+    "pawn ram": 0.0,
+    "king shelter": 0.1239,
+    "castled king": 0.1816,
+    "fianchetto": 0.0,
+    "pawn-guarded": 0.0288,
+    "battery": 0.2853,
+    "undeveloped": 0.1326,
+    "attack": 0.0
+   },
+   "top": [
+    {
+     "pieces": [
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g7",
+       "bP"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "count": 69,
+     "ideas": [
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a7",
+       "bP"
+      ],
+      [
+       "a8",
+       "bR"
+      ]
+     ],
+     "count": 45,
+     "ideas": []
+    },
+    {
+     "pieces": [
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "count": 35,
+     "ideas": [
+      "battery"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g7",
+       "bP"
+      ]
+     ],
+     "count": 33,
+     "ideas": [
+      "battery",
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a7",
+       "bP"
+      ],
+      [
+       "b7",
+       "bP"
+      ],
+      [
+       "c6",
+       "bP"
+      ],
+      [
+       "d5",
+       "bP"
+      ]
+     ],
+     "count": 18,
+     "ideas": [
+      "pawn chain",
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "f2",
+       "wP"
+      ],
+      [
+       "g1",
+       "wK"
+      ],
+      [
+       "g2",
+       "wP"
+      ],
+      [
+       "h2",
+       "wP"
+      ]
+     ],
+     "count": 17,
+     "ideas": [
+      "castled king",
+      "king shelter",
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a7",
+       "bP"
+      ],
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "b7",
+       "bP"
+      ]
+     ],
+     "count": 16,
+     "ideas": [
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g7",
+       "bP"
+      ],
+      [
+       "g8",
+       "bK"
+      ]
+     ],
+     "count": 15,
+     "ideas": [
+      "castled king",
+      "king shelter",
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g7",
+       "bB"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "count": 14,
+     "ideas": []
+    },
+    {
+     "pieces": [
+      [
+       "a2",
+       "wP"
+      ],
+      [
+       "b2",
+       "wP"
+      ]
+     ],
+     "count": 13,
+     "ideas": [
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "h7",
+       "bP"
+      ],
+      [
+       "h8",
+       "bR"
+      ]
+     ],
+     "count": 13,
+     "ideas": []
+    },
+    {
+     "pieces": [
+      [
+       "a2",
+       "wP"
+      ],
+      [
+       "b2",
+       "wP"
+      ],
+      [
+       "c2",
+       "wP"
+      ],
+      [
+       "f2",
+       "wP"
+      ]
+     ],
+     "count": 13,
+     "ideas": [
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a1",
+       "wR"
+      ],
+      [
+       "c1",
+       "wB"
+      ],
+      [
+       "d1",
+       "wQ"
+      ],
+      [
+       "e1",
+       "wR"
+      ]
+     ],
+     "count": 12,
+     "ideas": [
+      "battery",
+      "undeveloped"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "d4",
+       "wP"
+      ],
+      [
+       "f2",
+       "wP"
+      ],
+      [
+       "g2",
+       "wP"
+      ],
+      [
+       "h2",
+       "wP"
+      ]
+     ],
+     "count": 11,
+     "ideas": [
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a7",
+       "bP"
+      ],
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "b7",
+       "bP"
+      ],
+      [
+       "c6",
+       "bP"
+      ]
+     ],
+     "count": 11,
+     "ideas": [
+      "pawn chain",
+      "pawn phalanx"
+     ]
+    }
+   ]
+  },
+  {
+   "learned": 2000,
+   "seconds": 2279,
+   "window chunks": 6818,
+   "mean size": 3.719,
+   "size counts": {
+    "4": 5543,
+    "2": 644,
+    "3": 631
+   },
+   "rate": {
+    "pawn chain": 0.2476,
+    "pawn phalanx": 0.2655,
+    "doubled pawns": 0.0125,
+    "pawn ram": 0.0041,
+    "king shelter": 0.0623,
+    "castled king": 0.1203,
+    "fianchetto": 0.0048,
+    "pawn-guarded": 0.0307,
+    "battery": 0.1933,
+    "undeveloped": 0.1056,
+    "attack": 0.0223
+   },
+   "chance random": {
+    "pawn chain": 0.0613,
+    "pawn phalanx": 0.0582,
+    "doubled pawns": 0.0044,
+    "pawn ram": 0.0081,
+    "king shelter": 0.0056,
+    "castled king": 0.0679,
+    "fianchetto": 0.006,
+    "pawn-guarded": 0.0337,
+    "battery": 0.0559,
+    "undeveloped": 0.0334,
+    "attack": 0.1968
+   },
+   "chance nearby": {
+    "pawn chain": 0.1558,
+    "pawn phalanx": 0.1593,
+    "doubled pawns": 0.0106,
+    "pawn ram": 0.0245,
+    "king shelter": 0.0569,
+    "castled king": 0.1386,
+    "fianchetto": 0.0157,
+    "pawn-guarded": 0.0908,
+    "battery": 0.0808,
+    "undeveloped": 0.0597,
+    "attack": 0.1421
+   },
+   "lift nearby": {
+    "pawn chain": 1.589,
+    "pawn phalanx": 1.667,
+    "doubled pawns": 1.179,
+    "pawn ram": 0.167,
+    "king shelter": 1.095,
+    "castled king": 0.868,
+    "fianchetto": 0.306,
+    "pawn-guarded": 0.338,
+    "battery": 2.392,
+    "undeveloped": 1.769,
+    "attack": 0.157
+   },
+   "held-out recognised per position": 4.3,
+   "held-out mean size": 3.628,
+   "held-out rate": {
+    "pawn chain": 0.1581,
+    "pawn phalanx": 0.3233,
+    "doubled pawns": 0.007,
+    "pawn ram": 0.0047,
+    "king shelter": 0.1186,
+    "castled king": 0.1628,
+    "fianchetto": 0.0,
+    "pawn-guarded": 0.0116,
+    "battery": 0.2465,
+    "undeveloped": 0.1209,
+    "attack": 0.0
+   },
+   "top": [
+    {
+     "pieces": [
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g7",
+       "bP"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "count": 89,
+     "ideas": [
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g7",
+       "bP"
+      ]
+     ],
+     "count": 57,
+     "ideas": [
+      "battery",
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "count": 52,
+     "ideas": [
+      "battery"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a7",
+       "bP"
+      ],
+      [
+       "a8",
+       "bR"
+      ]
+     ],
+     "count": 44,
+     "ideas": []
+    },
+    {
+     "pieces": [
+      [
+       "f2",
+       "wP"
+      ],
+      [
+       "g1",
+       "wK"
+      ],
+      [
+       "g2",
+       "wP"
+      ],
+      [
+       "h2",
+       "wP"
+      ]
+     ],
+     "count": 39,
+     "ideas": [
+      "castled king",
+      "king shelter",
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a7",
+       "bP"
+      ],
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "b7",
+       "bP"
+      ]
+     ],
+     "count": 37,
+     "ideas": [
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g7",
+       "bP"
+      ],
+      [
+       "g8",
+       "bK"
+      ]
+     ],
+     "count": 31,
+     "ideas": [
+      "castled king",
+      "king shelter",
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "e8",
+       "bR"
+      ],
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "g7",
+       "bP"
+      ],
+      [
+       "g8",
+       "bK"
+      ]
+     ],
+     "count": 27,
+     "ideas": [
+      "castled king",
+      "king shelter",
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a7",
+       "bP"
+      ],
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "b7",
+       "bP"
+      ],
+      [
+       "c6",
+       "bP"
+      ]
+     ],
+     "count": 24,
+     "ideas": [
+      "pawn chain",
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a7",
+       "bP"
+      ],
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "b7",
+       "bP"
+      ],
+      [
+       "c7",
+       "bP"
+      ]
+     ],
+     "count": 24,
+     "ideas": [
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g7",
+       "bB"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "count": 23,
+     "ideas": []
+    },
+    {
+     "pieces": [
+      [
+       "a1",
+       "wR"
+      ],
+      [
+       "c1",
+       "wB"
+      ],
+      [
+       "d1",
+       "wQ"
+      ],
+      [
+       "f1",
+       "wR"
+      ]
+     ],
+     "count": 20,
+     "ideas": [
+      "battery",
+      "undeveloped"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "e8",
+       "bK"
+      ],
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "h7",
+       "bP"
+      ],
+      [
+       "h8",
+       "bR"
+      ]
+     ],
+     "count": 19,
+     "ideas": [
+      "undeveloped"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "e4",
+       "wP"
+      ],
+      [
+       "f2",
+       "wP"
+      ],
+      [
+       "g2",
+       "wP"
+      ],
+      [
+       "h3",
+       "wP"
+      ]
+     ],
+     "count": 18,
+     "ideas": [
+      "pawn chain",
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a1",
+       "wR"
+      ],
+      [
+       "d1",
+       "wQ"
+      ],
+      [
+       "e2",
+       "wB"
+      ],
+      [
+       "f1",
+       "wR"
+      ]
+     ],
+     "count": 18,
+     "ideas": [
+      "battery",
+      "undeveloped"
+     ]
+    }
+   ]
+  },
+  {
+   "learned": 4000,
+   "seconds": 7014,
+   "window chunks": 13715,
+   "mean size": 3.711,
+   "size counts": {
+    "4": 11056,
+    "3": 1361,
+    "2": 1298
+   },
+   "rate": {
+    "pawn chain": 0.2303,
+    "pawn phalanx": 0.2793,
+    "doubled pawns": 0.0128,
+    "pawn ram": 0.005,
+    "king shelter": 0.0658,
+    "castled king": 0.1159,
+    "fianchetto": 0.0079,
+    "pawn-guarded": 0.0296,
+    "battery": 0.1926,
+    "undeveloped": 0.1024,
+    "attack": 0.0249
+   },
+   "chance random": {
+    "pawn chain": 0.063,
+    "pawn phalanx": 0.0588,
+    "doubled pawns": 0.0057,
+    "pawn ram": 0.0104,
+    "king shelter": 0.0054,
+    "castled king": 0.0662,
+    "fianchetto": 0.0058,
+    "pawn-guarded": 0.0323,
+    "battery": 0.0572,
+    "undeveloped": 0.0327,
+    "attack": 0.21
+   },
+   "chance nearby": {
+    "pawn chain": 0.157,
+    "pawn phalanx": 0.1659,
+    "doubled pawns": 0.013,
+    "pawn ram": 0.0233,
+    "king shelter": 0.0567,
+    "castled king": 0.1397,
+    "fianchetto": 0.0168,
+    "pawn-guarded": 0.1044,
+    "battery": 0.0743,
+    "undeveloped": 0.0565,
+    "attack": 0.138
+   },
+   "lift nearby": {
+    "pawn chain": 1.467,
+    "pawn phalanx": 1.684,
+    "doubled pawns": 0.985,
+    "pawn ram": 0.215,
+    "king shelter": 1.16,
+    "castled king": 0.83,
+    "fianchetto": 0.47,
+    "pawn-guarded": 0.284,
+    "battery": 2.592,
+    "undeveloped": 1.812,
+    "attack": 0.18
+   },
+   "held-out recognised per position": 5.09,
+   "held-out mean size": 3.664,
+   "held-out rate": {
+    "pawn chain": 0.1827,
+    "pawn phalanx": 0.3379,
+    "doubled pawns": 0.0039,
+    "pawn ram": 0.0059,
+    "king shelter": 0.1041,
+    "castled king": 0.1513,
+    "fianchetto": 0.002,
+    "pawn-guarded": 0.0098,
+    "battery": 0.2318,
+    "undeveloped": 0.1061,
+    "attack": 0.0039
+   },
+   "top": [
+    {
+     "pieces": [
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g7",
+       "bP"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "count": 186,
+     "ideas": [
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g7",
+       "bP"
+      ]
+     ],
+     "count": 130,
+     "ideas": [
+      "battery",
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a7",
+       "bP"
+      ],
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "b7",
+       "bP"
+      ]
+     ],
+     "count": 89,
+     "ideas": [
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "f2",
+       "wP"
+      ],
+      [
+       "g1",
+       "wK"
+      ],
+      [
+       "g2",
+       "wP"
+      ],
+      [
+       "h2",
+       "wP"
+      ]
+     ],
+     "count": 82,
+     "ideas": [
+      "castled king",
+      "king shelter",
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a7",
+       "bP"
+      ],
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "b7",
+       "bP"
+      ],
+      [
+       "c7",
+       "bP"
+      ]
+     ],
+     "count": 76,
+     "ideas": [
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a8",
+       "bR"
+      ],
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "count": 65,
+     "ideas": [
+      "battery"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a7",
+       "bP"
+      ],
+      [
+       "a8",
+       "bR"
+      ]
+     ],
+     "count": 64,
+     "ideas": []
+    },
+    {
+     "pieces": [
+      [
+       "e8",
+       "bR"
+      ],
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "g7",
+       "bP"
+      ],
+      [
+       "g8",
+       "bK"
+      ]
+     ],
+     "count": 63,
+     "ideas": [
+      "castled king",
+      "king shelter",
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g7",
+       "bP"
+      ],
+      [
+       "g8",
+       "bK"
+      ]
+     ],
+     "count": 61,
+     "ideas": [
+      "castled king",
+      "king shelter",
+      "pawn phalanx"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "g8",
+       "bK"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "count": 58,
+     "ideas": [
+      "castled king"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "e8",
+       "bK"
+      ],
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "g7",
+       "bP"
+      ],
+      [
+       "h8",
+       "bR"
+      ]
+     ],
+     "count": 55,
+     "ideas": [
+      "pawn phalanx",
+      "undeveloped"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "f8",
+       "bR"
+      ],
+      [
+       "g7",
+       "bB"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "count": 46,
+     "ideas": []
+    },
+    {
+     "pieces": [
+      [
+       "e8",
+       "bR"
+      ],
+      [
+       "f7",
+       "bP"
+      ],
+      [
+       "g8",
+       "bK"
+      ],
+      [
+       "h7",
+       "bP"
+      ]
+     ],
+     "count": 46,
+     "ideas": [
+      "castled king",
+      "king shelter"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "a1",
+       "wR"
+      ],
+      [
+       "c1",
+       "wB"
+      ],
+      [
+       "d1",
+       "wQ"
+      ],
+      [
+       "f1",
+       "wR"
+      ]
+     ],
+     "count": 44,
+     "ideas": [
+      "battery",
+      "undeveloped"
+     ]
+    },
+    {
+     "pieces": [
+      [
+       "e3",
+       "wP"
+      ],
+      [
+       "f2",
+       "wP"
+      ],
+      [
+       "g2",
+       "wP"
+      ],
+      [
+       "h2",
+       "wP"
+      ]
+     ],
+     "count": 35,
+     "ideas": [
+      "pawn chain",
+      "pawn phalanx"
+     ]
+    }
+   ]
+  }
+ ],
+ "cases": [
+  {
+   "fen": {
+    "a8": "bR",
+    "e8": "bB",
+    "f8": "bR",
+    "g8": "bK",
+    "a7": "bP",
+    "b7": "bP",
+    "g7": "bP",
+    "c6": "bP",
+    "d6": "bQ",
+    "e6": "bP",
+    "h6": "bP",
+    "d5": "bP",
+    "e5": "bB",
+    "f5": "bP",
+    "c4": "wP",
+    "d4": "wP",
+    "f4": "wP",
+    "e3": "wP",
+    "g3": "wP",
+    "a2": "wP",
+    "b2": "wP",
+    "c2": "wQ",
+    "g2": "wB",
+    "h2": "wP",
+    "a1": "wR",
+    "f1": "wR",
+    "g1": "wK"
+   },
+   "by checkpoint": [
+    {
+     "learned": 100,
+     "chunks": [
+      {
+       "pieces": [
+        [
+         "a1",
+         "wR"
+        ],
+        [
+         "f1",
+         "wR"
+        ]
+       ],
+       "ideas": [
+        "battery"
+       ]
+      }
+     ]
+    },
+    {
+     "learned": 300,
+     "chunks": [
+      {
+       "pieces": [
+        [
+         "a1",
+         "wR"
+        ],
+        [
+         "c2",
+         "wQ"
+        ],
+        [
+         "f1",
+         "wR"
+        ],
+        [
+         "g2",
+         "wB"
+        ]
+       ],
+       "ideas": [
+        "battery"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "g1",
+         "wK"
+        ],
+        [
+         "h2",
+         "wP"
+        ]
+       ],
+       "ideas": [
+        "castled king"
+       ]
+      }
+     ]
+    },
+    {
+     "learned": 1000,
+     "chunks": [
+      {
+       "pieces": [
+        [
+         "a1",
+         "wR"
+        ],
+        [
+         "c2",
+         "wQ"
+        ],
+        [
+         "f1",
+         "wR"
+        ],
+        [
+         "g2",
+         "wB"
+        ]
+       ],
+       "ideas": [
+        "battery"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "c4",
+         "wP"
+        ],
+        [
+         "e3",
+         "wP"
+        ],
+        [
+         "g1",
+         "wK"
+        ],
+        [
+         "h2",
+         "wP"
+        ]
+       ],
+       "ideas": [
+        "castled king"
+       ]
+      }
+     ]
+    },
+    {
+     "learned": 2000,
+     "chunks": [
+      {
+       "pieces": [
+        [
+         "a1",
+         "wR"
+        ],
+        [
+         "c2",
+         "wQ"
+        ],
+        [
+         "f1",
+         "wR"
+        ],
+        [
+         "g2",
+         "wB"
+        ]
+       ],
+       "ideas": [
+        "battery"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "c4",
+         "wP"
+        ],
+        [
+         "e3",
+         "wP"
+        ],
+        [
+         "g1",
+         "wK"
+        ],
+        [
+         "h2",
+         "wP"
+        ]
+       ],
+       "ideas": [
+        "castled king"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "a2",
+         "wP"
+        ],
+        [
+         "b2",
+         "wP"
+        ],
+        [
+         "d4",
+         "wP"
+        ],
+        [
+         "f4",
+         "wP"
+        ]
+       ],
+       "ideas": [
+        "pawn phalanx"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "d6",
+         "bQ"
+        ],
+        [
+         "e5",
+         "bB"
+        ],
+        [
+         "e8",
+         "bB"
+        ]
+       ],
+       "ideas": [
+        "battery"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "a7",
+         "bP"
+        ],
+        [
+         "a8",
+         "bR"
+        ]
+       ],
+       "ideas": []
+      }
+     ]
+    },
+    {
+     "learned": 4000,
+     "chunks": [
+      {
+       "pieces": [
+        [
+         "a1",
+         "wR"
+        ],
+        [
+         "c2",
+         "wQ"
+        ],
+        [
+         "f1",
+         "wR"
+        ],
+        [
+         "g2",
+         "wB"
+        ]
+       ],
+       "ideas": [
+        "battery"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "c4",
+         "wP"
+        ],
+        [
+         "e3",
+         "wP"
+        ],
+        [
+         "g1",
+         "wK"
+        ],
+        [
+         "h2",
+         "wP"
+        ]
+       ],
+       "ideas": [
+        "castled king"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "c6",
+         "bP"
+        ],
+        [
+         "d5",
+         "bP"
+        ],
+        [
+         "e6",
+         "bP"
+        ],
+        [
+         "h6",
+         "bP"
+        ]
+       ],
+       "ideas": [
+        "pawn chain"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "a2",
+         "wP"
+        ],
+        [
+         "b2",
+         "wP"
+        ],
+        [
+         "d4",
+         "wP"
+        ],
+        [
+         "f4",
+         "wP"
+        ]
+       ],
+       "ideas": [
+        "pawn phalanx"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "a7",
+         "bP"
+        ],
+        [
+         "a8",
+         "bR"
+        ],
+        [
+         "b7",
+         "bP"
+        ],
+        [
+         "g7",
+         "bP"
+        ]
+       ],
+       "ideas": [
+        "pawn phalanx"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "d6",
+         "bQ"
+        ],
+        [
+         "e5",
+         "bB"
+        ],
+        [
+         "e8",
+         "bB"
+        ]
+       ],
+       "ideas": [
+        "battery"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "fen": {
+    "a8": "bR",
+    "f8": "bR",
+    "g8": "bK",
+    "b7": "bP",
+    "d7": "bB",
+    "e7": "bB",
+    "g7": "bP",
+    "h7": "bP",
+    "a6": "bP",
+    "b6": "bQ",
+    "e6": "bP",
+    "d5": "bP",
+    "e5": "wP",
+    "f5": "bP",
+    "a4": "wP",
+    "d4": "wP",
+    "e4": "bN",
+    "f4": "wB",
+    "c3": "wP",
+    "d3": "wB",
+    "f3": "wN",
+    "b2": "wP",
+    "e2": "wQ",
+    "g2": "wP",
+    "h2": "wP",
+    "a1": "wR",
+    "f1": "wR",
+    "g1": "wK"
+   },
+   "by checkpoint": [
+    {
+     "learned": 100,
+     "chunks": [
+      {
+       "pieces": [
+        [
+         "f3",
+         "wN"
+        ],
+        [
+         "g1",
+         "wK"
+        ]
+       ],
+       "ideas": []
+      }
+     ]
+    },
+    {
+     "learned": 300,
+     "chunks": [
+      {
+       "pieces": [
+        [
+         "a1",
+         "wR"
+        ],
+        [
+         "e2",
+         "wQ"
+        ],
+        [
+         "f1",
+         "wR"
+        ],
+        [
+         "f4",
+         "wB"
+        ]
+       ],
+       "ideas": [
+        "battery"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "d3",
+         "wB"
+        ],
+        [
+         "f3",
+         "wN"
+        ],
+        [
+         "g1",
+         "wK"
+        ]
+       ],
+       "ideas": []
+      }
+     ]
+    },
+    {
+     "learned": 1000,
+     "chunks": [
+      {
+       "pieces": [
+        [
+         "a1",
+         "wR"
+        ],
+        [
+         "e2",
+         "wQ"
+        ],
+        [
+         "f1",
+         "wR"
+        ],
+        [
+         "f4",
+         "wB"
+        ]
+       ],
+       "ideas": [
+        "battery"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "c3",
+         "wP"
+        ],
+        [
+         "d3",
+         "wB"
+        ],
+        [
+         "f3",
+         "wN"
+        ],
+        [
+         "g1",
+         "wK"
+        ]
+       ],
+       "ideas": []
+      },
+      {
+       "pieces": [
+        [
+         "b6",
+         "bQ"
+        ],
+        [
+         "b7",
+         "bP"
+        ],
+        [
+         "d7",
+         "bB"
+        ],
+        [
+         "e7",
+         "bB"
+        ]
+       ],
+       "ideas": []
+      },
+      {
+       "pieces": [
+        [
+         "a4",
+         "wP"
+        ],
+        [
+         "b2",
+         "wP"
+        ],
+        [
+         "d4",
+         "wP"
+        ],
+        [
+         "e5",
+         "wP"
+        ]
+       ],
+       "ideas": [
+        "pawn chain"
+       ]
+      }
+     ]
+    },
+    {
+     "learned": 2000,
+     "chunks": [
+      {
+       "pieces": [
+        [
+         "d3",
+         "wB"
+        ],
+        [
+         "f3",
+         "wN"
+        ],
+        [
+         "f4",
+         "wB"
+        ],
+        [
+         "g1",
+         "wK"
+        ]
+       ],
+       "ideas": []
+      },
+      {
+       "pieces": [
+        [
+         "a1",
+         "wR"
+        ],
+        [
+         "a4",
+         "wP"
+        ],
+        [
+         "e2",
+         "wQ"
+        ],
+        [
+         "f1",
+         "wR"
+        ]
+       ],
+       "ideas": [
+        "battery"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "b2",
+         "wP"
+        ],
+        [
+         "c3",
+         "wP"
+        ],
+        [
+         "d4",
+         "wP"
+        ],
+        [
+         "e5",
+         "wP"
+        ]
+       ],
+       "ideas": [
+        "pawn chain"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "b6",
+         "bQ"
+        ],
+        [
+         "b7",
+         "bP"
+        ],
+        [
+         "d7",
+         "bB"
+        ],
+        [
+         "e7",
+         "bB"
+        ]
+       ],
+       "ideas": []
+      },
+      {
+       "pieces": [
+        [
+         "d5",
+         "bP"
+        ],
+        [
+         "e6",
+         "bP"
+        ],
+        [
+         "g7",
+         "bP"
+        ],
+        [
+         "h7",
+         "bP"
+        ]
+       ],
+       "ideas": [
+        "pawn chain",
+        "pawn phalanx"
+       ]
+      }
+     ]
+    },
+    {
+     "learned": 4000,
+     "chunks": [
+      {
+       "pieces": [
+        [
+         "d3",
+         "wB"
+        ],
+        [
+         "f3",
+         "wN"
+        ],
+        [
+         "f4",
+         "wB"
+        ],
+        [
+         "g1",
+         "wK"
+        ]
+       ],
+       "ideas": []
+      },
+      {
+       "pieces": [
+        [
+         "a1",
+         "wR"
+        ],
+        [
+         "a4",
+         "wP"
+        ],
+        [
+         "e2",
+         "wQ"
+        ],
+        [
+         "f1",
+         "wR"
+        ]
+       ],
+       "ideas": [
+        "battery"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "b2",
+         "wP"
+        ],
+        [
+         "c3",
+         "wP"
+        ],
+        [
+         "d4",
+         "wP"
+        ],
+        [
+         "e5",
+         "wP"
+        ]
+       ],
+       "ideas": [
+        "pawn chain"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "a6",
+         "bP"
+        ],
+        [
+         "b7",
+         "bP"
+        ],
+        [
+         "d5",
+         "bP"
+        ],
+        [
+         "e6",
+         "bP"
+        ]
+       ],
+       "ideas": [
+        "pawn chain"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "a8",
+         "bR"
+        ],
+        [
+         "b6",
+         "bQ"
+        ],
+        [
+         "f5",
+         "bP"
+        ],
+        [
+         "f8",
+         "bR"
+        ]
+       ],
+       "ideas": [
+        "battery"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "g7",
+         "bP"
+        ],
+        [
+         "g8",
+         "bK"
+        ],
+        [
+         "h7",
+         "bP"
+        ]
+       ],
+       "ideas": [
+        "castled king",
+        "king shelter",
+        "pawn phalanx"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "g2",
+         "wP"
+        ],
+        [
+         "h2",
+         "wP"
+        ]
+       ],
+       "ideas": [
+        "pawn phalanx"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "fen": {
+    "b8": "bQ",
+    "f8": "bR",
+    "g8": "bK",
+    "a7": "bP",
+    "d7": "bB",
+    "f7": "bP",
+    "g7": "bP",
+    "h7": "bP",
+    "d6": "bB",
+    "c5": "bP",
+    "d5": "bP",
+    "d3": "wQ",
+    "a2": "wP",
+    "b2": "wP",
+    "c2": "wP",
+    "d2": "wB",
+    "f2": "wP",
+    "g2": "wP",
+    "h2": "wP",
+    "e1": "wR",
+    "f1": "wR",
+    "g1": "wK"
+   },
+   "by checkpoint": [
+    {
+     "learned": 100,
+     "chunks": []
+    },
+    {
+     "learned": 300,
+     "chunks": [
+      {
+       "pieces": [
+        [
+         "g1",
+         "wK"
+        ],
+        [
+         "g2",
+         "wP"
+        ],
+        [
+         "h2",
+         "wP"
+        ]
+       ],
+       "ideas": [
+        "castled king",
+        "king shelter",
+        "pawn phalanx"
+       ]
+      }
+     ]
+    },
+    {
+     "learned": 1000,
+     "chunks": [
+      {
+       "pieces": [
+        [
+         "f2",
+         "wP"
+        ],
+        [
+         "g1",
+         "wK"
+        ],
+        [
+         "g2",
+         "wP"
+        ],
+        [
+         "h2",
+         "wP"
+        ]
+       ],
+       "ideas": [
+        "castled king",
+        "king shelter",
+        "pawn phalanx"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "f7",
+         "bP"
+        ],
+        [
+         "f8",
+         "bR"
+        ],
+        [
+         "g7",
+         "bP"
+        ],
+        [
+         "h7",
+         "bP"
+        ]
+       ],
+       "ideas": [
+        "pawn phalanx"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "b8",
+         "bQ"
+        ],
+        [
+         "d6",
+         "bB"
+        ],
+        [
+         "d7",
+         "bB"
+        ]
+       ],
+       "ideas": [
+        "battery"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "d3",
+         "wQ"
+        ],
+        [
+         "e1",
+         "wR"
+        ],
+        [
+         "f1",
+         "wR"
+        ]
+       ],
+       "ideas": [
+        "battery"
+       ]
+      }
+     ]
+    },
+    {
+     "learned": 2000,
+     "chunks": [
+      {
+       "pieces": [
+        [
+         "f2",
+         "wP"
+        ],
+        [
+         "g1",
+         "wK"
+        ],
+        [
+         "g2",
+         "wP"
+        ],
+        [
+         "h2",
+         "wP"
+        ]
+       ],
+       "ideas": [
+        "castled king",
+        "king shelter",
+        "pawn phalanx"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "f7",
+         "bP"
+        ],
+        [
+         "f8",
+         "bR"
+        ],
+        [
+         "g7",
+         "bP"
+        ],
+        [
+         "h7",
+         "bP"
+        ]
+       ],
+       "ideas": [
+        "pawn phalanx"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "d2",
+         "wB"
+        ],
+        [
+         "d3",
+         "wQ"
+        ],
+        [
+         "e1",
+         "wR"
+        ],
+        [
+         "f1",
+         "wR"
+        ]
+       ],
+       "ideas": [
+        "battery"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "a2",
+         "wP"
+        ],
+        [
+         "b2",
+         "wP"
+        ],
+        [
+         "c2",
+         "wP"
+        ],
+        [
+         "d5",
+         "bP"
+        ]
+       ],
+       "ideas": [
+        "pawn phalanx"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "b8",
+         "bQ"
+        ],
+        [
+         "d6",
+         "bB"
+        ],
+        [
+         "d7",
+         "bB"
+        ]
+       ],
+       "ideas": [
+        "battery"
+       ]
+      }
+     ]
+    },
+    {
+     "learned": 4000,
+     "chunks": [
+      {
+       "pieces": [
+        [
+         "f2",
+         "wP"
+        ],
+        [
+         "g1",
+         "wK"
+        ],
+        [
+         "g2",
+         "wP"
+        ],
+        [
+         "h2",
+         "wP"
+        ]
+       ],
+       "ideas": [
+        "castled king",
+        "king shelter",
+        "pawn phalanx"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "d2",
+         "wB"
+        ],
+        [
+         "d3",
+         "wQ"
+        ],
+        [
+         "e1",
+         "wR"
+        ],
+        [
+         "f1",
+         "wR"
+        ]
+       ],
+       "ideas": [
+        "battery"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "a2",
+         "wP"
+        ],
+        [
+         "b2",
+         "wP"
+        ],
+        [
+         "c2",
+         "wP"
+        ],
+        [
+         "d5",
+         "bP"
+        ]
+       ],
+       "ideas": [
+        "pawn phalanx"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "b8",
+         "bQ"
+        ],
+        [
+         "c5",
+         "bP"
+        ],
+        [
+         "d6",
+         "bB"
+        ],
+        [
+         "d7",
+         "bB"
+        ]
+       ],
+       "ideas": [
+        "battery"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "f7",
+         "bP"
+        ],
+        [
+         "f8",
+         "bR"
+        ],
+        [
+         "h7",
+         "bP"
+        ]
+       ],
+       "ideas": []
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "fen": {
+    "a8": "bR",
+    "c8": "bB",
+    "d8": "bQ",
+    "f8": "bR",
+    "g8": "bK",
+    "a7": "bP",
+    "b7": "bP",
+    "g7": "bP",
+    "h7": "bP",
+    "e6": "bP",
+    "d5": "bP",
+    "e5": "wP",
+    "f5": "bN",
+    "c4": "bP",
+    "e4": "bN",
+    "f4": "wP",
+    "c3": "wP",
+    "e3": "wB",
+    "f3": "wB",
+    "g3": "wP",
+    "a2": "wP",
+    "b2": "wP",
+    "c2": "wQ",
+    "h2": "wP",
+    "a1": "wR",
+    "b1": "wN",
+    "e1": "wK",
+    "h1": "wR"
+   },
+   "by checkpoint": [
+    {
+     "learned": 100,
+     "chunks": []
+    },
+    {
+     "learned": 300,
+     "chunks": []
+    },
+    {
+     "learned": 1000,
+     "chunks": [
+      {
+       "pieces": [
+        [
+         "a1",
+         "wR"
+        ],
+        [
+         "a2",
+         "wP"
+        ],
+        [
+         "b1",
+         "wN"
+        ],
+        [
+         "c2",
+         "wQ"
+        ]
+       ],
+       "ideas": [
+        "undeveloped"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "b2",
+         "wP"
+        ],
+        [
+         "c3",
+         "wP"
+        ],
+        [
+         "e5",
+         "wP"
+        ],
+        [
+         "f4",
+         "wP"
+        ]
+       ],
+       "ideas": [
+        "pawn chain"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "a7",
+         "bP"
+        ],
+        [
+         "a8",
+         "bR"
+        ],
+        [
+         "b7",
+         "bP"
+        ]
+       ],
+       "ideas": [
+        "pawn phalanx"
+       ]
+      }
+     ]
+    },
+    {
+     "learned": 2000,
+     "chunks": [
+      {
+       "pieces": [
+        [
+         "a1",
+         "wR"
+        ],
+        [
+         "a2",
+         "wP"
+        ],
+        [
+         "b1",
+         "wN"
+        ],
+        [
+         "c2",
+         "wQ"
+        ]
+       ],
+       "ideas": [
+        "undeveloped"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "b2",
+         "wP"
+        ],
+        [
+         "c3",
+         "wP"
+        ],
+        [
+         "e5",
+         "wP"
+        ],
+        [
+         "f4",
+         "wP"
+        ]
+       ],
+       "ideas": [
+        "pawn chain"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "a7",
+         "bP"
+        ],
+        [
+         "a8",
+         "bR"
+        ]
+       ],
+       "ideas": []
+      }
+     ]
+    },
+    {
+     "learned": 4000,
+     "chunks": [
+      {
+       "pieces": [
+        [
+         "a1",
+         "wR"
+        ],
+        [
+         "a2",
+         "wP"
+        ],
+        [
+         "b1",
+         "wN"
+        ],
+        [
+         "c2",
+         "wQ"
+        ]
+       ],
+       "ideas": [
+        "undeveloped"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "b2",
+         "wP"
+        ],
+        [
+         "c3",
+         "wP"
+        ],
+        [
+         "e5",
+         "wP"
+        ],
+        [
+         "f4",
+         "wP"
+        ]
+       ],
+       "ideas": [
+        "pawn chain"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "a7",
+         "bP"
+        ],
+        [
+         "a8",
+         "bR"
+        ],
+        [
+         "b7",
+         "bP"
+        ],
+        [
+         "g7",
+         "bP"
+        ]
+       ],
+       "ideas": [
+        "pawn phalanx"
+       ]
+      },
+      {
+       "pieces": [
+        [
+         "d8",
+         "bQ"
+        ],
+        [
+         "f5",
+         "bN"
+        ],
+        [
+         "f8",
+         "bR"
+        ],
+        [
+         "g8",
+         "bK"
+        ]
+       ],
+       "ideas": [
+        "battery",
+        "castled king"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
