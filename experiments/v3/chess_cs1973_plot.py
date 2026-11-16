@@ -16,7 +16,12 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
 out = sys.argv[1]
-runs = [json.load(open(p, encoding="utf-8")) for p in sys.argv[2:]]
+import os
+from collections import OrderedDict
+GROUPS = OrderedDict()   # tag (file name before _s<seed>) -> runs; first tag solid, later tags dashed
+for p in sys.argv[2:]:
+    GROUPS.setdefault(os.path.basename(p).rsplit("_s", 1)[0], []).append(json.load(open(p, encoding="utf-8")))
+NAMES = {"cs73x": "4,660-position stream", "cs73L": "27,459-position stream"}
 INK, MUTED, GRID = "#1f1f1d", "#6b6a64", "#e4e3dc"
 COL = {"K=7": "#2a78d6", "K=4": "#d6336c"}
 HEAD = [300, 1000, 4000]
@@ -41,12 +46,13 @@ def get(r, K, typ, key):
     return out_
 
 
-def draw(ax, series, colour, label):
-    xs = [n for n, _ in series[0]]
+def draw(ax, series, colour, label, ls="-"):
+    L = min(len(s) for s in series)        # seeds still running may have fewer points
+    xs = [n for n, _ in series[0][:L]]
     for s in series:
-        ax.plot([n for n, _ in s], [v for _, v in s], color=colour, lw=0.7, alpha=0.35)
-    m = [sum(s[i][1] for s in series) / len(series) for i in range(len(xs))]
-    ax.plot(xs, m, color=colour, lw=2, marker="o", ms=4, label=label)
+        ax.plot([n for n, _ in s], [v for _, v in s], color=colour, lw=0.7, alpha=0.35, ls=ls)
+    m = [sum(s[i][1] for s in series) / len(series) for i in range(L)]
+    ax.plot(xs, m, color=colour, lw=2, marker="o" if ls == "-" else "^", ms=4, label=label, ls=ls)
 
 
 def human(ax, vals, label="human B / A / M"):
@@ -55,18 +61,23 @@ def human(ax, vals, label="human B / A / M"):
         ax.annotate(t, (x, v), xytext=(6, 4), textcoords="offset points", fontsize=8, color=INK)
 
 
-fig, axes = plt.subplots(1, 4, figsize=(15, 3.6))
+fig, axes = plt.subplots(1, 4, figsize=(16, 4.0))
 for ax, typ, title in zip(axes[:3], ("middle", "end", "random"),
                           ("game middle (24-26 pieces)", "game end (12-15 pieces)", "random positions")):
-    for K in ("K=7", "K=4"):
-        draw(ax, [get(r, K, typ, "trial 1 correct") for r in runs], COL[K], f"model, STM {K}")
+    for gi, (tag, runs) in enumerate(GROUPS.items()):
+        for K in ("K=7", "K=4"):
+            draw(ax, [get(r, K, typ, "trial 1 correct") for r in runs], COL[K],
+                 f"STM {K}, {NAMES.get(tag, tag)}", "-" if gi == 0 else "--")
     human(ax, HUMAN[typ])
     ax.set_title(f"trial-1 recall, {title}", fontsize=10)
     ax.set_ylabel("pieces correct", fontsize=9)
 ax = axes[3]
-draw(ax, [get(r, "K=7", "middle", "first chunk size") for r in runs], "#1baf7a", "model first chunk size")
-cp = [[(n, p["copy"]["middle"]["pieces per glance"]["mean"]) for n, p in pts(r)] for r in runs]
-draw(ax, cp, "#eda100", "model pieces per glance (copy)")
+for gi, (tag, runs) in enumerate(GROUPS.items()):
+    ls = "-" if gi == 0 else "--"
+    draw(ax, [get(r, "K=7", "middle", "first chunk size") for r in runs], "#1baf7a",
+         "first chunk size" + ("" if gi == 0 else ", long"), ls)
+    cp = [[(n, p["copy"]["middle"]["pieces per glance"]["mean"]) for n, p in pts(r)] for r in runs]
+    draw(ax, cp, "#eda100", "pieces per glance (copy)" + ("" if gi == 0 else ", long"), ls)
 ax.plot(HEAD, HUMAN["first chunk size"], ls="none", marker="s", ms=8, mfc="none", mec="#1baf7a", mew=1.5, label="human first chunk")
 ax.plot(HEAD, HUMAN["pieces per glance"], ls="none", marker="D", ms=7, mfc="none", mec="#eda100", mew=1.5, label="human per glance")
 ax.set_title("chunk size, game middle", fontsize=10)
@@ -77,7 +88,8 @@ for ax in axes:
     ax.grid(color=GRID, lw=0.6)
     for sp in ("top", "right"):
         ax.spines[sp].set_visible(False)
-    ax.legend(fontsize=7, frameon=False)
+    if ax in (axes[0], axes[3]):
+        ax.legend(fontsize=6.5, frameon=False)
 fig.tight_layout()
 fig.savefig(out, dpi=150)
 print("wrote", out)

@@ -1,0 +1,4793 @@
+{
+ "tag": "cs73L",
+ "seed": 13,
+ "theta": 16.0,
+ "K": [
+  7,
+  4
+ ],
+ "reps": 10,
+ "curve": [
+  1000,
+  4000,
+  8000,
+  16000,
+  27459
+ ],
+ "train positions available": 27459,
+ "headline": {
+  "B": 300,
+  "A": 1000,
+  "M": 4000
+ },
+ "max size": 4,
+ "note": "no timing in the model: no latencies; chunk boundaries are labels (memory) or glances (copy)",
+ "points": {
+  "1000": {
+   "positions learned": 1000,
+   "records": 26604,
+   "stored chunks": 4251,
+   "memory": {
+    "K=7": {
+     "middle": {
+      "trial 1 correct": {
+       "mean": 9.2,
+       "se_pos": 0.734,
+       "se_rep": 0.137
+      },
+      "trial 1 commission": {
+       "mean": 2.44,
+       "se_pos": 0.824,
+       "se_rep": 0.217
+      },
+      "trial 1 omission": {
+       "mean": 15.82,
+       "se_pos": 0.835,
+       "se_rep": 0.18
+      },
+      "trial 1 percent": {
+       "mean": 36.815,
+       "se_pos": 3.035,
+       "se_rep": 0.535
+      },
+      "chunks trial 1": {
+       "mean": 7.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "omitted labels trial 1": {
+       "mean": 0.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "multi-piece chunks trial 1": {
+       "mean": 1.68,
+       "se_pos": 0.328,
+       "se_rep": 0.085
+      },
+      "mean chunk size trial 1": {
+       "mean": 1.711,
+       "se_pos": 0.14,
+       "se_rep": 0.033
+      },
+      "first chunk size": {
+       "mean": 3.88,
+       "se_pos": 0.12,
+       "se_rep": 0.08
+      },
+      "pieces added per later trial": {
+       "mean": 6.037,
+       "se_pos": 0.406,
+       "se_rep": 0.123
+      },
+      "reached criterion": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "trials (to criterion or cap)": {
+       "mean": 3.68,
+       "se_pos": 0.202,
+       "se_rep": 0.061
+      },
+      "curve 1": {
+       "mean": 9.2,
+       "se_pos": 0.734,
+       "se_rep": 0.137
+      },
+      "curve 2": {
+       "mean": 17.2,
+       "se_pos": 0.698,
+       "se_rep": 0.171
+      },
+      "curve 3": {
+       "mean": 23.6,
+       "se_pos": 0.561,
+       "se_rep": 0.163
+      },
+      "curve 4": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 5": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 6": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 7": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 8": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 9": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 10": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 11": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 12": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 13": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 14": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 15": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      }
+     },
+     "end": {
+      "trial 1 correct": {
+       "mean": 7.0,
+       "se_pos": 0.202,
+       "se_rep": 0.094
+      },
+      "trial 1 commission": {
+       "mean": 0.38,
+       "se_pos": 0.26,
+       "se_rep": 0.182
+      },
+      "trial 1 omission": {
+       "mean": 6.62,
+       "se_pos": 0.603,
+       "se_rep": 0.185
+      },
+      "trial 1 percent": {
+       "mean": 51.851,
+       "se_pos": 2.981,
+       "se_rep": 0.852
+      },
+      "chunks trial 1": {
+       "mean": 6.9,
+       "se_pos": 0.084,
+       "se_rep": 0.045
+      },
+      "omitted labels trial 1": {
+       "mean": 0.1,
+       "se_pos": 0.084,
+       "se_rep": 0.045
+      },
+      "multi-piece chunks trial 1": {
+       "mean": 0.18,
+       "se_pos": 0.104,
+       "se_rep": 0.087
+      },
+      "mean chunk size trial 1": {
+       "mean": 1.071,
+       "se_pos": 0.039,
+       "se_rep": 0.036
+      },
+      "first chunk size": {
+       "mean": 1.48,
+       "se_pos": 0.253,
+       "se_rep": 0.25
+      },
+      "pieces added per later trial": {
+       "mean": 5.04,
+       "se_pos": 0.602,
+       "se_rep": 0.203
+      },
+      "reached criterion": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "trials (to criterion or cap)": {
+       "mean": 2.42,
+       "se_pos": 0.222,
+       "se_rep": 0.076
+      },
+      "curve 1": {
+       "mean": 7.0,
+       "se_pos": 0.202,
+       "se_rep": 0.094
+      },
+      "curve 2": {
+       "mean": 13.12,
+       "se_pos": 0.36,
+       "se_rep": 0.161
+      },
+      "curve 3": {
+       "mean": 13.6,
+       "se_pos": 0.456,
+       "se_rep": 0.184
+      },
+      "curve 4": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 5": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 6": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 7": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 8": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 9": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 10": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 11": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 12": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 13": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 14": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 15": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      }
+     },
+     "random middle": {
+      "trial 1 correct": {
+       "mean": 5.45,
+       "se_pos": 0.65,
+       "se_rep": 0.203
+      },
+      "trial 1 commission": {
+       "mean": 0.65,
+       "se_pos": 0.35,
+       "se_rep": 0.373
+      },
+      "trial 1 omission": {
+       "mean": 19.3,
+       "se_pos": 0.7,
+       "se_rep": 0.26
+      },
+      "trial 1 percent": {
+       "mean": 22.011,
+       "se_pos": 2.689,
+       "se_rep": 0.793
+      },
+      "chunks trial 1": {
+       "mean": 5.75,
+       "se_pos": 0.45,
+       "se_rep": 0.171
+      },
+      "omitted labels trial 1": {
+       "mean": 1.25,
+       "se_pos": 0.45,
+       "se_rep": 0.171
+      },
+      "multi-piece chunks trial 1": {
+       "mean": 0.15,
+       "se_pos": 0.05,
+       "se_rep": 0.107
+      },
+      "mean chunk size trial 1": {
+       "mean": 1.076,
+       "se_pos": 0.034,
+       "se_rep": 0.055
+      },
+      "first chunk size": {
+       "mean": 1.45,
+       "se_pos": 0.15,
+       "se_rep": 0.32
+      },
+      "pieces added per later trial": {
+       "mean": 4.983,
+       "se_pos": 0.258,
+       "se_rep": 0.14
+      },
+      "reached criterion": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "trials (to criterion or cap)": {
+       "mean": 4.9,
+       "se_pos": 0.1,
+       "se_rep": 0.067
+      },
+      "curve 1": {
+       "mean": 5.45,
+       "se_pos": 0.65,
+       "se_rep": 0.203
+      },
+      "curve 2": {
+       "mean": 12.55,
+       "se_pos": 0.85,
+       "se_rep": 0.229
+      },
+      "curve 3": {
+       "mean": 18.9,
+       "se_pos": 0.6,
+       "se_rep": 0.306
+      },
+      "curve 4": {
+       "mean": 23.15,
+       "se_pos": 0.65,
+       "se_rep": 0.299
+      },
+      "curve 5": {
+       "mean": 24.75,
+       "se_pos": 0.25,
+       "se_rep": 0.239
+      },
+      "curve 6": {
+       "mean": 24.75,
+       "se_pos": 0.25,
+       "se_rep": 0.239
+      },
+      "curve 7": {
+       "mean": 24.75,
+       "se_pos": 0.25,
+       "se_rep": 0.239
+      }
+     },
+     "random end": {
+      "trial 1 correct": {
+       "mean": 5.75,
+       "se_pos": 0.35,
+       "se_rep": 0.271
+      },
+      "trial 1 commission": {
+       "mean": 0.2,
+       "se_pos": 0.1,
+       "se_rep": 0.111
+      },
+      "trial 1 omission": {
+       "mean": 7.85,
+       "se_pos": 0.95,
+       "se_rep": 0.35
+      },
+      "trial 1 percent": {
+       "mean": 42.646,
+       "se_pos": 4.045,
+       "se_rep": 2.052
+      },
+      "chunks trial 1": {
+       "mean": 6.0,
+       "se_pos": 0.2,
+       "se_rep": 0.183
+      },
+      "omitted labels trial 1": {
+       "mean": 1.0,
+       "se_pos": 0.2,
+       "se_rep": 0.183
+      },
+      "multi-piece chunks trial 1": {
+       "mean": 0.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "mean chunk size trial 1": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "first chunk size": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "pieces added per later trial": {
+       "mean": 4.425,
+       "se_pos": 0.775,
+       "se_rep": 0.341
+      },
+      "reached criterion": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "trials (to criterion or cap)": {
+       "mean": 2.95,
+       "se_pos": 0.35,
+       "se_rep": 0.157
+      },
+      "curve 1": {
+       "mean": 5.75,
+       "se_pos": 0.35,
+       "se_rep": 0.271
+      },
+      "curve 2": {
+       "mean": 11.8,
+       "se_pos": 0.5,
+       "se_rep": 0.17
+      },
+      "curve 3": {
+       "mean": 13.25,
+       "se_pos": 0.55,
+       "se_rep": 0.25
+      },
+      "curve 4": {
+       "mean": 13.6,
+       "se_pos": 0.7,
+       "se_rep": 0.233
+      },
+      "curve 5": {
+       "mean": 13.6,
+       "se_pos": 0.7,
+       "se_rep": 0.233
+      },
+      "curve 6": {
+       "mean": 13.6,
+       "se_pos": 0.7,
+       "se_rep": 0.233
+      },
+      "curve 7": {
+       "mean": 13.6,
+       "se_pos": 0.7,
+       "se_rep": 0.233
+      }
+     }
+    },
+    "K=4": {
+     "middle": {
+      "trial 1 correct": {
+       "mean": 6.24,
+       "se_pos": 0.732,
+       "se_rep": 0.136
+      },
+      "trial 1 commission": {
+       "mean": 2.54,
+       "se_pos": 0.806,
+       "se_rep": 0.25
+      },
+      "trial 1 omission": {
+       "mean": 18.78,
+       "se_pos": 0.826,
+       "se_rep": 0.187
+      },
+      "trial 1 percent": {
+       "mean": 24.966,
+       "se_pos": 2.984,
+       "se_rep": 0.539
+      },
+      "chunks trial 1": {
+       "mean": 4.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "omitted labels trial 1": {
+       "mean": 0.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "multi-piece chunks trial 1": {
+       "mean": 1.68,
+       "se_pos": 0.328,
+       "se_rep": 0.085
+      },
+      "mean chunk size trial 1": {
+       "mean": 2.245,
+       "se_pos": 0.245,
+       "se_rep": 0.058
+      },
+      "first chunk size": {
+       "mean": 3.88,
+       "se_pos": 0.12,
+       "se_rep": 0.08
+      },
+      "pieces added per later trial": {
+       "mean": 3.804,
+       "se_pos": 0.156,
+       "se_rep": 0.04
+      },
+      "reached criterion": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "trials (to criterion or cap)": {
+       "mean": 5.96,
+       "se_pos": 0.194,
+       "se_rep": 0.065
+      },
+      "curve 1": {
+       "mean": 6.24,
+       "se_pos": 0.732,
+       "se_rep": 0.136
+      },
+      "curve 2": {
+       "mean": 11.24,
+       "se_pos": 0.669,
+       "se_rep": 0.21
+      },
+      "curve 3": {
+       "mean": 15.3,
+       "se_pos": 0.705,
+       "se_rep": 0.194
+      },
+      "curve 4": {
+       "mean": 19.32,
+       "se_pos": 0.686,
+       "se_rep": 0.182
+      },
+      "curve 5": {
+       "mean": 22.9,
+       "se_pos": 0.565,
+       "se_rep": 0.141
+      },
+      "curve 6": {
+       "mean": 24.84,
+       "se_pos": 0.353,
+       "se_rep": 0.157
+      },
+      "curve 7": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 8": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 9": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 10": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 11": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 12": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 13": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 14": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 15": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      }
+     },
+     "end": {
+      "trial 1 correct": {
+       "mean": 4.02,
+       "se_pos": 0.197,
+       "se_rep": 0.101
+      },
+      "trial 1 commission": {
+       "mean": 0.38,
+       "se_pos": 0.26,
+       "se_rep": 0.182
+      },
+      "trial 1 omission": {
+       "mean": 9.6,
+       "se_pos": 0.594,
+       "se_rep": 0.189
+      },
+      "trial 1 percent": {
+       "mean": 29.803,
+       "se_pos": 2.282,
+       "se_rep": 0.778
+      },
+      "chunks trial 1": {
+       "mean": 3.92,
+       "se_pos": 0.064,
+       "se_rep": 0.044
+      },
+      "omitted labels trial 1": {
+       "mean": 0.08,
+       "se_pos": 0.064,
+       "se_rep": 0.044
+      },
+      "multi-piece chunks trial 1": {
+       "mean": 0.18,
+       "se_pos": 0.104,
+       "se_rep": 0.087
+      },
+      "mean chunk size trial 1": {
+       "mean": 1.125,
+       "se_pos": 0.068,
+       "se_rep": 0.063
+      },
+      "first chunk size": {
+       "mean": 1.48,
+       "se_pos": 0.253,
+       "se_rep": 0.25
+      },
+      "pieces added per later trial": {
+       "mean": 3.402,
+       "se_pos": 0.199,
+       "se_rep": 0.058
+      },
+      "reached criterion": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "trials (to criterion or cap)": {
+       "mean": 3.86,
+       "se_pos": 0.228,
+       "se_rep": 0.052
+      },
+      "curve 1": {
+       "mean": 4.02,
+       "se_pos": 0.197,
+       "se_rep": 0.101
+      },
+      "curve 2": {
+       "mean": 7.98,
+       "se_pos": 0.195,
+       "se_rep": 0.105
+      },
+      "curve 3": {
+       "mean": 11.88,
+       "se_pos": 0.138,
+       "se_rep": 0.08
+      },
+      "curve 4": {
+       "mean": 13.56,
+       "se_pos": 0.477,
+       "se_rep": 0.178
+      },
+      "curve 5": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 6": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 7": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 8": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 9": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 10": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 11": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 12": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 13": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 14": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 15": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      }
+     },
+     "random middle": {
+      "trial 1 correct": {
+       "mean": 2.85,
+       "se_pos": 0.55,
+       "se_rep": 0.15
+      },
+      "trial 1 commission": {
+       "mean": 0.65,
+       "se_pos": 0.35,
+       "se_rep": 0.373
+      },
+      "trial 1 omission": {
+       "mean": 21.9,
+       "se_pos": 0.5,
+       "se_rep": 0.233
+      },
+      "trial 1 percent": {
+       "mean": 11.494,
+       "se_pos": 2.2,
+       "se_rep": 0.588
+      },
+      "chunks trial 1": {
+       "mean": 3.1,
+       "se_pos": 0.4,
+       "se_rep": 0.145
+      },
+      "omitted labels trial 1": {
+       "mean": 0.9,
+       "se_pos": 0.4,
+       "se_rep": 0.145
+      },
+      "multi-piece chunks trial 1": {
+       "mean": 0.15,
+       "se_pos": 0.05,
+       "se_rep": 0.107
+      },
+      "mean chunk size trial 1": {
+       "mean": 1.137,
+       "se_pos": 0.062,
+       "se_rep": 0.096
+      },
+      "first chunk size": {
+       "mean": 1.45,
+       "se_pos": 0.15,
+       "se_rep": 0.32
+      },
+      "pieces added per later trial": {
+       "mean": 3.467,
+       "se_pos": 0.1,
+       "se_rep": 0.047
+      },
+      "reached criterion": {
+       "mean": 0.35,
+       "se_pos": 0.25,
+       "se_rep": 0.107
+      },
+      "trials (to criterion or cap)": {
+       "mean": 7.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "curve 1": {
+       "mean": 2.85,
+       "se_pos": 0.55,
+       "se_rep": 0.15
+      },
+      "curve 2": {
+       "mean": 6.6,
+       "se_pos": 0.8,
+       "se_rep": 0.221
+      },
+      "curve 3": {
+       "mean": 10.55,
+       "se_pos": 0.85,
+       "se_rep": 0.229
+      },
+      "curve 4": {
+       "mean": 14.45,
+       "se_pos": 0.85,
+       "se_rep": 0.283
+      },
+      "curve 5": {
+       "mean": 18.2,
+       "se_pos": 0.9,
+       "se_rep": 0.249
+      },
+      "curve 6": {
+       "mean": 21.35,
+       "se_pos": 0.75,
+       "se_rep": 0.299
+      },
+      "curve 7": {
+       "mean": 23.65,
+       "se_pos": 0.65,
+       "se_rep": 0.279
+      }
+     },
+     "random end": {
+      "trial 1 correct": {
+       "mean": 3.25,
+       "se_pos": 0.35,
+       "se_rep": 0.171
+      },
+      "trial 1 commission": {
+       "mean": 0.1,
+       "se_pos": 0.1,
+       "se_rep": 0.067
+      },
+      "trial 1 omission": {
+       "mean": 10.35,
+       "se_pos": 1.05,
+       "se_rep": 0.236
+      },
+      "trial 1 percent": {
+       "mean": 24.116,
+       "se_pos": 3.842,
+       "se_rep": 1.173
+      },
+      "chunks trial 1": {
+       "mean": 3.35,
+       "se_pos": 0.35,
+       "se_rep": 0.167
+      },
+      "omitted labels trial 1": {
+       "mean": 0.65,
+       "se_pos": 0.35,
+       "se_rep": 0.167
+      },
+      "multi-piece chunks trial 1": {
+       "mean": 0.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "mean chunk size trial 1": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "first chunk size": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "pieces added per later trial": {
+       "mean": 2.833,
+       "se_pos": 0.167,
+       "se_rep": 0.096
+      },
+      "reached criterion": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "trials (to criterion or cap)": {
+       "mean": 4.7,
+       "se_pos": 0.4,
+       "se_rep": 0.133
+      },
+      "curve 1": {
+       "mean": 3.25,
+       "se_pos": 0.35,
+       "se_rep": 0.171
+      },
+      "curve 2": {
+       "mean": 6.75,
+       "se_pos": 0.35,
+       "se_rep": 0.271
+      },
+      "curve 3": {
+       "mean": 10.55,
+       "se_pos": 0.25,
+       "se_rep": 0.203
+      },
+      "curve 4": {
+       "mean": 12.6,
+       "se_pos": 0.3,
+       "se_rep": 0.245
+      },
+      "curve 5": {
+       "mean": 13.45,
+       "se_pos": 0.55,
+       "se_rep": 0.241
+      },
+      "curve 6": {
+       "mean": 13.6,
+       "se_pos": 0.7,
+       "se_rep": 0.233
+      },
+      "curve 7": {
+       "mean": 13.6,
+       "se_pos": 0.7,
+       "se_rep": 0.233
+      }
+     }
+    }
+   },
+   "table 8 (K=7)": {
+    "middle": [
+     3.88,
+     2.74,
+     1.36,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     null
+    ],
+    "end": [
+     1.48,
+     1.02,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     null
+    ],
+    "random middle": [
+     1.45,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     null
+    ],
+    "random end": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     null
+    ]
+   },
+   "copy": {
+    "middle": {
+     "glances": {
+      "mean": 21.28,
+      "se_pos": 0.798,
+      "se_rep": 0.298
+     },
+     "pieces per glance": {
+      "mean": 1.382,
+      "se_pos": 0.093,
+      "se_rep": 0.036
+     },
+     "pieces per productive glance": {
+      "mean": 1.382,
+      "se_pos": 0.093,
+      "se_rep": 0.036
+     },
+     "correct at end": {
+      "mean": 24.86,
+      "se_pos": 0.397,
+      "se_rep": 0.067
+     },
+     "commission at end": {
+      "mean": 1.82,
+      "se_pos": 0.598,
+      "se_rep": 0.296
+     },
+     "multi-piece glances": {
+      "mean": 2.74,
+      "se_pos": 0.645,
+      "se_rep": 0.27
+     }
+    },
+    "end": {
+     "glances": {
+      "mean": 13.46,
+      "se_pos": 0.572,
+      "se_rep": 0.193
+     },
+     "pieces per glance": {
+      "mean": 1.03,
+      "se_pos": 0.024,
+      "se_rep": 0.017
+     },
+     "pieces per productive glance": {
+      "mean": 1.03,
+      "se_pos": 0.024,
+      "se_rep": 0.017
+     },
+     "correct at end": {
+      "mean": 13.58,
+      "se_pos": 0.489,
+      "se_rep": 0.194
+     },
+     "commission at end": {
+      "mean": 0.12,
+      "se_pos": 0.1,
+      "se_rep": 0.08
+     },
+     "multi-piece glances": {
+      "mean": 0.16,
+      "se_pos": 0.129,
+      "se_rep": 0.093
+     }
+    },
+    "random middle": {
+     "glances": {
+      "mean": 24.6,
+      "se_pos": 0.4,
+      "se_rep": 0.245
+     },
+     "pieces per glance": {
+      "mean": 1.013,
+      "se_pos": 0.013,
+      "se_rep": 0.013
+     },
+     "pieces per productive glance": {
+      "mean": 1.013,
+      "se_pos": 0.013,
+      "se_rep": 0.013
+     },
+     "correct at end": {
+      "mean": 24.7,
+      "se_pos": 0.4,
+      "se_rep": 0.213
+     },
+     "commission at end": {
+      "mean": 0.1,
+      "se_pos": 0.1,
+      "se_rep": 0.1
+     },
+     "multi-piece glances": {
+      "mean": 0.1,
+      "se_pos": 0.1,
+      "se_rep": 0.1
+     }
+    },
+    "random end": {
+     "glances": {
+      "mean": 13.45,
+      "se_pos": 0.55,
+      "se_rep": 0.263
+     },
+     "pieces per glance": {
+      "mean": 1.014,
+      "se_pos": 0.014,
+      "se_rep": 0.014
+     },
+     "pieces per productive glance": {
+      "mean": 1.014,
+      "se_pos": 0.014,
+      "se_rep": 0.014
+     },
+     "correct at end": {
+      "mean": 13.45,
+      "se_pos": 0.55,
+      "se_rep": 0.263
+     },
+     "commission at end": {
+      "mean": 0.1,
+      "se_pos": 0.1,
+      "se_rep": 0.1
+     },
+     "multi-piece glances": {
+      "mean": 0.1,
+      "se_pos": 0.1,
+      "se_rep": 0.1
+     }
+    }
+   },
+   "decoding": {
+    "memory": {
+     "identical": 226,
+     "concept": 2340,
+     "omission": 106
+    },
+    "copy": {
+     "identical": 86,
+     "seen": 2349,
+     "concept": 63
+    }
+   },
+   "examples": [
+    {
+     "type": "middle",
+     "n": 26,
+     "curve": [
+      10,
+      17,
+      23,
+      26
+     ],
+     "chunks": [
+      [
+       "g1:wK",
+       "g2:wP",
+       "h2:wP",
+       "c2:wP"
+      ],
+      [
+       "e1:wR"
+      ],
+      [
+       "a2:wP"
+      ],
+      [
+       "b2:wP"
+      ],
+      [
+       "c3:wN"
+      ],
+      [
+       "f3:wB"
+      ],
+      [
+       "h3:wR"
+      ]
+     ]
+    },
+    {
+     "type": "middle",
+     "n": 24,
+     "curve": [
+      10,
+      19,
+      24
+     ],
+     "chunks": [
+      [
+       "d1:wQ",
+       "d3:wB",
+       "f1:wR",
+       "c3:wN"
+      ],
+      [
+       "g1:wK",
+       "g2:wP",
+       "f2:wP",
+       "h3:wP"
+      ],
+      [
+       "a2:wP"
+      ],
+      [
+       "c3:wP"
+      ],
+      [
+       "b5:bP"
+      ],
+      [
+       "c5:wB"
+      ],
+      [
+       "e5:wP"
+      ]
+     ]
+    },
+    {
+     "type": "middle",
+     "n": 24,
+     "curve": [
+      6,
+      15,
+      22,
+      24
+     ],
+     "chunks": [
+      [
+       "c1:wB",
+       "d1:wQ",
+       "f1:wR",
+       "f3:wN"
+      ],
+      [
+       "e1:wK"
+      ],
+      [
+       "h1:wR"
+      ],
+      [
+       "d2:wN"
+      ],
+      [
+       "f2:wP"
+      ],
+      [
+       "g2:wP"
+      ],
+      [
+       "a3:bQ"
+      ]
+     ]
+    },
+    {
+     "type": "middle",
+     "n": 24,
+     "curve": [
+      10,
+      19,
+      24
+     ],
+     "chunks": [
+      [
+       "g1:wK",
+       "g2:wP",
+       "f2:wP",
+       "d4:wP"
+      ],
+      [
+       "f1:wR"
+      ],
+      [
+       "b2:wP"
+      ],
+      [
+       "d2:wQ"
+      ],
+      [
+       "h3:wP"
+      ],
+      [
+       "c4:wR"
+      ],
+      [
+       "g5:wN"
+      ]
+     ]
+    }
+   ],
+   "relations": {
+    "copy within random": {
+     "N": 4,
+     "-": 0.0,
+     "A": 0.0,
+     "P": 0.0,
+     "C": 0.25,
+     "S": 0.0,
+     "AP": 0.0,
+     "AS": 0.0,
+     "DC": 0.0,
+     "PC": 0.0,
+     "PS": 0.0,
+     "CS": 0.0,
+     "APS": 0.0,
+     "DPC": 0.75,
+     "DCS": 0.0,
+     "PCS": 0.0,
+     "DPCS": 0.0
+    },
+    "copy within game": {
+     "N": 254,
+     "-": 0.0,
+     "A": 0.0,
+     "P": 0.0,
+     "C": 0.122,
+     "S": 0.0,
+     "AP": 0.0,
+     "AS": 0.0,
+     "DC": 0.1496,
+     "PC": 0.0157,
+     "PS": 0.0,
+     "CS": 0.1417,
+     "APS": 0.0,
+     "DPC": 0.311,
+     "DCS": 0.0945,
+     "PCS": 0.122,
+     "DPCS": 0.0433
+    },
+    "memory within game": {
+     "N": 264,
+     "-": 0.0,
+     "A": 0.0,
+     "P": 0.0,
+     "C": 0.0871,
+     "S": 0.0,
+     "AP": 0.0,
+     "AS": 0.0,
+     "DC": 0.2462,
+     "PC": 0.0,
+     "PS": 0.0,
+     "CS": 0.1553,
+     "APS": 0.0,
+     "DPC": 0.3485,
+     "DCS": 0.0076,
+     "PCS": 0.1515,
+     "DPCS": 0.0038
+    },
+    "copy between random": {
+     "N": 719,
+     "-": 0.1335,
+     "A": 0.0556,
+     "P": 0.0278,
+     "C": 0.1502,
+     "S": 0.1168,
+     "AP": 0.0765,
+     "AS": 0.0056,
+     "DC": 0.0668,
+     "PC": 0.0264,
+     "PS": 0.0793,
+     "CS": 0.1113,
+     "APS": 0.0097,
+     "DPC": 0.0834,
+     "DCS": 0.0014,
+     "PCS": 0.0501,
+     "DPCS": 0.0056
+    },
+    "copy between game": {
+     "N": 1585,
+     "-": 0.0751,
+     "A": 0.0215,
+     "P": 0.0208,
+     "C": 0.2233,
+     "S": 0.0587,
+     "AP": 0.0177,
+     "AS": 0.0006,
+     "DC": 0.0902,
+     "PC": 0.0435,
+     "PS": 0.0265,
+     "CS": 0.1792,
+     "APS": 0.0013,
+     "DPC": 0.1167,
+     "DCS": 0.0139,
+     "PCS": 0.0776,
+     "DPCS": 0.0334
+    },
+    "memory between game": {
+     "N": 591,
+     "-": 0.0897,
+     "A": 0.022,
+     "P": 0.0152,
+     "C": 0.2826,
+     "S": 0.0609,
+     "AP": 0.0203,
+     "AS": 0.0085,
+     "DC": 0.0897,
+     "PC": 0.0338,
+     "PS": 0.0186,
+     "CS": 0.1641,
+     "APS": 0.0,
+     "DPC": 0.0981,
+     "DCS": 0.0118,
+     "PCS": 0.0592,
+     "DPCS": 0.0254
+    },
+    "a priori game": {
+     "N": 38524,
+     "-": 0.319,
+     "A": 0.0156,
+     "P": 0.0051,
+     "C": 0.2486,
+     "S": 0.1677,
+     "AP": 0.0056,
+     "AS": 0.0006,
+     "DC": 0.0321,
+     "PC": 0.018,
+     "PS": 0.0071,
+     "CS": 0.1035,
+     "APS": 0.0006,
+     "DPC": 0.0456,
+     "DCS": 0.003,
+     "PCS": 0.0097,
+     "DPCS": 0.0182
+    },
+    "a priori random": {
+     "N": 15159,
+     "-": 0.2861,
+     "A": 0.0226,
+     "P": 0.0089,
+     "C": 0.2855,
+     "S": 0.1508,
+     "AP": 0.0295,
+     "AS": 0.0012,
+     "DC": 0.0224,
+     "PC": 0.0096,
+     "PS": 0.0164,
+     "CS": 0.1145,
+     "APS": 0.0061,
+     "DPC": 0.0278,
+     "DCS": 0.0007,
+     "PCS": 0.0092,
+     "DPCS": 0.0087
+    },
+    "memory within random": {
+     "N": 8,
+     "-": 0.0,
+     "A": 0.0,
+     "P": 0.0,
+     "C": 0.0,
+     "S": 0.0,
+     "AP": 0.0,
+     "AS": 0.0,
+     "DC": 0.5,
+     "PC": 0.0,
+     "PS": 0.0,
+     "CS": 0.0,
+     "APS": 0.0,
+     "DPC": 0.375,
+     "DCS": 0.0,
+     "PCS": 0.125,
+     "DPCS": 0.0
+    },
+    "memory between random": {
+     "N": 194,
+     "-": 0.1289,
+     "A": 0.0515,
+     "P": 0.0258,
+     "C": 0.1443,
+     "S": 0.1546,
+     "AP": 0.0464,
+     "AS": 0.0,
+     "DC": 0.0825,
+     "PC": 0.0361,
+     "PS": 0.0309,
+     "CS": 0.134,
+     "APS": 0.0052,
+     "DPC": 0.067,
+     "DCS": 0.0052,
+     "PCS": 0.0567,
+     "DPCS": 0.0309
+    }
+   },
+   "relations correlations (Table 7)": {
+    "copy within random | copy within game": 0.783,
+    "copy within random | memory within game": 0.705,
+    "copy within random | copy between random": 0.269,
+    "copy within random | copy between game": 0.435,
+    "copy within random | memory between game": 0.384,
+    "copy within random | a priori game": 0.119,
+    "copy within game | memory within game": 0.941,
+    "copy within game | copy between random": 0.226,
+    "copy within game | copy between game": 0.622,
+    "copy within game | memory between game": 0.505,
+    "copy within game | a priori game": 0.031,
+    "memory within game | copy between random": 0.27,
+    "memory within game | copy between game": 0.576,
+    "memory within game | memory between game": 0.447,
+    "memory within game | a priori game": 0.004,
+    "copy between random | copy between game": 0.739,
+    "copy between random | memory between game": 0.76,
+    "copy between random | a priori game": 0.814,
+    "copy between game | memory between game": 0.974,
+    "copy between game | a priori game": 0.6,
+    "memory between game | a priori game": 0.679
+   },
+   "ideas": {
+    "memory game": {
+     "chunks": 93,
+     "pawn chain": 0.054,
+     "pawn phalanx": 0.484,
+     "doubled pawns": 0.0,
+     "pawn ram": 0.0,
+     "king shelter": 0.409,
+     "castled king": 0.452,
+     "fianchetto": 0.0,
+     "pawn-guarded": 0.065,
+     "battery": 0.366,
+     "undeveloped": 0.237,
+     "attack": 0.0,
+     "same-colour cluster": 0.548,
+     "  back-rank group": 0.0,
+     "  connected rooks / queen+rooks": 0.0,
+     "C&S types (pawn chain, castled king or same-colour cluster)": 1.0
+    },
+    "memory random": {
+     "chunks": 3,
+     "pawn chain": 0.0,
+     "pawn phalanx": 0.333,
+     "doubled pawns": 0.0,
+     "pawn ram": 0.0,
+     "king shelter": 0.0,
+     "castled king": 0.0,
+     "fianchetto": 0.0,
+     "pawn-guarded": 0.333,
+     "battery": 0.333,
+     "undeveloped": 0.333,
+     "attack": 0.0,
+     "same-colour cluster": 1.0,
+     "  back-rank group": 0.0,
+     "  connected rooks / queen+rooks": 0.0,
+     "C&S types (pawn chain, castled king or same-colour cluster)": 1.0
+    },
+    "copy game": {
+     "chunks": 145,
+     "pawn chain": 0.062,
+     "pawn phalanx": 0.297,
+     "doubled pawns": 0.0,
+     "pawn ram": 0.0,
+     "king shelter": 0.262,
+     "castled king": 0.303,
+     "fianchetto": 0.0,
+     "pawn-guarded": 0.028,
+     "battery": 0.497,
+     "undeveloped": 0.131,
+     "attack": 0.0,
+     "same-colour cluster": 0.676,
+     "  back-rank group": 0.007,
+     "  connected rooks / queen+rooks": 0.028,
+     "C&S types (pawn chain, castled king or same-colour cluster)": 1.0
+    },
+    "copy random": {
+     "chunks": 4,
+     "pawn chain": 0.0,
+     "pawn phalanx": 0.0,
+     "doubled pawns": 0.0,
+     "pawn ram": 0.0,
+     "king shelter": 0.0,
+     "castled king": 0.0,
+     "fianchetto": 0.0,
+     "pawn-guarded": 0.0,
+     "battery": 0.5,
+     "undeveloped": 0.0,
+     "attack": 0.0,
+     "same-colour cluster": 1.0,
+     "  back-rank group": 0.0,
+     "  connected rooks / queen+rooks": 0.0,
+     "C&S types (pawn chain, castled king or same-colour cluster)": 1.0
+    }
+   },
+   "seconds": 1282
+  },
+  "4000": {
+   "positions learned": 4000,
+   "records": 107012,
+   "stored chunks": 14681,
+   "memory": {
+    "K=7": {
+     "middle": {
+      "trial 1 correct": {
+       "mean": 14.24,
+       "se_pos": 1.097,
+       "se_rep": 0.245
+      },
+      "trial 1 commission": {
+       "mean": 3.7,
+       "se_pos": 0.907,
+       "se_rep": 0.196
+      },
+      "trial 1 omission": {
+       "mean": 10.78,
+       "se_pos": 1.155,
+       "se_rep": 0.29
+      },
+      "trial 1 percent": {
+       "mean": 56.984,
+       "se_pos": 4.418,
+       "se_rep": 1.039
+      },
+      "chunks trial 1": {
+       "mean": 6.96,
+       "se_pos": 0.04,
+       "se_rep": 0.027
+      },
+      "omitted labels trial 1": {
+       "mean": 0.04,
+       "se_pos": 0.04,
+       "se_rep": 0.027
+      },
+      "multi-piece chunks trial 1": {
+       "mean": 4.7,
+       "se_pos": 0.481,
+       "se_rep": 0.086
+      },
+      "mean chunk size trial 1": {
+       "mean": 2.69,
+       "se_pos": 0.156,
+       "se_rep": 0.038
+      },
+      "first chunk size": {
+       "mean": 3.88,
+       "se_pos": 0.12,
+       "se_rep": 0.061
+      },
+      "pieces added per later trial": {
+       "mean": 6.317,
+       "se_pos": 0.904,
+       "se_rep": 0.218
+      },
+      "reached criterion": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "trials (to criterion or cap)": {
+       "mean": 2.86,
+       "se_pos": 0.282,
+       "se_rep": 0.052
+      },
+      "curve 1": {
+       "mean": 14.24,
+       "se_pos": 1.097,
+       "se_rep": 0.245
+      },
+      "curve 2": {
+       "mean": 22.9,
+       "se_pos": 0.897,
+       "se_rep": 0.278
+      },
+      "curve 3": {
+       "mean": 24.84,
+       "se_pos": 0.364,
+       "se_rep": 0.173
+      },
+      "curve 4": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 5": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 6": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 7": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 8": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 9": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 10": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 11": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 12": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 13": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 14": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 15": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      }
+     },
+     "end": {
+      "trial 1 correct": {
+       "mean": 7.88,
+       "se_pos": 0.61,
+       "se_rep": 0.15
+      },
+      "trial 1 commission": {
+       "mean": 1.62,
+       "se_pos": 0.796,
+       "se_rep": 0.329
+      },
+      "trial 1 omission": {
+       "mean": 5.74,
+       "se_pos": 0.784,
+       "se_rep": 0.146
+      },
+      "trial 1 percent": {
+       "mean": 58.179,
+       "se_pos": 4.908,
+       "se_rep": 0.809
+      },
+      "chunks trial 1": {
+       "mean": 6.96,
+       "se_pos": 0.04,
+       "se_rep": 0.027
+      },
+      "omitted labels trial 1": {
+       "mean": 0.04,
+       "se_pos": 0.04,
+       "se_rep": 0.027
+      },
+      "multi-piece chunks trial 1": {
+       "mean": 1.04,
+       "se_pos": 0.369,
+       "se_rep": 0.139
+      },
+      "mean chunk size trial 1": {
+       "mean": 1.385,
+       "se_pos": 0.152,
+       "se_rep": 0.056
+      },
+      "first chunk size": {
+       "mean": 2.8,
+       "se_pos": 0.566,
+       "se_rep": 0.196
+      },
+      "pieces added per later trial": {
+       "mean": 5.18,
+       "se_pos": 0.714,
+       "se_rep": 0.194
+      },
+      "reached criterion": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "trials (to criterion or cap)": {
+       "mean": 2.16,
+       "se_pos": 0.129,
+       "se_rep": 0.058
+      },
+      "curve 1": {
+       "mean": 7.88,
+       "se_pos": 0.61,
+       "se_rep": 0.15
+      },
+      "curve 2": {
+       "mean": 13.44,
+       "se_pos": 0.458,
+       "se_rep": 0.165
+      },
+      "curve 3": {
+       "mean": 13.6,
+       "se_pos": 0.456,
+       "se_rep": 0.184
+      },
+      "curve 4": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 5": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 6": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 7": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 8": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 9": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 10": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 11": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 12": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 13": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 14": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 15": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      }
+     },
+     "random middle": {
+      "trial 1 correct": {
+       "mean": 6.1,
+       "se_pos": 0.5,
+       "se_rep": 0.233
+      },
+      "trial 1 commission": {
+       "mean": 2.75,
+       "se_pos": 1.45,
+       "se_rep": 0.724
+      },
+      "trial 1 omission": {
+       "mean": 18.65,
+       "se_pos": 0.75,
+       "se_rep": 0.358
+      },
+      "trial 1 percent": {
+       "mean": 24.709,
+       "se_pos": 2.217,
+       "se_rep": 1.008
+      },
+      "chunks trial 1": {
+       "mean": 6.5,
+       "se_pos": 0.4,
+       "se_rep": 0.167
+      },
+      "omitted labels trial 1": {
+       "mean": 0.5,
+       "se_pos": 0.4,
+       "se_rep": 0.167
+      },
+      "multi-piece chunks trial 1": {
+       "mean": 0.9,
+       "se_pos": 0.5,
+       "se_rep": 0.233
+      },
+      "mean chunk size trial 1": {
+       "mean": 1.374,
+       "se_pos": 0.217,
+       "se_rep": 0.098
+      },
+      "first chunk size": {
+       "mean": 2.55,
+       "se_pos": 0.75,
+       "se_rep": 0.337
+      },
+      "pieces added per later trial": {
+       "mean": 5.654,
+       "se_pos": 0.363,
+       "se_rep": 0.194
+      },
+      "reached criterion": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "trials (to criterion or cap)": {
+       "mean": 4.35,
+       "se_pos": 0.25,
+       "se_rep": 0.107
+      },
+      "curve 1": {
+       "mean": 6.1,
+       "se_pos": 0.5,
+       "se_rep": 0.233
+      },
+      "curve 2": {
+       "mean": 14.4,
+       "se_pos": 0.9,
+       "se_rep": 0.379
+      },
+      "curve 3": {
+       "mean": 21.1,
+       "se_pos": 0.7,
+       "se_rep": 0.314
+      },
+      "curve 4": {
+       "mean": 24.1,
+       "se_pos": 0.4,
+       "se_rep": 0.356
+      },
+      "curve 5": {
+       "mean": 24.75,
+       "se_pos": 0.25,
+       "se_rep": 0.239
+      },
+      "curve 6": {
+       "mean": 24.75,
+       "se_pos": 0.25,
+       "se_rep": 0.239
+      },
+      "curve 7": {
+       "mean": 24.75,
+       "se_pos": 0.25,
+       "se_rep": 0.239
+      }
+     },
+     "random end": {
+      "trial 1 correct": {
+       "mean": 6.55,
+       "se_pos": 0.25,
+       "se_rep": 0.203
+      },
+      "trial 1 commission": {
+       "mean": 1.6,
+       "se_pos": 0.8,
+       "se_rep": 0.504
+      },
+      "trial 1 omission": {
+       "mean": 7.05,
+       "se_pos": 0.65,
+       "se_rep": 0.302
+      },
+      "trial 1 percent": {
+       "mean": 48.47,
+       "se_pos": 2.803,
+       "se_rep": 1.703
+      },
+      "chunks trial 1": {
+       "mean": 6.85,
+       "se_pos": 0.15,
+       "se_rep": 0.076
+      },
+      "omitted labels trial 1": {
+       "mean": 0.15,
+       "se_pos": 0.15,
+       "se_rep": 0.076
+      },
+      "multi-piece chunks trial 1": {
+       "mean": 0.55,
+       "se_pos": 0.35,
+       "se_rep": 0.174
+      },
+      "mean chunk size trial 1": {
+       "mean": 1.207,
+       "se_pos": 0.136,
+       "se_rep": 0.064
+      },
+      "first chunk size": {
+       "mean": 2.15,
+       "se_pos": 0.65,
+       "se_rep": 0.35
+      },
+      "pieces added per later trial": {
+       "mean": 4.792,
+       "se_pos": 0.658,
+       "se_rep": 0.396
+      },
+      "reached criterion": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "trials (to criterion or cap)": {
+       "mean": 2.65,
+       "se_pos": 0.35,
+       "se_rep": 0.13
+      },
+      "curve 1": {
+       "mean": 6.55,
+       "se_pos": 0.25,
+       "se_rep": 0.203
+      },
+      "curve 2": {
+       "mean": 12.85,
+       "se_pos": 0.35,
+       "se_rep": 0.167
+      },
+      "curve 3": {
+       "mean": 13.5,
+       "se_pos": 0.6,
+       "se_rep": 0.224
+      },
+      "curve 4": {
+       "mean": 13.6,
+       "se_pos": 0.7,
+       "se_rep": 0.233
+      },
+      "curve 5": {
+       "mean": 13.6,
+       "se_pos": 0.7,
+       "se_rep": 0.233
+      },
+      "curve 6": {
+       "mean": 13.6,
+       "se_pos": 0.7,
+       "se_rep": 0.233
+      },
+      "curve 7": {
+       "mean": 13.6,
+       "se_pos": 0.7,
+       "se_rep": 0.233
+      }
+     }
+    },
+    "K=4": {
+     "middle": {
+      "trial 1 correct": {
+       "mean": 10.46,
+       "se_pos": 0.889,
+       "se_rep": 0.235
+      },
+      "trial 1 commission": {
+       "mean": 3.42,
+       "se_pos": 0.786,
+       "se_rep": 0.153
+      },
+      "trial 1 omission": {
+       "mean": 14.56,
+       "se_pos": 0.964,
+       "se_rep": 0.302
+      },
+      "trial 1 percent": {
+       "mean": 41.867,
+       "se_pos": 3.59,
+       "se_rep": 1.018
+      },
+      "chunks trial 1": {
+       "mean": 4.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "omitted labels trial 1": {
+       "mean": 0.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "multi-piece chunks trial 1": {
+       "mean": 3.84,
+       "se_pos": 0.124,
+       "se_rep": 0.065
+      },
+      "mean chunk size trial 1": {
+       "mean": 3.59,
+       "se_pos": 0.145,
+       "se_rep": 0.049
+      },
+      "first chunk size": {
+       "mean": 3.88,
+       "se_pos": 0.12,
+       "se_rep": 0.061
+      },
+      "pieces added per later trial": {
+       "mean": 4.348,
+       "se_pos": 0.316,
+       "se_rep": 0.099
+      },
+      "reached criterion": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "trials (to criterion or cap)": {
+       "mean": 4.44,
+       "se_pos": 0.326,
+       "se_rep": 0.093
+      },
+      "curve 1": {
+       "mean": 10.46,
+       "se_pos": 0.889,
+       "se_rep": 0.235
+      },
+      "curve 2": {
+       "mean": 17.14,
+       "se_pos": 1.036,
+       "se_rep": 0.295
+      },
+      "curve 3": {
+       "mean": 21.24,
+       "se_pos": 1.045,
+       "se_rep": 0.29
+      },
+      "curve 4": {
+       "mean": 23.96,
+       "se_pos": 0.686,
+       "se_rep": 0.212
+      },
+      "curve 5": {
+       "mean": 24.9,
+       "se_pos": 0.362,
+       "se_rep": 0.167
+      },
+      "curve 6": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 7": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 8": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 9": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 10": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 11": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 12": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 13": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 14": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 15": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      }
+     },
+     "end": {
+      "trial 1 correct": {
+       "mean": 4.88,
+       "se_pos": 0.61,
+       "se_rep": 0.15
+      },
+      "trial 1 commission": {
+       "mean": 1.64,
+       "se_pos": 0.795,
+       "se_rep": 0.33
+      },
+      "trial 1 omission": {
+       "mean": 8.74,
+       "se_pos": 0.784,
+       "se_rep": 0.146
+      },
+      "trial 1 percent": {
+       "mean": 35.997,
+       "se_pos": 4.625,
+       "se_rep": 0.82
+      },
+      "chunks trial 1": {
+       "mean": 3.96,
+       "se_pos": 0.04,
+       "se_rep": 0.027
+      },
+      "omitted labels trial 1": {
+       "mean": 0.04,
+       "se_pos": 0.04,
+       "se_rep": 0.027
+      },
+      "multi-piece chunks trial 1": {
+       "mean": 1.04,
+       "se_pos": 0.369,
+       "se_rep": 0.139
+      },
+      "mean chunk size trial 1": {
+       "mean": 1.677,
+       "se_pos": 0.265,
+       "se_rep": 0.099
+      },
+      "first chunk size": {
+       "mean": 2.8,
+       "se_pos": 0.566,
+       "se_rep": 0.196
+      },
+      "pieces added per later trial": {
+       "mean": 3.662,
+       "se_pos": 0.29,
+       "se_rep": 0.128
+      },
+      "reached criterion": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "trials (to criterion or cap)": {
+       "mean": 3.46,
+       "se_pos": 0.251,
+       "se_rep": 0.085
+      },
+      "curve 1": {
+       "mean": 4.88,
+       "se_pos": 0.61,
+       "se_rep": 0.15
+      },
+      "curve 2": {
+       "mean": 9.48,
+       "se_pos": 0.691,
+       "se_rep": 0.227
+      },
+      "curve 3": {
+       "mean": 12.88,
+       "se_pos": 0.458,
+       "se_rep": 0.153
+      },
+      "curve 4": {
+       "mean": 13.58,
+       "se_pos": 0.462,
+       "se_rep": 0.19
+      },
+      "curve 5": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 6": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 7": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 8": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 9": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 10": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 11": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 12": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 13": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 14": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 15": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      }
+     },
+     "random middle": {
+      "trial 1 correct": {
+       "mean": 3.35,
+       "se_pos": 0.55,
+       "se_rep": 0.236
+      },
+      "trial 1 commission": {
+       "mean": 2.7,
+       "se_pos": 1.3,
+       "se_rep": 0.761
+      },
+      "trial 1 omission": {
+       "mean": 21.4,
+       "se_pos": 0.8,
+       "se_rep": 0.379
+      },
+      "trial 1 percent": {
+       "mean": 13.6,
+       "se_pos": 2.322,
+       "se_rep": 1.011
+      },
+      "chunks trial 1": {
+       "mean": 3.6,
+       "se_pos": 0.3,
+       "se_rep": 0.163
+      },
+      "omitted labels trial 1": {
+       "mean": 0.4,
+       "se_pos": 0.3,
+       "se_rep": 0.163
+      },
+      "multi-piece chunks trial 1": {
+       "mean": 0.9,
+       "se_pos": 0.5,
+       "se_rep": 0.233
+      },
+      "mean chunk size trial 1": {
+       "mean": 1.654,
+       "se_pos": 0.379,
+       "se_rep": 0.17
+      },
+      "first chunk size": {
+       "mean": 2.55,
+       "se_pos": 0.75,
+       "se_rep": 0.337
+      },
+      "pieces added per later trial": {
+       "mean": 3.743,
+       "se_pos": 0.227,
+       "se_rep": 0.079
+      },
+      "reached criterion": {
+       "mean": 0.9,
+       "se_pos": 0.1,
+       "se_rep": 0.067
+      },
+      "trials (to criterion or cap)": {
+       "mean": 6.7,
+       "se_pos": 0.3,
+       "se_rep": 0.082
+      },
+      "curve 1": {
+       "mean": 3.35,
+       "se_pos": 0.55,
+       "se_rep": 0.236
+      },
+      "curve 2": {
+       "mean": 8.4,
+       "se_pos": 0.9,
+       "se_rep": 0.379
+      },
+      "curve 3": {
+       "mean": 12.45,
+       "se_pos": 0.95,
+       "se_rep": 0.383
+      },
+      "curve 4": {
+       "mean": 16.4,
+       "se_pos": 0.9,
+       "se_rep": 0.4
+      },
+      "curve 5": {
+       "mean": 20.15,
+       "se_pos": 0.65,
+       "se_rep": 0.342
+      },
+      "curve 6": {
+       "mean": 23.3,
+       "se_pos": 0.8,
+       "se_rep": 0.367
+      },
+      "curve 7": {
+       "mean": 24.55,
+       "se_pos": 0.25,
+       "se_rep": 0.217
+      }
+     },
+     "random end": {
+      "trial 1 correct": {
+       "mean": 3.6,
+       "se_pos": 0.2,
+       "se_rep": 0.18
+      },
+      "trial 1 commission": {
+       "mean": 1.55,
+       "se_pos": 0.85,
+       "se_rep": 0.491
+      },
+      "trial 1 omission": {
+       "mean": 10.0,
+       "se_pos": 0.7,
+       "se_rep": 0.307
+      },
+      "trial 1 percent": {
+       "mean": 26.675,
+       "se_pos": 2.153,
+       "se_rep": 1.436
+      },
+      "chunks trial 1": {
+       "mean": 3.85,
+       "se_pos": 0.15,
+       "se_rep": 0.076
+      },
+      "omitted labels trial 1": {
+       "mean": 0.15,
+       "se_pos": 0.15,
+       "se_rep": 0.076
+      },
+      "multi-piece chunks trial 1": {
+       "mean": 0.55,
+       "se_pos": 0.35,
+       "se_rep": 0.174
+      },
+      "mean chunk size trial 1": {
+       "mean": 1.375,
+       "se_pos": 0.25,
+       "se_rep": 0.119
+      },
+      "first chunk size": {
+       "mean": 2.15,
+       "se_pos": 0.65,
+       "se_rep": 0.35
+      },
+      "pieces added per later trial": {
+       "mean": 3.525,
+       "se_pos": 0.392,
+       "se_rep": 0.23
+      },
+      "reached criterion": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "trials (to criterion or cap)": {
+       "mean": 4.0,
+       "se_pos": 0.3,
+       "se_rep": 0.211
+      },
+      "curve 1": {
+       "mean": 3.6,
+       "se_pos": 0.2,
+       "se_rep": 0.18
+      },
+      "curve 2": {
+       "mean": 8.35,
+       "se_pos": 0.65,
+       "se_rep": 0.248
+      },
+      "curve 3": {
+       "mean": 12.0,
+       "se_pos": 0.5,
+       "se_rep": 0.183
+      },
+      "curve 4": {
+       "mean": 13.25,
+       "se_pos": 0.55,
+       "se_rep": 0.227
+      },
+      "curve 5": {
+       "mean": 13.6,
+       "se_pos": 0.7,
+       "se_rep": 0.233
+      },
+      "curve 6": {
+       "mean": 13.6,
+       "se_pos": 0.7,
+       "se_rep": 0.233
+      },
+      "curve 7": {
+       "mean": 13.6,
+       "se_pos": 0.7,
+       "se_rep": 0.233
+      }
+     }
+    }
+   },
+   "table 8 (K=7)": {
+    "middle": [
+     3.88,
+     3.94,
+     3.4,
+     3.14,
+     2.06,
+     1.28,
+     1.04,
+     null
+    ],
+    "end": [
+     2.8,
+     1.7,
+     1.18,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     null
+    ],
+    "random middle": [
+     2.55,
+     1.65,
+     1.3,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     null
+    ],
+    "random end": [
+     2.15,
+     1.25,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     null
+    ]
+   },
+   "copy": {
+    "middle": {
+     "glances": {
+      "mean": 15.58,
+      "se_pos": 1.125,
+      "se_rep": 0.257
+     },
+     "pieces per glance": {
+      "mean": 2.243,
+      "se_pos": 0.165,
+      "se_rep": 0.068
+     },
+     "pieces per productive glance": {
+      "mean": 2.246,
+      "se_pos": 0.162,
+      "se_rep": 0.069
+     },
+     "correct at end": {
+      "mean": 24.86,
+      "se_pos": 0.397,
+      "se_rep": 0.067
+     },
+     "commission at end": {
+      "mean": 3.58,
+      "se_pos": 0.54,
+      "se_rep": 0.309
+     },
+     "multi-piece glances": {
+      "mean": 7.3,
+      "se_pos": 0.631,
+      "se_rep": 0.286
+     }
+    },
+    "end": {
+     "glances": {
+      "mean": 12.1,
+      "se_pos": 0.59,
+      "se_rep": 0.312
+     },
+     "pieces per glance": {
+      "mean": 1.271,
+      "se_pos": 0.097,
+      "se_rep": 0.048
+     },
+     "pieces per productive glance": {
+      "mean": 1.276,
+      "se_pos": 0.097,
+      "se_rep": 0.048
+     },
+     "correct at end": {
+      "mean": 13.58,
+      "se_pos": 0.489,
+      "se_rep": 0.194
+     },
+     "commission at end": {
+      "mean": 0.98,
+      "se_pos": 0.505,
+      "se_rep": 0.241
+     },
+     "multi-piece glances": {
+      "mean": 1.5,
+      "se_pos": 0.49,
+      "se_rep": 0.207
+     }
+    },
+    "random middle": {
+     "glances": {
+      "mean": 23.15,
+      "se_pos": 0.95,
+      "se_rep": 0.428
+     },
+     "pieces per glance": {
+      "mean": 1.243,
+      "se_pos": 0.158,
+      "se_rep": 0.038
+     },
+     "pieces per productive glance": {
+      "mean": 1.28,
+      "se_pos": 0.164,
+      "se_rep": 0.044
+     },
+     "correct at end": {
+      "mean": 24.7,
+      "se_pos": 0.4,
+      "se_rep": 0.213
+     },
+     "commission at end": {
+      "mean": 1.5,
+      "se_pos": 1.0,
+      "se_rep": 0.289
+     },
+     "multi-piece glances": {
+      "mean": 2.8,
+      "se_pos": 1.4,
+      "se_rep": 0.335
+     }
+    },
+    "random end": {
+     "glances": {
+      "mean": 12.45,
+      "se_pos": 1.25,
+      "se_rep": 0.283
+     },
+     "pieces per glance": {
+      "mean": 1.242,
+      "se_pos": 0.174,
+      "se_rep": 0.045
+     },
+     "pieces per productive glance": {
+      "mean": 1.296,
+      "se_pos": 0.205,
+      "se_rep": 0.057
+     },
+     "correct at end": {
+      "mean": 13.45,
+      "se_pos": 0.55,
+      "se_rep": 0.263
+     },
+     "commission at end": {
+      "mean": 1.0,
+      "se_pos": 0.8,
+      "se_rep": 0.307
+     },
+     "multi-piece glances": {
+      "mean": 1.75,
+      "se_pos": 1.05,
+      "se_rep": 0.327
+     }
+    }
+   },
+   "decoding": {
+    "memory": {
+     "identical": 364,
+     "concept": 1795,
+     "omission": 25
+    },
+    "copy": {
+     "identical": 360,
+     "concept": 171,
+     "seen": 1540,
+     "omission": 25
+    }
+   },
+   "examples": [
+    {
+     "type": "middle",
+     "n": 26,
+     "curve": [
+      15,
+      22,
+      25,
+      26
+     ],
+     "chunks": [
+      [
+       "g1:wK",
+       "g2:wP",
+       "h2:wP",
+       "c2:wP"
+      ],
+      [
+       "d5:bP",
+       "f6:bP",
+       "g7:bP",
+       "h7:bP"
+      ],
+      [
+       "a2:wP",
+       "c3:wN",
+       "b2:wP"
+      ],
+      [
+       "f3:wN",
+       "g5:wB"
+      ],
+      [
+       "a7:bP",
+       "a8:bR"
+      ],
+      [
+       "e1:wR"
+      ],
+      [
+       "h3:wR"
+      ]
+     ]
+    },
+    {
+     "type": "middle",
+     "n": 24,
+     "curve": [
+      12,
+      21,
+      24
+     ],
+     "chunks": [
+      [
+       "d1:wR",
+       "f1:wR",
+       "d3:wQ",
+       "e2:wN"
+      ],
+      [
+       "g1:wK",
+       "g2:wP",
+       "f2:wP",
+       "h3:wP"
+      ],
+      [
+       "f5:bP",
+       "g7:bP",
+       "g8:bK",
+       "h7:bP"
+      ],
+      [
+       "a2:wP"
+      ],
+      [
+       "c3:wP"
+      ],
+      [
+       "b5:bP"
+      ],
+      [
+       "c5:wB"
+      ]
+     ]
+    },
+    {
+     "type": "middle",
+     "n": 24,
+     "curve": [
+      14,
+      24
+     ],
+     "chunks": [
+      [
+       "c1:wB",
+       "d1:wQ",
+       "d3:wB",
+       "f1:wR"
+      ],
+      [
+       "e1:wK",
+       "f2:wP",
+       "e3:wP",
+       "g2:wP"
+      ],
+      [
+       "h1:wR",
+       "h3:wP"
+      ],
+      [
+       "b6:bB",
+       "d7:bN",
+       "a8:bR",
+       "b7:bP"
+      ],
+      [
+       "h6:bP",
+       "g7:bP"
+      ],
+      [
+       "a7:bP",
+       "a8:bR"
+      ],
+      [
+       "f7:bP",
+       "g8:bK"
+      ]
+     ]
+    },
+    {
+     "type": "middle",
+     "n": 24,
+     "curve": [
+      16,
+      24
+     ],
+     "chunks": [
+      [
+       "g1:wK",
+       "g2:wP",
+       "f2:wP",
+       "d4:wP"
+      ],
+      [
+       "f6:bN",
+       "g7:bB",
+       "f8:bR",
+       "a8:bR"
+      ],
+      [
+       "g6:bP",
+       "h7:bP",
+       "f7:bP",
+       "g8:bK"
+      ],
+      [
+       "b6:bQ",
+       "b7:bP",
+       "a7:bP"
+      ],
+      [
+       "b2:wP",
+       "c2:wQ"
+      ],
+      [
+       "f1:wR"
+      ],
+      [
+       "h3:wP"
+      ]
+     ]
+    }
+   ],
+   "relations": {
+    "copy within random": {
+     "N": 114,
+     "-": 0.0526,
+     "A": 0.0351,
+     "P": 0.0,
+     "C": 0.1842,
+     "S": 0.0,
+     "AP": 0.0351,
+     "AS": 0.0175,
+     "DC": 0.2018,
+     "PC": 0.0175,
+     "PS": 0.0,
+     "CS": 0.1579,
+     "APS": 0.0,
+     "DPC": 0.2105,
+     "DCS": 0.0,
+     "PCS": 0.0351,
+     "DPCS": 0.0526
+    },
+    "copy within game": {
+     "N": 759,
+     "-": 0.0013,
+     "A": 0.0026,
+     "P": 0.0013,
+     "C": 0.112,
+     "S": 0.0,
+     "AP": 0.0,
+     "AS": 0.0,
+     "DC": 0.112,
+     "PC": 0.0105,
+     "PS": 0.0,
+     "CS": 0.1476,
+     "APS": 0.0,
+     "DPC": 0.278,
+     "DCS": 0.0659,
+     "PCS": 0.0935,
+     "DPCS": 0.1752
+    },
+    "memory within game": {
+     "N": 686,
+     "-": 0.0058,
+     "A": 0.0,
+     "P": 0.0,
+     "C": 0.0991,
+     "S": 0.0,
+     "AP": 0.0,
+     "AS": 0.0,
+     "DC": 0.1195,
+     "PC": 0.0233,
+     "PS": 0.0015,
+     "CS": 0.1356,
+     "APS": 0.0,
+     "DPC": 0.3061,
+     "DCS": 0.0452,
+     "PCS": 0.1195,
+     "DPCS": 0.1443
+    },
+    "copy between random": {
+     "N": 617,
+     "-": 0.1718,
+     "A": 0.047,
+     "P": 0.0292,
+     "C": 0.1621,
+     "S": 0.1297,
+     "AP": 0.06,
+     "AS": 0.0049,
+     "DC": 0.0583,
+     "PC": 0.0146,
+     "PS": 0.06,
+     "CS": 0.1183,
+     "APS": 0.0081,
+     "DPC": 0.0843,
+     "DCS": 0.0016,
+     "PCS": 0.0421,
+     "DPCS": 0.0081
+    },
+    "copy between game": {
+     "N": 1146,
+     "-": 0.1414,
+     "A": 0.0253,
+     "P": 0.0183,
+     "C": 0.2461,
+     "S": 0.103,
+     "AP": 0.0218,
+     "AS": 0.0,
+     "DC": 0.0454,
+     "PC": 0.0271,
+     "PS": 0.0244,
+     "CS": 0.1693,
+     "APS": 0.0009,
+     "DPC": 0.096,
+     "DCS": 0.0052,
+     "PCS": 0.0428,
+     "DPCS": 0.0332
+    },
+    "memory between game": {
+     "N": 590,
+     "-": 0.2153,
+     "A": 0.0339,
+     "P": 0.0102,
+     "C": 0.2237,
+     "S": 0.1102,
+     "AP": 0.0254,
+     "AS": 0.0034,
+     "DC": 0.0356,
+     "PC": 0.0271,
+     "PS": 0.0186,
+     "CS": 0.1559,
+     "APS": 0.0017,
+     "DPC": 0.0847,
+     "DCS": 0.0017,
+     "PCS": 0.0356,
+     "DPCS": 0.0169
+    },
+    "a priori game": {
+     "N": 38524,
+     "-": 0.319,
+     "A": 0.0156,
+     "P": 0.0051,
+     "C": 0.2486,
+     "S": 0.1677,
+     "AP": 0.0056,
+     "AS": 0.0006,
+     "DC": 0.0321,
+     "PC": 0.018,
+     "PS": 0.0071,
+     "CS": 0.1035,
+     "APS": 0.0006,
+     "DPC": 0.0456,
+     "DCS": 0.003,
+     "PCS": 0.0097,
+     "DPCS": 0.0182
+    },
+    "a priori random": {
+     "N": 15159,
+     "-": 0.2861,
+     "A": 0.0226,
+     "P": 0.0089,
+     "C": 0.2855,
+     "S": 0.1508,
+     "AP": 0.0295,
+     "AS": 0.0012,
+     "DC": 0.0224,
+     "PC": 0.0096,
+     "PS": 0.0164,
+     "CS": 0.1145,
+     "APS": 0.0061,
+     "DPC": 0.0278,
+     "DCS": 0.0007,
+     "PCS": 0.0092,
+     "DPCS": 0.0087
+    },
+    "memory within random": {
+     "N": 74,
+     "-": 0.027,
+     "A": 0.0,
+     "P": 0.027,
+     "C": 0.1486,
+     "S": 0.0405,
+     "AP": 0.0135,
+     "AS": 0.0,
+     "DC": 0.2027,
+     "PC": 0.027,
+     "PS": 0.0135,
+     "CS": 0.0946,
+     "APS": 0.0,
+     "DPC": 0.2432,
+     "DCS": 0.027,
+     "PCS": 0.0676,
+     "DPCS": 0.0676
+    },
+    "memory between random": {
+     "N": 227,
+     "-": 0.1586,
+     "A": 0.0441,
+     "P": 0.0264,
+     "C": 0.1674,
+     "S": 0.1498,
+     "AP": 0.0529,
+     "AS": 0.0,
+     "DC": 0.0485,
+     "PC": 0.0308,
+     "PS": 0.0308,
+     "CS": 0.1101,
+     "APS": 0.0088,
+     "DPC": 0.0749,
+     "DCS": 0.0088,
+     "PCS": 0.0617,
+     "DPCS": 0.0264
+    }
+   },
+   "relations correlations (Table 7)": {
+    "copy within random | copy within game": 0.768,
+    "copy within random | memory within game": 0.776,
+    "copy within random | copy between random": 0.467,
+    "copy within random | copy between game": 0.628,
+    "copy within random | memory between game": 0.509,
+    "copy within random | a priori game": 0.304,
+    "copy within game | memory within game": 0.985,
+    "copy within game | copy between random": 0.129,
+    "copy within game | copy between game": 0.367,
+    "copy within game | memory between game": 0.215,
+    "copy within game | a priori game": 0.015,
+    "memory within game | copy between random": 0.139,
+    "memory within game | copy between game": 0.344,
+    "memory within game | memory between game": 0.204,
+    "memory within game | a priori game": 0.001,
+    "copy between random | copy between game": 0.893,
+    "copy between random | memory between game": 0.947,
+    "copy between random | a priori game": 0.909,
+    "copy between game | memory between game": 0.958,
+    "copy between game | a priori game": 0.838,
+    "memory between game | a priori game": 0.944
+   },
+   "ideas": {
+    "memory game": {
+     "chunks": 287,
+     "pawn chain": 0.296,
+     "pawn phalanx": 0.345,
+     "doubled pawns": 0.003,
+     "pawn ram": 0.003,
+     "king shelter": 0.265,
+     "castled king": 0.307,
+     "fianchetto": 0.0,
+     "pawn-guarded": 0.045,
+     "battery": 0.23,
+     "undeveloped": 0.091,
+     "attack": 0.007,
+     "same-colour cluster": 0.484,
+     "  back-rank group": 0.021,
+     "  connected rooks / queen+rooks": 0.007,
+     "C&S types (pawn chain, castled king or same-colour cluster)": 0.99
+    },
+    "memory random": {
+     "chunks": 29,
+     "pawn chain": 0.138,
+     "pawn phalanx": 0.138,
+     "doubled pawns": 0.0,
+     "pawn ram": 0.0,
+     "king shelter": 0.069,
+     "castled king": 0.103,
+     "fianchetto": 0.0,
+     "pawn-guarded": 0.069,
+     "battery": 0.138,
+     "undeveloped": 0.103,
+     "attack": 0.103,
+     "same-colour cluster": 0.483,
+     "  back-rank group": 0.0,
+     "  connected rooks / queen+rooks": 0.034,
+     "C&S types (pawn chain, castled king or same-colour cluster)": 0.69
+    },
+    "copy game": {
+     "chunks": 440,
+     "pawn chain": 0.275,
+     "pawn phalanx": 0.257,
+     "doubled pawns": 0.009,
+     "pawn ram": 0.0,
+     "king shelter": 0.166,
+     "castled king": 0.223,
+     "fianchetto": 0.0,
+     "pawn-guarded": 0.039,
+     "battery": 0.28,
+     "undeveloped": 0.059,
+     "attack": 0.009,
+     "same-colour cluster": 0.559,
+     "  back-rank group": 0.018,
+     "  connected rooks / queen+rooks": 0.018,
+     "C&S types (pawn chain, castled king or same-colour cluster)": 0.993
+    },
+    "copy random": {
+     "chunks": 91,
+     "pawn chain": 0.132,
+     "pawn phalanx": 0.132,
+     "doubled pawns": 0.022,
+     "pawn ram": 0.0,
+     "king shelter": 0.044,
+     "castled king": 0.055,
+     "fianchetto": 0.0,
+     "pawn-guarded": 0.11,
+     "battery": 0.033,
+     "undeveloped": 0.033,
+     "attack": 0.121,
+     "same-colour cluster": 0.681,
+     "  back-rank group": 0.0,
+     "  connected rooks / queen+rooks": 0.0,
+     "C&S types (pawn chain, castled king or same-colour cluster)": 0.868
+    }
+   },
+   "seconds": 5010
+  },
+  "8000": {
+   "positions learned": 8000,
+   "records": 215274,
+   "stored chunks": 26527,
+   "memory": {
+    "K=7": {
+     "middle": {
+      "trial 1 correct": {
+       "mean": 16.22,
+       "se_pos": 1.041,
+       "se_rep": 0.305
+      },
+      "trial 1 commission": {
+       "mean": 4.4,
+       "se_pos": 1.169,
+       "se_rep": 0.272
+      },
+      "trial 1 omission": {
+       "mean": 8.8,
+       "se_pos": 1.131,
+       "se_rep": 0.291
+      },
+      "trial 1 percent": {
+       "mean": 64.898,
+       "se_pos": 4.348,
+       "se_rep": 1.153
+      },
+      "chunks trial 1": {
+       "mean": 7.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "omitted labels trial 1": {
+       "mean": 0.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "multi-piece chunks trial 1": {
+       "mean": 5.72,
+       "se_pos": 0.305,
+       "se_rep": 0.131
+      },
+      "mean chunk size trial 1": {
+       "mean": 3.071,
+       "se_pos": 0.142,
+       "se_rep": 0.053
+      },
+      "first chunk size": {
+       "mean": 3.84,
+       "se_pos": 0.16,
+       "se_rep": 0.065
+      },
+      "pieces added per later trial": {
+       "mean": 7.457,
+       "se_pos": 1.012,
+       "se_rep": 0.45
+      },
+      "reached criterion": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "trials (to criterion or cap)": {
+       "mean": 2.28,
+       "se_pos": 0.186,
+       "se_rep": 0.085
+      },
+      "curve 1": {
+       "mean": 16.22,
+       "se_pos": 1.041,
+       "se_rep": 0.305
+      },
+      "curve 2": {
+       "mean": 24.36,
+       "se_pos": 0.506,
+       "se_rep": 0.332
+      },
+      "curve 3": {
+       "mean": 24.96,
+       "se_pos": 0.391,
+       "se_rep": 0.171
+      },
+      "curve 4": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 5": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 6": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 7": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 8": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 9": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 10": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 11": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 12": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 13": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 14": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 15": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      }
+     },
+     "end": {
+      "trial 1 correct": {
+       "mean": 8.7,
+       "se_pos": 0.849,
+       "se_rep": 0.252
+      },
+      "trial 1 commission": {
+       "mean": 2.66,
+       "se_pos": 1.052,
+       "se_rep": 0.462
+      },
+      "trial 1 omission": {
+       "mean": 4.92,
+       "se_pos": 0.947,
+       "se_rep": 0.291
+      },
+      "trial 1 percent": {
+       "mean": 64.283,
+       "se_pos": 6.597,
+       "se_rep": 2.055
+      },
+      "chunks trial 1": {
+       "mean": 6.86,
+       "se_pos": 0.124,
+       "se_rep": 0.052
+      },
+      "omitted labels trial 1": {
+       "mean": 0.06,
+       "se_pos": 0.044,
+       "se_rep": 0.043
+      },
+      "multi-piece chunks trial 1": {
+       "mean": 2.18,
+       "se_pos": 0.423,
+       "se_rep": 0.208
+      },
+      "mean chunk size trial 1": {
+       "mean": 1.71,
+       "se_pos": 0.172,
+       "se_rep": 0.075
+      },
+      "first chunk size": {
+       "mean": 3.34,
+       "se_pos": 0.414,
+       "se_rep": 0.112
+      },
+      "pieces added per later trial": {
+       "mean": 4.505,
+       "se_pos": 0.856,
+       "se_rep": 0.33
+      },
+      "reached criterion": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "trials (to criterion or cap)": {
+       "mean": 2.14,
+       "se_pos": 0.153,
+       "se_rep": 0.043
+      },
+      "curve 1": {
+       "mean": 8.7,
+       "se_pos": 0.849,
+       "se_rep": 0.252
+      },
+      "curve 2": {
+       "mean": 13.28,
+       "se_pos": 0.545,
+       "se_rep": 0.26
+      },
+      "curve 3": {
+       "mean": 13.56,
+       "se_pos": 0.465,
+       "se_rep": 0.188
+      },
+      "curve 4": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 5": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 6": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 7": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 8": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 9": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 10": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 11": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 12": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 13": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 14": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 15": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      }
+     },
+     "random middle": {
+      "trial 1 correct": {
+       "mean": 5.55,
+       "se_pos": 0.55,
+       "se_rep": 0.252
+      },
+      "trial 1 commission": {
+       "mean": 5.25,
+       "se_pos": 2.05,
+       "se_rep": 0.638
+      },
+      "trial 1 omission": {
+       "mean": 19.2,
+       "se_pos": 0.8,
+       "se_rep": 0.351
+      },
+      "trial 1 percent": {
+       "mean": 22.483,
+       "se_pos": 2.426,
+       "se_rep": 1.045
+      },
+      "chunks trial 1": {
+       "mean": 6.2,
+       "se_pos": 0.5,
+       "se_rep": 0.226
+      },
+      "omitted labels trial 1": {
+       "mean": 0.8,
+       "se_pos": 0.5,
+       "se_rep": 0.226
+      },
+      "multi-piece chunks trial 1": {
+       "mean": 2.1,
+       "se_pos": 0.9,
+       "se_rep": 0.233
+      },
+      "mean chunk size trial 1": {
+       "mean": 1.802,
+       "se_pos": 0.333,
+       "se_rep": 0.086
+      },
+      "first chunk size": {
+       "mean": 3.4,
+       "se_pos": 0.4,
+       "se_rep": 0.277
+      },
+      "pieces added per later trial": {
+       "mean": 6.862,
+       "se_pos": 1.154,
+       "se_rep": 0.276
+      },
+      "reached criterion": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "trials (to criterion or cap)": {
+       "mean": 3.95,
+       "se_pos": 0.45,
+       "se_rep": 0.09
+      },
+      "curve 1": {
+       "mean": 5.55,
+       "se_pos": 0.55,
+       "se_rep": 0.252
+      },
+      "curve 2": {
+       "mean": 16.2,
+       "se_pos": 1.4,
+       "se_rep": 0.501
+      },
+      "curve 3": {
+       "mean": 22.45,
+       "se_pos": 1.25,
+       "se_rep": 0.311
+      },
+      "curve 4": {
+       "mean": 24.4,
+       "se_pos": 0.4,
+       "se_rep": 0.256
+      },
+      "curve 5": {
+       "mean": 24.75,
+       "se_pos": 0.25,
+       "se_rep": 0.239
+      },
+      "curve 6": {
+       "mean": 24.75,
+       "se_pos": 0.25,
+       "se_rep": 0.239
+      },
+      "curve 7": {
+       "mean": 24.75,
+       "se_pos": 0.25,
+       "se_rep": 0.239
+      }
+     },
+     "random end": {
+      "trial 1 correct": {
+       "mean": 6.4,
+       "se_pos": 0.2,
+       "se_rep": 0.208
+      },
+      "trial 1 commission": {
+       "mean": 2.7,
+       "se_pos": 0.9,
+       "se_rep": 0.461
+      },
+      "trial 1 omission": {
+       "mean": 7.2,
+       "se_pos": 0.9,
+       "se_rep": 0.318
+      },
+      "trial 1 percent": {
+       "mean": 47.458,
+       "se_pos": 3.934,
+       "se_rep": 1.786
+      },
+      "chunks trial 1": {
+       "mean": 6.85,
+       "se_pos": 0.15,
+       "se_rep": 0.076
+      },
+      "omitted labels trial 1": {
+       "mean": 0.15,
+       "se_pos": 0.15,
+       "se_rep": 0.076
+      },
+      "multi-piece chunks trial 1": {
+       "mean": 1.15,
+       "se_pos": 0.25,
+       "se_rep": 0.248
+      },
+      "mean chunk size trial 1": {
+       "mean": 1.338,
+       "se_pos": 0.095,
+       "se_rep": 0.078
+      },
+      "first chunk size": {
+       "mean": 2.7,
+       "se_pos": 0.3,
+       "se_rep": 0.389
+      },
+      "pieces added per later trial": {
+       "mean": 4.883,
+       "se_pos": 1.167,
+       "se_rep": 0.34
+      },
+      "reached criterion": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "trials (to criterion or cap)": {
+       "mean": 2.7,
+       "se_pos": 0.5,
+       "se_rep": 0.153
+      },
+      "curve 1": {
+       "mean": 6.4,
+       "se_pos": 0.2,
+       "se_rep": 0.208
+      },
+      "curve 2": {
+       "mean": 12.7,
+       "se_pos": 0.6,
+       "se_rep": 0.271
+      },
+      "curve 3": {
+       "mean": 13.2,
+       "se_pos": 0.7,
+       "se_rep": 0.249
+      },
+      "curve 4": {
+       "mean": 13.6,
+       "se_pos": 0.7,
+       "se_rep": 0.233
+      },
+      "curve 5": {
+       "mean": 13.6,
+       "se_pos": 0.7,
+       "se_rep": 0.233
+      },
+      "curve 6": {
+       "mean": 13.6,
+       "se_pos": 0.7,
+       "se_rep": 0.233
+      },
+      "curve 7": {
+       "mean": 13.6,
+       "se_pos": 0.7,
+       "se_rep": 0.233
+      }
+     }
+    },
+    "K=4": {
+     "middle": {
+      "trial 1 correct": {
+       "mean": 11.56,
+       "se_pos": 0.927,
+       "se_rep": 0.29
+      },
+      "trial 1 commission": {
+       "mean": 3.24,
+       "se_pos": 0.895,
+       "se_rep": 0.268
+      },
+      "trial 1 omission": {
+       "mean": 13.46,
+       "se_pos": 1.043,
+       "se_rep": 0.331
+      },
+      "trial 1 percent": {
+       "mean": 46.295,
+       "se_pos": 3.84,
+       "se_rep": 1.201
+      },
+      "chunks trial 1": {
+       "mean": 4.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "omitted labels trial 1": {
+       "mean": 0.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "multi-piece chunks trial 1": {
+       "mean": 4.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "mean chunk size trial 1": {
+       "mean": 3.77,
+       "se_pos": 0.102,
+       "se_rep": 0.044
+      },
+      "first chunk size": {
+       "mean": 3.84,
+       "se_pos": 0.16,
+       "se_rep": 0.065
+      },
+      "pieces added per later trial": {
+       "mean": 5.186,
+       "se_pos": 0.487,
+       "se_rep": 0.205
+      },
+      "reached criterion": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "trials (to criterion or cap)": {
+       "mean": 3.72,
+       "se_pos": 0.311,
+       "se_rep": 0.104
+      },
+      "curve 1": {
+       "mean": 11.56,
+       "se_pos": 0.927,
+       "se_rep": 0.29
+      },
+      "curve 2": {
+       "mean": 19.46,
+       "se_pos": 0.91,
+       "se_rep": 0.303
+      },
+      "curve 3": {
+       "mean": 23.74,
+       "se_pos": 0.689,
+       "se_rep": 0.323
+      },
+      "curve 4": {
+       "mean": 24.8,
+       "se_pos": 0.388,
+       "se_rep": 0.217
+      },
+      "curve 5": {
+       "mean": 25.0,
+       "se_pos": 0.365,
+       "se_rep": 0.161
+      },
+      "curve 6": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 7": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 8": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 9": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 10": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 11": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 12": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 13": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 14": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      },
+      "curve 15": {
+       "mean": 25.02,
+       "se_pos": 0.365,
+       "se_rep": 0.153
+      }
+     },
+     "end": {
+      "trial 1 correct": {
+       "mean": 5.84,
+       "se_pos": 0.852,
+       "se_rep": 0.249
+      },
+      "trial 1 commission": {
+       "mean": 2.68,
+       "se_pos": 1.058,
+       "se_rep": 0.473
+      },
+      "trial 1 omission": {
+       "mean": 7.78,
+       "se_pos": 0.967,
+       "se_rep": 0.274
+      },
+      "trial 1 percent": {
+       "mean": 43.119,
+       "se_pos": 6.507,
+       "se_rep": 1.897
+      },
+      "chunks trial 1": {
+       "mean": 3.94,
+       "se_pos": 0.044,
+       "se_rep": 0.043
+      },
+      "omitted labels trial 1": {
+       "mean": 0.06,
+       "se_pos": 0.044,
+       "se_rep": 0.043
+      },
+      "multi-piece chunks trial 1": {
+       "mean": 2.16,
+       "se_pos": 0.407,
+       "se_rep": 0.193
+      },
+      "mean chunk size trial 1": {
+       "mean": 2.21,
+       "se_pos": 0.271,
+       "se_rep": 0.119
+      },
+      "first chunk size": {
+       "mean": 3.34,
+       "se_pos": 0.414,
+       "se_rep": 0.112
+      },
+      "pieces added per later trial": {
+       "mean": 3.892,
+       "se_pos": 0.303,
+       "se_rep": 0.131
+      },
+      "reached criterion": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "trials (to criterion or cap)": {
+       "mean": 3.06,
+       "se_pos": 0.303,
+       "se_rep": 0.09
+      },
+      "curve 1": {
+       "mean": 5.84,
+       "se_pos": 0.852,
+       "se_rep": 0.249
+      },
+      "curve 2": {
+       "mean": 10.96,
+       "se_pos": 0.902,
+       "se_rep": 0.247
+      },
+      "curve 3": {
+       "mean": 13.24,
+       "se_pos": 0.507,
+       "se_rep": 0.173
+      },
+      "curve 4": {
+       "mean": 13.6,
+       "se_pos": 0.456,
+       "se_rep": 0.184
+      },
+      "curve 5": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 6": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 7": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 8": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 9": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 10": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 11": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 12": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 13": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 14": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      },
+      "curve 15": {
+       "mean": 13.62,
+       "se_pos": 0.465,
+       "se_rep": 0.185
+      }
+     },
+     "random middle": {
+      "trial 1 correct": {
+       "mean": 2.8,
+       "se_pos": 0.7,
+       "se_rep": 0.226
+      },
+      "trial 1 commission": {
+       "mean": 5.35,
+       "se_pos": 2.15,
+       "se_rep": 0.76
+      },
+      "trial 1 omission": {
+       "mean": 21.95,
+       "se_pos": 0.85,
+       "se_rep": 0.361
+      },
+      "trial 1 percent": {
+       "mean": 11.374,
+       "se_pos": 2.917,
+       "se_rep": 0.945
+      },
+      "chunks trial 1": {
+       "mean": 3.35,
+       "se_pos": 0.45,
+       "se_rep": 0.183
+      },
+      "omitted labels trial 1": {
+       "mean": 0.65,
+       "se_pos": 0.45,
+       "se_rep": 0.183
+      },
+      "multi-piece chunks trial 1": {
+       "mean": 2.05,
+       "se_pos": 0.85,
+       "se_rep": 0.203
+      },
+      "mean chunk size trial 1": {
+       "mean": 2.487,
+       "se_pos": 0.588,
+       "se_rep": 0.149
+      },
+      "first chunk size": {
+       "mean": 3.4,
+       "se_pos": 0.4,
+       "se_rep": 0.277
+      },
+      "pieces added per later trial": {
+       "mean": 4.265,
+       "se_pos": 0.338,
+       "se_rep": 0.129
+      },
+      "reached criterion": {
+       "mean": 0.95,
+       "se_pos": 0.05,
+       "se_rep": 0.05
+      },
+      "trials (to criterion or cap)": {
+       "mean": 6.2,
+       "se_pos": 0.3,
+       "se_rep": 0.133
+      },
+      "curve 1": {
+       "mean": 2.8,
+       "se_pos": 0.7,
+       "se_rep": 0.226
+      },
+      "curve 2": {
+       "mean": 10.4,
+       "se_pos": 1.3,
+       "se_rep": 0.464
+      },
+      "curve 3": {
+       "mean": 14.1,
+       "se_pos": 1.2,
+       "se_rep": 0.393
+      },
+      "curve 4": {
+       "mean": 18.2,
+       "se_pos": 1.4,
+       "se_rep": 0.467
+      },
+      "curve 5": {
+       "mean": 21.8,
+       "se_pos": 1.4,
+       "se_rep": 0.374
+      },
+      "curve 6": {
+       "mean": 24.15,
+       "se_pos": 0.45,
+       "se_rep": 0.325
+      },
+      "curve 7": {
+       "mean": 24.65,
+       "se_pos": 0.25,
+       "se_rep": 0.224
+      }
+     },
+     "random end": {
+      "trial 1 correct": {
+       "mean": 3.55,
+       "se_pos": 0.25,
+       "se_rep": 0.203
+      },
+      "trial 1 commission": {
+       "mean": 2.55,
+       "se_pos": 0.95,
+       "se_rep": 0.529
+      },
+      "trial 1 omission": {
+       "mean": 10.05,
+       "se_pos": 0.95,
+       "se_rep": 0.337
+      },
+      "trial 1 percent": {
+       "mean": 26.413,
+       "se_pos": 3.266,
+       "se_rep": 1.65
+      },
+      "chunks trial 1": {
+       "mean": 3.85,
+       "se_pos": 0.15,
+       "se_rep": 0.076
+      },
+      "omitted labels trial 1": {
+       "mean": 0.15,
+       "se_pos": 0.15,
+       "se_rep": 0.076
+      },
+      "multi-piece chunks trial 1": {
+       "mean": 1.15,
+       "se_pos": 0.25,
+       "se_rep": 0.248
+      },
+      "mean chunk size trial 1": {
+       "mean": 1.596,
+       "se_pos": 0.171,
+       "se_rep": 0.136
+      },
+      "first chunk size": {
+       "mean": 2.7,
+       "se_pos": 0.3,
+       "se_rep": 0.389
+      },
+      "pieces added per later trial": {
+       "mean": 3.879,
+       "se_pos": 0.396,
+       "se_rep": 0.231
+      },
+      "reached criterion": {
+       "mean": 1.0,
+       "se_pos": 0.0,
+       "se_rep": 0.0
+      },
+      "trials (to criterion or cap)": {
+       "mean": 3.7,
+       "se_pos": 0.3,
+       "se_rep": 0.17
+      },
+      "curve 1": {
+       "mean": 3.55,
+       "se_pos": 0.25,
+       "se_rep": 0.203
+      },
+      "curve 2": {
+       "mean": 8.75,
+       "se_pos": 0.45,
+       "se_rep": 0.507
+      },
+      "curve 3": {
+       "mean": 12.1,
+       "se_pos": 0.7,
+       "se_rep": 0.379
+      },
+      "curve 4": {
+       "mean": 13.45,
+       "se_pos": 0.65,
+       "se_rep": 0.252
+      },
+      "curve 5": {
+       "mean": 13.6,
+       "se_pos": 0.7,
+       "se_rep": 0.233
+      },
+      "curve 6": {
+       "mean": 13.6,
+       "se_pos": 0.7,
+       "se_rep": 0.233
+      },
+      "curve 7": {
+       "mean": 13.6,
+       "se_pos": 0.7,
+       "se_rep": 0.233
+      }
+     }
+    }
+   },
+   "table 8 (K=7)": {
+    "middle": [
+     3.84,
+     3.88,
+     3.64,
+     3.72,
+     3.12,
+     2.16,
+     1.14,
+     null
+    ],
+    "end": [
+     3.34,
+     2.54,
+     1.64,
+     1.26,
+     1.02,
+     1.0,
+     1.0,
+     null
+    ],
+    "random middle": [
+     3.4,
+     2.65,
+     1.65,
+     1.37,
+     1.05,
+     1.0,
+     1.0,
+     null
+    ],
+    "random end": [
+     2.7,
+     1.5,
+     1.15,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     null
+    ]
+   },
+   "copy": {
+    "middle": {
+     "glances": {
+      "mean": 13.12,
+      "se_pos": 1.015,
+      "se_rep": 0.336
+     },
+     "pieces per glance": {
+      "mean": 2.717,
+      "se_pos": 0.199,
+      "se_rep": 0.078
+     },
+     "pieces per productive glance": {
+      "mean": 2.729,
+      "se_pos": 0.194,
+      "se_rep": 0.077
+     },
+     "correct at end": {
+      "mean": 24.86,
+      "se_pos": 0.397,
+      "se_rep": 0.067
+     },
+     "commission at end": {
+      "mean": 3.3,
+      "se_pos": 0.658,
+      "se_rep": 0.285
+     },
+     "multi-piece glances": {
+      "mean": 8.44,
+      "se_pos": 0.664,
+      "se_rep": 0.263
+     }
+    },
+    "end": {
+     "glances": {
+      "mean": 10.2,
+      "se_pos": 0.702,
+      "se_rep": 0.248
+     },
+     "pieces per glance": {
+      "mean": 1.665,
+      "se_pos": 0.185,
+      "se_rep": 0.048
+     },
+     "pieces per productive glance": {
+      "mean": 1.687,
+      "se_pos": 0.181,
+      "se_rep": 0.052
+     },
+     "correct at end": {
+      "mean": 13.58,
+      "se_pos": 0.489,
+      "se_rep": 0.194
+     },
+     "commission at end": {
+      "mean": 1.78,
+      "se_pos": 0.817,
+      "se_rep": 0.19
+     },
+     "multi-piece glances": {
+      "mean": 3.12,
+      "se_pos": 0.668,
+      "se_rep": 0.219
+     }
+    },
+    "random middle": {
+     "glances": {
+      "mean": 21.05,
+      "se_pos": 1.25,
+      "se_rep": 0.444
+     },
+     "pieces per glance": {
+      "mean": 1.571,
+      "se_pos": 0.17,
+      "se_rep": 0.076
+     },
+     "pieces per productive glance": {
+      "mean": 1.626,
+      "se_pos": 0.163,
+      "se_rep": 0.079
+     },
+     "correct at end": {
+      "mean": 24.7,
+      "se_pos": 0.4,
+      "se_rep": 0.213
+     },
+     "commission at end": {
+      "mean": 3.15,
+      "se_pos": 1.25,
+      "se_rep": 0.495
+     },
+     "multi-piece glances": {
+      "mean": 5.55,
+      "se_pos": 1.45,
+      "se_rep": 0.673
+     }
+    },
+    "random end": {
+     "glances": {
+      "mean": 10.85,
+      "se_pos": 0.95,
+      "se_rep": 0.259
+     },
+     "pieces per glance": {
+      "mean": 1.682,
+      "se_pos": 0.265,
+      "se_rep": 0.073
+     },
+     "pieces per productive glance": {
+      "mean": 1.712,
+      "se_pos": 0.257,
+      "se_rep": 0.076
+     },
+     "correct at end": {
+      "mean": 13.45,
+      "se_pos": 0.55,
+      "se_rep": 0.263
+     },
+     "commission at end": {
+      "mean": 1.95,
+      "se_pos": 0.85,
+      "se_rep": 0.302
+     },
+     "multi-piece glances": {
+      "mean": 3.4,
+      "se_pos": 0.6,
+      "se_rep": 0.332
+     }
+    }
+   },
+   "decoding": {
+    "memory": {
+     "identical": 520,
+     "concept": 1360,
+     "omission": 26
+    },
+    "copy": {
+     "concept": 242,
+     "identical": 515,
+     "omission": 29,
+     "seen": 1018
+    }
+   },
+   "examples": [
+    {
+     "type": "middle",
+     "n": 26,
+     "curve": [
+      15,
+      22,
+      26
+     ],
+     "chunks": [
+      [
+       "g1:wK",
+       "g2:wP",
+       "h2:wP",
+       "c2:wP"
+      ],
+      [
+       "a2:wP",
+       "c3:wN",
+       "b2:wP",
+       "c2:wP"
+      ],
+      [
+       "a7:bP",
+       "a8:bR",
+       "b7:bP",
+       "d8:bQ"
+      ],
+      [
+       "g7:bP",
+       "h8:bK",
+       "h7:bP"
+      ],
+      [
+       "e1:wR"
+      ],
+      [
+       "h3:wR"
+      ],
+      [
+       "b4:bB"
+      ]
+     ]
+    },
+    {
+     "type": "middle",
+     "n": 24,
+     "curve": [
+      14,
+      24
+     ],
+     "chunks": [
+      [
+       "d1:wR",
+       "d3:wQ",
+       "h1:wR",
+       "c3:wN"
+      ],
+      [
+       "g1:wK",
+       "g2:wP",
+       "f2:wP",
+       "h3:wP"
+      ],
+      [
+       "a2:wP",
+       "c3:wP"
+      ],
+      [
+       "f7:bP",
+       "g8:bK",
+       "g7:bP",
+       "h7:bP"
+      ],
+      [
+       "f5:bP",
+       "a8:bR",
+       "c8:bB",
+       "b7:bP"
+      ],
+      [
+       "b5:bP",
+       "a6:bP"
+      ],
+      [
+       "c5:wB"
+      ]
+     ]
+    },
+    {
+     "type": "middle",
+     "n": 24,
+     "curve": [
+      18,
+      24
+     ],
+     "chunks": [
+      [
+       "c1:wB",
+       "d1:wQ",
+       "d3:wB",
+       "f1:wR"
+      ],
+      [
+       "e1:wK",
+       "f2:wP",
+       "e3:wP",
+       "g2:wP"
+      ],
+      [
+       "h6:bP",
+       "g7:bP",
+       "f7:bP",
+       "g8:bK"
+      ],
+      [
+       "a7:bP",
+       "a8:bR",
+       "b7:bP",
+       "e8:bR"
+      ],
+      [
+       "h1:wR",
+       "h3:wP"
+      ],
+      [
+       "b6:bN",
+       "d7:bB"
+      ],
+      [
+       "d2:wN"
+      ]
+     ]
+    },
+    {
+     "type": "middle",
+     "n": 24,
+     "curve": [
+      15,
+      24
+     ],
+     "chunks": [
+      [
+       "f1:wR",
+       "g3:wB",
+       "g4:wQ",
+       "a3:bB"
+      ],
+      [
+       "g1:wK",
+       "g2:wP",
+       "f2:wP",
+       "d4:wP"
+      ],
+      [
+       "g6:bP",
+       "f7:bP",
+       "g8:bK",
+       "h7:bP"
+      ],
+      [
+       "b6:bQ",
+       "b7:bP",
+       "a7:bP"
+      ],
+      [
+       "f6:bN",
+       "g7:bB",
+       "f8:bR",
+       "c8:bB"
+      ],
+      [
+       "a7:bP",
+       "a8:bR"
+      ],
+      [
+       "b2:wP"
+      ]
+     ]
+    }
+   ],
+   "relations": {
+    "copy within random": {
+     "N": 230,
+     "-": 0.0565,
+     "A": 0.0261,
+     "P": 0.0043,
+     "C": 0.2304,
+     "S": 0.0043,
+     "AP": 0.0217,
+     "AS": 0.0043,
+     "DC": 0.1652,
+     "PC": 0.013,
+     "PS": 0.0,
+     "CS": 0.1739,
+     "APS": 0.0043,
+     "DPC": 0.213,
+     "DCS": 0.0043,
+     "PCS": 0.0522,
+     "DPCS": 0.0261
+    },
+    "copy within game": {
+     "N": 1045,
+     "-": 0.0038,
+     "A": 0.0057,
+     "P": 0.0019,
+     "C": 0.1254,
+     "S": 0.0048,
+     "AP": 0.0029,
+     "AS": 0.001,
+     "DC": 0.1129,
+     "PC": 0.0144,
+     "PS": 0.001,
+     "CS": 0.1608,
+     "APS": 0.001,
+     "DPC": 0.2316,
+     "DCS": 0.0478,
+     "PCS": 0.0871,
+     "DPCS": 0.1981
+    },
+    "memory within game": {
+     "N": 935,
+     "-": 0.0107,
+     "A": 0.0011,
+     "P": 0.0,
+     "C": 0.1166,
+     "S": 0.0075,
+     "AP": 0.0011,
+     "AS": 0.0,
+     "DC": 0.1176,
+     "PC": 0.015,
+     "PS": 0.0011,
+     "CS": 0.1412,
+     "APS": 0.0,
+     "DPC": 0.2749,
+     "DCS": 0.0342,
+     "PCS": 0.1016,
+     "DPCS": 0.1775
+    },
+    "copy between random": {
+     "N": 494,
+     "-": 0.1579,
+     "A": 0.0263,
+     "P": 0.0283,
+     "C": 0.2105,
+     "S": 0.1397,
+     "AP": 0.0486,
+     "AS": 0.004,
+     "DC": 0.0425,
+     "PC": 0.0162,
+     "PS": 0.0607,
+     "CS": 0.1255,
+     "APS": 0.0101,
+     "DPC": 0.0749,
+     "DCS": 0.002,
+     "PCS": 0.0385,
+     "DPCS": 0.0142
+    },
+    "copy between game": {
+     "N": 903,
+     "-": 0.1805,
+     "A": 0.0177,
+     "P": 0.01,
+     "C": 0.2735,
+     "S": 0.1152,
+     "AP": 0.0177,
+     "AS": 0.0,
+     "DC": 0.0465,
+     "PC": 0.0244,
+     "PS": 0.0188,
+     "CS": 0.1462,
+     "APS": 0.0011,
+     "DPC": 0.0908,
+     "DCS": 0.0066,
+     "PCS": 0.0221,
+     "DPCS": 0.0288
+    },
+    "memory between game": {
+     "N": 580,
+     "-": 0.2138,
+     "A": 0.0241,
+     "P": 0.0172,
+     "C": 0.2776,
+     "S": 0.1569,
+     "AP": 0.0086,
+     "AS": 0.0052,
+     "DC": 0.031,
+     "PC": 0.0121,
+     "PS": 0.0224,
+     "CS": 0.15,
+     "APS": 0.0017,
+     "DPC": 0.0517,
+     "DCS": 0.0017,
+     "PCS": 0.0121,
+     "DPCS": 0.0138
+    },
+    "a priori game": {
+     "N": 38524,
+     "-": 0.319,
+     "A": 0.0156,
+     "P": 0.0051,
+     "C": 0.2486,
+     "S": 0.1677,
+     "AP": 0.0056,
+     "AS": 0.0006,
+     "DC": 0.0321,
+     "PC": 0.018,
+     "PS": 0.0071,
+     "CS": 0.1035,
+     "APS": 0.0006,
+     "DPC": 0.0456,
+     "DCS": 0.003,
+     "PCS": 0.0097,
+     "DPCS": 0.0182
+    },
+    "a priori random": {
+     "N": 15159,
+     "-": 0.2861,
+     "A": 0.0226,
+     "P": 0.0089,
+     "C": 0.2855,
+     "S": 0.1508,
+     "AP": 0.0295,
+     "AS": 0.0012,
+     "DC": 0.0224,
+     "PC": 0.0096,
+     "PS": 0.0164,
+     "CS": 0.1145,
+     "APS": 0.0061,
+     "DPC": 0.0278,
+     "DCS": 0.0007,
+     "PCS": 0.0092,
+     "DPCS": 0.0087
+    },
+    "memory within random": {
+     "N": 134,
+     "-": 0.0821,
+     "A": 0.0224,
+     "P": 0.0149,
+     "C": 0.1716,
+     "S": 0.0075,
+     "AP": 0.0224,
+     "AS": 0.0,
+     "DC": 0.2015,
+     "PC": 0.0299,
+     "PS": 0.0,
+     "CS": 0.0746,
+     "APS": 0.0075,
+     "DPC": 0.1642,
+     "DCS": 0.0149,
+     "PCS": 0.0522,
+     "DPCS": 0.1343
+    },
+    "memory between random": {
+     "N": 218,
+     "-": 0.1835,
+     "A": 0.055,
+     "P": 0.0183,
+     "C": 0.2156,
+     "S": 0.1284,
+     "AP": 0.0275,
+     "AS": 0.0,
+     "DC": 0.0413,
+     "PC": 0.0138,
+     "PS": 0.0367,
+     "CS": 0.1422,
+     "APS": 0.0046,
+     "DPC": 0.0734,
+     "DCS": 0.0046,
+     "PCS": 0.0367,
+     "DPCS": 0.0183
+    }
+   },
+   "relations correlations (Table 7)": {
+    "copy within random | copy within game": 0.743,
+    "copy within random | memory within game": 0.759,
+    "copy within random | copy between random": 0.58,
+    "copy within random | copy between game": 0.688,
+    "copy within random | memory between game": 0.546,
+    "copy within random | a priori game": 0.4,
+    "copy within game | memory within game": 0.985,
+    "copy within game | copy between random": 0.192,
+    "copy within game | copy between game": 0.333,
+    "copy within game | memory between game": 0.171,
+    "copy within game | a priori game": 0.055,
+    "memory within game | copy between random": 0.191,
+    "memory within game | copy between game": 0.318,
+    "memory within game | memory between game": 0.151,
+    "memory within game | a priori game": 0.055,
+    "copy between random | copy between game": 0.961,
+    "copy between random | memory between game": 0.972,
+    "copy between random | a priori game": 0.906,
+    "copy between game | memory between game": 0.979,
+    "copy between game | a priori game": 0.906,
+    "memory between game | a priori game": 0.95
+   },
+   "ideas": {
+    "memory game": {
+     "chunks": 395,
+     "pawn chain": 0.367,
+     "pawn phalanx": 0.286,
+     "doubled pawns": 0.003,
+     "pawn ram": 0.0,
+     "king shelter": 0.218,
+     "castled king": 0.251,
+     "fianchetto": 0.003,
+     "pawn-guarded": 0.035,
+     "battery": 0.195,
+     "undeveloped": 0.058,
+     "attack": 0.01,
+     "same-colour cluster": 0.43,
+     "  back-rank group": 0.005,
+     "  connected rooks / queen+rooks": 0.013,
+     "C&S types (pawn chain, castled king or same-colour cluster)": 0.959
+    },
+    "memory random": {
+     "chunks": 65,
+     "pawn chain": 0.262,
+     "pawn phalanx": 0.092,
+     "doubled pawns": 0.0,
+     "pawn ram": 0.0,
+     "king shelter": 0.015,
+     "castled king": 0.031,
+     "fianchetto": 0.031,
+     "pawn-guarded": 0.062,
+     "battery": 0.138,
+     "undeveloped": 0.077,
+     "attack": 0.154,
+     "same-colour cluster": 0.446,
+     "  back-rank group": 0.0,
+     "  connected rooks / queen+rooks": 0.031,
+     "C&S types (pawn chain, castled king or same-colour cluster)": 0.738
+    },
+    "copy game": {
+     "chunks": 578,
+     "pawn chain": 0.32,
+     "pawn phalanx": 0.22,
+     "doubled pawns": 0.014,
+     "pawn ram": 0.002,
+     "king shelter": 0.149,
+     "castled king": 0.18,
+     "fianchetto": 0.0,
+     "pawn-guarded": 0.042,
+     "battery": 0.232,
+     "undeveloped": 0.043,
+     "attack": 0.031,
+     "same-colour cluster": 0.516,
+     "  back-rank group": 0.005,
+     "  connected rooks / queen+rooks": 0.009,
+     "C&S types (pawn chain, castled king or same-colour cluster)": 0.955
+    },
+    "copy random": {
+     "chunks": 179,
+     "pawn chain": 0.067,
+     "pawn phalanx": 0.112,
+     "doubled pawns": 0.039,
+     "pawn ram": 0.0,
+     "king shelter": 0.039,
+     "castled king": 0.05,
+     "fianchetto": 0.011,
+     "pawn-guarded": 0.05,
+     "battery": 0.084,
+     "undeveloped": 0.045,
+     "attack": 0.084,
+     "same-colour cluster": 0.726,
+     "  back-rank group": 0.0,
+     "  connected rooks / queen+rooks": 0.022,
+     "C&S types (pawn chain, castled king or same-colour cluster)": 0.844
+    }
+   },
+   "seconds": 12262
+  }
+ }
+}
