@@ -95,10 +95,10 @@ del raw, all_sents
 
 LABELS = ["NP", "PP", "VP", "AP", "verb group", "subject+verb", "inside one phrase", "crosses a boundary", "whole sentence"]
 CHUNKER = nltk.RegexpParser(r"""
-  NP: {<DT|PRP\$|POS|CD|PDT>*<JJ.*>*<NN.*>+}
+  NP: {<DT|PRP\$|POS|CD|PDT>*<JJ.*|RBS|RBR>*<NN.*>+}
       {<PRP|EX>}
   AP: {<RB.*>*<JJ.*>+}
-  VG: {<MD|TO>?<RB.*>*<VB.*>+(<RB.*>*<VB.*>+)*<RP|RB.*>?}
+  VG: {<MD|TO>?<RB.*>*<VB.*>+(<RB.*>*<VB.*>+)*<RP>?}
   PP: {<IN|TO><NP>}
   VP: {<VG><NP|PP|AP|RB.*>+}
 """)
@@ -120,6 +120,9 @@ def phrases(words):
             return j
         return i + 1
     walk(tree, 0)
+    for k, (_, t) in enumerate(tagged):     # conjunctions, marked for the subject+verb rule only (one word: never crossed)
+        if t == "CC":
+            spans[(k, k + 1)].add("CC")
     return [t[:2] for _, t in tagged], dict(spans)
 
 
@@ -129,7 +132,8 @@ def labels(i, j, n_words, spans):
     for lab, name in (("NP", "NP"), ("PP", "PP"), ("VP", "VP"), ("AP", "AP"), ("VG", "verb group")):
         if lab in here:
             found.add(name)
-    if any("NP" in spans.get((i, k), ()) and "VG" in spans.get((k, j), ()) for k in range(i + 1, j)):
+    lead = 1 if j - i > 2 and "CC" in spans.get((i, i + 1), ()) else 0      # "but they were": a conjunction before the subject
+    if any(("NP" in spans.get((i, k), ()) or (lead and "NP" in spans.get((i + 1, k), ()))) and "VG" in spans.get((k, j), ()) for k in range(i + 1, j)):
         found.add("subject+verb")
     if not here and any(a <= i and j <= b and (a, b) != (i, j) for a, b in spans):
         found.add("inside one phrase")
