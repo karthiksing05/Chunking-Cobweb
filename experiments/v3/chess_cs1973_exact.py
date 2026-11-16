@@ -139,7 +139,7 @@ def load(name):
         return [C.parse_fen(l.strip()) for l in fh if l.strip()]
 
 
-train = load("train")                     # 4,660 positions: the cap of the curve
+train = load(os.environ.get("CS73X_TRAIN", "train"))   # 4,660 positions: the cap of the curve (train_long: 27,459, chess_cs1973_long_data.py)
 random.Random(seed).shuffle(train)
 curve = sorted({min(c, len(train)) for c in curve})
 pools = {"middle": load("middle"), "end": load("end")}
