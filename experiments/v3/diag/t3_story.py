@@ -555,6 +555,45 @@ if os.environ.get("FILL_GAMMA") or os.environ.get("FILL_BACKOFF"):   # test-time
     print(json.dumps({"fill read": _fk}), flush=True)
 
 
+if os.environ.get("STORY_CRITIC_AUC"):        # r182 pre-test: does the learner's parse tell judged-good new sentences from bad?
+    # On judged dumps of this seed and n, each new generation is scored by the parse (log Z per join,
+    # and the weakest chosen join) and by a stream baseline (the rarest trigram's count); reported:
+    # AUC against the judge, and the judged-grammatical share kept when only the top half/third pass.
+    import glob
+    L._quiet = True
+    tri = Counter(g for s, _ in train for g in grams(s, 3))
+
+    def auc(xs, ys):
+        pos = [x for x, y in zip(xs, ys) if y]
+        neg = [x for x, y in zip(xs, ys) if not y]
+        if not pos or not neg:
+            return None
+        w = sum((p > q) + 0.5 * (p == q) for p in pos for q in neg)
+        return round(w / (len(pos) * len(neg)), 3)
+    for f in sorted(glob.glob(os.path.join(os.environ["STORY_CRITIC_AUC"], f"*_s{seed}_n{n}_arm*.jsonl"))):
+        sc = f[:-len(".jsonl")] + ".scores.json"
+        if not os.path.exists(sc):
+            continue
+        rows = [json.loads(l) for l in open(f, encoding="utf-8")][1:]
+        ps = json.load(open(sc, encoding="utf-8"))
+        items = [(r["gen"].split(), p > 0.5) for r, p in zip(rows, ps) if r["novel"] and len(r["gen"].split()) >= 2]
+        feats = defaultdict(list)
+        for g, _ in items:
+            r_ = L.parse(g)
+            feats["logZ per join"].append(r_["logZ"] / max(len(g) - 1, 1))
+            joins = [r_["comps"][c].gain for c in r_["chosen"] if c in r_["comps"]]
+            feats["weakest join"].append(min(joins) if joins else -1e9)
+            feats["rarest trigram count"].append(min(tri.get(t_, 0) for t_ in grams(g, 3)))
+            feats["minus length"].append(-len(g))
+        ys = [y for _, y in items]
+        out = {"critic auc": os.path.basename(f), "seed": seed, "n": n, "new": len(items), "judged good": round(sum(ys) / max(len(ys), 1), 3)}
+        for k, xs in feats.items():
+            order = sorted(range(len(xs)), key=lambda i: -xs[i])
+            keep = {fr: round(sum(ys[i] for i in order[:int(len(order) * fr)]) / max(int(len(order) * fr), 1), 3) for fr in (0.5, 0.33)}
+            out[k] = {"auc": auc(xs, ys), "good among top half": keep[0.5], "good among top third": keep[0.33]}
+        print(json.dumps(out), flush=True)
+    sys.exit()
+
 if os.environ.get("STORY_BOUND"):             # r177 pre-test: where held-out unstored bigrams fall in the learner's parse
     # Each adjacent pair (t_i, t_i+1) of a held-out sentence is joined by the one split of the parse at i+1;
     # its children's sizes say whether the pair is word+word (inside a phrase) or joins larger units
