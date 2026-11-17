@@ -3305,7 +3305,8 @@ class Trellis3:
                   own word-filler counts, P_C(w) = (c_C(w) + T_C P_parent(w)) / (c_C + T_C), the root over a
                   uniform base (hierarchical Dirichlet, Witten-Bell concentration); the end likewise along
                   the sorting path of q + the filler, on r1 = end marker.
-          "post"  the same concepts mixed by Cobweb's posterior given q (_hier_path_mix)."""
+          "post"  the same concepts mixed by Cobweb's posterior given q (_hier_path_mix).
+          "knpost" as "kn" with the "post" read as the bottom level (exact histories over the posterior path mix)."""
         W = self.window
         ls = [q.get(f"l{i}", BOS) for i in range(1, W + 1)]
         cache = self.__dict__.setdefault("_hier_cache", {})
@@ -3317,11 +3318,15 @@ class Trellis3:
             cache.clear()
         hist, ends = self._hier_index()
         fill, end = {}, {}
-        if how in ("kn", "top", "ngram"):
+        if how in ("kn", "top", "ngram", "knpost"):
             if how == "ngram":
                 vocab = {w for d in hist[1].values() for w in d}
                 P0 = {w: 1.0 / len(vocab) for w in vocab} if vocab else {}
                 E0 = {}
+            elif how == "knpost":            # r195 v2: the exact histories over the "post" read (the sorting
+                b_, be_ = self.hier_fills(q, how="post")   # path mixed by Cobweb's posterior) as the bottom
+                P0 = {v[1]: p for v, p in b_.items()}
+                E0 = {v[1]: min(be_.get(v, 0.0) / p, 1.0) for v, p in b_.items() if p > 0}
             else:
                 a_ = {v[1]: m for v, m in self._gap_fills(dict(q)).items() if v[0] == "w"}
                 e_ = {v[1]: m for v, m in self._gap_fills({**q, "r1": EOS}).items() if v[0] == "w"}

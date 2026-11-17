@@ -4,7 +4,7 @@ import pytest
 from trellis2.trellis3 import BOS, EOS, Trellis3
 from test_r192_both_sides import CFG, SENTS
 
-HOWS = ["kn", "top", "ngram", "path", "post"]
+HOWS = ["kn", "top", "ngram", "path", "post", "knpost"]
 
 
 @pytest.fixture(scope="module")
