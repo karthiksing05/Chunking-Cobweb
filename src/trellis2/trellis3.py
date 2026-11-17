@@ -151,7 +151,7 @@ class Trellis3:
                  story_facet: bool = False, exact_alone: bool = False,
                  search: str = "chart", beam: int = 8, hierarchy: str = "two",
                  gain_alpha: Optional[float] = None, gain_alpha_on: str = "content", conj: bool = False,
-                 consist: Optional[str] = None):
+                 consist: Optional[str] = None, edge_once: bool = False):
         # gain_alpha: None = _gain as before; else a fixed TOTAL pseudo-count |gain_alpha| spread over each
         # attribute's values in _gain, for the content tree ("content") or both trees ("both")
         self.gain_alpha, self.gain_alpha_on = gain_alpha, gain_alpha_on
@@ -165,6 +165,14 @@ class Trellis3:
         # binds the two parts, the window marginalised out), each concept's value probabilities backed off to its
         # parent's with one pseudo-count (the root's to uniform). Default None: unchanged.
         self.consist = consist
+        # consist="cohesion_count" (r196b): the cohesion read from the stored content records themselves -- the
+        # posterior-weighted co-occurrence of the two parts' identities (a word part: its token; a composite part:
+        # its token string) over every composite stored in the content tree -- PMI shrunk to independence by one
+        # pseudo-count, floored at 0: deterministic given the data, not given the tree's sort paths.
+        self._coh = {"pair": {}, "l": {}, "r": {}, "n": 0.0}
+        # edge_once (r196b): the window counts a sentence boundary once: the first slot past the edge reads the
+        # marker, further slots are absent (not the marker again), in parsing and in storage. Default off.
+        self.edge_once = edge_once
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -467,11 +475,11 @@ class Trellis3:
         for k in range(1, self.window + 1):
             if i - k >= 0:
                 x[f"l{k}"] = tokens[i - k]
-            elif self.boundary == "marker":
+            elif self.boundary == "marker" and (i - k == -1 or not self.__dict__.get("edge_once")):
                 x[f"l{k}"] = BOS
             if j + k - 1 < len(tokens):
                 x[f"r{k}"] = tokens[j + k - 1]
-            elif self.boundary == "marker":
+            elif self.boundary == "marker" and (j + k - 1 == len(tokens) or not self.__dict__.get("edge_once")):
                 x[f"r{k}"] = EOS
         if self.boundary == "edge":
             # whether a neighbour exists on each side, once per side; the
@@ -960,6 +968,13 @@ class Trellis3:
         boundary="missing" the surface slots beyond the experience stay out)."""
         if self.boundary in ("missing", "edge"):
             return {a: x.get(a, BLANK) for a in attrs if a in x or not (a[0] in "lr" and (a[1:].isdigit() or a[1:2] == "j"))}
+        if self.__dict__.get("edge_once") and self.boundary == "marker":
+            # edge_once counts the boundary once in SCORING (partial instances); the compiled tree stores complete
+            # instances, so a stored record keeps the markers in the further slots, as without the flag
+            x = dict(x)
+            for a in attrs:
+                if a not in x and a[0] in "lr" and a[1:].isdigit():
+                    x[a] = BOS if a[0] == "l" else EOS
         return {a: x.get(a, BLANK) for a in attrs}
 
     # ------------------------------------------------------------------ #
@@ -1160,9 +1175,43 @@ class Trellis3:
             return self._code(self.cnt, e.cnt) + self._code(self.ctx, e.ctx)
         if self.hierarchy == "joint":
             return self._gain(self.ctx, self._jx(e))
-        if self.__dict__.get("consist") == "cohesion":
+        if self.__dict__.get("consist") in ("cohesion", "cohesion_count"):
             return self._gain(self.cnt, e.cnt) + self._gain(self.ctx, e.ctx) + self._cohesion(e)
         return self._gain(self.cnt, e.cnt) + self._gain(self.ctx, e.ctx)
+
+    @staticmethod
+    def _ident(e: Elem) -> tuple:
+        """What an element is made of: its tokens, left to right."""
+        out, stack = [], [e]
+        while stack:
+            x = stack.pop()
+            if x.token is not None:
+                out.append(x.token)
+            else:
+                stack += [x.right, x.left]
+        return tuple(out)
+
+    def _coh_add(self, e: Elem, w: float) -> None:
+        """r196b: count a stored composite's two parts' identities (weight = its storage weight)."""
+        c = self._coh
+        a, b = self._ident(e.left), self._ident(e.right)
+        c["pair"][(a, b)] = c["pair"].get((a, b), 0.0) + w
+        c["l"][a] = c["l"].get(a, 0.0) + w
+        c["r"][b] = c["r"].get(b, 0.0) + w
+        c["n"] += w
+
+    def _coh_count(self, e: Elem) -> float:
+        """r196b: log2 P(a, b) / P(a) P(b) over the stored composites' part pairs, P(a) = (count + 1/size) /
+        (N + 1) per side, P(a, b) = (count + P(a) P(b)) / (N + 1); floored at 0."""
+        c = self._coh
+        N = c["n"]
+        if N <= 0:
+            return 0.0
+        a, b = self._ident(e.left), self._ident(e.right)
+        pa = (c["l"].get(a, 0.0) + 1.0 / (len(c["l"]) + 1)) / (N + 1.0)
+        pb = (c["r"].get(b, 0.0) + 1.0 / (len(c["r"]) + 1)) / (N + 1.0)
+        pab = (c["pair"].get((a, b), 0.0) + pa * pb) / (N + 1.0)
+        return max(0.0, math.log2(pab / (pa * pb)))
 
     def _cohesion(self, e: Elem) -> float:
         """r196 (consist="cohesion"): best over the sorting path of the partial content instance {LC, RC} of
@@ -1170,6 +1219,8 @@ class Trellis3:
         (the root: (count + 1/size) / (count root + 1)); 0 at the root and for an element without both facets."""
         if e.token is not None or not e.cnt:
             return 0.0
+        if self.__dict__.get("consist") == "cohesion_count":
+            return self._coh_count(e)
         x = {a: e.cnt[a] for a in ("LC", "RC") if e.cnt.get(a, BLANK) != BLANK}
         if len(x) < 2:
             return 0.0
@@ -1418,6 +1469,8 @@ class Trellis3:
                 e.leaf = e.cleaf = self.ctx.ifit(self._jx(e), w)
             else:
                 e.cleaf = self.cnt.ifit(e.cnt, w)
+                if self.__dict__.get("consist") == "cohesion_count":
+                    self._coh_add(e, w)
                 e.ctx = self._full(self._context(tokens, e, analysed=key in chosen), self.ctx_attrs)
                 if self.ref_names and self.donate_ctx and self.bags:
                     e.ctx["cc"] = self._ref(("cc", e.rid), e.ctx["cc"])
