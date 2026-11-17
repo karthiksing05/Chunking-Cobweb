@@ -999,6 +999,9 @@ for ai, arm in enumerate(arms):
         seg_ = bool(arm.pop("seg", False))  # r194: record each generated sentence's unit lengths in the dump ("units")
         read_ = arm.pop("read", None)       # r195: the fill read that mixes levels (Trellis3.hier_fills how = "kn" | "top" |
                                            # "ngram" | "path" | "post"); P(w) and P(w, end) replace the product read's masses
+        pool_ = arm.pop("pool", None)      # r197: "geo" = the fill read weights each occurrence by the GEOMETRIC MEAN of its per-attribute
+                                           # back-off factors (product ** (1 / A)) in _gap_fills, fill_words and pivot_support
+        L.pool = pool_
         both_ = arm.pop("both", None)      # r192: a filler that makes a trigram memory never stored is kept only if the
                                            # context tree, re-predicting the previous word (the pivot) from ITS left
                                            # context, finds the filler supports it: log P(pivot | left, r1 = w) /
@@ -1054,7 +1057,7 @@ for ai, arm in enumerate(arms):
                         continue
                     if not _ok(l1, _words(v)[0]):
                         continue
-                    me = e_.get(v, 0.0)
+                    me = e_.get(v, 0.0) if not pool_ else min(e_.get(v, 0.0), m_)   # r197: with "pool" the end read has A + 1 factors, not nested in the A of m_
                     vs += [(v, True), (v, False)]
                     ws += [me, max(m_ - me, 0.0)]
                 if esc_ and l1 != T3BOS and l1 in _ix_:
@@ -1191,7 +1194,7 @@ for ai, arm in enumerate(arms):
             arm["blend"] = blend_
             if chart:
                 arm["chart"] = chart
-        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"esc": esc_} if esc_ else {}), **({"new": True} if new_ else {}), **({"q": q_} if q_ != 0.5 else {}), **({"near": near_} if near_ else {}), **({"sweep": sweep_} if sweep_ else {}), **({"temp": temp_} if temp_ != 1.0 else {}), **({"both": both_} if both_ else {}), **({"reach": reach_} if reach_ != 1 else {}), **({"repair": True} if repair_ else {}), **({"seg": True} if seg_ else {}), **({"read": read_} if read_ else {})})
+        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"esc": esc_} if esc_ else {}), **({"new": True} if new_ else {}), **({"q": q_} if q_ != 0.5 else {}), **({"near": near_} if near_ else {}), **({"sweep": sweep_} if sweep_ else {}), **({"temp": temp_} if temp_ != 1.0 else {}), **({"both": both_} if both_ else {}), **({"reach": reach_} if reach_ != 1 else {}), **({"repair": True} if repair_ else {}), **({"seg": True} if seg_ else {}), **({"read": read_} if read_ else {}), **({"pool": pool_} if pool_ else {})})
         if sweep_:
             _tw = {}
 

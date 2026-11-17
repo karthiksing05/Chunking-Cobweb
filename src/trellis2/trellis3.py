@@ -2822,7 +2822,10 @@ class Trellis3:
             return tmemo[node.id]
 
         cache = self.__dict__.setdefault("_gap_cache", {})
+        geo = self.__dict__.get("pool") == "geo"     # r197: geometric mean of the per-attribute factors
         key = (tuple(sorted(q.items())), repr(nbq), len(self.records), self.stats.get("experiences", 0), beta, gamma, backoff)
+        if geo:
+            key = key + ("geo",)
         if key in cache:
             return cache[key]
         if len(cache) > 256:
@@ -2850,6 +2853,8 @@ class Trellis3:
             for which, attr, value, w in e.pas:
                 if which == "ctx" and attr == FILL:
                     lp = sum(math.log(max(v, 1e-300)) for v in probs(e.leaf).values())
+                    if geo and q:
+                        lp /= len(q)
                     if nbq:
                         for a, bag in nbq[min(e.span[1] - e.span[0], top)].items():
                             lp += sum(p * math.log(max(nprob(e.leaf, a, v), 1e-300)) for v, p in bag.items())
@@ -2924,7 +2929,15 @@ class Trellis3:
         cache = self.__dict__.setdefault("_ps_cache", {})
         if self.__dict__.get("conj"):     # r194: joined histories of the known left (and right) words
             left = self._joins(left)
-        lk = (tuple(sorted(left.items())), slot)
+        geo = self.__dict__.get("pool") == "geo"     # r197: geometric mean over the A attributes (left and the slot)
+        Rm1 = Rm
+        lk = (tuple(sorted(left.items())), slot) + (("geo",) if geo else ())
+        if geo:
+            Rm1 = Rm                                  # P(x | p) alone is a one-attribute read (kind "left")
+            gk = ("geo", slot, len(left) + 1)
+            if gk not in slots:
+                slots[gk] = np.power(Rm, 1.0 / (len(left) + 1))
+            Rm = slots[gk]
         if lk not in cache:
             if len(cache) > 4096:
                 cache.clear()
@@ -2943,9 +2956,14 @@ class Trellis3:
                                        for a, v in q.items()}
                 return pm[node.id]
             Lg = np.array([sum(math.log(max(p, 1e-300)) for p in pv(nd).values()) for nd in nodes])
-            Lw = np.exp(Lg - Lg.max())
-            cache[lk] = (Lw, (Lw * tot) @ Rm, Lw @ Wm / max(float(Lw @ tot), 1e-300))
-        Lw, a_all, p1 = cache[lk]
+            Ll = np.exp(Lg - Lg.max())
+            if geo:                      # P(x | left) joins one more attribute: its geometric mean runs over A + 1
+                Lw = np.exp(Lg / (len(q) + 1))      # unshifted: the two powers must keep their common scale (kind "left")
+                Ll = np.exp(Lg / max(len(q), 1))
+            else:
+                Lw = Ll
+            cache[lk] = (Lw, (Lw * tot) @ Rm, Ll @ Wm / max(float(Ll @ tot), 1e-300), Ll)
+        Lw, a_all, p1, Ll = cache[lk]
         out = {}
         for p in pivots:
             if p not in wx or p1[wx[p]] <= 0:
@@ -2954,7 +2972,7 @@ class Trellis3:
             col = Wm[:, wx[p]]
             a_p = (Lw * col) @ Rm                           # [x]  sum over p's occurrences of P(left) P(x)
             if kind != "pivot":
-                s_l, s_r, n_p = float(Lw @ col), col @ Rm, float(col.sum())
+                s_l, s_r, n_p = float(Ll @ col), col @ Rm1, float(col.sum())
             for x in rights:
                 if x not in rx:                              # never stored in the slot: the root's smoothing alone
                     out[(p, x)] = 0.0
@@ -3018,6 +3036,8 @@ class Trellis3:
                     return memo[node.id]
                 vec[(a, v)] = np.log(np.maximum(np.array([pr(nd) for nd in nodes]), 1e-300)).astype(np.float32)
             lg = lg + vec[(a, v)]
+        if self.__dict__.get("pool") == "geo" and q:     # r197: geometric mean of the A per-attribute factors
+            lg = lg / len(q)
         m = Wm.T @ np.exp(lg - lg.max())        # masses up to one common factor (relative, as a distribution)
         return {w: float(m[k]) for k, w in enumerate(words) if m[k] > 0}
 

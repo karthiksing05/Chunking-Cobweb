@@ -62,7 +62,8 @@ for s in held:
         ps = {}
         for r in READS:
             a = time.time()
-            if r == "default":
+            if r in ("default", "geo"):             # r197: "geo" = the same read with L.pool = "geo" (geometric mean of the attribute factors)
+                L.pool = "geo" if r == "geo" else None
                 m, e = words(L._gap_fills(q)), words(L._gap_fills({**q, "r1": EOS}))
                 z = sum(m.values())
             else:
@@ -71,6 +72,7 @@ for s in held:
                 z = 1.0
             mw = m.get(t[i], 0.0)
             me = min(e.get(t[i], 0.0), mw)
+            L.pool = None
             ps[r] = (me if fin else mw - me) / z if z > 0 else 0.0
             secs[r] += time.time() - a
         toks.append(((t[i - 2], t[i - 1], t[i]) in tri, ps))
