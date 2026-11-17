@@ -278,6 +278,56 @@ def set_variant(L, v):
         L.factor = "ccm"
     elif v == "Vzero":
         L._factor = lambda e: 0.0
+    elif v == "Vmarg":
+        # the context gain with the observed window replaced by its expectation under the context concept the
+        # span's own content (cc) sorts to: E_{w ~ P(.|C)} log2 share(C) P(w|C)/P(w|root) = log2 share(C) +
+        # sum_a KL(P(a|C) || P(a|root)) over window attributes, best over the path of {cc}; the same estimator
+        # as _gain, context marginalised, so a string's score depends on what it is, not on where it stands
+        from trellis2.trellis3 import log_prob
+        cache = {}
+        wins = [a for a in L.ctx_attrs if is_win(a)]
+
+        def marg(e):
+            cc = e.ctx.get("cc")
+            if not isinstance(cc, dict) or not cc:
+                return L._gain(L.cnt, e.cnt)
+            key = tuple(sorted(cc.items()))
+            if key not in cache:
+                tree = L.ctx
+                path = tree.categorize({"cc": cc})
+                root = path[0]
+                N = root.count
+                best = 0.0
+                if N > 0:
+                    for node in path[1:]:
+                        c = node.count
+                        if c <= 0:
+                            break
+                        g = math.log2(c / N)
+                        for a in wins:
+                            d = node.av.get(a, {})
+                            for u, cu in list(d.items()):
+                                if cu <= 0:
+                                    continue
+                                lp = log_prob(node, {a: u}, root, L.alpha)
+                                g += math.exp(lp) * (lp - log_prob(root, {a: u}, root, L.alpha)) / LN2
+                        best = max(best, g)
+                cache[key] = best
+            return L._gain(L.cnt, e.cnt) + cache[key]
+        L._factor = marg
+    elif v in ("Vside", "Vside_coh"):
+        # what the context shares ACROSS the span: the context gain minus each side's own gain (the left
+        # window's internal coherence, the right window's), so a frame scores by how its two sides and the
+        # span's own content go together, not by how familiar each side is on its own
+        coh = v == "Vside_coh"
+
+        def side(e):
+            x = e.ctx
+            lft = {a: u for a, u in x.items() if a[0] == "l" and (a[1:].isdigit() or a[1:2] == "j")}
+            rgt = {a: u for a, u in x.items() if a[0] == "r" and (a[1:].isdigit() or a[1:2] == "j")}
+            f = L._gain(L.cnt, e.cnt) + L._gain(L.ctx, x) - L._gain(L.ctx, lft) - L._gain(L.ctx, rgt)
+            return f + (L._cohesion(e) if coh else 0.0)
+        L._factor = side
     elif v.startswith("Vc:"):  # consist readouts ("Vc:none" = the default factor on the same memory)
         L.consist = None if v[3:] == "none" else v[3:]
     elif v != "V0_default":

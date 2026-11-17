@@ -150,7 +150,8 @@ class Trellis3:
                  repair_path: bool = False, repair_draws: int = 1, repair_now: bool = False,
                  story_facet: bool = False, exact_alone: bool = False,
                  search: str = "chart", beam: int = 8, hierarchy: str = "two",
-                 gain_alpha: Optional[float] = None, gain_alpha_on: str = "content", conj: bool = False):
+                 gain_alpha: Optional[float] = None, gain_alpha_on: str = "content", conj: bool = False,
+                 consist: Optional[str] = None):
         # gain_alpha: None = _gain as before; else a fixed TOTAL pseudo-count |gain_alpha| spread over each
         # attribute's values in _gain, for the content tree ("content") or both trees ("both")
         self.gain_alpha, self.gain_alpha_on = gain_alpha, gain_alpha_on
@@ -158,6 +159,12 @@ class Trellis3:
         # window) as single attributes, so sorting and the fill read condition on the conjunction, backing off
         # along the path from conjunctive matches to single-word ones. Default off (no extra attributes).
         self.conj = conj
+        # consist (r196, parse consistency): "parts" -- a word part's content facet (LC/RC) is the word itself, so
+        # the content tree knows what a chunk is made of independently of where it stood; "cohesion" -- also adds
+        # to each composite's factor the content tree's gain on the partial instance {LC, RC} (how strongly memory
+        # binds the two parts, the window marginalised out), each concept's value probabilities backed off to its
+        # parent's with one pseudo-count (the root's to uniform). Default None: unchanged.
+        self.consist = consist
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -821,6 +828,8 @@ class Trellis3:
             if self.donate_cnt:
                 bag = self._word_content_bag(part.token) if (part.token is not None and self.word_content in ("parts", "cc", "cc+token")) else None
                 self._facet(x, f"{p}C", bag if bag else self._cnt_name(part))
+                if part.token is not None and self.__dict__.get("consist"):
+                    self._facet(x, f"{p}C", [f"w:{part.token}"])
             if self.heights:
                 x[f"{p}H"] = str(min(part.height, 4))
         return x
@@ -1151,7 +1160,44 @@ class Trellis3:
             return self._code(self.cnt, e.cnt) + self._code(self.ctx, e.ctx)
         if self.hierarchy == "joint":
             return self._gain(self.ctx, self._jx(e))
+        if self.__dict__.get("consist") == "cohesion":
+            return self._gain(self.cnt, e.cnt) + self._gain(self.ctx, e.ctx) + self._cohesion(e)
         return self._gain(self.cnt, e.cnt) + self._gain(self.ctx, e.ctx)
+
+    def _cohesion(self, e: Elem) -> float:
+        """r196 (consist="cohesion"): best over the sorting path of the partial content instance {LC, RC} of
+        log2 [share(C) P(LC, RC | C) / P(LC, RC | root)], P(v|C) = (count of v at C + P(v|parent)) / (count C + 1)
+        (the root: (count + 1/size) / (count root + 1)); 0 at the root and for an element without both facets."""
+        if e.token is not None or not e.cnt:
+            return 0.0
+        x = {a: e.cnt[a] for a in ("LC", "RC") if e.cnt.get(a, BLANK) != BLANK}
+        if len(x) < 2:
+            return 0.0
+        path = self.cnt.categorize(x)
+        root = path[0]
+        N = root.count
+        if N <= 0:
+            return 0.0
+        bags = {a: (v if isinstance(v, dict) else {v: 1.0}) for a, v in x.items()}
+        prev = {}
+        for a, bag in bags.items():
+            d = root.av.get(a, {})
+            S = len(d) + 1
+            prev[a] = {u: (d.get(u, 0.0) + 1.0 / S) / (N + 1.0) for u in bag}
+        proot = {a: dict(p) for a, p in prev.items()}
+        best = 0.0
+        for node in path[1:]:
+            c = node.count
+            if c <= 0:
+                break
+            cur, lr = {}, 0.0
+            for a, bag in bags.items():
+                d = node.av.get(a, {})
+                cur[a] = {u: (d.get(u, 0.0) + prev[a][u]) / (c + 1.0) for u in bag}
+                lr += sum(p * math.log(cur[a][u] / proot[a][u]) for u, p in bag.items())
+            prev = cur
+            best = max(best, (math.log(c / N) + lr) / LN2)
+        return best
 
     def _inside_outside(self, n: int, comps):
         """Log inside/outside over binary analyses with factors 2^(gain/tau);
