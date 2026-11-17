@@ -1,8 +1,8 @@
 """Word-level causal LM reference baselines for t3_story.py (STORY_BASE arms {"lm": "gpt"|"lstm"}).
 
 Trained only on the n training sentences, size picked by held-out per-token loss (words + </s>) on
-sentences from stories the stream never reached; AdamW with early stopping; ancestral sampling at
-temperature 1 from <s> to </s>.
+sentences from stories the stream never reached; AdamW with early stopping; ancestral sampling (default
+temperature 1; train_lm(temp=) rescales the logits, r184) from <s> to </s>.
 """
 import copy
 import itertools
@@ -87,7 +87,7 @@ def _fit(kind, V, layers, d, drop, tr, ho, w2i, dev, seed, max_ep=80, patience=6
     return model, best, ep_best
 
 
-def train_lm(kind, train_sents, held_sents, vocab, seed, log=print):
+def train_lm(kind, train_sents, held_sents, vocab, seed, log=print, temp=1.0):
     """Grid search by held-out loss; returns (sampler, info)."""
     dev = "cuda" if torch.cuda.is_available() else "cpu"
     words = sorted(vocab)
@@ -114,7 +114,7 @@ def train_lm(kind, train_sents, held_sents, vocab, seed, log=print):
         x = torch.full((m, 1), BOS, dtype=torch.long, device=dev)
         done = torch.zeros(m, dtype=torch.bool, device=dev)
         for _ in range(9):
-            p = F.softmax(model(x)[:, -1], -1)
+            p = F.softmax(model(x)[:, -1] / temp, -1)
             p[:, :2] = 0.0   # never PAD or BOS
             nxt = torch.multinomial(p / p.sum(-1, keepdim=True), 1, generator=gen)
             nxt[done] = PAD

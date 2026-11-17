@@ -495,7 +495,7 @@ if BASE or DIAG:
         lm_info = None
         if "lm" in arm:
             from t3_lm import train_lm
-            sample, lm_info = train_lm(arm["lm"], sents, lm_held, vocab, seed)
+            sample, lm_info = train_lm(arm["lm"], sents, lm_held, vocab, seed, temp=float(arm.get("temp", 1.0)))
             print(json.dumps({"tag": tag, "seed": seed, "n": n, "arm": arm, **lm_info}), flush=True)
             pool = []
             while len(pool) < len(PP):          # unconditioned: draws until enough sentences of 3-8 words (the ngram arm's retry, in bulk)
@@ -1025,10 +1025,10 @@ for ai, arm in enumerate(arms):
                 return True
             return l1 in _ix_ and w in _ix_ and float(_M_[_ix_[l1], _ix_[w]]) >= _med_ > 0
 
-        def _fills(l2, l1, l3=None):
-            k = (l3, l2, l1)
+        def _fills(l2, l1, *far):          # far: l3, l4, ... when the learner's window is wider (r161: 3; r184: up to 5)
+            k = (far, l2, l1)
             if k not in _cz:
-                q = {"l2": l2, "l1": l1, **({"l3": l3} if l3 is not None else {})}   # l3 when the learner's window is 3 (r161)
+                q = {"l2": l2, "l1": l1, **{f"l{3 + i}": w for i, w in enumerate(far)}}
                 a_, e_ = L._gap_fills(q), L._gap_fills({**q, "r1": T3EOS})
                 vs, ws = [], []
                 for v, m_ in a_.items():
@@ -1068,8 +1068,8 @@ for ai, arm in enumerate(arms):
             for _ in range(50):
                 out, done = [], False
                 while not done and len(out) <= 8:
-                    t_ = [T3BOS] * 3 + out
-                    vs, ws = _fills(t_[-2], t_[-1], t_[-3] if getattr(L, "window", 2) >= 3 else None)
+                    t_ = [T3BOS] * 5 + out
+                    vs, ws = _fills(t_[-2], t_[-1], *[t_[-3 - i] for i in range(max(getattr(L, "window", 2), 2) - 2)])
                     if not vs or sum(ws) <= 0:
                         break
                     (v, done) = _rng.choices(vs, weights=ws)[0]
