@@ -290,3 +290,77 @@ Mixing levels is a change to the read, not to the attributes, and the n-gram bas
 | 1000 | on | .357 | .630 | .318 | .804 | .726 |
 
 At 1k, conj lowers cross-seed F1 (.726 vs .742) and NP recall, and raises crossing. It helps only at 250.
+
+## 10. Round 195: reads that mix levels (`Trellis3.hier_fills`, arm key `"read"`; pre-test fails, not run at full scale)
+
+**Code check first.** `_gap_fills` does not mix levels of the filler distribution. Its hierarchy is on the CONTEXT
+side: each attribute's P(q_a | leaf) backs off up the leaf's path, independently per attribute, and the
+product weights each committed occurrence, whose filler is a point mass (its own word). No level has its own
+estimate of P(w | context) with an escape set by how much evidence that level holds. Round 178's "types" back-off
+swaps the parent's token counts for distinct-filler counts in the same per-attribute product, so it has the same
+form. (Rounds 175-176 mixed suffix depths for characters, but each depth was read by its own reader.)
+
+**Reads tried** (`hier_fills(q, how)`; all return P(w) and P(w, end); Witten-Bell escapes T / (T + c), so there is no tuned constant):
+
+- `kn`: exact histories l1, l2 l1, .., lW..l1 from memory's committed occurrences. Each backs off to the level
+  below, and the bottom level is the tree's own read (`_gap_fills` normalised). The end is read as the next token, with levels
+  (w), (l1 w), .., backing off to the tree's end share.
+- `top`: only the full-window history over the tree read.
+- `ngram`: `kn` over a uniform bottom. This is the control for what the tree adds.
+- `path`: the context tree's sorting path of q (the leaf reached by l1..lW jointly, with its ancestors as the back-off). Each
+  concept's own (passive) filler counts give P_C(w) = (c_C(w) + T_C P_parent(w)) / (c_C + T_C).
+- `post`: the same path concepts mixed by Cobweb's posterior count(C) prod_a P(q_a | C).
+- `knpost`: `kn` over `post`.
+
+**Pre-test 1: held-out log-loss** (`diag/r195_logloss.py`, n 1000, 400 held-out sentences, one learner per cell;
+bits/word including the end decision; `r192-diag/r195_logloss_v2_*.txt`, `_path_*.txt`):
+
+| w, seed | default | kn | top | ngram (control) | path | post | knpost | default / kn / ngram / knpost on new trigrams |
+|---|---|---|---|---|---|---|---|---|
+| 3, 13 | 11.19 | 8.02 | 11.22 | **5.38** | 20.82 | 8.72 | 5.54 | 20.99 / 15.64 / 8.88 / 9.30 |
+| 3, 17 | 11.58 | 8.59 | 11.69 | **5.62** | 15.53 | 8.04 | 5.83 | 21.26 / 16.27 / 9.00 / 9.51 |
+| 4, 13 | 11.90 | 8.19 | 12.03 | **5.63** | 14.14 | 8.21 | 5.82 | 21.44 / 15.97 / 9.43 / 9.94 |
+| 4, 17 | 12.28 | 8.93 | 12.43 | **5.85** | 14.22 | 7.66 | 6.05 | 21.99 / 17.03 / 9.49 / 9.99 |
+| 5, 13 | 12.38 | 8.48 | 12.52 | **5.87** | 14.84 | 8.03 | 6.04 | 21.71 / 16.62 / 9.95 / 10.39 |
+| 5, 17 | 12.99 | 9.24 | 13.15 | **6.09** | 14.44 | 8.16 | 6.36 | 23.02 / 17.66 / 9.97 / 10.64 |
+
+Mixing levels cuts log-loss by 3 to 7 bits/word. But the best read is the plain Witten-Bell n-gram over a uniform
+bottom. With the tree read as its bottom level (kn), held-out new trigrams cost 6 to 8 bits more than over a uniform
+bottom: the tree's product read puts almost no mass on plausible new words. The posterior path mix (post) is the best
+tree-only read (7.7-8.7) but spends 7-8 bits on stored trigrams, against 3.2 for the exact-history reads. Over post
+(knpost), the tree still trails the uniform bottom by 0.2-0.3 bits. `path` (one Witten-Bell chain down the sorting
+path) is worse than default. Its deepest concepts are 1-3 occurrences whose history usually differs from q, and
+Witten-Bell gives them half the mass.
+
+**Pre-test 2: generation** ("both", temp .7, n 1000, seeds 13 17, judged; `r192-diag/r195_{kn,knpost,ngram,post}_compare.txt`;
+gram, tri, gram|tri over new sentences, against the matched r192 "both" dumps):
+
+| w, seed | r192 both | kn | knpost | ngram | post |
+|---|---|---|---|---|---|
+| 3, 13 | .879 .099 .692 | .845 .035 .464 | .846 .040 .547 | .828 .046 .568 | .448 .649 .324 |
+| 3, 17 | .890 .112 .659 | .857 .038 .638 | .839 .049 .539 | .847 .051 .654 | .461 .673 .302 |
+| 4, 13 | .853 .244 .655 | .853 .036 .483 | .855 .040 .438 | .871 .034 .527 | .403 .791 .288 |
+| 4, 17 | .860 .206 .710 | .839 .032 .440 | .870 .032 .620 | .868 .036 .643 | .412 .682 .288 |
+| 5, 13 | .781 .389 .700 | .849 .032 .638 | .836 .033 .500 | .830 .026 .486 | .458 .759 .342 |
+| 5, 17 | .819 .360 .659 | .887 .028 .625 | .887 .029 .750 | .882 .023 .812 | .440 .730 .357 |
+
+(gram|tri at tri ~.03 rests on about 40-60 sentences per cell.) No read improves gram|tri at matched tri. The
+exact-history reads collapse novelty to tri .02-.05 at every window. Their gram|tri there (.44-.81, mean about .58)
+is below r192 "both" at its own low-novelty point (w3 temp .5: tri .044, gram|tri .748, 4 seeds). post goes the other
+way: tri .65-.79 at gram|tri .29-.36, far below the neural curves at that tri (r192 envelope: LSTM about .85-.90 at
+tri .4-.7). So no full n 1000 / n 4000 frontier was run. Default byte identity holds: `r195-byteid-n250-w3` s13 matches
+r191 on all 3 arms and refs (cmp). tests/trellis2/test_r195_hier.py passes 12/12.
+
+**Why it fails.** Mixing levels fixes the probability ESTIMATE (log-loss), but not the failure the judge sees.
+With a Witten-Bell escape, a seen history keeps most of its mass on its stored continuations, so generation walks
+stored trigrams (tri ~.03). What it does escape goes to the next level down, (l1) alone. That is the bigram chaining
+of class C (section 1): l2 is dropped outright, where the tree read at least keeps l2's similarity in the product.
+Novel words are then *less* grammatical, not more. The tree-path reads go the other way. Their deep concepts do not
+share q's history (a concept on the sorting path is similar in all attributes, not a conjunction of l1..lW), so the
+leaf-dominant `path` memorises mismatched neighbours. The posterior-weighted `post` puts most weight on large
+general concepts, which yields novel but ungrammatical text. In Cobweb's tree the sorting path is a similarity
+chain, not a back-off chain, so "the leaf reached by l1..lW jointly is the conjunction" does not hold at n 1000.
+A KN-style read cannot both keep novelty and keep l2's role when the history has escaped. The log-loss result
+also shows the tree read as a bottom level is worse than uniform. Where the tree should add value (class-based
+generalisation of unseen contexts), its product read is overconfident. That is a calibration problem, not a
+mixing one. Closed.
