@@ -70,6 +70,7 @@ train = train[:n]
 seen = {tuple(s) for s, _ in train}
 adj = lambda sts: [(st[i - 1], st[i]) for st in sts for i in range(1, len(st)) if keep(st[i - 1]) and keep(st[i])]
 val = adj(train_st[k + 1:k + 400])[:200]   # pairs of stories the stream never reached: for fitting the topic weight
+lm_held = [s for st in train_st[k + 1:k + 400] for s in st if keep(s)]   # for sizing the neural LM baselines: stories the stream never reached
 pairs = adj(test)
 random.Random(seed + 1).shuffle(pairs)
 pairs = pairs[:N_PROMPT]
@@ -170,6 +171,8 @@ if len(sys.argv) > 7 and sys.argv[7] == "refs":
 #   {"ngram": k}                 maximum-likelihood k-gram sampler with sentence boundaries
 #   {"ngram": k, "topic": b}     each word also weighted by exp(b * lift), lift = mean over the
 #                                prompt's words u of log P(w in next | u in previous) / P(w in next)
+#   {"lm": "gpt"} / {"lm": "lstm"}  word-level neural LM trained only on the n sentences (t3_lm.py), size
+#                                chosen by held-out loss on lm_held, sampled unconditioned like the ngram arm
 #   {"swap": "random"}           a stored sentence with one word replaced by another word stored
 #                                between the same two neighbours
 #   {"swap": "retrieve"}         the same, on the stored sentence that followed the stored
@@ -489,7 +492,17 @@ if BASE or DIAG:
         g_rng = random.Random(seed + 7)
         t1 = time.time()
         PP = [p for p in P for _ in range(DRAWS)]
-        if "ngram" in arm:
+        lm_info = None
+        if "lm" in arm:
+            from t3_lm import train_lm
+            sample, lm_info = train_lm(arm["lm"], sents, lm_held, vocab, seed)
+            print(json.dumps({"tag": tag, "seed": seed, "n": n, "arm": arm, **lm_info}), flush=True)
+            pool = []
+            while len(pool) < len(PP):          # unconditioned: draws until enough sentences of 3-8 words (the ngram arm's retry, in bulk)
+                pool += [s for s in sample(2048) if s and 3 <= len(s) <= 8 and not (arm.get("new") and tuple(s) in seen)]
+            it_ = iter(pool)
+            gen = lambda p: next(it_)
+        elif "ngram" in arm:
             k, tab, beta = arm["ngram"], table(arm["ngram"]), arm.get("topic", 0)
 
             def gen(p):
