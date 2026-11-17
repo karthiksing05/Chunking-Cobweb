@@ -504,6 +504,7 @@ if BASE or DIAG:
             gen = lambda p: next(it_)
         elif "ngram" in arm:
             k, tab, beta = arm["ngram"], table(arm["ngram"]), arm.get("topic", 0)
+            temp_ = float(arm.get("temp", 1.0))
 
             def gen(p):
                 for _ in range(200):
@@ -512,6 +513,8 @@ if BASE or DIAG:
                         c = tab[tuple(h[len(h) - k + 1:])] if k > 1 else tab[()]
                         ws = list(c)
                         wt = [c[w] * (math.exp(beta * lift(p, w)) if beta and w != "</s>" else 1.0) for w in ws]
+                        if temp_ != 1.0:    # r188: sampling temperature, counts ** (1 / temp); absent = untouched
+                            wt = [x ** (1.0 / temp_) for x in wt]
                         w = g_rng.choices(ws, weights=wt)[0]
                         if w == "</s>":
                             break
@@ -989,6 +992,7 @@ for ai, arm in enumerate(arms):
         # ("spec", r160, swapped a drawn word for a member of its context concept: no better than trigram; deleted r171)
         sweep_ = int(arm.pop("sweep", 0))  # r171: k Gibbs passes over the draft, each word redrawn from the context tree
                                            # given both sides (l2, l1, r1, r2), the gate on both of its pairs
+        temp_ = float(arm.pop("temp", 1.0))  # r188: sampling temperature; the drawn weights go to w ** (1 / temp), 1.0 = unchanged
         esc_ = arm.pop("esc", None)        # r179 "licence": unstored next words drawn FROM the type licence, with the
                                            # Witten-Bell escape mass d/(d+c) of l1 (d distinct stored successors, c tokens);
                                            # the context tree draws the stored successors with the rest
@@ -1072,6 +1076,8 @@ for ai, arm in enumerate(arms):
                     vs, ws = _fills(t_[-2], t_[-1], *[t_[-3 - i] for i in range(max(getattr(L, "window", 2), 2) - 2)])
                     if not vs or sum(ws) <= 0:
                         break
+                    if temp_ != 1.0:
+                        ws = [x ** (1.0 / temp_) for x in ws]
                     (v, done) = _rng.choices(vs, weights=ws)[0]
                     out += _words(v)
                 if done and 3 <= len(out) <= 8 and not (new_ and tuple(out) in seen):
@@ -1127,7 +1133,7 @@ for ai, arm in enumerate(arms):
             arm["blend"] = blend_
             if chart:
                 arm["chart"] = chart
-        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"esc": esc_} if esc_ else {}), **({"new": True} if new_ else {}), **({"q": q_} if q_ != 0.5 else {}), **({"near": near_} if near_ else {}), **({"sweep": sweep_} if sweep_ else {})})
+        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"esc": esc_} if esc_ else {}), **({"new": True} if new_ else {}), **({"q": q_} if q_ != 0.5 else {}), **({"near": near_} if near_ else {}), **({"sweep": sweep_} if sweep_ else {}), **({"temp": temp_} if temp_ != 1.0 else {})})
         if sweep_:
             _tw = {}
 

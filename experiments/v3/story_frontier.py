@@ -5,6 +5,8 @@ departs from the training sentences:
   copy        longest span copied verbatim from one training sentence, as a fraction of the generation's length (mean)
   tri / bi    share with at least one unstored trigram / bigram (sentence padded with <s>, </s>)
   gram|tri    judged-grammatical share among new sentences with an unstored trigram (gram|bi: bigram)
+  gram new tri  "gram new with unstored trigram per generation" = tri x gram|tri: the share of new generations that are
+                judged grammatical AND have an unstored trigram (r188; computed per seed as mean(gram and tri) over new generations, then averaged over seeds)
 
 Reads <dump dir>/*_s{seed}_n{n}_arm{i}.jsonl and the .scores.json beside each (t3_judge.py), and the judge's
 real / scrambled calibration from <dump dir>/judge.json. The training sentences are rebuilt with t3_story.py's
@@ -131,6 +133,7 @@ def main(out, dirs):
                    "copy frac": r3(mean(cp)), "unstored trigram": r3(mean(tri)), "unstored bigram": r3(mean(bi)),
                    "gram | unstored trigram": r3(mean([a for a, t in zip(ok, tri) if t])),
                    "gram | unstored bigram": r3(mean([a for a, t in zip(ok, bi) if t])),
+                   "gram new tri": r3(mean([a and t for a, t in zip(ok, tri)])),
                    "n tri": sum(tri), "n bi": sum(bi),
                    "calibration real": cal.get("real"), "calibration scrambled": cal.get("word order scrambled")}
             rows_out.append(rec)
@@ -143,7 +146,7 @@ def main(out, dirs):
     for r in rows_out:
         g[(r["dir"], r["arm"], r["n"])].append(r)
     cols = ["novel judged grammatical", "copy frac", "unstored trigram", "unstored bigram",
-            "gram | unstored trigram", "gram | unstored bigram"]
+            "gram | unstored trigram", "gram | unstored bigram", "gram new tri"]
     print("\n%-14s %-52s %5s %5s | %s" % ("dir", "arm", "n", "seeds", " ".join(c[:11].rjust(11) for c in cols)))
     for k in sorted(g):
         rs = g[k]
