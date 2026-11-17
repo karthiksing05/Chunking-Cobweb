@@ -229,3 +229,64 @@ check applied at chunk junctions would put every new trigram at a chunk boundary
 is licensed by a constituent, and leave within-chunk word order as stored. Round 177b found unstored pairs equally
 common at all junction types, so the pre-test should be gram|tri of new trigrams at chunk junctions vs inside the
 window-generated text, on dumps of the units "both" arm.
+
+## 9. Round 194: conjunctive context attributes (`Trellis3(conj=True)`; pre-test fails, not run at full scale)
+
+**Code check first.** The window learner had no conjunctive attribute. `window_names` renames each neighbour by its
+concept, one slot at a time, and Cobweb's CU sorting already clusters instances jointly. But the fill read
+(`_gap_fills`) multiplies one back-off factor per attribute at each leaf. So "wanted to _" is read as l1=to times
+l2=wanted, and a leaf that saw "to the" and "wanted ..." elsewhere supports "the". That is the root cause named in
+section 3.
+
+**Change.** `conj=True` adds `lj2..ljW` (l_k ... l1 joined) and `rj2..rjW` (r1 ... r_k joined) to the context
+attributes, at learning and in every read (`_gap_fills`, `pivot_support`, `fill_words`). Joins count as surface
+slots in `_full`. It adds no constants. The default adds no attributes, and `r191-n250-w3` s13 reproduces
+byte-identically (all 3 arms and refs). Tests: `tests/trellis2/test_r194_conj.py` (the r192 agreement tests rerun
+on a conj learner, plus join checks); 42/42 pass in tests/trellis2.
+
+**Pre-test 1: held-out log-loss** of the causal fill read (`experiments/v3/diag/r194_logloss.py`; 400 held-out
+sentences, n 1000; bits per word including the end decision; p floored at 1e-12, so "zero-mass" tokens cost 39.9 bits):
+
+| w | seed | conj | bits/word | bits, stored trigram | bits, new trigram | zero-mass tokens |
+|---|---|---|---|---|---|---|
+| 3 | 13 | off | 11.19 | 4.94 | 20.99 | 224 / 2270 |
+| 3 | 13 | on | 15.79 | 6.22 | 30.78 | 549 / 2270 |
+| 3 | 17 | off | 11.58 | 4.91 | 21.26 | 215 / 2213 |
+| 3 | 17 | on | 16.74 | 6.83 | 31.15 | 566 / 2213 |
+| 4 | 13 | off | 11.90 | 5.82 | 21.44 | 245 / 2270 |
+| 4 | 13 | on | 19.24 | 8.91 | 35.44 | 774 / 2270 |
+| 4 | 17 | off | 12.28 | 5.61 | 21.99 | 247 / 2213 |
+| 4 | 17 | on | 18.92 | 8.15 | 34.57 | 730 / 2213 |
+
+conj is worse in every cell, on stored trigrams as well as new ones. Even with the zero-mass tokens left out it is
+slightly worse (w3 s17: about 8.8 vs 8.5 bits).
+
+**Pre-test 2: generation** ("both" on, temp .7, n 1000, seeds 13 17; t3_story's own counts against the matched
+r192 arm). Share of generated sentences whose every trigram is stored:
+
+| | w3 s13 | w3 s17 | w4 s13 | w4 s17 |
+|---|---|---|---|---|
+| r192 both | .901 | .888 | .756 | .794 |
+| r192 both + conj | 1.000 | .999 | 1.000 | .999 |
+
+With conj the arm stops making new trigrams, so tri is about 0 and there is no point to put on the frontier at
+tri ≥ .3.
+
+**Why it fails.** A joined attribute is not a back-off path. In the product over attributes it is one more factor
+next to l1 and l2, so the same evidence counts twice: lj2 = wanted·to is a function of l1 and l2. On a seen history
+this factor is large for exactly the leaves that stored that history. The leaf posterior collapses onto them, and the
+fill becomes the stored continuations: every trigram is stored and held-out new trigrams get no mass. On an unseen
+history it is close to uniform and adds nothing. Back-off from the conjunction to single words would need the read to
+mix levels (P(w | l2 l1) with P(w | l1) as its prior, Kneser-Ney style), and a product of factors cannot do that.
+Mixing levels is a change to the read, not to the attributes, and the n-gram baselines already embody it.
+
+**Parse consistency** (`story_parse_eval.py`, r185 recipe + conj, seeds 13 17 19; trellis_chosen):
+
+| n | conj | F1 | NP recall | crossing | decisive | xseed F1 |
+|---|---|---|---|---|---|---|
+| 250 | off (r185) | .343 | .591 | .294 | .847 | .587 |
+| 250 | on | .380 | .614 | .312 | .803 | .679 |
+| 1000 | off (r185) | .368 | .690 | .249 | .868 | .742 |
+| 1000 | on | .357 | .630 | .318 | .804 | .726 |
+
+At 1k, conj lowers cross-seed F1 (.726 vs .742) and NP recall, and raises crossing. It helps only at 250.

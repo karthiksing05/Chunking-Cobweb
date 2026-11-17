@@ -947,6 +947,7 @@ def u_swap(p, units, places, pick, rng):
 L._quiet = True
 ix = L.concept_index()
 DUMP = os.environ.get("STORY_DUMP")            # a directory: every generation of every arm, as JSON lines
+_SEG_ = {}                                       # r194 ("seg" arms): generated sentence -> its unit lengths
 if DUMP:                                         # judge calibration: held-out sentences, their words in random order, content words swapped by tag
     os.makedirs(DUMP, exist_ok=True)
     ref = random.Random(seed + 21).sample(held, min(300, len(held)))
@@ -995,6 +996,7 @@ for ai, arm in enumerate(arms):
         temp_ = float(arm.pop("temp", 1.0))  # r188: sampling temperature; the drawn weights go to w ** (1 / temp), 1.0 = unchanged
         repair_ = bool(arm.pop("repair", False))   # r193: after drawing, redraw each word given both windows until a sweep changes nothing (max length sweeps)
         reach_ = int(arm.pop("reach", 1))  # r192 v2 (with "both"): 2 also checks the word two back as a pivot (r1 = l1, r2 = new word)
+        seg_ = bool(arm.pop("seg", False))  # r194: record each generated sentence's unit lengths in the dump ("units")
         both_ = arm.pop("both", None)      # r192: a filler that makes a trigram memory never stored is kept only if the
                                            # context tree, re-predicting the previous word (the pivot) from ITS left
                                            # context, finds the filler supports it: log P(pivot | left, r1 = w) /
@@ -1119,7 +1121,7 @@ for ai, arm in enumerate(arms):
 
         def gen(p, _rng=g_rng):
             for _ in range(50):
-                out, done = [], False
+                out, done, lens = [], False, []
                 while not done and len(out) <= 8:
                     t_ = [T3BOS] * 5 + out
                     vs, ws = _fills(t_[-2], t_[-1], *[t_[-3 - i] for i in range(max(getattr(L, "window", 2), 2) - 2)],
@@ -1131,7 +1133,10 @@ for ai, arm in enumerate(arms):
                         ws = [x ** (1.0 / temp_) for x in ws]
                     (v, done) = _rng.choices(vs, weights=ws)[0]
                     out += _words(v)
+                    lens.append(len(_words(v)))
                 if done and 3 <= len(out) <= 8 and not (new_ and tuple(out) in seen):
+                    if seg_:      # r194: the unit lengths of the sentence, for the chunk-junction pre-test
+                        _SEG_[tuple(out)] = lens
                     return out
             return None
 
@@ -1184,7 +1189,7 @@ for ai, arm in enumerate(arms):
             arm["blend"] = blend_
             if chart:
                 arm["chart"] = chart
-        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"esc": esc_} if esc_ else {}), **({"new": True} if new_ else {}), **({"q": q_} if q_ != 0.5 else {}), **({"near": near_} if near_ else {}), **({"sweep": sweep_} if sweep_ else {}), **({"temp": temp_} if temp_ != 1.0 else {}), **({"both": both_} if both_ else {}), **({"reach": reach_} if reach_ != 1 else {}), **({"repair": True} if repair_ else {})})
+        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"esc": esc_} if esc_ else {}), **({"new": True} if new_ else {}), **({"q": q_} if q_ != 0.5 else {}), **({"near": near_} if near_ else {}), **({"sweep": sweep_} if sweep_ else {}), **({"temp": temp_} if temp_ != 1.0 else {}), **({"both": both_} if both_ else {}), **({"reach": reach_} if reach_ != 1 else {}), **({"repair": True} if repair_ else {}), **({"seg": True} if seg_ else {})})
         if sweep_:
             _tw = {}
 
@@ -1280,7 +1285,8 @@ for ai, arm in enumerate(arms):
         with open(os.path.join(DUMP, f"{tag}_s{seed}_n{n}_arm{ai}.jsonl"), "w", encoding="utf-8") as fh:
             fh.write(json.dumps({"arm": {"cond": cond, **({"critic": critic} if critic else {}), **({"critic_mode": critic_mode} if critic_mode != "mean" else {}), **arm}}) + "\n")
             for (p, g), a, b in zip(ok, pat, nov):
-                fh.write(json.dumps({"prompt": " ".join(p), "gen": " ".join(g), "pattern": a, "novel": b}) + "\n")
+                fh.write(json.dumps({"prompt": " ".join(p), "gen": " ".join(g), "pattern": a, "novel": b,
+                                     **({"units": _SEG_.get(tuple(g))} if _SEG_ and arm.get("seg") else {})}) + "\n")
 
 # infill (INFILL=<n>): mask 1-3 consecutive words of held-out sentences; the gap is filled
 # by expansion (generate_tree's gap mode: one stored instance standing there) and by the
