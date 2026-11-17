@@ -172,3 +172,19 @@ only by w3 at temp .5, n 250, mean .806, and with seed ranges reaching .92 at n 
 not lead the envelope at tri >= .3 where a neural curve is present; it leads at tri .3 at n 250 / 500 only where the
 neural curves do not reach. The gap to the best neural arm at tri .3-.4 is cut by about a third (n 1000) to two thirds
 (n 500).
+
+## 7. Ablation: what the right-side read adds over closing the pairs and boundaries (n 1000, w5, 4 seeds)
+
+Arm `"both": "pairs"`: the same boundary rule, and a new trigram allowed only over a stored pair, with no right-side
+read (the strict pair gate the closed rounds already pointed to). `r192a-w5-frontier-n1000.jsonl`.
+
+| w5, temp | none (r188/r190): tri, gram\|tri | pairs + boundaries: gram, tri, gram\|tri | both (pivot read): gram, tri, gram\|tri |
+|---|---|---|---|
+| 0.5 | 0.566, 0.507 | 0.780, 0.417, 0.633 | 0.841, 0.277, 0.729 |
+| 0.7 | 0.637, 0.498 | 0.749, 0.512, 0.615 | 0.821, 0.366, 0.709 |
+| 1.0 | 0.706, 0.531 | 0.695, 0.637, 0.589 | 0.781, 0.461, 0.662 |
+
+About half of the gram|tri gain is the closed pairs and boundaries (+0.06 to +0.13), half the right-side read (+0.07 to
++0.10). On the gram-vs-tri frontier the read is worth less, because it also cuts novelty: at tri .42 the checked arm
+interpolates to about .80 against .78 for pairs-only. (w3 / w4 of this ablation were still running at hand-back;
+`logs/v3_r192_submit.sh 1000 r192a '"pairs"'` writes `r192a-frontier-n1000.*` when they finish.)
