@@ -424,3 +424,39 @@ Calibrating the product helps the probability of the observed word (log-loss) bu
 novel trigrams: flattening the weights spreads mass over more occurrences, including occurrences that agree with
 only some of the attributes (the same chaining as section 1, class C), and the pivot check (a ratio of two
 flattened reads) is weaker as a filter. The overconfidence of the product is not what limits gram|tri. Closed.
+
+## 12. Round 199: role-concept check of the pivot (pre-test: fails; no generation run)
+
+**Idea.** The r192 pivot check re-reads the surface word p by per-attribute back-off, which merges p's roles (*to*
+infinitive vs preposition, *was* copula vs auxiliary). The role check asks which role p plays in THIS sentence: C = the
+context-tree concept that p's current left context (l1..lW of p) sorts to (`ctx.categorize`, nothing inserted; "leaf"
+= last node on the sorting path, "parent" = the one above); an occurrence of p is "in C" if C is on its context leaf's
+path. For a candidate next word w, ratio = P(C | occurrences of p followed by w) / P(C | all occurrences of p), with
+P(C | S) = (mass of S in C + P0(C)) / (mass of S + 1), P0(C) = share of all stored word occurrences in C (the single
+pseudo-count of the r192 back-off, no tuned constant; a concept holding no stored word occurrence counts as one
+occurrence). Accept w if log ratio >= 0.
+
+**Pre-test** (`diag/r199_role_auc.py`, `logs/v3_r199_role.sh`; the r192-diag traces of seed 13, w3/4/5, i.e. the judged
+r188 n1000 dumps, 3119 sentences with an unstored trigram, 48.3% judged grammatical; sentence = its worst new step;
+`r192-diag/r199_role_auc.txt`, per-step rows `r199_steps_w*_s13.jsonl`). AUC against the judge (higher = accepted):
+
+| subset | n | gram | pivot ratio (r192) | role, leaf | role, parent |
+|---|---|---|---|---|---|
+| all | 3119 | .48 | .668 | .462 | .516 |
+| class A | 376 | .12 | .430 | .513 | .553 |
+| class B | 729 | .36 | .598 | .368 | .522 |
+| class C | 2014 | .59 | .603 | .457 | .455 |
+| class C, one new step | 1595 | .65 | .552 | .418 | .410 |
+
+Per window, class C: pivot .627 / .582 / .612 (w3/4/5); role leaf .575 / .424 / .442; role parent .598 / .447 / .409.
+As a filter (every new step ratio >= 0) on class C: the role check keeps 86-96% of the sentences and leaves gram
+.595-.596 against .59 unfiltered (the pivot check keeps 59%, gram .667).
+
+**Verdict: fails** (threshold: within-class-C AUC >= .65; observed .455-.457, below chance; w3 alone .58-.60). No
+generation run. Why: in 21% of steps no stored occurrence of p is followed by w (S_pw empty), where the ratio reads the
+prior and is inflated; when S_pw is non-empty the ratio mostly measures how typical w is after the sorted concept, which
+the left-to-right draw already used, and the sorted concept C is a joint-window concept (a stored occurrence's leaf
+also carries its right window), so "in C" mixes p's role with its right neighbour: a wanted role split ("to" before a
+verb vs before a noun) and the unwanted one (a rare right neighbour w selects occurrences of rare contexts) look alike. Lowest
+class C ratios are good sentences (*they were both very happy*, *the big boy was surprised*); highest include *everyone was a
+very good day*. The existing pivot ratio stays the better (still weak) filter.

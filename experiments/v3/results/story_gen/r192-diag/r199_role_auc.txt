@@ -1,0 +1,87 @@
+
+=== w3: 413 sentences with a new trigram, judged grammatical 0.562
+subset                         n  gram        pivot log ratio              role leaf            role parent  role min(leaf,parent)
+all                          413  0.56                  0.701                  0.641                  0.640                  0.641
+class A                       51  0.04                  0.500                  1.000                  1.000                  1.000
+class B                       15  0.73                  0.875                  0.318                  0.545                  0.545
+class C                      347  0.63                  0.627                  0.575                  0.598                  0.599
+class C, one new step        301  0.65                  0.609                  0.558                  0.591                  0.593
+accept rule (every new step ratio >= 0): kept share, judged grammatical among kept, among rejected
+  pivot log ratio        all                    kept 0.431 gram|kept 0.719 gram|rejected 0.443
+  pivot log ratio        class C                kept 0.487 gram|kept 0.710 gram|rejected 0.556
+  role leaf              all                    kept 0.925 gram|kept 0.592 gram|rejected 0.194
+  role leaf              class C                kept 0.911 gram|kept 0.674 gram|rejected 0.194
+  role parent            all                    kept 0.847 gram|kept 0.597 gram|rejected 0.365
+  role parent            class C                kept 0.821 gram|kept 0.688 gram|rejected 0.371
+  role min(leaf,parent)  all                    kept 0.847 gram|kept 0.597 gram|rejected 0.365
+  role min(leaf,parent)  class C                kept 0.821 gram|kept 0.688 gram|rejected 0.371
+
+=== w4: 947 sentences with a new trigram, judged grammatical 0.517
+subset                         n  gram        pivot log ratio              role leaf            role parent  role min(leaf,parent)
+all                          947  0.52                  0.680                  0.485                  0.497                  0.493
+class A                      158  0.13                  0.585                  0.409                  0.358                  0.358
+class B                       41  0.46                  0.923                  0.242                  0.242                  0.242
+class C                      748  0.60                  0.582                  0.424                  0.447                  0.443
+class C, one new step        596  0.65                  0.536                  0.389                  0.415                  0.411
+accept rule (every new step ratio >= 0): kept share, judged grammatical among kept, among rejected
+  pivot log ratio        all                    kept 0.522 gram|kept 0.664 gram|rejected 0.358
+  pivot log ratio        class C                kept 0.636 gram|kept 0.655 gram|rejected 0.511
+  role leaf              all                    kept 0.984 gram|kept 0.517 gram|rejected 0.533
+  role leaf              class C                kept 0.983 gram|kept 0.603 gram|rejected 0.615
+  role parent            all                    kept 0.949 gram|kept 0.517 gram|rejected 0.521
+  role parent            class C                kept 0.952 gram|kept 0.607 gram|rejected 0.528
+  role min(leaf,parent)  all                    kept 0.946 gram|kept 0.516 gram|rejected 0.549
+  role min(leaf,parent)  class C                kept 0.948 gram|kept 0.605 gram|rejected 0.564
+
+=== w5: 1759 sentences with a new trigram, judged grammatical 0.447
+subset                         n  gram        pivot log ratio              role leaf            role parent  role min(leaf,parent)
+all                         1759  0.45                  0.652                  0.420                  0.488                  0.488
+class A                      167  0.14                  0.304                  0.576                  0.713                  0.713
+class B                      673  0.35                  0.558                  0.376                  0.522                  0.521
+class C                      919  0.57                  0.612                  0.442                  0.409                  0.409
+class C, one new step        698  0.64                  0.535                  0.388                  0.337                  0.338
+accept rule (every new step ratio >= 0): kept share, judged grammatical among kept, among rejected
+  pivot log ratio        all                    kept 0.457 gram|kept 0.567 gram|rejected 0.346
+  pivot log ratio        class C                kept 0.584 gram|kept 0.663 gram|rejected 0.445
+  role leaf              all                    kept 0.933 gram|kept 0.437 gram|rejected 0.590
+  role leaf              class C                kept 0.962 gram|kept 0.563 gram|rejected 0.800
+  role parent            all                    kept 0.719 gram|kept 0.463 gram|rejected 0.406
+  role parent            class C                kept 0.799 gram|kept 0.548 gram|rejected 0.670
+  role min(leaf,parent)  all                    kept 0.719 gram|kept 0.463 gram|rejected 0.406
+  role min(leaf,parent)  class C                kept 0.799 gram|kept 0.548 gram|rejected 0.670
+
+=== pooled: 3119 sentences with a new trigram, judged grammatical 0.483
+subset                         n  gram        pivot log ratio              role leaf            role parent  role min(leaf,parent)
+all                         3119  0.48                  0.668                  0.462                  0.516                  0.514
+class A                      376  0.12                  0.430                  0.513                  0.553                  0.553
+class B                      729  0.36                  0.598                  0.368                  0.522                  0.522
+class C                     2014  0.59                  0.603                  0.457                  0.455                  0.454
+class C, one new step       1595  0.65                  0.552                  0.418                  0.410                  0.409
+accept rule (every new step ratio >= 0): kept share, judged grammatical among kept, among rejected
+  pivot log ratio        all                    kept 0.473 gram|kept 0.618 gram|rejected 0.363
+  pivot log ratio        class C                kept 0.587 gram|kept 0.667 gram|rejected 0.490
+  role leaf              all                    kept 0.948 gram|kept 0.482 gram|rejected 0.509
+  role leaf              class C                kept 0.961 gram|kept 0.596 gram|rejected 0.532
+  role parent            all                    kept 0.806 gram|kept 0.501 gram|rejected 0.411
+  role parent            class C                kept 0.859 gram|kept 0.595 gram|rejected 0.587
+  role min(leaf,parent)  all                    kept 0.805 gram|kept 0.500 gram|rejected 0.414
+  role min(leaf,parent)  class C                kept 0.858 gram|kept 0.594 gram|rejected 0.591
+
+step-level share with an informative role (path deeper than the root), pooled: 1.000 ; steps with S_pw empty: 0.210
+
+class C, lowest role-leaf steps (pivot -> w, judge):
+    -7.82  judge 1.00  they were both very happy  | ['both very happy']
+    -7.82  judge 1.00  they were both very happy  | ['both very happy']
+    -7.74  judge 0.41  but we have to play  | ['have to play']
+    -7.48  judge 1.00  he played with the new friend  | ['the new friend']
+    -7.32  judge 0.00  i will just playing with you  | ['will just playing', 'just playing with']
+    -7.24  judge 1.00  the big boy was surprised  | ['big boy was', 'boy was surprised']
+     2.47  judge 0.27  everyone was a very good friend  | ['everyone was a']
+     2.47  judge 0.68  ben was a fun day for her  | ['ben was a']
+     2.47  judge 0.00  everyone was a very good day  | ['everyone was a']
+     4.60  judge 0.22  they played and walked  | ['played and walked']
+     4.60  judge 0.22  they played and walked  | ['played and walked']
+     4.60  judge 1.00  lily and lucy felt sad  | ['lily and lucy']
+     4.60  judge 0.22  they played and walked  | ['played and walked']
+     4.60  judge 0.03  let's go and again  | ['go and again']
+     4.60  judge 1.00  sara and sky opened the box together  | ['sara and sky']
