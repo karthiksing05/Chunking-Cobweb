@@ -3343,12 +3343,15 @@ class Trellis3:
                         pe = (c[0] + t * pe) / (c[1] + t)
                 end[("w", w)] = p * pe
         else:
+            # the filler is a passive attribute (it does not shape sorting): the path is q's; the end is
+            # P(end | q) (r1 along q's path) times P(w | q, end) (fills along the path of q + r1 = end marker)
+            fills_of = self.ctx.passive
             root = self.ctx.root
-            V = [v[1] for v in root.av.get(FILL, {}) if v[0] == "w"]
+            V = [v[1] for v in fills_of(root, FILL) if v[0] == "w"]
             base = {w: 1.0 / (len(V) + 1) for w in V}
 
             def own(nd):
-                return {v[1]: c for v, c in nd.av.get(FILL, {}).items() if v[0] == "w" and c > 0}
+                return {v[1]: c for v, c in fills_of(nd, FILL).items() if v[0] == "w" and c > 0}
 
             def endc(nd):
                 d = nd.av.get("r1", {})
@@ -3356,13 +3359,15 @@ class Trellis3:
                 return {k: x for k, x in (("e", c), ("n", n - c)) if x > 0}
             P = self._hier_path_mix(dict(q), base, own, how)
             zp = sum(P.values())
+            pe = self._hier_path_mix(dict(q), {"e": 0.5, "n": 0.5}, endc, how).get("e", 0.0)
+            PE = self._hier_path_mix({**q, "r1": EOS}, base, own, how)
+            ze = sum(PE.values())
             for w, p in P.items():
                 if p <= 0:
                     continue
                 fill[("w", w)] = p / zp
                 if only is not None and w not in only:
                     continue
-                pe = self._hier_path_mix({**q, FILL: ("w", w)}, {"e": 0.5, "n": 0.5}, endc, how).get("e", 0.0)
-                end[("w", w)] = p / zp * pe
+                end[("w", w)] = min(pe * PE.get(w, 0.0) / ze, p / zp) if ze > 0 else 0.0
         cache[key] = (fill, end)
         return cache[key]
