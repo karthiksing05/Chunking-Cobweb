@@ -63,3 +63,24 @@ def test_pivot_ratio_in_r2_matches_gap_fills(learner):
     want = math.log(m2[p] / sum(m2.values())) - math.log(m1[p] / sum(m1.values()))
     got = learner.pivot_support(q, [p], [x], kind="pivot", slot="r2")[(p, x)]
     assert got == pytest.approx(want, rel=1e-6, abs=1e-9)
+
+
+@pytest.mark.parametrize("q", [{"l1": "the", "l2": "to", "l3": "ran", "r1": EOS, "r2": EOS, "r3": EOS},
+                               {"l1": BOS, "l2": BOS, "l3": BOS, "r1": "was", "r2": "happy", "r3": EOS}])
+def test_fill_words_matches_gap_fills(learner, q):
+    want = {v[1]: m for v, m in learner._gap_fills(q).items() if v[0] == "w"}
+    got = learner.fill_words(q)
+    zw, zg = sum(want.values()), sum(got.values())
+    for w, m in want.items():
+        assert got.get(w, 0.0) / zg == pytest.approx(m / zw, rel=1e-4, abs=1e-9)
+
+
+def test_gibbs_repair_keeps_pairs_stored(learner):
+    import random
+    rng = random.Random(0)
+    for s in ["he was happy to play", "they were sad", "the cat ran to the park"]:
+        out, sweeps = learner.gibbs_repair(s.split(), rng)
+        assert len(out) == len(s.split()) and 1 <= sweeps <= len(out)
+        pairs = learner._pair_counts
+        for i, (a, b) in enumerate(zip(out, out[1:])):
+            assert (a, b) in pairs or (a, b) == tuple(s.split()[i:i + 2])

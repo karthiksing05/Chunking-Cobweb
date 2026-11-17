@@ -2915,6 +2915,80 @@ class Trellis3:
             self._tri_set = got = (key, s)
         return got[1]
 
+    def fill_words(self, q: dict) -> Dict[str, float]:
+        """_gap_fills(q) for word fillers (beta 1, tokens), vectorized over context leaves (r193):
+        each attribute value's back-off probability P(a = v | leaf) is computed once per memory
+        state and kept, so a query is a product of a few vectors. Proportional to _gap_fills masses (one common factor), up to
+        float rounding (tests/trellis2/test_r192_both_sides.py)."""
+        import numpy as np
+        self.pivot_support({}, [], [])           # builds / refreshes the leaf index
+        nodes, wx, Wm, tot, _ = self._ps_index[1]
+        key = self._ps_index[0]
+        av = self.__dict__.get("_fw_av")
+        if av is None or av[0] != key:
+            av = self._fw_av = (key, {}, sorted(wx, key=wx.get))
+        vec, words = av[1], av[2]
+        root, alpha = self.ctx.root, self.alpha
+        lg = np.zeros(len(nodes), dtype=np.float64)
+        for a, v in q.items():
+            if (a, v) not in vec:
+                size = len(root.av.get(a, {})) + 1
+                memo: Dict[int, float] = {}
+
+                def pr(node):
+                    if node.id not in memo:
+                        c = node.av.get(a, {}).get(v, 0.0)
+                        if node.parent is None:
+                            memo[node.id] = (c + alpha) / (node.count + alpha * size)
+                        else:
+                            memo[node.id] = (c + pr(node.parent)) / (node.count + 1.0)
+                    return memo[node.id]
+                vec[(a, v)] = np.log(np.maximum(np.array([pr(nd) for nd in nodes]), 1e-300)).astype(np.float32)
+            lg = lg + vec[(a, v)]
+        m = Wm.T @ np.exp(lg - lg.max())        # masses up to one common factor (relative, as a distribution)
+        return {w: float(m[k]) for k, w in enumerate(words) if m[k] > 0}
+
+    def gibbs_repair(self, words: Sequence[str], rng, temp: float = 1.0, targeted: bool = False) -> Tuple[List[str], int]:
+        """Two-sided repair (r193): revisit each position left to right and redraw its word from the
+        context tree given BOTH windows (l1..lW and r1..rW, boundary-padded; fill_words), among words
+        that keep both neighbouring pairs stored (at the first / last place: a word memory saw
+        start / end a sentence; the current word always stays a candidate). Sweeps repeat until a
+        sweep changes nothing, at most len(words) sweeps. targeted: only words inside a trigram memory
+        never stored are redrawn. Returns (words, sweeps run)."""
+        out = list(words)
+        W = self.window
+        pairs = self.__dict__.get("_pair_counts", {})
+        tri = self.stored_trigrams()
+        starts = {t[2] for t in tri if t[0] == BOS and t[1] == BOS}
+        ends = {t[1] for t in tri if t[2] == EOS}
+        n = len(out)
+        for sweep in range(n):
+            changed = False
+            for i in range(n):
+                if targeted:               # only the words inside a trigram memory never stored (BOS / EOS padded)
+                    t3 = [BOS, BOS] + out + [EOS]
+                    if all(tuple(t3[j:j + 3]) in tri for j in range(i, min(i + 3, n + 1))):
+                        continue
+                t = [BOS] * W + out + [EOS] * W
+                q = {**{f"l{k}": t[W + i - k] for k in range(1, W + 1)},
+                     **{f"r{k}": t[W + i + k] for k in range(1, W + 1)}}
+                d = self.fill_words(q)
+                left_ok = (lambda w: w in starts) if i == 0 else (lambda w: (out[i - 1], w) in pairs)
+                right_ok = (lambda w: w in ends) if i == n - 1 else (lambda w: (w, out[i + 1]) in pairs)
+                ok = lambda w: left_ok(w) and right_ok(w)
+                cand = [(w, x) for w, x in d.items() if w == out[i] or ok(w)]
+                if not cand:
+                    continue
+                ws = [x ** (1.0 / temp) if temp != 1.0 else x for _, x in cand]
+                if sum(ws) <= 0:
+                    continue
+                w = rng.choices([c for c, _ in cand], weights=ws)[0]
+                if w != out[i]:
+                    out[i], changed = w, True
+            if not changed:
+                return out, sweep + 1
+        return out, n
+
     def _next_pool(self, prev: Sequence[str], level: int = 0) -> Optional[Dict[int, float]]:
         """The whole experiences that followed sentences like ``prev`` (NEXT at the
         first concept from ``level`` above its content leaf up that has any; the root

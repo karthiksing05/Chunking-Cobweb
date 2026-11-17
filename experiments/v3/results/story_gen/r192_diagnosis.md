@@ -188,3 +188,44 @@ About half of the gram|tri gain is the closed pairs and boundaries (+0.06 to +0.
 +0.10). On the gram-vs-tri frontier the read is worth less, because it also cuts novelty: at tri .42 the checked arm
 interpolates to about .80 against .78 for pairs-only. (w3 / w4 of this ablation were still running at hand-back;
 `logs/v3_r192_submit.sh 1000 r192a '"pairs"'` writes `r192a-frontier-n1000.*` when they finish.)
+
+## 8. Round 193: two-sided Gibbs repair (pre-test: fails; not run)
+
+Mechanism (opt-in arm key `"repair": true` on top of `"both"`; `Trellis3.gibbs_repair`, `Trellis3.fill_words`): after a
+sentence is drawn, revisit each position left to right and redraw its word from the context tree given BOTH windows
+(l1..lW and r1..rW, the same back-off as `_gap_fills`, vectorised in `fill_words`), among words that keep both
+neighbouring pairs stored (boundary words at the ends); sweep until nothing changes (at most the sentence length);
+a repaired sentence that is a stored sentence falls back to the draft. Close to round 171's sweep (two words each side,
+"no better than trigram"); the differences are the full window, the strict pairs and boundaries, and the fixed point.
+
+Pre-test (`diag/r193_pretest.py`, `r193_compare.py`; r192 n1000 "both" dumps at temp 0.7, seeds 13 17, the originals
+and the repairs judged together; `r192-diag/r193_compare*.txt`):
+
+| w, seed | original: gram, tri, gram\|tri | full repair, stored -> draft | became stored (full) | targeted repair (only words in a new trigram), stored -> draft |
+|---|---|---|---|---|
+| w3 s13 | .879, .099, .692 | .871, .123, .675 | 36% | .885, .069, .694 |
+| w3 s17 | .890, .112, .659 | .869, .159, .614 | 32% | .897, .085, .672 |
+| w4 s13 | .853, .244, .655 | .840, .254, .636 | 61% | .869, .198, .697 |
+| w4 s17 | .860, .206, .710 | .849, .214, .702 | 54% | .870, .182, .751 |
+| w5 s13 | .781, .389, .700 | .772, .397, .681 | 80% | .787, .359, .693 |
+| w5 s17 | .819, .360, .659 | .820, .372, .661 | 78% | .821, .333, .645 |
+
+Why it fails. Redrawing a word given 2W context attributes is dominated by the stored occurrences whose own context
+matches most of those attributes, so the full repair walks the sentence back into memory (31-80% of repairs ARE stored
+sentences, more with a wider window) and changes judged-good sentences as often as bad ones (70-90% of each); the new
+sentences it does make are worse (raw gram|tri .43-.62 against .66-.71). The targeted version touches bad sentences
+two to three times as often as good ones, but it repairs them by removing the novelty (raw tri falls from .10-.39 to
+.01-.09): on the frontier that is a lower temperature, and gram|tri of what stays new moves by -.03 to +.04. Both read
+the same per-leaf, attribute-independent back-off that made the error, so a second look from the right adds no
+information the left-to-right draw plus the pivot read did not already use; and class C's residue (coordination
+repeats, selection, agreement beyond the window) is not a single-word junction error that one local redraw can see.
+Neither variant was run at n 1000 / 4000. Instead the r192 "both" arm itself was launched at n 4000 (seeds 13 17,
+w3/4/5 x .5/.7/1.0; `logs/v3_r193_both4k.sh`, dirs `r193-n4000-w*`, frontier `r193-frontier-n4000.*`).
+
+Next candidate (not launched): stop generating word by word for novelty and make the novel step a whole committed
+unit. The diagnosis says the failures sit at junctions between words whose roles the window does not fix; the content
+tree already stores chunks (the arm uses units "words" only). Drawing chunk fillers ("units": "both") with the r192
+check applied at chunk junctions would put every new trigram at a chunk boundary, where the parse says recombination
+is licensed by a constituent, and leave within-chunk word order as stored. Round 177b found unstored pairs equally
+common at all junction types, so the pre-test should be gram|tri of new trigrams at chunk junctions vs inside the
+window-generated text, on dumps of the units "both" arm.

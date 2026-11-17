@@ -35,7 +35,8 @@ def family(r):
     m = re.search(r"-w(\d+)$", r["dir"])
     if arm.get("both"):                                # r192: the both-sides check on new trigrams
         b = arm["both"]
-        return "TRELLIS both%s w%s" % ("" if b is True or b == "pivot" else "-" + b, m.group(1)), arm.get("temp", 1.0)
+        return "TRELLIS both%s%s w%s" % ("" if b is True or b == "pivot" else "-" + b, "+repair" if arm.get("repair") else "",
+                                         m.group(1)), arm.get("temp", 1.0)
     return "TRELLIS w%s" % m.group(1), arm.get("temp", 1.0)
 
 
@@ -138,7 +139,9 @@ def main(jl, prefix, pngs):
     style = {"TRELLIS w3": ("#1b4f8a", "o"), "TRELLIS w4": ("#2f8fd1", "s"), "TRELLIS w5": ("#7fc4ee", "^"),
              "TRELLIS w6": ("#0a2a4d", "D"), "TRELLIS w2": ("#9aa5b1", "o"), "GPT": ("#d95f02", "o"),
              "LSTM": ("#1b9e77", "s"), "retrieved swap": ("#c2185b", "*"),
-             "TRELLIS both w3": ("#6a1b9a", "o"), "TRELLIS both w4": ("#9c4dcc", "s"), "TRELLIS both w5": ("#ce93d8", "^")}
+             "TRELLIS both w3": ("#6a1b9a", "o"), "TRELLIS both w4": ("#9c4dcc", "s"), "TRELLIS both w5": ("#ce93d8", "^"),
+             "TRELLIS both+repair w3": ("#7a4b00", "o"), "TRELLIS both+repair w4": ("#b8860b", "s"),
+             "TRELLIS both+repair w5": ("#e6b800", "^")}
     fig, axs = plt.subplots(1, 2, figsize=(14, 5.8), sharex=True)
     for ax, (c, ylab) in zip(axs, [("gram", "new judged grammatical (gram)"),
                                   ("gram|tri", "grammatical among new sentences with an unstored trigram (gram | tri)")]):

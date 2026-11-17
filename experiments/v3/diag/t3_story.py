@@ -993,6 +993,7 @@ for ai, arm in enumerate(arms):
         sweep_ = int(arm.pop("sweep", 0))  # r171: k Gibbs passes over the draft, each word redrawn from the context tree
                                            # given both sides (l2, l1, r1, r2), the gate on both of its pairs
         temp_ = float(arm.pop("temp", 1.0))  # r188: sampling temperature; the drawn weights go to w ** (1 / temp), 1.0 = unchanged
+        repair_ = bool(arm.pop("repair", False))   # r193: after drawing, redraw each word given both windows until a sweep changes nothing (max length sweeps)
         reach_ = int(arm.pop("reach", 1))  # r192 v2 (with "both"): 2 also checks the word two back as a pivot (r1 = l1, r2 = new word)
         both_ = arm.pop("both", None)      # r192: a filler that makes a trigram memory never stored is kept only if the
                                            # context tree, re-predicting the previous word (the pivot) from ITS left
@@ -1183,7 +1184,7 @@ for ai, arm in enumerate(arms):
             arm["blend"] = blend_
             if chart:
                 arm["chart"] = chart
-        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"esc": esc_} if esc_ else {}), **({"new": True} if new_ else {}), **({"q": q_} if q_ != 0.5 else {}), **({"near": near_} if near_ else {}), **({"sweep": sweep_} if sweep_ else {}), **({"temp": temp_} if temp_ != 1.0 else {}), **({"both": both_} if both_ else {}), **({"reach": reach_} if reach_ != 1 else {})})
+        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"esc": esc_} if esc_ else {}), **({"new": True} if new_ else {}), **({"q": q_} if q_ != 0.5 else {}), **({"near": near_} if near_ else {}), **({"sweep": sweep_} if sweep_ else {}), **({"temp": temp_} if temp_ != 1.0 else {}), **({"both": both_} if both_ else {}), **({"reach": reach_} if reach_ != 1 else {}), **({"repair": True} if repair_ else {})})
         if sweep_:
             _tw = {}
 
@@ -1212,6 +1213,15 @@ for ai, arm in enumerate(arms):
                     if not (new_ and tuple(out) in seen):
                         return out
                 return None
+        if repair_:                        # r193: two-sided Gibbs repair of each drawn sentence (Trellis3.gibbs_repair)
+            _draft3 = gen
+
+            def gen(p, _rng=g_rng):
+                out = _draft3(p, _rng)
+                if out is None:
+                    return None
+                o2, _ = L.gibbs_repair(out, _rng, temp=temp_)
+                return out if (new_ and tuple(o2) in seen) else o2
     elif chart is not None:
         CG = ChartGen(L, **chart)
         print(json.dumps({"tag": tag, "seed": seed, "chart": chart, **CG.stats}), flush=True)
