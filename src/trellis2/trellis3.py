@@ -150,10 +150,14 @@ class Trellis3:
                  repair_path: bool = False, repair_draws: int = 1, repair_now: bool = False,
                  story_facet: bool = False, exact_alone: bool = False,
                  search: str = "chart", beam: int = 8, hierarchy: str = "two",
-                 gain_alpha: Optional[float] = None, gain_alpha_on: str = "content"):
+                 gain_alpha: Optional[float] = None, gain_alpha_on: str = "content", conj: bool = False):
         # gain_alpha: None = _gain as before; else a fixed TOTAL pseudo-count |gain_alpha| spread over each
         # attribute's values in _gain, for the content tree ("content") or both trees ("both")
         self.gain_alpha, self.gain_alpha_on = gain_alpha, gain_alpha_on
+        # conj (r194): the context also carries the joined histories l2.l1, l3.l2.l1, .. and r1.r2, .. (up to the
+        # window) as single attributes, so sorting and the fill read condition on the conjunction, backing off
+        # along the path from conjunctive matches to single-word ones. Default off (no extra attributes).
+        self.conj = conj
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -349,7 +353,7 @@ class Trellis3:
         # frontier (_beam). beam=1 is the greedy parse.
         self.search, self.beam = search, beam
         d = [""] if bags else [str(k) for k in range(1, depth + 1)]
-        surface = self._surface_names(window)
+        surface = self._surface_names(window) + (self._join_names(window) if conj else ())
         chunk = (tuple(f"{p}{k}" for p in ("cl", "cr") for k in d) if self.children else ()) + \
             (tuple(f"{p}{k}" for p in ("par", "sib") for k in d) if self.spine else ())
         own = tuple(f"cc{k}" for k in d) if self.donate_ctx else ()
@@ -427,6 +431,23 @@ class Trellis3:
         return tuple(f"l{k}" for k in range(window, 0, -1)) + tuple(f"r{k}" for k in range(1, window + 1))
 
     @staticmethod
+    def _join_names(window: int) -> tuple:
+        return tuple(f"lj{k}" for k in range(2, window + 1)) + tuple(f"rj{k}" for k in range(2, window + 1))
+
+    def _joins(self, x: dict) -> dict:
+        """r194 (conj): add the joined histories to a description holding l1..lk / r1..rk: lj{k} = l_k.....l1,
+        rj{k} = r1.....r_k, for every k up to the window whose parts are all present."""
+        if not self.__dict__.get("conj"):
+            return x
+        out = dict(x)
+        for side, pre in (("l", "lj"), ("r", "rj")):
+            for k in range(2, self.window + 1):
+                parts = [x.get(f"{side}{i}") for i in range(1, k + 1)]
+                if all(p is not None for p in parts):
+                    out[f"{pre}{k}"] = "\x1f".join(parts if side == "r" else parts[::-1])
+        return out
+
+    @staticmethod
     def _neigh_names(d) -> tuple:
         return tuple(f"{p}{k}" for p in ("lc", "rc") for k in d)
 
@@ -450,7 +471,7 @@ class Trellis3:
             # neighbour slots past an edge stay unobserved
             x["le"] = "edge" if i == 0 else "in"
             x["re"] = "edge" if j == len(tokens) else "in"
-        return x
+        return self._joins(x) if self.__dict__.get("conj") else x
 
     def is_sentence(self, e: Elem) -> bool:
         """A sentence-level element: nothing on either side."""
@@ -929,7 +950,7 @@ class Trellis3:
         """Complete an instance for storage (missing attributes blank; with
         boundary="missing" the surface slots beyond the experience stay out)."""
         if self.boundary in ("missing", "edge"):
-            return {a: x.get(a, BLANK) for a in attrs if a in x or not (a[0] in "lr" and a[1:].isdigit())}
+            return {a: x.get(a, BLANK) for a in attrs if a in x or not (a[0] in "lr" and (a[1:].isdigit() or a[1:2] == "j"))}
         return {a: x.get(a, BLANK) for a in attrs}
 
     # ------------------------------------------------------------------ #
@@ -2719,6 +2740,8 @@ class Trellis3:
         TYPE distribution, P_T(v | C) = (t_C(v) + beta P_T(v | parent)) / (t_C + beta), t_C(v) the
         number of distinct fillers under C whose occurrence had value v (as type_licence reads
         the tree); the concept's own token counts are kept."""
+        if self.__dict__.get("conj"):         # r194: the query also carries its joined histories
+            q = self._joins(q)
         root = self.ctx.root
         sizes = {a: len(root.av.get(a, {})) + 1 for a in q}
         memo: Dict[int, Dict[str, float]] = {}
@@ -2853,6 +2876,8 @@ class Trellis3:
             slots[slot] = (rx, np.stack([rprob(nd) for nd in nodes]))
         rx, Rm = slots[slot]
         cache = self.__dict__.setdefault("_ps_cache", {})
+        if self.__dict__.get("conj"):     # r194: joined histories of the known left (and right) words
+            left = self._joins(left)
         lk = (tuple(sorted(left.items())), slot)
         if lk not in cache:
             if len(cache) > 4096:
@@ -2928,6 +2953,8 @@ class Trellis3:
         if av is None or av[0] != key:
             av = self._fw_av = (key, {}, sorted(wx, key=wx.get))
         vec, words = av[1], av[2]
+        if self.__dict__.get("conj"):
+            q = self._joins(q)
         root, alpha = self.ctx.root, self.alpha
         lg = np.zeros(len(nodes), dtype=np.float64)
         for a, v in q.items():
