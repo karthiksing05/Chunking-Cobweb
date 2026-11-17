@@ -997,6 +997,8 @@ for ai, arm in enumerate(arms):
         repair_ = bool(arm.pop("repair", False))   # r193: after drawing, redraw each word given both windows until a sweep changes nothing (max length sweeps)
         reach_ = int(arm.pop("reach", 1))  # r192 v2 (with "both"): 2 also checks the word two back as a pivot (r1 = l1, r2 = new word)
         seg_ = bool(arm.pop("seg", False))  # r194: record each generated sentence's unit lengths in the dump ("units")
+        read_ = arm.pop("read", None)       # r195: the fill read that mixes levels (Trellis3.hier_fills how = "kn" | "top" |
+                                           # "ngram" | "path" | "post"); P(w) and P(w, end) replace the product read's masses
         both_ = arm.pop("both", None)      # r192: a filler that makes a trigram memory never stored is kept only if the
                                            # context tree, re-predicting the previous word (the pivot) from ITS left
                                            # context, finds the filler supports it: log P(pivot | left, r1 = w) /
@@ -1045,7 +1047,7 @@ for ai, arm in enumerate(arms):
             k = (far, l2, l1)
             if k not in _cz:
                 q = {"l2": l2, "l1": l1, **{f"l{3 + i}": w for i, w in enumerate(far)}}
-                a_, e_ = L._gap_fills(q), L._gap_fills({**q, "r1": T3EOS})
+                a_, e_ = L.hier_fills(q, how=read_) if read_ else (L._gap_fills(q), L._gap_fills({**q, "r1": T3EOS}))
                 vs, ws = [], []
                 for v, m_ in a_.items():
                     if units_ == "words" and v[0] != "w":
@@ -1189,7 +1191,7 @@ for ai, arm in enumerate(arms):
             arm["blend"] = blend_
             if chart:
                 arm["chart"] = chart
-        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"esc": esc_} if esc_ else {}), **({"new": True} if new_ else {}), **({"q": q_} if q_ != 0.5 else {}), **({"near": near_} if near_ else {}), **({"sweep": sweep_} if sweep_ else {}), **({"temp": temp_} if temp_ != 1.0 else {}), **({"both": both_} if both_ else {}), **({"reach": reach_} if reach_ != 1 else {}), **({"repair": True} if repair_ else {}), **({"seg": True} if seg_ else {})})
+        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"esc": esc_} if esc_ else {}), **({"new": True} if new_ else {}), **({"q": q_} if q_ != 0.5 else {}), **({"near": near_} if near_ else {}), **({"sweep": sweep_} if sweep_ else {}), **({"temp": temp_} if temp_ != 1.0 else {}), **({"both": both_} if both_ else {}), **({"reach": reach_} if reach_ != 1 else {}), **({"repair": True} if repair_ else {}), **({"seg": True} if seg_ else {}), **({"read": read_} if read_ else {})})
         if sweep_:
             _tw = {}
 

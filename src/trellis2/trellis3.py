@@ -3206,3 +3206,163 @@ class Trellis3:
             if t <= 0:
                 return s
         return cands[-1]
+
+    # ------------------------------------------------------------------ #
+    # r195: a read that mixes levels (Witten-Bell / hierarchical Dirichlet)
+    # ------------------------------------------------------------------ #
+    def _hier_index(self):
+        """r195: per history length k = 1..W, the word fillers memory committed after each exact history
+        (l1..lk) ({k: {h: {w: c}}}), and per (w, l1..lk), k = 0..W-1, how often that occurrence of w ended
+        the sentence ({k: {(w,) + h: [c_end, c]}}). Read off the committed occurrences (as stored_trigrams),
+        cached until memory changes."""
+        key = (len(self.records), self.stats.get("experiences", 0))
+        got = self.__dict__.get("_hier_ix")
+        if got is not None and got[0] == key:
+            return got[1]
+        W = self.window
+        hist = {k: {} for k in range(1, W + 1)}
+        ends = {k: {} for k in range(0, W)}
+        for e in self.records:
+            if e.leaf is None or e.ctx is None:
+                continue
+            for which, attr, value, w in e.pas:
+                if which == "ctx" and attr == FILL and value[0] == "w":
+                    ls = [e.ctx.get(f"l{i}", BOS) for i in range(1, W + 1)]
+                    fin = 1.0 if e.ctx.get("r1") == EOS else 0.0
+                    for k in range(1, W + 1):
+                        d = hist[k].setdefault(tuple(ls[:k]), {})
+                        d[value[1]] = d.get(value[1], 0.0) + w
+                    for k in range(0, W):
+                        c = ends[k].setdefault((value[1],) + tuple(ls[:k]), [0.0, 0.0])
+                        c[0] += w * fin
+                        c[1] += w
+        self._hier_ix = (key, (hist, ends))
+        return self._hier_ix[1]
+
+    @staticmethod
+    def _wb(counts: Optional[Dict], lower: Dict) -> Dict:
+        """Witten-Bell interpolation: P(v) = (c(v) + T P_lower(v)) / (c + T), T the number of distinct
+        values the level saw, c its total: a level escapes to the one below in proportion to how many
+        new values it has met. A level that never saw its history leaves the lower one unchanged."""
+        if not counts:
+            return lower
+        n, t = sum(counts.values()), len(counts)
+        out = {v: t * p / (n + t) for v, p in lower.items()}
+        for v, c in counts.items():
+            out[v] = out.get(v, 0.0) + c / (n + t)
+        return out
+
+    def _hier_path_mix(self, x: dict, lower: Dict, counts_of, how: str) -> Dict:
+        """r195 "path" / "post": the distribution counts_of(C) mixed over the concepts C on the context
+        tree's sorting path of x (root to leaf). "path": hierarchical Dirichlet down the path with
+        Witten-Bell concentration (_wb), the root over ``lower``. "post": each concept's own distribution
+        weighted by Cobweb's posterior P(C | x) proportional to count(C) prod_a P(x_a | C), P(x_a | C) the
+        hierarchical back-off of _gap_fills (beta 1, Laplace root)."""
+        path = self._query_path(x)
+        if how == "path":
+            P = lower
+            for nd in path:
+                P = self._wb(counts_of(nd), P)
+            return P
+        root = self.ctx.root
+        sizes = {a: len(root.av.get(a, {})) + 1 for a in x}
+        lg, pv = [], None
+        for nd in path:
+            if pv is None:
+                pv = {a: (nd.av.get(a, {}).get(v, 0.0) + self.alpha) / (nd.count + self.alpha * sizes[a]) for a, v in x.items()}
+            else:
+                pv = {a: (nd.av.get(a, {}).get(v, 0.0) + pv[a]) / (nd.count + 1.0) for a, v in x.items()}
+            lg.append(math.log(max(nd.count, 1e-12)) + sum(math.log(max(p, 1e-300)) for p in pv.values()))
+        m = max(lg)
+        ws = [math.exp(v - m) for v in lg]
+        out: Dict = {}
+        for nd, wgt in zip(path, ws):
+            d = counts_of(nd)
+            n = sum(d.values())
+            if n <= 0:
+                continue
+            for v, c in d.items():
+                out[v] = out.get(v, 0.0) + wgt * c / n
+        z = sum(out.values())
+        return {v: p / z for v, p in out.items()} if z > 0 else lower
+
+    def hier_fills(self, q: dict, how: str = "kn", only=None) -> Tuple[Dict[tuple, float], Dict[tuple, float]]:
+        """r195: the causal word read P(w | l1..lW) and P(w, end | l1..lW) that MIXES levels, so a specific
+        context dominates where memory has evidence for it and general ones take over otherwise, with each
+        level's escape set by its own statistics (Witten-Bell: T distinct values over T + count); no tuned
+        constant. Returns ({("w", w): P(w)}, {("w", w): P(w, end)}), P normalised over word fillers;
+        ``only``: compute the end for these words only (the rest get no end entry).
+
+          "kn"    levels = the exact histories l1, l2 l1, .., lW..l1 (memory's committed occurrences), each
+                  backing off to the one below, the bottom one to the context tree's own read (_gap_fills of
+                  the full window, words only, normalised): the tree is the class-based back-off where exact
+                  histories run out. The end is read as the next token: P(end | lW-1..l1 w) with levels
+                  (w), (l1 w), .., backing off to the tree's end share for w (its r1 = end marker read).
+          "top"   as "kn" with the full-window history as the only exact level (and (lW-1..l1 w) for the end).
+          "ngram" as "kn" over a uniform bottom instead of the tree (a Witten-Bell n-gram; the control for
+                  what the tree adds).
+          "path"  levels = the concepts on the context tree's sorting path of q (_query_path), each with its
+                  own word-filler counts, P_C(w) = (c_C(w) + T_C P_parent(w)) / (c_C + T_C), the root over a
+                  uniform base (hierarchical Dirichlet, Witten-Bell concentration); the end likewise along
+                  the sorting path of q + the filler, on r1 = end marker.
+          "post"  the same concepts mixed by Cobweb's posterior given q (_hier_path_mix)."""
+        W = self.window
+        ls = [q.get(f"l{i}", BOS) for i in range(1, W + 1)]
+        cache = self.__dict__.setdefault("_hier_cache", {})
+        key = (how, tuple(sorted(q.items())), None if only is None else tuple(sorted(only)),
+               len(self.records), self.stats.get("experiences", 0))
+        if key in cache:
+            return cache[key]
+        if len(cache) > 4096:
+            cache.clear()
+        hist, ends = self._hier_index()
+        fill, end = {}, {}
+        if how in ("kn", "top", "ngram"):
+            if how == "ngram":
+                vocab = {w for d in hist[1].values() for w in d}
+                P0 = {w: 1.0 / len(vocab) for w in vocab} if vocab else {}
+                E0 = {}
+            else:
+                a_ = {v[1]: m for v, m in self._gap_fills(dict(q)).items() if v[0] == "w"}
+                e_ = {v[1]: m for v, m in self._gap_fills({**q, "r1": EOS}).items() if v[0] == "w"}
+                z = sum(a_.values())
+                P0 = {w: m / z for w, m in a_.items()} if z > 0 else {}
+                E0 = {w: min(e_.get(w, 0.0) / m, 1.0) for w, m in a_.items() if m > 0}
+            P = P0
+            for k in (range(1, W + 1) if how != "top" else (W,)):
+                P = self._wb(hist[k].get(tuple(ls[:k])), P)
+            for w, p in P.items():
+                fill[("w", w)] = p
+                if only is not None and w not in only:
+                    continue
+                pe = E0.get(w, 0.5 if how == "ngram" else 0.0)
+                for k in (range(0, W) if how != "top" else (W - 1,)):
+                    c = ends[k].get((w,) + tuple(ls[:k]))
+                    if c and c[1] > 0:
+                        t = (c[0] > 0) + (c[0] < c[1])
+                        pe = (c[0] + t * pe) / (c[1] + t)
+                end[("w", w)] = p * pe
+        else:
+            root = self.ctx.root
+            V = [v[1] for v in root.av.get(FILL, {}) if v[0] == "w"]
+            base = {w: 1.0 / (len(V) + 1) for w in V}
+
+            def own(nd):
+                return {v[1]: c for v, c in nd.av.get(FILL, {}).items() if v[0] == "w" and c > 0}
+
+            def endc(nd):
+                d = nd.av.get("r1", {})
+                n, c = sum(d.values()), d.get(EOS, 0.0)
+                return {k: x for k, x in (("e", c), ("n", n - c)) if x > 0}
+            P = self._hier_path_mix(dict(q), base, own, how)
+            zp = sum(P.values())
+            for w, p in P.items():
+                if p <= 0:
+                    continue
+                fill[("w", w)] = p / zp
+                if only is not None and w not in only:
+                    continue
+                pe = self._hier_path_mix({**q, FILL: ("w", w)}, {"e": 0.5, "n": 0.5}, endc, how).get("e", 0.0)
+                end[("w", w)] = p / zp * pe
+        cache[key] = (fill, end)
+        return cache[key]
