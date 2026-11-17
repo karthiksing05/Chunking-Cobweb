@@ -364,3 +364,63 @@ A KN-style read cannot both keep novelty and keep l2's role when the history has
 also shows the tree read as a bottom level is worse than uniform. Where the tree should add value (class-based
 generalisation of unseen contexts), its product read is overconfident. That is a calibration problem, not a
 mixing one. Closed.
+
+## 11. Round 197: geometric-mean pooling of the per-attribute factors (`Trellis3.pool = "geo"`, arm key `"pool"`; pre-test fails, not run at full scale)
+
+**Change (one, no constants).** Section 10 found the product of per-attribute back-off factors overconfident: the
+attributes l1..lW (r1..rW) are correlated, so the product double counts. `pool="geo"` weights each stored
+occurrence by `(prod_a f_a) ** (1 / A)`, A = number of attributes in the query (the average of the log factors), in
+`_gap_fills`, `fill_words` and `pivot_support` (the r192 "both" check reads the same weights: the pivot ratio
+P(p | left, x) / P(p | left) is a ratio of an A+1 read and an A read; kind "left" uses the A+1, A and one-attribute
+reads). Default (`pool` unset) is unchanged: `r197-byteid-n250-w3` seed 13 matches `r191-n250-w3` byte for byte on all
+3 arms and refs (`cmp`), and tests/trellis2 pass 69/69 (`test_r197_pool.py`: geo weights equal product^(1/A)
+computed by hand, A=1 unchanged, default unchanged, the r192 agreement tests rerun on a geo learner).
+One consequence for the generator: the "end" read `_gap_fills({**q, "r1": EOS})` has A+1 attributes, so its mass is no
+longer nested inside the A-attribute mass. In `t3_story.py` (and r195_logloss.py) the end mass is clamped to the
+total (`min(e, m)`) when `pool` is on; default untouched.
+
+**Pre-test 1: held-out log-loss** (`diag/r195_logloss.py default,geo`; n 1000, 400 held-out sentences, bits/word incl.
+the end decision; `r192-diag/r197_logloss_w*_s*.txt`; zero-mass tokens cost 39.9 bits; "common" = tokens both reads
+give mass > 0):
+
+| w, seed | default | geo | default / geo, new trigrams | zero-mass (default / geo) | common: default / geo | common new: default / geo |
+|---|---|---|---|---|---|---|
+| 3, 13 | 11.19 | 8.83 | 20.99 / 14.84 | 6 / 192 | 9.52 / 5.96 | 19.11 / 9.69 |
+| 3, 17 | 11.58 | 8.86 | 21.26 / 14.76 | 7 / 169 | 10.12 / 6.30 | 19.54 / 10.11 |
+| 4, 13 | 11.90 | 9.04 | 21.44 / 14.46 | 6 / 203 | 10.26 / 6.02 | 19.51 / 9.02 |
+| 4, 17 | 12.28 | 9.15 | 21.99 / 14.29 | 6 / 170 | 11.09 / 6.59 | 20.62 / 10.10 |
+| 5, 13 | 12.38 | 10.47 | 21.71 / 16.03 | 6 / 290 | 10.23 / 6.17 | 19.41 / 9.02 |
+| 5, 17 | 12.99 | 9.85 | 23.02 / 14.76 | 6 / 213 | 11.52 / 6.65 | 21.62 / 9.83 |
+
+Geo calibrates the read: on the tokens both give mass, 3.5-5 bits/word better (6.0-6.7 vs 9.5-11.5), and 8.9-10.1 vs
+19-22 bits on new trigrams. It is still far from the Witten-Bell n-gram control of section 10 (5.4-6.1 overall, 8.7-10
+on new). The zero-mass tokens (8-14%, up from 0.3%) come from the clamped end split (an A+1 end read larger than the
+A read leaves no "go on" mass), so the overall column understates the gain on the word itself and overstates the
+cost of the end decision.
+
+**Pre-test 2: generation** ("both" + `"pool":"geo"`, n 1000, seeds 13 17, judged; `r192-diag/r197_geo_compare.txt`;
+gram, tri, gram|tri over new sentences, against the matched r192 "both" dumps):
+
+| temp | w, seed | r192 both | geo |
+|---|---|---|---|
+| .7 | 3, 13 | .879 .099 .692 | .769 .396 .621 |
+| .7 | 3, 17 | .890 .112 .659 | .803 .374 .641 |
+| .7 | 4, 13 | .853 .244 .655 | .733 .571 .617 |
+| .7 | 4, 17 | .860 .206 .710 | .699 .580 .562 |
+| .7 | 5, 13 | .781 .389 .700 | .642 .657 .511 |
+| .7 | 5, 17 | .819 .360 .659 | .612 .637 .465 |
+| 1.0 | 3, 13 | .816 .206 .593 | .676 .511 .528 |
+| 1.0 | 3, 17 | .823 .224 .647 | .703 .506 .549 |
+| 1.0 | 4, 13 | .804 .389 .666 | .639 .679 .543 |
+| 1.0 | 4, 17 | .824 .311 .671 | .613 .674 .495 |
+| 1.0 | 5, 13 | .742 .497 .635 | .571 .757 .481 |
+| 1.0 | 5, 17 | .770 .460 .638 | .562 .731 .451 |
+
+**Verdict: fails; no full n 1000 run or frontier.** Geo moves novelty up (tri .37-.76 against .10-.50), and it
+spends grammaticality for it. At matched tri it is below r192: geo w3 temp .7 (tri .37-.40) has gram|tri .62-.64, r192
+w5 temp .7 (tri .36-.39) has .66-.70; geo w3 temp 1.0 (tri .51) has .53-.55, r192 w5 temp 1.0 (tri .46-.50) has
+.64. At higher tri geo reaches .45-.54, below the neural curves (r192 envelope: LSTM about .85-.90 at tri .4-.7).
+Calibrating the product helps the probability of the observed word (log-loss) but not the judged grammaticality of
+novel trigrams: flattening the weights spreads mass over more occurrences, including occurrences that agree with
+only some of the attributes (the same chaining as section 1, class C), and the pivot check (a ratio of two
+flattened reads) is weaker as a filter. The overconfidence of the product is not what limits gram|tri. Closed.

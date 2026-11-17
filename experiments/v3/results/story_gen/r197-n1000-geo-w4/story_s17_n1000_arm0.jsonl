@@ -1,0 +1,1545 @@
+{"arm": {"cond": false, "causal": 1, "units": "words", "pair": "gate", "new": true, "temp": 0.7, "both": true, "pool": "geo"}}
+{"prompt": "tom and mia look at the bird", "gen": "he did not want to share the cake", "pattern": false, "novel": true}
+{"prompt": "tom and mia look at the bird", "gen": "they wanted the toys they want", "pattern": true, "novel": true}
+{"prompt": "tom and mia look at the bird", "gen": "he was not nice", "pattern": true, "novel": true}
+{"prompt": "tom and mia look at the bird", "gen": "lily saw sue and wanted to help", "pattern": true, "novel": true}
+{"prompt": "it was a big red ball", "gen": "they go to play more", "pattern": true, "novel": true}
+{"prompt": "it was a big red ball", "gen": "they all wanted to play with", "pattern": false, "novel": true}
+{"prompt": "it was a big red ball", "gen": "but and sue were scared", "pattern": false, "novel": true}
+{"prompt": "it was a big red ball", "gen": "sue was not happy", "pattern": true, "novel": true}
+{"prompt": "ben and mia are scared", "gen": "his mom said see tim", "pattern": false, "novel": true}
+{"prompt": "ben and mia are scared", "gen": "she liked to play with", "pattern": true, "novel": true}
+{"prompt": "ben and mia are scared", "gen": "the bird wanted to help his friends", "pattern": true, "novel": true}
+{"prompt": "ben and mia are scared", "gen": "the little girl was very much", "pattern": true, "novel": true}
+{"prompt": "they played and had fun", "gen": "they became friends and played", "pattern": true, "novel": true}
+{"prompt": "they played and had fun", "gen": "tim loved to play and have fun together", "pattern": false, "novel": true}
+{"prompt": "they played and had fun", "gen": "tim saw a new toy", "pattern": true, "novel": true}
+{"prompt": "they played and had fun", "gen": "they were so happy", "pattern": true, "novel": true}
+{"prompt": "can i play with you", "gen": "tim and ben were sad", "pattern": true, "novel": true}
+{"prompt": "can i play with you", "gen": "they were so happy", "pattern": true, "novel": true}
+{"prompt": "can i play with you", "gen": "the dog and the girl smiled", "pattern": true, "novel": true}
+{"prompt": "can i play with you", "gen": "she was not happy", "pattern": true, "novel": true}
+{"prompt": "i don't know", "gen": "they go to play together", "pattern": true, "novel": true}
+{"prompt": "i don't know", "gen": "lily and sue were scared", "pattern": true, "novel": true}
+{"prompt": "i don't know", "gen": "they were all the ball too", "pattern": false, "novel": true}
+{"prompt": "i don't know", "gen": "they had a big box", "pattern": true, "novel": true}
+{"prompt": "max said don't be sad lily", "gen": "sam was so happy", "pattern": true, "novel": true}
+{"prompt": "max said don't be sad lily", "gen": "all and sue were very sad", "pattern": false, "novel": true}
+{"prompt": "max said don't be sad lily", "gen": "they liked to play outside in the sun", "pattern": true, "novel": true}
+{"prompt": "max said don't be sad lily", "gen": "he was very happy with his new car", "pattern": false, "novel": true}
+{"prompt": "that is not your toy", "gen": "they had an idea", "pattern": true, "novel": true}
+{"prompt": "that is not your toy", "gen": "anna and tom were scared", "pattern": true, "novel": true}
+{"prompt": "that is not your toy", "gen": "tim had a little dog with a ball", "pattern": true, "novel": true}
+{"prompt": "that is not your toy", "gen": "max and the dog", "pattern": false, "novel": true}
+{"prompt": "let's go play with my toys", "gen": "that ben we are", "pattern": true, "novel": true}
+{"prompt": "let's go play with my toys", "gen": "he played with it all day", "pattern": true, "novel": true}
+{"prompt": "let's go play with my toys", "gen": "they said yes let's play together", "pattern": false, "novel": true}
+{"prompt": "let's go play with my toys", "gen": "tom was surprised and happy", "pattern": true, "novel": true}
+{"prompt": "she was surprised", "gen": "they were all the bird did something unexpected", "pattern": false, "novel": true}
+{"prompt": "she was surprised", "gen": "he was very sad", "pattern": true, "novel": true}
+{"prompt": "she was surprised", "gen": "it was sad", "pattern": true, "novel": true}
+{"prompt": "she was surprised", "gen": "he saw his mom for help", "pattern": true, "novel": true}
+{"prompt": "the bird flew away with the ball", "gen": "tom saw a big dog", "pattern": true, "novel": true}
+{"prompt": "the bird flew away with the ball", "gen": "they had an idea", "pattern": true, "novel": true}
+{"prompt": "the bird flew away with the ball", "gen": "we had a good friend", "pattern": true, "novel": true}
+{"prompt": "the bird flew away with the ball", "gen": "all and ben were playing in the park", "pattern": false, "novel": true}
+{"prompt": "tim and sam felt bad", "gen": "tim and mia are friends", "pattern": true, "novel": true}
+{"prompt": "tim and sam felt bad", "gen": "tim and mia are friends", "pattern": true, "novel": true}
+{"prompt": "tim and sam felt bad", "gen": "he was very sad", "pattern": true, "novel": true}
+{"prompt": "tim and sam felt bad", "gen": "he wanted it a small house", "pattern": true, "novel": true}
+{"prompt": "they had lots of fun", "gen": "it was a and wanted to see", "pattern": false, "novel": true}
+{"prompt": "they had lots of fun", "gen": "it was very happy", "pattern": true, "novel": true}
+{"prompt": "they had lots of fun", "gen": "they both very happy", "pattern": false, "novel": true}
+{"prompt": "they had lots of fun", "gen": "max loved to find a friend", "pattern": true, "novel": true}
+{"prompt": "he looked all around", "gen": "i will make you feel better", "pattern": true, "novel": true}
+{"prompt": "he looked all around", "gen": "ben smiled and gave it to sam", "pattern": false, "novel": true}
+{"prompt": "he looked all around", "gen": "it was very excited", "pattern": true, "novel": true}
+{"prompt": "he looked all around", "gen": "they laughed at them had an idea", "pattern": false, "novel": true}
+{"prompt": "don't be scared bird tom says", "gen": "he was very happy with his new car", "pattern": false, "novel": true}
+{"prompt": "don't be scared bird tom says", "gen": "he did not like to go near it", "pattern": false, "novel": true}
+{"prompt": "don't be scared bird tom says", "gen": "tim was very scared anymore", "pattern": true, "novel": true}
+{"prompt": "don't be scared bird tom says", "gen": "she played together and thanked the ground", "pattern": true, "novel": true}
+{"prompt": "they had a lot of fun", "gen": "it was very happy", "pattern": true, "novel": true}
+{"prompt": "they had a lot of fun", "gen": "he saw a nice car", "pattern": true, "novel": true}
+{"prompt": "they had a lot of fun", "gen": "she was a big red ball", "pattern": true, "novel": true}
+{"prompt": "they had a lot of fun", "gen": "they says i don't like my tree", "pattern": false, "novel": true}
+{"prompt": "they play with him some more", "gen": "she wanted to play with it", "pattern": true, "novel": true}
+{"prompt": "they play with him some more", "gen": "do you want to share", "pattern": false, "novel": true}
+{"prompt": "they play with him some more", "gen": "do you want to share", "pattern": false, "novel": true}
+{"prompt": "they play with him some more", "gen": "they played together in a fun", "pattern": true, "novel": true}
+{"prompt": "you always take my things", "gen": "can you want to eat it", "pattern": true, "novel": true}
+{"prompt": "you always take my things", "gen": "they had an idea", "pattern": true, "novel": true}
+{"prompt": "you always take my things", "gen": "they all lived in a small house", "pattern": true, "novel": true}
+{"prompt": "you always take my things", "gen": "but sue was not and play", "pattern": false, "novel": true}
+{"prompt": "the cat was not scared of the dog", "gen": "he was not a little dog anymore", "pattern": false, "novel": true}
+{"prompt": "the cat was not scared of the dog", "gen": "it was not to go home", "pattern": false, "novel": true}
+{"prompt": "the cat was not scared of the dog", "gen": "he wanted to play with you", "pattern": true, "novel": true}
+{"prompt": "the cat was not scared of the dog", "gen": "he wanted to share and play", "pattern": false, "novel": true}
+{"prompt": "tim said let's play together", "gen": "the dog was very excited", "pattern": true, "novel": true}
+{"prompt": "tim said let's play together", "gen": "tim was so happy and thanked the bird", "pattern": true, "novel": true}
+{"prompt": "tim said let's play together", "gen": "they liked to play with it", "pattern": true, "novel": true}
+{"prompt": "tim said let's play together", "gen": "i did not careful tim", "pattern": true, "novel": true}
+{"prompt": "he could not play with his friends", "gen": "they played with the toys all day", "pattern": true, "novel": true}
+{"prompt": "he could not play with his friends", "gen": "they were so much", "pattern": true, "novel": true}
+{"prompt": "he could not play with his friends", "gen": "the bird was sad and scared", "pattern": true, "novel": true}
+{"prompt": "he could not play with his friends", "gen": "he saw something unexpected happened", "pattern": false, "novel": true}
+{"prompt": "sue had a big blue ball", "gen": "she liked to play with his friends", "pattern": true, "novel": true}
+{"prompt": "sue had a big blue ball", "gen": "lily and sue were scared", "pattern": true, "novel": true}
+{"prompt": "sue had a big blue ball", "gen": "it had a big rock", "pattern": true, "novel": true}
+{"prompt": "sue had a big blue ball", "gen": "can you want to be my friend", "pattern": true, "novel": true}
+{"prompt": "i wanted to play with her", "gen": "they had the ball and felt happy", "pattern": false, "novel": true}
+{"prompt": "i wanted to play with her", "gen": "they have so much", "pattern": true, "novel": true}
+{"prompt": "i wanted to play with her", "gen": "it was happy", "pattern": true, "novel": true}
+{"prompt": "i wanted to play with her", "gen": "they both very sad", "pattern": false, "novel": true}
+{"prompt": "yes he is", "gen": "they wanted to help tom was inside", "pattern": false, "novel": true}
+{"prompt": "yes he is", "gen": "sue and were not a little dog anymore", "pattern": false, "novel": true}
+{"prompt": "yes he is", "gen": "sara was very happy", "pattern": true, "novel": true}
+{"prompt": "yes he is", "gen": "but he found a pretty rock", "pattern": false, "novel": true}
+{"prompt": "bob was a little boy", "gen": "i saw a big box", "pattern": true, "novel": true}
+{"prompt": "bob was a little boy", "gen": "tim said and thanked sam", "pattern": true, "novel": true}
+{"prompt": "bob was a little boy", "gen": "tim was so happy and his new car", "pattern": false, "novel": true}
+{"prompt": "bob was a little boy", "gen": "they wanted to play with it", "pattern": true, "novel": true}
+{"prompt": "they played and ran together", "gen": "they had the best of friends", "pattern": true, "novel": true}
+{"prompt": "they played and ran together", "gen": "they were so happy", "pattern": true, "novel": true}
+{"prompt": "they played and ran together", "gen": "but now i have to go", "pattern": true, "novel": true}
+{"prompt": "they played and ran together", "gen": "he took the dog to his mom", "pattern": true, "novel": true}
+{"prompt": "tim was very surprised and happy", "gen": "he was happy and wanted to help", "pattern": true, "novel": true}
+{"prompt": "tim was very surprised and happy", "gen": "they went up and smiled", "pattern": true, "novel": true}
+{"prompt": "tim was very surprised and happy", "gen": "he asked his friends", "pattern": true, "novel": true}
+{"prompt": "tim was very surprised and happy", "gen": "she liked it", "pattern": true, "novel": true}
+{"prompt": "then something unexpected happened", "gen": "they played and had fun", "pattern": true, "novel": true}
+{"prompt": "then something unexpected happened", "gen": "bob was very happy", "pattern": true, "novel": true}
+{"prompt": "then something unexpected happened", "gen": "they were all happy", "pattern": true, "novel": true}
+{"prompt": "then something unexpected happened", "gen": "tom was so excited to play with", "pattern": false, "novel": true}
+{"prompt": "spot was excited", "gen": "the bird said yes you", "pattern": false, "novel": true}
+{"prompt": "spot was excited", "gen": "she wanted to help them", "pattern": true, "novel": true}
+{"prompt": "spot was excited", "gen": "so they was the best", "pattern": false, "novel": true}
+{"prompt": "spot was excited", "gen": "tim was happy and wanted to get out", "pattern": false, "novel": true}
+{"prompt": "they played and laughed together every day", "gen": "mia was so surprised", "pattern": true, "novel": true}
+{"prompt": "they played and laughed together every day", "gen": "what was sad", "pattern": true, "novel": true}
+{"prompt": "they played and laughed together every day", "gen": "they both loved each other and smiled", "pattern": false, "novel": true}
+{"prompt": "they played and laughed together every day", "gen": "she was so happy and play", "pattern": true, "novel": true}
+{"prompt": "he saw what happened", "gen": "they said not and saw her friend tom", "pattern": true, "novel": true}
+{"prompt": "he saw what happened", "gen": "do you want to play with", "pattern": false, "novel": true}
+{"prompt": "he saw what happened", "gen": "it will help you", "pattern": true, "novel": true}
+{"prompt": "he saw what happened", "gen": "the cat was so happy", "pattern": true, "novel": true}
+{"prompt": "he wanted it so much", "gen": "they both wanted to the park to play", "pattern": true, "novel": true}
+{"prompt": "he wanted it so much", "gen": "bird said not now max", "pattern": false, "novel": true}
+{"prompt": "he wanted it so much", "gen": "he wanted to play in the ball", "pattern": true, "novel": true}
+{"prompt": "he wanted it so much", "gen": "they played together and went to help", "pattern": false, "novel": true}
+{"prompt": "the cat was surprised too", "gen": "the man was sad", "pattern": true, "novel": true}
+{"prompt": "the cat was surprised too", "gen": "the man were scared", "pattern": true, "novel": true}
+{"prompt": "the cat was surprised too", "gen": "she was very scared anymore", "pattern": true, "novel": true}
+{"prompt": "the cat was surprised too", "gen": "he played with it all day", "pattern": true, "novel": true}
+{"prompt": "thank you ben", "gen": "the cat and picked up the toy", "pattern": false, "novel": true}
+{"prompt": "thank you ben", "gen": "they wanted to play with them", "pattern": true, "novel": true}
+{"prompt": "thank you ben", "gen": "all and sam were sad", "pattern": false, "novel": true}
+{"prompt": "thank you ben", "gen": "he was so happy and fast", "pattern": true, "novel": true}
+{"prompt": "mom will be back soon", "gen": "they had a toy she loved very much", "pattern": false, "novel": true}
+{"prompt": "mom will be back soon", "gen": "they said not and sad", "pattern": true, "novel": true}
+{"prompt": "mom will be back soon", "gen": "he smiled and said thank you", "pattern": false, "novel": true}
+{"prompt": "mom will be back soon", "gen": "they are not and sad", "pattern": true, "novel": true}
+{"prompt": "tom saw his friend a dog named max", "gen": "it had a big box", "pattern": true, "novel": true}
+{"prompt": "tom saw his friend a dog named max", "gen": "it was playing with a dog", "pattern": true, "novel": true}
+{"prompt": "tom saw his friend a dog named max", "gen": "lily was very happy", "pattern": true, "novel": true}
+{"prompt": "tom saw his friend a dog named max", "gen": "the bird said yes it", "pattern": false, "novel": true}
+{"prompt": "tim liked to play in the park", "gen": "tom and ben are friends", "pattern": true, "novel": true}
+{"prompt": "tim liked to play in the park", "gen": "bob wanted to play in the park", "pattern": true, "novel": true}
+{"prompt": "tim liked to play in the park", "gen": "they played and play with you", "pattern": false, "novel": true}
+{"prompt": "tim liked to play in the park", "gen": "they were scared and new", "pattern": true, "novel": true}
+{"prompt": "they see a bird in the tree", "gen": "sue was happy and play", "pattern": true, "novel": true}
+{"prompt": "they see a bird in the tree", "gen": "tim wanted to go home", "pattern": true, "novel": true}
+{"prompt": "they see a bird in the tree", "gen": "he was very happy and play", "pattern": true, "novel": true}
+{"prompt": "they see a bird in the tree", "gen": "they all excited to play with", "pattern": false, "novel": true}
+{"prompt": "tim saw a big red ball", "gen": "mom and his mom were very happy", "pattern": true, "novel": true}
+{"prompt": "tim saw a big red ball", "gen": "he thought and walked", "pattern": true, "novel": true}
+{"prompt": "tim saw a big red ball", "gen": "she was a big red ball", "pattern": true, "novel": true}
+{"prompt": "tim saw a big red ball", "gen": "it was sad too", "pattern": true, "novel": true}
+{"prompt": "they played for a long time", "gen": "tim had a big room with many toys", "pattern": false, "novel": true}
+{"prompt": "they played for a long time", "gen": "the man and picked it to have fun", "pattern": false, "novel": true}
+{"prompt": "they played for a long time", "gen": "they were so much", "pattern": true, "novel": true}
+{"prompt": "they played for a long time", "gen": "they became good idea", "pattern": true, "novel": true}
+{"prompt": "he thought and thought", "gen": "tim did not scared anymore", "pattern": true, "novel": true}
+{"prompt": "he thought and thought", "gen": "they both very happy", "pattern": false, "novel": true}
+{"prompt": "he thought and thought", "gen": "tim was very happy to play outside", "pattern": false, "novel": true}
+{"prompt": "he thought and thought", "gen": "the man was scared", "pattern": true, "novel": true}
+{"prompt": "all the friends were happy and excited", "gen": "tom and lily were scared", "pattern": true, "novel": true}
+{"prompt": "all the friends were happy and excited", "gen": "but he opened the house", "pattern": true, "novel": true}
+{"prompt": "all the friends were happy and excited", "gen": "they all wanted to see", "pattern": false, "novel": true}
+{"prompt": "all the friends were happy and excited", "gen": "they were all happy", "pattern": true, "novel": true}
+{"prompt": "the toy looked new and fun", "gen": "they were not to give up", "pattern": false, "novel": true}
+{"prompt": "the toy looked new and fun", "gen": "the bird wanted to help them", "pattern": true, "novel": true}
+{"prompt": "the toy looked new and fun", "gen": "the bird and the new toy", "pattern": false, "novel": true}
+{"prompt": "the toy looked new and fun", "gen": "they wanted to play with them", "pattern": true, "novel": true}
+{"prompt": "he was excited to play with lily", "gen": "the bird wanted the ball", "pattern": true, "novel": true}
+{"prompt": "he was excited to play with lily", "gen": "they had so much", "pattern": true, "novel": true}
+{"prompt": "he was excited to play with lily", "gen": "the bird had to help", "pattern": true, "novel": true}
+{"prompt": "he was excited to play with lily", "gen": "it is red and again", "pattern": true, "novel": true}
+{"prompt": "now let's go back to my house", "gen": "it was so happy", "pattern": true, "novel": true}
+{"prompt": "now let's go back to my house", "gen": "the dog to a house", "pattern": false, "novel": true}
+{"prompt": "now let's go back to my house", "gen": "do you want to play with it", "pattern": true, "novel": true}
+{"prompt": "now let's go back to my house", "gen": "but it is", "pattern": true, "novel": true}
+{"prompt": "he was very surprised", "gen": "he saw a big rock", "pattern": true, "novel": true}
+{"prompt": "he was very surprised", "gen": "we had a fun day", "pattern": true, "novel": true}
+{"prompt": "he was very surprised", "gen": "it was happy", "pattern": true, "novel": true}
+{"prompt": "he was very surprised", "gen": "they felt very happy", "pattern": true, "novel": true}
+{"prompt": "sara and ben are friends", "gen": "lily was surprised", "pattern": true, "novel": true}
+{"prompt": "sara and ben are friends", "gen": "they were not to the park", "pattern": true, "novel": true}
+{"prompt": "sara and ben are friends", "gen": "tim and the girl became good friends", "pattern": true, "novel": true}
+{"prompt": "sara and ben are friends", "gen": "she was happy", "pattern": true, "novel": true}
+{"prompt": "do you want to play with me", "gen": "they wanted to help the bird", "pattern": true, "novel": true}
+{"prompt": "do you want to play with me", "gen": "the dog to and to the big ball", "pattern": false, "novel": true}
+{"prompt": "do you want to play with me", "gen": "they did not want to go away", "pattern": true, "novel": true}
+{"prompt": "do you want to play with me", "gen": "they were so much fun", "pattern": true, "novel": true}
+{"prompt": "max and lily were very happy", "gen": "they had played and had fun", "pattern": false, "novel": true}
+{"prompt": "max and lily were very happy", "gen": "she wanted to share and play", "pattern": false, "novel": true}
+{"prompt": "max and lily were very happy", "gen": "they played and the ball and had fun", "pattern": false, "novel": true}
+{"prompt": "max and lily were very happy", "gen": "ben was happy", "pattern": true, "novel": true}
+{"prompt": "they all liked it", "gen": "it was so happy", "pattern": true, "novel": true}
+{"prompt": "they all liked it", "gen": "but she said what is it", "pattern": false, "novel": true}
+{"prompt": "they all liked it", "gen": "they were not a very careful", "pattern": false, "novel": true}
+{"prompt": "they all liked it", "gen": "tim felt sorry", "pattern": true, "novel": true}
+{"prompt": "they liked to play together a lot", "gen": "max and a little bird", "pattern": false, "novel": true}
+{"prompt": "they liked to play together a lot", "gen": "you want to be friends", "pattern": true, "novel": true}
+{"prompt": "they liked to play together a lot", "gen": "he wanted to play with the ball", "pattern": true, "novel": true}
+{"prompt": "they liked to play together a lot", "gen": "they thanked the bird and went home", "pattern": true, "novel": true}
+{"prompt": "he wanted to play with the ball", "gen": "tim was not happy", "pattern": true, "novel": true}
+{"prompt": "he wanted to play with the ball", "gen": "lily liked to play outside", "pattern": true, "novel": true}
+{"prompt": "he wanted to play with the ball", "gen": "lily was very happy", "pattern": true, "novel": true}
+{"prompt": "he wanted to play with the ball", "gen": "he was very happy and play together", "pattern": true, "novel": true}
+{"prompt": "we did not know", "gen": "he said to run away", "pattern": true, "novel": true}
+{"prompt": "we did not know", "gen": "tom and sam were sad", "pattern": true, "novel": true}
+{"prompt": "we did not know", "gen": "they all the toys in the park", "pattern": false, "novel": true}
+{"prompt": "we did not know", "gen": "lily and tim felt sorry", "pattern": true, "novel": true}
+{"prompt": "they were happy", "gen": "lily and tom were scared", "pattern": true, "novel": true}
+{"prompt": "they were happy", "gen": "i will help me", "pattern": true, "novel": true}
+{"prompt": "they were happy", "gen": "tom and bob were scared", "pattern": true, "novel": true}
+{"prompt": "they were happy", "gen": "they found a fun day", "pattern": true, "novel": true}
+{"prompt": "they were best friends", "gen": "tim and the girl smiled", "pattern": false, "novel": true}
+{"prompt": "they were best friends", "gen": "the dog was very excited", "pattern": true, "novel": true}
+{"prompt": "they were best friends", "gen": "the tree wanted the ball and her", "pattern": false, "novel": true}
+{"prompt": "they were best friends", "gen": "the cat had to run away", "pattern": false, "novel": true}
+{"prompt": "we are your friends", "gen": "tom and ben were playing in the park", "pattern": true, "novel": true}
+{"prompt": "we are your friends", "gen": "mia was very sad", "pattern": true, "novel": true}
+{"prompt": "we are your friends", "gen": "it was very happy", "pattern": true, "novel": true}
+{"prompt": "we are your friends", "gen": "they all and play together", "pattern": false, "novel": true}
+{"prompt": "you are my new friend", "gen": "lily and anna were scared", "pattern": true, "novel": true}
+{"prompt": "you are my new friend", "gen": "tim and his mom were very happy", "pattern": true, "novel": true}
+{"prompt": "you are my new friend", "gen": "they found a lot of fun", "pattern": true, "novel": true}
+{"prompt": "you are my new friend", "gen": "the dog wanted to play more", "pattern": true, "novel": true}
+{"prompt": "ben is sorry", "gen": "sue and ben were scared", "pattern": true, "novel": true}
+{"prompt": "ben is sorry", "gen": "they played and friends", "pattern": false, "novel": true}
+{"prompt": "ben is sorry", "gen": "they felt happy", "pattern": true, "novel": true}
+{"prompt": "ben is sorry", "gen": "they liked it in a pretty rock", "pattern": false, "novel": true}
+{"prompt": "i want to go home with spot", "gen": "he wanted to play with", "pattern": true, "novel": true}
+{"prompt": "i want to go home with spot", "gen": "spot and tom were scared", "pattern": true, "novel": true}
+{"prompt": "i want to go home with spot", "gen": "she was a and went away", "pattern": false, "novel": true}
+{"prompt": "i want to go home with spot", "gen": "but and sam were scared", "pattern": false, "novel": true}
+{"prompt": "we will find mom", "gen": "she was not like that", "pattern": true, "novel": true}
+{"prompt": "we will find mom", "gen": "it was so happy", "pattern": true, "novel": true}
+{"prompt": "we will find mom", "gen": "said to play in a big rock", "pattern": false, "novel": true}
+{"prompt": "we will find mom", "gen": "bob wanted to help", "pattern": true, "novel": true}
+{"prompt": "max was surprised but he was happy", "gen": "max wanted to see him", "pattern": true, "novel": true}
+{"prompt": "max was surprised but he was happy", "gen": "mia was very excited", "pattern": true, "novel": true}
+{"prompt": "max was surprised but he was happy", "gen": "she was not a little dog anymore", "pattern": false, "novel": true}
+{"prompt": "max was surprised but he was happy", "gen": "she was very special", "pattern": true, "novel": true}
+{"prompt": "ben was scared of the dog", "gen": "it was very nice", "pattern": true, "novel": true}
+{"prompt": "ben was scared of the dog", "gen": "they were all day long", "pattern": true, "novel": true}
+{"prompt": "ben was scared of the dog", "gen": "she was happy and said to you did", "pattern": false, "novel": true}
+{"prompt": "ben was scared of the dog", "gen": "let's be careful", "pattern": true, "novel": true}
+{"prompt": "how about spot", "gen": "the bird wanted to help them", "pattern": true, "novel": true}
+{"prompt": "how about spot", "gen": "they went to play outside", "pattern": true, "novel": true}
+{"prompt": "how about spot", "gen": "they went to play with the ball", "pattern": true, "novel": true}
+{"prompt": "how about spot", "gen": "they lived in a big house", "pattern": true, "novel": true}
+{"prompt": "but he was too small", "gen": "they were not like to share his toys", "pattern": true, "novel": true}
+{"prompt": "but he was too small", "gen": "he loved to find things in the park", "pattern": true, "novel": true}
+{"prompt": "but he was too small", "gen": "the car was very happy", "pattern": true, "novel": true}
+{"prompt": "but he was too small", "gen": "they had an idea", "pattern": true, "novel": true}
+{"prompt": "he picked it up and ran to lily", "gen": "then they opened the boy and flew away", "pattern": false, "novel": true}
+{"prompt": "he picked it up and ran to lily", "gen": "they all the best of friends", "pattern": false, "novel": true}
+{"prompt": "he picked it up and ran to lily", "gen": "he was very happy and thanked max", "pattern": true, "novel": true}
+{"prompt": "he picked it up and ran to lily", "gen": "they had an idea", "pattern": true, "novel": true}
+{"prompt": "you are fun and nice", "gen": "tim was very happy and excited", "pattern": true, "novel": true}
+{"prompt": "you are fun and nice", "gen": "the dog wanted to play with", "pattern": false, "novel": true}
+{"prompt": "you are fun and nice", "gen": "they played with it all day", "pattern": true, "novel": true}
+{"prompt": "you are fun and nice", "gen": "they were scared and had fun", "pattern": false, "novel": true}
+{"prompt": "they were very happy", "gen": "they play with the ball", "pattern": true, "novel": true}
+{"prompt": "they were very happy", "gen": "he was very happy to see them", "pattern": true, "novel": true}
+{"prompt": "they were very happy", "gen": "they had a big rock", "pattern": true, "novel": true}
+{"prompt": "they were very happy", "gen": "she was very sad", "pattern": true, "novel": true}
+{"prompt": "the dog was very sad", "gen": "sam was so happy", "pattern": true, "novel": true}
+{"prompt": "the dog was very sad", "gen": "tim and sam were scared", "pattern": true, "novel": true}
+{"prompt": "the dog was very sad", "gen": "tim started to help me", "pattern": true, "novel": true}
+{"prompt": "the dog was very sad", "gen": "they wanted to play and his friends", "pattern": false, "novel": true}
+{"prompt": "he says no i don't want to look", "gen": "they were so happy", "pattern": true, "novel": true}
+{"prompt": "he says no i don't want to look", "gen": "they played all excited to come and play", "pattern": false, "novel": true}
+{"prompt": "he says no i don't want to look", "gen": "max was happy", "pattern": true, "novel": true}
+{"prompt": "he says no i don't want to look", "gen": "he said i find it", "pattern": false, "novel": true}
+{"prompt": "no i don't know said sam", "gen": "one day lily found a small cat", "pattern": true, "novel": true}
+{"prompt": "no i don't know said sam", "gen": "she wanted to help the bird", "pattern": true, "novel": true}
+{"prompt": "no i don't know said sam", "gen": "they wanted the ball too", "pattern": true, "novel": true}
+{"prompt": "no i don't know said sam", "gen": "the ball and scared", "pattern": false, "novel": true}
+{"prompt": "just then a girl named sue came by", "gen": "tim wanted it a dog", "pattern": true, "novel": true}
+{"prompt": "just then a girl named sue came by", "gen": "the animals were surprised", "pattern": true, "novel": true}
+{"prompt": "just then a girl named sue came by", "gen": "they wanted to play with", "pattern": true, "novel": true}
+{"prompt": "just then a girl named sue came by", "gen": "he loved to know what was inside", "pattern": true, "novel": true}
+{"prompt": "it was big and shiny", "gen": "one day lily found a small cat", "pattern": true, "novel": true}
+{"prompt": "it was big and shiny", "gen": "they saw a big room with many toys", "pattern": true, "novel": true}
+{"prompt": "it was big and shiny", "gen": "lily was very excited", "pattern": true, "novel": true}
+{"prompt": "it was big and shiny", "gen": "the tree was very happy", "pattern": true, "novel": true}
+{"prompt": "and you have me", "gen": "tim was happy and wanted to help", "pattern": true, "novel": true}
+{"prompt": "and you have me", "gen": "it will help me", "pattern": true, "novel": true}
+{"prompt": "and you have me", "gen": "but and sue were scared", "pattern": false, "novel": true}
+{"prompt": "and you have me", "gen": "one day lily found a big rock", "pattern": true, "novel": true}
+{"prompt": "lily found a room with many toys", "gen": "tom and her mom were the best", "pattern": false, "novel": true}
+{"prompt": "lily found a room with many toys", "gen": "tim was happy and said thank you lily", "pattern": true, "novel": true}
+{"prompt": "lily found a room with many toys", "gen": "tom and tom were sad", "pattern": true, "novel": true}
+{"prompt": "lily found a room with many toys", "gen": "he liked to play outside in the sun", "pattern": true, "novel": true}
+{"prompt": "they laughed and played all day", "gen": "they felt happy and proud", "pattern": true, "novel": true}
+{"prompt": "they laughed and played all day", "gen": "the man looked sad and said thank you", "pattern": true, "novel": true}
+{"prompt": "they laughed and played all day", "gen": "it was so happy", "pattern": true, "novel": true}
+{"prompt": "they laughed and played all day", "gen": "they walked and walked", "pattern": true, "novel": true}
+{"prompt": "the girl had the big red ball", "gen": "lily and his friends did not know that", "pattern": false, "novel": true}
+{"prompt": "the girl had the big red ball", "gen": "he said a friend named sue", "pattern": true, "novel": true}
+{"prompt": "the girl had the big red ball", "gen": "the car was so happy", "pattern": true, "novel": true}
+{"prompt": "the girl had the big red ball", "gen": "tim was very careful", "pattern": true, "novel": true}
+{"prompt": "she thought and thought", "gen": "tom said sue came over to play", "pattern": false, "novel": true}
+{"prompt": "she thought and thought", "gen": "they all lived in a small house", "pattern": true, "novel": true}
+{"prompt": "she thought and thought", "gen": "sue felt proud and smiled", "pattern": true, "novel": true}
+{"prompt": "she thought and thought", "gen": "what was sad", "pattern": true, "novel": true}
+{"prompt": "they look at the cat", "gen": "they were so happy to see them", "pattern": true, "novel": true}
+{"prompt": "they look at the cat", "gen": "the cat wanted to the ball", "pattern": true, "novel": true}
+{"prompt": "they look at the cat", "gen": "lily liked to find things in the sun", "pattern": true, "novel": true}
+{"prompt": "they look at the cat", "gen": "he wanted to play with", "pattern": true, "novel": true}
+{"prompt": "i am sorry", "gen": "the little dog was very happy", "pattern": true, "novel": true}
+{"prompt": "i am sorry", "gen": "they all and laughed together all day long", "pattern": false, "novel": true}
+{"prompt": "i am sorry", "gen": "they are not and new", "pattern": false, "novel": true}
+{"prompt": "i am sorry", "gen": "tom saw sam were playing in the park", "pattern": false, "novel": true}
+{"prompt": "lily was so happy", "gen": "sue and tom were very happy", "pattern": true, "novel": true}
+{"prompt": "lily was so happy", "gen": "he was not a toy", "pattern": true, "novel": true}
+{"prompt": "lily was so happy", "gen": "tim and ben looked at each other", "pattern": true, "novel": true}
+{"prompt": "lily was so happy", "gen": "tim wanted to help the bird", "pattern": true, "novel": true}
+{"prompt": "the old man smiled again", "gen": "he was very happy and play together", "pattern": true, "novel": true}
+{"prompt": "the old man smiled again", "gen": "look ben i found a pretty toy", "pattern": false, "novel": true}
+{"prompt": "the old man smiled again", "gen": "he said it was not there", "pattern": true, "novel": true}
+{"prompt": "the old man smiled again", "gen": "what was surprised", "pattern": true, "novel": true}
+{"prompt": "tom and mia are friends", "gen": "tim felt very happy", "pattern": true, "novel": true}
+{"prompt": "tom and mia are friends", "gen": "they were best friends", "pattern": true, "novel": true}
+{"prompt": "tom and mia are friends", "gen": "they went to play with", "pattern": true, "novel": true}
+{"prompt": "tom and mia are friends", "gen": "it had a friend named tom", "pattern": true, "novel": true}
+{"prompt": "it went high up into the tree", "gen": "sam was surprised and happy", "pattern": true, "novel": true}
+{"prompt": "it went high up into the tree", "gen": "they did not want him to do", "pattern": false, "novel": true}
+{"prompt": "it went high up into the tree", "gen": "they had fun", "pattern": true, "novel": true}
+{"prompt": "it went high up into the tree", "gen": "he was very happy to see them all", "pattern": true, "novel": true}
+{"prompt": "this is not fun", "gen": "he was very happy to play with", "pattern": false, "novel": true}
+{"prompt": "this is not fun", "gen": "the dog wanted to help", "pattern": true, "novel": true}
+{"prompt": "this is not fun", "gen": "they liked to play with his friends", "pattern": true, "novel": true}
+{"prompt": "this is not fun", "gen": "can you want to play", "pattern": true, "novel": true}
+{"prompt": "lily was so happy to find the toy", "gen": "yes it in", "pattern": false, "novel": true}
+{"prompt": "lily was so happy to find the toy", "gen": "do you want to play with", "pattern": false, "novel": true}
+{"prompt": "lily was so happy to find the toy", "gen": "lily liked to play with his toys", "pattern": true, "novel": true}
+{"prompt": "lily was so happy to find the toy", "gen": "they play with the ball", "pattern": true, "novel": true}
+{"prompt": "she saw her friend tom", "gen": "but he loved to find a friend", "pattern": true, "novel": true}
+{"prompt": "she saw her friend tom", "gen": "they like to play outside in the sun", "pattern": true, "novel": true}
+{"prompt": "she saw her friend tom", "gen": "he was very sad", "pattern": true, "novel": true}
+{"prompt": "she saw her friend tom", "gen": "he wanted to do it", "pattern": true, "novel": true}
+{"prompt": "get down from my tree", "gen": "she was happy and and had fun", "pattern": false, "novel": true}
+{"prompt": "get down from my tree", "gen": "the little boy was happy", "pattern": true, "novel": true}
+{"prompt": "get down from my tree", "gen": "they both played together and had fun", "pattern": true, "novel": true}
+{"prompt": "get down from my tree", "gen": "they said to play with", "pattern": true, "novel": true}
+{"prompt": "she is not happy", "gen": "it was not and scared", "pattern": true, "novel": true}
+{"prompt": "she is not happy", "gen": "max and lily were very surprised", "pattern": true, "novel": true}
+{"prompt": "she is not happy", "gen": "she wanted to play outside in the sun", "pattern": true, "novel": true}
+{"prompt": "she is not happy", "gen": "she was happy", "pattern": true, "novel": true}
+{"prompt": "do you want to help me", "gen": "it will not do it again", "pattern": true, "novel": true}
+{"prompt": "do you want to help me", "gen": "he had a lot of fun together", "pattern": true, "novel": true}
+{"prompt": "do you want to help me", "gen": "suddenly he had an idea", "pattern": true, "novel": true}
+{"prompt": "do you want to help me", "gen": "sara was very happy", "pattern": true, "novel": true}
+{"prompt": "sue was sad", "gen": "she felt sad", "pattern": true, "novel": true}
+{"prompt": "sue was sad", "gen": "they all the best of friends", "pattern": false, "novel": true}
+{"prompt": "sue was sad", "gen": "they were so happy", "pattern": true, "novel": true}
+{"prompt": "sue was sad", "gen": "tim said to his mom", "pattern": true, "novel": true}
+{"prompt": "tom said no but let's find it together", "gen": "it was so happy", "pattern": true, "novel": true}
+{"prompt": "tom said no but let's find it together", "gen": "it was a and fun", "pattern": false, "novel": true}
+{"prompt": "tom said no but let's find it together", "gen": "he said to play with", "pattern": true, "novel": true}
+{"prompt": "tom said no but let's find it together", "gen": "they were all very excited", "pattern": true, "novel": true}
+{"prompt": "tim felt sad", "gen": "you have to go home", "pattern": true, "novel": true}
+{"prompt": "tim felt sad", "gen": "sam was so happy", "pattern": true, "novel": true}
+{"prompt": "tim felt sad", "gen": "sam and a girl named sue", "pattern": true, "novel": true}
+{"prompt": "tim felt sad", "gen": "it was surprised", "pattern": true, "novel": true}
+{"prompt": "it is so pretty", "gen": "they had the big red ball", "pattern": true, "novel": true}
+{"prompt": "it is so pretty", "gen": "tim wanted to play outside", "pattern": true, "novel": true}
+{"prompt": "it is so pretty", "gen": "the dog and said yes let's go", "pattern": false, "novel": true}
+{"prompt": "it is so pretty", "gen": "the car did not know what to do", "pattern": true, "novel": true}
+{"prompt": "the dog is happy", "gen": "tom and sue were scared", "pattern": true, "novel": true}
+{"prompt": "the dog is happy", "gen": "they were not to it", "pattern": false, "novel": true}
+{"prompt": "the dog is happy", "gen": "they saw a big rock", "pattern": true, "novel": true}
+{"prompt": "the dog is happy", "gen": "they like to play with the dog", "pattern": true, "novel": true}
+{"prompt": "it was big and shiny", "gen": "the bird was happy and her friends", "pattern": false, "novel": true}
+{"prompt": "it was big and shiny", "gen": "they wanted it to play", "pattern": true, "novel": true}
+{"prompt": "it was big and shiny", "gen": "the dog wanted to play more", "pattern": true, "novel": true}
+{"prompt": "it was big and shiny", "gen": "the man were sad", "pattern": true, "novel": true}
+{"prompt": "he says i'm sorry dad", "gen": "i can be careful too", "pattern": false, "novel": true}
+{"prompt": "he says i'm sorry dad", "gen": "they all wanted to play with the ball", "pattern": true, "novel": true}
+{"prompt": "he says i'm sorry dad", "gen": "they are happy and loved", "pattern": true, "novel": true}
+{"prompt": "he says i'm sorry dad", "gen": "he felt proud and happy", "pattern": true, "novel": true}
+{"prompt": "it was a new friend for the car", "gen": "he played with it all day", "pattern": true, "novel": true}
+{"prompt": "it was a new friend for the car", "gen": "they do it to play with the toy", "pattern": false, "novel": true}
+{"prompt": "it was a new friend for the car", "gen": "she wanted to play with it", "pattern": true, "novel": true}
+{"prompt": "it was a new friend for the car", "gen": "amy was so surprised and scared", "pattern": true, "novel": true}
+{"prompt": "sue said yes let's play", "gen": "she was very scared anymore", "pattern": true, "novel": true}
+{"prompt": "sue said yes let's play", "gen": "he smiled and said thank you sue", "pattern": true, "novel": true}
+{"prompt": "sue said yes let's play", "gen": "i don't want to play with", "pattern": false, "novel": true}
+{"prompt": "sue said yes let's play", "gen": "he loved to play with it", "pattern": true, "novel": true}
+{"prompt": "i will help you", "gen": "but he was not find it", "pattern": true, "novel": true}
+{"prompt": "i will help you", "gen": "they opened the box and something unexpected happened", "pattern": true, "novel": true}
+{"prompt": "i will help you", "gen": "the cat was so happy", "pattern": true, "novel": true}
+{"prompt": "i will help you", "gen": "they liked to play with his toy car", "pattern": true, "novel": true}
+{"prompt": "mia was scared and sad", "gen": "i come in", "pattern": false, "novel": true}
+{"prompt": "mia was scared and sad", "gen": "they all excited to see what was inside", "pattern": false, "novel": true}
+{"prompt": "mia was scared and sad", "gen": "bob was not happy", "pattern": true, "novel": true}
+{"prompt": "mia was scared and sad", "gen": "the cat was happy and excited", "pattern": true, "novel": true}
+{"prompt": "lily was very sad", "gen": "you are not do it", "pattern": true, "novel": true}
+{"prompt": "lily was very sad", "gen": "they were all happy", "pattern": true, "novel": true}
+{"prompt": "lily was very sad", "gen": "tim wanted to help them", "pattern": true, "novel": true}
+{"prompt": "lily was very sad", "gen": "sue was happy", "pattern": true, "novel": true}
+{"prompt": "the girl said thank you bird", "gen": "what it was", "pattern": false, "novel": true}
+{"prompt": "the girl said thank you bird", "gen": "they were scared and new", "pattern": true, "novel": true}
+{"prompt": "the girl said thank you bird", "gen": "tom had a and and went home", "pattern": false, "novel": true}
+{"prompt": "the girl said thank you bird", "gen": "they said to his friend", "pattern": true, "novel": true}
+{"prompt": "they are scared", "gen": "then he saw a boy and said yes", "pattern": false, "novel": true}
+{"prompt": "they are scared", "gen": "she said to play with", "pattern": true, "novel": true}
+{"prompt": "they are scared", "gen": "tom said to see what was inside", "pattern": true, "novel": true}
+{"prompt": "they are scared", "gen": "they had an idea", "pattern": true, "novel": true}
+{"prompt": "his friends were very excited", "gen": "she was happy", "pattern": true, "novel": true}
+{"prompt": "his friends were very excited", "gen": "he was not nice", "pattern": true, "novel": true}
+{"prompt": "his friends were very excited", "gen": "one day lily found a big rock", "pattern": true, "novel": true}
+{"prompt": "his friends were very excited", "gen": "they are scared and new", "pattern": true, "novel": true}
+{"prompt": "she didn't like it", "gen": "tim and tom were scared", "pattern": true, "novel": true}
+{"prompt": "she didn't like it", "gen": "mom and lily were very scared", "pattern": true, "novel": true}
+{"prompt": "she didn't like it", "gen": "they felt very happy", "pattern": true, "novel": true}
+{"prompt": "she didn't like it", "gen": "he wanted to be careful", "pattern": true, "novel": true}
+{"prompt": "she was happy to see them so happy", "gen": "she was very happy to play with", "pattern": false, "novel": true}
+{"prompt": "she was happy to see them so happy", "gen": "she was not happy", "pattern": true, "novel": true}
+{"prompt": "she was happy to see them so happy", "gen": "they like to play with it", "pattern": true, "novel": true}
+{"prompt": "she was happy to see them so happy", "gen": "lily and her mom laughed", "pattern": true, "novel": true}
+{"prompt": "tim was very sad", "gen": "the dog to play and and fun", "pattern": false, "novel": true}
+{"prompt": "tim was very sad", "gen": "it was sad and scared", "pattern": true, "novel": true}
+{"prompt": "tim was very sad", "gen": "they had a big red ball", "pattern": true, "novel": true}
+{"prompt": "tim was very sad", "gen": "tim was happy to give the ball back", "pattern": false, "novel": true}
+{"prompt": "they are too hard for me too", "gen": "tom and sue felt sad", "pattern": true, "novel": true}
+{"prompt": "they are too hard for me too", "gen": "they had the best of friends", "pattern": true, "novel": true}
+{"prompt": "they are too hard for me too", "gen": "she was happy and said to you can", "pattern": false, "novel": true}
+{"prompt": "they are too hard for me too", "gen": "the bird and the ball and felt happy", "pattern": false, "novel": true}
+{"prompt": "they laughed and had fun", "gen": "he asked his friends", "pattern": true, "novel": true}
+{"prompt": "they laughed and had fun", "gen": "tim wanted to play with the dog", "pattern": true, "novel": true}
+{"prompt": "they laughed and had fun", "gen": "tim was sad and thanked tom", "pattern": true, "novel": true}
+{"prompt": "they laughed and had fun", "gen": "it was very happy", "pattern": true, "novel": true}
+{"prompt": "i had fun too", "gen": "tim and the and to see it again", "pattern": false, "novel": true}
+{"prompt": "i had fun too", "gen": "but then a bird did something unexpected", "pattern": true, "novel": true}
+{"prompt": "i had fun too", "gen": "sue was not scared anymore", "pattern": true, "novel": true}
+{"prompt": "i had fun too", "gen": "tim played all play with her", "pattern": true, "novel": true}
+{"prompt": "you are bad", "gen": "tim wanted to do something new and fun", "pattern": false, "novel": true}
+{"prompt": "you are bad", "gen": "he loved to play with me", "pattern": true, "novel": true}
+{"prompt": "you are bad", "gen": "he was very happy and thanked tom", "pattern": true, "novel": true}
+{"prompt": "you are bad", "gen": "lily was very happy to see them", "pattern": true, "novel": true}
+{"prompt": "the cat had a friend", "gen": "they had an idea", "pattern": true, "novel": true}
+{"prompt": "the cat had a friend", "gen": "but the toy car was not happy", "pattern": false, "novel": true}
+{"prompt": "the cat had a friend", "gen": "he had a big rock", "pattern": true, "novel": true}
+{"prompt": "the cat had a friend", "gen": "they take the best of friends", "pattern": true, "novel": true}
+{"prompt": "yes yes yes", "gen": "they were the bird again", "pattern": true, "novel": true}
+{"prompt": "yes yes yes", "gen": "they played in the toys all day", "pattern": true, "novel": true}
+{"prompt": "yes yes yes", "gen": "she was not happy", "pattern": true, "novel": true}
+{"prompt": "yes yes yes", "gen": "tim and something unexpected happened", "pattern": false, "novel": true}
+{"prompt": "max loved to play with his ball", "gen": "they wanted it to be fun", "pattern": true, "novel": true}
+{"prompt": "max loved to play with his ball", "gen": "he said to play with", "pattern": true, "novel": true}
+{"prompt": "max loved to play with his ball", "gen": "tim was excited and thanked tom", "pattern": true, "novel": true}
+{"prompt": "max loved to play with his ball", "gen": "he was very excited", "pattern": true, "novel": true}
+{"prompt": "do you want to play with me", "gen": "do you want to play with", "pattern": false, "novel": true}
+{"prompt": "do you want to play with me", "gen": "the dog was very excited", "pattern": true, "novel": true}
+{"prompt": "do you want to play with me", "gen": "the people and the cat came too", "pattern": true, "novel": true}
+{"prompt": "do you want to play with me", "gen": "tim and the girl looked at them", "pattern": false, "novel": true}
+{"prompt": "the door opened and they were so happy", "gen": "just be friends", "pattern": true, "novel": true}
+{"prompt": "the door opened and they were so happy", "gen": "they played and laughed together all day", "pattern": true, "novel": true}
+{"prompt": "the door opened and they were so happy", "gen": "tim loved to play with her friends", "pattern": true, "novel": true}
+{"prompt": "the door opened and they were so happy", "gen": "sue and sam were sad", "pattern": true, "novel": true}
+{"prompt": "the dog was very happy", "gen": "they were the car did something unexpected", "pattern": false, "novel": true}
+{"prompt": "the dog was very happy", "gen": "the dog to a boy and said yes", "pattern": false, "novel": true}
+{"prompt": "the dog was very happy", "gen": "it was so happy", "pattern": true, "novel": true}
+{"prompt": "the dog was very happy", "gen": "i saw his mom were very surprised", "pattern": false, "novel": true}
+{"prompt": "and you have to share what you have", "gen": "tim played together and had fun", "pattern": false, "novel": true}
+{"prompt": "and you have to share what you have", "gen": "i saw a nice cat", "pattern": true, "novel": true}
+{"prompt": "and you have to share what you have", "gen": "they all played in a small house", "pattern": true, "novel": true}
+{"prompt": "and you have to share what you have", "gen": "they all and play with you", "pattern": false, "novel": true}
+{"prompt": "but he was not sad", "gen": "he wanted the new toy sam", "pattern": true, "novel": true}
+{"prompt": "but he was not sad", "gen": "she said sue and saw a friend tom", "pattern": false, "novel": true}
+{"prompt": "but he was not sad", "gen": "they had an idea", "pattern": true, "novel": true}
+{"prompt": "but he was not sad", "gen": "it was happy again", "pattern": true, "novel": true}
+{"prompt": "tim felt sorry for the tree", "gen": "and and the dog were sad", "pattern": false, "novel": true}
+{"prompt": "tim felt sorry for the tree", "gen": "the boy and the girl became good friends", "pattern": true, "novel": true}
+{"prompt": "tim felt sorry for the tree", "gen": "the dog had an idea", "pattern": true, "novel": true}
+{"prompt": "tim felt sorry for the tree", "gen": "they became friends and played", "pattern": true, "novel": true}
+{"prompt": "they play with the ball and the cat", "gen": "tom and his mom laughed", "pattern": true, "novel": true}
+{"prompt": "they play with the ball and the cat", "gen": "i can help you", "pattern": true, "novel": true}
+{"prompt": "they play with the ball and the cat", "gen": "max was very sad", "pattern": true, "novel": true}
+{"prompt": "they play with the ball and the cat", "gen": "the tree wanted to help", "pattern": true, "novel": true}
+{"prompt": "one day tom found a new toy", "gen": "the bird and the and was sad", "pattern": false, "novel": true}
+{"prompt": "one day tom found a new toy", "gen": "tim was very happy to see them", "pattern": true, "novel": true}
+{"prompt": "one day tom found a new toy", "gen": "lily was very happy", "pattern": true, "novel": true}
+{"prompt": "one day tom found a new toy", "gen": "tim had a fun day at the park", "pattern": true, "novel": true}
+{"prompt": "she was very sad", "gen": "tim and sue were very happy", "pattern": true, "novel": true}
+{"prompt": "she was very sad", "gen": "they had fun and they were scared", "pattern": false, "novel": true}
+{"prompt": "she was very sad", "gen": "one day a small bird came to play", "pattern": true, "novel": true}
+{"prompt": "she was very sad", "gen": "the cat was so happy", "pattern": true, "novel": true}
+{"prompt": "she said tim what is that", "gen": "you sue looked outside the house", "pattern": true, "novel": true}
+{"prompt": "she said tim what is that", "gen": "they did not want to go away", "pattern": true, "novel": true}
+{"prompt": "she said tim what is that", "gen": "the cat had to the toy", "pattern": true, "novel": true}
+{"prompt": "she said tim what is that", "gen": "but and his mom were very surprised", "pattern": false, "novel": true}
+{"prompt": "she gave the ball back to him", "gen": "tim loved to play all day", "pattern": true, "novel": true}
+{"prompt": "she gave the ball back to him", "gen": "tim wanted to help the bird", "pattern": true, "novel": true}
+{"prompt": "she gave the ball back to him", "gen": "she was proud and smiled", "pattern": true, "novel": true}
+{"prompt": "she gave the ball back to him", "gen": "bob wanted to play with it", "pattern": true, "novel": true}
+{"prompt": "then a little boy came to her", "gen": "it had a big red ball", "pattern": true, "novel": true}
+{"prompt": "then a little boy came to her", "gen": "i could not like it", "pattern": true, "novel": true}
+{"prompt": "then a little boy came to her", "gen": "the bird and to a and a ball", "pattern": false, "novel": true}
+{"prompt": "then a little boy came to her", "gen": "they were scared and sad", "pattern": true, "novel": true}
+{"prompt": "she says i want the red one", "gen": "now no one came too big and scared", "pattern": false, "novel": true}
+{"prompt": "she says i want the red one", "gen": "tim was not happy", "pattern": true, "novel": true}
+{"prompt": "she says i want the red one", "gen": "i play with it anymore", "pattern": true, "novel": true}
+{"prompt": "she says i want the red one", "gen": "he was not want to play", "pattern": true, "novel": true}
+{"prompt": "he went to find tom", "gen": "lily had a lot of fun", "pattern": false, "novel": true}
+{"prompt": "he went to find tom", "gen": "it was very happy", "pattern": true, "novel": true}
+{"prompt": "he went to find tom", "gen": "they both loved them all and happy", "pattern": false, "novel": true}
+{"prompt": "he went to find tom", "gen": "you have to go home", "pattern": true, "novel": true}
+{"prompt": "sara and ben look at each other", "gen": "she was so happy to play", "pattern": true, "novel": true}
+{"prompt": "sara and ben look at each other", "gen": "and and lily were very happy", "pattern": false, "novel": true}
+{"prompt": "sara and ben look at each other", "gen": "he played with it all day", "pattern": true, "novel": true}
+{"prompt": "sara and ben look at each other", "gen": "lily and lily were very happy", "pattern": false, "novel": true}
+{"prompt": "she looked at it and smiled", "gen": "i don't want to play with", "pattern": false, "novel": true}
+{"prompt": "she looked at it and smiled", "gen": "tom and tom were scared", "pattern": true, "novel": true}
+{"prompt": "she looked at it and smiled", "gen": "sue said to help the bird", "pattern": true, "novel": true}
+{"prompt": "she looked at it and smiled", "gen": "it was a big toy", "pattern": true, "novel": true}
+{"prompt": "i see him lily", "gen": "lily felt sad", "pattern": true, "novel": true}
+{"prompt": "i see him lily", "gen": "tim smiled and said thank you can", "pattern": false, "novel": true}
+{"prompt": "i see him lily", "gen": "they looked at each other", "pattern": true, "novel": true}
+{"prompt": "i see him lily", "gen": "he wanted to help its new friend", "pattern": true, "novel": true}
+{"prompt": "you are safe", "gen": "he was very happy and thanked tom", "pattern": true, "novel": true}
+{"prompt": "you are safe", "gen": "sam was so pretty and shiny", "pattern": false, "novel": true}
+{"prompt": "you are safe", "gen": "the dog and said yes let's go", "pattern": false, "novel": true}
+{"prompt": "you are safe", "gen": "they felt very happy", "pattern": true, "novel": true}
+{"prompt": "i want to play with you too", "gen": "it was very happy", "pattern": true, "novel": true}
+{"prompt": "i want to play with you too", "gen": "the dog to play with", "pattern": false, "novel": true}
+{"prompt": "i want to play with you too", "gen": "tim felt very happy", "pattern": true, "novel": true}
+{"prompt": "i want to play with you too", "gen": "they had a small red ball", "pattern": true, "novel": true}
+{"prompt": "tom and tim thought and thought", "gen": "he lived in the park", "pattern": true, "novel": true}
+{"prompt": "tom and tim thought and thought", "gen": "she was happy", "pattern": true, "novel": true}
+{"prompt": "tom and tim thought and thought", "gen": "then he had a little dog anymore", "pattern": false, "novel": true}
+{"prompt": "tom and tim thought and thought", "gen": "lily said to help tim and lily", "pattern": false, "novel": true}
+{"prompt": "tim was happy", "gen": "she was very happy and excited", "pattern": true, "novel": true}
+{"prompt": "tim was happy", "gen": "they liked to play and have fun", "pattern": true, "novel": true}
+{"prompt": "tim was happy", "gen": "tim was happy to help", "pattern": true, "novel": true}
+{"prompt": "tim was happy", "gen": "he could not find a friend", "pattern": true, "novel": true}
+{"prompt": "one day tom went to the park", "gen": "they all the man and have fun", "pattern": false, "novel": true}
+{"prompt": "one day tom went to the park", "gen": "tom was happy and they played together", "pattern": true, "novel": true}
+{"prompt": "one day tom went to the park", "gen": "but and to go to your room", "pattern": false, "novel": true}
+{"prompt": "one day tom went to the park", "gen": "he lived near a big dog", "pattern": true, "novel": true}
+{"prompt": "the dog was nice and liked to play", "gen": "tim loved to play with his ball", "pattern": true, "novel": true}
+{"prompt": "the dog was nice and liked to play", "gen": "they played with it every day", "pattern": true, "novel": true}
+{"prompt": "the dog was nice and liked to play", "gen": "he wanted to play in the ball", "pattern": true, "novel": true}
+{"prompt": "the dog was nice and liked to play", "gen": "sue said not scared anymore", "pattern": true, "novel": true}
+{"prompt": "he says lily ben are you there", "gen": "they had the toys they want", "pattern": true, "novel": true}
+{"prompt": "he says lily ben are you there", "gen": "they all wanted to see them", "pattern": true, "novel": true}
+{"prompt": "he says lily ben are you there", "gen": "do it was a and happy", "pattern": false, "novel": true}
+{"prompt": "he says lily ben are you there", "gen": "he was very happy and had fun", "pattern": true, "novel": true}
+{"prompt": "lily smiled and said yes", "gen": "they are scared", "pattern": true, "novel": true}
+{"prompt": "lily smiled and said yes", "gen": "he was very excited to help them", "pattern": true, "novel": true}
+{"prompt": "lily smiled and said yes", "gen": "it was sad", "pattern": true, "novel": true}
+{"prompt": "lily smiled and said yes", "gen": "they both wanted to help the dog", "pattern": true, "novel": true}
+{"prompt": "the bird was happy", "gen": "the animals were sad", "pattern": true, "novel": true}
+{"prompt": "the bird was happy", "gen": "he liked to play outside in the sun", "pattern": true, "novel": true}
+{"prompt": "the bird was happy", "gen": "she was not careful", "pattern": true, "novel": true}
+{"prompt": "the bird was happy", "gen": "i don't want to play with", "pattern": false, "novel": true}
+{"prompt": "he saw a small dog", "gen": "the girl was so happy", "pattern": true, "novel": true}
+{"prompt": "he saw a small dog", "gen": "they all and play with his friends", "pattern": false, "novel": true}
+{"prompt": "he saw a small dog", "gen": "they had an idea", "pattern": true, "novel": true}
+{"prompt": "he saw a small dog", "gen": "we had a very happy", "pattern": true, "novel": true}
+{"prompt": "he found the toy she wanted", "gen": "tim and sam were scared", "pattern": true, "novel": true}
+{"prompt": "he found the toy she wanted", "gen": "they did it was a pretty toy", "pattern": true, "novel": true}
+{"prompt": "he found the toy she wanted", "gen": "she wanted to help the bird", "pattern": true, "novel": true}
+{"prompt": "he found the toy she wanted", "gen": "tim and lily were scared", "pattern": true, "novel": true}
+{"prompt": "asked her mom", "gen": "she was very happy to play", "pattern": true, "novel": true}
+{"prompt": "asked her mom", "gen": "he was very happy and had fun", "pattern": true, "novel": true}
+{"prompt": "asked her mom", "gen": "the cat was happy too", "pattern": true, "novel": true}
+{"prompt": "asked her mom", "gen": "it was very happy", "pattern": true, "novel": true}
+{"prompt": "he says no", "gen": "they liked to play with his friends", "pattern": true, "novel": true}
+{"prompt": "he says no", "gen": "she wanted to help the dog", "pattern": true, "novel": true}
+{"prompt": "he says no", "gen": "the boy and the girl became good friends", "pattern": true, "novel": true}
+{"prompt": "he says no", "gen": "they did not know what was that", "pattern": false, "novel": true}
+{"prompt": "they were very happy", "gen": "they saw the bird and and excited", "pattern": false, "novel": true}
+{"prompt": "they were very happy", "gen": "it was a big rock", "pattern": true, "novel": true}
+{"prompt": "they were very happy", "gen": "she had many friends who lived with it", "pattern": true, "novel": true}
+{"prompt": "they were very happy", "gen": "he could not find a friend", "pattern": true, "novel": true}
+{"prompt": "they felt sad too", "gen": "bird was not scared anymore", "pattern": true, "novel": true}
+{"prompt": "they felt sad too", "gen": "they were happy and loved", "pattern": true, "novel": true}
+{"prompt": "they felt sad too", "gen": "they had an idea", "pattern": true, "novel": true}
+{"prompt": "they felt sad too", "gen": "it was so happy", "pattern": true, "novel": true}
+{"prompt": "but you can do it", "gen": "they had so much", "pattern": true, "novel": true}
+{"prompt": "but you can do it", "gen": "i will not careful too", "pattern": false, "novel": true}
+{"prompt": "but you can do it", "gen": "they found a lot of fun", "pattern": true, "novel": true}
+{"prompt": "but you can do it", "gen": "they liked to play outside in the park", "pattern": true, "novel": true}
+{"prompt": "the bird said thank you big cat", "gen": "they asked all happy", "pattern": true, "novel": true}
+{"prompt": "the bird said thank you big cat", "gen": "mom was very happy", "pattern": true, "novel": true}
+{"prompt": "the bird said thank you big cat", "gen": "they were all the and they flew away", "pattern": false, "novel": true}
+{"prompt": "the bird said thank you big cat", "gen": "they are happy and scared", "pattern": true, "novel": true}
+{"prompt": "they ran to get it", "gen": "tim had a small bird came to lily", "pattern": false, "novel": true}
+{"prompt": "they ran to get it", "gen": "sue was very sad", "pattern": true, "novel": true}
+{"prompt": "they ran to get it", "gen": "they played together and went away", "pattern": true, "novel": true}
+{"prompt": "they ran to get it", "gen": "the man asked can i play with you", "pattern": true, "novel": true}
+{"prompt": "he said yes i do", "gen": "lily had a lot of fun", "pattern": false, "novel": true}
+{"prompt": "he said yes i do", "gen": "they wanted to play with it", "pattern": true, "novel": true}
+{"prompt": "he said yes i do", "gen": "she wanted to help him", "pattern": true, "novel": true}
+{"prompt": "he said yes i do", "gen": "they played together all", "pattern": false, "novel": true}
+{"prompt": "lily and ben are friends", "gen": "the bird was happy with his new car", "pattern": false, "novel": true}
+{"prompt": "lily and ben are friends", "gen": "they felt happy", "pattern": true, "novel": true}
+{"prompt": "lily and ben are friends", "gen": "they were all happy", "pattern": true, "novel": true}
+{"prompt": "lily and ben are friends", "gen": "he liked to play with his toys now", "pattern": true, "novel": true}
+{"prompt": "they found the cat inside", "gen": "he was scared and said thank you", "pattern": false, "novel": true}
+{"prompt": "they found the cat inside", "gen": "one day a small bird came to play", "pattern": true, "novel": true}
+{"prompt": "they found the cat inside", "gen": "soon he saw the bird again", "pattern": true, "novel": true}
+{"prompt": "they found the cat inside", "gen": "sue was not happy", "pattern": true, "novel": true}
+{"prompt": "mia said thank you tom", "gen": "tim liked to play with", "pattern": false, "novel": true}
+{"prompt": "mia said thank you tom", "gen": "it was a and fun", "pattern": false, "novel": true}
+{"prompt": "mia said thank you tom", "gen": "he was very happy to play with", "pattern": false, "novel": true}
+{"prompt": "mia said thank you tom", "gen": "they were scared and sad", "pattern": true, "novel": true}
+{"prompt": "tim was happy", "gen": "ben was scared", "pattern": true, "novel": true}
+{"prompt": "tim was happy", "gen": "she was very sad", "pattern": true, "novel": true}
+{"prompt": "tim was happy", "gen": "they had an idea", "pattern": true, "novel": true}
+{"prompt": "tim was happy", "gen": "it was not nice", "pattern": true, "novel": true}
+{"prompt": "sue saw tim and wanted to help", "gen": "tim wanted to help tim was inside", "pattern": false, "novel": true}
+{"prompt": "sue saw tim and wanted to help", "gen": "tim felt very special", "pattern": true, "novel": true}
+{"prompt": "sue saw tim and wanted to help", "gen": "he had an idea", "pattern": true, "novel": true}
+{"prompt": "sue saw tim and wanted to help", "gen": "she was surprised and said no", "pattern": false, "novel": true}
+{"prompt": "he was happy", "gen": "the tree wanted to help", "pattern": true, "novel": true}
+{"prompt": "he was happy", "gen": "tom did not want to share the cake", "pattern": false, "novel": true}
+{"prompt": "he was happy", "gen": "max and lily were playing in the park", "pattern": true, "novel": true}
+{"prompt": "he was happy", "gen": "it was happy", "pattern": true, "novel": true}
+{"prompt": "the bird is happy", "gen": "he told his mommy", "pattern": true, "novel": true}
+{"prompt": "the bird is happy", "gen": "the big and to find the cat", "pattern": false, "novel": true}
+{"prompt": "the bird is happy", "gen": "they had the best of friends", "pattern": true, "novel": true}
+{"prompt": "the bird is happy", "gen": "they laughed and walked together", "pattern": true, "novel": true}
+{"prompt": "she said thank you lily", "gen": "he had a big room with many toys", "pattern": true, "novel": true}
+{"prompt": "she said thank you lily", "gen": "max was sad", "pattern": true, "novel": true}
+{"prompt": "she said thank you lily", "gen": "we had a lot of fun", "pattern": true, "novel": true}
+{"prompt": "she said thank you lily", "gen": "we have it", "pattern": true, "novel": true}
+{"prompt": "once there was a boy named tim", "gen": "they liked to play and her", "pattern": false, "novel": true}
+{"prompt": "once there was a boy named tim", "gen": "she saw sue be careful", "pattern": true, "novel": true}
+{"prompt": "once there was a boy named tim", "gen": "but he could not find it", "pattern": true, "novel": true}
+{"prompt": "once there was a boy named tim", "gen": "they are scared and new", "pattern": true, "novel": true}
+{"prompt": "tim said what is in the box", "gen": "tom had a good girl", "pattern": true, "novel": true}
+{"prompt": "tim said what is in the box", "gen": "one day max saw a big house", "pattern": true, "novel": true}
+{"prompt": "tim said what is in the box", "gen": "they opened it and saw a little boy", "pattern": true, "novel": true}
+{"prompt": "tim said what is in the box", "gen": "so it together", "pattern": false, "novel": true}
+{"prompt": "thank you lily said the bird", "gen": "the cat wanted to help", "pattern": true, "novel": true}
+{"prompt": "thank you lily said the bird", "gen": "the bird and was sad and scared", "pattern": false, "novel": true}
+{"prompt": "thank you lily said the bird", "gen": "they were all happy", "pattern": true, "novel": true}
+{"prompt": "thank you lily said the bird", "gen": "the bird said yes i play with you", "pattern": false, "novel": true}
+{"prompt": "i don't want to play", "gen": "the bird had no friends", "pattern": true, "novel": true}
+{"prompt": "i don't want to play", "gen": "they played together and and fun", "pattern": false, "novel": true}
+{"prompt": "i don't want to play", "gen": "they wanted to help him look", "pattern": false, "novel": true}
+{"prompt": "i don't want to play", "gen": "it was so happy", "pattern": true, "novel": true}
+{"prompt": "we want to help you", "gen": "tom had the bird and was sad", "pattern": false, "novel": true}
+{"prompt": "we want to help you", "gen": "they were all happy", "pattern": true, "novel": true}
+{"prompt": "we want to help you", "gen": "but and to help its new friend", "pattern": false, "novel": true}
+{"prompt": "we want to help you", "gen": "they were so happy", "pattern": true, "novel": true}
+{"prompt": "the dog took tim to his mom", "gen": "they are very happy together", "pattern": true, "novel": true}
+{"prompt": "the dog took tim to his mom", "gen": "he was not like to share it", "pattern": false, "novel": true}
+{"prompt": "the dog took tim to his mom", "gen": "yes you ben", "pattern": true, "novel": true}
+{"prompt": "the dog took tim to his mom", "gen": "she liked to play with it", "pattern": true, "novel": true}
+{"prompt": "they are sad", "gen": "he wanted to play with the ball", "pattern": true, "novel": true}
+{"prompt": "they are sad", "gen": "he saw the girl named sue", "pattern": true, "novel": true}
+{"prompt": "they are sad", "gen": "it was very special", "pattern": true, "novel": true}
+{"prompt": "they are sad", "gen": "then he found a small cat", "pattern": true, "novel": true}
+{"prompt": "i don't want to share", "gen": "they were scared and said to get out", "pattern": true, "novel": true}
+{"prompt": "i don't want to share", "gen": "they all the best of friends", "pattern": false, "novel": true}
+{"prompt": "i don't want to share", "gen": "they go together and had fun", "pattern": true, "novel": true}
+{"prompt": "i don't want to share", "gen": "the bird and was her and ran away", "pattern": false, "novel": true}
+{"prompt": "come on spot", "gen": "a friend the new toy sam", "pattern": false, "novel": true}
+{"prompt": "come on spot", "gen": "tim was very sorry", "pattern": true, "novel": true}
+{"prompt": "come on spot", "gen": "tim was happy and started to run away", "pattern": false, "novel": true}
+{"prompt": "come on spot", "gen": "tim played with it all day long", "pattern": true, "novel": true}
+{"prompt": "spot felt bad and said i'm sorry cat", "gen": "they have so much", "pattern": true, "novel": true}
+{"prompt": "spot felt bad and said i'm sorry cat", "gen": "the dog and the girl looked at them", "pattern": false, "novel": true}
+{"prompt": "spot felt bad and said i'm sorry cat", "gen": "the man and tim became good friends", "pattern": true, "novel": true}
+{"prompt": "spot felt bad and said i'm sorry cat", "gen": "they played all their friends to play", "pattern": true, "novel": true}
+{"prompt": "it is not safe", "gen": "they laughed at the ball and had fun", "pattern": true, "novel": true}
+{"prompt": "it is not safe", "gen": "she wanted to play with", "pattern": true, "novel": true}
+{"prompt": "it is not safe", "gen": "they are not good", "pattern": true, "novel": true}
+{"prompt": "it is not safe", "gen": "the cat had to eat blue", "pattern": true, "novel": true}
+{"prompt": "amy felt bad for the cat", "gen": "tim was not play and had fun", "pattern": true, "novel": true}
+{"prompt": "amy felt bad for the cat", "gen": "he was very happy and thanked max", "pattern": true, "novel": true}
+{"prompt": "amy felt bad for the cat", "gen": "sue was not and her friends", "pattern": false, "novel": true}
+{"prompt": "amy felt bad for the cat", "gen": "they played together and felt happy", "pattern": true, "novel": true}
+{"prompt": "you can go", "gen": "she was a big toy", "pattern": true, "novel": true}
+{"prompt": "you can go", "gen": "sue was happy", "pattern": true, "novel": true}
+{"prompt": "you can go", "gen": "he wanted to help tim was inside", "pattern": false, "novel": true}
+{"prompt": "you can go", "gen": "the cat was happy and shiny", "pattern": true, "novel": true}
+{"prompt": "he thought about what to do", "gen": "suddenly he saw the bird felt happy", "pattern": false, "novel": true}
+{"prompt": "he thought about what to do", "gen": "they played with it all day long", "pattern": true, "novel": true}
+{"prompt": "he thought about what to do", "gen": "he was so happy with his new car", "pattern": false, "novel": true}
+{"prompt": "he thought about what to do", "gen": "the man and tim became best friends", "pattern": true, "novel": true}
+{"prompt": "lucy was very happy", "gen": "he was very excited", "pattern": true, "novel": true}
+{"prompt": "lucy was very happy", "gen": "tom and sue were scared", "pattern": true, "novel": true}
+{"prompt": "lucy was very happy", "gen": "it was sad", "pattern": true, "novel": true}
+{"prompt": "lucy was very happy", "gen": "tim was sad and wanted to give up", "pattern": false, "novel": true}
+{"prompt": "she felt sad", "gen": "she had the best day", "pattern": true, "novel": true}
+{"prompt": "she felt sad", "gen": "they liked to play in the house", "pattern": true, "novel": true}
+{"prompt": "she felt sad", "gen": "one day he saw a little bird", "pattern": true, "novel": true}
+{"prompt": "she felt sad", "gen": "he wanted to be my friend", "pattern": true, "novel": true}
+{"prompt": "the girl and the bird became friends", "gen": "he thought it", "pattern": true, "novel": true}
+{"prompt": "the girl and the bird became friends", "gen": "she was very happy to help them", "pattern": true, "novel": true}
+{"prompt": "the girl and the bird became friends", "gen": "lily and ben felt happy", "pattern": true, "novel": true}
+{"prompt": "the girl and the bird became friends", "gen": "the bird was scared and flew away", "pattern": true, "novel": true}
+{"prompt": "what is this", "gen": "she was very sad", "pattern": true, "novel": true}
+{"prompt": "what is this", "gen": "just be friends", "pattern": true, "novel": true}
+{"prompt": "what is this", "gen": "his mom said yes you sue", "pattern": false, "novel": true}
+{"prompt": "what is this", "gen": "bob was not happy", "pattern": true, "novel": true}
+{"prompt": "thank you mia", "gen": "the cat and animals were very scared", "pattern": true, "novel": true}
+{"prompt": "thank you mia", "gen": "they wanted to play with it", "pattern": true, "novel": true}
+{"prompt": "thank you mia", "gen": "ben was scared and wanted to get out", "pattern": false, "novel": true}
+{"prompt": "thank you mia", "gen": "they were the toys they want", "pattern": true, "novel": true}
+{"prompt": "the tree was in a pretty park", "gen": "she was a little bird in a tree", "pattern": true, "novel": true}
+{"prompt": "the tree was in a pretty park", "gen": "they are sorry and scared", "pattern": true, "novel": true}
+{"prompt": "the tree was in a pretty park", "gen": "the bird wanted the ball", "pattern": true, "novel": true}
+{"prompt": "the tree was in a pretty park", "gen": "they opened the box something unexpected happened", "pattern": false, "novel": true}
+{"prompt": "they know that they have each other", "gen": "he wanted to go to your room", "pattern": true, "novel": true}
+{"prompt": "they know that they have each other", "gen": "she was very happy with his new toy", "pattern": false, "novel": true}
+{"prompt": "they know that they have each other", "gen": "he loved to play outside", "pattern": true, "novel": true}
+{"prompt": "they know that they have each other", "gen": "mom and sam felt sad", "pattern": true, "novel": true}
+{"prompt": "they became good friends", "gen": "what was so happy", "pattern": false, "novel": true}
+{"prompt": "they became good friends", "gen": "lily saw sue and wanted to help", "pattern": true, "novel": true}
+{"prompt": "they became good friends", "gen": "sue and mia are friends", "pattern": true, "novel": true}
+{"prompt": "they became good friends", "gen": "they wanted to know what was inside", "pattern": true, "novel": true}
+{"prompt": "tim thought it was special", "gen": "he was very sad", "pattern": true, "novel": true}
+{"prompt": "tim thought it was special", "gen": "max was happy", "pattern": true, "novel": true}
+{"prompt": "tim thought it was special", "gen": "she saw a big dog", "pattern": true, "novel": true}
+{"prompt": "tim thought it was special", "gen": "the man and the dog were happy", "pattern": true, "novel": true}
+{"prompt": "tim told his friends about the tree", "gen": "they all lived in a small house", "pattern": true, "novel": true}
+{"prompt": "tim told his friends about the tree", "gen": "she was surprised and happy", "pattern": true, "novel": true}
+{"prompt": "tim told his friends about the tree", "gen": "they did not like that", "pattern": true, "novel": true}
+{"prompt": "tim told his friends about the tree", "gen": "tim was happy and happy", "pattern": true, "novel": true}
+{"prompt": "tom and sam are friends", "gen": "but then something unexpected", "pattern": false, "novel": true}
+{"prompt": "tom and sam are friends", "gen": "tom said i saw your ball", "pattern": false, "novel": true}
+{"prompt": "tom and sam are friends", "gen": "they wanted to play with his toys now", "pattern": true, "novel": true}
+{"prompt": "tom and sam are friends", "gen": "lily was so excited", "pattern": true, "novel": true}
+{"prompt": "tim thought it was fun too", "gen": "i found a fun day", "pattern": true, "novel": true}
+{"prompt": "tim thought it was fun too", "gen": "it was happy", "pattern": true, "novel": true}
+{"prompt": "tim thought it was fun too", "gen": "i did not want to play anymore", "pattern": false, "novel": true}
+{"prompt": "tim thought it was fun too", "gen": "tim was very sorry", "pattern": true, "novel": true}
+{"prompt": "lucy was happy", "gen": "he wanted to play outside", "pattern": true, "novel": true}
+{"prompt": "lucy was happy", "gen": "they did not want to go away", "pattern": true, "novel": true}
+{"prompt": "lucy was happy", "gen": "the bird wanted to play", "pattern": true, "novel": true}
+{"prompt": "lucy was happy", "gen": "he loved to play with her", "pattern": true, "novel": true}
+{"prompt": "it is their dad", "gen": "they were all happy", "pattern": true, "novel": true}
+{"prompt": "it is their dad", "gen": "tim thought and said thank you", "pattern": false, "novel": true}
+{"prompt": "it is their dad", "gen": "can i play together", "pattern": true, "novel": true}
+{"prompt": "it is their dad", "gen": "he was not like it", "pattern": true, "novel": true}
+{"prompt": "suddenly tim could not find mom", "gen": "she says i will get help soon", "pattern": false, "novel": true}
+{"prompt": "suddenly tim could not find mom", "gen": "they play all their friends were there", "pattern": false, "novel": true}
+{"prompt": "suddenly tim could not find mom", "gen": "i did not want to share the cake", "pattern": false, "novel": true}
+{"prompt": "suddenly tim could not find mom", "gen": "she played together and had fun", "pattern": true, "novel": true}
+{"prompt": "they are happy", "gen": "he had so happy", "pattern": true, "novel": true}
+{"prompt": "they are happy", "gen": "they were so happy", "pattern": true, "novel": true}
+{"prompt": "they are happy", "gen": "they are very happy", "pattern": true, "novel": true}
+{"prompt": "they are happy", "gen": "lily was not scared anymore", "pattern": true, "novel": true}
+{"prompt": "lily felt sad again", "gen": "tim said to play with it", "pattern": true, "novel": true}
+{"prompt": "lily felt sad again", "gen": "we be careful", "pattern": true, "novel": true}
+{"prompt": "lily felt sad again", "gen": "but be scared it will end soon", "pattern": false, "novel": true}
+{"prompt": "lily felt sad again", "gen": "said and tom were scared", "pattern": false, "novel": true}
+{"prompt": "his mom said yes tim", "gen": "they are happy and proud", "pattern": true, "novel": true}
+{"prompt": "his mom said yes tim", "gen": "they were so happy", "pattern": true, "novel": true}
+{"prompt": "his mom said yes tim", "gen": "the bird wanted to look at the park", "pattern": true, "novel": true}
+{"prompt": "his mom said yes tim", "gen": "the dog just wanted to go", "pattern": true, "novel": true}
+{"prompt": "can we go home", "gen": "the bird was scared and flew away", "pattern": true, "novel": true}
+{"prompt": "can we go home", "gen": "tim had so happy to help", "pattern": true, "novel": true}
+{"prompt": "can we go home", "gen": "he saw a little boy", "pattern": true, "novel": true}
+{"prompt": "can we go home", "gen": "tim and ben are playing in the park", "pattern": true, "novel": true}
+{"prompt": "tim and the cat played all day", "gen": "it was sad", "pattern": true, "novel": true}
+{"prompt": "tim and the cat played all day", "gen": "he liked to play with his toys", "pattern": true, "novel": true}
+{"prompt": "tim and the cat played all day", "gen": "tim and tom were very surprised", "pattern": true, "novel": true}
+{"prompt": "tim and the cat played all day", "gen": "they like to play with the ball", "pattern": true, "novel": true}
+{"prompt": "the bird felt happy", "gen": "they were not to the park", "pattern": true, "novel": true}
+{"prompt": "the bird felt happy", "gen": "she felt very happy", "pattern": true, "novel": true}
+{"prompt": "the bird felt happy", "gen": "they did it", "pattern": true, "novel": true}
+{"prompt": "the bird felt happy", "gen": "the ball and and fun", "pattern": false, "novel": true}
+{"prompt": "the cat was happy to help", "gen": "they had a big red ball", "pattern": true, "novel": true}
+{"prompt": "the cat was happy to help", "gen": "the man and said yes you can", "pattern": false, "novel": true}
+{"prompt": "the cat was happy to help", "gen": "the dog was happy too", "pattern": true, "novel": true}
+{"prompt": "the cat was happy to help", "gen": "lily and amy felt sad", "pattern": true, "novel": true}
+{"prompt": "tim said i am just playing", "gen": "what was surprised", "pattern": true, "novel": true}
+{"prompt": "tim said i am just playing", "gen": "max and lily were very happy and scared", "pattern": false, "novel": true}
+{"prompt": "tim said i am just playing", "gen": "they felt happy", "pattern": true, "novel": true}
+{"prompt": "tim said i am just playing", "gen": "it was a and happy", "pattern": false, "novel": true}
+{"prompt": "it is fun", "gen": "the dog to play and and fun", "pattern": false, "novel": true}
+{"prompt": "it is fun", "gen": "but he was not their new home", "pattern": true, "novel": true}
+{"prompt": "it is fun", "gen": "he loved to play outside in the sun", "pattern": true, "novel": true}
+{"prompt": "it is fun", "gen": "he loved to play with me", "pattern": true, "novel": true}
+{"prompt": "can i play with it", "gen": "they wanted to play", "pattern": true, "novel": true}
+{"prompt": "can i play with it", "gen": "he was not nice", "pattern": true, "novel": true}
+{"prompt": "can i play with it", "gen": "the dog and the dog came too", "pattern": true, "novel": true}
+{"prompt": "can i play with it", "gen": "tim and sue were happy", "pattern": true, "novel": true}
+{"prompt": "lily was happy and said thank you max", "gen": "tim loved it", "pattern": true, "novel": true}
+{"prompt": "lily was happy and said thank you max", "gen": "they said mom said thank you sue", "pattern": false, "novel": true}
+{"prompt": "lily was happy and said thank you max", "gen": "it was so happy and play", "pattern": true, "novel": true}
+{"prompt": "lily was happy and said thank you max", "gen": "tim and tom were scared", "pattern": true, "novel": true}
+{"prompt": "they said they did not know", "gen": "lily was very careful", "pattern": true, "novel": true}
+{"prompt": "they said they did not know", "gen": "they had fun and they had fun", "pattern": false, "novel": true}
+{"prompt": "they said they did not know", "gen": "she was very surprised", "pattern": true, "novel": true}
+{"prompt": "they said they did not know", "gen": "tim and a and they were sad", "pattern": false, "novel": true}
+{"prompt": "it's not safe", "gen": "they played all day long", "pattern": true, "novel": true}
+{"prompt": "it's not safe", "gen": "he was scared and said thank you mom", "pattern": false, "novel": true}
+{"prompt": "it's not safe", "gen": "but and to a and something unexpected happened", "pattern": false, "novel": true}
+{"prompt": "it's not safe", "gen": "it was so happy", "pattern": true, "novel": true}
+{"prompt": "the bird and tim became good friends", "gen": "it was sad", "pattern": true, "novel": true}
+{"prompt": "the bird and tim became good friends", "gen": "he could not find you", "pattern": true, "novel": true}
+{"prompt": "the bird and tim became good friends", "gen": "we had a big fish", "pattern": true, "novel": true}
+{"prompt": "the bird and tim became good friends", "gen": "sue was sad and said no", "pattern": false, "novel": true}
+{"prompt": "they are happy", "gen": "he wanted to make it happy", "pattern": true, "novel": true}
+{"prompt": "they are happy", "gen": "he wanted to play with the ball", "pattern": true, "novel": true}
+{"prompt": "they are happy", "gen": "it was happy and smiled", "pattern": true, "novel": true}
+{"prompt": "they are happy", "gen": "they could not play with it", "pattern": true, "novel": true}
+{"prompt": "it was old and not pretty", "gen": "but we have to go home", "pattern": true, "novel": true}
+{"prompt": "it was old and not pretty", "gen": "spot and ben were very sad", "pattern": true, "novel": true}
+{"prompt": "it was old and not pretty", "gen": "they liked to play with his friends", "pattern": true, "novel": true}
+{"prompt": "it was old and not pretty", "gen": "they are very sad and excited", "pattern": true, "novel": true}
+{"prompt": "they felt something good", "gen": "she was very sad", "pattern": true, "novel": true}
+{"prompt": "they felt something good", "gen": "he loved to play in the sun", "pattern": true, "novel": true}
+{"prompt": "they felt something good", "gen": "he was very excited", "pattern": true, "novel": true}
+{"prompt": "they felt something good", "gen": "tim was so happy with his new car", "pattern": true, "novel": true}
+{"prompt": "do you want to play with me", "gen": "sue was happy and wanted the house", "pattern": true, "novel": true}
+{"prompt": "do you want to play with me", "gen": "they were scared and had fun", "pattern": false, "novel": true}
+{"prompt": "do you want to play with me", "gen": "they felt happy", "pattern": true, "novel": true}
+{"prompt": "do you want to play with me", "gen": "sara and ben were playing in the park", "pattern": true, "novel": true}
+{"prompt": "they were both very happy", "gen": "they found a big rock", "pattern": true, "novel": true}
+{"prompt": "they were both very happy", "gen": "they were very sad and went away", "pattern": true, "novel": true}
+{"prompt": "they were both very happy", "gen": "the bird and tim and lily", "pattern": false, "novel": true}
+{"prompt": "they were both very happy", "gen": "they were the toys they want", "pattern": true, "novel": true}
+{"prompt": "she asked a boy", "gen": "they were all happy to their room", "pattern": false, "novel": true}
+{"prompt": "she asked a boy", "gen": "they take the best of friends", "pattern": true, "novel": true}
+{"prompt": "she asked a boy", "gen": "she was a and shiny", "pattern": false, "novel": true}
+{"prompt": "she asked a boy", "gen": "he saw his mom for help", "pattern": true, "novel": true}
+{"prompt": "they thank spot again", "gen": "tim walked to run away", "pattern": false, "novel": true}
+{"prompt": "they thank spot again", "gen": "he was very excited", "pattern": true, "novel": true}
+{"prompt": "they thank spot again", "gen": "i play too", "pattern": false, "novel": true}
+{"prompt": "they thank spot again", "gen": "they opened the dog and something unexpected", "pattern": false, "novel": true}
+{"prompt": "thank you tom", "gen": "what was sad", "pattern": true, "novel": true}
+{"prompt": "thank you tom", "gen": "the bird wanted to find his friends", "pattern": true, "novel": true}
+{"prompt": "thank you tom", "gen": "tom said sue were sad", "pattern": true, "novel": true}
+{"prompt": "thank you tom", "gen": "sara was very happy", "pattern": true, "novel": true}
+{"prompt": "tim saw a big girl named sue", "gen": "we can i play with you", "pattern": false, "novel": true}
+{"prompt": "tim saw a big girl named sue", "gen": "anna and anna felt happy", "pattern": true, "novel": true}
+{"prompt": "tim saw a big girl named sue", "gen": "he wanted to play with you", "pattern": true, "novel": true}
+{"prompt": "tim saw a big girl named sue", "gen": "all and lily were playing in the park", "pattern": false, "novel": true}
+{"prompt": "he was sad", "gen": "they all wanted to play with", "pattern": false, "novel": true}
+{"prompt": "he was sad", "gen": "they were scared and sad", "pattern": true, "novel": true}
+{"prompt": "he was sad", "gen": "the dog to play and play", "pattern": false, "novel": true}
+{"prompt": "he was sad", "gen": "but we be your friends", "pattern": true, "novel": true}
+{"prompt": "he thought it was fun", "gen": "but sue and tim's mom were very surprised", "pattern": false, "novel": true}
+{"prompt": "he thought it was fun", "gen": "he was not scared anymore", "pattern": true, "novel": true}
+{"prompt": "he thought it was fun", "gen": "lily was very happy", "pattern": true, "novel": true}
+{"prompt": "he thought it was fun", "gen": "tim was happy and thanked max", "pattern": true, "novel": true}
+{"prompt": "tim and spot were so surprised", "gen": "sue and his mom were very happy", "pattern": true, "novel": true}
+{"prompt": "tim and spot were so surprised", "gen": "but and sue were all day", "pattern": false, "novel": true}
+{"prompt": "tim and spot were so surprised", "gen": "it was very happy", "pattern": true, "novel": true}
+{"prompt": "tim and spot were so surprised", "gen": "they were the toys they want", "pattern": true, "novel": true}
+{"prompt": "tim felt even more sad", "gen": "the boy and tim became good friends", "pattern": true, "novel": true}
+{"prompt": "tim felt even more sad", "gen": "the cat had to the water", "pattern": true, "novel": true}
+{"prompt": "tim felt even more sad", "gen": "he was very sad and excited", "pattern": true, "novel": true}
+{"prompt": "tim felt even more sad", "gen": "the bird wanted the ball", "pattern": true, "novel": true}
+{"prompt": "it is kind of good", "gen": "they are not and new", "pattern": false, "novel": true}
+{"prompt": "it is kind of good", "gen": "they asked his mom for help", "pattern": true, "novel": true}
+{"prompt": "it is kind of good", "gen": "she loved to play with it", "pattern": true, "novel": true}
+{"prompt": "it is kind of good", "gen": "they did not want to go away", "pattern": true, "novel": true}
+{"prompt": "we are ben and lily", "gen": "they lived in a small happy house", "pattern": true, "novel": true}
+{"prompt": "we are ben and lily", "gen": "the dog was happy and flew away", "pattern": true, "novel": true}
+{"prompt": "we are ben and lily", "gen": "they did not know what it was", "pattern": true, "novel": true}
+{"prompt": "we are ben and lily", "gen": "they said not and saw her friends", "pattern": true, "novel": true}
+{"prompt": "tim was happy now", "gen": "tom was so excited and play with you", "pattern": false, "novel": true}
+{"prompt": "tim was happy now", "gen": "they were so happy", "pattern": true, "novel": true}
+{"prompt": "tim was happy now", "gen": "she had a lot of fun", "pattern": true, "novel": true}
+{"prompt": "tim was happy now", "gen": "they became the toys they want", "pattern": true, "novel": true}
+{"prompt": "she was very proud and happy", "gen": "she was a lot of fun", "pattern": true, "novel": true}
+{"prompt": "she was very proud and happy", "gen": "they liked to play and have fun", "pattern": true, "novel": true}
+{"prompt": "she was very proud and happy", "gen": "but and ben were playing in the park", "pattern": false, "novel": true}
+{"prompt": "she was very proud and happy", "gen": "it was so happy", "pattern": true, "novel": true}
+{"prompt": "he played with the toys", "gen": "he played with it all day", "pattern": true, "novel": true}
+{"prompt": "he played with the toys", "gen": "they were very sorry", "pattern": true, "novel": true}
+{"prompt": "he played with the toys", "gen": "they liked to play with it", "pattern": true, "novel": true}
+{"prompt": "he played with the toys", "gen": "water is not a toy", "pattern": true, "novel": true}
+{"prompt": "so max and the cat became friends", "gen": "he was very happy and thanked max", "pattern": true, "novel": true}
+{"prompt": "so max and the cat became friends", "gen": "they had a big rock", "pattern": true, "novel": true}
+{"prompt": "so max and the cat became friends", "gen": "the dog was happy too", "pattern": true, "novel": true}
+{"prompt": "so max and the cat became friends", "gen": "he liked tim did this", "pattern": false, "novel": true}
+{"prompt": "tim was very happy", "gen": "sue and mia are scared", "pattern": true, "novel": true}
+{"prompt": "tim was very happy", "gen": "she was very careful", "pattern": true, "novel": true}
+{"prompt": "tim was very happy", "gen": "mom was very excited", "pattern": true, "novel": true}
+{"prompt": "tim was very happy", "gen": "the dog and the girl became good friends", "pattern": true, "novel": true}
+{"prompt": "sue picked up the box and opened it", "gen": "she was not like it", "pattern": true, "novel": true}
+{"prompt": "sue picked up the box and opened it", "gen": "he had a lot of fun together", "pattern": true, "novel": true}
+{"prompt": "sue picked up the box and opened it", "gen": "he was happy and said yes you can", "pattern": false, "novel": true}
+{"prompt": "sue picked up the box and opened it", "gen": "they found a lot of fun", "pattern": true, "novel": true}
+{"prompt": "tim was very happy", "gen": "he saw that the little boy was happy", "pattern": false, "novel": true}
+{"prompt": "tim was very happy", "gen": "can you want to see them", "pattern": true, "novel": true}
+{"prompt": "tim was very happy", "gen": "she was happy and they played all happy", "pattern": false, "novel": true}
+{"prompt": "tim was very happy", "gen": "he wanted to play with them", "pattern": true, "novel": true}
+{"prompt": "his mom said yes you can have it", "gen": "she was happy to give the ball back", "pattern": false, "novel": true}
+{"prompt": "his mom said yes you can have it", "gen": "they were not have fun", "pattern": true, "novel": true}
+{"prompt": "his mom said yes you can have it", "gen": "max was happy", "pattern": true, "novel": true}
+{"prompt": "his mom said yes you can have it", "gen": "she was very careful", "pattern": true, "novel": true}
+{"prompt": "no one came to get the cat", "gen": "max was sad", "pattern": true, "novel": true}
+{"prompt": "no one came to get the cat", "gen": "tim and the and were scared", "pattern": false, "novel": true}
+{"prompt": "no one came to get the cat", "gen": "tim wanted to help them", "pattern": true, "novel": true}
+{"prompt": "no one came to get the cat", "gen": "can you want to find it", "pattern": true, "novel": true}
+{"prompt": "he said thank you max", "gen": "they had so much", "pattern": true, "novel": true}
+{"prompt": "he said thank you max", "gen": "they wanted to help tim feel even better", "pattern": true, "novel": true}
+{"prompt": "he said thank you max", "gen": "tim played together and had fun", "pattern": false, "novel": true}
+{"prompt": "he said thank you max", "gen": "they played together in the park", "pattern": true, "novel": true}
+{"prompt": "he had a toy car", "gen": "sue and lily were best friends", "pattern": true, "novel": true}
+{"prompt": "he had a toy car", "gen": "the bird was scared", "pattern": true, "novel": true}
+{"prompt": "he had a toy car", "gen": "tim and sue felt sad", "pattern": true, "novel": true}
+{"prompt": "he had a toy car", "gen": "they played and play and became good friends", "pattern": false, "novel": true}
+{"prompt": "come on let's go", "gen": "i found a friend the toy", "pattern": true, "novel": true}
+{"prompt": "come on let's go", "gen": "they had an idea", "pattern": true, "novel": true}
+{"prompt": "come on let's go", "gen": "it was not like that", "pattern": true, "novel": true}
+{"prompt": "come on let's go", "gen": "they played together and the park every day", "pattern": false, "novel": true}
+{"prompt": "tom sue and the bird became friends", "gen": "she smiled and said thank you mom", "pattern": true, "novel": true}
+{"prompt": "tom sue and the bird became friends", "gen": "she liked to play with the park", "pattern": true, "novel": true}
+{"prompt": "tom sue and the bird became friends", "gen": "sue and sue were sad", "pattern": true, "novel": true}
+{"prompt": "tom sue and the bird became friends", "gen": "the dog to play more", "pattern": false, "novel": true}
+{"prompt": "and so are you", "gen": "it was always careful when he walked", "pattern": true, "novel": true}
+{"prompt": "and so are you", "gen": "she was so happy and excited", "pattern": true, "novel": true}
+{"prompt": "and so are you", "gen": "sam was very sad", "pattern": true, "novel": true}
+{"prompt": "and so are you", "gen": "tim was excited and said yes", "pattern": true, "novel": true}
+{"prompt": "it was shiny and pretty", "gen": "she was very sad", "pattern": true, "novel": true}
+{"prompt": "it was shiny and pretty", "gen": "i could not find it", "pattern": true, "novel": true}
+{"prompt": "it was shiny and pretty", "gen": "she made big dog max with his ball", "pattern": false, "novel": true}
+{"prompt": "it was shiny and pretty", "gen": "they found a lot of fun", "pattern": true, "novel": true}
+{"prompt": "he said thank you lucy", "gen": "they had an idea", "pattern": true, "novel": true}
+{"prompt": "he said thank you lucy", "gen": "do you want to play with", "pattern": false, "novel": true}
+{"prompt": "he said thank you lucy", "gen": "they laughed and played with his ball", "pattern": true, "novel": true}
+{"prompt": "he said thank you lucy", "gen": "she played and laughed together all day long", "pattern": false, "novel": true}
+{"prompt": "tim was sad to see them go", "gen": "the little boy found a new ball", "pattern": true, "novel": true}
+{"prompt": "tim was sad to see them go", "gen": "she was so nice", "pattern": true, "novel": true}
+{"prompt": "tim was sad to see them go", "gen": "she said it", "pattern": true, "novel": true}
+{"prompt": "tim was sad to see them go", "gen": "the dog and said thank you can", "pattern": false, "novel": true}
+{"prompt": "lily and ben laughed", "gen": "mom was so happy", "pattern": true, "novel": true}
+{"prompt": "lily and ben laughed", "gen": "she wanted to help tim was inside", "pattern": false, "novel": true}
+{"prompt": "lily and ben laughed", "gen": "he liked to play together", "pattern": true, "novel": true}
+{"prompt": "lily and ben laughed", "gen": "she was surprised but happy", "pattern": true, "novel": true}
+{"prompt": "as they looked they found a big box", "gen": "it was a big fish", "pattern": true, "novel": true}
+{"prompt": "as they looked they found a big box", "gen": "sue and sue felt sad", "pattern": true, "novel": true}
+{"prompt": "as they looked they found a big box", "gen": "the dog wanted to see", "pattern": true, "novel": true}
+{"prompt": "as they looked they found a big box", "gen": "they were very happy to his ball", "pattern": false, "novel": true}
+{"prompt": "he did not know what to do", "gen": "the dog was happy too", "pattern": true, "novel": true}
+{"prompt": "he did not know what to do", "gen": "the little boy was happy", "pattern": true, "novel": true}
+{"prompt": "he did not know what to do", "gen": "tim liked it a fun", "pattern": true, "novel": true}
+{"prompt": "he did not know what to do", "gen": "sue and sam felt sad", "pattern": true, "novel": true}
+{"prompt": "max was sad again", "gen": "they went to play with", "pattern": true, "novel": true}
+{"prompt": "max was sad again", "gen": "he is red and smiled", "pattern": true, "novel": true}
+{"prompt": "max was sad again", "gen": "soon he could not and it", "pattern": false, "novel": true}
+{"prompt": "max was sad again", "gen": "they all and play", "pattern": false, "novel": true}
+{"prompt": "it said thank you lily", "gen": "tim wanted to run away", "pattern": false, "novel": true}
+{"prompt": "it said thank you lily", "gen": "the bird and to find his friends", "pattern": false, "novel": true}
+{"prompt": "it said thank you lily", "gen": "what was happy", "pattern": true, "novel": true}
+{"prompt": "it said thank you lily", "gen": "but then something unexpected", "pattern": false, "novel": true}
+{"prompt": "yes it is", "gen": "it was surprised but happy", "pattern": true, "novel": true}
+{"prompt": "yes it is", "gen": "max was happy", "pattern": true, "novel": true}
+{"prompt": "yes it is", "gen": "the man was sad", "pattern": true, "novel": true}
+{"prompt": "yes it is", "gen": "tim had a friend named sue", "pattern": true, "novel": true}
+{"prompt": "lily says thank you tom", "gen": "the little boy was happy", "pattern": true, "novel": true}
+{"prompt": "lily says thank you tom", "gen": "tim was very happy and thanked max", "pattern": true, "novel": true}
+{"prompt": "lily says thank you tom", "gen": "it had a lot of fun", "pattern": true, "novel": true}
+{"prompt": "lily says thank you tom", "gen": "they wanted to know what was inside", "pattern": true, "novel": true}
+{"prompt": "they play with him", "gen": "tim and ben are playing in the park", "pattern": true, "novel": true}
+{"prompt": "they play with him", "gen": "he wanted to play with the ball", "pattern": true, "novel": true}
+{"prompt": "they play with him", "gen": "as they saw a boy and a girl", "pattern": false, "novel": true}
+{"prompt": "they play with him", "gen": "they go to help", "pattern": true, "novel": true}
+{"prompt": "she loved lily and sam very much", "gen": "lily was very excited", "pattern": true, "novel": true}
+{"prompt": "she loved lily and sam very much", "gen": "he liked to play together all day", "pattern": true, "novel": true}
+{"prompt": "she loved lily and sam very much", "gen": "they were so happy", "pattern": true, "novel": true}
+{"prompt": "she loved lily and sam very much", "gen": "max and happy that lily said sorry", "pattern": false, "novel": true}
+{"prompt": "who is it", "gen": "tim wanted to help them", "pattern": true, "novel": true}
+{"prompt": "who is it", "gen": "the man and said yes let's go", "pattern": false, "novel": true}
+{"prompt": "who is it", "gen": "she wanted to know what was inside", "pattern": true, "novel": true}
+{"prompt": "who is it", "gen": "he could not find her toy", "pattern": true, "novel": true}
+{"prompt": "but you have to be nice to him", "gen": "bob and his friends did not know that", "pattern": true, "novel": true}
+{"prompt": "but you have to be nice to him", "gen": "but the dog was too big and excited", "pattern": false, "novel": true}
+{"prompt": "but you have to be nice to him", "gen": "lily was very happy", "pattern": true, "novel": true}
+{"prompt": "but you have to be nice to him", "gen": "can i play together", "pattern": true, "novel": true}
+{"prompt": "he felt very happy in it", "gen": "they were all very excited", "pattern": true, "novel": true}
+{"prompt": "he felt very happy in it", "gen": "he wanted to play with the ball", "pattern": true, "novel": true}
+{"prompt": "he felt very happy in it", "gen": "they were so much fun", "pattern": true, "novel": true}
+{"prompt": "he felt very happy in it", "gen": "one day a little dog came to sue", "pattern": true, "novel": true}
+{"prompt": "it went all over the ground", "gen": "she saw a little dog", "pattern": true, "novel": true}
+{"prompt": "it went all over the ground", "gen": "he was very excited", "pattern": true, "novel": true}
+{"prompt": "it went all over the ground", "gen": "can you want to help me", "pattern": true, "novel": true}
+{"prompt": "it went all over the ground", "gen": "ben and his friends did not know that", "pattern": true, "novel": true}
+{"prompt": "you are a good friend", "gen": "and you want to play", "pattern": false, "novel": true}
+{"prompt": "you are a good friend", "gen": "but and a bird flew down", "pattern": false, "novel": true}
+{"prompt": "you are a good friend", "gen": "anna and sue were so happy", "pattern": true, "novel": true}
+{"prompt": "you are a good friend", "gen": "she was very happy and thanked max", "pattern": true, "novel": true}
+{"prompt": "the bird was happy again", "gen": "they all wanted to play with the dog", "pattern": true, "novel": true}
+{"prompt": "the bird was happy again", "gen": "tim was not happy", "pattern": true, "novel": true}
+{"prompt": "the bird was happy again", "gen": "lily felt scared and sad", "pattern": true, "novel": true}
+{"prompt": "the bird was happy again", "gen": "they were so happy", "pattern": true, "novel": true}
+{"prompt": "the cat and the dog took the box", "gen": "tim was surprised and happy", "pattern": true, "novel": true}
+{"prompt": "the cat and the dog took the box", "gen": "they all had so much fun", "pattern": true, "novel": true}
+{"prompt": "the cat and the dog took the box", "gen": "she was happy", "pattern": true, "novel": true}
+{"prompt": "the cat and the dog took the box", "gen": "she smiled and said yes mia", "pattern": true, "novel": true}
+{"prompt": "max was so excited", "gen": "they played with the ball too", "pattern": true, "novel": true}
+{"prompt": "max was so excited", "gen": "anna was a lot of fun", "pattern": true, "novel": true}
+{"prompt": "max was so excited", "gen": "he was very excited", "pattern": true, "novel": true}
+{"prompt": "max was so excited", "gen": "he wanted it was a toy", "pattern": true, "novel": true}
+{"prompt": "it is so pretty and big", "gen": "they all liked to play outside", "pattern": true, "novel": true}
+{"prompt": "it is so pretty and big", "gen": "do you want to play with", "pattern": false, "novel": true}
+{"prompt": "it is so pretty and big", "gen": "his mom said yes you did", "pattern": false, "novel": true}
+{"prompt": "it is so pretty and big", "gen": "it was so happy", "pattern": true, "novel": true}
+{"prompt": "she was sad", "gen": "sue and sam were very surprised", "pattern": true, "novel": true}
+{"prompt": "she was sad", "gen": "tom wanted to play with me", "pattern": true, "novel": true}
+{"prompt": "she was sad", "gen": "anna and lily were so happy", "pattern": true, "novel": true}
+{"prompt": "she was sad", "gen": "they play all day", "pattern": true, "novel": true}
+{"prompt": "he says sorry", "gen": "they wanted to play with the ball", "pattern": true, "novel": true}
+{"prompt": "he says sorry", "gen": "it's not do", "pattern": true, "novel": true}
+{"prompt": "he says sorry", "gen": "they wanted to play with the ball", "pattern": true, "novel": true}
+{"prompt": "he says sorry", "gen": "they did not want to go away", "pattern": true, "novel": true}
+{"prompt": "it was not shiny anymore", "gen": "sue was not and to play with", "pattern": false, "novel": true}
+{"prompt": "it was not shiny anymore", "gen": "it was happy with the ball", "pattern": true, "novel": true}
+{"prompt": "it was not shiny anymore", "gen": "they felt very happy", "pattern": true, "novel": true}
+{"prompt": "it was not shiny anymore", "gen": "tim felt very special", "pattern": true, "novel": true}
+{"prompt": "tim got very small", "gen": "they had a new and flew away", "pattern": true, "novel": true}
+{"prompt": "tim got very small", "gen": "they played together and had no friends", "pattern": true, "novel": true}
+{"prompt": "tim got very small", "gen": "lily loved to play outside", "pattern": true, "novel": true}
+{"prompt": "tim got very small", "gen": "tim saw his friends playing", "pattern": false, "novel": true}
+{"prompt": "one day a man came to her house", "gen": "he wanted to play with the ball", "pattern": true, "novel": true}
+{"prompt": "one day a man came to her house", "gen": "they were all happy", "pattern": true, "novel": true}
+{"prompt": "one day a man came to her house", "gen": "let's go and a good friend", "pattern": false, "novel": true}
+{"prompt": "one day a man came to her house", "gen": "she had so happy and excited", "pattern": true, "novel": true}
+{"prompt": "now max and the dog were best friends", "gen": "they were not want to see", "pattern": true, "novel": true}
+{"prompt": "now max and the dog were best friends", "gen": "he was so happy and play", "pattern": true, "novel": true}
+{"prompt": "now max and the dog were best friends", "gen": "he had a lot of fun together", "pattern": true, "novel": true}
+{"prompt": "now max and the dog were best friends", "gen": "they liked to play and the ball", "pattern": false, "novel": true}
+{"prompt": "spot and the ball became friends", "gen": "she was a big box", "pattern": true, "novel": true}
+{"prompt": "spot and the ball became friends", "gen": "they felt happy", "pattern": true, "novel": true}
+{"prompt": "spot and the ball became friends", "gen": "i did not want him to go", "pattern": false, "novel": true}
+{"prompt": "spot and the ball became friends", "gen": "he was very excited", "pattern": true, "novel": true}
+{"prompt": "anna and ben were friends", "gen": "they played all their friends to help", "pattern": true, "novel": true}
+{"prompt": "anna and ben were friends", "gen": "they saw a big fish", "pattern": true, "novel": true}
+{"prompt": "anna and ben were friends", "gen": "max was so happy", "pattern": true, "novel": true}
+{"prompt": "anna and ben were friends", "gen": "the bird wanted to play", "pattern": true, "novel": true}
+{"prompt": "he wanted to help her", "gen": "they thought they were the best", "pattern": true, "novel": true}
+{"prompt": "he wanted to help her", "gen": "they do not want to go away", "pattern": true, "novel": true}
+{"prompt": "he wanted to help her", "gen": "i did not want to go", "pattern": true, "novel": true}
+{"prompt": "he wanted to help her", "gen": "they feel sad", "pattern": true, "novel": true}
+{"prompt": "they look at the ball", "gen": "they were so excited to come and play", "pattern": false, "novel": true}
+{"prompt": "they look at the ball", "gen": "she liked to play with the ball", "pattern": true, "novel": true}
+{"prompt": "they look at the ball", "gen": "the dog and said thank you mom", "pattern": false, "novel": true}
+{"prompt": "they look at the ball", "gen": "the cat looked in the sun", "pattern": true, "novel": true}
+{"prompt": "it is very special to me", "gen": "they were best friends", "pattern": true, "novel": true}
+{"prompt": "it is very special to me", "gen": "his mom said yes you did", "pattern": false, "novel": true}
+{"prompt": "it is very special to me", "gen": "he smiled and ran away happy", "pattern": true, "novel": true}
+{"prompt": "it is very special to me", "gen": "i saw sam and wanted to help people", "pattern": false, "novel": true}
+{"prompt": "lily and tom were very surprised", "gen": "sue had a lot of fun", "pattern": true, "novel": true}
+{"prompt": "lily and tom were very surprised", "gen": "they felt very happy", "pattern": true, "novel": true}
+{"prompt": "lily and tom were very surprised", "gen": "he did not want to play with", "pattern": true, "novel": true}
+{"prompt": "lily and tom were very surprised", "gen": "they played together and saw her friend max", "pattern": true, "novel": true}
+{"prompt": "the dog said thank you cat", "gen": "they laughed at the bird and had fun", "pattern": true, "novel": true}
+{"prompt": "the dog said thank you cat", "gen": "they are happy and loved", "pattern": true, "novel": true}
+{"prompt": "the dog said thank you cat", "gen": "he looked sad", "pattern": true, "novel": true}
+{"prompt": "the dog said thank you cat", "gen": "he was very excited to help his mom", "pattern": true, "novel": true}
+{"prompt": "they had fun and learned new things", "gen": "spot and ben were very sad", "pattern": true, "novel": true}
+{"prompt": "they had fun and learned new things", "gen": "tim loved to play with his toy car", "pattern": true, "novel": true}
+{"prompt": "they had fun and learned new things", "gen": "all and max were best friends", "pattern": false, "novel": true}
+{"prompt": "they had fun and learned new things", "gen": "tom and his friend were very surprised", "pattern": true, "novel": true}
+{"prompt": "lucy was happy and opened the door", "gen": "do you want to help", "pattern": true, "novel": true}
+{"prompt": "lucy was happy and opened the door", "gen": "sue was happy", "pattern": true, "novel": true}
+{"prompt": "lucy was happy and opened the door", "gen": "tim was very happy and flew away", "pattern": true, "novel": true}
+{"prompt": "lucy was happy and opened the door", "gen": "lily was very happy", "pattern": true, "novel": true}
+{"prompt": "and you have anna", "gen": "but it was not a and went away", "pattern": false, "novel": true}
+{"prompt": "and you have anna", "gen": "they were happy and loved", "pattern": true, "novel": true}
+{"prompt": "and you have anna", "gen": "they felt happy", "pattern": true, "novel": true}
+{"prompt": "and you have anna", "gen": "they liked to play in the house", "pattern": true, "novel": true}
+{"prompt": "the cat said yes but i'm scared", "gen": "they wanted to find things in the park", "pattern": true, "novel": true}
+{"prompt": "the cat said yes but i'm scared", "gen": "tim was not happy", "pattern": true, "novel": true}
+{"prompt": "the cat said yes but i'm scared", "gen": "it was happy", "pattern": true, "novel": true}
+{"prompt": "the cat said yes but i'm scared", "gen": "spot was very happy and thanked max", "pattern": true, "novel": true}
+{"prompt": "he looked for help", "gen": "sue and ben were scared", "pattern": true, "novel": true}
+{"prompt": "he looked for help", "gen": "she wanted to help the bird feel better", "pattern": true, "novel": true}
+{"prompt": "he looked for help", "gen": "he asked his friends", "pattern": true, "novel": true}
+{"prompt": "he looked for help", "gen": "tim was very excited and thanked the bird", "pattern": true, "novel": true}
+{"prompt": "can i have it sam", "gen": "tim and anna were sad", "pattern": true, "novel": true}
+{"prompt": "can i have it sam", "gen": "we have to go now", "pattern": true, "novel": true}
+{"prompt": "can i have it sam", "gen": "tom had a and played with the ball", "pattern": false, "novel": true}
+{"prompt": "can i have it sam", "gen": "i will be fun", "pattern": true, "novel": true}
+{"prompt": "they knew they did something bad", "gen": "he looked at it for a long time", "pattern": false, "novel": true}
+{"prompt": "they knew they did something bad", "gen": "he saw the ball back", "pattern": true, "novel": true}
+{"prompt": "they knew they did something bad", "gen": "do you want to play with", "pattern": false, "novel": true}
+{"prompt": "they knew they did something bad", "gen": "he was very happy and thanked tom", "pattern": true, "novel": true}
+{"prompt": "max wanted to help the cat", "gen": "the little bird was sad", "pattern": true, "novel": true}
+{"prompt": "max wanted to help the cat", "gen": "he saw a little dog", "pattern": true, "novel": true}
+{"prompt": "max wanted to help the cat", "gen": "that is not for playing", "pattern": false, "novel": true}
+{"prompt": "max wanted to help the cat", "gen": "they were very happy to his mom", "pattern": false, "novel": true}
+{"prompt": "tim was very happy", "gen": "the bird wanted to find his friends", "pattern": true, "novel": true}
+{"prompt": "tim was very happy", "gen": "then they had no friends", "pattern": true, "novel": true}
+{"prompt": "tim was very happy", "gen": "tim liked to help people", "pattern": true, "novel": true}
+{"prompt": "tim was very happy", "gen": "tim was sad and they all very happy", "pattern": false, "novel": true}
+{"prompt": "inside he found a big red ball", "gen": "tim and his mom were very happy", "pattern": true, "novel": true}
+{"prompt": "inside he found a big red ball", "gen": "mom and lily were so happy", "pattern": true, "novel": true}
+{"prompt": "inside he found a big red ball", "gen": "tim loved to play all day", "pattern": true, "novel": true}
+{"prompt": "inside he found a big red ball", "gen": "we had many friends", "pattern": true, "novel": true}
+{"prompt": "lucy was sad", "gen": "the boy and the dog to sam", "pattern": false, "novel": true}
+{"prompt": "lucy was sad", "gen": "they had so much", "pattern": true, "novel": true}
+{"prompt": "lucy was sad", "gen": "they wanted to play with the ball", "pattern": true, "novel": true}
+{"prompt": "lucy was sad", "gen": "the bird and sad", "pattern": false, "novel": true}
+{"prompt": "yes she said", "gen": "tom was very excited", "pattern": true, "novel": true}
+{"prompt": "yes she said", "gen": "they played together and said look", "pattern": true, "novel": true}
+{"prompt": "yes she said", "gen": "he liked tim very much", "pattern": false, "novel": true}
+{"prompt": "yes she said", "gen": "he was very excited", "pattern": true, "novel": true}
+{"prompt": "they said they were sorry", "gen": "they could not play and the ball", "pattern": false, "novel": true}
+{"prompt": "they said they were sorry", "gen": "the cat and the girl was happy", "pattern": true, "novel": true}
+{"prompt": "they said they were sorry", "gen": "tim had a lot of fun", "pattern": true, "novel": true}
+{"prompt": "they said they were sorry", "gen": "tim loved to play with her", "pattern": true, "novel": true}
+{"prompt": "she saw a little door", "gen": "they go to play with", "pattern": true, "novel": true}
+{"prompt": "she saw a little door", "gen": "bob was very happy", "pattern": true, "novel": true}
+{"prompt": "she saw a little door", "gen": "they had a big red ball", "pattern": true, "novel": true}
+{"prompt": "she saw a little door", "gen": "they wanted to play and her toys", "pattern": false, "novel": true}
+{"prompt": "the bird said i saw your friend", "gen": "he was very excited", "pattern": true, "novel": true}
+{"prompt": "the bird said i saw your friend", "gen": "max was sad", "pattern": true, "novel": true}
+{"prompt": "the bird said i saw your friend", "gen": "tim and her mom were very happy", "pattern": true, "novel": true}
+{"prompt": "the bird said i saw your friend", "gen": "they all the man and went away", "pattern": false, "novel": true}
+{"prompt": "it made sam feel good", "gen": "the cat wanted to see", "pattern": true, "novel": true}
+{"prompt": "it made sam feel good", "gen": "the dog was very excited", "pattern": true, "novel": true}
+{"prompt": "it made sam feel good", "gen": "tim was happy and and to help", "pattern": false, "novel": true}
+{"prompt": "it made sam feel good", "gen": "the man and said yes you can", "pattern": false, "novel": true}
+{"prompt": "they are happy", "gen": "they were not to play", "pattern": true, "novel": true}
+{"prompt": "they are happy", "gen": "she was happy", "pattern": true, "novel": true}
+{"prompt": "they are happy", "gen": "lily smiled and said thank you lily", "pattern": false, "novel": true}
+{"prompt": "they are happy", "gen": "it is not for playing", "pattern": true, "novel": true}
+{"prompt": "tom and mia are friends", "gen": "i did not do it", "pattern": true, "novel": true}
+{"prompt": "tom and mia are friends", "gen": "she wanted to play with his toy car", "pattern": true, "novel": true}
+{"prompt": "tom and mia are friends", "gen": "lily and tom were scared", "pattern": true, "novel": true}
+{"prompt": "tom and mia are friends", "gen": "the bird wanted the ball", "pattern": true, "novel": true}
+{"prompt": "tom and tim were scared", "gen": "he was so happy and play", "pattern": true, "novel": true}
+{"prompt": "tom and tim were scared", "gen": "she was very happy with his new toy", "pattern": false, "novel": true}
+{"prompt": "tom and tim were scared", "gen": "tom was happy and said thank you can", "pattern": false, "novel": true}
+{"prompt": "tom and tim were scared", "gen": "they had an idea", "pattern": true, "novel": true}
+{"prompt": "sam had a friend named tom", "gen": "but the friends were scared of the house", "pattern": false, "novel": true}
+{"prompt": "sam had a friend named tom", "gen": "said and friends", "pattern": false, "novel": true}
+{"prompt": "sam had a friend named tom", "gen": "they were very happy and went away", "pattern": true, "novel": true}
+{"prompt": "sam had a friend named tom", "gen": "the boy and lily were scared", "pattern": false, "novel": true}
+{"prompt": "they said they wanted to be nice", "gen": "max was sad", "pattern": true, "novel": true}
+{"prompt": "they said they wanted to be nice", "gen": "they have one", "pattern": false, "novel": true}
+{"prompt": "they said they wanted to be nice", "gen": "they were very sorry", "pattern": true, "novel": true}
+{"prompt": "they said they wanted to be nice", "gen": "the animals were sad", "pattern": true, "novel": true}
+{"prompt": "tim wanted to help", "gen": "the bird was very high", "pattern": true, "novel": true}
+{"prompt": "tim wanted to help", "gen": "and they looked sad and excited", "pattern": false, "novel": true}
+{"prompt": "tim wanted to help", "gen": "sue was happy", "pattern": true, "novel": true}
+{"prompt": "tim wanted to help", "gen": "tim was not happy", "pattern": true, "novel": true}
+{"prompt": "can you do that", "gen": "all and sue were scared", "pattern": false, "novel": true}
+{"prompt": "can you do that", "gen": "she was so much fun", "pattern": true, "novel": true}
+{"prompt": "can you do that", "gen": "they looked at each other very much", "pattern": false, "novel": true}
+{"prompt": "can you do that", "gen": "they played together and said what was that", "pattern": false, "novel": true}
+{"prompt": "sam and tom were sad", "gen": "the bird was sad and scared", "pattern": true, "novel": true}
+{"prompt": "sam and tom were sad", "gen": "they were all happy", "pattern": true, "novel": true}
+{"prompt": "sam and tom were sad", "gen": "they were so happy", "pattern": true, "novel": true}
+{"prompt": "sam and tom were sad", "gen": "sam was very sad", "pattern": true, "novel": true}
+{"prompt": "one day she went to the park", "gen": "she was so happy to his mom", "pattern": false, "novel": true}
+{"prompt": "one day she went to the park", "gen": "they wanted to play with", "pattern": true, "novel": true}
+{"prompt": "one day she went to the park", "gen": "he was not know what to do", "pattern": true, "novel": true}
+{"prompt": "one day she went to the park", "gen": "they looked at each other", "pattern": true, "novel": true}
+{"prompt": "tom and tim said thank you", "gen": "she was very happy to find him", "pattern": true, "novel": true}
+{"prompt": "tom and tim said thank you", "gen": "they liked to play together all day", "pattern": true, "novel": true}
+{"prompt": "tom and tim said thank you", "gen": "sue was not scared anymore", "pattern": true, "novel": true}
+{"prompt": "tom and tim said thank you", "gen": "sue looked at her and had fun", "pattern": false, "novel": true}
+{"prompt": "they had a lot of fun", "gen": "he looked sad", "pattern": true, "novel": true}
+{"prompt": "they had a lot of fun", "gen": "tim was happy and they played all day", "pattern": true, "novel": true}
+{"prompt": "they had a lot of fun", "gen": "he wanted it", "pattern": true, "novel": true}
+{"prompt": "they had a lot of fun", "gen": "they wanted to find his friends", "pattern": true, "novel": true}
+{"prompt": "tom and mia are friends", "gen": "tim was not and happy", "pattern": false, "novel": true}
+{"prompt": "tom and mia are friends", "gen": "he was very happy and thanked tom", "pattern": true, "novel": true}
+{"prompt": "tom and mia are friends", "gen": "it was a friend the ball", "pattern": true, "novel": true}
+{"prompt": "tom and mia are friends", "gen": "the dog wanted to go", "pattern": true, "novel": true}
+{"prompt": "they learned something new", "gen": "the bird wanted the ball", "pattern": true, "novel": true}
+{"prompt": "they learned something new", "gen": "lily was very excited", "pattern": true, "novel": true}
+{"prompt": "they learned something new", "gen": "they played all their friends to help", "pattern": true, "novel": true}
+{"prompt": "they learned something new", "gen": "the bird and to help tom feel better", "pattern": false, "novel": true}
+{"prompt": "thank you sam", "gen": "they wanted the best of friends", "pattern": true, "novel": true}
+{"prompt": "thank you sam", "gen": "i did not like that", "pattern": true, "novel": true}
+{"prompt": "thank you sam", "gen": "the cat looked in the park", "pattern": true, "novel": true}
+{"prompt": "thank you sam", "gen": "she made a boy with a ball", "pattern": true, "novel": true}
+{"prompt": "the cat and the bird became friends", "gen": "they were very sorry", "pattern": true, "novel": true}
+{"prompt": "the cat and the bird became friends", "gen": "tim was very happy and excited", "pattern": true, "novel": true}
+{"prompt": "the cat and the bird became friends", "gen": "they looked up down and all around", "pattern": true, "novel": true}
+{"prompt": "the cat and the bird became friends", "gen": "she thought and said thank you", "pattern": false, "novel": true}
+{"prompt": "they played and had fun", "gen": "you did not a good friend", "pattern": true, "novel": true}
+{"prompt": "they played and had fun", "gen": "tim smiled and gave it to sam", "pattern": false, "novel": true}
+{"prompt": "they played and had fun", "gen": "i will not nice", "pattern": false, "novel": true}
+{"prompt": "they played and had fun", "gen": "she was not like that", "pattern": true, "novel": true}
+{"prompt": "he saw a girl named sue", "gen": "the cat was so happy", "pattern": true, "novel": true}
+{"prompt": "he saw a girl named sue", "gen": "sue was happy", "pattern": true, "novel": true}
+{"prompt": "he saw a girl named sue", "gen": "the dog and tim became good friends", "pattern": true, "novel": true}
+{"prompt": "he saw a girl named sue", "gen": "they were all happy", "pattern": true, "novel": true}
+{"prompt": "he did not know what to do", "gen": "they saw a big box", "pattern": true, "novel": true}
+{"prompt": "he did not know what to do", "gen": "they wanted to play", "pattern": true, "novel": true}
+{"prompt": "he did not know what to do", "gen": "they were all happy", "pattern": true, "novel": true}
+{"prompt": "he did not know what to do", "gen": "she was happy", "pattern": true, "novel": true}
+{"prompt": "they played with the ball all day long", "gen": "she wanted to help tim was inside", "pattern": false, "novel": true}
+{"prompt": "they played with the ball all day long", "gen": "they did not want to play", "pattern": true, "novel": true}
+{"prompt": "they played with the ball all day long", "gen": "lily was very happy", "pattern": true, "novel": true}
+{"prompt": "they played with the ball all day long", "gen": "they had a big rock", "pattern": true, "novel": true}
+{"prompt": "water came out", "gen": "they felt happy", "pattern": true, "novel": true}
+{"prompt": "water came out", "gen": "sue was very sad", "pattern": true, "novel": true}
+{"prompt": "water came out", "gen": "max loved to play outside", "pattern": true, "novel": true}
+{"prompt": "water came out", "gen": "do you have to be scared", "pattern": false, "novel": true}
+{"prompt": "but then they saw a little bird", "gen": "bob was very happy", "pattern": true, "novel": true}
+{"prompt": "but then they saw a little bird", "gen": "the cat wanted to play with", "pattern": false, "novel": true}
+{"prompt": "but then they saw a little bird", "gen": "it was sad", "pattern": true, "novel": true}
+{"prompt": "but then they saw a little bird", "gen": "sue was not happy", "pattern": true, "novel": true}
+{"prompt": "the bird is red and blue", "gen": "but the ball and said look", "pattern": false, "novel": true}
+{"prompt": "the bird is red and blue", "gen": "the tree was very happy", "pattern": true, "novel": true}
+{"prompt": "the bird is red and blue", "gen": "tim and his mom were very sad", "pattern": true, "novel": true}
+{"prompt": "the bird is red and blue", "gen": "sue and the and up", "pattern": false, "novel": true}
+{"prompt": "they learned to share and play together", "gen": "they all the man and have fun", "pattern": false, "novel": true}
+{"prompt": "they learned to share and play together", "gen": "we had a good girl", "pattern": true, "novel": true}
+{"prompt": "they learned to share and play together", "gen": "all and ben were very surprised", "pattern": false, "novel": true}
+{"prompt": "they learned to share and play together", "gen": "they had played and sad", "pattern": true, "novel": true}
+{"prompt": "they were happy and proud of their toys", "gen": "tim was very special", "pattern": true, "novel": true}
+{"prompt": "they were happy and proud of their toys", "gen": "they had so much", "pattern": true, "novel": true}
+{"prompt": "they were happy and proud of their toys", "gen": "but he found a big tree", "pattern": true, "novel": true}
+{"prompt": "they were happy and proud of their toys", "gen": "sue looked at it for a long time", "pattern": false, "novel": true}
+{"prompt": "do you want to play with me", "gen": "tim and lily were sad", "pattern": true, "novel": true}
+{"prompt": "do you want to play with me", "gen": "how did not a toy", "pattern": false, "novel": true}
+{"prompt": "do you want to play with me", "gen": "they liked it and saw a little bird", "pattern": true, "novel": true}
+{"prompt": "do you want to play with me", "gen": "they wanted to play in the house", "pattern": true, "novel": true}
+{"prompt": "he saw a little dog named spot", "gen": "sara and spot were scared", "pattern": true, "novel": true}
+{"prompt": "he saw a little dog named spot", "gen": "the dog and the girl became good friends", "pattern": true, "novel": true}
+{"prompt": "he saw a little dog named spot", "gen": "she was happy and to and thanked tom", "pattern": false, "novel": true}
+{"prompt": "he saw a little dog named spot", "gen": "sue felt sad", "pattern": true, "novel": true}
+{"prompt": "one day he saw a big fish", "gen": "he saw the toy dog", "pattern": true, "novel": true}
+{"prompt": "one day he saw a big fish", "gen": "yes i do", "pattern": true, "novel": true}
+{"prompt": "one day he saw a big fish", "gen": "what was surprised", "pattern": true, "novel": true}
+{"prompt": "one day he saw a big fish", "gen": "he loved to play with", "pattern": true, "novel": true}
+{"prompt": "they had fun", "gen": "they played together in the cake so much", "pattern": false, "novel": true}
+{"prompt": "they had fun", "gen": "they were so happy", "pattern": true, "novel": true}
+{"prompt": "they had fun", "gen": "they did not want to play with", "pattern": true, "novel": true}
+{"prompt": "they had fun", "gen": "mom and his mom laughed and happy", "pattern": false, "novel": true}
+{"prompt": "he was very good at it", "gen": "it was very happy", "pattern": true, "novel": true}
+{"prompt": "he was very good at it", "gen": "the cat was happy again", "pattern": true, "novel": true}
+{"prompt": "he was very good at it", "gen": "but he saw the new", "pattern": true, "novel": true}
+{"prompt": "he was very good at it", "gen": "they played together and saw a friend tom", "pattern": true, "novel": true}
+{"prompt": "they have fun", "gen": "they were all happy", "pattern": true, "novel": true}
+{"prompt": "they have fun", "gen": "lily was surprised", "pattern": true, "novel": true}
+{"prompt": "they have fun", "gen": "she says i can play with you", "pattern": false, "novel": true}
+{"prompt": "they have fun", "gen": "they became the best of friends", "pattern": true, "novel": true}
+{"prompt": "lily and ben are friends", "gen": "they are not and sad", "pattern": true, "novel": true}
+{"prompt": "lily and ben are friends", "gen": "he looked at it every day", "pattern": true, "novel": true}
+{"prompt": "lily and ben are friends", "gen": "they were scared and sad", "pattern": true, "novel": true}
+{"prompt": "lily and ben are friends", "gen": "tim and sam were scared", "pattern": true, "novel": true}
+{"prompt": "her mom said no it's not safe", "gen": "spot laughed and said what was that", "pattern": false, "novel": true}
+{"prompt": "her mom said no it's not safe", "gen": "he looked sad", "pattern": true, "novel": true}
+{"prompt": "her mom said no it's not safe", "gen": "lily was so excited", "pattern": true, "novel": true}
+{"prompt": "her mom said no it's not safe", "gen": "they were happy and loved", "pattern": true, "novel": true}
+{"prompt": "she said yes you did take it", "gen": "the cat had to help", "pattern": true, "novel": true}
+{"prompt": "she said yes you did take it", "gen": "they were very surprised", "pattern": true, "novel": true}
+{"prompt": "she said yes you did take it", "gen": "he wanted to play and his friends", "pattern": false, "novel": true}
+{"prompt": "she said yes you did take it", "gen": "they played all day long", "pattern": true, "novel": true}
+{"prompt": "the cat was very happy", "gen": "they wanted to play with me", "pattern": true, "novel": true}
+{"prompt": "the cat was very happy", "gen": "lily wanted to play outside in the house", "pattern": true, "novel": true}
+{"prompt": "the cat was very happy", "gen": "bird was not happy", "pattern": true, "novel": true}
+{"prompt": "the cat was very happy", "gen": "he had a lot of fun together", "pattern": true, "novel": true}
+{"prompt": "they wanted to go inside", "gen": "lily and tom were scared", "pattern": true, "novel": true}
+{"prompt": "they wanted to go inside", "gen": "they liked to play and have fun", "pattern": true, "novel": true}
+{"prompt": "they wanted to go inside", "gen": "but we do", "pattern": true, "novel": true}
+{"prompt": "they wanted to go inside", "gen": "they had the toys they want", "pattern": true, "novel": true}
+{"prompt": "they do not want to share", "gen": "he wanted to play with her", "pattern": true, "novel": true}
+{"prompt": "they do not want to share", "gen": "sue and lily felt sad", "pattern": true, "novel": true}
+{"prompt": "they do not want to share", "gen": "they saw the bird again", "pattern": true, "novel": true}
+{"prompt": "they do not want to share", "gen": "sara was so happy", "pattern": true, "novel": true}
+{"prompt": "lily said to spot come on spot", "gen": "tim and tom were scared", "pattern": true, "novel": true}
+{"prompt": "lily said to spot come on spot", "gen": "they both thought they were very happy", "pattern": false, "novel": true}
+{"prompt": "lily said to spot come on spot", "gen": "it was sad but happy", "pattern": true, "novel": true}
+{"prompt": "lily said to spot come on spot", "gen": "they had an idea", "pattern": true, "novel": true}
+{"prompt": "tim and spot felt bad", "gen": "i have to their friends to play", "pattern": false, "novel": true}
+{"prompt": "tim and spot felt bad", "gen": "but and max saw the park", "pattern": false, "novel": true}
+{"prompt": "tim and spot felt bad", "gen": "his mom said yes but something unexpected", "pattern": false, "novel": true}
+{"prompt": "tim and spot felt bad", "gen": "he wanted to help tim find his toy", "pattern": false, "novel": true}
+{"prompt": "they were very happy", "gen": "tom and ben were playing in the park", "pattern": true, "novel": true}
+{"prompt": "they were very happy", "gen": "tim was happy and thanked the bird", "pattern": true, "novel": true}
+{"prompt": "they were very happy", "gen": "tim's mom were very surprised", "pattern": false, "novel": true}
+{"prompt": "they were very happy", "gen": "the bird wanted the ball", "pattern": true, "novel": true}
+{"prompt": "let's share it and eat it together", "gen": "she said to help the bird", "pattern": true, "novel": true}
+{"prompt": "let's share it and eat it together", "gen": "the bird and tim's mom were very surprised", "pattern": false, "novel": true}
+{"prompt": "let's share it and eat it together", "gen": "the man was sad", "pattern": true, "novel": true}
+{"prompt": "let's share it and eat it together", "gen": "they had so much", "pattern": true, "novel": true}
+{"prompt": "he wanted to be big again", "gen": "tim said and said thank you", "pattern": true, "novel": true}
+{"prompt": "he wanted to be big again", "gen": "they wanted to see what was inside", "pattern": true, "novel": true}
+{"prompt": "he wanted to be big again", "gen": "it was sad", "pattern": true, "novel": true}
+{"prompt": "he wanted to be big again", "gen": "what was sad", "pattern": true, "novel": true}
+{"prompt": "the boy looked sad", "gen": "sam was so happy", "pattern": true, "novel": true}
+{"prompt": "the boy looked sad", "gen": "he wanted to play outside", "pattern": true, "novel": true}
+{"prompt": "the boy looked sad", "gen": "we will not to play", "pattern": false, "novel": true}
+{"prompt": "the boy looked sad", "gen": "tim was not happy", "pattern": true, "novel": true}
+{"prompt": "the man smiled", "gen": "anna was very sad and scared", "pattern": true, "novel": true}
+{"prompt": "the man smiled", "gen": "they wanted to help the bird", "pattern": true, "novel": true}
+{"prompt": "the man smiled", "gen": "tim was so pretty and excited", "pattern": false, "novel": true}
+{"prompt": "the man smiled", "gen": "can you want to see", "pattern": true, "novel": true}
+{"prompt": "it told all the animals to come", "gen": "they played together and saw tim's mom", "pattern": true, "novel": true}
+{"prompt": "it told all the animals to come", "gen": "tom and his friends were surprised", "pattern": true, "novel": true}
+{"prompt": "it told all the animals to come", "gen": "she was a big tree", "pattern": true, "novel": true}
+{"prompt": "it told all the animals to come", "gen": "they did not like to share his toys", "pattern": true, "novel": true}
+{"prompt": "one day max saw a little bird", "gen": "the little dog was too", "pattern": true, "novel": true}
+{"prompt": "one day max saw a little bird", "gen": "they laughed at the ball and flew away", "pattern": true, "novel": true}
+{"prompt": "one day max saw a little bird", "gen": "he wanted to play with you", "pattern": true, "novel": true}
+{"prompt": "one day max saw a little bird", "gen": "i did not want to play anymore", "pattern": false, "novel": true}
+{"prompt": "the bird was sad", "gen": "he wanted to play with me", "pattern": true, "novel": true}
+{"prompt": "the bird was sad", "gen": "the dog and the dog came too", "pattern": true, "novel": true}
+{"prompt": "the bird was sad", "gen": "he wanted to play outside", "pattern": true, "novel": true}
+{"prompt": "the bird was sad", "gen": "they liked to help them", "pattern": true, "novel": true}
+{"prompt": "spot loved to play and run all day", "gen": "the bird and scared", "pattern": false, "novel": true}
+{"prompt": "spot loved to play and run all day", "gen": "the dog had an idea", "pattern": true, "novel": true}
+{"prompt": "spot loved to play and run all day", "gen": "he wanted to play outside in the sun", "pattern": true, "novel": true}
+{"prompt": "spot loved to play and run all day", "gen": "they were very sad and went away", "pattern": true, "novel": true}
+{"prompt": "we are lily and tom", "gen": "they liked to play with it", "pattern": true, "novel": true}
+{"prompt": "we are lily and tom", "gen": "the bird and scared of the ball", "pattern": false, "novel": true}
+{"prompt": "we are lily and tom", "gen": "tim and lily were playing in the park", "pattern": true, "novel": true}
+{"prompt": "we are lily and tom", "gen": "they went to play outside", "pattern": true, "novel": true}
+{"prompt": "they both wanted it", "gen": "he was very surprised", "pattern": true, "novel": true}
+{"prompt": "they both wanted it", "gen": "she wanted to help tim find his toy", "pattern": false, "novel": true}
+{"prompt": "they both wanted it", "gen": "lily and his friends were surprised but happy", "pattern": false, "novel": true}
+{"prompt": "they both wanted it", "gen": "tom and help me", "pattern": true, "novel": true}
+{"prompt": "she was his best friend", "gen": "it was so happy and play", "pattern": true, "novel": true}
+{"prompt": "she was his best friend", "gen": "they lived near a friend tom", "pattern": true, "novel": true}
+{"prompt": "she was his best friend", "gen": "tom was surprised", "pattern": true, "novel": true}
+{"prompt": "she was his best friend", "gen": "the dog was excited too", "pattern": true, "novel": true}
+{"prompt": "we can be friends", "gen": "he asked max to give the ball back", "pattern": false, "novel": true}
+{"prompt": "we can be friends", "gen": "sue was happy", "pattern": true, "novel": true}
+{"prompt": "we can be friends", "gen": "they were very sorry", "pattern": true, "novel": true}
+{"prompt": "we can be friends", "gen": "they liked to play in the water", "pattern": true, "novel": true}
+{"prompt": "lily was happy again", "gen": "they were so much fun", "pattern": true, "novel": true}
+{"prompt": "lily was happy again", "gen": "it was so happy", "pattern": true, "novel": true}
+{"prompt": "lily was happy again", "gen": "tim was so happy with his new car", "pattern": true, "novel": true}
+{"prompt": "lily was happy again", "gen": "the dog had to play more", "pattern": true, "novel": true}
+{"prompt": "tom wanted to help sue feel better", "gen": "tim and tom were scared", "pattern": true, "novel": true}
+{"prompt": "tom wanted to help sue feel better", "gen": "they played all excited to come and play", "pattern": false, "novel": true}
+{"prompt": "tom wanted to help sue feel better", "gen": "they felt happy", "pattern": true, "novel": true}
+{"prompt": "tom wanted to help sue feel better", "gen": "sara and sue were scared", "pattern": true, "novel": true}
+{"prompt": "they became friends", "gen": "she wanted to help tim was inside", "pattern": false, "novel": true}
+{"prompt": "they became friends", "gen": "can you have it", "pattern": true, "novel": true}
+{"prompt": "they became friends", "gen": "they played all excited to come and play", "pattern": false, "novel": true}
+{"prompt": "they became friends", "gen": "sue loved to play all day long", "pattern": true, "novel": true}
+{"prompt": "i found it", "gen": "they like a lot of fun", "pattern": true, "novel": true}
+{"prompt": "i found it", "gen": "we will make you feel better", "pattern": true, "novel": true}
+{"prompt": "i found it", "gen": "they wanted to help tim feel even better", "pattern": true, "novel": true}
+{"prompt": "i found it", "gen": "lily and you do not see it", "pattern": false, "novel": true}
+{"prompt": "thank you ben", "gen": "people and ben are playing in the park", "pattern": true, "novel": true}
+{"prompt": "thank you ben", "gen": "they all and a fun", "pattern": false, "novel": true}
+{"prompt": "thank you ben", "gen": "he was scared and said what to it", "pattern": false, "novel": true}
+{"prompt": "thank you ben", "gen": "lily felt sad", "pattern": true, "novel": true}
+{"prompt": "she opened the door and went inside", "gen": "sue and sue were sad", "pattern": true, "novel": true}
+{"prompt": "she opened the door and went inside", "gen": "tim loved to play together in the park", "pattern": true, "novel": true}
+{"prompt": "she opened the door and went inside", "gen": "tim had so happy", "pattern": true, "novel": true}
+{"prompt": "she opened the door and went inside", "gen": "they asked all day", "pattern": true, "novel": true}
+{"prompt": "the big dog was so happy", "gen": "everyone was very happy", "pattern": true, "novel": true}
+{"prompt": "the big dog was so happy", "gen": "she was happy", "pattern": true, "novel": true}
+{"prompt": "the big dog was so happy", "gen": "bob liked to play with it", "pattern": true, "novel": true}
+{"prompt": "the big dog was so happy", "gen": "he was very happy and thanked the best", "pattern": false, "novel": true}
+{"prompt": "i didn't know it was your toy", "gen": "he was very excited", "pattern": true, "novel": true}
+{"prompt": "i didn't know it was your toy", "gen": "they felt happy", "pattern": true, "novel": true}
+{"prompt": "i didn't know it was your toy", "gen": "they were very sorry", "pattern": true, "novel": true}
+{"prompt": "i didn't know it was your toy", "gen": "tim loved to help them", "pattern": true, "novel": true}
+{"prompt": "tim was scared", "gen": "he wanted to play in the house", "pattern": true, "novel": true}
+{"prompt": "tim was scared", "gen": "they were happy and said no", "pattern": false, "novel": true}
+{"prompt": "tim was scared", "gen": "they both wanted to play with it", "pattern": true, "novel": true}
+{"prompt": "tim was scared", "gen": "it was a big toy", "pattern": true, "novel": true}
+{"prompt": "the bird lived in a big tree", "gen": "mia was very sad", "pattern": true, "novel": true}
+{"prompt": "the bird lived in a big tree", "gen": "but and to you", "pattern": false, "novel": true}
+{"prompt": "the bird lived in a big tree", "gen": "they were so happy", "pattern": true, "novel": true}
+{"prompt": "the bird lived in a big tree", "gen": "they had a big tree", "pattern": true, "novel": true}
+{"prompt": "sue said to tom", "gen": "tim wanted to play with her", "pattern": true, "novel": true}
+{"prompt": "sue said to tom", "gen": "tom was surprised", "pattern": true, "novel": true}
+{"prompt": "sue said to tom", "gen": "you did not see what to do", "pattern": true, "novel": true}
+{"prompt": "sue said to tom", "gen": "tim and sam were scared", "pattern": true, "novel": true}
+{"prompt": "she says that is better", "gen": "i see it", "pattern": true, "novel": true}
+{"prompt": "she says that is better", "gen": "he saw his mom laughed and laughed", "pattern": false, "novel": true}
+{"prompt": "she says that is better", "gen": "tim was not and and it", "pattern": false, "novel": true}
+{"prompt": "she says that is better", "gen": "they like a big box", "pattern": true, "novel": true}
+{"prompt": "their mom said yes it is", "gen": "it was happy to help", "pattern": true, "novel": true}
+{"prompt": "their mom said yes it is", "gen": "they felt happy and proud", "pattern": true, "novel": true}
+{"prompt": "their mom said yes it is", "gen": "it was very special", "pattern": true, "novel": true}
+{"prompt": "their mom said yes it is", "gen": "lily was very happy and thanked tom", "pattern": true, "novel": true}
+{"prompt": "we just wanted to play", "gen": "tim and sue were happy", "pattern": true, "novel": true}
+{"prompt": "we just wanted to play", "gen": "tim was happy and wanted to get out", "pattern": false, "novel": true}
+{"prompt": "we just wanted to play", "gen": "they felt happy", "pattern": true, "novel": true}
+{"prompt": "we just wanted to play", "gen": "but and the unexpected happened", "pattern": false, "novel": true}
+{"prompt": "it is time to go home", "gen": "they all the ball", "pattern": false, "novel": true}
+{"prompt": "it is time to go home", "gen": "it was a and shiny", "pattern": false, "novel": true}
+{"prompt": "it is time to go home", "gen": "max and the girl became good friends", "pattern": true, "novel": true}
+{"prompt": "it is time to go home", "gen": "they had the toys in their room", "pattern": true, "novel": true}
+{"prompt": "she asked spot to help her find them", "gen": "one day lily found a new ball", "pattern": true, "novel": true}
+{"prompt": "she asked spot to help her find them", "gen": "they said mom said what is that", "pattern": false, "novel": true}
+{"prompt": "she asked spot to help her find them", "gen": "he was very sad", "pattern": true, "novel": true}
+{"prompt": "she asked spot to help her find them", "gen": "they liked to play with", "pattern": true, "novel": true}
+{"prompt": "max was surprised and happy", "gen": "can i want some", "pattern": true, "novel": true}
+{"prompt": "max was surprised and happy", "gen": "they had the best day", "pattern": true, "novel": true}
+{"prompt": "max was surprised and happy", "gen": "can i play together", "pattern": true, "novel": true}
+{"prompt": "max was surprised and happy", "gen": "the tree was very excited", "pattern": true, "novel": true}
+{"prompt": "sara put it on and said look mom", "gen": "they liked to play and her toys", "pattern": false, "novel": true}
+{"prompt": "sara put it on and said look mom", "gen": "can you want to help me", "pattern": true, "novel": true}
+{"prompt": "sara put it on and said look mom", "gen": "the man and said yes you can", "pattern": false, "novel": true}
+{"prompt": "sara put it on and said look mom", "gen": "then sue said the and play with you", "pattern": false, "novel": true}
+{"prompt": "she loved cake", "gen": "that ben was sad", "pattern": true, "novel": true}
+{"prompt": "she loved cake", "gen": "the cat was scared", "pattern": true, "novel": true}
+{"prompt": "she loved cake", "gen": "the big and said yes", "pattern": false, "novel": true}
+{"prompt": "she loved cake", "gen": "tim wanted to see what was inside", "pattern": true, "novel": true}
+{"prompt": "tim asked the cat", "gen": "it was very happy", "pattern": true, "novel": true}
+{"prompt": "tim asked the cat", "gen": "tom was very surprised", "pattern": true, "novel": true}
+{"prompt": "tim asked the cat", "gen": "amy was very sad", "pattern": true, "novel": true}
+{"prompt": "tim asked the cat", "gen": "lily was not happy", "pattern": true, "novel": true}
+{"prompt": "he said i'm sorry tree", "gen": "they were so excited to come and play", "pattern": false, "novel": true}
+{"prompt": "he said i'm sorry tree", "gen": "yes we don't", "pattern": true, "novel": true}
+{"prompt": "he said i'm sorry tree", "gen": "he was very happy and thanked tom", "pattern": true, "novel": true}
+{"prompt": "he said i'm sorry tree", "gen": "they find the best of friends", "pattern": true, "novel": true}
+{"prompt": "ben and lily ran away", "gen": "it had a friend named tom", "pattern": true, "novel": true}
+{"prompt": "ben and lily ran away", "gen": "they all the man and went away", "pattern": false, "novel": true}
+{"prompt": "ben and lily ran away", "gen": "tim and a little dog", "pattern": false, "novel": true}
+{"prompt": "ben and lily ran away", "gen": "they did not know what it was", "pattern": true, "novel": true}
+{"prompt": "he wanted to play with it", "gen": "tim and her mom were happy", "pattern": true, "novel": true}
+{"prompt": "he wanted to play with it", "gen": "she was happy", "pattern": true, "novel": true}
+{"prompt": "he wanted to play with it", "gen": "she was not happy and thanked tom", "pattern": true, "novel": true}
+{"prompt": "he wanted to play with it", "gen": "tim's mom said yes but be careful", "pattern": true, "novel": true}
+{"prompt": "they look at each other", "gen": "the girl was so happy", "pattern": true, "novel": true}
+{"prompt": "they look at each other", "gen": "they walked to a big", "pattern": false, "novel": true}
+{"prompt": "they look at each other", "gen": "she liked to play with his friends", "pattern": true, "novel": true}
+{"prompt": "they look at each other", "gen": "mia had a lot", "pattern": true, "novel": true}
+{"prompt": "sam was happy too", "gen": "they were playing something unexpected happened", "pattern": false, "novel": true}
+{"prompt": "sam was happy too", "gen": "they had an idea", "pattern": true, "novel": true}
+{"prompt": "sam was happy too", "gen": "tim saw a friend tom", "pattern": true, "novel": true}
+{"prompt": "sam was happy too", "gen": "lily was excited and said yes", "pattern": true, "novel": true}
+{"prompt": "it was a big red ball", "gen": "the bird was happy and thanked the bird", "pattern": true, "novel": true}
+{"prompt": "it was a big red ball", "gen": "tim felt very happy", "pattern": true, "novel": true}
+{"prompt": "it was a big red ball", "gen": "they go together and had fun", "pattern": true, "novel": true}
+{"prompt": "it was a big red ball", "gen": "i did not find you", "pattern": true, "novel": true}
+{"prompt": "the toy car became very small", "gen": "she felt very sorry", "pattern": true, "novel": true}
+{"prompt": "the toy car became very small", "gen": "he saw sue could not find it anymore", "pattern": false, "novel": true}
+{"prompt": "the toy car became very small", "gen": "she was sad and ran away", "pattern": true, "novel": true}
+{"prompt": "the toy car became very small", "gen": "he did not like to share it", "pattern": false, "novel": true}
+{"prompt": "they make friends with him", "gen": "sue loved to play and play", "pattern": true, "novel": true}
+{"prompt": "they make friends with him", "gen": "she was so happy to see him", "pattern": true, "novel": true}
+{"prompt": "they make friends with him", "gen": "they all wanted to the park to play", "pattern": true, "novel": true}
+{"prompt": "they make friends with him", "gen": "they said to play with", "pattern": true, "novel": true}
+{"prompt": "let's play with it", "gen": "water is not a toy", "pattern": true, "novel": true}
+{"prompt": "let's play with it", "gen": "he said it", "pattern": true, "novel": true}
+{"prompt": "let's play with it", "gen": "they are scared and new", "pattern": true, "novel": true}
+{"prompt": "let's play with it", "gen": "anna and lily were playing in the park", "pattern": true, "novel": true}
+{"prompt": "it was so pretty", "gen": "lily felt sad", "pattern": true, "novel": true}
+{"prompt": "it was so pretty", "gen": "tim was not like to be careful", "pattern": false, "novel": true}
+{"prompt": "it was so pretty", "gen": "sam was surprised and happy", "pattern": true, "novel": true}
+{"prompt": "it was so pretty", "gen": "sue was sad and and his friends", "pattern": false, "novel": true}
+{"prompt": "the cat was not sad anymore", "gen": "he loved to play and have fun together", "pattern": true, "novel": true}
+{"prompt": "the cat was not sad anymore", "gen": "they all the man and had fun", "pattern": false, "novel": true}
+{"prompt": "the cat was not sad anymore", "gen": "tim had so happy", "pattern": true, "novel": true}
+{"prompt": "the cat was not sad anymore", "gen": "tim and the man were happy", "pattern": true, "novel": true}
+{"prompt": "the little bird said i like this tree", "gen": "they played together and saw the park", "pattern": true, "novel": true}
+{"prompt": "the little bird said i like this tree", "gen": "they had so much", "pattern": true, "novel": true}
+{"prompt": "the little bird said i like this tree", "gen": "she was very happy to play outside", "pattern": true, "novel": true}
+{"prompt": "the little bird said i like this tree", "gen": "can i want to see", "pattern": false, "novel": true}
+{"prompt": "i like to play too", "gen": "they felt happy", "pattern": true, "novel": true}
+{"prompt": "i like to play too", "gen": "they played together and the park every day", "pattern": false, "novel": true}
+{"prompt": "i like to play too", "gen": "they said to play outside", "pattern": true, "novel": true}
+{"prompt": "i like to play too", "gen": "bob and the best of friends", "pattern": false, "novel": true}
+{"prompt": "they look at the water", "gen": "they had so much", "pattern": true, "novel": true}
+{"prompt": "they look at the water", "gen": "she had so happy", "pattern": true, "novel": true}
+{"prompt": "they look at the water", "gen": "the little bird was happy", "pattern": true, "novel": true}
+{"prompt": "they look at the water", "gen": "she played and a and have fun", "pattern": false, "novel": true}
+{"prompt": "the cat felt better and smiled", "gen": "they had a big toy dog", "pattern": true, "novel": true}
+{"prompt": "the cat felt better and smiled", "gen": "they had a big red ball", "pattern": true, "novel": true}
+{"prompt": "the cat felt better and smiled", "gen": "but and ben were playing in the park", "pattern": false, "novel": true}
+{"prompt": "the cat felt better and smiled", "gen": "they are shiny and sad", "pattern": true, "novel": true}
+{"prompt": "he decided to share his toys too", "gen": "tim said to find his toys", "pattern": true, "novel": true}
+{"prompt": "he decided to share his toys too", "gen": "it had a big rock", "pattern": true, "novel": true}
+{"prompt": "he decided to share his toys too", "gen": "but be scared lily", "pattern": false, "novel": true}
+{"prompt": "he decided to share his toys too", "gen": "tom and ben were scared", "pattern": true, "novel": true}
+{"prompt": "this is not a toy", "gen": "the bird wanted the girl became good friends", "pattern": false, "novel": true}
+{"prompt": "this is not a toy", "gen": "she was very sad", "pattern": true, "novel": true}
+{"prompt": "this is not a toy", "gen": "he loved to play outside", "pattern": true, "novel": true}
+{"prompt": "this is not a toy", "gen": "the dog wanted the box", "pattern": true, "novel": true}
+{"prompt": "spot was very happy", "gen": "they were scared and sad", "pattern": true, "novel": true}
+{"prompt": "spot was very happy", "gen": "the bird was happy too", "pattern": true, "novel": true}
+{"prompt": "spot was very happy", "gen": "can you want to play", "pattern": true, "novel": true}
+{"prompt": "spot was very happy", "gen": "they were not to play with", "pattern": false, "novel": true}
+{"prompt": "she was not happy", "gen": "it had a fun day", "pattern": true, "novel": true}
+{"prompt": "she was not happy", "gen": "they wanted it to play with", "pattern": false, "novel": true}
+{"prompt": "she was not happy", "gen": "the cat wanted to the house", "pattern": true, "novel": true}
+{"prompt": "she was not happy", "gen": "mia loved to play with", "pattern": false, "novel": true}
+{"prompt": "the man liked to help her", "gen": "bob and his friends did not know that", "pattern": true, "novel": true}
+{"prompt": "the man liked to help her", "gen": "she was very sorry", "pattern": true, "novel": true}
+{"prompt": "the man liked to help her", "gen": "tom and sam were sad", "pattern": true, "novel": true}
+{"prompt": "the man liked to help her", "gen": "tim was very excited and wanted to share", "pattern": false, "novel": true}
+{"prompt": "you are very kind", "gen": "tim loved to play outside", "pattern": true, "novel": true}
+{"prompt": "you are very kind", "gen": "they had the big red ball", "pattern": true, "novel": true}
+{"prompt": "you are very kind", "gen": "he loved to play with her", "pattern": true, "novel": true}
+{"prompt": "you are very kind", "gen": "it was sad", "pattern": true, "novel": true}
+{"prompt": "that was fun", "gen": "one day he saw a small house", "pattern": true, "novel": true}
+{"prompt": "that was fun", "gen": "lily was not scared anymore", "pattern": true, "novel": true}
+{"prompt": "that was fun", "gen": "they were so happy together", "pattern": true, "novel": true}
+{"prompt": "that was fun", "gen": "the dog and said what was that", "pattern": false, "novel": true}
+{"prompt": "tim was so happy", "gen": "tom was very excited", "pattern": true, "novel": true}
+{"prompt": "tim was so happy", "gen": "tim wanted to play with", "pattern": false, "novel": true}
+{"prompt": "tim was so happy", "gen": "tom saw his friends did not know that", "pattern": false, "novel": true}
+{"prompt": "tim was so happy", "gen": "we are you do it", "pattern": true, "novel": true}
+{"prompt": "lily and tom are friends", "gen": "max was sad", "pattern": true, "novel": true}
+{"prompt": "lily and tom are friends", "gen": "the cat was so happy", "pattern": true, "novel": true}
+{"prompt": "lily and tom are friends", "gen": "i can help you", "pattern": true, "novel": true}
+{"prompt": "lily and tom are friends", "gen": "tom and lily could not see it anymore", "pattern": false, "novel": true}
+{"prompt": "is that what you want", "gen": "he wanted to play outside", "pattern": true, "novel": true}
+{"prompt": "is that what you want", "gen": "they were the bird and went away", "pattern": true, "novel": true}
+{"prompt": "is that what you want", "gen": "tim wanted to help tom feel better", "pattern": true, "novel": true}
+{"prompt": "is that what you want", "gen": "they did not like it", "pattern": true, "novel": true}
+{"prompt": "they saw a girl named sue", "gen": "she was happy", "pattern": true, "novel": true}
+{"prompt": "they saw a girl named sue", "gen": "they liked to play and have fun", "pattern": true, "novel": true}
+{"prompt": "they saw a girl named sue", "gen": "they were the toys they want", "pattern": true, "novel": true}
+{"prompt": "they saw a girl named sue", "gen": "they had a big tree", "pattern": true, "novel": true}
+{"prompt": "sue wanted to help the bird", "gen": "tim and sam were scared", "pattern": true, "novel": true}
+{"prompt": "sue wanted to help the bird", "gen": "they all the man and have fun", "pattern": false, "novel": true}
+{"prompt": "sue wanted to help the bird", "gen": "he loved to play with his ball", "pattern": true, "novel": true}
+{"prompt": "sue wanted to help the bird", "gen": "they had a big rock", "pattern": true, "novel": true}
+{"prompt": "his mom said yes you can", "gen": "lily was so excited", "pattern": true, "novel": true}
+{"prompt": "his mom said yes you can", "gen": "the little bird was happy", "pattern": true, "novel": true}
+{"prompt": "his mom said yes you can", "gen": "tim wanted to help the bird", "pattern": true, "novel": true}
+{"prompt": "his mom said yes you can", "gen": "they play with the ball back", "pattern": true, "novel": true}
+{"prompt": "it was shiny and pretty", "gen": "they were not know what to do", "pattern": true, "novel": true}
+{"prompt": "it was shiny and pretty", "gen": "they were not have fun anymore", "pattern": false, "novel": true}
+{"prompt": "it was shiny and pretty", "gen": "it was sad", "pattern": true, "novel": true}
+{"prompt": "it was shiny and pretty", "gen": "she had the dog was a toy", "pattern": false, "novel": true}
+{"prompt": "they liked to play together", "gen": "they walked to help", "pattern": true, "novel": true}
+{"prompt": "they liked to play together", "gen": "her dog was scared of the big dog", "pattern": false, "novel": true}
+{"prompt": "they liked to play together", "gen": "she wanted to find his friend cat", "pattern": true, "novel": true}
+{"prompt": "they liked to play together", "gen": "the man was very much", "pattern": true, "novel": true}
+{"prompt": "it was his friend lily", "gen": "he was very sad", "pattern": true, "novel": true}
+{"prompt": "it was his friend lily", "gen": "they were all happy", "pattern": true, "novel": true}
+{"prompt": "it was his friend lily", "gen": "tim felt very happy", "pattern": true, "novel": true}
+{"prompt": "it was his friend lily", "gen": "can i want it", "pattern": true, "novel": true}
+{"prompt": "the bird lived in a big tree", "gen": "they were happy and they all played together", "pattern": false, "novel": true}
+{"prompt": "the bird lived in a big tree", "gen": "tim was not like that", "pattern": true, "novel": true}
+{"prompt": "the bird lived in a big tree", "gen": "they found a lot of fun", "pattern": true, "novel": true}
+{"prompt": "the bird lived in a big tree", "gen": "the ball was surprised", "pattern": true, "novel": true}
+{"prompt": "they did not know what was inside", "gen": "but and his friends did not know that", "pattern": false, "novel": true}
+{"prompt": "they did not know what was inside", "gen": "sara and lily were playing in the sun", "pattern": true, "novel": true}
+{"prompt": "they did not know what was inside", "gen": "tim was so happy with his new car", "pattern": true, "novel": true}
+{"prompt": "they did not know what was inside", "gen": "they played with it all day", "pattern": true, "novel": true}
+{"prompt": "they looked at the man", "gen": "sam was so happy", "pattern": true, "novel": true}
+{"prompt": "they looked at the man", "gen": "they had a big box", "pattern": true, "novel": true}
+{"prompt": "they looked at the man", "gen": "they wanted to play and his toys", "pattern": false, "novel": true}
+{"prompt": "they looked at the man", "gen": "the cat was so happy", "pattern": true, "novel": true}
+{"prompt": "sue was so happy to see her friend", "gen": "the man asked can i play with you", "pattern": true, "novel": true}
+{"prompt": "sue was so happy to see her friend", "gen": "he wanted to play with the house", "pattern": true, "novel": true}
+{"prompt": "sue was so happy to see her friend", "gen": "they had the best of friends", "pattern": true, "novel": true}
+{"prompt": "sue was so happy to see her friend", "gen": "yes i have some", "pattern": false, "novel": true}

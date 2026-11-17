@@ -1,0 +1,303 @@
+{
+ "model": "Qwen/Qwen2.5-3B-Instruct",
+ "references": {
+  "story_s13_n1000_refs.jsonl": {
+   "real": 0.897,
+   "word order scrambled": 0.117,
+   "content swapped": 0.05
+  },
+  "story_s17_n1000_refs.jsonl": {
+   "real": 0.913,
+   "word order scrambled": 0.11,
+   "content swapped": 0.063
+  }
+ },
+ "arms": [
+  {
+   "file": "story_s13_n1000_arm0.jsonl",
+   "arm": {
+    "cond": false,
+    "causal": 1,
+    "units": "words",
+    "pair": "gate",
+    "new": true,
+    "temp": 0.7,
+    "both": true,
+    "pool": "geo"
+   },
+   "generated": 1600,
+   "judged grammatical": 0.769,
+   "novel": 1.0,
+   "novel judged grammatical": 0.769,
+   "grammatical novel per generation": 0.769,
+   "tag pattern attested": 0.863,
+   "novel attested-pattern share": 0.863,
+   "novel judged grammatical, pattern attested": 0.812,
+   "novel judged grammatical, pattern unattested": 0.498,
+   "novel examples": [
+    [
+     "we have to go",
+     0.62
+    ],
+    [
+     "he had a big idea",
+     1.0
+    ],
+    [
+     "they started to play it",
+     0.01
+    ],
+    [
+     "she was so happy",
+     1.0
+    ],
+    [
+     "the bird was happy and said yes",
+     1.0
+    ],
+    [
+     "he said thank you bird",
+     0.0
+    ],
+    [
+     "the bird said yes come in",
+     0.91
+    ],
+    [
+     "he asked his mom what it is",
+     0.99
+    ],
+    [
+     "they were very happy and pretty",
+     0.16
+    ],
+    [
+     "she gave it food and water",
+     1.0
+    ],
+    [
+     "the cat was happy and excited",
+     1.0
+    ],
+    [
+     "they saw a big red ball",
+     1.0
+    ]
+   ]
+  },
+  {
+   "file": "story_s13_n1000_arm1.jsonl",
+   "arm": {
+    "cond": false,
+    "causal": 1,
+    "units": "words",
+    "pair": "gate",
+    "new": true,
+    "both": true,
+    "pool": "geo"
+   },
+   "generated": 1600,
+   "judged grammatical": 0.676,
+   "novel": 1.0,
+   "novel judged grammatical": 0.676,
+   "grammatical novel per generation": 0.676,
+   "tag pattern attested": 0.79,
+   "novel attested-pattern share": 0.79,
+   "novel judged grammatical, pattern attested": 0.754,
+   "novel judged grammatical, pattern unattested": 0.384,
+   "novel examples": [
+    [
+     "she played together all day",
+     1.0
+    ],
+    [
+     "he liked his mom to see him",
+     0.0
+    ],
+    [
+     "it was sad",
+     1.0
+    ],
+    [
+     "tom and lily liked to find it",
+     0.85
+    ],
+    [
+     "he had a big idea",
+     1.0
+    ],
+    [
+     "the car was happy",
+     0.47
+    ],
+    [
+     "he is scared",
+     1.0
+    ],
+    [
+     "tom look at each other",
+     0.07
+    ],
+    [
+     "you are a new friend",
+     0.95
+    ],
+    [
+     "the house was safe now",
+     1.0
+    ],
+    [
+     "tim loved to play and eat together",
+     1.0
+    ],
+    [
+     "tim and ben were sad",
+     1.0
+    ]
+   ]
+  },
+  {
+   "file": "story_s17_n1000_arm0.jsonl",
+   "arm": {
+    "cond": false,
+    "causal": 1,
+    "units": "words",
+    "pair": "gate",
+    "new": true,
+    "temp": 0.7,
+    "both": true,
+    "pool": "geo"
+   },
+   "generated": 1544,
+   "judged grammatical": 0.803,
+   "novel": 1.0,
+   "novel judged grammatical": 0.803,
+   "grammatical novel per generation": 0.803,
+   "tag pattern attested": 0.814,
+   "novel attested-pattern share": 0.814,
+   "novel judged grammatical, pattern attested": 0.846,
+   "novel judged grammatical, pattern unattested": 0.617,
+   "novel examples": [
+    [
+     "they played together in the park to play",
+     0.0
+    ],
+    [
+     "he wanted to know what to do",
+     1.0
+    ],
+    [
+     "sue was happy and flew away",
+     0.08
+    ],
+    [
+     "the man asked can i play too",
+     0.25
+    ],
+    [
+     "they all went to play more",
+     0.96
+    ],
+    [
+     "she wanted to help the bird",
+     1.0
+    ],
+    [
+     "anna and ben were scared",
+     1.0
+    ],
+    [
+     "do you want to help the cat",
+     0.95
+    ],
+    [
+     "she wanted to play with you",
+     1.0
+    ],
+    [
+     "mom and ben looked at each other",
+     1.0
+    ],
+    [
+     "tim loved to play outside in the park",
+     1.0
+    ],
+    [
+     "lily was very happy",
+     1.0
+    ]
+   ]
+  },
+  {
+   "file": "story_s17_n1000_arm1.jsonl",
+   "arm": {
+    "cond": false,
+    "causal": 1,
+    "units": "words",
+    "pair": "gate",
+    "new": true,
+    "both": true,
+    "pool": "geo"
+   },
+   "generated": 1544,
+   "judged grammatical": 0.703,
+   "novel": 1.0,
+   "novel judged grammatical": 0.703,
+   "grammatical novel per generation": 0.703,
+   "tag pattern attested": 0.735,
+   "novel attested-pattern share": 0.735,
+   "novel judged grammatical, pattern attested": 0.777,
+   "novel judged grammatical, pattern unattested": 0.496,
+   "novel examples": [
+    [
+     "the cat was so happy",
+     1.0
+    ],
+    [
+     "the ball and friends went up and smiled",
+     0.71
+    ],
+    [
+     "no no we did",
+     0.01
+    ],
+    [
+     "inside he found a new toy",
+     1.0
+    ],
+    [
+     "but it was not happy",
+     0.95
+    ],
+    [
+     "but the animals were scared",
+     1.0
+    ],
+    [
+     "the cat was sad",
+     1.0
+    ],
+    [
+     "she loved to play with his friends",
+     1.0
+    ],
+    [
+     "they were so happy",
+     1.0
+    ],
+    [
+     "what was sad",
+     0.29
+    ],
+    [
+     "yes we don't",
+     0.0
+    ],
+    [
+     "tim was not happy",
+     1.0
+    ]
+   ]
+  }
+ ]
+}
