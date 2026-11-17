@@ -213,8 +213,8 @@ and the repairs judged together; `r192-diag/r193_compare*.txt`):
 Why it fails. Redrawing a word given 2W context attributes is dominated by the stored occurrences whose own context
 matches most of those attributes, so the full repair walks the sentence back into memory (31-80% of repairs ARE stored
 sentences, more with a wider window) and changes judged-good sentences as often as bad ones (70-90% of each); the new
-sentences it does make are worse (raw gram|tri .43-.62 against .66-.71). The targeted version touches bad sentences
-two to three times as often as good ones, but it repairs them by removing the novelty (raw tri falls from .10-.39 to
+sentences it does make are worse (raw gram|tri .43-.62 against .66-.71). The targeted version touches bad sentences 1.5 to 4
+times as often as good ones, but it repairs them by removing the novelty (raw tri falls from .10-.39 to
 .01-.09): on the frontier that is a lower temperature, and gram|tri of what stays new moves by -.03 to +.04. Both read
 the same per-leaf, attribute-independent back-off that made the error, so a second look from the right adds no
 information the left-to-right draw plus the pivot read did not already use; and class C's residue (coordination
