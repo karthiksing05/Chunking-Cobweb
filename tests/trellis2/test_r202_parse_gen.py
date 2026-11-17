@@ -149,6 +149,20 @@ def test_close_mode_reweights_ends_only():
         assert c / N == pytest.approx(t, abs=0.03)
 
 
+def test_closure_is_a_share(learner):
+    PC = PrefixChart(learner)
+    root = learner.cnt.root
+    assert PC.sent_share(root) == pytest.approx(len(SENTS) / root.count)
+    for s in PROBES:
+        toks = s.split()
+        for k in range(2, len(toks) + 1):
+            c = PC.closure(toks[:k])
+            assert 0.0 <= c <= 1.0
+    small = PrefixChart(learner, cap=3)           # the memo cap never loses a closure read
+    for s in PROBES:
+        assert small.closure(s.split()) == pytest.approx(PC.closure(s.split()))
+
+
 def test_unsupported_recipe_refused():
     L = Trellis3(seed=1, **{**CFG, "spine": True})
     with pytest.raises(NotImplementedError):

@@ -212,7 +212,7 @@ for ai, arm in enumerate(arms):
     pair_ = arm.pop("pair", None)      # "gate": as t3_story.py (type licence at or above the median of stored pairs)
     if arm:
         raise SystemExit(f"t3_story_r202.py: unsupported arm keys {sorted(arm)}")
-    if gen_ not in (None, "parse", "close"):
+    if gen_ not in (None, "parse", "close", "parse2", "close2"):
         raise SystemExit(f"t3_story_r202.py: unknown gen {gen_}")
     _cz = {}
     if pair_:
@@ -253,7 +253,7 @@ for ai, arm in enumerate(arms):
         return _cz[k]
 
     pstats = {}
-    if gen_ in ("parse", "close") and PC is None:
+    if gen_ in ("parse", "close", "parse2", "close2") and PC is None:
         PC = PrefixChart(L)
 
     def gen(p, _rng=g_rng):
@@ -266,7 +266,7 @@ for ai, arm in enumerate(arms):
                     break
                 if temp_ != 1.0:
                     ws = [x ** (1.0 / temp_) for x in ws]
-                if gen_ in ("parse", "close"):
+                if gen_ in ("parse", "close", "parse2", "close2"):
                     (v, done) = parse_step(PC, out, vs, ws, _words, _rng, temp=temp_, M=M_, stats=pstats, mode=gen_)
                 else:
                     (v, done) = _rng.choices(vs, weights=ws)[0]
@@ -278,7 +278,7 @@ for ai, arm in enumerate(arms):
     arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"new": True} if new_ else {}), **({"q": q_} if q_ != 0.5 else {}), **({"near": near_} if near_ else {}), **({"temp": temp_} if temp_ != 1.0 else {}), **({"gen": gen_} if gen_ else {}), **({"M": M_} if gen_ and M_ != 16 else {})})
     G = [gen(p) for p in PP]
     ok = [(p, g) for p, g in zip(PP, G) if g]
-    if gen_ in ("parse", "close"):
+    if gen_ in ("parse", "close", "parse2", "close2"):
         st_ = max(pstats.get("steps", 0), 1)
         extra = {"parse steps": pstats.get("steps", 0), "distinct candidates per step": round(pstats.get("distinct", 0) / st_, 2),
                  "parse moved the draw": round(pstats.get("moved", 0) / st_, 3),

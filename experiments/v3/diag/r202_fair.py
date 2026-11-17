@@ -27,7 +27,7 @@ SEL, HELD = (13, 17), (19, 23)
 
 def family_of(r):
     arm = json.loads(r["arm"])
-    if arm.get("gen") in ("parse", "close"):
+    if arm.get("gen") in ("parse", "close", "parse2", "close2"):
         m = re.search(r"-w(\d+)$", r["dir"])
         return "TRELLIS %s w%s%s" % (arm["gen"], m.group(1), "" if arm.get("M", 16) == 16 else " M%d" % arm["M"]), arm.get("temp", 1.0)
     return spn.family(r)
@@ -50,7 +50,7 @@ def main(n, prefix, jls):
     seen, uniq = set(), []
     for r in rows:                                   # a dump listed in two frontier files counts once
         k = (r["dir"], r["file"])
-        if k not in seen:
+        if k not in seen and os.path.exists(os.path.join(sff.GD, r["dir"], r["file"][:-len(".jsonl")] + ".scores.json")):
             seen.add(k)
             uniq.append(r)
     merged = prefix + ".frontier.jsonl"

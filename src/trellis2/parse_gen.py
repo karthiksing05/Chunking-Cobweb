@@ -47,6 +47,8 @@ class PrefixChart:
             raise NotImplementedError("PrefixChart supports the r184+ story recipe only; set: %s" % bad)
         self.L, self.W, self.drop, self.cap = L, L.window, tuple(drop), cap
         self.memo: Dict[tuple, Tuple[float, Elem, float]] = {}
+        self.tops: Dict[tuple, tuple] = {}      # span key -> (inside terms, composites) of its splits
+        self._s: Dict[int, float] = {}
         self.calls = self.built = 0
 
     # -- descriptions ------------------------------------------------------------------------------------
@@ -79,7 +81,7 @@ class PrefixChart:
             res = (0.0, e, 0.0)
         else:
             best: Optional[Tuple[float, Elem]] = None
-            terms = []
+            terms, comps = [], []
             for k in range(i + 1, j):
                 vl, a, il = self.span(toks, i, k, closed)
                 vr, b, ir = self.span(toks, k, j, closed)
@@ -90,12 +92,15 @@ class PrefixChart:
                 e.gain = L._factor(e)
                 self.built += 1
                 terms.append(e.gain * LN2 / L.tau + il + ir)
+                comps.append(e)
                 v = vl + vr + e.gain
                 if best is None or v > best[0]:
                     best = (v, e)
             res = (best[0], best[1], logsumexp(terms))
+            self.tops[key] = (terms, comps)
         if len(self.memo) >= self.cap:
             self.memo.clear()
+            self.tops.clear()
         self.memo[key] = res
         return res
 
@@ -106,6 +111,45 @@ class PrefixChart:
         if len(toks) < 2:
             return 0.0
         return self.span(toks, 0, len(toks), closed)[2]
+
+    def sent_share(self, node) -> float:
+        """s(C): the share of a content concept's stored composite mass that is a whole committed sentence (SENT),
+        backed off along the path with one pseudo-count, s(C) = (sent_C + s(parent)) / (count_C + 1), from the
+        root's own share."""
+        got = self._s.get(node.id)
+        if got is None:
+            sent = sum(self.L.cnt.passive(node, "sent").values())
+            if node.parent is None:
+                got = min(1.0, sent / max(node.count, 1e-9))
+            else:
+                got = min(1.0, (sent + self.sent_share(node.parent)) / (node.count + 1.0))   # SENT counts 1 per sentence, the concept its posterior mass
+            self._s[node.id] = got
+        return got
+
+    def closure(self, toks: Sequence[str]) -> float:
+        """r202 v2: the closure probability of a whole candidate sentence: over the closed chart's spanning
+        composites (one per top split, weighted by its share of Z), the share s(C) of their content concept C
+        that memory committed as whole sentences. A spanning analysis built of parts that never make a sentence
+        together (an open determiner phrase, a dangling preposition) sorts to concepts of non-sentence chunks."""
+        toks = list(toks)
+        if len(toks) < 2:
+            return self.sent_share(self.L.cnt.root)
+        key = self._key(toks, 0, len(toks), True)
+        if key not in self.tops:
+            self.memo.pop(key, None)
+            self.span(toks, 0, len(toks), True)
+            if key not in self.tops:      # cleared at the cap while being built: build once more
+                self.memo.pop(key, None)
+                self.span(toks, 0, len(toks), True)
+        terms, comps = self.tops[key]
+        top = max(terms)
+        ws = [math.exp(t - top) for t in terms]
+        out = 0.0
+        for w, e in zip(ws, comps):
+            if "sent" not in e.memo:
+                e.memo["sent"] = self.sent_share(self.L.cnt.categorize(e.cnt)[-1])
+            out += w * e.memo["sent"]
+        return out / sum(ws)
 
 
 def parse_step(PC: PrefixChart, out: Sequence[str], vs: List[tuple], ws: List[float], words_of, rng, temp: float = 1.0,
@@ -128,6 +172,19 @@ def parse_step(PC: PrefixChart, out: Sequence[str], vs: List[tuple], ws: List[fl
                 lz.append(PC.logZ(toks, closed=True) - PC.logZ(toks, closed=False))
             else:
                 lz.append(0.0)
+    elif mode in ("parse2", "close2"):
+        # r202 v2: the end read as a closure probability c (PrefixChart.closure) against its base rate c0 (the
+        # content root's sentence share): end x c / c0, go on x (1 - c) / (1 - c0); "parse2" also keeps the open
+        # chart's Z for every candidate (both the same edge, so end and go are compared on equal descriptions)
+        c0 = PC.sent_share(PC.L.cnt.root)
+        lz = []
+        for j in cands:
+            toks = list(out) + list(words_of(vs[j][0]))
+            c = min(max(PC.closure(toks), 1e-12), 1 - 1e-12)
+            z = math.log(c / c0) if vs[j][1] else math.log((1 - c) / (1 - c0))
+            if mode == "parse2":
+                z += PC.logZ(toks, closed=False)
+            lz.append(z)
     else:
         lz = [PC.logZ(list(out) + list(words_of(vs[j][0])), closed=bool(vs[j][1])) for j in cands]
     top = max(lz)
