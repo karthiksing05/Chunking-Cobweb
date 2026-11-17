@@ -802,6 +802,21 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     <div class="fig"><img class="plot" src="story_chunks_cases.png" alt="Six held-out sentences at 250, 500, 1,000, 2,000 and 4,000 sentences learned, with recognised chunks in square brackets and other chosen chunks in round brackets. For example tim had an idea is bracketed tim had, an idea from 250 on; i loved that toy car becomes i loved, that toy car by 4,000." loading="lazy"></div>
   </figure>
   <figcaption><b>Figure S2.</b> Case studies, seed 13: held-out sentences bracketed by the learner as learning goes on. [ ] recognised, ( ) chosen below the recognition threshold.</figcaption>
+  <h2>Generation and parsing against other learners (16 to 17 November)</h2>
+  <div class="col">
+    <p>Every generator learns the same 1,000 TinyStories sentences and must produce a sentence it never stored. The same Qwen judge scores them; it passes 89% of real held-out sentences (the dashed ceiling). Novelty is the share of new sentences that contain a word triple never stored, so splicing stored pieces earns none. Each line is one generator swept over its sampling temperature: TRELLIS's causal generator at context windows 3, 4 and 5, a transformer and an LSTM trained on the same sentences and sized by held-out loss, n-gram samplers and the retrieved one-word swap (rounds 184, 188, 190; 4 seeds).</p>
+  </div>
+  <figure>
+    <div class="fig"><img class="plot" src="story_frontier.png" alt="Two panels against novelty, the share of new sentences with an unstored trigram. Left, new sentences judged grammatical: TRELLIS window 3 from .90 at novelty .08 to .76 at .34; window 4 from .82 at .25 to .65 at .62; window 5 from .67 at .57 to .59 at .77; LSTM from .96 at .25 to .45 at .84; transformer from .87 at .50 to .37 at .89; n-grams .72 to .90 at novelty 0; swap .65 at .75. Right, grammatical share of the sentences with an unstored trigram: TRELLIS .50 to .63 at every window and temperature; LSTM .88 at temperature .3 falling to .37; transformer .77 to .30." loading="lazy"></div>
+  </figure>
+  <figcaption><b>Figure S3.</b> Grammaticality against novelty at 1,000 sentences learned. Labels are sampling temperatures; bars are seed ranges.</figcaption>
+  <ul>
+    <li><b>TRELLIS reaches the judge's ceiling, but only near copying.</b> At window 3 and temperature 0.5, 90% of its new sentences are judged grammatical, with 8% containing an unstored trigram. The 4- and 5-gram samplers reach 85 to 90% with none.</li>
+    <li><b>At matched novelty the neural models lead.</b> At novelty .3 and .4 the LSTM is at .93 and .89 against TRELLIS's .80 and .76; from .5 to .7 the transformer leads by .03 to .05. TRELLIS leads only below .25, where no neural point was measured.</li>
+    <li><b>The reason is the sentences that are new at the trigram level.</b> TRELLIS's are 50 to 63% grammatical at every window and temperature; the LSTM's reach 88% at low temperature. Sharpening TRELLIS's draw trades novelty for copying without making its new trigrams better.</li>
+    <li><b>Parsing.</b> Against the same gold shallow phrases, TRELLIS's parses cross the fewest phrase boundaries (.25 against BPE .28) and score highest when subject + verb frames count (F1 .48 against .38 to .42), but plain phrase F1 ties word-level BPE (.37) and trails right-branching (.47), and a repeated phrase is bracketed alike less often than by BPE (.32 against .44; round 185). The content hierarchy plays no part in these parses: its gain was exactly zero, because smoothing over thousands of part names swamped it (round 187). Fixing the smoothing gives it 3 to 5 bits but makes parses worse (round 189).</li>
+  </ul>
+
   <h2>Parse agreement</h2>
   <div class="tablewrap"><table>
     <thead><tr><th>Sentences learned</th><th class="num">250</th><th class="num">500</th><th class="num">1,000</th><th class="num">2,000</th></tr></thead>
