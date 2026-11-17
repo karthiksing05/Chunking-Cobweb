@@ -10,7 +10,7 @@ A new trigram (a, b, c) at positions i-2..i is placed by its units:
 "edge" = a trigram with the start or end pad (as story_frontier.grams). A sentence's class: "chunk" if all its new trigrams are chunk-junction ones, "word" otherwise.
 Also: gram|tri overall, the units' share of chunks, and for reference the same measures on a words-only dump.
 
-Usage (compute node): r194_junction.py <n> <dir> [...]
+Usage (compute node): r194_junction.py <n> <dir> [...]   (ALL pools every arm of a dir; per-file lines name the arm)
 """
 import glob
 import json
@@ -67,7 +67,7 @@ for d in sys.argv[2:]:
             per["tri"].append(tri)
         out = {k: (m(v), len(v)) for k, v in per.items()}
         out["new trigram places"] = dict(kinds)
-        print(f"{os.path.basename(d)} s{seed}: " + json.dumps(out), flush=True)
+        print(f"{os.path.basename(d)} {os.path.basename(f)}: " + json.dumps(out), flush=True)
         for k, v in per.items():
             agg[k] += v
     print(f"{os.path.basename(d)} ALL: " + json.dumps({k: (m(v), len(v)) for k, v in agg.items()}), flush=True)
