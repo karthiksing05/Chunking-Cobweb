@@ -138,3 +138,37 @@ sentence-level applies here unchanged.
 Also checking the word two back as a pivot (l2 with r1 = l1 and the new word in r2; arm key `"reach": 2`) keeps only
 5-9% of the new-trigram sentences and is no more grammatical (0.33-0.63 with the boundary rule, against 0.67-0.72 for
 reach 1): with two right attributes the back-off makes almost every pair of right neighbours look unexpected. Not run.
+
+## 6. Results (arm `"both": true`, seeds 13 17 19 23, judged; frontier computed with the earlier dirs at each n)
+
+gram = new sentences judged grammatical, tri = share with an unstored trigram, gram|tri; mean [seed range].
+
+n = 1000 (`r192-frontier-n1000.*`, with r184/r188/r190/r191 dirs):
+
+| arm | temp | gram | tri | gram\|tri | without the check (r188/r190), gram\|tri |
+|---|---|---|---|---|---|
+| both w3 | 0.5 | 0.913 [0.877,0.945] | 0.044 [0.030,0.061] | 0.748 [0.621,0.922] | 0.633 |
+| both w3 | 0.7 | 0.873 [0.850,0.890] | 0.100 [0.087,0.112] | 0.695 [0.659,0.733] | 0.621 |
+| both w3 | 1.0 | 0.818 [0.790,0.842] | 0.197 [0.167,0.224] | 0.655 [0.593,0.729] | 0.583 |
+| both w4 | 0.5 | 0.889 [0.868,0.904] | 0.125 [0.099,0.166] | 0.708 [0.633,0.749] | 0.516 |
+| both w4 | 0.7 | 0.847 [0.820,0.860] | 0.218 [0.184,0.244] | 0.663 [0.635,0.710] | 0.543 |
+| both w4 | 1.0 | 0.806 [0.796,0.824] | 0.338 [0.311,0.389] | 0.667 [0.627,0.705] | 0.552 |
+| both w5 | 0.5 | 0.841 [0.780,0.867] | 0.277 [0.223,0.320] | 0.729 [0.681,0.800] | 0.507 |
+| both w5 | 0.7 | 0.821 [0.781,0.846] | 0.366 [0.353,0.389] | 0.709 [0.659,0.749] | 0.498 |
+| both w5 | 1.0 | 0.781 [0.742,0.820] | 0.461 [0.421,0.497] | 0.662 [0.635,0.720] | 0.531 |
+
+Envelope (gram at fixed tri): tri .2 LSTM .968 vs both w4 .855 (margin .113; was .135 against w3); tri .3 LSTM .932 vs
+both w5 .836 (margin .096; was .136); tri .4-.7 unchanged (GPT/LSTM lead; the checked arms do not reach tri .5).
+
+n = 500 (`r192-frontier-n500.*`): gram|tri 0.67-0.78 (was 0.49-0.62). Envelope: TRELLIS both leads at tri .2 (.855 vs
+TRELLIS w3 .830) and tri .3 (.821 vs .789; the neural curves start above tri .3 at n 500); tri .4 LSTM .885 vs both w5 .833
+(margin .052; was .139).
+n = 250 (`r192-frontier-n250.*`): gram|tri 0.66-0.81 (was 0.42-0.59). Envelope: both w4 leads at tri .3 (.815 vs .767,
+no neural arm reaches down to .3); tri .4 only LSTM covers it (.891); both w5 at tri .40-.49 has gram .84-.79 against
+LSTM's .90-.83 there.
+
+Verdict against the target: gram|tri rises by .1 to .2 at every n and window, but stays at .66-.81 (target .80 reached
+only by w3 at temp .5, n 250, mean .806, and with seed ranges reaching .92 at n 1000 w3 .5 on 4% of outputs). TRELLIS does
+not lead the envelope at tri >= .3 where a neural curve is present; it leads at tri .3 at n 250 / 500 only where the
+neural curves do not reach. The gap to the best neural arm at tri .3-.4 is cut by about a third (n 1000) to two thirds
+(n 500).
