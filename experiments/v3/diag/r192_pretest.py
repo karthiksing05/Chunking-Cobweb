@@ -62,8 +62,8 @@ for d in dumps:
     ps = json.load(open(d[:-len(".jsonl")] + ".scores.json", encoding="utf-8"))
     for r, pj in zip(rows, ps):
         s = r["gen"].split()
-        full = [BOS] * (W + 1) + s + [EOS]
-        o = W + 1
+        full = [BOS] * (W + 2) + s + [EOS]
+        o = W + 2
         steps = []
         for i in range(len(s) + 1):            # i: the new word's index in s (len(s): the end)
             l2, l1, w = full[o + i - 2], full[o + i - 1], full[o + i]
@@ -72,6 +72,11 @@ for d in dumps:
             j = o + i - 1                      # the pivot
             left = {f"l{k}": full[j - k] for k in range(1, W + 1)}
             sc = {kd: L.pivot_support(left, [l1], [w], kind=kd)[(l1, w)] for kd in KINDS}
+            if l2 != BOS and w != EOS:         # reach 2 (as generation: not at the end): l2 as the pivot, l1 its r1, w its r2
+                q2 = {**{f"l{k}": full[j - 1 - k] for k in range(1, W + 1)}, "r1": l1}
+                sc["pivot2"] = min(sc["pivot"], L.pivot_support(q2, [l2], [w], kind="pivot", slot="r2")[(l2, w)])
+            else:
+                sc["pivot2"] = sc["pivot"]
             steps.append({"end": w == EOS, "licensed": w != EOS and (l1, w) not in pairs,
                           "end pair stored": w != EOS or l1 in ends, **sc})
         if steps:
@@ -81,6 +86,8 @@ rules = {"all": lambda st: True}
 for kd in KINDS:
     rules[f"{kd} >= 0"] = (lambda kd: lambda st: st[kd] >= 0)(kd)
 rules["no unstored bigram"] = lambda st: not st["licensed"]
+rules["pivot2 >= 0"] = lambda st: st["pivot2"] >= 0
+rules["pivot2 >= 0, end after stored last word"] = lambda st: st["pivot2"] >= 0 and st["end pair stored"]
 rules["end only after a stored last word"] = lambda st: st["end pair stored"]
 for kd in KINDS:
     rules[f"{kd} >= 0, end after stored last word"] = (lambda kd: lambda st: st[kd] >= 0 and st["end pair stored"])(kd)
@@ -93,8 +100,8 @@ for name, rule in rules.items():
         by[c].append(g)
     tail = "; ".join(f"{c} {len(v) / len(res):.3f} gram {sum(v) / len(v):.3f}" for c, v in sorted(by.items()))
     print(f"{name:42s} kept {len(kept) / len(res):.3f} gram {sum(g for g, _ in kept) / max(len(kept), 1):.3f} | {tail}")
-print("\nkept by 'both >= 0, end after stored last word' and judged ungrammatical (random 30):")
-bad = [(gen, st) for g, st, gen in res if not g and all(x["both"] >= 0 and x["end pair stored"] for x in st)]
+print("\nkept by 'pivot2 >= 0, end after stored last word' and judged ungrammatical (random 30):")
+bad = [(gen, st) for g, st, gen in res if not g and all(x["pivot2"] >= 0 and x["end pair stored"] for x in st)]
 random.Random(0).shuffle(bad)
 for gen, st in bad[:30]:
     print("  " + gen + " | " + "; ".join(f"p{x['pivot']:+.2f} l{x['left']:+.2f}{' END' if x['end'] else ''}" for x in st))

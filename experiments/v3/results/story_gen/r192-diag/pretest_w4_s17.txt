@@ -1,4 +1,4 @@
-host friday.cc.gatech.edu start Tue Nov 17 02:45:39 AM EST 2026
+host kipp.cc.gatech.edu start Tue Nov 17 03:06:18 AM EST 2026
 {"seed": 17, "window": 4, "stored trigrams (memory)": 2906, "stream": 2835, "memory minus stream": 71, "stream minus memory": 0}
 sentences with a new trigram: 881, judged grammatical 0.501
 all                                        kept 1.000 gram 0.501 | A unstored bigram 0.162 gram 0.084; B new end 0.144 gram 0.362; C middle only 0.694 gram 0.627
@@ -6,40 +6,32 @@ pivot >= 0                                 kept 0.455 gram 0.696 | A unstored bi
 left >= 0                                  kept 0.411 gram 0.412 | A unstored bigram 0.076 gram 0.104; B new end 0.111 gram 0.255; C middle only 0.224 gram 0.594
 both >= 0                                  kept 0.193 gram 0.594 | A unstored bigram 0.001 gram 1.000; B new end 0.020 gram 0.333; C middle only 0.171 gram 0.623
 no unstored bigram                         kept 0.838 gram 0.581 | B new end 0.144 gram 0.362; C middle only 0.694 gram 0.627
+pivot2 >= 0                                kept 0.068 gram 0.483 | A unstored bigram 0.001 gram 1.000; B new end 0.020 gram 0.333; C middle only 0.047 gram 0.537
+pivot2 >= 0, end after stored last word    kept 0.054 gram 0.583 | A unstored bigram 0.001 gram 1.000; B new end 0.007 gram 0.833; C middle only 0.047 gram 0.537
 end only after a stored last word          kept 0.897 gram 0.537 | A unstored bigram 0.161 gram 0.085; B new end 0.042 gram 0.784; C middle only 0.694 gram 0.627
 pivot >= 0, end after stored last word     kept 0.442 gram 0.715 | A unstored bigram 0.001 gram 1.000; B new end 0.010 gram 0.667; C middle only 0.430 gram 0.715
 left >= 0, end after stored last word      kept 0.312 gram 0.484 | A unstored bigram 0.076 gram 0.104; B new end 0.012 gram 0.818; C middle only 0.224 gram 0.594
 both >= 0, end after stored last word      kept 0.179 gram 0.633 | A unstored bigram 0.001 gram 1.000; B new end 0.007 gram 0.833; C middle only 0.171 gram 0.623
 
-kept by 'both >= 0, end after stored last word' and judged ungrammatical (random 30):
-  they are scared and new | p+0.09 l+1.90
-  it was so pretty and excited | p+0.16 l+0.57
-  they were the toys they want | p+2.24 l+1.87
-  sue and sue were scared | p+1.62 l+0.31
-  they are scared and new | p+0.09 l+1.90
-  she liked to feel sad | p+0.20 l+3.72
-  they are scared and new | p+0.09 l+1.90
-  the man were scared | p+3.68 l+1.52
-  they were scared and safe | p+0.28 l+1.02
-  they were scared and safe | p+0.28 l+1.02
-  she liked to feel sad | p+0.20 l+3.72
-  i want some | p+0.57 l+0.58
-  they were the toys they want | p+2.24 l+1.87
+kept by 'pivot2 >= 0, end after stored last word' and judged ungrammatical (random 30):
   what was surprised | p+1.88 l+0.45
-  sue and sue were scared | p+1.62 l+0.31
-  she wanted to eat the bird feel better | p+0.01 l+0.08
-  they all liked to the park | p+0.02 l+1.90
-  they were scared and safe | p+0.28 l+1.02
-  they are scared and new | p+0.09 l+1.90
-  they were scared and safe | p+0.28 l+1.02
-  he thought and walked | p+1.35 l+3.38
-  she wanted to eat the bird feel better | p+0.01 l+0.08
-  they are scared and new | p+0.09 l+1.90
-  max walked to a big | p+0.00 l+1.88 END
-  he thought and walked | p+1.35 l+3.38
-  anna and anna looked at each other | p+0.43 l+1.81
-  they were scared and safe | p+0.28 l+1.02
+  i want some | p+0.57 l+0.58
   she liked to feel sad | p+0.20 l+3.72
-  they are scared and new | p+0.09 l+1.90
-  they were scared and safe | p+0.28 l+1.02
-end Tue Nov 17 02:47:57 AM EST 2026 status 0
+  she liked to feel sad | p+0.20 l+3.72
+  max was fun | p+0.63 l-0.66
+  she liked to feel sad | p+0.20 l+3.72
+  mom said me too | p+1.38 l-0.54
+  i want some | p+0.57 l+0.58
+  they all excited to see them all | p+0.65 l-0.62
+  mom said me too | p+1.38 l-0.54
+  i want some | p+0.57 l+0.58
+  they all excited to see what was inside | p+0.65 l-0.62
+  tim did you do that | p+0.93 l+0.20
+  she liked to feel sad | p+0.20 l+3.72
+  they all excited to see them all | p+0.65 l-0.62
+  max walked to a big | p+0.00 l+1.88 END
+  what was surprised | p+1.88 l+0.45
+  he wanted to be their cat | p+0.05 l-4.32
+  he wanted to be their cat | p+0.05 l-4.32
+  she liked to feel sad | p+0.20 l+3.72
+end Tue Nov 17 03:09:19 AM EST 2026 status 0

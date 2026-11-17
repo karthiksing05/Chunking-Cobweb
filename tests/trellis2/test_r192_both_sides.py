@@ -53,3 +53,13 @@ def test_left_is_conditional_pmi(learner):
     both = learner.pivot_support(q, [p], [EOS], kind="both")[(p, EOS)]
     piv = learner.pivot_support(q, [p], [EOS], kind="pivot")[(p, EOS)]
     assert both == pytest.approx(min(got, piv))
+
+
+def test_pivot_ratio_in_r2_matches_gap_fills(learner):
+    q = {"l1": "he", "l2": BOS, "l3": BOS, "r1": "to"}
+    p, x = "went", "the"
+    m1 = {v[1]: m for v, m in learner._gap_fills(q).items() if v[0] == "w"}
+    m2 = {v[1]: m for v, m in learner._gap_fills({**q, "r2": x}).items() if v[0] == "w"}
+    want = math.log(m2[p] / sum(m2.values())) - math.log(m1[p] / sum(m1.values()))
+    got = learner.pivot_support(q, [p], [x], kind="pivot", slot="r2")[(p, x)]
+    assert got == pytest.approx(want, rel=1e-6, abs=1e-9)

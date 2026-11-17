@@ -1,4 +1,4 @@
-host vincent.cc.gatech.edu start Tue Nov 17 02:45:39 AM EST 2026
+host bmo.cc.gatech.edu start Tue Nov 17 03:06:18 AM EST 2026
 {"seed": 13, "window": 5, "stored trigrams (memory)": 2815, "stream": 2744, "memory minus stream": 71, "stream minus memory": 0}
 sentences with a new trigram: 1759, judged grammatical 0.447
 all                                        kept 1.000 gram 0.447 | A unstored bigram 0.095 gram 0.144; B new end 0.383 gram 0.351; C middle only 0.522 gram 0.572
@@ -6,40 +6,42 @@ pivot >= 0                                 kept 0.403 gram 0.613 | B new end 0.1
 left >= 0                                  kept 0.486 gram 0.390 | A unstored bigram 0.034 gram 0.102; B new end 0.308 gram 0.332; C middle only 0.144 gram 0.581
 both >= 0                                  kept 0.188 gram 0.491 | B new end 0.079 gram 0.353; C middle only 0.109 gram 0.592
 no unstored bigram                         kept 0.905 gram 0.479 | B new end 0.383 gram 0.351; C middle only 0.522 gram 0.572
+pivot2 >= 0                                kept 0.148 gram 0.454 | B new end 0.098 gram 0.439; C middle only 0.049 gram 0.483
+pivot2 >= 0, end after stored last word    kept 0.088 gram 0.623 | B new end 0.038 gram 0.806; C middle only 0.049 gram 0.483
 end only after a stored last word          kept 0.724 gram 0.505 | A unstored bigram 0.094 gram 0.145; B new end 0.107 gram 0.492; C middle only 0.522 gram 0.572
 pivot >= 0, end after stored last word     kept 0.342 gram 0.684 | B new end 0.040 gram 0.800; C middle only 0.302 gram 0.669
 left >= 0, end after stored last word      kept 0.226 gram 0.491 | A unstored bigram 0.033 gram 0.103; B new end 0.049 gram 0.488; C middle only 0.144 gram 0.581
 both >= 0, end after stored last word      kept 0.127 gram 0.625 | B new end 0.019 gram 0.818; C middle only 0.109 gram 0.592
 
-kept by 'both >= 0, end after stored last word' and judged ungrammatical (random 30):
-  they went to run away | p+0.95 l+2.49
-  tom said i like playing with you tom | p+1.80 l+0.22
-  we have it together | p+0.27 l+1.21; p+0.92 l+3.07
-  and we can be good | p+0.13 l+0.94
-  says it is time to go home | p+4.46 l+1.95
-  they opened the sun | p+0.23 l+0.89
+kept by 'pivot2 >= 0, end after stored last word' and judged ungrammatical (random 30):
+  they were not share | p+1.67 l-1.12
   they go to run away | p+0.74 l+2.52
-  and we can be good | p+0.13 l+0.94
-  what is good | p+0.65 l+0.27
-  can i go home now | p+2.72 l+0.97
-  tom said i like playing with you tom | p+1.80 l+0.22
-  it is shiny and shiny | p+0.02 l+1.93
-  the ball said yes i can help you | p+2.15 l+1.42
-  amy was so happy and happy | p+0.10 l+3.58
-  tom said i like playing with you tom | p+1.80 l+0.22
-  and we can be good | p+0.13 l+0.94
-  the ball was surprised and blue | p+1.14 l+0.52; p+0.29 l+4.56
-  he wanted to play with the tree | p+3.10 l+3.59
-  he decided to have it | p+0.09 l+1.18
-  can i help me | p+1.78 l+0.31
-  says it is time to go home | p+4.46 l+1.95
-  thank you mom and mia | p+0.01 l+2.84
-  says it is time to go home | p+4.46 l+1.95
-  tom said i like playing with you tom | p+1.80 l+0.22
-  they told their red ball back | p+0.13 l+0.26
-  they eat the sun | p+0.23 l+0.89
-  and we can be good | p+0.13 l+0.94
-  can i help me | p+1.78 l+0.31
+  his dad said be careful tim | p+1.64 l-1.24; p+0.86 l+1.95
+  they were not share | p+1.67 l-1.12
+  they were not share | p+1.67 l-1.12
   they go to run fast | p+0.74 l+2.52
   they go to run away | p+0.74 l+2.52
-end Tue Nov 17 02:48:23 AM EST 2026 status 0
+  they were not share | p+1.67 l-1.12
+  they were not share | p+1.67 l-1.12
+  they went to run away | p+0.95 l+2.49
+  one day max saw a big | p+0.00 l+1.50 END
+  he decided to have it | p+0.09 l+1.18
+  they were not share | p+1.67 l-1.12
+  says it is time to go home | p+4.46 l+1.95
+  they go to run fast | p+0.74 l+2.52
+  they went to run fast | p+0.95 l+2.49
+  they went to run away | p+0.95 l+2.49
+  one day she had a big | p+0.00 l+1.52 END
+  max was happy and help | p+0.69 l-1.86
+  one day he saw a big | p+0.00 l+1.50 END
+  they were not share | p+1.67 l-1.12
+  they were not share | p+1.67 l-1.12
+  they went to run away | p+0.95 l+2.49
+  they were not share | p+1.67 l-1.12
+  they were not share | p+1.67 l-1.12
+  says it is time to go home | p+4.46 l+1.95
+  they go to run fast | p+0.74 l+2.52
+  she said no you are too | p+0.00 l-1.39 END
+  they were not share | p+1.67 l-1.12
+  they go to run fast | p+0.74 l+2.52
+end Tue Nov 17 03:09:27 AM EST 2026 status 0

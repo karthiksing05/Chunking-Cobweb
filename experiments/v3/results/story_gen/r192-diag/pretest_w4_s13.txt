@@ -1,4 +1,4 @@
-host vincent.cc.gatech.edu start Tue Nov 17 02:45:39 AM EST 2026
+host bmo.cc.gatech.edu start Tue Nov 17 03:06:18 AM EST 2026
 {"seed": 13, "window": 4, "stored trigrams (memory)": 2815, "stream": 2744, "memory minus stream": 71, "stream minus memory": 0}
 sentences with a new trigram: 947, judged grammatical 0.517
 all                                        kept 1.000 gram 0.517 | A unstored bigram 0.167 gram 0.127; B new end 0.043 gram 0.463; C middle only 0.790 gram 0.603
@@ -6,40 +6,42 @@ pivot >= 0                                 kept 0.518 gram 0.666 | B new end 0.0
 left >= 0                                  kept 0.315 gram 0.352 | A unstored bigram 0.096 gram 0.099; B new end 0.023 gram 0.727; C middle only 0.195 gram 0.432
 both >= 0                                  kept 0.157 gram 0.530 | B new end 0.019 gram 0.889; C middle only 0.138 gram 0.481
 no unstored bigram                         kept 0.833 gram 0.596 | B new end 0.043 gram 0.463; C middle only 0.790 gram 0.603
+pivot2 >= 0                                kept 0.091 gram 0.628 | B new end 0.019 gram 0.889; C middle only 0.072 gram 0.559
+pivot2 >= 0, end after stored last word    kept 0.091 gram 0.628 | B new end 0.019 gram 0.889; C middle only 0.072 gram 0.559
 end only after a stored last word          kept 0.997 gram 0.519 | A unstored bigram 0.166 gram 0.127; B new end 0.041 gram 0.487; C middle only 0.790 gram 0.603
 pivot >= 0, end after stored last word     kept 0.518 gram 0.666 | B new end 0.019 gram 0.889; C middle only 0.499 gram 0.658
 left >= 0, end after stored last word      kept 0.312 gram 0.356 | A unstored bigram 0.095 gram 0.100; B new end 0.021 gram 0.800; C middle only 0.195 gram 0.432
 both >= 0, end after stored last word      kept 0.157 gram 0.530 | B new end 0.019 gram 0.889; C middle only 0.138 gram 0.481
 
-kept by 'both >= 0, end after stored last word' and judged ungrammatical (random 30):
-  sue was happy and flew away | p+1.22 l+4.20
-  they decided to their room | p+0.05 l+0.11
-  the ball was surprised and blue | p+0.48 l+1.70; p+0.27 l+4.58
+kept by 'pivot2 >= 0, end after stored last word' and judged ungrammatical (random 30):
+  the tree was playing with a ball | p+0.18 l-6.75
+  they were not share | p+1.76 l-0.82
+  they like to play outside with his toys | p+0.00 l+1.01 END
+  they all laughed and ben mom said | p+0.03 l-5.46
   she picked it is time to go home | p+0.19 l+0.20
-  and they were they | p+0.42 l+2.70
-  they were their mom and sorry | p+0.09 l+3.06
-  he wanted to play it back | p+1.87 l+1.51
-  thank you tom and dad | p+0.00 l+3.15
-  he wanted to play it back | p+1.87 l+1.51
-  and they were they | p+0.42 l+2.70
-  they were very excited and excited | p+0.09 l+1.98
-  he was not get out | p+2.71 l+1.00
-  they were the mom and dad | p+0.65 l+1.33; p+1.35 l+2.40
-  he wanted to play it back | p+1.87 l+1.51
-  and they were they | p+0.42 l+2.70
-  they see the cake | p+0.21 l+2.04
-  and they were they | p+0.42 l+2.70
-  he wanted to play it on | p+2.14 l+0.38
-  they were the mom and dad | p+0.65 l+1.33; p+1.35 l+2.40
+  they were not share | p+1.76 l-0.82
+  they all laughed and ben mom said | p+0.03 l-5.46
+  they were not share | p+1.76 l-0.82
+  they were not share | p+1.76 l-0.82
+  they said thank you big cat | p+0.01 l-9.81
+  they said thank you big cat | p+0.01 l-9.81
+  they like to play outside with his toys | p+0.00 l+1.01 END
+  they had a lot of fun in it | p+1.39 l-1.11
+  they eat the sun | p+0.21 l+0.98
+  they were not share | p+1.76 l-0.82
+  they do not nice | p+0.02 l-2.56
+  they were not share | p+1.76 l-0.82
+  they do not nice | p+0.02 l-2.56
+  they were not share | p+1.76 l-0.82
+  they were not share | p+1.76 l-0.82
+  the cat was happy and flew away | p+0.18 l-12.87
+  they were not share | p+1.76 l-0.82
+  she picked it is time to go home | p+0.19 l+0.20
   max was happy and a little scared | p+0.23 l+0.49
-  and they were they | p+0.42 l+2.70
-  they were the mom and dad | p+0.65 l+1.33; p+1.35 l+2.40
-  he wanted to play it back | p+1.87 l+1.51
-  and they were they | p+0.42 l+2.70
-  and they were they | p+0.42 l+2.70
-  he was not get out | p+2.71 l+1.00
+  they all laughed and ben mom said | p+0.03 l-5.46
+  they were very sad and dad | p+0.01 l+2.22
+  they were not share | p+1.76 l-0.82
   she picked it is time to go home | p+0.19 l+0.20
-  he wanted to play it on | p+2.14 l+0.38
-  he wanted to play it back | p+1.87 l+1.51
-  thank you mom and mia | p+0.00 l+2.73
-end Tue Nov 17 02:48:03 AM EST 2026 status 0
+  they see the cake | p+0.21 l+2.04
+  who are nice | p+1.42 l-0.37
+end Tue Nov 17 03:08:57 AM EST 2026 status 0

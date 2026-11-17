@@ -993,6 +993,7 @@ for ai, arm in enumerate(arms):
         sweep_ = int(arm.pop("sweep", 0))  # r171: k Gibbs passes over the draft, each word redrawn from the context tree
                                            # given both sides (l2, l1, r1, r2), the gate on both of its pairs
         temp_ = float(arm.pop("temp", 1.0))  # r188: sampling temperature; the drawn weights go to w ** (1 / temp), 1.0 = unchanged
+        reach_ = int(arm.pop("reach", 1))  # r192 v2 (with "both"): 2 also checks the word two back as a pivot (r1 = l1, r2 = new word)
         both_ = arm.pop("both", None)      # r192: a filler that makes a trigram memory never stored is kept only if the
                                            # context tree, re-predicting the previous word (the pivot) from ITS left
                                            # context, finds the filler supports it: log P(pivot | left, r1 = w) /
@@ -1075,7 +1076,6 @@ for ai, arm in enumerate(arms):
             if v[1] not in _yc:
                 _yc[v[1]] = yield_of(L.records[v[1]])
             return _yc[v[1]]
-
         if both_:
             _bk_ = "pivot" if both_ is True else both_
             _tri_ = L.stored_trigrams()
@@ -1084,17 +1084,27 @@ for ai, arm in enumerate(arms):
             _bz = {}
             _f0 = _fills
 
-            def _fills(l2, l1, *far, _x=T3BOS):   # the same fillers, novel trigrams kept only when both sides agree
-                k = (far, l2, l1, _x)              # _x: the word before the window (the pivot's own l_W)
+            def _fills(l2, l1, *far, _x=T3BOS, _x2=T3BOS):   # the same fillers, novel trigrams kept only when both sides agree
+                k = (far, l2, l1, _x, _x2)         # _x, _x2: the words before the window (l_W+1, l_W+2)
                 if k not in _bz:
                     vs, ws = _f0(l2, l1, *far)
                     h = [l1, l2, *far]     # l1 .. lW of the filler
                     cand = sorted({_words(v)[0] for v, _ in vs})
                     nov = [w for w in cand if l1 != T3BOS and (l2, l1, w) not in _tri_]
                     piv_left = {f"l{i + 1}": x for i, x in enumerate(h[1:] + [_x])}   # the pivot l1 stands after l2 .. l_W+1
-                    go = L.pivot_support(piv_left, [l1], nov, kind=_bk_) if nov else {}
+                    if _bk_ == "pairs":    # ablation: a new trigram only over a stored pair (the strict pair gate)
+                        go = {(l1, w): (0.0 if (l1, w) in L._pair_counts else -1.0) for w in nov}
+                    else:
+                        go = L.pivot_support(piv_left, [l1], nov, kind=_bk_) if nov else {}
+                    if reach_ >= 2 and nov and l2 != T3BOS:   # r192 v2: also l2 as the pivot, l1 its r1, the new word its r2
+                        q2 = {**{f"l{i + 1}": x for i, x in enumerate(h[2:] + [_x, _x2])}, "r1": l1}
+                        go2 = L.pivot_support(q2, [l2], nov, kind=_bk_, slot="r2")
+                        go = {(l1, w): min(go.get((l1, w), 0.0), go2.get((l2, w), 0.0)) for w in nov}
                     endc = [w for w in cand if (l1, w, T3EOS) not in _tri_ and w in _ends_]
-                    end = L.pivot_support({f"l{i + 1}": x for i, x in enumerate(h)}, endc, [T3EOS], kind=_bk_) if endc else {}
+                    if _bk_ == "pairs":    # ablation: no right-side read; only stored pairs and the boundary words
+                        end = {(w, T3EOS): 0.0 for w in endc}
+                    else:
+                        end = L.pivot_support({f"l{i + 1}": x for i, x in enumerate(h)}, endc, [T3EOS], kind=_bk_) if endc else {}
                     keep = []
                     for j, (v, d) in enumerate(vs):
                         w = _words(v)[0]
@@ -1112,7 +1122,8 @@ for ai, arm in enumerate(arms):
                 while not done and len(out) <= 8:
                     t_ = [T3BOS] * 5 + out
                     vs, ws = _fills(t_[-2], t_[-1], *[t_[-3 - i] for i in range(max(getattr(L, "window", 2), 2) - 2)],
-                                    **({"_x": t_[-_W_ - 1] if len(t_) > _W_ else T3BOS} if both_ else {}))
+                                    **({"_x": t_[-_W_ - 1] if len(t_) > _W_ else T3BOS,
+                                        "_x2": t_[-_W_ - 2] if len(t_) > _W_ + 1 else T3BOS} if both_ else {}))
                     if not vs or sum(ws) <= 0:
                         break
                     if temp_ != 1.0:
@@ -1172,7 +1183,7 @@ for ai, arm in enumerate(arms):
             arm["blend"] = blend_
             if chart:
                 arm["chart"] = chart
-        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"esc": esc_} if esc_ else {}), **({"new": True} if new_ else {}), **({"q": q_} if q_ != 0.5 else {}), **({"near": near_} if near_ else {}), **({"sweep": sweep_} if sweep_ else {}), **({"temp": temp_} if temp_ != 1.0 else {}), **({"both": both_} if both_ else {})})
+        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"esc": esc_} if esc_ else {}), **({"new": True} if new_ else {}), **({"q": q_} if q_ != 0.5 else {}), **({"near": near_} if near_ else {}), **({"sweep": sweep_} if sweep_ else {}), **({"temp": temp_} if temp_ != 1.0 else {}), **({"both": both_} if both_ else {}), **({"reach": reach_} if reach_ != 1 else {})})
         if sweep_:
             _tw = {}
 

@@ -1,0 +1,140 @@
+# Round 192: why TRELLIS's new trigrams are ungrammatical, and one check against it
+
+Setting: causal words-gated arm `{"causal":1,"units":"words","pair":"gate","new":true}`, learner window 3/4/5, n = 1000,
+the judged r188 dumps (temp 0.5 and 0.7). Tools (all on compute nodes):
+
+- `experiments/v3/diag/r192_trace.py`: rebuilds the seed's stream and learner exactly as `t3_story.py`, and for every
+  judged sentence with a trigram the stream never had (padded with `<s>`, `</s>`) traces the step that placed the
+  trigram's last word: the gated filler share p, whether the pair (l1, w) was stored or only passed the type-licence gate,
+  the committed occurrences of w that carried its mass, and for the top ones the concept on the occurrence's context path
+  that licensed each attribute of the query (the deepest ancestor holding the value: height above the leaf, size, lift).
+- `r192_summarize.py` / `r192_cases.py`: feature splits by the judge, AUCs, classes and cases
+  (`r192-diag/summary_all_s13.txt`, `r192-diag/cases_s13.txt`; seed 13, windows 3/4/5, both temps pooled:
+  2719 new-trigram sentences, 48.8% judged grammatical).
+- `r192_pretest.py`: candidate checks scored on the same dumps without generating (`r192-diag/pretest_w{3,4,5}_s{13,17}.txt`).
+
+## 1. Three kinds of failure, by where the new trigram comes from
+
+| class (seed 13, w3-5 pooled) | share of new-trigram sentences | judged grammatical |
+|---|---|---|
+| A. the pair (l1, w) was never stored; the type-licence gate let it through | 12.2% | 0.12 |
+| B. the sentence ends where it never ended before ((l1, w, `</s>`) new) | 23.1% | 0.36 |
+| C. every pair stored, only the trigram (l2, l1, w) new | 64.7% | 0.60 |
+
+(The no-new-trigram generations are judged grammatical at about 0.88-0.91, the judge's ceiling, so the new trigram is
+what costs the sentence.)
+
+**A: the type licence licenses substitutions across agreement and function words.** 327 of the 372 class-A sentences
+are judged ungrammatical. Nearly all are one of a handful of pairs: *they was*, *she were*, *max were*, *tim were*,
+*she and*, *he and*, *and and*, *tom and to*, *max said thank you bird*. The trace shows the mechanism: `was` after `they`
+gets its mass from occurrences of `was` after `he` / `she` / `it`, whose leaves back off to a concept 1 level up where
+`l1 = they` has a count (they, he, she share almost every other neighbour), and the type licence (2.2 against a median of
+1.4) passes the pair. Distributional similarity is high exactly where agreement makes the substitution wrong.
+
+**B: ends after words that never end a sentence.** *she loved to play outside in the*, *it was a big red*, *he was very*,
+*they did not want to*, *said the little*, *he wanted to play with his*. The end is read jointly with the word through
+r1 = `</s>`; a single-occurrence leaf backs off half of its parent's end probability, so a determiner or preposition still
+gets P(end) of 0.05-0.27 after a few levels, and the pair gate never looks at (w, `</s>`): the end marker has no type
+licence and the gate skips it. The same happens at the start (`l1 = <s>` is skipped by the gate): *loved it on a special
+rock*, *smiled and her friend tom*, *wanted it was very pretty*, *boy is so pretty*.
+
+**C: bigram chaining through a pivot used in two ways.** Both pairs are stored but the middle word (the pivot) is used
+differently on each side:
+
+- *to* infinitive vs preposition: *tom wanted to the friends*, *they went to be careful*, *the ball went to play outside*
+- copula vs auxiliary around *not* / *was* / *a*: *they were not share*, *they did not good friends*, *he was a happy to*,
+  *you are a nice ball*, *i was fun and pretty*
+- coordination that repeats or switches category: *tom and tom were*, *lily and lily*, *it was shiny and shiny*,
+  *max was happy and have fun*, *it is so pretty and excited*
+- pronoun / determiner slots: *they were they*, *lily and ben were they*, *sue was their mom*
+- selection the judge reads as semantic: *spot loved to play with the park*, *the tree was playing*, *under a lot*
+- agreement beyond the window: *she was very happy to help his mom*, *they like to play outside with his ball* (the new
+  trigram is elsewhere in the sentence; the window cannot see the subject)
+
+## 2. What does not explain it
+
+Per step (sentence = its worst new step), AUC against the judge:
+
+| statistic | AUC all | AUC class C (one new step) | AUC class B (one new step) |
+|---|---|---|---|
+| the gated filler share p of the new word | 0.50 | 0.44 | 0.49 |
+| licensing concept height above the leaf (mass-weighted, l2 / r1) | 0.52 | 0.52 | 0.53 |
+| share of w's mass from occurrences with the same l1 | 0.57 | 0.44 | 0.44 |
+| pre-emption, N(history) x log(1 - p) (seen often, never with w) | 0.67 | 0.54 | 0.52 |
+| pair stored (vs type-licensed) | 0.59 | - | - |
+| **both sides: log P(pivot \| left, r1 = w) / P(pivot \| left)** | **0.67** | **0.55** | **0.58** |
+
+The licensing concept is not an over-general concept near the root: in good and bad sentences alike the new value is
+held 1-3 levels above a single-occurrence leaf (mass-weighted mean height 1.1 in judged-grammatical sentences, 1.5 in the rest), so a depth / gain-over-root threshold
+(Kneser-Ney-style back-off limit) has nothing to cut. Neither the step probability nor how often the history was seen
+separates them within a class. What separates them is the class (A 0.12, B 0.36, C 0.60) and, inside A and C, whether the
+new word supports the previous word from the right.
+
+## 3. The mechanism (round 192 arm key `"both"`) and why
+
+A new word is placed by the context tree from its left context only, and every attribute of that context is backed off
+independently at the occurrence's leaf; nothing asks whether the previous word, as it was placed, is the word that
+stands before the new one. The check asks the context tree that question with the same reading it already uses for
+generation: re-predict the previous word (the pivot) from its own left context, once alone and once with r1 = the new
+word, and keep the new word only if it does not make the pivot less probable,
+
+    log P(pivot | left, r1 = w) / P(pivot | left) >= 0     (Trellis3.pivot_support, kind "pivot")
+
+By Bayes this is log P(w | left, pivot) / P(w | left): the new word must be at least as expected after this pivot as
+after the left context with any word in the pivot's place, so a pivot whose occurrences before w are a different use
+(*to* before *the* stood after *went*, not after *wanted*) or a different word altogether (*was* after *they* is
+explained by *he*, not *they*) loses it. It needs no new constant: the threshold is the point where the right neighbour
+stops carrying information for the pivot (zero pointwise mutual information). It only applies to trigrams memory never
+stored (stored ones are licensed by the stream), it reads the context tree's committed occurrences with the same
+hierarchical back-off as `_gap_fills` (no new tree, no tags, no fitted layer), and it is tried at generation time, not as
+a post-filter. The sentence boundaries get the same rule where the ratio is uninformative (when the left context nearly
+fixes the pivot, both reads agree and the ratio is ~0, e.g. *outside in the* `</s>`): the end and start markers are
+neighbours the type licence cannot license, so a new end or start is allowed only at a word memory saw end or start a
+sentence (the pair gate's own rule, which it skipped at the boundaries).
+
+Pre-test on the judged r188 dumps (rule = every new step passes; kept = share of new-trigram sentences kept):
+
+| w, seed | all: gram | pivot >= 0: kept, gram | + boundary words: kept, gram | "left" (PMI of left and w given pivot) >= 0 | no unstored pair at all |
+|---|---|---|---|---|---|
+| w3 s13 | 0.562 | 0.43, 0.718 | 0.43, 0.718 | 0.32, 0.477 | 0.88, 0.635 |
+| w3 s17 | 0.618 | 0.55, 0.687 | 0.55, 0.687 | 0.20, 0.714 | 0.91, 0.665 |
+| w4 s13 | 0.517 | 0.52, 0.666 | 0.52, 0.666 | 0.32, 0.352 | 0.83, 0.596 |
+| w4 s17 | 0.501 | 0.46, 0.696 | 0.44, 0.715 | 0.41, 0.412 | 0.84, 0.581 |
+| w5 s13 | 0.447 | 0.40, 0.613 | 0.34, 0.684 | 0.49, 0.390 | 0.91, 0.479 |
+| w5 s17 | 0.436 | 0.38, 0.658 | 0.28, 0.704 | 0.56, 0.434 | 0.84, 0.501 |
+
+The pivot ratio removes nearly all of class A (kept A share ~0) and raises class C from 0.60-0.67 to 0.66-0.77; the
+boundary rule matters at w5, where new ends are 38-40% of the new-trigram sentences. The other reading of "both sides"
+(the left context and w co-occurring among the pivot's own occurrences, kind "left") is worse than no check: the
+back-off smooths the pivot's occurrences toward each other, so the joint read is noise. As a post-filter the check
+reaches 0.67-0.72, short of the 0.80 target; what it leaves is mostly class C's coordination repeats and semantic
+selection (section 1), which a window-local two-sided read cannot see.
+
+## 4. How this differs from the closed lines (site Appendix, rounds 156-182)
+
+Every closed line tried to make *unstored pairs* (bigrams) better or to rerank whole sentences:
+
+| closed line | what it changed | why the r192 check is not a repeat |
+|---|---|---|
+| r156 / r159 gate quantiles, nearest-4 licence; r177 type-read fills (Kneser-Ney); r178 back-off over the parent's distinct fillers | how the LEFT context licenses a word, read by types or at nearer concepts | the check reads the RIGHT side: whether the new word supports the word before it (log P(pivot \| left, r1 = w) / P(pivot \| left)); no licence, quantile or type read is involved |
+| r179 / r180 escape to an unstored next word from the type / pair / skip-pair licence | adds unstored pairs | the check adds nothing; it only removes fillers whose trigram is new and whose right-side read fails |
+| r160 specialising a drawn word one level up | replaces a drawn word | nothing is replaced |
+| r170 chart mixing (length drawn first) | a second generator | same generator; the ends that r170 left "mid-phrase" are what the boundary rule closes (r170 drew the length up front; here the end is gated where the pair gate never looked) |
+| r182 parse-score critic (draw and rerank whole sentences, AUC .51-.57) | a post-hoc sentence score | the check is per step, at generation, on the step that makes the new trigram; its AUC as a sentence filter is .67 overall but only .55 (class C) / .58 (class B) inside a class, i.e. it is NOT a better critic. Its gain comes from what it removes at generation |
+
+Where it overlaps, said plainly: (1) Most of its gain on class A is the same thing the strict pair gate does: unstored
+pairs are bad (rounds 156-181 found 12-27% grammatical; here 12%), and the check rejects almost all of them (kept A share
+~0 in the pre-test). The current arm (r184+) lets type-licensed unstored pairs through (12% of new-trigram sentences);
+tightening the gate is not new, and the pre-test row "no unstored pair at all" (0.58-0.67) is that alone. (2) What is new
+is (a) gating the sentence boundaries, which the pair gate skipped (class B, 4-40% of new-trigram sentences depending on
+window, 0.36 grammatical), and (b) the right-side check on new trigrams of STORED pairs (class C, 65%), which no closed
+line touched (they all worked on pairs). In the pre-test (b) adds +0.03 to +0.15 over "no unstored pair" in class C.
+(3) It cannot fix the failures that are sentence-level (agreement such as *tim and sue was sad*, or *she ... his mom*,
+fragments): those are in sentences whose trigrams may all be stored, and the r181 note that such failures are
+sentence-level applies here unchanged.
+
+## 5. Variant tried in pre-test and dropped: reach 2
+
+Also checking the word two back as a pivot (l2 with r1 = l1 and the new word in r2; arm key `"reach": 2`) keeps only
+5-9% of the new-trigram sentences and is no more grammatical (0.33-0.63 with the boundary rule, against 0.67-0.72 for
+reach 1): with two right attributes the back-off makes almost every pair of right neighbours look unexpected. Not run.

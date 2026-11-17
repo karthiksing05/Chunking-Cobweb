@@ -1,0 +1,18 @@
+judge real-sentence ceiling (mean over seeds): 0.891  (per seed 13:0.897, 17:0.913, 19:0.890, 23:0.863)
+upper envelope of gram along each family's temperature curve (linear interpolation in tri, no extrapolation)
+level | TRELLIS both w3 | TRELLIS both w4 | TRELLIS both w5 | TRELLIS w3 | TRELLIS w4 | TRELLIS w5 | GPT | LSTM | ngram 3 | ngram 4 | ngram 5 | retrieved swap
+tri=0.1 | 0.876 [0.853,0.893] | - | - | 0.878 [0.859,0.907] (3 seeds) | - | - | - | - | - | - | - | -
+tri=0.2 | - | 0.855 [0.802,0.897] | - | 0.830 [0.819,0.852] | - | - | - | - | - | - | - | -
+tri=0.3 | - | 0.821 [0.796,0.863] | - | 0.789 [0.785,0.803] | - | - | - | - | - | - | - | -
+tri=0.4 | - | - | 0.833 [0.784,0.863] | - | 0.746 [0.733,0.802] (3 seeds) | - | - | 0.885 [0.854,0.928] | - | - | - | -
+tri=0.5 | - | - | - | - | 0.708 [0.667,0.747] | - | 0.874 [0.813,0.832] (2 seeds) | 0.822 [0.790,0.850] | - | - | - | -
+tri=0.6 | - | - | - | - | - | - | 0.785 [0.730,0.756] (2 seeds) | 0.736 [0.713,0.775] | - | - | - | -
+tri=0.7 | - | - | - | - | - | 0.646 [0.605,0.730] (3 seeds) | 0.683 [0.641,0.796] | 0.648 [0.607,0.700] | - | - | - | -
+
+tri=0.1: highest TRELLIS w3 0.878 [0.859,0.907]; next TRELLIS both w3 0.876 [0.853,0.893]; margin +0.003
+tri=0.2: highest TRELLIS both w4 0.855 [0.802,0.897]; next TRELLIS w3 0.830 [0.819,0.852]; margin +0.025
+tri=0.3: highest TRELLIS both w4 0.821 [0.796,0.863]; next TRELLIS w3 0.789 [0.785,0.803]; margin +0.031
+tri=0.4: highest LSTM 0.885 [0.854,0.928]; next TRELLIS both w5 0.833 [0.784,0.863]; margin +0.052
+tri=0.5: highest GPT 0.874 [0.813,0.832]; next LSTM 0.822 [0.790,0.850]; margin +0.051
+tri=0.6: highest GPT 0.785 [0.730,0.756]; next LSTM 0.736 [0.713,0.775]; margin +0.049
+tri=0.7: highest GPT 0.683 [0.641,0.796]; next LSTM 0.648 [0.607,0.700]; margin +0.035

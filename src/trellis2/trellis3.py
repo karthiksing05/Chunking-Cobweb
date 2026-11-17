@@ -2792,21 +2792,22 @@ class Trellis3:
         return mass
 
     def pivot_support(self, left: dict, pivots: Sequence[str], rights: Sequence[str],
-                      kind: str = "pivot") -> Dict[tuple, float]:
+                      kind: str = "pivot", slot: str = "r1") -> Dict[tuple, float]:
         """Both sides (r192): how a right neighbour x supports a word p (each of ``pivots``) standing
-        after the surroundings ``left`` (l1..lk), read off the context tree as _gap_fills reads it
-        (each committed word occurrence by the hierarchical back-off along its context leaf's path,
-        beta 1, word fillers only). kind:
+        in the surroundings ``left`` (l1..lk, and any right attributes already known, e.g. r1 when x
+        goes in r2), read off the context tree as _gap_fills reads it (each committed word occurrence
+        by the hierarchical back-off along its context leaf's path, beta 1, word fillers only); x
+        fills the attribute ``slot`` (r1 by default). kind:
 
-          "pivot"  log P(p | left, r1 = x) / P(p | left): x makes p more probable than the other
-                   words that stand after ``left`` (< 0: x pulls toward occurrences of other words)
-          "left"   log P(x | left, p) / P(x | p): among p's own occurrences, those standing after
-                   ``left`` are the ones that stood before x (< 0: p before x is a different use of p
-                   than p after ``left``), i.e. the pointwise mutual information of left and x given p
+          "pivot"  log P(p | left, slot = x) / P(p | left): x makes p more probable than the other
+                   words that stand in ``left`` (< 0: x pulls toward occurrences of other words)
+          "left"   log P(x | left, p) / P(x | p): among p's own occurrences, those standing in
+                   ``left`` are the ones that had x (< 0: p with x is a different use of p than p
+                   in ``left``), i.e. the pointwise mutual information of left and x given p
           "both"   the smaller of the two
 
-        Returns {(p, x): log ratio}; a p that never filled a context, or an x never stored as a
-        right neighbour, gets 0."""
+        Returns {(p, x): log ratio}; a p that never filled a context, or an x never stored in the
+        slot, gets 0."""
         import numpy as np
         root, alpha = self.ctx.root, self.alpha
         key = (len(self.records), self.stats.get("experiences", 0))
@@ -2830,28 +2831,29 @@ class Trellis3:
             for a, i in enumerate(ids):
                 for w, c in by_leaf[i].items():
                     Wm[a, wx[w]] = c
-            rvals = sorted(root.av.get("r1", {}), key=str)
+            self._ps_index = got = (key, (nodes, wx, Wm, Wm.sum(1), {}))
+            self.__dict__.pop("_ps_cache", None)
+        nodes, wx, Wm, tot, slots = got[1]
+        if slot not in slots:                    # P(slot = x | leaf) for every stored x, hierarchical back-off
+            rvals = sorted(root.av.get(slot, {}), key=str)
             rx = {v: k for k, v in enumerate(rvals)}
             size = len(rvals) + 1
             rm: Dict[int, object] = {}
 
-            def rprob(node):                   # P(r1 = x | node) for every stored x, hierarchical back-off
+            def rprob(node):
                 if node.id not in rm:
-                    d = node.av.get("r1", {})
                     c = np.zeros(len(rvals))
-                    for v, n in d.items():
+                    for v, n in node.av.get(slot, {}).items():
                         c[rx[v]] = n
                     if node.parent is None:
                         rm[node.id] = (c + alpha) / (node.count + alpha * size)
                     else:
                         rm[node.id] = (c + rprob(node.parent)) / (node.count + 1.0)
                 return rm[node.id]
-            Rm = np.stack([rprob(nd) for nd in nodes])
-            self._ps_index = got = (key, (nodes, wx, Wm, Wm.sum(1), rx, Rm))
-            self.__dict__.pop("_ps_cache", None)
-        nodes, wx, Wm, tot, rx, Rm = got[1]
+            slots[slot] = (rx, np.stack([rprob(nd) for nd in nodes]))
+        rx, Rm = slots[slot]
         cache = self.__dict__.setdefault("_ps_cache", {})
-        lk = tuple(sorted(left.items()))
+        lk = (tuple(sorted(left.items())), slot)
         if lk not in cache:
             if len(cache) > 4096:
                 cache.clear()
@@ -2883,7 +2885,7 @@ class Trellis3:
             if kind != "pivot":
                 s_l, s_r, n_p = float(Lw @ col), col @ Rm, float(col.sum())
             for x in rights:
-                if x not in rx:                              # never a right neighbour: the root's smoothing alone
+                if x not in rx:                              # never stored in the slot: the root's smoothing alone
                     out[(p, x)] = 0.0
                     continue
                 k = rx[x]
