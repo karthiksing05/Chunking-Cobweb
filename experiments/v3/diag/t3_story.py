@@ -993,6 +993,14 @@ for ai, arm in enumerate(arms):
         sweep_ = int(arm.pop("sweep", 0))  # r171: k Gibbs passes over the draft, each word redrawn from the context tree
                                            # given both sides (l2, l1, r1, r2), the gate on both of its pairs
         temp_ = float(arm.pop("temp", 1.0))  # r188: sampling temperature; the drawn weights go to w ** (1 / temp), 1.0 = unchanged
+        both_ = arm.pop("both", None)      # r192: a filler that makes a trigram memory never stored is kept only if the
+                                           # context tree, re-predicting the previous word (the pivot) from ITS left
+                                           # context, finds the filler supports it: log P(pivot | left, r1 = w) /
+                                           # P(pivot | left) >= 0 (Trellis3.pivot_support kind "pivot"; "left" / "both"
+                                           # are the other kinds); a new end ((l1, w, end) never stored) likewise with w
+                                           # as the pivot and the end marker as r1, and only after a word memory saw
+                                           # end a sentence (the end marker is a right neighbour without a type licence;
+                                           # likewise the first word: only a word memory saw start a sentence)
         esc_ = arm.pop("esc", None)        # r179 "licence": unstored next words drawn FROM the type licence, with the
                                            # Witten-Bell escape mass d/(d+c) of l1 (d distinct stored successors, c tokens);
                                            # the context tree draws the stored successors with the rest
@@ -1068,12 +1076,43 @@ for ai, arm in enumerate(arms):
                 _yc[v[1]] = yield_of(L.records[v[1]])
             return _yc[v[1]]
 
+        if both_:
+            _bk_ = "pivot" if both_ is True else both_
+            _tri_ = L.stored_trigrams()
+            _ends_ = {t[1] for t in _tri_ if t[2] == T3EOS}   # words memory saw end a sentence
+            _W_ = max(getattr(L, "window", 2), 2)
+            _bz = {}
+            _f0 = _fills
+
+            def _fills(l2, l1, *far, _x=T3BOS):   # the same fillers, novel trigrams kept only when both sides agree
+                k = (far, l2, l1, _x)              # _x: the word before the window (the pivot's own l_W)
+                if k not in _bz:
+                    vs, ws = _f0(l2, l1, *far)
+                    h = [l1, l2, *far]     # l1 .. lW of the filler
+                    cand = sorted({_words(v)[0] for v, _ in vs})
+                    nov = [w for w in cand if l1 != T3BOS and (l2, l1, w) not in _tri_]
+                    piv_left = {f"l{i + 1}": x for i, x in enumerate(h[1:] + [_x])}   # the pivot l1 stands after l2 .. l_W+1
+                    go = L.pivot_support(piv_left, [l1], nov, kind=_bk_) if nov else {}
+                    endc = [w for w in cand if (l1, w, T3EOS) not in _tri_ and w in _ends_]
+                    end = L.pivot_support({f"l{i + 1}": x for i, x in enumerate(h)}, endc, [T3EOS], kind=_bk_) if endc else {}
+                    keep = []
+                    for j, (v, d) in enumerate(vs):
+                        w = _words(v)[0]
+                        if go.get((l1, w), 0.0) < 0 or (l1 == T3BOS and (T3BOS, T3BOS, w) not in _tri_):
+                            continue   # (a new start: only a word memory saw start a sentence, as the end)
+                        if d and (l1, w, T3EOS) not in _tri_ and (w not in _ends_ or end[(w, T3EOS)] < 0):
+                            continue
+                        keep.append(j)
+                    _bz[k] = ([vs[j] for j in keep], [ws[j] for j in keep])
+                return _bz[k]
+
         def gen(p, _rng=g_rng):
             for _ in range(50):
                 out, done = [], False
                 while not done and len(out) <= 8:
                     t_ = [T3BOS] * 5 + out
-                    vs, ws = _fills(t_[-2], t_[-1], *[t_[-3 - i] for i in range(max(getattr(L, "window", 2), 2) - 2)])
+                    vs, ws = _fills(t_[-2], t_[-1], *[t_[-3 - i] for i in range(max(getattr(L, "window", 2), 2) - 2)],
+                                    **({"_x": t_[-_W_ - 1] if len(t_) > _W_ else T3BOS} if both_ else {}))
                     if not vs or sum(ws) <= 0:
                         break
                     if temp_ != 1.0:
@@ -1133,7 +1172,7 @@ for ai, arm in enumerate(arms):
             arm["blend"] = blend_
             if chart:
                 arm["chart"] = chart
-        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"esc": esc_} if esc_ else {}), **({"new": True} if new_ else {}), **({"q": q_} if q_ != 0.5 else {}), **({"near": near_} if near_ else {}), **({"sweep": sweep_} if sweep_ else {}), **({"temp": temp_} if temp_ != 1.0 else {})})
+        arm.update({"causal": causal, "units": units_, **({"pair": pair_} if pair_ else {}), **({"esc": esc_} if esc_ else {}), **({"new": True} if new_ else {}), **({"q": q_} if q_ != 0.5 else {}), **({"near": near_} if near_ else {}), **({"sweep": sweep_} if sweep_ else {}), **({"temp": temp_} if temp_ != 1.0 else {}), **({"both": both_} if both_ else {})})
         if sweep_:
             _tw = {}
 

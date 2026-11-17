@@ -2791,6 +2791,128 @@ class Trellis3:
         cache[key] = mass
         return mass
 
+    def pivot_support(self, left: dict, pivots: Sequence[str], rights: Sequence[str],
+                      kind: str = "pivot") -> Dict[tuple, float]:
+        """Both sides (r192): how a right neighbour x supports a word p (each of ``pivots``) standing
+        after the surroundings ``left`` (l1..lk), read off the context tree as _gap_fills reads it
+        (each committed word occurrence by the hierarchical back-off along its context leaf's path,
+        beta 1, word fillers only). kind:
+
+          "pivot"  log P(p | left, r1 = x) / P(p | left): x makes p more probable than the other
+                   words that stand after ``left`` (< 0: x pulls toward occurrences of other words)
+          "left"   log P(x | left, p) / P(x | p): among p's own occurrences, those standing after
+                   ``left`` are the ones that stood before x (< 0: p before x is a different use of p
+                   than p after ``left``), i.e. the pointwise mutual information of left and x given p
+          "both"   the smaller of the two
+
+        Returns {(p, x): log ratio}; a p that never filled a context, or an x never stored as a
+        right neighbour, gets 0."""
+        import numpy as np
+        root, alpha = self.ctx.root, self.alpha
+        key = (len(self.records), self.stats.get("experiences", 0))
+        got = self.__dict__.get("_ps_index")
+        if got is None or got[0] != key:
+            leaves: Dict[int, object] = {}
+            by_leaf: Dict[int, Dict[str, float]] = {}
+            for e in self.records:
+                if e.leaf is None:
+                    continue
+                for which, attr, value, w in e.pas:
+                    if which == "ctx" and attr == FILL and value[0] == "w":
+                        leaves[e.leaf.id] = e.leaf
+                        d = by_leaf.setdefault(e.leaf.id, {})
+                        d[value[1]] = d.get(value[1], 0.0) + w
+            ids = sorted(leaves)
+            nodes = [leaves[i] for i in ids]
+            words = sorted({w for d in by_leaf.values() for w in d})
+            wx = {w: k for k, w in enumerate(words)}
+            Wm = np.zeros((len(ids), len(words)))
+            for a, i in enumerate(ids):
+                for w, c in by_leaf[i].items():
+                    Wm[a, wx[w]] = c
+            rvals = sorted(root.av.get("r1", {}), key=str)
+            rx = {v: k for k, v in enumerate(rvals)}
+            size = len(rvals) + 1
+            rm: Dict[int, object] = {}
+
+            def rprob(node):                   # P(r1 = x | node) for every stored x, hierarchical back-off
+                if node.id not in rm:
+                    d = node.av.get("r1", {})
+                    c = np.zeros(len(rvals))
+                    for v, n in d.items():
+                        c[rx[v]] = n
+                    if node.parent is None:
+                        rm[node.id] = (c + alpha) / (node.count + alpha * size)
+                    else:
+                        rm[node.id] = (c + rprob(node.parent)) / (node.count + 1.0)
+                return rm[node.id]
+            Rm = np.stack([rprob(nd) for nd in nodes])
+            self._ps_index = got = (key, (nodes, wx, Wm, Wm.sum(1), rx, Rm))
+            self.__dict__.pop("_ps_cache", None)
+        nodes, wx, Wm, tot, rx, Rm = got[1]
+        cache = self.__dict__.setdefault("_ps_cache", {})
+        lk = tuple(sorted(left.items()))
+        if lk not in cache:
+            if len(cache) > 4096:
+                cache.clear()
+            q = dict(left)
+            sizes = {a: len(root.av.get(a, {})) + 1 for a in q}
+            pm: Dict[int, Dict[str, float]] = {}
+
+            def pv(node) -> Dict[str, float]:  # P(q_a | node) per attribute, hierarchical back-off
+                if node.id not in pm:
+                    if node.parent is None:
+                        pm[node.id] = {a: (node.av.get(a, {}).get(v, 0.0) + alpha) / (node.count + alpha * sizes[a])
+                                       for a, v in q.items()}
+                    else:
+                        up = pv(node.parent)
+                        pm[node.id] = {a: (node.av.get(a, {}).get(v, 0.0) + up[a]) / (node.count + 1.0)
+                                       for a, v in q.items()}
+                return pm[node.id]
+            Lg = np.array([sum(math.log(max(p, 1e-300)) for p in pv(nd).values()) for nd in nodes])
+            Lw = np.exp(Lg - Lg.max())
+            cache[lk] = (Lw, (Lw * tot) @ Rm, Lw @ Wm / max(float(Lw @ tot), 1e-300))
+        Lw, a_all, p1 = cache[lk]
+        out = {}
+        for p in pivots:
+            if p not in wx or p1[wx[p]] <= 0:
+                out.update({(p, x): 0.0 for x in rights})
+                continue
+            col = Wm[:, wx[p]]
+            a_p = (Lw * col) @ Rm                           # [x]  sum over p's occurrences of P(left) P(x)
+            if kind != "pivot":
+                s_l, s_r, n_p = float(Lw @ col), col @ Rm, float(col.sum())
+            for x in rights:
+                if x not in rx:                              # never a right neighbour: the root's smoothing alone
+                    out[(p, x)] = 0.0
+                    continue
+                k = rx[x]
+                piv = math.log(max(a_p[k] / max(a_all[k], 1e-300), 1e-300)) - math.log(p1[wx[p]])
+                if kind == "pivot":
+                    out[(p, x)] = piv
+                    continue
+                lef = math.log(max(a_p[k] * n_p, 1e-300)) - math.log(max(s_l * s_r[k], 1e-300))
+                out[(p, x)] = lef if kind == "left" else min(piv, lef)
+        return out
+
+    def stored_trigrams(self) -> set:
+        """The (l2, l1, w) of every committed word occurrence, and (l1, w, r1) where r1 is the
+        end marker: the word trigrams memory holds (BOS / EOS padded), cached until memory changes."""
+        key = (len(self.records), self.stats.get("experiences", 0))
+        got = self.__dict__.get("_tri_set")
+        if got is None or got[0] != key:
+            s = set()
+            for e in self.records:
+                if e.leaf is None or e.ctx is None:
+                    continue
+                for which, attr, value, _ in e.pas:
+                    if which == "ctx" and attr == FILL and value[0] == "w":
+                        s.add((e.ctx.get("l2", BOS), e.ctx.get("l1", BOS), value[1]))
+                        if e.ctx.get("r1") == EOS:
+                            s.add((e.ctx.get("l1", BOS), value[1], EOS))
+            self._tri_set = got = (key, s)
+        return got[1]
+
     def _next_pool(self, prev: Sequence[str], level: int = 0) -> Optional[Dict[int, float]]:
         """The whole experiences that followed sentences like ``prev`` (NEXT at the
         first concept from ``level`` above its content leaf up that has any; the root

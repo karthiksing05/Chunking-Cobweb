@@ -1,0 +1,45 @@
+host vincent.cc.gatech.edu start Tue Nov 17 02:45:39 AM EST 2026
+{"seed": 13, "window": 4, "stored trigrams (memory)": 2815, "stream": 2744, "memory minus stream": 71, "stream minus memory": 0}
+sentences with a new trigram: 947, judged grammatical 0.517
+all                                        kept 1.000 gram 0.517 | A unstored bigram 0.167 gram 0.127; B new end 0.043 gram 0.463; C middle only 0.790 gram 0.603
+pivot >= 0                                 kept 0.518 gram 0.666 | B new end 0.019 gram 0.889; C middle only 0.499 gram 0.658
+left >= 0                                  kept 0.315 gram 0.352 | A unstored bigram 0.096 gram 0.099; B new end 0.023 gram 0.727; C middle only 0.195 gram 0.432
+both >= 0                                  kept 0.157 gram 0.530 | B new end 0.019 gram 0.889; C middle only 0.138 gram 0.481
+no unstored bigram                         kept 0.833 gram 0.596 | B new end 0.043 gram 0.463; C middle only 0.790 gram 0.603
+end only after a stored last word          kept 0.997 gram 0.519 | A unstored bigram 0.166 gram 0.127; B new end 0.041 gram 0.487; C middle only 0.790 gram 0.603
+pivot >= 0, end after stored last word     kept 0.518 gram 0.666 | B new end 0.019 gram 0.889; C middle only 0.499 gram 0.658
+left >= 0, end after stored last word      kept 0.312 gram 0.356 | A unstored bigram 0.095 gram 0.100; B new end 0.021 gram 0.800; C middle only 0.195 gram 0.432
+both >= 0, end after stored last word      kept 0.157 gram 0.530 | B new end 0.019 gram 0.889; C middle only 0.138 gram 0.481
+
+kept by 'both >= 0, end after stored last word' and judged ungrammatical (random 30):
+  sue was happy and flew away | p+1.22 l+4.20
+  they decided to their room | p+0.05 l+0.11
+  the ball was surprised and blue | p+0.48 l+1.70; p+0.27 l+4.58
+  she picked it is time to go home | p+0.19 l+0.20
+  and they were they | p+0.42 l+2.70
+  they were their mom and sorry | p+0.09 l+3.06
+  he wanted to play it back | p+1.87 l+1.51
+  thank you tom and dad | p+0.00 l+3.15
+  he wanted to play it back | p+1.87 l+1.51
+  and they were they | p+0.42 l+2.70
+  they were very excited and excited | p+0.09 l+1.98
+  he was not get out | p+2.71 l+1.00
+  they were the mom and dad | p+0.65 l+1.33; p+1.35 l+2.40
+  he wanted to play it back | p+1.87 l+1.51
+  and they were they | p+0.42 l+2.70
+  they see the cake | p+0.21 l+2.04
+  and they were they | p+0.42 l+2.70
+  he wanted to play it on | p+2.14 l+0.38
+  they were the mom and dad | p+0.65 l+1.33; p+1.35 l+2.40
+  max was happy and a little scared | p+0.23 l+0.49
+  and they were they | p+0.42 l+2.70
+  they were the mom and dad | p+0.65 l+1.33; p+1.35 l+2.40
+  he wanted to play it back | p+1.87 l+1.51
+  and they were they | p+0.42 l+2.70
+  and they were they | p+0.42 l+2.70
+  he was not get out | p+2.71 l+1.00
+  she picked it is time to go home | p+0.19 l+0.20
+  he wanted to play it on | p+2.14 l+0.38
+  he wanted to play it back | p+1.87 l+1.51
+  thank you mom and mia | p+0.00 l+2.73
+end Tue Nov 17 02:48:03 AM EST 2026 status 0

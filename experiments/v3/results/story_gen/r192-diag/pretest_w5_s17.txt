@@ -1,0 +1,45 @@
+host friday.cc.gatech.edu start Tue Nov 17 02:45:39 AM EST 2026
+{"seed": 17, "window": 5, "stored trigrams (memory)": 2906, "stream": 2835, "memory minus stream": 71, "stream minus memory": 0}
+sentences with a new trigram: 1683, judged grammatical 0.436
+all                                        kept 1.000 gram 0.436 | A unstored bigram 0.161 gram 0.092; B new end 0.400 gram 0.403; C middle only 0.439 gram 0.591
+pivot >= 0                                 kept 0.382 gram 0.658 | A unstored bigram 0.001 gram 0.000; B new end 0.137 gram 0.457; C middle only 0.244 gram 0.774
+left >= 0                                  kept 0.559 gram 0.434 | A unstored bigram 0.074 gram 0.056; B new end 0.346 gram 0.419; C middle only 0.138 gram 0.674
+both >= 0                                  kept 0.237 gram 0.589 | A unstored bigram 0.001 gram 0.000; B new end 0.130 gram 0.466; C middle only 0.106 gram 0.743
+no unstored bigram                         kept 0.839 gram 0.501 | B new end 0.400 gram 0.403; C middle only 0.439 gram 0.591
+end only after a stored last word          kept 0.696 gram 0.454 | A unstored bigram 0.157 gram 0.087; B new end 0.100 gram 0.429; C middle only 0.439 gram 0.591
+pivot >= 0, end after stored last word     kept 0.281 gram 0.704 | A unstored bigram 0.001 gram 0.000; B new end 0.036 gram 0.250; C middle only 0.244 gram 0.774
+left >= 0, end after stored last word      kept 0.270 gram 0.463 | A unstored bigram 0.072 gram 0.041; B new end 0.059 gram 0.485; C middle only 0.138 gram 0.674
+both >= 0, end after stored last word      kept 0.137 gram 0.630 | A unstored bigram 0.001 gram 0.000; B new end 0.030 gram 0.240; C middle only 0.106 gram 0.743
+
+kept by 'both >= 0, end after stored last word' and judged ungrammatical (random 30):
+  they were the toys they want | p+1.79 l+0.50
+  lily was happy and happy again | p+0.85 l+1.78
+  the dog had no home and was | p+0.00 l+3.07 END
+  he played with the toys all | p+0.00 l+1.71 END
+  sue and sue were very surprised | p+1.51 l+0.35; p+0.65 l+0.34
+  he played with the toys all | p+0.00 l+1.71 END
+  he played in the toy all day | p+2.25 l+1.05; p+0.18 l+2.06
+  the man and max became good | p+0.00 l+0.44 END
+  he played with the toys all | p+0.00 l+1.71 END
+  they wanted to share it happy | p+0.89 l+4.39
+  he played with the toy all | p+0.00 l+1.71 END
+  they wanted to share it happy | p+0.89 l+4.39
+  i want some | p+0.87 l+0.75
+  they wanted to share it happy | p+0.89 l+4.39
+  she was very excited and play with you | p+0.00 l+0.85
+  the man and max became good | p+0.00 l+0.44 END
+  blue and the girl became good | p+0.00 l+0.46 END
+  he played with the toys all | p+0.00 l+1.71 END
+  she wanted it up and said look | p+1.42 l+2.48
+  he is a lot | p+0.21 l+0.38; p+1.63 l+1.65
+  they played with the park every day | p+0.20 l+0.78
+  the man were scared | p+4.36 l+1.41
+  they wanted to share it happy | p+0.89 l+4.39
+  she wanted it up and said look | p+1.42 l+2.48
+  the man and max became good | p+0.00 l+0.44 END
+  they wanted to share it happy | p+0.89 l+4.39
+  tom said don't be careful | p+1.04 l+0.23; p+0.14 l+0.71
+  he took his toy car with | p+0.00 l+1.87 END
+  the man and max became good | p+0.00 l+0.44 END
+  they were the toys they want | p+1.79 l+0.50
+end Tue Nov 17 02:48:14 AM EST 2026 status 0

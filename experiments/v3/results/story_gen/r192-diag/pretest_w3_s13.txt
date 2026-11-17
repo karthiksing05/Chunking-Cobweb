@@ -1,0 +1,28 @@
+host neo.cc.gatech.edu start Tue Nov 17 02:45:39 AM EST 2026
+{"seed": 13, "window": 3, "stored trigrams (memory)": 2815, "stream": 2744, "memory minus stream": 71, "stream minus memory": 0}
+sentences with a new trigram: 413, judged grammatical 0.562
+all                                        kept 1.000 gram 0.562 | A unstored bigram 0.123 gram 0.039; B new end 0.036 gram 0.733; C middle only 0.840 gram 0.631
+pivot >= 0                                 kept 0.429 gram 0.718 | B new end 0.019 gram 0.875; C middle only 0.409 gram 0.710
+left >= 0                                  kept 0.320 gram 0.477 | A unstored bigram 0.111 gram 0.000; B new end 0.024 gram 1.000; C middle only 0.184 gram 0.697
+both >= 0                                  kept 0.128 gram 0.755 | B new end 0.017 gram 1.000; C middle only 0.111 gram 0.717
+no unstored bigram                         kept 0.877 gram 0.635 | B new end 0.036 gram 0.733; C middle only 0.840 gram 0.631
+end only after a stored last word          kept 1.000 gram 0.562 | A unstored bigram 0.123 gram 0.039; B new end 0.036 gram 0.733; C middle only 0.840 gram 0.631
+pivot >= 0, end after stored last word     kept 0.429 gram 0.718 | B new end 0.019 gram 0.875; C middle only 0.409 gram 0.710
+left >= 0, end after stored last word      kept 0.320 gram 0.477 | A unstored bigram 0.111 gram 0.000; B new end 0.024 gram 1.000; C middle only 0.184 gram 0.697
+both >= 0, end after stored last word      kept 0.128 gram 0.755 | B new end 0.017 gram 1.000; C middle only 0.111 gram 0.717
+
+kept by 'both >= 0, end after stored last word' and judged ungrammatical (random 30):
+  he said thank you can | p+0.28 l+0.32
+  it was shiny and shiny | p+0.16 l+0.74
+  max was happy and have fun | p+0.13 l+2.26
+  they eat the box | p+0.21 l+1.26
+  he wanted to see it on | p+1.82 l+3.18
+  they played and walked | p+1.20 l+1.47
+  tom and the bird became good idea | p+0.07 l+1.98
+  what is good | p+0.85 l+1.20
+  he did not get out | p+0.18 l+0.33
+  they went to run fast | p+0.94 l+2.48
+  and they do not share | p+0.59 l+0.87
+  they opened the sun | p+0.21 l+0.48
+  lily was happy and have fun | p+0.65 l+2.44
+end Tue Nov 17 02:48:04 AM EST 2026 status 0
