@@ -1,0 +1,96 @@
+{
+ "250|V0_default": {
+  "13": {
+   "brackets/sent": 3.303,
+   "P": 0.2371,
+   "R": 0.3997,
+   "F1": 0.2977,
+   "P+sv": 0.3148,
+   "R+sv": 0.3619,
+   "F1+sv": 0.3368,
+   "NP recall": 0.5039,
+   "crossing": 0.4137,
+   "consistency": 0.4493,
+   "decisive": 0.8279,
+   "strings": 125,
+   "xseed F1": 0.4738
+  },
+  "17": {
+   "brackets/sent": 3.303,
+   "P": 0.2331,
+   "R": 0.3929,
+   "F1": 0.2926,
+   "P+sv": 0.3189,
+   "R+sv": 0.3666,
+   "F1+sv": 0.3411,
+   "NP recall": 0.4961,
+   "crossing": 0.4057,
+   "consistency": 0.4457,
+   "decisive": 0.8351,
+   "strings": 125,
+   "xseed F1": 0.4844
+  },
+  "19": {
+   "brackets/sent": 3.303,
+   "P": 0.2301,
+   "R": 0.3878,
+   "F1": 0.2888,
+   "P+sv": 0.3189,
+   "R+sv": 0.3666,
+   "F1+sv": 0.3411,
+   "NP recall": 0.4803,
+   "crossing": 0.3895,
+   "consistency": 0.4601,
+   "decisive": 0.8188,
+   "strings": 125,
+   "xseed F1": 0.4828
+  }
+ },
+ "1000|V0_default": {
+  "13": {
+   "brackets/sent": 3.303,
+   "P": 0.2503,
+   "R": 0.4218,
+   "F1": 0.3141,
+   "P+sv": 0.3522,
+   "R+sv": 0.4049,
+   "F1+sv": 0.3767,
+   "NP recall": 0.5118,
+   "crossing": 0.3683,
+   "consistency": 0.4692,
+   "decisive": 0.8043,
+   "strings": 125,
+   "xseed F1": 0.5469
+  },
+  "17": {
+   "brackets/sent": 3.303,
+   "P": 0.2543,
+   "R": 0.4286,
+   "F1": 0.3192,
+   "P+sv": 0.3401,
+   "R+sv": 0.391,
+   "F1+sv": 0.3637,
+   "NP recall": 0.6535,
+   "crossing": 0.3875,
+   "consistency": 0.4638,
+   "decisive": 0.8188,
+   "strings": 125,
+   "xseed F1": 0.5368
+  },
+  "19": {
+   "brackets/sent": 3.303,
+   "P": 0.2412,
+   "R": 0.4065,
+   "F1": 0.3027,
+   "P+sv": 0.336,
+   "R+sv": 0.3863,
+   "F1+sv": 0.3594,
+   "NP recall": 0.5276,
+   "crossing": 0.3754,
+   "consistency": 0.4746,
+   "decisive": 0.8315,
+   "strings": 125,
+   "xseed F1": 0.5651
+  }
+ }
+}
