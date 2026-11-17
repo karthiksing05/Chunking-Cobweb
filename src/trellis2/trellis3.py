@@ -149,7 +149,11 @@ class Trellis3:
                  ref_names: bool = False, repair_reached: int = 0, repair_use: int = 0,
                  repair_path: bool = False, repair_draws: int = 1, repair_now: bool = False,
                  story_facet: bool = False, exact_alone: bool = False,
-                 search: str = "chart", beam: int = 8, hierarchy: str = "two"):
+                 search: str = "chart", beam: int = 8, hierarchy: str = "two",
+                 gain_alpha: Optional[float] = None, gain_alpha_on: str = "content"):
+        # gain_alpha: None = _gain as before; else a fixed TOTAL pseudo-count |gain_alpha| spread over each
+        # attribute's values in _gain, for the content tree ("content") or both trees ("both")
+        self.gain_alpha, self.gain_alpha_on = gain_alpha, gain_alpha_on
         self.depth, self.alpha, self.window, self.tau = depth, alpha, window, tau
         self.store, self.chunk_context, self.donate = store, chunk_context, donate
         self.refresh_budget, self.min_weight = refresh_budget, min_weight
@@ -972,11 +976,36 @@ class Trellis3:
             return 0.0
         return (log_prob(node, x, root, self.alpha) - log_prob(root, x, root, self.alpha)) / LN2
 
+    def _gain_fixed(self, tree: IncrementalCobwebTree, x: dict) -> float:
+        """_gain with a fixed TOTAL pseudo-count |gain_alpha| spread over each attribute's values:
+        P(v|C) = (d + |a|/size) / (count + |a|), for the node and the root term."""
+        root, A = tree.root, abs(self.gain_alpha)
+
+        def lp(node):
+            tot = 0.0
+            for a, v in x.items():
+                d = node.av.get(a, {})
+                al = A / (len(root.av.get(a, {})) + 1)
+                if isinstance(v, dict):
+                    tot += sum(p * math.log((d.get(u, 0.0) + al) / (node.count + A)) for u, p in v.items())
+                else:
+                    tot += math.log((d.get(v, 0.0) + al) / (node.count + A))
+            return tot
+        base = lp(root)
+        best = 0.0
+        for node in tree.categorize(x)[1:]:
+            if node.count <= 0:
+                continue
+            best = max(best, (math.log(node.count / root.count) + lp(node) - base) / LN2)
+        return best
+
     def _gain(self, tree: IncrementalCobwebTree, x: dict) -> float:
         """Best over x's sorting path of log2 [share(C) P(x|C) / P(x|root)]; 0 at the root."""
         root = tree.root
         if root.count <= 0:
             return 0.0
+        if self.gain_alpha is not None and (self.gain_alpha_on == "both" or tree is self.cnt):
+            return self._gain_fixed(tree, x)
         base = log_prob(root, x, root, self.alpha)
         best = 0.0
         for node in tree.categorize(x)[1:]:

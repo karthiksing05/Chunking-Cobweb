@@ -1,0 +1,153 @@
+seed 13; brackets are word spans [i,j); gold = shallow phrases (size>=2)
+
+## 1000 learned: 15 held-out sentences, gold vs V0_default vs a-10_content_t1
+
+- they knew they did something bad
+  - gold: (knew they) (did something bad)
+  - V0: (they knew they did) (they knew they) (they knew) (something bad)
+  - a-10_content_t1: (they knew they did something) (they knew they did) (knew they did) (they did)
+- they ran as fast as they could
+  - gold: (ran as fast as they) (as they)
+  - V0: (they ran as fast) (ran as fast) (as fast) (as they could) (they could)
+  - a-10_content_t1: (they ran as fast as) (ran as fast as) (ran as fast) (as fast) (they could)
+- amy and tim got very sad
+  - gold: (got very sad) (very sad)
+  - V0: (amy and tim got) (and tim got) (and tim) (very sad)
+  - a-10_content_t1: (amy and tim got) (and tim got) (tim got) (very sad)
+- i found a ball
+  - gold: (found a ball) (a ball)
+  - V0: (i found) (a ball)
+  - a-10_content_t1: (found a ball) (a ball)
+- they were very happy
+  - gold: (were very happy) (very happy)
+  - V0: (they were) (very happy)
+  - a-10_content_t1: (they were) (very happy)
+- they laughed and had a lot of fun
+  - gold: (had a lot of fun) (a lot) (of fun)
+  - V0: (they laughed) (and had a lot of fun) (and had a lot) (and had a) (had a) (of fun)
+  - a-10_content_t1: (they laughed) (and had a lot of fun) (and had a lot) (and had a) (had a) (of fun)
+- all their friends were there
+  - gold: (all their friends) (were there)
+  - V0: (all their friends) (all their) (were there)
+  - a-10_content_t1: (all their friends) (all their) (were there)
+- a little boy named tim was sad
+  - gold: (a little boy) (named tim) (was sad)
+  - V0: (a little) (boy named tim was sad) (named tim was sad) (tim was sad) (tim was)
+  - a-10_content_t1: (a little boy named tim was) (a little boy named) (little boy named) (boy named) (tim was)
+- tom was happy
+  - gold: (was happy)
+  - V0: (tom was)
+  - a-10_content_t1: (was happy)
+- he felt so excited
+  - gold: (felt so excited) (so excited)
+  - V0: (he felt) (so excited)
+  - a-10_content_t1: (he felt) (so excited)
+- he is not happy
+  - gold: (is not happy) (not happy)
+  - V0: (he is) (not happy)
+  - a-10_content_t1: (he is) (not happy)
+- tim ran as fast as he could
+  - gold: (ran as fast as he) (as he)
+  - V0: (tim ran as fast) (ran as fast) (as fast) (as he could) (he could)
+  - a-10_content_t1: (tim ran as fast as) (ran as fast as) (ran as fast) (as fast) (he could)
+- i'm sorry mom
+  - gold: 
+  - V0: (i'm sorry)
+  - a-10_content_t1: (sorry mom)
+- he liked to play all day long
+  - gold: (to play all day long) (to play) (all day)
+  - V0: (he liked) (to play all day long) (to play all) (to play) (day long)
+  - a-10_content_t1: (he liked) (to play all day long) (to play all) (to play) (day long)
+- sue smiled and said yes let's play
+  - gold: (said yes) (let's play)
+  - V0: (sue smiled) (and said yes let's play) (and said) (yes let's play) (let's play)
+  - a-10_content_t1: (sue smiled) (and said yes let's play) (and said yes) (and said) (let's play)
+
+## 1000 learned: the 10 most repeated strings (>=3 occurrences), consistency V0 vs a-10_content_t1
+
+- "wanted to" (18 occ): V0 0.00, a-10_content_t1 0.00
+- "to play" (15 occ): V0 0.47, a-10_content_t1 0.53
+- "they were" (12 occ): V0 0.83, a-10_content_t1 0.67
+- "tim was" (11 occ): V0 0.82, a-10_content_t1 0.55
+- "a big" (10 occ): V0 0.50, a-10_content_t1 0.70
+- "was so" (10 occ): V0 0.00, a-10_content_t1 0.00
+- "were very" (10 occ): V0 0.00, a-10_content_t1 0.00
+- "play with" (9 occ): V0 0.00, a-10_content_t1 0.00
+- "was very" (9 occ): V0 0.00, a-10_content_t1 0.00
+- "he was" (8 occ): V0 0.88, a-10_content_t1 0.50
+
+## 4000 learned: 15 held-out sentences, gold vs V0_default vs a-10_content_t1
+
+- they knew they did something bad
+  - gold: (knew they) (did something bad)
+  - V0: (they knew they did) (they knew they) (knew they) (something bad)
+  - a-10_content_t1: (they knew they did something) (they knew they did) (knew they did) (knew they)
+- they ran as fast as they could
+  - gold: (ran as fast as they) (as they)
+  - V0: (they ran as fast as) (they ran as fast) (ran as fast) (as fast) (they could)
+  - a-10_content_t1: (they ran as fast as) (ran as fast as) (ran as fast) (as fast) (they could)
+- amy and tim got very sad
+  - gold: (got very sad) (very sad)
+  - V0: (amy and tim got) (amy and tim) (and tim) (very sad)
+  - a-10_content_t1: (amy and tim got very) (amy and tim got) (amy and tim) (and tim)
+- i found a ball
+  - gold: (found a ball) (a ball)
+  - V0: (i found) (a ball)
+  - a-10_content_t1: (i found) (a ball)
+- they were very happy
+  - gold: (were very happy) (very happy)
+  - V0: (they were) (very happy)
+  - a-10_content_t1: (they were) (very happy)
+- they laughed and had a lot of fun
+  - gold: (had a lot of fun) (a lot) (of fun)
+  - V0: (they laughed) (and had a lot of fun) (and had a lot) (had a lot) (had a) (of fun)
+  - a-10_content_t1: (they laughed) (and had a lot of fun) (and had a lot) (had a lot) (had a) (of fun)
+- all their friends were there
+  - gold: (all their friends) (were there)
+  - V0: (all their) (friends were there) (were there)
+  - a-10_content_t1: (all their friends) (their friends) (were there)
+- a little boy named tim was sad
+  - gold: (a little boy) (named tim) (was sad)
+  - V0: (a little) (boy named tim was sad) (named tim was sad) (tim was sad) (tim was)
+  - a-10_content_t1: (a little boy) (a little) (named tim was sad) (named tim was) (tim was)
+- tom was happy
+  - gold: (was happy)
+  - V0: (tom was)
+  - a-10_content_t1: (was happy)
+- he felt so excited
+  - gold: (felt so excited) (so excited)
+  - V0: (he felt) (so excited)
+  - a-10_content_t1: (he felt) (so excited)
+- he is not happy
+  - gold: (is not happy) (not happy)
+  - V0: (he is) (not happy)
+  - a-10_content_t1: (he is) (not happy)
+- tim ran as fast as he could
+  - gold: (ran as fast as he) (as he)
+  - V0: (tim ran as fast as) (tim ran as fast) (ran as fast) (as fast) (he could)
+  - a-10_content_t1: (tim ran as fast as) (ran as fast as) (ran as fast) (as fast) (he could)
+- i'm sorry mom
+  - gold: 
+  - V0: (i'm sorry)
+  - a-10_content_t1: (sorry mom)
+- he liked to play all day long
+  - gold: (to play all day long) (to play) (all day)
+  - V0: (he liked) (to play all day long) (to play all) (to play) (day long)
+  - a-10_content_t1: (he liked) (to play all day long) (to play all) (to play) (day long)
+- sue smiled and said yes let's play
+  - gold: (said yes) (let's play)
+  - V0: (sue smiled and said yes) (sue smiled and said) (sue smiled) (and said) (let's play)
+  - a-10_content_t1: (sue smiled and said yes) (sue smiled) (and said yes) (and said) (let's play)
+
+## 4000 learned: the 10 most repeated strings (>=3 occurrences), consistency V0 vs a-10_content_t1
+
+- "wanted to" (18 occ): V0 0.00, a-10_content_t1 0.00
+- "to play" (15 occ): V0 0.53, a-10_content_t1 0.53
+- "they were" (12 occ): V0 0.83, a-10_content_t1 0.67
+- "tim was" (11 occ): V0 0.82, a-10_content_t1 0.82
+- "a big" (10 occ): V0 0.40, a-10_content_t1 0.50
+- "was so" (10 occ): V0 0.00, a-10_content_t1 0.00
+- "were very" (10 occ): V0 0.00, a-10_content_t1 0.00
+- "play with" (9 occ): V0 0.00, a-10_content_t1 0.11
+- "was very" (9 occ): V0 0.00, a-10_content_t1 0.11
+- "he was" (8 occ): V0 0.88, a-10_content_t1 0.62
