@@ -1,0 +1,485 @@
+seed 13; brackets are word spans [i,j); gold = shallow phrases (size>=2)
+
+## 1000 learned, V0_default: 15 held-out sentences
+
+- they knew they did something bad
+  - trellis: (they knew they did) (they knew they) (they knew) (something bad)
+  - gold: (knew they) (did something bad)
+- they ran as fast as they could
+  - trellis: (they ran as fast) (ran as fast) (as fast) (as they could) (they could)
+  - gold: (ran as fast as they) (as they)
+- amy and tim got very sad
+  - trellis: (amy and tim got) (and tim got) (and tim) (very sad)
+  - gold: (got very sad) (very sad)
+- i found a ball
+  - trellis: (i found) (a ball)
+  - gold: (found a ball) (a ball)
+- they were very happy
+  - trellis: (they were) (very happy)
+  - gold: (were very happy) (very happy)
+- they laughed and had a lot of fun
+  - trellis: (they laughed) (and had a lot of fun) (and had a lot) (and had a) (had a) (of fun)
+  - gold: (had a lot of fun) (a lot) (of fun)
+- all their friends were there
+  - trellis: (all their friends) (all their) (were there)
+  - gold: (all their friends) (were there)
+- a little boy named tim was sad
+  - trellis: (a little) (boy named tim was sad) (named tim was sad) (tim was sad) (tim was)
+  - gold: (a little boy) (named tim) (was sad)
+- tom was happy
+  - trellis: (tom was)
+  - gold: (was happy)
+- he felt so excited
+  - trellis: (he felt) (so excited)
+  - gold: (felt so excited) (so excited)
+- he is not happy
+  - trellis: (he is) (not happy)
+  - gold: (is not happy) (not happy)
+- tim ran as fast as he could
+  - trellis: (tim ran as fast) (ran as fast) (as fast) (as he could) (he could)
+  - gold: (ran as fast as he) (as he)
+- i'm sorry mom
+  - trellis: (i'm sorry)
+  - gold: 
+- he liked to play all day long
+  - trellis: (he liked) (to play all day long) (to play all) (to play) (day long)
+  - gold: (to play all day long) (to play) (all day)
+- sue smiled and said yes let's play
+  - trellis: (sue smiled) (and said yes let's play) (and said) (yes let's play) (let's play)
+  - gold: (said yes) (let's play)
+
+## 1000 learned, V0_default: 10 repeated strings with lowest consistency (>=3 occurrences)
+
+- "wanted to" consistency 0.00 (18 occ)
+  - split: tom <wanted to> help   crossed by ['tom wanted', 'to help']
+  - split: it <wanted to> be with its friend again   crossed by ['to be', 'it wanted', 'to be with', 'to be with its friend again']
+  - split: tim <wanted to> help   crossed by ['tim wanted', 'to help']
+  - split: he <wanted to> find his friends again   crossed by ['to find', 'to find his friends again', 'he wanted']
+  - split: they <wanted to> help more   crossed by ['they wanted', 'to help more']
+  - split: amy <wanted to> make something with it   crossed by ['amy wanted']
+- "was so" consistency 0.00 (10 occ)
+  - split: he <was so> happy   crossed by ['he was', 'so happy']
+  - split: sue <was so> surprised   crossed by ['sue was', 'so surprised']
+  - split: tim <was so> surprised and happy   crossed by ['tim was', 'so surprised and happy']
+  - split: lucy <was so> happy   crossed by ['lucy was', 'so happy']
+  - split: amy <was so> happy   crossed by ['amy was', 'so happy']
+  - split: lily <was so> happy   crossed by ['lily was', 'so happy']
+- "were very" consistency 0.00 (10 occ)
+  - split: tim and his mom <were very> surprised   crossed by ['very surprised']
+  - split: they <were very> happy   crossed by ['they were', 'very happy']
+  - split: they <were very> excited   crossed by ['they were', 'very excited']
+  - split: tim and his mom <were very> surprised   crossed by ['very surprised']
+  - split: they <were very> happy   crossed by ['they were', 'very happy']
+  - split: they <were very> happy   crossed by ['they were', 'very happy']
+- "play with" consistency 0.00 (9 occ)
+  - split: now i can <play with> the toy   crossed by ['can play']
+  - split: tom and anna liked to <play with> water   crossed by ['with water', 'to play']
+  - split: can i <play with> it   crossed by ['with it']
+  - split: can we <play with> you   crossed by ['with you']
+  - split: she wanted to <play with> her friend tim   crossed by ['to play']
+  - split: he liked to <play with> his friends   crossed by ['to play']
+- "was very" consistency 0.00 (9 occ)
+  - split: tim <was very> happy   crossed by ['tim was', 'very happy']
+  - split: mia <was very> happy   crossed by ['mia was', 'very happy']
+  - split: she <was very> happy   crossed by ['she was', 'very happy']
+  - split: the little boy <was very> happy   crossed by ['very happy', 'the little boy was']
+  - split: max <was very> happy   crossed by ['max was', 'very happy']
+  - split: he <was very> happy   crossed by ['he was', 'very happy']
+- "did not" consistency 0.00 (7 occ)
+  - split: he <did not> know what to do   crossed by ['not know', 'he did', 'not know what']
+  - split: they <did not> want him to go   crossed by ['they did']
+  - split: they <did not> know what to do   crossed by ['not know', 'they did', 'not know what']
+  - split: he <did not> like it   crossed by ['he did']
+  - split: lily <did not> know who they were   crossed by ['not know']
+  - split: they <did not> know what to do   crossed by ['not know', 'they did', 'not know what']
+- "had an" consistency 0.00 (7 occ)
+  - split: sue <had an> idea   crossed by ['sue had', 'an idea']
+  - split: lily <had an> idea   crossed by ['lily had', 'an idea']
+  - split: he <had an> idea   crossed by ['he had', 'an idea']
+  - split: then sue <had an> idea   crossed by ['then sue had', 'an idea']
+  - split: she <had an> idea   crossed by ['she had', 'an idea']
+  - split: lily was sad but <had an> idea   crossed by ['an idea', 'lily was sad but had']
+- "in the" consistency 0.00 (6 occ)
+  - split: lily and sam played together <in the> park   crossed by ['the park', 'together in', 'sam played together in']
+  - split: they liked to play <in the> park   crossed by ['the park', 'to play in', 'play in']
+  - split: lily and tom were playing <in the> park   crossed by ['the park', 'tom were playing in']
+  - split: max had found it <in the> park   crossed by ['the park', 'found it in']
+  - split: sara and ben were playing <in the> park   crossed by ['the park', 'ben were playing in']
+  - split: ben and lily were playing <in the> park   crossed by ['the park', 'playing in', 'lily were playing in']
+- "liked to" consistency 0.00 (6 occ)
+  - split: they <liked to> play together   crossed by ['they liked', 'to play together']
+  - split: tom and anna <liked to> play with water   crossed by ['to play', 'to play with water']
+  - split: they <liked to> play in the park   crossed by ['to play in the park', 'they liked', 'to play in']
+  - split: he <liked to> play with his friends   crossed by ['to play', 'to play with his friends', 'he liked', 'to play with']
+  - split: max and lily <liked to> play together   crossed by ['max and lily liked', 'to play together']
+  - split: he <liked to> play all day long   crossed by ['to play', 'to play all day long', 'he liked', 'to play all']
+- "liked to play" consistency 0.00 (6 occ)
+  - split: they <liked to play> together   crossed by ['they liked', 'to play together', 'play together']
+  - split: tom and anna <liked to play> with water   crossed by ['to play with water']
+  - split: they <liked to play> in the park   crossed by ['to play in the park', 'they liked', 'to play in', 'play in']
+  - split: he <liked to play> with his friends   crossed by ['to play with his friends', 'he liked', 'to play with']
+  - split: max and lily <liked to play> together   crossed by ['max and lily liked', 'play together', 'to play together']
+  - split: he <liked to play> all day long   crossed by ['to play all day long', 'he liked', 'to play all']
+
+## 1000 learned, V1_content: 15 held-out sentences
+
+- they knew they did something bad
+  - trellis: (knew they did something bad) (they did something bad) (they did) (something bad)
+  - gold: (knew they) (did something bad)
+- they ran as fast as they could
+  - trellis: (ran as fast as they could) (ran as fast as) (ran as) (fast as) (they could)
+  - gold: (ran as fast as they) (as they)
+- amy and tim got very sad
+  - trellis: (and tim got very sad) (tim got very sad) (tim got) (very sad)
+  - gold: (got very sad) (very sad)
+- i found a ball
+  - trellis: (found a ball) (a ball)
+  - gold: (found a ball) (a ball)
+- they were very happy
+  - trellis: (were very happy) (very happy)
+  - gold: (were very happy) (very happy)
+- they laughed and had a lot of fun
+  - trellis: (laughed and had a lot of fun) (laughed and had a lot of) (laughed and) (had a lot of) (had a) (lot of)
+  - gold: (had a lot of fun) (a lot) (of fun)
+- all their friends were there
+  - trellis: (their friends were there) (friends were there) (were there)
+  - gold: (all their friends) (were there)
+- a little boy named tim was sad
+  - trellis: (little boy named tim was sad) (little boy named tim) (little boy) (named tim) (was sad)
+  - gold: (a little boy) (named tim) (was sad)
+- tom was happy
+  - trellis: (was happy)
+  - gold: (was happy)
+- he felt so excited
+  - trellis: (felt so excited) (so excited)
+  - gold: (felt so excited) (so excited)
+- he is not happy
+  - trellis: (is not happy) (not happy)
+  - gold: (is not happy) (not happy)
+- tim ran as fast as he could
+  - trellis: (ran as fast as he could) (ran as fast as) (ran as) (fast as) (he could)
+  - gold: (ran as fast as he) (as he)
+- i'm sorry mom
+  - trellis: (sorry mom)
+  - gold: 
+- he liked to play all day long
+  - trellis: (liked to play all day long) (liked to play all) (liked to) (play all) (day long)
+  - gold: (to play all day long) (to play) (all day)
+- sue smiled and said yes let's play
+  - trellis: (smiled and said yes let's play) (smiled and said yes) (smiled and) (said yes) (let's play)
+  - gold: (said yes) (let's play)
+
+## 1000 learned, V1_content: 10 repeated strings with lowest consistency (>=3 occurrences)
+
+- "they were" consistency 0.00 (12 occ)
+  - split:  <they were> happy   crossed by ['were happy']
+  - split:  <they were> very happy   crossed by ['were very happy']
+  - split:  <they were> very excited   crossed by ['were very excited']
+  - split:  <they were> all excited   crossed by ['were all excited']
+  - split:  <they were> very happy   crossed by ['were very happy']
+  - split:  <they were> best friends   crossed by ['were best friends']
+- "tim was" consistency 0.00 (11 occ)
+  - split:  <tim was> sad   crossed by ['was sad']
+  - split:  <tim was> very happy   crossed by ['was very happy']
+  - split:  <tim was> so surprised and happy   crossed by ['was so surprised and happy']
+  - split: a little boy named <tim was> sad   crossed by ['little boy named tim', 'was sad', 'named tim']
+  - split:  <tim was> excited because he had many toys   crossed by ['was excited because he had many toys', 'was excited because he had many', 'was excited']
+  - split:  <tim was> sad and sam was sorry   crossed by ['was sad and sam', 'was sad and sam was sorry', 'was sad']
+- "was so" consistency 0.00 (10 occ)
+  - split: he <was so> happy   crossed by ['so happy']
+  - split: sue <was so> surprised   crossed by ['so surprised']
+  - split: tim <was so> surprised and happy   crossed by ['so surprised', 'so surprised and happy']
+  - split: lucy <was so> happy   crossed by ['so happy']
+  - split: amy <was so> happy   crossed by ['so happy']
+  - split: lily <was so> happy   crossed by ['so happy']
+- "he was" consistency 0.00 (8 occ)
+  - split:  <he was> so happy   crossed by ['was so happy']
+  - split:  <he was> playing outside with his toy car   crossed by ['was playing outside with his toy car', 'was playing outside with his toy', 'was playing']
+  - split:  <he was> happy   crossed by ['was happy']
+  - split:  <he was> happy again   crossed by ['was happy again']
+  - split:  <he was> sad   crossed by ['was sad']
+  - split:  <he was> very happy   crossed by ['was very happy']
+- "had an" consistency 0.00 (7 occ)
+  - split: sue <had an> idea   crossed by ['an idea']
+  - split: lily <had an> idea   crossed by ['an idea']
+  - split: he <had an> idea   crossed by ['an idea']
+  - split: then sue <had an> idea   crossed by ['an idea']
+  - split: she <had an> idea   crossed by ['an idea']
+  - split: lily was sad but <had an> idea   crossed by ['was sad but had', 'an idea', 'but had']
+- "liked to play" consistency 0.00 (6 occ)
+  - split: they <liked to play> together   crossed by ['to play together', 'play together']
+  - split: tom and anna <liked to play> with water   crossed by ['play with']
+  - split: they <liked to play> in the park   crossed by ['play in']
+  - split: he <liked to play> with his friends   crossed by ['play with']
+  - split: max and lily <liked to play> together   crossed by ['and lily liked to', 'play together']
+  - split: he <liked to play> all day long   crossed by ['play all']
+- "something unexpected" consistency 0.00 (6 occ)
+  - split: then <something unexpected> happened   crossed by ['unexpected happened']
+  - split: but then <something unexpected> happened   crossed by ['unexpected happened']
+  - split: but then <something unexpected> happened   crossed by ['unexpected happened']
+  - split: then <something unexpected> happened   crossed by ['unexpected happened']
+  - split: but then <something unexpected> happened   crossed by ['unexpected happened']
+  - split: then <something unexpected> happened   crossed by ['unexpected happened']
+- "then something" consistency 0.00 (6 occ)
+  - split:  <then something> unexpected happened   crossed by ['something unexpected happened']
+  - split: but <then something> unexpected happened   crossed by ['something unexpected happened']
+  - split: but <then something> unexpected happened   crossed by ['something unexpected happened']
+  - split:  <then something> unexpected happened   crossed by ['something unexpected happened']
+  - split: but <then something> unexpected happened   crossed by ['something unexpected happened']
+  - split:  <then something> unexpected happened   crossed by ['something unexpected happened']
+- "then something unexpected" consistency 0.00 (6 occ)
+  - split:  <then something unexpected> happened   crossed by ['unexpected happened', 'something unexpected happened']
+  - split: but <then something unexpected> happened   crossed by ['something unexpected happened', 'unexpected happened']
+  - split: but <then something unexpected> happened   crossed by ['something unexpected happened', 'unexpected happened']
+  - split:  <then something unexpected> happened   crossed by ['unexpected happened', 'something unexpected happened']
+  - split: but <then something unexpected> happened   crossed by ['something unexpected happened', 'unexpected happened']
+  - split:  <then something unexpected> happened   crossed by ['unexpected happened', 'something unexpected happened']
+- "they were very" consistency 0.00 (6 occ)
+  - split:  <they were very> happy   crossed by ['very happy', 'were very happy']
+  - split:  <they were very> excited   crossed by ['very excited', 'were very excited']
+  - split:  <they were very> happy   crossed by ['very happy', 'were very happy']
+  - split:  <they were very> happy   crossed by ['very happy', 'were very happy']
+  - split:  <they were very> happy   crossed by ['very happy', 'were very happy']
+  - split:  <they were very> happy to be outside   crossed by ['were very happy to', 'were very happy to be outside']
+
+## 4000 learned, V0_default: 15 held-out sentences
+
+- they knew they did something bad
+  - trellis: (they knew they did) (they knew they) (knew they) (something bad)
+  - gold: (knew they) (did something bad)
+- they ran as fast as they could
+  - trellis: (they ran as fast as) (they ran as fast) (ran as fast) (as fast) (they could)
+  - gold: (ran as fast as they) (as they)
+- amy and tim got very sad
+  - trellis: (amy and tim got) (amy and tim) (and tim) (very sad)
+  - gold: (got very sad) (very sad)
+- i found a ball
+  - trellis: (i found) (a ball)
+  - gold: (found a ball) (a ball)
+- they were very happy
+  - trellis: (they were) (very happy)
+  - gold: (were very happy) (very happy)
+- they laughed and had a lot of fun
+  - trellis: (they laughed) (and had a lot of fun) (and had a lot) (had a lot) (had a) (of fun)
+  - gold: (had a lot of fun) (a lot) (of fun)
+- all their friends were there
+  - trellis: (all their) (friends were there) (were there)
+  - gold: (all their friends) (were there)
+- a little boy named tim was sad
+  - trellis: (a little) (boy named tim was sad) (named tim was sad) (tim was sad) (tim was)
+  - gold: (a little boy) (named tim) (was sad)
+- tom was happy
+  - trellis: (tom was)
+  - gold: (was happy)
+- he felt so excited
+  - trellis: (he felt) (so excited)
+  - gold: (felt so excited) (so excited)
+- he is not happy
+  - trellis: (he is) (not happy)
+  - gold: (is not happy) (not happy)
+- tim ran as fast as he could
+  - trellis: (tim ran as fast as) (tim ran as fast) (ran as fast) (as fast) (he could)
+  - gold: (ran as fast as he) (as he)
+- i'm sorry mom
+  - trellis: (i'm sorry)
+  - gold: 
+- he liked to play all day long
+  - trellis: (he liked) (to play all day long) (to play all) (to play) (day long)
+  - gold: (to play all day long) (to play) (all day)
+- sue smiled and said yes let's play
+  - trellis: (sue smiled and said yes) (sue smiled and said) (sue smiled) (and said) (let's play)
+  - gold: (said yes) (let's play)
+
+## 4000 learned, V0_default: 10 repeated strings with lowest consistency (>=3 occurrences)
+
+- "wanted to" consistency 0.00 (18 occ)
+  - split: tom <wanted to> help   crossed by ['tom wanted', 'to help']
+  - split: it <wanted to> be with its friend again   crossed by ['to be', 'it wanted', 'to be with', 'to be with its friend again']
+  - split: tim <wanted to> help   crossed by ['tim wanted', 'to help']
+  - split: he <wanted to> find his friends again   crossed by ['to find', 'he wanted']
+  - split: they <wanted to> help more   crossed by ['they wanted', 'to help more']
+  - split: amy <wanted to> make something with it   crossed by ['to make something with it', 'amy wanted', 'to make something']
+- "was so" consistency 0.00 (10 occ)
+  - split: he <was so> happy   crossed by ['he was', 'so happy']
+  - split: sue <was so> surprised   crossed by ['sue was', 'so surprised']
+  - split: tim <was so> surprised and happy   crossed by ['tim was', 'so surprised and happy']
+  - split: lucy <was so> happy   crossed by ['lucy was', 'so happy']
+  - split: amy <was so> happy   crossed by ['amy was', 'so happy']
+  - split: lily <was so> happy   crossed by ['lily was', 'so happy']
+- "were very" consistency 0.00 (10 occ)
+  - split: tim and his mom <were very> surprised   crossed by ['very surprised', 'tim and his mom were']
+  - split: they <were very> happy   crossed by ['they were', 'very happy']
+  - split: they <were very> excited   crossed by ['they were', 'very excited']
+  - split: tim and his mom <were very> surprised   crossed by ['very surprised', 'tim and his mom were']
+  - split: they <were very> happy   crossed by ['they were', 'very happy']
+  - split: they <were very> happy   crossed by ['they were', 'very happy']
+- "play with" consistency 0.00 (9 occ)
+  - split: now i can <play with> the toy   crossed by ['can play', 'with the toy']
+  - split: tom and anna liked to <play with> water   crossed by ['with water', 'to play']
+  - split: can i <play with> it   crossed by ['with it']
+  - split: can we <play with> you   crossed by ['with you']
+  - split: she wanted to <play with> her friend tim   crossed by ['to play']
+  - split: he liked to <play with> his friends   crossed by ['to play']
+- "was very" consistency 0.00 (9 occ)
+  - split: tim <was very> happy   crossed by ['tim was', 'very happy']
+  - split: mia <was very> happy   crossed by ['mia was', 'very happy']
+  - split: she <was very> happy   crossed by ['she was', 'very happy']
+  - split: the little boy <was very> happy   crossed by ['very happy', 'the little boy was']
+  - split: max <was very> happy   crossed by ['max was', 'very happy']
+  - split: he <was very> happy   crossed by ['he was', 'very happy']
+- "did not" consistency 0.00 (7 occ)
+  - split: he <did not> know what to do   crossed by ['not know', 'he did', 'not know what']
+  - split: they <did not> want him to go   crossed by ['they did']
+  - split: they <did not> know what to do   crossed by ['not know', 'they did', 'not know what']
+  - split: he <did not> like it   crossed by ['he did']
+  - split: lily <did not> know who they were   crossed by ['not know', 'lily did']
+  - split: they <did not> know what to do   crossed by ['not know', 'they did', 'not know what']
+- "had an" consistency 0.00 (7 occ)
+  - split: sue <had an> idea   crossed by ['sue had', 'an idea']
+  - split: lily <had an> idea   crossed by ['lily had', 'an idea']
+  - split: he <had an> idea   crossed by ['he had', 'an idea']
+  - split: then sue <had an> idea   crossed by ['then sue had', 'an idea']
+  - split: she <had an> idea   crossed by ['she had', 'an idea']
+  - split: lily was sad but <had an> idea   crossed by ['an idea', 'lily was sad but had']
+- "in the" consistency 0.00 (6 occ)
+  - split: lily and sam played together <in the> park   crossed by ['the park', 'sam played together in']
+  - split: they liked to play <in the> park   crossed by ['the park', 'to play in', 'play in']
+  - split: lily and tom were playing <in the> park   crossed by ['the park', 'tom were playing in']
+  - split: max had found it <in the> park   crossed by ['the park', 'found it in']
+  - split: sara and ben were playing <in the> park   crossed by ['the park', 'ben were playing in']
+  - split: ben and lily were playing <in the> park   crossed by ['the park', 'lily were playing in']
+- "liked to" consistency 0.00 (6 occ)
+  - split: they <liked to> play together   crossed by ['they liked', 'to play together', 'to play']
+  - split: tom and anna <liked to> play with water   crossed by ['tom and anna liked', 'to play', 'to play with water']
+  - split: they <liked to> play in the park   crossed by ['to play in the park', 'they liked', 'to play in']
+  - split: he <liked to> play with his friends   crossed by ['to play', 'he liked', 'to play with']
+  - split: max and lily <liked to> play together   crossed by ['max and lily liked', 'to play together']
+  - split: he <liked to> play all day long   crossed by ['to play', 'to play all day long', 'he liked', 'to play all']
+- "liked to play" consistency 0.00 (6 occ)
+  - split: they <liked to play> together   crossed by ['they liked', 'to play together']
+  - split: tom and anna <liked to play> with water   crossed by ['tom and anna liked', 'to play with water']
+  - split: they <liked to play> in the park   crossed by ['to play in the park', 'they liked', 'to play in', 'play in']
+  - split: he <liked to play> with his friends   crossed by ['he liked', 'to play with']
+  - split: max and lily <liked to play> together   crossed by ['max and lily liked', 'play together', 'to play together']
+  - split: he <liked to play> all day long   crossed by ['to play all day long', 'he liked', 'to play all']
+
+## 4000 learned, V1_content: 15 held-out sentences
+
+- they knew they did something bad
+  - trellis: (knew they did something bad) (they did something bad) (they did) (something bad)
+  - gold: (knew they) (did something bad)
+- they ran as fast as they could
+  - trellis: (ran as fast as they could) (ran as fast as) (ran as) (fast as) (they could)
+  - gold: (ran as fast as they) (as they)
+- amy and tim got very sad
+  - trellis: (and tim got very sad) (tim got very sad) (tim got) (very sad)
+  - gold: (got very sad) (very sad)
+- i found a ball
+  - trellis: (found a ball) (a ball)
+  - gold: (found a ball) (a ball)
+- they were very happy
+  - trellis: (were very happy) (very happy)
+  - gold: (were very happy) (very happy)
+- they laughed and had a lot of fun
+  - trellis: (laughed and had a lot of fun) (laughed and had a lot of) (laughed and) (had a lot of) (had a) (lot of)
+  - gold: (had a lot of fun) (a lot) (of fun)
+- all their friends were there
+  - trellis: (their friends were there) (friends were there) (were there)
+  - gold: (all their friends) (were there)
+- a little boy named tim was sad
+  - trellis: (little boy named tim was sad) (little boy named tim) (little boy) (named tim) (was sad)
+  - gold: (a little boy) (named tim) (was sad)
+- tom was happy
+  - trellis: (was happy)
+  - gold: (was happy)
+- he felt so excited
+  - trellis: (felt so excited) (so excited)
+  - gold: (felt so excited) (so excited)
+- he is not happy
+  - trellis: (is not happy) (not happy)
+  - gold: (is not happy) (not happy)
+- tim ran as fast as he could
+  - trellis: (ran as fast as he could) (ran as fast as) (ran as) (fast as) (he could)
+  - gold: (ran as fast as he) (as he)
+- i'm sorry mom
+  - trellis: (sorry mom)
+  - gold: 
+- he liked to play all day long
+  - trellis: (liked to play all day long) (liked to play all) (liked to) (play all) (day long)
+  - gold: (to play all day long) (to play) (all day)
+- sue smiled and said yes let's play
+  - trellis: (smiled and said yes let's play) (smiled and said yes) (smiled and) (said yes) (let's play)
+  - gold: (said yes) (let's play)
+
+## 4000 learned, V1_content: 10 repeated strings with lowest consistency (>=3 occurrences)
+
+- "they were" consistency 0.00 (12 occ)
+  - split:  <they were> happy   crossed by ['were happy']
+  - split:  <they were> very happy   crossed by ['were very happy']
+  - split:  <they were> very excited   crossed by ['were very excited']
+  - split:  <they were> all excited   crossed by ['were all excited']
+  - split:  <they were> very happy   crossed by ['were very happy']
+  - split:  <they were> best friends   crossed by ['were best friends']
+- "tim was" consistency 0.00 (11 occ)
+  - split:  <tim was> sad   crossed by ['was sad']
+  - split:  <tim was> very happy   crossed by ['was very happy']
+  - split:  <tim was> so surprised and happy   crossed by ['was so surprised and happy']
+  - split: a little boy named <tim was> sad   crossed by ['little boy named tim', 'was sad', 'named tim']
+  - split:  <tim was> excited because he had many toys   crossed by ['was excited because he had many toys', 'was excited because he had many', 'was excited']
+  - split:  <tim was> sad and sam was sorry   crossed by ['was sad and sam', 'was sad and sam was sorry', 'was sad']
+- "was so" consistency 0.00 (10 occ)
+  - split: he <was so> happy   crossed by ['so happy']
+  - split: sue <was so> surprised   crossed by ['so surprised']
+  - split: tim <was so> surprised and happy   crossed by ['so surprised', 'so surprised and happy']
+  - split: lucy <was so> happy   crossed by ['so happy']
+  - split: amy <was so> happy   crossed by ['so happy']
+  - split: lily <was so> happy   crossed by ['so happy']
+- "he was" consistency 0.00 (8 occ)
+  - split:  <he was> so happy   crossed by ['was so happy']
+  - split:  <he was> playing outside with his toy car   crossed by ['was playing outside with his toy car', 'was playing outside with his toy', 'was playing']
+  - split:  <he was> happy   crossed by ['was happy']
+  - split:  <he was> happy again   crossed by ['was happy again']
+  - split:  <he was> sad   crossed by ['was sad']
+  - split:  <he was> very happy   crossed by ['was very happy']
+- "had an" consistency 0.00 (7 occ)
+  - split: sue <had an> idea   crossed by ['an idea']
+  - split: lily <had an> idea   crossed by ['an idea']
+  - split: he <had an> idea   crossed by ['an idea']
+  - split: then sue <had an> idea   crossed by ['an idea']
+  - split: she <had an> idea   crossed by ['an idea']
+  - split: lily was sad but <had an> idea   crossed by ['was sad but had', 'an idea', 'but had']
+- "liked to play" consistency 0.00 (6 occ)
+  - split: they <liked to play> together   crossed by ['to play together', 'play together']
+  - split: tom and anna <liked to play> with water   crossed by ['play with']
+  - split: they <liked to play> in the park   crossed by ['play in']
+  - split: he <liked to play> with his friends   crossed by ['play with']
+  - split: max and lily <liked to play> together   crossed by ['and lily liked to', 'play together']
+  - split: he <liked to play> all day long   crossed by ['play all']
+- "something unexpected" consistency 0.00 (6 occ)
+  - split: then <something unexpected> happened   crossed by ['unexpected happened']
+  - split: but then <something unexpected> happened   crossed by ['unexpected happened']
+  - split: but then <something unexpected> happened   crossed by ['unexpected happened']
+  - split: then <something unexpected> happened   crossed by ['unexpected happened']
+  - split: but then <something unexpected> happened   crossed by ['unexpected happened']
+  - split: then <something unexpected> happened   crossed by ['unexpected happened']
+- "then something" consistency 0.00 (6 occ)
+  - split:  <then something> unexpected happened   crossed by ['something unexpected happened']
+  - split: but <then something> unexpected happened   crossed by ['something unexpected happened']
+  - split: but <then something> unexpected happened   crossed by ['something unexpected happened']
+  - split:  <then something> unexpected happened   crossed by ['something unexpected happened']
+  - split: but <then something> unexpected happened   crossed by ['something unexpected happened']
+  - split:  <then something> unexpected happened   crossed by ['something unexpected happened']
+- "then something unexpected" consistency 0.00 (6 occ)
+  - split:  <then something unexpected> happened   crossed by ['unexpected happened', 'something unexpected happened']
+  - split: but <then something unexpected> happened   crossed by ['something unexpected happened', 'unexpected happened']
+  - split: but <then something unexpected> happened   crossed by ['something unexpected happened', 'unexpected happened']
+  - split:  <then something unexpected> happened   crossed by ['unexpected happened', 'something unexpected happened']
+  - split: but <then something unexpected> happened   crossed by ['something unexpected happened', 'unexpected happened']
+  - split:  <then something unexpected> happened   crossed by ['unexpected happened', 'something unexpected happened']
+- "they were very" consistency 0.00 (6 occ)
+  - split:  <they were very> happy   crossed by ['very happy', 'were very happy']
+  - split:  <they were very> excited   crossed by ['very excited', 'were very excited']
+  - split:  <they were very> happy   crossed by ['very happy', 'were very happy']
+  - split:  <they were very> happy   crossed by ['very happy', 'were very happy']
+  - split:  <they were very> happy   crossed by ['very happy', 'were very happy']
+  - split:  <they were very> happy to be outside   crossed by ['were very happy to', 'were very happy to be outside']
