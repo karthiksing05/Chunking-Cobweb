@@ -1128,7 +1128,7 @@ for ai, arm in enumerate(arms):
             for _ in range(50):
                 out, done, lens = [], False, []
                 while not done and len(out) <= 8:
-                    t_ = [T3BOS] * 5 + out
+                    t_ = [T3BOS] * max(5, getattr(L, "window", 2)) + out
                     vs, ws = _fills(t_[-2], t_[-1], *[t_[-3 - i] for i in range(max(getattr(L, "window", 2), 2) - 2)],
                                     **({"_x": t_[-_W_ - 1] if len(t_) > _W_ else T3BOS,
                                         "_x2": t_[-_W_ - 2] if len(t_) > _W_ + 1 else T3BOS} if both_ else {}))
