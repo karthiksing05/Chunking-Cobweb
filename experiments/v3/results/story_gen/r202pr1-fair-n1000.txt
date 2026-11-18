@@ -1,0 +1,37 @@
+n=1000; attempted per seed: 13:1600, 17:1544, 19:1460, 23:1476
+
+max distinct gram-novel per attempted draw, per family (mean over seeds at the best temperature; per-seed range)
+  TRELLIS close w5       0.259  [0.259, 0.259]  at temp 1.3 (seeds 1)
+  TRELLIS parse w5       0.246  [0.246, 0.246]  at temp 1.3 (seeds 1)
+  TRELLIS w2             0.146  [0.135, 0.158]  at temp 1.0 (seeds 4)
+  TRELLIS w3             0.162  [0.144, 0.179]  at temp 1.0 (seeds 4)
+  TRELLIS w4             0.263  [0.251, 0.269]  at temp 1.3 (seeds 4)
+  TRELLIS w5             0.316  [0.299, 0.333]  at temp 2.0 (seeds 4)
+  TRELLIS w6             0.323  [0.302, 0.343]  at temp 1.6 (seeds 2)
+  TRELLIS w7             0.307  [0.307, 0.307]  at temp 1.6 (seeds 1)
+  GPT                    0.324  [0.274, 0.356]  at temp 0.8 (seeds 4)
+  LSTM                   0.344  [0.308, 0.395]  at temp 0.8 (seeds 4)
+  ngram 3                0.000  [0.000, 0.000]  at temp 0.7 (seeds 4)
+  ngram 4                0.000  [0.000, 0.000]  at temp 0.7 (seeds 4)
+  ngram 5                0.000  [0.000, 0.000]  at temp 0.7 (seeds 4)
+  retrieved swap         0.239  [0.225, 0.253]  at temp 1.0 (seeds 4)
+
+upper envelope: distinct gram per attempted draw vs tri among distinct new (linear interpolation along temperature, no extrapolation)
+level | TRELLIS close w5 | TRELLIS parse w5 | TRELLIS w2 | TRELLIS w3 | TRELLIS w4 | TRELLIS w5 | TRELLIS w6 | TRELLIS w7 | GPT | LSTM | ngram 3 | ngram 4 | ngram 5 | retrieved swap
+0.1 | - | - | - | - | - | - | - | - | - | - | - | - | - | -
+0.2 | - | - | - | 0.345 | - | - | - | - | - | - | - | - | - | -
+0.3 | - | - | - | 0.463 | - | - | - | - | - | - | - | - | - | -
+0.4 | - | - | - | - | - | - | - | - | - | 0.037 | - | - | - | -
+0.5 | - | - | - | - | 0.314 | - | - | - | - | 0.194 | - | - | - | -
+0.6 | - | - | - | - | 0.463 | - | - | - | - | 0.359 | - | - | - | -
+0.7 | - | - | - | - | - | 0.364 | - | - | 0.305 | 0.511 | - | - | - | -
+
+upper envelope: gram among distinct new vs tri among distinct new (linear interpolation along temperature, no extrapolation)
+level | TRELLIS close w5 | TRELLIS parse w5 | TRELLIS w2 | TRELLIS w3 | TRELLIS w4 | TRELLIS w5 | TRELLIS w6 | TRELLIS w7 | GPT | LSTM | ngram 3 | ngram 4 | ngram 5 | retrieved swap
+0.1 | - | - | - | - | - | - | - | - | - | - | - | - | - | -
+0.2 | - | - | - | 0.837 | - | - | - | - | - | - | - | - | - | -
+0.3 | - | - | - | 0.786 | - | - | - | - | - | - | - | - | - | -
+0.4 | - | - | - | - | - | - | - | - | - | 0.909 | - | - | - | -
+0.5 | - | - | - | - | 0.721 | - | - | - | - | 0.861 | - | - | - | -
+0.6 | - | - | - | - | 0.686 | - | - | - | - | 0.786 | - | - | - | -
+0.7 | - | - | - | - | - | 0.626 | - | - | 0.693 | 0.675 | - | - | - | -

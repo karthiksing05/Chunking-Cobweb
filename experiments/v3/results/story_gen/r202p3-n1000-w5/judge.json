@@ -1,0 +1,153 @@
+{
+ "model": "Qwen/Qwen2.5-3B-Instruct",
+ "references": {
+  "story_s13_n1000_refs.jsonl": {
+   "real": 0.897,
+   "word order scrambled": 0.117,
+   "content swapped": 0.05
+  }
+ },
+ "arms": [
+  {
+   "file": "story_s13_n1000_arm0.jsonl",
+   "arm": {
+    "cond": false,
+    "causal": 1,
+    "units": "words",
+    "pair": "gate",
+    "new": true,
+    "gen": "parse3"
+   },
+   "generated": 1600,
+   "judged grammatical": 0.606,
+   "novel": 1.0,
+   "novel judged grammatical": 0.606,
+   "grammatical novel per generation": 0.606,
+   "tag pattern attested": 0.649,
+   "novel attested-pattern share": 0.649,
+   "novel judged grammatical, pattern attested": 0.715,
+   "novel judged grammatical, pattern unattested": 0.404,
+   "novel examples": [
+    [
+     "she was very happy and excited",
+     1.0
+    ],
+    [
+     "he smiled and played with the bird",
+     1.0
+    ],
+    [
+     "lily was very happy and pretty",
+     0.98
+    ],
+    [
+     "lily and ben were very much",
+     0.47
+    ],
+    [
+     "ben came over and looked at it too",
+     1.0
+    ],
+    [
+     "the big bird thought about",
+     0.91
+    ],
+    [
+     "tim was very happy and pretty",
+     0.0
+    ],
+    [
+     "sue and tim were very",
+     0.12
+    ],
+    [
+     "loved it on a high rock",
+     0.0
+    ],
+    [
+     "they loved to play near the tree",
+     1.0
+    ],
+    [
+     "lily and spot played together every day",
+     1.0
+    ],
+    [
+     "cat was so happy",
+     0.99
+    ]
+   ]
+  },
+  {
+   "file": "story_s13_n1000_arm1.jsonl",
+   "arm": {
+    "cond": false,
+    "causal": 1,
+    "units": "words",
+    "pair": "gate",
+    "new": true,
+    "temp": 1.3,
+    "gen": "parse3"
+   },
+   "generated": 1600,
+   "judged grammatical": 0.564,
+   "novel": 1.0,
+   "novel judged grammatical": 0.564,
+   "grammatical novel per generation": 0.564,
+   "tag pattern attested": 0.627,
+   "novel attested-pattern share": 0.627,
+   "novel judged grammatical, pattern attested": 0.686,
+   "novel judged grammatical, pattern unattested": 0.36,
+   "novel examples": [
+    [
+     "i had an idea",
+     1.0
+    ],
+    [
+     "he played with the ball all had fun",
+     0.0
+    ],
+    [
+     "tim were the dog would take their toy",
+     0.0
+    ],
+    [
+     "the girl was red and blue",
+     0.71
+    ],
+    [
+     "thank you mom and mia",
+     0.01
+    ],
+    [
+     "he had a lot of fun in it",
+     0.07
+    ],
+    [
+     "he wanted to play in the",
+     0.0
+    ],
+    [
+     "tim liked to play in the sun",
+     1.0
+    ],
+    [
+     "sue and i like playing with you tom",
+     0.12
+    ],
+    [
+     "sam came over and looked at the rock",
+     1.0
+    ],
+    [
+     "what it again",
+     0.0
+    ],
+    [
+     "loved it under a special rock",
+     0.38
+    ]
+   ]
+  }
+ ]
+}

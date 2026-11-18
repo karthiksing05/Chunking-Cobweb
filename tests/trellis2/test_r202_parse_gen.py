@@ -163,6 +163,21 @@ def test_closure_is_a_share(learner):
         assert small.closure(s.split()) == pytest.approx(PC.closure(s.split()))
 
 
+def test_parse3_reads_the_open_edge_only():
+    vs = [(("w", "a"), False), (("w", "a"), True), (("w", "b"), False)]
+    z = {("a", False): 1.0, ("a", True): 50.0, ("b", False): 0.0}
+    target = [0.4 * math.e, 0.2 * math.e, 0.4]
+    target = [t / sum(target) for t in target]
+    rng = random.Random(3)
+    counts = [0] * 3
+    N = 3000
+    for _ in range(N):
+        v = parse_step(_StubChart2(z), ["x"], vs, [0.4, 0.2, 0.4], lambda v: [v[1]], rng, M=400, mode="parse3")
+        counts[vs.index(v)] += 1
+    for c, t in zip(counts, target):
+        assert c / N == pytest.approx(t, abs=0.03)
+
+
 def test_unsupported_recipe_refused():
     L = Trellis3(seed=1, **{**CFG, "spine": True})
     with pytest.raises(NotImplementedError):

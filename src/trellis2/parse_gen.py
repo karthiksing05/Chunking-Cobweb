@@ -172,6 +172,10 @@ def parse_step(PC: PrefixChart, out: Sequence[str], vs: List[tuple], ws: List[fl
                 lz.append(PC.logZ(toks, closed=True) - PC.logZ(toks, closed=False))
             else:
                 lz.append(0.0)
+    elif mode == "parse3":
+        # r202 v3: no closure read: every candidate, end or go on, by the OPEN chart of prefix + w (equal
+        # descriptions), so the parse reweights which word comes and the end stays the window read's
+        lz = [PC.logZ(list(out) + list(words_of(vs[j][0])), closed=False) for j in cands]
     elif mode in ("parse2", "close2"):
         # r202 v2: the end read as a closure probability c (PrefixChart.closure) against its base rate c0 (the
         # content root's sentence share): end x c / c0, go on x (1 - c) / (1 - c0); "parse2" also keeps the open

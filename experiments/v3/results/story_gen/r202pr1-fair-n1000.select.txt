@@ -1,0 +1,77 @@
+n=1000; seeds [13]; selection seeds [13]; reported on [13]
+
+(a) per setting: fair count, tri, gram, gram|tri -- mean over selection seeds | held-out seeds
+  TRELLIS parse w5       t1.00  sel 0.208 0.778 0.570 0.485 | held 0.208 0.778 0.570 0.485
+  TRELLIS parse w5       t1.30  sel 0.246 0.812 0.540 0.470 | held 0.246 0.812 0.540 0.470
+  GPT                    t0.15  sel 0.011 0.549 0.784 0.643 | held 0.011 0.549 0.784 0.643
+  GPT                    t0.20  sel 0.022 0.576 0.768 0.632 | held 0.022 0.576 0.768 0.632
+  GPT                    t0.30  sel 0.058 0.573 0.806 0.715 | held 0.058 0.573 0.806 0.715
+  GPT                    t0.40  sel 0.116 0.660 0.710 0.607 | held 0.116 0.660 0.710 0.607
+  GPT                    t0.50  sel 0.174 0.675 0.698 0.603 | held 0.174 0.675 0.698 0.603
+  GPT                    t0.60  sel 0.244 0.726 0.674 0.590 | held 0.244 0.726 0.674 0.590
+  GPT                    t0.70  sel 0.276 0.775 0.585 0.493 | held 0.276 0.775 0.585 0.493
+  GPT                    t0.80  sel 0.317 0.834 0.525 0.456 | held 0.317 0.834 0.525 0.456
+  GPT                    t0.90  sel 0.308 0.880 0.448 0.390 | held 0.308 0.880 0.448 0.390
+  GPT                    t1.00  sel 0.250 0.912 0.341 0.287 | held 0.250 0.912 0.341 0.287
+  GPT                    t1.20  sel 0.178 0.953 0.222 0.189 | held 0.178 0.953 0.222 0.189
+  LSTM                   t0.15  sel 0.001 0.091 1.000 1.000 | held 0.001 0.091 1.000 1.000
+  LSTM                   t0.20  sel 0.012 0.284 0.970 1.000 | held 0.012 0.284 0.970 1.000
+  LSTM                   t0.30  sel 0.043 0.421 0.896 0.896 | held 0.043 0.421 0.896 0.896
+  LSTM                   t0.40  sel 0.100 0.483 0.858 0.812 | held 0.100 0.483 0.858 0.812
+  LSTM                   t0.50  sel 0.174 0.562 0.790 0.706 | held 0.174 0.562 0.790 0.706
+  LSTM                   t0.60  sel 0.255 0.621 0.735 0.653 | held 0.255 0.621 0.735 0.653
+  LSTM                   t0.70  sel 0.307 0.691 0.679 0.589 | held 0.307 0.691 0.679 0.589
+  LSTM                   t0.80  sel 0.342 0.776 0.589 0.506 | held 0.342 0.776 0.589 0.506
+  LSTM                   t0.90  sel 0.328 0.817 0.511 0.432 | held 0.328 0.817 0.511 0.432
+  LSTM                   t1.00  sel 0.301 0.850 0.451 0.375 | held 0.301 0.850 0.451 0.375
+  LSTM                   t1.20  sel 0.195 0.945 0.241 0.207 | held 0.195 0.945 0.241 0.207
+  TRELLIS close w5       t1.00  sel 0.206 0.786 0.563 0.478 | held 0.206 0.786 0.563 0.478
+  TRELLIS close w5       t1.30  sel 0.259 0.831 0.539 0.474 | held 0.259 0.831 0.539 0.474
+  TRELLIS w2             t1.00  sel 0.135 0.364 0.654 0.441 | held 0.135 0.364 0.654 0.441
+  TRELLIS w3             t0.50  sel 0.027 0.153 0.867 0.614 | held 0.027 0.153 0.867 0.614
+  TRELLIS w3             t0.70  sel 0.085 0.284 0.791 0.586 | held 0.085 0.284 0.791 0.586
+  TRELLIS w3             t1.00  sel 0.163 0.416 0.734 0.549 | held 0.163 0.416 0.734 0.549
+  TRELLIS w4             t0.50  sel 0.056 0.424 0.759 0.556 | held 0.056 0.424 0.759 0.556
+  TRELLIS w4             t0.70  sel 0.129 0.520 0.708 0.543 | held 0.129 0.520 0.708 0.543
+  TRELLIS w4             t1.00  sel 0.222 0.620 0.669 0.540 | held 0.222 0.620 0.669 0.540
+  TRELLIS w4             t1.30  sel 0.269 0.690 0.622 0.525 | held 0.269 0.690 0.622 0.525
+  TRELLIS w5             t0.50  sel 0.091 0.666 0.616 0.492 | held 0.091 0.666 0.616 0.492
+  TRELLIS w5             t0.70  sel 0.185 0.703 0.603 0.493 | held 0.185 0.703 0.603 0.493
+  TRELLIS w5             t1.00  sel 0.257 0.755 0.572 0.487 | held 0.257 0.755 0.572 0.487
+  TRELLIS w5             t1.30  sel 0.268 0.792 0.539 0.453 | held 0.268 0.792 0.539 0.453
+  TRELLIS w5             t1.60  sel 0.314 0.825 0.549 0.474 | held 0.314 0.825 0.549 0.474
+  TRELLIS w5             t2.00  sel 0.299 0.870 0.472 0.415 | held 0.299 0.870 0.472 0.415
+  TRELLIS w6             t1.30  sel 0.296 0.831 0.551 0.485 | held 0.296 0.831 0.551 0.485
+  TRELLIS w6             t1.60  sel 0.302 0.866 0.495 0.446 | held 0.302 0.866 0.495 0.446
+  TRELLIS w6             t2.00  sel 0.297 0.895 0.450 0.406 | held 0.297 0.895 0.450 0.406
+
+(b) setting with the best fair count on [13], reported on [13]
+  TRELLIS parse  TRELLIS parse w5 t1.30: sel fair 0.246 | held fair 0.246, tri 0.812, gram 0.540, gram|tri 0.470; per seed fair 13:0.246
+  TRELLIS close  TRELLIS close w5 t1.30: sel fair 0.259 | held fair 0.259, tri 0.831, gram 0.539, gram|tri 0.474; per seed fair 13:0.259
+  TRELLIS        TRELLIS w5 t1.60: sel fair 0.314 | held fair 0.314, tri 0.825, gram 0.549, gram|tri 0.474; per seed fair 13:0.314
+  LSTM           LSTM t0.80: sel fair 0.342 | held fair 0.342, tri 0.776, gram 0.589, gram|tri 0.506; per seed fair 13:0.342
+  GPT            GPT t0.80: sel fair 0.317 | held fair 0.317, tri 0.834, gram 0.525, gram|tri 0.456; per seed fair 13:0.317
+  paired fair count, parse vs TRELLIS close on [13]: wins 0 of 1; mean diff -0.014; 13:0.246/0.259
+  paired fair count, parse vs TRELLIS on [13]: wins 0 of 1; mean diff -0.068; 13:0.246/0.314
+  paired fair count, parse vs LSTM on [13]: wins 0 of 1; mean diff -0.096; 13:0.246/0.342
+  paired fair count, parse vs GPT on [13]: wins 0 of 1; mean diff -0.071; 13:0.246/0.317
+
+(c) held-out envelope on [13]: gram (distinct new) vs tri (interpolated along temperature, no extrapolation)
+tri | TRELLIS parse w5 | TRELLIS close w5 | TRELLIS w2 | TRELLIS w3 | TRELLIS w4 | TRELLIS w5 | TRELLIS w6 | GPT | LSTM
+0.1 | - | - | - | - | - | - | - | - | 0.999
+0.2 | - | - | - | 0.839 | - | - | - | - | 0.983
+0.3 | - | - | - | 0.784 | - | - | - | - | 0.961
+0.4 | - | - | - | 0.741 | - | - | - | - | 0.907
+0.5 | - | - | - | - | 0.719 | - | - | - | 0.843
+0.6 | - | - | - | - | 0.677 | - | - | 0.751 | 0.755
+0.7 | - | - | - | - | - | 0.604 | - | 0.686 | 0.670
+
+(c) held-out envelope on [13]: gram|tri vs tri (interpolated along temperature, no extrapolation)
+tri | TRELLIS parse w5 | TRELLIS close w5 | TRELLIS w2 | TRELLIS w3 | TRELLIS w4 | TRELLIS w5 | TRELLIS w6 | GPT | LSTM
+0.1 | - | - | - | - | - | - | - | - | 1.000
+0.2 | - | - | - | 0.604 | - | - | - | - | 1.000
+0.3 | - | - | - | 0.582 | - | - | - | - | 0.988
+0.4 | - | - | - | 0.553 | - | - | - | - | 0.912
+0.5 | - | - | - | - | 0.546 | - | - | - | 0.789
+0.6 | - | - | - | - | 0.540 | - | - | 0.624 | 0.672
+0.7 | - | - | - | - | - | 0.493 | - | 0.596 | 0.581

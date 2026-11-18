@@ -27,7 +27,7 @@ SEL, HELD = (13, 17), (19, 23)
 
 def family_of(r):
     arm = json.loads(r["arm"])
-    if arm.get("gen") in ("parse", "close", "parse2", "close2"):
+    if arm.get("gen") in ("parse", "close", "parse2", "close2", "parse3"):
         m = re.search(r"-w(\d+)$", r["dir"])
         return "TRELLIS %s w%s%s" % (arm["gen"], m.group(1), "" if arm.get("M", 16) == 16 else " M%d" % arm["M"]), arm.get("temp", 1.0)
     return spn.family(r)
