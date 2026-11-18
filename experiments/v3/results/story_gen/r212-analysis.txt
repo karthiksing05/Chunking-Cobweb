@@ -1,0 +1,179 @@
+
+# n=250  attempted per seed: {13: 1600, 17: 1544, 19: 1460, 23: 1476, 29: 1600, 31: 1592, 37: 1524, 41: 1600}
+
+## n=250 FAIR count at the r205-selected settings (TRELLIS edge w7 t3.50, LSTM t0.70, GPT t0.70), seeds [13, 17, 19, 23, 29, 31, 37, 41]
+seed | TRELLIS edge | LSTM | GPT
+13 | 0.253 | 0.244 | 0.223
+17 | 0.245 | 0.232 | 0.196
+19 | 0.247 | 0.277 | 0.225
+23 | 0.218 | 0.222 | 0.207
+29 | 0.239 | 0.219 | 0.229
+31 | 0.263 | 0.220 | 0.183
+37 | 0.235 | 0.198 | 0.196
+41 | 0.234 | 0.247 | 0.196
+mean over all 8: TRELLIS edge 0.2419, LSTM 0.2323, GPT 0.2068
+mean over old 4: TRELLIS edge 0.2408, LSTM 0.2436, GPT 0.2127
+mean over new 4: TRELLIS edge 0.2430, LSTM 0.2211, GPT 0.2010
+TRELLIS-LSTM [all 8]: mean +0.0096, t95 [-0.0110, +0.0301], boot95 [-0.0064, +0.0252], wins 5/8
+TRELLIS-GPT [all 8]: mean +0.0351, t95 [+0.0163, +0.0539], boot95 [+0.0217, +0.0505], wins 8/8
+TRELLIS-LSTM [old 4]: mean -0.0028, t95 [-0.0334, +0.0278], boot95 [-0.0197, +0.0112], wins 2/4
+TRELLIS-GPT [old 4]: mean +0.0282, t95 [+0.0034, +0.0530], boot95 [+0.0161, +0.0421], wins 4/4
+TRELLIS-LSTM [new 4]: mean +0.0219, t95 [-0.0182, +0.0620], boot95 [-0.0005, +0.0401], wins 3/4
+TRELLIS-GPT [new 4]: mean +0.0420, t95 [-0.0033, +0.0873], boot95 [+0.0178, +0.0694], wins 4/4
+VERDICT n=250 fair: matches LSTM -> t: HOLDS, boot: HOLDS ; beats GPT -> t: HOLDS, boot: HOLDS
+
+## n=250 BOUNDARY-STRICT count at the r205-selected settings (TRELLIS edge w7 t3.50, LSTM t0.70, GPT t0.70), seeds [13, 17, 19, 23, 29, 31, 37, 41]
+seed | TRELLIS edge | LSTM | GPT
+13 | 0.233 | 0.223 | 0.205
+17 | 0.229 | 0.220 | 0.185
+19 | 0.237 | 0.255 | 0.217
+23 | 0.197 | 0.203 | 0.199
+29 | 0.220 | 0.198 | 0.212
+31 | 0.236 | 0.202 | 0.172
+37 | 0.223 | 0.187 | 0.185
+41 | 0.214 | 0.234 | 0.191
+mean over all 8: TRELLIS edge 0.2236, LSTM 0.2154, GPT 0.1959
+mean over old 4: TRELLIS edge 0.2240, LSTM 0.2255, GPT 0.2016
+mean over new 4: TRELLIS edge 0.2233, LSTM 0.2053, GPT 0.1901
+TRELLIS-LSTM [all 8]: mean +0.0082, t95 [-0.0102, +0.0266], boot95 [-0.0059, +0.0221], wins 5/8
+TRELLIS-GPT [all 8]: mean +0.0278, t95 [+0.0104, +0.0452], boot95 [+0.0146, +0.0415], wins 7/8
+TRELLIS-LSTM [old 4]: mean -0.0015, t95 [-0.0229, +0.0198], boot95 [-0.0123, +0.0092], wins 2/4
+TRELLIS-GPT [old 4]: mean +0.0223, t95 [-0.0078, +0.0525], boot95 [+0.0055, +0.0375], wins 3/4
+TRELLIS-LSTM [new 4]: mean +0.0180, t95 [-0.0241, +0.0600], boot95 [-0.0070, +0.0350], wins 3/4
+TRELLIS-GPT [new 4]: mean +0.0332, t95 [-0.0049, +0.0713], boot95 [+0.0153, +0.0537], wins 4/4
+reading n=250 strict (same rules): matches LSTM -> t: HOLDS, boot: HOLDS ; beats GPT -> t: HOLDS, boot: HOLDS
+
+## n=250 selection re-check: fair count means per setting
+-- new 4 seeds
+   TRELLIS edge  w7 t3.00 0.2389  w7 t3.50 0.2430  w7 t4.00 0.2451   best w7 t4.00
+   LSTM          t0.70 0.2211  t0.80 0.2210  t0.90 0.1882   best t0.70
+   GPT           t0.70 0.2010  t0.80 0.2010  t0.90 0.1757   best t0.70
+-- old 4 seeds
+   TRELLIS edge  w7 t1.30 0.1490  w7 t1.60 0.1766  w7 t2.00 0.1961  w7 t2.40 0.2046  w7 t2.80 0.2196  w7 t3.50 0.2408  w7 t4.50 0.2579  w7 t6.00 0.2561   best w7 t4.50
+   LSTM          t0.70 0.2436  t0.80 0.2364  t0.90 0.2078   best t0.70
+   GPT           t0.70 0.2127  t0.80 0.2037  t0.90 0.1723   best t0.70
+-- all 8 seeds
+   TRELLIS edge  w7 t3.50 0.2419   best w7 t3.50
+   LSTM          t0.70 0.2323  t0.80 0.2287  t0.90 0.1980   best t0.70
+   GPT           t0.70 0.2068  t0.80 0.2023  t0.90 0.1740   best t0.70
+
+# n=500  attempted per seed: {13: 1600, 17: 1544, 19: 1460, 23: 1476, 29: 1600, 31: 1592, 37: 1524, 41: 1600}
+
+## n=500 FAIR count at the r205-selected settings (TRELLIS edge w6 t2.80, LSTM t0.80, GPT t0.80), seeds [13, 17, 19, 23, 29, 31, 37, 41]
+seed | TRELLIS edge | LSTM | GPT
+13 | 0.307 | 0.298 | 0.290
+17 | 0.294 | 0.295 | 0.265
+19 | 0.308 | 0.339 | 0.298
+23 | 0.296 | 0.286 | 0.278
+29 | 0.300 | 0.298 | 0.269
+31 | 0.291 | 0.300 | 0.270
+37 | 0.289 | 0.275 | 0.227
+41 | 0.300 | 0.301 | 0.293
+mean over all 8: TRELLIS edge 0.2982, LSTM 0.2990, GPT 0.2738
+mean over old 4: TRELLIS edge 0.3011, LSTM 0.3044, GPT 0.2827
+mean over new 4: TRELLIS edge 0.2952, LSTM 0.2935, GPT 0.2649
+TRELLIS-LSTM [all 8]: mean -0.0008, t95 [-0.0129, +0.0113], boot95 [-0.0108, +0.0075], wins 4/8
+TRELLIS-GPT [all 8]: mean +0.0244, t95 [+0.0098, +0.0390], boot95 [+0.0146, +0.0368], wins 8/8
+TRELLIS-LSTM [old 4]: mean -0.0033, t95 [-0.0342, +0.0276], boot95 [-0.0214, +0.0095], wins 2/4
+TRELLIS-GPT [old 4]: mean +0.0185, t95 [+0.0056, +0.0313], boot95 [+0.0118, +0.0261], wins 4/4
+TRELLIS-LSTM [new 4]: mean +0.0017, t95 [-0.0136, +0.0170], boot95 [-0.0061, +0.0107], wins 2/4
+TRELLIS-GPT [new 4]: mean +0.0303, t95 [-0.0071, +0.0677], boot95 [+0.0128, +0.0521], wins 4/4
+VERDICT n=500 fair: matches LSTM -> t: HOLDS, boot: HOLDS ; beats GPT -> t: HOLDS, boot: HOLDS
+
+## n=500 BOUNDARY-STRICT count at the r205-selected settings (TRELLIS edge w6 t2.80, LSTM t0.80, GPT t0.80), seeds [13, 17, 19, 23, 29, 31, 37, 41]
+seed | TRELLIS edge | LSTM | GPT
+13 | 0.279 | 0.284 | 0.266
+17 | 0.274 | 0.278 | 0.253
+19 | 0.281 | 0.321 | 0.292
+23 | 0.266 | 0.272 | 0.272
+29 | 0.282 | 0.276 | 0.254
+31 | 0.269 | 0.278 | 0.253
+37 | 0.260 | 0.259 | 0.219
+41 | 0.270 | 0.287 | 0.282
+mean over all 8: TRELLIS edge 0.2725, LSTM 0.2819, GPT 0.2617
+mean over old 4: TRELLIS edge 0.2748, LSTM 0.2885, GPT 0.2711
+mean over new 4: TRELLIS edge 0.2701, LSTM 0.2753, GPT 0.2523
+TRELLIS-LSTM [all 8]: mean -0.0094, t95 [-0.0211, +0.0023], boot95 [-0.0193, -0.0016], wins 2/8
+TRELLIS-GPT [all 8]: mean +0.0108, t95 [-0.0055, +0.0270], boot95 [-0.0017, +0.0235], wins 5/8
+TRELLIS-LSTM [old 4]: mean -0.0137, t95 [-0.0413, +0.0140], boot95 [-0.0310, -0.0044], wins 0/4
+TRELLIS-GPT [old 4]: mean +0.0037, t95 [-0.0208, +0.0282], boot95 [-0.0092, +0.0166], wins 2/4
+TRELLIS-LSTM [new 4]: mean -0.0052, t95 [-0.0216, +0.0113], boot95 [-0.0135, +0.0031], wins 2/4
+TRELLIS-GPT [new 4]: mean +0.0178, t95 [-0.0182, +0.0539], boot95 [-0.0025, +0.0344], wins 3/4
+reading n=500 strict (same rules): matches LSTM -> t: HOLDS, boot: FAILS ; beats GPT -> t: FAILS, boot: FAILS
+
+## n=500 selection re-check: fair count means per setting
+-- new 4 seeds
+   TRELLIS edge  w6 t2.40 0.2971  w6 t2.80 0.2952  w6 t3.20 0.2879   best w6 t2.40
+   LSTM          t0.70 0.3000  t0.80 0.2935  t0.90 0.2642   best t0.70
+   GPT           t0.70 0.2647  t0.80 0.2649  t0.90 0.2383   best t0.80
+-- old 4 seeds
+   TRELLIS edge  w6 t1.30 0.2282  w6 t1.60 0.2660  w6 t2.00 0.2716  w6 t2.40 0.2865  w6 t2.80 0.3011  w6 t3.50 0.2990   best w6 t2.80
+   LSTM          t0.70 0.2904  t0.80 0.3044  t0.90 0.2776   best t0.80
+   GPT           t0.70 0.2758  t0.80 0.2827  t0.90 0.2561   best t0.80
+-- all 8 seeds
+   TRELLIS edge  w6 t2.40 0.2918  w6 t2.80 0.2982   best w6 t2.80
+   LSTM          t0.70 0.2952  t0.80 0.2990  t0.90 0.2709   best t0.80
+   GPT           t0.70 0.2702  t0.80 0.2738  t0.90 0.2472   best t0.80
+
+# n=1000  attempted per seed: {13: 1600, 17: 1544, 19: 1460, 23: 1476, 29: 1600, 31: 1592, 37: 1524, 41: 1600}
+
+## n=1000 FAIR count at the r205-selected settings (TRELLIS edge w7 t2.00, LSTM t0.80, GPT t0.80), seeds [13, 17, 19, 23, 29, 31, 37, 41]
+seed | TRELLIS edge | LSTM | GPT
+13 | 0.337 | 0.342 | 0.317
+17 | 0.337 | 0.332 | 0.356
+19 | 0.353 | 0.395 | 0.351
+23 | 0.326 | 0.308 | 0.274
+29 | 0.335 | 0.303 | 0.329
+31 | 0.299 | 0.320 | 0.330
+37 | 0.304 | 0.340 | 0.327
+41 | 0.334 | 0.338 | 0.342
+mean over all 8: TRELLIS edge 0.3281, LSTM 0.3346, GPT 0.3282
+mean over old 4: TRELLIS edge 0.3381, LSTM 0.3439, GPT 0.3244
+mean over new 4: TRELLIS edge 0.3180, LSTM 0.3252, GPT 0.3321
+TRELLIS-LSTM [all 8]: mean -0.0065, t95 [-0.0279, +0.0149], boot95 [-0.0228, +0.0101], wins 3/8
+TRELLIS-GPT [all 8]: mean -0.0002, t95 [-0.0227, +0.0223], boot95 [-0.0161, +0.0184], wins 4/8
+TRELLIS-LSTM [old 4]: mean -0.0058, t95 [-0.0469, +0.0352], boot95 [-0.0300, +0.0125], wins 2/4
+TRELLIS-GPT [old 4]: mean +0.0137, t95 [-0.0343, +0.0617], boot95 [-0.0091, +0.0395], wins 3/4
+TRELLIS-LSTM [new 4]: mean -0.0072, t95 [-0.0538, +0.0395], boot95 [-0.0287, +0.0186], wins 1/4
+TRELLIS-GPT [new 4]: mean -0.0141, t95 [-0.0402, +0.0121], boot95 [-0.0272, -0.0009], wins 1/4
+VERDICT n=1000 fair: matches LSTM -> t: HOLDS, boot: HOLDS ; beats GPT -> t: FAILS, boot: FAILS
+
+## n=1000 BOUNDARY-STRICT count at the r205-selected settings (TRELLIS edge w7 t2.00, LSTM t0.80, GPT t0.80), seeds [13, 17, 19, 23, 29, 31, 37, 41]
+seed | TRELLIS edge | LSTM | GPT
+13 | 0.309 | 0.318 | 0.299
+17 | 0.303 | 0.314 | 0.343
+19 | 0.314 | 0.375 | 0.330
+23 | 0.299 | 0.291 | 0.262
+29 | 0.314 | 0.280 | 0.318
+31 | 0.278 | 0.303 | 0.312
+37 | 0.281 | 0.326 | 0.319
+41 | 0.303 | 0.310 | 0.328
+mean over all 8: TRELLIS edge 0.3003, LSTM 0.3147, GPT 0.3139
+mean over old 4: TRELLIS edge 0.3066, LSTM 0.3246, GPT 0.3086
+mean over new 4: TRELLIS edge 0.2940, LSTM 0.3049, GPT 0.3192
+TRELLIS-LSTM [all 8]: mean -0.0144, t95 [-0.0392, +0.0104], boot95 [-0.0334, +0.0049], wins 2/8
+TRELLIS-GPT [all 8]: mean -0.0136, t95 [-0.0363, +0.0091], boot95 [-0.0297, +0.0052], wins 2/8
+TRELLIS-LSTM [old 4]: mean -0.0180, t95 [-0.0657, +0.0297], boot95 [-0.0479, +0.0039], wins 1/4
+TRELLIS-GPT [old 4]: mean -0.0020, t95 [-0.0554, +0.0515], boot95 [-0.0280, +0.0245], wins 2/4
+TRELLIS-LSTM [new 4]: mean -0.0109, t95 [-0.0642, +0.0424], boot95 [-0.0352, +0.0189], wins 1/4
+TRELLIS-GPT [new 4]: mean -0.0252, t95 [-0.0494, -0.0009], boot95 [-0.0360, -0.0114], wins 0/4
+reading n=1000 strict (same rules): matches LSTM -> t: FAILS, boot: FAILS ; beats GPT -> t: FAILS, boot: FAILS
+
+## n=1000 selection re-check: fair count means per setting
+-- new 4 seeds
+   TRELLIS edge  w7 t1.60 0.3123  w7 t2.00 0.3180  w7 t2.40 0.3146   best w7 t2.00
+   LSTM          t0.70 0.3095  t0.80 0.3252  t0.90 0.3022   best t0.80
+   GPT           t0.70 0.3138  t0.80 0.3321  t0.90 0.3298   best t0.80
+-- old 4 seeds
+   TRELLIS edge  w7 t1.30 0.3128  w7 t1.60 0.3294  w7 t2.00 0.3381  w7 t2.40 0.3253  w7 t2.80 0.3258  w7 t3.50 0.3123   best w7 t2.00
+   LSTM          t0.70 0.3062  t0.80 0.3439  t0.90 0.3341   best t0.80
+   GPT           t0.70 0.2954  t0.80 0.3244  t0.90 0.3103   best t0.80
+-- all 8 seeds
+   TRELLIS edge  w7 t1.60 0.3208  w7 t2.00 0.3281  w7 t2.40 0.3199   best w7 t2.00
+   LSTM          t0.70 0.3079  t0.80 0.3346  t0.90 0.3181   best t0.80
+   GPT           t0.70 0.3046  t0.80 0.3282  t0.90 0.3200   best t0.80
+
+## Training-set overlap between seeds (share of seed a's distinct training sentences also in seed b's)
+n=250  old-old 0.076  new-old 0.077  new-new 0.077
+n=500  old-old 0.107  new-old 0.107  new-new 0.117
+n=1000  old-old 0.136  new-old 0.141  new-new 0.142
