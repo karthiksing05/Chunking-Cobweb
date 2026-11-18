@@ -1,0 +1,70 @@
+n=4000; attempted per seed: {13: 1600, 17: 1544}; seeds [13, 17]
+
+per setting (mean over seeds present in every setting): fair, strict, dist/draw, tri|d, gram|tri, atypical share of distinct, repeats, repeats that are proper spans of stored sentences
+family setting | fair strict | dist/draw tri|d gram|tri | atyp | repeats(rows) cutcopy(rows)
+TRELLIS edge  w5 t1.30  | 0.297 0.264 | 0.907 0.698 0.469 | 0.137 | 146.5 8.0
+TRELLIS edge  w5 t1.60  | 0.294 0.251 | 0.933 0.749 0.421 | 0.162 | 105.0 4.0
+TRELLIS edge  w5 t2.00  | 0.319 0.264 | 0.952 0.816 0.410 | 0.220 | 75.0 2.0
+TRELLIS       w2 t1.00  | 0.112 0.102 | 0.942 0.263 0.453 | 0.099 | 90.5 35.5
+TRELLIS       w3 t0.50  | 0.021 0.019 | 0.494 0.072 0.597 | 0.046 | 794.0 121.0
+TRELLIS       w3 t0.70  | 0.059 0.056 | 0.742 0.141 0.563 | 0.063 | 405.5 70.5
+TRELLIS       w3 t1.00  | 0.140 0.125 | 0.902 0.300 0.519 | 0.104 | 155.0 37.5
+TRELLIS       w4 t0.50  | 0.041 0.038 | 0.370 0.197 0.564 | 0.063 | 871.0 203.0
+TRELLIS       w4 t0.70  | 0.112 0.100 | 0.674 0.315 0.528 | 0.076 | 504.5 95.0
+TRELLIS       w6 t1.30  | 0.317 0.223 | 0.913 0.787 0.441 | 0.296 | 136.5 46.0
+GPT           t0.30     | 0.031 0.029 | 0.141 0.285 0.756 | 0.044 | 1350.0 205.0
+GPT           t0.40     | 0.076 0.071 | 0.280 0.359 0.758 | 0.050 | 1130.5 183.5
+GPT           t0.50     | 0.144 0.135 | 0.448 0.428 0.753 | 0.061 | 868.0 118.0
+GPT           t0.70     | 0.271 0.244 | 0.753 0.550 0.655 | 0.088 | 388.0 80.0
+GPT           t0.80     | 0.342 0.316 | 0.857 0.618 0.646 | 0.089 | 224.5 58.5
+GPT           t0.90     | 0.362 0.328 | 0.923 0.688 0.570 | 0.107 | 120.5 38.5
+GPT           t1.00     | 0.357 0.316 | 0.949 0.746 0.504 | 0.135 | 81.0 18.0
+GPT           t1.20     | 0.310 0.277 | 0.991 0.860 0.363 | 0.184 | 14.5 5.0
+LSTM          t0.30     | 0.024 0.024 | 0.156 0.196 0.793 | 0.018 | 1326.0 441.0
+LSTM          t0.40     | 0.077 0.074 | 0.333 0.283 0.818 | 0.046 | 1049.0 254.5
+LSTM          t0.50     | 0.145 0.139 | 0.526 0.354 0.781 | 0.050 | 745.5 153.0
+LSTM          t0.70     | 0.277 0.257 | 0.811 0.512 0.666 | 0.073 | 296.5 53.0
+LSTM          t0.80     | 0.340 0.316 | 0.894 0.600 0.634 | 0.094 | 166.5 29.5
+LSTM          t0.90     | 0.355 0.325 | 0.945 0.676 0.555 | 0.117 | 87.0 17.0
+LSTM          t1.00     | 0.358 0.325 | 0.972 0.742 0.498 | 0.128 | 44.0 11.5
+LSTM          t1.20     | 0.297 0.265 | 0.993 0.866 0.346 | 0.188 | 11.0 2.0
+
+=== fair count (distinct gram-novel per attempted draw) ===
+  best over all seeds  TRELLIS       0.317 [0.314, 0.320] at w6 t1.30
+  chosen on [13, 17] TRELLIS       w6 t1.30  sel 0.317 held -  per-seed 13:0.314, 17:0.320
+  best over all seeds  TRELLIS edge  0.319 [0.318, 0.319] at w5 t2.00
+  chosen on [13, 17] TRELLIS edge  w5 t2.00  sel 0.319 held -  per-seed 13:0.318, 17:0.319
+  best over all seeds  LSTM          0.358 [0.333, 0.383] at t1.00
+  chosen on [13, 17] LSTM          t1.00     sel 0.358 held -  per-seed 13:0.383, 17:0.333
+  best over all seeds  GPT           0.362 [0.352, 0.372] at t0.90
+  chosen on [13, 17] GPT           t0.90     sel 0.362 held -  per-seed 13:0.372, 17:0.352
+  -- paired, best over all seeds
+    TRELLIS edge w5 t2.00 vs LSTM t1.00: wins 0 of 2; mean diff -0.039; 13:0.318/0.383, 17:0.319/0.333
+    TRELLIS edge w5 t2.00 vs GPT t0.90: wins 0 of 2; mean diff -0.043; 13:0.318/0.372, 17:0.319/0.352
+    TRELLIS w6 t1.30 vs LSTM t1.00: wins 0 of 2; mean diff -0.041; 13:0.314/0.383, 17:0.320/0.333
+    TRELLIS w6 t1.30 vs GPT t0.90: wins 0 of 2; mean diff -0.045; 13:0.314/0.372, 17:0.320/0.352
+  -- paired, chosen on [13, 17], compared on [13, 17]
+    TRELLIS edge w5 t2.00 vs LSTM t1.00: wins 0 of 2; mean diff -0.039; 13:0.318/0.383, 17:0.319/0.333
+    TRELLIS edge w5 t2.00 vs GPT t0.90: wins 0 of 2; mean diff -0.043; 13:0.318/0.372, 17:0.319/0.352
+    TRELLIS w6 t1.30 vs LSTM t1.00: wins 0 of 2; mean diff -0.041; 13:0.314/0.383, 17:0.320/0.333
+    TRELLIS w6 t1.30 vs GPT t0.90: wins 0 of 2; mean diff -0.045; 13:0.314/0.372, 17:0.320/0.352
+
+=== boundary-strict fair count ===
+  best over all seeds  TRELLIS       0.223 [0.214, 0.231] at w6 t1.30
+  chosen on [13, 17] TRELLIS       w6 t1.30  sel 0.223 held -  per-seed 13:0.214, 17:0.231
+  best over all seeds  TRELLIS edge  0.264 [0.262, 0.267] at w5 t1.30
+  chosen on [13, 17] TRELLIS edge  w5 t1.30  sel 0.264 held -  per-seed 13:0.262, 17:0.267
+  best over all seeds  LSTM          0.325 [0.321, 0.329] at t0.90
+  chosen on [13, 17] LSTM          t0.90     sel 0.325 held -  per-seed 13:0.329, 17:0.321
+  best over all seeds  GPT           0.328 [0.323, 0.333] at t0.90
+  chosen on [13, 17] GPT           t0.90     sel 0.328 held -  per-seed 13:0.333, 17:0.323
+  -- paired, best over all seeds
+    TRELLIS edge w5 t1.30 vs LSTM t0.90: wins 0 of 2; mean diff -0.061; 13:0.262/0.329, 17:0.267/0.321
+    TRELLIS edge w5 t1.30 vs GPT t0.90: wins 0 of 2; mean diff -0.063; 13:0.262/0.333, 17:0.267/0.323
+    TRELLIS w6 t1.30 vs LSTM t0.90: wins 0 of 2; mean diff -0.102; 13:0.214/0.329, 17:0.231/0.321
+    TRELLIS w6 t1.30 vs GPT t0.90: wins 0 of 2; mean diff -0.105; 13:0.214/0.333, 17:0.231/0.323
+  -- paired, chosen on [13, 17], compared on [13, 17]
+    TRELLIS edge w5 t1.30 vs LSTM t0.90: wins 0 of 2; mean diff -0.061; 13:0.262/0.329, 17:0.267/0.321
+    TRELLIS edge w5 t1.30 vs GPT t0.90: wins 0 of 2; mean diff -0.063; 13:0.262/0.333, 17:0.267/0.323
+    TRELLIS w6 t1.30 vs LSTM t0.90: wins 0 of 2; mean diff -0.102; 13:0.214/0.329, 17:0.231/0.321
+    TRELLIS w6 t1.30 vs GPT t0.90: wins 0 of 2; mean diff -0.105; 13:0.214/0.333, 17:0.231/0.323
