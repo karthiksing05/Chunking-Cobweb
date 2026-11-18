@@ -555,7 +555,12 @@ if BASE or DIAG:
                     fh.write(json.dumps({"prompt": " ".join(p), "gen": " ".join(g), "pattern": a_, "novel": b_}) + "\n")
     sys.exit()
 
-L = Trellis3(seed=seed, **cfg)
+_same_ = cfg.pop("same_k", False)       # r208 (M3): the learner also stores s_k = [own word == l_k] (trellis3_r208.Trellis3R208); default unchanged
+if _same_:
+    from trellis2.trellis3_r208 import Trellis3R208
+    L = Trellis3R208(seed=seed, store_same=True, **cfg)
+else:
+    L = Trellis3(seed=seed, **cfg)
 t0 = time.time()
 EXP = []                                       # each experience's tokens and its records' range in memory
 for s, fol in train:
@@ -1018,7 +1023,8 @@ for ai, arm in enumerate(arms):
                                            # stood at that boundary (trellis3_r204.Trellis3R204, edge_exact); default None = unchanged
         if edge_ == "exact":
             from trellis2.trellis3_r204 import Trellis3R204
-            L.__class__ = Trellis3R204
+            if not isinstance(L, Trellis3R204):     # r208: a Trellis3R208 learner already is one
+                L.__class__ = Trellis3R204
             L.edge_exact = True
         escape_ = arm.pop("escape", None)  # r207 (M1 of r206): "n1" = a novel continuation gets only its history's missing mass
                                            # N1 / (c + N1) at (l2, l1) and, for the fillers the pair gate admits, at l1
@@ -1026,9 +1032,14 @@ for ai, arm in enumerate(arms):
         if escape_ == "n1":
             from trellis2.trellis3_r207 import Trellis3R207
             _ee_ = bool(getattr(L, "edge_exact", False))
-            L.__class__ = Trellis3R207
+            if not isinstance(L, Trellis3R207):
+                L.__class__ = Trellis3R207
             L.edge_exact = _ee_
             L.escape_mass = True
+        repeat_ = arm.pop("repeat", None)  # r208 (M3): "same" = each occurrence is read with s_k = [its word == l_k] (needs cfg "same_k": true)
+        if repeat_ == "same":
+            assert getattr(L, "store_same", False), "arm repeat=same needs cfg same_k"
+            L.repeat_read = True
         both_ = arm.pop("both", None)    # r192: a filler that makes a trigram memory never stored is kept only if the
                                            # context tree, re-predicting the previous word (the pivot) from ITS left
                                            # context, finds the filler supports it: log P(pivot | left, r1 = w) /
@@ -1300,6 +1311,9 @@ for ai, arm in enumerate(arms):
     if causal is not None and escape_ == "n1":      # r207: later arms of this run read without the escape again
         L.escape_mass = False
         arm["escape"] = "n1"
+    if causal is not None and repeat_ == "same":    # r208: later arms of this run read without the identity factor again
+        L.repeat_read = False
+        arm["repeat"] = "same"
     ok = [(p, g) for p, g in zip(PP, G) if g]
     if usw is not None:
         extra = {"chunk for chunk": round(sum(a for a, _ in _us_log) / max(len(_us_log), 1), 3),
