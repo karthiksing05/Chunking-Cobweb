@@ -1,0 +1,112 @@
+{
+ "seed": 13,
+ "n": 1000,
+ "dump": "story_s13_n1000_arm1.jsonl",
+ "arm": {
+  "cond": false,
+  "causal": 1,
+  "units": "words",
+  "pair": "gate",
+  "new": true,
+  "temp": 1.6
+ },
+ "window": 6,
+ "temp": 1.6,
+ "rows": 1600,
+ "refs": 1200,
+ "floor": -30.0,
+ "start": {
+  "atypical": {
+   "finite": 59,
+   "finite_median": 0.126,
+   "finite_mean": 0.129,
+   "p10": 0.123,
+   "p25": 0.124,
+   "p75": 0.134,
+   "p90": 0.145,
+   "lose_ge_1_5": 0.884,
+   "lose_gt_0_3": 0.884,
+   "gain_gt_0_3": 0.0,
+   "n": 509,
+   "median": -23.838,
+   "mean": -21.25,
+   "zero_mass_default": 0,
+   "zero_mass_exact": 450,
+   "median_logp_default": -5.133,
+   "median_logp_exact": -4.988
+  },
+  "typical": {
+   "finite": 929,
+   "finite_median": 0.125,
+   "finite_mean": 0.111,
+   "p10": 0.085,
+   "p25": 0.122,
+   "p75": 0.131,
+   "p90": 0.137,
+   "lose_ge_1_5": 0.003,
+   "lose_gt_0_3": 0.009,
+   "gain_gt_0_3": 0.0,
+   "n": 932,
+   "median": 0.125,
+   "mean": 0.035,
+   "zero_mass_default": 0,
+   "zero_mass_exact": 3,
+   "median_logp_default": -3.662,
+   "median_logp_exact": -3.529
+  }
+ },
+ "end": {
+  "atypical": {
+   "finite": 111,
+   "finite_median": 0.0,
+   "finite_mean": -14.159,
+   "p10": -72.065,
+   "p25": 0.0,
+   "p75": 0.002,
+   "p90": 0.035,
+   "lose_ge_1_5": 0.651,
+   "lose_gt_0_3": 0.67,
+   "gain_gt_0_3": 0.0,
+   "n": 261,
+   "median": -28.446,
+   "mean": -22.363,
+   "zero_mass_default": 0,
+   "zero_mass_exact": 150,
+   "median_logp_default": -0.955,
+   "median_logp_exact": -1.346
+  },
+  "typical": {
+   "finite": 925,
+   "finite_median": 0.002,
+   "finite_mean": -2.497,
+   "p10": 0.0,
+   "p25": 0.0,
+   "p75": 0.033,
+   "p90": 0.118,
+   "lose_ge_1_5": 0.078,
+   "lose_gt_0_3": 0.08,
+   "gain_gt_0_3": 0.023,
+   "n": 932,
+   "median": 0.002,
+   "mean": -2.691,
+   "zero_mass_default": 0,
+   "zero_mass_exact": 7,
+   "median_logp_default": -0.396,
+   "median_logp_exact": -0.372
+  }
+ },
+ "pooled": {
+  "atypical": {
+   "n": 770,
+   "median": -24.001,
+   "mean": -21.627
+  },
+  "typical": {
+   "n": 1864,
+   "median": 0.1,
+   "mean": -1.328
+  }
+ },
+ "sentence_share_atypical": 0.417,
+ "pass": true
+}

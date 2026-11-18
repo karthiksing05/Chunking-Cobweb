@@ -571,6 +571,12 @@ if os.environ.get("FILL_GAMMA") or os.environ.get("FILL_BACKOFF"):   # test-time
     print(json.dumps({"fill read": _fk}), flush=True)
 
 
+if os.environ.get("STORY_R204_REPLAY"):       # r204 pre-test: replay judged dumps' boundary steps under the default read and edge_exact, then exit
+    sys.path.insert(0, os.path.join("experiments", "v3", "diag"))
+    import r204_replay
+    r204_replay.run(L, train, seed, n, os.environ["STORY_R204_REPLAY"], os.environ.get("R204_OUT", "r204_replay.json"))
+    sys.exit()
+
 if os.environ.get("STORY_CRITIC_AUC"):        # r182 pre-test: does the learner's parse tell judged-good new sentences from bad?
     # On judged dumps of this seed and n, each new generation is scored by the parse (log Z per join,
     # and the weakest chosen join) and by a stream baseline (the rarest trigram's count); reported:
@@ -1002,6 +1008,12 @@ for ai, arm in enumerate(arms):
         pool_ = arm.pop("pool", None)      # r197: "geo" = the fill read weights each occurrence by the GEOMETRIC MEAN of its per-attribute
                                            # back-off factors (product ** (1 / A)) in _gap_fills, fill_words and pivot_support
         L.pool = pool_
+        edge_ = arm.pop("edge", None)      # r204 (M1): "exact" = the start / end marker slots are read from the occurrences that really
+                                           # stood at that boundary (trellis3_r204.Trellis3R204, edge_exact); default None = unchanged
+        if edge_ == "exact":
+            from trellis2.trellis3_r204 import Trellis3R204
+            L.__class__ = Trellis3R204
+            L.edge_exact = True
         both_ = arm.pop("both", None)      # r192: a filler that makes a trigram memory never stored is kept only if the
                                            # context tree, re-predicting the previous word (the pivot) from ITS left
                                            # context, finds the filler supports it: log P(pivot | left, r1 = w) /
@@ -1261,6 +1273,9 @@ for ai, arm in enumerate(arms):
         cands = [g for g in (gen(p) for _ in range(critic)) if g]
         return max(cands, key=score) if cands else None
     G = [best(p) if critic else gen(p) for p in PP]
+    if causal is not None and edge_ == "exact":     # r204: later arms of this run read the plain boundary again
+        L.edge_exact = False
+        arm["edge"] = "exact"
     ok = [(p, g) for p, g in zip(PP, G) if g]
     if usw is not None:
         extra = {"chunk for chunk": round(sum(a for a, _ in _us_log) / max(len(_us_log), 1), 3),
