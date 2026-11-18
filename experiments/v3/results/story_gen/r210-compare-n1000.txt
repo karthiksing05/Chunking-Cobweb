@@ -1,0 +1,26 @@
+setting | metric: edge -> same (mean diff, wins same>edge of 4 seeds; sel=13/17, held=19/23)
+t1.3 fair      edge 0.313 same 0.314 diff +0.001 wins 3/4 sel +0.009 held -0.007 | 13:+0.004 17:+0.014 19:+0.002 23:-0.016
+t1.3 strict    edge 0.290 same 0.288 diff -0.002 wins 1/4 sel +0.005 held -0.010 | 13:-0.001 17:+0.012 19:-0.007 23:-0.012
+t1.3 dist/draw edge 0.740 same 0.748 diff +0.007 wins 3/4 sel -0.007 held +0.021 | 13:-0.016 17:+0.002 19:+0.039 23:+0.003
+t1.3 tri|d     edge 0.756 same 0.774 diff +0.018 wins 4/4 sel +0.025 held +0.010 | 13:+0.019 17:+0.031 19:+0.003 23:+0.018
+t1.3 gram|tri  edge 0.559 same 0.542 diff -0.017 wins 2/4 sel +0.003 held -0.037 | 13:+0.005 17:+0.002 19:-0.027 23:-0.046
+t1.3 repeated-word rate (all distinct new / among ungrammatical) edge: 0.089 / 0.171
+t1.3 repeated-word rate (all distinct new / among ungrammatical) same: 0.047 / 0.065
+
+t1.6 fair      edge 0.329 same 0.331 diff +0.002 wins 3/4 sel +0.009 held -0.005 | 13:+0.006 17:+0.012 19:-0.014 23:+0.005
+t1.6 strict    edge 0.299 same 0.304 diff +0.005 wins 3/4 sel +0.008 held +0.001 | 13:+0.007 17:+0.010 19:-0.010 23:+0.012
+t1.6 dist/draw edge 0.779 same 0.788 diff +0.009 wins 2/4 sel -0.006 held +0.025 | 13:-0.009 17:-0.003 19:+0.024 23:+0.026
+t1.6 tri|d     edge 0.791 same 0.807 diff +0.016 wins 3/4 sel +0.016 held +0.017 | 13:-0.007 17:+0.038 19:+0.012 23:+0.021
+t1.6 gram|tri  edge 0.534 same 0.521 diff -0.013 wins 1/4 sel +0.009 held -0.035 | 13:+0.020 17:-0.003 19:-0.046 23:-0.024
+t1.6 repeated-word rate (all distinct new / among ungrammatical) edge: 0.090 / 0.160
+t1.6 repeated-word rate (all distinct new / among ungrammatical) same: 0.050 / 0.069
+
+t2.0 fair      edge 0.338 same 0.332 diff -0.006 wins 1/4 sel -0.008 held -0.005 | 13:-0.019 17:+0.003 19:-0.001 23:-0.009
+t2.0 strict    edge 0.307 same 0.296 diff -0.010 wins 1/4 sel -0.011 held -0.010 | 13:-0.024 17:+0.003 19:-0.003 23:-0.016
+t2.0 dist/draw edge 0.814 same 0.816 diff +0.002 wins 2/4 sel -0.029 held +0.033 | 13:-0.016 17:-0.042 19:+0.032 23:+0.033
+t2.0 tri|d     edge 0.836 same 0.834 diff -0.002 wins 3/4 sel +0.001 held -0.005 | 13:+0.000 17:+0.001 19:+0.008 23:-0.018
+t2.0 gram|tri  edge 0.497 same 0.487 diff -0.010 wins 1/4 sel +0.005 held -0.025 | 13:-0.018 17:+0.028 19:-0.026 23:-0.023
+t2.0 repeated-word rate (all distinct new / among ungrammatical) edge: 0.089 / 0.153
+t2.0 repeated-word rate (all distinct new / among ungrammatical) same: 0.047 / 0.057
+
+best same setting on 13/17: t1.6 (sel fair 0.331); held 19/23 same 0.331, edge same t 0.336, best edge-alone t2.0 held 0.339
