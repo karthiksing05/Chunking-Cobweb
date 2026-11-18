@@ -52,3 +52,11 @@ Round 206 diagnosed the cause. From 1,000 to 4,000 sentences all three families 
 - **Selection.** Only two seeds are held out, and TRELLIS's grid was extended after round 204 put its optimum at the grid edge. The neural grids were not extended because their optima are interior.
 - **Scope.** The result holds for one corpus, one judge and the fair count as defined here. At matched novelty (the round 190 frontier) the neural models lead, and TRELLIS's new-trigram sentences are 50 to 63% grammatical against the LSTM's 88% at low temperature.
 - **Earlier claim withdrawn.** Round 183 reported that TRELLIS beats the neural models at 1,000 sentences. That result used neural models sampled at temperature 1.0 and does not survive their tuned temperatures.
+
+## High-grammaticality operating points (rounds 209-211)
+
+The default judge (Qwen2.5-3B) rates real TinyStories sentences .89 grammatical, so it cannot certify .95. A stricter prompt raises the real-sentence ceiling to .958 (Qwen3-8B) and .970 (phi-4) while still rejecting scrambled and content-swapped controls (at most .075 pass); round 209 judged all families with these strict judges.
+
+At n=1000, no generator reaches .95 grammaticality among its distinct new sentences under either strict judge, at any temperature (round 211). The highest values are LSTM .914-.926, plain TRELLIS (3-word window) .878-.914, the 5-gram sampler .898-.926 with no unstored trigrams, GPT .850-.852, and TRELLIS with exact boundaries about .80. Where a .90 constraint can be met, the LSTM keeps more novelty than TRELLIS (unstored-trigram share .48 against .19), and 87% of plain TRELLIS's grammatical new sentences at that level recombine stored trigrams. The tie with the LSTM therefore holds at the fair-count optimum, where every model is .58-.66 grammatical, and not at the high-grammaticality end.
+
+Repeat tracking (round 210) halves repeated words but leaves the fair count unchanged (.331 against .339 held-out), because repeats account for about 16% of ungrammatical sentences.
