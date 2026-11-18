@@ -577,7 +577,13 @@ if os.environ.get("STORY_R204_REPLAY"):       # r204 pre-test: replay judged dum
     r204_replay.run(L, train, seed, n, os.environ["STORY_R204_REPLAY"], os.environ.get("R204_OUT", "r204_replay.json"))
     sys.exit()
 
-if os.environ.get("STORY_CRITIC_AUC"):        # r182 pre-test: does the learner's parse tell judged-good new sentences from bad?
+if os.environ.get("STORY_R207_M2"):           # r207 mechanism-2 probe (no generation): pivot_support "left" AUC + tree statistics, then exit
+    sys.path.insert(0, os.path.join("experiments", "v3", "diag"))
+    import r207_m2
+    r207_m2.run(L, train, seed, n, os.environ["STORY_R207_M2"], os.environ.get("R207_OUT", "r207_m2.tsv"))
+    sys.exit()
+
+if os.environ.get("STORY_CRITIC_AUC"):    # r182 pre-test: does the learner's parse tell judged-good new sentences from bad?
     # On judged dumps of this seed and n, each new generation is scored by the parse (log Z per join,
     # and the weakest chosen join) and by a stream baseline (the rarest trigram's count); reported:
     # AUC against the judge, and the judged-grammatical share kept when only the top half/third pass.
@@ -1014,7 +1020,16 @@ for ai, arm in enumerate(arms):
             from trellis2.trellis3_r204 import Trellis3R204
             L.__class__ = Trellis3R204
             L.edge_exact = True
-        both_ = arm.pop("both", None)      # r192: a filler that makes a trigram memory never stored is kept only if the
+        escape_ = arm.pop("escape", None)  # r207 (M1 of r206): "n1" = a novel continuation gets only its history's missing mass
+                                           # N1 / (c + N1) at (l2, l1) and, for the fillers the pair gate admits, at l1
+                                           # (trellis3_r207.Trellis3R207.escape_split); default None = unchanged
+        if escape_ == "n1":
+            from trellis2.trellis3_r207 import Trellis3R207
+            _ee_ = bool(getattr(L, "edge_exact", False))
+            L.__class__ = Trellis3R207
+            L.edge_exact = _ee_
+            L.escape_mass = True
+        both_ = arm.pop("both", None)    # r192: a filler that makes a trigram memory never stored is kept only if the
                                            # context tree, re-predicting the previous word (the pivot) from ITS left
                                            # context, finds the filler supports it: log P(pivot | left, r1 = w) /
                                            # P(pivot | left) >= 0 (Trellis3.pivot_support kind "pivot"; "left" / "both"
@@ -1072,6 +1087,12 @@ for ai, arm in enumerate(arms):
                     me = e_.get(v, 0.0) if not pool_ else min(e_.get(v, 0.0), m_)   # r197: with "pool" the end read has A + 1 factors, not nested in the A of m_
                     vs += [(v, True), (v, False)]
                     ws += [me, max(m_ - me, 0.0)]
+                if escape_ == "n1" and units_ == "words" and not read_ and vs:   # r207: rescale to the history's missing mass
+                    _wm_ = {}
+                    for j_ in range(0, len(vs), 2):
+                        _wm_[vs[j_][0][1]] = ws[j_] + ws[j_ + 1]
+                    _fx_ = L.escape_split(q, _wm_, (lambda w: (not pair_) or l1 == T3BOS or (l1, w) in _st_))
+                    ws = [x * _fx_.get(vs[j_][0][1], 1.0) for j_, x in enumerate(ws)]
                 if esc_ and l1 != T3BOS and l1 in _ix_:
                     keep = [j for j, (v, _) in enumerate(vs) if (l1, _words(v)[0]) in _st_]
                     vs, ws = [vs[j] for j in keep], [ws[j] for j in keep]
@@ -1276,6 +1297,9 @@ for ai, arm in enumerate(arms):
     if causal is not None and edge_ == "exact":     # r204: later arms of this run read the plain boundary again
         L.edge_exact = False
         arm["edge"] = "exact"
+    if causal is not None and escape_ == "n1":      # r207: later arms of this run read without the escape again
+        L.escape_mass = False
+        arm["escape"] = "n1"
     ok = [(p, g) for p, g in zip(PP, G) if g]
     if usw is not None:
         extra = {"chunk for chunk": round(sum(a for a, _ in _us_log) / max(len(_us_log), 1), 3),
