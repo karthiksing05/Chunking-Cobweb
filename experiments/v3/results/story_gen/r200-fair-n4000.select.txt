@@ -1,0 +1,44 @@
+seeds present: [13, 17]; settings with all seeds: 23 of 25
+
+(a) per-family max over settings, all seeds (distinct gram-novel per attempted draw)
+  TRELLIS  0.317  [0.314, 0.320]  at w6 t1.30  (seeds [13, 17])
+  LSTM     0.358  [0.333, 0.383]  at t1.00  (seeds [13, 17])
+  GPT      0.362  [0.352, 0.372]  at t0.90  (seeds [13, 17])
+
+    per-setting means (all seeds)
+    TRELLIS  w2 t1.00   0.112
+    TRELLIS  w3 t0.50   0.021
+    TRELLIS  w3 t0.70   0.059
+    TRELLIS  w3 t1.00   0.140
+    TRELLIS  w4 t0.50   0.041
+    TRELLIS  w4 t0.70   0.112
+    TRELLIS  w6 t1.30   0.317
+    LSTM     t0.30      0.024
+    LSTM     t0.40      0.077
+    LSTM     t0.50      0.145
+    LSTM     t0.70      0.277
+    LSTM     t0.80      0.340
+    LSTM     t0.90      0.355
+    LSTM     t1.00      0.358
+    LSTM     t1.20      0.297
+    GPT      t0.30      0.031
+    GPT      t0.40      0.076
+    GPT      t0.50      0.144
+    GPT      t0.70      0.271
+    GPT      t0.80      0.342
+    GPT      t0.90      0.362
+    GPT      t1.00      0.357
+    GPT      t1.20      0.310
+
+(b) setting chosen on seeds [13, 17], reported on seeds - (n=4000: both seeds reported separately)
+  TRELLIS  chose w6 t1.30    sel 0.317  held -  per-seed 13:0.314, 17:0.320
+  LSTM     chose t1.00       sel 0.358  held -  per-seed 13:0.383, 17:0.333
+  GPT      chose t0.90       sel 0.362  held -  per-seed 13:0.372, 17:0.352
+
+(c1) paired, best-over-all-seeds settings
+  TRELLIS w6 t1.30 vs LSTM t1.00: wins 0 of 2 seeds; mean diff -0.041; 13:0.314/0.383, 17:0.320/0.333
+  TRELLIS w6 t1.30 vs GPT t0.90: wins 0 of 2 seeds; mean diff -0.045; 13:0.314/0.372, 17:0.320/0.352
+
+(c2) paired, selected on [13, 17], compared on [13, 17]
+  TRELLIS w6 t1.30 vs LSTM t1.00: wins 0 of 2 seeds; mean diff -0.041; 13:0.314/0.383, 17:0.320/0.333
+  TRELLIS w6 t1.30 vs GPT t0.90: wins 0 of 2 seeds; mean diff -0.045; 13:0.314/0.372, 17:0.320/0.352
