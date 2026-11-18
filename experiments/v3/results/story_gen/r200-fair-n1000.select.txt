@@ -1,7 +1,7 @@
-seeds present: [13, 17, 19, 23]; settings with all seeds: 36 of 42
+seeds present: [13, 17, 19, 23]; settings with all seeds: 42 of 42
 
 (a) per-family max over settings, all seeds (distinct gram-novel per attempted draw)
-  TRELLIS  0.316  [0.299, 0.333]  at w5 t2.00  (seeds [13, 17, 19, 23])
+  TRELLIS  0.316  [0.297, 0.343]  at w6 t1.60  (seeds [13, 17, 19, 23])
   LSTM     0.344  [0.308, 0.395]  at t0.80  (seeds [13, 17, 19, 23])
   GPT      0.324  [0.274, 0.356]  at t0.80  (seeds [13, 17, 19, 23])
 
@@ -20,6 +20,12 @@ seeds present: [13, 17, 19, 23]; settings with all seeds: 36 of 42
     TRELLIS  w5 t1.30   0.301
     TRELLIS  w5 t1.60   0.314
     TRELLIS  w5 t2.00   0.316
+    TRELLIS  w6 t1.30   0.310
+    TRELLIS  w6 t1.60   0.316
+    TRELLIS  w6 t2.00   0.311
+    TRELLIS  w7 t1.30   0.312
+    TRELLIS  w7 t1.60   0.308
+    TRELLIS  w7 t2.00   0.309
     LSTM     t0.15      0.007
     LSTM     t0.20      0.017
     LSTM     t0.30      0.050
@@ -44,14 +50,14 @@ seeds present: [13, 17, 19, 23]; settings with all seeds: 36 of 42
     GPT      t1.20      0.176
 
 (b) setting chosen on seeds [13, 17], reported on seeds [19, 23]
-  TRELLIS  chose w5 t1.60    sel 0.311  held 0.317  per-seed 13:0.314, 17:0.308, 19:0.327, 23:0.307
+  TRELLIS  chose w6 t1.60    sel 0.323  held 0.310  per-seed 13:0.302, 17:0.343, 19:0.324, 23:0.297
   LSTM     chose t0.80       sel 0.337  held 0.351  per-seed 13:0.342, 17:0.332, 19:0.395, 23:0.308
   GPT      chose t0.80       sel 0.336  held 0.313  per-seed 13:0.317, 17:0.356, 19:0.351, 23:0.274
 
 (c1) paired, best-over-all-seeds settings
-  TRELLIS w5 t2.00 vs LSTM t0.80: wins 1 of 4 seeds; mean diff -0.028; 13:0.299/0.342, 17:0.316/0.332, 19:0.333/0.395, 23:0.318/0.308
-  TRELLIS w5 t2.00 vs GPT t0.80: wins 1 of 4 seeds; mean diff -0.008; 13:0.299/0.317, 17:0.316/0.356, 19:0.333/0.351, 23:0.318/0.274
+  TRELLIS w6 t1.60 vs LSTM t0.80: wins 1 of 4 seeds; mean diff -0.027; 13:0.302/0.342, 17:0.343/0.332, 19:0.324/0.395, 23:0.297/0.308
+  TRELLIS w6 t1.60 vs GPT t0.80: wins 1 of 4 seeds; mean diff -0.008; 13:0.302/0.317, 17:0.343/0.356, 19:0.324/0.351, 23:0.297/0.274
 
 (c2) paired, selected on [13, 17], compared on [19, 23]
-  TRELLIS w5 t1.60 vs LSTM t0.80: wins 0 of 2 seeds; mean diff -0.034; 19:0.327/0.395, 23:0.307/0.308
-  TRELLIS w5 t1.60 vs GPT t0.80: wins 1 of 2 seeds; mean diff +0.004; 19:0.327/0.351, 23:0.307/0.274
+  TRELLIS w6 t1.60 vs LSTM t0.80: wins 0 of 2 seeds; mean diff -0.041; 19:0.324/0.395, 23:0.297/0.308
+  TRELLIS w6 t1.60 vs GPT t0.80: wins 1 of 2 seeds; mean diff -0.002; 19:0.324/0.351, 23:0.297/0.274
