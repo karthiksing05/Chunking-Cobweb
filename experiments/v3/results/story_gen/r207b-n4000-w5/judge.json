@@ -1,0 +1,84 @@
+{
+ "model": "Qwen/Qwen2.5-3B-Instruct",
+ "references": {
+  "story_s13_n4000_refs.jsonl": {
+   "real": 0.897,
+   "word order scrambled": 0.117,
+   "content swapped": 0.05
+  }
+ },
+ "arms": [
+  {
+   "file": "story_s13_n4000_arm0.jsonl",
+   "arm": {
+    "cond": false,
+    "causal": 1,
+    "units": "words",
+    "pair": "gate",
+    "new": true,
+    "temp": 2.4,
+    "edge": "exact",
+    "escape": "n1"
+   },
+   "generated": 1600,
+   "judged grammatical": 0.338,
+   "novel": 1.0,
+   "novel judged grammatical": 0.338,
+   "grammatical novel per generation": 0.338,
+   "tag pattern attested": 0.425,
+   "novel attested-pattern share": 0.425,
+   "novel judged grammatical, pattern attested": 0.481,
+   "novel judged grammatical, pattern unattested": 0.233,
+   "novel examples": [
+    [
+     "tom saw that is not happy",
+     0.16
+    ],
+    [
+     "sue and smiled",
+     0.56
+    ],
+    [
+     "tim laughed and to the dog every day",
+     0.03
+    ],
+    [
+     "let's share with max",
+     0.99
+    ],
+    [
+     "they loved to play in a ball",
+     0.01
+    ],
+    [
+     "tim's mom knew what sam said sorry",
+     0.88
+    ],
+    [
+     "now max felt bad",
+     1.0
+    ],
+    [
+     "be kind and it",
+     0.0
+    ],
+    [
+     "suddenly he found something special friend",
+     0.0
+    ],
+    [
+     "come play with me the toy",
+     0.9
+    ],
+    [
+     "can i look now mom",
+     0.1
+    ],
+    [
+     "he were very happy and sorry",
+     0.0
+    ]
+   ]
+  }
+ ]
+}

@@ -1,0 +1,84 @@
+{
+ "model": "Qwen/Qwen2.5-3B-Instruct",
+ "references": {
+  "story_s13_n4000_refs.jsonl": {
+   "real": 0.897,
+   "word order scrambled": 0.117,
+   "content swapped": 0.05
+  }
+ },
+ "arms": [
+  {
+   "file": "story_s13_n4000_arm0.jsonl",
+   "arm": {
+    "cond": false,
+    "causal": 1,
+    "units": "words",
+    "pair": "gate",
+    "new": true,
+    "temp": 2.0,
+    "edge": "exact",
+    "escape": "n1"
+   },
+   "generated": 1600,
+   "judged grammatical": 0.385,
+   "novel": 1.0,
+   "novel judged grammatical": 0.385,
+   "grammatical novel per generation": 0.385,
+   "tag pattern attested": 0.465,
+   "novel attested-pattern share": 0.465,
+   "novel judged grammatical, pattern attested": 0.509,
+   "novel judged grammatical, pattern unattested": 0.277,
+   "novel examples": [
+    [
+     "how can we like him",
+     0.0
+    ],
+    [
+     "once upon a time to go back home",
+     0.29
+    ],
+    [
+     "tim got up and a pretty",
+     0.0
+    ],
+    [
+     "his friends saw something unexpected",
+     1.0
+    ],
+    [
+     "she told you were the best day ever",
+     0.25
+    ],
+    [
+     "they had the best friend a boy",
+     0.68
+    ],
+    [
+     "no friends to help",
+     0.0
+    ],
+    [
+     "they asked a big man for everyone",
+     0.01
+    ],
+    [
+     "just am not sad",
+     0.0
+    ],
+    [
+     "i get a cat named tom",
+     0.44
+    ],
+    [
+     "i see the sun",
+     0.73
+    ],
+    [
+     "tim laughed as she looked sad",
+     0.92
+    ]
+   ]
+  }
+ ]
+}
