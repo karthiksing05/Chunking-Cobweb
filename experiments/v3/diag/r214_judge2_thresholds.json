@@ -1,0 +1,32 @@
+{
+ "ensemble_logit_thr": {
+  "syn": -5.25,
+  "sem": 2.5
+ },
+ "models": [
+  "Qwen3-8B",
+  "phi-4"
+ ],
+ "judges": {
+  "Qwen3-8B": {
+   "syn": {
+    "variant": "v5",
+    "thr": 0.01
+   },
+   "sem": {
+    "variant": "v2",
+    "thr": 0.8
+   }
+  },
+  "phi-4": {
+   "syn": {
+    "variant": "v5",
+    "thr": 0.1
+   },
+   "sem": {
+    "variant": "v2",
+    "thr": 0.9
+   }
+  }
+ }
+}
