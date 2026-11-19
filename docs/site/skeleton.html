@@ -310,8 +310,6 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
       <ol class="sub" data-group="results">
         <li><a href="#curves"><span class="n"></span><span>Toy grammars</span></a></li>
         <li><a href="#r-stories"><span class="n"></span><span>TinyStories</span></a></li>
-        <li><a href="#s-babi"><span class="n"></span><span>bAbI</span></a></li>
-        <li><a href="#s-chars"><span class="n"></span><span>Chinese characters</span></a></li>
         <li><a href="#s-chess"><span class="n"></span><span>Chess</span></a></li>
       </ol></li>
     <li><a href="#conclusion"><span class="n">9</span><span>Conclusion and next steps</span></a></li>
@@ -336,6 +334,9 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
         <li><a href="#a-copying"><span class="n">A17</span><span>Ablation: toy-grammar copying</span></a></li>
         <li><a href="#a-rationale"><span class="n">A18</span><span>Why the architecture is this way</span></a></li>
         <li><a href="#a-refs"><span class="n">A19</span><span>Against simple references</span></a></li>
+        <li><a href="#a-other"><span class="n">A20</span><span>Other domains (bAbI, Chinese characters)</span></a></li>
+        <li><a href="#s-babi"><span class="n">A20a</span><span>bAbI</span></a></li>
+        <li><a href="#s-chars"><span class="n">A20b</span><span>Chinese characters</span></a></li>
       </ol></li>
   </ol>
 </nav>
@@ -361,9 +362,9 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     <p>The upcoming iterations follow from this theory:</p>
     <ul>
       <li><b>Choose the concept from the data.</b> Which generalization of x should predict y is now partly fixed by hand (a topic weight and a cut on words). The theory says memory should choose it.</li>
-      <li><b>One machinery everywhere.</b> Parsing, generating and coding should read the same probabilities. Inside-outside now does this for generating and coding characters. Parsing still scores chunks by a separate factor.</li>
+      <li><b>One machinery everywhere.</b> Parsing, generating and coding should read the same probabilities. Inside-outside now does this for generating and for coding. Parsing still scores chunks by a separate factor.</li>
       <li><b>Earn every hierarchy.</b> Two hierarchies are an assumption. An ablation will test a single hierarchy holding content and context together.</li>
-      <li><b>Domain generality.</b> Every mechanism must work on characters and chess as well as sentences. Chess still loses to simple shape-based coders in most tests, so its representation is due a rethink.</li>
+      <li><b>Domain generality.</b> Every mechanism must work on chess as well as sentences. Chess still loses to simple shape-based coders in most tests, so its representation is due a rethink.</li>
     </ul>
   </div>
   <dl class="facts">
@@ -372,7 +373,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     <div><dt>Generation</dt><dd>inside-outside over concepts, one word at a time</dd></div>
     <div><dt>Learning</dt><dd>one pass; every composite stored, weighted by its posterior; no night</dd></div>
     <div><dt>Generation, 18 November</dt><dd>On TinyStories from 250 to 1,000 sentences, TRELLIS matches a matched LSTM (8 seeds; the paired 95% CI includes 0 at every size). It beats a matched GPT at 250 and 500 sentences (8 of 8 seeds each) and is level with it at 1,000. At 4,000 sentences both neural models pull ahead. No model reaches .95 grammaticality (<a href="#r-stories">details</a>)</dd></div>
-    <div><dt>Domains</dt><dd>toy grammars, TinyStories, bAbI, Chinese characters, chess</dd></div>
+    <div><dt>Domains</dt><dd>toy grammars, TinyStories, chess (bAbI and Chinese characters are in <a href="#a-other">A20</a>)</dd></div>
     <div><dt>Supervision</dt><dd>none; gold labels only score</dd></div>
   </dl>
   <h2>Principles</h2>
@@ -384,19 +385,16 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     <tbody>
       <tr><td><a href="#curves">Toy grammars</a></td><td>Grammatical; grammatical and new (320 experiences), current recipe</td><td class="num">Inside-outside: small 100%, 0.11–0.14 new; med 46–48%, 0.29–0.32 new</td><td>Expansion: 100%, 0.00–0.12 new. Grammar known exactly</td></tr>
       <tr><td><a href="#r-stories">TinyStories</a></td><td>Judged grammatical and new, per generation (1,000 sentences, 4 seeds)</td><td class="num best">0.186</td><td>0.159 tree drawn first; 0.161 / 0.152 expansion (2 seeds)</td></tr>
-      <tr><td><a href="#s-babi">bAbI</a></td><td>Answer of the right type</td><td class="num">0.60–0.63</td><td>0.20–0.23 frequency baseline</td></tr>
-      <tr><td><a href="#s-chars">Characters</a></td><td>Bits per held-out character (2,000 learned)</td><td class="num">27.8 / 27.5</td><td><b>Trigram 26.4 / 26.0</b>; BPE 29.6 / 29.1</td></tr>
       <tr><td><a href="#s-chess">Chess</a></td><td>Bits per held-out position (4,000 learned): control; shifted</td><td class="num">127.7 (squares in the description); <b>147.2</b> (offsets only, <code>exact_alone</code> off): two runs, each best on one set</td><td><b>BPE squares 108.8</b>; 205.5. BPE shapes 111.3; 149.7</td></tr>
     </tbody>
   </table></div>
-  <p class="small">These numbers are for the older recipe. <a href="#a-rationale">A18</a> reports a simpler candidate that does better on stories, characters and toy expansion and has not been adopted.</p>
+  <p class="small">These numbers are for the older recipe. <a href="#a-rationale">A18</a> reports a simpler candidate that does better on stories and toy expansion (and on characters, <a href="#a-other">A20</a>) and has not been adopted.</p>
   <h2>Against outside references (10 November)</h2>
   <div class="tablewrap"><table>
     <thead><tr><th>Domain</th><th>Measure</th><th>TRELLIS, candidate recipe</th><th>Simple references (<a href="#a-refs">A19</a>)</th></tr></thead>
     <tbody>
       <tr><td>TinyStories</td><td>Judged grammatical and new, per generation (1,000 sentences, 4 seeds)</td><td class="num">.22 chart generation; <b>.38 to .40</b> causal generation from the context tree, gated (A19, Table 7)</td><td class="best">Trigram sampler .40; stored sentence with one word swapped in the same frame .57; neural LMs trained on the same sentences and sized by held-out loss, sampled at temperature 1.0 (round 183, 4 seeds): transformer .26 to .33, LSTM .29 to .35; superseded: at tuned temperatures TRELLIS ties the LSTM and is level with the GPT at 1,000 sentences on the fair count, .3281 against .3346 and .3282 over eight seeds (rounds 200 to 212, <a href="#r-stories">Figure S3 section</a>)</td></tr>
       <tr><td>TinyStories</td><td>The same at 4,000 sentences (seeds 13 / 17)</td><td class="num">.21 / .20 chart generation; <b>.40 / .36</b> causal generation, gated (round 181)</td><td class="best">Trigram .41 / .39; swap .51 / .51; transformer .40 / .36, LSTM .38 / .33 (round 183, temperature 1.0; superseded: at tuned temperatures they lead TRELLIS, fair count .358 and .362 against .319 on seeds 13 and 17, rounds 204 and 205)</td></tr>
-      <tr><td>Characters</td><td>Bits per held-out character (4,000 learned, s13 / s17)</td><td class="num best">24.04 / 23.82 with lengths from stored characters; ahead of the trigram at every size from 500 (A19)</td><td>Trigram 25.48 / 24.87</td></tr>
       <tr><td>Chess</td><td>Bits per held-out position (4,000 learned): control; shifted</td><td class="num">99.4 to 99.9; <b>104.4 to 105.0</b> with a causal context tree and no absolute square, but no chunks stored; 116.9 to 118.3; 129.6 to 131.6 with chunks (seeds 13, 17, 19; was 127.8 to 130.8; 150.1 to 153.7)</td><td>Trigram over relative tokens <b>98.5 to 98.9</b>; 108.5 to 110.9 (seeds 13, 17, 19)</td></tr>
     </tbody>
   </table></div>
@@ -540,8 +538,6 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     <tbody>
       <tr><th>Toy grammars</th><td>A sentence from a known grammar (<code>small</code>, <code>med</code>, <code>large</code>, <code>term_low</code> and others)</td><td>10 to 320 experiences</td><td>Grammaticality can be checked exactly. Used as the guard on every change</td></tr>
       <tr><th>TinyStories</th><td>A sentence of 3 to 8 words, using the 250 commonest words, read in story order</td><td>250 to 2,000 sentences; 1,500 held-out stories; 400 prompts, 4 draws each</td><td>Grammatical, new, on-topic generation from real text</td></tr>
-      <tr><th>bAbI</th><td>A story sentence, or a line <code>question ? answer</code>, from the 20 tasks</td><td>76,610 sentences, 4,114 distinct, 150 words; 600 to 3,000 learned</td><td>Answering as gap filling</td></tr>
-      <tr><th>Chinese characters</th><td>A character's IDS decomposition as a token sequence</td><td>500 to 2,000 characters; 300 held out</td><td>Compression and well-formed novelty on very short experiences, where alternative analyses carry information</td></tr>
       <tr><th>Chess</th><td>A position as a board graph, from Lichess games rated 1800 and above</td><td>300 to 4,000 positions; 1,000 held out; 100 for recall</td><td>Compression of states, transfer to new squares, and Chase and Simon's (1973) recall experiments</td></tr>
     </tbody>
   </table></div>
@@ -559,7 +555,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
       <tr><th>Generation</th><td>Inside-outside: whole content tree, words within 12 bits, λ 4, β 2, marginal times window prediction</td></tr>
     </tbody>
   </table></div>
-  <p class="small">The chess recall studies and older character rows were measured on earlier configurations; each result page says which. The toy-grammar curves and the explorers were regenerated with the current recipe on 4 November.</p>
+  <p class="small">The chess recall studies were measured on earlier configurations; each result page says which. The bAbI and Chinese-character domains are in <a href="#a-other">Appendix A20</a>. The toy-grammar curves and the explorers were regenerated with the current recipe on 4 November.</p>
 </section>
 
 <!-- ============================================================ DESIGN: EVALUATIONS -->
@@ -573,16 +569,16 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
       <tr><th>Grammatical, new</th><td>Share of samples the grammar accepts and training lacks</td><td>Toy grammars</td><td>Small languages saturate</td></tr>
       <tr><th>Grammatical new per generation</th><td>Share of generations Qwen2.5-3B judges grammatical (few-shot, P(yes) above 0.5) and training lacks. The headline</td><td>TinyStories</td><td>The judge is imperfect and passes some bad sentences. It is calibrated on each run's real, scrambled and content-swapped sentences</td></tr>
       <tr><th>Cross share</th><td>Mean PMI of the prompt's content words with the output's, as a share from random held-out (0) to the real next sentence (1)</td><td>TinyStories</td><td>Varies widely by seed (0.10 to 0.55)</td></tr>
-      <tr><th>Bits</th><td>Held-out code length under the learned model, model not charged</td><td>Characters, chess</td><td>Favours large memories; storage is reported apart</td></tr>
+      <tr><th>Bits</th><td>Held-out code length under the learned model, model not charged</td><td>Chess</td><td>Favours large memories; storage is reported apart</td></tr>
       <tr><th>Parse agreement</th><td>Bracket F1 across seeds, across stream sizes and under word substitution</td><td>TinyStories</td><td>Agreement is not correctness</td></tr>
-      <tr><th>Prompts</th><td>Attested trigrams in filled gaps; right answer type and exact answer on bAbI</td><td>TinyStories, bAbI</td><td>Trigrams reward the common</td></tr>
+      <tr><th>Prompts</th><td>Attested trigrams in filled gaps</td><td>TinyStories</td><td>Trigrams reward the common</td></tr>
       <tr><th>Recall</th><td>Pieces rebuilt from 7 units, on real and random boards, against Chase and Simon's numbers</td><td>Chess</td><td>Experience stands in for rating; no latencies</td></tr>
       <tr><th>Memory currency</th><td>Share of used records that no longer sort where they sit; learning time</td><td>TinyStories</td><td></td></tr>
     </tbody>
   </table></div>
   <h2>Guards and seeds</h2>
   <div class="col">
-    <p>Each change must pass the guard: grammaticality within 2 points of the original and more grammatical-and-new samples on <code>med</code> and <code>large</code>, seeds 13 and 17, plus characters held. Story rounds use seeds 13 and 17, and a change that survives is confirmed on 19 and 23. No result here has a significance test; differences are read against the spread between seeds.</p>
+    <p>Each change must pass the guard: grammaticality within 2 points of the original and more grammatical-and-new samples on <code>med</code> and <code>large</code>, seeds 13 and 17, plus characters held (<a href="#a-other">A20</a>). Story rounds use seeds 13 and 17, and a change that survives is confirmed on 19 and 23. No result here has a significance test; differences are read against the spread between seeds.</p>
   </div>
 </section>
 
@@ -594,17 +590,16 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
   <div class="tablewrap"><table>
     <thead><tr><th>Competitor</th><th>What it is</th><th>Used on</th></tr></thead>
     <tbody>
-      <tr><th>Unigram, trigram (Witten-Bell)</th><td>Frequency coders over tokens</td><td>Characters</td></tr>
-      <tr><th>BPE, squares</th><td>Byte-pair merging; on chess, chunks are exact pieces on exact squares</td><td>Characters, chess</td></tr>
+      <tr><th>Unigram, trigram (Witten-Bell)</th><td>Frequency coders over tokens</td><td>Chess, TinyStories samplers (characters: <a href="#a-other">A20</a>)</td></tr>
+      <tr><th>BPE, squares</th><td>Byte-pair merging; on chess, chunks are exact pieces on exact squares</td><td>Chess (characters: <a href="#a-other">A20</a>)</td></tr>
       <tr><th>BPE, shapes</th><td>The same merging on translation-free shapes, each coded with an anchor square</td><td>Chess</td></tr>
       <tr><th>Krimp</th><td>MDL itemset mining (Vreeken et al., 2011)</td><td>Chess</td></tr>
       <tr><th>xz</th><td>General compressor, each position coded given all learned positions</td><td>Chess</td></tr>
       <tr><th>Piece-square list</th><td>No learning: each piece and its square</td><td>Chess</td></tr>
-      <tr><th>Frequency baseline</th><td>The most common answers</td><td>bAbI</td></tr>
       <tr><th>LSTM, GPT (matched)</th><td>Neural language models trained on the same n sentences, sized by held-out loss, sampled at their best temperature</td><td>TinyStories generation</td></tr>
       <tr><th>Copy, retrieval, oracle</th><td>A stored next sentence; the stored next sentence with the most shared idf-weighted words; the training sentence with the highest cross PMI</td><td>TinyStories (references, not learners)</td></tr>
       <tr><th>Earlier generators</th><td>Expansion from stored experiences; inside-outside grammar with the tree drawn first; the marginal alone</td><td>TinyStories</td></tr>
-      <tr><th>Ablations</th><td>Beam and greedy search in place of inside-outside; no chunk identity; one hierarchy (in progress)</td><td>TinyStories, characters</td></tr>
+      <tr><th>Ablations</th><td>Beam and greedy search in place of inside-outside; no chunk identity; one hierarchy (in progress)</td><td>TinyStories</td></tr>
     </tbody>
   </table></div>
   <div class="col"><p>A matched LSTM and a matched GPT, each trained on the same 250 to 4,000 sentences and sized by held-out loss, now run on the generation task (rounds 200 to 211). No standard grammar inducer has been run under these constraints.</p></div>
@@ -614,13 +609,11 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
 <section class="page" data-page="results" hidden>
   <p class="eyebrow">Results</p>
   <h1>Results by domain</h1>
-  <p class="lede">Generation improves on real text but has a problem on grammars: under the current recipe, expansion mostly copies and inside-outside loses grammar on the larger ones. As a coder TRELLIS beats BPE on characters but loses to a trigram coder there and wins on chess only where shapes move. Each domain has its own page with its curves, chunks and tables.</p>
+  <p class="lede">Generation improves on real text but has a problem on grammars: under the current recipe, expansion mostly copies and inside-outside loses grammar on the larger ones. As a coder TRELLIS wins on chess only where shapes move. Each domain has its own page with its curves, chunks and tables. The other two domains, bAbI and Chinese characters, are in <a href="#a-other">Appendix A20</a>.</p>
   <ul class="rlist">
     <li><a href="#curves"><span class="rn">1</span><span class="rt">Toy grammars</span><span class="ra">What memory generates after 10 to 320 experiences on each grammar.</span></a></li>
     <li><a href="#r-stories"><span class="rn">2</span><span class="rt">TinyStories</span><span class="ra">Grammatical, new, on-topic generation; chunks and concepts; parse agreement; prompts.</span></a></li>
-    <li><a href="#s-babi"><span class="rn">3</span><span class="rt">bAbI</span><span class="ra">Questions answered by filling a gap.</span></a></li>
-    <li><a href="#s-chars"><span class="rn">4</span><span class="rt">Chinese characters</span><span class="ra">Compression against other coders; new characters.</span></a></li>
-    <li><a href="#s-chess"><span class="rn">5</span><span class="rt">Chess</span><span class="ra">Chase and Simon, figure for figure; compression; shapes on new squares; chunks.</span></a></li>
+    <li><a href="#s-chess"><span class="rn">3</span><span class="rt">Chess</span><span class="ra">Chase and Simon, figure for figure; compression; shapes on new squares; chunks.</span></a></li>
   </ul>
 </section>
 
@@ -672,6 +665,127 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     <div class="fig"><img class="plot" src="story_frontier.png" alt="Two panels against novelty, the share of new sentences with an unstored trigram. Left, new sentences judged grammatical: TRELLIS window 3 from .90 at novelty .08 to .76 at .34; window 4 from .82 at .25 to .65 at .62; window 5 from .67 at .57 to .59 at .77; LSTM from .96 at .25 to .45 at .84; transformer from .87 at .50 to .37 at .89; n-grams .72 to .90 at novelty 0; swap .65 at .75. Right, grammatical share of the sentences with an unstored trigram: TRELLIS .50 to .63 at every window and temperature; LSTM .88 at temperature .3 falling to .37; transformer .77 to .30." loading="lazy"></div>
   </figure>
   <figcaption><b>Figure S3.</b> Grammaticality against novelty at 1,000 sentences learned. Labels are sampling temperatures; bars are seed ranges.</figcaption>
+  <h3>Novelty against grammaticality: the trade-off</h3>
+  <figure>
+    <div class="fig">
+<svg class="dg" viewBox="0 0 760 470" role="img" aria-label="Grammaticality against novelty at 1,000 sentences learned, one line per generator family. The LSTM and GPT lines lie above the TRELLIS lines at every novelty level from .3 up; n-gram samplers sit at zero novelty.">
+<line x1="64" x2="600" y1="380.0" y2="380.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="56" y="384.0" text-anchor="end" style="font-size:12px;fill:var(--muted)">0.2</text>
+<line x1="64" x2="600" y1="312.0" y2="312.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="56" y="316.0" text-anchor="end" style="font-size:12px;fill:var(--muted)">0.4</text>
+<line x1="64" x2="600" y1="244.0" y2="244.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="56" y="248.0" text-anchor="end" style="font-size:12px;fill:var(--muted)">0.5</text>
+<line x1="64" x2="600" y1="176.0" y2="176.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="56" y="180.0" text-anchor="end" style="font-size:12px;fill:var(--muted)">0.7</text>
+<line x1="64" x2="600" y1="108.0" y2="108.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="56" y="112.0" text-anchor="end" style="font-size:12px;fill:var(--muted)">0.8</text>
+<line x1="64" x2="600" y1="40.0" y2="40.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="56" y="44.0" text-anchor="end" style="font-size:12px;fill:var(--muted)">1.0</text>
+<line x1="64.0" x2="64.0" y1="380" y2="385" stroke="var(--muted)" stroke-width="1"/>
+<text x="64.0" y="400" text-anchor="middle" style="font-size:12px;fill:var(--muted)">0.0</text>
+<line x1="171.2" x2="171.2" y1="380" y2="385" stroke="var(--muted)" stroke-width="1"/>
+<text x="171.2" y="400" text-anchor="middle" style="font-size:12px;fill:var(--muted)">0.2</text>
+<line x1="278.4" x2="278.4" y1="380" y2="385" stroke="var(--muted)" stroke-width="1"/>
+<text x="278.4" y="400" text-anchor="middle" style="font-size:12px;fill:var(--muted)">0.4</text>
+<line x1="385.6" x2="385.6" y1="380" y2="385" stroke="var(--muted)" stroke-width="1"/>
+<text x="385.6" y="400" text-anchor="middle" style="font-size:12px;fill:var(--muted)">0.6</text>
+<line x1="492.8" x2="492.8" y1="380" y2="385" stroke="var(--muted)" stroke-width="1"/>
+<text x="492.8" y="400" text-anchor="middle" style="font-size:12px;fill:var(--muted)">0.8</text>
+<line x1="600.0" x2="600.0" y1="380" y2="385" stroke="var(--muted)" stroke-width="1"/>
+<text x="600.0" y="400" text-anchor="middle" style="font-size:12px;fill:var(--muted)">1.0</text>
+<line x1="64" x2="600" y1="380" y2="380" stroke="var(--muted)" stroke-width="1"/>
+<text x="332" y="422" text-anchor="middle" style="font-size:13px;fill:var(--ink)">Novelty: share of new sentences with an unstored trigram</text>
+<text transform="translate(16 210) rotate(-90)" text-anchor="middle" style="font-size:13px;fill:var(--ink)">Grammatical (strict judge)</text>
+<line x1="64" x2="600" y1="57.8" y2="57.8" stroke="var(--ink2)" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="596" y="51.8" text-anchor="end" style="font-size:12px;fill:var(--ink2)">real held-out sentences: 0.958</text>
+<polyline points="147.1,76.4 204.1,96.7 273.8,122.1" fill="none" stroke="var(--s3)" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="147.1" cy="76.4" r="4.5" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS, window 3, temperature 0.5: novelty 0.155, grammatical 0.914</title></circle>
+<circle cx="204.1" cy="96.7" r="4.5" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS, window 3, temperature 0.7: novelty 0.261, grammatical 0.867</title></circle>
+<circle cx="273.8" cy="122.1" r="4.5" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS, window 3, temperature 1: novelty 0.392, grammatical 0.807</title></circle>
+<polyline points="299.2,129.2 338.4,137.9 383.1,158.0 420.0,175.7" fill="none" stroke="var(--s3)" stroke-width="2" stroke-linejoin="round"/>
+<rect x="294.7" y="124.7" width="9.0" height="9.0" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS, window 4, temperature 0.5: novelty 0.439, grammatical 0.790</title></rect>
+<rect x="333.9" y="133.4" width="9.0" height="9.0" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS, window 4, temperature 0.7: novelty 0.512, grammatical 0.770</title></rect>
+<rect x="378.6" y="153.5" width="9.0" height="9.0" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS, window 4, temperature 1: novelty 0.595, grammatical 0.722</title></rect>
+<rect x="415.5" y="171.2" width="9.0" height="9.0" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS, window 4, temperature 1.3: novelty 0.664, grammatical 0.681</title></rect>
+<polyline points="415.5,202.5 430.2,207.2 459.5,217.3 485.3,232.0 503.8,242.7 526.7,255.5" fill="none" stroke="var(--s3)" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="415.5,197.0 421.0,202.5 415.5,208.0 410.0,202.5" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS, window 5, temperature 0.5: novelty 0.656, grammatical 0.618</title></polygon>
+<polygon points="430.2,201.7 435.7,207.2 430.2,212.7 424.7,207.2" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS, window 5, temperature 0.7: novelty 0.683, grammatical 0.607</title></polygon>
+<polygon points="459.5,211.8 465.0,217.3 459.5,222.8 454.0,217.3" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS, window 5, temperature 1: novelty 0.738, grammatical 0.583</title></polygon>
+<polygon points="485.3,226.5 490.8,232.0 485.3,237.5 479.8,232.0" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS, window 5, temperature 1.3: novelty 0.786, grammatical 0.548</title></polygon>
+<polygon points="503.8,237.2 509.3,242.7 503.8,248.2 498.3,242.7" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS, window 5, temperature 1.6: novelty 0.821, grammatical 0.523</title></polygon>
+<polygon points="526.7,250.0 532.2,255.5 526.7,261.0 521.2,255.5" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS, window 5, temperature 2: novelty 0.863, grammatical 0.493</title></polygon>
+<polyline points="346.9,142.6 402.9,140.3 420.5,148.7 453.4,163.7 469.4,176.8 488.2,191.5 512.1,211.9 524.9,227.5 536.5,242.7 553.2,266.3" fill="none" stroke="var(--foc)" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="346.9" cy="142.6" r="4.5" fill="var(--foc)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS edge, window 7, temperature 0.3: novelty 0.528, grammatical 0.759</title></circle>
+<circle cx="402.9" cy="140.3" r="4.5" fill="var(--foc)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS edge, window 7, temperature 0.5: novelty 0.632, grammatical 0.764</title></circle>
+<circle cx="420.5" cy="148.7" r="4.5" fill="var(--foc)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS edge, window 7, temperature 0.7: novelty 0.665, grammatical 0.744</title></circle>
+<circle cx="453.4" cy="163.7" r="4.5" fill="var(--foc)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS edge, window 7, temperature 1: novelty 0.726, grammatical 0.709</title></circle>
+<circle cx="469.4" cy="176.8" r="4.5" fill="var(--foc)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS edge, window 7, temperature 1.3: novelty 0.756, grammatical 0.678</title></circle>
+<circle cx="488.2" cy="191.5" r="4.5" fill="var(--foc)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS edge, window 7, temperature 1.6: novelty 0.791, grammatical 0.643</title></circle>
+<circle cx="512.1" cy="211.9" r="4.5" fill="var(--foc)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS edge, window 7, temperature 2: novelty 0.836, grammatical 0.596</title></circle>
+<circle cx="524.9" cy="227.5" r="4.5" fill="var(--foc)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS edge, window 7, temperature 2.4: novelty 0.860, grammatical 0.559</title></circle>
+<circle cx="536.5" cy="242.7" r="4.5" fill="var(--foc)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS edge, window 7, temperature 2.8: novelty 0.881, grammatical 0.523</title></circle>
+<circle cx="553.2" cy="266.3" r="4.5" fill="var(--foc)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS edge, window 7, temperature 3.5: novelty 0.913, grammatical 0.468</title></circle>
+<polyline points="241.2,87.6 288.9,76.3 314.5,80.0 339.6,91.1 384.3,115.7 415.2,132.3 436.5,160.7 481.4,197.8 509.8,235.9 527.3,269.0 569.2,346.9" fill="none" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="241.2" cy="87.6" r="4.5" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.5"><title>LSTM, temperature 0.15: novelty 0.331, grammatical 0.888</title></circle>
+<circle cx="288.9" cy="76.3" r="4.5" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.5"><title>LSTM, temperature 0.2: novelty 0.419, grammatical 0.914</title></circle>
+<circle cx="314.5" cy="80.0" r="4.5" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.5"><title>LSTM, temperature 0.3: novelty 0.467, grammatical 0.906</title></circle>
+<circle cx="339.6" cy="91.1" r="4.5" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.5"><title>LSTM, temperature 0.4: novelty 0.514, grammatical 0.880</title></circle>
+<circle cx="384.3" cy="115.7" r="4.5" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.5"><title>LSTM, temperature 0.5: novelty 0.598, grammatical 0.822</title></circle>
+<circle cx="415.2" cy="132.3" r="4.5" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.5"><title>LSTM, temperature 0.6: novelty 0.655, grammatical 0.783</title></circle>
+<circle cx="436.5" cy="160.7" r="4.5" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.5"><title>LSTM, temperature 0.7: novelty 0.695, grammatical 0.716</title></circle>
+<circle cx="481.4" cy="197.8" r="4.5" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.5"><title>LSTM, temperature 0.8: novelty 0.779, grammatical 0.629</title></circle>
+<circle cx="509.8" cy="235.9" r="4.5" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.5"><title>LSTM, temperature 0.9: novelty 0.832, grammatical 0.539</title></circle>
+<circle cx="527.3" cy="269.0" r="4.5" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.5"><title>LSTM, temperature 1: novelty 0.864, grammatical 0.461</title></circle>
+<circle cx="569.2" cy="346.9" r="4.5" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.5"><title>LSTM, temperature 1.2: novelty 0.943, grammatical 0.278</title></circle>
+<polyline points="414.6,106.5 401.9,103.0 411.4,121.0 429.3,139.0 438.9,147.7 464.4,168.0 492.3,191.8 514.5,220.4 535.1,256.2 551.4,302.1 575.6,360.9" fill="none" stroke="var(--s2)" stroke-width="2" stroke-linejoin="round"/>
+<rect x="410.1" y="102.0" width="9.0" height="9.0" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.5"><title>GPT, temperature 0.15: novelty 0.654, grammatical 0.844</title></rect>
+<rect x="397.4" y="98.5" width="9.0" height="9.0" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.5"><title>GPT, temperature 0.2: novelty 0.630, grammatical 0.852</title></rect>
+<rect x="406.9" y="116.5" width="9.0" height="9.0" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.5"><title>GPT, temperature 0.3: novelty 0.648, grammatical 0.809</title></rect>
+<rect x="424.8" y="134.5" width="9.0" height="9.0" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.5"><title>GPT, temperature 0.4: novelty 0.682, grammatical 0.767</title></rect>
+<rect x="434.4" y="143.2" width="9.0" height="9.0" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.5"><title>GPT, temperature 0.5: novelty 0.700, grammatical 0.747</title></rect>
+<rect x="459.9" y="163.5" width="9.0" height="9.0" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.5"><title>GPT, temperature 0.6: novelty 0.747, grammatical 0.699</title></rect>
+<rect x="487.8" y="187.3" width="9.0" height="9.0" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.5"><title>GPT, temperature 0.7: novelty 0.799, grammatical 0.643</title></rect>
+<rect x="510.0" y="215.9" width="9.0" height="9.0" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.5"><title>GPT, temperature 0.8: novelty 0.840, grammatical 0.576</title></rect>
+<rect x="530.6" y="251.7" width="9.0" height="9.0" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.5"><title>GPT, temperature 0.9: novelty 0.879, grammatical 0.491</title></rect>
+<rect x="546.9" y="297.6" width="9.0" height="9.0" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.5"><title>GPT, temperature 1: novelty 0.909, grammatical 0.383</title></rect>
+<rect x="571.1" y="356.4" width="9.0" height="9.0" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.5"><title>GPT, temperature 1.2: novelty 0.954, grammatical 0.245</title></rect>
+<polyline points="64.0,132.9 64.0,78.4 64.0,72.2" fill="none" stroke="var(--cand)" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="64.0,127.4 69.5,132.9 64.0,138.4 58.5,132.9" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.5"><title>n-gram sampler, order (3, 4, 5) 3: novelty 0.000, grammatical 0.781</title></polygon>
+<polygon points="64.0,72.9 69.5,78.4 64.0,83.9 58.5,78.4" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.5"><title>n-gram sampler, order (3, 4, 5) 4: novelty 0.000, grammatical 0.910</title></polygon>
+<polygon points="64.0,66.7 69.5,72.2 64.0,77.7 58.5,72.2" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.5"><title>n-gram sampler, order (3, 4, 5) 5: novelty 0.000, grammatical 0.924</title></polygon>
+<text x="284.8" y="126.1" style="font-size:12.5px;font-weight:600;fill:var(--s3)">TRELLIS, window 3</text>
+<text x="75.0" y="136.9" style="font-size:12.5px;font-weight:600;fill:var(--cand)">n-gram sampler</text>
+<text x="431.0" y="179.7" style="font-size:12.5px;font-weight:600;fill:var(--s3)">TRELLIS, window 4</text>
+<text x="537.7" y="259.5" style="font-size:12.5px;font-weight:600;fill:var(--s3)">TRELLIS, window 5</text>
+<text x="564.2" y="273.5" style="font-size:12.5px;font-weight:600;fill:var(--foc)">TRELLIS edge, window 7</text>
+<text x="580.2" y="350.9" style="font-size:12.5px;font-weight:600;fill:var(--s1)">LSTM</text>
+<text x="586.6" y="364.9" style="font-size:12.5px;font-weight:600;fill:var(--s2)">GPT</text>
+<text x="64" y="436" style="font-size:12px;fill:var(--muted)">Along each line: sampling temperature rises from left to right (n-gram samplers: order 3, 4, 5, from low to high grammaticality).</text>
+<line x1="64" x2="82" y1="452" y2="452" stroke="var(--s3)" stroke-width="2"/>
+<circle cx="73.0" cy="452.0" r="4.5" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS, window 3</title></circle>
+<text x="88" y="456" style="font-size:12px;fill:var(--ink2)">TRELLIS, window 3</text>
+<line x1="213" x2="231" y1="452" y2="452" stroke="var(--s3)" stroke-width="2"/>
+<rect x="217.5" y="447.5" width="9.0" height="9.0" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS, window 4</title></rect>
+<text x="237" y="456" style="font-size:12px;fill:var(--ink2)">TRELLIS, window 4</text>
+<line x1="362" x2="380" y1="452" y2="452" stroke="var(--s3)" stroke-width="2"/>
+<polygon points="371.0,446.5 376.5,452.0 371.0,457.5 365.5,452.0" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS, window 5</title></polygon>
+<text x="386" y="456" style="font-size:12px;fill:var(--ink2)">TRELLIS, window 5</text>
+<line x1="511" x2="529" y1="452" y2="452" stroke="var(--foc)" stroke-width="2"/>
+<circle cx="520.0" cy="452.0" r="4.5" fill="var(--foc)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS edge, window 7</title></circle>
+<text x="535" y="456" style="font-size:12px;fill:var(--ink2)">TRELLIS edge, window 7</text>
+<line x1="695" x2="713" y1="452" y2="452" stroke="var(--s1)" stroke-width="2"/>
+<circle cx="704.0" cy="452.0" r="4.5" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.5"><title>LSTM</title></circle>
+<text x="719" y="456" style="font-size:12px;fill:var(--ink2)">LSTM</text>
+<line x1="753" x2="771" y1="452" y2="452" stroke="var(--s2)" stroke-width="2"/>
+<rect x="757.5" y="447.5" width="9.0" height="9.0" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.5"><title>GPT</title></rect>
+<text x="777" y="456" style="font-size:12px;fill:var(--ink2)">GPT</text>
+<line x1="804" x2="822" y1="452" y2="452" stroke="var(--cand)" stroke-width="2"/>
+<polygon points="813.0,446.5 818.5,452.0 813.0,457.5 807.5,452.0" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.5"><title>n-gram sampler</title></polygon>
+<text x="828" y="456" style="font-size:12px;fill:var(--ink2)">n-gram sampler</text>
+</svg>
+    </div>
+  </figure>
+  <figcaption><b>Figure S4.</b> The trade-off between novelty and abstraction, at 1,000 sentences learned (mean of four seeds, Qwen3-8B strict judge; n = 1,000; the dashed line is the judge's pass rate on real held-out sentences). Each point is one setting of a generator's dial. For the LSTM, the GPT and TRELLIS the dial is the sampling temperature (rising left to right), and TRELLIS has a second dial, the window W, which sets how much context a word is read from (smaller windows generalize further). For the n-gram samplers the dial is the order (3, 4, 5), and since they only recombine stored trigrams their novelty is zero by construction. Moving toward abstraction or variability buys novelty and costs grammaticality, on every line. The question is who sits on the frontier. At 250 to 1,000 sentences rounds 190 and 191 found the LSTM and the GPT above TRELLIS at matched novelty, and this figure agrees for the plain windows: from novelty .3 to .5 the LSTM lies about .1 above TRELLIS. TRELLIS's edge-coded window 7 comes within about .02 to .04 of the LSTM and GPT lines at novelty .6 to .7 and above the LSTM beyond .7; the edge windows lie above both neural models only at novelty near .8 and higher, where grammaticality is already below .6. Settings with fewer than 20 distinct new sentences per seed are left out. Round 214's abstraction-knob points will be added as further lines (<code>experiments/v3/diag/fig_novelty_tradeoff.py --extra</code>).</figcaption>
   <ul>
     <li><b>Claim: from 250 to 1,000 sentences TRELLIS matches the LSTM (8 seeds; the paired 95% CI includes 0 at every size). It beats a matched GPT at 250 and 500 sentences (8 of 8 seeds each) and is level with it at 1,000.</b> On the fair count over eight seeds (rounds 204, 205 and 212), it scores .2419, .2982 and .3281 against the LSTM's .2323, .2990 and .3346 and the GPT's .2068, .2738 and .3282. At 4,000 sentences (2 seeds) it trails both neural models (.319 against .358 and .362). The judge passes about 90% of real sentences, which caps every score, and under stricter judges (ceiling .96 to .97) no model reaches .95 grammaticality at 1,000 sentences (rounds 209 and 211).</li>
     <li><b>TRELLIS reaches the judge's ceiling, but only near copying.</b> At window 3 and temperature 0.5, 90% of its new sentences are judged grammatical, with 8% containing an unstored trigram. The 4- and 5-gram samplers reach 85 to 90% with none.</li>
@@ -719,10 +833,10 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
   <h2>10 November: simple references set the bar</h2>
   <p>Story generation had no outside baseline until 10 November. Simple generators on the same stream, prompts and judge beat every TRELLIS recipe (<a href="#a-refs">A19</a>): a trigram sampler yields .40 new grammatical sentences per generation and a stored sentence with one word swapped in the same frame .57, against .22 for the candidate recipe below. TRELLIS's errors come from word pairs it never saw side by side: its new sentences built from stored pairs are mostly grammatical, and those with a never-seen pair mostly are not. Read by token counts, its context concepts rank such pairs no better than word frequency (.145 average precision at 1,000 sentences). Read by types, each distinct member word counting once, the same tree reaches .29 with nothing in the tree changed, still below an analogy count over stored pairs (.34); in chart generation that reading raises yield only by avoiding never-seen pairs (.29 against .22), and sentences that keep one stay 11 to 16% grammatical. Generating left to right from the context tree instead, each word drawn given the two already placed and gated by the same reading, yields .38 to .40 on four seeds, level with the trigram sampler (.39 to .41), still behind the one-word swap (.57), and almost entirely from stored pairs: generalization past stored pairs is still unsolved. On chess, a trigram over the board read in a fixed order beats TRELLIS's coder on control and shifted boards. TRELLIS coded every unit without conditioning on what came before, and its context tree did no work in the code. Coding places as gaps in reading order, and describing each occurrence by what a reader has already decoded so its context concept predicts the unit, saves 10 to 13 bits on control and 20 to 22 on shifted boards on three seeds. Leaving the anchor's absolute square out of that description brings TRELLIS within about 1 bit of the trigram on control and 3.5 to 6 bits ahead of it on shifted boards, but then no chunks form: it is the context hierarchy alone. When chunks are made to form, coding with them costs more (124.3 against 105.2 bits at 1,000 learned), because each piece's context already sees the earlier pieces of its pattern. The next step for the two-hierarchy learner is its generalization step, checked first on the judge-free test in A19 (Table 5).</p>
   <h2>Earlier: a simpler candidate recipe</h2>
-  <p>Removing each part alone (<a href="#a-rationale">A18</a>) found a recipe without <code>word_cc</code>, type names or neighbour chunks. Story yield rises from .186 to .224 on four seeds, characters at 2,000 fall from 27.8 / 27.5 to 26.7 / 26.5 bits (trigram 26.4 / 26.0), and expansion on <code>med</code> and <code>large</code> goes from copying to .80–.89 grammatical and new. The word's identity in its context description caused the copying. It has not been adopted, and the rest of this site still describes the older recipe. The largest open conflict is <code>exact_alone</code>: off, characters tie trigram and chess improves, but story yield and chunk grouping fall.</p>
+  <p>Removing each part alone (<a href="#a-rationale">A18</a>) found a recipe without <code>word_cc</code>, type names or neighbour chunks. Story yield rises from .186 to .224 on four seeds, and expansion on <code>med</code> and <code>large</code> goes from copying to .80–.89 grammatical and new. The word's identity in its context description caused the copying. It has not been adopted, and the rest of this site still describes the older recipe. The largest open conflict is <code>exact_alone</code>: off, chess improves, but story yield and chunk grouping fall.</p>
   <h2>Why this matters</h2>
   <div class="col">
-    <p>Most systems that generate well need many passes over much data, and what they know is not inspectable. TRELLIS learns from each experience once, stores what it learns in concepts one can read, and uses the same memory to parse, generate and compress. It applies unchanged to sentences, characters and chess. If it can match simple coders and reach good grammar from a few thousand experiences, that gives a transparent, always-learning account of how structure and generalization can arise together. It is not there yet, and the gaps below are real.</p>
+    <p>Most systems that generate well need many passes over much data, and what they know is not inspectable. TRELLIS learns from each experience once, stores what it learns in concepts one can read, and uses the same memory to parse, generate and compress. It applies unchanged to sentences and chess. If it can match simple coders and reach good grammar from a few thousand experiences, that gives a transparent, always-learning account of how structure and generalization can arise together. It is not there yet, and the gaps below are real.</p>
   </div>
   <h2>What has been shown</h2>
   <div class="col">
@@ -746,9 +860,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
       <tr><th>Parsing and generation read different scores</th><td>Parsing uses a separate chunk factor; generation and coding read the grammar's probabilities</td><td>Test parsing and learning by the same probabilities</td></tr>
       <tr><th>The content tree's gain</th><td>On toy grammars, held-out composites stop 2–4 levels down and gain no bits there. Not re-measured since the representation fixes</td><td>Re-measure; name words by what they build as well as where they stand</td></tr>
       <tr><th>Infill and prompts</th><td>Infill fails to fit both sides under gap filling</td><td>Run prompts through inside-outside generation, which already handles gaps</td></tr>
-      <tr><th>Characters</th><td>Beats BPE, loses to a trigram coder</td><td>Find what the trigram coder captures that the grammar misses</td></tr>
       <tr><th>Chess</th><td>Wins only on shifted boards, narrowly, for a reason BPE on shapes shares. Recall saturates too early</td><td>Rethink the representation of positions; chunk probabilities</td></tr>
-      <tr><th>Answering (bAbI)</th><td>Right type, rarely the exact answer</td><td>Answer by analogy: align the question's chunks with the story sentence that shares its role</td></tr>
       <tr><th>Scale and comparison</th><td>Story results stop at 2,000 sentences and a 250-word vocabulary, with no external generation baseline</td><td>Larger streams; a fair online baseline</td></tr>
     </tbody>
   </table></div>
@@ -779,6 +891,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     <li><a href="#a-copying"><span class="rn">A17</span><span class="rt">Ablation: toy-grammar copying</span><span class="ra">Which mechanisms made generation copy, and where inside-outside loses grammar.</span></a></li>
     <li><a href="#a-rationale"><span class="rn">A18</span><span class="rt">Why the architecture is this way</span><span class="ra">Each decision removed alone: its reason, what removal did, and whether the reason held.</span></a></li>
     <li><a href="#a-refs"><span class="rn">A19</span><span class="rt">Against simple references</span><span class="ra">Trigram and one-swap generators on the same stream, prompts and judge; where the errors come from.</span></a></li>
+    <li><a href="#a-other"><span class="rn">A20</span><span class="rt">Other domains (bAbI, Chinese characters)</span><span class="ra">The two domains cut from the main pages, with the rows and claims that mentioned them, and their own pages.</span></a></li>
   </ul>
 </section>
 
@@ -816,6 +929,221 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
   <h1>Ablation: toy-grammar copying</h1>
   <p class="lede">Why does generation on the toy grammars copy what it has seen, and where does inside-outside lose grammar?</p>
   <div id="copying-body">@@COPYING@@</div>
+</section>
+
+<!-- ============================================================ APPENDIX: OTHER DOMAINS -->
+<section class="page" data-page="a-other" hidden>
+  <p class="eyebrow">Appendix A20</p>
+  <h1>Appendix: other domains (bAbI, Chinese characters)</h1>
+  <p class="lede">The main pages cover artificial grammars, TinyStories and chess. The two other domains, bAbI and Chinese characters, are collected here with every row, bullet and claim the main pages once held about them, moved without change.</p>
+  <ul class="rlist">
+    <li><a href="#s-babi"><span class="rn">A20a</span><span class="rt">bAbI</span><span class="ra">Questions answered by filling a gap.</span></a></li>
+    <li><a href="#s-chars"><span class="rn">A20b</span><span class="rt">Chinese characters</span><span class="ra">Compression against other coders; new characters.</span></a></li>
+  </ul>
+  <h2>Experimental design</h2>
+  <h3>Domains</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Domain</th><th>What an experience is</th><th>Scale</th><th>What it tests</th></tr></thead>
+    <tbody>
+      <tr><th>bAbI</th><td>A story sentence, or a line <code>question ? answer</code>, from the 20 tasks</td><td>76,610 sentences, 4,114 distinct, 150 words; 600 to 3,000 learned</td><td>Answering as gap filling</td></tr>
+      <tr><th>Chinese characters</th><td>A character's IDS decomposition as a token sequence</td><td>500 to 2,000 characters; 300 held out</td><td>Compression and well-formed novelty on very short experiences, where alternative analyses carry information</td></tr>
+    </tbody></table></div>
+  <h3>Evaluations</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Measure</th><th>Definition</th><th>Domains</th><th>Limits</th></tr></thead>
+    <tbody>
+      <tr><th>Bits</th><td>Held-out code length under the learned model, model not charged</td><td>Characters, chess</td><td>Favours large memories; storage is reported apart</td></tr>
+      <tr><th>Prompts</th><td>Attested trigrams in filled gaps; right answer type and exact answer on bAbI</td><td>TinyStories, bAbI</td><td>Trigrams reward the common</td></tr>
+    </tbody></table></div>
+  <h3>Competitors</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Competitor</th><th>What it is</th><th>Used on</th></tr></thead>
+    <tbody>
+      <tr><th>Unigram, trigram (Witten-Bell)</th><td>Frequency coders over tokens</td><td>Characters</td></tr>
+      <tr><th>BPE, squares</th><td>Byte-pair merging; on chess, chunks are exact pieces on exact squares</td><td>Characters, chess</td></tr>
+      <tr><th>Frequency baseline</th><td>The most common answers</td><td>bAbI</td></tr>
+      <tr><th>Ablations</th><td>Beam and greedy search in place of inside-outside; no chunk identity; one hierarchy (in progress)</td><td>TinyStories, characters</td></tr>
+    </tbody></table></div>
+  <h3>Results at a glance (older recipe)</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Domain</th><th>Measure</th><th>TRELLIS</th><th>Reference</th></tr></thead>
+    <tbody>
+      <tr><td><a href="#s-babi">bAbI</a></td><td>Answer of the right type</td><td class="num">0.60–0.63</td><td>0.20–0.23 frequency baseline</td></tr>
+      <tr><td><a href="#s-chars">Characters</a></td><td>Bits per held-out character (2,000 learned)</td><td class="num">27.8 / 27.5</td><td><b>Trigram 26.4 / 26.0</b>; BPE 29.6 / 29.1</td></tr>
+    </tbody></table></div>
+  <h3>Against outside references (10 November)</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Domain</th><th>Measure</th><th>TRELLIS, candidate recipe</th><th>Simple references (<a href="#a-refs">A19</a>)</th></tr></thead>
+    <tbody>
+      <tr><td>Characters</td><td>Bits per held-out character (4,000 learned, s13 / s17)</td><td class="num best">24.04 / 23.82 with lengths from stored characters; ahead of the trigram at every size from 500 (A19)</td><td>Trigram 25.48 / 24.87</td></tr>
+    </tbody></table></div>
+  <h3>Open problems</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Open problem</th><th>What is known</th><th>Next</th></tr></thead>
+    <tbody>
+      <tr><th>Characters</th><td>Beats BPE, loses to a trigram coder</td><td>Find what the trigram coder captures that the grammar misses</td></tr>
+      <tr><th>Answering (bAbI)</th><td>Right type, rarely the exact answer</td><td>Answer by analogy: align the question's chunks with the story sentence that shares its role</td></tr>
+    </tbody></table></div>
+  <h3>Introduction and conclusion, as first written</h3>
+  <ul>
+    <li>Introduction, domains: toy grammars, TinyStories, bAbI, Chinese characters, chess.</li>
+    <li>Introduction, one machinery: Parsing, generating and coding should read the same probabilities. Inside-outside now does this for generating and coding characters. Parsing still scores chunks by a separate factor.</li>
+    <li>Introduction, domain generality: Every mechanism must work on characters and chess as well as sentences. Chess still loses to simple shape-based coders in most tests, so its representation is due a rethink.</li>
+    <li>Results at a glance, note: These numbers are for the older recipe. A18 reports a simpler candidate that does better on stories, characters and toy expansion and has not been adopted.</li>
+    <li>Domains, note: The chess recall studies and older character rows were measured on earlier configurations; each result page says which.</li>
+    <li>Guards: grammaticality within 2 points of the original and more grammatical-and-new samples on <code>med</code> and <code>large</code>, seeds 13 and 17, plus characters held.</li>
+    <li>Earlier: a simpler candidate recipe: characters at 2,000 fall from 27.8 / 27.5 to 26.7 / 26.5 bits (trigram 26.4 / 26.0).</li>
+    <li>Earlier: a simpler candidate recipe, conflict over <code>exact_alone</code>: off, characters tie trigram and chess improves, but story yield and chunk grouping fall.</li>
+    <li>Why this matters: It applies unchanged to sentences, characters and chess.</li>
+    <li>Results index, domain 3 (bAbI): Questions answered by filling a gap. Domain 4 (Chinese characters): Compression against other coders; new characters.</li>
+  </ul>
+  <h3>Prompts and parse consistency</h3>
+  <p>On bAbI (3,000 sentences), gap filling after a prefix gives 0.87–0.92 of trigrams attested. (From A6, prompted generation.)</p>
+  <p>bAbI parses look like <code>[[sandra travelled] [to [the garden]]]</code>, with phrase consistency 0.91. (From A7, parse consistency.)</p>
+  <div class="case">
+    <p class="ch">Case 4 · claim: bAbI parses are phrase-like and stable within a seed</p>
+    <p class="claim">A bAbI statement keeps one phrase-like parse as memory grows; another seed may choose a different one.</p>
+<div class="ex"><span class="p">seed 13, at 300, 1,000 and 3,000</span>   <span class="ok">[[sandra travelled] [to [the garden]]]</span>
+<span class="p">seed 17, at 3,000</span>                  [[sandra [travelled to]] [the garden]]
+<span class="p">seed 13, question line</span>             [[where is] [john [? hallway]]]</div>
+    <p class="reads">Phrase consistency (0.91) asks whether one memory brackets a repeated string the same way everywhere; it does not ask whether two seeds agree. Question lines parse less like phrases than statements.</p>
+  </div>
+</section>
+
+<!-- ============================================================ S4 BABI -->
+<section class="page" data-page="s-babi" hidden>
+  <p class="eyebrow">Appendix A20a</p>
+  <h1>bAbI questions as gap filling</h1>
+  <p class="lede">The question plus a question mark is the prompt, and the answer is the generated gap. Memory reaches the right kind of answer three times as often as a frequency baseline; exact answers need the story.</p>
+  <div class="col">
+    <p>The stream holds each story's sentences once and lines of the form <code>&lt;question&gt; ? &lt;answer&gt;</code>: 76,610 sentences, 4,114 distinct, 150 words, from the 20 bAbI tasks. Type accuracy asks whether the answer is one the task ever has; story-restricted exact accuracy limits fillers to the story's words and closed answers such as yes or no. The baseline draws an answer from the training answers by frequency.</p>
+  </div>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>600 sentences, seeds 13 / 17</th><th class="num">Right type</th><th class="num">Exact</th><th class="num">Exact, story-restricted</th></tr></thead>
+    <tbody>
+      <tr class="hl"><th>Gap filling</th><td class="num best">0.60 / 0.58</td><td class="num">0.21 / 0.17</td><td class="num">0.25 / 0.24</td></tr>
+      <tr><th>Gap filling + neighbour chunks</th><td class="num">0.64 / 0.63</td><td class="num">0.19 / 0.19</td><td class="num">–</td></tr>
+      <tr><th>Frequency baseline</th><td class="num">0.20 / 0.23</td><td class="num">0.06 / 0.06</td><td class="num">–</td></tr>
+    </tbody>
+  </table></div>
+  <p>Neighbouring chunks give no real gain. Long questions fail: &ldquo;where was the apple before the bathroom ?&rdquo; is answered yes or no, because the window sees only &ldquo;bathroom ?&rdquo;. QA lines parse as <code>[where [is [[mary ?] bathroom]]]</code>. The next step is answering by analogy: align the question's chunks with the story sentence that shares its entity and role, and answer with the filler in the aligned slot.</p>
+
+  <h2>Case studies</h2>
+  <p>Seed 13, 600 sentences, verify 700: the first test questions of tasks 1, 3, 6 and 15, nothing selected. "Memory" answers from the question alone; "story" keeps only fillers made of the story's words.</p>
+  <div class="case">
+    <p class="ch">Case 1 · claim: memory gives the right kind of answer, not the right one</p>
+    <p class="claim">Asked where someone is, memory names a location, but not the one the story says.</p>
+<div class="ex"><span class="p">story</span>     john travelled to the hallway · mary journeyed to the bathroom
+<span class="p">question</span>  where is john ?
+<span class="p">memory</span>    kitchen       <span class="p">story</span> bathroom      <span class="p">gold</span> hallway      <span class="ok">right type</span>, <span class="err">wrong answer</span></div>
+    <p class="reads">The gap's window sees "john ?" and fills a word that stands there in training: some location. Nothing ties it to this story. Restricting to the story's words picks one of its two locations, here the wrong one.</p>
+  </div>
+  <div class="case">
+    <p class="ch">Case 2 · claim: exact answers need the story</p>
+    <p class="claim">When the story names one location for the person, restricting to its words gives the right answer.</p>
+<div class="ex"><span class="p">story</span>     … john went to the hallway · sandra journeyed to the kitchen
+<span class="p">question</span>  where is sandra ?
+<span class="p">memory</span>    garden        <span class="p">story</span> <span class="ok">kitchen</span>       <span class="p">gold</span> kitchen</div>
+    <p class="reads">Story restriction raises exact accuracy only from 0.21 to 0.25. It filters words; it does not find the sentence about sandra. Answering by analogy, aligning the question's chunks with that sentence, is the next step.</p>
+  </div>
+  <div class="case">
+    <p class="ch">Case 3 · claim: long questions fail</p>
+    <p class="claim">A question with a second clause is answered as a yes/no question.</p>
+<div class="ex"><span class="p">story</span>     38 sentences of objects picked up, moved and dropped
+<span class="p">question</span>  where was the apple before the bathroom ?
+<span class="p">memory</span>    <span class="err">no</span>            <span class="p">story</span> <span class="err">no</span>            <span class="p">gold</span> office
+<span class="p">parse</span>     [where [[was [[[the [apple before]] [the bathroom]] ?]] office]]</div>
+    <p class="reads">The two-word window sees "the bathroom ?", which is also how task-6 yes/no questions end ("is john in the kitchen ? no"). The parse joins "apple before", so the question's own chunks do not isolate "where … the apple".</p>
+  </div>
+  <div class="case">
+    <p class="ch">Case 4 · claim: an exact answer can be right by frequency</p>
+    <p class="claim">A correct answer to a deduction question does not show deduction.</p>
+<div class="ex"><span class="p">story</span>     wolves are afraid of mice · … · emily is a cat · gertrude is a wolf
+<span class="p">what is gertrude afraid of ?</span>   memory <span class="ok">mouse</span>   gold mouse
+<span class="p">what is emily afraid of ?</span>      memory <span class="err">mouse</span>   gold wolf</div>
+    <p class="reads">Memory answers "mouse" to both. Task 15 has four answers (cat 29%, mouse 27%, sheep 24%, wolf 21% of training answers), so one in four guesses of the right type is exact by chance.</p>
+  </div>
+</section>
+
+<!-- ============================================================ S5 CHARACTERS -->
+<section class="page" data-page="s-chars" hidden>
+  <p class="eyebrow">Appendix A20b</p>
+  <h1>Chinese characters</h1>
+  <p class="lede">The same code runs on character decompositions, with components in spatial relations. A character has only a few parts, so it is a hard test for any change that drops low-weight analyses.</p>
+  <div class="col">
+    <ul>
+      <li><em>Well formed</em>: the sample reads back into a structure.</li>
+      <li><em>Real</em>: the sample is an existing character.</li>
+      <li><em>Novel</em>: the sample was not in training.</li>
+    </ul>
+    <p>Omission is measured on held-out characters; right-branching scores 0.678. Under the current recipe expansion is close to copying here too (0–5% novel, up from 0–1% at 250). Figure 7 and the guard table below come from earlier configurations.</p>
+  </div>
+@@L 636-636@@
+  <h2>Characters as a guard for memory repair</h2>
+  <p>Real and real-and-unseen characters at 500 experiences, seeds 13; 17:</p>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Run</th><th class="num">Seed 13</th><th class="num">Seed 17</th></tr></thead>
+    <tbody>
+      <tr><th>original</th><td class="num">0.647 / 0.046</td><td class="num">0.741 / 0.072</td></tr>
+      <tr><th>verify 700</th><td class="num">0.711 / 0.043</td><td class="num">0.687 / 0.090</td></tr>
+      <tr><th>repair on use, path 700</th><td class="num">0.739 / 0.036</td><td class="num">0.647 / 0.074</td></tr>
+      <tr><th>repair on use, path 3000</th><td class="num">0.681 / 0.044</td><td class="num">0.612 / 0.082</td></tr>
+      <tr><th>min_weight 0.03 (real only)</th><td class="num">0.614</td><td class="num">0.586</td></tr>
+    </tbody>
+  </table></div>
+  <p>Every repair variant is up on seed 13 and down on seed 17. Real-and-unseen is too rare (4–9%) to separate them. Dropping low-weight records fails here because a character's alternative analyses carry information.</p>
+  <figure>
+    <div class="fig"><img class="plot" src="generated_characters.png" alt="Rows of characters generated by TRELLIS v2 with their component sequences, under three encodings: IDS operators as relations, IDS operators as tokens, and sequences alone." loading="lazy"></div>
+  </figure>
+  <figcaption><b>Figure 7.</b> Characters TRELLIS v2 invents: new combinations of learned components in learned positions, under three encodings (an earlier export; rates as printed above each row).</figcaption>
+
+  <h2>TRELLIS as a coder of characters</h2>
+  <div class="col">
+    <p>Each coder learns the first n characters (IDS decompositions as token sequences) and codes 300 held-out characters; bits per character, the model not charged. TRELLIS codes a character by the probability its grammar grammar (S7) gives the sequence, the same machinery it generates from. Seeds 13 / 17.</p>
+    <table>
+      <tr><th>Coder</th><th>500 learned</th><th>1,000</th><th>2,000</th></tr>
+      <tr><td>Unigram</td><td class="num">45.6 / 46.6</td><td class="num">45.1 / 45.8</td><td class="num">44.7 / 45.5</td></tr>
+      <tr><td>Trigram (Witten-Bell)</td><td class="num best">31.9 / 32.7</td><td class="num best">29.1 / 28.8</td><td class="num best">26.4 / 26.0</td></tr>
+      <tr><td>BPE</td><td class="num">38.6 / 41.0</td><td class="num">33.7 / 33.5</td><td class="num">29.6 / 29.1</td></tr>
+      <tr><td>TRELLIS, before the fixes (best grammar)</td><td class="num">38.9 / 40.3</td><td class="num">37.3 / 38.3</td><td class="num">35.4 / 36.7</td></tr>
+      <tr><td>TRELLIS, fixes, grammar cut at depth 3</td><td class="num">38.7 / 39.4</td><td class="num">37.1 / 37.8</td><td class="num">35.4 / 36.0</td></tr>
+      <tr><td>TRELLIS, fixes, grammar cut at 12 bits</td><td class="num">35.7 / 36.3</td><td class="num">32.5 / 32.4</td><td class="num">28.4 / 28.7</td></tr>
+      <tr><td>TRELLIS, fixes, grammar cut at 16 bits</td><td class="num">33.5 / 33.8</td><td class="num">30.5 / 30.1</td><td class="num">27.9 / 27.8</td></tr>
+      <tr><td>TRELLIS, fixes, whole tree</td><td class="num">33.6 / 33.9</td><td class="num">30.5 / 30.2</td><td class="num">27.8 / 27.5</td></tr>
+      <tr><td>TRELLIS, beam 4 learning, cut at 14 bits</td><td class="num">—</td><td class="num">—</td><td class="num">30.2 / 29.3</td></tr>
+    </table>
+    <p>The representation fixes (<a href="#a-fixes">Appendix A11</a>) make the trees deep and narrow, so a grammar cut at a fixed depth holds only 6–20 concepts. Cutting by information (every concept within a number of bits of the root) fixes that, and the finer the cut the better: 6 bits 37.0, 9 bits 32.8, 12 bits 28.4, 16 bits 27.9, the whole tree 27.8 at 2,000 (seed 13). With the whole tree TRELLIS beats BPE at every size by 1.6–5 bits and ends 1.4 / 1.5 bits behind the trigram. On characters the cut needs no setting: the whole tree is best. Learning with a beam of 4 (round 80) costs 1.5–2.5 bits here, at a quarter of the learning time.</p>
+  </div>
+
+  <h2>Case studies</h2>
+  <div class="case">
+    <p class="ch">Case 1 · claim: samples are well formed, and some are real characters</p>
+    <p class="claim">Generated decompositions read back into structures, and some spell existing characters.</p>
+<div class="ex"><span class="p">sample</span>             <span class="p">existing character</span>
+⿰ 月 彡            <span class="ok">肜</span>   (left 月, right 彡)
+⿱ 宀 疌            <span class="ok">寁</span>   (top 宀, bottom 疌)
+⿺ 瓜 ⿹ 勹 丶       <span class="ok">瓝</span>   (瓜 wrapping 勺 = ⿹勹丶)
+⿰ 言 ⿴ 囗 ⿰ 丿 乚   well formed; not matched to a character</div>
+    <p class="reads">Seed 13, 500 experiences, original configuration (real 0.647). Matches are against the IDS file. The nested sample shows that a part can itself be a composite (勺 inside 瓝).</p>
+  </div>
+  <div class="case">
+    <p class="ch">Case 2 · claim: new characters combine learned components in learned positions</p>
+    <p class="claim">Novel samples put familiar components in positions those components take in real characters.</p>
+<div class="ex">⿰ 虫 ⿱ 𠂉 皿      insect radical on the left, a stacked right side
+⿸ 广 ⿱ 田 口      广 enclosing from the top left, as in 店 or 庫
+⿰ 扌 ⿱ 八 丨      hand radical on the left
+⿱ 八 豆          <span class="ok">real and unseen: 𧯚</span></div>
+    <p class="reads">TRELLIS v2 export (Figure 7 source, 2,000 training characters, seed 13), from its labelled novel lists. One "novel" sample is a real character that was not in training. Such cases are rare (real and unseen 4–9% in v3), which is why they cannot separate the repair variants.</p>
+  </div>
+  <div class="case">
+    <p class="ch">Case 3 · claim: parsing misses part of held-out structure</p>
+    <p class="claim">Parsing a held-out character recovers the top split but not always the inner one.</p>
+<div class="ex"><span class="p">楮  gold</span>   [[⿰ 木] [[⿸ 耂] 日]]
+<span class="p">    parse</span>  [[⿰ 木] [⿸ [耂 日]]]      <span class="err">[⿸ 耂] missed</span>
+<span class="p">gold</span>       [[⿵ ⺆] [[⿱ [[⿱ 十] 一]] 口]]
+<span class="p">parse</span>      [[⿵ ⺆] [⿱ [⿱ [十 [一 口]]]]]   <span class="err">right-branches inside</span></div>
+    <p class="reads">Seed 13, 500 experiences. Omission is the share of gold brackets the parse lacks: 0.585 on held-out characters, against 0.678 for right-branching.</p>
+  </div>
 </section>
 
 <!-- ============================================================ PARSING -->
@@ -1287,7 +1615,6 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     <li class="bad">the man the tree (error; "the * the tree")</li>
     <li class="bad">i can and ben (error; "i * and ben")</li>
   </ul>
-  <p>On bAbI (3,000 sentences), gap filling after a prefix gives 0.87–0.92 of trigrams attested.</p>
 
   <h2>Neighbouring chunks and sibling mode</h2>
   <p>With <code>neighbour_chunks</code>, a context also names the same-width units beside the element by the content concept of memory's best analysis, and a filler of width m is scored against the prompt's m-word chunk beside the gap. On 600 sentences (verify 700, seeds 13 / 17) prefix-1 improves (trigrams attested 0.78 → 0.87), while prefix-2 and infill get worse. It fails the novelty guard: grammatical and new at 320 falls to 0.67 / 0.73 / 0.51 / 0.60, against 0.871 / 0.892 / 0.846 / 0.839. A more specific context makes the learner memorise, so the option stays off.</p>
@@ -1351,7 +1678,6 @@ they * day long      <span class="err">they knew they would day long</span> (all
     <li>Substitution F1 at 2,000 sentences (seed 17): 0.962 for a near word, 0.893 for a far word.</li>
     <li>Stability against the previous checkpoint reaches 0.92.</li>
     <li>Verify 700 is less stable: cross-seed 0.77–0.79 at 2,000, substitution 0.84–0.87 near and 0.77–0.79 far.</li>
-    <li>bAbI parses look like <code>[[sandra travelled] [to [the garden]]]</code>, with phrase consistency 0.91.</li>
   </ul>
 
   <h2>Case studies</h2>
@@ -1394,14 +1720,6 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
 <span class="p">near  said→bad</span>         [[[[he bad] no] i'm] not]</div>
     <p class="reads">Original configuration, seed 17, 2,000 sentences; the first eight held-out sentences with a replaceable word, of which four are shown. A true substitute ("asked → says") keeps every bracket, while a function word ("asked → a") moves one. The nearest word by learned name is often no substitute ("day → anymore", "said → bad"). The parse may then stay the same for the wrong reason, so the near-word F1 of 0.962 likely overstates invariance.</p>
   </div>
-  <div class="case">
-    <p class="ch">Case 4 · claim: bAbI parses are phrase-like and stable within a seed</p>
-    <p class="claim">A bAbI statement keeps one phrase-like parse as memory grows; another seed may choose a different one.</p>
-<div class="ex"><span class="p">seed 13, at 300, 1,000 and 3,000</span>   <span class="ok">[[sandra travelled] [to [the garden]]]</span>
-<span class="p">seed 17, at 3,000</span>                  [[sandra [travelled to]] [the garden]]
-<span class="p">seed 13, question line</span>             [[where is] [john [? hallway]]]</div>
-    <p class="reads">Phrase consistency (0.91) asks whether one memory brackets a repeated string the same way everywhere; it does not ask whether two seeds agree. Question lines parse less like phrases than statements.</p>
-  </div>
 </section>
 
 <!-- ============================================================ S3 PROBE -->
@@ -1442,142 +1760,6 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
 <span class="p">played together</span>  very happy · unexpected happened · they were · the bird · tim was
 <span class="p">was happy</span>        very happy · unexpected happened · they were · the bird · tim was</div>
     <p class="reads">The same five frequent types answer every query: the dense cluster in Figure 6. This fits the content tree's missing gain (<a href="#f-known">known failures</a>): content descriptions do not yet separate kinds of chunk.</p>
-  </div>
-</section>
-
-<!-- ============================================================ S4 BABI -->
-<section class="page" data-page="s-babi" hidden>
-  <p class="eyebrow">Results</p>
-  <h1>bAbI questions as gap filling</h1>
-  <p class="lede">The question plus a question mark is the prompt, and the answer is the generated gap. Memory reaches the right kind of answer three times as often as a frequency baseline; exact answers need the story.</p>
-  <div class="col">
-    <p>The stream holds each story's sentences once and lines of the form <code>&lt;question&gt; ? &lt;answer&gt;</code>: 76,610 sentences, 4,114 distinct, 150 words, from the 20 bAbI tasks. Type accuracy asks whether the answer is one the task ever has; story-restricted exact accuracy limits fillers to the story's words and closed answers such as yes or no. The baseline draws an answer from the training answers by frequency.</p>
-  </div>
-  <div class="tbl-wrap"><table class="tbl">
-    <thead><tr><th>600 sentences, seeds 13 / 17</th><th class="num">Right type</th><th class="num">Exact</th><th class="num">Exact, story-restricted</th></tr></thead>
-    <tbody>
-      <tr class="hl"><th>Gap filling</th><td class="num best">0.60 / 0.58</td><td class="num">0.21 / 0.17</td><td class="num">0.25 / 0.24</td></tr>
-      <tr><th>Gap filling + neighbour chunks</th><td class="num">0.64 / 0.63</td><td class="num">0.19 / 0.19</td><td class="num">–</td></tr>
-      <tr><th>Frequency baseline</th><td class="num">0.20 / 0.23</td><td class="num">0.06 / 0.06</td><td class="num">–</td></tr>
-    </tbody>
-  </table></div>
-  <p>Neighbouring chunks give no real gain. Long questions fail: &ldquo;where was the apple before the bathroom ?&rdquo; is answered yes or no, because the window sees only &ldquo;bathroom ?&rdquo;. QA lines parse as <code>[where [is [[mary ?] bathroom]]]</code>. The next step is answering by analogy: align the question's chunks with the story sentence that shares its entity and role, and answer with the filler in the aligned slot.</p>
-
-  <h2>Case studies</h2>
-  <p>Seed 13, 600 sentences, verify 700: the first test questions of tasks 1, 3, 6 and 15, nothing selected. "Memory" answers from the question alone; "story" keeps only fillers made of the story's words.</p>
-  <div class="case">
-    <p class="ch">Case 1 · claim: memory gives the right kind of answer, not the right one</p>
-    <p class="claim">Asked where someone is, memory names a location, but not the one the story says.</p>
-<div class="ex"><span class="p">story</span>     john travelled to the hallway · mary journeyed to the bathroom
-<span class="p">question</span>  where is john ?
-<span class="p">memory</span>    kitchen       <span class="p">story</span> bathroom      <span class="p">gold</span> hallway      <span class="ok">right type</span>, <span class="err">wrong answer</span></div>
-    <p class="reads">The gap's window sees "john ?" and fills a word that stands there in training: some location. Nothing ties it to this story. Restricting to the story's words picks one of its two locations, here the wrong one.</p>
-  </div>
-  <div class="case">
-    <p class="ch">Case 2 · claim: exact answers need the story</p>
-    <p class="claim">When the story names one location for the person, restricting to its words gives the right answer.</p>
-<div class="ex"><span class="p">story</span>     … john went to the hallway · sandra journeyed to the kitchen
-<span class="p">question</span>  where is sandra ?
-<span class="p">memory</span>    garden        <span class="p">story</span> <span class="ok">kitchen</span>       <span class="p">gold</span> kitchen</div>
-    <p class="reads">Story restriction raises exact accuracy only from 0.21 to 0.25. It filters words; it does not find the sentence about sandra. Answering by analogy, aligning the question's chunks with that sentence, is the next step.</p>
-  </div>
-  <div class="case">
-    <p class="ch">Case 3 · claim: long questions fail</p>
-    <p class="claim">A question with a second clause is answered as a yes/no question.</p>
-<div class="ex"><span class="p">story</span>     38 sentences of objects picked up, moved and dropped
-<span class="p">question</span>  where was the apple before the bathroom ?
-<span class="p">memory</span>    <span class="err">no</span>            <span class="p">story</span> <span class="err">no</span>            <span class="p">gold</span> office
-<span class="p">parse</span>     [where [[was [[[the [apple before]] [the bathroom]] ?]] office]]</div>
-    <p class="reads">The two-word window sees "the bathroom ?", which is also how task-6 yes/no questions end ("is john in the kitchen ? no"). The parse joins "apple before", so the question's own chunks do not isolate "where … the apple".</p>
-  </div>
-  <div class="case">
-    <p class="ch">Case 4 · claim: an exact answer can be right by frequency</p>
-    <p class="claim">A correct answer to a deduction question does not show deduction.</p>
-<div class="ex"><span class="p">story</span>     wolves are afraid of mice · … · emily is a cat · gertrude is a wolf
-<span class="p">what is gertrude afraid of ?</span>   memory <span class="ok">mouse</span>   gold mouse
-<span class="p">what is emily afraid of ?</span>      memory <span class="err">mouse</span>   gold wolf</div>
-    <p class="reads">Memory answers "mouse" to both. Task 15 has four answers (cat 29%, mouse 27%, sheep 24%, wolf 21% of training answers), so one in four guesses of the right type is exact by chance.</p>
-  </div>
-</section>
-
-<!-- ============================================================ S5 CHARACTERS -->
-<section class="page" data-page="s-chars" hidden>
-  <p class="eyebrow">Results</p>
-  <h1>Chinese characters</h1>
-  <p class="lede">The same code runs on character decompositions, with components in spatial relations. A character has only a few parts, so it is a hard test for any change that drops low-weight analyses.</p>
-  <div class="col">
-    <ul>
-      <li><em>Well formed</em>: the sample reads back into a structure.</li>
-      <li><em>Real</em>: the sample is an existing character.</li>
-      <li><em>Novel</em>: the sample was not in training.</li>
-    </ul>
-    <p>Omission is measured on held-out characters; right-branching scores 0.678. Under the current recipe expansion is close to copying here too (0–5% novel, up from 0–1% at 250). Figure 7 and the guard table below come from earlier configurations.</p>
-  </div>
-@@L 636-636@@
-  <h2>Characters as a guard for memory repair</h2>
-  <p>Real and real-and-unseen characters at 500 experiences, seeds 13; 17:</p>
-  <div class="tbl-wrap"><table class="tbl">
-    <thead><tr><th>Run</th><th class="num">Seed 13</th><th class="num">Seed 17</th></tr></thead>
-    <tbody>
-      <tr><th>original</th><td class="num">0.647 / 0.046</td><td class="num">0.741 / 0.072</td></tr>
-      <tr><th>verify 700</th><td class="num">0.711 / 0.043</td><td class="num">0.687 / 0.090</td></tr>
-      <tr><th>repair on use, path 700</th><td class="num">0.739 / 0.036</td><td class="num">0.647 / 0.074</td></tr>
-      <tr><th>repair on use, path 3000</th><td class="num">0.681 / 0.044</td><td class="num">0.612 / 0.082</td></tr>
-      <tr><th>min_weight 0.03 (real only)</th><td class="num">0.614</td><td class="num">0.586</td></tr>
-    </tbody>
-  </table></div>
-  <p>Every repair variant is up on seed 13 and down on seed 17. Real-and-unseen is too rare (4–9%) to separate them. Dropping low-weight records fails here because a character's alternative analyses carry information.</p>
-  <figure>
-    <div class="fig"><img class="plot" src="generated_characters.png" alt="Rows of characters generated by TRELLIS v2 with their component sequences, under three encodings: IDS operators as relations, IDS operators as tokens, and sequences alone." loading="lazy"></div>
-  </figure>
-  <figcaption><b>Figure 7.</b> Characters TRELLIS v2 invents: new combinations of learned components in learned positions, under three encodings (an earlier export; rates as printed above each row).</figcaption>
-
-  <h2>TRELLIS as a coder of characters</h2>
-  <div class="col">
-    <p>Each coder learns the first n characters (IDS decompositions as token sequences) and codes 300 held-out characters; bits per character, the model not charged. TRELLIS codes a character by the probability its grammar grammar (S7) gives the sequence, the same machinery it generates from. Seeds 13 / 17.</p>
-    <table>
-      <tr><th>Coder</th><th>500 learned</th><th>1,000</th><th>2,000</th></tr>
-      <tr><td>Unigram</td><td class="num">45.6 / 46.6</td><td class="num">45.1 / 45.8</td><td class="num">44.7 / 45.5</td></tr>
-      <tr><td>Trigram (Witten-Bell)</td><td class="num best">31.9 / 32.7</td><td class="num best">29.1 / 28.8</td><td class="num best">26.4 / 26.0</td></tr>
-      <tr><td>BPE</td><td class="num">38.6 / 41.0</td><td class="num">33.7 / 33.5</td><td class="num">29.6 / 29.1</td></tr>
-      <tr><td>TRELLIS, before the fixes (best grammar)</td><td class="num">38.9 / 40.3</td><td class="num">37.3 / 38.3</td><td class="num">35.4 / 36.7</td></tr>
-      <tr><td>TRELLIS, fixes, grammar cut at depth 3</td><td class="num">38.7 / 39.4</td><td class="num">37.1 / 37.8</td><td class="num">35.4 / 36.0</td></tr>
-      <tr><td>TRELLIS, fixes, grammar cut at 12 bits</td><td class="num">35.7 / 36.3</td><td class="num">32.5 / 32.4</td><td class="num">28.4 / 28.7</td></tr>
-      <tr><td>TRELLIS, fixes, grammar cut at 16 bits</td><td class="num">33.5 / 33.8</td><td class="num">30.5 / 30.1</td><td class="num">27.9 / 27.8</td></tr>
-      <tr><td>TRELLIS, fixes, whole tree</td><td class="num">33.6 / 33.9</td><td class="num">30.5 / 30.2</td><td class="num">27.8 / 27.5</td></tr>
-      <tr><td>TRELLIS, beam 4 learning, cut at 14 bits</td><td class="num">—</td><td class="num">—</td><td class="num">30.2 / 29.3</td></tr>
-    </table>
-    <p>The representation fixes (<a href="#a-fixes">Appendix A11</a>) make the trees deep and narrow, so a grammar cut at a fixed depth holds only 6–20 concepts. Cutting by information (every concept within a number of bits of the root) fixes that, and the finer the cut the better: 6 bits 37.0, 9 bits 32.8, 12 bits 28.4, 16 bits 27.9, the whole tree 27.8 at 2,000 (seed 13). With the whole tree TRELLIS beats BPE at every size by 1.6–5 bits and ends 1.4 / 1.5 bits behind the trigram. On characters the cut needs no setting: the whole tree is best. Learning with a beam of 4 (round 80) costs 1.5–2.5 bits here, at a quarter of the learning time.</p>
-  </div>
-
-  <h2>Case studies</h2>
-  <div class="case">
-    <p class="ch">Case 1 · claim: samples are well formed, and some are real characters</p>
-    <p class="claim">Generated decompositions read back into structures, and some spell existing characters.</p>
-<div class="ex"><span class="p">sample</span>             <span class="p">existing character</span>
-⿰ 月 彡            <span class="ok">肜</span>   (left 月, right 彡)
-⿱ 宀 疌            <span class="ok">寁</span>   (top 宀, bottom 疌)
-⿺ 瓜 ⿹ 勹 丶       <span class="ok">瓝</span>   (瓜 wrapping 勺 = ⿹勹丶)
-⿰ 言 ⿴ 囗 ⿰ 丿 乚   well formed; not matched to a character</div>
-    <p class="reads">Seed 13, 500 experiences, original configuration (real 0.647). Matches are against the IDS file. The nested sample shows that a part can itself be a composite (勺 inside 瓝).</p>
-  </div>
-  <div class="case">
-    <p class="ch">Case 2 · claim: new characters combine learned components in learned positions</p>
-    <p class="claim">Novel samples put familiar components in positions those components take in real characters.</p>
-<div class="ex">⿰ 虫 ⿱ 𠂉 皿      insect radical on the left, a stacked right side
-⿸ 广 ⿱ 田 口      广 enclosing from the top left, as in 店 or 庫
-⿰ 扌 ⿱ 八 丨      hand radical on the left
-⿱ 八 豆          <span class="ok">real and unseen: 𧯚</span></div>
-    <p class="reads">TRELLIS v2 export (Figure 7 source, 2,000 training characters, seed 13), from its labelled novel lists. One "novel" sample is a real character that was not in training. Such cases are rare (real and unseen 4–9% in v3), which is why they cannot separate the repair variants.</p>
-  </div>
-  <div class="case">
-    <p class="ch">Case 3 · claim: parsing misses part of held-out structure</p>
-    <p class="claim">Parsing a held-out character recovers the top split but not always the inner one.</p>
-<div class="ex"><span class="p">楮  gold</span>   [[⿰ 木] [[⿸ 耂] 日]]
-<span class="p">    parse</span>  [[⿰ 木] [⿸ [耂 日]]]      <span class="err">[⿸ 耂] missed</span>
-<span class="p">gold</span>       [[⿵ ⺆] [[⿱ [[⿱ 十] 一]] 口]]
-<span class="p">parse</span>      [[⿵ ⺆] [⿱ [⿱ [十 [一 口]]]]]   <span class="err">right-branches inside</span></div>
-    <p class="reads">Seed 13, 500 experiences. Omission is the share of gold brackets the parse lacks: 0.585 on held-out characters, against 0.678 for right-branching.</p>
   </div>
 </section>
 
@@ -2235,7 +2417,7 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
   <p class="eyebrow">Results</p>
   <h1>What memory can generate as experience accumulates</h1>
   <p class="lede">Both generators after 10 to 320 experiences, current recipe, seeds 13 and 17. Expansion stays fully grammatical but now mostly copies (0.00–0.12 grammatical and new at 320). Earlier configurations reached 0.75–0.88 new here, and round 99 is testing which change caused the drop. Inside-outside produces more new output but only about half of it is grammatical on <code>med</code>; it stays fully grammatical on <code>small</code>. Expansion with a broader draw does better than either: three levels up with the kind check gives 100% grammatical and 0.40 new on <code>med</code> (seed 13, <a href="#rules">concept-choice rules</a>), so the loss of novelty lies in the leaf default rather than in the trees.</p>
-  <p class="small">Hover a panel for values. Characters are on <a href="#s-chars">characters</a>.</p>
+  <p class="small">Hover a panel for values.</p>
 @@L 625-627@@
 </section>
 
@@ -2282,17 +2464,17 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
 <script>
 (function () {
 const ORDER = ["intro", "hierarchies", "representations", "parse", "io-generation", "learning", "d-domains", "d-evals", "d-competitors",
-  "results", "curves", "r-stories", "s-babi", "s-chars", "s-chess", "conclusion", "appendices", "a-unified", "s-sem", "generate", "types", "rules",
-  "s-prompt", "s-consist", "s-probe", "sustain", "status", "a-fixes", "representation", "failures", "f-known", "iterations", "a-window", "a-copying", "a-rationale", "a-refs"];
+  "results", "curves", "r-stories", "s-chess", "conclusion", "appendices", "a-unified", "s-sem", "generate", "types", "rules",
+  "s-prompt", "s-consist", "s-probe", "sustain", "status", "a-fixes", "representation", "failures", "f-known", "iterations", "a-window", "a-copying", "a-rationale", "a-refs", "a-other", "s-babi", "s-chars"];
 const TITLES = { intro: "Introduction", hierarchies: "Hierarchies", representations: "Representations", parse: "Parsing", "io-generation": "Generation", learning: "Learning",
   "d-domains": "Design: domains", "d-evals": "Design: evaluations", "d-competitors": "Design: competitors", results: "Results", curves: "Results: toy grammars",
-  "r-stories": "Results: TinyStories", "s-babi": "Results: bAbI", "s-chars": "Results: Chinese characters", "s-chess": "Results: chess", conclusion: "Conclusion and next steps",
+  "r-stories": "Results: TinyStories", "s-babi": "A20a bAbI", "s-chars": "A20b Chinese characters", "a-other": "A20 Other domains (bAbI, Chinese characters)", "s-chess": "Results: chess", conclusion: "Conclusion and next steps",
   appendices: "Appendices", "a-unified": "A1 Ablation: one hierarchy", "s-sem": "A2 Story rounds", generate: "A3 Expansion generation", types: "A4 Type names", rules: "A5 Concept-choice rules",
   "s-prompt": "A6 Prompted generation", "s-consist": "A7 Parse consistency", "s-probe": "A8 Chunk representations", sustain: "A9 Sustaining memory", status: "A10 Memory scoreboard",
   "a-fixes": "A11 Representation fixes", representation: "A12 Earlier representation", failures: "A13 Failure checks", "f-known": "A14 Known failures", iterations: "A15 Kept and set aside", "a-window": "A16 Ablation: window size", "a-rationale": "A18 Why the architecture is this way", "a-refs": "A19 Against simple references", "a-copying": "A17 Ablation: toy-grammar copying" };
 const ALIAS = { overview: "intro", instances: "representations", principles: "intro", next: "conclusion", "s-prompts": "s-prompt" };
-const GROUPS = { design: ["d-domains", "d-evals", "d-competitors"], results: ["results", "curves", "r-stories", "s-babi", "s-chars", "s-chess"],
-  appendices: ["appendices", "a-unified", "s-sem", "generate", "types", "rules", "s-prompt", "s-consist", "s-probe", "sustain", "status", "a-fixes", "representation", "failures", "f-known", "iterations", "a-window", "a-copying", "a-rationale", "a-refs"] };
+const GROUPS = { design: ["d-domains", "d-evals", "d-competitors"], results: ["results", "curves", "r-stories", "s-chess"],
+  appendices: ["appendices", "a-unified", "s-sem", "generate", "types", "rules", "s-prompt", "s-consist", "s-probe", "sustain", "status", "a-fixes", "representation", "failures", "f-known", "iterations", "a-window", "a-copying", "a-rationale", "a-refs", "a-other", "s-babi", "s-chars"] };
 const PICKER = ["parse", "generate", "types"];
 const LIVE = ["parse", "generate", "types", "rules", "curves", "failures", "s-chars"];
 const q = s => document.querySelector(s);
