@@ -238,3 +238,348 @@ classes of >= 3 words) and misses on seed 17 (.779). Purity rises with fineness 
 the closest level) the window_names probe arms were not run. What the table does show: the level whose classes are about half-pure
 (4-5 bits, 14-33 classes) has large classes (22-53 words) of mixed function words, names and nouns; the Cobweb partition of
 neighbour distributions is a clean syntax/semantics cut only near the leaves.
+
+# Addendum 3: track 1 (knob B, temperature control) and track 2 probe (word-tree window names), judged by r214_judge2
+
+Judge: `r214_judge2.py score` (ensemble Qwen3-8B + phi-4, thresholds `r214_judge2_thresholds.json`: syntax pass at the low thresholds, see `r214_judge2.md`);
+regimes R-sem = syn_pass and sem_pass, R-syn = syn_pass and not sem_pass, R-non = not syn_pass; purity = share of the arm's distinct new
+sentences (not a stored training sentence). Novelty as r204_fair: A = 1600 attempted draws, tri|d, fair_X = distinct new in regime X with an
+unstored trigram per attempted draw, repeats (cut = proper spans of stored sentences). Seed 13, n=1000, edge exact, gate off, tau 1 unless
+noted; the token learner is the paper recipe (r212/r204 edge, window 7). Drivers `r214_p1b.sh` (track 1), `r214_p1c.sh` (probe),
+`r214_phase01.py` (collect / report / report211); dumps in `r214p01/{b1,b2,t_<b>}`, judge outputs in `r214p01/judge{1,2,211}`.
+The wrapper's arm key `wreach` is the read reach W' (query keeps l1..lW'); `wtree` b = window names from the word tree at b bits, "leaf" = each
+word its own class (identical to the token learner: the wtree-leaf rows equal the token rows to every digit, a check of the wiring).
+
+## Track 1: knob B (reach) and temperature, token learner
+
+| group | arm | seed | distinct new | dist/draw | R-sem | R-syn | R-non | (non with sem_pass) | tri\|d | tri\|d in sem / syn / non | fair sem / syn / non | repeats (cut) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| reach | W'=1 t=1 | 13 | 1544 | 0.965 | 0.157 | 0.159 | 0.684 | 0.003 | 0.955 | 0.786 / 0.951 / 0.994 | 0.119 / 0.146 / 0.656 | 56 (10) |
+| reach | W'=2 t=1 | 13 | 1463 | 0.914 | 0.334 | 0.174 | 0.491 | 0.005 | 0.645 | 0.260 / 0.655 / 0.904 | 0.079 / 0.104 / 0.406 | 137 (47) |
+| reach | W'=3 t=1 | 13 | 1432 | 0.895 | 0.290 | 0.155 | 0.555 | 0.005 | 0.779 | 0.376 / 0.793 / 0.986 | 0.098 / 0.110 / 0.490 | 168 (16) |
+| reach | W'=5 t=1 | 13 | 1474 | 0.921 | 0.196 | 0.145 | 0.659 | 0.008 | 0.925 | 0.671 / 0.953 / 0.995 | 0.121 / 0.127 / 0.604 | 126 (1) |
+| temp | W'=7 t=1 | 13 | 1468 | 0.917 | 0.193 | 0.140 | 0.668 | 0.009 | 0.934 | 0.696 / 0.966 / 0.996 | 0.123 / 0.124 / 0.610 | 132 (1) |
+| temp | W'=7 t=2 | 13 | 1583 | 0.989 | 0.056 | 0.097 | 0.846 | 0.002 | 0.990 | 0.854 / 0.987 / 0.999 | 0.048 / 0.095 / 0.837 | 17 (0) |
+| temp | W'=7 t=4 | 13 | 1600 | 1.000 | 0.016 | 0.041 | 0.943 | 0.001 | 0.999 | 0.920 / 1.000 / 1.000 | 0.014 / 0.041 / 0.943 | 0 (0) |
+| temp | W'=7 t=8 | 13 | 1600 | 1.000 | 0.007 | 0.030 | 0.963 | 0.001 | 1.000 | 1.000 / 1.000 / 1.000 | 0.007 / 0.030 / 0.963 | 0 (0) |
+
+
+### Samples (5 per arm)
+
+**reach / W'=1 t=1**
+- they did it is not careful  (syn_p 0.00, sem_p 0.00, non)
+- will be careful  (syn_p 0.00, sem_p 0.03, non)
+- sara and ben tom and the animals  (syn_p 0.00, sem_p 0.00, non)
+- sky opened new friends  (syn_p 0.01, sem_p 0.01, non)
+- max loved to were very sad  (syn_p 0.00, sem_p 0.00, non)
+
+**reach / W'=2 t=1**
+- tim's was happy and excited  (syn_p 0.00, sem_p 0.53, non)
+- they loved to play with lily  (syn_p 0.94, sem_p 0.93, sem)
+- the car to it  (syn_p 0.00, sem_p 0.00, non)
+- it was so happy  (syn_p 1.00, sem_p 1.00, sem)
+- sue not too  (syn_p 0.00, sem_p 0.00, non)
+
+**reach / W'=3 t=1**
+- but house was not too  (syn_p 0.00, sem_p 0.00, non)
+- lily liked to play in the animals  (syn_p 0.59, sem_p 0.00, syn)
+- it was big happy shiny  (syn_p 0.00, sem_p 0.04, non)
+- lily felt scared  (syn_p 1.00, sem_p 1.00, sem)
+- he could not like it  (syn_p 0.96, sem_p 0.94, sem)
+
+**reach / W'=5 t=1**
+- we have be friends  (syn_p 0.00, sem_p 0.01, non)
+- his mom said no lily  (syn_p 0.06, sem_p 0.01, syn)
+- lily was so excited  (syn_p 0.99, sem_p 0.99, sem)
+- tom is bad happy  (syn_p 0.00, sem_p 0.00, non)
+- they played together all the long  (syn_p 0.00, sem_p 0.00, non)
+
+**temp / W'=7 t=1**
+- they were to play too  (syn_p 0.01, sem_p 0.36, syn)
+- tom was his new home very much  (syn_p 0.00, sem_p 0.00, non)
+- can want play with you  (syn_p 0.00, sem_p 0.00, non)
+- let's said find some food  (syn_p 0.00, sem_p 0.00, non)
+- tim dog was playing with a ball  (syn_p 0.47, sem_p 0.98, sem)
+
+**temp / W'=7 t=2**
+- then a boy came in the park  (syn_p 0.29, sem_p 0.92, syn)
+- tom had no the day long  (syn_p 0.00, sem_p 0.00, non)
+- bear do the walked to go good fun  (syn_p 0.00, sem_p 0.00, non)
+- yes we go  (syn_p 0.00, sem_p 0.04, non)
+- give have be away  (syn_p 0.00, sem_p 0.00, non)
+
+**temp / W'=7 t=4**
+- tim sam help were were at cat  (syn_p 0.00, sem_p 0.00, non)
+- lily what the good  (syn_p 0.00, sem_p 0.00, non)
+- they feel can for laughed  (syn_p 0.00, sem_p 0.00, non)
+- tim could that what dog  (syn_p 0.00, sem_p 0.00, non)
+- tom like liked loved them you  (syn_p 0.00, sem_p 0.00, non)
+
+**temp / W'=7 t=8**
+- look is to toy  (syn_p 0.00, sem_p 0.00, non)
+- he became his is take all the long  (syn_p 0.00, sem_p 0.00, non)
+- and mom no fast  (syn_p 0.00, sem_p 0.00, non)
+- no be together  (syn_p 0.00, sem_p 0.00, non)
+- said car anna the much  (syn_p 0.00, sem_p 0.00, non)
+
+## Track 2 probe: window_names "all" from the word tree (wtree b), read reach W' = 7, 3, 1
+
+| group | arm | seed | distinct new | dist/draw | R-sem | R-syn | R-non | (non with sem_pass) | tri\|d | tri\|d in sem / syn / non | fair sem / syn / non | repeats (cut) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| wtree-0 | W'=7 t=1 | 13 | 1595 | 0.997 | 0.010 | 0.026 | 0.964 | 0.001 | 0.999 | 0.875 / 1.000 / 1.000 | 0.009 / 0.026 / 0.961 | 5 (0) |
+| wtree-0 | W'=3 t=1 | 13 | 1598 | 0.999 | 0.008 | 0.035 | 0.957 | 0.002 | 0.999 | 0.917 / 1.000 / 1.000 | 0.007 / 0.035 / 0.956 | 2 (0) |
+| wtree-0 | W'=1 t=1 | 13 | 1599 | 0.999 | 0.005 | 0.018 | 0.977 | 0.001 | 1.000 | 1.000 / 1.000 / 1.000 | 0.005 / 0.018 / 0.977 | 1 (0) |
+| wtree-4 | W'=7 t=1 | 13 | 1548 | 0.968 | 0.054 | 0.097 | 0.849 | 0.010 | 0.984 | 0.735 / 0.993 / 0.998 | 0.038 / 0.093 / 0.821 | 52 (0) |
+| wtree-4 | W'=3 t=1 | 13 | 1563 | 0.977 | 0.052 | 0.086 | 0.861 | 0.010 | 0.988 | 0.793 / 0.993 / 0.999 | 0.041 / 0.084 / 0.841 | 37 (1) |
+| wtree-4 | W'=1 t=1 | 13 | 1580 | 0.988 | 0.027 | 0.056 | 0.918 | 0.002 | 0.996 | 0.857 / 0.989 / 1.000 | 0.022 / 0.054 / 0.906 | 20 (0) |
+| wtree-5 | W'=7 t=1 | 13 | 1525 | 0.953 | 0.110 | 0.117 | 0.773 | 0.009 | 0.970 | 0.744 / 0.989 / 1.000 | 0.078 / 0.110 / 0.737 | 75 (1) |
+| wtree-5 | W'=3 t=1 | 13 | 1532 | 0.958 | 0.091 | 0.108 | 0.801 | 0.010 | 0.980 | 0.807 / 0.982 / 0.999 | 0.071 / 0.101 / 0.766 | 68 (3) |
+| wtree-5 | W'=1 t=1 | 13 | 1564 | 0.978 | 0.038 | 0.058 | 0.904 | 0.004 | 0.992 | 0.800 / 1.000 / 1.000 | 0.030 / 0.056 / 0.884 | 36 (1) |
+| wtree-6 | W'=7 t=1 | 13 | 1462 | 0.914 | 0.132 | 0.134 | 0.734 | 0.007 | 0.969 | 0.782 / 0.980 / 1.000 | 0.094 / 0.120 / 0.671 | 138 (2) |
+| wtree-6 | W'=3 t=1 | 13 | 1491 | 0.932 | 0.137 | 0.123 | 0.740 | 0.005 | 0.954 | 0.716 / 0.951 / 0.999 | 0.091 / 0.109 / 0.689 | 109 (4) |
+| wtree-6 | W'=1 t=1 | 13 | 1551 | 0.969 | 0.055 | 0.086 | 0.859 | 0.003 | 0.992 | 0.884 / 1.000 / 0.998 | 0.048 / 0.083 / 0.831 | 49 (1) |
+| wtree-7 | W'=7 t=1 | 13 | 1386 | 0.866 | 0.229 | 0.134 | 0.636 | 0.004 | 0.932 | 0.742 / 0.952 / 0.997 | 0.147 / 0.111 / 0.549 | 214 (7) |
+| wtree-7 | W'=3 t=1 | 13 | 1425 | 0.891 | 0.255 | 0.150 | 0.594 | 0.004 | 0.899 | 0.695 / 0.879 / 0.992 | 0.158 / 0.117 / 0.525 | 175 (12) |
+| wtree-7 | W'=1 t=1 | 13 | 1523 | 0.952 | 0.096 | 0.120 | 0.784 | 0.007 | 0.974 | 0.774 / 0.978 / 0.997 | 0.071 / 0.112 / 0.744 | 77 (5) |
+| wtree-leaf | W'=7 t=1 | 13 | 1468 | 0.917 | 0.193 | 0.140 | 0.668 | 0.009 | 0.934 | 0.696 / 0.966 / 0.996 | 0.123 / 0.124 / 0.610 | 132 (1) |
+| wtree-leaf | W'=3 t=1 | 13 | 1432 | 0.895 | 0.290 | 0.155 | 0.555 | 0.005 | 0.779 | 0.376 / 0.793 / 0.986 | 0.098 / 0.110 / 0.490 | 168 (16) |
+| wtree-leaf | W'=1 t=1 | 13 | 1544 | 0.965 | 0.157 | 0.159 | 0.684 | 0.003 | 0.955 | 0.786 / 0.951 / 0.994 | 0.119 / 0.146 / 0.656 | 56 (10) |
+
+
+### Samples (5 per arm)
+
+**wtree-0 / W'=7 t=1**
+- then have want your ball  (syn_p 0.00, sem_p 0.00, non)
+- tom had not had you  (syn_p 0.16, sem_p 0.00, syn)
+- one was sad  (syn_p 0.83, sem_p 0.96, sem)
+- she will the safe  (syn_p 0.00, sem_p 0.00, non)
+- lily was to were anymore  (syn_p 0.00, sem_p 0.00, non)
+
+**wtree-0 / W'=3 t=1**
+- they they to their fast  (syn_p 0.00, sem_p 0.00, non)
+- they and away were and sun  (syn_p 0.00, sem_p 0.00, non)
+- you go with to what dog  (syn_p 0.00, sem_p 0.00, non)
+- sue saw again  (syn_p 0.00, sem_p 0.00, non)
+- is became very much play  (syn_p 0.00, sem_p 0.00, non)
+
+**wtree-0 / W'=1 t=1**
+- she want said sun  (syn_p 0.00, sem_p 0.00, non)
+- but said were home  (syn_p 0.00, sem_p 0.00, non)
+- let's played friend  (syn_p 0.00, sem_p 0.00, non)
+- is the new mom ball  (syn_p 0.00, sem_p 0.00, non)
+- yes play the are said sam day  (syn_p 0.00, sem_p 0.00, non)
+
+**wtree-4 / W'=7 t=1**
+- lily and max went scared  (syn_p 0.00, sem_p 0.01, non)
+- he and the boy  (syn_p 0.00, sem_p 0.00, non)
+- tim saw tom and a tree  (syn_p 0.99, sem_p 0.99, sem)
+- his mom smiled at the box  (syn_p 1.00, sem_p 1.00, sem)
+- lily saw not mom idea  (syn_p 0.00, sem_p 0.00, non)
+
+**wtree-4 / W'=3 t=1**
+- this bird play the home  (syn_p 0.00, sem_p 0.00, non)
+- they had an of other  (syn_p 0.00, sem_p 0.00, non)
+- they played had surprised  (syn_p 0.00, sem_p 0.00, non)
+- tim did a back bird  (syn_p 0.01, sem_p 0.00, syn)
+- but made sam lot of fun  (syn_p 0.00, sem_p 0.00, non)
+
+**wtree-4 / W'=1 t=1**
+- yes i mommy all friends  (syn_p 0.00, sem_p 0.00, non)
+- it were came happened  (syn_p 0.00, sem_p 0.00, non)
+- they wanted a go happy together  (syn_p 0.00, sem_p 0.00, non)
+- they liked idea  (syn_p 0.00, sem_p 0.00, non)
+- tim were so and sky said sad  (syn_p 0.00, sem_p 0.00, non)
+
+**wtree-5 / W'=7 t=1**
+- can cat was yes am sorry  (syn_p 0.00, sem_p 0.00, non)
+- he was surprised  (syn_p 1.00, sem_p 0.93, sem)
+- tim was with the new toys all day  (syn_p 1.00, sem_p 1.00, sem)
+- one go was see  (syn_p 0.00, sem_p 0.00, non)
+- tim all good friends  (syn_p 0.00, sem_p 0.00, non)
+
+**wtree-5 / W'=3 t=1**
+- tim wanted outside and laughed  (syn_p 0.19, sem_p 1.00, sem)
+- tom saw it bear  (syn_p 0.00, sem_p 0.00, non)
+- she had so that play him  (syn_p 0.00, sem_p 0.00, non)
+- is mom happy too  (syn_p 0.08, sem_p 0.20, syn)
+- but had the toys to much  (syn_p 0.00, sem_p 0.00, non)
+
+**wtree-5 / W'=1 t=1**
+- sue was sam big friends  (syn_p 0.00, sem_p 0.00, non)
+- the was so pretty  (syn_p 0.00, sem_p 0.01, non)
+- the girl fast  (syn_p 0.00, sem_p 0.00, non)
+- as day all a big outside  (syn_p 0.00, sem_p 0.00, non)
+- they was we i big box  (syn_p 0.00, sem_p 0.00, non)
+
+**wtree-6 / W'=7 t=1**
+- do don't go with there  (syn_p 0.00, sem_p 0.00, non)
+- they all happy it proud  (syn_p 0.00, sem_p 0.00, non)
+- it girl was not little girl amy  (syn_p 0.00, sem_p 0.00, non)
+- sue and very happy  (syn_p 0.00, sem_p 0.00, non)
+- tim wanted to have it  (syn_p 1.00, sem_p 0.99, sem)
+
+**wtree-6 / W'=3 t=1**
+- the have lots of fun  (syn_p 0.00, sem_p 0.00, non)
+- at the end house  (syn_p 0.00, sem_p 0.00, non)
+- at the park they saw a big friend  (syn_p 0.99, sem_p 0.45, syn)
+- he liked to play with it ball together  (syn_p 0.00, sem_p 0.01, non)
+- they want their and and yes lily  (syn_p 0.00, sem_p 0.00, non)
+
+**wtree-6 / W'=1 t=1**
+- they were and fast with the have fun  (syn_p 0.00, sem_p 0.00, non)
+- they sue said  (syn_p 0.00, sem_p 0.00, non)
+- tim put get good  (syn_p 0.00, sem_p 0.00, non)
+- thank it had to girl  (syn_p 0.00, sem_p 0.00, non)
+- no are best cake away  (syn_p 0.00, sem_p 0.00, non)
+
+**wtree-7 / W'=7 t=1**
+- it was the bird became good friends  (syn_p 0.00, sem_p 0.00, non)
+- tim is not happy  (syn_p 1.00, sem_p 1.00, sem)
+- max was happy  (syn_p 1.00, sem_p 1.00, sem)
+- but saw her mom for help  (syn_p 0.00, sem_p 0.00, non)
+- his mom said yes too  (syn_p 0.94, sem_p 0.99, sem)
+
+**wtree-7 / W'=3 t=1**
+- she was they loved sorry  (syn_p 0.00, sem_p 0.00, non)
+- the dog felt to all day  (syn_p 0.00, sem_p 0.00, non)
+- they we will play home it  (syn_p 0.00, sem_p 0.00, non)
+- but are good friends  (syn_p 0.00, sem_p 0.00, non)
+- the they went happy  (syn_p 0.00, sem_p 0.01, non)
+
+**wtree-7 / W'=1 t=1**
+- tom had fun  (syn_p 1.00, sem_p 1.00, sem)
+- i don't be sorry  (syn_p 0.00, sem_p 0.02, non)
+- they saw a pretty  (syn_p 0.00, sem_p 0.00, non)
+- but played very happy  (syn_p 0.00, sem_p 0.00, non)
+- tom was yes lily  (syn_p 0.00, sem_p 0.00, non)
+
+**wtree-leaf / W'=7 t=1**
+- he was the happy to be home  (syn_p 0.00, sem_p 0.35, non)
+- tim we have to go home soon  (syn_p 0.00, sem_p 0.08, non)
+- she said what what happened  (syn_p 0.02, sem_p 0.04, syn)
+- they fish all day  (syn_p 0.01, sem_p 0.48, syn)
+- they saw a it box  (syn_p 0.00, sem_p 0.00, non)
+
+**wtree-leaf / W'=3 t=1**
+- tim said thank what happened  (syn_p 0.00, sem_p 0.00, non)
+- they were not share  (syn_p 0.00, sem_p 0.00, non)
+- she said who you lily me  (syn_p 0.00, sem_p 0.00, non)
+- a big laughed came down fun  (syn_p 0.00, sem_p 0.00, non)
+- tom and tim were so happy and excited  (syn_p 1.00, sem_p 1.00, sem)
+
+**wtree-leaf / W'=1 t=1**
+- it there was very happy  (syn_p 0.00, sem_p 0.04, non)
+- he the dog became good bird  (syn_p 0.00, sem_p 0.00, non)
+- he asked her better soon  (syn_p 0.00, sem_p 0.01, non)
+- what it too  (syn_p 0.00, sem_p 0.00, non)
+- the mommy said yes it is  (syn_p 0.29, sem_p 0.96, sem)
+
+## r211 dumps re-judged with the ensemble (learned-W curve and baselines)
+At most 100 distinct new sentences per (family, temp, seed) were judged (a fixed random sample; `R214_CAP211`); the columns dist/draw and
+distinct new come from the full sets; tri|d, R-sem, R-syn and R-non over the judged sample, mean over the seeds present. TRELLIS wN = plain
+TRELLIS at learned window N, TRELLIS edge wN = edge-exact; ngram k = maximum-likelihood k-gram (tri|d 0 by construction).
+
+| family | temp | seeds | distinct new/seed | dist/draw | judged/seed | tri\|d | R-sem | R-syn | R-non |
+|---|---|---|---|---|---|---|---|---|---|
+| GPT | 0.15 | 4 | 38 | 0.025 | 38 | 0.654 | 0.780 | 0.133 | 0.087 |
+| GPT | 0.2 | 4 | 86 | 0.056 | 86 | 0.630 | 0.771 | 0.143 | 0.086 |
+| GPT | 0.3 | 4 | 208 | 0.137 | 100 | 0.643 | 0.730 | 0.155 | 0.115 |
+| GPT | 0.4 | 4 | 422 | 0.277 | 100 | 0.688 | 0.660 | 0.190 | 0.150 |
+| GPT | 0.5 | 4 | 667 | 0.439 | 100 | 0.703 | 0.625 | 0.200 | 0.175 |
+| GPT | 0.6 | 4 | 908 | 0.598 | 100 | 0.735 | 0.573 | 0.205 | 0.223 |
+| GPT | 0.7 | 4 | 1116 | 0.735 | 100 | 0.810 | 0.493 | 0.217 | 0.290 |
+| GPT | 0.8 | 4 | 1283 | 0.845 | 100 | 0.850 | 0.440 | 0.215 | 0.345 |
+| GPT | 0.9 | 4 | 1384 | 0.911 | 100 | 0.890 | 0.357 | 0.242 | 0.400 |
+| GPT | 1.0 | 4 | 1449 | 0.953 | 100 | 0.917 | 0.282 | 0.203 | 0.515 |
+| GPT | 1.2 | 4 | 1502 | 0.988 | 100 | 0.940 | 0.155 | 0.155 | 0.690 |
+| LSTM | 0.15 | 4 | 33 | 0.022 | 33 | 0.331 | 0.837 | 0.108 | 0.055 |
+| LSTM | 0.2 | 4 | 71 | 0.047 | 71 | 0.419 | 0.849 | 0.113 | 0.039 |
+| LSTM | 0.3 | 4 | 192 | 0.127 | 100 | 0.475 | 0.865 | 0.083 | 0.052 |
+| LSTM | 0.4 | 4 | 411 | 0.271 | 100 | 0.500 | 0.825 | 0.098 | 0.077 |
+| LSTM | 0.5 | 4 | 684 | 0.450 | 100 | 0.603 | 0.745 | 0.135 | 0.120 |
+| LSTM | 0.6 | 4 | 940 | 0.619 | 100 | 0.652 | 0.730 | 0.130 | 0.140 |
+| LSTM | 0.7 | 4 | 1144 | 0.752 | 100 | 0.730 | 0.622 | 0.168 | 0.210 |
+| LSTM | 0.8 | 4 | 1316 | 0.866 | 100 | 0.785 | 0.490 | 0.198 | 0.312 |
+| LSTM | 0.9 | 4 | 1413 | 0.929 | 100 | 0.855 | 0.432 | 0.208 | 0.360 |
+| LSTM | 1.0 | 4 | 1448 | 0.953 | 100 | 0.875 | 0.345 | 0.190 | 0.465 |
+| LSTM | 1.2 | 4 | 1502 | 0.988 | 100 | 0.948 | 0.195 | 0.158 | 0.647 |
+| TRELLIS edge w5 | 0.15 | 3 | 2 | 0.001 | 2 | 0.000 | 1.000 | 0.000 | 0.000 |
+| TRELLIS edge w5 | 0.2 | 4 | 4 | 0.002 | 4 | 0.250 | 0.850 | 0.000 | 0.150 |
+| TRELLIS edge w5 | 0.3 | 4 | 43 | 0.028 | 43 | 0.404 | 0.763 | 0.065 | 0.173 |
+| TRELLIS edge w5 | 0.5 | 4 | 362 | 0.239 | 100 | 0.485 | 0.708 | 0.113 | 0.180 |
+| TRELLIS edge w5 | 0.7 | 4 | 708 | 0.466 | 100 | 0.655 | 0.603 | 0.193 | 0.205 |
+| TRELLIS edge w5 | 1.0 | 4 | 992 | 0.653 | 100 | 0.680 | 0.590 | 0.185 | 0.225 |
+| TRELLIS edge w5 | 1.3 | 4 | 1131 | 0.744 | 100 | 0.777 | 0.532 | 0.208 | 0.260 |
+| TRELLIS edge w5 | 1.6 | 4 | 1194 | 0.786 | 100 | 0.797 | 0.483 | 0.205 | 0.312 |
+| TRELLIS edge w5 | 2.0 | 4 | 1244 | 0.819 | 100 | 0.850 | 0.535 | 0.188 | 0.278 |
+| TRELLIS edge w6 | 1.3 | 4 | 1118 | 0.736 | 100 | 0.732 | 0.513 | 0.210 | 0.277 |
+| TRELLIS edge w6 | 1.6 | 4 | 1180 | 0.776 | 100 | 0.775 | 0.502 | 0.230 | 0.268 |
+| TRELLIS edge w6 | 2.0 | 4 | 1236 | 0.814 | 100 | 0.815 | 0.492 | 0.208 | 0.300 |
+| TRELLIS edge w6 | 2.4 | 4 | 1268 | 0.835 | 100 | 0.865 | 0.415 | 0.205 | 0.380 |
+| TRELLIS edge w6 | 2.8 | 4 | 1294 | 0.852 | 100 | 0.858 | 0.360 | 0.235 | 0.405 |
+| TRELLIS edge w6 | 3.5 | 4 | 1328 | 0.874 | 100 | 0.902 | 0.335 | 0.247 | 0.417 |
+| TRELLIS edge w7 | 0.2 | 3 | 3 | 0.002 | 3 | 0.567 | 0.350 | 0.083 | 0.567 |
+| TRELLIS edge w7 | 0.3 | 4 | 36 | 0.024 | 36 | 0.528 | 0.721 | 0.075 | 0.204 |
+| TRELLIS edge w7 | 0.5 | 4 | 342 | 0.225 | 100 | 0.600 | 0.670 | 0.138 | 0.193 |
+| TRELLIS edge w7 | 0.7 | 4 | 719 | 0.473 | 100 | 0.677 | 0.647 | 0.145 | 0.208 |
+| TRELLIS edge w7 | 1.0 | 4 | 1007 | 0.663 | 100 | 0.748 | 0.610 | 0.180 | 0.210 |
+| TRELLIS edge w7 | 1.3 | 4 | 1125 | 0.740 | 100 | 0.738 | 0.562 | 0.200 | 0.237 |
+| TRELLIS edge w7 | 1.6 | 4 | 1184 | 0.779 | 100 | 0.792 | 0.537 | 0.193 | 0.270 |
+| TRELLIS edge w7 | 2.0 | 4 | 1238 | 0.814 | 100 | 0.883 | 0.397 | 0.228 | 0.375 |
+| TRELLIS edge w7 | 2.4 | 4 | 1272 | 0.836 | 100 | 0.840 | 0.388 | 0.245 | 0.367 |
+| TRELLIS edge w7 | 2.8 | 4 | 1299 | 0.855 | 100 | 0.873 | 0.348 | 0.225 | 0.427 |
+| TRELLIS edge w7 | 3.5 | 4 | 1340 | 0.882 | 100 | 0.905 | 0.315 | 0.240 | 0.445 |
+| TRELLIS edge w8 | 2.4 | 4 | 1261 | 0.830 | 100 | 0.853 | 0.422 | 0.182 | 0.395 |
+| TRELLIS edge w8 | 2.8 | 2 | 1312 | 0.854 | 100 | 0.865 | 0.405 | 0.175 | 0.420 |
+| TRELLIS edge w8 | 3.5 | 1 | 1384 | 0.865 | 100 | 0.970 | 0.310 | 0.260 | 0.430 |
+| TRELLIS w2 | 1.0 | 4 | 1296 | 0.853 | 100 | 0.348 | 0.583 | 0.198 | 0.220 |
+| TRELLIS w3 | 0.5 | 4 | 496 | 0.327 | 100 | 0.130 | 0.812 | 0.133 | 0.055 |
+| TRELLIS w3 | 0.7 | 4 | 817 | 0.538 | 100 | 0.230 | 0.770 | 0.138 | 0.092 |
+| TRELLIS w3 | 1.0 | 4 | 1094 | 0.720 | 100 | 0.443 | 0.647 | 0.202 | 0.150 |
+| TRELLIS w4 | 0.5 | 4 | 380 | 0.251 | 100 | 0.430 | 0.685 | 0.143 | 0.172 |
+| TRELLIS w4 | 0.7 | 4 | 720 | 0.473 | 100 | 0.480 | 0.645 | 0.172 | 0.182 |
+| TRELLIS w4 | 1.0 | 4 | 1017 | 0.669 | 100 | 0.590 | 0.625 | 0.182 | 0.193 |
+| TRELLIS w4 | 1.3 | 4 | 1152 | 0.758 | 100 | 0.670 | 0.568 | 0.203 | 0.230 |
+| TRELLIS w5 | 0.5 | 4 | 444 | 0.292 | 100 | 0.677 | 0.528 | 0.125 | 0.347 |
+| TRELLIS w5 | 0.7 | 4 | 808 | 0.532 | 100 | 0.690 | 0.523 | 0.155 | 0.323 |
+| TRELLIS w5 | 1.0 | 4 | 1059 | 0.696 | 100 | 0.718 | 0.473 | 0.153 | 0.375 |
+| TRELLIS w5 | 1.3 | 4 | 1176 | 0.774 | 100 | 0.845 | 0.463 | 0.152 | 0.385 |
+| TRELLIS w5 | 1.6 | 4 | 1232 | 0.811 | 100 | 0.833 | 0.420 | 0.177 | 0.402 |
+| TRELLIS w5 | 2.0 | 4 | 1281 | 0.843 | 100 | 0.870 | 0.378 | 0.200 | 0.422 |
+| TRELLIS w6 | 1.3 | 4 | 1156 | 0.761 | 100 | 0.830 | 0.375 | 0.143 | 0.482 |
+| TRELLIS w6 | 1.6 | 4 | 1216 | 0.800 | 100 | 0.845 | 0.333 | 0.145 | 0.522 |
+| TRELLIS w6 | 2.0 | 4 | 1258 | 0.828 | 100 | 0.865 | 0.307 | 0.200 | 0.492 |
+| TRELLIS w7 | 1.3 | 4 | 1183 | 0.779 | 100 | 0.805 | 0.417 | 0.133 | 0.450 |
+| TRELLIS w7 | 1.6 | 4 | 1220 | 0.802 | 100 | 0.860 | 0.335 | 0.177 | 0.487 |
+| TRELLIS w7 | 2.0 | 4 | 1274 | 0.838 | 100 | 0.867 | 0.295 | 0.218 | 0.487 |
+| ngram 3 | 0.7 | 4 | 992 | 0.653 | 100 | 0.000 | 0.652 | 0.200 | 0.148 |
+| ngram 3 | 1.0 | 4 | 1163 | 0.765 | 100 | 0.000 | 0.637 | 0.235 | 0.128 |
+| ngram 4 | 0.7 | 4 | 610 | 0.402 | 100 | 0.000 | 0.833 | 0.117 | 0.050 |
+| ngram 4 | 1.0 | 4 | 703 | 0.463 | 100 | 0.000 | 0.820 | 0.138 | 0.043 |
+| ngram 5 | 0.7 | 4 | 190 | 0.125 | 100 | 0.000 | 0.875 | 0.105 | 0.020 |
+| ngram 5 | 1.0 | 4 | 198 | 0.130 | 100 | 0.000 | 0.855 | 0.120 | 0.025 |
+
+## Go rule and verdict
+Go rule: each regime has a setting with purity >= .6, R-syn peaks at an interior position along the level dial, and the temperature path
+does not reproduce R-syn.
+- **R-non** reaches .6 and above everywhere on the coarse side (wtree b=0: .964; temperature 4 and 8: .94 and .96).
+- **R-sem** >= .6 occurs only in the r211 families at low-to-mid temperature (edge w7 at tau 1: .610 with tri|d .748; edge w5: .59), not in any
+  r214 arm: the best r214 arm is the token read at W'=2 (.334, tri|d among its R-sem sentences only .26) and the word tree at 7 bits (.229).
+  The r214 arms use gate off and tau 1 (the r211 arms have the pair gate, which this design switches off as a confound).
+- **R-syn** never reaches .6; the largest R-syn share in any arm, any family, any temperature is about .26 (r211 edge w5 tau 1.3: .21;
+  TRELLIS edge w7 tau 3.5: .24; GPT tau 0.9: .24; r214 arms: at most .159, token W'=1 and 7-bit tree W'=1 .120). No setting is "syntax without
+  meaning": when the output stops being meaningful it stops being grammatical too.
+- **No interior R-syn peak**: along wtree b (root, 4, 5, 6, 7, leaf) at W'=7 R-syn goes .026, .097, .117, .134, .134, .140 (monotone), R-sem
+  .010, .054, .110, .132, .229, .193, R-non .964 down to .668. The word tree behaves as a dial between R-non and R-sem/R-syn in a fixed
+  ratio (R-sem : R-syn about 1 : 1 to 2 : 1), with R-non shrinking; it is not a syntax-only band.
+- **Reach**: on the token learner R-sem peaks at W'=2 (.334), R-syn stays at .14-.17 for every W', R-non is lowest at W'=2 (.49). Knob B gives a
+  partial R-sem / R-non axis, as the design predicted, not R-syn. The word-tree names sit on the same curve (at 7 bits W'=3: .255 / .150 / .594).
+- **Temperature** (token learner, W'=7): R-sem .193 -> .056 -> .016 -> .007 and R-syn .140 -> .097 -> .041 -> .030 for tau 1, 2, 4, 8; the path
+  goes straight to R-non and does not reproduce R-syn (criterion met trivially, because there is nothing to reproduce).
+- The word-salad cell (R-non with sem_pass) is below .011 in every arm.
+
+**Verdict: NO-GO.** R-syn is not available as a regime on this corpus with this judge: not through read level (Phase 0 level map), learned names
+(Phase 0'), a Cobweb word-category tree (.775 / .795 purity at 7 bits, and its probe), read reach, or temperature, and the existing
+families (TRELLIS, LSTM, GPT, n-grams) also give at most about .26. Of the three regimes, R-non and R-sem are produced by the dials (R-sem
+is meaningful output only at the pair-gate recipe of r211, with novelty .6-.75 tri|d); the middle regime is a transition, with R-syn between .03
+and .26 whatever the setting. Phase 2 is not warranted. Interim (track 1) numbers were reported to the coordinator before the word-tree probe finished.

@@ -78,18 +78,29 @@ def r211_sets():
     return json.load(open(p, encoding="utf-8")) if os.path.exists(p) else []
 
 
+CAP211 = int(os.environ.get("R214_CAP211", 100))
+
+
+def r211_pick(e, T):
+    """The distinct new sentences of one r211 set that are judged: at most CAP211, a fixed random sample."""
+    S = sorted({tuple(x[0] if isinstance(x[0], list) else x[0].split()) for x in e["sents"]} - T.whole)
+    return random.Random("%s/%s/%s" % (e["fam"], e["temp"], e["seed"])).sample(S, min(CAP211, len(S)))
+
+
 def collect(out, specs):
+    """Distinct new sentences of the arms in specs; with the spec "r211" instead, the capped sample of every r211 set."""
     os.makedirs(out, exist_ok=True)
     S = set()
-    for a in load_arms(specs):
-        seen, _, _ = distinct_new(a["rows"], train(a["seed"], a["n"]))
-        S |= {" ".join(s) for s in seen}
-    n_arms = len(S)
-    for e in r211_sets():
-        S |= {" ".join(x[0]) if isinstance(x[0], list) else x[0] for x in e["sents"]}
+    if specs == ["r211"]:
+        for e in r211_sets():
+            S |= {" ".join(s) for s in r211_pick(e, train(e["seed"], 1000))}
+    else:
+        for a in load_arms(specs):
+            seen, _, _ = distinct_new(a["rows"], train(a["seed"], a["n"]))
+            S |= {" ".join(s) for s in seen}
     with open(os.path.join(out, "sentences.txt"), "w", encoding="utf-8") as fh:
         fh.write("\n".join(sorted(S)) + "\n")
-    print("sentences", len(S), "from arms", n_arms)
+    print("sentences", len(S))
 
 
 def read_scores(path):
@@ -147,33 +158,40 @@ def report(out, scores, out_md, specs):
         pick = rng.sample(pool, min(5, len(pool)))
         samples.append("**%s / %s**\n" % (a["group"], a["label"]) + "\n".join(
             "- %s  (syn_p %.2f, sem_p %.2f, %s)" % (" ".join(s), J[" ".join(s)][0], J[" ".join(s)][1], regime(J[" ".join(s)])) for s in pick))
-    # r211 re-judge: mean over seeds per family and temperature
+    open(out_md, "w", encoding="utf-8").write(
+        "## Arms (seed 13, n=1000)\n\n" + "\n".join(L) + "\n\n## Samples (5 per arm, random, fixed seed 214)\n\n" + "\n\n".join(samples) + "\n")
+    print("wrote", out_md)
+
+
+def report211(scores, out_md):
+    """r211 sets re-judged: at most CAP211 distinct new sentences per (family, temp, seed); purities and tri|d over that sample, mean over
+    seeds. dist/draw and the sample sizes come from the full set."""
+    J = read_scores(scores)
     by = defaultdict(list)
     for e in r211_sets():
-        sents = [tuple((x[0] if isinstance(x[0], list) else x[0].split())) for x in e["sents"]]
         T = train(e["seed"], 1000)
-        seen = {s: (any(g not in T.tri for g in sf.grams(s, 3)), s in T.sub) for s in set(sents) if s not in T.whole}
-        if not seen:
+        pick = r211_pick(e, T)
+        if not pick:
             continue
-        reg = {s: regime(J[" ".join(s)]) for s in seen}
-        d = len(seen)
-        by[(e["fam"], e["temp"])].append(dict(d=d, dist=d / e["A"], tri=mean([v[0] for v in seen.values()]),
-                                              **{k: sum(1 for s in seen if reg[s] == k) / d for k in ("sem", "syn", "non")},
-                                              fair_sem=sum(seen[s][0] for s in seen if reg[s] == "sem") / e["A"]))
-    R = ["| family | temp | seeds | distinct/seed | dist/draw | tri\\|d | R-sem | R-syn | R-non | fair R-sem |", "|---|---|---|---|---|---|---|---|---|---|"]
+        reg = {s: regime(J[" ".join(s)]) for s in pick}
+        full = {tuple(x[0] if isinstance(x[0], list) else x[0].split()) for x in e["sents"]} - T.whole
+        by[(e["fam"], e["temp"])].append(dict(
+            d=len(full), dist=len(full) / e["A"], n=len(pick), tri=mean([any(g not in T.tri for g in sf.grams(s, 3)) for s in pick]),
+            **{k: sum(1 for s in pick if reg[s] == k) / len(pick) for k in ("sem", "syn", "non")}))
+    R = ["| family | temp | seeds | distinct new/seed | dist/draw | judged/seed | tri\\|d | R-sem | R-syn | R-non |", "|---|---|---|---|---|---|---|---|---|---|"]
     for k in sorted(by, key=lambda k: (str(k[0]), k[1])):
         v = by[k]
         m = lambda key: mean([x[key] for x in v])
-        R.append("| %s | %s | %d | %.0f | %.3f | %s | %s | %s | %s | %.3f |" % (k[0], k[1], len(v), m("d"), m("dist"), f3(m("tri")),
-                                                                               f3(m("sem")), f3(m("syn")), f3(m("non")), m("fair_sem")))
-    open(out_md, "w", encoding="utf-8").write(
-        "## Arms (seed 13, n=1000)\n\n" + "\n".join(L) + "\n\n## Samples (5 per arm, random, fixed seed 214)\n\n" + "\n\n".join(samples) +
-        "\n\n## r211 dumps re-judged (mean over seeds present; distinct new only)\n\n" + "\n".join(R) + "\n")
+        R.append("| %s | %s | %d | %.0f | %.3f | %.0f | %s | %s | %s | %s |" % (k[0], k[1], len(v), m("d"), m("dist"), m("n"), f3(m("tri")),
+                                                                            f3(m("sem")), f3(m("syn")), f3(m("non"))))
+    open(out_md, "w", encoding="utf-8").write("\n".join(R) + "\n")
     print("wrote", out_md)
 
 
 if __name__ == "__main__":
     if sys.argv[1] == "collect":
         collect(sys.argv[2], sys.argv[3:])
+    elif sys.argv[1] == "report211":
+        report211(sys.argv[2], sys.argv[3])
     else:
         report(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5:])
