@@ -41,7 +41,7 @@ BASE = [
 ]
 EXTRA_COLOURS = ["var(--words)", "var(--ctx)", "var(--accent)", "var(--cnt)"]
 
-W, H = 760, 470
+W, H = 760, 490
 X0, X1, Y0, Y1 = 64, 600, 40, 380  # plot box
 YMIN, YMAX = 0.2, 1.0
 
@@ -99,10 +99,10 @@ def build(base, extra):
     out = []
     a = out.append
     a(f'<svg class="dg" viewBox="0 0 {W} {H}" role="img" aria-label="Grammaticality against novelty at 1,000 sentences learned, one line per generator family. '
-      f'The LSTM and GPT lines lie above the TRELLIS lines at every novelty level from .3 up; n-gram samplers sit at zero novelty.">')
+      f'From novelty .3 to .7 the LSTM and GPT lines lie above the TRELLIS lines; only the edge-coded TRELLIS line passes them, at novelty near .8 and above where grammaticality is below .6. N-gram samplers sit at zero novelty.">')
     # grid and axes
-    for i in range(0, 6):
-        v = YMIN + 0.8 * i / 5
+    for i in range(0, 5):
+        v = YMIN + 0.2 * i
         a(f'<line x1="{X0}" x2="{X1}" y1="{fy(v):.1f}" y2="{fy(v):.1f}" stroke="var(--gridc)" stroke-width="1"/>')
         a(f'<text x="{X0 - 8}" y="{fy(v) + 4:.1f}" text-anchor="end" style="font-size:12px;fill:var(--muted)">{v:.1f}</text>')
     for i in range(0, 6):
@@ -143,9 +143,11 @@ def build(base, extra):
     for x, y, label, colour in labels:
         a(f'<text x="{x:.1f}" y="{y:.1f}" style="font-size:12.5px;font-weight:600;fill:{colour}">{html.escape(label)}</text>')
     # legend
-    lx, ly = X0, H - 14
-    a(f'<text x="{lx}" y="{ly - 20}" style="font-size:12px;fill:var(--muted)">Along each line: sampling temperature rises from left to right (n-gram samplers: order 3, 4, 5, from low to high grammaticality).</text>')
+    lx, ly = X0, H - 34
+    a(f'<text x="{lx}" y="{ly - 20}" style="font-size:12px;fill:var(--muted)">Dial along each line: temperature, rising left to right (n-gram samplers: order 3 to 5).</text>')
     for label, colour, mk, pts, dial in entries:
+        if lx + 24 + 7 * len(label) > W - 8:
+            lx, ly = X0, ly + 20
         a(f'<line x1="{lx}" x2="{lx + 18}" y1="{ly - 4}" y2="{ly - 4}" stroke="{colour}" stroke-width="2"/>')
         a(marker(mk, lx + 9, ly - 4, colour, label))
         a(f'<text x="{lx + 24}" y="{ly}" style="font-size:12px;fill:var(--ink2)">{html.escape(label)}</text>')

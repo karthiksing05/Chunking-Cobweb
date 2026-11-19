@@ -668,17 +668,15 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
   <h3>Novelty against grammaticality: the trade-off</h3>
   <figure>
     <div class="fig">
-<svg class="dg" viewBox="0 0 760 470" role="img" aria-label="Grammaticality against novelty at 1,000 sentences learned, one line per generator family. The LSTM and GPT lines lie above the TRELLIS lines at every novelty level from .3 up; n-gram samplers sit at zero novelty.">
+<svg class="dg" viewBox="0 0 760 490" role="img" aria-label="Grammaticality against novelty at 1,000 sentences learned, one line per generator family. From novelty .3 to .7 the LSTM and GPT lines lie above the TRELLIS lines; only the edge-coded TRELLIS line passes them, at novelty near .8 and above where grammaticality is below .6. N-gram samplers sit at zero novelty.">
 <line x1="64" x2="600" y1="380.0" y2="380.0" stroke="var(--gridc)" stroke-width="1"/>
 <text x="56" y="384.0" text-anchor="end" style="font-size:12px;fill:var(--muted)">0.2</text>
-<line x1="64" x2="600" y1="312.0" y2="312.0" stroke="var(--gridc)" stroke-width="1"/>
-<text x="56" y="316.0" text-anchor="end" style="font-size:12px;fill:var(--muted)">0.4</text>
-<line x1="64" x2="600" y1="244.0" y2="244.0" stroke="var(--gridc)" stroke-width="1"/>
-<text x="56" y="248.0" text-anchor="end" style="font-size:12px;fill:var(--muted)">0.5</text>
-<line x1="64" x2="600" y1="176.0" y2="176.0" stroke="var(--gridc)" stroke-width="1"/>
-<text x="56" y="180.0" text-anchor="end" style="font-size:12px;fill:var(--muted)">0.7</text>
-<line x1="64" x2="600" y1="108.0" y2="108.0" stroke="var(--gridc)" stroke-width="1"/>
-<text x="56" y="112.0" text-anchor="end" style="font-size:12px;fill:var(--muted)">0.8</text>
+<line x1="64" x2="600" y1="295.0" y2="295.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="56" y="299.0" text-anchor="end" style="font-size:12px;fill:var(--muted)">0.4</text>
+<line x1="64" x2="600" y1="210.0" y2="210.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="56" y="214.0" text-anchor="end" style="font-size:12px;fill:var(--muted)">0.6</text>
+<line x1="64" x2="600" y1="125.0" y2="125.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="56" y="129.0" text-anchor="end" style="font-size:12px;fill:var(--muted)">0.8</text>
 <line x1="64" x2="600" y1="40.0" y2="40.0" stroke="var(--gridc)" stroke-width="1"/>
 <text x="56" y="44.0" text-anchor="end" style="font-size:12px;fill:var(--muted)">1.0</text>
 <line x1="64.0" x2="64.0" y1="380" y2="385" stroke="var(--muted)" stroke-width="1"/>
@@ -760,7 +758,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
 <text x="564.2" y="273.5" style="font-size:12.5px;font-weight:600;fill:var(--foc)">TRELLIS edge, window 7</text>
 <text x="580.2" y="350.9" style="font-size:12.5px;font-weight:600;fill:var(--s1)">LSTM</text>
 <text x="586.6" y="364.9" style="font-size:12.5px;font-weight:600;fill:var(--s2)">GPT</text>
-<text x="64" y="436" style="font-size:12px;fill:var(--muted)">Along each line: sampling temperature rises from left to right (n-gram samplers: order 3, 4, 5, from low to high grammaticality).</text>
+<text x="64" y="436" style="font-size:12px;fill:var(--muted)">Dial along each line: temperature, rising left to right (n-gram samplers: order 3 to 5).</text>
 <line x1="64" x2="82" y1="452" y2="452" stroke="var(--s3)" stroke-width="2"/>
 <circle cx="73.0" cy="452.0" r="4.5" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.5"><title>TRELLIS, window 3</title></circle>
 <text x="88" y="456" style="font-size:12px;fill:var(--ink2)">TRELLIS, window 3</text>
@@ -776,12 +774,12 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
 <line x1="695" x2="713" y1="452" y2="452" stroke="var(--s1)" stroke-width="2"/>
 <circle cx="704.0" cy="452.0" r="4.5" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.5"><title>LSTM</title></circle>
 <text x="719" y="456" style="font-size:12px;fill:var(--ink2)">LSTM</text>
-<line x1="753" x2="771" y1="452" y2="452" stroke="var(--s2)" stroke-width="2"/>
-<rect x="757.5" y="447.5" width="9.0" height="9.0" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.5"><title>GPT</title></rect>
-<text x="777" y="456" style="font-size:12px;fill:var(--ink2)">GPT</text>
-<line x1="804" x2="822" y1="452" y2="452" stroke="var(--cand)" stroke-width="2"/>
-<polygon points="813.0,446.5 818.5,452.0 813.0,457.5 807.5,452.0" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.5"><title>n-gram sampler</title></polygon>
-<text x="828" y="456" style="font-size:12px;fill:var(--ink2)">n-gram sampler</text>
+<line x1="64" x2="82" y1="472" y2="472" stroke="var(--s2)" stroke-width="2"/>
+<rect x="68.5" y="467.5" width="9.0" height="9.0" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.5"><title>GPT</title></rect>
+<text x="88" y="476" style="font-size:12px;fill:var(--ink2)">GPT</text>
+<line x1="115" x2="133" y1="472" y2="472" stroke="var(--cand)" stroke-width="2"/>
+<polygon points="124.0,466.5 129.5,472.0 124.0,477.5 118.5,472.0" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.5"><title>n-gram sampler</title></polygon>
+<text x="139" y="476" style="font-size:12px;fill:var(--ink2)">n-gram sampler</text>
 </svg>
     </div>
   </figure>
