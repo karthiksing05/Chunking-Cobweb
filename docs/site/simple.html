@@ -1,0 +1,188 @@
+<title>TRELLIS</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+/* Layout: one reading column; each idea is a short section with one picture or one table. */
+:root {
+  --bg: #f7f8f5; --fg: #1d2420; --muted: #5b6660; --line: #d9ded8;
+  --accent: #2f6b4f; --accent-soft: #e3eee7; --warn: #8a5a12; --warn-soft: #f6ecd9;
+  --chunk: #3b5f8a; --concept: #2f6b4f;
+  --display: "Fraunces", Georgia, serif;
+  --body: "Source Sans 3", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #141917; --fg: #e4e9e5; --muted: #9aa69f; --line: #2c3530;
+  --accent: #7cc4a0; --accent-soft: #1e2d26; --warn: #e2b46a; --warn-soft: #2e2618;
+  --chunk: #8db4e2; --concept: #7cc4a0; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #141917; --fg: #e4e9e5; --muted: #9aa69f; --line: #2c3530;
+  --accent: #7cc4a0; --accent-soft: #1e2d26; --warn: #e2b46a; --warn-soft: #2e2618;
+  --chunk: #8db4e2; --concept: #7cc4a0; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font: 18px/1.6 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 64px; }
+main { max-width: 42rem; margin: 0 auto; display: flex; flex-direction: column; gap: 44px; }
+h1, h2 { font-family: var(--display); font-weight: 650; text-wrap: balance; line-height: 1.2; margin: 0; }
+h1 { font-size: 2.6rem; }
+h2 { font-size: 1.5rem; margin-bottom: 10px; }
+p { margin: 0 0 12px; }
+.lede { font-size: 1.2rem; color: var(--muted); }
+.eyebrow { font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 6px; }
+.box { border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+.ok { background: var(--accent-soft); border-color: transparent; }
+.open { background: var(--warn-soft); border-color: transparent; }
+.open .eyebrow { color: var(--warn); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.two > div { min-width: 0; }
+@media (max-width: 560px) { .two { grid-template-columns: 1fr; } h1 { font-size: 2.1rem; } }
+.tag { font-weight: 600; }
+.tag.c { color: var(--chunk); } .tag.g { color: var(--concept); }
+code, .mono { font-family: var(--mono); font-size: .88em; }
+.ex { font-family: var(--mono); font-size: .9rem; background: var(--bg); border-left: 3px solid var(--line); padding: 2px 10px; margin: 6px 0; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 600; color: var(--muted); font-size: .82rem; text-transform: uppercase; letter-spacing: .05em; }
+td.n { text-align: right; }
+svg text { font-family: var(--body); }
+ul { margin: 0 0 12px; padding-left: 1.2em; } li { margin-bottom: 6px; }
+a { color: var(--accent); }
+.small { font-size: .9rem; color: var(--muted); }
+</style>
+
+<main>
+
+<header>
+  <div class="eyebrow">Research summary · 19 November 2026</div>
+  <h1>TRELLIS: learning language and chess from concepts and chunks</h1>
+  <p class="lede">A learner that reads a stream one item at a time, with no neural network and no gradients, and still learns to parse, generate and remember. Here is what it is, what it can do, and what is still open.</p>
+</header>
+
+<section>
+  <h2>The idea in one picture</h2>
+  <p>People compress what they experience in two ways. They <span class="tag c">chunk</span>: parts that keep occurring together get stored as one unit ("once upon a time", a castled king). And they <span class="tag g">generalize</span>: things that behave alike get grouped into a concept ("dog", "cat" and "bird" can all be the subject of "ran").</p>
+  <p>TRELLIS does both, and each one feeds the other. Concepts give chunks their vocabulary, and chunks give concepts something bigger than single words to group.</p>
+  <div class="scroll">
+  <svg viewBox="0 0 640 230" width="100%" role="img" aria-label="Two trees. The concept tree groups words by where they occur, such as dog, cat and bird. The chunk tree stores units such as 'the dog' and 'a cat' whose parts are named by concepts. Arrows run both ways between them.">
+    <rect x="10" y="10" width="270" height="210" rx="10" fill="var(--accent-soft)"/>
+    <text x="145" y="36" text-anchor="middle" style="font-size:15px;font-weight:600;fill:var(--concept)">Concepts: where things occur</text>
+    <line x1="145" y1="62" x2="80" y2="112" stroke="var(--concept)" stroke-width="2"/>
+    <line x1="145" y1="62" x2="210" y2="112" stroke="var(--concept)" stroke-width="2"/>
+    <line x1="80" y1="122" x2="45" y2="170" stroke="var(--concept)" stroke-width="1.5"/>
+    <line x1="80" y1="122" x2="80" y2="170" stroke="var(--concept)" stroke-width="1.5"/>
+    <line x1="80" y1="122" x2="115" y2="170" stroke="var(--concept)" stroke-width="1.5"/>
+    <line x1="210" y1="122" x2="180" y2="170" stroke="var(--concept)" stroke-width="1.5"/>
+    <line x1="210" y1="122" x2="240" y2="170" stroke="var(--concept)" stroke-width="1.5"/>
+    <circle cx="145" cy="58" r="6" fill="var(--concept)"/>
+    <text x="80" y="116" text-anchor="middle" style="font-size:13px;fill:var(--fg)">animals</text>
+    <text x="210" y="116" text-anchor="middle" style="font-size:13px;fill:var(--fg)">actions</text>
+    <text x="45" y="188" text-anchor="middle" style="font-size:13px;fill:var(--muted)">dog</text>
+    <text x="80" y="188" text-anchor="middle" style="font-size:13px;fill:var(--muted)">cat</text>
+    <text x="115" y="188" text-anchor="middle" style="font-size:13px;fill:var(--muted)">bird</text>
+    <text x="180" y="188" text-anchor="middle" style="font-size:13px;fill:var(--muted)">ran</text>
+    <text x="240" y="188" text-anchor="middle" style="font-size:13px;fill:var(--muted)">jumped</text>
+    <rect x="360" y="10" width="270" height="210" rx="10" fill="none" stroke="var(--chunk)" stroke-width="1.5"/>
+    <text x="495" y="36" text-anchor="middle" style="font-size:15px;font-weight:600;fill:var(--chunk)">Chunks: what things are made of</text>
+    <rect x="395" y="64" width="200" height="34" rx="6" fill="none" stroke="var(--chunk)"/>
+    <text x="495" y="86" text-anchor="middle" style="font-size:13px;fill:var(--fg)">[ the + <tspan style="fill:var(--concept);font-weight:600">animal</tspan> ]</text>
+    <rect x="395" y="118" width="200" height="34" rx="6" fill="none" stroke="var(--chunk)"/>
+    <text x="495" y="140" text-anchor="middle" style="font-size:13px;fill:var(--fg)">[ <tspan style="fill:var(--concept);font-weight:600">animal</tspan> + <tspan style="fill:var(--concept);font-weight:600">action</tspan> ]</text>
+    <text x="495" y="182" text-anchor="middle" style="font-size:13px;fill:var(--muted)">"the dog", "a cat" share a chunk</text>
+    <text x="495" y="200" text-anchor="middle" style="font-size:13px;fill:var(--muted)">though they share no word</text>
+    <path d="M285 95 C 320 80, 330 80, 355 88" fill="none" stroke="var(--fg)" stroke-width="1.5" marker-end="url(#ah)"/>
+    <path d="M355 150 C 330 165, 320 165, 285 152" fill="none" stroke="var(--fg)" stroke-width="1.5" marker-end="url(#ah)"/>
+    <text x="320" y="72" text-anchor="middle" style="font-size:11px;fill:var(--muted)">names parts</text>
+    <text x="320" y="182" text-anchor="middle" style="font-size:11px;fill:var(--muted)">names wholes</text>
+    <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="var(--fg)"/></marker></defs>
+  </svg>
+  </div>
+  <p class="small">Both hierarchies are Cobweb trees, which grow one example at a time. Nothing is trained offline and no labels are used; gold labels are only for scoring.</p>
+</section>
+
+<section>
+  <h2>What it does with them</h2>
+  <div class="two">
+    <div class="box"><div class="eyebrow">Parse</div>Given a sentence, find the most likely way to bracket it into chunks, for example <span class="mono">((the bird) (looked sad))</span>.</div>
+    <div class="box"><div class="eyebrow">Generate</div>Write a new sentence one word at a time. A general concept ("animal") is narrowed by the context to one word, which is how it says things it has never seen.</div>
+  </div>
+</section>
+
+<section>
+  <h2>Three test domains</h2>
+  <div class="scroll"><table>
+    <tr><th>Domain</th><th>What it learns from</th><th>Main finding</th></tr>
+    <tr><td>Toy grammars</td><td>Sentences from small known grammars</td><td>Small grammar: every sentence it writes is grammatical. Medium grammar: about half are grammatical, and about 30% are new.</td></tr>
+    <tr><td>TinyStories</td><td>250 to 4,000 sentences of children's stories</td><td>With little data it writes about as well as small neural networks trained on the same sentences (below).</td></tr>
+    <tr><td>Chess</td><td>Board positions from real games</td><td>Its chunks look like a chess player's, and its memory behaves like the classic expert-memory experiments (below).</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <div class="eyebrow">TinyStories</div>
+  <h2>Writing sentences: as good as small neural networks, with little data</h2>
+  <p>We compared TRELLIS with an LSTM and a small GPT, each trained on exactly the same sentences and sized for them. A language model judged each generated sentence: is it grammatical, and is it new (not copied from training)?</p>
+  <div class="scroll"><table>
+    <tr><th>Sentences learned</th><th>vs LSTM</th><th>vs GPT</th></tr>
+    <tr><td>250</td><td>level</td><td><b>TRELLIS ahead</b> (8 of 8 seeds)</td></tr>
+    <tr><td>500</td><td>level</td><td><b>TRELLIS ahead</b> (8 of 8 seeds)</td></tr>
+    <tr><td>1,000</td><td>level</td><td>level</td></tr>
+    <tr><td>4,000</td><td>LSTM ahead</td><td>GPT ahead</td></tr>
+  </table></div>
+  <p class="small">"Level" means the 95% interval of the difference includes zero over 8 seeds. No model reaches 95% grammatical. When any of them is pushed to write more novel sentences, its grammaticality drops; the neural models drop less.</p>
+</section>
+
+<section>
+  <div class="eyebrow">TinyStories</div>
+  <h2>Parsing: telling grammatical sentences from broken ones</h2>
+  <p>We took real sentences and broke them in controlled ways, then asked whether TRELLIS accepts each one. A good learner accepts the real sentences and rejects the broken ones.</p>
+  <div class="ex">real: the fish was not happy anymore</div>
+  <div class="ex">scrambled: not anymore was happy the fish</div>
+  <div class="ex">two words swapped: little the bird looked sad</div>
+  <div class="ex">agreement error: they is not friends anymore</div>
+  <div class="ex">content swapped (grammatical, nonsense): the hard door looked hard</div>
+  <p style="margin-top:12px">What we found:</p>
+  <ul>
+    <li><b>The parse tree alone works like a syntax checker.</b> It accepts the content-swapped nonsense (90%) as readily as real sentences, because the grammar is fine. It is weak against scrambles.</li>
+    <li><b>The generator's word probabilities do the real work.</b> With them, TRELLIS keeps up with the n-gram, LSTM and GPT baselines at 125 to 500 sentences on scrambles, swaps and agreement errors.</li>
+    <li><b>It falls behind as data grows</b>, and it is weakest on meaning: at 4,000 sentences it still accepts 63% of content-swapped sentences, where the neural models accept about 40%.</li>
+  </ul>
+</section>
+
+<section>
+  <div class="eyebrow">Chess</div>
+  <h2>Memory like a chess player's</h2>
+  <p>In 1973 Chase and Simon showed people a chess board for five seconds and asked them to rebuild it. Masters recalled far more than beginners, but only on real positions; on random boards the advantage disappeared. The explanation was chunks: masters see familiar groups of pieces.</p>
+  <p>TRELLIS, given a short-term memory of a few chunks, reproduces that pattern:</p>
+  <div class="scroll"><table>
+    <tr><th>Pieces recalled, middle game</th><th class="n">Beginner</th><th class="n">Club player</th><th class="n">Master</th></tr>
+    <tr><td>Chase &amp; Simon (people)</td><td class="n">4</td><td class="n">8</td><td class="n">16</td></tr>
+    <tr><td>TRELLIS, 7 chunks of memory, after 300 / 1,000 / 4,000 positions</td><td class="n">7.2</td><td class="n">9.7</td><td class="n">12.9</td></tr>
+  </table></div>
+  <p>With more experience it reaches the master's 16 pieces at about 8,000 positions and levels off near 17. On random boards its recall stays flat. The chunks it learns are what players would name: pawn chains, batteries, and castled kings. The most common one is the castled king with its pawn shield, <span class="mono">f2 g1 g2 h2</span>.</p>
+</section>
+
+<section class="box open">
+  <div class="eyebrow">Open question</div>
+  <h2>Does the level of abstraction control what it writes?</h2>
+  <p>The hypothesis: by changing one setting, how abstract TRELLIS's word categories are, we should get three kinds of output.</p>
+  <div class="scroll"><table>
+    <tr><th>Setting</th><th>Expected output</th><th>Example</th><th>Reached?</th></tr>
+    <tr><td>Exact words</td><td>Grammatical and meaningful</td><td class="mono">he liked to play with his ball</td><td>Yes (63%)</td></tr>
+    <tr><td>Middle categories</td><td>Grammatical but meaningless</td><td class="mono">the hard door looked hard</td><td><b>Not yet</b> (at most 26%)</td></tr>
+    <tr><td>No categories</td><td>Word salad</td><td class="mono">give it is shiny</td><td>Yes (over 90%)</td></tr>
+  </table></div>
+  <p>The middle case is hard. With only about 240 different words in 1,000 children's sentences, nearly any swap of one noun for another still makes sense ("a big cat came down from the sky"). And TRELLIS's categories group words by meaning as well as by grammar. We are now testing it on 4,000 sentences, where there are more words to go wrong with.</p>
+  <p>Chess does not show it either: TRELLIS recognises familiar positions but does not know the rules, so it cannot yet produce "legal but pointless" moves on purpose.</p>
+</section>
+
+<section>
+  <h2>In short</h2>
+  <ul>
+    <li>A learner built only from two growing concept trees can parse, generate and remember, with no gradients.</li>
+    <li>With little data it writes as well as small neural networks, and its chess memory looks like a human expert's.</li>
+    <li>It falls behind neural models as data grows, and it is weaker on meaning than on grammar.</li>
+  </ul>
+  <p class="small">Full methods, every experiment, ablations and appendices are on the <a href="https://claude.ai/artifact/3UT8FEFJAw32TDfzZFD4sx" id="details-link">detailed results page</a>.</p>
+</section>
+
+</main>
