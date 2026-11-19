@@ -1,0 +1,10 @@
+#!/bin/bash
+# Round 218: the window tests and the full tests/trellis2 suite on a compute node
+export PATH=$HOME/flash/miniconda3/envs/trellis/bin:$PATH
+cd /coc/flash10/ksingara3/Chunking-Cobweb
+echo "host $(hostname) start $(date)"
+python -m pytest tests/trellis2/test_r218_window.py -q -x 2>&1 | tail -40
+python -m pytest tests/trellis2/test_r216_parse.py -q 2>&1 | tail -5
+
+python -m pytest tests/trellis2 -q 2>&1 | tail -8
+echo "end $(date)"
