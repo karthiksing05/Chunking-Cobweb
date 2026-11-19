@@ -168,10 +168,11 @@ a { color: var(--accent); }
   <div class="scroll"><table>
     <tr><th>Setting</th><th>Expected output</th><th>Example</th><th>Reached?</th></tr>
     <tr><td>Exact words</td><td>Grammatical and meaningful</td><td class="mono">he liked to play with his ball</td><td>Yes (63%)</td></tr>
-    <tr><td>Middle categories</td><td>Grammatical but meaningless</td><td class="mono">the hard door looked hard</td><td><b>Not yet</b> (at most 26%)</td></tr>
+    <tr><td>Middle categories</td><td>Grammatical but meaningless</td><td class="mono">the hard door looked hard</td><td><b>No</b> (at most 27%)</td></tr>
     <tr><td>No categories</td><td>Word salad</td><td class="mono">give it is shiny</td><td>Yes (over 90%)</td></tr>
   </table></div>
-  <p>The middle case is hard. With only about 240 different words in 1,000 children's sentences, nearly any swap of one noun for another still makes sense ("a big cat came down from the sky"). And TRELLIS's categories group words by meaning as well as by grammar. We are now testing it on 4,000 sentences, where there are more words to go wrong with.</p>
+  <p>The middle case is hard. With only about 240 different words in 1,000 children's sentences, nearly any swap of one noun for another still makes sense ("a big cat came down from the sky"). And TRELLIS's categories group words by meaning as well as by grammar. Turning the setting moves the output smoothly from meaningful to word salad, with no middle peak, and 4,000 sentences give the same picture.</p>
+  <p>A cheat test shows why. We took TRELLIS's good sentences and swapped words at random for other words of the same part of speech (noun for noun, verb for verb). Even that gives "grammatical but meaningless" only about 20% of the time, because a blind swap usually breaks agreement or the verb's frame ("the girls was", "she put"). So the middle case is out of reach for any word-swap model on this data, not just TRELLIS. We report it as a finding.</p>
   <p>Chess does not show it either: TRELLIS recognises familiar positions but does not know the rules, so it cannot yet produce "legal but pointless" moves on purpose.</p>
 </section>
 
