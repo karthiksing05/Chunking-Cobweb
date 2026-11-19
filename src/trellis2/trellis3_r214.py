@@ -44,6 +44,28 @@ class Trellis3R214(Trellis3R208):
     read_reach = None
     parse_bits = None
     word_names = None
+    emit_names = None                 # word -> class name; with emit_counts: class emission (see _emit)
+    emit_counts = None                # word -> training-stream count
+    word_tree = None                  # a WordTree (the class source of emit_bits)
+    _emit_bits = None
+
+    @property
+    def emit_bits(self):
+        """Output-side abstraction level in bits (None / inf = off: the read's word masses unchanged). Setting it classes the words by the
+        word tree at that level (needs word_tree and emit_counts)."""
+        return self._emit_bits
+
+    @emit_bits.setter
+    def emit_bits(self, b):
+        self._emit_bits = b
+        if b is None or (not isinstance(b, str) and b == math.inf):
+            self.emit_names = None
+            return
+        cache = self.__dict__.setdefault("_r214_emit_names", {})
+        if b not in cache:
+            cache[b] = self.word_tree.names(b=float(b))
+        self.emit_names = cache[b]
+
 
     # ------------------------------------------------------------------ levels
     def level_bits(self, node, root=None) -> float:
@@ -129,7 +151,34 @@ class Trellis3R214(Trellis3R208):
         win = {a: v for a, v in q.items() if a[0] == "l" and a[1:].isdigit()}
         return {**q, **self._named_window(win)} if win else q
 
+    def _emit(self, out: Dict[tuple, float]) -> Dict[tuple, float]:
+        """Class emission (output-side abstraction): a filler word w gets P(C(w) | ctx) * P(w | C(w)), P(C | ctx) the read's mass summed
+        over the words of class C and P(w | C) the context-free within-class share of the training-stream counts (over the class's
+        words that the read offers). A word without a class is its own class. One class per word = the read unchanged; one class
+        = the unigram. Chunk fillers are untouched."""
+        names, cnt = self.emit_names, self.emit_counts
+        cm: Dict[str, float] = {}
+        ct: Dict[str, float] = {}
+        for v, m in out.items():
+            if v[0] == "w":
+                c = names.get(v[1], v[1])
+                cm[c] = cm.get(c, 0.0) + m
+                ct[c] = ct.get(c, 0.0) + cnt.get(v[1], 1.0)
+        new = {}
+        for v, m in out.items():
+            if v[0] == "w":
+                c = names.get(v[1], v[1])
+                new[v] = cm[c] * (cnt.get(v[1], 1.0) / ct[c]) if ct[c] > 0 else 0.0
+            else:
+                new[v] = m
+        return new
+
     def _gap_fills(self, q: dict, beta: float = 1.0, nbq: Optional[Dict[int, dict]] = None,
+                   gamma: float = 1.0, backoff: str = "tokens") -> Dict[tuple, float]:
+        out = self._gap_fills_read(q, beta, nbq, gamma, backoff)
+        return out if self.emit_names is None else self._emit(out)
+
+    def _gap_fills_read(self, q: dict, beta: float = 1.0, nbq: Optional[Dict[int, dict]] = None,
                    gamma: float = 1.0, backoff: str = "tokens") -> Dict[tuple, float]:
         q = self._named_query(self._reach_query(q))
         b = self.read_bits

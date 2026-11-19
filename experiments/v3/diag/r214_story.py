@@ -34,18 +34,24 @@ def _r214_start(L, arm):
     L.read_bits = _bits(arm.get("bits"))
     L.read_reach = None if arm.get("wreach") is None else int(arm["wreach"])
     L.parse_bits = _bits(arm.get("pbits"))
+    we = arm.get("wemit")
+    L.emit_bits = None if we in (None, "leaf", "inf") else float(we)
+    if L.emit_names is not None:
+        print(json.dumps({"r214 emit": we, "classes": len(set(L.emit_names.values()))}), flush=True)
     if L.read_bits is not None or L.read_reach is not None or L.parse_bits is not None:
         print(json.dumps({"r214 read": {"bits": L.read_bits, "reach": L.read_reach, "parse_bits": L.parse_bits}}), flush=True)
 
 
 def _r214_end(L):
     L.read_bits = L.read_reach = L.parse_bits = None
+    L.emit_bits = None
 
 
 def _r214_levels(L, train, EXP, seed, n):
     """No generation: every committed word occurrence (sentence id, position, token, l2, weight) and the concept id it is read
     at for each band of GRID, plus the sentences (for the part-of-speech tagging done by r214_levels.py, env cobint)."""
     L.read_bits = L.read_reach = L.parse_bits = None
+    L.emit_bits = None
     owner = {}
     for sid, (toks, a0, a1) in enumerate(EXP):
         for i in range(a0, a1):
@@ -119,12 +125,16 @@ def _r214_make(seed, cfg, train):
                        "reservoir types": len(T.words), "tree nodes": sum(1 for _ in T.tree.nodes()), "root count": root.count}, fh)
         print(json.dumps({"r214 wordtree": os.environ["R214_WORDTREE"], "types": len(T.words), "root": root.count}), flush=True)
         sys.exit()
+    wem = cfg.pop("wemit_tree", False)
     L = Trellis3R214(seed=seed, **cfg)
+    T = WordTree([s for s, _ in train], seed) if (wt is not None or wem) else None
     if wt is not None:
-        T = WordTree([s for s, _ in train], seed)
         L.word_names = T.names(b=_wtree_b(wt) if wt != "leaf" else None)
         L.window_names = L.window_names or "all"
         print(json.dumps({"r214 wtree": wt, "classes": len(set(L.word_names.values())), "types": len(T.words)}), flush=True)
+    if T is not None:
+        from collections import Counter
+        L.word_tree, L.emit_counts = T, dict(Counter(w for s, _ in train for w in s))
     return L
 
 

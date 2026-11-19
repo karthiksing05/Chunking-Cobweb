@@ -275,3 +275,43 @@ def test_8_word_tree_names_are_shared_by_storage_and_query():
     q = {"l2": "the", "l1": "dog", "l3": BOS}
     named = {"l2": L.word_names["the"], "l1": L.word_names["dog"], "l3": BOS}
     assert L._gap_fills(q) == Trellis3R208._gap_fills(L, named)
+
+
+def test_9_class_emission_identities():
+    from collections import Counter
+    from trellis2.trellis3_r214 import WordTree
+    sents = [s.split() for s in SENTS]
+    T = WordTree(sents, seed=3)
+    cnt = dict(Counter(w for s in sents for w in s))
+    L = build(Trellis3R214)
+    ref = all_reads(L)
+    L.word_tree, L.emit_counts = T, cnt
+    # off / leaf: the read exactly
+    L.emit_bits = None
+    assert all_reads(L) == ref
+    L.emit_bits = math.inf
+    assert all_reads(L) == ref
+    L.emit_names = {w: w for w in cnt}                        # one class per word: the read exactly
+    assert all_reads(L) == ref
+    # root: one class -> P(C | ctx) = 1 and the mass of each word is the unigram share of the read's total
+    L.emit_bits = 0
+    assert len(set(L.emit_names.values())) == 1
+    for q in QS[1:]:
+        out = L._gap_fills(q)
+        ws = {v[1]: m for v, m in out.items() if v[0] == "w"}
+        r = [ws[w] / cnt[w] for w in ws]
+        assert max(r) == pytest.approx(min(r), rel=1e-9)
+        tot = sum(m for v, m in L._gap_fills_read(q).items() if v[0] == "w")
+        assert sum(ws.values()) == pytest.approx(tot, rel=1e-9)
+    # a middle level keeps each class's mass and splits it by the training counts
+    L.emit_bits = 2
+    names = L.emit_names
+    q = QS[2]
+    base = {v[1]: m for v, m in L._gap_fills_read(q).items() if v[0] == "w"}
+    out = {v[1]: m for v, m in L._gap_fills(q).items() if v[0] == "w"}
+    for c in set(names.values()):
+        mem = [w for w in out if names[w] == c]
+        assert sum(out[w] for w in mem) == pytest.approx(sum(base[w] for w in mem), rel=1e-9)
+        assert all(out[w] / cnt[w] == pytest.approx(out[mem[0]] / cnt[mem[0]], rel=1e-9) for w in mem)
+    L.emit_bits = None
+    assert all_reads(L) == ref

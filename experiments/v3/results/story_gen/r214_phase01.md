@@ -583,3 +583,425 @@ does not reproduce R-syn.
 families (TRELLIS, LSTM, GPT, n-grams) also give at most about .26. Of the three regimes, R-non and R-sem are produced by the dials (R-sem
 is meaningful output only at the pair-gate recipe of r211, with novelty .6-.75 tri|d); the middle regime is a transition, with R-syn between .03
 and .26 whatever the setting. Phase 2 is not warranted. Interim (track 1) numbers were reported to the coordinator before the word-tree probe finished.
+
+# Addendum 4: output-side abstraction (class emission, `emit_bits` / driver key `wemit`)
+
+Diagnosis from the coordinator: the earlier dials abstracted only how the context is read; the filler came from stored token occurrences, so lexical
+identity survived and syntax never decoupled from lexical choice. New opt-in `Trellis3R214.emit_bits` (word tree `WordTree` at level b, built
+from the training stream; `emit_counts` = training-stream word counts): every step's filler masses, for the go-on read and the end read alike, become
+P(w | ctx) = P(C_b(w) | ctx) * P(w | C_b(w)), with P(C | ctx) = the read's mass summed over the words of the class and P(w | C) = the context-free
+share of the word's training count within its class (over the class's words the read offers). Leaf (one class per word, or `emit_bits` None / inf)
+= the existing model exactly; root = the unigram share of the read's total mass. Tests (test 9: off, inf and singleton classes equal the read
+exactly; root gives mass proportional to the counts and conserves the total; a middle level conserves every class's mass and splits it by
+count) pass; the default path is byte-identical (tests 1-2) and the full `tests/trellis2` suite passes (137). The pair gate is applied to the
+emitted word (t3_story's `_ok(l1, w)` filters the post-emission fillers, i.e. rejection inside the class). Drivers `r214_p1d.sh` (seed, b list),
+`r214_p1e.sh`; dumps `r214p01/e13_*`, `e17_*`; judge outputs `judge3` (seed 13), `judge4` (follow-ups and seed 17). Seed 13 and 17, n=1000, edge exact, tau 1, W' 7 unless noted.
+Input (i) = token window (`e-i-*`); input (ii) = window named by the same word tree at the same b (`e-ii-*`, a learner per b). `emit=leaf` with the gate is the paper-recipe
+token model with the gate on, gate on being the primary run as asked.
+
+## Seed 13 (all arms)
+
+| group | arm | seed | distinct new | dist/draw | R-sem | R-syn | R-non | (non with sem_pass) | tri\|d | tri\|d in sem / syn / non | fair sem / syn / non | repeats (cut) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| e-i-off | W'=7 emit=0 t=1 | 13 | 1600 | 1.000 | 0.001 | 0.012 | 0.988 | 0.001 | 1.000 | 1.000 / 1.000 / 1.000 | 0.001 / 0.012 / 0.988 | 0 (0) |
+| e-i-off | W'=7 emit=4 t=1 | 13 | 1585 | 0.991 | 0.021 | 0.032 | 0.947 | 0.001 | 0.999 | 0.939 / 1.000 / 1.000 | 0.019 / 0.032 / 0.938 | 15 (0) |
+| e-i-off | W'=7 emit=5 t=1 | 13 | 1574 | 0.984 | 0.029 | 0.049 | 0.922 | 0.001 | 0.994 | 0.778 / 1.000 / 1.000 | 0.022 / 0.048 / 0.907 | 26 (0) |
+| e-i-off | W'=7 emit=6 t=1 | 13 | 1574 | 0.984 | 0.041 | 0.062 | 0.897 | 0.005 | 0.992 | 0.862 / 0.969 / 1.000 | 0.035 / 0.059 / 0.882 | 26 (0) |
+| e-i-off | W'=7 emit=6.5 t=1 | 13 | 1533 | 0.958 | 0.067 | 0.100 | 0.833 | 0.001 | 0.984 | 0.824 / 0.968 / 0.999 | 0.052 / 0.093 / 0.797 | 67 (1) |
+| e-i-off | W'=7 emit=7 t=1 | 13 | 1499 | 0.937 | 0.110 | 0.129 | 0.761 | 0.001 | 0.976 | 0.818 / 0.979 / 0.998 | 0.084 / 0.118 / 0.712 | 101 (3) |
+| e-i-on | W'=7 emit=0 t=1 gate | 13 | 1543 | 0.964 | 0.069 | 0.116 | 0.815 | 0.004 | 0.990 | 0.916 / 0.972 / 0.998 | 0.061 / 0.109 / 0.784 | 57 (9) |
+| e-i-on | W'=7 emit=4 t=1 gate | 13 | 1436 | 0.897 | 0.212 | 0.186 | 0.602 | 0.012 | 0.951 | 0.826 / 0.955 / 0.993 | 0.157 / 0.159 / 0.537 | 164 (8) |
+| e-i-on | W'=7 emit=5 t=1 gate | 13 | 1391 | 0.869 | 0.268 | 0.193 | 0.538 | 0.014 | 0.938 | 0.818 / 0.944 / 0.996 | 0.191 / 0.159 / 0.466 | 209 (16) |
+| e-i-on | W'=7 emit=6 t=1 gate | 13 | 1352 | 0.845 | 0.286 | 0.209 | 0.505 | 0.022 | 0.926 | 0.811 / 0.929 / 0.990 | 0.196 / 0.164 / 0.422 | 248 (10) |
+| e-i-on | W'=7 emit=6.5 t=1 gate | 13 | 1262 | 0.789 | 0.409 | 0.213 | 0.378 | 0.010 | 0.895 | 0.793 / 0.944 / 0.977 | 0.256 / 0.159 / 0.291 | 338 (9) |
+| e-i-on | W'=7 emit=7 t=1 gate | 13 | 1172 | 0.733 | 0.432 | 0.217 | 0.352 | 0.010 | 0.871 | 0.755 / 0.925 / 0.981 | 0.239 / 0.147 / 0.253 | 428 (16) |
+| e-i-on | W'=7 emit=leaf t=1 gate | 13 | 1032 | 0.645 | 0.558 | 0.206 | 0.235 | 0.012 | 0.766 | 0.639 / 0.887 / 0.963 | 0.230 / 0.118 / 0.146 | 566 (16) |
+| e-ii-0 | W'=7 emit=0 t=1 gate | 13 | 1596 | 0.998 | 0.005 | 0.012 | 0.983 | 0.001 | 0.999 | 0.875 / 0.947 / 1.000 | 0.004 / 0.011 / 0.981 | 4 (1) |
+| e-ii-0 | W'=7 emit=0 t=1 | 13 | 1600 | 1.000 | 0.002 | 0.012 | 0.986 | 0.000 | 1.000 | 1.000 / 1.000 / 1.000 | 0.002 / 0.012 / 0.986 | 0 (0) |
+| e-ii-4 | W'=7 emit=4 t=1 gate | 13 | 1451 | 0.907 | 0.179 | 0.168 | 0.653 | 0.012 | 0.955 | 0.819 / 0.947 / 0.995 | 0.133 / 0.144 / 0.589 | 149 (21) |
+| e-ii-4 | W'=7 emit=4 t=1 | 13 | 1592 | 0.995 | 0.013 | 0.025 | 0.962 | 0.003 | 0.999 | 0.952 / 1.000 / 1.000 | 0.013 / 0.025 / 0.957 | 8 (0) |
+| e-ii-5 | W'=7 emit=5 t=1 gate | 13 | 1434 | 0.896 | 0.231 | 0.179 | 0.591 | 0.008 | 0.944 | 0.807 / 0.949 / 0.995 | 0.167 / 0.152 / 0.527 | 166 (10) |
+| e-ii-5 | W'=7 emit=5 t=1 | 13 | 1586 | 0.991 | 0.017 | 0.045 | 0.938 | 0.004 | 0.997 | 0.889 / 0.972 / 1.000 | 0.015 / 0.044 / 0.929 | 14 (0) |
+| e-ii-6 | W'=7 emit=6 t=1 gate | 13 | 1364 | 0.853 | 0.296 | 0.177 | 0.526 | 0.015 | 0.927 | 0.800 / 0.926 / 0.999 | 0.202 / 0.140 / 0.448 | 236 (13) |
+| e-ii-6 | W'=7 emit=6 t=1 | 13 | 1571 | 0.982 | 0.028 | 0.057 | 0.915 | 0.003 | 0.994 | 0.818 / 0.978 / 1.000 | 0.022 / 0.055 / 0.898 | 29 (0) |
+| e-ii-6.5 | W'=7 emit=6.5 t=1 gate | 13 | 1316 | 0.823 | 0.371 | 0.224 | 0.405 | 0.007 | 0.891 | 0.758 / 0.939 / 0.987 | 0.231 / 0.173 / 0.329 | 284 (20) |
+| e-ii-6.5 | W'=7 emit=6.5 t=1 | 13 | 1552 | 0.970 | 0.057 | 0.079 | 0.863 | 0.003 | 0.985 | 0.764 / 0.976 / 1.000 | 0.043 / 0.075 / 0.838 | 48 (0) |
+| e-ii-7 | W'=7 emit=7 t=1 gate | 13 | 1250 | 0.781 | 0.407 | 0.189 | 0.404 | 0.004 | 0.871 | 0.723 / 0.928 / 0.994 | 0.230 / 0.137 / 0.314 | 350 (17) |
+| e-ii-7 | W'=7 emit=7 t=1 | 13 | 1514 | 0.946 | 0.096 | 0.104 | 0.800 | 0.006 | 0.976 | 0.788 / 0.981 / 0.998 | 0.072 / 0.096 / 0.756 | 86 (4) |
+
+
+### Samples, seed 13 arms (5 per arm)
+
+**e-i-off / W'=7 emit=0 t=1**
+- so toy she he that  (syn_p 0.00, sem_p 0.00, non)
+- we scared much he am  (syn_p 0.00, sem_p 0.00, non)
+- lily so sad some friends  (syn_p 0.00, sem_p 0.00, non)
+- now i friend happy know you idea with  (syn_p 0.00, sem_p 0.00, non)
+- it every play many tom  (syn_p 0.00, sem_p 0.00, non)
+
+**e-i-off / W'=7 emit=4 t=1**
+- they was not got of to smiled  (syn_p 0.00, sem_p 0.00, non)
+- they all and very friend became mom around  (syn_p 0.00, sem_p 0.00, non)
+- you yes it's friends mom  (syn_p 0.00, sem_p 0.00, non)
+- sue found the to fun other  (syn_p 0.00, sem_p 0.00, non)
+- it felt excited happy wanted happy  (syn_p 0.00, sem_p 0.00, non)
+
+**e-i-off / W'=7 emit=5 t=1**
+- she so look with careful  (syn_p 0.00, sem_p 0.00, non)
+- bob were together thanked toy  (syn_p 0.00, sem_p 0.00, non)
+- just big car laughed day  (syn_p 0.00, sem_p 0.00, non)
+- is mia were big  (syn_p 0.00, sem_p 0.00, non)
+- you it was inside  (syn_p 0.00, sem_p 0.00, non)
+
+**e-i-off / W'=7 emit=6 t=1**
+- it was red said excited  (syn_p 0.00, sem_p 0.00, non)
+- come see good him  (syn_p 0.00, sem_p 0.00, non)
+- tim played the the and played can fun  (syn_p 0.00, sem_p 0.00, non)
+- he were can was was good go  (syn_p 0.00, sem_p 0.00, non)
+- lily and ben played together all it park  (syn_p 0.00, sem_p 0.01, non)
+
+**e-i-off / W'=7 emit=6.5 t=1**
+- tim and not fun  (syn_p 0.00, sem_p 0.00, non)
+- they feel happy  (syn_p 0.31, sem_p 0.98, sem)
+- they play happy  (syn_p 0.00, sem_p 0.05, non)
+- tim have tom in fun  (syn_p 0.00, sem_p 0.00, non)
+- but then looked had happened  (syn_p 0.00, sem_p 0.00, non)
+
+**e-i-off / W'=7 emit=7 t=1**
+- it was a fun soon is her  (syn_p 0.00, sem_p 0.00, non)
+- they were surprised toy the cat happy  (syn_p 0.00, sem_p 0.00, non)
+- they said i'm were sorry  (syn_p 0.00, sem_p 0.06, non)
+- we to want to go  (syn_p 0.00, sem_p 0.00, non)
+- but with careful  (syn_p 0.00, sem_p 0.00, non)
+
+**e-i-on / W'=7 emit=0 t=1 gate**
+- you will not a car went fast  (syn_p 0.00, sem_p 0.00, non)
+- can be happy with the dog went back  (syn_p 0.00, sem_p 0.00, non)
+- tim said look i was the sky  (syn_p 0.16, sem_p 0.03, syn)
+- lily look ben and tim  (syn_p 0.00, sem_p 0.00, non)
+- they look ben are you  (syn_p 0.00, sem_p 0.00, non)
+
+**e-i-on / W'=7 emit=4 t=1 gate**
+- tom was sad  (syn_p 1.00, sem_p 1.00, sem)
+- you mom to play  (syn_p 0.00, sem_p 0.00, non)
+- she liked the toys were so much fun  (syn_p 0.00, sem_p 0.18, non)
+- it said they had fun together  (syn_p 1.00, sem_p 0.97, sem)
+- ben were very scared  (syn_p 0.00, sem_p 0.01, non)
+
+**e-i-on / W'=7 emit=5 t=1 gate**
+- the car was very fast  (syn_p 1.00, sem_p 1.00, sem)
+- they and smiled and said yes it too  (syn_p 0.00, sem_p 0.00, non)
+- then he saw a big tree  (syn_p 1.00, sem_p 1.00, sem)
+- and play together  (syn_p 0.00, sem_p 0.00, non)
+- tom and then the ball together  (syn_p 0.00, sem_p 0.00, non)
+
+**e-i-on / W'=7 emit=6 t=1 gate**
+- he and it together  (syn_p 0.00, sem_p 0.00, non)
+- they like to play in it water  (syn_p 0.00, sem_p 0.00, non)
+- let's find something fun to play  (syn_p 0.01, sem_p 0.99, sem)
+- the cat and i am sorry  (syn_p 0.00, sem_p 0.01, non)
+- tom were the cat was fun together  (syn_p 0.00, sem_p 0.00, non)
+
+**e-i-on / W'=7 emit=6.5 t=1 gate**
+- they do not find him  (syn_p 0.89, sem_p 0.23, syn)
+- as they all became best friends  (syn_p 0.00, sem_p 0.22, non)
+- at the park mia saw his friend sue  (syn_p 0.99, sem_p 0.96, sem)
+- he wanted to do it  (syn_p 1.00, sem_p 1.00, sem)
+- we did not get it  (syn_p 1.00, sem_p 0.98, sem)
+
+**e-i-on / W'=7 emit=7 t=1 gate**
+- they liked to play at the friends  (syn_p 0.01, sem_p 0.01, syn)
+- she went to see what it  (syn_p 0.00, sem_p 0.01, non)
+- lily and ben were playing in the sun  (syn_p 1.00, sem_p 1.00, sem)
+- see you look  (syn_p 0.00, sem_p 0.01, non)
+- come play on a good friends  (syn_p 0.00, sem_p 0.00, non)
+
+**e-i-on / W'=7 emit=leaf t=1 gate**
+- lily and ben let's go  (syn_p 0.00, sem_p 0.00, non)
+- they played together all the park  (syn_p 0.00, sem_p 0.05, non)
+- tim was big again  (syn_p 0.99, sem_p 0.29, syn)
+- can i play with me  (syn_p 0.00, sem_p 0.01, non)
+- tom and to play outside in the sun  (syn_p 0.00, sem_p 0.01, non)
+
+**e-ii-0 / W'=7 emit=0 t=1 gate**
+- tim played and girl and what the can  (syn_p 0.00, sem_p 0.00, non)
+- go with had and lots of the with  (syn_p 0.00, sem_p 0.00, non)
+- the was had to was  (syn_p 0.00, sem_p 0.00, non)
+- and bad too little  (syn_p 0.00, sem_p 0.00, non)
+- tim you to a tree  (syn_p 0.00, sem_p 0.00, non)
+
+**e-ii-0 / W'=7 emit=0 t=1**
+- but a happy her  (syn_p 0.00, sem_p 0.00, non)
+- they he day happy max you so was  (syn_p 0.00, sem_p 0.00, non)
+- lily play and knew in but happy  (syn_p 0.00, sem_p 0.00, non)
+- you he yes fun  (syn_p 0.00, sem_p 0.00, non)
+- spot she little  (syn_p 0.00, sem_p 0.00, non)
+
+**e-ii-4 / W'=7 emit=4 t=1 gate**
+- they played something shiny and pretty  (syn_p 0.99, sem_p 0.81, syn)
+- they were the rock and so were sorry  (syn_p 0.00, sem_p 0.01, non)
+- they said the rock and friends and friends  (syn_p 0.00, sem_p 0.00, non)
+- she liked to go home was so small  (syn_p 0.00, sem_p 0.00, non)
+- a bad man smiled excited  (syn_p 0.00, sem_p 0.15, non)
+
+**e-ii-4 / W'=7 emit=4 t=1**
+- they upon to time look and is back  (syn_p 0.00, sem_p 0.00, non)
+- it bear play in you  (syn_p 0.00, sem_p 0.00, non)
+- he so look do came the and animals  (syn_p 0.00, sem_p 0.00, non)
+- can with what was be outside  (syn_p 0.00, sem_p 0.00, non)
+- tom laughed it both don't go his tim  (syn_p 0.00, sem_p 0.00, non)
+
+**e-ii-5 / W'=7 emit=5 t=1 gate**
+- then a car was not good friends  (syn_p 0.04, sem_p 0.00, syn)
+- who was scared and happy  (syn_p 0.00, sem_p 0.00, non)
+- she said let's do not his ball  (syn_p 0.00, sem_p 0.00, non)
+- she is your dog  (syn_p 0.96, sem_p 0.74, syn)
+- one day he were they liked to do  (syn_p 0.00, sem_p 0.00, non)
+
+**e-ii-5 / W'=7 emit=5 t=1**
+- the dog were laughed was good  (syn_p 0.00, sem_p 0.00, non)
+- i his help fun  (syn_p 0.00, sem_p 0.00, non)
+- tim's do and fish away  (syn_p 0.00, sem_p 0.00, non)
+- ben was and happy  (syn_p 0.00, sem_p 0.05, non)
+- sue see to big ball  (syn_p 0.00, sem_p 0.00, non)
+
+**e-ii-6 / W'=7 emit=6 t=1 gate**
+- it too big and shiny  (syn_p 0.00, sem_p 0.00, non)
+- spot was very scared and pretty  (syn_p 0.28, sem_p 0.62, syn)
+- sue said lily and sad  (syn_p 0.00, sem_p 0.00, non)
+- one day he made a little bird  (syn_p 1.00, sem_p 0.71, syn)
+- she was her best friend  (syn_p 0.61, sem_p 0.39, syn)
+
+**e-ii-6 / W'=7 emit=6 t=1**
+- lily and so sad  (syn_p 0.00, sem_p 0.00, non)
+- they then something took idea  (syn_p 0.00, sem_p 0.00, non)
+- they told mom and was together  (syn_p 0.00, sem_p 0.01, non)
+- she like it park  (syn_p 0.00, sem_p 0.00, non)
+- tim was with i toys are fun  (syn_p 0.00, sem_p 0.00, non)
+
+**e-ii-6.5 / W'=7 emit=6.5 t=1 gate**
+- but wanted to play with it  (syn_p 0.00, sem_p 0.02, non)
+- yes it a shiny  (syn_p 0.00, sem_p 0.00, non)
+- his mom and the friends  (syn_p 0.00, sem_p 0.01, non)
+- it a happy  (syn_p 0.00, sem_p 0.00, non)
+- lily and sue loved the friends  (syn_p 0.78, sem_p 0.06, syn)
+
+**e-ii-6.5 / W'=7 emit=6.5 t=1**
+- they thought tom bird was home  (syn_p 0.27, sem_p 0.00, syn)
+- everyone are you  (syn_p 0.00, sem_p 0.00, non)
+- it and flew was fun  (syn_p 0.00, sem_p 0.00, non)
+- can a the good ball careful  (syn_p 0.00, sem_p 0.00, non)
+- that they have fun  (syn_p 0.00, sem_p 0.00, non)
+
+**e-ii-7 / W'=7 emit=7 t=1 gate**
+- can we play with you  (syn_p 0.52, sem_p 0.83, syn)
+- i had to play it  (syn_p 0.99, sem_p 0.97, sem)
+- tom and very surprised and excited  (syn_p 0.00, sem_p 0.00, non)
+- the dog was surprised  (syn_p 1.00, sem_p 1.00, sem)
+- they were they wanted to look ben look  (syn_p 0.00, sem_p 0.00, non)
+
+**e-ii-7 / W'=7 emit=7 t=1**
+- max was lily you at friends  (syn_p 0.00, sem_p 0.00, non)
+- but were very happy  (syn_p 0.00, sem_p 0.01, non)
+- tim found share sam play  (syn_p 0.00, sem_p 0.00, non)
+- the dog went to make the bird  (syn_p 0.13, sem_p 0.00, syn)
+- said played mia lots good there  (syn_p 0.00, sem_p 0.00, non)
+
+## Follow-ups on seed 13 (tau and W' at the top b) and seed 17 replicates (b = 6, 6.5, 7: the three b values with the highest R-syn)
+
+| group | arm | seed | distinct new | dist/draw | R-sem | R-syn | R-non | (non with sem_pass) | tri\|d | tri\|d in sem / syn / non | fair sem / syn / non | repeats (cut) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| e17-i-off | W'=7 emit=6 t=1 | 17 | 1507 | 0.942 | 0.063 | 0.046 | 0.891 | 0.001 | 0.980 | 0.705 / 0.971 / 1.000 | 0.042 / 0.042 / 0.839 | 37 (2) |
+| e17-i-off | W'=7 emit=6.5 t=1 | 17 | 1500 | 0.938 | 0.065 | 0.069 | 0.866 | 0.003 | 0.983 | 0.745 / 0.990 / 1.000 | 0.046 / 0.064 / 0.812 | 44 (10) |
+| e17-i-off | W'=7 emit=7 t=1 | 17 | 1484 | 0.927 | 0.080 | 0.083 | 0.837 | 0.003 | 0.980 | 0.790 / 0.992 / 0.997 | 0.059 / 0.076 / 0.774 | 60 (4) |
+| e17-i-on | W'=7 emit=6 t=1 gate | 17 | 1291 | 0.807 | 0.352 | 0.203 | 0.445 | 0.009 | 0.900 | 0.767 / 0.939 / 0.988 | 0.218 / 0.154 / 0.354 | 253 (36) |
+| e17-i-on | W'=7 emit=6.5 t=1 gate | 17 | 1268 | 0.792 | 0.335 | 0.215 | 0.450 | 0.016 | 0.894 | 0.739 / 0.949 / 0.984 | 0.196 / 0.161 / 0.351 | 276 (27) |
+| e17-i-on | W'=7 emit=7 t=1 gate | 17 | 1207 | 0.754 | 0.369 | 0.216 | 0.415 | 0.014 | 0.886 | 0.742 / 0.939 / 0.988 | 0.206 / 0.153 / 0.309 | 337 (27) |
+| e17-i-on | W'=7 emit=leaf t=1 gate | 17 | 1057 | 0.661 | 0.577 | 0.171 | 0.252 | 0.011 | 0.737 | 0.597 / 0.851 / 0.981 | 0.228 / 0.096 / 0.163 | 487 (11) |
+| e17-ii-6 | W'=7 emit=6 t=1 gate | 17 | 1277 | 0.798 | 0.306 | 0.178 | 0.516 | 0.013 | 0.907 | 0.752 / 0.925 / 0.992 | 0.184 / 0.131 / 0.409 | 267 (29) |
+| e17-ii-6 | W'=7 emit=6 t=1 | 17 | 1509 | 0.943 | 0.052 | 0.041 | 0.907 | 0.001 | 0.991 | 0.846 / 1.000 / 0.999 | 0.041 / 0.039 / 0.855 | 35 (0) |
+| e17-ii-6.5 | W'=7 emit=6.5 t=1 gate | 17 | 1259 | 0.787 | 0.355 | 0.178 | 0.467 | 0.011 | 0.892 | 0.720 / 0.969 / 0.993 | 0.201 / 0.136 / 0.365 | 285 (35) |
+| e17-ii-6.5 | W'=7 emit=6.5 t=1 | 17 | 1487 | 0.929 | 0.057 | 0.054 | 0.889 | 0.000 | 0.989 | 0.800 / 1.000 / 1.000 | 0.043 / 0.050 / 0.826 | 57 (2) |
+| e17-ii-7 | W'=7 emit=7 t=1 gate | 17 | 1202 | 0.751 | 0.369 | 0.197 | 0.433 | 0.009 | 0.883 | 0.734 / 0.924 / 0.990 | 0.204 / 0.137 / 0.323 | 342 (20) |
+| e17-ii-7 | W'=7 emit=7 t=1 | 17 | 1452 | 0.907 | 0.083 | 0.090 | 0.828 | 0.003 | 0.977 | 0.742 / 0.985 / 1.000 | 0.056 / 0.080 / 0.751 | 92 (3) |
+| follow | W'=7 emit=6.5 t=0.7 gate | 13 | 995 | 0.622 | 0.445 | 0.198 | 0.357 | 0.013 | 0.870 | 0.745 / 0.959 / 0.977 | 0.206 / 0.118 / 0.217 | 605 (22) |
+| follow | W'=7 emit=6.5 t=2 gate | 13 | 1403 | 0.877 | 0.301 | 0.249 | 0.450 | 0.004 | 0.928 | 0.823 / 0.946 / 0.989 | 0.217 / 0.206 / 0.390 | 197 (14) |
+| follow | W'=2 emit=6.5 t=1 gate | 13 | 1338 | 0.836 | 0.470 | 0.197 | 0.333 | 0.009 | 0.726 | 0.595 / 0.787 / 0.874 | 0.234 / 0.129 / 0.244 | 262 (52) |
+| follow | W'=2 emit=7 t=1 gate | 13 | 1324 | 0.828 | 0.469 | 0.231 | 0.300 | 0.005 | 0.682 | 0.557 / 0.712 / 0.854 | 0.216 / 0.136 / 0.212 | 276 (75) |
+
+
+### Samples (5 per arm)
+
+**e17-i-off / W'=7 emit=6 t=1**
+- they are not with little dog anymore  (syn_p 0.50, sem_p 0.02, syn)
+- you am be be the dog  (syn_p 0.00, sem_p 0.00, non)
+- she laughed look the said to do fun  (syn_p 0.00, sem_p 0.00, non)
+- sue wanted to find his what cat  (syn_p 0.00, sem_p 0.00, non)
+- mom playing was smiled  (syn_p 0.00, sem_p 0.03, non)
+
+**e17-i-off / W'=7 emit=6.5 t=1**
+- tim and sue all with had the bird  (syn_p 0.00, sem_p 0.00, non)
+- they had can were very surprised  (syn_p 0.00, sem_p 0.00, non)
+- the boy feel found sad  (syn_p 0.00, sem_p 0.03, non)
+- it and sue mom smiled  (syn_p 0.00, sem_p 0.00, non)
+- sue was so sad  (syn_p 1.00, sem_p 0.99, sem)
+
+**e17-i-off / W'=7 emit=7 t=1**
+- but can one unexpected happened  (syn_p 0.00, sem_p 0.00, non)
+- lily a proud unexpected happened  (syn_p 0.00, sem_p 0.00, non)
+- i saw will now  (syn_p 0.03, sem_p 0.09, syn)
+- let's go soon  (syn_p 0.99, sem_p 0.59, syn)
+- do you came to go with friend  (syn_p 0.00, sem_p 0.00, non)
+
+**e17-i-on / W'=7 emit=6 t=1 gate**
+- i will do you  (syn_p 0.11, sem_p 0.22, syn)
+- sara and lily had no friends  (syn_p 1.00, sem_p 1.00, sem)
+- tim and sue were very happy  (syn_p 1.00, sem_p 1.00, sem)
+- tom and his friends were excited  (syn_p 1.00, sem_p 1.00, sem)
+- but the friends were scared of the tree  (syn_p 1.00, sem_p 0.99, sem)
+
+**e17-i-on / W'=7 emit=6.5 t=1 gate**
+- mia wanted to go away  (syn_p 1.00, sem_p 1.00, sem)
+- while they played in a big house  (syn_p 0.00, sem_p 0.77, non)
+- tom and ben and said to help them  (syn_p 0.00, sem_p 0.00, non)
+- from that day on they played with him  (syn_p 1.00, sem_p 0.93, sem)
+- his toys now  (syn_p 0.00, sem_p 0.00, non)
+
+**e17-i-on / W'=7 emit=7 t=1 gate**
+- sue was happy to do  (syn_p 0.00, sem_p 0.02, non)
+- the bird asked can we play with you  (syn_p 0.01, sem_p 0.59, syn)
+- lily and sue wanted to do it  (syn_p 1.00, sem_p 1.00, sem)
+- but she could not see what was inside  (syn_p 1.00, sem_p 0.65, syn)
+- they and the girl became good friends  (syn_p 0.01, sem_p 0.52, syn)
+
+**e17-i-on / W'=7 emit=leaf t=1 gate**
+- tom and tom thanked her  (syn_p 1.00, sem_p 0.99, sem)
+- tim smiled and said yes you lily  (syn_p 0.25, sem_p 0.04, syn)
+- anna and lily were playing in the park  (syn_p 1.00, sem_p 1.00, sem)
+- he loved to play outside  (syn_p 1.00, sem_p 1.00, sem)
+- we be scared lily  (syn_p 0.00, sem_p 0.00, non)
+
+**e17-ii-6 / W'=7 emit=6 t=1 gate**
+- lily were not happy to find his ball  (syn_p 0.00, sem_p 0.03, non)
+- then he looked at lily sam  (syn_p 0.21, sem_p 0.09, syn)
+- they had so excited to your ball together  (syn_p 0.00, sem_p 0.00, non)
+- ben was happy and said yes  (syn_p 1.00, sem_p 1.00, sem)
+- ben were so happy to see their cat  (syn_p 0.00, sem_p 0.25, non)
+
+**e17-ii-6 / W'=7 emit=6 t=1**
+- he and scared and will anymore  (syn_p 0.00, sem_p 0.00, non)
+- they then did food happened  (syn_p 0.00, sem_p 0.00, non)
+- tim a so sad  (syn_p 0.00, sem_p 0.00, non)
+- they very friends  (syn_p 0.00, sem_p 0.00, non)
+- tim want with go are you better  (syn_p 0.00, sem_p 0.00, non)
+
+**e17-ii-6.5 / W'=7 emit=6.5 t=1 gate**
+- they and friends and scared  (syn_p 0.00, sem_p 0.00, non)
+- she was very happy to do  (syn_p 0.00, sem_p 0.04, non)
+- lily had an idea  (syn_p 1.00, sem_p 1.00, sem)
+- tom wanted to play with it  (syn_p 1.00, sem_p 1.00, sem)
+- she and proud of her little girl  (syn_p 0.00, sem_p 0.00, non)
+
+**e17-ii-6.5 / W'=7 emit=6.5 t=1**
+- but then something unexpected long  (syn_p 0.00, sem_p 0.00, non)
+- he wanted mom a lily  (syn_p 0.00, sem_p 0.00, non)
+- so they could the went have play  (syn_p 0.00, sem_p 0.00, non)
+- the dog went to see i cake  (syn_p 0.01, sem_p 0.00, syn)
+- they played liked friends  (syn_p 0.00, sem_p 0.67, non)
+
+**e17-ii-7 / W'=7 emit=7 t=1 gate**
+- but he saw the man was a girl  (syn_p 0.92, sem_p 0.75, syn)
+- they played and sad  (syn_p 0.00, sem_p 0.00, non)
+- lily and happy to help  (syn_p 0.00, sem_p 0.00, non)
+- what was proud of fun  (syn_p 0.00, sem_p 0.00, non)
+- do that was very happy and thanked sam  (syn_p 0.00, sem_p 0.00, non)
+
+**e17-ii-7 / W'=7 emit=7 t=1**
+- who all you  (syn_p 0.00, sem_p 0.00, non)
+- he was and to with his ball me  (syn_p 0.00, sem_p 0.00, non)
+- tim liked for play with together long  (syn_p 0.00, sem_p 0.00, non)
+- soon he saw was girl my max  (syn_p 0.00, sem_p 0.00, non)
+- they had and lot of fun  (syn_p 0.00, sem_p 0.06, non)
+
+**follow / W'=7 emit=6.5 t=0.7 gate**
+- the car and i was playing lily  (syn_p 0.00, sem_p 0.00, non)
+- the little girl was happy  (syn_p 1.00, sem_p 1.00, sem)
+- the cat and i don't do that ball  (syn_p 0.00, sem_p 0.00, non)
+- they was very happy to help his mom  (syn_p 0.00, sem_p 0.86, non)
+- this is big  (syn_p 0.99, sem_p 0.98, sem)
+
+**follow / W'=7 emit=6.5 t=2 gate**
+- once upon a high rock and a girl  (syn_p 0.00, sem_p 0.00, non)
+- a big bird came down from the toys  (syn_p 1.00, sem_p 0.03, syn)
+- tom wanted to go now  (syn_p 1.00, sem_p 1.00, sem)
+- it a boy came to the park  (syn_p 0.00, sem_p 0.02, non)
+- go in a lot too  (syn_p 0.00, sem_p 0.00, non)
+
+**follow / W'=2 emit=6.5 t=1 gate**
+- he and sad  (syn_p 0.00, sem_p 0.00, non)
+- they and lily and sue were happy  (syn_p 0.09, sem_p 0.68, syn)
+- so they found it under a new friend  (syn_p 1.00, sem_p 0.00, syn)
+- she wanted to play  (syn_p 0.99, sem_p 1.00, sem)
+- she asked a car  (syn_p 0.00, sem_p 0.01, non)
+
+**follow / W'=2 emit=7 t=1 gate**
+- they asked lily said scared  (syn_p 0.00, sem_p 0.00, non)
+- it a kind bird to do it  (syn_p 0.00, sem_p 0.00, non)
+- but then they saw a big red ball  (syn_p 1.00, sem_p 1.00, sem)
+- the man smiled and smiled  (syn_p 1.00, sem_p 1.00, sem)
+- it was not happy  (syn_p 1.00, sem_p 1.00, sem)
+
+## Is class impurity the bottleneck? (seed 13, `r214_impurity.py`)
+An emitted word is IMPURE when its majority POS (spaCy UPOS over the training stream) differs from the token-weighted majority POS of its class at b.
+Per arm: share of syntax-fail and of syntax-pass sentences with at least one impure emission, impure words per sentence (fail / pass), and the
+commonest (word POS <- class POS) among the fails.
+
+| arm | b | classes | distinct new | syn-fail | impure share in syn-fail | impure share in syn-pass | impure words per sentence (fail / pass) | top impure (word POS <- class POS) among fails |
+|---|---|---|---|---|---|---|---|---|
+| e-i-on gate W'=7 | 0 | 1 | 1543 | 1257 | 1.000 | 1.000 | 4.93 / 4.14 | PRON<-VERB 1152, NOUN<-VERB 772, CCONJ<-VERB 753, DET<-VERB 698 |
+| e-i-on gate W'=7 | 4 | 14 | 1436 | 865 | 0.984 | 0.921 | 2.97 / 2.36 | CCONJ<-AUX 564, PRON<-DET 244, PROPN<-PRON 193, ADV<-VERB 158 |
+| e-i-on gate W'=7 | 5 | 27 | 1391 | 749 | 0.971 | 0.916 | 2.58 / 2.09 | CCONJ<-AUX 486, PRON<-DET 188, PROPN<-PRON 164, ADV<-NOUN 155 |
+| e-i-on gate W'=7 | 6 | 50 | 1352 | 683 | 0.941 | 0.827 | 2.25 / 1.66 | CCONJ<-AUX 477, PRON<-DET 165, VERB<-AUX 133, ADV<-PROPN 107 |
+| e-i-on gate W'=7 | 6.5 | 69 | 1262 | 477 | 0.782 | 0.746 | 1.29 / 1.26 | AUX<-CCONJ 109, AUX<-VERB 48, NOUN<-ADV 41, ADV<-PROPN 39 |
+| e-i-on gate W'=7 | 7 | 97 | 1172 | 412 | 0.711 | 0.684 | 1.11 / 1.09 | AUX<-CCONJ 103, AUX<-VERB 53, ADV<-PROPN 33, VERB<-CCONJ 27 |
+| e-i-off W'=7 | 0 | 1 | 1600 | 1580 | 0.999 | 1.000 | 4.41 / 3.65 | PRON<-VERB 1675, NOUN<-VERB 840, ADV<-VERB 812, ADJ<-VERB 783 |
+| e-i-off W'=7 | 4 | 14 | 1585 | 1501 | 0.973 | 0.881 | 2.78 / 1.93 | PRON<-DET 347, ADP<-VERB 329, CCONJ<-AUX 318, PROPN<-PRON 290 |
+| e-i-off W'=7 | 5 | 27 | 1574 | 1452 | 0.955 | 0.820 | 2.38 / 1.66 | CCONJ<-AUX 352, PRON<-DET 327, VERB<-AUX 285, PROPN<-PRON 268 |
+| e-i-off W'=7 | 6 | 50 | 1574 | 1412 | 0.899 | 0.790 | 2.05 / 1.48 | CCONJ<-AUX 346, PRON<-DET 335, VERB<-AUX 303, ADV<-PROPN 180 |
+| e-i-off W'=7 | 6.5 | 69 | 1533 | 1277 | 0.836 | 0.758 | 1.52 / 1.20 | AUX<-CCONJ 191, PRON<-DET 124, ADV<-PROPN 122, VERB<-CCONJ 91 |
+| e-i-off W'=7 | 7 | 97 | 1499 | 1141 | 0.738 | 0.676 | 1.23 / 1.06 | AUX<-CCONJ 192, ADV<-PROPN 98, VERB<-CCONJ 88, PRON<-NOUN 79 |
+| e-ii-4 gate W'=7 | 4 | 14 | 1451 | 947 | 0.965 | 0.907 | 2.75 / 2.12 | CCONJ<-AUX 485, PRON<-DET 236, ADV<-VERB 175, VERB<-AUX 158 |
+| e-ii-4 W'=7 | 4 | 14 | 1592 | 1531 | 0.970 | 0.803 | 2.66 / 1.66 | PRON<-DET 351, CCONJ<-AUX 345, PROPN<-PRON 305, VERB<-AUX 291 |
+| e-ii-5 gate W'=7 | 5 | 27 | 1434 | 847 | 0.933 | 0.867 | 2.20 / 1.91 | CCONJ<-AUX 452, PRON<-DET 189, PROPN<-PRON 152, VERB<-AUX 145 |
+| e-ii-5 W'=7 | 5 | 27 | 1586 | 1487 | 0.951 | 0.899 | 2.33 / 1.98 | PRON<-DET 321, CCONJ<-AUX 308, VERB<-AUX 281, PROPN<-PRON 268 |
+| e-ii-6 gate W'=7 | 6 | 50 | 1364 | 718 | 0.935 | 0.802 | 2.18 / 1.53 | CCONJ<-AUX 391, PRON<-DET 193, VERB<-AUX 140, ADV<-PROPN 92 |
+| e-ii-6 W'=7 | 6 | 50 | 1571 | 1437 | 0.917 | 0.754 | 1.96 / 1.40 | CCONJ<-AUX 327, VERB<-AUX 299, PRON<-DET 293, ADV<-PROPN 156 |
+| e-ii-6.5 gate W'=7 | 6.5 | 69 | 1316 | 533 | 0.799 | 0.728 | 1.35 / 1.16 | AUX<-CCONJ 118, VERB<-CCONJ 57, NOUN<-ADV 54, ADV<-PROPN 54 |
+| e-ii-6.5 W'=7 | 6.5 | 69 | 1552 | 1340 | 0.845 | 0.708 | 1.65 / 1.08 | AUX<-CCONJ 267, PRON<-DET 141, ADV<-PROPN 118, VERB<-CCONJ 117 |
+| e-ii-7 gate W'=7 | 7 | 97 | 1250 | 505 | 0.667 | 0.663 | 1.05 / 1.00 | AUX<-CCONJ 104, PROPN<-PRON 50, VERB<-CCONJ 40, AUX<-VERB 38 |
+| e-ii-7 W'=7 | 7 | 97 | 1514 | 1211 | 0.752 | 0.670 | 1.29 / 0.90 | AUX<-CCONJ 231, ADV<-PROPN 108, VERB<-CCONJ 97, PROPN<-PRON 95 |
+
+Reading: at coarse b (<= 6) every sentence carries impure emissions (2-5 per sentence) and the fails carry more than the passes (.94-.98 vs .83-.92
+of sentences); at 6.5-7 bits the two groups carry the same amount (.711 vs .684, 1.11 vs 1.09 words per sentence with the gate; .667 vs .663 and 1.05 vs 1.00
+in the named-input arm), so at the fine levels a syntax fail is not explained by impurity alone. The impure pairs are function-word mixtures
+(CCONJ <- AUX: "and" in the class of "was / were / said"; AUX <- CCONJ; PRON <- DET; PROPN <- PRON), the word tree's "and was said" class; content
+classes (nouns, emotion words) rarely appear among the top impure pairs. So the bottleneck is the function-word class, not the content
+classes; a class source that separates auxiliaries, conjunctions, determiners and pronouns is what the R-syn regime would need.
+
+## Go rule and verdict (class emission)
+- **R-non >= .6**: yes (gate off, b <= 6: .90-.99; gate on b = 0: .815).
+- **R-sem >= .6**: no in any class-emission arm; the gated token model (emit = leaf) reaches .558 (seed 13) and .577 (seed 17) with tri|d .766 / .737; R-sem rises
+  monotonically with b (gate on, token input, seed 13: .069, .212, .268, .286, .409, .432, leaf .558).
+- **R-syn >= .6**: no. Gate on, token input, seed 13: .116 (b 0), .186, .193, .209, .213, .217 (b 7), .206 (leaf); seed 17: .203 (6), .215 (6.5), .216 (7), .171 (leaf);
+  maximum anywhere .249 (b 6.5, tau 2). The curve rises from the root and then sits at .2-.22 up to the leaf: no interior peak (the maximum is .01 above the leaf on
+  seed 13 and .045 on seed 17, far from the pre-registered .2 above both ends), and the kill threshold (R-syn max < .4) applies.
+  Gate off the R-syn share is lower (.012 to .129).
+- **Input named at the same b** (ii) is no better than token input (i) at every b (R-sem .179-.407 against .212-.432; R-syn .168-.224 against .186-.217): naming the window loses R-sem and gains nothing in R-syn.
+- **Temperature at b 6.5 (gate on)**: .7 / 1 / 2 give R-sem .445 / .409 / .301, R-syn .198 / .213 / .249, R-non .357 / .378 / .450. R-syn is nearly flat in tau (the gain
+  from 1 to 2 is .036 while R-non grows .07), so the level and not the temperature does the little there is, and temperature alone (token model without emission, previous addendum) falls to R-syn .03-.14.
+- **W' = 2** at b 6.5 / 7 (gate on): R-sem .470 / .469 (tri|d among them .595 / .557, above the .30 floor), R-syn .197 / .231, R-non .333 / .300: the best R-sem of any class-emission arm, still below .6.
+
+**Verdict: NO-GO.** Output-side abstraction moves the generator from R-sem to R-non as b falls, and the gate keeps R-syn at about .2 for every b from 4 to the leaf, a level that the
+leaf itself also has (.17-.21). The abstraction decouples word identity from context (the emitted words differ from the context-licensed word) but not syntax
+from meaning: the sentences that lose meaning lose grammar too, because the class the word tree gives for function words is mixed. R-syn is not a regime that either dial
+(input read level, window names, read reach, temperature, output class level) produces on this corpus with this judge; the largest purity anywhere is .249. Phase 2 is not warranted.
