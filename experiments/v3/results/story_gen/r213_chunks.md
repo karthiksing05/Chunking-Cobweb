@@ -252,3 +252,17 @@ Counts are training sentences (by index in the seed's stream) in which the strin
 ## Rule notes
 
 One trivial `python -c "print(1)"` and one `python3 --version` ran on the login node, and an `import nltk` check on the login node was blocked by the auto-mode classifier before it ran; everything else, the training, dumps and analyses, ran as batch jobs on compute nodes. All four learning jobs and the analysis jobs were `sbatch --requeue` on the overcap partition with the standard exclude list, no jobs or waiters left running.
+
+## Correction (18 Nov)
+
+Some secondary language numbers in this file were mis-transcribed from the script output. `r213/stats.txt` is authoritative, and the site uses it. The headline numbers (top-50 and top-200 Jaccard at 1000 sentences, and the top-50 values at 250 and 500) match.
+
+| Quantity | This file had | stats.txt |
+|---|---|---|
+| TRELLIS top-200 Jaccard at 250 | .194 | .117 |
+| Length-matched frequency, top-200 at 250 | .229 | .216 |
+| TRELLIS stability at 250, top-200 | .436 | .290 |
+| Pooled top-200 length histogram | 141/49/10 | 143/51/6 |
+| Count-weighted overlap, all strings, 250/500/1000 | .196/.243/.284 | .114/.162/.214 |
+| Count-weighted overlap, TRELLIS top-200 at 250 | .178 | .136 |
+| Seed 13 distinct strings / occurrences | 496/1733 | 2218/3455 |
