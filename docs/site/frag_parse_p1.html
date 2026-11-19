@@ -1,0 +1,227 @@
+<svg class="dg" viewBox="0 0 800 770" role="img" aria-label="Parse success rate against training sentences, three panels. Parse only: real sentences stay near .93; content swaps are accepted nearly as often (.905 at 4,000 sentences), adjacent swaps at .87 and scrambles at .77. Generator score and the (b) split score: success on scrambles falls from .39 and .49 at 125 sentences to .05 at 4,000, while content swaps stay at .58 and .63.">
+<line x1="70" x2="380" y1="280.0" y2="280.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="64" y="284.0" text-anchor="end" style="font-size:11px;fill:var(--muted)">0</text>
+<line x1="70" x2="380" y1="232.0" y2="232.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="64" y="236.0" text-anchor="end" style="font-size:11px;fill:var(--muted)">0.2</text>
+<line x1="70" x2="380" y1="184.0" y2="184.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="64" y="188.0" text-anchor="end" style="font-size:11px;fill:var(--muted)">0.4</text>
+<line x1="70" x2="380" y1="136.0" y2="136.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="64" y="140.0" text-anchor="end" style="font-size:11px;fill:var(--muted)">0.6</text>
+<line x1="70" x2="380" y1="88.0" y2="88.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="64" y="92.0" text-anchor="end" style="font-size:11px;fill:var(--muted)">0.8</text>
+<line x1="70" x2="380" y1="40.0" y2="40.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="64" y="44.0" text-anchor="end" style="font-size:11px;fill:var(--muted)">1</text>
+<line x1="70" x2="380" y1="280" y2="280" stroke="var(--muted)" stroke-width="1"/>
+<line x1="70.0" x2="70.0" y1="280" y2="284" stroke="var(--muted)" stroke-width="1"/>
+<text x="70.0" y="296" text-anchor="middle" style="font-size:11px;fill:var(--muted)">125</text>
+<line x1="132.0" x2="132.0" y1="280" y2="284" stroke="var(--muted)" stroke-width="1"/>
+<text x="132.0" y="296" text-anchor="middle" style="font-size:11px;fill:var(--muted)">250</text>
+<line x1="194.0" x2="194.0" y1="280" y2="284" stroke="var(--muted)" stroke-width="1"/>
+<text x="194.0" y="296" text-anchor="middle" style="font-size:11px;fill:var(--muted)">500</text>
+<line x1="256.0" x2="256.0" y1="280" y2="284" stroke="var(--muted)" stroke-width="1"/>
+<text x="256.0" y="296" text-anchor="middle" style="font-size:11px;fill:var(--muted)">1000</text>
+<line x1="318.0" x2="318.0" y1="280" y2="284" stroke="var(--muted)" stroke-width="1"/>
+<text x="318.0" y="296" text-anchor="middle" style="font-size:11px;fill:var(--muted)">2000</text>
+<line x1="380.0" x2="380.0" y1="280" y2="284" stroke="var(--muted)" stroke-width="1"/>
+<text x="380.0" y="296" text-anchor="middle" style="font-size:11px;fill:var(--muted)">4000</text>
+<text x="225" y="312" text-anchor="middle" style="font-size:12px;fill:var(--ink)">training sentences n</text>
+<text x="70" y="30" style="font-size:12.5px;font-weight:600;fill:var(--ink)">Parse only (logZ per word)</text>
+<text transform="translate(34 160) rotate(-90)" text-anchor="middle" style="font-size:11.5px;fill:var(--ink2)">P(parse success)</text>
+<polygon points="70.0,55.8 132.0,54.7 194.0,52.0 256.0,52.9 318.0,51.5 380.0,53.8 380.0,58.6 318.0,59.3 256.0,62.7 194.0,61.6 132.0,59.7 70.0,61.4" fill="var(--ink)" fill-opacity="0.14" stroke="none"/>
+<polyline points="70.0,58.6 132.0,57.2 194.0,56.8 256.0,57.8 318.0,55.4 380.0,56.2" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round" stroke-dasharray="5 3"/>
+<circle cx="70.0" cy="58.6" r="3.6" fill="var(--ink)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): real sentences (C1), n=125: P(success) 0.922 (sd 0.012)</title></circle>
+<circle cx="132.0" cy="57.2" r="3.6" fill="var(--ink)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): real sentences (C1), n=250: P(success) 0.928 (sd 0.010)</title></circle>
+<circle cx="194.0" cy="56.8" r="3.6" fill="var(--ink)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): real sentences (C1), n=500: P(success) 0.930 (sd 0.020)</title></circle>
+<circle cx="256.0" cy="57.8" r="3.6" fill="var(--ink)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): real sentences (C1), n=1000: P(success) 0.926 (sd 0.021)</title></circle>
+<circle cx="318.0" cy="55.4" r="3.6" fill="var(--ink)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): real sentences (C1), n=2000: P(success) 0.936 (sd 0.016)</title></circle>
+<circle cx="380.0" cy="56.2" r="3.6" fill="var(--ink)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): real sentences (C1), n=4000: P(success) 0.932 (sd 0.010)</title></circle>
+<polygon points="70.0,59.0 132.0,64.8 194.0,81.2 256.0,88.9 318.0,92.4 380.0,94.0 380.0,97.6 318.0,96.0 256.0,99.1 194.0,91.2 132.0,83.6 70.0,78.2" fill="var(--s2)" fill-opacity="0.14" stroke="none"/>
+<polyline points="70.0,68.6 132.0,74.2 194.0,86.2 256.0,94.0 318.0,94.2 380.0,95.8" fill="none" stroke="var(--s2)" stroke-width="2" stroke-linejoin="round"/>
+<rect x="66.4" y="65.0" width="7.2" height="7.2" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): scramble, n=125: P(success) 0.881 (sd 0.040)</title></rect>
+<rect x="128.4" y="70.6" width="7.2" height="7.2" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): scramble, n=250: P(success) 0.857 (sd 0.039)</title></rect>
+<rect x="190.4" y="82.6" width="7.2" height="7.2" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): scramble, n=500: P(success) 0.807 (sd 0.021)</title></rect>
+<rect x="252.4" y="90.4" width="7.2" height="7.2" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): scramble, n=1000: P(success) 0.775 (sd 0.021)</title></rect>
+<rect x="314.4" y="90.6" width="7.2" height="7.2" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): scramble, n=2000: P(success) 0.774 (sd 0.007)</title></rect>
+<rect x="376.4" y="92.2" width="7.2" height="7.2" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): scramble, n=4000: P(success) 0.767 (sd 0.007)</title></rect>
+<polygon points="70.0,59.6 132.0,60.6 194.0,66.2 256.0,68.9 318.0,67.6 380.0,69.3 380.0,75.1 318.0,73.6 256.0,75.5 194.0,72.6 132.0,71.0 70.0,71.2" fill="var(--s1)" fill-opacity="0.14" stroke="none"/>
+<polyline points="70.0,65.4 132.0,65.8 194.0,69.4 256.0,72.2 318.0,70.6 380.0,72.2" fill="none" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="70.0,60.8 74.6,65.4 70.0,70.0 65.4,65.4" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): adjacent swap, n=125: P(success) 0.894 (sd 0.024)</title></polygon>
+<polygon points="132.0,61.2 136.6,65.8 132.0,70.4 127.4,65.8" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): adjacent swap, n=250: P(success) 0.892 (sd 0.022)</title></polygon>
+<polygon points="194.0,64.8 198.6,69.4 194.0,74.0 189.4,69.4" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): adjacent swap, n=500: P(success) 0.877 (sd 0.013)</title></polygon>
+<polygon points="256.0,67.6 260.6,72.2 256.0,76.8 251.4,72.2" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): adjacent swap, n=1000: P(success) 0.866 (sd 0.014)</title></polygon>
+<polygon points="318.0,66.0 322.6,70.6 318.0,75.2 313.4,70.6" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): adjacent swap, n=2000: P(success) 0.873 (sd 0.013)</title></polygon>
+<polygon points="380.0,67.6 384.6,72.2 380.0,76.8 375.4,72.2" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): adjacent swap, n=4000: P(success) 0.866 (sd 0.012)</title></polygon>
+<polygon points="70.0,94.4 132.0,78.6 194.0,65.0 256.0,67.0 318.0,68.7 380.0,67.6 380.0,87.0 318.0,92.1 256.0,88.8 194.0,90.1 132.0,100.6 70.0,126.4" fill="var(--cand)" fill-opacity="0.14" stroke="none"/>
+<polyline points="70.0,110.4 132.0,89.6 194.0,77.5 256.0,77.9 318.0,80.4 380.0,77.3" fill="none" stroke="var(--cand)" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="70.0" cy="110.4" r="3.6" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): agreement error, n=125: P(success) 0.707 (sd 0.067)</title></circle>
+<circle cx="132.0" cy="89.6" r="3.6" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): agreement error, n=250: P(success) 0.793 (sd 0.046)</title></circle>
+<circle cx="194.0" cy="77.5" r="3.6" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): agreement error, n=500: P(success) 0.844 (sd 0.052)</title></circle>
+<circle cx="256.0" cy="77.9" r="3.6" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): agreement error, n=1000: P(success) 0.842 (sd 0.046)</title></circle>
+<circle cx="318.0" cy="80.4" r="3.6" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): agreement error, n=2000: P(success) 0.832 (sd 0.049)</title></circle>
+<circle cx="380.0" cy="77.3" r="3.6" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): agreement error, n=4000: P(success) 0.845 (sd 0.040)</title></circle>
+<polygon points="70.0,51.7 132.0,51.9 194.0,53.7 256.0,57.4 318.0,56.9 380.0,61.8 380.0,63.8 318.0,62.7 256.0,63.4 194.0,61.5 132.0,58.5 70.0,59.5" fill="var(--s3)" fill-opacity="0.14" stroke="none"/>
+<polyline points="70.0,55.6 132.0,55.2 194.0,57.6 256.0,60.4 318.0,59.8 380.0,62.8" fill="none" stroke="var(--s3)" stroke-width="2" stroke-linejoin="round"/>
+<rect x="66.4" y="52.0" width="7.2" height="7.2" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): content swap (C2full), n=125: P(success) 0.935 (sd 0.016)</title></rect>
+<rect x="128.4" y="51.6" width="7.2" height="7.2" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): content swap (C2full), n=250: P(success) 0.937 (sd 0.014)</title></rect>
+<rect x="190.4" y="54.0" width="7.2" height="7.2" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): content swap (C2full), n=500: P(success) 0.927 (sd 0.016)</title></rect>
+<rect x="252.4" y="56.8" width="7.2" height="7.2" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): content swap (C2full), n=1000: P(success) 0.915 (sd 0.012)</title></rect>
+<rect x="314.4" y="56.2" width="7.2" height="7.2" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): content swap (C2full), n=2000: P(success) 0.917 (sd 0.012)</title></rect>
+<rect x="376.4" y="59.2" width="7.2" height="7.2" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.2"><title>Parse only (logZ per word): content swap (C2full), n=4000: P(success) 0.905 (sd 0.004)</title></rect>
+<line x1="450" x2="760" y1="280.0" y2="280.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="444" y="284.0" text-anchor="end" style="font-size:11px;fill:var(--muted)">0</text>
+<line x1="450" x2="760" y1="232.0" y2="232.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="444" y="236.0" text-anchor="end" style="font-size:11px;fill:var(--muted)">0.2</text>
+<line x1="450" x2="760" y1="184.0" y2="184.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="444" y="188.0" text-anchor="end" style="font-size:11px;fill:var(--muted)">0.4</text>
+<line x1="450" x2="760" y1="136.0" y2="136.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="444" y="140.0" text-anchor="end" style="font-size:11px;fill:var(--muted)">0.6</text>
+<line x1="450" x2="760" y1="88.0" y2="88.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="444" y="92.0" text-anchor="end" style="font-size:11px;fill:var(--muted)">0.8</text>
+<line x1="450" x2="760" y1="40.0" y2="40.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="444" y="44.0" text-anchor="end" style="font-size:11px;fill:var(--muted)">1</text>
+<line x1="450" x2="760" y1="280" y2="280" stroke="var(--muted)" stroke-width="1"/>
+<line x1="450.0" x2="450.0" y1="280" y2="284" stroke="var(--muted)" stroke-width="1"/>
+<text x="450.0" y="296" text-anchor="middle" style="font-size:11px;fill:var(--muted)">125</text>
+<line x1="512.0" x2="512.0" y1="280" y2="284" stroke="var(--muted)" stroke-width="1"/>
+<text x="512.0" y="296" text-anchor="middle" style="font-size:11px;fill:var(--muted)">250</text>
+<line x1="574.0" x2="574.0" y1="280" y2="284" stroke="var(--muted)" stroke-width="1"/>
+<text x="574.0" y="296" text-anchor="middle" style="font-size:11px;fill:var(--muted)">500</text>
+<line x1="636.0" x2="636.0" y1="280" y2="284" stroke="var(--muted)" stroke-width="1"/>
+<text x="636.0" y="296" text-anchor="middle" style="font-size:11px;fill:var(--muted)">1000</text>
+<line x1="698.0" x2="698.0" y1="280" y2="284" stroke="var(--muted)" stroke-width="1"/>
+<text x="698.0" y="296" text-anchor="middle" style="font-size:11px;fill:var(--muted)">2000</text>
+<line x1="760.0" x2="760.0" y1="280" y2="284" stroke="var(--muted)" stroke-width="1"/>
+<text x="760.0" y="296" text-anchor="middle" style="font-size:11px;fill:var(--muted)">4000</text>
+<text x="605" y="312" text-anchor="middle" style="font-size:12px;fill:var(--ink)">training sentences n</text>
+<text x="450" y="30" style="font-size:12.5px;font-weight:600;fill:var(--ink)">Generator (gen_lp_gate)</text>
+<text transform="translate(414 160) rotate(-90)" text-anchor="middle" style="font-size:11.5px;fill:var(--ink2)">P(parse success)</text>
+<polygon points="450.0,50.6 512.0,57.2 574.0,55.4 636.0,61.4 698.0,59.7 760.0,58.1 760.0,63.1 698.0,68.3 636.0,67.4 574.0,67.0 512.0,71.6 450.0,70.2" fill="var(--ink)" fill-opacity="0.14" stroke="none"/>
+<polyline points="450.0,60.4 512.0,64.4 574.0,61.2 636.0,64.4 698.0,64.0 760.0,60.6" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round" stroke-dasharray="5 3"/>
+<circle cx="450.0" cy="60.4" r="3.6" fill="var(--ink)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): real sentences (C1), n=125: P(success) 0.915 (sd 0.041)</title></circle>
+<circle cx="512.0" cy="64.4" r="3.6" fill="var(--ink)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): real sentences (C1), n=250: P(success) 0.898 (sd 0.030)</title></circle>
+<circle cx="574.0" cy="61.2" r="3.6" fill="var(--ink)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): real sentences (C1), n=500: P(success) 0.912 (sd 0.024)</title></circle>
+<circle cx="636.0" cy="64.4" r="3.6" fill="var(--ink)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): real sentences (C1), n=1000: P(success) 0.898 (sd 0.012)</title></circle>
+<circle cx="698.0" cy="64.0" r="3.6" fill="var(--ink)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): real sentences (C1), n=2000: P(success) 0.900 (sd 0.018)</title></circle>
+<circle cx="760.0" cy="60.6" r="3.6" fill="var(--ink)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): real sentences (C1), n=4000: P(success) 0.914 (sd 0.010)</title></circle>
+<polygon points="450.0,163.4 512.0,206.0 574.0,228.7 636.0,242.0 698.0,252.7 760.0,262.4 760.0,274.0 698.0,264.1 636.0,254.0 574.0,238.1 512.0,229.6 450.0,207.8" fill="var(--s2)" fill-opacity="0.14" stroke="none"/>
+<polyline points="450.0,185.6 512.0,217.8 574.0,233.4 636.0,248.0 698.0,258.4 760.0,268.2" fill="none" stroke="var(--s2)" stroke-width="2" stroke-linejoin="round"/>
+<rect x="446.4" y="182.0" width="7.2" height="7.2" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): scramble, n=125: P(success) 0.393 (sd 0.093)</title></rect>
+<rect x="508.4" y="214.2" width="7.2" height="7.2" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): scramble, n=250: P(success) 0.259 (sd 0.049)</title></rect>
+<rect x="570.4" y="229.8" width="7.2" height="7.2" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): scramble, n=500: P(success) 0.194 (sd 0.020)</title></rect>
+<rect x="632.4" y="244.4" width="7.2" height="7.2" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): scramble, n=1000: P(success) 0.133 (sd 0.025)</title></rect>
+<rect x="694.4" y="254.8" width="7.2" height="7.2" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): scramble, n=2000: P(success) 0.090 (sd 0.024)</title></rect>
+<rect x="756.4" y="264.6" width="7.2" height="7.2" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): scramble, n=4000: P(success) 0.049 (sd 0.024)</title></rect>
+<polygon points="450.0,80.9 512.0,92.7 574.0,107.0 636.0,122.3 698.0,125.9 760.0,148.1 760.0,155.9 698.0,146.1 636.0,128.5 574.0,120.2 512.0,124.5 450.0,119.9" fill="var(--s1)" fill-opacity="0.14" stroke="none"/>
+<polyline points="450.0,100.4 512.0,108.6 574.0,113.6 636.0,125.4 698.0,136.0 760.0,152.0" fill="none" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="450.0,95.8 454.6,100.4 450.0,105.0 445.4,100.4" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): adjacent swap, n=125: P(success) 0.748 (sd 0.081)</title></polygon>
+<polygon points="512.0,104.0 516.6,108.6 512.0,113.2 507.4,108.6" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): adjacent swap, n=250: P(success) 0.714 (sd 0.066)</title></polygon>
+<polygon points="574.0,109.0 578.6,113.6 574.0,118.2 569.4,113.6" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): adjacent swap, n=500: P(success) 0.693 (sd 0.028)</title></polygon>
+<polygon points="636.0,120.8 640.6,125.4 636.0,130.0 631.4,125.4" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): adjacent swap, n=1000: P(success) 0.644 (sd 0.013)</title></polygon>
+<polygon points="698.0,131.4 702.6,136.0 698.0,140.6 693.4,136.0" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): adjacent swap, n=2000: P(success) 0.600 (sd 0.042)</title></polygon>
+<polygon points="760.0,147.4 764.6,152.0 760.0,156.6 755.4,152.0" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): adjacent swap, n=4000: P(success) 0.533 (sd 0.016)</title></polygon>
+<polygon points="450.0,61.3 512.0,64.9 574.0,60.0 636.0,71.1 698.0,69.9 760.0,68.3 760.0,98.6 698.0,78.4 636.0,76.4 574.0,71.3 512.0,74.7 450.0,82.8" fill="var(--cand)" fill-opacity="0.14" stroke="none"/>
+<polyline points="450.0,72.0 512.0,69.8 574.0,65.6 636.0,73.8 698.0,74.1 760.0,83.5" fill="none" stroke="var(--cand)" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="450.0" cy="72.0" r="3.6" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): agreement error, n=125: P(success) 0.867 (sd 0.045)</title></circle>
+<circle cx="512.0" cy="69.8" r="3.6" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): agreement error, n=250: P(success) 0.876 (sd 0.020)</title></circle>
+<circle cx="574.0" cy="65.6" r="3.6" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): agreement error, n=500: P(success) 0.893 (sd 0.024)</title></circle>
+<circle cx="636.0" cy="73.8" r="3.6" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): agreement error, n=1000: P(success) 0.859 (sd 0.011)</title></circle>
+<circle cx="698.0" cy="74.1" r="3.6" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): agreement error, n=2000: P(success) 0.858 (sd 0.018)</title></circle>
+<circle cx="760.0" cy="83.5" r="3.6" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): agreement error, n=4000: P(success) 0.819 (sd 0.063)</title></circle>
+<polygon points="450.0,58.1 512.0,68.3 574.0,82.9 636.0,105.4 698.0,107.3 760.0,126.4 760.0,154.0 698.0,127.9 636.0,111.8 574.0,97.9 512.0,93.3 450.0,90.3" fill="var(--s3)" fill-opacity="0.14" stroke="none"/>
+<polyline points="450.0,74.2 512.0,80.8 574.0,90.4 636.0,108.6 698.0,117.6 760.0,140.2" fill="none" stroke="var(--s3)" stroke-width="2" stroke-linejoin="round"/>
+<rect x="446.4" y="70.6" width="7.2" height="7.2" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): content swap (C2full), n=125: P(success) 0.858 (sd 0.067)</title></rect>
+<rect x="508.4" y="77.2" width="7.2" height="7.2" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): content swap (C2full), n=250: P(success) 0.830 (sd 0.052)</title></rect>
+<rect x="570.4" y="86.8" width="7.2" height="7.2" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): content swap (C2full), n=500: P(success) 0.790 (sd 0.031)</title></rect>
+<rect x="632.4" y="105.0" width="7.2" height="7.2" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): content swap (C2full), n=1000: P(success) 0.714 (sd 0.013)</title></rect>
+<rect x="694.4" y="114.0" width="7.2" height="7.2" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): content swap (C2full), n=2000: P(success) 0.677 (sd 0.043)</title></rect>
+<rect x="756.4" y="136.6" width="7.2" height="7.2" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.2"><title>Generator (gen_lp_gate): content swap (C2full), n=4000: P(success) 0.583 (sd 0.057)</title></rect>
+<line x1="70" x2="380" y1="640.0" y2="640.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="64" y="644.0" text-anchor="end" style="font-size:11px;fill:var(--muted)">0</text>
+<line x1="70" x2="380" y1="592.0" y2="592.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="64" y="596.0" text-anchor="end" style="font-size:11px;fill:var(--muted)">0.2</text>
+<line x1="70" x2="380" y1="544.0" y2="544.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="64" y="548.0" text-anchor="end" style="font-size:11px;fill:var(--muted)">0.4</text>
+<line x1="70" x2="380" y1="496.0" y2="496.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="64" y="500.0" text-anchor="end" style="font-size:11px;fill:var(--muted)">0.6</text>
+<line x1="70" x2="380" y1="448.0" y2="448.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="64" y="452.0" text-anchor="end" style="font-size:11px;fill:var(--muted)">0.8</text>
+<line x1="70" x2="380" y1="400.0" y2="400.0" stroke="var(--gridc)" stroke-width="1"/>
+<text x="64" y="404.0" text-anchor="end" style="font-size:11px;fill:var(--muted)">1</text>
+<line x1="70" x2="380" y1="640" y2="640" stroke="var(--muted)" stroke-width="1"/>
+<line x1="70.0" x2="70.0" y1="640" y2="644" stroke="var(--muted)" stroke-width="1"/>
+<text x="70.0" y="656" text-anchor="middle" style="font-size:11px;fill:var(--muted)">125</text>
+<line x1="132.0" x2="132.0" y1="640" y2="644" stroke="var(--muted)" stroke-width="1"/>
+<text x="132.0" y="656" text-anchor="middle" style="font-size:11px;fill:var(--muted)">250</text>
+<line x1="194.0" x2="194.0" y1="640" y2="644" stroke="var(--muted)" stroke-width="1"/>
+<text x="194.0" y="656" text-anchor="middle" style="font-size:11px;fill:var(--muted)">500</text>
+<line x1="256.0" x2="256.0" y1="640" y2="644" stroke="var(--muted)" stroke-width="1"/>
+<text x="256.0" y="656" text-anchor="middle" style="font-size:11px;fill:var(--muted)">1000</text>
+<line x1="318.0" x2="318.0" y1="640" y2="644" stroke="var(--muted)" stroke-width="1"/>
+<text x="318.0" y="656" text-anchor="middle" style="font-size:11px;fill:var(--muted)">2000</text>
+<line x1="380.0" x2="380.0" y1="640" y2="644" stroke="var(--muted)" stroke-width="1"/>
+<text x="380.0" y="656" text-anchor="middle" style="font-size:11px;fill:var(--muted)">4000</text>
+<text x="225" y="672" text-anchor="middle" style="font-size:12px;fill:var(--ink)">training sentences n</text>
+<text x="70" y="390" style="font-size:12.5px;font-weight:600;fill:var(--ink)">Parse with the generator inside, (b) split</text>
+<text transform="translate(34 520) rotate(-90)" text-anchor="middle" style="font-size:11.5px;fill:var(--ink2)">P(parse success)</text>
+<polygon points="70.0,410.5 132.0,413.0 194.0,408.7 256.0,413.4 318.0,411.8 380.0,413.8 380.0,420.2 318.0,419.4 256.0,420.2 194.0,422.9 132.0,419.8 70.0,422.3" fill="var(--ink)" fill-opacity="0.14" stroke="none"/>
+<polyline points="70.0,416.4 132.0,416.4 194.0,415.8 256.0,416.8 318.0,415.6 380.0,417.0" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round" stroke-dasharray="5 3"/>
+<circle cx="70.0" cy="416.4" r="3.6" fill="var(--ink)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: real sentences (C1), n=125: P(success) 0.932 (sd 0.024)</title></circle>
+<circle cx="132.0" cy="416.4" r="3.6" fill="var(--ink)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: real sentences (C1), n=250: P(success) 0.932 (sd 0.014)</title></circle>
+<circle cx="194.0" cy="415.8" r="3.6" fill="var(--ink)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: real sentences (C1), n=500: P(success) 0.934 (sd 0.029)</title></circle>
+<circle cx="256.0" cy="416.8" r="3.6" fill="var(--ink)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: real sentences (C1), n=1000: P(success) 0.930 (sd 0.014)</title></circle>
+<circle cx="318.0" cy="415.6" r="3.6" fill="var(--ink)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: real sentences (C1), n=2000: P(success) 0.935 (sd 0.016)</title></circle>
+<circle cx="380.0" cy="417.0" r="3.6" fill="var(--ink)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: real sentences (C1), n=4000: P(success) 0.929 (sd 0.013)</title></circle>
+<polygon points="70.0,505.2 132.0,542.1 194.0,568.3 256.0,594.9 318.0,614.0 380.0,625.9 380.0,632.1 318.0,628.0 256.0,614.7 194.0,596.5 132.0,583.5 70.0,542.0" fill="var(--s2)" fill-opacity="0.14" stroke="none"/>
+<polyline points="70.0,523.6 132.0,562.8 194.0,582.4 256.0,604.8 318.0,621.0 380.0,629.0" fill="none" stroke="var(--s2)" stroke-width="2" stroke-linejoin="round"/>
+<rect x="66.4" y="520.0" width="7.2" height="7.2" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: scramble, n=125: P(success) 0.485 (sd 0.077)</title></rect>
+<rect x="128.4" y="559.2" width="7.2" height="7.2" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: scramble, n=250: P(success) 0.322 (sd 0.086)</title></rect>
+<rect x="190.4" y="578.8" width="7.2" height="7.2" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: scramble, n=500: P(success) 0.240 (sd 0.059)</title></rect>
+<rect x="252.4" y="601.2" width="7.2" height="7.2" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: scramble, n=1000: P(success) 0.147 (sd 0.041)</title></rect>
+<rect x="314.4" y="617.4" width="7.2" height="7.2" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: scramble, n=2000: P(success) 0.079 (sd 0.029)</title></rect>
+<rect x="376.4" y="625.4" width="7.2" height="7.2" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: scramble, n=4000: P(success) 0.046 (sd 0.013)</title></rect>
+<polygon points="70.0,442.2 132.0,449.8 194.0,461.5 256.0,478.7 318.0,494.6 380.0,506.5 380.0,527.1 318.0,513.0 256.0,503.3 194.0,483.7 132.0,471.8 70.0,456.6" fill="var(--s1)" fill-opacity="0.14" stroke="none"/>
+<polyline points="70.0,449.4 132.0,460.8 194.0,472.6 256.0,491.0 318.0,503.8 380.0,516.8" fill="none" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="70.0,444.8 74.6,449.4 70.0,454.0 65.4,449.4" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: adjacent swap, n=125: P(success) 0.794 (sd 0.030)</title></polygon>
+<polygon points="132.0,456.2 136.6,460.8 132.0,465.4 127.4,460.8" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: adjacent swap, n=250: P(success) 0.747 (sd 0.046)</title></polygon>
+<polygon points="194.0,468.0 198.6,472.6 194.0,477.2 189.4,472.6" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: adjacent swap, n=500: P(success) 0.698 (sd 0.046)</title></polygon>
+<polygon points="256.0,486.4 260.6,491.0 256.0,495.6 251.4,491.0" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: adjacent swap, n=1000: P(success) 0.621 (sd 0.051)</title></polygon>
+<polygon points="318.0,499.2 322.6,503.8 318.0,508.4 313.4,503.8" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: adjacent swap, n=2000: P(success) 0.568 (sd 0.038)</title></polygon>
+<polygon points="380.0,512.2 384.6,516.8 380.0,521.4 375.4,516.8" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: adjacent swap, n=4000: P(success) 0.513 (sd 0.043)</title></polygon>
+<polygon points="70.0,439.0 132.0,436.6 194.0,433.5 256.0,449.0 318.0,454.1 380.0,462.1 380.0,483.7 318.0,471.3 256.0,461.7 194.0,457.7 132.0,457.1 70.0,452.2" fill="var(--cand)" fill-opacity="0.14" stroke="none"/>
+<polyline points="70.0,445.6 132.0,446.9 194.0,445.6 256.0,455.4 318.0,462.7 380.0,472.9" fill="none" stroke="var(--cand)" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="70.0" cy="445.6" r="3.6" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: agreement error, n=125: P(success) 0.810 (sd 0.028)</title></circle>
+<circle cx="132.0" cy="446.9" r="3.6" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: agreement error, n=250: P(success) 0.805 (sd 0.043)</title></circle>
+<circle cx="194.0" cy="445.6" r="3.6" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: agreement error, n=500: P(success) 0.810 (sd 0.050)</title></circle>
+<circle cx="256.0" cy="455.4" r="3.6" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: agreement error, n=1000: P(success) 0.769 (sd 0.026)</title></circle>
+<circle cx="318.0" cy="462.7" r="3.6" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: agreement error, n=2000: P(success) 0.739 (sd 0.036)</title></circle>
+<circle cx="380.0" cy="472.9" r="3.6" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: agreement error, n=4000: P(success) 0.696 (sd 0.045)</title></circle>
+<polygon points="70.0,418.2 132.0,430.4 194.0,433.3 256.0,452.9 318.0,472.2 380.0,484.6 380.0,492.6 318.0,491.0 256.0,474.3 194.0,457.9 132.0,447.6 70.0,435.8" fill="var(--s3)" fill-opacity="0.14" stroke="none"/>
+<polyline points="70.0,427.0 132.0,439.0 194.0,445.6 256.0,463.6 318.0,481.6 380.0,488.6" fill="none" stroke="var(--s3)" stroke-width="2" stroke-linejoin="round"/>
+<rect x="66.4" y="423.4" width="7.2" height="7.2" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: content swap (C2full), n=125: P(success) 0.887 (sd 0.037)</title></rect>
+<rect x="128.4" y="435.4" width="7.2" height="7.2" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: content swap (C2full), n=250: P(success) 0.838 (sd 0.036)</title></rect>
+<rect x="190.4" y="442.0" width="7.2" height="7.2" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: content swap (C2full), n=500: P(success) 0.810 (sd 0.051)</title></rect>
+<rect x="252.4" y="460.0" width="7.2" height="7.2" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: content swap (C2full), n=1000: P(success) 0.735 (sd 0.044)</title></rect>
+<rect x="314.4" y="478.0" width="7.2" height="7.2" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: content swap (C2full), n=2000: P(success) 0.660 (sd 0.039)</title></rect>
+<rect x="376.4" y="485.0" width="7.2" height="7.2" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.2"><title>Parse with the generator inside, (b) split: content swap (C2full), n=4000: P(success) 0.631 (sd 0.017)</title></rect>
+<text x="450" y="440" style="font-size:12.5px;font-weight:600;fill:var(--ink)">Sentence class</text>
+<line x1="450" x2="474" y1="460" y2="460" stroke="var(--ink)" stroke-width="2" stroke-dasharray="5 3"/>
+<circle cx="462.0" cy="460.0" r="3.6" fill="var(--ink)" stroke="var(--surface)" stroke-width="1.2"><title>real sentences (C1)</title></circle>
+<text x="482" y="464" style="font-size:12px;fill:var(--ink2)">real sentences (C1)</text>
+<line x1="450" x2="474" y1="482" y2="482" stroke="var(--s2)" stroke-width="2"/>
+<rect x="458.4" y="478.4" width="7.2" height="7.2" fill="var(--s2)" stroke="var(--surface)" stroke-width="1.2"><title>scramble</title></rect>
+<text x="482" y="486" style="font-size:12px;fill:var(--ink2)">scramble</text>
+<line x1="450" x2="474" y1="504" y2="504" stroke="var(--s1)" stroke-width="2"/>
+<polygon points="462.0,499.4 466.6,504.0 462.0,508.6 457.4,504.0" fill="var(--s1)" stroke="var(--surface)" stroke-width="1.2"><title>adjacent swap</title></polygon>
+<text x="482" y="508" style="font-size:12px;fill:var(--ink2)">adjacent swap</text>
+<line x1="450" x2="474" y1="526" y2="526" stroke="var(--cand)" stroke-width="2"/>
+<circle cx="462.0" cy="526.0" r="3.6" fill="var(--cand)" stroke="var(--surface)" stroke-width="1.2"><title>agreement error</title></circle>
+<text x="482" y="530" style="font-size:12px;fill:var(--ink2)">agreement error</text>
+<line x1="450" x2="474" y1="548" y2="548" stroke="var(--s3)" stroke-width="2"/>
+<rect x="458.4" y="544.4" width="7.2" height="7.2" fill="var(--s3)" stroke="var(--surface)" stroke-width="1.2"><title>content swap (C2full)</title></rect>
+<text x="482" y="552" style="font-size:12px;fill:var(--ink2)">content swap (C2full)</text>
+<text x="450" y="590" style="font-size:11px;fill:var(--muted)">Success = score at or above the 10th percentile of 400 held-out</text>
+<text x="450" y="605" style="font-size:11px;fill:var(--muted)">real sentences (one threshold per seed and n).</text>
+<text x="450" y="620" style="font-size:11px;fill:var(--muted)">Lines: mean of four seeds; band: plus or minus one sd.</text>
+<text x="450" y="635" style="font-size:11px;fill:var(--muted)">A syntax-only parser should accept content swaps as often</text>
+<text x="450" y="650" style="font-size:11px;fill:var(--muted)">as real sentences (green on the dashed line).</text>
+</svg>

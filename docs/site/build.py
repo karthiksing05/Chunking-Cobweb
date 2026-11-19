@@ -39,7 +39,7 @@ out = sub(out, "@@SCRIPT@@", script)
 # measured fragments, filled in as their rounds finish
 io = (D / "frag_io.html").read_text(encoding="utf-8").replace("@@IOJSON@@", (D / "../../experiments/v3/results/explorers/io_trace.json").read_text(encoding="utf-8").replace("</", "<\\/"))
 out = sub(out, "@@IOEXP@@", io)
-for key, name in (("@@R94@@", "frag_r94.html"), ("@@R95@@", "frag_r95.html"), ("@@CHUNKS@@", "frag_chunks.html"), ("@@UNIFIED@@", "frag_unified.html"), ("@@CHESSCHUNKS@@", "frag_chess.html"), ("@@WINDOW@@", "frag_window.html"), ("@@COPYING@@", "frag_copying.html"), ("@@RATIONALE@@", "frag_rationale.html"), ("@@REFS@@", "frag_refs.html")):
+for key, name in (("@@R94@@", "frag_r94.html"), ("@@R95@@", "frag_r95.html"), ("@@CHUNKS@@", "frag_chunks.html"), ("@@UNIFIED@@", "frag_unified.html"), ("@@CHESSCHUNKS@@", "frag_chess.html"), ("@@WINDOW@@", "frag_window.html"), ("@@COPYING@@", "frag_copying.html"), ("@@RATIONALE@@", "frag_rationale.html"), ("@@REFS@@", "frag_refs.html"), ("@@PARSEP1@@", "frag_parse_p1.html"), ("@@PARSEP2@@", "frag_parse_p2.html")):
     f = D / name
     out = sub(out, key, f.read_text(encoding="utf-8") if f.exists() else '<p class="small">Running; numbers will appear here when the round finishes.</p>')
 
