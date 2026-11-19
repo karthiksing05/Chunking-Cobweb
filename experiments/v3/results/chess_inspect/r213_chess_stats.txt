@@ -1,0 +1,293 @@
+# r213 chess chunk stats (cs73L memory, GraphTrellis, max chunk size 4, seeds [13, 17, 19, 23], stream = train_long shuffled by seed, checkpoints [500, 1000, 2000, 4000])
+seed 13 {"500": {"records": 13367, "stored chunks": 2249, "chosen distinct": 2249, "learn s": 209}, "1000": {"records": 26604, "stored chunks": 4251, "chosen distinct": 4251, "learn s": 490}, "2000": {"records": 53504, "stored chunks": 8026, "chosen distinct": 8026, "learn s": 1213}, "4000": {"records": 107012, "stored chunks": 14681, "chosen distinct": 14681, "learn s": 2986}}
+seed 17 {"500": {"records": 13203, "stored chunks": 2244, "chosen distinct": 2244, "learn s": 211}, "1000": {"records": 26706, "stored chunks": 4411, "chosen distinct": 4411, "learn s": 499}, "2000": {"records": 53511, "stored chunks": 8225, "chosen distinct": 8225, "learn s": 1186}, "4000": {"records": 107300, "stored chunks": 14931, "chosen distinct": 14931, "learn s": 3045}}
+seed 19 {"500": {"records": 13119, "stored chunks": 2090, "chosen distinct": 2090, "learn s": 185}, "1000": {"records": 26477, "stored chunks": 4002, "chosen distinct": 4002, "learn s": 409}, "2000": {"records": 53783, "stored chunks": 7461, "chosen distinct": 7461, "learn s": 964}, "4000": {"records": 106848, "stored chunks": 13624, "chosen distinct": 13624, "learn s": 2457}}
+seed 23 {"500": {"records": 13138, "stored chunks": 2082, "chosen distinct": 2082, "learn s": 184}, "1000": {"records": 26582, "stored chunks": 3971, "chosen distinct": 3971, "learn s": 416}, "2000": {"records": 53446, "stored chunks": 7403, "chosen distinct": 7403, "learn s": 986}, "4000": {"records": 107545, "stored chunks": 13528, "chosen distinct": 13528, "learn s": 2634}}
+
+## top chunks by use count at 4000 positions (chosen as a chunk in a learned parse; per seed top 15, with chess class)
+seed 13: distinct chunks used >= 2 times: 1860 (sizes {2: 275, 3: 219, 4: 1366}); total uses 9277
+   f2:wP|g1:wK|g2:wP|h2:wP                          uses 496  size 4  castled king (kingside) + pawn shield
+   f2:wP|g1:wK|g2:wP|h3:wP                          uses 135  size 4  castled king (kingside) + pawn shield
+   f7:bP|g6:bP|g8:bK|h7:bP                          uses 115  size 4  castled king (kingside) + pawn shield
+   f7:bP|g7:bP|g8:bK|h7:bP                          uses 112  size 4  castled king (kingside) + pawn shield
+   e6:bP|f7:bP|g7:bP|h7:bP                          uses 94   size 4  pawn chain (diagonal pawns)
+   f2:wP|g1:wK|g3:wP|h2:wP                          uses 94   size 4  castled king (kingside) + pawn shield
+   g7:bP|g8:bK|h7:bP                                uses 83   size 3  castled king (kingside) + pawn shield
+   a7:bP|b7:bP                                      uses 65   size 2  pawn duo / phalanx (side by side)
+   a1:wR|a2:wP|b2:wP|c3:wN                          uses 64   size 4  corner rook with its pawns
+   a8:bR|d8:bQ|e7:bB|f8:bR                          uses 58   size 4  mixed piece group
+   g7:bP|h6:bP                                      uses 57   size 2  pawn chain (diagonal pawns)
+   b2:wP|f2:wP|g1:wK|g2:wP                          uses 56   size 4  castled king (kingside) + pawn shield
+   d5:bP|e6:bP|f7:bP|g7:bP                          uses 55   size 4  pawn chain (diagonal pawns)
+   g7:bP|h7:bP                                      uses 55   size 2  pawn duo / phalanx (side by side)
+   a7:bP|a8:bR                                      uses 52   size 2  corner rook with its pawns
+seed 17: distinct chunks used >= 2 times: 1893 (sizes {2: 246, 3: 211, 4: 1436}); total uses 9052
+   e6:bP|f7:bP|g7:bP|h7:bP                          uses 229  size 4  pawn chain (diagonal pawns)
+   f8:bR|g8:bK                                      uses 171  size 2  back-rank pieces
+   e6:bP|f7:bP|g7:bP|h6:bP                          uses 103  size 4  pawn chain (diagonal pawns)
+   a1:wR|a2:wP|b2:wP|c2:wP                          uses 80   size 4  corner rook with its pawns
+   a7:bP|a8:bR|b7:bP|c7:bP                          uses 78   size 4  corner rook with its pawns
+   f1:wR|f2:wP|f3:wN|g1:wK                          uses 75   size 4  king in corner + one pawn
+   a7:bP|a8:bR                                      uses 70   size 2  corner rook with its pawns
+   a1:wR|a2:wP|b2:wP|c3:wP                          uses 69   size 4  corner rook with its pawns
+   g2:wP|g7:bP|h2:wP|h7:bP                          uses 69   size 4  pawns of both colours
+   a7:bP|a8:bR|b7:bP                                uses 65   size 3  corner rook with its pawns
+   a1:wR|a2:wP|b2:wP|d1:wQ                          uses 64   size 4  corner rook with its pawns
+   f7:bP|g6:bP|g8:bK|h7:bP                          uses 62   size 4  castled king (kingside) + pawn shield
+   e6:bP|f7:bP|g6:bP|h7:bP                          uses 60   size 4  pawn chain (diagonal pawns)
+   e8:bK|h8:bR                                      uses 51   size 2  back-rank pieces
+   e7:bP|f7:bP|g6:bP|h7:bP                          uses 47   size 4  pawn chain (diagonal pawns)
+seed 19: distinct chunks used >= 2 times: 1795 (sizes {2: 201, 3: 178, 4: 1416}); total uses 9886
+   f2:wP|g1:wK|g2:wP|h2:wP                          uses 449  size 4  castled king (kingside) + pawn shield
+   f2:wP|g1:wK|g2:wP|h3:wP                          uses 300  size 4  castled king (kingside) + pawn shield
+   f2:wP|g1:wK|g3:wP|h2:wP                          uses 176  size 4  castled king (kingside) + pawn shield
+   e6:bP|f7:bP|g7:bP|h7:bP                          uses 167  size 4  pawn chain (diagonal pawns)
+   f8:bR|g8:bK                                      uses 156  size 2  back-rank pieces
+   f8:bR|g7:bP|g8:bK|h7:bP                          uses 121  size 4  castled king (kingside) + pawn shield
+   g7:bP|h6:bP                                      uses 92   size 2  pawn chain (diagonal pawns)
+   d5:bP|e6:bP|f7:bP|g7:bP                          uses 80   size 4  pawn chain (diagonal pawns)
+   a2:wP|b2:wP|c3:wP|d4:wP                          uses 79   size 4  pawn chain (diagonal pawns)
+   f7:bP|g6:bP|h7:bP                                uses 57   size 3  pawn chain (diagonal pawns)
+   b7:bP|d5:bP|e6:bP|f7:bP                          uses 56   size 4  pawn chain (diagonal pawns)
+   a6:bP|b7:bP                                      uses 53   size 2  pawn chain (diagonal pawns)
+   f4:wP|g1:wK|g2:wP|h2:wP                          uses 53   size 4  castled king (kingside) + pawn shield
+   g6:bP|h7:bP                                      uses 53   size 2  pawn chain (diagonal pawns)
+   e6:bP|f7:bP|g6:bP|h7:bP                          uses 49   size 4  pawn chain (diagonal pawns)
+seed 23: distinct chunks used >= 2 times: 1965 (sizes {2: 234, 3: 207, 4: 1524}); total uses 10556
+   f2:wP|g1:wK|g2:wP|h2:wP                          uses 507  size 4  castled king (kingside) + pawn shield
+   f2:wP|g1:wK|g2:wP|h3:wP                          uses 262  size 4  castled king (kingside) + pawn shield
+   f2:wP|g1:wK|g3:wP|h2:wP                          uses 186  size 4  castled king (kingside) + pawn shield
+   e6:bP|f7:bP|g7:bP|h7:bP                          uses 174  size 4  pawn chain (diagonal pawns)
+   g7:bP|h7:bP                                      uses 120  size 2  pawn duo / phalanx (side by side)
+   d5:bP|e6:bP|f7:bP|g7:bP                          uses 102  size 4  pawn chain (diagonal pawns)
+   f7:bP|g7:bP|h7:bP                                uses 102  size 3  pawn duo / phalanx (side by side)
+   g7:bP|h6:bP                                      uses 99   size 2  pawn chain (diagonal pawns)
+   a7:bP|b7:bP                                      uses 76   size 2  pawn duo / phalanx (side by side)
+   a2:wP|b2:wP|c3:wP|d4:wP                          uses 70   size 4  pawn chain (diagonal pawns)
+   e6:bP|f7:bP|g7:bP|h6:bP                          uses 65   size 4  pawn chain (diagonal pawns)
+   a8:bR|c8:bB                                      uses 61   size 2  back-rank pieces
+   d8:bQ|f6:bN|f8:bR|g8:bK                          uses 59   size 4  mixed piece group
+   a7:bP|b7:bP|c6:bP                                uses 58   size 3  pawn chain (diagonal pawns)
+   a6:bP|b7:bP                                      uses 57   size 2  pawn chain (diagonal pawns)
+
+## class shares: of top-50 / top-200 chunks (per-seed lists, pooled over seeds) and of all uses, at final
+top-50: pawn chain (diagonal pawns) 0.35; castled king (kingside) + pawn shield 0.21; corner rook with its pawns 0.14; mixed piece group 0.12; pawn duo / phalanx (side by side) 0.07; back-rank pieces 0.05; castled king (queenside) + pawn shield 0.01; king in corner + one pawn 0.01; fianchetto (bishop behind pawn on the long diagonal) 0.01; pawns of both colours 0.01
+top-200: pawn chain (diagonal pawns) 0.36; mixed piece group 0.20; castled king (kingside) + pawn shield 0.16; corner rook with its pawns 0.12; pawn duo / phalanx (side by side) 0.06; back-rank pieces 0.05; king in corner + one pawn 0.03; fianchetto (bishop behind pawn on the long diagonal) 0.01; castled king (queenside) + pawn shield 0.01; pawns of both colours 0.01
+top-None (all, weighted by uses): pawn chain (diagonal pawns) 0.32; mixed piece group 0.24; castled king (kingside) + pawn shield 0.17; corner rook with its pawns 0.11; pawn duo / phalanx (side by side) 0.04; back-rank pieces 0.04; king in corner + one pawn 0.03; pawns of both colours 0.02; pawns of one colour (other) 0.01; castled king (queenside) + pawn shield 0.01; fianchetto (bishop behind pawn on the long diagonal) 0.01
+size histogram of per-seed top-50 / top-200 (pooled over seeds): {50: {2: 49, 3: 18, 4: 133}, 200: {2: 144, 3: 79, 4: 577}}
+
+## cross-seed overlap of chunk inventories (mean over the 6 seed pairs)
+cp 500 top-50 Jaccard: exact (squares) 0.201; translation-invariant (shape) 0.207; random from each seed's own chunks (exact) 0.010; random (shape) 0.011; random from the union pool of all seeds' chunks (exact) 0.017; frequency baseline: piece pairs within 2 squares, top by raw count (exact) 0.725; frequency baseline (shape) 0.567; TRELLIS size-2 chunks only (exact) 0.317
+cp 500 top-200 Jaccard: exact (squares) 0.134; translation-invariant (shape) 0.138; random from each seed's own chunks (exact) 0.039; random (shape) 0.049; random from the union pool of all seeds' chunks (exact) 0.064; frequency baseline: piece pairs within 2 squares, top by raw count (exact) 0.781; frequency baseline (shape) 0.743; TRELLIS size-2 chunks only (exact) 0.276
+cp 500 count-weighted overlap (sum min / sum max of use counts): exact 0.141, shape 0.183
+cp 1000 top-50 Jaccard: exact (squares) 0.252; translation-invariant (shape) 0.313; random from each seed's own chunks (exact) 0.006; random (shape) 0.008; random from the union pool of all seeds' chunks (exact) 0.009; frequency baseline: piece pairs within 2 squares, top by raw count (exact) 0.859; frequency baseline (shape) 0.645; TRELLIS size-2 chunks only (exact) 0.355
+cp 1000 top-200 Jaccard: exact (squares) 0.172; translation-invariant (shape) 0.174; random from each seed's own chunks (exact) 0.027; random (shape) 0.033; random from the union pool of all seeds' chunks (exact) 0.036; frequency baseline: piece pairs within 2 squares, top by raw count (exact) 0.871; frequency baseline (shape) 0.797; TRELLIS size-2 chunks only (exact) 0.283
+cp 1000 count-weighted overlap (sum min / sum max of use counts): exact 0.179, shape 0.216
+cp 2000 top-50 Jaccard: exact (squares) 0.309; translation-invariant (shape) 0.347; random from each seed's own chunks (exact) 0.004; random (shape) 0.005; random from the union pool of all seeds' chunks (exact) 0.006; frequency baseline: piece pairs within 2 squares, top by raw count (exact) 0.842; frequency baseline (shape) 0.681; TRELLIS size-2 chunks only (exact) 0.392
+cp 2000 top-200 Jaccard: exact (squares) 0.219; translation-invariant (shape) 0.239; random from each seed's own chunks (exact) 0.019; random (shape) 0.024; random from the union pool of all seeds' chunks (exact) 0.024; frequency baseline: piece pairs within 2 squares, top by raw count (exact) 0.903; frequency baseline (shape) 0.848; TRELLIS size-2 chunks only (exact) 0.283
+cp 2000 count-weighted overlap (sum min / sum max of use counts): exact 0.206, shape 0.241
+cp 4000 top-50 Jaccard: exact (squares) 0.307; translation-invariant (shape) 0.343; random from each seed's own chunks (exact) 0.004; random (shape) 0.005; random from the union pool of all seeds' chunks (exact) 0.005; frequency baseline: piece pairs within 2 squares, top by raw count (exact) 0.899; frequency baseline (shape) 0.701; TRELLIS size-2 chunks only (exact) 0.451
+cp 4000 top-200 Jaccard: exact (squares) 0.240; translation-invariant (shape) 0.265; random from each seed's own chunks (exact) 0.016; random (shape) 0.021; random from the union pool of all seeds' chunks (exact) 0.020; frequency baseline: piece pairs within 2 squares, top by raw count (exact) 0.945; frequency baseline (shape) 0.853; TRELLIS size-2 chunks only (exact) 0.302
+cp 4000 count-weighted overlap (sum min / sum max of use counts): exact 0.229, shape 0.262
+
+chunks in every seed's top-50 (exact squares): 9
+   e6:bP|f7:bP|g7:bP|h7:bP                          uses 94/229/167/174  pawn chain (diagonal pawns)
+   g7:bP|h6:bP                                      uses 57/47/92/99  pawn chain (diagonal pawns)
+   e6:bP|f7:bP|g7:bP|h6:bP                          uses 52/103/44/65  pawn chain (diagonal pawns)
+   a7:bP|a8:bR                                      uses 52/70/44/34  corner rook with its pawns
+   e6:bP|f7:bP|g6:bP|h7:bP                          uses 36/60/49/51  pawn chain (diagonal pawns)
+   a6:bP|b7:bP                                      uses 47/32/53/57  pawn chain (diagonal pawns)
+   g6:bP|h7:bP                                      uses 38/28/53/44  pawn chain (diagonal pawns)
+   a7:bP|b6:bP                                      uses 39/26/39/43  pawn chain (diagonal pawns)
+   a6:bP|b5:bP                                      uses 44/28/32/34  pawn chain (diagonal pawns)
+shapes in every seed's top-50 (translation-invariant): 11
+
+chunks in every seed's top-200 (exact squares): 34
+   e6:bP|f7:bP|g7:bP|h7:bP                          uses 94/229/167/174  pawn chain (diagonal pawns)
+   f8:bR|g8:bK                                      uses 10/171/156/38  back-rank pieces
+   g7:bP|h6:bP                                      uses 57/47/92/99  pawn chain (diagonal pawns)
+   e6:bP|f7:bP|g7:bP|h6:bP                          uses 52/103/44/65  pawn chain (diagonal pawns)
+   g7:bP|h7:bP                                      uses 55/22/11/120  pawn duo / phalanx (side by side)
+   a7:bP|a8:bR                                      uses 52/70/44/34  corner rook with its pawns
+   e6:bP|f7:bP|g6:bP|h7:bP                          uses 36/60/49/51  pawn chain (diagonal pawns)
+   a6:bP|b7:bP                                      uses 47/32/53/57  pawn chain (diagonal pawns)
+   a2:wP|b2:wP|c3:wP|d4:wP                          uses 20/18/79/70  pawn chain (diagonal pawns)
+   g6:bP|h7:bP                                      uses 38/28/53/44  pawn chain (diagonal pawns)
+   a7:bP|b6:bP                                      uses 39/26/39/43  pawn chain (diagonal pawns)
+   e7:bP|f7:bP|g6:bP|h7:bP                          uses 15/47/41/44  pawn chain (diagonal pawns)
+   a7:bP|b7:bP|c6:bP|d5:bP                          uses 41/20/43/38  pawn chain (diagonal pawns)
+   a6:bP|b5:bP                                      uses 44/28/32/34  pawn chain (diagonal pawns)
+   a7:bP|b7:bP|c6:bP                                uses 22/13/36/58  pawn chain (diagonal pawns)
+   f7:bP|g6:bP|h7:bP                                uses 19/15/57/29  pawn chain (diagonal pawns)
+   a2:wP|b2:wP                                      uses 24/24/25/33  pawn duo / phalanx (side by side)
+   f7:bP|g7:bP|h6:bP                                uses 25/20/29/24  pawn chain (diagonal pawns)
+   g8:bK|h7:bP                                      uses 31/21/20/9  king in corner + one pawn
+   g2:wP|h2:wP                                      uses 12/40/13/9  pawn duo / phalanx (side by side)
+   b7:bP|c7:bP|d6:bP|e5:bP                          uses 23/14/26/10  pawn chain (diagonal pawns)
+   h7:bP|h8:bR                                      uses 16/23/9/20  corner rook with its pawns
+   g5:bP|h6:bP                                      uses 17/15/16/17  pawn chain (diagonal pawns)
+   a7:bP|a8:bR|b7:bP|c6:bP                          uses 15/26/10/11  corner rook with its pawns
+   a3:wP|b4:wP                                      uses 12/16/16/17  pawn chain (diagonal pawns)
+shapes in every seed's top-200 (translation-invariant): 37
+
+chunks used >= 2 times by k of the seeds: {1: 3663, 2: 846, 3: 414, 4: 229}
+
+## stability along the stream (within seed, mean over seeds): top-k Jaccard of checkpoint vs final
+top-50 exact: cp 500 vs 4000: 0.367 | shape: 0.410 | random reference (exact): 0.018
+top-50 exact: cp 1000 vs 4000: 0.559 | shape: 0.603 | random reference (exact): 0.023
+top-50 exact: cp 2000 vs 4000: 0.722 | shape: 0.759 | random reference (exact): 0.013
+top-200 exact: cp 500 vs 4000: 0.269 | shape: 0.293 | random reference (exact): 0.058
+top-200 exact: cp 1000 vs 4000: 0.399 | shape: 0.443 | random reference (exact): 0.060
+top-200 exact: cp 2000 vs 4000: 0.606 | shape: 0.652 | random reference (exact): 0.054
+share of the final top-50 chunks already chosen at least once at each checkpoint: 500: 0.85; 1000: 0.96; 2000: 1.00
+pair-frequency baseline top-50 checkpoint vs final (exact): 500: 0.818; 1000: 0.888; 2000: 0.896
+
+## the example boards: units of seed 13 at 4000 positions (size >= 2), with class, uses in the stream, recurrence and whether every seed finds it
+
+board 0 (middle, 26 pieces): 4 multi-piece units covering 16 pieces; 10 single pieces
+   unit c1:wR|d3:wN|f1:wR|h6:wQ                        class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit a8:bR|b6:bQ|d7:bN|f8:bR                        class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit e6:bP|f7:bP|g6:bP|h7:bP                        class: pawn chain (diagonal pawns) | stored True | uses per seed 36/60/49/51 | shape uses 40/64/54/56, placements 3 (e.g. e6 x36, e4 x2, e5 x2) | first chosen at stream position 70 (seed 13) | seeds finding it (>=2 uses): 4/4
+   unit f3:wP|g2:wP|h1:wK|h2:wP                        class: castled king (kingside) + pawn shield | stored True | uses per seed 9/0/15/11 | shape uses 25/0/25/24, placements 3 (e.g. e1 x13, f1 x9, a1 x3) | first chosen at stream position 106 (seed 13) | seeds finding it (>=2 uses): 3/4
+
+board 1 (middle, 24 pieces): 4 multi-piece units covering 14 pieces; 10 single pieces
+   unit f2:wP|g1:wK|g2:wP|h3:wP                        class: castled king (kingside) + pawn shield | stored True | uses per seed 135/3/300/262 | shape uses 140/3/304/272, placements 2 (e.g. f1 x135, a1 x5) | first chosen at stream position 101 (seed 13) | seeds finding it (>=2 uses): 4/4
+   unit a7:bP|b7:bP|d5:bP|e6:bP                        class: pawn chain (diagonal pawns) | stored True | uses per seed 11/2/10/6 | shape uses 11/2/10/6, placements 1 (e.g. a5 x11) | first chosen at stream position 359 (seed 13) | seeds finding it (>=2 uses): 4/4
+   unit a2:wP|b2:wP|c3:wP|d4:wP                        class: pawn chain (diagonal pawns) | stored True | uses per seed 20/18/79/70 | shape uses 22/25/84/77, placements 2 (e.g. a2 x20, b2 x2) | first chosen at stream position 743 (seed 13) | seeds finding it (>=2 uses): 4/4
+   unit d6:bQ|d8:bN                                    class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+
+board 2 (middle, 26 pieces): 5 multi-piece units covering 17 pieces; 9 single pieces
+   unit a2:wP|c3:wP|g1:wK|h2:wP                        class: king in corner + one pawn | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit a1:wR|c1:wB|d3:wQ|f1:wR                        class: mixed piece group | stored True | uses per seed 0/0/3/2 | shape uses 0/0/3/2, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 2/4
+   unit b7:bP|c6:bP|d5:bP|e6:bP                        class: pawn chain (diagonal pawns) | stored True | uses per seed 14/4/11/17 | shape uses 31/11/23/27, placements 4 (e.g. b5 x14, a5 x10, c5 x5, a4 x2) | first chosen at stream position 437 (seed 13) | seeds finding it (>=2 uses): 4/4
+   unit d7:bN|f6:bP|g7:bN                              class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit d6:bB|f8:bK                                    class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/2, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+
+board 3 (middle, 24 pieces): 4 multi-piece units covering 14 pieces; 10 single pieces
+   unit f3:wP|g1:wK|g2:wP|h2:wP                        class: castled king (kingside) + pawn shield | stored True | uses per seed 34/0/49/43 | shape uses 39/0/49/45, placements 2 (e.g. f1 x34, a1 x5) | first chosen at stream position 227 (seed 13) | seeds finding it (>=2 uses): 3/4
+   unit c1:wR|c3:wN|d1:wR|f2:wQ                        class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit f7:bP|g7:bP|g8:bK|h7:bP                        class: castled king (kingside) + pawn shield | stored True | uses per seed 112/36/11/0 | shape uses 118/38/11/0, placements 2 (e.g. f7 x112, a7 x6) | first chosen at stream position 89 (seed 13) | seeds finding it (>=2 uses): 3/4
+   unit a8:bR|e8:bR                                    class: back-rank pieces | stored True | uses per seed 4/0/3/0 | shape uses 4/2/3/0, placements 1 (e.g. a8 x4) | first chosen at stream position 2412 (seed 13) | seeds finding it (>=2 uses): 2/4
+
+board 4 (middle, 24 pieces): 2 multi-piece units covering 8 pieces; 16 single pieces
+   unit d1:wR|e3:wB|f1:wR|h3:wB                        class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit e2:wP|f2:wP|g1:wK|h2:wP                        class: castled king (kingside) + pawn shield | stored True | uses per seed 32/0/0/3 | shape uses 34/0/0/3, placements 2 (e.g. e1 x32, c1 x2) | first chosen at stream position 782 (seed 13) | seeds finding it (>=2 uses): 2/4
+
+board 5 (middle, 25 pieces): 2 multi-piece units covering 8 pieces; 17 single pieces
+   unit e4:wP|f2:wP|g1:wK|g2:wP                        class: castled king (kingside) + pawn shield | stored True | uses per seed 42/0/7/12 | shape uses 59/0/21/23, placements 2 (e.g. e1 x42, f1 x17) | first chosen at stream position 456 (seed 13) | seeds finding it (>=2 uses): 3/4
+   unit c2:wQ|c4:wB|d1:wR|f1:wR                        class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+
+board 6 (middle, 25 pieces): 4 multi-piece units covering 14 pieces; 11 single pieces
+   unit a1:wR|c3:wN|d2:wQ|f1:wR                        class: mixed piece group | stored True | uses per seed 0/0/4/0 | shape uses 0/0/4/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 1/4
+   unit a3:wP|b2:wP|c4:wP|d5:wP                        class: pawn chain (diagonal pawns) | stored True | uses per seed 2/5/14/6 | shape uses 2/5/14/6, placements 1 (e.g. a2 x2) | first chosen at stream position 2804 (seed 13) | seeds finding it (>=2 uses): 4/4
+   unit f7:bP|g7:bP|g8:bK|h6:bP                        class: castled king (kingside) + pawn shield | stored True | uses per seed 46/20/18/0 | shape uses 46/20/18/0, placements 1 (e.g. f6 x46) | first chosen at stream position 172 (seed 13) | seeds finding it (>=2 uses): 3/4
+   unit a7:bP|a8:bR                                    class: corner rook with its pawns | stored True | uses per seed 52/70/44/34 | shape uses 68/96/53/54, placements 2 (e.g. a7 x52, h7 x16) | first chosen at stream position 90 (seed 13) | seeds finding it (>=2 uses): 4/4
+
+board 7 (middle, 24 pieces): 4 multi-piece units covering 16 pieces; 8 single pieces
+   unit a1:wR|b3:wQ|c2:wB|f1:wR                        class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit f2:wP|g1:wK|g3:wP|h2:wP                        class: castled king (kingside) + pawn shield | stored True | uses per seed 94/0/176/186 | shape uses 94/0/180/195, placements 1 (e.g. f1 x94) | first chosen at stream position 79 (seed 13) | seeds finding it (>=2 uses): 3/4
+   unit a3:wP|b2:wP|c4:wP|e3:wP                        class: pawn chain (diagonal pawns) | stored True | uses per seed 2/0/0/2 | shape uses 2/0/0/2, placements 1 (e.g. a2 x2) | first chosen at stream position 3109 (seed 13) | seeds finding it (>=2 uses): 2/4
+   unit f7:bP|g7:bP|g8:bK|h6:bP                        class: castled king (kingside) + pawn shield | stored True | uses per seed 46/20/18/0 | shape uses 46/20/18/0, placements 1 (e.g. f6 x46) | first chosen at stream position 172 (seed 13) | seeds finding it (>=2 uses): 3/4
+
+board 8 (middle, 25 pieces): 3 multi-piece units covering 10 pieces; 15 single pieces
+   unit f2:wP|g1:wK|g2:wP|h3:wP                        class: castled king (kingside) + pawn shield | stored True | uses per seed 135/3/300/262 | shape uses 140/3/304/272, placements 2 (e.g. f1 x135, a1 x5) | first chosen at stream position 101 (seed 13) | seeds finding it (>=2 uses): 4/4
+   unit a1:wQ|c1:wR|c3:wN|d3:wB                        class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit f7:bP|g8:bK                                    class: king in corner + one pawn | stored True | uses per seed 8/6/2/0 | shape uses 8/16/4/2, placements 1 (e.g. f7 x8) | first chosen at stream position 534 (seed 13) | seeds finding it (>=2 uses): 3/4
+
+board 9 (middle, 24 pieces): 6 multi-piece units covering 22 pieces; 2 single pieces
+   unit f2:wP|g1:wK|g3:wP|h2:wP                        class: castled king (kingside) + pawn shield | stored True | uses per seed 94/0/176/186 | shape uses 94/0/180/195, placements 1 (e.g. f1 x94) | first chosen at stream position 79 (seed 13) | seeds finding it (>=2 uses): 3/4
+   unit a1:wR|c1:wQ|e2:wN|f1:wR                        class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit a3:wP|b2:wP|c2:wP|e3:wP                        class: pawn chain (diagonal pawns) | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit b7:bP|g6:bP|g8:bK|h7:bP                        class: castled king (kingside) + pawn shield | stored True | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit d6:bQ|d8:bR|e5:bN                              class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit a7:bP|c6:bP|d5:bP                              class: pawn chain (diagonal pawns) | stored True | uses per seed 2/5/0/0 | shape uses 2/5/0/0, placements 1 (e.g. a5 x2) | first chosen at stream position 1213 (seed 13) | seeds finding it (>=2 uses): 2/4
+
+board 10 (middle, 26 pieces): 6 multi-piece units covering 19 pieces; 7 single pieces
+   unit a1:wR|e3:wQ|f1:wR|g2:wB                        class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit e4:wP|g3:wP|h1:wK|h2:wP                        class: castled king (kingside) + pawn shield | stored True | uses per seed 0/0/0/0 | shape uses 0/0/0/3, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit f7:bP|g7:bP|h6:bP                              class: pawn chain (diagonal pawns) | stored True | uses per seed 25/20/29/24 | shape uses 47/33/65/82, placements 2 (e.g. f6 x25, a6 x22) | first chosen at stream position 527 (seed 13) | seeds finding it (>=2 uses): 4/4
+   unit c7:bQ|d6:bR|d8:bR                              class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit e5:bP|f6:bN|g8:bK                              class: mixed piece group | stored True | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit a3:wP|b4:wP                                    class: pawn chain (diagonal pawns) | stored True | uses per seed 12/16/16/17 | shape uses 89/138/76/79, placements 16 (e.g. d4 x16, a3 x12, c3 x8, b4 x7) | first chosen at stream position 20 (seed 13) | seeds finding it (>=2 uses): 4/4
+
+board 11 (middle, 26 pieces): 7 multi-piece units covering 22 pieces; 4 single pieces
+   unit d1:wQ|e1:wR|e4:wN|g2:wB                        class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit a1:wR|a3:wP|d3:wP|f3:wP                        class: corner rook with its pawns | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit c6:bN|c7:bP|d8:bR|f8:bR                        class: mixed piece group | stored True | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit g7:bP|g8:bK|h7:bP                              class: castled king (kingside) + pawn shield | stored True | uses per seed 83/35/28/0 | shape uses 83/35/28/0, placements 1 (e.g. g7 x83) | first chosen at stream position 173 (seed 13) | seeds finding it (>=2 uses): 3/4
+   unit g3:wP|h1:wK|h2:wP                              class: castled king (kingside) + pawn shield | stored False | uses per seed 0/0/0/0 | shape uses 0/0/2/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit d4:bQ|d5:bN                                    class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/2, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit a7:bP|b7:bP                                    class: pawn duo / phalanx (side by side) | stored True | uses per seed 65/26/0/76 | shape uses 142/65/20/249, placements 8 (e.g. a7 x65, g7 x55, a5 x7, f7 x5) | first chosen at stream position 165 (seed 13) | seeds finding it (>=2 uses): 3/4
+
+board 12 (middle, 26 pieces): 4 multi-piece units covering 14 pieces; 12 single pieces
+   unit c3:wP|e4:wP|f2:wP|g1:wK                        class: king in corner + one pawn | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit a1:wR|c4:wB|e2:wQ|f1:wR                        class: mixed piece group | stored True | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit c6:bN|d7:bQ|d8:bR|f7:bB                        class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit a7:bP|b7:bP                                    class: pawn duo / phalanx (side by side) | stored True | uses per seed 65/26/0/76 | shape uses 142/65/20/249, placements 8 (e.g. a7 x65, g7 x55, a5 x7, f7 x5) | first chosen at stream position 165 (seed 13) | seeds finding it (>=2 uses): 3/4
+
+board 13 (middle, 24 pieces): 5 multi-piece units covering 17 pieces; 7 single pieces
+   unit e3:wP|g1:wK|g2:wP|h3:wP                        class: castled king (kingside) + pawn shield | stored True | uses per seed 8/0/12/15 | shape uses 8/0/12/15, placements 1 (e.g. e1 x8) | first chosen at stream position 185 (seed 13) | seeds finding it (>=2 uses): 3/4
+   unit c1:wR|d2:wQ|e2:wB|f1:wR                        class: mixed piece group | stored True | uses per seed 3/0/3/0 | shape uses 3/0/3/0, placements 1 (e.g. c1 x3) | first chosen at stream position 2199 (seed 13) | seeds finding it (>=2 uses): 2/4
+   unit g7:bP|g8:bK|h7:bP                              class: castled king (kingside) + pawn shield | stored True | uses per seed 83/35/28/0 | shape uses 83/35/28/0, placements 1 (e.g. g7 x83) | first chosen at stream position 173 (seed 13) | seeds finding it (>=2 uses): 3/4
+   unit d8:bR|e7:bB|f8:bR                              class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit b7:bP|c6:bP|d5:bP                              class: pawn chain (diagonal pawns) | stored True | uses per seed 2/6/0/0 | shape uses 23/25/29/16, placements 4 (e.g. a4 x11, a5 x7, f5 x3, b5 x2) | first chosen at stream position 2865 (seed 13) | seeds finding it (>=2 uses): 2/4
+
+board 14 (middle, 26 pieces): 4 multi-piece units covering 13 pieces; 13 single pieces
+   unit f4:wP|g1:wK|g2:wP|h2:wP                        class: castled king (kingside) + pawn shield | stored True | uses per seed 51/0/53/44 | shape uses 53/0/58/44, placements 2 (e.g. f1 x51, d1 x2) | first chosen at stream position 75 (seed 13) | seeds finding it (>=2 uses): 3/4
+   unit d5:bP|e6:bP|f7:bP|g6:bP                        class: pawn chain (diagonal pawns) | stored True | uses per seed 35/2/39/42 | shape uses 40/12/42/54, placements 2 (e.g. d5 x35, e5 x5) | first chosen at stream position 408 (seed 13) | seeds finding it (>=2 uses): 4/4
+   unit b8:bR|c6:bN|e7:bQ                              class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit b2:wP|c3:wP                                    class: pawn chain (diagonal pawns) | stored True | uses per seed 5/7/5/3 | shape uses 89/138/76/79, placements 16 (e.g. d4 x16, a3 x12, c3 x8, b4 x7) | first chosen at stream position 354 (seed 13) | seeds finding it (>=2 uses): 4/4
+
+board 15 (middle, 24 pieces): 3 multi-piece units covering 9 pieces; 15 single pieces
+   unit a1:wR|a4:wP|b1:wN|b4:wP                        class: corner rook with its pawns | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit g7:bP|g8:bK|h7:bP                              class: castled king (kingside) + pawn shield | stored True | uses per seed 83/35/28/0 | shape uses 83/35/28/0, placements 1 (e.g. g7 x83) | first chosen at stream position 173 (seed 13) | seeds finding it (>=2 uses): 3/4
+   unit a6:bP|b7:bP                                    class: pawn chain (diagonal pawns) | stored True | uses per seed 47/32/53/57 | shape uses 161/134/167/156, placements 17 (e.g. a6 x47, g6 x38, g5 x17, a5 x12) | first chosen at stream position 160 (seed 13) | seeds finding it (>=2 uses): 4/4
+
+board 16 (middle, 24 pieces): 4 multi-piece units covering 10 pieces; 14 single pieces
+   unit b3:wN|d1:wQ|f1:wR|g2:wB                        class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit d7:bN|e6:bB                                    class: mixed piece group | stored True | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit f6:bP|g7:bK                                    class: mixed piece group | stored True | uses per seed 0/0/0/0 | shape uses 8/16/4/2, placements 1 (e.g. f7 x8) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit a7:bP|b7:bP                                    class: pawn duo / phalanx (side by side) | stored True | uses per seed 65/26/0/76 | shape uses 142/65/20/249, placements 8 (e.g. a7 x65, g7 x55, a5 x7, f7 x5) | first chosen at stream position 165 (seed 13) | seeds finding it (>=2 uses): 3/4
+
+board 17 (middle, 26 pieces): 6 multi-piece units covering 18 pieces; 8 single pieces
+   unit d4:wP|f3:wP|g1:wK|g2:wP                        class: castled king (kingside) + pawn shield | stored True | uses per seed 0/0/0/3 | shape uses 0/0/0/3, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 1/4
+   unit b2:wB|c1:wR|e1:wR|e2:wQ                        class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit d5:bP|e6:bP|f7:bP|g7:bP                        class: pawn chain (diagonal pawns) | stored True | uses per seed 55/4/80/102 | shape uses 65/12/95/113, placements 3 (e.g. d5 x55, c5 x6, e5 x4) | first chosen at stream position 453 (seed 13) | seeds finding it (>=2 uses): 4/4
+   unit f6:bN|g8:bK                                    class: mixed piece group | stored True | uses per seed 15/0/0/9 | shape uses 15/0/0/9, placements 1 (e.g. f6 x15) | first chosen at stream position 929 (seed 13) | seeds finding it (>=2 uses): 2/4
+   unit a3:wP|b4:wP                                    class: pawn chain (diagonal pawns) | stored True | uses per seed 12/16/16/17 | shape uses 89/138/76/79, placements 16 (e.g. d4 x16, a3 x12, c3 x8, b4 x7) | first chosen at stream position 20 (seed 13) | seeds finding it (>=2 uses): 4/4
+   unit c7:bQ|d6:bB                                    class: mixed piece group | stored False | uses per seed 0/2/2/0 | shape uses 0/2/2/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 2/4
+
+board 18 (middle, 24 pieces): 2 multi-piece units covering 8 pieces; 16 single pieces
+   unit f4:wP|g1:wK|g2:wP|h4:wP                        class: king in corner + one pawn | stored False | uses per seed 0/0/3/0 | shape uses 0/0/3/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 1/4
+   unit a2:wP|b2:wP|c2:wP|d3:wP                        class: pawn chain (diagonal pawns) | stored True | uses per seed 6/9/37/28 | shape uses 6/9/37/28, placements 1 (e.g. a2 x6) | first chosen at stream position 1088 (seed 13) | seeds finding it (>=2 uses): 4/4
+
+board 19 (middle, 26 pieces): 3 multi-piece units covering 11 pieces; 15 single pieces
+   unit c3:wN|d1:wQ|f1:wR|f7:wB                        class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+   unit a1:wR|a2:wP|c2:wP|e4:wP                        class: corner rook with its pawns | stored True | uses per seed 0/13/0/0 | shape uses 0/13/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 1/4
+   unit g6:bP|h7:bP|h8:bK                              class: castled king (kingside) + pawn shield | stored True | uses per seed 2/2/0/0 | shape uses 4/5/0/0, placements 2 (e.g. f6 x2, g6 x2) | first chosen at stream position 2346 (seed 13) | seeds finding it (>=2 uses): 2/4
+
+board 20 (end, 14 pieces): 1 multi-piece units covering 2 pieces; 12 single pieces
+   unit a1:wQ|d1:wR                                    class: back-rank pieces | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+
+board 21 (end, 14 pieces): 0 multi-piece units covering 0 pieces; 14 single pieces
+
+board 22 (end, 14 pieces): 1 multi-piece units covering 2 pieces; 12 single pieces
+   unit a3:wP|b2:wP                                    class: pawn chain (diagonal pawns) | stored True | uses per seed 15/19/16/10 | shape uses 106/112/79/83, placements 16 (e.g. g2 x18, a2 x15, g3 x10, d4 x10) | first chosen at stream position 419 (seed 13) | seeds finding it (>=2 uses): 4/4
+
+board 23 (end, 12 pieces): 0 multi-piece units covering 0 pieces; 12 single pieces
+
+board 24 (end, 12 pieces): 1 multi-piece units covering 4 pieces; 8 single pieces
+   unit a3:wP|b3:wP|c4:wP|f8:wK                        class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+
+board 25 (end, 12 pieces): 1 multi-piece units covering 3 pieces; 9 single pieces
+   unit d2:wB|g1:wK|g2:wP                              class: king in corner + one pawn | stored False | uses per seed 0/0/0/0 | shape uses 0/0/0/0, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+
+board 26 (end, 14 pieces): 1 multi-piece units covering 2 pieces; 12 single pieces
+   unit c6:bB|d6:bK                                    class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 0/4/5/7, placements 0 (e.g. ) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4
+
+board 27 (end, 13 pieces): 0 multi-piece units covering 0 pieces; 13 single pieces
+
+board 28 (end, 12 pieces): 0 multi-piece units covering 0 pieces; 12 single pieces
+
+board 29 (end, 15 pieces): 1 multi-piece units covering 2 pieces; 13 single pieces
+   unit e7:bR|g7:bB                                    class: mixed piece group | stored False | uses per seed 0/0/0/0 | shape uses 13/2/6/61, placements 1 (e.g. a8 x13) | first chosen at stream position - (seed 13) | seeds finding it (>=2 uses): 0/4

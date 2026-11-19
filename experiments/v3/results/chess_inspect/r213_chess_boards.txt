@@ -1,0 +1,117 @@
+
+### board 1 (middle, 24 pieces), seed 13 at 4000 positions: pieces (left; white upper case, black lower case) and chunk letters (right; o = piece in no multi-piece chunk)
+   8  . . r n r . k .     8  . . o D o . o .
+   7  p p . . . . p .     7  B B . . . . o .
+   6  . . . q p p Q p     6  . . . D B o o o
+   5  . . N p . . . .     5  . . o B . . . .
+   4  . . . P . . . .     4  . . . A . . . .
+   3  . . P . . . . P     3  . . A . . . . C
+   2  P P . . R P P .     2  A A . . o C C .
+   1  . . . . R . K .     1  . . . . o . C .
+      a b c d e f g h        a b c d e f g h
+   A = Pa2, Pb2, Pc3, Pd4 (4 pieces, stored chunk: True)
+   B = pa7, pb7, pd5, pe6 (4 pieces, stored chunk: True)
+   C = Pf2, Kg1, Pg2, Ph3 (4 pieces, stored chunk: True)
+   D = qd6, nd8 (2 pieces, stored chunk: False)
+   seed 17: 3 multi-piece units; identical to a seed-13 unit: 0 of 4; units: b2:wP|e1:wR|e2:wR|g1:wK; c3:wP|d4:wP|g2:wP|h3:wP; e8:bR|g8:bK
+   seed 19: 6 multi-piece units; identical to a seed-13 unit: 4 of 4; units: a2:wP|b2:wP|c3:wP|d4:wP; a7:bP|b7:bP|d5:bP|e6:bP; d6:bQ|d8:bN; e8:bR|g8:bK; f2:wP|g1:wK|g2:wP|h3:wP; g7:bP|h6:bP
+   seed 23: 5 multi-piece units; identical to a seed-13 unit: 3 of 4; units: a7:bP|b7:bP|d5:bP|e6:bP; b2:wP|e1:wR|e2:wR; d6:bQ|d8:bN; f2:wP|g1:wK|g2:wP|h3:wP; g7:bP|h6:bP
+
+### board 14 (middle, 26 pieces), seed 13 at 4000 positions: pieces (left; white upper case, black lower case) and chunk letters (right; o = piece in no multi-piece chunk)
+   8  . r . . . . k .     8  . C . . . . o .
+   7  . . . . q p b .     7  . . . . C A o .
+   6  . . n . p . p n     6  . . C . A . A o
+   5  . . . p P . N p     5  . . . A o . o o
+   4  . p p P . P . .     4  . o o o . B . .
+   3  . . P . N . . .     3  . . D . o . . .
+   2  . P Q B . . P P     2  . D o o . . B B
+   1  R . . . . . K .     1  o . . . . . B .
+      a b c d e f g h        a b c d e f g h
+   A = pd5, pe6, pf7, pg6 (4 pieces, stored chunk: True)
+   B = Pf4, Kg1, Pg2, Ph2 (4 pieces, stored chunk: True)
+   C = rb8, nc6, qe7 (3 pieces, stored chunk: False)
+   D = Pb2, Pc3 (2 pieces, stored chunk: True)
+   seed 17: 5 multi-piece units; identical to a seed-13 unit: 1 of 4; units: a1:wR|c2:wQ|d2:wB|e3:wN; b2:wP|c3:wP|d4:wP; b8:bR|c6:bN|e7:bQ; e5:wP|f4:wP|g2:wP|h2:wP; e6:bP|f7:bP|g6:bP
+   seed 19: 6 multi-piece units; identical to a seed-13 unit: 2 of 4; units: a1:wR|c2:wQ|d2:wB|e3:wN; b2:wP|c3:wP|d4:wP|e5:wP; b8:bR|g7:bB|g8:bK; c6:bN|e7:bQ; d5:bP|e6:bP|f7:bP|g6:bP; f4:wP|g1:wK|g2:wP|h2:wP
+   seed 23: 5 multi-piece units; identical to a seed-13 unit: 2 of 4; units: a1:wR|c2:wQ|d2:wB|e3:wN; b2:wP|c3:wP|d4:wP|e5:wP; c6:bN|e7:bQ; d5:bP|e6:bP|f7:bP|g6:bP; f4:wP|g1:wK|g2:wP|h2:wP
+
+### board 6 (middle, 25 pieces), seed 13 at 4000 positions: pieces (left; white upper case, black lower case) and chunk letters (right; o = piece in no multi-piece chunk)
+   8  r . . . r . k .     8  D . . . o . C .
+   7  p p . . . p p .     7  D o . . . C C .
+   6  . . . p . . b p     6  . . . o . . o C
+   5  . . p P . P . .     5  . . o B . o . .
+   4  . . P b . . P q     4  . . B o . . o o
+   3  P . N . . . . P     3  B . A . . . . o
+   2  . P . Q . . . .     2  . B . A . . . .
+   1  R . . . . R . K     1  A . . . . A . o
+      a b c d e f g h        a b c d e f g h
+   A = Ra1, Nc3, Qd2, Rf1 (4 pieces, stored chunk: True)
+   B = Pa3, Pb2, Pc4, Pd5 (4 pieces, stored chunk: True)
+   C = pf7, pg7, kg8, ph6 (4 pieces, stored chunk: True)
+   D = pa7, ra8 (2 pieces, stored chunk: True)
+   seed 17: 3 multi-piece units; identical to a seed-13 unit: 0 of 4; units: a1:wR|a3:wP|b2:wP|c4:wP; a7:bP|a8:bR|b7:bP|e8:bR; c3:wN|d2:wQ|f1:wR|h1:wK
+   seed 19: 4 multi-piece units; identical to a seed-13 unit: 2 of 4; units: a1:wR|c3:wN|d2:wQ|f1:wR; a3:wP|b2:wP|c4:wP|d5:wP; a8:bR|e8:bR|g8:bK; f7:bP|g7:bP|h6:bP
+   seed 23: 5 multi-piece units; identical to a seed-13 unit: 2 of 4; units: a1:wR|c3:wN|d2:wQ|f1:wR; a3:wP|b2:wP|c4:wP|d5:wP; a7:bP|b7:bP|c5:bP|d6:bP; a8:bR|e8:bR|g8:bK; f7:bP|g7:bP|h6:bP
+
+### board 17 (middle, 26 pieces), seed 13 at 4000 positions: pieces (left; white upper case, black lower case) and chunk letters (right; o = piece in no multi-piece chunk)
+   8  r . . . . r k .     8  o . . . . o F .
+   7  . . q . . p p p     7  . . E . . C C o
+   6  p . . b p n . .     6  o . . E C F . .
+   5  . . . p . . . .     5  . . . C . . . .
+   4  . P p P P . . .     4  . D o B o . . .
+   3  P . . N . P . P     3  D . . o . B . o
+   2  . B . . Q . P .     2  . A . . A . B .
+   1  . . R . R . K .     1  . . A . A . B .
+      a b c d e f g h        a b c d e f g h
+   A = Bb2, Rc1, Re1, Qe2 (4 pieces, stored chunk: False)
+   B = Pd4, Pf3, Kg1, Pg2 (4 pieces, stored chunk: True)
+   C = pd5, pe6, pf7, pg7 (4 pieces, stored chunk: True)
+   D = Pa3, Pb4 (2 pieces, stored chunk: True)
+   E = qc7, bd6 (2 pieces, stored chunk: False)
+   F = nf6, kg8 (2 pieces, stored chunk: True)
+   seed 17: 4 multi-piece units; identical to a seed-13 unit: 0 of 6; units: a8:bR|f6:bN|f8:bR|g8:bK; d3:wN|e1:wR|e2:wQ|g1:wK; e4:wP|f3:wP|g2:wP|h3:wP; e6:bP|f7:bP|g7:bP|h7:bP
+   seed 19: 5 multi-piece units; identical to a seed-13 unit: 3 of 6; units: a3:wP|b4:wP; a8:bR|f6:bN|f8:bR|g8:bK; b2:wB|c1:wR|e1:wR|e2:wQ; d4:wP|g1:wK|g2:wP|h3:wP; d5:bP|e6:bP|f7:bP|g7:bP
+   seed 23: 5 multi-piece units; identical to a seed-13 unit: 3 of 6; units: a8:bR|f6:bN|f8:bR|g8:bK; b2:wB|c1:wR|e1:wR|e2:wQ; c7:bQ|d6:bB; d4:wP|g1:wK|g2:wP|h3:wP; d5:bP|e6:bP|f7:bP|g7:bP
+
+### board 9 (middle, 24 pieces), seed 13 at 4000 positions: pieces (left; white upper case, black lower case) and chunk letters (right; o = piece in no multi-piece chunk)
+   8  . . . r . r k .     8  . . . F . o C .
+   7  p p . . . . . p     7  E C . . . . . C
+   6  . . p q . . p .     6  . . E F . . C .
+   5  . . . p n . . .     5  . . . E F . . .
+   4  . . . . p . . .     4  . . . . o . . .
+   3  P . . . P . P .     3  B . . . B . D .
+   2  . P P . N P . P     2  . B B . A D . D
+   1  R . Q . . R K .     1  A . A . . A D .
+      a b c d e f g h        a b c d e f g h
+   A = Ra1, Qc1, Ne2, Rf1 (4 pieces, stored chunk: False)
+   B = Pa3, Pb2, Pc2, Pe3 (4 pieces, stored chunk: False)
+   C = pb7, pg6, kg8, ph7 (4 pieces, stored chunk: True)
+   D = Pf2, Kg1, Pg3, Ph2 (4 pieces, stored chunk: True)
+   E = pa7, pc6, pd5 (3 pieces, stored chunk: True)
+   F = qd6, rd8, ne5 (3 pieces, stored chunk: False)
+   seed 17: 5 multi-piece units; identical to a seed-13 unit: 0 of 6; units: a1:wR|a3:wP|b2:wP|c2:wP; c1:wQ|e2:wN|f1:wR|g1:wK; d6:bQ|e5:bN; e3:wP|f2:wP|g3:wP|h2:wP; f8:bR|g8:bK
+   seed 19: 6 multi-piece units; identical to a seed-13 unit: 3 of 6; units: a1:wR|c1:wQ|e2:wN|f1:wR; a3:wP|b2:wP|c2:wP|e3:wP; a7:bP|b7:bP|c6:bP|d5:bP; f2:wP|g1:wK|g3:wP|h2:wP; f8:bR|g8:bK; g6:bP|h7:bP
+   seed 23: 6 multi-piece units; identical to a seed-13 unit: 3 of 6; units: a1:wR|c1:wQ|e2:wN|f1:wR; a3:wP|b2:wP|c2:wP|e3:wP; a7:bP|b7:bP|c6:bP|d5:bP; d6:bQ|d8:bR|f8:bR|g8:bK; f2:wP|g1:wK|g3:wP|h2:wP; g6:bP|h7:bP
+
+### board 0 (middle, 26 pieces), seed 13 at 4000 positions: pieces (left; white upper case, black lower case) and chunk letters (right; o = piece in no multi-piece chunk)
+   8  r . . . . r k .     8  A . . . . A o .
+   7  . . . n . p . p     7  . . . A . C . C
+   6  . q p . p . p Q     6  . A o . C . C B
+   5  p . . . . . . n     5  o . . . . . . o
+   4  P p . P P . . .     4  o o . o o . . .
+   3  . P . N . P . .     3  . o . B . D . .
+   2  . . . . N . P P     2  . . . . o . D D
+   1  . . R . . R . K     1  . . B . . B . D
+      a b c d e f g h        a b c d e f g h
+   A = ra8, qb6, nd7, rf8 (4 pieces, stored chunk: False)
+   B = Rc1, Nd3, Rf1, Qh6 (4 pieces, stored chunk: False)
+   C = pe6, pf7, pg6, ph7 (4 pieces, stored chunk: True)
+   D = Pf3, Pg2, Kh1, Ph2 (4 pieces, stored chunk: True)
+   seed 17: 6 multi-piece units; identical to a seed-13 unit: 1 of 4; units: b6:bQ|d7:bN; c1:wR|h6:wQ; d3:wN|e2:wN|f1:wR|h1:wK; e4:wP|f3:wP|g2:wP|h2:wP; e6:bP|f7:bP|g6:bP|h7:bP; f8:bR|g8:bK
+   seed 19: 4 multi-piece units; identical to a seed-13 unit: 1 of 4; units: a8:bR|f8:bR|g8:bK; c1:wR|e2:wN|f1:wR|h6:wQ; e6:bP|f7:bP|g6:bP|h7:bP; g2:wP|h1:wK|h2:wP
+   seed 23: 4 multi-piece units; identical to a seed-13 unit: 2 of 4; units: a8:bR|d7:bN|f8:bR|g8:bK; c1:wR|e2:wN|f1:wR|h6:wQ; e6:bP|f7:bP|g6:bP|h7:bP; f3:wP|g2:wP|h1:wK|h2:wP
+
+### cross-seed agreement of decompositions over all 30 boards at 4000 positions
+mean over the 6 seed pairs and boards: Jaccard of the multi-piece unit sets 0.211; Jaccard of the covered squares 0.506
+random baseline for the covered-squares Jaccard (each seed covers as many squares as it does, chosen at random among the board's pieces): 0.334
+seed 13: multi-piece units per board 2.93, share of pieces in a multi-piece unit 0.41; stored-chunk share of multi-piece units 0.60

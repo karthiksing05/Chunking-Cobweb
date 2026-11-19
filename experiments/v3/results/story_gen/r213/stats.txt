@@ -1,0 +1,93 @@
+# r213 language stats (seeds [13, 17, 19, 23], n=1000, held-out 400 sentences)
+
+## stream info
+13 {"250": {"records": 8873, "composite strings": 2630, "bracketed strings": 731, "learn s": 22}, "500": {"records": 16330, "composite strings": 4411, "bracketed strings": 1268, "learn s": 59}, "1000": {"records": 30685, "composite strings": 7590, "bracketed strings": 2218, "learn s": 161}}
+17 {"250": {"records": 9221, "composite strings": 2682, "bracketed strings": 712, "learn s": 28}, "500": {"records": 17110, "composite strings": 4683, "bracketed strings": 1304, "learn s": 75}, "1000": {"records": 32694, "composite strings": 8182, "bracketed strings": 2302, "learn s": 208}}
+19 {"250": {"records": 9544, "composite strings": 2788, "bracketed strings": 744, "learn s": 30}, "500": {"records": 17324, "composite strings": 4723, "bracketed strings": 1304, "learn s": 81}, "1000": {"records": 32316, "composite strings": 8058, "bracketed strings": 2283, "learn s": 230}}
+23 {"250": {"records": 9121, "composite strings": 2682, "bracketed strings": 746, "learn s": 23}, "500": {"records": 16872, "composite strings": 4687, "bracketed strings": 1353, "learn s": 62}, "1000": {"records": 31523, "composite strings": 7976, "bracketed strings": 2383, "learn s": 166}}
+
+## top chunks by count at 1000 (per-seed top 25; count = learn-tree bracket occurrences)
+seed 13 distinct bracketed strings 2218 total bracket occurrences 3455
+   he wanted (22); the park (19); tim was (19); the dog (15); the bird (14); lily and (13); the cat (13); they were (13); he was (12); played together (12); they played (12); in the park (11); tom and (11); it is (10); said yes (10); she was (10); so happy (10); the little (10); to do (10); to play (10); and ben (9); he wanted to (9); it was (9); one day (9); the boy (9)
+seed 17 distinct bracketed strings 2302 total bracket occurrences 3662
+   the bird (28); they were (19); was very (19); they played together (17); every day (16); he wanted to (16); the dog (16); they played (16); he wanted (15); he was (15); tim was (15); it was (14); one day (14); she was (12); the man (12); tim and (12); played together (11); they all (11); do you want (10); had fun (10); his mom (10); lily was (10); the cat (10); the little (10); to play (10)
+seed 19 distinct bracketed strings 2283 total bracket occurrences 3624
+   was very (26); the bird (22); so happy (18); had an (17); one day (17); the cat (16); tim and (16); every day (15); he was (15); it was (15); they played (15); tim was (15); together every day (13); was so happy (13); his friends (12); to do (12); very happy (12); he did not (11); he wanted (11); and had fun (10); had fun (10); he did (10); he had (10); her mom (10); thank you (10)
+seed 23 distinct bracketed strings 2383 total bracket occurrences 3536
+   the bird (20); lily was (18); they were (17); tim was (17); the little (14); it was (13); the park (13); to play (13); one day (12); sue was (12); to help (12); he was (11); the dog (11); his mom (10); the tree (10); tom and (10); thank you (9); the ball (9); the cat (9); every day (8); he wanted (8); her mom (8); in the park (8); lily and (8); lily was very (8)
+
+pooled over 4 seeds, top 40: the bird (84); tim was (66); they were (59); was very (56); he wanted (56); he was (53); one day (52); it was (51); they played (50); the dog (50); the cat (48); every day (47); the park (45); the little (41); lily was (40); to play (39); tim and (37); she was (35); he wanted to (35); his mom (34); played together (34); they all (34); they played together (33); sue was (33); lily and (33); so happy (32); to do (32); the ball (32); tom and (32); and had fun (29); her mom (29); in the park (29); tim was very (28); had fun (28); the man (28); his friends (28); all day (28); what to do (27); they had (27); thank you (27)
+length histogram of pooled top-200: {2: 143, 3: 51, 4: 6}
+
+chunks in the per-seed top-200 of ALL 4 seeds (54):
+   the bird (14/28/22/20); tim was (19/15/15/17); they were (13/19/10/17); he wanted (22/15/11/8); he was (12/15/15/11); one day (9/14/17/12); it was (9/14/15/13); they played (12/16/15/7); the dog (15/16/8/11); the cat (13/10/16/9); every day (8/16/15/8); the park (19/8/5/13); the little (10/10/7/14); lily was (8/10/4/18); to play (10/10/6/13); tim and (5/12/16/4); he wanted to (9/16/5/5); she was (10/12/6/7); his mom (5/10/9/10); played together (12/11/4/7); they all (9/11/8/6); they played together (5/17/7/4); lily and (13/6/6/8); sue was (8/8/5/12); to do (10/5/12/5); the ball (5/9/9/9); tom and (11/6/5/10); in the park (11/7/3/8); her mom (6/5/10/8); and had fun (6/7/10/6); all day (8/5/8/7); tim was very (8/9/5/6); had fun (5/10/10/3); they had (5/9/6/7); play together (5/5/9/7); very happy (4/5/12/5); with it (7/8/5/4); was happy (6/7/6/4); they did (5/6/7/4); he did (5/3/10/4); red ball (7/5/5/5); fun together (4/6/7/4); sue and (4/4/6/7); she wanted (4/7/6/4); he had (4/3/10/3); of fun (5/6/5/4); big tree (3/7/7/3); each other (6/4/5/5); they liked (4/5/4/6); do you (3/8/3/4); at the park (7/4/3/3); be friends (4/3/4/5); lily said (4/3/6/3); he asked (3/4/4/3)
+in the per-seed top-50 of all 4 seeds (14): and had fun; every day; he wanted; he was; it was; one day; the bird; the cat; the dog; the little; they all; they played; they were; tim was
+strings with count >= 3 in k of 4 seeds: {1: 312, 2: 126, 3: 55, 4: 66}
+
+## cross-seed overlap of chunk inventories (mean over the 6 seed pairs)
+cp 250 top-50 Jaccard: TRELLIS 0.153, freq 0.258, freq-lenmatched 0.241, BPE 0.224, random (pool: n-grams count>=2) 0.024  [pool sizes [350, 347, 402, 396]]
+cp 250 top-200 Jaccard: TRELLIS 0.117, freq 0.233, freq-lenmatched 0.216, BPE 0.150, random (pool: n-grams count>=2) 0.099  [pool sizes [350, 347, 402, 396]]
+cp 500 top-50 Jaccard: TRELLIS 0.244, freq 0.391, freq-lenmatched 0.391, BPE 0.346, random (pool: n-grams count>=2) 0.013  [pool sizes [801, 770, 812, 855]]
+cp 500 top-200 Jaccard: TRELLIS 0.223, freq 0.366, freq-lenmatched 0.363, BPE 0.263, random (pool: n-grams count>=2) 0.057  [pool sizes [801, 770, 812, 855]]
+cp 1000 top-50 Jaccard: TRELLIS 0.332, freq 0.510, freq-lenmatched 0.490, BPE 0.431, random (pool: n-grams count>=2) 0.008  [pool sizes [1618, 1648, 1655, 1681]]
+cp 1000 top-200 Jaccard: TRELLIS 0.298, freq 0.454, freq-lenmatched 0.438, BPE 0.362, random (pool: n-grams count>=2) 0.031  [pool sizes [1618, 1648, 1655, 1681]]
+
+count-weighted overlap (sum min / sum max of raw counts over the union of chunk strings), mean over pairs
+cp 250: TRELLIS bracketed strings 0.114; all n-grams (raw count, same stream) 0.136
+   TRELLIS top-200 count-weighted 0.136; freq-lenmatched top-200 0.239; BPE top-200 (merge order, unit weight = jaccard) 0.150
+cp 500: TRELLIS bracketed strings 0.162; all n-grams (raw count, same stream) 0.193
+   TRELLIS top-200 count-weighted 0.230; freq-lenmatched top-200 0.375; BPE top-200 (merge order, unit weight = jaccard) 0.263
+cp 1000: TRELLIS bracketed strings 0.214; all n-grams (raw count, same stream) 0.245
+   TRELLIS top-200 count-weighted 0.305; freq-lenmatched top-200 0.464; BPE top-200 (merge order, unit weight = jaccard) 0.362
+
+TRELLIS top-50 vs frequency baselines within a seed (Jaccard, mean over seeds), cp 1000
+  TRELLIS top-50 vs freq top-50: 0.352; top-200 vs top-200: 0.341
+  TRELLIS top-50 vs freq-lenmatched top-50: 0.343; top-200 vs top-200: 0.345
+  TRELLIS top-50 vs BPE top-50: 0.325; top-200 vs top-200: 0.335
+TRELLIS length histogram of top-200 at 1000, seed 13: {2: 146, 3: 40, 4: 14}  freq top-200: {2: 144, 3: 47, 4: 7, 5: 2}
+
+## stability along the stream (within seed; mean over seeds)
+top-50 Jaccard of checkpoint vs final (1000): 250 0.350, 500 0.551  [TRELLIS]
+top-50 Jaccard of checkpoint vs final (1000): 250 0.483, 500 0.691  [freq]
+top-50 Jaccard of checkpoint vs final (1000): 250 0.465, 500 0.668  [freq-lenmatched]
+top-50 Jaccard of checkpoint vs final (1000): 250 0.413, 500 0.569  [BPE]
+top-200 Jaccard of checkpoint vs final (1000): 250 0.290, 500 0.511  [TRELLIS]
+top-200 Jaccard of checkpoint vs final (1000): 250 0.460, 500 0.616  [freq]
+top-200 Jaccard of checkpoint vs final (1000): 250 0.423, 500 0.588  [freq-lenmatched]
+top-200 Jaccard of checkpoint vs final (1000): 250 0.319, 500 0.489  [BPE]
+Spearman of count at 250 / 500 vs count at 1000 over the final top-50 (TRELLIS): 0.488 / 0.677
+Spearman of count at 250 / 500 vs count at 1000 over the final top-50 (freq): 0.664 / 0.800
+final top-50 already a bracket (count>=1) at 250: TRELLIS 0.91; at 500 1.00
+
+## parse consistency on the shared held-out set (400 sentences, 183 repeated 2-4 word strings, eval-script definition)
+gold (NLTK shallow phrases): consistency 0.130 decisive 0.989
+right-branching: consistency 0.000 decisive 1.000; left-branching: consistency 0.354 decisive 0.940
+cp 250: consistency 0.306 decisive 0.841 | cross-seed bracket F1 0.652 | stability vs previous checkpoint nan | F1 vs NLTK 0.311 (right-branching 0.488, left-branching 0.074) | brackets/sentence 3.27
+cp 500: consistency 0.292 decisive 0.850 | cross-seed bracket F1 0.701 | stability vs previous checkpoint 0.849 | F1 vs NLTK 0.327 (right-branching 0.488, left-branching 0.074) | brackets/sentence 3.27
+cp 1000: consistency 0.285 decisive 0.861 | cross-seed bracket F1 0.724 | stability vs previous checkpoint 0.891 | F1 vs NLTK 0.341 (right-branching 0.488, left-branching 0.074) | brackets/sentence 3.27
+per-seed cp 1000 cross-seed pairs: {'13-17': 0.728, '13-19': 0.719, '13-23': 0.805, '17-19': 0.642, '17-23': 0.745, '19-23': 0.703}
+random-binary cross-seed reference (r203 table, seeds 13/17/19): .343 at 1000; BPE x1 .682; TRELLIS default chosen .742, parts .756 (story_parse_eval, 300 other held-out sentences)
+bracketed-somewhere consistency (t3_parse_agree definition) at 1000: 13: 0.509 (153 strings), 17: 0.510 (151 strings), 19: 0.505 (144 strings), 23: 0.537 (140 strings); right-branching 0.610 (84); left-branching 0.802 (81)
+
+## share of TRELLIS parses (binary chosen tree, whole sentence excluded) that differ from right- / left-branching
+cp 250 seed 13: differs from RB 0.850 (340), equals LB 0.158, neither RB nor LB 0.693 (277) | on the 340 non-RB parses F1 vs NLTK: TRELLIS 0.269, RB 0.470, LB 0.076 | on the 277 neither-parses: TRELLIS 0.290, RB 0.445, LB 0.076 | on RB-equal parses RB F1 0.685
+cp 250 seed 17: differs from RB 0.963 (385), equals LB 0.335, neither RB nor LB 0.627 (251) | on the 385 non-RB parses F1 vs NLTK: TRELLIS 0.265, RB 0.485, LB 0.074 | on the 251 neither-parses: TRELLIS 0.312, RB 0.425, LB 0.071 | on RB-equal parses RB F1 0.667
+cp 250 seed 19: differs from RB 0.755 (302), equals LB 0.055, neither RB nor LB 0.700 (280) | on the 302 non-RB parses F1 vs NLTK: TRELLIS 0.293, RB 0.442, LB 0.081 | on the 280 neither-parses: TRELLIS 0.297, RB 0.433, LB 0.080 | on RB-equal parses RB F1 0.744
+cp 250 seed 23: differs from RB 0.825 (330), equals LB 0.190, neither RB nor LB 0.635 (254) | on the 330 non-RB parses F1 vs NLTK: TRELLIS 0.272, RB 0.478, LB 0.076 | on the 254 neither-parses: TRELLIS 0.290, RB 0.445, LB 0.066 | on RB-equal parses RB F1 0.567
+cp 250 mean over seeds: differs from RB 0.848, equals LB 0.184, neither 0.664
+cp 500 seed 13: differs from RB 0.855 (342), equals LB 0.160, neither RB nor LB 0.695 (278) | on the 342 non-RB parses F1 vs NLTK: TRELLIS 0.279, RB 0.470, LB 0.075 | on the 278 neither-parses: TRELLIS 0.308, RB 0.438, LB 0.079 | on RB-equal parses RB F1 0.694
+cp 500 seed 17: differs from RB 0.900 (360), equals LB 0.193, neither RB nor LB 0.708 (283) | on the 360 non-RB parses F1 vs NLTK: TRELLIS 0.290, RB 0.474, LB 0.077 | on the 283 neither-parses: TRELLIS 0.315, RB 0.445, LB 0.072 | on RB-equal parses RB F1 0.768
+cp 500 seed 19: differs from RB 0.743 (297), equals LB 0.065, neither RB nor LB 0.677 (271) | on the 297 non-RB parses F1 vs NLTK: TRELLIS 0.306, RB 0.445, LB 0.078 | on the 271 neither-parses: TRELLIS 0.315, RB 0.435, LB 0.078 | on RB-equal parses RB F1 0.707
+cp 500 seed 23: differs from RB 0.850 (340), equals LB 0.233, neither RB nor LB 0.618 (247) | on the 340 non-RB parses F1 vs NLTK: TRELLIS 0.277, RB 0.477, LB 0.075 | on the 247 neither-parses: TRELLIS 0.305, RB 0.424, LB 0.066 | on RB-equal parses RB F1 0.582
+cp 500 mean over seeds: differs from RB 0.837, equals LB 0.163, neither 0.674
+cp 1000 seed 13: differs from RB 0.830 (332), equals LB 0.175, neither RB nor LB 0.655 (262) | on the 332 non-RB parses F1 vs NLTK: TRELLIS 0.283, RB 0.471, LB 0.077 | on the 262 neither-parses: TRELLIS 0.310, RB 0.435, LB 0.079 | on RB-equal parses RB F1 0.628
+cp 1000 seed 17: differs from RB 0.907 (363), equals LB 0.185, neither RB nor LB 0.723 (289) | on the 363 non-RB parses F1 vs NLTK: TRELLIS 0.309, RB 0.476, LB 0.075 | on the 289 neither-parses: TRELLIS 0.333, RB 0.442, LB 0.067 | on RB-equal parses RB F1 0.822
+cp 1000 seed 19: differs from RB 0.735 (294), equals LB 0.050, neither RB nor LB 0.685 (274) | on the 294 non-RB parses F1 vs NLTK: TRELLIS 0.324, RB 0.446, LB 0.081 | on the 274 neither-parses: TRELLIS 0.330, RB 0.436, LB 0.081 | on RB-equal parses RB F1 0.699
+cp 1000 seed 23: differs from RB 0.815 (326), equals LB 0.228, neither RB nor LB 0.588 (235) | on the 326 non-RB parses F1 vs NLTK: TRELLIS 0.293, RB 0.474, LB 0.077 | on the 235 neither-parses: TRELLIS 0.326, RB 0.423, LB 0.070 | on RB-equal parses RB F1 0.585
+cp 1000 mean over seeds: differs from RB 0.822, equals LB 0.159, neither 0.663
+overall F1 vs NLTK at 1000 by seed: {13: 0.32, 17: 0.327, 19: 0.386, 23: 0.331}
+sentences non-right-branching in all 4 seeds at 1000: 263 of 400
+
+## candidates (seed 13, cp 1000): neither RB nor LB; index | F1 vs NLTK | nonend brackets | tree | gold
+wrote candidates.txt with 262 trees
+random draw (random.Random(213).sample of the seed-13 cp-1000 neither-RB-nor-LB set, k=4): [110, 314, 163, 219]

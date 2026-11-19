@@ -1,0 +1,460 @@
+
+### held-out sentence 366: the tree had no friends
+  seed 13 (shown) [[the tree] [[had no] friends]]
+  seed 17        [[[the tree] had] [no friends]]
+  seed 19        [[the tree] [had [no friends]]]
+  seed 23        [[[[the tree] had] no] friends]
+  NLTK reference [the tree] [had [no friends]]
+  chunk 'the tree' span 0-2 posterior 0.58 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 3
+      this string in the 400 held-out sentences: 3 occurrences; bracketed as this span per seed 13:1/3 17:1/3 19:2/3 23:1/3
+      nearest concept c125971 (12.0 bits, 4 member strings): boy said; lived with; wanted to
+      concept c125971 (12.0 bits, 4 member strings); members: boy said; lived with; wanted to
+  chunk 'had no' span 2-4 posterior 0.44 | in NLTK reference: no | same span bracketed by other seeds: none | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 2 occurrences; bracketed as this span per seed 13:1/2 17:1/2 19:0/2 23:0/2
+      nearest concept c137567 (14.1 bits, 2 member strings): have no
+      concept c137566 (12.7 bits, 6 member strings); members: a boy; have no; do not; day sue; car went
+  chunk 'had no friends' span 2-5 posterior 0.44 | in NLTK reference: yes | same span bracketed by other seeds: 19 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:0/1 19:1/1 23:0/1
+      no content-concept record kept for this string
+
+### held-out sentence 202: the bird looked at spot
+  seed 13 (shown) [[the bird] [[looked at] spot]]
+  seed 17        [[[[the bird] looked] at] spot]
+  seed 19        [[the bird] [looked [at spot]]]
+  seed 23        [[the bird] [looked [at spot]]]
+  NLTK reference [the bird] [looked [at spot]]
+  chunk 'the bird' span 0-2 posterior 0.66 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 14
+      this string in the 400 held-out sentences: 13 occurrences; bracketed as this span per seed 13:9/13 17:9/13 19:8/13 23:10/13
+      nearest concept c102239 (9.4 bits, 7 member strings): happy too; the animals; was inside; with tim; the tree; feel better
+      concept c102239 (9.4 bits, 7 member strings); members: happy too; the animals; was inside; with tim; the tree; feel better
+  chunk 'looked at' span 2-4 posterior 0.58 | in NLTK reference: no | same span bracketed by other seeds: none | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 1
+      this string in the 400 held-out sentences: 3 occurrences; bracketed as this span per seed 13:1/3 17:0/3 19:0/3 23:0/3
+      nearest concept c140666 (9.4 bits, 13 member strings): don't be; a friend; can each; we get; saw a; am tom; can all
+      concept c140666 (9.4 bits, 13 member strings); members: don't be; a friend; can each; we get; saw a; am tom; can all; looked for; said yes; a big; know what; to play
+  chunk 'looked at spot' span 2-5 posterior 0.52 | in NLTK reference: yes | same span bracketed by other seeds: 19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:0/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+
+### held-out sentence 178: one day tom went to the park
+  seed 13 (shown) [[[[one day] tom] went] [to [the park]]]
+  seed 17        [[[[one day] tom] went] [to [the park]]]
+  seed 19        [[[[one day] tom] went] [to [the park]]]
+  seed 23        [[[[one day] tom] went] [to [the park]]]
+  NLTK reference [one day] [[tom went] [to [the park]]]
+  chunk 'one day' span 0-2 posterior 0.96 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 9
+      this string in the 400 held-out sentences: 6 occurrences; bracketed as this span per seed 13:6/6 17:6/6 19:6/6 23:6/6
+      nearest concept c118844 (8.9 bits, 7 member strings): at the; he knew; inside the; as he; the little; he played
+      concept c118844 (8.9 bits, 7 member strings); members: at the; he knew; inside the; as he; the little; he played
+  chunk 'the park' span 5-7 posterior 0.97 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 19
+      this string in the 400 held-out sentences: 7 occurrences; bracketed as this span per seed 13:7/7 17:7/7 19:7/7 23:7/7
+      nearest concept c124010 (9.2 bits, 4 member strings): their room; the house; back home
+      concept c124010 (9.2 bits, 4 member strings); members: their room; the house; back home
+  chunk 'one day tom' span 0-3 posterior 0.97 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 2
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      nearest concept c137346 (9.8 bits, 7 member strings): so he asked; then he made; now you have; she says it; as he walked; the little boy
+      concept c137346 (9.8 bits, 7 member strings); members: so he asked; then he made; now you have; she says it; as he walked; the little boy
+  chunk 'to the park' span 4-7 posterior 0.74 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 2
+      this string in the 400 held-out sentences: 2 occurrences; bracketed as this span per seed 13:2/2 17:2/2 19:2/2 23:2/2
+      nearest concept c93182 (9.7 bits, 8 member strings): to each other; to play with; into the water; to her mommy; to play too; to play again; he was sad
+      concept c93182 (9.7 bits, 8 member strings); members: to each other; to play with; into the water; to her mommy; to play too; to play again; he was sad
+  chunk 'one day tom went' span 0-4 posterior 0.48 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+
+### held-out sentence 299: one day max saw a door
+  seed 13 (shown) [[[one day] max] [saw [a door]]]
+  seed 17        [[[one day] max] [saw [a door]]]
+  seed 19        [[[[one day] max] saw] [a door]]
+  seed 23        [[[one day] max] [saw [a door]]]
+  NLTK reference [one day] [[max saw] [a door]]
+  chunk 'one day' span 0-2 posterior 0.93 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 9
+      this string in the 400 held-out sentences: 6 occurrences; bracketed as this span per seed 13:6/6 17:6/6 19:6/6 23:6/6
+      nearest concept c118844 (8.9 bits, 7 member strings): at the; he knew; inside the; as he; the little; he played
+      concept c118844 (8.9 bits, 7 member strings); members: at the; he knew; inside the; as he; the little; he played
+  chunk 'a door' span 4-6 posterior 0.54 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      nearest concept c23116 (9.5 bits, 5 member strings): a girl; a boy; many toys; in there
+      concept c23116 (9.5 bits, 5 member strings); members: a girl; a boy; many toys; in there
+  chunk 'one day max' span 0-3 posterior 0.78 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 1
+      this string in the 400 held-out sentences: 2 occurrences; bracketed as this span per seed 13:2/2 17:2/2 19:2/2 23:2/2
+      nearest concept c92068 (11.9 bits, 4 member strings): tim was playing; it was a; she put it
+      concept c92068 (11.9 bits, 4 member strings); members: tim was playing; it was a; she put it
+  chunk 'saw a door' span 3-6 posterior 0.35 | in NLTK reference: no | same span bracketed by other seeds: 17,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:0/1 23:1/1
+      no content-concept record kept for this string
+
+### held-out sentence 361: this rock lived in a big park
+  seed 13 (shown) [[[this rock] lived] [in [a [big park]]]]
+  seed 17        [[[this rock] lived] [in [a [big park]]]]
+  seed 19        [[[[this rock] lived] in] [a [big park]]]
+  seed 23        [[[[this rock] lived] in] [a [big park]]]
+  NLTK reference [this rock] [lived [in [a big park]]]
+  chunk 'this rock' span 0-2 posterior 0.98 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'big park' span 5-7 posterior 0.97 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'this rock lived' span 0-3 posterior 0.89 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'a big park' span 4-7 posterior 0.85 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'in a big park' span 3-7 posterior 0.76 | in NLTK reference: yes | same span bracketed by other seeds: 17 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:0/1 23:0/1
+      no content-concept record kept for this string
+
+### held-out sentence 205: all the animals were very happy
+  seed 13 (shown) [[[[all the] animals] were] [very happy]]
+  seed 17        [[[[all the] animals] were] [very happy]]
+  seed 19        [[[all the] animals] [were [very happy]]]
+  seed 23        [[[[all the] animals] were] [very happy]]
+  NLTK reference [all the animals] [were [very happy]]
+  chunk 'all the' span 0-2 posterior 0.97 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 3
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      nearest concept c143532 (10.7 bits, 3 member strings): and i; one day
+      concept c135193 (8.9 bits, 12 member strings); members: and i; tim's friend; the cat; they do; tim's friends; one day; he asked; the fish; he said; sara and; he made
+  chunk 'very happy' span 4-6 posterior 0.86 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 4
+      this string in the 400 held-out sentences: 21 occurrences; bracketed as this span per seed 13:5/21 17:3/21 19:9/21 23:3/21
+      nearest concept c94840 (9.9 bits, 4 member strings): of fun; good friends; their toy
+      concept c94840 (9.9 bits, 4 member strings); members: of fun; good friends; their toy
+  chunk 'all the animals' span 0-3 posterior 0.84 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 1
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      nearest concept c132859 (11.3 bits, 2 member strings): with the bird
+      concept c89372 (9.6 bits, 11 member strings); members: with the bird; what was inside; him happy too; friends with tim; near the tree; tim feel better; lily make the; tim find his; friends with the; with his toy
+  chunk 'all the animals were' span 0-4 posterior 0.77 | in NLTK reference: no | same span bracketed by other seeds: 17,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:0/1 23:1/1
+      no content-concept record kept for this string
+
+### held-out sentence 328: it was a fun day for everyone
+  seed 13 (shown) [[it was] [[a [fun day]] [for everyone]]]
+  seed 17        [[[it was] a] [fun [day [for everyone]]]]
+  seed 19        [[it was] [a [fun [day [for everyone]]]]]
+  seed 23        [[it was] [a [fun [day [for everyone]]]]]
+  NLTK reference it [was [a fun day] [for everyone]]
+  chunk 'it was' span 0-2 posterior 0.89 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 9
+      this string in the 400 held-out sentences: 12 occurrences; bracketed as this span per seed 13:5/12 17:4/12 19:3/12 23:5/12
+      nearest concept c132666 (11.1 bits, 2 member strings): was inside
+      concept c142526 (9.7 bits, 6 member strings); members: was inside; cat happy; play with; go home; went home
+  chunk 'fun day' span 3-5 posterior 0.51 | in NLTK reference: no | same span bracketed by other seeds: none | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:0/1 19:0/1 23:0/1
+      nearest concept c108154 (11.4 bits, 11 member strings): happy to; to have; and opened; careful with; but wanted; but he; to play
+      concept c108154 (11.4 bits, 11 member strings); members: happy to; to have; and opened; careful with; but wanted; but he; to play; excited and; and started; and they
+  chunk 'for everyone' span 5-7 posterior 0.87 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'a fun day' span 2-5 posterior 0.52 | in NLTK reference: yes | same span bracketed by other seeds: none | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 1
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:0/1 19:0/1 23:0/1
+      nearest concept c130319 (13.8 bits, 2 member strings): very careful with
+      concept c101573 (13.8 bits, 4 member strings); members: very careful with; very excited and; playing with a
+  chunk 'a fun day for everyone' span 2-7 posterior 0.39 | in NLTK reference: no | same span bracketed by other seeds: 19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:0/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+
+### held-out sentence 301: the cat ran after the ball
+  seed 13 (shown) [[[the cat] ran] [after [the ball]]]
+  seed 17        [[[the cat] ran] [after [the ball]]]
+  seed 19        [[the cat] [ran [after [the ball]]]]
+  seed 23        [[[the cat] ran] [after [the ball]]]
+  NLTK reference [the cat] [ran [after [the ball]]]
+  chunk 'the cat' span 0-2 posterior 0.96 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 13
+      this string in the 400 held-out sentences: 10 occurrences; bracketed as this span per seed 13:5/10 17:7/10 19:4/10 23:6/10
+      nearest concept c110008 (9.9 bits, 5 member strings): max lived; once there; she lived; now tim
+      concept c110008 (9.9 bits, 5 member strings); members: max lived; once there; she lived; now tim
+  chunk 'the ball' span 4-6 posterior 0.98 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 5
+      this string in the 400 held-out sentences: 6 occurrences; bracketed as this span per seed 13:4/6 17:4/6 19:4/6 23:3/6
+      nearest concept c142563 (10.7 bits, 3 member strings): tom said; tom and
+      concept c141465 (7.6 bits, 23 member strings); members: tom and; tom thought; they found; she played; they were; now you; he said; sue said; sue started; then he; and his; do you; the little
+  chunk 'the cat ran' span 0-3 posterior 0.52 | in NLTK reference: no | same span bracketed by other seeds: 17,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 1
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:0/1 23:1/1
+      nearest concept c124245 (13.2 bits, 2 member strings): the dog was
+      concept c136992 (11.5 bits, 10 member strings); members: you are so; the dog was; he liked his; the cat felt; let's make it; is this one; we can be; they found some; i will take
+  chunk 'after the ball' span 3-6 posterior 0.66 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+
+### held-out sentence 147: amy loved to play in the park
+  seed 13 (shown) [[[amy loved] to] [play [in [the park]]]]
+  seed 17        [[[amy loved] to] [play [in [the park]]]]
+  seed 19        [[amy loved] [[to play] [in [the park]]]]
+  seed 23        [[[amy loved] to] [play [in [the park]]]]
+  NLTK reference [amy loved] [[to play] [in [the park]]]
+  chunk 'amy loved' span 0-2 posterior 0.94 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'the park' span 5-7 posterior 0.99 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 19
+      this string in the 400 held-out sentences: 7 occurrences; bracketed as this span per seed 13:7/7 17:7/7 19:7/7 23:7/7
+      nearest concept c124010 (9.2 bits, 4 member strings): their room; the house; back home
+      concept c124010 (9.2 bits, 4 member strings); members: their room; the house; back home
+  chunk 'amy loved to' span 0-3 posterior 0.91 | in NLTK reference: no | same span bracketed by other seeds: 17,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:0/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'in the park' span 4-7 posterior 0.92 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 11
+      this string in the 400 held-out sentences: 3 occurrences; bracketed as this span per seed 13:3/3 17:3/3 19:3/3 23:3/3
+      nearest concept c99381 (10.4 bits, 3 member strings): with his friends; all day long
+      concept c20186 (8.0 bits, 15 member strings); members: in the sun; with his friends; his friends outside; her friend tom; his toys there; with the bear; with his ball; his toy car; run all day; with their toys; make the cake; toys in it; find his toy
+  chunk 'play in the park' span 3-7 posterior 0.83 | in NLTK reference: no | same span bracketed by other seeds: 17,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 1
+      this string in the 400 held-out sentences: 2 occurrences; bracketed as this span per seed 13:2/2 17:2/2 19:0/2 23:2/2
+      nearest concept c98074 (11.8 bits, 2 member strings): play with her friends
+      concept c98073 (10.1 bits, 6 member strings); members: play with his ball; play near the water; play with her friends; play at the park; play with her ball
+
+### held-out sentence 358: suddenly the little girl had an idea
+  seed 13 (shown) [[[[suddenly the] little] girl] [had [an idea]]]
+  seed 17        [[[[suddenly the] little] girl] [had [an idea]]]
+  seed 19        [[[[suddenly the] little] girl] [had [an idea]]]
+  seed 23        [[[[suddenly the] little] girl] [had [an idea]]]
+  NLTK reference suddenly [the little girl] [had [an idea]]
+  chunk 'suddenly the' span 0-2 posterior 0.44 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'an idea' span 5-7 posterior 0.91 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 9 occurrences; bracketed as this span per seed 13:2/9 17:3/9 19:1/9 23:1/9
+      nearest concept c94299 (11.7 bits, 3 member strings): to play; not fun
+      concept c120244 (9.8 bits, 10 member strings); members: to play; this ball; hard ball; you bird; little dog; bad man; friend tim; nice ball; not fun
+  chunk 'suddenly the little' span 0-3 posterior 0.68 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'had an idea' span 4-7 posterior 0.46 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 9 occurrences; bracketed as this span per seed 13:1/9 17:1/9 19:1/9 23:1/9
+      nearest concept c97500 (10.7 bits, 12 member strings): walked and walked; want to eat; eat the cake; said we will; saw many animals; both like animals; became best friends; both smiled excited
+      concept c97501 (11.8 bits, 6 member strings); members: walked and walked; became best friends; said thank you; are for playing; are good friends
+  chunk 'suddenly the little girl' span 0-4 posterior 0.70 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+
+### held-out sentence 110: one day he saw a big ball
+  seed 13 (shown) [[[[one day] he] saw] [a [big ball]]]
+  seed 17        [[[[one day] he] saw] [a [big ball]]]
+  seed 19        [[[[one day] he] saw] [a [big ball]]]
+  seed 23        [[[[[one day] he] saw] a] [big ball]]
+  NLTK reference [one day] he [saw [a big ball]]
+  chunk 'one day' span 0-2 posterior 0.98 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 9
+      this string in the 400 held-out sentences: 6 occurrences; bracketed as this span per seed 13:6/6 17:6/6 19:6/6 23:6/6
+      nearest concept c118844 (8.9 bits, 7 member strings): at the; he knew; inside the; as he; the little; he played
+      concept c118844 (8.9 bits, 7 member strings); members: at the; he knew; inside the; as he; the little; he played
+  chunk 'big ball' span 5-7 posterior 0.98 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 2 occurrences; bracketed as this span per seed 13:2/2 17:2/2 19:2/2 23:2/2
+      no content-concept record kept for this string
+  chunk 'one day he' span 0-3 posterior 0.99 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 1
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      nearest concept c92066 (10.8 bits, 7 member strings): one day max; tim was playing; they found it; she said no; it was a; she put it
+      concept c92066 (10.8 bits, 7 member strings); members: one day max; tim was playing; they found it; she said no; it was a; she put it
+  chunk 'a big ball' span 4-7 posterior 0.53 | in NLTK reference: yes | same span bracketed by other seeds: 17,19 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 2 occurrences; bracketed as this span per seed 13:2/2 17:2/2 19:2/2 23:1/2
+      no content-concept record kept for this string
+  chunk 'one day he saw' span 0-4 posterior 0.84 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 1
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      nearest concept c133353 (11.0 bits, 5 member strings): they said he was; tim was playing with; one day max saw; they found it under
+      concept c133353 (11.0 bits, 5 member strings); members: they said he was; tim was playing with; one day max saw; they found it under
+
+### held-out sentence 314: the girl was happy to help
+  seed 13 (shown) [[the girl] [was [happy [to help]]]]
+  seed 17        [[[the girl] was] [happy [to help]]]
+  seed 19        [[the girl] [was [happy [to help]]]]
+  seed 23        [[the girl] [was [happy [to help]]]]
+  NLTK reference [the girl] [was happy] [to help]
+  chunk 'the girl' span 0-2 posterior 0.91 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 6
+      this string in the 400 held-out sentences: 2 occurrences; bracketed as this span per seed 13:1/2 17:2/2 19:1/2 23:2/2
+      nearest concept c143000 (10.8 bits, 3 member strings): him happy; it too
+      concept c119472 (8.5 bits, 12 member strings); members: with it; with max; their friend; it back; in it; it on; the bird; him happy; with them; it too; at it
+  chunk 'to help' span 4-6 posterior 0.94 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 1
+      this string in the 400 held-out sentences: 9 occurrences; bracketed as this span per seed 13:4/9 17:4/9 19:4/9 23:4/9
+      nearest concept c141714 (11.6 bits, 2 member strings): to go
+      concept c68483 (9.1 bits, 10 member strings); members: and play; to go; toy car; with lily; new friends; the door; said yes; both laughed; for her
+  chunk 'happy to help' span 3-6 posterior 0.56 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 1
+      this string in the 400 held-out sentences: 5 occurrences; bracketed as this span per seed 13:4/5 17:2/5 19:4/5 23:4/5
+      nearest concept c42137 (12.0 bits, 7 member strings): her best friend; a good dog; proud of them; surprised but happy; a happy house; not scared anymore
+      concept c42137 (12.0 bits, 7 member strings); members: her best friend; a good dog; proud of them; surprised but happy; a happy house; not scared anymore
+  chunk 'was happy to help' span 2-6 posterior 0.59 | in NLTK reference: no | same span bracketed by other seeds: 19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 1
+      this string in the 400 held-out sentences: 4 occurrences; bracketed as this span per seed 13:4/4 17:2/4 19:4/4 23:4/4
+      nearest concept c54508 (10.2 bits, 16 member strings): was in a box; was red and shiny; was her best friend; was not his toy; was so much fun; was fun and fast; was scared and excited
+      concept c54508 (10.2 bits, 16 member strings); members: was in a box; was red and shiny; was her best friend; was not his toy; was so much fun; was fun and fast; was scared and excited; was blue and shiny; was sad and scared; was fun and pretty; was shiny and pretty; was surprised but 
+
+### held-out sentence 163: she ran fast to get the cake
+  seed 13 (shown) [[[she ran] fast] [to [get [the cake]]]]
+  seed 17        [[[she ran] fast] [to [get [the cake]]]]
+  seed 19        [[[[she ran] fast] to] [get [the cake]]]
+  seed 23        [[[she ran] fast] [to [get [the cake]]]]
+  NLTK reference she [ran fast] [[to get] [the cake]]
+  chunk 'she ran' span 0-2 posterior 0.71 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'the cake' span 5-7 posterior 0.97 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 2
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      nearest concept c140481 (9.6 bits, 6 member strings): his toy; his ball; their toys; the bear; in it
+      concept c84641 (9.8 bits, 5 member strings); members: his ball; their toys; the bear; in it
+  chunk 'she ran fast' span 0-3 posterior 0.83 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'get the cake' span 4-7 posterior 0.92 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'to get the cake' span 3-7 posterior 0.64 | in NLTK reference: yes | same span bracketed by other seeds: 17,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:0/1 23:1/1
+      no content-concept record kept for this string
+
+### held-out sentence 219: i will help you said tom
+  seed 13 (shown) [[i will] [help [you [said tom]]]]
+  seed 17        [[[i will] help] [you [said tom]]]
+  seed 19        [[i will] [help [you [said tom]]]]
+  seed 23        [[i will] [help [you [said tom]]]]
+  NLTK reference i [[will help] you] [said tom]
+  chunk 'i will' span 0-2 posterior 0.64 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 2
+      this string in the 400 held-out sentences: 3 occurrences; bracketed as this span per seed 13:2/3 17:2/3 19:2/3 23:2/3
+      nearest concept c127404 (8.8 bits, 6 member strings): he wanted; tom liked; they like; he went; he liked
+      concept c43729 (8.9 bits, 5 member strings); members: he wanted; tom liked; he went; he liked
+  chunk 'said tom' span 4-6 posterior 0.94 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      nearest concept c137733 (13.2 bits, 6 member strings): big bird; bob but; cat said; house said; boy had
+      concept c137733 (13.2 bits, 6 member strings); members: big bird; bob but; cat said; house said; boy had
+  chunk 'you said tom' span 3-6 posterior 0.87 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'help you said tom' span 2-6 posterior 0.88 | in NLTK reference: no | same span bracketed by other seeds: 19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:0/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+
+## chunk biographies (count = learn-tree bracket occurrences in the stream so far)
+
+### 'the bird'
+  seed 13: first bracketed at sentence 27; count at 100/250/500/750/1000 sentences: [2, 5, 8, 13, 14]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c30746 (7.5 bits, 7 members): all day; had fun; day long; very happy; of fun; their toy
+      cp 500 concept c55287 (9.3 bits, 5 members): he was; he liked; yes you; they played
+      cp 1000 concept c102239 (9.4 bits, 7 members): happy too; the animals; was inside; with tim; the tree; feel better
+      first training sentences where it was a bracket: the bird saw a big cat | the big cat walked away with the bird | they all laughed and played with the bird
+  seed 17: first bracketed at sentence 59; count at 100/250/500/750/1000 sentences: [3, 12, 18, 24, 28]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c37059 (6.0 bits, 23 members): they were; he thought; lily loved; his mom; they all; they liked; but the
+      cp 500 concept c19501 (8.7 bits, 6 members): you sue; them all; to help; his mom; new car
+      cp 1000 concept c162604 (8.7 bits, 14 members): but then; the bear; the dog; lily smiled; i found; she was; sam smiled
+      first training sentences where it was a bracket: the bird was happy and flew away | the bird could not take it | the bird got scared and flew away
+  seed 19: first bracketed at sentence 27; count at 100/250/500/750/1000 sentences: [1, 7, 14, 17, 22]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c35099 (8.1 bits, 5 members): now i; once upon; when he; he had
+      cp 500 concept c77309 (6.6 bits, 25 members): they liked; he picked; a big; she loved; can i; the old; now i
+      cp 1000 concept c162423 (7.6 bits, 22 members): the cat; one day; then we; tom looked; sue smiled; but we; she told
+      first training sentences where it was a bracket: the bird was happy and flew out | the bird saw a little girl named lily | the bird was happy too
+  seed 23: first bracketed at sentence 37; count at 100/250/500/750/1000 sentences: [3, 7, 10, 12, 20]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c33876 (6.6 bits, 14 members): sorry sue; of fun; other surprised; new friends; what happened; her friends; the park
+      cp 500 concept c52213 (5.1 bits, 67 members): of fun; the tree; her friends; the park; all day; big box; very happy; they wanted
+      cp 1000 concept c125987 (10.3 bits, 4 members): the cat; everyone was; he thanked
+      first training sentences where it was a bracket: the bird was high up in the tree | the bird was scared and flew away | the bird was very happy and thanked max
+
+### 'one day'
+  seed 13: first bracketed at sentence 250; count at 100/250/500/750/1000 sentences: [0, 0, 4, 8, 9]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c24088 (8.9 bits, 5 members): tim was; they found; she said; she put
+      cp 500 concept c70139 (6.5 bits, 24 members): the cat; the little; tim was; at the; but the; but they; sue started; then he
+      cp 1000 concept c118844 (8.9 bits, 7 members): at the; he knew; inside the; as he; the little; he played
+      first training sentences where it was a bracket: one day max saw a big door | but one day something unexpected happened | one day he saw a little bird
+  seed 17: first bracketed at sentence 106; count at 100/250/500/750/1000 sentences: [0, 2, 5, 11, 14]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c15538 (8.7 bits, 4 members): the cat; but we; she lived
+      cp 500 concept c68776 (8.5 bits, 7 members): he opened; he had; they knew; the bird; it had; tom was
+      cp 1000 concept c132226 (8.1 bits, 15 members): but the; she asked; tim and; spot laughed; lily said; he thought; his friend
+      first training sentences where it was a bracket: one day her mom found out | one day a small bird came to lily | one day the cat saw something shiny
+  seed 19: first bracketed at sentence 71; count at 100/250/500/750/1000 sentences: [1, 2, 3, 8, 17]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c31570 (7.8 bits, 6 members): it flew; tim played; bob wanted; he got; yes you
+      cp 500 concept c31570 (8.2 bits, 9 members): he liked; it was; he had; it flew; tim played; bob wanted; he got
+      cp 1000 concept c87631 (9.9 bits, 5 members): his mom; the rock; the old; the bird
+      first training sentences where it was a bracket: one day spot could not find his toy | one day he saw a girl named sue | one day max saw a big cat
+  seed 23: first bracketed at sentence 18; count at 100/250/500/750/1000 sentences: [2, 2, 6, 9, 12]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c33195 (7.8 bits, 6 members): tim and; her mom; the ball; and they; he thanked
+      cp 500 concept c66192 (9.3 bits, 4 members): look sam; they put; he thought
+      cp 1000 concept c93130 (9.7 bits, 5 members): look sam; they put; sue thought; he thought
+      first training sentences where it was a bracket: one day sue went to the park | one day they saw a big box | one day spot saw a big ball
+
+### 'tim was'
+  seed 13: first bracketed at sentence 32; count at 100/250/500/750/1000 sentences: [2, 4, 7, 12, 19]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c24088 (8.9 bits, 5 members): they found; one day; she said; she put
+      cp 500 concept c64021 (8.4 bits, 7 members): the cat; then he; the little; he loved; he saw; he was
+      cp 1000 concept c64157 (9.5 bits, 7 members): one day; they said; they found; she put; he walked; the park
+      first training sentences where it was a bracket: tim was very happy to help his mom | tim was playing with a toy car | tim was happy too
+  seed 17: first bracketed at sentence 3; count at 100/250/500/750/1000 sentences: [2, 4, 8, 13, 15]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c34975 (8.4 bits, 7 members): sue was; tim felt; tom was; sara was; bob was; everyone was
+      cp 500 concept c71046 (8.2 bits, 10 members): but the; he saw; she opened; she looked; he found; but sue; anna was
+      cp 1000 concept c161520 (9.5 bits, 7 members): they both; they all; the bird; the tree; they were; tom was
+      first training sentences where it was a bracket: tim was very excited to help his mom | tim was happy | tim was very happy with his new car
+  seed 19: first bracketed at sentence 52; count at 100/250/500/750/1000 sentences: [2, 3, 6, 8, 15]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c39307 (6.5 bits, 13 members): they played; he was; he picked; her mom; then a; one day; we can
+      cp 500 concept c34818 (8.0 bits, 5 members): they were; the cat; lucy was; she was
+      cp 1000 concept c72189 (9.7 bits, 4 members): they were; sam was; lucy was
+      first training sentences where it was a bracket: tim was sad but then something unexpected happened | tim was excited | tim was so happy and surprised
+  seed 23: first bracketed at sentence 103; count at 100/250/500/750/1000 sentences: [0, 1, 7, 14, 17]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c16614 (8.9 bits, 6 members): i will; i am; do you; they went; day they
+      cp 500 concept c24551 (8.7 bits, 5 members): and that; they both; she could; she played
+      cp 1000 concept c43290 (9.6 bits, 6 members): do you; we don't; they both; sue was; they were
+      first training sentences where it was a bracket: tim was now her new friend | tim was happy and said yes thank you | tim was so surprised
+
+### 'in the park'
+  seed 13: first bracketed at sentence 194; count at 100/250/500/750/1000 sentences: [0, 1, 4, 7, 11]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c28099 (8.1 bits, 7 members): excited to go; happy and surprised; to play too; want to share; in the water; a small bird
+      cp 500 concept c63909 (8.6 bits, 9 members): what to do; what was inside; to go home; you little boy; i go inside; take your ball; of fun in
+      cp 1000 concept c20186 (8.0 bits, 15 members): in the sun; with his friends; his friends outside; her friend tom; his toys there; with the bear; with his ball
+      first training sentences where it was a bracket: lily and tom were playing in the park | tim liked to play in the park | lily and ben were playing in the park
+  seed 17: first bracketed at sentence 107; count at 100/250/500/750/1000 sentences: [0, 3, 6, 6, 7]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c12982 (8.2 bits, 14 members): of fun together; and had fun; friends to help; and went home; park every day; to see him; a small happy
+      cp 500 concept c60246 (9.0 bits, 6 members): was inside it; the ball too; in the sun; cake so much; bird feel better
+      cp 1000 concept c127468 (10.9 bits, 5 members): all day long; with the dog; outside in the; with the ball
+      first training sentences where it was a bracket: they liked to play in the park | tom and lily were playing in the park | anna and ben were playing in the park
+  seed 19: first bracketed at sentence 129; count at 100/250/500/750/1000 sentences: [0, 1, 3, 3, 3]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c35574 (9.1 bits, 4 members): on the ground; a big tree; help and said
+      cp 500 concept c69248 (9.2 bits, 5 members): at the park; as she walked; as they walked; i will help
+      cp 1000 concept c69248 (10.2 bits, 5 members): at the park; as she walked; as they walked; i will help
+      first training sentences where it was a bracket: he had many friends in the park | lily and tom were playing in the park | in the park they saw a big tree
+  seed 23: first bracketed at sentence 155; count at 100/250/500/750/1000 sentences: [0, 3, 4, 6, 8]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c36098 (8.7 bits, 4 members): cat was there; to the bear; help the bird
+      cp 500 concept c50043 (5.4 bits, 73 members): lots of fun; with her friends; a big box; in the tree; what they wanted; happy to go; day after that
+      cp 1000 concept c143547 (9.3 bits, 24 members): of fun together; as they went; for her help; thanked the dog; best of friends; fun playing together; to be careful
+      first training sentences where it was a bracket: they liked to play in the park | they liked to play in the park | lily and sam played together in the park
+
+### 'the little'
+  seed 13: first bracketed at sentence 28; count at 100/250/500/750/1000 sentences: [2, 2, 6, 8, 10]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c24371 (8.1 bits, 5 members): the man; they all; he saw; the big
+      cp 500 concept c64021 (8.4 bits, 7 members): the cat; then he; tim was; he loved; he saw; he was
+      cp 1000 concept c116424 (6.0 bits, 74 members): they all; they played; i don't; they laughed; and they; tim said; the bird
+      first training sentences where it was a bracket: the little boy said go away big cat | the little boy was sad | the little girl was so excited
+  seed 17: first bracketed at sentence 63; count at 100/250/500/750/1000 sentences: [1, 3, 5, 9, 10]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c13198 (6.8 bits, 19 members): he wanted; but then; lily had; max loved; you want; they found; he saw
+      cp 500 concept c69412 (9.7 bits, 4 members): look ben; they put; while playing
+      cp 1000 concept c84671 (9.2 bits, 9 members): so it; tim and; the dog; the bird; they laughed; they play; then they
+      first training sentences where it was a bracket: the little girl was happy | the little girl was sad | the little girl was very happy
+  seed 19: first bracketed at sentence 236; count at 100/250/500/750/1000 sentences: [0, 1, 1, 6, 7]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c25408 (8.4 bits, 6 members): the bird; he had; he said; the dog; lily and
+      cp 500 concept c51959 (8.5 bits, 9 members): the bird; the cat; the man; the girl; the old; her mom; the dog
+      cp 1000 concept c102412 (10.0 bits, 4 members): tim and; lily and; bob and
+      first training sentences where it was a bracket: the little fish were scared | the little girl was sad | the little girl felt sad
+  seed 23: first bracketed at sentence 124; count at 100/250/500/750/1000 sentences: [0, 1, 5, 10, 14]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c38370 (9.1 bits, 4 members): mia smiled; mom smiled; felt bad
+      cp 500 concept c40118 (9.6 bits, 4 members): sue smiled; ben smiled; mom smiled
+      cp 1000 concept c133729 (8.5 bits, 11 members): his mom; she did; one day; sue and; she said; the bird; spot was
+      first training sentences where it was a bracket: the little girl said thank you bob | the little fish was scared | the little girl loved the toy
+
+## top chunks of seed 13 at 1000 with the concept each falls under (nearest = parent of its leaf; wider = deepest concept with >= 4 member strings)
+he wanted (22) | nearest c125920 2 members: she wanted | wider c125919 (10.2 bits, 4 members): tom wanted; she wanted; he liked
+the park (19) | nearest c124010 4 members: their room; the house; back home | wider c124010 (9.2 bits, 4 members): their room; the house; back home
+tim was (19) | nearest c64157 7 members: one day; they said; they found; she put; he walked | wider c64157 (9.5 bits, 7 members): one day; they said; they found; she put; he walked
+the dog (15) | nearest c130514 6 members: her mom; new toy; it up; his friends; his mom | wider c130514 (9.2 bits, 6 members): her mom; new toy; it up; his friends; his mom
+the bird (14) | nearest c102239 7 members: happy too; the animals; was inside; with tim; the tree | wider c102239 (9.4 bits, 7 members): happy too; the animals; was inside; with tim; the tree
+lily and (13) | nearest c124005 3 members: anna and; sara and | wider c13958 (8.6 bits, 7 members): anna and; sue and; sara and; mia and; she had
+the cat (13) | nearest c110008 5 members: max lived; once there; she lived; now tim | wider c110008 (9.9 bits, 5 members): max lived; once there; she lived; now tim
+they were (13) | nearest c121993 3 members: the little; they said | wider c141465 (7.6 bits, 23 members): tom and; the ball; tom thought; they found; she played
+he was (12) | nearest c129222 3 members: in the; but they | wider c46482 (8.8 bits, 11 members): in the; lily was; they were; sue was; the bird
+played together (12) | nearest c141092 19 members: had fun; the park; and laughed; see it; day together | wider c121638 (10.1 bits, 5 members): the park; had fun; play anymore; did it
+they played (12) | nearest c64839 7 members: one day; tim was; sam came; they asked; they went | wider c64839 (8.9 bits, 7 members): one day; tim was; sam came; they asked; they went
+in the park (11) | nearest c99381 3 members: with his friends; all day long | wider c20186 (8.0 bits, 15 members): in the sun; with his friends; his friends outside; her friend tom; his toys there
+tom and (11) | nearest c143332 5 members: she played; he said; and his; they thought | wider c143332 (9.9 bits, 5 members): she played; he said; and his; they thought
+it is (10) | nearest c133049 3 members: it was; lily was | wider c138880 (9.0 bits, 10 members): she said; lily and; tom loved; tim said; but we
+said yes (10) | nearest c101561 4 members: see it; find it; be home | wider c101561 (10.2 bits, 4 members): see it; find it; be home
+she was (10) | nearest c83835 2 members: he was | wider c92868 (10.0 bits, 5 members): they were; everyone was; he was; they took
+so happy (10) | nearest c142762 13 members: and blue; get it; and happy; sad anymore; play too | wider c78807 (9.0 bits, 10 members): and blue; get it; and happy; sad anymore; ball too
+the little (10) | nearest c105798 2 members: the bird | wider c116424 (6.0 bits, 74 members): they all; they played; i don't; they laughed; and they
+to do (10) | nearest c100766 4 members: all day; it was; every day | wider c100766 (9.9 bits, 4 members): all day; it was; every day
+to play (10) | nearest c135298 2 members: to share | wider c110133 (8.7 bits, 12 members): with it; you tom; play outside; my ball; very much
+and ben (9) | nearest c99237 3 members: and sue; and tom | wider c77469 (9.2 bits, 7 members): and sam; and sue; and tom; and lucy; and lily
+he wanted to (9) | nearest c139897 4 members: he liked to; they like to; tim liked to | wider c139897 (10.6 bits, 4 members): he liked to; they like to; tim liked to
+it was (9) | nearest c132666 2 members: was inside | wider c142526 (9.7 bits, 6 members): was inside; cat happy; play with; go home; went home
+one day (9) | nearest c118844 7 members: at the; he knew; inside the; as he; the little | wider c118844 (8.9 bits, 7 members): at the; he knew; inside the; as he; the little
+the boy (9) | nearest c122299 4 members: they were; they made; they looked | wider c122299 (10.2 bits, 4 members): they were; they made; they looked
+they all (9) | nearest c94622 3 members: tim and; she picked | wider c40018 (8.2 bits, 15 members): lily was; they were; he was; in the; sue was; the bird
+was very (9) | nearest c135313 12 members: girl was; was so; was not; asked the; were so | wider c27492 (9.9 bits, 7 members): asked the; was so; were so; was not; boy was
+what to do (9) | nearest c130049 5 members: what it was; to go away; room with many; bird to help | wider c130049 (9.8 bits, 5 members): what it was; to go away; room with many; bird to help
+all day (8) | nearest c38865 4 members: day long; the dog; had fun | wider c38865 (10.2 bits, 4 members): day long; the dog; had fun
+every day (8) | nearest c106188 7 members: each other; help him; and scared; box together; and laughed | wider c51178 (9.4 bits, 5 members): each other; and scared; and laughed; all day
