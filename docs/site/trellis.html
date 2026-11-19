@@ -260,6 +260,9 @@ td.heat span { font-family: var(--font-mono); font-size: 11.5px; opacity: 0.85; 
 #tip .m { font-family: var(--font-mono); font-size: 12px; }
 details.history { margin-top: 2.5rem; border-top: 1px solid var(--rule); padding-top: 1rem; }
 details.history > summary { cursor: pointer; font-weight: 600; color: var(--accent); margin-bottom: 1rem; }
+details.cs { margin: 10px 0; }
+details.cs > summary { cursor: pointer; font-weight: 600; color: var(--accent); }
+.case pre.ex { font-family: var(--mono); font-size: 13px; line-height: 1.55; overflow-x: auto; margin: 6px 0; padding: 8px 10px; background: var(--surface-2); border-radius: 4px; white-space: pre; }
 @media (max-width: 920px) {
   .shell { grid-template-columns: 1fr; gap: 0; padding-top: 12px; }
   .toc { display: none; }
@@ -780,6 +783,671 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
 <h3>New sentences it wrote</h3>
 <p class="small">Examples, with the judge above 0.9: "one day she saw a big cat", "tom and max wanted to play together", "then the unexpected happened", "the bear wanted to eat it", "you are a nice friend". They were picked by hand; about 40% of all outputs are judged ungrammatical (<a href="#io-generation">Generation</a>).</p>
 </div>
+  <h2>Which chunks fall out, and how consistent they are (round 213)</h2>
+  <div class="col">
+    <p>Four seeds (13, 17, 19, 23) each learn their own 1,000-sentence TinyStories stream (kept sentences of 3 to 8 words, a 250-word vocabulary, story order) with the round 204 and 205 edge recipe, with checkpoints at 250, 500 and 1,000 sentences. A chunk here is a word string of two or more words that is a bracket of the tree <code>learn()</code> returns for a training sentence, and its count is the number of training sentences in which it was one. The parser reads the same learned memory (the chosen binary tree). Held-out parses use the shared 400-sentence set, and the reference is the NLTK shallow chunker of <code>story_parse_eval.py</code> (NP, PP, VP, AP and verb-group spans of two or more words, whole sentence excluded), which gives flat chunks and not a full tree. Sentences equal to a held-out sentence are skipped in training. The baselines for chunk inventories use the same prefix of each seed's stream: BPE merges (budget = the number of distinct strings TRELLIS bracketed at that checkpoint), raw frequency (the top contiguous 2 to 8-word n-grams by count), the same length-matched to the TRELLIS top-k length histogram, and a random draw of k strings from the n-grams that occur at least twice in that seed's prefix (100 draws). Code in <code>experiments/v3/diag/r213_lang.py</code>, <code>r213_lang_analyze.py</code> and <code>r213_lang_cases.py</code>; write-up in <code>experiments/v3/results/story_gen/r213_chunks.md</code>.</p>
+  </div>
+
+  <h3>The top chunks and their kinds</h3>
+  <p>Most-used chunks pooled over the four seeds at 1,000 sentences (count = training sentences in which the string was a bracket, summed over seeds): <i>the bird</i> 84, <i>tim was</i> 66, <i>they were</i> 59, <i>was very</i> 56, <i>he wanted</i> 56, <i>he was</i> 53, <i>one day</i> 52, <i>it was</i> 51, <i>they played</i> 50, <i>the dog</i> 50, <i>the cat</i> 48, <i>every day</i> 47, <i>the park</i> 45, <i>the little</i> 41, <i>lily was</i> 40, <i>to play</i> 39, <i>tim and</i> 37, <i>she was</i> 35, <i>he wanted to</i> 35, <i>his mom</i> 34.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Seed</th><th>Top 10 at 1,000 sentences (count)</th></tr></thead>
+    <tbody>
+      <tr><td>13</td><td>he wanted (22); the park (19); tim was (19); the dog (15); the bird (14); lily and (13); the cat (13); they were (13); he was (12); played together (12)</td></tr>
+      <tr><td>17</td><td>the bird (28); they were (19); was very (19); they played together (17); every day (16); he wanted to (16); the dog (16); they played (16); he wanted (15); he was (15)</td></tr>
+      <tr><td>19</td><td>was very (26); the bird (22); so happy (18); had an (17); one day (17); the cat (16); tim and (16); every day (15); he was (15); it was (15)</td></tr>
+      <tr><td>23</td><td>the bird (20); lily was (18); they were (17); tim was (17); the little (14); it was (13); the park (13); to play (13); one day (12); sue was (12)</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><b>Short.</b> In the pooled top 200, 143 chunks are 2 words, 51 are 3 words and 6 are 4 words. No chunk spans a sentence, and there is no &ldquo;once upon a time&rdquo;: <i>upon</i> lies outside the 250-word vocabulary.</li>
+    <li><b>Determiner (or possessive) + noun</b>, the commonest kind: <i>the bird</i>, <i>the dog</i>, <i>the cat</i>, <i>the park</i>, <i>the ball</i>, <i>the man</i>, <i>the tree</i>, <i>the boy</i>, <i>his mom</i>, <i>her mom</i>, <i>his friends</i>, and <i>the little</i> (a determiner and an adjective left open for the noun).</li>
+    <li><b>Subject + verb or auxiliary</b>, the next commonest: <i>tim was</i>, <i>lily was</i>, <i>sue was</i>, <i>he was</i>, <i>she was</i>, <i>they were</i>, <i>it was</i>, <i>they played</i>, <i>they all</i>, <i>he wanted</i>, <i>tim was very</i>, <i>they had</i>, <i>he did</i>. The shallow-parse reference does not treat these as phrases.</li>
+    <li><b>Name + &ldquo;and&rdquo;</b>: <i>lily and</i>, <i>tom and</i>, <i>tim and</i>, <i>and ben</i>, <i>sue and</i>, the left half of a coordinated subject.</li>
+    <li><b>Fixed time phrases and openers</b>: <i>one day</i>, <i>every day</i>, <i>all day</i>, <i>together every day</i>, and set phrases <i>thank you</i>, <i>had fun</i>, <i>and had fun</i>, <i>what to do</i>, <i>so happy</i>, <i>very happy</i>, <i>played together</i>, <i>they played together</i>.</li>
+    <li><b>to + verb and verb + to</b>: <i>to play</i>, <i>to do</i>, <i>to help</i>, <i>he wanted to</i>.</li>
+    <li><b>Prepositional phrases</b> are rare: <i>in the park</i> (8 to 11 per seed, 29 pooled) and <i>the park</i>; no other preposition + noun phrase reaches the top 50.</li>
+  </ul>
+
+  <h3>The 14 chunks every seed finds</h3>
+  <p>Fourteen strings sit in the top 50 of all four seeds at 1,000 sentences: <i>and had fun</i>, <i>every day</i>, <i>he wanted</i>, <i>he was</i>, <i>it was</i>, <i>one day</i>, <i>the bird</i>, <i>the cat</i>, <i>the dog</i>, <i>the little</i>, <i>they all</i>, <i>they played</i>, <i>they were</i>, <i>tim was</i>. Fifty-four strings are in the top 200 of all four seeds (random expectation: about 0.4). Among strings bracketed at least 3 times in a seed, 66 are bracketed at least 3 times in all four seeds, 55 in three, 126 in two and 312 in one only.</p>
+
+  <h3>The concepts that group them</h3>
+  <p>Seed 13, 1,000 sentences: the concept each of the commonest chunks falls under (nearest = the parent of its content leaf; wider = the deepest concept on its path holding 4 or more member strings). Concept ids are internal; the members are other strings under the same concept. Thirty chunks are in the full list in the case-study block below.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Chunk (count)</th><th>Nearest concept, members</th><th>Wider concept, members</th></tr></thead>
+    <tbody>
+      <tr><td>he wanted (22)</td><td>she wanted</td><td>tom wanted; she wanted; he liked</td></tr>
+      <tr><td>the park (19)</td><td>their room; the house; back home</td><td>same</td></tr>
+      <tr><td>tim was (19)</td><td>one day; they said; they found; she put; he walked</td><td>same</td></tr>
+      <tr><td>the dog (15)</td><td>her mom; new toy; it up; his friends; his mom</td><td>same</td></tr>
+      <tr><td>the bird (14)</td><td>happy too; the animals; was inside; with tim; the tree</td><td>same</td></tr>
+      <tr><td>lily and (13)</td><td>anna and; sara and</td><td>anna and; sue and; sara and; mia and; she had</td></tr>
+      <tr><td>the cat (13)</td><td>max lived; once there; she lived; now tim</td><td>same</td></tr>
+      <tr><td>they were (13)</td><td>the little; they said</td><td>tom and; the ball; tom thought; they found; she played</td></tr>
+      <tr><td>he was (12)</td><td>in the; but they</td><td>in the; lily was; they were; sue was; the bird</td></tr>
+      <tr><td>they played (12)</td><td>one day; tim was; sam came; they asked; they went</td><td>same</td></tr>
+      <tr><td>tom and (11)</td><td>she played; he said; and his; they thought</td><td>same</td></tr>
+      <tr><td>he wanted to (9)</td><td>he liked to; they like to; tim liked to</td><td>same</td></tr>
+      <tr><td>and ben (9)</td><td>and sue; and tom</td><td>and sam; and sue; and tom; and lucy; and lily</td></tr>
+      <tr><td>one day (9)</td><td>at the; he knew; inside the; as he; the little</td><td>same</td></tr>
+      <tr><td>in the park (11)</td><td>with his friends; all day long</td><td>in the sun; with his friends; his friends outside; her friend tom</td></tr>
+    </tbody>
+  </table></div>
+  <p>A few concepts are clean. The &ldquo;name + and&rdquo; chunks (<i>lily and</i>, <i>and ben</i>) fall with <i>anna and</i>, <i>sue and</i>, <i>sara and</i>, <i>mia and</i>, <i>and tom</i> and <i>and lucy</i>; <i>he wanted</i> falls with <i>she wanted</i> and <i>he liked</i>; <i>he wanted to</i> falls with <i>he liked to</i>, <i>they like to</i> and <i>tim liked to</i>. Most concepts are not grammatical categories. <i>the bird</i> shares a concept with <i>happy too</i>, <i>the animals</i>, <i>was inside</i>, <i>with tim</i> and <i>the tree</i>; <i>tim was</i> with <i>one day</i>, <i>they said</i>, <i>they found</i> and <i>she put</i>. A concept follows a shared role in the contexts, not a part of speech, and the concept a chunk falls under changes along the stream and differs by seed (see the biographies below).</p>
+
+  <h3>Consistency across seeds, against baselines</h3>
+  <p>Jaccard overlap of the top-k chunk strings of two seeds, mean over the 6 seed pairs. Every row uses the same stream prefix.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Sentences learned</th><th class="num">Top-k</th><th class="num">TRELLIS</th><th class="num">Raw frequency</th><th class="num">Frequency, length-matched</th><th class="num">BPE merges</th><th class="num">Random (same pool)</th></tr></thead>
+    <tbody>
+      <tr><td>250</td><td class="num">50</td><td class="num">.153</td><td class="num">.258</td><td class="num">.241</td><td class="num">.224</td><td class="num">.024</td></tr>
+      <tr><td>250</td><td class="num">200</td><td class="num">.117</td><td class="num">.233</td><td class="num">.216</td><td class="num">.150</td><td class="num">.099</td></tr>
+      <tr><td>500</td><td class="num">50</td><td class="num">.244</td><td class="num">.391</td><td class="num">.391</td><td class="num">.346</td><td class="num">.013</td></tr>
+      <tr><td>500</td><td class="num">200</td><td class="num">.223</td><td class="num">.366</td><td class="num">.363</td><td class="num">.263</td><td class="num">.057</td></tr>
+      <tr><td>1,000</td><td class="num">50</td><td class="num"><b>.332</b></td><td class="num">.510</td><td class="num">.490</td><td class="num">.431</td><td class="num">.008</td></tr>
+      <tr><td>1,000</td><td class="num">200</td><td class="num"><b>.298</b></td><td class="num">.454</td><td class="num">.438</td><td class="num">.362</td><td class="num">.031</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><b>In language, chunking adds no cross-seed agreement beyond frequency.</b> At 1,000 sentences raw n-gram frequency reaches Jaccard .510 (top 50) and .454 (top 200) against TRELLIS's .332 and .298, and BPE reaches .431 and .362. Length matching moves frequency by about .02. TRELLIS agrees across seeds less than the baselines that need no learning.</li>
+    <li><b>The overlap is far above chance and grows with data.</b> TRELLIS reaches about .30 to .33 at 1,000 sentences against .01 to .03 for random strings, and the top-50 overlap rises from .153 to .332 between 250 and 1,000 sentences.</li>
+    <li><b>The TRELLIS list is related to the frequency list but is a different list.</b> Within a seed at 1,000 sentences, the TRELLIS top 50 and the frequency top 50 overlap .352 (top 200: .341), TRELLIS and length-matched frequency .343 (.345), and TRELLIS and BPE .325 (.335). Length profile of the top 200 in seed 13: TRELLIS 146, 40 and 14 chunks of 2, 3 and 4 words; frequency 144, 47, 7 and 2 chunks of 2, 3, 4 and 5 words.</li>
+    <li><b>Count-weighted overlap</b> (sum of the smaller count over the sum of the larger, over the union of strings) at 250, 500 and 1,000 sentences: all bracketed TRELLIS strings .114, .162, .214; all n-grams with their raw counts .136, .193, .245; on the top 200, TRELLIS .136, .230, .305 against length-matched frequency .239, .375, .464.</li>
+  </ul>
+
+  <h3>Rank stability, phrase consistency and cross-seed bracket F1</h3>
+  <p>Rank stability along the stream: within a seed, the top-k Jaccard of an earlier checkpoint with the final 1,000-sentence list (mean over seeds).</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th class="num">Top-k</th><th class="num">Checkpoint</th><th class="num">TRELLIS</th><th class="num">Frequency</th><th class="num">Frequency, length-matched</th><th class="num">BPE</th></tr></thead>
+    <tbody>
+      <tr><td class="num">50</td><td class="num">250</td><td class="num">.350</td><td class="num">.483</td><td class="num">.465</td><td class="num">.413</td></tr>
+      <tr><td class="num">50</td><td class="num">500</td><td class="num">.551</td><td class="num">.691</td><td class="num">.668</td><td class="num">.569</td></tr>
+      <tr><td class="num">200</td><td class="num">250</td><td class="num">.290</td><td class="num">.460</td><td class="num">.423</td><td class="num">.319</td></tr>
+      <tr><td class="num">200</td><td class="num">500</td><td class="num">.511</td><td class="num">.616</td><td class="num">.588</td><td class="num">.489</td></tr>
+    </tbody>
+  </table></div>
+  <p>The Spearman rank correlation of a chunk's count at 250 (500) sentences with its count at 1,000, over the final top 50, is .488 (.677) for TRELLIS and .664 (.800) for frequency. Every final top-50 TRELLIS chunk is already a bracket at 500 sentences (1.00; .91 at 250). TRELLIS's ranking is less stable along the stream than frequency.</p>
+  <p>Parse consistency on the 400 shared held-out sentences (183 repeated 2 to 4-word strings; &ldquo;consistency&rdquo; = share of occurrences bracketed; &ldquo;decisive&rdquo; = share bracketed the majority way):</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th></th><th class="num">Consistency</th><th class="num">Decisive</th><th class="num">Cross-seed bracket F1</th><th class="num">Stability vs previous checkpoint</th><th class="num">F1 vs NLTK</th><th class="num">Brackets per sentence</th></tr></thead>
+    <tbody>
+      <tr><td>NLTK reference</td><td class="num">.130</td><td class="num">.989</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="num">1</td><td class="num">&ndash;</td></tr>
+      <tr><td>Right-branching</td><td class="num">.000</td><td class="num">1.000</td><td class="num">1.000 (identical)</td><td class="num">&ndash;</td><td class="num">.488</td><td class="num">&ndash;</td></tr>
+      <tr><td>Left-branching</td><td class="num">.354</td><td class="num">.940</td><td class="num">1.000</td><td class="num">&ndash;</td><td class="num">.074</td><td class="num">&ndash;</td></tr>
+      <tr><td>TRELLIS, 250 sentences</td><td class="num">.306</td><td class="num">.841</td><td class="num">.652</td><td class="num">&ndash;</td><td class="num">.311</td><td class="num">3.27</td></tr>
+      <tr><td>TRELLIS, 500 sentences</td><td class="num">.292</td><td class="num">.850</td><td class="num">.701</td><td class="num">.849</td><td class="num">.327</td><td class="num">3.27</td></tr>
+      <tr><td>TRELLIS, 1,000 sentences</td><td class="num">.285</td><td class="num">.861</td><td class="num">.724</td><td class="num">.891</td><td class="num">.341</td><td class="num">3.27</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><b>Cross-seed bracket F1</b> (mean sentence F1 between two independent learners over the 6 seed pairs) is .652, .701 and .724 at 250, 500 and 1,000 sentences. Per pair at 1,000: 13&ndash;17 .728, 13&ndash;19 .719, 13&ndash;23 .805, 17&ndash;19 .642, 17&ndash;23 .745, 19&ndash;23 .703. Earlier measurements on another 300-sentence held-out set (round 203): random binary trees .343, BPE .682, TRELLIS default .742, parts .756. Right- and left-branching trees agree across seeds trivially (F1 1), so agreement alone does not show structure.</li>
+    <li><b>Phrase consistency</b> is .285 at 1,000 sentences against the reference's .130: TRELLIS brackets repeated strings more often than the reference does, and brackets one string the same way 86% of the time against the reference's 99%.</li>
+    <li><b>Bracketed-somewhere consistency</b> (of the 2 to 4-word strings the parser brackets at least once, the share of occurrences bracketed) at 1,000 sentences: seed 13 .509 (153 strings), seed 17 .510 (151), seed 19 .505 (144), seed 23 .537 (140); right-branching .610 (84 strings), left-branching .802 (81).</li>
+    <li><b>F1 against the NLTK reference</b> at 1,000 sentences is .32, .327, .386 and .331 for seeds 13, 17, 19 and 23, and right-branching (.488) beats every seed. Right-branching earns it from the reference's end-anchored phrases (VP and PP at the end of a sentence).</li>
+  </ul>
+
+  <h3>Trees that are not right-branching</h3>
+  <p><b>82.2% of TRELLIS's held-out parses differ from right-branching, and 66.3% are neither right- nor left-branching</b> (1,000 sentences, mean over seeds; binary chosen tree, whole-sentence bracket excluded). The same shares at the other checkpoints:</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Sentences learned</th><th class="num">Differs from right-branching</th><th class="num">Equals left-branching</th><th class="num">Neither</th></tr></thead>
+    <tbody>
+      <tr><td>250</td><td class="num">.848</td><td class="num">.184</td><td class="num">.664</td></tr>
+      <tr><td>500</td><td class="num">.837</td><td class="num">.163</td><td class="num">.674</td></tr>
+      <tr><td>1,000</td><td class="num"><b>.822</b></td><td class="num">.159</td><td class="num"><b>.663</b></td></tr>
+    </tbody>
+  </table></div>
+  <p>Per seed at 1,000 sentences: seed 13 .830 differ (332 of 400 sentences), .175 left-branching, .655 neither (262); seed 17 .907 (363), .185, .723 (289); seed 19 .735 (294), .050, .685 (274); seed 23 .815 (326), .228, .588 (235). 263 of 400 sentences are non-right-branching in all four seeds.</p>
+  <p>Against the NLTK reference, on the sentences where TRELLIS departs from right-branching (F1, 1,000 sentences learned):</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Seed</th><th class="num">Sentences differing</th><th class="num">TRELLIS</th><th class="num">Right-branching</th><th class="num">Left-branching</th><th>On the &ldquo;neither&rdquo; set: n, TRELLIS / RB / LB</th></tr></thead>
+    <tbody>
+      <tr><td>13</td><td class="num">332</td><td class="num">.283</td><td class="num">.471</td><td class="num">.077</td><td>262: .310 / .435 / .079</td></tr>
+      <tr><td>17</td><td class="num">363</td><td class="num">.309</td><td class="num">.476</td><td class="num">.075</td><td>289: .333 / .442 / .067</td></tr>
+      <tr><td>19</td><td class="num">294</td><td class="num">.324</td><td class="num">.446</td><td class="num">.081</td><td>274: .330 / .436 / .081</td></tr>
+      <tr><td>23</td><td class="num">326</td><td class="num">.293</td><td class="num">.474</td><td class="num">.077</td><td>235: .326 / .423 / .070</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>On these sentences TRELLIS scores F1 .28&ndash;.32 against right-branching's .45&ndash;.48</b>, about .15 below right-branching on the same sentences and far above left-branching. The departures are real structure in some sentences, and the reference still prefers the right-branching tree. (Where TRELLIS happens to produce the right-branching tree, right-branching scores .59 to .82.)</p>
+
+  <h3>Showcase: nine chosen trees</h3>
+  <p>Picked by reading all 262 neither-branching trees of seed 13 (1,000 sentences learned; the number is the held-out sentence index) for a structure that matches linguistic intuition, one construction each. They are not typical; the tables above give the typical case. Left, TRELLIS's binary chosen tree; right, the NLTK reference.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th class="num">#</th><th>Construction</th><th>TRELLIS (seed 13)</th><th>NLTK reference</th></tr></thead>
+    <tbody>
+      <tr><td class="num">366</td><td>subject NP, then VP</td><td><code>[[the tree] [[had no] friends]]</code></td><td><code>[the tree] [had [no friends]]</code></td></tr>
+      <tr><td class="num">202</td><td>subject NP, then VP</td><td><code>[[the bird] [[looked at] spot]]</code></td><td><code>[the bird] [looked [at spot]]</code></td></tr>
+      <tr><td class="num">178</td><td>fixed opener &ldquo;one day&rdquo;, PP &ldquo;to the park&rdquo;</td><td><code>[[[[one day] tom] went] [to [the park]]]</code></td><td><code>[one day] [[tom went] [to [the park]]]</code></td></tr>
+      <tr><td class="num">299</td><td>fixed opener, object NP</td><td><code>[[[one day] max] [saw [a door]]]</code></td><td><code>[one day] [[max saw] [a door]]</code></td></tr>
+      <tr><td class="num">361</td><td>subject NP, adjective + noun &ldquo;big park&rdquo;, PP</td><td><code>[[[this rock] lived] [in [a [big park]]]]</code></td><td><code>[this rock] [lived [in [a big park]]]</code></td></tr>
+      <tr><td class="num">205</td><td>&ldquo;all the&rdquo; + noun, then AP</td><td><code>[[[[all the] animals] were] [very happy]]</code></td><td><code>[all the animals] [were [very happy]]</code></td></tr>
+      <tr><td class="num">328</td><td>NP &ldquo;a fun day&rdquo; + PP &ldquo;for everyone&rdquo;</td><td><code>[[it was] [[a [fun day]] [for everyone]]]</code></td><td><code>it [was [a fun day] [for everyone]]</code></td></tr>
+      <tr><td class="num">301</td><td>subject NP, PP &ldquo;after the ball&rdquo;</td><td><code>[[[the cat] ran] [after [the ball]]]</code></td><td><code>[the cat] [ran [after [the ball]]]</code></td></tr>
+      <tr><td class="num">147</td><td>PP &ldquo;in the park&rdquo;, &ldquo;amy loved&rdquo;</td><td><code>[[[amy loved] to] [play [in [the park]]]]</code></td><td><code>[amy loved] [[to play] [in [the park]]]</code></td></tr>
+    </tbody>
+  </table></div>
+  <p>In every one the NP and the PP are bracketed as the reference has them. The binary tree attaches the subject NP to the verb first (<code>[[the cat] ran]</code>) where the reference leaves subject and verb phrase apart, so even these score a per-sentence bracket F1 of .50 to .75 and not 1.0. &ldquo;Once upon a time&rdquo; cannot be shown, since no held-out sentence contains it.</p>
+
+  <h3>Four random draws, with the draw seed</h3>
+  <p>Four trees drawn with <code>random.Random(213).sample</code> from the 262 seed-13 sentences (1,000 sentences learned) that are neither right- nor left-branching. The draw returned held-out sentences 110, 314, 163 and 219.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th class="num">#</th><th>TRELLIS (seed 13)</th><th>NLTK reference</th></tr></thead>
+    <tbody>
+      <tr><td class="num">110</td><td><code>[[[[one day] he] saw] [a [big ball]]]</code></td><td><code>[one day] he [saw [a big ball]]</code></td></tr>
+      <tr><td class="num">314</td><td><code>[[the girl] [was [happy [to help]]]]</code></td><td><code>[the girl] [was happy] [to help]</code></td></tr>
+      <tr><td class="num">163</td><td><code>[[[she ran] fast] [to [get [the cake]]]]</code></td><td><code>she [ran fast] [[to get] [the cake]]</code></td></tr>
+      <tr><td class="num">219</td><td><code>[[i will] [help [you [said tom]]]]</code></td><td><code>i [[will help] you] [said tom]</code></td></tr>
+    </tbody>
+  </table></div>
+  <p>Trees 110 and 314 look good. Tree 163 groups the subject with the verb and puts &ldquo;to&rdquo; with the verb phrase on the right. Tree 219 mis-parses a sentence of two clauses (&ldquo;i will help you&rdquo; and &ldquo;said tom&rdquo;) by joining &ldquo;you said tom&rdquo;.</p>
+
+  <h3>The tree that looks wrong</h3>
+  <p>Held-out sentence 358, <i>suddenly the little girl had an idea</i>, identical in all four seeds:</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th></th><th>Tree</th></tr></thead>
+    <tbody>
+      <tr><td>TRELLIS</td><td><code>[[[[suddenly the] little] girl] [had [an idea]]]</code></td></tr>
+      <tr><td>NLTK reference</td><td><code>suddenly [the little girl] [had [an idea]]</code></td></tr>
+    </tbody>
+  </table></div>
+  <p>The adverb joins the determiner (<i>suddenly the</i>, posterior .44), so the noun phrase <i>the little girl</i> is never a constituent: the tree builds it left to right as ((suddenly the) little) girl. A likely cause, not tested, is that <i>suddenly the</i> and <i>the little</i> are both frequent word pairs and the parser picks the pairing by what it has seen. All four seeds produce this tree, so this is a systematic error and not noise. It also marks the limit of the consistency numbers: four seeds agree here, and they agree on an error.</p>
+
+  <h3>Case studies and chunk biographies</h3>
+  <div class="col">
+    <p>Each case lists the sentence, the tree of every seed beside the NLTK reference, then each chunk of the seed-13 tree with its posterior (summed over splits), whether the reference has it, which other seeds bracket the same span, whether memory stored the string as a composite (and how often it was a bracket in a training tree), how often the string occurs in the 400 held-out sentences and how often each seed brackets it as that span, and the concept it falls under. Cases 1 to 14 below are all the sentences in <code>experiments/v3/results/story_gen/r213/cases.txt</code> (the nine chosen trees, the four random draws and the one that looks wrong), followed by the chunk biographies and the concept of each of seed 13's top chunks. Open any block to read it in full.</p>
+    <ul>
+      <li><b>The clearest consistency is sentence 178.</b> All four seeds give the identical tree, and <i>one day</i> (6 of 6 held-out occurrences), <i>the park</i> (7 of 7) and <i>to the park</i> (2 of 2) are bracketed as that span by every seed.</li>
+      <li><b>Frequent chunks are not always handled consistently.</b> <i>very happy</i> occurs 21 times in the held-out set and seeds 13, 17, 19 and 23 bracket it as that span in 5, 3, 9 and 3 of them; <i>it was</i> (12 occurrences) in 5, 4, 3 and 5.</li>
+      <li><b>All four seeds can share an error</b> (sentence 358, above).</li>
+    </ul>
+  </div>
+<details class="cs"><summary>Case 1, held-out sentence 366: the tree had no friends</summary><div class="case"><div class="ex">
+  seed 13 (shown) [[the tree] [[had no] friends]]
+  seed 17        [[[the tree] had] [no friends]]
+  seed 19        [[the tree] [had [no friends]]]
+  seed 23        [[[[the tree] had] no] friends]
+  NLTK reference [the tree] [had [no friends]]
+  chunk 'the tree' span 0-2 posterior 0.58 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 3
+      this string in the 400 held-out sentences: 3 occurrences; bracketed as this span per seed 13:1/3 17:1/3 19:2/3 23:1/3
+      nearest concept c125971 (12.0 bits, 4 member strings): boy said; lived with; wanted to
+      concept c125971 (12.0 bits, 4 member strings); members: boy said; lived with; wanted to
+  chunk 'had no' span 2-4 posterior 0.44 | in NLTK reference: no | same span bracketed by other seeds: none | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 2 occurrences; bracketed as this span per seed 13:1/2 17:1/2 19:0/2 23:0/2
+      nearest concept c137567 (14.1 bits, 2 member strings): have no
+      concept c137566 (12.7 bits, 6 member strings); members: a boy; have no; do not; day sue; car went
+  chunk 'had no friends' span 2-5 posterior 0.44 | in NLTK reference: yes | same span bracketed by other seeds: 19 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:0/1 19:1/1 23:0/1
+      no content-concept record kept for this string
+
+</div></div></details>
+<details class="cs"><summary>Case 2, held-out sentence 202: the bird looked at spot</summary><div class="case"><div class="ex">
+  seed 13 (shown) [[the bird] [[looked at] spot]]
+  seed 17        [[[[the bird] looked] at] spot]
+  seed 19        [[the bird] [looked [at spot]]]
+  seed 23        [[the bird] [looked [at spot]]]
+  NLTK reference [the bird] [looked [at spot]]
+  chunk 'the bird' span 0-2 posterior 0.66 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 14
+      this string in the 400 held-out sentences: 13 occurrences; bracketed as this span per seed 13:9/13 17:9/13 19:8/13 23:10/13
+      nearest concept c102239 (9.4 bits, 7 member strings): happy too; the animals; was inside; with tim; the tree; feel better
+      concept c102239 (9.4 bits, 7 member strings); members: happy too; the animals; was inside; with tim; the tree; feel better
+  chunk 'looked at' span 2-4 posterior 0.58 | in NLTK reference: no | same span bracketed by other seeds: none | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 1
+      this string in the 400 held-out sentences: 3 occurrences; bracketed as this span per seed 13:1/3 17:0/3 19:0/3 23:0/3
+      nearest concept c140666 (9.4 bits, 13 member strings): don't be; a friend; can each; we get; saw a; am tom; can all
+      concept c140666 (9.4 bits, 13 member strings); members: don't be; a friend; can each; we get; saw a; am tom; can all; looked for; said yes; a big; know what; to play
+  chunk 'looked at spot' span 2-5 posterior 0.52 | in NLTK reference: yes | same span bracketed by other seeds: 19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:0/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+
+</div></div></details>
+<details class="cs"><summary>Case 3, held-out sentence 178: one day tom went to the park</summary><div class="case"><div class="ex">
+  seed 13 (shown) [[[[one day] tom] went] [to [the park]]]
+  seed 17        [[[[one day] tom] went] [to [the park]]]
+  seed 19        [[[[one day] tom] went] [to [the park]]]
+  seed 23        [[[[one day] tom] went] [to [the park]]]
+  NLTK reference [one day] [[tom went] [to [the park]]]
+  chunk 'one day' span 0-2 posterior 0.96 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 9
+      this string in the 400 held-out sentences: 6 occurrences; bracketed as this span per seed 13:6/6 17:6/6 19:6/6 23:6/6
+      nearest concept c118844 (8.9 bits, 7 member strings): at the; he knew; inside the; as he; the little; he played
+      concept c118844 (8.9 bits, 7 member strings); members: at the; he knew; inside the; as he; the little; he played
+  chunk 'the park' span 5-7 posterior 0.97 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 19
+      this string in the 400 held-out sentences: 7 occurrences; bracketed as this span per seed 13:7/7 17:7/7 19:7/7 23:7/7
+      nearest concept c124010 (9.2 bits, 4 member strings): their room; the house; back home
+      concept c124010 (9.2 bits, 4 member strings); members: their room; the house; back home
+  chunk 'one day tom' span 0-3 posterior 0.97 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 2
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      nearest concept c137346 (9.8 bits, 7 member strings): so he asked; then he made; now you have; she says it; as he walked; the little boy
+      concept c137346 (9.8 bits, 7 member strings); members: so he asked; then he made; now you have; she says it; as he walked; the little boy
+  chunk 'to the park' span 4-7 posterior 0.74 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 2
+      this string in the 400 held-out sentences: 2 occurrences; bracketed as this span per seed 13:2/2 17:2/2 19:2/2 23:2/2
+      nearest concept c93182 (9.7 bits, 8 member strings): to each other; to play with; into the water; to her mommy; to play too; to play again; he was sad
+      concept c93182 (9.7 bits, 8 member strings); members: to each other; to play with; into the water; to her mommy; to play too; to play again; he was sad
+  chunk 'one day tom went' span 0-4 posterior 0.48 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+
+</div></div></details>
+<details class="cs"><summary>Case 4, held-out sentence 299: one day max saw a door</summary><div class="case"><div class="ex">
+  seed 13 (shown) [[[one day] max] [saw [a door]]]
+  seed 17        [[[one day] max] [saw [a door]]]
+  seed 19        [[[[one day] max] saw] [a door]]
+  seed 23        [[[one day] max] [saw [a door]]]
+  NLTK reference [one day] [[max saw] [a door]]
+  chunk 'one day' span 0-2 posterior 0.93 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 9
+      this string in the 400 held-out sentences: 6 occurrences; bracketed as this span per seed 13:6/6 17:6/6 19:6/6 23:6/6
+      nearest concept c118844 (8.9 bits, 7 member strings): at the; he knew; inside the; as he; the little; he played
+      concept c118844 (8.9 bits, 7 member strings); members: at the; he knew; inside the; as he; the little; he played
+  chunk 'a door' span 4-6 posterior 0.54 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      nearest concept c23116 (9.5 bits, 5 member strings): a girl; a boy; many toys; in there
+      concept c23116 (9.5 bits, 5 member strings); members: a girl; a boy; many toys; in there
+  chunk 'one day max' span 0-3 posterior 0.78 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 1
+      this string in the 400 held-out sentences: 2 occurrences; bracketed as this span per seed 13:2/2 17:2/2 19:2/2 23:2/2
+      nearest concept c92068 (11.9 bits, 4 member strings): tim was playing; it was a; she put it
+      concept c92068 (11.9 bits, 4 member strings); members: tim was playing; it was a; she put it
+  chunk 'saw a door' span 3-6 posterior 0.35 | in NLTK reference: no | same span bracketed by other seeds: 17,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:0/1 23:1/1
+      no content-concept record kept for this string
+
+</div></div></details>
+<details class="cs"><summary>Case 5, held-out sentence 361: this rock lived in a big park</summary><div class="case"><div class="ex">
+  seed 13 (shown) [[[this rock] lived] [in [a [big park]]]]
+  seed 17        [[[this rock] lived] [in [a [big park]]]]
+  seed 19        [[[[this rock] lived] in] [a [big park]]]
+  seed 23        [[[[this rock] lived] in] [a [big park]]]
+  NLTK reference [this rock] [lived [in [a big park]]]
+  chunk 'this rock' span 0-2 posterior 0.98 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'big park' span 5-7 posterior 0.97 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'this rock lived' span 0-3 posterior 0.89 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'a big park' span 4-7 posterior 0.85 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'in a big park' span 3-7 posterior 0.76 | in NLTK reference: yes | same span bracketed by other seeds: 17 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:0/1 23:0/1
+      no content-concept record kept for this string
+
+</div></div></details>
+<details class="cs"><summary>Case 6, held-out sentence 205: all the animals were very happy</summary><div class="case"><div class="ex">
+  seed 13 (shown) [[[[all the] animals] were] [very happy]]
+  seed 17        [[[[all the] animals] were] [very happy]]
+  seed 19        [[[all the] animals] [were [very happy]]]
+  seed 23        [[[[all the] animals] were] [very happy]]
+  NLTK reference [all the animals] [were [very happy]]
+  chunk 'all the' span 0-2 posterior 0.97 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 3
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      nearest concept c143532 (10.7 bits, 3 member strings): and i; one day
+      concept c135193 (8.9 bits, 12 member strings); members: and i; tim's friend; the cat; they do; tim's friends; one day; he asked; the fish; he said; sara and; he made
+  chunk 'very happy' span 4-6 posterior 0.86 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 4
+      this string in the 400 held-out sentences: 21 occurrences; bracketed as this span per seed 13:5/21 17:3/21 19:9/21 23:3/21
+      nearest concept c94840 (9.9 bits, 4 member strings): of fun; good friends; their toy
+      concept c94840 (9.9 bits, 4 member strings); members: of fun; good friends; their toy
+  chunk 'all the animals' span 0-3 posterior 0.84 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 1
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      nearest concept c132859 (11.3 bits, 2 member strings): with the bird
+      concept c89372 (9.6 bits, 11 member strings); members: with the bird; what was inside; him happy too; friends with tim; near the tree; tim feel better; lily make the; tim find his; friends with the; with his toy
+  chunk 'all the animals were' span 0-4 posterior 0.77 | in NLTK reference: no | same span bracketed by other seeds: 17,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:0/1 23:1/1
+      no content-concept record kept for this string
+
+</div></div></details>
+<details class="cs"><summary>Case 7, held-out sentence 328: it was a fun day for everyone</summary><div class="case"><div class="ex">
+  seed 13 (shown) [[it was] [[a [fun day]] [for everyone]]]
+  seed 17        [[[it was] a] [fun [day [for everyone]]]]
+  seed 19        [[it was] [a [fun [day [for everyone]]]]]
+  seed 23        [[it was] [a [fun [day [for everyone]]]]]
+  NLTK reference it [was [a fun day] [for everyone]]
+  chunk 'it was' span 0-2 posterior 0.89 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 9
+      this string in the 400 held-out sentences: 12 occurrences; bracketed as this span per seed 13:5/12 17:4/12 19:3/12 23:5/12
+      nearest concept c132666 (11.1 bits, 2 member strings): was inside
+      concept c142526 (9.7 bits, 6 member strings); members: was inside; cat happy; play with; go home; went home
+  chunk 'fun day' span 3-5 posterior 0.51 | in NLTK reference: no | same span bracketed by other seeds: none | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:0/1 19:0/1 23:0/1
+      nearest concept c108154 (11.4 bits, 11 member strings): happy to; to have; and opened; careful with; but wanted; but he; to play
+      concept c108154 (11.4 bits, 11 member strings); members: happy to; to have; and opened; careful with; but wanted; but he; to play; excited and; and started; and they
+  chunk 'for everyone' span 5-7 posterior 0.87 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'a fun day' span 2-5 posterior 0.52 | in NLTK reference: yes | same span bracketed by other seeds: none | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 1
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:0/1 19:0/1 23:0/1
+      nearest concept c130319 (13.8 bits, 2 member strings): very careful with
+      concept c101573 (13.8 bits, 4 member strings); members: very careful with; very excited and; playing with a
+  chunk 'a fun day for everyone' span 2-7 posterior 0.39 | in NLTK reference: no | same span bracketed by other seeds: 19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:0/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+
+</div></div></details>
+<details class="cs"><summary>Case 8, held-out sentence 301: the cat ran after the ball</summary><div class="case"><div class="ex">
+  seed 13 (shown) [[[the cat] ran] [after [the ball]]]
+  seed 17        [[[the cat] ran] [after [the ball]]]
+  seed 19        [[the cat] [ran [after [the ball]]]]
+  seed 23        [[[the cat] ran] [after [the ball]]]
+  NLTK reference [the cat] [ran [after [the ball]]]
+  chunk 'the cat' span 0-2 posterior 0.96 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 13
+      this string in the 400 held-out sentences: 10 occurrences; bracketed as this span per seed 13:5/10 17:7/10 19:4/10 23:6/10
+      nearest concept c110008 (9.9 bits, 5 member strings): max lived; once there; she lived; now tim
+      concept c110008 (9.9 bits, 5 member strings); members: max lived; once there; she lived; now tim
+  chunk 'the ball' span 4-6 posterior 0.98 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 5
+      this string in the 400 held-out sentences: 6 occurrences; bracketed as this span per seed 13:4/6 17:4/6 19:4/6 23:3/6
+      nearest concept c142563 (10.7 bits, 3 member strings): tom said; tom and
+      concept c141465 (7.6 bits, 23 member strings); members: tom and; tom thought; they found; she played; they were; now you; he said; sue said; sue started; then he; and his; do you; the little
+  chunk 'the cat ran' span 0-3 posterior 0.52 | in NLTK reference: no | same span bracketed by other seeds: 17,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 1
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:0/1 23:1/1
+      nearest concept c124245 (13.2 bits, 2 member strings): the dog was
+      concept c136992 (11.5 bits, 10 member strings); members: you are so; the dog was; he liked his; the cat felt; let's make it; is this one; we can be; they found some; i will take
+  chunk 'after the ball' span 3-6 posterior 0.66 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+
+</div></div></details>
+<details class="cs"><summary>Case 9, held-out sentence 147: amy loved to play in the park</summary><div class="case"><div class="ex">
+  seed 13 (shown) [[[amy loved] to] [play [in [the park]]]]
+  seed 17        [[[amy loved] to] [play [in [the park]]]]
+  seed 19        [[amy loved] [[to play] [in [the park]]]]
+  seed 23        [[[amy loved] to] [play [in [the park]]]]
+  NLTK reference [amy loved] [[to play] [in [the park]]]
+  chunk 'amy loved' span 0-2 posterior 0.94 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'the park' span 5-7 posterior 0.99 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 19
+      this string in the 400 held-out sentences: 7 occurrences; bracketed as this span per seed 13:7/7 17:7/7 19:7/7 23:7/7
+      nearest concept c124010 (9.2 bits, 4 member strings): their room; the house; back home
+      concept c124010 (9.2 bits, 4 member strings); members: their room; the house; back home
+  chunk 'amy loved to' span 0-3 posterior 0.91 | in NLTK reference: no | same span bracketed by other seeds: 17,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:0/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'in the park' span 4-7 posterior 0.92 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 11
+      this string in the 400 held-out sentences: 3 occurrences; bracketed as this span per seed 13:3/3 17:3/3 19:3/3 23:3/3
+      nearest concept c99381 (10.4 bits, 3 member strings): with his friends; all day long
+      concept c20186 (8.0 bits, 15 member strings); members: in the sun; with his friends; his friends outside; her friend tom; his toys there; with the bear; with his ball; his toy car; run all day; with their toys; make the cake; toys in it; find his toy
+  chunk 'play in the park' span 3-7 posterior 0.83 | in NLTK reference: no | same span bracketed by other seeds: 17,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 1
+      this string in the 400 held-out sentences: 2 occurrences; bracketed as this span per seed 13:2/2 17:2/2 19:0/2 23:2/2
+      nearest concept c98074 (11.8 bits, 2 member strings): play with her friends
+      concept c98073 (10.1 bits, 6 member strings); members: play with his ball; play near the water; play with her friends; play at the park; play with her ball
+
+</div></div></details>
+<details class="cs"><summary>Case 10, held-out sentence 358: suddenly the little girl had an idea</summary><div class="case"><div class="ex">
+  seed 13 (shown) [[[[suddenly the] little] girl] [had [an idea]]]
+  seed 17        [[[[suddenly the] little] girl] [had [an idea]]]
+  seed 19        [[[[suddenly the] little] girl] [had [an idea]]]
+  seed 23        [[[[suddenly the] little] girl] [had [an idea]]]
+  NLTK reference suddenly [the little girl] [had [an idea]]
+  chunk 'suddenly the' span 0-2 posterior 0.44 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'an idea' span 5-7 posterior 0.91 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 9 occurrences; bracketed as this span per seed 13:2/9 17:3/9 19:1/9 23:1/9
+      nearest concept c94299 (11.7 bits, 3 member strings): to play; not fun
+      concept c120244 (9.8 bits, 10 member strings); members: to play; this ball; hard ball; you bird; little dog; bad man; friend tim; nice ball; not fun
+  chunk 'suddenly the little' span 0-3 posterior 0.68 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'had an idea' span 4-7 posterior 0.46 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 9 occurrences; bracketed as this span per seed 13:1/9 17:1/9 19:1/9 23:1/9
+      nearest concept c97500 (10.7 bits, 12 member strings): walked and walked; want to eat; eat the cake; said we will; saw many animals; both like animals; became best friends; both smiled excited
+      concept c97501 (11.8 bits, 6 member strings); members: walked and walked; became best friends; said thank you; are for playing; are good friends
+  chunk 'suddenly the little girl' span 0-4 posterior 0.70 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+
+</div></div></details>
+<details class="cs"><summary>Case 11, held-out sentence 110: one day he saw a big ball</summary><div class="case"><div class="ex">
+  seed 13 (shown) [[[[one day] he] saw] [a [big ball]]]
+  seed 17        [[[[one day] he] saw] [a [big ball]]]
+  seed 19        [[[[one day] he] saw] [a [big ball]]]
+  seed 23        [[[[[one day] he] saw] a] [big ball]]
+  NLTK reference [one day] he [saw [a big ball]]
+  chunk 'one day' span 0-2 posterior 0.98 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 9
+      this string in the 400 held-out sentences: 6 occurrences; bracketed as this span per seed 13:6/6 17:6/6 19:6/6 23:6/6
+      nearest concept c118844 (8.9 bits, 7 member strings): at the; he knew; inside the; as he; the little; he played
+      concept c118844 (8.9 bits, 7 member strings); members: at the; he knew; inside the; as he; the little; he played
+  chunk 'big ball' span 5-7 posterior 0.98 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 2 occurrences; bracketed as this span per seed 13:2/2 17:2/2 19:2/2 23:2/2
+      no content-concept record kept for this string
+  chunk 'one day he' span 0-3 posterior 0.99 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 1
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      nearest concept c92066 (10.8 bits, 7 member strings): one day max; tim was playing; they found it; she said no; it was a; she put it
+      concept c92066 (10.8 bits, 7 member strings); members: one day max; tim was playing; they found it; she said no; it was a; she put it
+  chunk 'a big ball' span 4-7 posterior 0.53 | in NLTK reference: yes | same span bracketed by other seeds: 17,19 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 2 occurrences; bracketed as this span per seed 13:2/2 17:2/2 19:2/2 23:1/2
+      no content-concept record kept for this string
+  chunk 'one day he saw' span 0-4 posterior 0.84 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 1
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      nearest concept c133353 (11.0 bits, 5 member strings): they said he was; tim was playing with; one day max saw; they found it under
+      concept c133353 (11.0 bits, 5 member strings); members: they said he was; tim was playing with; one day max saw; they found it under
+
+</div></div></details>
+<details class="cs"><summary>Case 12, held-out sentence 314: the girl was happy to help</summary><div class="case"><div class="ex">
+  seed 13 (shown) [[the girl] [was [happy [to help]]]]
+  seed 17        [[[the girl] was] [happy [to help]]]
+  seed 19        [[the girl] [was [happy [to help]]]]
+  seed 23        [[the girl] [was [happy [to help]]]]
+  NLTK reference [the girl] [was happy] [to help]
+  chunk 'the girl' span 0-2 posterior 0.91 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 6
+      this string in the 400 held-out sentences: 2 occurrences; bracketed as this span per seed 13:1/2 17:2/2 19:1/2 23:2/2
+      nearest concept c143000 (10.8 bits, 3 member strings): him happy; it too
+      concept c119472 (8.5 bits, 12 member strings); members: with it; with max; their friend; it back; in it; it on; the bird; him happy; with them; it too; at it
+  chunk 'to help' span 4-6 posterior 0.94 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 1
+      this string in the 400 held-out sentences: 9 occurrences; bracketed as this span per seed 13:4/9 17:4/9 19:4/9 23:4/9
+      nearest concept c141714 (11.6 bits, 2 member strings): to go
+      concept c68483 (9.1 bits, 10 member strings); members: and play; to go; toy car; with lily; new friends; the door; said yes; both laughed; for her
+  chunk 'happy to help' span 3-6 posterior 0.56 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 1
+      this string in the 400 held-out sentences: 5 occurrences; bracketed as this span per seed 13:4/5 17:2/5 19:4/5 23:4/5
+      nearest concept c42137 (12.0 bits, 7 member strings): her best friend; a good dog; proud of them; surprised but happy; a happy house; not scared anymore
+      concept c42137 (12.0 bits, 7 member strings); members: her best friend; a good dog; proud of them; surprised but happy; a happy house; not scared anymore
+  chunk 'was happy to help' span 2-6 posterior 0.59 | in NLTK reference: no | same span bracketed by other seeds: 19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 1
+      this string in the 400 held-out sentences: 4 occurrences; bracketed as this span per seed 13:4/4 17:2/4 19:4/4 23:4/4
+      nearest concept c54508 (10.2 bits, 16 member strings): was in a box; was red and shiny; was her best friend; was not his toy; was so much fun; was fun and fast; was scared and excited
+      concept c54508 (10.2 bits, 16 member strings); members: was in a box; was red and shiny; was her best friend; was not his toy; was so much fun; was fun and fast; was scared and excited; was blue and shiny; was sad and scared; was fun and pretty; was shiny and pretty; was surprised but 
+
+</div></div></details>
+<details class="cs"><summary>Case 13, held-out sentence 163: she ran fast to get the cake</summary><div class="case"><div class="ex">
+  seed 13 (shown) [[[she ran] fast] [to [get [the cake]]]]
+  seed 17        [[[she ran] fast] [to [get [the cake]]]]
+  seed 19        [[[[she ran] fast] to] [get [the cake]]]
+  seed 23        [[[she ran] fast] [to [get [the cake]]]]
+  NLTK reference she [ran fast] [[to get] [the cake]]
+  chunk 'she ran' span 0-2 posterior 0.71 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'the cake' span 5-7 posterior 0.97 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 2
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      nearest concept c140481 (9.6 bits, 6 member strings): his toy; his ball; their toys; the bear; in it
+      concept c84641 (9.8 bits, 5 member strings); members: his ball; their toys; the bear; in it
+  chunk 'she ran fast' span 0-3 posterior 0.83 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'get the cake' span 4-7 posterior 0.92 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'to get the cake' span 3-7 posterior 0.64 | in NLTK reference: yes | same span bracketed by other seeds: 17,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:0/1 23:1/1
+      no content-concept record kept for this string
+
+</div></div></details>
+<details class="cs"><summary>Case 14, held-out sentence 219: i will help you said tom</summary><div class="case"><div class="ex">
+  seed 13 (shown) [[i will] [help [you [said tom]]]]
+  seed 17        [[[i will] help] [you [said tom]]]
+  seed 19        [[i will] [help [you [said tom]]]]
+  seed 23        [[i will] [help [you [said tom]]]]
+  NLTK reference i [[will help] you] [said tom]
+  chunk 'i will' span 0-2 posterior 0.64 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 2
+      this string in the 400 held-out sentences: 3 occurrences; bracketed as this span per seed 13:2/3 17:2/3 19:2/3 23:2/3
+      nearest concept c127404 (8.8 bits, 6 member strings): he wanted; tom liked; they like; he went; he liked
+      concept c43729 (8.9 bits, 5 member strings); members: he wanted; tom liked; he went; he liked
+  chunk 'said tom' span 4-6 posterior 0.94 | in NLTK reference: yes | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: yes, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      nearest concept c137733 (13.2 bits, 6 member strings): big bird; bob but; cat said; house said; boy had
+      concept c137733 (13.2 bits, 6 member strings); members: big bird; bob but; cat said; house said; boy had
+  chunk 'you said tom' span 3-6 posterior 0.87 | in NLTK reference: no | same span bracketed by other seeds: 17,19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:1/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+  chunk 'help you said tom' span 2-6 posterior 0.88 | in NLTK reference: no | same span bracketed by other seeds: 19,23 | stored as a composite in memory: no, learn-tree bracket count in the 1000 training sentences: 0
+      this string in the 400 held-out sentences: 1 occurrences; bracketed as this span per seed 13:1/1 17:0/1 19:1/1 23:1/1
+      no content-concept record kept for this string
+
+</div></div></details>
+<p><b>Chunk biographies.</b> Count = learn-tree bracket occurrences in the stream so far. &ldquo;Concept&rdquo; = the deepest concept on the string&rsquo;s content path with 4 or more member strings, at that checkpoint.</p>
+<details class="cs"><summary>Biography of 'the bird'</summary><div class="case"><div class="ex">
+  seed 13: first bracketed at sentence 27; count at 100/250/500/750/1000 sentences: [2, 5, 8, 13, 14]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c30746 (7.5 bits, 7 members): all day; had fun; day long; very happy; of fun; their toy
+      cp 500 concept c55287 (9.3 bits, 5 members): he was; he liked; yes you; they played
+      cp 1000 concept c102239 (9.4 bits, 7 members): happy too; the animals; was inside; with tim; the tree; feel better
+      first training sentences where it was a bracket: the bird saw a big cat | the big cat walked away with the bird | they all laughed and played with the bird
+  seed 17: first bracketed at sentence 59; count at 100/250/500/750/1000 sentences: [3, 12, 18, 24, 28]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c37059 (6.0 bits, 23 members): they were; he thought; lily loved; his mom; they all; they liked; but the
+      cp 500 concept c19501 (8.7 bits, 6 members): you sue; them all; to help; his mom; new car
+      cp 1000 concept c162604 (8.7 bits, 14 members): but then; the bear; the dog; lily smiled; i found; she was; sam smiled
+      first training sentences where it was a bracket: the bird was happy and flew away | the bird could not take it | the bird got scared and flew away
+  seed 19: first bracketed at sentence 27; count at 100/250/500/750/1000 sentences: [1, 7, 14, 17, 22]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c35099 (8.1 bits, 5 members): now i; once upon; when he; he had
+      cp 500 concept c77309 (6.6 bits, 25 members): they liked; he picked; a big; she loved; can i; the old; now i
+      cp 1000 concept c162423 (7.6 bits, 22 members): the cat; one day; then we; tom looked; sue smiled; but we; she told
+      first training sentences where it was a bracket: the bird was happy and flew out | the bird saw a little girl named lily | the bird was happy too
+  seed 23: first bracketed at sentence 37; count at 100/250/500/750/1000 sentences: [3, 7, 10, 12, 20]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c33876 (6.6 bits, 14 members): sorry sue; of fun; other surprised; new friends; what happened; her friends; the park
+      cp 500 concept c52213 (5.1 bits, 67 members): of fun; the tree; her friends; the park; all day; big box; very happy; they wanted
+      cp 1000 concept c125987 (10.3 bits, 4 members): the cat; everyone was; he thanked
+      first training sentences where it was a bracket: the bird was high up in the tree | the bird was scared and flew away | the bird was very happy and thanked max
+
+</div></div></details>
+<details class="cs"><summary>Biography of 'one day'</summary><div class="case"><div class="ex">
+  seed 13: first bracketed at sentence 250; count at 100/250/500/750/1000 sentences: [0, 0, 4, 8, 9]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c24088 (8.9 bits, 5 members): tim was; they found; she said; she put
+      cp 500 concept c70139 (6.5 bits, 24 members): the cat; the little; tim was; at the; but the; but they; sue started; then he
+      cp 1000 concept c118844 (8.9 bits, 7 members): at the; he knew; inside the; as he; the little; he played
+      first training sentences where it was a bracket: one day max saw a big door | but one day something unexpected happened | one day he saw a little bird
+  seed 17: first bracketed at sentence 106; count at 100/250/500/750/1000 sentences: [0, 2, 5, 11, 14]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c15538 (8.7 bits, 4 members): the cat; but we; she lived
+      cp 500 concept c68776 (8.5 bits, 7 members): he opened; he had; they knew; the bird; it had; tom was
+      cp 1000 concept c132226 (8.1 bits, 15 members): but the; she asked; tim and; spot laughed; lily said; he thought; his friend
+      first training sentences where it was a bracket: one day her mom found out | one day a small bird came to lily | one day the cat saw something shiny
+  seed 19: first bracketed at sentence 71; count at 100/250/500/750/1000 sentences: [1, 2, 3, 8, 17]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c31570 (7.8 bits, 6 members): it flew; tim played; bob wanted; he got; yes you
+      cp 500 concept c31570 (8.2 bits, 9 members): he liked; it was; he had; it flew; tim played; bob wanted; he got
+      cp 1000 concept c87631 (9.9 bits, 5 members): his mom; the rock; the old; the bird
+      first training sentences where it was a bracket: one day spot could not find his toy | one day he saw a girl named sue | one day max saw a big cat
+  seed 23: first bracketed at sentence 18; count at 100/250/500/750/1000 sentences: [2, 2, 6, 9, 12]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c33195 (7.8 bits, 6 members): tim and; her mom; the ball; and they; he thanked
+      cp 500 concept c66192 (9.3 bits, 4 members): look sam; they put; he thought
+      cp 1000 concept c93130 (9.7 bits, 5 members): look sam; they put; sue thought; he thought
+      first training sentences where it was a bracket: one day sue went to the park | one day they saw a big box | one day spot saw a big ball
+
+</div></div></details>
+<details class="cs"><summary>Biography of 'tim was'</summary><div class="case"><div class="ex">
+  seed 13: first bracketed at sentence 32; count at 100/250/500/750/1000 sentences: [2, 4, 7, 12, 19]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c24088 (8.9 bits, 5 members): they found; one day; she said; she put
+      cp 500 concept c64021 (8.4 bits, 7 members): the cat; then he; the little; he loved; he saw; he was
+      cp 1000 concept c64157 (9.5 bits, 7 members): one day; they said; they found; she put; he walked; the park
+      first training sentences where it was a bracket: tim was very happy to help his mom | tim was playing with a toy car | tim was happy too
+  seed 17: first bracketed at sentence 3; count at 100/250/500/750/1000 sentences: [2, 4, 8, 13, 15]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c34975 (8.4 bits, 7 members): sue was; tim felt; tom was; sara was; bob was; everyone was
+      cp 500 concept c71046 (8.2 bits, 10 members): but the; he saw; she opened; she looked; he found; but sue; anna was
+      cp 1000 concept c161520 (9.5 bits, 7 members): they both; they all; the bird; the tree; they were; tom was
+      first training sentences where it was a bracket: tim was very excited to help his mom | tim was happy | tim was very happy with his new car
+  seed 19: first bracketed at sentence 52; count at 100/250/500/750/1000 sentences: [2, 3, 6, 8, 15]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c39307 (6.5 bits, 13 members): they played; he was; he picked; her mom; then a; one day; we can
+      cp 500 concept c34818 (8.0 bits, 5 members): they were; the cat; lucy was; she was
+      cp 1000 concept c72189 (9.7 bits, 4 members): they were; sam was; lucy was
+      first training sentences where it was a bracket: tim was sad but then something unexpected happened | tim was excited | tim was so happy and surprised
+  seed 23: first bracketed at sentence 103; count at 100/250/500/750/1000 sentences: [0, 1, 7, 14, 17]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c16614 (8.9 bits, 6 members): i will; i am; do you; they went; day they
+      cp 500 concept c24551 (8.7 bits, 5 members): and that; they both; she could; she played
+      cp 1000 concept c43290 (9.6 bits, 6 members): do you; we don't; they both; sue was; they were
+      first training sentences where it was a bracket: tim was now her new friend | tim was happy and said yes thank you | tim was so surprised
+
+</div></div></details>
+<details class="cs"><summary>Biography of 'in the park'</summary><div class="case"><div class="ex">
+  seed 13: first bracketed at sentence 194; count at 100/250/500/750/1000 sentences: [0, 1, 4, 7, 11]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c28099 (8.1 bits, 7 members): excited to go; happy and surprised; to play too; want to share; in the water; a small bird
+      cp 500 concept c63909 (8.6 bits, 9 members): what to do; what was inside; to go home; you little boy; i go inside; take your ball; of fun in
+      cp 1000 concept c20186 (8.0 bits, 15 members): in the sun; with his friends; his friends outside; her friend tom; his toys there; with the bear; with his ball
+      first training sentences where it was a bracket: lily and tom were playing in the park | tim liked to play in the park | lily and ben were playing in the park
+  seed 17: first bracketed at sentence 107; count at 100/250/500/750/1000 sentences: [0, 3, 6, 6, 7]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c12982 (8.2 bits, 14 members): of fun together; and had fun; friends to help; and went home; park every day; to see him; a small happy
+      cp 500 concept c60246 (9.0 bits, 6 members): was inside it; the ball too; in the sun; cake so much; bird feel better
+      cp 1000 concept c127468 (10.9 bits, 5 members): all day long; with the dog; outside in the; with the ball
+      first training sentences where it was a bracket: they liked to play in the park | tom and lily were playing in the park | anna and ben were playing in the park
+  seed 19: first bracketed at sentence 129; count at 100/250/500/750/1000 sentences: [0, 1, 3, 3, 3]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c35574 (9.1 bits, 4 members): on the ground; a big tree; help and said
+      cp 500 concept c69248 (9.2 bits, 5 members): at the park; as she walked; as they walked; i will help
+      cp 1000 concept c69248 (10.2 bits, 5 members): at the park; as she walked; as they walked; i will help
+      first training sentences where it was a bracket: he had many friends in the park | lily and tom were playing in the park | in the park they saw a big tree
+  seed 23: first bracketed at sentence 155; count at 100/250/500/750/1000 sentences: [0, 3, 4, 6, 8]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c36098 (8.7 bits, 4 members): cat was there; to the bear; help the bird
+      cp 500 concept c50043 (5.4 bits, 73 members): lots of fun; with her friends; a big box; in the tree; what they wanted; happy to go; day after that
+      cp 1000 concept c143547 (9.3 bits, 24 members): of fun together; as they went; for her help; thanked the dog; best of friends; fun playing together; to be careful
+      first training sentences where it was a bracket: they liked to play in the park | they liked to play in the park | lily and sam played together in the park
+
+</div></div></details>
+<details class="cs"><summary>Biography of 'the little'</summary><div class="case"><div class="ex">
+  seed 13: first bracketed at sentence 28; count at 100/250/500/750/1000 sentences: [2, 2, 6, 8, 10]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c24371 (8.1 bits, 5 members): the man; they all; he saw; the big
+      cp 500 concept c64021 (8.4 bits, 7 members): the cat; then he; tim was; he loved; he saw; he was
+      cp 1000 concept c116424 (6.0 bits, 74 members): they all; they played; i don't; they laughed; and they; tim said; the bird
+      first training sentences where it was a bracket: the little boy said go away big cat | the little boy was sad | the little girl was so excited
+  seed 17: first bracketed at sentence 63; count at 100/250/500/750/1000 sentences: [1, 3, 5, 9, 10]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c13198 (6.8 bits, 19 members): he wanted; but then; lily had; max loved; you want; they found; he saw
+      cp 500 concept c69412 (9.7 bits, 4 members): look ben; they put; while playing
+      cp 1000 concept c84671 (9.2 bits, 9 members): so it; tim and; the dog; the bird; they laughed; they play; then they
+      first training sentences where it was a bracket: the little girl was happy | the little girl was sad | the little girl was very happy
+  seed 19: first bracketed at sentence 236; count at 100/250/500/750/1000 sentences: [0, 1, 1, 6, 7]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c25408 (8.4 bits, 6 members): the bird; he had; he said; the dog; lily and
+      cp 500 concept c51959 (8.5 bits, 9 members): the bird; the cat; the man; the girl; the old; her mom; the dog
+      cp 1000 concept c102412 (10.0 bits, 4 members): tim and; lily and; bob and
+      first training sentences where it was a bracket: the little fish were scared | the little girl was sad | the little girl felt sad
+  seed 23: first bracketed at sentence 124; count at 100/250/500/750/1000 sentences: [0, 1, 5, 10, 14]; stored composite at checkpoints [250, 500, 1000]
+      cp 250 concept c38370 (9.1 bits, 4 members): mia smiled; mom smiled; felt bad
+      cp 500 concept c40118 (9.6 bits, 4 members): sue smiled; ben smiled; mom smiled
+      cp 1000 concept c133729 (8.5 bits, 11 members): his mom; she did; one day; sue and; she said; the bird; spot was
+      first training sentences where it was a bracket: the little girl said thank you bob | the little fish was scared | the little girl loved the toy
+
+</div></div></details>
+<p><b>Seed 13, the commonest chunks and their concepts</b> (1,000 sentences; nearest = parent of its leaf; wider = deepest concept with 4 or more member strings).</p>
+<details class="cs"><summary>The 30 commonest chunks of seed 13, with their concepts</summary><div class="case"><div class="ex">
+he wanted (22) | nearest c125920 2 members: she wanted | wider c125919 (10.2 bits, 4 members): tom wanted; she wanted; he liked
+the park (19) | nearest c124010 4 members: their room; the house; back home | wider c124010 (9.2 bits, 4 members): their room; the house; back home
+tim was (19) | nearest c64157 7 members: one day; they said; they found; she put; he walked | wider c64157 (9.5 bits, 7 members): one day; they said; they found; she put; he walked
+the dog (15) | nearest c130514 6 members: her mom; new toy; it up; his friends; his mom | wider c130514 (9.2 bits, 6 members): her mom; new toy; it up; his friends; his mom
+the bird (14) | nearest c102239 7 members: happy too; the animals; was inside; with tim; the tree | wider c102239 (9.4 bits, 7 members): happy too; the animals; was inside; with tim; the tree
+lily and (13) | nearest c124005 3 members: anna and; sara and | wider c13958 (8.6 bits, 7 members): anna and; sue and; sara and; mia and; she had
+the cat (13) | nearest c110008 5 members: max lived; once there; she lived; now tim | wider c110008 (9.9 bits, 5 members): max lived; once there; she lived; now tim
+they were (13) | nearest c121993 3 members: the little; they said | wider c141465 (7.6 bits, 23 members): tom and; the ball; tom thought; they found; she played
+he was (12) | nearest c129222 3 members: in the; but they | wider c46482 (8.8 bits, 11 members): in the; lily was; they were; sue was; the bird
+played together (12) | nearest c141092 19 members: had fun; the park; and laughed; see it; day together | wider c121638 (10.1 bits, 5 members): the park; had fun; play anymore; did it
+they played (12) | nearest c64839 7 members: one day; tim was; sam came; they asked; they went | wider c64839 (8.9 bits, 7 members): one day; tim was; sam came; they asked; they went
+in the park (11) | nearest c99381 3 members: with his friends; all day long | wider c20186 (8.0 bits, 15 members): in the sun; with his friends; his friends outside; her friend tom; his toys there
+tom and (11) | nearest c143332 5 members: she played; he said; and his; they thought | wider c143332 (9.9 bits, 5 members): she played; he said; and his; they thought
+it is (10) | nearest c133049 3 members: it was; lily was | wider c138880 (9.0 bits, 10 members): she said; lily and; tom loved; tim said; but we
+said yes (10) | nearest c101561 4 members: see it; find it; be home | wider c101561 (10.2 bits, 4 members): see it; find it; be home
+she was (10) | nearest c83835 2 members: he was | wider c92868 (10.0 bits, 5 members): they were; everyone was; he was; they took
+so happy (10) | nearest c142762 13 members: and blue; get it; and happy; sad anymore; play too | wider c78807 (9.0 bits, 10 members): and blue; get it; and happy; sad anymore; ball too
+the little (10) | nearest c105798 2 members: the bird | wider c116424 (6.0 bits, 74 members): they all; they played; i don't; they laughed; and they
+to do (10) | nearest c100766 4 members: all day; it was; every day | wider c100766 (9.9 bits, 4 members): all day; it was; every day
+to play (10) | nearest c135298 2 members: to share | wider c110133 (8.7 bits, 12 members): with it; you tom; play outside; my ball; very much
+and ben (9) | nearest c99237 3 members: and sue; and tom | wider c77469 (9.2 bits, 7 members): and sam; and sue; and tom; and lucy; and lily
+he wanted to (9) | nearest c139897 4 members: he liked to; they like to; tim liked to | wider c139897 (10.6 bits, 4 members): he liked to; they like to; tim liked to
+it was (9) | nearest c132666 2 members: was inside | wider c142526 (9.7 bits, 6 members): was inside; cat happy; play with; go home; went home
+one day (9) | nearest c118844 7 members: at the; he knew; inside the; as he; the little | wider c118844 (8.9 bits, 7 members): at the; he knew; inside the; as he; the little
+the boy (9) | nearest c122299 4 members: they were; they made; they looked | wider c122299 (10.2 bits, 4 members): they were; they made; they looked
+they all (9) | nearest c94622 3 members: tim and; she picked | wider c40018 (8.2 bits, 15 members): lily was; they were; he was; in the; sue was; the bird
+was very (9) | nearest c135313 12 members: girl was; was so; was not; asked the; were so | wider c27492 (9.9 bits, 7 members): asked the; was so; were so; was not; boy was
+what to do (9) | nearest c130049 5 members: what it was; to go away; room with many; bird to help | wider c130049 (9.8 bits, 5 members): what it was; to go away; room with many; bird to help
+all day (8) | nearest c38865 4 members: day long; the dog; had fun | wider c38865 (10.2 bits, 4 members): day long; the dog; had fun
+every day (8) | nearest c106188 7 members: each other; help him; and scared; box together; and laughed | wider c51178 (9.4 bits, 5 members): each other; and scared; and laughed; all day
+</div></div></details>
+  <h3>What round 213 says about language chunks</h3>
+  <ul>
+    <li>By 1,000 sentences TRELLIS's chunk inventory is dominated by two-word strings of determiner + noun, subject + auxiliary, name + <i>and</i> and fixed time words, and every seed finds about a third of the same top 50, roughly 40 times the random rate.</li>
+    <li>That agreement is lower than raw n-gram frequency's and BPE's on the same data (.33 against .51 and .43 for the top 50 at 1,000 sentences). In language, chunking adds no cross-seed agreement beyond frequency.</li>
+    <li>Parses agree across seeds at bracket F1 .65 to .72 (random binary trees .34, BPE .68), and a parse changes little between checkpoints (stability .85 to .89).</li>
+    <li>82% of held-out parses differ from right-branching. On those, TRELLIS scores .28 to .32 F1 against NLTK, below right-branching on the same sentences (.45 to .48), so against this reference the non-right-branching structure is not a net gain.</li>
+    <li>The clear cases (<i>one day tom went to the park</i>) recur in every seed. Concepts group chunks by shared contexts; few are grammatical categories (names + <i>and</i>, <i>he wanted</i> with <i>she wanted</i>), and a chunk's concept changes along the stream.</li>
+  </ul>
   <h2>What story chunks encode as learning goes on (15 November)</h2>
   <div class="col">
     <p>The language counterpart of the chess analysis (Figures C2 to C4). The current recipe learns TinyStories sentences in story order. At 250, 500, 1,000, 2,000 and 4,000 sentences, every multi-word chunk committed in the window is labelled by the phrases of a shallow parse (NLTK tags and a regular-expression chunker; scoring only, the learner never sees them): an exact noun, prepositional, verb or adjective phrase, a verb group, subject + verb (<i>tim was</i>), a span strictly inside one phrase, or a span that crosses a phrase boundary. Chance is a span of the same length from the same sentence, and a span of the same length that starts on the same tag. Code <code>experiments/v3/story_chunks.py</code>; seeds 13 and 17.</p>
@@ -944,6 +1612,7 @@ details.history > summary { cursor: pointer; font-weight: 600; color: var(--acce
     <li><b>No generator reaches .95 grammaticality (round 211).</b> At 1,000 sentences, under both strict judges and at every temperature, the highest grammatical share among distinct new sentences is .91 and .93 for the LSTM, .93 and .90 for the 5-gram sampler (which has no unstored trigram), .91 and .88 for plain TRELLIS at window 3, .85 for the GPT and about .80 for TRELLIS with exact boundaries. Lowering the temperature further does not help: the sampler collapses into stored sentences.</li>
     <li><b>The tie holds at the fair optimum, not at high grammaticality (round 211).</b> At the fair-count optimum every model is .58 to .66 grammatical and TRELLIS matches the LSTM. Where a .90 constraint can be met, the LSTM is more novel (unstored-trigram share .48 against .19 for plain TRELLIS), and 87% of plain TRELLIS's grammatical sentences there recombine stored trigrams.</li>
     <li><b>Eight seeds for the generation claim (round 212).</b> Seeds 29, 31, 37 and 41 join seeds 13, 17, 19 and 23, with the same pipeline, judge and fair count and settings fixed from round 205. Pre-registered verdicts at the fair count: "matches LSTM" (CI includes 0, lower bound above -.03) holds at 250, 500 and 1,000 sentences (t lower bounds -.0110, -.0129 and -.0279); "beats GPT" (CI above 0) holds at 250 and 500 and fails at 1,000. The round 205 GPT edge at 1,000 sentences did not replicate. On the boundary-strict count TRELLIS matches and beats only at 250 sentences and trails both models by about .014 at 1,000. Selection re-check: TRELLIS's optima at 500 (t2.8) and 1,000 (t2.0) stay interior, while at 250 the new seeds favour t4.0 (.2451) and the old seeds t4.5 (.2579, against t3.5 .2408). That t4.5 result is post hoc and not confirmatory; the confirmatory comparison uses the pre-fixed t3.5. Write-up: experiments/v3/results/story_gen/r212_seeds.md.</li>
+    <li><b>Which chunks fall out, and how consistent they are (round 213).</b> Four seeds at 1,000 sentences: chunk inventories overlap across seeds at Jaccard .332 (top 50), against .510 for raw frequency and .431 for BPE, so chunking adds no cross-seed agreement beyond frequency in language; 82.2% of held-out parses differ from right-branching and score F1 .28&ndash;.32 against right-branching's .45&ndash;.48 on those sentences. Chess at 4,000 positions: .307 (top 50) against .004 for random chunks. Case studies and showcase trees: <a href="#r-stories">TinyStories chunks and concepts</a> and <a href="#s-chess">chess chunks across seeds</a>. Write-ups: experiments/v3/results/story_gen/r213_chunks.md and experiments/v3/results/chess_inspect/r213_chess_chunks.md.</li>
     <li><b>Parse reference (round 203 and 209).</b> Parse F1 is measured against NLTK shallow phrases (NP, PP, VP, AP and verb groups of two or more words, not the whole sentence), a chunker's output and not a treebank. Right-branching with no learning scores .466 and random binary trees .28, so learned parsers span roughly .28 to .47, not up to 1. At 4,000 sentences TRELLIS scores F1 .36 to .37 and BPE .37. Cross-seed agreement (bracket F1 between two seeds, .80 for TRELLIS and .84 for BPE) measures stability. The "decisive" and "consistency" rates are distances to gold values (.982 and .116), so neither is an accuracy, and consistency rewards over-bracketing.</li>
     <li><b>Parse consistency against gold (round 198).</b> Gold shallow phrases bracket 11.6% of repeated 2&ndash;4 word strings and make the same decision for a string in 98.2% of cases. BPE brackets 36&ndash;49% (it over-brackets frequent strings such as "on the"), TRELLIS's posterior parse 23&ndash;27%, closest to gold (|difference| .12&ndash;.16 against BPE's .25&ndash;.37). On same-decision rate BPE is closer to gold (.92&ndash;.97) than TRELLIS (.85&ndash;.88). Making TRELLIS's bracket rate rise toward BPE (cohesion, rounds 196 and 196b) costs about .05 phrase F1.</li>
     <li><b>Parser fixes (round 203).</b> Counting the sentence edge once drops phrase F1 from .357 to .278 at 4,000 sentences, and a pure Goodman labelled-recall readout leaves it unchanged (.366 against .369). Neither beats the default parser. Matched to BPE's bracket budget, TRELLIS crosses fewer gold phrase boundaries (.171, .169 and .210 against .299, .281 and .301 at 250, 1,000 and 4,000 sentences) and leads on F1 with subject-verb frames at every size; plain F1 leads at 250 sentences (.309 against .275) and trails BPE by .011 at 1,000 and 4,000.</li>
@@ -2649,6 +3318,352 @@ it was a big day for him       [[it was] [a [big [day [for him]]]]]  [[it was] [
   </figure>
   <figcaption><b>Figure C4.</b> Case studies, seed 13: the chunks recognised in four held-out positions as learning goes on.</figcaption>
 
+  <h2>Chunks that fall out across seeds (round 213)</h2>
+  <div class="col">
+    <p>The chess counterpart of the language study above. Four seeds (13, 17, 19, 23) each learn the cs73L memory (GraphTrellis, <code>store: best</code>, bands naming, <code>restructure: sample</code>, <code>type_names: sample</code>, <code>type_key: concept</code>, <code>chess_flat</code>, <code>chess_join: any</code>, chunks of up to 4 pieces) from <code>train_long.fen</code> shuffled by the seed. Learning is deterministic, so it reproduces what cs73L learned: seed 13 stores 14,681 chunks after 4,000 positions here and in the cs73L log. Only the learning loop reruns here; the Chase and Simon exact protocol around it (K = 7, recall as generation) does not.</p>
+    <p><b>These runs learn 4,000 positions, not the 27,459 of cs73L</b> (about 23 hours for the whole stream; these take 2,500 to 3,000 seconds each), with checkpoints at 500, 1,000, 2,000 and 4,000. For seeds 13 and 17 the 4,000 positions are the ones cs73L learned first, and cs73L itself ran only seeds 13 and 17. A chunk is a committed multi-piece unit (2 to 4 pieces on their squares) chosen in the parse of a learned position, and its use count is the number of training positions where it was chosen. At 4,000 positions seed 13 has 1,860 distinct chunks used at least twice (seed 17 1,893, seed 19 1,795, seed 23 1,965); for seed 13, 275 have 2 pieces, 219 have 3 and 1,366 have 4. Code: <code>experiments/v3/diag/r213_chess.py</code>, <code>r213_chess_analyze.py</code>, <code>r213_chess_boards.py</code>; write-up in <code>experiments/v3/results/chess_inspect/r213_chess_chunks.md</code>.</p>
+    <p><b>The chunk names are labels from a rule set, not from memory.</b> A small rule set in <code>r213_chess_analyze.py::classify</code> assigns them: a king on the back rank, files f to h (or a to c), with at least two own pawns within two ranks in front and one file either side is a castled king with its shield; two pawns of one colour on adjacent files and ranks are a chain; the same rank on adjacent files is a duo; a back-rank corner rook with a pawn is a corner rook; a bishop on g2, b2, g7 or b7 behind a pawn on g3, b3, g6 or b6 is a fianchetto. &ldquo;Mixed piece group&rdquo; is everything the rules do not name. The memory never sees these labels.</p>
+  </div>
+
+  <h3>The top chunks, in chess terms</h3>
+  <p>Most-used chunks per seed at 4,000 positions (use counts; squares as printed, pieces are pawns unless named).</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th class="num">Rank</th><th>Seed 13</th><th>Seed 17</th><th>Seed 19</th><th>Seed 23</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1</td><td><code>f2 g1 g2 h2</code> (white castled, shield) 496</td><td><code>e6 f7 g7 h7</code> (black pawn chain) 229</td><td><code>f2 g1 g2 h2</code> 449</td><td><code>f2 g1 g2 h2</code> 507</td></tr>
+      <tr><td class="num">2</td><td><code>f2 g1 g2 h3</code> 135</td><td>f8 rook, g8 king 171</td><td><code>f2 g1 g2 h3</code> 300</td><td><code>f2 g1 g2 h3</code> 262</td></tr>
+      <tr><td class="num">3</td><td><code>f7 g6 g8 h7</code> (black king, h-pawn, g6) 115</td><td><code>e6 f7 g7 h6</code> 103</td><td><code>f2 g1 g3 h2</code> 176</td><td><code>f2 g1 g3 h2</code> 186</td></tr>
+      <tr><td class="num">4</td><td><code>f7 g7 g8 h7</code> (black castled, shield) 112</td><td>a1 rook, a2 b2 c2 pawns 80</td><td><code>e6 f7 g7 h7</code> 167</td><td><code>e6 f7 g7 h7</code> 174</td></tr>
+      <tr><td class="num">5</td><td><code>e6 f7 g7 h7</code> 94</td><td>a7 a8 rook, b7 c7 pawns 78</td><td>f8 rook g8 king 156</td><td><code>g7 h7</code> pawns 120</td></tr>
+      <tr><td class="num">6</td><td><code>f2 g1 g3 h2</code> 94</td><td>f1 rook, f2 pawn, f3 knight, g1 king 75</td><td>f8 rook, g7 h7 pawns, g8 king 121</td><td><code>d5 e6 f7 g7</code> 102</td></tr>
+      <tr><td class="num">7</td><td><code>g7 g8 h7</code> (3 pieces) 83</td><td>a7 a8 rook 70</td><td><code>g7 h6</code> 92</td><td><code>f7 g7 h7</code> 102</td></tr>
+      <tr><td class="num">8</td><td><code>a7 b7</code> 65</td><td>a1 rook, a2 b2 c3 pawns 69</td><td><code>d5 e6 f7 g7</code> 80</td><td><code>g7 h6</code> 99</td></tr>
+    </tbody>
+  </table></div>
+  <p>The most-used chunks are the white kingside castle with its three-pawn shield (<code>f2 g1 g2 h2</code> and its h3 and g3 variants, the top chunk in three seeds), the black chains <code>e6 f7 g7 h7</code> and <code>d5 e6 f7 g7</code>, the a-file rook with its queenside pawns, and pairs such as <code>g7 h6</code> and <code>a7 b7</code>. They sit on their usual squares (white castled king on g1, black on g8). Seed 17 differs: it uses <code>f2 g1 g2 h3</code> only 3 times (against 135, 300 and 262) and holds a rook-pawn corner structure and &ldquo;f1 rook, f2 pawn, f3 knight, g1 king&rdquo; (75 uses) in place of the white shield.</p>
+
+  <h3>The labelled shares</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Class (rule-set label)</th><th class="num">Share of per-seed top 50 (pooled)</th><th class="num">Top 200</th><th class="num">Of all uses</th></tr></thead>
+    <tbody>
+      <tr><td>Pawn chain (diagonal pawns)</td><td class="num">.35</td><td class="num">.36</td><td class="num">.32</td></tr>
+      <tr><td>Castled king (kingside) + pawn shield</td><td class="num">.21</td><td class="num">.16</td><td class="num">.17</td></tr>
+      <tr><td>Corner rook with its pawns</td><td class="num">.14</td><td class="num">.12</td><td class="num">.11</td></tr>
+      <tr><td>Mixed piece group</td><td class="num">.12</td><td class="num">.20</td><td class="num">.24</td></tr>
+      <tr><td>Pawn duo / phalanx (side by side)</td><td class="num">.07</td><td class="num">.06</td><td class="num">.04</td></tr>
+      <tr><td>Back-rank pieces (e.g. f8 rook + g8 king)</td><td class="num">.05</td><td class="num">.05</td><td class="num">.04</td></tr>
+      <tr><td>King in corner + one pawn</td><td class="num">.01</td><td class="num">.03</td><td class="num">.03</td></tr>
+      <tr><td>Fianchetto, queenside castle, pawns of both colours</td><td class="num">.01 each</td><td class="num">.01 each</td><td class="num">.01 each</td></tr>
+    </tbody>
+  </table></div>
+  <p>The memory's chunks are pawn structures and castled kings. Most are four-piece chunks: of the per-seed top 50, 133 of 200 chunk slots have 4 pieces, 18 have 3 and 49 have 2; of the top 200, 577, 79 and 144. Piece-only groups of 3 or 4 (queen, rooks and minor pieces on their starting squares) fall in the mixed row. Fianchetto bishops, queenside castles and attack patterns are rare (about 1% each), in line with the line above that the chunks are pawn structures, batteries and castled kings, not attacks.</p>
+
+  <h3>The 9 chunks every seed finds</h3>
+  <p>Nine chunks sit in all four per-seed top 50s (exact squares), and 34 in all four top 200s; as shapes, 11 and 37. Of the 5,152 chunks used at least twice by some seed, 3,663 are used twice or more by one seed only, 846 by two, 414 by three and 229 by all four. The nine, with use counts for seeds 13 / 17 / 19 / 23:</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Chunk</th><th class="num">Uses</th><th>Label</th></tr></thead>
+    <tbody>
+      <tr><td><code>e6 f7 g7 h7</code> (black)</td><td class="num">94 / 229 / 167 / 174</td><td>pawn chain</td></tr>
+      <tr><td><code>g7 h6</code></td><td class="num">57 / 47 / 92 / 99</td><td>pawn chain</td></tr>
+      <tr><td><code>e6 f7 g7 h6</code></td><td class="num">52 / 103 / 44 / 65</td><td>pawn chain</td></tr>
+      <tr><td><code>a7</code> pawn, <code>a8</code> rook</td><td class="num">52 / 70 / 44 / 34</td><td>corner rook with pawn</td></tr>
+      <tr><td><code>e6 f7 g6 h7</code></td><td class="num">36 / 60 / 49 / 51</td><td>pawn chain</td></tr>
+      <tr><td><code>a6 b7</code></td><td class="num">47 / 32 / 53 / 57</td><td>pawn chain</td></tr>
+      <tr><td><code>g6 h7</code></td><td class="num">38 / 28 / 53 / 44</td><td>pawn chain</td></tr>
+      <tr><td><code>a7 b6</code></td><td class="num">39 / 26 / 39 / 43</td><td>pawn chain</td></tr>
+      <tr><td><code>a6 b5</code></td><td class="num">44 / 28 / 32 / 34</td><td>pawn chain</td></tr>
+    </tbody>
+  </table></div>
+  <p>All nine are black pawn structures. The white castled-king shield (<code>f2 g1 g2 h2</code>, <code>f2 g1 g2 h3</code>, <code>f2 g1 g3 h2</code>) is the most-used chunk in three seeds, and seed 17 does not find it, so it is not among the nine.</p>
+
+  <h3>Consistency across seeds, with the pair-frequency baseline</h3>
+  <p>Jaccard overlap of the top-k chunks of two seeds, mean over the 6 seed pairs, by use count. &ldquo;Exact&rdquo; = the same pieces on the same squares; &ldquo;shape&rdquo; = the same pieces in the same relative squares (the chunk moved as a rigid unit by whole files and ranks, same colours). The pair-frequency baseline counts every pair of pieces within two squares of each other in each training position and takes the top-k pairs by raw count.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th class="num">Positions learned</th><th class="num">Top-k</th><th class="num">Exact</th><th class="num">Shape</th><th class="num">Random draw from the seed's own chunks (exact)</th><th class="num">Pair-frequency baseline (exact / shape)</th><th class="num">TRELLIS 2-piece chunks only (exact)</th></tr></thead>
+    <tbody>
+      <tr><td class="num">500</td><td class="num">50</td><td class="num">.201</td><td class="num">.207</td><td class="num">.010</td><td class="num">.725 / .567</td><td class="num">.317</td></tr>
+      <tr><td class="num">500</td><td class="num">200</td><td class="num">.134</td><td class="num">.138</td><td class="num">.039</td><td class="num">.781 / .743</td><td class="num">.276</td></tr>
+      <tr><td class="num">1,000</td><td class="num">50</td><td class="num">.252</td><td class="num">.313</td><td class="num">.006</td><td class="num">.859 / .645</td><td class="num">.355</td></tr>
+      <tr><td class="num">1,000</td><td class="num">200</td><td class="num">.172</td><td class="num">.174</td><td class="num">.027</td><td class="num">.871 / .797</td><td class="num">.283</td></tr>
+      <tr><td class="num">2,000</td><td class="num">50</td><td class="num">.309</td><td class="num">.347</td><td class="num">.004</td><td class="num">.842 / .681</td><td class="num">.392</td></tr>
+      <tr><td class="num">2,000</td><td class="num">200</td><td class="num">.219</td><td class="num">.239</td><td class="num">.019</td><td class="num">.903 / .848</td><td class="num">.283</td></tr>
+      <tr><td class="num">4,000</td><td class="num">50</td><td class="num"><b>.307</b></td><td class="num"><b>.343</b></td><td class="num">.004</td><td class="num">.899 / .701</td><td class="num">.451</td></tr>
+      <tr><td class="num">4,000</td><td class="num">200</td><td class="num"><b>.240</b></td><td class="num"><b>.265</b></td><td class="num">.016</td><td class="num">.945 / .853</td><td class="num">.302</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><b>TRELLIS's chunk inventories overlap far more than chance.</b> At 4,000 positions the top-50 overlap is .307 against .004 for a random draw from the seed's own chunks (60 to 80 times as much), and the top-200 overlap is .240 against .016 (15 times).</li>
+    <li><b>The frequency baseline overlaps more than TRELLIS.</b> Its top 50 reaches .899 (exact) and its top 200 .945 at 4,000 positions. Caveat: the baseline covers 2-piece chunks only. TRELLIS's own 2-piece top 50 reaches .451 (top 200: .302), still far below .899, but most TRELLIS chunks have 4 pieces and are more specific, so the same chunk in two seeds needs the same training positions. A matched frequency baseline for 3 and 4-piece chunks was not built. On this metric TRELLIS's inventory does not agree across seeds more than frequency does.</li>
+    <li><b>Shape matching helps a little</b> (.343 against .307 at top 50; .265 against .240 at top 200): most top chunks stay on their usual squares and a few move.</li>
+    <li>Count-weighted overlap (sum of the smaller use count over the sum of the larger): exact .141, .179, .206, .229 and shape .183, .216, .241, .262 at 500, 1,000, 2,000 and 4,000 positions.</li>
+  </ul>
+
+  <h3>Rank stability, and the one shape that moves</h3>
+  <p>Within a seed, the top-k Jaccard of the checkpoint with the final 4,000-position list (mean over seeds).</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th class="num">Positions learned</th><th class="num">Top 50, exact / shape</th><th class="num">Top 200, exact / shape</th><th class="num">Pair-frequency baseline, top 50 exact</th><th class="num">Final top 50 already chosen at least once</th></tr></thead>
+    <tbody>
+      <tr><td class="num">500</td><td class="num">.367 / .410</td><td class="num">.269 / .293</td><td class="num">.818</td><td class="num">.85</td></tr>
+      <tr><td class="num">1,000</td><td class="num">.559 / .603</td><td class="num">.399 / .443</td><td class="num">.888</td><td class="num">.96</td></tr>
+      <tr><td class="num">2,000</td><td class="num">.722 / .759</td><td class="num">.606 / .652</td><td class="num">.896</td><td class="num">1.00</td></tr>
+    </tbody>
+  </table></div>
+  <p>The random reference for the top 50 against its own final list is .013 to .023. The chunk ranking stabilises more slowly than the pair-frequency ranking (.367 at 500 positions against .818) and is far from random from 500 positions on. <b>The diagonal pawn pair <code>b2 c3</code> recurs on 16 squares</b> in seed 13 (origin squares <code>d4</code> x16, <code>a3</code> x12, <code>c3</code> x8, <code>b4</code> x7 and others), and the pair <code>a6 b7</code> on 17: the one shape that moves as a unit across the board.</p>
+
+  <h3>Showcase boards</h3>
+  <p>Four middle-game boards chosen for clean decompositions, seed 13 at 4,000 positions, parsed with learning off. Left, the pieces (white upper case, black lower case); right, the chunk letter on each piece that is in a multi-piece chunk, <code>o</code> for a piece in no chunk. A unit counts once its content plus context recognition reaches 16 bits.</p>
+  <div class="case"><p class="ch">Board 1 · middle game, 24 pieces</p>
+<pre class="ex">   8  . . r n r . k .     8  . . o D o . o .
+   7  p p . . . . p .     7  B B . . . . o .
+   6  . . . q p p Q p     6  . . . D B o o o
+   5  . . N p . . . .     5  . . o B . . . .
+   4  . . . P . . . .     4  . . . A . . . .
+   3  . . P . . . . P     3  . . A . . . . C
+   2  P P . . R P P .     2  A A . . o C C .
+   1  . . . . R . K .     1  . . . . o . C .
+      a b c d e f g h        a b c d e f g h
+   A = Pa2 Pb2 Pc3 Pd4 (white queenside pawn chain, stored)
+   B = pa7 pb7 pd5 pe6 (black pawn chain, stored)
+   C = Pf2 Kg1 Pg2 Ph3 (white castled king, shield, stored)
+   D = qd6 nd8 (not stored)</pre></div>
+  <div class="case"><p class="ch">Board 14 · middle game, 26 pieces</p>
+<pre class="ex">   8  . r . . . . k .     8  . C . . . . o .
+   7  . . . . q p b .     7  . . . . C A o .
+   6  . . n . p . p n     6  . . C . A . A o
+   5  . . . p P . N p     5  . . . A o . o o
+   4  . p p P . P . .     4  . o o o . B . .
+   3  . . P . N . . .     3  . . D . o . . .
+   2  . P Q B . . P P     2  . D o o . . B B
+   1  R . . . . . K .     1  o . . . . . B .
+      a b c d e f g h        a b c d e f g h
+   A = pd5 pe6 pf7 pg6 (black pawn chain, stored)
+   B = Pf4 Kg1 Pg2 Ph2 (white castled king, shield, stored)
+   C = rb8 nc6 qe7 (not stored)
+   D = Pb2 Pc3 (white diagonal pawn pair, stored)</pre></div>
+  <div class="case"><p class="ch">Board 6 · middle game, 25 pieces</p>
+<pre class="ex">   8  r . . . r . k .     8  D . . . o . C .
+   7  p p . . . p p .     7  D o . . . C C .
+   6  . . . p . . b p     6  . . . o . . o C
+   5  . . p P . P . .     5  . . o B . o . .
+   4  . . P b . . P q     4  . . B o . . o o
+   3  P . N . . . . P     3  B . A . . . . o
+   2  . P . Q . . . .     2  . B . A . . . .
+   1  R . . . . R . K     1  A . . . . A . o
+      a b c d e f g h        a b c d e f g h
+   A = Ra1 Nc3 Qd2 Rf1 (white pieces, stored)
+   B = Pa3 Pb2 Pc4 Pd5 (white pawn chain, stored)
+   C = pf7 pg7 kg8 ph6 (black castled king with h-pawn on h6, stored)
+   D = pa7 ra8 (rook behind rook-pawn, stored)</pre></div>
+  <div class="case"><p class="ch">Board 17 · middle game, 26 pieces</p>
+<pre class="ex">   8  r . . . . r k .     8  o . . . . o F .
+   7  . . q . . p p p     7  . . E . . C C o
+   6  p . . b p n . .     6  o . . E C F . .
+   5  . . . p . . . .     5  . . . C . . . .
+   4  . P p P P . . .     4  . D o B o . . .
+   3  P . . N . P . P     3  D . . o . B . o
+   2  . B . . Q . P .     2  . A . . A . B .
+   1  . . R . R . K .     1  . . A . A . B .
+      a b c d e f g h        a b c d e f g h
+   A = Bb2 Rc1 Re1 Qe2 (white back pieces, not stored)
+   B = Pd4 Pf3 Kg1 Pg2 (white castled king, stored)
+   C = pd5 pe6 pf7 pg7 (black pawn chain, stored)
+   D = Pa3 Pb4 (white diagonal pawn pair, stored)
+   E = qc7 bd6 (not stored)
+   F = nf6 kg8 (stored)</pre></div>
+  <p>In all four boards the chunks that are pawn structures and castled kings are stored chunks, and most piece groups of three or four pieces (queen and rooks, knight and queen) are recognised without a stored copy. Over the 30 fixed boards (the first 20 middle games and 10 end games of the pools), seed 13 recognises 2.93 multi-piece units per board and puts 41% of the pieces into one; 60% of its multi-piece units are stored chunks, and the others are recognised from concepts without an exact stored copy. End games have at most one 2 to 4-piece unit each, mostly unstored.</p>
+  <p><b>Across seeds, the decompositions of the 30 boards agree at Jaccard .211 on the sets of multi-piece units and .506 on the covered squares</b>, against .334 for squares covered at random by the same number of pieces (6 seed pairs, 4,000 positions). The seeds agree on where the chunks are twice as often as on the exact units, and the square agreement is above a random cover but not far above it. The six boards of this section are picked for clean decompositions; the 30-board numbers cover all of them.</p>
+
+  <h3>Case studies</h3>
+  <p>For each unit: uses per seed at 4,000 positions (seeds 13 / 17 / 19 / 23), whether the shape also occurs on other squares, the stream position where seed 13 first chose it, and how many of the four seeds use it at least twice. &ldquo;Seeds' decomposition&rdquo; counts how many of seed 13's multi-piece units on the board appear identically in each other seed's decomposition of the same board. The block under each case opens to every seed's decomposition of that board.</p>
+  <div class="case"><p class="ch">Case 1 · board 1</p>
+    <p class="claim">Three stored chunks recur across seeds; seed 17 breaks the board differently.</p>
+    <p class="reads">Seeds' decomposition: seed 17 0 of 4, seed 19 4 of 4, seed 23 3 of 4.</p>
+    <ul>
+      <li>White castled king <code>f2 g1 g2 h3</code>: uses 135 / 3 / 300 / 262; shape uses 140 / 3 / 304 / 272, on two origin squares in seed 13 (<code>f1</code> x135, <code>a1</code> x5: the second has the same shape as a queenside castle, king on b1 with pawns a2 b2 c3); first chosen at stream position 101; used by 4 of 4 seeds (seed 17 only 3 times).</li>
+      <li>White chain <code>a2 b2 c3 d4</code>: uses 20 / 18 / 79 / 70; two origin squares (<code>a2</code> x20, <code>b2</code> x2); first chosen at 743; 4 of 4.</li>
+      <li>Black chain <code>a7 b7 d5 e6</code>: uses 11 / 2 / 10 / 6, one origin square; first chosen at 359; 4 of 4 (seed 17 twice).</li>
+      <li>Queen <code>d6</code> and knight <code>d8</code>: not stored by any seed's top list; seeds 19 and 23 recognise the same pair.</li>
+    </ul>
+    <p class="reads">Seed 17 breaks the board into the b2 pawn with the two rooks and king (<code>e1 e2 g1</code>), the pawns <code>c3 d4 g2 h3</code> together, and <code>e8 g8</code> rook and king, none of which is a seed-13 unit.</p>
+  </div>
+  <div class="case"><p class="ch">Case 2 · board 14</p>
+    <p class="claim">A diagonal pawn pair is a translated small chunk and also part of a bigger one.</p>
+    <p class="reads">Seeds' decomposition: seed 17 1 of 4, seed 19 2 of 4, seed 23 2 of 4.</p>
+    <ul>
+      <li>Black chain <code>d5 e6 f7 g6</code>: uses 35 / 2 / 39 / 42, shape uses 40 / 12 / 42 / 54, two origin squares (<code>d5</code> x35, <code>e5</code> x5); first at 408; 4 of 4 seeds use it twice or more (seed 17 exactly 2).</li>
+      <li>White castled king <code>f4 g1 g2 h2</code>: uses 51 / 0 / 53 / 44; two origin squares (<code>f1</code> x51, <code>d1</code> x2); first at 75; 3 of 4.</li>
+      <li>White diagonal pair <code>b2 c3</code>: uses 5 / 7 / 5 / 3, but the shape (a diagonal pawn pair of one colour) has 89 / 138 / 76 / 79 uses and appears on 16 different origin squares in seed 13 (<code>d4</code> x16, <code>a3</code> x12, <code>c3</code> x8, <code>b4</code> x7 and others). Seeds 17, 19 and 23 decompose the same pawns as a larger unit <code>b2 c3 d4</code> (or <code>b2 c3 d4 e5</code>).</li>
+      <li>Black rook, knight, queen <code>b8 c6 e7</code>: not stored; seed 17 finds the same three, seed 19 splits it (<code>c6 e7</code> and <code>b8 g7 g8</code>).</li>
+      <li>Seeds 17, 19 and 23 also give the white back pieces <code>a1 c2 d2 e3</code> (rook, queen, bishop, knight) as a unit, which seed 13 leaves as singletons.</li>
+    </ul>
+  </div>
+  <div class="case"><p class="ch">Case 3 · board 6</p>
+    <p class="claim">The same structures, grouped differently by seed 17.</p>
+    <p class="reads">Seeds' decomposition: seed 17 0 of 4, seed 19 2 of 4, seed 23 2 of 4.</p>
+    <ul>
+      <li>Black rook-pawn corner <code>a7 a8</code>: uses 52 / 70 / 44 / 34; shape uses 68 / 96 / 53 / 54 on two origin squares (<code>a7</code> x52, <code>h7</code> x16: the mirror h-file rook corner); first at 90; 4 of 4.</li>
+      <li>Black castled king <code>f7 g7 g8 h6</code>: uses 46 / 20 / 18 / 0; one origin square; first at 172; 3 of 4.</li>
+      <li>White chain <code>a3 b2 c4 d5</code>: uses 2 / 5 / 14 / 6; first at 2,804; 4 of 4. A late chunk.</li>
+      <li>White pieces <code>a1 c3 d2 f1</code>: stored but chosen 0 / 0 / 4 / 0 times; seeds 19 and 23 recognise it, seeds 13 and 17 do not as a stored chunk.</li>
+    </ul>
+    <p class="reads">Seed 17's decomposition of the same board has <code>a1 a3 b2 c4</code> (rook plus three pawns) and <code>a7 a8 b7 e8</code> as larger units.</p>
+  </div>
+  <div class="case"><p class="ch">Case 4 · board 17</p>
+    <p class="claim">The earliest-learned shape of the cases, and a rare castle variant.</p>
+    <p class="reads">Seeds' decomposition: seed 17 0 of 6, seed 19 3 of 6, seed 23 3 of 6.</p>
+    <ul>
+      <li>Black chain <code>d5 e6 f7 g7</code>: uses 55 / 4 / 80 / 102, shape uses 65 / 12 / 95 / 113 on three origin squares (<code>d5</code> x55, <code>c5</code> x6, <code>e5</code> x4); first at 453; 4 of 4.</li>
+      <li>White diagonal pair <code>a3 b4</code>: uses 12 / 16 / 16 / 17, shape 89 / 138 / 76 / 79 on 16 origin squares; first at stream position 20, the earliest-learned chunk of these cases; 4 of 4.</li>
+      <li>White castled king <code>d4 f3 g1 g2</code>: stored, but chosen 0 / 0 / 0 / 3 times; a rare variant. Its neighbour <code>e4 f3 g2 h3</code> appears in seed 17.</li>
+      <li>Black knight and king <code>f6 g8</code>: uses 15 / 0 / 0 / 9, first at 929; 2 of 4.</li>
+      <li>Rooks <code>a8 f8</code>, knight <code>f6</code> and king <code>g8</code> as one unit: found by seeds 17, 19 and 23, not by seed 13, which keeps <code>f6 g8</code> as a pair.</li>
+    </ul>
+  </div>
+  <div class="case"><p class="ch">Case 5 · board 9 (24 pieces, 22 of them in six chunks)</p>
+    <p class="claim">The largest decomposition in the sample; half of it agrees across two other seeds and none with seed 17.</p>
+    <p class="reads">Seeds' decomposition: seed 17 0 of 6, seeds 19 and 23 3 of 6.</p>
+    <ul>
+      <li>White castled king <code>f2 g1 g3 h2</code>: uses 94 / 0 / 176 / 186; first at 79; 3 of 4.</li>
+      <li>Black <code>a7 c6 d5</code> chain: uses 2 / 5 / 0 / 0 (late and rare). Black <code>b7 g6 g8 h7</code>: stored, never chosen as a chunk by any seed (a unit recognised by concept, not a common stored shape).</li>
+      <li>White <code>a1 c1 e2 f1</code> (rook, queen, knight, rook) and white pawns <code>a3 b2 c2 e3</code>: not stored by seed 13; seeds 19 and 23 find the same two units.</li>
+    </ul>
+  </div>
+  <div class="case"><p class="ch">Case 6 · board 0 (26 pieces; four four-piece units, 16 pieces)</p>
+    <p class="claim">One chain is identical in every seed; the piece groups differ.</p>
+    <p class="reads">Seeds' decomposition: seed 17 1 of 4, seed 19 1 of 4, seed 23 2 of 4.</p>
+    <ul>
+      <li>Black chain <code>e6 f7 g6 h7</code>: uses 36 / 60 / 49 / 51; shape uses 40 / 64 / 54 / 56, three origin squares (<code>e6</code> x36, <code>e4</code> x2, <code>e5</code> x2); first at 70; 4 of 4 (identical in every seed's decomposition).</li>
+      <li>White castled king <code>f3 g2 h1 h2</code>: uses 9 / 0 / 15 / 11, shape 25 / 0 / 25 / 24 on three origin squares (<code>e1</code> x13, <code>f1</code> x9, <code>a1</code> x3); first at 106; 3 of 4.</li>
+      <li>Black rook, queen, knight, rook <code>a8 b6 d7 f8</code> and white rooks, knight, queen <code>c1 d3 f1 h6</code>: not stored, found by seed 13 from concepts. Seeds 17, 19 and 23 give <code>c1 e2 f1 h6</code> or <code>d3 e2 f1 h1</code> and similar: close but different groupings of the white pieces.</li>
+    </ul>
+  </div>
+  <p><b>Every seed's decomposition of the six boards</b> (units as <code>square:colour piece</code>; open a block):</p>
+<details class="cs"><summary>All four seeds on board 1 (middle, 24 pieces)</summary><div class="case"><pre class="ex">
+   8  . . r n r . k .     8  . . o D o . o .
+   7  p p . . . . p .     7  B B . . . . o .
+   6  . . . q p p Q p     6  . . . D B o o o
+   5  . . N p . . . .     5  . . o B . . . .
+   4  . . . P . . . .     4  . . . A . . . .
+   3  . . P . . . . P     3  . . A . . . . C
+   2  P P . . R P P .     2  A A . . o C C .
+   1  . . . . R . K .     1  . . . . o . C .
+      a b c d e f g h        a b c d e f g h
+   A = Pa2, Pb2, Pc3, Pd4 (4 pieces, stored chunk: True)
+   B = pa7, pb7, pd5, pe6 (4 pieces, stored chunk: True)
+   C = Pf2, Kg1, Pg2, Ph3 (4 pieces, stored chunk: True)
+   D = qd6, nd8 (2 pieces, stored chunk: False)
+   seed 17: 3 multi-piece units; identical to a seed-13 unit: 0 of 4; units: b2:wP|e1:wR|e2:wR|g1:wK; c3:wP|d4:wP|g2:wP|h3:wP; e8:bR|g8:bK
+   seed 19: 6 multi-piece units; identical to a seed-13 unit: 4 of 4; units: a2:wP|b2:wP|c3:wP|d4:wP; a7:bP|b7:bP|d5:bP|e6:bP; d6:bQ|d8:bN; e8:bR|g8:bK; f2:wP|g1:wK|g2:wP|h3:wP; g7:bP|h6:bP
+   seed 23: 5 multi-piece units; identical to a seed-13 unit: 3 of 4; units: a7:bP|b7:bP|d5:bP|e6:bP; b2:wP|e1:wR|e2:wR; d6:bQ|d8:bN; f2:wP|g1:wK|g2:wP|h3:wP; g7:bP|h6:bP
+
+</pre></div></details>
+<details class="cs"><summary>All four seeds on board 14 (middle, 26 pieces)</summary><div class="case"><pre class="ex">
+   8  . r . . . . k .     8  . C . . . . o .
+   7  . . . . q p b .     7  . . . . C A o .
+   6  . . n . p . p n     6  . . C . A . A o
+   5  . . . p P . N p     5  . . . A o . o o
+   4  . p p P . P . .     4  . o o o . B . .
+   3  . . P . N . . .     3  . . D . o . . .
+   2  . P Q B . . P P     2  . D o o . . B B
+   1  R . . . . . K .     1  o . . . . . B .
+      a b c d e f g h        a b c d e f g h
+   A = pd5, pe6, pf7, pg6 (4 pieces, stored chunk: True)
+   B = Pf4, Kg1, Pg2, Ph2 (4 pieces, stored chunk: True)
+   C = rb8, nc6, qe7 (3 pieces, stored chunk: False)
+   D = Pb2, Pc3 (2 pieces, stored chunk: True)
+   seed 17: 5 multi-piece units; identical to a seed-13 unit: 1 of 4; units: a1:wR|c2:wQ|d2:wB|e3:wN; b2:wP|c3:wP|d4:wP; b8:bR|c6:bN|e7:bQ; e5:wP|f4:wP|g2:wP|h2:wP; e6:bP|f7:bP|g6:bP
+   seed 19: 6 multi-piece units; identical to a seed-13 unit: 2 of 4; units: a1:wR|c2:wQ|d2:wB|e3:wN; b2:wP|c3:wP|d4:wP|e5:wP; b8:bR|g7:bB|g8:bK; c6:bN|e7:bQ; d5:bP|e6:bP|f7:bP|g6:bP; f4:wP|g1:wK|g2:wP|h2:wP
+   seed 23: 5 multi-piece units; identical to a seed-13 unit: 2 of 4; units: a1:wR|c2:wQ|d2:wB|e3:wN; b2:wP|c3:wP|d4:wP|e5:wP; c6:bN|e7:bQ; d5:bP|e6:bP|f7:bP|g6:bP; f4:wP|g1:wK|g2:wP|h2:wP
+
+</pre></div></details>
+<details class="cs"><summary>All four seeds on board 6 (middle, 25 pieces)</summary><div class="case"><pre class="ex">
+   8  r . . . r . k .     8  D . . . o . C .
+   7  p p . . . p p .     7  D o . . . C C .
+   6  . . . p . . b p     6  . . . o . . o C
+   5  . . p P . P . .     5  . . o B . o . .
+   4  . . P b . . P q     4  . . B o . . o o
+   3  P . N . . . . P     3  B . A . . . . o
+   2  . P . Q . . . .     2  . B . A . . . .
+   1  R . . . . R . K     1  A . . . . A . o
+      a b c d e f g h        a b c d e f g h
+   A = Ra1, Nc3, Qd2, Rf1 (4 pieces, stored chunk: True)
+   B = Pa3, Pb2, Pc4, Pd5 (4 pieces, stored chunk: True)
+   C = pf7, pg7, kg8, ph6 (4 pieces, stored chunk: True)
+   D = pa7, ra8 (2 pieces, stored chunk: True)
+   seed 17: 3 multi-piece units; identical to a seed-13 unit: 0 of 4; units: a1:wR|a3:wP|b2:wP|c4:wP; a7:bP|a8:bR|b7:bP|e8:bR; c3:wN|d2:wQ|f1:wR|h1:wK
+   seed 19: 4 multi-piece units; identical to a seed-13 unit: 2 of 4; units: a1:wR|c3:wN|d2:wQ|f1:wR; a3:wP|b2:wP|c4:wP|d5:wP; a8:bR|e8:bR|g8:bK; f7:bP|g7:bP|h6:bP
+   seed 23: 5 multi-piece units; identical to a seed-13 unit: 2 of 4; units: a1:wR|c3:wN|d2:wQ|f1:wR; a3:wP|b2:wP|c4:wP|d5:wP; a7:bP|b7:bP|c5:bP|d6:bP; a8:bR|e8:bR|g8:bK; f7:bP|g7:bP|h6:bP
+
+</pre></div></details>
+<details class="cs"><summary>All four seeds on board 17 (middle, 26 pieces)</summary><div class="case"><pre class="ex">
+   8  r . . . . r k .     8  o . . . . o F .
+   7  . . q . . p p p     7  . . E . . C C o
+   6  p . . b p n . .     6  o . . E C F . .
+   5  . . . p . . . .     5  . . . C . . . .
+   4  . P p P P . . .     4  . D o B o . . .
+   3  P . . N . P . P     3  D . . o . B . o
+   2  . B . . Q . P .     2  . A . . A . B .
+   1  . . R . R . K .     1  . . A . A . B .
+      a b c d e f g h        a b c d e f g h
+   A = Bb2, Rc1, Re1, Qe2 (4 pieces, stored chunk: False)
+   B = Pd4, Pf3, Kg1, Pg2 (4 pieces, stored chunk: True)
+   C = pd5, pe6, pf7, pg7 (4 pieces, stored chunk: True)
+   D = Pa3, Pb4 (2 pieces, stored chunk: True)
+   E = qc7, bd6 (2 pieces, stored chunk: False)
+   F = nf6, kg8 (2 pieces, stored chunk: True)
+   seed 17: 4 multi-piece units; identical to a seed-13 unit: 0 of 6; units: a8:bR|f6:bN|f8:bR|g8:bK; d3:wN|e1:wR|e2:wQ|g1:wK; e4:wP|f3:wP|g2:wP|h3:wP; e6:bP|f7:bP|g7:bP|h7:bP
+   seed 19: 5 multi-piece units; identical to a seed-13 unit: 3 of 6; units: a3:wP|b4:wP; a8:bR|f6:bN|f8:bR|g8:bK; b2:wB|c1:wR|e1:wR|e2:wQ; d4:wP|g1:wK|g2:wP|h3:wP; d5:bP|e6:bP|f7:bP|g7:bP
+   seed 23: 5 multi-piece units; identical to a seed-13 unit: 3 of 6; units: a8:bR|f6:bN|f8:bR|g8:bK; b2:wB|c1:wR|e1:wR|e2:wQ; c7:bQ|d6:bB; d4:wP|g1:wK|g2:wP|h3:wP; d5:bP|e6:bP|f7:bP|g7:bP
+
+</pre></div></details>
+<details class="cs"><summary>All four seeds on board 9 (middle, 24 pieces)</summary><div class="case"><pre class="ex">
+   8  . . . r . r k .     8  . . . F . o C .
+   7  p p . . . . . p     7  E C . . . . . C
+   6  . . p q . . p .     6  . . E F . . C .
+   5  . . . p n . . .     5  . . . E F . . .
+   4  . . . . p . . .     4  . . . . o . . .
+   3  P . . . P . P .     3  B . . . B . D .
+   2  . P P . N P . P     2  . B B . A D . D
+   1  R . Q . . R K .     1  A . A . . A D .
+      a b c d e f g h        a b c d e f g h
+   A = Ra1, Qc1, Ne2, Rf1 (4 pieces, stored chunk: False)
+   B = Pa3, Pb2, Pc2, Pe3 (4 pieces, stored chunk: False)
+   C = pb7, pg6, kg8, ph7 (4 pieces, stored chunk: True)
+   D = Pf2, Kg1, Pg3, Ph2 (4 pieces, stored chunk: True)
+   E = pa7, pc6, pd5 (3 pieces, stored chunk: True)
+   F = qd6, rd8, ne5 (3 pieces, stored chunk: False)
+   seed 17: 5 multi-piece units; identical to a seed-13 unit: 0 of 6; units: a1:wR|a3:wP|b2:wP|c2:wP; c1:wQ|e2:wN|f1:wR|g1:wK; d6:bQ|e5:bN; e3:wP|f2:wP|g3:wP|h2:wP; f8:bR|g8:bK
+   seed 19: 6 multi-piece units; identical to a seed-13 unit: 3 of 6; units: a1:wR|c1:wQ|e2:wN|f1:wR; a3:wP|b2:wP|c2:wP|e3:wP; a7:bP|b7:bP|c6:bP|d5:bP; f2:wP|g1:wK|g3:wP|h2:wP; f8:bR|g8:bK; g6:bP|h7:bP
+   seed 23: 6 multi-piece units; identical to a seed-13 unit: 3 of 6; units: a1:wR|c1:wQ|e2:wN|f1:wR; a3:wP|b2:wP|c2:wP|e3:wP; a7:bP|b7:bP|c6:bP|d5:bP; d6:bQ|d8:bR|f8:bR|g8:bK; f2:wP|g1:wK|g3:wP|h2:wP; g6:bP|h7:bP
+
+</pre></div></details>
+<details class="cs"><summary>All four seeds on board 0 (middle, 26 pieces)</summary><div class="case"><pre class="ex">
+   8  r . . . . r k .     8  A . . . . A o .
+   7  . . . n . p . p     7  . . . A . C . C
+   6  . q p . p . p Q     6  . A o . C . C B
+   5  p . . . . . . n     5  o . . . . . . o
+   4  P p . P P . . .     4  o o . o o . . .
+   3  . P . N . P . .     3  . o . B . D . .
+   2  . . . . N . P P     2  . . . . o . D D
+   1  . . R . . R . K     1  . . B . . B . D
+      a b c d e f g h        a b c d e f g h
+   A = ra8, qb6, nd7, rf8 (4 pieces, stored chunk: False)
+   B = Rc1, Nd3, Rf1, Qh6 (4 pieces, stored chunk: False)
+   C = pe6, pf7, pg6, ph7 (4 pieces, stored chunk: True)
+   D = Pf3, Pg2, Kh1, Ph2 (4 pieces, stored chunk: True)
+   seed 17: 6 multi-piece units; identical to a seed-13 unit: 1 of 4; units: b6:bQ|d7:bN; c1:wR|h6:wQ; d3:wN|e2:wN|f1:wR|h1:wK; e4:wP|f3:wP|g2:wP|h2:wP; e6:bP|f7:bP|g6:bP|h7:bP; f8:bR|g8:bK
+   seed 19: 4 multi-piece units; identical to a seed-13 unit: 1 of 4; units: a8:bR|f8:bR|g8:bK; c1:wR|e2:wN|f1:wR|h6:wQ; e6:bP|f7:bP|g6:bP|h7:bP; g2:wP|h1:wK|h2:wP
+   seed 23: 4 multi-piece units; identical to a seed-13 unit: 2 of 4; units: a8:bR|d7:bN|f8:bR|g8:bK; c1:wR|e2:wN|f1:wR|h6:wQ; e6:bP|f7:bP|g6:bP|h7:bP; f3:wP|g2:wP|h1:wK|h2:wP
+
+</pre></div></details>
+  <h3>What round 213 says about chess chunks</h3>
+  <ul>
+    <li>The chunks that fall out are pawn structures, castled kings with pawn shields, corner rooks with their pawns, and groups of back-rank pieces. Most have four pieces and sit on their usual squares; the diagonal pawn pair is the one shape that moves (16 origin squares).</li>
+    <li>Across seeds the inventory agrees at Jaccard .31 (top 50) and .24 (top 200) at 4,000 positions, against .004 and .016 for random chunks; shape matching adds about .03; the overlap grows with the stream (.20 to .31 over 500 to 4,000 positions for top 50), and the final top chunks have mostly appeared by 1,000 positions.</li>
+    <li>The 2-piece frequency baseline agrees across seeds at .90 (top 50) and .95 (top 200), so TRELLIS's inventory is less consistent than the plain frequency of simple relations, and no matched baseline for 3 to 4-piece chunks exists.</li>
+    <li>Decompositions agree at a unit-set Jaccard of .21 and a covered-squares Jaccard of .51 (random cover .33): the same pawn structures and castles are found on the same boards by most seeds, while the grouping of piece groups and the choice between a pair and a larger chain vary. Seed 17 deviates most.</li>
+    <li>Limits: 4,000 positions learned, not the 27,459 of cs73L; four seeds; the class names come from the rule set and not from the memory; the 30 boards are the first 20 middle-game and 10 end-game positions of the pools, not random draws.</li>
+  </ul>
   <h2>Chase and Simon (1973), figure for figure (earlier protocol)</h2>
   <div class="col">
     <p>Each of the paper's experiments is rerun on a TRELLIS player (flat chunks, interaction joins, absolute squares). The paper's own numbers are on the left of each figure, TRELLIS's on the right, both seeds averaged (s13, s17).</p>
