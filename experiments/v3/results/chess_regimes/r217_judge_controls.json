@@ -1,0 +1,31 @@
+{
+ "n": 300,
+ "poor_threshold": 2,
+ "controls": {
+  "real": {
+   "R-sem": 0.983,
+   "R-legal": 0.017,
+   "R-illegal": 0.0
+  },
+  "random legal": {
+   "R-sem": 0.697,
+   "R-legal": 0.303,
+   "R-illegal": 0.0
+  },
+  "worst legal": {
+   "R-sem": 0.033,
+   "R-legal": 0.967,
+   "R-illegal": 0.0
+  },
+  "wrong square": {
+   "R-sem": 0.0,
+   "R-legal": 0.0,
+   "R-illegal": 1.0
+  },
+  "random pair": {
+   "R-sem": 0.0,
+   "R-legal": 0.0,
+   "R-illegal": 1.0
+  }
+ }
+}
