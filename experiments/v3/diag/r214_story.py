@@ -38,6 +38,8 @@ def _r214_start(L, arm):
     L.emit_bits = None if we in (None, "leaf", "inf") else float(we)
     L.emit_freq_cut = int(arm.get("wemitk", 0))
     L.emit_uniform = bool(arm.get("wemitu", False))
+    wg = arm.get("wgate")
+    L.gate_bits = None if wg in (None, "word") else float(wg)
     if L.emit_names is not None:
         print(json.dumps({"r214 emit": we, "classes": len(set(L.emit_names.values()))}), flush=True)
     if L.read_bits is not None or L.read_reach is not None or L.parse_bits is not None:
@@ -49,6 +51,7 @@ def _r214_end(L):
     L.emit_bits = None
     L.emit_freq_cut = 0
     L.emit_uniform = False
+    L.gate_bits = None
 
 
 def _r214_levels(L, train, EXP, seed, n):
@@ -58,6 +61,7 @@ def _r214_levels(L, train, EXP, seed, n):
     L.emit_bits = None
     L.emit_freq_cut = 0
     L.emit_uniform = False
+    L.gate_bits = None
     owner = {}
     for sid, (toks, a0, a1) in enumerate(EXP):
         for i in range(a0, a1):
@@ -154,6 +158,8 @@ def patch(src):
               '        _r214_start(L, arm)\n        if edge_ == "exact":\n            from trellis2.trellis3_r204 import Trellis3R204\n')
     src = sub('    if causal is not None and edge_ == "exact":     # r204: later arms',
               '    if causal is not None:\n        _r214_end(L)\n    if causal is not None and edge_ == "exact":     # r204: later arms')
+    src = sub('        def _ok(l1, w):\n            if not pair_ or l1 == T3BOS or (l1, w) in _st_:\n',
+              '        def _ok(l1, w):\n            if pair_ and l1 != T3BOS and L.gate_bits is not None:     # r214h: class-level pair gate\n                return L.class_pair_ok(l1, w)\n            if not pair_ or l1 == T3BOS or (l1, w) in _st_:\n')
     src = sub('if os.environ.get("STORY_R204_REPLAY"):',
               'if os.environ.get("R214_WORDMAP"):\n    _r214_wordmap(L, train, seed, n)\n    sys.exit()\n'
               'if os.environ.get("R214_LEVELS"):\n    _r214_levels(L, train, EXP, seed, n)\n    sys.exit()\n'

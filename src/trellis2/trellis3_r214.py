@@ -46,6 +46,7 @@ class Trellis3R214(Trellis3R208):
     word_names = None
     emit_names = None                 # word -> class name; with emit_counts: class emission (see _emit)
     emit_counts = None                # word -> training-stream count
+    gate_bits = None                  # None = the word-level pair gate (unchanged); b = class-pair gate at b bits (class_pair_ok)
     emit_uniform = False              # P(w | C) uniform over the class instead of count-weighted
     emit_freq_cut = 0                 # K: the K most frequent word types are emitted at leaf identity (not classed)
     word_tree = None                  # a WordTree (the class source of emit_bits)
@@ -152,6 +153,25 @@ class Trellis3R214(Trellis3R208):
             return q
         win = {a: v for a, v in q.items() if a[0] == "l" and a[1:].isdigit()}
         return {**q, **self._named_window(win)} if win else q
+
+    def class_of_word(self, w: str, b) -> object:
+        """The class of word w at b bits in the emission tree; the emit_freq_cut most frequent types are singleton classes."""
+        if self.emit_freq_cut and w in self._top_words():
+            return ("#", w)
+        names = self.__dict__.setdefault("_r214_gate_names", {})
+        if b not in names:
+            names[b] = self.word_tree.names(b=float(b))
+        return names[b].get(w, w)
+
+    def class_pair_ok(self, l1: str, w: str) -> bool:
+        """The class-level pair gate: (l1, w) is allowed when some stored adjacent word pair (a, b) has the classes of (l1, w) at
+        gate_bits. gate_bits None = not used (the word-level gate of the driver)."""
+        b = self.gate_bits
+        key = (b, self.emit_freq_cut, len(self._pair_counts))
+        c = self.__dict__.get("_r214_cpairs")
+        if c is None or c[0] != key:
+            c = self.__dict__["_r214_cpairs"] = (key, {(self.class_of_word(a, b), self.class_of_word(x, b)) for a, x in self._pair_counts})
+        return (self.class_of_word(l1, b), self.class_of_word(w, b)) in c[1]
 
     def _top_words(self) -> frozenset:
         """The emit_freq_cut most frequent word types of the training stream (ties by word), cached per (K, counts)."""

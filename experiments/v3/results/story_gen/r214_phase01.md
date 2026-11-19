@@ -1438,3 +1438,232 @@ all tree). func:50 at 7 bits passes the earlier purity gate on both seeds (.825 
 **Verdict: NO-GO.** Restricting the word-tree features to frequent neighbours changes the classes little at this scale (239 types, 5306 tokens: the top-50 neighbours cover .64 of tokens, and the content words' neighbour
 distributions over them are already what the all-feature tree sees), and the emitted sentences stay at R-syn .20-.26. The three-regime single dial is not realised: R-non (b = 0, gate off) and R-sem (leaf, tau .7) are, the
 middle regime is not.
+
+# Addendum 7 (r214h, r214i): oracle reachability, class-level pair gate, and n = 4000
+
+Hypotheses from the coordinator: the word-level pair gate re-imposes lexical co-occurrence after the class draw (gate on gives meaning back, gate off loses syntax), so put the gate at the emission's level; and
+test whether R-syn is reachable at all. Everything here is seed 13 and 17, token input, edge exact, judged by r214_judge2 as before. Part 2 (class gate, n=1000) was launched before the oracle result came back
+(the arms are cheap); the stop rule "oracle R-syn < .5: stop and report, rerun the oracle at n=4000" was then followed, and the user's later instruction (also run n=4000 and seed 17 for the best cell) is r214i.
+
+## 1. Oracle reachability (no model change; `r214_oracle.py`)
+Input: the R-sem sentences (syn_pass and sem_pass) of the gated token leaf at tau 0.7 (n=1000: 468 of 743 distinct new, seed 13, W' 7; n=4000: 697 of 1100 (seed 13) and the seed-17 equivalent, W' 5). Post hoc, with no context, every word outside the K=50
+most frequent training types is replaced by a uniformly random other member of its class (class = word-tree class at b, members = non-top-K types of that class; all-feature tree and func:100 tree, b = 4 and 6; 3 draws per sentence);
+`nocls` = a uniformly random other non-top-K type (the R-non end); `pos` (diagnostic only, never in the model) = a random other non-top-K type with the same majority spaCy UPOS (type level, over the training stream).
+
+| source / variant | sentences | changed words per sentence | R-sem | R-syn | R-non |
+|---|---|---|---|---|---|
+|n=1000, seed 13  all-b4 | 1404 | 1.78 | 0.251 | 0.160 | 0.590 |
+|n=1000, seed 13  all-b6 | 1404 | 1.70 | 0.381 | 0.208 | 0.411 |
+|n=1000, seed 13  func100-b4 | 1404 | 1.78 | 0.251 | 0.153 | 0.595 |
+|n=1000, seed 13  func100-b6 | 1404 | 1.71 | 0.348 | 0.165 | 0.487 |
+|n=1000, seed 13  nocls | 1404 | 1.78 | 0.167 | 0.078 | 0.755 |
+|n=1000, seed 13  pos | 1404 | 1.72 | 0.310 | 0.199 | 0.491 |
+|n=4000, seed 13  all-b4 | 2091 | 1.94 | 0.195 | 0.149 | 0.656 |
+|n=4000, seed 13  all-b6 | 2091 | 1.86 | 0.316 | 0.165 | 0.519 |
+|n=4000, seed 13  func100-b4 | 2091 | 1.94 | 0.215 | 0.130 | 0.656 |
+|n=4000, seed 13  func100-b6 | 2091 | 1.92 | 0.307 | 0.181 | 0.513 |
+|n=4000, seed 13  nocls | 2091 | 1.94 | 0.122 | 0.099 | 0.779 |
+|n=4000, seed 13  pos | 2091 | 1.89 | 0.254 | 0.211 | 0.534 |
+|n=4000, seed 17  all-b4 | 2037 | 2.04 | 0.151 | 0.127 | 0.723 |
+|n=4000, seed 17  all-b6 | 2037 | 1.97 | 0.288 | 0.203 | 0.509 |
+|n=4000, seed 17  func100-b4 | 2037 | 2.04 | 0.195 | 0.169 | 0.635 |
+|n=4000, seed 17  func100-b6 | 2037 | 2.03 | 0.251 | 0.203 | 0.546 |
+|n=4000, seed 17  nocls | 2037 | 2.04 | 0.113 | 0.086 | 0.801 |
+|n=4000, seed 17  pos | 2037 | 1.99 | 0.242 | 0.217 | 0.541 |
+
+Reading: the oracle's input has R-syn = 0 and R-sem = 1 by construction. After random class swaps of about 1.7-2.0 words per sentence the share that stays grammatical-and-meaningful is .11-.38, grammatical-but-meaningless (R-syn) at most
+**.208 (n=1000) / .181 (n=4000, seed 13) / .203 (n=4000, seed 17)** for the word-tree classes and **.199 / .211 / .217 for the POS-class oracle**; a class-free swap gives .08-.10. The POS oracle is the upper end of what a syntactic class
+can do: swapping same-POS words still loses syntax in about half the sentences (R-non .49-.54), because majority UPOS misses subcategorisation and agreement (verb frames, was/were, a/an, plural nouns, particles) that the judge enforces.
+Under this judge, with 239 word types, R-syn >= .5 is **not reachable by swapping words within syntactic classes**; the n=4000 corpus (the same 250-word vocabulary, 4x the tokens per type) leaves the ceiling at .18-.22. The oracle is below the generated R-syn of the
+best class-emission cells (.255-.265), so the generators already sit at the oracle's level. The bottleneck is therefore neither the generator's classes nor the corpus size: it is how much of the judge's "syntax pass" survives meaning-blind
+word substitution at this vocabulary (substituting meaning-bearing words breaks fine-grained agreement and selection, which the judge treats as ungrammatical, not as a semantic anomaly).
+
+Oracle samples (5 per variant): `r214p01/oracle_pos/report.md`, `oracle4000_pos/report.md`, `oracle4000_s17/report.md`.
+
+## 2. Class-level pair gate (`wgate b`, `Trellis3R214.gate_bits`, `class_pair_ok`)
+The gate allows (prev, w) when some stored adjacent word pair has the classes (C_b(prev), C_b(w)) in the emission's word tree (top-K words singleton classes, as in emission; start-of-sentence pairs are not gated, as in the word gate).
+Default (`gate_bits` None) is the word gate, byte-identical. Test 12: one class per word reduces to the stored-pair test; one class admits every pair; a two-class and a frequency-cut map reproduce the class-pair set; full `tests/trellis2` 149 passed.
+Driver `r214_p1h.sh` (n=1000), `r214_p1i.sh` (n=4000). The patch is an in-memory anchor on `t3_story.py`'s `_ok`; `t3_story.py` is unedited.
+
+### n = 1000, seed 13 (func:100 tree, K=50, emission b = gate b, tau 1, W' 7; all-feature tree at b=6)
+
+| group | arm | seed | distinct new | dist/draw | R-sem | R-syn | R-non | (non with sem_pass) | tri\|d | tri\|d in sem / syn / non | fair sem / syn / non | repeats (cut) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| h-all | W'=7 emit=6 K=50 t=1 gate | 13 | 1393 | 0.871 | 0.202 | 0.183 | 0.615 | 0.001 | 0.952 | 0.808 / 0.957 / 0.998 | 0.142 / 0.152 / 0.534 | 207 (0) |
+| h-func100 | W'=7 emit=7 K=50 t=1 gate | 13 | 1218 | 0.761 | 0.331 | 0.255 | 0.415 | 0.001 | 0.906 | 0.774 / 0.942 / 0.990 | 0.195 / 0.182 / 0.312 | 382 (1) |
+| h-func100 | W'=7 emit=6 K=50 t=1 gate | 13 | 1386 | 0.866 | 0.197 | 0.208 | 0.595 | 0.004 | 0.955 | 0.832 / 0.944 / 0.999 | 0.142 / 0.170 / 0.515 | 214 (1) |
+| h-func100 | W'=7 emit=5 K=50 t=1 gate | 13 | 1483 | 0.927 | 0.156 | 0.168 | 0.676 | 0.003 | 0.963 | 0.810 / 0.960 / 0.999 | 0.117 / 0.149 / 0.626 | 117 (1) |
+| h-func100 | W'=7 emit=4 K=50 t=1 gate | 13 | 1530 | 0.956 | 0.107 | 0.140 | 0.753 | 0.002 | 0.984 | 0.878 / 0.981 / 0.999 | 0.090 / 0.131 / 0.719 | 70 (0) |
+| h-func100 | W'=7 emit=0 K=50 t=1 gate | 13 | 1586 | 0.991 | 0.034 | 0.095 | 0.871 | 0.000 | 0.995 | 0.889 / 0.987 / 1.000 | 0.030 / 0.092 / 0.864 | 14 (0) |
+
+
+### Samples (5 per arm)
+
+**h-all / W'=7 emit=6 K=50 t=1 gate**
+- they had an around  (syn_p 0.00, sem_p 0.00, non)
+- she is surprised  (syn_p 1.00, sem_p 0.99, sem)
+- the ball wanted to help the back small  (syn_p 0.00, sem_p 0.00, non)
+- mom small i have the ball  (syn_p 0.00, sem_p 0.00, non)
+- we liked it too  (syn_p 1.00, sem_p 0.98, sem)
+
+**h-func100 / W'=7 emit=7 K=50 t=1 gate**
+- tim's home was in a box  (syn_p 1.00, sem_p 0.99, sem)
+- they had a special too  (syn_p 0.00, sem_p 0.03, non)
+- lily had a big more  (syn_p 0.00, sem_p 0.00, non)
+- the tree was very big and excited  (syn_p 1.00, sem_p 0.98, sem)
+- but then something would happened  (syn_p 0.00, sem_p 0.00, non)
+
+**h-func100 / W'=7 emit=6 K=50 t=1 gate**
+- lily want to many friends  (syn_p 0.00, sem_p 0.00, non)
+- just then his friend smiled came  (syn_p 0.00, sem_p 0.00, non)
+- lily liked to find idea  (syn_p 0.02, sem_p 0.00, syn)
+- he had both your ball together  (syn_p 0.00, sem_p 0.00, non)
+- i have to play too  (syn_p 0.99, sem_p 1.00, sem)
+
+**h-func100 / W'=7 emit=5 K=50 t=1 gate**
+- lily started to many and know your them  (syn_p 0.00, sem_p 0.00, non)
+- tim what is in the big box  (syn_p 0.00, sem_p 0.04, non)
+- they knew he had am a near toy  (syn_p 0.00, sem_p 0.00, non)
+- they said they want pretty mom and surprised  (syn_p 0.00, sem_p 0.00, non)
+- tom and that are surprised  (syn_p 0.00, sem_p 0.00, non)
+
+**h-func100 / W'=7 emit=4 K=50 t=1 gate**
+- but then something down happened  (syn_p 0.03, sem_p 0.00, syn)
+- it was a very best says  (syn_p 0.00, sem_p 0.00, non)
+- they said thank you big cat  (syn_p 0.01, sem_p 0.08, non)
+- they loved playing know sam special car  (syn_p 0.00, sem_p 0.00, non)
+- tom looked and laughed  (syn_p 0.05, sem_p 1.00, sem)
+
+**h-func100 / W'=7 emit=0 K=50 t=1 gate**
+- but then something made happened  (syn_p 0.00, sem_p 0.00, non)
+- yes friend that smiled you  (syn_p 0.00, sem_p 0.00, non)
+- he played with the red all day red  (syn_p 0.04, sem_p 0.00, syn)
+- this go and tried together  (syn_p 0.00, sem_p 0.00, non)
+- no go no big  (syn_p 0.00, sem_p 0.00, non)
+
+### n = 4000 (window 5, W' 5, tau 1 unless noted): gated token leaf and the class-gate dial, seeds 13 and 17
+
+| group | arm | seed | distinct new | dist/draw | R-sem | R-syn | R-non | (non with sem_pass) | tri\|d | tri\|d in sem / syn / non | fair sem / syn / non | repeats (cut) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| o4000 | W'=5 emit=leaf t=0.7 gate | 13 | 1100 | 0.688 | 0.634 | 0.176 | 0.190 | 0.007 | 0.520 | 0.363 / 0.665 / 0.909 | 0.158 / 0.081 / 0.119 | 458 (25) |
+| i13 | W'=5 emit=leaf t=1 gate | 13 | 1392 | 0.870 | 0.580 | 0.193 | 0.228 | 0.006 | 0.602 | 0.425 / 0.735 / 0.940 | 0.214 / 0.123 / 0.186 | 208 (9) |
+| i13 | W'=5 emit=7 K=50 t=1 gate | 13 | 1466 | 0.916 | 0.293 | 0.211 | 0.497 | 0.002 | 0.883 | 0.669 / 0.909 / 0.997 | 0.179 / 0.176 / 0.454 | 134 (3) |
+| i13 | W'=5 emit=6 K=50 t=1 gate | 13 | 1525 | 0.953 | 0.180 | 0.161 | 0.658 | 0.001 | 0.925 | 0.647 / 0.943 / 0.996 | 0.111 / 0.145 / 0.625 | 75 (1) |
+| i13 | W'=5 emit=4 K=50 t=1 gate | 13 | 1568 | 0.980 | 0.087 | 0.116 | 0.797 | 0.001 | 0.966 | 0.684 / 0.956 / 0.998 | 0.058 / 0.109 / 0.780 | 32 (1) |
+| i13 | W'=5 emit=0 K=50 t=1 gate | 13 | 1589 | 0.993 | 0.029 | 0.082 | 0.889 | 0.001 | 0.988 | 0.630 / 0.985 / 1.000 | 0.018 / 0.080 / 0.883 | 11 (0) |
+| i17 | W'=5 emit=leaf t=0.7 gate | 17 | 1094 | 0.684 | 0.621 | 0.182 | 0.197 | 0.007 | 0.547 | 0.374 / 0.698 / 0.949 | 0.159 / 0.087 / 0.128 | 392 (22) |
+| i17 | W'=5 emit=leaf t=1 gate | 17 | 1358 | 0.849 | 0.541 | 0.218 | 0.241 | 0.008 | 0.642 | 0.473 / 0.723 / 0.948 | 0.217 / 0.134 / 0.194 | 186 (10) |
+| i17 | W'=5 emit=7 K=50 t=1 gate | 17 | 1384 | 0.865 | 0.323 | 0.265 | 0.412 | 0.004 | 0.882 | 0.696 / 0.932 / 0.996 | 0.194 / 0.214 / 0.355 | 160 (10) |
+| i17 | W'=5 emit=6 K=50 t=1 gate | 17 | 1454 | 0.909 | 0.201 | 0.225 | 0.574 | 0.003 | 0.925 | 0.695 / 0.951 / 0.995 | 0.127 / 0.194 / 0.519 | 90 (6) |
+| i17 | W'=5 emit=4 K=50 t=1 gate | 17 | 1512 | 0.945 | 0.116 | 0.157 | 0.727 | 0.001 | 0.963 | 0.754 / 0.958 / 0.997 | 0.083 / 0.142 / 0.685 | 32 (0) |
+| i17 | W'=5 emit=0 K=50 t=1 gate | 17 | 1536 | 0.960 | 0.033 | 0.083 | 0.885 | 0.001 | 0.986 | 0.700 / 0.969 / 0.998 | 0.022 / 0.077 / 0.848 | 8 (0) |
+
+
+### Samples (5 per arm), n = 4000
+
+**i13 / W'=5 emit=leaf t=1 gate**
+- they learned to them  (syn_p 0.00, sem_p 0.00, non)
+- she loved to give it back soon  (syn_p 1.00, sem_p 0.04, syn)
+- sue and tim were so happy  (syn_p 1.00, sem_p 1.00, sem)
+- once there was a little dog named anna  (syn_p 1.00, sem_p 1.00, sem)
+- tom loved to play and run all day  (syn_p 1.00, sem_p 1.00, sem)
+
+**i13 / W'=5 emit=7 K=50 t=1 gate**
+- they had so every fun at the park  (syn_p 0.00, sem_p 0.10, non)
+- sue was pretty and scared  (syn_p 0.99, sem_p 0.98, sem)
+- inside and saw her toy bear ben  (syn_p 0.00, sem_p 0.00, non)
+- she went and said can i play too  (syn_p 0.07, sem_p 0.87, syn)
+- ben ran to tom  (syn_p 1.00, sem_p 1.00, sem)
+
+**i13 / W'=5 emit=6 K=50 t=1 gate**
+- it was so big and proud  (syn_p 0.93, sem_p 1.00, sem)
+- i picked it laughed and felt at it  (syn_p 0.00, sem_p 0.00, non)
+- it was a outside and said lily  (syn_p 0.00, sem_p 0.00, non)
+- do you want to play with back  (syn_p 0.00, sem_p 0.00, non)
+- tom and bob wanted to play together  (syn_p 1.00, sem_p 1.00, sem)
+
+**i13 / W'=5 emit=4 K=50 t=1 gate**
+- he went to lot go idea  (syn_p 0.00, sem_p 0.00, non)
+- lily and sam were friends  (syn_p 1.00, sem_p 1.00, sem)
+- tim and sue ran very happy friends  (syn_p 0.00, sem_p 0.00, non)
+- they felt again and boy to her  (syn_p 0.00, sem_p 0.00, non)
+- they played all day and looked little it  (syn_p 0.00, sem_p 0.00, non)
+
+**i13 / W'=5 emit=0 K=50 t=1 gate**
+- this had the this day be  (syn_p 0.00, sem_p 0.00, non)
+- but sorry we lived happened  (syn_p 0.00, sem_p 0.00, non)
+- what is thanked see that  (syn_p 0.00, sem_p 0.00, non)
+- i cake take happened  (syn_p 0.00, sem_p 0.00, non)
+- they me friends  (syn_p 0.00, sem_p 0.00, non)
+
+**i17 / W'=5 emit=leaf t=0.7 gate**
+- he found a little dog with a ball  (syn_p 1.00, sem_p 1.00, sem)
+- it was a small red car  (syn_p 1.00, sem_p 1.00, sem)
+- the cat said the dog were surprised  (syn_p 0.00, sem_p 0.00, non)
+- the little boy was very excited  (syn_p 1.00, sem_p 1.00, sem)
+- now i can play together  (syn_p 0.00, sem_p 0.96, non)
+
+**i17 / W'=5 emit=leaf t=1 gate**
+- ben is not nice  (syn_p 0.98, sem_p 0.99, sem)
+- the dog looked nice home and was sad  (syn_p 0.03, sem_p 0.05, syn)
+- they had played together  (syn_p 0.99, sem_p 0.77, syn)
+- the man and tim became best friends  (syn_p 1.00, sem_p 1.00, sem)
+- and i am sorry too  (syn_p 0.01, sem_p 0.17, syn)
+
+**i17 / W'=5 emit=7 K=50 t=1 gate**
+- tom red she had a big idea  (syn_p 0.00, sem_p 0.00, non)
+- do you like to play with me  (syn_p 0.68, sem_p 0.90, syn)
+- they feel proud for heard cake  (syn_p 0.00, sem_p 0.00, non)
+- it looked in the park  (syn_p 0.99, sem_p 0.99, sem)
+- sue was very safe  (syn_p 1.00, sem_p 0.99, sem)
+
+**i17 / W'=5 emit=6 K=50 t=1 gate**
+- tim wanted to be friends with the dog  (syn_p 1.00, sem_p 1.00, sem)
+- the car look fast and surprised  (syn_p 0.00, sem_p 0.09, non)
+- anna said ben were very happy and excited  (syn_p 0.00, sem_p 0.04, non)
+- anna was happy their he had no friends  (syn_p 0.00, sem_p 0.00, non)
+- he picked no back girl to max  (syn_p 0.00, sem_p 0.00, non)
+
+**i17 / W'=5 emit=4 K=50 t=1 gate**
+- they played together in the water all day  (syn_p 1.00, sem_p 1.00, sem)
+- tim and amy for excited  (syn_p 0.00, sem_p 0.00, non)
+- they upon not scared smiled girl the cake  (syn_p 0.00, sem_p 0.00, non)
+- tim was so happy with her what  (syn_p 0.00, sem_p 0.00, non)
+- the best loved it toy  (syn_p 0.00, sem_p 0.00, non)
+
+**i17 / W'=5 emit=0 K=50 t=1 gate**
+- sam gave happy to help  (syn_p 0.00, sem_p 0.00, non)
+- i playing dog saw a boy  (syn_p 0.00, sem_p 0.01, non)
+- they smiled know get we came that  (syn_p 0.00, sem_p 0.00, non)
+- tom saw we excited girl a many like  (syn_p 0.00, sem_p 0.00, non)
+- little and tom were scared  (syn_p 0.02, sem_p 0.45, syn)
+
+### The one-dial story, everything at the same b (emission and gate; word gate at the leaf; K=50)
+
+| setting | n=1000 s13 R-sem / R-syn / R-non | n=4000 s13 | n=4000 s17 |
+|---|---|---|---|
+| leaf (word gate, tau 1) | .558 / .206 / .235 | .580 / .193 / .228 | .541 / .218 / .241 |
+| leaf (word gate, tau 0.7) | .630 / .170 / .201 (W' 7) | .634 / .176 / .190 | .621 / .182 / .197 |
+| b = 7 (func:100, class gate) | .331 / .255 / .415 | .293 / .211 / .497 | .323 / .265 / .412 |
+| b = 6 | .197 / .208 / .595 | .180 / .161 / .658 | .201 / .225 / .574 |
+| b = 4 | .107 / .140 / .753 | .087 / .116 / .797 | .116 / .157 / .727 |
+| b = 0 (root) | .034 / .095 / .871 | .029 / .082 / .889 | .033 / .083 / .885 |
+
+The class gate does not recover syntax: compared with the word gate on the same tree (func:100, K=50, Addendum 6: b=4-7 at n=1000: R-sem .41-.53, R-non .25-.33), the class gate lowers R-sem (b=6: .197 against .447) and raises R-non (.595 against .302), with R-syn about the same (.208 against .250).
+So the word gate's contribution is to the syntax-and-meaning pass (R-sem), not to a separate lexical-meaning layer: gate off or class level makes the sentences fail the syntax judge as well, as the coordinator's hypothesis said, but a class-level gate is too permissive to bring it back.
+From leaf to root the output moves monotonically R-sem -> R-non with R-syn at .08-.27 throughout, with no interior peak; the same at n=4000 on both seeds.
+
+## Effect of vocabulary / corpus size (n = 1000 to 4000, same 250-word vocabulary)
+- Oracle R-syn ceiling: .208 -> .181 (word-tree classes, seed 13), POS oracle .199 -> .211 (13), .217 (17): no gain from 4x the data.
+- Dial: the same shape at both sizes; R-syn at b=7 is .255 (n=1000, seed 13), .211 (n=4000, seed 13), .265 (n=4000, seed 17), within seed noise of each other; the gated leaf at tau .7 is .630 / .634 / .621 R-sem, the leaf tau 1 .558 / .580 / .541; R-sem at the leaf holds its level with tri|d among R-sem .425 (n=4000) against .639 (n=1000) — more training text means more of the generated sentences are stored trigrams (tri|d .60 against .77), the usual copying trade.
+- Class purity at 4x the data: not re-tabulated beyond the oracle's class swaps; word-tree files `wordtree_{all,func100}_s{13,17}_n4000.json`.
+
+## Go rule and verdict (r214h / r214i)
+- R-syn >= .5 (or the oracle >= .5): **not met anywhere**; the maximum over every arm, oracle variant, seed and size is .265 (generated) / .217 (oracle). The three conditions R-sem >= .6 (gated leaf, tau .7: .630 / .634 / .621) and R-non >= .6 (b <= 6 and root arms: .60-.89) are met; the middle regime is not.
+- Replication rule (R-syn >= .4 replicate on seed 17): not triggered; seed 17 at n=4000 was run for the best cell by the coordinator's instruction and agrees (R-syn .265 at b=7, oracle .203-.217).
+- Temperature does not reproduce R-syn: the leaf at tau .7 / 1 gives .17-.22.
+
+**Verdict: R-syn is unreachable here.** With the 250-word story vocabulary and a judge that treats agreement and selection errors as syntax failures, a meaning-blind word substitution that keeps the sentence grammatical happens in about .2 of
+sentences under every class source (word-tree classes at b = 4-6, function-feature trees, same-POS classes), at n=1000 and n=4000, on two seeds. This bounds any class-emission or class-gate generator at about .2 on this setup, and the generated cells (.21-.27) sit at that bound.
+For the paper: the dials produce R-sem (leaf, tau .7) and R-non (coarse classes, root), but no regime of syntax without meaning; the oracle shows the limit is the substitution itself (and the judge's strictness about agreement/selection), not the generator, the word classes, or the amount of training text.
+Caveats: the oracle replaces words independently and without agreement repair; a repair-aware oracle (agreement-matching, frame-matching swaps) would be a different test; the judge is the two-model ensemble with the thresholds of `r214_judge2.md`; class POS in the oracle is the type-level majority.

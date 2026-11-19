@@ -376,3 +376,50 @@ def test_11_function_word_feature_tree():
     L.emit_bits = 0
     out = {v[1]: m for v, m in L._gap_fills(QS[2]).items() if v[0] == "w"}
     assert max(out.values()) == pytest.approx(min(out.values()), rel=1e-9)
+
+
+def test_12_class_pair_gate():
+    from collections import Counter
+    sents = [s.split() for s in SENTS]
+    L = build(Trellis3R214)
+    assert L.gate_bits is None                                 # word level: the driver's own gate, nothing changed
+    L.type_licence(near=None)
+    pairs = set(L._pair_counts)
+    assert pairs
+    cnt = dict(Counter(w for s in sents for w in s))
+    vocab = sorted(cnt)
+
+    class Stub:
+        def __init__(self, f):
+            self.f = f
+
+        def names(self, b=None, depth=None):
+            return {w: self.f(w, b) for w in vocab}
+    L.emit_counts = cnt
+    L.word_tree = Stub(lambda w, b: w)                          # one class per word: the gate is the stored-pair test
+    L.gate_bits = 5.0
+    for a in vocab:
+        for w in vocab:
+            assert L.class_pair_ok(a, w) == ((a, w) in pairs)
+    L.__dict__.pop("_r214_gate_names", None)
+    L.__dict__.pop("_r214_cpairs", None)
+    L.word_tree = Stub(lambda w, b: "root")                     # one class: every pair is observed
+    assert all(L.class_pair_ok(a, w) for a in vocab for w in vocab)
+    L.__dict__.pop("_r214_gate_names", None)
+    L.__dict__.pop("_r214_cpairs", None)
+    half = {w: ("A" if i % 2 == 0 else "B") for i, w in enumerate(vocab)}
+    L.word_tree = Stub(lambda w, b: half[w])                    # two classes: allowed iff some stored pair has these classes
+    cp = {(half[a], half[b]) for a, b in pairs}
+    for a in vocab:
+        for w in vocab:
+            assert L.class_pair_ok(a, w) == ((half[a], half[w]) in cp)
+    L.__dict__.pop("_r214_gate_names", None)
+    L.__dict__.pop("_r214_cpairs", None)
+    L.emit_freq_cut = 3                                         # the 3 most frequent types are singleton classes, as in emission
+    top = L._top_words()
+    assert len(top) == 3
+    cp2 = {(("#", a) if a in top else half[a], ("#", b) if b in top else half[b]) for a, b in pairs}
+    for a in vocab:
+        for w in vocab:
+            ca, cw = (("#", a) if a in top else half[a]), (("#", w) if w in top else half[w])
+            assert L.class_pair_ok(a, w) == ((ca, cw) in cp2)
