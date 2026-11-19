@@ -26,6 +26,8 @@ def main(wt, scores, out_md, specs):
     wpos = {w: c.most_common(1)[0][0] for w, c in pos.items()}
     wcnt = {w: sum(c.values()) for w, c in pos.items()}
     stored = {" ".join(s) for s in D["sentences"]}
+    tokc = Counter(w for s in D["sentences"] for w in s)
+    ranked = [w for w, _ in sorted(tokc.items(), key=lambda kv: (-kv[1], kv[0]))]
     rows = [l.rstrip("\n").split("\t") for l in open(scores, encoding="utf-8")]
     ix = {k: i for i, k in enumerate(rows[0])}
     syn = {r[0]: int(r[ix["syn_pass"]]) for r in rows[1:]}
@@ -49,12 +51,14 @@ def main(wt, scores, out_md, specs):
             if key not in D["names"]:
                 continue
             nm, cm = D["names"][key], cmaj[key]
+            K = int(arm.get("wemitk", 0))
+            top = set(ranked[:K])
             S = {l["gen"] for l in lines[1:]} - stored
             st = {"fail": [0, 0, 0], "pass": [0, 0, 0]}
             pairs = Counter()
             for s in S:
                 k = "pass" if syn[s] else "fail"
-                imp = [(wpos.get(w), cm[nm[w]]) for w in s.split() if w in nm and wpos.get(w) != cm[nm[w]]]
+                imp = [(wpos.get(w), cm[nm[w]]) for w in s.split() if w in nm and w not in top and wpos.get(w) != cm[nm[w]]]
                 st[k][0] += 1
                 st[k][1] += bool(imp)
                 st[k][2] += len(imp)
@@ -62,8 +66,12 @@ def main(wt, scores, out_md, specs):
                     pairs.update("%s<-%s" % p for p in imp)
             g = lambda k, i: (st[k][i] / st[k][0]) if st[k][0] else float("nan")
             L.append("| %s %s%s | %s | %d | %d | %d | %.3f | %.3f | %.2f / %.2f | %s |" % (
-                lab, "gate " if arm.get("pair") else "", "W'=%s" % arm.get("wreach"), key, len(set(nm.values())), len(S), st["fail"][0],
+                lab, "gate " if arm.get("pair") else "", "W'=%s K=%d" % (arm.get("wreach"), K), key, len(set(nm.values())), len(S), st["fail"][0],
                 g("fail", 1), g("pass", 1), g("fail", 2), g("pass", 2), ", ".join("%s %d" % kv for kv in pairs.most_common(4))))
+    tot = sum(tokc.values())
+    L += ["", "| K | distinct types covered | share of tokens |", "|---|---|---|"]
+    L += ["| %d | %d | %.3f |" % (k, k, sum(tokc[w] for w in ranked[:k]) / tot) for k in (50, 100, 200)]
+    L += ["", "vocabulary: %d types, %d tokens; the 50 most frequent: %s" % (len(tokc), tot, " ".join(ranked[:50]))]
     open(out_md, "w", encoding="utf-8").write("\n".join(L) + "\n")
     print("\n".join(L))
 

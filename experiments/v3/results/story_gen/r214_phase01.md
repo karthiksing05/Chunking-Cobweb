@@ -1005,3 +1005,184 @@ classes; a class source that separates auxiliaries, conjunctions, determiners an
 leaf itself also has (.17-.21). The abstraction decouples word identity from context (the emitted words differ from the context-licensed word) but not syntax
 from meaning: the sentences that lose meaning lose grammar too, because the class the word tree gives for function words is mixed. R-syn is not a regime that either dial
 (input read level, window names, read reach, temperature, output class level) produces on this corpus with this judge; the largest purity anywhere is .249. Phase 2 is not warranted.
+
+# Addendum 5 (r214f): open-class emission (`emit_freq_cut`, driver key `wemitk`) and the gated token leaf at lower tau / W'
+
+Principle: abstract only the open class. `Trellis3R214.emit_freq_cut = K`: the K most frequent word types of the training stream (ties by word; no POS) are
+emitted at leaf identity (singleton classes, so class mass excludes them); every other word is emitted through the word-tree class at b as in `emit_bits`.
+Tests (test 10; full `tests/trellis2` 147 passed, default path byte-identical): K = 0 equals the current `emit_bits` read exactly; K >= vocabulary (and
+10^6) equals the leaf token model exactly; with K = 5 total mass is conserved, the K top words keep their own read mass, and each class keeps
+the mass of its non-top words. Driver `r214_p1f.sh`; dumps `r214p01/f13_*`; judge `judge5`. Seed 13, n=1000, edge exact, token input, **gate on**, tau 1, W' 7 unless noted.
+
+Top-K coverage of the training stream (239 word types, 5306 tokens; `judge5/impurity.md`): K=50 covers 50 types and **.642** of tokens, K=100 .841, K=200 .985
+(the 50 most frequent: they and was the to happy he it play a lily you very with said she were had tim so tom fun together i friends played is mom sad are not
+day can wanted ball happened too all but then go his big her liked something do have in sue).
+
+## Arms and purities
+
+| group | arm | seed | distinct new | dist/draw | R-sem | R-syn | R-non | (non with sem_pass) | tri\|d | tri\|d in sem / syn / non | fair sem / syn / non | repeats (cut) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| f-K100 | W'=7 emit=4 K=100 t=1 gate | 13 | 1097 | 0.686 | 0.463 | 0.226 | 0.311 | 0.007 | 0.830 | 0.671 / 0.935 / 0.988 | 0.213 / 0.145 / 0.211 | 503 (19) |
+| f-K100 | W'=7 emit=5 K=100 t=1 gate | 13 | 1052 | 0.657 | 0.478 | 0.232 | 0.290 | 0.008 | 0.797 | 0.636 / 0.910 / 0.970 | 0.200 / 0.139 / 0.185 | 548 (13) |
+| f-K100 | W'=7 emit=6 K=100 t=1 gate | 13 | 1021 | 0.638 | 0.495 | 0.220 | 0.285 | 0.009 | 0.793 | 0.640 / 0.902 / 0.976 | 0.202 / 0.127 / 0.177 | 579 (22) |
+| f-K100 | W'=7 emit=7 K=100 t=1 gate | 13 | 996 | 0.623 | 0.539 | 0.206 | 0.255 | 0.010 | 0.785 | 0.657 / 0.898 / 0.965 | 0.221 / 0.115 / 0.153 | 604 (13) |
+| f-K200 | W'=7 emit=4 K=200 t=1 gate | 13 | 1034 | 0.646 | 0.570 | 0.202 | 0.228 | 0.008 | 0.740 | 0.606 / 0.871 / 0.958 | 0.223 / 0.114 / 0.141 | 565 (21) |
+| f-K200 | W'=7 emit=5 K=200 t=1 gate | 13 | 1033 | 0.646 | 0.553 | 0.213 | 0.234 | 0.009 | 0.752 | 0.620 / 0.868 / 0.959 | 0.221 / 0.119 / 0.145 | 567 (21) |
+| f-K200 | W'=7 emit=6 K=200 t=1 gate | 13 | 1030 | 0.644 | 0.563 | 0.199 | 0.238 | 0.013 | 0.761 | 0.634 / 0.888 / 0.955 | 0.230 / 0.114 / 0.146 | 569 (18) |
+| f-K200 | W'=7 emit=7 K=200 t=1 gate | 13 | 1013 | 0.633 | 0.561 | 0.203 | 0.236 | 0.012 | 0.763 | 0.639 / 0.883 / 0.954 | 0.227 / 0.114 / 0.142 | 585 (21) |
+| f-K50 | W'=7 emit=4 K=50 t=1 gate | 13 | 1208 | 0.755 | 0.410 | 0.233 | 0.357 | 0.002 | 0.846 | 0.689 / 0.915 / 0.981 | 0.213 / 0.161 / 0.264 | 392 (10) |
+| f-K50 | W'=7 emit=5 K=50 t=1 gate | 13 | 1176 | 0.735 | 0.476 | 0.253 | 0.271 | 0.004 | 0.831 | 0.705 / 0.923 / 0.966 | 0.247 / 0.171 / 0.193 | 424 (5) |
+| f-K50 | W'=7 emit=6 K=50 t=1 gate | 13 | 1124 | 0.703 | 0.480 | 0.236 | 0.284 | 0.005 | 0.820 | 0.706 / 0.887 / 0.959 | 0.238 / 0.147 / 0.191 | 476 (1) |
+| f-K50 | W'=7 emit=7 K=50 t=1 gate | 13 | 1008 | 0.630 | 0.499 | 0.255 | 0.246 | 0.005 | 0.800 | 0.664 / 0.903 / 0.968 | 0.209 / 0.145 / 0.150 | 592 (4) |
+| f-leaf | W'=7 emit=leaf t=0.7 gate | 13 | 743 | 0.464 | 0.630 | 0.170 | 0.201 | 0.015 | 0.669 | 0.549 / 0.778 / 0.953 | 0.161 / 0.061 / 0.089 | 787 (8) |
+| f-leaf | W'=2 emit=leaf t=1 gate | 13 | 1284 | 0.802 | 0.604 | 0.211 | 0.185 | 0.009 | 0.325 | 0.239 / 0.347 / 0.580 | 0.116 / 0.059 / 0.086 | 316 (84) |
+| f-leaf | W'=2 emit=leaf t=0.7 gate | 13 | 1055 | 0.659 | 0.722 | 0.151 | 0.127 | 0.009 | 0.158 | 0.115 / 0.208 / 0.343 | 0.055 / 0.021 / 0.029 | 545 (97) |
+
+
+### Samples (5 per arm)
+
+**f-K100 / W'=7 emit=4 K=100 t=1 gate**
+- we want to go now  (syn_p 1.00, sem_p 1.00, sem)
+- the cat was the little girl went outside  (syn_p 0.00, sem_p 0.00, non)
+- they loved to play and all the ball  (syn_p 0.00, sem_p 0.00, non)
+- she was very excited  (syn_p 1.00, sem_p 0.99, sem)
+- they was sad and sue was sad too  (syn_p 0.01, sem_p 0.96, non)
+
+**f-K100 / W'=7 emit=5 K=100 t=1 gate**
+- mom is not nice  (syn_p 0.99, sem_p 0.78, syn)
+- they want to help him  (syn_p 1.00, sem_p 0.97, sem)
+- give it is pretty  (syn_p 0.00, sem_p 0.00, non)
+- she found a little dog every day  (syn_p 1.00, sem_p 0.96, sem)
+- max was very happy to see him  (syn_p 1.00, sem_p 1.00, sem)
+
+**f-K100 / W'=7 emit=6 K=100 t=1 gate**
+- they opened the rock  (syn_p 1.00, sem_p 0.00, syn)
+- tom and the cat played together all day  (syn_p 1.00, sem_p 1.00, sem)
+- it is big and proud  (syn_p 1.00, sem_p 0.69, syn)
+- tom found sam near the sun  (syn_p 1.00, sem_p 0.58, syn)
+- give it is shiny  (syn_p 0.00, sem_p 0.00, non)
+
+**f-K100 / W'=7 emit=7 K=100 t=1 gate**
+- then they saw a big box  (syn_p 1.00, sem_p 1.00, sem)
+- he saw his mom what it was  (syn_p 0.00, sem_p 0.00, non)
+- it was happy and a little scared  (syn_p 0.93, sem_p 0.97, sem)
+- the girl was happy  (syn_p 1.00, sem_p 1.00, sem)
+- she was scared but he said yes  (syn_p 1.00, sem_p 0.98, sem)
+
+**f-K200 / W'=7 emit=4 K=200 t=1 gate**
+- he asked a big bird to help him  (syn_p 1.00, sem_p 1.00, sem)
+- one day max saw a big idea  (syn_p 1.00, sem_p 0.73, syn)
+- he had a friend named bob  (syn_p 1.00, sem_p 1.00, sem)
+- it was not a box  (syn_p 1.00, sem_p 0.92, syn)
+- they all laughed and had fun  (syn_p 1.00, sem_p 1.00, sem)
+
+**f-K200 / W'=7 emit=5 K=200 t=1 gate**
+- they found it to go away  (syn_p 0.19, sem_p 0.00, syn)
+- lucy wanted to get it  (syn_p 1.00, sem_p 0.99, sem)
+- everyone was surprised  (syn_p 1.00, sem_p 0.99, sem)
+- this one day something unexpected happened  (syn_p 0.94, sem_p 0.96, sem)
+- what had an idea  (syn_p 0.00, sem_p 0.01, non)
+
+**f-K200 / W'=7 emit=6 K=200 t=1 gate**
+- tom and ben were best friends  (syn_p 1.00, sem_p 1.00, sem)
+- and wanted to play it on  (syn_p 0.00, sem_p 0.00, non)
+- he liked to play with his ball  (syn_p 1.00, sem_p 1.00, sem)
+- max was the bird became good friends  (syn_p 0.00, sem_p 0.00, non)
+- they went to play together in the park  (syn_p 1.00, sem_p 1.00, sem)
+
+**f-K200 / W'=7 emit=7 K=200 t=1 gate**
+- the dog was not scared  (syn_p 1.00, sem_p 1.00, sem)
+- once there was a girl named tom  (syn_p 0.97, sem_p 0.99, sem)
+- and said let's go and play  (syn_p 0.00, sem_p 0.55, non)
+- and so were happy  (syn_p 0.00, sem_p 0.06, non)
+- tim and his mom were scared  (syn_p 1.00, sem_p 1.00, sem)
+
+**f-K50 / W'=7 emit=4 K=50 t=1 gate**
+- her mom said we play outside  (syn_p 0.33, sem_p 0.99, sem)
+- you want their ball and went away  (syn_p 0.00, sem_p 0.00, non)
+- they decided to have fun  (syn_p 1.00, sem_p 1.00, sem)
+- she wanted to be friends with tim  (syn_p 1.00, sem_p 1.00, sem)
+- lily and lily said  (syn_p 0.02, sem_p 0.09, syn)
+
+**f-K50 / W'=7 emit=5 K=50 t=1 gate**
+- once there was a good dog  (syn_p 1.00, sem_p 1.00, sem)
+- everyone was surprised  (syn_p 1.00, sem_p 0.99, sem)
+- it is big and proud  (syn_p 1.00, sem_p 0.69, syn)
+- the boy said yes i will be nice  (syn_p 0.08, sem_p 0.99, sem)
+- they played and bob was very nice  (syn_p 0.14, sem_p 0.97, sem)
+
+**f-K50 / W'=7 emit=6 K=50 t=1 gate**
+- but then they saw a tree  (syn_p 0.99, sem_p 1.00, sem)
+- they were happy and pretty  (syn_p 0.91, sem_p 0.96, sem)
+- lily had lots of fun at the park  (syn_p 1.00, sem_p 1.00, sem)
+- everyone was very happy to help her mom  (syn_p 1.00, sem_p 1.00, sem)
+- i was happy  (syn_p 1.00, sem_p 1.00, sem)
+
+**f-K50 / W'=7 emit=7 K=50 t=1 gate**
+- the boy said yes i can  (syn_p 0.16, sem_p 1.00, sem)
+- lily said yes mommy  (syn_p 0.07, sem_p 0.99, sem)
+- they liked to play too  (syn_p 0.90, sem_p 0.94, sem)
+- tom and bob played together every day  (syn_p 1.00, sem_p 1.00, sem)
+- she liked to play outside in the park  (syn_p 1.00, sem_p 1.00, sem)
+
+**f-leaf / W'=7 emit=leaf t=0.7 gate**
+- they started to play outside with their toys  (syn_p 1.00, sem_p 1.00, sem)
+- they were happy and laughed  (syn_p 0.98, sem_p 1.00, sem)
+- they want to their room  (syn_p 0.00, sem_p 0.00, non)
+- she wanted to play with her ball  (syn_p 1.00, sem_p 1.00, sem)
+- a big cat came down from the sky  (syn_p 1.00, sem_p 0.99, sem)
+
+**f-leaf / W'=2 emit=leaf t=1 gate**
+- let's go down and all around  (syn_p 0.84, sem_p 0.86, syn)
+- he wanted to see the sun  (syn_p 1.00, sem_p 1.00, sem)
+- everyone was very surprised  (syn_p 1.00, sem_p 1.00, sem)
+- they like to find the dog  (syn_p 0.89, sem_p 0.97, sem)
+- sue and spot played together all day  (syn_p 1.00, sem_p 1.00, sem)
+
+**f-leaf / W'=2 emit=leaf t=0.7 gate**
+- they had a big box  (syn_p 1.00, sem_p 1.00, sem)
+- they all played and laughed together  (syn_p 1.00, sem_p 1.00, sem)
+- tom and ben mom said  (syn_p 0.00, sem_p 0.03, non)
+- lily was very excited  (syn_p 1.00, sem_p 1.00, sem)
+- he felt bad  (syn_p 1.00, sem_p 1.00, sem)
+
+## Impurity breakdown (seed 13, K = 50 best R-syn; K = 100, 200 for comparison; top-K words count as pure)
+
+| arm | b | classes | distinct new | syn-fail | impure share in syn-fail | impure share in syn-pass | impure words per sentence (fail / pass) | top impure (word POS <- class POS) among fails |
+|---|---|---|---|---|---|---|---|---|
+| K50 gate W'=7 K=50 | 4 | 14 | 1208 | 431 | 0.675 | 0.598 | 1.21 / 0.92 | ADJ<-VERB 50, AUX<-VERB 48, PRON<-PART 42, ADV<-NOUN 39 |
+| K50 gate W'=7 K=50 | 5 | 27 | 1176 | 319 | 0.661 | 0.607 | 1.08 / 0.94 | ADV<-NOUN 29, PRON<-PART 27, ADJ<-VERB 27, VERB<-ADV 25 |
+| K50 gate W'=7 K=50 | 6 | 50 | 1124 | 319 | 0.586 | 0.532 | 0.86 / 0.72 | PRON<-PART 32, VERB<-AUX 24, ADV<-NOUN 23, VERB<-PART 22 |
+| K50 gate W'=7 K=50 | 7 | 97 | 1008 | 248 | 0.331 | 0.389 | 0.42 / 0.49 | PRON<-NOUN 12, PRON<-ADV 9, VERB<-PRON 8, PROPN<-PART 7 |
+| K100 gate W'=7 K=100 | 4 | 14 | 1097 | 341 | 0.493 | 0.411 | 0.73 / 0.53 | ADJ<-VERB 53, DET<-VERB 21, ADJ<-PART 17, NOUN<-VERB 13 |
+| K100 gate W'=7 K=100 | 5 | 27 | 1052 | 305 | 0.452 | 0.404 | 0.59 / 0.52 | ADJ<-VERB 25, VERB<-ADV 14, ADV<-NOUN 12, NOUN<-VERB 10 |
+| K100 gate W'=7 K=100 | 6 | 50 | 1021 | 291 | 0.364 | 0.344 | 0.48 / 0.44 | VERB<-AUX 12, ADV<-NOUN 10, ADV<-ADJ 9, PROPN<-PART 8 |
+| K100 gate W'=7 K=100 | 7 | 97 | 996 | 254 | 0.181 | 0.271 | 0.20 / 0.32 | VERB<-ADP 4, ADP<-ADV 4, VERB<-PRON 4, PRON<-VERB 3 |
+| K200 gate W'=7 K=200 | 4 | 14 | 1034 | 236 | 0.051 | 0.039 | 0.05 / 0.04 | ADJ<-VERB 4, VERB<-PRON 3, NOUN<-VERB 3, AUX<-VERB 2 |
+| K200 gate W'=7 K=200 | 5 | 27 | 1033 | 242 | 0.045 | 0.043 | 0.05 / 0.05 | ADJ<-VERB 3, VERB<-NOUN 3, NOUN<-VERB 3, AUX<-ADV 1 |
+| K200 gate W'=7 K=200 | 6 | 50 | 1030 | 245 | 0.057 | 0.043 | 0.06 / 0.04 | VERB<-ADJ 4, VERB<-NOUN 3, ADJ<-NOUN 2, ADV<-ADJ 1 |
+| K200 gate W'=7 K=200 | 7 | 97 | 1013 | 239 | 0.021 | 0.025 | 0.02 / 0.02 | VERB<-ADP 3, NOUN<-ADJ 1, VERB<-DET 1 |
+
+| K | distinct types covered | share of tokens |
+|---|---|---|
+| 50 | 50 | 0.642 |
+| 100 | 100 | 0.841 |
+| 200 | 200 | 0.985 |
+
+vocabulary: 239 types, 5306 tokens; the 50 most frequent: they and was the to happy he it play a lily you very with said she were had tim so tom fun together i friends played is mom sad are not day can wanted ball happened too all but then go his big her liked something do have in sue
+
+## Go rule and verdict (r214f)
+- **R-syn**: K=50 gives .233, .253, .236, .255 at b = 4, 5, 6, 7 (R-sem .410-.499); K=100: .226, .232, .220, .206; K=200: .202, .213, .199, .203. The maximum is .255 (K=50, b=7), below
+  the .4 bar, so no seed-17 replication was run. No interior peak along b or K (the curve is flat to within .05), so the pre-registered peak 0.2 above both ends is absent; the
+  plain gated token leaf (K >= vocabulary) is itself at .17-.21. Fewer abstracted words (larger K) moves the output from R-non to R-sem (K=200, b=4: R-sem .570, R-non .228) and
+  leaves R-syn at its floor of about .2.
+- **Impurity is not the bottleneck.** At K=200 the open-class emission is almost pure (impure words in 2-6% of sentences) and R-syn is still .20; syntax fails there are the model's own
+  (R-non .23 at K=200, .235 at the leaf). At K=50 the share of impure sentences is .59-.68 at b 4-6 in both fails and passes (1.21 vs .92 impure words per sentence at b=4) and falls to .33 / .39 at b=7, where the fails carry
+  fewer impure words than the passes. So the fails track the base generator's errors, not the class mixtures; keeping function words singleton removes the CCONJ<-AUX mixtures (they are absent from the K=50 top-impure list) without changing R-syn.
+- **R-sem >= .6 is reachable with the gated token leaf**: tau .7, W'=7: **.630** (R-syn .170, R-non .201; tri|d among R-sem .549, distinct new .464 per draw; fair R-sem .161); W'=2 tau 1: .604 (tri|d among R-sem .239, below the .30 floor, so a copying setting);
+  W'=2 tau .7: .722 (tri|d .115, copying). At tau 1 W'=7 the same model gives .558 (seed 13) / .577 (seed 17); the r211 edge w7 tau 1 row (.610) is the mean of four seeds over a 100-sentence sample per set, so the .05 gap to seed 13 is
+  between-seed and sampling spread, and the gate is the same in both. Lower tau, not the window, closes it: tau .7 gives +.07 at W'=7 and costs distinct-new rate (.464 per draw against .645).
+- **R-non >= .6**: met in the earlier addenda (gate off, b <= 6). **R-sem >= .6**: met only at tau .7 (W'=7, novelty above the floor). **R-syn >= .6 (or .4)**: no setting of any dial.
+
+**Verdict: NO-GO** for R-syn. Keeping the frequent function words singleton does not make a syntax-only regime: R-syn is .20-.26 whatever K and b are, and impurity of the classes is not what limits it. The three regimes are
+not three levels of one dial in this model: R-non and R-sem are produced by the abstraction level (and tau), the middle regime stays near the model's own rate of meaning failures at fixed grammaticality (about .2).

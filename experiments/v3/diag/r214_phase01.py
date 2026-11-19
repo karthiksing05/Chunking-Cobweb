@@ -42,6 +42,8 @@ def arm_label(arm):
         k.append("b=%s" % arm["bits"])
     if arm.get("wemit") is not None:
         k.append("emit=%s" % arm["wemit"])
+        if arm.get("wemitk"):
+            k.append("K=%s" % arm["wemitk"])
     k.append("t=%g" % arm.get("temp", 1.0))
     if arm.get("pair"):
         k.append("gate")

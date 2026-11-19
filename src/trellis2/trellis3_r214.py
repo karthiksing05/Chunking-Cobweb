@@ -46,6 +46,7 @@ class Trellis3R214(Trellis3R208):
     word_names = None
     emit_names = None                 # word -> class name; with emit_counts: class emission (see _emit)
     emit_counts = None                # word -> training-stream count
+    emit_freq_cut = 0                 # K: the K most frequent word types are emitted at leaf identity (not classed)
     word_tree = None                  # a WordTree (the class source of emit_bits)
     _emit_bits = None
 
@@ -151,23 +152,34 @@ class Trellis3R214(Trellis3R208):
         win = {a: v for a, v in q.items() if a[0] == "l" and a[1:].isdigit()}
         return {**q, **self._named_window(win)} if win else q
 
+    def _top_words(self) -> frozenset:
+        """The emit_freq_cut most frequent word types of the training stream (ties by word), cached per (K, counts)."""
+        K = self.emit_freq_cut
+        c = self.__dict__.get("_r214_top")
+        if c is None or c[0] != (K, id(self.emit_counts)):
+            top = frozenset(w for w, _ in sorted(self.emit_counts.items(), key=lambda kv: (-kv[1], kv[0]))[:K])
+            c = self.__dict__["_r214_top"] = ((K, id(self.emit_counts)), top)
+        return c[1]
+
     def _emit(self, out: Dict[tuple, float]) -> Dict[tuple, float]:
         """Class emission (output-side abstraction): a filler word w gets P(C(w) | ctx) * P(w | C(w)), P(C | ctx) the read's mass summed
         over the words of class C and P(w | C) the context-free within-class share of the training-stream counts (over the class's
         words that the read offers). A word without a class is its own class. One class per word = the read unchanged; one class
         = the unigram. Chunk fillers are untouched."""
         names, cnt = self.emit_names, self.emit_counts
+        top = self._top_words() if self.emit_freq_cut else ()
+        cls = lambda w: ("#", w) if w in top else names.get(w, w)    # the K most frequent types stay singleton classes
         cm: Dict[str, float] = {}
         ct: Dict[str, float] = {}
         for v, m in out.items():
             if v[0] == "w":
-                c = names.get(v[1], v[1])
+                c = cls(v[1])
                 cm[c] = cm.get(c, 0.0) + m
                 ct[c] = ct.get(c, 0.0) + cnt.get(v[1], 1.0)
         new = {}
         for v, m in out.items():
             if v[0] == "w":
-                c = names.get(v[1], v[1])
+                c = cls(v[1])
                 new[v] = cm[c] * (cnt.get(v[1], 1.0) / ct[c]) if ct[c] > 0 else 0.0
             else:
                 new[v] = m

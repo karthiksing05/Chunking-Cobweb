@@ -36,6 +36,7 @@ def _r214_start(L, arm):
     L.parse_bits = _bits(arm.get("pbits"))
     we = arm.get("wemit")
     L.emit_bits = None if we in (None, "leaf", "inf") else float(we)
+    L.emit_freq_cut = int(arm.get("wemitk", 0))
     if L.emit_names is not None:
         print(json.dumps({"r214 emit": we, "classes": len(set(L.emit_names.values()))}), flush=True)
     if L.read_bits is not None or L.read_reach is not None or L.parse_bits is not None:
@@ -45,6 +46,7 @@ def _r214_start(L, arm):
 def _r214_end(L):
     L.read_bits = L.read_reach = L.parse_bits = None
     L.emit_bits = None
+    L.emit_freq_cut = 0
 
 
 def _r214_levels(L, train, EXP, seed, n):
@@ -52,6 +54,7 @@ def _r214_levels(L, train, EXP, seed, n):
     at for each band of GRID, plus the sentences (for the part-of-speech tagging done by r214_levels.py, env cobint)."""
     L.read_bits = L.read_reach = L.parse_bits = None
     L.emit_bits = None
+    L.emit_freq_cut = 0
     owner = {}
     for sid, (toks, a0, a1) in enumerate(EXP):
         for i in range(a0, a1):

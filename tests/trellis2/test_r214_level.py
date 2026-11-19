@@ -315,3 +315,40 @@ def test_9_class_emission_identities():
         assert all(out[w] / cnt[w] == pytest.approx(out[mem[0]] / cnt[mem[0]], rel=1e-9) for w in mem)
     L.emit_bits = None
     assert all_reads(L) == ref
+
+
+def test_10_frequency_cut_emission():
+    from collections import Counter
+    from trellis2.trellis3_r214 import WordTree
+    sents = [s.split() for s in SENTS]
+    T = WordTree(sents, seed=3)
+    cnt = dict(Counter(w for s in sents for w in s))
+    L = build(Trellis3R214)
+    ref = all_reads(L)
+    L.word_tree, L.emit_counts = T, cnt
+    L.emit_bits = 2
+    plain = all_reads(L)
+    L.emit_freq_cut = 0
+    assert all_reads(L) == plain                              # K = 0 is the current emit_bits, byte for byte
+    L.emit_freq_cut = len(cnt)
+    assert all_reads(L) == ref                                # K >= vocabulary: the leaf token model
+    L.emit_freq_cut = 10 ** 6
+    assert all_reads(L) == ref
+    K = 5
+    L.emit_freq_cut = K
+    top = L._top_words()
+    assert len(top) == K and all(cnt[w] >= max(cnt[u] for u in cnt if u not in top) for w in top)
+    for q in QS[1:]:
+        base = {v[1]: m for v, m in L._gap_fills_read(q).items() if v[0] == "w"}
+        out = {v[1]: m for v, m in L._gap_fills(q).items() if v[0] == "w"}
+        assert sum(out.values()) == pytest.approx(sum(base.values()), rel=1e-9)     # mass conserved
+        for w in top:
+            assert out[w] == base[w]                                                 # the K most frequent keep their own mass
+        rest = {w for w in out if w not in top}
+        names = L.emit_names
+        for c in {names[w] for w in rest}:
+            mem = [w for w in rest if names[w] == c]
+            assert sum(out[w] for w in mem) == pytest.approx(sum(base[w] for w in mem), rel=1e-9)   # class mass excludes the top-K words
+    L.emit_freq_cut = 0
+    L.emit_bits = None
+    assert all_reads(L) == ref
