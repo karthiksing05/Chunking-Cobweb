@@ -37,6 +37,7 @@ def _r214_start(L, arm):
     we = arm.get("wemit")
     L.emit_bits = None if we in (None, "leaf", "inf") else float(we)
     L.emit_freq_cut = int(arm.get("wemitk", 0))
+    L.emit_uniform = bool(arm.get("wemitu", False))
     if L.emit_names is not None:
         print(json.dumps({"r214 emit": we, "classes": len(set(L.emit_names.values()))}), flush=True)
     if L.read_bits is not None or L.read_reach is not None or L.parse_bits is not None:
@@ -47,6 +48,7 @@ def _r214_end(L):
     L.read_bits = L.read_reach = L.parse_bits = None
     L.emit_bits = None
     L.emit_freq_cut = 0
+    L.emit_uniform = False
 
 
 def _r214_levels(L, train, EXP, seed, n):
@@ -55,6 +57,7 @@ def _r214_levels(L, train, EXP, seed, n):
     L.read_bits = L.read_reach = L.parse_bits = None
     L.emit_bits = None
     L.emit_freq_cut = 0
+    L.emit_uniform = False
     owner = {}
     for sid, (toks, a0, a1) in enumerate(EXP):
         for i in range(a0, a1):
@@ -118,8 +121,9 @@ def _r214_make(seed, cfg, train):
     word types (Trellis3R214.word_names), window_names "all" unless cfg sets it. Env R214_WORDTREE=<out.json>: no learning, dump the
     word classes of the tree at bit levels and depths, then exit."""
     wt = cfg.pop("wtree", None)
+    wf = cfg.pop("wtree_feats", "all")
     if os.environ.get("R214_WORDTREE"):
-        T = WordTree([s for s, _ in train], seed)
+        T = WordTree([s for s, _ in train], seed, wf)
         names = {str(b): T.names(b=math.inf if b == "leaf" else b) for b in [0, 1, 2, 3, 4, 5, 6, 6.5, 7, 7.25, 7.5, 7.75, "leaf"]}
         names.update({"d%d" % k: T.names(depth=k) for k in (1, 2, 3, 4, 5, 6, 8)})
         root = T.tree.root
@@ -130,7 +134,7 @@ def _r214_make(seed, cfg, train):
         sys.exit()
     wem = cfg.pop("wemit_tree", False)
     L = Trellis3R214(seed=seed, **cfg)
-    T = WordTree([s for s, _ in train], seed) if (wt is not None or wem) else None
+    T = WordTree([s for s, _ in train], seed, wf) if (wt is not None or wem) else None
     if wt is not None:
         L.word_names = T.names(b=_wtree_b(wt) if wt != "leaf" else None)
         L.window_names = L.window_names or "all"

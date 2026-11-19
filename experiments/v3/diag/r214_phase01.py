@@ -44,6 +44,8 @@ def arm_label(arm):
         k.append("emit=%s" % arm["wemit"])
         if arm.get("wemitk"):
             k.append("K=%s" % arm["wemitk"])
+        if arm.get("wemitu"):
+            k.append("uniform")
     k.append("t=%g" % arm.get("temp", 1.0))
     if arm.get("pair"):
         k.append("gate")

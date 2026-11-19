@@ -46,6 +46,7 @@ class Trellis3R214(Trellis3R208):
     word_names = None
     emit_names = None                 # word -> class name; with emit_counts: class emission (see _emit)
     emit_counts = None                # word -> training-stream count
+    emit_uniform = False              # P(w | C) uniform over the class instead of count-weighted
     emit_freq_cut = 0                 # K: the K most frequent word types are emitted at leaf identity (not classed)
     word_tree = None                  # a WordTree (the class source of emit_bits)
     _emit_bits = None
@@ -167,6 +168,8 @@ class Trellis3R214(Trellis3R208):
         words that the read offers). A word without a class is its own class. One class per word = the read unchanged; one class
         = the unigram. Chunk fillers are untouched."""
         names, cnt = self.emit_names, self.emit_counts
+        if self.emit_uniform:
+            cnt = {w: 1.0 for w in cnt}
         top = self._top_words() if self.emit_freq_cut else ()
         cls = lambda w: ("#", w) if w in top else names.get(w, w)    # the K most frequent types stay singleton classes
         cm: Dict[str, float] = {}
@@ -268,7 +271,7 @@ class WordTree:
     (level -log2(count / root count) <= b); b = inf is the leaf (the word itself), 0 the root.
     ``depth`` instead counts edges from the root."""
 
-    def __init__(self, sentences, seed: int = 0):
+    def __init__(self, sentences, seed: int = 0, feats: str = "all"):
         from .cu_cobweb import CUCobwebTree
         from .trellis3 import BOS, EOS
         left: Dict[str, Dict[str, float]] = {}
@@ -283,6 +286,18 @@ class WordTree:
                     left[w], right[w] = {}, {}
                 left[w][t[i - 1]] = left[w].get(t[i - 1], 0.0) + 1.0
                 right[w][t[i + 1]] = right[w].get(t[i + 1], 0.0) + 1.0
+        self.feats = feats
+        if feats != "all":
+            assert feats.startswith("func:"), feats
+            K = int(feats.split(":")[1])
+            freq: Dict[str, int] = {}
+            for s in sentences:
+                for w in s:
+                    freq[w] = freq.get(w, 0) + 1
+            keep = {w for w, _ in sorted(freq.items(), key=lambda kv: (-kv[1], kv[0]))[:K]} | {BOS, EOS}
+            for d in (left, right):
+                for w in d:
+                    d[w] = {k: v for k, v in d[w].items() if k in keep} or {"-": 1.0}     # only the top-K frequent neighbours are features
         norm = lambda d: {k: v / sum(d.values()) for k, v in d.items()}
         self.tree = CUCobwebTree(["L", "R"], seed=seed)
         self.tree.exact_alone = True

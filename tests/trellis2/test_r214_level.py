@@ -352,3 +352,27 @@ def test_10_frequency_cut_emission():
     L.emit_freq_cut = 0
     L.emit_bits = None
     assert all_reads(L) == ref
+
+
+def test_11_function_word_feature_tree():
+    from collections import Counter
+    from trellis2.trellis3_r214 import WordTree
+    sents = [s.split() for s in SENTS]
+    A = WordTree(sents, seed=3)
+    B = WordTree(sents, seed=3, feats="all")
+    assert [A.class_of(w, b=2) for w in A.words] == [B.class_of(w, b=2) for w in B.words]       # 'all' is the current tree
+    assert A.names(b=4) == B.names(b=4) and A.names(depth=3) == B.names(depth=3)
+    F = WordTree(sents, seed=3, feats="func:6")
+    top = {w for w, _ in sorted(Counter(w for s in sents for w in s).items(), key=lambda kv: (-kv[1], kv[0]))[:6]} | {BOS, EOS}
+    for w in F.words:
+        for att in ("L", "R"):
+            feats = set(F.leaf[w].av.get(att, {}))
+            assert feats <= top | {"-"}, (w, att, feats)               # only top-K neighbours (and markers) are features
+    assert set(F.words) == set(A.words)
+    # P(w | C) uniform: every member of a class gets the same share
+    L = build(Trellis3R214)
+    L.word_tree, L.emit_counts = F, dict(Counter(w for s in sents for w in s))
+    L.emit_uniform = True
+    L.emit_bits = 0
+    out = {v[1]: m for v, m in L._gap_fills(QS[2]).items() if v[0] == "w"}
+    assert max(out.values()) == pytest.approx(min(out.values()), rel=1e-9)
