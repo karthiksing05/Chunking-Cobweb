@@ -41,13 +41,14 @@ def main(path, out_md, out_json=None):
         L.append("| %s | %d | %d | %d | %.3f | %.2f | %s |" % (b, r["classes"], big, r["largest"], r["purity"], r["entropy"], "pass" if r["pass"] else "no"))
     head = "seed %s, n=%s, %d word types, %d tokens, %s reservoir types\n\n" % (D["seed"], D["n"], len(wc), N, D["reservoir types"])
     ex = []
-    for b in ("4", "8", "none"):
-        if b in D["names"]:
+    best = sorted((b for b in D["names"] if res[b]["big"] >= 2), key=lambda b: -res[b]["purity"])[:3]
+    for b in best:
+        if True:
             cls = defaultdict(list)
             for w in wc:
                 cls[D["names"][b][w]].append(w)
             top = sorted(cls.values(), key=lambda v: -sum(wc[w] for w in v))[:5]
-            ex.append("b=%s, five biggest classes by tokens: " % b + " | ".join(" ".join(sorted(v, key=lambda w: -wc[w])[:8]) for v in top))
+            ex.append("level %s, five biggest classes by tokens: " % b + " | ".join(" ".join(sorted(v, key=lambda w: -wc[w])[:8]) for v in top))
     out = head + "\n".join(L) + "\n\n" + "\n".join(ex) + "\n\npassing b: %s\n" % ([b for b, r in res.items() if r["pass"]] or "none")
     open(out_md, "w", encoding="utf-8").write(out)
     if out_json:

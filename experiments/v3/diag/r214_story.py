@@ -17,7 +17,7 @@ import os
 import sys
 
 sys.path.insert(0, "src")
-from trellis2.trellis3_r214 import Trellis3R214  # noqa: E402
+from trellis2.trellis3_r214 import Trellis3R214, WordTree  # noqa: E402
 from trellis2.trellis3 import FILL  # noqa: E402
 
 SRC = os.path.join("experiments", "v3", "diag", "t3_story.py")
@@ -100,11 +100,39 @@ def _r214_wordmap(L, train, seed, n):
     print(json.dumps({"r214 wordmap": os.environ["R214_WORDMAP"], "types": len(toks), "reservoirs": len(L.type_res)}), flush=True)
 
 
+def _wtree_b(v):
+    return None if v in (None, "leaf") else float(v)
+
+
+def _r214_make(seed, cfg, train):
+    """The learner. cfg key "wtree" (b in bits, or "leaf"): the window names come from a WordTree built over the training stream's
+    word types (Trellis3R214.word_names), window_names "all" unless cfg sets it. Env R214_WORDTREE=<out.json>: no learning, dump the
+    word classes of the tree at bit levels and depths, then exit."""
+    wt = cfg.pop("wtree", None)
+    if os.environ.get("R214_WORDTREE"):
+        T = WordTree([s for s, _ in train], seed)
+        names = {str(b): T.names(b=math.inf if b == "leaf" else b) for b in [0, 1, 2, 3, 4, 5, 6, 6.5, 7, 7.25, 7.5, 7.75, "leaf"]}
+        names.update({"d%d" % k: T.names(depth=k) for k in (1, 2, 3, 4, 5, 6, 8)})
+        root = T.tree.root
+        with open(os.environ["R214_WORDTREE"], "w", encoding="utf-8") as fh:
+            json.dump({"seed": seed, "n": len(train), "sentences": [list(s) for s, _ in train], "names": names,
+                       "reservoir types": len(T.words), "tree nodes": sum(1 for _ in T.tree.nodes()), "root count": root.count}, fh)
+        print(json.dumps({"r214 wordtree": os.environ["R214_WORDTREE"], "types": len(T.words), "root": root.count}), flush=True)
+        sys.exit()
+    L = Trellis3R214(seed=seed, **cfg)
+    if wt is not None:
+        T = WordTree([s for s, _ in train], seed)
+        L.word_names = T.names(b=_wtree_b(wt) if wt != "leaf" else None)
+        L.window_names = L.window_names or "all"
+        print(json.dumps({"r214 wtree": wt, "classes": len(set(L.word_names.values())), "types": len(T.words)}), flush=True)
+    return L
+
+
 def patch(src):
     def sub(old, new):
         assert src.count(old) == 1, ("anchor not unique", old)
         return src.replace(old, new)
-    src = sub("    L = Trellis3(seed=seed, **cfg)\n", "    L = _R214(seed=seed, **cfg)\n")
+    src = sub("    L = Trellis3(seed=seed, **cfg)\n", "    L = _r214_make(seed, cfg, train)\n")
     src = sub('        if edge_ == "exact":\n            from trellis2.trellis3_r204 import Trellis3R204\n',
               '        _r214_start(L, arm)\n        if edge_ == "exact":\n            from trellis2.trellis3_r204 import Trellis3R204\n')
     src = sub('    if causal is not None and edge_ == "exact":     # r204: later arms',
@@ -120,5 +148,5 @@ if __name__ == "__main__":
     src = patch(open(SRC, encoding="utf-8").read())
     sys.argv = [SRC] + sys.argv[1:]
     g = {"__name__": "__main__", "__file__": SRC, "_R214": Trellis3R214, "_r214_start": _r214_start, "_r214_end": _r214_end,
-         "_r214_levels": _r214_levels, "_r214_wordmap": _r214_wordmap}
+         "_r214_levels": _r214_levels, "_r214_wordmap": _r214_wordmap, "_r214_make": _r214_make}
     exec(compile(src, SRC, "exec"), g)

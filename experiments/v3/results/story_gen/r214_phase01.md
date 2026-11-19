@@ -152,3 +152,89 @@ type-level distributional clustering) with the same read.
 - `Trellis3R214._named_query`: with `window_names` set, `_gap_fills` names the query's window words as the stored contexts are named
   (default, `window_names` None, unchanged); test 7 checks it against the parent read of the named query. Full `tests/trellis2`: 135 passed (job 4793529).
 - `r214_story.py` env `R214_WORDMAP=<out.json>` (no generation) and `r214_wordmap.py`.
+
+# Addendum 2: track 2, a type-level word-category tree (Cobweb only): gate fails; probe arms not run
+
+Tree: `trellis2.trellis3_r214.WordTree`. One instance per word type of the training stream (n=1000), described by two bag attributes,
+L = the type's left-neighbour distribution and R = its right-neighbour distribution (probabilities over the words that stood there,
+`<s>` / `</s>` included), the Brown / Schuetze description. It is sorted by the repo's `cu_cobweb.CUCobwebTree` (compiled Fisher Cobweb,
+the tree TRELLIS uses; bags as TRELLIS's facets; `exact_alone` on), types inserted in order of first occurrence, seed = the run seed. No
+clustering library, no gradient, no new Cobweb. A type's class at level b = its leaf's deepest ancestor holding at least a 2^-b share of
+the types (level -log2(count / root count) <= b); `dK` = the ancestor at depth K. Batch over the stream's types (the incremental variant
+was not built). Same columns as the word-class map; purity = token-weighted spaCy UPOS majority per class.
+
+Opt-in wiring (built, tested): `Trellis3R214.word_names` (word -> class name) replaces the reservoir names as the `window_names` source for
+the learner's stored contexts and for the read's query alike (`_named_window`; None = unchanged); driver cfg key `"wtree": b | "leaf"`
+builds the tree from the stream and sets it (window_names "all" by default). Test 8 checks that every stored window slot is a class
+name and that the read of a token query equals the read of its named query. Full `tests/trellis2`: 136 passed. Default path byte-identical (tests 1-2).
+
+### seed 13
+
+| level (bits, or dK = depth K) | classes | classes with >= 3 words | largest class (words) | POS purity | within-class entropy (bits) | gate |
+|---|---|---|---|---|---|---|
+| 0 | 1 | 1 | 239 | 0.177 | 6.94 | no |
+| 1 | 2 | 2 | 128 | 0.284 | 5.94 | no |
+| 2 | 4 | 4 | 96 | 0.365 | 5.17 | no |
+| 3 | 8 | 8 | 53 | 0.439 | 4.21 | no |
+| 4 | 14 | 12 | 53 | 0.503 | 3.62 | no |
+| 5 | 27 | 23 | 22 | 0.574 | 2.82 | no |
+| 6 | 50 | 40 | 14 | 0.648 | 2.09 | no |
+| 6.5 | 69 | 50 | 10 | 0.722 | 1.46 | no |
+| 7 | 97 | 37 | 5 | 0.775 | 1.13 | no |
+| 7.25 | 97 | 37 | 5 | 0.775 | 1.13 | no |
+| 7.5 | 97 | 37 | 5 | 0.775 | 1.13 | no |
+| 7.75 | 97 | 37 | 5 | 0.775 | 1.13 | no |
+| leaf | 239 | 0 | 1 | 0.965 | 0.00 | no |
+| d1 | 3 | 3 | 128 | 0.365 | 5.47 | no |
+| d2 | 12 | 9 | 96 | 0.427 | 4.59 | no |
+| d3 | 55 | 17 | 43 | 0.509 | 3.38 | no |
+| d4 | 109 | 17 | 30 | 0.647 | 2.37 | no |
+| d5 | 157 | 13 | 24 | 0.735 | 1.60 | no |
+| d6 | 198 | 10 | 14 | 0.812 | 0.79 | pass |
+| d8 | 238 | 0 | 2 | 0.965 | 0.01 | no |
+
+level d6, five biggest classes by tokens: to a is mom not what will look | and was said | he she tim amy | together friends too friend sorry him again | they
+level 7, five biggest classes by tokens: and was said | they but lucy | he she tim amy | lily tom sue max anna | happy sad surprised
+level 7.25, five biggest classes by tokens: and was said | they but lucy | he she tim amy | lily tom sue max anna | happy sad surprised
+passing b: ['d6']
+
+### seed 17
+
+| level (bits, or dK = depth K) | classes | classes with >= 3 words | largest class (words) | POS purity | within-class entropy (bits) | gate |
+|---|---|---|---|---|---|---|
+| 0 | 1 | 1 | 245 | 0.176 | 6.89 | no |
+| 1 | 2 | 2 | 141 | 0.278 | 5.90 | no |
+| 2 | 6 | 6 | 75 | 0.332 | 4.90 | no |
+| 3 | 8 | 8 | 54 | 0.363 | 4.47 | no |
+| 4 | 13 | 12 | 38 | 0.477 | 3.81 | no |
+| 5 | 33 | 27 | 17 | 0.623 | 2.75 | no |
+| 6 | 54 | 40 | 12 | 0.675 | 1.88 | no |
+| 6.5 | 70 | 52 | 9 | 0.729 | 1.55 | no |
+| 7 | 98 | 39 | 6 | 0.795 | 1.12 | no |
+| 7.25 | 98 | 39 | 6 | 0.795 | 1.12 | no |
+| 7.5 | 98 | 39 | 6 | 0.795 | 1.12 | no |
+| 7.75 | 98 | 39 | 6 | 0.795 | 1.12 | no |
+| leaf | 242 | 1 | 4 | 0.966 | 0.00 | no |
+| d1 | 3 | 3 | 141 | 0.325 | 5.46 | no |
+| d2 | 13 | 10 | 94 | 0.457 | 4.28 | no |
+| d3 | 43 | 14 | 79 | 0.521 | 3.76 | no |
+| d4 | 89 | 17 | 75 | 0.575 | 3.10 | no |
+| d5 | 146 | 12 | 41 | 0.698 | 1.92 | no |
+| d6 | 183 | 7 | 27 | 0.779 | 1.24 | no |
+| d8 | 221 | 6 | 7 | 0.878 | 0.36 | no |
+
+level d8, five biggest classes by tokens: was and a felt is just feel | were had all are | they | the | to for
+level 7, five biggest classes by tokens: was and a felt feel | the can this | were had all are | they let's it's | he she lucy
+level 7.25, five biggest classes by tokens: was and a felt feel | the can this | were had all are | they let's it's | he she lucy
+passing b: none
+
+## Verdict (track 2)
+The word tree is far purer than the learned-name map (Phase 0'): at 7 bits purity is .775 (seed 13) and .795 (seed 17) with 97-98
+classes, 37-39 of them holding >= 3 words (largest 5-6 words); at 6 bits .648 / .675 with 50-54 classes. But the gate (purity >= .8 and >= 8
+classes of >= 3 words) is not passed on both seeds at any bit level: the closest level is **7 bits** (a finer grid, 7.25-7.75, gives the
+same classes as 7 because the tree has no node between 6.5 and 8 bits' worth of share). By depth, depth 6 passes on seed 13 only (.812, 10
+classes of >= 3 words) and misses on seed 17 (.779). Purity rises with fineness while the classes shrink: .8 purity arrives only when classes hold
+2 to 3 words on average, so there is no band of "slots that hold many words". Per the coordinator's rule (fail: report the purity table and
+the closest level) the window_names probe arms were not run. What the table does show: the level whose classes are about half-pure
+(4-5 bits, 14-33 classes) has large classes (22-53 words) of mixed function words, names and nouns; the Cobweb partition of
+neighbour distributions is a clean syntax/semantics cut only near the leaves.

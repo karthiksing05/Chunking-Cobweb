@@ -252,3 +252,26 @@ def test_7_window_names_query_is_named():
     q = QS[2]
     one = {"l1": q["l1"]}
     assert L._gap_fills(q) == R._gap_fills({**one, **R._named_window(one)})
+
+
+def test_8_word_tree_names_are_shared_by_storage_and_query():
+    from trellis2.trellis3_r214 import WordTree
+    T = WordTree([s.split() for s in SENTS], seed=3)
+    assert set(T.words) == {w for s in SENTS for w in s.split()}
+    root = T.names(b=0)
+    assert len(set(root.values())) == 1                       # the root holds every type
+    leaf = T.names(b=math.inf)
+    assert len(set(leaf.values())) <= len(T.words)
+    coarse, fine = T.names(b=2), T.names(b=6)
+    assert len(set(coarse.values())) <= len(set(fine.values())) <= len(set(leaf.values()))
+    kw = dict(CFG, window_names="all")
+    L = Trellis3R214(seed=3, **kw)
+    L.word_names = T.names(b=2)
+    for k, s in enumerate(SENTS):
+        L.learn(s.split(), follows=k % 3 != 0)
+    L._quiet = True
+    stored = {v for e in L.records if e.ctx for a, v in e.ctx.items() if a[0] == "l" and a[1:].isdigit()}
+    assert stored <= set(L.word_names.values()) | {BOS, EOS}   # every stored window slot is a class name
+    q = {"l2": "the", "l1": "dog", "l3": BOS}
+    named = {"l2": L.word_names["the"], "l1": L.word_names["dog"], "l3": BOS}
+    assert L._gap_fills(q) == Trellis3R208._gap_fills(L, named)

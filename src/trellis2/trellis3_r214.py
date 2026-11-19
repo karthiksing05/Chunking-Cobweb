@@ -19,7 +19,7 @@ from __future__ import annotations
 import math
 from typing import Dict, Optional
 
-from .trellis3 import FILL, LN2, log_prob
+from .trellis3 import BOS, EOS, FILL, LN2, log_prob
 from .trellis3_r208 import Trellis3R208
 
 
@@ -43,6 +43,7 @@ class Trellis3R214(Trellis3R208):
     read_bits = None
     read_reach = None
     parse_bits = None
+    word_names = None
 
     # ------------------------------------------------------------------ levels
     def level_bits(self, node, root=None) -> float:
@@ -108,6 +109,17 @@ class Trellis3R214(Trellis3R208):
             return q
         drop = [a for a in q if a[0] == "l" and a[1:].isdigit() and int(a[1:]) > W]
         return {a: v for a, v in q.items() if a not in drop} if drop else q
+
+    def _named_window(self, win: dict) -> dict:
+        """word_names (a dict word -> class name, e.g. WordTree.names(b)) replaces the reservoir names as the window's name source,
+        for the learner's stored contexts and for the read's query alike; None = Trellis3's own names (unchanged)."""
+        if self.word_names is None:
+            return super()._named_window(win)
+        out = {}
+        for a, v in win.items():
+            skip = v in (BOS, EOS) or (self.window_names == "near" and a[1:] != "1") or (self.window_names == "far" and a[1:] == "1")
+            out[a] = v if skip else self.word_names.get(v, v)
+        return out
 
     def _named_query(self, q: dict) -> dict:
         """With window_names the stored contexts hold learned names in the window slots, so the query's words are named the
@@ -184,3 +196,59 @@ class Trellis3R214(Trellis3R208):
             g = (math.log(node.count / root.count) + log_prob(node, x, root, self.alpha) - base) / LN2
             best = max(best, g)
         return best
+
+
+# ---------------------------------------------------------------------- type-level word-category tree (r214 track 2)
+class WordTree:
+    """A Cobweb tree over the word TYPES of a stream: one instance per type, described by its left-neighbour and right-neighbour
+    distributions (bags of probabilities over the words that stood there, sentence markers included): the Brown / Schuetze
+    distributional description, sorted by the repo's compiled Fisher Cobweb (cu_cobweb.CUCobwebTree, the tree TRELLIS uses), bags
+    as in TRELLIS's facets. A type's class at level b is its leaf's deepest ancestor holding at least a 2^-b share of the types
+    (level -log2(count / root count) <= b); b = inf is the leaf (the word itself), 0 the root.
+    ``depth`` instead counts edges from the root."""
+
+    def __init__(self, sentences, seed: int = 0):
+        from .cu_cobweb import CUCobwebTree
+        from .trellis3 import BOS, EOS
+        left: Dict[str, Dict[str, float]] = {}
+        right: Dict[str, Dict[str, float]] = {}
+        order = []
+        for s in sentences:
+            t = [BOS] + list(s) + [EOS]
+            for i in range(1, len(t) - 1):
+                w = t[i]
+                if w not in left:
+                    order.append(w)
+                    left[w], right[w] = {}, {}
+                left[w][t[i - 1]] = left[w].get(t[i - 1], 0.0) + 1.0
+                right[w][t[i + 1]] = right[w].get(t[i + 1], 0.0) + 1.0
+        norm = lambda d: {k: v / sum(d.values()) for k, v in d.items()}
+        self.tree = CUCobwebTree(["L", "R"], seed=seed)
+        self.tree.exact_alone = True
+        self.leaf = {w: self.tree.ifit({"L": norm(left[w]), "R": norm(right[w])}) for w in order}
+        self.words = order
+
+    def _path(self, node):
+        path = []
+        while node is not None:
+            path.append(node)
+            node = node.parent
+        return path[::-1]
+
+    def class_of(self, w: str, b=None, depth=None) -> int:
+        root = self.tree.root
+        path = self._path(self.leaf[w])
+        if depth is not None:
+            return path[min(depth, len(path) - 1)].id
+        if b is None or b == math.inf:
+            return path[-1].id
+        out = path[0]
+        for n in path:
+            if -math.log2(max(n.count, 1e-9) / root.count) <= b + 1e-12:
+                out = n
+            else:
+                break
+        return out.id
+
+    def names(self, b=None, depth=None) -> Dict[str, str]:
+        return {w: "k%d" % self.class_of(w, b, depth) for w in self.words}
