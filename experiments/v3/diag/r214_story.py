@@ -81,6 +81,25 @@ def _r214_levels(L, train, EXP, seed, n):
                       "concepts per band": out["concepts per band"]}), flush=True)
 
 
+def _r214_wordmap(L, train, seed, n):
+    """No generation: each word type's learned name truncated to b bits (Trellis3._window_name's rule: the most common concept of the
+    bag of the type's reservoir paths, bands up to b; a word with no reservoir keeps its token), for b in 0, 1, 2, 4, 6, 8, 12, None."""
+    bs = [0, 1, 2, 4, 6, 8, 12, None]
+    toks = sorted({w for s, _ in train for w in s})
+    names = {}
+    for b in bs:
+        d = {}
+        for w in toks:
+            bag = L._res_bag((w,), b)
+            d["%s" % w] = max(bag.items(), key=lambda kv: kv[1])[0] if bag else w
+        names["none" if b is None else str(b)] = d
+    out = {"seed": seed, "n": n, "sentences": [list(s) for s, _ in train], "names": names,
+           "reservoir types": len(L.type_res), "type_names": L.type_names, "window": getattr(L, "window", None)}
+    with open(os.environ["R214_WORDMAP"], "w", encoding="utf-8") as fh:
+        json.dump(out, fh)
+    print(json.dumps({"r214 wordmap": os.environ["R214_WORDMAP"], "types": len(toks), "reservoirs": len(L.type_res)}), flush=True)
+
+
 def patch(src):
     def sub(old, new):
         assert src.count(old) == 1, ("anchor not unique", old)
@@ -91,6 +110,7 @@ def patch(src):
     src = sub('    if causal is not None and edge_ == "exact":     # r204: later arms',
               '    if causal is not None:\n        _r214_end(L)\n    if causal is not None and edge_ == "exact":     # r204: later arms')
     src = sub('if os.environ.get("STORY_R204_REPLAY"):',
+              'if os.environ.get("R214_WORDMAP"):\n    _r214_wordmap(L, train, seed, n)\n    sys.exit()\n'
               'if os.environ.get("R214_LEVELS"):\n    _r214_levels(L, train, EXP, seed, n)\n    sys.exit()\n'
               'if os.environ.get("STORY_R204_REPLAY"):')
     return src
@@ -100,5 +120,5 @@ if __name__ == "__main__":
     src = patch(open(SRC, encoding="utf-8").read())
     sys.argv = [SRC] + sys.argv[1:]
     g = {"__name__": "__main__", "__file__": SRC, "_R214": Trellis3R214, "_r214_start": _r214_start, "_r214_end": _r214_end,
-         "_r214_levels": _r214_levels}
+         "_r214_levels": _r214_levels, "_r214_wordmap": _r214_wordmap}
     exec(compile(src, SRC, "exec"), g)

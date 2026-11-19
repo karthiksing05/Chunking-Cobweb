@@ -82,3 +82,73 @@ pass band: none (Kill A)
   but untouched by this verdict.
 
 Files: `experiments/v3/results/story_gen/r214p01/levels_s{13,17}_n1000.json` (occurrence dumps), `r214_levelmap_s{13,17}.{md,json}`.
+
+# Addendum: Phase 0' (word-class map for the window_names / nb_bits fallback of knob A) — gate fails; Phase 1' not run
+
+Learner: seed 13 and seed 17, n=1000, the paper recipe plus `type_names: "sample"` (the only added flag; it fills the per-type
+reservoirs that `_res_bag` reads, `type_k` 8 and `type_top` 40 at their defaults; `name_level`, `name_mix_k` and `window_names` stay off, so
+the tree is the token-window tree). Name of word w at nb_bits b = the rule `Trellis3._window_name` / `_named_window` uses: the most common
+concept in the bag of the concept ids on w's reservoir paths, bands up to b (b = 0: no band, all words share one name; None: every band).
+Words are grouped by that name; purity = token-weighted share of the majority spaCy UPOS (tagged in the sentence) per class; entropy =
+token-weighted H(word | class). Gate: purity >= .8 and >= 8 classes with >= 3 words. Code: `experiments/v3/diag/r214_wordmap.py`
+(env cobint) on the dump of `r214_story.py` with env `R214_WORDMAP`.
+
+### seed 13
+
+seed 13, n=1000, 239 word types, 5306 tokens, 7077 reservoir types
+
+| nb_bits b | classes | classes with >= 3 words | largest class (words) | POS purity | within-class entropy (bits) | gate |
+|---|---|---|---|---|---|---|
+| 0 | 1 | 1 | 239 | 0.177 | 6.94 | no |
+| 1 | 3 | 3 | 117 | 0.248 | 5.67 | no |
+| 2 | 3 | 3 | 117 | 0.248 | 5.67 | no |
+| 4 | 4 | 4 | 106 | 0.280 | 5.29 | no |
+| 6 | 8 | 5 | 104 | 0.284 | 5.16 | no |
+| 8 | 15 | 5 | 99 | 0.294 | 5.06 | no |
+| 12 | 15 | 6 | 98 | 0.299 | 4.97 | no |
+| none | 15 | 6 | 98 | 0.299 | 4.97 | no |
+
+b=4, five biggest classes by tokens: they was the he it a lily said | play you with fun together friends sad day | and to were her in what saw at | happy very are unexpected scared felt feel many
+b=8, five biggest classes by tokens: they was the he it a lily said | play you with fun together friends sad too | and to were her in what saw at | happy very are unexpected scared felt feel my | park boy long sun sky
+b=none, five biggest classes by tokens: they was the he it a lily said | play you with fun together friends sad too | and to were big her in what saw | happy very so are unexpected scared felt an | park boy long sun
+
+passing b: none
+
+### seed 17
+
+seed 17, n=1000, 245 word types, 5502 tokens, 7587 reservoir types
+
+| nb_bits b | classes | classes with >= 3 words | largest class (words) | POS purity | within-class entropy (bits) | gate |
+|---|---|---|---|---|---|---|
+| 0 | 1 | 1 | 245 | 0.176 | 6.89 | no |
+| 1 | 3 | 3 | 119 | 0.254 | 5.45 | no |
+| 2 | 3 | 3 | 119 | 0.254 | 5.45 | no |
+| 4 | 4 | 4 | 119 | 0.254 | 5.31 | no |
+| 6 | 11 | 5 | 113 | 0.275 | 5.14 | no |
+| 8 | 22 | 5 | 111 | 0.323 | 4.84 | no |
+| 12 | 23 | 5 | 109 | 0.297 | 4.85 | no |
+| none | 23 | 5 | 109 | 0.297 | 4.85 | no |
+
+b=4, five biggest classes by tokens: and they the he tim a were she | to happy it had play with fun friends | was very sad so not something unexpected an | you yes felt let's just both kind learned
+b=8, five biggest classes by tokens: and they the he tim a were she | to happy it had play with fun friends | was sad so not an surprised man careful | you yes felt let's just both kind learned | very
+b=none, five biggest classes by tokens: was and they the he a were she | to happy it had play with fun friends | sad so not bird an man careful proud | tim you yes felt let's just kind learned | very
+
+passing b: none
+
+## Verdict (Phase 0')
+No nb_bits passes on either seed: POS purity is at most .30 (seed 13) and .32 (seed 17) against .18 for one class, and at most 6
+classes hold >= 3 words (the gate needs 8). The learned names group the 240 words into 3 to 23 classes whose biggest holds 98-119 words;
+b = 4 to None change little (15 vs 23 classes). The names come from the token-window tree whose coarse concepts are not part-of-speech
+slots (the Phase 0 level map), so naming the window by them does not give syntactic classes. Per the coordinator's rule I stopped:
+no window_names learners (about 6), no knob-B reach arms, no temperature control, no judge step, no go rule, no per-arm purity or novelty
+table, no samples. Nothing was generated.
+
+Caveat on the gate: the name is the single most common concept of the bag, which tends to be the coarsest shared concept; a name built from
+the full bag (several concepts per word) or from a learner trained with `window_names` on (names inside the tree, so a name is refined by
+earlier names) is a different map and was not tried. Both are options for the re-plan, as are classes from another source (for example
+type-level distributional clustering) with the same read.
+
+## Code added in this step
+- `Trellis3R214._named_query`: with `window_names` set, `_gap_fills` names the query's window words as the stored contexts are named
+  (default, `window_names` None, unchanged); test 7 checks it against the parent read of the named query. Full `tests/trellis2`: 135 passed (job 4793529).
+- `r214_story.py` env `R214_WORDMAP=<out.json>` (no generation) and `r214_wordmap.py`.

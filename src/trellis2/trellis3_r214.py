@@ -109,9 +109,17 @@ class Trellis3R214(Trellis3R208):
         drop = [a for a in q if a[0] == "l" and a[1:].isdigit() and int(a[1:]) > W]
         return {a: v for a, v in q.items() if a not in drop} if drop else q
 
+    def _named_query(self, q: dict) -> dict:
+        """With window_names the stored contexts hold learned names in the window slots, so the query's words are named the
+        same way (Trellis3._named_window); without window_names the query is unchanged."""
+        if not self.window_names:
+            return q
+        win = {a: v for a, v in q.items() if a[0] == "l" and a[1:].isdigit()}
+        return {**q, **self._named_window(win)} if win else q
+
     def _gap_fills(self, q: dict, beta: float = 1.0, nbq: Optional[Dict[int, dict]] = None,
                    gamma: float = 1.0, backoff: str = "tokens") -> Dict[tuple, float]:
-        q = self._reach_query(q)
+        q = self._named_query(self._reach_query(q))
         b = self.read_bits
         if _is_off(b):
             return super()._gap_fills(q, beta, nbq, gamma, backoff)

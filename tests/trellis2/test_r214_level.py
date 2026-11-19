@@ -234,3 +234,21 @@ def test_6b_coarse_reads_change_the_mass(sub):
     reset(sub)
     assert set(coarse) == set(leaf)
     assert any(abs(coarse[w] / sum(coarse.values()) - leaf[w] / sum(leaf.values())) > 1e-6 for w in leaf)
+
+
+def test_7_window_names_query_is_named():
+    """With window_names the read names the query's words as the stored contexts are named; without it nothing changes."""
+    kw = dict(CFG, type_names="sample", window_names="all", nb_bits=4)
+    L = Trellis3R214(seed=3, **kw)
+    R = Trellis3R208(seed=3, **kw)
+    for k, s in enumerate(SENTS):
+        L.learn(s.split(), follows=k % 3 != 0)
+        R.learn(s.split(), follows=k % 3 != 0)
+    L._quiet = R._quiet = True
+    for q in QS[1:]:
+        named = {**q, **R._named_window({a: v for a, v in q.items() if a[0] == "l"})}
+        assert L._gap_fills(q) == R._gap_fills(named)
+    L.read_reach = 1
+    q = QS[2]
+    one = {"l1": q["l1"]}
+    assert L._gap_fills(q) == R._gap_fills({**one, **R._named_window(one)})
