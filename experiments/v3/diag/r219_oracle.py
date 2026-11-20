@@ -358,7 +358,7 @@ def purity(out_md, *specs):
     cont = {w for w in upos if upos[w].most_common(1)[0][0] in CPOS}
     L = ["| tree | b | classes (content types) | mean candidates | tokens with a candidate | morph purity of candidates | purity (type-majority sig) |", "|---|---|---|---|---|---|---|"]
     for nm, T in trees.items():
-        for b in ("3", "4", "5", "6", "6.5", "7"):
+        for b in os.environ.get("R219_TB", "3,4,5,6,6.5,7").split(","):
             names = T["names"][b]
             cls = defaultdict(list)
             for w in cont:
@@ -378,6 +378,9 @@ def purity(out_md, *specs):
                             pur2 += sum(maj[u] == maj[t.text] for u in pool) / len(pool)
                             cand += len(pool)
             L.append("| %s | %s | %d | %.1f | %.2f | %.3f | %.3f |" % (nm, b, len(cls), cand / max(hit, 1), hit / n, pur / max(hit, 1), pur2 / max(hit, 1)))
+    cn = Counter(w for s in S for w in s)
+    rank = sorted(cn.items(), key=lambda kv: (-kv[1], kv[0]))[:90]
+    L.append("\nTop-90 types by frequency with majority UPOS (rank: word/UPOS):\n" + " ".join("%d:%s/%s" % (i + 1, w, upos[w].most_common(1)[0][0]) for i, (w, _) in enumerate(rank)))
     open(out_md, "w", encoding="utf-8").write("\n".join(L) + "\n")
     print("\n".join(L))
 

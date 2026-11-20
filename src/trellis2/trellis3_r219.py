@@ -1,11 +1,11 @@
-"""Round 219: word-tree feature sets that carry agreement and frame cues (a representation change of the existing WordTree; no new generation machinery).
+"""Round 219/222: word-tree feature sets that carry agreement and frame cues (a representation change of the existing WordTree; no new generation machinery).
 
-WordTree219(sentences, seed, feats) is WordTree with a richer description of each word TYPE. feats = "fn:K[+d2][+lr][+nb]":
+WordTree219(sentences, seed, feats) is WordTree with a richer description of each word TYPE. feats = "fn:K[+d2][+lr][+suf][+nf]":
   fn:K  the K most frequent word types (plus sentence markers) are the feature vocabulary (the function-word contexts; as "func:K" of r214)
-  +d2   two more facets, the distribution of the word two to the left and two to the right (agreement and frames are decided across one word,
-        e.g. "was [adj]", "the [adj] cat was")
+  +d2   two more facets, the distribution of the word two to the left and two to the right
   +lr   one more facet, the joint (left, right) pair of feature words: "a _ was" marks a singular count noun, "to _ the" a transitive verb
-  +nb   the facets use K only for the neighbour word kept; a type with none of its neighbours in the vocabulary keeps the dummy "-"
+  +suf  (r222) one facet: the word's own ending, its last 1, 2 and 3 characters (raw-token derived, no tagger)
+  +nf   (r222) two facets: the nearest feature (function) word to the left and to the right of each occurrence, skipping content words
 Learning is unchanged (the same Fisher Cobweb tree over bags of probabilities); levels b are read as before.
 """
 from __future__ import annotations
@@ -21,7 +21,7 @@ class WordTree219(WordTree):
         from .trellis3 import BOS, EOS
         parts = feats.split("+")
         K = int(parts[0].split(":")[1])
-        d2, lr = "d2" in parts[1:], "lr" in parts[1:]
+        d2, lr, suf, nf = ("d2" in parts[1:], "lr" in parts[1:], "suf" in parts[1:], "nf" in parts[1:])
         freq: Dict[str, int] = {}
         for s in sentences:
             for w in s:
@@ -32,12 +32,16 @@ class WordTree219(WordTree):
             facets.update({"L2": {}, "R2": {}})
         if lr:
             facets["LR"] = {}
+        if suf:
+            facets["S"] = {}
+        if nf:
+            facets.update({"LF": {}, "RF": {}})
         order = []
         seen = set()
 
         def add(f, w, k, v=1.0):
             d = facets[f].setdefault(w, {})
-            if k in keep or f == "LR":
+            if k in keep or f in ("LR", "S"):
                 d[k] = d.get(k, 0.0) + v
 
         for s in sentences:
@@ -49,6 +53,10 @@ class WordTree219(WordTree):
                     order.append(w)
                     for f in facets:
                         facets[f][w] = {}
+                    if suf:
+                        for k in (1, 2, 3):
+                            if len(w) > k:
+                                facets["S"][w]["%d:%s" % (k, w[-k:])] = 1.0
                 add("L", w, t[i - 1])
                 add("R", w, t[i + 1])
                 if d2:
@@ -56,6 +64,15 @@ class WordTree219(WordTree):
                     add("R2", w, t[i + 2])
                 if lr and t[i - 1] in keep and t[i + 1] in keep:
                     add("LR", w, t[i - 1] + "|" + t[i + 1])
+                if nf:
+                    j = i - 1
+                    while j > 0 and t[j] not in keep:
+                        j -= 1
+                    add("LF", w, t[j])
+                    j = i + 1
+                    while j < len(t) - 1 and t[j] not in keep:
+                        j += 1
+                    add("RF", w, t[j])
         self.feats = feats
         norm = lambda d: {k: v / sum(d.values()) for k, v in d.items()} if d else {"-": 1.0}
         self.tree = CUCobwebTree(list(facets), seed=seed)

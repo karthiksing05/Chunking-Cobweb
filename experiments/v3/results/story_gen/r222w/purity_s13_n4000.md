@@ -1,0 +1,59 @@
+| tree | b | classes (content types) | mean candidates | tokens with a candidate | morph purity of candidates | purity (type-majority sig) |
+|---|---|---|---|---|---|---|
+| func100 | 3 | 8 | 33.0 | 0.98 | 0.227 | 0.237 |
+| func100 | 4 | 14 | 13.8 | 0.98 | 0.284 | 0.295 |
+| func100 | 5 | 26 | 7.6 | 0.96 | 0.325 | 0.341 |
+| func100 | 6 | 43 | 3.3 | 0.95 | 0.379 | 0.395 |
+| func100 | 6.5 | 57 | 2.4 | 0.87 | 0.375 | 0.389 |
+| func100 | 7 | 79 | 1.5 | 0.72 | 0.439 | 0.487 |
+| fn25lr | 3 | 8 | 23.3 | 1.00 | 0.249 | 0.261 |
+| fn25lr | 4 | 13 | 15.5 | 1.00 | 0.260 | 0.274 |
+| fn25lr | 5 | 27 | 7.1 | 0.97 | 0.347 | 0.358 |
+| fn25lr | 6 | 45 | 3.8 | 0.89 | 0.442 | 0.479 |
+| fn25lr | 6.5 | 57 | 2.7 | 0.84 | 0.475 | 0.517 |
+| fn25lr | 7 | 84 | 1.5 | 0.71 | 0.519 | 0.573 |
+| fn25suf | 3 | 6 | 32.7 | 1.00 | 0.217 | 0.221 |
+| fn25suf | 4 | 11 | 15.0 | 1.00 | 0.284 | 0.289 |
+| fn25suf | 5 | 21 | 8.8 | 0.99 | 0.305 | 0.307 |
+| fn25suf | 6 | 38 | 4.0 | 0.95 | 0.356 | 0.365 |
+| fn25suf | 6.5 | 48 | 2.9 | 0.88 | 0.371 | 0.384 |
+| fn25suf | 7 | 67 | 1.9 | 0.72 | 0.392 | 0.408 |
+| fn25nf | 3 | 7 | 21.4 | 1.00 | 0.246 | 0.255 |
+| fn25nf | 4 | 12 | 14.1 | 1.00 | 0.285 | 0.305 |
+| fn25nf | 5 | 30 | 5.3 | 0.99 | 0.364 | 0.396 |
+| fn25nf | 6 | 47 | 3.3 | 0.92 | 0.414 | 0.459 |
+| fn25nf | 6.5 | 57 | 2.2 | 0.90 | 0.411 | 0.447 |
+| fn25nf | 7 | 80 | 1.4 | 0.77 | 0.444 | 0.490 |
+| fn25sufnf | 3 | 6 | 26.5 | 1.00 | 0.206 | 0.211 |
+| fn25sufnf | 4 | 10 | 15.5 | 1.00 | 0.239 | 0.246 |
+| fn25sufnf | 5 | 23 | 8.1 | 0.99 | 0.271 | 0.274 |
+| fn25sufnf | 6 | 38 | 4.3 | 0.96 | 0.294 | 0.312 |
+| fn25sufnf | 6.5 | 50 | 2.9 | 0.91 | 0.318 | 0.328 |
+| fn25sufnf | 7 | 66 | 1.8 | 0.87 | 0.325 | 0.340 |
+| fn25lrsufnf | 3 | 7 | 26.8 | 1.00 | 0.209 | 0.219 |
+| fn25lrsufnf | 4 | 12 | 15.5 | 1.00 | 0.252 | 0.261 |
+| fn25lrsufnf | 5 | 27 | 7.6 | 0.96 | 0.286 | 0.301 |
+| fn25lrsufnf | 6 | 38 | 4.7 | 0.93 | 0.312 | 0.329 |
+| fn25lrsufnf | 6.5 | 56 | 2.3 | 0.87 | 0.332 | 0.363 |
+| fn25lrsufnf | 7 | 72 | 1.5 | 0.78 | 0.405 | 0.450 |
+| fn40sufnf | 3 | 8 | 27.3 | 1.00 | 0.221 | 0.229 |
+| fn40sufnf | 4 | 13 | 13.5 | 1.00 | 0.284 | 0.291 |
+| fn40sufnf | 5 | 24 | 10.8 | 0.99 | 0.291 | 0.289 |
+| fn40sufnf | 6 | 40 | 4.0 | 0.93 | 0.404 | 0.413 |
+| fn40sufnf | 6.5 | 54 | 2.8 | 0.88 | 0.419 | 0.428 |
+| fn40sufnf | 7 | 71 | 1.6 | 0.79 | 0.391 | 0.418 |
+| fn15sufnf | 3 | 7 | 21.8 | 1.00 | 0.242 | 0.250 |
+| fn15sufnf | 4 | 12 | 16.5 | 1.00 | 0.301 | 0.310 |
+| fn15sufnf | 5 | 27 | 6.5 | 0.99 | 0.326 | 0.328 |
+| fn15sufnf | 6 | 39 | 4.5 | 0.93 | 0.391 | 0.406 |
+| fn15sufnf | 6.5 | 49 | 3.5 | 0.90 | 0.404 | 0.426 |
+| fn15sufnf | 7 | 70 | 1.7 | 0.75 | 0.416 | 0.444 |
+| fn25sufnfd2 | 3 | 6 | 27.5 | 1.00 | 0.216 | 0.220 |
+| fn25sufnfd2 | 4 | 11 | 15.2 | 1.00 | 0.235 | 0.235 |
+| fn25sufnfd2 | 5 | 24 | 7.9 | 0.97 | 0.346 | 0.354 |
+| fn25sufnfd2 | 6 | 39 | 4.4 | 0.93 | 0.367 | 0.376 |
+| fn25sufnfd2 | 6.5 | 51 | 3.1 | 0.85 | 0.422 | 0.450 |
+| fn25sufnfd2 | 7 | 67 | 1.8 | 0.82 | 0.463 | 0.504 |
+
+Top-90 types by frequency with majority UPOS (rank: word/UPOS):
+1:they/PRON 2:was/AUX 3:and/CCONJ 4:the/DET 5:to/PART 6:happy/ADJ 7:he/PRON 8:it/PRON 9:a/DET 10:you/PRON 11:tim/PROPN 12:very/ADV 13:play/VERB 14:said/VERB 15:she/PRON 16:were/AUX 17:lily/ADV 18:had/VERB 19:with/ADP 20:tom/PROPN 21:i/PRON 22:friends/NOUN 23:sad/ADJ 24:so/ADV 25:fun/NOUN 26:together/ADV 27:help/VERB 28:day/NOUN 29:not/PART 30:are/AUX 31:wanted/VERB 32:played/VERB 33:mom/NOUN 34:can/AUX 35:then/ADV 36:his/PRON 37:but/CCONJ 38:is/AUX 39:something/PRON 40:happened/VERB 41:bird/NOUN 42:all/DET 43:her/PRON 44:scared/ADJ 45:sue/PROPN 46:unexpected/ADJ 47:ball/NOUN 48:big/ADJ 49:saw/VERB 50:do/VERB 51:what/PRON 52:ben/PROPN 53:be/AUX 54:in/ADP 55:too/ADV 56:want/VERB 57:cat/NOUN 58:friend/NOUN 59:have/VERB 60:felt/VERB 61:we/PRON 62:dog/NOUN 63:good/ADJ 64:sam/PROPN 65:idea/NOUN 66:max/PROPN 67:surprised/ADJ 68:yes/INTJ 69:thank/VERB 70:little/ADJ 71:an/DET 72:did/AUX 73:go/VERB 74:looked/VERB 75:of/ADP 76:know/VERB 77:loved/VERB 78:smiled/VERB 79:sorry/ADJ 80:excited/ADJ 81:let's/NOUN 82:me/PRON 83:at/ADP 84:one/NUM 85:spot/NOUN 86:mia/PROPN 87:park/NOUN 88:liked/VERB 89:will/AUX 90:boy/NOUN
