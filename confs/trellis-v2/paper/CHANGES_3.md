@@ -45,3 +45,18 @@ Main paper: 22 pages (rev 3: 25). Supplement: 17 pages, Tables S1 to S21 and Fig
 
 ## Prose scan (compute node, `build/scan2.py`)
 Main paper: mean sentence length 21.9 words; no "rather than", ", not", "but not", "and not", "and also", causal "since", what-clauses, clefts, rhetorical questions, summary closers or section cross-references left (two section references and ten sentences over 40 words fixed). Hits that remain are false positives: "In short TinyStories sentences", "above/below" as comparisons, and merged cite or caption fragments. The word "span" stays in Section 3 where the method defines it (formal term); it is removed from captions. Supplement: mean 20.6; seven sentences over 40 words split.
+
+# Revision 5 (r230 controlled grammar)
+
+Main paper: 23 pages (rev 4: 22). Supplement: 21 pages, Tables S1 to S29 (S22 to S29 new, older numbers unchanged). Tectonic build on a compute node: 0 undefined references or citations, 0 overfull boxes.
+
+## Added
+- Main, new subsection "A controlled grammar with an exact judge" at the end of the regimes section, with Figure 6 (`figures/controlled_regimes.png`, script `confs/trellis-v2/make_figure_r230.py`, reads `results/story_gen/r230/judge_p1*.json`). Source of truth: `experiments/v3/results/story_gen/r230_controlled_grammar.md`. The text reports C6 on a 147-word grammar with a rule-based judge: meaningful .72-.73 at the leaf, syntax-only .60-.67 at b=6-7, nonsense .97-.98 at b=0, purity of the b=5-7 classes (syntactic about .9, semantic near chance), C9 with no syntax-only share above .41, and six caveats (func:5 chosen after reading purity tables of five feature sets; two seeds; leaf meaningful share about .75; classes of two words or fewer at b=6-7; syntax-only at b=6 needs n >= 1,000; C9 fails to separate).
+- Abstract, regimes introduction, introduction's dial sentence and conclusion now say: unmet on TinyStories (law plus oracle ceiling), met on the controlled grammar. The C6 row of the configuration table names the controlled-grammar setting.
+- Supplement, new section "Controlled Grammar" (grammar spec, judge, Tables S22 to S28: judge controls, func:5 purity, purity by feature set, C6 dial with reach, C9, learning curves, examples = first three stored generations per regime per seed, unselected) and a short section holding Table S29. All tables come from `confs/trellis-v2/make_tables_r230.py`, which reads the result files.
+
+## Moved
+- Judged-example table of the context-abstraction study (was Table 8 in the main paper) to the supplement as Table S29, to hold the main text near 22 pages. The main text points to it.
+
+## Checks
+- No numeric discrepancy between the r230 md and the data files. The md's "R-syn b = 6 and 7 (.64-.67 / .60-.65)" is a seed-by-level pairing (b=7 is .646 / .600). C9 max syntax-only .41 is the W'=2 setting at b=4, seed 17 (.408).

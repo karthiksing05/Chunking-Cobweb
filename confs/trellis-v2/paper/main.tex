@@ -56,7 +56,7 @@ The code for held-out sentences is about 2 bits shorter than a byte-pair code, a
 It is 5 to 7 bits longer than trigram and neural codes.
 With 250 training sentences the system writes new, judged-grammatical sentences about as often as a matched LSTM and GPT. At 500 sentences it matches them on eight seeds pooled and trails the LSTM on four confirmation seeds, and at 1,000 and 4,000 sentences both neural models lead.
 A dial that raises the abstraction of the generator's words shows a regularity in language and in chess: abstraction costs meaning before it costs grammar.
-The grammatical but meaningless regime stays thin, with a syntax-only share of at most .27 against a target of .5 that equals the ceiling of an oracle word swapper.
+On TinyStories the grammatical but meaningless regime stays thin, with a syntax-only share of at most .27 against a target of .5 that equals the ceiling of an oracle word swapper. On a controlled grammar with an exact judge, the same dial yields all three regimes, with a syntax-only share of .60 to .67.
 \end{abstract}
 
 \section{Introduction}
@@ -98,7 +98,7 @@ a recall trial after Chase and Simon, and judged examples of each output regime,
 \textbf{Contributions.} We present an unsupervised, incremental, gradient-free learner of concepts and chunks that parses and generates from one memory.
 In chess its chunks carry the compression and the recall pattern, encode recognizable chess ideas, and code shifted positions in 4 more bits than a shape-based byte-pair coder needs.
 In children's stories the chunks carry nothing we could measure, the concepts carry the generation results, and a two-model judge finds the system level with an LSTM and a GPT at 250 sentences and behind them with more data.
-A dial on the abstraction of the generator's words, context, or locations shows that abstraction costs meaning before grammar, in language and in chess.
+A dial on the abstraction of the generator's words, context, or locations shows that abstraction costs meaning before grammar, in language and in chess. On TinyStories the middle regime stays thin, and on a controlled grammar with an exact judge the same dial produces all three.
 
 \section{Concepts and Chunks in \trellis{}}
 
@@ -545,7 +545,7 @@ Any learner that stores more chunks with more data would recall more, so the ord
 
 Language can be grammatical and meaningful, grammatical and meaningless, or neither. We asked how the output of \trellis{} moves among these three regimes as the abstraction of the generator's words, context, or locations rises.
 We call them meaningful, syntax-only, and nonsense, and judge 2 defines each: a sentence is meaningful if it passes both the syntax and the meaning question, syntax-only if it passes syntax and fails meaning, and nonsense if it fails syntax.
-A strong form of the hypothesis holds that an interior setting of the dial would produce the syntax-only regime at a share of one half or more, which would show that the memory separates how words combine from their referents. The evidence supports a weaker regularity, and the strong form is not met.
+A strong form of the hypothesis holds that an interior setting of the dial would produce the syntax-only regime at a share of one half or more, which would show that the memory separates how words combine from their referents. On TinyStories the evidence supports a weaker regularity, and the strong form is not met; a controlled grammar with an exact judge meets it (Figure~\ref{fig:controlled}).
 Every dial (word, context, and location abstraction, and context reach) is a read-out of the taxonomies and the context window that the learner already holds, and learning, storage, and the generator stay those of the main configuration, so the dials add no new machinery. Configuration C6 also changes the representation, because its word taxonomy describes each word by its function-word neighbors. The class-level pair gate of C6 reads the stored word pairs at level $b$, and C9 reads the stored context window at level $b$ and reach $W'$ while the emitted word stays exact.
 
 \paragraph{The judge separates the regimes.} Judge 2 passes syntax on .88 of held-out sentences whose content words we swapped within part of speech and meaning on only .13 of them, and it rejects scrambles and agreement errors on both questions (Supplement, Table~S12).
@@ -601,30 +601,7 @@ Legality (share of legal boards, solid) and realism (share of real-looking board
 \label{fig:law}
 \end{figure}
 
-Table~\ref{tab:showcase} gives judged examples of each regime. The syntax-only draws mostly repeat a word or attach an odd object, and the nonsense draws break agreement or word order.
-
-\begin{table}[!htbp]
-\caption{Judged generated sentences by regime, quoted exactly from the judge-2 reports of the context-abstraction study (TinyStories, seed 13, 1,000 sentences, window 5, temperature 1, pair gate on). The label is the judge's.
-The window is the width of the stored context records, and the reach $W'$ is the number of those words that the generator reads. Content words and function words of the context are read exactly (leaf) or at level $b$ (root means a wildcard).
-Each report lists five random draws per setting. We picked the examples by label.}
-\label{tab:showcase}
-\begin{center}
-\footnotesize
-\begin{tabular}{lp{0.34\textwidth}p{0.36\textwidth}}
-\toprule
-Regime & Setting & Sentence \\
-\midrule
-Meaningful & exact context, $W'=3$ & anna and ben looked at each other \\
- & exact content words, function words at $b=4$, $W'=3$ & tom was sad and scared \\
- & content words at the root, function words at $b=4$, $W'=3$ & tim saw his mom \\
-Syntax-only & exact context, $W'=3$ & she felt so happy and happy \\
- & exact content words, function words at $b=6$, $W'=3$ & lily and lily thanked her \\
-Nonsense & exact context, $W'=0$ & the cat happy \\
- & exact context, $W'=0$ & mia said and the ball \\
-\bottomrule
-\end{tabular}
-\end{center}
-\end{table}
+Supplement Table~S29 gives judged examples of each regime. The syntax-only draws mostly repeat a word or attach an odd object, and the nonsense draws break agreement or word order.
 
 \paragraph{The middle regime is not reached.} The largest syntax-only share over every setting, seed, and size is .265, against a target of .5. We looked for the cause with oracles that need no model.
 An oracle that takes the meaningful sentences of the best generator and swaps every noun, verb, and adjective within exact morphosyntactic cells (tense, number, verb frame) reaches a syntax-only share of .45, .50, and .52 on the three runs.
@@ -632,6 +609,30 @@ The target of .5 therefore equals the ceiling of perfect morphosyntactic swaps, 
 An older protocol that protects the 50 most frequent word types leaves .18 to .22 syntax-only for learned and part-of-speech classes, the level the generators already reach.
 Class sources that need no labels stay at .15 to .395 (Supplement, Table~S15 gives both protocols).
 Supplement Table~S16 gives the regime shares by context reach and abstraction (configuration C9, seed 13, 1,000 sentences), and the syntax-only share never exceeds .245 in any of the 36 cells. A move-selection study gives no legal-but-poor regime in chess either (Supplement, Table~S11).
+
+\subsection{A controlled grammar with an exact judge}
+
+The ceiling of .45 to .52 belongs to TinyStories and to judge 2, whose answers come from language models. We therefore ran the same dial on a controlled grammar.
+A context-free grammar with 147 words generates sentences with number agreement and verb frames, and selectional restrictions supply the meaning: each verb restricts the types of its subject and object, and each adjective restricts its noun.
+A rule-based judge, fixed before any generation, labels a sentence nonsense if it does not parse, syntax-only if it parses and violates a restriction, and meaningful if it parses and satisfies all restrictions.
+On 2,000 samples it scores grammar sentences meaningful at 1.000 and word shuffles nonsense at .994, and it sends same-category word swaps to syntax-only (.66, .85, and .91 for one, two, and three swapped words; Supplement, Table~S22).
+We trained the unchanged learner in configuration C6, with a word taxonomy built from the five most frequent function words, on 1,000 sentences (seeds 13 and 17) and judged 1,600 new generations per setting.
+
+One dial produces all three regimes (Figure~\ref{fig:controlled}; Supplement, Table~S25). At the leaf, .72 to .73 of the generations are meaningful. At $b=6$ and $b=7$, .60 to .67 are syntax-only, above the target of .5 on both seeds, and at $b=0$, .97 to .98 are nonsense (.88 at $b=2$).
+The word classes at $b=5$ to 7 pair words of one syntactic category in about .9 of class-mate pairs and words of one semantic type near chance (.15 to .21; Supplement, Table~S23). A class gate with class-level emission therefore keeps syntax and drops the restrictions.
+Dial C9, which abstracts the context while the word-level pair gate stays, gives no syntax-only share above .41, because the gate keeps the noun-verb and adjective-noun adjacencies that carry the restrictions (Supplement, Table~S26).
+When the data's syntax and meaning separate cleanly and the judge is exact, the same mechanism separates them, so the limit on TinyStories belongs to the data and the judge.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/controlled_regimes}
+\caption{Three regimes on one dial in the controlled grammar (configuration C6, rule-based judge). Left, regime shares at each level $b$ of the word taxonomy after 1,000 training sentences (line: mean of seeds 13 and 17; band: range). Right, the share of the target regime at the leaf (meaningful), at $b=6$ (syntax-only), and at $b=0$ (nonsense) against training sentences.}
+\label{fig:controlled}
+\end{figure}
+
+Six caveats apply. We chose the five-function-word feature set after reading the purity tables of five feature sets (Supplement, Table~S24), and with all-neighbor features the same levels are semantically pure (we did not run C6 on them).
+We ran two seeds. The meaningful share tops out near .75, because about a quarter of leaf generations violate an object restriction. At $b=6$ and $b=7$ the classes hold two words or fewer on average.
+The syntax-only share at $b=6$ needs 1,000 or more sentences (.37 to .49 at 500 or fewer, .56 to .69 at 1,000 or more; Supplement, Table~S27). The context dial fails to separate the regimes.
 
 \subsection{Chess: parse, then regenerate where or what}
 
@@ -677,7 +678,7 @@ The evidence for chunking as compression comes from chess. There removing the ch
 In short TinyStories sentences the evidence does not support the claim: the generator earns the margin over byte-pair coding, removing both chunks and concepts shortens the code further, and removing the chunks changes neither the code nor the generation counts.
 The concepts drive generation, and we suspect that a domain with recurring multi-part structure rewards chunks while short sentences do not, a hypothesis that remains untested.
 With 250 sentences the system writes new, judged-grammatical sentences about as often as matched LSTM and GPT models. It trails the LSTM at 500 sentences on the confirmation seeds, and both neural models lead at 1,000 and 4,000 sentences.
-The abstraction dial shows that abstraction costs meaning before grammar in language and in chess, and the grammatical but meaningless regime stays thin.
+The abstraction dial shows that abstraction costs meaning before grammar in language and in chess. On TinyStories the grammatical but meaningless regime stays thin, and an oracle ceiling explains why. On a controlled grammar with an exact judge, the same dial produces all three regimes, so the limit belongs to the data and the judge.
 
 \paragraph{Limitations.} The language compression and removal controls use two seeds, the generation ablations run at 1,000 sentences only, and the 4,000-sentence generation results use two seeds.
 The earlier judge chose every generation setting, and judge 2 is permissive on syntax and validated on constructed controls only.
@@ -720,10 +721,10 @@ C2 & Plain generator without the exact-boundary rule, windows 3 to 5, temperatur
 C3 & Learner of the generation study (posterior storage, window 7); default parser; four seeds, 250 to 1,000 sentences; set S & Tables~\ref{tab:cases} and \ref{tab:bio}, Table~S9, Figures~\ref{fig:chunkcases} and S2 \\
 C4 & Learner of the parsing-curve study (simpler candidate set); four seeds, 125 to 4,000 sentences; set C & Figure~S5, Tables~S6 to S8 \\
 C5 & Standard chess configuration: relational chunks of at most four pieces, in two variants (offsets only, and offsets plus squares); seed 13 (compression), seeds 13, 17, 19 (recall) & Table~\ref{tab:chess-bits}, Tables~\ref{tab:cstrial} and S10, Figures~\ref{fig:chesstypes} and \ref{fig:chesscases}, S3, S4, S7, Table~S11 \\
-C6 & Regime generator: pair-gated word generator, word taxonomy with function-word features, class-level pair gate and emission at level $b$, temperature .7 to 1, window 5 or 7; seeds 13 and 17 & Table~\ref{tab:regimecases}, Figure~\ref{fig:law}, Tables~S12 to S15 \\
+C6 & Regime generator: pair-gated word generator, word taxonomy with function-word features, class-level pair gate and emission at level $b$, temperature .7 to 1, window 5 or 7; seeds 13 and 17; in the controlled grammar (147 words, 1,000 sentences, window 5, temperature 1, five function-word features) & Table~\ref{tab:regimecases}, Figures~\ref{fig:law} and \ref{fig:controlled}, Tables~S12 to S15 and S22 to S28 \\
 C7 & Chess compression with the standard configuration C5 except that a new concept holding one position counts as one correct guess, as in the original Cobweb, instead of by the expected correct guesses of its pieces & shifted-set value 147.2 in Table~\ref{tab:chess-bits} \\
 C8 & Language compression and removal controls: the generator of C1 at temperature 1 as a code (window per size, uniform escape weight chosen on a development set); variants full, chunks off, concepts off (leaf reads), both off; seeds 13 and 17, 250 to 4,000 sentences (generation at 1,000 sentences, temperatures 1.2, 2.0, 3.0; judge 2) & Figure~S6, Table~S19, Table~S5 \\
-C9 & Context-abstraction generator: the pair-gated word generator of C6 with the context window read at level $b$ and reach $W'$ and the emitted word exact; seed 13, 1,000 sentences, window 5 & Table~\ref{tab:showcase}, Table~S16 \\
+C9 & Context-abstraction generator: the pair-gated word generator of C6 with the context window read at level $b$ and reach $W'$ and the emitted word exact; seed 13, 1,000 sentences, window 5 & Tables~S16 and S29 \\
 C10 & Standard chess configuration with chunks capped at one piece (chunks off) or leaf-only reads (concepts off); seeds 13, 17, 19, 4,000 positions & Table~S20 \\
 C11 & Chess position generator: the C5 learner, with positions drawn from distributions, regenerated from parses, or regenerated with the file or rank of each reference square redrawn; seeds 13 and 17, 500 to 4,000 positions & Figures~\ref{fig:law} and \ref{fig:boards}, Table~S17 \\
 \bottomrule

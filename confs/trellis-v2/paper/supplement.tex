@@ -24,7 +24,7 @@
          2164 Staunton Court, Palo Alto, CA 94306 USA}
 
 
-This document holds the tables and figures that the main paper cites by number (Tables S1 to S21 and Figures S1 to S7).
+This document holds the tables and figures that the main paper cites by number (Tables S1 to S29 and Figures S1 to S7).
 Configurations C1 to C11 are those of Table 11 in the main paper. Every result uses TinyStories sentences of three to eight words from a 250-word vocabulary, or Lichess positions, as in the main paper.
 Judge 2 is the ensemble of Qwen3-8B and phi-4 that the main paper reports, and the earlier judge is Qwen2.5-3B with a grammaticality probability above .5.
 
@@ -666,6 +666,218 @@ Shift +1 file & 26 & 16 & .615 \\
 Shift $-$1 file & 53 & 38 & .717 \\
 Shift +2 files & 4 & 2 & .500 \\
 Shift $-$2 files & 13 & 5 & .385 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+
+
+\section{Controlled Grammar}
+
+This section documents the controlled-grammar study of the main paper (configurations C6 and C9; code \texttt{r230\_grammar.py} and \texttt{r230\_story.py}, results in \texttt{results/story\_gen/r230}).
+All tables are generated from the result files by \texttt{make\_tables\_r230.py}.
+
+\paragraph{Grammar and judge.} Sentences follow S $\to$ NP VP, NP $\to$ Det (Adj) N, and VP $\to$ Vi $\mid$ Vt NP $\mid$ Vpp Prep NP.
+The determiners are \textit{a} (singular), \textit{some} (plural), and \textit{the} (either), and the verb agrees with its subject in number. Each verb has one frame, and verbs of the third kind fix their preposition (\textit{to} or \textit{in}).
+Five noun types (person, animal, food, place, object; eight nouns each) carry the meaning. Each verb restricts the type of its subject, its object, or its complement, and each of 14 adjectives restricts the type of its noun.
+The lexicon has 147 words (80 noun forms, 48 verb forms, 14 adjectives, 3 determiners, 2 prepositions), sentences have 3 to 8 words, and 20,000 samples hold 14,720 distinct sentences. Nouns pluralize by adding \textit{s}, so ``womans'' and ``foxs'' are legal tokens.
+The judge labels a sentence nonsense if it does not parse (noun-phrase structure, agreement, verb frame, preposition), syntax-only if it parses and some selectional restriction fails, and meaningful if it parses and all restrictions hold.
+We fixed the judge before any generation. The learner is the unchanged \textsc{Trellis3R223} in the TinyStories configuration (window 5, edge-exact generator, token input, word pair gate, temperature 1), with the TinyStories data replaced by grammar samples and every generation new (not a stored training sentence).
+We trained on 250 to 4,000 sentences with seeds 13 and 17 and judged 1,600 unconditioned generations per setting (400 prompts, four draws each).
+
+\begin{table}[h]
+\caption{Judge controls on 2,000 sentences each. A same-category swap lands in the meaningful regime when the new word keeps the semantic type, hence .337 for one swap.}
+\label{tab:r230controls}
+\begin{center}
+\small
+\begin{tabular}{lccc}
+\toprule
+Set & Meaningful & Syntax-only & Nonsense \\
+\midrule
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+\paragraph{Word-taxonomy purity.} A pair of class mates is syntactically pure if both words share a syntactic category (part of speech, number, and verb frame or preposition) and semantically pure if both content words of the same kind share a semantic type (noun type, verb restriction profile, or adjective restriction set).
+Chance is .17 for syntax and .158 for semantics. Table~\ref{tab:r230purity} gives the taxonomy of the function-word feature set that the study uses, with the five most frequent function words as features (func:5; 1,000 sentences; seeds 13 and 17).
+Table~\ref{tab:r230feat} compares the feature sets. The feature set decides whether the classes carry meaning: with all-neighbor features the semantic purity rises with $b$, and with function-word features it stays near chance.
+We chose func:5 after reading these tables, so the choice is a representation decision made with knowledge of the result.
+
+\begin{table}[h]
+\caption{Purity of the func:5 word taxonomy at each level $b$ (seed 13 / seed 17). Chance purity is .170 (syntax) and .158 (semantics).}
+\label{tab:r230purity}
+\begin{center}
+\small
+\begin{tabular}{lccc}
+\toprule
+Level $b$ & Classes & Syntactic purity & Semantic purity \\
+\midrule
+$0$ & 1 & .170 / .170 & .158 / .158 \\
+2 & 3 & .469 / .456 & .158 / .150 \\
+3 & 9 & .590 / .709 & .147 / .135 \\
+4 & 17-18 & .778 / .817 & .164 / .153 \\
+5 & 34 & .872 / .806 & .170 / .178 \\
+6 & 50-53 & .912 / .925 & .176 / .152 \\
+7 & 69-71 & .906 / .916 & .205 / .152 \\
+leaf & 106-107 & .902 / .928 & .230 / .193 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[h]
+\caption{Purity by feature set at three levels (syntactic / semantic purity, mean of seeds 13 and 17; 1,000 sentences). The feature set \texttt{all} uses every neighbor word, and func:$K$ uses the $K$ most frequent function words.}
+\label{tab:r230feat}
+\begin{center}
+\small
+\begin{tabular}{lccc}
+\toprule
+Features & $b=5$ & $b=6$ & $b=7$ \\
+\midrule
+all & 0.84 / 0.50 & 0.94 / 0.56 & 0.93 / 0.61 \\
+func5 & 0.84 / 0.17 & 0.92 / 0.16 & 0.91 / 0.18 \\
+func8 & 0.81 / 0.19 & 0.93 / 0.19 & 0.93 / 0.21 \\
+func15 & 0.81 / 0.22 & 0.94 / 0.23 & 0.92 / 0.23 \\
+func30 & 0.87 / 0.31 & 0.95 / 0.32 & 0.93 / 0.32 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+\paragraph{The dial.} Table~\ref{tab:r230dial} gives the regime shares of configuration C6 at 1,000 sentences with reach $W'=5$, and Table~\ref{tab:r230c9} gives configuration C9.
+At the leaf the reach changes the meaningful share as follows (meaningful, seeds 13 / 17): $W'=0$, .065 / .074 (nonsense .892 / .854); $W'=1$, .219 / .210; $W'=2$, .658 / .713; $W'=3$, .828 / .846 (best); $W'=5$, .728 / .719.
+In C9 the nonsense share appears only at reach $W'\le 2$ (about .52 at every level for $W'=1$).
+
+\begin{table}[h]
+\caption{Configuration C6 in the controlled grammar (1,000 sentences, reach $W'=5$, 1,600 generations; seed 13 / seed 17): class gate and class-level emission at level $b$ on the func:5 taxonomy.}
+\label{tab:r230dial}
+\begin{center}
+\small
+\begin{tabular}{lccc}
+\toprule
+Setting & Meaningful & Syntax-only & Nonsense \\
+\midrule
+leaf, $W'=5$ & .728 / .719 & .239 / .249 & .033 / .032 \\
+$b=7$ & .209 / .263 & .646 / .600 & .146 / .137 \\
+$b=6$ & .193 / .234 & .667 / .636 & .140 / .130 \\
+$b=5$ & .146 / .154 & .639 / .548 & .215 / .297 \\
+$b=4$ & .090 / .116 & .504 / .562 & .406 / .322 \\
+$b=3$ & .036 / .083 & .268 / .524 & .697 / .393 \\
+$b=2$ & .016 / .011 & .100 / .108 & .884 / .881 \\
+$b=0$ & .003 / .003 & .016 / .028 & .981 / .969 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[h]
+\caption{Configuration C9 in the controlled grammar (context window read at level $b$, exact emission, word-level pair gate, reach $W'=5$; seed 13 / seed 17). The last column is the largest syntax-only share over $W'=1,2,3,5$.}
+\label{tab:r230c9}
+\begin{center}
+\small
+\begin{tabular}{lcccc}
+\toprule
+Level $b$ & Meaningful & Syntax-only & Nonsense & Max syntax-only \\
+\midrule
+leaf & .728 / .719 & .239 / .249 & .033 / .032 & .239 / .258 \\
+7 & .723 / .686 & .260 / .304 & .018 / .011 & .260 / .304 \\
+6 & .713 / .709 & .275 / .284 & .013 / .007 & .287 / .284 \\
+5 & .702 / .684 & .288 / .314 & .010 / .002 & .296 / .378 \\
+4 & .634 / .616 & .361 / .381 & .004 / .003 & .369 / .408 \\
+3 & .636 / .617 & .359 / .379 & .005 / .004 & .370 / .407 \\
+0 & .584 / .592 & .398 / .391 & .018 / .018 & .398 / .391 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+\paragraph{Learning curves.} Table~\ref{tab:r230curve} gives the three regime shares (meaningful / syntax-only / nonsense) of configuration C6 at the leaf, at $b=6$, and at $b=0$ for 250 to 4,000 training sentences.
+The syntax-only share at $b=6$ rises with data as the word taxonomy sharpens. The meaningful share at the leaf stays at about three quarters at every size, and the nonsense share at the leaf falls to .003.
+
+\begin{table}[h]
+\caption{Learning curves of configuration C6 (reach $W'=5$; meaningful / syntax-only / nonsense).}
+\label{tab:r230curve}
+\begin{center}
+\footnotesize
+\begin{tabular}{llccc}
+\toprule
+Sentences & Seed & Leaf & $b=6$ & $b=0$ \\
+\midrule
+250 & 13 & .668/.223/.109 & .212/.435/.353 & .003/.015/.983 \\
+250 & 17 & .639/.291/.069 & .126/.371/.502 & .003/.021/.976 \\
+500 & 13 & .669/.263/.069 & .259/.487/.254 & .007/.014/.979 \\
+500 & 17 & .693/.255/.052 & .111/.374/.515 & .005/.026/.969 \\
+1,000 & 13 & .728/.239/.033 & .193/.667/.140 & .003/.016/.981 \\
+1,000 & 17 & .719/.249/.032 & .234/.636/.130 & .003/.028/.969 \\
+2,000 & 13 & .709/.280/.011 & .221/.641/.138 & .001/.021/.978 \\
+2,000 & 17 & .723/.269/.009 & .270/.558/.172 & .004/.021/.974 \\
+4,000 & 13 & .748/.249/.003 & .210/.685/.105 & .001/.025/.974 \\
+4,000 & 17 & .721/.277/.003 & .184/.659/.156 & .005/.028/.967 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+\paragraph{Examples.} Table~\ref{tab:r230ex} lists the first three of the five stored random generations of each regime for each seed (1,000 sentences, reach $W'=5$; meaningful from the leaf, syntax-only from $b=6$, nonsense from $b=0$), in file order and without selection.
+The reason column is the judge's. At $b=0$ the rare meaningful and syntax-only sentences are chance hits.
+
+\begin{table}[h]
+\caption{Generated sentences of the controlled grammar, first three per regime and seed from \texttt{examples.jsonl}, labeled by the rule-based judge.}
+\label{tab:r230ex}
+\begin{center}
+\small
+\begin{tabular}{llp{0.42\textwidth}l}
+\toprule
+Seed & Regime & Sentence & Judge's reason \\
+\midrule
+13 & meaningful & the sleepy woman eats the cake &  \\
+ &  & a tall teacher buys the book &  \\
+ &  & the big mans buy a box &  \\
+ & syntax-only & a pie bakes a cow & subject + object \\
+ &  & the woman returns to some cakes & object \\
+ &  & a boy feeds a sleepy park & object + adjective \\
+ & nonsense & some runs returns some farmer & subject NP \\
+ &  & a laughs egg sleep & subject NP \\
+ &  & a dogs cookie man & subject NP \\
+17 & meaningful & the horse goes to a farm &  \\
+ &  & the baker eats some carrots &  \\
+ &  & the womans walk to the houses &  \\
+ & syntax-only & a old girl returns to a woman & object \\
+ &  & the small shops smile & subject \\
+ &  & some dogs go to the doctors & object \\
+ & nonsense & the garden returns to the visit school & object NP \\
+ &  & the womans dog & verb \\
+ &  & the bakers sleepy visit markets & verb \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\section{Judged Examples on TinyStories}
+
+Table~\ref{tab:showcase} gives judged examples of each regime from the context-abstraction study of the main paper.
+
+\begin{table}[h]
+\caption{Judged generated sentences by regime, quoted exactly from the judge-2 reports of the context-abstraction study (TinyStories, seed 13, 1,000 sentences, window 5, temperature 1, pair gate on). The label is the judge's.
+The window is the width of the stored context records, and the reach $W'$ is the number of those words that the generator reads. Content words and function words of the context are read exactly (leaf) or at level $b$ (root means a wildcard).
+Each report lists five random draws per setting. We picked the examples by label.}
+\label{tab:showcase}
+\begin{center}
+\footnotesize
+\begin{tabular}{lp{0.34\textwidth}p{0.36\textwidth}}
+\toprule
+Regime & Setting & Sentence \\
+\midrule
+Meaningful & exact context, $W'=3$ & anna and ben looked at each other \\
+ & exact content words, function words at $b=4$, $W'=3$ & tom was sad and scared \\
+ & content words at the root, function words at $b=4$, $W'=3$ & tim saw his mom \\
+Syntax-only & exact context, $W'=3$ & she felt so happy and happy \\
+ & exact content words, function words at $b=6$, $W'=3$ & lily and lily thanked her \\
+Nonsense & exact context, $W'=0$ & the cat happy \\
+ & exact context, $W'=0$ & mia said and the ball \\
 \bottomrule
 \end{tabular}
 \end{center}
