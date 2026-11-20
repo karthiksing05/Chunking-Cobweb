@@ -25,6 +25,7 @@ spec = [("unigram", "word unigram", GREY, "-", 1.4),
         ("bpe", "BPE + unigram code", PURPLE, "-", 1.6),
         ("trellis", "TRELLIS", BLUE, "-", 2.6),
         ("trellis_noconcept", "TRELLIS, concepts off", BLUE, "--", 1.4),
+        ("trellis_neither", "TRELLIS, both off", BLUE, ":", 1.6),
         ("kn3", "Kneser-Ney trigram", ORANGE, "-", 1.6),
         ("gpt", "GPT", GREEN, "-", 1.6),
         ("lstm", "LSTM", RED, "-", 1.6)]
@@ -38,7 +39,7 @@ ends.sort()
 # spread end labels by at least 1.15 bits
 pos = []
 for y, lab, col in ends:
-    p = y if not pos or y - pos[-1][0] >= 1.15 else pos[-1][0] + 1.15
+    p = y if not pos or y - pos[-1][0] >= 1.5 else pos[-1][0] + 1.5
     pos.append((p, lab, col, y))
 for p, lab, col, y in pos:
     ax.annotate(lab, xy=(4000, y), xytext=(4350, p), color=col, fontsize=8.5, va="center",
@@ -57,10 +58,10 @@ plt.close(fig)
 
 # ---------- Figure 2: the abstraction law ----------
 levels = ["leaf", "b=7", "b=6", "b=4", "root"]
-runs = {  # R-sem, R-syn per level, from Table dial (r214 Addendum 7)
-    "1,000 s13": [(.630, .170), (.331, .255), (.197, .208), (.107, .140), (.034, .095)],
-    "4,000 s13": [(.634, .176), (.293, .211), (.180, .161), (.087, .116), (.029, .082)],
-    "4,000 s17": [(.621, .182), (.323, .265), (.201, .225), (.116, .157), (.033, .083)],
+runs = {  # R-sem, R-syn per level, from Table dial (r214 Addendum 7); leaf = generation temperature 1 (same as class levels)
+    "1,000 s13": [(.558, .206), (.331, .255), (.197, .208), (.107, .140), (.034, .095)],
+    "4,000 s13": [(.580, .193), (.293, .211), (.180, .161), (.087, .116), (.029, .082)],
+    "4,000 s17": [(.541, .218), (.323, .265), (.201, .225), (.116, .157), (.033, .083)],
 }
 marks = {"1,000 s13": "o", "4,000 s13": "s", "4,000 s17": "^"}
 fig, axs = plt.subplots(1, 3, figsize=(7.4, 2.9), gridspec_kw={"wspace": 0.42})
@@ -89,11 +90,16 @@ real = [.890, .790, .738, .718, .696, .696, .681]
 legal = [.890 + .056, .790 + .139, .738 + .184, .718 + .206, .696 + .215, .696 + .216, .681 + .233]
 c.plot(range(7), [r / .945 for r in real], "--", color=ORANGE, marker="o", ms=4, lw=1.3, mfc="white")
 c.plot(range(7), legal, "-", color=BLUE, marker="o", ms=4, lw=1.3)
+# where-rank dial (r227): kc 0, 2, 6, root at x = 0, 2, 5, 6
+rx = [0, 2, 5, 6]
+rreal = [.829, .480, .219, .193]; rleg = [.829 + .053, .480 + .091, .219 + .121, .193 + .137]
+c.plot(rx, [r / .945 for r in rreal], "--", color=ORANGE, marker="s", ms=4, lw=1.3, mfc="white")
+c.plot(rx, rleg, "-", color=BLUE, marker="s", ms=4, lw=1.3)
 c.set_xticks(range(7)); c.set_xticklabels(kc, fontsize=8)
-c.set_ylim(0, 1.05); c.set_xlabel("anchor-file abstraction level", fontsize=8)
-c.set_ylabel("fraction of identity retained")
-c.set_title("Chess: where-file", fontsize=9)
-c.text(2.2, 0.60, "realism", color=ORANGE, fontsize=8.5); c.text(0.3, 0.99, "legality", color=BLUE, fontsize=8.5)
+c.set_ylim(0, 1.05); c.set_xlabel("anchor abstraction level", fontsize=8)
+c.set_ylabel("fraction of real board retained")
+c.set_title("Chess: file (o), rank (s)", fontsize=9)
+c.text(3.2, 0.58, "realism", color=ORANGE, fontsize=8.5); c.text(0.3, 0.99, "legality", color=BLUE, fontsize=8.5)
 c.grid(axis="y", color="#e3e3e3", lw=0.6)
 for ax_ in axs[:2]:
     ax_.set_xlabel("abstraction level", fontsize=8)
