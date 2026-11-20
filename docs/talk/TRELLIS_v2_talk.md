@@ -254,3 +254,18 @@ Notes: Backup. AUC compares grammatical sentences against each broken class alon
 Table: Candidates | Loses material | Illegal / Legal moves, best recognized (1,000 positions learned) | .38 | 0 / Legal moves, uniform random | .35 | 0 / Any displacement, best recognized | .11 | .77 / Any displacement, uniform random | .10 | .70
 - Recognition barely separates poor legal moves from reasonable ones, and it prefers legal moves only slightly over chance.
 Notes: Backup. In chess we asked the same regime question about moves. TRELLIS has no move generator, so it plays the legal move after which memory recognizes the resulting position best. Among legal moves, the share that lose at least two pawns of material stays between .27 and .42 across every setting we tried, around the .35 of a uniformly random legal move, so recognition does not separate poor moves from reasonable ones. When the model is not told the rules and chooses among legal moves and random displacements, about three quarters of candidates are illegal, and its best-recognized picks are illegal .77 of the time against .70 for a random pick. The judge is a material criterion, not an engine, so it catches hung pieces and lost exchanges but not positional sense.
+
+## Figure slides added 2026-11-19 (deck is now 40 slides)
+The sections above keep the original 1-29 numbering. Eleven figure slides were added from the detailed site (docs/site/trellis_full.html), and later slides shifted: old 13-16 are now 14-17, old 17-18 are 19-20, old 19-20 are 23-24, old 21 is 28, old 22 is 30, old 23-29 are 34-40. Titles, takeaways and speaker notes are in the deck; figures are PNGs under docs/talk/build/img/ (not committed), uploaded to the Drive image folder and shown by URL. New slide, figure, source:
+- 13 Generation Across Experience: generation_fair_count.png, made by docs/talk/build/fig_talk_curves.py from the 8-seed means in experiments/v3/results/story_gen/r212_seeds.md (judge in that round is Qwen2.5-3B).
+- 18 Parsing Along Training: parse_success_curve.png, fig_talk_curves.py from experiments/v3/results/story_parse_eval/r216_figure.tsv (p_succ_set_mean; same numbers as slide 17).
+- 21 Story Chunks Through Experience: docs/site/story_chunks_cases.png.
+- 22 Phrase Chunks Over Experience: docs/site/story_chunks_curves.png.
+- 25 Frequent Chess Chunks: docs/site/chess_chunk_types.png.
+- 26 Chess Chunks Through Experience: docs/site/chess_ideas_cases.png.
+- 27 One Position, Real and Scrambled: docs/site/chess_case.png.
+- 29 Compression Across Experience: docs/site/chess_chunkers.png.
+- 31 Recall Across Experience: docs/site/chess_cs1973_curve.png (data experiments/v3/results/chess_cs1973_exact/).
+- 32 Chase and Simon Trials: docs/site/cs_fig1.png.
+- 33 Chess Ideas Over Experience: docs/site/chess_ideas_curves.png.
+Build scripts: docs/talk/build/fig_talk_curves.py (matplotlib figures), gen3.py and gen4.py (slide text, notes and request batches).
