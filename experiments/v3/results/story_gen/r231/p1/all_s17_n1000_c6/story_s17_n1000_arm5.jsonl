@@ -1,0 +1,1601 @@
+{"arm": {"cond": false, "wreach": 5, "wemit": 4, "wemitk": 5, "wgate": 4, "causal": 1, "units": "words", "pair": "gate", "new": true, "edge": "exact"}}
+{"prompt": "some dogs chase the horses", "gen": "a dog bakes some small farms", "pattern": true, "novel": true}
+{"prompt": "some dogs chase the horses", "gen": "the sweet hat breaks", "pattern": true, "novel": true}
+{"prompt": "some dogs chase the horses", "gen": "a boy feeds the balls", "pattern": true, "novel": true}
+{"prompt": "some dogs chase the horses", "gen": "the old teachers eat a woman", "pattern": true, "novel": true}
+{"prompt": "the big dog stays in a garden", "gen": "a baker carries a hat", "pattern": true, "novel": true}
+{"prompt": "the big dog stays in a garden", "gen": "the girl eats the pies", "pattern": true, "novel": true}
+{"prompt": "the big dog stays in a garden", "gen": "a girl hugs the big dog", "pattern": true, "novel": true}
+{"prompt": "the big dog stays in a garden", "gen": "a dog run", "pattern": true, "novel": true}
+{"prompt": "a dog eats the cake", "gen": "a girl carries some small book", "pattern": true, "novel": true}
+{"prompt": "a dog eats the cake", "gen": "the small dogs eat some big apples", "pattern": true, "novel": true}
+{"prompt": "a dog eats the cake", "gen": "a boy eats the apple", "pattern": true, "novel": true}
+{"prompt": "a dog eats the cake", "gen": "the boy eats the chairs", "pattern": true, "novel": true}
+{"prompt": "some teachers eat a sweet cake", "gen": "the farmer breaks", "pattern": true, "novel": true}
+{"prompt": "some teachers eat a sweet cake", "gen": "the hungry doctor shops", "pattern": false, "novel": true}
+{"prompt": "some teachers eat a sweet cake", "gen": "a girl cleans the tall cups", "pattern": true, "novel": true}
+{"prompt": "some teachers eat a sweet cake", "gen": "the happy girls run", "pattern": true, "novel": true}
+{"prompt": "the farmer cleans the small chair", "gen": "a dog live to some apples", "pattern": true, "novel": true}
+{"prompt": "the farmer cleans the small chair", "gen": "the girl helps the cup", "pattern": true, "novel": true}
+{"prompt": "the farmer cleans the small chair", "gen": "a boy cooks a woman apple", "pattern": false, "novel": true}
+{"prompt": "the farmer cleans the small chair", "gen": "the boy buys the farm", "pattern": true, "novel": true}
+{"prompt": "some dogs eat the apple", "gen": "a girl carries the big ball", "pattern": true, "novel": true}
+{"prompt": "some dogs eat the apple", "gen": "the rabbits cook a ripe house", "pattern": true, "novel": true}
+{"prompt": "some dogs eat the apple", "gen": "the hungry rabbit goes to a old cookie", "pattern": true, "novel": true}
+{"prompt": "some dogs eat the apple", "gen": "the ripe lemon sleep", "pattern": true, "novel": true}
+{"prompt": "a old man goes to the market", "gen": "the small mans chase the market", "pattern": true, "novel": true}
+{"prompt": "a old man goes to the market", "gen": "the pig goes to the farm", "pattern": true, "novel": true}
+{"prompt": "a old man goes to the market", "gen": "the small teachers in a small book", "pattern": false, "novel": true}
+{"prompt": "a old man goes to the market", "gen": "the girl carries the box", "pattern": true, "novel": true}
+{"prompt": "the small teachers help the tall boy", "gen": "a farmer feeds the eggs", "pattern": true, "novel": true}
+{"prompt": "the small teachers help the tall boy", "gen": "a small baker smiles", "pattern": true, "novel": true}
+{"prompt": "the small teachers help the tall boy", "gen": "a boy sleeps", "pattern": true, "novel": true}
+{"prompt": "the small teachers help the tall boy", "gen": "the girl lives to a hungry houses", "pattern": true, "novel": true}
+{"prompt": "the teacher bakes a egg", "gen": "a farmer buys the horses eggs", "pattern": false, "novel": true}
+{"prompt": "the teacher bakes a egg", "gen": "a woman works bake some tall school", "pattern": false, "novel": true}
+{"prompt": "the teacher bakes a egg", "gen": "the teacher buys a market", "pattern": true, "novel": true}
+{"prompt": "the teacher bakes a egg", "gen": "a girl fixes a ball", "pattern": true, "novel": true}
+{"prompt": "the ball breaks", "gen": "the womans eat some quiet pigs", "pattern": true, "novel": true}
+{"prompt": "the ball breaks", "gen": "the horses smile", "pattern": true, "novel": true}
+{"prompt": "the ball breaks", "gen": "some sweet breaks", "pattern": false, "novel": true}
+{"prompt": "the ball breaks", "gen": "the old dogs smile", "pattern": true, "novel": true}
+{"prompt": "the old boys smile", "gen": "the boys return to a big market", "pattern": true, "novel": true}
+{"prompt": "the old boys smile", "gen": "the old mans walks in some happy farms", "pattern": true, "novel": true}
+{"prompt": "the old boys smile", "gen": "the baker eats the old cookies", "pattern": true, "novel": true}
+{"prompt": "the old boys smile", "gen": "some boys buy a hat", "pattern": true, "novel": true}
+{"prompt": "the girls carry a cup", "gen": "the kind girl chases the dogs", "pattern": true, "novel": true}
+{"prompt": "the girls carry a cup", "gen": "some tall mans spoils", "pattern": true, "novel": true}
+{"prompt": "the girls carry a cup", "gen": "some womans eat a cookie", "pattern": true, "novel": true}
+{"prompt": "the girls carry a cup", "gen": "the tall boy eats a apple", "pattern": true, "novel": true}
+{"prompt": "the boys buy a ball", "gen": "some boys walks eat a man house", "pattern": false, "novel": true}
+{"prompt": "the boys buy a ball", "gen": "the boy cleans the box", "pattern": true, "novel": true}
+{"prompt": "the boys buy a ball", "gen": "the farmers work buy some small cookies", "pattern": false, "novel": true}
+{"prompt": "the boys buy a ball", "gen": "a school runs", "pattern": true, "novel": true}
+{"prompt": "a dog runs", "gen": "a old boy eats the apples", "pattern": true, "novel": true}
+{"prompt": "a dog runs", "gen": "the doctors laughs", "pattern": true, "novel": true}
+{"prompt": "a dog runs", "gen": "the big farmers works to a house", "pattern": true, "novel": true}
+{"prompt": "a dog runs", "gen": "the girls walks eat some small houses", "pattern": false, "novel": true}
+{"prompt": "a girl hugs the happy boys", "gen": "the boys buy a book", "pattern": true, "novel": true}
+{"prompt": "a girl hugs the happy boys", "gen": "some mans clean the apple", "pattern": true, "novel": true}
+{"prompt": "a girl hugs the happy boys", "gen": "a carrot runs", "pattern": true, "novel": true}
+{"prompt": "a girl hugs the happy boys", "gen": "some farmers in a cat", "pattern": false, "novel": true}
+{"prompt": "the quiet rabbits return to a house", "gen": "the sleepy bakers return to the happy cake", "pattern": true, "novel": true}
+{"prompt": "the quiet rabbits return to a house", "gen": "a small boy hugs some cats", "pattern": true, "novel": true}
+{"prompt": "the quiet rabbits return to a house", "gen": "a boy cooks a teacher apple", "pattern": false, "novel": true}
+{"prompt": "the quiet rabbits return to a house", "gen": "a hungry dog stays in the forest", "pattern": true, "novel": true}
+{"prompt": "the mans feed a dog", "gen": "some boys eat a ball", "pattern": true, "novel": true}
+{"prompt": "the mans feed a dog", "gen": "the girl buys a boy", "pattern": true, "novel": true}
+{"prompt": "the mans feed a dog", "gen": "a happy doctor spoil", "pattern": true, "novel": true}
+{"prompt": "the mans feed a dog", "gen": "the farmers lives to a cake", "pattern": true, "novel": true}
+{"prompt": "the womans laugh", "gen": "a kind woman buys the apples", "pattern": true, "novel": true}
+{"prompt": "the womans laugh", "gen": "a boy bakes a cake", "pattern": true, "novel": true}
+{"prompt": "the womans laugh", "gen": "a old boy stays to a old park", "pattern": true, "novel": true}
+{"prompt": "the womans laugh", "gen": "the bakers spoils", "pattern": true, "novel": true}
+{"prompt": "the girls work in the house", "gen": "the quiet red buy a small egg", "pattern": false, "novel": true}
+{"prompt": "the girls work in the house", "gen": "a fox cooks some books", "pattern": true, "novel": true}
+{"prompt": "the girls work in the house", "gen": "the ripe forest smiles", "pattern": true, "novel": true}
+{"prompt": "the girls work in the house", "gen": "the birds in the girl", "pattern": false, "novel": true}
+{"prompt": "some birds chase a happy cat", "gen": "the small baker chases the cookie", "pattern": true, "novel": true}
+{"prompt": "some birds chase a happy cat", "gen": "a happy girl eats the hungry ball", "pattern": true, "novel": true}
+{"prompt": "some birds chase a happy cat", "gen": "the boys returns to the house", "pattern": true, "novel": true}
+{"prompt": "some birds chase a happy cat", "gen": "a small girl go to some big cakes", "pattern": true, "novel": true}
+{"prompt": "the hungry man feeds the fox", "gen": "a tall teacher breaks", "pattern": true, "novel": true}
+{"prompt": "the hungry man feeds the fox", "gen": "a sweet apple runs", "pattern": true, "novel": true}
+{"prompt": "the hungry man feeds the fox", "gen": "the small baker stay to a sleepy house", "pattern": true, "novel": true}
+{"prompt": "the hungry man feeds the fox", "gen": "some teachers in the small dogs", "pattern": false, "novel": true}
+{"prompt": "the big cat sleeps", "gen": "a ripe book runs", "pattern": true, "novel": true}
+{"prompt": "the big cat sleeps", "gen": "the boys chase a old cat", "pattern": true, "novel": true}
+{"prompt": "the big cat sleeps", "gen": "the pig work carry the happy baker", "pattern": false, "novel": true}
+{"prompt": "the big cat sleeps", "gen": "some big boys stays to a sweet cake", "pattern": true, "novel": true}
+{"prompt": "the cake spoils", "gen": "the big boy go to a school", "pattern": true, "novel": true}
+{"prompt": "the cake spoils", "gen": "the horses returns cook some small house", "pattern": false, "novel": true}
+{"prompt": "the cake spoils", "gen": "the quiet boy walks hug the small pie", "pattern": false, "novel": true}
+{"prompt": "the cake spoils", "gen": "the happy girl run", "pattern": true, "novel": true}
+{"prompt": "the dog lives in the forests", "gen": "the girl walks in the market", "pattern": true, "novel": true}
+{"prompt": "the dog lives in the forests", "gen": "a woman eats a school", "pattern": true, "novel": true}
+{"prompt": "the dog lives in the forests", "gen": "the quiet cat work in the quiet apple", "pattern": true, "novel": true}
+{"prompt": "the dog lives in the forests", "gen": "some horses eat the cake", "pattern": true, "novel": true}
+{"prompt": "the boy bakes the big cake", "gen": "some mans in the small house", "pattern": false, "novel": true}
+{"prompt": "the boy bakes the big cake", "gen": "some red spoils", "pattern": false, "novel": true}
+{"prompt": "the boy bakes the big cake", "gen": "the farmer stay in the cake", "pattern": true, "novel": true}
+{"prompt": "the boy bakes the big cake", "gen": "the girl hugs the happy coats", "pattern": true, "novel": true}
+{"prompt": "a happy cow goes to a house", "gen": "some cows work in the sweet farm", "pattern": true, "novel": true}
+{"prompt": "a happy cow goes to a house", "gen": "the woman eats some cookies", "pattern": true, "novel": true}
+{"prompt": "a happy cow goes to a house", "gen": "the quiet boy walk to some cakes", "pattern": true, "novel": true}
+{"prompt": "a happy cow goes to a house", "gen": "the teachers in the old man", "pattern": false, "novel": true}
+{"prompt": "the happy boys cook the apples", "gen": "a girl bakes a apple", "pattern": true, "novel": true}
+{"prompt": "the happy boys cook the apples", "gen": "some bakers help the tall egg", "pattern": true, "novel": true}
+{"prompt": "the happy boys cook the apples", "gen": "the sweet pear sleeps", "pattern": true, "novel": true}
+{"prompt": "the happy boys cook the apples", "gen": "a small cow stays buy the house", "pattern": false, "novel": true}
+{"prompt": "a girl visits the big market", "gen": "the apples breaks", "pattern": true, "novel": true}
+{"prompt": "a girl visits the big market", "gen": "a girl carries the small dog", "pattern": true, "novel": true}
+{"prompt": "a girl visits the big market", "gen": "the happy farmer returns visit a quiet cookie", "pattern": false, "novel": true}
+{"prompt": "a girl visits the big market", "gen": "the girl hugs the girls", "pattern": true, "novel": true}
+{"prompt": "a doctor helps a boy", "gen": "the cats returns help some old park", "pattern": false, "novel": true}
+{"prompt": "a doctor helps a boy", "gen": "the horse go to the house", "pattern": true, "novel": true}
+{"prompt": "a doctor helps a boy", "gen": "a boy cooks a sweet pie", "pattern": true, "novel": true}
+{"prompt": "a doctor helps a boy", "gen": "the small cat stays chase the apples", "pattern": false, "novel": true}
+{"prompt": "the apples spoil", "gen": "a boy returns to the big forest", "pattern": true, "novel": true}
+{"prompt": "the apples spoil", "gen": "the cakes runs", "pattern": true, "novel": true}
+{"prompt": "the apples spoil", "gen": "a boy work eat some happy lemons", "pattern": false, "novel": true}
+{"prompt": "the apples spoil", "gen": "the hungry pigs walk in a old forest", "pattern": true, "novel": true}
+{"prompt": "the quiet girl laughs", "gen": "the doctors live in a pie", "pattern": true, "novel": true}
+{"prompt": "the quiet girl laughs", "gen": "the big teacher cleans a small cookies", "pattern": true, "novel": true}
+{"prompt": "the quiet girl laughs", "gen": "the baker feeds some farms", "pattern": true, "novel": true}
+{"prompt": "the quiet girl laughs", "gen": "a cow returns to the cake", "pattern": true, "novel": true}
+{"prompt": "the girl smiles", "gen": "some mans in the books", "pattern": false, "novel": true}
+{"prompt": "the girl smiles", "gen": "the tall farmer sleeps", "pattern": true, "novel": true}
+{"prompt": "the girl smiles", "gen": "some red balls smiles", "pattern": true, "novel": true}
+{"prompt": "the girl smiles", "gen": "a hungry baker goes to a park", "pattern": true, "novel": true}
+{"prompt": "the doctors return to a house", "gen": "the woman smile", "pattern": true, "novel": true}
+{"prompt": "the doctors return to a house", "gen": "a ripe ball breaks", "pattern": true, "novel": true}
+{"prompt": "the doctors return to a house", "gen": "a boy cleans some eggs", "pattern": true, "novel": true}
+{"prompt": "the doctors return to a house", "gen": "the farmer buys a ball", "pattern": true, "novel": true}
+{"prompt": "the cows live in the old house", "gen": "the boys in the cat", "pattern": false, "novel": true}
+{"prompt": "the cows live in the old house", "gen": "the birds smile", "pattern": true, "novel": true}
+{"prompt": "the cows live in the old house", "gen": "the girls sleeps", "pattern": true, "novel": true}
+{"prompt": "the cows live in the old house", "gen": "the tall man cooks the cats garden", "pattern": false, "novel": true}
+{"prompt": "the horses return to a forest", "gen": "some tall farmers cook the kind cakes", "pattern": true, "novel": true}
+{"prompt": "the horses return to a forest", "gen": "a woman goes to a hungry egg", "pattern": true, "novel": true}
+{"prompt": "the horses return to a forest", "gen": "the tall woman cleans the quiet ball", "pattern": true, "novel": true}
+{"prompt": "the horses return to a forest", "gen": "a doctor cooks the markets", "pattern": true, "novel": true}
+{"prompt": "the big boy cooks the pear", "gen": "the big boy fixes a shop", "pattern": true, "novel": true}
+{"prompt": "the big boy cooks the pear", "gen": "the man return eat some small house", "pattern": false, "novel": true}
+{"prompt": "the big boy cooks the pear", "gen": "the woman fixes the farm", "pattern": true, "novel": true}
+{"prompt": "the big boy cooks the pear", "gen": "the boy eats a garden", "pattern": true, "novel": true}
+{"prompt": "the sleepy horse goes to a small garden", "gen": "the boy helps some old markets", "pattern": true, "novel": true}
+{"prompt": "the sleepy horse goes to a small garden", "gen": "some birds chase the dogs", "pattern": true, "novel": true}
+{"prompt": "the sleepy horse goes to a small garden", "gen": "a man bakes a pear", "pattern": true, "novel": true}
+{"prompt": "the sleepy horse goes to a small garden", "gen": "the baker eats the kind fresh farms", "pattern": false, "novel": true}
+{"prompt": "the farmers feed the pigs", "gen": "the mans eat a old pie", "pattern": true, "novel": true}
+{"prompt": "the farmers feed the pigs", "gen": "the womans feed a garden", "pattern": true, "novel": true}
+{"prompt": "the farmers feed the pigs", "gen": "some womans clean some cakes", "pattern": true, "novel": true}
+{"prompt": "the farmers feed the pigs", "gen": "the kind foxs eat a park", "pattern": true, "novel": true}
+{"prompt": "some tall womans eat some ripe cakes", "gen": "a happy cow go to a quiet cake", "pattern": true, "novel": true}
+{"prompt": "some tall womans eat some ripe cakes", "gen": "the boy fixes the chair", "pattern": true, "novel": true}
+{"prompt": "some tall womans eat some ripe cakes", "gen": "the gardens sleeps", "pattern": true, "novel": true}
+{"prompt": "some tall womans eat some ripe cakes", "gen": "some old breaks", "pattern": false, "novel": true}
+{"prompt": "the doctors visit some quiet parks", "gen": "the small ball spoils", "pattern": true, "novel": true}
+{"prompt": "the doctors visit some quiet parks", "gen": "the farmers feed a bird", "pattern": true, "novel": true}
+{"prompt": "the doctors visit some quiet parks", "gen": "a farmer helps the chairs", "pattern": true, "novel": true}
+{"prompt": "the doctors visit some quiet parks", "gen": "the kind girl works chase the quiet shop", "pattern": false, "novel": true}
+{"prompt": "some keys break", "gen": "the baker runs", "pattern": true, "novel": true}
+{"prompt": "some keys break", "gen": "a girl cleans some cakes", "pattern": true, "novel": true}
+{"prompt": "some keys break", "gen": "the foxs runs", "pattern": true, "novel": true}
+{"prompt": "some keys break", "gen": "some boys in the schools", "pattern": false, "novel": true}
+{"prompt": "a woman helps the baker", "gen": "a happy cow lives to a quiet apple", "pattern": true, "novel": true}
+{"prompt": "a woman helps the baker", "gen": "a cake smiles", "pattern": true, "novel": true}
+{"prompt": "a woman helps the baker", "gen": "a teacher feeds a kind farmer", "pattern": true, "novel": true}
+{"prompt": "a woman helps the baker", "gen": "a farmer visits a forest", "pattern": true, "novel": true}
+{"prompt": "a boy hugs the girl", "gen": "a baker walk to the apple", "pattern": true, "novel": true}
+{"prompt": "a boy hugs the girl", "gen": "some doctors works to the cookie", "pattern": true, "novel": true}
+{"prompt": "a boy hugs the girl", "gen": "the farm runs", "pattern": true, "novel": true}
+{"prompt": "a boy hugs the girl", "gen": "some broken eggs smile", "pattern": true, "novel": true}
+{"prompt": "the man bakes a big lemon", "gen": "a small baker smile", "pattern": true, "novel": true}
+{"prompt": "the man bakes a big lemon", "gen": "the boy spoil", "pattern": true, "novel": true}
+{"prompt": "the man bakes a big lemon", "gen": "the teacher fixes the happy garden", "pattern": true, "novel": true}
+{"prompt": "the man bakes a big lemon", "gen": "a boy go in a small pie", "pattern": true, "novel": true}
+{"prompt": "some teachers work in the old house", "gen": "the dogs returns to a quiet apple", "pattern": true, "novel": true}
+{"prompt": "some teachers work in the old house", "gen": "the dogs stays to the apple", "pattern": true, "novel": true}
+{"prompt": "some teachers work in the old house", "gen": "some farmers cook the kind dog", "pattern": true, "novel": true}
+{"prompt": "some teachers work in the old house", "gen": "some tall horses spoils", "pattern": true, "novel": true}
+{"prompt": "the tall teachers help the mans", "gen": "the quiet boy lives carry the markets", "pattern": false, "novel": true}
+{"prompt": "the tall teachers help the mans", "gen": "a small woman go to the school", "pattern": true, "novel": true}
+{"prompt": "the tall teachers help the mans", "gen": "some teachers shops", "pattern": false, "novel": true}
+{"prompt": "the tall teachers help the mans", "gen": "the boys return to a sleepy house", "pattern": true, "novel": true}
+{"prompt": "the small horses eat a apple", "gen": "the boy eats a school", "pattern": true, "novel": true}
+{"prompt": "the small horses eat a apple", "gen": "a man smile", "pattern": true, "novel": true}
+{"prompt": "the small horses eat a apple", "gen": "some girls return to the apples", "pattern": true, "novel": true}
+{"prompt": "the small horses eat a apple", "gen": "a dog eats a egg", "pattern": true, "novel": true}
+{"prompt": "the boy feeds the small bird", "gen": "the farmers sleep", "pattern": true, "novel": true}
+{"prompt": "the boy feeds the small bird", "gen": "a cat live to some kind cookies", "pattern": true, "novel": true}
+{"prompt": "the boy feeds the small bird", "gen": "a cat lives to the apples", "pattern": true, "novel": true}
+{"prompt": "the boy feeds the small bird", "gen": "a man cooks the farm", "pattern": true, "novel": true}
+{"prompt": "the kind boys visit the market", "gen": "the woman visits a school", "pattern": true, "novel": true}
+{"prompt": "the kind boys visit the market", "gen": "some big dogs goes clean the forest", "pattern": false, "novel": true}
+{"prompt": "the kind boys visit the market", "gen": "some girls runs", "pattern": true, "novel": true}
+{"prompt": "the kind boys visit the market", "gen": "some womans in the apple", "pattern": false, "novel": true}
+{"prompt": "the girls live in the quiet markets", "gen": "some womans hug a cake", "pattern": true, "novel": true}
+{"prompt": "the girls live in the quiet markets", "gen": "some farmers eat some carrots", "pattern": true, "novel": true}
+{"prompt": "the girls live in the quiet markets", "gen": "the farmers works to a forest", "pattern": true, "novel": true}
+{"prompt": "the girls live in the quiet markets", "gen": "the quiet cows return to the cake", "pattern": true, "novel": true}
+{"prompt": "a hungry man cooks the cake", "gen": "the dogs stays cook the apple", "pattern": false, "novel": true}
+{"prompt": "a hungry man cooks the cake", "gen": "the woman return to the small smile", "pattern": false, "novel": true}
+{"prompt": "a hungry man cooks the cake", "gen": "some small boys walk to a happy apple", "pattern": true, "novel": true}
+{"prompt": "a hungry man cooks the cake", "gen": "the teachers bake some sleepy parks", "pattern": true, "novel": true}
+{"prompt": "a boy helps the teacher", "gen": "the tall baker laughs", "pattern": true, "novel": true}
+{"prompt": "a boy helps the teacher", "gen": "the teachers hug a fox", "pattern": true, "novel": true}
+{"prompt": "a boy helps the teacher", "gen": "some birds breaks", "pattern": true, "novel": true}
+{"prompt": "a boy helps the teacher", "gen": "some bakers in the books", "pattern": false, "novel": true}
+{"prompt": "the mans smile", "gen": "the teacher buys a carrot", "pattern": true, "novel": true}
+{"prompt": "the mans smile", "gen": "the teacher eats some apples", "pattern": true, "novel": true}
+{"prompt": "the mans smile", "gen": "some womans smiles", "pattern": true, "novel": true}
+{"prompt": "the mans smile", "gen": "a baker walks to the happy apple", "pattern": true, "novel": true}
+{"prompt": "the teacher runs", "gen": "a girl eats the apples", "pattern": true, "novel": true}
+{"prompt": "the teacher runs", "gen": "a sweet shops", "pattern": false, "novel": true}
+{"prompt": "the teacher runs", "gen": "some cats carry a quiet hat", "pattern": true, "novel": true}
+{"prompt": "the teacher runs", "gen": "a old boy carries the horses cake", "pattern": false, "novel": true}
+{"prompt": "the farmer smiles", "gen": "the mans walks to a cake", "pattern": true, "novel": true}
+{"prompt": "the farmer smiles", "gen": "the dogs returns bake the happy cookie", "pattern": false, "novel": true}
+{"prompt": "the farmer smiles", "gen": "some dogs stay buy the small schools", "pattern": false, "novel": true}
+{"prompt": "the farmer smiles", "gen": "some womans eat the house", "pattern": true, "novel": true}
+{"prompt": "a fox sleeps", "gen": "a horse laughs", "pattern": true, "novel": true}
+{"prompt": "a fox sleeps", "gen": "a man live bake a hungry pear", "pattern": false, "novel": true}
+{"prompt": "a fox sleeps", "gen": "the man bakes the market", "pattern": true, "novel": true}
+{"prompt": "a fox sleeps", "gen": "the girl walks buy a small teachers", "pattern": false, "novel": true}
+{"prompt": "some hungry boys hug the mans", "gen": "a boy visits the pie", "pattern": true, "novel": true}
+{"prompt": "some hungry boys hug the mans", "gen": "the woman bakes some gardens", "pattern": true, "novel": true}
+{"prompt": "some hungry boys hug the mans", "gen": "the cow cleans the tall cake", "pattern": true, "novel": true}
+{"prompt": "some hungry boys hug the mans", "gen": "the boy laugh", "pattern": true, "novel": true}
+{"prompt": "the old cow chases a sleepy dog", "gen": "the teacher eats some farms", "pattern": true, "novel": true}
+{"prompt": "the old cow chases a sleepy dog", "gen": "some boys in the market", "pattern": false, "novel": true}
+{"prompt": "the old cow chases a sleepy dog", "gen": "a lemon sleep", "pattern": true, "novel": true}
+{"prompt": "the old cow chases a sleepy dog", "gen": "some red laughs", "pattern": false, "novel": true}
+{"prompt": "the dog goes to a big farm", "gen": "the sweet pie laugh", "pattern": true, "novel": true}
+{"prompt": "the dog goes to a big farm", "gen": "a big man walk to a market", "pattern": true, "novel": true}
+{"prompt": "the dog goes to a big farm", "gen": "the big baker lives visit the old cakes", "pattern": false, "novel": true}
+{"prompt": "the dog goes to a big farm", "gen": "a kind teacher spoils", "pattern": true, "novel": true}
+{"prompt": "a happy dog eats a cookie", "gen": "the womans bake a park", "pattern": true, "novel": true}
+{"prompt": "a happy dog eats a cookie", "gen": "a ripe doctor breaks", "pattern": true, "novel": true}
+{"prompt": "a happy dog eats a cookie", "gen": "a kind teacher sleeps", "pattern": true, "novel": true}
+{"prompt": "a happy dog eats a cookie", "gen": "the man eats a garden", "pattern": true, "novel": true}
+{"prompt": "the big man cooks the big apple", "gen": "the teacher breaks", "pattern": true, "novel": true}
+{"prompt": "the big man cooks the big apple", "gen": "the girl buys the carrots", "pattern": true, "novel": true}
+{"prompt": "the big man cooks the big apple", "gen": "some boys stay eat the big shop", "pattern": false, "novel": true}
+{"prompt": "the big man cooks the big apple", "gen": "some big horses go to a market", "pattern": true, "novel": true}
+{"prompt": "the big mans help the baker", "gen": "the happy baker runs", "pattern": true, "novel": true}
+{"prompt": "the big mans help the baker", "gen": "a bird stays chase the big dog", "pattern": false, "novel": true}
+{"prompt": "the big mans help the baker", "gen": "the teacher chases a farmer", "pattern": true, "novel": true}
+{"prompt": "the big mans help the baker", "gen": "the boys in some womans pears", "pattern": false, "novel": true}
+{"prompt": "a boy cooks the pies", "gen": "a cake runs", "pattern": true, "novel": true}
+{"prompt": "a boy cooks the pies", "gen": "the woman cleans the ball", "pattern": true, "novel": true}
+{"prompt": "a boy cooks the pies", "gen": "a farmer cleans the houses", "pattern": true, "novel": true}
+{"prompt": "a boy cooks the pies", "gen": "a hungry teacher laughs", "pattern": true, "novel": true}
+{"prompt": "the fox sleeps", "gen": "the birds sleep", "pattern": true, "novel": true}
+{"prompt": "the fox sleeps", "gen": "a boy visits some gardens", "pattern": true, "novel": true}
+{"prompt": "the fox sleeps", "gen": "the horse goes to a house", "pattern": true, "novel": true}
+{"prompt": "the fox sleeps", "gen": "the old mans live visit some ripe cakes", "pattern": false, "novel": true}
+{"prompt": "a girl bakes the pies", "gen": "some dogs smile", "pattern": true, "novel": true}
+{"prompt": "a girl bakes the pies", "gen": "the small boy cooks the houses", "pattern": true, "novel": true}
+{"prompt": "a girl bakes the pies", "gen": "a farmer cleans the lemons", "pattern": true, "novel": true}
+{"prompt": "a girl bakes the pies", "gen": "the mans eat a dog", "pattern": true, "novel": true}
+{"prompt": "the womans cook a pie", "gen": "a pig works to the garden", "pattern": true, "novel": true}
+{"prompt": "the womans cook a pie", "gen": "the boys walks to the house", "pattern": true, "novel": true}
+{"prompt": "the womans cook a pie", "gen": "some mans live help some quiet forest", "pattern": false, "novel": true}
+{"prompt": "the womans cook a pie", "gen": "a horse go to the apple", "pattern": true, "novel": true}
+{"prompt": "the boy feeds a dog", "gen": "a fox lives buy a forest", "pattern": false, "novel": true}
+{"prompt": "the boy feeds a dog", "gen": "the woman breaks", "pattern": true, "novel": true}
+{"prompt": "the boy feeds a dog", "gen": "the girl cooks the dogs balls", "pattern": false, "novel": true}
+{"prompt": "the boy feeds a dog", "gen": "the dogs lives to the small cake", "pattern": true, "novel": true}
+{"prompt": "a key breaks", "gen": "the boys in the big key", "pattern": false, "novel": true}
+{"prompt": "a key breaks", "gen": "a dog feeds a big cow", "pattern": true, "novel": true}
+{"prompt": "a key breaks", "gen": "a teacher visits some small books", "pattern": true, "novel": true}
+{"prompt": "a key breaks", "gen": "some girls breaks", "pattern": true, "novel": true}
+{"prompt": "the boys carry the sweet carrots", "gen": "the quiet womans stays in the schools", "pattern": true, "novel": true}
+{"prompt": "the boys carry the sweet carrots", "gen": "a small pig sleep", "pattern": true, "novel": true}
+{"prompt": "the boys carry the sweet carrots", "gen": "the happy cat cooks some boys", "pattern": true, "novel": true}
+{"prompt": "the boys carry the sweet carrots", "gen": "a doctor fixes the small hats", "pattern": true, "novel": true}
+{"prompt": "a girl bakes the lemon", "gen": "the woman eats the quiet woman", "pattern": true, "novel": true}
+{"prompt": "a girl bakes the lemon", "gen": "the quiet bird eats the forest", "pattern": true, "novel": true}
+{"prompt": "a girl bakes the lemon", "gen": "the dog smile", "pattern": true, "novel": true}
+{"prompt": "a girl bakes the lemon", "gen": "the cats goes to the house", "pattern": true, "novel": true}
+{"prompt": "a box breaks", "gen": "a teacher helps a doctor", "pattern": true, "novel": true}
+{"prompt": "a box breaks", "gen": "a boy buys the dog", "pattern": true, "novel": true}
+{"prompt": "a box breaks", "gen": "a man visits some lemons", "pattern": true, "novel": true}
+{"prompt": "a box breaks", "gen": "some doctors in a book", "pattern": false, "novel": true}
+{"prompt": "the hungry teachers visit the garden", "gen": "a teacher cleans the balls", "pattern": true, "novel": true}
+{"prompt": "the hungry teachers visit the garden", "gen": "a dog sleep", "pattern": true, "novel": true}
+{"prompt": "the hungry teachers visit the garden", "gen": "a boy visits some happy farms", "pattern": true, "novel": true}
+{"prompt": "the hungry teachers visit the garden", "gen": "some dogs smile", "pattern": true, "novel": true}
+{"prompt": "the small farmers help the tall boys", "gen": "the girls chase the bird", "pattern": true, "novel": true}
+{"prompt": "the small farmers help the tall boys", "gen": "the small cat goes in the apple", "pattern": true, "novel": true}
+{"prompt": "the small farmers help the tall boys", "gen": "a man bakes a garden", "pattern": true, "novel": true}
+{"prompt": "the small farmers help the tall boys", "gen": "the cat feeds a quiet dog", "pattern": true, "novel": true}
+{"prompt": "a man works in a market", "gen": "a kind man walks to a farm", "pattern": true, "novel": true}
+{"prompt": "a man works in a market", "gen": "some girls eat the big gardens", "pattern": true, "novel": true}
+{"prompt": "a man works in a market", "gen": "a boy buys the cat", "pattern": true, "novel": true}
+{"prompt": "a man works in a market", "gen": "the carrot sleeps", "pattern": true, "novel": true}
+{"prompt": "the fox runs", "gen": "the cows spoil", "pattern": true, "novel": true}
+{"prompt": "the fox runs", "gen": "the boys in a small shop", "pattern": false, "novel": true}
+{"prompt": "the fox runs", "gen": "the boy feeds a rabbit", "pattern": true, "novel": true}
+{"prompt": "the fox runs", "gen": "the boy feeds the forest", "pattern": true, "novel": true}
+{"prompt": "some dogs run", "gen": "the girls returns cook the shop", "pattern": false, "novel": true}
+{"prompt": "some dogs run", "gen": "the farmer eats the doctors lemons", "pattern": false, "novel": true}
+{"prompt": "some dogs run", "gen": "the girls cook a big pear", "pattern": true, "novel": true}
+{"prompt": "some dogs run", "gen": "the girl bakes the ripe apples", "pattern": true, "novel": true}
+{"prompt": "a teacher cooks a pear", "gen": "the rabbits carry the kind eggs", "pattern": true, "novel": true}
+{"prompt": "a teacher cooks a pear", "gen": "the boy fixes the apple", "pattern": true, "novel": true}
+{"prompt": "a teacher cooks a pear", "gen": "the farmers smiles", "pattern": true, "novel": true}
+{"prompt": "a teacher cooks a pear", "gen": "a girl cleans some quiet breaks", "pattern": false, "novel": true}
+{"prompt": "some birds go to a small market", "gen": "the boy fixes the dogs", "pattern": true, "novel": true}
+{"prompt": "some birds go to a small market", "gen": "the woman buys the market", "pattern": true, "novel": true}
+{"prompt": "some birds go to a small market", "gen": "some horses runs", "pattern": true, "novel": true}
+{"prompt": "some birds go to a small market", "gen": "the kind man spoils", "pattern": true, "novel": true}
+{"prompt": "the fox stays in the markets", "gen": "the big ball laugh", "pattern": true, "novel": true}
+{"prompt": "the fox stays in the markets", "gen": "the boys buy the carrot", "pattern": true, "novel": true}
+{"prompt": "the fox stays in the markets", "gen": "some boys sleeps", "pattern": true, "novel": true}
+{"prompt": "the fox stays in the markets", "gen": "a boy buys the tall books", "pattern": true, "novel": true}
+{"prompt": "the boys work in the school", "gen": "a doctor cooks the coats", "pattern": true, "novel": true}
+{"prompt": "the boys work in the school", "gen": "a kind woman buys the houses", "pattern": true, "novel": true}
+{"prompt": "the boys work in the school", "gen": "the farmers smiles", "pattern": true, "novel": true}
+{"prompt": "the boys work in the school", "gen": "some dogs laughs", "pattern": true, "novel": true}
+{"prompt": "some girls smile", "gen": "the woman feeds the apples", "pattern": true, "novel": true}
+{"prompt": "some girls smile", "gen": "a old woman chases a horse", "pattern": true, "novel": true}
+{"prompt": "some girls smile", "gen": "some mans work to a apple", "pattern": true, "novel": true}
+{"prompt": "some girls smile", "gen": "the man helps the woman", "pattern": true, "novel": true}
+{"prompt": "the cows walk to the farm", "gen": "some mans goes bake the cookie", "pattern": false, "novel": true}
+{"prompt": "the cows walk to the farm", "gen": "a apple sleeps", "pattern": true, "novel": true}
+{"prompt": "the cows walk to the farm", "gen": "the tall baker runs", "pattern": true, "novel": true}
+{"prompt": "the cows walk to the farm", "gen": "the broken boxs sleeps", "pattern": true, "novel": true}
+{"prompt": "a boy buys a hat", "gen": "some dogs lives chase a forest", "pattern": false, "novel": true}
+{"prompt": "a boy buys a hat", "gen": "the red boxs spoil", "pattern": true, "novel": true}
+{"prompt": "a boy buys a hat", "gen": "a book breaks", "pattern": true, "novel": true}
+{"prompt": "a boy buys a hat", "gen": "the man cleans the boxs", "pattern": true, "novel": true}
+{"prompt": "the womans buy the cake", "gen": "some sweet smiles", "pattern": false, "novel": true}
+{"prompt": "the womans buy the cake", "gen": "some boys shops", "pattern": false, "novel": true}
+{"prompt": "the womans buy the cake", "gen": "some big dogs works to the tall cake", "pattern": true, "novel": true}
+{"prompt": "the womans buy the cake", "gen": "the small boys shops", "pattern": false, "novel": true}
+{"prompt": "a pig goes to the shop", "gen": "a bird stays to the garden", "pattern": true, "novel": true}
+{"prompt": "a pig goes to the shop", "gen": "the girl carries the hat", "pattern": true, "novel": true}
+{"prompt": "a pig goes to the shop", "gen": "the man sleeps", "pattern": true, "novel": true}
+{"prompt": "a pig goes to the shop", "gen": "the cats lives to a pie", "pattern": true, "novel": true}
+{"prompt": "a boy sleeps", "gen": "some mans fix a hat", "pattern": true, "novel": true}
+{"prompt": "a boy sleeps", "gen": "some doctors hug a kind pears", "pattern": true, "novel": true}
+{"prompt": "a boy sleeps", "gen": "the girl cooks the mans cups", "pattern": false, "novel": true}
+{"prompt": "a boy sleeps", "gen": "the old dog cooks a old doctor", "pattern": true, "novel": true}
+{"prompt": "the boy helps the small boys", "gen": "the broken eggs runs", "pattern": true, "novel": true}
+{"prompt": "the boy helps the small boys", "gen": "the teacher fixes some schools", "pattern": true, "novel": true}
+{"prompt": "the boy helps the small boys", "gen": "the mans walk to the carrots", "pattern": true, "novel": true}
+{"prompt": "the boy helps the small boys", "gen": "the old fresh return to the pear", "pattern": false, "novel": true}
+{"prompt": "a woman sleeps", "gen": "the boys visit a big ball", "pattern": true, "novel": true}
+{"prompt": "a woman sleeps", "gen": "a teacher eats some cakes", "pattern": true, "novel": true}
+{"prompt": "a woman sleeps", "gen": "the boy spoils", "pattern": true, "novel": true}
+{"prompt": "a woman sleeps", "gen": "a boy bakes the garden", "pattern": true, "novel": true}
+{"prompt": "the farmers laugh", "gen": "a boy eats some big markets", "pattern": true, "novel": true}
+{"prompt": "the farmers laugh", "gen": "a dog spoils", "pattern": true, "novel": true}
+{"prompt": "the farmers laugh", "gen": "the quiet horses return to the garden", "pattern": true, "novel": true}
+{"prompt": "the farmers laugh", "gen": "a sleepy teacher shops", "pattern": false, "novel": true}
+{"prompt": "some small foxs live in the farms", "gen": "a old smile", "pattern": false, "novel": true}
+{"prompt": "some small foxs live in the farms", "gen": "the boy buys a old box", "pattern": true, "novel": true}
+{"prompt": "some small foxs live in the farms", "gen": "a bird bakes a forest", "pattern": true, "novel": true}
+{"prompt": "some small foxs live in the farms", "gen": "the mans lives clean some pies", "pattern": false, "novel": true}
+{"prompt": "a ball breaks", "gen": "a small teacher spoils", "pattern": true, "novel": true}
+{"prompt": "a ball breaks", "gen": "a girl feeds the happy horse", "pattern": true, "novel": true}
+{"prompt": "a ball breaks", "gen": "a farmer sleep", "pattern": true, "novel": true}
+{"prompt": "a ball breaks", "gen": "a teacher buys the boys house", "pattern": false, "novel": true}
+{"prompt": "the womans cook a red pear", "gen": "the sleepy boy hugs some bakers cookies", "pattern": false, "novel": true}
+{"prompt": "the womans cook a red pear", "gen": "a bird walks to the garden", "pattern": true, "novel": true}
+{"prompt": "the womans cook a red pear", "gen": "a girl cleans a apple", "pattern": true, "novel": true}
+{"prompt": "the womans cook a red pear", "gen": "the red cup sleeps", "pattern": true, "novel": true}
+{"prompt": "the quiet boy returns to a garden", "gen": "the quiet teacher cleans a big cookie", "pattern": true, "novel": true}
+{"prompt": "the quiet boy returns to a garden", "gen": "the happy horse go to the schools", "pattern": true, "novel": true}
+{"prompt": "the quiet boy returns to a garden", "gen": "the boy hugs the cookie", "pattern": true, "novel": true}
+{"prompt": "the quiet boy returns to a garden", "gen": "a girl fixes the ball", "pattern": true, "novel": true}
+{"prompt": "the man cooks the big pear", "gen": "a man runs", "pattern": true, "novel": true}
+{"prompt": "the man cooks the big pear", "gen": "the big bakers returns in some schools", "pattern": true, "novel": true}
+{"prompt": "the man cooks the big pear", "gen": "the big boys clean a cats", "pattern": true, "novel": true}
+{"prompt": "the man cooks the big pear", "gen": "the teacher bakes some houses", "pattern": true, "novel": true}
+{"prompt": "a horse chases the big horses", "gen": "a man cooks a old doctor", "pattern": true, "novel": true}
+{"prompt": "a horse chases the big horses", "gen": "some dogs runs", "pattern": true, "novel": true}
+{"prompt": "a horse chases the big horses", "gen": "a girl helps the house", "pattern": true, "novel": true}
+{"prompt": "a horse chases the big horses", "gen": "the doctors bake a dog", "pattern": true, "novel": true}
+{"prompt": "some boys return to the school", "gen": "the dogs in a tall market", "pattern": false, "novel": true}
+{"prompt": "some boys return to the school", "gen": "a quiet woman eats the apple", "pattern": true, "novel": true}
+{"prompt": "some boys return to the school", "gen": "a cat sleep", "pattern": true, "novel": true}
+{"prompt": "some boys return to the school", "gen": "a small house spoils", "pattern": true, "novel": true}
+{"prompt": "a pig stays in some shops", "gen": "a girl smile", "pattern": true, "novel": true}
+{"prompt": "a pig stays in some shops", "gen": "a man eats the small farm", "pattern": true, "novel": true}
+{"prompt": "a pig stays in some shops", "gen": "a man eats the quiet forest", "pattern": true, "novel": true}
+{"prompt": "a pig stays in some shops", "gen": "the rabbit go to the hungry apples", "pattern": true, "novel": true}
+{"prompt": "the womans live in the houses", "gen": "the mans lives to a pear", "pattern": true, "novel": true}
+{"prompt": "the womans live in the houses", "gen": "a sweet runs", "pattern": false, "novel": true}
+{"prompt": "the womans live in the houses", "gen": "some bakers help a dog", "pattern": true, "novel": true}
+{"prompt": "the womans live in the houses", "gen": "a hungry man work fix a happy garden", "pattern": false, "novel": true}
+{"prompt": "some dogs sleep", "gen": "the womans chase a cow", "pattern": true, "novel": true}
+{"prompt": "some dogs sleep", "gen": "the cat breaks", "pattern": true, "novel": true}
+{"prompt": "some dogs sleep", "gen": "a hungry woman walk to a apple", "pattern": true, "novel": true}
+{"prompt": "some dogs sleep", "gen": "a dog live to some apples", "pattern": true, "novel": true}
+{"prompt": "a teacher feeds some foxs", "gen": "a farmer hugs the cookies", "pattern": true, "novel": true}
+{"prompt": "a teacher feeds some foxs", "gen": "a teacher cooks the red pie", "pattern": true, "novel": true}
+{"prompt": "a teacher feeds some foxs", "gen": "a sweet laughs", "pattern": false, "novel": true}
+{"prompt": "a teacher feeds some foxs", "gen": "some cats walks in some farms", "pattern": true, "novel": true}
+{"prompt": "some cats return to a tall shop", "gen": "a teacher stays eat the big gardens", "pattern": false, "novel": true}
+{"prompt": "some cats return to a tall shop", "gen": "the boy shops", "pattern": false, "novel": true}
+{"prompt": "some cats return to a tall shop", "gen": "some quiet dogs goes to a big house", "pattern": true, "novel": true}
+{"prompt": "some cats return to a tall shop", "gen": "the man chases the farmer", "pattern": true, "novel": true}
+{"prompt": "the boys hug the cats", "gen": "the womans help some pies", "pattern": true, "novel": true}
+{"prompt": "the boys hug the cats", "gen": "some womans in a book", "pattern": false, "novel": true}
+{"prompt": "the boys hug the cats", "gen": "the farm spoil", "pattern": true, "novel": true}
+{"prompt": "the boys hug the cats", "gen": "some boys stay to a school", "pattern": true, "novel": true}
+{"prompt": "the cow goes to some old forests", "gen": "the pie smiles", "pattern": true, "novel": true}
+{"prompt": "the cow goes to some old forests", "gen": "the bird works to a cookie", "pattern": true, "novel": true}
+{"prompt": "the cow goes to some old forests", "gen": "the teacher spoils", "pattern": true, "novel": true}
+{"prompt": "the cow goes to some old forests", "gen": "some dogs stays to a apple", "pattern": true, "novel": true}
+{"prompt": "some womans stay in some houses", "gen": "a sleepy bird chases some dogs", "pattern": true, "novel": true}
+{"prompt": "some womans stay in some houses", "gen": "a big boy spoil", "pattern": true, "novel": true}
+{"prompt": "some womans stay in some houses", "gen": "some pies smiles", "pattern": true, "novel": true}
+{"prompt": "some womans stay in some houses", "gen": "the boys buy some houses", "pattern": true, "novel": true}
+{"prompt": "a big doctor chases some cows", "gen": "a fox shops", "pattern": false, "novel": true}
+{"prompt": "a big doctor chases some cows", "gen": "a big man visits some big apples", "pattern": true, "novel": true}
+{"prompt": "a big doctor chases some cows", "gen": "some horses runs", "pattern": true, "novel": true}
+{"prompt": "a big doctor chases some cows", "gen": "a boy eats a old farm", "pattern": true, "novel": true}
+{"prompt": "a doctor laughs", "gen": "the quiet girl sleeps", "pattern": true, "novel": true}
+{"prompt": "a doctor laughs", "gen": "a fresh pie runs", "pattern": true, "novel": true}
+{"prompt": "a doctor laughs", "gen": "the dogs stays eat a house", "pattern": false, "novel": true}
+{"prompt": "a doctor laughs", "gen": "a boy chases some happy girls", "pattern": true, "novel": true}
+{"prompt": "some hungry girls clean some red balls", "gen": "the mans walk to the school", "pattern": true, "novel": true}
+{"prompt": "some hungry girls clean some red balls", "gen": "the baker runs", "pattern": true, "novel": true}
+{"prompt": "some hungry girls clean some red balls", "gen": "a horse stays to the house", "pattern": true, "novel": true}
+{"prompt": "some hungry girls clean some red balls", "gen": "some teachers buy the apple", "pattern": true, "novel": true}
+{"prompt": "the tall bakers help the happy farmer", "gen": "the dog break", "pattern": true, "novel": true}
+{"prompt": "the tall bakers help the happy farmer", "gen": "the baker visits some books", "pattern": true, "novel": true}
+{"prompt": "the tall bakers help the happy farmer", "gen": "a boy cleans a big dog", "pattern": true, "novel": true}
+{"prompt": "the tall bakers help the happy farmer", "gen": "some dogs sleeps", "pattern": true, "novel": true}
+{"prompt": "some girls buy the cookie", "gen": "the farmer goes to the cookie", "pattern": true, "novel": true}
+{"prompt": "some girls buy the cookie", "gen": "the doctor laugh", "pattern": true, "novel": true}
+{"prompt": "some girls buy the cookie", "gen": "some red smile", "pattern": false, "novel": true}
+{"prompt": "some girls buy the cookie", "gen": "the teacher chases the hat", "pattern": true, "novel": true}
+{"prompt": "the girls feed the horse", "gen": "a old boy returns cook a old forest", "pattern": false, "novel": true}
+{"prompt": "the girls feed the horse", "gen": "the red eggs run", "pattern": true, "novel": true}
+{"prompt": "the girls feed the horse", "gen": "a teacher stay to a quiet house", "pattern": true, "novel": true}
+{"prompt": "the girls feed the horse", "gen": "a baker eats a small apple", "pattern": true, "novel": true}
+{"prompt": "some boys buy a apple", "gen": "the girls walk to the schools", "pattern": true, "novel": true}
+{"prompt": "some boys buy a apple", "gen": "a dog eats the apple", "pattern": true, "novel": true}
+{"prompt": "some boys buy a apple", "gen": "some sleepy dogs goes to a small apple", "pattern": true, "novel": true}
+{"prompt": "some boys buy a apple", "gen": "the happy girls laughs", "pattern": true, "novel": true}
+{"prompt": "a girl works in a house", "gen": "some mans visit some parks", "pattern": true, "novel": true}
+{"prompt": "a girl works in a house", "gen": "the tall cats in a pear", "pattern": false, "novel": true}
+{"prompt": "a girl works in a house", "gen": "the horses goes buy a cookie", "pattern": false, "novel": true}
+{"prompt": "a girl works in a house", "gen": "a small cookie smiles", "pattern": true, "novel": true}
+{"prompt": "the old womans go to the forests", "gen": "the dogs sleeps", "pattern": true, "novel": true}
+{"prompt": "the old womans go to the forests", "gen": "the farmer go to the old house", "pattern": true, "novel": true}
+{"prompt": "the old womans go to the forests", "gen": "a small teacher laughs", "pattern": true, "novel": true}
+{"prompt": "the old womans go to the forests", "gen": "a pig helps the small park", "pattern": true, "novel": true}
+{"prompt": "a doctor runs", "gen": "the sleepy teacher runs", "pattern": true, "novel": true}
+{"prompt": "a doctor runs", "gen": "some dogs stay cook the parks", "pattern": false, "novel": true}
+{"prompt": "a doctor runs", "gen": "the big cup spoils", "pattern": true, "novel": true}
+{"prompt": "a doctor runs", "gen": "the boy bakes the tall cakes", "pattern": true, "novel": true}
+{"prompt": "the happy girls cook the cookie", "gen": "a man buys the old chair", "pattern": true, "novel": true}
+{"prompt": "the happy girls cook the cookie", "gen": "a farmer fixes a rabbit", "pattern": true, "novel": true}
+{"prompt": "the happy girls cook the cookie", "gen": "a baker cooks the shop", "pattern": true, "novel": true}
+{"prompt": "the happy girls cook the cookie", "gen": "a quiet boy fixes some small balls", "pattern": true, "novel": true}
+{"prompt": "the old cats live in the forests", "gen": "a girl eats the houses", "pattern": true, "novel": true}
+{"prompt": "the old cats live in the forests", "gen": "a girl visits some happy cookies", "pattern": true, "novel": true}
+{"prompt": "the old cats live in the forests", "gen": "the old boy walks to a garden", "pattern": true, "novel": true}
+{"prompt": "the old cats live in the forests", "gen": "some horses walk to the apples", "pattern": true, "novel": true}
+{"prompt": "the mans feed a dog", "gen": "a old boy eats the womans cookie", "pattern": false, "novel": true}
+{"prompt": "the mans feed a dog", "gen": "the girl eats the happy cookies", "pattern": true, "novel": true}
+{"prompt": "the mans feed a dog", "gen": "some boys sleeps", "pattern": true, "novel": true}
+{"prompt": "the mans feed a dog", "gen": "a girl chases a cookie", "pattern": true, "novel": true}
+{"prompt": "the dogs sleep", "gen": "the hungry teacher spoils", "pattern": true, "novel": true}
+{"prompt": "the dogs sleep", "gen": "some small farmers chase some small doctors", "pattern": true, "novel": true}
+{"prompt": "the dogs sleep", "gen": "the man sleep", "pattern": true, "novel": true}
+{"prompt": "the dogs sleep", "gen": "the ball runs", "pattern": true, "novel": true}
+{"prompt": "some boys help the boys", "gen": "some farmers walk to the school", "pattern": true, "novel": true}
+{"prompt": "some boys help the boys", "gen": "the cat cooks the cookies", "pattern": true, "novel": true}
+{"prompt": "some boys help the boys", "gen": "some boys in the small carrots", "pattern": false, "novel": true}
+{"prompt": "some boys help the boys", "gen": "the big man smiles", "pattern": true, "novel": true}
+{"prompt": "a boy eats a cookie", "gen": "the small boy cooks the gardens", "pattern": true, "novel": true}
+{"prompt": "a boy eats a cookie", "gen": "some dogs walks in the old farms", "pattern": true, "novel": true}
+{"prompt": "a boy eats a cookie", "gen": "the man feeds the cat", "pattern": true, "novel": true}
+{"prompt": "a boy eats a cookie", "gen": "the pig live to a forest", "pattern": true, "novel": true}
+{"prompt": "the pig eats some cookies", "gen": "a fox walk eat the farms", "pattern": false, "novel": true}
+{"prompt": "the pig eats some cookies", "gen": "some small girls walk eat a big pear", "pattern": false, "novel": true}
+{"prompt": "the pig eats some cookies", "gen": "a doctor stay to a sweet cookie", "pattern": true, "novel": true}
+{"prompt": "the pig eats some cookies", "gen": "a baker chases some old red pie", "pattern": false, "novel": true}
+{"prompt": "the girls bake a red carrot", "gen": "the ripe park breaks", "pattern": true, "novel": true}
+{"prompt": "the girls bake a red carrot", "gen": "a boy eats the apple", "pattern": true, "novel": true}
+{"prompt": "the girls bake a red carrot", "gen": "the baker cooks a house", "pattern": true, "novel": true}
+{"prompt": "the girls bake a red carrot", "gen": "the womans in a cat", "pattern": false, "novel": true}
+{"prompt": "the girls help some girls", "gen": "the boys eat a quiet ball", "pattern": true, "novel": true}
+{"prompt": "the girls help some girls", "gen": "a boy eats the bakers cookie", "pattern": false, "novel": true}
+{"prompt": "the girls help some girls", "gen": "some doctors stays to a shop", "pattern": true, "novel": true}
+{"prompt": "the girls help some girls", "gen": "some teachers sleeps", "pattern": true, "novel": true}
+{"prompt": "the old dogs return to the garden", "gen": "the teacher laughs", "pattern": true, "novel": true}
+{"prompt": "the old dogs return to the garden", "gen": "the tall girl buys some old markets", "pattern": true, "novel": true}
+{"prompt": "the old dogs return to the garden", "gen": "a boy cleans some kind balls", "pattern": true, "novel": true}
+{"prompt": "the old dogs return to the garden", "gen": "the big boys in a park", "pattern": false, "novel": true}
+{"prompt": "the farmer bakes the carrots", "gen": "a girl fixes the ball", "pattern": true, "novel": true}
+{"prompt": "the farmer bakes the carrots", "gen": "the teachers carry some horses markets", "pattern": false, "novel": true}
+{"prompt": "the farmer bakes the carrots", "gen": "some cows in the horse", "pattern": false, "novel": true}
+{"prompt": "the farmer bakes the carrots", "gen": "the small teacher carries some horses", "pattern": true, "novel": true}
+{"prompt": "the big womans cook some pears", "gen": "a old man returns to a hungry market", "pattern": true, "novel": true}
+{"prompt": "the big womans cook some pears", "gen": "some womans cook the house", "pattern": true, "novel": true}
+{"prompt": "the big womans cook some pears", "gen": "the small baker lives buy the apples", "pattern": false, "novel": true}
+{"prompt": "the big womans cook some pears", "gen": "a happy boy breaks", "pattern": true, "novel": true}
+{"prompt": "the cows go to a garden", "gen": "the teacher chases a cat", "pattern": true, "novel": true}
+{"prompt": "the cows go to a garden", "gen": "the boys in a teachers pie", "pattern": false, "novel": true}
+{"prompt": "the cows go to a garden", "gen": "a horse go to the gardens", "pattern": true, "novel": true}
+{"prompt": "the cows go to a garden", "gen": "a teacher eats a sweet cake", "pattern": true, "novel": true}
+{"prompt": "some old mans carry the box", "gen": "the mans in a horse", "pattern": false, "novel": true}
+{"prompt": "some old mans carry the box", "gen": "the kind teachers lives bake the happy garden", "pattern": false, "novel": true}
+{"prompt": "some old mans carry the box", "gen": "the doctor carries the hat", "pattern": true, "novel": true}
+{"prompt": "some old mans carry the box", "gen": "the big rabbits stay in a house", "pattern": true, "novel": true}
+{"prompt": "some mans carry the cake", "gen": "some cats stays in the cups", "pattern": true, "novel": true}
+{"prompt": "some mans carry the cake", "gen": "a small dog buys the ball", "pattern": true, "novel": true}
+{"prompt": "some mans carry the cake", "gen": "a kind farmer go to a apple", "pattern": true, "novel": true}
+{"prompt": "some mans carry the cake", "gen": "some red runs", "pattern": false, "novel": true}
+{"prompt": "the birds chase the dog", "gen": "the ball smiles", "pattern": true, "novel": true}
+{"prompt": "the birds chase the dog", "gen": "a boy hugs the boys", "pattern": true, "novel": true}
+{"prompt": "the birds chase the dog", "gen": "a boy fixes the small eggs", "pattern": true, "novel": true}
+{"prompt": "the birds chase the dog", "gen": "some happy cats return to the sleepy house", "pattern": true, "novel": true}
+{"prompt": "a hungry cat runs", "gen": "a boy carries some balls", "pattern": true, "novel": true}
+{"prompt": "a hungry cat runs", "gen": "the farmers in the small apple", "pattern": false, "novel": true}
+{"prompt": "a hungry cat runs", "gen": "a farmer cooks the cup", "pattern": true, "novel": true}
+{"prompt": "a hungry cat runs", "gen": "the egg sleeps", "pattern": true, "novel": true}
+{"prompt": "the man feeds a rabbit", "gen": "a baker returns to the pear", "pattern": true, "novel": true}
+{"prompt": "the man feeds a rabbit", "gen": "the boy buys the quiet ball", "pattern": true, "novel": true}
+{"prompt": "the man feeds a rabbit", "gen": "the dogs walks buy the big farms", "pattern": false, "novel": true}
+{"prompt": "the man feeds a rabbit", "gen": "the kind teachers works feed the happy farms", "pattern": false, "novel": true}
+{"prompt": "the cows chase a rabbit", "gen": "a girl feeds a tall school", "pattern": true, "novel": true}
+{"prompt": "the cows chase a rabbit", "gen": "the doctor laughs", "pattern": true, "novel": true}
+{"prompt": "the cows chase a rabbit", "gen": "a happy horse break", "pattern": true, "novel": true}
+{"prompt": "the cows chase a rabbit", "gen": "the big woman chases a bird", "pattern": true, "novel": true}
+{"prompt": "the mans sleep", "gen": "the boy eats a apple", "pattern": true, "novel": true}
+{"prompt": "the mans sleep", "gen": "some ripe run", "pattern": false, "novel": true}
+{"prompt": "the mans sleep", "gen": "a small dog goes to the apple", "pattern": true, "novel": true}
+{"prompt": "the mans sleep", "gen": "a dog live to some gardens", "pattern": true, "novel": true}
+{"prompt": "the girls work in a farm", "gen": "a pig helps the boy", "pattern": true, "novel": true}
+{"prompt": "the girls work in a farm", "gen": "the tall dogs run", "pattern": true, "novel": true}
+{"prompt": "the girls work in a farm", "gen": "a woman feeds the broken pig", "pattern": true, "novel": true}
+{"prompt": "the girls work in a farm", "gen": "a hungry horse buys a hat", "pattern": true, "novel": true}
+{"prompt": "the farmer fixes a small hat", "gen": "a farmer carries a carrot", "pattern": true, "novel": true}
+{"prompt": "the farmer fixes a small hat", "gen": "the boy hugs the happy cup", "pattern": true, "novel": true}
+{"prompt": "the farmer fixes a small hat", "gen": "the mans carry the garden", "pattern": true, "novel": true}
+{"prompt": "the farmer fixes a small hat", "gen": "the teacher goes to the farms", "pattern": true, "novel": true}
+{"prompt": "some mans live in the small house", "gen": "a old cat chases a cat", "pattern": true, "novel": true}
+{"prompt": "some mans live in the small house", "gen": "some mans in the cookie", "pattern": false, "novel": true}
+{"prompt": "some mans live in the small house", "gen": "some boys in the garden", "pattern": false, "novel": true}
+{"prompt": "some mans live in the small house", "gen": "the girl eats some big womans", "pattern": true, "novel": true}
+{"prompt": "some cows live in the house", "gen": "some womans clean some cakes", "pattern": true, "novel": true}
+{"prompt": "some cows live in the house", "gen": "a sweet break", "pattern": false, "novel": true}
+{"prompt": "some cows live in the house", "gen": "the cows laughs", "pattern": true, "novel": true}
+{"prompt": "some cows live in the house", "gen": "a dog eats a forest", "pattern": true, "novel": true}
+{"prompt": "a happy man cooks the carrots", "gen": "a big boy sleep", "pattern": true, "novel": true}
+{"prompt": "a happy man cooks the carrots", "gen": "some kind horses returns to a small garden", "pattern": true, "novel": true}
+{"prompt": "a happy man cooks the carrots", "gen": "a fresh apple spoils", "pattern": true, "novel": true}
+{"prompt": "a happy man cooks the carrots", "gen": "the womans sleeps", "pattern": true, "novel": true}
+{"prompt": "the boy feeds a cat", "gen": "the rabbit live buy some cookies", "pattern": false, "novel": true}
+{"prompt": "the boy feeds a cat", "gen": "a quiet dog laugh", "pattern": true, "novel": true}
+{"prompt": "the boy feeds a cat", "gen": "some farmers work bake some apples", "pattern": false, "novel": true}
+{"prompt": "the boy feeds a cat", "gen": "some boys eat a quiet apple", "pattern": true, "novel": true}
+{"prompt": "a baker stays in a house", "gen": "the chair sleeps", "pattern": true, "novel": true}
+{"prompt": "a baker stays in a house", "gen": "a farmer eats the old balls", "pattern": true, "novel": true}
+{"prompt": "a baker stays in a house", "gen": "a woman cooks a sleepy house", "pattern": true, "novel": true}
+{"prompt": "a baker stays in a house", "gen": "the farmer fixes the balls", "pattern": true, "novel": true}
+{"prompt": "some farmers go to a farm", "gen": "a big teacher spoils", "pattern": true, "novel": true}
+{"prompt": "some farmers go to a farm", "gen": "a farmer eats the big cake", "pattern": true, "novel": true}
+{"prompt": "some farmers go to a farm", "gen": "the baker helps the foxs", "pattern": true, "novel": true}
+{"prompt": "some farmers go to a farm", "gen": "a dog stays clean the big farm", "pattern": false, "novel": true}
+{"prompt": "the old boy fixes a book", "gen": "a man smile", "pattern": true, "novel": true}
+{"prompt": "the old boy fixes a book", "gen": "the big cats eat a shop", "pattern": true, "novel": true}
+{"prompt": "the old boy fixes a book", "gen": "the girl carries the key", "pattern": true, "novel": true}
+{"prompt": "the old boy fixes a book", "gen": "a big dog go buy some farms", "pattern": false, "novel": true}
+{"prompt": "the boy eats a apple", "gen": "a dog go to some pies", "pattern": true, "novel": true}
+{"prompt": "the boy eats a apple", "gen": "some cows in the womans", "pattern": false, "novel": true}
+{"prompt": "the boy eats a apple", "gen": "the girl chases the big womans", "pattern": true, "novel": true}
+{"prompt": "the boy eats a apple", "gen": "some horses clean a house", "pattern": true, "novel": true}
+{"prompt": "the dogs stay in the house", "gen": "a teacher helps a farmer", "pattern": true, "novel": true}
+{"prompt": "the dogs stay in the house", "gen": "a cat walks to the market", "pattern": true, "novel": true}
+{"prompt": "the dogs stay in the house", "gen": "the boy sleep", "pattern": true, "novel": true}
+{"prompt": "the dogs stay in the house", "gen": "the dog works to a apple", "pattern": true, "novel": true}
+{"prompt": "some carrots spoil", "gen": "the dog visits a forest", "pattern": true, "novel": true}
+{"prompt": "some carrots spoil", "gen": "a tall man works eat a hungry shop", "pattern": false, "novel": true}
+{"prompt": "some carrots spoil", "gen": "the cat sleep", "pattern": true, "novel": true}
+{"prompt": "some carrots spoil", "gen": "a boy eats the cake", "pattern": true, "novel": true}
+{"prompt": "the quiet horse goes to a small school", "gen": "a market laughs", "pattern": true, "novel": true}
+{"prompt": "the quiet horse goes to a small school", "gen": "a baker fixes some cups", "pattern": true, "novel": true}
+{"prompt": "the quiet horse goes to a small school", "gen": "some dogs sleeps", "pattern": true, "novel": true}
+{"prompt": "the quiet horse goes to a small school", "gen": "the quiet dogs sleeps", "pattern": true, "novel": true}
+{"prompt": "a small boy buys a key", "gen": "some womans in a rabbit", "pattern": false, "novel": true}
+{"prompt": "a small boy buys a key", "gen": "the boy buys a quiet cup", "pattern": true, "novel": true}
+{"prompt": "a small boy buys a key", "gen": "a dog returns to the forest", "pattern": true, "novel": true}
+{"prompt": "a small boy buys a key", "gen": "a baker fixes some coats", "pattern": true, "novel": true}
+{"prompt": "a happy boy sleeps", "gen": "a girl buys a apple", "pattern": true, "novel": true}
+{"prompt": "a happy boy sleeps", "gen": "some dogs smiles", "pattern": true, "novel": true}
+{"prompt": "a happy boy sleeps", "gen": "a dog walk to a happy apple", "pattern": true, "novel": true}
+{"prompt": "a happy boy sleeps", "gen": "some farmers in some lemons", "pattern": false, "novel": true}
+{"prompt": "a girl helps the small boy", "gen": "the boy cooks a apple", "pattern": true, "novel": true}
+{"prompt": "a girl helps the small boy", "gen": "a baker carries some balls", "pattern": true, "novel": true}
+{"prompt": "a girl helps the small boy", "gen": "a boy eats the apple", "pattern": true, "novel": true}
+{"prompt": "a girl helps the small boy", "gen": "the man fixes the cat", "pattern": true, "novel": true}
+{"prompt": "a teacher cleans a chair", "gen": "some cows walks to some kind cows", "pattern": true, "novel": true}
+{"prompt": "a teacher cleans a chair", "gen": "some boys help the girl", "pattern": true, "novel": true}
+{"prompt": "a teacher cleans a chair", "gen": "a sleepy man returns to a house", "pattern": true, "novel": true}
+{"prompt": "a teacher cleans a chair", "gen": "the baker eats a carrot", "pattern": true, "novel": true}
+{"prompt": "some happy farmers walk to the house", "gen": "the man buys the schools", "pattern": true, "novel": true}
+{"prompt": "some happy farmers walk to the house", "gen": "the old horse go to the apple", "pattern": true, "novel": true}
+{"prompt": "some happy farmers walk to the house", "gen": "the girl visits a apple", "pattern": true, "novel": true}
+{"prompt": "some happy farmers walk to the house", "gen": "the girls walks help a house", "pattern": false, "novel": true}
+{"prompt": "some dogs eat a lemon", "gen": "the farmer sleeps", "pattern": true, "novel": true}
+{"prompt": "some dogs eat a lemon", "gen": "the small girl laughs", "pattern": true, "novel": true}
+{"prompt": "some dogs eat a lemon", "gen": "the boy buys a big cup", "pattern": true, "novel": true}
+{"prompt": "some dogs eat a lemon", "gen": "a girl carries some books", "pattern": true, "novel": true}
+{"prompt": "a teacher carries the hats", "gen": "some boys cook the cake", "pattern": true, "novel": true}
+{"prompt": "a teacher carries the hats", "gen": "the cat sleep", "pattern": true, "novel": true}
+{"prompt": "a teacher carries the hats", "gen": "the girl cleans the hat", "pattern": true, "novel": true}
+{"prompt": "a teacher carries the hats", "gen": "a boys goes to the forest", "pattern": true, "novel": true}
+{"prompt": "the boy helps some farmers", "gen": "the cup runs", "pattern": true, "novel": true}
+{"prompt": "the boy helps some farmers", "gen": "a dog cooks a girl house", "pattern": false, "novel": true}
+{"prompt": "the boy helps some farmers", "gen": "a kind man works in a egg", "pattern": true, "novel": true}
+{"prompt": "the boy helps some farmers", "gen": "some hungry cats goes to a big garden", "pattern": true, "novel": true}
+{"prompt": "the cows walk to the forests", "gen": "some boys smiles", "pattern": true, "novel": true}
+{"prompt": "the cows walk to the forests", "gen": "a fox walk in a school", "pattern": true, "novel": true}
+{"prompt": "the cows walk to the forests", "gen": "the old farmer lives to a cake", "pattern": true, "novel": true}
+{"prompt": "the cows walk to the forests", "gen": "a boy hugs some small carrots", "pattern": true, "novel": true}
+{"prompt": "some big books break", "gen": "a boy feeds the teacher", "pattern": true, "novel": true}
+{"prompt": "some big books break", "gen": "the cat laugh", "pattern": true, "novel": true}
+{"prompt": "some big books break", "gen": "a teacher buys a happy egg", "pattern": true, "novel": true}
+{"prompt": "some big books break", "gen": "the doctor smiles", "pattern": true, "novel": true}
+{"prompt": "a quiet man goes to a farm", "gen": "a girl works buy a tall market", "pattern": false, "novel": true}
+{"prompt": "a quiet man goes to a farm", "gen": "a teacher eats a old garden", "pattern": true, "novel": true}
+{"prompt": "a quiet man goes to a farm", "gen": "a small market spoil", "pattern": true, "novel": true}
+{"prompt": "a quiet man goes to a farm", "gen": "some happy red go to a big farm", "pattern": false, "novel": true}
+{"prompt": "the apple spoils", "gen": "a man bakes a market", "pattern": true, "novel": true}
+{"prompt": "the apple spoils", "gen": "the boys walk to a cookie", "pattern": true, "novel": true}
+{"prompt": "the apple spoils", "gen": "some girls eat the happy cakes", "pattern": true, "novel": true}
+{"prompt": "the apple spoils", "gen": "the teacher cleans a fox", "pattern": true, "novel": true}
+{"prompt": "the doctor walks to a garden", "gen": "some happy farmers walk to some schools", "pattern": true, "novel": true}
+{"prompt": "the doctor walks to a garden", "gen": "a girl visits some old eggs", "pattern": true, "novel": true}
+{"prompt": "the doctor walks to a garden", "gen": "a girl helps a apple", "pattern": true, "novel": true}
+{"prompt": "the doctor walks to a garden", "gen": "a girl visits a dog", "pattern": true, "novel": true}
+{"prompt": "some cows run", "gen": "some girls stays to a market", "pattern": true, "novel": true}
+{"prompt": "some cows run", "gen": "some womans in a ball", "pattern": false, "novel": true}
+{"prompt": "some cows run", "gen": "some red sleeps", "pattern": false, "novel": true}
+{"prompt": "some cows run", "gen": "a bird cleans a shop", "pattern": true, "novel": true}
+{"prompt": "a boy buys the apples", "gen": "some rabbits sleep", "pattern": true, "novel": true}
+{"prompt": "a boy buys the apples", "gen": "the boy chases the girls", "pattern": true, "novel": true}
+{"prompt": "a boy buys the apples", "gen": "a hat sleeps", "pattern": true, "novel": true}
+{"prompt": "a boy buys the apples", "gen": "some red sleeps", "pattern": false, "novel": true}
+{"prompt": "some old doctors return to a tall shop", "gen": "some boys sleeps", "pattern": true, "novel": true}
+{"prompt": "some old doctors return to a tall shop", "gen": "the girl eats the boy", "pattern": true, "novel": true}
+{"prompt": "some old doctors return to a tall shop", "gen": "a boy feeds the farmer", "pattern": true, "novel": true}
+{"prompt": "some old doctors return to a tall shop", "gen": "the girls in a happy apple", "pattern": false, "novel": true}
+{"prompt": "some boys go to a house", "gen": "some cats smiles", "pattern": true, "novel": true}
+{"prompt": "some boys go to a house", "gen": "some teachers in a ball", "pattern": false, "novel": true}
+{"prompt": "some boys go to a house", "gen": "the teachers cook the pies", "pattern": true, "novel": true}
+{"prompt": "some boys go to a house", "gen": "the woman hugs the lemons", "pattern": true, "novel": true}
+{"prompt": "a woman hugs some pigs", "gen": "the boy bakes a bakers cake", "pattern": false, "novel": true}
+{"prompt": "a woman hugs some pigs", "gen": "the ripe house runs", "pattern": true, "novel": true}
+{"prompt": "a woman hugs some pigs", "gen": "some red sleep", "pattern": false, "novel": true}
+{"prompt": "a woman hugs some pigs", "gen": "some cats return eat a cup", "pattern": false, "novel": true}
+{"prompt": "some womans bake the red apple", "gen": "the doctor chases the garden", "pattern": true, "novel": true}
+{"prompt": "some womans bake the red apple", "gen": "the mans live in a kind garden", "pattern": true, "novel": true}
+{"prompt": "some womans bake the red apple", "gen": "a hungry horse cooks some small breaks", "pattern": false, "novel": true}
+{"prompt": "some womans bake the red apple", "gen": "the small dog return bake the gardens", "pattern": false, "novel": true}
+{"prompt": "the doctor returns to some gardens", "gen": "a dog chases the apples", "pattern": true, "novel": true}
+{"prompt": "the doctor returns to some gardens", "gen": "the cow eats the small lemons", "pattern": true, "novel": true}
+{"prompt": "the doctor returns to some gardens", "gen": "the old womans returns to the schools", "pattern": true, "novel": true}
+{"prompt": "the doctor returns to some gardens", "gen": "some girls eat a pear", "pattern": true, "novel": true}
+{"prompt": "some big doctors clean a farm", "gen": "some girls sleeps", "pattern": true, "novel": true}
+{"prompt": "some big doctors clean a farm", "gen": "some girls returns to the apples", "pattern": true, "novel": true}
+{"prompt": "some big doctors clean a farm", "gen": "a horse return to the cookie", "pattern": true, "novel": true}
+{"prompt": "some big doctors clean a farm", "gen": "the mans goes to a house", "pattern": true, "novel": true}
+{"prompt": "some farmers sleep", "gen": "some forests laughs", "pattern": true, "novel": true}
+{"prompt": "some farmers sleep", "gen": "a boy walks to the houses", "pattern": true, "novel": true}
+{"prompt": "some farmers sleep", "gen": "a girl eats the school", "pattern": true, "novel": true}
+{"prompt": "some farmers sleep", "gen": "the quiet boys visit the eggs", "pattern": true, "novel": true}
+{"prompt": "a tall man carries a small cake", "gen": "a girl helps a garden", "pattern": true, "novel": true}
+{"prompt": "a tall man carries a small cake", "gen": "a old dog laugh", "pattern": true, "novel": true}
+{"prompt": "a tall man carries a small cake", "gen": "a boy eats the red farm", "pattern": true, "novel": true}
+{"prompt": "a tall man carries a small cake", "gen": "some boys carry a horse", "pattern": true, "novel": true}
+{"prompt": "a big farmer sleeps", "gen": "the boy eats a apple", "pattern": true, "novel": true}
+{"prompt": "a big farmer sleeps", "gen": "the baker stay buy a farm", "pattern": false, "novel": true}
+{"prompt": "a big farmer sleeps", "gen": "the womans go to the cookie", "pattern": true, "novel": true}
+{"prompt": "a big farmer sleeps", "gen": "a woman return chase a hat", "pattern": false, "novel": true}
+{"prompt": "the teachers clean a box", "gen": "the small horse go to a small house", "pattern": true, "novel": true}
+{"prompt": "the teachers clean a box", "gen": "the girl buys a boy", "pattern": true, "novel": true}
+{"prompt": "the teachers clean a box", "gen": "a boy carries some small houses", "pattern": true, "novel": true}
+{"prompt": "the teachers clean a box", "gen": "the womans return to the quiet cookie", "pattern": true, "novel": true}
+{"prompt": "the ripe cake spoils", "gen": "the horse walks eat a pie", "pattern": false, "novel": true}
+{"prompt": "the ripe cake spoils", "gen": "a sleepy cat returns buy a forest", "pattern": false, "novel": true}
+{"prompt": "the ripe cake spoils", "gen": "the boys buy the ripe ball", "pattern": true, "novel": true}
+{"prompt": "the ripe cake spoils", "gen": "the man smile", "pattern": true, "novel": true}
+{"prompt": "the boys clean a forest", "gen": "the teacher chases the sleepy girl", "pattern": true, "novel": true}
+{"prompt": "the boys clean a forest", "gen": "the big eggs smiles", "pattern": true, "novel": true}
+{"prompt": "the boys clean a forest", "gen": "some mans cook some happy carrots", "pattern": true, "novel": true}
+{"prompt": "the boys clean a forest", "gen": "a farmer chases the market", "pattern": true, "novel": true}
+{"prompt": "a apple spoils", "gen": "some farmers in a ball", "pattern": false, "novel": true}
+{"prompt": "a apple spoils", "gen": "a girl eats the gardens", "pattern": true, "novel": true}
+{"prompt": "a apple spoils", "gen": "the baker cooks some big cookies", "pattern": true, "novel": true}
+{"prompt": "a apple spoils", "gen": "the boy helps a happy girl", "pattern": true, "novel": true}
+{"prompt": "the old woman laughs", "gen": "some boys go to some apples", "pattern": true, "novel": true}
+{"prompt": "the old woman laughs", "gen": "the dog bakes some small forest", "pattern": true, "novel": true}
+{"prompt": "the old woman laughs", "gen": "the school sleeps", "pattern": true, "novel": true}
+{"prompt": "the old woman laughs", "gen": "some pigs spoils", "pattern": true, "novel": true}
+{"prompt": "the boys work in the gardens", "gen": "some girls feed the forest", "pattern": true, "novel": true}
+{"prompt": "the boys work in the gardens", "gen": "the boys chase the small cookies", "pattern": true, "novel": true}
+{"prompt": "the boys work in the gardens", "gen": "the girl bakes the quiet cats", "pattern": true, "novel": true}
+{"prompt": "the boys work in the gardens", "gen": "a woman returns carry the quiet runs", "pattern": false, "novel": true}
+{"prompt": "the woman works in the big shop", "gen": "some small boys stays to a ripe apple", "pattern": true, "novel": true}
+{"prompt": "the woman works in the big shop", "gen": "a doctor runs", "pattern": true, "novel": true}
+{"prompt": "the woman works in the big shop", "gen": "a ripe ball smiles", "pattern": true, "novel": true}
+{"prompt": "the woman works in the big shop", "gen": "the farmers smiles", "pattern": true, "novel": true}
+{"prompt": "the sleepy dog walks to a park", "gen": "a cat helps the school", "pattern": true, "novel": true}
+{"prompt": "the sleepy dog walks to a park", "gen": "the boy hugs the small girl", "pattern": true, "novel": true}
+{"prompt": "the sleepy dog walks to a park", "gen": "the doctors cook the garden", "pattern": true, "novel": true}
+{"prompt": "the sleepy dog walks to a park", "gen": "a ripe ball laughs", "pattern": true, "novel": true}
+{"prompt": "the teacher eats the pears", "gen": "a sweet cake sleep", "pattern": true, "novel": true}
+{"prompt": "the teacher eats the pears", "gen": "the mans stays in the school", "pattern": true, "novel": true}
+{"prompt": "the teacher eats the pears", "gen": "the horses lives to a apple", "pattern": true, "novel": true}
+{"prompt": "the teacher eats the pears", "gen": "a boy smile", "pattern": true, "novel": true}
+{"prompt": "a quiet baker cooks the apples", "gen": "some girls sleeps", "pattern": true, "novel": true}
+{"prompt": "a quiet baker cooks the apples", "gen": "the sleepy teachers chase the small dog", "pattern": true, "novel": true}
+{"prompt": "a quiet baker cooks the apples", "gen": "a small horse runs", "pattern": true, "novel": true}
+{"prompt": "a quiet baker cooks the apples", "gen": "the small fresh shops", "pattern": false, "novel": true}
+{"prompt": "the tall teacher sleeps", "gen": "some cats sleeps", "pattern": true, "novel": true}
+{"prompt": "the tall teacher sleeps", "gen": "a dog smiles", "pattern": true, "novel": true}
+{"prompt": "the tall teacher sleeps", "gen": "the woman buys the cookies", "pattern": true, "novel": true}
+{"prompt": "the tall teacher sleeps", "gen": "a cow laugh", "pattern": true, "novel": true}
+{"prompt": "the sleepy girl goes to a shop", "gen": "the boy eats the apples", "pattern": true, "novel": true}
+{"prompt": "the sleepy girl goes to a shop", "gen": "a woman carries a apple", "pattern": true, "novel": true}
+{"prompt": "the sleepy girl goes to a shop", "gen": "the girls clean the house", "pattern": true, "novel": true}
+{"prompt": "the sleepy girl goes to a shop", "gen": "a man sleep", "pattern": true, "novel": true}
+{"prompt": "the farmer sleeps", "gen": "a old woman cleans the teachers shop", "pattern": false, "novel": true}
+{"prompt": "the farmer sleeps", "gen": "a woman sleep", "pattern": true, "novel": true}
+{"prompt": "the farmer sleeps", "gen": "a horse spoils", "pattern": true, "novel": true}
+{"prompt": "the farmer sleeps", "gen": "the woman return to some sleepy garden", "pattern": true, "novel": true}
+{"prompt": "some boys cook some cookies", "gen": "the dog work bake the apple", "pattern": false, "novel": true}
+{"prompt": "some boys cook some cookies", "gen": "the pig walks to a house", "pattern": true, "novel": true}
+{"prompt": "some boys cook some cookies", "gen": "some pigs runs", "pattern": true, "novel": true}
+{"prompt": "some boys cook some cookies", "gen": "a fresh farm spoils", "pattern": true, "novel": true}
+{"prompt": "some mans go to the quiet forest", "gen": "some small teachers walks to the sleep", "pattern": false, "novel": true}
+{"prompt": "some mans go to the quiet forest", "gen": "a girl cleans the old eggs", "pattern": true, "novel": true}
+{"prompt": "some mans go to the quiet forest", "gen": "the woman eats a house", "pattern": true, "novel": true}
+{"prompt": "some mans go to the quiet forest", "gen": "some doctors walks to some quiet schools", "pattern": true, "novel": true}
+{"prompt": "the girl sleeps", "gen": "a kind horse returns to a hungry pie", "pattern": true, "novel": true}
+{"prompt": "the girl sleeps", "gen": "a tall fox work to a kind school", "pattern": true, "novel": true}
+{"prompt": "the girl sleeps", "gen": "some girls in a ball", "pattern": false, "novel": true}
+{"prompt": "the girl sleeps", "gen": "a doctor goes to a apple", "pattern": true, "novel": true}
+{"prompt": "the boys work in some shops", "gen": "a big boy walks in a big house", "pattern": true, "novel": true}
+{"prompt": "the boys work in some shops", "gen": "some horses go in the gardens", "pattern": true, "novel": true}
+{"prompt": "the boys work in some shops", "gen": "a teacher bakes the gardens", "pattern": true, "novel": true}
+{"prompt": "the boys work in some shops", "gen": "a boy cooks a sweet cookie", "pattern": true, "novel": true}
+{"prompt": "the horses go to a garden", "gen": "the baker laughs", "pattern": true, "novel": true}
+{"prompt": "the horses go to a garden", "gen": "the kind farmers in a ball", "pattern": false, "novel": true}
+{"prompt": "the horses go to a garden", "gen": "the fresh house spoils", "pattern": true, "novel": true}
+{"prompt": "the horses go to a garden", "gen": "a man bakes a garden", "pattern": true, "novel": true}
+{"prompt": "the teachers cook some cakes", "gen": "the birds shops", "pattern": false, "novel": true}
+{"prompt": "the teachers cook some cakes", "gen": "the woman bakes some houses", "pattern": true, "novel": true}
+{"prompt": "the teachers cook some cakes", "gen": "the sleepy boys in the sleepy cookie", "pattern": false, "novel": true}
+{"prompt": "the teachers cook some cakes", "gen": "the dogs walks to some happy schools", "pattern": true, "novel": true}
+{"prompt": "the small baker helps a man", "gen": "a woman live buy a small market", "pattern": false, "novel": true}
+{"prompt": "the small baker helps a man", "gen": "the kind boys visit a cake", "pattern": true, "novel": true}
+{"prompt": "the small baker helps a man", "gen": "the dog cleans the cups", "pattern": true, "novel": true}
+{"prompt": "the small baker helps a man", "gen": "a farmer sleep", "pattern": true, "novel": true}
+{"prompt": "a kind boy lives in the quiet garden", "gen": "some farmers spoils", "pattern": true, "novel": true}
+{"prompt": "a kind boy lives in the quiet garden", "gen": "a horse work to the apples", "pattern": true, "novel": true}
+{"prompt": "a kind boy lives in the quiet garden", "gen": "the dog work to the kind apple", "pattern": true, "novel": true}
+{"prompt": "a kind boy lives in the quiet garden", "gen": "a man carries a ball", "pattern": true, "novel": true}
+{"prompt": "a fox returns to some tall gardens", "gen": "a cat hugs a hungry gardens", "pattern": true, "novel": true}
+{"prompt": "a fox returns to some tall gardens", "gen": "some foxs spoils", "pattern": true, "novel": true}
+{"prompt": "a fox returns to some tall gardens", "gen": "the small boy buys some houses", "pattern": true, "novel": true}
+{"prompt": "a fox returns to some tall gardens", "gen": "the mans in some red cookies", "pattern": false, "novel": true}
+{"prompt": "the boys feed some pigs", "gen": "the cow go to the sleepy cookie", "pattern": true, "novel": true}
+{"prompt": "the boys feed some pigs", "gen": "the boys buy the big ball", "pattern": true, "novel": true}
+{"prompt": "the boys feed some pigs", "gen": "the cat go to the house", "pattern": true, "novel": true}
+{"prompt": "the boys feed some pigs", "gen": "the teachers goes clean the boys house", "pattern": false, "novel": true}
+{"prompt": "the cows eat a cake", "gen": "the pigs bake some cookies", "pattern": true, "novel": true}
+{"prompt": "the cows eat a cake", "gen": "some farmers runs", "pattern": true, "novel": true}
+{"prompt": "the cows eat a cake", "gen": "the small man eats the girls house", "pattern": false, "novel": true}
+{"prompt": "the cows eat a cake", "gen": "the small mans carry the quiet cup", "pattern": true, "novel": true}
+{"prompt": "the big woman bakes the cake", "gen": "the small teacher cooks the house", "pattern": true, "novel": true}
+{"prompt": "the big woman bakes the cake", "gen": "a hungry boy fixes some teachers", "pattern": true, "novel": true}
+{"prompt": "the big woman bakes the cake", "gen": "the teacher go in some old cake", "pattern": true, "novel": true}
+{"prompt": "the big woman bakes the cake", "gen": "the woman feeds the pears", "pattern": true, "novel": true}
+{"prompt": "the girl bakes the apples", "gen": "some teachers visit a ball", "pattern": true, "novel": true}
+{"prompt": "the girl bakes the apples", "gen": "a baker carries a ball", "pattern": true, "novel": true}
+{"prompt": "the girl bakes the apples", "gen": "a doctor visits a apple", "pattern": true, "novel": true}
+{"prompt": "the girl bakes the apples", "gen": "a cow goes to a sweet cake", "pattern": true, "novel": true}
+{"prompt": "the farmer visits a farm", "gen": "a baker eats a sweet house", "pattern": true, "novel": true}
+{"prompt": "the farmer visits a farm", "gen": "the boys go to the garden", "pattern": true, "novel": true}
+{"prompt": "the farmer visits a farm", "gen": "the girl eats a apple", "pattern": true, "novel": true}
+{"prompt": "the farmer visits a farm", "gen": "some girls stay to the chair", "pattern": true, "novel": true}
+{"prompt": "a old boy lives in a garden", "gen": "a baker fixes some boys", "pattern": true, "novel": true}
+{"prompt": "a old boy lives in a garden", "gen": "a baker eats the park", "pattern": true, "novel": true}
+{"prompt": "a old boy lives in a garden", "gen": "some mans sleeps", "pattern": true, "novel": true}
+{"prompt": "a old boy lives in a garden", "gen": "the happy bakers go buy the apple", "pattern": false, "novel": true}
+{"prompt": "the horse goes to a big house", "gen": "the horse breaks", "pattern": true, "novel": true}
+{"prompt": "the horse goes to a big house", "gen": "a boy carries some boxs", "pattern": true, "novel": true}
+{"prompt": "the horse goes to a big house", "gen": "some boys go to a quiet shop", "pattern": true, "novel": true}
+{"prompt": "the horse goes to a big house", "gen": "a woman returns to the school", "pattern": true, "novel": true}
+{"prompt": "the teachers smile", "gen": "the man carries the farms", "pattern": true, "novel": true}
+{"prompt": "the teachers smile", "gen": "the woman sleep", "pattern": true, "novel": true}
+{"prompt": "the teachers smile", "gen": "a boy buys the coats", "pattern": true, "novel": true}
+{"prompt": "the teachers smile", "gen": "a girl cooks a dog", "pattern": true, "novel": true}
+{"prompt": "the girls bake the pears", "gen": "the woman visits a house", "pattern": true, "novel": true}
+{"prompt": "the girls bake the pears", "gen": "some big girls walk eat some quiet pears", "pattern": false, "novel": true}
+{"prompt": "the girls bake the pears", "gen": "the man bakes the schools", "pattern": true, "novel": true}
+{"prompt": "the girls bake the pears", "gen": "the bakers runs", "pattern": true, "novel": true}
+{"prompt": "a pig eats a fresh pie", "gen": "some tall mans chase a rabbit", "pattern": true, "novel": true}
+{"prompt": "a pig eats a fresh pie", "gen": "some teachers in the old doctor", "pattern": false, "novel": true}
+{"prompt": "a pig eats a fresh pie", "gen": "a dog visits a apple", "pattern": true, "novel": true}
+{"prompt": "a pig eats a fresh pie", "gen": "a woman bakes some small pears", "pattern": true, "novel": true}
+{"prompt": "a boy lives in a farm", "gen": "the sleepy horses walk to the happy house", "pattern": true, "novel": true}
+{"prompt": "a boy lives in a farm", "gen": "some boys cook a womans apple", "pattern": false, "novel": true}
+{"prompt": "a boy lives in a farm", "gen": "some horses in the houses", "pattern": false, "novel": true}
+{"prompt": "a boy lives in a farm", "gen": "a book spoils", "pattern": true, "novel": true}
+{"prompt": "a baker chases some pigs", "gen": "the old pig carries the forest", "pattern": true, "novel": true}
+{"prompt": "a baker chases some pigs", "gen": "the boy cleans the markets", "pattern": true, "novel": true}
+{"prompt": "a baker chases some pigs", "gen": "a girl run", "pattern": true, "novel": true}
+{"prompt": "a baker chases some pigs", "gen": "the big boy feeds the girls", "pattern": true, "novel": true}
+{"prompt": "a old dog stays in the school", "gen": "some womans runs", "pattern": true, "novel": true}
+{"prompt": "a old dog stays in the school", "gen": "some old dogs return to the cakes", "pattern": true, "novel": true}
+{"prompt": "a old dog stays in the school", "gen": "a sleepy woman buys the coats", "pattern": true, "novel": true}
+{"prompt": "a old dog stays in the school", "gen": "some farmers return to the house", "pattern": true, "novel": true}
+{"prompt": "the girls clean the markets", "gen": "a boy bakes a pie", "pattern": true, "novel": true}
+{"prompt": "the girls clean the markets", "gen": "the hat spoils", "pattern": true, "novel": true}
+{"prompt": "the girls clean the markets", "gen": "the fresh garden smiles", "pattern": true, "novel": true}
+{"prompt": "the girls clean the markets", "gen": "the sleepy girl buys the big horse", "pattern": true, "novel": true}
+{"prompt": "the horse sleeps", "gen": "a hat smiles", "pattern": true, "novel": true}
+{"prompt": "the horse sleeps", "gen": "the boy buys a big book", "pattern": true, "novel": true}
+{"prompt": "the horse sleeps", "gen": "the womans walk to the broken garden", "pattern": true, "novel": true}
+{"prompt": "the horse sleeps", "gen": "the girl visits a boy", "pattern": true, "novel": true}
+{"prompt": "some boys smile", "gen": "the boy hugs the sweet apple", "pattern": true, "novel": true}
+{"prompt": "some boys smile", "gen": "some small red hug a quiet cup", "pattern": false, "novel": true}
+{"prompt": "some boys smile", "gen": "the quiet dog go to the apple", "pattern": true, "novel": true}
+{"prompt": "some boys smile", "gen": "some boys in some old houses", "pattern": false, "novel": true}
+{"prompt": "a big man carries a cup", "gen": "a woman hugs the tall pie", "pattern": true, "novel": true}
+{"prompt": "a big man carries a cup", "gen": "some rabbits break", "pattern": true, "novel": true}
+{"prompt": "a big man carries a cup", "gen": "a teacher live chase a big cats", "pattern": false, "novel": true}
+{"prompt": "a big man carries a cup", "gen": "a woman eats a cake", "pattern": true, "novel": true}
+{"prompt": "the kind womans help the man", "gen": "a farmer visits the kind boxs", "pattern": true, "novel": true}
+{"prompt": "the kind womans help the man", "gen": "the old woman buys a carrot", "pattern": true, "novel": true}
+{"prompt": "the kind womans help the man", "gen": "a small dog bakes some bakers lemons", "pattern": false, "novel": true}
+{"prompt": "the kind womans help the man", "gen": "the happy baker spoil", "pattern": true, "novel": true}
+{"prompt": "the woman cooks a big cookie", "gen": "the cats returns to some kind farm", "pattern": true, "novel": true}
+{"prompt": "the woman cooks a big cookie", "gen": "a farmer buys the horses chairs", "pattern": false, "novel": true}
+{"prompt": "the woman cooks a big cookie", "gen": "some dogs laugh", "pattern": true, "novel": true}
+{"prompt": "the woman cooks a big cookie", "gen": "a farmer returns to a forest", "pattern": true, "novel": true}
+{"prompt": "the big boys bake a carrot", "gen": "some quiet horses go to a small pie", "pattern": true, "novel": true}
+{"prompt": "the big boys bake a carrot", "gen": "a bird eats the old market", "pattern": true, "novel": true}
+{"prompt": "the big boys bake a carrot", "gen": "the boy sleep", "pattern": true, "novel": true}
+{"prompt": "the big boys bake a carrot", "gen": "some small red in the big apples", "pattern": false, "novel": true}
+{"prompt": "the fox goes to the market", "gen": "a boy walk to a apple", "pattern": true, "novel": true}
+{"prompt": "the fox goes to the market", "gen": "a girl cooks a box", "pattern": true, "novel": true}
+{"prompt": "the fox goes to the market", "gen": "the womans cook some boys cups", "pattern": false, "novel": true}
+{"prompt": "the fox goes to the market", "gen": "a small dog bakes the carrot", "pattern": true, "novel": true}
+{"prompt": "a quiet boy cleans a small ball", "gen": "the woman run", "pattern": true, "novel": true}
+{"prompt": "a quiet boy cleans a small ball", "gen": "a old boy buys a coat", "pattern": true, "novel": true}
+{"prompt": "a quiet boy cleans a small ball", "gen": "a man carries a hat", "pattern": true, "novel": true}
+{"prompt": "a quiet boy cleans a small ball", "gen": "a tall teacher sleeps", "pattern": true, "novel": true}
+{"prompt": "the girls return to the shop", "gen": "the woman bakes some schools", "pattern": true, "novel": true}
+{"prompt": "the girls return to the shop", "gen": "the old boy live in some gardens", "pattern": true, "novel": true}
+{"prompt": "the girls return to the shop", "gen": "a girl chases a dog", "pattern": true, "novel": true}
+{"prompt": "the girls return to the shop", "gen": "some boys in a ripe forest", "pattern": false, "novel": true}
+{"prompt": "the farmer laughs", "gen": "a boy stay to the pies", "pattern": true, "novel": true}
+{"prompt": "the farmer laughs", "gen": "the cat works eat some sweet cookies", "pattern": false, "novel": true}
+{"prompt": "the farmer laughs", "gen": "the girl bakes the sweet books", "pattern": true, "novel": true}
+{"prompt": "the farmer laughs", "gen": "the boys eat some cookies", "pattern": true, "novel": true}
+{"prompt": "a girl smiles", "gen": "some boys carry a cup", "pattern": true, "novel": true}
+{"prompt": "a girl smiles", "gen": "the small horse goes to some old farms", "pattern": true, "novel": true}
+{"prompt": "a girl smiles", "gen": "the birds sleep", "pattern": true, "novel": true}
+{"prompt": "a girl smiles", "gen": "the quiet red in a happy house", "pattern": false, "novel": true}
+{"prompt": "the boy cleans a box", "gen": "a teacher returns in the small cookie", "pattern": true, "novel": true}
+{"prompt": "the boy cleans a box", "gen": "a teacher spoils", "pattern": true, "novel": true}
+{"prompt": "the boy cleans a box", "gen": "a doctor chases some big houses", "pattern": true, "novel": true}
+{"prompt": "the boy cleans a box", "gen": "the teacher buys a hat", "pattern": true, "novel": true}
+{"prompt": "the boy cooks a apple", "gen": "a man eats the apple", "pattern": true, "novel": true}
+{"prompt": "the boy cooks a apple", "gen": "a baker eats a happy house", "pattern": true, "novel": true}
+{"prompt": "the boy cooks a apple", "gen": "the dog sleeps", "pattern": true, "novel": true}
+{"prompt": "the boy cooks a apple", "gen": "the quiet dogs smile", "pattern": true, "novel": true}
+{"prompt": "the quiet birds eat some apples", "gen": "the bakers chase the dog", "pattern": true, "novel": true}
+{"prompt": "the quiet birds eat some apples", "gen": "some girls walk to the apples", "pattern": true, "novel": true}
+{"prompt": "the quiet birds eat some apples", "gen": "the ripe cookies smiles", "pattern": true, "novel": true}
+{"prompt": "the quiet birds eat some apples", "gen": "the keys sleeps", "pattern": true, "novel": true}
+{"prompt": "the horse goes to the house", "gen": "the farmer helps some old woman", "pattern": true, "novel": true}
+{"prompt": "the horse goes to the house", "gen": "the girl carries the sweet apple", "pattern": true, "novel": true}
+{"prompt": "the horse goes to the house", "gen": "the cups laughs", "pattern": true, "novel": true}
+{"prompt": "the horse goes to the house", "gen": "some boys work in the quiet shop", "pattern": true, "novel": true}
+{"prompt": "some mans clean the garden", "gen": "some small boys walks to a cookie", "pattern": true, "novel": true}
+{"prompt": "some mans clean the garden", "gen": "a horse cooks the gardens", "pattern": true, "novel": true}
+{"prompt": "some mans clean the garden", "gen": "a farmer feeds the dog", "pattern": true, "novel": true}
+{"prompt": "some mans clean the garden", "gen": "the horses lives in a house", "pattern": true, "novel": true}
+{"prompt": "the hungry dog stays in the park", "gen": "a farmer bakes the teachers farms", "pattern": false, "novel": true}
+{"prompt": "the hungry dog stays in the park", "gen": "the girl live in some tall apples", "pattern": true, "novel": true}
+{"prompt": "the hungry dog stays in the park", "gen": "some horses fix the pie", "pattern": true, "novel": true}
+{"prompt": "the hungry dog stays in the park", "gen": "a girl buys a ball", "pattern": true, "novel": true}
+{"prompt": "a dog walks to some shops", "gen": "some bakers in the cows", "pattern": false, "novel": true}
+{"prompt": "a dog walks to some shops", "gen": "the teachers in the pies", "pattern": false, "novel": true}
+{"prompt": "a dog walks to some shops", "gen": "some womans cook some lemons", "pattern": true, "novel": true}
+{"prompt": "a dog walks to some shops", "gen": "some red cook the small pears", "pattern": false, "novel": true}
+{"prompt": "the doctor cleans some small boxs", "gen": "a girl buys a forest", "pattern": true, "novel": true}
+{"prompt": "the doctor cleans some small boxs", "gen": "a woman fixes the hats", "pattern": true, "novel": true}
+{"prompt": "the doctor cleans some small boxs", "gen": "the dogs live cook some kind pears", "pattern": false, "novel": true}
+{"prompt": "the doctor cleans some small boxs", "gen": "a fox goes to the cookie", "pattern": true, "novel": true}
+{"prompt": "a ball breaks", "gen": "a baker eats the book", "pattern": true, "novel": true}
+{"prompt": "a ball breaks", "gen": "a girl break", "pattern": true, "novel": true}
+{"prompt": "a ball breaks", "gen": "a boy eats the house", "pattern": true, "novel": true}
+{"prompt": "a ball breaks", "gen": "the small man cooks the boys apple", "pattern": false, "novel": true}
+{"prompt": "the teacher smiles", "gen": "some cows in the school", "pattern": false, "novel": true}
+{"prompt": "the teacher smiles", "gen": "the small girl laughs", "pattern": true, "novel": true}
+{"prompt": "the teacher smiles", "gen": "a woman bakes some small cakes", "pattern": true, "novel": true}
+{"prompt": "the teacher smiles", "gen": "the bakers in the carrots", "pattern": false, "novel": true}
+{"prompt": "the doctor smiles", "gen": "the ball smiles", "pattern": true, "novel": true}
+{"prompt": "the doctor smiles", "gen": "some red spoils", "pattern": false, "novel": true}
+{"prompt": "the doctor smiles", "gen": "a girl buys the boy", "pattern": true, "novel": true}
+{"prompt": "the doctor smiles", "gen": "a farmer fixes a hat", "pattern": true, "novel": true}
+{"prompt": "some cats go to some gardens", "gen": "a boy visits the pie", "pattern": true, "novel": true}
+{"prompt": "some cats go to some gardens", "gen": "some boys returns in the small pie", "pattern": true, "novel": true}
+{"prompt": "some cats go to some gardens", "gen": "a cat smile", "pattern": true, "novel": true}
+{"prompt": "some cats go to some gardens", "gen": "the dogs in some old farms", "pattern": false, "novel": true}
+{"prompt": "the girl feeds some cows", "gen": "the dog walks to the markets", "pattern": true, "novel": true}
+{"prompt": "the girl feeds some cows", "gen": "the old dog eats the shop", "pattern": true, "novel": true}
+{"prompt": "the girl feeds some cows", "gen": "the girl visits a boy", "pattern": true, "novel": true}
+{"prompt": "the girl feeds some cows", "gen": "some kind horses work to a big cake", "pattern": true, "novel": true}
+{"prompt": "the boy cooks the cookie", "gen": "the big man hugs some girls", "pattern": true, "novel": true}
+{"prompt": "the boy cooks the cookie", "gen": "the teacher returns to a house", "pattern": true, "novel": true}
+{"prompt": "the boy cooks the cookie", "gen": "a quiet boy chases a sweet dog", "pattern": true, "novel": true}
+{"prompt": "the boy cooks the cookie", "gen": "a hungry teacher break", "pattern": true, "novel": true}
+{"prompt": "the sleepy cows sleep", "gen": "the dogs smile", "pattern": true, "novel": true}
+{"prompt": "the sleepy cows sleep", "gen": "the quiet man returns eat the pie", "pattern": false, "novel": true}
+{"prompt": "the sleepy cows sleep", "gen": "the man sleeps", "pattern": true, "novel": true}
+{"prompt": "the sleepy cows sleep", "gen": "the big mans chase the balls", "pattern": true, "novel": true}
+{"prompt": "the teachers chase the cat", "gen": "some cats sleeps", "pattern": true, "novel": true}
+{"prompt": "the teachers chase the cat", "gen": "the boy breaks", "pattern": true, "novel": true}
+{"prompt": "the teachers chase the cat", "gen": "a happy woman bakes the old pears", "pattern": true, "novel": true}
+{"prompt": "the teachers chase the cat", "gen": "the boy feeds a rabbit", "pattern": true, "novel": true}
+{"prompt": "the cats run", "gen": "a boy stays buy the pear", "pattern": false, "novel": true}
+{"prompt": "the cats run", "gen": "the sweet garden smile", "pattern": true, "novel": true}
+{"prompt": "the cats run", "gen": "the farmers in the happy garden", "pattern": false, "novel": true}
+{"prompt": "the cats run", "gen": "some womans sleeps", "pattern": true, "novel": true}
+{"prompt": "the small cat goes to the school", "gen": "the old teachers stay cook the farms", "pattern": false, "novel": true}
+{"prompt": "the small cat goes to the school", "gen": "some girls in a forest", "pattern": false, "novel": true}
+{"prompt": "the small cat goes to the school", "gen": "the tall girls spoils", "pattern": true, "novel": true}
+{"prompt": "the small cat goes to the school", "gen": "the man laugh", "pattern": true, "novel": true}
+{"prompt": "the doctors go to the schools", "gen": "the boys clean a quiet apple", "pattern": true, "novel": true}
+{"prompt": "the doctors go to the schools", "gen": "the pear smiles", "pattern": true, "novel": true}
+{"prompt": "the doctors go to the schools", "gen": "some teachers buy a book", "pattern": true, "novel": true}
+{"prompt": "the doctors go to the schools", "gen": "the book sleep", "pattern": true, "novel": true}
+{"prompt": "the quiet bakers bake the lemon", "gen": "some womans clean the quiet apple", "pattern": true, "novel": true}
+{"prompt": "the quiet bakers bake the lemon", "gen": "the tall girl helps a man", "pattern": true, "novel": true}
+{"prompt": "the quiet bakers bake the lemon", "gen": "a big horse smile", "pattern": true, "novel": true}
+{"prompt": "the quiet bakers bake the lemon", "gen": "the red hat runs", "pattern": true, "novel": true}
+{"prompt": "a box breaks", "gen": "a big woman carries some small lemons", "pattern": true, "novel": true}
+{"prompt": "a box breaks", "gen": "some sweet smile", "pattern": false, "novel": true}
+{"prompt": "a box breaks", "gen": "some small boys returns to a garden", "pattern": true, "novel": true}
+{"prompt": "a box breaks", "gen": "a farmer chases a book", "pattern": true, "novel": true}
+{"prompt": "the teacher laughs", "gen": "the teacher goes to a garden", "pattern": true, "novel": true}
+{"prompt": "the teacher laughs", "gen": "the old doctors stay visit a apple", "pattern": false, "novel": true}
+{"prompt": "the teacher laughs", "gen": "a girl bakes a sweet dog", "pattern": true, "novel": true}
+{"prompt": "the teacher laughs", "gen": "a small dog walk to the old garden", "pattern": true, "novel": true}
+{"prompt": "the teachers stay in the houses", "gen": "the dog go in the farm", "pattern": true, "novel": true}
+{"prompt": "the teachers stay in the houses", "gen": "the pigs clean the forests", "pattern": true, "novel": true}
+{"prompt": "the teachers stay in the houses", "gen": "the dogs walks to the hungry pear", "pattern": true, "novel": true}
+{"prompt": "the teachers stay in the houses", "gen": "the big pigs walk to a hungry apple", "pattern": true, "novel": true}
+{"prompt": "the kind woman bakes the pie", "gen": "the fresh apple laughs", "pattern": true, "novel": true}
+{"prompt": "the kind woman bakes the pie", "gen": "a teacher chases a sleepy cow", "pattern": true, "novel": true}
+{"prompt": "the kind woman bakes the pie", "gen": "some mans feed some apples", "pattern": true, "novel": true}
+{"prompt": "the kind woman bakes the pie", "gen": "a fresh pie smiles", "pattern": true, "novel": true}
+{"prompt": "the pies spoil", "gen": "a small cow stays in the hungry apple", "pattern": true, "novel": true}
+{"prompt": "the pies spoil", "gen": "a tall teacher sleep", "pattern": true, "novel": true}
+{"prompt": "the pies spoil", "gen": "the small pig sleep", "pattern": true, "novel": true}
+{"prompt": "the pies spoil", "gen": "the horses go to some gardens", "pattern": true, "novel": true}
+{"prompt": "the farmers bake some small pies", "gen": "some teachers in the forest", "pattern": false, "novel": true}
+{"prompt": "the farmers bake some small pies", "gen": "the girl goes to the house", "pattern": true, "novel": true}
+{"prompt": "the farmers bake some small pies", "gen": "the dogs eat the market", "pattern": true, "novel": true}
+{"prompt": "the farmers bake some small pies", "gen": "the girl goes to a hungry pies", "pattern": true, "novel": true}
+{"prompt": "some dogs walk to the old markets", "gen": "a sleepy fox bakes a garden", "pattern": true, "novel": true}
+{"prompt": "some dogs walk to the old markets", "gen": "the cows in the pies", "pattern": false, "novel": true}
+{"prompt": "some dogs walk to the old markets", "gen": "a horse returns to a market", "pattern": true, "novel": true}
+{"prompt": "some dogs walk to the old markets", "gen": "the teacher fixes the quiet house", "pattern": true, "novel": true}
+{"prompt": "the hungry boy hugs the old cows", "gen": "the small cats cook a book", "pattern": true, "novel": true}
+{"prompt": "the hungry boy hugs the old cows", "gen": "the baker spoils", "pattern": true, "novel": true}
+{"prompt": "the hungry boy hugs the old cows", "gen": "a big girl sleeps", "pattern": true, "novel": true}
+{"prompt": "the hungry boy hugs the old cows", "gen": "the small cat chases the hungry horses", "pattern": true, "novel": true}
+{"prompt": "the red ball breaks", "gen": "the old boys spoils", "pattern": true, "novel": true}
+{"prompt": "the red ball breaks", "gen": "some cats laugh", "pattern": true, "novel": true}
+{"prompt": "the red ball breaks", "gen": "the boys carry the broken bakers spoil", "pattern": false, "novel": true}
+{"prompt": "the red ball breaks", "gen": "the baker stays in the sweet house", "pattern": true, "novel": true}
+{"prompt": "a man cleans the house", "gen": "a boy helps some horses", "pattern": true, "novel": true}
+{"prompt": "a man cleans the house", "gen": "the boy eats a park", "pattern": true, "novel": true}
+{"prompt": "a man cleans the house", "gen": "the cat walks help the park", "pattern": false, "novel": true}
+{"prompt": "a man cleans the house", "gen": "a girl cleans the small balls", "pattern": true, "novel": true}
+{"prompt": "the teachers work in the garden", "gen": "a dog feeds a apple", "pattern": true, "novel": true}
+{"prompt": "the teachers work in the garden", "gen": "a girl walks to the egg", "pattern": true, "novel": true}
+{"prompt": "the teachers work in the garden", "gen": "the horse goes to the market", "pattern": true, "novel": true}
+{"prompt": "the teachers work in the garden", "gen": "the small woman breaks", "pattern": true, "novel": true}
+{"prompt": "the man eats a lemon", "gen": "some horses spoils", "pattern": true, "novel": true}
+{"prompt": "the man eats a lemon", "gen": "some small horses stays eat a quiet market", "pattern": false, "novel": true}
+{"prompt": "the man eats a lemon", "gen": "some mans in some apples", "pattern": false, "novel": true}
+{"prompt": "the man eats a lemon", "gen": "a woman returns to a big farm", "pattern": true, "novel": true}
+{"prompt": "some balls break", "gen": "a man work chase the kind apple", "pattern": false, "novel": true}
+{"prompt": "some balls break", "gen": "some mans return to a house", "pattern": true, "novel": true}
+{"prompt": "some balls break", "gen": "the big fox walks to a forest", "pattern": true, "novel": true}
+{"prompt": "some balls break", "gen": "some boys eat the house", "pattern": true, "novel": true}
+{"prompt": "the hats break", "gen": "the horses works in a shop", "pattern": true, "novel": true}
+{"prompt": "the hats break", "gen": "the small farmers goes to a happy market", "pattern": true, "novel": true}
+{"prompt": "the hats break", "gen": "the girl eats the parks", "pattern": true, "novel": true}
+{"prompt": "the hats break", "gen": "a dog break", "pattern": true, "novel": true}
+{"prompt": "the boy chases a rabbit", "gen": "the happy dogs smiles", "pattern": true, "novel": true}
+{"prompt": "the boy chases a rabbit", "gen": "some boys sleeps", "pattern": true, "novel": true}
+{"prompt": "the boy chases a rabbit", "gen": "a girl cooks the boy", "pattern": true, "novel": true}
+{"prompt": "the boy chases a rabbit", "gen": "the red boxs breaks", "pattern": true, "novel": true}
+{"prompt": "a red ball breaks", "gen": "a farmer eats the schools", "pattern": true, "novel": true}
+{"prompt": "a red ball breaks", "gen": "the farmers spoil", "pattern": true, "novel": true}
+{"prompt": "a red ball breaks", "gen": "the woman bakes the schools", "pattern": true, "novel": true}
+{"prompt": "a red ball breaks", "gen": "the hungry teacher go to the ripe cakes", "pattern": true, "novel": true}
+{"prompt": "a boy bakes some pies", "gen": "some boys chase the apples", "pattern": true, "novel": true}
+{"prompt": "a boy bakes some pies", "gen": "some mans stay visit a big pie", "pattern": false, "novel": true}
+{"prompt": "a boy bakes some pies", "gen": "the small womans works carry the shop", "pattern": false, "novel": true}
+{"prompt": "a boy bakes some pies", "gen": "some boys goes visit a quiet cake", "pattern": false, "novel": true}
+{"prompt": "some small doctors return to the garden", "gen": "the kind fox cooks a old farm", "pattern": true, "novel": true}
+{"prompt": "some small doctors return to the garden", "gen": "the quiet farmers carry a quiet school", "pattern": true, "novel": true}
+{"prompt": "some small doctors return to the garden", "gen": "a girl visits a big doctor", "pattern": true, "novel": true}
+{"prompt": "some small doctors return to the garden", "gen": "some mans returns fix a pie", "pattern": false, "novel": true}
+{"prompt": "a doctor eats some sweet apples", "gen": "the girls chase the chair", "pattern": true, "novel": true}
+{"prompt": "a doctor eats some sweet apples", "gen": "some girls sleeps", "pattern": true, "novel": true}
+{"prompt": "a doctor eats some sweet apples", "gen": "some teachers in a ball", "pattern": false, "novel": true}
+{"prompt": "a doctor eats some sweet apples", "gen": "a teacher cooks a big school", "pattern": true, "novel": true}
+{"prompt": "some kind boys smile", "gen": "the sweet lemons breaks", "pattern": true, "novel": true}
+{"prompt": "some kind boys smile", "gen": "the boy helps the mans house", "pattern": false, "novel": true}
+{"prompt": "some kind boys smile", "gen": "a old woman helps some doctors", "pattern": true, "novel": true}
+{"prompt": "some kind boys smile", "gen": "the ripe mans sleeps", "pattern": true, "novel": true}
+{"prompt": "a girl cooks some sweet cakes", "gen": "a doctor smile", "pattern": true, "novel": true}
+{"prompt": "a girl cooks some sweet cakes", "gen": "a man break", "pattern": true, "novel": true}
+{"prompt": "a girl cooks some sweet cakes", "gen": "some balls sleep", "pattern": true, "novel": true}
+{"prompt": "a girl cooks some sweet cakes", "gen": "the woman carries the pie", "pattern": true, "novel": true}
+{"prompt": "the teacher fixes the big ball", "gen": "the foxs sleeps", "pattern": true, "novel": true}
+{"prompt": "the teacher fixes the big ball", "gen": "the doctors feed a dog", "pattern": true, "novel": true}
+{"prompt": "the teacher fixes the big ball", "gen": "a small horse breaks", "pattern": true, "novel": true}
+{"prompt": "the teacher fixes the big ball", "gen": "a doctor helps the boy", "pattern": true, "novel": true}
+{"prompt": "the boy helps the boys", "gen": "some girls spoil", "pattern": true, "novel": true}
+{"prompt": "the boy helps the boys", "gen": "some pigs run", "pattern": true, "novel": true}
+{"prompt": "the boy helps the boys", "gen": "the girl chases the big boys", "pattern": true, "novel": true}
+{"prompt": "the boy helps the boys", "gen": "some boys carry a sleepy shop", "pattern": true, "novel": true}
+{"prompt": "a small boy sleeps", "gen": "the boy sleep", "pattern": true, "novel": true}
+{"prompt": "a small boy sleeps", "gen": "a dog visits some small cups", "pattern": true, "novel": true}
+{"prompt": "a small boy sleeps", "gen": "a horse breaks", "pattern": true, "novel": true}
+{"prompt": "a small boy sleeps", "gen": "the big woman go to a house", "pattern": true, "novel": true}
+{"prompt": "the carrots spoil", "gen": "a apple laughs", "pattern": true, "novel": true}
+{"prompt": "the carrots spoil", "gen": "a big cow stays in a small house", "pattern": true, "novel": true}
+{"prompt": "the carrots spoil", "gen": "the girl helps a small man", "pattern": true, "novel": true}
+{"prompt": "the carrots spoil", "gen": "the cats returns to a tall house", "pattern": true, "novel": true}
+{"prompt": "a cat lives in a shop", "gen": "the woman smile", "pattern": true, "novel": true}
+{"prompt": "a cat lives in a shop", "gen": "the boy helps a hungry rabbit", "pattern": true, "novel": true}
+{"prompt": "a cat lives in a shop", "gen": "some quiet boys buy the books", "pattern": true, "novel": true}
+{"prompt": "a cat lives in a shop", "gen": "the sleepy boy live in some cakes", "pattern": true, "novel": true}
+{"prompt": "some womans feed a sleepy cow", "gen": "some cats fix some gardens", "pattern": true, "novel": true}
+{"prompt": "some womans feed a sleepy cow", "gen": "some dogs walks to a hungry school", "pattern": true, "novel": true}
+{"prompt": "some womans feed a sleepy cow", "gen": "some girls goes to a small cake", "pattern": true, "novel": true}
+{"prompt": "some womans feed a sleepy cow", "gen": "the small hat shops", "pattern": false, "novel": true}
+{"prompt": "the old man goes to a shop", "gen": "the man eats the boxs", "pattern": true, "novel": true}
+{"prompt": "the old man goes to a shop", "gen": "the boys hug a hat", "pattern": true, "novel": true}
+{"prompt": "the old man goes to a shop", "gen": "some red keys sleeps", "pattern": true, "novel": true}
+{"prompt": "the old man goes to a shop", "gen": "the old dog cooks the farm", "pattern": true, "novel": true}
+{"prompt": "a woman smiles", "gen": "the mans stay in the small apples", "pattern": true, "novel": true}
+{"prompt": "a woman smiles", "gen": "the mans visit some schools", "pattern": true, "novel": true}
+{"prompt": "a woman smiles", "gen": "the ball sleep", "pattern": true, "novel": true}
+{"prompt": "a woman smiles", "gen": "a man visits some small chairs", "pattern": true, "novel": true}
+{"prompt": "the cats go to the farm", "gen": "the woman spoil", "pattern": true, "novel": true}
+{"prompt": "the cats go to the farm", "gen": "some tall doctors returns in a old pie", "pattern": true, "novel": true}
+{"prompt": "the cats go to the farm", "gen": "a horse return to some sweet apples", "pattern": true, "novel": true}
+{"prompt": "the cats go to the farm", "gen": "some schools laughs", "pattern": true, "novel": true}
+{"prompt": "the boy cleans the small farm", "gen": "the quiet birds works eat the cake", "pattern": false, "novel": true}
+{"prompt": "the boy cleans the small farm", "gen": "the small teacher buys some houses", "pattern": true, "novel": true}
+{"prompt": "the boy cleans the small farm", "gen": "the big mans in a big cake", "pattern": false, "novel": true}
+{"prompt": "the boy cleans the small farm", "gen": "the bird laugh", "pattern": true, "novel": true}
+{"prompt": "a rabbit stays in a school", "gen": "the hungry teacher stays cook the gardens", "pattern": false, "novel": true}
+{"prompt": "a rabbit stays in a school", "gen": "some mans clean the apple", "pattern": true, "novel": true}
+{"prompt": "a rabbit stays in a school", "gen": "the boys smiles", "pattern": true, "novel": true}
+{"prompt": "a rabbit stays in a school", "gen": "a dog carries a house", "pattern": true, "novel": true}
+{"prompt": "the boy hugs the kind boys", "gen": "a boy works to the happy school", "pattern": true, "novel": true}
+{"prompt": "the boy hugs the kind boys", "gen": "the farmer hugs the house", "pattern": true, "novel": true}
+{"prompt": "the boy hugs the kind boys", "gen": "a boy eats the doctors shop", "pattern": false, "novel": true}
+{"prompt": "the boy hugs the kind boys", "gen": "a farmer helps the farm", "pattern": true, "novel": true}
+{"prompt": "a cat runs", "gen": "some dogs returns to a big apple", "pattern": true, "novel": true}
+{"prompt": "a cat runs", "gen": "a small rabbit sleep", "pattern": true, "novel": true}
+{"prompt": "a cat runs", "gen": "some boys in the ripe cookie", "pattern": false, "novel": true}
+{"prompt": "a cat runs", "gen": "the man helps the birds", "pattern": true, "novel": true}
+{"prompt": "the happy teacher works in a big house", "gen": "the dogs goes to a cookie", "pattern": true, "novel": true}
+{"prompt": "the happy teacher works in a big house", "gen": "the big boys cook a pig", "pattern": true, "novel": true}
+{"prompt": "the happy teacher works in a big house", "gen": "the baker sleep", "pattern": true, "novel": true}
+{"prompt": "the happy teacher works in a big house", "gen": "the sleepy dogs bake the sleepy pears", "pattern": true, "novel": true}
+{"prompt": "a girl carries a box", "gen": "a fox goes to the gardens", "pattern": true, "novel": true}
+{"prompt": "a girl carries a box", "gen": "some boys in some happy pears", "pattern": false, "novel": true}
+{"prompt": "a girl carries a box", "gen": "the boys help the sweet boys", "pattern": true, "novel": true}
+{"prompt": "a girl carries a box", "gen": "a cow returns to the shop", "pattern": true, "novel": true}
+{"prompt": "the small boy goes to a forest", "gen": "the happy dog cooks some doctors", "pattern": true, "novel": true}
+{"prompt": "the small boy goes to a forest", "gen": "some mans walks cook the garden", "pattern": false, "novel": true}
+{"prompt": "the small boy goes to a forest", "gen": "the horse return to a farm", "pattern": true, "novel": true}
+{"prompt": "the small boy goes to a forest", "gen": "the girl bakes the big parks", "pattern": true, "novel": true}
+{"prompt": "the farmer lives in the tall parks", "gen": "some cakes sleep", "pattern": true, "novel": true}
+{"prompt": "the farmer lives in the tall parks", "gen": "the dogs stays to the quiet forest", "pattern": true, "novel": true}
+{"prompt": "the farmer lives in the tall parks", "gen": "a boy walk to some hungry cookies", "pattern": true, "novel": true}
+{"prompt": "the farmer lives in the tall parks", "gen": "some horses feed the house", "pattern": true, "novel": true}
+{"prompt": "the mans buy some lemons", "gen": "a farmer bakes the girls", "pattern": true, "novel": true}
+{"prompt": "the mans buy some lemons", "gen": "a tall man stay in a tall farm", "pattern": true, "novel": true}
+{"prompt": "the mans buy some lemons", "gen": "the man spoils", "pattern": true, "novel": true}
+{"prompt": "the mans buy some lemons", "gen": "a farmer eats the mans pie", "pattern": false, "novel": true}
+{"prompt": "the foxs walk to a garden", "gen": "some girls carry a horse", "pattern": true, "novel": true}
+{"prompt": "the foxs walk to a garden", "gen": "a teacher cleans a old hat", "pattern": true, "novel": true}
+{"prompt": "the foxs walk to a garden", "gen": "the big books spoils", "pattern": true, "novel": true}
+{"prompt": "the foxs walk to a garden", "gen": "the cow helps some tall girls", "pattern": true, "novel": true}
+{"prompt": "a cat lives in a house", "gen": "the bakers returns to the big forest", "pattern": true, "novel": true}
+{"prompt": "a cat lives in a house", "gen": "the tall boy eats a cake", "pattern": true, "novel": true}
+{"prompt": "a cat lives in a house", "gen": "the happy girls stay cook a garden", "pattern": false, "novel": true}
+{"prompt": "a cat lives in a house", "gen": "the sleepy boy bakes some cookies", "pattern": true, "novel": true}
+{"prompt": "some girls run", "gen": "a tall girl eats a ball", "pattern": true, "novel": true}
+{"prompt": "some girls run", "gen": "the farmer returns in the apple", "pattern": true, "novel": true}
+{"prompt": "some girls run", "gen": "some womans visit the horses", "pattern": true, "novel": true}
+{"prompt": "some girls run", "gen": "a bird goes to a apple", "pattern": true, "novel": true}
+{"prompt": "the girls go to a school", "gen": "the happy horse stays in the tall house", "pattern": true, "novel": true}
+{"prompt": "the girls go to a school", "gen": "the garden spoil", "pattern": true, "novel": true}
+{"prompt": "the girls go to a school", "gen": "the girl eats the houses", "pattern": true, "novel": true}
+{"prompt": "the girls go to a school", "gen": "some boys carry a book", "pattern": true, "novel": true}
+{"prompt": "the sleepy bird eats the fresh apple", "gen": "the quiet farmers return eat the house", "pattern": false, "novel": true}
+{"prompt": "the sleepy bird eats the fresh apple", "gen": "a small boy eats the boys pie", "pattern": false, "novel": true}
+{"prompt": "the sleepy bird eats the fresh apple", "gen": "the dog helps the farmers house", "pattern": false, "novel": true}
+{"prompt": "the sleepy bird eats the fresh apple", "gen": "a boy breaks", "pattern": true, "novel": true}
+{"prompt": "some old boys smile", "gen": "a quiet woman chases some happy horse", "pattern": true, "novel": true}
+{"prompt": "some old boys smile", "gen": "the old woman eats a ball", "pattern": true, "novel": true}
+{"prompt": "some old boys smile", "gen": "the doctor bakes the cookies", "pattern": true, "novel": true}
+{"prompt": "some old boys smile", "gen": "a woman stays in a cake", "pattern": true, "novel": true}
+{"prompt": "the woman sleeps", "gen": "a cat sleep", "pattern": true, "novel": true}
+{"prompt": "the woman sleeps", "gen": "the man sleep", "pattern": true, "novel": true}
+{"prompt": "the woman sleeps", "gen": "some cats break", "pattern": true, "novel": true}
+{"prompt": "the woman sleeps", "gen": "a fresh house smile", "pattern": true, "novel": true}
+{"prompt": "a boy chases the pig", "gen": "a boy buys the big pig", "pattern": true, "novel": true}
+{"prompt": "a boy chases the pig", "gen": "the apple breaks", "pattern": true, "novel": true}
+{"prompt": "a boy chases the pig", "gen": "the big girl chases a woman", "pattern": true, "novel": true}
+{"prompt": "a boy chases the pig", "gen": "the dog stays in the garden", "pattern": true, "novel": true}
+{"prompt": "the kind teachers clean some big houses", "gen": "the girl eats the boy", "pattern": true, "novel": true}
+{"prompt": "the kind teachers clean some big houses", "gen": "the big womans go eat a cookie", "pattern": false, "novel": true}
+{"prompt": "the kind teachers clean some big houses", "gen": "the dog fixes a hungry horse", "pattern": true, "novel": true}
+{"prompt": "the kind teachers clean some big houses", "gen": "the woman cooks the house", "pattern": true, "novel": true}
+{"prompt": "the girl cleans a small ball", "gen": "a quiet baker return bake the house", "pattern": false, "novel": true}
+{"prompt": "the girl cleans a small ball", "gen": "some cats work bake the house", "pattern": false, "novel": true}
+{"prompt": "the girl cleans a small ball", "gen": "the small cat return in the shop", "pattern": true, "novel": true}
+{"prompt": "the girl cleans a small ball", "gen": "the boy spoils", "pattern": true, "novel": true}
+{"prompt": "a hungry boy smiles", "gen": "some boys go to a house", "pattern": true, "novel": true}
+{"prompt": "a hungry boy smiles", "gen": "the girl feeds the happy dog", "pattern": true, "novel": true}
+{"prompt": "a hungry boy smiles", "gen": "a big girl returns to a cake", "pattern": true, "novel": true}
+{"prompt": "a hungry boy smiles", "gen": "the baker carries the coat", "pattern": true, "novel": true}
+{"prompt": "some cows go to the gardens", "gen": "the woman breaks", "pattern": true, "novel": true}
+{"prompt": "some cows go to the gardens", "gen": "a dog walk to some houses", "pattern": true, "novel": true}
+{"prompt": "some cows go to the gardens", "gen": "the big birds walk in the big schools", "pattern": true, "novel": true}
+{"prompt": "some cows go to the gardens", "gen": "the boy bakes a girls shop", "pattern": false, "novel": true}
+{"prompt": "some boys work in the garden", "gen": "the dogs stay in the big cake", "pattern": true, "novel": true}
+{"prompt": "some boys work in the garden", "gen": "a woman chases the girls house", "pattern": false, "novel": true}
+{"prompt": "some boys work in the garden", "gen": "the teachers spoils", "pattern": true, "novel": true}
+{"prompt": "some boys work in the garden", "gen": "a man fixes the shop", "pattern": true, "novel": true}
+{"prompt": "a bird goes to a house", "gen": "the horse walks to a apple", "pattern": true, "novel": true}
+{"prompt": "a bird goes to a house", "gen": "the woman eats the rabbits pears", "pattern": false, "novel": true}
+{"prompt": "a bird goes to a house", "gen": "the garden laughs", "pattern": true, "novel": true}
+{"prompt": "a bird goes to a house", "gen": "some sleepy horses smile", "pattern": true, "novel": true}
+{"prompt": "a man runs", "gen": "the farmer runs", "pattern": true, "novel": true}
+{"prompt": "a man runs", "gen": "a boy cooks a old park", "pattern": true, "novel": true}
+{"prompt": "a man runs", "gen": "some girls in a park", "pattern": false, "novel": true}
+{"prompt": "a man runs", "gen": "the girl carries the boy", "pattern": true, "novel": true}
+{"prompt": "the rabbits sleep", "gen": "some bakers fix the hat", "pattern": true, "novel": true}
+{"prompt": "the rabbits sleep", "gen": "the mans works help the hungry farmer", "pattern": false, "novel": true}
+{"prompt": "the rabbits sleep", "gen": "the womans walks to the small house", "pattern": true, "novel": true}
+{"prompt": "the rabbits sleep", "gen": "the womans go in a shop", "pattern": true, "novel": true}
+{"prompt": "some happy teachers bake the apples", "gen": "some doctors walk to the house", "pattern": true, "novel": true}
+{"prompt": "some happy teachers bake the apples", "gen": "the big man cooks the horses forest", "pattern": false, "novel": true}
+{"prompt": "some happy teachers bake the apples", "gen": "the girls in the balls", "pattern": false, "novel": true}
+{"prompt": "some happy teachers bake the apples", "gen": "the boys in the big book", "pattern": false, "novel": true}
+{"prompt": "a bird runs", "gen": "the red eggs runs", "pattern": true, "novel": true}
+{"prompt": "a bird runs", "gen": "the pig stays to a ripe farm", "pattern": true, "novel": true}
+{"prompt": "a bird runs", "gen": "the bird goes to a garden", "pattern": true, "novel": true}
+{"prompt": "a bird runs", "gen": "a dog fixes a school", "pattern": true, "novel": true}
+{"prompt": "some teachers help a woman", "gen": "a rabbit carries a house", "pattern": true, "novel": true}
+{"prompt": "some teachers help a woman", "gen": "the baker runs", "pattern": true, "novel": true}
+{"prompt": "some teachers help a woman", "gen": "a boy fixes the sweet boxs", "pattern": true, "novel": true}
+{"prompt": "some teachers help a woman", "gen": "a boy chases the horse", "pattern": true, "novel": true}
+{"prompt": "the bakers eat the cookies", "gen": "the baker carries the ball", "pattern": true, "novel": true}
+{"prompt": "the bakers eat the cookies", "gen": "the teachers help some big eggs", "pattern": true, "novel": true}
+{"prompt": "the bakers eat the cookies", "gen": "a girl eats the school", "pattern": true, "novel": true}
+{"prompt": "the bakers eat the cookies", "gen": "the fresh park laughs", "pattern": true, "novel": true}
+{"prompt": "the bird eats the egg", "gen": "a fresh garden laughs", "pattern": true, "novel": true}
+{"prompt": "the bird eats the egg", "gen": "the baker lives help some sweet pears", "pattern": false, "novel": true}
+{"prompt": "the bird eats the egg", "gen": "the womans lives to a garden", "pattern": true, "novel": true}
+{"prompt": "the bird eats the egg", "gen": "the old baker eats the house", "pattern": true, "novel": true}
+{"prompt": "some girls help the boys", "gen": "the big girls in a big shop", "pattern": false, "novel": true}
+{"prompt": "some girls help the boys", "gen": "the small ball break", "pattern": true, "novel": true}
+{"prompt": "some girls help the boys", "gen": "the girls go bake the small pie", "pattern": false, "novel": true}
+{"prompt": "some girls help the boys", "gen": "the dogs visit a big farms", "pattern": true, "novel": true}
+{"prompt": "the woman walks to the market", "gen": "a big cow return in a tall apple", "pattern": true, "novel": true}
+{"prompt": "the woman walks to the market", "gen": "a cat returns to a egg", "pattern": true, "novel": true}
+{"prompt": "the woman walks to the market", "gen": "the dog sleep", "pattern": true, "novel": true}
+{"prompt": "the woman walks to the market", "gen": "the big chairs laugh", "pattern": true, "novel": true}
+{"prompt": "a quiet woman cleans the boxs", "gen": "a teacher stay clean the forest", "pattern": false, "novel": true}
+{"prompt": "a quiet woman cleans the boxs", "gen": "the dog cleans the kind apples", "pattern": true, "novel": true}
+{"prompt": "a quiet woman cleans the boxs", "gen": "the woman cleans the schools", "pattern": true, "novel": true}
+{"prompt": "a quiet woman cleans the boxs", "gen": "a woman break", "pattern": true, "novel": true}
+{"prompt": "the boy fixes a big key", "gen": "the dogs runs", "pattern": true, "novel": true}
+{"prompt": "the boy fixes a big key", "gen": "the baker hugs the chairs", "pattern": true, "novel": true}
+{"prompt": "the boy fixes a big key", "gen": "the womans goes in a garden", "pattern": true, "novel": true}
+{"prompt": "the boy fixes a big key", "gen": "the girls sleeps", "pattern": true, "novel": true}
+{"prompt": "a quiet cat eats the apples", "gen": "a girl helps a old baker", "pattern": true, "novel": true}
+{"prompt": "a quiet cat eats the apples", "gen": "the baker spoils", "pattern": true, "novel": true}
+{"prompt": "a quiet cat eats the apples", "gen": "some kind horses return to the cake", "pattern": true, "novel": true}
+{"prompt": "a quiet cat eats the apples", "gen": "the dogs goes clean a small school", "pattern": false, "novel": true}
+{"prompt": "a cat stays in a market", "gen": "the red carrot laughs", "pattern": true, "novel": true}
+{"prompt": "a cat stays in a market", "gen": "some horses in the apple", "pattern": false, "novel": true}
+{"prompt": "a cat stays in a market", "gen": "some quiet rabbits walks in a cake", "pattern": true, "novel": true}
+{"prompt": "a cat stays in a market", "gen": "the horse walks to a house", "pattern": true, "novel": true}
+{"prompt": "the doctors clean the market", "gen": "the woman bakes some cookies", "pattern": true, "novel": true}
+{"prompt": "the doctors clean the market", "gen": "the man eats a cake", "pattern": true, "novel": true}
+{"prompt": "the doctors clean the market", "gen": "the quiet boy lives in the apples", "pattern": true, "novel": true}
+{"prompt": "the doctors clean the market", "gen": "the girls visit a egg", "pattern": true, "novel": true}
+{"prompt": "some girls smile", "gen": "a old boy stay to a small house", "pattern": true, "novel": true}
+{"prompt": "some girls smile", "gen": "the sleepy boy chases a shop", "pattern": true, "novel": true}
+{"prompt": "some girls smile", "gen": "a small rabbit smile", "pattern": true, "novel": true}
+{"prompt": "some girls smile", "gen": "some bakers runs", "pattern": true, "novel": true}
+{"prompt": "a teacher hugs the kind man", "gen": "a cat walks to a school", "pattern": true, "novel": true}
+{"prompt": "a teacher hugs the kind man", "gen": "a small cow stays carry some farms", "pattern": false, "novel": true}
+{"prompt": "a teacher hugs the kind man", "gen": "some happy womans stays to a school", "pattern": true, "novel": true}
+{"prompt": "a teacher hugs the kind man", "gen": "some boys stays in the kind garden", "pattern": true, "novel": true}
+{"prompt": "the boys clean the key", "gen": "some boys bake the farmer", "pattern": true, "novel": true}
+{"prompt": "the boys clean the key", "gen": "a girl walks to a kind house", "pattern": true, "novel": true}
+{"prompt": "the boys clean the key", "gen": "the man bakes a boys house", "pattern": false, "novel": true}
+{"prompt": "the boys clean the key", "gen": "a farmer carries the hat", "pattern": true, "novel": true}
+{"prompt": "the hungry girl helps some tall boys", "gen": "the dog stays eat the pear", "pattern": false, "novel": true}
+{"prompt": "the hungry girl helps some tall boys", "gen": "a cat run", "pattern": true, "novel": true}
+{"prompt": "the hungry girl helps some tall boys", "gen": "a old dog smiles", "pattern": true, "novel": true}
+{"prompt": "the hungry girl helps some tall boys", "gen": "a quiet girl buys a book", "pattern": true, "novel": true}
+{"prompt": "the boy sleeps", "gen": "a teacher cooks the cats garden", "pattern": false, "novel": true}
+{"prompt": "the boy sleeps", "gen": "the sleepy cow goes carry the cakes", "pattern": false, "novel": true}
+{"prompt": "the boy sleeps", "gen": "the small dogs feed some kind lemons", "pattern": true, "novel": true}
+{"prompt": "the boy sleeps", "gen": "a horse goes to a house", "pattern": true, "novel": true}
+{"prompt": "the farmers stay in some shops", "gen": "some womans laughs", "pattern": true, "novel": true}
+{"prompt": "the farmers stay in some shops", "gen": "the old bakers goes to the old apples", "pattern": true, "novel": true}
+{"prompt": "the farmers stay in some shops", "gen": "the balls sleeps", "pattern": true, "novel": true}
+{"prompt": "the farmers stay in some shops", "gen": "some houses spoils", "pattern": true, "novel": true}
+{"prompt": "the girls buy the book", "gen": "some small farmers cook the forests", "pattern": true, "novel": true}
+{"prompt": "the girls buy the book", "gen": "some small womans in some schools", "pattern": false, "novel": true}
+{"prompt": "the girls buy the book", "gen": "the red cups shops", "pattern": false, "novel": true}
+{"prompt": "the girls buy the book", "gen": "the big teachers live in the happy cookies", "pattern": true, "novel": true}
+{"prompt": "a old farmer feeds the hungry birds", "gen": "the woman chases the ripe cake", "pattern": true, "novel": true}
+{"prompt": "a old farmer feeds the hungry birds", "gen": "the man cooks a cake", "pattern": true, "novel": true}
+{"prompt": "a old farmer feeds the hungry birds", "gen": "a horse carries the tall pie", "pattern": true, "novel": true}
+{"prompt": "a old farmer feeds the hungry birds", "gen": "the small girls help the birds", "pattern": true, "novel": true}
+{"prompt": "a horse eats some pies", "gen": "the woman bakes the cakes", "pattern": true, "novel": true}
+{"prompt": "a horse eats some pies", "gen": "the small birds goes to the shop", "pattern": true, "novel": true}
+{"prompt": "a horse eats some pies", "gen": "some girls sleeps", "pattern": true, "novel": true}
+{"prompt": "a horse eats some pies", "gen": "the woman fixes the pear", "pattern": true, "novel": true}
+{"prompt": "a girl eats some cakes", "gen": "some boys sleeps", "pattern": true, "novel": true}
+{"prompt": "a girl eats some cakes", "gen": "the dogs goes to a big apple", "pattern": true, "novel": true}
+{"prompt": "a girl eats some cakes", "gen": "the baker hugs a girl", "pattern": true, "novel": true}
+{"prompt": "a girl eats some cakes", "gen": "the dog returns to a park", "pattern": true, "novel": true}
+{"prompt": "some womans go to some markets", "gen": "the girls runs", "pattern": true, "novel": true}
+{"prompt": "some womans go to some markets", "gen": "a boy helps some horses", "pattern": true, "novel": true}
+{"prompt": "some womans go to some markets", "gen": "the quiet cow lives to the cookie", "pattern": true, "novel": true}
+{"prompt": "some womans go to some markets", "gen": "a boy carries the tall coat", "pattern": true, "novel": true}
+{"prompt": "the small man goes to the houses", "gen": "some bakers in the cups", "pattern": false, "novel": true}
+{"prompt": "the small man goes to the houses", "gen": "the quiet womans walks to the hungry farm", "pattern": true, "novel": true}
+{"prompt": "the small man goes to the houses", "gen": "the teachers goes to some old cakes", "pattern": true, "novel": true}
+{"prompt": "the small man goes to the houses", "gen": "some mans walk to the cake", "pattern": true, "novel": true}
+{"prompt": "a man hugs a boy", "gen": "the cows laughs", "pattern": true, "novel": true}
+{"prompt": "a man hugs a boy", "gen": "the dogs walk to a sleepy park", "pattern": true, "novel": true}
+{"prompt": "a man hugs a boy", "gen": "a cow works to the shop", "pattern": true, "novel": true}
+{"prompt": "a man hugs a boy", "gen": "the boys in the balls", "pattern": false, "novel": true}
+{"prompt": "the cows go to a farm", "gen": "the boy cooks the pear", "pattern": true, "novel": true}
+{"prompt": "the cows go to a farm", "gen": "the tall teachers chase the old woman", "pattern": true, "novel": true}
+{"prompt": "the cows go to a farm", "gen": "some dogs laughs", "pattern": true, "novel": true}
+{"prompt": "the cows go to a farm", "gen": "a kind boy bakes the apples", "pattern": true, "novel": true}
+{"prompt": "the girls cook the carrot", "gen": "a farmer cooks the apple", "pattern": true, "novel": true}
+{"prompt": "the girls cook the carrot", "gen": "the farms spoils", "pattern": true, "novel": true}
+{"prompt": "the girls cook the carrot", "gen": "the girl chases a cake", "pattern": true, "novel": true}
+{"prompt": "the girls cook the carrot", "gen": "the girl carries the tall lemons", "pattern": true, "novel": true}
+{"prompt": "some bakers chase a happy fox", "gen": "a teacher helps a farmer", "pattern": true, "novel": true}
+{"prompt": "some bakers chase a happy fox", "gen": "the mans go to the apple", "pattern": true, "novel": true}
+{"prompt": "some bakers chase a happy fox", "gen": "some boys sleep", "pattern": true, "novel": true}
+{"prompt": "some bakers chase a happy fox", "gen": "the horses stay in the garden", "pattern": true, "novel": true}
+{"prompt": "the man laughs", "gen": "a boy eats the school", "pattern": true, "novel": true}
+{"prompt": "the man laughs", "gen": "some small doctors goes in some small houses", "pattern": true, "novel": true}
+{"prompt": "the man laughs", "gen": "the doctor eats some quiet cookies", "pattern": true, "novel": true}
+{"prompt": "the man laughs", "gen": "some boys stays cook a happy pie", "pattern": false, "novel": true}
+{"prompt": "the cow goes to some forests", "gen": "a boys walks to a sweet garden", "pattern": true, "novel": true}
+{"prompt": "the cow goes to some forests", "gen": "a farmer work to a small forest", "pattern": true, "novel": true}
+{"prompt": "the cow goes to some forests", "gen": "the dogs sleeps", "pattern": true, "novel": true}
+{"prompt": "the cow goes to some forests", "gen": "some boys visit the pie", "pattern": true, "novel": true}
+{"prompt": "some mans laugh", "gen": "a big baker returns to a school", "pattern": true, "novel": true}
+{"prompt": "some mans laugh", "gen": "the mans cook a mans school", "pattern": false, "novel": true}
+{"prompt": "some mans laugh", "gen": "the teacher cooks a cake", "pattern": true, "novel": true}
+{"prompt": "some mans laugh", "gen": "a boy buys some big gardens", "pattern": true, "novel": true}
+{"prompt": "the teachers laugh", "gen": "the carrot sleep", "pattern": true, "novel": true}
+{"prompt": "the teachers laugh", "gen": "the happy farmers go to the quiet smiles", "pattern": false, "novel": true}
+{"prompt": "the teachers laugh", "gen": "the womans eat some doctors cookies", "pattern": false, "novel": true}
+{"prompt": "the teachers laugh", "gen": "the mans return to a house", "pattern": true, "novel": true}
+{"prompt": "a woman cooks the red pie", "gen": "the big man bakes a egg", "pattern": true, "novel": true}
+{"prompt": "a woman cooks the red pie", "gen": "the happy fox cooks the old boys", "pattern": true, "novel": true}
+{"prompt": "a woman cooks the red pie", "gen": "a woman walk to a sleepy park", "pattern": true, "novel": true}
+{"prompt": "a woman cooks the red pie", "gen": "some girls in some gardens", "pattern": false, "novel": true}
+{"prompt": "a happy cat goes to the market", "gen": "the farmer goes to the houses", "pattern": true, "novel": true}
+{"prompt": "a happy cat goes to the market", "gen": "some horses sleeps", "pattern": true, "novel": true}
+{"prompt": "a happy cat goes to the market", "gen": "a girl cooks some houses", "pattern": true, "novel": true}
+{"prompt": "a happy cat goes to the market", "gen": "the hungry girls hug a cow", "pattern": true, "novel": true}
+{"prompt": "the pears spoil", "gen": "the dogs eat the market", "pattern": true, "novel": true}
+{"prompt": "the pears spoil", "gen": "some sleepy dogs stay to the sleepy house", "pattern": true, "novel": true}
+{"prompt": "the pears spoil", "gen": "the red hat sleeps", "pattern": true, "novel": true}
+{"prompt": "the pears spoil", "gen": "a baker chases the big forest", "pattern": true, "novel": true}
+{"prompt": "the quiet girl bakes a cake", "gen": "the boys goes to a happy garden", "pattern": true, "novel": true}
+{"prompt": "the quiet girl bakes a cake", "gen": "the old horse stay to a apple", "pattern": true, "novel": true}
+{"prompt": "the quiet girl bakes a cake", "gen": "the pig go to a small farm", "pattern": true, "novel": true}
+{"prompt": "the quiet girl bakes a cake", "gen": "the small teacher buys some farms", "pattern": true, "novel": true}
+{"prompt": "the lemon spoils", "gen": "a woman goes to the cakes", "pattern": true, "novel": true}
+{"prompt": "the lemon spoils", "gen": "some teachers walks in some small farms", "pattern": true, "novel": true}
+{"prompt": "the lemon spoils", "gen": "some old boys sleep", "pattern": true, "novel": true}
+{"prompt": "the lemon spoils", "gen": "the boys stay chase the forest", "pattern": false, "novel": true}
+{"prompt": "the tall man works in the house", "gen": "the farmers runs", "pattern": true, "novel": true}
+{"prompt": "the tall man works in the house", "gen": "the dogs runs", "pattern": true, "novel": true}
+{"prompt": "the tall man works in the house", "gen": "the man eats the balls", "pattern": true, "novel": true}
+{"prompt": "the tall man works in the house", "gen": "the big dogs in some big apples", "pattern": false, "novel": true}
+{"prompt": "a quiet girl bakes some lemons", "gen": "the girls stays in the apple", "pattern": true, "novel": true}
+{"prompt": "a quiet girl bakes some lemons", "gen": "the teacher chases a farmer", "pattern": true, "novel": true}
+{"prompt": "a quiet girl bakes some lemons", "gen": "a boy returns to the big house", "pattern": true, "novel": true}
+{"prompt": "a quiet girl bakes some lemons", "gen": "a girl feeds the ripe dog", "pattern": true, "novel": true}
+{"prompt": "the birds go to the houses", "gen": "the farmer buys a book", "pattern": true, "novel": true}
+{"prompt": "the birds go to the houses", "gen": "the sleepy teachers buy the cake", "pattern": true, "novel": true}
+{"prompt": "the birds go to the houses", "gen": "the big teachers stays in the small house", "pattern": true, "novel": true}
+{"prompt": "the birds go to the houses", "gen": "the man spoils", "pattern": true, "novel": true}
+{"prompt": "the boy lives in the schools", "gen": "the rabbit smiles", "pattern": true, "novel": true}
+{"prompt": "the boy lives in the schools", "gen": "the boys stay help a small cookie", "pattern": false, "novel": true}
+{"prompt": "the boy lives in the schools", "gen": "the dogs live eat a house", "pattern": false, "novel": true}
+{"prompt": "the boy lives in the schools", "gen": "a old baker buys the houses", "pattern": true, "novel": true}
+{"prompt": "a man sleeps", "gen": "the old teacher goes to the carrots", "pattern": true, "novel": true}
+{"prompt": "a man sleeps", "gen": "the red balls breaks", "pattern": true, "novel": true}
+{"prompt": "a man sleeps", "gen": "a dog visits the pie", "pattern": true, "novel": true}
+{"prompt": "a man sleeps", "gen": "some dogs live to a old shop", "pattern": true, "novel": true}
+{"prompt": "the teachers sleep", "gen": "some boys in the forest", "pattern": false, "novel": true}
+{"prompt": "the teachers sleep", "gen": "the dogs goes to the house", "pattern": true, "novel": true}
+{"prompt": "the teachers sleep", "gen": "the happy man returns to a forest", "pattern": true, "novel": true}
+{"prompt": "the teachers sleep", "gen": "a rabbit bakes a market", "pattern": true, "novel": true}
+{"prompt": "the apple spoils", "gen": "the womans walks to a hungry house", "pattern": true, "novel": true}
+{"prompt": "the apple spoils", "gen": "some tall cats work eat the small apple", "pattern": false, "novel": true}
+{"prompt": "the apple spoils", "gen": "some hungry cats walk to the big shop", "pattern": true, "novel": true}
+{"prompt": "the apple spoils", "gen": "some rabbits work eat a sweet cookies", "pattern": false, "novel": true}
+{"prompt": "the horses sleep", "gen": "the baker buys a garden", "pattern": true, "novel": true}
+{"prompt": "the horses sleep", "gen": "some kind dogs work buy a hungry house", "pattern": false, "novel": true}
+{"prompt": "the horses sleep", "gen": "the woman helps the big pie", "pattern": true, "novel": true}
+{"prompt": "the horses sleep", "gen": "some dogs go to the pies", "pattern": true, "novel": true}
+{"prompt": "the balls break", "gen": "the red cups laugh", "pattern": true, "novel": true}
+{"prompt": "the balls break", "gen": "the small boy lives in some small cakes", "pattern": true, "novel": true}
+{"prompt": "the balls break", "gen": "the books spoils", "pattern": true, "novel": true}
+{"prompt": "the balls break", "gen": "a hungry woman buys the sweet pears", "pattern": true, "novel": true}
+{"prompt": "the old man fixes the cup", "gen": "the happy doctors goes to the house", "pattern": true, "novel": true}
+{"prompt": "the old man fixes the cup", "gen": "some mans chase the boys", "pattern": true, "novel": true}
+{"prompt": "the old man fixes the cup", "gen": "a fresh shop smiles", "pattern": true, "novel": true}
+{"prompt": "the old man fixes the cup", "gen": "a boy cooks a dog", "pattern": true, "novel": true}
+{"prompt": "the womans buy a big coat", "gen": "the womans help the girls", "pattern": true, "novel": true}
+{"prompt": "the womans buy a big coat", "gen": "some doctors cook the small pie", "pattern": true, "novel": true}
+{"prompt": "the womans buy a big coat", "gen": "the old doctor spoils", "pattern": true, "novel": true}
+{"prompt": "the womans buy a big coat", "gen": "a horse runs", "pattern": true, "novel": true}
+{"prompt": "some girls laugh", "gen": "some mans buy some quiet pies", "pattern": true, "novel": true}
+{"prompt": "some girls laugh", "gen": "the man bakes the house", "pattern": true, "novel": true}
+{"prompt": "some girls laugh", "gen": "the boy eats a apple", "pattern": true, "novel": true}
+{"prompt": "some girls laugh", "gen": "a dog bakes the happy dog", "pattern": true, "novel": true}
+{"prompt": "a big farmer walks to some parks", "gen": "some apples sleeps", "pattern": true, "novel": true}
+{"prompt": "a big farmer walks to some parks", "gen": "the bakers laughs", "pattern": true, "novel": true}
+{"prompt": "a big farmer walks to some parks", "gen": "a teacher spoil", "pattern": true, "novel": true}
+{"prompt": "a big farmer walks to some parks", "gen": "a old boy buys a book", "pattern": true, "novel": true}
+{"prompt": "a quiet baker cleans the schools", "gen": "a teacher chases the mans house", "pattern": false, "novel": true}
+{"prompt": "a quiet baker cleans the schools", "gen": "the bird live feed a kind apple", "pattern": false, "novel": true}
+{"prompt": "a quiet baker cleans the schools", "gen": "the baker shops", "pattern": false, "novel": true}
+{"prompt": "a quiet baker cleans the schools", "gen": "the farmer cooks the girls", "pattern": true, "novel": true}
+{"prompt": "the boys run", "gen": "a boy helps the cake", "pattern": true, "novel": true}
+{"prompt": "the boys run", "gen": "the old dogs breaks", "pattern": true, "novel": true}
+{"prompt": "the boys run", "gen": "a woman cleans some boxs", "pattern": true, "novel": true}
+{"prompt": "the boys run", "gen": "a girl eats a sweet cake", "pattern": true, "novel": true}
+{"prompt": "a boy buys some hats", "gen": "the gardens runs", "pattern": true, "novel": true}
+{"prompt": "a boy buys some hats", "gen": "the dogs stay chase the quiet apples", "pattern": false, "novel": true}
+{"prompt": "a boy buys some hats", "gen": "the old womans lives to the gardens", "pattern": true, "novel": true}
+{"prompt": "a boy buys some hats", "gen": "some cats lives buy the books", "pattern": false, "novel": true}
+{"prompt": "a girl lives in some gardens", "gen": "the man feeds the doctors", "pattern": true, "novel": true}
+{"prompt": "a girl lives in some gardens", "gen": "the doctor buys some small houses", "pattern": true, "novel": true}
+{"prompt": "a girl lives in some gardens", "gen": "the kind teacher helps some sleepy apple", "pattern": true, "novel": true}
+{"prompt": "a girl lives in some gardens", "gen": "the teacher fixes some apples", "pattern": true, "novel": true}
+{"prompt": "a old girl smiles", "gen": "the dogs returns in the farm", "pattern": true, "novel": true}
+{"prompt": "a old girl smiles", "gen": "a doctor goes to the house", "pattern": true, "novel": true}
+{"prompt": "a old girl smiles", "gen": "the boy bakes a teachers market", "pattern": false, "novel": true}
+{"prompt": "a old girl smiles", "gen": "the boys clean a sweet forest", "pattern": true, "novel": true}
+{"prompt": "the woman walks to the old gardens", "gen": "a small shop sleep", "pattern": true, "novel": true}
+{"prompt": "the woman walks to the old gardens", "gen": "some boys shops", "pattern": false, "novel": true}
+{"prompt": "the woman walks to the old gardens", "gen": "the balls shops", "pattern": false, "novel": true}
+{"prompt": "the woman walks to the old gardens", "gen": "a dog run", "pattern": true, "novel": true}
+{"prompt": "the hungry cat lives in a farm", "gen": "a small dog visits some cows", "pattern": true, "novel": true}
+{"prompt": "the hungry cat lives in a farm", "gen": "the boy carries a hat", "pattern": true, "novel": true}
+{"prompt": "the hungry cat lives in a farm", "gen": "the happy doctor eats the houses", "pattern": true, "novel": true}
+{"prompt": "the hungry cat lives in a farm", "gen": "the teacher fixes the park", "pattern": true, "novel": true}
+{"prompt": "the boy fixes the ball", "gen": "the teacher helps some quiet apples", "pattern": true, "novel": true}
+{"prompt": "the boy fixes the ball", "gen": "the man works to the houses", "pattern": true, "novel": true}
+{"prompt": "the boy fixes the ball", "gen": "a teacher chases the cow", "pattern": true, "novel": true}
+{"prompt": "the boy fixes the ball", "gen": "the boys smile", "pattern": true, "novel": true}
+{"prompt": "a boy cleans the balls", "gen": "some big doctors walks in a quiet house", "pattern": true, "novel": true}
+{"prompt": "a boy cleans the balls", "gen": "some farmers hug the small dog", "pattern": true, "novel": true}
+{"prompt": "a boy cleans the balls", "gen": "a man helps a park", "pattern": true, "novel": true}
+{"prompt": "a boy cleans the balls", "gen": "the teachers cook the schools", "pattern": true, "novel": true}
+{"prompt": "some girls bake a big pear", "gen": "a woman lives in the market", "pattern": true, "novel": true}
+{"prompt": "some girls bake a big pear", "gen": "the farmer eats the boys cookies", "pattern": false, "novel": true}
+{"prompt": "some girls bake a big pear", "gen": "the doctor buys some big books", "pattern": true, "novel": true}
+{"prompt": "some girls bake a big pear", "gen": "the small bakers stays to the farm", "pattern": true, "novel": true}
+{"prompt": "a man buys a cake", "gen": "some rabbits sleep", "pattern": true, "novel": true}
+{"prompt": "a man buys a cake", "gen": "a ripe shop smile", "pattern": true, "novel": true}
+{"prompt": "a man buys a cake", "gen": "the girls clean the shop", "pattern": true, "novel": true}
+{"prompt": "a man buys a cake", "gen": "a big boy go eat a apple", "pattern": false, "novel": true}
+{"prompt": "the boys help a teacher", "gen": "a kind horse chases a horse", "pattern": true, "novel": true}
+{"prompt": "the boys help a teacher", "gen": "the happy cat visits some small gardens", "pattern": true, "novel": true}
+{"prompt": "the boys help a teacher", "gen": "a boy fixes the ripe cat", "pattern": true, "novel": true}
+{"prompt": "the boys help a teacher", "gen": "some womans sleeps", "pattern": true, "novel": true}
+{"prompt": "the boys eat the cookies", "gen": "the cow helps the old cookie", "pattern": true, "novel": true}
+{"prompt": "the boys eat the cookies", "gen": "the boy bakes a boys house", "pattern": false, "novel": true}
+{"prompt": "the boys eat the cookies", "gen": "the doctors cook the apple", "pattern": true, "novel": true}
+{"prompt": "the boys eat the cookies", "gen": "a hungry farmer bakes some apples", "pattern": true, "novel": true}
+{"prompt": "the womans hug a dog", "gen": "the baker eats some cookies", "pattern": true, "novel": true}
+{"prompt": "the womans hug a dog", "gen": "the quiet red in a big garden", "pattern": false, "novel": true}
+{"prompt": "the womans hug a dog", "gen": "the happy rabbit lives in a garden", "pattern": true, "novel": true}
+{"prompt": "the womans hug a dog", "gen": "some old bakers sleeps", "pattern": true, "novel": true}
+{"prompt": "the boys fix some coats", "gen": "the cat feeds a dog", "pattern": true, "novel": true}
+{"prompt": "the boys fix some coats", "gen": "a sweet laughs", "pattern": false, "novel": true}
+{"prompt": "the boys fix some coats", "gen": "the cats spoil", "pattern": true, "novel": true}
+{"prompt": "the boys fix some coats", "gen": "a sleepy girl returns to a apple", "pattern": true, "novel": true}
+{"prompt": "the happy doctors buy the red keys", "gen": "the old boy lives to some small gardens", "pattern": true, "novel": true}
+{"prompt": "the happy doctors buy the red keys", "gen": "the small man helps some apples", "pattern": true, "novel": true}
+{"prompt": "the happy doctors buy the red keys", "gen": "a boy carries the cup", "pattern": true, "novel": true}
+{"prompt": "the happy doctors buy the red keys", "gen": "a boy live to the cake", "pattern": true, "novel": true}
+{"prompt": "some mans smile", "gen": "a girl bakes a garden", "pattern": true, "novel": true}
+{"prompt": "some mans smile", "gen": "the small dogs carry the tall ball", "pattern": true, "novel": true}
+{"prompt": "some mans smile", "gen": "a farmer sleep", "pattern": true, "novel": true}
+{"prompt": "some mans smile", "gen": "the farmer walks to some cookies", "pattern": true, "novel": true}
+{"prompt": "the sleepy boy walks to the farms", "gen": "some womans break", "pattern": true, "novel": true}
+{"prompt": "the sleepy boy walks to the farms", "gen": "the doctors spoils", "pattern": true, "novel": true}
+{"prompt": "the sleepy boy walks to the farms", "gen": "some sleepy teachers go to a small cookie", "pattern": true, "novel": true}
+{"prompt": "the sleepy boy walks to the farms", "gen": "some sleepy dogs stays to the farms", "pattern": true, "novel": true}
+{"prompt": "the boys cook a apple", "gen": "some mans bake the hungry dog", "pattern": true, "novel": true}
+{"prompt": "the boys cook a apple", "gen": "a baker walk to a apple", "pattern": true, "novel": true}
+{"prompt": "the boys cook a apple", "gen": "the baker cooks some quiet cookies", "pattern": true, "novel": true}
+{"prompt": "the boys cook a apple", "gen": "the kind woman eats some quiet shop", "pattern": true, "novel": true}
+{"prompt": "some girls buy a sweet apple", "gen": "a man sleep", "pattern": true, "novel": true}
+{"prompt": "some girls buy a sweet apple", "gen": "a small woman fixes a pear", "pattern": true, "novel": true}
+{"prompt": "some girls buy a sweet apple", "gen": "the boy cooks the tall girl", "pattern": true, "novel": true}
+{"prompt": "some girls buy a sweet apple", "gen": "the house sleep", "pattern": true, "novel": true}
+{"prompt": "some pigs live in a quiet farm", "gen": "the small boy visits a broken house", "pattern": true, "novel": true}
+{"prompt": "some pigs live in a quiet farm", "gen": "a boy walk in some old sleeps", "pattern": false, "novel": true}
+{"prompt": "some pigs live in a quiet farm", "gen": "some womans walks buy the eggs", "pattern": false, "novel": true}
+{"prompt": "some pigs live in a quiet farm", "gen": "the cats returns to a pear", "pattern": true, "novel": true}
+{"prompt": "the fox eats the pies", "gen": "some cats return chase the cookie", "pattern": false, "novel": true}
+{"prompt": "the fox eats the pies", "gen": "a boy eats a old school", "pattern": true, "novel": true}
+{"prompt": "the fox eats the pies", "gen": "the cats go to the pies", "pattern": true, "novel": true}
+{"prompt": "the fox eats the pies", "gen": "a big pig returns in a old house", "pattern": true, "novel": true}
+{"prompt": "a pig chases the horse", "gen": "some cows fix a hat", "pattern": true, "novel": true}
+{"prompt": "a pig chases the horse", "gen": "a boy visits some coats", "pattern": true, "novel": true}
+{"prompt": "a pig chases the horse", "gen": "the farmer work to the school", "pattern": true, "novel": true}
+{"prompt": "a pig chases the horse", "gen": "the boys run", "pattern": true, "novel": true}
+{"prompt": "the happy boy goes to the quiet house", "gen": "the girl cooks the womans books", "pattern": false, "novel": true}
+{"prompt": "the happy boy goes to the quiet house", "gen": "the birds sleeps", "pattern": true, "novel": true}
+{"prompt": "the happy boy goes to the quiet house", "gen": "the girls walks to a cookie", "pattern": true, "novel": true}
+{"prompt": "the happy boy goes to the quiet house", "gen": "the horse breaks", "pattern": true, "novel": true}
+{"prompt": "some boys return to the tall house", "gen": "the dogs smiles", "pattern": true, "novel": true}
+{"prompt": "some boys return to the tall house", "gen": "some big bakers eat some carrots", "pattern": true, "novel": true}
+{"prompt": "some boys return to the tall house", "gen": "the happy bird cooks the womans", "pattern": true, "novel": true}
+{"prompt": "some boys return to the tall house", "gen": "a boy eats the kind cookie", "pattern": true, "novel": true}
+{"prompt": "the woman bakes the cookie", "gen": "the dog cooks the fox forest", "pattern": false, "novel": true}
+{"prompt": "the woman bakes the cookie", "gen": "the old teachers in a box", "pattern": false, "novel": true}
+{"prompt": "the woman bakes the cookie", "gen": "the girl cooks a egg", "pattern": true, "novel": true}
+{"prompt": "the woman bakes the cookie", "gen": "some bakers eat the school", "pattern": true, "novel": true}
+{"prompt": "the small pie spoils", "gen": "the sleepy boys in the key", "pattern": false, "novel": true}
+{"prompt": "the small pie spoils", "gen": "a baker eats the hungry apple", "pattern": true, "novel": true}
+{"prompt": "the small pie spoils", "gen": "the dog cleans the school", "pattern": true, "novel": true}
+{"prompt": "the small pie spoils", "gen": "the doctors hug a happy dog", "pattern": true, "novel": true}
+{"prompt": "the hungry cat returns to the market", "gen": "the man break", "pattern": true, "novel": true}
+{"prompt": "the hungry cat returns to the market", "gen": "some boys clean the old cake", "pattern": true, "novel": true}
+{"prompt": "the hungry cat returns to the market", "gen": "the girls returns in the quiet school", "pattern": true, "novel": true}
+{"prompt": "the hungry cat returns to the market", "gen": "a boy feeds the farmers pie", "pattern": false, "novel": true}
+{"prompt": "the farmer feeds a quiet pig", "gen": "a fox lives in a garden", "pattern": true, "novel": true}
+{"prompt": "the farmer feeds a quiet pig", "gen": "the boy breaks", "pattern": true, "novel": true}
+{"prompt": "the farmer feeds a quiet pig", "gen": "a old bird feeds some cats", "pattern": true, "novel": true}
+{"prompt": "the farmer feeds a quiet pig", "gen": "some dogs live to the old pie", "pattern": true, "novel": true}
+{"prompt": "some teachers cook the cakes", "gen": "a pig return to a house", "pattern": true, "novel": true}
+{"prompt": "some teachers cook the cakes", "gen": "the small bakers returns to a old market", "pattern": true, "novel": true}
+{"prompt": "some teachers cook the cakes", "gen": "some teachers cook the farm", "pattern": true, "novel": true}
+{"prompt": "some teachers cook the cakes", "gen": "the teachers bake the farms", "pattern": true, "novel": true}
+{"prompt": "some girls work in a big garden", "gen": "a dog visits the park", "pattern": true, "novel": true}
+{"prompt": "some girls work in a big garden", "gen": "a horse cleans the forest", "pattern": true, "novel": true}
+{"prompt": "some girls work in a big garden", "gen": "a broken boxs breaks", "pattern": true, "novel": true}
+{"prompt": "some girls work in a big garden", "gen": "a cow return to the apples", "pattern": true, "novel": true}
+{"prompt": "a quiet woman carries the carrots", "gen": "the dog walk to the cakes", "pattern": true, "novel": true}
+{"prompt": "a quiet woman carries the carrots", "gen": "some boys in the apple", "pattern": false, "novel": true}
+{"prompt": "a quiet woman carries the carrots", "gen": "the dogs shops", "pattern": false, "novel": true}
+{"prompt": "a quiet woman carries the carrots", "gen": "some tall womans return to the old house", "pattern": true, "novel": true}
+{"prompt": "a woman cooks the carrot", "gen": "the boy spoils", "pattern": true, "novel": true}
+{"prompt": "a woman cooks the carrot", "gen": "the dog bakes the apples", "pattern": true, "novel": true}
+{"prompt": "a woman cooks the carrot", "gen": "the doctors runs", "pattern": true, "novel": true}
+{"prompt": "a woman cooks the carrot", "gen": "the kind girl breaks", "pattern": true, "novel": true}
+{"prompt": "some girls smile", "gen": "the big boy returns to a happy shop", "pattern": true, "novel": true}
+{"prompt": "some girls smile", "gen": "some foxs walks to a sweet market", "pattern": true, "novel": true}
+{"prompt": "some girls smile", "gen": "the happy boys spoils", "pattern": true, "novel": true}
+{"prompt": "some girls smile", "gen": "the apples smiles", "pattern": true, "novel": true}
+{"prompt": "a boy sleeps", "gen": "some dogs go to the apples", "pattern": true, "novel": true}
+{"prompt": "a boy sleeps", "gen": "the small womans goes to a park", "pattern": true, "novel": true}
+{"prompt": "a boy sleeps", "gen": "the ripe lemon run", "pattern": true, "novel": true}
+{"prompt": "a boy sleeps", "gen": "the mans smiles", "pattern": true, "novel": true}
+{"prompt": "the mans fix some balls", "gen": "the old horse walks to a market", "pattern": true, "novel": true}
+{"prompt": "the mans fix some balls", "gen": "some cows walks to some small apples", "pattern": true, "novel": true}
+{"prompt": "the mans fix some balls", "gen": "a rabbit cleans a small pie", "pattern": true, "novel": true}
+{"prompt": "the mans fix some balls", "gen": "a girl hugs some sleepy boys", "pattern": true, "novel": true}
+{"prompt": "the boys live in the park", "gen": "the woman helps the pear", "pattern": true, "novel": true}
+{"prompt": "the boys live in the park", "gen": "a boy walks to the forest", "pattern": true, "novel": true}
+{"prompt": "the boys live in the park", "gen": "a sleepy boy eats the girls lemons", "pattern": false, "novel": true}
+{"prompt": "the boys live in the park", "gen": "some boys bake a girls forest", "pattern": false, "novel": true}
+{"prompt": "some cats stay in some big gardens", "gen": "the dog walk to the houses", "pattern": true, "novel": true}
+{"prompt": "some cats stay in some big gardens", "gen": "the man sleeps", "pattern": true, "novel": true}
+{"prompt": "some cats stay in some big gardens", "gen": "the boys eat a happy horse", "pattern": true, "novel": true}
+{"prompt": "some cats stay in some big gardens", "gen": "some womans eat the farms", "pattern": true, "novel": true}
+{"prompt": "a woman cleans a hat", "gen": "a woman goes to the carrots", "pattern": true, "novel": true}
+{"prompt": "a woman cleans a hat", "gen": "a sweet ball sleep", "pattern": true, "novel": true}
+{"prompt": "a woman cleans a hat", "gen": "the boys lives to a egg", "pattern": true, "novel": true}
+{"prompt": "a woman cleans a hat", "gen": "some houses breaks", "pattern": true, "novel": true}
+{"prompt": "a teacher feeds the cow", "gen": "the cats sleeps", "pattern": true, "novel": true}
+{"prompt": "a teacher feeds the cow", "gen": "the rabbit walks to the old forest", "pattern": true, "novel": true}
+{"prompt": "a teacher feeds the cow", "gen": "a girl sleep", "pattern": true, "novel": true}
+{"prompt": "a teacher feeds the cow", "gen": "the happy cow goes to a old cake", "pattern": true, "novel": true}
+{"prompt": "some girls smile", "gen": "the old birds return to the school", "pattern": true, "novel": true}
+{"prompt": "some girls smile", "gen": "some farmers in the big farms", "pattern": false, "novel": true}
+{"prompt": "some girls smile", "gen": "some kind pigs stays carry a quiet cake", "pattern": false, "novel": true}
+{"prompt": "some girls smile", "gen": "the cups smile", "pattern": true, "novel": true}
+{"prompt": "a old dog stays in a small house", "gen": "some boys buy a hungry shop", "pattern": true, "novel": true}
+{"prompt": "a old dog stays in a small house", "gen": "the sweet teachers spoils", "pattern": true, "novel": true}
+{"prompt": "a old dog stays in a small house", "gen": "some red runs", "pattern": false, "novel": true}
+{"prompt": "a old dog stays in a small house", "gen": "the happy boys break", "pattern": true, "novel": true}
+{"prompt": "the rabbit chases the horse", "gen": "the mans go to the apple", "pattern": true, "novel": true}
+{"prompt": "the rabbit chases the horse", "gen": "some boys in the small bird", "pattern": false, "novel": true}
+{"prompt": "the rabbit chases the horse", "gen": "a small man stay to the apples", "pattern": true, "novel": true}
+{"prompt": "the rabbit chases the horse", "gen": "a woman stays bake a market", "pattern": false, "novel": true}
+{"prompt": "some girls run", "gen": "the markets sleep", "pattern": true, "novel": true}
+{"prompt": "some girls run", "gen": "the balls sleep", "pattern": true, "novel": true}
+{"prompt": "some girls run", "gen": "a teacher chases a rabbit", "pattern": true, "novel": true}
+{"prompt": "some girls run", "gen": "the doctors chase some ripe houses", "pattern": true, "novel": true}
+{"prompt": "the cat chases a horse", "gen": "the mans visit some schools", "pattern": true, "novel": true}
+{"prompt": "the cat chases a horse", "gen": "some small boys goes to a quiet house", "pattern": true, "novel": true}
+{"prompt": "the cat chases a horse", "gen": "a boy eats the house", "pattern": true, "novel": true}
+{"prompt": "the cat chases a horse", "gen": "a man run", "pattern": true, "novel": true}
+{"prompt": "the fox sleeps", "gen": "a sweet sleeps", "pattern": false, "novel": true}
+{"prompt": "the fox sleeps", "gen": "a girl eats the garden", "pattern": true, "novel": true}
+{"prompt": "the fox sleeps", "gen": "the boys clean a box", "pattern": true, "novel": true}
+{"prompt": "the fox sleeps", "gen": "some boys in some farmers lemons", "pattern": false, "novel": true}
+{"prompt": "some quiet bakers buy some boxs", "gen": "the cats go to the happy apples", "pattern": true, "novel": true}
+{"prompt": "some quiet bakers buy some boxs", "gen": "some boys chase a hungry horse", "pattern": true, "novel": true}
+{"prompt": "some quiet bakers buy some boxs", "gen": "some girls in the farm", "pattern": false, "novel": true}
+{"prompt": "some quiet bakers buy some boxs", "gen": "the cows chase the boys", "pattern": true, "novel": true}
+{"prompt": "some womans eat some big apples", "gen": "the broken hats shops", "pattern": false, "novel": true}
+{"prompt": "some womans eat some big apples", "gen": "the boy eats the garden", "pattern": true, "novel": true}
+{"prompt": "some womans eat some big apples", "gen": "the old dogs help a girl", "pattern": true, "novel": true}
+{"prompt": "some womans eat some big apples", "gen": "a boy go cook the houses", "pattern": false, "novel": true}
+{"prompt": "a girl walks to the big parks", "gen": "some boys bake the forest", "pattern": true, "novel": true}
+{"prompt": "a girl walks to the big parks", "gen": "the quiet teachers walks bake the shop", "pattern": false, "novel": true}
+{"prompt": "a girl walks to the big parks", "gen": "the boy eats a shop", "pattern": true, "novel": true}
+{"prompt": "a girl walks to the big parks", "gen": "some pies smile", "pattern": true, "novel": true}
+{"prompt": "the girl bakes the cake", "gen": "the tall fox cooks the happy girl", "pattern": true, "novel": true}
+{"prompt": "the girl bakes the cake", "gen": "a doctor chases the farmer schools", "pattern": false, "novel": true}
+{"prompt": "the girl bakes the cake", "gen": "the dogs goes to some big forest", "pattern": true, "novel": true}
+{"prompt": "the girl bakes the cake", "gen": "a boy cooks the quiet cookies", "pattern": true, "novel": true}
+{"prompt": "the boys eat the fresh cookie", "gen": "the boy laugh", "pattern": true, "novel": true}
+{"prompt": "the boys eat the fresh cookie", "gen": "the farmer eats the teachers lemons", "pattern": false, "novel": true}
+{"prompt": "the boys eat the fresh cookie", "gen": "the doctor visits the hungry womans", "pattern": true, "novel": true}
+{"prompt": "the boys eat the fresh cookie", "gen": "a ball sleeps", "pattern": true, "novel": true}
+{"prompt": "the ball breaks", "gen": "a cow breaks", "pattern": true, "novel": true}
+{"prompt": "the ball breaks", "gen": "the girls clean the ripe cake", "pattern": true, "novel": true}
+{"prompt": "the ball breaks", "gen": "a kind baker returns to a shop", "pattern": true, "novel": true}
+{"prompt": "the ball breaks", "gen": "a man cooks a happy school", "pattern": true, "novel": true}
+{"prompt": "the quiet baker cooks a cake", "gen": "the rabbits eat the quiet houses", "pattern": true, "novel": true}
+{"prompt": "the quiet baker cooks a cake", "gen": "some foxs stays to a big house", "pattern": true, "novel": true}
+{"prompt": "the quiet baker cooks a cake", "gen": "a sleepy boy eats the dogs apple", "pattern": false, "novel": true}
+{"prompt": "the quiet baker cooks a cake", "gen": "the man spoils", "pattern": true, "novel": true}
+{"prompt": "the girl laughs", "gen": "a woman helps the teachers", "pattern": true, "novel": true}
+{"prompt": "the girl laughs", "gen": "the pig goes to the school", "pattern": true, "novel": true}
+{"prompt": "the girl laughs", "gen": "some sweet break", "pattern": false, "novel": true}
+{"prompt": "the girl laughs", "gen": "the dog stays cook the market", "pattern": false, "novel": true}
+{"prompt": "the doctor bakes some cakes", "gen": "a quiet man go carry a small book", "pattern": false, "novel": true}
+{"prompt": "the doctor bakes some cakes", "gen": "a girl cooks the mans school", "pattern": false, "novel": true}
+{"prompt": "the doctor bakes some cakes", "gen": "the farmer return to a cake", "pattern": true, "novel": true}
+{"prompt": "the doctor bakes some cakes", "gen": "the horse helps the womans", "pattern": true, "novel": true}
+{"prompt": "the man bakes a lemon", "gen": "the dogs breaks", "pattern": true, "novel": true}
+{"prompt": "the man bakes a lemon", "gen": "a fresh garden sleep", "pattern": true, "novel": true}
+{"prompt": "the man bakes a lemon", "gen": "a boy walks to some happy run", "pattern": false, "novel": true}
+{"prompt": "the man bakes a lemon", "gen": "a kind man returns to a house", "pattern": true, "novel": true}
+{"prompt": "some teachers laugh", "gen": "a baker eats a old cake", "pattern": true, "novel": true}
+{"prompt": "some teachers laugh", "gen": "the boy fixes some keys", "pattern": true, "novel": true}
+{"prompt": "some teachers laugh", "gen": "the old woman feeds a small rabbit", "pattern": true, "novel": true}
+{"prompt": "some teachers laugh", "gen": "the old cat go clean a shop", "pattern": false, "novel": true}
