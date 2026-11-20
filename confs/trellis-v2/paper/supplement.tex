@@ -314,10 +314,11 @@ Chance labels groups of nearby pieces of the same size as the chunks, so a lift 
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\textwidth]{figures/chess_chunkers}
+\includegraphics[width=\textwidth]{figures/chess_chunkers_std}
 \caption{Bits per held-out Lichess position against positions learned (300 to 4,000) for \trellis{} and the comparison coders, on four test sets: control, other openings, other wing, and positions shifted one file (seed 13, model cost not charged).
-The \trellis{} curve is the better of its offsets-only and offsets-plus-squares variants in each panel.
-Its shifted panel therefore uses a variant that the standard chess configuration C5 does not allow, and the main paper gives both values.}
+The blue curve is the better of the offsets-only and offsets-plus-squares variants of \trellis{} in each panel, learned without the exact-only rule (exact\_alone off), a variant that the standard chess configuration C5 does not allow.
+The orange marker is C5 after 4,000 positions (130.6, 139.6, 154.0, and 153.6 bits); only the 4,000-position run exists for it.
+On the shifted set the best variant reaches 147.2 bits against 153.6 for C5, and the main paper gives both values.}
 \label{fig:chesscompress}
 \end{figure}
 
