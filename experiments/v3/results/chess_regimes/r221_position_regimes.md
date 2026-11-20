@@ -5,7 +5,7 @@ Code: `experiments/v3/diag/r221_position_gen.py` (count facet x kc x kx), `r221_
 `r221_analyze.py`, `r221_pr_report.py`. Data: `r221_gen_v1_s13.json`, `r221_gen_v1_s17.json`, `r221_pr_v1_s13.json`, `r221_pr_v1_s17.json`.
 Full tables: `r221_tables.md`, `r221_pr_tables.md`. Two seeds (13, 17); N = 500, 1000, 2000, 4000.
 Jobs: r221 smoke 4806789; first full runs 4806898/4806899 cancelled (a kc=99 cell was too slow, sampler rewritten); final runs
-4807047 (seed 13), 4807048 (seed 17); analysis 4807777 (first, later re-run on the final data as 4806xxx-era job, output in `r221_tables.md`);
+4807047 (seed 13), 4807048 (seed 17); analysis 4807777 (output `r221_tables.md`, run after the final generation data existed);
 parse-regen first runs 4807778/4807779 crashed (KeyError, fixed by backing off to the nearest ancestor concept with stored instances);
 final parse-regen 4807838 (seed 13), 4807839 (seed 17); report 4808277.
 
