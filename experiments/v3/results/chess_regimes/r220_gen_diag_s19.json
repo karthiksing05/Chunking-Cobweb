@@ -1,0 +1,381 @@
+{
+ "seed": 19,
+ "NS": [
+  500
+ ],
+ "n": 300,
+ "tau": 0.7022767292976416,
+ "kcs": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  6,
+  99
+ ],
+ "N500": {
+  "learned": 500,
+  "learn_s": 174,
+  "chunk units": 2557,
+  "path depth": {
+   "6": 712,
+   "4": 801,
+   "14": 1,
+   "5": 317,
+   "7": 515,
+   "13": 6,
+   "9": 98,
+   "8": 72,
+   "16": 2,
+   "15": 1,
+   "10": 18,
+   "11": 11,
+   "12": 3
+  },
+  "kc=0": {
+   "real": 0.117,
+   "legal": 0.0,
+   "non": 0.883,
+   "drop_per_board": 2.867,
+   "mean_pieces": 12.7,
+   "exact_train_copy": 0.0,
+   "unique": 0.873,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.44,
+    "NO_BLACK_KING": 0.44,
+    "TOO_MANY_KINGS": 0.127,
+    "TOO_MANY_WHITE_PAWNS": 0.09,
+    "TOO_MANY_BLACK_PAWNS": 0.11,
+    "TOO_MANY_BLACK_PIECES": 0.063,
+    "PAWNS_ON_BACKRANK": 0.023,
+    "OPPOSITE_CHECK": 0.037,
+    "TOO_MANY_WHITE_PIECES": 0.053
+   },
+   "examples": {
+    "real": [
+     "6k1/5p1p/6p1/4n3/8/8/6PP/6K1",
+     "5k2/6pp/5n2/8/Q1PRP3/P1N5/PP2K3/R2Rq3",
+     "3q2k1/5p1p/6n1/3p1N2/2PP1P2/8/PP1KB3/R1Q2R2",
+     "2r3k1/p1q2ppp/1n6/8/8/7P/5PP1/6K1"
+    ],
+    "legal": [],
+    "non": [
+     "r7/p4ppp/8/8/8/4P3/2PQBP2/8",
+     "r2qk3/ppq1pppp/p4ppp/2pb1PB1/3p1P1P/P5P1/PP3KPP/RNR1K1K1",
+     "8/8/8/8/8/8/8/8",
+     "8/3n1q2/3p1kb1/p2p4/4p3/PPP3Q1/N5P1/3RRN2"
+    ]
+   }
+  },
+  "abs0": {
+   "real": 0.107,
+   "legal": 0.0,
+   "non": 0.893,
+   "drop_per_board": 2.72,
+   "mean_pieces": 12.4,
+   "exact_train_copy": 0.0,
+   "unique": 0.883,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.407,
+    "TOO_MANY_WHITE_PAWNS": 0.077,
+    "NO_BLACK_KING": 0.447,
+    "TOO_MANY_WHITE_PIECES": 0.04,
+    "TOO_MANY_KINGS": 0.113,
+    "TOO_MANY_BLACK_PIECES": 0.05,
+    "TOO_MANY_BLACK_PAWNS": 0.087,
+    "OPPOSITE_CHECK": 0.047,
+    "TOO_MANY_CHECKERS": 0.003,
+    "IMPOSSIBLE_CHECK": 0.003
+   },
+   "examples": {
+    "real": [
+     "r3q3/pp3pkp/p3r1p1/3pNn2/P2N4/2P1p1B1/3Q2PP/6K1",
+     "r3r1k1/1p5p/2pB4/p2pp3/4QB1P/6P1/5P1P/R4RK1",
+     "6k1/3n2pp/5p2/8/8/6P1/5P1P/6K1",
+     "5nk1/1p3p1p/pn6/qp1nb3/1b1p4/P6P/1Q3PPP/R1B2K2"
+    ],
+    "legal": [],
+    "non": [
+     "4rr2/6pp/4rr2/6p1/4k3/3p3P/8/8",
+     "5k2/6pp/5n2/8/8/8/5P2/8",
+     "6k1/5ppp/4pp2/1Pp1p3/2P1n3/2PPPQ2/PP1Q1PPP/4K3",
+     "8/pp6/2p3p1/3N4/2PP4/2Q1Q3/PPQN1PPP/RRK1RRK1"
+    ]
+   }
+  },
+  "kc=1": {
+   "real": 0.013,
+   "legal": 0.0,
+   "non": 0.987,
+   "drop_per_board": 1.493,
+   "mean_pieces": 15.5,
+   "exact_train_copy": 0.0,
+   "unique": 0.87,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.45,
+    "NO_BLACK_KING": 0.377,
+    "TOO_MANY_KINGS": 0.27,
+    "TOO_MANY_BLACK_PAWNS": 0.153,
+    "PAWNS_ON_BACKRANK": 0.243,
+    "TOO_MANY_BLACK_PIECES": 0.167,
+    "TOO_MANY_WHITE_PAWNS": 0.16,
+    "OPPOSITE_CHECK": 0.057,
+    "TOO_MANY_WHITE_PIECES": 0.153,
+    "TOO_MANY_CHECKERS": 0.007,
+    "IMPOSSIBLE_CHECK": 0.007
+   },
+   "examples": {
+    "real": [
+     "2bq2k1/pp3p2/1p2p3/3p1p2/6P1/8/6K1/8",
+     "5k2/5pp1/8/8/8/3BN1P1/5P1P/3Q1RK1",
+     "5k2/6p1/8/8/8/8/6P1/6K1",
+     "4k3/3p4/2p5/3n4/8/7P/1PP4P/6K1"
+    ],
+    "legal": [],
+    "non": [
+     "8/8/8/8/3p4/2n1p3/p7/8",
+     "4kr2/p4pk1/3kpppp/3p4/4p3/8/5PPP/5R2",
+     "4r3/3pp3/2n1p3/3p4/8/8/8/8",
+     "3q4/1p6/2p5/3p4/8/8/8/8"
+    ]
+   }
+  },
+  "kc=2": {
+   "real": 0.05,
+   "legal": 0.013,
+   "non": 0.937,
+   "drop_per_board": 1.537,
+   "mean_pieces": 16.6,
+   "exact_train_copy": 0.0,
+   "unique": 0.883,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.377,
+    "TOO_MANY_KINGS": 0.287,
+    "TOO_MANY_BLACK_PAWNS": 0.167,
+    "PAWNS_ON_BACKRANK": 0.27,
+    "TOO_MANY_BLACK_PIECES": 0.183,
+    "TOO_MANY_WHITE_PIECES": 0.16,
+    "NO_BLACK_KING": 0.35,
+    "TOO_MANY_WHITE_PAWNS": 0.173,
+    "OPPOSITE_CHECK": 0.07,
+    "TOO_MANY_CHECKERS": 0.003,
+    "IMPOSSIBLE_CHECK": 0.003
+   },
+   "examples": {
+    "real": [
+     "2k4r/1pp5/3p4/3Q4/3P4/8/2P3P1/4q2K",
+     "2r3k1/bq3p2/1p3p1p/6P1/3P4/1PP1P1K1/PB6/8",
+     "8/6p1/4k3/3p4/5QP1/7P/1P4K1/8",
+     "bq1r2k1/5p2/2p5/1p1p4/8/6B1/6PP/6K1"
+    ],
+    "legal": [
+     "5b2/p2p1k1p/P2pb1N1/6P1/8/3K4/6P1/8",
+     "6k1/5p2/4p3/bp3nB1/p2N1QBN/4B3/5Q2/NRQR1RK1",
+     "8/1b2rk2/2p1rp2/Q2pp3/P1nP4/B7/6P1/R1R3K1",
+     "5k2/3pp3/2p1n3/8/r2P3P/1PR1BPP1/R4K2/1R1B1R2"
+    ],
+    "non": [
+     "2kr1bqr/2kppkn1/ppbpppp1/pp1rnbPQ/qp1PbP2/3NPQ2/PB3PB1/RQ1R1R1P",
+     "5b2/1r4k1/pppkrnP1/2Npp3/2PPP3/BP1pNK1P/N1PBN1RP/QRR1Q1R1",
+     "8/8/8/8/8/7P/2P3P1/6K1",
+     "r2r4/4p2r/3b1N1r/2pp4/4Pn2/4N1P1/3PP2P/5QNK"
+    ]
+   }
+  },
+  "kc=3": {
+   "real": 0.017,
+   "legal": 0.007,
+   "non": 0.977,
+   "drop_per_board": 1.483,
+   "mean_pieces": 16.9,
+   "exact_train_copy": 0.0,
+   "unique": 0.863,
+   "illegal_causes": {
+    "NO_BLACK_KING": 0.397,
+    "PAWNS_ON_BACKRANK": 0.457,
+    "NO_WHITE_KING": 0.373,
+    "TOO_MANY_CHECKERS": 0.017,
+    "IMPOSSIBLE_CHECK": 0.023,
+    "TOO_MANY_KINGS": 0.3,
+    "TOO_MANY_WHITE_PAWNS": 0.21,
+    "TOO_MANY_BLACK_PAWNS": 0.173,
+    "TOO_MANY_WHITE_PIECES": 0.183,
+    "TOO_MANY_BLACK_PIECES": 0.163,
+    "OPPOSITE_CHECK": 0.103
+   },
+   "examples": {
+    "real": [
+     "8/5pkp/5pp1/8/8/6K1/N3Q3/8",
+     "8/k7/1p3p2/3pp3/4Q1P1/8/8/4R2K",
+     "8/5p1k/1b3q1p/N1qbp1p1/1PP5/2R5/RBP5/2K5",
+     "7r/5r1k/8/3b4/3qP3/5P2/5PPP/7K"
+    ],
+    "legal": [
+     "2b2rk1/4b3/2Q1pnrr/3pP3/2P5/1P2P1R1/P2P1PrR/RR1RKN2",
+     "8/5kP1/3np3/3PBPp1/4P3/8/4PP2/4K3"
+    ],
+    "non": [
+     "8/8/8/8/8/8/8/8",
+     "8/8/8/8/8/8/8/8",
+     "8/8/8/8/8/8/8/8",
+     "4r3/1p1ppp2/2pNP3/3p1P2/1P2K2P/3N3K/P4P2/2q2PR1"
+    ]
+   }
+  },
+  "kc=4": {
+   "real": 0.007,
+   "legal": 0.013,
+   "non": 0.98,
+   "drop_per_board": 1.353,
+   "mean_pieces": 16.5,
+   "exact_train_copy": 0.0,
+   "unique": 0.883,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.42,
+    "NO_BLACK_KING": 0.413,
+    "PAWNS_ON_BACKRANK": 0.51,
+    "TOO_MANY_KINGS": 0.257,
+    "TOO_MANY_WHITE_PAWNS": 0.16,
+    "TOO_MANY_BLACK_PAWNS": 0.203,
+    "TOO_MANY_WHITE_PIECES": 0.187,
+    "TOO_MANY_BLACK_PIECES": 0.167,
+    "OPPOSITE_CHECK": 0.11,
+    "TOO_MANY_CHECKERS": 0.013,
+    "IMPOSSIBLE_CHECK": 0.017
+   },
+   "examples": {
+    "real": [
+     "8/1r4rk/1rn4p/1p6/5p2/8/8/6K1",
+     "8/pp3k2/5p1P/6B1/8/5K2/4R1P1/8"
+    ],
+    "legal": [
+     "8/4kP2/3pppK1/p7/8/1P1r1bq1/8/6b1",
+     "5rr1/2p1p1k1/4bp2/3pR1n1/5Q2/7K/1r6/8",
+     "8/3pp1p1/4kpp1/8/2nr4/B2pPPP1/2B2KNB/3R2Q1",
+     "8/1r1p4/1pp1p3/3p4/k7/bp3NP1/p5BP/7K"
+    ],
+    "non": [
+     "3r1p2/p2pp3/3r1nP1/2b2RP1/8/6P1/8/8",
+     "4p1p1/2r5/bb4pq/p1n5/8/8/8/5R2",
+     "8/1kb5/3p4/2np4/4p3/5k2/5p2/6p1",
+     "8/8/8/8/8/8/P5P1/8"
+    ]
+   }
+  },
+  "kc=6": {
+   "real": 0.007,
+   "legal": 0.0,
+   "non": 0.993,
+   "drop_per_board": 1.44,
+   "mean_pieces": 17.4,
+   "exact_train_copy": 0.0,
+   "unique": 0.88,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.413,
+    "NO_BLACK_KING": 0.38,
+    "TOO_MANY_KINGS": 0.28,
+    "TOO_MANY_WHITE_PAWNS": 0.183,
+    "TOO_MANY_BLACK_PAWNS": 0.243,
+    "PAWNS_ON_BACKRANK": 0.583,
+    "TOO_MANY_WHITE_PIECES": 0.17,
+    "TOO_MANY_BLACK_PIECES": 0.21,
+    "OPPOSITE_CHECK": 0.173,
+    "TOO_MANY_CHECKERS": 0.017,
+    "IMPOSSIBLE_CHECK": 0.03
+   },
+   "examples": {
+    "real": [
+     "7k/8/N7/8/2P5/1K6/N7/8",
+     "8/5k2/5pp1/4r3/2n5/3p1n2/1b3PP1/6K1"
+    ],
+    "legal": [],
+    "non": [
+     "8/8/8/8/8/8/8/8",
+     "8/7p/8/8/8/8/8/8",
+     "3qk3/2PPP1P1/1PpKpP2/pp1pqK2/2pBQ1N1/Pr1pp1r1/1PPPnK1p/R1PPRpn1",
+     "5r2/6r1/4p1p1/2pb4/2n5/2n2k2/PPpP2p1/1pP1n3"
+    ]
+   }
+  },
+  "kc=99": {
+   "real": 0.007,
+   "legal": 0.01,
+   "non": 0.983,
+   "drop_per_board": 1.107,
+   "mean_pieces": 17.0,
+   "exact_train_copy": 0.0,
+   "unique": 0.933,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.477,
+    "PAWNS_ON_BACKRANK": 0.607,
+    "OPPOSITE_CHECK": 0.17,
+    "NO_BLACK_KING": 0.37,
+    "TOO_MANY_WHITE_PAWNS": 0.193,
+    "TOO_MANY_WHITE_PIECES": 0.13,
+    "TOO_MANY_BLACK_PAWNS": 0.167,
+    "TOO_MANY_BLACK_PIECES": 0.13,
+    "TOO_MANY_KINGS": 0.257,
+    "TOO_MANY_CHECKERS": 0.03,
+    "IMPOSSIBLE_CHECK": 0.033
+   },
+   "examples": {
+    "real": [
+     "r7/4k3/5p2/3p1P2/1p1P2P1/4P2K/3P4/8",
+     "8/5k2/4ppp1/8/8/8/3PPP2/3RK3"
+    ],
+    "legal": [
+     "8/4p3/3rn3/1p3Pp1/1k1b3p/pp1p1q2/nPP2PPP/6K1",
+     "8/4k3/4b3/3n1p2/4pq2/5P2/R3PKr1/6r1",
+     "8/1k2r2p/4p3/3p4/2P5/1P1P2P1/2BQ1Pr1/3B1KN1"
+    ],
+    "non": [
+     "b1k5/p3pp2/3n4/8/2p5/8/1qPbPP2/2pPp3",
+     "8/6b1/1n1PP3/4P3/3Q4/6P1/R1r1Rk2/4p1p1",
+     "3k3r/2pp1n1p/3p2p1/3p4/4p3/5P2/6P1/8",
+     "8/1pp5/8/8/B7/8/8/P7"
+    ]
+   }
+  },
+  "list": {
+   "real": 0.123,
+   "legal": 0.01,
+   "non": 0.867,
+   "drop_per_board": 0.0,
+   "mean_pieces": 21.2,
+   "exact_train_copy": 0.0,
+   "unique": 1.0,
+   "illegal_causes": {
+    "TOO_MANY_KINGS": 0.287,
+    "NO_WHITE_KING": 0.323,
+    "NO_BLACK_KING": 0.343,
+    "TOO_MANY_WHITE_PAWNS": 0.1,
+    "TOO_MANY_BLACK_PAWNS": 0.137,
+    "TOO_MANY_BLACK_PIECES": 0.057,
+    "OPPOSITE_CHECK": 0.063,
+    "TOO_MANY_WHITE_PIECES": 0.037,
+    "TOO_MANY_CHECKERS": 0.003,
+    "IMPOSSIBLE_CHECK": 0.003
+   },
+   "examples": {
+    "real": [
+     "r1r2rk1/4qp2/1q1b4/pP3p2/2P5/P2B1N2/P2Q1P1P/2R3K1",
+     "2b1kr2/ppp1b2p/p4n2/3PPp2/4n1bP/2r3P1/PP4PP/R2K3R",
+     "4rrk1/p4pp1/3p2p1/8/3PPP2/8/4B1P1/5RK1",
+     "4r1k1/p1N2p2/3p4/8/2PPP3/2r3q1/P5K1/5R2"
+    ],
+    "legal": [
+     "1R1q1k2/8/1q1P1p2/3p2p1/3P3n/2N3RP/Q6P/R1R2RKR",
+     "r1rrk3/1R2P3/2b1ppp1/p2pn1p1/8/1N1P3n/1PR5/4qRK1",
+     "r4r1r/r2p1pkp/2n1p3/1ppBP1Pp/8/4PP1p/4P1PN/RRR2RK1"
+    ],
+    "non": [
+     "4nr2/1b5p/1ppppk2/3pp3/2PP2Q1/3BP1KP/P4P2/R3K1K1",
+     "r2q2k1/5p2/6p1/2b5/3P4/q1Np1Q1P/P1P1P1P1/6R1",
+     "r3r3/1p2bp2/7p/8/8/4PN2/P4PP1/8",
+     "8/6pp/3b2n1/8/8/2NB2P1/P5P1/3Q2K1"
+    ]
+   }
+  }
+ }
+}
