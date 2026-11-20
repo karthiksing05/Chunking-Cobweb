@@ -69,7 +69,7 @@ Flat in N, as before.
 2. **Check is what caps legality, quantified.** In where-file the check rate is .054 (kc=0) to .089 (kc=4-99) of all boards: a move of a chunk along its rank can put the king on an attacked line.
    Even if every check board were counted legal, where-file at kc=99 would give R-legal + R-non = .233 + .085 = .32; the other 68% are R-real by the judge. So check is
    not the binding cap on R-legal at .5: the judge is. Adjacent kings play no role (they are rarely among illegals, 2-8%).
-3. **Why file shifts stay "real" for the judge.** The piece-square classifier is nearly file-symmetric for most pieces, so moving a chunk along its rank to another file mostly keeps the
+3. **Why file shifts stay "real" for the judge.** Likely (untested hypothesis): the piece-square classifier is nearly file-symmetric for most pieces, so moving a chunk along its rank to another file mostly keeps the
    piece-square score above TAU (R-real .68 at kc=99). The boards that fail the judge's realism but stay legal (R-legal .22-.25) are those where kings or pawn structures land on
    the wrong wing (examples below). The "shifted-board" compression result (a shape-based coder handles shifted positions) is the same fact seen from the other side: file position is the weakly constrained coordinate.
 4. **where-file+what and where-both+what stay the nonsense end** (R-non .77 at kc=1, .95-.99 for kc >= 2), because swapping pieces breaks king and pawn counts (no king / two kings / back-rank pawns).

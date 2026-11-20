@@ -1,0 +1,188 @@
+{
+ "tag": "r228-full-control",
+ "seed": 17,
+ "learn s": 1018,
+ "parse s": 209,
+ "positions coded": 1000,
+ "piece-square bits mean": 181.8,
+ "eps": 0.05,
+ "stored chunks": 10168,
+ "stored records": 26520,
+ "memory bits (distinct chunks as piece-square lists)": 332017,
+ "by levels": [
+  {
+   "content level": 0,
+   "context level": 0,
+   "copy": false,
+   "bits per position": 174.5,
+   "top concepts": 8742,
+   "s": 41,
+   "per position": {
+    "anchors": 17.32,
+    "chunk roots": 67.53,
+    "chunk tops (count)": 6.33,
+    "single tops": 46.12,
+    "templates": 57.27
+   }
+  },
+  {
+   "content level": 0,
+   "context level": 0,
+   "copy": true,
+   "bits per position": 129.5,
+   "top concepts": 8742,
+   "s": 40,
+   "per position": {
+    "abs copy cheaper (count)": 5.6,
+    "anchors": 19.36,
+    "chunk roots": 71.93,
+    "chunk tops (count)": 6.37,
+    "chunk tops copied (count)": 6.34,
+    "copy, choosing the instance": 12.23,
+    "single tops": 42.02,
+    "templates": 61.55,
+    "written as pieces (count)": 0.0
+   }
+  },
+  {
+   "content level": 1,
+   "context level": 0,
+   "copy": false,
+   "bits per position": 174.4,
+   "top concepts": 4014,
+   "s": 36,
+   "per position": {
+    "anchors": 16.06,
+    "chunk roots": 63.53,
+    "chunk tops (count)": 6.23,
+    "single tops": 46.96,
+    "templates": 60.43
+   }
+  },
+  {
+   "content level": 1,
+   "context level": 0,
+   "copy": true,
+   "bits per position": 129.0,
+   "top concepts": 4014,
+   "s": 41,
+   "per position": {
+    "abs copy cheaper (count)": 5.55,
+    "anchors": 18.13,
+    "chunk roots": 68.11,
+    "chunk tops (count)": 6.36,
+    "chunk tops copied (count)": 6.33,
+    "copy, choosing the instance": 15.67,
+    "single tops": 41.62,
+    "templates": 66.43,
+    "written as pieces (count)": 0.0
+   }
+  },
+  {
+   "content level": 1,
+   "context level": 1,
+   "copy": false,
+   "bits per position": 174.4,
+   "top concepts": 4014,
+   "s": 38,
+   "per position": {
+    "anchors": 16.06,
+    "chunk roots": 63.53,
+    "chunk tops (count)": 6.23,
+    "single tops": 46.96,
+    "templates": 60.43
+   }
+  },
+  {
+   "content level": 1,
+   "context level": 1,
+   "copy": true,
+   "bits per position": 129.0,
+   "top concepts": 4014,
+   "s": 43,
+   "per position": {
+    "abs copy cheaper (count)": 5.55,
+    "anchors": 18.13,
+    "chunk roots": 68.11,
+    "chunk tops (count)": 6.36,
+    "chunk tops copied (count)": 6.33,
+    "copy, choosing the instance": 15.67,
+    "single tops": 41.62,
+    "templates": 66.43,
+    "written as pieces (count)": 0.0
+   }
+  },
+  {
+   "content level": 2,
+   "context level": 1,
+   "copy": false,
+   "bits per position": 176.8,
+   "top concepts": 2263,
+   "s": 36,
+   "per position": {
+    "anchors": 14.59,
+    "chunk roots": 58.52,
+    "chunk tops (count)": 6.13,
+    "single tops": 49.63,
+    "templates": 65.21
+   }
+  },
+  {
+   "content level": 2,
+   "context level": 1,
+   "copy": true,
+   "bits per position": 128.9,
+   "top concepts": 2263,
+   "s": 40,
+   "per position": {
+    "abs copy cheaper (count)": 5.48,
+    "anchors": 17.57,
+    "chunk roots": 64.24,
+    "chunk tops (count)": 6.36,
+    "chunk tops copied (count)": 6.32,
+    "copy, choosing the instance": 19.3,
+    "single tops": 41.46,
+    "templates": 75.44,
+    "written as pieces (count)": 0.0
+   }
+  },
+  {
+   "content level": 2,
+   "context level": 2,
+   "copy": false,
+   "bits per position": 176.8,
+   "top concepts": 2263,
+   "s": 37,
+   "per position": {
+    "anchors": 14.59,
+    "chunk roots": 58.52,
+    "chunk tops (count)": 6.13,
+    "single tops": 49.63,
+    "templates": 65.21
+   }
+  },
+  {
+   "content level": 2,
+   "context level": 2,
+   "copy": true,
+   "bits per position": 128.9,
+   "top concepts": 2263,
+   "s": 37,
+   "per position": {
+    "abs copy cheaper (count)": 5.48,
+    "anchors": 17.57,
+    "chunk roots": 64.24,
+    "chunk tops (count)": 6.36,
+    "chunk tops copied (count)": 6.32,
+    "copy, choosing the instance": 19.3,
+    "single tops": 41.46,
+    "templates": 75.44,
+    "written as pieces (count)": 0.0
+   }
+  },
+  {
+   "content level": "mixture of 0-3",
+   "bits per position": 215.0
+  }
+ ]
+}
