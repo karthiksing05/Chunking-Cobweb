@@ -30,6 +30,7 @@
 
 \begin{document}
 \raggedbottom
+\renewcommand{\topfraction}{.9}\renewcommand{\textfraction}{.1}\renewcommand{\floatpagefraction}{.8}
 \emergencystretch 2em
 
 \title{Learning Concepts and Chunks from Raw Experience: Chunks Compress Chess Positions, and Concepts Drive Children's Stories}
@@ -87,8 +88,7 @@ It left three questions open: a less greedy parser might repair the choices that
 
 Version 2 of \trellis{} addresses all three, and the answers differ in strength.
 The system reads a raw stream of experiences and uses gold labels only to score its output. It parses by inside-outside computation over every binary segmentation, generates one element at a time, and learns by storing every candidate chunk weighted by its posterior probability.
-The answer on parsing is negative. On sentences of at most eight words, a greedy parse produces the same trees as the full computation in 93\% of cases, at a fifth of the cost,
-with the same agreement with a shallow-phrase reference and the same discrimination of broken sentences.
+The answer on parsing is negative. On sentences of at most eight words, a greedy parse produces the same trees as the full computation in 93\% of cases, at a fifth of the cost. It also agrees as well with a shallow-phrase reference and discriminates broken sentences as well.
 We use the full computation because it is cheap at this length and supplies the posterior weights that learning stores.
 Whether those weights matter more than the best tree, and whether the full computation pays on longer inputs, remains untested.
 
@@ -209,12 +209,12 @@ A position arrives as a set of pieces on squares, and the system derives offsets
 The two sets give different values for the same quantity, such as right-branching agreement (.49 on set S, .42 on set C), so every table and caption names its set.
 
 \paragraph{Baselines.} We compare \trellis{} with n-gram models, an LSTM \citep{hochreiter-lstm}, and a small GPT-style transformer \citep{vaswani-attention}, all trained on exactly the same $n$ sentences.
-We choose each neural model's size by held-out loss and sample it at a tuned temperature (Supplement, Section 1). An n-gram sampler emits only stored n-grams, so it scores zero on the fair count by construction.
+We choose each neural model's size by held-out loss and sample it at a tuned temperature (details in the Supplement). An n-gram sampler emits only stored n-grams, so it scores zero on the fair count by construction.
 For compression we add byte-pair encoding \citep{sennrich-bpe} with a unigram code over words in language and over squares or shapes in chess, Witten-Bell and Kneser-Ney n-grams in language, and Krimp \citep{vreeken-krimp} and the compressor xz in chess.
 
 \paragraph{Generation protocol.} Language-model judges decide whether each generated sentence is grammatical and whether it is meaningful, and the training stream tells us whether it is new.
 The \textit{fair count} is the number of distinct, new, judged-grammatical sentences that contain a trigram the training stream never stored, divided by the number of attempted draws, so repeated and copied sentences count against the generator.
-We use eight seeds. Seeds 13, 17, 19, and 23 selected the settings and seeds 29, 31, 37, and 41 confirm them, and Table~\ref{tab:gen} reports both groups. The training sets of different seeds overlap by 8 to 14\% of sentences, so seeds are not independent samples.
+We use eight seeds. Seeds 13, 17, 19, and 23 selected the settings and seeds 29, 31, 37, and 41 confirm them, and Table~\ref{tab:gen} pools all eight (Supplement, Table~S18 gives the confirmation seeds alone). The training sets of different seeds overlap by 8 to 14\% of sentences, so seeds are not independent samples.
 We report paired differences with 95\% $t$ intervals and bootstrap intervals over seeds. We call two models level when the interval for their difference includes zero and has a lower bound above $-.03$, a margin we fixed in advance at roughly a tenth of the fair count.
 The earlier judge, Qwen2.5-3B \citep{qwen25} with a grammaticality probability above .5, passes .89 of real held-out sentences. It chose every sampling temperature and window, so the judge-2 scores re-score draws made at settings that it selected, and we did not re-tune.
 
@@ -306,13 +306,13 @@ in the park & 194 & 0, 1, 4, 7, 11 & in the sun; with his friends; his friends o
 
 Figure~\ref{fig:chunkcases} follows six held-out sentences through five training sizes.
 Two-word strings dominate the chunks the learners find, such as a determiner and a noun, a subject and an auxiliary, or a fixed time phrase like ``one day.''
-The inventories of different seeds overlap far more than chance would predict (a Jaccard overlap of .33 for the 50 most frequent chunks, against .01 to .03 by chance), and 14 chunks appear in the top 50 of all four seeds.
+The inventories of different seeds overlap far more than chance: the Jaccard overlap of the 50 most frequent chunks is .33, against .01 to .03 by chance, and 14 chunks appear in the top 50 of all four seeds.
 The overlap is lower than that of raw n-gram frequency (.51) or byte-pair encoding (.43) on the same data (Supplement, Table~S9; Figure~S2 gives chunk types). Chunking therefore adds no cross-seed agreement beyond frequency in language.
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.9\textwidth]{figures/story_chunks_cases}
-\caption{Six held-out TinyStories sentences parsed by one \trellis{} learner (seed 13) after 250 to 4,000 training sentences. Square brackets mark spans whose posterior reaches a fixed threshold, and round brackets mark chosen spans below it.
+\includegraphics[width=0.8\textwidth]{figures/story_chunks_cases}
+\caption{Six held-out TinyStories sentences parsed by one \trellis{} learner (seed 13) after 250 to 4,000 training sentences. Square brackets mark word groups whose posterior reaches a fixed threshold, and round brackets mark chosen groups below it.
 Grey text gives the NLTK shallow-phrase labels of the two most confident chunks ($-$ means no label).}
 \label{fig:chunkcases}
 \end{figure}
@@ -355,24 +355,20 @@ At 1,000 sentences the LSTM leads on the meaningful count by .026 (bootstrap int
 The syntax interval against the LSTM reaches $-$.042, beyond our margin, so the tie there fails.
 At 4,000 sentences both neural models lead on both seeds, by .055 to .057 on syntax and .070 to .082 on the meaningful count.
 
-The four confirmation seeds chose no setting, and their separate result is weaker at 500 sentences.
-At 250 sentences \trellis{} leads the LSTM on 3 of 4 seeds (+.021 on syntax) and the GPT on 4 of 4 (+.027, interval +.010 to +.044).
-At 500 sentences the LSTM leads on all four seeds on both counts, by .012 on syntax and by .022 on the meaningful count, where the $t$ interval excludes zero ($-$.039 to $-$.005 on four seeds).
-At 1,000 sentences the GPT leads on all four seeds on syntax ($-$.028).
+The four confirmation seeds chose no setting and give a weaker result at 500 sentences. The LSTM leads there on all four seeds on both counts, by .012 on syntax and .022 on the meaningful count ($t$ interval $-$.039 to $-$.005). At 250 sentences \trellis{} leads the GPT on 4 of 4 seeds (+.027; Supplement, Table~S18).
 The earlier judge showed \trellis{} ahead of a matched GPT at 250 and 500 sentences on 8 of 8 seeds (Supplement, Table~S1). That result does not survive judge 2, because the GPT's count rises more under judge 2 at both sizes.
 \trellis{} therefore writes new grammatical sentences about as often as both neural models at 250 sentences, matches them at 500 sentences on eight seeds pooled while trailing the LSTM on the confirmation seeds, and trails at 1,000 and 4,000 sentences.
-
+\trellis{} therefore writes new grammatical sentences about as often as both neural models at 250 sentences. It matches them at 500 sentences on eight seeds pooled while trailing the LSTM on the confirmation seeds, and it trails them at 1,000 and 4,000 sentences.
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.72\textwidth]{figures/generation_fair_count_judge2}
+\includegraphics[width=0.62\textwidth]{figures/generation_fair_count_judge2}
 \caption{Fair count (distinct new sentences with an unstored trigram that pass judge 2, per attempted draw) against training sentences for \trellis{}, an LSTM, and a GPT on TinyStories, each at its best sampling temperature under the earlier judge.
 Left, syntax pass of judge 2 (Qwen3-8B and phi-4); right, syntax and meaning pass. Means over eight seeds at 250, 500, and 1,000 sentences (solid) and over two seeds at 4,000 sentences (open markers), where settings and seed count differ.}
 \label{fig:gen}
 \end{figure}
 
 \begin{table}[!htbp]
-\caption{Fair count on TinyStories under judge 2 (configuration C1). Paired differences give the mean, the 95\% $t$ interval, and the seeds won. The 4,000-sentence rows use seeds 13 and 17.
-The lower part uses the confirmation seeds 29, 31, 37, and 41 and per-seed values rounded to three digits, so its means can differ from the upper part by .001. The Qwen2.5-3B judge chose the settings.}
+\caption{Fair count on TinyStories under judge 2 (configuration C1), mean over all eight seeds. Paired differences give the mean, the 95\% $t$ interval, and the seeds won. The 4,000-sentence rows use seeds 13 and 17. The Qwen2.5-3B judge chose the settings.}
 \label{tab:gen}
 \begin{center}
 \footnotesize
@@ -390,15 +386,6 @@ $n$ & \trellis{} & LSTM & GPT & \trellis{} $-$ LSTM & \trellis{} $-$ GPT \\
 500   & .230 & .244 & .227 & $-$.013 [$-$.030, +.004], 2/8 & +.004 [$-$.011, +.018], 5/8 \\
 1,000 & .258 & .284 & .271 & $-$.026 [$-$.052, +.001], 1/8 & $-$.013 [$-$.037, +.012], 2/8 \\
 4,000 & .222 & .292 & .304 & $-$.070, 0/2 & $-$.082, 0/2 \\
-\midrule
-\multicolumn{6}{l}{\textit{Confirmation seeds, syntax pass}} \\
-250   & .308 & .287 & .281 & +.021 [$-$.016, +.059], 3/4 & +.027 [+.010, +.044], 4/4 \\
-500   & .366 & .378 & .362 & $-$.012 [$-$.024, +.001], 0/4 & +.004 [$-$.056, +.064], 2/4 \\
-1,000 & .399 & .413 & .427 & $-$.014 [$-$.072, +.043], 1/4 & $-$.028 [$-$.059, +.003], 0/4 \\
-\multicolumn{6}{l}{\textit{Confirmation seeds, syntax and meaning pass}} \\
-250   & .191 & .176 & .162 & +.015 [$-$.010, +.040], 3/4 & +.029 [$-$.011, +.070], 4/4 \\
-500   & .220 & .241 & .213 & $-$.022 [$-$.039, $-$.005], 0/4 & +.006 [$-$.026, +.039], 3/4 \\
-1,000 & .254 & .275 & .275 & $-$.020 [$-$.059, +.018], 1/4 & $-$.021 [$-$.055, +.013], 0/4 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -417,22 +404,12 @@ If chunking is compression, the chunks should shorten the code of held-out text.
 Protocol: the \trellis{} code is the sequence of choices that the generator would make to write the sentence, each costing $-\log_2$ of its probability.
 A uniform escape covers outcomes to which the generator gives no mass, and a development set fixes the escape weight and the number of byte-pair merges.
 No coder pays for its model: the byte-pair dictionary costs 2,000 to 43,000 bits, the networks hold 0.2 to 1.7 million parameters, and \trellis{} stores 8,300 records at 250 sentences and 102,000 at 4,000.
-Between 10\% and 36\% of the test sentences also occur in the training stream, and the ranking holds on the sentences that do not (Supplement, Section 2).
 
-\begin{figure}[!htbp]
-\centering
-\includegraphics[width=0.6\textwidth]{figures/language_bits_curve}
-\caption{Held-out code length in bits per sentence against training sentences on TinyStories (first 1,000 held-out sentences, seeds 13 and 17 averaged; model cost not charged). The uniform code costs 51.4 bits.
-\trellis{} is the generator's code with a uniform escape (configuration C8). The dashed line removes the concepts from the generator's reads, and the dotted line removes the chunks and the concepts.
-Removing only the chunks overlaps the solid \trellis{} line and is not drawn. The n-gram is a Kneser-Ney trigram.}
-\label{fig:bits}
-\end{figure}
-
-\trellis{} codes sentences in 2.1 to 2.5 bits fewer than byte-pair coding at every size (35.7 against 38.0 bits at 250 sentences and 26.6 against 28.7 at 4,000), with both seeds agreeing and a paired standard error of about 0.3 bits.
-It trails the Kneser-Ney trigram by about 5 bits and the LSTM and GPT by 5.5 to 6.6 bits, and the gap does not close with data.
+\trellis{} codes sentences in 2.1 to 2.5 bits fewer than byte-pair coding at every size (35.7 against 38.0 bits at 250 sentences and 26.6 against 28.7 at 4,000). Both seeds agree, and the paired standard error is about 0.3 bits.
+It trails the Kneser-Ney trigram by about 5 bits and the LSTM and GPT by 5.5 to 6.6 bits, and the gap does not close with data (Supplement, Figure~S6).
 We built the generator to sample, and at temperature 1 with a pair gate it spreads probability in ways a predictor would not, so these numbers measure that distribution as it stands.
 
-Table~\ref{tab:ablation} removes the parts at 1,000 sentences.
+Supplement Table~S19 removes the parts at 1,000 sentences.
 Removing every stored chunk leaves the code length and the generation counts unchanged to within the seed spread (30.8 bits with and without chunks).
 Removing the concepts from the generator's reads shortens the code by about 2 bits (28.8), and removing both gives 28.6 bits, shorter than the full system at every size.
 The margin over byte-pair coding therefore belongs to the word-window generator with its pair gate and leaf reads. The chunks add nothing to it, and the concepts cost about 2 bits.
@@ -441,43 +418,15 @@ It also makes the generator reject content-swapped sentences more often (accepte
 Chunks reach the generator only through the context tree that they sit in, so the null result for chunks in generation holds partly by construction.
 The chunk-free parser also reaches a higher tree F1 against the shallow-phrase reference (.383 against .347, both below right-branching at .427).
 
-\begin{table}[!htbp]
-\caption{Removal controls on TinyStories after 1,000 sentences (seeds 13 and 17, configuration C8). Code length is bits per held-out sentence. Fair counts use judge 2 at temperature 2.0 and omit the unstored-trigram requirement, so they differ from Table~\ref{tab:gen}.
-Content swap accepted is the share of content-swapped sentences that the generator score accepts at the threshold that accepts 90\% of real sentences (lower is better).
-Chunks off stores no composite. Concepts off reads every record at its own leaf, with back-off to the root. Both off combines the two.}
-\label{tab:ablation}
-\begin{center}
-\small
-\begin{tabular}{lcccc}
-\toprule
-Variant & Code length & Fair syntax & Fair syntax and meaning & Content swap accepted \\
-\midrule
-Full & 30.8 & .539 & .363 & .708 \\
-Chunks off & 30.8 & .520 & .347 & .707 \\
-Concepts off & 28.8 & .496 & .309 & .573 \\
-Both off & 28.6 & .512 & .311 & .575 \\
-\bottomrule
-\end{tabular}
-\end{center}
-\end{table}
-
 \subsection{Real and broken sentences}
 
 The parse score is the inside-pass log probability of the sentence per word, and the generator score is the per-word log probability that the pair-gated generator assigns to each word given its left context.
-Figure~\ref{fig:parsecurve} shows the share of broken sentences each score accepts as training grows (configuration C4, set C; Supplement, Tables~S7 and S8 give the values and the AUC).
+Supplement Figure~S5 shows the share of broken sentences each score accepts as training grows (configuration C4, set C; Tables~S7 and S8 give the values and the AUC).
 The parse score alone accepts most scrambles at every size (.88 at 125 sentences, .77 at 4,000) and content-swapped sentences at .91 to .94, as a syntax checker should, because those sentences are grammatical.
 The generator score does better. At 125 sentences it matches the GPT on scrambles (.39 against .40) and beats the LSTM (.65), and at 4,000 sentences it falls behind both (.049 against .010 and .007).
 It is weakest on content swaps, where it still accepts .58 at 4,000 sentences against .41 and .40 for the neural models, and it trails them on both classes.
 Beam-one greedy parsing matches full inside-outside in F1 against the reference (.353 against .352) and in AUC for ungrammatical sentences (.541 against .542). It keeps 93\% of the full trees and costs .21 as much (Supplement, Table~S6).
 The first open question of version 1 therefore has a negative answer on short sentences.
-
-\begin{figure}[!htbp]
-\centering
-\includegraphics[width=0.7\textwidth]{figures/parse_success_curve}
-\caption{Share of broken held-out TinyStories sentences accepted by each score against training sentences (configuration C4, set C, four seeds). The threshold accepts 90\% of real calibration sentences, so lower is better.
-Parse and generator scores come from \trellis{}, and the LSTM and GPT train on the same sentences.}
-\label{fig:parsecurve}
-\end{figure}
 
 \section{Evaluation in Chess}
 
@@ -496,7 +445,7 @@ Right, a held-out Lichess position as parsed by \trellis{} after 4,000 positions
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.7\textwidth]{figures/chess_ideas_cases}
+\includegraphics[width=0.56\textwidth]{figures/chess_ideas_cases}
 \caption{Four held-out Lichess positions (rows) as one \trellis{} learner parses them after learning 100, 300, 1,000, 2,000, and 4,000 positions (columns). Each outline marks one recognized chunk.
 Grey text lists the chess idea (rule-based label) of each of the first chunks. No chunk recognised'' means that no chunk cleared the recognition threshold.}
 \label{fig:chesscases}
@@ -513,15 +462,15 @@ No coder pays for its model, so these numbers are held-out code lengths without 
 Table~\ref{tab:chess-bits} gives the result after 4,000 positions on four test sets. Control positions resemble the training games, other openings and the other wing change the opening and the pawn structure, and shifted positions place shapes seen in training one file over, on squares that training never used.
 On control positions byte-pair over squares is best, at 108.8 bits against 127.7 for the better of two \trellis{} variants and 130.6 for the standard configuration.
 On shifted positions, byte-pair over squares degrades to 205.5 bits. The standard configuration codes them in 153.6 bits, which saves 52 bits per position relative to byte-pair over squares, and it trails byte-pair over shapes (149.7) by 3.9 bits.
-The three-seed mean of the standard configuration on shifted positions is 151.5 (Table~\ref{tab:chess-abl}), still 1.8 bits above the seed-13 value for byte-pair over shapes.
-A run with one storage setting changed (configuration C7), which the standard configuration does not allow, reaches 147.2 and edges out byte-pair over shapes by 2.5 bits.
+The three-seed mean of the standard configuration on shifted positions is 151.5 (Supplement, Table~S20), still 1.8 bits above the seed-13 value for byte-pair over shapes.
+Configuration C7 switches off one scoring rule of the standard configuration. The standard rule scores a new concept that holds one position by the expected correct guesses of the pieces it holds, and C7 counts it as one correct guess, as the original Cobweb does. Under C7 the system reaches 147.2 on shifted positions and edges out byte-pair over shapes by 2.5 bits.
 On other openings and the other wing, byte-pair over shapes beats the better \trellis{} variant by 16.9 and 13.4 bits. The advantage of relational chunks on shifted positions comes from describing chunks by shape, and a frequency-based miner can do that too.
 Chunking therefore compresses chess positions, and the chunks of \trellis{} compress about as well as byte-pair chunks over shapes and never better under the standard configuration (Supplement, Figure~S4 gives the curves against positions learned).
 
 \begin{table}[!htbp]
 \caption{Bits to code a held-out Lichess chess position after 4,000 training positions (lower is better; seed 13, 1,000 test positions per set, one run, model cost not charged). \trellis{} (standard) is the run with the standard chess configuration C5, available for control and shifted sets only.
 \trellis{} (best variant) is the better of the variant that describes a chunk by the offsets between its pieces and the variant that adds the squares of the pieces, in each column.
-Its shifted value, 147.2, comes from a run with one storage setting changed (configuration C7). The standard configuration does not allow that run.}
+Its shifted value, 147.2, comes from configuration C7, which switches off the scoring rule for new single-position concepts.}
 \label{tab:chess-bits}
 \begin{center}
 \small
@@ -544,7 +493,7 @@ Pieces coded independently by square frequency & 183.2 & 192.4 & 199.4 & 210.2 \
 \subsection{Removing the chunks and the concepts}
 
 We ran the language controls in chess too (configuration C10, three seeds, 4,000 positions learned). Chunks off caps every chunk at one piece, so the system stores no composite. Concepts off reads every chunk at its own leaf, with no ancestor concept, for compression, and for recall it recognizes and decodes only at a leaf.
-Table~\ref{tab:chess-abl} gives the result.
+Supplement Table~S20 gives the result.
 Removing the chunks costs 47 to 59 bits per position (+54.1 on control positions, +54.4 on other openings, +47.3 on the other wing, and +59.2 on shifted positions).
 That places the code within 1.4 to 2.4 bits of the piece-square list, which treats pieces as independent, and the system with no chunks reduces to that code.
 Removing the concepts costs under one bit (+0.7, +0.7, +0.4, and +0.6), because the stored instances of each chunk carry nearly all of the gain and the ancestors add 0.4 to 0.7 bits.
@@ -554,34 +503,11 @@ Removing the concepts yields zero recall in every cell, because recognition need
 This control is degenerate by construction. It bounds the effect and leaves open the recall of a smaller concept tree.
 Chess positions repeat multi-piece structures, and short TinyStories sentences offer few recurring multi-word units. The contrast between the two domains is an untested hypothesis about structure.
 
-\begin{table}[!htbp]
-\caption{Removal controls in chess after 4,000 learned Lichess positions (configuration C10, mean of seeds 13, 17, and 19; model cost not charged). Top: bits to code 1,000 held-out positions per set; the piece-square list codes each piece independently from the frequencies of its square.
-Bottom: first-trial recall of pieces on middle-game, end-game, and random positions with seven chunk slots (ten simulated subjects per seed). Full-system code lengths are three-seed means and differ slightly from the seed-13 values in Table~\ref{tab:chess-bits}. Concepts-off recall is zero by construction.}
-\label{tab:chess-abl}
-\begin{center}
-\small
-\begin{tabular}{lcccc}
-\toprule
-Bits per position & Control & Other openings & Other wing & Shifted \\
-\midrule
-Full system & 129.2 & 137.5 & 153.4 & 151.5 \\
-Concepts off & 129.9 & 138.2 & 153.8 & 152.1 \\
-Chunks off & 183.3 & 191.9 & 200.7 & 210.7 \\
-Piece-square list & 181.9 & 190.4 & 198.3 & 208.9 \\
-\midrule
-Recall, seven slots & Middle game & End game & Random middle & Random end \\
-\midrule
-Full system & 12.9 & 7.4 & 5.9 & 6.1 \\
-Chunks off & 7.0 & 6.9 & 6.4 & 6.3 \\
-Concepts off & 0.0 & 0.0 & 0.0 & 0.0 \\
-\bottomrule
-\end{tabular}
-\end{center}
-\end{table}
 
 \subsection{Chase and Simon recall}
 
 Chase and Simon showed players a board for five seconds and asked them to rebuild it. We give \trellis{} a short-term memory of seven chunks (or four, following \citealp{cowan-magical-four}) and run the same task on Lichess middle-game positions with 24 to 26 pieces.
+Each seed learns one memory, and the ten simulated subjects of that seed share it. A subject differs only in its test set. It holds 28 positions drawn at random from the Lichess pools: 10 middle games after White'"'"'s 21st move, 10 end games after the 41st, and 8 random boards that place the pieces of real positions on random squares. The recall and copy tasks split these positions between them.
 Protocol: the system parses the board, holds its recognized chunks in a store with the given number of slots, and rebuilds the position from them; further trials repeat the view with the previous reconstruction kept.
 Table~\ref{tab:cstrial} shows one trial on one 26-piece position after 4,000 positions of learning (seed 13, seven slots, the first example saved for that run).
 The first look yields 12 correct pieces from seven chunks, and later trials reach 18, 25, and 26 correct. The square d4 appears in two chunks, as a white pawn and as a white bishop, so one of the two is a commission error.
@@ -607,21 +533,13 @@ Slot & Chunk held after the first look \\
 \end{center}
 \end{table}
 
-Figure~\ref{fig:cscurve} gives first-trial recall across experience, averaged over three seeds with ten simulated subjects each (Supplement, Table~S10 lists the values).
+Supplement Figure~S7 gives first-trial recall across experience, averaged over three seeds with ten simulated subjects each (the subjects share the learned memory and differ in the 28 positions they see; Table~S10 lists the values).
 With seven slots, middle-game recall rises from 7.2 pieces after 300 positions to 9.7 after 1,000 and 12.9 after 4,000. People recall 4, 8, and 16 pieces as beginners, class A players, and masters, so the ordering matches and the values at the master point do not: with four slots the figure at 4,000 positions is 9.5.
 On a longer stream with seven slots, recall reaches 15.6 at about 8,000 positions (two seeds, 16.2 and 14.9), which approaches the master's 16 at twice the experience we fixed for the master in advance. It levels off near 16.7 at 16,000 positions.
 Random positions diverge from the human pattern. With seven slots, first-trial recall on random positions rises from 4.2 to 5.5 to 6.0 over the three amounts of experience, and with four slots from 2.2 to 2.8 to 3.2.
 People fall from 3.0 to 2.5 to 2.0 across the same skill levels.
 \citet{gobet-simon-random} found that skill still helps a little on random positions, which agrees in direction with our rise, though the 1973 values fall with skill.
 Any learner that stores more chunks with more data would recall more, so the ordering by experience is weak evidence for the account. We ran no chunker baseline, such as byte-pair chunks in the same slots, and no comparison with the recall simulations of CHREST \citep{gobet-simon-five-seconds}.
-
-\begin{figure}[!htbp]
-\centering
-\includegraphics[width=\textwidth]{figures/chess_cs1973_curve}
-\caption{Recall of Lichess middle-game, end-game, and random positions against positions learned (100 to 4,660 for solid lines, three seeds; 1,000 to 27,459 for dashed lines, the long stream), with seven and four chunk slots, next to people's recall (black squares: beginner B, class A player A, master M).
-The right panel shows the size of the first chunk and the pieces per glance, the pieces placed after one look at the board while a subject copies a board that stays in view (Chase and Simon's copy task). Thin lines are single seeds.}
-\label{fig:cscurve}
-\end{figure}
 
 \section{Abstraction Costs Meaning Before Grammar}
 
@@ -712,7 +630,7 @@ An oracle that takes the meaningful sentences of the best generator and swaps ev
 The target of .5 therefore equals the ceiling of perfect morphosyntactic swaps, and missing it separates no mechanism from another.
 An older protocol that protects the 50 most frequent word types leaves .18 to .22 syntax-only for learned and part-of-speech classes, the level the generators already reach.
 Class sources that need no labels stay at .15 to .395 (Supplement, Table~S15 gives both protocols).
-Supplement Table~S16 gives the regime shares by context reach and abstraction (configuration C9, seed 13, 1,000 sentences): the syntax-only share never exceeds .245 in any of the 36 cells, and a move-selection study gives no legal-but-poor regime in chess either (Supplement, Table~S11).
+Supplement Table~S16 gives the regime shares by context reach and abstraction (configuration C9, seed 13, 1,000 sentences), and the syntax-only share never exceeds .245 in any of the 36 cells. A move-selection study gives no legal-but-poor regime in chess either (Supplement, Table~S11).
 
 \subsection{Chess: parse, then regenerate where or what}
 
@@ -730,7 +648,8 @@ The rank therefore plays the part of grammar and the file the part of content, a
 Every real board is also a legal board, so the chess ordering is nested in the same way as the language ordering. The two constraints differ in kind, because legality is a global constraint on piece counts and placement and grammar here is local, enforced by the pair gate.
 The legal-unrealistic share peaks at .254 at 500 positions (where-file, level 6), is .233 at 4,000 positions, and never approaches the target of .5.
 Every illegal where-file board is a check failure. Counting every check board as legal would still give R-legal plus R-non of .32 at the root. Then 68\% of the boards pass as real, and the judge sets the cap.
-We hypothesize that the piece-square classifier is nearly file-symmetric and therefore treats file-shifted boards as real, and that the same symmetry lets a shape-based coder handle shifted positions well. Neither hypothesis is tested, and a test would score real held-out positions shifted one file.
+We tested whether the piece-square classifier is file-symmetric by moving the 1,000 real held-out positions of its validation set sideways and keeping the legal results. It is not. The mirror image (a-file to h-file) scores real for 78.9\% of positions against 95.7\% unchanged, and one-file shifts for 68.4\% (54 of 79 positions that fit; two-file shifts, 7 of 17). The classifier still accepts far more shifted boards than random legal boards (3\%), so it tolerates part of a file move, and the 68.1\% real share of where-file output lies in the same range.
+Whether a similar symmetry lets a shape-based coder handle shifted positions well remains untested.
 
 \begin{figure}[!htbp]
 \centering
@@ -798,13 +717,13 @@ Name & Setting & Results that use it \\
 C1 & Edge-exact generator, window 7 (250 and 1,000 sentences) or 6 (500), temperature 3.5, 2.8, 2.0 at 250, 500, 1,000 sentences; at 4,000 sentences window 5, temperature 2.0 (LSTM 1.0, GPT .9); eight seeds; settings chosen with Qwen2.5-3B, results judged by judge 2 and by Qwen2.5-3B & Table~\ref{tab:gen}, Figure~\ref{fig:gen}, Table~\ref{tab:samples}, Tables~S1 to S3 \\
 C2 & Plain generator without the exact-boundary rule, windows 3 to 5, temperatures .5 to 1; four seeds, 1,000 sentences & Table~S4, Figure~S1 \\
 C3 & Learner of the generation study (posterior storage, window 7); default parser; four seeds, 250 to 1,000 sentences; set S & Tables~\ref{tab:cases} and \ref{tab:bio}, Table~S9, Figures~\ref{fig:chunkcases} and S2 \\
-C4 & Learner of the parsing-curve study (simpler candidate set); four seeds, 125 to 4,000 sentences; set C & Figure~\ref{fig:parsecurve}, Tables~S6 to S8 \\
-C5 & Standard chess configuration: relational chunks of at most four pieces, in two variants (offsets only, and offsets plus squares); seed 13 (compression), seeds 13, 17, 19 (recall) & Table~\ref{tab:chess-bits}, Tables~\ref{tab:cstrial} and S10, Figures~\ref{fig:chesstypes} to \ref{fig:cscurve}, S3, S4, Table~S11 \\
+C4 & Learner of the parsing-curve study (simpler candidate set); four seeds, 125 to 4,000 sentences; set C & Figure~S5, Tables~S6 to S8 \\
+C5 & Standard chess configuration: relational chunks of at most four pieces, in two variants (offsets only, and offsets plus squares); seed 13 (compression), seeds 13, 17, 19 (recall) & Table~\ref{tab:chess-bits}, Tables~\ref{tab:cstrial} and S10, Figures~\ref{fig:chesstypes} and \ref{fig:chesscases}, S3, S4, S7, Table~S11 \\
 C6 & Regime generator: pair-gated word generator, word taxonomy with function-word features, class-level pair gate and emission at level $b$, temperature .7 to 1, window 5 or 7; seeds 13 and 17 & Table~\ref{tab:regimecases}, Figure~\ref{fig:law}, Tables~S12 to S15 \\
-C7 & Chess compression run with one storage setting changed (not allowed in the standard configuration) & shifted-set value 147.2 in Table~\ref{tab:chess-bits} \\
-C8 & Language compression and removal controls: the generator of C1 at temperature 1 as a code (window per size, uniform escape weight chosen on a development set); variants full, chunks off, concepts off (leaf reads), both off; seeds 13 and 17, 250 to 4,000 sentences (generation at 1,000 sentences, temperatures 1.2, 2.0, 3.0; judge 2) & Figure~\ref{fig:bits}, Table~\ref{tab:ablation}, Table~S5 \\
+C7 & Chess compression with the standard configuration C5 except that a new concept holding one position counts as one correct guess, as in the original Cobweb, instead of by the expected correct guesses of its pieces & shifted-set value 147.2 in Table~\ref{tab:chess-bits} \\
+C8 & Language compression and removal controls: the generator of C1 at temperature 1 as a code (window per size, uniform escape weight chosen on a development set); variants full, chunks off, concepts off (leaf reads), both off; seeds 13 and 17, 250 to 4,000 sentences (generation at 1,000 sentences, temperatures 1.2, 2.0, 3.0; judge 2) & Figure~S6, Table~S19, Table~S5 \\
 C9 & Context-abstraction generator: the pair-gated word generator of C6 with the context window read at level $b$ and reach $W'$ and the emitted word exact; seed 13, 1,000 sentences, window 5 & Table~\ref{tab:showcase}, Table~S16 \\
-C10 & Standard chess configuration with chunks capped at one piece (chunks off) or leaf-only reads (concepts off); seeds 13, 17, 19, 4,000 positions & Table~\ref{tab:chess-abl} \\
+C10 & Standard chess configuration with chunks capped at one piece (chunks off) or leaf-only reads (concepts off); seeds 13, 17, 19, 4,000 positions & Table~S20 \\
 C11 & Chess position generator: the C5 learner, with positions drawn from distributions, regenerated from parses, or regenerated with the file or rank of each reference square redrawn; seeds 13 and 17, 500 to 4,000 positions & Figures~\ref{fig:law} and \ref{fig:boards}, Table~S17 \\
 \bottomrule
 \end{tabular}

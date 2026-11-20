@@ -1,0 +1,52 @@
+{
+ "tau": 0.7022767292976416,
+ "n_held_out": 1000,
+ "identity": {
+  "positions the transform applies to": 1000,
+  "legal kept": 1000,
+  "real": 957,
+  "share real of kept": 0.957,
+  "share real of applicable": 0.957,
+  "mean score of kept": 0.95
+ },
+ "mirror a<->h": {
+  "positions the transform applies to": 1000,
+  "legal kept": 1000,
+  "real": 789,
+  "share real of kept": 0.789,
+  "share real of applicable": 0.789,
+  "mean score of kept": 0.818
+ },
+ "shift -2": {
+  "positions the transform applies to": 13,
+  "legal kept": 13,
+  "real": 5,
+  "share real of kept": 0.385,
+  "share real of applicable": 0.385,
+  "mean score of kept": 0.433
+ },
+ "shift -1": {
+  "positions the transform applies to": 53,
+  "legal kept": 53,
+  "real": 38,
+  "share real of kept": 0.717,
+  "share real of applicable": 0.717,
+  "mean score of kept": 0.781
+ },
+ "shift +1": {
+  "positions the transform applies to": 26,
+  "legal kept": 26,
+  "real": 16,
+  "share real of kept": 0.615,
+  "share real of applicable": 0.615,
+  "mean score of kept": 0.717
+ },
+ "shift +2": {
+  "positions the transform applies to": 4,
+  "legal kept": 4,
+  "real": 2,
+  "share real of kept": 0.5,
+  "share real of applicable": 0.5,
+  "mean score of kept": 0.669
+ }
+}

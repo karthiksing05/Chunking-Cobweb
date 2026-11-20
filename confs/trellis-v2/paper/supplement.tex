@@ -24,7 +24,7 @@
          2164 Staunton Court, Palo Alto, CA 94306 USA}
 
 
-This document holds the tables and figures that the main paper cites by number (Tables S1 to S17 and Figures S1 to S4).
+This document holds the tables and figures that the main paper cites by number (Tables S1 to S21 and Figures S1 to S7).
 Configurations C1 to C11 are those of Table 11 in the main paper. Every result uses TinyStories sentences of three to eight words from a 250-word vocabulary, or Lichess positions, as in the main paper.
 Judge 2 is the ensemble of Qwen3-8B and phi-4 that the main paper reports, and the earlier judge is Qwen2.5-3B with a grammaticality probability above .5.
 
@@ -299,7 +299,7 @@ F1 against reference, right-branching & .49 \\
 \centering
 \includegraphics[width=0.8\textwidth]{figures/story_chunks_curves}
 \caption{Share of committed chunks of each type against training sentences on TinyStories (blue; thin lines are seeds), where a committed chunk is a composite of the tree chosen during learning that the system stored as a record.
-Dashed lines show random-span chance and dotted lines show chance for spans that start on a word of the same tag. The green line shows the share of recognized spans in held-out sentences.
+Dashed lines show random-group chance and dotted lines show chance for groups that start on a word of the same tag. The green line shows the share of recognized groups in held-out sentences.
 Types come from the NLTK reference, and ``crosses a boundary'' marks chunks that straddle a reference phrase. The share of boundary-crossing chunks falls with experience.}
 \label{fig:chunkcurves}
 \end{figure}
@@ -396,7 +396,7 @@ Scrambled & not anymore was happy the fish & .02 & .00 \\
 The leaf row at generation temperature 1 matches the temperature of the class levels, and the leaf row at temperature .7 is the best leaf setting.
 Table~\ref{tab:law} normalizes by the temperature-1 leaf. Normalizing by the temperature-.7 leaf instead gives a meaningless share of .21 to .23 at the leaf, and the ordering across levels stays the same.
 As a null for abstraction along the word taxonomy, a class-free swap replaces every word outside the 50 most frequent types by a random type, starting from meaningful sentences of the temperature-.7 leaf.
-It leaves a meaningless share of grammatical output of .32, .45, and .43 on the three runs (syntax-only .078, .099, and .086 against meaningful .167, .122, and .113), so random damage also raises the share and the ordering by itself does not distinguish abstraction along the taxonomy from damage in general.
+It leaves a meaningless share of grammatical output of .32, .45, and .43 on the three runs (syntax-only .078, .099, and .086 against meaningful .167, .122, and .113). Random damage also raises the share, so the ordering alone does not distinguish abstraction along the taxonomy from damage in general.
 
 \begin{table}[h]
 \caption{Share of generated TinyStories sentences in each regime (judge 2; configuration C6) as the generator's context moves from exact words (leaf) to one class (root), seed 13 after 1,000 and 4,000 sentences and seed 17 after 4,000.
@@ -450,9 +450,9 @@ Protocol B supersedes the verdict of protocol A that substitution itself caps th
 Swapping across a coarse class breaks agreement and verb frames, which the judge treats as syntax failures, and about half of the part-of-speech swaps lose syntax for that reason.
 Protocol A's ceiling does not rise with more text, because the same 250-word vocabulary at 4,000 sentences leaves it at .18 to .22.
 Class sources that need no labels fall short of the cell oracle under protocol B. The levels of the learned word taxonomy mix tags and frames, so only .4 to .5 of the members of a class share a morphosyntactic signature.
-A later test added each word's own ending (its last one to three characters) and the nearest function words to the left and right as features of the word taxonomy, and it cut classes by size as well as by depth.
+A later test added each word's own ending (its last one to three characters) and the nearest function words to the left and right as features of the word taxonomy. It also cut classes by size as well as by depth.
 Every tree-class oracle stayed at a syntax-only share of .15 to .395 (typically .30 to .38), and class purity stayed at .4 to .58, so no generator here uses these classes.
-A search for a read level of committed word occurrences (the level at which the context taxonomy is read) whose slots are pure in part of speech (at least .8) and varied (at least 3 bits of filler entropy) finds none. Purity reaches .8 only at the leaf, where filler entropy is .03 bits.
+We searched for a level of the context taxonomy at which the slots of committed word occurrences are pure in part of speech (at least .8) and varied (at least 3 bits of filler entropy), and found none. Purity reaches .8 only at the leaf, where filler entropy is .03 bits.
 A feature that sees a verb's complement, or a tagging pass, would be a different mechanism, and no experiment here tests one.
 
 \begin{table}[h]
@@ -477,7 +477,7 @@ B ($K=0$) & learned word taxonomy, best cell & -- & .349 & .395 \\
 \end{table}
 
 \paragraph{Context length and context abstraction.} The reach $W'$ sets the number of left-context words that the generator reads, and abstracting the context replaces the exact words in its window by classes of the word taxonomy at level $b$ while the emitted word stays exact (configuration C9, seed 13, 1,000 sentences, window 5, judge 2).
-Table~\ref{tab:ctx} gives the regime shares. With exact words, context length is a clean dial between the meaningful and nonsense ends: the meaningful share is .28 at $W'=1$, .61 at 2, .68 at 3, and .60 at 5, and a reach of zero yields .85 nonsense and .07 meaningful.
+Table~\ref{tab:ctx} gives the regime shares. With exact words, context length is a clean dial between the meaningful and nonsense ends. The meaningful share is .28 at $W'=1$, .61 at 2, .68 at 3, and .60 at 5, and a reach of zero yields .85 nonsense and .07 meaningful.
 Abstracting the context moves mass from meaningful to nonsense. At $W'=3$ the meaningful share falls from .68 at the leaf to .57 at $b=4$ and to .41 to .48 at the root, and the nonsense share rises from .14 to .20 and to .28 to .37.
 The syntax-only share never exceeds .245 in any of the 36 cells, and abstracting the function words of the context as well leaves the same limit. The word-level pair gate keeps every adjacent pair a stored bigram, so local syntax holds in every cell, and abstraction removes the long-range selection that keeps sentences sensible.
 The middle cells yield syntax-only sentences only when a word repeats or the object is odd, in about one draw in five. The study ran at one size and one seed, because it stopped before 4,000 sentences.
@@ -505,9 +505,9 @@ Root, $K=50$ & -- & .29 / .16 / .55 & .42 / .21 / .37 & .48 / .24 / .28 & .46 / 
 \paragraph{Chess regimes.} Table~\ref{tab:chesslaw} gives every route of the chess study (configuration C11, two seeds, 4,000 positions learned, 500 boards per cell for the content-dial rows and 600 for the others).
 A board is legal by the rules of chess (python-chess, White to move). A piece-square classifier calibrated on real positions decides realism, and we call a legal board that the classifier accepts R-real, a legal board that it rejects R-legal, and an illegal board R-non.
 Real held-out positions are R-real in .957 of cases, random legal boards are R-legal in .97 of cases, and random illegal boards are R-non always.
-Drawing positions from the chunk and concept distributions alone gives R-real of .085 at the leaf and .006 at the root, and R-legal never exceeds .015, because the whole-board counts (one king per side, at most eight pawns) belong to no unit-level distribution.
+Drawing positions from the chunk and concept distributions alone gives R-real of .085 at the leaf and .006 at the root. R-legal never exceeds .015, because the whole-board counts (one king per side, at most eight pawns) belong to no unit-level distribution.
 Adding a stored piece-count profile lifts R-real to at most .54 and R-legal to at most .098.
-Parsing a held-out position and regenerating its chunks keeps the real structure at the leaf (R-real .76), and replacing chunk contents at any higher concept level gives nonsense (R-non .72 at level 1 and about .94 from level 2 up), because the replacement chunks bring their own kings and pawns. The legal-unrealistic regime stays at or below .058 in these routes.
+Parsing a held-out position and regenerating its chunks keeps the real structure at the leaf (R-real .76). Replacing chunk contents at any higher concept level gives nonsense (R-non .72 at level 1 and about .94 from level 2 up), because the replacement chunks bring their own kings and pawns. The legal-unrealistic regime stays at or below .058 in these routes.
 
 \begin{table}[h]
 \caption{Chess regime shares (R-real / R-legal / R-non) after 4,000 learned positions, mean of two seeds, with the same judge for every row (legality by python-chess, realism by a piece-square classifier).
@@ -534,6 +534,137 @@ Where-both, root & .080 & .137 & .782 \\
 Where-file and what, root & .003 & .014 & .984 \\
 Where-both and what, root & .002 & .009 & .990 \\
 Piece list, counts off / on & .099 / .504 & .003 / .006 & .898 / .490 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+\section{Items Moved from the Main Paper}
+
+\paragraph{Confirmation seeds.} Table~\ref{tab:genconf} gives the fair count of the four confirmation seeds (29, 31, 37, and 41), which chose no setting. It complements Table 4 of the main paper, which pools all eight seeds.
+
+\begin{table}[h]
+\caption{Fair count on TinyStories under judge 2 for the confirmation seeds 29, 31, 37, and 41 (configuration C1; per-seed values rounded to three digits). Paired differences give the mean, the 95\% $t$ interval on four seeds, and the seeds won. The Qwen2.5-3B judge chose the settings.}
+\label{tab:genconf}
+\begin{center}
+\footnotesize
+\begin{tabular}{rcccll}
+\toprule
+$n$ & \trellis{} & LSTM & GPT & \trellis{} $-$ LSTM & \trellis{} $-$ GPT \\
+\midrule
+\multicolumn{6}{l}{\textit{Syntax pass}} \\
+250   & .308 & .287 & .281 & +.021 [$-$.016, +.059], 3/4 & +.027 [+.010, +.044], 4/4 \\
+500   & .366 & .378 & .362 & $-$.012 [$-$.024, +.001], 0/4 & +.004 [$-$.056, +.064], 2/4 \\
+1,000 & .399 & .413 & .427 & $-$.014 [$-$.072, +.043], 1/4 & $-$.028 [$-$.059, +.003], 0/4 \\
+\multicolumn{6}{l}{\textit{Syntax and meaning pass}} \\
+250   & .191 & .176 & .162 & +.015 [$-$.010, +.040], 3/4 & +.029 [$-$.011, +.070], 4/4 \\
+500   & .220 & .241 & .213 & $-$.022 [$-$.039, $-$.005], 0/4 & +.006 [$-$.026, +.039], 3/4 \\
+1,000 & .254 & .275 & .275 & $-$.020 [$-$.059, +.018], 1/4 & $-$.021 [$-$.055, +.013], 0/4 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+\paragraph{Parse score and generator score.} Figure~\ref{fig:parsecurve} gives the share of broken held-out sentences that each score accepts as training grows (configuration C4, set C; Tables~\ref{tab:parse} and~\ref{tab:auc} give the values and the AUC).
+
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.7\textwidth]{figures/parse_success_curve}
+\caption{Share of broken held-out TinyStories sentences accepted by each score against training sentences (configuration C4, set C, four seeds). The threshold accepts 90\% of real calibration sentences, so lower is better.
+Parse and generator scores come from \trellis{}, and the LSTM and GPT train on the same sentences.}
+\label{fig:parsecurve}
+\end{figure}
+
+\paragraph{Code length in language.} Figure~\ref{fig:bits} gives the held-out code length against training sentences for \trellis{} and the comparison coders, as the main paper describes.
+
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.6\textwidth]{figures/language_bits_curve}
+\caption{Held-out code length in bits per sentence against training sentences on TinyStories (first 1,000 held-out sentences, seeds 13 and 17 averaged; model cost not charged). The uniform code costs 51.4 bits.
+\trellis{} is the generator's code with a uniform escape (configuration C8). The dashed line removes the concepts from the generator's reads, and the dotted line removes the chunks and the concepts.
+Removing only the chunks overlaps the solid \trellis{} line and is not drawn. The n-gram is a Kneser-Ney trigram.}
+\label{fig:bits}
+\end{figure}
+
+\paragraph{Removal controls in language.} Table~\ref{tab:ablation} removes the parts of the generator at 1,000 sentences, as the main paper describes.
+
+\begin{table}[h]
+\caption{Removal controls on TinyStories after 1,000 sentences (seeds 13 and 17, configuration C8). Code length is bits per held-out sentence. Fair counts use judge 2 at temperature 2.0 and omit the unstored-trigram requirement, so they differ from Table 4 of the main paper.
+Content swap accepted is the share of content-swapped sentences that the generator score accepts at the threshold that accepts 90\% of real sentences (lower is better).
+Chunks off stores no composite. Concepts off reads every record at its own leaf, with back-off to the root. Both off combines the two.}
+\label{tab:ablation}
+\begin{center}
+\small
+\begin{tabular}{lcccc}
+\toprule
+Variant & Code length & Fair syntax & Fair syntax and meaning & Content swap accepted \\
+\midrule
+Full & 30.8 & .539 & .363 & .708 \\
+Chunks off & 30.8 & .520 & .347 & .707 \\
+Concepts off & 28.8 & .496 & .309 & .573 \\
+Both off & 28.6 & .512 & .311 & .575 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\paragraph{Removal controls in chess.} Table~\ref{tab:chess-abl} gives the removal controls of the chess study at 4,000 positions.
+
+\begin{table}[h]
+\caption{Removal controls in chess after 4,000 learned Lichess positions (configuration C10, mean of seeds 13, 17, and 19; model cost not charged). Top: bits to code 1,000 held-out positions per set; the piece-square list codes each piece independently from the frequencies of its square.
+Bottom: first-trial recall of pieces on middle-game, end-game, and random positions with seven chunk slots (ten simulated subjects per seed, each recalling its own random draw of positions). Full-system code lengths are three-seed means and differ slightly from the seed-13 values in Table 5 of the main paper. Concepts-off recall is zero by construction.}
+\label{tab:chess-abl}
+\begin{center}
+\small
+\begin{tabular}{lcccc}
+\toprule
+Bits per position & Control & Other openings & Other wing & Shifted \\
+\midrule
+Full system & 129.2 & 137.5 & 153.4 & 151.5 \\
+Concepts off & 129.9 & 138.2 & 153.8 & 152.1 \\
+Chunks off & 183.3 & 191.9 & 200.7 & 210.7 \\
+Piece-square list & 181.9 & 190.4 & 198.3 & 208.9 \\
+\midrule
+Recall, seven slots & Middle game & End game & Random middle & Random end \\
+\midrule
+Full system & 12.9 & 7.4 & 5.9 & 6.1 \\
+Chunks off & 7.0 & 6.9 & 6.4 & 6.3 \\
+Concepts off & 0.0 & 0.0 & 0.0 & 0.0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+\paragraph{Recall across experience.} Figure~\ref{fig:cscurve} gives first-trial recall against positions learned, as the main paper describes.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\textwidth]{figures/chess_cs1973_curve}
+\caption{Recall of Lichess middle-game, end-game, and random positions against positions learned (solid lines: 100 to 4,660 positions, three seeds; dashed lines: 1,000 to 27,459 positions, the long stream), with seven and four chunk slots, next to people's recall (black squares: beginner B, class A player A, master M).
+The right panel shows the size of the first chunk and the pieces per glance, the pieces placed after one look at the board while a subject copies a board that stays in view (Chase and Simon's copy task). Thin lines are single seeds.}
+\label{fig:cscurve}
+\end{figure}
+
+\paragraph{File symmetry of the chess judge.} The realism judge of the chess regime study (tau = .702) is a logistic regression on piece-square indicators, piece counts, pawns per file, and material. We moved the 1,000 real held-out positions of its validation set sideways and kept the legal results. The moves were every shift of one or two files that keeps all pieces on the board and the mirror image from the a-file to the h-file. Table~\ref{tab:filesym} gives the share scored real.
+
+\begin{table}[h]
+\caption{Share of file-shifted real held-out positions that the chess realism judge scores real (all results legal; shifts fit only positions without pieces near both edges). Random legal boards score real in .03 of cases.}
+\label{tab:filesym}
+\begin{center}
+\small
+\begin{tabular}{lccc}
+\toprule
+Transform & Positions & Scored real & Share \\
+\midrule
+None & 1,000 & 957 & .957 \\
+Mirror a to h & 1,000 & 789 & .789 \\
+Shift +1 file & 26 & 16 & .615 \\
+Shift $-$1 file & 53 & 38 & .717 \\
+Shift +2 files & 4 & 2 & .500 \\
+Shift $-$2 files & 13 & 5 & .385 \\
 \bottomrule
 \end{tabular}
 \end{center}
