@@ -46,6 +46,12 @@ def arm_label(arm):
             k.append("K=%s" % arm["wemitk"])
         if arm.get("wemitu"):
             k.append("uniform")
+    if arm.get("cbits") is not None or arm.get("cfbits") is not None:      # r223
+        k.append("cb=%s" % arm.get("cbits", "leaf"))
+        if arm.get("cfbits") is not None:
+            k.append("cf=%s" % arm["cfbits"])
+        if arm.get("wemitk") and arm.get("wemit") is None:
+            k.append("K=%s" % arm["wemitk"])
     k.append("t=%g" % arm.get("temp", 1.0))
     if arm.get("pair"):
         k.append("gate")
