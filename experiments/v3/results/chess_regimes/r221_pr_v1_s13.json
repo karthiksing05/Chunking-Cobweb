@@ -1,0 +1,2262 @@
+{
+ "seed": 13,
+ "NS": [
+  500,
+  1000,
+  2000,
+  4000
+ ],
+ "n": 600,
+ "tau": 0.7022767292976416,
+ "kcs": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  6,
+  99
+ ],
+ "N500": {
+  "learned": 500,
+  "learn_s": 310,
+  "chunk units": 2578,
+  "parsed chunks per position": 5.51,
+  "identity (real board, parse units unchanged)": {
+   "real": 0.953,
+   "legal": 0.047,
+   "non": 0.0,
+   "chunks kept (no draw fit)": 0.0,
+   "illegal_causes": {},
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "r3k1nr/pp2ppbp/2p1b3/3p2p1/1nPPP3/1P3N2/1P1N1PPP/R1BK1B1R",
+     "r3k1nr/pp2ppbp/2p1b3/3p2p1/1nPPP3/1P3N2/1P1N1PPP/R1BK1B1R",
+     "5r2/r2n3k/Pq4pp/Q1Npb3/1B2p3/3P2nP/4P1BK/R3R3",
+     "5r2/r2n3k/Pq4pp/Q1Npb3/1B2p3/3P2nP/4P1BK/R3R3"
+    ],
+    "non": []
+   }
+  },
+  "keep kc=0": {
+   "real": 0.638,
+   "legal": 0.042,
+   "non": 0.32,
+   "chunks kept (no draw fit)": 0.299,
+   "illegal_causes": {
+    "TOO_MANY_KINGS": 0.072,
+    "TOO_MANY_BLACK_PAWNS": 0.013,
+    "NO_BLACK_KING": 0.06,
+    "TOO_MANY_WHITE_PAWNS": 0.018,
+    "PAWNS_ON_BACKRANK": 0.062,
+    "OPPOSITE_CHECK": 0.072,
+    "TOO_MANY_BLACK_PIECES": 0.007,
+    "NO_WHITE_KING": 0.055,
+    "IMPOSSIBLE_CHECK": 0.003
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2p2p2/r1p1n1p1/pp6/8/4P2P/PP4P1/1K5R",
+     "1r4k1/2p2p2/r1p1n1p1/pp6/8/4P2P/PP4P1/1K5R",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/8/2P2N2/PP3PPP/R1B2RK1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/8/2P2N2/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "r4knr/p3ppbp/2p1b3/3p4/1nP5/1P3N2/1P1N1PPP/R1BK1B1R",
+     "r4knr/p3ppbp/2p1b3/3p4/1nP5/1P3N2/1P1N1PPP/R1BK1B1R",
+     "7r/2k2Np1/pp4P1/2p4R/6n1/1P6/2K5/8",
+     "4k2r/1p4pp/2p5/1N3b2/1b6/8/PP1PP3/2KRN3"
+    ],
+    "non": [
+     "r4rk1/p4pp1/4p2k/3p2P1/1P1P4/2PQ4/PP3P2/6K1",
+     "r4rk1/p4pp1/4p2k/3p2P1/1P1P4/2PQ4/PP3P2/6K1",
+     "r3k1r1/pp3ppp/2p2q2/3p4/nbpP4/P1pP3P/1PPB1P2/R2Q1K1R",
+     "r3k1r1/pp3ppp/2p2q2/3p4/nbpP4/P1pP3P/1PPB1P2/R2Q1K1R"
+    ]
+   }
+  },
+  "keep kc=1": {
+   "real": 0.173,
+   "legal": 0.053,
+   "non": 0.773,
+   "chunks kept (no draw fit)": 0.025,
+   "illegal_causes": {
+    "NO_BLACK_KING": 0.295,
+    "PAWNS_ON_BACKRANK": 0.325,
+    "TOO_MANY_KINGS": 0.213,
+    "TOO_MANY_BLACK_PAWNS": 0.03,
+    "NO_WHITE_KING": 0.168,
+    "TOO_MANY_WHITE_PAWNS": 0.035,
+    "OPPOSITE_CHECK": 0.088,
+    "TOO_MANY_BLACK_PIECES": 0.003,
+    "TOO_MANY_CHECKERS": 0.002,
+    "IMPOSSIBLE_CHECK": 0.002,
+    "TOO_MANY_WHITE_PIECES": 0.003
+   },
+   "examples": {
+    "real": [
+     "3r4/p2p1kpp/2pqpp2/4n1p1/8/1P1PPP2/r1P2PPP/NQ2R1K1",
+     "4b1rk/1p1p2pp/2p2pp1/4P3/1P6/P7/3P2PP/4R1KB",
+     "2q3r1/1p1kp1p1/3ppr2/2p1p3/2Pp4/3PP1P1/P1Q1BPPP/R3R1K1",
+     "1n1qrkr1/2b1p1p1/3p1n2/4p3/3p2P1/2P1BPB1/PP2B1PP/R2Q1RK1"
+    ],
+    "legal": [
+     "8/q2k4/3p4/2p2P2/8/3PKP2/8/3R2Q1",
+     "8/8/rk6/2p2P2/6P1/4K3/3PP3/3R4",
+     "r1r3rk/p1p1p2p/5q2/5p2/PR6/b1N3B1/4PP2/R3KBQ1",
+     "8/2ppb3/1k2p3/p1p5/1p4p1/1P6/K3P2B/8"
+    ],
+    "non": [
+     "3p1p2/n3p3/r1p3p1/p5P1/7P/1N2P3/1PP5/1K5R",
+     "6k1/4pp1p/r1n3p1/p7/6P1/7P/P6B/1K5K",
+     "1q2p3/1pp2ppp/2pnk1p1/1P2pp2/P7/RP1B4/B4PK1/R5P1",
+     "r7/pp3k1p/2p1Rpp1/4P3/1P1P4/P7/5PPP/4P1K1"
+    ]
+   }
+  },
+  "keep kc=2": {
+   "real": 0.04,
+   "legal": 0.028,
+   "non": 0.932,
+   "chunks kept (no draw fit)": 0.011,
+   "illegal_causes": {
+    "NO_BLACK_KING": 0.485,
+    "PAWNS_ON_BACKRANK": 0.517,
+    "NO_WHITE_KING": 0.525,
+    "OPPOSITE_CHECK": 0.073,
+    "TOO_MANY_BLACK_PAWNS": 0.048,
+    "TOO_MANY_KINGS": 0.088,
+    "TOO_MANY_WHITE_PAWNS": 0.05,
+    "TOO_MANY_WHITE_PIECES": 0.003,
+    "TOO_MANY_CHECKERS": 0.002,
+    "IMPOSSIBLE_CHECK": 0.002,
+    "TOO_MANY_BLACK_PIECES": 0.003
+   },
+   "examples": {
+    "real": [
+     "r5bk/1prn1q1p/2p3p1/p1p5/8/5P1P/P5P1/1B5K",
+     "4k2b/1ppq1b2/1pn1n3/8/6BP/5PP1/P1Q3K1/8",
+     "8/8/1rk5/Pp1pp3/1n5P/1P6/3K1P2/8",
+     "8/6p1/2R2p2/R1rk2P1/2p4P/2n4B/7K/8"
+    ],
+    "legal": [
+     "bq2rk2/p3bppp/2pn4/4r1QN/2P4P/1P1P4/P4P2/K2R2R1",
+     "8/rrp5/1rp1k1r1/qq1p2p1/5P2/1PP3P1/P5BP/R5K1",
+     "7r/rk3qnp/1p3pn1/7P/p5P1/1P2N3/2P3P1/3K2R1",
+     "1r1k4/p2n2q1/pp1pr2b/3p4/3PP3/1PQ1P3/PP3P2/2BB2K1"
+    ],
+    "non": [
+     "2q5/1pn5/r1p3pp/p7/6P1/7P/P1NB3B/1P5K",
+     "2nr4/p5pp/2pprk2/4p1p1/P1B2R2/1P6/P1PP1PP1/B1R3R1",
+     "4k3/2p1bp1p/2n2ppk/8/1P2B3/P5N1/3Pp3/4R1RR",
+     "2br1qp1/1p5p/2p2npb/8/2P5/PP1P4/2n3P1/4B1K1"
+    ]
+   }
+  },
+  "keep kc=3": {
+   "real": 0.018,
+   "legal": 0.022,
+   "non": 0.96,
+   "chunks kept (no draw fit)": 0.011,
+   "illegal_causes": {
+    "TOO_MANY_KINGS": 0.167,
+    "PAWNS_ON_BACKRANK": 0.652,
+    "NO_WHITE_KING": 0.48,
+    "NO_BLACK_KING": 0.398,
+    "TOO_MANY_BLACK_PAWNS": 0.083,
+    "OPPOSITE_CHECK": 0.105,
+    "TOO_MANY_WHITE_PAWNS": 0.077,
+    "TOO_MANY_BLACK_PIECES": 0.045,
+    "TOO_MANY_WHITE_PIECES": 0.017
+   },
+   "examples": {
+    "real": [
+     "2n5/R4p1k/4n2b/2p5/P2p2n1/1P2n3/2P1B1PP/6K1",
+     "6k1/5np1/r3b1p1/2qb4/2n5/3NPPPQ/5K2/4R2R",
+     "8/8/1qr1r1k1/2pp4/4P3/1p3PP1/6K1/8",
+     "8/1r3kp1/5p2/3rp3/3p4/3QP2q/4K3/8"
+    ],
+    "legal": [
+     "3r1k2/3p1p2/2pbp3/1PN2pp1/1pP5/p1n1qN2/1Q1K3P/8",
+     "8/2p3p1/p1pb4/3k4/3bn3/1P5P/P2pP1P1/B2K4",
+     "3b4/6p1/n4p1Q/K3k3/3p2P1/2pb1P2/7P/8",
+     "8/8/4p3/k4p2/6P1/p3PP2/NBQ1RK2/8"
+    ],
+    "non": [
+     "5p2/1p3kp1/k1p2rp1/pp5Q/8/2P5/PP6/1K5P",
+     "1r2kr1q/2p1pb1n/2b3n1/p3b3/8/3r1N2/p1n3PP/1p5K",
+     "p2rk3/4b1pp/2pnr3/4pp2/8/6rk/P1Q2Pp1/R2R2n1",
+     "2rr4/2ppb1pp/2pppn2/1P2b3/P7/1QB5/N3RP1P/R4RPK"
+    ]
+   }
+  },
+  "keep kc=4": {
+   "real": 0.013,
+   "legal": 0.02,
+   "non": 0.967,
+   "chunks kept (no draw fit)": 0.007,
+   "illegal_causes": {
+    "NO_BLACK_KING": 0.363,
+    "PAWNS_ON_BACKRANK": 0.713,
+    "NO_WHITE_KING": 0.455,
+    "TOO_MANY_BLACK_PAWNS": 0.15,
+    "TOO_MANY_BLACK_PIECES": 0.103,
+    "TOO_MANY_KINGS": 0.222,
+    "TOO_MANY_WHITE_PAWNS": 0.095,
+    "OPPOSITE_CHECK": 0.162,
+    "TOO_MANY_WHITE_PIECES": 0.035,
+    "IMPOSSIBLE_CHECK": 0.012,
+    "TOO_MANY_CHECKERS": 0.008
+   },
+   "examples": {
+    "real": [
+     "4Q3/6p1/5r2/3p4/7k/7P/2PP1PP1/2R2QK1",
+     "1r3r2/1p6/2nP4/1pn1P3/1kp1r3/1P1p4/Pp3P1K/8",
+     "8/4n3/6kp/1P3pp1/2PP4/3BP3/PP3K2/8",
+     "R7/3r4/2p2k1p/3P1p2/1P6/6R1/P4RK1/8"
+    ],
+    "legal": [
+     "8/4kpp1/r4n2/7P/3p2PK/7q/4P3/8",
+     "5k2/1pbprr2/p1pn1p2/8/1B4P1/4NP2/5R2/3K4",
+     "1bq2r2/ppkpr3/1pp1r3/8/4p3/1r6/PpP4P/R5K1",
+     "4k1Nr/3NP1pp/1Rr1Q1R1/8/r1p5/P4R1K/B1P1p3/2R5"
+    ],
+    "non": [
+     "8/1p5n/2n3p1/PKP5/8/3n1q2/4b3/1q2p2n",
+     "4rkr1/1k3p2/2q3p1/P7/8/3nbq2/p1n5/1pb4n",
+     "1pp2p1p/p5p1/2pbr3/4p3/2pp4/1p6/p3nPqp/p1n3p1",
+     "4pkk1/1n3kp1/P1pKppp1/4p2P/nQ4P1/8/RPR2P2/K5Q1"
+    ]
+   }
+  },
+  "keep kc=6": {
+   "real": 0.013,
+   "legal": 0.013,
+   "non": 0.973,
+   "chunks kept (no draw fit)": 0.006,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.385,
+    "TOO_MANY_BLACK_PAWNS": 0.173,
+    "PAWNS_ON_BACKRANK": 0.742,
+    "NO_BLACK_KING": 0.413,
+    "OPPOSITE_CHECK": 0.17,
+    "TOO_MANY_KINGS": 0.247,
+    "TOO_MANY_WHITE_PAWNS": 0.103,
+    "TOO_MANY_BLACK_PIECES": 0.093,
+    "TOO_MANY_WHITE_PIECES": 0.057,
+    "IMPOSSIBLE_CHECK": 0.015,
+    "TOO_MANY_CHECKERS": 0.01
+   },
+   "examples": {
+    "real": [
+     "4r3/2rkp3/3p1p1p/q4P2/1B6/2P3PP/7K/8",
+     "8/3r1k2/5p2/r1p5/1bp3P1/1p4BP/6K1/8",
+     "8/1p1b4/Bp5r/1Pp2k2/P2b2n1/1B6/1P4P1/7K",
+     "8/pp1r4/2qp4/2rk2p1/2rp1pqP/3KP2P/r7/5Q2"
+    ],
+    "legal": [
+     "3rk3/5p2/4r3/PPPp4/1K5P/2b1p3/3p4/8",
+     "4r3/4p1r1/4kp2/4b2P/3nB3/7q/4P1K1/8",
+     "1B6/1P1PP3/PK2R3/2rqP2p/2p3pk/8/7p/6b1",
+     "8/2p4p/n2p4/3b2Pk/Pp3P1P/1P4Kp/1p4p1/q7"
+    ],
+    "non": [
+     "8/2k3r1/1ppp2p1/p1bk4/8/6pp/7p/1pp4B",
+     "4pQnN/5p2/1pR3pR/p5P1/7P/4P3/7P/1PP3PR",
+     "N1pp1b1r/1PP2pk1/2Kb1P1p/4nN2/8/3Q4/bq3P2/R3R1nn",
+     "4PP1P/1P1NP1K1/1rkK1pPP/4R1K1/b2n4/2ppp3/p4P2/BB4n1"
+    ]
+   }
+  },
+  "keep kc=99": {
+   "real": 0.003,
+   "legal": 0.023,
+   "non": 0.973,
+   "chunks kept (no draw fit)": 0.007,
+   "illegal_causes": {
+    "NO_BLACK_KING": 0.398,
+    "PAWNS_ON_BACKRANK": 0.748,
+    "NO_WHITE_KING": 0.382,
+    "TOO_MANY_WHITE_PIECES": 0.055,
+    "TOO_MANY_BLACK_PAWNS": 0.205,
+    "TOO_MANY_KINGS": 0.248,
+    "OPPOSITE_CHECK": 0.178,
+    "IMPOSSIBLE_CHECK": 0.022,
+    "TOO_MANY_BLACK_PIECES": 0.103,
+    "TOO_MANY_WHITE_PAWNS": 0.115,
+    "TOO_MANY_CHECKERS": 0.012
+   },
+   "examples": {
+    "real": [
+     "6bk/8/1r3N2/1p1pPp2/R1Q1Rn2/Q3N3/1RR4P/6K1",
+     "8/B2k2rp/1P2Npp1/2P5/3P4/4RP2/2R2P1P/6K1"
+    ],
+    "legal": [
+     "4k3/4b3/4p3/PPPp4/1KN4P/4B3/3R3R/8",
+     "8/PP6/1K6/3pp2k/4bb2/p1Pp4/6r1/8",
+     "1q1r3r/p3k2p/3p1p2/b1Q1p2P/RN3R2/1b6/2ppPP2/3n2K1",
+     "8/p7/3b2P1/7P/2P1B2n/kp4PP/p4p1K/8"
+    ],
+    "non": [
+     "3P4/1PP5/1PK3nn/P7/8/P4r2/5pp1/1N5p",
+     "5p2/8/2R1BQrR/BP2N3/3P4/3B2Q1/8/1pp4R",
+     "2B4P/P1BP1NP1/2BR3P/4K2R/2k5/rpbp4/pp1P1PQP/n5R1",
+     "4b3/1p1pP1pp/2pP1p2/4p3/4B3/p3p1B1/pb3P1P/KP4K1"
+    ]
+   }
+  },
+  "resample kc=0": {
+   "real": 0.645,
+   "legal": 0.042,
+   "non": 0.313,
+   "chunks kept (no draw fit)": 0.303,
+   "illegal_causes": {
+    "TOO_MANY_KINGS": 0.072,
+    "TOO_MANY_BLACK_PAWNS": 0.01,
+    "PAWNS_ON_BACKRANK": 0.063,
+    "NO_BLACK_KING": 0.058,
+    "TOO_MANY_WHITE_PAWNS": 0.015,
+    "OPPOSITE_CHECK": 0.08,
+    "NO_WHITE_KING": 0.047,
+    "IMPOSSIBLE_CHECK": 0.005,
+    "TOO_MANY_WHITE_PIECES": 0.003,
+    "TOO_MANY_CHECKERS": 0.002,
+    "TOO_MANY_BLACK_PIECES": 0.003
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2p2p2/r1p1n1p1/pp6/8/4P2P/PP4P1/1K5R",
+     "1r4k1/2p2p2/r1p1n1p1/pp6/8/4P2P/PP4P1/1K5R",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/8/2P2N2/PP3PPP/R1B2RK1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/8/2P2N2/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "r4knr/p3ppbp/2p1b3/3p4/1nP5/1P3N2/1P1N1PPP/R1BK1B1R",
+     "r4knr/p3ppbp/2p1b3/3p4/1nP5/1P3N2/1P1N1PPP/R1BK1B1R",
+     "rn2r1kq/p2pp2p/5p2/5p1P/5P2/b4NB1/1P2PP2/R2QKB1R",
+     "4k2r/1p4pp/2p5/1N3b2/1b6/8/PP1PP3/2KRN3"
+    ],
+    "non": [
+     "r4rk1/p4pp1/4p2k/3p2P1/1P1P4/2PQ4/PP3P2/6K1",
+     "r4rk1/p4pp1/4p2k/3p2P1/1P1P4/2PQ4/PP3P2/6K1",
+     "r3k1pr/1p3ppp/2p2q2/3p4/nbpP4/P1pP3P/1PPB1P2/R2Q1K1R",
+     "r3k1r1/pp3ppp/2p2q2/3p4/nbpP4/P1pP3P/1PPB1P2/R2Q1K1R"
+    ]
+   }
+  },
+  "resample kc=1": {
+   "real": 0.163,
+   "legal": 0.045,
+   "non": 0.792,
+   "chunks kept (no draw fit)": 0.025,
+   "illegal_causes": {
+    "NO_BLACK_KING": 0.328,
+    "PAWNS_ON_BACKRANK": 0.307,
+    "NO_WHITE_KING": 0.173,
+    "TOO_MANY_KINGS": 0.202,
+    "TOO_MANY_WHITE_PAWNS": 0.043,
+    "TOO_MANY_BLACK_PAWNS": 0.072,
+    "TOO_MANY_WHITE_PIECES": 0.01,
+    "OPPOSITE_CHECK": 0.097,
+    "TOO_MANY_BLACK_PIECES": 0.005,
+    "IMPOSSIBLE_CHECK": 0.003,
+    "TOO_MANY_CHECKERS": 0.002
+   },
+   "examples": {
+    "real": [
+     "bq6/1np3pp/2pn1k2/4ppp1/P5n1/1P1Q1N2/B1P2P1P/R1B3K1",
+     "1r6/2pqbkpp/2pn1p2/3Pn1p1/P1P5/P6P/R4RP1/R1BQ1RK1",
+     "5k2/1p1p1bpp/2p2pp1/8/1P6/PB6/3PP2P/4R1K1",
+     "2r5/n2k2p1/3p4/3bp1p1/3P1P2/2r1P3/1P3PP1/6K1"
+    ],
+    "legal": [
+     "2k5/3pb3/8/2p2P2/1P4B1/4K3/8/3R2R1",
+     "4k3/2n1p3/8/2p2P2/6P1/4K3/3PP3/3R4",
+     "r2r1rk1/p3pqp1/P4b2/5p1P/3N4/r3P3/2QPPP2/R3KB1R",
+     "8/4k1p1/4pp2/1pp5/2n1b1B1/4PPP1/5K1N/4R1B1"
+    ],
+    "non": [
+     "3pp3/r6p/2n3p1/p7/4P3/N1P2P2/1P4P1/1K5K",
+     "pq6/4npn1/r1p3p1/pp6/8/1P1P4/P1P1PN2/1K5P",
+     "3p1k2/1p3p1p/2p2pp1/2R5/1P6/P2BP3/6PP/4R1K1",
+     "1b6/r5p1/4p3/Pb1p2p1/1P6/2q5/5P2/6K1"
+    ]
+   }
+  },
+  "resample kc=2": {
+   "real": 0.037,
+   "legal": 0.035,
+   "non": 0.928,
+   "chunks kept (no draw fit)": 0.015,
+   "illegal_causes": {
+    "PAWNS_ON_BACKRANK": 0.497,
+    "NO_WHITE_KING": 0.492,
+    "NO_BLACK_KING": 0.453,
+    "TOO_MANY_BLACK_PAWNS": 0.063,
+    "TOO_MANY_KINGS": 0.122,
+    "TOO_MANY_BLACK_PIECES": 0.018,
+    "TOO_MANY_WHITE_PAWNS": 0.048,
+    "OPPOSITE_CHECK": 0.06,
+    "TOO_MANY_WHITE_PIECES": 0.005
+   },
+   "examples": {
+    "real": [
+     "2krr3/3p1qbp/2p2np1/5P2/1P2P3/P2Q2P1/6BP/4R1K1",
+     "8/5p2/1kP1p3/pp6/1pp4B/P1N2N2/P3K3/8",
+     "r1r1k3/2ppbpp1/2bp1n1p/1Q1P4/2P3PB/3P1B2/1P4K1/R2QRR1R",
+     "1k6/p1p1bq2/1p1n1p1p/8/1P6/P3PB2/3Q1PP1/2R2RK1"
+    ],
+    "legal": [
+     "3k4/p2b4/4p3/P2pb1r1/1Q1Pp1bn/3p1p1b/P6P/R4RK1",
+     "5k2/5bn1/8/5p2/2q4P/1pn2PP1/2p3K1/8",
+     "r7/p1r1rk1p/4qp2/1PP1PbB1/3P4/1K3P2/1P1P4/R1Q2RR1",
+     "5r2/3N1ppp/3rkr2/2pbp2n/1p1pB2P/P4PB1/PP2n1K1/N5B1"
+    ],
+    "non": [
+     "3pp3/1q6/2b3n1/pk6/8/1P2r3/2P3P1/1K5P",
+     "8/kpp5/p1n1b1pk/B7/8/5N2/2P1P1P1/1P5P",
+     "r2q4/pp4pp/1rpb1Br1/4n3/3P4/B1PB4/PP3PN1/K5PP",
+     "r1rppr1k/qn4pp/2pn4/4p3/P2R4/1P2P3/B1PP1PQ1/PP4R1"
+    ]
+   }
+  },
+  "resample kc=3": {
+   "real": 0.02,
+   "legal": 0.023,
+   "non": 0.957,
+   "chunks kept (no draw fit)": 0.013,
+   "illegal_causes": {
+    "PAWNS_ON_BACKRANK": 0.643,
+    "NO_WHITE_KING": 0.512,
+    "NO_BLACK_KING": 0.417,
+    "TOO_MANY_BLACK_PAWNS": 0.08,
+    "TOO_MANY_KINGS": 0.165,
+    "TOO_MANY_WHITE_PAWNS": 0.06,
+    "TOO_MANY_BLACK_PIECES": 0.038,
+    "OPPOSITE_CHECK": 0.098,
+    "TOO_MANY_WHITE_PIECES": 0.013,
+    "TOO_MANY_CHECKERS": 0.003,
+    "IMPOSSIBLE_CHECK": 0.003
+   },
+   "examples": {
+    "real": [
+     "8/p1pp2pp/2prkr2/4b3/8/1P3N2/P2QPPNP/R3R1K1",
+     "8/5kp1/4ppp1/P3n3/1Pp1b3/1B3PP1/5K2/4B3",
+     "6rk/1b4pr/2p1b1Bp/4p2P/1P1q4/P4N2/PP4KP/R7",
+     "5r1k/2pp3p/4prp1/8/6Pb/3PP1Q1/PPP4P/2K3R1"
+    ],
+    "legal": [
+     "3r4/3p2p1/r1p2r2/bk3p1p/1n3P2/3q4/1b1P3P/2nK1n2",
+     "7r/r1k2r1p/5p2/7P/q1rP2P1/3pPP2/2pq4/3K4",
+     "2rk4/4p3/1n6/Ppp2p2/3p2p1/1R1NB3/6P1/7K",
+     "2b1k3/1ppp1r1b/p1n1rp2/3PP3/2P3N1/P3RP2/PB2P1P1/K7"
+    ],
+    "non": [
+     "r2q2rk/6r1/2p3p1/p2B4/5P2/8/PPPP4/1K5P",
+     "3r4/1prk4/2p2qpp/p1q5/7P/1r2q1P1/2p4P/1p5K",
+     "p3p1r1/2p3pp/2pn1p2/4p3/3P4/1P2p1b1/P1P2P1p/Pq4p1",
+     "6rk/6pp/2KP1bp1/4P3/1P1P4/P4P2/3B2PP/4P1K1"
+    ]
+   }
+  },
+  "resample kc=4": {
+   "real": 0.007,
+   "legal": 0.018,
+   "non": 0.975,
+   "chunks kept (no draw fit)": 0.011,
+   "illegal_causes": {
+    "TOO_MANY_KINGS": 0.238,
+    "PAWNS_ON_BACKRANK": 0.73,
+    "NO_BLACK_KING": 0.397,
+    "TOO_MANY_BLACK_PAWNS": 0.16,
+    "TOO_MANY_BLACK_PIECES": 0.083,
+    "NO_WHITE_KING": 0.462,
+    "OPPOSITE_CHECK": 0.12,
+    "TOO_MANY_WHITE_PIECES": 0.028,
+    "TOO_MANY_WHITE_PAWNS": 0.088,
+    "TOO_MANY_CHECKERS": 0.01,
+    "IMPOSSIBLE_CHECK": 0.013
+   },
+   "examples": {
+    "real": [
+     "8/1pp4P/3prp2/p1p5/npr1rk2/P6P/7K/2q5",
+     "4rk2/2b5/p1pp2p1/2Pn3p/8/1NKPP3/2Q1r3/R3R1R1",
+     "8/3pp3/b2rbpk1/5pp1/4B3/1BP1R1B1/PP3P1P/6K1",
+     "6k1/1p6/2p5/2P5/1P4P1/7K/PBq5/8"
+    ],
+    "legal": [
+     "8/bkr2N1q/1pp2b1n/2pQP1n1/1B6/R3R1P1/1P1K3P/8",
+     "4N3/3PP1p1/4K2p/3r2r1/4nP2/1k4n1/ppp5/8",
+     "5N1r/3Q1p2/R3Rpb1/5p2/2K4k/2p3p1/1p6/8",
+     "r4R2/8/7p/1rk5/p7/8/1p6/5K2"
+    ],
+    "non": [
+     "3r1r2/1qrrk2p/2p3p1/n7/1b6/5R2/1PP3B1/1K5K",
+     "5K2/1rk5/2pp2R1/pp6/8/1k2r2r/bb4b1/1p5n",
+     "p7/6pp/2pbq1pR/4p1p1/4P3/r4P2/pP3PP1/P5K1",
+     "1rpb2k1/1p3ppp/1PBpPP2/4K3/3r3k/p5p1/r3rP2/qp4p1"
+    ]
+   }
+  },
+  "resample kc=6": {
+   "real": 0.012,
+   "legal": 0.017,
+   "non": 0.972,
+   "chunks kept (no draw fit)": 0.007,
+   "illegal_causes": {
+    "PAWNS_ON_BACKRANK": 0.722,
+    "TOO_MANY_KINGS": 0.235,
+    "TOO_MANY_WHITE_PAWNS": 0.112,
+    "TOO_MANY_BLACK_PAWNS": 0.198,
+    "NO_WHITE_KING": 0.392,
+    "OPPOSITE_CHECK": 0.163,
+    "NO_BLACK_KING": 0.39,
+    "TOO_MANY_BLACK_PIECES": 0.095,
+    "TOO_MANY_CHECKERS": 0.007,
+    "IMPOSSIBLE_CHECK": 0.012,
+    "TOO_MANY_WHITE_PIECES": 0.038
+   },
+   "examples": {
+    "real": [
+     "8/p7/bk6/1p3P2/2p3Pp/1B5P/PPP4K/8",
+     "8/5P2/4k1P1/4pp2/5B1p/2BB4/1P3PP1/N3r1K1",
+     "8/8/B7/2PPr1k1/3K2p1/1Bq5/1P6/8",
+     "8/1p2k3/pq2b3/4P2P/p2n1PP1/1PP3P1/7K/8"
+    ],
+    "legal": [
+     "5Nrk/7b/2RQ1Rn1/PP6/7n/8/QN1KPP2/1R5N",
+     "3rk3/3pP3/1pp1PKP1/8/1r4B1/5P2/pp4P1/8",
+     "8/8/1PKPp3/3pBp1k/8/P1PN1P2/6P1/8",
+     "3rrk2/3pp1p1/5p2/PPP5/1K6/8/6P1/8"
+    ],
+    "non": [
+     "2b1k3/1Pq5/2n3pp/K7/8/3rb3/2p3b1/1p5n",
+     "4p2P/2B1P1P1/2Prk3/4pp2/7P/1ppp3K/pP1PpP2/K2R2R1",
+     "2p1P2P/1P3PP1/2BPPB2/4QrK1/2P1p3/1P2Pr1k/p3bPp1/P5n1",
+     "3N1r2/1p2PpP1/2p2Kp1/p7/8/B7/4r1k1/4pppp"
+    ]
+   }
+  },
+  "resample kc=99": {
+   "real": 0.003,
+   "legal": 0.02,
+   "non": 0.977,
+   "chunks kept (no draw fit)": 0.008,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.365,
+    "PAWNS_ON_BACKRANK": 0.742,
+    "OPPOSITE_CHECK": 0.175,
+    "NO_BLACK_KING": 0.422,
+    "TOO_MANY_KINGS": 0.235,
+    "TOO_MANY_WHITE_PAWNS": 0.108,
+    "TOO_MANY_WHITE_PIECES": 0.058,
+    "TOO_MANY_BLACK_PAWNS": 0.15,
+    "TOO_MANY_BLACK_PIECES": 0.085,
+    "TOO_MANY_CHECKERS": 0.017,
+    "IMPOSSIBLE_CHECK": 0.018
+   },
+   "examples": {
+    "real": [
+     "4r1k1/p4p2/1pN2n2/7B/1PNB1N2/P1P1P3/4BK1q/2R5",
+     "7k/3P1pp1/1N1rNn2/P2p1p2/5P1B/2NP4/PP1P2P1/BK3R2"
+    ],
+    "legal": [
+     "8/6P1/1k2PP2/1r6/1pKP4/2n5/p1b1P3/8",
+     "5k2/1PP5/2K1rn1q/1P2p3/2P5/2r3B1/pRp1QPRb/8",
+     "2b1n3/pr3p2/P1p1k3/1P1p4/3P4/1K2r1r1/4p1p1/8",
+     "8/6p1/7p/8/PPpp2P1/1pk3K1/pp6/8"
+    ],
+    "non": [
+     "bk2P3/rp1P2Q1/2p3R1/p7/8/k2r4/1p3r2/1n5p",
+     "n1r5/P1pp4/2n3nn/P3N3/8/3k4/1bp4P/1p5K",
+     "3b3p/1nP2qp1/2Rnb3/4P3/2p2p1Q/2Q1N3/Rp2RbPP/p5K1",
+     "8/PP1PkpPq/2PB1K2/b2pn3/8/2p1p3/p4q2/r2rk1p1"
+    ]
+   }
+  }
+ },
+ "N1000": {
+  "learned": 1000,
+  "learn_s": 681,
+  "chunk units": 5329,
+  "parsed chunks per position": 5.48,
+  "identity (real board, parse units unchanged)": {
+   "real": 0.953,
+   "legal": 0.047,
+   "non": 0.0,
+   "chunks kept (no draw fit)": 0.0,
+   "illegal_causes": {},
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "r3k1nr/pp2ppbp/2p1b3/3p2p1/1nPPP3/1P3N2/1P1N1PPP/R1BK1B1R",
+     "r3k1nr/pp2ppbp/2p1b3/3p2p1/1nPPP3/1P3N2/1P1N1PPP/R1BK1B1R",
+     "5r2/r2n3k/Pq4pp/Q1Npb3/1B2p3/3P2nP/4P1BK/R3R3",
+     "5r2/r2n3k/Pq4pp/Q1Npb3/1B2p3/3P2nP/4P1BK/R3R3"
+    ],
+    "non": []
+   }
+  },
+  "keep kc=0": {
+   "real": 0.613,
+   "legal": 0.03,
+   "non": 0.357,
+   "chunks kept (no draw fit)": 0.267,
+   "illegal_causes": {
+    "NO_BLACK_KING": 0.058,
+    "PAWNS_ON_BACKRANK": 0.128,
+    "TOO_MANY_BLACK_PAWNS": 0.022,
+    "TOO_MANY_KINGS": 0.062,
+    "TOO_MANY_BLACK_PIECES": 0.007,
+    "NO_WHITE_KING": 0.047,
+    "OPPOSITE_CHECK": 0.078,
+    "TOO_MANY_WHITE_PAWNS": 0.015
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/8/4P2P/PP4P1/1K5R",
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/8/4P2P/PP4P1/1K5R",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "r4knr/pp2ppbp/1np1b3/3p1p2/1nPPP3/1P3N2/1P1N2PP/R1BK1B1R",
+     "rnb1r1k1/p2p3p/5pq1/5p2/N1P2P2/b7/1P3PPP/R2QKB1R",
+     "rnb1r1k1/p2p3p/5pq1/5p2/N1P2P2/b7/1P3PPP/R2QKB1R",
+     "8/3r1k1p/2N2p2/2n5/pP6/2PRPK2/2rP4/3R4"
+    ],
+    "non": [
+     "3rr3/1p2p1pp/2p1Pnp1/8/1P3P2/P1N1Q1P1/5R1P/4R1K1",
+     "3rr3/1p2p1pp/2p1Pnp1/8/1P3P2/P1N1Q1P1/5R1P/4R1K1",
+     "8/8/3k4/2ppp3/4R3/4K1P1/4P1P1/3r1P2",
+     "8/8/3k4/2p1p1p1/4R3/4K1P1/4P1P1/3r1P2"
+    ]
+   }
+  },
+  "keep kc=1": {
+   "real": 0.172,
+   "legal": 0.052,
+   "non": 0.777,
+   "chunks kept (no draw fit)": 0.026,
+   "illegal_causes": {
+    "OPPOSITE_CHECK": 0.085,
+    "PAWNS_ON_BACKRANK": 0.287,
+    "NO_BLACK_KING": 0.297,
+    "NO_WHITE_KING": 0.18,
+    "TOO_MANY_BLACK_PAWNS": 0.06,
+    "TOO_MANY_KINGS": 0.202,
+    "TOO_MANY_BLACK_PIECES": 0.017,
+    "TOO_MANY_WHITE_PAWNS": 0.035,
+    "TOO_MANY_WHITE_PIECES": 0.005,
+    "TOO_MANY_CHECKERS": 0.002,
+    "IMPOSSIBLE_CHECK": 0.002
+   },
+   "examples": {
+    "real": [
+     "2r5/p2b2pb/rr2pk2/p7/6PP/5P2/PPP5/1K5R",
+     "6k1/5ppp/p4p2/1pr1p3/2rb4/R3P3/QPB1P2P/R5K1",
+     "5k2/4pNbp/5p2/2p5/3P2n1/1PP5/2K5/8",
+     "3r3k/7p/4np1Q/2p1p3/3pP3/2b4P/1P1P1PP1/1R4K1"
+    ],
+    "legal": [
+     "1r1k1r2/p2pp1p1/npr1p3/p3b3/8/2P2P2/PP4PB/1K5B",
+     "8/1p3pp1/2pr2rk/2r2q2/3PNPb1/6Pn/P1P1PPP1/2BNR1KB",
+     "1r3k2/1p2ppp1/2pb4/2rR1qQ1/6Pp/2Q1PP1n/PPN1PP2/2R1B1KN",
+     "rnrq4/2ppbppk/2pppn1r/8/2P5/5N2/P3N1PP/R1BQKB1R"
+    ],
+    "non": [
+     "7n/2pp3p/B1pQ1k2/4ppp1/3R1P2/2PN4/PP2PP1P/R3R1K1",
+     "5r2/1qpr3p/2ppkp2/4pp2/2P5/PP2P3/R2N1P1P/R1B1R1PK",
+     "3r4/1p4pp/2pb1np1/2P5/1P4P1/PB4Q1/3PP1PP/4R1K1",
+     "3rr3/1p2p2p/2p2np1/2P5/1P1P4/P2B2P1/4P2P/4RKK1"
+    ]
+   }
+  },
+  "keep kc=2": {
+   "real": 0.037,
+   "legal": 0.027,
+   "non": 0.937,
+   "chunks kept (no draw fit)": 0.018,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.443,
+    "PAWNS_ON_BACKRANK": 0.575,
+    "NO_BLACK_KING": 0.37,
+    "TOO_MANY_WHITE_PAWNS": 0.067,
+    "TOO_MANY_KINGS": 0.158,
+    "OPPOSITE_CHECK": 0.073,
+    "TOO_MANY_BLACK_PAWNS": 0.052,
+    "TOO_MANY_BLACK_PIECES": 0.023,
+    "IMPOSSIBLE_CHECK": 0.002
+   },
+   "examples": {
+    "real": [
+     "2q2r1k/p1q1pp2/Qp2r3/2pp2B1/4p3/1P2n1PP/2P2P2/6K1",
+     "5rk1/5p1p/2pp4/1p2p3/2nP4/4P3/1P3P2/RN1Q1RK1",
+     "1r2k3/1p1n1pp1/2pq1r2/6bp/3P1P2/6Pn/PP1QBPPP/2R2RKB",
+     "6k1/2r3b1/4pPp1/1q1nPp1P/nn1P4/6Q1/P3PP1P/1B3RK1"
+    ],
+    "legal": [
+     "r1k5/rp6/1n4pp/2Np1P2/1B1Pp3/N1P3RP/1Q2P2K/RR6",
+     "1q6/1pprk2p/1r1n4/1p3n2/2p1qP1P/2KBNP2/5PP1/R1BQ1RB1",
+     "1r6/3rkr1p/b2r1p1p/4p1pP/8/BB6/3p1P2/3Nn1K1",
+     "8/8/2rkp3/2pb4/8/1n3rK1/6R1/8"
+    ],
+    "non": [
+     "4bq2/1pp3p1/pk2pp2/p1b5/3Q4/1B6/1P4P1/1R5P",
+     "n3b2r/r2p2p1/p3n3/p7/5N2/6P1/B4P2/1P5P",
+     "p2k1p2/4n2p/1rppk1Q1/4pp2/8/1P6/P3PPP1/R1BQ1RR1",
+     "r2r3p/r1pqp2p/1bpn4/4n3/8/2P5/PP1N1PP1/NBQ1R1K1"
+    ]
+   }
+  },
+  "keep kc=3": {
+   "real": 0.03,
+   "legal": 0.018,
+   "non": 0.952,
+   "chunks kept (no draw fit)": 0.012,
+   "illegal_causes": {
+    "TOO_MANY_KINGS": 0.195,
+    "NO_WHITE_KING": 0.508,
+    "NO_BLACK_KING": 0.303,
+    "PAWNS_ON_BACKRANK": 0.64,
+    "TOO_MANY_BLACK_PIECES": 0.045,
+    "TOO_MANY_BLACK_PAWNS": 0.095,
+    "OPPOSITE_CHECK": 0.13,
+    "TOO_MANY_WHITE_PAWNS": 0.052,
+    "TOO_MANY_WHITE_PIECES": 0.01,
+    "TOO_MANY_CHECKERS": 0.002,
+    "IMPOSSIBLE_CHECK": 0.002
+   },
+   "examples": {
+    "real": [
+     "8/3r1rk1/8/2p5/5P1P/4P3/2PP4/3K4",
+     "2r3k1/3nq1p1/3ppn2/3rn3/3p4/2pP1PBP/P1P1B1PP/R2Q1RK1",
+     "8/3r3p/2p2k2/2b1ppN1/1q5B/1R3K1P/1P4R1/6R1",
+     "6k1/ppp2p2/1N2p3/5NbP/5KPp/6P1/1PP2PB1/2R5"
+    ],
+    "legal": [
+     "2b2r1b/qB3pp1/1b3rk1/3b4/4P1N1/2pP1P2/PPPP1r2/K2R3R",
+     "2krr3/2p3p1/1p2pp2/1np1N3/3b1p2/3K1Pr1/6p1/7n",
+     "4k3/2pn4/1p6/1p5p/p2bbqP1/8/4PPn1/5K2",
+     "8/8/6kp/2p2p2/ppP5/2P5/2rPP3/3K4"
+    ],
+    "non": [
+     "8/2prk1p1/ppk1pp2/pp6/8/1P3Pb1/2P3P1/1K5q",
+     "8/r3k1p1/pp2pp2/p1bk4/1rr2kP1/4P3/5P2/1b5R",
+     "2r2qbr/2pr3p/2pn2R1/4p3/2PR4/2N5/PP3P2/PP4P1",
+     "r2rk2r/p1k1kr1p/2pn1p2/4p3/4P2k/P4Pb1/R1P2PKp/PP4p1"
+    ]
+   }
+  },
+  "keep kc=4": {
+   "real": 0.013,
+   "legal": 0.022,
+   "non": 0.965,
+   "chunks kept (no draw fit)": 0.01,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.477,
+    "PAWNS_ON_BACKRANK": 0.707,
+    "TOO_MANY_BLACK_PAWNS": 0.182,
+    "TOO_MANY_BLACK_PIECES": 0.113,
+    "OPPOSITE_CHECK": 0.138,
+    "TOO_MANY_KINGS": 0.222,
+    "NO_BLACK_KING": 0.325,
+    "TOO_MANY_WHITE_PAWNS": 0.082,
+    "IMPOSSIBLE_CHECK": 0.017,
+    "TOO_MANY_WHITE_PIECES": 0.018,
+    "TOO_MANY_CHECKERS": 0.008
+   },
+   "examples": {
+    "real": [
+     "4Qr2/p4pp1/2b5/r2p1k2/5Pp1/4P1P1/4Kp2/8",
+     "1nqq2k1/1p1npppp/2p1pn2/8/R1BQ1R2/1P1BB3/1KPR3P/R2Q4",
+     "2b4r/8/1r2kr2/2bppp2/6n1/B5P1/PPBQ1PP1/R1BQ1RK1",
+     "Q7/8/7p/1b6/p7/P1k5/1pB2P2/5K2"
+    ],
+    "legal": [
+     "8/8/1P3P2/8/5R2/k2pB3/P1b2K2/8",
+     "8/8/b1pp4/kq6/2p5/rBP5/pR1K4/8",
+     "8/4p3/2P1n3/k7/1p4P1/2p1KB2/P6r/8",
+     "4r3/1r3pq1/1p1p2pp/4p3/P1P5/K1r2qk1/P1p5/5b1n"
+    ],
+    "non": [
+     "8/2B1N1p1/PpNprk2/p1p5/8/rk6/p6P/1p5N",
+     "3p4/r5p1/pr2p3/p1q5/8/4k2r/1rp5/1p5r",
+     "4pr2/7p/2ppp1r1/4p1p1/r1b5/1p1Q3k/p1q2P1p/R1B2Rp1",
+     "2p2nqr/6np/2Bb1p2/3kp3/3p4/1p4r1/p4P1p/NBQ1R1p1"
+    ]
+   }
+  },
+  "keep kc=6": {
+   "real": 0.012,
+   "legal": 0.032,
+   "non": 0.957,
+   "chunks kept (no draw fit)": 0.011,
+   "illegal_causes": {
+    "NO_BLACK_KING": 0.368,
+    "TOO_MANY_WHITE_PAWNS": 0.118,
+    "PAWNS_ON_BACKRANK": 0.71,
+    "NO_WHITE_KING": 0.37,
+    "TOO_MANY_KINGS": 0.262,
+    "TOO_MANY_BLACK_PAWNS": 0.168,
+    "TOO_MANY_BLACK_PIECES": 0.095,
+    "OPPOSITE_CHECK": 0.198,
+    "TOO_MANY_CHECKERS": 0.008,
+    "IMPOSSIBLE_CHECK": 0.015,
+    "TOO_MANY_WHITE_PIECES": 0.038
+   },
+   "examples": {
+    "real": [
+     "1Q6/4r3/1bp5/2p5/4PP2/4Kb1k/6q1/3n4",
+     "8/7p/b1r2k2/1r1Pp3/1p6/3B4/1P4PN/6K1",
+     "8/6rk/6p1/1p3p2/p1p5/4PK2/5P2/R7",
+     "8/1r4k1/1p3p2/2n4p/5ppP/8/5PP1/7K"
+    ],
+    "legal": [
+     "8/PP1P4/4P3/2bp4/1np5/2brK3/rk1pR3/8",
+     "7k/3bqPp1/pp2PK1p/1BN1p3/3P4/PP3p2/4Q1p1/R4R2",
+     "6R1/r4k1p/1rn5/2Pp4/1B2n2P/N3P1P1/4K2P/nb6",
+     "2k5/2pN1Q2/1n1p4/4R2R/2p5/P2p2PP/6K1/8"
+    ],
+    "non": [
+     "3p4/N3P1p1/PP2R3/PPP5/8/8/3P2PP/1PP4K",
+     "3p4/rQ2N1p1/pp2P3/R1R5/1pp4N/8/7p/1P5n",
+     "2k4P/4r2q/2pP1Q2/2P1pp2/8/NpB5/p1p2P2/K5kP",
+     "b3p1PP/1n1p1p1K/pppnqq2/4p3/8/1p1p1p2/n2k1P1p/pr4pp"
+    ]
+   }
+  },
+  "keep kc=99": {
+   "real": 0.007,
+   "legal": 0.027,
+   "non": 0.967,
+   "chunks kept (no draw fit)": 0.011,
+   "illegal_causes": {
+    "TOO_MANY_KINGS": 0.252,
+    "TOO_MANY_BLACK_PAWNS": 0.155,
+    "NO_BLACK_KING": 0.372,
+    "PAWNS_ON_BACKRANK": 0.713,
+    "OPPOSITE_CHECK": 0.193,
+    "NO_WHITE_KING": 0.368,
+    "TOO_MANY_BLACK_PIECES": 0.092,
+    "TOO_MANY_WHITE_PAWNS": 0.118,
+    "TOO_MANY_WHITE_PIECES": 0.052,
+    "IMPOSSIBLE_CHECK": 0.018,
+    "TOO_MANY_CHECKERS": 0.008
+   },
+   "examples": {
+    "real": [
+     "5k2/4bb2/5p2/8/8/3P1P2/NKP5/8",
+     "8/r1p2k2/1p3b2/1p1Pp3/p3PP2/4K3/8/8",
+     "4r1k1/PpNb2p1/1rp1p2p/3P4/8/PN2N2P/P4PPP/1N4K1",
+     "8/8/8/5pk1/r2P2p1/8/p4P1P/6K1"
+    ],
+    "legal": [
+     "rk6/1b6/n1P1N3/8/RP1B4/8/R4PPP/4R1K1",
+     "5N2/4Bb2/2q1p2K/3pQBR1/3R2R1/2p1pk2/5b2/8",
+     "1R6/6p1/4p3/PPPp1p2/rP3b2/2b1k2b/1K1q2pp/n6n",
+     "4N3/5P2/2b1Ppp1/6P1/1k1b1P2/1P4P1/b4K2/8"
+    ],
+    "non": [
+     "8/1p1PPPp1/bk2Kp2/p5p1/7r/3kp1p1/2p4p/1b5n",
+     "nr6/1PpnPPp1/rPp1K3/P7/7B/2r4r/3N1qN1/1P5n",
+     "1Nb1kr2/1Qq4p/2nRRp2/4p3/6b1/1P3P1p/K2P1P2/RBQ2RP1",
+     "5r2/2qP3p/2PRNBp1/2r1rk1p/8/pPb5/K1P2P2/P5P1"
+    ]
+   }
+  },
+  "resample kc=0": {
+   "real": 0.64,
+   "legal": 0.037,
+   "non": 0.323,
+   "chunks kept (no draw fit)": 0.269,
+   "illegal_causes": {
+    "NO_BLACK_KING": 0.053,
+    "PAWNS_ON_BACKRANK": 0.11,
+    "TOO_MANY_BLACK_PAWNS": 0.022,
+    "TOO_MANY_KINGS": 0.055,
+    "TOO_MANY_BLACK_PIECES": 0.005,
+    "NO_WHITE_KING": 0.048,
+    "OPPOSITE_CHECK": 0.072,
+    "TOO_MANY_WHITE_PAWNS": 0.013
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/8/4P2P/PP4P1/1K5R",
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/8/4P2P/PP4P1/1K5R",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "rnb1r1k1/p2p3p/5pq1/5p2/N1P2P2/b7/1P3PPP/R2QKB1R",
+     "rnb1r1k1/p2p3p/5pq1/5p2/N1P2P2/b7/1P3PPP/R2QKB1R",
+     "5r2/r2n2b1/1q3pp1/Q1NpK3/1B1Pp3/3P2p1/4P1Bk/R3R3",
+     "5r2/r2n2b1/1q4p1/Q1NpK3/1B1Pp2p/3P2p1/4P1Bk/R3R3"
+    ],
+    "non": [
+     "3rr3/1p2p1pp/2p1Pnp1/8/1P3P2/P1N1Q1P1/5R1P/4R1K1",
+     "3rr3/1p2p1pp/2p1Pnp1/8/1P3P2/P1N1Q1P1/5R1P/4R1K1",
+     "8/8/3k4/2p1p1p1/4R3/4K1P1/4P1P1/3r1P2",
+     "8/8/3k4/2ppp3/4R3/4K1P1/4P1P1/3r1P2"
+    ]
+   }
+  },
+  "resample kc=1": {
+   "real": 0.182,
+   "legal": 0.025,
+   "non": 0.793,
+   "chunks kept (no draw fit)": 0.022,
+   "illegal_causes": {
+    "TOO_MANY_KINGS": 0.208,
+    "PAWNS_ON_BACKRANK": 0.293,
+    "NO_BLACK_KING": 0.303,
+    "NO_WHITE_KING": 0.168,
+    "OPPOSITE_CHECK": 0.102,
+    "TOO_MANY_WHITE_PAWNS": 0.032,
+    "TOO_MANY_BLACK_PAWNS": 0.067,
+    "TOO_MANY_BLACK_PIECES": 0.008,
+    "TOO_MANY_WHITE_PIECES": 0.005
+   },
+   "examples": {
+    "real": [
+     "5rk1/r2n1pp1/p1p1p3/p7/8/5P2/2P3PB/1K5B",
+     "8/r2rk1pp/6p1/3p1p2/3P1P2/2P5/3N1P1P/6K1",
+     "5r1k/1qn5/pp1p2r1/P1pp4/1P2n3/2P1p2P/PPR2P2/6K1",
+     "5r1k/pn6/1pqb4/2n2p2/2P1pQpp/NP2n1N1/P6P/R1R3K1"
+    ],
+    "legal": [
+     "2n4n/2pqb1kp/2pnpp2/1r2n3/4P3/1P6/PBNN1PP1/R1B1R1K1",
+     "1rn2rk1/1ppp2p1/1r1p1p1n/1pP2bq1/2PpP3/8/P2B2PP/R1BQKR1R",
+     "k5r1/p2b4/1q1R4/2Np3p/1b2p1p1/3P2NK/4P2P/R1BQ1R2",
+     "2b2k2/pp1qb1p1/1p3n2/n2pp3/3BQP2/3Q1P2/1Q1PP1B1/2R1KrRq"
+    ],
+    "non": [
+     "6k1/pp1b1pp1/r3n1p1/q7/5P2/6P1/2P1P2P/1R1K3K",
+     "3bq2p/2pr1k1n/2pppp2/4p3/5P2/1PP5/P2BQP2/R4RKP",
+     "3r4/1p2pp1p/2pb1npb/2P5/1P3N2/P1N5/2Q1PP1P/4RRK1",
+     "3r4/1p2pp1p/2pb1npb/P1P5/1P6/P5Q1/4PPPP/4R1KQ"
+    ]
+   }
+  },
+  "resample kc=2": {
+   "real": 0.042,
+   "legal": 0.02,
+   "non": 0.938,
+   "chunks kept (no draw fit)": 0.013,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.458,
+    "PAWNS_ON_BACKRANK": 0.578,
+    "TOO_MANY_KINGS": 0.173,
+    "NO_BLACK_KING": 0.385,
+    "OPPOSITE_CHECK": 0.08,
+    "TOO_MANY_BLACK_PAWNS": 0.063,
+    "TOO_MANY_WHITE_PAWNS": 0.09,
+    "TOO_MANY_BLACK_PIECES": 0.025,
+    "TOO_MANY_CHECKERS": 0.002,
+    "IMPOSSIBLE_CHECK": 0.002,
+    "TOO_MANY_WHITE_PIECES": 0.003
+   },
+   "examples": {
+    "real": [
+     "rrb2r1k/pp2bppp/R3pn2/8/2p1N3/2NBP1P1/1P4PP/R2Q2K1",
+     "8/p2qrk2/1p1Ppbp1/2p3p1/3pP3/PP4P1/1K2R2B/8",
+     "r7/p2k1bp1/2n2b2/3pr3/4P3/3P4/PPP2P1P/R1BQ1RK1",
+     "3r2k1/6pp/3b2P1/3pB3/P6P/2P5/PP4P1/3Q2K1"
+    ],
+    "legal": [
+     "5rk1/4pp2/1p2p1p1/n1p5/1n6/1Pr5/K2bPP2/8",
+     "8/bbp1p1K1/p3kqn1/1p1pp2p/8/1P6/P2B2Q1/R1BQ1RRR",
+     "6k1/1rp1p3/2bpp3/1p6/1P6/2PPN3/2P1PP2/3KB1B1",
+     "r1kb4/p3p3/3p4/2PN2pp/PP2P3/1K1P4/2P5/8"
+    ],
+    "non": [
+     "2rr3r/p4qk1/pb2b3/pp6/8/4P3/2P2PP1/1P5R",
+     "4q2k/kp3pp1/p2kp1n1/p7/4P3/5P2/6P1/1RP4K",
+     "r2qrrk1/1p5p/2pbp3/4q1r1/2P5/2PPP1q1/PP3P2/K2R2PB",
+     "3r3p/1q2b2n/2pppbp1/P3np2/1PP5/6P1/K3Pq2/PP4N1"
+    ]
+   }
+  },
+  "resample kc=3": {
+   "real": 0.027,
+   "legal": 0.013,
+   "non": 0.96,
+   "chunks kept (no draw fit)": 0.012,
+   "illegal_causes": {
+    "NO_BLACK_KING": 0.3,
+    "PAWNS_ON_BACKRANK": 0.662,
+    "NO_WHITE_KING": 0.548,
+    "TOO_MANY_BLACK_PAWNS": 0.105,
+    "TOO_MANY_BLACK_PIECES": 0.062,
+    "TOO_MANY_KINGS": 0.223,
+    "OPPOSITE_CHECK": 0.13,
+    "TOO_MANY_WHITE_PAWNS": 0.072,
+    "TOO_MANY_CHECKERS": 0.003,
+    "IMPOSSIBLE_CHECK": 0.003,
+    "TOO_MANY_WHITE_PIECES": 0.005
+   },
+   "examples": {
+    "real": [
+     "4rk2/5pp1/2r5/n1p5/6b1/2PP4/2K5/8",
+     "6k1/5p2/3bp1pQ/p1pn4/1p2P2n/8/3K4/8",
+     "6rk/5p2/2p2pp1/3pPNp1/3P1B2/4PPP1/5K2/8",
+     "4rk2/p4p2/1p2n2p/2PnP3/5P2/7N/4KPP1/8"
+    ],
+    "legal": [
+     "8/7k/2P1q2b/2p1P3/P2P4/1P2R3/2P5/3K4",
+     "8/r3kp1r/N2p2pp/3nbn2/5PP1/2Q1ppPP/R2R1PBP/2R2QKR",
+     "8/3kPPP1/5K2/1pp5/3pN3/7P/4PBP1/8",
+     "8/7p/3PK1rk/1rP5/1P1P4/2P1P3/1P3N2/8"
+    ],
+    "non": [
+     "b1r5/pp2r1p1/p3pp2/p4RPP/8/8/8/1B2P2K",
+     "2p5/pp2p1p1/p3k2r/b7/8/5Q2/p1P3B1/1p5R",
+     "r2rp1rr/3pp2p/2pnn3/1p2p2r/6pp/2P5/PPPP1P2/P5b1",
+     "4b1rr/2pq2rp/2pb2k1/4K3/8/3B1N2/KP3P2/R4RPB"
+    ]
+   }
+  },
+  "resample kc=4": {
+   "real": 0.018,
+   "legal": 0.01,
+   "non": 0.972,
+   "chunks kept (no draw fit)": 0.01,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.517,
+    "NO_BLACK_KING": 0.327,
+    "PAWNS_ON_BACKRANK": 0.713,
+    "TOO_MANY_BLACK_PAWNS": 0.182,
+    "TOO_MANY_KINGS": 0.222,
+    "OPPOSITE_CHECK": 0.135,
+    "TOO_MANY_BLACK_PIECES": 0.113,
+    "TOO_MANY_WHITE_PAWNS": 0.063,
+    "TOO_MANY_WHITE_PIECES": 0.025,
+    "IMPOSSIBLE_CHECK": 0.007,
+    "TOO_MANY_CHECKERS": 0.003
+   },
+   "examples": {
+    "real": [
+     "1r4k1/5pp1/1ppr1b2/4p3/7P/3p4/6K1/8",
+     "8/7p/1Pp2p2/3p2rk/3P1P2/4P1P1/5K2/8",
+     "8/2r1k3/3n1r2/2p2pp1/P6p/1P6/P1R5/1K6",
+     "2bk2r1/pp1n1pp1/pbqR4/2p5/3PP2P/2P1PNP1/RPBQN3/R2R2K1"
+    ],
+    "legal": [
+     "8/1r6/nb6/2n5/4p2k/2P1p3/3PP3/3K4",
+     "8/1rn1k3/1p2bp2/4pp2/4pK1p/3p4/6R1/8",
+     "8/ppp5/kb6/p2P3p/bp2P3/4B3/6pp/5K2",
+     "1r6/3p4/2bk3p/1p3PPP/p2N2K1/PP6/8/8"
+    ],
+    "non": [
+     "8/1P4p1/Bp1ppp2/q1p5/4r3/3P1p2/P1P3n1/1P5p",
+     "2ppp3/1p3pb1/nr2p3/p7/8/k7/2p3PP/1p5K",
+     "1pp4r/4b2p/2bp2q1/4pp2/3PP3/3BP3/PPB2PP1/R4RB1",
+     "pr3r2/2rk3p/1bppp1n1/3rpb2/3p4/8/RN2KP1R/PPP3r1"
+    ]
+   }
+  },
+  "resample kc=6": {
+   "real": 0.007,
+   "legal": 0.025,
+   "non": 0.968,
+   "chunks kept (no draw fit)": 0.013,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.393,
+    "NO_BLACK_KING": 0.367,
+    "TOO_MANY_BLACK_PAWNS": 0.2,
+    "PAWNS_ON_BACKRANK": 0.735,
+    "TOO_MANY_BLACK_PIECES": 0.12,
+    "TOO_MANY_WHITE_PAWNS": 0.128,
+    "TOO_MANY_KINGS": 0.253,
+    "OPPOSITE_CHECK": 0.172,
+    "TOO_MANY_WHITE_PIECES": 0.055,
+    "TOO_MANY_CHECKERS": 0.005,
+    "IMPOSSIBLE_CHECK": 0.008
+   },
+   "examples": {
+    "real": [
+     "8/1r1r2kb/5p2/4p3/1p6/2p3P1/1p3P1P/6K1",
+     "4k1r1/2b5/1n3p2/4p3/3PP3/3RPPQP/6K1/8",
+     "6k1/2p1Q1N1/2npp3/1R1Nn1R1/4P3/8/r1PP1rPP/3n2K1",
+     "8/2q5/1pn3k1/2p3p1/5bbp/4Q3/6PP/7K"
+    ],
+    "legal": [
+     "5rk1/5ppp/1PPP4/2K5/6BN/6R1/2P2Q2/8",
+     "8/8/8/2N5/PPkp4/R1p1QP2/p4K2/8",
+     "4rk2/1Pb5/PPb5/2P4Q/4B3/2R5/1P3pPP/5q1K",
+     "2r3k1/K7/1PP5/3rp3/P2pp3/2b2p2/pp2q3/2n5"
+    ],
+    "non": [
+     "2p3p1/4ppp1/bp1pp3/p1p5/8/2p3r1/3p1nb1/1n5n",
+     "8/1p1p1rp1/p1p1pk2/kp1p4/8/8/p3pp1r/1p5p",
+     "2B2r2/1p1P3p/2pR1P2/4P3/3P4/1P4r1/PNP2P2/PP2N1p1",
+     "4pr2/4Pp1p/2pPr3/4p1k1/r5b1/1p1bbq2/rp2pP2/p5n1"
+    ]
+   }
+  },
+  "resample kc=99": {
+   "real": 0.008,
+   "legal": 0.022,
+   "non": 0.97,
+   "chunks kept (no draw fit)": 0.012,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.41,
+    "NO_BLACK_KING": 0.365,
+    "PAWNS_ON_BACKRANK": 0.728,
+    "OPPOSITE_CHECK": 0.205,
+    "TOO_MANY_WHITE_PIECES": 0.072,
+    "TOO_MANY_KINGS": 0.253,
+    "TOO_MANY_BLACK_PAWNS": 0.185,
+    "TOO_MANY_BLACK_PIECES": 0.097,
+    "TOO_MANY_WHITE_PAWNS": 0.117,
+    "TOO_MANY_CHECKERS": 0.007,
+    "IMPOSSIBLE_CHECK": 0.012
+   },
+   "examples": {
+    "real": [
+     "5r1k/8/pp1P4/2P5/8/3Pn1qp/1PP1P2P/6K1",
+     "2N5/5r1k/7p/2Bq4/1P1P3P/2PPP3/3K4/8",
+     "8/P5qB/3Rpp2/2k1pppp/2p5/p1P3PP/2BB4/3Q2K1",
+     "3r1bq1/2rk4/3bppbp/3pRPP1/1n6/8/8/6K1"
+    ],
+    "legal": [
+     "8/2P5/1P1P4/2K5/3p1pk1/4p3/3p4/3n4",
+     "5r1k/r7/ppb5/2P1b2r/4q3/1QP1nB1p/2K5/6B1",
+     "8/1Q1p4/2pPP3/2k1K3/2pp4/ppP5/nPp2P1P/8",
+     "5bk1/3p4/4n1P1/5P1P/6K1/1pb3pp/p1p5/8"
+    ],
+    "non": [
+     "8/2Q1BpB1/R3pR2/P1PP4/4P3/8/1PP4P/1R5R",
+     "2rk3R/1PNp1BP1/P3p3/b7/8/2rP1q1r/6N1/1P3P1n",
+     "2r1b2r/2Pp3p/2pB1p2/4p3/1P6/P3P3/NN3PPP/pp4K1",
+     "1PBP3P/1QP4R/2RKr1R1/4p3/1qp2P2/1p6/p4pPP/R1BQ1RK1"
+    ]
+   }
+  }
+ },
+ "N2000": {
+  "learned": 2000,
+  "learn_s": 1407,
+  "chunk units": 10884,
+  "parsed chunks per position": 5.51,
+  "identity (real board, parse units unchanged)": {
+   "real": 0.953,
+   "legal": 0.047,
+   "non": 0.0,
+   "chunks kept (no draw fit)": 0.0,
+   "illegal_causes": {},
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "r3k1nr/pp2ppbp/2p1b3/3p2p1/1nPPP3/1P3N2/1P1N1PPP/R1BK1B1R",
+     "r3k1nr/pp2ppbp/2p1b3/3p2p1/1nPPP3/1P3N2/1P1N1PPP/R1BK1B1R",
+     "5r2/r2n3k/Pq4pp/Q1Npb3/1B2p3/3P2nP/4P1BK/R3R3",
+     "5r2/r2n3k/Pq4pp/Q1Npb3/1B2p3/3P2nP/4P1BK/R3R3"
+    ],
+    "non": []
+   }
+  },
+  "keep kc=0": {
+   "real": 0.783,
+   "legal": 0.038,
+   "non": 0.178,
+   "chunks kept (no draw fit)": 0.248,
+   "illegal_causes": {
+    "OPPOSITE_CHECK": 0.053,
+    "NO_WHITE_KING": 0.03,
+    "TOO_MANY_KINGS": 0.028,
+    "PAWNS_ON_BACKRANK": 0.043,
+    "NO_BLACK_KING": 0.033,
+    "TOO_MANY_BLACK_PAWNS": 0.008,
+    "TOO_MANY_BLACK_PIECES": 0.003
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r2Bn1p1/pp2P3/8/4P2P/PP4P1/1K5R",
+     "1r4k1/2pR1pp1/r2Bn1p1/pp2P3/8/4P2P/PP4P1/1K5R",
+     "1r1q1rk1/2p1nppp/2pb4/4p3/2N1P3/2P5/P2PQPPP/R1B2RK1",
+     "1r1q1rk1/2p1nppp/2pb4/4p3/2N1P3/2P5/P2PQPPP/R1B2RK1"
+    ],
+    "legal": [
+     "r3k1nr/pp2ppbp/2p1b3/3p4/1nP5/1P3N2/1P1N1PPP/R1BK1B1R",
+     "r3k1nr/pp2ppbp/2p1b3/3p4/2P5/1P1n1N2/1P1N1PPP/R1BK1B1R",
+     "r1bnr1k1/pp1p1p2/5pq1/5p2/N1P2P2/b7/5PPP/R2QKB1R",
+     "4k2r/r7/1qn3pp/Q1Np4/1B2p3/3P2QP/4P1BK/R3R3"
+    ],
+    "non": [
+     "4Q3/6p1/3bp2p/3p4/3PR2k/3p4/5PP1/2q3K1",
+     "4Q3/6p1/3bp2p/3p4/3PR2k/3p4/5PP1/2q3K1",
+     "5rk1/pp3q2/2np3p/4p2N/2pp2Q1/2P4P/PP2RPPK/8",
+     "5rk1/pp3q2/2np3p/4p2N/2pp2Q1/2P4P/PP2RPPK/8"
+    ]
+   }
+  },
+  "keep kc=1": {
+   "real": 0.205,
+   "legal": 0.045,
+   "non": 0.75,
+   "chunks kept (no draw fit)": 0.018,
+   "illegal_causes": {
+    "NO_BLACK_KING": 0.215,
+    "PAWNS_ON_BACKRANK": 0.288,
+    "TOO_MANY_KINGS": 0.197,
+    "OPPOSITE_CHECK": 0.108,
+    "NO_WHITE_KING": 0.16,
+    "TOO_MANY_WHITE_PAWNS": 0.015,
+    "TOO_MANY_BLACK_PAWNS": 0.045,
+    "TOO_MANY_BLACK_PIECES": 0.01,
+    "TOO_MANY_WHITE_PIECES": 0.002
+   },
+   "examples": {
+    "real": [
+     "r4k2/ppp1pp2/6p1/3p4/3P1Q2/2P5/5PPP/6K1",
+     "8/2P2p2/1p1k4/2pp4/P7/4K3/5P2/3B1R2",
+     "r1b4r/3n3p/2pp1n1k/4p1pp/3P4/2P4P/PP2r1PP/R1B1QRK1",
+     "r1bq1rk1/pppnp1b1/3p1np1/5P2/2PpN1P1/2NP1PP1/PP1N1KR1/R2Q1R2"
+    ],
+    "legal": [
+     "r6r/pp2p1p1/2p2q2/3p4/Q1Np1k2/PK1PNn1p/1BP2P2/R2R1R2",
+     "8/1p5p/2pQ2p1/3P1rkp/2P1P1P1/r4P1b/p3P1P1/2R2RKN",
+     "8/r1b4p/3R2nk/4n3/n5P1/qn5K/1b6/6q1",
+     "8/5k2/2rppp2/8/2bP1p2/4PPBB/5KQ1/4N3"
+    ],
+    "non": [
+     "5r2/5p1p/r1bqr1pq/p7/6P1/7P/PPP3N1/1K5B",
+     "r2r3r/6Rp/4rkp1/p7/8/2P4P/PP4P1/1K5P",
+     "4nr2/4bppp/1p1nkp2/2R1p3/4P3/BPPK4/P2B2PP/RR4K1",
+     "5rk1/1bpqkppp/2pb4/4p3/2BPP3/2PPQ1B1/P4P1P/R4RK1"
+    ]
+   }
+  },
+  "keep kc=2": {
+   "real": 0.057,
+   "legal": 0.023,
+   "non": 0.92,
+   "chunks kept (no draw fit)": 0.014,
+   "illegal_causes": {
+    "NO_BLACK_KING": 0.39,
+    "PAWNS_ON_BACKRANK": 0.57,
+    "NO_WHITE_KING": 0.483,
+    "TOO_MANY_BLACK_PAWNS": 0.057,
+    "TOO_MANY_KINGS": 0.108,
+    "OPPOSITE_CHECK": 0.088,
+    "TOO_MANY_WHITE_PAWNS": 0.082,
+    "TOO_MANY_BLACK_PIECES": 0.007,
+    "TOO_MANY_CHECKERS": 0.003,
+    "IMPOSSIBLE_CHECK": 0.003,
+    "TOO_MANY_WHITE_PIECES": 0.005
+   },
+   "examples": {
+    "real": [
+     "2bq1rk1/pppn4/3p1n2/8/3pPPP1/2NP3P/PP1NQKN1/R3R3",
+     "3q2k1/5p2/1pn1pb2/2P5/1P2N3/3P4/NPP3K1/8",
+     "5rk1/p4p2/1p1pbqp1/2PP1n2/B2P3n/1PP1K3/2PB4/2N5",
+     "2bq1rk1/n1r1bp2/4pn2/3N4/2p1P3/5NP1/1N1Q2P1/R2Q1RK1"
+    ],
+    "legal": [
+     "4k3/2n1p3/8/P1p1P3/R2P4/4b3/8/3K4",
+     "r2b1rk1/p1q2ppn/2b1p2p/4n3/2P1P1n1/8/P1PNP2P/R1BKq2R",
+     "r4rk1/r7/qb1p1p2/2nPpnp1/1PP1P3/4NBP1/1PPBK1P1/1R2Q1R1",
+     "8/pp1Pp1pp/2p1q1rk/5b2/1nb5/2P5/PP1P4/2KR4"
+    ],
+    "non": [
+     "r1r5/2p1q2p/4p1p1/p7/8/4P3/PPP2P1B/1K5P",
+     "1rq5/3b3p/4n1p1/pp6/PP6/5P2/2P3P1/1K5n",
+     "4q1r1/4np2/3nqppp/4nnp1/N3P3/1PP2p2/P1Q2P2/R1B1R1K1",
+     "3pp3/1P2qp2/1p1p1np1/2p1p2b/1P2b3/P7/BBPN1N2/PP4P1"
+    ]
+   }
+  },
+  "keep kc=3": {
+   "real": 0.028,
+   "legal": 0.02,
+   "non": 0.952,
+   "chunks kept (no draw fit)": 0.011,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.503,
+    "TOO_MANY_WHITE_PAWNS": 0.093,
+    "PAWNS_ON_BACKRANK": 0.677,
+    "OPPOSITE_CHECK": 0.097,
+    "TOO_MANY_KINGS": 0.177,
+    "NO_BLACK_KING": 0.345,
+    "TOO_MANY_BLACK_PAWNS": 0.135,
+    "TOO_MANY_BLACK_PIECES": 0.05,
+    "IMPOSSIBLE_CHECK": 0.01,
+    "TOO_MANY_CHECKERS": 0.003,
+    "TOO_MANY_WHITE_PIECES": 0.018
+   },
+   "examples": {
+    "real": [
+     "rk2r3/5p2/1pb1p1p1/8/8/P1PPn3/NP4K1/8",
+     "8/5k2/8/7p/1r2P1pP/2BP4/3K4/8",
+     "8/8/4p1pk/2Np1ppb/3PP3/5PP1/5K2/8",
+     "2r5/4q2p/4n3/2rk1n2/q7/4K2P/2p3P1/8"
+    ],
+    "legal": [
+     "8/6p1/P4p2/K7/6P1/2rk4/7N/8",
+     "5b2/k2bq3/b1pp2p1/1P1P1pB1/2P3P1/2N2N2/2B1P1P1/R1Q1R1K1",
+     "2k2r2/1p2pp2/2pn2p1/5p1P/1P3RB1/8/4QP2/5Knn",
+     "8/6qb/P7/1PPPp2P/1K1BPp1k/6p1/R3qb1p/R7"
+    ],
+    "non": [
+     "2br2k1/2P2k2/2N1p1p1/P3PPP1/6PP/8/8/1PP4R",
+     "2pp4/6P1/4pkR1/p1n5/8/3pp3/2p3P1/1p5P",
+     "3bq3/PR1P1prk/3pp2b/4p1rk/4pp2/8/R3K3/PP3Nq1",
+     "8/2r2p2/PR1b1rp1/1n2b3/4k3/pP3N2/P1Q1Q3/R1B1R1B1"
+    ]
+   }
+  },
+  "keep kc=4": {
+   "real": 0.017,
+   "legal": 0.025,
+   "non": 0.958,
+   "chunks kept (no draw fit)": 0.013,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.517,
+    "NO_BLACK_KING": 0.338,
+    "TOO_MANY_BLACK_PAWNS": 0.215,
+    "PAWNS_ON_BACKRANK": 0.707,
+    "TOO_MANY_KINGS": 0.208,
+    "OPPOSITE_CHECK": 0.115,
+    "TOO_MANY_BLACK_PIECES": 0.107,
+    "TOO_MANY_WHITE_PAWNS": 0.058,
+    "TOO_MANY_WHITE_PIECES": 0.017,
+    "TOO_MANY_CHECKERS": 0.003,
+    "IMPOSSIBLE_CHECK": 0.003
+   },
+   "examples": {
+    "real": [
+     "1k6/1bqp3p/1bpnb3/2bP1n2/1p6/PRP5/1P1P4/2KR4",
+     "8/5k2/3Rp1p1/7p/1r1Q2pP/3R4/3K4/8",
+     "4k3/1bp5/1p3pp1/8/2P4P/1P1P2P1/2K2P2/3nn3",
+     "8/R1rr4/6k1/2Bbp3/3p4/3K2P1/6r1/7r"
+    ],
+    "legal": [
+     "4k3/3r1p2/4p3/4B1N1/2PrNq2/8/3N1n1b/4RRK1",
+     "qnrk1r2/pnp1p1p1/1p2b3/3q4/8/PP1P4/PPP1Br2/K6R",
+     "5k2/p1R2bp1/1p1r1p2/2pp2P1/5P2/8/2b2K2/3R1BQR",
+     "2r1b3/8/4n3/5q2/3k4/3ppPPP/2p3K1/8"
+    ],
+    "non": [
+     "2p1r3/3ppp2/1p1pqpp1/p1p5/8/8/p4N2/1p5P",
+     "8/4r1P1/k3p1P1/p7/8/4krk1/7p/1bb1q2P",
+     "6rk/5p2/3nbk2/4ppp1/P3rk2/rP6/pP3PP1/K5K1",
+     "4p3/4bp2/3p1ppp/4p3/p3P3/3k4/N2K1PP1/K1p3N1"
+    ]
+   }
+  },
+  "keep kc=6": {
+   "real": 0.008,
+   "legal": 0.013,
+   "non": 0.978,
+   "chunks kept (no draw fit)": 0.013,
+   "illegal_causes": {
+    "TOO_MANY_KINGS": 0.287,
+    "TOO_MANY_WHITE_PAWNS": 0.11,
+    "PAWNS_ON_BACKRANK": 0.728,
+    "NO_WHITE_KING": 0.372,
+    "NO_BLACK_KING": 0.368,
+    "OPPOSITE_CHECK": 0.173,
+    "TOO_MANY_BLACK_PAWNS": 0.163,
+    "TOO_MANY_WHITE_PIECES": 0.077,
+    "TOO_MANY_BLACK_PIECES": 0.085,
+    "TOO_MANY_CHECKERS": 0.008,
+    "IMPOSSIBLE_CHECK": 0.013
+   },
+   "examples": {
+    "real": [
+     "8/4Bk2/4p1p1/1BN2p2/P7/4PPP1/5K2/R7",
+     "8/7k/6pp/1P1P3P/Q7/1RB1PPP1/1R3K2/8",
+     "r4rk1/8/p3rr2/1P1P1p2/K2R1n2/P5P1/7P/8",
+     "8/1n6/b1kP4/1n6/8/1P6/P6P/7K"
+    ],
+    "legal": [
+     "8/5k2/8/5PPP/1r2P1KP/8/3P4/8",
+     "8/5k1P/8/5PP1/1r3PKP/8/3P4/8",
+     "1kr5/1P3PP1/6K1/8/2p3PQ/p1P5/8/5R2",
+     "3B4/8/2N1P3/3pp3/r1k1b1p1/8/p3rPPP/5bK1"
+    ],
+    "non": [
+     "3p1P2/1P1PP1PP/4K1K1/kpp5/8/4P3/qn4PP/1bp4K",
+     "6rk/7p/1p2b1kr/p1p5/8/1q6/2k3NP/1rb4B",
+     "b7/4pp2/3n1BP1/4PP2/1P2rP2/PB6/KQ4PP/BR1R2K1",
+     "3Q4/3P1p2/3rr1qr/4pp2/4n3/2P5/bP1kN1r1/P1P3p1"
+    ]
+   }
+  },
+  "keep kc=99": {
+   "real": 0.008,
+   "legal": 0.01,
+   "non": 0.982,
+   "chunks kept (no draw fit)": 0.013,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.398,
+    "PAWNS_ON_BACKRANK": 0.747,
+    "OPPOSITE_CHECK": 0.188,
+    "TOO_MANY_KINGS": 0.303,
+    "TOO_MANY_BLACK_PAWNS": 0.157,
+    "NO_BLACK_KING": 0.338,
+    "TOO_MANY_BLACK_PIECES": 0.112,
+    "TOO_MANY_WHITE_PAWNS": 0.113,
+    "TOO_MANY_WHITE_PIECES": 0.053,
+    "TOO_MANY_CHECKERS": 0.012,
+    "IMPOSSIBLE_CHECK": 0.017
+   },
+   "examples": {
+    "real": [
+     "8/1k4p1/2p2n2/1b1nq2b/p1N2N2/8/R2Q1PPP/3R2K1",
+     "8/p7/8/4k3/3p4/PPP2p2/1K6/8",
+     "8/np2n1p1/rp3p2/p2prkP1/3p4/2p5/5PPP/6K1",
+     "8/1p6/2p5/5k1r/1P1Pp1qP/3b3K/PR6/8"
+    ],
+    "legal": [
+     "8/1r1bqP2/2rPP2k/3K2n1/3n2n1/6p1/5p2/8",
+     "2k2B2/3p4/q4PP1/1p1n2K1/8/PP6/1b6/8",
+     "5N2/4p3/1nkpK1P1/2p5/7p/1P1p4/P3p3/8",
+     "8/6B1/2qPPP1N/k2rP2p/2pPK3/7p/nr4p1/2b5"
+    ],
+    "non": [
+     "3p4/5pr1/QN2p1pp/R1R5/8/4p3/4r1p1/1rk4p",
+     "4r3/6rk/r3PBb1/pP6/8/2Q5/2P4Q/1K5P",
+     "bq6/2b2p2/2pn1PP1/r1k1K3/2p1p3/2P3P1/P1R3b1/p5P1",
+     "6pp/3r1p2/3p1p2/4p3/4r2r/P7/K3p1k1/n2k2pp"
+    ]
+   }
+  },
+  "resample kc=0": {
+   "real": 0.783,
+   "legal": 0.038,
+   "non": 0.178,
+   "chunks kept (no draw fit)": 0.249,
+   "illegal_causes": {
+    "OPPOSITE_CHECK": 0.055,
+    "NO_WHITE_KING": 0.03,
+    "NO_BLACK_KING": 0.032,
+    "TOO_MANY_KINGS": 0.027,
+    "PAWNS_ON_BACKRANK": 0.042,
+    "TOO_MANY_BLACK_PAWNS": 0.008,
+    "TOO_MANY_BLACK_PIECES": 0.003
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r2Bn1p1/pp2P3/8/4P2P/PP4P1/1K5R",
+     "1r4k1/2pR1pp1/r2Bn1p1/pp2P3/8/4P2P/PP4P1/1K5R",
+     "1r1q1rk1/2p1nppp/2pb4/4p3/2N1P3/2P5/P2PQPPP/R1B2RK1",
+     "1r1q1rk1/2p1nppp/2pb4/4p3/2N1P3/2P5/P2PQPPP/R1B2RK1"
+    ],
+    "legal": [
+     "r3k1nr/pp2ppbp/2p1b3/3p4/2P5/1Pn2N2/1P1N1PPP/R1BK1B1R",
+     "r3k1nr/pp2ppbp/2p1b3/3p4/1nPP4/1P3N2/1PPN1PPP/R1BK1B1R",
+     "8/r2r2rk/1p4pp/Q1Np4/1B2p3/3P2QP/4P1BK/R3R3",
+     "2b2b1r/p1n5/1pb2k2/7P/P5P1/2PPBN2/2K2BP1/3R3R"
+    ],
+    "non": [
+     "4Q3/6p1/3bp2p/3p4/3PR2k/3p4/5PP1/2q3K1",
+     "4Q3/6p1/3bp2p/3p4/3PR2k/3p4/5PP1/2q3K1",
+     "5rk1/pp3q2/2np3p/4p2N/2pp2Q1/2P4P/PP2RPPK/8",
+     "5rk1/pp3q2/2np3p/4p2N/2pp2Q1/2P4P/PP2RPPK/8"
+    ]
+   }
+  },
+  "resample kc=1": {
+   "real": 0.225,
+   "legal": 0.042,
+   "non": 0.733,
+   "chunks kept (no draw fit)": 0.022,
+   "illegal_causes": {
+    "TOO_MANY_KINGS": 0.187,
+    "NO_BLACK_KING": 0.245,
+    "PAWNS_ON_BACKRANK": 0.287,
+    "NO_WHITE_KING": 0.157,
+    "OPPOSITE_CHECK": 0.098,
+    "TOO_MANY_BLACK_PAWNS": 0.048,
+    "TOO_MANY_WHITE_PAWNS": 0.028,
+    "TOO_MANY_WHITE_PIECES": 0.007,
+    "TOO_MANY_BLACK_PIECES": 0.013
+   },
+   "examples": {
+    "real": [
+     "1q1b4/1pp1kp1p/2ppbp2/4p3/3PP1P1/1P6/P1qB1P2/R2QR1K1",
+     "8/r3k2r/p3r3/1PbPp3/P1PpP3/1P2r3/2Q3PP/6K1",
+     "r5kr/pp1b1ppn/2n1p2p/6B1/8/2N2N2/PP1PPPBP/R2QKR1R",
+     "nr3rk1/pppb1ppn/2n1p2p/4n3/6n1/2NB4/PP2P1BP/R1Q1KR1R"
+    ],
+    "legal": [
+     "8/rk6/1p2P3/2p5/8/4K3/3PB3/3R4",
+     "8/2k2pnp/1p2p3/2p5/1KP3P1/8/2P1P3/8",
+     "4b3/2k2pr1/1p1p4/2p5/6q1/1PPP4/2K5/8",
+     "3kb1r1/n1pnp1pp/2ppnnpp/8/1P2NP1P/B3PPP1/PK3PR1/RNBQ4"
+    ],
+    "non": [
+     "5kk1/4rp1p/r1b1qpp1/pp6/8/2P3P1/PP5P/1K5Q",
+     "5rbr/4qp1p/r3b1p1/p7/8/8/1P3QP1/1KP4P",
+     "r1bq4/5ppp/3b1k2/R3pp2/2N1PB2/1P1PP3/P4PP1/R1P3K1",
+     "1p4p1/1p1p2kp/2p1prp1/8/1P6/P2BNP2/6PP/4RQKR"
+    ]
+   }
+  },
+  "resample kc=2": {
+   "real": 0.045,
+   "legal": 0.035,
+   "non": 0.92,
+   "chunks kept (no draw fit)": 0.012,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.473,
+    "NO_BLACK_KING": 0.457,
+    "PAWNS_ON_BACKRANK": 0.55,
+    "OPPOSITE_CHECK": 0.063,
+    "TOO_MANY_WHITE_PAWNS": 0.082,
+    "TOO_MANY_BLACK_PAWNS": 0.042,
+    "TOO_MANY_KINGS": 0.147,
+    "TOO_MANY_CHECKERS": 0.002,
+    "IMPOSSIBLE_CHECK": 0.003,
+    "TOO_MANY_BLACK_PIECES": 0.012
+   },
+   "examples": {
+    "real": [
+     "q7/2bp1p1k/3n2p1/2P1p1pb/1P2q3/8/BP1PPPPP/R1R3K1",
+     "r1bq1rk1/p1pn4/3p1n2/3P2P1/2PPPP2/2N3BN/PP3KN1/R4R2",
+     "8/7p/3b1qn1/4p2p/8/8/1nkbb1P1/6K1",
+     "2q3k1/2nb4/1pp1pp2/3p4/2pp2P1/2P2N1P/PP2n1K1/8"
+    ],
+    "legal": [
+     "1r3k2/7P/3b4/2p3r1/8/4K3/3P1P2/3R4",
+     "r4rk1/1r2Pp2/1p1pBPp1/2n1pn2/1R2PN1r/3N4/3P1PPP/1R2Q1K1",
+     "2rq2k1/3b4/2p5/3pppn1/P1pp1pN1/3P1PPN/K1P1R1P1/8",
+     "n5k1/8/2pp1Pp1/qnpb1p1B/n2P1Q2/8/2P2BPP/1R1BQ1K1"
+    ],
+    "non": [
+     "n1q1r3/pq1rpp2/1n2n1p1/n7/7P/6P1/2P4N/1P5B",
+     "4rr2/p4pq1/1p2p1p1/rP6/6p1/1R1B4/3K2P1/1R5P",
+     "1q1pp3/5p2/3bqn2/4n3/1R2b3/1P1QN3/P1Q3P1/R2B2R1",
+     "p3p3/1p4pp/2p2rpk/8/pP5Q/PP6/2PQ2PP/4B1K1"
+    ]
+   }
+  },
+  "resample kc=3": {
+   "real": 0.033,
+   "legal": 0.017,
+   "non": 0.95,
+   "chunks kept (no draw fit)": 0.014,
+   "illegal_causes": {
+    "TOO_MANY_KINGS": 0.16,
+    "PAWNS_ON_BACKRANK": 0.643,
+    "NO_WHITE_KING": 0.542,
+    "NO_BLACK_KING": 0.343,
+    "TOO_MANY_BLACK_PAWNS": 0.14,
+    "OPPOSITE_CHECK": 0.085,
+    "TOO_MANY_WHITE_PAWNS": 0.065,
+    "TOO_MANY_BLACK_PIECES": 0.052,
+    "TOO_MANY_CHECKERS": 0.005,
+    "IMPOSSIBLE_CHECK": 0.005,
+    "TOO_MANY_WHITE_PIECES": 0.003
+   },
+   "examples": {
+    "real": [
+     "8/5ppp/1prPp2k/8/1N1B4/2N2N2/PK2B1P1/8",
+     "r1k5/p1p3p1/1p1p2p1/3B4/1n6/P4P2/2PQ1N1P/2R1R1K1",
+     "5r2/1k6/p4p2/1N1Pp3/P1Q5/2P3P1/Pq3K2/R7",
+     "8/6p1/1PP1Pp2/P1nkP3/3p4/1Pn3P1/7K/8"
+    ],
+    "legal": [
+     "5rk1/p1p4q/1p2pp2/8/2PP2Pp/2PP1Q2/3P4/2Q1K3",
+     "8/1Q6/5qrp/8/2r5/4k3/2bp2P1/3R2K1",
+     "8/r3r1k1/4P3/3n2r1/P1B5/K3P3/BP1P4/8",
+     "2r2bn1/8/5pqp/4p1p1/4P3/p2PprNk/P1K2p2/5R1n"
+    ],
+    "non": [
+     "1b2rk2/B5k1/2P1p1pp/KB6/8/5p2/1Ppp2PP/1p5K",
+     "8/4kN2/r3r1P1/p7/8/2P5/4PPPP/1K2R2K",
+     "2rr2pp/4kp2/3p3k/4p1n1/1P1qK1p1/2PP1B2/R2Q1R2/K5n1",
+     "8/1p1qkp2/2pn4/4n3/4P2p/NPB5/K2R1PPP/PPP3K1"
+    ]
+   }
+  },
+  "resample kc=4": {
+   "real": 0.017,
+   "legal": 0.015,
+   "non": 0.968,
+   "chunks kept (no draw fit)": 0.015,
+   "illegal_causes": {
+    "TOO_MANY_KINGS": 0.185,
+    "PAWNS_ON_BACKRANK": 0.722,
+    "NO_WHITE_KING": 0.53,
+    "OPPOSITE_CHECK": 0.1,
+    "TOO_MANY_BLACK_PAWNS": 0.243,
+    "NO_BLACK_KING": 0.343,
+    "TOO_MANY_WHITE_PAWNS": 0.065,
+    "TOO_MANY_BLACK_PIECES": 0.118,
+    "TOO_MANY_WHITE_PIECES": 0.018,
+    "IMPOSSIBLE_CHECK": 0.007
+   },
+   "examples": {
+    "real": [
+     "5rk1/8/6p1/5p2/2r5/4pPPP/2bb2K1/8",
+     "1bq5/p4rr1/1p5k/3PP1p1/p7/3pppP1/6K1/5q2",
+     "8/8/2pp1Q1p/2kpp3/p1n4P/4K2R/8/8",
+     "r7/8/7p/k7/p7/b4N2/1p4P1/5RK1"
+    ],
+    "legal": [
+     "2r3k1/4q3/R5P1/2r2P2/3PPn2/2r1PP2/2pp1P2/6K1",
+     "5rk1/p1p1p3/1p1p1r2/5pp1/1PPN3n/B1PPP3/3RK3/2N5",
+     "2br1k2/8/1p3PPP/2P3K1/P3B2N/5B1P/5PR1/5R2",
+     "5k2/4p1p1/5pP1/ppp5/3pN1B1/7P/4K3/8"
+    ],
+    "non": [
+     "k1p2k2/b4p2/4p1p1/B7/3P4/2P5/4NQPP/1P5K",
+     "3k4/1p2pp2/p3p1p1/bb1Q4/8/8/3P3r/1R4Rp",
+     "8/1r2qp2/3rkP1P/3nP2B/4n3/4B3/pp1ppp2/R2Q1Rp1",
+     "b2bk3/1p2kp2/p2qp2k/3Qp3/4NpP1/3P4/NP2P2p/K2P2p1"
+    ]
+   }
+  },
+  "resample kc=6": {
+   "real": 0.005,
+   "legal": 0.02,
+   "non": 0.975,
+   "chunks kept (no draw fit)": 0.012,
+   "illegal_causes": {
+    "PAWNS_ON_BACKRANK": 0.745,
+    "NO_BLACK_KING": 0.4,
+    "TOO_MANY_KINGS": 0.268,
+    "NO_WHITE_KING": 0.382,
+    "OPPOSITE_CHECK": 0.17,
+    "TOO_MANY_BLACK_PAWNS": 0.15,
+    "IMPOSSIBLE_CHECK": 0.007,
+    "TOO_MANY_WHITE_PAWNS": 0.13,
+    "TOO_MANY_WHITE_PIECES": 0.068,
+    "TOO_MANY_BLACK_PIECES": 0.072,
+    "TOO_MANY_CHECKERS": 0.005
+   },
+   "examples": {
+    "real": [
+     "8/5rkp/3b1p2/1PN1p3/8/P7/1K4P1/6R1",
+     "2r1k3/3pp1pp/4pp2/6N1/3P1P1P/r1bqP3/P5PP/2n3K1",
+     "4qr1k/4N3/3Qb3/PbR1R3/1P6/2q5/1P3PP1/5K2"
+    ],
+    "legal": [
+     "1rq1rk2/4p3/1pnbn3/2P5/8/P1Br4/Kp4R1/8",
+     "8/4PPP1/5K2/8/r4k2/1r3P2/n7/8",
+     "8/4PPP1/1nk2K2/2ppp3/1n6/5p2/6p1/8",
+     "6k1/2PN4/1PpbPPK1/3p1B2/3QB2P/3r1PP1/R1nRpP2/n5R1"
+    ],
+    "non": [
+     "2r1r3/1pr1bk2/4q1p1/pp6/8/8/PPP4r/1K5p",
+     "8/P2pPP1N/3Pp1K1/K1PK4/2P5/8/p1p5/1p5P",
+     "5pp1/4pp2/3p4/4QB2/1PrkPP2/P2b4/p6P/N3R1P1",
+     "8/2p1NP2/3p1N1N/4B3/4BQ1R/PPPbq3/K4b2/PPP3n1"
+    ]
+   }
+  },
+  "resample kc=99": {
+   "real": 0.007,
+   "legal": 0.018,
+   "non": 0.975,
+   "chunks kept (no draw fit)": 0.013,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.395,
+    "PAWNS_ON_BACKRANK": 0.757,
+    "NO_BLACK_KING": 0.398,
+    "TOO_MANY_KINGS": 0.295,
+    "TOO_MANY_WHITE_PAWNS": 0.133,
+    "OPPOSITE_CHECK": 0.193,
+    "TOO_MANY_BLACK_PAWNS": 0.19,
+    "TOO_MANY_BLACK_PIECES": 0.11,
+    "TOO_MANY_CHECKERS": 0.017,
+    "IMPOSSIBLE_CHECK": 0.02,
+    "TOO_MANY_WHITE_PIECES": 0.067
+   },
+   "examples": {
+    "real": [
+     "8/1p3p2/4p1k1/3p1n2/1nrqprP1/3P4/P7/K5b1",
+     "8/3P4/1pp5/1p2kP2/pq6/7P/5RK1/8",
+     "8/4PP2/5B2/7k/p5p1/7p/P5PP/6K1",
+     "8/1R3pk1/2p1p1pp/Kp3r2/8/5pq1/1P1QN3/1R4n1"
+    ],
+    "legal": [
+     "8/7k/6p1/2q1p1P1/3P1P2/4P3/2PPP3/3K4",
+     "6b1/1B5p/PRQ5/1Rbq1k2/8/1Pn1r2n/P1P3qb/1K4n1",
+     "8/k3P3/2PP4/2pK4/2qp4/1p1P4/pPP3B1/8",
+     "8/3p1K2/2p2p1P/3p1N2/2kr4/p1p5/8/8"
+    ],
+    "non": [
+     "1r1bq1k1/2p4b/1p1pn1n1/p1p5/8/8/1r4P1/1p5P",
+     "r4r2/2p1q2p/4n1p1/P2B4/8/2P2P2/rk2P3/1b5r",
+     "5pp1/2p2P2/1ppp2R1/3pPP2/4p1P1/1B6/R1N1PR2/PP4P1",
+     "3r1k2/2N2P2/3nPp2/2Q1p3/B3KPP1/1q1rk3/R3R3/n5PP"
+    ]
+   }
+  }
+ },
+ "N4000": {
+  "learned": 4000,
+  "learn_s": 3124,
+  "chunk units": 22023,
+  "parsed chunks per position": 5.49,
+  "identity (real board, parse units unchanged)": {
+   "real": 0.953,
+   "legal": 0.047,
+   "non": 0.0,
+   "chunks kept (no draw fit)": 0.0,
+   "illegal_causes": {},
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "r3k1nr/pp2ppbp/2p1b3/3p2p1/1nPPP3/1P3N2/1P1N1PPP/R1BK1B1R",
+     "r3k1nr/pp2ppbp/2p1b3/3p2p1/1nPPP3/1P3N2/1P1N1PPP/R1BK1B1R",
+     "5r2/r2n3k/Pq4pp/Q1Npb3/1B2p3/3P2nP/4P1BK/R3R3",
+     "5r2/r2n3k/Pq4pp/Q1Npb3/1B2p3/3P2nP/4P1BK/R3R3"
+    ],
+    "non": []
+   }
+  },
+  "keep kc=0": {
+   "real": 0.777,
+   "legal": 0.052,
+   "non": 0.172,
+   "chunks kept (no draw fit)": 0.193,
+   "illegal_causes": {
+    "OPPOSITE_CHECK": 0.04,
+    "NO_WHITE_KING": 0.027,
+    "TOO_MANY_KINGS": 0.023,
+    "PAWNS_ON_BACKRANK": 0.033,
+    "NO_BLACK_KING": 0.057,
+    "TOO_MANY_BLACK_PIECES": 0.007
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/8/4P2P/PP4P1/1K5R",
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/8/4P2P/PP4P1/1K5R",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "r3k2r/ppp1ppb1/2p1b3/3p4/1nPP4/3P1N2/1PPN1PPP/R1BK1B1R",
+     "r3k2r/ppp1ppb1/2p1b3/3p4/1nPP4/3P1N2/1PPN1PPP/R1BK1B1R",
+     "k4b1r/pn6/1p3n2/7P/PP4P1/3PBN2/2K2PB1/3R3R",
+     "k4b1r/pn6/1p3n2/7P/PP4P1/3PBN2/2K2PB1/3R3R"
+    ],
+    "non": [
+     "r3r1k1/pp4pp/3n1qp1/5p2/3P1P2/1Q2N1Pb/PP3P1P/2R1R1KB",
+     "r3r1k1/pp4pp/3n1qp1/5p2/3P1P2/1Q2N1Pb/PP3P1P/2R1R1KB",
+     "4Q3/6p1/3bp2p/3p4/3PR2k/3p4/5PP1/2q3K1",
+     "4Q3/6p1/3bp2p/3p4/3PR2k/3p4/5PP1/2q3K1"
+    ]
+   }
+  },
+  "keep kc=1": {
+   "real": 0.235,
+   "legal": 0.043,
+   "non": 0.722,
+   "chunks kept (no draw fit)": 0.015,
+   "illegal_causes": {
+    "PAWNS_ON_BACKRANK": 0.258,
+    "NO_WHITE_KING": 0.148,
+    "TOO_MANY_KINGS": 0.202,
+    "OPPOSITE_CHECK": 0.088,
+    "NO_BLACK_KING": 0.21,
+    "TOO_MANY_BLACK_PAWNS": 0.027,
+    "TOO_MANY_BLACK_PIECES": 0.01,
+    "TOO_MANY_WHITE_PAWNS": 0.027,
+    "IMPOSSIBLE_CHECK": 0.003,
+    "TOO_MANY_WHITE_PIECES": 0.008,
+    "TOO_MANY_CHECKERS": 0.002
+   },
+   "examples": {
+    "real": [
+     "8/8/rb2rk1p/ppp5/8/6P1/PPP4P/1K5N",
+     "1rbq1k2/Q1p2pp1/2n1p3/4p3/3P1Q2/2PB4/PP3PPP/R3R1K1",
+     "1rbq3k/Q1p1b1pp/2n1p3/4p3/5P2/3P4/PPP1Q1PP/R2RN1K1",
+     "r3rk2/p3q1p1/8/P3p1p1/1P1PPp2/2P5/6PP/6K1"
+    ],
+    "legal": [
+     "r1b1r3/ppp3kp/1pp1pb2/3p4/P1P5/1P1NBn2/1K2PP2/RQ1R1R2",
+     "rnb5/p6p/5rk1/5p2/8/b7/4P1PP/RNBQKR1B",
+     "7r/2pq1rbk/P2pnpp1/1Pb1pp2/4Bn2/q3BBP1/3N1P1P/1R2Q1K1",
+     "2bq4/2rpbpp1/2pp1n1p/8/2r1k2B/P3bN2/3PP2P/R1BQKR1R"
+    ],
+    "non": [
+     "r4k2/ppp1p3/r2qq3/ppb5/8/7P/2P1p1P1/1PK4B",
+     "5k2/ppr3pp/2pp1np1/7q/1P6/P1P3P1/2R1Q2P/4R1PK",
+     "4pk2/1prpb1pp/2p2np1/3P3q/1PP5/P7/3B1QP1/4RRR1",
+     "r4b1k/p5p1/6k1/P6p/1P1P1pp1/2P5/5PPP/6K1"
+    ]
+   }
+  },
+  "keep kc=2": {
+   "real": 0.053,
+   "legal": 0.025,
+   "non": 0.922,
+   "chunks kept (no draw fit)": 0.009,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.477,
+    "PAWNS_ON_BACKRANK": 0.583,
+    "TOO_MANY_KINGS": 0.113,
+    "NO_BLACK_KING": 0.373,
+    "TOO_MANY_WHITE_PAWNS": 0.067,
+    "TOO_MANY_BLACK_PAWNS": 0.047,
+    "OPPOSITE_CHECK": 0.088,
+    "TOO_MANY_BLACK_PIECES": 0.012,
+    "TOO_MANY_WHITE_PIECES": 0.012
+   },
+   "examples": {
+    "real": [
+     "r2q4/ppp3rk/3p1P2/4p3/3P1bP1/2P5/4PP1P/6K1",
+     "5rk1/3pqb2/2p3p1/1p1Pp3/p1ppP2P/2P5/PP2P1K1/8",
+     "3r1rk1/2p2b2/N1q2pp1/1Q2p3/2ppN3/1PPP1PP1/PP2R1K1/8",
+     "8/1k3pp1/1pp1p2p/8/4P1B1/2N1PP1P/PP4K1/8"
+    ],
+    "legal": [
+     "1n6/r1kbqp2/2p1p3/3pPP1B/3P2PQ/3B1N1P/8/R4RK1",
+     "1rr2k2/R3p1p1/n4p2/rbp5/1K6/1P6/7P/7b",
+     "8/1p6/1K3k2/6p1/p3P3/1P1P4/3P4/5B2",
+     "8/3nk3/2ppp3/2n5/p2Q4/3Q4/2PKP3/3R1B2"
+    ],
+    "non": [
+     "nbq5/b7/p2Qrk2/PPn5/3P4/5P2/6P1/1R1R3P",
+     "8/8/rb1krk2/p1q5/8/6P1/5P2/1KP4R",
+     "br4k1/Qbpqnppp/2p5/3Pp3/3BP3/8/R2B3P/R2Q1Rb1",
+     "qr3bq1/Qnp3nb/2bb2pp/4p3/8/2P2N2/PPP2PPP/rK1P2K1"
+    ]
+   }
+  },
+  "keep kc=3": {
+   "real": 0.02,
+   "legal": 0.017,
+   "non": 0.963,
+   "chunks kept (no draw fit)": 0.01,
+   "illegal_causes": {
+    "TOO_MANY_KINGS": 0.117,
+    "NO_WHITE_KING": 0.523,
+    "PAWNS_ON_BACKRANK": 0.667,
+    "OPPOSITE_CHECK": 0.117,
+    "NO_BLACK_KING": 0.405,
+    "TOO_MANY_BLACK_PAWNS": 0.112,
+    "TOO_MANY_WHITE_PAWNS": 0.092,
+    "TOO_MANY_WHITE_PIECES": 0.017,
+    "TOO_MANY_BLACK_PIECES": 0.035,
+    "TOO_MANY_CHECKERS": 0.002,
+    "IMPOSSIBLE_CHECK": 0.002
+   },
+   "examples": {
+    "real": [
+     "1r5k/Q1p1r1pp/2p2bb1/4pp2/3P4/1P6/P3PPP1/QRN3K1",
+     "8/5r2/2kp4/2p2Q2/6K1/4P1PP/8/3r4",
+     "8/pp3k2/2pP1P2/3pB1p1/3P4/5PP1/5KB1/8",
+     "1r6/8/1q1p4/Np6/pp3b2/Q1P4k/1P6/R3R2K"
+    ],
+    "legal": [
+     "8/1r1k4/2p5/2n5/3B1P2/4PKP1/8/3r4",
+     "B7/8/P1rr4/Rb3p1P/4pkP1/2q4P/7K/8",
+     "r1bqrk2/3p3p/pnp2np1/1p4P1/1PB2R2/P2P3P/6P1/1R4K1",
+     "6k1/pp1pP3/2p1b3/2n1N1q1/Q3nKPb/5PNP/2P1N1NB/6Q1"
+    ],
+    "non": [
+     "8/r3kb2/r2pppp1/ppb1p3/8/1PP2P2/PP5P/1K5K",
+     "1q2p3/r7/3pk2r/p1p5/8/8/1k4B1/1p5R",
+     "p1k5/nb3pnr/2QB4/4p3/8/1P1pp3/P1N1Kp2/Q1R3p1",
+     "1p1rrkbq/3p2pp/2p3pB/6pn/1PP1K3/P4P2/5PP1/4PKP1"
+    ]
+   }
+  },
+  "keep kc=4": {
+   "real": 0.017,
+   "legal": 0.02,
+   "non": 0.963,
+   "chunks kept (no draw fit)": 0.014,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.467,
+    "NO_BLACK_KING": 0.417,
+    "PAWNS_ON_BACKRANK": 0.693,
+    "TOO_MANY_KINGS": 0.175,
+    "TOO_MANY_BLACK_PIECES": 0.087,
+    "TOO_MANY_BLACK_PAWNS": 0.212,
+    "TOO_MANY_WHITE_PAWNS": 0.068,
+    "OPPOSITE_CHECK": 0.138,
+    "TOO_MANY_WHITE_PIECES": 0.018,
+    "IMPOSSIBLE_CHECK": 0.01,
+    "TOO_MANY_CHECKERS": 0.007
+   },
+   "examples": {
+    "real": [
+     "8/2k5/1p1p4/2p5/P4P2/4BKP1/8/3r4",
+     "8/8/p4Q2/2p4p/3B2P1/1k2r3/2p2PPP/6K1",
+     "8/5ppp/4k3/3pppP1/5P2/3nr1P1/4p1K1/8",
+     "2b2rk1/1r2qpp1/3p4/3n4/8/3nPPP1/4PKP1/8"
+    ],
+    "legal": [
+     "5k2/PB2p1p1/1p1ppb1p/6p1/PP1pP1b1/B2B1N2/K2P2PP/R3B2R",
+     "8/2ppp2N/1p3NB1/b1k5/8/nP2P3/2qPPP2/3K4",
+     "8/r4rk1/8/5n2/1rn5/5PPP/2pp2K1/8",
+     "8/R7/1pP4p/PKpP2p1/2B5/1P6/7k/7b"
+    ],
+    "non": [
+     "r6P/1r4NB/2rpP3/pnp5/8/8/6P1/1PB4R",
+     "8/1P1Pp3/2P1pp2/P1p5/8/6p1/8/1PP2B1p",
+     "prn1kPPP/Q5K1/2q5/1k2ppp1/2p3P1/1n6/RN1QRPR1/p5R1",
+     "2b1k2k/nk2n1p1/2n5/4p1n1/3P1rP1/3r1k1p/PPb2p2/q5p1"
+    ]
+   }
+  },
+  "keep kc=6": {
+   "real": 0.008,
+   "legal": 0.015,
+   "non": 0.977,
+   "chunks kept (no draw fit)": 0.012,
+   "illegal_causes": {
+    "NO_BLACK_KING": 0.338,
+    "PAWNS_ON_BACKRANK": 0.715,
+    "NO_WHITE_KING": 0.415,
+    "TOO_MANY_BLACK_PIECES": 0.082,
+    "TOO_MANY_KINGS": 0.282,
+    "TOO_MANY_WHITE_PAWNS": 0.122,
+    "TOO_MANY_BLACK_PAWNS": 0.122,
+    "IMPOSSIBLE_CHECK": 0.015,
+    "OPPOSITE_CHECK": 0.198,
+    "TOO_MANY_WHITE_PIECES": 0.063,
+    "TOO_MANY_CHECKERS": 0.005
+   },
+   "examples": {
+    "real": [
+     "8/6kp/3RR1P1/4p3/2b1r3/7P/1b3PP1/6K1",
+     "5k2/4pp2/2Pp1p2/2pP2p1/3p4/4P1PP/5K2/8",
+     "3rk3/8/1p1q4/1pp1P3/p2p4/7P/5KP1/8",
+     "r7/p3rk2/1pb2p2/5p2/8/PPB2P1B/1PP2K2/8"
+    ],
+    "legal": [
+     "6rk/2q1r2p/8/1n4p1/1b3P2/1pppP3/p3K3/8",
+     "5rk1/3B4/2P1P3/2P2P2/2pP2KN/1p4Np/pB2PPp1/8",
+     "6B1/8/4P1P1/4k3/P2pp3/1PP2p2/K6r/8",
+     "8/2PN2pp/4Bpk1/8/8/5PKP/RN1QR1B1/1nq3b1"
+    ],
+    "non": [
+     "2r5/1Kp3r1/4p1p1/b1pq4/8/8/1r4Q1/1p5P",
+     "3Q4/5p2/1r2pB2/R1bR4/4rk2/8/3b3P/1p5R",
+     "1N1q3b/Bb1n2Bb/2n5/4pprk/8/2r3B1/p7/PK4n1",
+     "4qbp1/qBk3n1/2N1rn2/2r1p3/1p6/4b3/p7/rk4rp"
+    ]
+   }
+  },
+  "keep kc=99": {
+   "real": 0.007,
+   "legal": 0.018,
+   "non": 0.975,
+   "chunks kept (no draw fit)": 0.012,
+   "illegal_causes": {
+    "NO_BLACK_KING": 0.332,
+    "TOO_MANY_WHITE_PAWNS": 0.128,
+    "PAWNS_ON_BACKRANK": 0.713,
+    "NO_WHITE_KING": 0.423,
+    "TOO_MANY_KINGS": 0.287,
+    "OPPOSITE_CHECK": 0.205,
+    "TOO_MANY_BLACK_PAWNS": 0.165,
+    "TOO_MANY_BLACK_PIECES": 0.087,
+    "TOO_MANY_CHECKERS": 0.005,
+    "IMPOSSIBLE_CHECK": 0.008,
+    "TOO_MANY_WHITE_PIECES": 0.075
+   },
+   "examples": {
+    "real": [
+     "8/8/1kpP4/2N1P3/PPp5/3np3/5KP1/8",
+     "r2qk3/8/4bn2/8/8/7p/5PPP/6K1",
+     "8/8/Np4n1/p1P1n3/8/2k2r2/2q2PPP/3b2K1",
+     "8/8/2p2q2/2q2rk1/2p1p2p/3p3P/3p2PK/8"
+    ],
+    "legal": [
+     "8/8/2P3r1/PP4pp/1Kpp4/1pr1k3/p3pp2/8",
+     "8/k7/1p3PPP/6K1/p2ppp2/1p1r4/4bp2/5n2",
+     "2q1rk2/2ppp3/pn3p2/8/P7/5r2/2PP1ppp/3K4",
+     "8/3P1P2/1RK2R2/2p5/q1rk1P2/6P1/2n4P/2B5"
+    ],
+    "non": [
+     "2P5/PP3P2/1rP1K1P1/P1pp4/r7/7P/p5PP/1p5K",
+     "1rk5/5b2/b2prk2/n1p1p3/8/3r2k1/6p1/1r1k3p",
+     "1PPP4/B3N1BP/2PPPpp1/4p2p/1PP5/bq1r4/P4R2/n5n1",
+     "rPP1pq2/p2P2p1/P1PBPP2/4K3/1QN5/8/R2qnb2/rk4n1"
+    ]
+   }
+  },
+  "resample kc=0": {
+   "real": 0.773,
+   "legal": 0.048,
+   "non": 0.178,
+   "chunks kept (no draw fit)": 0.192,
+   "illegal_causes": {
+    "OPPOSITE_CHECK": 0.042,
+    "TOO_MANY_KINGS": 0.025,
+    "NO_WHITE_KING": 0.027,
+    "PAWNS_ON_BACKRANK": 0.035,
+    "NO_BLACK_KING": 0.06,
+    "TOO_MANY_BLACK_PIECES": 0.007
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/8/4P2P/PP4P1/1K5R",
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/8/4P2P/PP4P1/1K5R",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "r3k2r/ppp1ppb1/2p1b3/3p4/1nPP4/3P1N2/1PPN1PPP/R1BK1B1R",
+     "r3k2r/ppp1ppb1/2p1b3/3p4/1nPP4/3P1N2/1PPN1PPP/R1BK1B1R",
+     "k4b1r/pn6/1p3n2/7P/PP4P1/3PBN2/2K2PB1/3R3R",
+     "k4b1r/pn6/1p3n2/7P/PP4P1/3PBN2/2K2PB1/3R3R"
+    ],
+    "non": [
+     "r3r1k1/pp4pp/3n1qp1/5p2/3P1P2/1Q2N1Pb/PP3P1P/2R1R1KB",
+     "r3r1k1/pp4pp/3n1qp1/5p2/3P1P2/1Q2N1Pb/PP3P1P/2R1R1KB",
+     "7k/6pp/pr1b1k2/1p2n3/2p1N3/2n4P/2P2PP1/1BR1R1K1",
+     "4Q3/6p1/3bp2p/3p4/3PR2k/3p4/5PP1/2q3K1"
+    ]
+   }
+  },
+  "resample kc=1": {
+   "real": 0.233,
+   "legal": 0.052,
+   "non": 0.715,
+   "chunks kept (no draw fit)": 0.012,
+   "illegal_causes": {
+    "NO_BLACK_KING": 0.25,
+    "PAWNS_ON_BACKRANK": 0.253,
+    "NO_WHITE_KING": 0.148,
+    "TOO_MANY_BLACK_PAWNS": 0.043,
+    "TOO_MANY_KINGS": 0.192,
+    "OPPOSITE_CHECK": 0.1,
+    "TOO_MANY_WHITE_PAWNS": 0.022,
+    "TOO_MANY_BLACK_PIECES": 0.015,
+    "TOO_MANY_WHITE_PIECES": 0.008
+   },
+   "examples": {
+    "real": [
+     "1r1q1rk1/Q1ppn1pp/2pb4/4p3/3PP3/2P2N2/PP4PP/R2QR1K1",
+     "r4k2/pp4pp/6r1/4p1p1/3P1p2/2P3P1/5P1P/6K1",
+     "r7/pp3p2/2p1qpk1/3pR3/1pP5/3PPN2/1PP1Q1PP/R1BK1R1R",
+     "5r1k/8/pP1r4/P1p1p3/1PPp1nB1/2P1R3/1PR2PP1/6K1"
+    ],
+    "legal": [
+     "8/2r2q2/rB1brk2/pppp4/8/6P1/1PP3nP/1K5N",
+     "5q2/5k1p/3q2n1/1r2p3/2p5/2PnP3/1p5P/6K1",
+     "4k1r1/5p2/4p3/2r5/2pppPB1/4K3/5PQ1/4R2R",
+     "r1b1r1k1/pp4pp/2b4P/1qbp1P2/2p1nNN1/2BPPPP1/5Q1P/R4NK1"
+    ],
+    "non": [
+     "3rb1r1/8/r2pn3/ppb2p2/8/3PP3/1PPP1P2/1K5N",
+     "1rbq1rk1/Q1p3pp/2npp3/4p3/3P1P2/2P5/PQ6/R1B1R1KP",
+     "4r1k1/1pr1pppp/2pp1np1/7q/1P1P4/P1R2P2/6P1/4Q1Q1",
+     "5kpp/1prp2np/2pppnp1/7q/1P6/P1B2P2/1P2P1P1/4R1K1"
+    ]
+   }
+  },
+  "resample kc=2": {
+   "real": 0.063,
+   "legal": 0.022,
+   "non": 0.915,
+   "chunks kept (no draw fit)": 0.012,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.487,
+    "NO_BLACK_KING": 0.368,
+    "PAWNS_ON_BACKRANK": 0.588,
+    "TOO_MANY_WHITE_PAWNS": 0.077,
+    "TOO_MANY_KINGS": 0.143,
+    "OPPOSITE_CHECK": 0.078,
+    "TOO_MANY_BLACK_PAWNS": 0.063,
+    "TOO_MANY_BLACK_PIECES": 0.013,
+    "TOO_MANY_WHITE_PIECES": 0.012,
+    "IMPOSSIBLE_CHECK": 0.002
+   },
+   "examples": {
+    "real": [
+     "8/2r3np/8/2k2N2/5PP1/4K1P1/8/3q4",
+     "4rr1k/3q1rpp/3pn1p1/2b1pp2/1P3RQP/P5KB/1P1R1P2/1B4R1",
+     "8/r2q1b2/1k1b2pp/2n2p2/4p3/1PP2N2/P4PPP/R1BQ2K1",
+     "5k2/5p2/1pqbpQpp/3P4/5PP1/2N2N1P/PP4K1/8"
+    ],
+    "legal": [
+     "1n2r3/1pk1qpp1/2bp1b1p/4q3/5n1B/3BpN2/RN1PPP1P/N3K2R",
+     "4rq2/5n1p/3p4/2k1p3/1R6/4p3/1QP1P2P/6K1",
+     "1r6/2p5/b1pp4/8/2k4P/1bn5/n4PP1/4r1K1",
+     "3r4/2r3k1/1p1PK1p1/2p5/1R2p1p1/3B4/1PN5/NB4RN"
+    ],
+    "non": [
+     "5q2/6b1/1b2pp2/p1qp4/8/3PPP2/2P2P2/1P5P",
+     "r2rr3/br3qr1/2q1n3/n1n5/7P/1P4P1/7P/1PN4K",
+     "nr3n2/Q1pb2q1/2q2b2/4p1p1/8/1P6/P1PP3P/RNB2RK1",
+     "p3k3/Q1pb2bq/2nq4/4p3/B7/1PP2P2/P7/R1BQ2q1"
+    ]
+   }
+  },
+  "resample kc=3": {
+   "real": 0.012,
+   "legal": 0.018,
+   "non": 0.97,
+   "chunks kept (no draw fit)": 0.006,
+   "illegal_causes": {
+    "NO_BLACK_KING": 0.42,
+    "PAWNS_ON_BACKRANK": 0.677,
+    "TOO_MANY_KINGS": 0.145,
+    "TOO_MANY_WHITE_PAWNS": 0.075,
+    "NO_WHITE_KING": 0.545,
+    "TOO_MANY_WHITE_PIECES": 0.023,
+    "TOO_MANY_BLACK_PAWNS": 0.127,
+    "OPPOSITE_CHECK": 0.117,
+    "TOO_MANY_BLACK_PIECES": 0.035,
+    "IMPOSSIBLE_CHECK": 0.002
+   },
+   "examples": {
+    "real": [
+     "6k1/pp4p1/8/5r1b/2pPPp2/2P5/5PPP/6K1",
+     "rk6/2p3P1/8/2b1N1B1/8/4K1P1/8/3r4",
+     "8/1N1n4/1pk2p2/2pq2pp/2PPP3/2PK4/1P4P1/8",
+     "3q4/1p2bk2/1p3n2/2p2pp1/4b3/2P2B2/1P1B1PP1/5QK1"
+    ],
+    "legal": [
+     "7k/PK3p1b/2bqp3/8/ppp4p/4Br2/PPQp3P/R2Rq2R",
+     "1r1k4/N2p4/4pP2/1Q6/2RRPp1p/6p1/5n2/4K3",
+     "B5k1/5b1n/P3p3/2R1Pppp/1R2p1b1/1P1p1P2/1P3PP1/N5K1",
+     "3n1q2/1q2Pb1n/2bp1b1n/2p2K2/1p6/P1PPrnP1/1PN2Bk1/2Q3b1"
+    ],
+    "non": [
+     "3pp3/4q3/2P1rn1R/PPpN4/1P6/2PP4/7B/1K5P",
+     "8/5k2/r2qrk2/ppbrp3/4P3/3n4/5PPP/1PB4K",
+     "rn5N/p1k1r1B1/2p2bb1/4ppp1/1rP3r1/1P1qp3/P1PP4/K2R2p1",
+     "2r5/pp1kn1rk/2q5/4pp2/8/2PPP2P/P2P1PP1/PPP3K1"
+    ]
+   }
+  },
+  "resample kc=4": {
+   "real": 0.008,
+   "legal": 0.013,
+   "non": 0.978,
+   "chunks kept (no draw fit)": 0.01,
+   "illegal_causes": {
+    "NO_BLACK_KING": 0.433,
+    "PAWNS_ON_BACKRANK": 0.707,
+    "TOO_MANY_KINGS": 0.173,
+    "OPPOSITE_CHECK": 0.145,
+    "NO_WHITE_KING": 0.49,
+    "TOO_MANY_BLACK_PAWNS": 0.223,
+    "TOO_MANY_BLACK_PIECES": 0.073,
+    "TOO_MANY_WHITE_PAWNS": 0.073,
+    "TOO_MANY_WHITE_PIECES": 0.033,
+    "IMPOSSIBLE_CHECK": 0.008,
+    "TOO_MANY_CHECKERS": 0.005
+   },
+   "examples": {
+    "real": [
+     "8/1p2r2p/3p1p2/4p1n1/2k3p1/4b3/1n4PP/6K1",
+     "5r1k/5p2/3Np3/2P1P3/1rr1q1pp/6K1/p7/8",
+     "4kb1q/bp4pp/5n2/1r1b4/1p1n4/BN5P/PPB2PPP/R5K1",
+     "6k1/b3pp1p/6p1/1n1p1PB1/6R1/3Q2P1/5PR1/6K1"
+    ],
+    "legal": [
+     "8/4b3/pqn5/2krP3/2BpP3/2rPB3/2pp3P/6K1",
+     "8/3p1p2/2p1b3/rPpp1r2/pp6/2P3P1/1k1r3K/2b5",
+     "8/1r2q3/3p3b/2KBp1n1/1P3k1P/R4bp1/5p1P/2r5",
+     "8/prp5/1pp2P1P/1p2K1pR/5p1P/4BbPk/6q1/4R3"
+    ],
+    "non": [
+     "2p5/1p1NP3/4B3/rnnq4/8/8/PPP3p1/1K5p",
+     "3kQ3/r2pp3/4P3/p1p5/8/5P2/1P4PP/1R3K1K",
+     "k3n2p/n1p1p1nb/2kn4/4n3/4BNQ1/P2PQ3/R1b2R2/BN4R1",
+     "5pp1/nk2n1rk/2p1p3/4P3/8/2rk4/b1P4P/bb4P1"
+    ]
+   }
+  },
+  "resample kc=6": {
+   "real": 0.007,
+   "legal": 0.008,
+   "non": 0.985,
+   "chunks kept (no draw fit)": 0.013,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.417,
+    "PAWNS_ON_BACKRANK": 0.702,
+    "OPPOSITE_CHECK": 0.202,
+    "TOO_MANY_KINGS": 0.293,
+    "NO_BLACK_KING": 0.353,
+    "TOO_MANY_BLACK_PAWNS": 0.133,
+    "TOO_MANY_WHITE_PAWNS": 0.115,
+    "TOO_MANY_WHITE_PIECES": 0.04,
+    "TOO_MANY_CHECKERS": 0.005,
+    "IMPOSSIBLE_CHECK": 0.007,
+    "TOO_MANY_BLACK_PIECES": 0.098
+   },
+   "examples": {
+    "real": [
+     "5bk1/1r2qppp/4p3/4p1p1/2P3p1/6b1/Q1KP4/8",
+     "8/4p1p1/3k1p1p/3p4/1P6/B4P1P/6K1/8",
+     "6r1/4P1p1/6k1/7p/RNPQ1P2/8/1P3P1P/6K1",
+     "8/p7/3p1k2/4p3/3P4/4Pp2/1R1K4/8"
+    ],
+    "legal": [
+     "8/P7/2PP1pk1/1p1Kp1pp/3p4/5r2/5p2/8",
+     "1rn1q1k1/5b2/6n1/8/6p1/P7/4P1P1/5K2",
+     "8/8/2b1n1p1/4rkb1/1N1P3P/RQR1PP2/5K1P/2R5",
+     "8/Qpk2r2/4p1NP/2Nn1B2/2P1Bp2/1P3N2/p2b2PK/r5R1"
+    ],
+    "non": [
+     "4b3/6kN/1pp1n2b/p1RpBQ2/8/4r2p/2b2p2/1n4pn",
+     "2P5/N2R4/1P2P3/P1k1KP2/8/2r5/2bpq2k/1p5p",
+     "1P4PP/rnb1kBK1/2QbQ3/rn2R2R/1p3PP1/4P3/pKP5/P5R1",
+     "q3qPPP/npn3K1/2b2b2/4n3/5B2/2kQ4/Rpp1R1r1/r5p1"
+    ]
+   }
+  },
+  "resample kc=99": {
+   "real": 0.002,
+   "legal": 0.017,
+   "non": 0.982,
+   "chunks kept (no draw fit)": 0.01,
+   "illegal_causes": {
+    "NO_WHITE_KING": 0.388,
+    "PAWNS_ON_BACKRANK": 0.753,
+    "OPPOSITE_CHECK": 0.227,
+    "TOO_MANY_BLACK_PAWNS": 0.178,
+    "TOO_MANY_WHITE_PAWNS": 0.1,
+    "TOO_MANY_WHITE_PIECES": 0.047,
+    "TOO_MANY_KINGS": 0.278,
+    "NO_BLACK_KING": 0.353,
+    "TOO_MANY_BLACK_PIECES": 0.088,
+    "TOO_MANY_CHECKERS": 0.005,
+    "IMPOSSIBLE_CHECK": 0.008
+   },
+   "examples": {
+    "real": [
+     "7r/5b2/3k4/5p1p/8/5P2/4PKP1/6b1"
+    ],
+    "legal": [
+     "1rr4r/3rk3/n1pq4/5b2/7b/2pp1K2/2p3PP/RNB2RR1",
+     "4rk2/b3p3/2pPP3/1pBnRr2/3Pp1n1/n1q4b/3br3/4n1K1",
+     "6rk/5Pp1/4K1p1/1r3pp1/8/p7/1p3P2/8",
+     "1n2bKB1/2b5/4n3/1P5R/1B6/p7/3pp2p/4n1rk"
+    ],
+    "non": [
+     "8/2qpk3/rn2p3/p1b5/4B3/5P2/2p3bk/1P5p",
+     "8/5P2/1N1NBPP1/P1PP4/3rk3/4b2P/6P1/1p5R",
+     "NpPppp2/P2B2p1/1kp2pp1/4p3/6Q1/4p1B1/PP3p1p/R4Rp1",
+     "1Br2PQ1/R1Np2P1/1NpP1B2/4PN2/3P4/2NP4/P2K1rk1/PP4b1"
+    ]
+   }
+  }
+ }
+}
