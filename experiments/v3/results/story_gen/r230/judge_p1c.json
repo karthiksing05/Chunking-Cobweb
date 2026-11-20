@@ -1,0 +1,226 @@
+{
+ "experiments/v3/results/story_gen/r230/p1/func5_s13_n4000_c6_b0/story_s13_n4000_arm0.jsonl": {
+  "arm": {
+   "cond": false,
+   "wreach": 5,
+   "wemit": 0,
+   "wemitk": 5,
+   "wgate": 0,
+   "causal": 1,
+   "units": "words",
+   "pair": "gate",
+   "new": true,
+   "edge": "exact"
+  },
+  "n": 1600,
+  "all": {
+   "sem": 0.001,
+   "syn": 0.025,
+   "non": 0.974
+  },
+  "novel share": 1.0,
+  "among novel": {
+   "sem": 0.001,
+   "syn": 0.025,
+   "non": 0.974
+  },
+  "n novel": 1600,
+  "syn reasons": {
+   "object": 21,
+   "subject+object": 9,
+   "subject": 8,
+   "object+adjective": 1,
+   "subject+object+adjective": 1
+  },
+  "non reasons": {
+   "subject NP": 785,
+   "verb": 555,
+   "agreement": 138,
+   "object NP": 45,
+   "trailing": 19
+  }
+ },
+ "experiments/v3/results/story_gen/r230/p1/func5_s13_n4000_c6_b6/story_s13_n4000_arm0.jsonl": {
+  "arm": {
+   "cond": false,
+   "wreach": 5,
+   "wemit": 6,
+   "wemitk": 5,
+   "wgate": 6,
+   "causal": 1,
+   "units": "words",
+   "pair": "gate",
+   "new": true,
+   "edge": "exact"
+  },
+  "n": 1600,
+  "all": {
+   "sem": 0.21,
+   "syn": 0.685,
+   "non": 0.105
+  },
+  "novel share": 1.0,
+  "among novel": {
+   "sem": 0.21,
+   "syn": 0.685,
+   "non": 0.105
+  },
+  "n novel": 1600,
+  "syn reasons": {
+   "object": 579,
+   "subject": 239,
+   "subject+object": 96,
+   "object+adjective": 64,
+   "subject+adjective": 44
+  },
+  "non reasons": {
+   "agreement": 164,
+   "object NP": 3,
+   "subject NP": 1
+  }
+ },
+ "experiments/v3/results/story_gen/r230/p1/func5_s13_n4000_c6_leaf/story_s13_n4000_arm0.jsonl": {
+  "arm": {
+   "cond": false,
+   "wreach": 5,
+   "wemit": "leaf",
+   "causal": 1,
+   "units": "words",
+   "pair": "gate",
+   "new": true,
+   "edge": "exact"
+  },
+  "n": 1600,
+  "all": {
+   "sem": 0.748,
+   "syn": 0.249,
+   "non": 0.003
+  },
+  "novel share": 1.0,
+  "among novel": {
+   "sem": 0.748,
+   "syn": 0.249,
+   "non": 0.003
+  },
+  "n novel": 1600,
+  "syn reasons": {
+   "object": 398
+  },
+  "non reasons": {
+   "subject NP": 3,
+   "object NP": 2
+  }
+ },
+ "experiments/v3/results/story_gen/r230/p1/func5_s17_n4000_c6_b0/story_s17_n4000_arm0.jsonl": {
+  "arm": {
+   "cond": false,
+   "wreach": 5,
+   "wemit": 0,
+   "wemitk": 5,
+   "wgate": 0,
+   "causal": 1,
+   "units": "words",
+   "pair": "gate",
+   "new": true,
+   "edge": "exact"
+  },
+  "n": 1600,
+  "all": {
+   "sem": 0.005,
+   "syn": 0.028,
+   "non": 0.967
+  },
+  "novel share": 1.0,
+  "among novel": {
+   "sem": 0.005,
+   "syn": 0.028,
+   "non": 0.967
+  },
+  "n novel": 1600,
+  "syn reasons": {
+   "object": 19,
+   "subject": 16,
+   "subject+object": 8,
+   "adjective": 1,
+   "object+adjective": 1
+  },
+  "non reasons": {
+   "subject NP": 813,
+   "verb": 547,
+   "agreement": 107,
+   "object NP": 44,
+   "trailing": 24
+  }
+ },
+ "experiments/v3/results/story_gen/r230/p1/func5_s17_n4000_c6_b6/story_s17_n4000_arm0.jsonl": {
+  "arm": {
+   "cond": false,
+   "wreach": 5,
+   "wemit": 6,
+   "wemitk": 5,
+   "wgate": 6,
+   "causal": 1,
+   "units": "words",
+   "pair": "gate",
+   "new": true,
+   "edge": "exact"
+  },
+  "n": 1600,
+  "all": {
+   "sem": 0.184,
+   "syn": 0.659,
+   "non": 0.156
+  },
+  "novel share": 1.0,
+  "among novel": {
+   "sem": 0.184,
+   "syn": 0.659,
+   "non": 0.156
+  },
+  "n novel": 1600,
+  "syn reasons": {
+   "object": 527,
+   "subject": 267,
+   "object+adjective": 85,
+   "subject+object": 57,
+   "adjective": 53
+  },
+  "non reasons": {
+   "agreement": 159,
+   "verb": 60,
+   "preposition": 30,
+   "object NP": 1
+  }
+ },
+ "experiments/v3/results/story_gen/r230/p1/func5_s17_n4000_c6_leaf/story_s17_n4000_arm0.jsonl": {
+  "arm": {
+   "cond": false,
+   "wreach": 5,
+   "wemit": "leaf",
+   "causal": 1,
+   "units": "words",
+   "pair": "gate",
+   "new": true,
+   "edge": "exact"
+  },
+  "n": 1600,
+  "all": {
+   "sem": 0.721,
+   "syn": 0.277,
+   "non": 0.003
+  },
+  "novel share": 1.0,
+  "among novel": {
+   "sem": 0.721,
+   "syn": 0.277,
+   "non": 0.003
+  },
+  "n novel": 1600,
+  "syn reasons": {
+   "object": 443
+  },
+  "non reasons": {
+   "object NP": 4
+  }
+ }
+}

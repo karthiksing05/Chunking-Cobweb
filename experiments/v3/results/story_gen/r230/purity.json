@@ -1,0 +1,1872 @@
+{
+ "experiments/v3/results/story_gen/r230/wt/wordtree_all_s13_n1000.json": {
+  "levels": {
+   "0": {
+    "classes": 1,
+    "mean size": 147.0,
+    "pairs": 10731,
+    "syn purity (class mates, same syntactic category)": 0.17,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.158,
+    "sem purity within syntactic category": 0.166,
+    "n_sem_pairs": 4379
+   },
+   "1": {
+    "classes": 2,
+    "mean size": 73.5,
+    "pairs": 5511,
+    "syn purity (class mates, same syntactic category)": 0.192,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.274,
+    "sem purity within syntactic category": 0.273,
+    "n_sem_pairs": 2411
+   },
+   "2": {
+    "classes": 3,
+    "mean size": 49.0,
+    "pairs": 3625,
+    "syn purity (class mates, same syntactic category)": 0.292,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.274,
+    "sem purity within syntactic category": 0.273,
+    "n_sem_pairs": 2411
+   },
+   "3": {
+    "classes": 7,
+    "mean size": 21.0,
+    "pairs": 1599,
+    "syn purity (class mates, same syntactic category)": 0.637,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.273,
+    "sem purity within syntactic category": 0.27,
+    "n_sem_pairs": 1301
+   },
+   "4": {
+    "classes": 12,
+    "mean size": 12.2,
+    "pairs": 900,
+    "syn purity (class mates, same syntactic category)": 0.803,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.339,
+    "sem purity within syntactic category": 0.322,
+    "n_sem_pairs": 837
+   },
+   "5": {
+    "classes": 27,
+    "mean size": 5.4,
+    "pairs": 390,
+    "syn purity (class mates, same syntactic category)": 0.821,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.495,
+    "sem purity within syntactic category": 0.506,
+    "n_sem_pairs": 376
+   },
+   "6": {
+    "classes": 45,
+    "mean size": 3.3,
+    "pairs": 199,
+    "syn purity (class mates, same syntactic category)": 0.945,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.625,
+    "sem purity within syntactic category": 0.633,
+    "n_sem_pairs": 192
+   },
+   "6.5": {
+    "classes": 75,
+    "mean size": 2.0,
+    "pairs": 87,
+    "syn purity (class mates, same syntactic category)": 0.943,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.583,
+    "sem purity within syntactic category": 0.585,
+    "n_sem_pairs": 84
+   },
+   "7": {
+    "classes": 75,
+    "mean size": 2.0,
+    "pairs": 87,
+    "syn purity (class mates, same syntactic category)": 0.943,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.583,
+    "sem purity within syntactic category": 0.585,
+    "n_sem_pairs": 84
+   },
+   "7.25": {
+    "classes": 147,
+    "mean size": 1.0,
+    "pairs": 0,
+    "syn purity (class mates, same syntactic category)": null,
+    "sem purity (content class mates of the same kind, same semantic type)": null,
+    "sem purity within syntactic category": null,
+    "n_sem_pairs": 0
+   },
+   "7.5": {
+    "classes": 147,
+    "mean size": 1.0,
+    "pairs": 0,
+    "syn purity (class mates, same syntactic category)": null,
+    "sem purity (content class mates of the same kind, same semantic type)": null,
+    "sem purity within syntactic category": null,
+    "n_sem_pairs": 0
+   },
+   "7.75": {
+    "classes": 147,
+    "mean size": 1.0,
+    "pairs": 0,
+    "syn purity (class mates, same syntactic category)": null,
+    "sem purity (content class mates of the same kind, same semantic type)": null,
+    "sem purity within syntactic category": null,
+    "n_sem_pairs": 0
+   },
+   "leaf": {
+    "classes": 147,
+    "mean size": 1.0,
+    "pairs": 0,
+    "syn purity (class mates, same syntactic category)": null,
+    "sem purity (content class mates of the same kind, same semantic type)": null,
+    "sem purity within syntactic category": null,
+    "n_sem_pairs": 0
+   },
+   "d1": {
+    "classes": 2,
+    "mean size": 73.5,
+    "pairs": 5511,
+    "syn purity (class mates, same syntactic category)": 0.192,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.274,
+    "sem purity within syntactic category": 0.273,
+    "n_sem_pairs": 2411
+   },
+   "d2": {
+    "classes": 6,
+    "mean size": 24.5,
+    "pairs": 2092,
+    "syn purity (class mates, same syntactic category)": 0.487,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.305,
+    "sem purity within syntactic category": 0.27,
+    "n_sem_pairs": 1556
+   },
+   "d3": {
+    "classes": 19,
+    "mean size": 7.7,
+    "pairs": 952,
+    "syn purity (class mates, same syntactic category)": 0.73,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.336,
+    "sem purity within syntactic category": 0.324,
+    "n_sem_pairs": 715
+   },
+   "d4": {
+    "classes": 51,
+    "mean size": 2.9,
+    "pairs": 392,
+    "syn purity (class mates, same syntactic category)": 1.0,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.406,
+    "sem purity within syntactic category": 0.406,
+    "n_sem_pairs": 392
+   },
+   "d5": {
+    "classes": 91,
+    "mean size": 1.6,
+    "pairs": 138,
+    "syn purity (class mates, same syntactic category)": 1.0,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.681,
+    "sem purity within syntactic category": 0.681,
+    "n_sem_pairs": 138
+   },
+   "d6": {
+    "classes": 130,
+    "mean size": 1.1,
+    "pairs": 21,
+    "syn purity (class mates, same syntactic category)": 1.0,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.714,
+    "sem purity within syntactic category": 0.714,
+    "n_sem_pairs": 21
+   },
+   "d8": {
+    "classes": 147,
+    "mean size": 1.0,
+    "pairs": 0,
+    "syn purity (class mates, same syntactic category)": null,
+    "sem purity (content class mates of the same kind, same semantic type)": null,
+    "sem purity within syntactic category": null,
+    "n_sem_pairs": 0
+   }
+  },
+  "chance syn purity (all pairs)": 0.17,
+  "chance sem purity (same kind pairs)": 0.158,
+  "types": 147
+ },
+ "experiments/v3/results/story_gen/r230/wt/wordtree_all_s17_n1000.json": {
+  "levels": {
+   "0": {
+    "classes": 1,
+    "mean size": 147.0,
+    "pairs": 10731,
+    "syn purity (class mates, same syntactic category)": 0.17,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.158,
+    "sem purity within syntactic category": 0.166,
+    "n_sem_pairs": 4379
+   },
+   "1": {
+    "classes": 2,
+    "mean size": 73.5,
+    "pairs": 5539,
+    "syn purity (class mates, same syntactic category)": 0.19,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.282,
+    "sem purity within syntactic category": 0.282,
+    "n_sem_pairs": 2396
+   },
+   "2": {
+    "classes": 3,
+    "mean size": 49.0,
+    "pairs": 3612,
+    "syn purity (class mates, same syntactic category)": 0.291,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.282,
+    "sem purity within syntactic category": 0.282,
+    "n_sem_pairs": 2396
+   },
+   "3": {
+    "classes": 7,
+    "mean size": 21.0,
+    "pairs": 1585,
+    "syn purity (class mates, same syntactic category)": 0.64,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.283,
+    "sem purity within syntactic category": 0.285,
+    "n_sem_pairs": 1248
+   },
+   "4": {
+    "classes": 14,
+    "mean size": 10.5,
+    "pairs": 828,
+    "syn purity (class mates, same syntactic category)": 0.771,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.409,
+    "sem purity within syntactic category": 0.391,
+    "n_sem_pairs": 727
+   },
+   "5": {
+    "classes": 30,
+    "mean size": 4.9,
+    "pairs": 350,
+    "syn purity (class mates, same syntactic category)": 0.869,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.508,
+    "sem purity within syntactic category": 0.498,
+    "n_sem_pairs": 327
+   },
+   "6": {
+    "classes": 48,
+    "mean size": 3.1,
+    "pairs": 185,
+    "syn purity (class mates, same syntactic category)": 0.941,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.497,
+    "sem purity within syntactic category": 0.497,
+    "n_sem_pairs": 175
+   },
+   "6.5": {
+    "classes": 67,
+    "mean size": 2.2,
+    "pairs": 105,
+    "syn purity (class mates, same syntactic category)": 0.914,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.639,
+    "sem purity within syntactic category": 0.642,
+    "n_sem_pairs": 97
+   },
+   "7": {
+    "classes": 67,
+    "mean size": 2.2,
+    "pairs": 105,
+    "syn purity (class mates, same syntactic category)": 0.914,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.639,
+    "sem purity within syntactic category": 0.642,
+    "n_sem_pairs": 97
+   },
+   "7.25": {
+    "classes": 147,
+    "mean size": 1.0,
+    "pairs": 0,
+    "syn purity (class mates, same syntactic category)": null,
+    "sem purity (content class mates of the same kind, same semantic type)": null,
+    "sem purity within syntactic category": null,
+    "n_sem_pairs": 0
+   },
+   "7.5": {
+    "classes": 147,
+    "mean size": 1.0,
+    "pairs": 0,
+    "syn purity (class mates, same syntactic category)": null,
+    "sem purity (content class mates of the same kind, same semantic type)": null,
+    "sem purity within syntactic category": null,
+    "n_sem_pairs": 0
+   },
+   "7.75": {
+    "classes": 147,
+    "mean size": 1.0,
+    "pairs": 0,
+    "syn purity (class mates, same syntactic category)": null,
+    "sem purity (content class mates of the same kind, same semantic type)": null,
+    "sem purity within syntactic category": null,
+    "n_sem_pairs": 0
+   },
+   "leaf": {
+    "classes": 147,
+    "mean size": 1.0,
+    "pairs": 0,
+    "syn purity (class mates, same syntactic category)": null,
+    "sem purity (content class mates of the same kind, same semantic type)": null,
+    "sem purity within syntactic category": null,
+    "n_sem_pairs": 0
+   },
+   "d1": {
+    "classes": 2,
+    "mean size": 73.5,
+    "pairs": 5539,
+    "syn purity (class mates, same syntactic category)": 0.19,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.282,
+    "sem purity within syntactic category": 0.282,
+    "n_sem_pairs": 2396
+   },
+   "d2": {
+    "classes": 7,
+    "mean size": 21.0,
+    "pairs": 2041,
+    "syn purity (class mates, same syntactic category)": 0.504,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.305,
+    "sem purity within syntactic category": 0.281,
+    "n_sem_pairs": 1497
+   },
+   "d3": {
+    "classes": 22,
+    "mean size": 6.7,
+    "pairs": 981,
+    "syn purity (class mates, same syntactic category)": 0.723,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.356,
+    "sem purity within syntactic category": 0.353,
+    "n_sem_pairs": 719
+   },
+   "d4": {
+    "classes": 53,
+    "mean size": 2.8,
+    "pairs": 402,
+    "syn purity (class mates, same syntactic category)": 0.935,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.424,
+    "sem purity within syntactic category": 0.424,
+    "n_sem_pairs": 375
+   },
+   "d5": {
+    "classes": 93,
+    "mean size": 1.6,
+    "pairs": 148,
+    "syn purity (class mates, same syntactic category)": 0.939,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.583,
+    "sem purity within syntactic category": 0.583,
+    "n_sem_pairs": 139
+   },
+   "d6": {
+    "classes": 127,
+    "mean size": 1.2,
+    "pairs": 46,
+    "syn purity (class mates, same syntactic category)": 1.0,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.87,
+    "sem purity within syntactic category": 0.87,
+    "n_sem_pairs": 46
+   },
+   "d8": {
+    "classes": 145,
+    "mean size": 1.0,
+    "pairs": 3,
+    "syn purity (class mates, same syntactic category)": 1.0,
+    "sem purity (content class mates of the same kind, same semantic type)": 1.0,
+    "sem purity within syntactic category": 1.0,
+    "n_sem_pairs": 3
+   }
+  },
+  "chance syn purity (all pairs)": 0.17,
+  "chance sem purity (same kind pairs)": 0.158,
+  "types": 147
+ },
+ "experiments/v3/results/story_gen/r230/wt/wordtree_func15_s13_n1000.json": {
+  "levels": {
+   "0": {
+    "classes": 1,
+    "mean size": 147.0,
+    "pairs": 10731,
+    "syn purity (class mates, same syntactic category)": 0.17,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.158,
+    "sem purity within syntactic category": 0.166,
+    "n_sem_pairs": 4379
+   },
+   "1": {
+    "classes": 2,
+    "mean size": 73.5,
+    "pairs": 5635,
+    "syn purity (class mates, same syntactic category)": 0.308,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.175,
+    "sem purity within syntactic category": 0.168,
+    "n_sem_pairs": 3778
+   },
+   "2": {
+    "classes": 5,
+    "mean size": 29.4,
+    "pairs": 3064,
+    "syn purity (class mates, same syntactic category)": 0.552,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.158,
+    "sem purity within syntactic category": 0.168,
+    "n_sem_pairs": 2229
+   },
+   "3": {
+    "classes": 7,
+    "mean size": 21.0,
+    "pairs": 1911,
+    "syn purity (class mates, same syntactic category)": 0.672,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.155,
+    "sem purity within syntactic category": 0.164,
+    "n_sem_pairs": 1488
+   },
+   "4": {
+    "classes": 16,
+    "mean size": 9.2,
+    "pairs": 711,
+    "syn purity (class mates, same syntactic category)": 0.806,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.172,
+    "sem purity within syntactic category": 0.157,
+    "n_sem_pairs": 618
+   },
+   "5": {
+    "classes": 28,
+    "mean size": 5.2,
+    "pairs": 384,
+    "syn purity (class mates, same syntactic category)": 0.826,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.199,
+    "sem purity within syntactic category": 0.177,
+    "n_sem_pairs": 362
+   },
+   "6": {
+    "classes": 51,
+    "mean size": 2.9,
+    "pairs": 162,
+    "syn purity (class mates, same syntactic category)": 0.932,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.237,
+    "sem purity within syntactic category": 0.233,
+    "n_sem_pairs": 156
+   },
+   "6.5": {
+    "classes": 76,
+    "mean size": 1.9,
+    "pairs": 92,
+    "syn purity (class mates, same syntactic category)": 0.902,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.267,
+    "sem purity within syntactic category": 0.256,
+    "n_sem_pairs": 86
+   },
+   "7": {
+    "classes": 76,
+    "mean size": 1.9,
+    "pairs": 92,
+    "syn purity (class mates, same syntactic category)": 0.902,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.267,
+    "sem purity within syntactic category": 0.256,
+    "n_sem_pairs": 86
+   },
+   "7.25": {
+    "classes": 136,
+    "mean size": 1.1,
+    "pairs": 19,
+    "syn purity (class mates, same syntactic category)": 0.789,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.474,
+    "sem purity within syntactic category": 0.467,
+    "n_sem_pairs": 19
+   },
+   "7.5": {
+    "classes": 136,
+    "mean size": 1.1,
+    "pairs": 19,
+    "syn purity (class mates, same syntactic category)": 0.789,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.474,
+    "sem purity within syntactic category": 0.467,
+    "n_sem_pairs": 19
+   },
+   "7.75": {
+    "classes": 136,
+    "mean size": 1.1,
+    "pairs": 19,
+    "syn purity (class mates, same syntactic category)": 0.789,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.474,
+    "sem purity within syntactic category": 0.467,
+    "n_sem_pairs": 19
+   },
+   "leaf": {
+    "classes": 136,
+    "mean size": 1.1,
+    "pairs": 19,
+    "syn purity (class mates, same syntactic category)": 0.789,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.474,
+    "sem purity within syntactic category": 0.467,
+    "n_sem_pairs": 19
+   },
+   "d1": {
+    "classes": 2,
+    "mean size": 73.5,
+    "pairs": 5635,
+    "syn purity (class mates, same syntactic category)": 0.308,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.175,
+    "sem purity within syntactic category": 0.168,
+    "n_sem_pairs": 3778
+   },
+   "d2": {
+    "classes": 7,
+    "mean size": 21.0,
+    "pairs": 2212,
+    "syn purity (class mates, same syntactic category)": 0.756,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.163,
+    "sem purity within syntactic category": 0.17,
+    "n_sem_pairs": 1890
+   },
+   "d3": {
+    "classes": 19,
+    "mean size": 7.7,
+    "pairs": 1209,
+    "syn purity (class mates, same syntactic category)": 0.951,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.173,
+    "sem purity within syntactic category": 0.171,
+    "n_sem_pairs": 1193
+   },
+   "d4": {
+    "classes": 45,
+    "mean size": 3.3,
+    "pairs": 466,
+    "syn purity (class mates, same syntactic category)": 0.97,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.172,
+    "sem purity within syntactic category": 0.168,
+    "n_sem_pairs": 466
+   },
+   "d5": {
+    "classes": 83,
+    "mean size": 1.8,
+    "pairs": 195,
+    "syn purity (class mates, same syntactic category)": 0.979,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.21,
+    "sem purity within syntactic category": 0.204,
+    "n_sem_pairs": 195
+   },
+   "d6": {
+    "classes": 109,
+    "mean size": 1.3,
+    "pairs": 103,
+    "syn purity (class mates, same syntactic category)": 0.961,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.233,
+    "sem purity within syntactic category": 0.222,
+    "n_sem_pairs": 103
+   },
+   "d8": {
+    "classes": 131,
+    "mean size": 1.1,
+    "pairs": 26,
+    "syn purity (class mates, same syntactic category)": 0.846,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.462,
+    "sem purity within syntactic category": 0.455,
+    "n_sem_pairs": 26
+   }
+  },
+  "chance syn purity (all pairs)": 0.17,
+  "chance sem purity (same kind pairs)": 0.158,
+  "types": 147
+ },
+ "experiments/v3/results/story_gen/r230/wt/wordtree_func15_s17_n1000.json": {
+  "levels": {
+   "0": {
+    "classes": 1,
+    "mean size": 147.0,
+    "pairs": 10731,
+    "syn purity (class mates, same syntactic category)": 0.17,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.158,
+    "sem purity within syntactic category": 0.166,
+    "n_sem_pairs": 4379
+   },
+   "1": {
+    "classes": 2,
+    "mean size": 73.5,
+    "pairs": 5385,
+    "syn purity (class mates, same syntactic category)": 0.284,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.171,
+    "sem purity within syntactic category": 0.168,
+    "n_sem_pairs": 3452
+   },
+   "2": {
+    "classes": 2,
+    "mean size": 73.5,
+    "pairs": 5385,
+    "syn purity (class mates, same syntactic category)": 0.284,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.171,
+    "sem purity within syntactic category": 0.168,
+    "n_sem_pairs": 3452
+   },
+   "3": {
+    "classes": 10,
+    "mean size": 14.7,
+    "pairs": 1326,
+    "syn purity (class mates, same syntactic category)": 0.648,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.17,
+    "sem purity within syntactic category": 0.189,
+    "n_sem_pairs": 1108
+   },
+   "4": {
+    "classes": 16,
+    "mean size": 9.2,
+    "pairs": 732,
+    "syn purity (class mates, same syntactic category)": 0.792,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.202,
+    "sem purity within syntactic category": 0.193,
+    "n_sem_pairs": 633
+   },
+   "5": {
+    "classes": 31,
+    "mean size": 4.7,
+    "pairs": 355,
+    "syn purity (class mates, same syntactic category)": 0.794,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.245,
+    "sem purity within syntactic category": 0.235,
+    "n_sem_pairs": 335
+   },
+   "6": {
+    "classes": 50,
+    "mean size": 2.9,
+    "pairs": 166,
+    "syn purity (class mates, same syntactic category)": 0.94,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.228,
+    "sem purity within syntactic category": 0.226,
+    "n_sem_pairs": 158
+   },
+   "6.5": {
+    "classes": 71,
+    "mean size": 2.1,
+    "pairs": 100,
+    "syn purity (class mates, same syntactic category)": 0.93,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.2,
+    "sem purity within syntactic category": 0.196,
+    "n_sem_pairs": 95
+   },
+   "7": {
+    "classes": 71,
+    "mean size": 2.1,
+    "pairs": 100,
+    "syn purity (class mates, same syntactic category)": 0.93,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.2,
+    "sem purity within syntactic category": 0.196,
+    "n_sem_pairs": 95
+   },
+   "7.25": {
+    "classes": 136,
+    "mean size": 1.1,
+    "pairs": 17,
+    "syn purity (class mates, same syntactic category)": 0.824,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.353,
+    "sem purity within syntactic category": 0.357,
+    "n_sem_pairs": 17
+   },
+   "7.5": {
+    "classes": 136,
+    "mean size": 1.1,
+    "pairs": 17,
+    "syn purity (class mates, same syntactic category)": 0.824,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.353,
+    "sem purity within syntactic category": 0.357,
+    "n_sem_pairs": 17
+   },
+   "7.75": {
+    "classes": 136,
+    "mean size": 1.1,
+    "pairs": 17,
+    "syn purity (class mates, same syntactic category)": 0.824,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.353,
+    "sem purity within syntactic category": 0.357,
+    "n_sem_pairs": 17
+   },
+   "leaf": {
+    "classes": 136,
+    "mean size": 1.1,
+    "pairs": 17,
+    "syn purity (class mates, same syntactic category)": 0.824,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.353,
+    "sem purity within syntactic category": 0.357,
+    "n_sem_pairs": 17
+   },
+   "d1": {
+    "classes": 2,
+    "mean size": 73.5,
+    "pairs": 5385,
+    "syn purity (class mates, same syntactic category)": 0.284,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.171,
+    "sem purity within syntactic category": 0.168,
+    "n_sem_pairs": 3452
+   },
+   "d2": {
+    "classes": 6,
+    "mean size": 24.5,
+    "pairs": 1996,
+    "syn purity (class mates, same syntactic category)": 0.766,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.159,
+    "sem purity within syntactic category": 0.168,
+    "n_sem_pairs": 1778
+   },
+   "d3": {
+    "classes": 19,
+    "mean size": 7.7,
+    "pairs": 1058,
+    "syn purity (class mates, same syntactic category)": 0.897,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.202,
+    "sem purity within syntactic category": 0.201,
+    "n_sem_pairs": 951
+   },
+   "d4": {
+    "classes": 39,
+    "mean size": 3.8,
+    "pairs": 637,
+    "syn purity (class mates, same syntactic category)": 0.989,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.201,
+    "sem purity within syntactic category": 0.2,
+    "n_sem_pairs": 632
+   },
+   "d5": {
+    "classes": 73,
+    "mean size": 2.0,
+    "pairs": 321,
+    "syn purity (class mates, same syntactic category)": 0.991,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.221,
+    "sem purity within syntactic category": 0.22,
+    "n_sem_pairs": 321
+   },
+   "d6": {
+    "classes": 95,
+    "mean size": 1.5,
+    "pairs": 138,
+    "syn purity (class mates, same syntactic category)": 0.978,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.232,
+    "sem purity within syntactic category": 0.23,
+    "n_sem_pairs": 138
+   },
+   "d8": {
+    "classes": 133,
+    "mean size": 1.1,
+    "pairs": 20,
+    "syn purity (class mates, same syntactic category)": 0.85,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.3,
+    "sem purity within syntactic category": 0.294,
+    "n_sem_pairs": 20
+   }
+  },
+  "chance syn purity (all pairs)": 0.17,
+  "chance sem purity (same kind pairs)": 0.158,
+  "types": 147
+ },
+ "experiments/v3/results/story_gen/r230/wt/wordtree_func30_s13_n1000.json": {
+  "levels": {
+   "0": {
+    "classes": 1,
+    "mean size": 147.0,
+    "pairs": 10731,
+    "syn purity (class mates, same syntactic category)": 0.17,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.158,
+    "sem purity within syntactic category": 0.166,
+    "n_sem_pairs": 4379
+   },
+   "1": {
+    "classes": 2,
+    "mean size": 73.5,
+    "pairs": 5329,
+    "syn purity (class mates, same syntactic category)": 0.242,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.208,
+    "sem purity within syntactic category": 0.208,
+    "n_sem_pairs": 2788
+   },
+   "2": {
+    "classes": 3,
+    "mean size": 49.0,
+    "pairs": 4003,
+    "syn purity (class mates, same syntactic category)": 0.287,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.205,
+    "sem purity within syntactic category": 0.214,
+    "n_sem_pairs": 1831
+   },
+   "3": {
+    "classes": 10,
+    "mean size": 14.7,
+    "pairs": 1771,
+    "syn purity (class mates, same syntactic category)": 0.531,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.215,
+    "sem purity within syntactic category": 0.224,
+    "n_sem_pairs": 1342
+   },
+   "4": {
+    "classes": 17,
+    "mean size": 8.6,
+    "pairs": 794,
+    "syn purity (class mates, same syntactic category)": 0.907,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.238,
+    "sem purity within syntactic category": 0.221,
+    "n_sem_pairs": 764
+   },
+   "5": {
+    "classes": 30,
+    "mean size": 4.9,
+    "pairs": 328,
+    "syn purity (class mates, same syntactic category)": 0.893,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.299,
+    "sem purity within syntactic category": 0.276,
+    "n_sem_pairs": 321
+   },
+   "6": {
+    "classes": 50,
+    "mean size": 2.9,
+    "pairs": 172,
+    "syn purity (class mates, same syntactic category)": 0.942,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.337,
+    "sem purity within syntactic category": 0.346,
+    "n_sem_pairs": 169
+   },
+   "6.5": {
+    "classes": 74,
+    "mean size": 2.0,
+    "pairs": 94,
+    "syn purity (class mates, same syntactic category)": 0.915,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.341,
+    "sem purity within syntactic category": 0.349,
+    "n_sem_pairs": 91
+   },
+   "7": {
+    "classes": 74,
+    "mean size": 2.0,
+    "pairs": 94,
+    "syn purity (class mates, same syntactic category)": 0.915,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.341,
+    "sem purity within syntactic category": 0.349,
+    "n_sem_pairs": 91
+   },
+   "7.25": {
+    "classes": 144,
+    "mean size": 1.0,
+    "pairs": 4,
+    "syn purity (class mates, same syntactic category)": 0.5,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.5,
+    "sem purity within syntactic category": 0.5,
+    "n_sem_pairs": 4
+   },
+   "7.5": {
+    "classes": 144,
+    "mean size": 1.0,
+    "pairs": 4,
+    "syn purity (class mates, same syntactic category)": 0.5,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.5,
+    "sem purity within syntactic category": 0.5,
+    "n_sem_pairs": 4
+   },
+   "7.75": {
+    "classes": 144,
+    "mean size": 1.0,
+    "pairs": 4,
+    "syn purity (class mates, same syntactic category)": 0.5,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.5,
+    "sem purity within syntactic category": 0.5,
+    "n_sem_pairs": 4
+   },
+   "leaf": {
+    "classes": 144,
+    "mean size": 1.0,
+    "pairs": 4,
+    "syn purity (class mates, same syntactic category)": 0.5,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.5,
+    "sem purity within syntactic category": 0.5,
+    "n_sem_pairs": 4
+   },
+   "d1": {
+    "classes": 2,
+    "mean size": 73.5,
+    "pairs": 5329,
+    "syn purity (class mates, same syntactic category)": 0.242,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.208,
+    "sem purity within syntactic category": 0.208,
+    "n_sem_pairs": 2788
+   },
+   "d2": {
+    "classes": 6,
+    "mean size": 24.5,
+    "pairs": 2350,
+    "syn purity (class mates, same syntactic category)": 0.489,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.21,
+    "sem purity within syntactic category": 0.214,
+    "n_sem_pairs": 1651
+   },
+   "d3": {
+    "classes": 15,
+    "mean size": 9.8,
+    "pairs": 1207,
+    "syn purity (class mates, same syntactic category)": 0.879,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.227,
+    "sem purity within syntactic category": 0.221,
+    "n_sem_pairs": 1180
+   },
+   "d4": {
+    "classes": 40,
+    "mean size": 3.7,
+    "pairs": 648,
+    "syn purity (class mates, same syntactic category)": 0.867,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.247,
+    "sem purity within syntactic category": 0.244,
+    "n_sem_pairs": 648
+   },
+   "d5": {
+    "classes": 74,
+    "mean size": 2.0,
+    "pairs": 300,
+    "syn purity (class mates, same syntactic category)": 0.993,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.26,
+    "sem purity within syntactic category": 0.258,
+    "n_sem_pairs": 300
+   },
+   "d6": {
+    "classes": 116,
+    "mean size": 1.3,
+    "pairs": 57,
+    "syn purity (class mates, same syntactic category)": 0.965,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.474,
+    "sem purity within syntactic category": 0.473,
+    "n_sem_pairs": 57
+   },
+   "d8": {
+    "classes": 143,
+    "mean size": 1.0,
+    "pairs": 5,
+    "syn purity (class mates, same syntactic category)": 0.6,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.4,
+    "sem purity within syntactic category": 0.333,
+    "n_sem_pairs": 5
+   }
+  },
+  "chance syn purity (all pairs)": 0.17,
+  "chance sem purity (same kind pairs)": 0.158,
+  "types": 147
+ },
+ "experiments/v3/results/story_gen/r230/wt/wordtree_func30_s17_n1000.json": {
+  "levels": {
+   "0": {
+    "classes": 1,
+    "mean size": 147.0,
+    "pairs": 10731,
+    "syn purity (class mates, same syntactic category)": 0.17,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.158,
+    "sem purity within syntactic category": 0.166,
+    "n_sem_pairs": 4379
+   },
+   "1": {
+    "classes": 2,
+    "mean size": 73.5,
+    "pairs": 5331,
+    "syn purity (class mates, same syntactic category)": 0.253,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.197,
+    "sem purity within syntactic category": 0.201,
+    "n_sem_pairs": 2876
+   },
+   "2": {
+    "classes": 2,
+    "mean size": 73.5,
+    "pairs": 5331,
+    "syn purity (class mates, same syntactic category)": 0.253,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.197,
+    "sem purity within syntactic category": 0.201,
+    "n_sem_pairs": 2876
+   },
+   "3": {
+    "classes": 7,
+    "mean size": 21.0,
+    "pairs": 1628,
+    "syn purity (class mates, same syntactic category)": 0.606,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.256,
+    "sem purity within syntactic category": 0.257,
+    "n_sem_pairs": 1244
+   },
+   "4": {
+    "classes": 16,
+    "mean size": 9.2,
+    "pairs": 721,
+    "syn purity (class mates, same syntactic category)": 0.809,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.294,
+    "sem purity within syntactic category": 0.253,
+    "n_sem_pairs": 660
+   },
+   "5": {
+    "classes": 30,
+    "mean size": 4.9,
+    "pairs": 369,
+    "syn purity (class mates, same syntactic category)": 0.846,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.312,
+    "sem purity within syntactic category": 0.28,
+    "n_sem_pairs": 346
+   },
+   "6": {
+    "classes": 51,
+    "mean size": 2.9,
+    "pairs": 167,
+    "syn purity (class mates, same syntactic category)": 0.952,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.294,
+    "sem purity within syntactic category": 0.297,
+    "n_sem_pairs": 163
+   },
+   "6.5": {
+    "classes": 73,
+    "mean size": 2.0,
+    "pairs": 93,
+    "syn purity (class mates, same syntactic category)": 0.935,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.303,
+    "sem purity within syntactic category": 0.302,
+    "n_sem_pairs": 89
+   },
+   "7": {
+    "classes": 73,
+    "mean size": 2.0,
+    "pairs": 93,
+    "syn purity (class mates, same syntactic category)": 0.935,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.303,
+    "sem purity within syntactic category": 0.302,
+    "n_sem_pairs": 89
+   },
+   "7.25": {
+    "classes": 144,
+    "mean size": 1.0,
+    "pairs": 4,
+    "syn purity (class mates, same syntactic category)": 0.5,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.25,
+    "sem purity within syntactic category": 0.0,
+    "n_sem_pairs": 4
+   },
+   "7.5": {
+    "classes": 144,
+    "mean size": 1.0,
+    "pairs": 4,
+    "syn purity (class mates, same syntactic category)": 0.5,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.25,
+    "sem purity within syntactic category": 0.0,
+    "n_sem_pairs": 4
+   },
+   "7.75": {
+    "classes": 144,
+    "mean size": 1.0,
+    "pairs": 4,
+    "syn purity (class mates, same syntactic category)": 0.5,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.25,
+    "sem purity within syntactic category": 0.0,
+    "n_sem_pairs": 4
+   },
+   "leaf": {
+    "classes": 144,
+    "mean size": 1.0,
+    "pairs": 4,
+    "syn purity (class mates, same syntactic category)": 0.5,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.25,
+    "sem purity within syntactic category": 0.0,
+    "n_sem_pairs": 4
+   },
+   "d1": {
+    "classes": 2,
+    "mean size": 73.5,
+    "pairs": 5331,
+    "syn purity (class mates, same syntactic category)": 0.253,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.197,
+    "sem purity within syntactic category": 0.201,
+    "n_sem_pairs": 2876
+   },
+   "d2": {
+    "classes": 8,
+    "mean size": 18.4,
+    "pairs": 1599,
+    "syn purity (class mates, same syntactic category)": 0.635,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.247,
+    "sem purity within syntactic category": 0.25,
+    "n_sem_pairs": 1279
+   },
+   "d3": {
+    "classes": 23,
+    "mean size": 6.4,
+    "pairs": 801,
+    "syn purity (class mates, same syntactic category)": 0.773,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.264,
+    "sem purity within syntactic category": 0.256,
+    "n_sem_pairs": 651
+   },
+   "d4": {
+    "classes": 48,
+    "mean size": 3.1,
+    "pairs": 380,
+    "syn purity (class mates, same syntactic category)": 0.945,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.271,
+    "sem purity within syntactic category": 0.262,
+    "n_sem_pairs": 373
+   },
+   "d5": {
+    "classes": 93,
+    "mean size": 1.6,
+    "pairs": 103,
+    "syn purity (class mates, same syntactic category)": 0.981,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.35,
+    "sem purity within syntactic category": 0.347,
+    "n_sem_pairs": 103
+   },
+   "d6": {
+    "classes": 128,
+    "mean size": 1.1,
+    "pairs": 30,
+    "syn purity (class mates, same syntactic category)": 0.933,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.333,
+    "sem purity within syntactic category": 0.321,
+    "n_sem_pairs": 30
+   },
+   "d8": {
+    "classes": 144,
+    "mean size": 1.0,
+    "pairs": 4,
+    "syn purity (class mates, same syntactic category)": 0.5,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.25,
+    "sem purity within syntactic category": 0.0,
+    "n_sem_pairs": 4
+   }
+  },
+  "chance syn purity (all pairs)": 0.17,
+  "chance sem purity (same kind pairs)": 0.158,
+  "types": 147
+ },
+ "experiments/v3/results/story_gen/r230/wt/wordtree_func5_s13_n1000.json": {
+  "levels": {
+   "0": {
+    "classes": 1,
+    "mean size": 147.0,
+    "pairs": 10731,
+    "syn purity (class mates, same syntactic category)": 0.17,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.158,
+    "sem purity within syntactic category": 0.166,
+    "n_sem_pairs": 4379
+   },
+   "1": {
+    "classes": 2,
+    "mean size": 73.5,
+    "pairs": 5635,
+    "syn purity (class mates, same syntactic category)": 0.31,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.175,
+    "sem purity within syntactic category": 0.166,
+    "n_sem_pairs": 3791
+   },
+   "2": {
+    "classes": 3,
+    "mean size": 49.0,
+    "pairs": 3577,
+    "syn purity (class mates, same syntactic category)": 0.469,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.158,
+    "sem purity within syntactic category": 0.165,
+    "n_sem_pairs": 2279
+   },
+   "3": {
+    "classes": 9,
+    "mean size": 16.3,
+    "pairs": 1630,
+    "syn purity (class mates, same syntactic category)": 0.59,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.147,
+    "sem purity within syntactic category": 0.15,
+    "n_sem_pairs": 1179
+   },
+   "4": {
+    "classes": 17,
+    "mean size": 8.6,
+    "pairs": 670,
+    "syn purity (class mates, same syntactic category)": 0.778,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.164,
+    "sem purity within syntactic category": 0.144,
+    "n_sem_pairs": 586
+   },
+   "5": {
+    "classes": 34,
+    "mean size": 4.3,
+    "pairs": 327,
+    "syn purity (class mates, same syntactic category)": 0.872,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.17,
+    "sem purity within syntactic category": 0.151,
+    "n_sem_pairs": 312
+   },
+   "6": {
+    "classes": 50,
+    "mean size": 2.9,
+    "pairs": 217,
+    "syn purity (class mates, same syntactic category)": 0.912,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.176,
+    "sem purity within syntactic category": 0.177,
+    "n_sem_pairs": 210
+   },
+   "6.5": {
+    "classes": 71,
+    "mean size": 2.1,
+    "pairs": 159,
+    "syn purity (class mates, same syntactic category)": 0.906,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.205,
+    "sem purity within syntactic category": 0.208,
+    "n_sem_pairs": 156
+   },
+   "7": {
+    "classes": 71,
+    "mean size": 2.1,
+    "pairs": 159,
+    "syn purity (class mates, same syntactic category)": 0.906,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.205,
+    "sem purity within syntactic category": 0.208,
+    "n_sem_pairs": 156
+   },
+   "7.25": {
+    "classes": 106,
+    "mean size": 1.4,
+    "pairs": 122,
+    "syn purity (class mates, same syntactic category)": 0.902,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.23,
+    "sem purity within syntactic category": 0.236,
+    "n_sem_pairs": 122
+   },
+   "7.5": {
+    "classes": 106,
+    "mean size": 1.4,
+    "pairs": 122,
+    "syn purity (class mates, same syntactic category)": 0.902,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.23,
+    "sem purity within syntactic category": 0.236,
+    "n_sem_pairs": 122
+   },
+   "7.75": {
+    "classes": 106,
+    "mean size": 1.4,
+    "pairs": 122,
+    "syn purity (class mates, same syntactic category)": 0.902,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.23,
+    "sem purity within syntactic category": 0.236,
+    "n_sem_pairs": 122
+   },
+   "leaf": {
+    "classes": 106,
+    "mean size": 1.4,
+    "pairs": 122,
+    "syn purity (class mates, same syntactic category)": 0.902,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.23,
+    "sem purity within syntactic category": 0.236,
+    "n_sem_pairs": 122
+   },
+   "d1": {
+    "classes": 2,
+    "mean size": 73.5,
+    "pairs": 5635,
+    "syn purity (class mates, same syntactic category)": 0.31,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.175,
+    "sem purity within syntactic category": 0.166,
+    "n_sem_pairs": 3791
+   },
+   "d2": {
+    "classes": 8,
+    "mean size": 18.4,
+    "pairs": 1919,
+    "syn purity (class mates, same syntactic category)": 0.846,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.165,
+    "sem purity within syntactic category": 0.171,
+    "n_sem_pairs": 1833
+   },
+   "d3": {
+    "classes": 17,
+    "mean size": 8.6,
+    "pairs": 1142,
+    "syn purity (class mates, same syntactic category)": 0.947,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.162,
+    "sem purity within syntactic category": 0.16,
+    "n_sem_pairs": 1113
+   },
+   "d4": {
+    "classes": 27,
+    "mean size": 5.4,
+    "pairs": 815,
+    "syn purity (class mates, same syntactic category)": 0.958,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.17,
+    "sem purity within syntactic category": 0.169,
+    "n_sem_pairs": 799
+   },
+   "d5": {
+    "classes": 43,
+    "mean size": 3.4,
+    "pairs": 419,
+    "syn purity (class mates, same syntactic category)": 0.959,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.188,
+    "sem purity within syntactic category": 0.189,
+    "n_sem_pairs": 414
+   },
+   "d6": {
+    "classes": 68,
+    "mean size": 2.2,
+    "pairs": 236,
+    "syn purity (class mates, same syntactic category)": 0.945,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.2,
+    "sem purity within syntactic category": 0.202,
+    "n_sem_pairs": 235
+   },
+   "d8": {
+    "classes": 98,
+    "mean size": 1.5,
+    "pairs": 136,
+    "syn purity (class mates, same syntactic category)": 0.912,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.213,
+    "sem purity within syntactic category": 0.218,
+    "n_sem_pairs": 136
+   }
+  },
+  "chance syn purity (all pairs)": 0.17,
+  "chance sem purity (same kind pairs)": 0.158,
+  "types": 147
+ },
+ "experiments/v3/results/story_gen/r230/wt/wordtree_func5_s17_n1000.json": {
+  "levels": {
+   "0": {
+    "classes": 1,
+    "mean size": 147.0,
+    "pairs": 10731,
+    "syn purity (class mates, same syntactic category)": 0.17,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.158,
+    "sem purity within syntactic category": 0.166,
+    "n_sem_pairs": 4379
+   },
+   "1": {
+    "classes": 2,
+    "mean size": 73.5,
+    "pairs": 5485,
+    "syn purity (class mates, same syntactic category)": 0.303,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.169,
+    "sem purity within syntactic category": 0.167,
+    "n_sem_pairs": 3711
+   },
+   "2": {
+    "classes": 3,
+    "mean size": 49.0,
+    "pairs": 3640,
+    "syn purity (class mates, same syntactic category)": 0.456,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.15,
+    "sem purity within syntactic category": 0.167,
+    "n_sem_pairs": 2271
+   },
+   "3": {
+    "classes": 9,
+    "mean size": 16.3,
+    "pairs": 1355,
+    "syn purity (class mates, same syntactic category)": 0.709,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.135,
+    "sem purity within syntactic category": 0.148,
+    "n_sem_pairs": 1194
+   },
+   "4": {
+    "classes": 18,
+    "mean size": 8.2,
+    "pairs": 663,
+    "syn purity (class mates, same syntactic category)": 0.817,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.153,
+    "sem purity within syntactic category": 0.137,
+    "n_sem_pairs": 595
+   },
+   "5": {
+    "classes": 34,
+    "mean size": 4.3,
+    "pairs": 325,
+    "syn purity (class mates, same syntactic category)": 0.806,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.178,
+    "sem purity within syntactic category": 0.157,
+    "n_sem_pairs": 303
+   },
+   "6": {
+    "classes": 53,
+    "mean size": 2.8,
+    "pairs": 173,
+    "syn purity (class mates, same syntactic category)": 0.925,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.152,
+    "sem purity within syntactic category": 0.151,
+    "n_sem_pairs": 165
+   },
+   "6.5": {
+    "classes": 69,
+    "mean size": 2.1,
+    "pairs": 131,
+    "syn purity (class mates, same syntactic category)": 0.916,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.152,
+    "sem purity within syntactic category": 0.151,
+    "n_sem_pairs": 125
+   },
+   "7": {
+    "classes": 69,
+    "mean size": 2.1,
+    "pairs": 131,
+    "syn purity (class mates, same syntactic category)": 0.916,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.152,
+    "sem purity within syntactic category": 0.151,
+    "n_sem_pairs": 125
+   },
+   "7.25": {
+    "classes": 107,
+    "mean size": 1.4,
+    "pairs": 83,
+    "syn purity (class mates, same syntactic category)": 0.928,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.193,
+    "sem purity within syntactic category": 0.195,
+    "n_sem_pairs": 83
+   },
+   "7.5": {
+    "classes": 107,
+    "mean size": 1.4,
+    "pairs": 83,
+    "syn purity (class mates, same syntactic category)": 0.928,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.193,
+    "sem purity within syntactic category": 0.195,
+    "n_sem_pairs": 83
+   },
+   "7.75": {
+    "classes": 107,
+    "mean size": 1.4,
+    "pairs": 83,
+    "syn purity (class mates, same syntactic category)": 0.928,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.193,
+    "sem purity within syntactic category": 0.195,
+    "n_sem_pairs": 83
+   },
+   "leaf": {
+    "classes": 107,
+    "mean size": 1.4,
+    "pairs": 83,
+    "syn purity (class mates, same syntactic category)": 0.928,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.193,
+    "sem purity within syntactic category": 0.195,
+    "n_sem_pairs": 83
+   },
+   "d1": {
+    "classes": 2,
+    "mean size": 73.5,
+    "pairs": 5485,
+    "syn purity (class mates, same syntactic category)": 0.303,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.169,
+    "sem purity within syntactic category": 0.167,
+    "n_sem_pairs": 3711
+   },
+   "d2": {
+    "classes": 7,
+    "mean size": 21.0,
+    "pairs": 2062,
+    "syn purity (class mates, same syntactic category)": 0.801,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.156,
+    "sem purity within syntactic category": 0.168,
+    "n_sem_pairs": 1873
+   },
+   "d3": {
+    "classes": 16,
+    "mean size": 9.2,
+    "pairs": 1150,
+    "syn purity (class mates, same syntactic category)": 0.937,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.162,
+    "sem purity within syntactic category": 0.162,
+    "n_sem_pairs": 1082
+   },
+   "d4": {
+    "classes": 27,
+    "mean size": 5.4,
+    "pairs": 630,
+    "syn purity (class mates, same syntactic category)": 0.954,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.152,
+    "sem purity within syntactic category": 0.152,
+    "n_sem_pairs": 606
+   },
+   "d5": {
+    "classes": 47,
+    "mean size": 3.1,
+    "pairs": 372,
+    "syn purity (class mates, same syntactic category)": 0.957,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.175,
+    "sem purity within syntactic category": 0.175,
+    "n_sem_pairs": 361
+   },
+   "d6": {
+    "classes": 70,
+    "mean size": 2.1,
+    "pairs": 197,
+    "syn purity (class mates, same syntactic category)": 0.97,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.162,
+    "sem purity within syntactic category": 0.162,
+    "n_sem_pairs": 197
+   },
+   "d8": {
+    "classes": 105,
+    "mean size": 1.4,
+    "pairs": 86,
+    "syn purity (class mates, same syntactic category)": 0.93,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.186,
+    "sem purity within syntactic category": 0.188,
+    "n_sem_pairs": 86
+   }
+  },
+  "chance syn purity (all pairs)": 0.17,
+  "chance sem purity (same kind pairs)": 0.158,
+  "types": 147
+ },
+ "experiments/v3/results/story_gen/r230/wt/wordtree_func8_s13_n1000.json": {
+  "levels": {
+   "0": {
+    "classes": 1,
+    "mean size": 147.0,
+    "pairs": 10731,
+    "syn purity (class mates, same syntactic category)": 0.17,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.158,
+    "sem purity within syntactic category": 0.166,
+    "n_sem_pairs": 4379
+   },
+   "1": {
+    "classes": 2,
+    "mean size": 73.5,
+    "pairs": 5601,
+    "syn purity (class mates, same syntactic category)": 0.312,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.175,
+    "sem purity within syntactic category": 0.166,
+    "n_sem_pairs": 3791
+   },
+   "2": {
+    "classes": 3,
+    "mean size": 49.0,
+    "pairs": 3585,
+    "syn purity (class mates, same syntactic category)": 0.468,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.158,
+    "sem purity within syntactic category": 0.165,
+    "n_sem_pairs": 2279
+   },
+   "3": {
+    "classes": 10,
+    "mean size": 14.7,
+    "pairs": 1294,
+    "syn purity (class mates, same syntactic category)": 0.735,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.147,
+    "sem purity within syntactic category": 0.152,
+    "n_sem_pairs": 1180
+   },
+   "4": {
+    "classes": 16,
+    "mean size": 9.2,
+    "pairs": 733,
+    "syn purity (class mates, same syntactic category)": 0.759,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.161,
+    "sem purity within syntactic category": 0.135,
+    "n_sem_pairs": 641
+   },
+   "5": {
+    "classes": 29,
+    "mean size": 5.1,
+    "pairs": 357,
+    "syn purity (class mates, same syntactic category)": 0.818,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.175,
+    "sem purity within syntactic category": 0.144,
+    "n_sem_pairs": 331
+   },
+   "6": {
+    "classes": 51,
+    "mean size": 2.9,
+    "pairs": 201,
+    "syn purity (class mates, same syntactic category)": 0.935,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.185,
+    "sem purity within syntactic category": 0.182,
+    "n_sem_pairs": 195
+   },
+   "6.5": {
+    "classes": 74,
+    "mean size": 2.0,
+    "pairs": 139,
+    "syn purity (class mates, same syntactic category)": 0.942,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.216,
+    "sem purity within syntactic category": 0.208,
+    "n_sem_pairs": 134
+   },
+   "7": {
+    "classes": 74,
+    "mean size": 2.0,
+    "pairs": 139,
+    "syn purity (class mates, same syntactic category)": 0.942,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.216,
+    "sem purity within syntactic category": 0.208,
+    "n_sem_pairs": 134
+   },
+   "7.25": {
+    "classes": 114,
+    "mean size": 1.3,
+    "pairs": 94,
+    "syn purity (class mates, same syntactic category)": 0.957,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.234,
+    "sem purity within syntactic category": 0.222,
+    "n_sem_pairs": 94
+   },
+   "7.5": {
+    "classes": 114,
+    "mean size": 1.3,
+    "pairs": 94,
+    "syn purity (class mates, same syntactic category)": 0.957,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.234,
+    "sem purity within syntactic category": 0.222,
+    "n_sem_pairs": 94
+   },
+   "7.75": {
+    "classes": 114,
+    "mean size": 1.3,
+    "pairs": 94,
+    "syn purity (class mates, same syntactic category)": 0.957,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.234,
+    "sem purity within syntactic category": 0.222,
+    "n_sem_pairs": 94
+   },
+   "leaf": {
+    "classes": 114,
+    "mean size": 1.3,
+    "pairs": 94,
+    "syn purity (class mates, same syntactic category)": 0.957,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.234,
+    "sem purity within syntactic category": 0.222,
+    "n_sem_pairs": 94
+   },
+   "d1": {
+    "classes": 2,
+    "mean size": 73.5,
+    "pairs": 5601,
+    "syn purity (class mates, same syntactic category)": 0.312,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.175,
+    "sem purity within syntactic category": 0.166,
+    "n_sem_pairs": 3791
+   },
+   "d2": {
+    "classes": 7,
+    "mean size": 21.0,
+    "pairs": 2038,
+    "syn purity (class mates, same syntactic category)": 0.814,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.161,
+    "sem purity within syntactic category": 0.167,
+    "n_sem_pairs": 1924
+   },
+   "d3": {
+    "classes": 18,
+    "mean size": 8.2,
+    "pairs": 1109,
+    "syn purity (class mates, same syntactic category)": 0.956,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.164,
+    "sem purity within syntactic category": 0.162,
+    "n_sem_pairs": 1095
+   },
+   "d4": {
+    "classes": 38,
+    "mean size": 3.9,
+    "pairs": 751,
+    "syn purity (class mates, same syntactic category)": 0.985,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.168,
+    "sem purity within syntactic category": 0.165,
+    "n_sem_pairs": 750
+   },
+   "d5": {
+    "classes": 61,
+    "mean size": 2.4,
+    "pairs": 366,
+    "syn purity (class mates, same syntactic category)": 0.989,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.194,
+    "sem purity within syntactic category": 0.191,
+    "n_sem_pairs": 366
+   },
+   "d6": {
+    "classes": 82,
+    "mean size": 1.8,
+    "pairs": 201,
+    "syn purity (class mates, same syntactic category)": 0.98,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.204,
+    "sem purity within syntactic category": 0.198,
+    "n_sem_pairs": 201
+   },
+   "d8": {
+    "classes": 106,
+    "mean size": 1.4,
+    "pairs": 108,
+    "syn purity (class mates, same syntactic category)": 0.963,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.213,
+    "sem purity within syntactic category": 0.202,
+    "n_sem_pairs": 108
+   }
+  },
+  "chance syn purity (all pairs)": 0.17,
+  "chance sem purity (same kind pairs)": 0.158,
+  "types": 147
+ },
+ "experiments/v3/results/story_gen/r230/wt/wordtree_func8_s17_n1000.json": {
+  "levels": {
+   "0": {
+    "classes": 1,
+    "mean size": 147.0,
+    "pairs": 10731,
+    "syn purity (class mates, same syntactic category)": 0.17,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.158,
+    "sem purity within syntactic category": 0.166,
+    "n_sem_pairs": 4379
+   },
+   "1": {
+    "classes": 2,
+    "mean size": 73.5,
+    "pairs": 5539,
+    "syn purity (class mates, same syntactic category)": 0.304,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.175,
+    "sem purity within syntactic category": 0.167,
+    "n_sem_pairs": 3643
+   },
+   "2": {
+    "classes": 3,
+    "mean size": 49.0,
+    "pairs": 3619,
+    "syn purity (class mates, same syntactic category)": 0.465,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.158,
+    "sem purity within syntactic category": 0.167,
+    "n_sem_pairs": 2203
+   },
+   "3": {
+    "classes": 9,
+    "mean size": 16.3,
+    "pairs": 1350,
+    "syn purity (class mates, same syntactic category)": 0.743,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.148,
+    "sem purity within syntactic category": 0.154,
+    "n_sem_pairs": 1200
+   },
+   "4": {
+    "classes": 14,
+    "mean size": 10.5,
+    "pairs": 744,
+    "syn purity (class mates, same syntactic category)": 0.844,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.179,
+    "sem purity within syntactic category": 0.159,
+    "n_sem_pairs": 681
+   },
+   "5": {
+    "classes": 33,
+    "mean size": 4.5,
+    "pairs": 316,
+    "syn purity (class mates, same syntactic category)": 0.807,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.21,
+    "sem purity within syntactic category": 0.161,
+    "n_sem_pairs": 290
+   },
+   "6": {
+    "classes": 56,
+    "mean size": 2.6,
+    "pairs": 142,
+    "syn purity (class mates, same syntactic category)": 0.923,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.199,
+    "sem purity within syntactic category": 0.192,
+    "n_sem_pairs": 136
+   },
+   "6.5": {
+    "classes": 77,
+    "mean size": 1.9,
+    "pairs": 90,
+    "syn purity (class mates, same syntactic category)": 0.922,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.205,
+    "sem purity within syntactic category": 0.195,
+    "n_sem_pairs": 88
+   },
+   "7": {
+    "classes": 77,
+    "mean size": 1.9,
+    "pairs": 90,
+    "syn purity (class mates, same syntactic category)": 0.922,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.205,
+    "sem purity within syntactic category": 0.195,
+    "n_sem_pairs": 88
+   },
+   "7.25": {
+    "classes": 121,
+    "mean size": 1.2,
+    "pairs": 41,
+    "syn purity (class mates, same syntactic category)": 0.854,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.317,
+    "sem purity within syntactic category": 0.314,
+    "n_sem_pairs": 41
+   },
+   "7.5": {
+    "classes": 121,
+    "mean size": 1.2,
+    "pairs": 41,
+    "syn purity (class mates, same syntactic category)": 0.854,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.317,
+    "sem purity within syntactic category": 0.314,
+    "n_sem_pairs": 41
+   },
+   "7.75": {
+    "classes": 121,
+    "mean size": 1.2,
+    "pairs": 41,
+    "syn purity (class mates, same syntactic category)": 0.854,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.317,
+    "sem purity within syntactic category": 0.314,
+    "n_sem_pairs": 41
+   },
+   "leaf": {
+    "classes": 121,
+    "mean size": 1.2,
+    "pairs": 41,
+    "syn purity (class mates, same syntactic category)": 0.854,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.317,
+    "sem purity within syntactic category": 0.314,
+    "n_sem_pairs": 41
+   },
+   "d1": {
+    "classes": 2,
+    "mean size": 73.5,
+    "pairs": 5539,
+    "syn purity (class mates, same syntactic category)": 0.304,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.175,
+    "sem purity within syntactic category": 0.167,
+    "n_sem_pairs": 3643
+   },
+   "d2": {
+    "classes": 6,
+    "mean size": 24.5,
+    "pairs": 2029,
+    "syn purity (class mates, same syntactic category)": 0.829,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.162,
+    "sem purity within syntactic category": 0.167,
+    "n_sem_pairs": 1879
+   },
+   "d3": {
+    "classes": 16,
+    "mean size": 9.2,
+    "pairs": 1173,
+    "syn purity (class mates, same syntactic category)": 0.952,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.17,
+    "sem purity within syntactic category": 0.169,
+    "n_sem_pairs": 1122
+   },
+   "d4": {
+    "classes": 29,
+    "mean size": 5.1,
+    "pairs": 583,
+    "syn purity (class mates, same syntactic category)": 0.967,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.167,
+    "sem purity within syntactic category": 0.165,
+    "n_sem_pairs": 570
+   },
+   "d5": {
+    "classes": 55,
+    "mean size": 2.7,
+    "pairs": 269,
+    "syn purity (class mates, same syntactic category)": 0.967,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.199,
+    "sem purity within syntactic category": 0.196,
+    "n_sem_pairs": 266
+   },
+   "d6": {
+    "classes": 81,
+    "mean size": 1.8,
+    "pairs": 137,
+    "syn purity (class mates, same syntactic category)": 0.956,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.226,
+    "sem purity within syntactic category": 0.221,
+    "n_sem_pairs": 137
+   },
+   "d8": {
+    "classes": 116,
+    "mean size": 1.3,
+    "pairs": 50,
+    "syn purity (class mates, same syntactic category)": 0.88,
+    "sem purity (content class mates of the same kind, same semantic type)": 0.32,
+    "sem purity within syntactic category": 0.318,
+    "n_sem_pairs": 50
+   }
+  },
+  "chance syn purity (all pairs)": 0.17,
+  "chance sem purity (same kind pairs)": 0.158,
+  "types": 147
+ }
+}

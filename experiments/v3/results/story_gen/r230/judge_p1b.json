@@ -1,0 +1,683 @@
+{
+ "experiments/v3/results/story_gen/r230/p1/func5_s13_n250_c6_b0/story_s13_n250_arm0.jsonl": {
+  "arm": {
+   "cond": false,
+   "wreach": 5,
+   "wemit": 0,
+   "wemitk": 5,
+   "wgate": 0,
+   "causal": 1,
+   "units": "words",
+   "pair": "gate",
+   "new": true,
+   "edge": "exact"
+  },
+  "n": 1600,
+  "all": {
+   "sem": 0.003,
+   "syn": 0.015,
+   "non": 0.983
+  },
+  "novel share": 1.0,
+  "among novel": {
+   "sem": 0.003,
+   "syn": 0.015,
+   "non": 0.983
+  },
+  "n novel": 1600,
+  "syn reasons": {
+   "object": 10,
+   "subject": 9,
+   "subject+adjective": 2,
+   "subject+object": 2,
+   "adjective": 1
+  },
+  "non reasons": {
+   "subject NP": 814,
+   "verb": 572,
+   "agreement": 101,
+   "object NP": 41,
+   "trailing": 28
+  }
+ },
+ "experiments/v3/results/story_gen/r230/p1/func5_s13_n250_c6_b6/story_s13_n250_arm0.jsonl": {
+  "arm": {
+   "cond": false,
+   "wreach": 5,
+   "wemit": 6,
+   "wemitk": 5,
+   "wgate": 6,
+   "causal": 1,
+   "units": "words",
+   "pair": "gate",
+   "new": true,
+   "edge": "exact"
+  },
+  "n": 1600,
+  "all": {
+   "sem": 0.212,
+   "syn": 0.435,
+   "non": 0.353
+  },
+  "novel share": 1.0,
+  "among novel": {
+   "sem": 0.212,
+   "syn": 0.435,
+   "non": 0.353
+  },
+  "n novel": 1600,
+  "syn reasons": {
+   "object": 388,
+   "subject": 144,
+   "subject+object": 44,
+   "object+adjective": 42,
+   "subject+adjective": 27
+  },
+  "non reasons": {
+   "agreement": 206,
+   "subject NP": 127,
+   "verb": 93,
+   "object NP": 56,
+   "trailing": 48
+  }
+ },
+ "experiments/v3/results/story_gen/r230/p1/func5_s13_n250_c6_leaf/story_s13_n250_arm0.jsonl": {
+  "arm": {
+   "cond": false,
+   "wreach": 5,
+   "wemit": "leaf",
+   "causal": 1,
+   "units": "words",
+   "pair": "gate",
+   "new": true,
+   "edge": "exact"
+  },
+  "n": 1600,
+  "all": {
+   "sem": 0.668,
+   "syn": 0.223,
+   "non": 0.109
+  },
+  "novel share": 1.0,
+  "among novel": {
+   "sem": 0.668,
+   "syn": 0.223,
+   "non": 0.109
+  },
+  "n novel": 1600,
+  "syn reasons": {
+   "object": 356
+  },
+  "non reasons": {
+   "object NP": 107,
+   "subject NP": 68
+  }
+ },
+ "experiments/v3/results/story_gen/r230/p1/func5_s17_n250_c6_b0/story_s17_n250_arm0.jsonl": {
+  "arm": {
+   "cond": false,
+   "wreach": 5,
+   "wemit": 0,
+   "wemitk": 5,
+   "wgate": 0,
+   "causal": 1,
+   "units": "words",
+   "pair": "gate",
+   "new": true,
+   "edge": "exact"
+  },
+  "n": 1600,
+  "all": {
+   "sem": 0.003,
+   "syn": 0.021,
+   "non": 0.976
+  },
+  "novel share": 1.0,
+  "among novel": {
+   "sem": 0.003,
+   "syn": 0.021,
+   "non": 0.976
+  },
+  "n novel": 1600,
+  "syn reasons": {
+   "subject": 12,
+   "object": 9,
+   "subject+object": 8,
+   "subject+object+adjective": 2,
+   "adjective": 1
+  },
+  "non reasons": {
+   "subject NP": 824,
+   "verb": 536,
+   "agreement": 114,
+   "trailing": 40,
+   "object NP": 37
+  }
+ },
+ "experiments/v3/results/story_gen/r230/p1/func5_s17_n250_c6_b6/story_s17_n250_arm0.jsonl": {
+  "arm": {
+   "cond": false,
+   "wreach": 5,
+   "wemit": 6,
+   "wemitk": 5,
+   "wgate": 6,
+   "causal": 1,
+   "units": "words",
+   "pair": "gate",
+   "new": true,
+   "edge": "exact"
+  },
+  "n": 1600,
+  "all": {
+   "sem": 0.126,
+   "syn": 0.371,
+   "non": 0.502
+  },
+  "novel share": 1.0,
+  "among novel": {
+   "sem": 0.126,
+   "syn": 0.371,
+   "non": 0.502
+  },
+  "n novel": 1600,
+  "syn reasons": {
+   "object": 307,
+   "subject": 144,
+   "subject+object": 52,
+   "subject+adjective": 31,
+   "adjective": 26
+  },
+  "non reasons": {
+   "agreement": 598,
+   "subject NP": 88,
+   "trailing": 47,
+   "verb": 41,
+   "object NP": 30
+  }
+ },
+ "experiments/v3/results/story_gen/r230/p1/func5_s17_n250_c6_leaf/story_s17_n250_arm0.jsonl": {
+  "arm": {
+   "cond": false,
+   "wreach": 5,
+   "wemit": "leaf",
+   "causal": 1,
+   "units": "words",
+   "pair": "gate",
+   "new": true,
+   "edge": "exact"
+  },
+  "n": 1600,
+  "all": {
+   "sem": 0.639,
+   "syn": 0.291,
+   "non": 0.069
+  },
+  "novel share": 1.0,
+  "among novel": {
+   "sem": 0.639,
+   "syn": 0.291,
+   "non": 0.069
+  },
+  "n novel": 1600,
+  "syn reasons": {
+   "object": 466
+  },
+  "non reasons": {
+   "object NP": 80,
+   "subject NP": 31
+  }
+ },
+ "experiments/v3/results/story_gen/r230/p1/func5_s13_n500_c6_b0/story_s13_n500_arm0.jsonl": {
+  "arm": {
+   "cond": false,
+   "wreach": 5,
+   "wemit": 0,
+   "wemitk": 5,
+   "wgate": 0,
+   "causal": 1,
+   "units": "words",
+   "pair": "gate",
+   "new": true,
+   "edge": "exact"
+  },
+  "n": 1600,
+  "all": {
+   "sem": 0.007,
+   "syn": 0.014,
+   "non": 0.979
+  },
+  "novel share": 1.0,
+  "among novel": {
+   "sem": 0.007,
+   "syn": 0.014,
+   "non": 0.979
+  },
+  "n novel": 1600,
+  "syn reasons": {
+   "subject": 10,
+   "object": 5,
+   "subject+object": 4,
+   "object+adjective": 1,
+   "adjective": 1
+  },
+  "non reasons": {
+   "subject NP": 835,
+   "verb": 555,
+   "agreement": 100,
+   "object NP": 36,
+   "trailing": 23
+  }
+ },
+ "experiments/v3/results/story_gen/r230/p1/func5_s13_n500_c6_b6/story_s13_n500_arm0.jsonl": {
+  "arm": {
+   "cond": false,
+   "wreach": 5,
+   "wemit": 6,
+   "wemitk": 5,
+   "wgate": 6,
+   "causal": 1,
+   "units": "words",
+   "pair": "gate",
+   "new": true,
+   "edge": "exact"
+  },
+  "n": 1600,
+  "all": {
+   "sem": 0.259,
+   "syn": 0.487,
+   "non": 0.254
+  },
+  "novel share": 1.0,
+  "among novel": {
+   "sem": 0.259,
+   "syn": 0.487,
+   "non": 0.254
+  },
+  "n novel": 1600,
+  "syn reasons": {
+   "object": 404,
+   "subject": 200,
+   "adjective": 44,
+   "subject+object": 44,
+   "object+adjective": 39
+  },
+  "non reasons": {
+   "agreement": 233,
+   "subject NP": 44,
+   "verb": 43,
+   "trailing": 36,
+   "object NP": 28
+  }
+ },
+ "experiments/v3/results/story_gen/r230/p1/func5_s13_n500_c6_leaf/story_s13_n500_arm0.jsonl": {
+  "arm": {
+   "cond": false,
+   "wreach": 5,
+   "wemit": "leaf",
+   "causal": 1,
+   "units": "words",
+   "pair": "gate",
+   "new": true,
+   "edge": "exact"
+  },
+  "n": 1600,
+  "all": {
+   "sem": 0.669,
+   "syn": 0.263,
+   "non": 0.069
+  },
+  "novel share": 1.0,
+  "among novel": {
+   "sem": 0.669,
+   "syn": 0.263,
+   "non": 0.069
+  },
+  "n novel": 1600,
+  "syn reasons": {
+   "object": 420
+  },
+  "non reasons": {
+   "object NP": 93,
+   "subject NP": 17
+  }
+ },
+ "experiments/v3/results/story_gen/r230/p1/func5_s17_n500_c6_b0/story_s17_n500_arm0.jsonl": {
+  "arm": {
+   "cond": false,
+   "wreach": 5,
+   "wemit": 0,
+   "wemitk": 5,
+   "wgate": 0,
+   "causal": 1,
+   "units": "words",
+   "pair": "gate",
+   "new": true,
+   "edge": "exact"
+  },
+  "n": 1600,
+  "all": {
+   "sem": 0.005,
+   "syn": 0.026,
+   "non": 0.969
+  },
+  "novel share": 1.0,
+  "among novel": {
+   "sem": 0.005,
+   "syn": 0.026,
+   "non": 0.969
+  },
+  "n novel": 1600,
+  "syn reasons": {
+   "object": 15,
+   "subject+object": 12,
+   "subject": 12,
+   "subject+adjective": 2,
+   "subject+object+adjective": 1
+  },
+  "non reasons": {
+   "subject NP": 861,
+   "verb": 522,
+   "agreement": 120,
+   "object NP": 22,
+   "trailing": 21
+  }
+ },
+ "experiments/v3/results/story_gen/r230/p1/func5_s17_n500_c6_b6/story_s17_n500_arm0.jsonl": {
+  "arm": {
+   "cond": false,
+   "wreach": 5,
+   "wemit": 6,
+   "wemitk": 5,
+   "wgate": 6,
+   "causal": 1,
+   "units": "words",
+   "pair": "gate",
+   "new": true,
+   "edge": "exact"
+  },
+  "n": 1600,
+  "all": {
+   "sem": 0.111,
+   "syn": 0.374,
+   "non": 0.515
+  },
+  "novel share": 1.0,
+  "among novel": {
+   "sem": 0.111,
+   "syn": 0.374,
+   "non": 0.515
+  },
+  "n novel": 1600,
+  "syn reasons": {
+   "object": 267,
+   "subject": 154,
+   "subject+object": 74,
+   "subject+object+adjective": 30,
+   "subject+adjective": 27
+  },
+  "non reasons": {
+   "agreement": 726,
+   "subject NP": 43,
+   "object NP": 25,
+   "trailing": 20,
+   "verb": 10
+  }
+ },
+ "experiments/v3/results/story_gen/r230/p1/func5_s17_n500_c6_leaf/story_s17_n500_arm0.jsonl": {
+  "arm": {
+   "cond": false,
+   "wreach": 5,
+   "wemit": "leaf",
+   "causal": 1,
+   "units": "words",
+   "pair": "gate",
+   "new": true,
+   "edge": "exact"
+  },
+  "n": 1600,
+  "all": {
+   "sem": 0.693,
+   "syn": 0.255,
+   "non": 0.052
+  },
+  "novel share": 1.0,
+  "among novel": {
+   "sem": 0.693,
+   "syn": 0.255,
+   "non": 0.052
+  },
+  "n novel": 1600,
+  "syn reasons": {
+   "object": 408
+  },
+  "non reasons": {
+   "object NP": 69,
+   "subject NP": 15
+  }
+ },
+ "experiments/v3/results/story_gen/r230/p1/func5_s13_n2000_c6_b0/story_s13_n2000_arm0.jsonl": {
+  "arm": {
+   "cond": false,
+   "wreach": 5,
+   "wemit": 0,
+   "wemitk": 5,
+   "wgate": 0,
+   "causal": 1,
+   "units": "words",
+   "pair": "gate",
+   "new": true,
+   "edge": "exact"
+  },
+  "n": 1600,
+  "all": {
+   "sem": 0.001,
+   "syn": 0.021,
+   "non": 0.978
+  },
+  "novel share": 1.0,
+  "among novel": {
+   "sem": 0.001,
+   "syn": 0.021,
+   "non": 0.978
+  },
+  "n novel": 1600,
+  "syn reasons": {
+   "subject": 13,
+   "subject+object": 9,
+   "object": 9,
+   "subject+object+adjective": 2
+  },
+  "non reasons": {
+   "subject NP": 820,
+   "verb": 582,
+   "agreement": 100,
+   "object NP": 34,
+   "trailing": 18
+  }
+ },
+ "experiments/v3/results/story_gen/r230/p1/func5_s13_n2000_c6_b6/story_s13_n2000_arm0.jsonl": {
+  "arm": {
+   "cond": false,
+   "wreach": 5,
+   "wemit": 6,
+   "wemitk": 5,
+   "wgate": 6,
+   "causal": 1,
+   "units": "words",
+   "pair": "gate",
+   "new": true,
+   "edge": "exact"
+  },
+  "n": 1600,
+  "all": {
+   "sem": 0.221,
+   "syn": 0.641,
+   "non": 0.138
+  },
+  "novel share": 1.0,
+  "among novel": {
+   "sem": 0.221,
+   "syn": 0.641,
+   "non": 0.138
+  },
+  "n novel": 1600,
+  "syn reasons": {
+   "object": 507,
+   "subject": 230,
+   "subject+object": 93,
+   "object+adjective": 85,
+   "subject+adjective": 47
+  },
+  "non reasons": {
+   "agreement": 162,
+   "preposition": 29,
+   "verb": 24,
+   "object NP": 5,
+   "subject NP": 1
+  }
+ },
+ "experiments/v3/results/story_gen/r230/p1/func5_s13_n2000_c6_leaf/story_s13_n2000_arm0.jsonl": {
+  "arm": {
+   "cond": false,
+   "wreach": 5,
+   "wemit": "leaf",
+   "causal": 1,
+   "units": "words",
+   "pair": "gate",
+   "new": true,
+   "edge": "exact"
+  },
+  "n": 1600,
+  "all": {
+   "sem": 0.709,
+   "syn": 0.28,
+   "non": 0.011
+  },
+  "novel share": 1.0,
+  "among novel": {
+   "sem": 0.709,
+   "syn": 0.28,
+   "non": 0.011
+  },
+  "n novel": 1600,
+  "syn reasons": {
+   "object": 448
+  },
+  "non reasons": {
+   "object NP": 12,
+   "subject NP": 5
+  }
+ },
+ "experiments/v3/results/story_gen/r230/p1/func5_s17_n2000_c6_b0/story_s17_n2000_arm0.jsonl": {
+  "arm": {
+   "cond": false,
+   "wreach": 5,
+   "wemit": 0,
+   "wemitk": 5,
+   "wgate": 0,
+   "causal": 1,
+   "units": "words",
+   "pair": "gate",
+   "new": true,
+   "edge": "exact"
+  },
+  "n": 1600,
+  "all": {
+   "sem": 0.004,
+   "syn": 0.021,
+   "non": 0.974
+  },
+  "novel share": 1.0,
+  "among novel": {
+   "sem": 0.004,
+   "syn": 0.021,
+   "non": 0.974
+  },
+  "n novel": 1600,
+  "syn reasons": {
+   "object": 12,
+   "subject+object": 10,
+   "subject": 9,
+   "adjective": 2,
+   "object+adjective": 1
+  },
+  "non reasons": {
+   "subject NP": 755,
+   "verb": 585,
+   "agreement": 129,
+   "object NP": 44,
+   "trailing": 32
+  }
+ },
+ "experiments/v3/results/story_gen/r230/p1/func5_s17_n2000_c6_b6/story_s17_n2000_arm0.jsonl": {
+  "arm": {
+   "cond": false,
+   "wreach": 5,
+   "wemit": 6,
+   "wemitk": 5,
+   "wgate": 6,
+   "causal": 1,
+   "units": "words",
+   "pair": "gate",
+   "new": true,
+   "edge": "exact"
+  },
+  "n": 1600,
+  "all": {
+   "sem": 0.27,
+   "syn": 0.558,
+   "non": 0.172
+  },
+  "novel share": 1.0,
+  "among novel": {
+   "sem": 0.27,
+   "syn": 0.558,
+   "non": 0.172
+  },
+  "n novel": 1600,
+  "syn reasons": {
+   "object": 474,
+   "subject": 217,
+   "object+adjective": 56,
+   "subject+object": 54,
+   "subject+adjective": 42
+  },
+  "non reasons": {
+   "agreement": 117,
+   "preposition": 80,
+   "verb": 67,
+   "object NP": 11
+  }
+ },
+ "experiments/v3/results/story_gen/r230/p1/func5_s17_n2000_c6_leaf/story_s17_n2000_arm0.jsonl": {
+  "arm": {
+   "cond": false,
+   "wreach": 5,
+   "wemit": "leaf",
+   "causal": 1,
+   "units": "words",
+   "pair": "gate",
+   "new": true,
+   "edge": "exact"
+  },
+  "n": 1600,
+  "all": {
+   "sem": 0.723,
+   "syn": 0.269,
+   "non": 0.009
+  },
+  "novel share": 1.0,
+  "among novel": {
+   "sem": 0.723,
+   "syn": 0.269,
+   "non": 0.009
+  },
+  "n novel": 1600,
+  "syn reasons": {
+   "object": 430
+  },
+  "non reasons": {
+   "object NP": 14
+  }
+ }
+}

@@ -1,0 +1,102 @@
+{
+ "grammar samples": {
+  "n": 2000,
+  "sem": 1.0,
+  "syn": 0.0,
+  "non": 0.0,
+  "reasons": {}
+ },
+ "same-category swap, 1 word": {
+  "n": 2000,
+  "sem": 0.337,
+  "syn": 0.663,
+  "non": 0.0,
+  "reasons": {
+   "subject": 554,
+   "object": 506,
+   "adjective": 148,
+   "subject+adjective": 57,
+   "object+adjective": 41,
+   "subject+object": 21
+  }
+ },
+ "same-category swap, 2 words": {
+  "n": 2000,
+  "sem": 0.151,
+  "syn": 0.849,
+  "non": 0.0,
+  "reasons": {
+   "subject": 467,
+   "object": 463,
+   "subject+object": 349,
+   "subject+adjective": 131,
+   "adjective": 111,
+   "object+adjective": 102
+  }
+ },
+ "same-category swap, 3 words": {
+  "n": 2000,
+  "sem": 0.094,
+  "syn": 0.906,
+  "non": 0.0,
+  "reasons": {
+   "subject+object": 562,
+   "subject": 443,
+   "object": 276,
+   "subject+object+adjective": 163,
+   "subject+adjective": 159,
+   "object+adjective": 126
+  }
+ },
+ "word shuffle": {
+  "n": 2000,
+  "sem": 0.003,
+  "syn": 0.003,
+  "non": 0.994,
+  "reasons": {
+   "subject NP": 1768,
+   "verb": 160,
+   "object NP": 32,
+   "agreement": 16,
+   "trailing": 6,
+   "preposition": 6
+  }
+ },
+ "agreement broken (verb form flipped)": {
+  "n": 2000,
+  "sem": 0.0,
+  "syn": 0.0,
+  "non": 1.0,
+  "reasons": {
+   "agreement": 2000
+  }
+ },
+ "random words (same length)": {
+  "n": 2000,
+  "sem": 0.0,
+  "syn": 0.0,
+  "non": 1.0,
+  "reasons": {
+   "subject NP": 1987,
+   "verb": 10,
+   "agreement": 3
+  }
+ },
+ "lexicon": {
+  "words": 147,
+  "nouns": 80,
+  "verbs": 48,
+  "adjectives": 14,
+  "determiners": 3,
+  "prepositions": 2
+ },
+ "lengths": {
+  "3": 311,
+  "4": 143,
+  "5": 479,
+  "6": 689,
+  "7": 327,
+  "8": 51
+ },
+ "distinct sentences in 20000 samples": 14720
+}
