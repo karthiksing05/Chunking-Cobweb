@@ -1,0 +1,5418 @@
+{
+ "seed": 13,
+ "NS": [
+  500,
+  1000,
+  2000,
+  4000
+ ],
+ "n": 600,
+ "tau": 0.7022767292976416,
+ "kcs": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  6,
+  99
+ ],
+ "N500": {
+  "learned": 500,
+  "learn_s": 299,
+  "chunk units": 2578,
+  "parsed chunks per position": 5.51,
+  "identity (real board, parse units unchanged)": {
+   "real": 0.953,
+   "legal": 0.047,
+   "non": 0.0,
+   "illegal only by check (share of all boards)": 0.0,
+   "units kept (no draw fit)": 0.0,
+   "adjacent kings among illegal": 0.0,
+   "illegal_causes_of_all_boards": {},
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "r3k1nr/pp2ppbp/2p1b3/3p2p1/1nPPP3/1P3N2/1P1N1PPP/R1BK1B1R",
+     "r3k1nr/pp2ppbp/2p1b3/3p2p1/1nPPP3/1P3N2/1P1N1PPP/R1BK1B1R",
+     "5r2/r2n3k/Pq4pp/Q1Npb3/1B2p3/3P2nP/4P1BK/R3R3",
+     "5r2/r2n3k/Pq4pp/Q1Npb3/1B2p3/3P2nP/4P1BK/R3R3"
+    ],
+    "non": []
+   }
+  },
+  "where-file kc=0": {
+   "real": 0.87,
+   "legal": 0.077,
+   "non": 0.053,
+   "illegal only by check (share of all boards)": 0.053,
+   "units kept (no draw fit)": 0.266,
+   "adjacent kings among illegal": 0.031,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.053
+   },
+   "examples": {
+    "real": [
+     "1r5k/2pR2pp/r1p1n2p/p1B2P2/2P3P1/7P/1PP5/2K4R",
+     "1r5k/2pR2pp/r1p1n2p/p1B2P2/2P3P1/7P/1PP5/2K4R",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "r3k2r/pp3ppp/2p2q2/3pp3/8/P1bP1nP1/1PPBP3/R2QK1R1",
+     "r3k2r/pp3ppp/2p2q2/3pp3/8/P1bP1nP1/1PPBP3/R2QK1R1",
+     "r3k1nr/p1p1ppbp/3pb3/4p2p/2PPPn2/5N1P/1P1N1PPP/R1BK1B1R",
+     "r3k1nr/pp2ppbp/2p1b3/3p2p1/1nPPP3/5NP1/1P1N1PPP/R1BK1B1R"
+    ],
+    "non": [
+     "5r2/1p1N3p/p5P1/2kp3R/4n3/1P6/2K5/8",
+     "4b1kQ/p5p1/pb6/8/8/1N6/q4PPP/4R1K1",
+     "8/6p1/5pRp/5R1P/2b1pkP1/2r4P/7K/8",
+     "8/1p6/p1p3R1/5R1P/2b1pkP1/2r4P/7K/8"
+    ]
+   }
+  },
+  "where-file kc=1": {
+   "real": 0.758,
+   "legal": 0.152,
+   "non": 0.09,
+   "illegal only by check (share of all boards)": 0.09,
+   "units kept (no draw fit)": 0.029,
+   "adjacent kings among illegal": 0.019,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.09,
+    "IMPOSSIBLE_CHECK": 0.002
+   },
+   "examples": {
+    "real": [
+     "r5k1/1p1R1pp1/rp1n2p1/p1B1P3/1P3P2/6P1/PP6/1K4R1",
+     "1r5k/2pR2pp/r1p1n2p/p1B2P2/2P3P1/7P/1PP5/2K4R",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PPP3PP/R1B2RK1",
+     "1r1q1rk1/1Qp1nppp/2pb4/4p3/2N1P3/3P4/1PPP2PP/R1B2RK1"
+    ],
+    "legal": [
+     "8/8/3k4/1Pp1p1p1/P1R5/1K1P4/8/1r6",
+     "1r1r1k2/pppp2p1/2p3q1/3pp3/8/P1bP1n1P/1PPB1P2/R2Q1K1R",
+     "r2rk3/pppp1p2/2p2q2/3pp3/8/2bPPnP1/3BPPP1/R2QK1R1",
+     "r3k1nr/p1p1ppbp/3pb3/4p2p/P2PP2n/3P1N2/1P1N1PPP/RKBB1R2"
+    ],
+    "non": [
+     "5r1k/6pR/p2r3p/2p5/3p1P1P/1n1P1P1P/4P1PR/6K1",
+     "5r1k/6pR/p2r3p/2p5/1P1p1P2/P1P2n1P/1P2R1P1/6K1",
+     "4rr2/1p4pk/1p3q1p/2p3p1/n7/2N3PP/2Q2PP1/RR4K1",
+     "4r2k/p4p1p/3bp1qp/8/3BP3/4NQP1/2PP2KP/8"
+    ]
+   }
+  },
+  "where-file kc=2": {
+   "real": 0.73,
+   "legal": 0.192,
+   "non": 0.078,
+   "illegal only by check (share of all boards)": 0.078,
+   "units kept (no draw fit)": 0.015,
+   "adjacent kings among illegal": 0.021,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.078
+   },
+   "examples": {
+    "real": [
+     "1r5k/2pR2pp/r1p1n2p/p1B2P2/2P3P1/7P/1PP5/2K4R",
+     "1r1q1rk1/Qp2nppp/1p1b4/4p3/2N1P3/2P5/PP1P2PP/R1B2RK1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PPP3PP/R1B2RK1",
+     "3r1k2/pp2n1pp/2p1Pnp1/2q5/1P3P2/PPN1Q3/2P2R2/1K2R3"
+    ],
+    "legal": [
+     "1r4k1/2p1Rpp1/1rp1n1p1/1p1B3P/P3P3/5P2/3PP3/4KR2",
+     "8/8/3k4/1Pp1p1p1/P1R5/1K1P4/8/1r6",
+     "r2rk3/pppp1p2/2p2q2/3pp3/8/P1bP1nP1/1PPBP3/R2QK1R1",
+     "r2rk3/pppp1p2/2p2q2/3pp3/8/P1bP1nP1/1PPBP3/R2QK1R1"
+    ],
+    "non": [
+     "5r1k/6pR/p2r3p/2p5/P2p1P2/1P1P2nP/2P2RP1/6K1",
+     "r5rk/1nqppp2/6p1/b1pR4/1p6/1P2PN2/PB3PPP/R3Q1K1",
+     "5r2/3n2rk/1q2ppP1/QpN1b3/1Bp5/3P2nP/4P1BK/R3R3",
+     "8/1Q2p3/P2prp2/p2k4/2P5/5P2/3PPK2/8"
+    ]
+   }
+  },
+  "where-file kc=3": {
+   "real": 0.705,
+   "legal": 0.212,
+   "non": 0.083,
+   "illegal only by check (share of all boards)": 0.083,
+   "units kept (no draw fit)": 0.01,
+   "adjacent kings among illegal": 0.06,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.083
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2p1Rpp1/1rp1n1p1/1p1B1P2/P3P3/5P2/1PP5/2K2R2",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP1P2PP/R1B2RK1",
+     "r3rk2/ppp2p2/6p1/1P1p4/2P1Q3/1P4P1/PP3P2/6K1"
+    ],
+    "legal": [
+     "1r3k2/2pRpp2/r1p1np2/p1B3P1/1P3P2/6P1/2PP4/3K2R1",
+     "3r1k2/1ppp1np1/2ppPn2/3q4/1P3P2/PNPQ4/3PR3/2KR4",
+     "3r1k2/1pp2npp/3pPnp1/4q3/1P3P2/P1NPQ3/4PR2/3KR3",
+     "8/8/1k6/pPp1p3/P1R5/K1P5/8/1r6"
+    ],
+    "non": [
+     "2r3rk/1pp2p1p/6p1/P2p4/1P1Q4/P4P2/PP3P2/6K1",
+     "5rk1/5pR1/p2r2p1/2p5/1PpP4/n1P1PP2/3PP1R1/4K3",
+     "6Q1/2p5/1bp2p2/1p6/3P2k1/6R1/5PP1/5qK1",
+     "2kr4/ppp2q2/2np4/p6N/4ppQ1/2P4P/PPK1R1PP/8"
+    ]
+   }
+  },
+  "where-file kc=4": {
+   "real": 0.67,
+   "legal": 0.24,
+   "non": 0.09,
+   "illegal only by check (share of all boards)": 0.09,
+   "units kept (no draw fit)": 0.008,
+   "adjacent kings among illegal": 0.074,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.09
+   },
+   "examples": {
+    "real": [
+     "r1q2rk1/Qp1n1ppp/1pb5/4p3/2N1P3/2P5/PP1P2PP/R1B2RK1",
+     "3r1k2/1pp2npp/3pPnp1/3q4/1P3P2/PNPQ4/3PR3/2KR4",
+     "r3rk2/ppp2p2/6p1/3p2P1/1P1Q4/P4P2/1PP3P1/7K",
+     "2r3rk/1pp2pp1/6p1/3p1P2/2P1Q3/1P4P1/1PP3P1/7K"
+    ],
+    "legal": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B3P1/P3P3/5P2/2PP4/3K1R2",
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B3P1/2P3P1/7P/2PP4/3K3R",
+     "1r1q1rk1/Qpppnp2/1p1b4/4p3/1P2N3/2P5/PP1PP1P1/2RKB2R",
+     "3r1k2/ppp1n1p1/1pp1Pn2/4q3/1P3P2/P2PN1Q1/4P2R/3K2R1"
+    ],
+    "non": [
+     "7Q/4p3/2bp2p1/2p5/1kP5/1R6/4PP2/q4K2",
+     "2kr4/ppp2q2/2np4/p6N/2pp2Q1/2P4P/PP1PR1PK/8",
+     "2k2r2/ppp2q2/2np4/p6N/2pp2Q1/2P4P/PPK1RPP1/8",
+     "2rnrq2/1pp1k1pp/2pN1p1p/5NnP/2P3Q1/P7/P1PPP3/R2K1R2"
+    ]
+   }
+  },
+  "where-file kc=6": {
+   "real": 0.677,
+   "legal": 0.252,
+   "non": 0.072,
+   "illegal only by check (share of all boards)": 0.072,
+   "units kept (no draw fit)": 0.007,
+   "adjacent kings among illegal": 0.0,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.07,
+    "IMPOSSIBLE_CHECK": 0.002
+   },
+   "examples": {
+    "real": [
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP1P2PP/R1B2RK1",
+     "1r1q1rk1/2pQnppp/2pb4/4p3/2N1P3/5P2/3PPPPP/R1B2RK1",
+     "3r1k2/pp2n1pp/2p1Pnp1/6q1/1P3P2/PN1Q1P2/4R1P1/3R1K2",
+     "3r1k2/pp2n1pp/2p1Pnp1/7q/1P3P2/PN1Q2P1/4R2P/3R2K1"
+    ],
+    "legal": [
+     "1r3k2/2pRpp2/r1p1np2/p1B3P1/1P3P2/6P1/2PP4/3K2R1",
+     "1r3k2/2p1ppR1/2prnp2/3p1B1P/2P3P1/7P/3PP3/4K2R",
+     "8/8/3k4/2p1pPp1/4P1R1/2K1P3/8/5r2",
+     "rr2k3/pppp1p2/4pq2/3p1p2/8/Pb1Pn1P1/1PPBP3/R2QK1R1"
+    ],
+    "non": [
+     "4r2r/4p1pk/1p3q1p/2p3p1/n7/2N1P1P1/2Q1PP2/RR3K2",
+     "2r5/1p1Np3/p5P1/2kp3R/n7/1P6/2K5/8",
+     "1rk5/ppp2q2/2np4/p6N/1pp3Q1/2P4P/PPKPR1P1/8",
+     "4r1k1/b1p1pr2/p1pqnpQ1/5N1p/1P6/P1P2P1P/6PK/R1B2R2"
+    ]
+   }
+  },
+  "where-file kc=99": {
+   "real": 0.655,
+   "legal": 0.26,
+   "non": 0.085,
+   "illegal only by check (share of all boards)": 0.085,
+   "units kept (no draw fit)": 0.004,
+   "adjacent kings among illegal": 0.039,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.085
+   },
+   "examples": {
+    "real": [
+     "1r1q1rk1/Qp2nppp/1p1b4/4p3/2N1P3/2P5/PPP3PP/R1B2RK1",
+     "1r1q1rk1/1pQ1nppp/1p1b4/4p3/2N1P3/4P3/2PP1PPP/R1B2RK1",
+     "3r1k2/ppp1n1p1/1pp1Pn2/7q/1P3P2/P2N1QP1/6RP/5RK1",
+     "3r1k2/1pp2npp/3pPnp1/7q/1P3P2/P1N1Q1P1/5R1P/4R1K1"
+    ],
+    "legal": [
+     "1r3k2/2p1ppR1/2prnp2/3p1BP1/2P3P1/7P/2PP4/3K3R",
+     "r5k1/1p3ppR/1p1nr1p1/4p1BP/1P3P2/6P1/3PP3/4K1R1",
+     "8/8/3k4/2p1pPp1/4P1R1/K1P5/8/5r2",
+     "r3k2r/2pp1ppp/4pq2/4pp2/8/P1bP1nP1/1PPBP3/R2QK1R1"
+    ],
+    "non": [
+     "4r3/2p1N1p1/1p3P2/3kp1R1/n7/P7/1K6/8",
+     "1rk5/ppp2q2/2np4/p6N/1pp3Q1/2P4P/PP1PRKP1/8",
+     "2rnrq2/1pp1kpp1/2p1pNp1/nP3N2/2P3Q1/2P5/P4PPP/2R3KR",
+     "5rkr/1pp3pp/1p5p/3BP2n/3qPN2/1P1P4/3Q2P1/3K3R"
+    ]
+   }
+  },
+  "where-rank kc=0": {
+   "real": 0.773,
+   "legal": 0.045,
+   "non": 0.182,
+   "illegal only by check (share of all boards)": 0.037,
+   "units kept (no draw fit)": 0.118,
+   "adjacent kings among illegal": 0.0,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.042,
+    "PAWNS_ON_BACKRANK": 0.145
+   },
+   "examples": {
+    "real": [
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P2P2/PP4PP/R1B2RK1",
+     "3r1k2/pp2n1pp/2p2npq/4P3/6P1/1PN1QP1P/P4RK1/4R3",
+     "3r1k2/pp2n1pp/2p2npq/4P3/6P1/1PN1QP1P/P4RK1/4R3"
+    ],
+    "legal": [
+     "6r1/p1p3k1/1p1p4/8/B1P3P1/2PK2p1/3Pp3/8",
+     "6r1/p1p3k1/1p1p4/8/B1P3P1/3K2p1/2PPp3/8",
+     "k4b1r/pn4pp/1pN2n2/7P/PP4P1/3PB3/2K2P2/3R3R",
+     "k4b1r/pn4pp/1pN2n2/8/PP5P/3PB1P1/2K2P2/3R3R"
+    ],
+    "non": [
+     "1r6/2pR2k1/r1p1npp1/p1B1P1p1/2P3P1/7P/PP6/1K5R",
+     "1r6/2pR2k1/r1p1npp1/p1B1P1p1/2P3P1/7P/PP6/1K5R",
+     "3k4/2p1p1p1/8/3P4/2P1R3/8/8/3rK1P1",
+     "rp2k1nr/p1p1ppbp/1n1pb1p1/1P6/2PPP3/5N2/1P1N1PPP/R1BK1B1R"
+    ]
+   }
+  },
+  "where-rank kc=1": {
+   "real": 0.563,
+   "legal": 0.07,
+   "non": 0.367,
+   "illegal only by check (share of all boards)": 0.063,
+   "units kept (no draw fit)": 0.009,
+   "adjacent kings among illegal": 0.023,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.088,
+    "PAWNS_ON_BACKRANK": 0.303,
+    "IMPOSSIBLE_CHECK": 0.002
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "6k1/3R1pp1/r5p1/p1B1P3/1rP3P1/2p4P/PPp1n3/1K5R",
+     "1r1q1rk1/Q3np2/2pb1P2/2p1p1pp/2N1P3/2P5/PP4PP/R1B2RK1",
+     "1r1q1rk1/Q3nppp/2pbP3/2p1p3/2N2PPP/2P3K1/PP6/R1B2R2"
+    ],
+    "legal": [
+     "r3k3/pp2pp2/2p2q2/2bp1n1r/6pp/P2P3P/1PPB1P2/R2Q1K1R",
+     "5r2/3n3k/1q6/Q1N1b1pp/rB1p4/P2Pp1nP/4P1BK/R3R3",
+     "5r2/3n3k/1q6/Q1N1b1pp/rB1p4/P2Pp1nP/4P1BK/R3R3",
+     "r7/1pPqk2r/p5b1/2pbpp1p/3P2p1/2N2PPP/PP4K1/R1BQ1R2"
+    ],
+    "non": [
+     "8/1p3pp1/r3rkp1/p2p2P1/3P1Q2/2P4P/PP3P2/6K1",
+     "8/1p3p2/r3rkp1/p2p2p1/3P1Q2/2P4P/PP3PP1/6K1",
+     "rp6/pnp1k3/3pppp1/4b1nr/2PPP1bp/1P3N2/1P1N1PPP/R1BK1B1R",
+     "rP2k3/pp2pp2/1np1b3/3p2p1/2PPP1nr/5Nbp/1P1N1PPP/R1BK1B1R"
+    ]
+   }
+  },
+  "where-rank kc=2": {
+   "real": 0.502,
+   "legal": 0.073,
+   "non": 0.425,
+   "illegal only by check (share of all boards)": 0.073,
+   "units kept (no draw fit)": 0.006,
+   "adjacent kings among illegal": 0.016,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.352,
+    "OPPOSITE_CHECK": 0.115,
+    "IMPOSSIBLE_CHECK": 0.002
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1PP2/2P5/PP4PP/R1B2RK1",
+     "5rk1/Qrpq1ppp/2p1n3/3bp3/2N1PP2/2P5/PP4PP/R1B2RK1",
+     "3r1k2/pp2n1pp/2p1Pnp1/7q/1P3P2/P1N1Q1P1/5R1P/4R1K1"
+    ],
+    "legal": [
+     "1r4k1/2pRPpp1/r1p1n1p1/p1B5/PPP3P1/1K5P/8/7R",
+     "r3k3/pp3p2/2p2q2/3pp2r/6pp/P1bP1n1P/1PPB1P2/R2Q1K1R",
+     "r3k3/pp2ppnr/2p1b1bp/1n1p2p1/2PPP3/1P3N2/1P1N1PPP/R1BK1B1R",
+     "1N6/1b2k1pr/pp3p1p/2p5/5b1P/3r2NR/PP4P1/2K5"
+    ],
+    "non": [
+     "6p1/1p3pP1/r3rkp1/p2p4/8/3P1Q2/PPP2P1P/6K1",
+     "8/3P4/2PkR3/2p1p1p1/8/3rK1P1/8/8",
+     "rp2k1nr/pPp1ppbp/3pb1p1/8/2PPP3/1n3N2/1P1N1PPP/R1BK1B1R",
+     "5r1k/6p1/p2r3p/2p1n3/P2p1P2/R6P/1P1P2P1/2P2RK1"
+    ]
+   }
+  },
+  "where-rank kc=3": {
+   "real": 0.407,
+   "legal": 0.107,
+   "non": 0.487,
+   "illegal only by check (share of all boards)": 0.085,
+   "units kept (no draw fit)": 0.004,
+   "adjacent kings among illegal": 0.051,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.402,
+    "OPPOSITE_CHECK": 0.143,
+    "IMPOSSIBLE_CHECK": 0.007,
+    "TOO_MANY_CHECKERS": 0.002
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "3r1k2/pp2n1p1/2p2n1p/4P1pq/8/1PN1QPP1/P4R1P/4R1K1",
+     "r3k3/pp3p1r/2p1pqpp/3p4/2b2n2/P2P3P/1PPB1P2/R2Q1K1R",
+     "8/2R2p2/p3pkpp/1p2n3/1P6/PK1r4/4BP1P/8"
+    ],
+    "legal": [
+     "r3k3/pp2pp1r/2p2qpp/P1bp1n2/1PPP4/3B3P/R2Q1P2/5K1R",
+     "r3k3/pp2ppnr/1Pp1b1bp/3p2p1/2PPPN2/3N4/RPB2PPP/1n1K1B1R",
+     "2b1r1k1/N1Pp3p/rn3pq1/pp3p2/R2Q1PPP/b4B1R/1P3P2/4K3",
+     "rnb1r1k1/pp1p3p/b4pq1/5p2/N1P2PPP/5B1R/1P3P2/R2QK3"
+    ],
+    "non": [
+     "1r2P3/2p3k1/2p1npp1/PP1R2p1/rKP3P1/p1B4P/8/7R",
+     "2p1Prk1/Qrpq1ppp/4n1PP/3bp1K1/2N2P2/2P5/PP6/R1B2R2",
+     "4Prk1/Qr1q1ppp/2p1nPPP/2pbp1K1/2N5/2P5/PP6/R1B2R2",
+     "pp2n3/2p4p/3r1kp1/4P1pq/5n2/1PN1QPP1/P4R1P/4R1K1"
+    ]
+   }
+  },
+  "where-rank kc=4": {
+   "real": 0.32,
+   "legal": 0.113,
+   "non": 0.567,
+   "illegal only by check (share of all boards)": 0.062,
+   "units kept (no draw fit)": 0.005,
+   "adjacent kings among illegal": 0.062,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.505,
+    "OPPOSITE_CHECK": 0.177,
+    "IMPOSSIBLE_CHECK": 0.002
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2p2pp1/2p1n1p1/3RP3/r1P3P1/p1B4P/PP6/1K5R",
+     "3r1k2/pp2n1pp/2p1Pnpq/8/1PN1QPP1/P4R1P/4R1K1/8",
+     "3r1k2/pp2n1p1/2p2n1p/4P1pq/8/1PN1QPP1/P4R1P/4R1K1",
+     "r3k3/pp3p1r/2p1pqpp/3p4/P1b2n1P/1PPP1P2/3B1K1R/R2Q4"
+    ],
+    "legal": [
+     "r3k3/pp3p1r/P1p1pqpp/1PPp4/2bP1n2/3B3P/R2Q1P2/5K1R",
+     "2b1r1k1/rn1p3p/pp3pq1/5p2/N1P2P2/b7/1P3PPP/R2QKB1R",
+     "5r2/4n3/p2r3k/2p3p1/5P1p/PP1P3P/R1Pp1RP1/6K1",
+     "3r4/2n2pk1/4q3/8/p5p1/1pN2p1P/r1Q1PPPp/RR4K1"
+    ],
+    "non": [
+     "1r6/2pR4/r1p1n3/p1B1P3/2P3P1/6kP/PP3pp1/1K4pR",
+     "8/Qr1q4/2p1nPpp/2pb4/2N1Prk1/2P2p2/PP4PP/R1B1pRK1",
+     "1rpq1rk1/Q1p1nppp/3b4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "8/6p1/PP3P2/r3rkK1/p7/1p3pP1/3P1Qp1/2Pp3P"
+    ]
+   }
+  },
+  "where-rank kc=6": {
+   "real": 0.247,
+   "legal": 0.112,
+   "non": 0.642,
+   "illegal only by check (share of all boards)": 0.077,
+   "units kept (no draw fit)": 0.003,
+   "adjacent kings among illegal": 0.065,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.565,
+    "OPPOSITE_CHECK": 0.213,
+    "IMPOSSIBLE_CHECK": 0.007,
+    "TOO_MANY_CHECKERS": 0.002
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2p2pp1/2p1n1p1/3RP3/r1P3P1/p1B4P/PP6/1K5R",
+     "3r1k2/pp2n1pp/2p2npq/4P3/6P1/1PN1QP1P/P4RK1/4R3",
+     "r3k2r/pp3ppp/2p2q2/P2pp3/1PP5/2bP1n1P/3B1P2/R2Q1K1R",
+     "b1b1r1k1/rn1p3p/pp3pq1/N1P2p2/5P2/8/RP1Q1PPP/4KB1R"
+    ],
+    "legal": [
+     "r3k3/pp2ppnr/2p1b1bp/1P1p2p1/2PPPN2/3N4/RPB2PPP/1n1K1B1R",
+     "3q1rk1/3bbp2/r1n1p3/ppp4B/2NPPNpn/PPB4p/R2Q1PPP/4K2R",
+     "2bq1rk1/2pn1pb1/r1Pp1n1p/pp1B2p1/1P6/2N1PNB1/P1Qp1PPP/R3K2R",
+     "2bq1rk1/2pn1pb1/r1Pp1n1p/pp1B1Np1/1P4PP/2N1P1BR/P1Qp1P2/R3K3"
+    ],
+    "non": [
+     "3R4/r7/p1B5/4P3/2P3P1/1r4kP/PPp2pp1/1Kp1n1pR",
+     "8/Q7/2p5/2p3pp/1rNqPrk1/2P1np2/PP1b1PPP/R1B1pRK1",
+     "2p5/Q1p2P2/1r1q2pp/4nrk1/2NbPp2/2P5/PP2p1PP/R1B2RK1",
+     "pp2n3/2p1P3/7p/1P3Ppq/P7/2NrQkP1/5RpP/4RnK1"
+    ]
+   }
+  },
+  "where-rank kc=99": {
+   "real": 0.183,
+   "legal": 0.147,
+   "non": 0.67,
+   "illegal only by check (share of all boards)": 0.123,
+   "units kept (no draw fit)": 0.004,
+   "adjacent kings among illegal": 0.085,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.547,
+    "OPPOSITE_CHECK": 0.292,
+    "IMPOSSIBLE_CHECK": 0.01,
+    "TOO_MANY_CHECKERS": 0.005
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "1r1q1rk1/Q1p1nppp/2pbPP2/4p3/2N3PP/2P3K1/PP6/R1B2R2",
+     "8/pp2n2p/2p1P1p1/3r1k1q/1P3Pp1/P1N1QnP1/5R1P/4R1K1",
+     "r3k2r/pp2qppp/3pbn2/4p3/3pP3/3P3P/PPP1BPP1/R1BQ1RK1"
+    ],
+    "legal": [
+     "r3rk2/p7/6P1/1p3p2/3P1Qp1/PPPp1PpP/6K1/8",
+     "3k4/2pPp1p1/2P1R3/8/8/3r4/4K1P1/8",
+     "8/pp5r/r1p1k1pp/3ppp2/5q2/P1bP1n1P/1PPB1P2/R2Q1K1R",
+     "rnb1r1k1/pp1p3p/5pq1/N1P2p2/5PPP/5B1R/RP1Q1P2/b3K3"
+    ],
+    "non": [
+     "1rP3P1/2p3kP/2p1npp1/3RP1pR/r7/p1B5/PP6/1K6",
+     "1rpq2pp/Q1p1n3/3b4/5rk1/2N1Pp2/2P5/PP2pPPP/R1B2RK1",
+     "3r1k1q/4P1p1/5nPp/1P3PpP/P5K1/2N1Q3/pp2nR2/2p1R3",
+     "3P1QP1/2P3pP/r3rk2/pp3p2/6p1/PP1p1P2/6K1/8"
+    ]
+   }
+  },
+  "where-both kc=0": {
+   "real": 0.767,
+   "legal": 0.055,
+   "non": 0.178,
+   "illegal only by check (share of all boards)": 0.073,
+   "units kept (no draw fit)": 0.303,
+   "adjacent kings among illegal": 0.0,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.087,
+    "PAWNS_ON_BACKRANK": 0.105
+   },
+   "examples": {
+    "real": [
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2NPP3/2P5/PP4PP/R1B2RK1",
+     "1r1q1rk1/Q3np2/3b4/2ppp2p/2N1P2p/2P4P/PP4PP/R1B2RK1",
+     "3r1k2/pp2n1pp/2p1Pnp1/7q/1P3P2/P1N1Q1P1/5R1P/4R1K1",
+     "3r1k2/pp2n1pp/2p1Pnpq/8/1P3PP1/P1N1Q2P/5RK1/4R3"
+    ],
+    "legal": [
+     "r3k2r/pp3ppp/2p2q2/3pp3/8/P1bP1nP1/1PPBP3/R2QK1R1",
+     "r3k2r/pp3ppp/2p2q2/3pp3/8/P1bP1nP1/1PPBP3/R2QK1R1",
+     "r3k1nr/pp2ppbp/2p1b3/3pP1p1/n1PPP3/5N2/1P1N1PPP/R1BK1B1R",
+     "rn2k1nr/pp2ppbp/2p1b3/3p2p1/2PPP3/5N2/PP1N1PPP/R1BK1B1R"
+    ],
+    "non": [
+     "1r6/2pR3k/r1p1n1pp/p1B2P1p/2P3P1/7P/1PP5/2K4R",
+     "1r6/2pR3k/r1p1n1pp/p1B2P1p/2P3P1/7P/1PP5/2K4R",
+     "r3rk2/p6p/2p3p1/3P3p/3PpQ2/2P4P/PP3P2/6K1",
+     "8/5p2/1R2pk1p/p5p1/1p2n3/2P5/1PK1r3/3BP1P1"
+    ]
+   }
+  },
+  "where-both kc=1": {
+   "real": 0.403,
+   "legal": 0.152,
+   "non": 0.445,
+   "illegal only by check (share of all boards)": 0.1,
+   "units kept (no draw fit)": 0.055,
+   "adjacent kings among illegal": 0.026,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.163,
+    "PAWNS_ON_BACKRANK": 0.345,
+    "IMPOSSIBLE_CHECK": 0.003
+   },
+   "examples": {
+    "real": [
+     "1r1q1rk1/PQ2nppp/3b4/3pp3/2NpP3/3P4/1PP3PP/R1B2RK1",
+     "4r1k1/pp2n2p/2p3np/4P1pq/8/1PN1QPP1/P4R1P/4R1K1",
+     "3r1k2/6pp/4Pnp1/pp2n2q/1Pp2P2/PN1Q2P1/4R2P/3R2K1",
+     "r3rk2/pp3pp1/6p1/3p4/3P1Q1P/2P4P/PP3P2/6K1"
+    ],
+    "legal": [
+     "r3k2r/pp2pppp/2p2q2/P1bp1n2/1PP5/3P2P1/3BP3/R2QK1R1",
+     "r3k3/pp3p2/1rp2qp1/pp1p4/3Pb2n/3PPPP1/3BP3/R2QK1R1",
+     "4k2r/2p1pp1p/1P1pbnr1/4pbpp/3PP3/P1K1BNR1/nP1N1PPP/R1B5",
+     "r1n5/pp1nrk2/P1pbppp1/3p1bp1/P2PP3/5N2/1P1N1PPP/RKBB1R2"
+    ],
+    "non": [
+     "3R2k1/r1r2ppP/p1Bp2p1/3p1n2/1P1PPP2/4K1P1/8/6R1",
+     "r2R2k1/rp3pp1/ppBn2p1/5P2/2P3P1/7P/1PP5/2K4R",
+     "1r1q1rk1/1Q2npp1/3b2p1/pp2p3/2N1P3/3P4/1PP3PP/R1B2RKP",
+     "8/r3rkp1/p1p3p1/7p/3PpQ2/PPPP1P1P/6K1/8"
+    ]
+   }
+  },
+  "where-both kc=2": {
+   "real": 0.325,
+   "legal": 0.197,
+   "non": 0.478,
+   "illegal only by check (share of all boards)": 0.113,
+   "units kept (no draw fit)": 0.044,
+   "adjacent kings among illegal": 0.035,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.185,
+    "PAWNS_ON_BACKRANK": 0.365,
+    "IMPOSSIBLE_CHECK": 0.007,
+    "TOO_MANY_CHECKERS": 0.005
+   },
+   "examples": {
+    "real": [
+     "1r1q1rk1/3Qnp2/3b4/3pppp1/1PNpP3/5P2/3PP1PP/R1B2RK1",
+     "1r1q1rk1/Q3npp1/3b2p1/2ppp3/P1N1P3/2P5/PP4PP/R1B2RK1",
+     "3r1k2/pp2n1p1/2p1Pnp1/5pq1/1P3P2/P1N1QP2/5RP1/4RK2",
+     "3r1k2/pp2n1p1/2p1Pn1q/5p2/1P2pPP1/P1N1Q2P/5RK1/4R3"
+    ],
+    "legal": [
+     "1r4k1/2pR1pp1/r1p1nPp1/p1B5/1P3P2/1PP3P1/2K5/6R1",
+     "8/r3rk2/p1p3p1/2P1Q2p/1P2ppP1/PP3P2/4P1K1/8",
+     "8/3k4/2p1p1p1/6P1/5P1R/8/2K1P3/6r1",
+     "r3k3/pp2rpp1/2pppq2/3pb2n/8/P2P2P1/1PPBP3/R2QK1R1"
+    ],
+    "non": [
+     "4Rk2/1r2pp2/1p1Brp2/4Pp2/2P2pPn/7P/PP6/1K5R",
+     "8/1p3p2/r3rkp1/p1PpQ3/1P4PP/8/PP3P2/3p2K1",
+     "r3kp1r/pp3ppp/2pb1qn1/3p4/8/P2P2P1/1PPBP3/R2QK1R1",
+     "rp4nr/p1p3bp/3p1kp1/5ppn/P2PPb2/3P1N2/1P1N1PPP/RKBB1R2"
+    ]
+   }
+  },
+  "where-both kc=3": {
+   "real": 0.253,
+   "legal": 0.158,
+   "non": 0.588,
+   "illegal only by check (share of all boards)": 0.113,
+   "units kept (no draw fit)": 0.039,
+   "adjacent kings among illegal": 0.062,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.475,
+    "OPPOSITE_CHECK": 0.238,
+    "IMPOSSIBLE_CHECK": 0.007,
+    "TOO_MANY_CHECKERS": 0.003
+   },
+   "examples": {
+    "real": [
+     "1r1q1rk1/Q3np2/3b2p1/3Pp1p1/ppN1P3/2P5/PP4PP/R1B2RK1",
+     "3r1k2/1ppp1np1/2pp1n2/4P2q/1N1Q4/1P2RPP1/P2R3P/6K1",
+     "8/3k4/2p1p1p1/3P4/2P1R3/8/5K1P/3r4",
+     "r3k3/pp2pp2/2p1b3/nnrp2p1/PbpPP3/5N2/PP1N1PPP/RKBB1R2"
+    ],
+    "legal": [
+     "5k2/2r1pp1R/3prp2/3ppnBP/P3P3/5P2/3PP3/4KR2",
+     "1r1k4/3pp3/2pnP3/2pp2nq/1P2pP2/PN1Q2P1/4R2P/3R2K1",
+     "8/8/3k4/2p1pPp1/3KPPR1/8/8/5r2",
+     "r3k3/pp1prp2/2pppq2/1b1pn3/8/P2P2P1/1PPBP3/R2QK1R1"
+    ],
+    "non": [
+     "1r6/2p1R1P1/1rp1n3/1p1B4/1PPP1P2/3Kk1P1/3pp3/4p1R1",
+     "1r1q2p1/3Qn1pP/3b2pp/1rk5/1pN1P3/5P2/p2PP1PP/R1B2RK1",
+     "3P4/8/1p3p2/r3rkp1/pPPp1pP1/3P1Q1K/2P4P/8",
+     "r3rk2/pp3p2/2P1Q1p1/1P1p2P1/3p4/1PP3P1/7K/4P3"
+    ]
+   }
+  },
+  "where-both kc=4": {
+   "real": 0.133,
+   "legal": 0.122,
+   "non": 0.745,
+   "illegal only by check (share of all boards)": 0.102,
+   "units kept (no draw fit)": 0.051,
+   "adjacent kings among illegal": 0.049,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.643,
+    "OPPOSITE_CHECK": 0.287,
+    "IMPOSSIBLE_CHECK": 0.008,
+    "TOO_MANY_CHECKERS": 0.005
+   },
+   "examples": {
+    "real": [
+     "3r1k2/pp2n1p1/1qp2n2/5pP1/P3p3/NPQP3P/K1PR4/2R5",
+     "3r1k2/pp2n1pp/2p2np1/1N1Q1Pq1/4R3/2PR1PP1/1P4P1/5K2",
+     "8/1pr2prk/2pP1Qp1/2Pp3P/8/p2P4/PP3P2/6K1",
+     "r1k4r/pp1pq1pp/1pb2n2/3Pp3/3p4/3BP2P/1PPP1PP1/R1BQ1RK1"
+    ],
+    "legal": [
+     "1r1q2rk/Q3n1p1/3b4/1pP2p2/1pN1pp2/2P1PP2/PP2KP2/R1B2R2",
+     "r2k4/pp1pp1nr/1Ppb2bp/3p2p1/2PPP3/5N2/nP1N1PPP/R1BK1B1R",
+     "8/npr2P1p/2p1pkp1/3q3P/1p3PP1/2N3K1/1rQ5/RR6",
+     "N7/b4P2/1r1kNRr1/2pp2pp/4p3/4b3/PP3pP1/2K5"
+    ],
+    "non": [
+     "1r6/2p3RP/2prn3/3p1B2/2PPP1P1/4K1kP/5pp1/6pR",
+     "r7/1p3R2/1prn4/2p1B2P/1P3P2/2k3P1/1ppPP3/2p1K1R1",
+     "pr1q1rk1/pQ2np1P/3b4/pp2p3/2N1P3/3P4/1PP3PP/R1B2RK1",
+     "2p3p1/PP3P1p/4p1K1/r3rk2/p3P3/1P1Q4/P4P2/7p"
+    ]
+   }
+  },
+  "where-both kc=6": {
+   "real": 0.113,
+   "legal": 0.157,
+   "non": 0.73,
+   "illegal only by check (share of all boards)": 0.107,
+   "units kept (no draw fit)": 0.043,
+   "adjacent kings among illegal": 0.055,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.328,
+    "PAWNS_ON_BACKRANK": 0.623,
+    "IMPOSSIBLE_CHECK": 0.012,
+    "TOO_MANY_CHECKERS": 0.01
+   },
+   "examples": {
+    "real": [
+     "7k/4R1pp/1r5p/1p1BP3/1Pr2P2/3p2P1/PP1p1n2/1K4R1",
+     "3k4/2p1p1p1/8/3P4/2P1R3/8/K1P5/3r4",
+     "r7/1p5p/2p1r1p1/3Pn1pk/p2N1q2/3Q3P/1RR2PP1/6K1",
+     "1r3r1k/1p2Npp1/2p1n3/1Q5p/P1P1q1p1/2RPR3/PP3PbP/4B1K1"
+    ],
+    "legal": [
+     "8/Qr1q4/2p1nrk1/2pb1pP1/2N1P3/2P1ppp1/PP4PP/R1B2RK1",
+     "7r/1p2k2p/nrp1pp1P/bp1pb1p1/P2PPN2/3N2PP/RPB2Pn1/1K1B1R2",
+     "r7/pp3k2/2p2pp1/3p1bpP/2PPP2N/nPP2Nnr/1PR1BPbp/3K1B1R",
+     "r3k3/ppr1qp2/1pppbn2/4p1P1/3pPP2/1P2PK2/1PPP4/RBBQ1R2"
+    ],
+    "non": [
+     "1k6/pp6/rp6/1p3P1R/1pPnr1P1/4p1BP/1PP5/2K4R",
+     "1r1q4/Q3n1p1/3b2p1/3rk3/2NpP3/2P5/PPp3PP/R1BppRKP",
+     "2q5/4p3/1P1p4/2PN1Q2/1K2P1R1/1r1k1R2/1PpppPn1/P2np3",
+     "8/pp2n3/2p5/NrQk3q/3RpP2/1pRn2P1/p1P3PP/1P4K1"
+    ]
+   }
+  },
+  "where-both kc=99": {
+   "real": 0.063,
+   "legal": 0.17,
+   "non": 0.767,
+   "illegal only by check (share of all boards)": 0.105,
+   "units kept (no draw fit)": 0.077,
+   "adjacent kings among illegal": 0.093,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.662,
+    "OPPOSITE_CHECK": 0.388,
+    "IMPOSSIBLE_CHECK": 0.015,
+    "TOO_MANY_CHECKERS": 0.01
+   },
+   "examples": {
+    "real": [
+     "r5k1/1p3pp1/1p1n2p1/6PR/2P1r1P1/4p1BP/2PP4/3K3R",
+     "8/3r2k1/p4ppp/2b1pq2/2P3B1/2NQP3/PP2KP2/8",
+     "8/8/1r4p1/3k4/2pP4/1pP1Rp1P/4K3/8",
+     "6k1/8/p3b2Q/p5p1/1b2PPP1/1NR2K2/q7/8"
+    ],
+    "legal": [
+     "8/3KPP2/3P1R2/4k3/3p1p1p/4r3/8/8",
+     "3r4/2pp4/ppr3k1/2pPp1Pp/2PpPPBq/P1bR1nQ1/K1R5/8",
+     "8/8/rpp1kp1r/3p1ppp/3bpqn1/P2P3P/1PPB1P2/R2Q1K1R",
+     "3k4/1p1pp1nr/2pbPPbp/1P1p2p1/n2PP1r1/3P1Np1/1PKNBPR1/R1B5"
+    ],
+    "non": [
+     "r5P1/1p4k1/1p1n1pp1/2PP2p1/1P1K1PR1/3r2P1/3p1B2/6R1",
+     "p3P3/pQ1N4/6rk/1pp1P1p1/1R1B2R1/2rPqpPP/1PP2nK1/4b3",
+     "pp6/Q3P3/5rk1/5pPP/P1N3Kp/1rPqp2p/PP2n3/R1Bb1R2",
+     "8/1pp2n2/NqQpP3/3R4/PPR1rPk1/PP5p/K3p1n1/3p4"
+    ]
+   }
+  },
+  "where-file+what kc=0": {
+   "real": 0.638,
+   "legal": 0.03,
+   "non": 0.332,
+   "illegal only by check (share of all boards)": 0.072,
+   "units kept (no draw fit)": 0.264,
+   "adjacent kings among illegal": 0.045,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.088,
+    "NO_BLACK_KING": 0.058,
+    "TOO_MANY_KINGS": 0.065,
+    "PAWNS_ON_BACKRANK": 0.087,
+    "TOO_MANY_WHITE_PAWNS": 0.01,
+    "NO_WHITE_KING": 0.067,
+    "TOO_MANY_BLACK_PAWNS": 0.01,
+    "TOO_MANY_WHITE_PIECES": 0.002,
+    "TOO_MANY_BLACK_PIECES": 0.008
+   },
+   "examples": {
+    "real": [
+     "1r5k/2p3p1/r1p1n2p/pp6/2P3P1/7P/5PP1/6KR",
+     "1r5k/2p3p1/r1p1n2p/pp6/8/4P2P/1PP3P1/2K4R",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/8/2P2N2/PPP3PP/R1B2RK1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/8/2P2N2/PP1P2PP/R1B2RK1"
+    ],
+    "legal": [
+     "r3k1nr/p3ppbp/4b1p1/7p/1nPPP3/5N1P/1P1N1PPP/R1BK1B1R",
+     "r3k1nr/p3ppbp/4b1p1/7p/1nPPP3/P4N2/1P1N1PPP/R1BK1B1R",
+     "r2q2k1/1ppb2bp/2Pp1np1/1nnP1p2/1p4b1/PPN2P2/2Q2NPP/1RB1N1KB",
+     "4N1k1/1r2pp2/4p3/1p1r4/2n5/1PP5/1PKr4/4R3"
+    ],
+    "non": [
+     "8/8/PR1k4/2p1p1pP/8/6K1/8/r7",
+     "8/8/PR4k1/3P1ppp/8/2K5/8/r7",
+     "4r3/1ppp3p/p5q1/1p6/1n6/2N2P1P/4QPP1/2RR2K1",
+     "r3rk2/p5p1/5n1p/3q1k2/1p5Q/1PN2b2/PPP2PP1/B1RPR1K1"
+    ]
+   }
+  },
+  "where-file+what kc=1": {
+   "real": 0.147,
+   "legal": 0.048,
+   "non": 0.805,
+   "illegal only by check (share of all boards)": 0.028,
+   "units kept (no draw fit)": 0.03,
+   "adjacent kings among illegal": 0.087,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.317,
+    "NO_BLACK_KING": 0.308,
+    "OPPOSITE_CHECK": 0.093,
+    "TOO_MANY_KINGS": 0.223,
+    "NO_WHITE_KING": 0.193,
+    "TOO_MANY_BLACK_PAWNS": 0.058,
+    "IMPOSSIBLE_CHECK": 0.003,
+    "TOO_MANY_CHECKERS": 0.003,
+    "TOO_MANY_WHITE_PAWNS": 0.05,
+    "TOO_MANY_BLACK_PIECES": 0.005,
+    "TOO_MANY_WHITE_PIECES": 0.003
+   },
+   "examples": {
+    "real": [
+     "r2q4/2pkb1pp/3prn1p/5p2/2B5/1P1N4/1PPb2PP/R2Q1RK1",
+     "8/p2k1p1p/1p1p2p1/8/1P6/P4N2/1P3PP1/R2Q1RK1",
+     "r4rk1/p1p3p1/2RPp3/2NpPn2/5P2/5R2/5PP1/6K1",
+     "3rk3/4p3/8/3p3P/4Q3/6K1/5P2/2R3R1"
+    ],
+    "legal": [
+     "3rq1k1/5bb1/p5n1/1p6/PR6/1B1Q2N1/3PP3/R2BK3",
+     "2r2k2/6pb/1p2n1p1/2p5/P2n4/2PP4/1nK5/Q7",
+     "4k3/3bnp2/Ppn1p2p/1Pp3p1/1B5P/1N5K/2P1B3/8",
+     "3bn1k1/1Qpp4/1p2p1rr/1n1b4/6pb/1P1P4/1PP1Q1B1/2K1RR2"
+    ],
+    "non": [
+     "5r1k/2p1n3/rppp4/p7/4P3/5P2/4QPP1/1P1B2K1",
+     "5n2/6p1/r5pp/p1p5/8/3P4/1PPPP1P1/1R3K2",
+     "1r1b4/1p4pp/1pprkpB1/4pp2/2BP1Pn1/4P3/2PRPP2/B1R2K2",
+     "1n3rk1/p4p1p/1p1bp1p1/8/2PP4/1P6/5KPP/1R2R1K1"
+    ]
+   }
+  },
+  "where-file+what kc=2": {
+   "real": 0.015,
+   "legal": 0.027,
+   "non": 0.958,
+   "illegal only by check (share of all boards)": 0.008,
+   "units kept (no draw fit)": 0.023,
+   "adjacent kings among illegal": 0.049,
+   "illegal_causes_of_all_boards": {
+    "NO_BLACK_KING": 0.48,
+    "PAWNS_ON_BACKRANK": 0.567,
+    "NO_WHITE_KING": 0.552,
+    "TOO_MANY_BLACK_PIECES": 0.012,
+    "TOO_MANY_KINGS": 0.123,
+    "TOO_MANY_WHITE_PAWNS": 0.038,
+    "OPPOSITE_CHECK": 0.07,
+    "TOO_MANY_BLACK_PAWNS": 0.035,
+    "TOO_MANY_WHITE_PIECES": 0.002
+   },
+   "examples": {
+    "real": [
+     "5r1k/2pq1p2/4p3/P3np2/3P4/P1P3P1/5P2/6K1",
+     "6rk/3p2p1/5p2/3B4/4PPP1/3P1K1P/6P1/8",
+     "r1bq1rk1/ppp1qppp/8/3p4/2P5/3P1BP1/P2B3P/K1RR2B1",
+     "5n2/1kp5/pp1b2p1/1p4N1/7P/5P2/3B3P/3B2K1"
+    ],
+    "legal": [
+     "4k3/3ppp2/2n1pRB1/3N4/1P2P3/1P2PP2/2r1K3/8",
+     "r7/1p2r3/2p2k2/8/8/8/qn2PN2/2K3B1",
+     "1r1b4/2p5/1p4p1/8/P2kP3/1PpP2nP/1PPp2P1/Q1K5",
+     "2rk4/3p4/4r3/2p5/4p3/8/3b1P1P/4K2R"
+    ],
+    "non": [
+     "1p2q2r/2pb4/n3nr2/5pP1/P4P2/1P1P4/8/3K1Q2",
+     "5r2/1p3rkk/2n2pbq/5n2/8/8/P2PQ3/1PPRR1B1",
+     "1r1bqp2/2p2p2/k1p1bQ1Q/pp6/3P2PP/2N2P2/P2b2PP/R5K1",
+     "2nbp3/1q1p1pp1/1pp1np2/2p1B3/3N1N2/2PN4/1P1R4/RRR1Q3"
+    ]
+   }
+  },
+  "where-file+what kc=3": {
+   "real": 0.022,
+   "legal": 0.025,
+   "non": 0.953,
+   "illegal only by check (share of all boards)": 0.005,
+   "units kept (no draw fit)": 0.023,
+   "adjacent kings among illegal": 0.059,
+   "illegal_causes_of_all_boards": {
+    "TOO_MANY_KINGS": 0.185,
+    "PAWNS_ON_BACKRANK": 0.64,
+    "NO_BLACK_KING": 0.377,
+    "NO_WHITE_KING": 0.483,
+    "TOO_MANY_BLACK_PIECES": 0.048,
+    "TOO_MANY_BLACK_PAWNS": 0.097,
+    "TOO_MANY_WHITE_PAWNS": 0.077,
+    "OPPOSITE_CHECK": 0.108,
+    "TOO_MANY_WHITE_PIECES": 0.017,
+    "IMPOSSIBLE_CHECK": 0.003,
+    "TOO_MANY_CHECKERS": 0.002
+   },
+   "examples": {
+    "real": [
+     "4r1bk/8/3pr2p/4p3/6pp/1P1PPP2/P3KqP1/8",
+     "8/5pp1/4P2p/3P4/2rk4/3pp1PP/6K1/8",
+     "5k2/2pp4/1P1n4/4P3/2B2P2/4K3/PPRN4/8",
+     "8/2pp2k1/3N1b2/8/PP1P4/R1N5/P2K2P1/8"
+    ],
+    "legal": [
+     "2r2r2/1p2b2p/p4nkr/8/P1PNPp2/2PP1Pp1/1NP1Q3/3RRK2",
+     "6r1/1pk2pp1/8/Kp6/p1n4P/1p6/2p5/8",
+     "3rqkqn/1p1qb3/pppp1pp1/1P6/R7/3P1NN1/2KQ1N1P/RR3R2",
+     "4k3/3pP3/2r1pp2/2pPn3/4q3/4pPP1/6K1/8"
+    ],
+    "non": [
+     "r1rrk3/2q2k2/2n1ppp1/3b4/5B2/4b3/P2P4/2K2P2",
+     "1ppr4/3r1bp1/2q2qnn/6b1/8/P1P1P3/4B1P1/R2Q2R1",
+     "3rk3/3p1rpp/1b2b1pp/P3p1q1/Q1Pn4/3P3P/R3B3/1PP3b1",
+     "2rnr3/2ppp3/pppnppr1/1b2np2/6rk/3p1B2/P3nP1P/3q1KB1"
+    ]
+   }
+  },
+  "where-file+what kc=4": {
+   "real": 0.012,
+   "legal": 0.017,
+   "non": 0.972,
+   "illegal only by check (share of all boards)": 0.015,
+   "units kept (no draw fit)": 0.02,
+   "adjacent kings among illegal": 0.094,
+   "illegal_causes_of_all_boards": {
+    "NO_BLACK_KING": 0.388,
+    "PAWNS_ON_BACKRANK": 0.715,
+    "NO_WHITE_KING": 0.475,
+    "TOO_MANY_KINGS": 0.198,
+    "IMPOSSIBLE_CHECK": 0.015,
+    "OPPOSITE_CHECK": 0.155,
+    "TOO_MANY_BLACK_PAWNS": 0.185,
+    "TOO_MANY_WHITE_PIECES": 0.023,
+    "TOO_MANY_WHITE_PAWNS": 0.083,
+    "TOO_MANY_BLACK_PIECES": 0.118,
+    "TOO_MANY_CHECKERS": 0.008
+   },
+   "examples": {
+    "real": [
+     "8/2pp4/rk2p3/2b2N2/p7/1PP1N3/2K3P1/8",
+     "3r4/3kn3/2pp4/4pp2/3p4/1B4N1/2Q1BPP1/R4RK1",
+     "7r/3r3p/2p2nk1/p4p2/1b6/1R1p3P/1QPB1PP1/1R4K1",
+     "8/B5k1/1P3bb1/1RK3p1/6P1/5P1P/PP6/8"
+    ],
+    "legal": [
+     "5r2/5kp1/5p2/8/8/1RPP4/qpp5/1RK2q2",
+     "1R6/rbqQ3p/4p1r1/R2B2pk/5p1q/1PP1P1p1/PK2R3/8",
+     "5krr/b3p3/p1p1q1pb/3p4/3PP3/3PK3/3PP3/4BB2",
+     "4r1rk/8/3p4/3P4/5PP1/4qK2/4pp2/6n1"
+    ],
+    "non": [
+     "4PP2/2P1p3/P2PPn2/3PK1P1/4r1b1/4N1B1/6p1/4Kp2",
+     "3krp1p/1p2p3/3Pqb2/2P5/3b3k/4Q3/3P2Bp/3R2p1",
+     "bk1n4/1p2pn2/p5p1/3bbk2/2p4p/P5b1/2NpR3/2PPP1P1",
+     "1p1rb3/1r1P1r2/3pPPpp/4PK2/1nkP4/b2p2P1/2P1BK2/pP6"
+    ]
+   }
+  },
+  "where-file+what kc=6": {
+   "real": 0.003,
+   "legal": 0.025,
+   "non": 0.972,
+   "illegal only by check (share of all boards)": 0.007,
+   "units kept (no draw fit)": 0.025,
+   "adjacent kings among illegal": 0.093,
+   "illegal_causes_of_all_boards": {
+    "TOO_MANY_KINGS": 0.213,
+    "PAWNS_ON_BACKRANK": 0.732,
+    "NO_BLACK_KING": 0.435,
+    "TOO_MANY_BLACK_PIECES": 0.108,
+    "OPPOSITE_CHECK": 0.177,
+    "TOO_MANY_BLACK_PAWNS": 0.183,
+    "NO_WHITE_KING": 0.425,
+    "TOO_MANY_WHITE_PIECES": 0.055,
+    "TOO_MANY_WHITE_PAWNS": 0.107,
+    "IMPOSSIBLE_CHECK": 0.018,
+    "TOO_MANY_CHECKERS": 0.008
+   },
+   "examples": {
+    "real": [
+     "r2r2k1/p2n4/qp1p1p2/2p5/7P/3NP1P1/2QNBK2/1R1R4",
+     "r3r1k1/2p5/P1p5/pP6/8/Q1K5/3Q4/8"
+    ],
+    "legal": [
+     "8/p2rk3/3p4/rbp5/pP6/p2P4/1pP1B2P/7K",
+     "8/2q1r3/4p3/1k4r1/ppp2b2/3P2p1/2P1Pp2/2K5",
+     "6B1/rk3P2/1Pp1R1K1/P7/p7/8/2pp4/8",
+     "r2B1rB1/p1Pq2B1/1R1K3b/6p1/5Pk1/3PrpBp/1b1rP1p1/qR1BQ1R1"
+    ],
+    "non": [
+     "3Pk3/1bP1P1p1/2pK4/2R1BQ1R/P4k2/1P3bn1/8/Q1K2p2",
+     "8/2pP2P1/1pBPPPP1/5K2/2rn4/8/2p5/3ppp2",
+     "4qnp1/2rpp1p1/1bpp1np1/n2k1p2/8/1P6/K1pRq1b1/3p1p1p",
+     "p7/1rpk4/1ppppn2/2pp4/1p6/p1p3bq/n2Q1p2/B5p1"
+    ]
+   }
+  },
+  "where-file+what kc=99": {
+   "real": 0.003,
+   "legal": 0.012,
+   "non": 0.985,
+   "illegal only by check (share of all boards)": 0.003,
+   "units kept (no draw fit)": 0.023,
+   "adjacent kings among illegal": 0.098,
+   "illegal_causes_of_all_boards": {
+    "TOO_MANY_BLACK_PIECES": 0.123,
+    "PAWNS_ON_BACKRANK": 0.772,
+    "NO_WHITE_KING": 0.388,
+    "TOO_MANY_BLACK_PAWNS": 0.197,
+    "NO_BLACK_KING": 0.428,
+    "TOO_MANY_WHITE_PAWNS": 0.12,
+    "TOO_MANY_KINGS": 0.28,
+    "OPPOSITE_CHECK": 0.182,
+    "TOO_MANY_WHITE_PIECES": 0.055,
+    "IMPOSSIBLE_CHECK": 0.012,
+    "TOO_MANY_CHECKERS": 0.008
+   },
+   "examples": {
+    "real": [
+     "5rk1/1r3p2/bp1pp3/1p2p3/P1pQ4/8/1R6/R1K5",
+     "8/2pk2r1/6p1/2Pp4/8/4K3/R2R4/8"
+    ],
+    "legal": [
+     "2k5/3pp3/2P1p3/3P4/8/4RP2/3P1K2/3N4",
+     "r1b2rk1/p2R1ppp/p2p4/1p2p1QN/7P/8/P1PPP3/1b1K2R1",
+     "8/8/8/3P4/5r2/1P1B1p2/1Kpk4/8",
+     "8/2rk4/2pN1b2/1Qn2P2/2KP1R2/8/1R3p1p/8"
+    ],
+    "non": [
+     "4kp2/1b2p1p1/2pp1n1r/7p/6p1/5p2/2kp4/2pbpp2",
+     "3r4/p2pP3/1ppK1PP1/3q4/6P1/3P1P1r/5p2/3R2pb",
+     "8/1KPR1N2/1P3n1P/4p3/3rk3/4p1P1/2Pp1P2/2pp4",
+     "2P2nr1/3P1ppp/pk2P3/1p3b2/1N4P1/5NP1/2RPPP2/RQ1R2K1"
+    ]
+   }
+  },
+  "where-both+what kc=0": {
+   "real": 0.642,
+   "legal": 0.023,
+   "non": 0.335,
+   "illegal only by check (share of all boards)": 0.07,
+   "units kept (no draw fit)": 0.259,
+   "adjacent kings among illegal": 0.095,
+   "illegal_causes_of_all_boards": {
+    "TOO_MANY_KINGS": 0.083,
+    "PAWNS_ON_BACKRANK": 0.043,
+    "TOO_MANY_BLACK_PAWNS": 0.017,
+    "NO_BLACK_KING": 0.055,
+    "OPPOSITE_CHECK": 0.083,
+    "IMPOSSIBLE_CHECK": 0.003,
+    "TOO_MANY_CHECKERS": 0.003,
+    "NO_WHITE_KING": 0.072,
+    "TOO_MANY_BLACK_PIECES": 0.01,
+    "TOO_MANY_WHITE_PIECES": 0.002,
+    "TOO_MANY_WHITE_PAWNS": 0.008
+   },
+   "examples": {
+    "real": [
+     "rr6/ppp4k/2p1n1p1/7p/8/4P2P/1PP3P1/2K4R",
+     "rr6/ppp4k/2p1n1p1/7p/2P3P1/7P/5PP1/6KR",
+     "1r1q1rk1/Q3nppp/3b4/4p2p/3P3p/2P2N2/PP4PP/R1B2RK1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/7P/2P2N2/PP4PP/R1B2RK1"
+    ],
+    "legal": [
+     "rn2kr2/p3ppb1/2p1bp1n/3p4/2PPP3/5N2/PP1N1PPP/R1BK1B1R",
+     "r3kr2/p3ppb1/4bp1n/4p3/1nPPPp2/5N2/PP1N1PPP/R1BK1B1R",
+     "r3N1k1/pr3p2/1n2p3/8/p7/1PP5/1PKr4/4R3",
+     "r1bq1rk1/p2pbppp/4pn2/2n3p1/2PP4/NQNn4/PP2PP1P/2R1KB1R"
+    ],
+    "non": [
+     "r3rkk1/p7/6p1/4Pp2/3PpQ2/2P1p2P/PP3P2/6K1",
+     "r3k1pr/1p3ppp/2p2q2/3pp3/3P4/P1bP1n2/1PPB1P1P/R2QK2R",
+     "6k1/5p2/4p2p/p5p1/1p2n3/2p4P/6PK/3PPB2",
+     "6k1/5p2/4p2p/p5p1/1p2n2p/2P5/1PK4P/3nP3"
+    ]
+   }
+  },
+  "where-both+what kc=1": {
+   "real": 0.158,
+   "legal": 0.037,
+   "non": 0.805,
+   "illegal only by check (share of all boards)": 0.033,
+   "units kept (no draw fit)": 0.02,
+   "adjacent kings among illegal": 0.093,
+   "illegal_causes_of_all_boards": {
+    "TOO_MANY_KINGS": 0.228,
+    "PAWNS_ON_BACKRANK": 0.313,
+    "NO_BLACK_KING": 0.298,
+    "TOO_MANY_WHITE_PAWNS": 0.055,
+    "OPPOSITE_CHECK": 0.098,
+    "TOO_MANY_BLACK_PAWNS": 0.048,
+    "NO_WHITE_KING": 0.175,
+    "TOO_MANY_WHITE_PIECES": 0.005,
+    "TOO_MANY_BLACK_PIECES": 0.012,
+    "IMPOSSIBLE_CHECK": 0.003,
+    "TOO_MANY_CHECKERS": 0.003
+   },
+   "examples": {
+    "real": [
+     "3r4/4b3/2kpp3/4p3/4P1Pn/1P1B1P2/3P1P1P/6K1",
+     "5n2/7k/6pp/R7/Q1B2R2/R7/6K1/8",
+     "r7/p1q2r2/1b1Bk3/2npp3/1PB1p3/1P6/Q2BQPPP/3R2K1",
+     "8/1q2rr2/bpnkbp1p/pn1p2p1/4P3/2PQnN1P/PP2B1P1/R4RK1"
+    ],
+    "legal": [
+     "4rk2/2P3p1/5p2/1K6/8/1Q6/R1B1R3/8",
+     "5k2/4rp2/1p1pp2p/r1nn2p1/1qb5/2NPn3/PP1PPPPP/R1R3KR",
+     "6r1/1k6/p1p5/pp3p2/3P4/8/pbp3PP/6K1",
+     "1qb2r2/rk2p3/p1npp3/n3P3/4PQ2/3P1N1B/5PPP/R3R1K1"
+    ],
+    "non": [
+     "5r2/3rpp1k/3p2n1/2ppp3/4n2P/6P1/3P1PK1/2K1P3",
+     "2r5/2pp4/8/1p1pn1bP/p2r1PP1/6Q1/2P1BP2/6K1",
+     "4pp2/6pp/4k1r1/1q2p1pp/1PPn1p2/2P1R1q1/Q2PPPP1/1B2P1K1",
+     "p1n5/1kp5/2pP1rk1/ppp2p2/2B1pP2/1P1PPPPP/P2R2K1/1R1P4"
+    ]
+   }
+  },
+  "where-both+what kc=2": {
+   "real": 0.033,
+   "legal": 0.027,
+   "non": 0.94,
+   "illegal only by check (share of all boards)": 0.015,
+   "units kept (no draw fit)": 0.018,
+   "adjacent kings among illegal": 0.055,
+   "illegal_causes_of_all_boards": {
+    "TOO_MANY_KINGS": 0.107,
+    "PAWNS_ON_BACKRANK": 0.538,
+    "NO_BLACK_KING": 0.472,
+    "NO_WHITE_KING": 0.533,
+    "TOO_MANY_BLACK_PAWNS": 0.055,
+    "OPPOSITE_CHECK": 0.083,
+    "TOO_MANY_WHITE_PAWNS": 0.065,
+    "TOO_MANY_BLACK_PIECES": 0.017,
+    "TOO_MANY_WHITE_PIECES": 0.003,
+    "IMPOSSIBLE_CHECK": 0.005,
+    "TOO_MANY_CHECKERS": 0.003
+   },
+   "examples": {
+    "real": [
+     "r4rk1/2pn1p2/1p1q1n2/3pn3/3NPP2/4PP1P/5RB1/6K1",
+     "1r1qqrk1/p1qpbp2/2p1p3/3Pp3/3P4/4Q1P1/7P/3R1RK1",
+     "r4rk1/ppp1n1pp/1pp1b3/2P2B1R/1P2Q3/6N1/KP3P1P/8",
+     "8/2r1k2p/3n1r2/2pP1p2/4P3/2RP3P/PPP5/4R2K"
+    ],
+    "legal": [
+     "8/3p4/2n5/r5k1/4R1P1/2R1r3/3PP1p1/4K3",
+     "rr2k2r/3pn1q1/2n1p3/6P1/n7/7P/2P1Q1P1/N1B3RK",
+     "5k1r/p3npR1/3p1p2/2q5/3P4/8/2PP1N2/2K5",
+     "7r/1p5k/2np1n1q/1pp5/p2P3P/2BPK3/2PP1B2/2NN4"
+    ],
+    "non": [
+     "2pq1rk1/1pp2p2/3Pb3/2Pp4/1P1rk3/Rb2K1P1/P7/2n5",
+     "8/1ppn2pp/p3p3/1rPKPpn1/1P3P2/2P5/1B6/8",
+     "4p3/k1kp4/1q1bppp1/1pn2p2/3P1P1P/1N1RNNP1/P5PP/7R",
+     "p4rp1/1n3pp1/4n3/2p2pp1/3p4/P6B/1PP2PP1/R2R4"
+    ]
+   }
+  },
+  "where-both+what kc=3": {
+   "real": 0.022,
+   "legal": 0.02,
+   "non": 0.958,
+   "illegal only by check (share of all boards)": 0.013,
+   "units kept (no draw fit)": 0.016,
+   "adjacent kings among illegal": 0.07,
+   "illegal_causes_of_all_boards": {
+    "NO_BLACK_KING": 0.405,
+    "PAWNS_ON_BACKRANK": 0.618,
+    "TOO_MANY_BLACK_PAWNS": 0.118,
+    "NO_WHITE_KING": 0.495,
+    "TOO_MANY_KINGS": 0.178,
+    "OPPOSITE_CHECK": 0.12,
+    "TOO_MANY_WHITE_PAWNS": 0.1,
+    "TOO_MANY_BLACK_PIECES": 0.068,
+    "TOO_MANY_WHITE_PIECES": 0.022,
+    "IMPOSSIBLE_CHECK": 0.002
+   },
+   "examples": {
+    "real": [
+     "8/2p2p2/2pp2p1/3kp3/2p5/1q6/1PQ2P2/4R1K1",
+     "r7/prk5/2pp1n2/8/1P1BP1P1/1P1NPP2/PP3K2/2R5",
+     "3k2r1/8/r7/p7/8/5N2/6P1/5RK1",
+     "8/5k2/5pp1/8/2RP4/8/3K4/8"
+    ],
+    "legal": [
+     "4r3/4pp1p/1b2r1p1/1q6/nn1k2r1/3P1p1p/1P1p4/K3N1n1",
+     "8/7n/5p1b/1P1P4/1BP1P2p/BP1P4/P1N3pk/3RRK2",
+     "3q1rk1/2nb4/p1nb2r1/7b/6pP/1PPB2PK/PR3B2/Q5R1",
+     "8/7p/8/1K3k2/2r1p3/1Ppnpp2/P2n4/8"
+    ],
+    "non": [
+     "3bq2N/1p3PP1/1n2pR2/p7/8/3r2r1/7p/3KP1nP",
+     "1pp5/3p4/3bp3/3PPP2/q2PK3/pp2PP2/2n1K3/8",
+     "8/3q3r/3ppp1p/1p3n2/1B1p2Bp/1r1P4/PPP2Q2/Kpp2R2",
+     "1b2p2Q/2pk2pp/3n3p/pp4pq/2P2P1P/1P3r1R/P7/6q1"
+    ]
+   }
+  },
+  "where-both+what kc=4": {
+   "real": 0.007,
+   "legal": 0.017,
+   "non": 0.977,
+   "illegal only by check (share of all boards)": 0.01,
+   "units kept (no draw fit)": 0.016,
+   "adjacent kings among illegal": 0.077,
+   "illegal_causes_of_all_boards": {
+    "NO_BLACK_KING": 0.397,
+    "PAWNS_ON_BACKRANK": 0.697,
+    "NO_WHITE_KING": 0.502,
+    "TOO_MANY_WHITE_PAWNS": 0.085,
+    "TOO_MANY_BLACK_PAWNS": 0.177,
+    "OPPOSITE_CHECK": 0.125,
+    "TOO_MANY_BLACK_PIECES": 0.11,
+    "TOO_MANY_WHITE_PIECES": 0.015,
+    "TOO_MANY_KINGS": 0.195,
+    "IMPOSSIBLE_CHECK": 0.015,
+    "TOO_MANY_CHECKERS": 0.012
+   },
+   "examples": {
+    "real": [
+     "4k2r/5p1p/pp6/PP6/3pq3/P1P5/PPP5/2N1RK2",
+     "8/5k2/4ppp1/8/8/3PP1B1/P1PP2P1/2K5",
+     "1r2r1k1/1p2q3/p2n2r1/7B/8/3P1PP1/2P1Q1K1/8",
+     "r1br1rk1/p4nb1/2p2pp1/1R1BQ1R1/4P3/4PPP1/P4P2/2K2R2"
+    ],
+    "legal": [
+     "8/8/2k5/2pp3p/2p4n/6P1/P3PP2/R4K2",
+     "3Q4/8/5bbk/1p1p1bp1/p3Bp1P/3p2P1/3PP1P1/3K4",
+     "r7/2p1b3/5n2/8/4pk1K/3pqP2/1P5N/8",
+     "4qn2/8/3pp3/8/4P3/p4K2/1p4p1/3k4"
+    ],
+    "non": [
+     "8/q1r5/2p1p3/8/8/p1rq1P2/1p1b1BP1/2p3P1",
+     "1pr4P/p1bk1PP1/2p2R2/8/8/4Pb2/3Pp1p1/4Kp2",
+     "5P2/4r1Pp/4pp2/1pp1pr2/n1qp1p1p/2pP2nP/PPP2PP1/4r1K1",
+     "r7/pr1p2pp/1p1rppp1/3p1pp1/3b4/1P6/P2N4/8"
+    ]
+   }
+  },
+  "where-both+what kc=6": {
+   "real": 0.007,
+   "legal": 0.013,
+   "non": 0.98,
+   "illegal only by check (share of all boards)": 0.007,
+   "units kept (no draw fit)": 0.021,
+   "adjacent kings among illegal": 0.1,
+   "illegal_causes_of_all_boards": {
+    "NO_BLACK_KING": 0.412,
+    "PAWNS_ON_BACKRANK": 0.777,
+    "NO_WHITE_KING": 0.393,
+    "TOO_MANY_BLACK_PAWNS": 0.182,
+    "TOO_MANY_BLACK_PIECES": 0.108,
+    "TOO_MANY_WHITE_PIECES": 0.057,
+    "TOO_MANY_WHITE_PAWNS": 0.103,
+    "TOO_MANY_KINGS": 0.232,
+    "OPPOSITE_CHECK": 0.185,
+    "IMPOSSIBLE_CHECK": 0.013,
+    "TOO_MANY_CHECKERS": 0.01
+   },
+   "examples": {
+    "real": [
+     "6k1/8/8/8/5B2/4P1P1/5K2/8",
+     "3k4/p1ppp1p1/8/8/8/8/1P6/K7",
+     "1k6/3Pnr2/5p2/4PP2/4K3/8/P7/8",
+     "3rk3/B3b3/2PPppp1/2pK4/8/8/8/8"
+    ],
+    "legal": [
+     "2N1r3/4p1p1/1K1P1nB1/8/pk3p2/3rp3/5bp1/3Q2n1",
+     "8/4pp2/3k2pP/3p1qPK/8/5B2/1RQ1R3/8",
+     "2r5/1PP1p1P1/1rk2bK1/5p2/8/1p6/n2PP3/3RN3",
+     "r1rkq3/2ppb3/3p4/8/4r3/P1p1P3/3ppPP1/2B3K1"
+    ],
+    "non": [
+     "3r1b1r/8/1p3pP1/7B/p3PPR1/5PP1/n5K1/1pPN4",
+     "5p2/2r1p3/8/2prn2k/4rR2/3p2n1/kp4pP/p4pR1",
+     "2pPpp2/2PpP1pk/3q1P2/2qn1pQ1/pp1p3n/6pN/6Qp/4B2R",
+     "3bk3/4pr2/3p1pp1/2pn1pbp/1r2prp1/3qp3/2r1bR1P/p3qpP1"
+    ]
+   }
+  },
+  "where-both+what kc=99": {
+   "real": 0.01,
+   "legal": 0.012,
+   "non": 0.978,
+   "illegal only by check (share of all boards)": 0.012,
+   "units kept (no draw fit)": 0.024,
+   "adjacent kings among illegal": 0.109,
+   "illegal_causes_of_all_boards": {
+    "TOO_MANY_KINGS": 0.243,
+    "OPPOSITE_CHECK": 0.198,
+    "NO_BLACK_KING": 0.393,
+    "PAWNS_ON_BACKRANK": 0.757,
+    "TOO_MANY_WHITE_PIECES": 0.05,
+    "NO_WHITE_KING": 0.4,
+    "TOO_MANY_BLACK_PAWNS": 0.173,
+    "TOO_MANY_WHITE_PAWNS": 0.11,
+    "TOO_MANY_BLACK_PIECES": 0.105,
+    "IMPOSSIBLE_CHECK": 0.012,
+    "TOO_MANY_CHECKERS": 0.007
+   },
+   "examples": {
+    "real": [
+     "4rk2/5p2/2p1q3/4N3/2PPP3/2r1K3/2n5/8",
+     "4q2k/8/3n2b1/4P3/3B4/PP6/5P2/2BK4",
+     "8/8/2n2k2/6p1/5pP1/5P1P/6K1/8",
+     "8/3k4/1pp5/3p4/3p4/2r5/7K/8"
+    ],
+    "legal": [
+     "4B1n1/6Pq/8/qn3K1p/1r1PP1p1/2p3P1/1p2Np2/nkbb4",
+     "8/N1P1p3/1Kbb4/P1P3r1/1P2rkp1/2p1p3/1B1pn3/8",
+     "8/3p4/3Pp3/1PK4k/2pBB1p1/3Q1p2/1N3N2/2R1B1R1",
+     "8/4n3/5p2/8/2k1p3/5P1P/p3K2R/1n6"
+    ],
+    "non": [
+     "rr5k/p6b/r2r4/p7/3B4/q2P4/P1PPPP2/R1K1K3",
+     "6rr/8/5rpb/5p2/5r2/1pP1PP2/1RKRp3/3p4",
+     "8/R2B4/1RP2NK1/1K1R1PPP/3N3B/3N4/1N1PP3/1PPK4",
+     "8/8/6PP/R1K3Br/1r3prb/1p4rp/4np1q/2p1b1p1"
+    ]
+   }
+  },
+  "list counts=0": {
+   "real": 0.125,
+   "legal": 0.005,
+   "non": 0.87,
+   "illegal only by check (share of all boards)": 0.022,
+   "units kept (no draw fit)": 0.0,
+   "adjacent kings among illegal": 0.207,
+   "illegal_causes_of_all_boards": {
+    "NO_WHITE_KING": 0.352,
+    "NO_BLACK_KING": 0.322,
+    "TOO_MANY_WHITE_PAWNS": 0.108,
+    "OPPOSITE_CHECK": 0.072,
+    "TOO_MANY_KINGS": 0.313,
+    "TOO_MANY_BLACK_PIECES": 0.052,
+    "TOO_MANY_BLACK_PAWNS": 0.123,
+    "TOO_MANY_WHITE_PIECES": 0.052,
+    "IMPOSSIBLE_CHECK": 0.003,
+    "TOO_MANY_CHECKERS": 0.003
+   },
+   "examples": {
+    "real": [
+     "r2q2k1/1p2n2p/5n2/2p4n/8/4PP1P/2Q3P1/R2Q1RK1",
+     "2rr1r2/p5kp/1p2pb2/3p2pP/3p4/4PN1P/1P3P1P/3Q2K1",
+     "1nk4r/8/3bpp1p/3Pp1P1/2PNpn2/4PKP1/5PPP/R3R3",
+     "r5kr/7p/p1p1pn2/3p2p1/1B1bP2P/PPPB1P2/P1Q2B2/R2R2K1"
+    ],
+    "legal": [
+     "r3kr1r/pppn1p1p/b1pb1n2/3pN3/P2P2n1/4KP2/P4PP1/1N4B1",
+     "8/p3p2p/n6P/4k3/p1p5/2P2b2/8/2B3K1",
+     "2b1kr2/3nb2p/2p1p1pp/3q1b2/P6P/N3nR1P/PP6/1NBQ2K1"
+    ],
+    "non": [
+     "6k1/4q1p1/2p1b2p/5p1Q/3P4/2NB1N1P/1PQBR1P1/R3R3",
+     "r4b2/2pn1pp1/7p/3QP3/3P4/P1PQ2QP/PP1Q1PP1/2K2RK1",
+     "5r2/ppp2pp1/B2q4/1b3P2/2P2P2/3Q4/7b/R2Q4",
+     "8/p7/3p2p1/2B4n/2B5/4P1P1/1PP1B1P1/3RR1K1"
+    ]
+   }
+  },
+  "list counts=1": {
+   "real": 0.51,
+   "legal": 0.007,
+   "non": 0.483,
+   "illegal only by check (share of all boards)": 0.05,
+   "units kept (no draw fit)": 0.0,
+   "adjacent kings among illegal": 0.0,
+   "illegal_causes_of_all_boards": {
+    "NO_WHITE_KING": 0.253,
+    "OPPOSITE_CHECK": 0.058,
+    "NO_BLACK_KING": 0.248
+   },
+   "examples": {
+    "real": [
+     "1r4k1/3b1pb1/p1p5/3p4/3pp3/2NP4/PPP4P/2R3K1",
+     "6k1/2qn2pp/5n1p/3p4/7B/P1P5/P3PPP1/1RB3K1",
+     "6k1/p3r2p/4pp2/p3P2p/3P4/5P2/5P2/R2Q2K1",
+     "6k1/1p2nppb/3pp3/4p1p1/2P1n3/P1NPP3/rP1B2PP/2BRK2R"
+    ],
+    "legal": [
+     "2b1kr2/p1p2pbn/3P4/r2pp2p/4R1p1/P1P1P1P1/1P4P1/2B2BKR",
+     "rnb2k1r/2p5/p3p1pp/3q1b2/3p3P/2N2N2/1P3PPR/2BR2K1",
+     "6kr/bp1npp2/ppP1p3/4p2P/1b1P2n1/P2BR2K/P4P1P/RN6",
+     "6k1/2p5/4K2p/8/P7/7B/P1P5/8"
+    ],
+    "non": [
+     "rr1q2k1/p1p2pb1/2p2p1p/1p1p2B1/P2P4/4PPPn/PP3P2/R3R3",
+     "5bkr/1p2p1pp/4p3/3pP3/3P4/7P/P6P/R7",
+     "4k1Qr/pp3p1p/4pn2/2pPPn2/3N2p1/4B2P/1P2BPPP/R4R2",
+     "r2R2k1/pp1n1pp1/2p4p/2pP3b/P1PbpP2/2N3PP/P1Q4P/5RK1"
+    ]
+   }
+  }
+ },
+ "N1000": {
+  "learned": 1000,
+  "learn_s": 681,
+  "chunk units": 5329,
+  "parsed chunks per position": 5.48,
+  "identity (real board, parse units unchanged)": {
+   "real": 0.953,
+   "legal": 0.047,
+   "non": 0.0,
+   "illegal only by check (share of all boards)": 0.0,
+   "units kept (no draw fit)": 0.0,
+   "adjacent kings among illegal": 0.0,
+   "illegal_causes_of_all_boards": {},
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "r3k1nr/pp2ppbp/2p1b3/3p2p1/1nPPP3/1P3N2/1P1N1PPP/R1BK1B1R",
+     "r3k1nr/pp2ppbp/2p1b3/3p2p1/1nPPP3/1P3N2/1P1N1PPP/R1BK1B1R",
+     "5r2/r2n3k/Pq4pp/Q1Npb3/1B2p3/3P2nP/4P1BK/R3R3",
+     "5r2/r2n3k/Pq4pp/Q1Npb3/1B2p3/3P2nP/4P1BK/R3R3"
+    ],
+    "non": []
+   }
+  },
+  "where-file kc=0": {
+   "real": 0.872,
+   "legal": 0.072,
+   "non": 0.057,
+   "illegal only by check (share of all boards)": 0.057,
+   "units kept (no draw fit)": 0.232,
+   "adjacent kings among illegal": 0.0,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.057
+   },
+   "examples": {
+    "real": [
+     "1r4k1/1ppR1p2/r1p1n1p1/p1B2P2/2P3P1/7P/1PP5/2K4R",
+     "1r4k1/p1pR1p2/r1p1n1p1/p1B2P2/2P3P1/7P/1PP5/2K4R",
+     "1r1q1rk1/Qp2nppp/1p1b4/4p3/2N1P3/2P5/PPP3PP/R1B2RK1",
+     "1r1q1rk1/Qp2nppp/1p1b4/4p3/2N1P3/2P5/PPP3PP/R1B2RK1"
+    ],
+    "legal": [
+     "r3k2r/pp3ppp/2p2q2/3pp3/8/P1bP1nP1/1PPBP3/R2QK1R1",
+     "rnb1r1k1/pp1p3p/5pq1/5p2/N1P2P2/2b5/3P1PPP/R2QKB1R",
+     "4r3/3p2pN/2p3P1/4kp1R/1n6/1P6/2K5/8",
+     "5r2/3nr2k/Pq2pp2/QpN1b3/2pB4/3P2nP/4P1BK/R3R3"
+    ],
+    "non": [
+     "5q2/p4k2/2p2Rn1/3Np3/3p4/5P2/P3Q1P1/6K1",
+     "5q2/1p3k2/2p2Rn1/3Np3/3p4/5P2/P3Q1P1/6K1",
+     "Q7/7p/1bp2p2/1p6/3P2k1/6R1/5PP1/5qK1",
+     "7Q/1p6/1bp2p2/1p6/3P2k1/6R1/5PP1/5qK1"
+    ]
+   }
+  },
+  "where-file kc=1": {
+   "real": 0.787,
+   "legal": 0.138,
+   "non": 0.075,
+   "illegal only by check (share of all boards)": 0.075,
+   "units kept (no draw fit)": 0.029,
+   "adjacent kings among illegal": 0.089,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.073,
+    "IMPOSSIBLE_CHECK": 0.002,
+    "TOO_MANY_CHECKERS": 0.002
+   },
+   "examples": {
+    "real": [
+     "1r1q1rk1/Qp2nppp/1p1b4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/1Qp1nppp/2pb4/4p3/2N1P3/3P4/PPP3PP/R1B2RK1",
+     "4rk2/1pp1n1pp/3pPnp1/2q5/1P3P2/PP1N1Q2/2P3R1/1K3R2",
+     "4rk2/1pp1n1pp/3pPnp1/7q/1P3P2/P1N1Q1P1/5R1P/4R1K1"
+    ],
+    "legal": [
+     "1r3k2/2pRp2p/r1pn1p2/p1B1P3/1P3P2/6P1/PP6/1K4R1",
+     "1r3k2/p1pRp3/r1pn1p2/p1B1P3/P3P3/5P2/PP6/1K3R2",
+     "3k2rr/pp2p1pp/2p1q3/p2p4/8/1n1P1PPb/3BP1PP/R2QK1R1",
+     "r3k2r/pp3ppp/2p2q2/3pp3/8/P1bP1nP1/1PPBP3/R2QK1R1"
+    ],
+    "non": [
+     "5q2/5kp1/2p2Rn1/1N2p3/3p4/3P4/1P2PQ2/4K3",
+     "8/4k3/3p4/2p3p1/rP3p2/2P1R2P/4K3/8",
+     "1b6/p4p2/np2ppk1/2p1pP2/3P4/1P1BK1N1/2P1P1PP/8",
+     "3b4/p4p2/1pn1p1kp/2p2Pp1/3P4/1P2KNB1/1P3PPP/8"
+    ]
+   }
+  },
+  "where-file kc=2": {
+   "real": 0.713,
+   "legal": 0.198,
+   "non": 0.088,
+   "illegal only by check (share of all boards)": 0.088,
+   "units kept (no draw fit)": 0.012,
+   "adjacent kings among illegal": 0.075,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.088
+   },
+   "examples": {
+    "real": [
+     "1r5k/p1pR2p1/r1p2n1p/p1B1P3/1P3P2/6P1/PP6/1K4R1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP2P1PP/R1B2RK1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "3r1k2/ppp1n1p1/1pp1Pn2/7q/1P3P2/PN1Q2P1/4R2P/3R2K1"
+    ],
+    "legal": [
+     "1r3k2/2pRp2p/r1pn1p2/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "1rk2r2/pp1p2pp/2pq4/3pp3/8/P1bP1nP1/1PPBP3/R2QK1R1",
+     "4k1rr/pp1ppp2/2p2q2/3pp3/8/P1b1Pn1P/1PP1BP2/1R2QK1R",
+     "r3k1nr/p1p1ppbp/3pb3/4p2p/PnPP4/4PN2/P2NP1PP/RKBB1R2"
+    ],
+    "non": [
+     "2q5/p1k5/2pn1R2/1p1N4/3p4/5P2/P3Q1P1/6K1",
+     "4q3/1p2k3/p2R1n2/N2p4/1p6/2P5/P2PQ3/3K4",
+     "2k2r2/ppp2q2/2np4/p6N/2pp2Q1/2P4P/PP2RPPK/8",
+     "1r2k3/p4p1p/b2qp2p/8/B3P3/2NQ2P1/PP4KP/8"
+    ]
+   }
+  },
+  "where-file kc=3": {
+   "real": 0.695,
+   "legal": 0.208,
+   "non": 0.097,
+   "illegal only by check (share of all boards)": 0.097,
+   "units kept (no draw fit)": 0.009,
+   "adjacent kings among illegal": 0.069,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.097
+   },
+   "examples": {
+    "real": [
+     "1r5k/2p1R1pp/r1p2n1p/1p1B1P2/1P3P2/6P1/1PP5/2K3R1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP1P2PP/R1B2RK1",
+     "1r1q1rk1/pQ2nppp/p2b4/4p3/2N1P3/3P4/1PP1P1PP/R1B2RK1",
+     "3r1k2/ppp1n1p1/1pp1Pn2/5q2/1P3P2/P2NPQ2/5PR1/4KR2"
+    ],
+    "legal": [
+     "3r1k2/ppp1n1p1/1pp1Pn2/4q3/1P3P2/P2PN1Q1/4P2R/3K2R1",
+     "3rk2r/pp1ppp2/2p2q2/3pp3/8/1P1b1nPP/2PP1PB1/3R1KQR",
+     "2kr1r2/pp1ppp2/2pq4/3pp3/8/P1bP1nP1/1PPBP3/R2QK1R1",
+     "3k1rnr/1p1pppbp/2pb4/3p2p1/PnPP4/2P2N2/P2NP1PP/RKBB1R2"
+    ],
+    "non": [
+     "1r3k2/2p1pRp1/r1pn1p2/2p1B2P/1P3P2/6P1/3PP3/4K1R1",
+     "8/8/1k6/p1p1pP2/1R2P3/1K1P4/8/5r2",
+     "4r3/1p1N2p1/p4P2/2kp2R1/4n3/P7/1K6/8",
+     "1r6/3pp1N1/3p2P1/5kpR/5n2/1P6/2K5/8"
+    ]
+   }
+  },
+  "where-file kc=4": {
+   "real": 0.687,
+   "legal": 0.215,
+   "non": 0.098,
+   "illegal only by check (share of all boards)": 0.098,
+   "units kept (no draw fit)": 0.009,
+   "adjacent kings among illegal": 0.085,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.098
+   },
+   "examples": {
+    "real": [
+     "1r4k1/p1pR1p2/r1p1n1p1/p1B1P3/P3P3/5P2/PP6/1K3R2",
+     "1r1q1rk1/1Qp1nppp/2pb4/4p3/2N1P3/3P4/1PP1P1PP/R1B2RK1",
+     "1r1q1rk1/Qp2nppp/1p1b4/4p3/1PN5/2P5/PP1PPP2/R1BK1R2",
+     "4rk2/1pp1n1pp/3pPnp1/6q1/1P3P2/PN1Q1P2/4R1P1/3R1K2"
+    ],
+    "legal": [
+     "1r3k2/2pRp1p1/r1pn1p2/p1B2P2/P3P3/5P2/1PP5/2K2R2",
+     "8/8/3k4/2p1pPp1/R3P3/K1P5/8/5r2",
+     "1r2k2r/pp1ppp2/2p2q2/3pp3/8/P1bP1nP1/1PPBP3/R2QK1R1",
+     "1r2k2r/pp1ppp2/2p2q2/p2p4/8/PnbP2P1/1PPBP3/R2QK1R1"
+    ],
+    "non": [
+     "2r3rk/1pp1pp2/6p1/3p2P1/3P3Q/2P4P/PP3P2/6K1",
+     "Q7/6p1/bp2p3/p7/1P4k1/6R1/3PP3/4Kq2",
+     "2k2r2/ppp2q2/2np4/p6N/2pp2Q1/2P4P/PPK1RPP1/8",
+     "r1r1k3/p5pp/pp6/4Q3/3P1RP1/P1P1P3/q5P1/3R2K1"
+    ]
+   }
+  },
+  "where-file kc=6": {
+   "real": 0.693,
+   "legal": 0.223,
+   "non": 0.083,
+   "illegal only by check (share of all boards)": 0.083,
+   "units kept (no draw fit)": 0.011,
+   "adjacent kings among illegal": 0.04,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.082,
+    "IMPOSSIBLE_CHECK": 0.002,
+    "TOO_MANY_CHECKERS": 0.002
+   },
+   "examples": {
+    "real": [
+     "1r5k/2p1R1pp/r1p2n1p/1p1BP3/1P3P2/6P1/PP6/1K4R1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PPP3PP/R1B2RK1",
+     "1r1q1rk1/1Qp1nppp/2pb4/4p3/2N1P3/3P4/1PP2PPP/R1B2RK1",
+     "4rk2/1pp1n1pp/3pPnp1/7q/1P3P2/P2N1QP1/6RP/5RK1"
+    ],
+    "legal": [
+     "1r3k2/2pRp2p/r1pn1p2/p1B1P3/P3P3/5P2/PP6/1K3R2",
+     "r3k2r/pp1ppp2/2p2q2/3pp3/8/P1bP1nP1/1PPBP3/R2QK1R1",
+     "2rk1nr1/1ppppbp1/2pb4/3p2p1/2PPP2n/3P1N2/1P1N1PPP/R1BK1B1R",
+     "r3k1nr/p1p1ppbp/3pb3/4p2p/2PPP2n/1P3N2/1P1N1PPP/R1BK1B1R"
+    ],
+    "non": [
+     "Q7/1p6/2bp2p1/2p5/k2P4/1R6/5PP1/q5K1",
+     "1r2k3/p4p1p/bp1qp3/8/B3P3/2NQ2P1/PP4KP/8",
+     "3rkr2/1p1p1pp1/1p5p/2PB1n2/1P3N1q/PP6/3PQ3/3K3R",
+     "3Q1bk1/1p5p/p1b5/8/8/1N6/qPPP4/2K3R1"
+    ]
+   }
+  },
+  "where-file kc=99": {
+   "real": 0.703,
+   "legal": 0.213,
+   "non": 0.083,
+   "illegal only by check (share of all boards)": 0.083,
+   "units kept (no draw fit)": 0.005,
+   "adjacent kings among illegal": 0.06,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.083,
+    "IMPOSSIBLE_CHECK": 0.002,
+    "TOO_MANY_CHECKERS": 0.002
+   },
+   "examples": {
+    "real": [
+     "1r4k1/p1pR1p2/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "rr1q2k1/Qpp1npp1/1p1b4/4p3/2N1P3/2P5/PP1P2PP/R1B2RK1",
+     "1r1q1rk1/1p1Qnppp/1p1b4/4p3/2N1P3/5P2/2PPP1PP/R1B2RK1",
+     "3r1k2/pp2n1pp/2p1Pnp1/3q4/1P3P2/P1PN1Q2/3P2R1/2K2R2"
+    ],
+    "legal": [
+     "1r3k2/2pRp2p/r1pn1p2/p1B4P/1P3P2/6P1/3PP3/4K1R1",
+     "1r1k2r1/ppppp3/2p1q3/3pp3/8/P1bP1nP1/1PPBP3/R2QK1R1",
+     "r2k2r1/pp2p1pp/2p1q3/p2p4/8/Pnb2PP1/1PP1PB2/2R1KQR1",
+     "r1nr1k2/ppbp1pp1/2p2b2/3p2p1/2PPP2n/5NP1/1P1N1PPP/R1BK1B1R"
+    ],
+    "non": [
+     "1r3rk1/1pp3pp/7p/4p1P1/2QP4/2P4P/PP3P2/6K1",
+     "4r3/3p1Np1/2p2P2/4kpR1/2n5/P7/1K6/8",
+     "4r3/3p1Np1/2p3P1/4kp1R/4n3/1P6/2K5/8",
+     "8/3k4/2p5/1p3p2/rP3p2/1P1R2P1/3K4/8"
+    ]
+   }
+  },
+  "where-rank kc=0": {
+   "real": 0.792,
+   "legal": 0.037,
+   "non": 0.172,
+   "illegal only by check (share of all boards)": 0.043,
+   "units kept (no draw fit)": 0.113,
+   "adjacent kings among illegal": 0.019,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.128,
+    "OPPOSITE_CHECK": 0.048
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1p2/r1p1n1p1/p1B1P1p1/2P3P1/7P/PP6/1K5R",
+     "1r4k1/2pR1p2/r1p1n1p1/p1B1P1p1/2P3P1/7P/PP6/1K5R",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1PP2/2P5/PP4PP/R1B2RK1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "rn2k1nr/pp2ppbp/2p1b3/3p2p1/2PPP1PP/1P3N2/1P1N1P2/R1BK1B1R",
+     "rn2k1nr/pp2ppbp/2p1b3/1P1p2p1/2PPP3/5N2/1P1N1PPP/R1BK1B1R",
+     "rnb1r1k1/pp1p3p/b4pq1/1P3p2/N1P2P2/8/5PPP/R2QKB1R",
+     "r4r2/3n3k/Pq4pp/Q1Npb3/4p3/3P2nP/1B2P1BK/R3R3"
+    ],
+    "non": [
+     "3k4/2p1p1p1/3P4/2P5/8/8/3rR3/4K1P1",
+     "3k4/2p1p1p1/3P4/2P5/8/8/3rR3/4K1P1",
+     "5rpk/3r3p/2p5/8/P2p1P2/1P1Pn3/R1P2RPP/p5K1",
+     "5rpk/3r3p/2p5/8/P2p1P2/1P1Pn3/R1P2RPP/p5K1"
+    ]
+   }
+  },
+  "where-rank kc=1": {
+   "real": 0.56,
+   "legal": 0.065,
+   "non": 0.375,
+   "illegal only by check (share of all boards)": 0.085,
+   "units kept (no draw fit)": 0.008,
+   "adjacent kings among illegal": 0.044,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.29,
+    "OPPOSITE_CHECK": 0.138
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1p2/r1p1n1p1/p1B1P3/2P3P1/7P/PP4p1/1K5R",
+     "1r1q2k1/Q3npp1/2pb1r2/2p1p2p/2N1P3/2P2P2/PP4PP/R1B2RK1",
+     "5k2/3rn1pp/pp2Pnpq/2p5/1P3PP1/P1N1Q2P/5RK1/4R3",
+     "3r1k2/pp2n1pp/2p1Pnp1/7q/1P3P2/P1N1Q1P1/5R1P/4R1K1"
+    ],
+    "legal": [
+     "4k2r/pp2pppp/2p2q2/P1bp1n2/1PP4P/3P1P2/r2B1K1R/R2Q4",
+     "r3k3/pp2ppnr/2p1b1bp/3p2p1/1nPPP3/1P3N2/1P1N1PPP/R1BK1B1R",
+     "2b1r1k1/rn1p3p/pp3pq1/5p2/N1P2P2/b7/1P3PPP/R2QKB1R",
+     "8/pp2kp1r/2p4p/1N4p1/1b3b2/PP4P1/2K4P/3r2NR"
+    ],
+    "non": [
+     "1r4k1/2p2p2/r1p1n1p1/4P1p1/2P3P1/3R3P/PP6/pKB4R",
+     "1r1q1Pk1/Q1p1npp1/2pb1r2/4p2p/2N1P3/2P5/PP4PP/R1B2RK1",
+     "6p1/r3rk2/pp3p2/5Qp1/3p2P1/3P4/PPP2P1P/6K1",
+     "8/1p3p2/r3rkp1/p2p1Q2/6P1/3P4/PPP2PpP/6K1"
+    ]
+   }
+  },
+  "where-rank kc=2": {
+   "real": 0.498,
+   "legal": 0.077,
+   "non": 0.425,
+   "illegal only by check (share of all boards)": 0.123,
+   "units kept (no draw fit)": 0.003,
+   "adjacent kings among illegal": 0.031,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.302,
+    "OPPOSITE_CHECK": 0.17
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2p2pp1/r1p1n1p1/3RP3/2P3P1/p1B4P/PP6/1K5R",
+     "1r1q1rk1/Q3nppp/2pb4/2p1p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1r1q2k1/Q3npp1/2pb1r2/2p1p2p/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "5k2/4n1pp/3r1np1/pp2P2q/2p5/1PN1QPP1/P4R1P/4R1K1"
+    ],
+    "legal": [
+     "4k2r/pp3p2/2p1pq2/r2p2pp/5n1P/P1bP1P2/1PPB1K1R/R2Q4",
+     "rn6/pp2k1nr/2p1ppbp/3pb1p1/2PPPNPP/1P1N4/RPB2P2/3K1B1R",
+     "8/4r1k1/b6p/1Pb2p2/N1Pp1P2/rn3pq1/pp3PPP/R2QKB1R",
+     "r3k3/1p2qp1P/3pbn1r/p3P1pp/3PB3/PPP1pPP1/3p2K1/R1BQ1R2"
+    ],
+    "non": [
+     "1r4k1/2p2pp1/r1p1n1p1/2P1P1P1/7P/3R4/PP5R/pKB5",
+     "8/1p3p2/r3rkp1/p2p2P1/3P4/2P2Q1P/PP3Pp1/6K1",
+     "5Q2/8/1p3p2/r3rkp1/p2p2P1/3P2p1/PPP2P1P/6K1",
+     "3P4/2Pk4/2p1p1p1/8/3r4/8/4R3/4K1P1"
+    ]
+   }
+  },
+  "where-rank kc=3": {
+   "real": 0.395,
+   "legal": 0.103,
+   "non": 0.502,
+   "illegal only by check (share of all boards)": 0.103,
+   "units kept (no draw fit)": 0.004,
+   "adjacent kings among illegal": 0.043,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.398,
+    "OPPOSITE_CHECK": 0.185,
+    "IMPOSSIBLE_CHECK": 0.003,
+    "TOO_MANY_CHECKERS": 0.002
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2p2pp1/r1p1n1p1/3RP3/2P3P1/p1B4P/PP6/1K5R",
+     "3r1k2/pp2n1pp/2p2np1/4P2q/8/1PN1QPP1/P4R1P/4R1K1",
+     "3r1k2/pp2n1pp/2p2npq/4P3/6P1/1PN1QP1P/P4RK1/4R3",
+     "8/8/3k4/2pPp1p1/2P5/4R3/4K1P1/3r4"
+    ],
+    "legal": [
+     "6k1/1r2Ppp1/2p1n1p1/r1pR4/PPP3P1/pKB4P/8/7R",
+     "4k2r/pp2pppp/2p2q2/P1bp1n2/1PP4P/3P1P2/r2B1K1R/R2Q4",
+     "r3k3/pp2ppnr/2p1b1bp/1n1p2p1/2PPPN2/1P1N4/RPB2PPP/3K1B1R",
+     "3q1r2/1ppb2b1/3p4/2nPp1kn/1pP1P2p/P1N2Pp1/r1QNBpPP/1RB2RK1"
+    ],
+    "non": [
+     "2p2r2/Q1p4p/1r1q2k1/4npp1/2NbP3/2P1pP2/PP4PP/R1B2RK1",
+     "1rpq1r2/Q1p1n2p/3b4/6k1/2N1Ppp1/2P2P2/PP2p1PP/R1B2RK1",
+     "6p1/1p3p2/PP3Pp1/3p2K1/r3rkP1/p2P1Q2/2P4P/8",
+     "8/1p3p2/6p1/r2prkP1/p2P2p1/2P2Q1P/PP3P2/6K1"
+    ]
+   }
+  },
+  "where-rank kc=4": {
+   "real": 0.333,
+   "legal": 0.1,
+   "non": 0.567,
+   "illegal only by check (share of all boards)": 0.103,
+   "units kept (no draw fit)": 0.004,
+   "adjacent kings among illegal": 0.044,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.463,
+    "OPPOSITE_CHECK": 0.193,
+    "IMPOSSIBLE_CHECK": 0.005,
+    "TOO_MANY_CHECKERS": 0.005
+   },
+   "examples": {
+    "real": [
+     "5k2/4n1p1/3rPn1p/pp4pq/1Pp2P2/P1N1Q1P1/5R1P/4R1K1",
+     "r3k3/pp2qp2/3pbn1P/4p3/3pP2r/3P2pp/PPP1BPP1/R1BQ1RK1",
+     "r3k3/pp2qp2/3pbn2/R1BQpR1r/3pP1pp/3PB3/PPP2PPP/6K1",
+     "r2r4/5pkp/p3q1p1/1p3p1P/2n2PP1/2N3K1/2Q1P3/RR6"
+    ],
+    "legal": [
+     "8/rn2r1k1/pp5p/2b2p2/N1Pp1P2/b4pq1/1P3PPP/R2QKB1R",
+     "3q1r2/1ppb2b1/3p4/2nPp1kn/1pP1P2p/P1N2Pp1/2QNBpPP/rRB2RK1",
+     "r4r2/P2nb2k/QqN3pp/3p2nP/3Pp2K/4P1B1/RB2R3/8",
+     "8/Q7/P5pp/2Npbr2/3np1Bk/Rq1PR1nP/rB2P2K/8"
+    ],
+    "non": [
+     "8/3R4/8/p1B1P3/2P3P1/1r4kP/PPp2pp1/rKp1n1pR",
+     "6k1/3R1p2/4n1p1/p1B1P1p1/2P3P1/1r5P/PPp5/rKp4R",
+     "2p1P1k1/Qrpq1pp1/4nrPP/3bp1Kp/2N5/2P5/PP3P2/R1B2R2",
+     "2N3k1/Qrpq1pp1/2p1n3/R1BbpR2/4P3/2P5/PP3rPP/5PKp"
+    ]
+   }
+  },
+  "where-rank kc=6": {
+   "real": 0.245,
+   "legal": 0.105,
+   "non": 0.65,
+   "illegal only by check (share of all boards)": 0.102,
+   "units kept (no draw fit)": 0.006,
+   "adjacent kings among illegal": 0.056,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.548,
+    "OPPOSITE_CHECK": 0.262,
+    "IMPOSSIBLE_CHECK": 0.002
+   },
+   "examples": {
+    "real": [
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P2P2/PP4PP/R1B2RK1",
+     "5k2/3rn1p1/pp2Pn1p/2p3pq/1P3P2/P1N1Q1P1/5R1P/4R1K1",
+     "8/3k4/2p1p1p1/3P4/2P5/4R3/4K1P1/3r4",
+     "r3k3/pp2qp1r/3pbnpp/3Pp2P/PPPpP3/R1BQ1R2/4BPP1/6K1"
+    ],
+    "legal": [
+     "8/pp2k2r/2p1pp2/P1bp1q2/rPP2npp/3P3P/3B1P2/R2Q1K1R",
+     "8/1p2k1nr/2p1ppbp/3pb1p1/rnPPP1PP/pP3N2/1P1N1P2/R1BK1B1R",
+     "r7/pp2k1nr/1np1ppbp/1P1pb1p1/2PPP3/5N2/1P1N1PPP/R1BK1B1R",
+     "5rk1/2pb2pn/r1nqbpP1/pp2p2p/PP1PP2B/2N2N2/2B2P1P/R2QK2R"
+    ],
+    "non": [
+     "1rP3P1/2p4P/r1p5/4P1kR/5p2/3Rn1p1/PP4p1/pKB5",
+     "8/1r4p1/2p5/r1pRP3/2P3P1/p1B3kP/PP3p2/1K2n1pR",
+     "1r1q1r2/Q1p1n2p/2pb4/8/2N1PPk1/2P2pp1/PP4PP/R1B1pRK1",
+     "2N1Qk2/4nRpp/3rRnp1/pp2P2q/2p5/1P3PP1/P6P/6K1"
+    ]
+   }
+  },
+  "where-rank kc=99": {
+   "real": 0.22,
+   "legal": 0.153,
+   "non": 0.627,
+   "illegal only by check (share of all boards)": 0.11,
+   "units kept (no draw fit)": 0.003,
+   "adjacent kings among illegal": 0.106,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.517,
+    "OPPOSITE_CHECK": 0.277,
+    "IMPOSSIBLE_CHECK": 0.012,
+    "TOO_MANY_CHECKERS": 0.008
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1p2/r1p1n1p1/p1B1P3/2P3P1/6pP/PP6/1K5R",
+     "r3r1k1/pp3pp1/2pn1q1p/1P2NP1P/3P1PKb/1Q4P1/P7/2R1R2B",
+     "3q1rk1/1ppb2bp/3p2p1/r1nPpp1n/1pP1PP2/P1N3PP/2QNB1K1/1RB2R2",
+     "5N1k/3n2pp/pBR1R3/1br1p2P/2p5/2n5/2P2PP1/6K1"
+    ],
+    "legal": [
+     "3k4/2pPp1p1/2P5/8/4R3/3rK1P1/8/8",
+     "6nr/1p2k1bp/2p1pp2/rP1pb1p1/p1PPPN2/3N4/RPB2PPP/1n1K1B1R",
+     "8/4Ppkp/8/r2r4/p5p1/1pN1qp1P/2Q2PP1/RRn3K1",
+     "2bq1rk1/1ppn1pb1/r1Pp1n1p/p3P1p1/PPNB1NB1/2Q2P2/R2pK1PP/7R"
+    ],
+    "non": [
+     "6k1/3R1pp1/4n1p1/p1B1P3/2P3P1/1r5P/PPp5/rKp4R",
+     "2p5/Q1p5/5r2/6kp/1rNqPpp1/2P1nP2/PP1bp1PP/R1B2RK1",
+     "2p5/Q1p5/1r1q1P2/4nrk1/2NbPppp/2P5/PP2p1PP/R1B2RK1",
+     "7p/3r2p1/pp2P3/2p2k1q/1P2nPp1/P1N1QnP1/5R1P/4R1K1"
+    ]
+   }
+  },
+  "where-both kc=0": {
+   "real": 0.787,
+   "legal": 0.047,
+   "non": 0.167,
+   "illegal only by check (share of all boards)": 0.053,
+   "units kept (no draw fit)": 0.274,
+   "adjacent kings among illegal": 0.0,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.113,
+    "OPPOSITE_CHECK": 0.06
+   },
+   "examples": {
+    "real": [
+     "1r4k1/p1pR1p2/r1p1n1p1/p1B2P2/2P3P1/7P/1PP5/2K4R",
+     "1r4k1/p1pR1p2/r1p1n1p1/p1B2P2/2P3P1/7P/1PP5/2K4R",
+     "1r1q1rk1/Q3nppp/3b4/1p2p3/1pN1P3/P1P5/PP4PP/R1B2RK1",
+     "1r1q1rk1/Q3nppp/3b4/4p2p/2N1P2p/1PP5/PP4PP/R1B2RK1"
+    ],
+    "legal": [
+     "r3k2r/pp3ppp/2p2q2/3pp3/8/P1bP1nP1/1PPBP3/R2QK1R1",
+     "r3k2r/pp3ppp/2p2q2/3pp3/8/P1bP1nP1/1PPBP3/R2QK1R1",
+     "8/5k2/P1R1pP2/2Kp3p/1r4p1/8/7P/8",
+     "r4r2/3n1ppk/Pqp5/Q1Npb3/2B5/3P2nP/4P1BK/R3R3"
+    ],
+    "non": [
+     "4r1k1/p5p1/1n1r3p/2p5/P4P2/1P1P4/1PPR1RP1/3p2K1",
+     "4r1k1/p5p1/1n1r3p/2p4P/P4P2/1P1P4/2PR1RP1/3p2K1",
+     "r2pk2r/1p2qppp/3pbn1p/6p1/4P3/B2P4/PPP2PPP/R1BQ1RK1",
+     "r1p1k2r/1p2qppp/3pbnp1/5p2/4P2B/3P3P/PPP2PP1/R1BQ1RK1"
+    ]
+   }
+  },
+  "where-both kc=1": {
+   "real": 0.415,
+   "legal": 0.113,
+   "non": 0.472,
+   "illegal only by check (share of all boards)": 0.132,
+   "units kept (no draw fit)": 0.049,
+   "adjacent kings among illegal": 0.032,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.205,
+    "PAWNS_ON_BACKRANK": 0.34
+   },
+   "examples": {
+    "real": [
+     "1r1q2k1/Q3npp1/3b4/1p1Pp3/1pN1Pr2/2P4p/PP4PP/R1B2RK1",
+     "r1q2rk1/1Q1n1ppp/1pb5/Pp2p3/2N1P3/3P4/1PP3PP/R1B2RK1",
+     "5k2/3rn1pp/pp2Pnp1/2p4q/1P3P2/P1N1Q1P1/5R1P/4R1K1",
+     "4rk2/1pp1n1p1/3p1np1/4Pp1q/8/1PN1QPP1/P4R1P/4R1K1"
+    ],
+    "legal": [
+     "1r4k1/2p2p2/r1p1n1pR/4P3/1P2pPBp/6P1/PP6/1K4R1",
+     "4k2r/pp1p1p2/2p2q2/3pn1pp/8/3P1PPb/1r1BP1PP/R2QK1R1",
+     "8/pp4pp/1ppk2r1/3pp3/2n1q3/P1bP2P1/1PPBP3/R2QK1Rr",
+     "r1nrk3/ppbppp2/2p1b3/n2pPPp1/P7/2P2NP1/P2N2PP/RKBB1R2"
+    ],
+    "non": [
+     "8/8/4R2k/3pP1p1/1pPBrnPp/5p1P/PP1r1p2/1K5R",
+     "2p3p1/1r3rkp/1p2p3/4P2p/1P6/PPP2PP1/Q6K/8",
+     "8/2k5/1p1p1p2/6P1/5P2/8/2R5/2K1P1r1",
+     "1k6/pPp1p3/P7/8/8/1r6/R7/K1P5"
+    ]
+   }
+  },
+  "where-both kc=2": {
+   "real": 0.333,
+   "legal": 0.163,
+   "non": 0.503,
+   "illegal only by check (share of all boards)": 0.127,
+   "units kept (no draw fit)": 0.033,
+   "adjacent kings among illegal": 0.03,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.377,
+    "OPPOSITE_CHECK": 0.21,
+    "IMPOSSIBLE_CHECK": 0.007,
+    "TOO_MANY_CHECKERS": 0.003
+   },
+   "examples": {
+    "real": [
+     "1r1q2k1/1Q2npp1/r2b4/2p1p3/p1N1PP2/p2P4/1PP3PP/R1B2RK1",
+     "r1q2k2/Q2npp2/2b1r3/3p2p1/2N1P1p1/P1P3p1/PP4PP/R1B2RK1",
+     "8/3rk2p/pp1nPpp1/2p1n2q/1P3P2/P1N1Q1P1/5R1P/4R1K1",
+     "8/1pr2prk/2p1Q1p1/3pP3/1P6/P4P1p/PP3P2/6K1"
+    ],
+    "legal": [
+     "1r3k2/2pRp1p1/r1pn1p2/p1B2P2/2P3P1/7P/1PP5/2K4R",
+     "3k4/2nppP2/2pn3r/2P1ppPq/1P4p1/N1Q3P1/3R3P/2R3K1",
+     "4k2r/pp1p1ppp/2p2q2/3pn3/8/P1b1P2P/1PPrBP2/1R2QK1R",
+     "r7/pp2k1P1/nrp1pp1n/bp1pb1p1/2PPP3/5N2/1P1N1PPP/R1BK1B1R"
+    ],
+    "non": [
+     "5k2/4p1p1/3n1pr1/5P1p/2P2rPp/4R2P/1PP5/1pKB3R",
+     "8/1p3pQ1/r3rkp1/p2p2P1/2pP4/2P4P/PP3P2/6K1",
+     "8/1P1k4/P1p1p1p1/8/8/1r6/2R5/2K1P3",
+     "rP1k2nr/pp1pp1bp/2pb4/3pPPp1/2P1PPN1/4N3/1RPB2P1/3K1BnR"
+    ]
+   }
+  },
+  "where-both kc=3": {
+   "real": 0.247,
+   "legal": 0.17,
+   "non": 0.583,
+   "illegal only by check (share of all boards)": 0.122,
+   "units kept (no draw fit)": 0.035,
+   "adjacent kings among illegal": 0.046,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.258,
+    "PAWNS_ON_BACKRANK": 0.462,
+    "IMPOSSIBLE_CHECK": 0.005,
+    "TOO_MANY_CHECKERS": 0.003
+   },
+   "examples": {
+    "real": [
+     "6k1/4rp2/4npp1/3rPp1R/2P3P1/4p1BP/PPp5/1K5R",
+     "5k2/3rn1p1/pp2pn2/2ppP2q/8/1PN1QPP1/P4R1P/4R1K1",
+     "r3rk2/pp3pp1/5Pp1/2Pp4/1P4P1/PP2QP2/6K1/8",
+     "8/4k3/3p1p1p/3P4/2P5/R7/K1P5/3r4"
+    ],
+    "legal": [
+     "7k/1Q1r2pp/3prpq1/3p1p1n/1PN1P1b1/3P4/1PPPP3/R1BK1R2",
+     "r1q2k2/Q2npp2/2br3P/1P1p1p1p/3N3p/2PPP3/PP1K4/1R1B2R1",
+     "2k5/1n1p3q/2nrp3/pp1pP1P1/2p4P/NPQ2PK1/P2R4/2R5",
+     "1b2rn2/2p1pp2/r1k1pq2/3p1p2/N1P2P2/b7/1P3PPP/R2QKB1R"
+    ],
+    "non": [
+     "6r1/3R1k1p/4pr1p/ppBnPp2/1P3P2/6P1/PP6/1K4R1",
+     "5p2/1p3p2/r3rkp1/p2p4/Q7/6P1/PP1P1P2/2P3KP",
+     "3pk2r/pp3p2/2p1nq2/3p2P1/1ppPP2r/3BK1R1/R2Q1P1b/6PP",
+     "4kp1r/pp3p2/2p2qn1/pprpP1b1/3P1PP1/3BP3/R1PQ4/2K1R3"
+    ]
+   }
+  },
+  "where-both kc=4": {
+   "real": 0.158,
+   "legal": 0.152,
+   "non": 0.69,
+   "illegal only by check (share of all boards)": 0.095,
+   "units kept (no draw fit)": 0.044,
+   "adjacent kings among illegal": 0.031,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.283,
+    "PAWNS_ON_BACKRANK": 0.595,
+    "IMPOSSIBLE_CHECK": 0.013,
+    "TOO_MANY_CHECKERS": 0.01
+   },
+   "examples": {
+    "real": [
+     "r1q3k1/Q2n1pp1/1rb1P3/3pp3/1pN1P3/1pP5/PP4PP/R1B2RK1",
+     "r3k2r/1p2qppp/2ppbn2/2P5/B3P1p1/4Pp2/1PPP1PP1/R1BQ1RK1",
+     "r2q4/pp2bp2/3kp2p/3pn3/3PP1rB/P1NpbN2/PPBn1P1P/R2QK2R",
+     "5r2/2pbbp2/2nrpkqp/2Ppppn1/4PP1B/1BN2N2/PP1K1PRP/R2Q4"
+    ],
+    "legal": [
+     "1r3k2/2pRp1p1/r1pn1p2/p1B2P2/1P3P2/6P1/1PP5/2K3R1",
+     "5k2/4n1p1/4Pn2/N1Q4q/1P1R1Pr1/PpRpp1P1/p4p1P/6K1",
+     "8/8/2P1k3/RP1p1p1p/K1P5/8/2r5/8",
+     "3k2r1/pp1pp3/2p1q3/3pnpp1/3P1b2/3PPPP1/3BP2r/R2QK1R1"
+    ],
+    "non": [
+     "2k4R/1p2r1pP/n1p1ppB1/3r1p2/1P1PPP2/4K1P1/8/6R1",
+     "p5k1/pr1qQpp1/r3n3/2pbp3/2N1P1P1/6P1/4PPPP/R1B2RK1",
+     "3k4/2n1p3/3nr3/1ppp3q/2ppP3/1N1Q2P1/1P2RP1P/P2R2K1",
+     "6p1/8/2p3p1/r3rkPp/p2Pp3/2P4P/PP3P2/1Q4K1"
+    ]
+   }
+  },
+  "where-both kc=6": {
+   "real": 0.093,
+   "legal": 0.152,
+   "non": 0.755,
+   "illegal only by check (share of all boards)": 0.112,
+   "units kept (no draw fit)": 0.048,
+   "adjacent kings among illegal": 0.068,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.643,
+    "OPPOSITE_CHECK": 0.327,
+    "IMPOSSIBLE_CHECK": 0.015,
+    "TOO_MANY_CHECKERS": 0.012
+   },
+   "examples": {
+    "real": [
+     "4r3/4Rp2/3r1p1k/1p1B1Pp1/P3Pn1p/p4P2/1PP5/2K2R2",
+     "4rk2/1pp1n1p1/N1Qp1n1p/3RP1pq/2R5/1P3PP1/P6P/6K1",
+     "r7/1pk1q2r/2pp1npp/1pb5/4PBp1/4Pp2/1PPP1PPP/R1BQ1RK1",
+     "8/pkp5/1pr2r1p/2pP2p1/6q1/2N4P/2Q1nPP1/RR4K1"
+    ],
+    "legal": [
+     "8/8/1P6/P7/4R3/1k2K1P1/prp1p3/8",
+     "4k3/1p2ppnr/2p1b1bp/3pPPp1/2PPP3/r1n2N2/pP1NPP2/R1BK1B1R",
+     "3qbrk1/rppb3p/3p1np1/2nPpp2/4PPN1/P1P1K1QN/pP1PBR2/2B2R2",
+     "8/1p4k1/1nb1p1p1/3p4/r1pn4/P2PP2N/1P2K3/3BR1R1"
+    ],
+    "non": [
+     "4P3/7k/6p1/PP3n1p/1KP3P1/1r3pRP/2p5/r1pp1B1R",
+     "P6P/Qr1q4/p1PPn3/p1Kb4/2N2k2/r1P1pp2/PPp5/R1Bp1R2",
+     "8/Qr4p1/P2p2p1/8/2N1P1k1/1rPq1pp1/PP2n1PP/R1BbpRK1",
+     "3r2P1/pp6/2pP3P/2P4q/2N1Q3/4kRP1/3nRppP/4npK1"
+    ]
+   }
+  },
+  "where-both kc=99": {
+   "real": 0.052,
+   "legal": 0.16,
+   "non": 0.788,
+   "illegal only by check (share of all boards)": 0.132,
+   "units kept (no draw fit)": 0.081,
+   "adjacent kings among illegal": 0.093,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.657,
+    "OPPOSITE_CHECK": 0.373,
+    "IMPOSSIBLE_CHECK": 0.022,
+    "TOO_MANY_CHECKERS": 0.02
+   },
+   "examples": {
+    "real": [
+     "rk6/ppp1q3/pb3n1r/4p1pp/B2pP3/5P2/P1PPPPP1/2R1BQKR",
+     "2bqrk2/1ppnrp2/2bppnp1/1NB2p2/1PP5/K3PNBp/PP3QPP/3R3R",
+     "7k/6p1/4r1Qp/b1p1rN2/1Ppqn3/P1P1pP1P/2p3PK/R1B2R2",
+     "4k3/3p4/2p3p1/8/8/1P1R2P1/r2K1p1P/8"
+    ],
+    "legal": [
+     "8/7k/2r1P1p1/3p1nRp/1rPp2P1/PP1p1BpP/1K6/7R",
+     "1r1q2k1/2QPnpp1/3b3p/4pPPp/2N2K2/1Pr1P3/2PPp3/R1B2R2",
+     "8/5r2/1qppP2p/N1Q1p1p1/PP1R1Pk1/PPR2n1p/K5n1/8",
+     "R7/p5p1/3rp2p/2p1rnk1/P1P5/PP6/P1PP1R2/3K4"
+    ],
+    "non": [
+     "1r6/2p5/rPp2P2/4k1PP/3p4/2nRp1R1/3PP3/p1B1K1p1",
+     "4P2k/1Q4pp/2N3PP/3p1pK1/3p1r2/R1BPrRqp/1PP2P1n/6b1",
+     "4k3/2qn1p2/4n2r/1P2ppP1/2P3p1/NKQP3P/2PR2p1/2R2p2",
+     "8/1r3rk1/1p3P2/p1P1p3/1P3pP1/2p5/1PP3P1/Qp5K"
+    ]
+   }
+  },
+  "where-file+what kc=0": {
+   "real": 0.628,
+   "legal": 0.038,
+   "non": 0.333,
+   "illegal only by check (share of all boards)": 0.07,
+   "units kept (no draw fit)": 0.243,
+   "adjacent kings among illegal": 0.045,
+   "illegal_causes_of_all_boards": {
+    "TOO_MANY_KINGS": 0.067,
+    "PAWNS_ON_BACKRANK": 0.128,
+    "NO_WHITE_KING": 0.047,
+    "TOO_MANY_BLACK_PIECES": 0.003,
+    "TOO_MANY_BLACK_PAWNS": 0.007,
+    "NO_BLACK_KING": 0.042,
+    "OPPOSITE_CHECK": 0.092,
+    "TOO_MANY_WHITE_PAWNS": 0.01
+   },
+   "examples": {
+    "real": [
+     "1r1q1rk1/Qp2nppp/1p1b4/4p3/2N1P3/2P5/PPP3PP/R1B2RK1",
+     "1r1q1rk1/Qp2nppp/1p1b4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "2r2k2/p3n1pp/1p2Pnp1/8/1P3P2/P4NP1/7P/R2Q1RK1",
+     "r3r1k1/p4p1p/4p1p1/3pP3/1P1PQ3/P7/PP3P2/6K1"
+    ],
+    "legal": [
+     "r3k1nr/pp2ppbp/pnp1b3/3p4/2PPP2n/5NP1/1P1N2PP/R1BK1B1R",
+     "rnb1r1k1/p2pr2p/4bpq1/4np2/N1P2P2/8/P4PPP/R2QKB1R",
+     "rnb1r1k1/p2p3p/5pq1/2b2p2/N1P2P2/p3P3/3P1PPP/R2QKB1R",
+     "r1bq1rk1/pppn2b1/3ppn2/3p4/2Pp4/2NB4/PPQPP1PP/R1bBK2R"
+    ],
+    "non": [
+     "1r4k1/2p2ppR/r1p1nkp1/3p1P2/8/4P2P/1PP3P1/2K4R",
+     "1r4k1/2pp1p1R/r1p1nkp1/3p1P2/8/4P2P/1PP3P1/2K4R",
+     "2r1pk2/p3n1pp/1p3np1/8/2P3P1/1PN1QPP1/5R1P/4R1K1",
+     "8/8/6k1/5ppp/1R6/1K4R1/1P1P4/r1P5"
+    ]
+   }
+  },
+  "where-file+what kc=1": {
+   "real": 0.155,
+   "legal": 0.053,
+   "non": 0.792,
+   "illegal only by check (share of all boards)": 0.032,
+   "units kept (no draw fit)": 0.033,
+   "adjacent kings among illegal": 0.076,
+   "illegal_causes_of_all_boards": {
+    "TOO_MANY_KINGS": 0.207,
+    "PAWNS_ON_BACKRANK": 0.285,
+    "NO_BLACK_KING": 0.3,
+    "NO_WHITE_KING": 0.18,
+    "TOO_MANY_BLACK_PAWNS": 0.057,
+    "OPPOSITE_CHECK": 0.107,
+    "TOO_MANY_WHITE_PAWNS": 0.053,
+    "TOO_MANY_BLACK_PIECES": 0.012,
+    "TOO_MANY_WHITE_PIECES": 0.012
+   },
+   "examples": {
+    "real": [
+     "r3rk2/p2p3p/5p1p/4p2P/n3P1PP/3P4/5PP1/6K1",
+     "4k3/4pp2/P5n1/3pp3/3N2Bb/1P4p1/1PQ2PP1/R5K1",
+     "8/1pp3p1/2pp3P/1p1bk3/1N4b1/P7/4PPP1/R2R1K2",
+     "5rk1/2p1bqpp/3p2n1/4np2/2b1pPP1/R3P2P/1N1P1P2/B5K1"
+    ],
+    "legal": [
+     "r1k1n3/4qn2/3p1b2/4p3/2Pp4/bPn1Q2P/P1r2P2/5K2",
+     "8/4p3/3p1pp1/p3pB2/1pr5/2k1PP2/1q1pK1BP/8",
+     "6kB/q2p1ppp/2rnp3/1Pp5/N2N2B1/1P2B3/PPP2Q1P/4R1RK",
+     "8/4k3/1p1ppp2/8/4b2P/5r2/4q1P1/5bBK"
+    ],
+    "non": [
+     "r5k1/1Kq2p2/p1n3p1/2p5/8/3N2N1/1PP3P1/2K1PP2",
+     "8/rrkb1p2/p1pp4/4q3/8/5P2/2P1N2P/3P1KP1",
+     "r1p1n3/1p1k2p1/3rkPp1/4pp2/3B4/bPQ1P3/P1rB1P1P/R2R2K1",
+     "bq6/1pn1pb2/1p1brk2/4p1p1/2PN4/1P6/P2NB3/R1BQ1PKP"
+    ]
+   }
+  },
+  "where-file+what kc=2": {
+   "real": 0.025,
+   "legal": 0.033,
+   "non": 0.942,
+   "illegal only by check (share of all boards)": 0.008,
+   "units kept (no draw fit)": 0.023,
+   "adjacent kings among illegal": 0.035,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.575,
+    "NO_WHITE_KING": 0.542,
+    "NO_BLACK_KING": 0.427,
+    "TOO_MANY_BLACK_PAWNS": 0.052,
+    "TOO_MANY_KINGS": 0.132,
+    "TOO_MANY_BLACK_PIECES": 0.02,
+    "TOO_MANY_WHITE_PAWNS": 0.078,
+    "OPPOSITE_CHECK": 0.068,
+    "TOO_MANY_WHITE_PIECES": 0.003,
+    "IMPOSSIBLE_CHECK": 0.003,
+    "TOO_MANY_CHECKERS": 0.002
+   },
+   "examples": {
+    "real": [
+     "r2q1rk1/2p1bppp/3pbnnp/1N6/8/bPB5/P2P3P/2N1K2R",
+     "r6k/2qn3p/p2p1p1p/4p3/QP6/8/P1PPPP2/N3K3",
+     "6k1/p7/2n5/b1qb1ppP/4p2p/2PK2P1/P7/R7",
+     "1b2r3/p7/1n6/3kP3/2nN2p1/2PPP3/2QKB3/R7"
+    ],
+    "legal": [
+     "r2bkr1r/p5np/p2pp1pp/4p3/qn4B1/3PK3/4PPPP/R1BQNR2",
+     "2rk4/3p4/r1b2p2/3n2n1/4P3/3Np2P/QR3P1P/1R4K1",
+     "8/1r1pk2p/8/2pqp3/2Nnp3/4P2N/1K2R3/2R1Q1R1",
+     "8/1rkrP3/3p1P2/n2qppP1/1b4K1/3B1NN1/4Q3/RR1R1R2"
+    ],
+    "non": [
+     "8/1r1k1k1p/1p1p1pp1/3p4/1P6/P2B4/6P1/R4P2",
+     "8/4p1pr/3n3p/ppp5/2P5/8/3PP2P/4KbP1",
+     "p7/3bpp2/Qppr1k2/1p6/8/3P1N1P/1ppBP1P1/5PK1",
+     "3r2n1/1p2bq1p/1p3nk1/5ppp/8/1P1Q4/P2Q1P1B/RRB2RR1"
+    ]
+   }
+  },
+  "where-file+what kc=3": {
+   "real": 0.027,
+   "legal": 0.023,
+   "non": 0.95,
+   "illegal only by check (share of all boards)": 0.012,
+   "units kept (no draw fit)": 0.027,
+   "adjacent kings among illegal": 0.1,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.66,
+    "NO_WHITE_KING": 0.513,
+    "TOO_MANY_BLACK_PAWNS": 0.095,
+    "TOO_MANY_KINGS": 0.215,
+    "NO_BLACK_KING": 0.277,
+    "OPPOSITE_CHECK": 0.122,
+    "IMPOSSIBLE_CHECK": 0.008,
+    "TOO_MANY_BLACK_PIECES": 0.07,
+    "TOO_MANY_CHECKERS": 0.007,
+    "TOO_MANY_WHITE_PAWNS": 0.088,
+    "TOO_MANY_WHITE_PIECES": 0.008
+   },
+   "examples": {
+    "real": [
+     "8/p2k1r2/4p3/2Ppq1pp/2Q1PP2/3N3P/5RP1/6K1",
+     "8/p1pk4/1p6/2p5/5PP1/2P3K1/B4P2/8",
+     "8/2q3kr/1p1n4/2p2p2/6p1/7P/1P3PP1/6K1",
+     "8/8/3k2r1/4q1p1/2b2b1P/6n1/6K1/8"
+    ],
+    "legal": [
+     "Bb1rkb2/p2pppp1/4bp2/4b3/Q1P4N/P3N3/P4PPP/N2K1B1R",
+     "3bk3/4p3/3b1pr1/2p5/P2n1p2/1P2P1p1/K3B2b/8",
+     "3k4/n7/2r5/q1p3p1/3p1p1p/5P1P/4K2R/8",
+     "4r1qr/2k5/1pppn3/8/8/2B1Q1PK/4rP2/1R1R3R"
+    ],
+    "non": [
+     "2p5/bq2n2p/1n1b1p2/3n4/8/1r1kP3/3p2PP/4p2K",
+     "8/r2rkr1p/p2p1pp1/2p5/8/1p6/p1Pp4/2p1P3",
+     "4p3/3n1n2/3ppp1p/2rk4/1P6/1pPP4/N2KB3/P1Pp4",
+     "2r1kr2/2rp2rp/pp1nq3/5b2/8/3PPPk1/P1Pbp3/2RpBQR1"
+    ]
+   }
+  },
+  "where-file+what kc=4": {
+   "real": 0.007,
+   "legal": 0.032,
+   "non": 0.962,
+   "illegal only by check (share of all boards)": 0.012,
+   "units kept (no draw fit)": 0.02,
+   "adjacent kings among illegal": 0.078,
+   "illegal_causes_of_all_boards": {
+    "TOO_MANY_KINGS": 0.195,
+    "PAWNS_ON_BACKRANK": 0.735,
+    "TOO_MANY_BLACK_PIECES": 0.128,
+    "NO_WHITE_KING": 0.508,
+    "TOO_MANY_BLACK_PAWNS": 0.202,
+    "OPPOSITE_CHECK": 0.15,
+    "NO_BLACK_KING": 0.343,
+    "TOO_MANY_WHITE_PAWNS": 0.062,
+    "TOO_MANY_WHITE_PIECES": 0.02,
+    "IMPOSSIBLE_CHECK": 0.02,
+    "TOO_MANY_CHECKERS": 0.01
+   },
+   "examples": {
+    "real": [
+     "7k/4p1p1/5p1p/8/7P/4Q3/5P1r/4K1N1",
+     "6q1/4b3/5nk1/3bbb2/p1p5/1R6/8/2K5",
+     "bnr2rrk/1p1b1q1p/8/3P1Pp1/1PP1B3/qB3P2/1R5K/8",
+     "8/5k2/1n3b2/3N4/2NP4/P1P5/1PP5/2K5"
+    ],
+    "legal": [
+     "rk6/2p2p2/6P1/3NKP2/1P6/5r2/6p1/8",
+     "8/5PP1/P2P2R1/1PP5/1NK2kp1/R4b2/5p2/R7",
+     "8/rpb1k3/3nb3/8/p2P1N2/2K2qB1/3bPnPP/7n",
+     "6k1/r3r1b1/p1pr1b2/2n1pn2/3p2NQ/2P5/4PPB1/R2QKR2"
+    ],
+    "non": [
+     "2pp1k2/p4Npb/3q2P1/5p2/8/3NNP2/3PP3/2K1KR2",
+     "2k1q1rr/2ppp1p1/1r1prp2/3b4/8/2r5/1p1bbk2/2p1np2",
+     "1r1q3n/4n1kp/1ppb3p/1r4p1/4P3/3rBP2/1Pp5/1RR1BQ1R",
+     "1k1r1k2/3p4/1ppp4/2pp4/r4p2/pp5p/pBp3r1/3p2p1"
+    ]
+   }
+  },
+  "where-file+what kc=6": {
+   "real": 0.002,
+   "legal": 0.027,
+   "non": 0.972,
+   "illegal only by check (share of all boards)": 0.017,
+   "units kept (no draw fit)": 0.019,
+   "adjacent kings among illegal": 0.101,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.753,
+    "OPPOSITE_CHECK": 0.165,
+    "NO_BLACK_KING": 0.403,
+    "NO_WHITE_KING": 0.408,
+    "TOO_MANY_BLACK_PAWNS": 0.188,
+    "TOO_MANY_WHITE_PAWNS": 0.11,
+    "TOO_MANY_KINGS": 0.227,
+    "TOO_MANY_BLACK_PIECES": 0.105,
+    "TOO_MANY_WHITE_PIECES": 0.053,
+    "IMPOSSIBLE_CHECK": 0.012,
+    "TOO_MANY_CHECKERS": 0.01
+   },
+   "examples": {
+    "real": [
+     "r3r3/2k5/1p5p/2N3q1/pB2Q3/P1PN2K1/1P3PP1/1R2B3"
+    ],
+    "legal": [
+     "8/2k2r2/5p2/P1p5/1K6/4p3/5P2/5b2",
+     "8/8/8/8/1rkP1P2/2pp1PR1/5KQ1/8",
+     "8/1rk2r2/3p4/p3qn2/nR1rnN2/2B5/2PK4/8",
+     "6kr/1p2P3/p1N3B1/3P2N1/2P3PN/5P1K/4PN1P/2R1B2R"
+    ],
+    "non": [
+     "8/6b1/3PPKPB/5pk1/8/2pq3r/1p5p/p5p1",
+     "5k1B/1b2pQp1/1q2RpR1/2R5/8/8/1P2PPP1/5KP1",
+     "2p4B/3R1BQ1/1PB1pp2/P7/8/pPpp4/1pp1p2p/2N2p2",
+     "P1P1b3/R4pbp/4pbp1/r5p1/2pp4/5P2/Pp1PP3/p2b4"
+    ]
+   }
+  },
+  "where-file+what kc=99": {
+   "real": 0.005,
+   "legal": 0.013,
+   "non": 0.982,
+   "illegal only by check (share of all boards)": 0.008,
+   "units kept (no draw fit)": 0.016,
+   "adjacent kings among illegal": 0.127,
+   "illegal_causes_of_all_boards": {
+    "NO_BLACK_KING": 0.37,
+    "TOO_MANY_WHITE_PAWNS": 0.15,
+    "PAWNS_ON_BACKRANK": 0.777,
+    "NO_WHITE_KING": 0.422,
+    "OPPOSITE_CHECK": 0.223,
+    "TOO_MANY_WHITE_PIECES": 0.065,
+    "TOO_MANY_BLACK_PIECES": 0.1,
+    "TOO_MANY_KINGS": 0.265,
+    "TOO_MANY_BLACK_PAWNS": 0.172,
+    "IMPOSSIBLE_CHECK": 0.017,
+    "TOO_MANY_CHECKERS": 0.012
+   },
+   "examples": {
+    "real": [
+     "8/4rrk1/4rp2/4ppp1/2PPP3/3K4/5NQ1/8",
+     "8/1NB5/4rk2/1B1R2p1/1P6/2P4q/P7/1K6",
+     "8/8/5r2/5k2/3rq1p1/8/1P2n3/K2R4"
+    ],
+    "legal": [
+     "8/2PP3p/p1pk4/pP6/Q1PP4/8/2K5/8",
+     "8/2P1k3/Pb1p3p/3b4/1pq1P1pp/b1p2PP1/1n6/1b1K4",
+     "1r3r2/P3Q1P1/1b3q2/R5R1/7k/2PPP1pp/3K3p/8",
+     "8/8/1pP5/pk5p/n2Pp1p1/3P4/2K1N1P1/8"
+    ],
+    "non": [
+     "8/2p1bP2/1pP1P1P1/4P2P/8/8/P2r1PP1/3p2K1",
+     "4Nk1p/B1PP2k1/1N1p1R2/4n3/8/1pp5/1r5p/2q3p1",
+     "1PNQ1r2/2Q3Np/N2RPR1P/1Q1PPP2/PP1BP3/3B4/R1PPp3/K2K4",
+     "r1b1r1kq/1P3PP1/1B3nnn/7n/8/1p2pp1P/2pk3r/3pp2R"
+    ]
+   }
+  },
+  "where-both+what kc=0": {
+   "real": 0.735,
+   "legal": 0.023,
+   "non": 0.242,
+   "illegal only by check (share of all boards)": 0.053,
+   "units kept (no draw fit)": 0.245,
+   "adjacent kings among illegal": 0.048,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.062,
+    "NO_WHITE_KING": 0.058,
+    "TOO_MANY_BLACK_PIECES": 0.007,
+    "TOO_MANY_BLACK_PAWNS": 0.008,
+    "PAWNS_ON_BACKRANK": 0.052,
+    "NO_BLACK_KING": 0.037,
+    "IMPOSSIBLE_CHECK": 0.003,
+    "TOO_MANY_KINGS": 0.047,
+    "TOO_MANY_CHECKERS": 0.003,
+    "TOO_MANY_WHITE_PAWNS": 0.007
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1p1p/r1p1n1p1/p1B2P2/8/4P2P/1PP3P1/2K4R",
+     "1r4k1/2pR1p2/r1p1n1p1/p1B2P2/3p4/4P2P/1PP3P1/2K4R",
+     "r4rk1/Q1q1nppp/3b4/3Pp2p/2N1P2p/2P5/PP4PP/R1B2RK1",
+     "r4rk1/Q1q1nppp/3b4/4p2p/1PN1P2p/2P5/PP4PP/R1B2RK1"
+    ],
+    "legal": [
+     "rnb1r1k1/p2pr2p/4bpq1/4np2/N1P2P2/8/P4PPP/R2QKB1R",
+     "rnb1r1k1/p2pr2p/4bpq1/4np2/N1P2P2/8/P4PPP/R2QKB1R",
+     "r3k1nr/p6p/2n2p2/p2pP3/2p3Nb/q3bN1P/PPP1BKB1/R2Q4",
+     "1k1r2nr/1b1nq3/p7/pp1P4/1Pp4P/2NPBNPb/2P3BP/R2Q1RK1"
+    ],
+    "non": [
+     "r3r1k1/p3p3/1p1p1pQ1/p3P3/1P1P4/P7/PP3P2/6K1",
+     "rn2k1nr/pp2ppbp/pnp1b3/3pPP1P/3PP3/5NQ1/PP1N2B1/1B2RR2",
+     "r3k1nr/pp2ppbp/1np1b3/3p1p2/2nPP2P/5NQ1/PP1N2PP/RBB2R2",
+     "r1bq1rk1/pppnb3/3ppn2/3p4/2Pp3N/2NB2Bb/PPQ1PPPP/R6R"
+    ]
+   }
+  },
+  "where-both+what kc=1": {
+   "real": 0.143,
+   "legal": 0.027,
+   "non": 0.83,
+   "illegal only by check (share of all boards)": 0.035,
+   "units kept (no draw fit)": 0.024,
+   "adjacent kings among illegal": 0.078,
+   "illegal_causes_of_all_boards": {
+    "TOO_MANY_KINGS": 0.232,
+    "NO_BLACK_KING": 0.318,
+    "PAWNS_ON_BACKRANK": 0.322,
+    "NO_WHITE_KING": 0.165,
+    "TOO_MANY_BLACK_PAWNS": 0.095,
+    "TOO_MANY_BLACK_PIECES": 0.015,
+    "OPPOSITE_CHECK": 0.083,
+    "TOO_MANY_WHITE_PAWNS": 0.055,
+    "TOO_MANY_WHITE_PIECES": 0.01,
+    "IMPOSSIBLE_CHECK": 0.002,
+    "TOO_MANY_CHECKERS": 0.002
+   },
+   "examples": {
+    "real": [
+     "3q1rk1/2p3pp/pp6/bpb2R2/4P3/p1PP4/1PP2PPP/1R4K1",
+     "6n1/5p1k/6pb/8/7P/5P1K/PP2P3/R7",
+     "8/pp1pbp2/2p5/3k4/2p5/6B1/5P1P/6K1",
+     "r2q1r2/p2kb3/1pp3p1/qn1n1p2/2Q1p3/1P2B3/P4PP1/4R1KR"
+    ],
+    "legal": [
+     "2r5/b3r1pp/2n1q1pn/4r1k1/B5pp/P3P1P1/1PPrR2P/6K1",
+     "8/pbqpb3/2n1bnk1/4pppp/8/B2B2PN/1PPrRP2/R1BQR1K1",
+     "2rkbr2/p4p1P/2p1pn1q/3ppPP1/1n1B1K2/1P6/P2QN3/3R4",
+     "r1b3k1/3bq3/2p2n2/3p1P2/8/2Nb1pPP/6K1/2R1Q1R1"
+    ],
+    "non": [
+     "r5k1/pp3k1p/5ppp/6Q1/5PP1/4PB1P/5P2/6K1",
+     "8/2r3rk/2p4p/3P4/r3PP2/2p2P2/P4KPP/1B4K1",
+     "4k1k1/2r1p3/p2n3q/1p2p3/3p1r2/1P3P2/P3PQP1/2RB1RK1",
+     "8/1ppr3p/1pn1b1p1/2pb4/3P4/N3PP1P/2N2KP1/1R1R4"
+    ]
+   }
+  },
+  "where-both+what kc=2": {
+   "real": 0.027,
+   "legal": 0.037,
+   "non": 0.937,
+   "illegal only by check (share of all boards)": 0.018,
+   "units kept (no draw fit)": 0.016,
+   "adjacent kings among illegal": 0.066,
+   "illegal_causes_of_all_boards": {
+    "NO_BLACK_KING": 0.39,
+    "NO_WHITE_KING": 0.458,
+    "PAWNS_ON_BACKRANK": 0.538,
+    "TOO_MANY_KINGS": 0.142,
+    "OPPOSITE_CHECK": 0.108,
+    "TOO_MANY_BLACK_PAWNS": 0.078,
+    "TOO_MANY_WHITE_PAWNS": 0.083,
+    "TOO_MANY_WHITE_PIECES": 0.007,
+    "TOO_MANY_BLACK_PIECES": 0.025,
+    "IMPOSSIBLE_CHECK": 0.003,
+    "TOO_MANY_CHECKERS": 0.003
+   },
+   "examples": {
+    "real": [
+     "3bq3/2p1rkp1/3p1pp1/4r3/2p5/3P4/PPP2PP1/6K1",
+     "5kr1/pp3ppp/2pn1q2/3p3P/2p2Pb1/4P3/P1B3PP/4K2R",
+     "8/4r1k1/p7/3bp1pp/2P2p1p/2PP1P2/b1P1B3/4K3",
+     "8/2rb1r1p/1P3k2/2Pnppp1/3PP3/1PK1PB2/5B2/8"
+    ],
+    "legal": [
+     "4q1r1/ppb2rk1/R1pn3n/5nP1/3PPP2/PPPP4/R3R1n1/3KR3",
+     "1r4rk/b3pppp/qnr1P1np/2pnB3/4PP1B/8/3P1PPP/2K2R1R",
+     "8/2p4p/2p3p1/nk6/8/5b1P/P1PPP3/3K4",
+     "2b1rb1k/pp2b1p1/2n2n2/n1NN4/1bQ3B1/4P1PP/R1QPR3/3KR3"
+    ],
+    "non": [
+     "8/2p1rq2/3b1B1p/3b4/2BPqn2/4P3/1R2R2P/8",
+     "2p5/1r1k4/2p1prr1/ppnB2p1/3P1NnP/2PPPPB1/4K3/3R1R2",
+     "q2rb3/ppp3k1/r4pp1/3p1p2/3p1P2/1P1b1P2/P2P4/R1BQ1R2",
+     "8/2r2p2/qp4p1/P1p2pp1/2nPp1Np/1PPP4/R7/3P1N2"
+    ]
+   }
+  },
+  "where-both+what kc=3": {
+   "real": 0.02,
+   "legal": 0.033,
+   "non": 0.947,
+   "illegal only by check (share of all boards)": 0.017,
+   "units kept (no draw fit)": 0.018,
+   "adjacent kings among illegal": 0.081,
+   "illegal_causes_of_all_boards": {
+    "NO_BLACK_KING": 0.258,
+    "PAWNS_ON_BACKRANK": 0.608,
+    "NO_WHITE_KING": 0.52,
+    "TOO_MANY_BLACK_PAWNS": 0.125,
+    "TOO_MANY_BLACK_PIECES": 0.08,
+    "TOO_MANY_KINGS": 0.2,
+    "TOO_MANY_WHITE_PAWNS": 0.078,
+    "IMPOSSIBLE_CHECK": 0.012,
+    "OPPOSITE_CHECK": 0.127,
+    "TOO_MANY_CHECKERS": 0.01,
+    "TOO_MANY_WHITE_PIECES": 0.007
+   },
+   "examples": {
+    "real": [
+     "3r4/3p1k2/5b2/5r2/3nppp1/2P1P2p/7P/6K1",
+     "r2rkb2/p2p4/3n4/5N2/4B3/6P1/PP5K/8",
+     "1rr3qn/6pn/2qr4/2np1k1b/5p2/2p3P1/2n3PP/5rK1",
+     "rqb1rkn1/p4p1p/ppb1p1p1/3pPPP1/3q1K2/P2B3P/8/8"
+    ],
+    "legal": [
+     "8/4k3/3b1p2/p3p3/2B5/P1r2q1K/1BQ3b1/7n",
+     "5rk1/2pbqppr/3pbp1p/2KppPP1/1B1P4/1PPP4/1P1B3P/5qnR",
+     "5rrk/8/3qr3/3npb2/2pp2p1/PN2p3/4PP1P/6K1",
+     "5k2/2bp3p/2p3p1/4Np2/3P4/P4N2/1PPPP3/2R1K2R"
+    ],
+    "non": [
+     "1r1rpp2/1pp5/1ppp1pp1/n7/3p4/3Pp1P1/5P2/6R1",
+     "4pr1p/1p3pp1/k3npp1/ppp2b2/2PPPP2/1P2Bb2/7P/6K1",
+     "2p1p1k1/1p1n2pp/1q1b2p1/8/1q2n3/1k2rk2/1PBppP2/1p1PK3",
+     "rr6/ppbp1q1r/2p3B1/3nn1B1/2PRb1Q1/3P4/2P1Q3/8"
+    ]
+   }
+  },
+  "where-both+what kc=4": {
+   "real": 0.005,
+   "legal": 0.02,
+   "non": 0.975,
+   "illegal only by check (share of all boards)": 0.008,
+   "units kept (no draw fit)": 0.016,
+   "adjacent kings among illegal": 0.079,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.653,
+    "NO_WHITE_KING": 0.507,
+    "TOO_MANY_KINGS": 0.228,
+    "TOO_MANY_BLACK_PIECES": 0.118,
+    "NO_BLACK_KING": 0.335,
+    "TOO_MANY_BLACK_PAWNS": 0.168,
+    "OPPOSITE_CHECK": 0.125,
+    "TOO_MANY_WHITE_PAWNS": 0.078,
+    "TOO_MANY_WHITE_PIECES": 0.025,
+    "IMPOSSIBLE_CHECK": 0.013,
+    "TOO_MANY_CHECKERS": 0.008
+   },
+   "examples": {
+    "real": [
+     "8/p6k/1rp1p3/1p1p1n2/2P5/2N5/PP4PP/6K1",
+     "8/PRp5/2pk4/3p4/3p4/2P5/PPP5/RK6",
+     "rB6/p1P5/1k6/2p3B1/1p2p3/6Pq/PP3P2/R2Q2K1"
+    ],
+    "legal": [
+     "8/2kPb1pp/1p1pPpR1/2p2K2/4rq2/4N1b1/2Q2NPn/4B1R1",
+     "4n1k1/pPpPp3/1pp1Pp2/2p5/3K4/P5P1/R7/8",
+     "8/2nr4/1k1pppBP/1pp1B3/3RP1p1/4N2p/2P1P3/1K2R3",
+     "2k5/2bpp3/3p1p2/R1BQR3/b3P3/3ppp2/r1N3P1/5qK1"
+    ],
+    "non": [
+     "3q4/1p2P3/2pP4/rk1p2B1/1p3R2/1P6/4PPB1/3P2pp",
+     "5kp1/2r2p2/3q1P2/3nb3/r2ppr2/1bp2P2/5q2/2B5",
+     "2q1r3/b1r2rk1/1nppppp1/2rN1k1p/8/3pNr2/3Q1pPP/1B2R1K1",
+     "p7/2r4n/2p4p/N2p4/3Nk1q1/RR1b3R/2r1p1r1/n2p4"
+    ]
+   }
+  },
+  "where-both+what kc=6": {
+   "real": 0.007,
+   "legal": 0.017,
+   "non": 0.977,
+   "illegal only by check (share of all boards)": 0.015,
+   "units kept (no draw fit)": 0.023,
+   "adjacent kings among illegal": 0.101,
+   "illegal_causes_of_all_boards": {
+    "NO_BLACK_KING": 0.427,
+    "PAWNS_ON_BACKRANK": 0.733,
+    "NO_WHITE_KING": 0.422,
+    "TOO_MANY_BLACK_PIECES": 0.115,
+    "TOO_MANY_BLACK_PAWNS": 0.182,
+    "TOO_MANY_KINGS": 0.233,
+    "OPPOSITE_CHECK": 0.188,
+    "TOO_MANY_WHITE_PAWNS": 0.133,
+    "TOO_MANY_WHITE_PIECES": 0.062,
+    "IMPOSSIBLE_CHECK": 0.012,
+    "TOO_MANY_CHECKERS": 0.01
+   },
+   "examples": {
+    "real": [
+     "k7/p1p2p2/pp5p/8/3P4/2P3PB/R6K/b1B5",
+     "8/1k2qP1p/1pR2RNB/8/2pP4/2P1P3/r4PPP/6K1",
+     "5r2/5pp1/4r2p/1p1PPk2/1P4p1/rBRK4/p7/8",
+     "rr2q3/1p2n3/2n3n1/3p4/1P2rk2/P1P5/PK6/8"
+    ],
+    "legal": [
+     "8/1r1kn3/r1p2p1n/2nPPP2/4p2p/1ppPRNBQ/BK4p1/8",
+     "8/Pp6/1PP5/2K5/8/PP2B3/R4P1P/3r1k2",
+     "1N1rB3/3p4/1BQ2p1p/3P1N2/1P2B3/qk6/r3P3/b4K2",
+     "8/6N1/rk2PP2/1p2R3/2p1pp2/2p5/1p3PPP/6K1"
+    ],
+    "non": [
+     "8/7N/5PP1/bbnr1Q1B/pb1p1RR1/3b4/4pp1p/6p1",
+     "P1P2PP1/P4K2/3rRR2/3p4/3pP1p1/2P3P1/7K/6q1",
+     "8/3P4/1pp1PP1B/5q2/3pp2P/r7/p1p1p3/3pB1P1",
+     "1bqqrr2/3b2b1/2n5/4rp1k/b1qr2n1/3P1rq1/2p2PPP/3p2K1"
+    ]
+   }
+  },
+  "where-both+what kc=99": {
+   "real": 0.002,
+   "legal": 0.008,
+   "non": 0.99,
+   "illegal only by check (share of all boards)": 0.007,
+   "units kept (no draw fit)": 0.021,
+   "adjacent kings among illegal": 0.114,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.738,
+    "NO_WHITE_KING": 0.398,
+    "TOO_MANY_KINGS": 0.265,
+    "OPPOSITE_CHECK": 0.21,
+    "NO_BLACK_KING": 0.405,
+    "TOO_MANY_BLACK_PIECES": 0.113,
+    "TOO_MANY_BLACK_PAWNS": 0.182,
+    "TOO_MANY_WHITE_PIECES": 0.075,
+    "TOO_MANY_WHITE_PAWNS": 0.132,
+    "IMPOSSIBLE_CHECK": 0.017,
+    "TOO_MANY_CHECKERS": 0.008
+   },
+   "examples": {
+    "real": [
+     "8/2r5/2p5/2p3kp/6p1/5b2/5P1P/4K2R"
+    ],
+    "legal": [
+     "n2rk3/4b3/2Pp4/2p4K/4pn2/5P2/8/8",
+     "1B3r1k/Qp1p4/1Rp2Rpp/P1ppP1P1/1nrb1K2/p1b1n3/4Q1B1/R2b1R2",
+     "8/8/6P1/1PP5/R3R1K1/q1kP4/2P5/8",
+     "8/8/8/r1b5/ppPNP1k1/5p2/K7/8"
+    ],
+    "non": [
+     "3PP3/8/5PP1/5RN1/1P1P3b/k1rKP3/1p3p2/p2p2p1",
+     "8/3nr3/2p1p3/1p1n1q2/3k4/R1p1p1p1/1b5p/2nb4",
+     "8/2pp1rK1/2rkkP2/2pbb2P/b3p1P1/R1BQPR2/3P1P2/3p3p",
+     "3P2B1/2P3B1/1K1R1qQp/PPP1p2Q/1K1p2k1/2p1pp1p/1p2N3/8"
+    ]
+   }
+  },
+  "list counts=0": {
+   "real": 0.127,
+   "legal": 0.002,
+   "non": 0.872,
+   "illegal only by check (share of all boards)": 0.022,
+   "units kept (no draw fit)": 0.0,
+   "adjacent kings among illegal": 0.205,
+   "illegal_causes_of_all_boards": {
+    "TOO_MANY_KINGS": 0.302,
+    "TOO_MANY_BLACK_PIECES": 0.047,
+    "TOO_MANY_BLACK_PAWNS": 0.108,
+    "NO_WHITE_KING": 0.292,
+    "NO_BLACK_KING": 0.32,
+    "TOO_MANY_WHITE_PIECES": 0.042,
+    "TOO_MANY_WHITE_PAWNS": 0.11,
+    "OPPOSITE_CHECK": 0.068,
+    "IMPOSSIBLE_CHECK": 0.003,
+    "TOO_MANY_CHECKERS": 0.003
+   },
+   "examples": {
+    "real": [
+     "4k3/4pp2/3b3p/p6p/3NP3/3B4/5P2/1R1Q1K2",
+     "2bq1b2/1b4pp/p1bpp1k1/4P3/1P1P4/P1N2N2/PP1Q2PP/R4K2",
+     "2b2rk1/p6p/R3pnp1/1n1nP1p1/Pqp5/7P/q1P4K/R1B3q1",
+     "r3k2r/p7/p7/2pp4/4N3/5NP1/2QB1P1P/R3R1K1"
+    ],
+    "legal": [
+     "r3k3/pb2pppp/5np1/1q2Np2/1P4r1/3P1P2/PBPNPP2/RNR3K1"
+    ],
+    "non": [
+     "5r1r/pp1k1pkp/1p1k1pp1/2pp1b2/1pPP4/3pp3/1P1Q1PPP/R4RK1",
+     "1rrr2kr/1p1nqp2/2n5/2p5/r4p2/4P1P1/4N1PB/6R1",
+     "2b1r3/1bp2r2/5p2/4Pp2/2PNN3/2Pn3P/3QNP1P/6K1",
+     "r4r2/3nqppp/1bn1pq1p/4q3/6p1/P2B4/6P1/3Q1RK1"
+    ]
+   }
+  },
+  "list counts=1": {
+   "real": 0.522,
+   "legal": 0.01,
+   "non": 0.468,
+   "illegal only by check (share of all boards)": 0.058,
+   "units kept (no draw fit)": 0.0,
+   "adjacent kings among illegal": 0.007,
+   "illegal_causes_of_all_boards": {
+    "NO_BLACK_KING": 0.228,
+    "NO_WHITE_KING": 0.243,
+    "OPPOSITE_CHECK": 0.068,
+    "IMPOSSIBLE_CHECK": 0.002,
+    "TOO_MANY_CHECKERS": 0.002
+   },
+   "examples": {
+    "real": [
+     "5k1r/3pb2p/3pp3/pbp1n3/1P5B/8/P2N1PPP/5RKR",
+     "1nr3kr/ppp2pb1/1pb1pp2/5p2/6BN/P2QP2P/PP1B1P1P/2K5",
+     "2r1rk2/pp1n2pp/p1n2b2/3p1p2/pb1B1PPR/2N1P2P/P4PPP/R5K1",
+     "1Nr3k1/pp3ppp/p2P4/P3p3/3Pb3/1Q3PKP/1P4PP/3R4"
+    ],
+    "legal": [
+     "r1b3kr/p5p1/P3p1Pp/3p4/1p1q4/4B1PP/2Pn2P1/R1B1RK2",
+     "kn1b4/1p6/1p6/p1p5/1b3p2/6P1/1PP1KP1P/RN6",
+     "2b2k2/2pp2p1/p1Nb1n1p/pNp5/2PPK3/PPn5/P4PBP/5R2",
+     "3qkbr1/1p5p/3P1nn1/1pPpp3/2p1p2B/2P1BNPP/1P2QP2/RK3b1R"
+    ],
+    "non": [
+     "7r/p5pp/4p1p1/3pp3/2PP4/1B4PP/1P1rN3/1R2KR2",
+     "5rkr/pp3p1p/p1n1b2p/4p3/p2bPP2/1PN1BP2/P4PPP/3QRR2",
+     "5b2/p2rp1pp/n1n1p1pk/3NP3/2pP4/P5P1/1P1N1BPP/3QR2R",
+     "2q1rr2/p2b1k1p/1p2pnp1/7p/P1Bb1NP1/5N2/BP3PPP/5R1R"
+    ]
+   }
+  }
+ },
+ "N2000": {
+  "learned": 2000,
+  "learn_s": 1448,
+  "chunk units": 10884,
+  "parsed chunks per position": 5.51,
+  "identity (real board, parse units unchanged)": {
+   "real": 0.953,
+   "legal": 0.047,
+   "non": 0.0,
+   "illegal only by check (share of all boards)": 0.0,
+   "units kept (no draw fit)": 0.0,
+   "adjacent kings among illegal": 0.0,
+   "illegal_causes_of_all_boards": {},
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "r3k1nr/pp2ppbp/2p1b3/3p2p1/1nPPP3/1P3N2/1P1N1PPP/R1BK1B1R",
+     "r3k1nr/pp2ppbp/2p1b3/3p2p1/1nPPP3/1P3N2/1P1N1PPP/R1BK1B1R",
+     "5r2/r2n3k/Pq4pp/Q1Npb3/1B2p3/3P2nP/4P1BK/R3R3",
+     "5r2/r2n3k/Pq4pp/Q1Npb3/1B2p3/3P2nP/4P1BK/R3R3"
+    ],
+    "non": []
+   }
+  },
+  "where-file kc=0": {
+   "real": 0.85,
+   "legal": 0.068,
+   "non": 0.082,
+   "illegal only by check (share of all boards)": 0.082,
+   "units kept (no draw fit)": 0.224,
+   "adjacent kings among illegal": 0.0,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.078,
+    "IMPOSSIBLE_CHECK": 0.003,
+    "TOO_MANY_CHECKERS": 0.003
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B2P2/2P3P1/7P/1PP5/2K4R",
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B2P2/2P3P1/7P/1PP5/2K4R",
+     "1r1q1rk1/Qpp1n1pp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/pQp1n1pp/2pb4/4p3/2N1P3/3P4/1PP2PPP/R1B2RK1"
+    ],
+    "legal": [
+     "r3k2r/pp3ppp/2p2q2/3pp3/8/P1bP1nP1/1PPBP3/R2QK1R1",
+     "r3k1nr/ppp1p1bp/2p1b3/3p2p1/Pn1PP3/1P3N2/1P1N1PPP/RKBB1R2",
+     "r3k1nr/pp2ppbp/2p1b3/3p2p1/PnPP4/1P3N2/P2NP1PP/RKBB1R2",
+     "2k5/2pn2p1/p7/1br3p1/4p3/4nN1P/1P2PP2/1BR1RK2"
+    ],
+    "non": [
+     "r3r2k/pp3pp1/6p1/3pP3/1P5Q/P4P2/PP3P2/6K1",
+     "5r2/1p1N3p/p5P1/2kp3R/3n4/1P6/2K5/8",
+     "5r2/1p1N3p/p5P1/2kp3R/5n2/1P6/2K5/8",
+     "2Q5/6p1/1b2p2p/3p4/3P2k1/6R1/5PP1/5qK1"
+    ]
+   }
+  },
+  "where-file kc=1": {
+   "real": 0.762,
+   "legal": 0.153,
+   "non": 0.085,
+   "illegal only by check (share of all boards)": 0.085,
+   "units kept (no draw fit)": 0.033,
+   "adjacent kings among illegal": 0.059,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.085
+   },
+   "examples": {
+    "real": [
+     "r4k2/1p1R1pp1/r1pn2p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B2P2/P3P3/5P2/1PP5/2K2R2",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "2r1qrk1/Q1pp1npp/2p1b3/4p3/2N1P3/2P5/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "1r1k4/2npp1pp/3nPpp1/2q5/1P3P2/PP2N1Q1/2P4R/1K4R1",
+     "8/8/1k6/p1p1pP2/4P1R1/3K1P2/8/5r2",
+     "r3k1nr/pp1pp1bp/2p1b3/3p2p1/P1PPn3/4PN2/P2NP1PP/RKBB1R2",
+     "r3k1nr/pp2ppbp/2p1b3/3p2p1/n1PPP3/P4N2/1P1N1PPP/R1BK1B1R"
+    ],
+    "non": [
+     "3q4/3kp3/2pRn3/2pN4/3p4/5P2/3P2PQ/6K1",
+     "2Q5/6p1/1b2p2p/3p4/P2k4/3R4/2PP4/2qK4",
+     "2r1r1k1/p5pp/1pp5/3Q4/P1P1R3/P1P1P3/q5P1/2R3K1",
+     "3rk3/p3p1pp/p2nn3/1Bp5/P4Pb1/1QPq1NP1/1PRN3P/6K1"
+    ]
+   }
+  },
+  "where-file kc=2": {
+   "real": 0.715,
+   "legal": 0.213,
+   "non": 0.072,
+   "illegal only by check (share of all boards)": 0.072,
+   "units kept (no draw fit)": 0.013,
+   "adjacent kings among illegal": 0.047,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.072
+   },
+   "examples": {
+    "real": [
+     "2r1qrk1/Qpp2npp/2p1b3/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/Q1ppn1pp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "3r1k2/pp2n1pp/2p1Pnp1/7q/1P3P2/PN1Q2P1/4R2P/3R2K1",
+     "3r1k2/pp2n1pp/2p1Pnp1/7q/1P3P2/PN1Q2P1/4R2P/3R2K1"
+    ],
+    "legal": [
+     "r4k2/1pR1pp2/r1pn1p2/p1B4P/2P3P1/7P/3PP3/4K2R",
+     "1r4k1/2p1R1pp/3rnp1p/3p1B1P/1P3P2/6P1/3PP3/4K1R1",
+     "r3k2r/pp3ppp/2p2q2/3pp3/8/P1bP1nP1/1PPBP3/R2QK1R1",
+     "r1nrk3/ppb1pp1p/b1p5/3p2p1/n1PPP3/P4N2/1P1N1PPP/R1BK1B1R"
+    ],
+    "non": [
+     "1k5r/1p1pp2q/4np2/2p3N1/p3pQ2/2P4P/PP1RP1PK/8",
+     "r1r1k3/p5pp/pp6/1Q6/P1R2P2/P3PP2/3q2P1/R5K1",
+     "r1r1k3/p5pp/pp6/3Q4/2PPR3/P3PP2/3q2P1/2R3K1",
+     "3b4/p4p2/1pn1p1kp/2p3pP/5P2/3PNBK1/P3PPP1/8"
+    ]
+   }
+  },
+  "where-file kc=3": {
+   "real": 0.702,
+   "legal": 0.228,
+   "non": 0.07,
+   "illegal only by check (share of all boards)": 0.07,
+   "units kept (no draw fit)": 0.012,
+   "adjacent kings among illegal": 0.048,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.07
+   },
+   "examples": {
+    "real": [
+     "r4k2/1p1R1pp1/r1pn2p1/p1B2P2/1P3P2/6P1/1PP5/2K3R1",
+     "1r1q1rk1/Q1ppn1pp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "3r1k2/1pp1n1pp/3pPnp1/7q/1P3P2/P2N1QP1/6RP/5RK1",
+     "3r1k2/1pp1n1pp/3pPnp1/2q5/1P3P2/PP2N1Q1/2P4R/1K4R1"
+    ],
+    "legal": [
+     "r4k2/1p1R1pp1/3n1rpp/5pPB/1P3P2/6P1/2PP4/3K2R1",
+     "2r1qrk1/Qpp2npp/2p1b3/4p3/2N1P3/2P5/PPPPP3/R1BK1R2",
+     "8/8/1k6/p1p1pP2/4P1R1/K1P5/8/5r2",
+     "r3k1nr/p1p1ppbp/3pb3/4p2p/2PPP2n/5N1P/1P1N1PPP/R1BK1B1R"
+    ],
+    "non": [
+     "2q5/2k1p3/p2n1R2/1p1N4/1p6/5P2/1P3QP1/6K1",
+     "3b4/p4p2/1pn1p1kp/2p2Pp1/3P4/1PB1K1N1/2PP2PP/8",
+     "3b4/p4p2/1pn1p1kp/2p3pP/5P2/2BPN1K1/P2PPP2/8",
+     "8/2Q4p/1Pr2pp1/3pk3/3P4/2P5/PPK5/8"
+    ]
+   }
+  },
+  "where-file kc=4": {
+   "real": 0.698,
+   "legal": 0.223,
+   "non": 0.078,
+   "illegal only by check (share of all boards)": 0.078,
+   "units kept (no draw fit)": 0.008,
+   "adjacent kings among illegal": 0.064,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.078
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/1r1pn1p1/1p1B1P2/P3P3/5P2/1PP5/2K2R2",
+     "1r1q1rk1/Qpp1n1pp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "3r1k2/1pp1n1pp/3pPnp1/7q/1P3P2/PN1Q2P1/4R2P/3R2K1",
+     "rk2r3/pp1pp3/4p3/1p2P3/1PQ5/P4P2/PP3P2/6K1"
+    ],
+    "legal": [
+     "r4k2/1p1R1pp1/r1pn2p1/p1B4P/P3P3/5P2/3PP3/4KR2",
+     "1r1q1rk1/Q1ppn1pp/2pb4/4p3/2N1P3/2P5/PPPPP3/R1BK1R2",
+     "3r1k2/1pp1n1pp/3pPnp1/4q3/1P3P2/P2PN1Q1/4P2R/3K2R1",
+     "8/8/1k6/pPp1p3/P1R5/K1P5/8/1r6"
+    ],
+    "non": [
+     "rn1qr3/pp2kpp1/1Np1p1p1/2PnN3/1P5Q/2P5/3P1PPP/2R3KR",
+     "r1r1k3/p5pp/pp6/1Q6/P1R3P1/P3PP2/3q2P1/R5K1",
+     "2r2k1r/2ppp1pp/3b4/2p4q/Bp1Nn1b1/1PPPP3/PP4P1/2R1BQKR",
+     "3b4/p4p2/1pn1ppk1/2p1pP2/3P4/1PB1K1N1/2PP2PP/8"
+    ]
+   }
+  },
+  "where-file kc=6": {
+   "real": 0.685,
+   "legal": 0.233,
+   "non": 0.082,
+   "illegal only by check (share of all boards)": 0.082,
+   "units kept (no draw fit)": 0.009,
+   "adjacent kings among illegal": 0.02,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.082
+   },
+   "examples": {
+    "real": [
+     "r4k2/1p1R1pp1/r1pn2p1/p1B1P3/P3P3/5P2/PP6/1K3R2",
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/1P3P2/6P1/PP6/1K4R1",
+     "1r1q1rk1/Qpp1n1pp/2pb4/4p3/2N1P3/2P5/PP1PPP2/R1B1KR2",
+     "1r1qrk2/Q1ppnp1p/2pb4/3p4/2N1P3/2P5/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "8/8/1k6/p1p1pP2/4P1R1/5K1P/8/5r2",
+     "8/8/3k4/1Pp1p1p1/P1R5/K1P5/8/1r6",
+     "r3k1r1/pp3ppp/2p2q2/p2p4/8/1nP1b1PP/3PPPB1/3R1KQR",
+     "r1nrk3/ppb1pp1p/b1p5/3p2p1/n1PPP3/P4N2/1P1N1PPP/R1BK1B1R"
+    ],
+    "non": [
+     "r3r2k/pp3pp1/6p1/3p1P2/2P4Q/1P4P1/1PP3P1/7K",
+     "4rr2/1p2p2k/1p3q1p/2p3p1/3n4/2N1P2P/2Q2PP1/RR4K1",
+     "7Q/4p3/2p2pb1/1p6/Pk6/1R6/2PP4/q2K4",
+     "k6r/2ppp2q/4np2/2p2N2/p3Qp2/2P4P/PPRP2PK/8"
+    ]
+   }
+  },
+  "where-file kc=99": {
+   "real": 0.642,
+   "legal": 0.255,
+   "non": 0.103,
+   "illegal only by check (share of all boards)": 0.103,
+   "units kept (no draw fit)": 0.005,
+   "adjacent kings among illegal": 0.032,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.103
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B2P2/2P3P1/7P/1PP5/2K4R",
+     "r4k2/1p1R1pp1/r1pn2p1/p1B2P2/2P3P1/7P/1PP5/2K4R",
+     "3r1k2/1pp1n1pp/3pPnp1/7q/1P3P2/P1N1Q1P1/5R1P/4R1K1",
+     "3r1k2/pp2n1pp/2p1Pnp1/5q2/1P3P2/P2NPQ2/5PR1/4KR2"
+    ],
+    "legal": [
+     "1r1qrk2/Q1ppnp1p/2pb4/3p4/2N1P3/2P5/PPPPP3/R1BK1R2",
+     "2r1qrk1/Qpp2npp/2p1b3/4p3/2N1P3/2P5/PPPPP3/R1BK1R2",
+     "8/8/1k6/p1p1p1P1/5P1R/1K1P4/8/6r1",
+     "rr2k3/pp3ppp/2p2q2/3pp3/8/P1bP1nP1/1PPBP3/R2QK1R1"
+    ],
+    "non": [
+     "2q1r1rk/ppb2b1p/2p3p1/1n1p1pPn/4pP1P/1P1N1P2/1Q2NBPP/RB2R1K1",
+     "1Q6/5p2/b2p2p1/2p5/1k1P4/5R2/5PP1/4q1K1",
+     "5rk1/p3p1pp/p4nn1/1Bp5/P4Pb1/1QP1qNP1/RP1N3P/6K1",
+     "3rk3/1p3ppp/1p1nn3/1B1p4/P4Pb1/1QP1qNP1/1PRN3P/6K1"
+    ]
+   }
+  },
+  "where-rank kc=0": {
+   "real": 0.837,
+   "legal": 0.03,
+   "non": 0.133,
+   "illegal only by check (share of all boards)": 0.032,
+   "units kept (no draw fit)": 0.115,
+   "adjacent kings among illegal": 0.037,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.102,
+    "OPPOSITE_CHECK": 0.042
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2p5/r1pRnpp1/p1B1P1p1/2P3P1/7P/PP6/1K5R",
+     "1r4k1/2p5/r1pRnpp1/p1B1P1p1/2P3P1/7P/PP6/1K5R",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/Q1p1n1pp/2pb1p2/4p3/2N1P3/2P5/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "r3k1nr/pp2ppbp/2p1b3/1n1p2p1/1PPPP3/5N2/1P1N1PPP/R1BK1B1R",
+     "r3k1nr/pp2p1bp/2p1bp2/3p2p1/1nPPP3/1P3N2/1P1N1PPP/R1BK1B1R",
+     "r4r2/3n3k/Pq2b1pp/Q1Np4/4p1nP/3P3K/1B2P1B1/R3R3",
+     "r4r2/3n3k/Pq2b1pp/Q1Np4/4p1nP/3P3K/1B2P1B1/R3R3"
+    ],
+    "non": [
+     "R4rpk/p6p/3r4/P1pp4/1P3P2/2PPnR1P/6P1/6K1",
+     "R4rpk/7p/3r4/p1pp4/P4P2/1P1Pn2P/2P2RP1/6K1",
+     "1p2r1n1/p5p1/2kp2P1/7R/8/1P3N2/2K5/8",
+     "1p2r3/p5p1/2kp2P1/7R/6n1/1P6/2K2N2/8"
+    ]
+   }
+  },
+  "where-rank kc=1": {
+   "real": 0.542,
+   "legal": 0.068,
+   "non": 0.39,
+   "illegal only by check (share of all boards)": 0.097,
+   "units kept (no draw fit)": 0.009,
+   "adjacent kings among illegal": 0.03,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.293,
+    "OPPOSITE_CHECK": 0.13,
+    "IMPOSSIBLE_CHECK": 0.002
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "1r1q1rk1/Q1p1n1pp/2pb4/4p3/2N1P3/2P2p2/PP3PPP/R1B2RK1",
+     "3r1k2/4n3/pp3npp/2p1P1pq/8/1PN1QPP1/P4R1P/4R1K1"
+    ],
+    "legal": [
+     "r7/pp2pp2/2p4r/3pkn2/P1b3pp/1PPP1q1P/3B1P2/R2Q1K1R",
+     "r7/pp2pp1r/2p1k3/3p1npp/5q2/P1bP3P/1PPB1P2/R2Q1K1R",
+     "r3k1nr/pp2p1bp/2p1bp2/3p2p1/1nPPP3/1P3N2/1P1N1PPP/R1BK1B1R",
+     "1n2r1k1/r1bp3p/pp3pq1/b4p2/N1P2PPP/5B1R/1P3P2/R2QK3"
+    ],
+    "non": [
+     "1r1q1p2/Q1p1n2p/2pb1rk1/6p1/2N1P3/2P1p3/PP3PPP/R1B2RK1",
+     "8/r3rpp1/pp3kp1/3p4/5QP1/3P4/PPP2P1P/6K1",
+     "6nr/1p3pbp/2p1b3/3p2p1/1nPPP3/rP2kN2/pP1NpPPP/R1BK1B1R",
+     "R4rpk/7p/3r4/P1pp1P2/1P1P4/p1P2RP1/4n1KP/8"
+    ]
+   }
+  },
+  "where-rank kc=2": {
+   "real": 0.54,
+   "legal": 0.082,
+   "non": 0.378,
+   "illegal only by check (share of all boards)": 0.088,
+   "units kept (no draw fit)": 0.006,
+   "adjacent kings among illegal": 0.044,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.142,
+    "PAWNS_ON_BACKRANK": 0.29,
+    "IMPOSSIBLE_CHECK": 0.003
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "5rk1/Q5p1/2p2p1p/2p1p3/2N5/1rPqP3/PP2nPPP/R1Bb1RK1",
+     "1r1q1rk1/Q3npp1/2pb3p/2p1p3/2N5/2P1P3/PP3PPP/R1B2RK1",
+     "3r1k2/4n3/pp3npp/2p1P1pq/8/1PN1QPP1/P4R1P/4R1K1"
+    ],
+    "legal": [
+     "1r4k1/2p1P3/r1pRnpp1/p1B3p1/PPP3P1/1K5P/8/7R",
+     "8/3n2p1/8/1br1p2k/2p4p/p1n2N2/2P2PPP/1BR1R1K1",
+     "3qr3/1p2kppQ/2p1p1p1/rn1n1PPP/p2N2K1/P3P1N1/1P1P4/R4R2",
+     "5r2/3n3k/Pq4pp/Q1Npb3/4p3/3P2nP/rB2P1BK/R3R3"
+    ],
+    "non": [
+     "8/5pp1/r3r1p1/pp1p1k2/6P1/3P1Q2/PPP2P1P/6K1",
+     "8/r3rpp1/pp4p1/3p1kP1/3P1Q2/PPP2P1P/6K1/8",
+     "rp2kp1r/p1p1p1pp/3p1q2/5n2/7P/3P1P2/P1bB1K1R/RPPQ4",
+     "rp2k3/p1p1pp1p/3p2p1/1n6/1PPPPNnr/3N2b1/RPB1bPPP/3K1B1R"
+    ]
+   }
+  },
+  "where-rank kc=3": {
+   "real": 0.398,
+   "legal": 0.11,
+   "non": 0.492,
+   "illegal only by check (share of all boards)": 0.135,
+   "units kept (no draw fit)": 0.005,
+   "adjacent kings among illegal": 0.061,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.357,
+    "OPPOSITE_CHECK": 0.205,
+    "IMPOSSIBLE_CHECK": 0.002
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2p5/r1pRnpp1/p1B1P1p1/2P3P1/7P/PP6/1K5R",
+     "5rk1/Qrpq2pp/2p1np2/3bp3/2N1P3/2P2PPP/PP4K1/R1B2R2",
+     "8/pp4pp/2p1P1p1/3r1k1q/1P2nP2/P1N1QnP1/5R1P/4R1K1",
+     "3r1k2/4n3/5npp/pp2P1pq/2p5/1PN1QPP1/P4R1P/4R1K1"
+    ],
+    "legal": [
+     "1r4k1/2p5/r1p1n3/p1B1P3/2P3P1/3R1ppP/PP4p1/1K5R",
+     "5rk1/Qrpq2pp/2p1nPPP/3bp1K1/2N1Pp2/2P5/PP6/R1B2R2",
+     "r3k1nr/pp2p1bp/2p1b3/1n1p1pp1/1PPPPN2/3N4/RPB2PPP/3K1B1R",
+     "1n2r1k1/3p3p/r1b2pq1/pp3p2/N1P2P2/8/bP3PPP/R2QKB1R"
+    ],
+    "non": [
+     "r3rQ2/pp3pp1/5kp1/3p4/8/6P1/PP1P1P2/2P3KP",
+     "8/8/5pp1/r3rkp1/pp1p2P1/3P1Q2/PPP2P1P/6K1",
+     "8/3k4/2p1p1p1/3P4/2P1R3/8/8/3rK1P1",
+     "1p2kp2/r1p3pp/p2ppq1r/8/5n1P/3P1P2/P1bB1K1R/RPPQ4"
+    ]
+   }
+  },
+  "where-rank kc=4": {
+   "real": 0.367,
+   "legal": 0.088,
+   "non": 0.545,
+   "illegal only by check (share of all boards)": 0.11,
+   "units kept (no draw fit)": 0.006,
+   "adjacent kings among illegal": 0.076,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.435,
+    "OPPOSITE_CHECK": 0.22,
+    "IMPOSSIBLE_CHECK": 0.007,
+    "TOO_MANY_CHECKERS": 0.007
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "3k4/2p1p1p1/3P4/2P1R3/8/4K1P1/3r4/8",
+     "r1b1r1k1/pp6/1n3pq1/3p3p/N1P2P2/5p2/bP3PPP/R2QKB1R"
+    ],
+    "legal": [
+     "1r4k1/2pRPpp1/r1p1n1p1/p1B5/PPP3P1/1K5P/8/7R",
+     "8/8/3P4/2P1R3/3k4/2p1p1p1/3rK1P1/8",
+     "8/1PR5/PK3p2/4pk1p/p5p1/1p2n3/4BP1P/3r4",
+     "8/8/1p6/p5P1/2kp1N1R/4r1n1/1P4p1/2K5"
+    ],
+    "non": [
+     "1rNq1PPP/2p1n1Kp/Q1pb1rk1/R1B2Rp1/4P3/4pp2/2P5/PP6",
+     "2NrQk2/pp2nR2/2p1Rnpp/4P1pq/8/1P3PP1/P6P/6K1",
+     "2NrQk2/4nRpp/4Rnp1/pp2P2q/2p5/1P3PP1/P6P/6K1",
+     "8/5pp1/5kp1/r2pr3/pp3Q2/6P1/PP1P1P2/2P3KP"
+    ]
+   }
+  },
+  "where-rank kc=6": {
+   "real": 0.227,
+   "legal": 0.122,
+   "non": 0.652,
+   "illegal only by check (share of all boards)": 0.112,
+   "units kept (no draw fit)": 0.004,
+   "adjacent kings among illegal": 0.097,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.54,
+    "OPPOSITE_CHECK": 0.27,
+    "IMPOSSIBLE_CHECK": 0.008,
+    "TOO_MANY_CHECKERS": 0.003
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2p5/r1pRnpp1/p1B1P1p1/2P3P1/7P/PP6/1K5R",
+     "5rk1/Q1p2ppp/2p5/4p3/2N1P3/1rPq1PPP/PP2n1K1/R1Bb1R2",
+     "3r1k2/4n1pp/pp3np1/2p1P2q/8/1PN1QPP1/P4R1P/4R1K1",
+     "8/8/3k4/2pPp1p1/2P1R3/8/4K1P1/3r4"
+    ],
+    "legal": [
+     "5rk1/Q1p2ppp/2p2PPP/4p1K1/1rNqP3/2P1n3/PP1b4/R1B2R2",
+     "5r2/2pbb1k1/r1nq3n/pp2P3/2NP1ppB/PP2pN1p/2B2PPP/R2QK2R",
+     "8/pp3p2/PPp1k1Pr/2K3pP/1N1r2NR/1b3b1p/8/8",
+     "r2q4/2p1bp2/3p1np1/2P4p/2PB1rkB/P3PN2/ppQ1bPPP/R1n1K2R"
+    ],
+    "non": [
+     "3R1pp1/6p1/r1p5/p1B1P3/2P3P1/1r4kP/PPp5/1K2n2R",
+     "2NrQk2/pp2nRpp/2p1Rnp1/4P2q/8/1P3PP1/P6P/6K1",
+     "6P1/3P4/2P2k1P/PP3P2/5QK1/r3rpp1/pp4p1/3p4",
+     "8/r3rpp1/pp4p1/3p1k2/8/PP3PP1/3P2K1/2P2Q1P"
+    ]
+   }
+  },
+  "where-rank kc=99": {
+   "real": 0.197,
+   "legal": 0.147,
+   "non": 0.657,
+   "illegal only by check (share of all boards)": 0.123,
+   "units kept (no draw fit)": 0.003,
+   "adjacent kings among illegal": 0.104,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.533,
+    "OPPOSITE_CHECK": 0.31,
+    "IMPOSSIBLE_CHECK": 0.007,
+    "TOO_MANY_CHECKERS": 0.005
+   },
+   "examples": {
+    "real": [
+     "5r1k/R5p1/3r1P1p/2pPn2P/P2p2P1/pP4K1/2P2R2/8",
+     "5r2/2pbbpp1/2nPp1kp/r2q3n/pp2PPPB/2N1KN2/PPB4P/R2Q3R",
+     "3q1rk1/1ppb2bp/3p2p1/2nPpp1n/rpP1PP2/P1N3PP/2QNB1K1/1RB2R2",
+     "3q1rk1/1ppb2bp/r2p2p1/2nPpp1n/1pP1P3/P1N2P2/2QNB1PP/1RB2RK1"
+    ],
+    "legal": [
+     "1r4k1/2p1P3/r1p1n3/p1B5/PPP3P1/1K1R1ppP/6p1/7R",
+     "8/Q1p4p/2p2rk1/6p1/2N1P3/1rPqpp2/PP2nPPP/R1Bb1RK1",
+     "8/3PK1P1/2P1R3/8/3k4/2prp1p1/8/8",
+     "8/1p3p2/2p1k3/r2pp1pp/p2P1q1r/P1bB1n1P/RPPQ1P2/5K1R"
+    ],
+    "non": [
+     "3R1pp1/6p1/r1p5/p1B1P3/2P3P1/1r4kP/PPp5/1K2n2R",
+     "8/Qrpq3p/2p1np2/3b1rk1/2N1P1p1/2P2PPP/PP2p1K1/R1B2R2",
+     "4P1pp/6p1/1P3P2/P2r1k1q/4n3/2N1QnP1/pp3R1P/2p1R1K1",
+     "6pp/pp1r1kp1/2p1n2q/4Pn2/6P1/1PN1QP1P/P4RK1/4R3"
+    ]
+   }
+  },
+  "where-both kc=0": {
+   "real": 0.825,
+   "legal": 0.063,
+   "non": 0.112,
+   "illegal only by check (share of all boards)": 0.057,
+   "units kept (no draw fit)": 0.258,
+   "adjacent kings among illegal": 0.015,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.055,
+    "OPPOSITE_CHECK": 0.062,
+    "IMPOSSIBLE_CHECK": 0.002
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B2P2/2P3P1/7P/1PP5/2K4R",
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B2P2/2P3P1/7P/1PP5/2K4R",
+     "1r1q1rk1/Q1p1n1pp/2pb4/4p3/2N1P1p1/2P5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/Q1p1n1pp/2pb2p1/4p3/2N1P3/2P5/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "r3k1nr/pp2p1bp/p1p1b3/1n1pPPp1/PP6/2P2NP1/3N2PP/RKBB1R2",
+     "r3k1nr/pp2p1bp/2p1b3/pn1pPPp1/PP6/2P2NP1/3N2PP/RKBB1R2",
+     "5r2/3n1ppk/Pqp5/Q1Npb3/8/3P2nP/1r2P1BK/RB2R3",
+     "k4b1r/pn4pp/1pN2n2/7P/PP4P1/3PB3/2K2P2/3R3R"
+    ],
+    "non": [
+     "3p1rn1/2p4p/4kpP1/7R/7N/1P6/2K5/8",
+     "1n1p1r2/2p4p/4kpP1/7R/8/1P3N2/2K5/8",
+     "5q2/1p3k2/p1R1N1n1/4p3/1p4P1/7P/1P3Q1K/8",
+     "5q2/5k2/p3N1n1/pR2p3/1p4P1/7P/1P3Q1K/8"
+    ]
+   }
+  },
+  "where-both kc=1": {
+   "real": 0.487,
+   "legal": 0.115,
+   "non": 0.398,
+   "illegal only by check (share of all boards)": 0.088,
+   "units kept (no draw fit)": 0.047,
+   "adjacent kings among illegal": 0.046,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.31,
+    "OPPOSITE_CHECK": 0.142,
+    "IMPOSSIBLE_CHECK": 0.003,
+    "TOO_MANY_CHECKERS": 0.002
+   },
+   "examples": {
+    "real": [
+     "8/3R1pp1/r1p3p1/p1B1P3/r1P2kP1/1p5P/PP1n4/1K5R",
+     "4r1k1/5n2/1pp1P1n1/3ppp1q/1P2pP2/PN1Q2P1/4R2P/3R2K1",
+     "3r1k2/pp2n3/2p1Pn2/2pp3q/1Pp2P2/PN1Q2P1/4R2P/3R2K1",
+     "r3r3/pp3pp1/6p1/3p1P2/2Pk4/QP4P1/PP3P2/6K1"
+    ],
+    "legal": [
+     "r4k2/1p1R1pp1/r1pn2p1/p1B4P/2P3P1/7P/3PP3/4K2R",
+     "1r1q1rk1/Q1p1n1pp/2pb4/4p3/2N1P3/1pP5/PPPPP3/R1BK1R2",
+     "r3k1nr/pp2p1bp/2p1b3/3pPPp1/2P1n3/p1P1PNP1/3N2PP/R1BK1B1R",
+     "2r1k3/8/n2pq3/2pr1bp1/N1PppP2/1PP1pb2/BPR2P2/R2QK3"
+    ],
+    "non": [
+     "3rk3/Qrpqp2p/2p1n3/2pb4/2N1P3/2P5/PP3PPP/R1B2RKp",
+     "r3r1pp/pp5p/4p3/6P1/3P4/2P2QkP/PP3P2/6K1",
+     "8/3P4/2PkR3/2p1p1p1/8/3r4/8/4K1P1",
+     "r5p1/pp3pr1/2pk3n/3p1pp1/P1b1q3/1PPP2P1/3BP3/R2QK1R1"
+    ]
+   }
+  },
+  "where-both kc=2": {
+   "real": 0.357,
+   "legal": 0.16,
+   "non": 0.483,
+   "illegal only by check (share of all boards)": 0.117,
+   "units kept (no draw fit)": 0.038,
+   "adjacent kings among illegal": 0.045,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.367,
+    "OPPOSITE_CHECK": 0.202,
+    "IMPOSSIBLE_CHECK": 0.005,
+    "TOO_MANY_CHECKERS": 0.003
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/4nrpp/4Pp1B/1P3P2/6P1/PP6/1K4R1",
+     "8/2r1kpp1/pp1nP2p/p3n1q1/NPQ2P2/P2R1P2/2R3P1/5K2",
+     "3r1k2/4n3/3ppn2/1pppP2q/3pN1Q1/1P3PPR/P5RP/6K1",
+     "r3r3/pp3pp1/6p1/3p1P2/1kP5/1P4P1/PP3PQ1/6K1"
+    ],
+    "legal": [
+     "1r4k1/2p1R1pp/3rnp1p/3p1BP1/2P3P1/7P/2PP4/3K3R",
+     "5rk1/Qr1q2p1/1p2n1p1/1p1bp3/2N2p2/2PP4/PPPPP3/R1BK1R2",
+     "3rk3/Q3p3/4r1q1/1pp3pn/1pN3b1/2Pp4/PP1P1PPP/R1B2RK1",
+     "rnb1r1k1/pp1p3p/5pq1/4bp2/N1P4P/1PP5/B1RP3P/R2Q2K1"
+    ],
+    "non": [
+     "6pp/7p/4p1P1/r2Pr3/ppP1Q2P/3k4/PP3P2/6K1",
+     "3P4/2PkR3/2p1p1p1/8/3r4/8/8/3K1P2",
+     "1P6/P1Rk4/2p1p1p1/8/1r6/8/4K1P1/8",
+     "r2pk3/pp3ppp/2p1nq2/2Ppb3/3PP3/3PP3/2PB2r1/R1KQR3"
+    ]
+   }
+  },
+  "where-both kc=3": {
+   "real": 0.255,
+   "legal": 0.187,
+   "non": 0.558,
+   "illegal only by check (share of all boards)": 0.11,
+   "units kept (no draw fit)": 0.036,
+   "adjacent kings among illegal": 0.03,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.448,
+    "OPPOSITE_CHECK": 0.218,
+    "IMPOSSIBLE_CHECK": 0.012,
+    "TOO_MANY_CHECKERS": 0.008
+   },
+   "examples": {
+    "real": [
+     "5rk1/Qr1q2p1/2p1n2p/p1pbp3/2N5/2P1P3/PP3PPP/R1B2RK1",
+     "8/3k4/2p1p1p1/4P3/3P1R2/8/1K1P4/4r3",
+     "8/2k5/1p1p1p2/3P4/2P1R3/3K1P2/8/3r4",
+     "r7/pp2qpp1/3pbn2/3kp1r1/3p1Pp1/3P1P2/PPP1B1PP/R1BQ1R1K"
+    ],
+    "legal": [
+     "6rk/1r1qQ2p/1p2n1p1/1p1b1p2/1pNPPP2/3PK1P1/4PP2/R1B2R2",
+     "4r1k1/5n2/pp2P1nq/2p1pp2/1P2pPP1/P3N1QP/6KR/6R1",
+     "8/1q1r1kpp/2ppn1p1/P3pnP1/1P6/K2PN1QP/2P4R/6R1",
+     "1n1r1k2/3p3p/4pq2/NrPb1p2/1pp2P2/5b2/RP1Q1PPP/4KB1R"
+    ],
+    "non": [
+     "1r4kP/2p5/4n3/3PP3/1P2KP2/1R1pp1P1/3rpp2/3p1BR1",
+     "2r4k/3p4/5n1P/4r1p1/1P2pPB1/3PP1P1/R1ppK3/3p2R1",
+     "r3r3/pp3pp1/6p1/1Q1p3k/6P1/PP1P1P2/2P3KP/8",
+     "r3r3/pp3pp1/6p1/3pP3/1Pk1Q3/P4P2/PP3P2/6K1"
+    ]
+   }
+  },
+  "where-both kc=4": {
+   "real": 0.188,
+   "legal": 0.147,
+   "non": 0.665,
+   "illegal only by check (share of all boards)": 0.132,
+   "units kept (no draw fit)": 0.041,
+   "adjacent kings among illegal": 0.043,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.533,
+    "OPPOSITE_CHECK": 0.27,
+    "IMPOSSIBLE_CHECK": 0.008,
+    "TOO_MANY_CHECKERS": 0.003
+   },
+   "examples": {
+    "real": [
+     "1r1k4/ppn5/2pn4/4Pppq/N1Q2p2/1P1R1PP1/P1R4P/6K1",
+     "3r1k2/4npp1/3ppn1p/3pP2q/8/NPQ2PP1/P2R3P/2R3K1",
+     "8/8/3k2P1/2p1pPpR/8/5K1P/6r1/8",
+     "r3k2r/ppppq2p/p1P1bn2/1p6/3pP3/3P4/PPP1BPP1/R1BQ1RK1"
+    ],
+    "legal": [
+     "r3knr1/pp2pb1p/1Ppb4/3p2p1/np1PPN2/P1KNB1R1/RPB2PPP/8",
+     "1n5b/2rpk2p/8/3pqp1P/N1PPPr1b/2BPRppP/6K1/R2Q4",
+     "1n1r1k2/3p3p/4pq2/5p2/NbP1rPb1/1PP1pp2/BPR2P2/R2QK3",
+     "2k2r2/2ppp2p/PP2p1P1/2Kb4/8/3p1N2/5b1P/3r2NR"
+    ],
+    "non": [
+     "3R1pp1/2r3pk/3p4/4Pn2/1Pr1pP2/2p1B1P1/PP6/1K4R1",
+     "P1r1P2k/3p1P2/5n2/4PR2/1R1pp3/4p3/PPr1p3/1Kp1B3",
+     "3rk2p/Q3p3/8/1ppr1qp1/1pN3n1/2P2b2/PP1P1PPP/R1B2RK1",
+     "8/Q1p3pp/1rpq4/4n3/2NbPrk1/2P3p1/PP3PPP/R1B1pRK1"
+    ]
+   }
+  },
+  "where-both kc=6": {
+   "real": 0.098,
+   "legal": 0.148,
+   "non": 0.753,
+   "illegal only by check (share of all boards)": 0.113,
+   "units kept (no draw fit)": 0.053,
+   "adjacent kings among illegal": 0.066,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.64,
+    "OPPOSITE_CHECK": 0.363,
+    "IMPOSSIBLE_CHECK": 0.01,
+    "TOO_MANY_CHECKERS": 0.007
+   },
+   "examples": {
+    "real": [
+     "7k/1R6/6n1/pp4p1/pp1p1r2/2P5/1PKBP1P1/8",
+     "r3k2r/pp2qppp/3pbn2/R1BQpR2/3p1PP1/3P4/PPP1B1PP/7K",
+     "3r2r1/6kp/1p2q2p/2p3p1/2n1p3/4N2P/1P2QPP1/2RR2K1",
+     "1n6/1p6/p1r2P2/2kpp1R1/8/P7/1K6/4N3"
+    ],
+    "legal": [
+     "r1qrk3/Q2np3/1pb3p1/1pp5/2N5/2PP3p/PPPPP3/R1BK1R2",
+     "3r1k2/4nP2/5n1q/2P3P1/1P4P1/ppppN1QP/p3p1KR/6R1",
+     "8/3k4/2p1p1p1/5P2/4P1R1/8/K1P5/5r2",
+     "8/2p3p1/3pk3/r3p1pp/3prq2/P1bPp2P/1PPBnP2/R2Q1K1R"
+    ],
+    "non": [
+     "1r4k1/2p5/4n3/5P2/1P3P2/1R1pp1P1/1PPrpp2/2Kp1BR1",
+     "1r4k1/2p5/4nP2/8/1P2RPpp/1PP3Pp/2Kr1p2/3p1BR1",
+     "3N1rk1/1Q4p1/8/rRqBp1R1/p2n1p2/p1bPPPP1/1PP2K1p/2P5",
+     "6P1/5pp1/1q1P1p1P/2P5/P3r1k1/1P2NnQ1/K2pp1nR/5pR1"
+    ]
+   }
+  },
+  "where-both kc=99": {
+   "real": 0.065,
+   "legal": 0.157,
+   "non": 0.778,
+   "illegal only by check (share of all boards)": 0.14,
+   "units kept (no draw fit)": 0.077,
+   "adjacent kings among illegal": 0.073,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.638,
+    "OPPOSITE_CHECK": 0.393,
+    "IMPOSSIBLE_CHECK": 0.022,
+    "TOO_MANY_CHECKERS": 0.018
+   },
+   "examples": {
+    "real": [
+     "8/3k4/2p1p1p1/K1PP4/2P1R3/8/8/3r4",
+     "5r1k/R5p1/3rp2p/P1pn2P1/1P1p1P2/2PP1R2/6P1/6K1",
+     "r7/ppppq3/p2kbnr1/1p4p1/3pPP1P/4PPP1/4BPP1/R1BQ1RK1",
+     "r3r1k1/pp1N1pp1/2pn4/Q4q2/1P1P4/1RpRP3/PP3P1P/2b2BK1"
+    ],
+    "legal": [
+     "r4k2/1p1R1pp1/3n2p1/rPp2PP1/p1B3P1/8/2PP2R1/3K4",
+     "1Q1rk3/4p3/3r1q2/p1p2pn1/p1NP1b2/pPP5/2PPPP2/R1B1KR2",
+     "1q2r1k1/5n2/P1ppP1n1/1PpN1Q2/KP3PR1/Ppp2R2/3p4/8",
+     "r2r1k2/p7/p1n1pp2/1p2q1Np/PP1PP1P1/3QPK1b/P7/4RBR1"
+    ],
+    "non": [
+     "r4k2/Pp2P3/3n1P2/4P3/5R2/1R1pp3/PP1rpp2/1K1p1B2",
+     "3PPP2/3QK3/1rk1p3/2p1r1q1/1pN3pn/pp3Pb1/3PP3/R1BP1R2",
+     "8/pp3P2/1qp5/2PN1QP1/PP4R1/1P2rRk1/K1pp1n2/2p3n1",
+     "4Qk2/6pp/5P1p/2P1p3/1P1r2Pr/3pp3/PP3P2/6K1"
+    ]
+   }
+  },
+  "where-file+what kc=0": {
+   "real": 0.77,
+   "legal": 0.03,
+   "non": 0.2,
+   "illegal only by check (share of all boards)": 0.063,
+   "units kept (no draw fit)": 0.232,
+   "adjacent kings among illegal": 0.042,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.075,
+    "NO_WHITE_KING": 0.03,
+    "TOO_MANY_KINGS": 0.023,
+    "PAWNS_ON_BACKRANK": 0.055,
+    "NO_BLACK_KING": 0.037,
+    "TOO_MANY_BLACK_PAWNS": 0.005,
+    "TOO_MANY_BLACK_PIECES": 0.003,
+    "TOO_MANY_WHITE_PAWNS": 0.003
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r2Bn1p1/pp3P2/8/4P2P/1PP3P1/2K4R",
+     "1r4k1/2pR1pp1/r2Bn1p1/pp3P2/8/4P2P/1PP3P1/2K4R",
+     "1r1q1rk1/Q1ppn1pp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "r3k1nr/pp2ppbp/2p1b3/3p4/1nP5/1P3N2/P2NP1PP/R1BK1B1R",
+     "4rk2/3rp3/P3n1pp/2Np4/4pB2/QP1PQ1B1/1K2P3/R3R3",
+     "r1r5/p4kb1/P2p1p2/PN4pp/PBP2P2/1K4P1/3R3P/8",
+     "8/3p1p2/4p2p/1P3Pr1/P7/3r3k/K1b5/8"
+    ],
+    "non": [
+     "8/8/PR4k1/5ppp/8/3K1P2/8/r7",
+     "8/8/PR4k1/5ppp/8/3K1P2/8/r7",
+     "r3k1nr/pp1p1pbp/2p1b3/3p4/3PP3/2Pn1NQ1/PP1N1PPP/RBB2R2",
+     "3r1r2/1pp3k1/1p2q2p/2p3p1/2n5/P1Q2N1P/5PP1/3RR1K1"
+    ]
+   }
+  },
+  "where-file+what kc=1": {
+   "real": 0.175,
+   "legal": 0.06,
+   "non": 0.765,
+   "illegal only by check (share of all boards)": 0.037,
+   "units kept (no draw fit)": 0.029,
+   "adjacent kings among illegal": 0.072,
+   "illegal_causes_of_all_boards": {
+    "TOO_MANY_KINGS": 0.198,
+    "PAWNS_ON_BACKRANK": 0.335,
+    "NO_BLACK_KING": 0.262,
+    "NO_WHITE_KING": 0.165,
+    "TOO_MANY_BLACK_PAWNS": 0.058,
+    "TOO_MANY_WHITE_PAWNS": 0.027,
+    "OPPOSITE_CHECK": 0.105,
+    "IMPOSSIBLE_CHECK": 0.005,
+    "TOO_MANY_CHECKERS": 0.005,
+    "TOO_MANY_WHITE_PIECES": 0.008,
+    "TOO_MANY_BLACK_PIECES": 0.012
+   },
+   "examples": {
+    "real": [
+     "8/pbp4p/1npkbq2/4p3/B3P3/1P6/P3B1PP/R5K1",
+     "8/2pb1p1p/2p2qk1/6pp/3RP3/2P3P1/PP3P1P/R1BQ1RK1",
+     "2r1k3/ppp2p2/pprp4/4PP2/3P3B/2P5/6PP/3RNQKR",
+     "8/3rk3/1br1bR2/2p2p2/1p4P1/1NP2PN1/PP4PP/6K1"
+    ],
+    "legal": [
+     "8/2pk4/4r3/5p2/8/5P1K/4P3/2BNR3",
+     "r1bk1b2/p1pbnpp1/2n1p2p/8/3P4/2NN4/PPQ1NPPP/RR2KBNR",
+     "3r4/2kb3p/P1p2n2/2Npp3/N4p2/3PP3/1BKQP1B1/2R3B1",
+     "3r1rk1/3p2pp/rpb2p2/2qp4/N1pb4/1P3P1P/3PPPB1/2R1KQ1R"
+    ],
+    "non": [
+     "1r4k1/1pp1k1p1/2r1np2/2ppb3/8/8/2R2PP1/4P1K1",
+     "1krq4/p3k3/1p1rb3/2p5/8/4N3/3P1PPP/1PP3K1",
+     "r2q1rp1/2p2ppp/3p1np1/3PB3/1P2P3/P7/PP1PN3/1RK3R1",
+     "r1br4/pp4p1/5p1p/4pP2/1PPPP1P1/1P6/7P/6K1"
+    ]
+   }
+  },
+  "where-file+what kc=2": {
+   "real": 0.015,
+   "legal": 0.013,
+   "non": 0.972,
+   "illegal only by check (share of all boards)": 0.013,
+   "units kept (no draw fit)": 0.023,
+   "adjacent kings among illegal": 0.046,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.607,
+    "NO_WHITE_KING": 0.535,
+    "NO_BLACK_KING": 0.462,
+    "TOO_MANY_WHITE_PAWNS": 0.085,
+    "TOO_MANY_BLACK_PAWNS": 0.065,
+    "TOO_MANY_KINGS": 0.12,
+    "OPPOSITE_CHECK": 0.075,
+    "TOO_MANY_BLACK_PIECES": 0.01,
+    "TOO_MANY_WHITE_PIECES": 0.005,
+    "IMPOSSIBLE_CHECK": 0.002,
+    "TOO_MANY_CHECKERS": 0.002
+   },
+   "examples": {
+    "real": [
+     "2k5/pp6/2P2qn1/4nb2/3P2P1/3P1P2/R1PK4/8",
+     "8/5k2/1r3b2/p1p1P3/1p6/4BPR1/5K2/8",
+     "4r3/pp2Pp1k/1pp2q2/3p4/3p3P/P5B1/1PP2Q2/1R1BK1RR",
+     "1rr3k1/2R5/pq2p3/1pp5/2P5/P1PB1NP1/5P1P/R2Q2K1"
+    ],
+    "legal": [
+     "2r2k2/2r1ppp1/3ppp1p/1pn2P2/1b2P3/2P5/3PP3/2K1R3",
+     "1k6/p1p1P3/3bp3/1Prp1PKq/2p1nPb1/1N2RP2/2QQ1B2/RR4R1",
+     "r1b5/pppbp3/2kpnP2/P2p4/1P1P4/2B1P2P/K1P1B1RB/RR1R2R1",
+     "bnr5/1prk1p1p/2p1p1p1/1p6/5Q2/3Nb3/PP1PPP2/R4K2"
+    ],
+    "non": [
+     "2k2r2/pr1pk2p/2p2r2/1r1n4/3q4/8/2PP4/PP4P1",
+     "r1p2p2/2p1b1p1/3p1nk1/6b1/3p4/8/2PP4/PP2K3",
+     "8/2qb1n2/1pb1nrk1/3n4/P1BP4/2P5/PP1Q4/R3R1Pq",
+     "8/pn4r1/3nnq2/2k1b3/b2n3B/2P5/1P5P/P2RPRN1"
+    ]
+   }
+  },
+  "where-file+what kc=3": {
+   "real": 0.015,
+   "legal": 0.015,
+   "non": 0.97,
+   "illegal only by check (share of all boards)": 0.01,
+   "units kept (no draw fit)": 0.023,
+   "adjacent kings among illegal": 0.057,
+   "illegal_causes_of_all_boards": {
+    "NO_BLACK_KING": 0.392,
+    "PAWNS_ON_BACKRANK": 0.702,
+    "NO_WHITE_KING": 0.52,
+    "TOO_MANY_KINGS": 0.157,
+    "TOO_MANY_BLACK_PAWNS": 0.153,
+    "TOO_MANY_WHITE_PAWNS": 0.097,
+    "TOO_MANY_WHITE_PIECES": 0.023,
+    "OPPOSITE_CHECK": 0.093,
+    "TOO_MANY_BLACK_PIECES": 0.06,
+    "IMPOSSIBLE_CHECK": 0.005,
+    "TOO_MANY_CHECKERS": 0.005
+   },
+   "examples": {
+    "real": [
+     "8/8/5rk1/1p6/n7/1N5N/RQ1R2PP/7K",
+     "5r1k/2q5/3np3/5pp1/pp2p2p/1PPBQNB1/2RPNPKR/8",
+     "5k2/pb2b3/8/3n2p1/Q7/2PPPP2/3K1P2/8",
+     "8/pp1p4/2p2pk1/8/5b2/1BN5/PPP3P1/RK2R3"
+    ],
+    "legal": [
+     "3rk3/3ppp1p/2p1r3/3nb3/P1PP1n2/1P2P3/1r1PN3/3K4",
+     "5rk1/pp1pp1p1/6Pp/B7/5Q1N/PR1B2BN/2q1rKR1/2n2b2",
+     "3k2r1/4bpp1/4pn1q/4Pp2/2P3N1/1P1PB3/P4KB1/8",
+     "2r2k2/3np3/1nP1n3/2q2P2/2PP4/2PPP3/RP1K4/8"
+    ],
+    "non": [
+     "r4r2/p1PPP3/rp1K4/p7/7P/r2q4/4b3/R1B2n1R",
+     "1rk5/1Np5/PP1p4/1P1k4/6P1/5p2/6QP/4r1P1",
+     "r2q4/1bpr3r/p2k4/6q1/1P1P2pp/4P3/R1KP1PP1/3P1K2",
+     "3q4/2pnnb2/3p4/3p1p1P/5pP1/2BppP2/1Q2p1K1/2R1B1R1"
+    ]
+   }
+  },
+  "where-file+what kc=4": {
+   "real": 0.003,
+   "legal": 0.02,
+   "non": 0.977,
+   "illegal only by check (share of all boards)": 0.007,
+   "units kept (no draw fit)": 0.023,
+   "adjacent kings among illegal": 0.082,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.733,
+    "NO_WHITE_KING": 0.537,
+    "OPPOSITE_CHECK": 0.142,
+    "NO_BLACK_KING": 0.342,
+    "TOO_MANY_BLACK_PAWNS": 0.235,
+    "TOO_MANY_KINGS": 0.197,
+    "TOO_MANY_BLACK_PIECES": 0.13,
+    "TOO_MANY_WHITE_PAWNS": 0.057,
+    "TOO_MANY_WHITE_PIECES": 0.02,
+    "IMPOSSIBLE_CHECK": 0.007,
+    "TOO_MANY_CHECKERS": 0.003
+   },
+   "examples": {
+    "real": [
+     "8/2r1rk1p/2npb1p1/4pp1p/2p5/3b1PPP/1P1Q2K1/8",
+     "6k1/1p2b3/2p5/1B2B3/2n1r3/R1P2R2/1PK5/8"
+    ],
+    "legal": [
+     "5b2/4Np2/1p1Brr2/n4pk1/6p1/p2rN1q1/1p2bPPb/6Kn",
+     "8/1q1r1k2/8/Q7/8/2PP4/4P3/3KB1R1",
+     "8/3ppp2/2pN4/8/1k6/1b3P2/n3P2B/1K5R",
+     "8/8/pp1p2p1/P3p3/kP6/1N6/K3P1B1/8"
+    ],
+    "non": [
+     "4p3/8/5prk/rk3N2/8/5P2/4P1P1/PPPP4",
+     "8/4rK1n/r2q1Rp1/pp6/1r6/1pp5/2ppp3/1p1p4",
+     "8/b1N3P1/q2rk2P/2bp1K2/3n4/2bPp3/BK6/2Ppr3",
+     "p7/2pppp2/1Kpp4/8/PPP5/1K1k4/1b1p4/2r1pr2"
+    ]
+   }
+  },
+  "where-file+what kc=6": {
+   "real": 0.008,
+   "legal": 0.013,
+   "non": 0.978,
+   "illegal only by check (share of all boards)": 0.015,
+   "units kept (no draw fit)": 0.025,
+   "adjacent kings among illegal": 0.099,
+   "illegal_causes_of_all_boards": {
+    "NO_BLACK_KING": 0.4,
+    "PAWNS_ON_BACKRANK": 0.725,
+    "NO_WHITE_KING": 0.393,
+    "TOO_MANY_WHITE_PAWNS": 0.138,
+    "TOO_MANY_KINGS": 0.27,
+    "OPPOSITE_CHECK": 0.197,
+    "TOO_MANY_BLACK_PIECES": 0.078,
+    "TOO_MANY_BLACK_PAWNS": 0.143,
+    "TOO_MANY_WHITE_PIECES": 0.073,
+    "IMPOSSIBLE_CHECK": 0.018,
+    "TOO_MANY_CHECKERS": 0.01
+   },
+   "examples": {
+    "real": [
+     "8/2q5/2rk2pp/3ppP2/5Pp1/7P/2P5/2K3b1",
+     "4k3/8/1p6/5P2/8/3P3P/2PK4/2R5",
+     "8/8/1pppk3/p1q5/1p4P1/2p3K1/8/8",
+     "8/5rnr/5p1k/7p/8/5P2/6K1/8"
+    ],
+    "legal": [
+     "8/2r2P2/1pp1K3/8/B1Nrk3/4p3/R1R1Bp2/8",
+     "5r2/2kP4/bp2B3/p4N2/P5p1/1PP1pp2/K4pp1/4n3",
+     "1r6/3k4/1p3p2/PPP5/K7/1P1P4/3q4/8",
+     "6k1/2r1b3/ppppP3/2pK4/8/1r2qBN1/2p1PPP1/5Nn1"
+    ],
+    "non": [
+     "3r3r/3P1p2/rbPb4/1p6/5Q2/8/3p1P2/2NPn3",
+     "2N2Q2/7p/1PPP1RpB/2K5/8/4P3/1P1PPKP1/P3B3",
+     "8/pqnb4/4n2r/1pkp1kn1/5n2/4N3/2PP1k2/B1P2pp1",
+     "8/3n2P1/p4P2/1pP1R1K1/6P1/pp1rk3/2qp1p2/3np3"
+    ]
+   }
+  },
+  "where-file+what kc=99": {
+   "real": 0.008,
+   "legal": 0.015,
+   "non": 0.977,
+   "illegal only by check (share of all boards)": 0.012,
+   "units kept (no draw fit)": 0.029,
+   "adjacent kings among illegal": 0.065,
+   "illegal_causes_of_all_boards": {
+    "NO_BLACK_KING": 0.383,
+    "PAWNS_ON_BACKRANK": 0.755,
+    "NO_WHITE_KING": 0.408,
+    "TOO_MANY_BLACK_PIECES": 0.113,
+    "TOO_MANY_BLACK_PAWNS": 0.172,
+    "TOO_MANY_WHITE_PIECES": 0.032,
+    "TOO_MANY_WHITE_PAWNS": 0.112,
+    "TOO_MANY_KINGS": 0.238,
+    "OPPOSITE_CHECK": 0.19,
+    "IMPOSSIBLE_CHECK": 0.02,
+    "TOO_MANY_CHECKERS": 0.015
+   },
+   "examples": {
+    "real": [
+     "8/5p2/6p1/8/8/PPP4k/1K6/8",
+     "5bk1/Bp3pp1/4p3/4PPP1/2rPr1R1/Rq2K3/1b6/8",
+     "3r2k1/5n2/5q2/4p3/4Pp2/3P3P/5K2/8",
+     "8/8/8/8/1kp1B3/1p6/4PP2/5K2"
+    ],
+    "legal": [
+     "8/6p1/5p2/b1P5/P2rP2k/3p1P2/bp2p1K1/8",
+     "2r5/3p3p/4p3/6p1/6k1/1r1pr3/ppK5/8",
+     "8/3P1P2/4P2r/6pp/3P4/4PP2/1k3P1P/1b4K1",
+     "1K2rk2/5p2/6p1/8/1P6/1r6/6R1/6N1"
+    ],
+    "non": [
+     "2pp4/p1rn2b1/1pq2n2/3n4/8/8/p4p2/1nP1p3",
+     "3r1k2/4p3/1qr1pk1p/3r1pp1/8/3p1p2/4p1p1/3rpp2",
+     "7P/1P3N2/n2PP2R/1p1P4/N4Q2/8/RQ1R4/R1BQ1R1P",
+     "8/3pbpr1/4pp2/4pr1r/3P1p2/2PB4/2K1rk2/3p2pp"
+    ]
+   }
+  },
+  "where-both+what kc=0": {
+   "real": 0.772,
+   "legal": 0.032,
+   "non": 0.197,
+   "illegal only by check (share of all boards)": 0.067,
+   "units kept (no draw fit)": 0.226,
+   "adjacent kings among illegal": 0.085,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.075,
+    "NO_WHITE_KING": 0.037,
+    "PAWNS_ON_BACKRANK": 0.015,
+    "TOO_MANY_KINGS": 0.027,
+    "NO_BLACK_KING": 0.045,
+    "TOO_MANY_BLACK_PAWNS": 0.012,
+    "TOO_MANY_BLACK_PIECES": 0.007,
+    "IMPOSSIBLE_CHECK": 0.002,
+    "TOO_MANY_CHECKERS": 0.002,
+    "TOO_MANY_WHITE_PAWNS": 0.003
+   },
+   "examples": {
+    "real": [
+     "rr1B2k1/pppR1pp1/4n1p1/5P2/8/4P2P/1PP3P1/2K4R",
+     "rr1B2k1/pppR1pp1/4n1p1/5P2/8/4P2P/1PP3P1/2K4R",
+     "1r1q1rk1/Q1p1n1pp/2pb4/4p3/2N1P3/1pP5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/2p1n1pp/2pb4/p3p3/2NPP3/1P2PQ2/5PPP/R1B2RK1"
+    ],
+    "legal": [
+     "3r1k2/pp2n1pp/P1p1Pnp1/1P6/KP3P2/P1N1Q3/5R2/4R3",
+     "3r1k2/pp2n1pp/P1p1Pnp1/1P6/KP3P2/P1N1Q3/5R2/4R3",
+     "r3k1nr/p4pbp/4p2p/5p2/1nP3p1/1P3N2/P2NP1PP/R1BK1B1R",
+     "7r/4r1k1/P5pp/Q1Npb3/1p2pp2/B2P2nP/4P1BK/R3R3"
+    ],
+    "non": [
+     "r3r2k/ppp2p2/6p1/3pP2Q/1P1P4/P7/PP3P2/6K1",
+     "r3k1nr/pp3pbp/2p5/3p4/2pPP3/2P1nNQ1/PP1N1PPP/RBB2R2",
+     "r3k3/2q5/p1n3pp/1p3p2/3p4/r1Q2NPP/5PP1/3RR1K1",
+     "r2r4/p5k1/p3q1p1/pp3p2/2n5/2Q2N1P/P4PP1/3RR1K1"
+    ]
+   }
+  },
+  "where-both+what kc=1": {
+   "real": 0.187,
+   "legal": 0.045,
+   "non": 0.768,
+   "illegal only by check (share of all boards)": 0.043,
+   "units kept (no draw fit)": 0.024,
+   "adjacent kings among illegal": 0.08,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.108,
+    "NO_BLACK_KING": 0.288,
+    "PAWNS_ON_BACKRANK": 0.28,
+    "NO_WHITE_KING": 0.155,
+    "TOO_MANY_KINGS": 0.198,
+    "TOO_MANY_WHITE_PAWNS": 0.028,
+    "TOO_MANY_BLACK_PAWNS": 0.072,
+    "TOO_MANY_BLACK_PIECES": 0.015,
+    "TOO_MANY_WHITE_PIECES": 0.003,
+    "IMPOSSIBLE_CHECK": 0.002,
+    "TOO_MANY_CHECKERS": 0.002
+   },
+   "examples": {
+    "real": [
+     "rr2q1rk/pp5p/6p1/3b4/3PP3/2P2P2/3B1KB1/8",
+     "2r5/1b2kq2/1rpbp3/1p1p4/1b1P4/NP6/PP3P2/6K1",
+     "8/2p4p/2p1kq1p/3p4/2ppP3/2P2QN1/PP4P1/2B1R1K1",
+     "6k1/7p/5n1p/8/7P/3N1P2/8/3B1R1K"
+    ],
+    "legal": [
+     "3k4/2pbp2p/2ppqP2/1pp2PP1/3PP1n1/3P2P1/P5RK/2R1BQR1",
+     "7k/r2pb1r1/p3p2p/2n3p1/4Q3/3B4/P1P1PPB1/RBR1KQ1R",
+     "4r3/8/r2rk1p1/3rnp2/3pQ3/2pBP2B/P1P3PP/2R2QKR",
+     "1r3rk1/5n2/4pQ2/3p4/NPp1P1K1/P2r4/PBP3R1/8"
+    ],
+    "non": [
+     "8/2p3p1/1p1p1p1p/2p1p1k1/6b1/1PP5/P1P2PP1/RNB2RK1",
+     "4r1r1/pp1q4/2pb2pp/Q2P1p2/2P1p3/1P2N3/PPP5/1KR1R3",
+     "r7/pp1ppp2/6p1/3pP3/1P1P2b1/P3K3/1P3PB1/6K1",
+     "8/2r2pPp/2p1p1p1/2P1P3/3P3P/3PPP2/4K1B1/8"
+    ]
+   }
+  },
+  "where-both+what kc=2": {
+   "real": 0.038,
+   "legal": 0.023,
+   "non": 0.938,
+   "illegal only by check (share of all boards)": 0.015,
+   "units kept (no draw fit)": 0.012,
+   "adjacent kings among illegal": 0.053,
+   "illegal_causes_of_all_boards": {
+    "NO_WHITE_KING": 0.515,
+    "OPPOSITE_CHECK": 0.093,
+    "TOO_MANY_KINGS": 0.108,
+    "PAWNS_ON_BACKRANK": 0.548,
+    "NO_BLACK_KING": 0.465,
+    "TOO_MANY_WHITE_PAWNS": 0.083,
+    "TOO_MANY_BLACK_PAWNS": 0.063,
+    "TOO_MANY_BLACK_PIECES": 0.013,
+    "IMPOSSIBLE_CHECK": 0.008,
+    "TOO_MANY_CHECKERS": 0.005,
+    "TOO_MANY_WHITE_PIECES": 0.007
+   },
+   "examples": {
+    "real": [
+     "8/1b1nbpk1/5nnp/3NP3/2N5/1qPpQN2/PP2RPPP/6K1",
+     "2bq1rk1/3n1p2/4nnp1/1p1p3P/3N2PN/2N2PPP/PP6/R1BQ1RK1",
+     "4r3/pp3rpp/3qk3/3bN3/2Pp4/1PNB1N2/PP1N1PPP/6K1",
+     "8/p7/1pp1N1p1/1B1p1nb1/q1Q1r1k1/1qN1P3/PP2b1PP/RR4K1"
+    ],
+    "legal": [
+     "2rk4/3p4/2p1p1P1/1p1p4/q7/P2PP3/R1P3r1/4K3",
+     "5rk1/3bR1p1/1n5p/1pp5/1P1P4/2PPn1b1/P1PPb3/K2R4",
+     "3b1r2/p3p3/1p6/1r1P2Pk/8/4PP2/PP3K2/RN1Q1R2",
+     "2bq1r1k/2pn2p1/p2n1n1p/1pp3P1/3p1N2/P1PPP3/3P4/2KN4"
+    ],
+    "non": [
+     "3rk3/8/qpp2p2/2rppBp1/5p2/2BN1P2/1P4P1/8",
+     "1rk5/1p4p1/3pp3/3p1pn1/4ppP1/2PP1P2/7P/8",
+     "8/1b2k3/2pRpQ2/4q2p/7N/1BPQQ3/1PRP2R1/R1R5",
+     "3p1rk1/3n3p/2p3p1/2pp1p2/K1PP4/1PP5/P1K2N2/3PP2N"
+    ]
+   }
+  },
+  "where-both+what kc=3": {
+   "real": 0.022,
+   "legal": 0.02,
+   "non": 0.958,
+   "illegal only by check (share of all boards)": 0.005,
+   "units kept (no draw fit)": 0.019,
+   "adjacent kings among illegal": 0.059,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.603,
+    "NO_WHITE_KING": 0.523,
+    "TOO_MANY_KINGS": 0.155,
+    "OPPOSITE_CHECK": 0.112,
+    "TOO_MANY_BLACK_PAWNS": 0.153,
+    "NO_BLACK_KING": 0.395,
+    "TOO_MANY_BLACK_PIECES": 0.082,
+    "TOO_MANY_WHITE_PIECES": 0.022,
+    "TOO_MANY_WHITE_PAWNS": 0.098,
+    "IMPOSSIBLE_CHECK": 0.007,
+    "TOO_MANY_CHECKERS": 0.005
+   },
+   "examples": {
+    "real": [
+     "3rr2k/7p/1r2r3/2nb4/4n1pp/5r2/3P1p1P/3R3K",
+     "8/6k1/5ppp/P7/5R2/6P1/1PP5/K7",
+     "8/3krp2/3b1r2/2q5/5p1p/1K6/2P4P/8",
+     "qr3rkr/pp1b1qp1/p1n1pb2/3pp3/P1BP4/1NP1BP2/PPP1Q1P1/R3K2R"
+    ],
+    "legal": [
+     "1R6/p3kp2/Bp2p3/2pp4/PP1q1B2/P3Pp2/2P5/3K4",
+     "4r3/6b1/q3Pnp1/npp5/2P1rk2/1Pn5/P1p5/2K1R3",
+     "8/3r1pqr/p2pp3/1ppr3p/1b1r3P/1k5K/1B2PP2/3rr3",
+     "r1n1r3/rk6/1pppPP2/pPp1R2Q/q7/3P4/P3K3/B7"
+    ],
+    "non": [
+     "5q2/6k1/5rb1/4P3/1PP1P3/P5P1/PP1r4/1K1p2R1",
+     "7P/2B3P1/2N2qb1/8/4k3/6p1/4B2p/R1BQp3",
+     "r7/1kr3r1/ppp5/2rk4/3kb3/P1QPPb2/3nK3/n5q1",
+     "8/8/1kr5/1p2bp1p/N1p1p1P1/2P3K1/PP5P/4PP2"
+    ]
+   }
+  },
+  "where-both+what kc=4": {
+   "real": 0.012,
+   "legal": 0.015,
+   "non": 0.973,
+   "illegal only by check (share of all boards)": 0.012,
+   "units kept (no draw fit)": 0.019,
+   "adjacent kings among illegal": 0.072,
+   "illegal_causes_of_all_boards": {
+    "TOO_MANY_WHITE_PAWNS": 0.072,
+    "TOO_MANY_KINGS": 0.192,
+    "PAWNS_ON_BACKRANK": 0.667,
+    "NO_BLACK_KING": 0.355,
+    "NO_WHITE_KING": 0.525,
+    "TOO_MANY_BLACK_PIECES": 0.132,
+    "TOO_MANY_BLACK_PAWNS": 0.242,
+    "OPPOSITE_CHECK": 0.125,
+    "TOO_MANY_WHITE_PIECES": 0.017,
+    "IMPOSSIBLE_CHECK": 0.01,
+    "TOO_MANY_CHECKERS": 0.008
+   },
+   "examples": {
+    "real": [
+     "8/8/bp1p1r2/P1prkp2/4P1PP/5P2/1PP5/K7",
+     "3rr2k/4p3/3p2qp/5P2/1b1P4/2P1P3/K7/8",
+     "4k2r/6bp/3p1p2/2p1p3/8/3NRNBQ/2P1P3/4K3",
+     "r4r2/2k5/3b2n1/1P6/8/8/5PPP/6K1"
+    ],
+    "legal": [
+     "r4bnr/2p2pp1/1k2ppp1/1B1p4/8/3PKP2/1Q3N2/2RR4",
+     "r7/1k2p1p1/2qn1p2/4B3/1P1PP1P1/K2R3P/3bP3/8",
+     "1Q6/3k1p1Q/2pp4/2n5/2P5/1P2P1P1/PBK5/RNB5",
+     "8/8/4rk2/P3p3/4n3/2P1K3/2P2P2/4R1B1"
+    ],
+    "non": [
+     "2rr1r1k/qn6/5b2/2N5/4P3/1PPP4/3K1PPP/P2P2K1",
+     "3p4/p1P1p2p/1qRr3Q/r1p5/n7/4p3/4n3/8",
+     "r4r2/3q4/6PP/pp1n3k/Nn1pp1n1/2n2pk1/p1QR2b1/R2R4",
+     "7r/1pp1n3/2npbb2/8/1p3bn1/2kp2p1/2pp1P2/p3p1Pp"
+    ]
+   }
+  },
+  "where-both+what kc=6": {
+   "real": 0.002,
+   "legal": 0.018,
+   "non": 0.98,
+   "illegal only by check (share of all boards)": 0.01,
+   "units kept (no draw fit)": 0.018,
+   "adjacent kings among illegal": 0.109,
+   "illegal_causes_of_all_boards": {
+    "NO_BLACK_KING": 0.4,
+    "PAWNS_ON_BACKRANK": 0.745,
+    "NO_WHITE_KING": 0.372,
+    "OPPOSITE_CHECK": 0.195,
+    "IMPOSSIBLE_CHECK": 0.022,
+    "TOO_MANY_KINGS": 0.285,
+    "TOO_MANY_CHECKERS": 0.017,
+    "TOO_MANY_BLACK_PIECES": 0.077,
+    "TOO_MANY_BLACK_PAWNS": 0.122,
+    "TOO_MANY_WHITE_PAWNS": 0.148,
+    "TOO_MANY_WHITE_PIECES": 0.078
+   },
+   "examples": {
+    "real": [
+     "8/6p1/3r3p/3pk2P/6P1/5PPP/5PP1/6K1"
+    ],
+    "legal": [
+     "2b1k2r/2q1b1pp/2P2n2/PP2P3/1KN5/PP5B/5P1P/6BQ",
+     "8/4P3/r1kP4/2P5/2n2PP1/1B4K1/bP6/R3R3",
+     "8/8/2p5/kpp5/1p1p4/2P5/pK6/8",
+     "8/2PN1ppk/1P5p/P7/2p4P/1p1p2N1/pB3PPP/R5K1"
+    ],
+    "non": [
+     "1B3P1N/6P1/1PPP4/8/4r3/4ppp1/3bP3/1PPB4",
+     "4p3/8/3PQ3/2B2bq1/3P3n/1PP5/2KPP1p1/4K3",
+     "2pq1rKk/1p2P1r1/ppQPp1p1/rkP5/8/5p2/1PPP4/2K5",
+     "1rq5/3b4/p1ppnb2/5P2/1k1rPq1r/4Bb2/pp2n3/3r4"
+    ]
+   }
+  },
+  "where-both+what kc=99": {
+   "real": 0.003,
+   "legal": 0.015,
+   "non": 0.982,
+   "illegal only by check (share of all boards)": 0.005,
+   "units kept (no draw fit)": 0.024,
+   "adjacent kings among illegal": 0.11,
+   "illegal_causes_of_all_boards": {
+    "NO_BLACK_KING": 0.418,
+    "NO_WHITE_KING": 0.378,
+    "TOO_MANY_KINGS": 0.263,
+    "PAWNS_ON_BACKRANK": 0.778,
+    "OPPOSITE_CHECK": 0.2,
+    "TOO_MANY_BLACK_PAWNS": 0.19,
+    "TOO_MANY_WHITE_PAWNS": 0.137,
+    "TOO_MANY_WHITE_PIECES": 0.063,
+    "TOO_MANY_BLACK_PIECES": 0.097,
+    "IMPOSSIBLE_CHECK": 0.008,
+    "TOO_MANY_CHECKERS": 0.007
+   },
+   "examples": {
+    "real": [
+     "8/1r4rk/6q1/3Nb3/1PP5/2K5/8/8",
+     "8/2r1bp2/2ppp3/6k1/5pp1/Pp2PP1p/1P1r1K2/8"
+    ],
+    "legal": [
+     "8/7B/2P5/1k4PP/p1p3K1/1p1Q4/2R1R3/8",
+     "2N2r2/8/3R4/PN6/1b3p2/1PP1r2P/1p3k1K/n3q3",
+     "5k2/2pp1Pp1/3nPP2/5KP1/2N1Pr1P/rqPr4/3b4/nb6",
+     "3qRrk1/1qnN1b2/pN1pn1b1/4p2P/B2P1NQB/1R1RP1R1/7K/8"
+    ],
+    "non": [
+     "4qB2/2p3P1/3bN3/3b4/2r1P3/3Pr3/4pp1p/8",
+     "3Qp3/5q2/6p1/4PPP1/2pPkK2/2P2p1r/PPP1b3/1K6",
+     "PPPP4/1PKr4/prkpk3/pppQ4/3p1p2/1b1p4/4p3/8",
+     "8/8/4rr2/1NB4P/3PP3/PPP1Ppn1/1B1P1B2/n1PRP3"
+    ]
+   }
+  },
+  "list counts=0": {
+   "real": 0.097,
+   "legal": 0.005,
+   "non": 0.898,
+   "illegal only by check (share of all boards)": 0.022,
+   "units kept (no draw fit)": 0.0,
+   "adjacent kings among illegal": 0.187,
+   "illegal_causes_of_all_boards": {
+    "TOO_MANY_WHITE_PIECES": 0.052,
+    "TOO_MANY_WHITE_PAWNS": 0.103,
+    "TOO_MANY_KINGS": 0.288,
+    "NO_WHITE_KING": 0.337,
+    "TOO_MANY_BLACK_PIECES": 0.07,
+    "NO_BLACK_KING": 0.357,
+    "OPPOSITE_CHECK": 0.055,
+    "TOO_MANY_BLACK_PAWNS": 0.117
+   },
+   "examples": {
+    "real": [
+     "4kb2/pp2bp2/pp2pn2/3p4/P1PQ3B/1BR5/2P2RPP/6KR",
+     "r3r1k1/p2r1p2/8/1N1p3p/1n1P4/P3B3/PP6/R3K3",
+     "r5k1/4q1p1/2p5/4b1K1/3P4/P7/1P6/2BQ4",
+     "r1kr1rr1/p1q2pp1/p4n1p/3p4/1P2P1Pp/4r3/PP1NNPP1/RRQQR2K"
+    ],
+    "legal": [
+     "r1r1B2k/4bp2/pnp2n1r/3N1P2/p3N3/2N1PN2/PPr2P1P/4NRK1",
+     "4kr1r/pp6/4pnpr/2pp4/4PB2/K1N1nP1P/3bB1PP/R4B2",
+     "2r5/k2n3b/1q3nq1/2ppp3/3P1B1P/3nP1P1/6PP/1N4K1"
+    ],
+    "non": [
+     "4r1k1/1p4pp/4kn1p/1pP1PP2/4P3/B2KKNP1/PBPNPP1P/3R1RK1",
+     "r2qk3/2R2p1p/4pnb1/2Kp4/2N2Bb1/3BPP1P/PP2NKPP/R1R5",
+     "2r2k2/1p1r2p1/3bpp2/pB1p4/4P3/1PP5/5PBP/3R4",
+     "rr1rr1k1/pp1n2pp/2n2n2/1B2p2p/2p1p2n/2N2P1P/P1r2PPP/2B2q2"
+    ]
+   }
+  },
+  "list counts=1": {
+   "real": 0.518,
+   "legal": 0.003,
+   "non": 0.478,
+   "illegal only by check (share of all boards)": 0.042,
+   "units kept (no draw fit)": 0.0,
+   "adjacent kings among illegal": 0.003,
+   "illegal_causes_of_all_boards": {
+    "NO_WHITE_KING": 0.25,
+    "OPPOSITE_CHECK": 0.063,
+    "NO_BLACK_KING": 0.243
+   },
+   "examples": {
+    "real": [
+     "8/1p4p1/3p2k1/8/5K2/5nP1/P6P/3Q1R2",
+     "6k1/1p6/2p3p1/8/8/5N2/8/6K1",
+     "r1rq3k/p3bp1p/p1p3p1/2pP2P1/3b4/P4NPP/1P5P/RNR3K1",
+     "r1k2rn1/1p5p/2n1p3/2p3p1/2PbpP2/2B2N1K/P1P2PP1/1N6"
+    ],
+    "legal": [
+     "rnb1kr2/pp3pp1/Bnp2p2/2p5/P2P1P2/1P5P/4bP1P/RN1R1NK1",
+     "k4r1r/p1p5/3ppp2/2PpB1b1/P1P1P1p1/3p4/1P5P/R1QR2K1"
+    ],
+    "non": [
+     "5k2/p5pp/8/1p1ppb2/2P2P2/5N2/6PP/8",
+     "r1kq4/pp2bp2/2N4R/1p1p4/p1p1PnbP/r2B1P1P/P1P1QP1p/R7",
+     "3r1rn1/5ppp/2Rpk3/p2Pp3/p1Pb4/1P1PBPP1/6PP/8",
+     "r3r3/p4p1p/1pn5/1pP2p2/1P1P4/1P1B1NKP/1B5P/3Q4"
+    ]
+   }
+  }
+ },
+ "N4000": {
+  "learned": 4000,
+  "learn_s": 3345,
+  "chunk units": 22023,
+  "parsed chunks per position": 5.49,
+  "identity (real board, parse units unchanged)": {
+   "real": 0.953,
+   "legal": 0.047,
+   "non": 0.0,
+   "illegal only by check (share of all boards)": 0.0,
+   "units kept (no draw fit)": 0.0,
+   "adjacent kings among illegal": 0.0,
+   "illegal_causes_of_all_boards": {},
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B1P3/2P3P1/7P/PP6/1K5R",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "r3k1nr/pp2ppbp/2p1b3/3p2p1/1nPPP3/1P3N2/1P1N1PPP/R1BK1B1R",
+     "r3k1nr/pp2ppbp/2p1b3/3p2p1/1nPPP3/1P3N2/1P1N1PPP/R1BK1B1R",
+     "5r2/r2n3k/Pq4pp/Q1Npb3/1B2p3/3P2nP/4P1BK/R3R3",
+     "5r2/r2n3k/Pq4pp/Q1Npb3/1B2p3/3P2nP/4P1BK/R3R3"
+    ],
+    "non": []
+   }
+  },
+  "where-file kc=0": {
+   "real": 0.882,
+   "legal": 0.055,
+   "non": 0.063,
+   "illegal only by check (share of all boards)": 0.063,
+   "units kept (no draw fit)": 0.183,
+   "adjacent kings among illegal": 0.053,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.063
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B2P2/2P3P1/7P/1PP5/2K4R",
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B2P2/2P3P1/7P/1PP5/2K4R",
+     "1r1q1rk1/Qpp1n1pp/2pb4/p7/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/Qpp1n1pp/2pb4/p7/2N1P3/2P5/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "r3k2r/pp3ppp/4pq2/5pp1/8/PnbP2P1/1PPBP3/R2QK1R1",
+     "r3k2r/ppp2pp1/p4q2/1pp5/8/PnbP2P1/1PPBP3/R2QK1R1",
+     "r3k1nr/pp2ppbp/2p1b3/3p2p1/2PPP2n/1P3N2/1P1N1PPP/R1BK1B1R",
+     "r3k1nr/p1ppp1bp/3pb3/4p2p/n1PPP3/1P3N2/1P1N1PPP/R1BK1B1R"
+    ],
+    "non": [
+     "r3r1k1/ppp4p/3p4/p3P3/1PQ5/P4P2/PP3P2/6K1",
+     "7Q/6p1/4p1bp/3p4/3P2k1/6R1/5PP1/5qK1",
+     "r7/1rk1n3/P1q3pp/Q1Np1b2/B3p3/3P2nP/4P1BK/R3R3",
+     "2r1r1k1/p5pp/1pp5/3Q4/2P1RP2/P3PP2/3q2P1/2R3K1"
+    ]
+   }
+  },
+  "where-file kc=1": {
+   "real": 0.772,
+   "legal": 0.15,
+   "non": 0.078,
+   "illegal only by check (share of all boards)": 0.078,
+   "units kept (no draw fit)": 0.017,
+   "adjacent kings among illegal": 0.064,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.078
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B2P2/1P3P2/6P1/1PP5/2K3R1",
+     "2rq1rk1/1Qppn1pp/2pb4/1p6/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "2rq1rk1/1Qppn1pp/2pb4/1p6/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "3r1k2/pp1n2pp/2pPn1p1/6q1/3P1P2/1NPQ2P1/4R2P/3R2K1"
+    ],
+    "legal": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B4P/2P3P1/7P/3PP3/4K2R",
+     "r1k5/nppp3p/Pn1p2p1/3q4/3P3P/1N1QP1P1/4RP2/3RK3",
+     "8/8/1k6/pPp1p3/P1R5/2K1P3/8/5r2",
+     "r3k2r/pp3ppp/2p2q2/3pp3/8/P1bP1nP1/1PPBP3/R2QK1R1"
+    ],
+    "non": [
+     "4r2k/p4p1p/3bp1qp/8/3BP3/2NQ2P1/PP4KP/8",
+     "4r3/1r2n1k1/P1q3pp/Q1Np1b2/3Bp3/1nPP4/2K1P1B1/R3R3",
+     "r7/1rk1n3/P1q3pp/Q1Np1b2/1B2p3/3P2nP/4P1BK/R3R3",
+     "3b4/p3p3/p1np1kp1/1p2Pp2/5P2/PNB3K1/1PPP1P2/8"
+    ]
+   }
+  },
+  "where-file kc=2": {
+   "real": 0.742,
+   "legal": 0.18,
+   "non": 0.078,
+   "illegal only by check (share of all boards)": 0.078,
+   "units kept (no draw fit)": 0.012,
+   "adjacent kings among illegal": 0.064,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.078
+   },
+   "examples": {
+    "real": [
+     "2r4k/2pR1p1p/r1p2np1/p1B2P2/P3P3/5P2/1PP5/2K2R2",
+     "2rq1rk1/1Q1pnppp/2pb4/4p3/2N2P2/3P4/1PP2PPP/R1B2RK1",
+     "1qr2rk1/1Qnp1ppp/pb6/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "2r1k3/pp2np1p/2p1Pnp1/7q/2P2P2/1PN1Q1P1/5R1P/4R1K1"
+    ],
+    "legal": [
+     "2r4k/2pR1p1p/r1p2np1/p1B3P1/P3P3/5P2/2PP4/3K1R2",
+     "2r1k3/pp1n1p1p/2pPn1p1/6q1/1PP5/P2PN1Q1/4P2R/3K2R1",
+     "r3k2r/pp1p1pp1/1p3q2/2pp4/8/P1bP1nP1/1PPBP3/R2QK1R1",
+     "r3k1nr/ppp1p1bp/2p1b3/3p2p1/2PPP1n1/1P3N2/1P1N1PPP/R1BK1B1R"
+    ],
+    "non": [
+     "4Q3/6p1/3bp2p/3p4/k2P4/3R4/5PP1/2q3K1",
+     "1r1k4/brp3p1/pnpQq2p/2N4p/1P6/P1P1PP2/3P3K/R1B2R2",
+     "r7/1rk1n3/P1q1pp2/QpN2b2/1Bp5/3PnP2/4PKB1/R3R3",
+     "3b4/p4p2/1pn1pkp1/2p1Pp2/1P6/P1K2NB1/1P3PPP/8"
+    ]
+   }
+  },
+  "where-file kc=3": {
+   "real": 0.712,
+   "legal": 0.208,
+   "non": 0.08,
+   "illegal only by check (share of all boards)": 0.08,
+   "units kept (no draw fit)": 0.007,
+   "adjacent kings among illegal": 0.042,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.08
+   },
+   "examples": {
+    "real": [
+     "1r4k1/3R1ppp/4nrpp/2B1Pp2/1P3P2/6P1/PP6/1K4R1",
+     "3r1k2/pppn2p1/1ppPn3/6q1/1P3P2/P2N1QP1/6RP/5RK1",
+     "3r1k2/pppn2p1/1ppPn3/6q1/1P3P2/P2N1QP1/6RP/5RK1",
+     "r1k1r3/pp1pp3/5p2/2p1P3/1P2Q3/P4P2/PP3P2/6K1"
+    ],
+    "legal": [
+     "2r4k/2pR1p1p/r1p2np1/p1B3P1/1P3P2/6P1/2PP4/3K2R1",
+     "1r2rkq1/Q1pp1ppn/5pb1/2p5/2N4P/5P2/3PPPPP/R1B2RK1",
+     "2rq1rk1/1Q1pnppp/2pb4/4p3/2N2P2/3P4/1PPPPP2/R1B1KR2",
+     "rk2r3/pppp1p2/p1q5/1pp5/8/PnbP2P1/1PPBP3/R2QK1R1"
+    ],
+    "non": [
+     "rk6/pp1p1q2/2n1p3/1p4N1/p4Qp1/2P4P/PP1RP1PK/8",
+     "r7/1rk1n3/P1q3pp/Q1Np1b2/4p2B/1nPP4/2K1P1B1/R3R3",
+     "2r1r1k1/p5pp/1pp5/3Q4/1PP1R3/P3P2P/5qP1/2R3K1",
+     "r1r1k3/p5pp/pp6/1Q6/P1R4P/P3PP2/3q2P1/R5K1"
+    ]
+   }
+  },
+  "where-file kc=4": {
+   "real": 0.667,
+   "legal": 0.233,
+   "non": 0.1,
+   "illegal only by check (share of all boards)": 0.1,
+   "units kept (no draw fit)": 0.007,
+   "adjacent kings among illegal": 0.05,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.1
+   },
+   "examples": {
+    "real": [
+     "2r4k/2pR1p1p/r1p2np1/p1B1P3/P3P3/5P2/PP6/1K3R2",
+     "1r4k1/3R1ppp/4nrpp/2B2p1P/P3P3/5P2/3PP3/4KR2",
+     "2rq1rk1/1Q1pnppp/2pb4/4p3/2N4P/5P2/3PPPPP/R1B2RK1",
+     "1r1q1rk1/Qpp1n1pp/2pb4/p7/2N3P1/4P3/2PP1PPP/R1B2RK1"
+    ],
+    "legal": [
+     "2r1k3/ppp1np2/1pp1Pn2/7q/1PP5/P1NPQ3/4PR2/3KR3",
+     "1r1k4/pppnp3/1ppPn3/6q1/2P1P3/1PN1QP2/5RP1/4RK2",
+     "r3k2r/pp1p1pp1/1p3q2/2pp4/8/Pnb1P2P/1PP1BP2/1R2QK1R",
+     "r1k2r2/pp2ppp1/1p1q4/2pp4/8/Pnb2PP1/1PP1PB2/2R1KQR1"
+    ],
+    "non": [
+     "3q4/2pk4/1p1Rn3/1Np5/2p5/3P4/2P1P1Q1/4K3",
+     "3r1k2/b1pr2p1/pQpnq2p/N1p5/2P5/1PPP2P1/1P5K/R1B2R2",
+     "r1r1k3/p5pp/pp6/1Q6/PPR5/P2PP3/1q4P1/R5K1",
+     "3b4/p3p3/p1np1kp1/1p2Pp2/P7/PK3NB1/1P3PPP/8"
+    ]
+   }
+  },
+  "where-file kc=6": {
+   "real": 0.695,
+   "legal": 0.222,
+   "non": 0.083,
+   "illegal only by check (share of all boards)": 0.083,
+   "units kept (no draw fit)": 0.008,
+   "adjacent kings among illegal": 0.08,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.083,
+    "IMPOSSIBLE_CHECK": 0.002
+   },
+   "examples": {
+    "real": [
+     "3qrrk1/1p1Qnppp/2pb4/p7/2N3P1/4P3/2PP1PPP/R1B2RK1",
+     "3qrrk1/1p1Qnppp/2pb4/p7/2N1P3/2P5/PP1PPP2/R1B1KR2",
+     "r3rk2/ppp3p1/3p4/p3P3/1PQ5/P4P2/PP3P2/6K1",
+     "r3rk2/pp2p1p1/5p2/2p3P1/3PQ3/2P4P/PP3P2/6K1"
+    ],
+    "legal": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B3P1/2P3P1/7P/2PP4/3K3R",
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B4P/1P3P2/6P1/3PP3/4K1R1",
+     "r1k5/nppp1p2/Pn1pp3/3q4/2P2P2/1P1N1QP1/6RP/5RK1",
+     "3r1k2/2pnppp1/1p1Pn1p1/6q1/1PP5/P2PN1Q1/4P2R/3K2R1"
+    ],
+    "non": [
+     "r7/2kr2n1/P3q1pp/Q1Np3b/B3p3/nP1P4/1K2P1B1/R3R3",
+     "r4k1r/pp3ppp/1b6/5qp1/1BnNbp2/3PPP1P/PP4P1/R1BQ1RK1",
+     "4b3/1p3p2/1p1npkp1/2p1Pp2/3P4/P3KNB1/1P3PPP/8",
+     "8/2Q1p3/rPpp4/p1k5/3P4/4P3/2PPK3/8"
+    ]
+   }
+  },
+  "where-file kc=99": {
+   "real": 0.68,
+   "legal": 0.233,
+   "non": 0.087,
+   "illegal only by check (share of all boards)": 0.087,
+   "units kept (no draw fit)": 0.005,
+   "adjacent kings among illegal": 0.058,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.087
+   },
+   "examples": {
+    "real": [
+     "1r4k1/3R1ppp/4nrpp/2B2pP1/P3P3/5P2/2PP4/3K1R2",
+     "1r4k1/3R1ppp/4nrpp/2B2p1P/1P3P2/6P1/3PP3/4K1R1",
+     "1r1qrk2/Q1ppnpp1/2pb4/2p5/4N1P1/4P3/2PP1PPP/2R1B1KR",
+     "1r1qrk2/Q1ppnpp1/2pb4/2p5/2N1P3/2P5/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "1r1k4/pppnp3/1ppPn3/6q1/4PP2/2NPQ1P1/5R1P/4R1K1",
+     "r1k2r2/ppp1pp2/3q1p2/6pp/8/1P1bn1PP/2PP1PB1/3R1KQR",
+     "r3k1nr/ppp1p1bp/2p1b3/3p2p1/2PPPn2/1P3N2/1P1N1PPP/R1BK1B1R",
+     "r3k1nr/ppp1p1bp/3pb3/4p2p/2PPP1n1/1P3N2/1P1N1PPP/R1BK1B1R"
+    ],
+    "non": [
+     "5q2/4pk2/p1R3n1/N3p3/1p6/2P5/1P1P1Q2/3K4",
+     "6q1/1p4k1/1pR4n/N4p2/2p5/2P5/2PP2Q1/3K4",
+     "5rk1/2ppp2q/4np2/2p4N/1pp3Q1/2P4P/PP2RPPK/8",
+     "2rr2qn/2kpp1pp/p3Np1p/1n3P1N/4PQ2/P7/1P3PPP/R4RK1"
+    ]
+   }
+  },
+  "where-rank kc=0": {
+   "real": 0.818,
+   "legal": 0.047,
+   "non": 0.135,
+   "illegal only by check (share of all boards)": 0.033,
+   "units kept (no draw fit)": 0.093,
+   "adjacent kings among illegal": 0.037,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.102,
+    "OPPOSITE_CHECK": 0.043
+   },
+   "examples": {
+    "real": [
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "3r1k2/pp2n1pp/2p1Pnp1/1P5q/P4P2/2N1Q1P1/5R1P/4R1K1",
+     "3r1k2/pp2n1pp/2p1Pnp1/7q/5P2/1PN1Q1P1/P4R1P/4R1K1"
+    ],
+    "legal": [
+     "1r4k1/2p3p1/r1p1n3/p3P3/2P3P1/3R1p1P/PP4p1/1KB4R",
+     "1r4k1/2p3p1/r1p1n3/p3P3/2P3P1/3R1p1P/PP4p1/1KB4R",
+     "r3k1nr/pp2p1bp/2p1b3/1n1p1pp1/2PPP3/1P3N2/1P1N1PPP/R1BK1B1R",
+     "r3k1nr/pp2ppbp/2p1b3/1n1p2p1/2PPP3/1P3N2/1P1N1PPP/R1BK1B1R"
+    ],
+    "non": [
+     "R4rpk/7p/3r4/P1pp4/1P3P2/p1PP1R2/4n1PP/6K1",
+     "R4rpk/p6p/3r4/P1pp4/1P3P2/2PPnR1P/6P1/6K1",
+     "r3rpk1/pppn2p1/5q2/4N2p/P2P1P2/1Q4Pb/1P3P1P/2R1R1KB",
+     "r3rpk1/pppn2p1/5q2/4N2p/3P1P2/1Q4Pb/PP3P1P/2R1R1KB"
+    ]
+   }
+  },
+  "where-rank kc=1": {
+   "real": 0.542,
+   "legal": 0.082,
+   "non": 0.377,
+   "illegal only by check (share of all boards)": 0.095,
+   "units kept (no draw fit)": 0.01,
+   "adjacent kings among illegal": 0.009,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.282,
+    "OPPOSITE_CHECK": 0.128,
+    "IMPOSSIBLE_CHECK": 0.002
+   },
+   "examples": {
+    "real": [
+     "1r1q1rk1/Q1p1nppp/2pb4/4p3/2N1P3/2P2PPP/PP4K1/R1B2R2",
+     "3r1k2/4n1pp/pp2Pnp1/2p2P1q/1P4P1/P1N1Q2P/5RK1/4R3",
+     "5k2/5pp1/6p1/r2pr3/pp3QP1/3P4/PPP2P1P/6K1",
+     "r3rk2/pp3pp1/6p1/3p4/5QP1/3P4/PPP2P1P/6K1"
+    ],
+    "legal": [
+     "r3kn1r/pp3pp1/2p2q1P/3ppP2/5K1R/P1bP4/1PPB3p/R2Q4",
+     "r3k1nr/pp2ppbp/2p1b3/3p2p1/2PPP3/1P3N2/1P1N1PPP/RnBK1B1R",
+     "r3k1n1/pp5p/1np5/3p1pp1/2PPP2r/1P2pNb1/1P1NbPPP/R1BK1B1R",
+     "b3r1k1/5p2/r4pq1/pp1p4/N1P2P2/1nb4p/1P3PPP/R2QKB1R"
+    ],
+    "non": [
+     "1rp3k1/r1p3p1/p3n3/4P3/2PR1pP1/6pP/PPB5/1K5R",
+     "2p5/r1p5/pr4k1/4P1p1/2P1n1P1/3R1p1P/PP4p1/1KB4R",
+     "1r1q4/Q1p1np2/2pb4/4prk1/2N1P1pp/2P5/PP3PPP/R1B2RK1",
+     "3rnk2/pp2Pnpp/2p3pq/1P3P2/P5P1/2N1Q2P/5RK1/4R3"
+    ]
+   }
+  },
+  "where-rank kc=2": {
+   "real": 0.482,
+   "legal": 0.088,
+   "non": 0.43,
+   "illegal only by check (share of all boards)": 0.137,
+   "units kept (no draw fit)": 0.004,
+   "adjacent kings among illegal": 0.043,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.293,
+    "OPPOSITE_CHECK": 0.197,
+    "IMPOSSIBLE_CHECK": 0.005
+   },
+   "examples": {
+    "real": [
+     "1r1q1rk1/Q1p1nppp/2pbP3/2P1p3/PPN5/8/5PPP/R1B2RK1",
+     "3r1k2/pp2n1pp/2p1Pnp1/1P3P1q/P5P1/2N1Q2P/5RK1/4R3",
+     "5k2/5pp1/r3r1p1/pp1p4/5QP1/PP1P1P2/2P3KP/8",
+     "8/3k4/2p1p1p1/8/3P4/2PrR3/4K1P1/8"
+    ],
+    "legal": [
+     "1r4k1/2pRPpp1/r1p1n1p1/p1B5/PPP3P1/1K5P/8/7R",
+     "4kn1r/2p3p1/r2ppq2/pp3p2/P1b4p/1PPP3P/3B1P2/R2Q1K1R",
+     "r3r1k1/pp1p3p/N1P2pq1/b7/5P2/R2Q1p2/1P3PPP/1nb1KB1R",
+     "6k1/P5p1/r3r3/pp2N2p/3P1P2/1Q3pPb/1Ppn1P1P/2R1RqKB"
+    ],
+    "non": [
+     "1rp3k1/r1pR1pp1/p3n1p1/2B1P3/2P3P1/7P/PP6/1K5R",
+     "1r1q4/Q1p1np2/2pb4/4prk1/2N1P1pp/2P2PPP/PP4K1/R1B2R2",
+     "4n3/pp2Pn1p/2p2Ppq/3r1kP1/1P4pP/P1N1Q1K1/5R2/4R3",
+     "8/5p2/r3r1p1/pp1p1kP1/3P1Qp1/2P4P/PP3P2/6K1"
+    ]
+   }
+  },
+  "where-rank kc=3": {
+   "real": 0.437,
+   "legal": 0.142,
+   "non": 0.422,
+   "illegal only by check (share of all boards)": 0.13,
+   "units kept (no draw fit)": 0.005,
+   "adjacent kings among illegal": 0.051,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.292,
+    "OPPOSITE_CHECK": 0.19,
+    "IMPOSSIBLE_CHECK": 0.008,
+    "TOO_MANY_CHECKERS": 0.005
+   },
+   "examples": {
+    "real": [
+     "3q4/4n3/1rpb1rk1/Q1p2ppp/2N1P3/2P1pPPP/PP4K1/R1B2R2",
+     "3r1k2/pp2n1p1/2p1Pn1p/6pq/1P3P2/P1N1Q1P1/5R1P/4R1K1",
+     "5k2/5pp1/6p1/r2pr3/pp3QP1/3P4/PPP2P1P/6K1",
+     "r3r3/pp3k2/6p1/6P1/3P1p2/2P3pP/PP1p1P2/5QK1"
+    ],
+    "legal": [
+     "8/2pR1p2/r1p3p1/p1B1P3/2P3P1/1r4kP/PP4p1/1K2n2R",
+     "5rk1/1r1q1ppp/Q1p1nPPP/2pbp1K1/2N1P3/2P5/PP6/R1B2R2",
+     "4k2r/2p3p1/r2ppq2/pp3p1p/8/P1bP1n1P/1PPB1P2/R2Q1K1R",
+     "8/r3r1k1/pp1p3p/5pq1/N1P2P2/5p2/bP3PPP/RnbQKB1R"
+    ],
+    "non": [
+     "1r4k1/3RPpp1/4n1p1/2B5/PPP3P1/1Kp4P/r1p5/p6R",
+     "4n3/4Pn1p/pp3Ppq/1Pp3P1/P6P/2NrQkK1/5Rp1/4R3",
+     "1n3p2/1p5p/r1p1k1n1/p2p2p1/2PPP2r/1P2pNb1/1P1NbPPP/R1BK1B1R",
+     "rn2kpnr/pp2p1bp/2p1b3/3p2p1/2PPPN2/1P4PP/1P1N1P1R/R1BK1B2"
+    ]
+   }
+  },
+  "where-rank kc=4": {
+   "real": 0.322,
+   "legal": 0.112,
+   "non": 0.567,
+   "illegal only by check (share of all boards)": 0.145,
+   "units kept (no draw fit)": 0.003,
+   "adjacent kings among illegal": 0.068,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.422,
+    "OPPOSITE_CHECK": 0.255,
+    "IMPOSSIBLE_CHECK": 0.003
+   },
+   "examples": {
+    "real": [
+     "8/3k4/2prp1p1/3P4/2P1R3/4K1P1/8/8",
+     "4r1k1/r4p2/pp1p1pq1/1nb5/N1P2P2/b6p/1P3PPP/R2QKB1R",
+     "8/2R2p2/4pk1p/p5p1/1p2n3/1P6/PK1rBP1P/8",
+     "r2r4/4Ppkp/p3q1p1/1p3p1P/2n2PP1/2N3K1/2Q5/RR6"
+    ],
+    "legal": [
+     "8/2pR1p2/r1p3p1/p1B1P3/2P3P1/1r4kP/PP4p1/1K2n2R",
+     "8/6P1/3k4/2p1p1p1/3P4/2P1R3/3rK3/8",
+     "4kn1r/2p3pp/r2ppq2/pp3p2/3P4/P1bB3P/RPPQ1P2/5K1R",
+     "rn2k1nr/pp2p1bp/2p1bp2/3p2p1/2PPPN2/1P4PP/1P1N1P1R/R1BK1B2"
+    ],
+    "non": [
+     "1rp1P1k1/r1p3p1/p3n3/PP6/1KP3P1/3R1p1P/6p1/2B4R",
+     "3q1p2/4n3/1rpbprk1/Q1p3pp/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "3q1p2/4n3/1rpbp3/Q1p5/2N1Prk1/2P3pp/PP3PPP/R1B2RK1",
+     "4n3/4Pn1p/ppNrQkpq/2p2Rp1/4RP2/1P4P1/P6P/6K1"
+    ]
+   }
+  },
+  "where-rank kc=6": {
+   "real": 0.218,
+   "legal": 0.123,
+   "non": 0.658,
+   "illegal only by check (share of all boards)": 0.135,
+   "units kept (no draw fit)": 0.005,
+   "adjacent kings among illegal": 0.068,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.523,
+    "OPPOSITE_CHECK": 0.3,
+    "IMPOSSIBLE_CHECK": 0.008,
+    "TOO_MANY_CHECKERS": 0.002
+   },
+   "examples": {
+    "real": [
+     "5rk1/1r1q1ppp/Q1p1n3/2pbp3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "8/5pkp/8/r2rP3/p5p1/1pN1qp1P/2Q2PP1/RRn3K1",
+     "r2r4/5pkp/4q3/p5p1/1pn1Pp2/2N4P/2Q2PP1/RR4K1",
+     "r2q1rk1/1ppb2bp/3p2p1/2nPpp1n/1pP1P3/P1N2P2/2QNB1PP/1RB2RK1"
+    ],
+    "legal": [
+     "1r4k1/2p3p1/r1p1n3/p3P3/2P3P1/3R1p1P/PP4p1/1KB4R",
+     "1nb5/4r1k1/r7/pp1p1pqp/N1P2P2/5p2/bP3PPP/R2QKB1R",
+     "r3r1k1/pp1p4/1nb2pq1/b4p2/N1P2PPP/5B1R/1P3P1p/R2QK3",
+     "8/1p6/p7/2kp2P1/6nR/4r3/1P3Np1/2K5"
+    ],
+    "non": [
+     "1rp3k1/r1p3p1/p3n3/4P3/2P3P1/3R1p1P/PP4p1/1KB4R",
+     "3q4/4n3/2pbPrk1/2P3pp/PPN5/1r3p2/Q1p2PPP/R1B1pRK1",
+     "8/pp2n2p/2p1Pnp1/7q/5P2/1PNrQkP1/P4RpP/4R1K1",
+     "3rnk2/4Pnp1/7q/1P6/P4P2/2N1Q1Pp/pp3RpP/2p1R1K1"
+    ]
+   }
+  },
+  "where-rank kc=99": {
+   "real": 0.203,
+   "legal": 0.145,
+   "non": 0.652,
+   "illegal only by check (share of all boards)": 0.127,
+   "units kept (no draw fit)": 0.004,
+   "adjacent kings among illegal": 0.107,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.525,
+    "OPPOSITE_CHECK": 0.308,
+    "IMPOSSIBLE_CHECK": 0.018,
+    "TOO_MANY_CHECKERS": 0.002
+   },
+   "examples": {
+    "real": [
+     "3r4/3k4/2p1p1p1/8/8/3P4/2P1R1P1/4K3",
+     "5r1k/R5p1/3r3p/P1p5/1P1pnP1P/2PP1R2/p5P1/6K1",
+     "r3k2r/pp2qppp/3pbn2/4p3/3pP2P/3P4/PPP2PP1/R1BQBRK1",
+     "r3r1k1/pp3pp1/2pnN3/5q1p/1Q1P1P2/6Pb/PPR1RP1P/6KB"
+    ],
+    "legal": [
+     "1r4k1/2p3p1/r1p1n3/p1P1P1P1/3R1p1P/6p1/PPB4R/1K6",
+     "1rN5/Q1p2p2/5rk1/R1B1pRpp/3qPPPP/2P1n1K1/PPpb4/8",
+     "r7/ppp1kp1r/3pp1pp/5q2/8/P1bP1n1P/1PPB1P2/R2Q1K1R",
+     "r3r1k1/pp3pp1/1PpnNP1P/5qKp/1Q1P1P2/6Pb/P1R1R3/7B"
+    ],
+    "non": [
+     "1rp3k1/r1p1P1p1/p3n3/8/PPP3P1/1K1R1p1P/6p1/2B4R",
+     "8/5p2/1r3PPP/Q1p1p1K1/2NqPrk1/2P1n1pp/PPpb4/R1B2R2",
+     "8/5P2/pp2n1P1/2p1Pn1P/2N1Q1Kq/5R1p/1P1rRkp1/P5p1",
+     "8/5P2/4n1Pp/4PnpP/6Kq/ppNrQk2/1Pp2Rp1/P3R3"
+    ]
+   }
+  },
+  "where-both kc=0": {
+   "real": 0.802,
+   "legal": 0.045,
+   "non": 0.153,
+   "illegal only by check (share of all boards)": 0.085,
+   "units kept (no draw fit)": 0.214,
+   "adjacent kings among illegal": 0.054,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.068,
+    "OPPOSITE_CHECK": 0.097
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B2P2/2P3P1/7P/1PP5/2K4R",
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B2P2/2P3P1/7P/1PP5/2K4R",
+     "3q1rk1/1p2n1pp/2pb4/p5r1/2N1PQ1p/2P5/PP3PPP/R1B2RK1",
+     "3q1rk1/1p2n1pp/2pb4/p5r1/2N1PQ1p/2P5/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "r3k2r/pp3pp1/n4q2/4p3/2p2pp1/P1bP2P1/1PPBP3/R2QK1R1",
+     "r3k2r/pp3pp1/p4q2/1ppn3p/8/P1bP2P1/1PPBP3/R2QK1R1",
+     "r3k1nr/ppp1p1bp/2p1b3/n2p2p1/2PPP3/1P3N2/1P1N1PPP/R1BK1B1R",
+     "rn2k1nr/p1p1p1bp/3pb3/4p2p/2PPP3/1P3N2/pP1N1PPP/R1BK1B1R"
+    ],
+    "non": [
+     "r1p1r1k1/pp1p3p/p7/2Q3P1/3P4/2P4P/PP3P2/6K1",
+     "r1p1r1k1/pp1p3p/p7/2Q3P1/3P4/2P4P/PP3P2/6K1",
+     "r3rpk1/pppn2p1/5q2/5N1p/3PPP2/2Q3Pb/1P3P1P/3R1RKB",
+     "r3rpk1/pppn2p1/5q2/4N2p/3P1P2/1Q4Pb/1P3PPP/2R1R1KB"
+    ]
+   }
+  },
+  "where-both kc=1": {
+   "real": 0.438,
+   "legal": 0.115,
+   "non": 0.447,
+   "illegal only by check (share of all boards)": 0.13,
+   "units kept (no draw fit)": 0.038,
+   "adjacent kings among illegal": 0.015,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.317,
+    "OPPOSITE_CHECK": 0.187,
+    "IMPOSSIBLE_CHECK": 0.005
+   },
+   "examples": {
+    "real": [
+     "2r4k/3R1p1p/5np1/2B1P3/1P2pP2/2r1p1P1/PPp5/1K4R1",
+     "7r/2k5/1p1p1p2/8/8/5P2/4PPR1/6K1",
+     "r1B1k3/ppppq3/p3bn2/1p6/r2pP3/p2P3P/PPP2PP1/R1BQ1RK1",
+     "3r2r1/8/p1pkp1pq/1p3p2/4Pn2/2N4P/2Q2PP1/RR4K1"
+    ],
+    "legal": [
+     "8/3qrk2/4npp1/2pb1pr1/2N1PQ1p/2P1pPPP/PP4K1/R1B2R2",
+     "2r1k3/5p2/1npp2p1/PPnPpp2/1PP1q3/1NPQ4/1K2R3/3R4",
+     "2nr1k2/2Pn1pp1/2pppq2/3Pp3/2P2P2/N1Q3P1/3R3P/2R3K1",
+     "7r/8/8/4k3/3p1p1p/4P3/3PPR2/5K2"
+    ],
+    "non": [
+     "2R1p3/2p2p2/rBp5/p4P2/2P3P1/r4k1P/1PP2p2/2Kn3R",
+     "3q4/4np2/2pbrk2/4ppp1/2N1P3/2P5/PPr2PPP/RQBp1RK1",
+     "r3r3/pp2p3/5p2/2p1Pk2/1P2Q1p1/P4P2/PP3P2/6K1",
+     "r2pr3/pp2p3/1p2kP2/2PQ1p2/1P4P1/8/PP3P2/6K1"
+    ]
+   }
+  },
+  "where-both kc=2": {
+   "real": 0.378,
+   "legal": 0.162,
+   "non": 0.46,
+   "illegal only by check (share of all boards)": 0.155,
+   "units kept (no draw fit)": 0.031,
+   "adjacent kings among illegal": 0.051,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.305,
+    "OPPOSITE_CHECK": 0.25,
+    "IMPOSSIBLE_CHECK": 0.002
+   },
+   "examples": {
+    "real": [
+     "3q1rk1/4n1pp/2pbp3/6r1/2NpPQ1p/2P5/PP3PPP/R1B2RK1",
+     "r3k2r/pp3pp1/3p1q2/3npp2/P1b1P3/1PP1B1pP/1R2QP2/5K1R",
+     "r3r1k1/pp1p4/2nb1pq1/8/N1P2P2/6bp/1Pp2PPP/R2QKB1R",
+     "r3k2r/pp2qppp/3pbn2/4p3/3pP3/3P3P/PPP2PP1/R1BQBRK1"
+    ],
+    "legal": [
+     "1r4k1/2pR1pp1/rPp1nPp1/p1B3PP/8/6R1/3PP3/4K3",
+     "2nr1k2/2Pn2pp/3P1qp1/1pp1P3/3pNPQ1/3PK2R/2P3R1/8",
+     "r1k5/n2p4/Pn3p2/pp1qpP2/2p3P1/1PN1Q2P/P4RK1/4R3",
+     "2r3r1/2ppp3/5p2/k1p5/1p2Q1P1/PP1P1P2/2P3KP/8"
+    ],
+    "non": [
+     "2r2p1k/3rRppp/3p1n1p/1P1B1PP1/6P1/8/2PP2R1/3K4",
+     "3q4/4n3/2pb2p1/5rk1/2N1Pppp/2P5/PPr2PPP/RQBp1RK1",
+     "4p3/5p2/r1p1r3/ppk1Q3/3p2P1/3P4/PPP2P1P/6K1",
+     "8/2k5/1p1p1p2/8/8/1P6/P1Rr4/2K2P2"
+    ]
+   }
+  },
+  "where-both kc=3": {
+   "real": 0.262,
+   "legal": 0.19,
+   "non": 0.548,
+   "illegal only by check (share of all boards)": 0.158,
+   "units kept (no draw fit)": 0.033,
+   "adjacent kings among illegal": 0.07,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.39,
+    "OPPOSITE_CHECK": 0.265,
+    "IMPOSSIBLE_CHECK": 0.013,
+    "TOO_MANY_CHECKERS": 0.012
+   },
+   "examples": {
+    "real": [
+     "8/1k6/pPp1p3/P1R2P2/2K5/r7/8/8",
+     "8/3k3r/2p1pPp1/8/6P1/5P1R/7K/8",
+     "4r3/3p2pn/2p3P1/N3kp1R/8/1P6/2K5/8",
+     "r2q1rk1/pp1b2b1/2p4p/1Pnp2p1/1N1P1p1n/1pNBPP2/PQ4PP/RB2R1K1"
+    ],
+    "legal": [
+     "1r4k1/6p1/1R1pn3/4p2P/B1Pp2P1/1r1p3P/1p1PP3/4K2R",
+     "1r6/Q1pqrk2/2p1npp1/2pb4/1pN3P1/4P3/2PP1PPP/R1B2RK1",
+     "1r1q1rk1/Qpp1n1pp/2pbPPP1/p4K2/3NP3/2P5/PP6/1R1B2R1",
+     "8/2r1kppp/1n3ppp/1Pn5/2P1q2P/2NPQ1P1/4PR2/3KR3"
+    ],
+    "non": [
+     "1r4k1/6p1/3Rnp2/6pP/P1B1P3/2p2P2/r1pPP3/p3KR2",
+     "3p4/1PP1p1P1/1p2k2K/3Q1pP1/3P4/2P4P/2r3r1/2pp4",
+     "7r/1p2p1bp/2p1b3/p2p2p1/2PPP3/rPn1kNn1/pP1N1PPP/R1BK1B1R",
+     "r1p1k1n1/p2p3p/n2rp2p/p1bP4/b1PPP3/5NPp/1P1NK1PP/R1B2B1R"
+    ]
+   }
+  },
+  "where-both kc=4": {
+   "real": 0.17,
+   "legal": 0.157,
+   "non": 0.673,
+   "illegal only by check (share of all boards)": 0.14,
+   "units kept (no draw fit)": 0.041,
+   "adjacent kings among illegal": 0.077,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.533,
+    "OPPOSITE_CHECK": 0.332,
+    "IMPOSSIBLE_CHECK": 0.025,
+    "TOO_MANY_CHECKERS": 0.022
+   },
+   "examples": {
+    "real": [
+     "2r4k/3R1p1p/5np1/2B1P3/1P2pP2/2r1p1P1/PPp5/1K4R1",
+     "8/8/8/2k5/1p1pPp2/3P1R2/1rP2K2/8",
+     "8/4k1r1/3p1p1p/8/8/3PP3/2P1R3/4K3",
+     "rk1q4/2nbbpp1/2nrp2p/3ppp2/3PP2B/1NN5/PPB2PPP/R2QK2R"
+    ],
+    "legal": [
+     "8/7p/2pp2p1/1r1kp3/4pP2/1P1NnQP1/P3PnRP/5RKq",
+     "4k2r/2n3p1/2p2q2/r2pp3/pp1Ppp2/P1bB2P1/RPPQP3/4K1R1",
+     "5b2/2rrkp2/2ppp1pP/3pq3/N1PP3P/6K1/nb1PP3/R1BQR3",
+     "3n4/3p4/2p3P1/1r2kp1R/3p4/1P6/2K1N3/8"
+    ],
+    "non": [
+     "1r4kP/3R1pp1/4n1p1/2BPP3/1P2KP2/5pP1/3r1p2/3p2R1",
+     "3qrk2/3Nnpp1/2pbr3/3Q1p2/1R1B1PR1/3Pp3/1PP2PPP/3p2K1",
+     "3q3p/4n3/rkpbr1p1/1ppQ1p2/2N1P3/2P5/PP1PPP2/R1B1KR2",
+     "1rnk4/2Pnppp1/3p1q1p/2pP4/2P2P2/1N1Q2P1/4R2P/3R2K1"
+    ]
+   }
+  },
+  "where-both kc=6": {
+   "real": 0.09,
+   "legal": 0.178,
+   "non": 0.732,
+   "illegal only by check (share of all boards)": 0.115,
+   "units kept (no draw fit)": 0.05,
+   "adjacent kings among illegal": 0.073,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.617,
+    "OPPOSITE_CHECK": 0.332,
+    "IMPOSSIBLE_CHECK": 0.018,
+    "TOO_MANY_CHECKERS": 0.008
+   },
+   "examples": {
+    "real": [
+     "8/1p1rn3/p4p2/2kp2P1/7R/8/1P5N/2K5",
+     "r2q1rkB/ppp1bpp1/2npbn1p/3N4/1P2PP2/1P1BPR2/P1Q1P3/R2K4",
+     "5bk1/3Q4/1p5p/p2R4/5PPP/1N4K1/q1b5/8",
+     "2b3bk/8/3Q4/1p2R2p/p7/2N5/1q3PPP/6K1"
+    ],
+    "legal": [
+     "5rk1/3r2pp/1qQ1p3/2n1p3/pbN1P3/2Pp4/PP1PPP2/R1B1KR2",
+     "1k6/p1p1p3/8/8/2P5/1P1R4/3KP3/r7",
+     "2n3r1/pp1p1b1p/1rpb1k1n/1p1pN1p1/2PPPPP1/1P4R1/1P1N1P2/R1BK1B2",
+     "3r4/nb1pp1p1/8/2r1k1P1/N1Pp4/b1Ppq1Pp/3PPK2/R1BQR3"
+    ],
+    "non": [
+     "1r4k1/6p1/4n3/6P1/PR1pP3/4pPp1/B1PPr1p1/3KpR2",
+     "4R1p1/6pp/3Br1p1/4pP2/2P3P1/1r4kP/1PP3p1/2K1n2R",
+     "5rk1/1r2q1pp/Q1p2n2/3pb3/2N1P3/2P1p3/PP3PPP/R1Bp1RK1",
+     "2n1r1k1/2Pn3p/3P1q1p/1PP3p1/2P1N1Q1/3P3R/ppK3R1/2p5"
+    ]
+   }
+  },
+  "where-both kc=99": {
+   "real": 0.088,
+   "legal": 0.133,
+   "non": 0.778,
+   "illegal only by check (share of all boards)": 0.107,
+   "units kept (no draw fit)": 0.068,
+   "adjacent kings among illegal": 0.088,
+   "illegal_causes_of_all_boards": {
+    "IMPOSSIBLE_CHECK": 0.015,
+    "PAWNS_ON_BACKRANK": 0.672,
+    "OPPOSITE_CHECK": 0.387,
+    "TOO_MANY_CHECKERS": 0.013
+   },
+   "examples": {
+    "real": [
+     "8/8/3k3r/2p1p1p1/5P1P/4P1R1/6K1/8",
+     "4k3/2rp1p1p/8/1P6/P1R5/2K5/2P5/8",
+     "B7/2rk1pp1/2rp1q1p/1bppp1b1/2P1n2n/2PB1N2/PPQ2PPP/R3K2R",
+     "3r1rk1/5pp1/1pP4p/1P1n4/P2Np1pq/PQ6/5P1B/2K3R1"
+    ],
+    "legal": [
+     "1r4k1/P3P1p1/3pnP2/1r1p1P2/1p3R2/4R1p1/1PP4p/2KB4",
+     "3r3r/1k1pp3/2p5/8/3p2P1/PP1PpP2/1pP3KP/3Q4",
+     "r7/pp3p2/1p2k2r/2pp2p1/pP1b1qP1/n1PP2BP/3R1PQ1/5K1R",
+     "4N3/4Q3/1rRRr2P/pkp5/p4qp1/1p3p1P/3n1PP1/6K1"
+    ],
+    "non": [
+     "7P/2p5/r1p5/pP1PPP2/r3KkP1/1R1p1p2/3np1R1/B7",
+     "3rk3/4pp2/1PPPp3/2K2qr1/2Np1Qnp/4pb1P/5P2/R1BPPR2",
+     "3q4/PPP1n3/1KpbP3/2P1p3/PPNr4/2Qpp3/2rk4/R1BppR2",
+     "8/2n2pp1/2Pn3p/3pPq2/P1pPr1k1/1P2N1Qp/2P4R/1K4R1"
+    ]
+   }
+  },
+  "where-file+what kc=0": {
+   "real": 0.762,
+   "legal": 0.03,
+   "non": 0.208,
+   "illegal only by check (share of all boards)": 0.065,
+   "units kept (no draw fit)": 0.189,
+   "adjacent kings among illegal": 0.04,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.08,
+    "TOO_MANY_BLACK_PIECES": 0.008,
+    "TOO_MANY_KINGS": 0.03,
+    "NO_WHITE_KING": 0.025,
+    "PAWNS_ON_BACKRANK": 0.038,
+    "NO_BLACK_KING": 0.052,
+    "IMPOSSIBLE_CHECK": 0.005,
+    "TOO_MANY_BLACK_PAWNS": 0.003
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B2P2/8/4P2P/1PP3P1/2K4R",
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B2P2/8/4P2P/1PP3P1/2K4R",
+     "1rbq1rk1/Q1pn1ppp/5p2/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1r1q1rk1/Q1ppn1pp/2pb4/2p5/2N1P3/2P5/PP3PPP/R1B2RK1"
+    ],
+    "legal": [
+     "r3k2r/p1p1ppbp/3pb3/4p3/n1PPP3/1P3N2/1P1N1PPP/R1BK1B1R",
+     "r3k2r/p2pppbp/4b1p1/7p/2PPP2n/1P3N2/1P1N1PPP/R1BK1B1R",
+     "rn1br1k1/pppp4/5pq1/6p1/N1P2P2/b7/1P3PPP/R2QKB1R",
+     "4r3/1r4k1/P1qb2pp/Q1Np1n2/1B2pP2/3P2nP/4P1BK/R3R3"
+    ],
+    "non": [
+     "3r1r2/5pkp/1p2q2p/2p3p1/6n1/2Q1PN1P/5PP1/3RR1K1",
+     "3r1r2/5pkp/1p2q2p/2p3p1/6n1/P1Q2N1P/5PP1/3RR1K1",
+     "r3r1k1/pp4pp/3n1qp1/5p2/3P1P2/1Q2N1Pb/1P2PP1P/2R1R1KB",
+     "r2q1rk1/1ppb2bp/3p2p1/2nPpp1n/1p2P1B1/Pb1P1P2/4QNPP/3R1BKR"
+    ]
+   }
+  },
+  "where-file+what kc=1": {
+   "real": 0.182,
+   "legal": 0.058,
+   "non": 0.76,
+   "illegal only by check (share of all boards)": 0.06,
+   "units kept (no draw fit)": 0.017,
+   "adjacent kings among illegal": 0.086,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.292,
+    "OPPOSITE_CHECK": 0.125,
+    "NO_BLACK_KING": 0.238,
+    "NO_WHITE_KING": 0.16,
+    "TOO_MANY_BLACK_PAWNS": 0.04,
+    "TOO_MANY_KINGS": 0.227,
+    "TOO_MANY_WHITE_PIECES": 0.007,
+    "TOO_MANY_WHITE_PAWNS": 0.022,
+    "TOO_MANY_BLACK_PIECES": 0.01,
+    "IMPOSSIBLE_CHECK": 0.003,
+    "TOO_MANY_CHECKERS": 0.003
+   },
+   "examples": {
+    "real": [
+     "1rq2rk1/Q1pb2pp/5nn1/p4p2/3P4/3P1P2/1P2PPP1/R1BQ1RK1",
+     "1rrq1k2/Q1ppnpp1/2pb4/2p5/4P3/2PBP1P1/PP5P/R2QR1K1",
+     "r4rk1/p3b1pp/3p4/2p5/1P2p3/P1P5/PPP5/2K5",
+     "8/2Q3rk/6p1/6p1/4P3/5PKP/8/4r3"
+    ],
+    "legal": [
+     "8/2prr1kr/1nqp1p1p/N2bp1p1/1P2B3/P1NPP3/N1B2PP1/RQ1R2K1",
+     "8/p1p5/1p6/1k2r2p/8/P2PB3/rPPqB3/RbK5",
+     "3r3r/3q2k1/3bp2q/1pn2b2/p2p1PP1/4P3/2BP3P/BR1R2K1",
+     "2r1r3/3bkq2/P2p4/1pN2p2/2p2P1P/3PPP2/4PK2/R1BQ1R2"
+    ],
+    "non": [
+     "1rr2k2/6Q1/r2b4/p2p2p1/1P6/6P1/2P2PP1/P1K1R3",
+     "4rqr1/1b6/rp1qbp2/ppKp4/1P6/8/P2Pn3/2P3P1",
+     "p2k2p1/1p1pNr1p/2pqppp1/5n2/2P5/1PQ1PP2/6P1/RN1R3P",
+     "1rpk2p1/p1pp2rp/1p2n1pb/2q5/1P6/P7/2Pn4/1PR1BQ1R"
+    ]
+   }
+  },
+  "where-file+what kc=2": {
+   "real": 0.025,
+   "legal": 0.033,
+   "non": 0.942,
+   "illegal only by check (share of all boards)": 0.008,
+   "units kept (no draw fit)": 0.019,
+   "adjacent kings among illegal": 0.041,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.603,
+    "NO_WHITE_KING": 0.52,
+    "TOO_MANY_BLACK_PAWNS": 0.058,
+    "NO_BLACK_KING": 0.397,
+    "TOO_MANY_WHITE_PAWNS": 0.073,
+    "OPPOSITE_CHECK": 0.087,
+    "TOO_MANY_KINGS": 0.115,
+    "IMPOSSIBLE_CHECK": 0.002,
+    "TOO_MANY_CHECKERS": 0.002,
+    "TOO_MANY_BLACK_PIECES": 0.017,
+    "TOO_MANY_WHITE_PIECES": 0.007
+   },
+   "examples": {
+    "real": [
+     "3rk2r/2pbppbp/p3b1p1/1p6/8/1PNPR3/PP1r1B2/4r1K1",
+     "8/5k2/2p2pp1/3p2p1/2PNnpb1/6PP/5P1P/RNB1Q1K1",
+     "r1bq1r1k/1p2bppp/2p1pn2/3P1B2/4NN2/1P1N2Pn/PPP1K3/3B1N2",
+     "3rr2k/2bn1ppp/2p3p1/3q4/p7/8/P3PP1P/R1BQ1RK1"
+    ],
+    "legal": [
+     "2nb3b/3bp1nk/p1p1pn2/1p6/8/1PpP1P2/P2PPP2/2K1RR2",
+     "3rb1nr/5nbp/5k2/4b3/2p5/P1nQB3/5K2/R1BQR2R",
+     "4rk2/pp3p2/2p1b3/1p3P2/P5B1/1P5P/2P1n3/K1R3R1",
+     "r3b1k1/1nrq1pp1/1P1p2b1/B1p1Bn1p/2N2Pr1/N7/2Q1PPP1/R4K2"
+    ],
+    "non": [
+     "8/2nbkbk1/1r2n3/b1P2n1p/1Q6/1B6/7P/R5P1",
+     "2k5/4q2b/R2p1R2/1N3p2/3Pq3/4P3/6P1/PP3P2",
+     "p4rk1/Q1p3pp/5bq1/3p4/2N5/P2P1P2/1PPP3B/N1Q3P1",
+     "1p6/1Q1pqrk1/1p1n1b2/1p6/5P1P/6P1/1B2PP2/R2Q1RP1"
+    ]
+   }
+  },
+  "where-file+what kc=3": {
+   "real": 0.013,
+   "legal": 0.02,
+   "non": 0.967,
+   "illegal only by check (share of all boards)": 0.005,
+   "units kept (no draw fit)": 0.018,
+   "adjacent kings among illegal": 0.05,
+   "illegal_causes_of_all_boards": {
+    "NO_BLACK_KING": 0.42,
+    "PAWNS_ON_BACKRANK": 0.672,
+    "NO_WHITE_KING": 0.53,
+    "TOO_MANY_KINGS": 0.135,
+    "OPPOSITE_CHECK": 0.128,
+    "TOO_MANY_WHITE_PAWNS": 0.088,
+    "TOO_MANY_BLACK_PAWNS": 0.125,
+    "TOO_MANY_BLACK_PIECES": 0.035,
+    "TOO_MANY_WHITE_PIECES": 0.02,
+    "IMPOSSIBLE_CHECK": 0.003,
+    "TOO_MANY_CHECKERS": 0.003
+   },
+   "examples": {
+    "real": [
+     "8/1r2qprk/3rp1p1/3pp1p1/5P1n/2PP4/1P2r1PP/2K3R1",
+     "3r4/5qb1/rp2k2r/p1p1p3/5PP1/pP2bN1P/Pr6/2R3K1",
+     "4qb2/2q1rk2/4p1n1/8/2p5/4PPP1/5K2/8",
+     "8/4r1k1/2pp1p2/1p2pn2/PR3K2/P2P4/1PPn4/8"
+    ],
+    "legal": [
+     "3BN3/P2B1Pqn/7P/4P3/2P2K2/PP6/8/2rk4",
+     "4R3/8/p2kpp2/3p4/R7/8/2PP3P/nb4K1",
+     "2rk3N/1b2bBr1/5n1b/5p2/3P4/1PPrP2r/2K1Nq2/2R1BQbR",
+     "8/n7/3pp2P/2p2K2/Pp5p/2rk4/R7/8"
+    ],
+    "non": [
+     "2r5/1r2b1n1/q2qbp2/1n1n4/Q7/1B6/1B2N3/NRP5",
+     "3rk3/r2Qb3/ppp2qk1/4pp2/3Q4/7k/3PP1p1/3Rp2p",
+     "1rpq4/Qbpqb1b1/5n2/3pp2R/8/2P1B1P1/1P1P1P2/3R2P1",
+     "p1r1rk2/1pnN1b2/1NB5/pp4P1/3P2R1/2P1BN2/P2P4/3RP3"
+    ]
+   }
+  },
+  "where-file+what kc=4": {
+   "real": 0.003,
+   "legal": 0.02,
+   "non": 0.977,
+   "illegal only by check (share of all boards)": 0.005,
+   "units kept (no draw fit)": 0.025,
+   "adjacent kings among illegal": 0.068,
+   "illegal_causes_of_all_boards": {
+    "NO_BLACK_KING": 0.405,
+    "PAWNS_ON_BACKRANK": 0.725,
+    "NO_WHITE_KING": 0.503,
+    "TOO_MANY_BLACK_PIECES": 0.097,
+    "TOO_MANY_KINGS": 0.183,
+    "TOO_MANY_BLACK_PAWNS": 0.223,
+    "TOO_MANY_WHITE_PAWNS": 0.062,
+    "OPPOSITE_CHECK": 0.127,
+    "TOO_MANY_WHITE_PIECES": 0.02,
+    "IMPOSSIBLE_CHECK": 0.007,
+    "TOO_MANY_CHECKERS": 0.002
+   },
+   "examples": {
+    "real": [
+     "8/8/1pp3k1/4PnP1/8/3R1Kn1/5pN1/8",
+     "6k1/5pp1/4p1Pp/4p3/7K/3p2N1/3P1PP1/8"
+    ],
+    "legal": [
+     "2r5/knpB4/np6/3p1NP1/4PK1Q/3NRN2/3PPP2/8",
+     "8/8/n3PPP1/5K2/1p6/3rk3/p3pp2/8",
+     "4rrk1/Rp6/1Np1n3/B3p3/P1P1B3/1QRNBP2/4P1P1/1RR2K2",
+     "3brn2/2p1qp2/3p1n2/Pq6/2P5/P2k1PrP/5p1K/4nr2"
+    ],
+    "non": [
+     "8/6P1/5P2/2nb2pp/8/P1P5/2P5/RK1Q4",
+     "8/3P4/4BN1P/1nn3P1/8/5ppp/8/r1k1P3",
+     "r1bqnrk1/2pp2pp/1q3b2/3p4/8/2P1P2p/1P1K1pp1/2KpP3",
+     "1r1q3P/Q1pbb1P1/r4n2/1p6/3PPk2/5pp1/1Q1K1bq1/4nP1r"
+    ]
+   }
+  },
+  "where-file+what kc=6": {
+   "real": 0.012,
+   "legal": 0.008,
+   "non": 0.98,
+   "illegal only by check (share of all boards)": 0.022,
+   "units kept (no draw fit)": 0.022,
+   "adjacent kings among illegal": 0.092,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.715,
+    "NO_BLACK_KING": 0.355,
+    "NO_WHITE_KING": 0.417,
+    "TOO_MANY_BLACK_PAWNS": 0.155,
+    "TOO_MANY_BLACK_PIECES": 0.097,
+    "TOO_MANY_KINGS": 0.255,
+    "OPPOSITE_CHECK": 0.192,
+    "TOO_MANY_WHITE_PAWNS": 0.097,
+    "IMPOSSIBLE_CHECK": 0.017,
+    "TOO_MANY_WHITE_PIECES": 0.048,
+    "TOO_MANY_CHECKERS": 0.012
+   },
+   "examples": {
+    "real": [
+     "5q2/p3r1k1/p2p1p2/2P1p3/1p6/2PPP3/1P1K4/1N1N4",
+     "8/8/3q4/1pP1b1rk/5n2/PP1K4/8/8",
+     "2r3k1/1p6/p7/P7/1P1R1Pb1/RP6/b2P2P1/5K2",
+     "8/1p6/p1bk4/8/1P3PP1/6K1/6r1/7b"
+    ],
+    "legal": [
+     "8/p7/2n1p3/pk1b4/3r4/2pnP3/2PP1p2/3K4",
+     "r1rrnrk1/8/p1P1P3/p1KP4/P4P2/2R5/q1R1P3/4R1BQ",
+     "4r1k1/P1r2r2/K1pp4/2P4Q/8/PP3PP1/B1Q3B1/1RR5",
+     "4k3/8/2PP2P1/1P1K4/P2B4/4N3/R7/5R2"
+    ],
+    "non": [
+     "5P2/r1bq4/5K2/2n3rk/4P1N1/3P1P2/1PP5/P2P4",
+     "8/1B6/P1PQ1Pr1/4Kpp1/5P2/3RP3/8/3Rpp2",
+     "1rr1krk1/Q1pn2pp/2p3P1/P4P1P/2P5/1P6/P1pNppp1/1r1p4",
+     "2bpnrkp/2pr2pp/1q2bb2/3n4/5P2/3pP3/PP1PP1N1/3q1K2"
+    ]
+   }
+  },
+  "where-file+what kc=99": {
+   "real": 0.002,
+   "legal": 0.017,
+   "non": 0.982,
+   "illegal only by check (share of all boards)": 0.017,
+   "units kept (no draw fit)": 0.02,
+   "adjacent kings among illegal": 0.109,
+   "illegal_causes_of_all_boards": {
+    "NO_BLACK_KING": 0.348,
+    "PAWNS_ON_BACKRANK": 0.768,
+    "TOO_MANY_WHITE_PAWNS": 0.12,
+    "TOO_MANY_KINGS": 0.292,
+    "OPPOSITE_CHECK": 0.205,
+    "NO_WHITE_KING": 0.407,
+    "TOO_MANY_BLACK_PAWNS": 0.15,
+    "TOO_MANY_BLACK_PIECES": 0.1,
+    "TOO_MANY_WHITE_PIECES": 0.045,
+    "IMPOSSIBLE_CHECK": 0.018,
+    "TOO_MANY_CHECKERS": 0.013
+   },
+   "examples": {
+    "real": [
+     "8/1b6/5r1k/P3b1q1/1PPPP3/3K4/8/8"
+    ],
+    "legal": [
+     "8/1k5b/1pp1P1P1/4r3/1p1P4/2p2Q2/3pPPP1/2N2K2",
+     "2rk4/r2pp2K/1p3q2/5p2/1RP5/1BN3nP/1B6/8",
+     "2r3k1/4P1N1/5B1R/8/1P3P1R/3PP1P1/1R3K2/1R6",
+     "3r4/8/2ppN1B1/1kb4Q/3p1R2/p7/2P2PP1/5K2"
+    ],
+    "non": [
+     "1q1rpp2/6p1/3p3p/bn4p1/8/8/PPPp4/1Kp5",
+     "8/3p4/3PK2n/1p5p/8/2P5/r2PP3/p3K3",
+     "1pP5/1PrkP3/3b1PPP/5PK1/2Pr4/1P4PP/2B1np1K/2pP4",
+     "2p3P1/1p1n2K1/5rkP/5qK1/4k1p1/7P/5Ppn/4Pp2"
+    ]
+   }
+  },
+  "where-both+what kc=0": {
+   "real": 0.792,
+   "legal": 0.022,
+   "non": 0.187,
+   "illegal only by check (share of all boards)": 0.068,
+   "units kept (no draw fit)": 0.193,
+   "adjacent kings among illegal": 0.054,
+   "illegal_causes_of_all_boards": {
+    "TOO_MANY_KINGS": 0.035,
+    "OPPOSITE_CHECK": 0.078,
+    "PAWNS_ON_BACKRANK": 0.007,
+    "NO_WHITE_KING": 0.03,
+    "NO_BLACK_KING": 0.047,
+    "TOO_MANY_BLACK_PAWNS": 0.003,
+    "TOO_MANY_BLACK_PIECES": 0.005
+   },
+   "examples": {
+    "real": [
+     "1r4k1/2pR1pp1/r1p1n1p1/p1B2P2/8/4P2P/1PP3P1/2K4R",
+     "1rbq1rk1/Q1pn1ppp/5p2/4p3/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "1rbq1rk1/Qppnp1pp/5p2/p7/2N1P3/2P5/PP3PPP/R1B2RK1",
+     "4r1k1/pp2n2p/2p1Pn1p/6pq/5P2/2NPQ1P1/2P2R1P/4R1K1"
+    ],
+    "legal": [
+     "8/pp1k4/2q1n3/8/8/2p2PN1/4pnP1/1R4Kq",
+     "1r2r3/2qb2k1/P4npp/Q1Np4/4pP2/3P2nP/1B2P1BK/R3R3",
+     "2bnk3/1KP1r3/3pp3/4np2/P7/1P6/8/8",
+     "3qk3/pKP1r3/1p1p4/3n1p2/P7/1P6/8/8"
+    ],
+    "non": [
+     "1r4k1/2p3p1/r1p1n3/p4P1p/6p1/4P2P/1PP1K1P1/2K3RR",
+     "2R1k2r/1p4pp/2p5/p5P1/P4P2/1P1Pn3/2P2RP1/6K1",
+     "2R1k2r/1p4p1/2p1p3/p5P1/P4P2/1P1Pn3/2P2RP1/6K1",
+     "3p1k2/1pRn4/p1pp4/2p5/6P1/5PK1/4BP1P/8"
+    ]
+   }
+  },
+  "where-both+what kc=1": {
+   "real": 0.2,
+   "legal": 0.045,
+   "non": 0.755,
+   "illegal only by check (share of all boards)": 0.053,
+   "units kept (no draw fit)": 0.012,
+   "adjacent kings among illegal": 0.079,
+   "illegal_causes_of_all_boards": {
+    "TOO_MANY_KINGS": 0.24,
+    "OPPOSITE_CHECK": 0.128,
+    "NO_WHITE_KING": 0.153,
+    "PAWNS_ON_BACKRANK": 0.288,
+    "NO_BLACK_KING": 0.2,
+    "IMPOSSIBLE_CHECK": 0.005,
+    "TOO_MANY_BLACK_PIECES": 0.035,
+    "TOO_MANY_BLACK_PAWNS": 0.057,
+    "TOO_MANY_WHITE_PAWNS": 0.037,
+    "TOO_MANY_CHECKERS": 0.003,
+    "TOO_MANY_WHITE_PIECES": 0.003
+   },
+   "examples": {
+    "real": [
+     "2q1r1kb/p3p3/1Q3p2/6p1/rPn1PN2/P5P1/5P2/6K1",
+     "3q2r1/1p2b3/5npP/2rk1pp1/1P1p1Q2/2PB4/P2N1PPP/R2Q1RK1",
+     "3rk3/2p1qp1p/pp1p2p1/1pP2nb1/1P1N4/2P5/PP6/R1K5",
+     "8/2pk4/4p3/4r3/r3pp2/P1PP2p1/pP3PPP/6K1"
+    ],
+    "legal": [
+     "8/2Pnqb2/1p1N4/pP2rrk1/4ppq1/3B4/1Q2BPPP/R1R3K1",
+     "3k4/1p2p2B/3p4/p1p5/6n1/7P/4PP2/2R1K3",
+     "4rk2/1r4r1/1p1p1q2/2p1pn2/8/3B3P/1PPP3R/2K5",
+     "8/r3b1k1/2r2rp1/1p3p1b/r2Qp1pN/2P2P2/6PP/1RNBQ1K1"
+    ],
+    "non": [
+     "r7/ppp1b3/4rk2/3Ppn2/4b3/2P5/1P1PKPPP/6K1",
+     "1r6/Qbpk1p1p/1q2rk2/4npp1/4PPp1/P5PP/5PP1/RN1QR1K1",
+     "8/1p4k1/pppk2pp/3p1p2/1P1q1B2/P5P1/2nBQ2P/R4R2",
+     "6kp/2p1k3/5p2/8/2R2P2/3K1N2/6P1/8"
+    ]
+   }
+  },
+  "where-both+what kc=2": {
+   "real": 0.035,
+   "legal": 0.033,
+   "non": 0.932,
+   "illegal only by check (share of all boards)": 0.013,
+   "units kept (no draw fit)": 0.014,
+   "adjacent kings among illegal": 0.041,
+   "illegal_causes_of_all_boards": {
+    "NO_WHITE_KING": 0.547,
+    "TOO_MANY_KINGS": 0.107,
+    "NO_BLACK_KING": 0.393,
+    "PAWNS_ON_BACKRANK": 0.523,
+    "OPPOSITE_CHECK": 0.102,
+    "TOO_MANY_BLACK_PAWNS": 0.072,
+    "TOO_MANY_WHITE_PAWNS": 0.062,
+    "TOO_MANY_WHITE_PIECES": 0.017,
+    "TOO_MANY_BLACK_PIECES": 0.018,
+    "IMPOSSIBLE_CHECK": 0.005,
+    "TOO_MANY_CHECKERS": 0.005
+   },
+   "examples": {
+    "real": [
+     "3q1rk1/2r1bq2/2pp2p1/3p2P1/1b2B3/PP2P3/2P1RK2/8",
+     "2bq2k1/rr2b3/pp3n2/b2nb1p1/1p3p1p/8/2BPQPPP/R2R1RK1",
+     "7k/p3p1np/5pp1/4P3/8/2N5/PP3PP1/3R2K1",
+     "7r/bq2qn1k/2p1bb2/5pB1/3P3P/4P3/2P2PP1/R1B1K3"
+    ],
+    "legal": [
+     "8/1r2k3/2b1pp2/Bp3p1p/2P3p1/PPP5/3P3P/6K1",
+     "1rn1k3/pp6/1pp2n2/2p1p3/8/P2p4/K1B5/8",
+     "2rk4/q3pp2/2r5/6p1/1P1Ppp2/2PpP3/1KP2P2/1B1NB3",
+     "4r2r/2p1b3/p1P1k1n1/1p2p3/1P3pbp/1P1PP3/P1P2P1Q/1K2R3"
+    ],
+    "non": [
+     "6r1/1rk2q2/3p1nb1/3R1BQR/1r2P3/1pPP1N2/3n4/4q3",
+     "rrb1q1kk/Q1p5/2Knbn2/PP4p1/BK1Pp3/2P5/4Q1B1/2R1B3",
+     "2bq4/3pb2B/1ppPPn2/2P2Qr1/QP1pp1B1/3RNP2/3NB3/3P1Q2",
+     "2q2r2/5pb1/3q1np1/2p1npp1/P3p3/1P1P2P1/NRP1PP1N/8"
+    ]
+   }
+  },
+  "where-both+what kc=3": {
+   "real": 0.022,
+   "legal": 0.013,
+   "non": 0.965,
+   "illegal only by check (share of all boards)": 0.007,
+   "units kept (no draw fit)": 0.016,
+   "adjacent kings among illegal": 0.052,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.613,
+    "NO_WHITE_KING": 0.535,
+    "TOO_MANY_KINGS": 0.137,
+    "NO_BLACK_KING": 0.433,
+    "TOO_MANY_BLACK_PAWNS": 0.138,
+    "OPPOSITE_CHECK": 0.125,
+    "TOO_MANY_WHITE_PAWNS": 0.098,
+    "TOO_MANY_WHITE_PIECES": 0.017,
+    "TOO_MANY_BLACK_PIECES": 0.04,
+    "IMPOSSIBLE_CHECK": 0.012,
+    "TOO_MANY_CHECKERS": 0.01
+   },
+   "examples": {
+    "real": [
+     "8/8/5p2/4rrk1/N7/1P5P/RK6/8",
+     "2bq4/2p1b2Q/2p2np1/k2ppp1p/3nPn2/5NB1/PPP3P1/1K1R2Q1",
+     "8/8/2nr4/4p1k1/P3b1p1/2PP1K2/r7/8",
+     "1k1r4/4p2p/2b2p2/8/qB6/2P2P2/N5P1/4K1R1"
+    ],
+    "legal": [
+     "8/1b6/p1k5/p6p/2P1npp1/2N2N2/P1QPP1PN/R3K1B1",
+     "rnkr4/1n6/5br1/3qn3/3nP3/6R1/4P1PP/RNB1QK2",
+     "8/2r5/2ppp3/2Ppnp1k/6pp/P1P5/1P1PQP2/2R1BKR1",
+     "r3R3/kpp5/p7/1pqp4/4pB2/3Br3/5PP1/5K2"
+    ],
+    "non": [
+     "3pr3/4p3/2b2bPk/4p3/8/kp1qP3/1nP5/3P4",
+     "8/8/b1n5/2r3k1/1p6/pP2r2Q/rk2PPP1/2P2K1P",
+     "1r6/Q1p5/3q1rnb/2Pppn2/1P2Q3/P4P2/1BPP1PP1/8",
+     "2r4Q/1b5p/2q1PB2/5B2/2ppQ2N/1P5P/5PP1/B1N5"
+    ]
+   }
+  },
+  "where-both+what kc=4": {
+   "real": 0.012,
+   "legal": 0.015,
+   "non": 0.973,
+   "illegal only by check (share of all boards)": 0.012,
+   "units kept (no draw fit)": 0.019,
+   "adjacent kings among illegal": 0.058,
+   "illegal_causes_of_all_boards": {
+    "OPPOSITE_CHECK": 0.152,
+    "NO_WHITE_KING": 0.498,
+    "PAWNS_ON_BACKRANK": 0.71,
+    "NO_BLACK_KING": 0.475,
+    "TOO_MANY_KINGS": 0.14,
+    "TOO_MANY_WHITE_PAWNS": 0.078,
+    "TOO_MANY_WHITE_PIECES": 0.033,
+    "TOO_MANY_BLACK_PIECES": 0.083,
+    "TOO_MANY_BLACK_PAWNS": 0.21,
+    "IMPOSSIBLE_CHECK": 0.017,
+    "TOO_MANY_CHECKERS": 0.012
+   },
+   "examples": {
+    "real": [
+     "8/p7/8/2kB4/2q5/RP1Q1RPP/6K1/8",
+     "8/2p4k/8/4P2P/4n3/8/2P3NN/1KB1R3",
+     "6k1/1p4Np/p5pK/8/3P1P2/8/NBP5/R1B5",
+     "8/3bk3/2BpP3/3n4/3KP3/8/2n1b3/8"
+    ],
+    "legal": [
+     "r1b2r2/1q1ppp2/1Pn1knp1/1R1n1p2/3pp3/3P4/1PPPn3/2K5",
+     "2r2q2/2kb4/3pnp2/1B1ppq2/P3P3/b1BBPN2/p4KPP/RN3R1R",
+     "2nq1k2/pb1n4/2PPPbb1/P2K4/1pN5/2Q4Q/4RR2/8",
+     "8/2r3r1/2ppbP2/1pp2k2/5b2/5K2/P7/R7"
+    ],
+    "non": [
+     "r7/p7/2PPP3/3K4/1bk5/PP3N2/6PP/7R",
+     "r2q4/1p2k3/4Pn2/3P4/3BrP2/6P1/1np5/6N1",
+     "8/p4k2/2Nqnk2/2Pn1p2/1P1B1Pn1/P4b1B/2PP2P1/1B1R2P1",
+     "7r/1p1q1p2/2pnp3/2npPPb1/4rPP1/1p2B1P1/pn3b1P/1q1P2K1"
+    ]
+   }
+  },
+  "where-both+what kc=6": {
+   "real": 0.008,
+   "legal": 0.012,
+   "non": 0.98,
+   "illegal only by check (share of all boards)": 0.018,
+   "units kept (no draw fit)": 0.015,
+   "adjacent kings among illegal": 0.114,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.703,
+    "NO_WHITE_KING": 0.4,
+    "TOO_MANY_BLACK_PAWNS": 0.167,
+    "TOO_MANY_KINGS": 0.287,
+    "TOO_MANY_BLACK_PIECES": 0.088,
+    "OPPOSITE_CHECK": 0.19,
+    "NO_BLACK_KING": 0.335,
+    "TOO_MANY_WHITE_PAWNS": 0.113,
+    "TOO_MANY_WHITE_PIECES": 0.057,
+    "IMPOSSIBLE_CHECK": 0.017,
+    "TOO_MANY_CHECKERS": 0.01
+   },
+   "examples": {
+    "real": [
+     "8/5p2/p7/1rk1P3/q3KP2/8/p7/8",
+     "8/r5k1/p2nn3/4N3/8/8/1P3PP1/6K1",
+     "8/7b/2kp1b2/4n3/5PPB/8/P7/K7",
+     "6k1/1p2Qp2/5p2/2B5/8/8/5PPP/6K1"
+    ],
+    "legal": [
+     "8/4p3/8/1P2P3/8/3N3b/4PPP1/3R1Krk",
+     "5R2/3P1R2/2Pp4/P1B1pP2/5p2/3q2rk/1PPP4/2K3n1",
+     "r1bq4/ppQ1p1P1/R1B1RP2/n1p1PPP1/5KP1/1k6/b3qQN1/4n1NR",
+     "8/r3k3/p7/2n5/2pp4/R1B5/ppK5/R2nb3"
+    ],
+    "non": [
+     "8/2P5/2R2rr1/3p3b/k7/pp2b3/3pppbp/N3p2n",
+     "P3r3/2P3p1/6Pp/1k1P1p2/3KPp1p/p7/1p6/b3p3",
+     "1q2Q3/3p1pp1/2pN1nr1/5Rp1/6Pp/1P3P2/k3P1b1/1n1PK3",
+     "6k1/b2rk1p1/p1bp1p1p/2qn4/5r1k/p3n2p/1pN3p1/1P4b1"
+    ]
+   }
+  },
+  "where-both+what kc=99": {
+   "real": 0.002,
+   "legal": 0.012,
+   "non": 0.987,
+   "illegal only by check (share of all boards)": 0.017,
+   "units kept (no draw fit)": 0.02,
+   "adjacent kings among illegal": 0.122,
+   "illegal_causes_of_all_boards": {
+    "PAWNS_ON_BACKRANK": 0.713,
+    "NO_WHITE_KING": 0.422,
+    "TOO_MANY_BLACK_PAWNS": 0.187,
+    "OPPOSITE_CHECK": 0.228,
+    "TOO_MANY_KINGS": 0.287,
+    "TOO_MANY_WHITE_PAWNS": 0.123,
+    "NO_BLACK_KING": 0.368,
+    "TOO_MANY_BLACK_PIECES": 0.083,
+    "IMPOSSIBLE_CHECK": 0.017,
+    "TOO_MANY_CHECKERS": 0.015,
+    "TOO_MANY_WHITE_PIECES": 0.067
+   },
+   "examples": {
+    "real": [
+     "1r6/2b1n3/4q3/4k3/8/8/P3P3/K7"
+    ],
+    "legal": [
+     "1R6/1K1p2R1/3np3/1rk5/4p3/8/N7/8",
+     "8/2P1P3/P3r2q/2P1pp2/KPPPP2k/1RB1R1b1/8/1r2q3",
+     "3b2rk/8/5p2/2P5/1P4PP/6NK/4PP2/8",
+     "8/8/8/2rk4/pqbp4/b2n4/3K4/8"
+    ],
+    "non": [
+     "3p1k2/3q1p2/5PpP/2pPPp2/3pk3/r1pp4/pbn5/8",
+     "p4pk1/4pBp1/2B1P3/P3r3/1r1b4/2b1n3/1p2q3/2p5",
+     "2PP1q2/2ppP3/4p2n/Rp1p2p1/p1prk2p/3Pp3/4Pp2/2PK4",
+     "4pp2/6k1/1Pb3p1/P2NpB1p/2Nppp2/1R1RQ1B1/3rk3/R1B2R2"
+    ]
+   }
+  },
+  "list counts=0": {
+   "real": 0.098,
+   "legal": 0.003,
+   "non": 0.898,
+   "illegal only by check (share of all boards)": 0.025,
+   "units kept (no draw fit)": 0.0,
+   "adjacent kings among illegal": 0.224,
+   "illegal_causes_of_all_boards": {
+    "TOO_MANY_KINGS": 0.31,
+    "NO_WHITE_KING": 0.327,
+    "NO_BLACK_KING": 0.333,
+    "TOO_MANY_WHITE_PAWNS": 0.098,
+    "OPPOSITE_CHECK": 0.088,
+    "TOO_MANY_BLACK_PAWNS": 0.12,
+    "TOO_MANY_WHITE_PIECES": 0.052,
+    "TOO_MANY_BLACK_PIECES": 0.063,
+    "IMPOSSIBLE_CHECK": 0.008,
+    "TOO_MANY_CHECKERS": 0.008
+   },
+   "examples": {
+    "real": [
+     "3r1rk1/3p1pr1/Bpnpp1p1/1Qq1p3/4P3/3QBN2/PPQK1PBP/8",
+     "r1bq2kr/7p/1Q6/q3p3/3B4/1RR5/2PB1P2/R1R3K1",
+     "8/4p1k1/3bpnp1/8/8/1P6/5P2/R5K1",
+     "r1b4r/5pk1/5np1/4PPN1/3P4/5NP1/PP2Q2P/5RKR"
+    ],
+    "legal": [
+     "r5k1/pp6/3b1npP/4p1N1/2pp4/P1Bq1P1P/P1PNPP1q/R1B1K3",
+     "5rk1/p1pnbpp1/2p1p3/2pq4/R1N2P2/B2P2NP/PP1B4/R1B1R1KR"
+    ],
+    "non": [
+     "2k1kk2/1k5p/3P1np1/1N6/6p1/2PP1NPP/2P2P1B/R2R2K1",
+     "4k3/1p3pbp/2n1pnp1/3p1p2/p2N4/r2Q4/1PP3PP/3Q1R2",
+     "r2r3r/pp3pp1/2n1p3/5q2/2PnPB1P/PP1PP3/PBP3PP/1N1Q2K1",
+     "rkk1k1k1/pQ2bpb1/4p2Q/1p1pn1B1/2nPPB2/4P3/1P1rN1KP/R4K2"
+    ]
+   }
+  },
+  "list counts=1": {
+   "real": 0.528,
+   "legal": 0.005,
+   "non": 0.467,
+   "illegal only by check (share of all boards)": 0.065,
+   "units kept (no draw fit)": 0.0,
+   "adjacent kings among illegal": 0.0,
+   "illegal_causes_of_all_boards": {
+    "NO_BLACK_KING": 0.25,
+    "NO_WHITE_KING": 0.205,
+    "OPPOSITE_CHECK": 0.083
+   },
+   "examples": {
+    "real": [
+     "6kr/4n2p/pb2p3/1pb1p3/p1rB2p1/P1N1PN1P/2P2PPP/R3R1K1",
+     "r5k1/pppbbp1p/2r1p3/1p1P2N1/P7/P3nPB1/P4P1P/R1B2RK1",
+     "r2r1bk1/p4ppp/4p1np/4pp2/3P2P1/1PN2NPP/1PB2PP1/R1B2R1K",
+     "3r4/4k3/7p/8/5p2/8/6KP/5R2"
+    ],
+    "legal": [
+     "5rk1/r3P1pp/1pp3bn/3p4/4P3/3Q4/2P3BP/RNB1KR2",
+     "2r3k1/p2pbq2/ppp1r3/2p1P2P/P1pP2PK/3P4/1B5P/R4R2",
+     "r1bb1rk1/1ppqP2p/2p1pp2/N5K1/2PR2p1/P1N2P1P/P3BPQ1/R7"
+    ],
+    "non": [
+     "7r/p1q3pp/2n1p2p/2np1p2/PbQNP3/3BP3/PPP1R1P1/5B1R",
+     "3q2r1/p3bpp1/1p6/1B1pPP1p/P7/r1PnQ3/P3B1P1/R3NR2",
+     "3q1r2/Pp4p1/2p2bpp/4P3/2P2B1P/3P4/P4pK1/4R3",
+     "2b5/2n1p3/p4p2/8/4K3/P7/P5P1/5B2"
+    ]
+   }
+  }
+ }
+}
