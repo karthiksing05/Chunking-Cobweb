@@ -487,7 +487,7 @@ The middle cells yield syntax-only sentences only when a word repeats or the obj
 \begin{table}[h]
 \caption{Regime shares (meaningful / syntax-only / nonsense; judge 2, configuration C9, seed 13, 1,000 sentences, window 5, generation temperature 1, pair gate on) by context reach $W'$ and context abstraction level $b$.
 Leaf means exact context words, and the root class acts as a wildcard. $K$ is the number of most frequent word types kept exact. Values are rounded.
-The table shows 16 of the 36 cells (the $b=7$ and $b=6$ rows are omitted), and the largest syntax-only share over all 36 is .245.}
+The table shows 17 of the 36 cells (the $b=7$ and $b=6$ rows are omitted), and the largest syntax-only share over all 36 is .245.}
 \label{tab:ctx}
 \begin{center}
 \footnotesize
@@ -691,7 +691,7 @@ The determiners are \textit{a} (singular), \textit{some} (plural), and \textit{t
 Five noun types (person, animal, food, place, object; eight nouns each) carry the meaning. Each verb restricts the type of its subject, its object, or its complement, and each of 14 adjectives restricts the type of its noun.
 The lexicon has 147 words (80 noun forms, 48 verb forms, 14 adjectives, 3 determiners, 2 prepositions), sentences have 3 to 8 words, and 20,000 samples hold 14,720 distinct sentences. Nouns pluralize by adding \textit{s}, so ``womans'' and ``foxs'' are legal tokens.
 The judge labels a sentence nonsense if it does not parse (noun-phrase structure, agreement, verb frame, preposition), syntax-only if it parses and some selectional restriction fails, and meaningful if it parses and all restrictions hold.
-We fixed the judge before any generation. The learner is that of the TinyStories configuration C6a (window 5, exact-boundary generator, token input, word pair gate, temperature 1) except for its word taxonomy, which uses the five most frequent function words as features, and the TinyStories data are replaced by grammar samples and every generation is new (not a stored training sentence).
+We fixed the judge before any generation. The learner is that of the TinyStories configuration C6a (window 5, exact-boundary generator, token input, word pair gate, temperature 1) except for its word taxonomy, which uses the five most frequent function words as features, and it keeps the five most frequent types exact in emission instead of 50, and the TinyStories data are replaced by grammar samples and every generation is new (not a stored training sentence).
 We trained on 250 to 4,000 sentences with seeds 13 and 17 and judged 1,600 unconditioned generations per setting (400 prompts, four draws each).
 
 \begin{table}[h]

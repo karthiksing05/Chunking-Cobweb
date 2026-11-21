@@ -113,3 +113,4 @@ Main paper: 23 pages (rev 4: 22). Supplement: 21 pages, Tables S1 to S29 (S22 to
 - Table 5 caption says the C7 row takes the better variant per column, chosen on the test sets. The C8 parse comparison says it reuses the set C construction of C4 (r225 report: 300 held-out sentences per seed with the r216 calibration).
 - Supplement: removed "round 204" and "round 214, addenda 6 and 7"; "tau = .702" became "decision threshold .702"; "nearly all disagreements" became "most disagreements (77 to 83%)" (matches the judge-agreement paragraph).
 - Prose: abstract cut to 11 sentences; "consistent with abstraction but not specific to it" replaced by "does not isolate abstraction"; "goes to nonsense, not to syntax-only output" replaced; the one-sentence lead-in to Table 4 merged into the next paragraph.
+- Revision 10 follow-up: chunks-off syntax range corrected to -.021 to +.023 (Table S19); S16 caption 17 of 36 cells; C6b supplement description states five exact types.

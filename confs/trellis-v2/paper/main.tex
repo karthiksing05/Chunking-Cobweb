@@ -401,7 +401,7 @@ It trails the Kneser-Ney trigram by 4.9 to 5.7 bits, the GPT by 5.5 to 6.5 bits,
 We built the generator to sample, and at temperature 1 with a pair gate it spreads probability in ways a predictor would not, so these numbers measure that distribution as it stands.
 
 Supplement Table~S19 removes the parts at 1,000 sentences.
-Removing every stored chunk leaves the code length unchanged (30.8 bits with and without chunks) and moves the per-seed generation counts by $-$.023 to +.021 on syntax and $-$.029 to +.017 on the meaningful count, with both signs, across three temperatures and two seeds (Supplement, Table~S19).
+Removing every stored chunk leaves the code length unchanged (30.8 bits with and without chunks) and moves the per-seed generation counts by $-$.021 to +.023 on syntax and $-$.029 to +.017 on the meaningful count, with both signs, across three temperatures and two seeds (Supplement, Table~S19).
 Removing the concepts from the generator's reads shortens the code by about 2 bits (28.8), and removing both gives 28.6 bits, shorter than the full system at every size.
 The margin over byte-pair coding therefore belongs to the word-window generator with its pair gate and leaf reads. The chunks add nothing to it, and the concepts cost about 2 bits.
 Removing the concepts lowers generation (syntax .539 to .496, syntax and meaning .363 to .309 at temperature 2.0, and lower in the two-seed mean at temperatures 1.2 and 3.0 too; Supplement, Table~S19).
