@@ -656,3 +656,301 @@ def diag3(seed, n_bg):
 
 if __name__ == "__main__" and sys.argv[1] == "diag3":
     diag3(int(sys.argv[2]), int(sys.argv[3]))
+
+
+# ----------------------------------------------------------------------------------------------- P3b staircase (docs/PLAN_PSYCH.md "P3b pre-registration")
+# Usage: psych_digits.py stair <arm: full|prioroff|nolimit|rehearsal> <seed> [max_sessions=865] [budget_s=0] [tag=P3b]
+#        psych_digits.py stairsummary [tag=P3b]
+# Choices on literal readings (also in P3b_SUMMARY.md): recognition = span_w[prefix] >= REC_W (0.5), prefix of 4 then 3, nothing else
+# (no parse, no bits).  Unrecognised head digit -> STM single.  At the list end the buffer is flushed the same way and everything goes to
+# STM (a recognised flush group is one STM unit).  A list is correct iff the STM holds <= K = 7 units (FIFO overflow drops the oldest);
+# every RS group decodes by identity because recognition == stored (span_w >= .5), so decode errors by group size are 0 by construction;
+# the size comparison therefore uses the MISS RATE of the buffer attempts (share of 4- / 3-digit prefix attempts not recognised) as proxy.
+REC_W = 0.5
+K_STM = 7
+STORE_S = 8.0
+PROBE_SESSIONS = (50, 100, 250, 500, 865)
+CONS = "BCDFGHJKLMNPQRSTVWXZ"
+ARMS = ("full", "prioroff", "nolimit", "rehearsal")
+
+
+def encode_stair(mem, seq, st):
+    """Same structure as encode_list (buffer B = 4, prefix 4 then 3), recognition = stored familiarity span_w >= REC_W.
+    st: Counter of attempts / hits by size (in-stream attempts only)."""
+    A, units = [], []
+
+    def attempt(flush):
+        for size in (4, 3):
+            if len(A) >= size:
+                tok = tuple(A[:size])
+                if not flush:
+                    st["att%d" % size] += 1
+                if mem.span_w.get(tok, 0.0) >= REC_W:
+                    if not flush:
+                        st["hit%d" % size] += 1
+                    units.append(("g", tok, None, not flush))
+                    del A[:size]
+                    return
+        units.append(("s", A.pop(0)))
+
+    for d in seq:
+        A.append(d)
+        if len(A) == B:
+            attempt(False)
+    while A:
+        attempt(True)
+    return units
+
+
+def stm_units(units):
+    """STM load: ungrouped digits plus tail-flush groups (one unit each); RS groups use no STM."""
+    return sum(1 for u in units if u[0] == "s" or not u[3])
+
+
+def stair(arm, seed, max_sessions, budget, tag):
+    assert arm in ARMS
+    os.makedirs(OUT, exist_ok=True)
+    t0 = time.time()
+    mem = Mem(seed)
+    info = {"arm": arm, "seed": seed, "rec_w": REC_W, "K": K_STM, "store_s": STORE_S, "start": 7}
+    if arm != "prioroff":
+        items, n_pre = prior_stream(seed, 1)
+        for c, d in items:
+            mem.learn(list(d))                     # DD's pre-experiment knowledge: no clock
+        info.update(n_pre=n_pre, prior_items=len(items), prior_seconds=round(time.time() - t0, 1), prior_records=len(mem.L.records))
+    print("prior", info, flush=True)
+    rng = random.Random(seed * 31 + 5)
+    prng = random.Random(seed * 77 + 11)
+    gain = 2.9 if arm == "rehearsal" else 1.0
+    clock, length, lst = 0.0, 7, 0
+    rows, sess_rows, probes = [], [], {}
+    stop = "max_sessions"
+    for sess in range(1, max_sessions + 1):
+        if budget and time.time() - t0 > budget:
+            stop = "time_budget"
+            break
+        sstart = length
+        for _ in range(lists_per_session(sess)):
+            digits = [str(rng.randrange(10)) for _ in range(length)]
+            st = Counter()
+            units = encode_stair(mem, digits, st)
+            nstm = stm_units(units)
+            correct = nstm <= K_STM
+            g3 = sum(1 for u in units if u[0] == "g" and len(u[1]) == 3)
+            g4 = sum(1 for u in units if u[0] == "g" and len(u[1]) == 4)
+            clock += gain * length
+            nlearn = nreinf = 0
+            for p in learn_pieces(units):
+                if arm == "nolimit":
+                    mem.learn(list(p))
+                    nlearn += 1
+                elif mem.span_w.get(p, 0.0) >= REC_W:
+                    mem.span_w[p] += 1.0
+                    nreinf += 1
+                elif clock >= STORE_S:
+                    mem.learn(list(p))
+                    clock -= STORE_S
+                    nlearn += 1
+            rows.append({"s": sess, "len": length, "ok": int(correct), "g3": g3, "g4": g4, "e3": 0, "e4": 0, "stm": nstm,
+                         "att4": st["att4"], "hit4": st["hit4"], "att3": st["att3"], "hit3": st["hit3"],
+                         "learned": nlearn, "reinf": nreinf, "clock": round(clock, 1), "recs": len(mem.L.records),
+                         "t": round(time.time() - t0, 1)})
+            length = max(1, length + (1 if correct else -1))
+            lst += 1
+        sess_rows.append({"s": sess, "start_len": sstart, "end_len": length})
+        if sess in PROBE_SESSIONS:
+            probes[sess] = letter_probe(mem, prng)
+            print("probe", sess, probes[sess], flush=True)
+        if sess % 10 == 0:
+            r = rows[-1]
+            blk = [x["len"] for x in rows if x["s"] > sess - 10]
+            print("session %d lists %d len(mean last10 sess) %.1f next %d clock %.1f recs %d t %.0fs" % (
+                sess, lst, sum(blk) / len(blk), length, clock, r["recs"], r["t"]), flush=True)
+            stair_dump(tag, arm, seed, info, rows, sess_rows, probes, stop + "(partial)", t0, sess)
+    stair_dump(tag, arm, seed, info, rows, sess_rows, probes, stop, t0, sess_rows[-1]["s"] if sess_rows else 0)
+    print("done", len(sess_rows), "sessions", round(time.time() - t0), "s", stop, flush=True)
+
+
+def letter_probe(mem, rng):
+    """10-list staircase on random consonants from 5; no learning, no clock."""
+    length, hist = 5, []
+    for _ in range(10):
+        seq = [rng.choice(CONS) for _ in range(length)]
+        units = encode_stair(mem, seq, Counter())
+        ok = stm_units(units) <= K_STM
+        hist.append((length, int(ok)))
+        length = max(1, length + (1 if ok else -1))
+    return {"final": length, "max": max(h[0] for h in hist), "hist": hist}
+
+
+def stair_dump(tag, arm, seed, info, rows, sess_rows, probes, stop, t0, sess):
+    d = {"experiment": "psych_digits P3b staircase", "cfg": CFG, "info": info, "stopped": stop, "sessions": sess,
+         "lists": len(rows), "seconds": round(time.time() - t0, 1), "probes": probes, "sess_rows": sess_rows, "rows": rows}
+    fn = os.path.join(OUT, "%s_%s_s%d.json" % (tag, arm, seed))
+    with open(fn + ".tmp", "w", encoding="utf-8") as f:
+        json.dump(d, f)
+    os.replace(fn + ".tmp", fn)
+
+
+def _span_at(d, s):
+    """Span = mean list length over the 5-session block ending at session s (Fig. 4 style)."""
+    v = [r["len"] for r in d["rows"] if s - 4 <= r["s"] <= s]
+    return sum(v) / len(v) if v else None
+
+
+def _hit(d, thr):
+    last = d["sessions"]
+    for s in range(5, last + 1):
+        v = _span_at(d, s)
+        if v is not None and v >= thr:
+            return s
+    return None
+
+
+def _miss(d, lo, hi):
+    c = Counter()
+    for r in d["rows"]:
+        if lo < r["s"] <= hi:
+            for k in ("att4", "hit4", "att3", "hit3"):
+                c[k] += r[k]
+    m4 = 1 - c["hit4"] / c["att4"] if c["att4"] else float("nan")
+    m3 = 1 - c["hit3"] / c["att3"] if c["att3"] else float("nan")
+    return m4, m3
+
+
+def stairsummary(tag):
+    import glob
+    runs = defaultdict(dict)
+    for fn in sorted(glob.glob(os.path.join(OUT, "%s_*_s*.json" % tag))):
+        d = json.load(open(fn, encoding="utf-8"))
+        if d.get("experiment") != "psych_digits P3b staircase":
+            continue
+        runs[d["info"]["arm"]][d["info"]["seed"]] = d
+
+    def ms(vals, fmt="%.1f"):
+        v = [x for x in vals if x is not None and x == x]
+        return (fmt % (sum(v) / len(v)) + " [" + fmt % min(v) + "-" + fmt % max(v) + "]") if v else "-"
+    pts = (15, 50, 100, 250, 500, 865)
+    L = ["# P3b: digit-span staircase with an 8 s storage limit (generated by psych_digits.py stairsummary)", "",
+         "Pre-registration: docs/PLAN_PSYCH.md, section P3b. Span at session s = mean list length over the 5-session block ending at s. "
+         "Cells are mean [min-max] over seeds that reached that session; n = seeds. Partial runs (wall time) are marked.", "",
+         "DD points (CE1981_PROTOCOL / RSS95): start 7-9; about 80 by session ~500; 104 at ~865.", "",
+         "## Runs", ""]
+    for arm in ARMS:
+        for s, d in sorted(runs.get(arm, {}).items()):
+            L.append("- %s seed %d: %d sessions, %d lists, %.0f s, stopped %s" % (arm, s, d["sessions"], d["lists"], d["seconds"], d["stopped"]))
+    L += ["", "## Span at sessions", "", "| arm | n | " + " | ".join("s%d" % p for p in pts) + " |", "|---|---|" + "---|" * len(pts)]
+    for arm in ARMS:
+        rr = runs.get(arm, {})
+        if not rr:
+            continue
+        cells = []
+        for p in pts:
+            ds = [d for d in rr.values() if d["sessions"] >= p]
+            cells.append(ms([_span_at(d, p) for d in ds]) + (" (n=%d)" % len(ds) if len(ds) != len(rr) else ""))
+        L.append("| %s | %d | %s |" % (arm, len(rr), " | ".join(cells)))
+    L.append("| DD | - | ~7-9 | - | - | - | ~80 | 104 (at ~865) |")
+    L += ["", "## Session when span first reaches a level (per seed; - = not reached within the run)", "",
+          "| arm | seed | sessions run | 20 | 40 | 80 | 104 |", "|---|---|---|---|---|---|---|"]
+    for arm in ARMS:
+        for s, d in sorted(runs.get(arm, {}).items()):
+            L.append("| %s | %d | %d | %s |" % (arm, s, d["sessions"], " | ".join(str(_hit(d, t) or "-") for t in (20, 40, 80, 104))))
+    # signature effects
+    L += ["", "## Pre-registered signature effects (primary clock = arm `full`)", ""]
+    full = runs.get("full", {})
+    po = runs.get("prioroff", {})
+
+    def complete(rr):
+        return rr and all(d["sessions"] >= 865 for d in rr.values())
+    if full:
+        mx = [max((_span_at(d, s) or 0) for s in range(5, d["sessions"] + 1)) for d in full.values()]
+        e1 = "holds" if min(mx) >= 15 else ("fails" if complete(full) else "not reached") if max(mx) < 15 else "holds in some seeds"
+        L.append("1. Span rises well above 7 (criterion: block span >= 15): max block span %s -> **%s**." % (ms(mx), e1))
+        h80 = [_hit(d, 80) for d in full.values()]
+        if all(h is not None and h >= 250 for h in h80):
+            e2 = "holds (all seeds in [250, 865])"
+        elif any(h is not None and h < 250 for h in h80):
+            e2 = "fails (explosion: 80 before session 250 in %d seed(s))" % sum(1 for h in h80 if h is not None and h < 250)
+        elif complete(full):
+            e2 = "fails (stall: 80 never reached in 865 sessions)"
+        else:
+            e2 = "not reached (runs ended at session %s without 80)" % ",".join(str(d["sessions"]) for d in full.values())
+        L.append("2. Span ~80 near session 500, not before 250, not never: first session at 80 = %s -> **%s**." % (h80, e2))
+        m = []
+        for d in full.values():
+            hi = d["sessions"]
+            m.append(_miss(d, max(0, hi - 50), hi))
+        m4 = [x[0] for x in m if x[0] == x[0]]
+        m3 = [x[1] for x in m if x[1] == x[1]]
+        if m4 and m3:
+            e3 = "holds" if sum(m4) / len(m4) > sum(m3) / len(m3) else "fails"
+        else:
+            e3 = "not reached"
+        L.append("3. 4-digit groups err more than 3-digit groups. Decode errors are 0 by construction (recognised == stored, identity decode), "
+                 "so the proxy is the miss rate of buffer attempts over the last 50 sessions run: 4-digit %s vs 3-digit %s -> **%s**." % (
+                     ms(m4, "%.3f"), ms(m3, "%.3f"), e3))
+        if po:
+            rows = []
+            res = []
+            for p in (15, 50):
+                a = [_span_at(d, p) for d in full.values() if d["sessions"] >= p]
+                b = [_span_at(d, p) for d in po.values() if d["sessions"] >= p]
+                if a and b:
+                    rows.append("s%d full %.1f vs prioroff %.1f" % (p, sum(a) / len(a), sum(b) / len(b)))
+                    res.append(sum(a) / len(a) > sum(b) / len(b))
+            h = "; first-20 full %s vs prioroff %s" % ([_hit(d, 20) for d in full.values()], [_hit(d, 20) for d in po.values()])
+            e4 = "not reached" if not res else ("holds" if all(res) else "fails" if not any(res) else "mixed")
+            L.append("4. Prior knowledge speeds early learning: %s%s -> **%s**." % ("; ".join(rows), h, e4))
+        else:
+            L.append("4. Prior knowledge speeds early learning: no prioroff runs -> **not reached**.")
+        fin = [pr["final"] for d in full.values() for pr in d["probes"].values()]
+        mxl = [pr["max"] for d in full.values() for pr in d["probes"].values()]
+        if fin:
+            e5 = "holds" if sum(mxl) / len(mxl) <= 9 else "fails"
+            L.append("5. Letter span stays about 7 (criterion: mean probe max length <= 9): final %s, max %s -> **%s**." % (ms(fin), ms(mxl), e5))
+        else:
+            L.append("5. Letter span stays about 7: no probe reached -> **not reached**.")
+    L += ["", "## Letter probes (10-list staircase from 5, no learning): final / max length per probe session", "",
+          "| arm | " + " | ".join("s%d" % p for p in PROBE_SESSIONS) + " |", "|---|" + "---|" * len(PROBE_SESSIONS)]
+    for arm in ARMS:
+        rr = runs.get(arm, {})
+        if not rr:
+            continue
+        cells = []
+        for p in PROBE_SESSIONS:
+            v = [d["probes"][str(p)] for d in rr.values() if str(p) in d["probes"]]
+            cells.append("final %s / max %s" % (ms([x["final"] for x in v]), ms([x["max"] for x in v])) if v else "-")
+        L.append("| %s | %s |" % (arm, " | ".join(cells)))
+    L += ["", "## 4- vs 3-digit groups: miss rate of buffer attempts over the 50 sessions before each probe (decode errors are 0 by construction)", "",
+          "| arm | " + " | ".join("s%d" % p for p in PROBE_SESSIONS) + " |", "|---|" + "---|" * len(PROBE_SESSIONS)]
+    for arm in ARMS:
+        rr = runs.get(arm, {})
+        if not rr:
+            continue
+        cells = []
+        for p in PROBE_SESSIONS:
+            v = [_miss(d, p - 50, p) for d in rr.values() if d["sessions"] >= p]
+            cells.append("4: %s / 3: %s" % (ms([x[0] for x in v], "%.3f"), ms([x[1] for x in v], "%.3f"))) if v else cells.append("-")
+        L.append("| %s | %s |" % (arm, " | ".join(cells)))
+    L += ["", "## Choices on ambiguous points", "",
+          "- Recognition: span_w[tuple] >= 0.5 for the 4-digit prefix, else the 3-digit prefix; no parse. The prior stream is learned without a clock.",
+          "- A list is correct iff the STM holds at most 7 units: ungrouped digits plus tail-flush groups (one unit per recognised flush group). "
+          "RS groups use no STM. Because recognition equals stored (span_w >= 0.5), identity decoding of an RS group always succeeds; "
+          "the 4-vs-3 comparison therefore uses the miss rate of buffer attempts (a proxy, not a decode error).",
+          "- Clock: +1 s (rehearsal arm +2.9 s) per digit presented, added before learning, carried across lists and sessions, starts at 0. "
+          "Pieces from learn_pieces in list order; a piece already at span_w >= 0.5 gets +1 for free (no learn()); otherwise learn() costs 8 s if the clock holds >= 8 s. "
+          "Reinforcement is checked against the weight at the moment the piece is reached (earlier pieces of the same list may already have raised it).",
+          "- Staircase: starts at 7, +1 / -1, floor 1, no cap; length carries over between sessions. Span = mean list length in the 5-session block ending at s.",
+          "- Letter probes: consonants never seen, so nothing is recognised; every letter goes to the STM (expected span ~7). Probe lists draw from a separate RNG.",
+          "- No resume after a wall-time stop: the learner is not serialised; the JSON checkpoint every 10 sessions is the result.", ""]
+    path = os.path.join(OUT, "%s_SUMMARY.md" % tag)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("\n".join(L))
+    print("\n".join(L))
+
+
+if __name__ == "__main__" and sys.argv[1] == "stair":
+    a = sys.argv
+    stair(a[2], int(a[3]), int(a[4]) if len(a) > 4 else 865, float(a[5]) if len(a) > 5 else 0.0, a[6] if len(a) > 6 else "P3b")
+if __name__ == "__main__" and sys.argv[1] == "stairsummary":
+    stairsummary(sys.argv[2] if len(sys.argv) > 2 else "P3b")

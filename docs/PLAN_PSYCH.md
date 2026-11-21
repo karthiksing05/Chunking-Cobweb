@@ -49,6 +49,44 @@ The user asked to keep P3. Pilot B named two causes, and each gets one change; n
 - **Probes (no learning):** at sessions 50, 100, 250, 500 and 865, a 10-list probe staircase of random consonants starting at 5 (material specificity; DD/SF span on letters ~ 6-7), plus the 4- against 3-digit group error rates.
 - **Signature effects scored against DD:** (1) span rises well above 7 with practice; (2) span reaches about 80 near session 500, not before session 250 and not never (the rate); (3) 4-digit groups err more than 3-digit groups; (4) prior knowledge speeds early learning; (5) letter span stays about 7. The decision is on the primary clock.
 
+### P3b result (2026-11-21; results/psych_digits/P3b_*.json, P3b_SUMMARY.md)
+
+Span at sessions 15/50/100/250/500/865, mean of 3 seeds (DD: 7-9 at the start, ~80 at ~500, 104 at ~865):
+- full: 20 / 33 / 51 / 105 / 198 / 266;
+- prior off: 7.9 / 10 / 14 / 48 / 118 / 209;
+- rehearsal clock: 22 / 37 / 57 / 117 / 181 / 264.
+
+The session when span first reaches 80 is 175-189 for full, 330-389 for prior off, and 162-177 for the rehearsal clock.
+- Effect 1 (span rises far above 7): holds.
+- Effect 2 (rate, 80 near session 500): **fails, about 2.7x too fast.**
+- Effect 3 (4- against 3-digit): holds only as a proxy. Recognition and identity decode coincide, so there are no decode errors; 4-digit prefixes are recognised far less often (8% against 79% in sessions 101-250).
+- Effect 4 (prior speeds learning): holds.
+- Effect 5 (letter span stays near 7): holds (7-8).
+
+Diagnosis (full arm, seed 13):
+- The 8 s limit binds only early: in sessions 1-50 the clock was below 8 s after learning in 178 of 680 lists, and in sessions 101-250 in 0 of 870.
+- The nolimit arm is close to the full arm at session 20 (span 26-34 against 33).
+- Span is therefore set by coverage of 3-digit strings, with no retrieval failure for a recognised group: a list fails only when the STM overflows.
+- DD's slow rate rests on what TRELLIS lacks: forgetting of codes at about 25% per item, which EPAM IV offsets with redundant retrieval cues that grow with practice (RSS95 pp. 319, 324).
+- Adding retrieval failure would be a new mechanism, so it is left to the user. The pre-registered banking of clock time across lists is not the cause: the clock is unspent after session 100 even per list (about 4.7 learns per list against length/8 affordable).
+
+## P4b pre-registration: Meulemans & Van der Linden (1997) Exps 2a/2b (fixed 2026-11-21, before any run)
+
+- Stimuli and procedure: docs/AGL_PROTOCOL.md section 2.
+  - 2a: 32 training strings, shown twice in the same order (one random order per subject, repeated).
+  - 2b: 125 training strings, shown once; shown twice is a secondary sensitivity check.
+  - Test: the 32 test strings of each experiment.
+  - One learn() call per presentation (TRELLIS always reproduces a string after one presentation, so the reproduction retries add nothing). Learning frozen at test.
+  - N = 20 per experiment, seeds 13..32.
+- Score, endorsement rule, arms (full, concepts off, ACS with MVdL's global ACS, TP) and secondary scores are as in P4. There is no time limit: P3b shows the limit is not what sets the rate there, so the fixed configuration stays the one used in P2 and P4. A secondary arm adds the limit (3 s per presentation, 8 s per new string) for completeness.
+- Human targets (cells GA, GNA, NGA, NGNA; JS99 values, which match the figure reads):
+  - 2a: 65.3 / 42.8 / 67.5 / 45.0 (associativity +22.5, grammaticality -2.2);
+  - 2b: 67.8 / 62.8 / 56.3 / 60.3 (associativity +0.5, grammaticality +7.0).
+- **Signature effect = the training shift:** the grammaticality effect grows from 2a to 2b (+9.2 in people), and the associativity effect shrinks (-22).
+- **Mechanism claim:** concepts carry the shift. It is supported if the full model's grammaticality-effect shift (2b minus 2a) is positive and larger than concepts off's and ACS's.
+- Also reported: Pearson r with the 8 cell means.
+- Caveat stated in advance: the test sets balance global ACS but not terminal-trigram strength (4.63 against 3.31 in 2b), so a position-sensitive score could win on 2b without concepts. The primary span_w score is position-free.
+
 ## P4 pre-registration (fixed 2026-11-21, before any AGL simulation)
 
 - Target: Knowlton & Squire (1996) Experiment 1, controls (N = 18), the 23 distinct training strings shown twice in random order, and the 32 test items, all from docs/AGL_PROTOCOL.md section 1. Meulemans & Van der Linden (1997) is not simulated, because its stimuli are not available.
