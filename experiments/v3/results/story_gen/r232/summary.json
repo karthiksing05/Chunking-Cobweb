@@ -1,0 +1,4 @@
+{"criterion": {"limits": "gain >= .10 on both seeds", "not_limit": "gain < .05 on both seeds"},
+ "best_interior_rsyn": {"13": {"func5": 0.209, "func5_b": 6, "func100": 0.255, "func100_b": 7, "gain": -0.046},
+                        "17": {"func5": 0.189, "func5_b": 7, "func100": 0.235, "func100_b": 7, "gain": -0.046}},
+ "verdict": "does not limit", "max_rsyn_any_cell": 0.255, "jobs": [4821192, 4821193, 4821194, 4821195, 4821196, 4821197]}
