@@ -80,7 +80,7 @@ $n$ & Sentences & Agreement & Kappa & Pass rate, earlier judge & Pass rate, judg
 \end{table}
 
 \paragraph{Boundary-strict count.} Table~\ref{tab:strict} gives the boundary-strict count under the earlier judge from the eight-seed run. The strict count drops distinct sentences whose first word never starts, or whose last word never ends, a real held-out sentence, for every model alike.
-Under it \trellis{} matches the LSTM and beats the GPT only at 250 sentences, and at 1,000 sentences it trails both by about .014.
+Under it \trellis{} is tied with the LSTM at 250 and 500 sentences ($t$ interval; the bootstrap interval disagrees at 500), is ahead of the GPT only at 250, and at 1,000 sentences trails both by about .014.
 A match requires a paired interval that includes zero with a lower bound above $-.03$. Under the $t$ interval, \trellis{} matches the LSTM at 500 sentences on the strict count, and the bootstrap interval says otherwise.
 
 \begin{table}[h]
@@ -100,7 +100,7 @@ $n$ & \trellis{} & LSTM & GPT & \trellis{} $-$ LSTM & \trellis{} $-$ GPT \\
 \end{center}
 \end{table}
 
-On seed 13 at 1,000 sentences, the share of distinct outputs with an atypical boundary falls from .32 to .38 for the plain generator to .07 to .11 for the exact boundary read, and over the four selection seeds the best fair count under the earlier judge rises from .316 (plain generator) to .338 (exact read; round 204 results).
+On seed 13 at 1,000 sentences, the share of distinct outputs with an atypical boundary falls from .32 to .38 for the plain generator to .07 to .11 for the exact boundary read, and over the four selection seeds the best fair count under the earlier judge rises from .316 (plain generator) to .338 (exact read).
 An earlier four-seed run under the earlier judge found a GPT deficit of .014 at 1,000 sentences, and the four additional seeds did not replicate it.
 The temperature grid for \trellis{} extended past the neural grids after its optimum at 250 sentences sat on the grid edge, while the neural optima were interior. At 250 sentences the optimum later moved to temperatures of 4.0 to 4.5, and the main paper reports the pre-fixed value 3.5.
 The four selection seeds supplied the pre-fixed setting for the eight-seed comparison.
@@ -111,7 +111,7 @@ The grid covers 1, 2, or 4 layers, widths 64, 128, or 256, and dropout .1 or .3 
 Training uses AdamW with early stopping (patience six, at most 80 epochs). The generation runs recorded no parameter counts. The compression runs retrained the same grid and selected networks of 0.2 to 1.2 million parameters for the LSTM and 0.23 to 1.7 million for the GPT.
 We sample each neural model at a tuned temperature, because at low temperature a neural model repeats its training data (2 to 14\% of draws are distinct at temperatures .1 to .3).
 
-\paragraph{Judge agreement.} Judge 2 passes more generated sentences than the earlier judge does (.51 to .72 against .41 to .58 of distinct new sentences). The two judges agree on 79 to 81\% of sentences (kappa .55 to .62), and nearly all disagreements are sentences that judge 2 passes and the earlier judge rejects.
+\paragraph{Judge agreement.} Judge 2 passes more generated sentences than the earlier judge does (.51 to .72 against .41 to .58 of distinct new sentences). The two judges agree on 79 to 81\% of sentences (kappa .55 to .62), and most disagreements (77 to 83\%) are sentences that judge 2 passes and the earlier judge rejects.
 
 \paragraph{Frontier of novelty and grammaticality.} A model that copies its training data writes grammatical sentences that are all stored, whereas a model that recombines parts freely writes new sentences and makes more errors.
 To compare models at matched novelty we measure the share of new distinct sentences that contain a trigram unseen in training. Table~\ref{tab:novel} and Figure~\ref{fig:frontier} show that every learner pays for novelty with grammaticality.
@@ -597,7 +597,7 @@ Removing only the chunks overlaps the solid \trellis{} line and is not drawn. Th
 \begin{table}[h]
 \caption{Removal controls on TinyStories after 1,000 sentences (seeds 13 and 17, configuration C8). Code length is bits per held-out sentence. Fair counts use judge 2 at temperature 2.0 and omit the unstored-trigram requirement, so they differ from Table 4 of the main paper.
 Content swap accepted is the share of content-swapped sentences that the generator score accepts at the threshold that accepts 90\% of real sentences (lower is better).
-Chunks off stores no composite. Concepts off reads every record at its own leaf, with back-off to the root. Both off combines the two. At temperatures 1.2 and 3.0 the fair syntax count is .510 and .486 for the full system against .462 and .448 without concepts, and the syntax-and-meaning count is .373 and .297 against .309 and .240. Tree F1 is the mean sentence F1 of the parser against the shallow-phrase reference on set C (right-branching .427).}
+Chunks off stores no composite. Concepts off reads every record at its own leaf, with back-off to the root. Both off combines the two. At temperatures 1.2 and 3.0 the fair syntax count is .510 and .486 for the full system against .462 and .448 without concepts, and the syntax-and-meaning count is .373 and .297 against .309 and .240. Tree F1 is the mean sentence F1 of the parser against the shallow-phrase reference on set C (right-branching .427). Per seed (13 / 17) at temperatures 1.2, 2.0, and 3.0, removing the concepts lowers the fair syntax count by .031 / .065, .069 / .016, and .075 / .001, and the syntax-and-meaning count by .061 / .068, .094 / .014, and .078 / .036 (full minus concepts off). Removing the chunks changes the fair syntax count by +.023 / $-$.021, $-$.018 / $-$.020, and $-$.020 / +.003, and the syntax-and-meaning count by +.017 / $-$.003, $-$.026 / $-$.008, and $-$.027 / $-$.029 (chunks off minus full). The differences for the concepts are all positive but vary from .001 to .094 across the six seed-temperature cells, and those for the chunks take both signs.}
 \label{tab:ablation}
 \begin{center}
 \small
@@ -658,7 +658,7 @@ The right panel shows the size of the first chunk and the pieces per glance, the
 \label{fig:cscurve}
 \end{figure}
 
-\paragraph{File symmetry of the chess judge.} The realism judge of the chess regime study (tau = .702) is a logistic regression on piece-square indicators, piece counts, pawns per file, and material. We moved the 1,000 real held-out positions of its validation set sideways and kept the legal results. The moves were every shift of one or two files that keeps all pieces on the board and the mirror image from the a-file to the h-file. Table~\ref{tab:filesym} gives the share scored real.
+\paragraph{File symmetry of the chess judge.} The realism judge of the chess regime study (decision threshold .702) is a logistic regression on piece-square indicators, piece counts, pawns per file, and material. We moved the 1,000 real held-out positions of its validation set sideways and kept the legal results. The moves were every shift of one or two files that keeps all pieces on the board and the mirror image from the a-file to the h-file. Table~\ref{tab:filesym} gives the share scored real.
 
 \begin{table}[h]
 \caption{Share of file-shifted real held-out positions that the chess realism judge scores real (all results legal; shifts fit only positions without pieces near both edges). Random legal boards score real in .03 of cases.}
@@ -899,10 +899,10 @@ Nonsense & exact context, $W'=0$ & the cat happy \\
 
 \section{The Controlled Grammar with All-Neighbor Word Features}
 
-Table~\ref{tab:r231} gives the class-level dial of configuration C6b in the controlled grammar when the word taxonomy describes each word by every neighbor on either side (the all-neighbor arm), and for three variants that we fixed before running: neighbors named by their class at $b=4$ (abs), immediate neighbors kept apart from those two and three words away (pos), and all neighbors with a suffix facet of the last one to three characters (suffix). Only the word taxonomy changes; the grammar, judge, window 5, $W'=5$, and temperature 1 are those of Table~S25.
-The all-neighbor arm is not the TinyStories configuration C6a. C6a described each word by the 100 most frequent words beside it and kept the 50 most frequent types exact in emission, whereas the all-neighbor arm keeps every neighbor and, like C6b, keeps the five most frequent types exact. We did not run the 100-neighbor taxonomy on the controlled grammar, and Table~S31 runs five function-word features on TinyStories.
+Table~\ref{tab:r231} gives the class-level dial of configuration C6b in the controlled grammar when the word taxonomy describes each word by every neighbor on either side (C6b with all-neighbor features), and for three variants that we fixed before running: neighbors named by their class at $b=4$ (abs), immediate neighbors kept apart from those two and three words away (pos), and all neighbors with a suffix facet of the last one to three characters (suffix). Only the word taxonomy changes; the grammar, judge, window 5, $W'=5$, and temperature 1 are those of Table~S25.
+The all-neighbor arm, which we call C6b with all-neighbor features, is not the TinyStories configuration C6a. C6a described each word by the 100 most frequent words beside it and kept the 50 most frequent types exact in emission, whereas the all-neighbor arm keeps every neighbor and, like C6b, keeps the five most frequent types exact (as do the three variants). We did not run the 100-neighbor taxonomy on the controlled grammar, and Table~S31 runs five function-word features on TinyStories.
 The controlled grammar therefore fails with the all-neighbor representation, and the representation, not only the data and the judge, limits the middle regime there.
-On TinyStories, one earlier seed-13 check at 1,000 sentences (class gate and emission at $b=3$ to 7) used the 50 or 100 most frequent neighbors, or all neighbors at $b=3$ and $b=6$, and its syntax-only shares were .18 to .26 (notes of round 214, addenda 6 and 7), so a representation change among these three sets did not lift the share there either.
+On TinyStories, one earlier seed-13 check at 1,000 sentences (class gate and emission at $b=3$ to 7) used the 50 or 100 most frequent neighbors, or all neighbors at $b=3$ and $b=6$, and its syntax-only shares were .18 to .26, so a representation change among these three sets did not lift the share there either.
 
 \begin{table}[h]
 \caption{Regime shares (meaningful / syntax-only / nonsense) of the class-level dial in the controlled grammar with word features other than the five function words, seed 13 | seed 17, 1,600 generations per cell. The leaf and $b=0$ rows do not depend on the features. The target is a syntax-only share of .5 or more on both seeds.}
@@ -933,7 +933,7 @@ suffix & 4,000 & $b=6$ & .36/.63/.02 \;|\; .44/.42/.15 \\
 
 \section{Five Function-Word Features on TinyStories}
 
-Table~\ref{tab:r232} replaces the 100-neighbor word taxonomy of configuration C6a with the five-function-word taxonomy of C6b and keeps everything else of C6a (1,000 sentences, window 7, temperature 1, the 50 most frequent types exact, 400 prompts with four draws each, judge 2). We reran C6a in the same batch and judged both in one pass; its seed-13 rows reproduce the earlier run exactly. We fixed in advance that a gain of .10 or more in the best interior syntax-only share on both seeds would implicate the representation and a gain below .05 on both seeds would not. The five-function-word classes are purer in part of speech at $b=4$ to 6 (.75 to .76 against .64 to .68 at $b=6$), yet the syntax-only share falls by .046 on both seeds, so the representation does not explain the thin middle regime on TinyStories.
+Table~\ref{tab:r232} replaces the 100-neighbor word taxonomy of configuration C6a with the five-function-word taxonomy of C6b and keeps everything else of C6a, including its 50 exact types where C6b keeps five (1,000 sentences, window 7, temperature 1, 400 prompts with four draws each, judge 2). We reran C6a in the same batch and judged both in one pass; its seed-13 rows reproduce the earlier run exactly. We fixed in advance that a gain of .10 or more in the best interior syntax-only share on both seeds would implicate the representation and a gain below .05 on both seeds would not. The five-function-word classes are purer in part of speech at $b=4$ to 6 (.75 to .76 against .64 to .68 at $b=6$), yet the syntax-only share falls by .046 on both seeds, so the representation does not explain the thin middle regime on TinyStories.
 
 \begin{table}[h]
 \caption{Regime shares (meaningful / syntax-only / nonsense) on TinyStories with five function-word features and with the 100-neighbor taxonomy of C6a, seed 13 | seed 17, 1,600 generations per cell, judge 2. The leaf and $b=0$ rows do not depend on the taxonomy.}
