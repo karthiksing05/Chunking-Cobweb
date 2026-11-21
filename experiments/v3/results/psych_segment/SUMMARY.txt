@@ -1,0 +1,69 @@
+
+=== Frank Exp 1 (words per sentence) ===  (model = mean over participants of the per-participant mean Luce / choice; human = % correct / 100)
+  cond   n human mean   beta  TRELLIS full Luce  TRELLIS full bits TRELLIS c-off Luce TRELLIS c-off bits                 TP
+     1  12      0.872   2.31              1.000              0.472              1.000              0.478              1.000
+     2  12      0.805   1.56              0.999              0.461              0.914              0.501              0.910
+     3  12      0.808   1.64              0.994              0.537              0.883              0.500              0.881
+     4  12      0.790   1.39              0.970              0.511              0.883              0.500              0.870
+     6  12      0.750   1.32              0.962              0.457              0.879              0.500              0.859
+     8  12      0.770   1.31              0.951              0.490              0.869              0.500              0.851
+    12  12      0.686   0.86              0.937              0.519              0.861              0.500              0.844
+    24  12      0.603   0.45              0.916              0.544              0.849              0.500              0.840
+correlation with human condition means (Pearson / Spearman) | with betas (Pearson / Spearman)
+     TRELLIS full Luce: 0.93 / 0.95   |   0.91 / 0.98
+     TRELLIS full bits: -0.55 / -0.31   |   -0.55 / -0.38
+    TRELLIS c-off Luce: 0.77 / 0.90   |   0.88 / 0.93
+    TRELLIS c-off bits: -0.52 / -0.22   |   -0.69 / -0.22
+                    TP: 0.76 / 0.95   |   0.87 / 0.98
+
+=== Frank Exp 2 (tokens) ===  (model = mean over participants of the per-participant mean Luce / choice; human = % correct / 100)
+  cond   n human mean   beta  TRELLIS full Luce  TRELLIS full bits TRELLIS c-off Luce TRELLIS c-off bits                 TP
+    48  12      0.572   0.08              0.924              0.467              0.860              0.500              0.842
+   100  12      0.638   0.39              0.961              0.557              0.883              0.500              0.869
+   300  12      0.708   0.75              0.968              0.457              0.881              0.500              0.870
+   600  12      0.705   0.76              0.971              0.476              0.884              0.500              0.872
+   900  12      0.753   1.03              0.974              0.539              0.881              0.500              0.870
+  1200  12      0.800   1.33              0.977              0.474              0.879              0.500              0.869
+correlation with human condition means (Pearson / Spearman) | with betas (Pearson / Spearman)
+     TRELLIS full Luce: 0.90 / 0.94   |   0.87 / 1.00
+     TRELLIS full bits: -0.02 / -0.03   |   -0.04 / 0.14
+    TRELLIS c-off Luce: 0.63 / -0.03   |   0.58 / 0.14
+    TRELLIS c-off bits:   -   /   -     |     -   /   -  
+                    TP: 0.75 / 0.49   |   0.71 / 0.60
+
+=== Frank Exp 3 (word types) ===  (model = mean over participants of the per-participant mean Luce / choice; human = % correct / 100)
+  cond   n human mean   beta  TRELLIS full Luce  TRELLIS full bits TRELLIS c-off Luce TRELLIS c-off bits                 TP
+     3  12      0.874   2.12              0.918              0.558              0.748              0.500              0.727
+     4  12      0.811   1.77              0.952              0.457              0.804              0.500              0.799
+     5  12      0.753   1.17              0.955              0.536              0.848              0.500              0.842
+     6  12      0.718   0.84              0.972              0.599              0.883              0.500              0.870
+     9  12      0.650   0.39              0.984              0.515              0.914              0.500              0.869
+correlation with human condition means (Pearson / Spearman) | with betas (Pearson / Spearman)
+     TRELLIS full Luce: -0.96 / -1.00   |   -0.94 / -1.00
+     TRELLIS full bits: -0.10 / 0.00   |   -0.20 / 0.00
+    TRELLIS c-off Luce: -0.99 / -1.00   |   -0.99 / -1.00
+    TRELLIS c-off bits:   -   /   -     |     -   /   -  
+                    TP: -0.94 / -0.90   |   -0.93 / -0.90
+
+Reference (doc 2.4, Frank et al. vs human means): TP .84 / .43 / -.99; lexical model .94 / .89 / -.98; PARSER .00 / .86 / .00.
+Human betas are condition coefficients (logit scale); Exp 2 order of the last four is presumed (doc 2.3).
+
+=== SAN96 infants Exp 1 (words vs nonwords) ===  (human: words-vs-part-words proportion better .06, looks longer to the novel foil; SAN96b 12/16 prefer nonwords)
+ cond          arm   n    Luce  prop better  bits choice  TP Luce
+    A         full   8   1.000        1.000        0.656    1.000
+    A  conceptsoff   8   1.000        1.000        0.500    1.000
+    B         full   8   1.000        1.000        0.578    1.000
+    B  conceptsoff   8   1.000        1.000        0.500    1.000
+  all         full  16   1.000        1.000        0.617    1.000
+  all  conceptsoff  16   1.000        1.000        0.500    1.000
+  infants with words more familiar (full arm): 16 of 16
+
+=== SAN96 infants Exp 2 (words vs part-words) ===  (human: words-vs-part-words proportion better .06, looks longer to the novel foil; SAN96b 12/16 prefer nonwords)
+ cond          arm   n    Luce  prop better  bits choice  TP Luce
+    A         full   8   0.681        0.362        0.625    0.755
+    A  conceptsoff   8   0.741        0.482        0.500    0.755
+    B         full   8   0.727        0.455        0.422    0.744
+    B  conceptsoff   8   0.730        0.461        0.500    0.744
+  all         full  16   0.704        0.409        0.523    0.750
+  all  conceptsoff  16   0.736        0.471        0.500    0.750
+  infants with words more familiar (full arm): 16 of 16
