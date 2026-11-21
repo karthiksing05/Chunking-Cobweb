@@ -87,6 +87,15 @@ Diagnosis (full arm, seed 13):
 - Also reported: Pearson r with the 8 cell means.
 - Caveat stated in advance: the test sets balance global ACS but not terminal-trigram strength (4.63 against 3.31 in 2b), so a position-sensitive score could win on 2b without concepts. The primary span_w score is position-free.
 
+### P4b result (2026-11-21; results/psych_agl/SUMMARY_MVDL.txt, 20 subjects per experiment)
+
+**Mechanism not supported.** The full model's grammaticality shift (2b minus 2a) is -8.8 ± 1.4, against +9.2 in people. Concepts off and ACS are both -12.5, and TP is 0. The criterion's "larger than" holds only as a smaller negative shift.
+- The associativity effect is far too large in every arm (+50 to +88, against people's +22 in 2a and +0.5 in 2b), and it does not fall with training (full: +6.9).
+- Cell-mean r: 2a .93 (every arm .93-.995, carried by associativity); 2b .03; all 8 cells .56 (TP .70).
+- The secondary limit arm gives a shift of +5.6 ± 3.3 (about 1.7 SE). It was not pre-registered as the decision arm and is not counted.
+- Reading: the stored-familiarity read is a chunk-strength measure, and C3's concepts do not add a grammaticality signal that grows with training on this task.
+- The nolimit P3b reference was cancelled at session 70. It tracks the full arm (span at session 50: 33-43 against 31-39), which confirms that the limit does not set the rate.
+
 ## P4 pre-registration (fixed 2026-11-21, before any AGL simulation)
 
 - Target: Knowlton & Squire (1996) Experiment 1, controls (N = 18), the 23 distinct training strings shown twice in random order, and the 32 test items, all from docs/AGL_PROTOCOL.md section 1. Meulemans & Van der Linden (1997) is not simulated, because its stimuli are not available.

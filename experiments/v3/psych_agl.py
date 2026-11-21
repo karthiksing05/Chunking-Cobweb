@@ -78,7 +78,8 @@ def endorse(scores, rng):
     return en
 
 
-def tp_scores(train_seq):
+def tp_scores(train_seq, items=None):
+    items = ITEMS if items is None else items
     c1, c2, c3 = Counter(), Counter(), Counter()
     for s in train_seq:
         q = ["#"] + list(s) + ["#"]
@@ -88,7 +89,7 @@ def tp_scores(train_seq):
         for a, b, c in zip(q, q[1:], q[2:]):
             c3[(a, b, c)] += 1
     out = []
-    for _, s, _ in ITEMS:
+    for _, s, _ in items:
         q = ["#"] + list(s) + ["#"]
         ps = [c2[(a, b)] / c1[a] if c1[a] else 0.0 for a, b in zip(s, s[1:])]
         # trigram TP within the item; the leading # is the context of the first letter, not scored (as psych_segment.TP)
@@ -230,17 +231,218 @@ def summary(outdir):
     print("\n".join(out))
 
 
+# ---- MVdL97 stimuli, transcribed from docs/AGL_PROTOCOL.md section 2.3-2.4 (Appendix C/D); ACS = recomputed global ACS ----
+MV_TRAIN = {
+    "2a": ("MXRVVVV MVXRMXT MVRVVV VMRVXT VXTRRRR MXRVXVR VMRVVVM VMRMVR VXVRVMT MXRMVRV MVXTRX MVXRVMR MXRVMRM VMRVMRV VMRVVM VMRVXVT MVXTRR MVXRM MXRMVRM MXTRRRX VMRTMXR MXTRR MVR VMTX VXVTRR MXRMVR MVXRVXT VXVTRRX VMRVMTR MVXRMXR MXRVXTR MVXRVV").split(),
+    "2b": ("VXVTX VXTRRX MVXRVVV VXVRVM VMRMXRM VXVT VXTRX MVXRMXT MXRVXVR MXRVXTR VXVTR VMRTVXT MVRVVM VMRMXTR MXRM VXVTRRR VXTX VXTRRR MXRMVXT MXRMXR VXVTRR MVXTRRX MXRMVR MXRVVV MXRVMT VMTRX VXVRVVV VXVRVVM MXRMXT MXRVV VMRTMXR VMTRR MVXRM MVRVM MVXRVVM VMTX MVRVVVV VXVRV VMRVXTX MXRVVM VMTRRRX MXTRRRX MXRVXVT MXRVMTR VMRVXTR VMTRRX MXTRRR MXRVMTX MVXTRR VMRVMT MXRTVMT MVRVV MXRVVVV MVXRVV MXRVXT MXTX MXRTVMR MXRMVRV MXRVVVM VMRMXRV MXTRX VXTRRRR MXTR VMT VMRMXR MXTRRX MXRMVRM VMRVXVT MXRMXRM VMRVVM VMRTMXT MVRVVVM VMRMVR VMRVXVR VMRVV MXRTVXT VXVR VXTRR MVXRV VMRM VMTRRRR VMTR MVXTR VXVRVMR VMRVMRM VMRTVMT VXVRVV VMRVMTX VMRMVXT VXT MVRM MVXTRRR VMRVVVV VXTR MXRVMRV VMTRRR MXTRR MXRVXTX MVXT MXRV MVRVVV VMRMVRM VMRMVRV VMRVVV VMRVMRV MVR VMRMXTX MXRMVXR VMRVMTR VMRVMR MVXTX VXVRMXR MVXRMXR VMRMXT VMRV VXTRRRX VMRTVMR MVXRVMT MXT MXRTMVR MXTRRRR MVRV MVXR VMRVVVM VMR").split(),
+}
+MV_TEST = {
+    "2a": {
+        "GA": [("MVXRVVV", 10.09), ("MXRMVXT", 9.91), ("MXRMXRM", 9.45), ("MXRVMT", 9.67), ("MXRVXVT", 8.91), ("VMRVMRM", 10.55), ("VMRVXTR", 10.36), ("VXVRVXT", 8.55), ],
+        "GNA": [("MXRMXTX", 7.09), ("MXRTVMR", 6.82), ("VMRTVXT", 6.55), ("VMTRRRX", 5.82), ("VXTX", 6.60), ("VXVTR", 6.29), ("VXVTRX", 5.33), ("VXVTX", 4.86), ],
+        "NGA": [("MVRMVXT", 8.73), ("MVRMXR", 8.44), ("MVRVMRM", 9.27), ("MVRVXRM", 9.64), ("MVRVXT", 9.44), ("MXRVXRM", 10.73), ("VMRVVMR", 10.55), ("VMRVXRM", 10.91), ],
+        "NGNA": [("MVRVRRX", 6.36), ("MXTRVX", 8.67), ("VMRTMTR", 5.00), ("VMRTRXT", 5.64), ("VXVMRRR", 7.82), ("VXVRX", 5.71), ("VXVTMXT", 5.36), ("VXVTRMR", 5.82), ],
+    },
+    "2b": {
+        "GA": [("MVXRVMR", 36.00), ("MVXRVXT", 32.45), ("MXRMXRV", 36.09), ("MXRMXTX", 28.18), ("MXRVMR", 41.11), ("VMRVM", 43.14), ("VMRVXT", 38.11), ("VXVRVXT", 28.45), ],
+        "GNA": [("MVXRMVR", 26.18), ("MVXTRX", 25.89), ("VMRTMVR", 22.27), ("VXVRM", 22.14), ("VXVRMVR", 21.82), ("VXVRMXT", 24.73), ("VXVRVMT", 28.00), ("VXVTRX", 16.44), ],
+        "NGA": [("MVRVMRV", 34.45), ("MVXRVXR", 31.82), ("MXRVXR", 36.00), ("MXRVXRM", 33.45), ("MXRVXRV", 36.27), ("VMRVXR", 37.33), ("VMRVXRM", 34.55), ("VMRVXRV", 37.36), ],
+        "NGNA": [("MVRMVRM", 20.82), ("MVRMVRV", 24.00), ("MVRMXTX", 22.09), ("MVRVXT", 29.78), ("MVXVRV", 26.89), ("MVXVTR", 20.78), ("MVXVTRX", 18.18), ("VXVRVXR", 27.82), ],
+    },
+}
+
+
+# ------------------------------------------------------------------------------------------------ MVdL97 Exps 2a / 2b
+# Binding design: docs/PLAN_PSYCH.md "P4b pre-registration" (inherits P4). Stimuli: docs/AGL_PROTOCOL.md section 2.
+MV_SEEDS = list(range(13, 33))
+MV_CELLS = ("GA", "GNA", "NGA", "NGNA")
+MV_HUMAN = {"2a": {"GA": 65.3, "GNA": 42.8, "NGA": 67.5, "NGNA": 45.0},
+            "2b": {"GA": 67.8, "GNA": 62.8, "NGA": 56.3, "NGNA": 60.3}}
+MV_STORE_S, MV_GAIN_S, MV_REC_W = 8.0, 3.0, 0.5     # limit arm: 8 s to store a new string, +3 s per presentation, REC_W as psych_digits
+MV_ASSUMPTION = ("2a: one random order of the 32 strings per seed, shown twice in that order (64 learns); 2b: the 125 strings once in a "
+                 "random order per seed (125 learns); full_x2 (2b sensitivity) = that order repeated twice. Test = the 32 strings of "
+                 "each experiment, cells GA/GNA/NGA/NGNA, acs arm = recomputed global ACS per item (AGL_PROTOCOL 2.4). Primary score "
+                 "span_w, median split with random tie-break (top 16 of 32). limit arm: clock += 3 s per presentation; a string with "
+                 "span_w(whole string) >= 0.5 is reinforced +1 without learn(); else learn() costs 8 s and happens only if clock >= 8 "
+                 "(clock starts at 0); otherwise the presentation is lost.")
+MV_ITEMS = {e: [(c, s, acs) for c in MV_CELLS for s, acs in MV_TEST[e][c]] for e in MV_TEST}
+for _e in MV_ITEMS:
+    assert len(MV_ITEMS[_e]) == 32
+assert len(MV_TRAIN["2a"]) == 32 and len(set(MV_TRAIN["2a"])) == 32
+assert len(MV_TRAIN["2b"]) == 125 and len(set(MV_TRAIN["2b"])) == 125
+
+
+def run_mv(exp, arm, seed, outdir, twice=False):
+    t0 = time.time()
+    e = exp[4:]                                              # "2a" / "2b"
+    items = MV_ITEMS[e]
+    rng = random.Random(f"mvdl{e}-{seed}")
+    order = list(MV_TRAIN[e])
+    rng.shuffle(order)
+    reps = 2 if (e == "2a" or twice) else 1
+    seq = order * reps
+    res = {"exp": exp, "arm": arm, "twice": twice, "seed": seed, "assumption": MV_ASSUMPTION, "cfg": CFG, "train_order": seq,
+           "n_presentations": len(seq), "items": [{"cell": c, "string": s, "acs": a} for c, s, a in items]}
+    erng = random.Random(f"mvdl{e}-endorse-{seed}")
+    scores = {}
+    if arm == "acs":
+        scores["acs"] = [a for _, _, a in items]
+    elif arm == "tp":
+        scores["tp"] = tp_scores(seq, items)
+    else:
+        kw = {"concepts_off": True, "concepts_off_parse": True} if arm == "conceptsoff" else {}
+        L = Trellis3Seg(seed=seed, **CFG, **kw)
+        tl = time.time()
+        if arm == "limit":
+            clock, nl, nr, nskip = 0.0, 0, 0, 0
+            for s in seq:
+                clock += MV_GAIN_S
+                tup = tuple(s)
+                if L.S(tup) >= MV_REC_W:
+                    L.span_w[tup] += 1.0
+                    nr += 1
+                elif clock >= MV_STORE_S:
+                    L.learn_buf(list(s))
+                    clock -= MV_STORE_S
+                    nl += 1
+                else:
+                    nskip += 1
+            res["limit"] = {"learned": nl, "reinforced": nr, "lost": nskip, "clock_end": clock}
+        else:
+            for s in seq:
+                L.learn_buf(list(s))
+        res["learn_s"] = time.time() - tl
+        res["n_records"] = len(L.records)
+        sp, lz, rg, cache = [], [], [], {}
+        for _, s, _ in items:
+            if s not in cache:
+                toks = list(s)
+                n = len(toks)
+                spans = [tuple(toks[i:j]) for i in range(n) for j in range(i + 2, n + 1)]
+                spw = sum(L.S(x) for x in spans) / len(spans)
+                L._quiet = True
+                try:
+                    r = L.parse(toks)
+                    bits = sum(L._deriv_bits(r["comps"][k]) for k in r["chosen"])
+                finally:
+                    L._quiet = False
+                cache[s] = (spw, r["logZ"] / n, -bits / n)
+            sp.append(cache[s][0]), lz.append(cache[s][1]), rg.append(cache[s][2])
+        scores["span_w"], scores["logZ"], scores["regen"] = sp, lz, rg
+    res["scores"] = scores
+    res["endorse"] = {k: endorse(v, erng) for k, v in scores.items()}
+    res["cell_endorse"] = {k: {c: 100 * sum(x for x, it in zip(v, items) if it[0] == c) / 8 for c in MV_CELLS}
+                           for k, v in res["endorse"].items()}
+    res["time_s"] = time.time() - t0
+    os.makedirs(outdir, exist_ok=True)
+    with open(os.path.join(outdir, f"s{seed}.json"), "w", encoding="utf-8") as f:
+        json.dump(res, f)
+    print(json.dumps({"exp": exp, "arm": arm, "seed": seed, "cells": res["cell_endorse"], "time_s": round(res["time_s"], 1)}), flush=True)
+
+
+def _mv_effects(subs, key):
+    ce = [s["cell_endorse"][key] for s in subs]
+    gram = [(x["GA"] + x["GNA"]) / 2 - (x["NGA"] + x["NGNA"]) / 2 for x in ce]
+    assoc = [(x["GA"] + x["NGA"]) / 2 - (x["GNA"] + x["NGNA"]) / 2 for x in ce]
+    m = {c: mean([x[c] for x in ce]) for c in MV_CELLS}
+    return ce, m, gram, assoc
+
+
+def summary_mv(outdir):
+    arms = ["full", "conceptsoff", "acs", "tp", "limit"]
+    out = ["Meulemans & Van der Linden (1997) Exps 2a/2b, TRELLIS simulation (psych_agl.py --exp mvdl2a|mvdl2b). Endorsement % per cell.",
+           "Pre-registration: docs/PLAN_PSYCH.md P4b. Subjects = seeds 13..32 (N=20 per experiment). Primary score = span_w (arms full, conceptsoff),",
+           "acs (recomputed global ACS), tp. limit arm and logZ/regen scores are secondary. Associativity effect = A - NA; grammaticality effect = G - NG.",
+           "Human cells (GA/GNA/NGA/NGNA): 2a 65.3/42.8/67.5/45.0 (assoc +22.5, gram -2.2); 2b 67.8/62.8/56.3/60.3 (assoc +0.5, gram +7.0); "
+           "human shift 2b-2a: gram +9.2, assoc -22.0", "", "ASSUMPTIONS: " + MV_ASSUMPTION, ""]
+    st = {}
+    for e in ("2a", "2b"):
+        out.append(f"=== Experiment {e} ===")
+        for sub in arms + (["full_x2"] if e == "2b" else []):
+            d = os.path.join(outdir, f"mvdl{e}", sub)
+            if not os.path.isdir(d) or not any(f.endswith(".json") for f in os.listdir(d)):
+                continue
+            subs = load(d)
+            for key in subs[0]["endorse"]:
+                tag = "PRIMARY" if key in ("span_w", "acs", "tp") and sub != "limit" else "secondary"
+                if sub == "full_x2":
+                    tag = "SENSITIVITY (shown twice)" + ("" if key == "span_w" else ", secondary")
+                ce, m, gram, assoc = _mv_effects(subs, key)
+                H = MV_HUMAN[e]
+                r = pearson([m[c] for c in MV_CELLS], [H[c] for c in MV_CELLS])
+                out.append(f"[{sub}] score = {key} ({tag}), n = {len(subs)}")
+                out.append("    cells (mean +- SD): " + "  ".join(f"{c} {m[c]:5.1f}+-{sd([x[c] for x in ce]):4.1f}" for c in MV_CELLS))
+                out.append(f"    grammaticality effect {mean(gram):6.1f} (SD {sd(gram):.1f}, paired t({len(gram)-1})={paired_t(gram)[0]:.2f})   "
+                           f"associativity effect {mean(assoc):6.1f} (SD {sd(assoc):.1f}, t={paired_t(assoc)[0]:.2f})   Pearson r (4 cells) {r:.3f}")
+                if sub == "limit":
+                    lm = [s["limit"] for s in subs]
+                    out.append("    limit bookkeeping (mean per subject): learned %.1f, reinforced %.1f, lost %.1f" % (
+                        mean([x["learned"] for x in lm]), mean([x["reinforced"] for x in lm]), mean([x["lost"] for x in lm])))
+                out.append("")
+                st[(e, sub, key)] = {"m": m, "gram": gram, "assoc": assoc}
+    out.append("=== Shift table: effect in 2b minus effect in 2a (percentage points; SE from the 20 seeds of each experiment, Welch) ===")
+    out.append("Human shift: grammaticality +9.2, associativity -22.0")
+    out.append(f"{'arm':12s} {'score':8s} {'gram 2a':>8s} {'gram 2b':>8s} {'gram shift':>10s} {'+-SE':>6s}   {'assoc 2a':>8s} {'assoc 2b':>8s} {'assoc shift':>11s} {'+-SE':>6s}   r8")
+    shifts = {}
+    for arm in arms:
+        keys = sorted({k for (e, a, k) in st if a == arm}, key=lambda k: (k not in ("span_w", "acs", "tp"), k))
+        for key in keys:
+            if ("2a", arm, key) not in st or ("2b", arm, key) not in st:
+                continue
+            a, b = st[("2a", arm, key)], st[("2b", arm, key)]
+            gs = mean(b["gram"]) - mean(a["gram"])
+            asf = mean(b["assoc"]) - mean(a["assoc"])
+            gse = math.sqrt(sd(a["gram"]) ** 2 / len(a["gram"]) + sd(b["gram"]) ** 2 / len(b["gram"]))
+            ase = math.sqrt(sd(a["assoc"]) ** 2 / len(a["assoc"]) + sd(b["assoc"]) ** 2 / len(b["assoc"]))
+            r8 = pearson([a["m"][c] for c in MV_CELLS] + [b["m"][c] for c in MV_CELLS],
+                         [MV_HUMAN["2a"][c] for c in MV_CELLS] + [MV_HUMAN["2b"][c] for c in MV_CELLS])
+            shifts[(arm, key)] = (gs, gse, asf, ase)
+            out.append(f"{arm:12s} {key:8s} {mean(a['gram']):8.1f} {mean(b['gram']):8.1f} {gs:10.1f} {gse:6.1f}   {mean(a['assoc']):8.1f} "
+                       f"{mean(b['assoc']):8.1f} {asf:11.1f} {ase:6.1f}   {r8:.3f}")
+    out.append("(r8 = Pearson r of the 8 simulated cell means, 2a then 2b, with the 8 human cell means.)")
+    out.append("")
+    out.append("=== Pre-registered mechanism criterion (primary scores) ===")
+    out.append("Claim: concepts carry the shift. Holds if the full model's grammaticality shift (2b - 2a) is positive and larger than conceptsoff's and acs's.")
+    if ("full", "span_w") in shifts:
+        gf, sef = shifts[("full", "span_w")][:2]
+        ok = gf > 0
+        out.append(f"  full span_w grammaticality shift {gf:+.1f} +- {sef:.1f} -> {'positive' if gf > 0 else 'NOT positive'}")
+        for o, okey in (("conceptsoff", "span_w"), ("acs", "acs")):
+            if (o, okey) in shifts:
+                go, seo = shifts[(o, okey)][:2]
+                diff, se = gf - go, math.sqrt(sef ** 2 + seo ** 2)
+                ok = ok and gf > go
+                out.append(f"  vs {o} {go:+.1f} +- {seo:.1f}: difference {diff:+.1f} +- {se:.1f} (z = {diff / se:.2f}) -> {'larger' if gf > go else 'NOT larger'}")
+        if ("tp", "tp") in shifts:
+            go, seo = shifts[("tp", "tp")][:2]
+            out.append(f"  (reference, not in the criterion) tp {go:+.1f} +- {seo:.1f}")
+        out.append(f"CRITERION {'HOLDS' if ok else 'DOES NOT HOLD'} (point estimates; the SEs above say whether the margins exceed across-seed noise).")
+    with open(os.path.join(outdir, "SUMMARY_MVDL.txt"), "w", encoding="utf-8") as fh:
+        fh.write("\n".join(out) + "\n")
+    print("\n".join(out))
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("mode", choices=["run", "summary"])
-    ap.add_argument("--arm", default="full", choices=["full", "conceptsoff", "acs", "tp"])
-    ap.add_argument("--seeds", default=",".join(map(str, SEEDS)))
+    ap.add_argument("--exp", default="ks96", choices=["ks96", "mvdl2a", "mvdl2b"])
+    ap.add_argument("--arm", default="full", choices=["full", "conceptsoff", "acs", "tp", "limit"])
+    ap.add_argument("--seeds", default=None)
     ap.add_argument("--train26", action="store_true")
+    ap.add_argument("--twice", action="store_true", help="mvdl2b sensitivity: show the 125 strings twice (full arm only)")
     ap.add_argument("--out", default=OUT)
     a = ap.parse_args()
     if a.mode == "summary":
-        summary(a.out)
-    else:
+        if a.exp == "ks96":
+            summary(a.out)
+        else:
+            summary_mv(a.out)
+    elif a.exp == "ks96":
+        assert a.arm != "limit"
         sub = "sens26_full" if a.train26 else a.arm
-        for s in [int(x) for x in a.seeds.split(",")]:
+        for s in [int(x) for x in (a.seeds or ",".join(map(str, SEEDS))).split(",")]:
             run_one(a.arm, s, os.path.join(a.out, sub), TRAIN26 if a.train26 else TRAIN23)
+    else:
+        assert not a.twice or (a.exp == "mvdl2b" and a.arm == "full")
+        sub = "full_x2" if a.twice else a.arm
+        for s in [int(x) for x in (a.seeds or ",".join(map(str, MV_SEEDS))).split(",")]:
+            run_mv(a.exp, a.arm, s, os.path.join(a.out, a.exp, sub), twice=a.twice)

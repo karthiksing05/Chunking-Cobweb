@@ -1,0 +1,138 @@
+Meulemans & Van der Linden (1997) Exps 2a/2b, TRELLIS simulation (psych_agl.py --exp mvdl2a|mvdl2b). Endorsement % per cell.
+Pre-registration: docs/PLAN_PSYCH.md P4b. Subjects = seeds 13..32 (N=20 per experiment). Primary score = span_w (arms full, conceptsoff),
+acs (recomputed global ACS), tp. limit arm and logZ/regen scores are secondary. Associativity effect = A - NA; grammaticality effect = G - NG.
+Human cells (GA/GNA/NGA/NGNA): 2a 65.3/42.8/67.5/45.0 (assoc +22.5, gram -2.2); 2b 67.8/62.8/56.3/60.3 (assoc +0.5, gram +7.0); human shift 2b-2a: gram +9.2, assoc -22.0
+
+ASSUMPTIONS: 2a: one random order of the 32 strings per seed, shown twice in that order (64 learns); 2b: the 125 strings once in a random order per seed (125 learns); full_x2 (2b sensitivity) = that order repeated twice. Test = the 32 strings of each experiment, cells GA/GNA/NGA/NGNA, acs arm = recomputed global ACS per item (AGL_PROTOCOL 2.4). Primary score span_w, median split with random tie-break (top 16 of 32). limit arm: clock += 3 s per presentation; a string with span_w(whole string) >= 0.5 is reinforced +1 without learn(); else learn() costs 8 s and happens only if clock >= 8 (clock starts at 0); otherwise the presentation is lost.
+
+=== Experiment 2a ===
+[full] score = span_w (PRIMARY), n = 20
+    cells (mean +- SD): GA  75.0+- 0.0  GNA  36.2+- 3.8  NGA  75.0+- 4.1  NGNA  13.8+- 5.6
+    grammaticality effect   11.2 (SD 3.8, paired t(19)=13.08)   associativity effect   50.0 (SD 4.1, t=55.14)   Pearson r (4 cells) 0.928
+
+[full] score = logZ (secondary), n = 20
+    cells (mean +- SD): GA  86.9+- 2.8  GNA  37.5+- 0.0  NGA  56.2+- 6.4  NGNA  19.4+- 6.4
+    grammaticality effect   24.4 (SD 2.8, paired t(19)=39.00)   associativity effect   43.1 (SD 6.4, t=30.23)   Pearson r (4 cells) 0.812
+
+[full] score = regen (secondary), n = 20
+    cells (mean +- SD): GA  57.5+-13.1  GNA  35.6+- 8.4  NGA  48.1+-13.6  NGNA  58.8+-11.5
+    grammaticality effect   -6.9 (SD 13.7, paired t(19)=-2.24)   associativity effect    5.6 (SD 12.5, t=2.02)   Pearson r (4 cells) 0.338
+
+[conceptsoff] score = span_w (PRIMARY), n = 20
+    cells (mean +- SD): GA  87.5+- 0.0  GNA  12.5+- 0.0  NGA  87.5+- 0.0  NGNA  12.5+- 0.0
+    grammaticality effect    0.0 (SD 0.0, paired t(19)=nan)   associativity effect   75.0 (SD 0.0, t=nan)   Pearson r (4 cells) 0.995
+
+[conceptsoff] score = logZ (secondary), n = 20
+    cells (mean +- SD): GA  63.1+- 8.6  GNA  33.8+- 9.2  NGA  50.0+-10.7  NGNA  53.1+- 9.8
+    grammaticality effect   -3.1 (SD 12.1, paired t(19)=-1.16)   associativity effect   13.1 (SD 9.5, t=6.19)   Pearson r (4 cells) 0.633
+
+[conceptsoff] score = regen (secondary), n = 20
+    cells (mean +- SD): GA  55.6+-10.3  GNA  35.0+- 9.6  NGA  63.8+-12.1  NGNA  45.6+-13.6
+    grammaticality effect   -9.4 (SD 12.7, paired t(19)=-3.29)   associativity effect   19.4 (SD 16.0, t=5.43)   Pearson r (4 cells) 0.937
+
+[acs] score = acs (PRIMARY), n = 20
+    cells (mean +- SD): GA 100.0+- 0.0  GNA   0.0+- 0.0  NGA  87.5+- 0.0  NGNA  12.5+- 0.0
+    grammaticality effect    0.0 (SD 0.0, paired t(19)=nan)   associativity effect   87.5 (SD 0.0, t=nan)   Pearson r (4 cells) 0.985
+
+[tp] score = tp (PRIMARY), n = 20
+    cells (mean +- SD): GA  87.5+- 0.0  GNA  12.5+- 0.0  NGA  87.5+- 0.0  NGNA  12.5+- 0.0
+    grammaticality effect    0.0 (SD 0.0, paired t(19)=nan)   associativity effect   75.0 (SD 0.0, t=nan)   Pearson r (4 cells) 0.995
+
+[limit] score = span_w (secondary), n = 20
+    cells (mean +- SD): GA  75.6+- 8.6  GNA  23.8+- 9.9  NGA  83.8+-10.8  NGNA  16.9+- 8.4
+    grammaticality effect   -0.6 (SD 9.5, paired t(19)=-0.29)   associativity effect   59.4 (SD 10.6, t=24.97)   Pearson r (4 cells) 0.988
+    limit bookkeeping (mean per subject): learned 23.0, reinforced 12.6, lost 28.4
+
+[limit] score = logZ (secondary), n = 20
+    cells (mean +- SD): GA  81.2+- 8.6  GNA  38.1+- 7.6  NGA  51.9+-12.4  NGNA  28.8+-16.3
+    grammaticality effect   19.4 (SD 10.3, paired t(19)=8.40)   associativity effect   33.1 (SD 17.8, t=8.32)   Pearson r (4 cells) 0.784
+    limit bookkeeping (mean per subject): learned 23.0, reinforced 12.6, lost 28.4
+
+[limit] score = regen (secondary), n = 20
+    cells (mean +- SD): GA  64.4+-10.9  GNA  36.9+-12.5  NGA  53.1+-15.6  NGNA  45.6+-15.3
+    grammaticality effect    1.2 (SD 15.7, paired t(19)=0.36)   associativity effect   17.5 (SD 18.3, t=4.27)   Pearson r (4 cells) 0.856
+    limit bookkeeping (mean per subject): learned 23.0, reinforced 12.6, lost 28.4
+
+=== Experiment 2b ===
+[full] score = span_w (PRIMARY), n = 20
+    cells (mean +- SD): GA  76.2+- 3.8  GNA  26.2+- 5.6  NGA  80.6+-10.3  NGNA  16.9+- 6.1
+    grammaticality effect    2.5 (SD 5.1, paired t(19)=2.18)   associativity effect   56.9 (SD 9.5, t=26.80)   Pearson r (4 cells) 0.031
+
+[full] score = logZ (secondary), n = 20
+    cells (mean +- SD): GA  61.2+- 3.8  GNA  50.0+- 7.0  NGA  63.8+- 3.8  NGNA  25.0+- 7.0
+    grammaticality effect   11.2 (SD 9.0, paired t(19)=5.60)   associativity effect   25.0 (SD 4.1, t=27.57)   Pearson r (4 cells) 0.115
+
+[full] score = regen (secondary), n = 20
+    cells (mean +- SD): GA  43.1+-12.5  GNA  50.6+-12.5  NGA  46.9+-14.6  NGNA  59.4+-15.1
+    grammaticality effect   -6.2 (SD 13.1, paired t(19)=-2.13)   associativity effect  -10.0 (SD 18.0, t=-2.49)   Pearson r (4 cells) -0.373
+
+[conceptsoff] score = span_w (PRIMARY), n = 20
+    cells (mean +- SD): GA  75.0+- 0.0  GNA  12.5+- 0.0  NGA 100.0+- 0.0  NGNA  12.5+- 0.0
+    grammaticality effect  -12.5 (SD 0.0, paired t(19)=nan)   associativity effect   75.0 (SD 0.0, t=nan)   Pearson r (4 cells) -0.165
+
+[conceptsoff] score = logZ (secondary), n = 20
+    cells (mean +- SD): GA  47.5+-13.8  GNA  45.0+- 9.4  NGA  61.2+-11.4  NGNA  46.2+-11.5
+    grammaticality effect   -7.5 (SD 15.9, paired t(19)=-2.11)   associativity effect    8.8 (SD 10.8, t=3.62)   Pearson r (4 cells) -0.698
+
+[conceptsoff] score = regen (secondary), n = 20
+    cells (mean +- SD): GA  44.4+-13.1  GNA  48.1+- 9.3  NGA  55.6+-13.1  NGNA  51.9+-12.4
+    grammaticality effect   -7.5 (SD 12.4, paired t(19)=-2.70)   associativity effect    0.0 (SD 16.2, t=0.00)   Pearson r (4 cells) -0.992
+
+[acs] score = acs (PRIMARY), n = 20
+    cells (mean +- SD): GA  87.5+- 0.0  GNA   0.0+- 0.0  NGA 100.0+- 0.0  NGNA  12.5+- 0.0
+    grammaticality effect  -12.5 (SD 0.0, paired t(19)=nan)   associativity effect   87.5 (SD 0.0, t=nan)   Pearson r (4 cells) -0.059
+
+[tp] score = tp (PRIMARY), n = 20
+    cells (mean +- SD): GA  87.5+- 0.0  GNA  12.5+- 0.0  NGA  75.0+- 0.0  NGNA  25.0+- 0.0
+    grammaticality effect    0.0 (SD 0.0, paired t(19)=nan)   associativity effect   62.5 (SD 0.0, t=nan)   Pearson r (4 cells) 0.165
+
+[limit] score = span_w (secondary), n = 20
+    cells (mean +- SD): GA  81.2+- 6.4  GNA  23.8+-10.7  NGA  80.6+-10.3  NGNA  14.4+- 9.3
+    grammaticality effect    5.0 (SD 11.0, paired t(19)=2.03)   associativity effect   61.9 (SD 8.6, t=32.25)   Pearson r (4 cells) 0.089
+    limit bookkeeping (mean per subject): learned 46.0, reinforced 10.1, lost 69.0
+
+[limit] score = logZ (secondary), n = 20
+    cells (mean +- SD): GA  61.9+- 2.8  GNA  44.4+-11.8  NGA  68.1+- 6.4  NGNA  25.6+-13.7
+    grammaticality effect    6.2 (SD 13.8, paired t(19)=2.03)   associativity effect   30.0 (SD 6.3, t=21.35)   Pearson r (4 cells) 0.009
+    limit bookkeeping (mean per subject): learned 46.0, reinforced 10.1, lost 69.0
+
+[limit] score = regen (secondary), n = 20
+    cells (mean +- SD): GA  46.2+-14.1  GNA  51.9+-13.6  NGA  51.2+-17.2  NGNA  50.6+-11.8
+    grammaticality effect   -1.9 (SD 14.2, paired t(19)=-0.59)   associativity effect   -2.5 (SD 20.5, t=-0.54)   Pearson r (4 cells) -0.772
+    limit bookkeeping (mean per subject): learned 46.0, reinforced 10.1, lost 69.0
+
+[full_x2] score = span_w (SENSITIVITY (shown twice)), n = 20
+    cells (mean +- SD): GA  75.0+- 0.0  GNA  29.4+- 6.1  NGA  78.1+-12.1  NGNA  17.5+- 6.3
+    grammaticality effect    4.4 (SD 6.1, paired t(19)=3.20)   associativity effect   53.1 (SD 12.1, t=19.66)   Pearson r (4 cells) 0.052
+
+[full_x2] score = logZ (SENSITIVITY (shown twice), secondary), n = 20
+    cells (mean +- SD): GA  61.2+- 3.8  GNA  49.4+- 4.9  NGA  63.8+- 3.8  NGNA  25.6+- 4.9
+    grammaticality effect   10.6 (SD 8.4, paired t(19)=5.67)   associativity effect   25.0 (SD 0.0, t=nan)   Pearson r (4 cells) 0.111
+
+[full_x2] score = regen (SENSITIVITY (shown twice), secondary), n = 20
+    cells (mean +- SD): GA  38.1+-11.8  GNA  61.9+- 9.5  NGA  34.4+-12.7  NGNA  65.6+-13.4
+    grammaticality effect    0.0 (SD 13.5, paired t(19)=0.00)   associativity effect  -27.5 (SD 13.8, t=-8.90)   Pearson r (4 cells) 0.014
+
+=== Shift table: effect in 2b minus effect in 2a (percentage points; SE from the 20 seeds of each experiment, Welch) ===
+Human shift: grammaticality +9.2, associativity -22.0
+arm          score     gram 2a  gram 2b gram shift   +-SE   assoc 2a assoc 2b assoc shift   +-SE   r8
+full         span_w       11.2      2.5       -8.8    1.4       50.0     56.9         6.9    2.3   0.555
+full         logZ         24.4     11.2      -13.1    2.1       43.1     25.0       -18.1    1.7   0.624
+full         regen        -6.9     -6.2        0.6    4.3        5.6    -10.0       -15.6    4.9   0.182
+conceptsoff  span_w        0.0    -12.5      -12.5    0.0       75.0     75.0         0.0    0.0   0.569
+conceptsoff  logZ         -3.1     -7.5       -4.4    4.5       13.1      8.8        -4.4    3.2   0.351
+conceptsoff  regen        -9.4     -7.5        1.9    4.0       19.4      0.0       -19.4    5.1   0.647
+acs          acs           0.0    -12.5      -12.5    0.0       87.5     87.5         0.0    0.0   0.595
+tp           tp            0.0      0.0        0.0    0.0       75.0     62.5       -12.5    0.0   0.697
+limit        span_w       -0.6      5.0        5.6    3.3       59.4     61.9         2.5    3.1   0.620
+limit        logZ         19.4      6.2      -13.1    3.8       33.1     30.0        -3.1    4.2   0.528
+limit        regen         1.2     -1.9       -3.1    4.7       17.5     -2.5       -20.0    6.2   0.678
+(r8 = Pearson r of the 8 simulated cell means, 2a then 2b, with the 8 human cell means.)
+
+=== Pre-registered mechanism criterion (primary scores) ===
+Claim: concepts carry the shift. Holds if the full model's grammaticality shift (2b - 2a) is positive and larger than conceptsoff's and acs's.
+  full span_w grammaticality shift -8.8 +- 1.4 -> NOT positive
+  vs conceptsoff -12.5 +- 0.0: difference +3.8 +- 1.4 (z = 2.62) -> larger
+  vs acs -12.5 +- 0.0: difference +3.8 +- 1.4 (z = 2.62) -> larger
+  (reference, not in the criterion) tp +0.0 +- 0.0
+CRITERION DOES NOT HOLD (point estimates; the SEs above say whether the margins exceed across-seed noise).
