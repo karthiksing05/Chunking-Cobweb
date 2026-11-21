@@ -1,5 +1,7 @@
 # r231: three regimes on one dial with all-neighbour word representations
 
+Verdict (updated after P3): NO-GO under the pre-registered criterion. At n = 1000, 2000 and 4000 no allsuf b in {5,6,7} reaches R-syn >= .5 on both seeds (seed 13 reaches .53-.63 at n >= 2000, seed 17 stays at .40-.49); the suffix facet, not data alone, is what lifts R-syn (control: all at n = 4000 gives R-syn .22-.45). Original P1/P2 verdict follows.
+
 Verdict: NO-GO. With every neighbour kept, the r230 class-level dial (C6, W' = 5) gives R-sem at the leaf (.72-.85) and R-non at b <= 2 (.90-.98), but no setting reaches R-syn >= .5 on both seeds. The original 'all' tree peaks at R-syn .39-.42 (b = 4-6); the three representation variants peak at .33 (abs:4), .31 (pos) and .52 / .45 (allsuf, b = 6, with R-sem only .32). The syntactic regime of r230 (.64-.67 at b = 6, 7) came from the function-word-only features (func:5).
 
 ## Setup
@@ -76,3 +78,41 @@ R-non (b=0): some buy mans chase a cake; some farmers gardens to a fresh boys; t
 - Code: experiments/v3/diag/r231_wordtree.py, r231_story.py, r231_p1.sh, r231_p0_job.sh, r231_examples.py, r231_ex_job.sh (judge: r230_judge_job.sh).
 - Data: experiments/v3/results/story_gen/r231/ (purity.json, wt/, judge_all.json, judge_var.json, examples.jsonl, p1/ dumps).
 - Jobs: word trees + purity 4816987; P1 'all' 4816981 (seed 13), 4816982 (seed 17); P2 4816996-4817001 (abs:4 s13/s17, pos, allsuf; earlier submissions 4816990-4816995 cancelled before starting to add b=0); judges 4817422 (variants), 4817798 (all); examples 4817804.
+
+## P3: allsuf at larger n (sem / syn / non; seed 13 | seed 17)
+Pre-registered criterion (set before running): GO if some b in {5,6,7} gives R-syn >= .5 on BOTH seeds at the same n, with leaf R-sem >= .6 and b=0 R-non >= .6 at that n. Setup as P2 (W'=5, 1,600 generations, word tree rebuilt at each n). Control: 'all' (no suffix) at n = 4000, b = 4-6.
+
+allsuf, n = 2000
+| setting | R-sem | R-syn | R-non |
+|---|---|---|---|
+| leaf | .709 / .723 | .280 / .269 | .011 / .009 |
+| b=7 | .398 / .438 | .528 / .472 | .074 / .091 |
+| b=6 | .361 / .382 | .556 / .482 | .083 / .136 |
+| b=5 | .265 / .268 | .533 / .494 | .202 / .239 |
+| b=0 | .001 / .004 | .021 / .021 | .978 / .974 |
+allsuf, n = 4000
+| setting | R-sem | R-syn | R-non |
+|---|---|---|---|
+| leaf | .748 / .721 | .249 / .277 | .003 / .003 |
+| b=7 | .448 / .475 | .537 / .404 | .015 / .121 |
+| b=6 | .355 / .435 | .626 / .419 | .019 / .146 |
+| b=5 | .253 / .269 | .580 / .441 | .168 / .290 |
+| b=0 | .001 / .005 | .025 / .028 | .974 / .967 |
+Control, 'all' at n = 4000
+| setting | R-sem | R-syn | R-non |
+|---|---|---|---|
+| b=6 | .574 / .743 | .245 / .225 | .181 / .033 |
+| b=5 | .381 / .459 | .256 / .244 | .364 / .297 |
+| b=4 | .251 / .231 | .373 / .452 | .376 / .317 |
+(Seed 13 b=6 came from the first job, b=5 and 4 from a rerun; see jobs.)
+
+Purity at b = 5 / 6 / 7 (syn / sem; seed 13 | seed 17; purity_p3.json)
+| n | rep | b=5 | b=6 | b=7 |
+|---|---|---|---|---|
+| 2000 | allsuf | .92/.37 \| .92/.36 | .95/.50 \| .92/.55 | .94/.46 \| .93/.53 |
+| 4000 | allsuf | .94/.40 \| .90/.40 | .97/.44 \| .93/.55 | .97/.45 \| .92/.57 |
+| 4000 | all | .86/.65 \| .85/.62 | .95/.69 \| .97/.75 | .94/.80 \| .95/.74 |
+
+Reading: R-syn under allsuf rises with n only on seed 13 (b=6: .519 -> .556 -> .626); seed 17 peaks at .494 (n=2000, b=5) and falls to .40-.44 at n = 4000, so the criterion fails at every n (seed 17 is the limiting seed; at n=2000 it misses by .006-.028). The leaf R-sem (.72-.75) and b=0 R-non (.97) conditions hold. In the control, 'all' at n = 4000 has class sem purity .62-.80 and R-syn only .22-.45, so more data alone does not produce the syntactic regime; the suffix facet does (allsuf sem purity stays .36-.57). The seed-17 shortfall is a mix of non-parsing outputs (R-non .12-.29 at n=4000, b=5-7) rather than semantic outputs, unlike seed 13 (.02-.17).
+Caveats: 2 seeds; the criterion is a hard threshold at .5 and seed 17 at n = 2000 is within noise of it (.472-.494); no b = 3-4 for allsuf at these n; the Killed-by-memory jobs (4817839, 4817841; 32G) were rerun with 72G and tag `_r`, so the arms of those settings come from a re-learned learner with the same seed.
+Jobs P3: word trees + purity 4817836; dials 4817837-4817842, reruns 4819223, 4819224; judges 4819217 (partial), 4820651 (final, judge_p3.json). Code: r231p3_p1.sh, r231p3_p0_job.sh. Data: r231/p3/, r231/wt3/, r231/purity_p3.json.
