@@ -25,7 +25,7 @@
 
 
 This document holds the tables and figures that the main paper cites by number (Tables S1 to S30 and Figures S1 to S7).
-Configurations C1 to C11 are those of Table 11 in the main paper. Every result uses TinyStories sentences of three to eight words from a 250-word vocabulary, or Lichess positions, as in the main paper.
+Configurations C1 to C11 are those of Table 8 in the main paper. Every result uses TinyStories sentences of three to eight words from a 250-word vocabulary, or Lichess positions, as in the main paper.
 Judge 2 is the ensemble of Qwen3-8B and phi-4 that the main paper reports, and the earlier judge is Qwen2.5-3B with a grammaticality probability above .5.
 
 \section{Generation}
@@ -100,6 +100,7 @@ $n$ & \trellis{} & LSTM & GPT & \trellis{} $-$ LSTM & \trellis{} $-$ GPT \\
 \end{center}
 \end{table}
 
+On seed 13 at 1,000 sentences, the share of distinct outputs with an atypical boundary falls from .32 to .38 for the plain generator to .07 to .11 for the exact boundary read, and over the four selection seeds the best fair count under the earlier judge rises from .316 (plain generator) to .338 (exact read; round 204 results).
 An earlier four-seed run under the earlier judge found a GPT deficit of .014 at 1,000 sentences, and the four additional seeds did not replicate it.
 The temperature grid for \trellis{} extended past the neural grids after its optimum at 250 sentences sat on the grid edge, while the neural optima were interior. At 250 sentences the optimum later moved to temperatures of 4.0 to 4.5, and the main paper reports the pre-fixed value 3.5.
 The four selection seeds supplied the pre-fixed setting for the eight-seed comparison.
@@ -195,10 +196,10 @@ LSTM & 29.8 & 26.5 & 23.5 & 21.5 & 20.0 \\
 
 Full inside-outside cost grows cubically with sentence length, so we tested a spectrum between greedy parsing and full inside-outside at 1,000 sentences (four seeds, configuration C4, set C).
 A window variant runs inside-outside inside a window of $W$ symbols, freezes the best parse of its first $S$ symbols, and moves on. A capped variant limits chunks to $2^D$ symbols per pass.
-Table~\ref{tab:window} gives selected cells. The sentences have at most eight tokens, so the cost saving here is modest (about a factor of two for the cap-four chart) and grows with length.
+Table~\ref{tab:window} gives selected cells. The sentences have at most eight tokens, so the cost saving here is modest (about a factor of two for the chart capped at four-symbol chunks) and grows with length.
 Disjoint windows hurt, because a chunk can never cross a window boundary in the pass that creates it, whereas overlapping windows that commit only the first part of the window recover full-parser accuracy against the shallow-phrase reference.
 No variant changes acceptance of broken sentences by more than seed noise, so these scores cannot discriminate between parsers. The main paper keeps full inside-outside, and no experiment here measures the cap-four gain on long sentences.
-Beam-one greedy parsing matches full inside-outside in F1 against the reference (.353 against .352) and in AUC for ungrammatical sentences (.541 against .542). Of its trees, 93\% are identical to the full ones, and it costs .21 as much.
+Beam-one greedy parsing matches full inside-outside in F1 against the reference (.353 against .352) and in AUC for ungrammatical sentences (.541 against .542). Its trees agree with the full ones at bracket F1 .934, and it costs .21 as much.
 
 \begin{table}[h]
 \caption{Windowed and capped inside-outside parsing on TinyStories after 1,000 sentences (configuration C4, set C, mean over four seeds). Cost is composites evaluated per sentence relative to full parsing; F1 is against the NLTK shallow-phrase reference
@@ -212,7 +213,7 @@ Variant & Cost & F1 vs.\ reference & Same as full & Mean AUC, ungrammatical \\
 \midrule
 Full inside-outside & 1.00 & .352 & 1.00 & .542 \\
 Greedy (beam 1) & .21 & .353 & .934 & .541 \\
-Cap-four chart & .53 & .362 & .970 & .542 \\
+Chart capped at four symbols & .53 & .362 & .970 & .542 \\
 Window 4, stride 2 & .48 & .413 & .799 & .540 \\
 Window 3, stride 2 & .30 & .428 & .788 & .538 \\
 Window 4, disjoint & .31 & .308 & .854 & .541 \\
@@ -316,7 +317,7 @@ Chance labels groups of nearby pieces of the same size as the chunks, so a lift 
 \centering
 \includegraphics[width=\textwidth]{figures/chess_chunkers_std}
 \caption{Bits per held-out Lichess position against positions learned (300 to 4,000) for \trellis{} and the comparison coders, on four test sets: control, other openings, other wing, and positions shifted one file (seed 13, model cost not charged).
-The blue curve is the better of the offsets-only and offsets-plus-squares variants of \trellis{} in each panel, learned without the exact-only rule (exact\_alone off), a variant that the standard chess configuration C5 does not allow.
+The blue curve is the better of the offsets-only and offsets-plus-squares variants of \trellis{} in each panel, learned with the C7 scoring rule (a new concept that holds one position counts as one correct guess), which the standard chess configuration C5 does not use.
 The orange marker is C5 after 4,000 positions (130.6, 139.6, 154.0, and 153.6 bits); only the 4,000-position run exists for it.
 On the shifted set the best variant reaches 147.2 bits against 153.6 for C5, and the main paper gives both values.}
 \label{fig:chesscompress}
@@ -371,7 +372,7 @@ The material criterion catches hung pieces and lost exchanges and misses positio
 
 \section{Regimes}
 
-\paragraph{Judge controls.} Table~\ref{tab:judge} gives the pass rates of the ensemble on control sentences built from held-out stories.
+\paragraph{Judge controls.} Table~\ref{tab:judge} gives the pass rates of the ensemble on control sentences built from held-out stories. A further control of 100 hand-built sentences with a correct frame and agreement, about half of them with absurd selection (``the boxes ate the flowers''), passes the syntax question at 1.00 and the meaning question at .50, and 99 scrambled or article-dropped sentences pass syntax at .21.
 
 \begin{table}[h]
 \caption{Share of control sentences passed by the Qwen3-8B and phi-4 ensemble on the syntax and meaning questions (test half, 150 sentences per class, built from held-out TinyStories sentences).
@@ -400,9 +401,9 @@ As a null for abstraction along the word taxonomy, a class-free swap replaces ev
 It leaves a meaningless share of grammatical output of .32, .45, and .43 on the three runs (syntax-only .078, .099, and .086 against meaningful .167, .122, and .113). Random damage also raises the share, so the ordering alone does not distinguish abstraction along the taxonomy from damage in general.
 
 \begin{table}[h]
-\caption{Share of generated TinyStories sentences in each regime (judge 2; configuration C6a) as the generator's context moves from exact words (leaf) to one class (root), seed 13 after 1,000 and 4,000 sentences and seed 17 after 4,000.
+\caption{Share of generated TinyStories sentences in each regime (judge 2; configuration C6a) as the generator's words move from exact words (leaf) to one class (root), with the pair gate and the emitted word both at level $b$, seed 13 after 1,000 and 4,000 sentences and seed 17 after 4,000.
 Meaningful passes syntax and meaning, syntax-only passes syntax alone, and nonsense fails syntax. Both leaf rows use the pair gate. The temperature-.7 leaf row is the setting with the highest meaningful share (window 7 at 1,000 sentences and window 5 at 4,000 sentences).
-All other rows use generation temperature 1. Class levels use a word taxonomy that Cobweb builds from each word's neighbors and the function words beside it.
+All other rows use generation temperature 1. Class levels use a word taxonomy that Cobweb builds from the 100 most frequent words beside each word.
 They also use a class-level pair gate, which admits a pair when memory stored some adjacent pair from the same two classes. Entries are meaningful / syntax-only / nonsense.}
 \label{tab:dial}
 \begin{center}
@@ -508,7 +509,8 @@ A board is legal by the rules of chess (python-chess, White to move). A piece-sq
 Real held-out positions are R-real in .957 of cases, random legal boards are R-legal in .97 of cases, and random illegal boards are R-non always.
 Drawing positions from the chunk and concept distributions alone gives R-real of .085 at the leaf and .006 at the root. R-legal never exceeds .015, because the whole-board counts (one king per side, at most eight pawns) belong to no unit-level distribution.
 Adding a stored piece-count profile lifts R-real to at most .54 and R-legal to at most .098.
-Parsing a held-out position and regenerating its chunks keeps the real structure at the leaf (R-real .76). Replacing chunk contents at any higher concept level gives nonsense (R-non .72 at level 1 and about .94 from level 2 up), because the replacement chunks bring their own kings and pawns. The legal-unrealistic regime stays at or below .058 in these routes.
+Parsing a held-out position and regenerating its chunks keeps the real structure at the leaf (R-real .76). Replacing chunk contents at any higher concept level gives nonsense (R-non .72 at level 1 and .94 to .98 from level 2 up; Table~\ref{tab:chesslaw}), because the replacement chunks bring their own kings and pawns. The legal-unrealistic regime stays at or below .058 in these routes.
+The largest legal-unrealistic share (R-legal) of any where-file cell at any size is .254, at 500 positions and level 6, against .233 at 4,000 positions (the learning-curve rows of the chess study).
 
 \begin{table}[h]
 \caption{Chess regime shares (R-real / R-legal / R-non) after 4,000 learned positions, mean of two seeds, with the same judge for every row (legality by python-chess, realism by a piece-square classifier).
@@ -523,7 +525,8 @@ Setting & R-real & R-legal & R-non \\
 \midrule
 Real board through the parser & .945 & .055 & .000 \\
 Content dial only, leaf / root & .085 / .006 & .000 / .005 & .915 / .989 \\
-Parse and regenerate, leaf / level 2 & .762 / .043 & .051 / .019 & .188 / .938 \\
+Parse and regenerate, leaf / level 1 / level 2 & .762 / .228 / .043 & .051 / .049 / .019 & .188 / .722 / .938 \\
+Parse and regenerate, levels 3 to 99 & .005 -- .020 & .015 -- .019 & .960 -- .980 \\
 Where-file, leaf & .890 & .056 & .054 \\
 Where-file, level 1 & .790 & .139 & .073 \\
 Where-file, level 2 & .738 & .184 & .077 \\
@@ -594,18 +597,18 @@ Removing only the chunks overlaps the solid \trellis{} line and is not drawn. Th
 \begin{table}[h]
 \caption{Removal controls on TinyStories after 1,000 sentences (seeds 13 and 17, configuration C8). Code length is bits per held-out sentence. Fair counts use judge 2 at temperature 2.0 and omit the unstored-trigram requirement, so they differ from Table 4 of the main paper.
 Content swap accepted is the share of content-swapped sentences that the generator score accepts at the threshold that accepts 90\% of real sentences (lower is better).
-Chunks off stores no composite. Concepts off reads every record at its own leaf, with back-off to the root. Both off combines the two.}
+Chunks off stores no composite. Concepts off reads every record at its own leaf, with back-off to the root. Both off combines the two. At temperatures 1.2 and 3.0 the fair syntax count is .510 and .486 for the full system against .462 and .448 without concepts, and the syntax-and-meaning count is .373 and .297 against .309 and .240. Tree F1 is the mean sentence F1 of the parser against the shallow-phrase reference on set C (right-branching .427).}
 \label{tab:ablation}
 \begin{center}
 \small
-\begin{tabular}{lcccc}
+\begin{tabular}{lccccc}
 \toprule
-Variant & Code length & Fair syntax & Fair syntax and meaning & Content swap accepted \\
+Variant & Code length & Fair syntax & Fair syntax and meaning & Content swap accepted & Tree F1 \\
 \midrule
-Full & 30.8 & .539 & .363 & .708 \\
-Chunks off & 30.8 & .520 & .347 & .707 \\
-Concepts off & 28.8 & .496 & .309 & .573 \\
-Both off & 28.6 & .512 & .311 & .575 \\
+Full & 30.8 & .539 & .363 & .708 & .347 \\
+Chunks off & 30.8 & .520 & .347 & .707 & .383 \\
+Concepts off & 28.8 & .496 & .309 & .573 & .347 \\
+Both off & 28.6 & .512 & .311 & .575 & .383 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -616,7 +619,7 @@ Both off & 28.6 & .512 & .311 & .575 \\
 
 \begin{table}[h]
 \caption{Removal controls in chess after 4,000 learned Lichess positions (configuration C10, mean of seeds 13, 17, and 19; model cost not charged). Top: bits to code 1,000 held-out positions per set; the piece-square list codes each piece independently from the frequencies of its square.
-Bottom: first-trial recall of pieces on middle-game, end-game, and random positions with seven chunk slots (ten simulated subjects per seed, each recalling its own random draw of positions). Full-system code lengths are three-seed means and differ slightly from the seed-13 values in Table 5 of the main paper. Concepts-off recall is zero by construction.}
+Bottom: first-trial recall of pieces on middle-game, end-game, and random positions with seven and four chunk slots (ten simulated subjects per seed, each recalling its own random draw of positions). Full-system code lengths are three-seed means and differ slightly from the seed-13 values in Table 5 of the main paper. Concepts-off recall is zero by construction.}
 \label{tab:chess-abl}
 \begin{center}
 \small
@@ -634,6 +637,12 @@ Recall, seven slots & Middle game & End game & Random middle & Random end \\
 Full system & 12.9 & 7.4 & 5.9 & 6.1 \\
 Chunks off & 7.0 & 6.9 & 6.4 & 6.3 \\
 Concepts off & 0.0 & 0.0 & 0.0 & 0.0 \\
+\midrule
+Recall, four slots & Middle game & End game & Random middle & Random end \\
+\midrule
+Full system & 9.5 & 4.5 & 3.2 & 3.2 \\
+Chunks off & 4.0 & 3.9 & 3.5 & 3.4 \\
+Concepts off & 0.0 & 0.0 & 0.0 & 0.0 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -645,7 +654,7 @@ Concepts off & 0.0 & 0.0 & 0.0 & 0.0 \\
 \centering
 \includegraphics[width=\textwidth]{figures/chess_cs1973_curve}
 \caption{Recall of Lichess middle-game, end-game, and random positions against positions learned (solid lines: 100 to 4,660 positions, three seeds; dashed lines: 1,000 to 27,459 positions, the long stream), with seven and four chunk slots, next to people's recall (black squares: beginner B, class A player A, master M).
-The right panel shows the size of the first chunk and the pieces per glance, the pieces placed after one look at the board while a subject copies a board that stays in view (Chase and Simon's copy task). Thin lines are single seeds.}
+The right panel shows the size of the first chunk and the pieces per glance, the pieces placed after one look at the board while a subject copies a board that stays in view (Chase and Simon's copy task). Thin lines are single seeds. Long-stream middle-game recall with seven slots (seeds 13 and 17): 9.2 and 7.5 pieces at 1,000 positions, 14.2 and 12.1 at 4,000, 16.2 and 14.9 at 8,000 (mean 15.6), 17.2 and 16.3 at 16,000 (mean 16.7), and 17.1 and 17.3 at 27,459.}
 \label{fig:cscurve}
 \end{figure}
 
@@ -682,7 +691,7 @@ The determiners are \textit{a} (singular), \textit{some} (plural), and \textit{t
 Five noun types (person, animal, food, place, object; eight nouns each) carry the meaning. Each verb restricts the type of its subject, its object, or its complement, and each of 14 adjectives restricts the type of its noun.
 The lexicon has 147 words (80 noun forms, 48 verb forms, 14 adjectives, 3 determiners, 2 prepositions), sentences have 3 to 8 words, and 20,000 samples hold 14,720 distinct sentences. Nouns pluralize by adding \textit{s}, so ``womans'' and ``foxs'' are legal tokens.
 The judge labels a sentence nonsense if it does not parse (noun-phrase structure, agreement, verb frame, preposition), syntax-only if it parses and some selectional restriction fails, and meaningful if it parses and all restrictions hold.
-We fixed the judge before any generation. The learner is that of the TinyStories configuration C6a (window 5, edge-exact generator, token input, word pair gate, temperature 1) except for its word taxonomy, which uses the five most frequent function words as features, and the TinyStories data are replaced by grammar samples and every generation is new (not a stored training sentence).
+We fixed the judge before any generation. The learner is that of the TinyStories configuration C6a (window 5, exact-boundary generator, token input, word pair gate, temperature 1) except for its word taxonomy, which uses the five most frequent function words as features, and the TinyStories data are replaced by grammar samples and every generation is new (not a stored training sentence).
 We trained on 250 to 4,000 sentences with seeds 13 and 17 and judged 1,600 unconditioned generations per setting (400 prompts, four draws each).
 
 \begin{table}[h]
@@ -705,12 +714,12 @@ Three same-category swaps & .094 & .906 & .000 \\
 \end{table}
 
 \paragraph{Word-taxonomy purity.} A pair of class mates is syntactically pure if both words share a syntactic category (part of speech, number, and verb frame or preposition) and semantically pure if both content words of the same kind share a semantic type (noun type, verb restriction profile, or adjective restriction set).
-Chance is .17 for syntax and .158 for semantics. Table~\ref{tab:r230purity} gives the taxonomy of the function-word feature set that the study uses, with the five most frequent function words as features (func:5; 1,000 sentences; seeds 13 and 17).
+Chance is .17 for syntax and .158 for semantics. Table~\ref{tab:r230purity} gives the taxonomy of the function-word feature set that the study uses, with the five most frequent function words as features (1,000 sentences; seeds 13 and 17).
 Table~\ref{tab:r230feat} compares the feature sets. The feature set decides whether the classes carry meaning: with all-neighbor features the semantic purity rises with $b$, and with function-word features it stays near chance.
-We chose func:5 after reading these tables, so the choice is a representation decision made with knowledge of the result.
+We chose the five function-word features after reading these tables, so the choice is a representation decision made with knowledge of the result.
 
 \begin{table}[h]
-\caption{Purity of the func:5 word taxonomy at each level $b$ (seed 13 / seed 17). Chance purity is .170 (syntax) and .158 (semantics).}
+\caption{Purity of the word taxonomy with five function-word features at each level $b$ (seed 13 / seed 17). Chance purity is .170 (syntax) and .158 (semantics).}
 \label{tab:r230purity}
 \begin{center}
 \small
@@ -732,7 +741,7 @@ leaf & 106-107 & .902 / .928 & .230 / .193 \\
 \end{table}
 
 \begin{table}[h]
-\caption{Purity by feature set at three levels (syntactic / semantic purity, mean of seeds 13 and 17; 1,000 sentences). The feature set \texttt{all} uses every neighbor word, and func:$K$ uses the $K$ most frequent function words.}
+\caption{Purity by feature set at three levels (syntactic / semantic purity, mean of seeds 13 and 17; 1,000 sentences). The first row (all) uses every neighbor word, and each other row uses the stated number of most frequent function words.}
 \label{tab:r230feat}
 \begin{center}
 \small
@@ -740,11 +749,11 @@ leaf & 106-107 & .902 / .928 & .230 / .193 \\
 \toprule
 Features & $b=5$ & $b=6$ & $b=7$ \\
 \midrule
-all & 0.84 / 0.50 & 0.94 / 0.56 & 0.93 / 0.61 \\
-func5 & 0.84 / 0.17 & 0.92 / 0.16 & 0.91 / 0.18 \\
-func8 & 0.81 / 0.19 & 0.93 / 0.19 & 0.93 / 0.21 \\
-func15 & 0.81 / 0.22 & 0.94 / 0.23 & 0.92 / 0.23 \\
-func30 & 0.87 / 0.31 & 0.95 / 0.32 & 0.93 / 0.32 \\
+All neighbors & 0.84 / 0.50 & 0.94 / 0.56 & 0.93 / 0.61 \\
+Five function words & 0.84 / 0.17 & 0.92 / 0.16 & 0.91 / 0.18 \\
+Eight & 0.81 / 0.19 & 0.93 / 0.19 & 0.93 / 0.21 \\
+Fifteen & 0.81 / 0.22 & 0.94 / 0.23 & 0.92 / 0.23 \\
+Thirty & 0.87 / 0.31 & 0.95 / 0.32 & 0.93 / 0.32 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -755,7 +764,7 @@ At the leaf the reach changes the meaningful share as follows (meaningful, seeds
 In C9 the nonsense share appears only at reach $W'\le 2$ (about .52 at every level for $W'=1$).
 
 \begin{table}[h]
-\caption{Configuration C6b in the controlled grammar (1,000 sentences, reach $W'=5$, 1,600 generations; seed 13 / seed 17): class gate and class-level emission at level $b$ on the func:5 taxonomy.}
+\caption{Configuration C6b in the controlled grammar (1,000 sentences, reach $W'=5$, 1,600 generations; seed 13 / seed 17): class gate and class-level emission at level $b$ on the taxonomy with five function-word features.}
 \label{tab:r230dial}
 \begin{center}
 \small
@@ -888,9 +897,12 @@ Nonsense & exact context, $W'=0$ & the cat happy \\
 \end{table}
 
 
-\section{The Controlled Grammar with the Original Word Features}
+\section{The Controlled Grammar with All-Neighbor Word Features}
 
-Table~\ref{tab:r231} gives the class-level dial of configuration C6b in the controlled grammar when the word taxonomy keeps every neighbor, as in the TinyStories configuration, and for three variants that we fixed before running: neighbors named by their class at $b=4$ (abs), immediate neighbors kept apart from those two and three words away (pos), and all neighbors with a suffix facet of the last one to three characters (suffix). Only the word taxonomy changes; the grammar, judge, window 5, $W'=5$, and temperature 1 are those of Table~S25.
+Table~\ref{tab:r231} gives the class-level dial of configuration C6b in the controlled grammar when the word taxonomy describes each word by every neighbor on either side (the all-neighbor arm), and for three variants that we fixed before running: neighbors named by their class at $b=4$ (abs), immediate neighbors kept apart from those two and three words away (pos), and all neighbors with a suffix facet of the last one to three characters (suffix). Only the word taxonomy changes; the grammar, judge, window 5, $W'=5$, and temperature 1 are those of Table~S25.
+The all-neighbor arm is not the TinyStories configuration C6a. C6a described each word by the 100 most frequent words beside it and kept the 50 most frequent types exact in emission, whereas the all-neighbor arm keeps every neighbor and, like C6b, keeps the five most frequent types exact. We did not run the 100-neighbor taxonomy on the controlled grammar, and we did not run five function-word features on TinyStories.
+The controlled grammar therefore fails with the all-neighbor representation, and the representation, not only the data and the judge, limits the middle regime there.
+On TinyStories, one earlier seed-13 check at 1,000 sentences (class gate and emission at $b=3$ to 7) used the 50 or 100 most frequent neighbors, or all neighbors at $b=3$ and $b=6$, and its syntax-only shares were .18 to .26 (notes of round 214, addenda 6 and 7), so a representation change among these three sets did not lift the share there either.
 
 \begin{table}[h]
 \caption{Regime shares (meaningful / syntax-only / nonsense) of the class-level dial in the controlled grammar with word features other than the five function words, seed 13 | seed 17, 1,600 generations per cell. The leaf and $b=0$ rows do not depend on the features. The target is a syntax-only share of .5 or more on both seeds.}

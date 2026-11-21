@@ -33,7 +33,7 @@
 \renewcommand{\topfraction}{.9}\renewcommand{\textfraction}{.1}\renewcommand{\floatpagefraction}{.8}
 \emergencystretch 2em
 
-\title{Learning Concepts and Chunks from Raw Experience: Chunks Compress Chess Positions, and Concepts Drive Children's Stories}
+\title{Learning Concepts and Chunks from Raw Experience: Compression of Chess Positions and Generation of Children's Stories}
 
 \author{Karthik Singaravadivelan}{ksingara3@gatech.edu}
 \author{Pat Langley}{patrick.w.langley@gmail.com}
@@ -50,13 +50,14 @@ segmentation its memory allows, generates from the same memory, and learns by st
 candidate chunk with its posterior probability as a weight. We apply it to chess and to children's stories, and we show case studies of real output next to the metrics.
 The evidence supports chunking as compression in chess and does not support it in short sentences.
 In chess, removing the chunks adds 47 to 59 bits per position and erases the recall gap between game and random positions.
-Positions shifted by one file cost 153.6 bits with the standard chunks, against 205.5 for byte-pair coding over squares and 149.7 for byte-pair coding over shapes.
-In children's stories, removing the chunks changes nothing we measured, and the concepts drive generation: removing them lowers the count of new, judged sentences.
+The chunks code positions in far fewer bits than independent-piece coding does. On positions shifted by one file they cost 153.6 bits, against 205.5 for byte-pair coding over squares and 149.7 for byte-pair coding over shapes, a gap inside seed variation (one seed).
+On the three other test sets, byte-pair coding over shapes and the compressor xz both code positions in fewer bits than the chunks do.
+In children's stories, removing the chunks changes neither the code length nor generation beyond two-seed variation, and the parser scores slightly higher without them. Removing the concepts lowers the count of new, judged sentences.
 The code for held-out sentences is about 2 bits shorter than a byte-pair code, and removing both chunks and concepts shortens it further, so the word-window generator earns that margin.
 It is about 5 to 7 bits longer than trigram and neural codes.
-With 250 training sentences the system writes new, judged-grammatical sentences about as often as a matched LSTM and GPT. At 500 sentences it matches them on eight seeds pooled and trails the LSTM on four confirmation seeds, at 1,000 sentences both neural models score higher without an interval that excludes zero, and at 4,000 sentences both lead.
-A dial that raises the abstraction of the generator's words shows a regularity in language and in chess: abstraction costs meaning before it costs grammar, and random damage to words shows the same ordering.
-On TinyStories the grammatical but meaningless regime stays thin, with a syntax-only share of at most .27 against a target of .5 that equals the ceiling of an oracle word swapper. On a controlled grammar with an exact judge, the same dial yields all three regimes, with a syntax-only share of .60 to .67, when the word taxonomy describes each word by the five function words beside it; with all-neighbor features the share stays at .45 or below. We did not vary the word representation on TinyStories, so whether the data, the judge, or the representation limits the middle regime there remains untested.
+With 250 training sentences the system writes new, judged-grammatical sentences about as often as a matched LSTM and GPT. At 500 sentences it matches them on the syntax count over eight seeds pooled and trails the LSTM on four confirmation seeds, at 1,000 sentences both neural models score higher without an interval that excludes zero, and at 4,000 sentences both score higher on both seeds (two seeds, no interval).
+A dial that raises the abstraction of the generator's words shows a regularity in language and in chess: meaning falls before grammar. The ordering is consistent with abstraction but not specific to it, because random damage to words reproduces it.
+On TinyStories the grammatical but meaningless regime stays thin, with a syntax-only share of at most .27 against a target of .5 that equals the ceiling of an oracle word swapper. On a controlled grammar with an exact judge, the same dial yields all three regimes, with a syntax-only share of .60 to .67, when the word taxonomy describes each word by the five function words beside it; with all-neighbor features the share stays at .45 or below. The TinyStories runs used the 100 most frequent neighboring words as features, and we never tried five function-word features there, so whether the data, the judge, or the representation limits the middle regime there remains untested.
 \end{abstract}
 
 \section{Introduction}
@@ -74,9 +75,9 @@ compression. A chunk is one symbol for many parts, and expertise is a better cod
 A second kind of structure complements chunks. A concept is one description
 for many instances that behave alike. A single concept can cover \textit{dog}, \textit{cat}, and \textit{bird} wherever they fill the slot in ``the \_\_\_ ran.''
 Chunks save symbols by naming parts that occur together, and concepts save description by grouping instances that behave alike \citep{langley-concepts-chunks-2025}.
-We argue that neither saves much alone: a system with chunks and no concepts
+We began with the hypothesis that neither saves much alone: a system with chunks and no concepts
 cannot relate a new chunk to older ones, and a system with concepts and no chunks
-has only single tokens to group.
+has only single tokens to group. The removal controls below test it, and they do not support it.
 
 \citet{singaravadivelan-langley-acs} proposed a theory that links the two. \trellis{}
 keeps a taxonomy of concepts organized by the contexts in which elements occur and
@@ -87,17 +88,15 @@ It left three questions open: a less greedy parser might repair the choices that
 
 Version 2 of \trellis{} addresses all three, and the answers differ in strength.
 The system reads a raw stream of experiences and uses gold labels only to score its output. It parses by inside-outside computation over every binary segmentation, generates one element at a time, and learns by storing every candidate chunk weighted by its posterior probability.
-The answer on parsing is negative. On sentences of at most eight words, a greedy parse produces the same trees as the full computation in 93\% of cases, at a fifth of the cost. It also agrees as well with a shallow-phrase reference and discriminates broken sentences as well.
+The answer on parsing is negative. On sentences of at most eight words, a greedy parse produces trees that agree with those of the full computation at bracket F1 .93, at a fifth of the cost. It also agrees as well with a shallow-phrase reference, and both parsers separate broken sentences from real ones only near chance (AUC about .54).
 We use the full computation because it is cheap at this length and supplies the posterior weights that learning stores.
 Whether those weights matter more than the best tree, and whether the full computation pays on longer inputs, remains untested.
 
-We lead with case studies of real parses, generated sentences, chunk histories, chess chunks,
-a recall trial after Chase and Simon, and judged examples of each output regime, and we add learning curves and a few core metric tables.
-
 \textbf{Contributions.} We present an unsupervised, incremental, gradient-free learner of concepts and chunks that parses and generates from one memory.
-In chess its chunks carry the compression and the recall pattern, encode recognizable chess ideas, and code shifted positions in 4 more bits than a shape-based byte-pair coder needs.
-In children's stories the chunks carry nothing we could measure, the concepts carry the generation results, and a two-model judge finds the system level with an LSTM and a GPT at 250 sentences and behind them at 4,000 sentences, with no decisive interval at 1,000.
-A dial on the abstraction of the generator's words, context, or locations shows that abstraction costs meaning before grammar, in language and in chess, and random word damage shows the same ordering. On TinyStories the middle regime stays thin, and on a controlled grammar with an exact judge the same dial produces all three once the word taxonomy is built from function-word features. We did not vary the representation on TinyStories.
+In chess its chunks carry the compression and the recall pattern, encode recognizable chess ideas, and code shifted positions within seed variation of a shape-based byte-pair coder (one seed), although byte-pair coding over shapes and xz beat them on the other test sets.
+In children's stories, removing the chunks changes neither the code length nor generation beyond two-seed variation, removing the concepts lowers the generation counts (two seeds), and a two-model judge finds the system level with an LSTM and a GPT at 250 sentences and behind them at 4,000 sentences (two seeds), with no decisive interval at 1,000.
+A dial on the abstraction of the generator's words, context, or locations shows that meaning falls before grammar, in language and in chess, and random word damage reproduces the same ordering, so the ordering is consistent with abstraction but not specific to it. On TinyStories the middle regime stays thin, and on a controlled grammar with an exact judge the same dial produces all three once the word taxonomy is built from function-word features. We never tried five function-word features on TinyStories.
+The paper leads with case studies of real parses, generated sentences, chunk histories, chess chunks, a recall trial after Chase and Simon, and judged examples of each output regime, and it adds learning curves and a few core metric tables.
 
 \section{Concepts and Chunks in \trellis{}}
 
@@ -205,7 +204,7 @@ For chess we use positions from Lichess games, taken at ply 30 in the idea and m
 A position arrives as a set of pieces on squares, and the system derives offsets and relations between pieces from that set.
 
 \paragraph{Evaluation sets.} Set S is a shared 400-sentence set for the chunk and parse-tree studies (configuration C3 in Table~\ref{tab:config}). Set C holds, for each seed, 300 real sentences from that seed's own held-out stories plus 400 calibration sentences, and it serves the broken-sentence studies (configuration C4).
-The two sets give different values for the same quantity, such as right-branching agreement (.49 on set S, .42 on set C), so every table and caption names its set.
+The two sets give different values for the same quantity, such as right-branching agreement (.49 on set S, .42 to .43 on set C), so every table and caption names its set.
 
 \paragraph{Baselines.} We compare \trellis{} with n-gram models, an LSTM \citep{hochreiter-lstm}, and a small GPT-style transformer \citep{vaswani-attention}, all trained on exactly the same $n$ sentences.
 We choose each neural model's size by held-out loss and sample it at a tuned temperature (details in the Supplement). An n-gram sampler emits only stored n-grams, so it scores zero on the fair count by construction.
@@ -215,7 +214,7 @@ For compression we add byte-pair encoding \citep{sennrich-bpe} with a unigram co
 The \textit{fair count} is the number of distinct, new, judged-grammatical sentences that contain a trigram the training stream never stored, divided by the number of attempted draws, so repeated and copied sentences count against the generator.
 We use eight seeds. Seeds 13, 17, 19, and 23 selected the settings and seeds 29, 31, 37, and 41 confirm them, and Table~\ref{tab:gen} pools all eight (Supplement, Table~S18 gives the confirmation seeds alone). The training sets of different seeds overlap by 8 to 14\% of sentences, so seeds are not independent samples.
 We report paired differences with 95\% $t$ intervals and bootstrap intervals over seeds, and every claim of a lead or a tie uses the $t$ interval. We call one model ahead when the interval for the difference excludes zero, and two models level when the interval includes zero and has a lower bound above $-.03$, a margin we fixed in advance at roughly a tenth of the fair count. Where the bootstrap interval disagrees, we say so and claim no lead.
-The earlier judge, Qwen2.5-3B \citep{qwen25} with a grammaticality probability above .5, passes .89 of real held-out sentences. It chose every sampling temperature and window, so the judge-2 scores re-score draws made at settings that it selected, and we did not re-tune.
+The earlier judge, Qwen2.5-3B \citep{qwen25} with a grammaticality probability above .5, passes .89 of real held-out sentences. It chose every sampling temperature and window, so the scores of the two-model judge (judge 2, described below) re-score draws made at settings that it selected, and we did not re-tune.
 
 \paragraph{Parsing and judging protocols.} Gold parses are scarce for children's stories, so we ask whether a score accepts real held-out sentences and rejects broken ones. The broken classes are scrambles, a single swap of adjacent words, and a swap of every content word with another of the same part of speech and verb frame, which leaves a grammatical but senseless sentence.
 We fix each score's threshold so that it accepts 90\% of 400 real calibration sentences and report the share of each broken class that it still accepts, so lower is better (four seeds). We also compare trees with a shallow-phrase reference from NLTK.
@@ -270,7 +269,7 @@ suddenly the little girl had an idea & all four seeds & [[[[suddenly the] little
 Only the chunk ``the tree'' appears in all four trees of the first sentence. Seed 13 groups ``had no,'' seed 17 attaches the subject to the verb first, seed 19 matches the reference, and seed 23 builds a left-leaning tree.
 All four learners give the second sentence one tree, with ``one day'' and ``the park'' as chunks, as the reference has them. Two of the four drawn trees look good, and in the fourth the learner joins ``you said tom'' across the boundary between two clauses.
 The last row shows that agreement across learners can coincide with error. The pairs ``suddenly the'' and ``the little'' are both frequent, so every seed builds the noun phrase from left to right.
-Independent learners agree on the bracket set of held-out sentences at F1 of .65, .70, and .72 after 250, 500, and 1,000 sentences (set S), where random binary trees give .34 on an earlier 300-sentence set.
+Independent learners agree on the bracket set of held-out sentences at F1 of .65, .70, and .72 after 250, 500, and 1,000 sentences (set S).
 After 1,000 sentences, 82\% of the held-out parses differ from right-branching, and 66\% are neither right- nor left-branching (set S).
 Where they differ they score .28 to .32 F1 against the NLTK reference, below right-branching on the same sentences (.45 to .48; set S).
 We make no claim that the departures are better, because the shallow-phrase reference cannot credit structure that its convention leaves unmarked.
@@ -349,14 +348,14 @@ Figure~\ref{fig:gen} and Table~\ref{tab:gen} give the fair count for \trellis{} 
 The earlier judge chose every setting, so the selection under a different judge limits the comparison.
 On the eight seeds pooled, \trellis{} is level with the LSTM on syntax at 250 sentences (+.015, 6 of 8 seeds, $t$ interval +.000 to +.031) and level with the GPT (+.020, 7 of 8 seeds, interval includes zero).
 On the meaningful count its margin over the GPT is +.022, and the lower bound of the interval is +.000, so we do not call it a lead.
-At 500 sentences the three models tie on syntax to within .002, and the LSTM's margin of .013 on the meaningful count has an interval that includes zero.
+At 500 sentences the three models tie on syntax to within .002 (intervals reach $-$.013 and $-$.028). The LSTM's margin of .013 on the meaningful count has an interval that includes zero but reaches $-$.030, which meets our margin only at its edge, so we claim a tie on syntax and none on that count.
 At 1,000 sentences the neural models score higher, but no $t$ interval excludes zero. The LSTM's margin on the meaningful count is .026 ($t$ interval [$-$.052, +.001], bootstrap interval [$-$.048, $-$.008], 1 of 8 seeds won), and the GPT's margin on syntax is .019 ($t$ interval [$-$.043, +.005], bootstrap interval [$-$.037, $-$.000]).
 The syntax interval against the LSTM reaches $-$.042 and against the GPT $-$.043, beyond our margin, so the tie fails there and we claim neither a tie nor a lead.
-At 4,000 sentences both neural models lead on both seeds, by .055 to .057 on syntax and .070 to .082 on the meaningful count (two seeds give no interval).
+At 4,000 sentences both neural models score higher on both seeds, by .055 to .057 on syntax and .070 to .082 on the meaningful count (two seeds, no interval).
 
 The four confirmation seeds chose no setting and give a weaker result at 500 sentences. The LSTM leads there on all four seeds on both counts, by .012 on syntax ($t$ interval $-$.024 to +.001) and .022 on the meaningful count ($-$.039 to $-$.005), and only the second interval excludes zero. At 250 sentences \trellis{} leads the GPT on 4 of 4 seeds (+.027; Supplement, Table~S18).
 The earlier judge showed \trellis{} ahead of a matched GPT at 250 and 500 sentences on 8 of 8 seeds (Supplement, Table~S1). That result does not survive judge 2, because the GPT's count rises more under judge 2 at both sizes.
-\trellis{} therefore writes new grammatical sentences about as often as both neural models at 250 sentences. It matches them at 500 sentences on eight seeds pooled while trailing the LSTM on the confirmation seeds, and it trails them at 1,000 and 4,000 sentences.
+\trellis{} therefore writes new grammatical sentences about as often as both neural models at 250 sentences. It matches them on syntax at 500 sentences on eight seeds pooled while trailing the LSTM on the confirmation seeds, it scores lower at 1,000 sentences without a decisive interval, and it scores lower at 4,000 sentences on both seeds (no interval).
 \begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.62\textwidth]{figures/generation_fair_count_judge2}
@@ -390,7 +389,7 @@ $n$ & \trellis{} & LSTM & GPT & \trellis{} $-$ LSTM & \trellis{} $-$ GPT \\
 \end{table}
 
 Two design decisions shape these counts. The plain generator let a sentence start or end on a word that never starts or ends a stored sentence.
-Reading the boundary exactly cuts the share of distinct outputs with an atypical boundary from .32--.42 to .07--.12 and lifts the fair count under the earlier judge at 1,000 sentences from .316 to .338 on the four selection seeds.
+Reading the boundary exactly cuts the share of distinct outputs with an atypical boundary from .32--.38 to .07--.11 (seed 13) and lifts the fair count under the earlier judge at 1,000 sentences from .316 to .338 on the four selection seeds.
 A stricter boundary count leaves \trellis{} tied with the LSTM and ahead of the GPT only at 250 sentences (Supplement, Table~S3).
 Every learner pays for novelty with grammaticality: when about half of its new sentences carry an unseen trigram, the LSTM and GPT are grammatical .81 and .80 of the time and \trellis{} .71 and .67 (Supplement, Figure~S1).
 From 1,000 to 4,000 sentences only the new-trigram sentences of \trellis{} become less grammatical.
@@ -411,10 +410,10 @@ Supplement Table~S19 removes the parts at 1,000 sentences.
 Removing every stored chunk leaves the code length and the generation counts unchanged to within the seed spread (30.8 bits with and without chunks).
 Removing the concepts from the generator's reads shortens the code by about 2 bits (28.8), and removing both gives 28.6 bits, shorter than the full system at every size.
 The margin over byte-pair coding therefore belongs to the word-window generator with its pair gate and leaf reads. The chunks add nothing to it, and the concepts cost about 2 bits.
-Removing the concepts lowers generation (syntax .539 to .496, syntax and meaning .363 to .309, lower in both seeds at every temperature).
+Removing the concepts lowers generation (syntax .539 to .496, syntax and meaning .363 to .309 at temperature 2.0, and lower in the two-seed mean at temperatures 1.2 and 3.0 too; Supplement, Table~S19).
 It also makes the generator reject content-swapped sentences more often (accepted share .708 down to .573), so the concepts make the generator more permissive, which helps generation and hurts prediction.
 Chunks reach the generator only through the context tree that they sit in, so the null result for chunks in generation holds partly by construction.
-The chunk-free parser also reaches a higher tree F1 against the shallow-phrase reference (.383 against .347 on set C at 1,000 sentences, both below right-branching at .427).
+The chunk-free parser also reaches a higher tree F1 against the shallow-phrase reference (.383 against .347 on set C at 1,000 sentences in configuration C8, two seeds, both below right-branching at .427; Supplement, Table~S19).
 
 \subsection{Real and broken sentences}
 
@@ -423,7 +422,7 @@ Supplement Figure~S5 shows the share of broken sentences each score accepts as t
 The parse score alone accepts most scrambles at every size (.88 at 125 sentences, .77 at 4,000) and content-swapped sentences at .91 to .94, as a syntax checker should, because those sentences are grammatical.
 The generator score does better. At 125 sentences it matches the GPT on scrambles (.39 against .40) and beats the LSTM (.65), and at 4,000 sentences it falls behind both (.049 against .010 and .007).
 It is weakest on content swaps, where it still accepts .58 at 4,000 sentences against .41 and .40 for the neural models, and it trails them on both classes.
-Beam-one greedy parsing matches full inside-outside in F1 against the reference (.353 against .352 on set C) and in AUC for ungrammatical sentences (.541 against .542). It keeps 93\% of the full trees and costs .21 as much (Supplement, Table~S6).
+Beam-one greedy parsing matches full inside-outside in F1 against the reference (.353 against .352 on set C, configuration C4, four seeds, where right-branching scores .423) and in AUC for ungrammatical sentences (.541 against .542). Its trees agree with the full ones at bracket F1 .934, and it costs .21 as much (Supplement, Table~S6).
 The first open question of version 1 therefore has a negative answer on short sentences.
 
 \section{Evaluation in Chess}
@@ -458,17 +457,16 @@ Pieces defended by a pawn appear at only 0.4 to 0.6 times chance, which runs aga
 If chunking is compression, the learned chunks should shorten the description of a held-out position. We code each of 1,000 held-out positions with the learned chunks, count bits, and compare with byte-pair coders over squares and over shapes, with Krimp, and with xz.
 No coder pays for its model, so these numbers are held-out code lengths without the model's own description length, which two-part description lengths include. All numbers come from one seed (13) and one run per cell.
 Table~\ref{tab:chess-bits} gives the result after 4,000 positions on four test sets. Control positions resemble the training games, other openings and the other wing change the opening and the pawn structure, and shifted positions place shapes seen in training one file over, on squares that training never used.
-On control positions byte-pair over squares is best, at 108.8 bits against 127.7 for the better of two \trellis{} variants and 130.6 for the standard configuration.
-On shifted positions, byte-pair over squares degrades to 205.5 bits. The standard configuration codes them in 153.6 bits, which saves 52 bits per position relative to byte-pair over squares, and it trails byte-pair over shapes (149.7) by 3.9 bits.
-The three-seed mean of the standard configuration on shifted positions is 151.5 (Supplement, Table~S20), still 1.8 bits above the seed-13 value for byte-pair over shapes.
-Configuration C7 switches off one scoring rule of the standard configuration. The standard rule scores a new concept that holds one position by the expected correct guesses of the pieces it holds, and C7 counts it as one correct guess, as the original Cobweb does. Under C7 the system reaches 147.2 on shifted positions and edges out byte-pair over shapes by 2.5 bits.
-On other openings and the other wing, byte-pair over shapes beats the better \trellis{} variant by 16.9 and 13.4 bits. The advantage of relational chunks on shifted positions comes from describing chunks by shape, and a frequency-based miner can do that too.
-Chunking therefore compresses chess positions, and the chunks of \trellis{} compress about as well as byte-pair chunks over shapes and never better under the standard configuration (Supplement, Figure~S4 gives the curves against positions learned).
+On control positions byte-pair over squares is best, at 108.8 bits. Byte-pair over shapes (111.3) and xz (122.7) also beat the standard configuration (130.6) and the better C7 variant (127.7).
+On shifted positions, byte-pair over squares degrades to 205.5 bits. The standard configuration codes them in 153.6 bits, which saves 52 bits per position relative to byte-pair over squares, and it trails byte-pair over shapes (149.7) by 3.9 bits; xz needs 181.3.
+The three-seed mean of the standard configuration on shifted positions is 151.5 (Supplement, Table~S20), so the seed swing (2.1 bits against seed 13) is about as large as the margin to byte-pair over shapes, which we measured on one seed only.
+Configuration C7 switches off one scoring rule of the standard configuration. The standard rule scores a new concept that holds one position by the expected correct guesses of the pieces it holds, and C7 counts it as one correct guess, as the original Cobweb does. Under C7 the system reaches 147.2 on shifted positions, 2.5 bits below byte-pair over shapes, a margin of the same size as the seed swing.
+On other openings and the other wing, byte-pair over shapes beats the better C7 variant by 16.9 and 13.4 bits (and by 16.4 bits on control positions), and xz beats it on both sets and on control positions (by 6.1, 1.6, and 5.0 bits). The advantage of relational chunks on shifted positions comes from describing chunks by shape, and a frequency-based miner can do that too.
+The chunks therefore beat independent-piece coding, by 45 to 63 bits per position in the better variant. They approach byte-pair chunks over shapes only on shifted positions, where one seed leaves the gap inside seed variation, and xz codes the three other sets in fewer bits (Supplement, Figure~S4 gives the curves against positions learned).
 
 \begin{table}[!htbp]
-\caption{Bits to code a held-out Lichess chess position after 4,000 training positions (lower is better; seed 13, 1,000 test positions per set, one run, model cost not charged). \trellis{} (standard) is the run with the standard chess configuration C5, available for control and shifted sets only.
-\trellis{} (best variant) is the better of the variant that describes a chunk by the offsets between its pieces and the variant that adds the squares of the pieces, in each column.
-Its shifted value, 147.2, comes from configuration C7, which switches off the scoring rule for new single-position concepts.}
+\caption{Bits to code a held-out Lichess chess position after 4,000 training positions (lower is better; seed 13, 1,000 test positions per set, one run, model cost not charged). \trellis{} (standard) is the run with the standard chess configuration C5 in every column.
+\trellis{} (best variant, C7) is the better, in each column, of the variant that describes a chunk by the offsets between its pieces and the variant that adds the squares of the pieces, both under configuration C7, which switches off the scoring rule for new single-position concepts. On the other wing the standard configuration is the shorter code by 0.6 bits.}
 \label{tab:chess-bits}
 \begin{center}
 \small
@@ -476,8 +474,8 @@ Its shifted value, 147.2, comes from configuration C7, which switches off the sc
 \toprule
 Coder & Control & Other openings & Other wing & Shifted \\
 \midrule
-\trellis{} (standard) & 130.6 & -- & -- & 153.6 \\
-\trellis{} (best variant) & 127.7 & 138.3 & 154.6 & 147.2 \\
+\trellis{} (standard, C5) & 130.6 & 139.6 & 154.0 & 153.6 \\
+\trellis{} (best variant, C7) & 127.7 & 138.3 & 154.6 & 147.2 \\
 Byte-pair over squares & 108.8 & 123.4 & 142.4 & 205.5 \\
 Byte-pair over shapes & 111.3 & 121.4 & 141.2 & 149.7 \\
 Krimp & 142.3 & 156.1 & 173.4 & 198.3 \\
@@ -539,17 +537,17 @@ People fall from 3.0 to 2.5 to 2.0 across the same skill levels.
 \citet{gobet-simon-random} found that skill still helps a little on random positions, which agrees in direction with our rise, though the 1973 values fall with skill.
 Any learner that stores more chunks with more data would recall more, so the ordering by experience is weak evidence for the account. We ran no chunker baseline, such as byte-pair chunks in the same slots, and no comparison with the recall simulations of CHREST \citep{gobet-simon-five-seconds}.
 
-\section{Abstraction Costs Meaning Before Grammar}
+\section{Abstraction and the Loss of Meaning Before Grammar}
 
 Language can be grammatical and meaningful, grammatical and meaningless, or neither. We asked how the output of \trellis{} moves among these three regimes as the abstraction of the generator's words, context, or locations rises.
-We call them meaningful, syntax-only, and nonsense, and judge 2 defines each: a sentence is meaningful if it passes both the syntax and the meaning question, syntax-only if it passes syntax and fails meaning, and nonsense if it fails syntax.
+We call them meaningful, syntax-only, and nonsense, and judge 2 defines each: a sentence is meaningful if it passes both the syntax and the meaning question, syntax-only if it passes syntax and fails meaning, and nonsense if it fails syntax. Random word damage reproduces the ordering of meaning before grammar (below), so we read the ordering as consistent with abstraction but not specific to it.
 A strong form of the hypothesis holds that an interior setting of the dial would produce the syntax-only regime at a share of one half or more, which would show that the memory separates how words combine from their referents. On TinyStories the evidence supports a weaker regularity, and the settings we ran do not reach the strong form; a controlled grammar with an exact judge reaches it when the word taxonomy describes each word by five function words (Figure~\ref{fig:controlled}) and misses it with all-neighbor features.
-Every dial (word, context, and location abstraction, and context reach) is a read-out of the taxonomies and the context window that the learner already holds, and learning, storage, and the generator stay those of the main configuration, so the dials add no new machinery. The regime generator comes in two forms. Configuration C6a is the TinyStories generator, whose word taxonomy describes each word by its neighbors and the function words beside it, and C6b is the controlled-grammar generator, whose taxonomy uses five function-word features and so changes the representation. The class-level pair gate of C6a and C6b reads the stored word pairs at level $b$, and C9 reads the stored context window at level $b$ and reach $W'$ while the emitted word stays exact.
+Every dial (word, context, and location abstraction, and context reach) is a read-out of the taxonomies and the context window that the learner already holds, and learning, storage, and the generator stay those of the main configuration, so the dials add no new machinery. The regime generator comes in two forms. Configuration C6a is the TinyStories generator, whose word taxonomy describes each word by the 100 most frequent words beside it, and C6b is the controlled-grammar generator, whose taxonomy uses five function-word features and so changes the representation. The class-level pair gate of C6a and C6b reads the stored word pairs at level $b$, and C9 reads the stored context window at level $b$ and reach $W'$ while the emitted word stays exact.
 
 \paragraph{The judge separates the regimes.} Judge 2 passes syntax on .88 of held-out sentences whose content words we swapped within part of speech and meaning on only .13 of them, and it rejects scrambles and agreement errors on both questions (Supplement, Table~S12).
-The syntax question passes every one of 100 hand-built templates with absurd selection (for example, ``the boxes ate the flowers''). A single adjacent swap passes syntax at .13, a known weakness, and we validated the judge on constructed controls only.
+The syntax question passes all 100 hand-built sentences with a correct frame, about half of them with absurd selection (for example, ``the boxes ate the flowers''). A single adjacent swap passes syntax at .13, a known weakness, and we validated the judge on constructed controls only.
 
-\paragraph{The dial reaches the two ends.} We read the generator's context at a level $b$ of a word-category taxonomy that Cobweb builds from the neighbors of each word and from the function words beside it.
+\paragraph{The dial reaches the two ends.} We abstract the generator's words to a level $b$ of a word-category taxonomy that Cobweb builds from the 100 most frequent words beside each word.
 The level of a concept is $-\log_2$ of its share of all word occurrences, and the generator reads each word at its deepest ancestor whose level is at most $b$ bits. The leaf holds exact words, the root ($b=0$) holds one class, and larger $b$ gives finer classes.
 Table~\ref{tab:regimecases} shows generated sentences at five levels after 4,000 sentences, and Supplement Table~S13 gives the regime shares.
 With exact words and the pair gate on, 54\% to 58\% of the sentences are meaningful at temperature 1 and 62\% to 63\% at temperature .7. With one class, 87\% to 89\% are nonsense, and in between the meaningful share falls and the nonsense share rises monotonically.
@@ -589,17 +587,16 @@ Because every meaningful sentence is also a syntax-pass sentence, the same state
 The ordering holds at every level on all three runs. We call it a regularity because three runs, one judge, and nested definitions support no more.
 Three features qualify it. The syntax threshold of judge 2 is permissive by design, which favors the ordering. A class-free swap of words outside the 50 most frequent types, applied to meaningful sentences, leaves a meaningless share of .32, .45, and .43, so random damage shows the pattern too.
 The best leaf, at temperature .7, gives a meaningless share of .21 to .23, and the temperature-1 leaf matches the temperature of the class levels.
+Supplement Table~S29 gives judged examples of each regime from the context dial (configuration C9), where the syntax-only draws mostly repeat a word or attach an odd object and the nonsense draws break agreement or word order.
 
 \begin{figure}[!htbp]
 \centering
 \includegraphics[width=\textwidth]{figures/abstraction_law}
-\caption{Abstraction costs meaning before grammar. Left, fraction of the temperature-1 leaf syntax-pass rate (solid) and meaning-pass rate (dashed) that generated TinyStories sentences keep at each abstraction level (judge 2; markers give three runs: seed 13 at 1,000 and 4,000 sentences, seed 17 at 4,000 sentences).
+\caption{Meaning falls before grammar as abstraction rises, and random damage does the same. Left, fraction of the temperature-1 leaf syntax-pass rate (solid) and meaning-pass rate (dashed) that generated TinyStories sentences keep at each abstraction level (judge 2; markers give three runs: seed 13 at 1,000 and 4,000 sentences, seed 17 at 4,000 sentences).
 Middle, the meaningless share of grammatical sentences. Right, the chess version for the where-file and where-rank dials (two seeds, 4,000 positions).
 Legality (share of legal boards, solid) and realism (share of real-looking boards, dashed) appear as fractions of the real board passed through the parser.}
 \label{fig:law}
 \end{figure}
-
-Supplement Table~S29 gives judged examples of each regime. The syntax-only draws mostly repeat a word or attach an odd object, and the nonsense draws break agreement or word order.
 
 \paragraph{TinyStories does not reach the middle regime.} On TinyStories the largest syntax-only share over every setting, seed, and size is .265, against a target of .5. We looked for the cause with oracles that need no model.
 An oracle that takes the meaningful sentences of the best generator and swaps every noun, verb, and adjective within exact morphosyntactic cells (tense, number, verb frame) reaches a syntax-only share of .45, .50, and .52 on the three runs.
@@ -614,13 +611,13 @@ We hypothesized that the ceiling of .45 to .52 belongs to TinyStories and to jud
 A context-free grammar with 147 words generates sentences with number agreement and verb frames, and selectional restrictions supply the meaning: each verb restricts the types of its subject and object, and each adjective restricts its noun.
 A rule-based judge, fixed before any generation, labels a sentence nonsense if it does not parse, syntax-only if it parses and violates a restriction, and meaningful if it parses and satisfies all restrictions.
 On 2,000 samples it scores grammar sentences meaningful at 1.000 and word shuffles nonsense at .994, and it sends same-category word swaps to syntax-only (.66, .85, and .91 for one, two, and three swapped words; Supplement, Table~S22).
-We trained the learner in configuration C6b, whose word taxonomy uses the five most frequent function words as features (func:5) in place of the neighbors and function words of C6a, on 1,000 sentences (seeds 13 and 17) and judged 1,600 new generations per setting.
+We trained the learner in configuration C6b, whose word taxonomy uses the five most frequent function words as features in place of the 100 most frequent neighboring words of C6a, on 1,000 sentences (seeds 13 and 17) and judged 1,600 new generations per setting.
 
 One dial produces all three regimes (Figure~\ref{fig:controlled}; Supplement, Table~S25). At the leaf, .72 to .73 of the generations are meaningful. At $b=6$ and $b=7$, .60 to .67 are syntax-only, above the target of .5 on both seeds, and at $b=0$, .97 to .98 are nonsense (.88 at $b=2$).
 The word classes at $b=5$ to 7 pair words of one syntactic category in about .9 of class-mate pairs and words of one semantic type near chance (.15 to .21; Supplement, Table~S23). A class gate with class-level emission therefore keeps syntax and drops the restrictions.
 Dial C9, which abstracts the context while the word-level pair gate stays, gives no syntax-only share above .41, because the gate keeps the noun-verb and adjective-noun adjacencies that carry the restrictions (Supplement, Table~S26).
 The function-word features carry this separation in the controlled grammar. With all-neighbor features, which describe each word by every word beside it, the dial gives a syntax-only share of at most .42 at 1,000 sentences and at most .45 at 4,000 (Supplement, Table~S30). Their classes at $b=5$ to 7 are syntactically pure (.82 to .95 by seed) but keep much of the semantic type (.50 to .64 by seed; means .50 to .61 in Supplement, Table~S24), so a swap within a class often respects the restrictions. Three variants that we fixed before running also fall short. Neighbors named by their class and near neighbors kept apart from far ones peak at .34 and .35, and a suffix feature added to all neighbors comes closest, at .52 to .63 on seed 13 from 1,000 to 4,000 sentences, but stays at .42 to .49 on seed 17, so it misses the target on one seed. The ordering holds in every row of Table~S30 other than the leaf and $b=0$: the meaningful share falls from .72 to .73 at the leaf to at most .55, and the nonsense share stays at or below .46.
-In the controlled grammar the memory therefore separates syntax from meaning when the word taxonomy describes each word by its function-word neighbors, and it does not when the taxonomy keeps all neighbors. We report C6b as an ablation of the representation. The TinyStories regime runs used a taxonomy of neighbors plus function words (C6a), not func:5, and we never varied the representation on TinyStories, so whether the data, the judge, or the word representation limits the middle regime there remains untested. The ordering, meaning before grammar, holds on TinyStories with the C6a taxonomy, in chess, and in the controlled grammar with every feature set we tested.
+In the controlled grammar the memory therefore separates syntax from meaning when the word taxonomy describes each word by its function-word neighbors, and it does not when the taxonomy keeps all neighbors. We report C6b as an ablation of the representation within the controlled grammar, where the data and the judge change too. The TinyStories regime runs used a taxonomy of the 100 most frequent neighboring words (C6a), and a one-seed check at 1,000 sentences with 50 or all neighbors stayed at a syntax-only share of .26 or below (Supplement, the text before Table~S30); we never tried five function-word features on TinyStories, so whether the data, the judge, or the word representation limits the middle regime there remains untested. The ordering, meaning before grammar, holds on TinyStories with the C6a taxonomy, in chess, and in the controlled grammar with every feature set we tested.
 
 \begin{figure}[!t]
 \centering
@@ -629,7 +626,7 @@ In the controlled grammar the memory therefore separates syntax from meaning whe
 \label{fig:controlled}
 \end{figure}
 
-Six caveats apply. We chose the five-function-word feature set after reading the purity tables of five feature sets (Supplement, Table~S24), the all-neighbor features and the three variants fixed in advance miss the target (Table~S30), and we ran two seeds. The meaningful share tops out near .75, because about a quarter of leaf generations violate an object restriction. At $b=6$ and $b=7$ the classes hold two words or fewer on average.
+Seven caveats apply. We chose the five-function-word feature set after reading the purity tables of five feature sets (Supplement, Table~S24), the all-neighbor features and the three variants fixed in advance miss the target (Table~S30), and we ran two seeds. The meaningful share tops out near .75, because about a quarter of leaf generations violate an object restriction. At $b=6$ and $b=7$ the classes hold two words or fewer on average.
 The syntax-only share at $b=6$ needs 1,000 or more sentences (.37 to .49 at 500 or fewer, .56 to .69 at 1,000 or more; Supplement, Table~S27). The context dial fails to separate the regimes.
 
 \subsection{Chess: parse, then regenerate where or what}
@@ -638,12 +635,12 @@ Chess follows the same ordering with locations in place of words (configuration 
 A board is legal by the rules of chess (python-chess, White to move). A piece-square classifier calibrated on real positions decides realism, and we call a legal board that the classifier accepts R-real, a legal board that it rejects R-legal, and an illegal board R-non.
 Real held-out positions are R-real in .957 of cases, random legal boards are R-legal in .97 of cases, and random illegal boards are R-non always.
 Drawing positions from the chunk and concept distributions alone gives R-real of .085 at the leaf and .006 at the root. R-legal never exceeds .015, because the whole-board counts (one king per side, at most eight pawns) belong to no unit-level distribution.
-Parsing a held-out position and regenerating its chunks keeps the real structure at the leaf (R-real .76). Replacing chunk contents at any higher concept level gives nonsense (R-non .72 at level 1 and about .94 from level 2 up), because the replacement chunks bring their own kings and pawns.
+Parsing a held-out position and regenerating its chunks keeps the real structure at the leaf (R-real .76). Replacing chunk contents at any higher concept level gives nonsense (R-non .72 at level 1 and .94 to .98 from level 2 up; Supplement, Table~S17), because the replacement chunks bring their own kings and pawns.
 
 The where-file dial moves only the file of the reference square of each parsed chunk up the concept tree, which abstracts location and keeps the chunk's pieces and shape.
 Legality survives longer than realism. With the file redrawn, the share of legal boards falls from .95 at the leaf to .91 at the root (the real board through the parser gives 1.00), whereas realism falls to .72 of that control.
 R-legal grows from .056 to .233 and R-non stays at or below .09. Replacing the pieces as well gives nonsense at .98 to .99, because swapped pieces break the king and pawn counts.
-Redrawing the rank puts pawns on the back ranks and gives check, so R-non reaches .67 at the root and R-real falls to .19, whereas redrawing the file leaves no pawn on rank 1 or 8.
+Redrawing the rank puts pawns on the back ranks and gives check, so R-non reaches .67 at the root and R-real falls to .19, whereas redrawing the file leaves no pawn on rank 1 or 8 (Figure~\ref{fig:boards} shows boards of each regime).
 The rank therefore plays the part of grammar and the file the part of content, a reading that we chose after seeing the grid of cells, so the chess parallel is exploratory (Figure~\ref{fig:law}, right, shows both dials).
 Every real board is also a legal board, so legal boards contain real boards and the chess ordering nests in the same way as the language ordering. The two constraints differ in kind, because legality is a global constraint on piece counts and placement and grammar here is local, enforced by the pair gate.
 The legal-unrealistic share peaks at .254 at 500 positions (where-file, level 6), is .233 at 4,000 positions, and never approaches the target of .5.
@@ -672,10 +669,11 @@ We have not compared \trellis{} with these systems. Our parser uses the inside-o
 \section{Concluding Remarks}
 
 We presented version 2 of \trellis{}, which learns chunks and concepts from raw streams without labels or gradients and parses and generates from one memory.
-The evidence for chunking as compression comes from chess. There removing the chunks adds 47 to 59 bits per position and erases the recall gap between game and random positions, and the chunks code shifted positions in slightly more bits than byte-pair coding over shapes.
+The evidence for chunking as compression comes from chess. There removing the chunks adds 47 to 59 bits per position and erases the recall gap between game and random positions, and the chunks beat independent-piece coding. On shifted positions they come within seed variation of byte-pair coding over shapes (one seed), and byte-pair coding over shapes and xz code the three other test sets in fewer bits.
 In short TinyStories sentences the evidence does not support the claim: the generator earns the margin over byte-pair coding, removing both chunks and concepts shortens the code further, and removing the chunks changes neither the code nor the generation counts.
-The concepts drive generation, and we suspect that a domain with recurring multi-part structure rewards chunks while short sentences do not, a hypothesis that remains untested.
-With 250 sentences the system writes new, judged-grammatical sentences about as often as matched LSTM and GPT models. It trails the LSTM at 500 sentences on the confirmation seeds, scores lower than both neural models at 1,000 sentences without an interval that excludes zero, and trails both at 4,000 sentences.
+Removing the concepts lowers the count of new, judged sentences by .04 to .05 on two seeds, and we suspect that a domain with recurring multi-part structure rewards chunks while short sentences do not, a hypothesis that remains untested.
+The removal controls do not support the claim that chunks and concepts depend on each other: chunks carry the chess compression and recall and concepts carry story generation, largely independently (in chess, chunks without concepts keep all but 0.4 to 0.7 bits; in language, removing both shortens the code).
+With 250 sentences the system writes new, judged-grammatical sentences about as often as matched LSTM and GPT models. It trails the LSTM at 500 sentences on the confirmation seeds, scores lower than both neural models at 1,000 sentences without an interval that excludes zero, and scores lower than both at 4,000 sentences on both seeds (no interval).
 The abstraction dial shows that abstraction costs meaning before grammar in language and in chess. On TinyStories the grammatical but meaningless regime stays thin, and an oracle ceiling shows how far a perfect word swapper could go. On a controlled grammar with an exact judge, the same dial produces all three regimes once the word taxonomy is built from function-word features, and it does not with all-neighbor features. Random damage to words reproduces the same ordering, and whether the data, the judge, or the word representation limits the middle regime on TinyStories remains untested.
 
 \paragraph{Limitations.} The language compression and removal controls use two seeds, the generation ablations run at 1,000 sentences only, and the 4,000-sentence generation results use two seeds.
@@ -683,7 +681,7 @@ The earlier judge chose every generation setting, and judge 2 is permissive on s
 The compression code of \trellis{} is the generator's distribution with a uniform escape and no model cost, so it sets no bound for a predictor built on the same memory.
 The concepts-off control in chess recalls nothing by construction, and we ran no chunker baseline for the recall task.
 The chess realism judge is a piece-square classifier that tolerates file shifts only in part: it scores 95.7\% of real boards, 78.9\% of mirrored boards, 68.4\% of boards shifted by one file, and 41.2\% of boards shifted by two files as real (Supplement, Table~S21). We chose the chess dial after the grid.
-We chose the func:5 feature set after reading purity tables and tested it on two seeds. The TinyStories regime runs are three runs on seeds 13 and 17. Random word damage reproduces the ordering of meaning before grammar, so the dial does not tie that ordering to the memory's own structure. The chess compression numbers come from one seed, and the shifted-position win over byte-pair coding over shapes belongs to a variant (configuration C7, 147.2 bits), whereas the standard configuration trails it by 3.9 bits. We ran no grammar-induction parsing baseline such as the constituent-context model or the compound probabilistic context-free grammar.
+We chose the five function-word features after reading purity tables and tested it on two seeds. The TinyStories regime runs are three runs on seeds 13 and 17. Random word damage reproduces the ordering of meaning before grammar, so the dial does not tie that ordering to the memory's own structure. The chess compression numbers come from one seed. The shifted-position margin over byte-pair coding over shapes is smaller than the seed swing: the variant (configuration C7, 147.2 bits) leads it by 2.5 bits and the standard configuration trails it by 3.9, and xz beats both on three of four test sets. We ran no grammar-induction parsing baseline such as the constituent-context model or the compound probabilistic context-free grammar.
 The language input is pre-segmented text with a 250-word vocabulary and sentences of at most eight words.
 Open questions include whether memory can choose the level of abstraction itself, whether the full inside-outside computation pays on longer inputs, and how to build a chess generator that composes positions from chunks while respecting the rules.
 
@@ -719,10 +717,10 @@ C1 & Edge-exact generator, window 7 (250 and 1,000 sentences) or 6 (500), temper
 C2 & Plain generator without the exact-boundary rule, windows 3 to 5, temperatures .5 to 1; four seeds, 1,000 sentences & Table~S4, Figure~S1 \\
 C3 & Learner of the generation study (posterior storage, window 7); default parser; four seeds, 250 to 1,000 sentences; set S & Tables~\ref{tab:cases} and \ref{tab:bio}, Table~S9, Figures~\ref{fig:chunkcases} and S2 \\
 C4 & Learner of the parsing-curve study (simpler candidate set); four seeds, 125 to 4,000 sentences; set C & Figure~S5, Tables~S6 to S8 \\
-C5 & Standard chess configuration: relational chunks of at most four pieces, in two variants (offsets only, and offsets plus squares); seed 13 (compression), seeds 13, 17, 19 (recall) & Table~\ref{tab:chess-bits}, Tables~\ref{tab:cstrial} and S10, Figures~\ref{fig:chesstypes} and \ref{fig:chesscases}, S3, S4, S7, Table~S11 \\
-C6a & TinyStories regime generator: pair-gated word generator, word taxonomy built from neighbors plus function words, class-level pair gate and emission at level $b$, temperature .7 to 1, window 5 or 7; seeds 13 and 17 & Table~\ref{tab:regimecases}, Figure~\ref{fig:law}, Tables~S12 to S15 \\
-C6b & Controlled-grammar regime generator (a representation ablation of C6a): the generator of C6a with the five-function-word taxonomy (func:5), class gate and class-level emission at level $b$; 147 words, 1,000 sentences, window 5, temperature 1; seeds 13 and 17 & Figure~\ref{fig:controlled}, Tables~S22 to S28 and S30 \\
-C7 & Chess compression with the standard configuration C5 except that a new concept holding one position counts as one correct guess, as in the original Cobweb, instead of by the expected correct guesses of its pieces & shifted-set value 147.2 in Table~\ref{tab:chess-bits} \\
+C5 & Standard chess configuration: relational chunks of at most four pieces, in two variants (offsets only, and offsets plus squares); seed 13 (compression, move study), seeds 13, 17, 19 (recall), seeds 13, 17, 19, 23, 29 (chess ideas) & Table~\ref{tab:chess-bits}, Tables~\ref{tab:cstrial} and S10, Figures~\ref{fig:chesstypes} and \ref{fig:chesscases}, S3, S4, S7, Table~S11 \\
+C6a & TinyStories regime generator: pair-gated word generator, word taxonomy built from the 100 most frequent neighboring words, class-level pair gate and emission at level $b$, temperature .7 to 1, window 5 or 7; seeds 13 and 17 & Table~\ref{tab:regimecases}, Figure~\ref{fig:law}, Tables~S12 to S15 \\
+C6b & Controlled-grammar regime generator (a representation ablation of C6a): the generator of C6a with the five-function-word taxonomy, class gate and class-level emission at level $b$; 147 words, 1,000 sentences, window 5, temperature 1; seeds 13 and 17 & Figure~\ref{fig:controlled}, Tables~S22 to S28 and S30 \\
+C7 & Chess compression with the standard configuration C5 except that a new concept holding one position counts as one correct guess, as in the original Cobweb, instead of by the expected correct guesses of its pieces & best-variant row of Table~\ref{tab:chess-bits} (all four sets) \\
 C8 & Language compression and removal controls: the generator of C1 at temperature 1 as a code (window per size, uniform escape weight chosen on a development set); variants full, chunks off, concepts off (leaf reads), both off; seeds 13 and 17, 250 to 4,000 sentences (generation at 1,000 sentences, temperatures 1.2, 2.0, 3.0; judge 2) & Figure~S6, Table~S19, Table~S5 \\
 C9 & Context-abstraction generator: the pair-gated word generator of C6a with the context window read at level $b$ and reach $W'$ and the emitted word exact; seed 13, 1,000 sentences, window 5; also run in the controlled grammar with the C6b taxonomy & Tables~S16, S26, and S29 \\
 C10 & Standard chess configuration with chunks capped at one piece (chunks off) or leaf-only reads (concepts off); seeds 13, 17, 19, 4,000 positions & Table~S20 \\
