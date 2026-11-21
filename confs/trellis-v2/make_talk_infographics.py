@@ -149,7 +149,6 @@ def make_parse_v2(path):
     vp = (xs[2] + np2) / 2
     s_ = (np1 + vp) / 2
     rr = 0.21
-    cand_x = (xs[1] + xs[2]) / 2
 
     def edge(a, b, color="#444", ls="-", lw=1.0):
         ax.add_line(Line2D([a[0], b[0]], [a[1], b[1]], color=color, linewidth=lw, linestyle=ls, zorder=2))
@@ -161,10 +160,6 @@ def make_parse_v2(path):
     edge((vp, y2 - rr), (np2, y1 + rr))
     edge((s_, y3 - rr), (np1, y1 + rr))
     edge((s_, y3 - rr), (vp, y2 + rr))
-    # a candidate that the reported tree does not use
-    for x in (xs[1], xs[2]):
-        edge((cand_x, y1 - rr), (x, leaf_y + 0.20), color=CAND_EDGE, ls=":", lw=0.9)
-    _circle_chunk(ax, cand_x, y1, rr, fill=CAND_FILL, edge=CAND_EDGE, label=".11", fontsize=8.5)
     for (x, y, t) in ((np1, y1, ".82"), (np2, y1, ".88"), (vp, y2, ".74"), (s_, y3, "1.0")):
         _circle_chunk(ax, x, y, rr, label=t, fontsize=8.5)
     plt.savefig(path, dpi=200, bbox_inches="tight", facecolor="white", pad_inches=0.05)
@@ -283,15 +278,15 @@ def make_learning_v2(path):
     # --- panel 3: two cards weighted by the posterior (hierarchies.png style)
     cx0, cy0, cw, ch = p3
     top = cy0 + ch - 0.12
-    cardw, cardh = 2.05, 2.70
+    cardw, cardh = 2.1, 2.95
     cyc = top - cardh / 2
-    _cobweb_node(ax, cx0 + cardw / 2 + 0.02, cyc, cardw, cardh, title="CNT_CONCEPT", count="+.84",
+    _cobweb_node(ax, cx0 + cardw / 2 + 0.06, cyc, cardw, cardh, title="CNT_CONCEPT", count="+.84",
                  attrs=[("content-left", [("the", ".84")]), ("content-right", [("dog", ".84")])],
-                 title_fill="#1f4e79", font_scale=0.55)
-    _cobweb_node(ax, cx0 + cw - cardw / 2 - 0.02, cyc, cardw, cardh, title="CTX_CONCEPT", count="+.84",
+                 title_fill="#1f4e79", font_scale=0.8)
+    _cobweb_node(ax, cx0 + cw - cardw / 2 - 0.06, cyc, cardw, cardh, title="CTX_CONCEPT", count="+.84",
                  attrs=[("left-1", [("EMPTYNULL", ".84")]), ("right+1", [("eats", ".84")]),
                         ("right+2", [("fish", ".84")])],
-                 title_fill="#2e6e55", font_scale=0.55)
+                 title_fill="#2e6e55", font_scale=0.8)
     ax.text(cx0 + cw / 2, cy0 + 0.30, "counts grow by the posterior, not by 1", ha="center", va="center",
             fontsize=10, family="serif", style="italic", color="#444")
     plt.savefig(path, dpi=200, bbox_inches="tight", facecolor="white", pad_inches=0.05)

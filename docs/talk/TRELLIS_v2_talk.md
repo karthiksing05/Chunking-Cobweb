@@ -1,49 +1,61 @@
 # TRELLIS v2 talk: slide content
 
-Deck: https://docs.google.com/presentation/d/161jduQT2dR5sZmeBV9EgKDq_Xm7nIUGlsjTDBlHKb2A (61 slides). Style follows TRELLIS-ACS-2026-talk-v5 (Drive id 1tSl8rTk01KTo7LToUqgKuzigc44wVbGW): plain title-case titles, short declarative text, one figure per slide, speaker notes on every slide, slide number bottom right, backups at the end. No pull-quote or slogan lines (removed 2026-11-20 on the user's feedback).
+Deck: https://docs.google.com/presentation/d/161jduQT2dR5sZmeBV9EgKDq_Xm7nIUGlsjTDBlHKb2A (44 slides: 39 main, 5 backups). Style follows TRELLIS-ACS-2026-talk-v5 (Drive id 1tSl8rTk01KTo7LToUqgKuzigc44wVbGW): plain title-case titles, short declarative text, one figure per slide, speaker notes on every slide, slide number bottom right, backups at the end. No pull-quote or slogan lines (removed 2026-11-20 on the user's feedback).
 
-## Structure (restructured 2026-11-20): the story as refinements to the ACS postulates
+## Structure (revision 3, 2026-11-20): 39 main slides and 5 backups
 
-Neither the ACS paper nor the inspiration deck has an algorithm listing; both give procedures as plain numbered phases ("1 Parsing: form candidate composites ... admit ... commit"). The step slides follow that format: numbered plain-text steps, indented sub-steps, version 1 beside version 2, changed phrases in bold.
+The user found the earlier 61-slide deck good but long and some pictures hard to read. Revision 3 merged or removed 17 slides and replaced small-font pictures with talk versions (confs/trellis-v2/make_talk_figures_rev3.py, PNGs *_talk.png in confs/trellis-v2/talk_figures/). Prediction sentences moved onto the first slide of each section and the speaker notes were extended to carry the removed slides' content.
 
-| # | Title | Kind |
+| # | Title | Notes |
 |---|---|---|
-| 1 | TRELLIS v2: Chunking as Compression | title (kept) |
-| 2 | Some Empirical Phenomena | motivation (kept; closing slogan removed) |
-| 3 | Concepts and Chunks as Compression | motivation (kept; closing line rewritten) |
-| 4 | Compression and Generation | motivation (kept; bullets rewritten) |
-| 5 | Representation Postulates | NEW, ACS R-postulates, instances.png |
-| 6 | Organization Postulates | NEW, ACS O-postulates, hierarchies.png |
-| 7 | Parsing in Version 1 | NEW, ACS parse postulates, parse_infographic.png |
-| 8 | Generation in Version 1 | NEW, ACS generation postulates, generation_infographic.png |
-| 9 | Learning in Version 1 | NEW, ACS learning postulates, instances.png |
-| 10 | Representation and Organization | kept (real content concept) |
-| 11 | What Changes in Version 2 | kept (overview table) |
-| 12 | Parsing: Version 1 to Version 2 | NEW refinement P1, postulate side by side |
-| 13 | Steps of Parsing | NEW, version 1 and version 2 steps |
-| 14 | Parsing Over Every Span | NEW infographic parse_v2_infographic.png |
-| 15 | A Parse of a Held-Out Sentence | case (old 7, retitled) |
-| 16 | Parsing Within a Window | NEW case, r218 windowed / frozen parse |
-| 17 | Generation: Version 1 to Version 2 | NEW refinement P2 |
-| 18 | Steps of Generation | NEW |
-| 19 | Generation One Element at a Time | NEW infographic generation_v2_infographic.png |
-| 20 | A Generated Sentence | case (old 8, step boxes removed) |
-| 21 | Learning: Version 1 to Version 2 | NEW refinement L1 |
-| 22 | Steps of Learning | NEW |
-| 23 | Learning From Every Candidate | NEW infographic learning_v2_infographic.png |
-| 24 | Predictions: Children's Stories | NEW claim |
-| 25-36 | Experimental Design; Judging Syntax and Meaning; Parsing Real and Broken Sentences; Parse Success by Training Size; The Same Sentence Under Four Seeds; Parses That Are Not Right-Branching; Story Chunks Through Experience; Phrase Chunks Over Experience; Chunks Reused Across Contexts; What the Three Models Wrote; Experimental Results: Generation; Novelty and Grammaticality | kept (old 10, 11, 15, 16, 17, 18, 21, 22, 19, 13, 12, 14) |
-| 37 | Predictions: Chess | NEW claim |
-| 38-44 | Chess Chunks on the Board; Frequent Chess Chunks; Chess Chunks Through Experience; One Position, Real and Scrambled; Compressing Shifted Chess Positions; A Chase and Simon Recall Trial; Chase and Simon Trials | kept |
-| 45 | Removing Chunks and Concepts | copy of the backup slide, in the chess section |
-| 46 | Predictions: Abstraction | NEW claim |
-| 47-48 | Abstraction Costs Meaning Before Grammar; With an Exact Judge, One Dial Gives All Three | kept |
-| 49 | Predictions: Learning Curves | NEW claim |
-| 50-54 | Generation Across Experience; Parsing Along Training; Compression Across Experience; Recall Across Experience; Chess Ideas Over Experience | kept |
-| 55-57 | Related and Future Research; Concluding Remarks (text rewritten around the refinements); References | kept |
-| 58-61 | Backup: Why the Middle Regime Failed; Backup: Parsing Along the Learning Curve; Backup: Removing Chunks and Concepts; Backup: Chess Moves Without Rules | backups kept |
+| 1 | TRELLIS v2: Chunking as Compression | title |
+| 2 | Some Empirical Phenomena | motivation |
+| 3 | Concepts and Chunks as Compression | merged old 3 and 4 (generation sentence moved into the closing line) |
+| 4 | Representation and Learning Postulates | R1, R2, L1, L2 above one image (instances_talk.png); merged old representation, learning v1 |
+| 5 | Organization Postulates | O1, O2 above hierarchies_talk.png (full width, regenerated) |
+| 6 | Parsing in Version 1 | P1-P3, infographic |
+| 7 | Generation in Version 1 | P4-P6, infographic |
+| 8 | What Changes in Version 2 | overview table (old "Representation and Organization" removed) |
+| 9 | Parsing: Version 1 to Version 2 | postulate |
+| 10 | Steps of Parsing | |
+| 11 | Parsing Over Every Span | infographic; the discarded "dog eats" (.11) node removed from panel 3 |
+| 12 | A Parse of a Held-Out Sentence | |
+| 13 | Parsing Within a Window | |
+| 14 | Generation: Version 1 to Version 2 | |
+| 15 | Steps of Generation | |
+| 16 | Generation One Element at a Time | infographic |
+| 17 | A Generated Sentence | |
+| 18 | Learning: Version 1 to Version 2 | merged postulate and steps (one sentence under the two columns) |
+| 19 | Learning From Every Candidate | infographic, larger cards |
+| 20 | Experimental Design | prediction sentence and judge description folded in (old Predictions: Children's Stories, Judging Syntax and Meaning) |
+| 21 | Parsing Real and Broken Sentences | |
+| 22 | Parsing Along Training | table "Parse Success by Training Size" folded into this figure |
+| 23 | Parses That Are Not Right-Branching | old "Same Sentence Under Four Seeds" dropped |
+| 24 | Story Chunks Through Experience | two sentences at 250 and 4,000 (story_chunks_cases_talk.png); phrase result in caption, plot in backup |
+| 25 | Chunks Reused Across Contexts | |
+| 26 | What the Three Models Wrote | |
+| 27 | Experimental Results: Generation | figure replaces the table slide |
+| 28 | Chess Chunks on the Board | prediction folded in (old Predictions: Chess); old "Frequent Chess Chunks" dropped |
+| 29 | Chess Chunks Through Experience | one position at 300, 1,000, 4,000 (chess_ideas_cases_talk.png) |
+| 30 | One Position, Real and Scrambled | chess_case_talk.png (case 6 of case_s13.json) |
+| 31 | Compression Across Experience | chess_chunkers_talk.png; table "Compressing Shifted Chess Positions" folded in |
+| 32 | Chase and Simon Trials | cs_trials_talk.png; recall-trial slide folded in |
+| 33 | Recall Across Experience | chess_cs1973_recall_talk.png |
+| 34 | Removing Chunks and Concepts | |
+| 35 | Abstraction Costs Meaning Before Grammar | prediction folded in |
+| 36 | With an Exact Judge, One Dial Gives All Three | controlled grammar |
+| 37 | Related and Future Research | |
+| 38 | Concluding Remarks | |
+| 39 | References | |
+| 40 | Backup: Phrase Chunks Over Experience | story_chunks_phrases_talk.png |
+| 41 | Novelty and Grammaticality | moved to backups |
+| 42 | Backup: Chess Ideas Over Experience | chess_ideas_curves_talk.png |
+| 43 | Backup: Why the Middle Regime Failed | |
+| 44 | Backup: Chess Moves Without Rules | |
 
-Deleted: old slide 9 "Learning in TRELLIS v2" (its step boxes are replaced by slides 21-23). Slide 20 lost its four step boxes and arrows (replaced by slides 17-19).
+Deleted in revision 3: Compression and Generation (merged into 3), Learning in Version 1 (merged into 4), Representation and Organization, Learning postulate slide (merged into 18), four "Predictions:" dividers, Judging Syntax and Meaning, Parse Success by Training Size (table), The Same Sentence Under Four Seeds, Frequent Chess Chunks, Compressing Shifted Chess Positions, A Chase and Simon Recall Trial, the Learning Curves section divider, the duplicate "Backup: Removing Chunks and Concepts", and the backup "Parsing Along the Learning Curve". The earlier 61-slide outline is in git history.
+
+Revision 3 Drive talk images (all anyoneWithLink readers): hierarchies_talk_v2 1D7QTXrPa0XyMQvJAvECpaoUbRZZ6-TVI, parse_v2_infographic_talk 1JeZ0SPZgwpxO7w-pjN6uEG1-BLUGmqys, story_chunks_cases_talk 1pQTsbwAI5Dqy43Zl9HsQCW9XabVXx3XD, story_chunks_phrases_talk 1dfYbOqRP5UzGJK9AvxgnuPFzfk6VZ41j, chess_ideas_cases_talk 1nkM9SL86oh-FB48ojEz4wCJ0l6eYUkFW, chess_ideas_curves_talk 1RYd3FJuB5HJypbdxrx_V4Zn5Rfkq3pRA, chess_case_talk 1_H_GNfAnAs0Fq_WqtgzRq0AoHy9Ihoje, cs_trials_talk_v2 1lcbqOpMjxbR0xELEctgHJO0g5mMCaWEH, chess_cs1973_recall_talk 1yoOa37pb0EPsPPHCZu3cpe-xi5WhNvKs, chess_chunkers_talk 1UGyJByxScEgRAvrOmCLhvfCaizPQd5Tr, instances_talk 1rpE1z0uN2R25ky5ubuMie4DSIKZMFh5P, learning_v2_infographic_talk 1QqYMNDzN846y6E0jRua6QlFj4Yb-6E5B.
 
 ## New slides: text and notes
 
