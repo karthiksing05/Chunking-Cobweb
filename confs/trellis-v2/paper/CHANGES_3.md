@@ -115,3 +115,4 @@ Main paper: 23 pages (rev 4: 22). Supplement: 21 pages, Tables S1 to S29 (S22 to
 - Prose: abstract cut to 11 sentences; "consistent with abstraction but not specific to it" replaced by "does not isolate abstraction"; "goes to nonsense, not to syntax-only output" replaced; the one-sentence lead-in to Table 4 merged into the next paragraph.
 - Revision 10 follow-up: chunks-off syntax range corrected to -.021 to +.023 (Table S19); S16 caption 17 of 36 cells; C6b supplement description states five exact types.
 - Title: 'Concepts Carry Children's Stories' (author's choice, 2026-11-21).
+- Final review fixes: t-interval wording at 1,000; shifted-position margins vs 2.1-bit seed swing; S19 counts named as without the unstored-trigram requirement.
