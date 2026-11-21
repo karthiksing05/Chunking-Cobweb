@@ -1,0 +1,60 @@
+Knowlton & Squire (1996) Exp 1, TRELLIS simulation (psych_agl.py). Endorsement % per cell; subjects = seeds 13..30.
+Human (controls, KS96 Table 3): GH 64.6  GL 62.5  NGH 54.9  NGL 28.1  | G-NG 22.0, H-L 14.4, interaction (NG CS effect 26.8 - G CS effect 2.1) 24.7
+
+[full] score = span_w (PRIMARY), n subjects = 18
+    cells (mean +- SD across subjects, N=18): GH  61.1+- 4.0  GL  40.3+- 6.9  NGH  71.5+- 5.8  NGL  27.1+- 4.8
+    grammaticality effect (G-NG)    1.4   chunk-strength effect (H-L)   32.6   interaction (CS effect NG - CS effect G)   23.6
+    paired t, G - NG within H:  -10.4 (t(17)=-6.87)   within L:   13.2 (t(17)=6.17)
+    Pearson r with human cell means: 0.641
+
+[full] score = logZ (secondary), n subjects = 18
+    cells (mean +- SD across subjects, N=18): GH  62.5+- 0.0  GL  75.0+- 0.0  NGH  25.0+- 0.0  NGL  37.5+- 0.0
+    grammaticality effect (G-NG)   37.5   chunk-strength effect (H-L)  -12.5   interaction (CS effect NG - CS effect G)    0.0
+    paired t, G - NG within H:   37.5 (t(17)=nan)   within L:   37.5 (t(17)=nan)
+    Pearson r with human cell means: 0.562
+
+[full] score = regen (secondary), n subjects = 18
+    cells (mean +- SD across subjects, N=18): GH  57.6+- 6.3  GL  70.1+- 7.6  NGH  25.0+- 0.0  NGL  47.2+- 6.9
+    grammaticality effect (G-NG)   27.8   chunk-strength effect (H-L)  -17.4   interaction (CS effect NG - CS effect G)   -9.7
+    paired t, G - NG within H:   32.6 (t(17)=22.08)   within L:   22.9 (t(17)=7.46)
+    Pearson r with human cell means: 0.313
+
+[conceptsoff] score = span_w (PRIMARY), n subjects = 18
+    cells (mean +- SD across subjects, N=18): GH  62.5+- 0.0  GL  37.5+- 0.0  NGH  75.0+- 0.0  NGL  25.0+- 0.0
+    grammaticality effect (G-NG)    0.0   chunk-strength effect (H-L)   37.5   interaction (CS effect NG - CS effect G)   25.0
+    paired t, G - NG within H:  -12.5 (t(17)=nan)   within L:   12.5 (t(17)=nan)
+    Pearson r with human cell means: 0.605
+
+[conceptsoff] score = logZ (secondary), n subjects = 18
+    cells (mean +- SD across subjects, N=18): GH  61.8+- 2.9  GL  69.4+- 6.4  NGH  20.8+- 6.1  NGL  47.9+- 4.8
+    grammaticality effect (G-NG)   31.2   chunk-strength effect (H-L)  -17.4   interaction (CS effect NG - CS effect G)  -19.4
+    paired t, G - NG within H:   41.0 (t(17)=24.21)   within L:   21.5 (t(17)=9.72)
+    Pearson r with human cell means: 0.295
+
+[conceptsoff] score = regen (secondary), n subjects = 18
+    cells (mean +- SD across subjects, N=18): GH  59.7+- 5.3  GL  68.8+- 6.4  NGH  23.6+- 4.0  NGL  47.9+- 4.8
+    grammaticality effect (G-NG)   28.5   chunk-strength effect (H-L)  -16.7   interaction (CS effect NG - CS effect G)  -15.3
+    paired t, G - NG within H:   36.1 (t(17)=21.02)   within L:   20.8 (t(17)=9.22)
+    Pearson r with human cell means: 0.297
+
+[acs] score = acs (PRIMARY), n subjects = 18
+    cells (mean +- SD across subjects, N=18): GH  89.6+- 4.8  GL   0.0+- 0.0  NGH 100.0+- 0.0  NGL  10.4+- 4.8
+    grammaticality effect (G-NG)  -10.4   chunk-strength effect (H-L)   89.6   interaction (CS effect NG - CS effect G)    0.0
+    paired t, G - NG within H:  -10.4 (t(17)=-9.22)   within L:  -10.4 (t(17)=-9.22)
+    Pearson r with human cell means: 0.406
+
+[tp] score = tp (PRIMARY), n subjects = 18
+    cells (mean +- SD across subjects, N=18): GH 100.0+- 0.0  GL  50.0+- 0.0  NGH  37.5+- 0.0  NGL  12.5+- 0.0
+    grammaticality effect (G-NG)   50.0   chunk-strength effect (H-L)   37.5   interaction (CS effect NG - CS effect G)  -25.0
+    paired t, G - NG within H:   62.5 (t(17)=nan)   within L:   37.5 (t(17)=nan)
+    Pearson r with human cell means: 0.803
+
+SENSITIVITY (secondary): 26-row printed training list x2 presentations, full arm, primary score span_w, n = 18
+    cells (mean +- SD across subjects, N=18): GH  62.5+- 0.0  GL  49.3+- 2.9  NGH  63.2+- 2.9  NGL  25.0+- 0.0
+    grammaticality effect (G-NG)   11.8   chunk-strength effect (H-L)   25.7   interaction (CS effect NG - CS effect G)   25.0
+    paired t, G - NG within H:   -0.7 (t(17)=-1.00)   within L:   24.3 (t(17)=35.00)
+    Pearson r with human cell means: 0.873
+
+Pre-registered mechanism criterion (primary score; grammaticality effect within CS cells, mean of G-NG within H and within L):
+  full 1.4 (H -10.4, L 13.2) vs acs -10.4 (H -10.4, L -10.4) -> exceeds
+  full 1.4 (H -10.4, L 13.2) vs conceptsoff 0.0 (H -12.5, L 12.5) -> exceeds
