@@ -24,7 +24,7 @@
          2164 Staunton Court, Palo Alto, CA 94306 USA}
 
 
-This document holds the tables and figures that the main paper cites by number (Tables S1 to S29 and Figures S1 to S7).
+This document holds the tables and figures that the main paper cites by number (Tables S1 to S30 and Figures S1 to S7).
 Configurations C1 to C11 are those of Table 11 in the main paper. Every result uses TinyStories sentences of three to eight words from a 250-word vocabulary, or Lichess positions, as in the main paper.
 Judge 2 is the ensemble of Qwen3-8B and phi-4 that the main paper reports, and the earlier judge is Qwen2.5-3B with a grammaticality probability above .5.
 
@@ -878,6 +878,37 @@ Syntax-only & exact context, $W'=3$ & she felt so happy and happy \\
  & exact content words, function words at $b=6$, $W'=3$ & lily and lily thanked her \\
 Nonsense & exact context, $W'=0$ & the cat happy \\
  & exact context, $W'=0$ & mia said and the ball \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\section{The Controlled Grammar with the Original Word Features}
+
+Table~\ref{tab:r231} gives the class-level dial of configuration C6 in the controlled grammar when the word taxonomy keeps every neighbor, as in the main configuration, and for three variants that we fixed before running: neighbors named by their class at $b=4$ (abs), immediate neighbors kept apart from those two and three words away (pos), and all neighbors with a suffix facet of the last one to three characters (suffix). Only the word taxonomy changes; the grammar, judge, learner, window 5, $W'=5$, and temperature 1 are those of Table~S25.
+
+\begin{table}[h]
+\caption{Regime shares (meaningful / syntax-only / nonsense) of the class-level dial in the controlled grammar with word features other than the five function words, seed 13 | seed 17, 1,600 generations per cell. The leaf and $b=0$ rows do not depend on the features. The target is a syntax-only share of .5 or more on both seeds.}
+\label{tab:r231}
+\begin{center}
+\footnotesize
+\begin{tabular}{llll}
+\toprule
+Features & Sentences & Setting & Meaningful / syntax-only / nonsense \\
+\midrule
+any & 1,000 & leaf & .73/.24/.03 \;|\; .72/.25/.03 \\
+any & 1,000 & $b=0$ & .00/.02/.98 \;|\; .00/.03/.97 \\
+all neighbors & 1,000 & $b=6$ & .55/.30/.15 \;|\; .47/.42/.12 \\
+all neighbors & 1,000 & $b=5$ & .28/.31/.41 \;|\; .30/.41/.29 \\
+all neighbors & 1,000 & $b=4$ & .17/.39/.43 \;|\; .20/.36/.43 \\
+all neighbors & 4,000 & $b=4$ & .25/.37/.38 \;|\; .23/.45/.32 \\
+abs & 1,000 & $b=5$ & .33/.34/.33 \;|\; .30/.34/.36 \\
+pos & 1,000 & $b=4$ & .20/.35/.46 \;|\; .23/.33/.45 \\
+suffix & 1,000 & $b=6$ & .32/.52/.17 \;|\; .32/.45/.23 \\
+suffix & 2,000 & $b=6$ & .36/.56/.08 \;|\; .38/.48/.14 \\
+suffix & 2,000 & $b=5$ & .27/.53/.20 \;|\; .27/.49/.24 \\
+suffix & 4,000 & $b=6$ & .36/.63/.02 \;|\; .44/.42/.15 \\
 \bottomrule
 \end{tabular}
 \end{center}

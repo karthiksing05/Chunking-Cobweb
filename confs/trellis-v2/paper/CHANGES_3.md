@@ -60,3 +60,8 @@ Main paper: 23 pages (rev 4: 22). Supplement: 21 pages, Tables S1 to S29 (S22 to
 
 ## Checks
 - No numeric discrepancy between the r230 md and the data files. The md's "R-syn b = 6 and 7 (.64-.67 / .60-.65)" is a seed-by-level pairing (b=7 is .646 / .600). C9 max syntax-only .41 is the W'=2 setting at b=4, seed 17 (.408).
+
+## Revision 6 (2026-11-21): C6 reported as a representation ablation (r231)
+- r231 ran the controlled-grammar dial with the original all-neighbor word features and three variants fixed in advance (abs, pos, suffix) at 1,000 to 4,000 sentences. None reaches a syntax-only share of .5 on both seeds (all: at most .45; suffix: .52-.63 on seed 13, .42-.49 on seed 17).
+- Abstract, introduction, hypothesis paragraph, controlled-grammar subsection, caveats, conclusion and configuration table now state that the three regimes appear when the word taxonomy is built from function-word features, that the limit lies in the data, the judge and the word representation, and that the ordering (meaning before grammar) is the result that holds with the original representation.
+- New Supplement Table S30 (tab:r231). Deck slide 36 updated to match.
