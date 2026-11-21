@@ -157,7 +157,7 @@ Judged with Qwen3-8B and phi-4 under a stricter prompt, no generator reaches .95
 
 \section{Compression}
 
-Table~\ref{tab:bits} gives every code length behind Figure 3 of the main paper, with the standard deviation over the two seeds.
+Table~\ref{tab:bits} gives every code length behind the compression results of the main paper (and Figure~S6), with the standard deviation over the two seeds.
 The test sentences are the first 1,000 kept sentences (three to eight words, 250-word vocabulary) of each seed's held-out stories, and the uniform code over 251 outcomes costs 51.4 bits for a sentence of about 5.5 words and the end symbol.
 The share of test sentences that also occur in the training stream is .10, .15, .21, .27, and .36 at 250, 500, 1,000, 2,000, and 4,000 sentences.
 On the remaining sentences the ranking is unchanged: byte-pair coding costs 40.1 to 35.6 bits, \trellis{} 38.6 to 34.2, the best n-gram 32.6 to 27.5, and the LSTM 32.0 to 24.9.
@@ -393,14 +393,14 @@ Scrambled & not anymore was happy the fish & .02 & .00 \\
 \end{center}
 \end{table}
 
-\paragraph{Dial.} Table~\ref{tab:dial} gives the regime shares at each abstraction level for the three runs behind Figure 8 of the main paper.
+\paragraph{Dial.} Table~\ref{tab:dial} gives the regime shares at each abstraction level for the three runs behind Figure 5 of the main paper.
 The leaf row at generation temperature 1 matches the temperature of the class levels, and the leaf row at temperature .7 is the best leaf setting.
 Table~\ref{tab:law} normalizes by the temperature-1 leaf. Normalizing by the temperature-.7 leaf instead gives a meaningless share of .21 to .23 at the leaf, and the ordering across levels stays the same.
 As a null for abstraction along the word taxonomy, a class-free swap replaces every word outside the 50 most frequent types by a random type, starting from meaningful sentences of the temperature-.7 leaf.
 It leaves a meaningless share of grammatical output of .32, .45, and .43 on the three runs (syntax-only .078, .099, and .086 against meaningful .167, .122, and .113). Random damage also raises the share, so the ordering alone does not distinguish abstraction along the taxonomy from damage in general.
 
 \begin{table}[h]
-\caption{Share of generated TinyStories sentences in each regime (judge 2; configuration C6) as the generator's context moves from exact words (leaf) to one class (root), seed 13 after 1,000 and 4,000 sentences and seed 17 after 4,000.
+\caption{Share of generated TinyStories sentences in each regime (judge 2; configuration C6a) as the generator's context moves from exact words (leaf) to one class (root), seed 13 after 1,000 and 4,000 sentences and seed 17 after 4,000.
 Meaningful passes syntax and meaning, syntax-only passes syntax alone, and nonsense fails syntax. Both leaf rows use the pair gate. The temperature-.7 leaf row is the setting with the highest meaningful share (window 7 at 1,000 sentences and window 5 at 4,000 sentences).
 All other rows use generation temperature 1. Class levels use a word taxonomy that Cobweb builds from each word's neighbors and the function words beside it.
 They also use a class-level pair gate, which admits a pair when memory stored some adjacent pair from the same two classes. Entries are meaningful / syntax-only / nonsense.}
@@ -423,7 +423,7 @@ Root (one class) & .034 / .095 / .871 & .029 / .082 / .889 & .033 / .083 / .885 
 \end{table}
 
 \begin{table}[h]
-\caption{Pass rates and the meaningless share by abstraction level (judge 2, configuration C6; the three runs of Table~\ref{tab:dial}).
+\caption{Pass rates and the meaningless share by abstraction level (judge 2, configuration C6a; the three runs of Table~\ref{tab:dial}).
 Syntax pass is the share of generated sentences that are meaningful or syntax-only, and meaning pass is the share that are meaningful. Retained values divide by the temperature-1 leaf value of the same run.
 Entries give the range over the three runs.}
 \label{tab:law}
@@ -443,7 +443,7 @@ Root & .14 -- .17 & .05 -- .06 & .72 -- .74 \\
 \end{center}
 \end{table}
 
-\paragraph{Oracles for the middle regime.} The largest syntax-only share over every setting, seed, and size is .265, against a target of .5. We looked for the cause with oracles that need no model, and two protocols appear.
+\paragraph{Oracles for the middle regime.} On TinyStories the largest syntax-only share over every setting, seed, and size is .265, against a target of .5. We looked for the cause with oracles that need no model, and two protocols appear.
 Protocol A takes the meaningful sentences of the best generator and replaces every word outside the 50 most frequent word types with another type of the same class, and the judge scores the result ($K=50$).
 Under protocol A, classes from the learned word taxonomy leave at most .208 of the sentences syntax-only at 1,000 sentences, and .181 and .203 at 4,000 sentences on two seeds. Part-of-speech classes give .199, .211, and .217, so the generators already sit at the level of this oracle.
 Protocol B protects no frequent types ($K=0$) and swaps only nouns, verbs, and adjectives. Under it, an oracle that swaps within exact morphosyntactic cells (tense, number, verb frame) reaches .45, .50, and .52 syntax-only on three runs, and the same cells with the 50 most frequent types protected give .31 to .34 (Table~\ref{tab:oracle}).
@@ -675,15 +675,14 @@ Shift $-$2 files & 13 & 5 & .385 \\
 
 \section{Controlled Grammar}
 
-This section documents the controlled-grammar study of the main paper (configurations C6 and C9; code \texttt{r230\_grammar.py} and \texttt{r230\_story.py}, results in \texttt{results/story\_gen/r230}).
-All tables are generated from the result files by \texttt{make\_tables\_r230.py}.
+This section documents the controlled-grammar study of the main paper (configurations C6b and C9).
 
 \paragraph{Grammar and judge.} Sentences follow S $\to$ NP VP, NP $\to$ Det (Adj) N, and VP $\to$ Vi $\mid$ Vt NP $\mid$ Vpp Prep NP.
 The determiners are \textit{a} (singular), \textit{some} (plural), and \textit{the} (either), and the verb agrees with its subject in number. Each verb has one frame, and verbs of the third kind fix their preposition (\textit{to} or \textit{in}).
 Five noun types (person, animal, food, place, object; eight nouns each) carry the meaning. Each verb restricts the type of its subject, its object, or its complement, and each of 14 adjectives restricts the type of its noun.
 The lexicon has 147 words (80 noun forms, 48 verb forms, 14 adjectives, 3 determiners, 2 prepositions), sentences have 3 to 8 words, and 20,000 samples hold 14,720 distinct sentences. Nouns pluralize by adding \textit{s}, so ``womans'' and ``foxs'' are legal tokens.
 The judge labels a sentence nonsense if it does not parse (noun-phrase structure, agreement, verb frame, preposition), syntax-only if it parses and some selectional restriction fails, and meaningful if it parses and all restrictions hold.
-We fixed the judge before any generation. The learner is the unchanged \textsc{Trellis3R223} in the TinyStories configuration (window 5, edge-exact generator, token input, word pair gate, temperature 1), with the TinyStories data replaced by grammar samples and every generation new (not a stored training sentence).
+We fixed the judge before any generation. The learner is that of the TinyStories configuration C6a (window 5, edge-exact generator, token input, word pair gate, temperature 1) except for its word taxonomy, which uses the five most frequent function words as features, and the TinyStories data are replaced by grammar samples and every generation is new (not a stored training sentence).
 We trained on 250 to 4,000 sentences with seeds 13 and 17 and judged 1,600 unconditioned generations per setting (400 prompts, four draws each).
 
 \begin{table}[h]
@@ -695,6 +694,11 @@ We trained on 250 to 4,000 sentences with seeds 13 and 17 and judged 1,600 uncon
 \toprule
 Set & Meaningful & Syntax-only & Nonsense \\
 \midrule
+Grammar sentences & 1.000 & .000 & .000 \\
+Word shuffles & .003 & .003 & .994 \\
+One same-category swap & .337 & .663 & .000 \\
+Two same-category swaps & .151 & .849 & .000 \\
+Three same-category swaps & .094 & .906 & .000 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -746,12 +750,12 @@ func30 & 0.87 / 0.31 & 0.95 / 0.32 & 0.93 / 0.32 \\
 \end{center}
 \end{table}
 
-\paragraph{The dial.} Table~\ref{tab:r230dial} gives the regime shares of configuration C6 at 1,000 sentences with reach $W'=5$, and Table~\ref{tab:r230c9} gives configuration C9.
+\paragraph{The dial.} Table~\ref{tab:r230dial} gives the regime shares of configuration C6b at 1,000 sentences with reach $W'=5$, and Table~\ref{tab:r230c9} gives configuration C9.
 At the leaf the reach changes the meaningful share as follows (meaningful, seeds 13 / 17): $W'=0$, .065 / .074 (nonsense .892 / .854); $W'=1$, .219 / .210; $W'=2$, .658 / .713; $W'=3$, .828 / .846 (best); $W'=5$, .728 / .719.
 In C9 the nonsense share appears only at reach $W'\le 2$ (about .52 at every level for $W'=1$).
 
 \begin{table}[h]
-\caption{Configuration C6 in the controlled grammar (1,000 sentences, reach $W'=5$, 1,600 generations; seed 13 / seed 17): class gate and class-level emission at level $b$ on the func:5 taxonomy.}
+\caption{Configuration C6b in the controlled grammar (1,000 sentences, reach $W'=5$, 1,600 generations; seed 13 / seed 17): class gate and class-level emission at level $b$ on the func:5 taxonomy.}
 \label{tab:r230dial}
 \begin{center}
 \small
@@ -793,11 +797,11 @@ leaf & .728 / .719 & .239 / .249 & .033 / .032 & .239 / .258 \\
 \end{center}
 \end{table}
 
-\paragraph{Learning curves.} Table~\ref{tab:r230curve} gives the three regime shares (meaningful / syntax-only / nonsense) of configuration C6 at the leaf, at $b=6$, and at $b=0$ for 250 to 4,000 training sentences.
+\paragraph{Learning curves.} Table~\ref{tab:r230curve} gives the three regime shares (meaningful / syntax-only / nonsense) of configuration C6b at the leaf, at $b=6$, and at $b=0$ for 250 to 4,000 training sentences.
 The syntax-only share at $b=6$ rises with data as the word taxonomy sharpens. The meaningful share at the leaf stays at about three quarters at every size, and the nonsense share at the leaf falls to .003.
 
 \begin{table}[h]
-\caption{Learning curves of configuration C6 (reach $W'=5$; meaningful / syntax-only / nonsense).}
+\caption{Learning curves of configuration C6b (reach $W'=5$; meaningful / syntax-only / nonsense).}
 \label{tab:r230curve}
 \begin{center}
 \footnotesize
@@ -824,7 +828,7 @@ Sentences & Seed & Leaf & $b=6$ & $b=0$ \\
 The reason column is the judge's. At $b=0$ the rare meaningful and syntax-only sentences are chance hits.
 
 \begin{table}[h]
-\caption{Generated sentences of the controlled grammar, first three per regime and seed from \texttt{examples.jsonl}, labeled by the rule-based judge.}
+\caption{Generated sentences of the controlled grammar, first three per regime and seed, labeled by the rule-based judge.}
 \label{tab:r230ex}
 \begin{center}
 \small
@@ -886,7 +890,7 @@ Nonsense & exact context, $W'=0$ & the cat happy \\
 
 \section{The Controlled Grammar with the Original Word Features}
 
-Table~\ref{tab:r231} gives the class-level dial of configuration C6 in the controlled grammar when the word taxonomy keeps every neighbor, as in the main configuration, and for three variants that we fixed before running: neighbors named by their class at $b=4$ (abs), immediate neighbors kept apart from those two and three words away (pos), and all neighbors with a suffix facet of the last one to three characters (suffix). Only the word taxonomy changes; the grammar, judge, learner, window 5, $W'=5$, and temperature 1 are those of Table~S25.
+Table~\ref{tab:r231} gives the class-level dial of configuration C6b in the controlled grammar when the word taxonomy keeps every neighbor, as in the TinyStories configuration, and for three variants that we fixed before running: neighbors named by their class at $b=4$ (abs), immediate neighbors kept apart from those two and three words away (pos), and all neighbors with a suffix facet of the last one to three characters (suffix). Only the word taxonomy changes; the grammar, judge, window 5, $W'=5$, and temperature 1 are those of Table~S25.
 
 \begin{table}[h]
 \caption{Regime shares (meaningful / syntax-only / nonsense) of the class-level dial in the controlled grammar with word features other than the five function words, seed 13 | seed 17, 1,600 generations per cell. The leaf and $b=0$ rows do not depend on the features. The target is a syntax-only share of .5 or more on both seeds.}
