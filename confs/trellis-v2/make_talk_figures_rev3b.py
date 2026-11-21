@@ -24,7 +24,8 @@ def want(n):
     return not WANT or n in WANT
 
 
-SHORT = {"Sample new content leaf": "Sample content leaf", "Sample new context leaves": "Sample context leaves",
+SHORT = {"Inside and outside, both taxonomies": "Inside and outside", "inside: each span from its sub-spans": "inside: from sub-spans", "outside: each span from its surroundings": "outside: from surroundings", "Weight each span by its posterior": "Weight each span", "counts grow by the posterior, not by 1": "counts grow by the posterior",
+         "Sample new content leaf": "Sample content leaf", "Sample new context leaves": "Sample context leaves",
          "Write it, close at the boundary": "Write it and close",
          "outside score: sum over chunks": "outside: sum over chunks",
          r"pair gate: (eats, a) seen side by side   $\checkmark$": r"pair gate: (eats, a) seen  $\checkmark$",
@@ -148,11 +149,87 @@ def v2_gen():
     ti.make_generation_v2(os.path.join(OUT, "generation_v2_infographic_talk.png"))
 
 
+
+
+def v1_gen3():
+    """Three-panel, large-label version of the ACS generation infographic (slide 7)."""
+    sys.path.insert(0, HERE)
+    import make_talk_infographics as ti
+    import matplotlib.patches as mpatches
+    from matplotlib.patches import FancyBboxPatch
+    from matplotlib.lines import Line2D
+    W, H, PW = 13.2, 4.4, 4.1
+    fig, ax = plt.subplots(figsize=(W, H))
+    fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+    ax.set_xlim(0, W); ax.set_ylim(0, H); ax.set_axis_off()
+    FS = 20
+
+    def panel(x, n, title):
+        ax.add_patch(FancyBboxPatch((x, 0.05), PW, H - 0.1, boxstyle="round,pad=0.005,rounding_size=0.04",
+                                    linewidth=1.2, edgecolor="#444", facecolor="white"))
+        ax.add_patch(FancyBboxPatch((x + 0.06, H - 0.05 - 0.62), PW - 0.12, 0.62,
+                                    boxstyle="round,pad=0.005,rounding_size=0.04", linewidth=0, facecolor="#1a1a1a"))
+        ax.add_patch(mpatches.Circle((x + 0.42, H - 0.36), 0.22, facecolor="white", edgecolor="#1a1a1a"))
+        ax.text(x + 0.42, H - 0.36, str(n), ha="center", va="center", fontsize=FS, fontweight="bold",
+                family="serif", color="#1a1a1a")
+        ax.text(x + 0.82, H - 0.36, title, ha="left", va="center", fontsize=FS, fontweight="bold",
+                family="serif", color="white")
+        return x + PW / 2
+
+    def line(a, b, ra=0.3, rb=0.3, col="#444"):
+        ax.add_line(Line2D([a[0], b[0]], [a[1] - ra, b[1] + rb], color=col, lw=1.8, zorder=2))
+
+    def node(p, lab, r=0.34, fill=None, edge=None):
+        ti._circle_chunk(ax, p[0], p[1], r, label=lab, fontsize=FS, fill=fill or ti.CHUNK_FILL,
+                         edge=edge or ti.CHUNK_EDGE)
+
+    def word(p, w):
+        ti._primitive_box(ax, p[0], p[1], 0.9, 0.55, w, fontsize=FS)
+
+    ly = 1.25
+    # panel 1: the partial tree with the next seed
+    cx = panel(0.05, 1, "Find the seed")
+    s, np_, the, dog, vp = (cx, 3.0), (cx - 1.0, 2.1), (cx - 1.35, ly), (cx - 0.4, ly), (cx + 1.15, ly)
+    line(s, np_, .34, .34); line(s, vp, .34, .4); line(np_, the, .34, .27); line(np_, dog, .34, .27)
+    node(s, "S"); node(np_, "NP"); node(vp, "VP", r=0.4, fill=ti.ANCHOR_FILL, edge=ti.ANCHOR_EDGE)
+    word(the, "the"); word(dog, "dog")
+    ax.text(vp[0], vp[1] - 0.72, "next seed", ha="center", va="center", fontsize=FS, fontweight="bold",
+            family="serif", color=ti.ANCHOR_EDGE)
+    # panel 2: sample from both taxonomies
+    cx = panel(0.05 + PW + 0.3, 2, "Recall its parts")
+    seed = (cx, 3.1)
+    node(seed, "VP", r=0.4, fill=ti.ANCHOR_FILL, edge=ti.ANCHOR_EDGE)
+    for dx, lab, col, tc in ((-1.0, "content", "#2b6cb0", "#eaf2fb"), (1.0, "context", "#3c8062", "#e8f7ed")):
+        ax.add_line(Line2D([seed[0], cx + dx], [seed[1] - 0.4, 2.3], color="#444", lw=1.8, zorder=2))
+        ax.add_patch(FancyBboxPatch((cx + dx - 0.9, 1.75), 1.8, 0.55, boxstyle="round,pad=0.02,rounding_size=0.06",
+                                    linewidth=1.8, edgecolor=col, facecolor=tc, zorder=3))
+        ax.text(cx + dx, 2.025, lab, ha="center", va="center", fontsize=FS, fontweight="bold", family="serif",
+                color=col, zorder=4)
+    ax.text(cx - 1.0, 1.2, "pick a\nsplit", ha="center", va="center", fontsize=FS, family="serif", color="#2b6cb0")
+    ax.text(cx + 1.0, 1.2, "fill each\nside", ha="center", va="center", fontsize=FS, family="serif", color="#3c8062")
+    # panel 3: expand
+    cx = panel(0.05 + 2 * (PW + 0.3), 3, "Expand the seed")
+    s, np_, vp = (cx, 3.0), (cx - 1.05, 2.1), (cx + 1.05, 2.1)
+    the, dog, eats, new = (cx - 1.5, ly), (cx - 0.52, ly), (cx + 0.46, ly), (cx + 1.42, ly)
+    line(s, np_, .34, .34); line(s, vp, .34, .4); line(np_, the, .34, .27); line(np_, dog, .34, .27)
+    line(vp, eats, .4, .27); line(vp, new, .4, .34)
+    node(s, "S"); node(np_, "NP"); node(vp, "VP", r=0.4, fill=ti.ANCHOR_FILL, edge=ti.ANCHOR_EDGE)
+    word(the, "the"); word(dog, "dog"); word(eats, "eats")
+    node(new, "NP", fill=ti.CAND_FILL, edge=ti.CAND_EDGE)
+    ax.text(new[0] - 0.3, new[1] - 0.72, "next seed", ha="center", va="center", fontsize=FS, fontweight="bold",
+            family="serif", color=ti.CAND_EDGE)
+    for x1 in (0.05 + PW + 0.02, 0.05 + 2 * PW + 0.32):
+        ti._panel_arrow(ax, x1, H / 2, x1 + 0.26, color="#444")
+    p = os.path.join(OUT, "generation_v1_infographic_talk.png")
+    fig.savefig(p, dpi=200, bbox_inches="tight", facecolor="white", pad_inches=0.05); plt.close(fig); print("wrote", p)
+
 if __name__ == "__main__":
-    which = [n for n in ("parse_success", "r230", "v1_parse", "v1_gen", "v2_gen") if want(n)]
+    which = [n for n in ("parse_success", "r230", "v1_parse", "v1_gen", "v1_gen3", "v2_gen", "v2_parse", "v2_learn") if want(n)]
     for n in which:
         if n == "parse_success":
             parse_success()
+        elif n == "v1_gen3":
+            v1_gen3()
         elif n == "r230":
             r230()
         else:
@@ -163,5 +240,15 @@ if __name__ == "__main__":
                 paper_infographic("make_parse_infographic_figure", "parse_v1_infographic_talk.png")
             elif n == "v1_gen":
                 paper_infographic("make_generation_infographic_figure", "generation_v1_infographic_talk.png")
+            elif n == "v2_parse":
+                scale_text(SCALE)
+                sys.path.insert(0, HERE)
+                import make_talk_infographics as ti
+                ti.make_parse_v2(os.path.join(OUT, "parse_v2_infographic_talk.png"))
+            elif n == "v2_learn":
+                scale_text(SCALE)
+                sys.path.insert(0, HERE)
+                import make_talk_infographics as ti
+                ti.make_learning_v2(os.path.join(OUT, "learning_v2_infographic_talk.png"))
             else:
                 v2_gen()
