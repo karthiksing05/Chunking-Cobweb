@@ -24,7 +24,7 @@
          2164 Staunton Court, Palo Alto, CA 94306 USA}
 
 
-This document holds the tables and figures that the main paper cites by number (Tables S1 to S30 and Figures S1 to S7).
+This document holds the tables and figures that the main paper cites by number (Tables S1 to S31 and Figures S1 to S7).
 Configurations C1 to C11 are those of Table 8 in the main paper. Every result uses TinyStories sentences of three to eight words from a 250-word vocabulary, or Lichess positions, as in the main paper.
 Judge 2 is the ensemble of Qwen3-8B and phi-4 that the main paper reports, and the earlier judge is Qwen2.5-3B with a grammaticality probability above .5.
 
@@ -900,7 +900,7 @@ Nonsense & exact context, $W'=0$ & the cat happy \\
 \section{The Controlled Grammar with All-Neighbor Word Features}
 
 Table~\ref{tab:r231} gives the class-level dial of configuration C6b in the controlled grammar when the word taxonomy describes each word by every neighbor on either side (the all-neighbor arm), and for three variants that we fixed before running: neighbors named by their class at $b=4$ (abs), immediate neighbors kept apart from those two and three words away (pos), and all neighbors with a suffix facet of the last one to three characters (suffix). Only the word taxonomy changes; the grammar, judge, window 5, $W'=5$, and temperature 1 are those of Table~S25.
-The all-neighbor arm is not the TinyStories configuration C6a. C6a described each word by the 100 most frequent words beside it and kept the 50 most frequent types exact in emission, whereas the all-neighbor arm keeps every neighbor and, like C6b, keeps the five most frequent types exact. We did not run the 100-neighbor taxonomy on the controlled grammar, and we did not run five function-word features on TinyStories.
+The all-neighbor arm is not the TinyStories configuration C6a. C6a described each word by the 100 most frequent words beside it and kept the 50 most frequent types exact in emission, whereas the all-neighbor arm keeps every neighbor and, like C6b, keeps the five most frequent types exact. We did not run the 100-neighbor taxonomy on the controlled grammar, and Table~S31 runs five function-word features on TinyStories.
 The controlled grammar therefore fails with the all-neighbor representation, and the representation, not only the data and the judge, limits the middle regime there.
 On TinyStories, one earlier seed-13 check at 1,000 sentences (class gate and emission at $b=3$ to 7) used the 50 or 100 most frequent neighbors, or all neighbors at $b=3$ and $b=6$, and its syntax-only shares were .18 to .26 (notes of round 214, addenda 6 and 7), so a representation change among these three sets did not lift the share there either.
 
@@ -925,6 +925,31 @@ suffix & 1,000 & $b=6$ & .32/.52/.17 \;|\; .32/.45/.23 \\
 suffix & 2,000 & $b=6$ & .36/.56/.08 \;|\; .38/.48/.14 \\
 suffix & 2,000 & $b=5$ & .27/.53/.20 \;|\; .27/.49/.24 \\
 suffix & 4,000 & $b=6$ & .36/.63/.02 \;|\; .44/.42/.15 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\section{Five Function-Word Features on TinyStories}
+
+Table~\ref{tab:r232} replaces the 100-neighbor word taxonomy of configuration C6a with the five-function-word taxonomy of C6b and keeps everything else of C6a (1,000 sentences, window 7, temperature 1, the 50 most frequent types exact, 400 prompts with four draws each, judge 2). We reran C6a in the same batch and judged both in one pass; its seed-13 rows reproduce the earlier run exactly. We fixed in advance that a gain of .10 or more in the best interior syntax-only share on both seeds would implicate the representation and a gain below .05 on both seeds would not. The five-function-word classes are purer in part of speech at $b=4$ to 6 (.75 to .76 against .64 to .68 at $b=6$), yet the syntax-only share falls by .046 on both seeds, so the representation does not explain the thin middle regime on TinyStories.
+
+\begin{table}[h]
+\caption{Regime shares (meaningful / syntax-only / nonsense) on TinyStories with five function-word features and with the 100-neighbor taxonomy of C6a, seed 13 | seed 17, 1,600 generations per cell, judge 2. The leaf and $b=0$ rows do not depend on the taxonomy.}
+\label{tab:r232}
+\begin{center}
+\footnotesize
+\begin{tabular}{lll}
+\toprule
+Setting & Five function words & 100 neighbors (C6a) \\
+\midrule
+leaf & .56/.21/.24 \;|\; .58/.17/.25 & same \\
+$b=7$ & .18/.19/.63 \;|\; .18/.19/.63 & .33/.26/.42 \;|\; .33/.24/.43 \\
+$b=6$ & .15/.21/.64 \;|\; .16/.17/.67 & .20/.21/.60 \;|\; .19/.19/.62 \\
+$b=5$ & .17/.20/.64 \;|\; .15/.15/.71 & .16/.17/.68 \;|\; .18/.15/.67 \\
+$b=4$ & .09/.14/.77 \;|\; .08/.14/.77 & .11/.14/.75 \;|\; .09/.13/.78 \\
+$b=0$ & .03/.10/.87 \;|\; .03/.10/.86 & same \\
 \bottomrule
 \end{tabular}
 \end{center}
