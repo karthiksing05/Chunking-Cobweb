@@ -28,11 +28,11 @@ for ax, (s, title) in zip(axes, m.SETS):
         pts = [(n, m.bits(name, s, n)) for n in m.NS]
         pts = [(n, b) for n, b in pts if b is not None]
         if pts:
-            lab = "TRELLIS, best variant (exact_alone off)" if name == "TRELLIS" else name
+            lab = "TRELLIS, C7 (best variant)" if name == "TRELLIS" else name
             ax.plot(*zip(*pts), color=color, ls=ls, lw=2.2 if name == "TRELLIS" else 1.3,
                     marker="o" if name == "TRELLIS" else None, ms=3.5, mfc="white" if name == "TRELLIS" else None, label=lab)
     b = std_bits(s)
-    ax.plot([4000], [b], "o", color="#D55E00", ms=6.5, zorder=5, label="TRELLIS, standard (exact_alone on)")
+    ax.plot([4000], [b], "o", color="#D55E00", ms=6.5, zorder=5, label="TRELLIS, C5 (standard)")
     ax.annotate(f"{b:.1f}", (4000, b), textcoords="offset points", xytext=(0, 8), ha="center", fontsize=7.5, color="#D55E00")
     ax.set_xscale("log")
     ax.set_xticks(m.NS)
