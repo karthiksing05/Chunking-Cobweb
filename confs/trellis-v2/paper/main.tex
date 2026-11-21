@@ -33,7 +33,7 @@
 \renewcommand{\topfraction}{.9}\renewcommand{\textfraction}{.1}\renewcommand{\floatpagefraction}{.8}
 \emergencystretch 2em
 
-\title{Learning Concepts and Chunks from Raw Experience: Chunks Compress Chess Positions, and Concepts Aid Children's Stories}
+\title{Learning Concepts and Chunks from Raw Experience: Chunks Compress Chess Positions, and Concepts Carry Children's Stories}
 
 \author{Karthik Singaravadivelan}{ksingara3@gatech.edu}
 \author{Pat Langley}{patrick.w.langley@gmail.com}
@@ -666,7 +666,7 @@ The evidence for chunking as compression comes from chess. There removing the ch
 In short TinyStories sentences the evidence does not support the claim: the generator earns the margin over byte-pair coding, removing both chunks and concepts shortens the code further, and removing the chunks changes neither the code nor the generation counts.
 Removing the concepts lowers the fair count of new, judged sentences by .038 to .048 on syntax and .054 to .064 on the meaningful count (two-seed means at three temperatures, one size, no interval; Supplement, Table~S19).
 We suspect that a domain with recurring multi-part structure rewards chunks while short sentences do not, a hypothesis that remains untested.
-The removal controls do not show the dependence that we hypothesized between chunks and concepts: chunks carry the chess compression and recall, and concepts aid story generation (in chess, chunks without concepts keep all but 0.4 to 0.7 bits, and concepts-off recall is zero by construction; in language, removing both shortens the code).
+The removal controls do not show the dependence that we hypothesized between chunks and concepts: chunks carry the chess compression and recall, and concepts carry story generation (in chess, chunks without concepts keep all but 0.4 to 0.7 bits, and concepts-off recall is zero by construction; in language, removing both shortens the code).
 With 250 sentences the system writes new, judged-grammatical sentences about as often as matched LSTM and GPT models. It trails the LSTM on the meaningful count at 500 sentences on the four confirmation seeds and is level on syntax, scores lower than both neural models at 1,000 sentences without an interval that excludes zero, and scores lower than both at 4,000 sentences on both seeds (no interval).
 The abstraction dial shows that abstraction costs meaning before grammar in language and in chess. On TinyStories the grammatical but meaningless regime stays thin, and an oracle ceiling shows how far a perfect word swapper could go. On a controlled grammar with an exact judge, the same dial produces all three regimes once the word taxonomy is built from function-word features, and it does not with all-neighbor features. Random damage to words reproduces the same ordering. Five function-word features do not raise the syntax-only share on TinyStories, so the representation does not explain the thin middle regime there; the data and the judge remain, and we did not separate them.
 
