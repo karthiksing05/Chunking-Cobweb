@@ -98,9 +98,19 @@ def story_cases():
             closes[j - 1].insert(0, c)
         return " ".join("".join(opens[k]) + w + "".join(closes[k]) for k, w in enumerate(words))
 
-    fig, ax = plt.subplots(figsize=(10.0, 2.5))
+    fig, ax = plt.subplots(figsize=(10.0, 3.0))
+    fig.subplots_adjust(left=0.01, right=0.99, bottom=0.02, top=0.88)
     ax.axis("off")
     n = len(keep_rows)
+
+    def wrap(t, limit=19):
+        """Split a long parse over two lines at the token boundary nearest the middle."""
+        if len(t) <= limit:
+            return t
+        toks = t.split(" ")
+        k = min(range(1, len(toks)), key=lambda q: abs(len(" ".join(toks[:q])) - len(" ".join(toks[q:]))))
+        return " ".join(toks[:k]) + "\n" + " ".join(toks[k:])
+    ax.plot([0.5, 0.5], [0, 1.02], color="#9a9a94", lw=1.6, transform=ax.transAxes, clip_on=False)
     for j, cp in enumerate(keep_cp):
         ax.text((j + 0.5) / 2, 1.0, f"{cp:,} learned", ha="center", va="bottom", fontsize=16, weight="bold", color=INK,
                 transform=ax.transAxes)
@@ -110,7 +120,8 @@ def story_cases():
         y = 1 - (i + 0.55) / n
         for j, cp in enumerate(keep_cp):
             snap = case["by checkpoint"][cps.index(cp)]
-            ax.text((j + 0.5) / 2, y, bracketed(words, snap["chunks"]), ha="center", va="center", fontsize=17,
+            ax.text((j + 0.5) / 2, y, wrap(bracketed(words, snap["chunks"])), ha="center", va="center", fontsize=17,
+                    linespacing=1.25,
                     color=INK, family="DejaVu Sans Mono", transform=ax.transAxes)
         ax.plot([0, 1], [1 - (i + 1) / n] * 2, color=GRID, lw=1, transform=ax.transAxes, clip_on=False)
     save(fig, "story_chunks_cases_talk.png")
