@@ -194,6 +194,39 @@ Mechanism readings:
 
 Decision: P3 is a replication if effects 1, 2, 3, 4 and 5 hold. It is partial otherwise, with the failed effects named. No parameter is changed after the runs; any follow-up is a new, separately registered section.
 
+### P3d result (2026-11-22; results/psych_digits/P3d_*.json, P3d_SUMMARY.md): partial. Slow climb, with the 4-digit groups as the wall
+
+Span at sessions 15/50/100/250/500/865 (mean of 3 seeds):
+- full: 9.1 / 11.5 / 11.0 / 15.1 / 16.6 / 15.7 (maximum block span 21.9);
+- actoff: 9.2 / 9.4 / 8.8 / 10.1 / 8.9 / 9.0;
+- conceptsoff: 9.7 / 10.0 / 10.4 / 13.0 / 15.8 / 18.2;
+- prioroff: 8.8 / 9.5 / 9.6 / 10.6 / 13.6 / 15.6;
+- f0: every list correct, so span rises by one per list (194 by session 6); stopped after about 10 sessions.
+
+Effects:
+- Effect 1: holds (21.9).
+- Effect 2 (rate): **fails, too slow**; 80 is never reached.
+- Effect 3 (4-digit error > 3-digit): holds, .269 against .096 (EPAM 3.0% against 1.5%).
+- Effect 4 (prior helps early): holds (11.5 against 9.5 at s50).
+- Effect 5 (letter span <= 9 at every probe): **fails narrowly**. Probe means are 7.7-9.7, but one seed ends a 10-list probe at 11.
+
+Mechanisms:
+- Activation is credited (full beats actoff on every seed, 15.5-16.0 against 8.0-10.0).
+- **Concepts are not** (conceptsoff 15.6/16.5/22.5 against 15.5/15.7/16.0), so TRELLIS acts as a string store here.
+
+Reading:
+- **The shape is now DD-like:** reliability grows with practice. The 3-digit error falls .435 -> .262 -> .122 -> .056, while the 4-digit error stays near .25-.30.
+- **The 4-digit groups are the wall.** Past 16 digits the retrieval structure opens with the d16 block of four 4-digit groups, and .75 to .70 per 4-digit group caps the span near 16-20.
+- **Unrecoverable groups dominate the failures:** about 90% are "no activated candidate", i.e. the group was not stored. That is 20% of groups late, at 8 s per new chunk.
+- **Net size is not the cause.** The net holds 931 three-digit and about 3,870 four-digit strings at the end, more than RSS95's ~3,000 for DD.
+- **What EPAM does that P3d does not** (RSS95 p. 318, encoding steps 7-9):
+  - It sorts a 4-digit group as its first three digits plus a blank, so its semantic code comes from the 3-digit prefix chunk ("(4, 6, 4, _) sorts to ... 10-mile time").
+  - It attaches between-group codes: back-to-back same category, plus symmetry and ascending or descending category patterns at the parent node.
+  - Both are redundancy that does not need the 4-digit string to be stored.
+  - These are candidates for a separately registered P3e.
+
+Trial order (reported): error .215/.184/.238/.161 for trials 1-4, with no monotone build-up; release .197 -> .215 (none).
+
 ## P4 pre-registration (fixed 2026-11-21, before any AGL simulation)
 
 - Target: Knowlton & Squire (1996) Experiment 1, controls (N = 18), the 23 distinct training strings shown twice in random order, and the 32 test items, all from docs/AGL_PROTOCOL.md section 1. Meulemans & Van der Linden (1997) is not simulated, because its stimuli are not available.

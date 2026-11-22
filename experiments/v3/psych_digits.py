@@ -1366,3 +1366,333 @@ def rescuediag(seed, max_sessions):
 
 if __name__ == "__main__" and sys.argv[1] == "rescuediag":
     rescuediag(int(sys.argv[2]), int(sys.argv[3]) if len(sys.argv) > 3 else 150)
+
+
+# ----------------------------------------------------------------------------------------------- P3d (docs/PLAN_PSYCH.md, section P3d)
+# Usage: psych_digits.py epam <arm: full|actoff|conceptsoff|prioroff|f0> <seed> [max_sessions=865] [budget_s=0] [tag=P3d]
+#        psych_digits.py epamsummary [tag=P3d]
+# EPAM IV's architecture with TRELLIS as the semantic net: groups from EPAM's retrieval-structure patterns (obligatory slots),
+# rehearsal of the last <= 7 digits, storage during presentation at 8 s per new chunk (clock reset per list), activation for one
+# session, 25% forgetting of slot items, rescue among activated familiar strings guided by the label.
+D_ARMS = {"full": {}, "actoff": dict(act=False), "conceptsoff": dict(concepts=False), "prioroff": dict(prior=False), "f0": dict(f=0.0)}
+D_REHEARSE = 7
+
+
+def rs_sizes(n):
+    """Group sizes for an n-item list (plan P3d step 1) and the number of trailing singles."""
+    sizes, r = [], n
+    if r >= 16:
+        sizes += [4, 4, 4, 4]
+        r -= 16
+        while r >= 21:
+            sizes += [3, 3, 3, 4, 4, 4]
+            r -= 21
+    m = r % 3
+    if m == 0:
+        sizes += [3] * (r // 3)
+        return sizes, 0
+    if m == 1 and r >= 4:
+        sizes += [3] * ((r - 4) // 3) + [4]
+        return sizes, 0
+    if m == 2 and r >= 8:
+        sizes += [3] * ((r - 8) // 3) + [4, 4]
+        return sizes, 0
+    sizes += [3] * (r // 3)                      # r = 1, 2, 5: 3s then 1-2 singles
+    return sizes, r - 3 * (r // 3)
+
+
+def partition_d(seq):
+    """[(group tuple, is_rs)] plus the trailing singles; rehearsal = singles + last groups up to D_REHEARSE items (>= 1 group)."""
+    sizes, ns = rs_sizes(len(seq))
+    groups, i = [], 0
+    for k in sizes:
+        groups.append(tuple(seq[i:i + k]))
+        i += k
+    singles = list(seq[i:])
+    tot, n_reh = len(singles), 0
+    for g in reversed(groups):
+        if n_reh == 0 or tot + len(g) <= D_REHEARSE:
+            tot += len(g)
+            n_reh += 1
+        else:
+            break
+    return [(g, j < len(groups) - n_reh) for j, g in enumerate(groups)], singles
+
+
+def decode_act(dec, k, known, c, x, act):
+    mem, L = dec.mem, dec.mem.L
+    if known:
+        sets = sorted((mem.fam_pos[k].get((i, d), set()) for i, d in known.items()), key=len)
+        cand = set(sets[0])
+        for s_ in sets[1:]:
+            cand &= s_
+    else:
+        cand = set(mem.fam[k])
+    if act is not None:
+        cand &= act
+    if not cand:
+        return None, 0
+    if len(cand) == 1:
+        return next(iter(cand)), 1
+    best, bw = None, 0.0
+    if c is not None or x is not None:
+        lc = dec.leaves(L.cnt, c) if c is not None else None
+        lx = dec.leaves(L.ctx, x) if x is not None else None
+        for t in sorted(cand):
+            w = 0.0
+            for rid in mem.recs_of.get(t, ()):
+                e = L.records[rid]
+                if e.leaf is None or e.cleaf is None:
+                    continue
+                if lc is not None and e.cleaf.id not in lc:
+                    continue
+                if lx is not None and e.leaf.id not in lx:
+                    continue
+                w += e.weight
+            if w > bw:
+                best, bw = t, w
+    if best is None:
+        best = min(cand, key=lambda t: (-mem.span_w.get(t, 0.0), t))
+    return best, len(cand)
+
+
+def recall_rs(dec, groups, frng, f, concepts, act, tally):
+    ok_all = True
+    for g, rs in groups:
+        if not rs:
+            continue
+        k = len(g)
+        c, x = dec.label(g) if concepts else (None, None)
+        known = {i: d for i, d in enumerate(g) if frng.random() >= f}
+        c = c if (c is not None and frng.random() >= f) else None
+        x = x if (x is not None and frng.random() >= f) else None
+        tally["n%d" % k] += 1
+        if len(known) == k:
+            tally["intact%d" % k] += 1
+            continue
+        got, nc = decode_act(dec, k, known, c, x, act) if k in (3, 4) else (None, 0)
+        tally["try%d" % k] += 1
+        if got == g:
+            tally["resc%d" % k] += 1
+        else:
+            tally["err%d" % k] += 1
+            tally["fail_nocand" if nc == 0 else "fail_wrong"] += 1
+            ok_all = False
+    return ok_all
+
+
+def letter_probe_d(mem, rng, f):
+    """10-list staircase of consonants from 5: same slots, forgetting and rescue, no storage, no activation."""
+    length, hist = 5, []
+    dec = Decoder(mem)
+    for _ in range(10):
+        seq = [rng.choice(CONS) for _ in range(length)]
+        groups, _ = partition_d(seq)
+        ok = recall_rs(dec, groups, rng, f, False, set(), Counter())
+        hist.append((length, int(ok)))
+        length = max(1, length + (1 if ok else -1))
+    return {"final": length, "max": max(h[0] for h in hist), "hist": hist}
+
+
+def epam(arm, seed, max_sessions, budget, tag):
+    opt = dict(f=0.25, act=True, concepts=True, prior=True)
+    opt.update(D_ARMS[arm])
+    os.makedirs(OUT, exist_ok=True)
+    t0 = time.time()
+    mem = Mem(seed)
+    info = {"arm": arm, "seed": seed, "rec_w": REC_W, "store_s": STORE_S, "rehearse": D_REHEARSE, "start": 7, **opt}
+    if opt["prior"]:
+        items, n_pre = prior_stream(seed, 1)
+        for c, d in items:
+            mem.learn(list(d))
+        info.update(n_pre=n_pre, prior_items=len(items), prior_records=len(mem.L.records))
+    info["fam_after_prior"] = [len(mem.fam[3]), len(mem.fam[4])]
+    print("prior", info, flush=True)
+    rng = random.Random(seed * 31 + 5)          # same list stream as P3b / P3c
+    prng = random.Random(seed * 77 + 11)
+    frng = random.Random(seed * 13 + 7)
+    length = 7
+    rows, sess_rows, probes = [], [], {}
+    stop = "max_sessions"
+    for sess in range(1, max_sessions + 1):
+        if budget and time.time() - t0 > budget:
+            stop = "time_budget"
+            break
+        act = set()
+        sstart, presented = length, []
+        for li in range(lists_per_session(sess)):
+            digits = [str(rng.randrange(10)) for _ in range(length)]
+            groups, singles = partition_d(digits)
+            clock, nlearn, nreinf = 0.0, 0, 0
+            for g, rs in groups:                 # storage during presentation (singles add time only)
+                clock += len(g)
+                presented.append(g)
+                if mem.span_w.get(g, 0.0) >= REC_W:
+                    mem.span_w[g] += 1.0
+                    act.add(g)
+                    nreinf += 1
+                elif clock >= STORE_S:
+                    mem.learn(list(g))
+                    clock -= STORE_S
+                    if mem.span_w.get(g, 0.0) >= REC_W:
+                        act.add(g)
+                    nlearn += 1
+            dec = Decoder(mem)
+            tally = Counter()
+            ok = recall_rs(dec, groups, frng, opt["f"], opt["concepts"], act if opt["act"] else None, tally)
+            row = {"s": sess, "trial": li + 1, "len": length, "ok": int(ok), "learned": nlearn, "reinf": nreinf,
+                   "nrs": sum(1 for g in groups if g[1]), "t": round(time.time() - t0, 1)}
+            row.update(tally)
+            rows.append(row)
+            length = max(1, length + (1 if ok else -1))
+        miss = sum(1 for g in presented if g not in act)
+        sess_rows.append({"s": sess, "start_len": sstart, "end_len": length, "groups": len(presented), "not_stored": miss,
+                          "fam3": len(mem.fam[3]), "fam4": len(mem.fam[4])})
+        if sess in PROBE_SESSIONS:
+            probes[sess] = letter_probe_d(mem, prng, opt["f"])
+            print("probe", sess, probes[sess], flush=True)
+        if sess % 10 == 0:
+            blk = [x["len"] for x in rows if x["s"] > sess - 10]
+            print("session %d len(mean last10) %.1f next %d fam3 %d fam4 %d t %.0fs" % (
+                sess, sum(blk) / len(blk), length, len(mem.fam[3]), len(mem.fam[4]), time.time() - t0), flush=True)
+            epam_dump(tag, arm, seed, info, rows, sess_rows, probes, stop + "(partial)", t0, sess)
+    epam_dump(tag, arm, seed, info, rows, sess_rows, probes, stop, t0, sess_rows[-1]["s"] if sess_rows else 0)
+    print("done", len(sess_rows), "sessions", round(time.time() - t0), "s", stop, flush=True)
+
+
+def epam_dump(tag, arm, seed, info, rows, sess_rows, probes, stop, t0, sess):
+    d = {"experiment": "psych_digits P3d epam", "cfg": CFG, "info": info, "stopped": stop, "sessions": sess,
+         "lists": len(rows), "seconds": round(time.time() - t0, 1), "probes": probes, "sess_rows": sess_rows, "rows": rows}
+    fn = os.path.join(OUT, "%s_%s_s%d.json" % (tag, arm, seed))
+    with open(fn + ".tmp", "w", encoding="utf-8") as fh:
+        json.dump(d, fh)
+    os.replace(fn + ".tmp", fn)
+
+
+def epamsummary(tag):
+    import glob
+    runs = defaultdict(dict)
+    for fn in sorted(glob.glob(os.path.join(OUT, "%s_*_s*.json" % tag))):
+        d = json.load(open(fn, encoding="utf-8"))
+        if d.get("experiment") == "psych_digits P3d epam":
+            runs[d["info"]["arm"]][d["info"]["seed"]] = d
+
+    def mean(v):
+        v = [x for x in v if x is not None]
+        return sum(v) / len(v) if v else None
+
+    def ms(vals, fmt="%.1f"):
+        v = [x for x in vals if x is not None and x == x]
+        return (fmt % (sum(v) / len(v)) + " [" + fmt % min(v) + "-" + fmt % max(v) + "]") if v else "-"
+    pts = (15, 50, 100, 250, 500, 865)
+    L = ["# P3d: EPAM IV architecture with TRELLIS as the semantic net (generated by psych_digits.py epamsummary)", "",
+         "Pre-registration: docs/PLAN_PSYCH.md, section P3d. Span at s = mean list length over the 5-session block ending at s; "
+         "mean [min-max] over seeds.", "", "DD: start 7-9; about 80 by session ~500; 104 at ~865.", "", "## Span at sessions", "",
+         "| arm | n | " + " | ".join("s%d" % p for p in pts) + " | max block span | first s >= 80 (per seed) |", "|---|---|" + "---|" * (len(pts) + 2)]
+    for arm in D_ARMS:
+        rr = runs.get(arm, {})
+        if not rr:
+            continue
+        cells = [ms([_span_at(d, p) for d in rr.values() if d["sessions"] >= p]) for p in pts]
+        mx = [max((_span_at(d, s) or 0) for s in range(5, d["sessions"] + 1)) for d in rr.values()]
+        hits = ", ".join(str(_hit(d, 80) or "-") for _, d in sorted(rr.items()))
+        L.append("| %s | %d | %s | %s | %s |" % (arm, len(rr), " | ".join(cells), ms(mx), hits))
+    L.append("| DD | - | ~7-9 | - | - | - | ~80 | 104 | 104 | ~500 |")
+    L += ["", "## Per-group RS recall (pooled over seeds)", "", "| arm | window | groups | err 3-digit | err 4-digit | intact | rescued of tries | fail: no activated candidate | fail: wrong pick |",
+          "|---|---|---|---|---|---|---|---|---|"]
+    keys = ["n3", "n4", "err3", "err4", "intact3", "intact4", "try3", "try4", "resc3", "resc4", "fail_nocand", "fail_wrong"]
+    for arm in D_ARMS:
+        rr = runs.get(arm, {})
+        for lo, hi in ((0, 50), (50, 250), (250, 500), (500, 865)):
+            c = Counter()
+            for d in rr.values():
+                c.update(_sum_rows(d, lo, hi, keys))
+            n = c["n3"] + c["n4"]
+            if not n:
+                continue
+            tr = c["try3"] + c["try4"]
+            L.append("| %s | %d-%d | %d | %s | %s | %.3f | %s | %d | %d |" % (
+                arm, lo, hi, n, "%.3f" % (c["err3"] / c["n3"]) if c["n3"] else "-", "%.3f" % (c["err4"] / c["n4"]) if c["n4"] else "-",
+                (c["intact3"] + c["intact4"]) / n, "%.3f" % ((c["resc3"] + c["resc4"]) / tr) if tr else "-", c["fail_nocand"], c["fail_wrong"]))
+    L += ["", "## Trial order within session (arm full, sessions 250-865, pooled): per-group RS error", ""]
+    full = runs.get("full", {})
+    to = defaultdict(Counter)
+    for d in full.values():
+        for r in d["rows"]:
+            if 250 < r["s"] <= 865 and r["trial"] <= 6:
+                to[r["trial"]].update({"n": r.get("n3", 0) + r.get("n4", 0), "e": r.get("err3", 0) + r.get("err4", 0)})
+    L.append("| trial | " + " | ".join(str(t) for t in sorted(to)) + " |")
+    L.append("|---|" + "---|" * len(to))
+    L.append("| error | " + " | ".join("%.3f (%d)" % (to[t]["e"] / to[t]["n"], to[t]["n"]) if to[t]["n"] else "-" for t in sorted(to)) + " |")
+    rel = []
+    for d in full.values():
+        rs = d["rows"]
+        for a, b in zip(rs, rs[1:]):
+            if b["trial"] == 1 and 250 < b["s"] <= 865:
+                ea, na = a.get("err3", 0) + a.get("err4", 0), a.get("n3", 0) + a.get("n4", 0)
+                eb, nb = b.get("err3", 0) + b.get("err4", 0), b.get("n3", 0) + b.get("n4", 0)
+                rel.append((ea, na, eb, nb))
+    if rel:
+        L.append("")
+        L.append("Release: last trial of a session %.3f vs first trial of the next %.3f (per-group RS error, pooled)." % (
+            sum(r[0] for r in rel) / max(1, sum(r[1] for r in rel)), sum(r[2] for r in rel) / max(1, sum(r[3] for r in rel))))
+    L += ["", "## Net size and not-stored share", "", "| arm | familiar 3-digit at end | familiar 4-digit at end | groups not stored, sessions 500-865 |", "|---|---|---|---|"]
+    for arm in D_ARMS:
+        rr = runs.get(arm, {})
+        if not rr:
+            continue
+        f3 = [d["sess_rows"][-1]["fam3"] for d in rr.values()]
+        f4 = [d["sess_rows"][-1]["fam4"] for d in rr.values()]
+        ns = [sum(x["not_stored"] for x in d["sess_rows"] if x["s"] > 500) / max(1, sum(x["groups"] for x in d["sess_rows"] if x["s"] > 500)) for d in rr.values()]
+        L.append("| %s | %s | %s | %s |" % (arm, ms(f3, "%.0f"), ms(f4, "%.0f"), ms(ns, "%.3f")))
+    L.append("| DD (RSS95 estimate) | ~1,000 (substantially all) | a fraction of 10,000 (total ~3,000) | 8% missed in free recall |")
+    L += ["", "## Letter probes: final / max length", "", "| arm | " + " | ".join("s%d" % p for p in PROBE_SESSIONS) + " |", "|---|" + "---|" * len(PROBE_SESSIONS)]
+    for arm in D_ARMS:
+        rr = runs.get(arm, {})
+        if rr:
+            cells = []
+            for p in PROBE_SESSIONS:
+                v = [d["probes"][str(p)] for d in rr.values() if str(p) in d["probes"]]
+                cells.append("%s / %s" % (ms([x["final"] for x in v]), ms([x["max"] for x in v])) if v else "-")
+            L.append("| %s | %s |" % (arm, " | ".join(cells)))
+    # pre-registered effects
+    L += ["", "## Pre-registered effects (arm full)", ""]
+    if full:
+        mx = mean([max((_span_at(d, s) or 0) for s in range(5, d["sessions"] + 1)) for d in full.values()])
+        L.append("1. Maximum block span >= 20: %.1f -> **%s**." % (mx, "holds" if mx >= 20 else "fails"))
+        hs = [_hit(d, 80) for d in full.values()]
+        hm = mean(hs) if all(h is not None for h in hs) else None
+        verdict = "fails, never" if hm is None else ("holds" if 250 <= hm <= 865 else "fails, too fast")
+        L.append("2. First session with span >= 80 in [250, 865]: per seed %s -> **%s**; span at 865 %s (DD 104)." % (
+            hs, verdict, ms([_span_at(d, 865) for d in full.values() if d["sessions"] >= 865])))
+        c = Counter()
+        for d in full.values():
+            c.update(_sum_rows(d, 250, 865, keys))
+        if c["n3"] and c["n4"]:
+            e3, e4 = c["err3"] / c["n3"], c["err4"] / c["n4"]
+            L.append("3. 4-digit error > 3-digit error (250-865): %.3f vs %.3f -> **%s** (EPAM 3.0%% vs 1.5%%)." % (e4, e3, "holds" if e4 > e3 else "fails"))
+        else:
+            L.append("3. 4- vs 3-digit: not reached.")
+        po = runs.get("prioroff", {})
+        if po:
+            a, b = mean([_span_at(d, 50) for d in full.values()]), mean([_span_at(d, 50) for d in po.values()])
+            L.append("4. Prior speeds early learning (span s50 full vs prioroff): %.1f vs %.1f -> **%s**." % (a, b, "holds" if a > b else "fails"))
+        lp = [d["probes"][str(p)]["final"] for d in full.values() for p in PROBE_SESSIONS if str(p) in d["probes"]]
+        L.append("5. Letter probe final <= 9 at every probe: max %s -> **%s**." % (max(lp) if lp else "-", "holds" if lp and max(lp) <= 9 else "fails"))
+        for other in ("actoff", "conceptsoff"):
+            o = runs.get(other, {})
+            if o:
+                pairs = [(_span_at(full[s], 865), _span_at(o[s], 865)) for s in full if s in o and full[s]["sessions"] >= 865 and o[s]["sessions"] >= 865]
+                L.append("- %s: span s865 full vs %s per seed %s -> full beats it on every seed: **%s**." % (
+                    other, other, [("%.1f" % a, "%.1f" % b) for a, b in pairs], all(a > b for a, b in pairs) if pairs else "-"))
+    path = os.path.join(OUT, "%s_SUMMARY.md" % tag)
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write("\n".join(L) + "\n")
+    print("\n".join(L))
+
+
+if __name__ == "__main__" and sys.argv[1] == "epam":
+    a = sys.argv
+    epam(a[2], int(a[3]), int(a[4]) if len(a) > 4 else 865, float(a[5]) if len(a) > 5 else 0.0, a[6] if len(a) > 6 else "P3d")
+if __name__ == "__main__" and sys.argv[1] == "epamsummary":
+    epamsummary(sys.argv[2] if len(sys.argv) > 2 else "P3d")
