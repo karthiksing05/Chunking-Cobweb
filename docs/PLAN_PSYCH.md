@@ -142,7 +142,7 @@ Reading: the KS96 grammaticality effect is matched by anchor chunk strength, so 
 ## P3d pre-registration: EPAM IV's architecture with TRELLIS as the semantic net (fixed 2026-11-22, before any run; user approved both changes)
 
 Why. rescuediag (3d4120b5, P3c full arm, 3 seeds, no change to the run): the target was always among the candidates, but the decoder picks the most frequent stored string, so the prior's running times beat the string just heard. Rescue succeeds .87-.92 when the surviving label leaves one candidate (about 40% of attempts), 0 when the target's records lie outside its own label (about 10%, cause not traced), and .15-.18 when three or more remain. Picking the most recently encoded candidate would have recovered .97. RSS95 (read from the PDF text, logs/rss95_full.txt) supplies three mechanisms that P3c lacked:
-- **Activation lasts one session.** "Once a branch or a node has been activated, it remains activated throughout that particular experimental 'day'. In the interval between sessions it loses its activation"; "the depth-first search mechanism restricts EPAM's search to activated portions of the net" (p. 310). A node is activated when EPAM sorts through it or adds information to it.
+- **Activation lasts one session.** "Once a branch or a node has been activated, it remains activated throughout that particular experimental 'day'. In the interval between sessions it loses its activation"; "the depth-first search mechanism restricts EPAM's search to activated portions of the net" (p. 314; cited as p. 310 when registered, corrected 2026-11-22). A node is activated when EPAM sorts through it or adds information to it.
 - **Every group gets a slot, and rescue needs a stored chunk.** "DD's semantic net is incomplete—many digit groups are not represented in it—but it gets larger as the trials continue", about 3,000 groups by the end, "substantially all three-digit groups but only a fraction of the 10,000 possible four-digit groups" (Appendix, p. 329). Coding is obligatory (ESC93 p. 973). EPAM's 3- against 4-digit error difference comes from this coverage difference (p. 319).
 - **Storage while the digits are still present**, at EPAM's 8 s per new chunk (p. 313).
 
@@ -219,7 +219,7 @@ Reading:
 - **The 4-digit groups are the wall.** Past 16 digits the retrieval structure opens with the d16 block of four 4-digit groups, and .75 to .70 per 4-digit group caps the span near 16-20.
 - **Unrecoverable groups dominate the failures:** about 90% are "no activated candidate", i.e. the group was not stored. That is 20% of groups late, at 8 s per new chunk.
 - **Net size is not the cause.** The net holds 931 three-digit and about 3,870 four-digit strings at the end, more than RSS95's ~3,000 for DD.
-- **What EPAM does that P3d does not** (RSS95 p. 318, encoding steps 7-9):
+- **What EPAM does that P3d does not** (RSS95 p. 320, encoding steps 7-9; first cited as p. 318):
   - It sorts a 4-digit group as its first three digits plus a blank, so its semantic code comes from the 3-digit prefix chunk ("(4, 6, 4, _) sorts to ... 10-mile time").
   - It attaches between-group codes: back-to-back same category, plus symmetry and ascending or descending category patterns at the parent node.
   - Both are redundancy that does not need the 4-digit string to be stored.
@@ -229,10 +229,10 @@ Trial order (reported): error .215/.184/.238/.161 for trials 1-4, with no monoto
 
 ## P3e pre-registration: EPAM's 4-digit prefix coding and between-group codes (fixed 2026-11-22, before any run; user said "go for P3e")
 
-Both mechanisms are EPAM IV encoding steps (RSS95 p. 318, read from logs/rss95_full.txt). Everything not listed is P3d unchanged: grouping, rehearsal, storage clock, session activation, 25% forgetting, staircase, seeds 13/17/19, 865 sessions, the same probes, effects 1-5 and their criteria.
+Both mechanisms are EPAM IV encoding steps (RSS95 p. 320 (first cited as p. 318), read from logs/rss95_full.txt). Everything not listed is P3d unchanged: grouping, rehearsal, storage clock, session activation, 25% forgetting, staircase, seeds 13/17/19, 865 sessions, the same probes, effects 1-5 and their criteria.
 
 **A. Prefix coding of 4-digit groups (step 7).** "If the RSF node will hold four digits, EPAM sorts the list (4, 2, 4, _)": a 4-digit group's semantic code comes from its first three digits.
-- **Encoding.** When a 4-digit group is presented and its 3-digit prefix is familiar (span_w >= .5), the prefix is activated for the session ("a branch is activated whenever EPAM sorts through it", p. 310). The prefix is not reinforced and costs no time. Storage of the group itself is as in P3d.
+- **Encoding.** When a 4-digit group is presented and its 3-digit prefix is familiar (span_w >= .5), the prefix is activated for the session ("a branch is activated whenever EPAM sorts through it", p. 314). The prefix is not reinforced and costs no time. Storage of the group itself is as in P3d.
 - **Label.** A 4-digit group's label (c, x) is the label of its prefix, read as in P3d.
 - **Recall of a damaged 4-digit group:**
   1. Run the P3d search over activated familiar 4-digit strings. If it finds any candidate, its pick is final.
@@ -270,6 +270,62 @@ Both mechanisms are EPAM IV encoding steps (RSS95 p. 318, read from logs/rss95_f
 - A is credited if full beats prefixoff in span at 865 on every seed; B if full beats patternoff on every seed; concepts if full beats conceptsoff on every seed.
 - P3 is a replication if effects 1-5 hold. Otherwise it is partial, with the failed effects named.
 - No changes after the runs.
+
+### P3e result (2026-11-22; results/psych_digits/P3e_*.json, P3e_SUMMARY.md): partial, but span reaches 42-51 and concepts are now credited
+
+Span at sessions 15/50/100/250/500/865 (mean of 3 seeds; DD about 80 near 500 and 104 at 865):
+- full: 9.9 / 10.9 / 11.1 / 17.1 / 26.7 / 42.2 (maximum block span 51.3, still rising);
+- prefixoff: 9.1 / 10.3 / 11.0 / 14.3 / 15.7 / 15.9;
+- patternoff: 10.0 / 12.2 / 11.1 / 16.5 / 28.8 / 43.9;
+- none: identical to P3d full on every seed (check passed);
+- conceptsoff: 10.1 / 11.6 / 11.6 / 15.1 / 25.5 / 33.1;
+- prioroff: 8.9 / 8.6 / 9.7 / 13.7 / 18.4 / 39.3.
+
+Effects:
+- Effect 1: holds (51.3).
+- Effect 2: **fails, too slow.** 80 is never reached, and span at 865 is 42 against 104.
+- Effect 3 (4-digit error > 3-digit, sessions 250-865): holds, .105 against .072 (EPAM .030 against .015).
+- Effect 4: holds (10.9 against 8.6 at s50).
+- Effect 5: **fails** on the same probe draws as P3d. The probe is identical in every arm, because consonant strings are never familiar and the probe uses its own random stream: one seed ends a 10-list probe at 11. This is a property of the probe at 25% forgetting, not of an arm.
+
+Mechanisms:
+- **Prefix coding (A): credited** (41.6-43.2 against 15.6-16.3 on every seed). It cuts the 4-digit error .242 -> .080 at sessions 500-865, and the unstored share .21 -> .09. EPAM's step 7 is the whole gain.
+- **Between-group codes (B): not credited** (patternoff 39.1-50.1). They recovered only 36 labels at sessions 250-865, as predicted.
+- **Concepts: credited** (full 41.6-43.2 against conceptsoff 31.7-34.5 on every seed; 3-digit error .062 against .110 at 500-865). With prefix coding, the label of the 3-digit prefix picks the right activated chunk, so the concept hierarchy now does work.
+
+Reported:
+- **Trial order:** per-group error rises within a session, .080 / .094 / .102 / .155 / .180 for trials 1-5.
+- **Release:** last trial .102 against the first trial of the next session .080.
+- Both have the direction of DD's slowing by trial (Table 3, a time measure) and of proactive interference with release overnight.
+- **Net size:** 989 three-digit and 6,303 four-digit familiar strings at the end, more than RSS95's ~3,000 for DD.
+
+Reading: failures at sessions 500-865 are now mostly wrong picks among activated candidates (1,376) rather than unstored groups (754). EPAM has a third information source that P3e lacks: "EPAM stores information about the digits as they are presented, both in the retrieval structure and with associative links to the chunks that are already available in semantic memory" (p. 310). Ur's appendix counts the forgetting of these links at 25% (p. 329). Its exit test finds "a node in the discrimination net that points to (associates to) a particular node in the retrieval structure" (p. 313). This is P3f.
+
+## P3f pre-registration: associative links from known chunks to retrieval-structure slots (fixed 2026-11-22, before any run; continues P3e under the user's instruction to keep iterating)
+
+Everything is P3e full unless listed (A + B, labels, activation, storage, forgetting, staircase, seeds 13/17/19, 865 sessions, probes, effects 1-5 and criteria).
+
+**C. Associative links (RSS95 p. 310, p. 313, Appendix p. 329).**
+- **Encoding.** When an RS group is presented, a link from a chunk already available in semantic memory to the group's slot is stored, if such a chunk exists. That is the group's own string if it is familiar before presentation, else (4-digit groups) its 3-digit prefix if that is familiar. Groups stored during this list, i.e. new chunks, get no link: "chunks that are already available".
+- **Forgetting.** The link is lost once with p = .25. It is drawn from a separate random stream, so the arm without links reproduces P3e full exactly.
+- **Recall of a damaged RS group with a surviving link:**
+  - a link to the full string gives the group;
+  - a link to the prefix gives the first three digits, and the 4th digit must have survived;
+  - otherwise the P3e procedure runs unchanged.
+
+**Arms (3 seeds):**
+- **full:** A + B + C;
+- **linkoff:** P3e full; it must reproduce P3e full exactly, as a check;
+- **conceptsoff:** C on, no labels;
+- **prioroff:** full without the prior stream.
+
+**Prediction:** wrong picks fall and span rises. The rate is still bounded by 4-digit coverage and by the loss of the 4th digit. Whether span reaches 80 inside [250, 865] is not predicted.
+
+**Decision:**
+- Effects 1-5 are scored as in P3d/P3e.
+- C is credited if full beats linkoff at 865 on every seed; concepts if full beats conceptsoff on every seed.
+- Replication iff effects 1-5 hold.
+- Effect 5 is the same probe as before and cannot change: it depends on no arm. Its verdict is carried as "fails, probe artifact" unless the probe itself is re-registered.
 
 ## P4 pre-registration (fixed 2026-11-21, before any AGL simulation)
 
