@@ -39,10 +39,11 @@ def block_curve(d):
     return xs, ys
 
 
-def main(tag):
+def main(tag, paper=False):
     fig, ax = plt.subplots(figsize=(7.2, 4.4), dpi=200)
-    fig.patch.set_facecolor("#fcfcfb")
-    ax.set_facecolor("#fcfcfb")
+    bg = "white" if paper else "#fcfcfb"
+    fig.patch.set_facecolor(bg)
+    ax.set_facecolor(bg)
     ends = []
     p3g = tag.startswith("P3g")
     for arm, name, col, ls in (G_ARMS if p3g else ARMS):
@@ -73,8 +74,9 @@ def main(tag):
     ax.set_ylim(0, 115)
     ax.set_xlabel("Practice session", color=INK2)
     ax.set_ylabel("Digit span (mean list length, 5-session block)", color=INK2)
-    ax.set_title("Digit span with practice: TRELLIS in EPAM IV's procedure vs. DD" + (" (held-out seeds)" if p3g else ""),
-                 color=INK, fontsize=11, loc="left")
+    if not paper:                                 # the paper's caption carries the title
+        ax.set_title("Digit span with practice: TRELLIS in EPAM IV's procedure vs. DD" + (" (held-out seeds)" if p3g else ""),
+                     color=INK, fontsize=11, loc="left")
     ax.grid(True, color=GRID, linewidth=0.8)
     for sp in ("top", "right"):
         ax.spines[sp].set_visible(False)
@@ -83,10 +85,12 @@ def main(tag):
     ax.tick_params(colors=INK2)
     ax.legend(frameon=False, fontsize=9, loc="upper left")
     fig.tight_layout()
-    path = os.path.join(OUT, "%s_curve.png" % tag)
-    fig.savefig(path, facecolor=fig.get_facecolor())
+    path = PAPER_FIG if paper else os.path.join(OUT, "%s_curve.png" % tag)
+    fig.savefig(path, facecolor="white" if paper else fig.get_facecolor())
     print("wrote", path)
 
 
+PAPER_FIG = os.path.join("confs", "trellis-v2", "paper", "figures", "digit_span_curve.png")
+
 if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else "P3f")
+    main(sys.argv[1] if len(sys.argv) > 1 else "P3f", paper=len(sys.argv) > 2 and sys.argv[2] == "paper")
