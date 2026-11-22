@@ -1266,3 +1266,103 @@ if __name__ == "__main__" and sys.argv[1] == "stair":
     stair(a[2], int(a[3]), int(a[4]) if len(a) > 4 else 865, float(a[5]) if len(a) > 5 else 0.0, a[6] if len(a) > 6 else "P3b")
 if __name__ == "__main__" and sys.argv[1] == "stairsummary":
     stairsummary(sys.argv[2] if len(sys.argv) > 2 else "P3b")
+
+
+# ----------------------------------------------------------------------------------------------- P3c rescue diagnostic (2026-11-21)
+# Usage: psych_digits.py rescuediag <seed> [max_sessions=150]
+# Re-runs the P3c full arm (same RNG streams, same trajectory) and, for every damaged RS group, logs why rescue fails:
+# candidate count after survivors, after the content label; rank of the target by record weight; and what an episodic-recency
+# rule (most recently encoded candidate wins; this list's groups are the most recent) would have picked.  No change to the run.
+def rescuediag(seed, max_sessions):
+    mem = Mem(seed)
+    items, _ = prior_stream(seed, 1)
+    for c, d in items:
+        mem.learn(list(d))
+    rng = random.Random(seed * 31 + 5)
+    frng = random.Random(seed * 13 + 7)
+    clock, length, lst = 0.0, 7, 0
+    last = {}                                  # string -> (session, list index) of the last time it was encoded as a group
+    out = []
+    for sess in range(1, max_sessions + 1):
+        for li in range(lists_per_session(sess)):
+            digits = [str(rng.randrange(10)) for _ in range(length)]
+            units = encode_stair(mem, digits, Counter())
+            nstm = stm_units(units)
+            dec = Decoder(mem)
+            here = [u[1] for u in units if u[0] == "g"]
+            for g in here:
+                last[g] = (sess, lst)
+            ok_all = True
+            for u in units:
+                if u[0] != "g" or not u[3]:
+                    continue
+                g = u[1]
+                k = len(g)
+                c, x = dec.label(g)
+                known = {i: d for i, d in enumerate(g) if frng.random() >= 0.25}
+                c = c if (c is not None and frng.random() >= 0.25) else None
+                x = x if (x is not None and frng.random() >= 0.25) else None
+                if len(known) == k:
+                    continue
+                got = dec.decode(k, known, c, x)
+                ok = got == g
+                ok_all &= ok
+                if known:
+                    sets = sorted((mem.fam_pos[k].get((i, d), set()) for i, d in known.items()), key=len)
+                    cand = set(sets[0])
+                    for s_ in sets[1:]:
+                        cand &= s_
+                else:
+                    cand = set(mem.fam[k])
+                ncand_c = None
+                if c is not None:
+                    lc = dec.leaves(mem.L.cnt, c)
+                    ncand_c = sum(1 for t in cand if any(mem.L.records[r].cleaf is not None and mem.L.records[r].cleaf.id in lc
+                                                         for r in mem.recs_of.get(t, ())))
+                same_list = [t for t in cand if t != g and t in here]
+                same_sess = [t for t in cand if t != g and t in last and last[t][0] == sess]
+                rec_pick = max(cand, key=lambda t: (last.get(t, (-1, -1)), -mem.span_w.get(t, 0.0))) if cand else None
+                rank = 1 + sum(1 for t in cand if mem.span_w.get(t, 0.0) > mem.span_w.get(g, 0.0))
+                out.append({"s": sess, "k": k, "miss": k - len(known), "c": c is not None, "x": x is not None, "ok": ok,
+                            "in": g in cand, "n": len(cand), "nc": ncand_c, "rank_w": rank, "same_list": len(same_list),
+                            "same_sess": len(same_sess), "rec_ok": rec_pick == g, "len": length})
+            correct = nstm <= K_STM and ok_all
+            clock += length
+            for p in learn_pieces(units):
+                if mem.span_w.get(p, 0.0) >= REC_W:
+                    mem.span_w[p] += 1.0
+                elif clock >= STORE_S:
+                    mem.learn(list(p))
+                    clock -= STORE_S
+            length = max(1, length + (1 if correct else -1))
+            lst += 1
+        if sess % 25 == 0:
+            print("session", sess, "len", length, "attempts", len(out), flush=True)
+    os.makedirs(OUT, exist_ok=True)
+    with open(os.path.join(OUT, "rescuediag_s%d.json" % seed), "w", encoding="utf-8") as fh:
+        json.dump(out, fh)
+    def rep(rows, name):
+        if not rows:
+            return
+        n = len(rows)
+        f = lambda key: sum(1 for r in rows if r[key]) / n
+        med = lambda key: sorted(r[key] for r in rows)[n // 2]
+        print("%-28s n %5d ok %.2f in_cand %.2f rec_ok %.2f | med cand %d, med rank_w %d, share same-list comp %.2f, same-sess comp %.2f"
+              % (name, n, f("ok"), f("in"), f("rec_ok"), med("n"), med("rank_w"),
+                 sum(1 for r in rows if r["same_list"]) / n, sum(1 for r in rows if r["same_sess"]) / n))
+    for lo, hi in ((1, 50), (51, 100), (101, max_sessions)):
+        w = [r for r in out if lo <= r["s"] <= hi]
+        print("== sessions %d-%d" % (lo, hi))
+        rep(w, "all")
+        for m in (1, 2, 3):
+            rep([r for r in w if r["miss"] == m], "missing %d" % m)
+        rep([r for r in w if r["c"]], "content label survives")
+        rep([r for r in w if not r["c"] and not r["x"]], "no label")
+        cs = [r for r in w if r["c"] and r["nc"] is not None]
+        if cs:
+            print("   median candidates under surviving content label: %d (vs %d before)" % (
+                sorted(r["nc"] for r in cs)[len(cs) // 2], sorted(r["n"] for r in cs)[len(cs) // 2]))
+
+
+if __name__ == "__main__" and sys.argv[1] == "rescuediag":
+    rescuediag(int(sys.argv[2]), int(sys.argv[3]) if len(sys.argv) > 3 else 150)
