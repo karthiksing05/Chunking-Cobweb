@@ -1,0 +1,43 @@
+P4c (psych_agl_p4c.py): position-sensitive context scores. Pre-registration: docs/PLAN_PSYCH.md P4c.
+
+=== Stage 1: KS96 Exp 1 (selection), 18 subjects. Human G-NG 22.0; cells GH 64.6  GL 62.5  NGH 54.9  NGL 28.1
+[full] score = pos, n = 18
+    cells (mean +- SD across subjects, N=18): GH  55.6+- 7.7  GL  20.8+- 7.4  NGH  95.1+- 7.6  NGL  28.5+- 5.8
+    grammaticality effect (G-NG)  -23.6   chunk-strength effect (H-L)   50.7   interaction (CS effect NG - CS effect G)   31.9
+    paired t, G - NG within H:  -39.6 (t(17)=-13.64)   within L:   -7.6 (t(17)=-3.33)
+    Pearson r with human cell means: 0.242
+
+[full] score = fit, n = 18
+    cells (mean +- SD across subjects, N=18): GH  59.0+- 9.4  GL  56.2+-14.4  NGH  38.9+-11.3  NGL  45.8+-12.1
+    grammaticality effect (G-NG)   15.3   chunk-strength effect (H-L)   -2.1   interaction (CS effect NG - CS effect G)   -9.7
+    paired t, G - NG within H:   20.1 (t(17)=6.26)   within L:   10.4 (t(17)=2.05)
+    Pearson r with human cell means: 0.524
+
+[conceptsoff] score = pos, n = 18
+    cells (mean +- SD across subjects, N=18): GH  50.0+- 0.0  GL  25.0+- 0.0  NGH  87.5+- 0.0  NGL  37.5+- 0.0
+    grammaticality effect (G-NG)  -25.0   chunk-strength effect (H-L)   37.5   interaction (CS effect NG - CS effect G)   25.0
+    paired t, G - NG within H:  -37.5 (t(17)=nan)   within L:  -12.5 (t(17)=nan)
+    Pearson r with human cell means: 0.106
+
+[conceptsoff] score = fit, n = 18
+    cells (mean +- SD across subjects, N=18): GH  63.2+-10.9  GL  54.2+-17.1  NGH  29.9+-16.1  NGL  52.8+-17.4
+    grammaticality effect (G-NG)   17.4   chunk-strength effect (H-L)   -6.9   interaction (CS effect NG - CS effect G)  -31.9
+    paired t, G - NG within H:   33.3 (t(17)=8.00)   within L:    1.4 (t(17)=0.21)
+    Pearson r with human cell means: 0.119
+
+[acs] score = acs, n = 18
+    cells (mean +- SD across subjects, N=18): GH  90.3+- 5.3  GL   0.0+- 0.0  NGH 100.0+- 0.0  NGL   9.7+- 5.3
+    grammaticality effect (G-NG)   -9.7   chunk-strength effect (H-L)   90.3   interaction (CS effect NG - CS effect G)    0.0
+    paired t, G - NG within H:   -9.7 (t(17)=-7.71)   within L:   -9.7 (t(17)=-7.71)
+    Pearson r with human cell means: 0.412
+
+[anchor] score = anchor, n = 18
+    cells (mean +- SD across subjects, N=18): GH  78.5+- 5.8  GL  43.1+- 6.4  NGH  41.0+- 5.8  NGL  37.5+- 0.0
+    grammaticality effect (G-NG)   21.5   chunk-strength effect (H-L)   19.4   interaction (CS effect NG - CS effect G)  -31.9
+    paired t, G - NG within H:   37.5 (t(17)=16.60)   within L:    5.6 (t(17)=3.69)
+    Pearson r with human cell means: 0.579
+
+criterion pos: full G-NG within CS -23.6 vs conceptsoff -25.0, acs -9.7, anchor 21.5 -> fails
+criterion fit: full G-NG within CS 15.3 vs conceptsoff 17.4, acs -9.7, anchor 21.5 -> fails
+SELECTED score: none -> P4c stops negative; MVdL not run (pre-registered)
+

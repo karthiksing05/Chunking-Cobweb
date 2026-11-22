@@ -185,6 +185,16 @@ class Mem:
         self.inst = {}                 # rid -> token tuple
         self.span_w = defaultdict(float)   # token tuple -> summed posterior weight of its records
         self.n_exp = 0
+        self.recs_of = defaultdict(list)   # token tuple -> rids of its composite records (P3c decoder)
+        self.fam_pos = {3: defaultdict(set), 4: defaultdict(set)}   # P3c: familiar strings (span_w >= .5) by (position, digit)
+        self.fam = {3: set(), 4: set()}
+
+    def mark_fam(self, t):
+        k = len(t)
+        if k in self.fam and t not in self.fam[k] and self.span_w.get(t, 0.0) >= 0.5:
+            self.fam[k].add(t)
+            for i, d in enumerate(t):
+                self.fam_pos[k][(i, d)].add(t)
 
     def learn(self, tokens):
         L = self.L
@@ -198,6 +208,8 @@ class Mem:
                 self.inst[e.rid] = t
                 self.comp_rids.append(e.rid)
                 self.span_w[t] += e.weight
+                self.recs_of[t].append(e.rid)
+                self.mark_fam(t)
 
     def top(self, tokens):
         """Top composite of the isolated parse of tokens, learning off (chess View.__init__)."""
@@ -949,6 +961,306 @@ def stairsummary(tag):
     print("\n".join(L))
 
 
+# ----------------------------------------------------------------------------------------------- P3c: retrieval failure + label rescue
+# Pre-registration: docs/PLAN_PSYCH.md "P3c".  P3b unchanged plus: each RS group's slot holds its digits and its TRELLIS label
+# (c = deepest supported content concept, x = deepest supported context concept of the isolated parse, read before this list is
+# learned).  Each digit and each label part is lost once with probability F (EPAM IV, RSS95 pp. 315, 319).  Recall: all digits
+# intact -> recalled; else the best familiar string of length k agreeing with the surviving digits, scored by its record weight under
+# the surviving label parts (chess composite decoder + partial image), or by span_w if no label part survives.
+F_ARMS = {"full": dict(f=0.25), "norescue": dict(f=0.25, rescue=False), "ctxoff": dict(f=0.25, ctx=False),
+          "prioroff": dict(f=0.25, prior=False), "f20": dict(f=0.20), "f30": dict(f=0.30)}
+
+
+class Decoder:
+    """Per-list label reader and partial-image decoder (memory is frozen during a list: learning comes after recall)."""
+
+    def __init__(self, mem):
+        self.mem = mem
+        self.view = View.__new__(View)
+        self.view.mem = mem
+        self.labels = {}
+        self.leafsets = {}
+
+    def label(self, g):
+        if g not in self.labels:
+            e = self.mem.top(list(g))
+            c = x = None
+            if e is not None:
+                pc, px = self.view.label(e)
+                c = pc[-1] if len(pc) > 1 else None
+                x = px[-1] if len(px) > 1 else None
+            self.labels[g] = (c, x)
+        return self.labels[g]
+
+    def leaves(self, tree, node):
+        key = (id(tree), node.id)
+        if key not in self.leafsets:
+            self.leafsets[key] = set(leaf_ids(tree, node))
+        return self.leafsets[key]
+
+    def decode(self, k, known, c, x):
+        """known: {position: digit} surviving; c / x: surviving label parts (or None).  Returns the recalled string or None."""
+        mem, L = self.mem, self.mem.L
+        if known:
+            sets = sorted((mem.fam_pos[k].get((i, d), set()) for i, d in known.items()), key=len)
+            cand = set(sets[0])
+            for s in sets[1:]:
+                cand &= s
+        else:
+            cand = mem.fam[k]
+        if not cand:
+            return None
+        if c is None and x is None:
+            return min(cand, key=lambda t: (-mem.span_w.get(t, 0.0), t))
+        lc = self.leaves(L.cnt, c) if c is not None else None
+        lx = self.leaves(L.ctx, x) if x is not None else None
+        best, bw = None, 0.0
+        for t in cand:
+            w = 0.0
+            for rid in mem.recs_of.get(t, ()):
+                e = L.records[rid]
+                if e.leaf is None or e.cleaf is None:
+                    continue
+                if lc is not None and e.cleaf.id not in lc:
+                    continue
+                if lx is not None and e.leaf.id not in lx:
+                    continue
+                w += e.weight
+            if w > 0 and (w > bw or (w == bw and t < best)):
+                best, bw = t, w
+        return best
+
+
+def recall_groups(dec, units, frng, f, rescue, use_ctx, tally):
+    """True iff every RS group is recalled.  tally: Counter of per-size / per-route counts."""
+    ok_all = True
+    for u in units:
+        if u[0] != "g" or not u[3]:
+            continue
+        g = u[1]
+        k = len(g)
+        c, x = dec.label(g)
+        if not use_ctx:
+            x = None
+        known = {i: d for i, d in enumerate(g) if frng.random() >= f}
+        c = c if (c is not None and frng.random() >= f) else None
+        x = x if (x is not None and frng.random() >= f) else None
+        tally["n%d" % k] += 1
+        if len(known) == k:
+            tally["intact%d" % k] += 1
+            continue
+        route = ("c" if c is not None else "") + ("x" if x is not None else "") or "d"
+        tally["try_" + route] += 1
+        got = dec.decode(k, known, c, x) if rescue else None
+        if got == g:
+            tally["resc_" + route] += 1
+        else:
+            tally["err%d" % k] += 1
+            ok_all = False
+    return ok_all
+
+
+def forget(arm, seed, max_sessions, budget, tag):
+    opt = dict(f=0.25, rescue=True, ctx=True, prior=True)
+    opt.update(F_ARMS[arm])
+    os.makedirs(OUT, exist_ok=True)
+    t0 = time.time()
+    mem = Mem(seed)
+    info = {"arm": arm, "seed": seed, "rec_w": REC_W, "K": K_STM, "store_s": STORE_S, "start": 7, **opt}
+    if opt["prior"]:
+        items, n_pre = prior_stream(seed, 1)
+        for c, d in items:
+            mem.learn(list(d))
+        info.update(n_pre=n_pre, prior_items=len(items), prior_seconds=round(time.time() - t0, 1), prior_records=len(mem.L.records))
+    print("prior", info, flush=True)
+    rng = random.Random(seed * 31 + 5)          # same list stream as P3b
+    prng = random.Random(seed * 77 + 11)
+    frng = random.Random(seed * 13 + 7)         # forgetting draws
+    clock, length, lst = 0.0, 7, 0
+    rows, sess_rows, probes = [], [], {}
+    stop = "max_sessions"
+    for sess in range(1, max_sessions + 1):
+        if budget and time.time() - t0 > budget:
+            stop = "time_budget"
+            break
+        sstart = length
+        for _ in range(lists_per_session(sess)):
+            digits = [str(rng.randrange(10)) for _ in range(length)]
+            st = Counter()
+            units = encode_stair(mem, digits, st)
+            nstm = stm_units(units)
+            tally = Counter()
+            dec = Decoder(mem)
+            rs_ok = recall_groups(dec, units, frng, opt["f"], opt["rescue"], opt["ctx"], tally)
+            correct = nstm <= K_STM and rs_ok
+            clock += length
+            nlearn = nreinf = 0
+            for p in learn_pieces(units):
+                if mem.span_w.get(p, 0.0) >= REC_W:
+                    mem.span_w[p] += 1.0
+                    nreinf += 1
+                elif clock >= STORE_S:
+                    mem.learn(list(p))
+                    clock -= STORE_S
+                    nlearn += 1
+            row = {"s": sess, "len": length, "ok": int(correct), "stm_ok": int(nstm <= K_STM), "rs_ok": int(rs_ok), "stm": nstm,
+                   "att4": st["att4"], "hit4": st["hit4"], "att3": st["att3"], "hit3": st["hit3"],
+                   "learned": nlearn, "reinf": nreinf, "clock": round(clock, 1), "recs": len(mem.L.records), "t": round(time.time() - t0, 1)}
+            row.update({k: v for k, v in tally.items()})
+            rows.append(row)
+            length = max(1, length + (1 if correct else -1))
+            lst += 1
+        sess_rows.append({"s": sess, "start_len": sstart, "end_len": length})
+        if sess in PROBE_SESSIONS:
+            probes[sess] = letter_probe(mem, prng)
+            print("probe", sess, probes[sess], flush=True)
+        if sess % 10 == 0:
+            r = rows[-1]
+            blk = [x["len"] for x in rows if x["s"] > sess - 10]
+            print("session %d lists %d len(mean last10 sess) %.1f next %d clock %.1f recs %d t %.0fs" % (
+                sess, lst, sum(blk) / len(blk), length, clock, r["recs"], r["t"]), flush=True)
+            forget_dump(tag, arm, seed, info, rows, sess_rows, probes, stop + "(partial)", t0, sess)
+    forget_dump(tag, arm, seed, info, rows, sess_rows, probes, stop, t0, sess_rows[-1]["s"] if sess_rows else 0)
+    print("done", len(sess_rows), "sessions", round(time.time() - t0), "s", stop, flush=True)
+
+
+def forget_dump(tag, arm, seed, info, rows, sess_rows, probes, stop, t0, sess):
+    d = {"experiment": "psych_digits P3c forgetting", "cfg": CFG, "info": info, "stopped": stop, "sessions": sess,
+         "lists": len(rows), "seconds": round(time.time() - t0, 1), "probes": probes, "sess_rows": sess_rows, "rows": rows}
+    fn = os.path.join(OUT, "%s_%s_s%d.json" % (tag, arm, seed))
+    with open(fn + ".tmp", "w", encoding="utf-8") as fh:
+        json.dump(d, fh)
+    os.replace(fn + ".tmp", fn)
+
+
+def _sum_rows(d, lo, hi, keys, minlen=0):
+    c = Counter()
+    for r in d["rows"]:
+        if lo < r["s"] <= hi and r["len"] >= minlen:
+            for k in keys:
+                c[k] += r.get(k, 0)
+    return c
+
+
+def forgetsummary(tag):
+    import glob
+    runs = defaultdict(dict)
+    for fn in sorted(glob.glob(os.path.join(OUT, "%s_*_s*.json" % tag))):
+        d = json.load(open(fn, encoding="utf-8"))
+        if d.get("experiment") != "psych_digits P3c forgetting":
+            continue
+        runs[d["info"]["arm"]][d["info"]["seed"]] = d
+
+    def ms(vals, fmt="%.1f"):
+        v = [x for x in vals if x is not None and x == x]
+        return (fmt % (sum(v) / len(v)) + " [" + fmt % min(v) + "-" + fmt % max(v) + "]") if v else "-"
+    arms = list(F_ARMS)
+    pts = (15, 50, 100, 250, 500, 865)
+    L = ["# P3c: retrieval failure (EPAM IV 25%) with TRELLIS label rescue (generated by psych_digits.py forgetsummary)", "",
+         "Pre-registration: docs/PLAN_PSYCH.md, section P3c. Span at session s = mean list length over the 5-session block ending at s; "
+         "mean [min-max] over seeds that reached s.", "", "DD: start 7-9; about 80 by session ~500; 104 at ~865.", "", "## Runs", ""]
+    for arm in arms:
+        for s, d in sorted(runs.get(arm, {}).items()):
+            L.append("- %s seed %d: %d sessions, %d lists, %.0f s, stopped %s" % (arm, s, d["sessions"], d["lists"], d["seconds"], d["stopped"]))
+    L += ["", "## Span at sessions", "", "| arm | n | " + " | ".join("s%d" % p for p in pts) + " | max block span |", "|---|---|" + "---|" * (len(pts) + 1)]
+    for arm in arms:
+        rr = runs.get(arm, {})
+        if not rr:
+            continue
+        cells = []
+        for p in pts:
+            ds = [d for d in rr.values() if d["sessions"] >= p]
+            cells.append(ms([_span_at(d, p) for d in ds]) + (" (n=%d)" % len(ds) if len(ds) != len(rr) else ""))
+        mx = [max((_span_at(d, s) or 0) for s in range(5, d["sessions"] + 1)) for d in rr.values()]
+        L.append("| %s | %d | %s | %s |" % (arm, len(rr), " | ".join(cells), ms(mx)))
+    L.append("| DD | - | ~7-9 | - | - | - | ~80 | 104 (at ~865) | 104 |")
+    L += ["", "## Session when span first reaches a level (- = not reached)", "", "| arm | seed | sessions run | 20 | 40 | 80 | 104 |",
+          "|---|---|---|---|---|---|---|"]
+    for arm in arms:
+        for s, d in sorted(runs.get(arm, {}).items()):
+            L.append("| %s | %d | %d | %s |" % (arm, s, d["sessions"], " | ".join(str(_hit(d, t) or "-") for t in (20, 40, 80, 104))))
+    keys = ["n3", "n4", "intact3", "intact4", "err3", "err4", "try_cx", "resc_cx", "try_c", "resc_c", "try_x", "resc_x", "try_d", "resc_d"]
+    L += ["", "## Per-group recall by session window (pooled over seeds): reliability p = 1 - errors / groups; rescue share by route", "",
+          "| arm | window | groups | p(3) | p(4) | digits intact | rescued cx | rescued c | rescued x | rescued digits-only |", "|---|---|---|---|---|---|---|---|---|---|"]
+    for arm in arms:
+        rr = runs.get(arm, {})
+        for lo, hi in ((0, 50), (50, 100), (100, 250), (250, 500), (500, 865)):
+            c = Counter()
+            for d in rr.values():
+                c.update(_sum_rows(d, lo, hi, keys))
+            n = c["n3"] + c["n4"]
+            if not n:
+                continue
+            fr = lambda a, b: ("%.3f (%d)" % (c[a] / c[b], c[b])) if c[b] else "-"
+            p3 = "%.3f" % (1 - c["err3"] / c["n3"]) if c["n3"] else "-"
+            p4 = "%.3f" % (1 - c["err4"] / c["n4"]) if c["n4"] else "-"
+            L.append("| %s | %d-%d | %d | %s | %s | %.3f | %s | %s | %s | %s |" % (arm, lo, hi, n, p3, p4, (c["intact3"] + c["intact4"]) / n,
+                     fr("resc_cx", "try_cx"), fr("resc_c", "try_c"), fr("resc_x", "try_x"), fr("resc_d", "try_d")))
+    L += ["", "## Pre-registered signature effects (arm full)", ""]
+    full, po, nr = runs.get("full", {}), runs.get("prioroff", {}), runs.get("norescue", {})
+
+    def complete(rr):
+        return bool(rr) and all(d["sessions"] >= 865 for d in rr.values())
+    if full:
+        mx = [max((_span_at(d, s) or 0) for s in range(5, d["sessions"] + 1)) for d in full.values()]
+        L.append("1. Span rises well above 7 (block span >= 15): max %s -> **%s**." % (ms(mx), "holds" if min(mx) >= 15 else "fails" if max(mx) < 15 else "some seeds"))
+        h80 = [_hit(d, 80) for d in full.values()]
+        if all(h is not None and 250 <= h for h in h80):
+            e2 = "holds"
+        elif any(h is not None and h < 250 for h in h80):
+            e2 = "fails (explosion)"
+        elif complete(full):
+            e2 = "fails (stall: 80 never reached)"
+        else:
+            e2 = "not reached (runs ended at %s)" % [d["sessions"] for d in full.values()]
+        L.append("2. Rate (decision): first session at 80 = %s -> **%s**." % (h80, e2))
+        c = Counter()
+        for d in full.values():
+            c.update(_sum_rows(d, 0, 865, keys, minlen=30))
+        if c["n3"] and c["n4"]:
+            r3, r4 = c["err3"] / c["n3"], c["err4"] / c["n4"]
+            L.append("3. 4-digit groups err more (lists >= 30): 4-digit %.3f (%d groups) vs 3-digit %.3f (%d) -> **%s**." % (
+                r4, c["n4"], r3, c["n3"], "holds" if r4 > r3 else "fails"))
+        else:
+            L.append("3. 4-digit groups err more: no lists >= 30 with both sizes -> **not reached**.")
+        if po:
+            res, rows = [], []
+            for p in (15, 50):
+                a = [_span_at(d, p) for d in full.values() if d["sessions"] >= p]
+                b = [_span_at(d, p) for d in po.values() if d["sessions"] >= p]
+                if a and b:
+                    rows.append("s%d full %.1f vs prioroff %.1f" % (p, sum(a) / len(a), sum(b) / len(b)))
+                    res.append(sum(a) / len(a) > sum(b) / len(b))
+            L.append("4. Prior knowledge speeds early learning: %s -> **%s**." % ("; ".join(rows), "holds" if res and all(res) else "fails" if res and not any(res) else "mixed/not reached"))
+        fin = [pr["final"] for d in full.values() for pr in d["probes"].values()]
+        mxl = [pr["max"] for d in full.values() for pr in d["probes"].values()]
+        if fin:
+            L.append("5. Letter span about 7 (mean probe max <= 9): final %s, max %s -> **%s**." % (ms(fin), ms(mxl), "holds" if sum(mxl) / len(mxl) <= 9 else "fails"))
+        if nr:
+            a = [_span_at(d, 250) for d in full.values() if d["sessions"] >= 250]
+            b = [_span_at(d, 250) for d in nr.values() if d["sessions"] >= 250]
+            if a and b:
+                L.append("Redundancy: span at s250 full %.1f vs no rescue %.1f -> **%s**." % (sum(a) / len(a), sum(b) / len(b), "holds" if sum(a) / len(a) > sum(b) / len(b) else "fails"))
+    L += ["", "## Letter probes: final / max length", "", "| arm | " + " | ".join("s%d" % p for p in PROBE_SESSIONS) + " |", "|---|" + "---|" * len(PROBE_SESSIONS)]
+    for arm in arms:
+        rr = runs.get(arm, {})
+        if rr:
+            cells = []
+            for p in PROBE_SESSIONS:
+                v = [d["probes"][str(p)] for d in rr.values() if str(p) in d["probes"]]
+                cells.append("%s / %s" % (ms([x["final"] for x in v]), ms([x["max"] for x in v])) if v else "-")
+            L.append("| %s | %s |" % (arm, " | ".join(cells)))
+    path = os.path.join(OUT, "%s_SUMMARY.md" % tag)
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write("\n".join(L) + "\n")
+    print("\n".join(L))
+
+
+if __name__ == "__main__" and sys.argv[1] == "forget":
+    a = sys.argv
+    forget(a[2], int(a[3]), int(a[4]) if len(a) > 4 else 865, float(a[5]) if len(a) > 5 else 0.0, a[6] if len(a) > 6 else "P3c")
+if __name__ == "__main__" and sys.argv[1] == "forgetsummary":
+    forgetsummary(sys.argv[2] if len(sys.argv) > 2 else "P3c")
 if __name__ == "__main__" and sys.argv[1] == "stair":
     a = sys.argv
     stair(a[2], int(a[3]), int(a[4]) if len(a) > 4 else 865, float(a[5]) if len(a) > 5 else 0.0, a[6] if len(a) > 6 else "P3b")

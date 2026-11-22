@@ -120,6 +120,16 @@ Two new endorsement scores, never computed before on any AGL dataset. The learne
 - **Stage 2, confirmation on MVdL 2a/2b (20 subjects each), selected score only counted.** Supported if the full model's grammaticality shift (2b - 2a) is positive, and larger than concepts off's (same score), ACS's and anchor ACS's. Reported: shift ± SE, associativity shift, Pearson r with the 8 cells. The unselected score is computed in the same runs and reported, not counted.
 - Prediction stated before running: MVdL matched G and NG items on global and anchor ACS, so pos is expected to show little grammaticality effect there; only fit can carry a shift.
 
+### P4c result (2026-11-21; results/psych_agl/p4c/SUMMARY_P4C.txt): stage 1 fails, so P4c stops negative and MVdL is not run
+
+KS96, 18 subjects. Grammaticality effect within CS cells (human +22.0):
+- pos: full -23.6, concepts off -25.0. Fails; it is a chunk-strength score with position, NGH 95%.
+- fit: full +15.3 (H +20.1, L +10.4; cells 59/56/39/46, r .52), concepts off +17.4. It beats printed ACS (-9.7) but not concepts off or anchor ACS. Fails.
+- anchor ACS (baseline): +21.5, cells 79/43/41/38, r .58. The positional count of first and last bigrams and trigrams alone reproduces the human grammaticality effect on the KS96 items.
+- The anchor ACS code reproduces AGL_PROTOCOL's MVdL cell means exactly (2a 4.78/3.31/4.44/3.41; 2b 18.00/13.38/18.25/12.25).
+
+Reading: the KS96 grammaticality effect is matched by anchor chunk strength, so a grammaticality score has to beat a positional chunk count before concepts are credited, and TRELLIS's context fit does not. The concepts-off control is weak for fit, because the score itself climbs the trees in both arms (concepts off changes learning and parsing, not the read). The anchor comparison decides the outcome either way. AGL is reported as a negative result. TRELLIS's stored familiarity is chunk strength (P4, P4b), and its context-concept fit adds nothing beyond anchor strength.
+
 ## P4 pre-registration (fixed 2026-11-21, before any AGL simulation)
 
 - Target: Knowlton & Squire (1996) Experiment 1, controls (N = 18), the 23 distinct training strings shown twice in random order, and the 32 test items, all from docs/AGL_PROTOCOL.md section 1. Meulemans & Van der Linden (1997) is not simulated, because its stimuli are not available.
