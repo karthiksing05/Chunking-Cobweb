@@ -25,6 +25,10 @@
 
 \newcommand{\trellis}{\textsc{Trellis}}
 
+% Itemization commands, as in the version 1 paper.
+\def\texitem#1{\par\noindent\hangindent 20pt\hbox to 20pt {\hss #1 ~}\ignorespaces}
+\def\bull{\texitem{$\bullet$}}
+
 \cogsysheading{X}{2026}{1-32}{12/2026}{X/2027}
 \ShortHeadings{Concepts and Chunks from Raw Experience}{K.\ Singaravadivelan and P.\ Langley}
 
@@ -97,82 +101,144 @@ The paper leads with case studies of real parses, generated sentences, chunk his
 
 \section{Concepts and Chunks in \trellis{}}
 
-Version 2 keeps the representation and organization postulates of version 1, which we restate because every result depends on them.
-Cobweb \citep{fisher-cobweb}
-builds a taxonomy of probabilistic concepts incrementally and without labels. Each instance
-is a set of attribute-value pairs, and each concept stores a distribution over the values of
-every attribute. The system sorts a new instance down the tree by a criterion
-called category utility.
+\citet{singaravadivelan-langley-acs} proposed a unified theory of concepts and chunks
+that extends Cobweb \citep{fisher-cobweb}, and \trellis{} is its implementation. In this
+section, we review the theory's main assumptions, which version 2 retains, and then
+present a small number of addenda that change how the system parses, generates, learns,
+and remembers. We state the addenda in the same spirit as the original postulates, as
+claims about the structures stored in memory and the processes that operate over them,
+but we organize them around the questions that prompted them.
 
-\trellis{} applies Cobweb to experiences made of elements in relations, following
-the representation of \citet{maclellan-cobweb-language} for language. In a sentence, the elements are words and the
-relation is adjacency. An element is either a primitive, such as a word, or a composite, which we call a chunk.
-A span is a contiguous run of elements. Every element has a \textit{context} description, the window of
-tokens on either side of its span, and every composite has a \textit{content}
-description, which names its two parts.
+\subsection{Assumptions Retained from Version 1}
 
-\begin{rpost}
-Elements are primitives or composites. A composite's content description names its two parts,
-and every element has a context description that records its surroundings.
-\end{rpost}
+Cobweb builds a taxonomy of probabilistic concepts incrementally and without labels.
+Each instance is a set of attribute-value pairs, and each concept specifies, for each
+attribute, a probability distribution over that attribute's values. The system sorts a
+new instance downward through the taxonomy, selecting at each level the child with the
+highest category utility, and it halts when no child is better than the current node.
+At the halting node, it can infer the values of any missing attributes, an ability that
+\citet{fisher-cobweb} called flexible prediction. The very act of sorting an instance
+also updates the probabilities along its path and can restructure the taxonomy, so
+learning is fully interleaved with performance.
 
-\begin{rpost}
-Concepts in the context taxonomy name a composite's two parts,
-so the content taxonomy never sees a surface word.
-\end{rpost}
+The earlier theory extends this framework to structures that are composed of others.
+An experience is a set of elements and the local relations among them. For example,
+someone reading text encounters words arranged in a linear sequence, related by
+adjacency. Every element is either a primitive, such as a word, or a composite, which
+corresponds to a chunk. Each element can be described by its {\it content\/}, the parts
+that compose it, or by its {\it context\/}, the elements in its vicinity. Following
+\citet{maclellan-cobweb-language}, the context of an element is the window of tokens on
+either side of its span, where a span is a contiguous run of elements.
 
-\begin{opost}
-Long-term memory contains a content taxonomy that organizes composites by their parts.
-\end{opost}
+Long-term memory organizes these descriptions in two taxonomies. A {\it content
+taxonomy\/} groups composites that have similar parts, and a {\it context taxonomy\/}
+groups elements, primitive or composite, that occur in similar surroundings. The two
+are intertwined, in that a composite names each of its two parts by a concept in the
+context taxonomy. As a result, the content taxonomy never sees a surface word, and one
+chunk description covers every instance whose parts belong to those concepts. Version~2
+keeps all of these assumptions, and every result in this paper depends on them.
 
-\begin{opost}
-Long-term memory contains a context taxonomy that organizes every element, primitive or composite, by the surroundings in which it occurs.
-\end{opost}
+\subsection{Addenda to the Theory}
 
-The two taxonomies give each element two descriptions that do not interfere, and the second representation postulate
-links them. Because a chunk names its parts by concept, one chunk description covers
-every instance whose parts belong to those concepts.
+The earlier paper's performance and learning postulates described a system that parses
+greedily, one candidate pair at a time, and that learns from sentences paired with
+sample parse trees. Version~2 answers the questions that this design left open, which
+we listed in the introduction, with three addenda:
 
-\section{Parsing, Generation, and Learning in Version 2}
+\vskip 0.05in
 
-Version 2 changes the performance and learning mechanisms, which we state as three further postulates.
+\bull
+{\it Parsing considers every way to segment an experience into chunks and weighs each
+candidate chunk by the share of analyses that contain it.\/}
 
-\begin{ppost}
-Parsing sums over every binary segmentation of an experience. An inside pass
-scores each span from its sub-spans, and an outside pass scores everything around it.
-The system reports the segmentation with the most expected correct chunks.
-\end{ppost}
+\vskip 0.02in
+\noindent
+The earlier theory built a single partonomic tree from the bottom up, adding the best
+recognized chunk until no candidate cleared a recognition threshold, so a wrong early
+choice could not be undone. Version~2 instead scores every candidate span. An inside
+pass combines the scores of each span's sub-spans, and an outside pass scores everything
+around it \citep{lari-young}. Together they give a posterior probability for every span,
+and the system reports the tree with the most expected correct chunks
+\citep{goodman-metrics}. The sentences we parse are short, so this full computation is
+cheap.
 
-Version 1 proposed candidate chunks over adjacent pairs, admitted those that cleared a
-recognition threshold, and committed the best one, so a wrong early choice could not
-be undone. Version 2 scores every candidate span. The inside-outside algorithm
-\citep{lari-young} converts these scores into a posterior for every span, and the reported tree maximizes the
-expected number of correct spans, the criterion of \citet{goodman-metrics}.
-The sentences we parse are short, so full inside-outside is cheap.
+\vskip 0.05in
 
-\begin{ppost}
-Generation writes one element at a time. A score that sums over every chunk that could surround the position selects each element,
-so the element sees chunk context in both directions.
-\end{ppost}
+\bull
+{\it Generation writes an experience one element at a time, and each choice considers
+every chunk that could surround the current position.\/}
 
-The generator proceeds in four steps. It reads the stored statistics of the taxonomies, takes the prompt as context, chooses a length, and fills each position by
-drawing from the stored word-in-context counts at the context concept, weighted by the outside score of
-the position. A pair gate restricts draws to word pairs that memory has seen side by side, and an exact-boundary
-rule lets a sentence begin or end only with words that began or ended a stored sentence. A window
-width and a sampling temperature set how far the output departs from stored sentences.
+\vskip 0.02in
+\noindent
+The earlier theory generated from the top down, expanding a composite into its parts
+until only primitives remained. Version~2 reads the same two taxonomies but fills
+positions in order. It takes the prompt as context, chooses a length, and draws each
+element from the counts stored at the relevant context concept, weighting each candidate
+by the outside score of its position. In this way, the element sees chunk context on
+both sides. A pair gate admits only elements that memory has stored side by side, and
+a boundary rule lets an experience begin or end only with elements that began or ended a
+stored one. A window width and a sampling temperature set how far the output departs
+from stored experiences.
 
-\begin{lpost}
-Every candidate chunk enters both taxonomies, weighted by its posterior probability. The memory that parses
-sentence $n$ is the memory built from sentences 1 to $n-1$.
-\end{lpost}
+\vskip 0.05in
 
-Learning remains incremental and unsupervised, as in Cobweb. No separate routine creates chunks:
-parsing proposes candidates, and learning treats them as data. Because the parse of each sentence uses only
-earlier sentences, the system never reads a gold tree and never makes an offline pass.
+\bull
+{\it Learning stores every candidate chunk in both taxonomies, weighted by its posterior
+probability, and the system parses each experience with the memory built from those
+before it.\/}
+
+\vskip 0.02in
+\noindent
+The earlier theory learned from sentences paired with sample parse trees, and version~2
+removes the trees. Because parsing already proposes candidate chunks, learning needs no
+separate routine to create them. It simply treats each candidate as an instance, with
+its posterior as a count, and passes it to Cobweb's usual mechanisms. The system
+therefore never reads a gold tree and never makes an offline pass, and learning stays
+incremental and unsupervised, as in Cobweb.
+
+Our studies of human memory require further assumptions, which the earlier theory did
+not address because it concerned long-term structures alone. These include:
+
+\vskip 0.05in
+
+\bull
+{\it Short-term memory holds a small number of elements, each of which may be a chunk.\/}
+
+\vskip 0.02in
+\noindent
+This follows \citet{miller-magical-seven} and \citet{chase-simon}. Recognizing a
+familiar chunk lets one slot hold many primitives, so a person with a richer store of
+chunks holds more in the same number of slots. We set the number of slots to seven, or
+to four following \citet{cowan-magical-four}, and we never fit it to an experiment.
+
+\vskip 0.05in
+
+\bull
+{\it The familiarity of an experience is the stored weight of the chunks that span it.\/}
+
+\vskip 0.02in
+\noindent
+This gives the system a sense of familiarity that needs no new machinery, because
+learning already stores each chunk with its posterior weight. A string that the system
+has often parsed as a unit, or as part of one, therefore feels familiar, and a string
+that crosses the boundaries of stored chunks does not.
+
+\vskip 0.05in
+
+\bull
+{\it Recall of a damaged chunk uses its concept and its surviving parts as cues.\/}
+
+\vskip 0.02in
+\noindent
+This applies Cobweb's flexible prediction to memory. When some parts of a remembered
+chunk are lost, the system searches the stored chunks under the same concept for one
+that agrees with the parts that survive, much as Cobweb imputes missing attribute values
+at the node where sorting halts. The concept narrows the search, and the surviving
+parts act as a partial image of the target.
 
 \section{Implementation}
 
-The implementation realizes each postulate with a small number of quantities. A candidate span $s$ receives a weight
+The implementation realizes each addendum with a small number of quantities. A candidate span $s$ receives a weight
 \begin{equation}
 w(s) = 2^{\,g(s)/\tau}, \qquad g(s) = \log_2 \frac{(n_{c^*}/n_0)\,P(s \mid c^*)}{P(s \mid c_0)},
 \label{eq:weight}
@@ -652,20 +718,26 @@ We tested whether the piece-square classifier is file-symmetric by moving the 1,
 
 \section{Replications of Psychological Experiments}
 
-Chunking began as an account of human memory, so the system should also meet the human data that motivated it.
-In this section we simulate five experiments on chunking and skilled memory in the format of \citet{maclellan-categorization}. For each one we state the human study design, reproduce its procedure one to one with as many simulated subjects as the paper reports, and score the effects the study was designed to show, with correlations on condition means where the papers give them.
-We add two safeguards. One configuration serves every experiment, the learner of the generation study (C3) for sequences and the chess learner (C5) for boards, and no parameter changes between studies (configuration C12 in Table~\ref{tab:config}). Every mechanism that we credit has a removal control.
-We fixed the procedure, score, controls, and decision rule of each digit-span and grammar-learning simulation in writing before its first run, and we report every registered round. Human numbers come from the original papers or, where those were unavailable as text, from the secondary sources that each subsection names.
-Table~\ref{tab:psych} summarizes the outcomes, and the chess recall study appears earlier in the paper.
+The theory behind \trellis{} draws on psychological accounts of chunking, so it should
+also explain the human data that motivated those accounts. To test this, we simulated
+five experiments on chunking and memory, following the format of
+\citet{maclellan-categorization}. For each study, we describe the human design,
+reproduce its procedure as closely as we can with as many simulated subjects as the
+original paper reports, and compare the effects that the study was designed to reveal.
+We used one configuration of the system for every study (C12 in Table~\ref{tab:config}),
+changed no parameter between them, and fixed each simulation's procedure and scoring
+rule before running it. We also removed each mechanism that we credit to see whether
+its effect disappears. Table~\ref{tab:psych} summarizes the outcomes, and we discussed
+the chess recall study earlier in the paper.
 
 \begin{table}[!htbp]
-\caption{Five psychological experiments simulated with one configuration of \trellis{}. Human effects come from the cited papers. Verdicts compare the effects each study was designed to show; correlations are Pearson $r$ with human condition means.}
+\caption{Five psychological experiments simulated with one configuration of \trellis{}. Human effects come from the cited papers, and correlations are Pearson $r$ with human condition means.}
 \label{tab:psych}
 \begin{center}
 \scriptsize
 \begin{tabular}{p{0.17\textwidth}p{0.27\textwidth}p{0.33\textwidth}p{0.11\textwidth}}
 \toprule
-Study & Human effects & \trellis{} & Verdict \\
+Study & Human effects & \trellis{} & Reproduced \\
 \midrule
 Chess recall by skill \citep{chase-simon,gobet-simon-random} & Recall rises with skill (4, 8, 16 pieces); small skill effect on random boards & 7.2, 9.7, 12.9 pieces with experience (15.6 at 8,000 positions); random-board recall rises where the 1973 values fall & Ordering yes, values partly \\
 Adult word segmentation \citep{frank-segmentation} & Accuracy falls with sentence length, rises with exposure, falls with the number of word types & $r = .93$ and $.90$ on the first two; $-.96$ on word types, as for transitional probabilities & Two of three \\
@@ -677,29 +749,60 @@ Artificial grammar \citep{knowlton-squire-agl,meulemans-vdl-acs} & Grammaticalit
 \end{center}
 \end{table}
 
-\subsection{Word segmentation from a syllable stream}
+\subsection{Word Segmentation from a Syllable Stream}
 
-\paragraph{Human study design.} \citet{frank-segmentation} played adults sentences in an artificial language of six words, two each of two, three, and four syllables, built at random from 18 syllables for each participant and synthesized with no pause inside a sentence.
-A test of 30 two-alternative trials then paired each word with a part-word made from the end of one word and the start of another.
-Experiment 1 varied the sentence length from one to 24 words at 600 word tokens, Experiment 2 varied exposure from 48 to 1,200 tokens, and Experiment 3 varied the number of word types from three to nine at 600 tokens.
-Accuracy fell with sentence length, rose steeply up to 300 tokens and then leveled off, and fell with the number of types.
-The last effect runs against transitional probabilities, which separate words more sharply as types increase, and no model that Frank et al.\ tested fit all three experiments.
-\citet{saffran-infants} played 8-month-old infants two minutes of four three-syllable words, 45 tokens each, with a transitional probability of 1.0 inside words and .33 across their boundaries. The infants then listened longer to nonwords, the syllables of the language in a new order, and to part-words than to words.
+\paragraph{Human study design.} \citet{frank-segmentation} studied how adults find words
+in a stream of speech that contains no pauses. Each participant heard sentences in an
+artificial language of six words, two each of two, three, and four syllables, built at
+random from 18 syllables. Afterward, the participant heard 30 pairs of items, each
+pairing a word with a part-word that joined the end of one word to the start of another,
+and chose the item that sounded more like a word. Across three experiments, Frank et
+al.\ varied the number of words per sentence from one to 24, the exposure from 48 to
+1,200 word tokens, and the number of word types from three to nine. Accuracy fell as
+sentences grew longer, rose steeply up to 300 tokens before leveling off, and fell as the
+vocabulary grew. The last result is surprising, because a larger vocabulary makes the
+transitions between words less predictable and so should make boundaries easier to find.
+None of the models that Frank et al.\ tested fit all three experiments.
+In an earlier study, \citet{saffran-infants} played 8-month-old infants two minutes of
+speech built from four three-syllable words. Syllables within a word always followed one
+another, whereas syllables across a word boundary did so only a third of the time. The
+infants then listened longer to nonwords and to part-words than to words, which shows
+that they had segmented the stream.
 
-\paragraph{Simulation methodology.} \trellis{} learns the stream with configuration C3 and a perceptual buffer of 12 syllables. A sentence of at most 12 syllables is one experience bounded by pauses. A longer utterance is cut into consecutive 12-syllable buffers whose cut edges the learner does not observe, and for the infants the whole stream is one utterance cut at a random phase.
-The score of a test string is the total posterior weight of the stored chunks that span exactly that string, and the two-alternative choice follows the Luce rule over the two scores.
-Each condition has 12 simulated participants, each with its own random language as in the human study, and the infant study has 16, eight in each counterbalanced word set.
-We reimplemented the forward transitional-probability model of Frank et al.\ and take the correlations of their lexical model, of PARSER \citep{perruchet-parser}, and of TRACX \citep{french-tracx} from the published papers.
-The removal control reads concepts only at the leaf, in the parse that decides storage as well as in the score.
+\paragraph{Simulation methodology.} We presented each stream to \trellis{} in the form
+that people heard it. The system reads up to 12 syllables at once, so a short sentence
+forms a single experience bounded by pauses, whereas a longer utterance is cut into
+successive pieces of 12 syllables whose cut edges the system does not treat as
+boundaries. To decide which item of a test pair sounds more like a word, the system
+compares their familiarity, the stored weight of the chunks that span each item, and
+chooses between them by the Luce rule. Each condition had 12 simulated participants, each
+with its own random language, and the infant study had 16. We compared the system with
+the transitional-probability model of Frank et al., which we reimplemented, and with the
+published results of their lexical model, PARSER \citep{perruchet-parser}, and TRACX
+\citep{french-tracx}. To test the role of concepts, we also ran a version that reads
+every chunk at its own leaf.
 
-\paragraph{Results and discussion.} Table~\ref{tab:seg} gives the correlations with the human condition means.
-\trellis{} follows sentence length ($r = .93$) and exposure ($r = .90$) as closely as the best model of Frank et al., the lexical model (.94 and .89), and more closely than transitional probabilities (.84 and .43 in their paper, .76 and .75 in our implementation).
-On the number of types it has the wrong sign ($r = -.96$), as do transitional probabilities and the lexical model, and only TRACX fits that experiment (.97).
-The cause is shared. More types lower the transitional probability across boundaries, so an observer with unlimited memory segments better, and Frank et al.\ needed a limit on memory to produce the human decline. \trellis{} stores every candidate chunk and has no such limit.
-Removing the concepts lowers the correlations on the first two experiments to .77 and .63 and flattens the exposure curve (rank correlation $-.03$ against .94), so the concepts carry the rise with exposure.
-In absolute terms the model is too accurate. Its mean choice probability lies between .92 and 1.00 where people score between .57 and .87, and the correlations, the measure Frank et al.\ used, set this offset aside.
-All 16 simulated infants find words more familiar than nonwords (choice probability 1.00) and than part-words (.70), the direction of the infants' preference.
-The normalized difference between word and part-word familiarity is .41, against .06 for the infants' looking times \citep{french-tracx}, although the two measures sit on different scales. Removing the concepts leaves the infant result unchanged (.74 against part-words), so chunks alone carry it.
+\paragraph{Results and discussion.} Table~\ref{tab:seg} shows the correlation between
+each model and the human condition means. The most important result is that \trellis{}
+tracks the effects of sentence length ($r = .93$) and exposure ($r = .90$) as closely as
+the best model of Frank et al., their lexical model, and more closely than transitional
+probabilities. However, like those two models, it predicts the wrong direction for
+vocabulary size ($r = -.96$). The reason is that \trellis{} stores every candidate chunk,
+so it behaves like an observer with unlimited memory, for whom a larger vocabulary makes
+boundaries easier to find. Frank et al.\ needed a limit on memory to produce the human
+decline, and only TRACX fits this experiment. Removing the concepts lowers the
+correlations for sentence length and exposure to .77 and .63 and flattens the curve over
+exposure, which suggests that the concepts carry the improvement with experience. The
+system is also more accurate than people, choosing the word 92 to 100 percent of the time
+where people do so 57 to 87 percent of the time, but the correlations set this offset
+aside, as in the analysis of Frank et al.
+
+The infant study produced a similar picture. All 16 simulated infants found the words
+more familiar than both the nonwords and the part-words, which matches the direction of
+the infants' preference. However, the difference between words and part-words was much
+larger than theirs, .41 against .06 on a normalized scale \citep{french-tracx}, although
+the two measures differ in kind. Removing the concepts left this result unchanged, so
+chunks alone account for it.
 
 \begin{table}[!htbp]
 \caption{Correlation (Pearson $r$) of each model with the human condition means of \citet{frank-segmentation}. We read the human means from their Figure 1 (about $\pm$1 percentage point of reading error); against the printed condition coefficients \trellis{} gives .91, .87, and $-.94$. Rows marked Frank et al.\ and French et al.\ are published values. TRACX was not run on Experiment 2.}
@@ -722,68 +825,127 @@ TRACX (French et al.) & .92 & -- & .97 \\
 \end{center}
 \end{table}
 
-\subsection{Skilled memory for digits}
+\subsection{Skilled Memory for Digits}
 
-\paragraph{Human study design.} \citet{chase-ericsson-skilled} trained a student, SF, to recall random digits, and \citet{richman-epam4} report a second runner, DD, over about 865 practice sessions.
-An experimenter read random digits at one per second, and DD then recalled the list in order. The next list was one digit longer after a correct list and one digit shorter after an error, and sessions held 25 lists at the start and three at the end.
-DD's span grew from 7--9 digits to about 80 near session 500 and to 104 near session 865.
-DD coded groups of three and four digits as running times, ages, and dates, and he placed each group in a retrieval structure, a hierarchy of slots prepared for the announced list length.
-Richman et al.\ simulated DD with EPAM IV, whose semantic network of running times and other categories its authors built by hand.
-EPAM sorts each group to a category and stores its digits and codes in a retrieval-structure slot. It loses a quarter of the slot contents when attention moves on, close to DD's measured loss of 23.6\% of pattern codes, and it recalls a damaged group by searching its category for an active chunk that agrees with the surviving digits.
-EPAM learns one new chunk per list, the last group, during rehearsal, and grows from 109 to about 3,400 chunks over practice. DD and EPAM both err more on 4-digit than on 3-digit groups (EPAM 3.0\% against 1.5\% on lists of 100 or more digits).
+\paragraph{Human study design.} \citet{chase-ericsson-skilled} showed that practice can
+expand a person's digit span far beyond the usual seven items, and \citet{richman-epam4}
+report the most complete case, a runner named DD who practiced for about 865 sessions.
+In each session, an experimenter read random digits aloud at one per second, and DD then
+recalled the list in order. After a correct recall the next list grew by one digit, and
+after an error it shrank by one. DD's span grew from 7 to 9 digits at the start to about
+80 near session 500 and to 104 near session 865. He did this by coding groups of three
+and four digits as running times, ages, and dates, and by placing each group in a
+{\it retrieval structure\/}, a hierarchy of slots that he prepared for each list length.
 
-\paragraph{Simulation methodology.} We keep EPAM IV's procedure and replace its hand-built semantic network with \trellis{}, so the test asks whether learned concepts can serve as EPAM's categories.
-Before practice the learner reads digit strings drawn from running times at ten distances, years, and ages until it has seen 500 distinct running times, the number of running-time chunks that Richman et al.\ estimate DD knew at the start. It sees the digits alone, with no category names.
-Practice follows DD's procedure: random digits, the staircase from seven, the number of lists per session of each phase, and 865 sessions.
-EPAM's retrieval structure splits each list into 3- and 4-digit groups, and a 4-digit group is sorted as its 3-digit prefix and a final digit, as in EPAM.
-A group's category is the deepest \trellis{} concept that supports its parse. Its slot holds its digits, its category, an associative link from the chunk that recognized it, and the codes that relate it to its neighbors, and each item is lost with probability .25.
-Recall of a damaged group searches the chunks that were active in the session and agree with the surviving digits, and it returns the most frequent one inside the group's category, which recall recovers from the slot or guesses from the surviving digits as EPAM does.
-A list is correct when every group returns intact. The learner stores one new chunk per list, the last group, during rehearsal.
-The controls replace each concept with a random bin (as many bins as the concepts in use), remove the prior strings, or store a new chunk for every 8 seconds of presentation, about three times EPAM's rate.
-We ran three development seeds and three held-out seeds that no earlier round had used, and we take every verdict on the held-out seeds.
+Richman et al.\ explained DD's performance with EPAM IV, which combines this retrieval
+structure with a semantic network of running times and other categories that its authors
+built by hand. EPAM sorts each group to a category and stores the group's digits and
+codes in a slot, but it loses a quarter of the slot's contents when attention moves on,
+close to DD's own measured loss of 23.6 percent. To recall a damaged group, it searches
+the group's category for an active chunk that agrees with the digits that survive. EPAM
+learns one new chunk per list, the last group, while it rehearses, and it grows from 109
+to about 3,400 chunks over practice. Both DD and EPAM make more errors on 4-digit groups
+than on 3-digit ones.
+
+\paragraph{Simulation methodology.} This study lets us ask whether the concepts that
+\trellis{} learns can serve in place of EPAM's hand-built categories. To this end, we
+kept EPAM's procedure and replaced its semantic network with \trellis{}. Before practice,
+the system reads digit strings drawn from running times, years, and ages until it has
+seen 500 distinct running times, the number of running-time chunks that Richman et al.\
+estimate DD knew at the start. It sees the digits alone, without the names of their
+categories. Practice then follows DD's procedure, with random digits, the same rule for
+list length, the same number of lists per session, and 865 sessions.
+
+As in EPAM, the retrieval structure splits each list into groups of three and four
+digits, and a group's category is the deepest \trellis{} concept that supports its parse.
+A slot holds the group's digits, its category, a link from the familiar chunk that
+recognized it, and codes that relate it to its neighbors, and each of these is lost with
+probability .25. To recall a damaged group, the system searches the chunks that were
+active in the session and agree with the surviving digits, and it returns the most
+frequent one under the group's category. The system stores one new chunk per list, the
+last group, during rehearsal, again as in EPAM. We also ran three variations: one that
+replaces each concept with a random label, one that omits the prior knowledge, and one
+that stores a new chunk for every eight seconds of presentation, about three times
+EPAM's rate. We report three simulated subjects whose data played no role in developing
+the simulation.
 
 \begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.72\textwidth]{figures/digit_span_curve}
-\caption{Digit span with practice for \trellis{} inside EPAM IV's procedure (span is the mean list length over five-session blocks; lines give the mean of the three held-out seeds and bands their range). DD's points come from the text of \citet{richman-epam4}. With EPAM's rule of one new chunk per list, span stalls near 16, and random labels do as well as the learned concepts. Storing a chunk for every 8 seconds of presentation raises span to about 70.}
+\caption{Digit span with practice for \trellis{} inside EPAM IV's procedure (span is the mean list length over five-session blocks; lines give the mean of three simulated subjects and bands their range). DD's points come from the text of \citet{richman-epam4}. With EPAM's rule of one new chunk per list, span stalls near 16, and random labels do as well as the learned concepts. Storing a chunk for every eight seconds of presentation raises span to about 70.}
 \label{fig:digitspan}
 \end{figure}
 
-\paragraph{Results and discussion.} Figure~\ref{fig:digitspan} gives the learning curves.
-Span climbs from about 9 to 16.6 at session 865 (15.1 to 19.3 across seeds) and never approaches 80, which DD reaches near session 500.
-Four-digit groups err more often than three-digit groups (.31 against .20 over sessions 250 to 865), as in EPAM, but both rates are about ten times EPAM's. Prior knowledge speeds early learning (span 11.2 against 8.8 at session 50).
-Random labels do as well as the learned concepts (16.0 at session 865). The memory ends at about EPAM's size, with about 760 three-digit and 2,800 four-digit strings against EPAM's 3,400 chunks, yet 38\% of the groups in sessions 500 to 865 are strings that it never stored, and recall of those rests on the guess from surviving digits.
-With a chunk stored for every 8 seconds of presentation, span reaches 69.8 at session 865, and one seed reaches 80 at session 834.
-\trellis{} therefore approaches DD's span only when it stores chunks faster than EPAM does. EPAM recovers a damaged group from categories that its authors fit to DD's running times, and the concepts that \trellis{} forms over isolated digit strings partition them no more usefully than random bins.
+\paragraph{Results and discussion.} Figure~\ref{fig:digitspan} plots the resulting
+learning curves. \trellis{} improves with practice, but much more slowly than DD. Its span
+climbs from about 9 digits to 16.6 by session 865, well short of DD's 104. The simulation
+does reproduce two qualitative effects. Groups of four digits err more often than groups
+of three (31 against 20 percent over sessions 250 to 865), as for DD and EPAM, although
+both rates are about ten times EPAM's. Prior knowledge also speeds early learning, raising
+the span at session 50 from 8.8 to 11.2 digits.
 
-This is the seventh simulation of DD that we registered, and the earlier rounds bracket the result. Without forgetting, span reached 80 by session 180, 2.7 times DD's rate, because the rate then follows the coverage of stored strings.
-With EPAM's forgetting and a concept label as the only redundant code, span stalled near 10. We did not fit the forgetting rate, because DD's measured loss of 23.6\% fixes it.
-Adding EPAM's session activation, prefix coding, between-group codes, and associative links raised span to 16, 42, and then 99 at session 865. The round that reached 99 stored a chunk for every 8 seconds of presentation, which misreads EPAM's rule of one chunk per list, and we withdrew it in favor of the round reported here.
+The variations explain the slow climb. Replacing the concepts with random labels gives
+nearly the same curve (16.0 at session 865), so the learned categories help recall no
+more than arbitrary ones. Storing chunks faster raises the span to 69.8, with one subject
+reaching 80 at session 834. By the end of practice, the standard version knows about as
+many strings as EPAM, about 760 of three digits and 2,800 of four digits, yet 38 percent
+of the groups it meets late in practice are strings it has never stored, and it can
+recall these only by guessing from the surviving digits. We conclude that \trellis{}
+approaches DD's span only when it stores chunks faster than EPAM does. EPAM recovers
+damaged groups from categories that its authors fit to DD's knowledge of running times,
+and the concepts that \trellis{} forms over isolated digit strings do not serve that role.
 
-\subsection{Artificial grammar learning}
+\subsection{Artificial Grammar Learning}
 
-\paragraph{Human study design.} \citet{knowlton-squire-agl} showed 18 control participants 23 letter strings from a finite-state grammar, each twice, and then asked them to judge 32 new strings as following the rules or not.
-The test strings crossed grammaticality with associative chunk strength, the frequency with which their bigrams and trigrams appeared in training.
-Participants endorsed 64.6\% of grammatical high-strength strings, 62.5\% of grammatical low-strength strings, 54.9\% of nongrammatical high-strength strings, and 28.1\% of nongrammatical low-strength strings. Grammaticality added 22.0 points and chunk strength 14.4, and chunk strength mattered more for nongrammatical strings (interaction 24.7).
-\citet{meulemans-vdl-acs} varied the amount of training, 32 strings shown twice in Experiment 2a against 125 strings shown once in Experiment 2b. The grammaticality effect grew from $-2.2$ to 7.0 points, and the chunk-strength effect shrank from 22.5 to 0.5.
+\paragraph{Human study design.} Studies of artificial grammar learning ask whether people
+acquire abstract rules or simply remember familiar fragments. \citet{knowlton-squire-agl}
+showed 18 participants 23 letter strings generated by a finite-state grammar, each twice,
+and then asked them to judge whether 32 new strings followed the same rules. The new
+strings crossed grammaticality with {\it chunk strength\/}, the frequency with which their
+two- and three-letter fragments had appeared in training. Both factors raised
+endorsement. Grammatical strings gained 22.0 percentage points, strong strings gained 14.4,
+and chunk strength mattered more for nongrammatical strings (an interaction of 24.7).
+\citet{meulemans-vdl-acs} then varied the amount of training, comparing 32 strings shown
+twice with 125 strings shown once. With more training, the grammaticality effect grew
+from $-2.2$ to 7.0 points, and the chunk-strength effect shrank from 22.5 to 0.5.
 
-\paragraph{Simulation methodology.} Each presentation is one learning step of configuration C3, and learning stops at test.
-The score of a test string is the mean stored posterior weight over every substring of two or more letters, the familiarity score of the segmentation study. Each simulated subject endorses the strings that score above its own median.
-We ran 18 subjects for the first study and 20 for each experiment of the second. The comparison models are chunk strength itself and a bigram and trigram transitional-probability model with the same endorsement rule.
-We registered the claim that concepts carry grammaticality beyond chunk strength, supported if the grammaticality effect within chunk-strength cells exceeds that of chunk strength and of the concepts-off control.
+\paragraph{Simulation methodology.} We treated each presentation of a training string as
+one experience for \trellis{} and froze learning at test. The system judges a test string
+by its familiarity, here the mean stored weight of all its substrings of two or more
+letters, and it endorses the strings that score above its own median. We simulated 18
+subjects for the first study and 20 for each experiment of the second, and we compared
+the system with chunk strength itself and with a transitional-probability model. The
+question was whether \trellis{}'s concepts let it detect grammaticality beyond chunk
+strength.
 
-\paragraph{Results and discussion.} \trellis{} endorses 61, 40, 72, and 27\% of the four cells ($r = .64$ with the human cells) and reproduces the interaction (23.6 against 24.7). It shows no grammaticality effect (1.4 against 22.0; $-10.4$ within high-strength strings and 13.2 within low).
-Removing the concepts changes nothing (0.0, $r = .61$), and transitional probabilities fit the cells better ($r = .80$).
-On the second study the grammaticality effect shrinks with training ($-8.8 \pm 1.4$ against $+9.2$ in people), and the chunk-strength effect stays far above the human values (50 to 88 points).
-A registered follow-up tested two new scores, one that counts chunks at the same string positions as in training and one that measures how well each chunk's content concept fits its context concept. The first gives a grammaticality effect of $-23.6$, and the second gives 15.3, below its own concepts-off control (17.4).
-Chunk strength counted at the string edges, the first and last bigrams and trigrams, gives 21.5 on its own against the human 22.0, so on these materials an edge-anchored chunk count accounts for the human grammaticality effect.
-\trellis{}'s familiarity is a chunk-strength measure, and its concepts add nothing here, in part because a concept needs several stored instances and 46 presentations supply few.
+\paragraph{Results and discussion.} The answer is no. \trellis{} reproduces the interaction
+between grammaticality and chunk strength (23.6 against 24.7) and correlates with the
+human cell means at $r = .64$, but it shows almost no effect of grammaticality (1.4 points
+against 22.0). Removing the concepts changes nothing, and the transitional-probability
+model fits the human cells better ($r = .80$). With more training, the system's
+grammaticality effect shrinks where people's grows ($-8.8$ against 9.2), and its
+chunk-strength effect stays far above the human values. Two other scores, one that counts
+chunks at their positions in the string and one that asks how well each chunk's concept
+fits its context, also find no grammaticality beyond chunk strength. Interestingly, chunk
+strength counted only at the edges of each string, from its first and last two- and
+three-letter fragments, gives a grammaticality effect of 21.5 on its own, close to the
+human 22.0. On these materials, then, a positional count of fragments accounts for the
+human results, and \trellis{}'s familiarity behaves like chunk strength. Its concepts
+contribute little here, in part because a concept needs several stored instances and 46
+presentations provide few.
 
-\subsection{What the replications show}
+\subsection{Summary of the Replications}
 
-Across the five studies, \trellis{} reproduces the effects that follow from the familiarity of stored chunks. These are the ordering of chess recall by experience, the dependence of segmentation on sentence length and exposure, the infants' discrimination of words, and the interaction of chunk strength with grammaticality.
-It misses the effects that need a limit it lacks or a category it cannot form from few instances: the decline of segmentation with the number of word types, DD's climb under EPAM's storage rule, and grammaticality beyond chunk strength.
-The concepts earn credit in one place, the rise of segmentation accuracy with exposure, and the chunks carry every other effect that the system reproduces.
+In general, the five studies produced a consistent picture. \trellis{} reproduces the
+effects that follow from the familiarity of stored chunks, including the ordering of
+chess recall by experience, the influence of sentence length and exposure on word
+segmentation, the infants' discrimination of words, and the interaction of chunk strength
+with grammaticality. It misses the effects that require either a limit on memory or
+categories formed from few instances, such as the decline of segmentation with vocabulary
+size, DD's growth in span at EPAM's rate of storage, and sensitivity to grammaticality
+beyond chunk strength. The concepts earn credit in one place, the improvement of
+segmentation with exposure, and the chunks carry every other effect that the system
+reproduces.
 
 \section{Related Research}
 
@@ -817,7 +979,7 @@ The concepts-off control in chess recalls nothing by construction, and we ran no
 The chess realism judge is a piece-square classifier that tolerates file shifts only in part: it scores 95.7\% of real boards, 78.9\% of mirrored boards, 68.4\% of boards shifted by one file, and 41.2\% of boards shifted by two files as real (Supplement, Table~S21). We chose the chess dial after the grid.
 We chose the five function-word features after reading purity tables and tested it on two seeds. The TinyStories regime runs are three runs on seeds 13 and 17. Random word damage reproduces the ordering of meaning before grammar, so the dial does not tie that ordering to the memory's own structure. The chess compression numbers come from one seed. The shifted-position margin over byte-pair coding over shapes is comparable to the seed swing of 2.1 bits (seed 13 against the three-seed mean): the variant (configuration C7, 147.2 bits) leads it by 2.5 bits and the standard configuration trails it by 3.9, and xz beats both on three of four test sets. We ran no grammar-induction parsing baseline such as the constituent-context model or the compound probabilistic context-free grammar.
 The language input is pre-segmented text with a 250-word vocabulary and sentences of at most eight words.
-In the psychological replications, the human means of the adult segmentation study come from reading a figure, and the infant looking times come from secondary sources. The digit-span study simulates one person with three held-out seeds, and it reports the seventh registered round, after one withdrawn round whose storage rule misread EPAM IV. The grammar-learning simulations give the concepts only 46 to 250 presentations from which to form.
+In the psychological replications, the human means of the adult segmentation study come from reading a figure, and the infant looking times come from secondary sources. The digit-span study simulates one person with three simulated subjects. The grammar-learning simulations give the concepts only 46 to 250 presentations from which to form.
 Open questions include whether memory can choose the level of abstraction itself, whether the full inside-outside computation pays on longer inputs, and how to build a chess generator that composes positions from chunks while respecting the rules.
 
 \begin{acknowledgements}
