@@ -327,6 +327,47 @@ Everything is P3e full unless listed (A + B, labels, activation, storage, forget
 - Replication iff effects 1-5 hold.
 - Effect 5 is the same probe as before and cannot change: it depends on no arm. Its verdict is carried as "fails, probe artifact" unless the probe itself is re-registered.
 
+### P3f result (2026-11-22; results/psych_digits/P3f_*.json, P3f_SUMMARY.md): DD's learning rate and final span reproduced; effects 1-4 hold, effect 5 fails as a probe artifact
+
+Span at sessions 15/50/100/250/500/865 (mean of 3 seeds):
+- full: 10.6 / 11.1 / 13.6 / 20.6 / 51.0 / 99.1 (maximum block span 106.3);
+- linkoff: identical to P3e full on every seed (check passed);
+- conceptsoff: 9.7 / 10.2 / 11.9 / 17.9 / 36.9 / 71.9;
+- prioroff: 8.5 / 8.9 / 9.3 / 11.4 / 18.7 / 72.4;
+- DD: 7-9 / - / - / - / ~80 / 104.
+
+Effects:
+- Effect 1: holds (106).
+- **Effect 2: holds.** The first session with span >= 80 is 759, 606 and 608 (DD about 500); span at 865 is 99.1 [97.6-101.9] against DD's 104.
+- Effect 3: holds, .056 against .029 for 4- against 3-digit groups (EPAM .030 against .015).
+- Effect 4: holds (11.1 against 8.9 at s50).
+- **Effect 5: fails as registered** (max probe final 11), with the same probe draws as P3d/P3e, independent of the arm.
+
+Mechanisms:
+- **Links: credited** (97.6-101.9 against 41.6-43.2 on every seed). Recall by a surviving link covers 37,148 of the damaged groups at sessions 250-865.
+- **Concepts: credited** (against conceptsoff 70.0-74.9 on every seed).
+- **Prior: credited early** (s50 11.1 against 8.9; s500 51.0 against 18.7).
+
+Reported:
+- **Trial order:** per-group error .034 / .043 / .049 / .108 / .180 for trials 1-5.
+- **Release:** .049 -> .034 (direction of DD's trial-order slowing, Table 3).
+- **Net size:** 1,000 three-digit and about 8,300 four-digit familiar strings at the end, against RSS95's estimate of about 3,000 groups in DD's net. **TRELLIS stores about 3x more than DD**, a discrepancy to report.
+- **Unstored share** at sessions 500-865: 2.3%, against DD's 8% missed in free recall (an upper bound only).
+- **No plateau near 80.** DD's plateau of about 250 sessions near 80 was not reproduced by EPAM either (protocol §9); TRELLIS crosses 80 and keeps rising.
+
+What the P3 claim now is: with EPAM IV's procedure and its information sources (slot digits, a semantic code with prefix coding, associative links, session activation, 25% forgetting fixed by DD's measured 23.6%), TRELLIS learned without supervision in place of EPAM's hand-built semantic net reproduces DD's learning rate and final span. TRELLIS's concept hierarchy carries part of the effect: removing labels costs about 27 digits at session 865. The between-group pattern codes add nothing.
+
+## P3f letter-probe re-registration (fixed 2026-11-22, after the P3d-P3f probe failures, before running the new probe)
+
+The registered probe is one 10-list staircase from 5 per probe point, judged on its final length. It is independent of every arm: consonant strings are never familiar, so the result depends only on the probe's random draws. A single final length of a short staircase is too noisy to test "letter span stays near 7".
+
+The original verdict stays on record ("fails"). This section registers a better measurement of the same quantity, using the same staircase rule as digit span:
+- 5 independent consonant staircases, one per probe point (sessions 50/100/250/500/865), each of 50 lists from length 5, with the same grouping, rehearsal, forgetting and rescue as P3f and no storage.
+- Letter span = mean list length over lists 11-50 of each staircase.
+- Criterion: the mean over staircases and seeds is <= 9, and no staircase exceeds 10.
+- The human value is from a secondary source only: SF's letter span stayed near 7 (Cowan 2013, via CE1981_PROTOCOL §L). DD's letter span is not in the opened sources.
+- Seeds 13/17/19 with a new probe stream (seed * 211 + 1). Since the probe uses no memory, it is run standalone.
+
 ## P4 pre-registration (fixed 2026-11-21, before any AGL simulation)
 
 - Target: Knowlton & Squire (1996) Experiment 1, controls (N = 18), the 23 distinct training strings shown twice in random order, and the 32 test items, all from docs/AGL_PROTOCOL.md section 1. Meulemans & Van der Linden (1997) is not simulated, because its stimuli are not available.
