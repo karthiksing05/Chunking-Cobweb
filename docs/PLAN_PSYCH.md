@@ -35,7 +35,7 @@ For each experiment:
 |---|---|---|---|---|---|
 | P1 | Chase & Simon (1973) chess recall by skill; Gobet & Simon (1996) random positions | docs/CS1973_PROTOCOL.md | chunks (recognition and decoding), concepts | CHREST and MAPP (numbers in the protocol) | Done: cs73x and cs73L runs, removals in Table S20. Random-position skill effect from existing runs: middle-game random positions 4.1-4.45 / 5.15-5.65 / 5.3-6.4 at B/A/M, against game positions 7.2 / 9.7 / 12.9. That is a gain of about 1.6 pieces against 5.7; humans gain about 1 against 5 pieces per 400 Elo (GS96a p. 8). |
 | P2 | Statistical word segmentation: Frank et al. (2010) Experiments 1-3 (adults; sentence length, exposure, word types); Saffran, Aslin & Newport (1996) infants (words vs nonwords and part-words) | docs/SAN96_PROTOCOL.md | chunks found from raw syllable streams; posterior storage | TP, Bayesian lexical, MI clustering, PARSER (FGGT10), TRACX (FAM11) | Done 2026-11-21 (commit 7a54727d; results/psych_segment/SUMMARY.txt). Pearson r with human means: Exp 1 .93, Exp 2 .90, Exp 3 -.96. Exp 3 has the wrong sign, as for TP and the lexical model; only TRACX and the capacity-limited models fit it, so it is stated as a limitation. Concepts off: Exp 1 .77, Exp 2 .63 (Spearman -.03, the exposure curve is gone). Infants: words beat nonwords and part-words in 16 of 16. The bits score is at chance and is dropped as diagnostic. |
-| P3 | Skilled memory, digit span of DD (Richman, Staszewski & Simon 1995 data); Chase & Ericsson | docs/CE1981_PROTOCOL.md, design docs/PLAN_PSYCH_DS.md | TRELLIS as the semantic net inside EPAM IV's procedure (slots, 25% forgetting, session activation, prefix coding, associative links); concepts as semantic codes | EPAM IV (RSS95) | **P3f replication WITHDRAWN 2026-11-22: its storage rule (n/8 chunks per list) misreads RSS95, which learns one chunk per list; P3g (EPAM storage + link rules, held-out seeds, random-label control) pending.** Earlier P3f numbers: Span 99.1 at session 865 against DD's 104; 80 first reached at sessions 606-759 against DD's ~500. 4-digit groups err more than 3-digit groups (.056 against .029; EPAM .030 against .015). Prior knowledge speeds early learning. Letter span 8.5 on the re-registered probe; the original 10-list probe failed as a probe artifact. Removal controls credit associative links (42 without them), concepts (72) and prior knowledge. Between-group codes are not credited. Discrepancies: TRELLIS stores about 9,300 strings against DD's ~3,000, and it shows no plateau near 80. History: Pilot B, P3b (2.7x fast), P3c (stall), P3d (16), P3e (42), P3f (99); all pre-registered. Figure: results/psych_digits/P3f_curve.png. |
+| P3 | Skilled memory, digit span of DD (Richman, Staszewski & Simon 1995 data); Chase & Ericsson | docs/CE1981_PROTOCOL.md, design docs/PLAN_PSYCH_DS.md | TRELLIS as the semantic net inside EPAM IV's procedure (slots, 25% forgetting, session activation, prefix coding, associative links); concepts as semantic codes | EPAM IV (RSS95) | **PARTIAL (P3g, 2026-11-22, held-out seeds). Under EPAM IV's own storage rule (one chunk per list; net ~3,560 strings against EPAM's ~3,400) span stalls at 16.6 at s865 (max 19.97, DD 104). 4- > 3-digit errors (.31 > .20) and prior-speeds-learning hold. Concepts do no better than random labels (16.0). 8 s storage reaches 69.8, so span is set by storage, not semantics. The earlier P3f "replication" is withdrawn: its storage rule (n/8 chunks per list) misread RSS95.** Earlier P3f numbers: Span 99.1 at session 865 against DD's 104; 80 first reached at sessions 606-759 against DD's ~500. 4-digit groups err more than 3-digit groups (.056 against .029; EPAM .030 against .015). Prior knowledge speeds early learning. Letter span 8.5 on the re-registered probe; the original 10-list probe failed as a probe artifact. Removal controls credit associative links (42 without them), concepts (72) and prior knowledge. Between-group codes are not credited. Discrepancies: TRELLIS stores about 9,300 strings against DD's ~3,000, and it shows no plateau near 80. History: Pilot B, P3b (2.7x fast), P3c (stall), P3d (16), P3e (42), P3f (99); all pre-registered. Figure: results/psych_digits/P3f_curve.png. |
 | P4 | Artificial grammar learning: chunk strength against grammaticality (Knowlton & Squire 1996; Meulemans & Van der Linden 1997, amount of training) | docs/AGL_PROTOCOL.md (in progress) | concepts (grammaticality beyond chunk strength) against chunks (chunk strength) | ACS and bigram/trigram TP (no published model fits these data; BD03 says so) | Done 2026-11-21 (experiments/v3/psych_agl.py, results/psych_agl/SUMMARY.txt, 18 subjects). **Mechanism not supported.** Primary score (span_w), cells GH/GL/NGH/NGL 61/40/72/27 against human 65/63/55/28, r = .64. The interaction is human-like (23.6 against 24.7), but there is no grammaticality effect (+1.4: -10.4 within high CS, +13.2 within low). Concepts off is almost identical (0.0, r = .61), so the nominal pass of the criterion (1.4 > 0.0 > -10.4) is tie-breaking noise and is not counted. TP beats TRELLIS (r = .80). The secondary scores (logZ, regen) show grammaticality effects of +28 to +38, with chunk strength reversed. They were not pre-registered as decision scores and are not used. Reading: from 46 presentations, C3's concepts (support 3) barely form, so the learner reduces to chunk familiarity. |
 
 ## P3b pre-registration: digit span with a storage-time limit (fixed 2026-11-21, before any run)
@@ -446,7 +446,47 @@ Everything is P3f full (slots, rehearsal of the last <= 7 items, 25% forgetting,
 - **Partial** otherwise, with the failed effects named.
 - No changes after the runs. P3 is reported with every registered variant (Pilot B, P3b-P3g) and its outcome.
 
-## P4 pre-registration (fixed 2026-11-21, before any AGL simulation)
+## P3g result (2026-11-22; code d8deb4d9, results/psych_digits/P3g_*.json, summaries P3g-held_SUMMARY.md and P3g-dev_SUMMARY.md, figure P3g_curve.png)
+
+All 30 runs completed: 5 arms x 6 seeds, 865 sessions each. Numbers are means over the held-out seeds 23/29/31 [min-max]. Development seeds 13/17/19 agree on every verdict.
+
+| arm | s50 | s250 | s500 | s865 | max block span | familiar 3-/4-digit at end | groups not stored, s500-865 |
+|---|---|---|---|---|---|---|---|
+| full | 11.2 | 12.1 | 15.3 [14.7-15.9] | 16.6 [15.1-19.3] | 19.97 [19.2-21.1] | 760 / 2,801 | .381 |
+| store8 | 11.3 | 18.5 | 36.5 | 69.8 [60.1-79.1] | 76.2 | 999 / 7,467 | .043 |
+| linkloose | 10.6 | 12.1 | 13.0 | 17.9 [15.1-21.6] | 21.1 | 763 / 2,769 | .392 |
+| randlabel | 10.1 | 11.8 | 13.4 | 16.0 [15.5-16.3] | 20.6 | 755 / 2,792 | .384 |
+| prioroff | 8.8 | 12.3 | 13.6 | 15.4 | 18.7 | 709 / 2,488 | .372 |
+| DD / EPAM | ~7-9 at start | - | ~80 | 104 | 104 | EPAM ~3,400 in all | DD 8% missed in free recall |
+
+**Effects (held-out, arm full):**
+1. Maximum block span >= 20: 19.97 -> **fails, narrowly**. One of the three seeds passes (21.1).
+2. Rate:
+   - 2a: span never reaches 80 on any seed -> **fails**;
+   - 2b: span at s500 is 15.3, outside [60, 100] -> **fails**.
+3. 4-digit error > 3-digit error, s250-865: .306 > .204 -> **holds**. In size, though, both errors are about 10x EPAM's (.030 and .015).
+4. Span at s50, full > prioroff: 11.2 > 8.8 -> **holds**.
+5. Letter probe (reported only): final 7.7-9.0, one probe reaching a maximum of 11.
+
+**Credits (held-out, every seed):**
+- **Concepts are not credited.** Full is 15.3 / 19.3 / 15.1 at s865 against randlabel's 16.1 / 15.5 / 16.3. Random hash bins with a matched label count do as well as TRELLIS's concepts.
+- **The storage rule carries almost all the span.** store8 reaches 69.8 against full's 16.6. One seed reaches 80 (at s834); s500 is 36.5.
+- **The link rule's category gate costs nothing under EPAM storage.** linkloose is 17.9 against 16.6, mixed by seed.
+  - Under 8 s storage the gate's cost is not isolated. store8 (gated, 69.8) against P3f full (ungated, 99.1) differs in the gate and also in the seeds.
+- Prior knowledge: credited early (s50) only.
+
+**Also reported:**
+- Trial order within a session (s250-865): error .249 / .236 / .250 / .275 / .408 over trials 1-5. The rise is confined to the rare trials 4-5.
+- Release: .250 on the last trial of a session against .249 on the first trial of the next, i.e. none.
+
+**Decision: P3 = partial** (effects 1, 2a and 2b fail; 3 and 4 hold; concepts not credited). This was fixed before the runs, and no change follows from them.
+
+**What P3g shows.**
+- With EPAM IV's own storage rule (one chunk per list), TRELLIS ends with a net about EPAM's size (~3,560 strings against ~3,400), yet its span stalls near 16, where EPAM and DD reach about 104.
+- The deficit is retrieval, not storage. 38% of groups at s500-865 are strings TRELLIS never learned, against DD's 8% unrecalled. And every group fails 10x more often than in EPAM.
+- So what EPAM's hand-built semantic net supplies at this storage rate is not supplied by TRELLIS's concepts: they do no better than random labels.
+- The P3f result came from a storage rate about 3x EPAM's (store8). That is the same as P3b's finding: span is set by coverage.
+- Across P3b-P3g, the one fact that stays fixed: TRELLIS reaches DD's span only when it stores more than EPAM's rate allows. The paper reports P3 as a partial replication, with this as the failure analysis. (fixed 2026-11-21, before any AGL simulation)
 
 - Target: Knowlton & Squire (1996) Experiment 1, controls (N = 18), the 23 distinct training strings shown twice in random order, and the 32 test items, all from docs/AGL_PROTOCOL.md section 1. Meulemans & Van der Linden (1997) is not simulated, because its stimuli are not available.
 - Learner: C3, as in P2 (psych_segment.py CFG). Each training presentation is one learn() call. Learning is frozen at test. Simulated subject = seed; 18 seeds.

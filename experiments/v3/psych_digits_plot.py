@@ -18,6 +18,11 @@ ARMS = [("full", "TRELLIS (EPAM procedure)", "#2a78d6", "-"),
         ("linkoff", "links off", "#eb6834", "--"),
         ("conceptsoff", "concepts off", "#1baf7a", "-."),
         ("prioroff", "prior knowledge off", "#eda100", ":")]
+G_ARMS = [("full", "TRELLIS, EPAM storage (1 chunk/list)", "#2a78d6", "-"),
+          ("store8", "8 s/chunk storage", "#eb6834", "--"),
+          ("randlabel", "random labels", "#1baf7a", "-."),
+          ("prioroff", "prior knowledge off", "#eda100", ":")]
+HELD = (23, 29, 31)                               # P3g verdicts are on held-out seeds only
 INK, INK2, GRID = "#0b0b0b", "#52514e", "#e4e3df"
 
 
@@ -39,8 +44,12 @@ def main(tag):
     fig.patch.set_facecolor("#fcfcfb")
     ax.set_facecolor("#fcfcfb")
     ends = []
-    for arm, name, col, ls in ARMS:
-        runs = [json.load(open(fn, encoding="utf-8")) for fn in sorted(glob.glob(os.path.join(OUT, "%s_%s_s*.json" % (tag, arm))))]
+    p3g = tag.startswith("P3g")
+    for arm, name, col, ls in (G_ARMS if p3g else ARMS):
+        fns = sorted(glob.glob(os.path.join(OUT, "%s_%s_s*.json" % (tag, arm))))
+        if p3g:
+            fns = [fn for fn in fns if int(fn.rsplit("_s", 1)[1][:-5]) in HELD]
+        runs = [json.load(open(fn, encoding="utf-8")) for fn in fns]
         if not runs:
             continue
         curves = [block_curve(d) for d in runs]
@@ -64,7 +73,8 @@ def main(tag):
     ax.set_ylim(0, 115)
     ax.set_xlabel("Practice session", color=INK2)
     ax.set_ylabel("Digit span (mean list length, 5-session block)", color=INK2)
-    ax.set_title("Digit span with practice: TRELLIS in EPAM IV's procedure vs. DD", color=INK, fontsize=11, loc="left")
+    ax.set_title("Digit span with practice: TRELLIS in EPAM IV's procedure vs. DD" + (" (held-out seeds)" if p3g else ""),
+                 color=INK, fontsize=11, loc="left")
     ax.grid(True, color=GRID, linewidth=0.8)
     for sp in ("top", "right"):
         ax.spines[sp].set_visible(False)
