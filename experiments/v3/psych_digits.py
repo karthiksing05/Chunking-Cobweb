@@ -1419,6 +1419,19 @@ def partition_d(seq):
     return [(g, j < len(groups) - n_reh) for j, g in enumerate(groups)], singles
 
 
+class RBin:
+    """P3g random label: bin of a string (its 3-digit prefix for 4-digit groups under prefix coding), nbins matched per session."""
+
+    def __init__(self, t, nbins, prefix):
+        self.nbins, self.prefix = nbins, prefix
+        self.id = self.of(t)
+
+    def of(self, t):
+        import zlib
+        s = "".join(t[:3] if (self.prefix and len(t) == 4) else t)
+        return ("r", zlib.crc32(s.encode("utf-8")) % self.nbins)
+
+
 def decode_act(dec, k, known, c, x, act):
     mem, L = dec.mem, dec.mem.L
     if known:
@@ -1435,7 +1448,11 @@ def decode_act(dec, k, known, c, x, act):
     if len(cand) == 1:
         return next(iter(cand)), 1
     best, bw = None, 0.0
-    if c is not None or x is not None:
+    if isinstance(c, RBin):                                  # P3g random-label control: frequency within the target's bin
+        inb = [t for t in cand if c.of(t) == c.id]
+        if inb:
+            best = min(inb, key=lambda t: (-mem.span_w.get(t, 0.0), t))
+    elif c is not None or x is not None:
         lc = dec.leaves(L.cnt, c) if c is not None else None
         lx = dec.leaves(L.ctx, x) if x is not None else None
         for t in sorted(cand):
@@ -1711,6 +1728,11 @@ E_ARMS = {"full": {}, "prefixoff": dict(prefix=False), "patternoff": dict(patter
 # Usage: psych_digits.py epame <arm: full|linkoff|conceptsoff|prioroff> <seed> [865] [budget] P3f ; epamfsummary [P3f]
 F3_ARMS = {"full": dict(links=True), "linkoff": {}, "conceptsoff": dict(links=True, concepts=False),
            "prioroff": dict(links=True, prior=False)}
+# P3g (docs/PLAN_PSYCH.md, section P3g): EPAM storage (one chunk per list, the last group, during rehearsal) and link retrieval
+# that needs a matching category (stored, recovered by codes, or guessed from surviving digits).  tag must start with "P3g".
+_G = dict(links=True, store="list1", linkcat=True)
+G_ARMS = {"full": dict(_G), "store8": dict(_G, store="clock8"), "linkloose": dict(_G, linkcat=False),
+          "randlabel": dict(_G, randlabel=True), "prioroff": dict(_G, prior=False)}
 
 
 def rs_parents(groups):
@@ -1745,7 +1767,19 @@ def recall_rs_e(dec, groups, frng, f, opt, act, tally, links=None, lrng=None):
     def lab(t):
         if not concepts:
             return (None, None)
+        if opt.get("randlabel"):
+            return (RBin(t, opt["nbins"], prefix), None)
         return dec.label(t[:3]) if (prefix and len(t) == 4) else dec.label(t)
+
+    def guess(k, known):
+        """P3g: category guessed from the surviving digits = label of the most frequent activated consistent candidate."""
+        if not known:
+            return None
+        s = decode_act(dec, k, known, None, None, act)[0]
+        if s is None and k == 4 and prefix:
+            pk = {i: d for i, d in known.items() if i < 3}
+            s = decode_act(dec, 3, pk, None, None, act)[0] if pk else None
+        return lab(s)[0] if s is not None else None
     labs = [lab(g) for g, _ in groups]
     par = rs_parents(groups) if patterns else [None] * len(groups)
     members = defaultdict(list)
@@ -1787,7 +1821,7 @@ def recall_rs_e(dec, groups, frng, f, opt, act, tally, links=None, lrng=None):
             tally["intact%d" % k] += 1
             known_lab[j] = labs[j]
             continue
-        if links and j in links and lrng.random() >= f:          # P3f: surviving associative link from a known chunk
+        if not opt.get("linkcat") and links and j in links and lrng.random() >= f:   # P3f: surviving link, no category needed
             ch = links[j]
             if len(ch) == k:
                 got = g
@@ -1820,6 +1854,21 @@ def recall_rs_e(dec, groups, frng, f, opt, act, tally, links=None, lrng=None):
                 if x is None:
                     x = rec[1]
                 tally["labrec_" + how] += 1
+        if opt.get("linkcat") and links and j in links and lrng.random() >= f:   # P3g: link needs a matching category
+            ch = links[j]
+            cav = c if c is not None else guess(k, known)
+            chc = lab(ch)[0]
+            if cav is not None and chc is not None and cav.id == chc.id:
+                got = g if len(ch) == k else ((tuple(ch) + (known[3],)) if 3 in known else None)
+                if got == g:
+                    tally["n_link"] += 1
+                    tally["try%d" % k] += 1
+                    tally["resc%d" % k] += 1
+                    known_lab[j] = labs[j]
+                    continue
+                tally["link_d4lost"] += 1
+            else:
+                tally["link_nocat"] += 1
         got, nc = decode_act(dec, k, known, c, x, act)
         if k == 4 and prefix and nc == 0:
             tally["pre_try"] += 1
@@ -1858,7 +1907,9 @@ def letter_probe_e(mem, rng, f, opt):
 
 def epame(arm, seed, max_sessions, budget, tag):
     opt = dict(f=0.25, act=True, concepts=True, prior=True, prefix=True, patterns=True, links=False)
-    opt.update((F3_ARMS if tag.startswith("P3f") else E_ARMS)[arm])
+    opt.update((G_ARMS if tag.startswith("P3g") else F3_ARMS if tag.startswith("P3f") else E_ARMS)[arm])
+    p3g = "store" in opt
+    prev_cids = set()
     os.makedirs(OUT, exist_ok=True)
     t0 = time.time()
     mem = Mem(seed)
@@ -1883,13 +1934,20 @@ def epame(arm, seed, max_sessions, budget, tag):
             break
         act = set()
         sstart, presented = length, []
+        sess_cids = set()
         for li in range(lists_per_session(sess)):
             digits = [str(rng.randrange(10)) for _ in range(length)]
             groups, singles = partition_d(digits)
             clock, nlearn, nreinf = 0.0, 0, 0
             links = {}
+            if p3g and opt["links"]:                 # P3g: links only from chunks familiar before the list
+                for j, (g, rs) in enumerate(groups):
+                    if rs and mem.span_w.get(g, 0.0) >= REC_W:
+                        links[j] = g
+                    elif rs and opt["prefix"] and len(g) == 4 and mem.span_w.get(g[:3], 0.0) >= REC_W:
+                        links[j] = g[:3]
             for j, (g, rs) in enumerate(groups):
-                if opt["links"] and rs:              # link from a chunk already available (before this group's storage)
+                if opt["links"] and rs and not p3g:  # P3f: link from a chunk already available (before this group's storage)
                     if mem.span_w.get(g, 0.0) >= REC_W:
                         links[j] = g
                     elif opt["prefix"] and len(g) == 4 and mem.span_w.get(g[:3], 0.0) >= REC_W:
@@ -1900,7 +1958,7 @@ def epame(arm, seed, max_sessions, budget, tag):
                     mem.span_w[g] += 1.0
                     act.add(g)
                     nreinf += 1
-                elif clock >= STORE_S:
+                elif opt.get("store", "clock8") == "clock8" and clock >= STORE_S:
                     mem.learn(list(g))
                     clock -= STORE_S
                     if mem.span_w.get(g, 0.0) >= REC_W:
@@ -1908,17 +1966,37 @@ def epame(arm, seed, max_sessions, budget, tag):
                     nlearn += 1
                 if opt["prefix"] and len(g) == 4 and mem.span_w.get(g[:3], 0.0) >= REC_W:
                     act.add(g[:3])
+            if opt.get("store") == "list1" and groups:   # P3g: EPAM learns the last group of the list during rehearsal (p. 318, 322)
+                gl = groups[-1][0]
+                if mem.span_w.get(gl, 0.0) < REC_W:
+                    mem.learn(list(gl))
+                    nlearn += 1
+                    if mem.span_w.get(gl, 0.0) >= REC_W:
+                        act.add(gl)
+                    if opt["prefix"] and len(gl) == 4 and mem.span_w.get(gl[:3], 0.0) >= REC_W:
+                        act.add(gl[:3])
             dec = Decoder(mem)
             tally = Counter()
+            if opt.get("randlabel"):                     # P3g: bin count matched to TRELLIS's distinct content concepts
+                cur = set()
+                for g, rs in groups:
+                    if rs:
+                        cc = dec.label(g[:3] if (opt["prefix"] and len(g) == 4) else g)[0]
+                        if cc is not None:
+                            cur.add(cc.id)
+                sess_cids |= cur
+                opt["nbins"] = max(1, len(prev_cids) if prev_cids else len(cur))
             ok = recall_rs_e(dec, groups, frng, opt["f"], opt, act if opt["act"] else None, tally, links, lrng)
             row = {"s": sess, "trial": li + 1, "len": length, "ok": int(ok), "learned": nlearn, "reinf": nreinf,
                    "nrs": sum(1 for g in groups if g[1]), "t": round(time.time() - t0, 1)}
             row.update(tally)
             rows.append(row)
             length = max(1, length + (1 if ok else -1))
+        if sess_cids:
+            prev_cids = sess_cids
         miss = sum(1 for g in presented if g not in act)
         sess_rows.append({"s": sess, "start_len": sstart, "end_len": length, "groups": len(presented), "not_stored": miss,
-                          "fam3": len(mem.fam[3]), "fam4": len(mem.fam[4])})
+                          "fam3": len(mem.fam[3]), "fam4": len(mem.fam[4]), "nbins": opt.get("nbins")})
         if sess in PROBE_SESSIONS:
             probes[sess] = letter_probe_e(mem, prng, opt["f"], opt)
             print("probe", sess, probes[sess], flush=True)
@@ -2031,3 +2109,42 @@ def letterprobe2():
 
 if __name__ == "__main__" and sys.argv[1] == "letterprobe2":
     letterprobe2()
+
+
+def epamgsummary(tag, dev=(13, 17, 19), held=(23, 29, 31)):
+    """P3g: summary per seed set (held-out seeds decide; development seeds reported)."""
+    import glob
+    import shutil
+    allf = sorted(glob.glob(os.path.join(OUT, "%s_*_s*.json" % tag)))
+    for name, seeds in (("held-out", held), ("development", dev)):
+        sub = "%s-%s" % (tag, "held" if name == "held-out" else "dev")
+        for fn in allf:
+            s = int(fn.rsplit("_s", 1)[1].split(".")[0])
+            if s in seeds:
+                shutil.copyfile(fn, fn.replace(os.path.basename(fn), os.path.basename(fn).replace(tag + "_", sub + "_", 1)))
+        print("\n\n######## %s seeds %s ########\n" % (name, list(seeds)))
+        epamsummary(sub, G_ARMS, ("randlabel", "store8", "linkloose"))
+        runs = defaultdict(dict)
+        for fn in sorted(glob.glob(os.path.join(OUT, "%s_*_s*.json" % sub))):
+            d = json.load(open(fn, encoding="utf-8"))
+            runs[d["info"]["arm"]][d["info"]["seed"]] = d
+        full = runs.get("full", {})
+        sp = [_span_at(d, 500) for d in full.values() if d["sessions"] >= 500]
+        if sp:
+            m = sum(sp) / len(sp)
+            print("\n2b. Span at s500 in [60, 100]: per seed %s, mean %.1f -> **%s**" % (["%.1f" % v for v in sp], m, "holds" if 60 <= m <= 100 else "fails"))
+        print("\n| arm | recalled by link | link: no matching category | link but 4th digit lost | wrong picks | no candidate | nbins (last session) |")
+        print("|---|---|---|---|---|---|---|")
+        for arm in G_ARMS:
+            c = Counter()
+            nb = []
+            for d in runs.get(arm, {}).values():
+                c.update(_sum_rows(d, 250, 865, ["n_link", "link_nocat", "link_d4lost", "fail_wrong", "fail_nocand"]))
+                nb.append(d["sess_rows"][-1].get("nbins"))
+            print("| %s | %d | %d | %d | %d | %d | %s |" % (arm, c["n_link"], c["link_nocat"], c["link_d4lost"], c["fail_wrong"], c["fail_nocand"], nb))
+        for fn in glob.glob(os.path.join(OUT, "%s_*_s*.json" % sub)):
+            os.remove(fn)
+
+
+if __name__ == "__main__" and sys.argv[1] == "epamgsummary":
+    epamgsummary(sys.argv[2] if len(sys.argv) > 2 else "P3g")
