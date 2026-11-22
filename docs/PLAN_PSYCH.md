@@ -227,6 +227,50 @@ Reading:
 
 Trial order (reported): error .215/.184/.238/.161 for trials 1-4, with no monotone build-up; release .197 -> .215 (none).
 
+## P3e pre-registration: EPAM's 4-digit prefix coding and between-group codes (fixed 2026-11-22, before any run; user said "go for P3e")
+
+Both mechanisms are EPAM IV encoding steps (RSS95 p. 318, read from logs/rss95_full.txt). Everything not listed is P3d unchanged: grouping, rehearsal, storage clock, session activation, 25% forgetting, staircase, seeds 13/17/19, 865 sessions, the same probes, effects 1-5 and their criteria.
+
+**A. Prefix coding of 4-digit groups (step 7).** "If the RSF node will hold four digits, EPAM sorts the list (4, 2, 4, _)": a 4-digit group's semantic code comes from its first three digits.
+- **Encoding.** When a 4-digit group is presented and its 3-digit prefix is familiar (span_w >= .5), the prefix is activated for the session ("a branch is activated whenever EPAM sorts through it", p. 310). The prefix is not reinforced and costs no time. Storage of the group itself is as in P3d.
+- **Label.** A 4-digit group's label (c, x) is the label of its prefix, read as in P3d.
+- **Recall of a damaged 4-digit group:**
+  1. Run the P3d search over activated familiar 4-digit strings. If it finds any candidate, its pick is final.
+  2. If there is no activated 4-digit candidate, take the prefix route. The 4th digit must have survived, since it is a raw digit with no other source. The prefix is intact, or recovered by the P3d search over activated familiar 3-digit strings from the surviving prefix digits and the label. The group is recalled as prefix plus 4th digit.
+
+**B. Between-group codes (steps 8-9).** Codes are computed on each group's content concept c, before forgetting.
+- **Parents.** The d16 block is one parent. Each d21 block is two parents: its three 3-digit groups, and its three 4-digit groups. In the remainder, the 3s form one parent and the 4s another. Rehearsed groups belong to their parent, and their labels are always known (from STM).
+- **Back-to-back (step 8):** attached to a group whose c equals the c of the previous group under the same parent.
+- **Identical (step 9):** attached to a parent of at least 2 groups whose c are all equal.
+- **Symmetry (step 9):** attached to a parent of at least 3 groups whose first and last c are equal and not all equal.
+- EPAM's ascending and descending progressions need an order on categories, which TRELLIS concepts lack, so they are omitted.
+- Each code is one more item, lost once with p = .25 (as pattern codes, p. 319).
+- **At recall.** Groups are taken in list order. A group's label is known if its c survived, if the group was rehearsed, or if the group has already been recalled (its label is read from the recalled string). When an RS group's c was lost:
+  - a surviving back-to-back code gives it the previous group's known label;
+  - otherwise a surviving identical code gives it any known sibling's label;
+  - otherwise a surviving symmetry code gives the first group the last group's known label, or the reverse.
+  The recovered label then guides the rescue as in P3d.
+- EPAM's time costs for these checks (100 ms to check plus 200 ms to attach) are far below the 8 s storage cost and are not charged.
+
+**Arms (3 seeds each):**
+- **full:** A + B;
+- **prefixoff:** B only;
+- **patternoff:** A only;
+- **none:** neither. This must reproduce P3d full exactly, as a check;
+- **conceptsoff:** A on, no labels (so B has nothing to compare);
+- **prioroff:** full without the prior stream.
+
+**Predictions, stated before running:**
+- A lowers the 4-digit error (P3d .27 at sessions 250-865) and raises span.
+- The floor for an unstored 4-digit group is the loss of its 4th digit, .25. A group is unstored about 20% of the time, so A alone cannot bring 4-digit groups to 3-digit reliability.
+- B is expected to be small or null, because P3d showed that labels do not change outcomes (conceptsoff = full).
+
+**Decision:**
+- Effects 1-5 are scored exactly as in P3d.
+- A is credited if full beats prefixoff in span at 865 on every seed; B if full beats patternoff on every seed; concepts if full beats conceptsoff on every seed.
+- P3 is a replication if effects 1-5 hold. Otherwise it is partial, with the failed effects named.
+- No changes after the runs.
+
 ## P4 pre-registration (fixed 2026-11-21, before any AGL simulation)
 
 - Target: Knowlton & Squire (1996) Experiment 1, controls (N = 18), the 23 distinct training strings shown twice in random order, and the 32 test items, all from docs/AGL_PROTOCOL.md section 1. Meulemans & Van der Linden (1997) is not simulated, because its stimuli are not available.
