@@ -139,6 +139,61 @@ KS96, 18 subjects. Grammaticality effect within CS cells (human +22.0):
 
 Reading: the KS96 grammaticality effect is matched by anchor chunk strength, so a grammaticality score has to beat a positional chunk count before concepts are credited, and TRELLIS's context fit does not. The concepts-off control is weak for fit, because the score itself climbs the trees in both arms (concepts off changes learning and parsing, not the read). The anchor comparison decides the outcome either way. AGL is reported as a negative result. TRELLIS's stored familiarity is chunk strength (P4, P4b), and its context-concept fit adds nothing beyond anchor strength.
 
+## P3d pre-registration: EPAM IV's architecture with TRELLIS as the semantic net (fixed 2026-11-22, before any run; user approved both changes)
+
+Why. rescuediag (3d4120b5, P3c full arm, 3 seeds, no change to the run): the target was always among the candidates, but the decoder picks the most frequent stored string, so the prior's running times beat the string just heard. Rescue succeeds .87-.92 when the surviving label leaves one candidate (about 40% of attempts), 0 when the target's records lie outside its own label (about 10%, cause not traced), and .15-.18 when three or more remain. Picking the most recently encoded candidate would have recovered .97. RSS95 (read from the PDF text, logs/rss95_full.txt) supplies three mechanisms that P3c lacked:
+- **Activation lasts one session.** "Once a branch or a node has been activated, it remains activated throughout that particular experimental 'day'. In the interval between sessions it loses its activation"; "the depth-first search mechanism restricts EPAM's search to activated portions of the net" (p. 310). A node is activated when EPAM sorts through it or adds information to it.
+- **Every group gets a slot, and rescue needs a stored chunk.** "DD's semantic net is incomplete—many digit groups are not represented in it—but it gets larger as the trials continue", about 3,000 groups by the end, "substantially all three-digit groups but only a fraction of the 10,000 possible four-digit groups" (Appendix, p. 329). Coding is obligatory (ESC93 p. 973). EPAM's 3- against 4-digit error difference comes from this coverage difference (p. 319).
+- **Storage while the digits are still present**, at EPAM's 8 s per new chunk (p. 313).
+
+What TRELLIS contributes, stated: the semantic net (EPAM's hand-built 14 category subnets, 99% of DD's groups, p. 325) is replaced by TRELLIS learned without supervision from the prior stream and the lists. The retrieval structure, the 25% forgetting and the activation rule are EPAM's.
+
+Procedure (one list; everything not listed is as in P3c: C3 learner, prior stream, staircase from 7, RSS95 Table 1 lists per session, seeds 13, 17, 19, 865 sessions):
+1. **Groups from EPAM's retrieval-structure patterns (p. 316), not from recognition.** From the start of the list: one d16 block (4,4,4,4) if at least 16 digits remain, then d21 blocks (3,3,3,4,4,4) while at least 21 remain. The remainder r < 21 is split into 3s and then 4s: r = 3a if r mod 3 = 0; one 4 if r mod 3 = 1; two 4s if r mod 3 = 2. Any 1-2 digits left over (r = 1, 2, 5) are singles. For lists under 16 digits, only the remainder rule applies. EPAM's 5-digit primitive is not used, since DD may form 5 as 2+3 (p. 312).
+2. **Rehearsal in STM (p. 321).** Taken from the end of the list: the singles, then whole groups while the total is at most 7 digits, always at least the last group. These are recalled without forgetting. All other groups are retrieval-structure (RS) groups.
+3. **Storage during presentation.** A clock starts at 0 for each list and gains 1 s per digit heard. When a group's last digit arrives:
+   - if its string is familiar (span_w >= .5), span_w is raised by 1 at no time cost and the string is activated for this session;
+   - otherwise, if the clock holds at least 8 s, the group is learned (learn() on the group, clock minus 8) and activated;
+   - otherwise it is not stored. Singles are not stored.
+   Unspent time does not carry to the next list (storage happens while the items are present). The activation set is cleared at the start of every session.
+4. **Labels.** After presentation, each RS group's label (c, x) is read as in P3c: the deepest supported content and context concepts of its isolated parse, with memory frozen.
+5. **Forgetting (P3c, unchanged).** Each digit, c and x of an RS group are each lost once with p = .25. A group with all digits intact is recalled.
+6. **Rescue (changed).**
+   - Candidates are the familiar strings of the group's length that agree with the surviving digits and are activated this session.
+   - With none, the group fails. With one, it is recalled.
+   - With several, the candidate with the most record weight under the surviving label parts wins (P3c's score). If that weight is 0, or no label part survives, the most frequent candidate (span_w) wins. The label guides the choice rather than gating it.
+7. A list is correct iff every RS group is recalled.
+
+Arms (3 seeds each):
+- **full;**
+- **actoff:** activation not required, so all familiar strings are candidates (P3c's candidate set with P3d's slots and storage);
+- **conceptsoff:** labels never used, so the choice is by frequency among activated candidates (a flat string store);
+- **prioroff:** no prior stream;
+- **f0:** forgetting off.
+
+Probes, as in P3b:
+- **Letters:** at sessions 50/100/250/500/865, a 10-list staircase of random consonants from 5, with the same grouping, slots, forgetting and rescue but no storage. Consonant strings are never familiar, so RS groups survive only intact.
+
+Measures and pre-registered effects (arm full, mean of 3 seeds; span = mean list length over the 5-session block, as P3b/P3c):
+1. Span rises well above 7: maximum block span >= 20.
+2. Rate: the first session with block span >= 80 lies in [250, 865]. Before 250 = too fast; never = too slow. Span at 865 is reported against DD's 104.
+3. 4-digit RS groups err more than 3-digit RS groups (per-group error, sessions 250-865, pooled). EPAM: 3.0% against 1.5% on 100+ digit lists (p. 319).
+4. Prior knowledge speeds early learning: span at session 50 is higher in full than in prioroff.
+5. Letter span stays near 7: final letter-probe length <= 9 at every probe.
+
+Reported, not scored:
+- **trial order:** per-group RS error by trial order 1-6 within sessions 250-865, against DD's slowing of about 7 s per trial (Table 3, a time measure);
+- **release:** error on trial 1 of a session against the last trial of the previous one;
+- **net size:** familiar 3- and 4-digit strings at session 865, against RSS95's estimate of about 3,000 (nearly all 1,000 three-digit, a fraction of the four-digit);
+- **post-session miss rate:** the share of a session's groups not stored, i.e. not activated, against DD's 8% missed in free recall (p. 326). An upper bound on the misses, since free recall is not simulated.
+
+Mechanism readings:
+- activation is credited if full beats actoff in span at 865 on every seed;
+- concepts are credited if full beats conceptsoff on every seed, otherwise TRELLIS works as a string store here and that is reported;
+- f0 is the no-forgetting reference.
+
+Decision: P3 is a replication if effects 1, 2, 3, 4 and 5 hold. It is partial otherwise, with the failed effects named. No parameter is changed after the runs; any follow-up is a new, separately registered section.
+
 ## P4 pre-registration (fixed 2026-11-21, before any AGL simulation)
 
 - Target: Knowlton & Squire (1996) Experiment 1, controls (N = 18), the 23 distinct training strings shown twice in random order, and the 32 test items, all from docs/AGL_PROTOCOL.md section 1. Meulemans & Van der Linden (1997) is not simulated, because its stimuli are not available.
