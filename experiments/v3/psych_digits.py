@@ -1707,6 +1707,10 @@ if __name__ == "__main__" and sys.argv[1] == "epamsummary":
 # content concept, each lost with p = f, used to recover a lost label.  Arm "none" must reproduce P3d full exactly.
 E_ARMS = {"full": {}, "prefixoff": dict(prefix=False), "patternoff": dict(patterns=False), "none": dict(prefix=False, patterns=False),
           "conceptsoff": dict(concepts=False), "prioroff": dict(prior=False)}
+# P3f (docs/PLAN_PSYCH.md, section P3f): (C) associative links from chunks already in semantic memory to RS slots.
+# Usage: psych_digits.py epame <arm: full|linkoff|conceptsoff|prioroff> <seed> [865] [budget] P3f ; epamfsummary [P3f]
+F3_ARMS = {"full": dict(links=True), "linkoff": {}, "conceptsoff": dict(links=True, concepts=False),
+           "prioroff": dict(links=True, prior=False)}
 
 
 def rs_parents(groups):
@@ -1735,7 +1739,7 @@ def rs_parents(groups):
     return par
 
 
-def recall_rs_e(dec, groups, frng, f, opt, act, tally):
+def recall_rs_e(dec, groups, frng, f, opt, act, tally, links=None, lrng=None):
     prefix, patterns, concepts = opt["prefix"], opt["patterns"] and opt["concepts"], opt["concepts"]
 
     def lab(t):
@@ -1783,6 +1787,21 @@ def recall_rs_e(dec, groups, frng, f, opt, act, tally):
             tally["intact%d" % k] += 1
             known_lab[j] = labs[j]
             continue
+        if links and j in links and lrng.random() >= f:          # P3f: surviving associative link from a known chunk
+            ch = links[j]
+            if len(ch) == k:
+                got = g
+            elif 3 in known:
+                got = tuple(ch) + (known[3],)
+            else:
+                got = None
+            if got == g:
+                tally["n_link"] += 1
+                tally["try%d" % k] += 1
+                tally["resc%d" % k] += 1
+                known_lab[j] = labs[j]
+                continue
+            tally["link_d4lost"] += 1
         if c is None and labs[j][0] is not None and patterns:
             rec = None
             if b2b_ok and j > 0 and known_lab[j - 1] is not None:
@@ -1838,8 +1857,8 @@ def letter_probe_e(mem, rng, f, opt):
 
 
 def epame(arm, seed, max_sessions, budget, tag):
-    opt = dict(f=0.25, act=True, concepts=True, prior=True, prefix=True, patterns=True)
-    opt.update(E_ARMS[arm])
+    opt = dict(f=0.25, act=True, concepts=True, prior=True, prefix=True, patterns=True, links=False)
+    opt.update((F3_ARMS if tag.startswith("P3f") else E_ARMS)[arm])
     os.makedirs(OUT, exist_ok=True)
     t0 = time.time()
     mem = Mem(seed)
@@ -1854,6 +1873,7 @@ def epame(arm, seed, max_sessions, budget, tag):
     rng = random.Random(seed * 31 + 5)
     prng = random.Random(seed * 77 + 11)
     frng = random.Random(seed * 13 + 7)
+    lrng = random.Random(seed * 101 + 3)        # P3f link forgetting (separate stream)
     length = 7
     rows, sess_rows, probes = [], [], {}
     stop = "max_sessions"
@@ -1867,7 +1887,13 @@ def epame(arm, seed, max_sessions, budget, tag):
             digits = [str(rng.randrange(10)) for _ in range(length)]
             groups, singles = partition_d(digits)
             clock, nlearn, nreinf = 0.0, 0, 0
-            for g, rs in groups:
+            links = {}
+            for j, (g, rs) in enumerate(groups):
+                if opt["links"] and rs:              # link from a chunk already available (before this group's storage)
+                    if mem.span_w.get(g, 0.0) >= REC_W:
+                        links[j] = g
+                    elif opt["prefix"] and len(g) == 4 and mem.span_w.get(g[:3], 0.0) >= REC_W:
+                        links[j] = g[:3]
                 clock += len(g)
                 presented.append(g)
                 if mem.span_w.get(g, 0.0) >= REC_W:
@@ -1884,7 +1910,7 @@ def epame(arm, seed, max_sessions, budget, tag):
                     act.add(g[:3])
             dec = Decoder(mem)
             tally = Counter()
-            ok = recall_rs_e(dec, groups, frng, opt["f"], opt, act if opt["act"] else None, tally)
+            ok = recall_rs_e(dec, groups, frng, opt["f"], opt, act if opt["act"] else None, tally, links, lrng)
             row = {"s": sess, "trial": li + 1, "len": length, "ok": int(ok), "learned": nlearn, "reinf": nreinf,
                    "nrs": sum(1 for g in groups if g[1]), "t": round(time.time() - t0, 1)}
             row.update(tally)
@@ -1942,3 +1968,66 @@ if __name__ == "__main__" and sys.argv[1] == "epame":
     epame(a[2], int(a[3]), int(a[4]) if len(a) > 4 else 865, float(a[5]) if len(a) > 5 else 0.0, a[6] if len(a) > 6 else "P3e")
 if __name__ == "__main__" and sys.argv[1] == "epamesummary":
     epamesummary(sys.argv[2] if len(sys.argv) > 2 else "P3e")
+
+
+def epamfsummary(tag):
+    epamsummary(tag, F3_ARMS, ("linkoff", "conceptsoff"))
+    import glob
+    runs = defaultdict(dict)
+    for fn in sorted(glob.glob(os.path.join(OUT, "%s_*_s*.json" % tag))):
+        d = json.load(open(fn, encoding="utf-8"))
+        runs[d["info"]["arm"]][d["info"]["seed"]] = d
+    print("\n## P3f mechanism counts (pooled over seeds, sessions 250-865)\n")
+    print("| arm | recalled by link | link but 4th digit lost | prefix route ok | wrong picks | not stored |")
+    print("|---|---|---|---|---|---|")
+    for arm in F3_ARMS:
+        c = Counter()
+        for d in runs.get(arm, {}).values():
+            c.update(_sum_rows(d, 250, 865, ["n_link", "link_d4lost", "pre_ok", "fail_wrong", "fail_nocand"]))
+        print("| %s | %d | %d | %d | %d | %d |" % (arm, c["n_link"], c["link_d4lost"], c["pre_ok"], c["fail_wrong"], c["fail_nocand"]))
+    print("\nCheck: arm linkoff vs P3e full (list lengths identical per seed):")
+    for s, d in sorted(runs.get("linkoff", {}).items()):
+        fn = os.path.join(OUT, "P3e_full_s%d.json" % s)
+        if os.path.exists(fn):
+            p = json.load(open(fn, encoding="utf-8"))
+            print("  seed %d: %s" % (s, [r["len"] for r in d["rows"]] == [r["len"] for r in p["rows"]]))
+
+
+if __name__ == "__main__" and sys.argv[1] == "epamfsummary":
+    epamfsummary(sys.argv[2] if len(sys.argv) > 2 else "P3f")
+
+
+# ----------------------------------------------------------------------------------------------- P3f letter probe, re-registered
+# Usage: psych_digits.py letterprobe2   (docs/PLAN_PSYCH.md "P3f letter-probe re-registration"; no memory is used by the probe)
+def letterprobe2():
+    dec = Decoder(Mem(13))                      # empty memory: consonant strings are never familiar, as in the in-run probe
+    opt = dict(f=0.25, act=True, concepts=False, prior=True, prefix=True, patterns=True, links=True)
+    out, spans = {}, []
+    for seed in (13, 17, 19):
+        rng = random.Random(seed * 211 + 1)
+        per = []
+        for p in PROBE_SESSIONS:
+            length, hist = 5, []
+            for _ in range(50):
+                seq = [rng.choice(CONS) for _ in range(length)]
+                groups, _ = partition_d(seq)
+                ok = recall_rs_e(dec, groups, rng, 0.25, opt, set(), Counter())
+                hist.append(length)
+                length = max(1, length + (1 if ok else -1))
+            sp = sum(hist[10:]) / 40.0
+            per.append(round(sp, 2))
+        out[seed] = per
+        spans += per
+    m = sum(spans) / len(spans)
+    verdict = "holds" if m <= 9 and max(spans) <= 10 else "fails"
+    lines = ["# P3f letter probe (re-registered): 50-list consonant staircases, span = mean length of lists 11-50", ""]
+    for s, per in out.items():
+        lines.append("- seed %d, probes at sessions %s: %s" % (s, list(PROBE_SESSIONS), per))
+    lines += ["", "Mean %.2f, max %.2f -> criterion (mean <= 9, none > 10): **%s**. Human: SF near 7 (secondary source)." % (m, max(spans), verdict)]
+    with open(os.path.join(OUT, "P3f_LETTERPROBE.md"), "w", encoding="utf-8") as fh:
+        fh.write("\n".join(lines) + "\n")
+    print("\n".join(lines))
+
+
+if __name__ == "__main__" and sys.argv[1] == "letterprobe2":
+    letterprobe2()
