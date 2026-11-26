@@ -1,0 +1,56 @@
+
+<!-- ============================================================ RESULTS: PSYCHOLOGY (paper section 8) -->
+<section class="page" data-page="psych" hidden>
+  <p class="eyebrow">Results</p>
+  <h1>Replications of psychological experiments</h1>
+  <p class="lede">Five experiments on chunking and memory, simulated with one configuration of TRELLIS (configuration C12 of the paper) and no parameter changed between them. Each study's procedure is reproduced with as many simulated subjects as the original paper reports, and each mechanism credited has a removal control. The chunks reproduce the effects of familiarity; the system misses effects that need a limit on memory or categories formed from few instances.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Study</th><th>Human effects</th><th>TRELLIS</th><th>Reproduced</th></tr></thead>
+    <tbody>
+      <tr><th>Chess recall by skill (Chase &amp; Simon 1973; Gobet &amp; Simon 1996)</th><td>Recall rises with skill (4, 8, 16 pieces); small skill effect on random boards</td><td>7.2, 9.7, 12.9 pieces with experience (15.6 at 8,000 positions); random-board recall rises where the 1973 values fall (<a href="#s-chess">Chess</a>)</td><td>Ordering yes, values partly</td></tr>
+      <tr><th>Adult word segmentation (Frank et al. 2010)</th><td>Accuracy falls with sentence length, rises with exposure, falls with the number of word types</td><td>r = .93 and .90 on the first two; −.96 on word types, as for transitional probabilities</td><td>Two of three</td></tr>
+      <tr><th>Infant word segmentation (Saffran et al. 1996)</th><td>Words differ from nonwords and from part-words after two minutes</td><td>Words more familiar in 16 of 16 simulated infants against both foils; difference larger than the infants'</td><td>Direction yes</td></tr>
+      <tr><th>Skilled digit memory (Richman et al. 1995, DD)</th><td>Span grows from 7–9 to about 80 by session 500 and 104 by session 865; 4-digit groups err more than 3-digit groups</td><td>Span 16.6 at session 865 under EPAM IV's storage rule; 4-digit groups err more; prior knowledge speeds early learning</td><td>Partly</td></tr>
+      <tr><th>Artificial grammar (Knowlton &amp; Squire 1996; Meulemans &amp; Van der Linden 1997)</th><td>Grammaticality and chunk strength both raise endorsement; the grammaticality effect grows with training</td><td>Chunk-strength interaction 23.6 (human 24.7); grammaticality effect 1.4 (human 22.0); no growth with training</td><td>No</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Word segmentation from a syllable stream</h2>
+  <div class="col">
+    <p>Frank et al. (2010) played adults sentences in a six-word artificial language and tested 30 word against part-word pairs, varying sentence length (1 to 24 words), exposure (48 to 1,200 tokens) and the number of word types (3 to 9). Saffran et al. (1996) played 8-month-olds two minutes of four three-syllable words. TRELLIS reads up to 12 syllables at once, scores a test item by its familiarity, and chooses by the Luce rule; 12 simulated participants per condition and 16 infants.</p>
+    <p>TRELLIS tracks sentence length and exposure as closely as the best model of Frank et al. and more closely than transitional probabilities. Like them it predicts the wrong direction for vocabulary size: it stores every candidate chunk, so it behaves like an observer with unlimited memory. Removing the concepts lowers the first two correlations to .77 and .63 and flattens the curve over exposure (rank correlation −.03 against .94). The model is also more accurate than people (.92 to 1.00 against .57 to .87). All 16 simulated infants find words more familiar than nonwords and part-words; the word against part-word difference is .41 against the infants' .06, on different scales, and removing the concepts leaves it unchanged (.74).</p>
+  </div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Model (Pearson r with human condition means)</th><th>Sentence length</th><th>Exposure</th><th>Word types</th></tr></thead>
+    <tbody>
+      <tr><th>TRELLIS</th><td class="num best">.93</td><td class="num best">.90</td><td class="num">−.96</td></tr>
+      <tr><th>TRELLIS, concepts off</th><td class="num">.77</td><td class="num">.63</td><td class="num">−.99</td></tr>
+      <tr><th>Transitional probability (ours)</th><td class="num">.76</td><td class="num">.75</td><td class="num">−.94</td></tr>
+      <tr><th>Transitional probability (Frank et al.)</th><td class="num">.84</td><td class="num">.43</td><td class="num">−.99</td></tr>
+      <tr><th>Lexical model (Frank et al.)</th><td class="num">.94</td><td class="num">.89</td><td class="num">−.98</td></tr>
+      <tr><th>PARSER (Frank et al.)</th><td class="num">.00</td><td class="num">.86</td><td class="num">.00</td></tr>
+      <tr><th>TRACX (French et al. 2011)</th><td class="num">.92</td><td class="num">–</td><td class="num">.97</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">Human means read from Figure 1 of Frank et al. (about ±1 percentage point); against the printed condition coefficients TRELLIS gives .91, .87 and −.94.</p>
+
+  <h2>Skilled memory for digits</h2>
+  <div class="col">
+    <p>DD practised digit span for about 865 sessions (Richman, Staszewski &amp; Simon 1995): digits read at one per second, one digit longer after a correct list and one shorter after an error. His span grew from 7–9 to about 80 near session 500 and 104 near session 865. EPAM IV explains this with a retrieval structure, a hand-built semantic network of running times and other categories, a 25% loss of slot contents, and one new chunk per list.</p>
+    <p>The simulation keeps EPAM IV's procedure and replaces its hand-built network with TRELLIS. Before practice the system reads digit strings drawn from running times, years and ages until it has seen 500 distinct running times, with no category names. A group's category is the deepest TRELLIS concept that supports its parse, and a damaged group is recalled as the most frequent active chunk under that category that agrees with the surviving digits. Three simulated subjects, none used in development.</p>
+  </div>
+  <figure>
+    <div class="fig"><img class="plot" src="digit_span_curve.png" alt="Digit span against practice session for TRELLIS inside EPAM IV's procedure, with random labels, prior knowledge off, and 8-second storage, against DD's points at sessions 1, 500 and 865."></div>
+  </figure>
+  <figcaption><b>Digit span with practice</b> (mean list length over five-session blocks; mean of three simulated subjects, band = range). With EPAM's rule of one new chunk per list, span stalls near 16 and random labels do as well as the learned concepts; storing a chunk for every eight seconds of presentation raises span to about 70. DD's points come from the text of Richman et al.</figcaption>
+  <div class="col">
+    <p>Span climbs from about 9 to 16.6 by session 865, far short of DD's 104. Four-digit groups err more often than three-digit groups (31 against 20 percent, sessions 250 to 865), as for DD and EPAM, but both rates are about ten times EPAM's; prior knowledge raises span at session 50 from 8.8 to 11.2. Random labels give nearly the same curve (16.0), so the learned categories help recall no more than arbitrary ones. Storing faster raises span to 69.8 (one subject reaches 80 at session 834). The memory ends at about EPAM's size (about 760 three-digit and 2,800 four-digit strings against 3,400 chunks), yet 38 percent of late groups are strings it never stored. TRELLIS approaches DD's span only when it stores chunks faster than EPAM does.</p>
+  </div>
+
+  <h2>Artificial grammar learning</h2>
+  <div class="col">
+    <p>Knowlton and Squire (1996) showed 18 participants 23 grammatical letter strings twice and tested 32 new strings that crossed grammaticality with chunk strength: grammaticality added 22.0 points of endorsement, chunk strength 14.4, with an interaction of 24.7. Meulemans and Van der Linden (1997) found the grammaticality effect grows with training (−2.2 to 7.0) while the chunk-strength effect shrinks (22.5 to 0.5). TRELLIS endorses the strings whose familiarity is above its own median.</p>
+    <p>TRELLIS reproduces the interaction (23.6 against 24.7; r = .64 with the human cells) but shows almost no grammaticality effect (1.4 against 22.0). Removing the concepts changes nothing, and transitional probabilities fit better (r = .80). With more training its grammaticality effect shrinks where people's grows (−8.8 against 9.2). Two other scores, chunks counted at their positions and the fit of each chunk's concept to its context, find no grammaticality beyond chunk strength. Chunk strength counted only at the string edges gives 21.5 on its own, close to the human 22.0, so TRELLIS's familiarity behaves like chunk strength.</p>
+  </div>
+  <p class="small">Paper section 8 (25 November). Per-study protocols and every simulation round are in the repository (docs/PLAN_PSYCH.md and the protocol documents).</p>
+</section>
