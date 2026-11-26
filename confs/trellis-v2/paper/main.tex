@@ -127,7 +127,9 @@ computation pays on longer inputs, remains untested.
 The other two questions receive more positive answers, which we report in four
 settings. On a controlled grammar with known trees, chunks learned from the raw stream
 recover .93 of the constituents of unseen sentences after 4,000 sentences, ahead of the
-constituent-context model of \citet{klein-manning-ccm}. In chess, the learned chunks carry the compression of positions and the
+constituent-context model of \citet{klein-manning-ccm}, and a generator that
+expands those chunks writes more meaningful new sentences when general concepts shaped
+them. In chess, the learned chunks carry the compression of positions and the
 recall pattern that Chase and Simon observed, and they encode recognizable chess ideas,
 although byte-pair coding and a standard compressor code most test sets in fewer bits.
 In children's stories, the chunks do not shorten the code, the concepts support the
@@ -450,6 +452,33 @@ Restricting the parse to concepts at least three bits below the root lowers reca
 At the floor no concept saves more than it costs, every candidate earns the same credit, and the parser returns one fixed shape that never brackets the subject. Removing the concepts entirely gives the same floor (.36 recall, .34 F1, at every size).
 Specific concepts thus need far more data to do what general ones do, and the chunks that \trellis{} finds in new sentences are the chunks its general concepts let it recognize.
 
+The same memory generates, and its generations inherit the quality of its chunks. Because the learner stores each candidate chunk by its posterior under the parse, restricting the concepts that the parse may use during learning changes which chunks memory holds, while the word-level counts stay the same.
+We generated 1,600 sentences per learner after 1,000 sentences with two generators and judged them with the exact rule of Section~\ref{sec:controlled-grammar} (configuration C13).
+The tree generator of version 1 draws a stored sentence chunk and expands each of its parts into a stored chunk that fills the same slot, down to words. The pair-gated word generator of Section~\ref{sec:gen} reads words and their contexts and expands no chunks.
+
+\begin{table}[!htbp]
+\caption{Generation from the controlled grammar after 1,000 sentences, with the concepts available to the parse during learning restricted to at least $m$ bits below the root (configuration C13). Means over six seeds of 1,600 draws each. The tree generator expands stored chunks; its shares are among draws that are not training sentences, and ``distinct new'' counts them. The word generator is constrained to new sentences. New head pairs is the share of new draws that are meaningful and join a subject and verb, a verb and object, or an adjective and noun never seen together in training.}
+\label{tab:controlled-gen}
+\begin{center}
+\footnotesize
+\begin{tabular}{lccccc}
+\toprule
+ & \multicolumn{4}{c}{Tree generator (chunks)} & Word generator \\
+Concepts in the parse & Meaningful & Syntax-only & Distinct new & New head pairs & Meaningful \\
+\midrule
+all & .64 & .25 & 760 & .031 & .71 \\
+$m \geq 3$ bits & .57 & .28 & 716 & .032 & .70 \\
+$m \geq 6$ bits & .40 & .49 & 344 & .018 & .70 \\
+$m \geq 12$ bits & .37 & .49 & 344 & .018 & .70 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+Table~\ref{tab:controlled-gen} shows the result. With all concepts, .64 of the tree generator's new sentences are meaningful. When the parse sees only concepts at six or more bits during learning, that share falls to .40 (paired difference .24, interval .19 to .29), syntax errors double, and the generator produces fewer than half as many distinct new sentences.
+The word generator, which reads the same memory but expands no chunks, does not move (.71 against .70, interval for the difference $-$.013 to +.024). The loss therefore travels through the chunks.
+The tree generator also makes new combinations that the word generator cannot. Among its new sentences, .031 are meaningful and join a subject and verb, a verb and object, or an adjective and noun that never met in training, against .004 to .006 for the word generator, which emits only word pairs that memory stored side by side. This rate stays far below that of fresh grammar samples (.157), so most of the tree generator's new sentences recombine pairs that it has seen.
+
 \subsection{Chunk Biographies}
 
 The main finding is that a chunk persists while the concept it belongs to keeps changing. Table~\ref{tab:bio} follows four chunks of seed 13 (configuration C3) through training.
@@ -493,6 +522,7 @@ Grey text gives the NLTK shallow-phrase labels of the two most confident chunks 
 \end{figure}
 
 \subsection{Generated Sentences}
+\label{sec:gen}
 
 The main finding is that the sampled sentences of the three models look alike, and none of them separates cleanly from the others by eye.
 Table~\ref{tab:samples} lists the first two draws for three prompts after each model learned the same 1,000 sentences (seed 29, TinyStories). The draws appear in the order sampled without selection, each model at its tuned temperature, and judge 2 labeled them.
@@ -1192,7 +1222,10 @@ memory of exact chunks parses below right-branching and gets worse with data, re
 the parse to specific concepts leaves it at a floor until it has seen 1,000 or more
 sentences, and removing the stored chunks lowers recall by .22. Composition of new
 sentences thus runs through the general concepts, while the concepts alone still find
-.72 of the constituents. In chess, chunks without concepts keep all but 0.4
+.72 of the constituents. Generation from the same memory follows its chunks. When the parse
+sees only specific concepts during learning, the share of meaningful new sentences that
+the tree generator writes falls from .64 to .40, while the word generator, which expands
+no chunks, stays at .70. In chess, chunks without concepts keep all but 0.4
 to 0.7 bits, and recall without concepts is zero by construction, whereas in language
 removing both shortens the code. With 250 sentences, the system writes new,
 judged-grammatical sentences about as often as matched LSTM and GPT models. It trails
@@ -1317,7 +1350,7 @@ C9 & Context-abstraction generator: the pair-gated word generator of C6a with th
 C10 & Standard chess configuration with chunks capped at one piece (chunks off) or leaf-only reads (concepts off); seeds 13, 17, 19, 4,000 positions & Table~S20 \\
 C11 & Chess position generator: the C5 learner, with positions drawn from distributions, regenerated from parses, or regenerated with the file or rank of each reference square redrawn; seeds 13 and 17, 500 to 4,000 positions & Figures~\ref{fig:law} and \ref{fig:boards}, Table~S17 \\
 C12 & Psychological replications: the learner of C3 without its story feature (which needs a previous sentence); a 12-syllable perceptual buffer and 12 participants per condition (adult segmentation), 16 infants; one learning step per presentation with 18 and 20 subjects (grammar learning); inside EPAM IV's procedure with one new chunk per list, seeds 13, 17, 19 (development) and 23, 29, 31 (held-out) (digit span) & Tables~\ref{tab:psych} and \ref{tab:seg}, Figure~\ref{fig:digitspan} \\
-C13 & Controlled-grammar parser: the learner of C3 with window 5, trained on 125 to 4,000 grammar sentences and tested with learning off on 500 unseen ones; variants chunks off (nothing stored), concepts restricted to at least $m$ bits below the root ($m = 3, 6, 9$), and concepts off (leaf reads); seeds 13, 17, 19, 23, 29, 31 & Table~\ref{tab:controlled-parse} \\
+C13 & Controlled-grammar parser: the learner of C3 with window 5, trained on 125 to 4,000 grammar sentences and tested with learning off on 500 unseen ones; variants chunks off (nothing stored), concepts restricted to at least $m$ bits below the root ($m = 3, 6, 9$), and concepts off (leaf reads); seeds 13, 17, 19, 23, 29, 31; generation after 1,000 sentences with the version-1 tree generator (leaf reads) and the pair-gated word generator (window 5, exact emission, constrained to new sentences), 1,600 draws, exact judge & Tables~\ref{tab:controlled-parse} and \ref{tab:controlled-gen} \\
 \bottomrule
 \end{tabular}
 \end{center}
