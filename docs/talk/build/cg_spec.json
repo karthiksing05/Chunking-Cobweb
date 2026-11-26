@@ -1,0 +1,260 @@
+{
+ "slides": [
+  {
+   "id": "cg1_slide",
+   "layout": "BLANK",
+   "index": 22,
+   "elements": [
+    {
+     "id": "cg1_title",
+     "type": "text",
+     "x": 0.5,
+     "y": 0.3,
+     "w": 9,
+     "h": 0.6,
+     "text": "Known Trees: One Pass Recovers the Constituents",
+     "size": 24,
+     "bold": true,
+     "font": "Merriweather"
+    },
+    {
+     "id": "cg1_take",
+     "type": "text",
+     "x": 0.5,
+     "y": 0.95,
+     "w": 9,
+     "h": 0.65,
+     "text": "Chunks found through general concepts bracket .93 of gold constituents in unseen sentences. Exact chunks and contexts, read once, do worse than right-branching (.64).",
+     "size": 14,
+     "bold": true,
+     "font": "Lato"
+    },
+    {
+     "id": "cg1_tbl",
+     "type": "table",
+     "x": 0.5,
+     "y": 1.7,
+     "w": 9,
+     "size": 13,
+     "font": "Lato",
+     "row_h": 0.37,
+     "col_widths": [
+      5.4,
+      1.2,
+      1.2,
+      1.2
+     ],
+     "header": true,
+     "col_align": [
+      "START",
+      "END",
+      "END",
+      "END"
+     ],
+     "rows": [
+      [
+       "Recall of gold constituents (unseen sentences)",
+       "125",
+       "1,000",
+       "4,000"
+      ],
+      [
+       "TRELLIS, one pass",
+       ".78",
+       ".91",
+       ".93"
+      ],
+      [
+       "   chunks off",
+       ".67",
+       ".71",
+       ".72"
+      ],
+      [
+       "   only concepts at least 3 bits below the root",
+       ".59",
+       ".74",
+       ".83"
+      ],
+      [
+       "   only concepts at least 6 bits below the root",
+       ".36",
+       ".42",
+       ".72"
+      ],
+      [
+       "Constituent-context model, read once (no concepts)",
+       ".31",
+       ".42",
+       ".49"
+      ],
+      [
+       "Constituent-context model, 20 passes",
+       ".80",
+       ".89",
+       ".90"
+      ],
+      [
+       "Exact-chunk memory, no contexts",
+       ".58",
+       ".53",
+       ".52"
+      ]
+     ]
+    },
+    {
+     "id": "cg1_foot",
+     "type": "text",
+     "x": 0.5,
+     "y": 4.85,
+     "w": 8.4,
+     "h": 0.4,
+     "text": "Six seeds; 500 sentences never seen in training. Constituent-context model: Klein & Manning (2002).",
+     "size": 11,
+     "font": "Lato",
+     "color": "#6B7280"
+    },
+    {
+     "id": "cg1_num",
+     "type": "text",
+     "x": 9,
+     "y": 5.1,
+     "w": 0.5,
+     "h": 0.4,
+     "text": "23",
+     "size": 12,
+     "font": "Lato",
+     "color": "#6B7280"
+    }
+   ]
+  },
+  {
+   "id": "cg2_slide",
+   "layout": "BLANK",
+   "index": 23,
+   "elements": [
+    {
+     "id": "cg2_title",
+     "type": "text",
+     "x": 0.5,
+     "y": 0.3,
+     "w": 9,
+     "h": 0.6,
+     "text": "Generation Inherits the Quality of the Chunks",
+     "size": 24,
+     "bold": true,
+     "font": "Merriweather"
+    },
+    {
+     "id": "cg2_take",
+     "type": "text",
+     "x": 0.5,
+     "y": 0.95,
+     "w": 9,
+     "h": 0.7,
+     "text": "Limit the concepts the parse may use during learning, and the generator that expands stored chunks writes fewer meaningful new sentences. The word generator does not move.",
+     "size": 14,
+     "bold": true,
+     "font": "Lato"
+    },
+    {
+     "id": "cg2_tbl",
+     "type": "table",
+     "x": 0.5,
+     "y": 1.75,
+     "w": 9,
+     "size": 14,
+     "font": "Lato",
+     "row_h": 0.42,
+     "col_widths": [
+      3.0,
+      1.6,
+      1.5,
+      1.3,
+      1.6
+     ],
+     "header": true,
+     "col_align": [
+      "START",
+      "END",
+      "END",
+      "END",
+      "END"
+     ],
+     "rows": [
+      [
+       "Concepts in the parse",
+       "Tree: meaningful",
+       "Tree: syntax-only",
+       "Tree: written",
+       "Word: meaningful"
+      ],
+      [
+       "All",
+       ".64",
+       ".25",
+       "1,564",
+       ".71"
+      ],
+      [
+       "At least 3 bits",
+       ".57",
+       ".28",
+       "1,474",
+       ".70"
+      ],
+      [
+       "At least 6 bits",
+       ".40",
+       ".49",
+       "842",
+       ".70"
+      ],
+      [
+       "At least 12 bits",
+       ".37",
+       ".49",
+       "807",
+       ".70"
+      ]
+     ]
+    },
+    {
+     "id": "cg2_note",
+     "type": "text",
+     "x": 0.5,
+     "y": 4.1,
+     "w": 9,
+     "h": 0.7,
+     "text": "Drop at 3 bits .07 (interval .02 to .12); at 6 bits .24 (.19 to .29). The word generator's change: \u2212.013 to +.024.",
+     "size": 14,
+     "font": "Lato"
+    },
+    {
+     "id": "cg2_foot",
+     "type": "text",
+     "x": 0.5,
+     "y": 4.85,
+     "w": 8.4,
+     "h": 0.4,
+     "text": "Six seeds, 1,000 sentences, 1,600 attempts each, exact judge; shares are of new sentences.",
+     "size": 11,
+     "font": "Lato",
+     "color": "#6B7280"
+    },
+    {
+     "id": "cg2_num",
+     "type": "text",
+     "x": 9,
+     "y": 5.1,
+     "w": 0.5,
+     "h": 0.4,
+     "text": "24",
+     "size": 12,
+     "font": "Lato",
+     "color": "#6B7280"
+    }
+   ]
+  }
+ ]
+}

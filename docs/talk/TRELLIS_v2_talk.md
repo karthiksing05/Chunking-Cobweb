@@ -378,3 +378,13 @@ Built from docs/talk/build/psych_spec.json (slides_helper.py build) and docs/tal
 - 35 Concluding Remarks: first bullet "Version 2 keeps the postulates of version 1 and adds six addenda."; new bullet on the psychological studies; notes add one sentence.
 - 36 References: Frank et al. 2010, Knowlton & Squire 1996, Meulemans & Van der Linden 1997, Richman et al. 1995, Saffran et al. 1996 added (all five bib entries are still marked NOT RE-CHECKED in refs.bib); 11 pt, box moved up.
 - Slide numbers renumbered 9-29 and 34-49. Speaker notes written for slides 8 and 30-33.
+
+## Revision 7 (2026-11-26): controlled-grammar parse and generation; 38 main slides, 13 backups (51 in all)
+Built from docs/talk/build/cg_spec.json (slides_helper.py build) plus renumbering, one conclusion bullet and one reference.
+- 23 (new) Known Trees: One Pass Recovers the Constituents: recall of gold constituents on 500 unseen sentences at 125/1,000/4,000
+  (TRELLIS .78/.91/.93; chunks off; concepts >= 3 and >= 6 bits; CCM read once .31/.42/.49 and 20 passes .80/.89/.90; exact-chunk
+  memory .58/.53/.52); right-branching .64 (paper Table tab:controlled-parse).
+- 24 (new) Generation Inherits the Quality of the Chunks: paper Table tab:controlled-gen (tree generator meaningful .64/.57/.40/.37,
+  syntax-only, written attempts; word generator .70-.71).
+- 37 Concluding Remarks: bullet on the controlled grammar. 38 References: Klein & Manning (2002).
+- Slide numbers 25-51 renumbered. Layout checked by geometry only (no renderer on the server).

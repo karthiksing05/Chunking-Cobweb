@@ -112,3 +112,13 @@ Readings.
 - Inside TRELLIS the signal comes from general concepts: restricting the parse to concepts at >= 3 bits costs .10 recall, >= 6 bits
   leaves the parser at the zero-signal floor until 1,000 sentences, >= 9 bits never leaves it. The zero-signal floor (every gain 0,
   constant tree) is what a code-saving score gives when no concept is both cheap to name and predictive.
+
+## CCM controls and generation (second Opus review, 2026-11-26)
+CCM (exact yields + exact contexts, no concepts), 6 seeds, unseen set, F1 at 125/1000/4000: initial split counts only (one read of the
+data) .28/.40/.47 (below RB at every size; TRELLIS - it0 +.37 [.33,.41] at 4000); one EM pass .65/.71/.74 (TRELLIS +.10 [.06,.13]);
+20 passes .75/.79/.80; transductive 20 passes .75/.78/.79 (no better). Files: unseen/ccm_it0_*, ccm_it1_*, ccm_trans_*, ccm2_drawcount.txt.
+Generation dial (6 seeds, n=1000, 1,600 attempts): tree generator writes 1564/1474/842/807 at m=0/3/6/12 (fails ~half at m>=6);
+meaningful among new .64/.57/.40/.37 (m0-m3 +.07 [.02,.12]; m0-m6 +.24 [.19,.29]); syntax-only .25/.28/.49/.49; ungrammatical
+.11-.15 throughout; word generator .71/.70/.70/.70 (m0-m6 +.006 [-.013,+.024]). Review corrections applied in the paper: "syntax
+errors" -> syntax-only; "distinct new" -> written/new; chunks-off is level in F1 by the paper's rule (recall-only claim); concepts-off
+floor is by construction; the m dial confounds specificity with naming cost.

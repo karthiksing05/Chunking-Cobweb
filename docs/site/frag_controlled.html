@@ -1,0 +1,46 @@
+
+<!-- ============================================================ RESULTS: CONTROLLED GRAMMAR (paper section 5.2) -->
+<section class="page" data-page="controlled" hidden>
+  <p class="eyebrow">Results</p>
+  <h1>Parses and generation on a controlled grammar</h1>
+  <p class="lede">A 147-word grammar with agreement, verb frames and selectional restrictions gives exact parse trees and an exact judge. One pass of TRELLIS recovers the constituents of sentences it has never seen, ahead of the constituent-context model after 20 passes. Its general concepts supply most of that ability, its stored chunks raise recall, and a generator that expands the chunks inherits their quality (configuration C13, six seeds, paper section 5.2).</p>
+  <h2>Parses of 500 unseen sentences</h2>
+  <div class="col">
+    <p>Each learner reads its own stream of n sentences with no trees or tags, then parses, with learning off, 500 held-out sentences that never occur among its first 4,000 training sentences. Gold trees mark the subject noun phrase, the verb phrase, any prepositional phrase and the object noun phrase. Cells give recall of gold constituents / share of sentences exactly right / pooled bracket F1, as means over seeds 13, 17, 19, 23, 29, 31. Right-branching scores .64 / 0 / .62.</p>
+  </div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Parser</th><th>125 sentences</th><th>1,000</th><th>4,000</th></tr></thead>
+    <tbody>
+      <tr><th>TRELLIS (one pass)</th><td class="num">.78 / .41 / .70</td><td class="num">.91 / .68 / .81</td><td class="num best">.93 / .75 / .83</td></tr>
+      <tr><th>&nbsp;&nbsp;chunks off</th><td class="num">.67 / .30 / .63</td><td class="num">.71 / .40 / .67</td><td class="num">.72 / .45 / .68</td></tr>
+      <tr><th>&nbsp;&nbsp;concepts at ≥ 3 bits</th><td class="num">.59 / .22 / .57</td><td class="num">.74 / .38 / .71</td><td class="num">.83 / .57 / .78</td></tr>
+      <tr><th>&nbsp;&nbsp;concepts at ≥ 6 bits</th><td class="num">.36 / .00 / .34</td><td class="num">.42 / .02 / .40</td><td class="num">.72 / .38 / .68</td></tr>
+      <tr><th>&nbsp;&nbsp;concepts at ≥ 9 bits</th><td class="num">.36 / .00 / .34</td><td class="num">.36 / .00 / .34</td><td class="num">.38 / .00 / .36</td></tr>
+      <tr><th>Constituent-context model, initial counts (one read)</th><td class="num">.31 / .06 / .28</td><td class="num">.42 / .02 / .40</td><td class="num">.49 / .04 / .47</td></tr>
+      <tr><th>&nbsp;&nbsp;one EM pass</th><td class="num">.69 / .40 / .65</td><td class="num">.76 / .48 / .71</td><td class="num">.79 / .51 / .74</td></tr>
+      <tr><th>&nbsp;&nbsp;20 EM passes</th><td class="num">.80 / .51 / .75</td><td class="num">.89 / .64 / .79</td><td class="num">.90 / .65 / .80</td></tr>
+      <tr><th>&nbsp;&nbsp;20 passes, gold part-of-speech tags</th><td class="num">.92 / .69 / .82</td><td class="num">.92 / .69 / .82</td><td class="num">.92 / .69 / .82</td></tr>
+      <tr><th>Exact-chunk memory, no contexts</th><td class="num">.58 / .21 / .54</td><td class="num">.53 / .15 / .49</td><td class="num">.52 / .10 / .48</td></tr>
+    </tbody>
+  </table></div>
+  <div class="col">
+    <p>Against the constituent-context model after 20 passes, TRELLIS is behind at 125 sentences without a lead by the paper's rule (F1 −.050, interval −.105 to +.005), level at 1,000 (+.023, −.016 to +.063) and ahead at 2,000 and 4,000 (+.035 and +.038, intervals above zero). That model scores spans by exact word sequences and exact neighbors, so it has chunks and contexts but no concepts. Read once, it parses below right-branching at every size (F1 −.153 at 4,000, interval −.161 to −.144); it needs repeated passes over the whole corpus to get further. Removing TRELLIS's stored chunks lowers recall by .22 (interval .04 to .39); in F1 the two are level by the rule, because the loss is large on two seeds and small on four. Restricting the parse to concepts three or more bits below the root lowers recall by .11 (.07 to .14). With no concepts at all every candidate earns zero credit and the parser returns one fixed shape, so that row is a floor by construction, not evidence.</p>
+  </div>
+  <h2>Generation from the same memory</h2>
+  <div class="col">
+    <p>Learning stores each candidate chunk by its posterior under the parse, so restricting the concepts the parse may use during learning changes the chunks memory holds. After 1,000 sentences, 1,600 attempts per learner, exact judge. The tree generator (version 1) expands stored chunks and gives up when none fits; the word generator expands none.</p>
+  </div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Concepts in the parse during learning</th><th>Tree gen. written</th><th>New</th><th>Meaningful (of new)</th><th>Syntax-only</th><th>Word gen. meaningful</th></tr></thead>
+    <tbody>
+      <tr><th>all</th><td class="num">1,564</td><td class="num">.49</td><td class="num best">.64</td><td class="num">.25</td><td class="num">.71</td></tr>
+      <tr><th>≥ 3 bits</th><td class="num">1,474</td><td class="num">.49</td><td class="num">.57</td><td class="num">.28</td><td class="num">.70</td></tr>
+      <tr><th>≥ 6 bits</th><td class="num">842</td><td class="num">.41</td><td class="num">.40</td><td class="num">.49</td><td class="num">.70</td></tr>
+      <tr><th>≥ 12 bits</th><td class="num">807</td><td class="num">.43</td><td class="num">.37</td><td class="num">.49</td><td class="num">.70</td></tr>
+    </tbody>
+  </table></div>
+  <div class="col">
+    <p>The meaningful share of the tree generator's new sentences falls by .07 at three bits (interval .02 to .12) and by .24 at six (.19 to .29); the lost share becomes selectional violations while ungrammatical output stays at .11 to .15. The word generator, which reads the same memory but expands no chunks, does not move (−.013 to +.024), so the loss travels through the chunks. The tree generator also joins head pairs never seen in training at .031 of its new sentences against .004 to .006 for the word generator, below the .16 of fresh grammar samples.</p>
+    <p class="small">Caveats: the grammar has ten part-of-speech patterns and every gold tree branches right below the subject; the constituent-context model is our own implementation; at six bits and above the learning parses sit near the floor, so those generation rows compare good chunks with nearly arbitrary ones. Two Opus reviews found and fixed a train/test overlap, a wrong CCM initialization and mislabelled generation counts before these numbers.</p>
+  </div>
+</section>
