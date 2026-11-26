@@ -376,5 +376,5 @@ Built from docs/talk/build/psych_spec.json (slides_helper.py build) and docs/tal
 - 33 (new) Grammar Learning Shows Chunk Strength Only: grammaticality 22.0 vs 1.4, interaction 24.7 vs 23.6, change with training 9.2 vs -8.8; edge chunk strength 21.5; transitional probabilities r = .80 against .64.
 - 34 Related and Future Research: fourth open question (limit on memory); table and boxes moved up 0.25 in; notes add the same question.
 - 35 Concluding Remarks: first bullet "Version 2 keeps the postulates of version 1 and adds six addenda."; new bullet on the psychological studies; notes add one sentence.
-- 36 References: Frank et al. 2010, Knowlton & Squire 1996, Meulemans & Van der Linden 1997, Richman et al. 1995, Saffran et al. 1996 added (bib entries still marked NOT RE-CHECKED in refs.bib except Frank); 11 pt, box moved up.
+- 36 References: Frank et al. 2010, Knowlton & Squire 1996, Meulemans & Van der Linden 1997, Richman et al. 1995, Saffran et al. 1996 added (all five bib entries are still marked NOT RE-CHECKED in refs.bib); 11 pt, box moved up.
 - Slide numbers renumbered 9-29 and 34-49. Speaker notes written for slides 8 and 30-33.
