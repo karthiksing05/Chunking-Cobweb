@@ -266,6 +266,8 @@ def diagnose(m, held, golds):
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     tags, mbr, diag = "--tags" in sys.argv, "--mbr" in sys.argv, "--diag" in sys.argv
+    trans = "--transductive" in sys.argv                     # also train on the (unlabelled) test sentences, as Klein & Manning did
+    iters = int(next((x.split("=")[1] for x in sys.argv if x.startswith("--iters=")), ITERS))  # 0 = split-init counts only
     seed = int(args[0])
     ns = [int(x) for x in args[1].split(",")] if len(args) > 1 else [125, 250, 500, 1000, 2000, 4000]
     C = G.load_corpus(seed, max(ns))
@@ -275,10 +277,10 @@ def main():
     if tags:
         stream = [tagify(s) for s in stream]
         held = [tagify(s) for s in held]
-    res = {"seed": seed, "K": K, "iters": ITERS, "tags": tags, "decode": "mbr" if mbr else "viterbi", "ccm": {}, "em_log_n1000": None}
+    res = {"seed": seed, "K": K, "iters": iters, "transductive": trans, "tags": tags, "decode": "mbr" if mbr else "viterbi", "ccm": {}, "em_log_n1000": None}
     for n in ns:
-        m = CCM(Data(stream[:n]))
-        log = m.fit(ITERS)
+        m = CCM(Data(stream[:n] + (held if trans else [])))
+        log = m.fit(iters)
         if diag:
             diagnose(m, GP.held_unseen(C, max(ns)), golds)
             return
@@ -288,7 +290,7 @@ def main():
             res["em_log_n1000"] = log
         print(json.dumps({"seed": seed, "n": n, **res["ccm"][n], "final_loglik": log[-1]["loglik"]}), flush=True)
     os.makedirs("experiments/v3/results/story_gen/r233/unseen", exist_ok=True)
-    json.dump(res, open(f"experiments/v3/results/story_gen/r233/unseen/ccm{'_tags' if tags else ''}{'_mbr' if mbr else ''}_s{seed}.json", "w", encoding="utf-8"), indent=1)
+    json.dump(res, open(f"experiments/v3/results/story_gen/r233/unseen/ccm{'_tags' if tags else ''}{'_mbr' if mbr else ''}{'_trans' if trans else ''}{'' if iters == ITERS else f'_it{iters}'}_s{seed}.json", "w", encoding="utf-8"), indent=1)
 
 
 if __name__ == "__main__":
