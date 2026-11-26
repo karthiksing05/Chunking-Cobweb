@@ -365,3 +365,16 @@ confs/trellis-v2/make_talk_figures_rev4.py redraws the four infographics (three-
 
 ## Revision 5 (2026-11-21): slide 25 data fix and 14 pt on slides 21, 23, 24
 confs/trellis-v2/make_talk_figures_rev5.py. Slide 25 now plots the paper's protocol: experiments/v3/results/chess_cs1973_exact/cs73x_s{13,17,19}.json, memory K=7, middle-game positions, curve k = pieces correct on trial k (repeated views, seven chunk slots, mean over three seeds with ten subjects each); trial 1 = 7.2, 9.7, 12.9 after 300, 1,000, 4,000 positions as in the supplement and Section Chase and Simon. The previous figure read chess_recall/cs73_s{13,17}.json (previous reconstruction kept, no slot limit, trial 1 = 14.5, 17.3, 19.1), which did not match the caption. People curves are the digitised Chase and Simon (1973) Figure 1. Drive (v5): cs_trials 1WprHV1RUWz4hdUSeK8qCiV7tUCGMLOiD, generation_fair_count 14qJIvXbCWaFCzdgsDIRCKOqcZ7XVb6s8, chess_ideas_cases 1HN4-bq7tMhH5Vyzwwcl68tcG2YOA6IB-, chess_chunkers 1y7nQHESSgzhEox6SiZ7M2GzzObwRXWYi.
+
+## Revision 6 (2026-11-25): synced to the paper "TRELLIS: Unsupervised Learning of Concepts and Chunks from Raw Experience"; 36 main slides, 13 backups (49 in all)
+Built from docs/talk/build/psych_spec.json (slides_helper.py build) and docs/talk/build/assemble.pl. Changes:
+- 1: title is the paper title; subtitle "Chess, children's stories and five psychological experiments, learned one experience at a time"; title box 1.85 in tall (three lines at 36 pt).
+- 8 (new) Addenda to the Theory: the paper's six addenda, three for version 2 (parsing, generation, learning) and three for the memory studies (short-term memory of a few chunks, familiarity = stored chunk weight, recall of a damaged chunk from its concept and surviving parts).
+- 30 (new) Five Psychological Experiments: summary table from paper Table tab:psych (chess recall, adult and infant segmentation, digit span, artificial grammar).
+- 31 (new) Word Segmentation Tracks Length and Exposure: paper Table tab:seg (Pearson r with Frank et al. 2010 condition means; TRELLIS, concepts off, two transitional-probability models, lexical model, PARSER, TRACX).
+- 32 (new) Digit Span Stalls Under EPAM's Storage Rule: confs/trellis-v2/paper/figures/digit_span_curve.png (paper Figure fig:digitspan, P3g held-out seeds 23/29/31), Drive 1eObh5UrT4b3YzftlmYmirl514_uTwmjo shared anyone-with-link reader; span 16.6 at session 865, random labels 16.0, 8 s per chunk 69.8.
+- 33 (new) Grammar Learning Shows Chunk Strength Only: grammaticality 22.0 vs 1.4, interaction 24.7 vs 23.6, change with training 9.2 vs -8.8; edge chunk strength 21.5; transitional probabilities r = .80 against .64.
+- 34 Related and Future Research: fourth open question (limit on memory); table and boxes moved up 0.25 in; notes add the same question.
+- 35 Concluding Remarks: first bullet "Version 2 keeps the postulates of version 1 and adds six addenda."; new bullet on the psychological studies; notes add one sentence.
+- 36 References: Frank et al. 2010, Knowlton & Squire 1996, Meulemans & Van der Linden 1997, Richman et al. 1995, Saffran et al. 1996 added (bib entries still marked NOT RE-CHECKED in refs.bib except Frank); 11 pt, box moved up.
+- Slide numbers renumbered 9-29 and 34-49. Speaker notes written for slides 8 and 30-33.
