@@ -2154,8 +2154,87 @@ class Trellis3:
             out.append(idx)
         return out[0], out[1]
 
+    def _r233_members(self, weight: str = "used"):
+        """Content concept id -> [(composite record, weight)] for every committed composite below it (r233)."""
+        stamp = (len(self.records), weight)
+        memo = self.__dict__.get("_r233_mem")
+        if memo is not None and memo[0] == stamp:
+            return memo[1]
+        mem: Dict[int, List[Tuple["Elem", float]]] = {}
+        for e in self.records:
+            if e.token is not None or e.cleaf is None:
+                continue
+            w = e.used if weight == "used" else e.weight
+            if w <= 0:
+                continue
+            n = e.cleaf
+            while n is not None:
+                mem.setdefault(n.id, []).append((e, w))
+                n = n.parent
+        self.__dict__["_r233_mem"] = (stamp, mem)
+        return mem
+
+    def compose(self, rng: Optional[random.Random] = None, cbits: Optional[float] = None, pair: str = "indep",
+                weight: str = "used", max_depth: int = 12, root_bits: Optional[float] = "same") -> Optional[List[str]]:
+        """r233: generation by composing stored chunks through the content taxonomy. A whole experience is drawn
+        from the content root (SENT). A composite is expanded through the content concept that holds it, read at
+        level ``cbits`` (-log2 of its share of the content root; None = its own leaf): the left part comes from
+        one committed member of that concept and the right part from another (``pair="indep"``) or the same
+        (``pair="same"``) member, each drawn in proportion to its count. A word part is emitted. The concept
+        keeps what its members share (how their parts are named); drawing the two parts from different members
+        makes new combinations of them. At the top, members are whole experiences only. ``root_bits``: the level
+        for the whole experience ("same" = cbits)."""
+        rng = rng or self.rng
+        mem = self._r233_members(weight)
+        root_c = max(self.cnt.root.count, 1e-9)
+        sents = {r for r, c in self.cnt.passive(self.cnt.root, SENT).items() if c > 0}
+
+        def lift(node, b):
+            if b is None:
+                return node
+            while node.parent is not None and -math.log2(max(node.count, 1e-9) / root_c) > b:
+                node = node.parent
+            return node
+
+        def draw(items):
+            tot = sum(w for _, w in items)
+            if tot <= 0:
+                return None
+            t = rng.random() * tot
+            for e, w in items:
+                t -= w
+                if t <= 0:
+                    return e
+            return items[-1][0]
+
+        def expand(e, d, top=False):
+            if e.token is not None:
+                return [e.token]
+            if d > max_depth or e.cleaf is None:
+                return expand(e.left, d + 1) + expand(e.right, d + 1) if e.left is not None else None
+            b = (cbits if root_bits == "same" else root_bits) if top else cbits
+            node = lift(e.cleaf, b)
+            ms = mem.get(node.id, [])
+            if top:
+                ms = [(m, w) for m, w in ms if m.rid in sents]
+            if not ms:
+                ms = [(e, 1.0)]
+            m1 = draw(ms)
+            m2 = m1 if pair == "same" else draw(ms)
+            a, c = expand(m1.left, d + 1), expand(m2.right, d + 1)
+            return a + c if a is not None and c is not None else None
+
+        pool = [(self.records[r], c) for r, c in self.cnt.passive(self.cnt.root, SENT).items() if c > 0]
+        if not pool:
+            return None
+        return expand(draw(pool), 0, top=True)
+
     def generate_tree(self, *args, **kwargs):
-        """Generation (``_generate_tree``); with repair_use the records it draws are marked as used."""
+        """Generation (``_generate_tree``); with repair_use the records it draws are marked as used.
+        r233: ``compose=dict(...)`` generates by ``compose`` instead (content-taxonomy composition)."""
+        if "compose" in kwargs:
+            ck = dict(kwargs["compose"])
+            return self.compose(args[0] if args else kwargs.get("rng"), **ck)
         if not self.repair_use:
             return self._generate_tree(*args, **kwargs)
         self.records.marking = True
@@ -2176,7 +2255,8 @@ class Trellis3:
                       sibling_window: int = 0, after: Optional[Sequence[str]] = None,
                       after_level: int = 0, after_mode: str = "next",
                       story_beta: float = 1.0, story_fill: Optional[float] = None,
-                      story_window: bool = False, join_check: bool = False) -> Optional[List[str]]:
+                      story_window: bool = False, join_check: bool = False,
+                      bits: Optional[float] = None, word_bits: Optional[float] = None) -> Optional[List[str]]:
         """Expansive generation from the two hierarchies alone. Every step reads
         statistics held by concepts: a whole experience is drawn from the content
         root (SENT); a content concept gives where its parts stood (LPART, RPART:
@@ -2298,6 +2378,13 @@ class Trellis3:
                         break
                     node = node.parent
                 return node
+            if choose == "bits":
+                # r233: the deepest ancestor whose information level, -log2 of its share of
+                # the context root, is at most ``bits`` (the level read of the r214 dials)
+                node, root_c = leaf, max(self.ctx.root.count, 1e-9)
+                while node.parent is not None and -math.log2(max(node.count, 1e-9) / root_c) > bits:
+                    node = node.parent
+                return node
             if choose == "best":
                 return max(path_scores(leaf), key=lambda t: t[0])[1]
             if choose == "match":
@@ -2397,8 +2484,25 @@ class Trellis3:
         last: List[Optional[tuple]] = [None]
         right_desc: Dict[tuple, dict] = {}
 
+        _rw = self.__dict__.get("_r233_rep")
+        if _rw is None or _rw[0] != len(self.records):
+            _rw = (len(self.records), {})
+            self.__dict__["_r233_rep"] = _rw
+        rep_word: Dict[str, Elem] = _rw[1]
+
         def as_elem(f: tuple) -> Elem:
-            return Elem((0, 1), token=f[1]) if f[0] == "w" else self.records[f[1]]
+            if f[0] != "w":
+                return self.records[f[1]]
+            # r233: a word filler stands for one of its stored occurrences (the one in its most
+            # populated context leaf), so it can be named and described as a part; a bare Elem
+            # has no context instance to sort
+            if not rep_word:
+                for r_ in self.records:
+                    if r_.token is not None and r_.leaf is not None and r_.ctx is not None:
+                        o_ = rep_word.get(r_.token)
+                        if o_ is None or r_.leaf.count > o_.leaf.count:
+                            rep_word[r_.token] = r_
+            return rep_word.get(f[1]) or Elem((0, 1), token=f[1])
 
         def sibling_concept() -> Optional[CobwebNode]:
             """Where the frozen left part's partial content instance sorts, ``sibling``
@@ -2538,6 +2642,24 @@ class Trellis3:
                 if not fills:                      # the chosen concept holds none of this kind
                     node = leaf
                     fills = {f: c for f, c in self.ctx.passive(node, FILL).items() if (f[0] == "w") == primitive}
+                if word_bits is not None and primitive and self.records[where[0]].token is not None \
+                        and getattr(self, "word_tree", None) is not None:
+                    # r233: a word part is named by the word-taxonomy class (at ``word_bits``) of
+                    # the word stored there, and filled by any word of that class, in
+                    # proportion to its count in the stream (the chunk keeps its structure,
+                    # the concept supplies new fillers)
+                    cls = self.__dict__.setdefault("_r233_cls", {})
+                    if word_bits not in cls:
+                        wt = self.word_tree
+                        by = {}
+                        for w_ in wt.words:
+                            by.setdefault(wt.class_of(w_, b=word_bits), []).append(w_)
+                        cls[word_bits] = ({w_: k_ for k_, ws_ in by.items() for w_ in ws_}, by)
+                    of, by = cls[word_bits]
+                    k_ = of.get(self.records[where[0]].token)
+                    if k_ is not None:
+                        ec = self.emit_counts or {}
+                        fills = {("w", w_): float(ec.get(w_, 1)) for w_ in by[k_]}
                 if fill_name and primitive and self.records[where[0]].token is not None:
                     # a word slot: weight each candidate word by how much its learned
                     # representation overlaps that of the word stored in the slot: its

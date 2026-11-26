@@ -13,6 +13,16 @@ import r230_grammar as G  # noqa: E402
 from trellis2.trellis3_r223 import Trellis3R223  # noqa: E402
 
 R.Trellis3R214 = Trellis3R223
+if os.environ.get("R233_KW"):        # r233: the learner with Trellis3R233 options (parse_min_bits, chosen_mode); default unchanged
+    import json as _json
+    from trellis2.trellis3_r233 import Trellis3R233
+    _KW = _json.loads(os.environ["R233_KW"])
+
+    class _R233(Trellis3R233):
+        def __init__(self, *a, **k):
+            super().__init__(*a, **{**_KW, **k})
+    R.Trellis3R214 = _R233
+    Trellis3R223 = _R233
 A0 = "# stories as lists of sentences (as read_sentences splits them)"
 A1 = "uni, pair, n_sent = Counter(), Counter(), 0"
 INJECT = ("_G230 = _r230.load_corpus(seed, n)\n"
@@ -28,6 +38,10 @@ if __name__ == "__main__":
     B0 = "ret_c, _ = cross(P, ret)"
     assert src.count(B0) == 1
     src = src.replace(B0, B0 + "\nret_c = rand_c if ret_c is None else ret_c      # r230: sentences are independent, no stored next sentences")
+    T0 = 'L.generate_tree(g_rng, index=ix, fill_name=FILL, **({"after": p} if cond else {}), **{"choose": "leaf", **arm})'
+    if src.count(T0) == 1:    # r233: an arm may set fill_name (False = fill a part from its concept's counts alone); default unchanged
+        src = src.replace(T0, 'L.generate_tree(g_rng, index=ix, fill_name=arm.get("fill_name", FILL), **({"after": p} if cond else {}), '
+                              '**{"choose": "leaf", **{k_: v_ for k_, v_ in arm.items() if k_ != "fill_name"}})')
     G.install_nltk_stub()
     sys.argv = [R.SRC] + sys.argv[1:]
     g = {"__name__": "__main__", "__file__": R.SRC, "_R214": Trellis3R223, "_r214_start": R3._start, "_r214_end": R3._end,

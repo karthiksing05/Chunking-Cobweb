@@ -1,0 +1,490 @@
+{
+ "seed": 23,
+ "baselines": {
+  "right-branching": {
+   "recall": 0.523,
+   "crossing": 0.5,
+   "exact": 0.0
+  },
+  "left-branching": {
+   "recall": 0.477,
+   "crossing": 0.5,
+   "exact": 0.246
+  },
+  "random": {
+   "recall": 0.42,
+   "crossing": 0.51,
+   "exact": 0.172
+  }
+ },
+ "trellis": {
+  "125": {
+   "recall": 0.837,
+   "crossing": 0.15,
+   "exact": 0.46
+  },
+  "250": {
+   "recall": 0.843,
+   "crossing": 0.146,
+   "exact": 0.482
+  },
+  "500": {
+   "recall": 0.846,
+   "crossing": 0.143,
+   "exact": 0.492
+  },
+  "1000": {
+   "recall": 0.854,
+   "crossing": 0.135,
+   "exact": 0.518
+  },
+  "2000": {
+   "recall": 0.896,
+   "crossing": 0.093,
+   "exact": 0.642
+  },
+  "4000": {
+   "recall": 0.917,
+   "crossing": 0.071,
+   "exact": 0.702
+  }
+ },
+ "examples": {
+  "1000": [
+   {
+    "s": "the woman hugs the hungry farmer",
+    "tree": [
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      3
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      6
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      2
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      3,
+      6
+     ]
+    ]
+   },
+   {
+    "s": "the small teachers cook a cookie",
+    "tree": [
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      3
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      6
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      3
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      6
+     ]
+    ]
+   },
+   {
+    "s": "the birds eat the cookies",
+    "tree": [
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      3
+     ],
+     [
+      3,
+      5
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      2
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ]
+   },
+   {
+    "s": "the farmers sleep",
+    "tree": [
+     [
+      0,
+      2
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      2
+     ]
+    ]
+   },
+   {
+    "s": "the man smiles",
+    "tree": [
+     [
+      0,
+      2
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      2
+     ]
+    ]
+   },
+   {
+    "s": "the quiet farmer bakes the apple",
+    "tree": [
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      3
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      6
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      3
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      6
+     ]
+    ]
+   },
+   {
+    "s": "a small cat runs",
+    "tree": [
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      3
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      3
+     ]
+    ]
+   },
+   {
+    "s": "the teacher hugs the teachers",
+    "tree": [
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      3
+     ],
+     [
+      3,
+      5
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      2
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ]
+   }
+  ],
+  "4000": [
+   {
+    "s": "the woman hugs the hungry farmer",
+    "tree": [
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      3
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      6
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      2
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      3,
+      6
+     ]
+    ]
+   },
+   {
+    "s": "the small teachers cook a cookie",
+    "tree": [
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      3
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      6
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      3
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      6
+     ]
+    ]
+   },
+   {
+    "s": "the birds eat the cookies",
+    "tree": [
+     [
+      0,
+      2
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      2
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ]
+   },
+   {
+    "s": "the farmers sleep",
+    "tree": [
+     [
+      0,
+      2
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      2
+     ]
+    ]
+   },
+   {
+    "s": "the man smiles",
+    "tree": [
+     [
+      0,
+      2
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      2
+     ]
+    ]
+   },
+   {
+    "s": "the quiet farmer bakes the apple",
+    "tree": [
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      3
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      6
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      3
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      6
+     ]
+    ]
+   },
+   {
+    "s": "a small cat runs",
+    "tree": [
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      3
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      3
+     ]
+    ]
+   },
+   {
+    "s": "the teacher hugs the teachers",
+    "tree": [
+     [
+      0,
+      2
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      2
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ]
+   }
+  ]
+ }
+}
