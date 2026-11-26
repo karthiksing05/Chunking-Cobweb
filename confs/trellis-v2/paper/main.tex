@@ -56,8 +56,10 @@ experiences without parse trees, labels, or gradients. The system parses by cons
 every segmentation that its memory allows, generates from the same memory, and learns by
 storing each candidate chunk with its posterior probability. We evaluate it on chess
 positions, on children's stories, on a controlled grammar, and on five classic
-psychological experiments. On the grammar, one pass of the system recovers .93 of the
+psychological experiments. On a grammar of simple clauses, one pass of the system recovers .93 of the
 constituents of unseen sentences, ahead of the constituent-context model after 20 passes.
+On a second grammar with relative clauses and noun modifiers, it matches that model on
+sentences without them but brackets few of the nested constructions.
 One pass over exact chunks and contexts without concepts parses worse than
 right-branching, restricting the system to specific concepts or removing its stored
 chunks lowers recall, and a generator that expands the chunks inherits their quality. In
@@ -99,7 +101,9 @@ will see, the removal studies on children's stories do not support this hypothes
 parses of a controlled grammar with known trees support it in part. There, one pass
 over exact chunks and their contexts without concepts parses worse than right-branching,
 restricting \trellis{} to specific concepts lowers its recall, and its stored chunks
-raise the recall that its concepts reach alone.
+raise the recall that its concepts reach alone. A second grammar, whose relative clauses
+and noun modifiers nest inside the subject, keeps these findings but shows that one pass
+learns few of the nested constructions.
 
 In earlier work, \citet{singaravadivelan-langley-acs} proposed a theory that links
 concepts and chunks, along with \trellis{}, a system that implements it. \trellis{} keeps
@@ -130,7 +134,9 @@ settings. On a controlled grammar with known trees, chunks learned from the raw 
 recover .93 of the constituents of unseen sentences after 4,000 sentences, ahead of the
 constituent-context model of \citet{klein-manning-ccm} after 20 passes, and a
 generator that expands those chunks writes more meaningful new sentences when general
-concepts shaped them. In chess, the learned chunks carry the compression of positions and the
+concepts shaped them, or when gold trees rather than right-branching ones did.
+On a second grammar with nested constructions, the same learner falls well behind that
+model. In chess, the learned chunks carry the compression of positions and the
 recall pattern that Chase and Simon observed, and they encode recognizable chess ideas,
 although byte-pair coding and a standard compressor code most test sets in fewer bits.
 In children's stories, the chunks do not shorten the code, the concepts support the
@@ -466,19 +472,22 @@ We attempted 1,600 sentences per learner after 1,000 sentences with two generato
 The tree generator of version 1 draws a stored sentence chunk and expands each of its parts into a stored chunk that fills the same slot, down to words, and it gives up when no stored chunk fits. The pair-gated word generator of Section~\ref{sec:gen} reads words and their contexts and expands no chunks.
 
 \begin{table}[!htbp]
-\caption{Generation from the controlled grammar after 1,000 sentences, with the concepts available to the parse during learning restricted to at least $m$ bits below the root (configuration C13). Means over six seeds of 1,600 attempts each. The tree generator expands stored chunks; ``written'' counts attempts that produced a sentence, and its shares are among written sentences that are not training sentences. The word generator is constrained to new sentences and writes all 1,600. New head pairs is the share of new sentences that are meaningful and join a subject and verb, a verb and object, or an adjective and noun never seen together in training.}
+\caption{Generation from the controlled grammar after 1,000 sentences, with the concepts available to the parse during learning restricted to at least $m$ bits below the root, or with the parse during learning forced to one given tree per sentence (configuration C13). Means over six seeds of 1,600 attempts each. The tree generator expands stored chunks; ``written'' counts attempts that produced a sentence, and its shares are among written sentences that are not training sentences. The word generator is constrained to new sentences and writes all 1,600. New head pairs is the share of new sentences that are meaningful and join a subject and verb, a verb and object, or an adjective and noun never seen together in training.}
 \label{tab:controlled-gen}
 \begin{center}
 \footnotesize
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lcccccc}
 \toprule
  & \multicolumn{5}{c}{Tree generator (chunks)} & Word generator \\
-Concepts in the parse & Written & New & Meaningful & Syntax-only & New head pairs & Meaningful \\
+Parse during learning & Written & New & Meaningful & Syntax-only & New head pairs & Meaningful \\
 \midrule
-all & 1,564 & .49 & .64 & .25 & .031 & .71 \\
-$m \geq 3$ bits & 1,474 & .49 & .57 & .28 & .032 & .70 \\
-$m \geq 6$ bits & 842 & .41 & .40 & .49 & .018 & .70 \\
-$m \geq 12$ bits & 807 & .43 & .37 & .49 & .018 & .70 \\
+\trellis{}, all concepts & 1,564 & .49 & .64 & .25 & .031 & .71 \\
+\quad concepts at $m \geq 3$ bits & 1,474 & .49 & .57 & .28 & .032 & .70 \\
+\quad concepts at $m \geq 6$ bits & 842 & .41 & .40 & .49 & .018 & .70 \\
+\quad concepts at $m \geq 12$ bits & 807 & .43 & .37 & .49 & .018 & .70 \\
+Forced to the gold tree & 1,437 & .56 & .58 & .28 & .028 & .70 \\
+Forced to the right-branching tree & 977 & .48 & .44 & .43 & .017 & .70 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -488,7 +497,44 @@ Table~\ref{tab:controlled-gen} shows the result. With all concepts, .64 of the t
 The lost share moves to syntax-only sentences, which break a selectional restriction, while the share that breaks the grammar stays between .11 and .15. At six or more bits about half of the attempts also find no chunk to expand.
 The word generator, which reads the same memory but expands no chunks, does not move (.71 against .70, interval for the difference $-$.013 to +.024). The loss therefore travels through the chunks.
 At six bits and above, the parses during learning sit near the floor of Table~\ref{tab:controlled-parse}, so those rows compare good chunks with nearly arbitrary ones; the row at three bits compares two working parsers.
+To compare chunks from two working parsers of known quality, we also forced the parse during learning to one given tree per sentence and stored that tree alone: the gold tree, completed to the right inside flat noun phrases, or the right-branching tree, which scores F1 .62 on this grammar.
+Chunks from the gold tree give .58 meaningful new sentences against .44 from the right-branching tree (difference .14, interval .07 to .20), and the tree generator built on right-branching chunks gives up on .39 of its attempts against .10. The word generator again does not move (difference .000, interval $-$.010 to +.011).
+\trellis{}'s own parse, which stores every candidate chunk by its posterior, generates better than the forced gold tree (.64 against .58, difference .07, interval .02 to .11). Because the forced arms store one tree per sentence, that comparison mixes the tree with the storage rule, and we do not read it as a better parse.
 The tree generator also makes new combinations that the word generator rarely makes. Among its new sentences, .031 are meaningful and join a subject and verb, a verb and object, or an adjective and noun that never met in training, against .004 to .006 for the word generator. Fresh samples from the grammar reach .16 (seeds 13 and 17), so most of the tree generator's new sentences recombine pairs that it has seen.
+
+\paragraph{A harder grammar.} The grammar above suits a parser that brackets the subject and then branches right. A second grammar breaks that shape with three constructions: a noun modifier introduced by \emph{with} (``a farmer with the cake''), a relative clause on the subject introduced by \emph{that} (``some boys that buy a chair''), and a verb adverbial introduced by \emph{at} (``at the house''). Each preposition attaches one way only, so the gold tree is still a function of the string. Sentences run from three to 14 words, and two thirds of the test sentences contain at least one of the new constructions. Right-branching scores F1 .43. Learners, baselines, seeds, and test design follow the first grammar (configuration C14).
+
+\begin{table}[!htbp]
+\caption{Parses of 500 unseen sentences of the second controlled grammar (configuration C14). The first three columns give recall / exact / pooled F1 as in Table~\ref{tab:controlled-parse}. The last two give recall at 4,000 sentences on the 173 test sentences that use only the constructions of the first grammar (simple) and on the 327 that use a noun modifier, relative clause, or verb adverbial (complex). Means over six seeds. Right-branching scores .47, 0, and .43 at every size, and .58 and .42 on simple and complex sentences.}
+\label{tab:controlled-parse2}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccccc}
+\toprule
+ & & & & \multicolumn{2}{c}{Recall at 4,000} \\
+Parser & 125 sentences & 1,000 sentences & 4,000 sentences & Simple & Complex \\
+\midrule
+\trellis{} (one pass) & .57 / .21 / .47 & .58 / .19 / .48 & .61 / .21 / .49 & .84 & .49 \\
+\quad chunks off & .53 / .13 / .48 & .56 / .17 / .46 & .55 / .19 / .45 & .79 & .44 \\
+\quad concepts at $m \geq 3$ bits & .38 / .04 / .35 & .50 / .11 / .43 & .58 / .22 / .47 & & \\
+\quad concepts at $m \geq 6$ bits & .23 / .00 / .20 & .32 / .00 / .29 & .55 / .16 / .45 & & \\
+Constituent-context model, initial counts & .24 / .02 / .22 & .31 / .01 / .28 & .35 / .01 / .31 & & \\
+\quad one pass & .49 / .10 / .44 & .58 / .14 / .53 & .62 / .15 / .58 & & \\
+\quad 20 passes & .59 / .13 / .53 & .72 / .25 / .64 & .83 / .40 / .75 & .84 & .82 \\
+Exact-chunk memory, no contexts & .49 / .10 / .42 & .52 / .09 / .45 & .53 / .08 / .47 & & \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+Table~\ref{tab:controlled-parse2} shows that the first result does not extend to these constructions. \trellis{} falls behind the constituent-context model with 20 passes at every size (F1 $-$.25 at 4,000 sentences, interval $-$.27 to $-$.24) and behind its one-pass version from 1,000 sentences on ($-$.08 at 4,000, $-$.10 to $-$.07). It leads right-branching by only .07 (.04 to .09), and it barely improves with data (F1 .47 at 125 sentences, .49 at 4,000).
+The loss sits in the new constructions. On the simple sentences \trellis{} brackets .84 of the gold constituents, level with the 20-pass model (difference +.01, interval $-$.07 to +.08) and ahead of right-branching by .27 (.20 to .34). On the complex sentences it brackets .49 against .82 ($-$.33, $-$.35 to $-$.31).
+It brackets almost no relative clause (.02, against .21 for the model) and almost none of the verb phrases inside them (.00 against .62), and a third of the \emph{with} phrases (.33 against .94).
+In the trees of seed 13, \trellis{} brackets a long subject as a chain of growing prefixes, as in [[[some boys] that] buy] \dots, and then branches right. That shape costs nothing in the first grammar, where noun phrases are flat and their inner brackets are not scored, and here it crosses every relative clause and modifier. The model, even after one pass, estimates every span from counts over the whole corpus, which the online learner never revisits.
+
+The other findings of the first grammar hold. The initial counts of the constituent-context model, exact chunks and contexts read once, again score below right-branching (F1 $-$.11 at 4,000 sentences, interval $-$.13 to $-$.10). Stored chunks still raise the parse, by .04 in F1 at 4,000 sentences (.03 to .06) and by .06 in recall on the complex sentences (.02 to .09). Restricting the concepts to three or more bits lowers F1 by .11 at 125 sentences (.06 to .17), and the two are level by 1,000 sentences. The exact-chunk memory now leads right-branching slightly (+.04, .02 to .05).
+The interweaving we report therefore holds for constituents that the learner's concepts describe. One pass over 4,000 sentences did not learn the constructions nested inside the subject, while the 20-pass model, which estimates over the whole corpus, brackets .82 of the constituents of the complex sentences, though only .21 of the relative clauses themselves.
 
 \subsection{Chunk Biographies}
 
@@ -1232,13 +1278,17 @@ parses .75 of them exactly, ahead in F1 of the constituent-context model after 2
 from 2,000 sentences on. One pass over exact chunks and contexts without concepts parses
 below right-branching, restricting the parse to concepts three or more bits below the root
 lowers recall by .11, and removing the stored chunks lowers it by .22, although not by a
-margin in F1 that our rule calls a lead. Composition of new sentences thus runs largely
+margin in F1 that our rule calls a lead. On a second grammar whose relative clauses and
+noun modifiers nest inside the subject, \trellis{} matches the 20-pass model on sentences
+without them (recall .84 against .84) and trails it by .33 on sentences with them, so the
+result covers constituents that its concepts describe. Composition of new sentences thus runs largely
 through the general concepts, while the concepts alone still find .72 of the
 constituents. Generation from the same memory follows its chunks. When the parse
 sees only specific concepts during learning, the share of meaningful new sentences that
 the tree generator writes falls from .64 to .40, while the word generator, which expands
 no chunks, stays at .70; with milder restriction (three bits) the share still falls,
-from .64 to .57. In chess, chunks without concepts keep all but 0.4
+from .64 to .57. Chunks from gold trees, stored one tree per sentence, give .58 against .44
+from right-branching trees, with the word generator again unmoved. In chess, chunks without concepts keep all but 0.4
 to 0.7 bits, and recall without concepts is zero by construction, whereas in language
 removing both shortens the code. With 250 sentences, the system writes new,
 judged-grammatical sentences about as often as matched LSTM and GPT models. It trails
@@ -1290,8 +1340,9 @@ configuration trails it by 3.9, and xz beats both on three of four test sets. We
 with a grammar-induction baseline, the constituent-context model in our own
 implementation, only on the controlled grammar, and we ran no compound probabilistic
 context-free grammar or data-oriented parser. That grammar has ten
-part-of-speech patterns and sentences of three to eight words, we ran one grammar, and
-the chunks-off loss in F1 varies from .03 to .38 across seeds. The language input is pre-segmented text
+part-of-speech patterns and sentences of three to eight words, and the chunks-off loss in F1
+varies from .03 to .38 across seeds. On the second grammar, one pass brackets .02 of the
+relative clauses and falls .25 in F1 behind the 20-pass model, and we did not run generation there. The language input is pre-segmented text
 with a 250-word vocabulary and sentences of at most eight words. In the psychological
 replications, the human means of the adult segmentation study come from reading a
 figure, and the infant looking times come from secondary sources. The digit-span study
@@ -1364,7 +1415,8 @@ C9 & Context-abstraction generator: the pair-gated word generator of C6a with th
 C10 & Standard chess configuration with chunks capped at one piece (chunks off) or leaf-only reads (concepts off); seeds 13, 17, 19, 4,000 positions & Table~S20 \\
 C11 & Chess position generator: the C5 learner, with positions drawn from distributions, regenerated from parses, or regenerated with the file or rank of each reference square redrawn; seeds 13 and 17, 500 to 4,000 positions & Figures~\ref{fig:law} and \ref{fig:boards}, Table~S17 \\
 C12 & Psychological replications: the learner of C3 without its story feature (which needs a previous sentence); a 12-syllable perceptual buffer and 12 participants per condition (adult segmentation), 16 infants; one learning step per presentation with 18 and 20 subjects (grammar learning); inside EPAM IV's procedure with one new chunk per list, seeds 13, 17, 19 (development) and 23, 29, 31 (held-out) (digit span) & Tables~\ref{tab:psych} and \ref{tab:seg}, Figure~\ref{fig:digitspan} \\
-C13 & Controlled-grammar parser: the learner of C3 with window 5, trained on 125 to 4,000 grammar sentences and tested with learning off on 500 unseen ones; variants chunks off (nothing stored), concepts restricted to at least $m$ bits below the root ($m = 3, 6, 9$ in parsing, $3, 6, 12$ in generation), and concepts off (leaf reads); seeds 13, 17, 19, 23, 29, 31; generation after 1,000 sentences with the version-1 tree generator (leaf reads) and the pair-gated word generator (window 5, exact emission, constrained to new sentences), 1,600 draws, exact judge & Tables~\ref{tab:controlled-parse} and \ref{tab:controlled-gen} \\
+C13 & Controlled-grammar parser: the learner of C3 with window 5, trained on 125 to 4,000 grammar sentences and tested with learning off on 500 unseen ones; variants chunks off (nothing stored), concepts restricted to at least $m$ bits below the root ($m = 3, 6, 9$ in parsing, $3, 6, 12$ in generation), and concepts off (leaf reads); in generation also the parse during learning forced to the gold tree (completed right-branching inside flat noun phrases and at the top) or to the right-branching tree, one tree per sentence stored at weight 1; seeds 13, 17, 19, 23, 29, 31; generation after 1,000 sentences with the version-1 tree generator (leaf reads) and the pair-gated word generator (window 5, exact emission, constrained to new sentences), 1,600 draws, exact judge & Tables~\ref{tab:controlled-parse} and \ref{tab:controlled-gen} \\
+C14 & Second controlled grammar: the grammar of C13 with a noun modifier introduced by \emph{with} (probability .2), a relative clause on the subject introduced by \emph{that} (.3), and a verb adverbial introduced by \emph{at} (.25), each attaching one way only; 3 to 14 words; learner, variants, baselines, seeds, and test set as C13; recall split by sentence type and construction on all six seeds at 4,000 sentences & Table~\ref{tab:controlled-parse2} \\
 \bottomrule
 \end{tabular}
 \end{center}

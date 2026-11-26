@@ -18,6 +18,11 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import r233_goldparse as GP  # noqa: E402
 import r230_grammar as G  # noqa: E402
 
+G2 = os.environ.get("R233_GRAMMAR") == "g2"
+SUF = "_g2" if G2 else ""
+if G2:
+    import r234_grammar2 as G  # noqa: E402,F811
+
 K = 0.01
 ITERS = 20
 
@@ -289,8 +294,8 @@ def main():
         if n == 1000:
             res["em_log_n1000"] = log
         print(json.dumps({"seed": seed, "n": n, **res["ccm"][n], "final_loglik": log[-1]["loglik"]}), flush=True)
-    os.makedirs("experiments/v3/results/story_gen/r233/unseen", exist_ok=True)
-    json.dump(res, open(f"experiments/v3/results/story_gen/r233/unseen/ccm{'_tags' if tags else ''}{'_mbr' if mbr else ''}{'_trans' if trans else ''}{'' if iters == ITERS else f'_it{iters}'}_s{seed}.json", "w", encoding="utf-8"), indent=1)
+    os.makedirs("experiments/v3/results/story_gen/r233/unseen" + ("_g2" if G2 else ""), exist_ok=True)
+    json.dump(res, open(f"experiments/v3/results/story_gen/r233/unseen{SUF}/ccm{'_tags' if tags else ''}{'_mbr' if mbr else ''}{'_trans' if trans else ''}{'' if iters == ITERS else f'_it{iters}'}_s{seed}.json", "w", encoding="utf-8"), indent=1)
 
 
 if __name__ == "__main__":

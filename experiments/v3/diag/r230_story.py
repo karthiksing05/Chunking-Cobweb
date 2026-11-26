@@ -21,6 +21,9 @@ if os.environ.get("R233_KW"):        # r233: the learner with Trellis3R233 optio
     class _R233(Trellis3R233):
         def __init__(self, *a, **k):
             super().__init__(*a, **{**_KW, **k})
+            if os.environ.get("R233_FORCE"):     # r233: learning-time parse forced to gold | rb (default off)
+                import r233_goldparse as _GP
+                self.force, self.force_gold = os.environ["R233_FORCE"], _GP.gold
     R.Trellis3R214 = _R233
     Trellis3R223 = _R233
 A0 = "# stories as lists of sentences (as read_sentences splits them)"

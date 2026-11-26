@@ -16,6 +16,11 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import r230_grammar as G  # noqa: E402
 import r233_goldparse as GP  # noqa: E402
 
+G2 = os.environ.get("R233_GRAMMAR") == "g2"
+SUF = "_g2" if G2 else ""
+if G2:
+    import r234_grammar2 as G  # noqa: E402,F811
+
 
 def counts(train):
     c = Counter()
@@ -76,8 +81,8 @@ def main():
         for name, f in (("count", sc_count), ("pmi", sc_pmi)):
             res[name][n] = GP.score([parse(s, f) for s in held], golds)
             print(json.dumps({"seed": seed, "n": n, "score": name, **res[name][n]}), flush=True)
-    os.makedirs("experiments/v3/results/story_gen/r233/unseen", exist_ok=True)
-    json.dump(res, open(f"experiments/v3/results/story_gen/r233/unseen/exactchunk_s{seed}.json", "w", encoding="utf-8"), indent=1)
+    os.makedirs("experiments/v3/results/story_gen/r233/unseen" + ("_g2" if G2 else ""), exist_ok=True)
+    json.dump(res, open(f"experiments/v3/results/story_gen/r233/unseen{SUF}/exactchunk_s{seed}.json", "w", encoding="utf-8"), indent=1)
 
 
 if __name__ == "__main__":

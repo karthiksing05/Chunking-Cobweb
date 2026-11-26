@@ -1,0 +1,62 @@
+{
+ "seed": 29,
+ "K": 0.01,
+ "iters": 1,
+ "transductive": false,
+ "tags": false,
+ "decode": "viterbi",
+ "ccm": {
+  "125": {
+   "recall": 0.485,
+   "crossing": 0.465,
+   "exact": 0.088,
+   "micro_P": 0.422,
+   "micro_F1": 0.454
+  },
+  "250": {
+   "recall": 0.505,
+   "crossing": 0.447,
+   "exact": 0.114,
+   "micro_P": 0.428,
+   "micro_F1": 0.461
+  },
+  "500": {
+   "recall": 0.527,
+   "crossing": 0.422,
+   "exact": 0.114,
+   "micro_P": 0.449,
+   "micro_F1": 0.483
+  },
+  "1000": {
+   "recall": 0.583,
+   "crossing": 0.37,
+   "exact": 0.124,
+   "micro_P": 0.497,
+   "micro_F1": 0.535
+  },
+  "2000": {
+   "recall": 0.612,
+   "crossing": 0.342,
+   "exact": 0.172,
+   "micro_P": 0.531,
+   "micro_F1": 0.571
+  },
+  "4000": {
+   "recall": 0.622,
+   "crossing": 0.333,
+   "exact": 0.172,
+   "micro_P": 0.537,
+   "micro_F1": 0.578
+  }
+ },
+ "em_log_n1000": [
+  {
+   "loglik": -590925.6392951958,
+   "map_objective": -596883.2945905764
+  },
+  {
+   "loglik": -585347.9234604861,
+   "map_objective": -591493.4782242775
+  }
+ ]
+}

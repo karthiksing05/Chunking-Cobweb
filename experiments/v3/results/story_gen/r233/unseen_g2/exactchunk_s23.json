@@ -1,0 +1,92 @@
+{
+ "seed": 23,
+ "held": 500,
+ "count": {
+  "125": {
+   "recall": 0.51,
+   "crossing": 0.441,
+   "exact": 0.128,
+   "micro_P": 0.397,
+   "micro_F1": 0.431
+  },
+  "250": {
+   "recall": 0.521,
+   "crossing": 0.426,
+   "exact": 0.11,
+   "micro_P": 0.415,
+   "micro_F1": 0.45
+  },
+  "500": {
+   "recall": 0.52,
+   "crossing": 0.423,
+   "exact": 0.104,
+   "micro_P": 0.413,
+   "micro_F1": 0.448
+  },
+  "1000": {
+   "recall": 0.526,
+   "crossing": 0.415,
+   "exact": 0.092,
+   "micro_P": 0.424,
+   "micro_F1": 0.46
+  },
+  "2000": {
+   "recall": 0.53,
+   "crossing": 0.41,
+   "exact": 0.104,
+   "micro_P": 0.424,
+   "micro_F1": 0.46
+  },
+  "4000": {
+   "recall": 0.533,
+   "crossing": 0.408,
+   "exact": 0.096,
+   "micro_P": 0.43,
+   "micro_F1": 0.467
+  }
+ },
+ "pmi": {
+  "125": {
+   "recall": 0.1,
+   "crossing": 0.879,
+   "exact": 0.004,
+   "micro_P": 0.075,
+   "micro_F1": 0.081
+  },
+  "250": {
+   "recall": 0.095,
+   "crossing": 0.883,
+   "exact": 0.004,
+   "micro_P": 0.072,
+   "micro_F1": 0.078
+  },
+  "500": {
+   "recall": 0.094,
+   "crossing": 0.884,
+   "exact": 0.004,
+   "micro_P": 0.068,
+   "micro_F1": 0.074
+  },
+  "1000": {
+   "recall": 0.101,
+   "crossing": 0.872,
+   "exact": 0.006,
+   "micro_P": 0.071,
+   "micro_F1": 0.077
+  },
+  "2000": {
+   "recall": 0.116,
+   "crossing": 0.854,
+   "exact": 0.006,
+   "micro_P": 0.081,
+   "micro_F1": 0.088
+  },
+  "4000": {
+   "recall": 0.117,
+   "crossing": 0.855,
+   "exact": 0.002,
+   "micro_P": 0.086,
+   "micro_F1": 0.093
+  }
+ }
+}

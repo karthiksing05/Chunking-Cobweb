@@ -42,6 +42,12 @@ def gold(s):
         out.add((k, len(s)))                       # object NP
     return {(a, b) for (a, b) in out if 2 <= b - a < len(s)}
 
+G2 = os.environ.get("R233_GRAMMAR") == "g2"
+SUF = "_g2" if G2 else ""
+if G2:
+    import r234_grammar2 as G  # noqa: E402,F811
+    gold = G.gold
+
 
 def tree_spans(chosen, n):
     return {(i, j) for (i, k, j) in chosen if 2 <= j - i < n}
@@ -125,8 +131,8 @@ def main():
         if n == ns[-1] or n == 1000:
             res.setdefault("examples", {})[n] = [{"s": " ".join(s), "tree": sorted(t), "gold": sorted(g)} for s, t, g in zip(held[:8], trees[:8], golds[:8])]
         print(json.dumps({"arm": arm, "n": n, **res["trellis"][n]}), flush=True)
-    os.makedirs("experiments/v3/results/story_gen/r233/unseen", exist_ok=True)
-    json.dump(res, open(f"experiments/v3/results/story_gen/r233/unseen/goldparse_s{seed}" + ("" if arm == "default" else f"_{arm}") + ".json", "w", encoding="utf-8"), indent=1)
+    os.makedirs("experiments/v3/results/story_gen/r233/unseen" + ("_g2" if G2 else ""), exist_ok=True)
+    json.dump(res, open(f"experiments/v3/results/story_gen/r233/unseen{SUF}/goldparse_s{seed}" + ("" if arm == "default" else f"_{arm}") + ".json", "w", encoding="utf-8"), indent=1)
 
 
 if __name__ == "__main__":
