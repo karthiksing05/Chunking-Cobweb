@@ -55,7 +55,11 @@ two linked taxonomies, one of concepts and one of chunks, from a raw stream of
 experiences without parse trees, labels, or gradients. The system parses by considering
 every segmentation that its memory allows, generates from the same memory, and learns by
 storing each candidate chunk with its posterior probability. We evaluate it on chess
-positions, on children's stories, and on five classic psychological experiments. In
+positions, on children's stories, on a controlled grammar, and on five classic
+psychological experiments. On the grammar, the system recovers .93 of the constituents of
+unseen sentences, ahead of the constituent-context model, and it needs both parts of its
+memory to do so: a memory of exact chunks parses worse than right-branching, and removing
+the stored chunks or the general concepts lowers recall. In
 chess, the chunks carry both the compression of positions and the recall advantage for
 real positions over random ones, although byte-pair coding and a standard compressor
 code most test sets in fewer bits. In children's stories, removing the chunks changes
@@ -90,7 +94,11 @@ save description by grouping instances that behave alike
 \citep{langley-concepts-chunks-2025}. We began this work with the hypothesis that neither
 saves much alone. A system with chunks but no concepts cannot relate a new chunk to older
 ones, and a system with concepts but no chunks has only single tokens to group. As we
-will see, the removal studies in this paper do not support this hypothesis.
+will see, the removal studies on children's stories do not support this hypothesis, but
+parses of a controlled grammar with known trees support it in part. There, a memory of
+exact chunks parses worse than right-branching, \trellis{} recognizes the constituents
+of new sentences only through its general concepts, and its stored chunks add to the
+constituents that the concepts find.
 
 In earlier work, \citet{singaravadivelan-langley-acs} proposed a theory that links
 concepts and chunks, along with \trellis{}, a system that implements it. \trellis{} keeps
@@ -116,8 +124,10 @@ because it is cheap at this length and supplies the posterior weights that learn
 stores. Whether those weights matter more than the best tree, and whether the full
 computation pays on longer inputs, remains untested.
 
-The other two questions receive more positive answers, which we report in three
-settings. In chess, the learned chunks carry the compression of positions and the
+The other two questions receive more positive answers, which we report in four
+settings. On a controlled grammar with known trees, chunks learned from the raw stream
+recover .93 of the constituents of unseen sentences after 4,000 sentences, ahead of the
+constituent-context model of \citet{klein-manning-ccm}. In chess, the learned chunks carry the compression of positions and the
 recall pattern that Chase and Simon observed, and they encode recognizable chess ideas,
 although byte-pair coding and a standard compressor code most test sets in fewer bits.
 In children's stories, the chunks do not shorten the code, the concepts support the
@@ -391,6 +401,54 @@ In general, the learners agree on the bracket set of held-out sentences at F1 of
 After 1,000 sentences, 82\% of the held-out parses differ from right-branching, and 66\% are neither right- nor left-branching (set S).
 Where they differ, they score .28 to .32 F1 against the NLTK reference, which is below right-branching on the same sentences (.45 to .48; set S).
 We make no claim that the departures are better, because the shallow-phrase reference cannot credit structure that its convention leaves unmarked.
+
+\subsection{Parses of Controlled Sentences}
+\label{sec:controlled-parse}
+
+Because the shallow-phrase reference cannot say whether a departure from it is right, we also parsed sentences whose trees we know. The main finding is that \trellis{} recovers the constituents of sentences it has never seen, and that it does so only when chunks and general concepts work together.
+
+A context-free grammar with 147 words generates the sentences. It enforces number agreement and verb frames, and selectional restrictions supply the meaning, in that each verb restricts the types of its subject and object and each adjective restricts its noun (Section~\ref{sec:controlled-grammar} judges generation with the same grammar).
+The gold tree of a sentence marks its subject noun phrase, its verb phrase, any prepositional phrase, and its object noun phrase. Noun phrases are flat, so a learner that brackets ``big dog'' inside ``the big dog'' loses precision but not recall.
+Each learner reads the first $n$ sentences of its own stream with no trees or tags and then parses, with learning off, 500 held-out sentences that never occur among the first 4,000 sentences of that stream (configuration C13).
+We report the share of gold constituents that the chosen tree brackets (recall), the share of sentences parsed exactly, and bracket F1 pooled over sentences, on six seeds (13, 17, 19, 23, 29, 31) with paired 95\% $t$ intervals. No setting was tuned on these seeds.
+
+We compare \trellis{} with right-branching, left-branching, and random binary trees and with the constituent-context model of \citet{klein-manning-ccm}, which we trained on the same words with its split-uniform initial distribution over trees and 20 passes of expectation maximization.
+To ask what chunks can do without concepts, we also built an exact-chunk memory. It stores every contiguous word sequence of the training sentences with its count, and it parses a sentence into the binary tree whose spans have the largest summed log count.
+
+\begin{table}[!htbp]
+\caption{Parses of 500 unseen sentences of the controlled grammar (configuration C13). Each cell gives recall of gold constituents, the share of sentences parsed exactly, and pooled bracket F1, as means over six seeds. The concept rows restrict the parse to concepts at least $m$ bits below the root of their taxonomy. Right-branching scores .64, 0, and .62 at every size.}
+\label{tab:controlled-parse}
+\begin{center}
+\footnotesize
+\begin{tabular}{lccc}
+\toprule
+Parser & 125 sentences & 1,000 sentences & 4,000 sentences \\
+\midrule
+\trellis{} & .78 / .42 / .70 & .91 / .68 / .81 & .93 / .75 / .83 \\
+\quad chunks off & .67 / .30 / .63 & .71 / .40 / .67 & .72 / .45 / .68 \\
+\quad concepts at $m \geq 3$ bits & .59 / .22 / .57 & .74 / .38 / .71 & .83 / .57 / .78 \\
+\quad concepts at $m \geq 6$ bits & .36 / .00 / .34 & .42 / .02 / .40 & .72 / .38 / .68 \\
+\quad concepts at $m \geq 9$ bits & .36 / .00 / .34 & .36 / .00 / .34 & .38 / .00 / .36 \\
+Exact-chunk memory & .58 / .21 / .54 & .53 / .15 / .49 & .52 / .10 / .48 \\
+Constituent-context model & .80 / .51 / .75 & .89 / .64 / .79 & .90 / .65 / .80 \\
+\quad with gold part-of-speech tags & .92 / .69 / .82 & .92 / .69 / .82 & .92 / .69 / .82 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+Table~\ref{tab:controlled-parse} gives the results. After 4,000 sentences, \trellis{} brackets .93 of the gold constituents and parses .75 of the unseen sentences exactly, against none for right-branching.
+It trails the constituent-context model early (F1 $-$.050 at 125 sentences, interval $-$.105 to +.005), is level with it at 1,000 sentences (+.023, $-$.016 to +.063), and leads it at 2,000 and 4,000 sentences (+.035 and +.038, intervals +.005 to +.065 and +.007 to +.070).
+At 4,000 sentences it matches the constituent-context model given gold part-of-speech tags, although \trellis{} sees only words and learns in a single pass.
+
+The exact-chunk memory shows that chunks alone do not parse. It scores below right-branching at 4,000 sentences (F1 $-$.137, interval $-$.147 to $-$.128), and it gets worse as data grow (F1 .54 at 125 sentences, .48 at 4,000).
+New sentences rarely repeat their constituents exactly, whereas pairs that cross a constituent boundary, such as a verb and the determiner that follows it, recur often.
+Concepts without chunks parse, but less well. Removing every stored chunk lowers recall by .22 at 4,000 sentences (interval .04 to .39), although the F1 interval includes zero ($-$.012 to +.320) because the loss ranges from .03 to .38 across seeds.
+
+The concept rows locate the signal. A candidate chunk earns credit in the parse when a concept describes its parts in fewer bits than the root does, after paying the bits it costs to name that concept.
+Restricting the parse to concepts at least three bits below the root lowers recall by .11 at 4,000 sentences (interval .07 to .14). At six bits the parser stays at its floor until 1,000 sentences and reaches .72 recall only at 4,000, and at nine bits it never leaves the floor.
+At the floor no concept saves more than it costs, every candidate earns the same credit, and the parser returns one fixed shape that never brackets the subject. Removing the concepts entirely gives the same floor (.36 recall, .34 F1, at every size).
+Specific concepts thus need far more data to do what general ones do, and the chunks that \trellis{} finds in new sentences are the chunks its general concepts let it recognize.
 
 \subsection{Chunk Biographies}
 
@@ -764,6 +822,7 @@ Class sources that need no labels stay at .15 to .395 (Supplement, Table~S15 giv
 Supplement Table~S16 gives the regime shares by context reach and abstraction (configuration C9, seed 13, 1,000 sentences), and the syntax-only share never exceeds .245 in any of the 36 cells. A move-selection study gives no legal-but-poor regime in chess either (Supplement, Table~S11).
 
 \subsection{A Controlled Grammar with an Exact Judge}
+\label{sec:controlled-grammar}
 
 We hypothesized that the ceiling of .45 to .52 belongs to TinyStories and to judge 2, whose answers come from language models. To test this, we ran the same dial on a controlled grammar.
 A context-free grammar with 147 words generates sentences with number agreement and verb frames, and selectional restrictions supply the meaning. Each verb restricts the types of its subject and object, and each adjective restricts its noun.
@@ -1123,9 +1182,17 @@ size, no interval; Supplement, Table~S19). We suspect that a domain with recurri
 multi-part structure rewards chunks while short sentences do not, a hypothesis that
 remains untested.
 
-The removal studies therefore do not show the dependence that we hypothesized between
-chunks and concepts. Instead, the chunks carry the chess compression and recall, and
-the concepts carry story generation. In chess, chunks without concepts keep all but 0.4
+In chess and children's stories, the removal studies therefore do not show the
+dependence that we hypothesized between chunks and concepts. Instead, the chunks carry
+the chess compression and recall, and the concepts carry story generation. Parsing a
+controlled grammar with known trees shows the dependence in part. After 4,000 sentences,
+\trellis{} brackets .93 of the gold constituents of unseen sentences and parses .75 of
+them exactly, ahead of the constituent-context model in F1 from 2,000 sentences on. A
+memory of exact chunks parses below right-branching and gets worse with data, restricting
+the parse to specific concepts leaves it at a floor until it has seen 1,000 or more
+sentences, and removing the stored chunks lowers recall by .22. Composition of new
+sentences thus runs through the general concepts, while the concepts alone still find
+.72 of the constituents. In chess, chunks without concepts keep all but 0.4
 to 0.7 bits, and recall without concepts is zero by construction, whereas in language
 removing both shortens the code. With 250 sentences, the system writes new,
 judged-grammatical sentences about as often as matched LSTM and GPT models. It trails
@@ -1173,9 +1240,11 @@ not tie that ordering to the memory's own structure. The chess compression numbe
 from one seed. The shifted-position margin over byte-pair coding over shapes is
 comparable to the seed swing of 2.1 bits (seed 13 against the three-seed mean), in that
 the variant (configuration C7, 147.2 bits) leads it by 2.5 bits and the standard
-configuration trails it by 3.9, and xz beats both on three of four test sets. We ran no
-grammar-induction parsing baseline, such as the constituent-context model or the
-compound probabilistic context-free grammar. The language input is pre-segmented text
+configuration trails it by 3.9, and xz beats both on three of four test sets. We compared
+with a grammar-induction baseline, the constituent-context model, only on the controlled
+grammar, and we ran no compound probabilistic context-free grammar. That grammar has ten
+part-of-speech patterns and sentences of three to eight words, we ran one grammar, and
+the chunks-off loss in F1 varies from .03 to .38 across seeds. The language input is pre-segmented text
 with a 250-word vocabulary and sentences of at most eight words. In the psychological
 replications, the human means of the adult segmentation study come from reading a
 figure, and the infant looking times come from secondary sources. The digit-span study
@@ -1248,6 +1317,7 @@ C9 & Context-abstraction generator: the pair-gated word generator of C6a with th
 C10 & Standard chess configuration with chunks capped at one piece (chunks off) or leaf-only reads (concepts off); seeds 13, 17, 19, 4,000 positions & Table~S20 \\
 C11 & Chess position generator: the C5 learner, with positions drawn from distributions, regenerated from parses, or regenerated with the file or rank of each reference square redrawn; seeds 13 and 17, 500 to 4,000 positions & Figures~\ref{fig:law} and \ref{fig:boards}, Table~S17 \\
 C12 & Psychological replications: the learner of C3 without its story feature (which needs a previous sentence); a 12-syllable perceptual buffer and 12 participants per condition (adult segmentation), 16 infants; one learning step per presentation with 18 and 20 subjects (grammar learning); inside EPAM IV's procedure with one new chunk per list, seeds 13, 17, 19 (development) and 23, 29, 31 (held-out) (digit span) & Tables~\ref{tab:psych} and \ref{tab:seg}, Figure~\ref{fig:digitspan} \\
+C13 & Controlled-grammar parser: the learner of C3 with window 5, trained on 125 to 4,000 grammar sentences and tested with learning off on 500 unseen ones; variants chunks off (nothing stored), concepts restricted to at least $m$ bits below the root ($m = 3, 6, 9$), and concepts off (leaf reads); seeds 13, 17, 19, 23, 29, 31 & Table~\ref{tab:controlled-parse} \\
 \bottomrule
 \end{tabular}
 \end{center}

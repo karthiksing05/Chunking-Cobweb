@@ -1,0 +1,573 @@
+{
+ "seed": 23,
+ "arm": "noconcept",
+ "baselines": {
+  "right-branching": {
+   "recall": 0.618,
+   "crossing": 0.409,
+   "exact": 0.0,
+   "micro_P": 0.554,
+   "micro_F1": 0.609
+  },
+  "left-branching": {
+   "recall": 0.383,
+   "crossing": 0.591,
+   "exact": 0.112,
+   "micro_P": 0.266,
+   "micro_F1": 0.292
+  },
+  "random": {
+   "recall": 0.367,
+   "crossing": 0.547,
+   "exact": 0.092,
+   "micro_P": 0.3,
+   "micro_F1": 0.33
+  }
+ },
+ "trellis": {
+  "125": {
+   "recall": 0.346,
+   "crossing": 0.59,
+   "exact": 0.0,
+   "micro_P": 0.3,
+   "micro_F1": 0.329
+  },
+  "250": {
+   "recall": 0.346,
+   "crossing": 0.59,
+   "exact": 0.0,
+   "micro_P": 0.3,
+   "micro_F1": 0.329
+  },
+  "500": {
+   "recall": 0.346,
+   "crossing": 0.59,
+   "exact": 0.0,
+   "micro_P": 0.3,
+   "micro_F1": 0.329
+  },
+  "1000": {
+   "recall": 0.346,
+   "crossing": 0.59,
+   "exact": 0.0,
+   "micro_P": 0.3,
+   "micro_F1": 0.329
+  },
+  "2000": {
+   "recall": 0.346,
+   "crossing": 0.59,
+   "exact": 0.0,
+   "micro_P": 0.3,
+   "micro_F1": 0.329
+  },
+  "4000": {
+   "recall": 0.346,
+   "crossing": 0.59,
+   "exact": 0.0,
+   "micro_P": 0.3,
+   "micro_F1": 0.329
+  }
+ },
+ "examples": {
+  "1000": [
+   {
+    "s": "the woman hugs the hungry farmer",
+    "tree": [
+     [
+      1,
+      6
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      4,
+      6
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      2
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      3,
+      6
+     ]
+    ]
+   },
+   {
+    "s": "the small teachers cook a cookie",
+    "tree": [
+     [
+      1,
+      6
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      4,
+      6
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      3
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      6
+     ]
+    ]
+   },
+   {
+    "s": "the birds eat the cookies",
+    "tree": [
+     [
+      1,
+      5
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      2
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ]
+   },
+   {
+    "s": "the farmers sleep",
+    "tree": [
+     [
+      1,
+      3
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      2
+     ]
+    ]
+   },
+   {
+    "s": "the quiet farmer bakes the apple",
+    "tree": [
+     [
+      1,
+      6
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      4,
+      6
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      3
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      6
+     ]
+    ]
+   },
+   {
+    "s": "the teacher hugs the teachers",
+    "tree": [
+     [
+      1,
+      5
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      2
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ]
+   },
+   {
+    "s": "the bakers carry a big cake",
+    "tree": [
+     [
+      1,
+      6
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      4,
+      6
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      2
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      3,
+      6
+     ]
+    ]
+   },
+   {
+    "s": "some girls fix the coat",
+    "tree": [
+     [
+      1,
+      5
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      2
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ]
+   }
+  ],
+  "4000": [
+   {
+    "s": "the woman hugs the hungry farmer",
+    "tree": [
+     [
+      1,
+      6
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      4,
+      6
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      2
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      3,
+      6
+     ]
+    ]
+   },
+   {
+    "s": "the small teachers cook a cookie",
+    "tree": [
+     [
+      1,
+      6
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      4,
+      6
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      3
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      6
+     ]
+    ]
+   },
+   {
+    "s": "the birds eat the cookies",
+    "tree": [
+     [
+      1,
+      5
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      2
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ]
+   },
+   {
+    "s": "the farmers sleep",
+    "tree": [
+     [
+      1,
+      3
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      2
+     ]
+    ]
+   },
+   {
+    "s": "the quiet farmer bakes the apple",
+    "tree": [
+     [
+      1,
+      6
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      4,
+      6
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      3
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      6
+     ]
+    ]
+   },
+   {
+    "s": "the teacher hugs the teachers",
+    "tree": [
+     [
+      1,
+      5
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      2
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ]
+   },
+   {
+    "s": "the bakers carry a big cake",
+    "tree": [
+     [
+      1,
+      6
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      4,
+      6
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      2
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      3,
+      6
+     ]
+    ]
+   },
+   {
+    "s": "some girls fix the coat",
+    "tree": [
+     [
+      1,
+      5
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ],
+    "gold": [
+     [
+      0,
+      2
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ]
+   }
+  ]
+ }
+}

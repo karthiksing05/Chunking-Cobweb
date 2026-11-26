@@ -78,3 +78,37 @@ Three confirmed problems with the first pass:
    Added a non-degenerate chunks-without-concepts baseline: r233_exactchunk.py (CKY over exact word-sequence counts, or PMI).
 Smoke run, s13, unseen set: exact-chunk count recall .59/.53/.52 at n=125/1000/4000 (falls with data), PMI .21/.18/.15; fixed CCM
 .75 at 125, .89 at 1000; TRELLIS full .77 at 125.
+
+## Gold-parse results on unseen sentences (FINAL; results/story_gen/r233/unseen; 6 seeds 13/17/19/23/29/31; 500 held sentences each,
+none in the 4,000-sentence stream). Range over seeds (mean). R = recall of gold constituents, X = exact sentences, F1 = pooled bracket F1.
+
+| parser | n=125 R / X / F1 | n=1000 R / X / F1 | n=4000 R / X / F1 |
+|---|---|---|---|
+| TRELLIS | .73-.90 (.78) / .42 / .70 | .83-.97 (.91) / .68 / .81 | .90-.97 (.93) / .63-.89 (.75) / .79-.88 (.83) |
+| TRELLIS, chunks off | (.67) / .30 / .63 | (.71) / .40 / .67 | .51-.84 (.72) / .45 / .68 |
+| TRELLIS, concepts >= 3 bits | (.59) / .22 / .57 | (.74) / .38 / .71 | .80-.87 (.83) / .57 / .78 |
+| TRELLIS, concepts >= 6 bits | (.36) / 0 / .34 | (.42) / .02 / .40 | .68-.75 (.72) / .38 / .69 |
+| TRELLIS, concepts >= 9 bits | (.37) / 0 / .34 | (.37) / 0 / .34 | (.39) / 0 / .37 |
+| TRELLIS, concepts off | (.37) / 0 / .34 constant tree | same | same |
+| exact-chunk memory (count CKY) | (.58) / .21 / .54 | (.53) / .15 / .49 | .50-.54 (.52) / .10 / .48 |
+| exact-chunk memory (PMI CKY) | (.20) / .01 / .18 | (.17) / 0 / .16 | (.16) / .01 / .14 |
+| CCM, words (split init, Viterbi) | .78-.84 (.80) / .51 / .75 | .88-.90 (.89) / .64 / .79 | .89-.91 (.90) / .63-.67 (.65) / .79-.81 (.80) |
+| CCM, words, MBR | (.80) / .51 / .74 | (.89) / .64 / .79 | (.90) / .65 / .80 |
+| CCM, gold POS tags | (.92) / .69 / .82 | (.92) / .69 / .82 | (.92) / .69 / .82 |
+| right-branching | | | .62-.65 (.64) / 0 / .62 |
+| left-branching | | | (.36) / .08 / .29 |
+| random binary | | | (.39) / .10 / .35 |
+
+Paired per seed (F1, TRELLIS minus CCM on words): n=125 -.10..+.04 (CCM ahead 5/6); n=500 -.05..+.02; n=1000 -.04..+.08 (TRELLIS
+ahead 5/6); n=2000 5/6; n=4000 +.005..+.081 (6/6). Exact: n=4000 -.03..+.23 (5/6). TRELLIS at 4,000 on words matches CCM on gold tags.
+Chunks (full minus chunks off, F1 at 4000): +.026..+.384, 6/6 seeds.
+
+Readings.
+- One online pass of TRELLIS recovers the constituents of sentences it has never seen: .93 recall, 75% exactly right, F1 .83 at
+  4,000 sentences, ahead of CCM (20 EM passes) from 1,000 sentences on, and level with CCM given gold tags. CCM learns faster early.
+- Chunks without concepts do not parse: an exact-sequence memory scores below right-branching and gets worse as data grow (.58 ->
+  .52), because new sentences rarely repeat their constituents exactly while frequent cross-constituent pairs (V Det) do recur.
+- Concepts without chunks parse, but worse: removing the stored chunks costs .22 recall and .15 F1 (6/6 seeds).
+- Inside TRELLIS the signal comes from general concepts: restricting the parse to concepts at >= 3 bits costs .10 recall, >= 6 bits
+  leaves the parser at the zero-signal floor until 1,000 sentences, >= 9 bits never leaves it. The zero-signal floor (every gain 0,
+  constant tree) is what a code-saving score gives when no concept is both cheap to name and predictive.
